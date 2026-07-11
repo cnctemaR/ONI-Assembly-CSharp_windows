@@ -125,6 +125,10 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void SetBatchGroup(KAnimFileData kafd)
 	{
+		if (this.batchGroupID.IsValid && kafd != null && this.batchGroupID == kafd.batchTag)
+		{
+			return;
+		}
 		DebugUtil.Assert(!this.batchGroupID.IsValid, "Should only be setting the batch group once.");
 		DebugUtil.Assert(kafd != null, "Null anim data!! For", base.name);
 		base.curBuild = kafd.build;
@@ -175,6 +179,18 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			DebugUtil.Assert(base.GetComponent<SymbolOverrideController>() != null);
 		}
+	}
+
+	public void SwapAnims(KAnimFile[] anims)
+	{
+		if (this.batchGroupID.IsValid)
+		{
+			this.DeRegister();
+			this.batchGroupID = HashedString.Invalid;
+		}
+		base.AnimFiles = anims;
+		this.LoadAnims();
+		this.Register();
 	}
 
 	public void UpdateAnim(float dt)

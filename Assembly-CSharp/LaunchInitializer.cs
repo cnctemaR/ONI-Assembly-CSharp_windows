@@ -17,7 +17,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		GraphicsOptionsScreen.SetSettingsFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("release Build: CS-" + 444111U.ToString());
+		global::Debug.Log("release Build: CS-" + 447213U.ToString());
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();

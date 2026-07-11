@@ -74,6 +74,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			component.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(component.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
 			this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+			base.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		}
 
 		public void CreateChore()
@@ -122,6 +123,11 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		{
 			Storage component = base.GetComponent<Storage>();
 			this.meter.SetPositionPercent(Mathf.Clamp01(component.RemainingCapacity() / component.capacityKg));
+		}
+
+		private void OnOnlyFetchMarkedItemsSettingChanged(object data)
+		{
+			this.RefreshChore();
 		}
 
 		public void StartMeter()

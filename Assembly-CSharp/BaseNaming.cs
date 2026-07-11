@@ -28,9 +28,19 @@ public class BaseNaming : KMonoBehaviour
 		string cloudSavePrefix = SaveLoader.GetCloudSavePrefix();
 		if (this.minionSelectScreen != null)
 		{
-			bool flag = Directory.Exists(Path.Combine(savePrefixAndCreateFolder, newName));
-			bool flag2 = cloudSavePrefix != null && Directory.Exists(Path.Combine(cloudSavePrefix, newName));
-			if (flag || flag2)
+			bool flag = false;
+			try
+			{
+				bool flag2 = Directory.Exists(Path.Combine(savePrefixAndCreateFolder, newName));
+				bool flag3 = cloudSavePrefix != null && Directory.Exists(Path.Combine(cloudSavePrefix, newName));
+				flag = flag2 || flag3;
+			}
+			catch (Exception ex)
+			{
+				flag = true;
+				global::Debug.Log(string.Format("Base Naming / Warning / {0}", ex));
+			}
+			if (flag)
 			{
 				this.minionSelectScreen.SetProceedButtonActive(false, string.Format(UI.IMMIGRANTSCREEN.DUPLICATE_COLONY_NAME, newName));
 				return false;
@@ -43,7 +53,7 @@ public class BaseNaming : KMonoBehaviour
 	private void OnEditing(string newName)
 	{
 		Util.ScrubInputField(this.inputField, false);
-		this.CheckBaseName(newName);
+		this.CheckBaseName(this.inputField.text);
 	}
 
 	private void OnEndEdit(string newName)

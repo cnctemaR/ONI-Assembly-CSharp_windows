@@ -23,7 +23,7 @@ public class ModsScreen : KModalScreen
 		this.mod_footprint.Clear();
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
-			if (mod.enabled)
+			if (mod.IsEnabledForActiveDlc())
 			{
 				this.mod_footprint.Add(mod.label);
 				if ((mod.loaded_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) == (mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)))
@@ -95,7 +95,12 @@ public class ModsScreen : KModalScreen
 				});
 				hierarchyReferences.GetComponent<DragMe>().listener = modOrderingDragListener;
 				LocText reference = hierarchyReferences.GetReference<LocText>("Title");
-				reference.text = mod.title;
+				string text = mod.title;
+				if (mod.available_content == (Content)0)
+				{
+					text += UI.FRONTEND.MODS.MOD_DISABLED_CONTENT.Replace("{Content}", ModsScreen.GetDlcName(DlcManager.GetActiveDlcId()));
+				}
+				reference.text = text;
 				hierarchyReferences.GetReference<ToolTip>("Description").toolTip = mod.description;
 				if (mod.crash_count != 0)
 				{
@@ -109,14 +114,25 @@ public class ModsScreen : KModalScreen
 					reference2.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
 					reference2.onClick += mod.on_managed;
 				}
+				KImage reference3 = hierarchyReferences.GetReference<KImage>("BG");
 				MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
-				toggle.ChangeState(mod.enabled ? 1 : 0);
-				MultiToggle toggle2 = toggle;
-				toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
+				toggle.ChangeState(mod.IsEnabledForActiveDlc() ? 1 : 0);
+				if (mod.available_content != (Content)0)
 				{
-					this.OnToggleClicked(toggle, mod.label);
-				}));
-				toggle.GetComponent<ToolTip>().OnToolTip = () => mod.enabled ? UI.FRONTEND.MODS.TOOLTIPS.ENABLED : UI.FRONTEND.MODS.TOOLTIPS.DISABLED;
+					reference3.defaultState = KImage.ColorSelector.Inactive;
+					reference3.ColorState = KImage.ColorSelector.Inactive;
+					MultiToggle toggle2 = toggle;
+					toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate
+					{
+						this.OnToggleClicked(toggle, mod.label);
+					}));
+					toggle.GetComponent<ToolTip>().OnToolTip = () => mod.IsEnabledForActiveDlc() ? UI.FRONTEND.MODS.TOOLTIPS.ENABLED : UI.FRONTEND.MODS.TOOLTIPS.DISABLED;
+				}
+				else
+				{
+					reference3.defaultState = KImage.ColorSelector.Disabled;
+					reference3.ColorState = KImage.ColorSelector.Disabled;
+				}
 				hierarchyReferences.gameObject.SetActive(true);
 			}
 		}
@@ -125,6 +141,18 @@ public class ModsScreen : KModalScreen
 			displayedMod2.rect_transform.gameObject.SetActive(true);
 		}
 		int count = this.displayedMods.Count;
+	}
+
+	private static string GetDlcName(string dlcId)
+	{
+		if (!(dlcId == "EXPANSION1_ID"))
+		{
+			if ((dlcId == null || dlcId.Length != 0) && dlcId != null)
+			{
+			}
+			return UI.VANILLA.NAME_ITAL;
+		}
+		return UI.DLC1.NAME_ITAL;
 	}
 
 	private void OnToggleClicked(MultiToggle toggle, Label mod)
@@ -139,7 +167,7 @@ public class ModsScreen : KModalScreen
 
 	private bool AreAnyModsDisabled()
 	{
-		return Global.Instance.modManager.mods.Any<Mod>((Mod mod) => !mod.enabled && this.ShouldDisplayMod(mod));
+		return Global.Instance.modManager.mods.Any<Mod>((Mod mod) => !mod.IsEmpty() && !mod.IsEnabledForActiveDlc() && this.ShouldDisplayMod(mod));
 	}
 
 	private void UpdateToggleAllButton()

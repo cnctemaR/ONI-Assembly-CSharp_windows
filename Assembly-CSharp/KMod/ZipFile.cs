@@ -28,32 +28,72 @@ namespace KMod
 			return File.Exists(this.GetRoot());
 		}
 
-		public void GetTopLevelItems(List<FileSystemItem> file_system_items, string relative_root)
+		public bool Exists(string relative_path)
 		{
-			HashSetPool<string, ZipFile>.PooledHashSet pooledHashSet = HashSetPool<string, ZipFile>.Allocate();
-			relative_root = relative_root ?? "";
-			relative_root = FileSystem.Normalize(relative_root);
+			if (!this.Exists())
+			{
+				return false;
+			}
 			foreach (ZipEntry zipEntry in this.zipfile)
 			{
 				string text = FileSystem.Normalize(zipEntry.FileName);
-				if (text.StartsWith(relative_root))
+				if (relative_path == text)
 				{
-					text = text.Remove(0, relative_root.Length);
-					List<string> list = (from part in text.Split(new char[] { '/' })
-						where !string.IsNullOrEmpty(part)
-						select part).ToList<string>();
-					string text2 = list[0];
-					if (pooledHashSet.Add(text2))
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public void GetTopLevelItems(List<FileSystemItem> file_system_items, string relative_root)
+		{
+			HashSetPool<string, ZipFile>.PooledHashSet pooledHashSet = HashSetPool<string, ZipFile>.Allocate();
+			string[] array;
+			if (!string.IsNullOrEmpty(relative_root))
+			{
+				relative_root = relative_root ?? "";
+				relative_root = FileSystem.Normalize(relative_root);
+				array = relative_root.Split(new char[] { '/' });
+			}
+			else
+			{
+				array = new string[0];
+			}
+			foreach (ZipEntry zipEntry in this.zipfile)
+			{
+				List<string> list = (from part in FileSystem.Normalize(zipEntry.FileName).Split(new char[] { '/' })
+					where !string.IsNullOrEmpty(part)
+					select part).ToList<string>();
+				if (this.IsSharedRoot(array, list))
+				{
+					list = list.GetRange(array.Length, list.Count - array.Length);
+					if (list.Count != 0)
 					{
-						file_system_items.Add(new FileSystemItem
+						string text = list[0];
+						if (pooledHashSet.Add(text))
 						{
-							name = text2,
-							type = ((1 < list.Count) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
-						});
+							file_system_items.Add(new FileSystemItem
+							{
+								name = text,
+								type = ((1 < list.Count) ? FileSystemItem.ItemType.Directory : FileSystemItem.ItemType.File)
+							});
+						}
 					}
 				}
 			}
 			pooledHashSet.Recycle();
+		}
+
+		private bool IsSharedRoot(string[] root_path, List<string> check_path)
+		{
+			for (int i = 0; i < root_path.Length; i++)
+			{
+				if (i >= check_path.Count || root_path[i] != check_path[i])
+				{
+					return false;
+				}
+			}
+			return true;
 		}
 
 		public IFileDirectory GetFileSystem()

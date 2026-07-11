@@ -25,6 +25,11 @@ namespace KMod
 			return Directory.Exists(this.GetRoot());
 		}
 
+		public bool Exists(string relative_path)
+		{
+			return this.Exists() && new DirectoryInfo(FileSystem.Normalize(Path.Combine(this.root, relative_path))).Exists;
+		}
+
 		public void GetTopLevelItems(List<FileSystemItem> file_system_items, string relative_root)
 		{
 			relative_root = relative_root ?? "";

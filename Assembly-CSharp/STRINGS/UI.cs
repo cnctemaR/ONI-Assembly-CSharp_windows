@@ -389,6 +389,13 @@ namespace STRINGS
 			Standby
 		}
 
+		public class VANILLA
+		{
+			public static LocString NAME = "base game";
+
+			public static LocString NAME_ITAL = "<i>" + UI.VANILLA.NAME + "</i>";
+		}
+
 		public class DLC1
 		{
 			public static LocString NAME = "Spaced Out!";
@@ -1857,6 +1864,8 @@ namespace STRINGS
 				public static LocString FAILED_TO_LOAD = "A mod failed to load and is being disabled:\n\n{0}: {1}\n\n{2}";
 
 				public static LocString DB_CORRUPT = "An error occurred trying to load the Mod Database.\n\n{0}";
+
+				public static LocString MOD_DISABLED_CONTENT = " - <i>Not compatible with {Content}</i>";
 
 				public class TOOLTIPS
 				{

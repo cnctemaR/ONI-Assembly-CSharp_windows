@@ -96,7 +96,7 @@ public class SteamUGCService : MonoBehaviour
 			{
 				if (this.retry_counts[details.m_nPublishedFileId] % 100 == 0)
 				{
-					global::Debug.LogFormat("Preview image load failed", Array.Empty<object>());
+					global::Debug.LogFormat("Steam: Preview image load failed", Array.Empty<object>());
 				}
 				array = null;
 			}
@@ -160,7 +160,7 @@ public class SteamUGCService : MonoBehaviour
 		{
 			if ((SteamUGC.GetItemState(steamUGCDetails_t2.m_nPublishedFileId) & 48U) == 0U)
 			{
-				global::Debug.LogFormat("publishing mod {0}", new object[] { steamUGCDetails_t2.m_rgchTitle });
+				global::Debug.LogFormat("Steam: updating info for mod {0}", new object[] { steamUGCDetails_t2.m_rgchTitle });
 				SteamUGCService.Mod mod2 = new SteamUGCService.Mod(steamUGCDetails_t2, this.LoadPreviewImage(steamUGCDetails_t2));
 				pooledList.Add(mod2);
 				if (steamUGCDetails_t2.m_hPreviewFile != UGCHandle_t.Invalid && mod2.previewImage == null)
@@ -174,7 +174,7 @@ public class SteamUGCService : MonoBehaviour
 		published.Recycle();
 		foreach (PublishedFileId_t publishedFileId_t in this.proxies)
 		{
-			global::Debug.LogFormat("proxy mod {0}", new object[] { publishedFileId_t });
+			global::Debug.LogFormat("Steam: proxy mod {0}", new object[] { publishedFileId_t });
 			pooledList.Add(new SteamUGCService.Mod(publishedFileId_t));
 		}
 		this.proxies.Clear();
@@ -264,7 +264,7 @@ public class SteamUGCService : MonoBehaviour
 			{
 				global::Debug.Log(string.Concat(new object[]
 				{
-					"[OnSteamUGCQueryDetailsCompleted] - handle: ",
+					"Steam: [OnSteamUGCQueryDetailsCompleted] - handle: ",
 					pCallback.m_handle,
 					" -- Result: ",
 					pCallback.m_eResult,
@@ -281,7 +281,7 @@ public class SteamUGCService : MonoBehaviour
 			}
 			else
 			{
-				global::Debug.Log(string.Concat(new object[] { "[OnSteamUGCQueryDetailsCompleted] - handle: ", pCallback.m_handle, " -- Result: ", pCallback.m_eResult, " Resending" }));
+				global::Debug.Log(string.Concat(new object[] { "Steam: [OnSteamUGCQueryDetailsCompleted] - handle: ", pCallback.m_handle, " -- Result: ", pCallback.m_eResult, " Resending" }));
 			}
 		}
 		else

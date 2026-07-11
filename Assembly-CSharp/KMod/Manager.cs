@@ -35,34 +35,41 @@ namespace KMod
 				global::Debug.LogWarningFormat(UI.FRONTEND.MODS.DB_CORRUPT, new object[] { filename });
 				this.mods = new List<Mod>();
 			}
-			List<Mod> list = new List<Mod>();
-			bool flag = false;
 			foreach (Mod mod in this.mods)
 			{
-				Mod.Status status = mod.status;
+				if (mod.enabledForDlc == null)
+				{
+					mod.SetEnabledForDlc("", mod.enabled);
+				}
+			}
+			List<Mod> list = new List<Mod>();
+			bool flag = false;
+			foreach (Mod mod2 in this.mods)
+			{
+				Mod.Status status = mod2.status;
 				if (status != Mod.Status.UninstallPending)
 				{
 					if (status == Mod.Status.ReinstallPending)
 					{
-						global::Debug.LogFormat("Latent reinstall of mod {0}", new object[] { mod.title });
-						if (!string.IsNullOrEmpty(mod.reinstall_path) && File.Exists(mod.reinstall_path))
+						global::Debug.LogFormat("Latent reinstall of mod {0}", new object[] { mod2.title });
+						if (!string.IsNullOrEmpty(mod2.reinstall_path) && File.Exists(mod2.reinstall_path))
 						{
-							bool enabled = mod.enabled;
-							mod.file_source = new ZipFile(mod.reinstall_path);
-							mod.enabled = false;
-							if (mod.Uninstall())
+							mod2.IsEnabledForActiveDlc();
+							mod2.file_source = new ZipFile(mod2.reinstall_path);
+							mod2.SetEnabledForActiveDlc(false);
+							if (mod2.Uninstall())
 							{
-								mod.Install();
-								if (mod.status == Mod.Status.Installed)
+								mod2.Install();
+								if (mod2.status == Mod.Status.Installed)
 								{
-									mod.enabled = enabled;
+									mod2.SetEnabledForActiveDlc(true);
 								}
 							}
 							flag = true;
 						}
-						else if (mod.enabled)
+						else if (mod2.IsEnabledForActiveDlc())
 						{
-							mod.enabled = false;
+							mod2.SetEnabledForActiveDlc(false);
 							flag = true;
 						}
 					}
@@ -71,36 +78,36 @@ namespace KMod
 				{
 					global::Debug.LogFormat("Latent uninstall of mod {0} from {1}", new object[]
 					{
-						mod.title,
-						mod.label.install_path
+						mod2.title,
+						mod2.label.install_path
 					});
-					if (mod.Uninstall())
+					if (mod2.Uninstall())
 					{
-						list.Add(mod);
+						list.Add(mod2);
 					}
 					else
 					{
-						DebugUtil.Assert(mod.status == Mod.Status.UninstallPending);
-						global::Debug.LogFormat("\t...failed to uninstall mod {0}", new object[] { mod.title });
+						DebugUtil.Assert(mod2.status == Mod.Status.UninstallPending);
+						global::Debug.LogFormat("\t...failed to uninstall mod {0}", new object[] { mod2.title });
 					}
-					if (mod.status != Mod.Status.UninstallPending)
+					if (mod2.status != Mod.Status.UninstallPending)
 					{
 						flag = true;
 					}
 				}
-				if (!string.IsNullOrEmpty(mod.reinstall_path))
+				if (!string.IsNullOrEmpty(mod2.reinstall_path))
 				{
-					mod.reinstall_path = null;
+					mod2.reinstall_path = null;
 					flag = true;
 				}
 			}
-			foreach (Mod mod2 in list)
+			foreach (Mod mod3 in list)
 			{
-				this.mods.Remove(mod2);
+				this.mods.Remove(mod3);
 			}
-			foreach (Mod mod3 in this.mods)
+			foreach (Mod mod4 in this.mods)
 			{
-				mod3.ScanContent();
+				mod4.ScanContent();
 			}
 			if (flag)
 			{
@@ -262,7 +269,7 @@ namespace KMod
 				this.mods.Insert(num, mod);
 				if (flag3 || mod.status == Mod.Status.NotInstalled)
 				{
-					if (mod.enabled)
+					if (mod.IsEnabledForActiveDlc())
 					{
 						mod.reinstall_path = root;
 						mod.status = Mod.Status.ReinstallPending;
@@ -310,7 +317,7 @@ namespace KMod
 			int num = this.mods.IndexOf(mod2);
 			this.mods.RemoveAt(num);
 			this.mods.Insert(num, mod);
-			if (mod.enabled)
+			if (mod.IsEnabledForActiveDlc())
 			{
 				mod.reinstall_path = root;
 				mod.status = Mod.Status.ReinstallPending;
@@ -348,7 +355,7 @@ namespace KMod
 				return;
 			}
 			Mod mod2 = this.mods[num];
-			mod2.enabled = false;
+			mod2.SetEnabledForActiveDlc(false);
 			mod2.Unload(Content.LayerableFiles);
 			this.events.Add(new Event
 			{
@@ -392,7 +399,7 @@ namespace KMod
 
 		public bool IsInDevMode()
 		{
-			return this.mods.Exists((Mod mod) => mod.enabled && mod.label.distribution_platform == Label.DistributionPlatform.Dev);
+			return this.mods.Exists((Mod mod) => mod.IsEnabledForActiveDlc() && mod.label.distribution_platform == Label.DistributionPlatform.Dev);
 		}
 
 		public void Load(Content content)
@@ -411,7 +418,7 @@ namespace KMod
 			}
 			foreach (Mod mod in this.mods)
 			{
-				if (mod.enabled)
+				if (mod.IsEnabledForActiveDlc())
 				{
 					mod.Load(content);
 				}
@@ -421,10 +428,10 @@ namespace KMod
 			{
 				Content content2 = mod2.loaded_content & content;
 				Content content3 = mod2.available_content & content;
-				if (mod2.enabled && content2 != content3)
+				if (mod2.IsEnabledForActiveDlc() && content2 != content3)
 				{
 					mod2.SetCrashed();
-					if (!mod2.enabled)
+					if (!mod2.IsEnabledForActiveDlc())
 					{
 						flag = true;
 						this.events.Add(new Event
@@ -496,7 +503,7 @@ namespace KMod
 						{
 							if (flag5)
 							{
-								if (!mod3.enabled)
+								if (!mod3.IsEnabledForActiveDlc())
 								{
 									List<Event> list = this.events;
 									Event @event = new Event
@@ -521,7 +528,7 @@ namespace KMod
 							flag4 = true;
 							break;
 						}
-						if (flag5 && mod3.enabled)
+						if (flag5 && mod3.IsEnabledForActiveDlc())
 						{
 							List<Event> list3 = this.events;
 							Event @event = new Event
@@ -549,7 +556,7 @@ namespace KMod
 			for (int num3 = num + 1; num3 != this.mods.Count; num3++)
 			{
 				Mod mod2 = this.mods[num3];
-				if ((mod2.available_content & relevant_content) > (Content)0 && mod2.enabled)
+				if ((mod2.available_content & relevant_content) > (Content)0 && mod2.IsEnabledForActiveDlc())
 				{
 					List<Event> list5 = this.events;
 					Event @event = new Event
@@ -684,7 +691,7 @@ namespace KMod
 				{
 					foreach (Mod mod in this.mods)
 					{
-						mod.enabled = false;
+						mod.SetEnabledForActiveDlc(false);
 					}
 					this.dirty = true;
 					this.Update(this);
@@ -797,7 +804,7 @@ namespace KMod
 				{
 					foreach (Mod mod in this.mods)
 					{
-						if (mod.enabled && text2.Contains(mod.label.install_path))
+						if (mod.IsEnabledForActiveDlc() && text2.Contains(mod.label.install_path))
 						{
 							this.events.Add(new Event
 							{
@@ -944,7 +951,7 @@ namespace KMod
 		public bool IsModEnabled(Label id)
 		{
 			Mod mod = this.FindMod(id);
-			return mod != null && mod.enabled;
+			return mod != null && mod.IsEnabledForActiveDlc();
 		}
 
 		public bool EnableMod(Label id, bool enabled, object caller)
@@ -954,11 +961,15 @@ namespace KMod
 			{
 				return false;
 			}
-			if (mod.enabled == enabled)
+			if (mod.IsEmpty())
 			{
 				return false;
 			}
-			mod.enabled = enabled;
+			if (mod.IsEnabledForActiveDlc() == enabled)
+			{
+				return false;
+			}
+			mod.SetEnabledForActiveDlc(enabled);
 			if (enabled)
 			{
 				mod.Load(Content.LayerableFiles);
@@ -1006,7 +1017,7 @@ namespace KMod
 			ListPool<string, Manager>.PooledList pooledList = ListPool<string, Manager>.Allocate();
 			foreach (Mod mod in this.mods)
 			{
-				if (mod.enabled)
+				if (mod.IsEnabledForActiveDlc())
 				{
 					pooledList.Add(mod.title);
 				}

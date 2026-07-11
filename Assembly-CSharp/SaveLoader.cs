@@ -126,7 +126,7 @@ public class SaveLoader : KMonoBehaviour
 		saveFileRoot.active_mods = new List<Label>();
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
-			if (mod.enabled)
+			if (mod.IsEnabledForActiveDlc())
 			{
 				saveFileRoot.active_mods.Add(mod.label);
 			}

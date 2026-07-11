@@ -27,7 +27,7 @@ public class InitializeCheck : MonoBehaviour
 		camera.clearFlags = CameraClearFlags.Color;
 		camera.nearClipPlane = 0f;
 		global::Debug.Log("Cannot initialize filesystem. [" + InitializeCheck.savePathState.ToString() + "]");
-		Localization.Initialize(true);
+		Localization.Initialize();
 		this.ShowFileErrorDialogs();
 	}
 

@@ -10,6 +10,8 @@ namespace KMod
 
 		bool Exists();
 
+		bool Exists(string relative_path);
+
 		void GetTopLevelItems(List<FileSystemItem> file_system_items, string relative_root = "");
 
 		IFileDirectory GetFileSystem();

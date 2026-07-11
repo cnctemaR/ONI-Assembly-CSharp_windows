@@ -1,0 +1,117 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{5F905F1C-9451-4828-833F-AFFAADAF369F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>LibNoiseDotNet</RootNamespace>
+    <AssemblyName>LibNoiseDotNet</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net40</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="Graphics\Tools\Noise\Builder\FilterLevel.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\IBuilderFilter.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\NoiseMap.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\NoiseMapBuilder.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\NoiseMapBuilderCallback.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\NoiseMapBuilderCylinder.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\NoiseMapBuilderPlane.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\NoiseMapBuilderSphere.cs" />
+    <Compile Include="Graphics\Tools\Noise\Builder\ShapeFilter.cs" />
+    <Compile Include="Graphics\Tools\Noise\CombinerModule.cs" />
+    <Compile Include="Graphics\Tools\Noise\Combiner\Add.cs" />
+    <Compile Include="Graphics\Tools\Noise\Combiner\Max.cs" />
+    <Compile Include="Graphics\Tools\Noise\Combiner\Min.cs" />
+    <Compile Include="Graphics\Tools\Noise\Combiner\Multiply.cs" />
+    <Compile Include="Graphics\Tools\Noise\Combiner\Power.cs" />
+    <Compile Include="Graphics\Tools\Noise\Combiner\Substract.cs" />
+    <Compile Include="Graphics\Tools\Noise\FilterModule.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\Billow.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\HeterogeneousMultiFractal.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\HybridMultiFractal.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\MultiFractal.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\Pipe.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\RidgedMultiFractal.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\SinFractal.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\SumFractal.cs" />
+    <Compile Include="Graphics\Tools\Noise\Filter\Voronoi.cs" />
+    <Compile Include="Graphics\Tools\Noise\IMap2D.cs" />
+    <Compile Include="Graphics\Tools\Noise\IModule.cs" />
+    <Compile Include="Graphics\Tools\Noise\IModule1D.cs" />
+    <Compile Include="Graphics\Tools\Noise\IModule2D.cs" />
+    <Compile Include="Graphics\Tools\Noise\IModule3D.cs" />
+    <Compile Include="Graphics\Tools\Noise\IModule4D.cs" />
+    <Compile Include="Graphics\Tools\Noise\Libnoise.cs" />
+    <Compile Include="Graphics\Tools\Noise\Model\AbstractModel.cs" />
+    <Compile Include="Graphics\Tools\Noise\Model\Cylinder.cs" />
+    <Compile Include="Graphics\Tools\Noise\Model\Line.cs" />
+    <Compile Include="Graphics\Tools\Noise\Model\Plane.cs" />
+    <Compile Include="Graphics\Tools\Noise\Model\Sphere.cs" />
+    <Compile Include="Graphics\Tools\Noise\ModifierModule.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Abs.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Blend.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Cache.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Clamp.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\ControlPoint.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Curve.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Exponent.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Invert.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\ScaleBias.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Select.cs" />
+    <Compile Include="Graphics\Tools\Noise\Modifier\Terrace.cs" />
+    <Compile Include="Graphics\Tools\Noise\NoiseFilter.cs" />
+    <Compile Include="Graphics\Tools\Noise\NoisePrimitive.cs" />
+    <Compile Include="Graphics\Tools\Noise\NoiseQuality.cs" />
+    <Compile Include="Graphics\Tools\Noise\PrimitiveModule.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\BevinsGradient.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\BevinsValue.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\Checkerboard.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\Constant.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\Cylinders.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\ImprovedPerlin.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\SimplexPerlin.cs" />
+    <Compile Include="Graphics\Tools\Noise\Primitive\Spheres.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\AbstractHeightmapRenderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\AbstractImageRenderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\AbstractRenderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Color.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\GradientColor.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\GradientPoint.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Heightmap16.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Heightmap16Renderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Heightmap32.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Heightmap32Renderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Heightmap8.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Heightmap8Renderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\IColor.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\Image.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\ImageRenderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\NormalMapRenderer.cs" />
+    <Compile Include="Graphics\Tools\Noise\Renderer\RendererCallback.cs" />
+    <Compile Include="Graphics\Tools\Noise\SelectorModule.cs" />
+    <Compile Include="Graphics\Tools\Noise\Tranformer\Displace.cs" />
+    <Compile Include="Graphics\Tools\Noise\Tranformer\RotatePoint.cs" />
+    <Compile Include="Graphics\Tools\Noise\Tranformer\ScalePoint.cs" />
+    <Compile Include="Graphics\Tools\Noise\Tranformer\TranslatePoint.cs" />
+    <Compile Include="Graphics\Tools\Noise\Tranformer\Turbulence.cs" />
+    <Compile Include="Graphics\Tools\Noise\TransformerModule.cs" />
+    <Compile Include="Graphics\Tools\Noise\Utils\DataMap.cs" />
+    <Compile Include="Graphics\Tools\Noise\Writer\AbstractWriter.cs" />
+    <Compile Include="Graphics\Tools\Noise\Writer\BMPWriter.cs" />
+    <Compile Include="Graphics\Tools\Noise\Writer\Heightmap16RawWriter.cs" />
+    <Compile Include="Graphics\Tools\Noise\Writer\Heightmap32RawWriter.cs" />
+    <Compile Include="Graphics\Tools\Noise\Writer\Heightmap8RawWriter.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36A2}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+  </ItemGroup>
+</Project>

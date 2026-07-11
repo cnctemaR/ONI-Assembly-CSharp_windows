@@ -130,7 +130,7 @@ public static class Localization
 		Localization.GenerateStringsTemplate(locstring_tree_root.Namespace, Assembly.GetAssembly(locstring_tree_root), FileSystem.Normalize(Path.Combine(output_folder, string.Format("{0}_template.pot", locstring_tree_root.Namespace.ToLower()))), null);
 	}
 
-	public static void Initialize(bool dontCheckSteam = false)
+	public static void Initialize()
 	{
 		DebugUtil.LogArgs(new object[] { "Localization.Initialize!" });
 		bool flag = false;
@@ -141,12 +141,12 @@ public static class Localization
 			break;
 		case Localization.SelectedLanguageType.Preinstalled:
 		{
-			string selectedPreinstalledLanguageCode = Localization.GetSelectedPreinstalledLanguageCode();
-			if (!string.IsNullOrEmpty(selectedPreinstalledLanguageCode))
+			string currentLanguageCode = Localization.GetCurrentLanguageCode();
+			if (!string.IsNullOrEmpty(currentLanguageCode))
 			{
 				DebugUtil.LogArgs(new object[] { "Localization Initialize... Preinstalled localization" });
-				DebugUtil.LogArgs(new object[] { " -> ", selectedPreinstalledLanguageCode });
-				Localization.LoadPreinstalledTranslation(selectedPreinstalledLanguageCode);
+				DebugUtil.LogArgs(new object[] { " -> ", currentLanguageCode });
+				Localization.LoadPreinstalledTranslation(currentLanguageCode);
 			}
 			else
 			{
@@ -155,26 +155,17 @@ public static class Localization
 			break;
 		}
 		case Localization.SelectedLanguageType.UGC:
-			if (!dontCheckSteam && SteamManager.Initialized && LanguageOptionsScreen.HasInstalledLanguage())
+			if (LanguageOptionsScreen.HasInstalledLanguage())
 			{
-				DebugUtil.LogArgs(new object[] { "Localization Initialize... SteamUGCService" });
-				PublishedFileId_t invalid = PublishedFileId_t.Invalid;
-				LanguageOptionsScreen.LoadTranslation(ref invalid);
-				if (invalid != PublishedFileId_t.Invalid)
+				DebugUtil.LogArgs(new object[] { "Localization Initialize... Mod-based localization" });
+				string savedLanguageMod = LanguageOptionsScreen.GetSavedLanguageMod();
+				if (LanguageOptionsScreen.SetCurrentLanguage(savedLanguageMod))
 				{
-					DebugUtil.LogArgs(new object[]
-					{
-						" -> Loaded steamworks file id: ",
-						invalid.ToString()
-					});
+					DebugUtil.LogArgs(new object[] { " -> Loaded language from mod: " + savedLanguageMod });
 				}
 				else
 				{
-					DebugUtil.LogArgs(new object[]
-					{
-						" -> Failed to load steamworks file id: ",
-						invalid.ToString()
-					});
+					DebugUtil.LogArgs(new object[] { " -> Failed to load language from mod: " + savedLanguageMod });
 				}
 			}
 			else
@@ -536,13 +527,19 @@ public static class Localization
 		return text;
 	}
 
-	public static string GetSelectedPreinstalledLanguageCode()
+	public static string GetCurrentLanguageCode()
 	{
-		if (Localization.GetSelectedLanguageType() == Localization.SelectedLanguageType.Preinstalled)
+		switch (Localization.GetSelectedLanguageType())
 		{
+		case Localization.SelectedLanguageType.None:
+			return Localization.DEFAULT_LANGUAGE_CODE;
+		case Localization.SelectedLanguageType.Preinstalled:
 			return KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_CODE_KEY);
+		case Localization.SelectedLanguageType.UGC:
+			return LanguageOptionsScreen.GetInstalledLanguageCode();
+		default:
+			return "";
 		}
-		return "";
 	}
 
 	public static Localization.SelectedLanguageType GetSelectedLanguageType()
@@ -866,7 +863,7 @@ public static class Localization
 		{
 			Localization.LoadTranslation(File.ReadAllLines(defaultLocalizationFilePath, Encoding.UTF8), true);
 		}
-		LanguageOptionsScreen.CleanUpCurrentModLanguage();
+		LanguageOptionsScreen.CleanUpSavedLanguageMod();
 	}
 
 	private static string ReverseText(string source)

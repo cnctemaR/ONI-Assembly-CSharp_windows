@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Steamworks;
 using STRINGS;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -53,10 +52,7 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IClient
 				gameObject.name = pooledList[i].title + "_button";
 				gameObject.gameObject.SetActive(true);
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-				TMP_FontAsset fontForLangage = LanguageOptionsScreen.GetFontForLangage(pooledList[i].fileId);
-				LocText reference = component.GetReference<LocText>("Title");
-				reference.SetText(pooledList[i].title);
-				reference.font = fontForLangage;
+				component.GetReference<LocText>("Title").SetText(pooledList[i].title);
 				Texture2D previewImage = pooledList[i].previewImage;
 				if (previewImage != null)
 				{

@@ -805,7 +805,7 @@ public class LoadScreen : KModalScreen
 					save.FileName,
 					save.FileHeader.buildVersion,
 					save.FileInfo.saveMinorVersion,
-					444111U,
+					447213U,
 					17
 				});
 			}
@@ -1104,7 +1104,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header, SaveGame.GameInfo gameInfo)
 	{
-		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 17) || header.buildVersion > 444111U;
+		return gameInfo.saveMajorVersion > 7 || (gameInfo.saveMajorVersion == 7 && gameInfo.saveMinorVersion > 17) || header.buildVersion > 447213U;
 	}
 
 	private static bool IsSaveFileFromSpacedOut(SaveGame.Header header, SaveGame.GameInfo gameInfo)
@@ -1153,10 +1153,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 444111U)
+		if (header.buildVersion > 447213U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 444111U.ToString();
+			text2 = 447213U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{

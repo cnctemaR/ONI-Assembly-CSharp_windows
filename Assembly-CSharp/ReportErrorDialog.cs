@@ -52,7 +52,7 @@ public class ReportErrorDialog : MonoBehaviour
 			reference.text = mod.title;
 			reference.color = (mod.foundInStackTrace ? Color.red : Color.white);
 			MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
-			toggle.ChangeState(mod.enabled ? 1 : 0);
+			toggle.ChangeState(mod.IsEnabledForActiveDlc() ? 1 : 0);
 			Label mod_label = mod.label;
 			MultiToggle toggle2 = toggle;
 			toggle2.onClick = (global::System.Action)Delegate.Combine(toggle2.onClick, new global::System.Action(delegate

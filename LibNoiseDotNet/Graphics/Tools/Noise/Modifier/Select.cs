@@ -92,37 +92,40 @@ namespace LibNoiseDotNet.Graphics.Tools.Noise.Modifier
 		public float GetValue(float x, float y, float z)
 		{
 			float value = ((IModule3D)this._controlModule).GetValue(x, y, z);
-			if ((double)this._edgeFalloff <= 0.0)
+			if ((double)this._edgeFalloff > 0.0)
 			{
-				if (value >= this._lowerBound)
+				if (value < this._lowerBound - this._edgeFalloff)
 				{
-					float upperBound = this._upperBound;
+					return ((IModule3D)this._leftModule).GetValue(x, y, z);
+				}
+				if (value < this._lowerBound + this._edgeFalloff)
+				{
+					float num = this._lowerBound - this._edgeFalloff;
+					float num2 = this._lowerBound + this._edgeFalloff;
+					float num3 = Libnoise.SCurve3((value - num) / (num2 - num));
+					return Libnoise.Lerp(((IModule3D)this._leftModule).GetValue(x, y, z), ((IModule3D)this._rightModule).GetValue(x, y, z), num3);
+				}
+				if (value < this._upperBound - this._edgeFalloff)
+				{
+					return ((IModule3D)this._rightModule).GetValue(x, y, z);
+				}
+				if (value < this._upperBound + this._edgeFalloff)
+				{
+					float num4 = this._upperBound - this._edgeFalloff;
+					float num5 = this._upperBound + this._edgeFalloff;
+					float num3 = Libnoise.SCurve3((value - num4) / (num5 - num4));
+					return Libnoise.Lerp(((IModule3D)this._rightModule).GetValue(x, y, z), ((IModule3D)this._leftModule).GetValue(x, y, z), num3);
 				}
 				return ((IModule3D)this._leftModule).GetValue(x, y, z);
 			}
-			if (value < this._lowerBound - this._edgeFalloff)
+			else
 			{
-				return ((IModule3D)this._leftModule).GetValue(x, y, z);
+				if (value < this._lowerBound || value > this._upperBound)
+				{
+					return ((IModule3D)this._leftModule).GetValue(x, y, z);
+				}
+				return ((IModule3D)this._rightModule).GetValue(x, y, z);
 			}
-			if (value < this._lowerBound + this._edgeFalloff)
-			{
-				float num = this._lowerBound - this._edgeFalloff;
-				float num2 = this._lowerBound + this._edgeFalloff;
-				float num3 = Libnoise.SCurve3((value - num) / (num2 - num));
-				return Libnoise.Lerp(((IModule3D)this._leftModule).GetValue(x, y, z), ((IModule3D)this._leftModule).GetValue(x, y, z), num3);
-			}
-			if (value < this._upperBound - this._edgeFalloff)
-			{
-				return ((IModule3D)this._leftModule).GetValue(x, y, z);
-			}
-			if (value < this._upperBound + this._edgeFalloff)
-			{
-				float num4 = this._upperBound - this._edgeFalloff;
-				float num5 = this._upperBound + this._edgeFalloff;
-				float num3 = Libnoise.SCurve3((value - num4) / (num5 - num4));
-				return Libnoise.Lerp(((IModule3D)this._leftModule).GetValue(x, y, z), ((IModule3D)this._leftModule).GetValue(x, y, z), num3);
-			}
-			return ((IModule3D)this._leftModule).GetValue(x, y, z);
 		}
 
 		public const float DEFAULT_FALL_OFF = -1f;

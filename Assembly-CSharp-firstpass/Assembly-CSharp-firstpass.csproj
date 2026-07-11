@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90DD}</ProjectGuid>
+    <ProjectGuid>{5F905F1C-9451-4828-833F-AFFAADAF3698}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -1351,99 +1351,7 @@
     <Compile Include="KTreeItem.cs" />
     <Compile Include="LayerGradient.cs" />
     <Compile Include="LevelLayer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\FilterLevel.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\IBuilderFilter.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\NoiseMap.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\NoiseMapBuilder.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\NoiseMapBuilderCallback.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\NoiseMapBuilderCylinder.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\NoiseMapBuilderPlane.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\NoiseMapBuilderSphere.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Builder\ShapeFilter.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\CombinerModule.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Combiner\Add.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Combiner\Max.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Combiner\Min.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Combiner\Multiply.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Combiner\Power.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Combiner\Substract.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\FilterModule.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\Billow.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\HeterogeneousMultiFractal.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\HybridMultiFractal.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\MultiFractal.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\Pipe.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\RidgedMultiFractal.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\SinFractal.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\SumFractal.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Filter\Voronoi.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\IMap2D.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\IModule.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\IModule1D.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\IModule2D.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\IModule3D.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\IModule4D.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Libnoise.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Model\AbstractModel.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Model\Cylinder.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Model\Line.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Model\Plane.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Model\Sphere.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\ModifierModule.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Abs.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Blend.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Cache.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Clamp.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\ControlPoint.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Curve.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Exponent.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Invert.cs" />
     <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Scale2d.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\ScaleBias.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Select.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Terrace.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\NoiseFilter.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\NoisePrimitive.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\NoiseQuality.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\PrimitiveModule.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\BevinsGradient.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\BevinsValue.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\Checkerboard.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\Constant.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\Cylinders.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\ImprovedPerlin.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\SimplexPerlin.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Primitive\Spheres.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\AbstractHeightmapRenderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\AbstractImageRenderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\AbstractRenderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Color.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\GradientColor.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\GradientPoint.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Heightmap16.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Heightmap16Renderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Heightmap32.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Heightmap32Renderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Heightmap8.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Heightmap8Renderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\IColor.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\Image.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\ImageRenderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\NormalMapRenderer.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Renderer\RendererCallback.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\SelectorModule.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Tranformer\Displace.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Tranformer\RotatePoint.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Tranformer\ScalePoint.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Tranformer\TranslatePoint.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Tranformer\Turbulence.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\TransformerModule.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Utils\DataMap.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Writer\AbstractWriter.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Writer\BMPWriter.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Writer\Heightmap16RawWriter.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Writer\Heightmap32RawWriter.cs" />
-    <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Writer\Heightmap8RawWriter.cs" />
     <Compile Include="LinearDictionary.cs" />
     <Compile Include="ListPool.cs" />
     <Compile Include="LoadProfiler.cs" />
@@ -2399,67 +2307,71 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FMODUnity\FMODUnity.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90DF}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF369A}</Project>
       <Name>FMODUnity</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90E3}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF369E}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LibNoiseDotNet\LibNoiseDotNet.csproj">
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF369F}</Project>
+      <Name>LibNoiseDotNet</Name>
+    </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90E6}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36A2}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90E7}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36A3}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90E9}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36A5}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90F3}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36AF}</Project>
       <Name>System.Xml.Linq</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90F2}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36AE}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90EB}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36A7}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\Unity.TextMeshPro\Unity.TextMeshPro.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90F4}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36B0}</Project>
       <Name>Unity.TextMeshPro</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AnimationModule\UnityEngine.AnimationModule.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E90F9}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36B5}</Project>
       <Name>UnityEngine.AnimationModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9100}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36BC}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9109}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36C5}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E910A}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36C6}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E911D}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36D9}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9122}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36DE}</Project>
       <Name>UnityEngine.UIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9120}</Project>
+      <Project>{5F905F1C-9451-4828-833F-AFFAADAF36DC}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
   </ItemGroup>

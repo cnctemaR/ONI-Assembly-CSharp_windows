@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Klei;
 using KMod;
 using Steamworks;
 using STRINGS;
@@ -67,7 +66,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 					}
 					gameObject.GetComponent<KButton>().onClick += delegate
 					{
-						this.ConfirmLanguageChoiceDialog((code != Localization.DEFAULT_LANGUAGE_CODE) ? code : string.Empty, PublishedFileId_t.Invalid);
+						this.ConfirmLanguagePreinstalledOrMod((code != Localization.DEFAULT_LANGUAGE_CODE) ? code : string.Empty, null);
 					};
 					this.buttons.Add(gameObject);
 				}
@@ -79,14 +78,8 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 	{
 		base.OnActivate();
 		Global.Instance.modManager.Sanitize(base.gameObject);
-		this.currentLanguage = LanguageOptionsScreen.GetInstalledFileID(out this.currentLastModified);
 		if (SteamUGCService.Instance != null)
 		{
-			if (SteamUGCService.Instance.FindMod(this.currentLanguage) == null)
-			{
-				this.currentLanguage = PublishedFileId_t.Invalid;
-				this.InstallLanguageFile(this.currentLanguage, false);
-			}
 			SteamUGCService.Instance.AddClient(this);
 		}
 	}
@@ -121,6 +114,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		string text = func(UI.CONFIRMDIALOG.DIALOG_HEADER);
 		screen2.PopupConfirmDialog(func(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT), delegate
 		{
+			LanguageOptionsScreen.CleanUpSavedLanguageMod();
 			install_language();
 			App.instance.Restart();
 		}, delegate
@@ -129,13 +123,32 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		}, null, null, text, func(UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART), UI.FRONTEND.TRANSLATIONS_SCREEN.CANCEL, null);
 	}
 
-	private void ConfirmLanguageChoiceDialog(string selected_preinstalled_translation)
+	private void ConfirmPreinstalledLanguage(string selected_preinstalled_translation)
+	{
+		Localization.GetSelectedLanguageType();
+	}
+
+	private void ConfirmLanguagePreinstalledOrMod(string selected_preinstalled_translation, string mod_id)
 	{
 		Localization.SelectedLanguageType selectedLanguageType = Localization.GetSelectedLanguageType();
-		if (!string.IsNullOrEmpty(selected_preinstalled_translation))
+		if (mod_id != null)
 		{
-			string selectedPreinstalledLanguageCode = Localization.GetSelectedPreinstalledLanguageCode();
-			if (selectedLanguageType == Localization.SelectedLanguageType.Preinstalled && selectedPreinstalledLanguageCode == selected_preinstalled_translation)
+			if (selectedLanguageType == Localization.SelectedLanguageType.UGC && mod_id == this.currentLanguageModId)
+			{
+				this.Deactivate();
+				return;
+			}
+			string[] languageLinesForMod = LanguageOptionsScreen.GetLanguageLinesForMod(mod_id);
+			this.ConfirmLanguageChoiceDialog(languageLinesForMod, false, delegate
+			{
+				LanguageOptionsScreen.SetCurrentLanguage(mod_id);
+			});
+			return;
+		}
+		else if (!string.IsNullOrEmpty(selected_preinstalled_translation))
+		{
+			string currentLanguageCode = Localization.GetCurrentLanguageCode();
+			if (selectedLanguageType == Localization.SelectedLanguageType.Preinstalled && currentLanguageCode == selected_preinstalled_translation)
 			{
 				this.Deactivate();
 				return;
@@ -163,26 +176,6 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		}
 	}
 
-	private void ConfirmLanguageChoiceDialog(string selected_preinstalled_translation, PublishedFileId_t selected_language_pack)
-	{
-		if (!(selected_language_pack != PublishedFileId_t.Invalid))
-		{
-			this.ConfirmLanguageChoiceDialog(selected_preinstalled_translation);
-			return;
-		}
-		if (Localization.GetSelectedLanguageType() == Localization.SelectedLanguageType.UGC && selected_language_pack == this.currentLanguage)
-		{
-			this.Deactivate();
-			return;
-		}
-		global::System.DateTime dateTime;
-		string[] array = LanguageOptionsScreen.GetLanguageFile(selected_language_pack, out dateTime).Split(new char[] { '\n' });
-		this.ConfirmLanguageChoiceDialog(array, false, delegate
-		{
-			this.SetCurrentLanguage(selected_language_pack);
-		});
-	}
-
 	private ConfirmDialogScreen GetConfirmDialog()
 	{
 		KScreen component = KScreenManager.AddChild(base.transform.parent.gameObject, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<KScreen>();
@@ -192,10 +185,6 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 
 	private void RebuildUGCButtons()
 	{
-		if (SteamUGCService.Instance == null)
-		{
-			return;
-		}
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
 			if ((mod.available_content & Content.Translation) != (Content)0 && mod.status == Mod.Status.Installed)
@@ -203,30 +192,23 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 				GameObject gameObject = Util.KInstantiateUI(this.languageButtonPrefab, this.ugcLanguagesContainer, false);
 				gameObject.name = mod.title + "_button";
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-				PublishedFileId_t file_id = new PublishedFileId_t(ulong.Parse(mod.label.id));
-				TMP_FontAsset fontForLangage = LanguageOptionsScreen.GetFontForLangage(file_id);
+				TMP_FontAsset font = Localization.GetFont(Localization.GetFontName(LanguageOptionsScreen.GetLanguageLinesForMod(mod)));
 				LocText reference = component.GetReference<LocText>("Title");
 				reference.SetText(string.Format(UI.FRONTEND.TRANSLATIONS_SCREEN.UGC_MOD_TITLE_FORMAT, mod.title));
-				reference.font = fontForLangage;
-				SteamUGCService.Mod mod2 = SteamUGCService.Instance.FindMod(file_id);
-				Texture2D texture2D = ((mod2 != null) ? mod2.previewImage : null);
-				if (texture2D != null)
+				reference.font = font;
+				Texture2D previewImage = mod.GetPreviewImage();
+				if (previewImage != null)
 				{
-					component.GetReference<Image>("Image").sprite = Sprite.Create(texture2D, new Rect(Vector2.zero, new Vector2((float)texture2D.width, (float)texture2D.height)), Vector2.one * 0.5f);
+					component.GetReference<Image>("Image").sprite = Sprite.Create(previewImage, new Rect(Vector2.zero, new Vector2((float)previewImage.width, (float)previewImage.height)), Vector2.one * 0.5f);
 				}
+				string mod_id = mod.label.id;
 				gameObject.GetComponent<KButton>().onClick += delegate
 				{
-					this.ConfirmLanguageChoiceDialog(string.Empty, file_id);
+					this.ConfirmLanguagePreinstalledOrMod(string.Empty, mod_id);
 				};
 				this.buttons.Add(gameObject);
 			}
 		}
-	}
-
-	private void InstallLanguage(PublishedFileId_t item)
-	{
-		this.SetCurrentLanguage(item);
-		this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null);
 	}
 
 	private void Uninstall()
@@ -252,73 +234,89 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 
 	public void UpdateMods(IEnumerable<PublishedFileId_t> added, IEnumerable<PublishedFileId_t> updated, IEnumerable<PublishedFileId_t> removed, IEnumerable<SteamUGCService.Mod> loaded_previews)
 	{
-		PublishedFileId_t publishedFileId_t = (PublishedFileId_t)this.GetCurrentLanguage();
-		if (removed.Contains(publishedFileId_t))
+		string savedLanguageMod = LanguageOptionsScreen.GetSavedLanguageMod();
+		ulong num;
+		if (ulong.TryParse(savedLanguageMod, out num))
 		{
-			global::Debug.Log("Unsubscribe detected for currently installed font [" + publishedFileId_t + "]");
-			this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, delegate
+			PublishedFileId_t publishedFileId_t = (PublishedFileId_t)num;
+			if (removed.Contains(publishedFileId_t))
 			{
-				Localization.ClearLanguage();
-				this.currentLanguage = PublishedFileId_t.Invalid;
-				App.instance.Restart();
-			}, null, null, null, null, UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART, null, null);
-		}
-		if (updated.Contains(publishedFileId_t))
-		{
-			global::Debug.Log("Download complete for currently installed font [" + publishedFileId_t + "] updating in background. Changes will happen next restart.");
-			this.UpdateInstalledLanguage(publishedFileId_t);
+				global::Debug.Log("Unsubscribe detected for currently installed language mod [" + savedLanguageMod + "]");
+				this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, delegate
+				{
+					Localization.ClearLanguage();
+					App.instance.Restart();
+				}, null, null, null, null, UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART, null, null);
+			}
+			if (updated.Contains(publishedFileId_t))
+			{
+				global::Debug.Log("Download complete for currently installed language [" + savedLanguageMod + "] updating in background. Changes will happen next restart.");
+			}
 		}
 		this.RebuildScreen();
 	}
 
-	private ulong GetCurrentLanguage()
+	public static string GetSavedLanguageMod()
 	{
-		return (ulong)((long)KPlayerPrefs.GetInt("InstalledLanguage"));
+		return KPlayerPrefs.GetString("InstalledLanguage");
 	}
 
-	public static void CleanUpCurrentModLanguage()
+	public static void SetSavedLanguageMod(string mod_id)
 	{
-		KPlayerPrefs.SetInt("InstalledLanguage", (int)PublishedFileId_t.Invalid.m_PublishedFileId);
-		LanguageOptionsScreen.InstalledLanguageData.Delete();
-		string modLocalizationFilePath = Localization.GetModLocalizationFilePath();
-		if (File.Exists(modLocalizationFilePath))
-		{
-			File.Delete(modLocalizationFilePath);
-		}
+		KPlayerPrefs.SetString("InstalledLanguage", mod_id);
 	}
 
-	public PublishedFileId_t currentLanguage
+	public static void CleanUpSavedLanguageMod()
+	{
+		KPlayerPrefs.SetString("InstalledLanguage", null);
+	}
+
+	public string currentLanguageModId
 	{
 		get
 		{
-			return this._currentLanguage;
+			return this._currentLanguageModId;
 		}
 		private set
 		{
-			this._currentLanguage = value;
-			KPlayerPrefs.SetInt("InstalledLanguage", (int)this._currentLanguage.m_PublishedFileId);
+			this._currentLanguageModId = value;
+			LanguageOptionsScreen.SetSavedLanguageMod(this._currentLanguageModId);
 		}
 	}
 
-	public void SetCurrentLanguage(PublishedFileId_t item)
+	public static bool SetCurrentLanguage(string mod_id)
 	{
-		this.InstallLanguageFile(item, false);
+		LanguageOptionsScreen.CleanUpSavedLanguageMod();
+		if (LanguageOptionsScreen.LoadTranslation(mod_id))
+		{
+			LanguageOptionsScreen.SetSavedLanguageMod(mod_id);
+			return true;
+		}
+		return false;
 	}
 
 	public static bool HasInstalledLanguage()
 	{
-		global::System.DateTime dateTime;
-		return LanguageOptionsScreen.GetInstalledFileID(out dateTime) != PublishedFileId_t.Invalid;
+		string currentModId = LanguageOptionsScreen.GetSavedLanguageMod();
+		if (currentModId == null)
+		{
+			return false;
+		}
+		if (Global.Instance.modManager.mods.Find((Mod m) => m.label.id == currentModId) == null)
+		{
+			LanguageOptionsScreen.CleanUpSavedLanguageMod();
+			return false;
+		}
+		return true;
 	}
 
-	public static string GetInstalledLanguageCode(out PublishedFileId_t installed)
+	public static string GetInstalledLanguageCode()
 	{
 		string text = "";
-		global::System.DateTime dateTime;
-		string languageFilename = LanguageOptionsScreen.GetLanguageFilename(out installed, out dateTime);
-		if (languageFilename != null && File.Exists(languageFilename))
+		string[] languageLinesForMod = LanguageOptionsScreen.GetLanguageLinesForMod(LanguageOptionsScreen.GetSavedLanguageMod());
+		if (languageLinesForMod != null)
 		{
-			Localization.Locale locale = Localization.GetLocale(File.ReadAllLines(languageFilename, Encoding.UTF8));
+			Localization.Locale locale = Localization.GetLocale(languageLinesForMod);
 			if (locale != null)
 			{
 				text = locale.Code;
@@ -327,135 +325,49 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		return text;
 	}
 
-	public static string GetInstalledLanguageFilename(ref PublishedFileId_t item)
+	private static bool LoadTranslation(string mod_id)
 	{
-		global::System.DateTime dateTime;
-		return LanguageOptionsScreen.GetLanguageFilename(out item, out dateTime);
-	}
-
-	public static TMP_FontAsset GetFontForLangage(PublishedFileId_t item)
-	{
-		global::System.DateTime dateTime;
-		string languageFile = LanguageOptionsScreen.GetLanguageFile(item, out dateTime);
-		if (languageFile != null && languageFile.Length > 0)
+		Mod mod = Global.Instance.modManager.mods.Find((Mod m) => m.label.id == mod_id);
+		if (mod == null)
 		{
-			return Localization.GetFont(LanguageOptionsScreen.GetFontForLocalisation(languageFile.Split(new char[] { '\n' })));
+			global::Debug.LogWarning("Tried loading a translation from a non-existent mod id: " + mod_id);
+			return false;
 		}
-		return null;
+		string languageFilename = LanguageOptionsScreen.GetLanguageFilename(mod);
+		return languageFilename != null && Localization.LoadLocalTranslationFile(Localization.SelectedLanguageType.UGC, languageFilename);
 	}
 
-	public static void LoadTranslation(ref PublishedFileId_t item)
+	private static string GetLanguageFilename(Mod mod)
 	{
-		string installedLanguageFilename = LanguageOptionsScreen.GetInstalledLanguageFilename(ref item);
-		Localization.LoadLocalTranslationFile(Localization.SelectedLanguageType.UGC, installedLanguageFilename);
-	}
-
-	private void UpdateInstalledLanguage(PublishedFileId_t item)
-	{
-		string languageFile = LanguageOptionsScreen.GetLanguageFile(item, out this.currentLastModified);
-		if (languageFile != null && languageFile.Length > 0)
+		global::Debug.Assert(mod.content_source.GetType() == typeof(global::KMod.Directory), "Can only load translations from extracted mods.");
+		string text = Path.Combine(mod.ContentPath, "strings.po");
+		if (!File.Exists(text))
 		{
-			LanguageOptionsScreen.InstalledLanguageData.Set(item, this.currentLastModified);
-			File.WriteAllText(Localization.GetModLocalizationFilePath(), languageFile);
-			return;
-		}
-		global::Debug.LogWarning(string.Concat(new object[] { "Loc file was empty.. [", item, "]  [", this.currentLastModified, "]" }));
-	}
-
-	private void InstallLanguageFile(PublishedFileId_t item, bool fromDownload = false)
-	{
-		LanguageOptionsScreen.CleanUpCurrentModLanguage();
-		if (item != PublishedFileId_t.Invalid)
-		{
-			this.UpdateInstalledLanguage(item);
-		}
-		PublishedFileId_t invalid = PublishedFileId_t.Invalid;
-		LanguageOptionsScreen.LoadTranslation(ref invalid);
-		this.currentLanguage = item;
-	}
-
-	private static string GetFontForLocalisation(string[] lines)
-	{
-		return Localization.GetLocale(lines).FontName;
-	}
-
-	private static string GetLanguageFilename(out PublishedFileId_t item, out global::System.DateTime lastModified)
-	{
-		LanguageOptionsScreen.InstalledLanguageData.Get(out item, out lastModified);
-		if (item != PublishedFileId_t.Invalid)
-		{
-			string modLocalizationFilePath = Localization.GetModLocalizationFilePath();
-			if (File.Exists(modLocalizationFilePath))
-			{
-				return modLocalizationFilePath;
-			}
-			global::Debug.LogWarning(string.Concat(new object[] { "GetLanguagFile [", modLocalizationFilePath, "] missing for [", item, "]" }));
-		}
-		return null;
-	}
-
-	private static string GetLanguageFile(PublishedFileId_t item, out global::System.DateTime lastModified)
-	{
-		lastModified = global::System.DateTime.MinValue;
-		if (Global.Instance == null || Global.Instance.modManager == null)
-		{
-			global::Debug.LogFormat("Failed to load language file from local mod installation...too early in initialization flow.", Array.Empty<object>());
-			return LanguageOptionsScreen.GetLanguageFileFromSteam(item, out lastModified);
-		}
-		string language_id = item.ToString();
-		Mod mod = Global.Instance.modManager.mods.Find((Mod candidate) => candidate.label.id == language_id);
-		if (string.IsNullOrEmpty(mod.label.id))
-		{
-			global::Debug.LogFormat("Failed to load language file from local mod installation...mod not found.", Array.Empty<object>());
-			return LanguageOptionsScreen.GetLanguageFileFromSteam(item, out lastModified);
-		}
-		lastModified = mod.label.time_stamp;
-		string text = Path.Combine(Application.streamingAssetsPath, "strings.po");
-		byte[] array = mod.file_source.GetFileSystem().ReadBytes(text);
-		if (array == null)
-		{
-			global::Debug.LogFormat("Failed to load language file from local mod installation...couldn't find {0}", new object[] { text });
-			return LanguageOptionsScreen.GetLanguageFileFromSteam(item, out lastModified);
-		}
-		return FileSystem.ConvertToText(array);
-	}
-
-	private static string GetLanguageFileFromSteam(PublishedFileId_t item, out global::System.DateTime lastModified)
-	{
-		lastModified = global::System.DateTime.MinValue;
-		if (item == PublishedFileId_t.Invalid)
-		{
-			global::Debug.LogWarning("Cant get INVALID file id from Steam");
+			global::Debug.LogWarning("GetLanguagFile: " + text + " missing for mod " + mod.label.title);
 			return null;
 		}
-		if (SteamUGCService.Instance.FindMod(item) == null)
-		{
-			global::Debug.LogWarning("Mod is not in published list");
-			return null;
-		}
-		byte[] bytesFromZip = SteamUGCService.GetBytesFromZip(item, LanguageOptionsScreen.poFile, out lastModified, false);
-		if (bytesFromZip == null || bytesFromZip.Length == 0)
-		{
-			global::Debug.LogWarning("Failed to read from Steam mod installation");
-			return null;
-		}
-		return Encoding.UTF8.GetString(bytesFromZip);
+		return text;
 	}
 
-	private static PublishedFileId_t GetInstalledFileID(out global::System.DateTime lastModified)
+	private static string[] GetLanguageLinesForMod(string mod_id)
 	{
-		PublishedFileId_t invalid;
-		LanguageOptionsScreen.InstalledLanguageData.Get(out invalid, out lastModified);
-		if (invalid == PublishedFileId_t.Invalid)
+		return LanguageOptionsScreen.GetLanguageLinesForMod(Global.Instance.modManager.mods.Find((Mod m) => m.label.id == mod_id));
+	}
+
+	private static string[] GetLanguageLinesForMod(Mod mod)
+	{
+		string languageFilename = LanguageOptionsScreen.GetLanguageFilename(mod);
+		if (languageFilename == null)
 		{
-			invalid = new PublishedFileId_t((ulong)KPlayerPrefs.GetInt("InstalledLanguage", (int)PublishedFileId_t.Invalid.m_PublishedFileId));
+			return null;
 		}
-		if (invalid != PublishedFileId_t.Invalid && SteamUGCService.Instance != null && !SteamUGCService.Instance.IsSubscribed(invalid))
+		string[] array = File.ReadAllLines(languageFilename, Encoding.UTF8);
+		if (array == null || array.Length == 0)
 		{
-			global::Debug.LogWarning("It doesn't look like we are subscribed..." + invalid);
-			invalid = PublishedFileId_t.Invalid;
+			global::Debug.LogWarning("Couldn't find any strings in the translation mod " + mod.label.title);
+			return null;
 		}
-		return invalid;
+		return array;
 	}
 
 	private static readonly string[] poFile = new string[] { "strings.po" };
@@ -487,59 +399,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 
 	private List<GameObject> buttons = new List<GameObject>();
 
-	private PublishedFileId_t _currentLanguage = PublishedFileId_t.Invalid;
+	private string _currentLanguageModId;
 
 	private global::System.DateTime currentLastModified;
-
-	private class InstalledLanguageData
-	{
-		private static string FilePath()
-		{
-			return Path.Combine(Application.streamingAssetsPath, LanguageOptionsScreen.InstalledLanguageData.FILE_NAME);
-		}
-
-		public static void Set(PublishedFileId_t item, global::System.DateTime lastModified)
-		{
-			YamlIO.SaveOrWarnUser<LanguageOptionsScreen.InstalledLanguageData>(new LanguageOptionsScreen.InstalledLanguageData
-			{
-				PublishedFileId = item.m_PublishedFileId,
-				LastModified = lastModified.ToFileTimeUtc()
-			}, LanguageOptionsScreen.InstalledLanguageData.FilePath(), null);
-		}
-
-		public static void Get(out PublishedFileId_t item, out global::System.DateTime lastModified)
-		{
-			if (LanguageOptionsScreen.InstalledLanguageData.Exists())
-			{
-				LanguageOptionsScreen.InstalledLanguageData installedLanguageData = YamlIO.LoadFile<LanguageOptionsScreen.InstalledLanguageData>(LanguageOptionsScreen.InstalledLanguageData.FilePath(), null, null);
-				if (installedLanguageData != null)
-				{
-					lastModified = global::System.DateTime.FromFileTimeUtc(installedLanguageData.LastModified);
-					item = new PublishedFileId_t(installedLanguageData.PublishedFileId);
-					return;
-				}
-			}
-			lastModified = global::System.DateTime.MinValue;
-			item = PublishedFileId_t.Invalid;
-		}
-
-		public static bool Exists()
-		{
-			return File.Exists(LanguageOptionsScreen.InstalledLanguageData.FilePath());
-		}
-
-		public static void Delete()
-		{
-			if (LanguageOptionsScreen.InstalledLanguageData.Exists())
-			{
-				File.Delete(LanguageOptionsScreen.InstalledLanguageData.FilePath());
-			}
-		}
-
-		public ulong PublishedFileId { get; set; }
-
-		public long LastModified { get; set; }
-
-		private static readonly string FILE_NAME = "strings/mod_installed.dat";
-	}
 }

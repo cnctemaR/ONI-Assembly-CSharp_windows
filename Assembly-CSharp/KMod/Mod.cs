@@ -47,7 +47,7 @@ namespace KMod
 		public void CopyPersistentDataTo(Mod other_mod)
 		{
 			other_mod.status = this.status;
-			other_mod.enabled = this.enabled;
+			other_mod.enabledForDlc = new List<string>(this.enabledForDlc);
 			other_mod.crash_count = this.crash_count;
 			other_mod.loaded_content = this.loaded_content;
 			other_mod.loaded_mod_data = this.loaded_mod_data;
@@ -56,7 +56,6 @@ namespace KMod
 
 		public Mod(Label label, string description, IFileSource file_source, LocString manage_tooltip, global::System.Action on_managed)
 		{
-			this.enabled = false;
 			this.label = label;
 			this.status = Mod.Status.NotInstalled;
 			this.description = description;
@@ -68,40 +67,227 @@ namespace KMod
 			this.ScanContent();
 		}
 
-		public void ScanContent()
+		public bool IsEnabledForActiveDlc()
 		{
-			this.available_content = (Content)0;
-			if (this.file_source == null)
+			return this.IsEnabledForDlc(DlcManager.GetActiveDlcId());
+		}
+
+		public bool IsEnabledForDlc(string dlcId)
+		{
+			return this.enabledForDlc != null && this.enabledForDlc.Contains(dlcId);
+		}
+
+		public void SetEnabledForActiveDlc(bool enabled)
+		{
+			this.SetEnabledForDlc(DlcManager.GetActiveDlcId(), enabled);
+		}
+
+		public void SetEnabledForDlc(string dlcId, bool set_enabled)
+		{
+			if (this.enabledForDlc == null)
 			{
-				this.file_source = new Directory(this.label.install_path);
+				this.enabledForDlc = new List<string>();
 			}
-			if (!this.file_source.Exists())
+			bool flag = this.enabledForDlc.Contains(dlcId);
+			if (set_enabled && !flag)
 			{
+				this.enabledForDlc.Add(dlcId);
 				return;
 			}
-			if (this.ScanContentFromSource(""))
+			if (!set_enabled && flag)
 			{
-				if (this.content_source == null)
-				{
-					this.content_source = new Directory(this.ContentPath);
-					return;
-				}
-			}
-			else
-			{
-				global::Debug.LogWarning(string.Format("No supported content for mod: {0}, skipping content.", this.label));
-				this.available_content = (Content)0;
-				this.enabled = false;
+				this.enabledForDlc.Remove(dlcId);
 			}
 		}
 
-		private bool ScanContentFromSource(string relativeRoot = "")
+		public void ScanContent()
+		{
+			this.ModDevLog(string.Format("{0}: Setting up mod.", this.label));
+			this.available_content = (Content)0;
+			if (this.file_source == null)
+			{
+				if (this.label.id.EndsWith(".zip"))
+				{
+					this.file_source = new ZipFile(this.label.install_path);
+				}
+				else
+				{
+					this.file_source = new Directory(this.label.install_path);
+				}
+			}
+			if (!this.file_source.Exists())
+			{
+				global::Debug.LogWarning(string.Format("{0}: File source does not appear to be valid, skipping. ({1})", this.label, this.label.install_path));
+				return;
+			}
+			string mostSuitableArchive = this.GetMostSuitableArchive();
+			if (mostSuitableArchive != null && this.ScanContentFromSource(mostSuitableArchive))
+			{
+				this.relative_root = mostSuitableArchive;
+				global::Debug.Assert(this.content_source == null);
+				this.content_source = new Directory(this.ContentPath);
+				string text = (string.IsNullOrEmpty(mostSuitableArchive) ? "root" : mostSuitableArchive);
+				global::Debug.Log(string.Format("{0}: Successfully loaded from path '{1}' with content '{2}'.", this.label, text, this.available_content.ToString()));
+				return;
+			}
+			global::Debug.LogWarning(string.Format("{0}: No supported content for mod, skipping content.", this.label));
+			this.available_content = (Content)0;
+			this.SetEnabledForActiveDlc(false);
+		}
+
+		private string GetMostSuitableArchive()
+		{
+			Mod.PackagedModInfo packagedModInfo = this.GetModInfoForFolder("");
+			if (packagedModInfo == null)
+			{
+				packagedModInfo = new Mod.PackagedModInfo
+				{
+					supportedContent = "vanilla_id",
+					lastWorkingBuild = 0
+				};
+				if (this.ScanContentFromSourceForTranslationsOnly(""))
+				{
+					global::Debug.Log(string.Format("{0}: No mod_info.yaml found, but since it contains a translation, default its supported content to 'ALL'", this.label));
+					packagedModInfo.supportedContent = "all";
+				}
+				else
+				{
+					global::Debug.Log(string.Format("{0}: No mod_info.yaml found, default its supported content to 'VANILLA_ID'", this.label));
+				}
+			}
+			if (!this.file_source.Exists("archived_versions"))
+			{
+				this.ModDevLog(string.Format("\t{0}: No archived_versions for this mod, using root version directly.", this.label));
+				if (!this.DoesModSupportCurrentContent(packagedModInfo))
+				{
+					return null;
+				}
+				return "";
+			}
+			else
+			{
+				List<FileSystemItem> list = new List<FileSystemItem>();
+				this.file_source.GetTopLevelItems(list, "archived_versions");
+				if (list.Count == 0)
+				{
+					this.ModDevLog(string.Format("\t{0}: No archived_versions for this mod, using root version directly.", this.label));
+					if (!this.DoesModSupportCurrentContent(packagedModInfo))
+					{
+						return null;
+					}
+					return "";
+				}
+				else
+				{
+					List<Mod.ArchivedVersion> list2 = new List<Mod.ArchivedVersion>();
+					list2.Add(new Mod.ArchivedVersion
+					{
+						relativePath = "",
+						info = packagedModInfo
+					});
+					foreach (FileSystemItem fileSystemItem in list)
+					{
+						string text = Path.Combine("archived_versions", fileSystemItem.name);
+						Mod.PackagedModInfo modInfoForFolder = this.GetModInfoForFolder(text);
+						if (modInfoForFolder != null)
+						{
+							list2.Add(new Mod.ArchivedVersion
+							{
+								relativePath = text,
+								info = modInfoForFolder
+							});
+						}
+					}
+					list2 = list2.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion v) => this.DoesModSupportCurrentContent(v.info)).ToList<Mod.ArchivedVersion>();
+					Mod.ArchivedVersion archivedVersion = (from v in list2
+						where (long)v.info.lastWorkingBuild >= 447213L
+						orderby v.info.lastWorkingBuild
+						select v).Concat<Mod.ArchivedVersion>(from v in list2
+						where (long)v.info.lastWorkingBuild < 447213L
+						orderby v.info.lastWorkingBuild descending
+						select v).First<Mod.ArchivedVersion>();
+					if (archivedVersion == null)
+					{
+						return "";
+					}
+					return archivedVersion.relativePath;
+				}
+			}
+		}
+
+		private Mod.PackagedModInfo GetModInfoForFolder(string relative_root)
+		{
+			List<FileSystemItem> list = new List<FileSystemItem>();
+			this.file_source.GetTopLevelItems(list, relative_root);
+			bool flag = false;
+			foreach (FileSystemItem fileSystemItem in list)
+			{
+				if (fileSystemItem.type == FileSystemItem.ItemType.File && fileSystemItem.name.ToLower() == "mod_info.yaml")
+				{
+					flag = true;
+					break;
+				}
+			}
+			string text = (string.IsNullOrEmpty(relative_root) ? "root" : relative_root);
+			Mod.PackagedModInfo packagedModInfo = null;
+			if (!flag)
+			{
+				this.ModDevLog(string.Concat(new string[] { "\t", this.title, ": has no mod_info.yaml in folder '", text, "'" }));
+				return packagedModInfo;
+			}
+			string text2 = this.file_source.Read(Path.Combine(relative_root, "mod_info.yaml"));
+			if (string.IsNullOrEmpty(text2))
+			{
+				this.ModDevLog(string.Format("\t{0}: Failed to read {1} in folder '{2}', skipping", this.label, "mod_info.yaml", text));
+				return packagedModInfo;
+			}
+			packagedModInfo = YamlIO.Parse<Mod.PackagedModInfo>(text2, default(FileHandle), null, null);
+			if (packagedModInfo == null)
+			{
+				this.ModDevLog(string.Format("\t{0}: Failed to parse {1} in folder '{2}', text is {3}", new object[] { this.label, "mod_info.yaml", text, text2 }));
+				return packagedModInfo;
+			}
+			if (packagedModInfo.supportedContent == null)
+			{
+				this.ModDevLog(string.Format("\t{0}: {1} in folder '{2}' does not specify supportedContent", this.label, "mod_info.yaml", text));
+				return packagedModInfo;
+			}
+			this.ModDevLog(string.Format("\t{0}: Found valid mod_info.yaml in folder '{1}': {2} at {3}", new object[] { this.label, text, packagedModInfo.supportedContent, packagedModInfo.lastWorkingBuild }));
+			return packagedModInfo;
+		}
+
+		private bool DoesModSupportCurrentContent(Mod.PackagedModInfo mod_info)
+		{
+			string text = DlcManager.GetActiveDlcId();
+			if (text == "")
+			{
+				text = "vanilla_id";
+			}
+			text = text.ToLower();
+			string text2 = mod_info.supportedContent.ToLower();
+			return text2.Contains(text) || text2.Contains("all");
+		}
+
+		private bool ScanContentFromSourceForTranslationsOnly(string relativeRoot)
 		{
 			this.available_content = (Content)0;
 			List<FileSystemItem> list = new List<FileSystemItem>();
 			this.file_source.GetTopLevelItems(list, relativeRoot);
-			bool flag = false;
-			bool flag2 = false;
+			foreach (FileSystemItem fileSystemItem in list)
+			{
+				if (fileSystemItem.type == FileSystemItem.ItemType.File && fileSystemItem.name.ToLower().EndsWith(".po"))
+				{
+					this.available_content |= Content.Translation;
+				}
+			}
+			return this.available_content > (Content)0;
+		}
+
+		private bool ScanContentFromSource(string relativeRoot)
+		{
+			this.available_content = (Content)0;
+			List<FileSystemItem> list = new List<FileSystemItem>();
+			this.file_source.GetTopLevelItems(list, relativeRoot);
 			foreach (FileSystemItem fileSystemItem in list)
 			{
 				if (fileSystemItem.type == FileSystemItem.ItemType.Directory)
@@ -112,103 +298,10 @@ namespace KMod
 				else
 				{
 					string text2 = fileSystemItem.name.ToLower();
-					if (text2 == "archived_versions.yaml")
-					{
-						flag = true;
-					}
-					else if (text2 == "mod_info.yaml")
-					{
-						flag2 = true;
-					}
-					else
-					{
-						this.AddFile(text2);
-					}
+					this.AddFile(text2);
 				}
 			}
-			bool flag3 = true;
-			if (flag2)
-			{
-				string text3 = this.file_source.Read(Path.Combine(relativeRoot, "mod_info.yaml"));
-				if (!string.IsNullOrEmpty(text3))
-				{
-					Mod.PackagedModInfo packagedModInfo = YamlIO.Parse<Mod.PackagedModInfo>(text3, default(FileHandle), null, null);
-					if (packagedModInfo != null)
-					{
-						string text4 = (string.IsNullOrEmpty(this.relative_root) ? "root" : this.relative_root);
-						if (packagedModInfo.supportedContent != null)
-						{
-							string text5 = packagedModInfo.supportedContent.ToLower();
-							if (!text5.Contains("vanilla_id") && !text5.Contains("all"))
-							{
-								global::Debug.Log(string.Format("Skipping mod {0} at {1} because it does not support vanilla content.", this.label, text4));
-								flag3 = false;
-							}
-						}
-					}
-					else
-					{
-						global::Debug.LogWarning("Failed to parse mod_info.yaml, text is " + text3);
-					}
-				}
-				else
-				{
-					global::Debug.LogWarning("Failed to read mod_info.yaml, skipping");
-				}
-			}
-			if (!string.IsNullOrEmpty(this.relative_root))
-			{
-				return flag3;
-			}
-			if (!flag)
-			{
-				return flag3;
-			}
-			string text6 = this.file_source.Read("archived_versions.yaml");
-			if (string.IsNullOrEmpty(text6))
-			{
-				global::Debug.LogWarning("Failed to read archived_versions.yaml, skipping");
-				return flag3;
-			}
-			Mod.ArchivedVersionArray archivedVersionArray = YamlIO.Parse<Mod.ArchivedVersionArray>(text6, default(FileHandle), null, null);
-			if (archivedVersionArray == null)
-			{
-				global::Debug.LogWarning("Failed to parse archived_versions.yaml, text is " + text6);
-				return flag3;
-			}
-			List<Mod.ArchivedVersion> list2;
-			if (flag3)
-			{
-				list2 = archivedVersionArray.archivedVersions.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion versionInfo) => (long)versionInfo.lastWorkingBuild == 444111L).ToList<Mod.ArchivedVersion>();
-			}
-			else
-			{
-				list2 = (from versionInfo in archivedVersionArray.archivedVersions
-					where (long)versionInfo.lastWorkingBuild >= 444111L
-					orderby versionInfo.lastWorkingBuild
-					select versionInfo).Concat<Mod.ArchivedVersion>(from versionInfo in archivedVersionArray.archivedVersions
-					where (long)versionInfo.lastWorkingBuild < 444111L
-					orderby versionInfo.lastWorkingBuild descending
-					select versionInfo).ToList<Mod.ArchivedVersion>();
-			}
-			foreach (Mod.ArchivedVersion archivedVersion in list2)
-			{
-				this.relative_root = FileSystem.Normalize(archivedVersion.relativePath);
-				if (!this.relative_root.StartsWith("archived_version"))
-				{
-					global::Debug.LogError("Archived version with path: " + archivedVersion.relativePath + ". For consistency among mods, please keep all old versions in a top-level directory called \"archived_versions\"");
-					return false;
-				}
-				Content available_content = this.available_content;
-				if (this.ScanContentFromSource(this.relative_root))
-				{
-					global::Debug.Log(string.Format("Found archived version for mod {0} with lastWorkingBuild: {1}, redirected content path to {2}", this.title, archivedVersion.lastWorkingBuild, this.relative_root));
-					return true;
-				}
-				this.relative_root = null;
-				this.available_content = available_content;
-			}
-			return flag3;
+			return this.available_content > (Content)0;
 		}
 
 		public string ContentPath
@@ -316,13 +409,12 @@ namespace KMod
 			}
 			this.file_source.CopyTo(this.label.install_path, null);
 			this.file_source = new Directory(this.label.install_path);
-			this.content_source = new Directory(this.ContentPath);
 			this.status = Mod.Status.Installed;
 		}
 
 		public bool Uninstall()
 		{
-			this.enabled = false;
+			this.SetEnabledForActiveDlc(false);
 			if (this.loaded_content != (Content)0)
 			{
 				global::Debug.Log(string.Format("Can't uninstall {0}: still has loaded content: {1}", this.label.ToString(), this.loaded_content.ToString()));
@@ -495,7 +587,7 @@ namespace KMod
 			this.SetCrashCount(this.crash_count + 1);
 			if (!this.IsDev)
 			{
-				this.enabled = false;
+				this.SetEnabledForActiveDlc(false);
 			}
 		}
 
@@ -539,6 +631,61 @@ namespace KMod
 			return this.available_content == Content.Translation;
 		}
 
+		public Texture2D GetPreviewImage()
+		{
+			string text = null;
+			foreach (string text2 in Mod.PREVIEW_FILENAMES)
+			{
+				if (Directory.Exists(this.ContentPath) && File.Exists(Path.Combine(this.ContentPath, text2)))
+				{
+					text = text2;
+					break;
+				}
+			}
+			if (text == null)
+			{
+				return null;
+			}
+			Texture2D texture2D2;
+			try
+			{
+				byte[] array = File.ReadAllBytes(Path.Combine(this.ContentPath, text));
+				Texture2D texture2D = new Texture2D(2, 2);
+				texture2D.LoadImage(array);
+				texture2D2 = texture2D;
+			}
+			catch
+			{
+				global::Debug.LogWarning(string.Format("Mod {0} seems to have a preview.png but it didn't load correctly.", this.label));
+				texture2D2 = null;
+			}
+			return texture2D2;
+		}
+
+		public void ModDevLog(string msg)
+		{
+			if (this.IsDev)
+			{
+				global::Debug.Log(msg);
+			}
+		}
+
+		public void ModDevLogWarning(string msg)
+		{
+			if (this.IsDev)
+			{
+				global::Debug.LogWarning(msg);
+			}
+		}
+
+		public void ModDevLogError(string msg)
+		{
+			if (this.IsDev)
+			{
+				global::Debug.LogError(msg);
+			}
+		}
+
 		[JsonProperty]
 		public Label label;
 
@@ -547,6 +694,9 @@ namespace KMod
 
 		[JsonProperty]
 		public bool enabled;
+
+		[JsonProperty]
+		public List<string> enabledForDlc;
 
 		[JsonProperty]
 		public int crash_count;
@@ -566,11 +716,17 @@ namespace KMod
 
 		public bool is_subscribed;
 
-		private const string ARCHIVED_VERSIONS_FILENAME = "archived_versions.yaml";
+		private const string VANILLA_ID = "vanilla_id";
+
+		private const string ALL_ID = "all";
+
+		private const string ARCHIVED_VERSIONS_FOLDER = "archived_versions";
 
 		private const string MOD_INFO_FILENAME = "mod_info.yaml";
 
 		public const int MAX_CRASH_COUNT = 3;
+
+		private static readonly List<string> PREVIEW_FILENAMES = new List<string> { "preview.png", "Preview.png", "PREVIEW.PNG" };
 
 		public enum Status
 		{
@@ -580,21 +736,11 @@ namespace KMod
 			ReinstallPending
 		}
 
-		public class ArchivedVersionArray
-		{
-			public Mod.ArchivedVersion[] archivedVersions { get; set; }
-
-			public ArchivedVersionArray()
-			{
-				this.archivedVersions = new Mod.ArchivedVersion[0];
-			}
-		}
-
 		public class ArchivedVersion
 		{
-			public string relativePath { get; set; }
+			public string relativePath;
 
-			public int lastWorkingBuild { get; set; }
+			public Mod.PackagedModInfo info;
 		}
 
 		public class PackagedModInfo

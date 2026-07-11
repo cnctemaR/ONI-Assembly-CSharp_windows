@@ -271,7 +271,6 @@ namespace FMODUnity
 				if (RuntimeManager.numListeners <= 0 && !this.listenerWarningIssued)
 				{
 					this.listenerWarningIssued = true;
-					global::UnityEngine.Debug.LogWarning("[FMOD] Please add an 'FMOD Studio Listener' component to your a camera in the scene for correct 3D positioning of sounds.");
 				}
 				for (int i = 0; i < this.attachedInstances.Count; i++)
 				{

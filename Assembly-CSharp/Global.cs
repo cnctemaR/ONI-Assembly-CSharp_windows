@@ -7,7 +7,6 @@ using System.Threading;
 using Klei;
 using KMod;
 using KSerialization;
-using Steamworks;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -300,7 +299,7 @@ public class Global : MonoBehaviour
 		this.mAnimEventManager = new AnimEventManager();
 		Singleton<KBatchedAnimUpdater>.CreateInstance();
 		DistributionPlatform.Initialize();
-		Localization.Initialize(false);
+		Localization.Initialize();
 		this.modManager.Load(Content.Translation);
 		this.modManager.distribution_platforms.Add(new Local("Local", Label.DistributionPlatform.Local));
 		this.modManager.distribution_platforms.Add(new Local("Dev", Label.DistributionPlatform.Dev));
@@ -560,7 +559,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 444111U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 447213U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -570,18 +569,11 @@ public class Global : MonoBehaviour
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.TemperatureUnitKey, ((GameUtil.TemperatureUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.TemperatureUnitKey)).ToString());
 		}
-		if (SteamManager.Initialized)
+		int selectedLanguageType = (int)Localization.GetSelectedLanguageType();
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageCodeKey, Localization.GetCurrentLanguageCode());
+		if (selectedLanguageType == 2)
 		{
-			PublishedFileId_t publishedFileId_t;
-			string installedLanguageCode = LanguageOptionsScreen.GetInstalledLanguageCode(out publishedFileId_t);
-			if (publishedFileId_t != PublishedFileId_t.Invalid)
-			{
-				ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguagePackKey, publishedFileId_t.m_PublishedFileId);
-			}
-			if (!string.IsNullOrEmpty(installedLanguageCode))
-			{
-				ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguageCodeKey, installedLanguageCode);
-			}
+			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(Global.LanguagePackKey, LanguageOptionsScreen.GetSavedLanguageMod());
 		}
 	}
 

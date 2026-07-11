@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{AD6E4EFC-901B-4197-AECE-048DCA3E16F1}</ProjectGuid>
+    <ProjectGuid>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAFD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.TLSModule</RootNamespace>
     <AssemblyName>UnityEngine.TLSModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16B7}</Project>
+      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAC3}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{AD6E4EFC-901B-4197-AECE-048DCA3E16E4}</Project>
+      <Project>{C6581FE8-D450-4BBA-B5F3-C25EE9B0FAF0}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

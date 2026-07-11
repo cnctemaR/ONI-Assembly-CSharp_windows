@@ -38,16 +38,15 @@ public class RocketModule : KMonoBehaviour
 		{
 			component.AddStatusItem(Db.Get().BuildingStatusItems.RocketName, this);
 		}
-		if (this.conditionManager.GetComponent<KPrefabID>().HasTag(GameTags.RocketNotOnGround))
+		if (this.conditionManager != null && this.conditionManager.GetComponent<KPrefabID>().HasTag(GameTags.RocketNotOnGround))
 		{
 			this.OnLaunch(null);
 		}
-		this.conditionManager.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 		base.Subscribe<RocketModule>(-1056989049, RocketModule.OnLaunchDelegate);
 		base.Subscribe<RocketModule>(238242047, RocketModule.OnLandDelegate);
 	}
 
-	private void OnTagsChanged(object data)
+	public void OnConditionManagerTagsChanged(object data)
 	{
 		KPrefabID component = this.conditionManager.GetComponent<KPrefabID>();
 		if (component.HasTag(GameTags.RocketNotOnGround))

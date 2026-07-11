@@ -750,9 +750,9 @@ public class Pickupable : Workable
 			if (this.entombedCell == -1)
 			{
 				int num = Grid.PosToCell(this);
-				if (PickupableWorldEntomber.CanEntomb(this))
+				if (EntombedItemManager.CanEntomb(this))
 				{
-					Game.Instance.pickupableWorldEntomber.Add(this);
+					SaveGame.Instance.entombedItemManager.Add(this);
 				}
 				if (Grid.Objects[num, 1] == null)
 				{

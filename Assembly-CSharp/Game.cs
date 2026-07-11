@@ -108,7 +108,6 @@ public class Game : KMonoBehaviour
 		new GameNavGrids(Pathfinding.Instance);
 		this.screenMgr = global::Util.KInstantiate(this.screenManagerPrefab, null, null).GetComponent<GameScreenManager>();
 		this.roleManager = new RoleManager();
-		this.pickupableWorldEntomber = base.gameObject.AddComponent<PickupableWorldEntomber>();
 		this.roomProber = new RoomProber();
 		this.roomProber.Init();
 		CellChangeMonitor.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
@@ -613,6 +612,10 @@ public class Game : KMonoBehaviour
 				}
 				this.simDt -= 0.016666668f;
 			}
+		}
+		else
+		{
+			this.UnsafeSim200ms(0f);
 		}
 	}
 
@@ -1232,8 +1235,6 @@ public class Game : KMonoBehaviour
 	public RoomProber roomProber;
 
 	public RoleManager roleManager;
-
-	public PickupableWorldEntomber pickupableWorldEntomber;
 
 	public CustomGameSettings customSettings;
 

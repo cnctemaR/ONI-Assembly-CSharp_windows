@@ -25,6 +25,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		instance.StartSM();
 		RedAlertManager.Instance instance2 = new RedAlertManager.Instance(this);
 		instance2.StartSM();
+		this.entombedItemManager = base.gameObject.AddComponent<EntombedItemManager>();
 	}
 
 	[OnSerializing]
@@ -57,7 +58,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 274778U;
+		header.buildVersion = 275206U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -130,6 +131,8 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	private string baseName;
 
 	public static SaveGame Instance;
+
+	public EntombedItemManager entombedItemManager;
 
 	public struct Header
 	{

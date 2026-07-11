@@ -18,9 +18,11 @@ public class KFMOD
 		try
 		{
 			global::FMOD.Studio.System studioSystem = RuntimeManager.StudioSystem;
+			KFMOD.didFmodInitializeSuccessfully = RuntimeManager.IsInitialized;
 		}
 		catch (Exception ex)
 		{
+			KFMOD.didFmodInitializeSuccessfully = false;
 			if (ex.GetType() != typeof(SystemNotInitializedException))
 			{
 				throw ex;
@@ -193,6 +195,8 @@ public class KFMOD
 	}
 
 	private static Dictionary<HashedString, SoundDescription> soundDescriptions = new Dictionary<HashedString, SoundDescription>();
+
+	public static bool didFmodInitializeSuccessfully = true;
 
 	private static Dictionary<HashedString, OneShotSoundParameterUpdater> parameterUpdaters = new Dictionary<HashedString, OneShotSoundParameterUpdater>();
 

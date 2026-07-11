@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using FMODUnity;
 using Klei;
 using Steamworks;
 using STRINGS;
@@ -155,7 +154,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 274778U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 275206U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -222,7 +221,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void CheckForAudioDriverIssue()
 	{
-		if (!RuntimeManager.IsInitialized)
+		if (!KFMOD.didFmodInitializeSuccessfully)
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupeAudio;

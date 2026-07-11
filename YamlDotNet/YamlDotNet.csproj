@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{38FDC63A-876B-43F7-9B10-0CCB8E88A4F2}</ProjectGuid>
+    <ProjectGuid>{565A657F-F71B-4118-8F5C-0A791C4C7905}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>YamlDotNet</RootNamespace>
     <AssemblyName>YamlDotNet</AssemblyName>
@@ -214,15 +214,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E0}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F3}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E5}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F8}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E7}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78FA}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

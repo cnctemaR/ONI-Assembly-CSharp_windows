@@ -85,7 +85,9 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 
 	public void Spawn()
 	{
-		this.shadowSpawnList.AddRange(this.spawnList);
+		HashSet<HandleVector<int>.Handle> hashSet = this.spawnList;
+		this.spawnList = this.shadowSpawnList;
+		this.shadowSpawnList = hashSet;
 		this.spawnList.Clear();
 		foreach (KComponentManager<T>.CleanupInfo cleanupInfo in this.cleanupList)
 		{
@@ -165,9 +167,9 @@ public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentMana
 
 	protected Dictionary<object, HandleVector<int>.Handle> instanceHandleMap = new Dictionary<object, HandleVector<int>.Handle>();
 
-	private List<HandleVector<int>.Handle> spawnList = new List<HandleVector<int>.Handle>();
+	private HashSet<HandleVector<int>.Handle> spawnList = new HashSet<HandleVector<int>.Handle>();
 
-	private List<HandleVector<int>.Handle> shadowSpawnList = new List<HandleVector<int>.Handle>();
+	private HashSet<HandleVector<int>.Handle> shadowSpawnList = new HashSet<HandleVector<int>.Handle>();
 
 	protected List<KComponentManager<T>.CleanupInfo> cleanupList = new List<KComponentManager<T>.CleanupInfo>();
 

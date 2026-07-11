@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{38FDC63A-876B-43F7-9B10-0CCB8E88A4D5}</ProjectGuid>
+    <ProjectGuid>{565A657F-F71B-4118-8F5C-0A791C4C78E8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp</RootNamespace>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -547,6 +547,7 @@
     <Compile Include="EntityTemplateExtensions.cs" />
     <Compile Include="EntityTemplates.cs" />
     <Compile Include="EntombedChore.cs" />
+    <Compile Include="EntombedItemManager.cs" />
     <Compile Include="EntombedItemVisualizer.cs" />
     <Compile Include="EntombVulnerable.cs" />
     <Compile Include="EnvironmentGenerator.cs" />
@@ -1353,7 +1354,6 @@
     <Compile Include="PickledMealConfig.cs" />
     <Compile Include="Pickupable.cs" />
     <Compile Include="PickupableSensor.cs" />
-    <Compile Include="PickupableWorldEntomber.cs" />
     <Compile Include="Placeable.cs" />
     <Compile Include="PlaceTool.cs" />
     <Compile Include="PlanCategoryNotifications.cs" />
@@ -2055,51 +2055,51 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4D3}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78E6}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Assembly-CSharp-firstpass\Assembly-CSharp-firstpass.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4D4}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78E7}</Project>
       <Name>Assembly-CSharp-firstpass</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4D7}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78EA}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\Ionic.Zip\Ionic.Zip.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4DB}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78EE}</Project>
       <Name>Ionic.Zip</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4DC}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78EF}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E0}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F3}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E1}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F4}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E3}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F6}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E5}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78F8}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4E7}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C78FA}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4F1}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C7904}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{38FDC63A-876B-43F7-9B10-0CCB8E88A4EF}</Project>
+      <Project>{565A657F-F71B-4118-8F5C-0A791C4C7902}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

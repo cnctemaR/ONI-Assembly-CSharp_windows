@@ -60,6 +60,7 @@ public class World : KMonoBehaviour
 				this.OnSolidChanged(cellIdx);
 			}
 		}
+		SaveGame.Instance.entombedItemManager.OnSolidChanged(this.changedCells);
 		GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.solidChangedLayer, null);
 		int count2 = callbackInfo.Count;
 		for (int j = 0; j < count2; j++)

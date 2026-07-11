@@ -250,6 +250,22 @@ public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 		{
 			data.ev.stop(STOP_MODE.ALLOWFADEOUT);
 			data.ev.release();
+			SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(data.path);
+			foreach (SoundDescription.Parameter parameter in soundEventDescription.parameters)
+			{
+				LoopingSoundParameterUpdater loopingSoundParameterUpdater = null;
+				if (LoopingSoundManager.Get().parameterUpdaters.TryGetValue(parameter.name, out loopingSoundParameterUpdater))
+				{
+					LoopingSoundParameterUpdater.Sound sound = new LoopingSoundParameterUpdater.Sound
+					{
+						ev = data.ev,
+						path = data.path,
+						description = soundEventDescription,
+						transform = data.transform
+					};
+					loopingSoundParameterUpdater.Remove(sound);
+				}
+			}
 		}
 		LoopingSoundManager.Get().sounds.Free(handle);
 	}

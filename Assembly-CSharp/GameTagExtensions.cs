@@ -10,7 +10,12 @@ public static class GameTagExtensions
 
 	public static string ProperName(this Tag tag)
 	{
-		return TagManager.GetProperName(tag);
+		return TagManager.GetProperName(tag, false);
+	}
+
+	public static string ProperNameStripLink(this Tag tag)
+	{
+		return TagManager.GetProperName(tag, true);
 	}
 
 	public static Tag Create(SimHashes id)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/NavigationReservations")]
 public class NavigationReservations : KMonoBehaviour
 {
 	public static void DestroyInstance()

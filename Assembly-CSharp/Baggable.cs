@@ -2,6 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Baggable")]
 public class Baggable : KMonoBehaviour
 {
 	protected override void OnSpawn()

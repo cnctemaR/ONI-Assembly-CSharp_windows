@@ -5,6 +5,7 @@ using ProcGen;
 using ProcGenGame;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DestinationSelectPanel")]
 public class DestinationSelectPanel : KMonoBehaviour
 {
 	public event Action<ColonyDestinationAsteroidData> OnAsteroidClicked;

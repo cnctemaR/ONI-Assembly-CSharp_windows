@@ -5,6 +5,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Shower")]
 public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	private Shower()

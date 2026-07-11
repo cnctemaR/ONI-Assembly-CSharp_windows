@@ -3,6 +3,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ItemPedestal")]
 public class ItemPedestal : KMonoBehaviour
 {
 	protected override void OnSpawn()
@@ -15,6 +16,7 @@ public class ItemPedestal : KMonoBehaviour
 			if (component)
 			{
 				component.enabled = true;
+				component.sceneLayer = Grid.SceneLayer.Move;
 			}
 			this.OnOccupantChanged(this.receptacle.Occupant);
 		}

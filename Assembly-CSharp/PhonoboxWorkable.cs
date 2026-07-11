@@ -3,6 +3,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/PhonoboxWorkable")]
 public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 {
 	private PhonoboxWorkable()

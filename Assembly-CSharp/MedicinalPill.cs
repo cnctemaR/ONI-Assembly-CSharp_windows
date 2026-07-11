@@ -4,6 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/MedicinalPill")]
 public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableUIItem
 {
 	protected override void OnSpawn()

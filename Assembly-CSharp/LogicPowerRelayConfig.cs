@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -25,31 +26,20 @@ public class LogicPowerRelayConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
+		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT_INACTIVE, true, false) };
 		SoundEventVolumeCache.instance.AddVolume("switchpower_kanim", "PowerSwitch_on", NOISE_POLLUTION.NOISY.TIER3);
 		SoundEventVolumeCache.instance.AddVolume("switchpower_kanim", "PowerSwitch_off", NOISE_POLLUTION.NOISY.TIER3);
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, LogicPowerRelayConfig.ID);
 		return buildingDef;
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicPowerRelayConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicPowerRelayConfig.INPUT_PORTS);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
-		GeneratedBuildings.RegisterLogicPorts(go, LogicPowerRelayConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGet<OperationalControlledSwitch>().objectLayer = ObjectLayer.Wire;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 
 	public static string ID = "LogicPowerRelay";
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICPOWERRELAY.LOGIC_PORT_INACTIVE, true, false) };
 }

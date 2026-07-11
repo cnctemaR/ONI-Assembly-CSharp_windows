@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Radiator")]
 public class Radiator : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public float IntensityAnimation { get; set; }

@@ -885,7 +885,9 @@ public class BuildMenu : KScreen
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("LogicWiring"), "icon_category_automation", global::Action.BuildCategoryLogicWiring, KKeyCode.W, new List<BuildMenu.BuildingInfo>
 			{
 				new BuildMenu.BuildingInfo("LogicWire", global::Action.BuildMenuKeyW),
-				new BuildMenu.BuildingInfo("LogicWireBridge", global::Action.BuildMenuKeyB)
+				new BuildMenu.BuildingInfo("LogicWireBridge", global::Action.BuildMenuKeyB),
+				new BuildMenu.BuildingInfo("LogicRibbon", global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("LogicRibbonBridge", global::Action.BuildMenuKeyV)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("LogicGates"), "icon_category_automation", global::Action.BuildCategoryLogicGates, KKeyCode.G, new List<BuildMenu.BuildingInfo>
 			{
@@ -904,9 +906,11 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo(LogicPressureSensorLiquidConfig.ID, global::Action.BuildMenuKeyQ),
 				new BuildMenu.BuildingInfo(LogicTemperatureSensorConfig.ID, global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo(LogicTimeOfDaySensorConfig.ID, global::Action.BuildMenuKeyD),
+				new BuildMenu.BuildingInfo(LogicTimerSensorConfig.ID, global::Action.BuildMenuKeyF),
 				new BuildMenu.BuildingInfo(LogicCritterCountSensorConfig.ID, global::Action.BuildMenuKeyV),
 				new BuildMenu.BuildingInfo(LogicDiseaseSensorConfig.ID, global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo(LogicElementSensorGasConfig.ID, global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo(LogicWattageSensorConfig.ID, global::Action.BuildMenuKeyP),
 				new BuildMenu.BuildingInfo("FloorSwitch", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("Checkpoint", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo(CometDetectorConfig.ID, global::Action.BuildMenuKeyR),

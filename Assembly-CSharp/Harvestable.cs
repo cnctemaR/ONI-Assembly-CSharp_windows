@@ -1,8 +1,10 @@
 ﻿using System;
 using KSerialization;
 using TUNING;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Harvestable")]
 public class Harvestable : Workable
 {
 	public Worker completed_by { get; protected set; }

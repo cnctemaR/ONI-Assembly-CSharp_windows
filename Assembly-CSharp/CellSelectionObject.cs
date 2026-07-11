@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ProcGen;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CellSelectionObject")]
 public class CellSelectionObject : KMonoBehaviour
 {
 	public int SelectedCell

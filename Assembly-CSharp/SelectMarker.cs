@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SelectMarker")]
 public class SelectMarker : KMonoBehaviour
 {
 	public void SetTargetTransform(Transform target_transform)

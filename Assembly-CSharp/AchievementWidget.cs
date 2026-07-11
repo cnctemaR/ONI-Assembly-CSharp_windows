@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AchievementWidget")]
 public class AchievementWidget : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -30,6 +30,7 @@ public class GasFilterConfig : IBuildingConfig
 		buildingDef.UtilityInputOffset = new CellOffset(-1, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(1, 0);
 		buildingDef.PermittedRotations = PermittedRotations.R360;
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "GasFilter");
 		return buildingDef;
 	}
 
@@ -61,6 +62,7 @@ public class GasFilterConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGetDef<PoweredActiveController.Def>().showWorkingStatus = true;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 
 	public const string ID = "GasFilter";

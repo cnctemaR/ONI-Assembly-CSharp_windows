@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TemplateSelectionInfoPanel")]
 public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 {
 	protected override void OnSpawn()

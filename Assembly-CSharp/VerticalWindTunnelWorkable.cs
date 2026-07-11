@@ -1,7 +1,9 @@
 ﻿using System;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/VerticalWindTunnelWorkable")]
 public class VerticalWindTunnelWorkable : Workable, IWorkerPrioritizable
 {
 	private VerticalWindTunnelWorkable()

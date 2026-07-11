@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EntombedItemManager")]
 public class EntombedItemManager : KMonoBehaviour, ISim33ms
 {
 	[OnDeserialized]

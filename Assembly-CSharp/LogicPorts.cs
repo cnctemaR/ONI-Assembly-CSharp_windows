@@ -6,6 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/LogicPorts")]
 public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 {
 	protected override void OnPrefabInit()
@@ -380,6 +381,22 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		this.DestroyVisualizers();
 	}
 
+	public LogicWire.BitDepth GetConnectedWireBitDepth(HashedString port_id)
+	{
+		LogicWire.BitDepth bitDepth = LogicWire.BitDepth.NumRatings;
+		int portCell = this.GetPortCell(port_id);
+		GameObject gameObject = Grid.Objects[portCell, 31];
+		if (gameObject != null)
+		{
+			LogicWire component = gameObject.GetComponent<LogicWire>();
+			if (component != null)
+			{
+				bitDepth = component.MaxBitDepth;
+			}
+		}
+		return bitDepth;
+	}
+
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -400,7 +417,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 			}
 			if (component.outputPortInfo != null && component.outputPortInfo.Length != 0)
 			{
-				Descriptor descriptor2 = new Descriptor(UI.LOGIC_PORTS.OUTPUT_PORTS, UI.LOGIC_PORTS.INPUT_PORTS_TOOLTIP, Descriptor.DescriptorType.Effect, false);
+				Descriptor descriptor2 = new Descriptor(UI.LOGIC_PORTS.OUTPUT_PORTS, UI.LOGIC_PORTS.OUTPUT_PORTS_TOOLTIP, Descriptor.DescriptorType.Effect, false);
 				list.Add(descriptor2);
 				foreach (LogicPorts.Port port2 in component.outputPortInfo)
 				{
@@ -476,6 +493,16 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		public static LogicPorts.Port OutputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false, bool display_custom_name = false)
 		{
 			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.Output, display_custom_name);
+		}
+
+		public static LogicPorts.Port RibbonInputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false, bool display_custom_name = false)
+		{
+			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.RibbonInput, display_custom_name);
+		}
+
+		public static LogicPorts.Port RibbonOutputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false, bool display_custom_name = false)
+		{
+			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.RibbonOutput, display_custom_name);
 		}
 
 		public HashedString id;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MinionGroupProber")]
 public class MinionGroupProber : KMonoBehaviour, IGroupProber
 {
 	public static void DestroyInstance()

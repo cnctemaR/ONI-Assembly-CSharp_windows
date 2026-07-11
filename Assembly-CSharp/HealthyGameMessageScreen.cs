@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/HealthyGameMessageScreen")]
 public class HealthyGameMessageScreen : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

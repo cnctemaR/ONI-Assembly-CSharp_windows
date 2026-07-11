@@ -5,6 +5,7 @@ using KMod;
 using ProcGen;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/NewGameSettingsPanel")]
 public class NewGameSettingsPanel : KMonoBehaviour
 {
 	public void SetCloseAction(global::System.Action onClose)

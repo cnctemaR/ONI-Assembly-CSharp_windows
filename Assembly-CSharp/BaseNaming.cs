@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BaseNaming")]
 public class BaseNaming : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -27,6 +27,7 @@ public class POIDoorInternalConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.InteriorWall;
+		buildingDef.LogicInputPorts = DoorConfig.CreateSingleInputPortList(new CellOffset(0, 0));
 		SoundEventVolumeCache.instance.AddVolume("door_poi_internal_kanim", "Open_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_poi_internal_kanim", "Close_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		return buildingDef;
@@ -45,19 +46,8 @@ public class POIDoorInternalConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 		AccessControl component = go.GetComponent<AccessControl>();
 		go.GetComponent<Door>().hasComplexUserControls = false;
 		component.controlEnabled = false;

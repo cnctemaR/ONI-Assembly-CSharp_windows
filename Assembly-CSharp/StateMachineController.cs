@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/StateMachineController")]
 public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, IStateMachineControllerHack
 {
 	public StateMachineController.CmpDef cmpdef

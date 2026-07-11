@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AssignableRegionCharacterSelection")]
 public class AssignableRegionCharacterSelection : KMonoBehaviour
 {
 	public event Action<MinionIdentity> OnDuplicantSelected;

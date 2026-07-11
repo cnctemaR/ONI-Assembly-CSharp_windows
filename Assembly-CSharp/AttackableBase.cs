@@ -3,6 +3,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/AttackableBase")]
 public class AttackableBase : Workable, IApproachable
 {
 	protected override void OnSpawn()

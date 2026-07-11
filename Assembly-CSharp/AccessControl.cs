@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/AccessControl")]
 public class AccessControl : KMonoBehaviour, ISaveLoadable, IEffectDescriptor
 {
 	public AccessControl.Permission DefaultPermission

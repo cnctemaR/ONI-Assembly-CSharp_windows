@@ -2,7 +2,9 @@
 using Klei;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/EspressoMachineWorkable")]
 public class EspressoMachineWorkable : Workable, IWorkerPrioritizable
 {
 	private EspressoMachineWorkable()

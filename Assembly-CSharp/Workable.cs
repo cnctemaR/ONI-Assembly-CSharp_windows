@@ -8,6 +8,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Workable")]
 public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 {
 	public Worker worker { get; protected set; }

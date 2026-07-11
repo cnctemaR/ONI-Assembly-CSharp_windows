@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FrontEndManager")]
 public class FrontEndManager : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

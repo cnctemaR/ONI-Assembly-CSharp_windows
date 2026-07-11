@@ -1,6 +1,8 @@
 ﻿using System;
 using FMODUnity;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MiningSounds")]
 public class MiningSounds : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ReportScreenEntryRow")]
 public class ReportScreenEntryRow : KMonoBehaviour
 {
 	private List<ReportManager.ReportEntry.Note> Sort(List<ReportManager.ReportEntry.Note> notes, ReportManager.ReportEntry.Order order)

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ConduitOverflow")]
 public class ConduitOverflow : KMonoBehaviour, ISecondaryOutput
 {
 	protected override void OnSpawn()

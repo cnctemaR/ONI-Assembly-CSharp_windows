@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AssignableSideScreenRow")]
 public class AssignableSideScreenRow : KMonoBehaviour
 {
 	public void Refresh(object data = null)

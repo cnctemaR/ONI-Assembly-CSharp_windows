@@ -4,6 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BuildingElementEmitter")]
 public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElementEmitter, ISim200ms
 {
 	public float AverageEmitRate

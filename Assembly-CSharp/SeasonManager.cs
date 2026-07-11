@@ -4,6 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/SeasonManager")]
 public class SeasonManager : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()

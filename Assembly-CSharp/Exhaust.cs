@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Exhaust")]
 public class Exhaust : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()

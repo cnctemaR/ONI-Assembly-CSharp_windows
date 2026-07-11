@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ProcGenGame;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CavityVisualizer")]
 public class CavityVisualizer : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

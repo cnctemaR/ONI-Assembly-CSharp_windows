@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Structure")]
 public class Structure : KMonoBehaviour
 {
 	public bool IsEntombed()

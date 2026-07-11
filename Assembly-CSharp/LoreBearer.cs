@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LoreBearer")]
 public class LoreBearer : KMonoBehaviour
 {
 	public string content

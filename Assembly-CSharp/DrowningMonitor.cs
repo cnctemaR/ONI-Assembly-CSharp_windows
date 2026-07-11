@@ -4,6 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DrowningMonitor")]
 public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 {
 	private OccupyArea occupyArea
@@ -164,7 +165,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 
 	public bool IsCellSafe(int cell)
 	{
-		return this.occupyArea.TestArea(cell, this, new Func<int, object, bool>(DrowningMonitor.CellSafeTest));
+		return this.occupyArea.TestArea(cell, this, DrowningMonitor.CellSafeTestDelegate);
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions
@@ -252,4 +253,6 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISlicedSim1000ms
 	public static Effect drowningEffect;
 
 	public static Effect saturatedEffect;
+
+	private static readonly Func<int, object, bool> CellSafeTestDelegate = (int testCell, object data) => DrowningMonitor.CellSafeTest(testCell, data);
 }

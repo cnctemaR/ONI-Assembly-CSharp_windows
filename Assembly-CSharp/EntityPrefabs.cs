@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EntityPrefabs")]
 public class EntityPrefabs : KMonoBehaviour
 {
 	public static EntityPrefabs Instance { get; private set; }

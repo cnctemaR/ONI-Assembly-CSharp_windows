@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DescriptorPanel")]
 public class DescriptorPanel : KMonoBehaviour
 {
 	public bool HasDescriptors()

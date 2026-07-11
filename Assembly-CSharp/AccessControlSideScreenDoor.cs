@@ -1,6 +1,8 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AccessControlSideScreenDoor")]
 public class AccessControlSideScreenDoor : KMonoBehaviour
 {
 	protected override void OnSpawn()

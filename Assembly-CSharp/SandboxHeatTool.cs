@@ -36,7 +36,6 @@ public class SandboxHeatTool : BrushTool
 		SandboxToolParameterMenu.instance.DisableParameters();
 		SandboxToolParameterMenu.instance.brushRadiusSlider.row.SetActive(true);
 		SandboxToolParameterMenu.instance.temperatureAdditiveSlider.row.SetActive(true);
-		SandboxToolParameterMenu.instance.temperatureAdditiveSlider.SetValue(5f);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
@@ -77,7 +76,19 @@ public class SandboxHeatTool : BrushTool
 		}, false);
 		int index = Game.Instance.callbackManager.Add(callbackInfo).index;
 		float num = Grid.Temperature[cell];
-		num += SandboxToolParameterMenu.instance.settings.temperatureAdditive;
+		num += SandboxToolParameterMenu.instance.settings.GetFloatSetting("SandbosTools.TemperatureAdditive");
+		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
+		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
+		{
+			if (temperatureUnit == GameUtil.TemperatureUnit.Fahrenheit)
+			{
+				num -= 255.372f;
+			}
+		}
+		else
+		{
+			num -= 273.15f;
+		}
 		num = Mathf.Clamp(num, 1f, 9999f);
 		int cell2 = cell;
 		SimHashes id = Grid.Element[cell].id;

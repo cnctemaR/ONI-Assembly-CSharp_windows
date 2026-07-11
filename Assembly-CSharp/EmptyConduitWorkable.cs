@@ -3,6 +3,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/EmptyConduitWorkable")]
 public class EmptyConduitWorkable : Workable
 {
 	protected override void OnPrefabInit()

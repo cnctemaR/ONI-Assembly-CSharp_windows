@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GenericUIProgressBar")]
 public class GenericUIProgressBar : KMonoBehaviour
 {
 	public void SetMaxValue(float max)

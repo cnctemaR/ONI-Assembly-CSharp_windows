@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityStandardAssets.ImageEffects;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CameraController")]
 public class CameraController : KMonoBehaviour, IInputHandler
 {
 	public string handlerName
@@ -907,7 +908,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		return this.soundCuller.IsAudible(pos);
 	}
 
-	public bool IsAudibleSound(Vector3 pos, string sound_path)
+	public bool IsAudibleSound(Vector3 pos, HashedString sound_path)
 	{
 		return this.soundCuller.IsAudible(pos, sound_path);
 	}

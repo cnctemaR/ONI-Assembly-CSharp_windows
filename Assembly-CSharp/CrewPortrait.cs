@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CrewPortrait")]
 [Serializable]
 public class CrewPortrait : KMonoBehaviour
 {

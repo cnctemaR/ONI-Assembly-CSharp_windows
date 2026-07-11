@@ -1,74 +1,11 @@
 ﻿using System;
-using System.Collections;
-using TMPro;
 using UnityEngine;
 
-public class KNumberInputField : KScreen
+public class KNumberInputField : KInputField
 {
-	public TMP_InputField field
-	{
-		get
-		{
-			return this.inputField;
-		}
-	}
-
-	public event global::System.Action onStartEdit;
-
-	public event global::System.Action onEndEdit;
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		TMP_InputField tmp_InputField = this.inputField;
-		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(this.OnEditStart));
-		this.inputField.onEndEdit.AddListener(delegate
-		{
-			this.OnEditEnd(this.inputField.text);
-		});
-	}
-
-	private void OnEditStart()
-	{
-		this.isEditing = true;
-		this.inputField.Select();
-		this.inputField.ActivateInputField();
-		KScreenManager.Instance.RefreshStack();
-		if (this.onStartEdit != null)
-		{
-			this.onStartEdit();
-		}
-	}
-
-	private void OnEditEnd(string input)
-	{
-		if (base.gameObject.activeInHierarchy)
-		{
-			this.ProcessInput(input);
-			base.StartCoroutine(this.DelayedEndEdit());
-			return;
-		}
-		this.StopEditing();
-	}
-
-	private IEnumerator DelayedEndEdit()
-	{
-		if (this.isEditing)
-		{
-			yield return new WaitForEndOfFrame();
-			this.StopEditing();
-		}
-		yield break;
-	}
-
-	private void StopEditing()
-	{
-		this.isEditing = false;
-		this.inputField.DeactivateInputField();
-		if (this.onEndEdit != null)
-		{
-			this.onEndEdit();
-		}
 	}
 
 	public void SetAmount(float newValue)
@@ -80,10 +17,10 @@ public class KNumberInputField : KScreen
 			newValue = Mathf.Round(newValue * num) / num;
 		}
 		this.currentValue = newValue;
-		this.SetDisplayValue(this.currentValue.ToString());
+		base.SetDisplayValue(this.currentValue.ToString());
 	}
 
-	private void ProcessInput(string input)
+	protected override void ProcessInput(string input)
 	{
 		input = ((input == "") ? this.minValue.ToString() : input);
 		float num = this.minValue;
@@ -97,30 +34,6 @@ public class KNumberInputField : KScreen
 		}
 	}
 
-	public void SetDisplayValue(string input)
-	{
-		this.inputField.text = input;
-	}
-
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		if (this.isEditing)
-		{
-			e.Consumed = true;
-			return;
-		}
-		base.OnKeyDown(e);
-	}
-
-	public override float GetSortKey()
-	{
-		if (this.isEditing)
-		{
-			return 10f;
-		}
-		return base.GetSortKey();
-	}
-
 	public int decimalPlaces = -1;
 
 	public float currentValue;
@@ -128,9 +41,4 @@ public class KNumberInputField : KScreen
 	public float minValue;
 
 	public float maxValue;
-
-	private bool isEditing;
-
-	[SerializeField]
-	private TMP_InputField inputField;
 }

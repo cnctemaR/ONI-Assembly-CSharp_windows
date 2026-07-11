@@ -3,6 +3,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Tinkerable")]
 public class Tinkerable : Workable
 {
 	public static Tinkerable MakePowerTinkerable(GameObject prefab)
@@ -78,25 +79,46 @@ public class Tinkerable : Workable
 	protected override void OnCleanUp()
 	{
 		this.UpdateMaterialReservation(false);
+		if (this.updateHandle.IsValid)
+		{
+			this.updateHandle.ClearScheduler();
+		}
 		base.OnCleanUp();
 	}
 
 	private void OnOperationalChanged(object data)
 	{
-		this.UpdateChore();
+		this.QueueUpdateChore();
 	}
 
 	private void OnEffectRemoved(object data)
 	{
-		this.UpdateChore();
+		this.QueueUpdateChore();
 	}
 
 	private void OnUpdateRoom(object data)
 	{
-		this.UpdateChore();
+		this.QueueUpdateChore();
 	}
 
 	private void OnStorageChange(object data)
+	{
+		if (((GameObject)data).HasTag(this.tinkerMaterialTag))
+		{
+			this.QueueUpdateChore();
+		}
+	}
+
+	private void QueueUpdateChore()
+	{
+		if (this.updateHandle.IsValid)
+		{
+			this.updateHandle.ClearScheduler();
+		}
+		this.updateHandle = GameScheduler.Instance.Schedule("UpdateTinkerChore", 1.2f, new Action<object>(this.UpdateChoreCallback), null, null);
+	}
+
+	private void UpdateChoreCallback(object obj)
 	{
 		this.UpdateChore();
 	}
@@ -112,7 +134,6 @@ public class Tinkerable : Workable
 		if (this.chore == null && flag4)
 		{
 			this.UpdateMaterialReservation(true);
-			base.SetWorkTime(this.workTime);
 			if (this.HasMaterial())
 			{
 				this.chore = new WorkChore<Tinkerable>(Db.Get().ChoreTypes.GetByHash(this.choreTypeTinker), this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
@@ -246,6 +267,8 @@ public class Tinkerable : Workable
 	{
 		component.OnOperationalChanged(data);
 	});
+
+	private SchedulerHandle updateHandle;
 
 	private bool hasReservedMaterial;
 }

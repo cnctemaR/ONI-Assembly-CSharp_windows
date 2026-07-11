@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
+using UnityEngine;
 
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
+	[AddComponentMenu("KMonoBehaviour/scripts/AttributeLevels")]
 	public class AttributeLevels : KMonoBehaviour, ISaveLoadable
 	{
 		public IEnumerator<AttributeLevel> GetEnumerator()
@@ -89,7 +91,7 @@ namespace Klei.AI
 			AttributeLevel attributeLevel = this.GetAttributeLevel(attribute_id);
 			if (attributeLevel == null)
 			{
-				Debug.LogWarning(attribute_id + " has no level.");
+				global::Debug.LogWarning(attribute_id + " has no level.");
 				return false;
 			}
 			time_spent *= multiplier;

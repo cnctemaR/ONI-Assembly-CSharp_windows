@@ -56,6 +56,7 @@ public class GasConduitPreferentialFlowConfig : IBuildingConfig
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<ConduitPreferentialFlow>().portInfo = this.secondaryPort;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

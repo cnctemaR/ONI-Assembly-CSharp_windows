@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Klei.AI
 {
+	[AddComponentMenu("KMonoBehaviour/scripts/PrefabAttributeModifiers")]
 	public class PrefabAttributeModifiers : KMonoBehaviour
 	{
 		protected override void OnPrefabInit()

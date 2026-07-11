@@ -1,7 +1,9 @@
 ﻿using System;
 using Klei.AI;
 using KSerialization;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/ToiletWorkableUse")]
 public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 {
 	private ToiletWorkableUse()

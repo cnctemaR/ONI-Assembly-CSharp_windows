@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DropDown")]
 public class DropDown : KMonoBehaviour
 {
 	public bool open { get; private set; }

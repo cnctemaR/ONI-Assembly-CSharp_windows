@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SnapOn")]
 public class SnapOn : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

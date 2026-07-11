@@ -452,6 +452,24 @@ namespace STRINGS
 				});
 			}
 
+			public class LOGICOVERLOADED
+			{
+				public static LocString NAME = "Damage: Overloading";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					UI.PRE_KEYWORD,
+					"Logic Wire",
+					UI.PST_KEYWORD,
+					" is taking damage.\n\nUse a ",
+					UI.PRE_KEYWORD,
+					"Logic Ribbon",
+					UI.PST_KEYWORD,
+					" instead, or limit the output to one Bit."
+				});
+			}
+
 			public class OPERATINGENERGY
 			{
 				public static LocString NAME = "Heat Production: {0}/s";
@@ -2075,6 +2093,13 @@ namespace STRINGS
 				public static LocString NAME = "Sending a " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
 
 				public static LocString TOOLTIP = "This sensor is currently sending " + UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby);
+			}
+
+			public class PLAYERCONTROLLEDTOGGLESIDESCREEN
+			{
+				public static LocString NAME = "Pending Toggle on Unpause";
+
+				public static LocString TOOLTIP = "This will be toggled when time is unpaused";
 			}
 
 			public class FOOD_CONTAINERS_OUTSIDE_RANGE

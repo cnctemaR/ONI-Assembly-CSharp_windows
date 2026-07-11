@@ -5,6 +5,7 @@ using TUNING;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/ArtifactFinder")]
 public class ArtifactFinder : KMonoBehaviour
 {
 	protected override void OnSpawn()

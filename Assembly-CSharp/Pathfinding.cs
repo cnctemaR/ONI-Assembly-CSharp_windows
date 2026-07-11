@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Pathfinding")]
 public class Pathfinding : KMonoBehaviour
 {
 	public static void DestroyInstance()
@@ -28,7 +30,7 @@ public class Pathfinding : KMonoBehaviour
 				return navGrid;
 			}
 		}
-		Debug.LogError("Could not find nav grid: " + id);
+		global::Debug.LogError("Could not find nav grid: " + id);
 		return null;
 	}
 

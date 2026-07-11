@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -26,22 +27,12 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort(FilteredStorage.FULL_PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT_INACTIVE, true, false) };
 		return buildingDef;
-	}
-
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, StorageLockerSmartConfig.OUTPUT_PORT);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, StorageLockerSmartConfig.OUTPUT_PORT);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, StorageLockerSmartConfig.OUTPUT_PORT);
 		SoundEventVolumeCache.instance.AddVolume("storagelocker_kanim", "StorageLocker_Hit_metallic_low", NOISE_POLLUTION.NOISY.TIER1);
 		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
@@ -53,10 +44,9 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.StorageLocker;
 		go.AddOrGet<StorageLockerSmart>();
+		go.AddOrGet<UserNameable>();
 		go.AddOrGetDef<StorageController.Def>();
 	}
 
 	public const string ID = "StorageLockerSmart";
-
-	private static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(FilteredStorage.FULL_PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.STORAGELOCKERSMART.LOGIC_PORT_INACTIVE, true, false);
 }

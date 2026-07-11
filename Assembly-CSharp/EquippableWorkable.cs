@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/EquippableWorkable")]
 public class EquippableWorkable : Workable, ISaveLoadable
 {
 	protected override void OnPrefabInit()
@@ -12,12 +14,12 @@ public class EquippableWorkable : Workable, ISaveLoadable
 		this.synchronizeAnims = false;
 	}
 
-	public QualityLevel GetQuality()
+	public global::QualityLevel GetQuality()
 	{
 		return this.quality;
 	}
 
-	public void SetQuality(QualityLevel level)
+	public void SetQuality(global::QualityLevel level)
 	{
 		this.quality = level;
 	}
@@ -30,7 +32,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 
 	private void CreateChore()
 	{
-		Debug.Assert(this.chore == null, "chore should be null");
+		global::Debug.Assert(this.chore == null, "chore should be null");
 		this.chore = new EquipChore(this);
 	}
 
@@ -79,5 +81,5 @@ public class EquippableWorkable : Workable, ISaveLoadable
 
 	private Chore chore;
 
-	private QualityLevel quality;
+	private global::QualityLevel quality;
 }

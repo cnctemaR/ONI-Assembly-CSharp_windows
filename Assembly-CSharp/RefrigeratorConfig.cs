@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -22,6 +23,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort(FilteredStorage.FULL_PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT_INACTIVE, false, false) };
 		buildingDef.Floodable = false;
 		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.AudioCategory = "Metal";
@@ -30,19 +32,8 @@ public class RefrigeratorConfig : IBuildingConfig
 		return buildingDef;
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, RefrigeratorConfig.OUTPUT_PORT);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, RefrigeratorConfig.OUTPUT_PORT);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, RefrigeratorConfig.OUTPUT_PORT);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
 		storage.showDescriptor = true;
@@ -54,11 +45,10 @@ public class RefrigeratorConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<Refrigerator>();
+		go.AddOrGet<UserNameable>();
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGetDef<StorageController.Def>();
 	}
 
 	public const string ID = "Refrigerator";
-
-	private static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(FilteredStorage.FULL_PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.REFRIGERATOR.LOGIC_PORT_INACTIVE, false, false);
 }

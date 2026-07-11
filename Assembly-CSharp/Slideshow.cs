@@ -3,6 +3,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Slideshow")]
 public class Slideshow : KMonoBehaviour
 {
 	protected override void OnSpawn()

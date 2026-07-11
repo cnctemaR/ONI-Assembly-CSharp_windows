@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Assets")]
 public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 {
 	protected override void OnPrefabInit()

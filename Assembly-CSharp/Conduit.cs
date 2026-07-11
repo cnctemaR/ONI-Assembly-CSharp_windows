@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Conduit")]
 public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkMgr, IBridgedNetworkItem, IDisconnectable, FlowUtilityNetwork.IItem
 {
 	public void SetFirstFrameCallback(global::System.Action ffCb)

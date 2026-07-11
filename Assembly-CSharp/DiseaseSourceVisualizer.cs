@@ -3,6 +3,7 @@ using Klei.AI;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DiseaseSourceVisualizer")]
 public class DiseaseSourceVisualizer : KMonoBehaviour
 {
 	protected override void OnSpawn()

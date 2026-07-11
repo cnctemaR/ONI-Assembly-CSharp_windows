@@ -342,7 +342,7 @@ namespace KMod
 			{
 				this.loaded_content |= Content.Translation;
 			}
-			if ((content & Content.DLL) != (Content)0 && DLLLoader.LoadDLLs(this.label.install_path))
+			if ((content & Content.DLL) != (Content)0 && DLLLoader.LoadDLLs(this.label.id + "." + this.label.distribution_platform, this.label.install_path))
 			{
 				this.loaded_content |= Content.DLL;
 			}

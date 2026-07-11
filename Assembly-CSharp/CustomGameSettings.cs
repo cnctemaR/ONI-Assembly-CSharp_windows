@@ -7,8 +7,10 @@ using Klei;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGen;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/CustomGameSettings")]
 public class CustomGameSettings : KMonoBehaviour
 {
 	public static CustomGameSettings Instance
@@ -171,7 +173,7 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.label;
 			}
 		}
-		Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id);
+		global::Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id);
 		return "";
 	}
 
@@ -186,7 +188,7 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.tooltip;
 			}
 		}
-		Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id);
+		global::Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id);
 		return "";
 	}
 
@@ -234,7 +236,7 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			text = string.Concat(new string[] { text, keyValuePair.Key, "=", keyValuePair.Value, "," });
 		}
-		Debug.Log(text);
+		global::Debug.Log(text);
 	}
 
 	private bool AllValuesMatch(Dictionary<string, string> data, CustomGameSettings.CustomGameMode mode)
@@ -311,7 +313,7 @@ public class CustomGameSettings : KMonoBehaviour
 				if (keyValuePair.Value.coordinate_dimension >= 0 || keyValuePair.Value.coordinate_dimension_width >= 0)
 				{
 					flag = true;
-					Debug.Assert(false, keyValuePair.Value.id + ": Both coordinate dimension props must be unset (-1) if either is unset.");
+					global::Debug.Assert(false, keyValuePair.Value.id + ": Both coordinate dimension props must be unset (-1) if either is unset.");
 				}
 			}
 			else
@@ -320,7 +322,7 @@ public class CustomGameSettings : KMonoBehaviour
 				if (keyValuePair.Value.coordinate_dimension_width < levels.Count)
 				{
 					flag = true;
-					Debug.Assert(false, string.Concat(new object[]
+					global::Debug.Assert(false, string.Concat(new object[]
 					{
 						keyValuePair.Value.id,
 						": Range between coordinate min and max insufficient for all levels (",
@@ -337,20 +339,20 @@ public class CustomGameSettings : KMonoBehaviour
 					if (settingLevel.coordinate_offset < 0)
 					{
 						flag = true;
-						Debug.Assert(false, text + ": Level coordinate offset must be >= 0");
+						global::Debug.Assert(false, text + ": Level coordinate offset must be >= 0");
 					}
 					else if (settingLevel.coordinate_offset == 0)
 					{
 						if (settingLevel.id != keyValuePair.Value.default_level_id)
 						{
 							flag = true;
-							Debug.Assert(false, text + ": Only the default level should have a coordinate offset of 0");
+							global::Debug.Assert(false, text + ": Only the default level should have a coordinate offset of 0");
 						}
 					}
 					else if (settingLevel.coordinate_offset > keyValuePair.Value.coordinate_dimension_width)
 					{
 						flag = true;
-						Debug.Assert(false, text + ": level coordinate must be <= dimension width");
+						global::Debug.Assert(false, text + ": level coordinate must be <= dimension width");
 					}
 					else
 					{
@@ -360,12 +362,12 @@ public class CustomGameSettings : KMonoBehaviour
 						if (settingLevel.id == keyValuePair.Value.default_level_id)
 						{
 							flag = true;
-							Debug.Assert(false, text + ": Default level must be coordinate 0");
+							global::Debug.Assert(false, text + ": Default level must be coordinate 0");
 						}
 						if (!flag2)
 						{
 							flag = true;
-							Debug.Assert(false, text + ": Combined coordinate conflicts with another coordinate (" + text2 + "). Ensure this SettingConfig's min and max don't overlap with another SettingConfig's");
+							global::Debug.Assert(false, text + ": Combined coordinate conflicts with another coordinate (" + text2 + "). Ensure this SettingConfig's min and max don't overlap with another SettingConfig's");
 						}
 					}
 				}

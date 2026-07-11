@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Capturable")]
 public class Capturable : Workable, IGameObjectEffectDescriptor
 {
 	public bool IsMarkedForCapture

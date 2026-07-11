@@ -7,6 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Diggable")]
 public class Diggable : Workable
 {
 	public bool Reachable

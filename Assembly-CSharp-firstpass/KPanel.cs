@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/KPanel")]
 public class KPanel : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

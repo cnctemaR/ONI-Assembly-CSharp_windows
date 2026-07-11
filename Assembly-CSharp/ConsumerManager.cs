@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using KSerialization;
 using TUNING;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/ConsumerManager")]
 public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 {
 	public static void DestroyInstance()

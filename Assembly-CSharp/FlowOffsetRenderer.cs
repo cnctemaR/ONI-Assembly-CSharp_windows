@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FlowOffsetRenderer")]
 public class FlowOffsetRenderer : KMonoBehaviour
 {
 	protected override void OnSpawn()

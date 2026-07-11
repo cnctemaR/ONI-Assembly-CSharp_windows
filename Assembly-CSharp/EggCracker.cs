@@ -2,6 +2,7 @@
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EggCracker")]
 public class EggCracker : KMonoBehaviour
 {
 	protected override void OnSpawn()

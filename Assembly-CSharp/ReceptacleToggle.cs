@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ReceptacleToggle")]
 public class ReceptacleToggle : KMonoBehaviour
 {
 	public LocText title;

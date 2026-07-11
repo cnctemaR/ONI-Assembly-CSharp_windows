@@ -3,6 +3,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/HarvestDesignatable")]
 public class HarvestDesignatable : KMonoBehaviour
 {
 	public bool InPlanterBox

@@ -217,7 +217,7 @@ public class Gantry : Switch
 			{
 				return;
 			}
-			this.logic_on = logicValueChanged.newValue != 0;
+			this.logic_on = LogicCircuitNetwork.IsBitActive(0, logicValueChanged.newValue);
 			this.UpdateShouldExtend();
 		}
 

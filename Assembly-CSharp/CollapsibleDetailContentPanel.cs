@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CollapsibleDetailContentPanel")]
 public class CollapsibleDetailContentPanel : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

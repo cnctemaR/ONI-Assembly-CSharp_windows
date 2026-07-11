@@ -5,7 +5,13 @@ public class FixedCapturableMonitor : GameStateMachine<FixedCapturableMonitor, F
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		this.root.ToggleBehaviour(GameTags.Creatures.WantsToGetCaptured, (FixedCapturableMonitor.Instance smi) => smi.ShouldGoGetCaptured(), null);
+		this.root.ToggleBehaviour(GameTags.Creatures.WantsToGetCaptured, (FixedCapturableMonitor.Instance smi) => smi.ShouldGoGetCaptured(), null).Enter(delegate(FixedCapturableMonitor.Instance smi)
+		{
+			Components.FixedCapturableMonitors.Add(smi);
+		}).Exit(delegate(FixedCapturableMonitor.Instance smi)
+		{
+			Components.FixedCapturableMonitors.Remove(smi);
+		});
 	}
 
 	public class Def : StateMachine.BaseDef

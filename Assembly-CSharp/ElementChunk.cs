@@ -3,6 +3,7 @@ using Klei;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/ElementChunk")]
 public class ElementChunk : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

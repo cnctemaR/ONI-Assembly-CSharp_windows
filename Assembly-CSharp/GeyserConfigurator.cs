@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GeyserConfigurator")]
 public class GeyserConfigurator : KMonoBehaviour
 {
 	public static GeyserConfigurator.GeyserType FindType(HashedString typeId)

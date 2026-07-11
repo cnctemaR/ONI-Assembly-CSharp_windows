@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/OccupyArea")]
 public class OccupyArea : KMonoBehaviour
 {
 	public bool ApplyToCells

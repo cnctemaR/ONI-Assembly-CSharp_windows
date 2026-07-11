@@ -25,15 +25,17 @@ public class LiquidVentConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "LiquidVent");
 		SoundEventVolumeCache.instance.AddVolume("ventliquid_kanim", "LiquidVent_squirt", NOISE_POLLUTION.NOISY.TIER0);
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Exhaust>();
+		go.AddOrGet<LogicOperationalController>();
 		Vent vent = go.AddOrGet<Vent>();
 		vent.conduitType = ConduitType.Liquid;
 		vent.endpointType = Endpoint.Sink;
@@ -48,6 +50,7 @@ public class LiquidVentConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGetDef<VentController.Def>();
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 
 	public const string ID = "LiquidVent";

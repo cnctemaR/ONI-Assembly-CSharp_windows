@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/InfoDescription")]
 public class InfoDescription : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

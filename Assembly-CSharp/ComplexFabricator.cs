@@ -7,6 +7,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/ComplexFabricator")]
 public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 {
 	public ComplexFabricatorWorkable Workable

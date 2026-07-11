@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SkillPerkMissingComplainer")]
 public class SkillPerkMissingComplainer : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -8,6 +8,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/FallingWater")]
 public class FallingWater : KMonoBehaviour, ISim200ms
 {
 	public static FallingWater instance

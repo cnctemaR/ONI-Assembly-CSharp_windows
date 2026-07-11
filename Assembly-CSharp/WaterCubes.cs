@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
+[AddComponentMenu("KMonoBehaviour/scripts/WaterCubes")]
 public class WaterCubes : KMonoBehaviour
 {
 	public static WaterCubes Instance { get; private set; }

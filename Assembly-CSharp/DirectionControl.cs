@@ -3,6 +3,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DirectionControl")]
 public class DirectionControl : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -4,6 +4,7 @@ using FMOD.Studio;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SplashMessageScreen")]
 public class SplashMessageScreen : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

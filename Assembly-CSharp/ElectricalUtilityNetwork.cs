@@ -16,6 +16,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 			this.wireGroups[(int)maxWattageRating] = list;
 		}
 		list.Add(wire);
+		this.allWires.Add(wire);
 		this.timeOverloaded = Mathf.Max(this.timeOverloaded, wire.circuitOverloadTime);
 	}
 
@@ -41,6 +42,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				list.Clear();
 			}
 		}
+		this.allWires.Clear();
 		this.RemoveOverloadedNotification();
 	}
 
@@ -104,7 +106,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				if (this.overloadedNotification == null)
 				{
 					this.timeOverloadNotificationDisplayed = 0f;
-					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, this.targetOverloadedWire.transform);
+					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, this.targetOverloadedWire.transform, true);
 					GameScheduler.Instance.Schedule("Power Tutorial", 2f, delegate(object obj)
 					{
 						Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Power, true);
@@ -151,13 +153,17 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 	{
 		if (item.GetType() == typeof(Wire))
 		{
-			((Wire)item).circuitOverloadTime = 0f;
+			Wire wire = (Wire)item;
+			wire.circuitOverloadTime = 0f;
+			this.allWires.Remove(wire);
 		}
 	}
 
 	private Notification overloadedNotification;
 
 	private List<Wire>[] wireGroups = new List<Wire>[5];
+
+	public List<Wire> allWires = new List<Wire>();
 
 	private const float MIN_OVERLOAD_TIME_FOR_DAMAGE = 6f;
 

@@ -31,6 +31,8 @@ namespace STRINGS
 			public static LocString SQUIRREL = UI.FormatAsLink("Pip", "SQUIRRELSPECIES");
 
 			public static LocString CRAB = UI.FormatAsLink("Pokeshell", "CRABSPECIES");
+
+			public static LocString SWEEPBOT = UI.FormatAsLink("Sweepys", "SWEEPBOT");
 		}
 
 		public class FAMILY_PLURAL

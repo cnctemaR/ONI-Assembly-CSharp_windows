@@ -4,6 +4,7 @@ using Klei;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PropertyTextures")]
 public class PropertyTextures : KMonoBehaviour, ISim200ms
 {
 	public static void DestroyInstance()

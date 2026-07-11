@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AudioEventManager")]
 public class AudioEventManager : KMonoBehaviour
 {
 	public static AudioEventManager Get()

@@ -72,7 +72,7 @@ public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 				if (plantElementAbsorber.consumedElements == null)
 				{
 					float num = plantElementAbsorber.localInfo.massConsumptionRate * dt;
-					PrimaryElement primaryElement = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.localInfo.tag);
+					PrimaryElement primaryElement = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.localInfo.tag, 0f);
 					if (primaryElement != null)
 					{
 						float num2 = Mathf.Min(num, primaryElement.Mass);
@@ -87,7 +87,7 @@ public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 					for (int j = 0; j < plantElementAbsorber.consumedElements.Length; j++)
 					{
 						float num3 = plantElementAbsorber.consumedElements[j].massConsumptionRate * dt;
-						PrimaryElement primaryElement2 = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.consumedElements[j].tag);
+						PrimaryElement primaryElement2 = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.consumedElements[j].tag, 0f);
 						while (primaryElement2 != null)
 						{
 							float num4 = Mathf.Min(num3, primaryElement2.Mass);
@@ -99,7 +99,7 @@ public class PlantElementAbsorbers : KCompactedVector<PlantElementAbsorber>
 							{
 								break;
 							}
-							primaryElement2 = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.consumedElements[j].tag);
+							primaryElement2 = plantElementAbsorber.storage.FindFirstWithMass(plantElementAbsorber.consumedElements[j].tag, 0f);
 						}
 					}
 				}

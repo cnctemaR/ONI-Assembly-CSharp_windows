@@ -9,7 +9,7 @@ public class MessageNotification : Notification
 	}
 
 	public MessageNotification(Message m)
-		: base(m.GetTitle(), NotificationType.Messages, HashedString.Invalid, null, null, false, 0f, null, null, null)
+		: base(m.GetTitle(), NotificationType.Messages, HashedString.Invalid, null, null, false, 0f, null, null, null, true)
 	{
 		MessageNotification <>4__this = this;
 		this.message = m;

@@ -4,6 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ConversationManager")]
 public class ConversationManager : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()

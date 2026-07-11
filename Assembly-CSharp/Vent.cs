@@ -4,6 +4,8 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Vent")]
 public class Vent : KMonoBehaviour, IEffectDescriptor
 {
 	public int SortKey
@@ -36,6 +38,12 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 			return this.lifeTimeVentMass[element];
 		}
 		return 0f;
+	}
+
+	public bool Closed()
+	{
+		bool flag = false;
+		return (this.operational.Flags.TryGetValue(LogicOperationalController.LogicOperationalFlag, out flag) && !flag) || (this.operational.Flags.TryGetValue(BuildingEnabledButton.EnabledFlag, out flag) && !flag);
 	}
 
 	protected override void OnSpawn()
@@ -86,7 +94,7 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 	private bool IsValidOutputCell(int output_cell)
 	{
 		bool flag = false;
-		if ((this.structure == null || !this.structure.IsEntombed()) && !Grid.Solid[output_cell])
+		if ((this.structure == null || !this.structure.IsEntombed() || !this.Closed()) && !Grid.Solid[output_cell])
 		{
 			flag = Grid.Mass[output_cell] < this.overpressureMass;
 		}
@@ -127,12 +135,17 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 	[NonSerialized]
 	public Structure structure;
 
+	[MyCmpGet]
+	[NonSerialized]
+	public Operational operational;
+
 	public enum State
 	{
 		Invalid,
 		Ready,
 		Blocked,
-		OverPressure
+		OverPressure,
+		Closed
 	}
 
 	public class StatesInstance : GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.GameInstance
@@ -165,17 +178,22 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 				base.smi.GoTo(base.sm.needExhaust);
 				return;
 			}
+			if (base.master.Closed())
+			{
+				base.smi.GoTo(base.sm.closed);
+				return;
+			}
 			if (this.Blocked())
 			{
-				base.smi.GoTo(base.sm.blocked);
+				base.smi.GoTo(base.sm.open.blocked);
 				return;
 			}
 			if (this.OverPressure())
 			{
-				base.smi.GoTo(base.sm.overPressure);
+				base.smi.GoTo(base.sm.open.overPressure);
 				return;
 			}
-			base.smi.GoTo(base.sm.idle);
+			base.smi.GoTo(base.sm.open.idle);
 		}
 
 		public StatusItem SelectStatusItem(StatusItem gas_status_item, StatusItem liquid_status_item)
@@ -194,23 +212,30 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.idle;
+			default_state = this.open.idle;
 			this.root.Update("CheckTransitions", delegate(Vent.StatesInstance smi, float dt)
 			{
 				smi.CheckTransitions();
 			}, UpdateRate.SIM_200ms, false);
-			this.blocked.ToggleStatusItem((Vent.StatesInstance smi) => smi.SelectStatusItem(Db.Get().BuildingStatusItems.GasVentObstructed, Db.Get().BuildingStatusItems.LiquidVentObstructed), null);
-			this.overPressure.ToggleStatusItem((Vent.StatesInstance smi) => smi.SelectStatusItem(Db.Get().BuildingStatusItems.GasVentOverPressure, Db.Get().BuildingStatusItems.LiquidVentOverPressure), null);
+			this.open.TriggerOnEnter(GameHashes.VentOpen, null);
+			this.closed.TriggerOnEnter(GameHashes.VentClosed, null);
+			this.open.blocked.ToggleStatusItem((Vent.StatesInstance smi) => smi.SelectStatusItem(Db.Get().BuildingStatusItems.GasVentObstructed, Db.Get().BuildingStatusItems.LiquidVentObstructed), null);
+			this.open.overPressure.ToggleStatusItem((Vent.StatesInstance smi) => smi.SelectStatusItem(Db.Get().BuildingStatusItems.GasVentOverPressure, Db.Get().BuildingStatusItems.LiquidVentOverPressure), null);
 		}
 
-		public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State idle;
+		public Vent.States.OpenState open;
 
-		public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State blocked;
-
-		public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State overPressure;
+		public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State closed;
 
 		public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State needExhaust;
 
-		public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State venting;
+		public class OpenState : GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State
+		{
+			public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State idle;
+
+			public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State blocked;
+
+			public GameStateMachine<Vent.States, Vent.StatesInstance, Vent, object>.State overPressure;
+		}
 	}
 }

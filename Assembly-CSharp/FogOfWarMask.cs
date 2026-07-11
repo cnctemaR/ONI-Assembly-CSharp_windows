@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FogOfWarMask")]
 public class FogOfWarMask : KMonoBehaviour
 {
 	protected override void OnSpawn()

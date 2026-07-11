@@ -2,7 +2,9 @@
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ClothingWearer")]
 public class ClothingWearer : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

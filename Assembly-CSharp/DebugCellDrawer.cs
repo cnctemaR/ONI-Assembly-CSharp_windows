@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DebugCellDrawer")]
 public class DebugCellDrawer : KMonoBehaviour
 {
 	private void Update()

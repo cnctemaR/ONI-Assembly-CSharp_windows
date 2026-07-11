@@ -3,6 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Sublimates")]
 public class Sublimates : KMonoBehaviour, ISim200ms
 {
 	public float Temperature

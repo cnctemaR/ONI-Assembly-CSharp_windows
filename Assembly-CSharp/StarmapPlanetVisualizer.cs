@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/StarmapPlanetVisualizer")]
 public class StarmapPlanetVisualizer : KMonoBehaviour
 {
 	public Image image;

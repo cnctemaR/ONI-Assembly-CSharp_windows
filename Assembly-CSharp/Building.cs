@@ -6,6 +6,7 @@ using Database;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Building")]
 public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, IApproachable
 {
 	public Orientation Orientation
@@ -240,7 +241,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			float wattsNeededWhenActive = base.GetComponent<IEnergyConsumer>().WattsNeededWhenActive;
 			if (wattsNeededWhenActive > 0f)
 			{
-				string formattedWattage = GameUtil.GetFormattedWattage(wattsNeededWhenActive, GameUtil.WattageFormatterUnit.Automatic);
+				string formattedWattage = GameUtil.GetFormattedWattage(wattsNeededWhenActive, GameUtil.WattageFormatterUnit.Automatic, true);
 				Descriptor descriptor = new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESPOWER, formattedWattage), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESPOWER, formattedWattage), Descriptor.DescriptorType.Requirement, false);
 				list.Add(descriptor);
 			}
@@ -314,7 +315,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		if (def.GeneratorWattageRating > 0f && base.GetComponent<Battery>() == null)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic)), Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic, true)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ENERGYGENERATED, GameUtil.GetFormattedWattage(def.GeneratorWattageRating, GameUtil.WattageFormatterUnit.Automatic, true)), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		if (def.ExhaustKilowattsWhenActive > 0f || def.SelfHeatKilowattsWhenActive > 0f)

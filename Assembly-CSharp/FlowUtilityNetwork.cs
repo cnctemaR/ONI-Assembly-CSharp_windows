@@ -41,7 +41,8 @@ public class FlowUtilityNetwork : UtilityNetwork
 				item.Network = this;
 				return;
 			case Endpoint.Conduit:
-				break;
+				this.conduitCount++;
+				return;
 			default:
 				item.Network = this;
 				break;
@@ -67,6 +68,7 @@ public class FlowUtilityNetwork : UtilityNetwork
 			utilityNetworkGridNode2.networkIdx = -1;
 			grid[item2.Cell] = utilityNetworkGridNode2;
 		}
+		this.conduitCount = 0;
 		for (int k = 0; k < this.conduits.Count; k++)
 		{
 			FlowUtilityNetwork.IItem item3 = this.conduits[k];
@@ -81,7 +83,9 @@ public class FlowUtilityNetwork : UtilityNetwork
 
 	public List<FlowUtilityNetwork.IItem> sinks = new List<FlowUtilityNetwork.IItem>();
 
-	private List<FlowUtilityNetwork.IItem> conduits = new List<FlowUtilityNetwork.IItem>();
+	public List<FlowUtilityNetwork.IItem> conduits = new List<FlowUtilityNetwork.IItem>();
+
+	public int conduitCount;
 
 	public interface IItem
 	{

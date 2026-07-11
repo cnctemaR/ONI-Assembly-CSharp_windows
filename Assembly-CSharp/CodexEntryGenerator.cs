@@ -131,6 +131,7 @@ public static class CodexEntryGenerator
 		action(GameTags.Creatures.Species.MoleSpecies, global::STRINGS.CREATURES.FAMILY_PLURAL.MOLESPECIES);
 		action(GameTags.Creatures.Species.SquirrelSpecies, global::STRINGS.CREATURES.FAMILY_PLURAL.SQUIRRELSPECIES);
 		action(GameTags.Creatures.Species.CrabSpecies, global::STRINGS.CREATURES.FAMILY_PLURAL.CRABSPECIES);
+		action(GameTags.Robots.Models.SweepBot, ROBOTS.CATEGORY_NAME);
 		return results;
 	}
 
@@ -888,26 +889,44 @@ public static class CodexEntryGenerator
 
 	private static void GenerateCreatureDescriptionContainers(GameObject creature, List<ContentContainer> containers)
 	{
-		CreatureCalorieMonitor.Def def = creature.GetDef<CreatureCalorieMonitor.Def>();
-		if (def != null)
+		if (creature.GetDef<RobotBatteryMonitor.Def>() != null)
 		{
-			List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag((creature.PrefabID() + "Egg").ToTag());
-			if (prefabsWithTag != null && prefabsWithTag.Count > 0)
+			float value = Db.Get().traits.Get(creature.GetComponent<Modifiers>().initialTraits[0]).SelfModifiers.Find((AttributeModifier match) => match.AttributeId == Db.Get().Amounts.InternalBattery.maxAttribute.Id).Value;
+			containers.Add(new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexSpacer(),
+				new CodexText(CODEX.HEADERS.INTERNALBATTERY, CodexTextStyle.Subtitle),
+				new CodexText("    • " + string.Format(CODEX.ROBOT_DESCRIPTORS.BATTERY.CAPACITY, value), CodexTextStyle.Body)
+			}, ContentContainer.ContentLayout.Vertical));
+		}
+		if (creature.GetDef<StorageUnloadMonitor.Def>() != null)
+		{
+			containers.Add(new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexSpacer(),
+				new CodexText(CODEX.HEADERS.INTERNALSTORAGE, CodexTextStyle.Subtitle),
+				new CodexText("    • " + string.Format(CODEX.ROBOT_DESCRIPTORS.STORAGE.CAPACITY, creature.GetComponents<Storage>()[1].Capacity()), CodexTextStyle.Body)
+			}, ContentContainer.ContentLayout.Vertical));
+		}
+		List<GameObject> prefabsWithTag = Assets.GetPrefabsWithTag((creature.PrefabID() + "Egg").ToTag());
+		if (prefabsWithTag != null && prefabsWithTag.Count > 0)
+		{
+			containers.Add(new ContentContainer(new List<ICodexWidget>
+			{
+				new CodexSpacer(),
+				new CodexText(CODEX.HEADERS.HATCHESFROMEGG, CodexTextStyle.Subtitle)
+			}, ContentContainer.ContentLayout.Vertical));
+			foreach (GameObject gameObject in prefabsWithTag)
 			{
 				containers.Add(new ContentContainer(new List<ICodexWidget>
 				{
-					new CodexSpacer(),
-					new CodexText(CODEX.HEADERS.HATCHESFROMEGG, CodexTextStyle.Subtitle)
-				}, ContentContainer.ContentLayout.Vertical));
-				foreach (GameObject gameObject in prefabsWithTag)
-				{
-					containers.Add(new ContentContainer(new List<ICodexWidget>
-					{
-						new CodexIndentedLabelWithIcon(gameObject.GetProperName(), CodexTextStyle.Body, Def.GetUISprite(gameObject, "ui", false))
-					}, ContentContainer.ContentLayout.Horizontal));
-				}
+					new CodexIndentedLabelWithIcon(gameObject.GetProperName(), CodexTextStyle.Body, Def.GetUISprite(gameObject, "ui", false))
+				}, ContentContainer.ContentLayout.Horizontal));
 			}
-			TemperatureVulnerable component = creature.GetComponent<TemperatureVulnerable>();
+		}
+		TemperatureVulnerable component = creature.GetComponent<TemperatureVulnerable>();
+		if (component != null)
+		{
 			containers.Add(new ContentContainer(new List<ICodexWidget>
 			{
 				new CodexSpacer(),
@@ -915,93 +934,94 @@ public static class CodexEntryGenerator
 				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.COMFORT_RANGE, GameUtil.GetFormattedTemperature(component.internalTemperatureWarning_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(component.internalTemperatureWarning_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body),
 				new CodexText("    • " + string.Format(CODEX.CREATURE_DESCRIPTORS.TEMPERATURE.NON_LETHAL_RANGE, GameUtil.GetFormattedTemperature(component.internalTemperatureLethal_Low, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false), GameUtil.GetFormattedTemperature(component.internalTemperatureLethal_High, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), CodexTextStyle.Body)
 			}, ContentContainer.ContentLayout.Vertical));
-			List<Tag> list = new List<Tag>();
-			if (def.diet.infos.Length != 0)
+		}
+		List<Tag> list = new List<Tag>();
+		CreatureCalorieMonitor.Def def = creature.GetDef<CreatureCalorieMonitor.Def>();
+		if (def != null && def.diet.infos.Length != 0)
+		{
+			if (list.Count == 0)
 			{
-				if (list.Count == 0)
+				containers.Add(new ContentContainer(new List<ICodexWidget>
 				{
-					containers.Add(new ContentContainer(new List<ICodexWidget>
-					{
-						new CodexSpacer(),
-						new CodexText(CODEX.HEADERS.DIET, CodexTextStyle.Subtitle)
-					}, ContentContainer.ContentLayout.Vertical));
-				}
-				ContentContainer contentContainer = new ContentContainer();
-				contentContainer.contentLayout = ContentContainer.ContentLayout.GridTwoColumn;
-				contentContainer.content = new List<ICodexWidget>();
-				foreach (Diet.Info info in def.diet.infos)
-				{
-					if (info.consumedTags.Count != 0)
-					{
-						foreach (Tag tag in info.consumedTags)
-						{
-							Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag));
-							GameObject gameObject2 = null;
-							if (element.id == SimHashes.Vacuum || element.id == SimHashes.Void)
-							{
-								gameObject2 = Assets.GetPrefab(tag);
-								if (gameObject2 == null)
-								{
-									continue;
-								}
-							}
-							if (element != null && gameObject2 == null)
-							{
-								if (!list.Contains(element.tag))
-								{
-									list.Add(element.tag);
-									contentContainer.content.Add(new CodexIndentedLabelWithIcon(element.name, CodexTextStyle.Body, Def.GetUISprite(element.substance, "ui", false)));
-								}
-							}
-							else if (gameObject2 != null && !list.Contains(gameObject2.PrefabID()))
-							{
-								list.Add(gameObject2.PrefabID());
-								contentContainer.content.Add(new CodexIndentedLabelWithIcon(gameObject2.GetProperName(), CodexTextStyle.Body, Def.GetUISprite(gameObject2, "ui", false)));
-							}
-						}
-					}
-				}
-				containers.Add(contentContainer);
+					new CodexSpacer(),
+					new CodexText(CODEX.HEADERS.DIET, CodexTextStyle.Subtitle)
+				}, ContentContainer.ContentLayout.Vertical));
 			}
-			bool flag = false;
-			if (def.diet != null)
+			ContentContainer contentContainer = new ContentContainer();
+			contentContainer.contentLayout = ContentContainer.ContentLayout.GridTwoColumn;
+			contentContainer.content = new List<ICodexWidget>();
+			foreach (Diet.Info info in def.diet.infos)
 			{
-				Diet.Info[] array = def.diet.infos;
-				for (int i = 0; i < array.Length; i++)
+				if (info.consumedTags.Count != 0)
 				{
-					if (array[i].producedElement != null)
+					foreach (Tag tag in info.consumedTags)
 					{
-						flag = true;
-						break;
-					}
-				}
-				if (flag)
-				{
-					ContentContainer contentContainer2 = new ContentContainer();
-					contentContainer2.contentLayout = ContentContainer.ContentLayout.GridTwoColumn;
-					contentContainer2.content = new List<ICodexWidget>();
-					ContentContainer contentContainer3 = new ContentContainer(new List<ICodexWidget>
-					{
-						new CodexSpacer(),
-						new CodexText(CODEX.HEADERS.PRODUCES, CodexTextStyle.Subtitle)
-					}, ContentContainer.ContentLayout.Vertical);
-					containers.Add(contentContainer3);
-					List<Tag> list2 = new List<Tag>();
-					for (int j = 0; j < def.diet.infos.Length; j++)
-					{
-						if (def.diet.infos[j].producedElement != Tag.Invalid && !list2.Contains(def.diet.infos[j].producedElement))
+						Element element = ElementLoader.FindElementByHash(ElementLoader.GetElementID(tag));
+						GameObject gameObject2 = null;
+						if (element.id == SimHashes.Vacuum || element.id == SimHashes.Void)
 						{
-							list2.Add(def.diet.infos[j].producedElement);
-							contentContainer2.content.Add(new CodexIndentedLabelWithIcon(def.diet.infos[j].producedElement.ProperName(), CodexTextStyle.Body, Def.GetUISprite(def.diet.infos[j].producedElement, "ui", false)));
+							gameObject2 = Assets.GetPrefab(tag);
+							if (gameObject2 == null)
+							{
+								continue;
+							}
+						}
+						if (element != null && gameObject2 == null)
+						{
+							if (!list.Contains(element.tag))
+							{
+								list.Add(element.tag);
+								contentContainer.content.Add(new CodexIndentedLabelWithIcon(element.name, CodexTextStyle.Body, Def.GetUISprite(element.substance, "ui", false)));
+							}
+						}
+						else if (gameObject2 != null && !list.Contains(gameObject2.PrefabID()))
+						{
+							list.Add(gameObject2.PrefabID());
+							contentContainer.content.Add(new CodexIndentedLabelWithIcon(gameObject2.GetProperName(), CodexTextStyle.Body, Def.GetUISprite(gameObject2, "ui", false)));
 						}
 					}
-					containers.Add(contentContainer2);
-					containers.Add(new ContentContainer(new List<ICodexWidget>
-					{
-						new CodexSpacer(),
-						new CodexSpacer()
-					}, ContentContainer.ContentLayout.Vertical));
 				}
+			}
+			containers.Add(contentContainer);
+		}
+		bool flag = false;
+		if (def != null && def.diet != null)
+		{
+			Diet.Info[] array = def.diet.infos;
+			for (int i = 0; i < array.Length; i++)
+			{
+				if (array[i].producedElement != null)
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (flag)
+			{
+				ContentContainer contentContainer2 = new ContentContainer();
+				contentContainer2.contentLayout = ContentContainer.ContentLayout.GridTwoColumn;
+				contentContainer2.content = new List<ICodexWidget>();
+				ContentContainer contentContainer3 = new ContentContainer(new List<ICodexWidget>
+				{
+					new CodexSpacer(),
+					new CodexText(CODEX.HEADERS.PRODUCES, CodexTextStyle.Subtitle)
+				}, ContentContainer.ContentLayout.Vertical);
+				containers.Add(contentContainer3);
+				List<Tag> list2 = new List<Tag>();
+				for (int j = 0; j < def.diet.infos.Length; j++)
+				{
+					if (def.diet.infos[j].producedElement != Tag.Invalid && !list2.Contains(def.diet.infos[j].producedElement))
+					{
+						list2.Add(def.diet.infos[j].producedElement);
+						contentContainer2.content.Add(new CodexIndentedLabelWithIcon(def.diet.infos[j].producedElement.ProperName(), CodexTextStyle.Body, Def.GetUISprite(def.diet.infos[j].producedElement, "ui", false)));
+					}
+				}
+				containers.Add(contentContainer2);
+				containers.Add(new ContentContainer(new List<ICodexWidget>
+				{
+					new CodexSpacer(),
+					new CodexSpacer()
+				}, ContentContainer.ContentLayout.Vertical));
 			}
 		}
 	}

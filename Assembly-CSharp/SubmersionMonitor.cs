@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SubmersionMonitor")]
 public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
 {
 	public bool Dry

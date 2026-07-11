@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/KBasicToggle")]
 public class KBasicToggle : KMonoBehaviour, IPointerClickHandler, IEventSystemHandler, IPointerEnterHandler, IPointerExitHandler
 {
 	public event global::System.Action onClick;

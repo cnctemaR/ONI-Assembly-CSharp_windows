@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/RoleStation")]
 public class RoleStation : Workable, IEffectDescriptor
 {
 	protected override void OnPrefabInit()

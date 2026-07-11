@@ -4,6 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Telescope")]
 public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescriptor, ISim200ms
 {
 	protected override void OnPrefabInit()
@@ -229,7 +230,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 		description = DUPLICANTS.CHORES.PRECONDITIONS.CONTAINS_OXYGEN,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			return context.chore.target.GetComponent<Storage>().FindFirstWithMass(GameTags.Oxygen) != null;
+			return context.chore.target.GetComponent<Storage>().FindFirstWithMass(GameTags.Oxygen, 0f) != null;
 		}
 	};
 

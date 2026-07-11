@@ -68,7 +68,7 @@ public class DetailsScreen : KTabMenu
 			return;
 		}
 		MinionIdentity component = this.target.GetComponent<MinionIdentity>();
-		StorageLocker component2 = this.target.GetComponent<StorageLocker>();
+		UserNameable component2 = this.target.GetComponent<UserNameable>();
 		if (component != null)
 		{
 			component.SetName(newName);
@@ -469,11 +469,11 @@ public class DetailsScreen : KTabMenu
 		{
 			this.TabTitle.SetTitle(this.target.GetProperName());
 			MinionIdentity minionIdentity = null;
-			StorageLocker storageLocker = null;
+			UserNameable userNameable = null;
 			if (this.target != null)
 			{
 				minionIdentity = this.target.gameObject.GetComponent<MinionIdentity>();
-				storageLocker = this.target.gameObject.GetComponent<StorageLocker>();
+				userNameable = this.target.gameObject.GetComponent<UserNameable>();
 			}
 			if (minionIdentity != null)
 			{
@@ -481,7 +481,7 @@ public class DetailsScreen : KTabMenu
 				this.TabTitle.SetUserEditable(true);
 				return;
 			}
-			if (storageLocker != null)
+			if (userNameable != null)
 			{
 				this.TabTitle.SetSubText("", "");
 				this.TabTitle.SetUserEditable(true);

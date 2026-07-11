@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/LoopingSounds")]
 public class LoopingSounds : KMonoBehaviour
 {
 	public bool IsSoundPlaying(string path)

@@ -5,10 +5,12 @@ public class VentController : GameStateMachine<VentController, VentController.In
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.off;
+		this.root.EventTransition(GameHashes.VentClosed, this.closed, (VentController.Instance smi) => smi.GetComponent<Vent>().Closed()).EventTransition(GameHashes.VentOpen, this.off, (VentController.Instance smi) => !smi.GetComponent<Vent>().Closed());
 		this.off.PlayAnim("off").EventTransition(GameHashes.VentAnimatingChanged, this.working_pre, (VentController.Instance smi) => smi.GetComponent<Exhaust>().IsAnimating());
 		this.working_pre.PlayAnim("working_pre").OnAnimQueueComplete(this.working_loop);
 		this.working_loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.VentAnimatingChanged, this.working_pst, (VentController.Instance smi) => !smi.GetComponent<Exhaust>().IsAnimating());
 		this.working_pst.PlayAnim("working_pst").OnAnimQueueComplete(this.off);
+		this.closed.PlayAnim("closed").EventTransition(GameHashes.VentAnimatingChanged, this.working_pre, (VentController.Instance smi) => smi.GetComponent<Exhaust>().IsAnimating());
 	}
 
 	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State off;
@@ -18,6 +20,8 @@ public class VentController : GameStateMachine<VentController, VentController.In
 	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State working_loop;
 
 	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State working_pst;
+
+	public GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.State closed;
 
 	public StateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.BoolParameter isAnimating;
 

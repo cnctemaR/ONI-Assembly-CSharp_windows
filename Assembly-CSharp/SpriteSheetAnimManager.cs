@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SpriteSheetAnimManager")]
 public class SpriteSheetAnimManager : KMonoBehaviour, IRenderEveryTick
 {
 	public static void DestroyInstance()

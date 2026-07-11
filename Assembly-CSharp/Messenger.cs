@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Messenger")]
 public class Messenger : KMonoBehaviour
 {
 	public int Count

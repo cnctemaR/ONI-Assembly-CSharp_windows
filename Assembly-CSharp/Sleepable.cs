@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Sleepable")]
 public class Sleepable : Workable
 {
 	private Sleepable()

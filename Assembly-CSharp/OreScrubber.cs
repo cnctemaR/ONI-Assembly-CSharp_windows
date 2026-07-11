@@ -197,6 +197,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		}
 	}
 
+	[AddComponentMenu("KMonoBehaviour/Workable/Work")]
 	public class Work : Workable, IGameObjectEffectDescriptor
 	{
 		protected override void OnPrefabInit()

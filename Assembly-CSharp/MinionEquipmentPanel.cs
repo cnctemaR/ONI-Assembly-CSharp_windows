@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MinionEquipmentPanel")]
 public class MinionEquipmentPanel : KMonoBehaviour
 {
 	public MinionEquipmentPanel()

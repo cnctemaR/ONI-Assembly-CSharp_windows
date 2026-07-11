@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/RenderTextureDestroyer")]
 public class RenderTextureDestroyer : KMonoBehaviour
 {
 	public static void DestroyInstance()

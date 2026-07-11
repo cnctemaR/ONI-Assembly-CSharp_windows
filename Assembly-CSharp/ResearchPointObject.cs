@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ResearchPointObject")]
 public class ResearchPointObject : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()

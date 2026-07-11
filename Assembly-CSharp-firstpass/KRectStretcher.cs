@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteInEditMode]
+[AddComponentMenu("KMonoBehaviour/Plugins/KRectStretcher")]
 public class KRectStretcher : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

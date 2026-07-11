@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/TravelTube")]
 public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece, IHaveUtilityNetworkMgr
 {
 	public IUtilityNetworkMgr GetNetworkManager()

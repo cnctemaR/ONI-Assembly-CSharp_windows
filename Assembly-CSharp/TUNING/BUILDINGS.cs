@@ -164,6 +164,7 @@ namespace TUNING
 				"SodaFountain",
 				"BeachChair",
 				"VerticalWindTunnel",
+				PixelPackConfig.ID,
 				"FlowerVase",
 				"FlowerVaseWall",
 				"FlowerVaseHanging",
@@ -192,22 +193,31 @@ namespace TUNING
 			new PlanScreen.PlanInfo(new HashedString("Utilities"), true, new List<string>
 			{
 				"SpaceHeater", "LiquidHeater", "LiquidCooledFan", "IceCooledFan", "IceMachine", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock",
-				"ExteriorWall"
+				"ExteriorWall", "SweepBotStation"
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Automation"), true, new List<string>
 			{
 				"LogicWire",
 				"LogicWireBridge",
+				"LogicRibbon",
+				"LogicRibbonBridge",
 				LogicSwitchConfig.ID,
 				"LogicDuplicantSensor",
 				LogicPressureSensorGasConfig.ID,
 				LogicPressureSensorLiquidConfig.ID,
 				LogicTemperatureSensorConfig.ID,
+				LogicWattageSensorConfig.ID,
 				LogicTimeOfDaySensorConfig.ID,
+				LogicTimerSensorConfig.ID,
 				LogicDiseaseSensorConfig.ID,
 				LogicElementSensorGasConfig.ID,
 				LogicElementSensorLiquidConfig.ID,
 				LogicCritterCountSensorConfig.ID,
+				LogicCounterConfig.ID,
+				LogicAlarmConfig.ID,
+				LogicHammerConfig.ID,
+				LogicRibbonReaderConfig.ID,
+				LogicRibbonWriterConfig.ID,
 				"FloorSwitch",
 				"Checkpoint",
 				CometDetectorConfig.ID,
@@ -217,9 +227,25 @@ namespace TUNING
 				"LogicGateBUFFER",
 				"LogicGateFILTER",
 				"LogicGateXOR",
-				LogicMemoryConfig.ID
+				LogicMemoryConfig.ID,
+				"LogicGateMultiplexer",
+				"LogicGateDemultiplexer"
 			}),
-			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string> { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidVent", "SolidLogicValve", "SolidConduitBridge", "AutoMiner" }),
+			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string>
+			{
+				"SolidTransferArm",
+				"SolidConduit",
+				"SolidConduitInbox",
+				"SolidConduitOutbox",
+				"SolidFilter",
+				"SolidVent",
+				"SolidLogicValve",
+				"SolidConduitBridge",
+				SolidConduitDiseaseSensorConfig.ID,
+				SolidConduitElementSensorConfig.ID,
+				SolidConduitTemperatureSensorConfig.ID,
+				"AutoMiner"
+			}),
 			new PlanScreen.PlanInfo(new HashedString("Rocketry"), true, new List<string>
 			{
 				"Gantry", "SteamEngine", "KeroseneEngine", "SolidBooster", "LiquidFuelTank", "OxidizerTank", "OxidizerTankLiquid", "CargoBay", "GasCargoBay", "LiquidCargoBay",

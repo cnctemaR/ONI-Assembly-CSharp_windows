@@ -822,42 +822,56 @@ namespace STRINGS
 
 				public class BRUSH_SIZE
 				{
-					public static LocString NAME = "Brush size";
+					public static LocString NAME = "Size";
 
 					public static LocString TOOLTIP = "Adjust brush size";
 				}
 
-				public class BRUSH_NOISE
+				public class BRUSH_NOISE_SCALE
 				{
-					public static LocString NAME = "Noise";
+					public static LocString NAME = "Noise A";
 
-					public static LocString TOOLTIP = "Adjust brush noisiness";
+					public static LocString TOOLTIP = "Adjust brush noisiness A";
+				}
+
+				public class BRUSH_NOISE_DENSITY
+				{
+					public static LocString NAME = "Noise B";
+
+					public static LocString TOOLTIP = "Adjust brush noisiness B";
 				}
 
 				public class TEMPERATURE
 				{
-					public static LocString NAME = "Absolute temperature";
+					public static LocString NAME = "Temperature";
 
 					public static LocString TOOLTIP = "Adjust absolute temperature";
 				}
 
 				public class TEMPERATURE_ADDITIVE
 				{
-					public static LocString NAME = "Additive temperature";
+					public static LocString NAME = "Temperature";
 
 					public static LocString TOOLTIP = "Adjust additive temperature";
 				}
 
 				public class MASS
 				{
-					public static LocString NAME = "Absolute mass";
+					public static LocString NAME = "Mass";
 
 					public static LocString TOOLTIP = "Adjust mass";
 				}
 
+				public class DISEASE
+				{
+					public static LocString NAME = "Germ";
+
+					public static LocString TOOLTIP = "Adjust type of germ";
+				}
+
 				public class DISEASE_COUNT
 				{
-					public static LocString NAME = "Germ count";
+					public static LocString NAME = "Germs";
 
 					public static LocString TOOLTIP = "Adjust germ count";
 				}
@@ -867,6 +881,13 @@ namespace STRINGS
 					public static LocString NAME = "Brush";
 
 					public static LocString TOOLTIP = "Paint elements into the world simulation {Hotkey}";
+				}
+
+				public class ELEMENT
+				{
+					public static LocString NAME = "Element";
+
+					public static LocString TOOLTIP = "Adjust type of element";
 				}
 
 				public class SPRINKLE
@@ -1501,13 +1522,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "NEW SOUNDTRACK!";
+				public static LocString IMAGE_HEADER = "AUTOMATION PACK!";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "<b>Welcome to Meep's Mandatory Recreation Pack!</b>\n\n<b>Update Features:</b>\n\n• New recreational buildings for Duplicants to relax in\n• New 'Overjoyed Reactions' may trigger when Duplicants have an excess of morale\n• Numerous bug fixes and improvements\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCH_NOTES_SUMMARY = "<b>Welcome to Banhi's Automation Innovation Pack!</b>\n\n<b>Update Features:</b>\n\n• New and Improved automation sensors and outputs for work and for play\n• New 'Sweepy' robot helps keep your colony tidy and stylish\n• Bunches of optimizations, bug fixes, and improvements across the game\n\nPlease view the full patch notes for further details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 			}
@@ -2143,6 +2164,10 @@ namespace STRINGS
 				public static LocString SUDDENMORALEHELPER_BUFF = "1) Bring on Morale!";
 
 				public static LocString SUDDENMORALEHELPER_DISABLE = "2) Disable Morale";
+
+				public static LocString NEWAUTOMATIONWARNING = "The following buildings have acquired new automation ports!\n\nThese buildings in your colony can now be connected to existing " + BUILDINGS.PREFABS.LOGICWIRE.NAME + "s.";
+
+				public static LocString NEWAUTOMATIONWARNING_TITLE = "AUTOMATION CHANGES";
 			}
 		}
 
@@ -4411,7 +4436,13 @@ namespace STRINGS
 
 				public static LocString OUTPUT = "Output Port";
 
+				public static LocString RIBBON_INPUT = "Ribbon Input Port";
+
+				public static LocString RIBBON_OUTPUT = "Ribbon Output Port";
+
 				public static LocString RESET_UPDATE = "Reset Port";
+
+				public static LocString CONTROL_INPUT = "Control Port";
 
 				public static LocString CIRCUIT_STATUS_HEADER = "GRID STATUS";
 
@@ -4427,7 +4458,13 @@ namespace STRINGS
 
 					public static LocString OUTPUT = "<b>Output Port</b>\nSends a signal out to an automation grid";
 
-					public static LocString RESET_UPDATE = "<b>Reset Port</b>\nCan reset a Memory Toggle's internal Memory";
+					public static LocString RIBBON_INPUT = "<b>Ribbon Input Port</b>\nReceives a 4-bit signal from an automation grid";
+
+					public static LocString RIBBON_OUTPUT = "<b>Ribbon Output Port</b>\nSends a 4-bit signal out to an automation grid";
+
+					public static LocString RESET_UPDATE = "<b>Reset Port</b>\nReset a " + BUILDINGS.PREFABS.LOGICMEMORY.NAME + "'s internal Memory to " + UI.FormatAsAutomationState("Red", UI.AutomationState.Standby);
+
+					public static LocString CONTROL_INPUT = "<b>Control Port</b>\nControl the signal selection of a " + BUILDINGS.PREFABS.LOGICGATEMULTIPLEXER.NAME + " or " + BUILDINGS.PREFABS.LOGICGATEDEMULTIPLEXER.NAME;
 
 					public static LocString ONE = "<b>Green</b>\nThis port is currently " + UI.FormatAsAutomationState("Green", UI.AutomationState.Active);
 
@@ -5328,6 +5365,8 @@ namespace STRINGS
 					public static LocString GAS = "Gas Output:\nAll";
 
 					public static LocString LIQUID = "Liquid Output:\nAll";
+
+					public static LocString SOLID = "Solid Output:\nAll";
 				}
 
 				public static class FILTEREDELEMENT
@@ -5335,6 +5374,8 @@ namespace STRINGS
 					public static LocString GAS = "Filtered Gas Output:\n{0}";
 
 					public static LocString LIQUID = "Filtered Liquid Output:\n{0}";
+
+					public static LocString SOLID = "Filtered Solid Output:\n{0}";
 				}
 			}
 
@@ -5383,6 +5424,8 @@ namespace STRINGS
 				public static LocString RECIPE_DETAILS = "Recipe Details";
 
 				public static LocString RECIPE_QUEUE = "Order Production Quantity:";
+
+				public static LocString RECIPE_FOREVER = "Forever";
 
 				public class TOOLTIPS
 				{
@@ -5955,7 +5998,7 @@ namespace STRINGS
 
 				public static LocString STOP = "Turn Off";
 
-				public static LocString VALUE_NAME = "Critter / Egg Count";
+				public static LocString VALUE_NAME = "Count";
 			}
 
 			public class OIL_WELL_CAP_SIDE_SCREEN
@@ -6015,6 +6058,58 @@ namespace STRINGS
 				});
 			}
 
+			public class TIMER_SIDE_SCREEN
+			{
+				public static LocString TITLE = "Timer";
+
+				public static LocString ON = "Green Duration";
+
+				public static LocString GREEN_DURATION_TOOLTIP = string.Concat(new string[]
+				{
+					"Green duration determines the amount of time this sensor should send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					UI.HORIZONTAL_BR_RULE,
+					"This sensor sends a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" for {0}"
+				});
+
+				public static LocString OFF = "Red Duration";
+
+				public static LocString RED_DURATION_TOOLTIP = string.Concat(new string[]
+				{
+					"Red duration determines the amount of time this sensor should send a ",
+					UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby),
+					UI.HORIZONTAL_BR_RULE,
+					"This sensor will send a ",
+					UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Active),
+					" for {0}"
+				});
+
+				public static LocString CURRENT_TIME = "{0}/{1}";
+
+				public static LocString MODE_LABEL_SECONDS = "Mode: Seconds";
+
+				public static LocString MODE_LABEL_CYCLES = "Mode: Cycles";
+
+				public static LocString RESET_BUTTON = "Reset Timer";
+
+				public static LocString DISABLED = "Timer Disabled";
+			}
+
+			public class COUNTER_SIDE_SCREEN
+			{
+				public static LocString TITLE = "Counter";
+
+				public static LocString RESET_BUTTON = "Reset Counter";
+
+				public static LocString DESCRIPTION = "Send " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " when count is reached:";
+
+				public static LocString INCREMENT_MODE = "Mode: Increment";
+
+				public static LocString DECREMENT_MODE = "Mode: Decrement";
+			}
+
 			public class TIMEDSWITCHSIDESCREEN
 			{
 				public static LocString TITLE = "Time Schedule";
@@ -6054,6 +6149,19 @@ namespace STRINGS
 				public static LocString TITLE = "Temperature Threshold";
 
 				public static LocString CURRENT_TEMPERATURE = "Current Temperature:\n{0}";
+
+				public static LocString ACTIVATE_IF = "Send " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " if:";
+
+				public static LocString COLDER_BUTTON = "Below";
+
+				public static LocString WARMER_BUTTON = "Above";
+			}
+
+			public class WATTAGESWITCHSIDESCREEN
+			{
+				public static LocString TITLE = "Wattage Threshold";
+
+				public static LocString CURRENT_TEMPERATURE = "Current Wattage:\n{0}";
 
 				public static LocString ACTIVATE_IF = "Send " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + " if:";
 
@@ -6124,6 +6232,30 @@ namespace STRINGS
 					"Temperature",
 					UI.PST_KEYWORD,
 					" is below <b>{0}</b>"
+				});
+
+				public static LocString WATTAGE = "Watts";
+
+				public static LocString WATTAGE_TOOLTIP_ABOVE = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ",
+					UI.PRE_KEYWORD,
+					"Wattage",
+					UI.PST_KEYWORD,
+					" consumed is above <b>{0}</b>"
+				});
+
+				public static LocString WATTAGE_TOOLTIP_BELOW = string.Concat(new string[]
+				{
+					"Will send a ",
+					UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active),
+					" if the ",
+					UI.PRE_KEYWORD,
+					"Wattage",
+					UI.PST_KEYWORD,
+					" consumed is below <b>{0}</b>"
 				});
 
 				public static LocString DISEASE_TITLE = "Germ Threshold";
@@ -6264,6 +6396,57 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" falls below <b>{0}%</b>"
 				});
+			}
+
+			public class LOGICBITSELECTORSIDESCREEN
+			{
+				public static LocString RIBBON_READER_TITLE = "Ribbon Reader";
+
+				public static LocString RIBBON_READER_DESCRIPTION = "Selected <b>Bit</b>'s <b>Signal</b> will be read by the <b>Output Port</b>.";
+
+				public static LocString RIBBON_WRITER_TITLE = "Ribbon Writer";
+
+				public static LocString RIBBON_WRITER_DESCRIPTION = "Received <b>Signal</b> will be written to selected <b>Bit</b>";
+
+				public static LocString BIT = "Bit {0}";
+
+				public static LocString STATE_ACTIVE = "Green";
+
+				public static LocString STATE_INACTIVE = "Red";
+			}
+
+			public class LOGICALARMSIDESCREEN
+			{
+				public static LocString TITLE = "Notification Designer";
+
+				public static LocString DESCRIPTION = "Notification will be sent upon receiving a " + UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + "\n\nMaking modifications will clear any existing notifications being sent by this building.";
+
+				public static LocString NAME = "<b>Name:</b>";
+
+				public static LocString NAME_DEFAULT = "Notification";
+
+				public static LocString TOOLTIP = "<b>Tooltip:</b>";
+
+				public static LocString TOOLTIP_DEFAULT = "Tooltip";
+
+				public static LocString TYPE = "<b>Type:</b>";
+
+				public static LocString PAUSE = "<b>Pause:</b>";
+
+				public static LocString ZOOM = "<b>Zoom:</b>";
+
+				public class TOOLTIPS
+				{
+					public static LocString NAME = "Select notification text";
+
+					public static LocString TOOLTIP = "Select notification hover text";
+
+					public static LocString TYPE = "Select the visual and aural style of the notification";
+
+					public static LocString PAUSE = "Time will pause upon notification when checked";
+
+					public static LocString ZOOM = "The view will zoom to this building upon notification when checked";
+				}
 			}
 		}
 
@@ -8037,6 +8220,8 @@ namespace STRINGS
 
 			public static LocString MAX_WATTAGE = "Max " + UI.FormatAsLink("Power", "POWER") + ": {0}";
 
+			public static LocString MAX_BITS = UI.FormatAsLink("Bit", "LOGIC") + " Depth: {0}";
+
 			public static LocString RESEARCH_MATERIALS = "{0}: {1} per " + UI.FormatAsLink("Research", "RESEARCH") + " point";
 
 			public static LocString PRODUCES_RESEARCH_POINTS = "{0}";
@@ -8570,6 +8755,23 @@ namespace STRINGS
 					" can result in damage to the circuit"
 				});
 
+				public static LocString MAX_BITS = string.Concat(new string[]
+				{
+					"Sending an ",
+					UI.PRE_KEYWORD,
+					"Automation Signal",
+					UI.PST_KEYWORD,
+					" with a higher ",
+					UI.PRE_KEYWORD,
+					"Bit Depth",
+					UI.PST_KEYWORD,
+					" than the connected ",
+					UI.PRE_KEYWORD,
+					"Logic Wire",
+					UI.PST_KEYWORD,
+					" can result in damage to the circuit"
+				});
+
 				public static LocString RESEARCH_MATERIALS = string.Concat(new string[]
 				{
 					"This research station consumes ",
@@ -8896,23 +9098,77 @@ namespace STRINGS
 
 			public static LocString PORT_OUTPUT_DEFAULT_NAME = "OUTPUT";
 
-			public static LocString GATE_DOUBLE_INPUT_ONE_NAME = "INPUT A";
+			public static LocString GATE_MULTI_INPUT_ONE_NAME = "INPUT A";
 
-			public static LocString GATE_DOUBLE_INPUT_ONE_ACTIVE = "Green Signal";
+			public static LocString GATE_MULTI_INPUT_ONE_ACTIVE = "Green Signal";
 
-			public static LocString GATE_DOUBLE_INPUT_ONE_INACTIVE = "Red Signal";
+			public static LocString GATE_MULTI_INPUT_ONE_INACTIVE = "Red Signal";
 
-			public static LocString GATE_DOUBLE_INPUT_TWO_NAME = "INPUT B";
+			public static LocString GATE_MULTI_INPUT_TWO_NAME = "INPUT B";
 
-			public static LocString GATE_DOUBLE_INPUT_TWO_ACTIVE = "Green Signal";
+			public static LocString GATE_MULTI_INPUT_TWO_ACTIVE = "Green Signal";
 
-			public static LocString GATE_DOUBLE_INPUT_TWO_INACTIVE = "Red Signal";
+			public static LocString GATE_MULTI_INPUT_TWO_INACTIVE = "Red Signal";
+
+			public static LocString GATE_MULTI_INPUT_THREE_NAME = "INPUT C";
+
+			public static LocString GATE_MULTI_INPUT_THREE_ACTIVE = "Green Signal";
+
+			public static LocString GATE_MULTI_INPUT_THREE_INACTIVE = "Red Signal";
+
+			public static LocString GATE_MULTI_INPUT_FOUR_NAME = "INPUT D";
+
+			public static LocString GATE_MULTI_INPUT_FOUR_ACTIVE = "Green Signal";
+
+			public static LocString GATE_MULTI_INPUT_FOUR_INACTIVE = "Red Signal";
 
 			public static LocString GATE_SINGLE_INPUT_ONE_NAME = "INPUT";
 
 			public static LocString GATE_SINGLE_INPUT_ONE_ACTIVE = "Green Signal";
 
 			public static LocString GATE_SINGLE_INPUT_ONE_INACTIVE = "Red Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_ONE_NAME = "OUTPUT A";
+
+			public static LocString GATE_MULTI_OUTPUT_ONE_ACTIVE = "Green Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_ONE_INACTIVE = "Red Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_TWO_NAME = "OUTPUT B";
+
+			public static LocString GATE_MULTI_OUTPUT_TWO_ACTIVE = "Green Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_TWO_INACTIVE = "Red Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_THREE_NAME = "OUTPUT C";
+
+			public static LocString GATE_MULTI_OUTPUT_THREE_ACTIVE = "Green Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_THREE_INACTIVE = "Red Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_FOUR_NAME = "OUTPUT D";
+
+			public static LocString GATE_MULTI_OUTPUT_FOUR_ACTIVE = "Green Signal";
+
+			public static LocString GATE_MULTI_OUTPUT_FOUR_INACTIVE = "Red Signal";
+
+			public static LocString GATE_SINGLE_OUTPUT_ONE_NAME = "OUTPUT";
+
+			public static LocString GATE_SINGLE_OUTPUT_ONE_ACTIVE = "Green Signal";
+
+			public static LocString GATE_SINGLE_OUTPUT_ONE_INACTIVE = "Red Signal";
+
+			public static LocString GATE_MULTIPLEXER_CONTROL_ONE_NAME = "CONTROL A";
+
+			public static LocString GATE_MULTIPLEXER_CONTROL_ONE_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Set signal path to <b>down</b> position";
+
+			public static LocString GATE_MULTIPLEXER_CONTROL_ONE_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Set signal path to <b>up</b> position";
+
+			public static LocString GATE_MULTIPLEXER_CONTROL_TWO_NAME = "CONTROL B";
+
+			public static LocString GATE_MULTIPLEXER_CONTROL_TWO_ACTIVE = UI.FormatAsAutomationState("Green Signal", UI.AutomationState.Active) + ": Set signal path to <b>down</b> position";
+
+			public static LocString GATE_MULTIPLEXER_CONTROL_TWO_INACTIVE = UI.FormatAsAutomationState("Red Signal", UI.AutomationState.Standby) + ": Set signal path to <b>up</b> position";
 		}
 
 		public class GAMEOBJECTEFFECTS
@@ -9150,6 +9406,8 @@ namespace STRINGS
 				public static LocString WRONG_ELEMENT = "Wrong Element Damage";
 
 				public static LocString CIRCUIT_OVERLOADED = "Overload Damage";
+
+				public static LocString LOGIC_CIRCUIT_OVERLOADED = "Signal Overload Damage";
 
 				public static LocString LIQUID_PRESSURE = "Pressure Damage";
 

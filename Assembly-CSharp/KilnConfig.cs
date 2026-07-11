@@ -25,6 +25,7 @@ public class KilnConfig : IBuildingConfig
 		buildingDef.ExhaustKilowattsWhenActive = 16f;
 		buildingDef.SelfHeatKilowattsWhenActive = 4f;
 		buildingDef.AudioCategory = "HollowMetal";
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		return buildingDef;
 	}
 
@@ -88,19 +89,8 @@ public class KilnConfig : IBuildingConfig
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text3, text4);
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
 		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGetDef<PoweredActiveController.Def>();
 		SymbolOverrideControllerUtil.AddToPrefab(go);

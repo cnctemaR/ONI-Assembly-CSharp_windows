@@ -1,6 +1,8 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SuitEquipper")]
 public class SuitEquipper : KMonoBehaviour
 {
 	protected override void OnSpawn()

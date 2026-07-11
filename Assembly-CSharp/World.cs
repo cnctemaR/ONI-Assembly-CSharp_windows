@@ -4,6 +4,7 @@ using Klei;
 using Rendering;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/World")]
 public class World : KMonoBehaviour
 {
 	public static World Instance { get; private set; }

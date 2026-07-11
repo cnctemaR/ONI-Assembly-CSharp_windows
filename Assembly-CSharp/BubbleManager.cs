@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BubbleManager")]
 public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 {
 	public static void DestroyInstance()

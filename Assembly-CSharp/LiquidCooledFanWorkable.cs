@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/LiquidCooledFanWorkable")]
 public class LiquidCooledFanWorkable : Workable
 {
 	private LiquidCooledFanWorkable()

@@ -468,31 +468,24 @@ public class SolidConduitFlow : IConduitFlow
 
 	public void RenderEveryTick(float dt)
 	{
-		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		Vector2I vector2I = new Vector2I(Mathf.Max(0, visibleArea.Min.x - 1), Mathf.Max(0, visibleArea.Min.y - 1));
-		Vector2I vector2I2 = new Vector2I(Mathf.Min(Grid.WidthInCells - 1, visibleArea.Max.x + 1), Mathf.Min(Grid.HeightInCells - 1, visibleArea.Max.y + 1));
 		for (int i = 0; i < this.GetSOAInfo().NumEntries; i++)
 		{
-			Vector2I vector2I3 = Grid.CellToXY(this.GetSOAInfo().GetCell(i));
-			if (!(vector2I3 < vector2I) && !(vector2I3 > vector2I2))
+			SolidConduitFlow.Conduit conduit = this.GetSOAInfo().GetConduit(i);
+			SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this);
+			if (lastFlowInfo.direction != SolidConduitFlow.FlowDirection.None)
 			{
-				SolidConduitFlow.Conduit conduit = this.GetSOAInfo().GetConduit(i);
-				SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this);
-				if (lastFlowInfo.direction != SolidConduitFlow.FlowDirection.None)
+				int cell = conduit.GetCell(this);
+				int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
+				SolidConduitFlow.ConduitContents contents = this.GetContents(cellFromDirection);
+				if (contents.pickupableHandle.IsValid())
 				{
-					int cell = conduit.GetCell(this);
-					int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
-					SolidConduitFlow.ConduitContents contents = this.GetContents(cellFromDirection);
-					if (contents.pickupableHandle.IsValid())
+					Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.SolidConduitContents);
+					Vector3 vector2 = Grid.CellToPosCCC(cellFromDirection, Grid.SceneLayer.SolidConduitContents);
+					Vector3 vector3 = Vector3.Lerp(vector, vector2, this.ContinuousLerpPercent);
+					Pickupable pickupable = this.GetPickupable(contents.pickupableHandle);
+					if (pickupable != null)
 					{
-						Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.SolidConduitContents);
-						Vector3 vector2 = Grid.CellToPosCCC(cellFromDirection, Grid.SceneLayer.SolidConduitContents);
-						Vector3 vector3 = Vector3.Lerp(vector, vector2, this.ContinuousLerpPercent);
-						Pickupable pickupable = this.GetPickupable(contents.pickupableHandle);
-						if (pickupable != null)
-						{
-							pickupable.transform.SetPosition(vector3);
-						}
+						pickupable.transform.SetPosition(vector3);
 					}
 				}
 			}
@@ -818,7 +811,7 @@ public class SolidConduitFlow : IConduitFlow
 
 	private SolidConduitFlow.GridNode[] grid;
 
-	private IUtilityNetworkMgr networkMgr;
+	public IUtilityNetworkMgr networkMgr;
 
 	private HashSet<int> visited = new HashSet<int>();
 

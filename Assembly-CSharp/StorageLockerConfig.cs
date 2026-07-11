@@ -37,6 +37,7 @@ public class StorageLockerConfig : IBuildingConfig
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.StorageLocker;
 		go.AddOrGet<StorageLocker>();
+		go.AddOrGet<UserNameable>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

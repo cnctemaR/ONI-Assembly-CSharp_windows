@@ -153,8 +153,8 @@ public class FilteredDragTool : DragTool
 					case ObjectLayer.Wire:
 					case ObjectLayer.WireConnectors:
 						return "Wires";
-					case ObjectLayer.LogicGates:
-					case ObjectLayer.LogicWires:
+					case ObjectLayer.LogicGate:
+					case ObjectLayer.LogicWire:
 						return "Logic";
 					default:
 						goto IL_00A5;
@@ -236,7 +236,7 @@ public class FilteredDragTool : DragTool
 		}
 		else if (text == "logic")
 		{
-			return ObjectLayer.LogicWires;
+			return ObjectLayer.LogicWire;
 		}
 		throw new ArgumentException("Invalid filter layer: " + filter_layer);
 	}

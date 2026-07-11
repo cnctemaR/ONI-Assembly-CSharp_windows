@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/KTime")]
 public class KTime : KMonoBehaviour
 {
 	public float UnscaledGameTime { get; set; }

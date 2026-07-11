@@ -20,6 +20,8 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 		{
 			this.countThreshold = component.countThreshold;
 			this.activateOnGreaterThan = component.activateOnGreaterThan;
+			this.countCritters = component.countCritters;
+			this.countEggs = component.countEggs;
 		}
 	}
 
@@ -37,7 +39,11 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
 		if (roomOfGameObject != null)
 		{
-			this.currentCount = roomOfGameObject.cavity.creatures.Count;
+			this.currentCount = 0;
+			if (this.countCritters)
+			{
+				this.currentCount += roomOfGameObject.cavity.creatures.Count;
+			}
 			if (this.countEggs)
 			{
 				this.currentCount += roomOfGameObject.cavity.eggs.Count;
@@ -224,7 +230,11 @@ public class LogicCritterCountSensor : Switch, ISaveLoadable, IThresholdSwitch, 
 
 	private bool wasOn;
 
-	private bool countEggs = true;
+	[Serialize]
+	public bool countEggs = true;
+
+	[Serialize]
+	public bool countCritters = true;
 
 	[Serialize]
 	public int countThreshold;

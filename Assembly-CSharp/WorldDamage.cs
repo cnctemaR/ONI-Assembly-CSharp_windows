@@ -5,6 +5,7 @@ using FMODUnity;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/WorldDamage")]
 public class WorldDamage : KMonoBehaviour
 {
 	public static WorldDamage Instance { get; private set; }

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/MaterialSelectorSerializer")]
 public class MaterialSelectorSerializer : KMonoBehaviour
 {
 	protected override void OnSpawn()

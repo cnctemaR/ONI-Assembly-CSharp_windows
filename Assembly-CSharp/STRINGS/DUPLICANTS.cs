@@ -5207,6 +5207,13 @@ namespace STRINGS
 					BUILDINGS.PREFABS.DININGTABLE.NAME
 				});
 			}
+
+			public class CHARGING
+			{
+				public static LocString NAME = "Charging";
+
+				public static LocString TOOLTIP = "This Robot is charging its internal battery";
+			}
 		}
 
 		public class CONGENITALTRAITS

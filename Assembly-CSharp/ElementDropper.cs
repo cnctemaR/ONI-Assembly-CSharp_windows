@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ElementDropper")]
 public class ElementDropper : KMonoBehaviour
 {
 	protected override void OnSpawn()

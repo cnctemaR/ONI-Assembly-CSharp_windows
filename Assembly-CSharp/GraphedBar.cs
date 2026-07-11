@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GraphedBar")]
 [Serializable]
 public class GraphedBar : KMonoBehaviour
 {

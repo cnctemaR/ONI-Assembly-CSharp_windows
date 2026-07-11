@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BreakdownListRow")]
 public class BreakdownListRow : KMonoBehaviour
 {
 	public void ShowData(string name, string value)

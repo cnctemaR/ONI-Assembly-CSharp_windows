@@ -30,6 +30,8 @@ public class LiquidConditionerConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.ViewMode = OverlayModes.LiquidConduits.ID;
 		buildingDef.OverheatTemperature = 398.15f;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(1, 1));
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "LiquidConditioner");
 		return buildingDef;
 	}
 
@@ -49,21 +51,11 @@ public class LiquidConditionerConfig : IBuildingConfig
 		storage.SetDefaultStoredItemModifiers(LiquidConditionerConfig.StoredItemModifiers);
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_1_1);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_1_1);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_1_1);
 		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGetDef<PoweredActiveController.Def>();
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayBehindConduits, false);
 	}
 
 	public const string ID = "LiquidConditioner";

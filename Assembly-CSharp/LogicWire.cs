@@ -4,8 +4,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkMgr, IBridgedNetworkItem
+[AddComponentMenu("KMonoBehaviour/scripts/LogicWire")]
+public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkMgr, IBridgedNetworkItem, IBitRating, IDisconnectable
 {
+	public static int GetBitDepthAsInt(LogicWire.BitDepth rating)
+	{
+		if (rating == LogicWire.BitDepth.OneBit)
+		{
+			return 1;
+		}
+		if (rating != LogicWire.BitDepth.FourBit)
+		{
+			return 0;
+		}
+		return 4;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -13,6 +27,7 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 		Game.Instance.logicCircuitSystem.AddToNetworks(num, this, false);
 		base.Subscribe<LogicWire>(774203113, LogicWire.OnBuildingBrokenDelegate);
 		base.Subscribe<LogicWire>(-1735440190, LogicWire.OnBuildingFullyRepairedDelegate);
+		this.Connect();
 		base.GetComponent<KBatchedAnimController>().SetSymbolVisiblity(LogicWire.OutlineSymbol, false);
 	}
 
@@ -36,6 +51,11 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			return Game.Instance.logicCircuitSystem.GetNetworkForCell(num) is LogicCircuitNetwork;
 		}
+	}
+
+	public bool IsDisconnected()
+	{
+		return this.disconnected;
 	}
 
 	public bool Connect()
@@ -96,6 +116,11 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 		yield break;
 	}
 
+	public LogicWire.BitDepth GetMaxBitRating()
+	{
+		return this.MaxBitDepth;
+	}
+
 	public IUtilityNetworkMgr GetNetworkManager()
 	{
 		return Game.Instance.logicCircuitSystem;
@@ -124,6 +149,9 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 	}
 
 	[SerializeField]
+	public LogicWire.BitDepth MaxBitDepth;
+
+	[SerializeField]
 	private bool disconnected = true;
 
 	public static readonly KAnimHashedString OutlineSymbol = new KAnimHashedString("outline");
@@ -139,4 +167,11 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 	});
 
 	private global::System.Action firstFrameCallback;
+
+	public enum BitDepth
+	{
+		OneBit,
+		FourBit,
+		NumRatings
+	}
 }

@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/NextUpdateTimer")]
 public class NextUpdateTimer : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

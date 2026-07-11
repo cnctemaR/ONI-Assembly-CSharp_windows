@@ -22,37 +22,79 @@ public class SandboxToolParameterMenu : KScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.ConfigureSettings();
+		this.activateOnSpawn = true;
+		this.ConsumeMouseScroll = true;
+	}
+
+	private void ConfigureSettings()
+	{
 		this.settings = new SandboxSettings();
 		SandboxSettings sandboxSettings = this.settings;
-		sandboxSettings.OnChangeElement = (global::System.Action)Delegate.Combine(sandboxSettings.OnChangeElement, new global::System.Action(delegate
+		sandboxSettings.OnChangeElement = (Action<bool>)Delegate.Combine(sandboxSettings.OnChangeElement, new Action<bool>(delegate(bool forceElementDefaults)
 		{
-			this.elementSelector.button.GetComponentInChildren<LocText>().text = SandboxToolParameterMenu.instance.settings.Element.name + " (" + SandboxToolParameterMenu.instance.settings.Element.GetStateString() + ")";
-			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(this.settings.Element, "ui", false);
+			Element element = ElementLoader.elements[this.settings.GetIntSetting("SandboxTools.SelectedElement")];
+			this.elementSelector.button.GetComponentInChildren<LocText>().text = element.name + " (" + element.GetStateString() + ")";
+			global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(element, "ui", false);
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].sprite = uisprite.first;
 			this.elementSelector.button.GetComponentsInChildren<Image>()[1].color = uisprite.second;
-			this.temperatureSlider.SetRange(Mathf.Max(SandboxToolParameterMenu.instance.settings.Element.lowTemp - 10f, 1f), Mathf.Min(9999f, SandboxToolParameterMenu.instance.settings.Element.highTemp + 10f));
-			this.temperatureSlider.SetValue(SandboxToolParameterMenu.instance.settings.Element.defaultValues.temperature);
-			this.massSlider.SetRange(0.1f, SandboxToolParameterMenu.instance.settings.Element.defaultValues.mass * 2f);
+			float num = Mathf.Max(element.lowTemp - 10f, 1f);
+			float num2;
+			if (element.IsGas)
+			{
+				num2 = Mathf.Min(new float[]
+				{
+					9999f,
+					element.highTemp + 10f,
+					element.defaultValues.temperature + 100f
+				});
+			}
+			else
+			{
+				num2 = Mathf.Min(9999f, element.highTemp + 10f);
+			}
+			num = GameUtil.GetConvertedTemperature(num, true);
+			num2 = GameUtil.GetConvertedTemperature(num2, true);
+			this.temperatureSlider.SetRange(num, num2, false);
+			this.massSlider.SetRange(0.1f, element.defaultValues.mass * 2f, false);
+			if (forceElementDefaults)
+			{
+				this.temperatureSlider.SetValue(GameUtil.GetConvertedTemperature(element.defaultValues.temperature, true), true);
+				this.massSlider.SetValue(element.defaultValues.mass, true);
+			}
 		}));
 		SandboxSettings sandboxSettings2 = this.settings;
-		sandboxSettings2.OnChangeDisease = (global::System.Action)Delegate.Combine(sandboxSettings2.OnChangeDisease, new global::System.Action(delegate
+		sandboxSettings2.OnChangeMass = (global::System.Action)Delegate.Combine(sandboxSettings2.OnChangeMass, new global::System.Action(delegate
 		{
-			this.diseaseSelector.button.GetComponentInChildren<LocText>().text = SandboxToolParameterMenu.instance.settings.Disease.Name;
-			this.diseaseSelector.button.GetComponentsInChildren<Image>()[1].sprite = Assets.GetSprite("germ");
-			this.diseaseCountSlider.SetRange(0f, 1000000f);
+			this.massSlider.SetValue(this.settings.GetFloatSetting("SandboxTools.Mass"), false);
 		}));
 		SandboxSettings sandboxSettings3 = this.settings;
-		sandboxSettings3.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings3.OnChangeEntity, new global::System.Action(delegate
+		sandboxSettings3.OnChangeDisease = (global::System.Action)Delegate.Combine(sandboxSettings3.OnChangeDisease, new global::System.Action(delegate
 		{
-			this.entitySelector.button.GetComponentInChildren<LocText>().text = SandboxToolParameterMenu.instance.settings.Entity.GetProperName();
+			Disease disease = Db.Get().Diseases.Get(SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedDisease"));
+			this.diseaseSelector.button.GetComponentInChildren<LocText>().text = disease.Name;
+			this.diseaseSelector.button.GetComponentsInChildren<Image>()[1].sprite = Assets.GetSprite("germ");
+			this.diseaseCountSlider.SetRange(0f, 1000000f, false);
+		}));
+		SandboxSettings sandboxSettings4 = this.settings;
+		sandboxSettings4.OnChangeDiseaseCount = (global::System.Action)Delegate.Combine(sandboxSettings4.OnChangeDiseaseCount, new global::System.Action(delegate
+		{
+			this.diseaseCountSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.DiseaseCount"), false);
+		}));
+		SandboxSettings sandboxSettings5 = this.settings;
+		sandboxSettings5.OnChangeEntity = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeEntity, new global::System.Action(delegate
+		{
+			string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
+			GameObject prefab = Assets.GetPrefab(stringSetting);
+			this.entitySelector.button.GetComponentInChildren<LocText>().text = prefab.GetProperName();
 			global::Tuple<Sprite, Color> tuple;
-			if (this.settings.Entity.PrefabTag == MinionConfig.ID)
+			if (stringSetting == MinionConfig.ID)
 			{
 				tuple = new global::Tuple<Sprite, Color>(Assets.GetSprite("ui_duplicant_portrait_placeholder"), Color.white);
 			}
 			else
 			{
-				tuple = Def.GetUISprite(this.settings.Entity.PrefabTag, "ui", false);
+				tuple = Def.GetUISprite(stringSetting, "ui", false);
 			}
 			if (tuple != null)
 			{
@@ -60,33 +102,40 @@ public class SandboxToolParameterMenu : KScreen
 				this.entitySelector.button.GetComponentsInChildren<Image>()[1].color = tuple.second;
 			}
 		}));
-		SandboxSettings sandboxSettings4 = this.settings;
-		sandboxSettings4.OnChangeBrushSize = (global::System.Action)Delegate.Combine(sandboxSettings4.OnChangeBrushSize, new global::System.Action(delegate
-		{
-			if (PlayerController.Instance.ActiveTool is BrushTool)
-			{
-				(PlayerController.Instance.ActiveTool as BrushTool).SetBrushSize(this.settings.BrushSize);
-			}
-		}));
-		SandboxSettings sandboxSettings5 = this.settings;
-		sandboxSettings5.OnChangeNoiseScale = (global::System.Action)Delegate.Combine(sandboxSettings5.OnChangeNoiseScale, new global::System.Action(delegate
-		{
-			if (PlayerController.Instance.ActiveTool is BrushTool)
-			{
-				(PlayerController.Instance.ActiveTool as BrushTool).SetBrushSize(this.settings.BrushSize);
-			}
-		}));
 		SandboxSettings sandboxSettings6 = this.settings;
-		sandboxSettings6.OnChangeNoiseDensity = (global::System.Action)Delegate.Combine(sandboxSettings6.OnChangeNoiseDensity, new global::System.Action(delegate
+		sandboxSettings6.OnChangeBrushSize = (global::System.Action)Delegate.Combine(sandboxSettings6.OnChangeBrushSize, new global::System.Action(delegate
 		{
 			if (PlayerController.Instance.ActiveTool is BrushTool)
 			{
-				(PlayerController.Instance.ActiveTool as BrushTool).SetBrushSize(this.settings.BrushSize);
+				(PlayerController.Instance.ActiveTool as BrushTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
 			}
 		}));
-		this.settings.InstantBuild = true;
-		this.activateOnSpawn = true;
-		this.ConsumeMouseScroll = true;
+		SandboxSettings sandboxSettings7 = this.settings;
+		sandboxSettings7.OnChangeNoiseScale = (global::System.Action)Delegate.Combine(sandboxSettings7.OnChangeNoiseScale, new global::System.Action(delegate
+		{
+			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
+			{
+				(PlayerController.Instance.ActiveTool as SandboxSprinkleTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
+			}
+		}));
+		SandboxSettings sandboxSettings8 = this.settings;
+		sandboxSettings8.OnChangeNoiseDensity = (global::System.Action)Delegate.Combine(sandboxSettings8.OnChangeNoiseDensity, new global::System.Action(delegate
+		{
+			if (PlayerController.Instance.ActiveTool is SandboxSprinkleTool)
+			{
+				(PlayerController.Instance.ActiveTool as SandboxSprinkleTool).SetBrushSize(this.settings.GetIntSetting("SandboxTools.BrushSize"));
+			}
+		}));
+		SandboxSettings sandboxSettings9 = this.settings;
+		sandboxSettings9.OnChangeTemperature = (global::System.Action)Delegate.Combine(sandboxSettings9.OnChangeTemperature, new global::System.Action(delegate
+		{
+			this.temperatureSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.Temperature"), false), false);
+		}));
+		SandboxSettings sandboxSettings10 = this.settings;
+		sandboxSettings10.OnChangeAdditiveTemperature = (global::System.Action)Delegate.Combine(sandboxSettings10.OnChangeAdditiveTemperature, new global::System.Action(delegate
+		{
+			this.temperatureAdditiveSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.TemperatureAdditive"), true), false);
+		}));
 	}
 
 	public void DisableParameters()
@@ -123,16 +172,7 @@ public class SandboxToolParameterMenu : KScreen
 		{
 			SandboxToolParameterMenu.instance = this;
 			base.gameObject.SetActive(false);
-			this.settings.SelectElement(ElementLoader.FindElementByHash(SimHashes.Water));
-			this.brushRadiusSlider.SetRange(1f, 10f);
-			this.brushRadiusSlider.slider.wholeNumbers = true;
-			this.noiseScaleSlider.SetRange(0f, 1f);
-			this.noiseDensitySlider.SetRange(0f, 20f);
-			this.temperatureSlider.SetRange(Mathf.Max(SandboxToolParameterMenu.instance.settings.Element.lowTemp - 10f, 1f), SandboxToolParameterMenu.instance.settings.Element.highTemp + 10f);
-			this.massSlider.SetRange(0.1f, SandboxToolParameterMenu.instance.settings.Element.defaultValues.mass * 2f);
-			this.massSlider.SetValue(this.settings.Mass);
-			this.settings.SelectDisease(Db.Get().Diseases.FoodGerms);
-			this.settings.SelectEntity(Assets.GetPrefab("MushBar".ToTag()).GetComponent<KPrefabID>());
+			this.settings.RestorePrefs();
 		}
 	}
 
@@ -149,7 +189,9 @@ public class SandboxToolParameterMenu : KScreen
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Dirt));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.SandStone));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Cuprite));
+		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Steel));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Algae));
+		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.CrudeOil));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.CarbonDioxide));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Sand));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.SlimeMold));
@@ -166,8 +208,8 @@ public class SandboxToolParameterMenu : KScreen
 		object[] array = list.ToArray();
 		this.elementSelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object element)
 		{
-			this.settings.SelectElement(element as Element);
-		}, (object element) => (element as Element).name + " (" + (element as Element).GetStateString() + ")", (string filterString, object option) => ((option as Element).name.ToUpper() + (option as Element).GetStateString().ToUpper()).Contains(filterString.ToUpper()), (object element) => Def.GetUISprite(element as Element, "ui", false), new SandboxToolParameterMenu.SelectorValue.SearchFilter[]
+			this.settings.SetIntSetting("SandboxTools.SelectedElement", (int)((Element)element).idx);
+		}, (object element) => (element as Element).name + " (" + (element as Element).GetStateString() + ")", (string filterString, object option) => ((option as Element).name.ToUpper() + (option as Element).GetStateString().ToUpper()).Contains(filterString.ToUpper()), (object element) => Def.GetUISprite(element as Element, "ui", false), UI.SANDBOXTOOLS.SETTINGS.ELEMENT.NAME, new SandboxToolParameterMenu.SelectorValue.SearchFilter[]
 		{
 			new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.COMMON, func4, null, null),
 			new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.SOLID, func, null, Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.SandStone), "ui", false)),
@@ -266,8 +308,8 @@ public class SandboxToolParameterMenu : KScreen
 		object[] array = list3.ToArray();
 		this.entitySelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object entity)
 		{
-			this.settings.SelectEntity(entity as KPrefabID);
-		}, (object entity) => (entity as KPrefabID).GetProperName(), (string filterString, object option) => (option as KPrefabID).GetProperName().ToUpper().Contains(filterString.ToUpper()), delegate(object entity)
+			this.settings.SetStringSetting("SandboxTools.SelectedEntity", (entity as KPrefabID).PrefabID().Name);
+		}, (object entity) => (entity as KPrefabID).GetProperName(), null, delegate(object entity)
 		{
 			GameObject prefab = Assets.GetPrefab((entity as KPrefabID).PrefabTag);
 			if (prefab != null)
@@ -283,7 +325,7 @@ public class SandboxToolParameterMenu : KScreen
 				}
 			}
 			return null;
-		}, list.ToArray());
+		}, UI.SANDBOXTOOLS.SETTINGS.SPAWN_ENTITY.NAME, list.ToArray());
 	}
 
 	private void ConfigureDiseaseSelector()
@@ -291,8 +333,8 @@ public class SandboxToolParameterMenu : KScreen
 		object[] array = Db.Get().Diseases.resources.ToArray();
 		this.diseaseSelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object disease)
 		{
-			this.settings.SelectDisease(disease as Disease);
-		}, (object disease) => (disease as Disease).Name, (string filterText, object option) => (option as Disease).Name.ToUpper().Contains(filterText.ToUpper()), (object disease) => new global::Tuple<Sprite, Color>(Assets.GetSprite("germ"), (disease as Disease).overlayColour), null);
+			this.settings.SetStringSetting("SandboxTools.SelectedDisease", ((Disease)disease).Id);
+		}, (object disease) => (disease as Disease).Name, null, (object disease) => new global::Tuple<Sprite, Color>(Assets.GetSprite("germ"), (disease as Disease).overlayColour), UI.SANDBOXTOOLS.SETTINGS.DISEASE.NAME, null);
 	}
 
 	protected override void OnCmpEnable()
@@ -309,12 +351,21 @@ public class SandboxToolParameterMenu : KScreen
 		this.brushRadiusSlider.row.SetActive(PlayerController.Instance.ActiveTool is BrushTool);
 		if (PlayerController.Instance.ActiveTool is BrushTool)
 		{
-			this.brushRadiusSlider.SetValue((float)this.settings.BrushSize);
+			this.brushRadiusSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.BrushSize"), true);
 		}
-		this.massSlider.SetValue(this.settings.Mass);
-		this.temperatureSlider.SetValue(this.settings.temperature);
-		this.temperatureAdditiveSlider.SetValue(this.settings.temperatureAdditive);
-		this.diseaseCountSlider.SetValue((float)this.settings.diseaseCount);
+		this.massSlider.SetValue(this.settings.GetFloatSetting("SandboxTools.Mass"), true);
+		this.RefreshTemperatureUnitDisplays();
+		this.temperatureSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.Temperature"), true), true);
+		this.temperatureAdditiveSlider.SetValue(GameUtil.GetConvertedTemperature(this.settings.GetFloatSetting("SandbosTools.TemperatureAdditive"), true), true);
+		this.diseaseCountSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.DiseaseCount"), true);
+	}
+
+	private void RefreshTemperatureUnitDisplays()
+	{
+		this.temperatureSlider.unitString = GameUtil.GetTemperatureUnitSuffix();
+		this.temperatureSlider.row.GetComponent<HierarchyReferences>().GetReference<LocText>("UnitLabel").text = this.temperatureSlider.unitString;
+		this.temperatureAdditiveSlider.unitString = GameUtil.GetTemperatureUnitSuffix();
+		this.temperatureAdditiveSlider.row.GetComponent<HierarchyReferences>().GetReference<LocText>("UnitLabel").text = this.temperatureSlider.unitString;
 	}
 
 	private GameObject SpawnSelector(SandboxToolParameterMenu.SelectorValue selector)
@@ -324,6 +375,14 @@ public class SandboxToolParameterMenu : KScreen
 		GameObject panel = component.GetReference("ScrollPanel").gameObject;
 		GameObject gameObject2 = component.GetReference("Content").gameObject;
 		InputField filterInputField = component.GetReference<InputField>("Filter");
+		component.GetReference<LocText>("Label").SetText(selector.labelText);
+		Game.Instance.Subscribe(1174281782, delegate(object data)
+		{
+			if (panel.activeSelf)
+			{
+				panel.SetActive(false);
+			}
+		});
 		KButton reference = component.GetReference<KButton>("Button");
 		reference.onClick += delegate
 		{
@@ -332,31 +391,34 @@ public class SandboxToolParameterMenu : KScreen
 			{
 				panel.GetComponent<KScrollRect>().verticalNormalizedPosition = 1f;
 				filterInputField.ActivateInputField();
+				filterInputField.onValueChanged.Invoke(filterInputField.text);
 			}
 		};
 		GameObject gameObject3 = component.GetReference("optionPrefab").gameObject;
 		selector.row = gameObject;
 		selector.optionButtons = new List<KeyValuePair<object, GameObject>>();
+		GameObject clearFilterButton = Util.KInstantiateUI(gameObject3, gameObject2, false);
+		clearFilterButton.GetComponentInChildren<LocText>().text = UI.SANDBOXTOOLS.FILTERS.BACK;
+		clearFilterButton.GetComponentsInChildren<Image>()[1].enabled = false;
+		clearFilterButton.GetComponent<KButton>().onClick += delegate
+		{
+			selector.currentFilter = null;
+			selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
+			{
+				if (test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter)
+				{
+					test.Value.SetActive((test.Key as SandboxToolParameterMenu.SelectorValue.SearchFilter).parentFilter == null);
+					return;
+				}
+				test.Value.SetActive(false);
+			});
+			clearFilterButton.SetActive(false);
+			panel.GetComponent<KScrollRect>().verticalNormalizedPosition = 1f;
+			filterInputField.text = "";
+			filterInputField.onValueChanged.Invoke(filterInputField.text);
+		};
 		if (selector.filters != null)
 		{
-			GameObject clearFilterButton = Util.KInstantiateUI(gameObject3, gameObject2, false);
-			clearFilterButton.GetComponentInChildren<LocText>().text = UI.SANDBOXTOOLS.FILTERS.BACK;
-			clearFilterButton.GetComponentsInChildren<Image>()[1].enabled = false;
-			clearFilterButton.GetComponent<KButton>().onClick += delegate
-			{
-				selector.currentFilter = null;
-				selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
-				{
-					if (test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter)
-					{
-						test.Value.SetActive((test.Key as SandboxToolParameterMenu.SelectorValue.SearchFilter).parentFilter == null);
-						return;
-					}
-					test.Value.SetActive(false);
-				});
-				clearFilterButton.SetActive(false);
-				panel.GetComponent<KScrollRect>().verticalNormalizedPosition = 1f;
-			};
 			SandboxToolParameterMenu.SelectorValue.SearchFilter[] filters = selector.filters;
 			for (int i = 0; i < filters.Length; i++)
 			{
@@ -369,16 +431,16 @@ public class SandboxToolParameterMenu : KScreen
 					gameObject4.GetComponentsInChildren<Image>()[1].sprite = filter.icon.first;
 					gameObject4.GetComponentsInChildren<Image>()[1].color = filter.icon.second;
 				}
-				Action<KeyValuePair<object, GameObject>> <>9__5;
+				Action<KeyValuePair<object, GameObject>> <>9__6;
 				gameObject4.GetComponent<KButton>().onClick += delegate
 				{
 					selector.currentFilter = filter;
 					clearFilterButton.SetActive(true);
 					List<KeyValuePair<object, GameObject>> optionButtons = selector.optionButtons;
 					Action<KeyValuePair<object, GameObject>> action;
-					if ((action = <>9__5) == null)
+					if ((action = <>9__6) == null)
 					{
-						action = (<>9__5 = delegate(KeyValuePair<object, GameObject> test)
+						action = (<>9__6 = delegate(KeyValuePair<object, GameObject> test)
 						{
 							if (!(test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter))
 							{
@@ -426,27 +488,62 @@ public class SandboxToolParameterMenu : KScreen
 		selector.button = reference;
 		filterInputField.onValueChanged.AddListener(delegate(string filterString)
 		{
+			if (!clearFilterButton.activeSelf && !string.IsNullOrEmpty(filterString))
+			{
+				clearFilterButton.SetActive(true);
+			}
 			new List<KeyValuePair<object, GameObject>>();
-			selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
+			bool flag = selector.optionButtons.Find((KeyValuePair<object, GameObject> match) => match.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter).Key != null;
+			if (string.IsNullOrEmpty(filterString))
 			{
-				if (test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter)
+				if (!flag)
 				{
-					test.Value.SetActive((test.Key as SandboxToolParameterMenu.SelectorValue.SearchFilter).Name.ToUpper().Contains(filterString.ToUpper()));
+					selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
+					{
+						test.Value.SetActive(true);
+					});
 				}
-			});
-			object[] options2 = selector.options;
-			for (int j = 0; j < options2.Length; j++)
-			{
-				object option = options2[j];
-				foreach (KeyValuePair<object, GameObject> keyValuePair in selector.optionButtons.FindAll((KeyValuePair<object, GameObject> match) => match.Key == option))
+				else
 				{
-					if (filterString == "")
+					selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
 					{
-						keyValuePair.Value.SetActive(false);
+						if (test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter && ((SandboxToolParameterMenu.SelectorValue.SearchFilter)test.Key).parentFilter == null)
+						{
+							test.Value.SetActive(true);
+							return;
+						}
+						test.Value.SetActive(false);
+					});
+				}
+			}
+			else
+			{
+				selector.optionButtons.ForEach(delegate(KeyValuePair<object, GameObject> test)
+				{
+					if (test.Key is SandboxToolParameterMenu.SelectorValue.SearchFilter)
+					{
+						test.Value.SetActive(((SandboxToolParameterMenu.SelectorValue.SearchFilter)test.Key).Name.ToUpper().Contains(filterString.ToUpper()));
+						return;
 					}
-					else
+					test.Value.SetActive(selector.getOptionName(test.Key).ToUpper().Contains(filterString.ToUpper()));
+				});
+			}
+			if (selector.filterOptionFunction != null)
+			{
+				object[] options2 = selector.options;
+				for (int j = 0; j < options2.Length; j++)
+				{
+					object option = options2[j];
+					foreach (KeyValuePair<object, GameObject> keyValuePair in selector.optionButtons.FindAll((KeyValuePair<object, GameObject> match) => match.Key == option))
 					{
-						keyValuePair.Value.SetActive(selector.filterOptionFunction(filterString, option));
+						if (string.IsNullOrEmpty(filterString))
+						{
+							keyValuePair.Value.SetActive(false);
+						}
+						else
+						{
+							keyValuePair.Value.SetActive(selector.filterOptionFunction(filterString, option));
+						}
 					}
 				}
 			}
@@ -463,6 +560,7 @@ public class SandboxToolParameterMenu : KScreen
 		HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
 		component.GetReference<Image>("BottomIcon").sprite = Assets.GetSprite(value.bottomSprite);
 		component.GetReference<Image>("TopIcon").sprite = Assets.GetSprite(value.topSprite);
+		component.GetReference<LocText>("Label").SetText(value.labelText);
 		KSlider slider = component.GetReference<KSlider>("Slider");
 		KNumberInputField inputField = component.GetReference<KNumberInputField>("InputField");
 		gameObject.GetComponent<ToolTip>().SetSimpleTooltip(value.tooltip);
@@ -472,12 +570,14 @@ public class SandboxToolParameterMenu : KScreen
 		inputField.maxValue = 99999f;
 		this.inputFields.Add(inputField.gameObject);
 		value.slider = slider;
+		inputField.decimalPlaces = value.roundToDecimalPlaces;
 		value.inputField = inputField;
 		value.row = gameObject;
 		slider.onReleaseHandle += delegate
 		{
-			slider.value = Mathf.Round(slider.value * 10f) / 10f;
-			inputField.currentValue = slider.value;
+			float num = Mathf.Round(slider.value * Mathf.Pow(10f, (float)value.roundToDecimalPlaces)) / Mathf.Pow(10f, (float)value.roundToDecimalPlaces);
+			slider.value = num;
+			inputField.currentValue = Mathf.Round(slider.value * Mathf.Pow(10f, (float)value.roundToDecimalPlaces)) / Mathf.Pow(10f, (float)value.roundToDecimalPlaces);
 			inputField.SetDisplayValue(inputField.currentValue.ToString());
 			if (value.onValueChanged != null)
 			{
@@ -486,8 +586,9 @@ public class SandboxToolParameterMenu : KScreen
 		};
 		slider.onDrag += delegate
 		{
-			slider.value = Mathf.Round(slider.value * 10f) / 10f;
-			inputField.currentValue = slider.value;
+			float num2 = Mathf.Round(slider.value * Mathf.Pow(10f, (float)value.roundToDecimalPlaces)) / Mathf.Pow(10f, (float)value.roundToDecimalPlaces);
+			slider.value = num2;
+			inputField.currentValue = num2;
 			inputField.SetDisplayValue(inputField.currentValue.ToString());
 			if (value.onValueChanged != null)
 			{
@@ -496,8 +597,9 @@ public class SandboxToolParameterMenu : KScreen
 		};
 		slider.onMove += delegate
 		{
-			slider.value = Mathf.Round(slider.value * 10f) / 10f;
-			inputField.currentValue = slider.value;
+			float num3 = Mathf.Round(slider.value * Mathf.Pow(10f, (float)value.roundToDecimalPlaces)) / Mathf.Pow(10f, (float)value.roundToDecimalPlaces);
+			slider.value = num3;
+			inputField.currentValue = num3;
 			inputField.SetDisplayValue(inputField.currentValue.ToString());
 			if (value.onValueChanged != null)
 			{
@@ -506,12 +608,13 @@ public class SandboxToolParameterMenu : KScreen
 		};
 		inputField.onEndEdit += delegate
 		{
-			float num = Mathf.Clamp(Mathf.Round(inputField.currentValue), inputField.minValue, inputField.maxValue);
-			inputField.SetDisplayValue(num.ToString());
-			slider.value = Mathf.Round(num);
+			float num4 = inputField.currentValue;
+			num4 = Mathf.Round(num4 * Mathf.Pow(10f, (float)value.roundToDecimalPlaces)) / Mathf.Pow(10f, (float)value.roundToDecimalPlaces);
+			inputField.SetDisplayValue(num4.ToString());
+			slider.value = num4;
 			if (value.onValueChanged != null)
 			{
-				value.onValueChanged(num);
+				value.onValueChanged(num4);
 			}
 		};
 		component.GetReference<LocText>("UnitLabel").text = value.unitString;
@@ -567,50 +670,52 @@ public class SandboxToolParameterMenu : KScreen
 
 	private List<GameObject> inputFields = new List<GameObject>();
 
+	private Dictionary<Tag, List<KPrefabID>> items;
+
 	public SandboxToolParameterMenu.SelectorValue elementSelector;
 
-	public SandboxToolParameterMenu.SliderValue brushRadiusSlider = new SandboxToolParameterMenu.SliderValue(1f, 10f, "dash", "circle_hard", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue brushRadiusSlider = new SandboxToolParameterMenu.SliderValue(1f, 10f, "dash", "circle_hard", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.BRUSH_SIZE.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.BrushSize = Mathf.RoundToInt(value);
-	});
+		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandboxTools.BrushSize", Mathf.RoundToInt(value));
+	}, 0);
 
-	public SandboxToolParameterMenu.SliderValue noiseScaleSlider = new SandboxToolParameterMenu.SliderValue(0f, 1f, "little", "lots", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue noiseScaleSlider = new SandboxToolParameterMenu.SliderValue(0f, 1f, "little", "lots", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE_SCALE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE_SCALE.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.NoiseScale = value;
-	});
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandboxTools.NoiseScale", value);
+	}, 2);
 
-	public SandboxToolParameterMenu.SliderValue noiseDensitySlider = new SandboxToolParameterMenu.SliderValue(1f, 20f, "little", "lots", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue noiseDensitySlider = new SandboxToolParameterMenu.SliderValue(1f, 20f, "little", "lots", "", UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE_SCALE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.BRUSH_NOISE_DENSITY.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.NoiseDensity = value;
-	});
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandboxTools.NoiseDensity", value);
+	}, 2);
 
-	public SandboxToolParameterMenu.SliderValue massSlider = new SandboxToolParameterMenu.SliderValue(0.1f, 1000f, "action_pacify", "status_item_plant_solid", UI.UNITSUFFIXES.MASS.KILOGRAM, UI.SANDBOXTOOLS.SETTINGS.MASS.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue massSlider = new SandboxToolParameterMenu.SliderValue(0.1f, 1000f, "action_pacify", "status_item_plant_solid", UI.UNITSUFFIXES.MASS.KILOGRAM, UI.SANDBOXTOOLS.SETTINGS.MASS.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.MASS.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.Mass = (float)Mathf.RoundToInt(value * 10000f) / 10000f;
-	});
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandboxTools.Mass", value);
+	}, 2);
 
-	public SandboxToolParameterMenu.SliderValue temperatureSlider = new SandboxToolParameterMenu.SliderValue(150f, 500f, "cold", "hot", UI.UNITSUFFIXES.TEMPERATURE.KELVIN, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue temperatureSlider = new SandboxToolParameterMenu.SliderValue(150f, 500f, "cold", "hot", GameUtil.GetTemperatureUnitSuffix(), UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.temperature = Mathf.Clamp((float)Mathf.RoundToInt(value * 100f) / 100f, 1f, 9999f);
-	});
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.Temperature", GameUtil.GetTemperatureConvertedToKelvin(value));
+	}, 0);
 
-	public SandboxToolParameterMenu.SliderValue temperatureAdditiveSlider = new SandboxToolParameterMenu.SliderValue(-15f, 15f, "cold", "hot", UI.UNITSUFFIXES.TEMPERATURE.KELVIN, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue temperatureAdditiveSlider = new SandboxToolParameterMenu.SliderValue(-15f, 15f, "cold", "hot", GameUtil.GetTemperatureUnitSuffix(), UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.TEMPERATURE_ADDITIVE.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.temperatureAdditive = (float)Mathf.RoundToInt(value * 100f) / 100f;
-	});
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.TemperatureAdditive", GameUtil.GetTemperatureConvertedToKelvin(value));
+	}, 0);
 
 	public SandboxToolParameterMenu.SelectorValue diseaseSelector;
 
-	public SandboxToolParameterMenu.SliderValue diseaseCountSlider = new SandboxToolParameterMenu.SliderValue(0f, 10000f, "status_item_barren", "germ", UI.UNITSUFFIXES.DISEASE.UNITS, UI.SANDBOXTOOLS.SETTINGS.DISEASE_COUNT.TOOLTIP, delegate(float value)
+	public SandboxToolParameterMenu.SliderValue diseaseCountSlider = new SandboxToolParameterMenu.SliderValue(0f, 10000f, "status_item_barren", "germ", UI.UNITSUFFIXES.DISEASE.UNITS, UI.SANDBOXTOOLS.SETTINGS.DISEASE_COUNT.TOOLTIP, UI.SANDBOXTOOLS.SETTINGS.DISEASE_COUNT.NAME, delegate(float value)
 	{
-		SandboxToolParameterMenu.instance.settings.diseaseCount = Mathf.RoundToInt(value);
-	});
+		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandboxTools.DiseaseCount", Mathf.RoundToInt(value));
+	}, 0);
 
 	public SandboxToolParameterMenu.SelectorValue entitySelector;
 
 	public class SelectorValue
 	{
-		public SelectorValue(object[] options, Action<object> onValueChanged, Func<object, string> getOptionName, Func<string, object, bool> filterOptionFunction, Func<object, global::Tuple<Sprite, Color>> getOptionSprite, SandboxToolParameterMenu.SelectorValue.SearchFilter[] filters = null)
+		public SelectorValue(object[] options, Action<object> onValueChanged, Func<object, string> getOptionName, Func<string, object, bool> filterOptionFunction, Func<object, global::Tuple<Sprite, Color>> getOptionSprite, string labelText, SandboxToolParameterMenu.SelectorValue.SearchFilter[] filters = null)
 		{
 			this.options = options;
 			this.onValueChanged = onValueChanged;
@@ -618,6 +723,7 @@ public class SandboxToolParameterMenu : KScreen
 			this.filterOptionFunction = filterOptionFunction;
 			this.getOptionSprite = getOptionSprite;
 			this.filters = filters;
+			this.labelText = labelText;
 		}
 
 		public bool runCurrentFilter(object obj)
@@ -647,6 +753,8 @@ public class SandboxToolParameterMenu : KScreen
 
 		public SandboxToolParameterMenu.SelectorValue.SearchFilter currentFilter;
 
+		public string labelText;
+
 		public class SearchFilter
 		{
 			public SearchFilter(string Name, Func<object, bool> condition, SandboxToolParameterMenu.SelectorValue.SearchFilter parentFilter = null, global::Tuple<Sprite, Color> icon = null)
@@ -669,7 +777,7 @@ public class SandboxToolParameterMenu : KScreen
 
 	public class SliderValue
 	{
-		public SliderValue(float minValue, float maxValue, string bottomSprite, string topSprite, string unitString, string tooltip, Action<float> onValueChanged)
+		public SliderValue(float minValue, float maxValue, string bottomSprite, string topSprite, string unitString, string tooltip, string labelText, Action<float> onValueChanged, int decimalPlaces = 0)
 		{
 			this.minValue = minValue;
 			this.maxValue = maxValue;
@@ -678,9 +786,11 @@ public class SandboxToolParameterMenu : KScreen
 			this.unitString = unitString;
 			this.onValueChanged = onValueChanged;
 			this.tooltip = tooltip;
+			this.roundToDecimalPlaces = decimalPlaces;
+			this.labelText = labelText;
 		}
 
-		public void SetRange(float min, float max)
+		public void SetRange(float min, float max, bool resetCurrentValue = true)
 		{
 			this.minValue = min;
 			this.maxValue = max;
@@ -688,15 +798,21 @@ public class SandboxToolParameterMenu : KScreen
 			this.slider.maxValue = this.maxValue;
 			this.inputField.currentValue = this.minValue + (this.maxValue - this.minValue) / 2f;
 			this.inputField.SetDisplayValue(this.inputField.currentValue.ToString());
-			this.slider.value = this.minValue + (this.maxValue - this.minValue) / 2f;
-			this.onValueChanged(this.minValue + (this.maxValue - this.minValue) / 2f);
+			if (resetCurrentValue)
+			{
+				this.slider.value = this.minValue + (this.maxValue - this.minValue) / 2f;
+				this.onValueChanged(this.minValue + (this.maxValue - this.minValue) / 2f);
+			}
 		}
 
-		public void SetValue(float value)
+		public void SetValue(float value, bool runOnValueChanged = true)
 		{
 			this.slider.value = value;
 			this.inputField.currentValue = value;
-			this.onValueChanged(value);
+			if (runOnValueChanged)
+			{
+				this.onValueChanged(value);
+			}
 			this.RefreshDisplay();
 		}
 
@@ -720,6 +836,10 @@ public class SandboxToolParameterMenu : KScreen
 		public Action<float> onValueChanged;
 
 		public string tooltip;
+
+		public int roundToDecimalPlaces;
+
+		public string labelText;
 
 		public KSlider slider;
 

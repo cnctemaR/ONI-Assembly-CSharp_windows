@@ -41,14 +41,6 @@ public class KeroseneEngineConfig : IBuildingConfig
 		};
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		RocketEngine rocketEngine = go.AddOrGet<RocketEngine>();

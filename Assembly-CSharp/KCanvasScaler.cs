@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/KCanvasScaler")]
 public class KCanvasScaler : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

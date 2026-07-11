@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Butcherable")]
 public class Butcherable : Workable, ISaveLoadable
 {
 	public void SetDrops(string[] drops)

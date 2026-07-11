@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/RoomTracker")]
 public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 {
 	public Room room { get; private set; }
@@ -9,7 +11,7 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Debug.Assert(!string.IsNullOrEmpty(this.requiredRoomType) && this.requiredRoomType != Db.Get().RoomTypes.Neutral.Id, "RoomTracker must have a requiredRoomType!");
+		global::Debug.Assert(!string.IsNullOrEmpty(this.requiredRoomType) && this.requiredRoomType != Db.Get().RoomTypes.Neutral.Id, "RoomTracker must have a requiredRoomType!");
 		base.Subscribe<RoomTracker>(144050788, RoomTracker.OnUpdateRoomDelegate);
 		this.FindAndSetRoom();
 	}

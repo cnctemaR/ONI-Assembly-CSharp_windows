@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/SimCellOccupier")]
 public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 {
 	public bool IsVisuallySolid

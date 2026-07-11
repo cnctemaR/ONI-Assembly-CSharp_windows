@@ -3,6 +3,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TreeBud")]
 public class TreeBud : KMonoBehaviour, IWiltCause
 {
 	protected override void OnPrefabInit()

@@ -41,14 +41,6 @@ public class SpecialCargoBayConfig : IBuildingConfig
 		};
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		CargoBay cargoBay = go.AddOrGet<CargoBay>();

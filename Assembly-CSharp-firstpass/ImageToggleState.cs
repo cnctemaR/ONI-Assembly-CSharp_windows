@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/ImageToggleState")]
 public class ImageToggleState : KMonoBehaviour
 {
 	public bool IsDisabled

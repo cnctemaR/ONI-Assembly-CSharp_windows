@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GasSourceManager")]
 public class GasSourceManager : KMonoBehaviour, IChunkManager
 {
 	protected override void OnPrefabInit()

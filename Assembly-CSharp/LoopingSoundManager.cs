@@ -5,6 +5,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LoopingSoundManager")]
 public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 {
 	public static void DestroyInstance()

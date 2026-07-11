@@ -2,7 +2,9 @@
 using Klei;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/SodaFountainWorkable")]
 public class SodaFountainWorkable : Workable, IWorkerPrioritizable
 {
 	private SodaFountainWorkable()

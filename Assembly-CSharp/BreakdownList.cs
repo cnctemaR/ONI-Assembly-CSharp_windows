@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BreakdownList")]
 public class BreakdownList : KMonoBehaviour
 {
 	public BreakdownListRow AddRow()

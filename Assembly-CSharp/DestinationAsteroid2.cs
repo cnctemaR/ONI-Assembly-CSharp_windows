@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DestinationAsteroid2")]
 public class DestinationAsteroid2 : KMonoBehaviour
 {
 	public event Action<ColonyDestinationAsteroidData> OnClicked;

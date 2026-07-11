@@ -4,6 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [RequireComponent(typeof(Health))]
+[AddComponentMenu("KMonoBehaviour/scripts/OxygenBreather")]
 public class OxygenBreather : KMonoBehaviour, ISim200ms
 {
 	public float CO2EmitRate

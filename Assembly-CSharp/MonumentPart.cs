@@ -4,6 +4,7 @@ using KSerialization;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MonumentPart")]
 public class MonumentPart : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TitleBarPortrait")]
 public class TitleBarPortrait : KMonoBehaviour
 {
 	public void SetSaturation(bool saturated)

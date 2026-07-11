@@ -3,6 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Rotatable")]
 public class Rotatable : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()

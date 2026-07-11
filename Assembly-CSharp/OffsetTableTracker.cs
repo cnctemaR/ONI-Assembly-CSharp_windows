@@ -10,7 +10,6 @@ public class OffsetTableTracker : OffsetTracker
 			{
 				OffsetTableTracker.navGridImpl = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
 			}
-			Debug.Assert(OffsetTableTracker.navGridImpl == Pathfinding.Instance.GetNavGrid("MinionNavGrid"), "Cached NavGrid reference is invalid");
 			return OffsetTableTracker.navGridImpl;
 		}
 	}

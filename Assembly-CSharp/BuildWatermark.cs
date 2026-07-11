@@ -18,14 +18,14 @@ public class BuildWatermark : KScreen
 
 	public void RefreshText()
 	{
-		string text = "RP-";
+		string text = "AP-";
 		if (Application.isEditor)
 		{
 			text += "<EDITOR>";
 		}
 		else
 		{
-			text += 394616U.ToString();
+			text += 398142U.ToString();
 			if (DebugHandler.enabled)
 			{
 				text += "-D";

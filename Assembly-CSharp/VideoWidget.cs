@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
+[AddComponentMenu("KMonoBehaviour/scripts/VideoWidget")]
 public class VideoWidget : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

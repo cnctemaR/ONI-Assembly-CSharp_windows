@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Operational")]
 public class Operational : KMonoBehaviour
 {
 	public bool IsOperational { get; private set; }

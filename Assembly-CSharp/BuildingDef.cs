@@ -291,7 +291,7 @@ public class BuildingDef : Def
 					break;
 				}
 			}
-			if (layer == ObjectLayer.Building && this.AttachmentSlotTag != GameTags.Rocket && Grid.Objects[num, 38] != null)
+			if (layer == ObjectLayer.Building && this.AttachmentSlotTag != GameTags.Rocket && Grid.Objects[num, 39] != null)
 			{
 				if (this.BuildingComplete.GetComponent<Wire>() == null)
 				{
@@ -1095,7 +1095,7 @@ public class BuildingDef : Def
 		else
 		{
 			LogicGateBase component2 = source_go.GetComponent<LogicGateBase>();
-			if (component2 != null && (this.IsLogicPortObstructed(component2.InputCellOne, visElements) || this.IsLogicPortObstructed(component2.OutputCell, visElements) || (component2.RequiresTwoInputs && this.IsLogicPortObstructed(component2.InputCellTwo, visElements))))
+			if (component2 != null && (this.IsLogicPortObstructed(component2.InputCellOne, visElements) || this.IsLogicPortObstructed(component2.OutputCellOne, visElements) || ((component2.RequiresTwoInputs || component2.RequiresFourInputs) && this.IsLogicPortObstructed(component2.InputCellTwo, visElements)) || (component2.RequiresFourInputs && (this.IsLogicPortObstructed(component2.InputCellThree, visElements) || this.IsLogicPortObstructed(component2.InputCellFour, visElements))) || (component2.RequiresFourOutputs && (this.IsLogicPortObstructed(component2.OutputCellTwo, visElements) || this.IsLogicPortObstructed(component2.OutputCellThree, visElements) || this.IsLogicPortObstructed(component2.OutputCellFour, visElements)))))
 			{
 				fail_reason = UI.TOOLTIPS.HELP_BUILDLOCATION_LOGIC_PORTS_OBSTRUCTED;
 				return false;
@@ -1469,6 +1469,12 @@ public class BuildingDef : Def
 
 	public float[] Mass;
 
+	public bool AlwaysOperational;
+
+	public List<LogicPorts.Port> LogicInputPorts;
+
+	public List<LogicPorts.Port> LogicOutputPorts;
+
 	public bool Upgradeable;
 
 	public float BaseTimeUntilRepair = 600f;
@@ -1476,6 +1482,8 @@ public class BuildingDef : Def
 	public bool ShowInBuildMenu = true;
 
 	public PermittedRotations PermittedRotations;
+
+	public Orientation InitialOrientation;
 
 	public bool Deprecated;
 

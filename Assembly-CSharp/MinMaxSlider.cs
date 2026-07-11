@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MinMaxSlider")]
 public class MinMaxSlider : KMonoBehaviour
 {
 	public MinMaxSlider.Mode mode { get; private set; }

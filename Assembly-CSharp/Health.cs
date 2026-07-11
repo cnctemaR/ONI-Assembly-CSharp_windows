@@ -4,6 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Health")]
 public class Health : KMonoBehaviour, ISaveLoadable
 {
 	public AmountInstance GetAmountInstance

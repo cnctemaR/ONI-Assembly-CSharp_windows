@@ -6,6 +6,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MinionVitalsPanel")]
 public class MinionVitalsPanel : KMonoBehaviour
 {
 	public void Init()

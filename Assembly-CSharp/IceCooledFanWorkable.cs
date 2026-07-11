@@ -1,6 +1,8 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/IceCooledFanWorkable")]
 public class IceCooledFanWorkable : Workable
 {
 	private IceCooledFanWorkable()

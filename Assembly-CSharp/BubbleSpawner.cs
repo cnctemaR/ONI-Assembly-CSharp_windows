@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BubbleSpawner")]
 public class BubbleSpawner : KMonoBehaviour
 {
 	protected override void OnSpawn()

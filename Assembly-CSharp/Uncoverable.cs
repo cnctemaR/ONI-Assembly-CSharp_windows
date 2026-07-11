@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Uncoverable")]
 public class Uncoverable : KMonoBehaviour
 {
 	private bool IsAnyCellShowing()
 	{
 		int num = Grid.PosToCell(this);
-		return !this.occupyArea.TestArea(num, null, new Func<int, object, bool>(Uncoverable.IsCellBlocked));
+		return !this.occupyArea.TestArea(num, null, Uncoverable.IsCellBlockedDelegate);
 	}
 
 	private static bool IsCellBlocked(int cell, object data)
@@ -43,7 +45,7 @@ public class Uncoverable : KMonoBehaviour
 			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 			this.hasBeenUncovered = true;
 			base.GetComponent<KSelectable>().IsSelectable = true;
-			Notification notification = new Notification(MISC.STATUSITEMS.BURIEDITEM.NOTIFICATION, NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null, null);
+			Notification notification = new Notification(MISC.STATUSITEMS.BURIEDITEM.NOTIFICATION, NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null, null, true);
 			base.gameObject.AddOrGet<Notifier>().Add(notification, "");
 		}
 	}
@@ -67,4 +69,6 @@ public class Uncoverable : KMonoBehaviour
 	private bool hasBeenUncovered;
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	private static readonly Func<int, object, bool> IsCellBlockedDelegate = (int cell, object data) => Uncoverable.IsCellBlocked(cell, data);
 }

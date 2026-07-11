@@ -113,6 +113,11 @@ public class SoundEvent : AnimEvent
 
 	public static bool ShouldPlaySound(KBatchedAnimController controller, string sound, bool is_looping, bool is_dynamic)
 	{
+		return SoundEvent.ShouldPlaySound(controller, sound, sound, is_looping, is_dynamic);
+	}
+
+	public static bool ShouldPlaySound(KBatchedAnimController controller, string sound, HashedString soundHash, bool is_looping, bool is_dynamic)
+	{
 		CameraController instance = CameraController.Instance;
 		if (instance == null)
 		{
@@ -131,7 +136,7 @@ public class SoundEvent : AnimEvent
 		{
 			return false;
 		}
-		if (!instance.IsAudibleSound(position, sound))
+		if (!instance.IsAudibleSound(position, soundHash))
 		{
 			if (!is_looping && !GlobalAssets.IsHighPriority(sound))
 			{
@@ -149,7 +154,7 @@ public class SoundEvent : AnimEvent
 	{
 		GameObject gameObject = behaviour.controller.gameObject;
 		this.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
-		if (this.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, this.sound, this.looping, this.isDynamic))
+		if (this.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, this.sound, this.soundHash, this.looping, this.isDynamic))
 		{
 			this.PlaySound(behaviour);
 		}

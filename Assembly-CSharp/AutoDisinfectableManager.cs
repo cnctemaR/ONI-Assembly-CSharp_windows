@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AutoDisinfectableManager")]
 public class AutoDisinfectableManager : KMonoBehaviour, ISim1000ms
 {
 	public static void DestroyInstance()

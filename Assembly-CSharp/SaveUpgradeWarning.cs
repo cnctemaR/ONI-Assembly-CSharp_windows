@@ -6,6 +6,7 @@ using Klei.CustomSettings;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SaveUpgradeWarning")]
 public class SaveUpgradeWarning : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
@@ -27,7 +28,8 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		foreach (SaveUpgradeWarning.Upgrade upgrade in new List<SaveUpgradeWarning.Upgrade>
 		{
 			new SaveUpgradeWarning.Upgrade(7, 5, new global::System.Action(this.SuddenMoraleHelper)),
-			new SaveUpgradeWarning.Upgrade(7, 13, new global::System.Action(this.BedAndBathHelper))
+			new SaveUpgradeWarning.Upgrade(7, 13, new global::System.Action(this.BedAndBathHelper)),
+			new SaveUpgradeWarning.Upgrade(7, 16, new global::System.Action(this.NewAutomationWarning))
 		})
 		{
 			if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(upgrade.major, upgrade.minor))
@@ -76,6 +78,22 @@ public class SaveUpgradeWarning : KMonoBehaviour
 		{
 			colonyAchievementStatus.failed = false;
 		}
+	}
+
+	private void NewAutomationWarning()
+	{
+		SpriteListDialogScreen screen = Util.KInstantiateUI<SpriteListDialogScreen>(ScreenPrefabs.Instance.SpriteListDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, true);
+		screen.AddOption(UI.CONFIRMDIALOG.OK, delegate
+		{
+			screen.Deactivate();
+		});
+		string[] array = new string[] { "LiquidVent", "GasVent", "GasVentHighPressure", "SolidVent", "LiquidReservoir", "GasReservoir" };
+		for (int i = 0; i < array.Length; i++)
+		{
+			BuildingDef buildingDef = Assets.GetBuildingDef(array[i]);
+			screen.AddSprite(buildingDef.GetUISprite("ui", false), buildingDef.Name);
+		}
+		screen.PopupConfirmDialog(UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING, UI.FRONTEND.SAVEUPGRADEWARNINGS.NEWAUTOMATIONWARNING_TITLE);
 	}
 
 	[MyCmpReq]

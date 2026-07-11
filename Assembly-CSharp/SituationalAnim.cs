@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SituationalAnim")]
 public class SituationalAnim : KMonoBehaviour
 {
 	protected override void OnSpawn()

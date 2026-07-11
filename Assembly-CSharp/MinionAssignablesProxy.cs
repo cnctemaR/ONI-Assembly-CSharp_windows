@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MinionAssignablesProxy")]
 public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 {
 	public IAssignableIdentity target { get; private set; }

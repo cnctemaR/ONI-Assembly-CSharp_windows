@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using UnityEngine;
 
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
+	[AddComponentMenu("KMonoBehaviour/scripts/Modifiers")]
 	public class Modifiers : KMonoBehaviour, ISaveLoadableDetails
 	{
 		protected override void OnPrefabInit()

@@ -1,6 +1,8 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/AstronautTrainingCenter")]
 public class AstronautTrainingCenter : Workable
 {
 	protected override void OnSpawn()

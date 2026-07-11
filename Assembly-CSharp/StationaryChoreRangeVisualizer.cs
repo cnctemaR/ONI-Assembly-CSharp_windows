@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/StationaryChoreRangeVisualizer")]
 public class StationaryChoreRangeVisualizer : KMonoBehaviour
 {
 	protected override void OnSpawn()

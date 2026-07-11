@@ -3,6 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/KAnimGraphTileVisualizer")]
 public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityItem
 {
 	public UtilityConnections Connections
@@ -168,7 +169,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 				objectLayer = ObjectLayer.WireTile;
 				break;
 			case KAnimGraphTileVisualizer.ConnectionSource.Logic:
-				objectLayer = ObjectLayer.LogicWiresTiling;
+				objectLayer = ObjectLayer.LogicWireTile;
 				break;
 			case KAnimGraphTileVisualizer.ConnectionSource.Tube:
 				objectLayer = ObjectLayer.TravelTubeTile;

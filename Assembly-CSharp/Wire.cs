@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Wire")]
 public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWattageRating, IHaveUtilityNetworkMgr, IUtilityNetworkItem, IBridgedNetworkItem
 {
 	public static float GetMaxWattageAsFloat(Wire.WattageRating rating)
@@ -129,21 +130,21 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 				ushort circuitID = circuitManager.GetCircuitID(num);
 				float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(circuitID);
 				GameUtil.WattageFormatterUnit wattageFormatterUnit = GameUtil.WattageFormatterUnit.Watts;
-				if (wire.MaxWattageRating == Wire.WattageRating.Max20000)
+				if (wire.MaxWattageRating >= Wire.WattageRating.Max20000)
 				{
 					wattageFormatterUnit = GameUtil.WattageFormatterUnit.Kilowatts;
 				}
 				float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wire.MaxWattageRating);
 				string wireLoadColor = GameUtil.GetWireLoadColor(wattsUsedByCircuit, maxWattageAsFloat);
-				str = str.Replace("{CurrentLoadAndColor}", (wireLoadColor == Color.white.ToHexString()) ? GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit) : string.Concat(new string[]
+				str = str.Replace("{CurrentLoadAndColor}", (wireLoadColor == Color.white.ToHexString()) ? GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit, true) : string.Concat(new string[]
 				{
 					"<color=#",
 					wireLoadColor,
 					">",
-					GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit),
+					GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit, true),
 					"</color>"
 				}));
-				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat, wattageFormatterUnit));
+				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat, wattageFormatterUnit, true));
 				str = str.Replace("{WireType}", this.GetProperName());
 				return str;
 			});
@@ -154,7 +155,7 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 			{
 				Wire wire2 = (Wire)data;
 				GameUtil.WattageFormatterUnit wattageFormatterUnit2 = GameUtil.WattageFormatterUnit.Watts;
-				if (wire2.MaxWattageRating == Wire.WattageRating.Max20000)
+				if (wire2.MaxWattageRating >= Wire.WattageRating.Max20000)
 				{
 					wattageFormatterUnit2 = GameUtil.WattageFormatterUnit.Kilowatts;
 				}
@@ -168,10 +169,10 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 					"<color=#",
 					new Color(0.9843137f, 0.6901961f, 0.23137255f).ToHexString(),
 					">",
-					GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2),
+					GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2, true),
 					"</color>"
-				}) : GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2));
-				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat2, wattageFormatterUnit2));
+				}) : GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2, true));
+				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat2, wattageFormatterUnit2, true));
 				return str;
 			});
 		}

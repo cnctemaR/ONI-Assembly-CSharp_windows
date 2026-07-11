@@ -1,6 +1,8 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/EggIncubatorWorkable")]
 public class EggIncubatorWorkable : Workable
 {
 	protected override void OnPrefabInit()

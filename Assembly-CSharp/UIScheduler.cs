@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/UIScheduler")]
 public class UIScheduler : KMonoBehaviour, IScheduler
 {
 	public static void DestroyInstance()

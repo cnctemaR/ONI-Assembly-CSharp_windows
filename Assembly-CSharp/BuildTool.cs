@@ -30,7 +30,6 @@ public class BuildTool : DragTool
 		}
 		this.active = true;
 		base.OnActivateTool();
-		this.buildingOrientation = Orientation.Neutral;
 		this.placementPivot = this.def.placementPivot;
 		Vector3 cursorPos = PlayerController.GetCursorPos(KInputManager.GetMousePos());
 		this.visualizer = GameUtil.KInstantiate(this.def.BuildingPreview, cursorPos, Grid.SceneLayer.Ore, null, LayerMask.NameToLayer("Place"));
@@ -42,6 +41,12 @@ public class BuildTool : DragTool
 			component.Offset = this.def.GetVisualizerOffset();
 			component.Offset += this.def.placementPivot;
 			component.name = component.GetComponent<KPrefabID>().GetDebugName() + "_visualizer";
+		}
+		Rotatable component2 = this.visualizer.GetComponent<Rotatable>();
+		if (component2 != null)
+		{
+			this.buildingOrientation = this.def.InitialOrientation;
+			component2.SetOrientation(this.buildingOrientation);
 		}
 		this.visualizer.SetActive(true);
 		this.UpdateVis(cursorPos);
@@ -401,6 +406,28 @@ public class BuildTool : DragTool
 	public override void OnLeftClickUp(Vector3 cursor_pos)
 	{
 		base.OnLeftClickUp(cursor_pos);
+	}
+
+	public void SetToolOrientation(Orientation orientation)
+	{
+		if (this.visualizer != null)
+		{
+			Rotatable component = this.visualizer.GetComponent<Rotatable>();
+			if (component != null)
+			{
+				this.buildingOrientation = orientation;
+				component.SetOrientation(orientation);
+				if (Grid.IsValidBuildingCell(this.lastCell))
+				{
+					Vector3 vector = Grid.CellToPosCCC(this.lastCell, Grid.SceneLayer.Building);
+					this.UpdateVis(vector);
+				}
+				if (base.Dragging && this.lastDragCell != -1)
+				{
+					this.TryBuild(this.lastDragCell);
+				}
+			}
+		}
 	}
 
 	[SerializeField]

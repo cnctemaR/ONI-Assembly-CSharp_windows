@@ -238,7 +238,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 			list.Add(new TreeFilterableSideScreen.TagOrderInfo
 			{
 				tag = tag,
-				strippedName = UI.StripLinkFormatting(tag.ProperName())
+				strippedName = tag.ProperNameStripLink()
 			});
 		}
 		list.Sort((TreeFilterableSideScreen.TagOrderInfo a, TreeFilterableSideScreen.TagOrderInfo b) => a.strippedName.CompareTo(b.strippedName));

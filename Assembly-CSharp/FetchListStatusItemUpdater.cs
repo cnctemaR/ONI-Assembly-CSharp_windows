@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FetchListStatusItemUpdater")]
 public class FetchListStatusItemUpdater : KMonoBehaviour, IRender200ms
 {
 	public static void DestroyInstance()

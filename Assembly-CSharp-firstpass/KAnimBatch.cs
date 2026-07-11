@@ -168,6 +168,7 @@ public class KAnimBatch
 		if (!this.controllers.Contains(controller))
 		{
 			this.controllers.Add(controller);
+			this.controllersToIdx[controller] = this.controllers.Count - 1;
 			this.currentOffset += 28;
 		}
 		this.AddToDirty(this.controllers.IndexOf(controller));
@@ -211,8 +212,10 @@ public class KAnimBatch
 			}
 			this.currentOffset = 28 * this.controllers.Count;
 			this.ClearDirty();
+			this.controllersToIdx.Clear();
 			for (int j = 0; j < this.controllers.Count; j++)
 			{
+				this.controllersToIdx[this.controllers[j]] = j;
 				this.AddToDirty(j);
 			}
 		}
@@ -254,12 +257,12 @@ public class KAnimBatch
 
 	public void SetDirty(KAnimConverter.IAnimConverter controller)
 	{
-		int num = this.controllers.IndexOf(controller);
-		if (num < 0)
+		if (!this.controllersToIdx.ContainsKey(controller))
 		{
 			global::Debug.LogError("Setting controller [" + controller.GetName() + "] to dirty but its not in this batch");
 			return;
 		}
+		int num = this.controllersToIdx[controller];
 		this.AddToDirty(num);
 	}
 
@@ -362,6 +365,8 @@ public class KAnimBatch
 	}
 
 	private List<KAnimConverter.IAnimConverter> controllers = new List<KAnimConverter.IAnimConverter>();
+
+	private Dictionary<KAnimConverter.IAnimConverter, int> controllersToIdx = new Dictionary<KAnimConverter.IAnimConverter, int>();
 
 	private List<int> dirtySet = new List<int>();
 

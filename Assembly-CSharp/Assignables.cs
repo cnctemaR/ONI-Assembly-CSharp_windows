@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Assignables")]
 public class Assignables : KMonoBehaviour
 {
 	public List<AssignableSlotInstance> Slots

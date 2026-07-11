@@ -2,6 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/RationBox")]
 public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 {
 	protected override void OnPrefabInit()

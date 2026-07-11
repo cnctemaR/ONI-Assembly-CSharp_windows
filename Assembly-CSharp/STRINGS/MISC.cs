@@ -1666,6 +1666,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "These " + BUILDINGS.PREFABS.WIRE.NAME + "s melted due to excessive current demands on their circuits";
 			}
 
+			public class LOGIC_CIRCUIT_OVERLOADED
+			{
+				public static LocString NAME = "Logic Circuit Overloaded";
+
+				public static LocString TOOLTIP = "These " + BUILDINGS.PREFABS.LOGICWIRE.NAME + "s melted due to more bits of data being sent over them than they can support";
+			}
+
 			public class DISCOVERED_SPACE
 			{
 				public static LocString NAME = "ALERT - Surface Breach";

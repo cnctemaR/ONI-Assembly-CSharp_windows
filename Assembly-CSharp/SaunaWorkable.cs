@@ -2,7 +2,9 @@
 using Klei;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/SaunaWorkable")]
 public class SaunaWorkable : Workable, IWorkerPrioritizable
 {
 	private SaunaWorkable()

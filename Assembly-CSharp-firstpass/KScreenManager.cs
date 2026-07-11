@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/KScreenManager")]
 public class KScreenManager : KMonoBehaviour, IInputHandler
 {
 	public static KScreenManager Instance { get; private set; }

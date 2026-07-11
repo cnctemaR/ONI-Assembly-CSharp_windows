@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/AirConditioner")]
 public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, ISim200ms
 {
 	public float lastEnvTemp { get; private set; }
@@ -62,7 +63,7 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 		this.cellCount = 0;
 		if (this.occupyArea != null && base.gameObject != null)
 		{
-			this.occupyArea.TestArea(Grid.PosToCell(base.gameObject), this, new Func<int, object, bool>(AirConditioner.UpdateStateCb));
+			this.occupyArea.TestArea(Grid.PosToCell(base.gameObject), this, AirConditioner.UpdateStateCbDelegate);
 			this.envTemp /= (float)this.cellCount;
 		}
 		this.lastEnvTemp = this.envTemp;
@@ -231,4 +232,6 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 	private float envTemp;
 
 	private int cellCount;
+
+	private static readonly Func<int, object, bool> UpdateStateCbDelegate = (int cell, object data) => AirConditioner.UpdateStateCb(cell, data);
 }

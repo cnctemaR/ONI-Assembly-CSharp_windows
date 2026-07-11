@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/HelmetController")]
 public class HelmetController : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

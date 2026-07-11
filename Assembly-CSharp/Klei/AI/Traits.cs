@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using KSerialization;
 using TUNING;
+using UnityEngine;
 
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
+	[AddComponentMenu("KMonoBehaviour/scripts/Traits")]
 	public class Traits : KMonoBehaviour, ISaveLoadable
 	{
 		public List<string> GetTraitIds()

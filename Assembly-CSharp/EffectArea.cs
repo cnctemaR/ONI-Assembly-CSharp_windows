@@ -1,6 +1,8 @@
 ﻿using System;
 using Klei.AI;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EffectArea")]
 public class EffectArea : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

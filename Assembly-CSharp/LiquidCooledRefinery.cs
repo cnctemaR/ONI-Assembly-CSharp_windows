@@ -120,7 +120,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 	{
 		List<Descriptor> list = base.AdditionalEffectsForRecipe(recipe);
 		PrimaryElement component = Assets.GetPrefab(recipe.results[0].material).GetComponent<PrimaryElement>();
-		PrimaryElement primaryElement = this.inStorage.FindFirstWithMass(this.coolantTag);
+		PrimaryElement primaryElement = this.inStorage.FindFirstWithMass(this.coolantTag, 0f);
 		string text = UI.BUILDINGEFFECTS.TOOLTIPS.REFINEMENT_ENERGY_HAS_COOLANT;
 		if (primaryElement == null)
 		{

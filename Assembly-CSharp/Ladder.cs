@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Ladder")]
 public class Ladder : KMonoBehaviour, IEffectDescriptor
 {
 	protected override void OnPrefabInit()

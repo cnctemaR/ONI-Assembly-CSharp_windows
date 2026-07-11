@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PageView")]
 public class PageView : KMonoBehaviour
 {
 	public int ChildrenPerPage

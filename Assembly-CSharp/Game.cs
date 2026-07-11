@@ -14,6 +14,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Game")]
 public class Game : KMonoBehaviour
 {
 	public static bool IsQuitting()
@@ -103,7 +104,7 @@ public class Game : KMonoBehaviour
 		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 27);
 		this.logicCircuitSystem = new UtilityNetworkManager<LogicCircuitNetwork, LogicWire>(Grid.WidthInCells, Grid.HeightInCells, 32);
 		this.logicCircuitManager = new LogicCircuitManager(this.logicCircuitSystem);
-		this.travelTubeSystem = new UtilityNetworkTubesManager(Grid.WidthInCells, Grid.HeightInCells, 34);
+		this.travelTubeSystem = new UtilityNetworkTubesManager(Grid.WidthInCells, Grid.HeightInCells, 35);
 		this.solidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, SolidConduit>(Grid.WidthInCells, Grid.HeightInCells, 21);
 		this.conduitTemperatureManager = new ConduitTemperatureManager();
 		this.conduitDiseaseManager = new ConduitDiseaseManager(this.conduitTemperatureManager);
@@ -531,10 +532,6 @@ public class Game : KMonoBehaviour
 					{
 						this.energySim.EnergySim200ms(dt);
 					}
-					if (this.logicCircuitManager != null)
-					{
-						this.logicCircuitManager.Sim200ms(dt);
-					}
 					if (this.circuitManager != null)
 					{
 						this.circuitManager.Sim200msLast(dt);
@@ -617,6 +614,7 @@ public class Game : KMonoBehaviour
 		this.liquidConduitSystem.Update();
 		this.solidConduitSystem.Update();
 		this.circuitManager.RenderEveryTick(deltaTime);
+		this.logicCircuitManager.RenderEveryTick(deltaTime);
 		this.solidConduitFlow.RenderEveryTick(deltaTime);
 		if (this.forceActiveArea)
 		{
@@ -830,7 +828,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 394616U;
+		uint num = 398142U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);

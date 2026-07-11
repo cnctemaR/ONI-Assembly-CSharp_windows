@@ -30,15 +30,17 @@ public class GasVentHighPressureConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 0);
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "GasVentHighPressure");
 		SoundEventVolumeCache.instance.AddVolume("ventgas_kanim", "GasVent_clunk", NOISE_POLLUTION.NOISY.TIER0);
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Exhaust>();
+		go.AddOrGet<LogicOperationalController>();
 		Vent vent = go.AddOrGet<Vent>();
 		vent.conduitType = ConduitType.Gas;
 		vent.endpointType = Endpoint.Sink;
@@ -53,6 +55,7 @@ public class GasVentHighPressureConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGetDef<VentController.Def>();
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 
 	public const string ID = "GasVentHighPressure";

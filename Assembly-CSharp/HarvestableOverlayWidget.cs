@@ -4,6 +4,7 @@ using Klei.AI;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/HarvestableOverlayWidget")]
 public class HarvestableOverlayWidget : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

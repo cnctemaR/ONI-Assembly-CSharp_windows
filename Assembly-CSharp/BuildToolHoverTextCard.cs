@@ -120,7 +120,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							bool portConnected = component4.GetPortConnected(portId);
 							LogicGate.LogicGateDescriptions.Description portDescription = component4.GetPortDescription(portId);
 							hoverTextDrawer.BeginShadowBar(false);
-							if (portId == LogicGateBase.PortId.Output)
+							if (portId == LogicGateBase.PortId.OutputOne)
 							{
 								hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_MULTI_OUTPUT_HOVER_FMT.Replace("{Port}", portDescription.name).Replace("{Name}", kselectable.GetProperName().ToUpper()), component2.Styles_Title.Standard);
 							}
@@ -155,7 +155,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 							hoverTextDrawer.EndShadowBar();
 						}
 					}
-					goto IL_0701;
+					goto IL_0702;
 				}
 			}
 			if (mode == OverlayModes.Power.ID)
@@ -170,12 +170,12 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 					float maxSafeWattageForCircuit = circuitManager.GetMaxSafeWattageForCircuit(circuitID);
 					Color color = ((num5 >= maxSafeWattageForCircuit) ? Color.red : Color.white);
 					hoverTextDrawer.AddIndent(num3);
-					hoverTextDrawer.DrawText(string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num5, GameUtil.WattageFormatterUnit.Automatic)), this.Styles_BodyText.Standard, color, true);
+					hoverTextDrawer.DrawText(string.Format(UI.DETAILTABS.ENERGYGENERATOR.POTENTIAL_WATTAGE_CONSUMED, GameUtil.GetFormattedWattage(num5, GameUtil.WattageFormatterUnit.Automatic, true)), this.Styles_BodyText.Standard, color, true);
 					hoverTextDrawer.EndShadowBar();
 				}
 			}
 		}
-		IL_0701:
+		IL_0702:
 		hoverTextDrawer.EndDrawing();
 	}
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LiquidSourceManager")]
 public class LiquidSourceManager : KMonoBehaviour, IChunkManager
 {
 	protected override void OnPrefabInit()

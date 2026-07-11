@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/GameScreenManager")]
 public class GameScreenManager : KMonoBehaviour
 {
 	public static GameScreenManager Instance { get; private set; }

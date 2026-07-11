@@ -91,7 +91,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
 		if (logicValueChanged.portID == Checkpoint.PORT_ID)
 		{
-			this.hasInputHigh = logicValueChanged.newValue > 0;
+			this.hasInputHigh = LogicCircuitNetwork.IsBitActive(0, logicValueChanged.newValue);
 			this.hasLogicWire = this.GetNetwork() != null;
 			this.statusDirty = true;
 		}

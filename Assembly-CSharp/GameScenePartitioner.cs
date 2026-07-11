@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GameScenePartitioner")]
 public class GameScenePartitioner : KMonoBehaviour
 {
 	public static GameScenePartitioner Instance
 	{
 		get
 		{
-			Debug.Assert(GameScenePartitioner.instance != null);
+			global::Debug.Assert(GameScenePartitioner.instance != null);
 			return GameScenePartitioner.instance;
 		}
 	}
 
 	protected override void OnPrefabInit()
 	{
-		Debug.Assert(GameScenePartitioner.instance == null);
+		global::Debug.Assert(GameScenePartitioner.instance == null);
 		GameScenePartitioner.instance = this;
 		this.partitioner = new ScenePartitioner(16, 64, Grid.WidthInCells, Grid.HeightInCells);
 		this.solidChangedLayer = this.partitioner.CreateMask("SolidChanged");
@@ -41,8 +43,8 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.industrialBuildings = this.partitioner.CreateMask("IndustrialBuildings");
 		this.completeBuildings = this.partitioner.CreateMask("CompleteBuildings");
 		this.prioritizableObjects = this.partitioner.CreateMask("PrioritizableObjects");
-		this.objectLayers = new ScenePartitionerLayer[39];
-		for (int i = 0; i < 39; i++)
+		this.objectLayers = new ScenePartitionerLayer[40];
+		for (int i = 0; i < 40; i++)
 		{
 			ObjectLayer objectLayer = (ObjectLayer)i;
 			this.objectLayers[i] = this.partitioner.CreateMask(new HashedString(objectLayer.ToString()));

@@ -10,12 +10,12 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		Vector2I visibleSize = this.GetVisibleSize();
 		int num = (visibleSize.x + 32 - 1) / 32;
 		int num2 = (visibleSize.y + 32 - 1) / 32;
-		this.controllerGrid = new List<KBatchedAnimController>[num, num2];
+		this.controllerGrid = new Dictionary<int, KBatchedAnimController>[num, num2];
 		for (int i = 0; i < num2; i++)
 		{
 			for (int j = 0; j < num; j++)
 			{
-				this.controllerGrid[j, i] = new List<KBatchedAnimController>();
+				this.controllerGrid[j, i] = new Dictionary<int, KBatchedAnimController>();
 			}
 		}
 		this.visibleChunks.Clear();
@@ -114,14 +114,14 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		});
 	}
 
-	private List<KBatchedAnimController> GetControllerList(Vector2I chunk_xy)
+	private Dictionary<int, KBatchedAnimController> GetControllerMap(Vector2I chunk_xy)
 	{
-		List<KBatchedAnimController> list = null;
+		Dictionary<int, KBatchedAnimController> dictionary = null;
 		if (this.controllerGrid != null && 0 <= chunk_xy.x && chunk_xy.x < this.controllerGrid.GetLength(0) && 0 <= chunk_xy.y && chunk_xy.y < this.controllerGrid.GetLength(1))
 		{
-			list = this.controllerGrid[chunk_xy.x, chunk_xy.y];
+			dictionary = this.controllerGrid[chunk_xy.x, chunk_xy.y];
 		}
-		return list;
+		return dictionary;
 	}
 
 	public void LateUpdate()
@@ -212,30 +212,28 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 				this.visibleChunks.Add(new Vector2I(j, i));
 				if (!this.previouslyVisibleChunkGrid[j, i])
 				{
-					List<KBatchedAnimController> list2 = this.controllerGrid[j, i];
-					for (int k = 0; k < list2.Count; k++)
+					foreach (KeyValuePair<int, KBatchedAnimController> keyValuePair in this.controllerGrid[j, i])
 					{
-						KBatchedAnimController kbatchedAnimController = list2[k];
-						if (!(kbatchedAnimController == null))
+						KBatchedAnimController value = keyValuePair.Value;
+						if (!(value == null))
 						{
-							kbatchedAnimController.SetVisiblity(true);
+							value.SetVisiblity(true);
 						}
 					}
 				}
 			}
 		}
-		for (int l = 0; l < this.previouslyVisibleChunks.Count; l++)
+		for (int k = 0; k < this.previouslyVisibleChunks.Count; k++)
 		{
-			Vector2I vector2I3 = this.previouslyVisibleChunks[l];
+			Vector2I vector2I3 = this.previouslyVisibleChunks[k];
 			if (!this.visibleChunkGrid[vector2I3.x, vector2I3.y])
 			{
-				List<KBatchedAnimController> list3 = this.controllerGrid[vector2I3.x, vector2I3.y];
-				for (int m = 0; m < list3.Count; m++)
+				foreach (KeyValuePair<int, KBatchedAnimController> keyValuePair2 in this.controllerGrid[vector2I3.x, vector2I3.y])
 				{
-					KBatchedAnimController kbatchedAnimController2 = list3[m];
-					if (!(kbatchedAnimController2 == null))
+					KBatchedAnimController value2 = keyValuePair2.Value;
+					if (!(value2 == null))
 					{
-						kbatchedAnimController2.SetVisiblity(false);
+						value2.SetVisiblity(false);
 					}
 				}
 			}
@@ -244,9 +242,8 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	private void ProcessMovingAnims()
 	{
-		for (int i = 0; i < this.movingControllerInfos.Count; i++)
+		foreach (KBatchedAnimUpdater.MovingControllerInfo movingControllerInfo in this.movingControllerInfos.Values)
 		{
-			KBatchedAnimUpdater.MovingControllerInfo movingControllerInfo = this.movingControllerInfos[i];
 			if (!(movingControllerInfo.controller == null))
 			{
 				Vector2I vector2I = KBatchedAnimUpdater.PosToChunkXY(movingControllerInfo.controller.PositionIncludingOffset);
@@ -256,23 +253,22 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 					DebugUtil.Assert(this.controllerChunkInfos.TryGetValue(movingControllerInfo.controllerInstanceId, out controllerChunkInfo));
 					DebugUtil.Assert(movingControllerInfo.controller == controllerChunkInfo.controller);
 					DebugUtil.Assert(controllerChunkInfo.chunkXY == movingControllerInfo.chunkXY);
-					List<KBatchedAnimController> list = this.GetControllerList(controllerChunkInfo.chunkXY);
-					if (list != null)
+					Dictionary<int, KBatchedAnimController> dictionary = this.GetControllerMap(controllerChunkInfo.chunkXY);
+					if (dictionary != null)
 					{
-						DebugUtil.Assert(list.Contains(controllerChunkInfo.controller));
-						list.Remove(controllerChunkInfo.controller);
+						DebugUtil.Assert(dictionary.ContainsKey(movingControllerInfo.controllerInstanceId));
+						dictionary.Remove(movingControllerInfo.controllerInstanceId);
 					}
-					list = this.GetControllerList(vector2I);
-					if (list != null)
+					dictionary = this.GetControllerMap(vector2I);
+					if (dictionary != null)
 					{
-						DebugUtil.Assert(!list.Contains(controllerChunkInfo.controller));
-						list.Add(controllerChunkInfo.controller);
+						DebugUtil.Assert(!dictionary.ContainsKey(movingControllerInfo.controllerInstanceId));
+						dictionary[movingControllerInfo.controllerInstanceId] = controllerChunkInfo.controller;
 					}
 					movingControllerInfo.chunkXY = vector2I;
-					this.movingControllerInfos[i] = movingControllerInfo;
 					controllerChunkInfo.chunkXY = vector2I;
 					this.controllerChunkInfos[movingControllerInfo.controllerInstanceId] = controllerChunkInfo;
-					if (list != null)
+					if (dictionary != null)
 					{
 						controllerChunkInfo.controller.SetVisiblity(this.visibleChunkGrid[vector2I.x, vector2I.y]);
 					}
@@ -287,74 +283,72 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	private void ProcessRegistrations()
 	{
-		ListPool<KBatchedAnimController, KBatchedAnimUpdater>.PooledList pooledList = ListPool<KBatchedAnimController, KBatchedAnimUpdater>.Allocate();
 		for (int i = 0; i < this.queuedRegistrations.Count; i++)
 		{
-			KBatchedAnimUpdater.RegistrationInfo info = this.queuedRegistrations[i];
-			if (info.register)
+			KBatchedAnimUpdater.RegistrationInfo registrationInfo = this.queuedRegistrations[i];
+			if (registrationInfo.register)
 			{
-				if (!(info.controller == null))
+				if (!(registrationInfo.controller == null))
 				{
-					int instanceID = info.controller.GetInstanceID();
+					int instanceID = registrationInfo.controller.GetInstanceID();
 					DebugUtil.Assert(!this.controllerChunkInfos.ContainsKey(instanceID));
 					KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo = new KBatchedAnimUpdater.ControllerChunkInfo
 					{
-						controller = info.controller,
-						chunkXY = KBatchedAnimUpdater.PosToChunkXY(info.controller.PositionIncludingOffset)
+						controller = registrationInfo.controller,
+						chunkXY = KBatchedAnimUpdater.PosToChunkXY(registrationInfo.controller.PositionIncludingOffset)
 					};
 					this.controllerChunkInfos[instanceID] = controllerChunkInfo;
-					Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(info.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
-					List<KBatchedAnimController> controllerList = this.GetControllerList(controllerChunkInfo.chunkXY);
-					if (controllerList != null)
+					Singleton<CellChangeMonitor>.Instance.RegisterMovementStateChanged(registrationInfo.controller.transform, new Action<Transform, bool>(this.OnMovementStateChanged));
+					Dictionary<int, KBatchedAnimController> controllerMap = this.GetControllerMap(controllerChunkInfo.chunkXY);
+					if (controllerMap != null)
 					{
-						DebugUtil.Assert(!controllerList.Contains(info.controller));
-						controllerList.Add(info.controller);
+						DebugUtil.Assert(!controllerMap.ContainsKey(instanceID));
+						controllerMap.Add(instanceID, registrationInfo.controller);
 					}
-					if (Singleton<CellChangeMonitor>.Instance.IsMoving(info.controller.transform))
+					if (Singleton<CellChangeMonitor>.Instance.IsMoving(registrationInfo.controller.transform))
 					{
-						this.movingControllerInfos.Add(new KBatchedAnimUpdater.MovingControllerInfo
+						DebugUtil.DevAssertArgs(!this.movingControllerInfos.ContainsKey(instanceID), new object[]
+						{
+							"Readding controller which is already moving",
+							registrationInfo.controller.name,
+							controllerChunkInfo.chunkXY,
+							this.movingControllerInfos.ContainsKey(instanceID) ? this.movingControllerInfos[instanceID].chunkXY.ToString() : null
+						});
+						this.movingControllerInfos[instanceID] = new KBatchedAnimUpdater.MovingControllerInfo
 						{
 							controllerInstanceId = instanceID,
-							controller = info.controller,
+							controller = registrationInfo.controller,
 							chunkXY = controllerChunkInfo.chunkXY
-						});
+						};
 					}
-					if (controllerList != null && this.visibleChunkGrid[controllerChunkInfo.chunkXY.x, controllerChunkInfo.chunkXY.y])
+					if (controllerMap != null && this.visibleChunkGrid[controllerChunkInfo.chunkXY.x, controllerChunkInfo.chunkXY.y])
 					{
-						pooledList.Add(info.controller);
+						registrationInfo.controller.SetVisiblity(true);
 					}
 				}
 			}
 			else
 			{
 				KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo2 = default(KBatchedAnimUpdater.ControllerChunkInfo);
-				if (this.controllerChunkInfos.TryGetValue(info.controllerInstanceId, out controllerChunkInfo2))
+				if (this.controllerChunkInfos.TryGetValue(registrationInfo.controllerInstanceId, out controllerChunkInfo2))
 				{
-					if (info.controller != null)
+					if (registrationInfo.controller != null)
 					{
-						List<KBatchedAnimController> controllerList2 = this.GetControllerList(controllerChunkInfo2.chunkXY);
-						if (controllerList2 != null)
+						Dictionary<int, KBatchedAnimController> controllerMap2 = this.GetControllerMap(controllerChunkInfo2.chunkXY);
+						if (controllerMap2 != null)
 						{
-							DebugUtil.Assert(controllerList2.Contains(info.controller));
-							controllerList2.Remove(info.controller);
+							DebugUtil.Assert(controllerMap2.ContainsKey(registrationInfo.controllerInstanceId));
+							controllerMap2.Remove(registrationInfo.controllerInstanceId);
 						}
+						registrationInfo.controller.SetVisiblity(false);
 					}
-					this.movingControllerInfos.RemoveAll((KBatchedAnimUpdater.MovingControllerInfo x) => x.controllerInstanceId == info.controllerInstanceId);
-					Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(info.transformId, new Action<Transform, bool>(this.OnMovementStateChanged));
-					this.controllerChunkInfos.Remove(info.controllerInstanceId);
-					pooledList.Remove(info.controller);
+					this.movingControllerInfos.Remove(registrationInfo.controllerInstanceId);
+					Singleton<CellChangeMonitor>.Instance.UnregisterMovementStateChanged(registrationInfo.transformId, new Action<Transform, bool>(this.OnMovementStateChanged));
+					this.controllerChunkInfos.Remove(registrationInfo.controllerInstanceId);
 				}
 			}
 		}
 		this.queuedRegistrations.Clear();
-		foreach (KBatchedAnimController kbatchedAnimController in pooledList)
-		{
-			if (kbatchedAnimController != null)
-			{
-				kbatchedAnimController.SetVisiblity(true);
-			}
-		}
-		pooledList.Recycle();
 	}
 
 	public void OnMovementStateChanged(Transform transform, bool is_moving)
@@ -364,20 +358,27 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			return;
 		}
 		KBatchedAnimController component = transform.GetComponent<KBatchedAnimController>();
-		int controller_instance_id = component.GetInstanceID();
+		int instanceID = component.GetInstanceID();
 		KBatchedAnimUpdater.ControllerChunkInfo controllerChunkInfo = default(KBatchedAnimUpdater.ControllerChunkInfo);
-		DebugUtil.Assert(this.controllerChunkInfos.TryGetValue(controller_instance_id, out controllerChunkInfo));
+		DebugUtil.Assert(this.controllerChunkInfos.TryGetValue(instanceID, out controllerChunkInfo));
 		if (is_moving)
 		{
-			this.movingControllerInfos.Add(new KBatchedAnimUpdater.MovingControllerInfo
+			DebugUtil.DevAssertArgs(!this.movingControllerInfos.ContainsKey(instanceID), new object[]
 			{
-				controllerInstanceId = controller_instance_id,
+				"Readding controller which is already moving",
+				component.name,
+				controllerChunkInfo.chunkXY,
+				this.movingControllerInfos.ContainsKey(instanceID) ? this.movingControllerInfos[instanceID].chunkXY.ToString() : null
+			});
+			this.movingControllerInfos[instanceID] = new KBatchedAnimUpdater.MovingControllerInfo
+			{
+				controllerInstanceId = instanceID,
 				controller = component,
 				chunkXY = controllerChunkInfo.chunkXY
-			});
+			};
 			return;
 		}
-		this.movingControllerInfos.RemoveAll((KBatchedAnimUpdater.MovingControllerInfo x) => x.controllerInstanceId == controller_instance_id);
+		this.movingControllerInfos.Remove(instanceID);
 	}
 
 	private void CleanUp()
@@ -392,7 +393,20 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 			int num = (this.cleanUpChunkIndex + i) % this.controllerGrid.Length;
 			int num2 = num % length;
 			int num3 = num / length;
-			this.controllerGrid[num2, num3].RemoveAll((KBatchedAnimController item) => item == null);
+			Dictionary<int, KBatchedAnimController> dictionary = this.controllerGrid[num2, num3];
+			ListPool<int, KBatchedAnimUpdater>.PooledList pooledList = ListPool<int, KBatchedAnimUpdater>.Allocate();
+			foreach (KeyValuePair<int, KBatchedAnimController> keyValuePair in dictionary)
+			{
+				if (keyValuePair.Value == null)
+				{
+					pooledList.Add(keyValuePair.Key);
+				}
+			}
+			foreach (int num4 in pooledList)
+			{
+				dictionary.Remove(num4);
+			}
+			pooledList.Recycle();
 		}
 		this.cleanUpChunkIndex = (this.cleanUpChunkIndex + 16) % this.controllerGrid.Length;
 	}
@@ -419,7 +433,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	public static readonly Vector2I INVALID_CHUNK_ID = Vector2I.minusone;
 
-	private List<KBatchedAnimController>[,] controllerGrid;
+	private Dictionary<int, KBatchedAnimController>[,] controllerGrid;
 
 	private LinkedList<KBatchedAnimController> updateList = new LinkedList<KBatchedAnimController>();
 
@@ -441,7 +455,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 
 	private Dictionary<int, KBatchedAnimUpdater.ControllerChunkInfo> controllerChunkInfos = new Dictionary<int, KBatchedAnimUpdater.ControllerChunkInfo>();
 
-	private List<KBatchedAnimUpdater.MovingControllerInfo> movingControllerInfos = new List<KBatchedAnimUpdater.MovingControllerInfo>();
+	private Dictionary<int, KBatchedAnimUpdater.MovingControllerInfo> movingControllerInfos = new Dictionary<int, KBatchedAnimUpdater.MovingControllerInfo>();
 
 	private const int CHUNKS_TO_CLEAN_PER_TICK = 16;
 
@@ -474,7 +488,7 @@ public class KBatchedAnimUpdater : Singleton<KBatchedAnimUpdater>
 		public Vector2I chunkXY;
 	}
 
-	private struct MovingControllerInfo
+	private class MovingControllerInfo
 	{
 		public int controllerInstanceId;
 

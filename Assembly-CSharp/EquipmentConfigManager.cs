@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EquipmentConfigManager")]
 public class EquipmentConfigManager : KMonoBehaviour
 {
 	public static void DestroyInstance()

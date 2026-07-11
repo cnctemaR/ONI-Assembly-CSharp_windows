@@ -8,11 +8,42 @@ public class LogicGateXorConfig : LogicGateBaseConfig
 		return LogicGateBase.Op.Xor;
 	}
 
+	protected override CellOffset[] InputPortOffsets
+	{
+		get
+		{
+			return new CellOffset[]
+			{
+				CellOffset.none,
+				new CellOffset(0, 1)
+			};
+		}
+	}
+
+	protected override CellOffset[] OutputPortOffsets
+	{
+		get
+		{
+			return new CellOffset[]
+			{
+				new CellOffset(1, 0)
+			};
+		}
+	}
+
+	protected override CellOffset[] ControlPortOffsets
+	{
+		get
+		{
+			return null;
+		}
+	}
+
 	protected override LogicGate.LogicGateDescriptions GetDescriptions()
 	{
 		return new LogicGate.LogicGateDescriptions
 		{
-			output = new LogicGate.LogicGateDescriptions.Description
+			outputOne = new LogicGate.LogicGateDescriptions.Description
 			{
 				name = BUILDINGS.PREFABS.LOGICGATEXOR.OUTPUT_NAME,
 				active = BUILDINGS.PREFABS.LOGICGATEXOR.OUTPUT_ACTIVE,

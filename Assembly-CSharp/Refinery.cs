@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Refinery")]
 public class Refinery : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BatteryUI")]
 public class BatteryUI : KMonoBehaviour
 {
 	private void Initialize()

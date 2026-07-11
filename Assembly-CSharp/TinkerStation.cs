@@ -6,6 +6,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/TinkerStation")]
 public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 {
 	public AttributeConverter AttributeConverter

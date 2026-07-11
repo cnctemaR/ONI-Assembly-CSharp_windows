@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ConsumableConsumer")]
 public class ConsumableConsumer : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

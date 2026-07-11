@@ -28,6 +28,7 @@ public class OilWellCapConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(1, 1);
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.Floodable = false;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		buildingDef.AttachmentSlotTag = GameTags.OilWell;
 		buildingDef.BuildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		buildingDef.ObjectLayer = ObjectLayer.AttachableBuilding;
@@ -60,19 +61,8 @@ public class OilWellCapConfig : IBuildingConfig
 		oilWellCap.releaseGasRate = 0.44444448f;
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		go.AddOrGet<LogicOperationalController>();
 	}
 

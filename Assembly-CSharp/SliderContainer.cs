@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.Events;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SliderContainer")]
 public class SliderContainer : KMonoBehaviour
 {
 	protected override void OnSpawn()

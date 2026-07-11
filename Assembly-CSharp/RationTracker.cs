@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/RationTracker")]
 public class RationTracker : KMonoBehaviour, ISaveLoadable
 {
 	public static void DestroyInstance()

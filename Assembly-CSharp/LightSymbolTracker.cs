@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LightSymbolTracker")]
 public class LightSymbolTracker : KMonoBehaviour, IRenderEveryTick
 {
 	public void RenderEveryTick(float dt)

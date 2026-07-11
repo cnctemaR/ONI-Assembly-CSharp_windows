@@ -39,6 +39,7 @@ public class RationBoxConfig : IBuildingConfig
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<RationBox>();
+		go.AddOrGet<UserNameable>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

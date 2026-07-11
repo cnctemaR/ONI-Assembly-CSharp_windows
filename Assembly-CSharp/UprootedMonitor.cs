@@ -2,6 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/UprootedMonitor")]
 public class UprootedMonitor : KMonoBehaviour
 {
 	public bool IsUprooted

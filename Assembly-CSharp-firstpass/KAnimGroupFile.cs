@@ -29,24 +29,15 @@ public class KAnimGroupFile : ScriptableObject
 		KAnimGroupFile.groupfile.Sort();
 	}
 
-	public static KAnimGroupFile.Group AddDynamicGroup(HashedString tag)
-	{
-		KAnimGroupFile.GetGroupFile();
-		List<KAnimGroupFile.Group> data = KAnimGroupFile.groupfile.GetData();
-		KAnimGroupFile.Group group = new KAnimGroupFile.Group(tag);
-		data.Add(group);
-		return group;
-	}
-
 	public static KAnimGroupFile.Group GetGroup(HashedString tag)
 	{
 		KAnimGroupFile.Group group = null;
 		KAnimGroupFile.GetGroupFile();
-		List<KAnimGroupFile.Group> data = KAnimGroupFile.groupfile.GetData();
-		global::Debug.Assert(data != null, data.Count > 0);
-		for (int i = 0; i < data.Count; i++)
+		List<KAnimGroupFile.Group> list = KAnimGroupFile.groupfile.groups;
+		global::Debug.Assert(list != null, list.Count > 0);
+		for (int i = 0; i < list.Count; i++)
 		{
-			KAnimGroupFile.Group group2 = data[i];
+			KAnimGroupFile.Group group2 = list[i];
 			if (group2.id == tag || group2.target == tag)
 			{
 				group = group2;
@@ -70,7 +61,7 @@ public class KAnimGroupFile : ScriptableObject
 
 	public List<KAnimGroupFile.Group> GetData()
 	{
-		return new List<KAnimGroupFile.Group>(this.groups);
+		return this.groups;
 	}
 
 	public void Reset()

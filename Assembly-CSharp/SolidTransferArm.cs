@@ -85,7 +85,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 				SolidTransferArm.cached_pickupables.Add(new SolidTransferArm.CachedPickupable
 				{
 					pickupable = fetchable.pickupable,
-					storage_cell = fetchable.pickupable.storageCell
+					storage_cell = fetchable.pickupable.cachedCell
 				});
 			}
 		}

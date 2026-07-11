@@ -1,6 +1,8 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DuplicantNoiseLevels")]
 public class DuplicantNoiseLevels : KMonoBehaviour
 {
 	public static void SetupNoiseLevels()

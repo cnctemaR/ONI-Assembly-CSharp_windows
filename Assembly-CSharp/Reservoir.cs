@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Reservoir")]
 public class Reservoir : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VoronoiTree;
 
+[AddComponentMenu("KMonoBehaviour/scripts/OfflineWorldGen")]
 public class OfflineWorldGen : KMonoBehaviour
 {
 	private void TrackProgress(string text)

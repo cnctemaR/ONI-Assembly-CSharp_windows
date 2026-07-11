@@ -15,7 +15,7 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ID, width, height, anim, num, num2, tier, refined_METALS, num3, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.ViewMode = OverlayModes.Logic.ID;
-		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
+		buildingDef.ObjectLayer = ObjectLayer.LogicGate;
 		buildingDef.SceneLayer = Grid.SceneLayer.LogicGates;
 		buildingDef.ThermalConductivity = 0.05f;
 		buildingDef.Floodable = false;
@@ -31,6 +31,12 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 		return buildingDef;
 	}
 
+	protected abstract CellOffset[] InputPortOffsets { get; }
+
+	protected abstract CellOffset[] OutputPortOffsets { get; }
+
+	protected abstract CellOffset[] ControlPortOffsets { get; }
+
 	protected abstract LogicGateBase.Op GetLogicOp();
 
 	protected abstract LogicGate.LogicGateDescriptions GetDescriptions();
@@ -44,21 +50,34 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		base.DoPostConfigurePreview(def, go);
-		go.AddComponent<MoveableLogicGateVisualizer>().op = this.GetLogicOp();
+		MoveableLogicGateVisualizer moveableLogicGateVisualizer = go.AddComponent<MoveableLogicGateVisualizer>();
+		moveableLogicGateVisualizer.op = this.GetLogicOp();
+		moveableLogicGateVisualizer.inputPortOffsets = this.InputPortOffsets;
+		moveableLogicGateVisualizer.outputPortOffsets = this.OutputPortOffsets;
+		moveableLogicGateVisualizer.controlPortOffsets = this.ControlPortOffsets;
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		go.AddComponent<LogicGateVisualizer>().op = this.GetLogicOp();
+		LogicGateVisualizer logicGateVisualizer = go.AddComponent<LogicGateVisualizer>();
+		logicGateVisualizer.op = this.GetLogicOp();
+		logicGateVisualizer.inputPortOffsets = this.InputPortOffsets;
+		logicGateVisualizer.outputPortOffsets = this.OutputPortOffsets;
+		logicGateVisualizer.controlPortOffsets = this.ControlPortOffsets;
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.AddComponent<LogicGate>().op = this.GetLogicOp();
+		LogicGate logicGate = go.AddComponent<LogicGate>();
+		logicGate.op = this.GetLogicOp();
+		logicGate.inputPortOffsets = this.InputPortOffsets;
+		logicGate.outputPortOffsets = this.OutputPortOffsets;
+		logicGate.controlPortOffsets = this.ControlPortOffsets;
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			game_object.GetComponent<LogicGate>().SetPortDescriptions(this.GetDescriptions());
 		};
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayBehindConduits, false);
 	}
 }

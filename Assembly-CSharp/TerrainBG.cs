@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TerrainBG")]
 public class TerrainBG : KMonoBehaviour
 {
 	protected override void OnSpawn()

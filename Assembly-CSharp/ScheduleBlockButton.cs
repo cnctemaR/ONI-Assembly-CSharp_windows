@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ScheduleBlockButton")]
 public class ScheduleBlockButton : KMonoBehaviour
 {
 	public int idx { get; private set; }

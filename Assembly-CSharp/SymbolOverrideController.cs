@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SymbolOverrideController")]
 public class SymbolOverrideController : KMonoBehaviour
 {
 	public SymbolOverrideController.SymbolEntry[] GetSymbolOverrides

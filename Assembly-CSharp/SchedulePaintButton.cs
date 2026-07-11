@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SchedulePaintButton")]
 public class SchedulePaintButton : KMonoBehaviour
 {
 	public ScheduleGroup group { get; private set; }

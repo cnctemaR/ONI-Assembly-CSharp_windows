@@ -47,8 +47,11 @@ public class StateMachineSerializer
 		{
 			if (instance.IsRunning())
 			{
-				StateMachineSerializer.Entry entry = new StateMachineSerializer.Entry(instance, entry_writer);
-				list.Add(entry);
+				StateMachineSerializer.Entry entry = StateMachineSerializer.Entry.TrySerialize(instance, entry_writer);
+				if (entry != null)
+				{
+					list.Add(entry);
+				}
 			}
 		}
 		return list;
@@ -216,31 +219,6 @@ public class StateMachineSerializer
 			this.currentState = current_state;
 		}
 
-		public Entry(StateMachine.Instance smi, BinaryWriter entry_writer)
-		{
-			this.version = smi.GetStateMachine().version;
-			this.dataPos = (int)entry_writer.BaseStream.Position;
-			this.type = smi.GetType();
-			this.currentState = smi.GetCurrentState().name;
-			Serializer.SerializeTypeless(smi, entry_writer);
-			StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
-			entry_writer.Write(parameterContexts.Length);
-			foreach (StateMachine.Parameter.Context context in parameterContexts)
-			{
-				long num = (long)((int)entry_writer.BaseStream.Position);
-				entry_writer.Write(0);
-				long num2 = (long)((int)entry_writer.BaseStream.Position);
-				entry_writer.WriteKleiString(context.GetType().FullName);
-				entry_writer.WriteKleiString(context.parameter.name);
-				context.Serialize(entry_writer);
-				long num3 = (long)((int)entry_writer.BaseStream.Position);
-				entry_writer.BaseStream.Position = num;
-				long num4 = num3 - num2;
-				entry_writer.Write((int)num4);
-				entry_writer.BaseStream.Position = num3;
-			}
-		}
-
 		public void Serialize(BinaryWriter writer)
 		{
 			writer.Write(this.version);
@@ -261,6 +239,39 @@ public class StateMachineSerializer
 				return null;
 			}
 			return new StateMachineSerializer.Entry(num, num2, type, text2);
+		}
+
+		public static StateMachineSerializer.Entry TrySerialize(StateMachine.Instance smi, BinaryWriter entry_writer)
+		{
+			int num = smi.GetStateMachine().version;
+			int num2 = (int)entry_writer.BaseStream.Position;
+			Type type = smi.GetType();
+			string name = smi.GetCurrentState().name;
+			Serializer.SerializeTypeless(smi, entry_writer);
+			if (smi.GetStateMachine().serializable)
+			{
+				StateMachine.Parameter.Context[] parameterContexts = smi.GetParameterContexts();
+				entry_writer.Write(parameterContexts.Length);
+				foreach (StateMachine.Parameter.Context context in parameterContexts)
+				{
+					long num3 = (long)((int)entry_writer.BaseStream.Position);
+					entry_writer.Write(0);
+					long num4 = (long)((int)entry_writer.BaseStream.Position);
+					entry_writer.WriteKleiString(context.GetType().FullName);
+					entry_writer.WriteKleiString(context.parameter.name);
+					context.Serialize(entry_writer);
+					long num5 = (long)((int)entry_writer.BaseStream.Position);
+					entry_writer.BaseStream.Position = num3;
+					long num6 = num5 - num4;
+					entry_writer.Write((int)num6);
+					entry_writer.BaseStream.Position = num5;
+				}
+			}
+			if (entry_writer.BaseStream.Position > (long)num2)
+			{
+				return new StateMachineSerializer.Entry(num, num2, type, name);
+			}
+			return null;
 		}
 
 		public int version;

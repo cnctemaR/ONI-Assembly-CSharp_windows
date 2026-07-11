@@ -2,6 +2,7 @@
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ParkSign")]
 public class ParkSign : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

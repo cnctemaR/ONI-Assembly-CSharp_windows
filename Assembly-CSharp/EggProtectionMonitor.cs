@@ -111,7 +111,7 @@ public class EggProtectionMonitor : GameStateMachine<EggProtectionMonitor, EggPr
 		public static void FindEggToGuard(List<UpdateBucketWithUpdater<EggProtectionMonitor.Instance>.Entry> instances, float time_delta)
 		{
 			ListPool<KPrefabID, EggProtectionMonitor>.PooledList pooledList = ListPool<KPrefabID, EggProtectionMonitor>.Allocate();
-			pooledList.Capacity = Mathf.Max(pooledList.Capacity, Components.Pickupables.Count);
+			pooledList.Capacity = Mathf.Max(pooledList.Capacity, Components.IncubationMonitors.Count);
 			foreach (object obj in Components.IncubationMonitors)
 			{
 				IncubationMonitor.Instance instance = (IncubationMonitor.Instance)obj;

@@ -166,16 +166,16 @@ public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 		}
 		this.delayTicksRemaining = 0;
 		this.meter.SetPositionPercent(0f);
-		if (this.outputValue == 1)
+		if (this.outputValueOne == 1)
 		{
 			return;
 		}
-		int outputCell = base.OutputCell;
-		if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCell) is LogicCircuitNetwork))
+		int outputCellOne = base.OutputCellOne;
+		if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCellOne) is LogicCircuitNetwork))
 		{
 			return;
 		}
-		this.outputValue = 1;
+		this.outputValueOne = 1;
 		base.RefreshAnimation();
 	}
 

@@ -392,7 +392,11 @@ namespace KMod
 			{
 				if (!DLLLoader.LoadUserModLoaderDLL())
 				{
-					global::Debug.Log("ModLoader.dll failed to load. Either it is not present or it encountered an error");
+					global::Debug.Log("Using builtin mod system.");
+				}
+				else
+				{
+					global::Debug.LogWarning("Using ModLoader.DLL for custom mod loading! This is not the standard mod loading method.");
 				}
 				this.load_user_mod_loader_dll = false;
 			}
@@ -974,7 +978,7 @@ namespace KMod
 			DictionaryPool<string, object, Manager>.PooledDictionary pooledDictionary = DictionaryPool<string, object, Manager>.Allocate();
 			pooledDictionary["ModCount"] = pooledList.Count;
 			pooledDictionary["Mods"] = pooledList;
-			ThreadedHttps<KleiMetrics>.Instance.SendEvent(pooledDictionary);
+			ThreadedHttps<KleiMetrics>.Instance.SendEvent(pooledDictionary, "Mods");
 			pooledDictionary.Recycle();
 			pooledList.Recycle();
 			KCrashReporter.haveActiveMods = pooledList.Count > 0;

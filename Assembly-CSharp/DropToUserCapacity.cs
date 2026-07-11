@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/DropToUserCapacity")]
 public class DropToUserCapacity : Workable
 {
 	protected DropToUserCapacity()

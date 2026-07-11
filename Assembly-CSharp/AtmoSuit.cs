@@ -2,6 +2,7 @@
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AtmoSuit")]
 public class AtmoSuit : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

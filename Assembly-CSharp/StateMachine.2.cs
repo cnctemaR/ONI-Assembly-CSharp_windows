@@ -358,7 +358,7 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 							".",
 							actions[this.currentActionIdx].name
 						});
-						DebugUtil.LogErrorArgs(this.controller, new object[] { text2 + "\n" + ex.ToString() });
+						DebugUtil.LogException(this.controller, text2, ex);
 					}
 				}
 				this.currentActionIdx++;

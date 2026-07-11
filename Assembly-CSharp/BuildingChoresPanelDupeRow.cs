@@ -3,6 +3,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BuildingChoresPanelDupeRow")]
 public class BuildingChoresPanelDupeRow : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

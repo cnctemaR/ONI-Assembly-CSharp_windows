@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/ResetSkillsStation")]
 public class ResetSkillsStation : Workable
 {
 	protected override void OnPrefabInit()
@@ -52,7 +54,7 @@ public class ResetSkillsStation : Workable
 			component.ResetSkillLevels(true);
 			component.SetHats(component.CurrentHat, null);
 			component.ApplyTargetHat();
-			this.notification = new Notification(MISC.NOTIFICATIONS.RESETSKILL.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.RESETSKILL.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
+			this.notification = new Notification(MISC.NOTIFICATIONS.RESETSKILL.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.RESETSKILL.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
 			worker.GetComponent<Notifier>().Add(this.notification, "");
 		}
 	}

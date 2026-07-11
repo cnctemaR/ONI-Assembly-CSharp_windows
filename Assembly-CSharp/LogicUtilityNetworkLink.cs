@@ -10,12 +10,16 @@ public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMg
 
 	protected override void OnConnect(int cell1, int cell2)
 	{
+		this.cell_one = cell1;
+		this.cell_two = cell2;
 		Game.Instance.logicCircuitSystem.AddLink(cell1, cell2);
+		Game.Instance.logicCircuitManager.Connect(this);
 	}
 
 	protected override void OnDisconnect(int cell1, int cell2)
 	{
 		Game.Instance.logicCircuitSystem.RemoveLink(cell1, cell2);
+		Game.Instance.logicCircuitManager.Disconnect(this);
 	}
 
 	public IUtilityNetworkMgr GetNetworkManager()
@@ -43,4 +47,10 @@ public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMg
 		UtilityNetwork networkForCell = this.GetNetworkManager().GetNetworkForCell(num);
 		return networks.Contains(networkForCell);
 	}
+
+	public LogicWire.BitDepth bitDepth;
+
+	public int cell_one;
+
+	public int cell_two;
 }

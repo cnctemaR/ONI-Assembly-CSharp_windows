@@ -6,6 +6,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MusicManager")]
 public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 {
 	private void Log(string s)

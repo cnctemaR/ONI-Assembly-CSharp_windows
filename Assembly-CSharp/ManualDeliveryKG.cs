@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/ManualDeliveryKG")]
 public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 {
 	public float Capacity
@@ -47,8 +48,11 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	{
 		base.OnSpawn();
 		DebugUtil.Assert(this.choreTypeIDHash.IsValid, "ManualDeliveryKG Must have a valid chore type specified!", base.name);
-		base.Subscribe<ManualDeliveryKG>(493375141, ManualDeliveryKG.OnRefreshUserMenuDelegate);
-		base.Subscribe<ManualDeliveryKG>(-111137758, ManualDeliveryKG.OnRefreshUserMenuDelegate);
+		if (this.allowPause)
+		{
+			base.Subscribe<ManualDeliveryKG>(493375141, ManualDeliveryKG.OnRefreshUserMenuDelegate);
+			base.Subscribe<ManualDeliveryKG>(-111137758, ManualDeliveryKG.OnRefreshUserMenuDelegate);
+		}
 		base.Subscribe<ManualDeliveryKG>(-592767678, ManualDeliveryKG.OnOperationalChangedDelegate);
 		if (this.storage != null)
 		{

@@ -3,7 +3,7 @@ using System.Collections;
 using KSerialization;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicSwitch : Switch
+public class LogicSwitch : Switch, IPlayerControlledToggle
 {
 	protected override void OnSpawn()
 	{
@@ -58,6 +58,29 @@ public class LogicSwitch : Switch
 		}
 		yield return null;
 		yield break;
+	}
+
+	public void ToggledByPlayer()
+	{
+		this.Toggle();
+	}
+
+	public bool ToggledOn()
+	{
+		return this.switchedOn;
+	}
+
+	public KSelectable GetSelectable()
+	{
+		return base.GetComponent<KSelectable>();
+	}
+
+	public string SideScreenTitleKey
+	{
+		get
+		{
+			return "STRINGS.BUILDINGS.PREFABS.LOGICSWITCH.SIDESCREEN_TITLE";
+		}
 	}
 
 	public static readonly HashedString PORT_ID = "LogicSwitch";

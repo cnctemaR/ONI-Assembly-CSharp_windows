@@ -4,6 +4,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/OverlayScreen")]
 public class OverlayScreen : KMonoBehaviour
 {
 	public HashedString mode

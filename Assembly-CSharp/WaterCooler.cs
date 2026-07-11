@@ -230,7 +230,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 
 		public void StartMeter()
 		{
-			PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.Water);
+			PrimaryElement primaryElement = this.storage.FindFirstWithMass(GameTags.Water, 0f);
 			if (primaryElement == null)
 			{
 				return;

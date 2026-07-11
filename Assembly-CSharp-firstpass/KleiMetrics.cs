@@ -28,7 +28,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.enabled = enabled;
 	}
 
-	protected string PostMetricData(Dictionary<string, object> data)
+	protected string PostMetricData(Dictionary<string, object> data, string debug_source)
 	{
 		string text = JsonConvert.SerializeObject(new KleiMetrics.PostData(this.CLIENT_KEY, data));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
@@ -197,7 +197,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		}
 		long num = DateTime.Now.Ticks - this.lastHeartBeatTicks;
 		dictionary.Add("HeartBeat", (int)TimeSpan.FromTicks(num).TotalSeconds);
-		this.PostMetricData(dictionary);
+		this.PostMetricData(dictionary, "SendHeartBeat");
 		this.lastHeartBeatTicks = DateTime.Now.Ticks;
 	}
 
@@ -340,7 +340,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
 		}
-		this.PostMetricData(dictionary);
+		this.PostMetricData(dictionary, "StartSession");
 		this.StartHeartBeat();
 	}
 
@@ -364,7 +364,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			dictionary.Add("HeartBeatTimeOut", true);
 		}
-		this.PostMetricData(dictionary);
+		this.PostMetricData(dictionary, "EndSession");
 		this.sessionStarted = false;
 		this.StopHeartBeat();
 		this.EndThread();
@@ -383,7 +383,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.IncrementGameCount();
 		Dictionary<string, object> dictionary = this.GetUserSession();
 		dictionary.Add("NewGame", true);
-		this.PostMetricData(dictionary);
+		this.PostMetricData(dictionary, "StartNewGame");
 	}
 
 	public void EndGame()
@@ -398,10 +398,10 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		}
 		Dictionary<string, object> dictionary = this.GetUserSession();
 		dictionary.Add("EndGame", true);
-		this.PostMetricData(dictionary);
+		this.PostMetricData(dictionary, "EndGame");
 	}
 
-	public void SendEvent(Dictionary<string, object> eventData)
+	public void SendEvent(Dictionary<string, object> eventData, string debug_event_name)
 	{
 		if (!this.enabled)
 		{
@@ -416,7 +416,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
 		}
-		this.PostMetricData(dictionary);
+		this.PostMetricData(dictionary, "SendEvent:" + debug_event_name);
 	}
 
 	public bool SendProfileStats()
@@ -426,7 +426,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 			return false;
 		}
 		Dictionary<string, object> dictionary = this.GetUserSession();
-		return ThreadedHttps<KleiMetrics>.Instance.PostMetricData(dictionary) == "OK";
+		return ThreadedHttps<KleiMetrics>.Instance.PostMetricData(dictionary, "SendProfileStats") == "OK";
 	}
 
 	public static Dictionary<string, object> GetHardwareStats()

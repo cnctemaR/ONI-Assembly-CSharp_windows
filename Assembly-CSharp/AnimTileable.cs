@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/AnimTileable")]
 public class AnimTileable : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AnimEventHandler")]
 public class AnimEventHandler : KMonoBehaviour
 {
 	private event AnimEventHandler.SetPos onWorkTargetSet;

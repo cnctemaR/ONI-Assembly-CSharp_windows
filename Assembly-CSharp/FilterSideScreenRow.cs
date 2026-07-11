@@ -3,9 +3,10 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FilterSideScreenRow")]
 public class FilterSideScreenRow : KMonoBehaviour
 {
-	public Element element { get; private set; }
+	public new Tag tag { get; private set; }
 
 	public bool isSelected { get; private set; }
 
@@ -32,10 +33,10 @@ public class FilterSideScreenRow : KMonoBehaviour
 		}
 	}
 
-	public void SetElement(Element elem)
+	public void SetTag(Tag tag)
 	{
-		this.element = elem;
-		this.SetText((elem.id == SimHashes.Void) ? UI.UISIDESCREENS.FILTERSIDESCREEN.NO_SELECTION.text : elem.name);
+		this.tag = tag;
+		this.SetText((tag == GameTags.Void) ? UI.UISIDESCREENS.FILTERSIDESCREEN.NO_SELECTION.text : tag.ProperName());
 	}
 
 	private void SetText(string assignmentStr)

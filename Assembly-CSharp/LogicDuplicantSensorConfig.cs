@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -15,30 +16,25 @@ public class LogicDuplicantSensorConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.Logic.ID;
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.PermittedRotations = PermittedRotations.R360;
+		buildingDef.AlwaysOperational = true;
+		buildingDef.LogicOutputPorts = new List<LogicPorts.Port> { LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICDUPLICANTSENSOR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICDUPLICANTSENSOR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICDUPLICANTSENSOR.LOGIC_PORT_INACTIVE, true, false) };
 		GeneratedBuildings.RegisterWithOverlay(OverlayModes.Logic.HighlightItemIDs, "LogicDuplicantSensor");
 		return buildingDef;
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicDuplicantSensorConfig.OUTPUT_PORT);
 		LogicDuplicantSensorConfig.AddVisualizer(go, true);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicDuplicantSensorConfig.OUTPUT_PORT);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.RegisterLogicPorts(go, LogicDuplicantSensorConfig.OUTPUT_PORT);
 		LogicDuplicantSensor logicDuplicantSensor = go.AddOrGet<LogicDuplicantSensor>();
 		logicDuplicantSensor.defaultState = false;
 		logicDuplicantSensor.manuallyControlled = false;
 		logicDuplicantSensor.pickupRange = 4;
 		LogicDuplicantSensorConfig.AddVisualizer(go, false);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 
 	private static void AddVisualizer(GameObject prefab, bool movable)
@@ -54,6 +50,4 @@ public class LogicDuplicantSensorConfig : IBuildingConfig
 	public const string ID = "LogicDuplicantSensor";
 
 	private const int RANGE = 4;
-
-	public static readonly LogicPorts.Port OUTPUT_PORT = LogicPorts.Port.OutputPort(LogicSwitch.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICDUPLICANTSENSOR.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICDUPLICANTSENSOR.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICDUPLICANTSENSOR.LOGIC_PORT_INACTIVE, true, false);
 }

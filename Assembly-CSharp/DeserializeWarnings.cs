@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DeserializeWarnings")]
 public class DeserializeWarnings : KMonoBehaviour
 {
 	public static void DestroyInstance()

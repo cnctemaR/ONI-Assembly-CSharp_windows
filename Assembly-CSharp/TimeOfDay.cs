@@ -5,6 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/TimeOfDay")]
 public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 {
 	public static void DestroyInstance()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -28,18 +29,9 @@ public class ObjectDispenserConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.EnergyConsumptionWhenActive = 60f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.125f;
+		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort(ObjectDispenser.PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_INACTIVE, false, false) };
 		SoundEventVolumeCache.instance.AddVolume("ventliquid_kanim", "LiquidVent_squirt", NOISE_POLLUTION.NOISY.TIER0);
 		return buildingDef;
-	}
-
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, ObjectDispenserConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, ObjectDispenserConfig.INPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -54,11 +46,8 @@ public class ObjectDispenserConfig : IBuildingConfig
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		storage.fetchCategory = Storage.FetchCategory.GeneralStorage;
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.StorageLocker;
-		GeneratedBuildings.RegisterLogicPorts(go, ObjectDispenserConfig.INPUT_PORTS);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicOperationalController>());
 	}
 
 	public const string ID = "ObjectDispenser";
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(ObjectDispenser.PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_INACTIVE, false, false) };
 }

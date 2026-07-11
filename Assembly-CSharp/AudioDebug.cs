@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AudioDebug")]
 public class AudioDebug : KMonoBehaviour
 {
 	public static AudioDebug Get()

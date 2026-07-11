@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Toggleable")]
 public class Toggleable : Workable
 {
 	private Toggleable()

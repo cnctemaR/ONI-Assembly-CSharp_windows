@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Klei.AI
 {
+	[AddComponentMenu("KMonoBehaviour/scripts/AttributeConverters")]
 	public class AttributeConverters : KMonoBehaviour
 	{
 		public int Count

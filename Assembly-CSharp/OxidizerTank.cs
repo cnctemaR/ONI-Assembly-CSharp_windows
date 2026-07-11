@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/OxidizerTank")]
 public class OxidizerTank : KMonoBehaviour, IUserControlledCapacity
 {
 	public bool IsSuspended

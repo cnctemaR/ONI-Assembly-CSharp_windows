@@ -501,6 +501,13 @@ namespace STRINGS
 				public static LocString DESC = "The decorative benefits of glass are both apparent and transparent.";
 			}
 
+			public class SCREENS
+			{
+				public static LocString NAME = UI.FormatAsLink("New Media", "SCREENS");
+
+				public static LocString DESC = "High tech displays with lots of pretty colors.";
+			}
+
 			public class ADVANCEDPOWERREGULATION
 			{
 				public static LocString NAME = UI.FormatAsLink("Advanced Power Regulation", "ADVANCEDPOWERREGULATION");
@@ -543,6 +550,13 @@ namespace STRINGS
 				public static LocString DESC = "The tools my colony needs to conduct more advanced, in-depth research.";
 			}
 
+			public class ARTIFICIALFRIENDS
+			{
+				public static LocString NAME = UI.FormatAsLink("Artificial Friends", "ARTIFICIALFRIENDS");
+
+				public static LocString DESC = "Sweeping advances in companion technology.";
+			}
+
 			public class LOGICCONTROL
 			{
 				public static LocString NAME = UI.FormatAsLink("Smart Home", "LOGICCONTROL");
@@ -555,6 +569,20 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Advanced Automation", "LOGICCIRCUITS");
 
 				public static LocString DESC = "The only limit to colony automation is my own imagination.";
+			}
+
+			public class PARALLELAUTOMATION
+			{
+				public static LocString NAME = UI.FormatAsLink("Parallel Automation", "PARALLELAUTOMATION");
+
+				public static LocString DESC = "Multi-wire automation at a fraction of the space.";
+			}
+
+			public class MULTIPLEXING
+			{
+				public static LocString NAME = UI.FormatAsLink("Multiplexing", "MULTIPLEXING");
+
+				public static LocString DESC = "More choices for Automation signal distribution.";
 			}
 
 			public class VALVEMINIATURIZATION
@@ -634,6 +662,13 @@ namespace STRINGS
 				public static LocString DESC = "Free Duplicants from the drudgery of day-to-day material deliveries with new methods of automation.";
 			}
 
+			public class SOLIDMANAGEMENT
+			{
+				public static LocString NAME = UI.FormatAsLink("Solid Management", "SOLIDMANAGEMENT");
+
+				public static LocString DESC = "Make solid decisions in " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " sorting.";
+			}
+
 			public class HIGHTEMPFORGING
 			{
 				public static LocString NAME = UI.FormatAsLink("Superheated Forging", "HIGHTEMPFORGING");
@@ -702,6 +737,13 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Unique Cargo", "CARGOIII");
 
 				public static LocString DESC = "Allow Duplicants to take their friends to see the stars... or simply bring souvenirs back from their travels.";
+			}
+
+			public class NOTIFICATIONSYSTEMS
+			{
+				public static LocString NAME = UI.FormatAsLink("Notification Systems", "NOTIFICATIONSYSTEMS");
+
+				public static LocString DESC = "Get all the news you need to know about your complex colony.";
 			}
 		}
 	}

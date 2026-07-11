@@ -6,6 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/OilWellCap")]
 public class OilWellCap : Workable, ISingleSliderControl, ISliderControl, IElementEmitter
 {
 	public SimHashes Element

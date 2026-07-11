@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/KFMODDebugger")]
 public class KFMODDebugger : KMonoBehaviour
 {
 	public static KFMODDebugger Get()

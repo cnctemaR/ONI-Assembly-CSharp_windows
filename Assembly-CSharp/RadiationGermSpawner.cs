@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/RadiationGermSpawner")]
 public class RadiationGermSpawner : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

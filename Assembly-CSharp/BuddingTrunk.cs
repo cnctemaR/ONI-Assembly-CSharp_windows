@@ -5,6 +5,7 @@ using Klei.AI;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BuddingTrunk")]
 public class BuddingTrunk : KMonoBehaviour, ISim4000ms
 {
 	public bool ExtraSeedAvailable

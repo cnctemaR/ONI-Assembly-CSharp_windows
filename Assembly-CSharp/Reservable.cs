@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Reservable")]
 public class Reservable : KMonoBehaviour
 {
 	public GameObject ReservedBy

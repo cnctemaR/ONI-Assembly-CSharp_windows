@@ -2,6 +2,7 @@
 using Klei;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/LiquidPumpingStation")]
 public class LiquidPumpingStation : Workable, ISim200ms
 {
 	protected override void OnPrefabInit()

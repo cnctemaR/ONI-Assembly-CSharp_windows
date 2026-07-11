@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SimDebugView")]
 public class SimDebugView : KMonoBehaviour
 {
 	public static void DestroyInstance()

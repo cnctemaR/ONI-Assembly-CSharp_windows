@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/KBatchedAnimEventToggler")]
 public class KBatchedAnimEventToggler : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

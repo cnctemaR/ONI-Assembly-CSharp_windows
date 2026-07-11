@@ -34,7 +34,8 @@ public class SandboxClearFloorTool : BrushTool
 		base.OnActivateTool();
 		SandboxToolParameterMenu.instance.gameObject.SetActive(true);
 		SandboxToolParameterMenu.instance.DisableParameters();
-		SandboxToolParameterMenu.instance.brushRadiusSlider.SetValue(1f);
+		SandboxToolParameterMenu.instance.brushRadiusSlider.row.SetActive(true);
+		SandboxToolParameterMenu.instance.brushRadiusSlider.SetValue((float)this.settings.GetIntSetting("SandboxTools.BrushSize"), true);
 	}
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)

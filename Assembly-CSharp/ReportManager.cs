@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ReportManager")]
 public class ReportManager : KMonoBehaviour
 {
 	public List<ReportManager.DailyReport> reports
@@ -102,10 +103,10 @@ public class ReportManager : KMonoBehaviour
 		Notification notification = new Notification(string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TITLE, day), NotificationType.Good, HashedString.Invalid, (List<Notification> n, object d) => string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TOOLTIP, day), null, true, 0f, delegate(object d)
 		{
 			ManagementMenu.Instance.OpenReports(day);
-		}, null, null);
+		}, null, null, true);
 		if (this.notifier == null)
 		{
-			Debug.LogError("Cant notify, null notifier");
+			global::Debug.LogError("Cant notify, null notifier");
 		}
 		else
 		{
@@ -461,7 +462,7 @@ public class ReportManager : KMonoBehaviour
 
 		public void Add(int report_entry_id, float value, string note)
 		{
-			int num = this.stringTable.AddString(note);
+			int num = this.stringTable.AddString(note, 6);
 			this.noteEntries.Add(report_entry_id, value, num);
 		}
 
@@ -479,7 +480,7 @@ public class ReportManager : KMonoBehaviour
 
 		public void Serialize(BinaryWriter writer)
 		{
-			writer.Write(5);
+			writer.Write(6);
 			writer.Write(this.nextNoteId);
 			this.stringTable.Serialize(writer);
 			this.noteEntries.Serialize(writer);
@@ -487,16 +488,17 @@ public class ReportManager : KMonoBehaviour
 
 		public void Deserialize(BinaryReader reader)
 		{
-			if (reader.ReadInt32() != 5)
+			int num = reader.ReadInt32();
+			if (num < 5)
 			{
 				return;
 			}
 			this.nextNoteId = reader.ReadInt32();
-			this.stringTable.Deserialize(reader);
-			this.noteEntries.Deserialize(reader);
+			this.stringTable.Deserialize(reader, num);
+			this.noteEntries.Deserialize(reader, num);
 		}
 
-		private const int SERIALIZATION_VERSION = 5;
+		public const int SERIALIZATION_VERSION = 6;
 
 		private int nextNoteId;
 
@@ -506,11 +508,11 @@ public class ReportManager : KMonoBehaviour
 
 		private class StringTable
 		{
-			public int AddString(string str)
+			public int AddString(string str, int version = 6)
 			{
-				HashedString hashedString = new HashedString(str);
-				this.strings[hashedString.HashValue] = str;
-				return hashedString.HashValue;
+				int num = Hash.SDBMLower(str);
+				this.strings[num] = str;
+				return num;
 			}
 
 			public string GetStringByHash(int hash)
@@ -529,13 +531,13 @@ public class ReportManager : KMonoBehaviour
 				}
 			}
 
-			public void Deserialize(BinaryReader reader)
+			public void Deserialize(BinaryReader reader, int version)
 			{
 				int num = reader.ReadInt32();
 				for (int i = 0; i < num; i++)
 				{
 					string text = reader.ReadString();
-					this.AddString(text);
+					this.AddString(text, version);
 				}
 			}
 
@@ -546,184 +548,115 @@ public class ReportManager : KMonoBehaviour
 		{
 			public void Add(int report_entry_id, float value, int note_id)
 			{
-				int i = this.ReportEntryIdToStorageBlockIdx(report_entry_id);
-				while (i >= this.storageBlocks.Count)
+				Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float> dictionary;
+				if (!this.entries.TryGetValue(report_entry_id, out dictionary))
 				{
-					int num = 32;
-					this.storageBlocks.Add(new ReportManager.NoteStorage.NoteEntries.NoteStorageBlock(num));
+					dictionary = new Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float>(ReportManager.NoteStorage.NoteEntries.sKeyComparer);
+					this.entries[report_entry_id] = dictionary;
 				}
-				ReportManager.NoteStorage.NoteEntries.NoteStorageBlock noteStorageBlock = this.storageBlocks[i];
-				noteStorageBlock.Add(report_entry_id, value, note_id);
-				this.storageBlocks[i] = noteStorageBlock;
+				ReportManager.NoteStorage.NoteEntries.NoteEntryKey noteEntryKey = new ReportManager.NoteStorage.NoteEntries.NoteEntryKey
+				{
+					noteHash = note_id,
+					isPositive = (value > 0f)
+				};
+				if (dictionary.ContainsKey(noteEntryKey))
+				{
+					Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float> dictionary2 = dictionary;
+					ReportManager.NoteStorage.NoteEntries.NoteEntryKey noteEntryKey2 = noteEntryKey;
+					dictionary2[noteEntryKey2] += value;
+					return;
+				}
+				dictionary[noteEntryKey] = value;
 			}
 
 			public void Serialize(BinaryWriter writer)
 			{
-				writer.Write(this.storageBlocks.Count);
-				foreach (ReportManager.NoteStorage.NoteEntries.NoteStorageBlock noteStorageBlock in this.storageBlocks)
+				writer.Write(this.entries.Count);
+				foreach (KeyValuePair<int, Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float>> keyValuePair in this.entries)
 				{
-					noteStorageBlock.Serialize(writer);
+					writer.Write(keyValuePair.Key);
+					writer.Write(keyValuePair.Value.Count);
+					foreach (KeyValuePair<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float> keyValuePair2 in keyValuePair.Value)
+					{
+						writer.Write(keyValuePair2.Key.noteHash);
+						writer.Write(keyValuePair2.Key.isPositive);
+						writer.Write(keyValuePair2.Value);
+					}
 				}
 			}
 
-			public void Deserialize(BinaryReader reader)
+			public void Deserialize(BinaryReader reader, int version)
 			{
+				if (version < 6)
+				{
+					OldNoteEntriesV5 oldNoteEntriesV = new OldNoteEntriesV5();
+					oldNoteEntriesV.Deserialize(reader);
+					foreach (OldNoteEntriesV5.NoteStorageBlock noteStorageBlock in oldNoteEntriesV.storageBlocks)
+					{
+						for (int i = 0; i < noteStorageBlock.entryCount; i++)
+						{
+							OldNoteEntriesV5.NoteEntry noteEntry = noteStorageBlock.entries.structs[i];
+							this.Add(noteEntry.reportEntryId, noteEntry.value, noteEntry.noteHash);
+						}
+					}
+					return;
+				}
 				int num = reader.ReadInt32();
-				for (int i = 0; i < num; i++)
+				this.entries = new Dictionary<int, Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float>>(num);
+				for (int j = 0; j < num; j++)
 				{
-					ReportManager.NoteStorage.NoteEntries.NoteStorageBlock noteStorageBlock = default(ReportManager.NoteStorage.NoteEntries.NoteStorageBlock);
-					noteStorageBlock.Deserialize(reader);
-					this.storageBlocks.Add(noteStorageBlock);
+					int num2 = reader.ReadInt32();
+					int num3 = reader.ReadInt32();
+					Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float> dictionary = new Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float>(num3, ReportManager.NoteStorage.NoteEntries.sKeyComparer);
+					this.entries[num2] = dictionary;
+					for (int k = 0; k < num3; k++)
+					{
+						ReportManager.NoteStorage.NoteEntries.NoteEntryKey noteEntryKey = new ReportManager.NoteStorage.NoteEntries.NoteEntryKey
+						{
+							noteHash = reader.ReadInt32(),
+							isPositive = reader.ReadBoolean()
+						};
+						dictionary[noteEntryKey] = reader.ReadSingle();
+					}
 				}
-			}
-
-			private int ReportEntryIdToStorageBlockIdx(int report_entry_id)
-			{
-				return report_entry_id / 100;
 			}
 
 			public void IterateNotes(ReportManager.NoteStorage.StringTable string_table, int report_entry_id, Action<ReportManager.ReportEntry.Note> callback)
 			{
-				int num = this.ReportEntryIdToStorageBlockIdx(report_entry_id);
-				if (num < this.storageBlocks.Count)
+				Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float> dictionary;
+				if (this.entries.TryGetValue(report_entry_id, out dictionary))
 				{
-					this.storageBlocks[num].IterateNotes(string_table, report_entry_id, callback);
+					foreach (KeyValuePair<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float> keyValuePair in dictionary)
+					{
+						string stringByHash = string_table.GetStringByHash(keyValuePair.Key.noteHash);
+						ReportManager.ReportEntry.Note note = new ReportManager.ReportEntry.Note(keyValuePair.Value, stringByHash);
+						callback(note);
+					}
 				}
 			}
 
-			private const int REPORT_IDS_PER_BLOCK = 100;
+			private static ReportManager.NoteStorage.NoteEntries.NoteEntryKeyComparer sKeyComparer = new ReportManager.NoteStorage.NoteEntries.NoteEntryKeyComparer();
 
-			private List<ReportManager.NoteStorage.NoteEntries.NoteStorageBlock> storageBlocks = new List<ReportManager.NoteStorage.NoteEntries.NoteStorageBlock>();
+			private Dictionary<int, Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float>> entries = new Dictionary<int, Dictionary<ReportManager.NoteStorage.NoteEntries.NoteEntryKey, float>>();
 
-			[StructLayout(LayoutKind.Explicit)]
-			public struct NoteEntry
+			public struct NoteEntryKey
 			{
-				public bool Matches(int report_entry_id, int note_hash, float value)
-				{
-					return report_entry_id == this.reportEntryId && note_hash == this.noteHash && value > 0f == this.value > 0f;
-				}
-
-				public NoteEntry(int report_entry_id, int note_hash, float value)
-				{
-					this.reportEntryId = report_entry_id;
-					this.noteHash = note_hash;
-					this.value = value;
-				}
-
-				[FieldOffset(0)]
-				public int reportEntryId;
-
-				[FieldOffset(4)]
 				public int noteHash;
 
-				[FieldOffset(8)]
-				public float value;
+				public bool isPositive;
 			}
 
-			[StructLayout(LayoutKind.Explicit)]
-			public struct NoteEntryArray
+			public class NoteEntryKeyComparer : IEqualityComparer<ReportManager.NoteStorage.NoteEntries.NoteEntryKey>
 			{
-				public int SizeInStructs
+				public bool Equals(ReportManager.NoteStorage.NoteEntries.NoteEntryKey a, ReportManager.NoteStorage.NoteEntries.NoteEntryKey b)
 				{
-					get
-					{
-						return this.bytes.Length / Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry));
-					}
+					return a.noteHash == b.noteHash && a.isPositive == b.isPositive;
 				}
 
-				public int StructSizeInBytes
+				public int GetHashCode(ReportManager.NoteStorage.NoteEntries.NoteEntryKey a)
 				{
-					get
-					{
-						return Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry));
-					}
+					return a.noteHash * (a.isPositive ? 1 : (-1));
 				}
-
-				public NoteEntryArray(int size_in_structs)
-				{
-					int num = size_in_structs * Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry));
-					this.structs = null;
-					this.bytes = new byte[num];
-				}
-
-				public void Resize(int size_in_structs)
-				{
-					byte[] array = this.bytes;
-					this.bytes = new byte[size_in_structs * Marshal.SizeOf(typeof(ReportManager.NoteStorage.NoteEntries.NoteEntry))];
-					Buffer.BlockCopy(array, 0, this.bytes, 0, array.Length);
-				}
-
-				[FieldOffset(0)]
-				public byte[] bytes;
-
-				[FieldOffset(0)]
-				public ReportManager.NoteStorage.NoteEntries.NoteEntry[] structs;
-			}
-
-			private struct NoteStorageBlock
-			{
-				public NoteStorageBlock(int capacity)
-				{
-					this.entries = new ReportManager.NoteStorage.NoteEntries.NoteEntryArray(capacity);
-					this.entryCount = 0;
-				}
-
-				public void Add(int report_entry_id, float value, int note_id)
-				{
-					bool flag = false;
-					for (int i = 0; i < this.entryCount; i++)
-					{
-						ReportManager.NoteStorage.NoteEntries.NoteEntry noteEntry = this.entries.structs[i];
-						if (noteEntry.Matches(report_entry_id, note_id, value))
-						{
-							noteEntry.value += value;
-							this.entries.structs[i] = noteEntry;
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						if (this.entries.SizeInStructs <= this.entryCount)
-						{
-							this.entries.Resize(this.entries.SizeInStructs * 2);
-						}
-						ReportManager.NoteStorage.NoteEntries.NoteEntry[] structs = this.entries.structs;
-						int num = this.entryCount;
-						this.entryCount = num + 1;
-						structs[num] = new ReportManager.NoteStorage.NoteEntries.NoteEntry(report_entry_id, note_id, value);
-					}
-				}
-
-				public void IterateNotes(ReportManager.NoteStorage.StringTable string_table, int report_entry_id, Action<ReportManager.ReportEntry.Note> callback)
-				{
-					for (int i = 0; i < this.entryCount; i++)
-					{
-						ReportManager.NoteStorage.NoteEntries.NoteEntry noteEntry = this.entries.structs[i];
-						if (noteEntry.reportEntryId == report_entry_id)
-						{
-							string stringByHash = string_table.GetStringByHash(noteEntry.noteHash);
-							ReportManager.ReportEntry.Note note = new ReportManager.ReportEntry.Note(noteEntry.value, stringByHash);
-							callback(note);
-						}
-					}
-				}
-
-				public void Serialize(BinaryWriter writer)
-				{
-					writer.Write(this.entryCount);
-					writer.Write(this.entries.bytes, 0, this.entries.StructSizeInBytes * this.entryCount);
-				}
-
-				public void Deserialize(BinaryReader reader)
-				{
-					this.entryCount = reader.ReadInt32();
-					this.entries.bytes = reader.ReadBytes(this.entries.StructSizeInBytes * this.entryCount);
-				}
-
-				private int entryCount;
-
-				private ReportManager.NoteStorage.NoteEntries.NoteEntryArray entries;
 			}
 		}
 	}

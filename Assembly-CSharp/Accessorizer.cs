@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Accessorizer")]
 public class Accessorizer : KMonoBehaviour
 {
 	public List<ResourceRef<Accessory>> GetAccessories()

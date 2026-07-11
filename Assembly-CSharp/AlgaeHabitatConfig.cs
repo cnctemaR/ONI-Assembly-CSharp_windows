@@ -54,7 +54,6 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		manualDeliveryKG2.requestedItemTag = tag2;
 		manualDeliveryKG2.capacity = 360f;
 		manualDeliveryKG2.refillMass = 72f;
-		manualDeliveryKG2.allowPause = true;
 		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_algae_terarrium_kanim") };
 		AlgaeHabitatEmpty algaeHabitatEmpty = go.AddOrGet<AlgaeHabitatEmpty>();

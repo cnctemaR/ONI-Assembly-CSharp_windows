@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BrainScheduler")]
 public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 {
 	private bool isAsyncPathProbeEnabled
@@ -169,7 +171,7 @@ public class BrainScheduler : KMonoBehaviour, IRenderEveryTick, ICPULoad
 			}
 			if (num >= 0 && num <= 0)
 			{
-				Debug.LogWarning("AdjustLoad() failed");
+				global::Debug.LogWarning("AdjustLoad() failed");
 			}
 			return num != 0;
 		}

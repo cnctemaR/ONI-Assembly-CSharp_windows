@@ -2,7 +2,9 @@
 using KSerialization;
 using STRINGS;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Uprootable")]
 public class Uprootable : Workable
 {
 	public bool IsMarkedForUproot

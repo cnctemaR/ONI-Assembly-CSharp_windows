@@ -67,7 +67,7 @@ public class BatterySmart : Battery, IActivationRangeTarget
 		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
 		if (logicValueChanged.portID == BatterySmart.PORT_ID)
 		{
-			this.SetLogicMeter(logicValueChanged.newValue > 0);
+			this.SetLogicMeter(LogicCircuitNetwork.IsBitActive(0, logicValueChanged.newValue));
 		}
 	}
 

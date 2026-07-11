@@ -214,6 +214,8 @@ public enum GameHashes
 	LaserOn = -673283254,
 	LaserOff = -1559999068,
 	VentAnimatingChanged = -793429877,
+	VentClosed = -997182271,
+	VentOpen = 1531265279,
 	StartTransition = 1189352983,
 	Attacking = 1039067354,
 	StoppedAttacking = 379728621,
@@ -330,5 +332,6 @@ public enum GameHashes
 	CheckColonyAchievements = 395452326,
 	StartWork = 1568504979,
 	StartReactable = -909573545,
-	EndReactable = 824899998
+	EndReactable = 824899998,
+	NameChanged = 1102426921
 }

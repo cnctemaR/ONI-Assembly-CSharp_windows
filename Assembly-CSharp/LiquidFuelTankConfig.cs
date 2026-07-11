@@ -44,14 +44,6 @@ public class LiquidFuelTankConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		FuelTank fuelTank = go.AddOrGet<FuelTank>();

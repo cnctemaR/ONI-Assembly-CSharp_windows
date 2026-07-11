@@ -44,7 +44,7 @@ namespace KMod
 			return false;
 		}
 
-		public static bool LoadDLLs(string path)
+		public static bool LoadDLLs(string harmonyId, string path)
 		{
 			bool flag;
 			try
@@ -121,7 +121,7 @@ namespace KMod
 									}
 								}
 							}
-							HarmonyInstance harmonyInstance = HarmonyInstance.Create(string.Format("OxygenNotIncluded_v{0}.{1}", 0, 1));
+							HarmonyInstance harmonyInstance = HarmonyInstance.Create(harmonyId);
 							if (harmonyInstance != null)
 							{
 								object[] array4 = new object[] { harmonyInstance };
@@ -156,8 +156,9 @@ namespace KMod
 					}
 				}
 			}
-			catch
+			catch (Exception ex)
 			{
+				DebugUtil.LogException(null, string.Concat(new string[] { "Exception while loading mod ", harmonyId, " at ", path, "." }), ex);
 				flag = false;
 			}
 			return flag;

@@ -16,7 +16,6 @@ public class BrushTool : InterfaceTool
 	{
 		base.OnActivateTool();
 		this.dragging = false;
-		this.SetBrushSize(5);
 	}
 
 	public override void GetOverlayColorData(out HashSet<ToolMenu.CellColorData> colors)

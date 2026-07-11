@@ -10,6 +10,7 @@ public enum SpawnFXHashes
 	BuildingLeakLiquid = 1046493203,
 	BuildingLeakGas = 1233886818,
 	BuildingFreeze = -1296864117,
+	BuildingLogicOverload = 1147735396,
 	MeteorImpactDirt = -130923271,
 	MeteorImpactMetal = 58009621,
 	MeteorImpactDust = -31719612

@@ -5,6 +5,7 @@ using UnityEngine;
 
 [SkipSaveFileSerialization]
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/SubstanceChunk")]
 public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AntiCluster")]
 public class AntiCluster : KMonoBehaviour, ISim200ms
 {
 	public void Sim200ms(float dt)

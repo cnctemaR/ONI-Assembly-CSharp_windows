@@ -24,7 +24,7 @@ public class WallDamageSoundEvent : SoundEvent
 			{
 				vector = SoundEvent.AudioHighlightListenerPosition(vector);
 			}
-			if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
+			if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.soundHash, base.looping, this.isDynamic))
 			{
 				EventInstance eventInstance = SoundEvent.BeginOneShot(base.sound, vector, SoundEvent.GetVolume(base.objectIsSelectedAndVisible), false);
 				eventInstance.setParameterValue("material_ID", (float)audioCategory);

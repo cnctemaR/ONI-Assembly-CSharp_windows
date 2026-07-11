@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ToolParameterMenu")]
 public class ToolParameterMenu : KMonoBehaviour
 {
 	public event global::System.Action onParametersChanged;

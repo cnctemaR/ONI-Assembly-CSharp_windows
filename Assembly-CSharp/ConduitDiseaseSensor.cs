@@ -14,12 +14,14 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 			if (this.switchedOn)
 			{
 				this.animController.Play(ConduitSensor.ON_ANIMS, KAnim.PlayMode.Loop);
-				int num = Grid.PosToCell(this);
-				ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
+				int num;
+				int num2;
+				bool flag;
+				this.GetContentsDisease(out num, out num2, out flag);
 				Color32 color = Color.white;
-				if (contents.diseaseIdx != 255)
+				if (num != 255)
 				{
-					color = Db.Get().Diseases[(int)contents.diseaseIdx].overlayColour;
+					color = Db.Get().Diseases[num].overlayColour;
 				}
 				this.animController.SetSymbolTint(ConduitDiseaseSensor.TINT_SYMBOL, color);
 				return;
@@ -28,15 +30,43 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 		}
 	}
 
+	private void GetContentsDisease(out int diseaseIdx, out int diseaseCount, out bool hasMass)
+	{
+		int num = Grid.PosToCell(this);
+		if (this.conduitType == ConduitType.Liquid || this.conduitType == ConduitType.Gas)
+		{
+			ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
+			diseaseIdx = (int)contents.diseaseIdx;
+			diseaseCount = contents.diseaseCount;
+			hasMass = contents.mass > 0f;
+			return;
+		}
+		SolidConduitFlow flowManager = SolidConduit.GetFlowManager();
+		SolidConduitFlow.ConduitContents contents2 = flowManager.GetContents(num);
+		Pickupable pickupable = flowManager.GetPickupable(contents2.pickupableHandle);
+		if (pickupable != null && pickupable.PrimaryElement.Mass > 0f)
+		{
+			diseaseIdx = (int)pickupable.PrimaryElement.DiseaseIdx;
+			diseaseCount = pickupable.PrimaryElement.DiseaseCount;
+			hasMass = true;
+			return;
+		}
+		diseaseIdx = 0;
+		diseaseCount = 0;
+		hasMass = false;
+	}
+
 	public override float CurrentValue
 	{
 		get
 		{
-			int num = Grid.PosToCell(this);
-			ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
-			if (contents.mass > 0f)
+			int num;
+			int num2;
+			bool flag;
+			this.GetContentsDisease(out num, out num2, out flag);
+			if (flag)
 			{
-				this.lastValue = (float)contents.diseaseCount;
+				this.lastValue = (float)num2;
 			}
 			return this.lastValue;
 		}

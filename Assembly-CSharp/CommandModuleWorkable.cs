@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/CommandModuleWorkable")]
 public class CommandModuleWorkable : Workable
 {
 	protected override void OnPrefabInit()

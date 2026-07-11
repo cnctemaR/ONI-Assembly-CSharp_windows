@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Prioritizable")]
 public class Prioritizable : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

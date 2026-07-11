@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BuildingAttachPoint")]
 public class BuildingAttachPoint : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

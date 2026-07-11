@@ -4,6 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PlantableSeed")]
 public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEffectDescriptor
 {
 	public SingleEntityReceptacle.ReceptacleDirection Direction

@@ -6,6 +6,7 @@ using ProcGen;
 using TemplateClasses;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/WorldGenSpawner")]
 public class WorldGenSpawner : KMonoBehaviour
 {
 	public bool SpawnsRemain()

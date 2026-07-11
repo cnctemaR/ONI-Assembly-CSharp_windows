@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Crop")]
 public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public string cropId

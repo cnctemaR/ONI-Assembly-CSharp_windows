@@ -406,7 +406,7 @@ public class ResearchScreen : KModalScreen
 		{
 			DetailsScreen.Instance.gameObject.SetActive(false);
 		}
-		else if (SelectTool.Instance.selected != null)
+		else if (SelectTool.Instance.selected != null && !DetailsScreen.Instance.gameObject.activeSelf)
 		{
 			DetailsScreen.Instance.gameObject.SetActive(true);
 			DetailsScreen.Instance.Refresh(SelectTool.Instance.selected.gameObject);

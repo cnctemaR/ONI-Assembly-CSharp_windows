@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SimpleVent")]
 public class SimpleVent : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

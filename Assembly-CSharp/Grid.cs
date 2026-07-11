@@ -777,7 +777,7 @@ public class Grid
 
 	public static bool VisibilityTest(int x, int y, int x2, int y2, bool blocking_tile_visible = false)
 	{
-		return Grid.TestLineOfSight(x, y, x2, y2, new Func<int, bool>(Grid.VisibleBlockingCB), blocking_tile_visible);
+		return Grid.TestLineOfSight(x, y, x2, y2, Grid.VisibleBlockingDelegate, blocking_tile_visible);
 	}
 
 	public static bool VisibilityTest(int cell, int target_cell, bool blocking_tile_visible = false)
@@ -798,7 +798,7 @@ public class Grid
 
 	public static bool IsPhysicallyAccessible(int x, int y, int x2, int y2, bool blocking_tile_visible = false)
 	{
-		return Grid.TestLineOfSight(x, y, x2, y2, new Func<int, bool>(Grid.PhysicalBlockingCB), blocking_tile_visible);
+		return Grid.TestLineOfSight(x, y, x2, y2, Grid.PhysicalBlockingDelegate, blocking_tile_visible);
 	}
 
 	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false)
@@ -1033,6 +1033,10 @@ public class Grid
 	public static Grid.ObjectLayerIndexer Objects;
 
 	public static float LayerMultiplier = 1f;
+
+	private static readonly Func<int, bool> VisibleBlockingDelegate = (int cell) => Grid.VisibleBlockingCB(cell);
+
+	private static readonly Func<int, bool> PhysicalBlockingDelegate = (int cell) => Grid.PhysicalBlockingCB(cell);
 
 	[Flags]
 	public enum BuildFlags : byte

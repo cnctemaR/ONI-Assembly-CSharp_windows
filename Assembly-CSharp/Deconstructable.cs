@@ -4,6 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Deconstructable")]
 public class Deconstructable : Workable
 {
 	protected override void OnPrefabInit()
@@ -102,7 +103,7 @@ public class Deconstructable : Workable
 		base.Trigger(-702296337, this);
 	}
 
-	private void TriggerDestroy(Building building, float temperature, byte disease_idx, int disease_count)
+	public void TriggerDestroy(Building building, float temperature, byte disease_idx, int disease_count)
 	{
 		if (this == null || this.destroyed)
 		{
@@ -139,6 +140,15 @@ public class Deconstructable : Workable
 	{
 		if (this.chore == null)
 		{
+			BuildingComplete component = base.GetComponent<BuildingComplete>();
+			if (component != null && component.Def.ReplacementLayer != ObjectLayer.NumLayers)
+			{
+				int num = Grid.PosToCell(component);
+				if (Grid.Objects[num, (int)component.Def.ReplacementLayer] != null)
+				{
+					return;
+				}
+			}
 			if (DebugHandler.InstantBuildMode)
 			{
 				this.OnCompleteWork(null);
@@ -176,7 +186,7 @@ public class Deconstructable : Workable
 		}
 	}
 
-	public static GameObject SpawnItem(Vector3 position, BuildingDef def, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
+	private static GameObject SpawnItem(Vector3 position, BuildingDef def, Tag src_element, float src_mass, float src_temperature, byte disease_idx, int disease_count)
 	{
 		GameObject gameObject = null;
 		int num = Grid.PosToCell(position);
@@ -225,7 +235,7 @@ public class Deconstructable : Workable
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 0f);
 	}
 
-	private void CancelDeconstruction()
+	public void CancelDeconstruction()
 	{
 		if (this.chore != null)
 		{

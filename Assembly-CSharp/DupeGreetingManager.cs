@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DupeGreetingManager")]
 public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 {
 	protected override void OnPrefabInit()

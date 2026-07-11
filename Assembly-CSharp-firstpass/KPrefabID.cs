@@ -5,6 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Plugins/KPrefabID")]
 public class KPrefabID : KMonoBehaviour, ISaveLoadable
 {
 	public static int NextUniqueID

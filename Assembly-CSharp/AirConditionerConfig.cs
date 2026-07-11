@@ -27,6 +27,7 @@ public class AirConditionerConfig : IBuildingConfig
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.ViewMode = OverlayModes.GasConduits.ID;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		return buildingDef;
 	}
 
@@ -42,19 +43,8 @@ public class AirConditionerConfig : IBuildingConfig
 		conduitConsumer.consumptionRate = 1f;
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
 		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGetDef<PoweredActiveController.Def>();
 	}

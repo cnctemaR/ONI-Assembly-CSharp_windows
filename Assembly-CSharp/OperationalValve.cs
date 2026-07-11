@@ -24,12 +24,16 @@ public class OperationalValve : ValveBase
 
 	private void OnOperationalChanged(object data)
 	{
-		if ((bool)data)
+		bool flag = (bool)data;
+		if (flag)
 		{
 			base.CurrentFlow = base.MaxFlow;
-			return;
 		}
-		base.CurrentFlow = 0f;
+		else
+		{
+			base.CurrentFlow = 0f;
+		}
+		this.operational.SetActive(flag, false);
 	}
 
 	public override void UpdateAnim()

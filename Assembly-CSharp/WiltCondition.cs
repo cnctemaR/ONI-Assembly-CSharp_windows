@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/WiltCondition")]
 public class WiltCondition : KMonoBehaviour
 {
 	public bool IsWilting()

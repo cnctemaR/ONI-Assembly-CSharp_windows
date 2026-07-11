@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ConduitBridge")]
 public class ConduitBridge : KMonoBehaviour, IBridgedNetworkItem
 {
 	protected override void OnPrefabInit()

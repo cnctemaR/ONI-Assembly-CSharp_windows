@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
+using UnityEngine;
 
 namespace Klei.AI
 {
 	[SerializationConfig(MemberSerialization.OptIn)]
+	[AddComponentMenu("KMonoBehaviour/scripts/Effects")]
 	public class Effects : KMonoBehaviour, ISaveLoadable, ISim1000ms
 	{
 		protected override void OnPrefabInit()

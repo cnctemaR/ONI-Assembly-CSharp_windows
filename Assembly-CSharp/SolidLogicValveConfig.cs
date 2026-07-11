@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -34,6 +35,7 @@ public class SolidLogicValveConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 10f;
 		buildingDef.PowerInputOffset = new CellOffset(0, 1);
+		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.SOLIDLOGICVALVE.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.SOLIDLOGICVALVE.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.SOLIDLOGICVALVE.LOGIC_PORT_INACTIVE, true, false) };
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SolidConveyorIDs, "SolidLogicValve");
 		return buildingDef;
 	}
@@ -42,19 +44,8 @@ public class SolidLogicValveConfig : IBuildingConfig
 	{
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, SolidLogicValveConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, SolidLogicValveConfig.INPUT_PORTS);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, SolidLogicValveConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>().unNetworkedValue = 0;
 		go.AddOrGet<RequireOutputs>().ignoreFullPipe = true;
 		go.AddOrGet<SolidConduitBridge>();
@@ -64,6 +55,4 @@ public class SolidLogicValveConfig : IBuildingConfig
 	public const string ID = "SolidLogicValve";
 
 	private const ConduitType CONDUIT_TYPE = ConduitType.Solid;
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.SOLIDLOGICVALVE.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.SOLIDLOGICVALVE.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.SOLIDLOGICVALVE.LOGIC_PORT_INACTIVE, true, false) };
 }

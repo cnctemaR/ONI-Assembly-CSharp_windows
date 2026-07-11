@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LightColorMenu")]
 public class LightColorMenu : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

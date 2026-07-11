@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PlanStamp")]
 public class PlanStamp : KMonoBehaviour
 {
 	public void SetStamp(Sprite sprite, string Text)

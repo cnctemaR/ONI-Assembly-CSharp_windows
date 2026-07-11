@@ -3,6 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Valve")]
 public class Valve : Workable, ISaveLoadable
 {
 	public float QueuedMaxFlow

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/prefabs/UIRotator")]
 public class UIRotator : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

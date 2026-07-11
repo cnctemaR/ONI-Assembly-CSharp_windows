@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ResearchEntry")]
 public class ResearchEntry : KMonoBehaviour
 {
 	protected override void OnSpawn()
@@ -321,7 +322,7 @@ public class ResearchEntry : KMonoBehaviour
 		if (notify)
 		{
 			this.unlockedTechMetric[ResearchEntry.UnlockedTechKey] = this.targetTech.Id;
-			ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.unlockedTechMetric);
+			ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.unlockedTechMetric, "ResearchCompleted");
 		}
 		this.toggle.ClearOnClick();
 		if (notify)

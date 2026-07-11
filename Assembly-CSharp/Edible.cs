@@ -5,6 +5,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Edible")]
 public class Edible : Workable, IGameObjectEffectDescriptor
 {
 	public float Units

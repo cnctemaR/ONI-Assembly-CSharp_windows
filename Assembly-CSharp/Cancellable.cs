@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Cancellable")]
 public class Cancellable : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

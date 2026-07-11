@@ -6,6 +6,7 @@ using KSerialization;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/SaveLoadRoot")]
 public class SaveLoadRoot : KMonoBehaviour
 {
 	public static void DestroyStatics()
@@ -211,7 +212,14 @@ public class SaveLoadRoot : KMonoBehaviour
 				{
 					for (int j = 0; j < array.Length; j++)
 					{
-						if (array[j].GetType().ToString() == text)
+						Type type = array[j].GetType();
+						string text2;
+						if (!SaveLoadRoot.sTypeToString.TryGetValue(type, out text2))
+						{
+							text2 = type.ToString();
+							SaveLoadRoot.sTypeToString[type] = text2;
+						}
+						if (text2 == text)
 						{
 							if (num4 == num3)
 							{
@@ -266,4 +274,6 @@ public class SaveLoadRoot : KMonoBehaviour
 	private bool registered = true;
 
 	private static Dictionary<string, ISerializableComponentManager> serializableComponentManagers;
+
+	private static Dictionary<Type, string> sTypeToString = new Dictionary<Type, string>();
 }

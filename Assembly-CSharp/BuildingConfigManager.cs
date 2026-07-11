@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BuildingConfigManager")]
 public class BuildingConfigManager : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

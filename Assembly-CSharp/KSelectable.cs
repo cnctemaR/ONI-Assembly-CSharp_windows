@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/KSelectable")]
 public class KSelectable : KMonoBehaviour
 {
 	public bool IsSelected

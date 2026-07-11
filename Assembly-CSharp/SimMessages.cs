@@ -395,6 +395,7 @@ public static class SimMessages
 	{
 		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(Sim.Element)) * elements.Count);
 		BinaryWriter binaryWriter = new BinaryWriter(memoryStream);
+		Debug.Assert(elements.Count < 255, "SimDLL internals assume there are fewer than 255 elements");
 		binaryWriter.Write(elements.Count);
 		for (int i = 0; i < elements.Count; i++)
 		{

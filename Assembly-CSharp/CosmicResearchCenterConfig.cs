@@ -46,7 +46,7 @@ public class CosmicResearchCenterConfig : IBuildingConfig
 		researchCenter.research_point_type_id = "gamma";
 		researchCenter.inputMaterial = CosmicResearchCenterConfig.INPUT_MATERIAL;
 		researchCenter.mass_per_point = 1f;
-		researchCenter.requiredSkillPerk = Db.Get().SkillPerks.AllowAdvancedResearch.Id;
+		researchCenter.requiredSkillPerk = Db.Get().SkillPerks.AllowInterstellarResearch.Id;
 		researchCenter.workLayer = Grid.SceneLayer.BuildingFront;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]

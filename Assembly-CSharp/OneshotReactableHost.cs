@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/OneshotReactableHost")]
 public class OneshotReactableHost : KMonoBehaviour
 {
 	protected override void OnSpawn()

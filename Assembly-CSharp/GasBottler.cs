@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/GasBottler")]
 public class GasBottler : Workable
 {
 	protected override void OnSpawn()

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ReportScreenHeader")]
 public class ReportScreenHeader : KMonoBehaviour
 {
 	public void SetMainEntry(ReportManager.ReportGroup reportGroup)

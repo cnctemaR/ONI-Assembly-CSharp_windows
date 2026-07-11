@@ -4,6 +4,7 @@ using Klei;
 using ProcGen;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SubworldZoneRenderData")]
 public class SubworldZoneRenderData : KMonoBehaviour
 {
 	protected override void OnSpawn()

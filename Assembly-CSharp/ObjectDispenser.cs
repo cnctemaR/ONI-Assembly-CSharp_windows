@@ -245,7 +245,7 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 
 		public void SetActive(bool active)
 		{
-			this.operational.SetActive(this.operational.IsOperational && active, false);
+			this.operational.SetActive(active, false);
 		}
 
 		private void OnOperationalChanged(object data)
@@ -260,12 +260,13 @@ public class ObjectDispenser : Switch, IUserControlledCapacity
 			{
 				return;
 			}
-			this.logic_on = logicValueChanged.newValue != 0;
+			this.logic_on = LogicCircuitNetwork.IsBitActive(0, logicValueChanged.newValue);
 			this.UpdateShouldOpen();
 		}
 
 		private void UpdateShouldOpen()
 		{
+			this.SetActive(this.operational.IsOperational);
 			if (!this.operational.IsOperational)
 			{
 				return;

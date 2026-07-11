@@ -3,6 +3,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Dumpable")]
 public class Dumpable : Workable
 {
 	protected override void OnPrefabInit()

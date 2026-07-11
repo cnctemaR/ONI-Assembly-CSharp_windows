@@ -6,6 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/ManualGenerator")]
 public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 {
 	public string SliderTitleKey
@@ -173,7 +174,6 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		global::Debug.Log("Worker is " + base.worker);
 		this.operational.SetActive(true, false);
 	}
 

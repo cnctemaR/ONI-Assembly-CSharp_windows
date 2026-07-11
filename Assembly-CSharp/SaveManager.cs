@@ -5,6 +5,7 @@ using System.Linq;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SaveManager")]
 public class SaveManager : KMonoBehaviour
 {
 	public event Action<SaveLoadRoot> onRegister;
@@ -106,7 +107,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(15);
+		writer.Write(16);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -198,9 +199,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 15)
+		if (num != 7 || num2 > 16)
 		{
-			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 15, num, num2 }) });
+			DebugUtil.LogWarningArgs(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 16, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -282,7 +283,9 @@ public class SaveManager : KMonoBehaviour
 
 	public const int SAVE_MINOR_VERSION_ADD_JOY_REACTIONS = 15;
 
-	public const int SAVE_MINOR_VERSION = 15;
+	public const int SAVE_MINOR_VERSION_NEW_AUTOMATION_WARNING = 16;
+
+	public const int SAVE_MINOR_VERSION = 16;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 

@@ -2,7 +2,9 @@
 using Klei;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/JuicerWorkable")]
 public class JuicerWorkable : Workable, IWorkerPrioritizable
 {
 	private JuicerWorkable()

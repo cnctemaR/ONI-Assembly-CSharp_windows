@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Filterable")]
 public class Filterable : KMonoBehaviour
 {
 	public event Action<Tag> onFilterChanged;
@@ -20,38 +21,31 @@ public class Filterable : KMonoBehaviour
 		}
 	}
 
-	public virtual IList<Tag> GetTagOptions()
+	public Dictionary<Tag, HashSet<Tag>> GetTagOptions()
 	{
-		List<Tag> list = new List<Tag>();
-		list.Add(GameTags.Void);
-		foreach (Element element in ElementLoader.elements)
+		Dictionary<Tag, HashSet<Tag>> dictionary = new Dictionary<Tag, HashSet<Tag>>();
+		if (this.filterElementState == Filterable.ElementState.Solid)
 		{
-			if (!element.disabled)
+			dictionary = WorldInventory.Instance.GetDiscoveredResourcesFromTagSet(Filterable.filterableCategories);
+		}
+		else
+		{
+			foreach (Element element in ElementLoader.elements)
 			{
-				bool flag = true;
-				if (this.filterElementState != Filterable.ElementState.None)
+				if (!element.disabled && ((element.IsGas && this.filterElementState == Filterable.ElementState.Gas) || (element.IsLiquid && this.filterElementState == Filterable.ElementState.Liquid)))
 				{
-					switch (this.filterElementState)
+					Tag materialCategoryTag = element.GetMaterialCategoryTag();
+					if (!dictionary.ContainsKey(materialCategoryTag))
 					{
-					case Filterable.ElementState.Solid:
-						flag = element.IsSolid;
-						break;
-					case Filterable.ElementState.Liquid:
-						flag = element.IsLiquid;
-						break;
-					case Filterable.ElementState.Gas:
-						flag = element.IsGas;
-						break;
+						dictionary[materialCategoryTag] = new HashSet<Tag>();
 					}
-				}
-				if (flag)
-				{
 					Tag tag = GameTagExtensions.Create(element.id);
-					list.Add(tag);
+					dictionary[materialCategoryTag].Add(tag);
 				}
 			}
 		}
-		return list;
+		dictionary.Add(GameTags.Void, new HashSet<Tag> { GameTags.Void });
+		return dictionary;
 	}
 
 	protected override void OnPrefabInit()
@@ -95,6 +89,14 @@ public class Filterable : KMonoBehaviour
 
 	[Serialize]
 	private Tag selectedTag = GameTags.Void;
+
+	private static TagSet filterableCategories = new TagSet(new TagSet[]
+	{
+		GameTags.CalorieCategories,
+		GameTags.UnitCategories,
+		GameTags.MaterialCategories,
+		GameTags.MaterialBuildingElements
+	});
 
 	private static readonly Operational.Flag filterSelected = new Operational.Flag("filterSelected", Operational.Flag.Type.Requirement);
 

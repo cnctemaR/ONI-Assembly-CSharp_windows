@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/MessStation")]
 public class MessStation : Workable, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()

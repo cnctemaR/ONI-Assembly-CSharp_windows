@@ -4,8 +4,10 @@ using Database;
 using KSerialization;
 using STRINGS;
 using TUNING;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/SpacecraftManager")]
 public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 {
 	public static void DestroyInstance()
@@ -38,7 +40,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 
 	private void GenerateRandomDestinations()
 	{
-		Random random = new Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed);
+		global::System.Random random = new global::System.Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed);
 		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
 		List<List<string>> list = new List<List<string>>
 		{
@@ -300,7 +302,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 				return spaceDestination;
 			}
 		}
-		Debug.LogErrorFormat("No space destination with ID {0}", new object[] { destinationID });
+		global::Debug.LogErrorFormat("No space destination with ID {0}", new object[] { destinationID });
 		return null;
 	}
 
@@ -364,7 +366,7 @@ public class SpacecraftManager : KMonoBehaviour, ISim1000ms
 				text = text + "\n" + (string)notification2.tooltipData;
 			}
 			return text;
-		}, "• " + spacecraft.rocketName, true, 0f, null, null, null);
+		}, "• " + spacecraft.rocketName, true, 0f, null, null, null, true);
 		spacecraft.launchConditions.gameObject.AddOrGet<Notifier>().Add(notification, "");
 	}
 

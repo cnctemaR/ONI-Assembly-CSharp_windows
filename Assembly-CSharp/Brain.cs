@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Brain")]
 public class Brain : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -4,6 +4,7 @@ using FMOD.Studio;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/UserNavigation")]
 public class UserNavigation : KMonoBehaviour
 {
 	public UserNavigation()

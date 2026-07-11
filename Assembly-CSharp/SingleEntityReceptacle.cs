@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/SingleEntityReceptacle")]
 public class SingleEntityReceptacle : Workable, IRender1000ms
 {
 	public FetchChore GetActiveRequest
@@ -279,9 +280,14 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		if (this.rotatable != null)
 		{
 			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.rotatable.GetRotatedOffset(this.occupyingObjectRelativePosition));
-			return;
 		}
-		this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.occupyingObjectRelativePosition);
+		else
+		{
+			this.occupyingObject.transform.SetPosition(base.gameObject.transform.GetPosition() + this.occupyingObjectRelativePosition);
+		}
+		KBatchedAnimController component = this.occupyingObject.GetComponent<KBatchedAnimController>();
+		component.enabled = false;
+		component.enabled = true;
 	}
 
 	private void UpdateActive()
@@ -290,7 +296,10 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		{
 			return;
 		}
-		this.operational.SetActive(this.operational.IsOperational && this.occupyingObject != null, false);
+		if (this.operational != null)
+		{
+			this.operational.SetActive(this.operational.IsOperational && this.occupyingObject != null, false);
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -309,7 +318,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		}
 	}
 
-	[MyCmpReq]
+	[MyCmpGet]
 	protected Operational operational;
 
 	[MyCmpReq]
@@ -327,7 +336,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	public Tag requestedEntityTag;
 
 	[Serialize]
-	private Ref<KSelectable> occupyObjectRef = new Ref<KSelectable>();
+	protected Ref<KSelectable> occupyObjectRef = new Ref<KSelectable>();
 
 	[SerializeField]
 	private List<Tag> possibleDepositTagsList = new List<Tag>();

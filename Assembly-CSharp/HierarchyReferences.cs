@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/HierarchyReferences")]
 public class HierarchyReferences : KMonoBehaviour
 {
 	public bool HasReference(string name)

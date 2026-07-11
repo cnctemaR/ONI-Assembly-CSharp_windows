@@ -1,6 +1,8 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/CompostWorkable")]
 public class CompostWorkable : Workable
 {
 	protected override void OnPrefabInit()

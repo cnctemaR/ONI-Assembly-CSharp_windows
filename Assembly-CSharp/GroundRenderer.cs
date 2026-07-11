@@ -4,6 +4,7 @@ using ProcGen;
 using UnityEngine;
 using UnityEngine.Rendering;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GroundRenderer")]
 public class GroundRenderer : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

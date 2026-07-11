@@ -51,7 +51,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		Extents extents = new Extents(num, num2, 1, 1);
 		UtilityConnections connections = Game.Instance.travelTubeSystem.GetConnections(Grid.XYToCell(num, num2), true);
 		this.TubeConnectionsChanged(connections);
-		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[34], new Action<object>(this.TubeChanged));
+		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[35], new Action<object>(this.TubeChanged));
 		base.Subscribe<TravelTubeEntrance>(-592767678, TravelTubeEntrance.OnOperationalChangedDelegate);
 		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Array.Empty<string>());
 		this.CreateNewWaitReactable();
@@ -416,6 +416,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		}
 	}
 
+	[AddComponentMenu("KMonoBehaviour/Workable/Work")]
 	public class Work : Workable, IGameObjectEffectDescriptor
 	{
 		protected override void OnPrefabInit()

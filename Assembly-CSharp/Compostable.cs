@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Compostable")]
 public class Compostable : KMonoBehaviour
 {
 	protected override void OnSpawn()

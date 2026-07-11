@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/MinimumOperatingTemperature")]
 public class MinimumOperatingTemperature : KMonoBehaviour, ISim200ms, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()

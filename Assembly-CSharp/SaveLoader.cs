@@ -12,6 +12,7 @@ using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SaveLoader")]
 public class SaveLoader : KMonoBehaviour
 {
 	public bool loadedFromSave { get; private set; }
@@ -659,7 +660,6 @@ public class SaveLoader : KMonoBehaviour
 		}
 		Dictionary<string, object> dictionary = new Dictionary<string, object>();
 		dictionary[GameClock.NewCycleKey] = GameClock.Instance.GetCycle() + 1;
-		dictionary["WasDebugEverUsed"] = Game.Instance.debugWasUsed;
 		dictionary["IsAutoSave"] = is_auto_save;
 		dictionary["SavedPrefabs"] = this.GetSavedPrefabMetrics();
 		dictionary["ResourcesAccessible"] = this.GetWorldInventoryMetrics();
@@ -671,7 +671,7 @@ public class SaveLoader : KMonoBehaviour
 			dictionary["AverageFrameTime"] = this.GetFrameTime();
 		}
 		dictionary["CustomGameSettings"] = CustomGameSettings.Instance.GetSettingsForMetrics();
-		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary);
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary, "ReportSaveMetrics");
 	}
 
 	private List<SaveLoader.MinionMetricsData> GetMinionMetrics()
@@ -863,6 +863,8 @@ public class SaveLoader : KMonoBehaviour
 	public const string METRIC_IS_AUTO_SAVE_KEY = "IsAutoSave";
 
 	public const string METRIC_WAS_DEBUG_EVER_USED = "WasDebugEverUsed";
+
+	public const string METRIC_IS_SANDBOX_ENABLED = "IsSandboxEnabled";
 
 	public const string METRIC_RESOURCES_ACCESSIBLE_KEY = "ResourcesAccessible";
 

@@ -317,7 +317,7 @@ public class NotificationScreen : KScreen
 		{
 			num = 0f;
 		}
-		float num2 = (Time.time - num) / this.soundDecayTime;
+		float num2 = (notification.volume_attenuation ? ((Time.time - num) / this.soundDecayTime) : 1f);
 		this.timeOfLastNotification[text] = Time.time;
 		string text2;
 		if (count > 1)
@@ -433,6 +433,59 @@ public class NotificationScreen : KScreen
 		{
 			return this.badColorBG;
 		}
+	}
+
+	public Sprite GetNotificationIcon(NotificationType type)
+	{
+		switch (type)
+		{
+		case NotificationType.Bad:
+			return this.icon_bad;
+		case NotificationType.Tutorial:
+			return this.icon_warning;
+		case NotificationType.Messages:
+			return this.icon_message;
+		case NotificationType.DuplicantThreatening:
+			return this.icon_bad;
+		}
+		return this.icon_normal;
+	}
+
+	public Color GetNotificationColour(NotificationType type)
+	{
+		switch (type)
+		{
+		case NotificationType.Bad:
+			return this.badColor;
+		case NotificationType.Tutorial:
+			return this.warningColor;
+		case NotificationType.Messages:
+			return this.messageColor;
+		case NotificationType.DuplicantThreatening:
+			return this.badColor;
+		}
+		return this.normalColor;
+	}
+
+	public Color GetNotificationBGColour(NotificationType type)
+	{
+		switch (type)
+		{
+		case NotificationType.Bad:
+			return this.badColorBG;
+		case NotificationType.Tutorial:
+			return this.warningColorBG;
+		case NotificationType.Messages:
+			return this.messageColorBG;
+		case NotificationType.DuplicantThreatening:
+			return this.badColorBG;
+		}
+		return this.normalColorBG;
+	}
+
+	public string GetNotificationSound(NotificationType type)
+	{
+		return this.notificationSounds[type];
 	}
 
 	public float lifetime;

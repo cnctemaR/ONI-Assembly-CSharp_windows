@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FabricatorIngredientStatusManager")]
 public class FabricatorIngredientStatusManager : KMonoBehaviour, ISim1000ms
 {
 	protected override void OnSpawn()

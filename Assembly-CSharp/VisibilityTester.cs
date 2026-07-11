@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/VisibilityTester")]
 public class VisibilityTester : KMonoBehaviour
 {
 	public static void DestroyInstance()

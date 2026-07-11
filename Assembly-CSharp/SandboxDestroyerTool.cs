@@ -76,7 +76,7 @@ public class SandboxDestroyerTool : BrushTool
 		float num = 0f;
 		float num2 = 0f;
 		int num3 = index;
-		SimMessages.ReplaceElement(cell2, simHashes, sandBoxTool, num, num2, Db.Get().Diseases.GetIndex(this.settings.Disease.IdHash), 0, num3);
+		SimMessages.ReplaceElement(cell2, simHashes, sandBoxTool, num, num2, Db.Get().Diseases.GetIndex(Db.Get().Diseases.Get(this.settings.GetStringSetting("SandboxTools.SelectedDisease")).id), 0, num3);
 		HashSetPool<GameObject, SandboxDestroyerTool>.PooledHashSet pooledHashSet = HashSetPool<GameObject, SandboxDestroyerTool>.Allocate();
 		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{

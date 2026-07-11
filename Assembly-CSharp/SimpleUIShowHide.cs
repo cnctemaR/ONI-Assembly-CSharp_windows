@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SimpleUIShowHide")]
 public class SimpleUIShowHide : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -421,6 +421,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private SuitLocker.SuitMarkerState suitMarkerState;
 
+	[AddComponentMenu("KMonoBehaviour/Workable/ReturnSuitWorkable")]
 	public class ReturnSuitWorkable : Workable
 	{
 		protected override void OnPrefabInit()

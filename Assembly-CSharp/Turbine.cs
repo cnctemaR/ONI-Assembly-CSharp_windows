@@ -3,6 +3,7 @@ using Klei;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Turbine")]
 public class Turbine : KMonoBehaviour
 {
 	protected override void OnSpawn()

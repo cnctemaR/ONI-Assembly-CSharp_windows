@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/RequireOutputs")]
 public class RequireOutputs : KMonoBehaviour
 {
 	protected override void OnSpawn()

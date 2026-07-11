@@ -1,6 +1,8 @@
 ﻿using System;
 using FMODUnity;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Sounds")]
 public class Sounds : KMonoBehaviour
 {
 	public static Sounds Instance { get; private set; }

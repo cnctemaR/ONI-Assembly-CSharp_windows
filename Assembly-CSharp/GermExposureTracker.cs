@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using KSerialization;
 using ProcGen;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/GermExposureTracker")]
 public class GermExposureTracker : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		Debug.Assert(GermExposureTracker.Instance == null);
+		global::Debug.Assert(GermExposureTracker.Instance == null);
 		GermExposureTracker.Instance = this;
 	}
 

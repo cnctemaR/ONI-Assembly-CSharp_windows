@@ -5,6 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/UnstableGroundManager")]
 public class UnstableGroundManager : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

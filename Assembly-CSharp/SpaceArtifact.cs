@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/SpaceArtifact")]
 public class SpaceArtifact : KMonoBehaviour, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	public void SetArtifactTier(ArtifactTier tier)

@@ -41,16 +41,28 @@ public static class Debug
 
 	public static void LogException(Exception exception)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::UnityEngine.Debug.LogException(exception);
 	}
 
 	public static void Log(object obj)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[] { "[INFO]", obj });
 	}
 
 	public static void Log(object obj, global::UnityEngine.Object context)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[INFO]",
@@ -61,6 +73,10 @@ public static class Debug
 
 	public static void LogFormat(string format, params object[] args)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[INFO]",
@@ -70,6 +86,10 @@ public static class Debug
 
 	public static void LogFormat(global::UnityEngine.Object context, string format, params object[] args)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[INFO]",
@@ -80,11 +100,19 @@ public static class Debug
 
 	public static void LogWarning(object obj)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[] { "[WARNING]", obj });
 	}
 
 	public static void LogWarning(object obj, global::UnityEngine.Object context)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[WARNING]",
@@ -95,6 +123,10 @@ public static class Debug
 
 	public static void LogWarningFormat(string format, params object[] args)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[WARNING]",
@@ -104,6 +136,10 @@ public static class Debug
 
 	public static void LogWarningFormat(global::UnityEngine.Object context, string format, params object[] args)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[WARNING]",
@@ -114,12 +150,20 @@ public static class Debug
 
 	public static void LogError(object obj)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[] { "[ERROR]", obj });
 		global::UnityEngine.Debug.LogError(obj);
 	}
 
 	public static void LogError(object obj, global::UnityEngine.Object context)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[ERROR]",
@@ -131,6 +175,10 @@ public static class Debug
 
 	public static void LogErrorFormat(string format, params object[] args)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[ERROR]",
@@ -141,6 +189,10 @@ public static class Debug
 
 	public static void LogErrorFormat(global::UnityEngine.Object context, string format, params object[] args)
 	{
+		if (global::Debug.s_loggingDisabled)
+		{
+			return;
+		}
 		global::Debug.WriteTimeStamped(new object[]
 		{
 			"[ERROR]",
@@ -177,6 +229,11 @@ public static class Debug
 		}
 	}
 
+	public static void DisableLogging()
+	{
+		global::Debug.s_loggingDisabled = true;
+	}
+
 	[Conditional("UNITY_EDITOR")]
 	public static void DrawLine(Vector3 start, Vector3 end, Color color = default(Color), float duration = 0f, bool depthTest = true)
 	{
@@ -188,4 +245,6 @@ public static class Debug
 	{
 		global::UnityEngine.Debug.DrawRay(start, dir, color, duration, depthTest);
 	}
+
+	private static bool s_loggingDisabled;
 }

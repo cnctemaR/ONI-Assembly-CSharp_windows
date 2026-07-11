@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MinionTodoChoreEntry")]
 public class MinionTodoChoreEntry : KMonoBehaviour
 {
 	public void SetMoreAmount(int amount)

@@ -1,7 +1,9 @@
 ﻿using System;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/ArcadeMachineWorkable")]
 public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 {
 	private ArcadeMachineWorkable()

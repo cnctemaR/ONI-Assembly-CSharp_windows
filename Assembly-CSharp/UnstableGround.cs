@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptOut)]
+[AddComponentMenu("KMonoBehaviour/scripts/UnstableGround")]
 public class UnstableGround : KMonoBehaviour
 {
 	public SimHashes element;

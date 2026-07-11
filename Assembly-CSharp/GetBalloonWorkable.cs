@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/GetBalloonWorkable")]
 public class GetBalloonWorkable : Workable
 {
 	protected override void OnPrefabInit()

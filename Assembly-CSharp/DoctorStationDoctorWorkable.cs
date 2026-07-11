@@ -1,6 +1,8 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/DoctorStationDoctorWorkable")]
 public class DoctorStationDoctorWorkable : Workable
 {
 	private DoctorStationDoctorWorkable()

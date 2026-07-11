@@ -244,7 +244,8 @@ namespace Database
 					"HighWattageWire",
 					"WireBridgeHighWattage",
 					"PowerTransformerSmall",
-					LogicPowerRelayConfig.ID
+					LogicPowerRelayConfig.ID,
+					LogicWattageSensorConfig.ID
 				}
 			},
 			{
@@ -305,6 +306,10 @@ namespace Database
 				new string[] { "GlassTile", "FlowerVaseHangingFancy", "SunLamp" }
 			},
 			{
+				"Screens",
+				new string[] { PixelPackConfig.ID }
+			},
+			{
 				"RenaissanceArt",
 				new string[] { "MarbleSculpture", "CanvasTall", "MonumentBottom", "MonumentMiddle", "MonumentTop" }
 			},
@@ -327,6 +332,18 @@ namespace Database
 			{
 				"AdvancedResearch",
 				new string[] { "AdvancedResearchCenter", "BetaResearchPoint", "ResetSkillsStation" }
+			},
+			{
+				"NotificationSystems",
+				new string[]
+				{
+					LogicHammerConfig.ID,
+					LogicAlarmConfig.ID
+				}
+			},
+			{
+				"ArtificialFriends",
+				new string[] { "SweepBotStation" }
 			},
 			{
 				"BasicRefinement",
@@ -387,6 +404,7 @@ namespace Database
 				new string[]
 				{
 					LogicTimeOfDaySensorConfig.ID,
+					LogicTimerSensorConfig.ID,
 					"FloorSwitch",
 					LogicElementSensorGasConfig.ID,
 					LogicElementSensorLiquidConfig.ID,
@@ -399,6 +417,16 @@ namespace Database
 				new string[] { "LogicGateAND", "LogicGateOR", "LogicGateBUFFER", "LogicGateFILTER" }
 			},
 			{
+				"ParallelAutomation",
+				new string[]
+				{
+					"LogicRibbon",
+					"LogicRibbonBridge",
+					LogicRibbonWriterConfig.ID,
+					LogicRibbonReaderConfig.ID
+				}
+			},
+			{
 				"DupeTrafficControl",
 				new string[]
 				{
@@ -406,8 +434,13 @@ namespace Database
 					LogicMemoryConfig.ID,
 					"ArcadeMachine",
 					"CosmicResearchCenter",
-					"LogicGateXOR"
+					"LogicGateXOR",
+					LogicCounterConfig.ID
 				}
+			},
+			{
+				"Multiplexing",
+				new string[] { "LogicGateMultiplexer", "LogicGateDemultiplexer" }
 			},
 			{
 				"SkyDetectors",
@@ -429,6 +462,16 @@ namespace Database
 			{
 				"SolidTransport",
 				new string[] { "SolidConduit", "SolidConduitBridge", "SolidConduitInbox", "SolidConduitOutbox", "SolidVent", "SolidLogicValve", "AutoMiner" }
+			},
+			{
+				"SolidManagement",
+				new string[]
+				{
+					"SolidFilter",
+					SolidConduitTemperatureSensorConfig.ID,
+					SolidConduitElementSensorConfig.ID,
+					SolidConduitDiseaseSensorConfig.ID
+				}
 			},
 			{
 				"BasicRocketry",

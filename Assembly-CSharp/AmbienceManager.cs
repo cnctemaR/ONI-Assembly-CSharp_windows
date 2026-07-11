@@ -5,6 +5,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AmbienceManager")]
 public class AmbienceManager : KMonoBehaviour
 {
 	protected override void OnSpawn()

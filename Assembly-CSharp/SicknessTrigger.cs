@@ -4,6 +4,7 @@ using Database;
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SicknessTrigger")]
 public class SicknessTrigger : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public void AddTrigger(GameHashes src_event, string[] sickness_ids, SicknessTrigger.SourceCallback source_callback)

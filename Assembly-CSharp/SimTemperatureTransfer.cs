@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/SimTemperatureTransfer")]
 public class SimTemperatureTransfer : KMonoBehaviour
 {
 	public float SurfaceArea

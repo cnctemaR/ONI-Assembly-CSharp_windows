@@ -2,6 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CopyBuildingSettings")]
 public class CopyBuildingSettings : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

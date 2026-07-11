@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/StarmapPlanet")]
 public class StarmapPlanet : KMonoBehaviour
 {
 	public void SetSprite(Sprite sprite, Color color)

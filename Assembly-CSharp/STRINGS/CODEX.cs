@@ -63,6 +63,10 @@ namespace STRINGS
 			public static LocString CONTENTLOCKED = "Undiscovered";
 
 			public static LocString CONTENTLOCKED_SUBTITLE = "More research or exploration is required";
+
+			public static LocString INTERNALBATTERY = "Battery";
+
+			public static LocString INTERNALSTORAGE = "Storage";
 		}
 
 		public class CREATURE_DESCRIPTORS
@@ -72,6 +76,19 @@ namespace STRINGS
 				public static LocString COMFORT_RANGE = "Comfort range: <b>{0}</b> to <b>{1}</b>";
 
 				public static LocString NON_LETHAL_RANGE = "Livable range: <b>{0}</b> to <b>{1}</b>";
+			}
+		}
+
+		public class ROBOT_DESCRIPTORS
+		{
+			public class BATTERY
+			{
+				public static LocString CAPACITY = "Battery capacity: <b>{0}" + UI.UNITSUFFIXES.ELECTRICAL.JOULE + "</b>";
+			}
+
+			public class STORAGE
+			{
+				public static LocString CAPACITY = "Internal storage: <b>{0}" + UI.UNITSUFFIXES.MASS.KILOGRAM + "</b>";
 			}
 		}
 
@@ -491,6 +508,18 @@ namespace STRINGS
 				public static LocString CONTAINER1 = "<smallcaps>Pictured: \"Longhair\" Slickster variant</smallcaps>";
 
 				public static LocString CONTAINER2 = "Positioned on either side of the Major Rhinophores are Minor Rhinophores, which specialize in mechanical reception and detect air pressure around the Slickster. These send signals to the brain to contract or expand its air sacks accordingly.";
+			}
+		}
+
+		public class SWEEPY
+		{
+			public static LocString TITLE = "Sweepy";
+
+			public static LocString SUBTITLE = "Cleaning Robot";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "The Sweepy is a domesticated sweeping robot programmed to clean solid and liquid debris. The Sweepy Dock will automatically launch the Sweepy, store the debris the robot picks up, and recharge the Sweepy's battery provided it has been plugged into a power source.\n\nThough the Sweepy can not travel over gaps or uneven ground, it is programmed to feel really bad about this.";
 			}
 		}
 

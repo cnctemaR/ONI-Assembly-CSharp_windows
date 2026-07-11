@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AmbientSoundManager")]
 public class AmbientSoundManager : KMonoBehaviour
 {
 	public static AmbientSoundManager Instance { get; private set; }

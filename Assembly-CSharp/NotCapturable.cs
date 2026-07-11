@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/NotCapturable")]
 public class NotCapturable : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/TravelTubeBridge")]
 public class TravelTubeBridge : KMonoBehaviour, ITravelTubePiece
 {
 	public Vector3 Position

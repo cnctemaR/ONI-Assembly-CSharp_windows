@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/SolidConduitSerializer")]
 public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 {
 	protected override void OnPrefabInit()
@@ -48,7 +50,7 @@ public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 					}
 					else
 					{
-						Debug.Log("Tried to save obj in solid conduit but obj has no SaveLoadRoot", pickupable.gameObject);
+						global::Debug.Log("Tried to save obj in solid conduit but obj has no SaveLoadRoot", pickupable.gameObject);
 					}
 				}
 			}
@@ -74,7 +76,7 @@ public class SolidConduitSerializer : KMonoBehaviour, ISaveLoadableDetails
 			}
 			else
 			{
-				Debug.Log("Tried to deserialize " + tag.ToString() + " into storage but failed", base.gameObject);
+				global::Debug.Log("Tried to deserialize " + tag.ToString() + " into storage but failed", base.gameObject);
 			}
 		}
 	}

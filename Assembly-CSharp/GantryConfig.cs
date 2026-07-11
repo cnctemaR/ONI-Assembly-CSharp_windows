@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -31,6 +32,7 @@ public class GantryConfig : IBuildingConfig
 		buildingDef.SelfHeatKilowattsWhenActive = 1f;
 		buildingDef.OverheatTemperature = 2273.15f;
 		buildingDef.AudioCategory = "Metal";
+		buildingDef.LogicInputPorts = new List<LogicPorts.Port> { LogicPorts.Port.InputPort(Gantry.PORT_ID, new CellOffset(-1, 1), global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT_INACTIVE, false, false) };
 		return buildingDef;
 	}
 
@@ -39,24 +41,11 @@ public class GantryConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, GantryConfig.INPUT_PORTS);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, GantryConfig.INPUT_PORTS);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<Gantry>();
-		GeneratedBuildings.RegisterLogicPorts(go, GantryConfig.INPUT_PORTS);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicOperationalController>());
 	}
 
 	public const string ID = "Gantry";
-
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Gantry.PORT_ID, new CellOffset(-1, 1), global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.GANTRY.LOGIC_PORT_INACTIVE, false, false) };
 }

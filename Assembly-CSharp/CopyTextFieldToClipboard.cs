@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CopyTextFieldToClipboard")]
 public class CopyTextFieldToClipboard : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

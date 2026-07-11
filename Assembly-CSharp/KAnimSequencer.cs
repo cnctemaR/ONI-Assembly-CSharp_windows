@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/KAnimSequencer")]
 public class KAnimSequencer : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()

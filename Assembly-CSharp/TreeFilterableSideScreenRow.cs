@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TreeFilterableSideScreenRow")]
 public class TreeFilterableSideScreenRow : KMonoBehaviour
 {
 	public TreeFilterableSideScreen Parent

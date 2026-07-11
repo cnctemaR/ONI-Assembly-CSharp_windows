@@ -27,18 +27,20 @@ public class SandboxSpawnerTool : InterfaceTool
 		{
 			return;
 		}
-		if (SandboxToolParameterMenu.instance.settings.Entity.PrefabID() == MinionConfig.ID)
+		string stringSetting = SandboxToolParameterMenu.instance.settings.GetStringSetting("SandboxTools.SelectedEntity");
+		GameObject prefab = Assets.GetPrefab(stringSetting);
+		if (stringSetting == MinionConfig.ID)
 		{
 			this.SpawnMinion();
 		}
-		else if (SandboxToolParameterMenu.instance.settings.Entity.GetComponent<Building>() != null)
+		else if (prefab.GetComponent<Building>() != null)
 		{
-			BuildingDef def = SandboxToolParameterMenu.instance.settings.Entity.GetComponent<Building>().Def;
+			BuildingDef def = prefab.GetComponent<Building>().Def;
 			def.Build(cell, Orientation.Neutral, null, def.DefaultElements(), 298.15f, true, -1f);
 		}
 		else
 		{
-			GameUtil.KInstantiate(Assets.GetPrefab(SandboxToolParameterMenu.instance.settings.Entity.PrefabTag), Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0).SetActive(true);
+			GameUtil.KInstantiate(prefab, Grid.CellToPosCBC(this.currentCell, Grid.SceneLayer.Creatures), Grid.SceneLayer.Creatures, null, 0).SetActive(true);
 		}
 		UISounds.PlaySound(UISounds.Sound.ClickObject);
 	}

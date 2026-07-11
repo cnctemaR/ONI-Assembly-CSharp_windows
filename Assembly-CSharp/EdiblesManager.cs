@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EdiblesManager")]
 public class EdiblesManager : KMonoBehaviour
 {
 	public static EdiblesManager.FoodInfo GetFoodInfo(string foodID)

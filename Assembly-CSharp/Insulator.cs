@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Insulator")]
 public class Insulator : KMonoBehaviour
 {
 	protected override void OnSpawn()

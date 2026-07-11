@@ -3,6 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/CO2")]
 public class CO2 : KMonoBehaviour
 {
 	public void StartLoop()

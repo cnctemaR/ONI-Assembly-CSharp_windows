@@ -112,10 +112,6 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			{
 				return false;
 			}
-			if (capturable.HasTag(GameTags.Creatures.Bagged))
-			{
-				return false;
-			}
 			if (capturable.targetCapturePoint != capture_point && !capturable.targetCapturePoint.IsNullOrStopped())
 			{
 				return false;
@@ -124,13 +120,17 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			{
 				return false;
 			}
-			if (!capturable.GetComponent<ChoreConsumer>().IsChoreEqualOrAboveCurrentChorePriority<FixedCaptureStates>())
-			{
-				return false;
-			}
 			int num = Grid.PosToCell(capturable.transform.GetPosition());
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
 			if (cavityForCell == null || cavityForCell != capture_cavity_info)
+			{
+				return false;
+			}
+			if (capturable.HasTag(GameTags.Creatures.Bagged))
+			{
+				return false;
+			}
+			if (!capturable.GetComponent<ChoreConsumer>().IsChoreEqualOrAboveCurrentChorePriority<FixedCaptureStates>())
 			{
 				return false;
 			}
@@ -158,13 +158,19 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 			}
 			if (this.targetCapturable.IsNullOrStopped())
 			{
-				FixedCapturePoint.Instance.CapturableIterator capturableIterator = new FixedCapturePoint.Instance.CapturableIterator(this, cavityForCell, num);
-				GameScenePartitioner.Instance.Iterate<FixedCapturePoint.Instance.CapturableIterator>(cavityForCell.minX, cavityForCell.minY, cavityForCell.maxX - cavityForCell.minX + 1, cavityForCell.maxY - cavityForCell.minY + 1, GameScenePartitioner.Instance.collisionLayer, ref capturableIterator);
-				capturableIterator.Cleanup();
-				this.targetCapturable = capturableIterator.result;
-				if (!this.targetCapturable.IsNullOrStopped())
+				foreach (object obj in Components.FixedCapturableMonitors)
 				{
-					this.targetCapturable.targetCapturePoint = this;
+					FixedCapturableMonitor.Instance instance = (FixedCapturableMonitor.Instance)obj;
+					if (FixedCapturePoint.Instance.CanCapturableBeCapturedAtCapturePoint(instance, this, cavityForCell, num))
+					{
+						this.targetCapturable = instance;
+						if (!this.targetCapturable.IsNullOrStopped())
+						{
+							this.targetCapturable.targetCapturePoint = this;
+							break;
+						}
+						break;
+					}
 				}
 			}
 		}
@@ -212,47 +218,6 @@ public class FixedCapturePoint : GameStateMachine<FixedCapturePoint, FixedCaptur
 		void ICheckboxControl.SetCheckboxValue(bool value)
 		{
 			base.sm.automated.Set(value, this);
-		}
-
-		private struct CapturableIterator : GameScenePartitioner.Iterator
-		{
-			public FixedCapturableMonitor.Instance result { get; private set; }
-
-			public CapturableIterator(FixedCapturePoint.Instance capture_point, CavityInfo capture_cavity_info, int capture_cell)
-			{
-				this.capturePoint = capture_point;
-				this.captureCavityInfo = capture_cavity_info;
-				this.captureCell = capture_cell;
-				this.result = null;
-			}
-
-			public void Iterate(object target_obj)
-			{
-				KMonoBehaviour kmonoBehaviour = target_obj as KMonoBehaviour;
-				if (kmonoBehaviour == null)
-				{
-					return;
-				}
-				FixedCapturableMonitor.Instance smi = kmonoBehaviour.GetSMI<FixedCapturableMonitor.Instance>();
-				if (smi == null)
-				{
-					return;
-				}
-				if (FixedCapturePoint.Instance.CanCapturableBeCapturedAtCapturePoint(smi, this.capturePoint, this.captureCavityInfo, this.captureCell))
-				{
-					this.result = smi;
-				}
-			}
-
-			public void Cleanup()
-			{
-			}
-
-			private CavityInfo captureCavityInfo;
-
-			private int captureCell;
-
-			private FixedCapturePoint.Instance capturePoint;
 		}
 	}
 }

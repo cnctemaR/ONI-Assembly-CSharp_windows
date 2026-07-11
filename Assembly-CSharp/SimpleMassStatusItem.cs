@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SimpleMassStatusItem")]
 public class SimpleMassStatusItem : KMonoBehaviour
 {
 	protected override void OnSpawn()

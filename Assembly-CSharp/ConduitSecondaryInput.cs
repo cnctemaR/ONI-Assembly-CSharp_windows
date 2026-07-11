@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ConduitSecondaryInput")]
 public class ConduitSecondaryInput : KMonoBehaviour, ISecondaryInput
 {
 	public ConduitType GetSecondaryConduitType()

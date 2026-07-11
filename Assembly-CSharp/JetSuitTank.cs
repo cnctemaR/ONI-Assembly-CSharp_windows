@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/JetSuitTank")]
 public class JetSuitTank : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()

@@ -5,6 +5,7 @@ using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Pickupable")]
 public class Pickupable : Workable, IHasSortOrder
 {
 	public PrimaryElement PrimaryElement
@@ -34,18 +35,6 @@ public class Pickupable : Workable, IHasSortOrder
 	public bool wasAbsorbed { get; private set; }
 
 	public int cachedCell { get; private set; }
-
-	public int storageCell
-	{
-		get
-		{
-			if (!(this.storage != null))
-			{
-				return this.cachedCell;
-			}
-			return Grid.PosToCell(this.storage);
-		}
-	}
 
 	public bool IsEntombed
 	{

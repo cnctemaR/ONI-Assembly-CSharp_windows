@@ -7,6 +7,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ScheduleManager")]
 public class ScheduleManager : KMonoBehaviour, ISim33ms
 {
 	public event Action<List<Schedule>> onSchedulesChanged;
@@ -168,7 +169,7 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 
 	public void PlayScheduleAlarm(Schedule schedule, ScheduleBlock block, bool forwards)
 	{
-		Notification notification = new Notification(string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.NAME, schedule.name, block.name), NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.TOOLTIP, schedule.name, block.name, Db.Get().ScheduleGroups.Get(block.GroupId).notificationTooltip), null, true, 0f, null, null, null);
+		Notification notification = new Notification(string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.NAME, schedule.name, block.name), NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => string.Format(MISC.NOTIFICATIONS.SCHEDULE_CHANGED.TOOLTIP, schedule.name, block.name, Db.Get().ScheduleGroups.Get(block.GroupId).notificationTooltip), null, true, 0f, null, null, null, true);
 		base.GetComponent<Notifier>().Add(notification, "");
 		base.StartCoroutine(this.PlayScheduleTone(schedule, forwards));
 	}

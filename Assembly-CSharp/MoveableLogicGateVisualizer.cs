@@ -72,11 +72,28 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 			return;
 		}
 		base.enabled = true;
-		this.visChildren.Add(this.CreateUIElem(base.OutputCell, false));
+		this.visChildren.Add(this.CreateUIElem(base.OutputCellOne, false));
+		if (base.RequiresFourOutputs)
+		{
+			this.visChildren.Add(this.CreateUIElem(base.OutputCellTwo, false));
+			this.visChildren.Add(this.CreateUIElem(base.OutputCellThree, false));
+			this.visChildren.Add(this.CreateUIElem(base.OutputCellFour, false));
+		}
 		this.visChildren.Add(this.CreateUIElem(base.InputCellOne, true));
 		if (base.RequiresTwoInputs)
 		{
 			this.visChildren.Add(this.CreateUIElem(base.InputCellTwo, true));
+		}
+		else if (base.RequiresFourInputs)
+		{
+			this.visChildren.Add(this.CreateUIElem(base.InputCellTwo, true));
+			this.visChildren.Add(this.CreateUIElem(base.InputCellThree, true));
+			this.visChildren.Add(this.CreateUIElem(base.InputCellFour, true));
+		}
+		if (base.RequiresControlInputs)
+		{
+			this.visChildren.Add(this.CreateUIElem(base.ControlCellOne, true));
+			this.visChildren.Add(this.CreateUIElem(base.ControlCellTwo, true));
 		}
 	}
 

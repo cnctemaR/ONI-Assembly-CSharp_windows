@@ -1,6 +1,8 @@
 ﻿using System;
 using ProcGen;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ZoneTile")]
 public class ZoneTile : KMonoBehaviour
 {
 	protected override void OnSpawn()

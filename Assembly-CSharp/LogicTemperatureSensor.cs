@@ -62,13 +62,13 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 		this.averageTemp /= 8f;
 		if (this.activateOnWarmerThan)
 		{
-			if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && base.IsSwitchedOn))
+			if ((this.averageTemp > this.thresholdTemperature && !base.IsSwitchedOn) || (this.averageTemp <= this.thresholdTemperature && base.IsSwitchedOn))
 			{
 				this.Toggle();
 				return;
 			}
 		}
-		else if ((this.averageTemp > this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
+		else if ((this.averageTemp >= this.thresholdTemperature && base.IsSwitchedOn) || (this.averageTemp < this.thresholdTemperature && !base.IsSwitchedOn))
 		{
 			this.Toggle();
 		}

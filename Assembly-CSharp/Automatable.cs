@@ -3,6 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Automatable")]
 public class Automatable : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

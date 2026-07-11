@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GoodnessSlider")]
 public class GoodnessSlider : KMonoBehaviour
 {
 	protected override void OnSpawn()

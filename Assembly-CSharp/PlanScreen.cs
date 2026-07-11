@@ -68,7 +68,7 @@ public class PlanScreen : KIconToggleMenu
 		else
 		{
 			base.OnPrefabInit();
-			this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, this.recipeInfoScreenParent, true);
+			this.productInfoScreen = global::Util.KInstantiateUI<ProductInfoScreen>(this.productInfoScreenPrefab, this.recipeInfoScreenParent, false);
 			this.productInfoScreen.rectTransform().pivot = new Vector2(0f, 0f);
 			this.productInfoScreen.rectTransform().SetLocalPosition(new Vector3(280f, 0f, 0f));
 			this.productInfoScreen.onElementsFullySelected = new global::System.Action(this.OnRecipeElementsFullySelected);
@@ -214,6 +214,12 @@ public class PlanScreen : KIconToggleMenu
 					this.OpenCategoryByName(HashCache.Get().Get(planInfo.category));
 					this.OnSelectBuilding(this.ActiveToggles[building.Def].gameObject, building.Def);
 					this.productInfoScreen.materialSelectionPanel.SelectSourcesMaterials(building);
+					Rotatable component = building.GetComponent<Rotatable>();
+					if (component != null)
+					{
+						BuildTool.Instance.SetToolOrientation(component.GetOrientation());
+						break;
+					}
 					break;
 				}
 			}
@@ -240,7 +246,6 @@ public class PlanScreen : KIconToggleMenu
 	protected override void OnCmpEnable()
 	{
 		this.Refresh();
-		this.productInfoScreen.Show(false);
 	}
 
 	protected override void OnCmpDisable()

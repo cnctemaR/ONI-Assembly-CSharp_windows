@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DietManager")]
 public class DietManager : KMonoBehaviour
 {
 	public static void DestroyInstance()
@@ -31,7 +33,7 @@ public class DietManager : KMonoBehaviour
 				{
 					if (Assets.GetPrefab(tag2) == null)
 					{
-						Debug.LogError("Could not find prefab: " + tag2);
+						global::Debug.LogError("Could not find prefab: " + tag2);
 					}
 				}
 			}

@@ -7,6 +7,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/PrimaryElement")]
 public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 {
 	public void SetUseSimDiseaseInfo(bool use)

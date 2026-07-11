@@ -30,19 +30,10 @@ public class PressureDoorConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.InteriorWall;
+		buildingDef.LogicInputPorts = DoorConfig.CreateSingleInputPortList(new CellOffset(0, 0));
 		SoundEventVolumeCache.instance.AddVolume("door_external_kanim", "Open_DoorPressure", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_external_kanim", "Close_DoorPressure", NOISE_POLLUTION.NOISY.TIER2);
 		return buildingDef;
-	}
-
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -59,7 +50,6 @@ public class PressureDoorConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		go.AddOrGet<CopyBuildingSettings>().copyGroupTag = GameTags.Door;
 		go.AddOrGet<Workable>().workTime = 5f;
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_0_0);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
 		go.GetComponent<AccessControl>().controlEnabled = true;
 		go.GetComponent<KBatchedAnimController>().initialAnim = "closed";

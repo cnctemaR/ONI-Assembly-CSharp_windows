@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FactionManager")]
 public class FactionManager : KMonoBehaviour
 {
 	public static void DestroyInstance()

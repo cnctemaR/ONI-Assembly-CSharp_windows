@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Switch")]
 public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 {
 	public bool IsSwitchedOn

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DestroyAfter")]
 public class DestroyAfter : KMonoBehaviour
 {
 	protected override void OnSpawn()

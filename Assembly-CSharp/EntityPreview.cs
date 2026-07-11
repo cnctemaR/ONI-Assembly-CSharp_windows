@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EntityPreview")]
 public class EntityPreview : KMonoBehaviour
 {
 	public bool Valid { get; private set; }
@@ -46,7 +47,7 @@ public class EntityPreview : KMonoBehaviour
 	public void UpdateValidity()
 	{
 		bool valid = this.Valid;
-		this.Valid = this.occupyArea.TestArea(Grid.PosToCell(this), this, new Func<int, object, bool>(EntityPreview.ValidTest));
+		this.Valid = this.occupyArea.TestArea(Grid.PosToCell(this), this, EntityPreview.ValidTestDelegate);
 		if (this.Valid)
 		{
 			this.animController.TintColour = Color.white;
@@ -81,4 +82,6 @@ public class EntityPreview : KMonoBehaviour
 	private HandleVector<int>.Handle solidPartitionerEntry;
 
 	private HandleVector<int>.Handle objectPartitionerEntry;
+
+	private static readonly Func<int, object, bool> ValidTestDelegate = (int cell, object data) => EntityPreview.ValidTest(cell, data);
 }

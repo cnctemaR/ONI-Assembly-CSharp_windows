@@ -29,6 +29,7 @@ public class PolymerizerConfig : IBuildingConfig
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 1);
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 1));
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		return buildingDef;
 	}
@@ -67,19 +68,8 @@ public class PolymerizerConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_1);
 		go.AddOrGet<LogicOperationalController>();
 		go.AddOrGetDef<PoweredActiveController.Def>();
 	}

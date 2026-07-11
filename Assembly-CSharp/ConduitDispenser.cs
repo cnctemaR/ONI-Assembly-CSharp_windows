@@ -4,6 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/ConduitDispenser")]
 public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 {
 	public ConduitType TypeOfConduit

@@ -10,6 +10,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(global::KSerialization.MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/SaveGame")]
 public class SaveGame : KMonoBehaviour, ISaveLoadable
 {
 	public int AutoSaveCycleInterval
@@ -81,7 +82,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		string text = JsonConvert.SerializeObject(new SaveGame.GameInfo(GameClock.Instance.GetCycle(), Components.LiveMinionIdentities.Count, this.baseName, isAutoSave, SaveLoader.GetActiveSaveFilePath(), SaveLoader.Instance.GameInfo.worldID, SaveLoader.Instance.GameInfo.worldTraits, this.sandboxEnabled));
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 394616U;
+		header.buildVersion = 398142U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = (isCompressed ? 1 : 0);
@@ -119,7 +120,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	{
 		if (string.IsNullOrEmpty(newBaseName))
 		{
-			global::UnityEngine.Debug.LogWarning("Cannot give the base an empty name");
+			global::Debug.LogWarning("Cannot give the base an empty name");
 			return;
 		}
 		this.baseName = newBaseName;
@@ -229,7 +230,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.worldTraits = worldTraits;
 			this.sandboxEnabled = sandboxEnabled;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 15;
+			this.saveMinorVersion = 16;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)

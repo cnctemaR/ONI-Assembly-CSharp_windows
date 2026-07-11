@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LightShapePreview")]
 public class LightShapePreview : KMonoBehaviour
 {
 	private void Update()

@@ -4,6 +4,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/ResearchCenter")]
 public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 {
 	protected override void OnPrefabInit()

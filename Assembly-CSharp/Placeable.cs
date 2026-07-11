@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Placeable")]
 public class Placeable : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DebugText")]
 public class DebugText : KMonoBehaviour
 {
 	public static void DestroyInstance()

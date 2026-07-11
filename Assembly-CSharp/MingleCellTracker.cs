@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MingleCellTracker")]
 public class MingleCellTracker : KMonoBehaviour, ISim1000ms
 {
 	public void Sim1000ms(float dt)

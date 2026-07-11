@@ -5,6 +5,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Clinic")]
 public class Clinic : Workable, IEffectDescriptor, ISingleSliderControl, ISliderControl
 {
 	protected override void OnPrefabInit()

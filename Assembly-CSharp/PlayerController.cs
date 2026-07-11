@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PlayerController")]
 public class PlayerController : KMonoBehaviour, IInputHandler
 {
 	public string handlerName

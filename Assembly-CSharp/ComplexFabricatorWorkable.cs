@@ -3,6 +3,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/ComplexFabricatorWorkable")]
 public class ComplexFabricatorWorkable : Workable
 {
 	public StatusItem WorkerStatusItem

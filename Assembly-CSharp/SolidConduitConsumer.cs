@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/SolidConduitConsumer")]
 public class SolidConduitConsumer : KMonoBehaviour
 {
 	public bool IsConsuming
@@ -76,7 +77,10 @@ public class SolidConduitConsumer : KMonoBehaviour
 				}
 			}
 		}
-		this.storage.storageNetworkID = this.GetConnectedNetworkID();
+		if (this.storage != null)
+		{
+			this.storage.storageNetworkID = this.GetConnectedNetworkID();
+		}
 		this.consuming = flag;
 	}
 

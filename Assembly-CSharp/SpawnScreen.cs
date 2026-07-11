@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SpawnScreen")]
 public class SpawnScreen : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Bed")]
 public class Bed : Workable, IEffectDescriptor, IBasicBuilding
 {
 	protected override void OnPrefabInit()

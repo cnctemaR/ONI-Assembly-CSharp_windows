@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TemperatureCookable")]
 public class TemperatureCookable : KMonoBehaviour, ISim1000ms
 {
 	public void Sim1000ms(float dt)

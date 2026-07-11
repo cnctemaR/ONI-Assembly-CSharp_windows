@@ -7,6 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name}")]
+[AddComponentMenu("KMonoBehaviour/scripts/Generator")]
 public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 {
 	public int PowerDistributionOrder

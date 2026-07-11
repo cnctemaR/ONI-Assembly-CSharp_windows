@@ -387,6 +387,10 @@ public class GameTags
 
 	public static readonly Tag FarmingMaterial = TagManager.Create("FarmingMaterial");
 
+	public static readonly Tag OverlayInFrontOfConduits = TagManager.Create("OverlayFrontLayer");
+
+	public static readonly Tag OverlayBehindConduits = TagManager.Create("OverlayBackLayer");
+
 	public static readonly Tag MassChunk = TagManager.Create("MassChunk");
 
 	public static readonly Tag UnitChunk = TagManager.Create("UnitChunk");
@@ -458,6 +462,7 @@ public class GameTags
 		GameTags.CalorieCategories,
 		GameTags.UnitCategories,
 		GameTags.MaterialCategories,
+		GameTags.MaterialBuildingElements,
 		GameTags.OtherEntityTags
 	});
 
@@ -616,6 +621,25 @@ public class GameTags
 			public static readonly Tag CallAdultBehaviour = TagManager.Create("CallAdultBehaviour");
 
 			public static readonly Tag PlayInterruptAnim = TagManager.Create("PlayInterruptAnim");
+		}
+	}
+
+	public static class Robots
+	{
+		public static class Models
+		{
+			public static readonly Tag SweepBot = TagManager.Create("SweepBot");
+		}
+
+		public static class Behaviours
+		{
+			public static readonly Tag UnloadBehaviour = TagManager.Create("UnloadBehaviour");
+
+			public static readonly Tag RechargeBehaviour = TagManager.Create("RechargeBehaviour");
+
+			public static readonly Tag EmoteBehaviour = TagManager.Create("EmoteBehaviour");
+
+			public static readonly Tag TrappedBehaviour = TagManager.Create("TrappedBehaviour");
 		}
 	}
 }

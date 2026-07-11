@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PumpingStationGuide")]
 public class PumpingStationGuide : KMonoBehaviour, IRenderEveryTick
 {
 	protected override void OnSpawn()

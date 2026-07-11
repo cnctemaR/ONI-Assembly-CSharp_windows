@@ -4,6 +4,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FileErrorReporter")]
 public class FileErrorReporter : KMonoBehaviour
 {
 	protected override void OnSpawn()

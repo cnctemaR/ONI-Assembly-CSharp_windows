@@ -26,6 +26,7 @@ public class LiquidValveConfig : IBuildingConfig
 		buildingDef.PermittedRotations = PermittedRotations.R360;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 1);
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.LiquidVentIDs, "LiquidValve");
 		return buildingDef;
 	}
 
@@ -52,6 +53,7 @@ public class LiquidValveConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitConsumer>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayInFrontOfConduits, false);
 	}
 
 	public const string ID = "LiquidValve";

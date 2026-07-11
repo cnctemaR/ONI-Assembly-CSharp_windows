@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ScreenPrefabs")]
 public class ScreenPrefabs : KMonoBehaviour
 {
 	public static ScreenPrefabs Instance { get; private set; }
@@ -50,6 +51,8 @@ public class ScreenPrefabs : KMonoBehaviour
 	public ConfirmDialogScreen ConfirmDialogScreen;
 
 	public CustomizableDialogScreen CustomizableDialogScreen;
+
+	public SpriteListDialogScreen SpriteListDialogScreen;
 
 	public InfoDialogScreen InfoDialogScreen;
 

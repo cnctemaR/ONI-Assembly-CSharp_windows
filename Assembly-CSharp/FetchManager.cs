@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FetchManager")]
 public class FetchManager : KMonoBehaviour, ISim1000ms
 {
 	private static int QuantizeRotValue(float rot_value)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Immigration")]
 public class Immigration : KMonoBehaviour, ISaveLoadable, ISim200ms, IPersonalPriorityManager
 {
 	public static void DestroyInstance()

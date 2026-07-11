@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Spawner")]
 public class Spawner : KMonoBehaviour, ISaveLoadable
 {
 	protected override void OnSpawn()

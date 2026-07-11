@@ -3,6 +3,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/ConduitConsumer")]
 public class ConduitConsumer : KMonoBehaviour
 {
 	public bool IsConnected

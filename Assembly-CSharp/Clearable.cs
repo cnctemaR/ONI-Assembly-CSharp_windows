@@ -1,8 +1,10 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Clearable")]
 public class Clearable : Workable, ISaveLoadable, IRender1000ms
 {
 	protected override void OnPrefabInit()

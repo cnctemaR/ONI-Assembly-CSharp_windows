@@ -2,6 +2,7 @@
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Worker")]
 public class Worker : KMonoBehaviour
 {
 	public Worker.State state { get; private set; }

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/UICurvePath")]
 public class UICurvePath : KMonoBehaviour
 {
 	protected override void OnSpawn()

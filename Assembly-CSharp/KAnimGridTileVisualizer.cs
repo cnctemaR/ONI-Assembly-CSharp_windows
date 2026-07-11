@@ -3,6 +3,7 @@ using Rendering;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/KAnimGridTileVisualizer")]
 public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 {
 	protected override void OnSpawn()

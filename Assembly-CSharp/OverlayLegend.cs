@@ -276,15 +276,15 @@ public class OverlayLegend : KScreen
 					componentInChildren.enabled = true;
 					ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
 					component2.enabled = true;
-					component2.toolTip = legendEntry.desc;
+					component2.toolTip = ((legendEntry.desc_arg == null) ? legendEntry.desc : string.Format(legendEntry.desc, legendEntry.desc_arg));
 					freeUnitObject.SetActive(true);
 					freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 				}
-				goto IL_0128;
+				goto IL_0143;
 			}
 		}
 		this.activeUnitsParent.SetActive(false);
-		IL_0128:
+		IL_0143:
 		if (!isRefresh && this.currentMode.legendFilters != null)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.toolParameterMenuPrefab, this.diagramsParent, false);

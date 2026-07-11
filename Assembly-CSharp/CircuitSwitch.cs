@@ -3,7 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class CircuitSwitch : Switch
+public class CircuitSwitch : Switch, IPlayerControlledToggle
 {
 	protected override void OnSpawn()
 	{
@@ -118,6 +118,29 @@ public class CircuitSwitch : Switch
 			Game.Instance.userMenu.Refresh(base.gameObject);
 		}
 		this.wasOn = this.switchedOn;
+	}
+
+	public void ToggledByPlayer()
+	{
+		this.Toggle();
+	}
+
+	public bool ToggledOn()
+	{
+		return this.switchedOn;
+	}
+
+	public KSelectable GetSelectable()
+	{
+		return base.GetComponent<KSelectable>();
+	}
+
+	public string SideScreenTitleKey
+	{
+		get
+		{
+			return "STRINGS.BUILDINGS.PREFABS.SWITCH.SIDESCREEN_TITLE";
+		}
 	}
 
 	[SerializeField]

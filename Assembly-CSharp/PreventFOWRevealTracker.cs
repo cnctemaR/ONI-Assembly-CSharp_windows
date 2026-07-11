@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/PreventFOWRevealTracker")]
 public class PreventFOWRevealTracker : KMonoBehaviour
 {
 	[OnSerializing]

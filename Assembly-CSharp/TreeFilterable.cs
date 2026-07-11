@@ -5,6 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/TreeFilterable")]
 public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 {
 	public List<Tag> AcceptedTags

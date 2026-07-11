@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Refrigerator")]
 public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	protected override void OnPrefabInit()

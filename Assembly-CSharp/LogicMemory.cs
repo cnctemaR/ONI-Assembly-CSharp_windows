@@ -1,8 +1,10 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/LogicMemory")]
 public class LogicMemory : KMonoBehaviour
 {
 	protected override void OnSpawn()
@@ -26,11 +28,11 @@ public class LogicMemory : KMonoBehaviour
 			int inputValue = this.ports.GetInputValue(LogicMemory.SET_PORT_ID);
 			int inputValue2 = this.ports.GetInputValue(LogicMemory.RESET_PORT_ID);
 			int num = this.value;
-			if (inputValue2 == 1)
+			if (LogicCircuitNetwork.IsBitActive(0, inputValue2))
 			{
 				num = 0;
 			}
-			else if (inputValue == 1)
+			else if (LogicCircuitNetwork.IsBitActive(0, inputValue))
 			{
 				num = 1;
 			}
@@ -41,7 +43,7 @@ public class LogicMemory : KMonoBehaviour
 				KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 				if (component != null)
 				{
-					component.Play((num != 0) ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(LogicCircuitNetwork.IsBitActive(0, this.value) ? "on" : "off", KAnim.PlayMode.Once, 1f, 0f);
 				}
 			}
 		}

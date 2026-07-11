@@ -494,7 +494,7 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
 
-	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic)
+	public static string GetFormattedWattage(float watts, GameUtil.WattageFormatterUnit unit = GameUtil.WattageFormatterUnit.Automatic, bool displayUnits = true)
 	{
 		LocString locString = "";
 		switch (unit)
@@ -518,7 +518,11 @@ public static class GameUtil
 			}
 			break;
 		}
-		return GameUtil.FloatToString(watts, "###0.##") + locString;
+		if (displayUnits)
+		{
+			return GameUtil.FloatToString(watts, "###0.##") + locString;
+		}
+		return GameUtil.FloatToString(watts, "###0.##");
 	}
 
 	public static string GetFormattedHeatEnergy(float dtu, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
@@ -803,9 +807,9 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(string.Format(floatFormat, mass) + text, timeSlice);
 	}
 
-	public static string GetFormattedTime(float seconds)
+	public static string GetFormattedTime(float seconds, string floatFormat = "F0")
 	{
-		return string.Format(UI.FORMATSECONDS, seconds.ToString("F0"));
+		return string.Format(UI.FORMATSECONDS, seconds.ToString(floatFormat));
 	}
 
 	public static string GetFormattedEngineEfficiency(float amount)
@@ -838,7 +842,7 @@ public static class GameUtil
 		{
 			return string.Format(UI.FORMATDAY, GameUtil.FloatToString(seconds / 600f, formatString));
 		}
-		return GameUtil.GetFormattedTime(seconds);
+		return GameUtil.GetFormattedTime(seconds, "F0");
 	}
 
 	public static float GetDisplaySHC(float shc)
@@ -2632,6 +2636,21 @@ public static class GameUtil
 			}
 		}
 		return null;
+	}
+
+	public static Color32 GetLogicColourOn()
+	{
+		return Color.green;
+	}
+
+	public static Color32 GetLogicColourOff()
+	{
+		return Color.red;
+	}
+
+	public static Color32 GetLogicColourDisconnected()
+	{
+		return Color.white;
 	}
 
 	public static GameUtil.TemperatureUnit temperatureUnit;

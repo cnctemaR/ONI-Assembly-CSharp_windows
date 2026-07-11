@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/InfoScreenLineItem")]
 public class InfoScreenLineItem : KMonoBehaviour
 {
 	public void SetText(string text)

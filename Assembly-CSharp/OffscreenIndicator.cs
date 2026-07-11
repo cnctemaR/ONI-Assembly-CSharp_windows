@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/OffscreenIndicator")]
 public class OffscreenIndicator : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -91,7 +91,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 
 	public bool IsCellSafe(int cell)
 	{
-		return this.occupyArea.TestArea(cell, null, new Func<int, object, bool>(EntombVulnerable.IsCellSafeCB));
+		return this.occupyArea.TestArea(cell, null, EntombVulnerable.IsCellSafeCBDelegate);
 	}
 
 	private static bool IsCellSafeCB(int cell, object data)
@@ -108,4 +108,6 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 	private bool isEntombed;
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	private static readonly Func<int, object, bool> IsCellSafeCBDelegate = (int cell, object data) => EntombVulnerable.IsCellSafeCB(cell, data);
 }

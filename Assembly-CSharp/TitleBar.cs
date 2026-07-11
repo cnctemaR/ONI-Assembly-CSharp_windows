@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TitleBar")]
 public class TitleBar : KMonoBehaviour
 {
 	public void SetTitle(string Name)

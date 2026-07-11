@@ -1,8 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LogicOperationalController")]
 public class LogicOperationalController : KMonoBehaviour
 {
+	public static List<LogicPorts.Port> CreateSingleInputPortList(CellOffset offset)
+	{
+		return new List<LogicPorts.Port> { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, offset, UI.LOGIC_PORTS.CONTROL_OPERATIONAL, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_ACTIVE, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_INACTIVE, false, false) };
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -25,13 +33,13 @@ public class LogicOperationalController : KMonoBehaviour
 	{
 		LogicCircuitNetwork network = this.GetNetwork();
 		int num = ((network != null) ? network.OutputValue : this.unNetworkedValue);
-		base.GetComponent<Operational>().SetFlag(LogicOperationalController.logicOperationalFlag, num > 0);
+		this.operational.SetFlag(LogicOperationalController.LogicOperationalFlag, LogicCircuitNetwork.IsBitActive(0, num));
 		return network;
 	}
 
 	private static string ResolveInfoStatusItemString(string format_str, object data)
 	{
-		return ((LogicOperationalController)data).GetComponent<Operational>().GetFlag(LogicOperationalController.logicOperationalFlag) ? BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_ENABLED : BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_DISABLED;
+		return ((LogicOperationalController)data).operational.GetFlag(LogicOperationalController.LogicOperationalFlag) ? BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_ENABLED : BUILDING.STATUSITEMS.LOGIC.LOGIC_CONTROLLED_DISABLED;
 	}
 
 	private void OnLogicValueChanged(object data)
@@ -47,19 +55,12 @@ public class LogicOperationalController : KMonoBehaviour
 
 	public int unNetworkedValue = 1;
 
-	private static readonly Operational.Flag logicOperationalFlag = new Operational.Flag("LogicOperational", Operational.Flag.Type.Requirement);
+	public static readonly Operational.Flag LogicOperationalFlag = new Operational.Flag("LogicOperational", Operational.Flag.Type.Requirement);
 
 	private static StatusItem infoStatusItem;
 
-	public static readonly LogicPorts.Port[] INPUT_PORTS_0_0 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_ACTIVE, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_INACTIVE, false, false) };
-
-	public static readonly LogicPorts.Port[] INPUT_PORTS_0_1 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_ACTIVE, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_INACTIVE, false, false) };
-
-	public static readonly LogicPorts.Port[] INPUT_PORTS_1_0 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_ACTIVE, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_INACTIVE, false, false) };
-
-	public static readonly LogicPorts.Port[] INPUT_PORTS_1_1 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(1, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_ACTIVE, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_INACTIVE, false, false) };
-
-	public static readonly LogicPorts.Port[] INPUT_PORTS_N1_0 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_ACTIVE, UI.LOGIC_PORTS.CONTROL_OPERATIONAL_INACTIVE, false, false) };
+	[MyCmpGet]
+	public Operational operational;
 
 	private static readonly EventSystem.IntraObjectHandler<LogicOperationalController> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<LogicOperationalController>(delegate(LogicOperationalController component, object data)
 	{

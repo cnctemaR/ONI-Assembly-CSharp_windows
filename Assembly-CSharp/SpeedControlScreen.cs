@@ -258,7 +258,7 @@ public class SpeedControlScreen : KScreen
 
 	public void DebugStepFrame()
 	{
-		DebugUtil.LogArgs(new object[] { "Stepping one frame" });
+		this.stepTime = Time.time;
 		this.Unpause(false);
 		base.StartCoroutine(this.DebugStepFrameDelay());
 	}
@@ -266,6 +266,12 @@ public class SpeedControlScreen : KScreen
 	private IEnumerator DebugStepFrameDelay()
 	{
 		yield return null;
+		DebugUtil.LogArgs(new object[]
+		{
+			"Stepped one frame",
+			Time.time - this.stepTime,
+			"seconds"
+		});
 		this.Pause(false);
 		yield break;
 	}
@@ -306,4 +312,6 @@ public class SpeedControlScreen : KScreen
 	private int speed;
 
 	private int pauseCount;
+
+	private float stepTime;
 }

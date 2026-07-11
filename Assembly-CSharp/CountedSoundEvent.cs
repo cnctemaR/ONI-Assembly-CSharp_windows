@@ -66,7 +66,7 @@ public class CountedSoundEvent : SoundEvent
 		}
 		GameObject gameObject = behaviour.controller.gameObject;
 		base.objectIsSelectedAndVisible = SoundEvent.ObjectIsSelectedAndVisible(gameObject);
-		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.looping, this.isDynamic))
+		if (base.objectIsSelectedAndVisible || SoundEvent.ShouldPlaySound(behaviour.controller, base.sound, base.soundHash, base.looping, this.isDynamic))
 		{
 			int num = -1;
 			if (this.counterModulus >= -1)

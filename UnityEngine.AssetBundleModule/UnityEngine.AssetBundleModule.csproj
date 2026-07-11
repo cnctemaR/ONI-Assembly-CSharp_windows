@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{18A75CA0-EB0C-47E0-BA68-311D7D3CDE0B}</ProjectGuid>
+    <ProjectGuid>{CBB8894E-7850-4E23-9320-6198CD2975C1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.AssetBundleModule</AssemblyName>
@@ -28,11 +28,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{18A75CA0-EB0C-47E0-BA68-311D7D3CDE11}</Project>
+      <Project>{CBB8894E-7850-4E23-9320-6198CD2975C7}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{18A75CA0-EB0C-47E0-BA68-311D7D3CDE25}</Project>
+      <Project>{CBB8894E-7850-4E23-9320-6198CD2975DB}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

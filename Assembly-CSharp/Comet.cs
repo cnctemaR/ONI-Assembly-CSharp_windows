@@ -6,6 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/Comet")]
 public class Comet : KMonoBehaviour, ISim33ms
 {
 	private float GetVolume(GameObject gameObject)

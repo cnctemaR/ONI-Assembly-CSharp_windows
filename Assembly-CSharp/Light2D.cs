@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Light2D")]
 public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor, IEffectDescriptor
 {
 	private T MaybeDirty<T>(T old_value, T new_value, ref bool dirty)

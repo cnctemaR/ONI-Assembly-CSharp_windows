@@ -3,6 +3,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/SocialGatheringPointWorkable")]
 public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 {
 	private SocialGatheringPointWorkable()

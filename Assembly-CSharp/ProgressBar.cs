@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ProgressBar")]
 public class ProgressBar : KMonoBehaviour
 {
 	public Color barColor

@@ -10,7 +10,6 @@ public class FilterSideScreen : SideScreenContent
 	{
 		base.OnPrefabInit();
 		this.filterRowMap.Clear();
-		this.PopulateElements();
 	}
 
 	public override bool IsValidForTarget(GameObject target)
@@ -30,76 +29,162 @@ public class FilterSideScreen : SideScreenContent
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);
-		Filterable component = target.GetComponent<Filterable>();
-		if (component == null)
+		this.targetFilterable = target.GetComponent<Filterable>();
+		if (this.targetFilterable == null)
 		{
 			return;
 		}
-		this.everythingElseHeaderLabel.text = ((component.filterElementState == Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID);
-		Element element = (component.SelectedTag.IsValid ? ElementLoader.GetElement(component.SelectedTag) : ElementLoader.FindElementByHash(SimHashes.Void));
-		this.SetFilterElement(element);
-		this.Configure(component);
+		switch (this.targetFilterable.filterElementState)
+		{
+		case Filterable.ElementState.Solid:
+			this.everythingElseHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.SOLID;
+			goto IL_0087;
+		case Filterable.ElementState.Gas:
+			this.everythingElseHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS;
+			goto IL_0087;
+		}
+		this.everythingElseHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID;
+		IL_0087:
+		this.Configure(this.targetFilterable);
+		this.SetFilterTag(this.targetFilterable.SelectedTag);
 	}
 
-	private void PopulateElements()
+	private void ToggleCategory(Tag tag, bool forceOn = false)
 	{
-		List<Element> list = new List<Element>(ElementLoader.elements);
-		list.Sort(delegate(Element a, Element b)
+		HierarchyReferences hierarchyReferences = this.categoryToggles[tag];
+		if (hierarchyReferences != null)
 		{
-			if (a.id == SimHashes.Void)
+			MultiToggle reference = hierarchyReferences.GetReference<MultiToggle>("Toggle");
+			if (!forceOn)
 			{
-				return -1;
+				reference.NextState();
 			}
-			if (b.id == SimHashes.Void)
+			else
 			{
-				return 1;
+				reference.ChangeState(1);
 			}
-			return a.name.CompareTo(b.name);
-		});
-		foreach (Element element in list)
-		{
-			FilterSideScreenRow row = Util.KInstantiateUI(this.elementEntryPrefab, this.elementEntryContainer, false).GetComponent<FilterSideScreenRow>();
-			row.SetElement(element);
-			row.button.onClick += delegate
-			{
-				this.SetFilterElement(row.element);
-			};
-			this.filterRowMap.Add(row.element, row);
+			hierarchyReferences.GetReference<RectTransform>("Entries").gameObject.SetActive(reference.CurrentState != 0);
 		}
 	}
 
 	private void Configure(Filterable filterable)
 	{
-		IList<Tag> tagOptions = filterable.GetTagOptions();
-		foreach (KeyValuePair<Element, FilterSideScreenRow> keyValuePair in this.filterRowMap)
+		Dictionary<Tag, HashSet<Tag>> tagOptions = filterable.GetTagOptions();
+		using (Dictionary<Tag, HashSet<Tag>>.Enumerator enumerator = tagOptions.GetEnumerator())
 		{
-			Element key = keyValuePair.Key;
-			bool flag = tagOptions.Contains(key.tag);
-			keyValuePair.Value.gameObject.SetActive(flag);
+			while (enumerator.MoveNext())
+			{
+				KeyValuePair<Tag, HashSet<Tag>> category_tags = enumerator.Current;
+				if (!this.filterRowMap.ContainsKey(category_tags.Key))
+				{
+					if (category_tags.Key != GameTags.Void)
+					{
+						HierarchyReferences hierarchyReferences = Util.KInstantiateUI<HierarchyReferences>(this.categoryFoldoutPrefab.gameObject, this.elementEntryContainer.gameObject, false);
+						hierarchyReferences.GetReference<LocText>("Label").text = category_tags.Key.ProperName();
+						hierarchyReferences.GetReference<MultiToggle>("Toggle").onClick = delegate
+						{
+							this.ToggleCategory(category_tags.Key, false);
+						};
+						this.categoryToggles.Add(category_tags.Key, hierarchyReferences);
+					}
+					this.filterRowMap[category_tags.Key] = new SortedDictionary<Tag, FilterSideScreenRow>(FilterSideScreen.comparer);
+				}
+				else if (category_tags.Key == GameTags.Void && !this.filterRowMap.ContainsKey(category_tags.Key))
+				{
+					this.filterRowMap[category_tags.Key] = new SortedDictionary<Tag, FilterSideScreenRow>(FilterSideScreen.comparer);
+				}
+				foreach (Tag tag in category_tags.Value)
+				{
+					if (!this.filterRowMap[category_tags.Key].ContainsKey(tag))
+					{
+						RectTransform rectTransform = ((category_tags.Key != GameTags.Void) ? this.categoryToggles[category_tags.Key].GetReference<RectTransform>("Entries") : this.elementEntryContainer);
+						FilterSideScreenRow row = Util.KInstantiateUI<FilterSideScreenRow>(this.elementEntryPrefab.gameObject, rectTransform.gameObject, false);
+						row.SetTag(tag);
+						row.button.onClick += delegate
+						{
+							this.SetFilterTag(row.tag);
+						};
+						this.filterRowMap[category_tags.Key].Add(row.tag, row);
+					}
+				}
+			}
 		}
+		int num = 0;
+		this.filterRowMap[GameTags.Void][GameTags.Void].transform.SetSiblingIndex(num++);
+		foreach (KeyValuePair<Tag, SortedDictionary<Tag, FilterSideScreenRow>> keyValuePair in this.filterRowMap)
+		{
+			if (tagOptions.ContainsKey(keyValuePair.Key) && tagOptions[keyValuePair.Key].Count > 0)
+			{
+				if (keyValuePair.Key != GameTags.Void)
+				{
+					this.categoryToggles[keyValuePair.Key].name = "CATE " + num.ToString();
+					this.categoryToggles[keyValuePair.Key].transform.SetSiblingIndex(num++);
+					this.categoryToggles[keyValuePair.Key].gameObject.SetActive(true);
+				}
+				int num2 = 0;
+				using (SortedDictionary<Tag, FilterSideScreenRow>.Enumerator enumerator4 = keyValuePair.Value.GetEnumerator())
+				{
+					while (enumerator4.MoveNext())
+					{
+						KeyValuePair<Tag, FilterSideScreenRow> keyValuePair2 = enumerator4.Current;
+						keyValuePair2.Value.name = "ELE " + num2;
+						keyValuePair2.Value.transform.SetSiblingIndex(num2++);
+						keyValuePair2.Value.gameObject.SetActive(tagOptions[keyValuePair.Key].Contains(keyValuePair2.Value.tag));
+						if (keyValuePair2.Key != GameTags.Void && keyValuePair2.Key == this.targetFilterable.SelectedTag)
+						{
+							this.ToggleCategory(keyValuePair.Key, true);
+						}
+					}
+					continue;
+				}
+			}
+			if (keyValuePair.Key != GameTags.Void)
+			{
+				this.categoryToggles[keyValuePair.Key].gameObject.SetActive(false);
+			}
+		}
+		this.RefreshUI();
 	}
 
-	private void SetFilterElement(Element element)
+	private void SetFilterTag(Tag tag)
 	{
-		Filterable component = DetailsScreen.Instance.target.GetComponent<Filterable>();
-		if (component == null)
+		if (this.targetFilterable == null)
 		{
 			return;
 		}
-		LocString locString = ((component.filterElementState == Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.GAS : UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.LIQUID);
-		this.currentSelectionLabel.text = string.Format(locString, UI.UISIDESCREENS.FILTERSIDESCREEN.NOELEMENTSELECTED);
-		if (element != null)
+		if (tag.IsValid)
 		{
-			component.SelectedTag = element.tag;
-			foreach (KeyValuePair<Element, FilterSideScreenRow> keyValuePair in this.filterRowMap)
+			this.targetFilterable.SelectedTag = tag;
+		}
+		this.RefreshUI();
+	}
+
+	private void RefreshUI()
+	{
+		LocString locString;
+		switch (this.targetFilterable.filterElementState)
+		{
+		case Filterable.ElementState.Solid:
+			locString = UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.SOLID;
+			goto IL_0038;
+		case Filterable.ElementState.Gas:
+			locString = UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.GAS;
+			goto IL_0038;
+		}
+		locString = UI.UISIDESCREENS.FILTERSIDESCREEN.FILTEREDELEMENT.LIQUID;
+		IL_0038:
+		this.currentSelectionLabel.text = string.Format(locString, UI.UISIDESCREENS.FILTERSIDESCREEN.NOELEMENTSELECTED);
+		foreach (KeyValuePair<Tag, SortedDictionary<Tag, FilterSideScreenRow>> keyValuePair in this.filterRowMap)
+		{
+			foreach (KeyValuePair<Tag, FilterSideScreenRow> keyValuePair2 in keyValuePair.Value)
 			{
-				bool flag = keyValuePair.Key == element;
-				keyValuePair.Value.SetSelected(flag);
+				bool flag = keyValuePair2.Key == this.targetFilterable.SelectedTag;
+				keyValuePair2.Value.SetSelected(flag);
 				if (flag)
 				{
-					if (element.id != SimHashes.Void && element.id != SimHashes.Vacuum)
+					if (keyValuePair2.Value.tag != GameTags.Void)
 					{
-						this.currentSelectionLabel.text = string.Format(locString, element.name);
+						this.currentSelectionLabel.text = string.Format(locString, this.targetFilterable.SelectedTag.ProperName());
 					}
 					else
 					{
@@ -110,9 +195,11 @@ public class FilterSideScreen : SideScreenContent
 		}
 	}
 
-	public GameObject elementEntryPrefab;
+	public HierarchyReferences categoryFoldoutPrefab;
 
-	public GameObject elementEntryContainer;
+	public FilterSideScreenRow elementEntryPrefab;
+
+	public RectTransform elementEntryContainer;
 
 	public Image outputIcon;
 
@@ -126,7 +213,13 @@ public class FilterSideScreen : SideScreenContent
 
 	public LocText currentSelectionLabel;
 
-	public Dictionary<Element, FilterSideScreenRow> filterRowMap = new Dictionary<Element, FilterSideScreenRow>();
+	private static TagNameComparer comparer = new TagNameComparer(GameTags.Void);
+
+	public Dictionary<Tag, HierarchyReferences> categoryToggles = new Dictionary<Tag, HierarchyReferences>();
+
+	public SortedDictionary<Tag, SortedDictionary<Tag, FilterSideScreenRow>> filterRowMap = new SortedDictionary<Tag, SortedDictionary<Tag, FilterSideScreenRow>>(FilterSideScreen.comparer);
 
 	public bool isLogicFilter;
+
+	private Filterable targetFilterable;
 }

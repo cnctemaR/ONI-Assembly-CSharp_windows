@@ -526,7 +526,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 394616U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 398142U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
@@ -556,6 +556,8 @@ public class Global : MonoBehaviour
 		if (Game.Instance != null && GameClock.Instance != null)
 		{
 			data.Add("GameTimeSeconds", (int)GameClock.Instance.GetTime());
+			data.Add("WasDebugEverUsed", Game.Instance.debugWasUsed);
+			data.Add("IsSandboxEnabled", SaveGame.Instance.sandboxEnabled);
 		}
 	}
 

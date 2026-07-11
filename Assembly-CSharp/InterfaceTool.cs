@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[AddComponentMenu("KMonoBehaviour/scripts/InterfaceTool")]
 public class InterfaceTool : KMonoBehaviour
 {
 	public HashedString ViewMode

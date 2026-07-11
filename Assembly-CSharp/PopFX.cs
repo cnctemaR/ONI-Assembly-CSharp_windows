@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PopFX")]
 public class PopFX : KMonoBehaviour
 {
 	public void Recycle()

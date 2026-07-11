@@ -3,6 +3,7 @@ using Klei;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/EntitySplitter")]
 public class EntitySplitter : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

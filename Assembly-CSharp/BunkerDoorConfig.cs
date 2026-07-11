@@ -28,24 +28,14 @@ public class BunkerDoorConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.ForegroundLayer = Grid.SceneLayer.InteriorWall;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
+		buildingDef.LogicInputPorts = DoorConfig.CreateSingleInputPortList(new CellOffset(-1, 0));
 		SoundEventVolumeCache.instance.AddVolume("door_internal_kanim", "Open_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_internal_kanim", "Close_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		return buildingDef;
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_N1_0);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_N1_0);
-	}
-
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS_N1_0);
 		Door door = go.AddOrGet<Door>();
 		door.unpoweredAnimSpeed = 0.01f;
 		door.poweredAnimSpeed = 0.1f;

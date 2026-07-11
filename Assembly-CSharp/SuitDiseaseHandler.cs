@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SuitDiseaseHandler")]
 public class SuitDiseaseHandler : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

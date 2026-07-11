@@ -44,9 +44,7 @@ public class NameDisplayScreen : KScreen
 
 	private bool ShouldShowName(GameObject representedObject)
 	{
-		bool flag = representedObject.GetComponent<MinionBrain>() != null;
-		bool flag2 = representedObject.GetComponent<CommandModule>() != null;
-		return flag || flag2;
+		return representedObject.GetComponent<MinionBrain>() != null || representedObject.GetComponent<CommandModule>() != null || representedObject.GetComponent<SweepBotStation>() || representedObject.GetComponent<UserNameable>() != null;
 	}
 
 	public Guid AddWorldText(string initialText, GameObject prefab)

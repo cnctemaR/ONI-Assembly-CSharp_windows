@@ -1,6 +1,8 @@
 ﻿using System;
 using KSerialization;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Unsealable")]
 public class Unsealable : Workable
 {
 	private Unsealable()

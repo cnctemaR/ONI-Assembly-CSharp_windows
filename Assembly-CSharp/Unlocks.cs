@@ -6,7 +6,9 @@ using System.Threading;
 using Newtonsoft.Json;
 using ProcGen;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Unlocks")]
 public class Unlocks : KMonoBehaviour
 {
 	private static string UnlocksFilename
@@ -81,7 +83,7 @@ public class Unlocks : KMonoBehaviour
 			}
 			catch (Exception ex)
 			{
-				Debug.LogWarningFormat("Failed to save Unlocks attempt {0}: {1}", new object[]
+				global::Debug.LogWarningFormat("Failed to save Unlocks attempt {0}: {1}", new object[]
 				{
 					num + 1,
 					ex.ToString()
@@ -119,7 +121,7 @@ public class Unlocks : KMonoBehaviour
 			}
 			catch (Exception ex)
 			{
-				Debug.LogWarningFormat("Failed to load Unlocks attempt {0}: {1}", new object[]
+				global::Debug.LogWarningFormat("Failed to load Unlocks attempt {0}: {1}", new object[]
 				{
 					num + 1,
 					ex.ToString()
@@ -143,7 +145,7 @@ public class Unlocks : KMonoBehaviour
 		}
 		catch (Exception ex2)
 		{
-			Debug.LogErrorFormat("Error parsing unlocks file [{0}]: {1}", new object[]
+			global::Debug.LogErrorFormat("Error parsing unlocks file [{0}]: {1}", new object[]
 			{
 				Unlocks.UnlocksFilename,
 				ex2.ToString()

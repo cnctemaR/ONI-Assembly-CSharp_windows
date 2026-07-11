@@ -53,6 +53,7 @@ public class Db : EntityModifierSet
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
+		this.RobotStatusItems = new RobotStatusItems(this.Root);
 		this.ChoreTypes = new ChoreTypes(this.Root);
 		Effect effect = new Effect("CenterOfAttention", DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.TOOLTIP, 0f, true, true, false, null, 0f, null);
 		effect.Add(new AttributeModifier("StressDelta", -0.008333334f, DUPLICANTS.MODIFIERS.CENTEROFATTENTION.NAME, false, false, true));
@@ -130,6 +131,8 @@ public class Db : EntityModifierSet
 	public MiscStatusItems MiscStatusItems;
 
 	public CreatureStatusItems CreatureStatusItems;
+
+	public RobotStatusItems RobotStatusItems;
 
 	public StatusItemCategories StatusItemCategories;
 

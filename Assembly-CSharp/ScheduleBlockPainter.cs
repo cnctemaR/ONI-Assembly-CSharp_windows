@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ScheduleBlockPainter")]
 public class ScheduleBlockPainter : KMonoBehaviour
 {
 	public void Setup(Action<float> blockPaintHandler)

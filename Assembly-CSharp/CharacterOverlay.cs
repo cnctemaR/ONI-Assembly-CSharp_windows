@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/CharacterOverlay")]
 public class CharacterOverlay : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -2,6 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/HeatBulb")]
 public class HeatBulb : KMonoBehaviour, ISim200ms
 {
 	protected override void OnSpawn()

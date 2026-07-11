@@ -379,7 +379,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 					bool portConnected = component3.GetPortConnected(portId);
 					LogicGate.LogicGateDescriptions.Description portDescription = component3.GetPortDescription(portId);
 					hoverTextDrawer.BeginShadowBar(false);
-					if (portId == LogicGateBase.PortId.Output)
+					if (portId == LogicGateBase.PortId.OutputOne)
 					{
 						hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.LOGIC_MULTI_OUTPUT_HOVER_FMT.Replace("{Port}", portDescription.name.ToUpper()).Replace("{Name}", kselectable2.GetProperName().ToUpper()), this.Styles_Title.Standard);
 					}

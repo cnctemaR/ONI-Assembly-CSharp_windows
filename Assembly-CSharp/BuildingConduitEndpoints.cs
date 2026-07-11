@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BuildingConduitEndpoints")]
 public class BuildingConduitEndpoints : KMonoBehaviour
 {
 	protected override void OnSpawn()

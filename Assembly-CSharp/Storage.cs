@@ -8,6 +8,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Storage")]
 public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 {
 	public bool ShouldOnlyTransferFromLowerPriority
@@ -554,7 +555,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		return gameObject;
 	}
 
-	public PrimaryElement FindFirstWithMass(Tag tag)
+	public PrimaryElement FindFirstWithMass(Tag tag, float mass = 0f)
 	{
 		PrimaryElement primaryElement = null;
 		for (int i = 0; i < this.items.Count; i++)
@@ -563,7 +564,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			if (!(gameObject == null) && gameObject.HasTag(tag))
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				if (component.Mass > 0f)
+				if (component.Mass > 0f && component.Mass >= mass)
 				{
 					primaryElement = component;
 					break;

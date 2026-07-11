@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/PathProber")]
 public class PathProber : KMonoBehaviour
 {
 	protected override void OnCleanUp()

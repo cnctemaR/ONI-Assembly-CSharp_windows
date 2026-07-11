@@ -145,6 +145,7 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 		public GameStateMachine<OilRefinery.States, OilRefinery.StatesInstance, OilRefinery, object>.State ready;
 	}
 
+	[AddComponentMenu("KMonoBehaviour/Workable/WorkableTarget")]
 	public class WorkableTarget : Workable
 	{
 		protected override void OnPrefabInit()

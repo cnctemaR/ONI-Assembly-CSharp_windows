@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CO2Manager")]
 public class CO2Manager : KMonoBehaviour, ISim33ms
 {
 	public static void DestroyInstance()

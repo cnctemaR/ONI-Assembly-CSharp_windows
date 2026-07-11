@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/DesalinatorWorkableEmpty")]
 public class DesalinatorWorkableEmpty : Workable
 {
 	protected override void OnPrefabInit()

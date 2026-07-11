@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/EntombedItemVisualizer")]
 public class EntombedItemVisualizer : KMonoBehaviour
 {
 	public void Clear()

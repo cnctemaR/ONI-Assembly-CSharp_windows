@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DiseaseOverlayWidget")]
 public class DiseaseOverlayWidget : KMonoBehaviour
 {
 	public void Refresh(AmountInstance value_src)

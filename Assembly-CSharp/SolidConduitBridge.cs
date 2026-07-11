@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SolidConduitBridge")]
 public class SolidConduitBridge : KMonoBehaviour
 {
 	public bool IsDispensing

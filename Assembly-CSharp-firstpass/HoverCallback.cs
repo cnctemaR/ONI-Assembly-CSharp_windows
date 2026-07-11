@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/HoverCallback")]
 public class HoverCallback : KMonoBehaviour, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
 	public void OnPointerEnter(PointerEventData data)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MaterialNeeds")]
 public class MaterialNeeds : KMonoBehaviour
 {
 	public static MaterialNeeds Instance { get; private set; }

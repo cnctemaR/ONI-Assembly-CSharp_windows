@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/PriorityButton")]
 public class PriorityButton : KMonoBehaviour
 {
 	public PrioritySetting priority

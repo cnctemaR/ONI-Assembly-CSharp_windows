@@ -4,6 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/DoctorStation")]
 public class DoctorStation : Workable
 {
 	protected override void OnPrefabInit()
@@ -204,7 +205,13 @@ public class DoctorStation : Workable
 			this.operational.ready.idle.ParamTransition<bool>(this.hasPatient, this.operational.ready.has_patient, (DoctorStation.StatesInstance smi, bool p) => p);
 			this.operational.ready.has_patient.ParamTransition<bool>(this.hasPatient, this.operational.ready.idle, (DoctorStation.StatesInstance smi, bool p) => !p).DefaultState(this.operational.ready.has_patient.waiting).ToggleRecurringChore(new Func<DoctorStation.StatesInstance, Chore>(this.CreateDoctorChore), null);
 			this.operational.ready.has_patient.waiting.ParamTransition<bool>(this.hasDoctor, this.operational.ready.has_patient.being_treated, (DoctorStation.StatesInstance smi, bool p) => p);
-			this.operational.ready.has_patient.being_treated.ParamTransition<bool>(this.hasDoctor, this.operational.ready.has_patient.waiting, (DoctorStation.StatesInstance smi, bool p) => !p);
+			this.operational.ready.has_patient.being_treated.ParamTransition<bool>(this.hasDoctor, this.operational.ready.has_patient.waiting, (DoctorStation.StatesInstance smi, bool p) => !p).Enter(delegate(DoctorStation.StatesInstance smi)
+			{
+				smi.GetComponent<Operational>().SetActive(true, false);
+			}).Exit(delegate(DoctorStation.StatesInstance smi)
+			{
+				smi.GetComponent<Operational>().SetActive(false, false);
+			});
 		}
 
 		private Chore CreatePatientChore(DoctorStation.StatesInstance smi)

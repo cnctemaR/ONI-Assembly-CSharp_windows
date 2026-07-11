@@ -52,7 +52,8 @@ public abstract class OverlayModes
 	{
 		public ConduitMode(ICollection<Tag> ids)
 		{
-			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
+			this.objectTargetLayer = LayerMask.NameToLayer("MaskedOverlayBG");
+			this.conduitTargetLayer = LayerMask.NameToLayer("MaskedOverlay");
 			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
 			this.selectionMask = this.cameraLayerMask;
 			this.targetIDs = ids;
@@ -92,6 +93,18 @@ public abstract class OverlayModes
 
 		public override void Disable()
 		{
+			foreach (SaveLoadRoot saveLoadRoot in this.layerTargets)
+			{
+				float defaultDepth = OverlayModes.Mode.GetDefaultDepth(saveLoadRoot);
+				Vector3 position = saveLoadRoot.transform.GetPosition();
+				position.z = defaultDepth;
+				saveLoadRoot.transform.SetPosition(position);
+				KBatchedAnimController[] componentsInChildren = saveLoadRoot.GetComponentsInChildren<KBatchedAnimController>();
+				for (int i = 0; i < componentsInChildren.Length; i++)
+				{
+					this.TriggerResorting(componentsInChildren[i]);
+				}
+			}
 			OverlayModes.Mode.ResetDisplayValues<SaveLoadRoot>(this.layerTargets);
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			SelectTool.Instance.ClearLayerMask();
@@ -107,11 +120,56 @@ public abstract class OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, null);
+			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.layerTargets, vector2I, vector2I2, delegate(SaveLoadRoot root)
+			{
+				if (root == null)
+				{
+					return;
+				}
+				float defaultDepth = OverlayModes.Mode.GetDefaultDepth(root);
+				Vector3 position = root.transform.GetPosition();
+				position.z = defaultDepth;
+				root.transform.SetPosition(position);
+				KBatchedAnimController[] componentsInChildren = root.GetComponentsInChildren<KBatchedAnimController>();
+				for (int i = 0; i < componentsInChildren.Length; i++)
+				{
+					this.TriggerResorting(componentsInChildren[i]);
+				}
+			});
 			foreach (object obj in this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 			{
 				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
-				base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+				if (saveLoadRoot.GetComponent<Conduit>() != null)
+				{
+					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.conduitTargetLayer, null, null);
+				}
+				else
+				{
+					base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
+					{
+						Vector3 position2 = root.transform.GetPosition();
+						float num2 = position2.z;
+						KPrefabID component3 = root.GetComponent<KPrefabID>();
+						if (component3 != null)
+						{
+							if (component3.HasTag(GameTags.OverlayInFrontOfConduits))
+							{
+								num2 = Grid.GetLayerZ((this.ViewMode() == OverlayModes.LiquidConduits.ID) ? Grid.SceneLayer.LiquidConduits : Grid.SceneLayer.GasConduits) - 0.2f;
+							}
+							else if (component3.HasTag(GameTags.OverlayBehindConduits))
+							{
+								num2 = Grid.GetLayerZ((this.ViewMode() == OverlayModes.LiquidConduits.ID) ? Grid.SceneLayer.LiquidConduits : Grid.SceneLayer.GasConduits) + 0.2f;
+							}
+						}
+						position2.z = num2;
+						root.transform.SetPosition(position2);
+						KBatchedAnimController[] componentsInChildren2 = root.GetComponentsInChildren<KBatchedAnimController>();
+						for (int j = 0; j < componentsInChildren2.Length; j++)
+						{
+							this.TriggerResorting(componentsInChildren2[j]);
+						}
+					}, null);
+				}
 			}
 			GameObject gameObject = null;
 			if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
@@ -136,7 +194,7 @@ public abstract class OverlayModes
 			Game.ConduitVisInfo conduitVisInfo = ((this.ViewMode() == OverlayModes.LiquidConduits.ID) ? Game.Instance.liquidConduitVisInfo : Game.Instance.gasConduitVisInfo);
 			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 			{
-				if (!(saveLoadRoot2 == null))
+				if (!(saveLoadRoot2 == null) && saveLoadRoot2.GetComponent<IBridgedNetworkItem>() != null)
 				{
 					BuildingDef def = saveLoadRoot2.GetComponent<Building>().Def;
 					Color32 color;
@@ -164,6 +222,15 @@ public abstract class OverlayModes
 					}
 					saveLoadRoot2.GetComponent<KBatchedAnimController>().TintColour = color;
 				}
+			}
+		}
+
+		private void TriggerResorting(KBatchedAnimController kbac)
+		{
+			if (kbac.enabled)
+			{
+				kbac.enabled = false;
+				kbac.enabled = true;
 			}
 		}
 
@@ -221,7 +288,9 @@ public abstract class OverlayModes
 
 		private ICollection<Tag> targetIDs;
 
-		private int targetLayer;
+		private int objectTargetLayer;
+
+		private int conduitTargetLayer;
 
 		private int cameraLayerMask;
 
@@ -789,7 +858,7 @@ public abstract class OverlayModes
 			list2.Sort((OverlayModes.Disease.DiseaseSortInfo a, OverlayModes.Disease.DiseaseSortInfo b) => a.sortkey.CompareTo(b.sortkey));
 			foreach (OverlayModes.Disease.DiseaseSortInfo diseaseSortInfo in list2)
 			{
-				list.Add(new LegendEntry(diseaseSortInfo.disease.Name, diseaseSortInfo.disease.overlayLegendHovertext.ToString(), diseaseSortInfo.disease.overlayColour));
+				list.Add(new LegendEntry(diseaseSortInfo.disease.Name, diseaseSortInfo.disease.overlayLegendHovertext.ToString(), diseaseSortInfo.disease.overlayColour, null));
 			}
 			return list;
 		}
@@ -1052,14 +1121,25 @@ public abstract class OverlayModes
 				Vector3 position = saveLoadRoot.transform.GetPosition();
 				position.z = defaultDepth;
 				saveLoadRoot.transform.SetPosition(position);
+				saveLoadRoot.GetComponent<KBatchedAnimController>().enabled = false;
+				saveLoadRoot.GetComponent<KBatchedAnimController>().enabled = true;
 			}
 			OverlayModes.Mode.ResetDisplayValues<SaveLoadRoot>(this.gameObjTargets);
 			OverlayModes.Mode.ResetDisplayValues<KBatchedAnimController>(this.wireControllers);
+			OverlayModes.Mode.ResetDisplayValues<KBatchedAnimController>(this.ribbonControllers);
+			this.ResetRibbonSymbolTints<KBatchedAnimController>(this.ribbonControllers);
 			foreach (OverlayModes.Logic.BridgeInfo bridgeInfo in this.bridgeControllers)
 			{
 				if (bridgeInfo.controller != null)
 				{
 					OverlayModes.Mode.ResetDisplayValues(bridgeInfo.controller);
+				}
+			}
+			foreach (OverlayModes.Logic.BridgeInfo bridgeInfo2 in this.ribbonBridgeControllers)
+			{
+				if (bridgeInfo2.controller != null)
+				{
+					this.ResetRibbonTint(bridgeInfo2.controller);
 				}
 			}
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
@@ -1076,7 +1156,9 @@ public abstract class OverlayModes
 			this.gameObjPartition.Clear();
 			this.gameObjTargets.Clear();
 			this.wireControllers.Clear();
+			this.ribbonControllers.Clear();
 			this.bridgeControllers.Clear();
+			this.ribbonBridgeControllers.Clear();
 			GridCompositor.Instance.ToggleMinor(false);
 		}
 
@@ -1123,40 +1205,61 @@ public abstract class OverlayModes
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
 			Tag wire_id = TagManager.Create("LogicWire");
+			Tag ribbon_id = TagManager.Create("LogicRibbon");
 			Tag bridge_id = TagManager.Create("LogicWireBridge");
+			Tag ribbon_bridge_id = TagManager.Create("LogicRibbonBridge");
 			OverlayModes.Mode.RemoveOffscreenTargets<SaveLoadRoot>(this.gameObjTargets, vector2I, vector2I2, delegate(SaveLoadRoot root)
 			{
 				if (root == null)
 				{
 					return;
 				}
-				KPrefabID component5 = root.GetComponent<KPrefabID>();
-				if (component5 != null)
+				KPrefabID component7 = root.GetComponent<KPrefabID>();
+				if (component7 != null)
 				{
-					Tag prefabTag = component5.PrefabTag;
+					Tag prefabTag = component7.PrefabTag;
 					if (prefabTag == wire_id)
 					{
 						this.wireControllers.Remove(root.GetComponent<KBatchedAnimController>());
 						return;
 					}
+					if (prefabTag == ribbon_id)
+					{
+						this.ResetRibbonTint(root.GetComponent<KBatchedAnimController>());
+						this.ribbonControllers.Remove(root.GetComponent<KBatchedAnimController>());
+						return;
+					}
 					if (prefabTag == bridge_id)
 					{
-						KBatchedAnimController controller = root.GetComponent<KBatchedAnimController>();
-						this.bridgeControllers.RemoveWhere((OverlayModes.Logic.BridgeInfo x) => x.controller == controller);
+						KBatchedAnimController controller2 = root.GetComponent<KBatchedAnimController>();
+						this.bridgeControllers.RemoveWhere((OverlayModes.Logic.BridgeInfo x) => x.controller == controller2);
+						return;
 					}
+					if (prefabTag == ribbon_bridge_id)
+					{
+						KBatchedAnimController controller = root.GetComponent<KBatchedAnimController>();
+						this.ribbonBridgeControllers.RemoveWhere((OverlayModes.Logic.BridgeInfo x) => x.controller == controller);
+						return;
+					}
+					float defaultDepth = OverlayModes.Mode.GetDefaultDepth(root);
+					Vector3 position = root.transform.GetPosition();
+					position.z = defaultDepth;
+					root.transform.SetPosition(position);
+					root.GetComponent<KBatchedAnimController>().enabled = false;
+					root.GetComponent<KBatchedAnimController>().enabled = true;
 				}
 			});
 			OverlayModes.Mode.RemoveOffscreenTargets<ILogicUIElement>(this.ioTargets, this.workingIOTargets, vector2I, vector2I2, new Action<ILogicUIElement>(this.FreeUI), null);
 			using (new KProfiler.Region("UpdateLogicOverlay", null))
 			{
-				Action<SaveLoadRoot> <>9__2;
+				Action<SaveLoadRoot> <>9__3;
 				foreach (object obj in this.gameObjPartition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y)))
 				{
 					SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
 					if (saveLoadRoot != null)
 					{
 						KPrefabID component = saveLoadRoot.GetComponent<KPrefabID>();
-						if (component.PrefabTag == wire_id || component.PrefabTag == bridge_id)
+						if (component.PrefabTag == wire_id || component.PrefabTag == bridge_id || component.PrefabTag == ribbon_id || component.PrefabTag == ribbon_bridge_id)
 						{
 							SaveLoadRoot saveLoadRoot2 = saveLoadRoot;
 							Vector2I vector2I3 = vector2I;
@@ -1164,32 +1267,50 @@ public abstract class OverlayModes
 							ICollection<SaveLoadRoot> collection = this.gameObjTargets;
 							int num = this.conduitTargetLayer;
 							Action<SaveLoadRoot> action;
-							if ((action = <>9__2) == null)
+							if ((action = <>9__3) == null)
 							{
-								action = (<>9__2 = delegate(SaveLoadRoot root)
+								action = (<>9__3 = delegate(SaveLoadRoot root)
 								{
 									if (root == null)
 									{
 										return;
 									}
-									KPrefabID component6 = root.GetComponent<KPrefabID>();
-									if (OverlayModes.Logic.HighlightItemIDs.Contains(component6.PrefabTag))
+									KPrefabID component8 = root.GetComponent<KPrefabID>();
+									if (OverlayModes.Logic.HighlightItemIDs.Contains(component8.PrefabTag))
 									{
-										if (component6.PrefabTag == wire_id)
+										if (component8.PrefabTag == wire_id)
 										{
 											this.wireControllers.Add(root.GetComponent<KBatchedAnimController>());
 											return;
 										}
-										if (component6.PrefabTag == bridge_id)
+										if (component8.PrefabTag == ribbon_id)
 										{
-											KBatchedAnimController component7 = root.GetComponent<KBatchedAnimController>();
+											this.ribbonControllers.Add(root.GetComponent<KBatchedAnimController>());
+											return;
+										}
+										if (component8.PrefabTag == bridge_id)
+										{
+											KBatchedAnimController component9 = root.GetComponent<KBatchedAnimController>();
 											int num3;
 											int num4;
 											root.GetComponent<LogicUtilityNetworkLink>().GetCells(out num3, out num4);
 											this.bridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
 											{
 												cell = num3,
-												controller = component7
+												controller = component9
+											});
+											return;
+										}
+										if (component8.PrefabTag == ribbon_bridge_id)
+										{
+											KBatchedAnimController component10 = root.GetComponent<KBatchedAnimController>();
+											int num5;
+											int num6;
+											root.GetComponent<LogicUtilityNetworkLink>().GetCells(out num5, out num6);
+											this.ribbonBridgeControllers.Add(new OverlayModes.Logic.BridgeInfo
+											{
+												cell = num5,
+												controller = component10
 											});
 										}
 									}
@@ -1201,12 +1322,25 @@ public abstract class OverlayModes
 						{
 							base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.gameObjTargets, this.objectTargetLayer, delegate(SaveLoadRoot root)
 							{
-								Vector3 position = root.transform.GetPosition();
-								position.z += 2f;
-								root.transform.SetPosition(position);
-								KBatchedAnimController component8 = root.GetComponent<KBatchedAnimController>();
-								component8.enabled = false;
-								component8.enabled = true;
+								Vector3 position2 = root.transform.GetPosition();
+								float num7 = position2.z;
+								KPrefabID component11 = root.GetComponent<KPrefabID>();
+								if (component11 != null)
+								{
+									if (component11.HasTag(GameTags.OverlayInFrontOfConduits))
+									{
+										num7 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) - 0.2f;
+									}
+									else if (component11.HasTag(GameTags.OverlayBehindConduits))
+									{
+										num7 = Grid.GetLayerZ(Grid.SceneLayer.LogicWires) + 0.2f;
+									}
+								}
+								position2.z = num7;
+								root.transform.SetPosition(position2);
+								KBatchedAnimController component12 = root.GetComponent<KBatchedAnimController>();
+								component12.enabled = false;
+								component12.enabled = true;
 							}, null);
 						}
 					}
@@ -1250,7 +1384,7 @@ public abstract class OverlayModes
 						LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController.transform.GetPosition()));
 						if (networkForCell != null)
 						{
-							color = ((networkForCell.OutputValue > 0) ? colourOn : colourOff);
+							color = (networkForCell.IsBitActive(0) ? colourOn : colourOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
@@ -1265,27 +1399,109 @@ public abstract class OverlayModes
 						kbatchedAnimController.TintColour = color;
 					}
 				}
-				foreach (OverlayModes.Logic.BridgeInfo bridgeInfo in this.bridgeControllers)
+				foreach (KBatchedAnimController kbatchedAnimController2 in this.ribbonControllers)
 				{
-					if (!(bridgeInfo.controller == null))
+					if (!(kbatchedAnimController2 == null))
 					{
 						Color32 color2 = colourOff;
-						LogicCircuitNetwork networkForCell2 = logicCircuitManager.GetNetworkForCell(bridgeInfo.cell);
+						Color32 color3 = colourOff;
+						Color32 color4 = colourOff;
+						Color32 color5 = colourOff;
+						LogicCircuitNetwork networkForCell2 = logicCircuitManager.GetNetworkForCell(Grid.PosToCell(kbatchedAnimController2.transform.GetPosition()));
 						if (networkForCell2 != null)
 						{
-							color2 = ((networkForCell2.OutputValue > 0) ? colourOn : colourOff);
+							color2 = (networkForCell2.IsBitActive(0) ? colourOn : colourOff);
+							color3 = (networkForCell2.IsBitActive(1) ? colourOn : colourOff);
+							color4 = (networkForCell2.IsBitActive(2) ? colourOn : colourOff);
+							color5 = (networkForCell2.IsBitActive(3) ? colourOn : colourOff);
 						}
 						if (this.connectedNetworks.Count > 0)
 						{
-							IBridgedNetworkItem component4 = bridgeInfo.controller.GetComponent<IBridgedNetworkItem>();
+							IBridgedNetworkItem component4 = kbatchedAnimController2.GetComponent<IBridgedNetworkItem>();
 							if (component4 != null && component4.IsConnectedToNetworks(this.connectedNetworks))
 							{
 								color2.r = (byte)((float)color2.r * num2);
 								color2.g = (byte)((float)color2.g * num2);
 								color2.b = (byte)((float)color2.b * num2);
+								color3.r = (byte)((float)color3.r * num2);
+								color3.g = (byte)((float)color3.g * num2);
+								color3.b = (byte)((float)color3.b * num2);
+								color4.r = (byte)((float)color4.r * num2);
+								color4.g = (byte)((float)color4.g * num2);
+								color4.b = (byte)((float)color4.b * num2);
+								color5.r = (byte)((float)color5.r * num2);
+								color5.g = (byte)((float)color5.g * num2);
+								color5.b = (byte)((float)color5.b * num2);
 							}
 						}
-						bridgeInfo.controller.TintColour = color2;
+						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_1_SYMBOL_NAME, color2);
+						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_2_SYMBOL_NAME, color3);
+						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_3_SYMBOL_NAME, color4);
+						kbatchedAnimController2.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_4_SYMBOL_NAME, color5);
+					}
+				}
+				foreach (OverlayModes.Logic.BridgeInfo bridgeInfo in this.bridgeControllers)
+				{
+					if (!(bridgeInfo.controller == null))
+					{
+						Color32 color6 = colourOff;
+						LogicCircuitNetwork networkForCell3 = logicCircuitManager.GetNetworkForCell(bridgeInfo.cell);
+						if (networkForCell3 != null)
+						{
+							color6 = (networkForCell3.IsBitActive(0) ? colourOn : colourOff);
+						}
+						if (this.connectedNetworks.Count > 0)
+						{
+							IBridgedNetworkItem component5 = bridgeInfo.controller.GetComponent<IBridgedNetworkItem>();
+							if (component5 != null && component5.IsConnectedToNetworks(this.connectedNetworks))
+							{
+								color6.r = (byte)((float)color6.r * num2);
+								color6.g = (byte)((float)color6.g * num2);
+								color6.b = (byte)((float)color6.b * num2);
+							}
+						}
+						bridgeInfo.controller.TintColour = color6;
+					}
+				}
+				foreach (OverlayModes.Logic.BridgeInfo bridgeInfo2 in this.ribbonBridgeControllers)
+				{
+					if (!(bridgeInfo2.controller == null))
+					{
+						Color32 color7 = colourOff;
+						Color32 color8 = colourOff;
+						Color32 color9 = colourOff;
+						Color32 color10 = colourOff;
+						LogicCircuitNetwork networkForCell4 = logicCircuitManager.GetNetworkForCell(bridgeInfo2.cell);
+						if (networkForCell4 != null)
+						{
+							color7 = (networkForCell4.IsBitActive(0) ? colourOn : colourOff);
+							color8 = (networkForCell4.IsBitActive(1) ? colourOn : colourOff);
+							color9 = (networkForCell4.IsBitActive(2) ? colourOn : colourOff);
+							color10 = (networkForCell4.IsBitActive(3) ? colourOn : colourOff);
+						}
+						if (this.connectedNetworks.Count > 0)
+						{
+							IBridgedNetworkItem component6 = bridgeInfo2.controller.GetComponent<IBridgedNetworkItem>();
+							if (component6 != null && component6.IsConnectedToNetworks(this.connectedNetworks))
+							{
+								color7.r = (byte)((float)color7.r * num2);
+								color7.g = (byte)((float)color7.g * num2);
+								color7.b = (byte)((float)color7.b * num2);
+								color8.r = (byte)((float)color8.r * num2);
+								color8.g = (byte)((float)color8.g * num2);
+								color8.b = (byte)((float)color8.b * num2);
+								color9.r = (byte)((float)color9.r * num2);
+								color9.g = (byte)((float)color9.g * num2);
+								color9.b = (byte)((float)color9.b * num2);
+								color10.r = (byte)((float)color10.r * num2);
+								color10.g = (byte)((float)color10.g * num2);
+								color10.b = (byte)((float)color10.b * num2);
+							}
+						}
+						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_1_SYMBOL_NAME, color7);
+						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_2_SYMBOL_NAME, color8);
+						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_3_SYMBOL_NAME, color9);
+						bridgeInfo2.controller.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_4_SYMBOL_NAME, color10);
 					}
 				}
 			}
@@ -1302,13 +1518,29 @@ public abstract class OverlayModes
 			{
 				LogicCircuitNetwork networkForCell = Game.Instance.logicCircuitManager.GetNetworkForCell(uiinfo.cell);
 				Color32 color = colourDisconnected;
-				if (networkForCell != null)
+				LogicControlInputUI component = uiinfo.instance.GetComponent<LogicControlInputUI>();
+				if (component != null)
 				{
-					color = ((networkForCell.OutputValue > 0) ? colourOn : colourOff);
+					component.SetContent(networkForCell);
 				}
-				if (uiinfo.image.color != color)
+				else if (uiinfo.bitDepth == 4)
 				{
-					uiinfo.image.color = color;
+					LogicRibbonDisplayUI component2 = uiinfo.instance.GetComponent<LogicRibbonDisplayUI>();
+					if (component2 != null)
+					{
+						component2.SetContent(networkForCell);
+					}
+				}
+				else if (uiinfo.bitDepth == 1)
+				{
+					if (networkForCell != null)
+					{
+						color = (networkForCell.IsBitActive(0) ? colourOn : colourOff);
+					}
+					if (uiinfo.image.color != color)
+					{
+						uiinfo.image.color = color;
+					}
 				}
 			}
 		}
@@ -1354,6 +1586,11 @@ public abstract class OverlayModes
 			return uniformGrid;
 		}
 
+		private bool IsBitActive(int value, int bit)
+		{
+			return (value & (1 << bit)) > 0;
+		}
+
 		private void FindConnectedNetworks(int cell, IUtilityNetworkMgr mgr, ICollection<UtilityNetwork> networks, List<int> visited)
 		{
 			if (visited.Contains(cell))
@@ -1385,9 +1622,40 @@ public abstract class OverlayModes
 			}
 		}
 
+		private void ResetRibbonSymbolTints<T>(ICollection<T> targets) where T : MonoBehaviour
+		{
+			foreach (T t in targets)
+			{
+				if (!(t == null))
+				{
+					KBatchedAnimController component = t.GetComponent<KBatchedAnimController>();
+					this.ResetRibbonTint(component);
+				}
+			}
+		}
+
+		private void ResetRibbonTint(KBatchedAnimController kbac)
+		{
+			if (kbac != null)
+			{
+				kbac.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_1_SYMBOL_NAME, Color.white);
+				kbac.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_2_SYMBOL_NAME, Color.white);
+				kbac.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_3_SYMBOL_NAME, Color.white);
+				kbac.SetSymbolTint(OverlayModes.Logic.RIBBON_WIRE_4_SYMBOL_NAME, Color.white);
+			}
+		}
+
 		public static readonly HashedString ID = "Logic";
 
 		public static HashSet<Tag> HighlightItemIDs = new HashSet<Tag>();
+
+		public static KAnimHashedString RIBBON_WIRE_1_SYMBOL_NAME = "wire1";
+
+		public static KAnimHashedString RIBBON_WIRE_2_SYMBOL_NAME = "wire2";
+
+		public static KAnimHashedString RIBBON_WIRE_3_SYMBOL_NAME = "wire3";
+
+		public static KAnimHashedString RIBBON_WIRE_4_SYMBOL_NAME = "wire4";
 
 		private int conduitTargetLayer;
 
@@ -1405,11 +1673,15 @@ public abstract class OverlayModes
 
 		private HashSet<KBatchedAnimController> wireControllers = new HashSet<KBatchedAnimController>();
 
+		private HashSet<KBatchedAnimController> ribbonControllers = new HashSet<KBatchedAnimController>();
+
 		private HashSet<UtilityNetwork> connectedNetworks = new HashSet<UtilityNetwork>();
 
 		private List<int> visited = new List<int>();
 
 		private HashSet<OverlayModes.Logic.BridgeInfo> bridgeControllers = new HashSet<OverlayModes.Logic.BridgeInfo>();
+
+		private HashSet<OverlayModes.Logic.BridgeInfo> ribbonBridgeControllers = new HashSet<OverlayModes.Logic.BridgeInfo>();
 
 		private UniformGrid<SaveLoadRoot> gameObjPartition;
 
@@ -1438,23 +1710,42 @@ public abstract class OverlayModes
 			public UIInfo(ILogicUIElement ui_elem, LogicModeUI ui_data)
 			{
 				this.cell = ui_elem.GetLogicUICell();
-				this.instance = global::Util.KInstantiate(ui_data.prefab, Grid.CellToPosCCC(this.cell, Grid.SceneLayer.Front), Quaternion.identity, GameScreenManager.Instance.worldSpaceCanvas, null, true, 0);
-				this.instance.SetActive(true);
-				this.image = this.instance.GetComponent<Image>();
-				this.image.raycastTarget = false;
+				GameObject gameObject = null;
+				Sprite sprite = null;
+				this.bitDepth = 1;
 				switch (ui_elem.GetLogicPortSpriteType())
 				{
 				case LogicPortSpriteType.Input:
-					this.image.sprite = ui_data.inputSprite;
-					return;
+					gameObject = ui_data.prefab;
+					sprite = ui_data.inputSprite;
+					break;
 				case LogicPortSpriteType.Output:
-					this.image.sprite = ui_data.outputSprite;
-					return;
+					gameObject = ui_data.prefab;
+					sprite = ui_data.outputSprite;
+					break;
 				case LogicPortSpriteType.ResetUpdate:
-					this.image.sprite = ui_data.resetSprite;
-					return;
-				default:
-					return;
+					gameObject = ui_data.prefab;
+					sprite = ui_data.resetSprite;
+					break;
+				case LogicPortSpriteType.ControlInput:
+					gameObject = ui_data.controlInputPrefab;
+					break;
+				case LogicPortSpriteType.RibbonInput:
+					gameObject = ui_data.ribbonInputPrefab;
+					this.bitDepth = 4;
+					break;
+				case LogicPortSpriteType.RibbonOutput:
+					gameObject = ui_data.ribbonOutputPrefab;
+					this.bitDepth = 4;
+					break;
+				}
+				this.instance = global::Util.KInstantiate(gameObject, Grid.CellToPosCCC(this.cell, Grid.SceneLayer.Front), Quaternion.identity, GameScreenManager.Instance.worldSpaceCanvas, null, true, 0);
+				this.instance.SetActive(true);
+				this.image = this.instance.GetComponent<Image>();
+				if (this.image != null)
+				{
+					this.image.raycastTarget = false;
+					this.image.sprite = sprite;
 				}
 			}
 
@@ -1468,6 +1759,8 @@ public abstract class OverlayModes
 			public Image image;
 
 			public int cell;
+
+			public int bitDepth;
 		}
 	}
 
@@ -1649,7 +1942,7 @@ public abstract class OverlayModes
 				{
 					text = text + "\n\n" + roomType.GetRoomEffectsString();
 				}
-				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, roomType.category.color));
+				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, roomType.category.color, null));
 			}
 			return list;
 		}
@@ -2650,12 +2943,99 @@ public abstract class OverlayModes
 				SaveLoadRoot saveLoadRoot = (SaveLoadRoot)obj;
 				base.AddTargetIfVisible<SaveLoadRoot>(saveLoadRoot, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 			}
-			Color32 color = Color.white;
+			GameObject gameObject = null;
+			if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
+			{
+				gameObject = SelectTool.Instance.hover.gameObject;
+			}
+			this.connectedNetworks.Clear();
+			float num = 1f;
+			if (gameObject != null)
+			{
+				SolidConduit component = gameObject.GetComponent<SolidConduit>();
+				if (component != null)
+				{
+					int num2 = Grid.PosToCell(component);
+					UtilityNetworkManager<FlowUtilityNetwork, SolidConduit> solidConduitSystem = Game.Instance.solidConduitSystem;
+					this.visited.Clear();
+					this.FindConnectedNetworks(num2, solidConduitSystem, this.connectedNetworks, this.visited);
+					this.visited.Clear();
+					num = OverlayModes.ModeUtil.GetHighlightScale();
+				}
+			}
 			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 			{
 				if (!(saveLoadRoot2 == null))
 				{
-					saveLoadRoot2.GetComponent<KBatchedAnimController>().TintColour = color;
+					Color32 color = this.tint_color;
+					SolidConduit component2 = saveLoadRoot2.GetComponent<SolidConduit>();
+					if (component2 != null)
+					{
+						if (this.connectedNetworks.Count > 0 && this.IsConnectedToNetworks(component2, this.connectedNetworks))
+						{
+							color.r = (byte)((float)color.r * num);
+							color.g = (byte)((float)color.g * num);
+							color.b = (byte)((float)color.b * num);
+						}
+						saveLoadRoot2.GetComponent<KBatchedAnimController>().TintColour = color;
+					}
+				}
+			}
+		}
+
+		public bool IsConnectedToNetworks(SolidConduit conduit, ICollection<UtilityNetwork> networks)
+		{
+			UtilityNetwork network = conduit.GetNetwork();
+			return networks.Contains(network);
+		}
+
+		private void FindConnectedNetworks(int cell, IUtilityNetworkMgr mgr, ICollection<UtilityNetwork> networks, List<int> visited)
+		{
+			if (visited.Contains(cell))
+			{
+				return;
+			}
+			visited.Add(cell);
+			UtilityNetwork networkForCell = mgr.GetNetworkForCell(cell);
+			if (networkForCell != null)
+			{
+				networks.Add(networkForCell);
+				UtilityConnections connections = mgr.GetConnections(cell, false);
+				if ((connections & UtilityConnections.Right) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellRight(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Left) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellLeft(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Up) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellAbove(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Down) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellBelow(cell), mgr, networks, visited);
+				}
+				object endpoint = mgr.GetEndpoint(cell);
+				if (endpoint != null)
+				{
+					FlowUtilityNetwork.NetworkItem networkItem = endpoint as FlowUtilityNetwork.NetworkItem;
+					IBridgedNetworkItem bridgedNetworkItem;
+					if (networkItem == null)
+					{
+						bridgedNetworkItem = null;
+					}
+					else
+					{
+						GameObject gameObject = networkItem.GameObject;
+						bridgedNetworkItem = ((gameObject != null) ? gameObject.GetComponent<IBridgedNetworkItem>() : null);
+					}
+					IBridgedNetworkItem bridgedNetworkItem2 = bridgedNetworkItem;
+					if (bridgedNetworkItem2 != null)
+					{
+						bridgedNetworkItem2.AddNetworks(networks);
+					}
 				}
 			}
 		}
@@ -2667,6 +3047,12 @@ public abstract class OverlayModes
 		private HashSet<SaveLoadRoot> layerTargets = new HashSet<SaveLoadRoot>();
 
 		private ICollection<Tag> targetIDs = OverlayScreen.SolidConveyorIDs;
+
+		private Color32 tint_color = new Color32(201, 201, 201, 0);
+
+		private HashSet<UtilityNetwork> connectedNetworks = new HashSet<UtilityNetwork>();
+
+		private List<int> visited = new List<int>();
 
 		private int targetLayer;
 
@@ -2975,17 +3361,17 @@ public abstract class OverlayModes
 		public Temperature()
 		{
 			this.legendFilters = this.CreateDefaultFilters();
-			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
-			for (int i = 0; i < this.temperatureLegend.Count; i++)
-			{
-				this.temperatureLegend[i].colour = SimDebugView.Instance.temperatureThresholds[num - i].color;
-				this.temperatureLegend[i].desc = string.Format(this.temperatureLegend[i].desc, GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
-			}
 		}
 
 		public override void Enable()
 		{
 			base.Enable();
+			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
+			for (int i = 0; i < this.temperatureLegend.Count; i++)
+			{
+				this.temperatureLegend[i].colour = SimDebugView.Instance.temperatureThresholds[num - i].color;
+				this.temperatureLegend[i].desc_arg = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
+			}
 		}
 
 		public override Dictionary<string, ToolParameterMenu.ToggleState> CreateDefaultFilters()
@@ -3076,40 +3462,40 @@ public abstract class OverlayModes
 
 		public List<LegendEntry> temperatureLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f))
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null)
 		};
 
 		public List<LegendEntry> heatFlowLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.HEATFLOW.HEATING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING, new Color(0.9098039f, 0.25882354f, 0.14901961f)),
-			new LegendEntry(UI.OVERLAYS.HEATFLOW.NEUTRAL, UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL, new Color(0.30980393f, 0.30980393f, 0.30980393f)),
-			new LegendEntry(UI.OVERLAYS.HEATFLOW.COOLING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING, new Color(0.2509804f, 0.6313726f, 0.90588236f))
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.HEATING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.HEATING, new Color(0.9098039f, 0.25882354f, 0.14901961f), null),
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.NEUTRAL, UI.OVERLAYS.HEATFLOW.TOOLTIPS.NEUTRAL, new Color(0.30980393f, 0.30980393f, 0.30980393f), null),
+			new LegendEntry(UI.OVERLAYS.HEATFLOW.COOLING, UI.OVERLAYS.HEATFLOW.TOOLTIPS.COOLING, new Color(0.2509804f, 0.6313726f, 0.90588236f), null)
 		};
 
 		public List<LegendEntry> expandedTemperatureLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f)),
-			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f))
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.MAXHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.8901961f, 0.13725491f, 0.12941177f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMEHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9843137f, 0.3254902f, 0.3137255f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYHOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(1f, 0.6627451f, 0.14117648f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.HOT, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.9372549f, 1f, 0f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.TEMPERATE, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.COLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.12156863f, 0.6313726f, 1f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.VERYCOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.16862746f, 0.79607844f, 1f), null),
+			new LegendEntry(UI.OVERLAYS.TEMPERATURE.EXTREMECOLD, UI.OVERLAYS.TEMPERATURE.TOOLTIPS.TEMPERATURE, new Color(0.5019608f, 0.99607843f, 0.9411765f), null)
 		};
 
 		public List<LegendEntry> stateChangeLegend = new List<LegendEntry>
 		{
-			new LegendEntry(UI.OVERLAYS.STATECHANGE.HIGHPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.HIGHPOINT, new Color(0.8901961f, 0.13725491f, 0.12941177f)),
-			new LegendEntry(UI.OVERLAYS.STATECHANGE.STABLE, UI.OVERLAYS.STATECHANGE.TOOLTIPS.STABLE, new Color(0.23137255f, 0.99607843f, 0.2901961f)),
-			new LegendEntry(UI.OVERLAYS.STATECHANGE.LOWPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.LOWPOINT, new Color(0.5019608f, 0.99607843f, 0.9411765f))
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.HIGHPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.HIGHPOINT, new Color(0.8901961f, 0.13725491f, 0.12941177f), null),
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.STABLE, UI.OVERLAYS.STATECHANGE.TOOLTIPS.STABLE, new Color(0.23137255f, 0.99607843f, 0.2901961f), null),
+			new LegendEntry(UI.OVERLAYS.STATECHANGE.LOWPOINT, UI.OVERLAYS.STATECHANGE.TOOLTIPS.LOWPOINT, new Color(0.5019608f, 0.99607843f, 0.9411765f), null)
 		};
 	}
 

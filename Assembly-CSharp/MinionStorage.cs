@@ -5,6 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/MinionStorage")]
 public class MinionStorage : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

@@ -1,6 +1,8 @@
 ﻿using System;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/AlgaeHabitatEmpty")]
 public class AlgaeHabitatEmpty : Workable
 {
 	protected override void OnPrefabInit()

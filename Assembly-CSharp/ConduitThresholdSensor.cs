@@ -48,7 +48,18 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 	private float GetContainedMass()
 	{
 		int num = Grid.PosToCell(this);
-		return Conduit.GetFlowManager(this.conduitType).GetContents(num).mass;
+		if (this.conduitType == ConduitType.Liquid || this.conduitType == ConduitType.Gas)
+		{
+			return Conduit.GetFlowManager(this.conduitType).GetContents(num).mass;
+		}
+		SolidConduitFlow flowManager = SolidConduit.GetFlowManager();
+		SolidConduitFlow.ConduitContents contents = flowManager.GetContents(num);
+		Pickupable pickupable = flowManager.GetPickupable(contents.pickupableHandle);
+		if (pickupable != null)
+		{
+			return pickupable.PrimaryElement.Mass;
+		}
+		return 0f;
 	}
 
 	public float Threshold

@@ -4,6 +4,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/MechanicalSurfboardWorkable")]
 public class MechanicalSurfboardWorkable : Workable, IWorkerPrioritizable
 {
 	private MechanicalSurfboardWorkable()

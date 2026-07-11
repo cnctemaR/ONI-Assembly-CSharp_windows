@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/KTabMenuHeader")]
 public class KTabMenuHeader : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

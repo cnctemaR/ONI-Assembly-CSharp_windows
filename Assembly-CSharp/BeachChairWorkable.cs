@@ -1,7 +1,9 @@
 ﻿using System;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/BeachChairWorkable")]
 public class BeachChairWorkable : Workable, IWorkerPrioritizable
 {
 	private BeachChairWorkable()

@@ -19,9 +19,9 @@ public struct SoundCuller
 		return this.IsAudibleNoCameraScaling(pos, falloff_distance_sq);
 	}
 
-	public bool IsAudible(Vector2 pos, string sound_path)
+	public bool IsAudible(Vector2 pos, HashedString sound_path)
 	{
-		return !string.IsNullOrEmpty(sound_path) && this.IsAudible(pos, KFMOD.GetSoundEventDescription(sound_path).falloffDistanceSq);
+		return sound_path.IsValid && this.IsAudible(pos, KFMOD.GetSoundEventDescription(sound_path).falloffDistanceSq);
 	}
 
 	public Vector3 GetVerticallyScaledPosition(Vector3 pos, bool objectIsSelectedAndVisible = false)

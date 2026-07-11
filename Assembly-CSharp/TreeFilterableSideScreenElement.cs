@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TreeFilterableSideScreenElement")]
 public class TreeFilterableSideScreenElement : KMonoBehaviour
 {
 	public Tag GetElementTag()

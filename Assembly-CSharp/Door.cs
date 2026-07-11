@@ -4,6 +4,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Door")]
 public class Door : Workable, ISaveLoadable, ISim200ms
 {
 	private void OnCopySettings(object data)
@@ -540,7 +541,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			this.changeStateChore.Cancel("Change state");
 			this.changeStateChore = null;
 		}
-		this.requestedState = ((newValue == 1) ? Door.ControlState.Opened : Door.ControlState.Locked);
+		this.requestedState = (LogicCircuitNetwork.IsBitActive(0, newValue) ? Door.ControlState.Opened : Door.ControlState.Locked);
 		this.applyLogicChange = true;
 	}
 
@@ -571,13 +572,13 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		{
 			StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
-			if (handle.IsValid() && !structureTemperatures.GetPayload(handle).enabled)
+			if (handle.IsValid() && structureTemperatures.IsBypassed(handle))
 			{
 				foreach (int num2 in this.building.PlacementCells)
 				{
 					if (!Grid.Solid[num2])
 					{
-						StructureTemperatureComponents.DoMelt(base.GetComponent<PrimaryElement>());
+						Util.KDestroyGameObject(this);
 						return;
 					}
 				}

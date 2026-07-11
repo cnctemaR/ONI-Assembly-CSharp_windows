@@ -85,6 +85,11 @@ public class KCrashReporter : MonoBehaviour
 
 	private void HandleLog(string msg, string stack_trace, LogType type)
 	{
+		if ((KCrashReporter.logCount += 1U) == 10000000U)
+		{
+			DebugUtil.DevLogError("Turning off logging to avoid increasing the file to an unreasonable size, please review the logs as they probably contain spam");
+			global::Debug.DisableLogging();
+		}
 		if (KCrashReporter.ignoreAll)
 		{
 			return;
@@ -332,7 +337,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = "RP-" + 394616U.ToString();
+				string text3 = "AP-" + 398142U.ToString();
 				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
@@ -381,7 +386,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 394616;
+			error.build = 398142;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -469,11 +474,15 @@ public class KCrashReporter : MonoBehaviour
 
 	public const string CRASH_REPORTER_SERVER = "http://crashes.klei.ca";
 
+	public const uint MAX_LOGS = 10000000U;
+
 	public static bool ignoreAll = false;
 
 	public static bool debugWasUsed = false;
 
 	public static bool haveActiveMods = false;
+
+	public static uint logCount = 0U;
 
 	public static string error_canvas_name = "ErrorCanvas";
 

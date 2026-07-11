@@ -59,20 +59,25 @@ public class RetiredColonyData
 			this.Duplicants[i].accessories.Add(Db.Get().AccessorySlots.Mouth.Id, Db.Get().Accessories.Get(component.bodyData.mouth).Id);
 			goto IL_0368;
 		}
-		this.buildings = new List<global::Tuple<string, int>>();
+		Dictionary<Tag, int> dictionary = new Dictionary<Tag, int>();
 		if (buildingCompletes != null)
 		{
-			for (int j = 0; j < buildingCompletes.Length; j++)
+			foreach (BuildingComplete buildingComplete in buildingCompletes)
 			{
-				BuildingComplete b = buildingCompletes[j];
-				int num = this.buildings.FindIndex((global::Tuple<string, int> match) => match.first == b.PrefabID());
-				if (num == -1)
+				if (!dictionary.ContainsKey(buildingComplete.PrefabID()))
 				{
-					this.buildings.Add(new global::Tuple<string, int>(b.PrefabID().ToString(), 0));
-					num = this.buildings.Count - 1;
+					dictionary[buildingComplete.PrefabID()] = 0;
 				}
-				this.buildings[num].second++;
+				Dictionary<Tag, int> dictionary2 = dictionary;
+				Tag tag = buildingComplete.PrefabID();
+				int num = dictionary2[tag];
+				dictionary2[tag] = num + 1;
 			}
+		}
+		this.buildings = new List<global::Tuple<string, int>>();
+		foreach (KeyValuePair<Tag, int> keyValuePair in dictionary)
+		{
+			this.buildings.Add(new global::Tuple<string, int>(keyValuePair.Key.ToString(), keyValuePair.Value));
 		}
 		this.Stats = null;
 		if (ReportManager.Instance != null)

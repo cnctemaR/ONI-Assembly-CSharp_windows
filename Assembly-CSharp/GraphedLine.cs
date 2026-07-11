@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI.Extensions;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GraphedLine")]
 [Serializable]
 public class GraphedLine : KMonoBehaviour
 {

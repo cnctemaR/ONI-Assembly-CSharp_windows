@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/RequireInputs")]
 public class RequireInputs : KMonoBehaviour, ISim200ms
 {
 	public bool RequiresPower

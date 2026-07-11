@@ -4,6 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/SeedProducer")]
 public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	public void Configure(string SeedID, SeedProducer.ProductionType productionType, int newSeedsProduced = 1)

@@ -2,6 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BudUprootedMonitor")]
 public class BudUprootedMonitor : KMonoBehaviour
 {
 	public bool IsUprooted

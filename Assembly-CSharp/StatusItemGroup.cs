@@ -130,7 +130,7 @@ public class StatusItemGroup
 			Func<List<Notification>, object, string> func = new Func<List<Notification>, object, string>(StatusItemGroup.OnToolTip);
 			bool flag = false;
 			Notification.ClickCallback notificationClickCallback = item.notificationClickCallback;
-			entry.notification = new Notification(notificationText, notificationType, invalid, func, item, flag, item.notificationDelay, notificationClickCallback, data, null);
+			entry.notification = new Notification(notificationText, notificationType, invalid, func, item, flag, item.notificationDelay, notificationClickCallback, data, null, true);
 			this.gameObject.AddOrGet<Notifier>().Add(entry.notification, "");
 		}
 		if (item.ShouldShowIcon())

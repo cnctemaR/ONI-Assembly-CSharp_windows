@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/Traces")]
 public class Traces : KMonoBehaviour
 {
 	public static Traces Instance { get; private set; }

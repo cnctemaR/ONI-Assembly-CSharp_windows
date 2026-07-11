@@ -19,6 +19,10 @@ public class ProductInfoScreen : KScreen
 
 	public void ClearProduct(bool deactivateTool = true)
 	{
+		if (this.materialSelectionPanel == null)
+		{
+			return;
+		}
 		this.currentDef = null;
 		this.materialSelectionPanel.ClearMaterialToggles();
 		if (PlayerController.Instance.ActiveTool == BuildTool.Instance && deactivateTool)

@@ -1,8 +1,10 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/BuildingEnabledButton")]
 public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandler
 {
 	public bool IsEnabled

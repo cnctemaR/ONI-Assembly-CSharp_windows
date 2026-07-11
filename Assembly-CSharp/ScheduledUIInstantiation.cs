@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ScheduledUIInstantiation")]
 public class ScheduledUIInstantiation : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

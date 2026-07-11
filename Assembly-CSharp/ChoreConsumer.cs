@@ -7,6 +7,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ChoreConsumer")]
 public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 {
 	public List<ChoreProvider> GetProviders()

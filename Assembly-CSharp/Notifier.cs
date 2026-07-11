@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Notifier")]
 public class Notifier : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

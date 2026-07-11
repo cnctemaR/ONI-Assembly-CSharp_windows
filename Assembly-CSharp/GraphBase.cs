@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI.Extensions;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GraphBase")]
 public class GraphBase : KMonoBehaviour
 {
 	public Vector2 GetRelativePosition(Vector2 absolute_point)

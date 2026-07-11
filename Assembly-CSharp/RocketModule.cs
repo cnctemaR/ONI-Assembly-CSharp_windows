@@ -4,6 +4,7 @@ using System.Diagnostics;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/RocketModule")]
 public class RocketModule : KMonoBehaviour
 {
 	public RocketLaunchCondition AddLaunchCondition(RocketLaunchCondition condition)
@@ -78,8 +79,11 @@ public class RocketModule : KMonoBehaviour
 		localPosition.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront) - (float)num * 0.01f;
 		base.transform.SetLocalPosition(localPosition);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-		component.enabled = false;
-		component.enabled = true;
+		if (component.enabled)
+		{
+			component.enabled = false;
+			component.enabled = true;
+		}
 	}
 
 	private void OnAttachmentNetworkChanged(AttachableBuilding ab)

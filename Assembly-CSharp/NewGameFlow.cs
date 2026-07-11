@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/NewGameFlow")]
 public class NewGameFlow : KMonoBehaviour
 {
 	public void BeginFlow()

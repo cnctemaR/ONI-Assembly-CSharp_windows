@@ -81,13 +81,14 @@ public class SandboxBrushTool : BrushTool
 	{
 		base.OnPaintCell(cell, distFromOrigin);
 		this.recentlyAffectedCells.Add(cell);
+		Element element = ElementLoader.elements[this.settings.GetIntSetting("SandboxTools.SelectedElement")];
 		if (!this.recentAffectedCellColor.ContainsKey(cell))
 		{
-			this.recentAffectedCellColor.Add(cell, this.settings.Element.substance.uiColour);
+			this.recentAffectedCellColor.Add(cell, element.substance.uiColour);
 		}
 		else
 		{
-			this.recentAffectedCellColor[cell] = this.settings.Element.substance.uiColour;
+			this.recentAffectedCellColor[cell] = element.substance.uiColour;
 		}
 		Game.CallbackInfo callbackInfo = new Game.CallbackInfo(delegate
 		{
@@ -96,12 +97,12 @@ public class SandboxBrushTool : BrushTool
 		}, false);
 		int index = Game.Instance.callbackManager.Add(callbackInfo).index;
 		int cell2 = cell;
-		SimHashes id = this.settings.Element.id;
+		SimHashes id = element.id;
 		CellElementEvent sandBoxTool = CellEventLogger.Instance.SandBoxTool;
-		float mass = this.settings.Mass;
-		float temperature = this.settings.temperature;
+		float floatSetting = this.settings.GetFloatSetting("SandboxTools.Mass");
+		float floatSetting2 = this.settings.GetFloatSetting("SandbosTools.Temperature");
 		int num = index;
-		SimMessages.ReplaceElement(cell2, id, sandBoxTool, mass, temperature, Db.Get().Diseases.GetIndex(this.settings.Disease.IdHash), this.settings.diseaseCount, num);
+		SimMessages.ReplaceElement(cell2, id, sandBoxTool, floatSetting, floatSetting2, Db.Get().Diseases.GetIndex(Db.Get().Diseases.Get(this.settings.GetStringSetting("SandboxTools.SelectedDisease")).id), this.settings.GetIntSetting("SandboxTools.DiseaseCount"), num);
 	}
 
 	public static SandboxBrushTool instance;

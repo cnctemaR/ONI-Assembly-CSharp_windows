@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Facing")]
 public class Facing : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

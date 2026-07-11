@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Trappable")]
 public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 {
 	protected override void OnSpawn()

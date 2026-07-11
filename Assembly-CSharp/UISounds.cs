@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/UISounds")]
 public class UISounds : KMonoBehaviour
 {
 	public static UISounds Instance { get; private set; }

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/MoveTarget")]
 public class MoveTarget : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

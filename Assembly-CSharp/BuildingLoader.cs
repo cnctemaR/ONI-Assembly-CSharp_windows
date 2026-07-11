@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/BuildingLoader")]
 public class BuildingLoader : KMonoBehaviour
 {
 	public static void DestroyInstance()
@@ -167,10 +168,11 @@ public class BuildingLoader : KMonoBehaviour
 		BuildingLoader.UpdateComponentRequirement<AnimTileable>(gameObject, flag);
 		if (def.RequiresPowerInput)
 		{
-			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS_0_0);
+			GeneratedBuildings.RegisterSingleLogicInputPort(gameObject);
 		}
 		Assets.AddPrefab(kprefabID);
 		gameObject.PreInit();
+		GeneratedBuildings.InitializeLogicPorts(gameObject, def);
 		return gameObject;
 	}
 
@@ -251,7 +253,7 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (def.RequiresPowerInput)
 		{
-			GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
+			GeneratedBuildings.RegisterSingleLogicInputPort(go);
 			go.AddOrGet<LogicOperationalController>();
 		}
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(go, def.CheckRequiresBuildingCellVisualizer());
@@ -269,6 +271,7 @@ public class BuildingLoader : KMonoBehaviour
 		kprefabID.defaultLayer = num;
 		Assets.AddPrefab(kprefabID);
 		go.PreInit();
+		GeneratedBuildings.InitializeLogicPorts(go, def);
 		return go;
 	}
 
@@ -299,10 +302,11 @@ public class BuildingLoader : KMonoBehaviour
 		}
 		if (def.RequiresPowerInput)
 		{
-			GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS_0_0);
+			GeneratedBuildings.RegisterSingleLogicInputPort(gameObject);
 		}
 		gameObject.PreInit();
 		Assets.AddPrefab(gameObject.GetComponent<KPrefabID>());
+		GeneratedBuildings.InitializeLogicPorts(gameObject, def);
 		return gameObject;
 	}
 

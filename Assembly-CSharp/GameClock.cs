@@ -7,6 +7,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/GameClock")]
 public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 {
 	public static void DestroyInstance()
@@ -130,7 +131,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		}
 		day++;
 		this.newDayMetric[GameClock.NewCycleKey] = day;
-		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.newDayMetric);
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.newDayMetric, "DoAutoSave");
 		string text = SaveLoader.GetActiveSaveFilePath();
 		if (text == null)
 		{

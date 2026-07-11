@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FloorSwitchActivator")]
 public class FloorSwitchActivator : KMonoBehaviour
 {
 	public PrimaryElement PrimaryElement

@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/ToiletWorkableClean")]
 public class ToiletWorkableClean : Workable
 {
 	protected override void OnPrefabInit()

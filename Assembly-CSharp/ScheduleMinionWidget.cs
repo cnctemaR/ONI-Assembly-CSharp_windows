@@ -4,6 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ScheduleMinionWidget")]
 public class ScheduleMinionWidget : KMonoBehaviour
 {
 	public Schedulable schedulable { get; private set; }

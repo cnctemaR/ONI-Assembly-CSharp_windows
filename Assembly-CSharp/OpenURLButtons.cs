@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/OpenURLButtons")]
 public class OpenURLButtons : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
@@ -13,23 +15,26 @@ public class OpenURLButtons : KMonoBehaviour
 			GameObject gameObject = Util.KInstantiateUI(this.buttonPrefab, base.gameObject, true);
 			string text = Strings.Get(data.stringKey);
 			gameObject.GetComponentInChildren<LocText>().SetText(text);
-			OpenURLButtons.URLButtonType urlType = data.urlType;
-			if (urlType != OpenURLButtons.URLButtonType.url)
+			switch (data.urlType)
 			{
-				if (urlType == OpenURLButtons.URLButtonType.patchNotes)
-				{
-					gameObject.GetComponent<KButton>().onClick += delegate
-					{
-						this.OpenPatchNotes();
-					};
-				}
-			}
-			else
-			{
+			case OpenURLButtons.URLButtonType.url:
 				gameObject.GetComponent<KButton>().onClick += delegate
 				{
 					this.OpenURL(data.url);
 				};
+				break;
+			case OpenURLButtons.URLButtonType.platformUrl:
+				gameObject.GetComponent<KButton>().onClick += delegate
+				{
+					this.OpenPlatformURL(data.url);
+				};
+				break;
+			case OpenURLButtons.URLButtonType.patchNotes:
+				gameObject.GetComponent<KButton>().onClick += delegate
+				{
+					this.OpenPatchNotes();
+				};
+				break;
 			}
 		}
 	}
@@ -44,6 +49,21 @@ public class OpenURLButtons : KMonoBehaviour
 		Application.OpenURL(URL);
 	}
 
+	public void OpenPlatformURL(string URL)
+	{
+		if (DistributionPlatform.Inst.Platform == "Steam" && DistributionPlatform.Inst.Initialized)
+		{
+			DistributionPlatform.Inst.GetAuthTicket(delegate(byte[] ticket)
+			{
+				string text2 = string.Concat(Array.ConvertAll<byte, string>(ticket, (byte x) => x.ToString("X2")));
+				Application.OpenURL(URL.Replace("{SteamID}", DistributionPlatform.Inst.LocalUser.Id.ToInt64().ToString()).Replace("{SteamTicket}", text2));
+			});
+			return;
+		}
+		string text = URL.Replace("{SteamID}", "").Replace("{SteamTicket}", "");
+		Application.OpenURL("https://accounts.klei.com/login?goto={gotoUrl}".Replace("{gotoUrl}", WebUtility.HtmlEncode(text)));
+	}
+
 	public GameObject buttonPrefab;
 
 	public List<OpenURLButtons.URLButtonData> buttonData;
@@ -54,6 +74,7 @@ public class OpenURLButtons : KMonoBehaviour
 	public enum URLButtonType
 	{
 		url,
+		platformUrl,
 		patchNotes
 	}
 

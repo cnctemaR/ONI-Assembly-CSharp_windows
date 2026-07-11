@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Chattable")]
 public class Chattable : KMonoBehaviour, IApproachable
 {
 	public CellOffset[] GetOffsets()

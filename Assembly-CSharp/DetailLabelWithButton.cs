@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/DetailLabelWithButton")]
 public class DetailLabelWithButton : KMonoBehaviour
 {
 	public LocText label;

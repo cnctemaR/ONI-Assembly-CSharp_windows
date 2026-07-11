@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TableRow")]
 public class TableRow : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

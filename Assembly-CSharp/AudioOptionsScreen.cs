@@ -150,7 +150,7 @@ public class AudioOptionsScreen : KModalScreen
 	private void OnClose(GameObject go)
 	{
 		this.alwaysPlayMusicMetric[AudioOptionsScreen.AlwaysPlayMusicKey] = MusicManager.instance.alwaysPlayMusic;
-		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.alwaysPlayMusicMetric);
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.alwaysPlayMusicMetric, "AudioOptionsScreen");
 		global::UnityEngine.Object.Destroy(go);
 	}
 

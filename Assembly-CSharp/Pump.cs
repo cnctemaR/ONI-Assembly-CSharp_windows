@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Pump")]
 public class Pump : KMonoBehaviour, ISim1000ms
 {
 	protected override void OnPrefabInit()

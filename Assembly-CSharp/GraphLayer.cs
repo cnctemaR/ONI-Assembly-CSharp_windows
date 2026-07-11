@@ -2,6 +2,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(GraphBase))]
+[AddComponentMenu("KMonoBehaviour/scripts/GraphLayer")]
 public class GraphLayer : KMonoBehaviour
 {
 	public GraphBase graph

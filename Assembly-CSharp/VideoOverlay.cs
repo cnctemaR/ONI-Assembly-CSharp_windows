@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/VideoOverlay")]
 public class VideoOverlay : KMonoBehaviour
 {
 	public void SetText(List<string> strings)

@@ -6,6 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/DecorProvider")]
 public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffectDescriptor
 {
 	public void Refresh()

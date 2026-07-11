@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[AddComponentMenu("KMonoBehaviour/Plugins/KScreen")]
 public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEventSystemHandler, IPointerExitHandler
 {
 	public string handlerName

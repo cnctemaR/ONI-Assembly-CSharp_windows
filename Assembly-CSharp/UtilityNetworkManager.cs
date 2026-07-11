@@ -157,7 +157,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			{
 				if (this.endpoints.ContainsKey(cell))
 				{
-					DebugUtil.DevLogError(string.Format("Cell {0} already has a utility network endpoint assigned. Adding {1} will stomp previous endpoint, destroying the object that's already there.", cell, item.ToString()));
+					global::Debug.LogWarning(string.Format("Cell {0} already has a utility network endpoint assigned. Adding {1} will stomp previous endpoint, destroying the object that's already there.", cell, item.ToString()));
 					KMonoBehaviour kmonoBehaviour = this.endpoints[cell] as KMonoBehaviour;
 					if (kmonoBehaviour != null)
 					{
@@ -170,7 +170,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 			{
 				if (this.items.ContainsKey(cell))
 				{
-					DebugUtil.DevLogError(string.Format("Cell {0} already has a utility network connector assigned. Adding {1} will stomp previous item, destroying the object that's already there.", cell, item.ToString()));
+					global::Debug.LogWarning(string.Format("Cell {0} already has a utility network connector assigned. Adding {1} will stomp previous item, destroying the object that's already there.", cell, item.ToString()));
 					KMonoBehaviour kmonoBehaviour2 = this.items[cell] as KMonoBehaviour;
 					if (kmonoBehaviour2 != null)
 					{

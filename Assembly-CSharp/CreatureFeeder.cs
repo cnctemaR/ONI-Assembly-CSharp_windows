@@ -2,6 +2,7 @@
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/CreatureFeeder")]
 public class CreatureFeeder : KMonoBehaviour
 {
 	protected override void OnSpawn()

@@ -3,6 +3,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/HotTubWorkable")]
 public class HotTubWorkable : Workable, IWorkerPrioritizable
 {
 	private HotTubWorkable()

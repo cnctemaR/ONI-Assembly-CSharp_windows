@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/SolidConduit")]
 public class SolidConduit : KMonoBehaviour, IHaveUtilityNetworkMgr
 {
 	public void SetFirstFrameCallback(global::System.Action ffCb)

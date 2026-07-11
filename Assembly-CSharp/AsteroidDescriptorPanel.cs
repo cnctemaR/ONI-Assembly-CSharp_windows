@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AsteroidDescriptorPanel")]
 public class AsteroidDescriptorPanel : KMonoBehaviour
 {
 	public bool HasDescriptors()

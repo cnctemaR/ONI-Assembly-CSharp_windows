@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/NavPathDrawer")]
 public class NavPathDrawer : KMonoBehaviour
 {
 	public static NavPathDrawer Instance { get; private set; }

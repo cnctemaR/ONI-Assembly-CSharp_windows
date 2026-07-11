@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/GridVisibility")]
 public class GridVisibility : KMonoBehaviour
 {
 	protected override void OnSpawn()

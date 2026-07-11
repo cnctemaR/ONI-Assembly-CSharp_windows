@@ -3,6 +3,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/ValveBase")]
 public class ValveBase : KMonoBehaviour, ISaveLoadable
 {
 	public float CurrentFlow

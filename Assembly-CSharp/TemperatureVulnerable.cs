@@ -141,7 +141,7 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	{
 		this.averageTemp = 0f;
 		this.cellCount = 0;
-		this.occupyArea.TestArea(cell, this, new Func<int, object, bool>(TemperatureVulnerable.GetAverageTemperatureCb));
+		this.occupyArea.TestArea(cell, this, TemperatureVulnerable.GetAverageTemperatureCbDelegate);
 		if (this.cellCount > 0)
 		{
 			return this.averageTemp / (float)this.cellCount;
@@ -186,6 +186,8 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	private float averageTemp;
 
 	private int cellCount;
+
+	private static readonly Func<int, object, bool> GetAverageTemperatureCbDelegate = (int cell, object data) => TemperatureVulnerable.GetAverageTemperatureCb(cell, data);
 
 	public class StatesInstance : GameStateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.GameInstance
 	{

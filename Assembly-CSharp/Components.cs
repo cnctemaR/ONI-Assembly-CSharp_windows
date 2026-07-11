@@ -114,6 +114,8 @@ public class Components
 
 	public static Components.Cmps<IncubationMonitor.Instance> IncubationMonitors = new Components.Cmps<IncubationMonitor.Instance>();
 
+	public static Components.Cmps<FixedCapturableMonitor.Instance> FixedCapturableMonitors = new Components.Cmps<FixedCapturableMonitor.Instance>();
+
 	public class Cmps<T> : ICollection, IEnumerable
 	{
 		public List<T> Items

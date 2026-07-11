@@ -10,6 +10,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/MinionResume")]
 public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 {
 	public MinionIdentity GetIdentity
@@ -461,7 +462,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			this.lastSkillNotification = new Notification(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME, NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip), null, true, 0f, delegate(object d)
 			{
 				ManagementMenu.Instance.OpenSkills(this.identity);
-			}, null, null);
+			}, null, null, true);
 			Game.Instance.GetComponent<Notifier>().Add(this.lastSkillNotification, "");
 		}
 		if (PopFXManager.Instance != null)

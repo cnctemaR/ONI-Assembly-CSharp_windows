@@ -1,7 +1,9 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FactionAlignment")]
 public class FactionAlignment : KMonoBehaviour
 {
 	[MyCmpAdd]

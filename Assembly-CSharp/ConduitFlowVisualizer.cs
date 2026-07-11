@@ -418,7 +418,7 @@ public class ConduitFlowVisualizer
 			this.outer = outer;
 			this.lerp_percent = lerp_percent;
 			this.visible_conduits = ListPool<int, ConduitFlowVisualizer>.Allocate();
-			this.visible_conduits.Capacity = outer.flowManager.soaInfo.NumEntries;
+			this.visible_conduits.Capacity = Math.Max(outer.flowManager.soaInfo.NumEntries, this.visible_conduits.Capacity);
 			for (int num = 0; num != outer.flowManager.soaInfo.NumEntries; num++)
 			{
 				Vector2I vector2I = Grid.CellToXY(outer.flowManager.soaInfo.GetCell(num));

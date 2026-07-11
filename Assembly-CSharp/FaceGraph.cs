@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/FaceGraph")]
 public class FaceGraph : KMonoBehaviour
 {
 	public IEnumerator<Expression> GetEnumerator()

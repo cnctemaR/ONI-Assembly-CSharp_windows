@@ -30,9 +30,11 @@ public class SwitchConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = false;
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		go.AddOrGet<CircuitSwitch>().objectLayer = ObjectLayer.Wire;
+		CircuitSwitch circuitSwitch = go.AddOrGet<CircuitSwitch>();
+		circuitSwitch.objectLayer = ObjectLayer.Wire;
+		circuitSwitch.manuallyControlled = false;
 		Prioritizable.AddRef(go);
 	}
 

@@ -166,16 +166,16 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 		}
 		this.delayTicksRemaining = 0;
 		this.meter.SetPositionPercent(1f);
-		if (this.outputValue == 0)
+		if (this.outputValueOne == 0)
 		{
 			return;
 		}
-		int outputCell = base.OutputCell;
-		if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCell) is LogicCircuitNetwork))
+		int outputCellOne = base.OutputCellOne;
+		if (!(Game.Instance.logicCircuitSystem.GetNetworkForCell(outputCellOne) is LogicCircuitNetwork))
 		{
 			return;
 		}
-		this.outputValue = 0;
+		this.outputValueOne = 0;
 		base.RefreshAnimation();
 	}
 

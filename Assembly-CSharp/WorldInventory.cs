@@ -5,6 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/scripts/WorldInventory")]
 public class WorldInventory : KMonoBehaviour, ISaveLoadable
 {
 	public static WorldInventory Instance { get; private set; }
@@ -188,6 +189,20 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return new HashSet<Tag>();
 	}
 
+	public Dictionary<Tag, HashSet<Tag>> GetDiscoveredResourcesFromTagSet(TagSet tagSet)
+	{
+		Dictionary<Tag, HashSet<Tag>> dictionary = new Dictionary<Tag, HashSet<Tag>>();
+		foreach (Tag tag in tagSet)
+		{
+			HashSet<Tag> hashSet;
+			if (this.DiscoveredCategories.TryGetValue(tag, out hashSet))
+			{
+				dictionary[tag] = hashSet;
+			}
+		}
+		return dictionary;
+	}
+
 	private void Update()
 	{
 		int num = 0;
@@ -248,7 +263,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	private void OnAddedFetchable(object data)
 	{
 		GameObject gameObject = (GameObject)data;
-		if (gameObject.GetComponent<Health>() != null)
+		if (gameObject.GetComponent<Navigator>() != null)
 		{
 			return;
 		}

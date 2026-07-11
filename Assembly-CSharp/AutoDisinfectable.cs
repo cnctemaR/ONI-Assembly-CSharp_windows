@@ -2,7 +2,9 @@
 using KSerialization;
 using STRINGS;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/AutoDisinfectable")]
 public class AutoDisinfectable : Workable
 {
 	protected override void OnPrefabInit()

@@ -30,6 +30,7 @@ public class SelectedRecipeQueueScreen : KScreen
 			this.RefreshQueueCountDisplay();
 			this.ownerScreen.RefreshQueueCountDisplayForRecipe(this.selectedRecipe, this.target);
 		};
+		this.InfiniteButton.GetComponentInChildren<LocText>().text = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPE_FOREVER;
 		this.InfiniteButton.onClick += delegate
 		{
 			if (this.target.GetRecipeQueueCount(this.selectedRecipe) != ComplexFabricator.QUEUE_INFINITE)

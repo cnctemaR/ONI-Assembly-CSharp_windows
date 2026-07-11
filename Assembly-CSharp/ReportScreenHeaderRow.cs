@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ReportScreenHeaderRow")]
 public class ReportScreenHeaderRow : KMonoBehaviour
 {
 	public void SetLine(ReportManager.ReportGroup reportGroup)

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text.RegularExpressions;
+using System.Text;
 using TMPro;
 using UnityEngine;
 
@@ -125,43 +125,14 @@ public class LocText : TextMeshProUGUI
 
 	private static string ModifyLinkStrings(string input)
 	{
-		string text = "<link=\"";
-		string text2 = "</link>";
-		string text3 = "<b><style=\"KLink\">";
-		string text4 = "</style></b>";
-		string text5 = text3 + text;
-		if (input == null || Regex.Split(input, text5).Length > 1)
+		if (input == null || input.IndexOf("<b><style=\"KLink\">") != -1)
 		{
 			return input;
 		}
-		LocText.splits = Regex.Split(input, text);
-		if (LocText.splits.Length > 1)
-		{
-			for (int i = 1; i < LocText.splits.Length; i++)
-			{
-				if (!(LocText.splits[i] == ""))
-				{
-					int num = input.IndexOf(LocText.splits[i]);
-					input = input.Insert(num - text.Length, text3);
-				}
-			}
-		}
-		LocText.splits = Regex.Split(input, text2);
-		if (LocText.splits.Length > 1)
-		{
-			for (int j = 0; j < LocText.splits.Length; j++)
-			{
-				if (!(LocText.splits[j] == ""))
-				{
-					int num2 = input.IndexOf(LocText.splits[j]);
-					if (num2 != 0)
-					{
-						input = input.Insert(num2, text4);
-					}
-				}
-			}
-		}
-		return input;
+		StringBuilder stringBuilder = new StringBuilder(input);
+		stringBuilder.Replace("<link=\"", LocText.combinedPrefix);
+		stringBuilder.Replace("</link>", LocText.combinedSuffix);
+		return stringBuilder.ToString();
 	}
 
 	private void RefreshLinkHandler()
@@ -198,5 +169,15 @@ public class LocText : TextMeshProUGUI
 	[SerializeField]
 	private bool allowLinksInternal;
 
-	private static string[] splits;
+	private const string linkPrefix_open = "<link=\"";
+
+	private const string linkSuffix = "</link>";
+
+	private const string linkColorPrefix = "<b><style=\"KLink\">";
+
+	private const string linkColorSuffix = "</style></b>";
+
+	private static readonly string combinedPrefix = "<b><style=\"KLink\"><link=\"";
+
+	private static readonly string combinedSuffix = "</style></b></link>";
 }

@@ -7,6 +7,7 @@ using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 [DebuggerDisplay("{name} {WattsUsed}W")]
+[AddComponentMenu("KMonoBehaviour/scripts/EnergyConsumer")]
 public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IEffectDescriptor
 {
 	public int PowerSortOrder

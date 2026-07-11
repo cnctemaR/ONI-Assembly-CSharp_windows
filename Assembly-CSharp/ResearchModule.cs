@@ -2,6 +2,7 @@
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ResearchModule")]
 public class ResearchModule : KMonoBehaviour
 {
 	protected override void OnSpawn()

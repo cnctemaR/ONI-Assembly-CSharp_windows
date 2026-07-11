@@ -56,7 +56,7 @@ public class DetectorNetwork : GameStateMachine<DetectorNetwork, DetectorNetwork
 		private string StringCallback(string str, DetectorNetwork.Instance smi)
 		{
 			MathUtil.MinMax detectTimeRange = smi.GetDetectTimeRange();
-			return str.Replace("{TotalQuality}", GameUtil.GetFormattedPercent(smi.ComputeTotalDishQuality() * 100f, GameUtil.TimeSlice.None)).Replace("{WorstTime}", GameUtil.GetFormattedTime(detectTimeRange.min)).Replace("{BestTime}", GameUtil.GetFormattedTime(detectTimeRange.max));
+			return str.Replace("{TotalQuality}", GameUtil.GetFormattedPercent(smi.ComputeTotalDishQuality() * 100f, GameUtil.TimeSlice.None)).Replace("{WorstTime}", GameUtil.GetFormattedTime(detectTimeRange.min, "F0")).Replace("{BestTime}", GameUtil.GetFormattedTime(detectTimeRange.max, "F0"));
 		}
 
 		public GameStateMachine<DetectorNetwork, DetectorNetwork.Instance, IStateMachineTarget, DetectorNetwork.Def>.State poor;

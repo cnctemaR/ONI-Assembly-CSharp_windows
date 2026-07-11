@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteInEditMode]
+[AddComponentMenu("KMonoBehaviour/Plugins/SetTextStyleSetting")]
 public class SetTextStyleSetting : KMonoBehaviour
 {
 	public static void ApplyStyle(TextMeshProUGUI sdfText, TextStyleSetting style)

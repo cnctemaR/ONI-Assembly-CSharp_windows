@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/NoisePolluter")]
 public class NoisePolluter : KMonoBehaviour, IPolluter
 {
 	public static bool IsNoiseableCell(int cell)

@@ -12,6 +12,7 @@ public class GasBottlerConfig : IBuildingConfig
 		buildingDef.ViewMode = OverlayModes.GasConduits.ID;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
+		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.GasVentIDs, "GasBottler");
 		return buildingDef;
 	}
 
@@ -38,6 +39,7 @@ public class GasBottlerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().AddTag(GameTags.OverlayBehindConduits, false);
 	}
 
 	public const string ID = "GasBottler";

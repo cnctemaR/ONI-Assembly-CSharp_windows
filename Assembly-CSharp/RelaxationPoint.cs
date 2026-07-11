@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/RelaxationPoint")]
 public class RelaxationPoint : Workable, IEffectDescriptor
 {
 	public RelaxationPoint()

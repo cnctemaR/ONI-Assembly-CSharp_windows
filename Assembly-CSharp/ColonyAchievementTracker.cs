@@ -7,6 +7,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ColonyAchievementTracker")]
 public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IRenderEveryTick
 {
 	public List<string> achievementsToDisplay
@@ -151,6 +152,8 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 
 	private void TriggerNewAchievementCompleted(string achievement, GameObject cameraTarget = null)
 	{
+		this.unlockedAchievementMetric[ColonyAchievementTracker.UnlockedAchievementKey] = achievement;
+		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.unlockedAchievementMetric, "TriggerNewAchievementCompleted");
 		bool flag = false;
 		if (Db.Get().ColonyAchievements.Get(achievement).isVictoryCondition)
 		{
@@ -341,6 +344,14 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails, IR
 	private List<string> completedAchievementsToDisplay = new List<string>();
 
 	private SchedulerHandle victorySchedulerHandle;
+
+	public static readonly string UnlockedAchievementKey = "UnlockedAchievement";
+
+	private Dictionary<string, object> unlockedAchievementMetric = new Dictionary<string, object> { 
+	{
+		ColonyAchievementTracker.UnlockedAchievementKey,
+		null
+	} };
 
 	private static readonly EventSystem.IntraObjectHandler<ColonyAchievementTracker> OnNewDayDelegate = new EventSystem.IntraObjectHandler<ColonyAchievementTracker>(delegate(ColonyAchievementTracker component, object data)
 	{

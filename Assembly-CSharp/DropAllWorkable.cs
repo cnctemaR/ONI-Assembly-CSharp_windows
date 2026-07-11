@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/DropAllWorkable")]
 public class DropAllWorkable : Workable
 {
 	protected DropAllWorkable()

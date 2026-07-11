@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/OverviewColumnIdentity")]
 public class OverviewColumnIdentity : KMonoBehaviour
 {
 	public string columnID = "";

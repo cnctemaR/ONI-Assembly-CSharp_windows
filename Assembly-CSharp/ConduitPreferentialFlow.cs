@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ConduitPreferentialFlow")]
 public class ConduitPreferentialFlow : KMonoBehaviour, ISecondaryInput
 {
 	protected override void OnSpawn()

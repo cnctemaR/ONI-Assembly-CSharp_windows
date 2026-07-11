@@ -2,6 +2,7 @@
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/StorageLocker")]
 public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 {
 	protected override void OnPrefabInit()
@@ -20,9 +21,9 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	protected override void OnSpawn()
 	{
 		this.filteredStorage.FilterChanged();
-		if (!this.lockerName.IsNullOrWhiteSpace())
+		if (this.nameable != null && !this.lockerName.IsNullOrWhiteSpace())
 		{
-			this.SetName(this.lockerName);
+			this.nameable.SetName(this.lockerName);
 		}
 	}
 
@@ -99,19 +100,6 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		}
 	}
 
-	public void SetName(string name)
-	{
-		KSelectable component = base.GetComponent<KSelectable>();
-		base.name = name;
-		this.lockerName = name;
-		if (component != null)
-		{
-			component.SetName(name);
-		}
-		base.gameObject.name = name;
-		NameDisplayScreen.Instance.UpdateName(base.gameObject);
-	}
-
 	private LoggerFS log;
 
 	[Serialize]
@@ -121,6 +109,9 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	public string lockerName = "";
 
 	protected FilteredStorage filteredStorage;
+
+	[MyCmpGet]
+	private UserNameable nameable;
 
 	private static readonly EventSystem.IntraObjectHandler<StorageLocker> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<StorageLocker>(delegate(StorageLocker component, object data)
 	{

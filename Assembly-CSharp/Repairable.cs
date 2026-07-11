@@ -9,6 +9,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Repairable")]
 public class Repairable : Workable
 {
 	protected override void OnPrefabInit()

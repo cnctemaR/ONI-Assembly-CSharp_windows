@@ -2,7 +2,9 @@
 using KSerialization;
 using STRINGS;
 using TUNING;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Studyable")]
 public class Studyable : Workable, ISidescreenButtonControl
 {
 	public bool Studied

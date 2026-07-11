@@ -295,7 +295,7 @@ namespace Database
 				IncapacitationMonitor.Instance instance = (IncapacitationMonitor.Instance)data;
 				float bleedLifeTime = instance.GetBleedLifeTime(instance);
 				str = str.Replace("{CauseOfIncapacitation}", instance.GetCauseOfIncapacitation().Name);
-				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedTime(bleedLifeTime));
+				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedTime(bleedLifeTime, "F0"));
 			};
 			this.Relocating = this.CreateStatusItem("Relocating", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Relocating.resolveStringCallback = func;

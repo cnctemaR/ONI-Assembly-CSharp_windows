@@ -3,6 +3,7 @@ using STRINGS;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Moppable")]
 public class Moppable : Workable, ISim1000ms, ISim200ms
 {
 	private Moppable()

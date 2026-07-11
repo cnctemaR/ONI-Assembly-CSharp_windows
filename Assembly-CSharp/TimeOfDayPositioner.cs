@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/TimeOfDayPositioner")]
 public class TimeOfDayPositioner : KMonoBehaviour
 {
 	private void Update()

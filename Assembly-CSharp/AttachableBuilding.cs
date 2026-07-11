@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/AttachableBuilding")]
 public class AttachableBuilding : KMonoBehaviour
 {
 	protected override void OnPrefabInit()

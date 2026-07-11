@@ -7,6 +7,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
+[AddComponentMenu("KMonoBehaviour/Workable/Constructable")]
 public class Constructable : Workable, ISaveLoadable
 {
 	public Recipe Recipe
@@ -126,10 +127,11 @@ public class Constructable : Workable, ISaveLoadable
 				float temperature = component7.Temperature;
 				byte diseaseIdx = component7.DiseaseIdx;
 				int diseaseCount = component7.DiseaseCount;
-				global::Debug.Assert(component7.Element != null && component7.Element.tag != null);
-				Deconstructable.SpawnItem(component7.transform.GetPosition(), component7.GetComponent<Building>().Def, component7.Element.tag, mass, temperature, diseaseIdx, diseaseCount);
-				replacementCandidate.Trigger(1606648047, this.building.Def.TileLayer);
-				replacementCandidate.DeleteObject();
+				Building component8 = replacementCandidate.GetComponent<Building>();
+				Deconstructable component9 = replacementCandidate.GetComponent<Deconstructable>();
+				global::Debug.Assert(component9 != null, "Shouldn't be able to replace over an object that can't be deconstructed");
+				replacementCandidate.Trigger(1606648047, component8.Def.TileLayer);
+				component9.TriggerDestroy(component8, temperature, diseaseIdx, diseaseCount);
 			}
 		}
 		if (flag2)
@@ -175,7 +177,7 @@ public class Constructable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
+		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null, true);
 		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
 		if (this.building.Def.IsTilePiece)
 		{
@@ -232,10 +234,10 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			if (base.gameObject.GetComponent<ConduitBridge>() == null)
 			{
-				GameObject gameObject2 = Grid.Objects[offset_cell, 7];
-				if (gameObject2 != null)
+				GameObject gameObject3 = Grid.Objects[offset_cell, 7];
+				if (gameObject3 != null)
 				{
-					gameObject2.DeleteObject();
+					gameObject3.DeleteObject();
 				}
 			}
 		});
@@ -257,6 +259,12 @@ public class Constructable : Workable, ISaveLoadable
 			{
 				global::Debug.LogError("multiple replacement tiles on the same cell!");
 				Util.KDestroyGameObject(base.gameObject);
+			}
+			GameObject gameObject2 = Grid.Objects[num, (int)this.building.Def.ObjectLayer];
+			Deconstructable deconstructable = ((gameObject2 != null) ? gameObject2.GetComponent<Deconstructable>() : null);
+			if (deconstructable != null)
+			{
+				deconstructable.CancelDeconstruction();
 			}
 		}
 		bool flag = this.building.Def.BuildingComplete.GetComponent<Ladder>();

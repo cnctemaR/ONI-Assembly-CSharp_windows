@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Approachable")]
 public class Approachable : KMonoBehaviour, IApproachable
 {
 	public CellOffset[] GetOffsets()

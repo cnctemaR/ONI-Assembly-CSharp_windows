@@ -1,6 +1,8 @@
 ﻿using System;
+using UnityEngine;
 
 [SkipSaveFileSerialization]
+[AddComponentMenu("KMonoBehaviour/scripts/Floodable")]
 public class Floodable : KMonoBehaviour
 {
 	public bool IsFlooded

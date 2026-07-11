@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using KSerialization;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/LaunchConditionManager")]
 public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 {
 	public List<RocketModule> rocketModules { get; private set; }

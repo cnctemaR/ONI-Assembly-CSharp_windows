@@ -10,6 +10,7 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("AirborneCreatureLure", 1, 4, "airbornecreaturetrap_kanim", 10, 10f, BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.PLASTICS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0, 0.2f);
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.Deprecated = true;
+		buildingDef.LogicInputPorts = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0));
 		return buildingDef;
 	}
 
@@ -28,21 +29,10 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 		prefab.AddOrGet<Operational>();
 	}
 
-	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
-	}
-
-	public override void DoPostConfigureUnderConstruction(GameObject go)
-	{
-		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
-	}
-
 	public override void DoPostConfigureComplete(GameObject prefab)
 	{
 		BuildingTemplates.DoPostConfigure(prefab);
 		SymbolOverrideControllerUtil.AddToPrefab(prefab);
-		GeneratedBuildings.RegisterLogicPorts(prefab, LogicOperationalController.INPUT_PORTS_0_0);
 		prefab.AddOrGet<LogicOperationalController>();
 		Lure.Def def = prefab.AddOrGetDef<Lure.Def>();
 		def.lurePoints = new CellOffset[]

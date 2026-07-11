@@ -31,10 +31,10 @@ public class SandboxSampleTool : InterfaceTool
 	private void Sample(int cell)
 	{
 		UISounds.PlaySound(UISounds.Sound.ClickObject);
-		SandboxToolParameterMenu.instance.settings.Element = Grid.Element[cell];
-		SandboxToolParameterMenu.instance.settings.Mass = Mathf.Round(Grid.Mass[cell] * 100f) / 100f;
-		SandboxToolParameterMenu.instance.settings.temperature = Mathf.Round(Grid.Temperature[cell] * 10f) / 10f;
-		SandboxToolParameterMenu.instance.settings.diseaseCount = Grid.DiseaseCount[cell];
+		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandboxTools.SelectedElement", (int)Grid.Element[cell].idx);
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandboxTools.Mass", Mathf.Round(Grid.Mass[cell] * 100f) / 100f);
+		SandboxToolParameterMenu.instance.settings.SetFloatSetting("SandbosTools.Temperature", Mathf.Round(Grid.Temperature[cell] * 10f) / 10f);
+		SandboxToolParameterMenu.instance.settings.SetIntSetting("SandboxTools.DiseaseCount", Grid.DiseaseCount[cell]);
 		SandboxToolParameterMenu.instance.RefreshDisplay();
 	}
 

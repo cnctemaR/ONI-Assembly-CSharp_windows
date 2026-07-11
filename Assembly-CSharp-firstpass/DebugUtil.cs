@@ -127,6 +127,15 @@ public static class DebugUtil
 		global::Debug.LogError(DebugUtil.BuildString(objs), context);
 	}
 
+	public static void LogException(global::UnityEngine.Object context, string errorMessage, Exception e)
+	{
+		DebugUtil.LogErrorArgs(context, new object[]
+		{
+			errorMessage,
+			"\n" + e.ToString()
+		});
+	}
+
 	private static void RecursiveBuildFullName(GameObject obj)
 	{
 		if (obj == null)

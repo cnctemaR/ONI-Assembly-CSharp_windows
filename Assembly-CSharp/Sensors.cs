@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Sensors")]
 public class Sensors : KMonoBehaviour
 {
 	protected override void OnSpawn()
@@ -18,7 +20,7 @@ public class Sensors : KMonoBehaviour
 				return (SensorType)((object)sensor);
 			}
 		}
-		Debug.LogError("Missing sensor of type: " + typeof(SensorType).Name);
+		global::Debug.LogError("Missing sensor of type: " + typeof(SensorType).Name);
 		return default(SensorType);
 	}
 

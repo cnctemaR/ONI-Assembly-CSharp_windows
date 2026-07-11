@@ -5,6 +5,7 @@ using KSerialization;
 using TUNING;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/Workable/Artable")]
 public class Artable : Workable
 {
 	public Artable.Status CurrentStatus

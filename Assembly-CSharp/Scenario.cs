@@ -5,6 +5,7 @@ using System.Linq;
 using Klei.AI;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Scenario")]
 public class Scenario : KMonoBehaviour
 {
 	public bool[] ReplaceElementMask { get; set; }

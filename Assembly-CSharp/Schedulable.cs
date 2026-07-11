@@ -1,5 +1,7 @@
 ﻿using System;
+using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Schedulable")]
 public class Schedulable : KMonoBehaviour
 {
 	public Schedule GetSchedule()

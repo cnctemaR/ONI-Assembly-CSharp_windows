@@ -24,9 +24,12 @@ public class GeneratedBuildings
 
 	public static void MakeBuildingAlwaysOperational(GameObject go)
 	{
-		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
-		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<Operational>());
-		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicPorts>());
+		BuildingDef def = go.GetComponent<BuildingComplete>().Def;
+		if (def.LogicInputPorts != null || def.LogicOutputPorts != null)
+		{
+			global::Debug.LogWarning("Do not call MakeBuildingAlwaysOperational directly if LogicInputPorts or LogicOutputPorts are defined. Instead set BuildingDef.AlwaysOperational = true");
+		}
+		GeneratedBuildings.MakeBuildingAlwaysOperationalImpl(go);
 	}
 
 	public static void RemoveLoopingSounds(GameObject go)
@@ -45,24 +48,31 @@ public class GeneratedBuildings
 		overlay_tags.Add(new Tag(id + "UnderConstruction"));
 	}
 
-	public static void RegisterLogicPorts(GameObject go, LogicPorts.Port[] inputs, LogicPorts.Port[] outputs)
+	public static void RegisterSingleLogicInputPort(GameObject go)
 	{
 		LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
-		logicPorts.inputPortInfo = inputs;
-		logicPorts.outputPortInfo = outputs;
-	}
-
-	public static void RegisterLogicPorts(GameObject go, LogicPorts.Port[] inputs)
-	{
-		LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
-		logicPorts.inputPortInfo = inputs;
+		logicPorts.inputPortInfo = LogicOperationalController.CreateSingleInputPortList(new CellOffset(0, 0)).ToArray();
 		logicPorts.outputPortInfo = null;
 	}
 
-	public static void RegisterLogicPorts(GameObject go, LogicPorts.Port output)
+	private static void MakeBuildingAlwaysOperationalImpl(GameObject go)
 	{
-		LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
-		logicPorts.inputPortInfo = null;
-		logicPorts.outputPortInfo = new LogicPorts.Port[] { output };
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<Operational>());
+		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<LogicPorts>());
+	}
+
+	public static void InitializeLogicPorts(GameObject go, BuildingDef def)
+	{
+		if (def.AlwaysOperational)
+		{
+			GeneratedBuildings.MakeBuildingAlwaysOperationalImpl(go);
+		}
+		if (def.LogicInputPorts != null || def.LogicOutputPorts != null)
+		{
+			LogicPorts logicPorts = go.AddOrGet<LogicPorts>();
+			logicPorts.inputPortInfo = ((def.LogicInputPorts != null) ? def.LogicInputPorts.ToArray() : null);
+			logicPorts.outputPortInfo = ((def.LogicOutputPorts != null) ? def.LogicOutputPorts.ToArray() : null);
+		}
 	}
 }

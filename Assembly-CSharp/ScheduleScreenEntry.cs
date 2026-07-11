@@ -5,6 +5,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
+[AddComponentMenu("KMonoBehaviour/scripts/ScheduleScreenEntry")]
 public class ScheduleScreenEntry : KMonoBehaviour
 {
 	public Schedule schedule { get; private set; }

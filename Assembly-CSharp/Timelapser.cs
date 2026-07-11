@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using UnityEngine;
 
+[AddComponentMenu("KMonoBehaviour/scripts/Timelapser")]
 public class Timelapser : KMonoBehaviour
 {
 	public bool CapturingTimelapseScreenshot

@@ -54,6 +54,8 @@ namespace Database
 			this.Illumination.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None, null));
 			this.ScaleGrowth = this.CreateAmount("ScaleGrowth", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS", "ui_icon_scale_growth", null);
 			this.ScaleGrowth.SetDisplayer(new AsPercentAmountDisplayer(GameUtil.TimeSlice.PerCycle));
+			this.InternalBattery = this.CreateAmount("InternalBattery", 0f, 0f, false, Units.Flat, 4000f, true, "STRINGS.ROBOTS.STATS.", "ui_icon_stress", "attribute_stress");
+			this.InternalBattery.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.SimpleFloat, GameUtil.TimeSlice.None, null));
 		}
 
 		public Amount CreateAmount(string id, float min, float max, bool show_max, Units units, float delta_threshold, bool show_in_ui, string string_root, string uiSprite = null, string thoughtSprite = null)
@@ -121,6 +123,8 @@ namespace Database
 		public Amount Incubation;
 
 		public Amount ScaleGrowth;
+
+		public Amount InternalBattery;
 
 		public Amount Rot;
 	}

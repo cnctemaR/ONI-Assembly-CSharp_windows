@@ -6,15 +6,39 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class ConduitTemperatureSensor : ConduitThresholdSensor, IThresholdSwitch
 {
+	private void GetContentsTemperature(out float temperature, out bool hasMass)
+	{
+		int num = Grid.PosToCell(this);
+		if (this.conduitType == ConduitType.Liquid || this.conduitType == ConduitType.Gas)
+		{
+			ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
+			temperature = contents.temperature;
+			hasMass = contents.mass > 0f;
+			return;
+		}
+		SolidConduitFlow flowManager = SolidConduit.GetFlowManager();
+		SolidConduitFlow.ConduitContents contents2 = flowManager.GetContents(num);
+		Pickupable pickupable = flowManager.GetPickupable(contents2.pickupableHandle);
+		if (pickupable != null && pickupable.PrimaryElement.Mass > 0f)
+		{
+			temperature = pickupable.PrimaryElement.Temperature;
+			hasMass = true;
+			return;
+		}
+		temperature = 0f;
+		hasMass = false;
+	}
+
 	public override float CurrentValue
 	{
 		get
 		{
-			int num = Grid.PosToCell(this);
-			ConduitFlow.ConduitContents contents = Conduit.GetFlowManager(this.conduitType).GetContents(num);
-			if (contents.mass > 0f)
+			float num;
+			bool flag;
+			this.GetContentsTemperature(out num, out flag);
+			if (flag)
 			{
-				this.lastValue = contents.temperature;
+				this.lastValue = num;
 			}
 			return this.lastValue;
 		}

@@ -52,6 +52,7 @@ public class LiquidValveConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<RequireInputs>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitConsumer>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
+		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		BuildingTemplates.DoPostConfigure(go);
 	}
 

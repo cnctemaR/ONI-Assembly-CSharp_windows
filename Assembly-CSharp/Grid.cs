@@ -396,13 +396,14 @@ public class Grid
 		int num = Grid.PosToCell(pos);
 		if (Grid.IsValidCell(num) && Grid.IsLiquid(num))
 		{
-			if (Grid.IsLiquid(Grid.CellAbove(num)))
+			int num2 = Grid.CellAbove(num);
+			if (Grid.IsValidCell(num2) && Grid.IsLiquid(num2))
 			{
 				return true;
 			}
-			float num2 = Grid.Mass[num];
-			float num3 = (float)((int)pos.y) - pos.y;
-			if (num2 / 1000f <= num3)
+			float num3 = Grid.Mass[num];
+			float num4 = (float)((int)pos.y) - pos.y;
+			if (num3 / 1000f <= num4)
 			{
 				return true;
 			}

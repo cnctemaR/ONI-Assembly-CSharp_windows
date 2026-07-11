@@ -1386,7 +1386,7 @@ namespace STRINGS
 		{
 			public static LocString ENTER_TEXT = string.Empty;
 
-			public static LocString INVALID_LOCATION = "Invalid Locaton";
+			public static LocString INVALID_LOCATION = "Invalid Location";
 
 			public class PAINT_ELEMENTS_SCREEN
 			{

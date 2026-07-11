@@ -550,11 +550,6 @@ public class Pickupable : Workable
 		{
 			int cachedCell = this.cachedCell;
 			this.RefreshStorageTags(data);
-			KCollider2D component = base.GetComponent<KCollider2D>();
-			if (component != null)
-			{
-				component.enabled = false;
-			}
 			if (this.storage != null)
 			{
 				if (this.carryAnimOverride != null && this.storage.GetComponent<Navigator>() != null)
@@ -583,11 +578,6 @@ public class Pickupable : Workable
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.enabled = true;
 		base.gameObject.transform.rotation = Quaternion.identity;
-		KCollider2D component2 = base.GetComponent<KCollider2D>();
-		if (component2 != null)
-		{
-			component2.enabled = true;
-		}
 		this.RegisterListeners();
 		component.GetBatchInstanceData().ClearOverrideTransformMatrix();
 	}
@@ -767,8 +757,6 @@ public class Pickupable : Workable
 					{
 						this.entombedCell = num;
 						component.enabled = false;
-						KCollider2D component2 = base.GetComponent<KCollider2D>();
-						component2.enabled = false;
 						this.RemoveFaller();
 					}
 				}
@@ -788,8 +776,6 @@ public class Pickupable : Workable
 			this.entombedCell = -1;
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			component.enabled = true;
-			KCollider2D component2 = base.GetComponent<KCollider2D>();
-			component2.enabled = true;
 			if (add_faller_if_necessary)
 			{
 				this.AddFaller(Vector2.zero);

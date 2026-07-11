@@ -63,11 +63,13 @@ public class Valve : Workable, ISaveLoadable
 					this.chore = null;
 				}
 				component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
+				component.RemoveStatusItem(Db.Get().BuildingStatusItems.PendingWork, false);
 				return;
 			}
 			if (this.chore == null)
 			{
 				component.AddStatusItem(Db.Get().BuildingStatusItems.ValveRequest, this);
+				component.AddStatusItem(Db.Get().BuildingStatusItems.PendingWork, this);
 				this.chore = new WorkChore<Valve>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 			}
 		}
@@ -88,7 +90,9 @@ public class Valve : Workable, ISaveLoadable
 			this.chore.Cancel("forced complete");
 		}
 		this.chore = null;
-		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.RemoveStatusItem(Db.Get().BuildingStatusItems.ValveRequest, false);
+		component.RemoveStatusItem(Db.Get().BuildingStatusItems.PendingWork, false);
 	}
 
 	[MyCmpReq]

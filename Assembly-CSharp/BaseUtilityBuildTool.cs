@@ -199,7 +199,7 @@ public class BaseUtilityBuildTool : DragTool
 		}
 		this.path.Clear();
 		int num = Grid.PosToCell(cursor_pos);
-		if (Grid.IsVisible(num))
+		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
 			bool flag = this.CheckValidPathPiece(num);
 			this.path.Add(new BaseUtilityBuildTool.PathNode

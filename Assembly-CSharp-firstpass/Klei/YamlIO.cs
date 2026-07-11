@@ -40,7 +40,7 @@ namespace Klei
 			catch (Exception ex)
 			{
 				string message = ex.Message;
-				Output.LogWarning(new object[] { "Exception while loading yaml data: " + message });
+				Output.LogWarning(new object[] { "Exception while loading yaml data: " + message + "\n YAML FILE:\n" + readText });
 			}
 			return default(T);
 		}

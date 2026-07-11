@@ -96,15 +96,10 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		base.PositionOccupyingObject();
 		KBatchedAnimController component = base.occupyingObject.GetComponent<KBatchedAnimController>();
 		component.SetSceneLayer(Grid.SceneLayer.BuildingUse);
-		KBoxCollider2D component2 = base.occupyingObject.GetComponent<KBoxCollider2D>();
+		KSelectable component2 = base.occupyingObject.GetComponent<KSelectable>();
 		if (component2 != null)
 		{
 			component2.enabled = true;
-		}
-		KSelectable component3 = base.occupyingObject.GetComponent<KSelectable>();
-		if (component3 != null)
-		{
-			component3.enabled = true;
 		}
 	}
 

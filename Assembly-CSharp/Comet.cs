@@ -133,35 +133,70 @@ public class Comet : KMonoBehaviour, ISim33ms
 	}
 
 	[ContextMenu("DamageTiles")]
-	private float DamageTiles(int cell, int prev_cell, float inputDamage)
+	private float DamageTiles(int cell, int prev_cell, float input_damage)
 	{
-		Element element = Grid.Element[cell];
+		GameObject gameObject = Grid.Objects[cell, 9];
+		float num = 1f;
+		bool flag = false;
+		if (gameObject != null)
+		{
+			if (gameObject.GetComponent<KPrefabID>().HasTag(GameTags.Window))
+			{
+				num = this.windowDamageMultiplier;
+			}
+			else if (gameObject.GetComponent<KPrefabID>().HasTag(GameTags.Bunker))
+			{
+				num = this.bunkerDamageMultiplier;
+			}
+			SimCellOccupier component = gameObject.GetComponent<SimCellOccupier>();
+			if (component != null && !component.doReplaceElement)
+			{
+				flag = true;
+			}
+		}
+		Element element;
+		if (flag)
+		{
+			element = gameObject.GetComponent<PrimaryElement>().Element;
+		}
+		else
+		{
+			element = Grid.Element[cell];
+		}
 		if (element.strength == 0f)
 		{
 			return 0f;
 		}
+		float num2 = input_damage * num / element.strength;
 		this.PlayTileDamageSound(element, Grid.CellToPos(cell));
-		float num = inputDamage / element.strength;
-		GameObject gameObject = Grid.Objects[cell, 9];
-		if (gameObject != null && gameObject.GetComponent<KPrefabID>().HasTag(GameTags.Window))
-		{
-			num *= this.windowDamageMultiplier;
-		}
-		else if (gameObject != null && gameObject.GetComponent<KPrefabID>().HasTag(GameTags.Bunker))
-		{
-			num *= this.bunkerDamageMultiplier;
-		}
-		if (num == 0f)
+		if (num2 == 0f)
 		{
 			return 0f;
 		}
-		WorldDamage instance = WorldDamage.Instance;
-		float num2 = num;
-		string text = BUILDINGS.DAMAGESOURCES.COMET;
-		float num3 = instance.ApplyDamage(cell, num2, prev_cell, -1, text, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.COMET);
+		float num5;
+		if (flag)
+		{
+			BuildingHP component2 = gameObject.GetComponent<BuildingHP>();
+			float num3 = (float)component2.HitPoints / (float)component2.MaxHitPoints;
+			float num4 = num2 * (float)component2.MaxHitPoints;
+			component2.gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+			{
+				damage = Mathf.RoundToInt(num4),
+				source = BUILDINGS.DAMAGESOURCES.COMET,
+				popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.COMET
+			});
+			num5 = Mathf.Min(num3, num2);
+		}
+		else
+		{
+			WorldDamage instance = WorldDamage.Instance;
+			float num6 = num2;
+			string text = BUILDINGS.DAMAGESOURCES.COMET;
+			num5 = instance.ApplyDamage(cell, num6, prev_cell, -1, text, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.COMET);
+		}
 		this.destroyedCells.Add(cell);
-		float num4 = num3 / num;
-		return inputDamage * (1f - num4);
+		float num7 = num5 / num2;
+		return input_damage * (1f - num7);
 	}
 
 	private void DamageThings(Vector3 pos, int cell, int damage)

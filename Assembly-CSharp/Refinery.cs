@@ -384,6 +384,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 				{
 					Refinery.UserOrder parentOrder2 = machineOrder4.parentOrder;
 					ComplexRecipe recipe3 = parentOrder2.recipe;
+					List<KeyValuePair<Tag, float>> list = new List<KeyValuePair<Tag, float>>();
 					foreach (ComplexRecipe.RecipeElement recipeElement4 in recipe3.ingredients)
 					{
 						float num2;
@@ -399,22 +400,29 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 							(dictionary2 = dictionary)[material = recipeElement4.material] = dictionary2[material] - recipeElement4.amount;
 							num2 = 0f;
 						}
-						int num3 = -m;
-						if (machineOrder4.fetchList == null && num2 > 0f)
+						if (num2 > 0f)
 						{
-							machineOrder4.fetchList = new FetchList2(this.inStorage, Db.Get().ChoreTypes.MachineFetch, this.choreTags);
-							machineOrder4.fetchList.ShowStatusItem = false;
-							machineOrder4.fetchList.SetPriorityMod(num3);
+							list.Add(new KeyValuePair<Tag, float>(recipeElement4.material, num2));
+						}
+					}
+					int num3 = -m;
+					if (machineOrder4.fetchList == null && list.Count > 0)
+					{
+						machineOrder4.fetchList = new FetchList2(this.inStorage, Db.Get().ChoreTypes.MachineFetch, this.choreTags);
+						machineOrder4.fetchList.ShowStatusItem = false;
+						machineOrder4.fetchList.SetPriorityMod(num3);
+						foreach (KeyValuePair<Tag, float> keyValuePair in list)
+						{
 							FetchList2 fetchList = machineOrder4.fetchList;
-							Tag material2 = recipeElement4.material;
-							float num4 = num2;
-							fetchList.Add(material2, null, null, num4, FetchOrder2.OperationalRequirement.None);
-							machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+							Tag key = keyValuePair.Key;
+							float value = keyValuePair.Value;
+							fetchList.Add(key, null, null, value, FetchOrder2.OperationalRequirement.None);
 						}
-						else if (machineOrder4.fetchList != null)
-						{
-							machineOrder4.fetchList.SetPriorityMod(num3);
-						}
+						machineOrder4.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+					}
+					else if (machineOrder4.fetchList != null)
+					{
+						machineOrder4.fetchList.SetPriorityMod(num3);
 					}
 				}
 			}

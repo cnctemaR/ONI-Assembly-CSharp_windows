@@ -64,15 +64,10 @@ public class EggCracker : KMonoBehaviour
 		KBatchedAnimController component = this.display_egg.GetComponent<KBatchedAnimController>();
 		component.enabled = true;
 		component.SetSceneLayer(Grid.SceneLayer.BuildingUse);
-		KBoxCollider2D component2 = this.display_egg.GetComponent<KBoxCollider2D>();
+		KSelectable component2 = this.display_egg.GetComponent<KSelectable>();
 		if (component2 != null)
 		{
 			component2.enabled = true;
-		}
-		KSelectable component3 = this.display_egg.GetComponent<KSelectable>();
-		if (component3 != null)
-		{
-			component3.enabled = true;
 		}
 		this.tracker = this.display_egg.AddComponent<KBatchedAnimTracker>();
 		this.tracker.symbol = "snapto_egg";

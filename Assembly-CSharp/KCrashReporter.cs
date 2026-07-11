@@ -19,10 +19,10 @@ public class KCrashReporter : MonoBehaviour
 
 	private void OnEnable()
 	{
+		KCrashReporter.dataRoot = Application.dataPath;
 		Application.logMessageReceived += this.HandleLog;
 		KCrashReporter.ignoreAll = true;
-		string dataPath = Application.dataPath;
-		string text = Path.Combine(dataPath, "hashes.json");
+		string text = Path.Combine(KCrashReporter.dataRoot, "hashes.json");
 		if (File.Exists(text))
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -37,7 +37,7 @@ public class KCrashReporter : MonoBehaviour
 					string key = keyValuePair.Key;
 					string value = keyValuePair.Value;
 					stringBuilder.Length = 0;
-					string text3 = Path.Combine(dataPath, key);
+					string text3 = Path.Combine(KCrashReporter.dataRoot, key);
 					using (FileStream fileStream = new FileStream(text3, FileMode.Open, FileAccess.Read))
 					{
 						byte[] array = md.ComputeHash(fileStream);
@@ -234,7 +234,7 @@ public class KCrashReporter : MonoBehaviour
 		}
 		else if (Application.platform == RuntimePlatform.WindowsPlayer)
 		{
-			text = Path.Combine(Application.dataPath, "output_log.txt");
+			text = Path.Combine(KCrashReporter.dataRoot, "output_log.txt");
 		}
 		else if (Application.platform == RuntimePlatform.OSXEditor)
 		{
@@ -336,7 +336,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = msg;
-			error.build = 273433;
+			error.build = 273690;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text3;
 			error.user_message = userMessage;
@@ -405,8 +405,8 @@ public class KCrashReporter : MonoBehaviour
 		if (dmp_filename != null)
 		{
 			string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(dmp_filename);
-			text2 = Path.Combine(Path.GetDirectoryName(Application.dataPath), dmp_filename);
-			text3 = Path.Combine(Path.GetDirectoryName(Application.dataPath), fileNameWithoutExtension + ".sav");
+			text2 = Path.Combine(Path.GetDirectoryName(KCrashReporter.dataRoot), dmp_filename);
+			text3 = Path.Combine(Path.GetDirectoryName(KCrashReporter.dataRoot), fileNameWithoutExtension + ".sav");
 			File.Move(text2, text3);
 			text = KCrashReporter.UploadSaveFile(text3, stack_trace, new Dictionary<string, string> { 
 			{
@@ -458,6 +458,8 @@ public class KCrashReporter : MonoBehaviour
 	private ReportErrorDialog errorDialog;
 
 	public static bool terminateOnError = true;
+
+	private static string dataRoot;
 
 	private static readonly string[] IgnoreStrings = new string[] { "Releasing render texture whose render buffer is set as Camera's target buffer with Camera.SetTargetBuffers!", "The profiler has run out of samples for this frame. This frame will be skipped. Increase the sample limit using Profiler.maxNumberOfSamplesPerFrame", "Trying to add Text (LocText) for graphic rebuild while we are already inside a graphic rebuild loop. This is not supported." };
 

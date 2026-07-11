@@ -10,7 +10,7 @@ public class LaunchInitializer : MonoBehaviour
 	{
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		LaunchInitializer.ApplyCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: CU-" + 273433U.ToString(), null);
+		global::Debug.Log("Development Build: CU-" + 273690U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();

@@ -63,6 +63,11 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	protected override void OnCleanUp()
 	{
+		if (this.travelTube != null)
+		{
+			this.travelTube.Unsubscribe(-1041684577, new Action<object>(this.TubeConnectionsChanged));
+			this.travelTube = null;
+		}
 		Grid.HasTubeEntrance[Grid.PosToCell(this)] = false;
 		this.ClearWaitReactable();
 		if (this.tubeChangedEntry != null)

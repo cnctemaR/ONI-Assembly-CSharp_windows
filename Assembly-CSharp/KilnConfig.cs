@@ -40,10 +40,13 @@ public class KilnConfig : IBuildingConfig
 		BuildingTemplates.CreateRefineryStorage(go, refinery);
 		Tag tag = SimHashes.Ceramic.CreateTag();
 		Tag tag2 = SimHashes.Clay.CreateTag();
+		Tag tag3 = SimHashes.Carbon.CreateTag();
 		float num = 100f;
+		float num2 = 25f;
 		ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(tag2, num)
+			new ComplexRecipe.RecipeElement(tag2, num),
+			new ComplexRecipe.RecipeElement(tag3, num2)
 		};
 		ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
 		{
@@ -53,11 +56,10 @@ public class KilnConfig : IBuildingConfig
 		complexRecipe.time = 40f;
 		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.EGGCRACKER.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Clay).name, ElementLoader.FindElementByHash(SimHashes.Ceramic).name);
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("Kiln") };
-		Tag tag3 = SimHashes.Carbon.CreateTag();
 		Tag tag4 = SimHashes.RefinedCarbon.CreateTag();
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement(tag3, num)
+			new ComplexRecipe.RecipeElement(tag3, num + num2)
 		};
 		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
 		{

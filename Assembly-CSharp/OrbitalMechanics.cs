@@ -31,9 +31,14 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 			OrbitalMechanics.OrbitData orbitData = this.orbitData[i];
 			bool flag;
 			Vector3 vector = this.CalculatePos(ref orbitData, time, out flag);
+			vector.y -= 0.5f;
+			Vector3 vector2 = vector;
+			vector2.x = Camera.main.ViewportToWorldPoint(vector).x;
+			vector2.y = Camera.main.ViewportToWorldPoint(vector).y;
 			bool flag2 = !orbitData.rotatesBehind || !flag;
 			GameObject gameObject = this.orbitingObjects[i];
-			gameObject.transform.SetPosition(vector);
+			gameObject.transform.SetPosition(vector2);
+			gameObject.transform.localScale = Vector3.one * Camera.main.orthographicSize / orbitData.distance;
 			if (gameObject.activeSelf != flag2)
 			{
 				gameObject.SetActive(flag2);
@@ -63,7 +68,6 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 				bool flag;
 				Vector3 vector = this.CalculatePos(ref orbitData, time, out flag);
 				GameObject gameObject2 = Util.KInstantiate(prefab, Folder.Entities, vector);
-				gameObject2.transform.localScale = orbitData.scale;
 				gameObject2.SetActive(true);
 				this.orbitingObjects[j] = gameObject2;
 			}
@@ -75,9 +79,9 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 		float num = data.periodInCycles * 600f;
 		float num2 = ((!this.applyOverrides) ? (time / num - (float)((int)(time / num))) : (this.overridePercent / 100f));
 		float num3 = num2 * 2f * 3.1415927f;
-		float num4 = (float)Grid.WidthInCells * 0.5f * data.radiusScale;
-		float num5 = data.yGridPercent * (float)Grid.HeightInCells;
-		Vector3 vector = new Vector3((float)Grid.WidthInCells * 0.5f, num5, 0f);
+		float num4 = 0.5f * data.radiusScale;
+		float yGridPercent = data.yGridPercent;
+		Vector3 vector = new Vector3(0.5f, yGridPercent, 0f);
 		Vector3 vector2 = new Vector3(Mathf.Cos(num3), 0f, Mathf.Sin(num3));
 		behind = vector2.z > data.behindZ;
 		Quaternion quaternion = Quaternion.Euler(data.angle, 0f, 0f);
@@ -118,5 +122,7 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 		public float behindZ;
 
 		public Vector3 scale;
+
+		public float distance;
 	}
 }

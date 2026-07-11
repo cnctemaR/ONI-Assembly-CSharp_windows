@@ -60,6 +60,11 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 				Debug.LogWarning("How can my state machine instance be null?", null);
 				return false;
 			}
+			if (base.smi.master.gameObject == null)
+			{
+				Debug.LogWarning("How is my gameObject null?", null);
+				return false;
+			}
 			StaminaMonitor.Instance smi = base.smi.master.gameObject.GetSMI<StaminaMonitor.Instance>();
 			return (smi == null || !smi.IsSleeping()) && this.bladder.value >= 100f;
 		}

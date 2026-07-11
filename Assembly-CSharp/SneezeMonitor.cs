@@ -18,7 +18,7 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 		});
 	}
 
-	private static readonly HashedString[] SneezeAnims = new HashedString[] { "sneeze" };
+	private static readonly HashedString[] SneezeAnims = new HashedString[] { "sneeze", "sneeze_pst" };
 
 	public GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State idle;
 

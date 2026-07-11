@@ -96,19 +96,22 @@ public static class Sim
 	{
 		if (message_id == 1)
 		{
-			string text = Marshal.PtrToStringAnsi(data);
-			text = "SimDLL: " + text;
-			KCrashReporter.ReportDLLCrash(text, text, null);
+			Sim.DLLReportMessageMessage* ptr = (Sim.DLLReportMessageMessage*)(void*)data;
+			string text = "SimMessage: " + Marshal.PtrToStringAnsi(ptr->message);
+			string text2 = Marshal.PtrToStringAnsi(ptr->file);
+			int line = ptr->line;
+			string text3 = text2 + ":" + line;
+			KCrashReporter.ReportDLLCrash(text, text3, null);
 			return 0;
 		}
 		if (message_id != 0)
 		{
 			return -1;
 		}
-		Sim.DLLCrash* ptr = (Sim.DLLCrash*)(void*)data;
-		string text2 = Marshal.PtrToStringAnsi(ptr->callstack);
-		string text3 = Marshal.PtrToStringAnsi(ptr->dmpFilename);
-		KCrashReporter.ReportDLLCrash(text2, text2, text3);
+		Sim.DLLExceptionHandlerMessage* ptr2 = (Sim.DLLExceptionHandlerMessage*)(void*)data;
+		string text4 = Marshal.PtrToStringAnsi(ptr2->callstack);
+		string text5 = Marshal.PtrToStringAnsi(ptr2->dmpFilename);
+		KCrashReporter.ReportDLLCrash(text4, text4, text5);
 		return 0;
 	}
 
@@ -155,11 +158,21 @@ public static class Sim
 	public delegate int GAME_MessageHandler(int message_id, IntPtr data);
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
-	public struct DLLCrash
+	public struct DLLExceptionHandlerMessage
 	{
 		public IntPtr callstack;
 
 		public IntPtr dmpFilename;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct DLLReportMessageMessage
+	{
+		public IntPtr message;
+
+		public IntPtr file;
+
+		public int line;
 	}
 
 	private enum GameHandledMessages

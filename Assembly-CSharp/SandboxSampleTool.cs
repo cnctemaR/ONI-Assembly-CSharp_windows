@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
 
 public class SandboxSampleTool : InterfaceTool
@@ -18,7 +19,13 @@ public class SandboxSampleTool : InterfaceTool
 
 	public override void OnLeftClickDown(Vector3 cursor_pos)
 	{
-		this.Sample(Grid.PosToCell(cursor_pos));
+		int num = Grid.PosToCell(cursor_pos);
+		if (!Grid.IsValidCell(num))
+		{
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.DEBUG_TOOLS.INVALID_LOCATION, null, cursor_pos, 1.5f, false, true);
+			return;
+		}
+		this.Sample(num);
 	}
 
 	private void Sample(int cell)

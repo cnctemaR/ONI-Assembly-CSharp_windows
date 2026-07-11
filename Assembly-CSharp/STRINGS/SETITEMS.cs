@@ -53,6 +53,13 @@ namespace STRINGS
 			public static LocString DESC = "A desk";
 		}
 
+		public class FACILITY_TABLE
+		{
+			public static LocString NAME = "Table";
+
+			public static LocString DESC = "A table";
+		}
+
 		public class FACILITY_CENTERPEICE
 		{
 			public static LocString NAME = "Statue";
@@ -106,7 +113,7 @@ namespace STRINGS
 		{
 			public static LocString NAME = "Painting";
 
-			public static LocString DESC = "A painting of an expensive thing which belongs to an expensive person";
+			public static LocString DESC = "A painting of a landscape";
 		}
 
 		public class RECEPTION_DESK

@@ -1080,7 +1080,7 @@ public class GameNavGrids
 
 		public override void UpdateCell(int cell, NavTable nav_table, CellOffset[] bounding_offsets)
 		{
-			bool flag = Grid.IsSubstantialLiquid(cell, 0.35f) && !Grid.ObjectLayers[9].ContainsKey(cell);
+			bool flag = Grid.IsSubstantialLiquid(cell, 0.35f) && base.IsClear(cell, bounding_offsets, Grid.BitFields, false);
 			nav_table.SetValid(cell, NavType.Swim, flag);
 		}
 

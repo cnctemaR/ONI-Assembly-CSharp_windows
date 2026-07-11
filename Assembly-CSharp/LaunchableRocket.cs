@@ -433,7 +433,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 						LaunchableRocket component = conditionManager.GetComponent<LaunchableRocket>();
 						if (!(component == null))
 						{
-							entry.ev.setParameterValueByIndex(entry.parameterIdx, Mathf.Abs(component.rocketSpeed));
+							entry.ev.setParameterValueByIndex(entry.parameterIdx, component.rocketSpeed);
 						}
 					}
 				}

@@ -260,10 +260,13 @@ public class Constructable : Workable, ISaveLoadable
 				Util.KDestroyGameObject(base.gameObject);
 			}
 			GameObject gameObject2 = Grid.Objects[num, (int)this.building.Def.ObjectLayer];
-			Deconstructable deconstructable = ((gameObject2 != null) ? gameObject2.GetComponent<Deconstructable>() : null);
-			if (deconstructable != null)
+			if (gameObject2 != null)
 			{
-				deconstructable.CancelDeconstruction();
+				Deconstructable component2 = gameObject2.GetComponent<Deconstructable>();
+				if (component2 != null)
+				{
+					component2.CancelDeconstruction();
+				}
 			}
 		}
 		bool flag = this.building.Def.BuildingComplete.GetComponent<Ladder>();
@@ -282,10 +285,10 @@ public class Constructable : Workable, ISaveLoadable
 		this.PlaceDiggables();
 		new ReachabilityMonitor.Instance(this).StartSM();
 		base.Subscribe<Constructable>(493375141, Constructable.OnRefreshUserMenuDelegate);
-		Prioritizable component2 = base.GetComponent<Prioritizable>();
-		Prioritizable prioritizable = component2;
+		Prioritizable component3 = base.GetComponent<Prioritizable>();
+		Prioritizable prioritizable = component3;
 		prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
-		this.OnPriorityChanged(component2.GetMasterPriority());
+		this.OnPriorityChanged(component3.GetMasterPriority());
 	}
 
 	private void OnPriorityChanged(PrioritySetting priority)

@@ -39,7 +39,11 @@ public class GenericMessage : Message
 	public override void OnClick()
 	{
 		KMonoBehaviour kmonoBehaviour = this.clickFocus.Get();
-		Transform transform = ((kmonoBehaviour != null) ? kmonoBehaviour.transform : null);
+		if (kmonoBehaviour == null)
+		{
+			return;
+		}
+		Transform transform = kmonoBehaviour.transform;
 		if (transform == null)
 		{
 			return;

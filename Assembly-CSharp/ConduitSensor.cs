@@ -12,12 +12,24 @@ public abstract class ConduitSensor : Switch
 		this.UpdateLogicCircuit();
 		this.UpdateVisualState(true);
 		this.wasOn = this.switchedOn;
-		Conduit.GetFlowManager(this.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
+		if (this.conduitType == ConduitType.Liquid || this.conduitType == ConduitType.Gas)
+		{
+			Conduit.GetFlowManager(this.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
+			return;
+		}
+		SolidConduit.GetFlowManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
 	}
 
 	protected override void OnCleanUp()
 	{
-		Conduit.GetFlowManager(this.conduitType).RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
+		if (this.conduitType == ConduitType.Liquid || this.conduitType == ConduitType.Gas)
+		{
+			Conduit.GetFlowManager(this.conduitType).RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
+		}
+		else
+		{
+			SolidConduit.GetFlowManager().RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
+		}
 		base.OnCleanUp();
 	}
 

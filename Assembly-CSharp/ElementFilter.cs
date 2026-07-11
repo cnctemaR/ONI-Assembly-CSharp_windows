@@ -128,6 +128,10 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 						}
 					}
 				}
+				else
+				{
+					flowManager2.RemovePickupable(this.inputCell);
+				}
 			}
 		}
 		this.operational.SetActive(flag, false);

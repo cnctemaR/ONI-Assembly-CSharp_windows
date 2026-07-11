@@ -3021,20 +3021,17 @@ public abstract class OverlayModes
 				if (endpoint != null)
 				{
 					FlowUtilityNetwork.NetworkItem networkItem = endpoint as FlowUtilityNetwork.NetworkItem;
-					IBridgedNetworkItem bridgedNetworkItem;
-					if (networkItem == null)
-					{
-						bridgedNetworkItem = null;
-					}
-					else
+					if (networkItem != null)
 					{
 						GameObject gameObject = networkItem.GameObject;
-						bridgedNetworkItem = ((gameObject != null) ? gameObject.GetComponent<IBridgedNetworkItem>() : null);
-					}
-					IBridgedNetworkItem bridgedNetworkItem2 = bridgedNetworkItem;
-					if (bridgedNetworkItem2 != null)
-					{
-						bridgedNetworkItem2.AddNetworks(networks);
+						if (gameObject != null)
+						{
+							IBridgedNetworkItem component = gameObject.GetComponent<IBridgedNetworkItem>();
+							if (component != null)
+							{
+								component.AddNetworks(networks);
+							}
+						}
 					}
 				}
 			}

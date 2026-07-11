@@ -539,11 +539,11 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			{
 				if (this.lastAnimState == -1)
 				{
-					component.Queue(num.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(num.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 				}
 				else
 				{
-					component.Queue(this.lastAnimState.ToString() + "_" + num.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(this.lastAnimState.ToString() + "_" + num.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 				}
 			}
 			this.lastAnimState = num;
@@ -584,11 +584,11 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 			{
 				if (this.lastAnimState == -1)
 				{
-					component.Queue(num2.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(num2.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 				}
 				else
 				{
-					component.Queue(this.lastAnimState.ToString() + "_" + num2.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+					component.Play(this.lastAnimState.ToString() + "_" + num2.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 				}
 			}
 			this.lastAnimState = num2;
@@ -636,11 +636,11 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 				{
 					if (this.lastAnimState == -1)
 					{
-						component.Queue(num3.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+						component.Play(num3.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 					}
 					else
 					{
-						component.Queue(this.lastAnimState.ToString() + "_" + num3.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+						component.Play(this.lastAnimState.ToString() + "_" + num3.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 					}
 					this.lastAnimState = num3;
 					return;
@@ -653,11 +653,11 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 				{
 					if (this.lastAnimState == -1)
 					{
-						component.Queue(value.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+						component.Play(value.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 					}
 					else
 					{
-						component.Queue(this.lastAnimState.ToString() + "_" + value.ToString(), KAnim.PlayMode.Once, 1f, 0f);
+						component.Play(this.lastAnimState.ToString() + "_" + value.ToString(), KAnim.PlayMode.Once, 1f, 0f);
 					}
 					this.lastAnimState = value;
 					return;

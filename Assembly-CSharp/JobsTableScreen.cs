@@ -44,7 +44,7 @@ public class JobsTableScreen : TableScreen
 		{
 			base.GetWidgetRow(widget_go).SelectAndFocusMinion();
 		}, new Comparison<MinionIdentity>(base.compare_rows_alphabetical), null, new Action<MinionIdentity, GameObject, ToolTip>(base.on_tooltip_sort_alphabetically), false);
-		List<ChoreGroup> list = new List<ChoreGroup>(Db.Get().ChoreGroups);
+		List<ChoreGroup> list = new List<ChoreGroup>(Db.Get().ChoreGroups.resources);
 			from @group in list
 			orderby @group.DefaultPersonalPriority descending, @group.Name
 			select @group;
@@ -100,7 +100,7 @@ public class JobsTableScreen : TableScreen
 			{
 				Trait trait = null;
 				Traits component = minionIdentity.GetComponent<Traits>();
-				foreach (Trait trait2 in component)
+				foreach (Trait trait2 in component.TraitList)
 				{
 					if (trait2.disabledChoreGroups != null)
 					{
@@ -736,7 +736,7 @@ public class JobsTableScreen : TableScreen
 		List<RaycastResult> list = new List<RaycastResult>();
 		current.RaycastAll(new PointerEventData(current)
 		{
-			position = Input.mousePosition
+			position = KInputManager.GetMousePos()
 		}, list);
 		bool flag = false;
 		bool flag2 = false;
@@ -924,7 +924,7 @@ public class JobsTableScreen : TableScreen
 			{
 				Immigration.Instance.ResetPersonalPriorities();
 			}
-			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 			{
 				if (!(minionIdentity == null))
 				{
@@ -935,12 +935,12 @@ public class JobsTableScreen : TableScreen
 		}
 		else
 		{
-			foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities)
+			foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities.Items)
 			{
 				if (!(minionIdentity2 == null))
 				{
 					ChoreConsumer component = minionIdentity2.GetComponent<ChoreConsumer>();
-					foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+					foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 					{
 						component.SetPersonalPriority(choreGroup, 3, false);
 					}

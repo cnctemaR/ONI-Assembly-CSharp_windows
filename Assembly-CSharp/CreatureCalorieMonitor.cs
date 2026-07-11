@@ -29,7 +29,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			this.starvationStartTime.Set(GameClock.Instance.GetTime(), smi);
 		}).Transition(this.hungry.outofcalories.starvedtodeath, (CreatureCalorieMonitor.Instance smi) => smi.GetDeathTimeRemaining() <= 0f, UpdateRate.SIM_1000ms).TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.wild, false)
 			.ToggleStatusItem(CREATURES.STATUSITEMS.STARVING.NAME, CREATURES.STATUSITEMS.STARVING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, 0, (string str, CreatureCalorieMonitor.Instance smi) => str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(smi.GetDeathTimeRemaining(), "F1")), null, null)
-			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notifications, object data) => CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null, null))
+			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notifications, object data) => CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null))
 			.ToggleEffect((CreatureCalorieMonitor.Instance smi) => this.outOfCaloriesTame);
 		this.hungry.outofcalories.starvedtodeath.Enter(delegate(CreatureCalorieMonitor.Instance smi)
 		{
@@ -72,7 +72,6 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_HEADER, UI.BUILDINGEFFECTS.TOOLTIPS.DIET_HEADER, Descriptor.DescriptorType.Effect, false));
 			if (this.diet.consumedTags.Count > 0)
 			{
-				WildnessMonitor.Def def = obj.GetDef<WildnessMonitor.Def>();
 				float calorie_loss_per_second = 0f;
 				Trait trait = Db.Get().traits.Get(obj.GetComponent<Modifiers>().initialTraits[0]);
 				foreach (AttributeModifier attributeModifier in trait.SelfModifiers)
@@ -257,7 +256,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			this.stomach = new CreatureCalorieMonitor.Stomach(def.diet, master.gameObject, def.minPoopSizeInCalories);
 			this.metabolism = base.gameObject.GetAttributes().Add(Db.Get().CritterAttributes.Metabolism);
 			this.deltaCalorieMetabolismModifier = new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, 1f, DUPLICANTS.MODIFIERS.METABOLISM_CALORIE_MODIFIER.NAME, true, false, false);
-			this.calories.deltaAttribute.Add(DUPLICANTS.MODIFIERS.METABOLISM_CALORIE_MODIFIER.NAME, this.deltaCalorieMetabolismModifier);
+			this.calories.deltaAttribute.Add(this.deltaCalorieMetabolismModifier);
 		}
 
 		public void OnCaloriesConsumed(object data)

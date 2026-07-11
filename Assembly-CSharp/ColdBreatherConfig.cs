@@ -14,8 +14,7 @@ public class ColdBreatherConfig : IEntityConfig
 		gameObject.AddOrGet<WiltCondition>();
 		gameObject.AddOrGet<Uprootable>();
 		gameObject.AddOrGet<UprootedMonitor>();
-		DrowningMonitor drowningMonitor = gameObject.AddOrGet<DrowningMonitor>();
-		drowningMonitor.Configure(15f, 5f, 0.95f);
+		gameObject.AddOrGet<DrowningMonitor>();
 		TemperatureVulnerable temperatureVulnerable = gameObject.AddOrGet<TemperatureVulnerable>();
 		temperatureVulnerable.Configure(213.15f, 183.15f, 368.15f, 463.15f, 0f, 0f);
 		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };

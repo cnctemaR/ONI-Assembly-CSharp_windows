@@ -223,9 +223,6 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	[MyCmpReq]
 	private Storage storage;
 
-	[MyCmpReq]
-	private UserMenu userMenu;
-
 	[MyCmpAdd]
 	private CopyBuildingSettings copyBuildingSettings;
 

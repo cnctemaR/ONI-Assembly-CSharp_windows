@@ -75,7 +75,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 
 	private static PrimaryElement GetFirstInfected(Storage storage)
 	{
-		foreach (GameObject gameObject in storage)
+		foreach (GameObject gameObject in storage.items)
 		{
 			if (!(gameObject == null))
 			{
@@ -96,9 +96,6 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 	public int diseaseRemovalCount = 10000;
 
 	public SimHashes outputElement = SimHashes.Vacuum;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	private WorkableReactable reactable;
 

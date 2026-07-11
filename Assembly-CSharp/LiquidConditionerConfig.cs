@@ -21,7 +21,6 @@ public class LiquidConditionerConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
-		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.EnergyConsumptionWhenActive = 1200f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
@@ -29,6 +28,8 @@ public class LiquidConditionerConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
+		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.OverheatTemperature = 398.15f;
 		return buildingDef;
 	}

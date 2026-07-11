@@ -12,7 +12,7 @@ public class KInputController : IInputHandler
 		this.IsGamepad = is_gamepad;
 		this.mAxis = new float[4];
 		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[207];
+		this.mActionState = new bool[209];
 		this.mScrollState = new bool[2];
 		this.inputHandler = new KInputHandler(this, this);
 	}
@@ -160,10 +160,10 @@ public class KInputController : IInputHandler
 			bool flag = this.mActiveModifiers != Modifier.None;
 			foreach (KInputController.KeyDef keyDef in this.mKeyDefs)
 			{
-				int hashCode = keyDef.mKeyCode.GetHashCode();
-				if (!this.mIgnoreKeyboard || hashCode >= KKeyCode.Mouse0.GetHashCode())
+				int mKeyCode = (int)keyDef.mKeyCode;
+				if (!this.mIgnoreKeyboard || mKeyCode >= 323)
 				{
-					if (!this.mIgnoreMouse || ((hashCode < KKeyCode.Mouse0.GetHashCode() || hashCode >= KKeyCode.JoystickButton0.GetHashCode()) && hashCode != KKeyCode.MouseScrollDown.GetHashCode() && hashCode != KKeyCode.MouseScrollUp.GetHashCode()))
+					if (!this.mIgnoreMouse || ((mKeyCode < 323 || mKeyCode >= 330) && mKeyCode != 1001 && mKeyCode != 1002))
 					{
 						if (this.GetKeyDown(keyDef.mKeyCode))
 						{
@@ -302,7 +302,7 @@ public class KInputController : IInputHandler
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[207];
+			this.mActionFlags = new bool[209];
 		}
 
 		public KKeyCode mKeyCode;

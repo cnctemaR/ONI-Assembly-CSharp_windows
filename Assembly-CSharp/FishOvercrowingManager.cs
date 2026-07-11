@@ -25,7 +25,7 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 		int num2 = 1;
 		this.cavityIdToCavityInfo.Clear();
 		this.cellToFishCount.Clear();
-		List<FishOvercrowingManager.FishInfo> list = ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.Allocate();
+		ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.PooledList pooledList = ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.Allocate();
 		foreach (FishOvercrowdingMonitor.Instance instance in this.fishes)
 		{
 			int num3 = Grid.PosToCell(instance);
@@ -36,22 +36,22 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 					cell = num3,
 					fish = instance
 				};
-				list.Add(fishInfo);
+				pooledList.Add(fishInfo);
 				int num4 = 0;
 				this.cellToFishCount.TryGetValue(num3, out num4);
 				num4++;
 				this.cellToFishCount[num3] = num4;
 			}
 		}
-		foreach (FishOvercrowingManager.FishInfo fishInfo2 in list)
+		foreach (FishOvercrowingManager.FishInfo fishInfo2 in pooledList)
 		{
-			List<int> list2 = ListPool<int, FishOvercrowingManager>.Allocate();
-			list2.Add(fishInfo2.cell);
+			ListPool<int, FishOvercrowingManager>.PooledList pooledList2 = ListPool<int, FishOvercrowingManager>.Allocate();
+			pooledList2.Add(fishInfo2.cell);
 			int i = 0;
 			int num5 = num2++;
-			while (i < list2.Count)
+			while (i < pooledList2.Count)
 			{
-				int num6 = list2[i++];
+				int num6 = pooledList2[i++];
 				if (Grid.IsValidCell(num6))
 				{
 					FishOvercrowingManager.Cell cell = this.cells[num6];
@@ -71,26 +71,26 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 							cavityInfo.fishCount += num7;
 							cavityInfo.cellCount++;
 							this.cavityIdToCavityInfo[num5] = cavityInfo;
-							list2.Add(Grid.CellLeft(num6));
-							list2.Add(Grid.CellRight(num6));
-							list2.Add(Grid.CellAbove(num6));
-							list2.Add(Grid.CellBelow(num6));
+							pooledList2.Add(Grid.CellLeft(num6));
+							pooledList2.Add(Grid.CellRight(num6));
+							pooledList2.Add(Grid.CellAbove(num6));
+							pooledList2.Add(Grid.CellBelow(num6));
 							this.cells[num6] = cell;
 							i++;
 						}
 					}
 				}
 			}
-			ListPool<int, FishOvercrowingManager>.Free(list2);
+			pooledList2.Recycle();
 		}
-		foreach (FishOvercrowingManager.FishInfo fishInfo3 in list)
+		foreach (FishOvercrowingManager.FishInfo fishInfo3 in pooledList)
 		{
 			FishOvercrowingManager.Cell cell2 = this.cells[fishInfo3.cell];
 			FishOvercrowingManager.CavityInfo cavityInfo2 = default(FishOvercrowingManager.CavityInfo);
 			this.cavityIdToCavityInfo.TryGetValue(cell2.cavityId, out cavityInfo2);
 			fishInfo3.fish.SetOvercrowdingInfo(cavityInfo2.cellCount, cavityInfo2.fishCount);
 		}
-		ListPool<FishOvercrowingManager.FishInfo, FishOvercrowingManager>.Free(list);
+		pooledList.Recycle();
 	}
 
 	public static FishOvercrowingManager Instance;
@@ -104,8 +104,6 @@ public class FishOvercrowingManager : KMonoBehaviour, ISim1000ms
 	private FishOvercrowingManager.Cell[] cells;
 
 	private int versionCounter = 1;
-
-	private readonly int INVALID_CAVITY_ID = -1;
 
 	private struct Cell
 	{

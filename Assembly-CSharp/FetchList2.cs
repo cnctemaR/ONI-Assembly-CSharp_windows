@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FetchList2 : IFetchList, IRender1000ms
+public class FetchList2 : IFetchList
 {
 	public FetchList2(Storage destination, ChoreType chore_type, Tag[] chore_tags)
 	{
@@ -65,7 +65,7 @@ public class FetchList2 : IFetchList, IRender1000ms
 		}
 	}
 
-	public void Add(Tag[] tags, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
+	public void Add(Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
 	{
 		if (amount <= 0f)
 		{
@@ -78,13 +78,13 @@ public class FetchList2 : IFetchList, IRender1000ms
 				this.MinimumAmount[tag] = amount;
 			}
 		}
-		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, forbidden_tags, this.Destination, amount, operationalRequirement, this.PriorityMod, this.choreTags);
+		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, required_tags, forbidden_tags, this.Destination, amount, operationalRequirement, this.PriorityMod, this.choreTags);
 		this.FetchOrders.Add(fetchOrder);
 	}
 
-	public void Add(Tag tag, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
+	public void Add(Tag tag, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
 	{
-		this.Add(new Tag[] { tag }, forbidden_tags, amount, operationalRequirement);
+		this.Add(new Tag[] { tag }, required_tags, forbidden_tags, amount, operationalRequirement);
 	}
 
 	public float GetMinimumAmount(Tag tag)
@@ -103,12 +103,8 @@ public class FetchList2 : IFetchList, IRender1000ms
 			{
 				this.OnComplete();
 			}
-			SimAndRenderScheduler.instance.Remove(this);
+			FetchListStatusItemUpdater.instance.RemoveFetchList(this);
 			this.ClearStatus();
-		}
-		else
-		{
-			this.UpdateStatus();
 		}
 	}
 
@@ -119,10 +115,10 @@ public class FetchList2 : IFetchList, IRender1000ms
 			fetchOrder.Cancel(reason);
 		}
 		this.ClearStatus();
-		SimAndRenderScheduler.instance.Remove(this);
+		FetchListStatusItemUpdater.instance.RemoveFetchList(this);
 	}
 
-	private void UpdateRemaining()
+	public void UpdateRemaining()
 	{
 		this.Remaining.Clear();
 		for (int i = 0; i < this.FetchOrders.Count; i++)
@@ -153,7 +149,7 @@ public class FetchList2 : IFetchList, IRender1000ms
 				dictionary[tag] = this.MinimumAmount[tag];
 			}
 		}
-		foreach (GameObject gameObject in this.Destination)
+		foreach (GameObject gameObject in this.Destination.items)
 		{
 			if (gameObject != null)
 			{
@@ -196,12 +192,11 @@ public class FetchList2 : IFetchList, IRender1000ms
 		List<FetchOrder2> range = this.FetchOrders.GetRange(0, this.FetchOrders.Count);
 		foreach (FetchOrder2 fetchOrder in range)
 		{
-			fetchOrder.Submit(new Action<FetchOrder2, Pickupable>(this.OnFetchOrderComplete), check_storage_contents);
+			fetchOrder.Submit(new Action<FetchOrder2, Pickupable>(this.OnFetchOrderComplete), check_storage_contents, null);
 		}
-		if (!this.IsComplete)
+		if (!this.IsComplete && this.ShowStatusItem)
 		{
-			SimAndRenderScheduler.instance.Add(this, false);
-			this.UpdateStatus();
+			FetchListStatusItemUpdater.instance.AddFetchList(this);
 		}
 	}
 
@@ -219,17 +214,12 @@ public class FetchList2 : IFetchList, IRender1000ms
 		}
 	}
 
-	private void UpdateStatusItem(MaterialsStatusItem status_item, ref Guid handle, Dictionary<Tag, float> remaining)
+	public void UpdateStatusItem(MaterialsStatusItem status_item, ref Guid handle, bool should_add)
 	{
-		bool flag = status_item.ShouldAdd(this, remaining);
-		if (!this.ShowStatusItem)
+		bool flag = handle != Guid.Empty;
+		if (should_add != flag)
 		{
-			flag = false;
-		}
-		bool flag2 = handle != Guid.Empty;
-		if (flag != flag2)
-		{
-			if (flag)
+			if (should_add)
 			{
 				KSelectable component = this.Destination.GetComponent<KSelectable>();
 				if (component != null)
@@ -248,34 +238,17 @@ public class FetchList2 : IFetchList, IRender1000ms
 		}
 	}
 
-	public void Render1000ms(float dt)
-	{
-		this.UpdateStatus();
-	}
-
-	private void UpdateStatus()
-	{
-		if (this.Destination != null)
-		{
-			this.UpdateRemaining();
-			Dictionary<Tag, float> remaining = this.GetRemaining();
-			this.UpdateStatusItem(Db.Get().BuildingStatusItems.WaitingForMaterials, ref this.waitingForMaterialsHandle, remaining);
-			this.UpdateStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, ref this.materialsUnavailableHandle, remaining);
-			this.UpdateStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailableForRefill, ref this.materialsUnavailableForRefillHandle, remaining);
-		}
-	}
-
 	private global::System.Action OnComplete;
 
 	private ChoreType choreType;
 
 	private Tag[] choreTags;
 
-	private Guid waitingForMaterialsHandle = Guid.Empty;
+	public Guid waitingForMaterialsHandle = Guid.Empty;
 
-	private Guid materialsUnavailableForRefillHandle = Guid.Empty;
+	public Guid materialsUnavailableForRefillHandle = Guid.Empty;
 
-	private Guid materialsUnavailableHandle = Guid.Empty;
+	public Guid materialsUnavailableHandle = Guid.Empty;
 
 	public Dictionary<Tag, float> MinimumAmount = new Dictionary<Tag, float>();
 

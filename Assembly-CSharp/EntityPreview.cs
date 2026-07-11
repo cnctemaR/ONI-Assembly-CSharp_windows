@@ -13,7 +13,7 @@ public class EntityPreview : KMonoBehaviour
 		{
 			this.objectPartitionerEntry = GameScenePartitioner.Instance.Add("EntityPreview", base.gameObject, this.occupyArea.GetExtents(), GameScenePartitioner.Instance.objectLayers[(int)this.objectLayer], new Action<object>(this.OnAreaChanged));
 		}
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "EntityPreview.OnSpawn");
 		this.OnAreaChanged(null);
 	}
 
@@ -60,7 +60,7 @@ public class EntityPreview : KMonoBehaviour
 	public void UpdateValidity()
 	{
 		bool valid = this.Valid;
-		this.Valid = this.occupyArea.TestArea(Grid.PosToCell(this), null, new Func<int, object, bool>(this.ValidTest));
+		this.Valid = this.occupyArea.TestArea(Grid.PosToCell(this), this, new Func<int, object, bool>(EntityPreview.ValidTest));
 		if (this.Valid)
 		{
 			this.animController.TintColour = Color.white;
@@ -75,9 +75,10 @@ public class EntityPreview : KMonoBehaviour
 		}
 	}
 
-	private bool ValidTest(int cell, object data)
+	private static bool ValidTest(int cell, object data)
 	{
-		return !Grid.Solid[cell] && (this.objectLayer == ObjectLayer.NumLayers || Grid.Objects[cell, (int)this.objectLayer] == base.gameObject || Grid.Objects[cell, (int)this.objectLayer] == null);
+		EntityPreview entityPreview = (EntityPreview)data;
+		return !Grid.Solid[cell] && (entityPreview.objectLayer == ObjectLayer.NumLayers || Grid.Objects[cell, (int)entityPreview.objectLayer] == entityPreview.gameObject || Grid.Objects[cell, (int)entityPreview.objectLayer] == null);
 	}
 
 	[MyCmpReq]

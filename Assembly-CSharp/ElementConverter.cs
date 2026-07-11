@@ -252,7 +252,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					if (outputElement.element.IsLiquid)
 					{
 						int elementIndex = ElementLoader.GetElementIndex(outputElement.element.id);
-						FallingWater.instance.AddParticle(num15, (byte)elementIndex, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, false, false, false, false);
+						FallingWater.instance.AddParticle(num15, (byte)elementIndex, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, false, false, false);
 					}
 					else if (outputElement.element.IsSolid)
 					{

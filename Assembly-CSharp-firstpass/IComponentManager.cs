@@ -17,4 +17,6 @@ public interface IComponentManager
 	bool Has(object go);
 
 	int Count { get; }
+
+	string Name { get; }
 }

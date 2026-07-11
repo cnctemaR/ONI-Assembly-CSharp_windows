@@ -111,25 +111,12 @@ public class DragTool : InterfaceTool
 	{
 		cursor_pos -= this.placementPivot;
 		KScreenManager.Instance.SetEventSystemEnabled(true);
+		this.dragAxis = DragTool.DragAxis.Invalid;
 		if (!this.dragging)
 		{
 			return;
 		}
 		this.dragging = false;
-		DragTool.DragAxis dragAxis = this.dragAxis;
-		if (dragAxis != DragTool.DragAxis.Horizontal)
-		{
-			if (dragAxis == DragTool.DragAxis.Vertical)
-			{
-				cursor_pos.x = this.downPos.x;
-				this.dragAxis = DragTool.DragAxis.None;
-			}
-		}
-		else
-		{
-			cursor_pos.y = this.downPos.y;
-			this.dragAxis = DragTool.DragAxis.None;
-		}
 		DragTool.Mode mode = this.GetMode();
 		if (mode == DragTool.Mode.Box && this.areaVisualizer != null)
 		{
@@ -190,10 +177,10 @@ public class DragTool : InterfaceTool
 	{
 		if (this.dragging)
 		{
-			if (this.dragAxis == DragTool.DragAxis.None)
+			if (Input.GetKey((KeyCode)Global.Instance.GetInputManager().GetDefaultController().GetInputForAction(global::Action.DragStraight)))
 			{
 				Vector3 vector = cursorPos - this.downPos;
-				if (vector.sqrMagnitude > 0.707f)
+				if ((this.canChangeDragAxis || this.dragAxis == DragTool.DragAxis.Invalid) && vector.sqrMagnitude > 0.707f)
 				{
 					if (Mathf.Abs(vector.x) < Mathf.Abs(vector.y))
 					{
@@ -204,6 +191,10 @@ public class DragTool : InterfaceTool
 						this.dragAxis = DragTool.DragAxis.Horizontal;
 					}
 				}
+			}
+			else
+			{
+				this.dragAxis = DragTool.DragAxis.Invalid;
 			}
 			DragTool.DragAxis dragAxis = this.dragAxis;
 			if (dragAxis != DragTool.DragAxis.Horizontal)
@@ -290,11 +281,7 @@ public class DragTool : InterfaceTool
 
 	public override void OnKeyDown(KButtonEvent e)
 	{
-		if (e.TryConsume(global::Action.DragStraight))
-		{
-			this.dragAxis = DragTool.DragAxis.None;
-		}
-		else if (this.interceptNumberKeysForPriority)
+		if (this.interceptNumberKeysForPriority)
 		{
 			this.HandlePriortyKeysDown(e);
 		}
@@ -306,11 +293,7 @@ public class DragTool : InterfaceTool
 
 	public override void OnKeyUp(KButtonEvent e)
 	{
-		if (e.TryConsume(global::Action.DragStraight))
-		{
-			this.dragAxis = DragTool.DragAxis.Invalid;
-		}
-		else if (this.interceptNumberKeysForPriority)
+		if (this.interceptNumberKeysForPriority)
 		{
 			this.HandlePriorityKeysUp(e);
 		}
@@ -439,6 +422,8 @@ public class DragTool : InterfaceTool
 	private DragTool.Mode mode = DragTool.Mode.Box;
 
 	private DragTool.DragAxis dragAxis = DragTool.DragAxis.Invalid;
+
+	protected bool canChangeDragAxis = true;
 
 	protected Vector3 downPos;
 

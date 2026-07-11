@@ -2,11 +2,13 @@
 
 public static class RenderQueues
 {
-	public static int Background = 2500;
-
-	public static int Gas = 2501;
-
 	public static int WorldOpaque = 2000;
+
+	public static int Backwall = 2499;
+
+	public static int Stars = 2501;
+
+	public static int Gas = 2502;
 
 	public static int Liquid = 3500;
 

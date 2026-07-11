@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -68,20 +67,24 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 	{
 		float num = 0f;
 		int num2 = Grid.CellAbove(this.NaturalBuildingCell());
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, list);
-		for (int i = 0; i < list.Count; i++)
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
+		for (int i = 0; i < pooledList.Count; i++)
 		{
-			Pickupable pickupable = list[i].obj as Pickupable;
+			Pickupable pickupable = pooledList[i].obj as Pickupable;
 			if (!(pickupable == null))
 			{
 				if (!pickupable.wasAbsorbed)
 				{
-					num += pickupable.PrimaryElement.Mass;
+					KPrefabID component = pickupable.GetComponent<KPrefabID>();
+					if (!component.HasPrefabTag(GameTags.Creature) || component.HasPrefabTag(GameTags.Creatures.GroundBased) || pickupable.HasTag(GameTags.Creatures.Flopping))
+					{
+						num += pickupable.PrimaryElement.Mass;
+					}
 				}
 			}
 		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+		pooledList.Recycle();
 		this.massPickupables = num;
 	}
 
@@ -89,17 +92,17 @@ public class LogicMassSensor : Switch, ISaveLoadable, IThresholdSwitch
 	{
 		float num = 0f;
 		int num2 = Grid.CellAbove(this.NaturalBuildingCell());
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.floorSwitchActivatorLayer, list);
-		for (int i = 0; i < list.Count; i++)
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num2).x, Grid.CellToXY(num2).y, 1, 1, GameScenePartitioner.Instance.floorSwitchActivatorLayer, pooledList);
+		for (int i = 0; i < pooledList.Count; i++)
 		{
-			FloorSwitchActivator floorSwitchActivator = list[i].obj as FloorSwitchActivator;
+			FloorSwitchActivator floorSwitchActivator = pooledList[i].obj as FloorSwitchActivator;
 			if (!(floorSwitchActivator == null))
 			{
 				num += floorSwitchActivator.PrimaryElement.Mass;
 			}
 		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+		pooledList.Recycle();
 		this.massActivators = num;
 	}
 

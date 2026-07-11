@@ -1,109 +1,106 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD.Studio
 {
-	public class Bank : HandleBase
+	public struct Bank
 	{
-		public Bank(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT getID(out Guid id)
 		{
-			byte[] array = new byte[16];
-			RESULT result = Bank.FMOD_Studio_Bank_GetID(this.rawPtr, array);
-			id = new Guid(array);
-			return result;
+			return Bank.FMOD_Studio_Bank_GetID(this.handle, out id);
 		}
 
 		public RESULT getPath(out string path)
 		{
 			path = null;
-			byte[] array = new byte[256];
-			int num = 0;
-			RESULT result = Bank.FMOD_Studio_Bank_GetPath(this.rawPtr, array, array.Length, out num);
-			if (result == RESULT.ERR_TRUNCATED)
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				array = new byte[num];
-				result = Bank.FMOD_Studio_Bank_GetPath(this.rawPtr, array, array.Length, out num);
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				RESULT result = Bank.FMOD_Studio_Bank_GetPath(this.handle, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = Bank.FMOD_Studio_Bank_GetPath(this.handle, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					path = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
 			}
-			if (result == RESULT.OK)
-			{
-				path = Encoding.UTF8.GetString(array, 0, num - 1);
-			}
-			return result;
+			return result2;
 		}
 
 		public RESULT unload()
 		{
-			RESULT result = Bank.FMOD_Studio_Bank_Unload(this.rawPtr);
-			if (result != RESULT.OK)
-			{
-				return result;
-			}
-			this.rawPtr = IntPtr.Zero;
-			return RESULT.OK;
+			return Bank.FMOD_Studio_Bank_Unload(this.handle);
 		}
 
 		public RESULT loadSampleData()
 		{
-			return Bank.FMOD_Studio_Bank_LoadSampleData(this.rawPtr);
+			return Bank.FMOD_Studio_Bank_LoadSampleData(this.handle);
 		}
 
 		public RESULT unloadSampleData()
 		{
-			return Bank.FMOD_Studio_Bank_UnloadSampleData(this.rawPtr);
+			return Bank.FMOD_Studio_Bank_UnloadSampleData(this.handle);
 		}
 
 		public RESULT getLoadingState(out LOADING_STATE state)
 		{
-			return Bank.FMOD_Studio_Bank_GetLoadingState(this.rawPtr, out state);
+			return Bank.FMOD_Studio_Bank_GetLoadingState(this.handle, out state);
 		}
 
 		public RESULT getSampleLoadingState(out LOADING_STATE state)
 		{
-			return Bank.FMOD_Studio_Bank_GetSampleLoadingState(this.rawPtr, out state);
+			return Bank.FMOD_Studio_Bank_GetSampleLoadingState(this.handle, out state);
 		}
 
 		public RESULT getStringCount(out int count)
 		{
-			return Bank.FMOD_Studio_Bank_GetStringCount(this.rawPtr, out count);
+			return Bank.FMOD_Studio_Bank_GetStringCount(this.handle, out count);
 		}
 
 		public RESULT getStringInfo(int index, out Guid id, out string path)
 		{
 			path = null;
 			id = Guid.Empty;
-			byte[] array = new byte[256];
-			int num = 0;
-			byte[] array2 = new byte[16];
-			RESULT result = Bank.FMOD_Studio_Bank_GetStringInfo(this.rawPtr, index, array2, array, array.Length, out num);
-			if (result == RESULT.ERR_TRUNCATED)
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				array = new byte[num];
-				result = Bank.FMOD_Studio_Bank_GetStringInfo(this.rawPtr, index, array2, array, array.Length, out num);
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				RESULT result = Bank.FMOD_Studio_Bank_GetStringInfo(this.handle, index, out id, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = Bank.FMOD_Studio_Bank_GetStringInfo(this.handle, index, out id, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					path = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
 			}
-			if (result == RESULT.OK)
-			{
-				path = Encoding.UTF8.GetString(array, 0, num - 1);
-				id = new Guid(array2);
-			}
-			return RESULT.OK;
+			return result2;
 		}
 
 		public RESULT getEventCount(out int count)
 		{
-			return Bank.FMOD_Studio_Bank_GetEventCount(this.rawPtr, out count);
+			return Bank.FMOD_Studio_Bank_GetEventCount(this.handle, out count);
 		}
 
 		public RESULT getEventList(out EventDescription[] array)
 		{
 			array = null;
 			int num;
-			RESULT result = Bank.FMOD_Studio_Bank_GetEventCount(this.rawPtr, out num);
+			RESULT result = Bank.FMOD_Studio_Bank_GetEventCount(this.handle, out num);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -115,7 +112,7 @@ namespace FMOD.Studio
 			}
 			IntPtr[] array2 = new IntPtr[num];
 			int num2;
-			result = Bank.FMOD_Studio_Bank_GetEventList(this.rawPtr, array2, num, out num2);
+			result = Bank.FMOD_Studio_Bank_GetEventList(this.handle, array2, num, out num2);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -127,21 +124,21 @@ namespace FMOD.Studio
 			array = new EventDescription[num2];
 			for (int i = 0; i < num2; i++)
 			{
-				array[i] = new EventDescription(array2[i]);
+				array[i].handle = array2[i];
 			}
 			return RESULT.OK;
 		}
 
 		public RESULT getBusCount(out int count)
 		{
-			return Bank.FMOD_Studio_Bank_GetBusCount(this.rawPtr, out count);
+			return Bank.FMOD_Studio_Bank_GetBusCount(this.handle, out count);
 		}
 
 		public RESULT getBusList(out Bus[] array)
 		{
 			array = null;
 			int num;
-			RESULT result = Bank.FMOD_Studio_Bank_GetBusCount(this.rawPtr, out num);
+			RESULT result = Bank.FMOD_Studio_Bank_GetBusCount(this.handle, out num);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -153,7 +150,7 @@ namespace FMOD.Studio
 			}
 			IntPtr[] array2 = new IntPtr[num];
 			int num2;
-			result = Bank.FMOD_Studio_Bank_GetBusList(this.rawPtr, array2, num, out num2);
+			result = Bank.FMOD_Studio_Bank_GetBusList(this.handle, array2, num, out num2);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -165,21 +162,21 @@ namespace FMOD.Studio
 			array = new Bus[num2];
 			for (int i = 0; i < num2; i++)
 			{
-				array[i] = new Bus(array2[i]);
+				array[i].handle = array2[i];
 			}
 			return RESULT.OK;
 		}
 
 		public RESULT getVCACount(out int count)
 		{
-			return Bank.FMOD_Studio_Bank_GetVCACount(this.rawPtr, out count);
+			return Bank.FMOD_Studio_Bank_GetVCACount(this.handle, out count);
 		}
 
 		public RESULT getVCAList(out VCA[] array)
 		{
 			array = null;
 			int num;
-			RESULT result = Bank.FMOD_Studio_Bank_GetVCACount(this.rawPtr, out num);
+			RESULT result = Bank.FMOD_Studio_Bank_GetVCACount(this.handle, out num);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -191,7 +188,7 @@ namespace FMOD.Studio
 			}
 			IntPtr[] array2 = new IntPtr[num];
 			int num2;
-			result = Bank.FMOD_Studio_Bank_GetVCAList(this.rawPtr, array2, num, out num2);
+			result = Bank.FMOD_Studio_Bank_GetVCAList(this.handle, array2, num, out num2);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -203,29 +200,29 @@ namespace FMOD.Studio
 			array = new VCA[num2];
 			for (int i = 0; i < num2; i++)
 			{
-				array[i] = new VCA(array2[i]);
+				array[i].handle = array2[i];
 			}
 			return RESULT.OK;
 		}
 
-		public RESULT getUserData(out IntPtr userData)
+		public RESULT getUserData(out IntPtr userdata)
 		{
-			return Bank.FMOD_Studio_Bank_GetUserData(this.rawPtr, out userData);
+			return Bank.FMOD_Studio_Bank_GetUserData(this.handle, out userdata);
 		}
 
-		public RESULT setUserData(IntPtr userData)
+		public RESULT setUserData(IntPtr userdata)
 		{
-			return Bank.FMOD_Studio_Bank_SetUserData(this.rawPtr, userData);
+			return Bank.FMOD_Studio_Bank_SetUserData(this.handle, userdata);
 		}
 
 		[DllImport("fmodstudio")]
 		private static extern bool FMOD_Studio_Bank_IsValid(IntPtr bank);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bank_GetID(IntPtr bank, [Out] byte[] id);
+		private static extern RESULT FMOD_Studio_Bank_GetID(IntPtr bank, out Guid id);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bank_GetPath(IntPtr bank, [Out] byte[] path, int size, out int retrieved);
+		private static extern RESULT FMOD_Studio_Bank_GetPath(IntPtr bank, IntPtr path, int size, out int retrieved);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_Bank_Unload(IntPtr bank);
@@ -246,7 +243,7 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_Bank_GetStringCount(IntPtr bank, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bank_GetStringInfo(IntPtr bank, int index, [Out] byte[] id, [Out] byte[] path, int size, out int retrieved);
+		private static extern RESULT FMOD_Studio_Bank_GetStringInfo(IntPtr bank, int index, out Guid id, IntPtr path, int size, out int retrieved);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_Bank_GetEventCount(IntPtr bank, out int count);
@@ -267,14 +264,26 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_Bank_GetVCAList(IntPtr bank, IntPtr[] array, int capacity, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bank_GetUserData(IntPtr studiosystem, out IntPtr userData);
+		private static extern RESULT FMOD_Studio_Bank_GetUserData(IntPtr bank, out IntPtr userdata);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_Bank_SetUserData(IntPtr studiosystem, IntPtr userData);
+		private static extern RESULT FMOD_Studio_Bank_SetUserData(IntPtr bank, IntPtr userdata);
 
-		protected override bool isValidInternal()
+		public bool hasHandle()
 		{
-			return Bank.FMOD_Studio_Bank_IsValid(this.rawPtr);
+			return this.handle != IntPtr.Zero;
 		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public bool isValid()
+		{
+			return this.hasHandle() && Bank.FMOD_Studio_Bank_IsValid(this.handle);
+		}
+
+		public IntPtr handle;
 	}
 }

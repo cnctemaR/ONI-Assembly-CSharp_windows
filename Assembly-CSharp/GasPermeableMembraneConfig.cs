@@ -21,7 +21,6 @@ public class GasPermeableMembraneConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;

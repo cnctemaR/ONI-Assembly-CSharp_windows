@@ -15,7 +15,7 @@ namespace OverlayModes
 				Color black2 = Color.black;
 				if (dp != null)
 				{
-					int num = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+					int num = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
 					float decorForCell = (dp as DecorProvider).GetDecorForCell(num);
 					if (decorForCell > 0f)
 					{

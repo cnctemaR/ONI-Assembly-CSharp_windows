@@ -19,15 +19,19 @@ public class SoundListenerController : MonoBehaviour
 
 	private void Start()
 	{
-		RuntimeManager.StudioSystem.getVCA("vca:/Looping", out this.loopingVCA);
+		if (RuntimeManager.IsInitialized)
+		{
+			RuntimeManager.StudioSystem.getVCA("vca:/Looping", out this.loopingVCA);
+		}
+		else
+		{
+			base.enabled = false;
+		}
 	}
 
 	public void SetLoopingVolume(float volume)
 	{
-		if (this.loopingVCA != null)
-		{
-			this.loopingVCA.setFaderLevel(volume);
-		}
+		this.loopingVCA.setVolume(volume);
 	}
 
 	private void Update()

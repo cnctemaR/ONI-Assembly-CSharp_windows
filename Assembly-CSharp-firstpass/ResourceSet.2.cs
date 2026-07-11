@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
 [Serializable]
-public class ResourceSet<T> : ResourceSet, IEnumerable<T>, IEnumerable where T : Resource
+public class ResourceSet<T> : ResourceSet where T : Resource
 {
 	public ResourceSet()
 	{
@@ -13,11 +12,6 @@ public class ResourceSet<T> : ResourceSet, IEnumerable<T>, IEnumerable where T :
 	public ResourceSet(string id, ResourceSet parent)
 		: base(id, parent)
 	{
-	}
-
-	public IEnumerator<T> GetEnumerator()
-	{
-		return this.resources.GetEnumerator();
 	}
 
 	public T this[int idx]
@@ -39,16 +33,6 @@ public class ResourceSet<T> : ResourceSet, IEnumerable<T>, IEnumerable where T :
 	public override Resource GetResource(int idx)
 	{
 		return this.resources[idx];
-	}
-
-	private IEnumerator GetEnumerator1()
-	{
-		return this.GetEnumerator();
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return this.GetEnumerator1();
 	}
 
 	public override void Initialize()

@@ -501,12 +501,12 @@ public class EconomyDetails
 				};
 				if (tag.Name.Contains("_ActiveOnly"))
 				{
-					float num5 = geyserInstanceConfiguration2.GetMassPerCycle() / 600f * geyserInstanceConfiguration2.GetIterationLength() * geyserInstanceConfiguration2.GetIterationPercent();
+					float num5 = geyserInstanceConfiguration2.GetMassPerCycle() / 600f * geyserInstanceConfiguration2.GetIterationLength();
 					transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(geyserInstanceConfiguration2.GetElement().CreateTag(), this.massResourceType), num5));
 				}
 				else
 				{
-					float num6 = geyserInstanceConfiguration2.GetMassPerCycle() / 600f * geyserInstanceConfiguration2.GetYearLength() * geyserInstanceConfiguration2.GetIterationPercent() * geyserInstanceConfiguration2.GetYearPercent();
+					float num6 = geyserInstanceConfiguration2.GetMassPerCycle() / 600f * geyserInstanceConfiguration2.GetYearLength() * geyserInstanceConfiguration2.GetYearPercent();
 					transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(geyserInstanceConfiguration2.GetElement().CreateTag(), this.massResourceType), num6));
 				}
 			}
@@ -542,36 +542,36 @@ public class EconomyDetails
 
 	private void CollectDietTransformations(KPrefabID prefab_id)
 	{
+		Trait trait = Db.Get().traits.Get(prefab_id.GetComponent<Modifiers>().initialTraits[0]);
 		CreatureCalorieMonitor.Def def = prefab_id.gameObject.GetDef<CreatureCalorieMonitor.Def>();
 		WildnessMonitor.Def def2 = prefab_id.gameObject.GetDef<WildnessMonitor.Def>();
+		List<AttributeModifier> list = new List<AttributeModifier>();
+		list.AddRange(trait.SelfModifiers);
+		list.AddRange(def2.tameEffect.SelfModifiers);
 		float num = 0f;
-		foreach (AttributeModifier attributeModifier in def2.tameEffect.SelfModifiers)
+		float num2 = 0f;
+		foreach (AttributeModifier attributeModifier in list)
 		{
-			if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
+			if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.maxAttribute.Id)
 			{
 				num = attributeModifier.Value;
+			}
+			if (attributeModifier.AttributeId == Db.Get().Amounts.Calories.deltaAttribute.Id)
+			{
+				num2 = attributeModifier.Value;
 			}
 		}
 		foreach (Diet.Info info in def.diet.infos)
 		{
 			foreach (Tag tag in info.consumedTagBits.GetTagsVerySlow())
 			{
-				float num2 = 0f;
-				Trait trait = Db.Get().traits.Get(prefab_id.GetComponent<Modifiers>().initialTraits[0]);
-				foreach (AttributeModifier attributeModifier2 in trait.SelfModifiers)
-				{
-					if (attributeModifier2.AttributeId == Db.Get().Amounts.Calories.maxAttribute.Id)
-					{
-						num2 = attributeModifier2.Value;
-					}
-				}
-				float num3 = Mathf.Abs(num2 / num);
-				float num4 = num2 / info.caloriesPerKg;
+				float num3 = Mathf.Abs(num / num2);
+				float num4 = num / info.caloriesPerKg;
 				float num5 = num4 * info.producedConversionRate;
 				EconomyDetails.Transformation transformation = new EconomyDetails.Transformation(new Tag(prefab_id.PrefabTag.Name + "Diet" + tag.Name), this.creatureTransformationType, num3);
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(tag, this.massResourceType), -num4));
 				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.CreateResource(new Tag(info.producedElement.ToString()), this.massResourceType), num5));
-				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, num2));
+				transformation.AddDelta(new EconomyDetails.Transformation.Delta(this.caloriesResource, num));
 				this.transformations.Add(transformation);
 			}
 		}
@@ -651,6 +651,7 @@ public class EconomyDetails
 
 	private static void DumpEconomyDetails()
 	{
+		global::Debug.Log("Starting Economy Details Dump...", null);
 		EconomyDetails details = new EconomyDetails();
 		List<EconomyDetails.Scenario> list = new List<EconomyDetails.Scenario>();
 		EconomyDetails.Scenario scenario = new EconomyDetails.Scenario("default", 1, (EconomyDetails.Transformation t) => true);
@@ -738,12 +739,41 @@ public class EconomyDetails
 			EconomyDetails.Scenario scenario19 = new EconomyDetails.Scenario("transformations/" + transformation.tag.Name, 1, (EconomyDetails.Transformation t) => transformation_iter == t);
 			list.Add(scenario19);
 		}
+		foreach (EconomyDetails.Transformation transformation2 in details.transformations)
+		{
+			EconomyDetails.Scenario scenario20 = new EconomyDetails.Scenario("transformation_groups/" + transformation2.tag.Name, 0, null);
+			scenario20.AddEntry(new EconomyDetails.Scenario.Entry(transformation2.tag, 1));
+			foreach (EconomyDetails.Transformation transformation3 in details.transformations)
+			{
+				bool flag = false;
+				foreach (EconomyDetails.Transformation.Delta delta in transformation2.deltas)
+				{
+					if (delta.resource.type != details.energyResourceType)
+					{
+						foreach (EconomyDetails.Transformation.Delta delta2 in transformation3.deltas)
+						{
+							if (delta.resource == delta2.resource)
+							{
+								scenario20.AddEntry(new EconomyDetails.Scenario.Entry(transformation3.tag, 0));
+								flag = true;
+								break;
+							}
+						}
+						if (flag)
+						{
+							break;
+						}
+					}
+				}
+			}
+			list.Add(scenario20);
+		}
 		foreach (EdiblesManager.FoodInfo foodInfo in FOOD.FOOD_TYPES_LIST)
 		{
-			EconomyDetails.Scenario scenario20 = new EconomyDetails.Scenario("food/" + foodInfo.Id, 0, null);
+			EconomyDetails.Scenario scenario21 = new EconomyDetails.Scenario("food/" + foodInfo.Id, 0, null);
 			Tag tag2 = TagManager.Create(foodInfo.Id);
-			scenario20.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
-			scenario20.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant"), 1));
+			scenario21.AddEntry(new EconomyDetails.Scenario.Entry(tag2, 1));
+			scenario21.AddEntry(new EconomyDetails.Scenario.Entry(TagManager.Create("Duplicant"), 1));
 			List<Tag> list2 = new List<Tag>();
 			list2.Add(tag2);
 			while (list2.Count > 0)
@@ -755,7 +785,7 @@ public class EconomyDetails
 				{
 					foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
 					{
-						scenario20.AddEntry(new EconomyDetails.Scenario.Entry(ingredient.tag, 1));
+						scenario21.AddEntry(new EconomyDetails.Scenario.Entry(ingredient.tag, 1));
 						list2.Add(ingredient.tag);
 					}
 				}
@@ -764,27 +794,27 @@ public class EconomyDetails
 					Crop component = kprefabID.GetComponent<Crop>();
 					if (component != null && component.cropVal.cropId == tag.Name)
 					{
-						scenario20.AddEntry(new EconomyDetails.Scenario.Entry(kprefabID.PrefabTag, 1));
+						scenario21.AddEntry(new EconomyDetails.Scenario.Entry(kprefabID.PrefabTag, 1));
 						list2.Add(kprefabID.PrefabTag);
 					}
 				}
 			}
-			list.Add(scenario20);
+			list.Add(scenario21);
 		}
 		if (!Directory.Exists("assets/Tuning/Economy"))
 		{
 			Directory.CreateDirectory("assets/Tuning/Economy");
 		}
-		foreach (EconomyDetails.Scenario scenario21 in list)
+		foreach (EconomyDetails.Scenario scenario22 in list)
 		{
-			string text = "assets/Tuning/Economy/" + scenario21.name + ".csv";
+			string text = "assets/Tuning/Economy/" + scenario22.name + ".csv";
 			if (!Directory.Exists(global::System.IO.Path.GetDirectoryName(text)))
 			{
 				Directory.CreateDirectory(global::System.IO.Path.GetDirectoryName(text));
 			}
 			using (StreamWriter streamWriter = new StreamWriter(text))
 			{
-				details.DumpTransformations(scenario21, streamWriter);
+				details.DumpTransformations(scenario22, streamWriter);
 			}
 		}
 		float dupeBreathingPerSecond = details.GetDupeBreathingPerSecond(details);
@@ -824,6 +854,7 @@ public class EconomyDetails
 				streamWriter2.Write("\n");
 			}
 		}
+		global::Debug.Log("Completed economy details dump!!", null);
 	}
 
 	private List<EconomyDetails.Transformation> transformations = new List<EconomyDetails.Transformation>();

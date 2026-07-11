@@ -16,7 +16,7 @@ namespace FMOD
 
 		public int sidechainchannels;
 
-		public IntPtr callbacks;
+		public IntPtr functions;
 
 		public int systemobject;
 	}

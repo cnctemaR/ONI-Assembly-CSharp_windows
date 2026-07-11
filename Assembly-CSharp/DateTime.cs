@@ -18,9 +18,10 @@ public class DateTime : KScreen
 
 	private void Update()
 	{
-		if (GameClock.Instance != null)
+		if (GameClock.Instance != null && this.displayedDayCount != GameUtil.GetCurrentCycle())
 		{
 			this.text.text = this.Days();
+			this.displayedDayCount = GameUtil.GetCurrentCycle();
 		}
 	}
 
@@ -43,6 +44,8 @@ public class DateTime : KScreen
 	public static global::DateTime Instance;
 
 	public LocText day;
+
+	private int displayedDayCount = -1;
 
 	[SerializeField]
 	private LocText text;

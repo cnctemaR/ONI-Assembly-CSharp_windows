@@ -304,7 +304,7 @@ public class KBatchedAnimUpdater
 
 	private void ProcessRegistrations()
 	{
-		List<KBatchedAnimController> list = ListPool<KBatchedAnimController, KBatchedAnimUpdater>.Allocate();
+		ListPool<KBatchedAnimController, KBatchedAnimUpdater>.PooledList pooledList = ListPool<KBatchedAnimController, KBatchedAnimUpdater>.Allocate();
 		for (int i = 0; i < this.queuedRegistrations.Count; i++)
 		{
 			KBatchedAnimUpdater.RegistrationInfo info = this.queuedRegistrations[i];
@@ -337,9 +337,9 @@ public class KBatchedAnimUpdater
 							chunkXY = controllerChunkInfo.chunkXY
 						});
 					}
-					if (this.visibleChunkGrid[controllerChunkInfo.chunkXY.x, controllerChunkInfo.chunkXY.y])
+					if (controllerList != null && this.visibleChunkGrid[controllerChunkInfo.chunkXY.x, controllerChunkInfo.chunkXY.y])
 					{
-						list.Add(info.controller);
+						pooledList.Add(info.controller);
 					}
 				}
 			}
@@ -360,19 +360,19 @@ public class KBatchedAnimUpdater
 					this.movingControllerInfos.RemoveAll((KBatchedAnimUpdater.MovingControllerInfo x) => x.controllerInstanceId == info.controllerInstanceId);
 					CellChangeMonitor.Instance.UnregisterMovementStateChanged(info.transformId, new Action<Transform, bool>(this.OnMovementStateChanged));
 					this.controllerChunkInfos.Remove(info.controllerInstanceId);
-					list.Remove(info.controller);
+					pooledList.Remove(info.controller);
 				}
 			}
 		}
 		this.queuedRegistrations.Clear();
-		foreach (KBatchedAnimController kbatchedAnimController in list)
+		foreach (KBatchedAnimController kbatchedAnimController in pooledList)
 		{
 			if (kbatchedAnimController != null)
 			{
 				kbatchedAnimController.SetVisiblity(true);
 			}
 		}
-		ListPool<KBatchedAnimController, KBatchedAnimUpdater>.Free(list);
+		pooledList.Recycle();
 	}
 
 	public void OnMovementStateChanged(Transform transform, bool is_moving)
@@ -471,7 +471,7 @@ public class KBatchedAnimUpdater
 
 	private int cleanUpChunkIndex;
 
-	private static Vector2 VISIBLE_RANGE_SCALE = new Vector2(1f, 1.25f);
+	private static Vector2 VISIBLE_RANGE_SCALE = new Vector2(1f, 1.5f);
 
 	public enum RegistrationState
 	{

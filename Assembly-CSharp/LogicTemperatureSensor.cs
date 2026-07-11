@@ -27,8 +27,12 @@ public class LogicTemperatureSensor : Switch, ISaveLoadable, IThresholdSwitch, I
 	{
 		if (this.simUpdateCounter < 8)
 		{
-			this.temperatures[this.simUpdateCounter] = Grid.Temperature[Grid.PosToCell(this)];
-			this.simUpdateCounter++;
+			int num = Grid.PosToCell(this);
+			if (Grid.Mass[num] > 0f)
+			{
+				this.temperatures[this.simUpdateCounter] = Grid.Temperature[num];
+				this.simUpdateCounter++;
+			}
 			return;
 		}
 		this.simUpdateCounter = 0;

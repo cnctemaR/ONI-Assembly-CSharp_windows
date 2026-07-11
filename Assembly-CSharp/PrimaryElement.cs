@@ -277,7 +277,7 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 			Element element = this.Element;
 			foreach (AttributeModifier attributeModifier in element.attributeModifiers)
 			{
-				attributes.Add(element.name, attributeModifier);
+				attributes.Add(attributeModifier);
 			}
 		}
 	}

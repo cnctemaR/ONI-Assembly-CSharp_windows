@@ -26,7 +26,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(2024405073, sizeof(SimMessages.AddElementConsumerMessage), (byte*)ptr);
 	}
 
-	public unsafe static void SetElementConsumerData(int sim_handle, float consumptionRate)
+	public unsafe static void SetElementConsumerData(int sim_handle, int cell, float consumptionRate)
 	{
 		if (!Sim.IsValidHandle(sim_handle))
 		{
@@ -34,6 +34,7 @@ public static class SimMessages
 		}
 		SimMessages.SetElementConsumerDataMessage* ptr = stackalloc SimMessages.SetElementConsumerDataMessage[checked(1 * sizeof(SimMessages.SetElementConsumerDataMessage))];
 		ptr->handle = sim_handle;
+		ptr->cell = cell;
 		ptr->consumptionRate = consumptionRate;
 		Sim.SIM_HandleMessage(1575539738, sizeof(SimMessages.SetElementConsumerDataMessage), (byte*)ptr);
 	}
@@ -559,7 +560,6 @@ public static class SimMessages
 			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, callbackIdx);
 			if (ev != null)
 			{
-				ev.Log(gameCell, ElementLoader.elements[elementIdx].id, mass, callbackIdx);
 			}
 		}
 	}
@@ -657,6 +657,14 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-1683118492, sizeof(Sim.DebugProperties), (byte*)ptr);
 	}
 
+	public unsafe static void ModifyCellWorldZone(int cell, byte zone_id)
+	{
+		SimMessages.CellWorldZoneModification* ptr = stackalloc SimMessages.CellWorldZoneModification[checked(1 * sizeof(SimMessages.CellWorldZoneModification))];
+		ptr->cell = cell;
+		ptr->zoneID = zone_id;
+		Sim.SIM_HandleMessage(-449718014, sizeof(SimMessages.CellWorldZoneModification), (byte*)ptr);
+	}
+
 	public const int InvalidCallback = -1;
 
 	public const float STATE_TRANSITION_TEMPERATURE_BUFER = 3f;
@@ -681,6 +689,8 @@ public static class SimMessages
 	private struct SetElementConsumerDataMessage
 	{
 		public int handle;
+
+		public int cell;
 
 		public float consumptionRate;
 	}
@@ -1145,5 +1155,13 @@ public static class SimMessages
 		public float temperature;
 
 		public int elementHash;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct CellWorldZoneModification
+	{
+		public int cell;
+
+		public byte zoneID;
 	}
 }

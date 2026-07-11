@@ -44,7 +44,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 			if (eq.assignee.GetSoleOwner().GetComponent<MinionResume>().HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
 			{
 				eq.assignee.GetSoleOwner().GetAttributes().Get(Db.Get().Attributes.Athletics)
-					.Add("SuitExpert", SuitExpert.AthleticsModifier);
+					.Add(SuitExpert.AthleticsModifier);
 			}
 		};
 		equipmentDef.OnUnequipCallBack = delegate(Equippable eq)

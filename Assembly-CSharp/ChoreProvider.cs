@@ -4,9 +4,12 @@ using System.Collections.Generic;
 [SkipSaveFileSerialization]
 public class ChoreProvider : KMonoBehaviour
 {
-	public IEnumerator<Chore> GetEnumerator()
+	public string Name { get; private set; }
+
+	protected override void OnSpawn()
 	{
-		return this.chores.GetEnumerator();
+		base.OnSpawn();
+		this.Name = base.name;
 	}
 
 	public virtual Chore AddChore(Chore chore)

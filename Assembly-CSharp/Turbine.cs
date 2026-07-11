@@ -19,7 +19,7 @@ public class Turbine : KMonoBehaviour
 			this.srcCells[i] = Grid.OffsetCell(num, new CellOffset(num2, -1));
 			this.destCells[i] = Grid.OffsetCell(num, new CellOffset(num2, def.HeightInCells - 1));
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.SetCellProperties(num3, 7);
+			SimMessages.SetCellProperties(num3, 39);
 			Grid.Foundation[num3] = true;
 			Grid.SetSolid(num3, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			Grid.RenderedByWorld[num3] = false;
@@ -49,14 +49,15 @@ public class Turbine : KMonoBehaviour
 		{
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.ClearCellProperties(num3, 7);
+			SimMessages.ClearCellProperties(num3, 39);
 			Grid.Foundation[num3] = false;
 			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
 			Grid.RenderedByWorld[num3] = true;
 			World.Instance.OnSolidChanged(num3);
 			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
-		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle);
+		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle, "Turbine");
+		this.simEmitCBHandle.Clear();
 		base.OnCleanUp();
 	}
 
@@ -80,10 +81,11 @@ public class Turbine : KMonoBehaviour
 			SimUtil.DiseaseInfo diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(this.diseaseIdx, this.diseaseCount, massConsumedCallback.diseaseIdx, massConsumedCallback.diseaseCount);
 			this.diseaseIdx = diseaseInfo.idx;
 			this.diseaseCount = diseaseInfo.count;
-			if (this.storedMass > this.minEmitMass)
+			if (this.storedMass > this.minEmitMass && this.simEmitCBHandle.IsValid())
 			{
 				float num = this.storedMass / (float)this.destCells.Length;
 				int num2 = this.diseaseCount / this.destCells.Length;
+				Game.Instance.complexCallbackManager.GetItem(this.simEmitCBHandle);
 				foreach (int num3 in this.destCells)
 				{
 					SimMessages.EmitMass(num3, massConsumedCallback.elemIdx, num, this.emitTemperature, this.diseaseIdx, num2, this.simEmitCBHandle.index);
@@ -215,7 +217,7 @@ public class Turbine : KMonoBehaviour
 
 	private static StatusItem spinningUpStatusItem;
 
-	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)7;
+	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
 
 	private MeterController meter;
 

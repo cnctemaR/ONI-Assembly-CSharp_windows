@@ -48,8 +48,8 @@ public class LogicMemoryConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
-		GeneratedBuildings.RegisterLogicPorts(go, LogicMemoryConfig.INPUT_PORTS, LogicMemoryConfig.OUTPUT_PORTS);
 		go.AddOrGet<LogicMemory>();
+		GeneratedBuildings.RegisterLogicPorts(go, LogicMemoryConfig.INPUT_PORTS, LogicMemoryConfig.OUTPUT_PORTS);
 		BuildingTemplates.DoPostConfigure(go);
 	}
 

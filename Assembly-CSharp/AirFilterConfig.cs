@@ -43,6 +43,7 @@ public class AirFilterConfig : IBuildingConfig
 		elementConsumer.sampleCellOffset = new Vector3(0f, 0f, 0f);
 		elementConsumer.isRequired = false;
 		elementConsumer.storeOnConsume = true;
+		elementConsumer.showDescriptor = false;
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = 10f;
 		elementDropper.emitTag = new Tag("Clay");

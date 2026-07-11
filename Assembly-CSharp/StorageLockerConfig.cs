@@ -32,11 +32,8 @@ public class StorageLockerConfig : IBuildingConfig
 		storage.showInUI = true;
 		storage.allowItemRemoval = true;
 		storage.showDescriptor = true;
-		StorageLocker storageLocker = go.AddOrGet<StorageLocker>();
-		storageLocker.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		storageLocker.filterTint = new Color(1f, 1f, 1f, 1f);
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
-		go.AddOrGet<UserMenu>();
+		go.AddOrGet<StorageLocker>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

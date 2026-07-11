@@ -35,7 +35,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 
 	private static void MoveStoredContentsToConsumeOffset(FishFeeder.Instance smi)
 	{
-		foreach (GameObject gameObject in smi.GetComponent<Storage>())
+		foreach (GameObject gameObject in smi.GetComponent<Storage>().items)
 		{
 			if (!(gameObject == null))
 			{
@@ -163,7 +163,7 @@ public class FishFeeder : GameStateMachine<FishFeeder, FishFeeder.Instance, ISta
 		{
 			this.smi = smi;
 			this.massPerBall = mass_per_ball;
-			this.anim = GameUtil.KInstantiate(Assets.GetPrefab("FishFeederBot"), smi.transform.position, Grid.SceneLayer.Front, Folder.Buildings, null, 0).GetComponent<KBatchedAnimController>();
+			this.anim = GameUtil.KInstantiate(Assets.GetPrefab("FishFeederBot"), smi.transform.GetPosition(), Grid.SceneLayer.Front, Folder.Buildings, null, 0).GetComponent<KBatchedAnimController>();
 			this.anim.transform.SetParent(smi.transform);
 			this.anim.gameObject.SetActive(true);
 			this.anim.SetSceneLayer(Grid.SceneLayer.Building);

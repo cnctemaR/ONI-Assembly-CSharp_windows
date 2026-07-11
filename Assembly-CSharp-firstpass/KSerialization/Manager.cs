@@ -148,6 +148,7 @@ namespace KSerialization
 			Manager.deserializationTemplatesByType.Clear();
 			Manager.deserializationMappings.Clear();
 			Manager.typeInfoMap.Clear();
+			Helper.ClearTypeInfoMask();
 		}
 
 		public static bool HasDeserializationMapping(Type type)

@@ -53,12 +53,6 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 	public float flipInterval = 600f;
 
 	[SerializeField]
-	public SimHashes emitHash = SimHashes.Vacuum;
-
-	[SerializeField]
-	public float emitMassThreshold = 1f;
-
-	[SerializeField]
 	public float simulatedInternalTemperature = 323.15f;
 
 	[SerializeField]
@@ -97,16 +91,6 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 			component.ShowProgressBar(false);
 			component.WorkTimeRemaining = component.GetWorkTime();
 		}
-
-		public void TryEmit()
-		{
-			PrimaryElement primaryElement = base.master.storage.FindPrimaryElement(base.master.emitHash);
-			if (primaryElement != null && primaryElement.Mass >= base.master.emitMassThreshold)
-			{
-				primaryElement.Temperature = base.master.GetComponent<PrimaryElement>().Temperature;
-				base.master.storage.Drop(primaryElement.gameObject);
-			}
-		}
 	}
 
 	public class States : GameStateMachine<Compost.States, Compost.StatesInstance, Compost>
@@ -133,10 +117,6 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 			{
 				smi.master.operational.SetActive(true, false);
 			}).EventTransition(GameHashes.OnStorageChange, this.empty, (Compost.StatesInstance smi) => !smi.CanContinueConverting()).EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
-				.EventHandler(GameHashes.OnStorageChange, delegate(Compost.StatesInstance smi)
-				{
-					smi.TryEmit();
-				})
 				.ScheduleGoTo((Compost.StatesInstance smi) => smi.master.flipInterval, this.inert)
 				.PlayAnims((Compost.StatesInstance smi) => Compost.States.compostingAnims, KAnim.PlayMode.Loop)
 				.Exit(delegate(Compost.StatesInstance smi)

@@ -11,18 +11,19 @@ public class MinionVitalsPanel : KMonoBehaviour
 	public void Init()
 	{
 		this.AddLine(Db.Get().Amounts.HitPoints, this.icon_hitpoints, null);
-		this.AddLine(Db.Get().Amounts.Happiness, this.icon_stress, null);
-		this.AddLine(Db.Get().Amounts.Wildness, this.icon_hitpoints, null);
-		this.AddLine(Db.Get().Amounts.Incubation, this.icon_hitpoints, null);
-		this.AddLine(Db.Get().Amounts.Fertility, this.icon_hitpoints, null);
-		this.AddLine(Db.Get().Amounts.Age, this.icon_stamina, null);
+		this.AddLine(Db.Get().Amounts.Happiness, this.icon_happiness, null);
+		this.AddLine(Db.Get().Amounts.Wildness, this.icon_wildness, null);
+		this.AddLine(Db.Get().Amounts.Incubation, this.icon_incubation, null);
+		this.AddLine(Db.Get().Amounts.Viability, this.icon_hitpoints, null);
+		this.AddLine(Db.Get().Amounts.Fertility, this.icon_reproduction, null);
+		this.AddLine(Db.Get().Amounts.Age, this.icon_age, null);
 		this.AddLine(Db.Get().Amounts.Stress, this.icon_stress, null);
 		this.AddLine(Db.Get().Amounts.Bladder, this.icon_bladder, null);
 		this.AddLine(Db.Get().Amounts.Breath, this.icon_breath, null);
 		this.AddLine(Db.Get().Amounts.Stamina, this.icon_stamina, null);
 		this.AddLine(Db.Get().Amounts.Calories, this.icon_calories, null);
 		this.AddLine(Db.Get().Amounts.ImmuneLevel, this.icon_disease, null);
-		this.AddLine(Db.Get().Amounts.ScaleGrowth, this.icon_hitpoints, null);
+		this.AddLine(Db.Get().Amounts.ScaleGrowth, this.icon_scale_growth, null);
 		this.AddLine(Db.Get().Amounts.Temperature, this.icon_temperature, null);
 		this.AddLine(Db.Get().Amounts.Decor, this.icon_decor, (AmountInstance ainstance) => this.GetDecorTooltip(ainstance));
 		this.AddCheckboxLine(Db.Get().Amounts.AirPressure, this.conditionsContainerNormal, (GameObject go) => this.GetAirPressureLabel(go), delegate(GameObject go)
@@ -367,18 +368,6 @@ public class MinionVitalsPanel : KMonoBehaviour
 		return UI.TOOLTIPS.VITALS_CHECKBOX_ATMOSPHERE;
 	}
 
-	private string GetSubmersionTooltip(GameObject go)
-	{
-		SubmersionMonitor component = go.GetComponent<SubmersionMonitor>();
-		return (!component.IsCellSafe()) ? UI.TOOLTIPS.VITALS_CHECKBOX_SUBMERGED_FALSE : UI.TOOLTIPS.VITALS_CHECKBOX_SUBMERGED_TRUE;
-	}
-
-	private string GetDrowningTooltip(GameObject go)
-	{
-		DrowningMonitor component = go.GetComponent<DrowningMonitor>();
-		return (!component.IsCellSafe(Grid.PosToCell(go))) ? UI.TOOLTIPS.VITALS_CHECKBOX_DROWNING_FALSE : UI.TOOLTIPS.VITALS_CHECKBOX_DROWNING_TRUE;
-	}
-
 	private string GetAirPressureLabel(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
@@ -454,16 +443,6 @@ public class MinionVitalsPanel : KMonoBehaviour
 		return text;
 	}
 
-	private string GetSubmersionLabel(GameObject go)
-	{
-		return UI.VITALSSCREEN.SUBMERSION;
-	}
-
-	private string GetDrowningLabel(GameObject go)
-	{
-		return UI.VITALSSCREEN.NOT_DROWNING;
-	}
-
 	private bool check_pressure(GameObject go)
 	{
 		PressureVulnerable component = go.GetComponent<PressureVulnerable>();
@@ -506,18 +485,6 @@ public class MinionVitalsPanel : KMonoBehaviour
 		return !(component != null) || component.IsSafeElement(Grid.Element[Grid.PosToCell(go)]);
 	}
 
-	private bool check_submersion(GameObject go)
-	{
-		SubmersionMonitor component = go.GetComponent<SubmersionMonitor>();
-		return !(component != null) || component.IsCellSafe();
-	}
-
-	private bool check_drowning(GameObject go)
-	{
-		DrowningMonitor component = go.GetComponent<DrowningMonitor>();
-		return !(component != null) || component.IsCellSafe(Grid.PosToCell(go));
-	}
-
 	public Sprite icon_stress;
 
 	public Sprite icon_breath;
@@ -537,6 +504,18 @@ public class MinionVitalsPanel : KMonoBehaviour
 	public Sprite icon_maturity;
 
 	public Sprite icon_disease;
+
+	public Sprite icon_age;
+
+	public Sprite icon_happiness;
+
+	public Sprite icon_incubation;
+
+	public Sprite icon_reproduction;
+
+	public Sprite icon_scale_growth;
+
+	public Sprite icon_wildness;
 
 	public GameObject LineItemPrefab;
 

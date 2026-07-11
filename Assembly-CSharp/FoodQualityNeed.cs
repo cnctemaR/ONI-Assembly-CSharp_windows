@@ -75,7 +75,7 @@ public class FoodQualityNeed : Need
 			}
 			if (attributeModifier != null)
 			{
-				attributes.Add(attributeModifier.GetDescription(), attributeModifier);
+				attributes.Add(attributeModifier);
 			}
 			ThoughtGraph.Instance smi = this.GetSMI<ThoughtGraph.Instance>();
 			if (smi != null)

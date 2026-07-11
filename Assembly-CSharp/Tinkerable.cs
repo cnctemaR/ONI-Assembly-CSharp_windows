@@ -139,7 +139,7 @@ public class Tinkerable : Workable
 			}
 			else
 			{
-				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount, new Tag[] { this.tinkerMaterialTag }, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, FetchOrder2.OperationalRequirement.Functional, 0, this.choreTags);
+				this.chore = new FetchChore(Db.Get().ChoreTypes.GetByHash(this.choreTypeFetch), this.storage, this.tinkerMaterialAmount, new Tag[] { this.tinkerMaterialTag }, null, null, null, true, new Action<Chore>(this.OnFetchComplete), null, null, FetchOrder2.OperationalRequirement.Functional, 0, this.choreTags);
 			}
 			this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, this.requiredRolePerk);
 			RoomTracker component2 = base.GetComponent<RoomTracker>();

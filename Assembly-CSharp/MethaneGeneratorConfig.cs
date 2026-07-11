@@ -22,7 +22,7 @@ public class MethaneGeneratorConfig : IBuildingConfig
 		buildingDef.GeneratorWattageRating = 800f;
 		buildingDef.GeneratorBaseCapacity = 1000f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
-		buildingDef.SelfHeatKilowattsWhenActive = 2f;
+		buildingDef.SelfHeatKilowattsWhenActive = 8f;
 		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
@@ -53,37 +53,30 @@ public class MethaneGeneratorConfig : IBuildingConfig
 		storage.capacityKg = 50f;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
-		conduitConsumer.consumptionRate = 0.59999996f;
+		conduitConsumer.consumptionRate = 0.90000004f;
 		conduitConsumer.capacityTag = GameTagExtensions.Create(SimHashes.Methane);
-		conduitConsumer.capacityKG = 0.59999996f;
+		conduitConsumer.capacityKG = 0.90000004f;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
-		float num = 0.00375f;
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
 		energyGenerator.powerDistributionOrder = 8;
 		energyGenerator.ignoreBatteryRefillPercent = true;
-		EnergyGenerator.Formula formula = default(EnergyGenerator.Formula);
-		formula.inputs = new EnergyGenerator.InputItem[]
+		energyGenerator.formula = new EnergyGenerator.Formula
 		{
-			new EnergyGenerator.InputItem(GameTagExtensions.Create(SimHashes.Methane), 0.06f, 0.59999996f)
+			inputs = new EnergyGenerator.InputItem[]
+			{
+				new EnergyGenerator.InputItem(GameTagExtensions.Create(SimHashes.Methane), 0.09f, 0.90000004f)
+			},
+			outputs = new EnergyGenerator.OutputItem[]
+			{
+				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 0.0675f, false, new CellOffset(1, 1), 0f),
+				new EnergyGenerator.OutputItem(SimHashes.CarbonDioxide, 0.0225f, true, new CellOffset(0, 2), 383.15f)
+			}
 		};
-		float num2 = num * 2f * 18f;
-		float num3 = num * 44f;
-		float num4 = 0.5f;
-		formula.outputs = new EnergyGenerator.OutputItem[]
-		{
-			new EnergyGenerator.OutputItem(SimHashes.DirtyWater, num2 * num4, false, new CellOffset(1, 1)),
-			new EnergyGenerator.OutputItem(SimHashes.CarbonDioxide, num3 * num4, true)
-		};
-		energyGenerator.formula = formula;
 		ConduitDispenser conduitDispenser = go.AddOrGet<ConduitDispenser>();
 		conduitDispenser.conduitType = ConduitType.Gas;
 		conduitDispenser.invertElementFilter = true;
-		conduitDispenser.elementFilter = new SimHashes[]
-		{
-			SimHashes.Methane,
-			SimHashes.Oxygen
-		};
+		conduitDispenser.elementFilter = new SimHashes[] { SimHashes.Methane };
 		Tinkerable.MakePowerTinkerable(go);
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
@@ -95,7 +88,11 @@ public class MethaneGeneratorConfig : IBuildingConfig
 
 	public const string ID = "MethaneGenerator";
 
-	public const float METHANE_CONSUMPTION_RATE = 0.06f;
+	public const float METHANE_CONSUMPTION_RATE = 0.09f;
+
+	private const float CO2_RATIO = 0.25f;
+
+	public const float EXHAUST_ELEMENT_TEMP = 383.15f;
 
 	private const int WIDTH = 4;
 

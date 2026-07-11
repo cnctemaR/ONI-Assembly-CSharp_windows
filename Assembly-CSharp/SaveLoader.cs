@@ -60,7 +60,7 @@ public class SaveLoader : KMonoBehaviour
 		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
 		if (WorldGen.CanLoad(activeSaveFilePath))
 		{
-			Sim.SIM_Initialize(null);
+			Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
 			SimMessages.CreateDiseaseTable();
 			this.loadedFromSave = true;
@@ -100,7 +100,6 @@ public class SaveLoader : KMonoBehaviour
 				}
 				App.LoadScene("frontend");
 			}
-			return;
 		}
 	}
 
@@ -205,7 +204,7 @@ public class SaveLoader : KMonoBehaviour
 		deserializer.Deserialize(saveFileRoot);
 		Game.LoadSettings(deserializer);
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
-		Sim.SIM_Initialize(null);
+		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
 		SimMessages.CreateDiseaseTable();
 		byte[] array = saveFileRoot.streamed["Sim"];
@@ -375,6 +374,7 @@ public class SaveLoader : KMonoBehaviour
 
 	public string Save(string filename, bool isAutoSave = false, bool updateSavePointer = true)
 	{
+		Manager.Clear();
 		this.ReportSaveMetrics(isAutoSave);
 		if (isAutoSave)
 		{
@@ -465,6 +465,7 @@ public class SaveLoader : KMonoBehaviour
 		SaveLoader.SetActiveSaveFilePath(filename);
 		try
 		{
+			Manager.Clear();
 			byte[] array = File.ReadAllBytes(filename);
 			IReader reader = new FastReader(array);
 			SaveGame.Header header;
@@ -476,6 +477,10 @@ public class SaveLoader : KMonoBehaviour
 				typeof(Polygon).Assembly,
 				typeof(Vector2).Assembly
 			};
+			if (this.GameInfo.saveMajorVersion == 7 && this.GameInfo.saveMinorVersion < 4)
+			{
+				Helper.SetTypeInfoMask((SerializationTypeInfo)191);
+			}
 			Manager.DeserializeDirectory(reader);
 			if (header.IsCompressed)
 			{
@@ -543,7 +548,7 @@ public class SaveLoader : KMonoBehaviour
 			global::Debug.LogError("Detail is null", null);
 		}
 		GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
-		Sim.SIM_Initialize(null);
+		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
 		SimMessages.CreateDiseaseTable();
 		try
@@ -612,7 +617,7 @@ public class SaveLoader : KMonoBehaviour
 	private List<SaveLoader.MinionMetricsData> GetMinionMetrics()
 	{
 		List<SaveLoader.MinionMetricsData> list = new List<SaveLoader.MinionMetricsData>();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			if (!(minionIdentity == null))
 			{

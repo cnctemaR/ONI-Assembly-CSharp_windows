@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -43,7 +42,7 @@ public class EntityConfigManager : KMonoBehaviour
 				list.Add(configEntry);
 			}
 		}
-		list = list.OrderBy<EntityConfigManager.ConfigEntry, int>((EntityConfigManager.ConfigEntry x) => x.sortOrder).ToList<EntityConfigManager.ConfigEntry>();
+		list.Sort((EntityConfigManager.ConfigEntry x, EntityConfigManager.ConfigEntry y) => x.sortOrder.CompareTo(y.sortOrder));
 		foreach (EntityConfigManager.ConfigEntry configEntry2 in list)
 		{
 			object obj = Activator.CreateInstance(configEntry2.type);

@@ -3,10 +3,13 @@ using System.Collections.Generic;
 
 public abstract class KComponentManager<T> : KCompactedVector<T>, IComponentManager where T : new()
 {
-	protected KComponentManager()
+	public KComponentManager()
 		: base(0)
 	{
+		this.Name = base.GetType().Name;
 	}
+
+	public string Name { get; set; }
 
 	public bool Has(object go)
 	{

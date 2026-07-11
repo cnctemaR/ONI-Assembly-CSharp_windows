@@ -47,7 +47,7 @@ internal class SubmergedStates : GameStateMachine<SubmergedStates, SubmergedStat
 		public bool FindTargetCell()
 		{
 			int num = Grid.PosToCell(base.gameObject);
-			this.targetCell = GameUtil.FloodFillFind(new Func<int, bool>(this.IsAboveWater), num, 8, true, false);
+			this.targetCell = GameUtil.FloodFillFind<object>(new Func<int, object, bool>(SubmergedStates.Instance.IsAboveWater), null, num, 8, true, false);
 			if (this.targetCell == -1)
 			{
 				CellOffset[] array = new CellOffset[]
@@ -69,32 +69,24 @@ internal class SubmergedStates : GameStateMachine<SubmergedStates, SubmergedStat
 			return this.targetCell != PathProber.InvalidCell;
 		}
 
-		public bool IsAboveWater(int cell)
+		private static bool IsAboveWater(int cell, object arg)
 		{
 			return !Grid.IsSubstantialLiquid(cell, 0.35f);
 		}
 
 		public bool IsSubmerged()
 		{
-			return !this.IsAboveWater(Grid.PosToCell(base.transform.GetPosition()));
+			return !SubmergedStates.Instance.IsAboveWater(Grid.PosToCell(base.transform.GetPosition()), null);
 		}
 
 		public void PlayIdleAnim(bool loop)
 		{
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-			KAnim.PlayMode playMode = KAnim.PlayMode.Once;
-			if (loop)
-			{
-				playMode = KAnim.PlayMode.Loop;
-			}
-			if (this.IsSubmerged())
-			{
-				component.Play("swim_idle_loop", playMode, 1f, 0f);
-			}
-			else
-			{
-				component.Play("idle_loop", playMode, 1f, 0f);
-			}
+			Navigator component2 = base.smi.GetComponent<Navigator>();
+			KAnim.PlayMode playMode = ((!loop) ? KAnim.PlayMode.Once : KAnim.PlayMode.Loop);
+			NavType navType = ((!this.IsSubmerged()) ? NavType.Hover : NavType.Swim);
+			HashedString idleAnim = component2.NavGrid.GetIdleAnim(navType);
+			component.Play(idleAnim, playMode, 1f, 0f);
 		}
 
 		public int targetCell = PathProber.InvalidCell;

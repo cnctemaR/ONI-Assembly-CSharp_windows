@@ -32,7 +32,6 @@ public class KPrivacyPrefs : YamlIO<KPrivacyPrefs>
 	{
 		try
 		{
-			string path = KPrivacyPrefs.GetPath();
 			if (!Directory.Exists(KPrivacyPrefs.GetDirectory()))
 			{
 				Directory.CreateDirectory(KPrivacyPrefs.GetDirectory());

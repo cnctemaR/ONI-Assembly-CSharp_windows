@@ -152,7 +152,7 @@ public class Def : ScriptableObject
 			num4 = 100f / (num3 / (float)num);
 		}
 		Sprite sprite = Sprite.Create(texture, rect, new Vector2(0f, 0f), num4, 0U, SpriteMeshType.FullRect);
-		sprite.name = ":" + frameElement.frame.ToString();
+		sprite.name = texture.name + ":" + frameElement.frame.ToString();
 		if (Def.knownUISprites.ContainsKey(animFileAndStateName.first))
 		{
 			Def.knownUISprites[animFileAndStateName.first].Add(animFileAndStateName.second, sprite);

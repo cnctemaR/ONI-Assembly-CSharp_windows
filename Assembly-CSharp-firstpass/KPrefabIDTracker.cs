@@ -12,20 +12,14 @@ public class KPrefabIDTracker
 		return KPrefabIDTracker.Instance;
 	}
 
-	public static void CleanUp()
-	{
-		KPrefabIDTracker.Instance = null;
-	}
-
-	public void Register(KPrefabID instance, KPrefabID prefab)
+	public void Register(KPrefabID instance)
 	{
 		if (instance.InstanceID != -1)
 		{
 			KPrefabIDTracker.Entry entry = new KPrefabIDTracker.Entry
 			{
 				id = instance.InstanceID,
-				instance = instance,
-				prefab = prefab
+				instance = instance
 			};
 			this.entryMap[instance] = entry;
 			this.prefabIdMap[instance.InstanceID] = instance;
@@ -57,13 +51,6 @@ public class KPrefabIDTracker
 		return kprefabID;
 	}
 
-	public KPrefabID GetOriginalPrefab(KPrefabID instance)
-	{
-		KPrefabIDTracker.Entry entry = default(KPrefabIDTracker.Entry);
-		this.entryMap.TryGetValue(instance, out entry);
-		return entry.prefab;
-	}
-
 	private static KPrefabIDTracker Instance;
 
 	private Dictionary<KPrefabID, KPrefabIDTracker.Entry> entryMap = new Dictionary<KPrefabID, KPrefabIDTracker.Entry>();
@@ -75,7 +62,5 @@ public class KPrefabIDTracker
 		public int id;
 
 		public KPrefabID instance;
-
-		public KPrefabID prefab;
 	}
 }

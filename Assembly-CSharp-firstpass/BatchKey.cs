@@ -20,7 +20,7 @@ public struct BatchKey : IEquatable<BatchKey>
 
 	private void CalculateHash()
 	{
-		this._hash = this._z.GetHashCode() ^ this._layer.GetHashCode() ^ this._materialType.GetHashCode() ^ this._groupID.GetHashCode() ^ this._idx.GetHashCode();
+		this._hash = this._z.GetHashCode() ^ this._layer ^ (int)this._materialType ^ this._groupID.HashValue ^ this._idx.GetHashCode();
 	}
 
 	public static BatchKey Create(KAnimConverter.IAnimConverter controller, Vector2I idx)

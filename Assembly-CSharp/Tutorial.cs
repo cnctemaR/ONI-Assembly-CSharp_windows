@@ -100,25 +100,25 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		List<Tutorial.Item> list = new List<Tutorial.Item>();
 		List<Tutorial.Item> list2 = list;
 		Tutorial.Item item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDTOILET.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 5f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDTOILET.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 5f, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.ToiletExists);
 		list2.Add(item);
 		this.itemTree.Add(list);
 		List<Tutorial.Item> list3 = new List<Tutorial.Item>();
 		List<Tutorial.Item> list4 = list3;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDFOOD.TOOLTIP.text, null, true, 20f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDFOOD.TOOLTIP.text, null, true, 20f, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodSourceExists);
 		list4.Add(item);
 		List<Tutorial.Item> list5 = list3;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP.text, null, true, 0f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP.text, null, true, 0f, null, null);
 		list5.Add(item);
 		this.itemTree.Add(list3);
 		List<Tutorial.Item> list6 = new List<Tutorial.Item>();
 		List<Tutorial.Item> list7 = list6;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.HYGENE_NEEDED.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.HYGENE_NEEDED.TOOLTIP, null, true, 20f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.HYGENE_NEEDED.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.HYGENE_NEEDED.TOOLTIP, null, true, 20f, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.HygeneExists);
 		list7.Add(item);
 		this.itemTree.Add(list6);
@@ -127,28 +127,28 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		Tutorial.Item item2 = item;
 		string text = MISC.NOTIFICATIONS.NEEDOXYGENSOURCE.NAME;
 		HashedString invalid = HashedString.Invalid;
-		item2.notification = new Notification(text, NotificationType.Tutorial, invalid, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, null, null, null);
+		item2.notification = new Notification(text, NotificationType.Tutorial, invalid, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.SufficientOxygen);
 		item.minTimeToNotify = 80f;
 		item.lastNotifyTime = 0f;
 		list8.Add(item);
 		this.warningItems.Add(new Tutorial.Item
 		{
-			notification = new Notification(MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, new Func<List<Notification>, object, string>(this.UnrefrigeratedFoodTooltip), null, false, 0f, null, null, null),
+			notification = new Notification(MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, new Func<List<Notification>, object, string>(this.UnrefrigeratedFoodTooltip), null, false, 0f, null, null),
 			requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodIsRefrigerated),
 			minTimeToNotify = 6f,
 			lastNotifyTime = 0f
 		});
 		this.warningItems.Add(new Tutorial.Item
 		{
-			notification = new Notification(MISC.NOTIFICATIONS.FOODLOW.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(this.OnLowFoodTooltip), null, false, 0f, null, null, null),
+			notification = new Notification(MISC.NOTIFICATIONS.FOODLOW.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(this.OnLowFoodTooltip), null, false, 0f, null, null),
 			requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughFood),
 			minTimeToNotify = 10f,
 			lastNotifyTime = 0f
 		});
 		List<Tutorial.Item> list9 = this.warningItems;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.NO_MEDICAL_COTS.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> n, object o) => MISC.NOTIFICATIONS.NO_MEDICAL_COTS.TOOLTIP, null, false, 0f, null, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.NO_MEDICAL_COTS.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> n, object o) => MISC.NOTIFICATIONS.NO_MEDICAL_COTS.TOOLTIP, null, false, 0f, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughMedicalCots);
 		item.minTimeToNotify = 10f;
 		item.lastNotifyTime = 0f;
@@ -261,7 +261,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			notificationType = NotificationType.Bad;
 			text = "Urgent important message. Uses Bad Color BG";
 		}
-		Notification notification = new Notification(string.Format("{0} ({1})", text, this.debugMessageCount++.ToString()), notificationType, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 0f, null, null, null);
+		Notification notification = new Notification(string.Format("{0} ({1})", text, this.debugMessageCount++.ToString()), notificationType, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 0f, null, null);
 		this.notifier.Add(notification, string.Empty);
 	}
 
@@ -403,7 +403,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	private bool FoodSourceExists()
 	{
-		foreach (Fabricator fabricator in Components.Fabricators)
+		foreach (Fabricator fabricator in Components.Fabricators.Items)
 		{
 			if (fabricator.GetType() == typeof(MicrobeMusher))
 			{

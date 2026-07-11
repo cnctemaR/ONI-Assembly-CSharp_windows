@@ -19,7 +19,6 @@ public class HeadquartersConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER5, none, 0.2f);
 		buildingDef.Floodable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "Metal";

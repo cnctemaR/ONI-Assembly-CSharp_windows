@@ -13,8 +13,8 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	protected void Initialize(bool use_logic_meter)
 	{
 		base.OnPrefabInit();
-		this.log = new LoggerFS("StorageLocker");
-		this.filteredStorage = new FilteredStorage(this, null, this.filterTint, this.noFilterTint, this, use_logic_meter, Db.Get().ChoreTypes.Fetch);
+		this.log = new LoggerFS("StorageLocker", 35);
+		this.filteredStorage = new FilteredStorage(this, null, null, this, use_logic_meter, Db.Get().ChoreTypes.Fetch);
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 	}
 
@@ -34,7 +34,7 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		BuildingEnabledButton component = base.GetComponent<BuildingEnabledButton>();
 		bool flag = component != null && !component.IsEnabled;
 		this.filteredStorage.SetEnabled(!flag);
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	private void OnCopySettings(object data)
@@ -65,6 +65,14 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		}
 	}
 
+	public float AmountStored
+	{
+		get
+		{
+			return base.GetComponent<Storage>().MassStored();
+		}
+	}
+
 	public float MinCapacity
 	{
 		get
@@ -78,6 +86,14 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		get
 		{
 			return base.GetComponent<Storage>().capacityKg;
+		}
+	}
+
+	public bool WholeValues
+	{
+		get
+		{
+			return false;
 		}
 	}
 
@@ -101,15 +117,6 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 			return locString;
 		}
 	}
-
-	[MyCmpReq]
-	private UserMenu userMenu;
-
-	[SerializeField]
-	public Color noFilterTint = Color.white;
-
-	[SerializeField]
-	public Color filterTint = Color.white;
 
 	private LoggerFS log;
 

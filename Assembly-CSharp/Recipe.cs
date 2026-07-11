@@ -135,7 +135,7 @@ public class Recipe : IHasSortOrder
 				Edible component = gameObject.GetComponent<Edible>();
 				if (component)
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.CRAFTED_USED, component.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.CRAFTED_USED, "{0}", component.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
 				}
 			}
 			SimUtil.DiseaseInfo diseaseInfo2;
@@ -172,7 +172,7 @@ public class Recipe : IHasSortOrder
 			Edible component3 = gameObject2.GetComponent<Edible>();
 			if (component3)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component3.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.CRAFTED, component3.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component3.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.CRAFTED, "{0}", component3.GetProperName()), UI.ENDOFDAYREPORT.NOTES.CRAFTED_CONTEXT);
 			}
 			gameObject2.SetActive(true);
 			if (component2 != null)
@@ -295,7 +295,6 @@ public class Recipe : IHasSortOrder
 			List<Element> list = new List<Element>(ElementLoader.elements);
 			list.RemoveAll((Element e) => !e.IsSolid);
 			list.RemoveAll((Element e) => !e.HasTag(this.tag));
-			list.Sort((Element a, Element b) => a.electricalConductivity.CompareTo(b.electricalConductivity));
 			return list;
 		}
 

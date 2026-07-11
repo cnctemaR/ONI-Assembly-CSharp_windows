@@ -168,9 +168,6 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 	[MyCmpAdd]
 	private ElementEmitter emitter;
 
-	[MyCmpAdd]
-	private UserMenu userMenu;
-
 	[Serialize]
 	public GeyserConfigurator.GeyserInstanceConfiguration configuration;
 

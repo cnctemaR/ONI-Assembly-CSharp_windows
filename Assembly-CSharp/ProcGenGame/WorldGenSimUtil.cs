@@ -77,11 +77,14 @@ namespace ProcGenGame
 						{
 							templateCellData = keyValuePair.Value.cells[l];
 							int num2 = Grid.OffsetCell(Grid.XYToCell(keyValuePair.Key.x, keyValuePair.Key.y), templateCellData.location_x, templateCellData.location_y);
-							cells[num2].elementIdx = (byte)ElementLoader.GetElementIndex(templateCellData.element);
-							cells[num2].temperature = templateCellData.temperature;
-							cells[num2].mass = templateCellData.mass;
-							dcs[num2].diseaseIdx = (byte)WorldGen.diseaseIds.FindIndex((string name) => name == templateCellData.diseaseName);
-							dcs[num2].elementCount = templateCellData.diseaseCount;
+							if (Grid.IsValidCell(num2))
+							{
+								cells[num2].elementIdx = (byte)ElementLoader.GetElementIndex(templateCellData.element);
+								cells[num2].temperature = templateCellData.temperature;
+								cells[num2].mass = templateCellData.mass;
+								dcs[num2].diseaseIdx = (byte)WorldGen.diseaseIds.FindIndex((string name) => name == templateCellData.diseaseName);
+								dcs[num2].elementCount = templateCellData.diseaseCount;
+							}
 						}
 					}
 				}

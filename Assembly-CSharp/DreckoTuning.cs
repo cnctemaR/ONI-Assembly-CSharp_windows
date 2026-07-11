@@ -39,4 +39,6 @@ public static class DreckoTuning
 	public static float STANDARD_STOMACH_SIZE = DreckoTuning.STANDARD_CALORIES_PER_CYCLE * DreckoTuning.STANDARD_STARVE_CYCLES;
 
 	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER3;
+
+	public static float EGG_MASS = 2f;
 }

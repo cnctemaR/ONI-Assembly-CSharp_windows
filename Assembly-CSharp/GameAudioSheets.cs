@@ -22,7 +22,23 @@ public class GameAudioSheets : AudioSheets
 		if (type == "SoundEvent" || type == "LoopingSoundEvent")
 		{
 			bool flag = type == "LoopingSoundEvent";
-			return new SoundEvent(file_name, sound_name, frame, true, flag, min_interval, false);
+			string[] array = sound_name.Split(new char[] { ':' });
+			sound_name = array[0];
+			string text = sound_name;
+			bool flag2 = flag;
+			SoundEvent soundEvent = new SoundEvent(file_name, text, frame, true, flag2, min_interval, false);
+			for (int i = 1; i < array.Length; i++)
+			{
+				if (array[i] == "IGNORE_PAUSE")
+				{
+					soundEvent.ignorePause = true;
+				}
+				else
+				{
+					global::Debug.LogWarning(sound_name + " has unknown parameter " + array[i], null);
+				}
+			}
+			return soundEvent;
 		}
 		if (type == "LadderSoundEvent")
 		{
@@ -62,8 +78,13 @@ public class GameAudioSheets : AudioSheets
 		}
 		if (type == "CreatureVariationSoundEvent")
 		{
-			bool flag = type == "LoopingSoundEvent";
-			return new CreatureVariationSoundEvent(file_name, sound_name, frame, true, flag, min_interval, false);
+			string text2 = sound_name;
+			bool flag2 = type == "LoopingSoundEvent";
+			return new CreatureVariationSoundEvent(file_name, text2, frame, true, flag2, min_interval, false);
+		}
+		if (type == "CountedSoundEvent")
+		{
+			return new CountedSoundEvent(file_name, sound_name, frame, true, false, min_interval, false);
 		}
 		return null;
 	}

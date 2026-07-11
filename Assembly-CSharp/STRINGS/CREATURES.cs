@@ -66,22 +66,64 @@ namespace STRINGS
 
 				public static LocString EGG_NAME = UI.FormatAsLink("Pacu Egg", "PACUEGG");
 
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Pacu Fry", "PACU");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"An innocent little ",
+						UI.FormatAsLink("Pacu Fry", "PACU"),
+						".\n\nIn time, it will mature into an adult ",
+						UI.FormatAsLink("Pacu", "PACU"),
+						"."
+					});
+				}
+
 				public class VARIANT_TROPICAL
 				{
-					public static LocString NAME = UI.FormatAsLink("Tropical Pacu", "TROPICAL_PACU");
+					public static LocString NAME = UI.FormatAsLink("Tropical Pacu", "PACUTROPICAL");
 
 					public static LocString DESC = "Every organism in the known universe finds the Pacu extremely delicious.";
 
-					public static LocString EGG_NAME = UI.FormatAsLink("Tropical Pacu Egg", "TROPICALPACUEGG");
+					public static LocString EGG_NAME = UI.FormatAsLink("Tropical Pacu Egg", "PACUTROPICALEGG");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Tropical Pacu Fry", "PACUTROPICAL");
+
+						public static LocString DESC = string.Concat(new string[]
+						{
+							"An innocent little ",
+							UI.FormatAsLink("Tropical Pacu Fry", "PACUTROPICAL"),
+							".\n\nIn time, it will mature into an adult ",
+							UI.FormatAsLink("Tropical Pacu", "PACUTROPICAL"),
+							"."
+						});
+					}
 				}
 
 				public class VARIANT_CLEANER
 				{
-					public static LocString NAME = UI.FormatAsLink("Gulp Fish", "GULP_FISH");
+					public static LocString NAME = UI.FormatAsLink("Gulp Fish", "PACUCLEANER");
 
 					public static LocString DESC = "Every organism in the known universe finds the Pacu extremely delicious.";
 
 					public static LocString EGG_NAME = UI.FormatAsLink("Gulp Fish Egg", "CLEANERPACUEGG");
+
+					public class BABY
+					{
+						public static LocString NAME = UI.FormatAsLink("Gulp Fish Fry", "PACUCLEANER");
+
+						public static LocString DESC = string.Concat(new string[]
+						{
+							"An innocent little ",
+							UI.FormatAsLink("Gulp Fish Fry", "GULPFISH"),
+							".\n\nIn time, it will mature into an adult ",
+							UI.FormatAsLink("Gulp Fish", "GULPFISH"),
+							"."
+						});
+					}
 				}
 			}
 
@@ -1085,6 +1127,20 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Someone's trying to capture this critter!";
 			}
 
+			public class BAGGED
+			{
+				public static LocString NAME = "Trussed";
+
+				public static LocString TOOLTIP = "Tied up, ready for delivery";
+			}
+
+			public class IN_INCUBATOR
+			{
+				public static LocString NAME = "Incubation Complete";
+
+				public static LocString TOOLTIP = "This critter has hatched in its incubator and is waiting for pickup";
+			}
+
 			public class HYPOTHERMIA
 			{
 				public static LocString NAME = "Freezing";
@@ -1590,6 +1646,13 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_TOOLTIP = "These critters are starving and will die if not fed soon:";
 			}
+
+			public class OLD
+			{
+				public static LocString NAME = "Old";
+
+				public static LocString TOOLTIP = "This critter is getting old and only has {TimeUntilDeath} left to live.";
+			}
 		}
 
 		public class STATS
@@ -1640,21 +1703,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Domestication";
 
-				public static LocString TOOLTIP = "Domestication" + UI.HORIZONTAL_BR_RULE + "Fully domesticated critters will produce more materials than wild ones, and may even provide psychological benefits to your colony\n\nThis critter is {0} domesticated";
+				public static LocString TOOLTIP = "Domestication" + UI.HORIZONTAL_BR_RULE + "Fully domesticated critters produce more materials than wild ones, and may even provide psychological benefits to my colony\n\nThis critter is {0} domesticated";
 			}
 
 			public class HAPPINESS
 			{
 				public static LocString NAME = "Happiness";
 
-				public static LocString TOOLTIP = "Happiness" + UI.HORIZONTAL_BR_RULE + "High Happiness increases a critter's productivity and indirectly improves their egg laying rates\n\nIt also provides satisfaction in knowing they're living a good little critter life";
+				public static LocString TOOLTIP = "Happiness" + UI.HORIZONTAL_BR_RULE + "High Happiness increases a critter's productivity and indirectly improves their egg laying rates\n\nIt also provides the satisfaction in knowing they're living a good little critter life";
 			}
 
 			public class WILDNESS
 			{
 				public static LocString NAME = "Wildness";
 
-				public static LocString TOOLTIP = "Wildness" + UI.HORIZONTAL_BR_RULE + "At zero Wildness a critter can start gaining Happiness, but they will also require more calories to survive";
+				public static LocString TOOLTIP = "Wildness" + UI.HORIZONTAL_BR_RULE + "At zero Wildness a critter becomes Tame, increasing its metabolism and requiring care from a Rancher.";
 			}
 
 			public class FERTILITY
@@ -1671,6 +1734,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "Incubation" + UI.HORIZONTAL_BR_RULE + "Eggs hatch into brand new critters at the end of their incubation period";
 			}
 
+			public class VIABILITY
+			{
+				public static LocString NAME = "Viability";
+
+				public static LocString TOOLTIP = "Viability" + UI.HORIZONTAL_BR_RULE + "Eggs will lose viability in poor environmental conditions\n\nIf Viability reaches zero the egg will become a Cracked Egg";
+			}
+
 			public class IRRIGATION
 			{
 				public static LocString NAME = "Irrigation";
@@ -1683,13 +1753,6 @@ namespace STRINGS
 			public class ILLUMINATION
 			{
 				public static LocString NAME = "Illumination";
-			}
-
-			public class THERMALCONDUCTIVITY
-			{
-				public static LocString NAME = "Thermal Conductivity";
-
-				public static LocString TOOLTIP = "Heat can pass through the selected object at a rate of (W/m)/K";
 			}
 
 			public class THERMALCONDUCTIVITYBARRIER
@@ -1710,7 +1773,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Scale Growth";
 
-				public static LocString TOOLTIP = "Scale Growth" + UI.HORIZONTAL_BR_RULE + "How long until this creatures scales will grow back.";
+				public static LocString TOOLTIP = "Scale Growth" + UI.HORIZONTAL_BR_RULE + "The amount of time required for this critter to regrow its scales";
 			}
 
 			public class AIRPRESSURE
@@ -1754,11 +1817,25 @@ namespace STRINGS
 				public static LocString NAME = "Scale Regrowth Rate";
 			}
 
-			public class INCUBATOR
+			public class INCUBATOR_SONG
 			{
-				public static LocString NAME = "Incubator";
+				public static LocString NAME = "Serenaded";
 
-				public static LocString TOOLTIP = "Increased incubation rate when placed inside an Incubator";
+				public static LocString TOOLTIP = "This egg has recently been sung to by a Rancher" + UI.HORIZONTAL_BR_RULE + "Increased incubation rate";
+			}
+
+			public class INCUBATING
+			{
+				public static LocString NAME = "Incubating";
+
+				public static LocString TOOLTIP = "This egg is incubating";
+			}
+
+			public class INCUBATING_SUPPRESSED
+			{
+				public static LocString NAME = "Incubation Suppressed";
+
+				public static LocString TOOLTIP = "Environmental conditions are keeping this egg from incubating";
 			}
 
 			public class RANCHED
@@ -1794,6 +1871,11 @@ namespace STRINGS
 				public static LocString NAME = "Wild";
 
 				public static LocString TOOLTIP = "This critter is wild";
+			}
+
+			public class AGE
+			{
+				public static LocString NAME = "Aging";
 			}
 
 			public class BABY
@@ -1867,144 +1949,6 @@ namespace STRINGS
 				public static LocString NAME = "Temperature";
 
 				public static LocString DESC = "Body temperature between: {0} and {1}";
-			}
-		}
-
-		public class DOMESTICATION
-		{
-			public class LEVELS
-			{
-				public class UNHAPPY
-				{
-					public static LocString NAME = "Wild";
-
-					public static LocString TOOLTIP = "This critter is fending for itself and does not trust Duplicants";
-				}
-
-				public class NEUTRAL
-				{
-					public static LocString NAME = "Skittish";
-
-					public static LocString TOOLTIP = "This critter's most basic needs are being met, but it's still wary of Duplicants";
-				}
-
-				public class HAPPY
-				{
-					public static LocString NAME = "Tame";
-
-					public static LocString TOOLTIP = "This critter is well taken care of and fully trusts its Duplicant caregivers";
-				}
-
-				public class SPOILED
-				{
-					public static LocString NAME = "Affectionate";
-
-					public static LocString TOOLTIP = "This critter loves its Duplicant caregivers and is spoiled absolutely rotten";
-				}
-			}
-
-			public class CRITERIA
-			{
-				public class TEMPERATURE_OK
-				{
-					public static LocString NAME = "Comfortable Temperature";
-
-					public static LocString TOOLTIP = "Not too hot, not too cold.";
-				}
-
-				public class ATMOSPHERE_OK
-				{
-					public static LocString NAME = "Acceptable Atmosphere";
-
-					public static LocString TOOLTIP = "It's breathable.";
-				}
-
-				public class IN_PEN
-				{
-					public static LocString NAME = "Critter Pen";
-
-					public static LocString TOOLTIP = "Has a pen to live in.";
-				}
-
-				public class HAS_FOOD_SOURCE
-				{
-					public static LocString NAME = "Fed";
-
-					public static LocString TOOLTIP = "Has enough food to eat.";
-				}
-
-				public class WELL_FED
-				{
-					public static LocString NAME = "Well Fed";
-
-					public static LocString TOOLTIP = "This critter has recently dined on its favorite food.";
-				}
-
-				public class WELL_GROOMED
-				{
-					public static LocString NAME = "Well Groomed";
-
-					public static LocString TOOLTIP = "Getting plenty of personal attention from a Rancher.";
-				}
-			}
-
-			public class EFFECTS
-			{
-				public class UNPRODUCTIVE
-				{
-					public static LocString NAME = "Unproductive";
-
-					public static LocString TOOLTIP = "Without improved conditions, this critter will not provide any useful products";
-				}
-
-				public class LOW_PRODUCTIVITY
-				{
-					public static LocString NAME = "Low Productivity";
-
-					public static LocString TOOLTIP = "Producing at a reduced level";
-				}
-
-				public class GOOD_PRODUCTIVITY
-				{
-					public static LocString NAME = "Good Productivity";
-
-					public static LocString TOOLTIP = "Producing at a normal level";
-				}
-
-				public class DESTRUCTIVE
-				{
-					public static LocString NAME = "Destructive";
-
-					public static LocString TOOLTIP = "Likely to mess up the place";
-				}
-
-				public class INCREASED_CRITERIA_PENALTY
-				{
-					public static LocString NAME = "Sensitive";
-
-					public static LocString TOOLTIP = "Loses happiness faster than normal under poor conditions";
-				}
-
-				public class LOSE_HAPPINESS
-				{
-					public static LocString NAME = "Downward Spiral";
-
-					public static LocString TOOLTIP = "Losing happiness until conditions improve";
-				}
-
-				public class GAIN_FERTILITY
-				{
-					public static LocString NAME = "Increased Reproduction";
-
-					public static LocString TOOLTIP = "This critter will produce an egg soon if conditions remain favorable";
-				}
-
-				public class LOSE_FERTILITY
-				{
-					public static LocString NAME = "Decreased Reproduction";
-
-					public static LocString TOOLTIP = "This creature is holding off on laying eggs due to bad conditions";
-				}
 			}
 		}
 	}

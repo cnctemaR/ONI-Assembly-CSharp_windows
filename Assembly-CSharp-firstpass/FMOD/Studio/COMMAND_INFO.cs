@@ -4,20 +4,20 @@ namespace FMOD.Studio
 {
 	public struct COMMAND_INFO
 	{
-		public string commandName;
+		private StringWrapper commandname;
 
-		public int parentCommandIndex;
+		public int parentcommandindex;
 
-		public int frameNumber;
+		public int framenumber;
 
-		public float frameTime;
+		public float frametime;
 
-		public INSTANCETYPE instanceType;
+		public INSTANCETYPE instancetype;
 
-		public INSTANCETYPE outputType;
+		public INSTANCETYPE outputtype;
 
-		public uint instanceHandle;
+		public uint instancehandle;
 
-		public uint outputHandle;
+		public uint outputhandle;
 	}
 }

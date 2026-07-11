@@ -145,11 +145,11 @@ public class ChoreTable
 			{
 				this.entries[i].OnCleanUp(prefab_id);
 			}
-			ListPool<ChoreTable.Instance.Entry, ChoreTable.Instance>.Free(this.entries);
+			this.entries.Recycle();
 			this.entries = null;
 		}
 
-		private List<ChoreTable.Instance.Entry> entries;
+		private ListPool<ChoreTable.Instance.Entry, ChoreTable.Instance>.PooledList entries;
 
 		private struct Entry
 		{

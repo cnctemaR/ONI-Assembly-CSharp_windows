@@ -51,7 +51,7 @@ public class ElementDropperMonitor : GameStateMachine<ElementDropperMonitor, Ele
 		public Instance(IStateMachineTarget master, ElementDropperMonitor.Def def)
 			: base(master, def)
 		{
-			CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "ElementDropperMonitor.Instance");
 		}
 
 		public override void StopSM(string reason)

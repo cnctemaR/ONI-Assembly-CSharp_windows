@@ -25,7 +25,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 		}
 	}
 
-	public bool NeedsWorker
+	public bool WaitingForWorker
 	{
 		get
 		{
@@ -414,7 +414,9 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 		{
 			if (ingredient.amount > 0f)
 			{
-				fetchList.Add(ingredient.tag, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+				Tag tag = ingredient.tag;
+				float amount = ingredient.amount;
+				fetchList.Add(tag, null, null, amount, FetchOrder2.OperationalRequirement.None);
 			}
 		}
 	}
@@ -595,6 +597,8 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 
 	[Serialize]
 	private List<Fabricator.OrderSaveData> savedOrders;
+
+	public bool hideRecipesUndiscoveredIngredients;
 
 	protected ChoreType choreType;
 

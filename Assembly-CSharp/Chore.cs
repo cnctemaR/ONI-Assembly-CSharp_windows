@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using UnityEngine;
 
 public abstract class Chore
@@ -93,7 +92,8 @@ public abstract class Chore
 	{
 		if (this.arePreconditionsDirty)
 		{
-			this.preconditions.OrderBy<Chore.PreconditionInstance, int>((Chore.PreconditionInstance x) => x.sortOrder);
+			this.preconditions.Sort((Chore.PreconditionInstance x, Chore.PreconditionInstance y) => x.sortOrder.CompareTo(y.sortOrder));
+			this.arePreconditionsDirty = false;
 		}
 		return this.preconditions;
 	}
@@ -309,7 +309,7 @@ public abstract class Chore
 		return this.IsPreemptable;
 	}
 
-	protected virtual void ShowCustomEditor(string filter)
+	protected virtual void ShowCustomEditor(string filter, int width)
 	{
 	}
 

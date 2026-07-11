@@ -7,11 +7,11 @@ public class Uncoverable : KMonoBehaviour
 	private bool IsAnyCellShowing()
 	{
 		int num = Grid.PosToCell(this);
-		bool flag = this.occupyArea.TestArea(num, null, new Func<int, object, bool>(this.IsCellBlocked));
+		bool flag = this.occupyArea.TestArea(num, null, new Func<int, object, bool>(Uncoverable.IsCellBlocked));
 		return !flag;
 	}
 
-	private bool IsCellBlocked(int cell, object data)
+	private static bool IsCellBlocked(int cell, object data)
 	{
 		return Grid.Element[cell].IsSolid && !Grid.Foundation[cell];
 	}
@@ -45,7 +45,7 @@ public class Uncoverable : KMonoBehaviour
 			this.partitionerEntry = null;
 			this.hasBeenUncovered = true;
 			base.GetComponent<KSelectable>().IsSelectable = true;
-			Notification notification = new Notification("Buried Object Discovered!", NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null, null);
+			Notification notification = new Notification("Buried Object Discovered!", NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null);
 			base.gameObject.AddOrGet<Notifier>().Add(notification, string.Empty);
 		}
 	}

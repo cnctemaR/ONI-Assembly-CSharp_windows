@@ -15,11 +15,6 @@ namespace Klei.AI
 			this.Attribute = attribute;
 		}
 
-		public IEnumerator<AttributeInstance.AttributeModifierEntry> GetEnumerator()
-		{
-			return this.Modifiers.GetEnumerator();
-		}
-
 		public string Id
 		{
 			get
@@ -49,35 +44,19 @@ namespace Klei.AI
 			return this.Attribute.BaseValue;
 		}
 
-		public float GetSkillLevel()
-		{
-			float num = 0f;
-			for (int i = 0; i < this.Modifiers.Count; i++)
-			{
-				AttributeInstance.AttributeModifierEntry attributeModifierEntry = this.Modifiers[i];
-				if (attributeModifierEntry.Name == "Skill Level")
-				{
-					num = attributeModifierEntry.Modifier.Value;
-					break;
-				}
-			}
-			return num;
-		}
-
 		public float GetTotalDisplayValue()
 		{
 			float num = this.Attribute.BaseValue;
 			float num2 = 0f;
-			for (int i = 0; i < this.Modifiers.Count; i++)
+			foreach (AttributeModifier attributeModifier in this.Modifiers)
 			{
-				AttributeModifier modifier = this.Modifiers[i].Modifier;
-				if (!modifier.IsMultiplier)
+				if (!attributeModifier.IsMultiplier)
 				{
-					num += modifier.Value;
+					num += attributeModifier.Value;
 				}
 				else
 				{
-					num2 += modifier.Value;
+					num2 += attributeModifier.Value;
 				}
 			}
 			if (num2 != 0f)
@@ -91,18 +70,17 @@ namespace Klei.AI
 		{
 			float num = this.Attribute.BaseValue;
 			float num2 = 0f;
-			for (int i = 0; i < this.Modifiers.Count; i++)
+			foreach (AttributeModifier attributeModifier in this.Modifiers)
 			{
-				AttributeModifier modifier = this.Modifiers[i].Modifier;
-				if (!modifier.UIOnly)
+				if (!attributeModifier.UIOnly)
 				{
-					if (!modifier.IsMultiplier)
+					if (!attributeModifier.IsMultiplier)
 					{
-						num += modifier.Value;
+						num += attributeModifier.Value;
 					}
 					else
 					{
-						num2 += modifier.Value;
+						num2 += attributeModifier.Value;
 					}
 				}
 			}
@@ -120,28 +98,19 @@ namespace Klei.AI
 				return testModifier.Value;
 			}
 			float num = this.Attribute.BaseValue;
-			for (int i = 0; i < this.Modifiers.Count; i++)
+			foreach (AttributeModifier attributeModifier in this.Modifiers)
 			{
-				AttributeModifier modifier = this.Modifiers[i].Modifier;
-				if (!modifier.IsMultiplier)
+				if (!attributeModifier.IsMultiplier)
 				{
-					num += modifier.Value;
+					num += attributeModifier.Value;
 				}
 			}
 			return num * testModifier.Value;
 		}
 
-		public float GetPercentOfBase()
+		public void Add(AttributeModifier modifier)
 		{
-			return this.GetTotalValue() / this.GetBaseValue();
-		}
-
-		public void Add(string name, AttributeModifier modifier)
-		{
-			AttributeInstance.AttributeModifierEntry attributeModifierEntry = new AttributeInstance.AttributeModifierEntry();
-			attributeModifierEntry.Name = string.Intern(name);
-			attributeModifierEntry.Modifier = modifier;
-			this.Modifiers.Add(attributeModifierEntry);
+			this.Modifiers.Add(modifier);
 			if (this.OnDirty != null)
 			{
 				this.OnDirty();
@@ -152,7 +121,7 @@ namespace Klei.AI
 		{
 			for (int i = 0; i < this.Modifiers.Count; i++)
 			{
-				if (this.Modifiers[i].Modifier == modifier)
+				if (this.Modifiers[i] == modifier)
 				{
 					this.Modifiers.RemoveAt(i);
 					if (this.OnDirty != null)
@@ -193,19 +162,19 @@ namespace Klei.AI
 			{
 				text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, this.GetBaseValue());
 			}
-			foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in this.Modifiers)
+			foreach (AttributeModifier attributeModifier in this.Modifiers)
 			{
-				string formattedString = attributeModifierEntry.Modifier.GetFormattedString(base.gameObject);
+				string formattedString = attributeModifier.GetFormattedString(base.gameObject);
 				if (formattedString != null)
 				{
-					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.GetDescription(), formattedString);
+					text += string.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier.GetDescription(), formattedString);
 				}
 			}
 			string text2 = string.Empty;
 			AttributeConverters component = base.gameObject.GetComponent<AttributeConverters>();
 			if (component != null && this.Attribute.converters.Count > 0)
 			{
-				foreach (AttributeConverterInstance attributeConverterInstance in base.gameObject.GetComponent<AttributeConverters>())
+				foreach (AttributeConverterInstance attributeConverterInstance in base.gameObject.GetComponent<AttributeConverters>().converters)
 				{
 					if (attributeConverterInstance.converter.attribute == this.Attribute)
 					{
@@ -228,13 +197,6 @@ namespace Klei.AI
 
 		public global::System.Action OnDirty;
 
-		public List<AttributeInstance.AttributeModifierEntry> Modifiers = new List<AttributeInstance.AttributeModifierEntry>();
-
-		public class AttributeModifierEntry
-		{
-			public string Name;
-
-			public AttributeModifier Modifier;
-		}
+		public List<AttributeModifier> Modifiers = new List<AttributeModifier>();
 	}
 }

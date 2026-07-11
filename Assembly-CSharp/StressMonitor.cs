@@ -56,10 +56,10 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 
 		public void ReportStress(float dt)
 		{
-			foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in this.stress.deltaAttribute.Modifiers)
+			foreach (AttributeModifier attributeModifier in this.stress.deltaAttribute.Modifiers)
 			{
-				DebugUtil.DevAssert(!attributeModifierEntry.Modifier.IsMultiplier, "Reporting stress for multipliers not supported yet.");
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, attributeModifierEntry.Modifier.Value * dt, attributeModifierEntry.Name, base.gameObject.GetProperName());
+				DebugUtil.DevAssert(!attributeModifier.IsMultiplier, "Reporting stress for multipliers not supported yet.");
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.StressDelta, attributeModifier.Value * dt, attributeModifier.GetDescription(), base.gameObject.GetProperName());
 			}
 		}
 

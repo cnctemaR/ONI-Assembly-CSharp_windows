@@ -74,13 +74,9 @@ public class Element : IComparable<Element>
 		}
 	}
 
-	public string name
-	{
-		get
-		{
-			return Strings.Get("STRINGS.ELEMENTS." + this.id.ToString().ToUpper() + ".NAME");
-		}
-	}
+	public string name { get; set; }
+
+	public string nameUpperCase { get; set; }
 
 	public string GetStateString()
 	{
@@ -122,31 +118,34 @@ public class Element : IComparable<Element>
 			text += "\n\n";
 			text += string.Format(ELEMENTS.ELEMENTDESCGAS, this.GetMaterialCategoryTag().ProperName(), GameUtil.GetFormattedTemperature(this.lowTemp, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 		}
-		text = text + "\n" + string.Format(ELEMENTS.THERMALPROPERTIES, this.specificHeatCapacity, this.thermalConductivity);
+		string text2 = ELEMENTS.THERMALPROPERTIES;
+		text2 = text2.Replace("{SPECIFIC_HEAT_CAPACITY}", GameUtil.GetFormattedSHC(this.specificHeatCapacity));
+		text2 = text2.Replace("{THERMAL_CONDUCTIVITY}", GameUtil.GetFormattedThermalConductivity(this.thermalConductivity));
+		text = text + "\n" + text2;
 		if (this.oreTags.Length > 0 && !this.IsVacuum)
 		{
 			text += "\n\n";
-			string text2 = string.Empty;
+			string text3 = string.Empty;
 			for (int i = 0; i < this.oreTags.Length; i++)
 			{
 				Tag tag = new Tag(this.oreTags[i]);
-				text2 += tag.ProperName();
+				text3 += tag.ProperName();
 				if (i < this.oreTags.Length - 1)
 				{
-					text2 += ", ";
+					text3 += ", ";
 				}
 			}
-			text += string.Format(ELEMENTS.ELEMENTPROPERTIES, text2);
+			text += string.Format(ELEMENTS.ELEMENTPROPERTIES, text3);
 		}
 		if (this.attributeModifiers.Count > 0)
 		{
 			foreach (AttributeModifier attributeModifier in this.attributeModifiers)
 			{
 				Klei.AI.Attribute attribute = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId);
-				string text3 = text;
+				string text4 = text;
 				text = string.Concat(new object[]
 				{
-					text3,
+					text4,
 					"\n",
 					attribute.Name,
 					": +",
@@ -185,8 +184,6 @@ public class Element : IComparable<Element>
 	public float specificHeatCapacity;
 
 	public float thermalConductivity = 1f;
-
-	public float electricalConductivity;
 
 	public float molarMass = 1f;
 
@@ -238,12 +235,6 @@ public class Element : IComparable<Element>
 
 	public Sim.PhysicsData defaultValues;
 
-	public float emitDistance;
-
-	public int emitIntensity;
-
-	public float transparency;
-
 	public float toxicity;
 
 	public Substance substance;
@@ -253,6 +244,8 @@ public class Element : IComparable<Element>
 	public Tag[] oreTags = new Tag[0];
 
 	public List<AttributeModifier> attributeModifiers = new List<AttributeModifier>();
+
+	public bool disabled;
 
 	public const byte StateMask = 3;
 

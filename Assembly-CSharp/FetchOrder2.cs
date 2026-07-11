@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FetchOrder2
 {
-	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0, Tag[] chore_tags = null)
+	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0, Tag[] chore_tags = null)
 	{
 		if (amount <= 0f)
 		{
@@ -12,6 +12,7 @@ public class FetchOrder2
 		}
 		this.choreType = chore_type;
 		this.Tags = tags;
+		this.RequiredTags = required_tags;
 		this.ForbiddenTags = forbidden_tags;
 		this.Destination = destination;
 		this.TotalAmount = amount;
@@ -26,6 +27,8 @@ public class FetchOrder2
 	public int PriorityMod { get; set; }
 
 	public Tag[] Tags { get; protected set; }
+
+	public Tag[] RequiredTags { get; protected set; }
 
 	public Tag[] ForbiddenTags { get; protected set; }
 
@@ -84,7 +87,7 @@ public class FetchOrder2
 
 	private void SetFetchTask(float amount)
 	{
-		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod, this.ChoreTags);
+		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.RequiredTags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod, this.ChoreTags);
 		this.Chores.Add(fetchChore);
 	}
 
@@ -115,6 +118,10 @@ public class FetchOrder2
 		FetchChore fetchChore = (FetchChore)chore;
 		this.UnfetchedAmount += fetchChore.originalAmount - fetchChore.amount;
 		this.IssueTask();
+		if (this.OnBegin != null)
+		{
+			this.OnBegin(this, fetchChore.fetchTarget);
+		}
 	}
 
 	public void Cancel(string reason)
@@ -137,9 +144,10 @@ public class FetchOrder2
 		global::Debug.LogError("UNIMPLEMENTED!", null);
 	}
 
-	public void Submit(Action<FetchOrder2, Pickupable> on_complete, bool check_storage_contents)
+	public void Submit(Action<FetchOrder2, Pickupable> on_complete, bool check_storage_contents, Action<FetchOrder2, Pickupable> on_begin = null)
 	{
 		this.OnComplete = on_complete;
+		this.OnBegin = on_begin;
 		this.checkStorageContents = check_storage_contents;
 		if (check_storage_contents)
 		{
@@ -165,7 +173,7 @@ public class FetchOrder2
 
 	public bool IsMaterialOnStorage(Storage storage, ref float amount, ref Pickupable out_item)
 	{
-		foreach (GameObject gameObject in this.Destination)
+		foreach (GameObject gameObject in this.Destination.items)
 		{
 			if (gameObject != null)
 			{
@@ -215,6 +223,18 @@ public class FetchOrder2
 		return num;
 	}
 
+	public bool IsComplete()
+	{
+		for (int i = 0; i < this.Chores.Count; i++)
+		{
+			if (!this.Chores[i].isComplete)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private void Assert(bool condition, string message)
 	{
 		if (condition)
@@ -236,6 +256,8 @@ public class FetchOrder2
 	}
 
 	public Action<FetchOrder2, Pickupable> OnComplete;
+
+	public Action<FetchOrder2, Pickupable> OnBegin;
 
 	public List<FetchChore> Chores = new List<FetchChore>();
 

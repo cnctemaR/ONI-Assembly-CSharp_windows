@@ -69,8 +69,9 @@ public class AnimEventManager
 		KCompactedVector<AnimEventManager.EventPlayerData> kcompactedVector2 = ((!data.isUIData) ? this.eventData : this.uiEventData);
 		AnimEventManager.EventPlayerData data2 = kcompactedVector2.GetData(data.eventDataHandle);
 		this.StopEvents(data2);
-		kcompactedVector.Free(data.animDataHandle);
-		kcompactedVector2.Free(data.eventDataHandle);
+		data.animDataHandle = kcompactedVector.Free(data.animDataHandle);
+		data.eventDataHandle = kcompactedVector2.Free(data.eventDataHandle);
+		this.indirectionData.SetData(handle, data);
 	}
 
 	public float GetElapsedTime(HandleVector<int>.Handle handle)

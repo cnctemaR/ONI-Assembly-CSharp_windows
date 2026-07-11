@@ -13,7 +13,7 @@ public class HoverTextScreen : KScreen
 	public HoverTextDrawer BeginDrawing()
 	{
 		Vector2 zero = Vector2.zero;
-		Vector2 vector = Input.mousePosition;
+		Vector2 vector = KInputManager.GetMousePos();
 		RectTransform rectTransform = base.transform.parent as RectTransform;
 		RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, vector, base.transform.parent.GetComponent<Canvas>().worldCamera, out zero);
 		zero.x += rectTransform.sizeDelta.x / 2f;
@@ -24,7 +24,7 @@ public class HoverTextScreen : KScreen
 
 	private void Update()
 	{
-		Vector3 vector = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		Vector3 vector = Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos());
 		if (OverlayScreen.Instance == null || vector.x < 0f || vector.x > Grid.WidthInMeters || vector.y < 0f || vector.y > Grid.HeightInMeters)
 		{
 			this.drawer.SetEnabled(false);

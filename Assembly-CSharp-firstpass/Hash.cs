@@ -9,18 +9,10 @@ public static class Hash
 		{
 			return 0;
 		}
-		return Hash.SDBM(s.ToLower());
-	}
-
-	public static int SDBM(string s)
-	{
-		if (s == null)
-		{
-			return 0;
-		}
 		uint num = 0U;
-		foreach (char c in s)
+		for (int i = 0; i < s.Length; i++)
 		{
+			char c = char.ToLower(s[i]);
 			num = (uint)c + (num << 6) + (num << 16) - num;
 		}
 		return (int)num;

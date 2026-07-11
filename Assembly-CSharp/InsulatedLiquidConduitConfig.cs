@@ -10,7 +10,7 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "utilities_liquid_insulated_kanim";
-		int num3 = 30;
+		int num3 = 10;
 		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] plumbable = MATERIALS.PLUMBABLE;
@@ -22,7 +22,6 @@ public class InsulatedLiquidConduitConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.ObjectLayer = ObjectLayer.LiquidConduit;
 		buildingDef.TileLayer = ObjectLayer.LiquidConduitTile;

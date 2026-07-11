@@ -36,18 +36,13 @@ namespace Klei.AI
 			return attributeInstance;
 		}
 
-		public void Add(string id, AttributeModifier modifier)
+		public void Add(AttributeModifier modifier)
 		{
 			AttributeInstance attributeInstance = this.Get(modifier.AttributeId);
 			if (attributeInstance != null)
 			{
-				attributeInstance.Add(id, modifier);
+				attributeInstance.Add(modifier);
 			}
-		}
-
-		public float GetInverseValuePercent(string attribute_id)
-		{
-			return 1f / this.GetValuePercent(attribute_id);
 		}
 
 		public float GetValuePercent(string attribute_id)

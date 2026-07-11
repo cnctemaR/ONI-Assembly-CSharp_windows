@@ -279,6 +279,12 @@ namespace Database
 			this.Unrefrigerated.resolveStringCallback = (string str, object data) => str.Replace("{RotTemperature}", GameUtil.GetFormattedTemperature(277.15f, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 			this.SterilizingAtmosphere = new StatusItem("SterilizingAtmosphere", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.ContaminatedAtmosphere = new StatusItem("ContaminatedAtmosphere", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.Old = new StatusItem("Old", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.Old.resolveTooltipCallback = delegate(string str, object data)
+			{
+				AgeMonitor.Instance instance5 = (AgeMonitor.Instance)data;
+				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(instance5.CyclesUntilDeath * 600f, "F1"));
+			};
 		}
 
 		public StatusItem HealthStatus;
@@ -371,6 +377,6 @@ namespace Database
 
 		public StatusItem ContaminatedAtmosphere;
 
-		public StatusItem Domestication;
+		public StatusItem Old;
 	}
 }

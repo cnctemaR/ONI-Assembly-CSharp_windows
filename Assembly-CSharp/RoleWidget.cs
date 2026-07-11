@@ -54,7 +54,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		this.RefreshSlot(this.SlotContainer.transform.GetChild(count).gameObject, null);
 		this.SlotContainer.transform.GetChild(count).gameObject.SetActive(!flag);
 		bool flag2 = false;
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
 			if (Game.Instance.roleManager.CanAssignToRole(roleID, component))
@@ -72,7 +72,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		}
 		string text = string.Empty;
 		List<MinionResume> list = new List<MinionResume>();
-		foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities.Items)
 		{
 			MinionResume component2 = minionIdentity2.GetComponent<MinionResume>();
 			if (component2.MasteryByRoleID[roleID])
@@ -223,7 +223,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			{
 				component.GetComponent<ToolTip>().enabled = false;
 				List<IListableOption> list = new List<IListableOption>();
-				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 				{
 					list.Add(minionIdentity);
 				}
@@ -238,7 +238,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			{
 			};
 			List<IListableOption> list2 = new List<IListableOption>();
-			foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities)
+			foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities.Items)
 			{
 				list2.Add(minionIdentity2);
 			}

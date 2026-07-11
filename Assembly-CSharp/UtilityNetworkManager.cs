@@ -82,33 +82,30 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 		HashSet<int> nodes = this.GetNodes(is_physical_building);
 		UtilityConnections connections = grid[cell].connections;
 		grid[cell].connections = (UtilityConnections)0;
-		int num = Grid.CellAbove(cell);
-		int num2 = Grid.CellBelow(cell);
-		int num3 = Grid.CellLeft(cell);
-		int num4 = Grid.CellRight(cell);
-		if (Grid.IsValidCell(num) && (connections & UtilityConnections.Up) != (UtilityConnections)0)
+		Vector2I vector2I = Grid.CellToXY(cell);
+		if (vector2I.x > 1 && (connections & UtilityConnections.Left) != (UtilityConnections)0)
 		{
 			UtilityNetworkGridNode[] array = grid;
-			int num5 = num;
-			array[num5].connections = array[num5].connections & ~UtilityConnections.Down;
+			int num = Grid.CellLeft(cell);
+			array[num].connections = array[num].connections & ~UtilityConnections.Right;
 		}
-		if (Grid.IsValidCell(num2) && (connections & UtilityConnections.Down) != (UtilityConnections)0)
+		if (vector2I.x < Grid.WidthInCells - 1 && (connections & UtilityConnections.Right) != (UtilityConnections)0)
 		{
 			UtilityNetworkGridNode[] array2 = grid;
-			int num6 = num2;
-			array2[num6].connections = array2[num6].connections & ~UtilityConnections.Up;
+			int num2 = Grid.CellRight(cell);
+			array2[num2].connections = array2[num2].connections & ~UtilityConnections.Left;
 		}
-		if (Grid.IsValidCell(num3) && (connections & UtilityConnections.Left) != (UtilityConnections)0)
+		if (vector2I.y > 1 && (connections & UtilityConnections.Down) != (UtilityConnections)0)
 		{
 			UtilityNetworkGridNode[] array3 = grid;
-			int num7 = num3;
-			array3[num7].connections = array3[num7].connections & ~UtilityConnections.Right;
+			int num3 = Grid.CellBelow(cell);
+			array3[num3].connections = array3[num3].connections & ~UtilityConnections.Up;
 		}
-		if (Grid.IsValidCell(num4) && (connections & UtilityConnections.Right) != (UtilityConnections)0)
+		if (vector2I.y < Grid.HeightInCells - 1 && (connections & UtilityConnections.Up) != (UtilityConnections)0)
 		{
 			UtilityNetworkGridNode[] array4 = grid;
-			int num8 = num4;
-			array4[num8].connections = array4[num8].connections & ~UtilityConnections.Left;
+			int num4 = Grid.CellAbove(cell);
+			array4[num4].connections = array4[num4].connections & ~UtilityConnections.Down;
 		}
 		nodes.Remove(cell);
 		if (is_physical_building)
@@ -163,51 +160,73 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 
 	private unsafe void Reconnect(int cell)
 	{
-		int* ptr = stackalloc int[checked(4 * 4)];
-		*ptr = Grid.CellAbove(cell);
-		ptr[1] = Grid.CellBelow(cell);
-		ptr[2] = Grid.CellLeft(cell);
-		ptr[3] = Grid.CellRight(cell);
-		int* ptr2 = stackalloc int[checked(4 * 4)];
-		*ptr2 = 4;
-		ptr2[1] = 8;
-		ptr2[2] = 1;
-		ptr2[3] = 2;
-		int* ptr3 = stackalloc int[checked(4 * 4)];
-		*ptr3 = 8;
-		ptr3[1] = 4;
-		ptr3[2] = 2;
-		ptr3[3] = 1;
+		Vector2I vector2I = Grid.CellToXY(cell);
+		int* ptr;
+		int* ptr2;
+		int* ptr3;
+		int num;
+		checked
+		{
+			ptr = stackalloc int[4 * 4];
+			ptr2 = stackalloc int[4 * 4];
+			ptr3 = stackalloc int[4 * 4];
+			num = 0;
+		}
+		if (vector2I.y < Grid.HeightInCells - 1)
+		{
+			ptr[num] = Grid.CellAbove(cell);
+			ptr2[num] = 4;
+			ptr3[num] = 8;
+			num++;
+		}
+		if (vector2I.y > 1)
+		{
+			ptr[num] = Grid.CellBelow(cell);
+			ptr2[num] = 8;
+			ptr3[num] = 4;
+			num++;
+		}
+		if (vector2I.x > 1)
+		{
+			ptr[num] = Grid.CellLeft(cell);
+			ptr2[num] = 1;
+			ptr3[num] = 2;
+			num++;
+		}
+		if (vector2I.x < Grid.WidthInCells - 1)
+		{
+			ptr[num] = Grid.CellRight(cell);
+			ptr2[num] = 2;
+			ptr3[num] = 1;
+			num++;
+		}
 		UtilityConnections connections = this.physicalGrid[cell].connections;
 		UtilityConnections connections2 = this.visualGrid[cell].connections;
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < num; i++)
 		{
-			int num = ptr[i];
+			int num2 = ptr[i];
 			UtilityConnections utilityConnections = (UtilityConnections)ptr2[i];
 			UtilityConnections utilityConnections2 = (UtilityConnections)ptr3[i];
-			if (Grid.IsValidCell(num))
+			if ((connections & utilityConnections) != (UtilityConnections)0)
 			{
-				if ((connections & utilityConnections) != (UtilityConnections)0)
+				if (this.physicalNodes.Contains(num2))
 				{
-					if (this.physicalNodes.Contains(num))
-					{
-						UtilityNetworkGridNode[] array = this.physicalGrid;
-						int num2 = num;
-						array[num2].connections = array[num2].connections | utilityConnections2;
-					}
-					if (this.visualNodes.Contains(num))
-					{
-						UtilityNetworkGridNode[] array2 = this.visualGrid;
-						int num3 = num;
-						array2[num3].connections = array2[num3].connections | utilityConnections2;
-					}
+					UtilityNetworkGridNode[] array = this.physicalGrid;
+					int num3 = num2;
+					array[num3].connections = array[num3].connections | utilityConnections2;
 				}
-				else if ((connections2 & utilityConnections) != (UtilityConnections)0 && (this.physicalNodes.Contains(num) || this.visualNodes.Contains(num)))
+				if (this.visualNodes.Contains(num2))
 				{
-					UtilityNetworkGridNode[] array3 = this.visualGrid;
-					int num4 = num;
-					array3[num4].connections = array3[num4].connections | utilityConnections2;
+					UtilityNetworkGridNode[] array2 = this.visualGrid;
+					int num4 = num2;
+					array2[num4].connections = array2[num4].connections | utilityConnections2;
 				}
+			}
+			else if ((connections2 & utilityConnections) != (UtilityConnections)0 && (this.physicalNodes.Contains(num2) || this.visualNodes.Contains(num2)))
+			{
+				UtilityNetworkGridNode[] array3 = this.visualGrid;
+				int num5 = num2;
+				array3[num5].connections = array3[num5].connections | utilityConnections2;
 			}
 		}
 	}
@@ -248,31 +267,61 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 
 	private unsafe void Disconnect(int cell)
 	{
-		int* ptr = stackalloc int[checked(4 * 4)];
-		*ptr = Grid.CellAbove(cell);
-		ptr[1] = Grid.CellBelow(cell);
-		ptr[2] = Grid.CellLeft(cell);
-		ptr[3] = Grid.CellRight(cell);
-		int* ptr2 = stackalloc int[checked(4 * 4)];
-		*ptr2 = -9;
-		ptr2[1] = -5;
-		ptr2[2] = -3;
-		ptr2[3] = -2;
-		for (int i = 0; i < 4; i++)
+		Vector2I vector2I = Grid.CellToXY(cell);
+		int num = 0;
+		int* ptr;
+		int* ptr2;
+		checked
 		{
-			int num = ptr[i];
-			int num2 = ptr2[i];
-			int num3 = (int)(this.physicalGrid[num].connections & (UtilityConnections)num2);
-			this.physicalGrid[num].connections = (UtilityConnections)num3;
+			ptr = stackalloc int[4 * 4];
+			ptr2 = stackalloc int[4 * 4];
+		}
+		if (vector2I.y < Grid.HeightInCells - 1)
+		{
+			ptr[num] = Grid.CellAbove(cell);
+			ptr2[num] = -9;
+			num++;
+		}
+		if (vector2I.y > 1)
+		{
+			ptr[num] = Grid.CellBelow(cell);
+			ptr2[num] = -5;
+			num++;
+		}
+		if (vector2I.x > 1)
+		{
+			ptr[num] = Grid.CellLeft(cell);
+			ptr2[num] = -3;
+			num++;
+		}
+		if (vector2I.x < Grid.WidthInCells - 1)
+		{
+			ptr[num] = Grid.CellRight(cell);
+			ptr2[num] = -2;
+			num++;
+		}
+		for (int i = 0; i < num; i++)
+		{
+			int num2 = ptr[i];
+			int num3 = ptr2[i];
+			int num4 = (int)(this.physicalGrid[num2].connections & (UtilityConnections)num3);
+			this.physicalGrid[num2].connections = (UtilityConnections)num4;
 		}
 	}
 
-	private void RebuildNetworks(int layer, bool is_physical)
+	private unsafe void RebuildNetworks(int layer, bool is_physical)
 	{
 		UtilityNetworkGridNode[] grid = this.GetGrid(is_physical);
 		HashSet<int> nodes = this.GetNodes(is_physical);
 		this.visitedCells.Clear();
 		this.queued.Clear();
+		int* ptr;
+		int* ptr2;
+		checked
+		{
+			ptr = stackalloc int[4 * 4];
+			ptr2 = stackalloc int[4 * 4];
+		}
 		foreach (int num in nodes)
 		{
 			UtilityNetworkGridNode utilityNetworkGridNode = grid[num];
@@ -286,10 +335,6 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 				while (this.queued.Count > 0)
 				{
 					int num2 = this.queued.Dequeue();
-					int num3 = Grid.CellLeft(num2);
-					int num4 = Grid.CellRight(num2);
-					int num5 = Grid.CellAbove(num2);
-					int num6 = Grid.CellBelow(num2);
 					utilityNetworkGridNode = grid[num2];
 					object obj = null;
 					object obj2 = null;
@@ -320,26 +365,45 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 					{
 						networkType.ConnectItem(num2, obj2);
 					}
-					if ((utilityNetworkGridNode.connections & UtilityConnections.Left) != (UtilityConnections)0)
+					Vector2I vector2I = Grid.CellToXY(num2);
+					int num3 = 0;
+					if (vector2I.x > 1)
 					{
-						this.QueueCellForVisit(grid, num3, UtilityConnections.Left);
+						ptr[num3] = Grid.CellLeft(num2);
+						ptr2[num3] = 1;
+						num3++;
 					}
-					if ((utilityNetworkGridNode.connections & UtilityConnections.Right) != (UtilityConnections)0)
+					if (vector2I.x < Grid.WidthInCells - 1)
 					{
-						this.QueueCellForVisit(grid, num4, UtilityConnections.Right);
+						ptr[num3] = Grid.CellRight(num2);
+						ptr2[num3] = 2;
+						num3++;
 					}
-					if ((utilityNetworkGridNode.connections & UtilityConnections.Up) != (UtilityConnections)0)
+					if (vector2I.y > 1)
 					{
-						this.QueueCellForVisit(grid, num5, UtilityConnections.Up);
+						ptr[num3] = Grid.CellBelow(num2);
+						ptr2[num3] = 8;
+						num3++;
 					}
-					if ((utilityNetworkGridNode.connections & UtilityConnections.Down) != (UtilityConnections)0)
+					if (vector2I.y < Grid.HeightInCells - 1)
 					{
-						this.QueueCellForVisit(grid, num6, UtilityConnections.Down);
+						ptr[num3] = Grid.CellAbove(num2);
+						ptr2[num3] = 4;
+						num3++;
 					}
-					int num7;
-					if (this.links.TryGetValue(num2, out num7))
+					for (int i = 0; i < num3; i++)
 					{
-						this.QueueCellForVisit(grid, num7, (UtilityConnections)0);
+						int num4 = ptr2[i];
+						if ((utilityNetworkGridNode.connections & (UtilityConnections)num4) != (UtilityConnections)0)
+						{
+							int num5 = ptr[i];
+							this.QueueCellForVisit(grid, num5, (UtilityConnections)num4);
+						}
+					}
+					int num6;
+					if (this.links.TryGetValue(num2, out num6))
+					{
+						this.QueueCellForVisit(grid, num6, (UtilityConnections)0);
 					}
 				}
 			}
@@ -386,25 +450,22 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 	private UtilityConnections GetNeighboursAsConnections(int cell, HashSet<int> nodes)
 	{
 		UtilityConnections utilityConnections = (UtilityConnections)0;
-		int num = Grid.CellAbove(cell);
-		int num2 = Grid.CellBelow(cell);
-		int num3 = Grid.CellLeft(cell);
-		int num4 = Grid.CellRight(cell);
-		if (nodes.Contains(num))
-		{
-			utilityConnections |= UtilityConnections.Up;
-		}
-		if (nodes.Contains(num2))
-		{
-			utilityConnections |= UtilityConnections.Down;
-		}
-		if (nodes.Contains(num3))
+		Vector2I vector2I = Grid.CellToXY(cell);
+		if (vector2I.x > 1 && nodes.Contains(Grid.CellLeft(cell)))
 		{
 			utilityConnections |= UtilityConnections.Left;
 		}
-		if (nodes.Contains(num4))
+		if (vector2I.x < Grid.WidthInCells - 1 && nodes.Contains(Grid.CellRight(cell)))
 		{
 			utilityConnections |= UtilityConnections.Right;
+		}
+		if (vector2I.y > 1 && nodes.Contains(Grid.CellBelow(cell)))
+		{
+			utilityConnections |= UtilityConnections.Down;
+		}
+		if (vector2I.y < Grid.HeightInCells - 1 && nodes.Contains(Grid.CellAbove(cell)))
+		{
+			utilityConnections |= UtilityConnections.Up;
 		}
 		return utilityConnections;
 	}

@@ -227,9 +227,9 @@ namespace Database
 				AttributeInstance attributeInstance = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
 				string text2 = attributeInstance.GetFormattedValue();
 				text2 += "\n----------\n";
-				foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in attributeInstance.Modifiers)
+				foreach (AttributeModifier attributeModifier in attributeInstance.Modifiers)
 				{
-					text2 = text2 + attributeModifierEntry.Name + " " + attributeModifierEntry.Modifier.GetFormattedString(attributeInstance.gameObject);
+					text2 = text2 + attributeModifier.GetDescription() + " " + attributeModifier.GetFormattedString(attributeInstance.gameObject);
 					text2 += "\n";
 				}
 				str = str.Replace("{conductivityBarrier}", text2);
@@ -244,9 +244,9 @@ namespace Database
 				AttributeInstance attributeInstance2 = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
 				string text3 = attributeInstance2.GetFormattedValue();
 				text3 += "\n----------\n";
-				foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry2 in attributeInstance2.Modifiers)
+				foreach (AttributeModifier attributeModifier2 in attributeInstance2.Modifiers)
 				{
-					text3 = text3 + attributeModifierEntry2.Name + " " + attributeModifierEntry2.Modifier.GetFormattedString(attributeInstance2.gameObject);
+					text3 = text3 + attributeModifier2.GetDescription() + " " + attributeModifier2.GetFormattedString(attributeInstance2.gameObject);
 					text3 += "\n";
 				}
 				str = str.Replace("{conductivityBarrier}", text3);

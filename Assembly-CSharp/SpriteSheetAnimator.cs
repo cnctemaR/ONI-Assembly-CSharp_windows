@@ -100,10 +100,10 @@ public class SpriteSheetAnimator
 
 	public void Render(List<SpriteSheetAnimator.AnimInfo> anim_infos, bool apply_rotation)
 	{
-		List<Vector3> list = ListPool<Vector3, SpriteSheetAnimManager>.Allocate();
-		List<Vector2> list2 = ListPool<Vector2, SpriteSheetAnimManager>.Allocate();
-		List<Color32> list3 = ListPool<Color32, SpriteSheetAnimManager>.Allocate();
-		List<int> list4 = ListPool<int, SpriteSheetAnimManager>.Allocate();
+		ListPool<Vector3, SpriteSheetAnimManager>.PooledList pooledList = ListPool<Vector3, SpriteSheetAnimManager>.Allocate();
+		ListPool<Vector2, SpriteSheetAnimManager>.PooledList pooledList2 = ListPool<Vector2, SpriteSheetAnimManager>.Allocate();
+		ListPool<Color32, SpriteSheetAnimManager>.PooledList pooledList3 = ListPool<Color32, SpriteSheetAnimManager>.Allocate();
+		ListPool<int, SpriteSheetAnimManager>.PooledList pooledList4 = ListPool<int, SpriteSheetAnimManager>.Allocate();
 		this.mesh.Clear();
 		if (apply_rotation)
 		{
@@ -116,30 +116,30 @@ public class SpriteSheetAnimator
 				Vector3 vector3 = animInfo.rotation * new Vector2(vector.x, -vector.y);
 				Vector3 vector4 = animInfo.rotation * new Vector2(-vector.x, vector.y);
 				Vector3 vector5 = animInfo.rotation * vector;
-				list.Add(animInfo.pos + vector2);
-				list.Add(animInfo.pos + vector3);
-				list.Add(animInfo.pos + vector5);
-				list.Add(animInfo.pos + vector4);
+				pooledList.Add(animInfo.pos + vector2);
+				pooledList.Add(animInfo.pos + vector3);
+				pooledList.Add(animInfo.pos + vector5);
+				pooledList.Add(animInfo.pos + vector4);
 				Vector2 vector6;
 				Vector2 vector7;
 				Vector2 vector8;
 				Vector2 vector9;
 				this.GetUVs(animInfo.frame, out vector6, out vector7, out vector8, out vector9);
-				list2.Add(vector6);
-				list2.Add(vector7);
-				list2.Add(vector9);
-				list2.Add(vector8);
-				list3.Add(animInfo.colour);
-				list3.Add(animInfo.colour);
-				list3.Add(animInfo.colour);
-				list3.Add(animInfo.colour);
+				pooledList2.Add(vector6);
+				pooledList2.Add(vector7);
+				pooledList2.Add(vector9);
+				pooledList2.Add(vector8);
+				pooledList3.Add(animInfo.colour);
+				pooledList3.Add(animInfo.colour);
+				pooledList3.Add(animInfo.colour);
+				pooledList3.Add(animInfo.colour);
 				int num = i * 4;
-				list4.Add(num);
-				list4.Add(num + 1);
-				list4.Add(num + 2);
-				list4.Add(num);
-				list4.Add(num + 2);
-				list4.Add(num + 3);
+				pooledList4.Add(num);
+				pooledList4.Add(num + 1);
+				pooledList4.Add(num + 2);
+				pooledList4.Add(num);
+				pooledList4.Add(num + 2);
+				pooledList4.Add(num + 3);
 			}
 		}
 		else
@@ -153,41 +153,41 @@ public class SpriteSheetAnimator
 				Vector3 vector12 = new Vector2(vector10.x, -vector10.y);
 				Vector3 vector13 = new Vector2(-vector10.x, vector10.y);
 				Vector3 vector14 = vector10;
-				list.Add(animInfo2.pos + vector11);
-				list.Add(animInfo2.pos + vector12);
-				list.Add(animInfo2.pos + vector14);
-				list.Add(animInfo2.pos + vector13);
+				pooledList.Add(animInfo2.pos + vector11);
+				pooledList.Add(animInfo2.pos + vector12);
+				pooledList.Add(animInfo2.pos + vector14);
+				pooledList.Add(animInfo2.pos + vector13);
 				Vector2 vector15;
 				Vector2 vector16;
 				Vector2 vector17;
 				Vector2 vector18;
 				this.GetUVs(animInfo2.frame, out vector15, out vector16, out vector17, out vector18);
-				list2.Add(vector15);
-				list2.Add(vector16);
-				list2.Add(vector18);
-				list2.Add(vector17);
-				list3.Add(animInfo2.colour);
-				list3.Add(animInfo2.colour);
-				list3.Add(animInfo2.colour);
-				list3.Add(animInfo2.colour);
+				pooledList2.Add(vector15);
+				pooledList2.Add(vector16);
+				pooledList2.Add(vector18);
+				pooledList2.Add(vector17);
+				pooledList3.Add(animInfo2.colour);
+				pooledList3.Add(animInfo2.colour);
+				pooledList3.Add(animInfo2.colour);
+				pooledList3.Add(animInfo2.colour);
 				int num2 = j * 4;
-				list4.Add(num2);
-				list4.Add(num2 + 1);
-				list4.Add(num2 + 2);
-				list4.Add(num2);
-				list4.Add(num2 + 2);
-				list4.Add(num2 + 3);
+				pooledList4.Add(num2);
+				pooledList4.Add(num2 + 1);
+				pooledList4.Add(num2 + 2);
+				pooledList4.Add(num2);
+				pooledList4.Add(num2 + 2);
+				pooledList4.Add(num2 + 3);
 			}
 		}
-		this.mesh.SetVertices(list);
-		this.mesh.SetUVs(0, list2);
-		this.mesh.SetColors(list3);
-		this.mesh.SetTriangles(list4, 0);
+		this.mesh.SetVertices(pooledList);
+		this.mesh.SetUVs(0, pooledList2);
+		this.mesh.SetColors(pooledList3);
+		this.mesh.SetTriangles(pooledList4, 0);
 		Graphics.DrawMesh(this.mesh, Vector3.zero, Quaternion.identity, this.sheet.material, this.sheet.renderLayer, null, 0, this.materialProperties);
-		ListPool<int, SpriteSheetAnimManager>.Free(list4);
-		ListPool<Color32, SpriteSheetAnimManager>.Free(list3);
-		ListPool<Vector2, SpriteSheetAnimManager>.Free(list2);
-		ListPool<Vector3, SpriteSheetAnimManager>.Free(list);
+		pooledList4.Recycle();
+		pooledList3.Recycle();
+		pooledList2.Recycle();
+		pooledList.Recycle();
 	}
 
 	public void Render()

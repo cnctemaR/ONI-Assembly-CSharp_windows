@@ -39,17 +39,11 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	{
 		base.OnSpawn();
 		KPrefabID component = base.GetComponent<KPrefabID>();
-		KPrefabID originalPrefab = component.GetOriginalPrefab();
-		ChoreConsumer component2 = originalPrefab.GetComponent<ChoreConsumer>();
-		if (component2 != null)
+		if (this.choreTable != null)
 		{
-			this.choreTable = originalPrefab.GetComponent<ChoreConsumer>().choreTable;
-			if (this.choreTable != null)
-			{
-				this.choreTableInstance = new ChoreTable.Instance(this.choreTable, component);
-			}
+			this.choreTableInstance = new ChoreTable.Instance(this.choreTable, component);
 		}
-		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 		{
 			bool flag;
 			int personalPriority = this.GetPersonalPriority(choreGroup, out flag);
@@ -124,9 +118,9 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		{
 			CellOffset offset = Grid.GetOffset(Grid.PosToCell(this));
 			Extents extents = new Extents(offset.x, offset.y, this.stationaryReach);
-			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.fetchChoreLayer, list);
-			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
+			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 			{
 				Chore chore = scenePartitionerEntry.obj as Chore;
 				int num2 = Grid.PosToCell(chore.gameObject);
@@ -135,7 +129,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 					chore.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
 				}
 			}
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+			pooledList.Recycle();
 		}
 		else
 		{
@@ -439,7 +433,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			if (!(choreType.IdHash == Db.Get().ChoreTypes.Idle.IdHash))
 			{
 				int num = 0;
-				foreach (ChoreGroup choreGroup in choreGroups)
+				foreach (ChoreGroup choreGroup in choreGroups.resources)
 				{
 					if (choreGroup.choreTypes != null)
 					{
@@ -494,7 +488,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	{
 		bool flag = false;
 		Traits component = base.gameObject.GetComponent<Traits>();
-		foreach (Trait trait in component)
+		foreach (Trait trait in component.TraitList)
 		{
 			if (trait.disabledChoreGroups != null)
 			{

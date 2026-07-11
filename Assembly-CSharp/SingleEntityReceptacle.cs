@@ -149,7 +149,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.fetchChore == null && entityTag.IsValid && entityTag != GameTags.Empty)
 		{
-			this.fetchChore = new FetchChore(Db.Get().ChoreTypes.FarmFetch, this.storage, 1f, new Tag[] { entityTag }, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
+			this.fetchChore = new FetchChore(Db.Get().ChoreTypes.FarmFetch, this.storage, 1f, new Tag[] { entityTag }, null, null, null, true, new Action<Chore>(this.OnFetchComplete), delegate(Chore chore)
 			{
 				this.UpdateStatusItem();
 			}, delegate(Chore chore)

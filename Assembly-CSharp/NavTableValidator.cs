@@ -11,6 +11,11 @@ public class NavTableValidator
 			{
 				return false;
 			}
+			int num2 = Grid.CellAbove(num);
+			if (Grid.IsValidCell(num2) && Grid.Element[num2].IsUnstable)
+			{
+				return false;
+			}
 		}
 		return true;
 	}

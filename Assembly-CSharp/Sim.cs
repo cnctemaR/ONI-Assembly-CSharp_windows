@@ -75,6 +75,7 @@ public static class Sim
 		Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
 		PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
 		PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
+		PropertyTextures.externalExposedToSunlight = ptr2->propertyTextureExposedToSunlight;
 		Grid.InitializeCells();
 		return 0;
 	}
@@ -91,6 +92,26 @@ public static class Sim
 	[DllImport("SimDLL")]
 	public static extern void SYSINFO_Release();
 
+	public unsafe static int DLL_MessageHandler(int message_id, IntPtr data)
+	{
+		if (message_id == 1)
+		{
+			string text = Marshal.PtrToStringAnsi(data);
+			text = "SimDLL: " + text;
+			KCrashReporter.ReportDLLCrash(text, text, null);
+			return 0;
+		}
+		if (message_id != 0)
+		{
+			return -1;
+		}
+		Sim.DLLCrash* ptr = (Sim.DLLCrash*)(void*)data;
+		string text2 = Marshal.PtrToStringAnsi(ptr->callstack);
+		string text3 = Marshal.PtrToStringAnsi(ptr->dmpFilename);
+		KCrashReporter.ReportDLLCrash(text2, text2, text3);
+		return 0;
+	}
+
 	public const int InvalidHandle = -1;
 
 	public const int QueuedRegisterHandle = -2;
@@ -98,6 +119,8 @@ public static class Sim
 	public const byte InvalidDiseaseIdx = 255;
 
 	public const byte InvalidElementIdx = 255;
+
+	public const byte SpaceZoneID = 255;
 
 	public const int ChunkEdgeSize = 32;
 
@@ -130,6 +153,20 @@ public static class Sim
 	public const int PACKING_ALIGNMENT = 4;
 
 	public delegate int GAME_MessageHandler(int message_id, IntPtr data);
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct DLLCrash
+	{
+		public IntPtr callstack;
+
+		public IntPtr dmpFilename;
+	}
+
+	private enum GameHandledMessages
+	{
+		ExceptionHandler,
+		ReportMessage
+	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct PhysicsData
@@ -174,6 +211,14 @@ public static class Sim
 			this.insulation = byte.MaxValue;
 		}
 
+		public void SetValues(byte new_elem_idx, float new_temperature, float new_mass)
+		{
+			this.elementIdx = new_elem_idx;
+			this.temperature = new_temperature;
+			this.mass = new_mass;
+			this.insulation = byte.MaxValue;
+		}
+
 		public byte elementIdx;
 
 		public byte properties;
@@ -191,7 +236,9 @@ public static class Sim
 			GasImpermeable = 1,
 			LiquidImpermeable,
 			SolidImpermeable = 4,
-			Unbreakable = 8
+			Unbreakable = 8,
+			Transparent = 16,
+			Foundation = 32
 		}
 	}
 
@@ -534,9 +581,7 @@ public static class Sim
 
 		public IntPtr propertyTextureLiquid;
 
-		public int numBuildingConductivityData;
-
-		public unsafe Sim.BuildingConductivityData* buildingConductivityData;
+		public IntPtr propertyTextureExposedToSunlight;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

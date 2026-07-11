@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ProcGen;
 using UnityEngine;
 
 public class CellSelectionObject : KMonoBehaviour
@@ -57,7 +58,7 @@ public class CellSelectionObject : KMonoBehaviour
 		this.SelectedDisplaySprite.SetActive(PlayerController.Instance.IsUsingDefaultTool() && !DebugHandler.HideUI);
 		if (SelectTool.Instance.selected != this.mSelectable)
 		{
-			this.mouseCell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+			this.mouseCell = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
 			if (Grid.IsValidCell(this.mouseCell) && Grid.IsVisible(this.mouseCell))
 			{
 				bool flag = true;
@@ -153,6 +154,13 @@ public class CellSelectionObject : KMonoBehaviour
 		{
 			this.mSelectable.RemoveStatusItem(Db.Get().MiscStatusItems.BuriedItem, true);
 		}
+		bool flag = CellSelectionObject.IsExposedToSpace(this.selectedCell);
+		this.mSelectable.ToggleStatusItem(Db.Get().MiscStatusItems.Space, flag, null);
+	}
+
+	public static bool IsExposedToSpace(int cell)
+	{
+		return Game.Instance.world.zoneRenderData.GetSubWorldZoneType(cell) == SubWorld.ZoneType.Space && Grid.Objects[cell, 2] == null;
 	}
 
 	private void UpdateStatusItem()
@@ -208,7 +216,7 @@ public class CellSelectionObject : KMonoBehaviour
 
 	private void ForceRefreshUserMenu(object data)
 	{
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	[HideInInspector]
@@ -231,9 +239,6 @@ public class CellSelectionObject : KMonoBehaviour
 	public Sprite Sprite_Hover;
 
 	public int mouseCell;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	private int selectedCell;
 

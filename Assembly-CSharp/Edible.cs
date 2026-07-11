@@ -97,7 +97,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	protected override void OnStartWork(Worker worker)
 	{
 		base.SetWorkTime(this.GetFeedingTime(worker));
-		worker.GetAttributes().Add("Eating", this.caloriesModifier);
+		worker.GetAttributes().Add(this.caloriesModifier);
 		this.StartConsuming();
 	}
 
@@ -128,7 +128,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		{
 			worker.GetComponent<Effects>().Add(this.foodInfo.Effects[i], true);
 		}
-		ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, string.Format(UI.ENDOFDAYREPORT.NOTES.EATEN, this.GetProperName()), worker.GetProperName());
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -this.caloriesConsumed, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.EATEN, "{0}", this.GetProperName()), worker.GetProperName());
 		worker.Trigger(1121894420, this);
 		base.Trigger(-10536414, worker.gameObject);
 		this.unitsConsumed = float.NaN;

@@ -75,8 +75,9 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	private void UpdateSimData()
 	{
+		int sampleCell = this.GetSampleCell();
 		float num = ((!this.consumptionEnabled || !this.hasAvailableCapacity) ? 0f : this.consumptionRate);
-		SimMessages.SetElementConsumerData(this.simHandle, num);
+		SimMessages.SetElementConsumerData(this.simHandle, sampleCell, num);
 	}
 
 	public static void AddMass(Sim.ConsumedMassInfo consumed_info)
@@ -90,6 +91,11 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		{
 			elementConsumer.AddMassInternal(consumed_info);
 		}
+	}
+
+	private int GetSampleCell()
+	{
+		return Grid.PosToCell(base.transform.GetPosition() + this.sampleCellOffset);
 	}
 
 	private void AddMassInternal(Sim.ConsumedMassInfo consumed_info)
@@ -124,9 +130,9 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	{
 		get
 		{
-			int num = Grid.PosToCell(base.transform.GetPosition() + this.sampleCellOffset);
-			SimHashes id = Grid.Element[num].id;
-			return this.elementToConsume == id && Grid.Mass[num] >= this.minimumMass;
+			int sampleCell = this.GetSampleCell();
+			SimHashes id = Grid.Element[sampleCell].id;
+			return this.elementToConsume == id && Grid.Mass[sampleCell] >= this.minimumMass;
 		}
 	}
 
@@ -209,27 +215,23 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		{
 			Element element = ElementLoader.FindElementByHash(this.elementToConsume);
 			string text = element.tag.ProperName();
-			string text2 = GameUtil.GetKeywordStyle(element);
 			if (element.IsVacuum)
 			{
 				if (this.configuration == ElementConsumer.Configuration.AllGas)
 				{
-					text2 = "gas";
 					text = ELEMENTS.STATE.GAS;
 				}
 				else if (this.configuration == ElementConsumer.Configuration.AllLiquid)
 				{
-					text2 = "liquid";
 					text = ELEMENTS.STATE.LIQUID;
 				}
 				else
 				{
-					text2 = "anyElement";
 					text = UI.BUILDINGEFFECTS.CONSUMESANYELEMENT;
 				}
 			}
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text2, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMED, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMED, text, GameUtil.GetFormattedMass(this.consumptionRate / 100f * 100f, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 		}
 		return list;
@@ -263,8 +265,8 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 
 	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
 	{
-		int num = Grid.PosToCell(base.transform.GetPosition() + this.sampleCellOffset);
-		SimMessages.AddElementConsumer(num, this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);
+		int sampleCell = this.GetSampleCell();
+		SimMessages.AddElementConsumer(sampleCell, this.configuration, this.elementToConsume, this.consumptionRadius, cb_handle.index);
 	}
 
 	protected override Action<int> GetStaticUnregister()

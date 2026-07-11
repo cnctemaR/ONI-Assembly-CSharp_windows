@@ -65,9 +65,31 @@ public class FabricatorSideScreen : SideScreenContent
 		});
 		this.recipeToggles.Clear();
 		Recipe[] array = recipes;
-		for (int i = 0; i < array.Length; i++)
+		int i = 0;
+		while (i < array.Length)
 		{
 			Recipe recipe = array[i];
+			if (!target.hideRecipesUndiscoveredIngredients)
+			{
+				goto IL_0130;
+			}
+			bool flag = false;
+			foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
+			{
+				if (!WorldInventory.Instance.IsDiscovered(ingredient.tag) && !DebugHandler.InstantBuildMode)
+				{
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+			{
+				goto IL_0130;
+			}
+			IL_027C:
+			i++;
+			continue;
+			IL_0130:
 			GameObject prefab = Assets.GetPrefab(recipe.Result);
 			KToggle newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 			newToggle.GetComponentInChildren<LocText>().text = recipe.Name;
@@ -92,6 +114,7 @@ public class FabricatorSideScreen : SideScreenContent
 			}
 			this.recipeMap.Add(newToggle, recipe);
 			this.recipeToggles.Add(newToggle);
+			goto IL_027C;
 		}
 		if (this.recipeToggles.Count > 0)
 		{

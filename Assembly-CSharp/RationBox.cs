@@ -7,7 +7,7 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 {
 	protected override void OnPrefabInit()
 	{
-		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this, false, Db.Get().ChoreTypes.FoodFetch);
+		this.filteredStorage = new FilteredStorage(this, null, new Tag[] { GameTags.MarkedForCompost }, this, false, Db.Get().ChoreTypes.FoodFetch);
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
 		WorldInventory.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);
@@ -64,6 +64,14 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 		}
 	}
 
+	public float AmountStored
+	{
+		get
+		{
+			return this.storage.MassStored();
+		}
+	}
+
 	public float MinCapacity
 	{
 		get
@@ -77,6 +85,14 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 		get
 		{
 			return this.storage.capacityKg;
+		}
+	}
+
+	public bool WholeValues
+	{
+		get
+		{
+			return false;
 		}
 	}
 
@@ -103,12 +119,6 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 
 	[MyCmpReq]
 	private Storage storage;
-
-	[SerializeField]
-	public Color noFilterTint = Color.white;
-
-	[SerializeField]
-	public Color filterTint = Color.white;
 
 	[Serialize]
 	private float userMaxCapacity = float.PositiveInfinity;

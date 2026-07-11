@@ -81,24 +81,25 @@ public class DropAllWorkable : Workable
 	{
 		if (this.showCmd)
 		{
+			KIconButtonMenu.ButtonInfo buttonInfo;
 			if (this.chore == null)
 			{
-				UserMenu userMenu = this.userMenu;
 				string text = "action_empty_contents";
 				string text2 = UI.USERMENUACTIONS.EMPTYSTORAGE.NAME;
 				global::System.Action action = new global::System.Action(this.DropAll);
 				string text3 = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+				buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 			}
 			else
 			{
-				UserMenu userMenu2 = this.userMenu;
 				string text3 = "action_empty_contents";
 				string text2 = UI.USERMENUACTIONS.EMPTYSTORAGE.NAME_OFF;
 				global::System.Action action = new global::System.Action(this.DropAll);
 				string text = UI.USERMENUACTIONS.EMPTYSTORAGE.TOOLTIP_OFF;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+				buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 			}
+			KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 		}
 	}
 
@@ -119,12 +120,9 @@ public class DropAllWorkable : Workable
 		if (newShowCmd != this.showCmd)
 		{
 			this.showCmd = newShowCmd;
-			this.userMenu.Refresh();
+			Game.Instance.userMenu.Refresh(base.gameObject);
 		}
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	private Chore chore;
 

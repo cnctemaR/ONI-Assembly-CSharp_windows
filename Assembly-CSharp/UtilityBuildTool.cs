@@ -6,6 +6,7 @@ public class UtilityBuildTool : BaseUtilityBuildTool
 	{
 		UtilityBuildTool.Instance = this;
 		base.OnPrefabInit();
+		this.canChangeDragAxis = false;
 	}
 
 	protected override void ApplyPathToConduitSystem()

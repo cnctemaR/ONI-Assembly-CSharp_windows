@@ -49,7 +49,7 @@ public class LightBuffer : MonoBehaviour
 		this.Material.SetTexture("_PropertyWorldLight", this.WorldLight);
 		this.CircleMaterial.SetTexture("_PropertyWorldLight", this.WorldLight);
 		this.ConeMaterial.SetTexture("_PropertyWorldLight", this.WorldLight);
-		foreach (Light2D light2D in Components.Light2Ds)
+		foreach (Light2D light2D in Components.Light2Ds.Items)
 		{
 			if (!(light2D == null) && light2D.enabled)
 			{

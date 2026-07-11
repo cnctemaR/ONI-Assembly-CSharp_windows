@@ -6,9 +6,35 @@ public class TerrainBG : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		this.layer = LayerMask.NameToLayer("Default");
+		this.noiseVolume = this.CreateTexture3D(32);
+		this.starsPlane = this.CreateStarsPlane("StarsPlane");
 		this.worldPlane = this.CreateWorldPlane("WorldPlane");
 		this.gasPlane = this.CreateGasPlane("GasPlane");
-		this.backgroundMaterial = global::UnityEngine.Object.Instantiate<Material>(this.backgroundMaterial);
+		this.propertyBlocks = new MaterialPropertyBlock[Lighting.Instance.Settings.BackgroundLayers];
+		for (int i = 0; i < this.propertyBlocks.Length; i++)
+		{
+			this.propertyBlocks[i] = new MaterialPropertyBlock();
+		}
+	}
+
+	private Texture3D CreateTexture3D(int size)
+	{
+		Color32[] array = new Color32[size * size * size];
+		Texture3D texture3D = new Texture3D(size, size, size, TextureFormat.RGBA32, true);
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 0; j < size; j++)
+			{
+				for (int k = 0; k < size; k++)
+				{
+					Color32 color = new Color32((byte)global::UnityEngine.Random.Range(0, 255), (byte)global::UnityEngine.Random.Range(0, 255), (byte)global::UnityEngine.Random.Range(0, 255), (byte)global::UnityEngine.Random.Range(0, 255));
+					array[i + j * size + k * size * size] = color;
+				}
+			}
+		}
+		texture3D.SetPixels32(array);
+		texture3D.Apply();
+		return texture3D;
 	}
 
 	public Mesh CreateGasPlane(string name)
@@ -71,13 +97,48 @@ public class TerrainBG : KMonoBehaviour
 		return mesh;
 	}
 
+	public Mesh CreateStarsPlane(string name)
+	{
+		Mesh mesh = new Mesh();
+		mesh.name = name;
+		int num = 4;
+		Vector3[] array = new Vector3[num];
+		Vector2[] array2 = new Vector2[num];
+		int[] array3 = new int[6];
+		array = new Vector3[]
+		{
+			new Vector3((float)(-(float)Grid.WidthInCells), (float)(-(float)Grid.HeightInCells), 0f),
+			new Vector3((float)Grid.WidthInCells * 2f, (float)(-(float)Grid.HeightInCells), 0f),
+			new Vector3((float)(-(float)Grid.WidthInCells), Grid.HeightInMeters * 2f, 0f),
+			new Vector3(Grid.WidthInMeters * 2f, Grid.HeightInMeters * 2f, 0f)
+		};
+		array2 = new Vector2[]
+		{
+			new Vector2(0f, 0f),
+			new Vector2(1f, 0f),
+			new Vector2(0f, 1f),
+			new Vector2(1f, 1f)
+		};
+		array3 = new int[] { 0, 2, 1, 1, 2, 3 };
+		mesh.vertices = array;
+		mesh.uv = array2;
+		mesh.triangles = array3;
+		Vector2 vector = new Vector2((float)Grid.WidthInCells, 2f * (float)Grid.HeightInCells);
+		mesh.bounds = new Bounds(new Vector3(0.5f * vector.x, 0.5f * vector.y, 0f), new Vector3(vector.x, vector.y, 0f));
+		return mesh;
+	}
+
 	private void LateUpdate()
 	{
 		if (!this.doDraw)
 		{
 			return;
 		}
-		this.backgroundMaterial.renderQueue = RenderQueues.Background;
+		this.starsMaterial.renderQueue = RenderQueues.Stars;
+		this.starsMaterial.SetTexture("_NoiseVolume", this.noiseVolume);
+		Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background) + 1f);
+		Graphics.DrawMesh(this.starsPlane, vector, Quaternion.identity, this.starsMaterial, this.layer);
+		this.backgroundMaterial.renderQueue = RenderQueues.Backwall;
 		for (int i = 0; i < Lighting.Instance.Settings.BackgroundLayers; i++)
 		{
 			if (i >= Lighting.Instance.Settings.BackgroundLayers - 1)
@@ -90,15 +151,17 @@ public class TerrainBG : KMonoBehaviour
 				{
 					num4 = 0f;
 				}
-				MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-				Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background));
+				MaterialPropertyBlock materialPropertyBlock = this.propertyBlocks[i];
 				materialPropertyBlock.SetVector("_BackWallParameters", new Vector4(num2, Lighting.Instance.Settings.BackgroundClip, num3, num4));
-				Graphics.DrawMesh(this.worldPlane, vector, Quaternion.identity, this.backgroundMaterial, this.layer, null, 0, materialPropertyBlock);
+				Vector3 vector2 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Background));
+				Graphics.DrawMesh(this.worldPlane, vector2, Quaternion.identity, this.backgroundMaterial, this.layer, null, 0, materialPropertyBlock);
 			}
 		}
 		this.gasMaterial.renderQueue = RenderQueues.Gas;
 		Graphics.DrawMesh(this.gasPlane, Vector3.zero, Quaternion.identity, this.gasMaterial, this.layer, null, 0, null);
 	}
+
+	public Material starsMaterial;
 
 	public Material backgroundMaterial;
 
@@ -106,9 +169,16 @@ public class TerrainBG : KMonoBehaviour
 
 	public bool doDraw = true;
 
+	[SerializeField]
+	private Texture3D noiseVolume;
+
+	private Mesh starsPlane;
+
 	private Mesh worldPlane;
 
 	private Mesh gasPlane;
 
 	private int layer;
+
+	private MaterialPropertyBlock[] propertyBlocks;
 }

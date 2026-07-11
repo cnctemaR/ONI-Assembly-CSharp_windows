@@ -23,22 +23,6 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 		this.cell = component.GetUtilityOutputCell();
 		this.smi = new Vent.StatesInstance(this);
 		this.smi.StartSM();
-		if (this.connected)
-		{
-			IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
-			networkManager.AddToNetworks(this.cell, this, true);
-		}
-	}
-
-	protected override void OnCleanUp()
-	{
-		BuildingComplete component = base.GetComponent<BuildingComplete>();
-		if (component.Def.ReplacementLayer == ObjectLayer.NumLayers || Grid.Objects[this.cell, (int)component.Def.ReplacementLayer] == null)
-		{
-			IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.conduitType);
-			networkManager.RemoveFromNetworks(this.cell, this, true);
-		}
-		base.OnCleanUp();
 	}
 
 	public Vent.State GetEndPointState()
@@ -101,8 +85,6 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 	private int cell = -1;
 
 	private int sortKey;
-
-	private bool connected = true;
 
 	private Vent.StatesInstance smi;
 

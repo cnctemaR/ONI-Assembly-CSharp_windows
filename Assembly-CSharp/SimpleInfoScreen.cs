@@ -293,41 +293,6 @@ public class SimpleInfoScreen : TargetScreen
 		}
 	}
 
-	private void CollectStorageItems(Storage storage, ref Dictionary<string, SimpleInfoScreen.StorageEntry> item_counts)
-	{
-		foreach (GameObject gameObject in storage.items)
-		{
-			if (!(gameObject == null))
-			{
-				string text = gameObject.name;
-				KSelectable component = gameObject.GetComponent<KSelectable>();
-				if (component != null)
-				{
-					text = component.GetName();
-				}
-				if (text != null)
-				{
-					float totalAmount = gameObject.GetComponent<Pickupable>().TotalAmount;
-					if (totalAmount != 0f)
-					{
-						if (item_counts.ContainsKey(text))
-						{
-							item_counts[text].Amount = item_counts[text].Amount + totalAmount;
-						}
-						else
-						{
-							item_counts[text] = new SimpleInfoScreen.StorageEntry
-							{
-								Amount = totalAmount,
-								gameObject = gameObject
-							};
-						}
-					}
-				}
-			}
-		}
-	}
-
 	private void RefreshBreedingChance()
 	{
 		if (this.selectedTarget == null)
@@ -545,13 +510,6 @@ public class SimpleInfoScreen : TargetScreen
 	private List<SimpleInfoScreen.StatusItemEntry> oldStatusItems = new List<SimpleInfoScreen.StatusItemEntry>();
 
 	private List<LocText> attributeLabels = new List<LocText>();
-
-	private class StorageEntry
-	{
-		public float Amount;
-
-		public GameObject gameObject;
-	}
 
 	[DebuggerDisplay("{item.item.Name}")]
 	public class StatusItemEntry : IRenderEveryTick

@@ -34,7 +34,7 @@ public class Weapon : KMonoBehaviour
 			return;
 		}
 		List<GameObject> list = new List<GameObject>();
-		foreach (Health health in Components.Health)
+		foreach (Health health in Components.Health.Items)
 		{
 			if (!(health.gameObject == base.gameObject))
 			{
@@ -43,7 +43,7 @@ public class Weapon : KMonoBehaviour
 					FactionAlignment component = health.GetComponent<FactionAlignment>();
 					if (!(component == null))
 					{
-						if (component.CheckAlignmentActive)
+						if (component.IsAlignmentActive())
 						{
 							if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, component.Alignment) == FactionManager.Disposition.Attack)
 							{

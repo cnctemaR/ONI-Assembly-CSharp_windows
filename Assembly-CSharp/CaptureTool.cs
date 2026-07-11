@@ -13,7 +13,7 @@ public class CaptureTool : DragTool
 
 	public static void MarkForCapture(Vector2 min, Vector2 max, bool mark)
 	{
-		foreach (Capturable capturable in Components.Capturables)
+		foreach (Capturable capturable in Components.Capturables.Items)
 		{
 			Vector2 vector = Grid.PosToXY(capturable.transform.GetPosition());
 			if (vector.x >= min.x && vector.x < max.x && vector.y >= min.y && vector.y < max.y)
@@ -23,7 +23,7 @@ public class CaptureTool : DragTool
 		}
 		if (mark)
 		{
-			foreach (NotCapturable notCapturable in Components.NotCapturables)
+			foreach (NotCapturable notCapturable in Components.NotCapturables.Items)
 			{
 				Vector2 vector2 = Grid.PosToXY(notCapturable.transform.GetPosition());
 				if (vector2.x >= min.x && vector2.x < max.x && vector2.y >= min.y && vector2.y < max.y)

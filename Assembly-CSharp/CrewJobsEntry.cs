@@ -15,7 +15,7 @@ public class CrewJobsEntry : CrewListEntry
 		this.consumer = _identity.GetComponent<ChoreConsumer>();
 		ChoreConsumer consumer = this.consumer;
 		consumer.choreRulesChanged = (global::System.Action)Delegate.Combine(consumer.choreRulesChanged, new global::System.Action(this.Dirty));
-		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 		{
 			this.CreateChoreButton(choreGroup);
 		}
@@ -75,7 +75,7 @@ public class CrewJobsEntry : CrewListEntry
 			text = "HUD_Click";
 		}
 		KMonoBehaviour.PlaySound(GlobalAssets.GetSound(text, false));
-		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 		{
 			this.consumer.SetPermittedByUser(choreGroup, flag);
 		}
@@ -137,7 +137,7 @@ public class CrewJobsEntry : CrewListEntry
 			}
 			int num2 = 0;
 			int num3 = 0;
-			foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+			foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 			{
 				if (this.consumer.IsPermittedByTraits(choreGroup))
 				{

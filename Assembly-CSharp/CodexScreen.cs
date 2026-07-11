@@ -66,7 +66,7 @@ public class CodexScreen : KScreen
 	{
 		this.contentContainerPool = new UIGameObjectPool(this.prefabContentContainer);
 		this.contentContainerPool.disabledElementParent = this.widgetPool;
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 7; i++)
 		{
 			switch (i)
 			{
@@ -84,6 +84,12 @@ public class CodexScreen : KScreen
 				break;
 			case 4:
 				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabLabelWithIcon;
+				break;
+			case 5:
+				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabContentLocked;
+				break;
+			case 6:
+				this.ContentPrefabs[(CodexWidget.ContentType)i] = this.prefabLargeSpacer;
 				break;
 			}
 		}
@@ -162,7 +168,7 @@ public class CodexScreen : KScreen
 
 	private void PopulatePools()
 	{
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 7; i++)
 		{
 			this.ContentUIPools[(CodexWidget.ContentType)i] = new UIGameObjectPool(this.ContentPrefabs[(CodexWidget.ContentType)i]);
 			this.ContentUIPools[(CodexWidget.ContentType)i].disabledElementParent = this.widgetPool;
@@ -290,8 +296,16 @@ public class CodexScreen : KScreen
 			while (gameObject.transform.childCount > 0)
 			{
 				GameObject gameObject2 = gameObject.transform.GetChild(0).gameObject;
-				CodexWidget.ContentType type = CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2].type;
-				this.ContentUIPools[type].ClearElement(gameObject2);
+				CodexWidget.ContentType contentType;
+				if (CodexCache.entries[this.activeEntryID].contentContainers[num].lockID != null && Game.Instance.unlocks.IsLocked(CodexCache.entries[this.activeEntryID].contentContainers[num].lockID))
+				{
+					contentType = CodexWidget.ContentType.ContentLockedIndicator;
+				}
+				else
+				{
+					contentType = CodexCache.entries[this.activeEntryID].contentContainers[num].content[num2].type;
+				}
+				this.ContentUIPools[contentType].ClearElement(gameObject2);
 				num2++;
 			}
 			this.contentContainerPool.ClearElement(this.contentContainers.transform.GetChild(0).gameObject);
@@ -304,49 +318,63 @@ public class CodexScreen : KScreen
 			CodexCache.entries[id].contentContainers = new List<ContentContainer>();
 		}
 		bool flag2 = false;
+		string text = string.Empty;
 		foreach (ContentContainer contentContainer2 in CodexCache.entries[id].contentContainers)
 		{
-			GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
-			this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
-			flag2 = !flag2;
-			if (contentContainer2.content != null)
+			if (!string.IsNullOrEmpty(contentContainer2.lockID) && Game.Instance.unlocks.IsLocked(contentContainer2.lockID))
 			{
-				foreach (CodexWidget codexWidget2 in contentContainer2.content)
+				if (text != contentContainer2.lockID)
 				{
-					GameObject gameObject4 = this.ContentUIPools[codexWidget2.type].GetFreeElement(gameObject3, true).gameObject;
-					this.ConfigureContentWidget(codexWidget2, gameObject4);
-					if (codexWidget2 == codexWidget)
+					GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
+					this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
+					text = contentContainer2.lockID;
+					GameObject gameObject4 = this.ContentUIPools[CodexWidget.ContentType.ContentLockedIndicator].GetFreeElement(gameObject3, true).gameObject;
+				}
+			}
+			else
+			{
+				GameObject gameObject3 = this.contentContainerPool.GetFreeElement(this.contentContainers.gameObject, true).gameObject;
+				this.ConfigureContentContainer(contentContainer2, gameObject3, flag && flag2);
+				flag2 = !flag2;
+				if (contentContainer2.content != null)
+				{
+					foreach (CodexWidget codexWidget2 in contentContainer2.content)
 					{
-						rectTransform = gameObject4.rectTransform();
+						GameObject gameObject5 = this.ContentUIPools[codexWidget2.type].GetFreeElement(gameObject3, true).gameObject;
+						this.ConfigureContentWidget(codexWidget2, gameObject5);
+						if (codexWidget2 == codexWidget)
+						{
+							rectTransform = gameObject5.rectTransform();
+						}
 					}
 				}
 			}
 		}
-		string text = string.Empty;
-		string text2 = id;
+		string text2 = string.Empty;
+		string text3 = id;
 		int num3 = 0;
-		while (text2 != CodexCache.FormatLinkID("HOME") && num3 < 10)
+		while (text3 != CodexCache.FormatLinkID("HOME") && num3 < 10)
 		{
 			num3++;
-			if (text2 != null)
+			if (text3 != null)
 			{
-				if (text2 != id)
+				if (text3 != id)
 				{
-					text = text.Insert(0, CodexCache.entries[text2].name + " > ");
+					text2 = text2.Insert(0, CodexCache.entries[text3].name + " > ");
 				}
 				else
 				{
-					text = text.Insert(0, CodexCache.entries[text2].name);
+					text2 = text2.Insert(0, CodexCache.entries[text3].name);
 				}
-				text2 = CodexCache.entries[text2].parentId;
+				text3 = CodexCache.entries[text3].parentId;
 			}
 			else
 			{
-				text2 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
-				text = text.Insert(0, CodexCache.entries[text2].name + " > ");
+				text3 = CodexCache.entries[CodexCache.FormatLinkID("HOME")].id;
+				text2 = text2.Insert(0, CodexCache.entries[text3].name + " > ");
 			}
 		}
-		this.currentLocationText.text = text;
+		this.currentLocationText.text = ((!(text2 == string.Empty)) ? text2 : CodexCache.entries["HOME"].name);
 		if (this.history.Count == 0)
 		{
 			this.history.Add(this.activeEntryID);
@@ -368,7 +396,7 @@ public class CodexScreen : KScreen
 		}
 		else
 		{
-			this.backButton.text = string.Empty;
+			this.backButton.text = UI.StripLinkFormatting(GameUtil.ColourizeString(Color.grey, string.Format(UI.CODEX.BACK_BUTTON, CodexCache.entries["HOME"].name)));
 		}
 		if (rectTransform != null)
 		{
@@ -387,7 +415,7 @@ public class CodexScreen : KScreen
 	private IEnumerator ScrollToTarget(RectTransform targetWidgetTransform)
 	{
 		yield return 0;
-		this.displayScrollRect.content.SetLocalPosition(Vector3.down * (this.displayScrollRect.content.InverseTransformPoint(targetWidgetTransform.position).y + 12f));
+		this.displayScrollRect.content.SetLocalPosition(Vector3.down * (this.displayScrollRect.content.InverseTransformPoint(targetWidgetTransform.GetPosition()).y + 12f));
 		yield break;
 	}
 
@@ -608,8 +636,6 @@ public class CodexScreen : KScreen
 
 	private UIGameObjectPool contentContainerPool;
 
-	private List<LocText> activeText = new List<LocText>();
-
 	[SerializeField]
 	private KScrollRect displayScrollRect;
 
@@ -671,7 +697,13 @@ public class CodexScreen : KScreen
 	private GameObject prefabSpacer;
 
 	[SerializeField]
+	private GameObject prefabLargeSpacer;
+
+	[SerializeField]
 	private GameObject prefabLabelWithIcon;
+
+	[SerializeField]
+	private GameObject prefabContentLocked;
 
 	[Header("Text Styles")]
 	[SerializeField]

@@ -36,7 +36,7 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 		for (int i = 0; i < this.attributeModifiers.Length; i++)
 		{
 			AttributeModifier attributeModifier = this.attributeModifiers[i];
-			attributes.Add(attributeModifier.AttributeId, attributeModifier);
+			attributes.Add(attributeModifier);
 		}
 	}
 

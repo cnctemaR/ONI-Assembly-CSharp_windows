@@ -127,6 +127,7 @@ namespace Database
 				return str;
 			};
 			this.OxyRockInactive = this.CreateStatusItem("OxyRockInactive", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.Space = this.CreateStatusItem("Space", "MISC", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Bad, false, SimViewMode.None, true, 63486);
 			this.BuriedItem = this.CreateStatusItem("BuriedItem", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.SpoutOverPressure = this.CreateStatusItem("SpoutOverPressure", "MISC", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.SpoutOverPressure.resolveStringCallback = delegate(string str, object data)
@@ -295,5 +296,7 @@ namespace Database
 		public StatusItem Studied;
 
 		public StatusItem StudiedGeyserTimeRemaining;
+
+		public StatusItem Space;
 	}
 }

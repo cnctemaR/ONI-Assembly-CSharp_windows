@@ -59,7 +59,7 @@ namespace Database
 			this.Toggle = this.Add("Toggle", new string[] { "Toggle" }, string.Empty, new string[0], DUPLICANTS.CHORES.TOGGLE.NAME, DUPLICANTS.CHORES.TOGGLE.STATUS, DUPLICANTS.CHORES.TOGGLE.TOOLTIP, true, 5000);
 			this.Capture = this.Add("Capture", new string[] { "Ranching" }, string.Empty, new string[0], DUPLICANTS.CHORES.CAPTURE.NAME, DUPLICANTS.CHORES.CAPTURE.STATUS, DUPLICANTS.CHORES.CAPTURE.TOOLTIP, false, 5000);
 			this.CreatureFetch = this.Add("CreatureFetch", new string[] { "Ranching" }, string.Empty, new string[0], DUPLICANTS.CHORES.FETCHCREATURE.NAME, DUPLICANTS.CHORES.FETCHCREATURE.STATUS, DUPLICANTS.CHORES.FETCHCREATURE.TOOLTIP, false, 5000);
-			this.CreatureHatch = this.Add("CreatureHatch", new string[] { "Ranching" }, string.Empty, new string[0], DUPLICANTS.CHORES.HATCHCREATURE.NAME, DUPLICANTS.CHORES.HATCHCREATURE.STATUS, DUPLICANTS.CHORES.HATCHCREATURE.TOOLTIP, false, 5000);
+			this.EggSing = this.Add("EggSing", new string[] { "Ranching" }, string.Empty, new string[0], DUPLICANTS.CHORES.SINGTOEGG.NAME, DUPLICANTS.CHORES.SINGTOEGG.STATUS, DUPLICANTS.CHORES.SINGTOEGG.TOOLTIP, false, 5000);
 			this.OperateFetch = this.Add("FetchCritical", new string[] { "Hauling", "LifeSupport" }, string.Empty, new string[0], DUPLICANTS.CHORES.FETCH.NAME, DUPLICANTS.CHORES.FETCH.STATUS, DUPLICANTS.CHORES.FETCH.TOOLTIP, false, 5000);
 			this.Art = this.Add("Art", new string[] { "Art" }, string.Empty, new string[0], DUPLICANTS.CHORES.ART.NAME, DUPLICANTS.CHORES.ART.STATUS, DUPLICANTS.CHORES.ART.TOOLTIP, false, 5000);
 			this.EmptyStorage = this.Add("EmptyStorage", new string[] { "Basekeeping", "Hauling" }, string.Empty, new string[0], DUPLICANTS.CHORES.EMPTYSTORAGE.NAME, DUPLICANTS.CHORES.EMPTYSTORAGE.STATUS, DUPLICANTS.CHORES.EMPTYSTORAGE.TOOLTIP, false, 5000);
@@ -126,7 +126,7 @@ namespace Database
 				{
 					this.DeliverFood, this.Sigh, this.EmptyStorage, this.Repair, this.Disinfect, this.Shower, this.CleanToilet, this.LiquidCooledFan, this.SuitMarker, this.Checkpoint,
 					this.TravelTubeEntrance, this.WashHands, this.TakeMedicine, this.Doctor, this.Recharge, this.OperateFetch, this.ScrubOre, this.Ranch, this.MoveToSafety, this.Relocate,
-					this.Research, this.ResearchFetch, this.Mop, this.Toggle, this.Deconstruct, this.Capture, this.CreatureFetch, this.CreatureHatch, this.Fetch, this.Transport,
+					this.Research, this.ResearchFetch, this.Mop, this.Toggle, this.Deconstruct, this.Capture, this.CreatureFetch, this.EggSing, this.Fetch, this.Transport,
 					this.Art, this.GeneratePower, this.CropTend, this.PowerTinker, this.MachineTinker, this.DropUnusedInventory, this.Harvest, this.FarmFetch, this.Uproot, this.FarmingFabricate,
 					this.PowerFabricate, this.Fabricate, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.BuildFetch, this.CookFetch,
 					this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.StressEmote, this.ReturnSuitUrgent, this.FoodFetch
@@ -381,7 +381,7 @@ namespace Database
 
 		public ChoreType SwitchHat;
 
-		public ChoreType CreatureHatch;
+		public ChoreType EggSing;
 
 		private int nextImplicitPriority = 10000;
 

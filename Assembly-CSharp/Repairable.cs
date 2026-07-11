@@ -65,21 +65,23 @@ public class Repairable : Workable
 			StateMachine.BaseState currentState = this.smi.GetCurrentState();
 			if (currentState == this.smi.sm.forbidden)
 			{
-				UserMenu userMenu = this.userMenu;
+				UserMenu userMenu = Game.Instance.userMenu;
+				GameObject gameObject = base.gameObject;
 				string text = "action_repair";
 				string text2 = global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.NAME;
 				global::System.Action action = new global::System.Action(this.AllowRepair);
 				string text3 = global::STRINGS.BUILDINGS.REPAIRABLE.ENABLE_AUTOREPAIR.TOOLTIP;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+				userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 			}
 			else
 			{
-				UserMenu userMenu2 = this.userMenu;
+				UserMenu userMenu2 = Game.Instance.userMenu;
+				GameObject gameObject2 = base.gameObject;
 				string text3 = "action_repair";
 				string text2 = global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.NAME;
 				global::System.Action action = new global::System.Action(this.CancelRepair);
 				string text = global::STRINGS.BUILDINGS.REPAIRABLE.DISABLE_AUTOREPAIR.TOOLTIP;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+				userMenu2.AddButton(gameObject2, new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
 			}
 		}
 	}
@@ -118,7 +120,7 @@ public class Repairable : Workable
 	{
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		float num = Mathf.Sqrt(component.Mass);
-		float num2 = num;
+		float num2 = ((this.expectedRepairTime >= 0f) ? this.expectedRepairTime : num);
 		float num3 = num2 * 0.1f;
 		if (this.timeSpentRepairing >= num3)
 		{
@@ -208,8 +210,7 @@ public class Repairable : Workable
 		}
 	}
 
-	[MyCmpReq]
-	private UserMenu userMenu;
+	public float expectedRepairTime = -1f;
 
 	[MyCmpGet]
 	private BuildingHP hp;
@@ -318,7 +319,7 @@ public class Repairable : Workable
 			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
 			float num = component.Mass * 0.1f - ((!(primaryElement != null)) ? 0f : primaryElement.Mass);
 			Tag[] array = new Tag[] { GameTagExtensions.Create(component.ElementID) };
-			return new FetchChore(Db.Get().ChoreTypes.Fetch, smi.master.storageProxy, num, array, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
+			return new FetchChore(Db.Get().ChoreTypes.Fetch, smi.master.storageProxy, num, array, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
 		}
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)

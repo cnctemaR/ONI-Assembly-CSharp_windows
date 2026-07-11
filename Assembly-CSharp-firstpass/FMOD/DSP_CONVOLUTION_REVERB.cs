@@ -6,6 +6,7 @@ namespace FMOD
 	{
 		IR,
 		WET,
-		DRY
+		DRY,
+		LINKED
 	}
 }

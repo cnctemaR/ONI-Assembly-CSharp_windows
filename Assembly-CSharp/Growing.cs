@@ -46,7 +46,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		Amounts amounts = base.gameObject.GetAmounts();
 		this.maturity = amounts.Add(new AmountInstance(Db.Get().Amounts.Maturity, base.gameObject));
 		this.baseMaturityMax = new AttributeModifier(this.maturity.maxAttribute.Id, this.growthTime / 600f, null, false, false, true);
-		this.maturity.maxAttribute.Add("Base", this.baseMaturityMax);
+		this.maturity.maxAttribute.Add(this.baseMaturityMax);
 		this.oldAge = amounts.Add(new AmountInstance(Db.Get().Amounts.OldAge, base.gameObject));
 		base.OnPrefabInit();
 		base.Subscribe(1119167081, new Action<object>(this.OnNewGameSpawn));

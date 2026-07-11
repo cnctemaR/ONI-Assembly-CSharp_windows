@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using KSerialization;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, IStateMachineControllerHack
 {
-	public int Count
+	public StateMachineController.CmpDef cmpdef
 	{
 		get
 		{
-			return this.stateMachines.Count;
+			return this.defHandle.Get<StateMachineController.CmpDef>();
 		}
 	}
 
@@ -43,26 +42,18 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 
 	public void AddDef(StateMachine.BaseDef def)
 	{
-		this.defs.Add(def);
-	}
-
-	public List<LoggerFSSSS> GetLogs()
-	{
-		return null;
+		this.cmpdef.defs.Add(def);
 	}
 
 	public LoggerFSSSS GetLog()
 	{
-		return null;
-	}
-
-	private void OnLog(LoggerFSSSS.Entry entry)
-	{
+		return this.log;
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.log.SetName(base.name);
 		base.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
 		base.Subscribe(1502190696, new Action<object>(this.OnTargetDestroyed));
 	}
@@ -100,25 +91,23 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 
 	public void CreateSMIS()
 	{
-		GameObject prefab = Assets.GetPrefab(base.GetComponent<KPrefabID>().PrefabTag);
-		if (prefab != null)
+		if (!this.defHandle.IsValid())
 		{
-			StateMachineController component = prefab.GetComponent<StateMachineController>();
-			if (component != null)
-			{
-				for (int i = 0; i < component.defs.Count; i++)
-				{
-					StateMachine.BaseDef baseDef = component.defs[i];
-					baseDef.CreateSMI(this);
-					this.defs.Add(baseDef);
-				}
-			}
+			return;
+		}
+		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
+		{
+			baseDef.CreateSMI(this);
 		}
 	}
 
 	public void StartSMIS()
 	{
-		foreach (StateMachine.BaseDef baseDef in this.defs)
+		if (!this.defHandle.IsValid())
+		{
+			return;
+		}
+		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
 		{
 			StateMachine.Instance smi = this.GetSMI(StateMachineManager.Instance.CreateStateMachine(baseDef.GetStateMachineType()).GetStateMachineInstanceType());
 			if (smi != null && !smi.IsRunning())
@@ -145,9 +134,13 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 
 	public DefType GetDef<DefType>() where DefType : StateMachine.BaseDef
 	{
-		for (int i = 0; i < this.defs.Count; i++)
+		if (!this.defHandle.IsValid())
 		{
-			DefType defType = this.defs[i] as DefType;
+			return (DefType)((object)null);
+		}
+		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
+		{
+			DefType defType = baseDef as DefType;
 			if (defType != null)
 			{
 				return defType;
@@ -159,9 +152,13 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	public List<DefType> GetDefs<DefType>() where DefType : StateMachine.BaseDef
 	{
 		List<DefType> list = new List<DefType>();
-		for (int i = 0; i < this.defs.Count; i++)
+		if (!this.defHandle.IsValid())
 		{
-			DefType defType = this.defs[i] as DefType;
+			return list;
+		}
+		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
+		{
+			DefType defType = baseDef as DefType;
 			if (defType != null)
 			{
 				list.Add(defType);
@@ -205,19 +202,30 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	public List<IGameObjectEffectDescriptor> GetDescriptors()
 	{
 		List<IGameObjectEffectDescriptor> list = new List<IGameObjectEffectDescriptor>();
-		for (int i = 0; i < this.defs.Count; i++)
+		if (!this.defHandle.IsValid())
 		{
-			if (this.defs[i] is IGameObjectEffectDescriptor)
+			return list;
+		}
+		foreach (StateMachine.BaseDef baseDef in this.cmpdef.defs)
+		{
+			if (baseDef is IGameObjectEffectDescriptor)
 			{
-				list.Add(this.defs[i] as IGameObjectEffectDescriptor);
+				list.Add(baseDef as IGameObjectEffectDescriptor);
 			}
 		}
 		return list;
 	}
 
-	private List<StateMachine.BaseDef> defs = new List<StateMachine.BaseDef>();
+	public DefHandle defHandle;
 
 	private List<StateMachine.Instance> stateMachines = new List<StateMachine.Instance>();
 
+	private LoggerFSSSS log = new LoggerFSSSS("StateMachineController", 35);
+
 	private StateMachineSerializer serializer = new StateMachineSerializer();
+
+	public class CmpDef
+	{
+		public List<StateMachine.BaseDef> defs = new List<StateMachine.BaseDef>();
+	}
 }

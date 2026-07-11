@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class KInputManager
 {
@@ -7,7 +8,6 @@ public class KInputManager
 	{
 		KInputManager.lastUserActionTicks = DateTime.Now.Ticks;
 		KInputManager.isFocused = true;
-		KInput.Log("KinputManager initialized.");
 	}
 
 	public static bool isFocused { get; private set; }
@@ -79,5 +79,18 @@ public class KInputManager
 		}
 	}
 
+	public static Vector3 GetMousePos()
+	{
+		if (KInputManager.isMousePosLocked)
+		{
+			return KInputManager.lockedMousePos;
+		}
+		return Input.mousePosition;
+	}
+
 	protected List<KInputController> mControllers = new List<KInputController>();
+
+	public static bool isMousePosLocked;
+
+	public static Vector3 lockedMousePos;
 }

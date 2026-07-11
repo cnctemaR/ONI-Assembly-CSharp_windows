@@ -7,7 +7,11 @@ public class AttachableBuilding : KMonoBehaviour
 	{
 		base.OnSpawn();
 		int num = Grid.PosToCell(base.gameObject);
-		GameObject gameObject = Grid.ObjectLayers[1][num];
+		GameObject gameObject;
+		if (!Grid.ObjectLayers[1].TryGetValue(num, out gameObject))
+		{
+			return;
+		}
 		if (gameObject != null)
 		{
 		}

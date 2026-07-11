@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using KSerialization;
@@ -470,22 +469,26 @@ public class SolidConduitFlow : IConduitFlow
 		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
 		Vector2I vector2I = new Vector2I(Mathf.Max(0, visibleArea.Min.x - 1), Mathf.Max(0, visibleArea.Min.y - 1));
 		Vector2I vector2I2 = new Vector2I(Mathf.Min(Grid.WidthInCells - 1, visibleArea.Max.x + 1), Mathf.Min(Grid.HeightInCells - 1, visibleArea.Max.y + 1));
-		IEnumerator<SolidConduitFlow.Conduit> enumerator = this.VisibleConduitsEnumerator(vector2I, vector2I2);
-		while (enumerator.MoveNext())
+		for (int i = 0; i < this.GetSOAInfo().NumEntries; i++)
 		{
-			SolidConduitFlow.Conduit conduit = enumerator.Current;
-			SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this);
-			if (lastFlowInfo.contents.pickupableHandle.IsValid())
+			int cell = this.GetSOAInfo().GetCell(i);
+			Vector2I vector2I3 = Grid.CellToXY(cell);
+			if (!(vector2I3 < vector2I) && !(vector2I3 > vector2I2))
 			{
-				int cell = conduit.GetCell(this);
-				int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
-				Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.SolidConduitContents);
-				Vector3 vector2 = Grid.CellToPosCCC(cellFromDirection, Grid.SceneLayer.SolidConduitContents);
-				Vector3 vector3 = Vector3.Lerp(vector, vector2, this.ContinuousLerpPercent);
-				Pickupable pickupable = this.GetPickupable(lastFlowInfo.contents.pickupableHandle);
-				if (pickupable != null)
+				SolidConduitFlow.Conduit conduit = this.GetSOAInfo().GetConduit(i);
+				SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this);
+				if (lastFlowInfo.contents.pickupableHandle.IsValid())
 				{
-					pickupable.transform.SetPosition(vector3);
+					int cell2 = conduit.GetCell(this);
+					int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell2, lastFlowInfo.direction);
+					Vector3 vector = Grid.CellToPosCCC(cell2, Grid.SceneLayer.SolidConduitContents);
+					Vector3 vector2 = Grid.CellToPosCCC(cellFromDirection, Grid.SceneLayer.SolidConduitContents);
+					Vector3 vector3 = Vector3.Lerp(vector, vector2, this.ContinuousLerpPercent);
+					Pickupable pickupable = this.GetPickupable(lastFlowInfo.contents.pickupableHandle);
+					if (pickupable != null)
+					{
+						pickupable.transform.SetPosition(vector3);
+					}
 				}
 			}
 		}
@@ -713,11 +716,6 @@ public class SolidConduitFlow : IConduitFlow
 	{
 		int cell = this.soaInfo.GetCell(conduit.idx);
 		return this.networkMgr.GetNetworkForCell(cell);
-	}
-
-	public IEnumerator<SolidConduitFlow.Conduit> VisibleConduitsEnumerator(Vector2I min, Vector2I max)
-	{
-		return new SolidConduitFlow.VisibleConduitIterator(min, max, this);
 	}
 
 	public void ForceRebuildNetworks()
@@ -1368,64 +1366,5 @@ public class SolidConduitFlow : IConduitFlow
 		}
 
 		public HandleVector<int>.Handle pickupableHandle;
-	}
-
-	private class VisibleConduitIterator : IEnumerator<SolidConduitFlow.Conduit>, IDisposable, IEnumerator
-	{
-		public VisibleConduitIterator(Vector2I min, Vector2I max, SolidConduitFlow manager)
-		{
-			this.min = min;
-			this.max = max;
-			this.manager = manager;
-		}
-
-		public SolidConduitFlow.Conduit Current
-		{
-			get
-			{
-				return this.manager.soaInfo.GetConduit(this.idx);
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.Current;
-			}
-		}
-
-		public void Dispose()
-		{
-		}
-
-		public bool MoveNext()
-		{
-			this.idx++;
-			while (this.idx < this.manager.soaInfo.NumEntries)
-			{
-				int cell = this.manager.soaInfo.GetCell(this.idx);
-				Vector2I vector2I = new Vector2I(cell % Grid.WidthInCells, cell / Grid.WidthInCells);
-				if (this.min <= vector2I && vector2I <= this.max)
-				{
-					return true;
-				}
-				this.idx++;
-			}
-			return false;
-		}
-
-		public void Reset()
-		{
-			this.idx = -1;
-		}
-
-		public int idx = -1;
-
-		private Vector2I min;
-
-		private Vector2I max;
-
-		private SolidConduitFlow manager;
 	}
 }

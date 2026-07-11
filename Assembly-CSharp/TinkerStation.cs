@@ -13,8 +13,31 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 		base.OnPrefabInit();
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
+		if (this.useFilteredStorage)
+		{
+			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreType);
+			this.filteredStorage = new FilteredStorage(this, null, null, null, false, byHash);
+		}
 		base.SetWorkTime(15f);
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		if (this.useFilteredStorage && this.filteredStorage != null)
+		{
+			this.filteredStorage.FilterChanged();
+		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.filteredStorage != null)
+		{
+			this.filteredStorage.CleanUp();
+		}
+		base.OnCleanUp();
 	}
 
 	private bool CorrectRolePrecondition(MinionIdentity worker)
@@ -61,7 +84,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 		base.OnCompleteWork(worker);
 		SimUtil.DiseaseInfo diseaseInfo;
 		float num;
-		this.storage.ConsumeAndGetDisease(this.inputMaterial, this.metalPerTinker, out diseaseInfo, out num);
+		this.storage.ConsumeAndGetDisease(this.inputMaterial, this.massPerTinker, out diseaseInfo, out num);
 		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition(), Grid.SceneLayer.Ore, Folder.Ore, null, 0);
 		gameObject.SetActive(true);
 		this.chore = null;
@@ -104,7 +127,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 	{
 		string text = this.inputMaterial.ProperName();
 		List<Descriptor> list = new List<Descriptor>();
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.metalPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.metalPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.massPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(this.massPerTinker, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false));
 		list.AddRange(GameUtil.GetAllDescriptors(Assets.GetPrefab(this.outputPrefab), false));
 		List<Tinkerable> list2 = new List<Tinkerable>();
 		foreach (GameObject gameObject in Assets.GetPrefabsWithComponent<Tinkerable>())
@@ -140,6 +163,8 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 
 	public HashedString choreType;
 
+	public HashedString fetchChoreType;
+
 	private Chore chore;
 
 	[MyCmpAdd]
@@ -148,7 +173,11 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 	[MyCmpAdd]
 	private Storage storage;
 
-	public float metalPerTinker;
+	public bool useFilteredStorage;
+
+	protected FilteredStorage filteredStorage;
+
+	public float massPerTinker;
 
 	public Tag inputMaterial;
 

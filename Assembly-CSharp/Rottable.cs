@@ -46,7 +46,7 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 						component2.GetCurrentChore().Fail("food rotted");
 					}
 				}
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.ROTTED, smi.gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.ROTTED_CONTEXT);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, -component.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.ROTTED, "{0}", smi.gameObject.GetProperName()), UI.ENDOFDAYREPORT.NOTES.ROTTED_CONTEXT);
 			}
 			Util.KDestroyGameObject(smi.gameObject);
 		});
@@ -253,13 +253,13 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			Amounts amounts = master.gameObject.GetAmounts();
 			this.RotAmountInstance = amounts.Add(new AmountInstance(Db.Get().Amounts.Rot, master.gameObject));
 			this.RotAmountInstance.maxAttribute.ClearModifiers();
-			this.RotAmountInstance.maxAttribute.Add("SpoilTime", new AttributeModifier("Rot", def.spoilTime, null, false, false, true));
+			this.RotAmountInstance.maxAttribute.Add(new AttributeModifier("Rot", def.spoilTime, null, false, false, true));
 			this.RotAmountInstance.SetValue(def.spoilTime);
 			base.sm.rotParameter.Set(this.RotAmountInstance.value, base.smi);
 			this.UnrefrigeratedModifier = new AttributeModifier("Rot", 0f, DUPLICANTS.MODIFIERS.ROTTEMPERATURE.NAME, false, false, false);
 			this.ContaminatedAtmosphere = new AttributeModifier("Rot", 0f, DUPLICANTS.MODIFIERS.ROTATMOSPHERE.NAME, false, false, false);
-			this.RotAmountInstance.deltaAttribute.Add("UnrefrigeratedModifier", this.UnrefrigeratedModifier);
-			this.RotAmountInstance.deltaAttribute.Add("ContaminatedAtmosphereModifier ", this.ContaminatedAtmosphere);
+			this.RotAmountInstance.deltaAttribute.Add(this.UnrefrigeratedModifier);
+			this.RotAmountInstance.deltaAttribute.Add(this.ContaminatedAtmosphere);
 			this.RefreshModifiers(0f);
 		}
 
@@ -344,11 +344,11 @@ public class Rottable : GameStateMachine<Rottable, Rottable.Instance, IStateMach
 			this.RotAmountInstance.deltaAttribute.ClearModifiers();
 			if (this.UnrefrigeratedModifier.Value != 0f && this.ContaminatedAtmosphere.Value != 0.5f)
 			{
-				this.RotAmountInstance.deltaAttribute.Add("UnrefrigeratedModifier", this.UnrefrigeratedModifier);
+				this.RotAmountInstance.deltaAttribute.Add(this.UnrefrigeratedModifier);
 			}
 			if (this.ContaminatedAtmosphere.Value != 0f && this.ContaminatedAtmosphere.Value != 0.5f)
 			{
-				this.RotAmountInstance.deltaAttribute.Add("ContaminatedAtmosphere", this.ContaminatedAtmosphere);
+				this.RotAmountInstance.deltaAttribute.Add(this.ContaminatedAtmosphere);
 			}
 		}
 

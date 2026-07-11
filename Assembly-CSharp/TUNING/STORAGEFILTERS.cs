@@ -32,7 +32,8 @@ namespace TUNING
 			GameTags.IndustrialProduct,
 			GameTags.IndustrialIngredient,
 			GameTags.Clothes,
-			GameTags.Plastic,
+			GameTags.ManufacturedMaterial,
+			GameTags.Egg,
 			GameTags.Other
 		};
 

@@ -104,7 +104,7 @@ public class PriorityScreen : KScreen
 	public static void PlayPriorityConfirmSound(PrioritySetting priority)
 	{
 		EventInstance eventInstance = KFMOD.BeginOneShot(GlobalAssets.GetSound("Priority_Tool_Confirm", false), Vector3.zero);
-		if (eventInstance != null)
+		if (eventInstance.isValid())
 		{
 			float num = 0f;
 			if (priority.priority_class >= PriorityScreen.PriorityClass.high)

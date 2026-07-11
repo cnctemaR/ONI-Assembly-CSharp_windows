@@ -21,7 +21,7 @@ public class PuftOxyliteConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = PuftOxyliteConfig.CreatePuftOxylite("PuftOxylite", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.DESC, "puft_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftOxyliteEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.DESC, "egg_puft_kanim", "PuftOxyliteBaby", PuftTuning.EGG_CHANCES_OXYLITE, PuftOxyliteConfig.EGG_SORT_ORDER, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftOxyliteEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_OXYLITE.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftOxyliteBaby", 45f, 15f, PuftTuning.EGG_CHANCES_OXYLITE, PuftOxyliteConfig.EGG_SORT_ORDER, true, false, true);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

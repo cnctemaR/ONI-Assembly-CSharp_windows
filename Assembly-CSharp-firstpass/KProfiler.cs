@@ -25,6 +25,12 @@ public static class KProfiler
 	}
 
 	[Conditional("ENABLE_KPROFILER")]
+	public static void BeginSample(string region_name, int count)
+	{
+		KProfiler.BeginSampleI(region_name);
+	}
+
+	[Conditional("ENABLE_KPROFILER")]
 	public static void BeginSample(string region_name, global::UnityEngine.Object profiler_obj)
 	{
 		KProfiler.BeginSampleI(region_name, profiler_obj);

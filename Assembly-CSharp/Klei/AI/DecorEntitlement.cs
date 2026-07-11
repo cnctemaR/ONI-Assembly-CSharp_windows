@@ -13,7 +13,7 @@ namespace Klei.AI
 		public override void Apply(GameObject target)
 		{
 			Attributes attributes = target.GetAttributes();
-			attributes.Add("role entitlement", this.modifier);
+			attributes.Add(this.modifier);
 		}
 
 		public override void Unapply(GameObject target)

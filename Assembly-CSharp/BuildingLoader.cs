@@ -8,17 +8,16 @@ public class BuildingLoader : KMonoBehaviour
 		BuildingLoader.Instance = this;
 		this.previewTemplate = this.CreatePreviewTemplate();
 		this.constructionTemplate = this.CreateConstructionTemplate();
-		this.packageTemplate = this.CreatePackageTemplate();
 	}
 
 	private GameObject CreateTemplate()
 	{
 		GameObject gameObject = new GameObject();
 		gameObject.SetActive(false);
-		gameObject.AddComponent<KPrefabID>();
-		gameObject.AddComponent<KSelectable>();
-		gameObject.AddComponent<StateMachineController>();
-		PrimaryElement primaryElement = gameObject.AddComponent<PrimaryElement>();
+		gameObject.AddOrGet<KPrefabID>();
+		gameObject.AddOrGet<KSelectable>();
+		gameObject.AddOrGet<StateMachineController>();
+		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.Mass = 1f;
 		primaryElement.Temperature = 293f;
 		return gameObject;
@@ -34,19 +33,13 @@ public class BuildingLoader : KMonoBehaviour
 	private GameObject CreateConstructionTemplate()
 	{
 		GameObject gameObject = this.CreateTemplate();
-		gameObject.AddComponent<BuildingUnderConstruction>();
-		gameObject.AddComponent<Constructable>();
+		gameObject.AddOrGet<BuildingUnderConstruction>();
+		gameObject.AddOrGet<Constructable>();
 		Storage storage = gameObject.AddComponent<Storage>();
 		storage.doDiseaseTransfer = false;
-		gameObject.AddComponent<Cancellable>();
-		gameObject.AddComponent<UserMenu>();
-		gameObject.AddComponent<Prioritizable>();
+		gameObject.AddOrGet<Cancellable>();
+		gameObject.AddOrGet<Prioritizable>();
 		return gameObject;
-	}
-
-	private GameObject CreatePackageTemplate()
-	{
-		return EntityPrefabs.Instance.GenericBuildingPackage;
 	}
 
 	public GameObject CreateBuilding(BuildingDef def, GameObject go, GameObject parent = null)
@@ -252,10 +245,6 @@ public class BuildingLoader : KMonoBehaviour
 			{
 				gameObject.AddComponent<Structure>();
 			}
-			if (def.Relocatable)
-			{
-				gameObject.AddComponent<Relocatable>();
-			}
 			if (def.RequiresPowerInput)
 			{
 				GeneratedBuildings.RegisterLogicPorts(gameObject, LogicOperationalController.INPUT_PORTS);
@@ -321,27 +310,9 @@ public class BuildingLoader : KMonoBehaviour
 		return gameObject;
 	}
 
-	public GameObject CreateBuildingPackage(BuildingDef def)
-	{
-		GameObject gameObject = this.CreateBuilding(def, this.packageTemplate, SceneOrganizer.Instance.GetFolder(Folder.GlobalDoNotDestroy));
-		int num = LayerMask.NameToLayer("Loot");
-		gameObject.transform.SetPosition(new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer)));
-		Relocatable relocatable = BuildingLoader.UpdateComponentRequirement<Relocatable>(gameObject, true);
-		relocatable.deconstruct = false;
-		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "Package");
-		kprefabID.defaultLayer = num;
-		KSelectable component = gameObject.GetComponent<KSelectable>();
-		component.SetName(def.Name);
-		Assets.AddPrefab(kprefabID);
-		gameObject.PreInit();
-		return gameObject;
-	}
-
 	private GameObject previewTemplate;
 
 	private GameObject constructionTemplate;
-
-	private GameObject packageTemplate;
 
 	public static BuildingLoader Instance;
 }

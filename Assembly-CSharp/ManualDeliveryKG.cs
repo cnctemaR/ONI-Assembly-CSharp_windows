@@ -118,7 +118,11 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 			this.fetchList = new FetchList2(this.storage, byHash, this.choreTags);
 			this.fetchList.ShowStatusItem = this.ShowStatusItem;
 			this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
-			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, fetchAmount, this.operationalRequirement);
+			FetchList2 fetchList = this.fetchList;
+			Tag[] array = new Tag[] { this.requestedItemTag };
+			float num = fetchAmount;
+			FetchOrder2.OperationalRequirement operationalRequirement = this.operationalRequirement;
+			fetchList.Add(array, null, null, num, operationalRequirement);
 			this.fetchList.Submit(null, false);
 		}
 	}
@@ -187,28 +191,26 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		{
 			return;
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.paused)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_move_to_storage";
 			string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME;
 			global::System.Action action = new global::System.Action(this.OnPause);
 			string text3 = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_move_to_storage";
 			string text2 = UI.USERMENUACTIONS.MANUAL_DELIVERY.NAME_OFF;
 			global::System.Action action = new global::System.Action(this.OnResume);
 			string text = UI.USERMENUACTIONS.MANUAL_DELIVERY.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[SerializeField]
 	private Storage storage;

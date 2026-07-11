@@ -33,7 +33,7 @@ public class RolePerks
 		this.IncreaseCarryAmountMedium = new RoleAttributePerk("IncreaseCarryAmountMedium", UI.ROLES_SCREEN.PERKS.INCREASED_CARRY_AMOUNT.DESCRIPTION, Db.Get().Attributes.CarryAmount.Id, 800f, DUPLICANTS.ROLES.MATERIALS_MANAGER.NAME);
 		this.IncreaseArtSmall = new RoleAttributePerk("IncreaseArtSmall", UI.ROLES_SCREEN.PERKS.INCREASED_ART.DESCRIPTION, Db.Get().Attributes.Art.Id, (float)ROLES.ATTRIBUTE_BONUS_SMALL, DUPLICANTS.ROLES.JUNIOR_ARTIST.NAME);
 		this.IncreaseArtMedium = new RoleAttributePerk("IncreaseArt", UI.ROLES_SCREEN.PERKS.INCREASED_ART.DESCRIPTION, Db.Get().Attributes.Art.Id, (float)ROLES.ATTRIBUTE_BONUS_MEDIUM, DUPLICANTS.ROLES.ARTIST.NAME);
-		this.CanArt = new SimpleRolePerk("CanArt", UI.ROLES_SCREEN.PERKS.CAN_PAINT.DESCRIPTION + "\n    • " + UI.ROLES_SCREEN.PERKS.CAN_SCULPT.DESCRIPTION);
+		this.CanArt = new SimpleRolePerk("CanArt", UI.ROLES_SCREEN.PERKS.CAN_ART.DESCRIPTION);
 		this.IncreaseMachineryMedium = new RoleAttributePerk("IncreaseMachineryMedium", UI.ROLES_SCREEN.PERKS.INCREASED_MACHINERY.DESCRIPTION, Db.Get().Attributes.Machinery.Id, (float)ROLES.ATTRIBUTE_BONUS_MEDIUM, DUPLICANTS.ROLES.MACHINE_TECHNICIAN.NAME);
 		this.ConveyorBuild = new SimpleRolePerk("ConveyorBuild", UI.ROLES_SCREEN.PERKS.CONVEYOR_BUILD.DESCRIPTION);
 		this.CanPowerTinker = new SimpleRolePerk("CanPowerTinker", UI.ROLES_SCREEN.PERKS.CAN_POWER_TINKER.DESCRIPTION);

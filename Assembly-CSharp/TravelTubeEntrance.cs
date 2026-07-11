@@ -74,6 +74,11 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	private void TubeChanged(object data)
 	{
+		if (this.travelTube != null)
+		{
+			this.travelTube.Unsubscribe(-1041684577, new Action<object>(this.TubeConnectionsChanged));
+			this.travelTube = null;
+		}
 		GameObject gameObject = data as GameObject;
 		if (data != null)
 		{
@@ -81,6 +86,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 			if (component != null)
 			{
 				component.Subscribe(-1041684577, new Action<object>(this.TubeConnectionsChanged));
+				this.travelTube = component;
 			}
 			else
 			{
@@ -264,6 +270,8 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 
 	[Serialize]
 	private float availableJoules;
+
+	private TravelTube travelTube;
 
 	private TravelTubeEntrance.WaitReactable wait_reactable;
 

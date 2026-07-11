@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace FMOD
 {
-	public class Memory
+	public struct Memory
 	{
 		public static RESULT Initialize(IntPtr poolmem, int poollen, MEMORY_ALLOC_CALLBACK useralloc, MEMORY_REALLOC_CALLBACK userrealloc, MEMORY_FREE_CALLBACK userfree, MEMORY_TYPE memtypeflags)
 		{

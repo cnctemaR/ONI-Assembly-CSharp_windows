@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,16 +31,16 @@ public class ResearchScreen : KModalScreen
 		}
 		this.pointDisplayContainer.transform.parent.gameObject.SetActive(Research.Instance.UseGlobalPointInventory);
 		this.entryMap = new Dictionary<Tech, ResearchEntry>();
-		List<Tech> list = Db.Get().Techs.resources;
-		list = list.OrderByDescending<Tech, float>((Tech tc) => tc.center.y).ToList<Tech>();
-		List<Vector2> list2 = new List<Vector2>();
+		List<Tech> resources = Db.Get().Techs.resources;
+		resources.Sort((Tech x, Tech y) => y.center.y.CompareTo(x.center.y));
+		List<Vector2> list = new List<Vector2>();
 		float num = 0f;
 		float num2 = 0f;
 		Vector2 vector = new Vector2(num, num2);
-		for (int i = 0; i < list.Count; i++)
+		for (int i = 0; i < resources.Count; i++)
 		{
 			ResearchEntry researchEntry = Util.KInstantiateUI<ResearchEntry>(this.entryPrefab.gameObject, this.scrollContent, false);
-			Tech tech = list[i];
+			Tech tech = resources[i];
 			researchEntry.name = tech.Name + " Panel";
 			Vector3 vector2 = tech.center + vector;
 			researchEntry.transform.rectTransform().anchoredPosition = vector2;
@@ -54,7 +53,7 @@ public class ResearchScreen : KModalScreen
 					ResourceTreeNode.Edge edge = tech.edges[j];
 					if (edge.path == null)
 					{
-						list2.AddRange(edge.SrcTarget);
+						list.AddRange(edge.SrcTarget);
 					}
 					else
 					{
@@ -65,27 +64,27 @@ public class ResearchScreen : KModalScreen
 						case ResourceTreeNode.Edge.EdgeType.BezierEdge:
 						case ResourceTreeNode.Edge.EdgeType.GenericEdge:
 						{
-							list2.Add(edge.SrcTarget[0]);
-							list2.Add(edge.path[0]);
+							list.Add(edge.SrcTarget[0]);
+							list.Add(edge.path[0]);
 							for (int k = 1; k < edge.path.Count; k++)
 							{
-								list2.Add(edge.path[k - 1]);
-								list2.Add(edge.path[k]);
+								list.Add(edge.path[k - 1]);
+								list.Add(edge.path[k]);
 							}
-							list2.Add(edge.path[edge.path.Count - 1]);
-							list2.Add(edge.SrcTarget[1]);
-							goto IL_03AD;
+							list.Add(edge.path[edge.path.Count - 1]);
+							list.Add(edge.SrcTarget[1]);
+							goto IL_03A7;
 						}
 						}
-						list2.AddRange(edge.path);
+						list.AddRange(edge.path);
 					}
-					IL_03AD:;
+					IL_03A7:;
 				}
 			}
 		}
-		for (int l = 0; l < list2.Count; l++)
+		for (int l = 0; l < list.Count; l++)
 		{
-			list2[l] = new Vector2(list2[l].x, list2[l].y + this.foreground.transform.rectTransform().rect.height);
+			list[l] = new Vector2(list[l].x, list[l].y + this.foreground.transform.rectTransform().rect.height);
 		}
 		foreach (KeyValuePair<Tech, ResearchEntry> keyValuePair in this.entryMap)
 		{

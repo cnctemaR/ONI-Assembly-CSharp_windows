@@ -297,7 +297,7 @@ public class NavGrid
 
 	public struct Transition
 	{
-		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets)
+		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool impassable_not_void = false)
 		{
 			this.id = -1;
 			this.start = start;
@@ -339,6 +339,7 @@ public class NavGrid
 			this.solidOffsets = solid_offsets;
 			this.validNavOffsets = valid_nav_offsets;
 			this.invalidNavOffsets = invalid_nav_offsets;
+			this.impassableNotVoid = impassable_not_void;
 		}
 
 		public int IsValid(int cell, NavTable nav_table, ushort[] gridBitFields, bool check_if_current_cell_is_valid)
@@ -359,9 +360,16 @@ public class NavGrid
 			foreach (CellOffset cellOffset in this.voidOffsets)
 			{
 				int num2 = Grid.OffsetCell(cell, cellOffset.x, cellOffset.y);
-				if (Grid.IsValidCell(num2) && (gridBitFields[num2] & 32) != 0)
+				if (Grid.IsValidCell(num2))
 				{
-					return Grid.InvalidCell;
+					if ((gridBitFields[num2] & 32) != 0)
+					{
+						return Grid.InvalidCell;
+					}
+					if (this.impassableNotVoid && (gridBitFields[num2] & 256) != 0)
+					{
+						return Grid.InvalidCell;
+					}
 				}
 			}
 			foreach (CellOffset cellOffset2 in this.solidOffsets)
@@ -558,5 +566,7 @@ public class NavGrid
 		public NavOffset[] validNavOffsets;
 
 		public NavOffset[] invalidNavOffsets;
+
+		public bool impassableNotVoid;
 	}
 }

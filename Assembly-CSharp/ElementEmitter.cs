@@ -90,6 +90,7 @@ public class ElementEmitter : SimComponent
 
 	protected override void OnSimRegister(HandleVector<Game.ComplexCallbackInfo>.Handle cb_handle)
 	{
+		Game.Instance.complexCallbackManager.GetItem(cb_handle);
 		SimMessages.AddElementEmitter(this.maxPressure, cb_handle.index, this.onBlockedHandle.index, this.onUnblockedHandle.index);
 	}
 

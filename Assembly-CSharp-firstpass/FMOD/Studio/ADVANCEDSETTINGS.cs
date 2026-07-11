@@ -4,14 +4,14 @@ namespace FMOD.Studio
 {
 	public struct ADVANCEDSETTINGS
 	{
-		public int cbSize;
+		public int cbsize;
 
-		public int commandQueueSize;
+		public int commandqueuesize;
 
-		public int handleInitialSize;
+		public int handleinitialsize;
 
-		public int studioUpdatePeriod;
+		public int studioupdateperiod;
 
-		public int idleSampleDataPoolSize;
+		public int idlesampledatapoolsize;
 	}
 }

@@ -34,6 +34,7 @@ public class KSelectable : KMonoBehaviour
 
 	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		this.statusItemGroup = new StatusItemGroup(base.gameObject);
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		if (component != null)
@@ -254,6 +255,7 @@ public class KSelectable : KMonoBehaviour
 				this.Unselect();
 			}
 		}
+		base.OnCleanUp();
 	}
 
 	private const float hoverHighlight = 0.25f;

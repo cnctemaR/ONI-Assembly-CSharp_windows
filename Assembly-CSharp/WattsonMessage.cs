@@ -73,33 +73,41 @@ public class WattsonMessage : KScreen
 		this.dialog.GetComponent<KScreen>().Show(false);
 		this.startFade = false;
 		GameObject telepad = GameUtil.GetTelepad();
-		KAnimControllerBase kac = telepad.GetComponent<KAnimControllerBase>();
-		kac.Play(WattsonMessage.WorkLoopAnims, KAnim.PlayMode.Loop);
-		for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
+		if (telepad != null)
 		{
-			int idx = i + 1;
-			MinionIdentity minionIdentity = Components.LiveMinionIdentities[i];
-			minionIdentity.gameObject.transform.SetPosition(new Vector3(telepad.transform.GetPosition().x + (float)idx - 1.5f, telepad.transform.GetPosition().y, minionIdentity.gameObject.transform.GetPosition().z));
-			GameObject gameObject = minionIdentity.gameObject;
-			ChoreProvider chore_provider = gameObject.GetComponent<ChoreProvider>();
-			EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop);
-			UIScheduler.Instance.Schedule("DupeBirth", (float)idx * 0.5f, delegate(object data)
+			KAnimControllerBase kac = telepad.GetComponent<KAnimControllerBase>();
+			kac.Play(WattsonMessage.WorkLoopAnims, KAnim.PlayMode.Loop);
+			for (int i = 0; i < Components.LiveMinionIdentities.Count; i++)
 			{
-				chorePre.Cancel("Done looping");
-				new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
+				int idx = i + 1;
+				MinionIdentity minionIdentity = Components.LiveMinionIdentities[i];
+				minionIdentity.gameObject.transform.SetPosition(new Vector3(telepad.transform.GetPosition().x + (float)idx - 1.5f, telepad.transform.GetPosition().y, minionIdentity.gameObject.transform.GetPosition().z));
+				GameObject gameObject = minionIdentity.gameObject;
+				ChoreProvider chore_provider = gameObject.GetComponent<ChoreProvider>();
+				EmoteChore chorePre = new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_pre_" + idx }, KAnim.PlayMode.Loop);
+				UIScheduler.Instance.Schedule("DupeBirth", (float)idx * 0.5f, delegate(object data)
+				{
+					chorePre.Cancel("Done looping");
+					new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
+				}, null, null);
+			}
+			UIScheduler.Instance.Schedule("Welcome", 4.6f, delegate(object data)
+			{
+				kac.Play(new HashedString[] { "working_pst", "idle" }, KAnim.PlayMode.Once);
 			}, null, null);
+			CameraController.Instance.DisableUserCameraControl = true;
 		}
-		CameraController.Instance.DisableUserCameraControl = true;
+		else
+		{
+			global::Debug.LogWarning("Failed to spawn telepad - does the starting base template lack a 'Headquarters' ?", null);
+		}
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("GoHome", 0.1f, delegate(object data)
 		{
+			CameraController.Instance.SetOrthographicsSize(TuningData<WattsonMessage.Tuning>.Get().initialOrthographicSize);
 			CameraController.Instance.CameraGoHome(1f);
 			this.startFade = true;
 			MusicManager.instance.PlaySong("Music_WattsonMessage", false);
 		}, null, null));
-		UIScheduler.Instance.Schedule("Welcome", 4.6f, delegate(object data)
-		{
-			kac.Play(new HashedString[] { "working_pst", "idle" }, KAnim.PlayMode.Once);
-		}, null, null);
 		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("WelcomeDialog", 5.6f, delegate(object d)
 		{
 			SpeedControlScreen.Instance.Pause(false);
@@ -195,4 +203,9 @@ public class WattsonMessage : KScreen
 	private List<SchedulerHandle> scheduleHandles = new List<SchedulerHandle>();
 
 	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop" };
+
+	public class Tuning : TuningData<WattsonMessage.Tuning>
+	{
+		public float initialOrthographicSize;
+	}
 }

@@ -26,12 +26,12 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		num = Grid.CellAbove(num);
-		return GameUtil.FloodFillCheck(new Func<int, bool>(this.IsCellOverPressure), num, 2, true, true);
+		return GameUtil.FloodFillCheck<OilRefinery>(new Func<int, OilRefinery, bool>(OilRefinery.IsCellOverPressure), this, num, 2, true, true);
 	}
 
-	private bool IsCellOverPressure(int cell)
+	private static bool IsCellOverPressure(int cell, OilRefinery oil_refinery)
 	{
-		return Grid.Mass[cell] > this.overpressureMass;
+		return Grid.Mass[cell] > oil_refinery.overpressureMass;
 	}
 
 	[SerializeField]

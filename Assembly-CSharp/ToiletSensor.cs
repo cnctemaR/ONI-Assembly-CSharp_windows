@@ -13,7 +13,7 @@ public class ToiletSensor : Sensor
 		IUsable usable = null;
 		int num = int.MaxValue;
 		bool flag = false;
-		foreach (IUsable usable2 in Components.Toilets)
+		foreach (IUsable usable2 in Components.Toilets.Items)
 		{
 			if (usable2.IsUsable())
 			{

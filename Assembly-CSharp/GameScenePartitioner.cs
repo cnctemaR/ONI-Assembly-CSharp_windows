@@ -37,6 +37,7 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.collisionLayer = this.partitioner.CreateMask("Collision");
 		this.lure = this.partitioner.CreateMask("Lure");
 		this.plants = this.partitioner.CreateMask("Plants");
+		this.industrialBuildings = this.partitioner.CreateMask("IndustrialBuildings");
 		this.objectLayers = new ScenePartitionerLayer[36];
 		for (int i = 0; i < 36; i++)
 		{
@@ -122,6 +123,11 @@ public class GameScenePartitioner : KMonoBehaviour
 		this.partitioner.TriggerEvent(cells, layer, event_data);
 	}
 
+	public void TriggerEvent(Extents extents, ScenePartitionerLayer layer, object event_data)
+	{
+		this.partitioner.TriggerEvent(extents.x, extents.y, extents.width, extents.height, layer, event_data);
+	}
+
 	public void TriggerEvent(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
 	{
 		this.partitioner.TriggerEvent(x, y, width, height, layer, event_data);
@@ -147,14 +153,14 @@ public class GameScenePartitioner : KMonoBehaviour
 
 	public void Iterate<IteratorType>(int x, int y, int width, int height, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
 	{
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(x, y, width, height, layer, list);
-		for (int i = 0; i < list.Count; i++)
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		GameScenePartitioner.Instance.GatherEntries(x, y, width, height, layer, pooledList);
+		for (int i = 0; i < pooledList.Count; i++)
 		{
-			ScenePartitionerEntry scenePartitionerEntry = list[i];
+			ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
 			iterator.Iterate(scenePartitionerEntry.obj);
 		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+		pooledList.Recycle();
 	}
 
 	public void Iterate<IteratorType>(int cell, int radius, ScenePartitionerLayer layer, ref IteratorType iterator) where IteratorType : GameScenePartitioner.Iterator
@@ -234,6 +240,8 @@ public class GameScenePartitioner : KMonoBehaviour
 	public ScenePartitionerLayer lure;
 
 	public ScenePartitionerLayer plants;
+
+	public ScenePartitionerLayer industrialBuildings;
 
 	private ScenePartitioner partitioner;
 

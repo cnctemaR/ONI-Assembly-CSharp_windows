@@ -50,7 +50,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Storage>();
 		BuildingDef def = go.GetComponent<Building>().Def;
-		float num = 30f;
+		float num = 20f;
 		go.AddOrGet<LoopingSounds>();
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = def.InputConduitType;
@@ -67,12 +67,12 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		{
 			inputs = new EnergyGenerator.InputItem[]
 			{
-				new EnergyGenerator.InputItem(SimHashes.Petroleum.CreateTag(), 3f, num)
+				new EnergyGenerator.InputItem(SimHashes.Petroleum.CreateTag(), 2f, num)
 			},
 			outputs = new EnergyGenerator.OutputItem[]
 			{
-				new EnergyGenerator.OutputItem(SimHashes.CarbonDioxide, 0.5f, false, new CellOffset(0, 3)),
-				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 1.25f, false, new CellOffset(1, 1))
+				new EnergyGenerator.OutputItem(SimHashes.CarbonDioxide, 0.5f, false, new CellOffset(0, 3), 0f),
+				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 0.75f, false, new CellOffset(1, 1), 0f)
 			}
 		};
 		Tinkerable.MakePowerTinkerable(go);
@@ -86,7 +86,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 
 	public const string ID = "PetroleumGenerator";
 
-	public const float CONSUMPTION_RATE = 3f;
+	public const float CONSUMPTION_RATE = 2f;
 
 	private const SimHashes INPUT_ELEMENT = SimHashes.Petroleum;
 
@@ -98,7 +98,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 
 	public const float EXHAUST_GAS_RATE = 0.5f;
 
-	public const float EXHAUST_LIQUID_RATE = 1.25f;
+	public const float EXHAUST_LIQUID_RATE = 0.75f;
 
 	private const int WIDTH = 3;
 

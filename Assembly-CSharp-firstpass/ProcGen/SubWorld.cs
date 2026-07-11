@@ -84,7 +84,8 @@ namespace ProcGen
 			Sandstone,
 			ToxicJungle,
 			MagmaCore,
-			OilField
+			OilField,
+			Space
 		}
 	}
 }

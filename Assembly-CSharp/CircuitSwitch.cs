@@ -115,7 +115,7 @@ public class CircuitSwitch : Switch
 			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 			component.Play((!this.switchedOn) ? "on_pst" : "on_pre", KAnim.PlayMode.Once, 1f, 0f);
 			component.Queue((!this.switchedOn) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
-			this.userMenu.Refresh();
+			Game.Instance.userMenu.Refresh(base.gameObject);
 		}
 		this.wasOn = this.switchedOn;
 	}

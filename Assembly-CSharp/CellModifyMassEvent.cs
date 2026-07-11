@@ -8,7 +8,7 @@ public class CellModifyMassEvent : CellEvent
 	{
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void Log(int cell, SimHashes element, float amount)
 	{
 		if (!this.enableLogging)

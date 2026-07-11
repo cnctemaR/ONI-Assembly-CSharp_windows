@@ -6,7 +6,6 @@ public class Brain : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.log = new LoggerFSS("Brain");
 	}
 
 	protected override void OnSpawn()
@@ -91,6 +90,4 @@ public class Brain : KMonoBehaviour
 	private bool suspend;
 
 	private static int stopID = -1;
-
-	protected LoggerFSS log;
 }

@@ -28,37 +28,35 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 	private void OnRefreshUserMenu(object data)
 	{
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (this.allowManualPumpingStationFetching)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_bottler_delivery";
 			string text2 = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.NAME;
 			global::System.Action action = new global::System.Action(this.OnChangeAllowManualPumpingStationFetching);
 			string text3 = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.DENIED.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_bottler_delivery";
 			string text2 = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.NAME;
 			global::System.Action action = new global::System.Action(this.OnChangeAllowManualPumpingStationFetching);
 			string text = UI.USERMENUACTIONS.MANUAL_PUMP_DELIVERY.ALLOWED.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
 	[Serialize]
 	public bool allowManualPumpingStationFetching;
 
 	[SerializeField]
-	public Color noFilterTint = Color.white;
+	public Color noFilterTint = FilteredStorage.NO_FILTER_TINT;
 
 	[SerializeField]
-	public Color filterTint = Color.white;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
+	public Color filterTint = FilteredStorage.FILTER_TINT;
 
 	public class StatesInstance : GameStateMachine<BottleEmptier.States, BottleEmptier.StatesInstance, BottleEmptier, object>.GameInstance
 	{
@@ -93,7 +91,12 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				array = new Tag[0];
 			}
 			Storage component2 = base.GetComponent<Storage>();
-			this.chore = new FetchChore(Db.Get().ChoreTypes.Fetch, component2, component2.Capacity(), base.GetComponent<TreeFilterable>().GetTags(), array, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
+			ChoreType fetch = Db.Get().ChoreTypes.Fetch;
+			Storage storage = component2;
+			float num = component2.Capacity();
+			Tag[] tags2 = base.GetComponent<TreeFilterable>().GetTags();
+			Tag[] array2 = array;
+			this.chore = new FetchChore(fetch, storage, num, tags2, null, array2, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
 		}
 
 		public void CancelChore()
@@ -179,7 +182,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			{
 				num4 += ((!flag) ? (-1) : 1);
 			}
-			FallingWater.instance.AddParticle(num4, (byte)ElementLoader.GetElementIndex(firstPrimaryElement.ElementID), num2, num3, diseaseInfo.idx, diseaseInfo.count, false, false, false, false);
+			FallingWater.instance.AddParticle(num4, (byte)ElementLoader.GetElementIndex(firstPrimaryElement.ElementID), num2, num3, diseaseInfo.idx, diseaseInfo.count, true, false, false, false);
 		}
 
 		private FetchChore chore;

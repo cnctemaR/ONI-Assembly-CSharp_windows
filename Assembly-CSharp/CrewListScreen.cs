@@ -61,7 +61,7 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 			this.UpdateColumnTitles();
 		}
 		bool flag = false;
-		List<MinionIdentity> liveIdentities = new List<MinionIdentity>(Components.LiveMinionIdentities);
+		List<MinionIdentity> liveIdentities = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
 		if (this.EntryObjects.Count != liveIdentities.Count || this.EntryObjects.FindAll((EntryType o) => liveIdentities.Contains(o.Identity)).Count != this.EntryObjects.Count)
 		{
 			flag = true;

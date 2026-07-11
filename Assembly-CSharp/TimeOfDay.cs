@@ -23,6 +23,7 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 	{
 		base.OnSpawn();
 		this.timeRegion = this.GetCurrentTimeRegion();
+		this.UpdateSunlightIntensity();
 	}
 
 	[OnDeserialized]
@@ -58,7 +59,8 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 			num4 = num3;
 		}
 		this.scale = Mathf.Lerp(this.scale, num4, Time.deltaTime * num2);
-		Shader.SetGlobalVector("_TimeOfDay", new Vector4(this.scale, 0f, 0f, 0f));
+		float num5 = this.UpdateSunlightIntensity();
+		Shader.SetGlobalVector("_TimeOfDay", new Vector4(this.scale, num5, 0f, 0f));
 	}
 
 	private void UpdateAudio()
@@ -70,6 +72,25 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 			this.timeRegion = currentTimeRegion;
 			base.Trigger(1791086652, null);
 		}
+	}
+
+	public void Sim4000ms(float dt)
+	{
+		this.UpdateSunlightIntensity();
+	}
+
+	private float UpdateSunlightIntensity()
+	{
+		float num = 0.875f;
+		float currentCycleAsPercentage = GameClock.Instance.GetCurrentCycleAsPercentage();
+		float num2 = currentCycleAsPercentage / num;
+		if (num2 >= 1f)
+		{
+			num2 = 0f;
+		}
+		float num3 = Mathf.Sin(num2 * 3.1415927f);
+		Game.Instance.currentSunlightIntensity = num3 * 80000f;
+		return num3;
 	}
 
 	private void TriggerSoundChange(TimeOfDay.TimeRegion new_region)

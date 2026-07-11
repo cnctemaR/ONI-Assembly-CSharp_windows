@@ -19,7 +19,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.Visible = new byte[Grid.CellCount];
 		Grid.Spawnable = new byte[Grid.CellCount];
 		Grid.BitFields = new ushort[Grid.CellCount];
-		Grid.LightCount = new byte[Grid.CellCount];
+		Grid.LightCount = new int[Grid.CellCount];
 		Grid.Damage = new float[Grid.CellCount];
 		Grid.HasDoor = new bool[Grid.CellCount];
 		Grid.HasAccessDoor = new bool[Grid.CellCount];
@@ -33,6 +33,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
 		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
 		Grid.AllowPathfinding = new bool[Grid.CellCount];
+		Grid.GravitasFacility = new bool[Grid.CellCount];
 		Grid.ObjectLayers = new Dictionary<int, GameObject>[36];
 		for (int i = 0; i < Grid.ObjectLayers.Length; i++)
 		{

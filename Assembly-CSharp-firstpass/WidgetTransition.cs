@@ -13,19 +13,6 @@ public class WidgetTransition : MonoBehaviour
 
 	public void SetTransitionType(WidgetTransition.TransitionType transitionType)
 	{
-		switch (transitionType)
-		{
-		case WidgetTransition.TransitionType.SlideFromRight:
-			this.beginningOffset = new Vector2(50f, 0f);
-			return;
-		case WidgetTransition.TransitionType.SlideFromLeft:
-			this.beginningOffset = new Vector2(-50f, 0f);
-			return;
-		case WidgetTransition.TransitionType.SlideFromTop:
-			this.beginningOffset = new Vector2(0f, 50f);
-			return;
-		}
-		this.beginningOffset = new Vector2(0f, 0f);
 	}
 
 	public void StartTransition()
@@ -75,10 +62,6 @@ public class WidgetTransition : MonoBehaviour
 	private const float OFFSETX = 50f;
 
 	private const float SLIDE_SPEED = 7f;
-
-	private Vector2 beginningOffset = new Vector2(50f, 0f);
-
-	private Vector2 targetPos = default(Vector2);
 
 	private const float FADEIN_SPEED = 6f;
 

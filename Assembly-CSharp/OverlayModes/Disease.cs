@@ -30,7 +30,7 @@ namespace OverlayModes
 			CameraController.Instance.ToggleColouredOverlayView(true);
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			base.RegisterSaveLoadListeners();
-			foreach (DiseaseSourceVisualizer diseaseSourceVisualizer in Components.DiseaseSourceVisualizers)
+			foreach (DiseaseSourceVisualizer diseaseSourceVisualizer in Components.DiseaseSourceVisualizers.Items)
 			{
 				if (!(diseaseSourceVisualizer == null))
 				{
@@ -59,7 +59,7 @@ namespace OverlayModes
 
 		public override void Disable()
 		{
-			foreach (DiseaseSourceVisualizer diseaseSourceVisualizer in Components.DiseaseSourceVisualizers)
+			foreach (DiseaseSourceVisualizer diseaseSourceVisualizer in Components.DiseaseSourceVisualizers.Items)
 			{
 				if (!(diseaseSourceVisualizer == null))
 				{
@@ -134,7 +134,7 @@ namespace OverlayModes
 			using (new KProfiler.Region("UpdateDiseaseCarriers", null))
 			{
 				this.queuedAdds.Clear();
-				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 				{
 					if (!(minionIdentity == null))
 					{

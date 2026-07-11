@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWattageRating, IHaveUtilityNetworkMgr, IUtilityNetworkItem
+public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWattageRating, IHaveUtilityNetworkMgr, IUtilityNetworkItem, IBridgedNetworkItem
 {
 	public static float GetMaxWattageAsFloat(Wire.WattageRating rating)
 	{
@@ -201,6 +202,28 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 	public IUtilityNetworkMgr GetNetworkManager()
 	{
 		return Game.Instance.electricalConduitSystem;
+	}
+
+	public void AddNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num = Grid.PosToCell(base.transform.GetPosition());
+		UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(num);
+		if (networkForCell != null)
+		{
+			networks.Add(networkForCell);
+		}
+	}
+
+	public bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num = Grid.PosToCell(base.transform.GetPosition());
+		UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(num);
+		return networks.Contains(networkForCell);
+	}
+
+	public int GetNetworkCell()
+	{
+		return Grid.PosToCell(this);
 	}
 
 	[SerializeField]

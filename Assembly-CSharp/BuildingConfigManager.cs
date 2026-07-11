@@ -17,7 +17,6 @@ public class BuildingConfigManager : KMonoBehaviour
 		this.baseTemplate.AddComponent<BuildingComplete>();
 		this.baseTemplate.AddComponent<StateMachineController>();
 		this.baseTemplate.AddComponent<Deconstructable>();
-		this.baseTemplate.AddComponent<UserMenu>();
 		this.baseTemplate.AddComponent<SaveLoadRoot>();
 		this.baseTemplate.AddComponent<SavedObject>();
 		this.baseTemplate.AddComponent<OccupyArea>();
@@ -68,9 +67,6 @@ public class BuildingConfigManager : KMonoBehaviour
 			buildingDef.BuildingPreview = BuildingLoader.Instance.CreateBuildingPreview(buildingDef);
 			GameObject buildingPreview = buildingDef.BuildingPreview;
 			buildingPreview.name += "Preview";
-			buildingDef.BuildingPackage = BuildingLoader.Instance.CreateBuildingPackage(buildingDef);
-			GameObject buildingPackage = buildingDef.BuildingPackage;
-			buildingPackage.name += "Package";
 		}
 		buildingDef.PostProcess();
 		config.DoPostConfigureComplete(buildingDef.BuildingComplete);

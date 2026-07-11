@@ -40,5 +40,5 @@ public class DualSliderSideScreen : SideScreenContent
 
 	private IDualSliderControl target;
 
-	public List<SingleSliderSideScreen.SliderSet> sliderSets;
+	public List<SliderSet> sliderSets;
 }

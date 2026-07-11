@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using FMOD.Studio;
 using Rendering;
+using STRINGS;
 using UnityEngine;
 
 public class BuildTool : DragTool
@@ -11,10 +12,12 @@ public class BuildTool : DragTool
 		BuildTool.Instance = this;
 		this.tooltip = base.GetComponent<ToolTip>();
 		this.buildingCount = global::UnityEngine.Random.Range(1, 14);
+		this.canChangeDragAxis = false;
 	}
 
 	protected override void OnActivateTool()
 	{
+		this.lastDragCell = -1;
 		if (this.visualizer != null)
 		{
 			this.ClearTilePreview();
@@ -24,7 +27,7 @@ public class BuildTool : DragTool
 		base.OnActivateTool();
 		this.buildingOrientation = Orientation.Neutral;
 		this.placementPivot = this.def.placementPivot;
-		Vector3 cursorPos = PlayerController.GetCursorPos(Input.mousePosition);
+		Vector3 cursorPos = PlayerController.GetCursorPos(KInputManager.GetMousePos());
 		GameObject buildingPreview = this.def.BuildingPreview;
 		Vector3 vector = cursorPos;
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
@@ -59,6 +62,7 @@ public class BuildTool : DragTool
 
 	protected override void OnDeactivateTool(InterfaceTool new_tool)
 	{
+		this.lastDragCell = -1;
 		if (!this.active)
 		{
 			return;
@@ -112,7 +116,7 @@ public class BuildTool : DragTool
 
 	private void ClearTilePreview()
 	{
-		if (Grid.IsValidCell(this.lastCell) && this.def.IsTilePiece)
+		if (Grid.IsValidBuildingCell(this.lastCell) && this.def.IsTilePiece)
 		{
 			GameObject gameObject = Grid.Objects[this.lastCell, (int)this.def.TileLayer];
 			if (this.visualizer == gameObject)
@@ -168,7 +172,7 @@ public class BuildTool : DragTool
 			if (this.def.IsTilePiece)
 			{
 				this.ClearTilePreview();
-				if (Grid.IsValidCell(num2))
+				if (Grid.IsValidBuildingCell(num2))
 				{
 					GameObject gameObject = Grid.Objects[num2, (int)this.def.TileLayer];
 					if (gameObject == null)
@@ -218,7 +222,7 @@ public class BuildTool : DragTool
 				{
 					KFMOD.PlayOneShot(GlobalAssets.GetSound("HUD_Rotate", false));
 					this.buildingOrientation = component.Rotate();
-					if (Grid.IsValidCell(this.lastCell))
+					if (Grid.IsValidBuildingCell(this.lastCell))
 					{
 						Vector3 vector = Grid.CellToPosCCC(this.lastCell, Grid.SceneLayer.Building);
 						this.UpdateVis(vector);
@@ -238,6 +242,11 @@ public class BuildTool : DragTool
 		{
 			return;
 		}
+		if (cell == this.lastDragCell)
+		{
+			return;
+		}
+		this.lastDragCell = cell;
 		this.ClearTilePreview();
 		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Building);
 		GameObject gameObject = null;
@@ -255,7 +264,7 @@ public class BuildTool : DragTool
 		}
 		else
 		{
-			gameObject = this.def.TryPlace(vector, this.buildingOrientation, this.selectedElements, 0, false);
+			gameObject = this.def.TryPlace(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0, false);
 			if (gameObject == null && this.def.ReplacementLayer != ObjectLayer.NumLayers)
 			{
 				if (!Grid.ObjectLayers[(int)this.def.TileLayer].ContainsKey(cell))
@@ -300,21 +309,28 @@ public class BuildTool : DragTool
 		}
 		if (gameObject != null)
 		{
-			this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
-			if (this.placeSound != null)
+			if (this.def.MaterialsAvailable(this.selectedElements) || DebugHandler.InstantBuildMode)
 			{
-				this.buildingCount = this.buildingCount % 14 + 1;
-				EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
-				if (this.def.AudioSize == "small")
+				this.placeSound = GlobalAssets.GetSound("Place_Building_" + this.def.AudioSize, false);
+				if (this.placeSound != null)
 				{
-					eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+					this.buildingCount = this.buildingCount % 14 + 1;
+					EventInstance eventInstance = SoundEvent.BeginOneShot(this.placeSound, vector);
+					if (this.def.AudioSize == "small")
+					{
+						eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
+					}
+					SoundEvent.EndOneShot(eventInstance);
 				}
-				SoundEvent.EndOneShot(eventInstance);
-				Rotatable component4 = gameObject.GetComponent<Rotatable>();
-				if (component4 != null)
-				{
-					component4.SetOrientation(this.buildingOrientation);
-				}
+			}
+			else
+			{
+				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, vector, 1.5f, false, false);
+			}
+			Rotatable component4 = gameObject.GetComponent<Rotatable>();
+			if (component4 != null)
+			{
+				component4.SetOrientation(this.buildingOrientation);
 			}
 		}
 	}
@@ -374,6 +390,8 @@ public class BuildTool : DragTool
 	private TextStyleSetting tooltipStyle;
 
 	private int lastCell = -1;
+
+	private int lastDragCell = -1;
 
 	private IList<Element> selectedElements;
 

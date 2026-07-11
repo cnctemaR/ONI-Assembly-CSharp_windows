@@ -87,14 +87,14 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 			{
 				smi.master.growth_bonus.Description = "Growth Bonus";
 				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.wilt_penalty);
-				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add("growth_bonus", smi.master.growth_bonus);
+				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add(smi.master.growth_bonus);
 				smi.master.GetComponent<DecorProvider>().Refresh();
 			});
 			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.alive.idle, null).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
 				smi.master.growth_bonus.Description = "Wilt Penalty";
 				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.growth_bonus);
-				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add("wilt_penalty", smi.master.wilt_penalty);
+				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add(smi.master.wilt_penalty);
 				smi.master.GetComponent<DecorProvider>().SetValues(DECOR.PENALTY.TIER1);
 				smi.master.GetComponent<DecorProvider>().Refresh();
 			});

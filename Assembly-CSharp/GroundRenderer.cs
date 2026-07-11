@@ -149,6 +149,7 @@ public class GroundRenderer : KMonoBehaviour
 		material.renderQueue = RenderQueues.WorldOpaque + element.substance.idx;
 		material.EnableKeyword("OPAQUE");
 		material.DisableKeyword("ALPHA");
+		this.ConfigureMaterialShine(material);
 		material.SetInt("_SrcAlpha", 1);
 		material.SetInt("_DstAlpha", 0);
 		material.SetInt("_ZWrite", 1);
@@ -161,10 +162,26 @@ public class GroundRenderer : KMonoBehaviour
 		material.renderQueue = RenderQueues.WorldTransparent + element.substance.idx;
 		material.EnableKeyword("ALPHA");
 		material.DisableKeyword("OPAQUE");
+		this.ConfigureMaterialShine(material);
 		material.SetTexture("_AlphaTestMap", this.masks.maskAtlas.texture);
 		material.SetInt("_SrcAlpha", 5);
 		material.SetInt("_DstAlpha", 10);
 		material.SetInt("_ZWrite", 0);
+	}
+
+	private void ConfigureMaterialShine(Material material)
+	{
+		Texture texture = material.GetTexture("_ShineMask");
+		if (texture != null)
+		{
+			material.DisableKeyword("MATTE");
+			material.EnableKeyword("SHINY");
+		}
+		else
+		{
+			material.EnableKeyword("MATTE");
+			material.DisableKeyword("SHINY");
+		}
 	}
 
 	[ContextMenu("Reload Shaders")]

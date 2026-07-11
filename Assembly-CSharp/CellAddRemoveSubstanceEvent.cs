@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 public class CellAddRemoveSubstanceEvent : CellEvent
 {
@@ -7,6 +8,7 @@ public class CellAddRemoveSubstanceEvent : CellEvent
 	{
 	}
 
+	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void Log(int cell, SimHashes element, float amount, int callback_id)
 	{
 		if (!this.enableLogging)

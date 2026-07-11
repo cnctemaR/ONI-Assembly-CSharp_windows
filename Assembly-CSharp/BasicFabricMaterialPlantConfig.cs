@@ -18,7 +18,7 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingBack, 1, 3, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
 		GameObject gameObject2 = gameObject;
 		text4 = BasicFabricConfig.ID;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 15f, 5f, 288f, 295f, 291.15f, 295.15f, 310f, 325f, new SimHashes[]
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 288f, 295f, 291.15f, 295.15f, 310f, 325f, new SimHashes[]
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,

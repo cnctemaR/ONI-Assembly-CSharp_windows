@@ -23,4 +23,8 @@ public class EffectPrefabs : MonoBehaviour
 	public GameObject PlantDeath;
 
 	public GameObject PickupEffect;
+
+	public GameObject MeteorBackground;
+
+	public GameObject MeteorImpact;
 }

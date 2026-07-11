@@ -46,9 +46,7 @@ public class FishFeederConfig : IBuildingConfig
 		storage2.showInUI = true;
 		storage2.showDescriptor = true;
 		storage2.allowItemRemoval = false;
-		StorageLocker storageLocker = go.AddOrGet<StorageLocker>();
-		storageLocker.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		storageLocker.filterTint = new Color(1f, 1f, 1f, 1f);
+		go.AddOrGet<StorageLocker>();
 		Effect effect = new Effect("AteFromFeeder", global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.TOOLTIP, 600f, true, false, false);
 		effect.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.033333335f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));
 		effect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 2f, global::STRINGS.CREATURES.MODIFIERS.ATE_FROM_FEEDER.NAME, false, false, true));

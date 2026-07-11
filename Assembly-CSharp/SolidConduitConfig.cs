@@ -21,7 +21,6 @@ public class SolidConduitConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.ViewMode = SimViewMode.SolidConveyorMap;
 		buildingDef.ObjectLayer = ObjectLayer.SolidConduit;
 		buildingDef.TileLayer = ObjectLayer.SolidConduitTile;

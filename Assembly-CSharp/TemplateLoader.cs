@@ -411,7 +411,7 @@ public static class TemplateLoader
 		if (TemplateLoader.template != null)
 		{
 			int num = Grid.OffsetCell(0, baseX, baseY);
-			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes)
+			foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
 			{
 				KAnimGraphTileVisualizer component = buildingComplete.GetComponent<KAnimGraphTileVisualizer>();
 				if (component != null)
@@ -466,7 +466,7 @@ public static class TemplateLoader
 		{
 			WorldGenSpawner.Instance.ClearSpawnersInArea(new Vector2((float)baseX, (float)baseY), template_as_offsets);
 		}
-		foreach (Pickupable pickupable in Components.Pickupables)
+		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{
 			if (Grid.IsCellOffsetOf(Grid.XYToCell(baseX, baseY), pickupable.gameObject, template_as_offsets))
 			{

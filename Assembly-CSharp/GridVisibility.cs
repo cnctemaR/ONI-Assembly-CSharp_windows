@@ -5,7 +5,7 @@ public class GridVisibility : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "GridVisibility.OnSpawn");
 		this.OnCellChange();
 	}
 

@@ -154,7 +154,8 @@ public class DoorToggleSideScreen : SideScreenContent
 		{
 			foreach (DoorToggleSideScreen.DoorButtonInfo doorButtonInfo3 in this.buttonList)
 			{
-				doorButtonInfo3.button.gameObject.SetActive(true);
+				bool flag = doorButtonInfo3.state != Door.ControlState.Auto || this.target.allowAutoControl;
+				doorButtonInfo3.button.gameObject.SetActive(flag);
 			}
 		}
 		this.description.text = text3;

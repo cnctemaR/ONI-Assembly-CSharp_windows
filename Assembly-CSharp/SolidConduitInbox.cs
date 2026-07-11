@@ -1,6 +1,5 @@
 ﻿using System;
 using KSerialization;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class SolidConduitInbox : StateMachineComponent<SolidConduitInbox.SMInstance>, ISim1000ms
@@ -8,9 +7,7 @@ public class SolidConduitInbox : StateMachineComponent<SolidConduitInbox.SMInsta
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		Color color = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		Color color2 = new Color(1f, 1f, 1f, 1f);
-		this.filteredStorage = new FilteredStorage(this, null, color2, color, null, false, Db.Get().ChoreTypes.Fetch);
+		this.filteredStorage = new FilteredStorage(this, null, null, null, false, Db.Get().ChoreTypes.Fetch);
 	}
 
 	protected override void OnSpawn()

@@ -79,11 +79,6 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		this.extents.height = num6 - num4 + 1;
 	}
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-	}
-
 	[OnDeserialized]
 	internal void OnDeserialized()
 	{
@@ -119,6 +114,21 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		{
 			component2.iconOffset.y = 0.3f;
 		}
+		KPrefabID component3 = base.GetComponent<KPrefabID>();
+		if (component3.HasTag(RoomConstraints.ConstraintTags.IndustrialMachinery))
+		{
+			this.scenePartitionerEntry = GameScenePartitioner.Instance.Add(base.name, base.gameObject, this.GetExtents(), GameScenePartitioner.Instance.industrialBuildings, null);
+		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		if (this.scenePartitionerEntry != null)
+		{
+			this.scenePartitionerEntry.Release();
+			this.scenePartitionerEntry = null;
+		}
+		base.OnCleanUp();
 	}
 
 	protected void RegisterBlockTileRenderer()
@@ -339,4 +349,6 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	private int[] placementCells;
 
 	private Extents extents;
+
+	private GameScenePartitionerEntry scenePartitionerEntry;
 }

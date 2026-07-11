@@ -17,16 +17,33 @@ public class LogicMemory : KMonoBehaviour
 
 	public void OnLogicValueChanged(object data)
 	{
-		LogicValueChanged logicValueChanged = (LogicValueChanged)data;
-		if (logicValueChanged.portID == LogicMemory.SET_PORT_ID && logicValueChanged.newValue != 0)
+		if (this.ports == null || base.gameObject == null || this == null)
 		{
-			this.ports.SendSignal(LogicMemory.READ_PORT_ID, 1);
-			base.GetComponent<KBatchedAnimController>().Play("on", KAnim.PlayMode.Once, 1f, 0f);
+			return;
 		}
-		else if (logicValueChanged.portID == LogicMemory.RESET_PORT_ID && logicValueChanged.newValue != 0)
+		if (((LogicValueChanged)data).portID != LogicMemory.READ_PORT_ID)
 		{
-			this.ports.SendSignal(LogicMemory.READ_PORT_ID, 0);
-			base.GetComponent<KBatchedAnimController>().Play("off", KAnim.PlayMode.Once, 1f, 0f);
+			int inputValue = this.ports.GetInputValue(LogicMemory.SET_PORT_ID);
+			int inputValue2 = this.ports.GetInputValue(LogicMemory.RESET_PORT_ID);
+			int num = this.value;
+			if (inputValue2 == 1)
+			{
+				num = 0;
+			}
+			else if (inputValue == 1)
+			{
+				num = 1;
+			}
+			if (num != this.value)
+			{
+				this.value = num;
+				this.ports.SendSignal(LogicMemory.READ_PORT_ID, this.value);
+				KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+				if (component != null)
+				{
+					component.Play((num == 0) ? "off" : "on", KAnim.PlayMode.Once, 1f, 0f);
+				}
+			}
 		}
 	}
 
@@ -39,6 +56,9 @@ public class LogicMemory : KMonoBehaviour
 
 	[MyCmpGet]
 	private LogicPorts ports;
+
+	[Serialize]
+	private int value;
 
 	private static StatusItem infoStatusItem;
 

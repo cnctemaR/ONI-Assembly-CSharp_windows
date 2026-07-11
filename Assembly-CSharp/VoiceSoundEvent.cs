@@ -37,6 +37,10 @@ public class VoiceSoundEvent : SoundEvent
 		}
 		Vector3 position = component2.transform.GetPosition();
 		string sound = GlobalAssets.GetSound(assetName, true);
+		if (!SoundEvent.ShouldPlaySound(behaviour, sound, base.looping, false))
+		{
+			return;
+		}
 		if (sound != null)
 		{
 			if (base.looping)
@@ -46,7 +50,7 @@ public class VoiceSoundEvent : SoundEvent
 				{
 					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
 				}
-				else if (!component3.StartSound(sound, position))
+				else if (!component3.StartSound(sound))
 				{
 					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}
@@ -89,7 +93,7 @@ public class VoiceSoundEvent : SoundEvent
 			string[] array = base.name.Split(new char[] { ':' });
 			text2 = array[0];
 		}
-		return "DupVoc_" + text + "_" + text2;
+		return StringFormatter.Combine("DupVoc_", text, "_", text2);
 	}
 
 	public override void Stop(AnimEventManager.EventPlayerData behaviour)

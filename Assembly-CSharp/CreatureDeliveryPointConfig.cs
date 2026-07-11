@@ -27,13 +27,13 @@ public class CreatureDeliveryPointConfig : IBuildingConfig
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
-		CreatureDeliveryPoint creatureDeliveryPoint = go.AddOrGet<CreatureDeliveryPoint>();
-		creatureDeliveryPoint.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		creatureDeliveryPoint.filterTint = new Color(1f, 1f, 1f, 1f);
+		go.AddOrGet<CreatureDeliveryPoint>();
+		go.AddOrGet<TreeFilterable>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.AddOrGetDef<FixedCapturePoint.Def>();
 		BuildingTemplates.DoPostConfigure(go);
 	}
 

@@ -32,6 +32,10 @@ public class SaveLoadRoot : KMonoBehaviour
 		{
 			SaveLoader.Instance.saveManager.Unregister(this);
 		}
+		if (GameComps.WhiteBoards.Has(base.gameObject))
+		{
+			GameComps.WhiteBoards.Remove(base.gameObject);
+		}
 	}
 
 	public void Save(BinaryWriter writer)

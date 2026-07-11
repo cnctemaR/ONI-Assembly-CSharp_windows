@@ -28,7 +28,7 @@ public class FlowOffsetRenderer : KMonoBehaviour
 
 	private void LateUpdate()
 	{
-		if (Time.deltaTime > 0f && Time.timeScale > 0f)
+		if ((Time.deltaTime > 0f && Time.timeScale > 0f) || this.forceUpdate)
 		{
 			float num = Time.deltaTime / Time.timeScale;
 			this.DoUpdate(num * Time.timeScale / 4f + num * 0.5f);
@@ -91,7 +91,11 @@ public class FlowOffsetRenderer : KMonoBehaviour
 
 	public Vector2 LiquidGasMask;
 
+	[SerializeField]
 	private Material FlowMaterial;
+
+	[SerializeField]
+	private bool forceUpdate;
 
 	private TextureLerper FlowLerper;
 

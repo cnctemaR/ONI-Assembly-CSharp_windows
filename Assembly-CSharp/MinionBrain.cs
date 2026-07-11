@@ -1,4 +1,5 @@
 ﻿using System;
+using ProcGen;
 using UnityEngine;
 
 public class MinionBrain : Brain
@@ -64,6 +65,27 @@ public class MinionBrain : Brain
 		if (component != null)
 		{
 			global::UnityEngine.Object.DestroyObject(component);
+		}
+	}
+
+	public override void UpdateBrain()
+	{
+		base.UpdateBrain();
+		if (Game.Instance == null)
+		{
+			return;
+		}
+		if (!Game.Instance.savedInfo.discoveredSurface)
+		{
+			int num = Grid.PosToCell(base.gameObject);
+			SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num);
+			if (subWorldZoneType == SubWorld.ZoneType.Space)
+			{
+				Game.Instance.savedInfo.discoveredSurface = true;
+				Vector3 position = base.gameObject.transform.GetPosition();
+				DiscoveredSpaceMessage discoveredSpaceMessage = new DiscoveredSpaceMessage(position);
+				Messenger.Instance.QueueMessage(discoveredSpaceMessage);
+			}
 		}
 	}
 

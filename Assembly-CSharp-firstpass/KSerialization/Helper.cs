@@ -16,7 +16,8 @@ namespace KSerialization
 
 		public static bool IsArray(SerializationTypeInfo type_info)
 		{
-			return (byte)(type_info & SerializationTypeInfo.VALUE_MASK) == 17;
+			SerializationTypeInfo serializationTypeInfo = type_info & SerializationTypeInfo.VALUE_MASK;
+			return serializationTypeInfo == SerializationTypeInfo.Array;
 		}
 
 		public static bool IsGenericType(SerializationTypeInfo type_info)
@@ -24,83 +25,89 @@ namespace KSerialization
 			return (byte)(type_info & SerializationTypeInfo.IS_GENERIC_TYPE) != 0;
 		}
 
+		public static bool IsValueType(SerializationTypeInfo type_info)
+		{
+			return (byte)(type_info & SerializationTypeInfo.IS_VALUE_TYPE) != 0;
+		}
+
 		public static SerializationTypeInfo EncodeSerializationType(Type type)
 		{
+			SerializationTypeInfo serializationTypeInfo;
 			if (type == typeof(sbyte))
 			{
-				return SerializationTypeInfo.SByte;
+				serializationTypeInfo = SerializationTypeInfo.SByte;
 			}
-			if (type == typeof(byte))
+			else if (type == typeof(byte))
 			{
-				return SerializationTypeInfo.Byte;
+				serializationTypeInfo = SerializationTypeInfo.Byte;
 			}
-			if (type == typeof(bool))
+			else if (type == typeof(bool))
 			{
-				return SerializationTypeInfo.Boolean;
+				serializationTypeInfo = SerializationTypeInfo.Boolean;
 			}
-			if (type == typeof(short))
+			else if (type == typeof(short))
 			{
-				return SerializationTypeInfo.Int16;
+				serializationTypeInfo = SerializationTypeInfo.Int16;
 			}
-			if (type == typeof(ushort))
+			else if (type == typeof(ushort))
 			{
-				return SerializationTypeInfo.UInt16;
+				serializationTypeInfo = SerializationTypeInfo.UInt16;
 			}
-			if (type == typeof(int))
+			else if (type == typeof(int))
 			{
-				return SerializationTypeInfo.Int32;
+				serializationTypeInfo = SerializationTypeInfo.Int32;
 			}
-			if (type == typeof(uint))
+			else if (type == typeof(uint))
 			{
-				return SerializationTypeInfo.UInt32;
+				serializationTypeInfo = SerializationTypeInfo.UInt32;
 			}
-			if (type == typeof(long))
+			else if (type == typeof(long))
 			{
-				return SerializationTypeInfo.Int64;
+				serializationTypeInfo = SerializationTypeInfo.Int64;
 			}
-			if (type == typeof(ulong))
+			else if (type == typeof(ulong))
 			{
-				return SerializationTypeInfo.UInt64;
+				serializationTypeInfo = SerializationTypeInfo.UInt64;
 			}
-			if (type == typeof(float))
+			else if (type == typeof(float))
 			{
-				return SerializationTypeInfo.Single;
+				serializationTypeInfo = SerializationTypeInfo.Single;
 			}
-			if (type == typeof(double))
+			else if (type == typeof(double))
 			{
-				return SerializationTypeInfo.Double;
+				serializationTypeInfo = SerializationTypeInfo.Double;
 			}
-			if (type == typeof(string))
+			else if (type == typeof(string))
 			{
-				return SerializationTypeInfo.String;
+				serializationTypeInfo = SerializationTypeInfo.String;
 			}
-			if (type == typeof(Vector2I))
+			else if (type == typeof(Vector2I))
 			{
-				return SerializationTypeInfo.Vector2I;
+				serializationTypeInfo = SerializationTypeInfo.Vector2I;
 			}
-			if (type == typeof(Vector2))
+			else if (type == typeof(Vector2))
 			{
-				return SerializationTypeInfo.Vector2;
+				serializationTypeInfo = SerializationTypeInfo.Vector2;
 			}
-			if (type == typeof(Vector3))
+			else if (type == typeof(Vector3))
 			{
-				return SerializationTypeInfo.Vector3;
+				serializationTypeInfo = SerializationTypeInfo.Vector3;
 			}
-			if (type == typeof(Color))
+			else if (type == typeof(Color))
 			{
-				return SerializationTypeInfo.Colour;
+				serializationTypeInfo = SerializationTypeInfo.Colour;
 			}
-			if (typeof(Array).IsAssignableFrom(type))
+			else if (typeof(Array).IsAssignableFrom(type))
 			{
-				return SerializationTypeInfo.Array;
+				serializationTypeInfo = SerializationTypeInfo.Array;
 			}
-			if (type.IsEnum)
+			else if (type.IsEnum)
 			{
-				return SerializationTypeInfo.Enumeration;
+				serializationTypeInfo = SerializationTypeInfo.Enumeration;
 			}
-			if (type.IsGenericType)
+			else if (type.IsGenericType)
 			{
-				SerializationTypeInfo serializationTypeInfo = SerializationTypeInfo.IS_GENERIC_TYPE;
+				serializationTypeInfo = SerializationTypeInfo.IS_GENERIC_TYPE;
 				Type genericTypeDefinition = type.GetGenericTypeDefinition();
 				if (genericTypeDefinition == typeof(List<>))
 				{
@@ -122,9 +129,16 @@ namespace KSerialization
 				{
 					serializationTypeInfo |= SerializationTypeInfo.UserDefined;
 				}
-				return serializationTypeInfo;
 			}
-			return SerializationTypeInfo.UserDefined;
+			else
+			{
+				serializationTypeInfo = SerializationTypeInfo.UserDefined;
+				if (type.IsValueType)
+				{
+					serializationTypeInfo |= SerializationTypeInfo.IS_VALUE_TYPE;
+				}
+			}
+			return serializationTypeInfo & Helper.TYPE_INFO_MASK;
 		}
 
 		public static void WriteValue(this BinaryWriter writer, TypeInfo type_info, object value)
@@ -224,11 +238,19 @@ namespace KSerialization
 					{
 						Helper.WriteArrayFast(writer, typeInfo, array);
 					}
-					else
+					else if (Helper.IsValueType(typeInfo.info))
 					{
+						SerializationTemplate serializationTemplate2 = Manager.GetSerializationTemplate(typeInfo.type);
 						for (int i = 0; i < array.Length; i++)
 						{
-							writer.WriteValue(typeInfo, array.GetValue(i));
+							serializationTemplate2.SerializeData(array.GetValue(i), writer);
+						}
+					}
+					else
+					{
+						for (int j = 0; j < array.Length; j++)
+						{
+							writer.WriteValue(typeInfo, array.GetValue(j));
 						}
 					}
 					long position6 = writer.BaseStream.Position;
@@ -336,21 +358,49 @@ namespace KSerialization
 					writer.Write(0);
 					writer.Write(collection.Count);
 					long position14 = writer.BaseStream.Position;
-					IEnumerator enumerator3 = collection.GetEnumerator();
-					try
+					if (Helper.IsPOD(typeInfo6.info))
 					{
-						while (enumerator3.MoveNext())
+						Helper.WriteListPOD(writer, typeInfo6, collection);
+					}
+					else if (Helper.IsValueType(typeInfo6.info))
+					{
+						SerializationTemplate serializationTemplate3 = Manager.GetSerializationTemplate(typeInfo6.type);
+						IEnumerator enumerator3 = collection.GetEnumerator();
+						try
 						{
-							object obj3 = enumerator3.Current;
-							writer.WriteValue(typeInfo6, obj3);
+							while (enumerator3.MoveNext())
+							{
+								object obj3 = enumerator3.Current;
+								serializationTemplate3.SerializeData(obj3, writer);
+							}
+						}
+						finally
+						{
+							IDisposable disposable3;
+							if ((disposable3 = enumerator3 as IDisposable) != null)
+							{
+								disposable3.Dispose();
+							}
 						}
 					}
-					finally
+					else
 					{
-						IDisposable disposable3;
-						if ((disposable3 = enumerator3 as IDisposable) != null)
+						IEnumerator enumerator4 = collection.GetEnumerator();
+						try
 						{
-							disposable3.Dispose();
+							while (enumerator4.MoveNext())
+							{
+								object obj4 = enumerator4.Current;
+								writer.WriteValue(typeInfo6, obj4);
+							}
+						}
+						finally
+						{
+							IDisposable disposable4;
+							if ((disposable4 = enumerator4 as IDisposable) != null)
+							{
+								disposable4.Dispose();
+							}
 						}
 					}
 					long position15 = writer.BaseStream.Position;
@@ -369,33 +419,60 @@ namespace KSerialization
 				if (value != null)
 				{
 					TypeInfo typeInfo7 = type_info.subTypes[0];
-					int num6 = (int)type_info.type.GetProperty("Count").GetValue(value, null);
-					IEnumerable enumerable = value as IEnumerable;
 					long position16 = writer.BaseStream.Position;
 					writer.Write(0);
-					writer.Write(num6);
+					writer.Write(0);
 					long position17 = writer.BaseStream.Position;
-					IEnumerator enumerator4 = enumerable.GetEnumerator();
-					try
+					int num6 = 0;
+					IEnumerable enumerable = value as IEnumerable;
+					if (Helper.IsValueType(typeInfo7.info))
 					{
-						while (enumerator4.MoveNext())
+						SerializationTemplate serializationTemplate4 = Manager.GetSerializationTemplate(typeInfo7.type);
+						IEnumerator enumerator5 = enumerable.GetEnumerator();
+						try
 						{
-							object obj4 = enumerator4.Current;
-							writer.WriteValue(typeInfo7, obj4);
+							while (enumerator5.MoveNext())
+							{
+								object obj5 = enumerator5.Current;
+								serializationTemplate4.SerializeData(obj5, writer);
+								num6++;
+							}
+						}
+						finally
+						{
+							IDisposable disposable5;
+							if ((disposable5 = enumerator5 as IDisposable) != null)
+							{
+								disposable5.Dispose();
+							}
 						}
 					}
-					finally
+					else
 					{
-						IDisposable disposable4;
-						if ((disposable4 = enumerator4 as IDisposable) != null)
+						IEnumerator enumerator6 = enumerable.GetEnumerator();
+						try
 						{
-							disposable4.Dispose();
+							while (enumerator6.MoveNext())
+							{
+								object obj6 = enumerator6.Current;
+								writer.WriteValue(typeInfo7, obj6);
+								num6++;
+							}
+						}
+						finally
+						{
+							IDisposable disposable6;
+							if ((disposable6 = enumerator6 as IDisposable) != null)
+							{
+								disposable6.Dispose();
+							}
 						}
 					}
 					long position18 = writer.BaseStream.Position;
 					long num7 = position18 - position17;
 					writer.BaseStream.Position = position16;
 					writer.Write((int)num7);
+					writer.Write(num6);
 					writer.BaseStream.Position = position18;
 				}
 				else
@@ -510,6 +587,223 @@ namespace KSerialization
 			throw new Exception("unknown pod type");
 		}
 
+		private static void WriteListPOD(BinaryWriter writer, TypeInfo elem_type_info, ICollection collection)
+		{
+			switch (elem_type_info.info)
+			{
+			case SerializationTypeInfo.SByte:
+			{
+				IEnumerator enumerator = collection.GetEnumerator();
+				try
+				{
+					while (enumerator.MoveNext())
+					{
+						object obj = enumerator.Current;
+						writer.Write((sbyte)obj);
+					}
+				}
+				finally
+				{
+					IDisposable disposable;
+					if ((disposable = enumerator as IDisposable) != null)
+					{
+						disposable.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.Byte:
+			{
+				IEnumerator enumerator2 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator2.MoveNext())
+					{
+						object obj2 = enumerator2.Current;
+						writer.Write((byte)obj2);
+					}
+				}
+				finally
+				{
+					IDisposable disposable2;
+					if ((disposable2 = enumerator2 as IDisposable) != null)
+					{
+						disposable2.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.Int16:
+			{
+				IEnumerator enumerator3 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator3.MoveNext())
+					{
+						object obj3 = enumerator3.Current;
+						writer.Write((short)obj3);
+					}
+				}
+				finally
+				{
+					IDisposable disposable3;
+					if ((disposable3 = enumerator3 as IDisposable) != null)
+					{
+						disposable3.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.UInt16:
+			{
+				IEnumerator enumerator4 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator4.MoveNext())
+					{
+						object obj4 = enumerator4.Current;
+						writer.Write((ushort)obj4);
+					}
+				}
+				finally
+				{
+					IDisposable disposable4;
+					if ((disposable4 = enumerator4 as IDisposable) != null)
+					{
+						disposable4.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.Int32:
+			{
+				IEnumerator enumerator5 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator5.MoveNext())
+					{
+						object obj5 = enumerator5.Current;
+						writer.Write((int)obj5);
+					}
+				}
+				finally
+				{
+					IDisposable disposable5;
+					if ((disposable5 = enumerator5 as IDisposable) != null)
+					{
+						disposable5.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.UInt32:
+			{
+				IEnumerator enumerator6 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator6.MoveNext())
+					{
+						object obj6 = enumerator6.Current;
+						writer.Write((uint)obj6);
+					}
+				}
+				finally
+				{
+					IDisposable disposable6;
+					if ((disposable6 = enumerator6 as IDisposable) != null)
+					{
+						disposable6.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.Int64:
+			{
+				IEnumerator enumerator7 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator7.MoveNext())
+					{
+						object obj7 = enumerator7.Current;
+						writer.Write((long)obj7);
+					}
+				}
+				finally
+				{
+					IDisposable disposable7;
+					if ((disposable7 = enumerator7 as IDisposable) != null)
+					{
+						disposable7.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.UInt64:
+			{
+				IEnumerator enumerator8 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator8.MoveNext())
+					{
+						object obj8 = enumerator8.Current;
+						writer.Write((ulong)obj8);
+					}
+				}
+				finally
+				{
+					IDisposable disposable8;
+					if ((disposable8 = enumerator8 as IDisposable) != null)
+					{
+						disposable8.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.Single:
+			{
+				IEnumerator enumerator9 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator9.MoveNext())
+					{
+						object obj9 = enumerator9.Current;
+						writer.Write((float)obj9);
+					}
+				}
+				finally
+				{
+					IDisposable disposable9;
+					if ((disposable9 = enumerator9 as IDisposable) != null)
+					{
+						disposable9.Dispose();
+					}
+				}
+				break;
+			}
+			case SerializationTypeInfo.Double:
+			{
+				IEnumerator enumerator10 = collection.GetEnumerator();
+				try
+				{
+					while (enumerator10.MoveNext())
+					{
+						object obj10 = enumerator10.Current;
+						writer.Write((double)obj10);
+					}
+				}
+				finally
+				{
+					IDisposable disposable10;
+					if ((disposable10 = enumerator10 as IDisposable) != null)
+					{
+						disposable10.Dispose();
+					}
+				}
+				break;
+			}
+			}
+		}
+
 		public static void GetSerializationMethods(this Type type, Type type_a, Type type_b, out MethodInfo method_a, out MethodInfo method_b)
 		{
 			method_a = null;
@@ -550,9 +844,26 @@ namespace KSerialization
 			return false;
 		}
 
+		public static bool IsPOD(Type type)
+		{
+			return type == typeof(int) || type == typeof(uint) || type == typeof(byte) || type == typeof(sbyte) || type == typeof(float) || type == typeof(double) || type == typeof(short) || type == typeof(ushort) || type == typeof(long) || type == typeof(ulong);
+		}
+
 		public static string GetKTypeString(this Type type)
 		{
 			return type.FullName;
 		}
+
+		public static void ClearTypeInfoMask()
+		{
+			Helper.TYPE_INFO_MASK = (SerializationTypeInfo)255;
+		}
+
+		public static void SetTypeInfoMask(SerializationTypeInfo mask)
+		{
+			Helper.TYPE_INFO_MASK = mask;
+		}
+
+		private static SerializationTypeInfo TYPE_INFO_MASK = (SerializationTypeInfo)255;
 	}
 }

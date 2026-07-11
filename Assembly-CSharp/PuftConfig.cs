@@ -24,7 +24,7 @@ public class PuftConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = PuftConfig.CreatePuft("Puft", global::STRINGS.CREATURES.SPECIES.PUFT.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.DESC, "puft_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftEgg", global::STRINGS.CREATURES.SPECIES.PUFT.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.DESC, "egg_puft_kanim", "PuftBaby", PuftTuning.EGG_CHANCES_BASE, PuftConfig.EGG_SORT_ORDER, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftEgg", global::STRINGS.CREATURES.SPECIES.PUFT.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftBaby", 45f, 15f, PuftTuning.EGG_CHANCES_BASE, PuftConfig.EGG_SORT_ORDER, true, false, true);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

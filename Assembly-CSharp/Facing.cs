@@ -7,7 +7,7 @@ public class Facing : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.log = new LoggerFS("Facing");
+		this.log = new LoggerFS("Facing", 35);
 	}
 
 	public void Face(float target_x)

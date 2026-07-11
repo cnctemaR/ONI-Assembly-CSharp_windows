@@ -67,10 +67,10 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			if (!this.topSounds.TryGetValue(num, out soundInfo))
 			{
 				soundInfo = default(FallingWater.SoundInfo);
-				soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_top_loop, root_pos, true);
+				soundInfo.handle = LoopingSoundManager.StartSound(this.liquid_top_loop, root_pos, true, true);
 			}
 			soundInfo.startTime = time;
-			soundInfo.eventInstance.setParameterValue("liquidVolume", SoundUtil.GetLiquidVolume(base_mass));
+			LoopingSoundManager.Get().UpdateSecondParameter(soundInfo.handle, FallingWater.HASH_LIQUIDVOLUME, SoundUtil.GetLiquidVolume(base_mass));
 			this.topSounds[num] = soundInfo;
 		}
 		while (base_mass > 0f)
@@ -300,7 +300,10 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 			float num = t - value.startTime;
 			if (num >= this.stopTopLoopDelay)
 			{
-				LoopingSoundManager.StopSound(this.liquid_top_loop, value.eventInstance);
+				if (value.handle != HandleVector<int>.InvalidHandle)
+				{
+					LoopingSoundManager.StopSound(value.handle);
+				}
 				this.clearList.Add(keyValuePair.Key);
 			}
 		}
@@ -312,14 +315,14 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		foreach (KeyValuePair<int, FallingWater.SoundInfo> keyValuePair2 in this.splashSounds)
 		{
 			FallingWater.SoundInfo value2 = keyValuePair2.Value;
-			if (value2.eventInstance != null)
+			float num3 = t - value2.startTime;
+			if (num3 >= this.stopSplashLoopDelay)
 			{
-				float num3 = t - value2.startTime;
-				if (num3 >= this.stopSplashLoopDelay)
+				if (value2.handle != HandleVector<int>.InvalidHandle)
 				{
-					LoopingSoundManager.StopSound(this.liquid_splash_loop, value2.eventInstance);
-					this.clearList.Add(keyValuePair2.Key);
+					LoopingSoundManager.StopSound(value2.handle);
 				}
+				this.clearList.Add(keyValuePair2.Key);
 			}
 		}
 		foreach (int num4 in this.clearList)
@@ -388,7 +391,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		{
 			this.lastSpawnTime[cell] = time;
 			Vector3 vector = Grid.CellToPosCCC(cell, Grid.SceneLayer.TileMain);
-			if (CameraController.Instance.IsAudibleSound(vector, 0f))
+			if (CameraController.Instance.IsAudibleSound(vector))
 			{
 				bool flag2 = true;
 				FallingWater.SoundInfo soundInfo;
@@ -397,18 +400,19 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 					soundInfo.splashCount++;
 					if (soundInfo.splashCount > this.splashCountLoopThreshold)
 					{
-						if (soundInfo.eventInstance == null)
+						if (soundInfo.handle == HandleVector<int>.InvalidHandle)
 						{
-							soundInfo.eventInstance = LoopingSoundManager.StartSound(this.liquid_splash_loop, vector, true);
+							soundInfo.handle = LoopingSoundManager.StartSound(this.liquid_splash_loop, vector, true, true);
 						}
-						soundInfo.eventInstance.setParameterValue("liquidDepth", SoundUtil.GetLiquidDepth(cell));
-						soundInfo.eventInstance.setParameterValue("liquidVolume", this.GetParticleVolume(particleProperties.mass));
+						LoopingSoundManager.Get().UpdateFirstParameter(soundInfo.handle, FallingWater.HASH_LIQUIDDEPTH, SoundUtil.GetLiquidDepth(cell));
+						LoopingSoundManager.Get().UpdateSecondParameter(soundInfo.handle, FallingWater.HASH_LIQUIDVOLUME, this.GetParticleVolume(particleProperties.mass));
 						flag2 = false;
 					}
 				}
 				else
 				{
 					soundInfo = default(FallingWater.SoundInfo);
+					soundInfo.handle = HandleVector<int>.InvalidHandle;
 				}
 				soundInfo.startTime = time;
 				this.splashSounds[cell] = soundInfo;
@@ -635,6 +639,10 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 
 	private List<Pair<int, bool>> mistClearList = new List<Pair<int, bool>>();
 
+	private static HashedString HASH_LIQUIDDEPTH = "liquidDepth";
+
+	private static HashedString HASH_LIQUIDVOLUME = "liquidVolume";
+
 	[Serializable]
 	private struct DecorInfo
 	{
@@ -651,7 +659,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 
 		public int splashCount;
 
-		public EventInstance eventInstance;
+		public HandleVector<int>.Handle handle;
 	}
 
 	private struct MistInfo

@@ -23,6 +23,11 @@ public static class EntityTemplateExtensions
 		{
 			componentType = go.AddComponent<ComponentType>();
 		}
+		KMonoBehaviour kmonoBehaviour = componentType as KMonoBehaviour;
+		if (kmonoBehaviour != null)
+		{
+			kmonoBehaviour.CreateDef();
+		}
 		return componentType;
 	}
 }

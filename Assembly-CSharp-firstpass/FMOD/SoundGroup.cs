@@ -1,116 +1,100 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD
 {
-	public class SoundGroup : HandleBase
+	public struct SoundGroup
 	{
-		public SoundGroup(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT release()
 		{
-			RESULT result = SoundGroup.FMOD5_SoundGroup_Release(base.getRaw());
-			if (result == RESULT.OK)
-			{
-				this.rawPtr = IntPtr.Zero;
-			}
-			return result;
+			return SoundGroup.FMOD5_SoundGroup_Release(this.handle);
 		}
 
 		public RESULT getSystemObject(out FMOD.System system)
 		{
-			system = null;
-			IntPtr intPtr;
-			RESULT result = SoundGroup.FMOD5_SoundGroup_GetSystemObject(this.rawPtr, out intPtr);
-			system = new FMOD.System(intPtr);
-			return result;
+			return SoundGroup.FMOD5_SoundGroup_GetSystemObject(this.handle, out system.handle);
 		}
 
 		public RESULT setMaxAudible(int maxaudible)
 		{
-			return SoundGroup.FMOD5_SoundGroup_SetMaxAudible(this.rawPtr, maxaudible);
+			return SoundGroup.FMOD5_SoundGroup_SetMaxAudible(this.handle, maxaudible);
 		}
 
 		public RESULT getMaxAudible(out int maxaudible)
 		{
-			return SoundGroup.FMOD5_SoundGroup_GetMaxAudible(this.rawPtr, out maxaudible);
+			return SoundGroup.FMOD5_SoundGroup_GetMaxAudible(this.handle, out maxaudible);
 		}
 
 		public RESULT setMaxAudibleBehavior(SOUNDGROUP_BEHAVIOR behavior)
 		{
-			return SoundGroup.FMOD5_SoundGroup_SetMaxAudibleBehavior(this.rawPtr, behavior);
+			return SoundGroup.FMOD5_SoundGroup_SetMaxAudibleBehavior(this.handle, behavior);
 		}
 
 		public RESULT getMaxAudibleBehavior(out SOUNDGROUP_BEHAVIOR behavior)
 		{
-			return SoundGroup.FMOD5_SoundGroup_GetMaxAudibleBehavior(this.rawPtr, out behavior);
+			return SoundGroup.FMOD5_SoundGroup_GetMaxAudibleBehavior(this.handle, out behavior);
 		}
 
 		public RESULT setMuteFadeSpeed(float speed)
 		{
-			return SoundGroup.FMOD5_SoundGroup_SetMuteFadeSpeed(this.rawPtr, speed);
+			return SoundGroup.FMOD5_SoundGroup_SetMuteFadeSpeed(this.handle, speed);
 		}
 
 		public RESULT getMuteFadeSpeed(out float speed)
 		{
-			return SoundGroup.FMOD5_SoundGroup_GetMuteFadeSpeed(this.rawPtr, out speed);
+			return SoundGroup.FMOD5_SoundGroup_GetMuteFadeSpeed(this.handle, out speed);
 		}
 
 		public RESULT setVolume(float volume)
 		{
-			return SoundGroup.FMOD5_SoundGroup_SetVolume(this.rawPtr, volume);
+			return SoundGroup.FMOD5_SoundGroup_SetVolume(this.handle, volume);
 		}
 
 		public RESULT getVolume(out float volume)
 		{
-			return SoundGroup.FMOD5_SoundGroup_GetVolume(this.rawPtr, out volume);
+			return SoundGroup.FMOD5_SoundGroup_GetVolume(this.handle, out volume);
 		}
 
 		public RESULT stop()
 		{
-			return SoundGroup.FMOD5_SoundGroup_Stop(this.rawPtr);
+			return SoundGroup.FMOD5_SoundGroup_Stop(this.handle);
 		}
 
-		public RESULT getName(StringBuilder name, int namelen)
+		public RESULT getName(out string name, int namelen)
 		{
-			IntPtr intPtr = Marshal.AllocHGlobal(name.Capacity);
-			RESULT result = SoundGroup.FMOD5_SoundGroup_GetName(this.rawPtr, intPtr, namelen);
-			StringMarshalHelper.NativeToBuilder(name, intPtr);
+			IntPtr intPtr = Marshal.AllocHGlobal(namelen);
+			RESULT result = SoundGroup.FMOD5_SoundGroup_GetName(this.handle, intPtr, namelen);
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				name = freeHelper.stringFromNative(intPtr);
+			}
 			Marshal.FreeHGlobal(intPtr);
 			return result;
 		}
 
 		public RESULT getNumSounds(out int numsounds)
 		{
-			return SoundGroup.FMOD5_SoundGroup_GetNumSounds(this.rawPtr, out numsounds);
+			return SoundGroup.FMOD5_SoundGroup_GetNumSounds(this.handle, out numsounds);
 		}
 
 		public RESULT getSound(int index, out Sound sound)
 		{
-			sound = null;
-			IntPtr intPtr;
-			RESULT result = SoundGroup.FMOD5_SoundGroup_GetSound(this.rawPtr, index, out intPtr);
-			sound = new Sound(intPtr);
-			return result;
+			return SoundGroup.FMOD5_SoundGroup_GetSound(this.handle, index, out sound.handle);
 		}
 
 		public RESULT getNumPlaying(out int numplaying)
 		{
-			return SoundGroup.FMOD5_SoundGroup_GetNumPlaying(this.rawPtr, out numplaying);
+			return SoundGroup.FMOD5_SoundGroup_GetNumPlaying(this.handle, out numplaying);
 		}
 
 		public RESULT setUserData(IntPtr userdata)
 		{
-			return SoundGroup.FMOD5_SoundGroup_SetUserData(this.rawPtr, userdata);
+			return SoundGroup.FMOD5_SoundGroup_SetUserData(this.handle, userdata);
 		}
 
 		public RESULT getUserData(out IntPtr userdata)
 		{
-			return SoundGroup.FMOD5_SoundGroup_GetUserData(this.rawPtr, out userdata);
+			return SoundGroup.FMOD5_SoundGroup_GetUserData(this.handle, out userdata);
 		}
 
 		[DllImport("fmodstudio")]
@@ -163,5 +147,17 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_SoundGroup_GetUserData(IntPtr soundgroup, out IntPtr userdata);
+
+		public bool hasHandle()
+		{
+			return this.handle != IntPtr.Zero;
+		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public IntPtr handle;
 	}
 }

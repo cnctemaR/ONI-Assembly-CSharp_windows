@@ -9,14 +9,6 @@ public class MinionSounds : KMonoBehaviour
 		base.Subscribe(939543986, new Action<object>(this.OnStopMiningSound));
 	}
 
-	private void OnPlayOneShot(object data)
-	{
-		if (data is FMODAsset)
-		{
-			SoundEvent.PlayOneShot((string)data, base.transform.GetPosition());
-		}
-	}
-
 	private void OnStartMiningSound(object data)
 	{
 		if (this.miningSound == null)
@@ -35,7 +27,7 @@ public class MinionSounds : KMonoBehaviour
 				this.miningSoundMigrated = GlobalAssets.GetSound(text, false);
 				if (this.miningSoundMigrated != null)
 				{
-					this.loopingSounds.StartSound(this.miningSoundMigrated, base.transform.GetPosition());
+					this.loopingSounds.StartSound(this.miningSoundMigrated);
 				}
 			}
 		}

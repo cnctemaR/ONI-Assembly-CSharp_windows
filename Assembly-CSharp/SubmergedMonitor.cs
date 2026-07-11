@@ -19,10 +19,7 @@ public class SubmergedMonitor : GameStateMachine<SubmergedMonitor, SubmergedMoni
 		}).Update("SetNavType", delegate(SubmergedMonitor.Instance smi, float dt)
 		{
 			smi.GetComponent<Navigator>().SetCurrentNavType(NavType.Swim);
-		}, UpdateRate.SIM_1000ms, false).ToggleBehaviour(GameTags.Creatures.ExitSubmerged, (SubmergedMonitor.Instance smi) => !smi.IsSubmerged(), delegate(SubmergedMonitor.Instance smi)
-		{
-			smi.GoTo(this.satisfied);
-		});
+		}, UpdateRate.SIM_1000ms, false).Transition(this.satisfied, (SubmergedMonitor.Instance smi) => !smi.IsSubmerged(), UpdateRate.SIM_1000ms);
 	}
 
 	public GameStateMachine<SubmergedMonitor, SubmergedMonitor.Instance, IStateMachineTarget, SubmergedMonitor.Def>.State satisfied;

@@ -87,7 +87,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 				}
 				else
 				{
-					Game.Instance.roleManager.AssignToRole(this.targetRole, this, false, false);
+					Game.Instance.roleManager.AssignToRole(this.targetRole, this, false, true);
 				}
 			}
 		}

@@ -5,11 +5,15 @@ namespace TUNING
 {
 	public class LIGHT2D
 	{
+		public const int SUNLIGHT_MAX_DEFAULT = 80000;
+
 		public static readonly Color LIGHT_YELLOW = new Color(0.57f, 0.55f, 0.44f, 1f);
 
 		public static readonly Color LIGHT_OVERLAY = new Color(0.56f, 0.56f, 0.56f, 1f);
 
 		public static readonly Vector2 DEFAULT_DIRECTION = new Vector2(0f, -1f);
+
+		public const int FLOORLAMP_LUX = 1000;
 
 		public const float FLOORLAMP_RANGE = 4f;
 
@@ -38,6 +42,8 @@ namespace TUNING
 		public static readonly Vector2 CEILINGLIGHT_OFFSET = new Vector2(0.05f, 0.65f);
 
 		public static readonly Vector2 CEILINGLIGHT_DIRECTION = LIGHT2D.DEFAULT_DIRECTION;
+
+		public const int CEILINGLIGHT_LUX = 1800;
 
 		public static readonly Color LIGHT_PREVIEW_COLOR = LIGHT2D.LIGHT_YELLOW;
 
@@ -70,6 +76,8 @@ namespace TUNING
 		public const float LIGHTBUG_ANGLE = 0f;
 
 		public const LightShape LIGHTBUG_SHAPE = LightShape.Circle;
+
+		public const int LIGHTBUG_LUX = 1800;
 
 		public static readonly Color LIGHTBUG_COLOR = LIGHT2D.LIGHT_YELLOW;
 

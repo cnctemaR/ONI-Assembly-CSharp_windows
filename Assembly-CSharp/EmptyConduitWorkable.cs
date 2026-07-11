@@ -107,13 +107,13 @@ public class EmptyConduitWorkable : Workable
 
 	private void CreateWorkChore()
 	{
+		base.GetComponent<Prioritizable>().AddRef();
 		this.chore = new WorkChore<EmptyConduitWorkable>(Db.Get().ChoreTypes.EmptyStorage, this, null, null, true, null, null, null, true, null, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		this.chore.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanDoPlumbing.id);
 		this.elapsedTime = 0f;
 		this.emptiedPipe = false;
 		this.shouldShowRolePerkStatusItem = true;
 		this.UpdateStatusItem(null);
-		base.GetComponent<Prioritizable>().AddRef();
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)

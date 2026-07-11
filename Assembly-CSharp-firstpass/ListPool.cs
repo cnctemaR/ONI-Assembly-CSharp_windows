@@ -3,16 +3,31 @@ using System.Collections.Generic;
 
 public static class ListPool<ObjectType, PoolIdentifier>
 {
-	public static List<ObjectType> Allocate()
+	public static ListPool<ObjectType, PoolIdentifier>.PooledList Allocate(List<ObjectType> objects)
+	{
+		ListPool<ObjectType, PoolIdentifier>.PooledList pooledList = ListPool<ObjectType, PoolIdentifier>.pool.Allocate();
+		pooledList.AddRange(objects);
+		return pooledList;
+	}
+
+	public static ListPool<ObjectType, PoolIdentifier>.PooledList Allocate()
 	{
 		return ListPool<ObjectType, PoolIdentifier>.pool.Allocate();
 	}
 
-	public static void Free(List<ObjectType> list)
+	private static void Free(ListPool<ObjectType, PoolIdentifier>.PooledList list)
 	{
 		list.Clear();
 		ListPool<ObjectType, PoolIdentifier>.pool.Free(list);
 	}
 
-	private static ContainerPool<List<ObjectType>, PoolIdentifier> pool = new ContainerPool<List<ObjectType>, PoolIdentifier>();
+	private static ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier> pool = new ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier>();
+
+	public class PooledList : List<ObjectType>
+	{
+		public void Recycle()
+		{
+			ListPool<ObjectType, PoolIdentifier>.Free(this);
+		}
+	}
 }

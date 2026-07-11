@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
 
@@ -15,7 +14,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	public KPrefabID GetStoredOutfit()
 	{
-		foreach (GameObject gameObject in base.GetComponent<Storage>())
+		foreach (GameObject gameObject in base.GetComponent<Storage>().items)
 		{
 			if (!(gameObject == null))
 			{
@@ -44,7 +43,12 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private void CreateFetchChore()
 	{
-		this.fetchChore = new FetchChore(Db.Get().ChoreTypes.Fetch, base.GetComponent<Storage>(), 1f, this.OutfitTags, new Tag[] { GameTags.Assigned }, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
+		ChoreType fetch = Db.Get().ChoreTypes.Fetch;
+		Storage component = base.GetComponent<Storage>();
+		float num = 1f;
+		Tag[] outfitTags = this.OutfitTags;
+		Tag[] array = new Tag[] { GameTags.Assigned };
+		this.fetchChore = new FetchChore(fetch, component, num, outfitTags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
 		this.fetchChore.allowMultifetch = false;
 	}
 
@@ -221,12 +225,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private GameObject GetOxygen()
 	{
-		List<GameObject> list = base.GetComponent<Storage>().Find(GameTags.Oxygen);
-		if (list == null || list.Count == 0)
-		{
-			return null;
-		}
-		return list[0];
+		return base.GetComponent<Storage>().FindFirst(GameTags.Oxygen);
 	}
 
 	private void ChargeSuit(float dt)

@@ -10,7 +10,9 @@ namespace FMODUnity
 	[AddComponentMenu("")]
 	public class RuntimeManager : MonoBehaviour
 	{
-		public static RuntimeManager Instance
+		public bool initializedSuccessfully { get; private set; }
+
+		private static RuntimeManager Instance
 		{
 			get
 			{
@@ -24,23 +26,23 @@ namespace FMODUnity
 				}
 				if (RuntimeManager.instance == null)
 				{
+					RESULT result = RESULT.OK;
 					RuntimeManager runtimeManager = global::UnityEngine.Object.FindObjectOfType(typeof(RuntimeManager)) as RuntimeManager;
 					if (runtimeManager != null && runtimeManager.cachedPointers[0] != 0L)
 					{
 						RuntimeManager.instance = runtimeManager;
-						RuntimeManager.instance.studioSystem = new global::FMOD.Studio.System((IntPtr)RuntimeManager.instance.cachedPointers[0]);
-						RuntimeManager.instance.lowlevelSystem = new global::FMOD.System((IntPtr)RuntimeManager.instance.cachedPointers[1]);
-						RuntimeManager.instance.mixerHead = new DSP((IntPtr)RuntimeManager.instance.cachedPointers[2]);
+						RuntimeManager.instance.studioSystem.handle = (IntPtr)RuntimeManager.instance.cachedPointers[0];
+						RuntimeManager.instance.lowlevelSystem.handle = (IntPtr)RuntimeManager.instance.cachedPointers[1];
 						return RuntimeManager.instance;
 					}
-					GameObject gameObject = new GameObject("FMOD.UnityItegration.RuntimeManager");
+					GameObject gameObject = new GameObject("FMOD.UnityIntegration.RuntimeManager");
 					RuntimeManager.instance = gameObject.AddComponent<RuntimeManager>();
 					global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 					gameObject.hideFlags = HideFlags.HideInHierarchy;
 					try
 					{
 						RuntimeUtils.EnforceLibraryOrder();
-						RuntimeManager.instance.Initialiase(false);
+						result = RuntimeManager.instance.Initialize();
 					}
 					catch (Exception ex)
 					{
@@ -50,6 +52,10 @@ namespace FMODUnity
 							RuntimeManager.initException = new SystemNotInitializedException(ex);
 						}
 						throw RuntimeManager.initException;
+					}
+					if (result != RESULT.OK)
+					{
+						throw new SystemNotInitializedException(result, "Output forced to NO SOUND mode");
 					}
 				}
 				return RuntimeManager.instance;
@@ -76,122 +82,84 @@ namespace FMODUnity
 		{
 			if (result != RESULT.OK)
 			{
-				if (this.studioSystem != null)
+				if (this.studioSystem.isValid())
 				{
 					this.studioSystem.release();
-					this.studioSystem = null;
+					this.studioSystem.clearHandle();
 				}
 				throw new SystemNotInitializedException(result, cause);
 			}
 		}
 
-		private void Initialiase(bool forceNoNetwork)
+		private RESULT Initialize()
 		{
-			global::Debug.Log("FMOD Studio: Creating runtime system instance", null);
-			RESULT result = global::FMOD.Studio.System.create(out this.studioSystem);
-			this.CheckInitResult(result, "Creating System Object");
-			this.studioSystem.getLowLevelSystem(out this.lowlevelSystem);
+			this.initializedSuccessfully = false;
+			RESULT result = RESULT.OK;
 			Settings settings = Settings.Instance;
 			this.fmodPlatform = RuntimeUtils.GetCurrentPlatform();
-			int num = settings.GetRealChannels(this.fmodPlatform);
-			num = Math.Min(num, 256);
-			result = this.lowlevelSystem.setSoftwareChannels(num);
-			this.CheckInitResult(result, "Set software channels");
-			result = this.lowlevelSystem.setSoftwareFormat(settings.GetSampleRate(this.fmodPlatform), (SPEAKERMODE)settings.GetSpeakerMode(this.fmodPlatform), 0);
-			this.CheckInitResult(result, "Set software format");
+			int sampleRate = settings.GetSampleRate(this.fmodPlatform);
+			int num = Math.Min(settings.GetRealChannels(this.fmodPlatform), 256);
+			int virtualChannels = settings.GetVirtualChannels(this.fmodPlatform);
+			SPEAKERMODE speakerMode = (SPEAKERMODE)settings.GetSpeakerMode(this.fmodPlatform);
+			OUTPUTTYPE outputtype = OUTPUTTYPE.AUTODETECT;
 			global::FMOD.ADVANCEDSETTINGS advancedsettings = default(global::FMOD.ADVANCEDSETTINGS);
-			advancedsettings.maxVorbisCodecs = num;
 			advancedsettings.randomSeed = (uint)DateTime.Now.Ticks;
-			result = this.lowlevelSystem.setAdvancedSettings(ref advancedsettings);
-			this.CheckInitResult(result, "Set advanced settings");
-			global::FMOD.INITFLAGS initflags = global::FMOD.INITFLAGS.NORMAL;
-			global::FMOD.Studio.INITFLAGS initflags2 = global::FMOD.Studio.INITFLAGS.DEFERRED_CALLBACKS;
-			if (settings.IsLiveUpdateEnabled(this.fmodPlatform) && !forceNoNetwork)
+			advancedsettings.maxVorbisCodecs = num;
+			global::FMOD.Studio.INITFLAGS initflags = global::FMOD.Studio.INITFLAGS.DEFERRED_CALLBACKS;
+			if (settings.IsLiveUpdateEnabled(this.fmodPlatform))
 			{
-				initflags2 |= global::FMOD.Studio.INITFLAGS.LIVEUPDATE;
+				initflags |= global::FMOD.Studio.INITFLAGS.LIVEUPDATE;
 			}
-			RESULT result2 = this.studioSystem.initialize(settings.GetVirtualChannels(this.fmodPlatform), initflags2, initflags, IntPtr.Zero);
-			if (result2 == RESULT.ERR_OUTPUT_INIT)
+			RESULT result2;
+			for (;;)
 			{
-				this.studioSystem.release();
-				global::FMOD.Studio.System.create(out this.studioSystem);
-				this.studioSystem.getLowLevelSystem(out this.lowlevelSystem);
-				this.lowlevelSystem.setOutput(OUTPUTTYPE.NOSOUND);
-				this.initializedSuccessfully = false;
-				result2 = this.studioSystem.initialize(settings.GetVirtualChannels(this.fmodPlatform), initflags2, initflags, IntPtr.Zero);
-			}
-			this.CheckInitResult(result2, "Calling initialize");
-			if (result2 == RESULT.OK)
-			{
-				this.initializedSuccessfully = true;
-			}
-			this.studioSystem.flushCommands();
-			RESULT result3 = this.studioSystem.update();
-			if (result3 == RESULT.ERR_NET_SOCKET_ERROR)
-			{
-				this.studioSystem.release();
-				global::Debug.LogWarning("FMOD Studio: Cannot open network port for Live Update, restarting with Live Update disabled. Check for other applications that are running FMOD Studio", null);
-				this.Initialiase(true);
-			}
-			else
-			{
-				foreach (string text in settings.Plugins)
+				result2 = global::FMOD.Studio.System.create(out this.studioSystem);
+				this.CheckInitResult(result2, "FMOD.Studio.System.create");
+				result2 = this.studioSystem.getLowLevelSystem(out this.lowlevelSystem);
+				this.CheckInitResult(result2, "FMOD.Studio.System.getLowLevelSystem");
+				result2 = this.lowlevelSystem.setOutput(outputtype);
+				this.CheckInitResult(result2, "FMOD.System.setOutput");
+				result2 = this.lowlevelSystem.setSoftwareChannels(num);
+				this.CheckInitResult(result2, "FMOD.System.setSoftwareChannels");
+				result2 = this.lowlevelSystem.setSoftwareFormat(sampleRate, speakerMode, 0);
+				this.CheckInitResult(result2, "FMOD.System.setSoftwareFormat");
+				result2 = this.lowlevelSystem.setAdvancedSettings(ref advancedsettings);
+				this.CheckInitResult(result2, "FMOD.System.setAdvancedSettings");
+				result2 = this.studioSystem.initialize(virtualChannels, initflags, global::FMOD.INITFLAGS.NORMAL, IntPtr.Zero);
+				if (result2 != RESULT.OK && result == RESULT.OK)
 				{
-					string pluginPath = RuntimeUtils.GetPluginPath(text);
-					uint num2;
-					result = this.lowlevelSystem.loadPlugin(pluginPath, out num2);
-					if (result == RESULT.ERR_FILE_BAD || result == RESULT.ERR_FILE_NOTFOUND)
-					{
-						string pluginPath2 = RuntimeUtils.GetPluginPath(text + "64");
-						result = this.lowlevelSystem.loadPlugin(pluginPath2, out num2);
-					}
-					this.CheckInitResult(result, string.Format("Loading plugin '{0}' from '{1}'", text, pluginPath));
-					this.loadedPlugins.Add(text, num2);
+					result = result2;
+					outputtype = OUTPUTTYPE.NOSOUND;
+					global::Debug.LogErrorFormat("FMOD Studio: Studio::System::initialize returned {0}, defaulting to no-sound mode.", new object[] { result2.ToString() });
 				}
-				if (settings.ImportType == ImportType.StreamingAssets)
+				else
 				{
-					try
+					this.CheckInitResult(result2, "Studio::System::initialize");
+					if ((initflags & global::FMOD.Studio.INITFLAGS.LIVEUPDATE) == global::FMOD.Studio.INITFLAGS.NORMAL)
 					{
-						RuntimeManager.LoadBank(settings.MasterBank + ".strings", settings.AutomaticSampleLoading);
+						break;
 					}
-					catch (BankLoadException ex)
+					this.studioSystem.flushCommands();
+					result2 = this.studioSystem.update();
+					if (result2 != RESULT.ERR_NET_SOCKET_ERROR)
 					{
-						global::Debug.LogException(ex);
+						break;
 					}
-					if (settings.AutomaticEventLoading)
-					{
-						try
-						{
-							RuntimeManager.LoadBank(settings.MasterBank, settings.AutomaticSampleLoading);
-						}
-						catch (BankLoadException ex2)
-						{
-							global::Debug.LogException(ex2);
-						}
-						foreach (string text2 in settings.Banks)
-						{
-							try
-							{
-								RuntimeManager.LoadBank(text2, settings.AutomaticSampleLoading);
-							}
-							catch (BankLoadException ex3)
-							{
-								global::Debug.LogException(ex3);
-							}
-						}
-						RuntimeManager.WaitForAllLoads();
-					}
+					initflags &= ~global::FMOD.Studio.INITFLAGS.LIVEUPDATE;
+					global::Debug.LogWarning("FMOD Studio: Cannot open network port for Live Update (in-use), restarting with Live Update disabled.", null);
+					result2 = this.studioSystem.release();
+					this.CheckInitResult(result2, "FMOD.Studio.System.Release");
 				}
 			}
-			ChannelGroup channelGroup;
-			this.lowlevelSystem.getMasterChannelGroup(out channelGroup);
-			channelGroup.getDSP(0, out this.mixerHead);
-			this.mixerHead.setMeteringEnabled(false, true);
+			this.LoadPlugins(settings);
+			this.LoadBanks(settings);
+			this.initializedSuccessfully = result2 == RESULT.OK;
+			return result;
 		}
 
 		private void Update()
 		{
-			if (this.studioSystem != null)
+			if (this.studioSystem.isValid() && RuntimeManager.IsInitialized)
 			{
 				this.studioSystem.update();
 				bool flag = false;
@@ -263,7 +231,7 @@ namespace FMODUnity
 			RuntimeManager runtimeManager = RuntimeManager.Instance;
 			for (int i = 0; i < runtimeManager.attachedInstances.Count; i++)
 			{
-				if (runtimeManager.attachedInstances[i].instance == instance)
+				if (runtimeManager.attachedInstances[i].instance.handle == instance.handle)
 				{
 					runtimeManager.attachedInstances.RemoveAt(i);
 					return;
@@ -273,7 +241,7 @@ namespace FMODUnity
 
 		private void OnGUI()
 		{
-			if (this.studioSystem != null && Settings.Instance.IsOverlayEnabled(this.fmodPlatform))
+			if (this.studioSystem.isValid() && Settings.Instance.IsOverlayEnabled(this.fmodPlatform))
 			{
 				this.windowRect = GUI.Window(0, this.windowRect, new GUI.WindowFunction(this.DrawDebugOverlay), "FMOD Studio Debug");
 			}
@@ -289,10 +257,17 @@ namespace FMODUnity
 				}
 				else
 				{
+					if (!this.mixerHead.hasHandle())
+					{
+						ChannelGroup channelGroup;
+						this.lowlevelSystem.getMasterChannelGroup(out channelGroup);
+						channelGroup.getDSP(0, out this.mixerHead);
+						this.mixerHead.setMeteringEnabled(false, true);
+					}
 					StringBuilder stringBuilder = new StringBuilder();
 					CPU_USAGE cpu_USAGE;
 					this.studioSystem.getCPUUsage(out cpu_USAGE);
-					stringBuilder.AppendFormat("CPU: dsp = {0:F1}%, studio = {1:F1}%\n", cpu_USAGE.dspUsage, cpu_USAGE.studioUsage);
+					stringBuilder.AppendFormat("CPU: dsp = {0:F1}%, studio = {1:F1}%\n", cpu_USAGE.dspusage, cpu_USAGE.studiousage);
 					int num;
 					int num2;
 					Memory.GetStats(out num, out num2);
@@ -301,8 +276,8 @@ namespace FMODUnity
 					int num4;
 					this.lowlevelSystem.getChannelsPlaying(out num3, out num4);
 					stringBuilder.AppendFormat("CHANNELS: real = {0}, total = {1}\n", num4, num3);
-					DSP_METERING_INFO dsp_METERING_INFO = new DSP_METERING_INFO();
-					this.mixerHead.getMeteringInfo(null, dsp_METERING_INFO);
+					DSP_METERING_INFO dsp_METERING_INFO;
+					this.mixerHead.getMeteringInfo(IntPtr.Zero, out dsp_METERING_INFO);
 					float num5 = 0f;
 					for (int i = 0; i < (int)dsp_METERING_INFO.numchannels; i++)
 					{
@@ -325,18 +300,16 @@ namespace FMODUnity
 
 		private void OnDisable()
 		{
-			this.cachedPointers[0] = (long)this.studioSystem.getRaw();
-			this.cachedPointers[1] = (long)this.lowlevelSystem.getRaw();
-			this.cachedPointers[2] = (long)this.mixerHead.getRaw();
+			this.cachedPointers[0] = (long)this.studioSystem.handle;
+			this.cachedPointers[1] = (long)this.lowlevelSystem.handle;
 		}
 
 		private void OnDestroy()
 		{
-			if (this.studioSystem != null)
+			if (this.studioSystem.isValid())
 			{
-				global::Debug.Log("FMOD Studio: Destroying runtime system instance", null);
 				this.studioSystem.release();
-				this.studioSystem = null;
+				this.studioSystem.clearHandle();
 			}
 			RuntimeManager.initException = null;
 			RuntimeManager.instance = null;
@@ -345,9 +318,12 @@ namespace FMODUnity
 
 		private void OnApplicationPause(bool pauseStatus)
 		{
-			if (this.studioSystem != null && this.studioSystem.isValid())
+			if (this.studioSystem.isValid())
 			{
-				RuntimeManager.PauseAllEvents(pauseStatus);
+				if (this.loadedBanks.Count > 1)
+				{
+					RuntimeManager.PauseAllEvents(pauseStatus);
+				}
 				if (pauseStatus)
 				{
 					this.lowlevelSystem.mixerSuspend();
@@ -356,6 +332,28 @@ namespace FMODUnity
 				{
 					this.lowlevelSystem.mixerResume();
 				}
+			}
+		}
+
+		private void loadedBankRegister(RuntimeManager.LoadedBank loadedBank, string bankPath, string bankName, bool loadSamples, RESULT loadResult)
+		{
+			if (loadResult == RESULT.OK)
+			{
+				loadedBank.RefCount = 1;
+				if (loadSamples)
+				{
+					loadedBank.Bank.loadSampleData();
+				}
+				RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank);
+			}
+			else
+			{
+				if (loadResult != RESULT.ERR_EVENT_ALREADY_LOADED)
+				{
+					throw new BankLoadException(bankPath, loadResult);
+				}
+				loadedBank.RefCount = 2;
+				RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank);
 			}
 		}
 
@@ -369,30 +367,14 @@ namespace FMODUnity
 				{
 					loadedBank.Bank.loadSampleData();
 				}
+				RuntimeManager.Instance.loadedBanks[bankName] = loadedBank;
 			}
 			else
 			{
-				RuntimeManager.LoadedBank loadedBank2 = default(RuntimeManager.LoadedBank);
 				string bankPath = RuntimeUtils.GetBankPath(bankName);
+				RuntimeManager.LoadedBank loadedBank2 = default(RuntimeManager.LoadedBank);
 				RESULT result = RuntimeManager.Instance.studioSystem.loadBankFile(bankPath, LOAD_BANK_FLAGS.NORMAL, out loadedBank2.Bank);
-				if (result == RESULT.OK)
-				{
-					loadedBank2.RefCount = 1;
-					RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank2);
-					if (loadSamples)
-					{
-						loadedBank2.Bank.loadSampleData();
-					}
-				}
-				else
-				{
-					if (result != RESULT.ERR_EVENT_ALREADY_LOADED)
-					{
-						throw new BankLoadException(bankPath, result);
-					}
-					loadedBank2.RefCount = 2;
-					RuntimeManager.Instance.loadedBanks.Add(bankName, loadedBank2);
-				}
+				RuntimeManager.Instance.loadedBankRegister(loadedBank2, bankPath, bankName, loadSamples, result);
 			}
 		}
 
@@ -433,6 +415,30 @@ namespace FMODUnity
 			}
 		}
 
+		private void LoadBanks(Settings fmodSettings)
+		{
+			if (fmodSettings.ImportType == ImportType.StreamingAssets)
+			{
+				try
+				{
+					RuntimeManager.LoadBank(fmodSettings.MasterBank + ".strings", fmodSettings.AutomaticSampleLoading);
+					if (fmodSettings.AutomaticEventLoading)
+					{
+						RuntimeManager.LoadBank(fmodSettings.MasterBank, fmodSettings.AutomaticSampleLoading);
+						foreach (string text in fmodSettings.Banks)
+						{
+							RuntimeManager.LoadBank(text, fmodSettings.AutomaticSampleLoading);
+						}
+						RuntimeManager.WaitForAllLoads();
+					}
+				}
+				catch (BankLoadException ex)
+				{
+					global::Debug.LogException(ex);
+				}
+			}
+		}
+
 		public static void UnloadBank(string bankName)
 		{
 			RuntimeManager.LoadedBank loadedBank;
@@ -443,7 +449,9 @@ namespace FMODUnity
 				{
 					loadedBank.Bank.unload();
 					RuntimeManager.Instance.loadedBanks.Remove(bankName);
+					return;
 				}
+				RuntimeManager.Instance.loadedBanks[bankName] = loadedBank;
 			}
 		}
 
@@ -498,9 +506,8 @@ namespace FMODUnity
 
 		public static EventInstance CreateInstance(Guid guid)
 		{
-			EventDescription eventDescription = RuntimeManager.GetEventDescription(guid);
 			EventInstance eventInstance;
-			eventDescription.createInstance(out eventInstance);
+			RuntimeManager.GetEventDescription(guid).createInstance(out eventInstance);
 			return eventInstance;
 		}
 
@@ -512,7 +519,7 @@ namespace FMODUnity
 			}
 			catch (EventNotFoundException)
 			{
-				throw new EventNotFoundException(path);
+				global::Debug.LogWarning("FMOD Event not found: " + path, null);
 			}
 		}
 
@@ -532,7 +539,7 @@ namespace FMODUnity
 			}
 			catch (EventNotFoundException)
 			{
-				throw new EventNotFoundException(path);
+				global::Debug.LogWarning("FMOD Event not found: " + path, null);
 			}
 		}
 
@@ -560,7 +567,7 @@ namespace FMODUnity
 
 		public static EventDescription GetEventDescription(Guid guid)
 		{
-			EventDescription eventDescription = null;
+			EventDescription eventDescription;
 			if (RuntimeManager.Instance.cachedDescriptions.ContainsKey(guid) && RuntimeManager.Instance.cachedDescriptions[guid].isValid())
 			{
 				eventDescription = RuntimeManager.Instance.cachedDescriptions[guid];
@@ -572,7 +579,7 @@ namespace FMODUnity
 				{
 					throw new EventNotFoundException(guid);
 				}
-				if (eventDescription != null && eventDescription.isValid())
+				if (eventDescription.isValid())
 				{
 					RuntimeManager.Instance.cachedDescriptions[guid] = eventDescription;
 				}
@@ -612,24 +619,22 @@ namespace FMODUnity
 
 		public static Bus GetBus(string path)
 		{
-			Bus bus2;
-			RESULT bus = RuntimeManager.StudioSystem.getBus(path, out bus2);
-			if (bus != RESULT.OK)
+			Bus bus;
+			if (RuntimeManager.StudioSystem.getBus(path, out bus) != RESULT.OK)
 			{
 				throw new BusNotFoundException(path);
 			}
-			return bus2;
+			return bus;
 		}
 
 		public static VCA GetVCA(string path)
 		{
-			VCA vca2;
-			RESULT vca = RuntimeManager.StudioSystem.getVCA(path, out vca2);
-			if (vca != RESULT.OK)
+			VCA vca;
+			if (RuntimeManager.StudioSystem.getVCA(path, out vca) != RESULT.OK)
 			{
 				throw new VCANotFoundException(path);
 			}
-			return vca2;
+			return vca;
 		}
 
 		public static void PauseAllEvents(bool paused)
@@ -646,38 +651,42 @@ namespace FMODUnity
 		{
 			get
 			{
-				return RuntimeManager.instance != null && RuntimeManager.instance.studioSystem != null;
+				return RuntimeManager.instance != null && RuntimeManager.instance.studioSystem.isValid() && RuntimeManager.instance.initializedSuccessfully;
 			}
 		}
 
-		public void SetDeviceToPreviouslySelected()
+		public static bool HasBanksLoaded
 		{
-			if (KPlayerPrefs.HasKey("AudioDeviceGuid"))
+			get
 			{
-				Guid guid = new Guid(KPlayerPrefs.GetString("AudioDeviceGuid"));
-				int num;
-				RuntimeManager.LowlevelSystem.getNumDrivers(out num);
-				for (int i = 0; i < num; i++)
-				{
-					KFMOD.AudioDevice audioDevice = default(KFMOD.AudioDevice);
-					StringBuilder stringBuilder = new StringBuilder();
-					stringBuilder.Capacity = 64;
-					RuntimeManager.LowlevelSystem.getDriverInfo(i, stringBuilder, stringBuilder.Capacity, out audioDevice.guid, out audioDevice.systemRate, out audioDevice.speakerMode, out audioDevice.speakerModeChannels);
-					audioDevice.name = stringBuilder.ToString();
-					audioDevice.fmod_id = i;
-					if (audioDevice.guid == guid)
-					{
-						this.lowlevelSystem.setDriver(i);
-						KFMOD.currentDevice = audioDevice;
-						return;
-					}
-				}
-				global::Debug.Log("The saved driver does not exist, defaulting to Windows default", null);
-				this.lowlevelSystem.setDriver(0);
+				return RuntimeManager.Instance.loadedBanks.Count > 1;
 			}
 		}
 
-		public bool initializedSuccessfully;
+		public static bool HasBankLoaded(string loadedBank)
+		{
+			return RuntimeManager.instance.loadedBanks.ContainsKey(loadedBank);
+		}
+
+		private void LoadPlugins(Settings fmodSettings)
+		{
+			foreach (string text in fmodSettings.Plugins)
+			{
+				if (!string.IsNullOrEmpty(text))
+				{
+					string pluginPath = RuntimeUtils.GetPluginPath(text);
+					uint num;
+					RESULT result = this.lowlevelSystem.loadPlugin(pluginPath, out num);
+					if (result == RESULT.ERR_FILE_BAD || result == RESULT.ERR_FILE_NOTFOUND)
+					{
+						string pluginPath2 = RuntimeUtils.GetPluginPath(text + "64");
+						result = this.lowlevelSystem.loadPlugin(pluginPath2, out num);
+					}
+					this.CheckInitResult(result, string.Format("Loading plugin '{0}' from '{1}'", text, pluginPath));
+					this.loadedPlugins.Add(text, num);
+				}
+			}
+		}
 
 		private static SystemNotInitializedException initException = null;
 
@@ -695,7 +704,7 @@ namespace FMODUnity
 		private DSP mixerHead;
 
 		[SerializeField]
-		private long[] cachedPointers = new long[3];
+		private long[] cachedPointers = new long[2];
 
 		private Dictionary<string, RuntimeManager.LoadedBank> loadedBanks = new Dictionary<string, RuntimeManager.LoadedBank>();
 

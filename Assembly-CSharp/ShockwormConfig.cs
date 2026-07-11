@@ -25,8 +25,7 @@ public class ShockwormConfig : IEntityConfig
 		int num2 = 3;
 		float freezing_ = global::TUNING.CREATURES.TEMPERATURE.FREEZING_1;
 		float hot_ = global::TUNING.CREATURES.TEMPERATURE.HOT_1;
-		float hot_2 = global::TUNING.CREATURES.TEMPERATURE.HOT_2;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, text4, text3, navType, 32, num, text2, num2, true, true, 30f, freezing_, hot_, global::TUNING.CREATURES.TEMPERATURE.FREEZING_2, hot_2);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, text4, text3, navType, 32, num, text2, num2, true, true, freezing_, hot_, global::TUNING.CREATURES.TEMPERATURE.FREEZING_2, global::TUNING.CREATURES.TEMPERATURE.HOT_2);
 		gameObject.AddOrGet<LoopingSounds>();
 		Weapon weapon = gameObject.AddWeapon(3f, 6f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.AreaOfEffect, 10, 4f);
 		weapon.AddEffect("WasAttacked", 1f);

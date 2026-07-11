@@ -38,7 +38,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 		{
 			if (this.diseaseConsumptionHandle.IsValid())
 			{
-				Game.Instance.complexCallbackManager.Release(this.diseaseConsumptionHandle);
+				Game.Instance.complexCallbackManager.Release(this.diseaseConsumptionHandle, "Disease consumption cb");
 				this.diseaseConsumptionHandle.Clear();
 			}
 			base.StopSM(reason);
@@ -71,6 +71,7 @@ public class SkinInfectionMonitor : GameStateMachine<SkinInfectionMonitor, SkinI
 				int num = Grid.PosToCell(base.master.transform.GetPosition());
 				int num2 = Grid.CellAbove(num);
 				int num3 = Grid.CellBelow(num);
+				Game.Instance.complexCallbackManager.GetItem(this.diseaseConsumptionHandle);
 				SimMessages.ConsumeDisease(num, 0.016666668f, 250000, this.diseaseConsumptionHandle.index);
 				if (Grid.IsValidCell(num2))
 				{

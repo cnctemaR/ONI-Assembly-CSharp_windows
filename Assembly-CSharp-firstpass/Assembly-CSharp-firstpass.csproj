@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{2D43BE79-B74F-4FB4-86F9-6B31073B6584}</ProjectGuid>
+    <ProjectGuid>{CD819B00-F480-4949-A228-455D0DF9F974}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Assembly-CSharp-firstpass</RootNamespace>
     <AssemblyName>Assembly-CSharp-firstpass</AssemblyName>
@@ -66,13 +66,13 @@
     <Compile Include="ColorStyleSetting.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="ContainerPool.cs" />
-    <Compile Include="CoroutineManager.cs" />
     <Compile Include="CSVUtil.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="DebugExtension.cs" />
     <Compile Include="DebugHashes.cs" />
     <Compile Include="DebugUtil.cs" />
     <Compile Include="DeepProfiler.cs" />
+    <Compile Include="DefHandle.cs" />
     <Compile Include="Delaunay\DelaunayHelpers.cs" />
     <Compile Include="Delaunay\Edge.cs" />
     <Compile Include="Delaunay\EdgeList.cs" />
@@ -97,6 +97,7 @@
     <Compile Include="Delaunay\Voronoi.cs" />
     <Compile Include="Descriptor.cs" />
     <Compile Include="DetailScreenTabHeader.cs" />
+    <Compile Include="DictionaryPool.cs" />
     <Compile Include="DistributionPlatform.cs" />
     <Compile Include="DrawUtil.cs" />
     <Compile Include="ElementBandConfiguration.cs" />
@@ -111,7 +112,6 @@
     <Compile Include="FixGUITextCS.cs" />
     <Compile Include="FloatHOTQueue.cs" />
     <Compile Include="FMODAsset.cs" />
-    <Compile Include="FMODReset.cs" />
     <Compile Include="FMODUnity\BankLoadException.cs" />
     <Compile Include="FMODUnity\BankRefAttribute.cs" />
     <Compile Include="FMODUnity\BusNotFoundException.cs" />
@@ -145,7 +145,6 @@
     <Compile Include="FMOD\ATTRIBUTES_3D.cs" />
     <Compile Include="FMOD\CB_3D_ROLLOFFCALLBACK.cs" />
     <Compile Include="FMOD\Channel.cs" />
-    <Compile Include="FMOD\ChannelControl.cs" />
     <Compile Include="FMOD\CHANNELCONTROL_CALLBACK_TYPE.cs" />
     <Compile Include="FMOD\CHANNELCONTROL_DSP_INDEX.cs" />
     <Compile Include="FMOD\CHANNELCONTROL_TYPE.cs" />
@@ -156,7 +155,6 @@
     <Compile Include="FMOD\COMPLEX.cs" />
     <Compile Include="FMOD\CONSTANTS.cs" />
     <Compile Include="FMOD\CREATESOUNDEXINFO.cs" />
-    <Compile Include="FMOD\CREATESOUNDEXINFO_INTERNAL.cs" />
     <Compile Include="FMOD\Debug.cs" />
     <Compile Include="FMOD\DEBUG_CALLBACK.cs" />
     <Compile Include="FMOD\DEBUG_FLAGS.cs" />
@@ -165,6 +163,7 @@
     <Compile Include="FMOD\DSP.cs" />
     <Compile Include="FMOD\DSPConnection.cs" />
     <Compile Include="FMOD\DSPCONNECTION_TYPE.cs" />
+    <Compile Include="FMOD\DSP_ALLOC_FUNC.cs" />
     <Compile Include="FMOD\DSP_BUFFER_ARRAY.cs" />
     <Compile Include="FMOD\DSP_CHANNELMIX.cs" />
     <Compile Include="FMOD\DSP_CHANNELMIX_OUTPUT.cs" />
@@ -174,41 +173,52 @@
     <Compile Include="FMOD\DSP_CREATECALLBACK.cs" />
     <Compile Include="FMOD\DSP_DELAY.cs" />
     <Compile Include="FMOD\DSP_DESCRIPTION.cs" />
-    <Compile Include="FMOD\DSP_DFT_FFTREAL.cs" />
-    <Compile Include="FMOD\DSP_DFT_IFFTREAL.cs" />
+    <Compile Include="FMOD\DSP_DFT_FFTREAL_FUNC.cs" />
+    <Compile Include="FMOD\DSP_DFT_IFFTREAL_FUNC.cs" />
     <Compile Include="FMOD\DSP_DISTORTION.cs" />
     <Compile Include="FMOD\DSP_ECHO.cs" />
     <Compile Include="FMOD\DSP_ENVELOPEFOLLOWER.cs" />
+    <Compile Include="FMOD\DSP_FADER.cs" />
     <Compile Include="FMOD\DSP_FFT.cs" />
     <Compile Include="FMOD\DSP_FFT_WINDOW.cs" />
     <Compile Include="FMOD\DSP_FLANGE.cs" />
+    <Compile Include="FMOD\DSP_FREE_FUNC.cs" />
+    <Compile Include="FMOD\DSP_GETBLOCKSIZE_FUNC.cs" />
+    <Compile Include="FMOD\DSP_GETCLOCK_FUNC.cs" />
+    <Compile Include="FMOD\DSP_GETLISTENERATTRIBUTES_FUNC.cs" />
     <Compile Include="FMOD\DSP_GETPARAM_BOOL_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_GETPARAM_DATA_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_GETPARAM_FLOAT_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_GETPARAM_INT_CALLBACK.cs" />
+    <Compile Include="FMOD\DSP_GETSAMPLERATE_FUNC.cs" />
+    <Compile Include="FMOD\DSP_GETSPEAKERMODE_FUNC.cs" />
+    <Compile Include="FMOD\DSP_GETUSERDATA_FUNC.cs" />
     <Compile Include="FMOD\DSP_HIGHPASS.cs" />
     <Compile Include="FMOD\DSP_HIGHPASS_SIMPLE.cs" />
     <Compile Include="FMOD\DSP_ITECHO.cs" />
     <Compile Include="FMOD\DSP_ITLOWPASS.cs" />
     <Compile Include="FMOD\DSP_LIMITER.cs" />
+    <Compile Include="FMOD\DSP_LOG_FUNC.cs" />
     <Compile Include="FMOD\DSP_LOWPASS.cs" />
     <Compile Include="FMOD\DSP_LOWPASS_SIMPLE.cs" />
     <Compile Include="FMOD\DSP_METERING_INFO.cs" />
+    <Compile Include="FMOD\DSP_MULTIBAND_EQ.cs" />
+    <Compile Include="FMOD\DSP_MULTIBAND_EQ_FILTER_TYPE.cs" />
     <Compile Include="FMOD\DSP_NORMALIZE.cs" />
     <Compile Include="FMOD\DSP_OBJECTPAN.cs" />
     <Compile Include="FMOD\DSP_OSCILLATOR.cs" />
     <Compile Include="FMOD\DSP_PAN.cs" />
+    <Compile Include="FMOD\DSP_PAN_2D_STEREO_MODE_TYPE.cs" />
     <Compile Include="FMOD\DSP_PAN_3D_EXTENT_MODE_TYPE.cs" />
-    <Compile Include="FMOD\DSP_PAN_3D_GET_ROLLOFF_GAIN.cs" />
     <Compile Include="FMOD\DSP_PAN_3D_ROLLOFF_TYPE.cs" />
+    <Compile Include="FMOD\DSP_PAN_GETROLLOFFGAIN_FUNC.cs" />
     <Compile Include="FMOD\DSP_PAN_MODE_TYPE.cs" />
-    <Compile Include="FMOD\DSP_PAN_SUM_MONO_MATRIX.cs" />
-    <Compile Include="FMOD\DSP_PAN_SUM_MONO_TO_SURROUND_MATRIX.cs" />
-    <Compile Include="FMOD\DSP_PAN_SUM_STEREO_MATRIX.cs" />
-    <Compile Include="FMOD\DSP_PAN_SUM_STEREO_TO_SURROUND_MATRIX.cs" />
-    <Compile Include="FMOD\DSP_PAN_SUM_SURROUND_MATRIX.cs" />
+    <Compile Include="FMOD\DSP_PAN_SUMMONOMATRIX_FUNC.cs" />
+    <Compile Include="FMOD\DSP_PAN_SUMMONOTOSURROUNDMATRIX_FUNC.cs" />
+    <Compile Include="FMOD\DSP_PAN_SUMSTEREOMATRIX_FUNC.cs" />
+    <Compile Include="FMOD\DSP_PAN_SUMSTEREOTOSURROUNDMATRIX_FUNC.cs" />
+    <Compile Include="FMOD\DSP_PAN_SUMSURROUNDMATRIX_FUNC.cs" />
     <Compile Include="FMOD\DSP_PAN_SURROUND_FLAGS.cs" />
-    <Compile Include="FMOD\DSP_PAN_SURROUND_FROM_STEREO_MODE_TYPE.cs" />
     <Compile Include="FMOD\DSP_PARAMEQ.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_3DATTRIBUTES.cs" />
     <Compile Include="FMOD\DSP_PARAMETER_3DATTRIBUTES_MULTI.cs" />
@@ -230,6 +240,7 @@
     <Compile Include="FMOD\DSP_PROCESS_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_PROCESS_OPERATION.cs" />
     <Compile Include="FMOD\DSP_READCALLBACK.cs" />
+    <Compile Include="FMOD\DSP_REALLOC_FUNC.cs" />
     <Compile Include="FMOD\DSP_RELEASECALLBACK.cs" />
     <Compile Include="FMOD\DSP_RESAMPLER.cs" />
     <Compile Include="FMOD\DSP_RESETCALLBACK.cs" />
@@ -243,15 +254,10 @@
     <Compile Include="FMOD\DSP_SFXREVERB.cs" />
     <Compile Include="FMOD\DSP_SHOULDIPROCESS_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_STATE.cs" />
-    <Compile Include="FMOD\DSP_STATE_DFTCALLBACKS.cs" />
-    <Compile Include="FMOD\DSP_STATE_GETCLOCK.cs" />
-    <Compile Include="FMOD\DSP_STATE_GETLISTENERATTRIBUTES.cs" />
-    <Compile Include="FMOD\DSP_STATE_PAN_CALLBACKS.cs" />
-    <Compile Include="FMOD\DSP_STATE_SYSTEMCALLBACKS.cs" />
+    <Compile Include="FMOD\DSP_STATE_DFT_FUNCTIONS.cs" />
+    <Compile Include="FMOD\DSP_STATE_FUNCTIONS.cs" />
+    <Compile Include="FMOD\DSP_STATE_PAN_FUNCTIONS.cs" />
     <Compile Include="FMOD\DSP_SYSTEM_DEREGISTER_CALLBACK.cs" />
-    <Compile Include="FMOD\DSP_SYSTEM_GETBLOCKSIZE.cs" />
-    <Compile Include="FMOD\DSP_SYSTEM_GETSAMPLERATE.cs" />
-    <Compile Include="FMOD\DSP_SYSTEM_GETSPEAKERMODE.cs" />
     <Compile Include="FMOD\DSP_SYSTEM_MIX_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_SYSTEM_REGISTER_CALLBACK.cs" />
     <Compile Include="FMOD\DSP_THREE_EQ.cs" />
@@ -271,7 +277,7 @@
     <Compile Include="FMOD\FILE_READCALLBACK.cs" />
     <Compile Include="FMOD\FILE_SEEKCALLBACK.cs" />
     <Compile Include="FMOD\Geometry.cs" />
-    <Compile Include="FMOD\HandleBase.cs" />
+    <Compile Include="FMOD\IChannelControl.cs" />
     <Compile Include="FMOD\INITFLAGS.cs" />
     <Compile Include="FMOD\Memory.cs" />
     <Compile Include="FMOD\MEMORY_ALLOC_CALLBACK.cs" />
@@ -298,7 +304,7 @@
     <Compile Include="FMOD\SOUND_TYPE.cs" />
     <Compile Include="FMOD\SPEAKER.cs" />
     <Compile Include="FMOD\SPEAKERMODE.cs" />
-    <Compile Include="FMOD\StringMarshalHelper.cs" />
+    <Compile Include="FMOD\StringHelper.cs" />
     <Compile Include="FMOD\StringWrapper.cs" />
     <Compile Include="FMOD\Studio\ADVANCEDSETTINGS.cs" />
     <Compile Include="FMOD\Studio\Bank.cs" />
@@ -313,30 +319,25 @@
     <Compile Include="FMOD\Studio\COMMANDREPLAY_FRAME_CALLBACK.cs" />
     <Compile Include="FMOD\Studio\COMMANDREPLAY_LOAD_BANK_CALLBACK.cs" />
     <Compile Include="FMOD\Studio\COMMAND_INFO.cs" />
-    <Compile Include="FMOD\Studio\COMMAND_INFO_INTERNAL.cs" />
     <Compile Include="FMOD\Studio\CPU_USAGE.cs" />
     <Compile Include="FMOD\Studio\EventDescription.cs" />
     <Compile Include="FMOD\Studio\EventInstance.cs" />
     <Compile Include="FMOD\Studio\EVENT_CALLBACK.cs" />
     <Compile Include="FMOD\Studio\EVENT_CALLBACK_TYPE.cs" />
     <Compile Include="FMOD\Studio\EVENT_PROPERTY.cs" />
-    <Compile Include="FMOD\Studio\HandleBase.cs" />
     <Compile Include="FMOD\Studio\INITFLAGS.cs" />
     <Compile Include="FMOD\Studio\INSTANCETYPE.cs" />
     <Compile Include="FMOD\Studio\LOADING_STATE.cs" />
     <Compile Include="FMOD\Studio\LOAD_BANK_FLAGS.cs" />
+    <Compile Include="FMOD\Studio\LOAD_MEMORY_ALIGNMENT.cs" />
     <Compile Include="FMOD\Studio\LOAD_MEMORY_MODE.cs" />
-    <Compile Include="FMOD\Studio\MarshallingHelper.cs" />
-    <Compile Include="FMOD\Studio\ParameterID.cs" />
     <Compile Include="FMOD\Studio\ParameterInstance.cs" />
     <Compile Include="FMOD\Studio\PARAMETER_DESCRIPTION.cs" />
-    <Compile Include="FMOD\Studio\PARAMETER_DESCRIPTION_INTERNAL.cs" />
     <Compile Include="FMOD\Studio\PARAMETER_TYPE.cs" />
     <Compile Include="FMOD\Studio\PLAYBACK_STATE.cs" />
     <Compile Include="FMOD\Studio\PLUGIN_INSTANCE_PROPERTIES.cs" />
     <Compile Include="FMOD\Studio\PROGRAMMER_SOUND_PROPERTIES.cs" />
     <Compile Include="FMOD\Studio\SOUND_INFO.cs" />
-    <Compile Include="FMOD\Studio\SOUND_INFO_INTERNAL.cs" />
     <Compile Include="FMOD\Studio\STOP_MODE.cs" />
     <Compile Include="FMOD\Studio\STUDIO_VERSION.cs" />
     <Compile Include="FMOD\Studio\System.cs" />
@@ -346,7 +347,6 @@
     <Compile Include="FMOD\Studio\TIMELINE_MARKER_PROPERTIES.cs" />
     <Compile Include="FMOD\Studio\Union_IntBoolFloatString.cs" />
     <Compile Include="FMOD\Studio\USER_PROPERTY.cs" />
-    <Compile Include="FMOD\Studio\USER_PROPERTY_INTERNAL.cs" />
     <Compile Include="FMOD\Studio\USER_PROPERTY_TYPE.cs" />
     <Compile Include="FMOD\Studio\Util.cs" />
     <Compile Include="FMOD\Studio\VCA.cs" />
@@ -391,7 +391,6 @@
     <Compile Include="ImageToggleState.cs" />
     <Compile Include="ImageToggleStateThrobber.cs" />
     <Compile Include="InputEventType.cs" />
-    <Compile Include="IPreUpdater.cs" />
     <Compile Include="IReader.cs" />
     <Compile Include="IRender1000ms.cs" />
     <Compile Include="IRender200ms.cs" />
@@ -407,8 +406,7 @@
     <Compile Include="IStateMachineTarget.cs" />
     <Compile Include="IUniformGridObject.cs" />
     <Compile Include="IWorkItem.cs" />
-    <Compile Include="Job.2.cs" />
-    <Compile Include="Job.cs" />
+    <Compile Include="IWorkItemCollection.cs" />
     <Compile Include="JobManager.cs" />
     <Compile Include="KAlign.cs" />
     <Compile Include="KAnim.cs" />
@@ -443,7 +441,6 @@
     <Compile Include="KImage.cs" />
     <Compile Include="KImageButton.cs" />
     <Compile Include="KImageToggle.cs" />
-    <Compile Include="KInput.cs" />
     <Compile Include="KInputBinding.cs" />
     <Compile Include="KInputController.cs" />
     <Compile Include="KInputEvent.cs" />
@@ -503,6 +500,7 @@
     <Compile Include="LibNoiseDotNet\Graphics\Tools\Noise\Modifier\Scale2d.cs" />
     <Compile Include="LinearDictionary.cs" />
     <Compile Include="ListPool.cs" />
+    <Compile Include="LoadProfiler.cs" />
     <Compile Include="Logger.2.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="LoggerFIO.cs" />
@@ -589,13 +587,13 @@
     <Compile Include="NodeEditorFramework\Utilities\PopupMenu.cs" />
     <Compile Include="NodeEditorFramework\Utilities\ResourceManager.cs" />
     <Compile Include="NodeEditorFramework\Utilities\RTEditorGUI.cs" />
+    <Compile Include="OneShotSoundParameterUpdater.cs" />
     <Compile Include="Output.cs" />
     <Compile Include="Pair.cs" />
     <Compile Include="PerlinNoise.cs" />
     <Compile Include="PerlinSimplexNoise.cs" />
     <Compile Include="PluginAssets.cs" />
     <Compile Include="PointGenerator.cs" />
-    <Compile Include="PreUpdateScheduler.cs" />
     <Compile Include="PriorityQueueDemo\PriorityQueue.cs" />
     <Compile Include="ProcGen\Arc.cs" />
     <Compile Include="ProcGen\BiomeSettings.cs" />
@@ -655,6 +653,7 @@
     <Compile Include="ProcGen\WorldGenSettings.cs" />
     <Compile Include="ProcGen\WorldGenTags.cs" />
     <Compile Include="ProcGen\Worlds.cs" />
+    <Compile Include="ProfilerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RailAPI.cs" />
     <Compile Include="ReadOnlyAttribute.cs" />
@@ -685,6 +684,7 @@
     <Compile Include="SimplexNoise.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="SingletonResource.cs" />
+    <Compile Include="SoundDescription.cs" />
     <Compile Include="SoundListenerController.cs" />
     <Compile Include="StateMachineUpdater.cs" />
     <Compile Include="SteamDistributionPlatform.cs" />
@@ -1044,6 +1044,7 @@
     <Compile Include="Steamworks\Version.cs" />
     <Compile Include="Steamworks\VolumeHasChanged_t.cs" />
     <Compile Include="StringEntry.cs" />
+    <Compile Include="StringFormatter.cs" />
     <Compile Include="StringKey.cs" />
     <Compile Include="Strings.cs" />
     <Compile Include="StringsUnitTest.cs" />
@@ -1169,6 +1170,8 @@
     <Compile Include="Traces.cs" />
     <Compile Include="TracesExtesions.cs" />
     <Compile Include="TransformExtensions.cs" />
+    <Compile Include="TuningData.cs" />
+    <Compile Include="TuningSystem.cs" />
     <Compile Include="Tuple.cs" />
     <Compile Include="UIHashes.cs" />
     <Compile Include="UIUtil.cs" />
@@ -1204,55 +1207,56 @@
     <Compile Include="VoronoiTree\Tree.cs" />
     <Compile Include="WidgetSoundPlayer.cs" />
     <Compile Include="WidgetTransition.cs" />
+    <Compile Include="WorkItemCollection.cs" />
     <Compile Include="WorldGenUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ArabicSupport\ArabicSupport.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B6583}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F973}</Project>
       <Name>ArabicSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\FileHelpers\FileHelpers.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B6587}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F977}</Project>
       <Name>FileHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\libnoise\libnoise.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B658C}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F97C}</Project>
       <Name>libnoise</Name>
     </ProjectReference>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B6590}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F980}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\Newtonsoft.Json\Newtonsoft.Json.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B6591}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F981}</Project>
       <Name>Newtonsoft.Json</Name>
     </ProjectReference>
     <ProjectReference Include="..\Satsuma\Satsuma.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B6593}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F983}</Project>
       <Name>Satsuma</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B6595}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F985}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B659D}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F98D}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B6597}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F987}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B65A1}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F991}</Project>
       <Name>UnityEngine.UI</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B659F}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F98F}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
     <ProjectReference Include="..\YamlDotNet\YamlDotNet.csproj">
-      <Project>{2D43BE79-B74F-4FB4-86F9-6B31073B65A2}</Project>
+      <Project>{CD819B00-F480-4949-A228-455D0DF9F992}</Project>
       <Name>YamlDotNet</Name>
     </ProjectReference>
   </ItemGroup>

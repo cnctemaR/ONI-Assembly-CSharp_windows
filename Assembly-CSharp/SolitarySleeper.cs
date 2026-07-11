@@ -30,7 +30,7 @@ public class SolitarySleeper : StateMachineComponent<SolitarySleeper.StatesInsta
 			{
 				flag2 = false;
 			}
-			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 			{
 				if (flag && Grid.PosToCell(minionIdentity.gameObject) == num4)
 				{

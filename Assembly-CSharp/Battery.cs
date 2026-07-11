@@ -176,7 +176,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		if (report)
 		{
 			float num = Mathf.Min(this.JoulesAvailable, joules);
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -num, BUILDINGS.PREFABS.BATTERY.CHARGE_LOSS.ToString().Replace("{Battery}", this.GetProperName()), null);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -num, StringFormatter.Replace(BUILDINGS.PREFABS.BATTERY.CHARGE_LOSS, "{Battery}", this.GetProperName()), null);
 		}
 		this.joulesAvailable = Mathf.Max(0f, this.JoulesAvailable - joules);
 	}

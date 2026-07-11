@@ -137,10 +137,10 @@ namespace OverlayModes
 				{
 					return;
 				}
-				KPrefabID component2 = root.GetComponent<KPrefabID>();
-				if (component2 != null)
+				KPrefabID component5 = root.GetComponent<KPrefabID>();
+				if (component5 != null)
 				{
-					Tag prefabTag = component2.PrefabTag;
+					Tag prefabTag = component5.PrefabTag;
 					if (prefabTag == wire_id)
 					{
 						this.wireControllers.Remove(root.GetComponent<KBatchedAnimController>());
@@ -174,24 +174,24 @@ namespace OverlayModes
 									{
 										return;
 									}
-									KPrefabID component3 = root.GetComponent<KPrefabID>();
-									if (Logic.HighlightItemIDs.Contains(component3.PrefabTag))
+									KPrefabID component6 = root.GetComponent<KPrefabID>();
+									if (Logic.HighlightItemIDs.Contains(component6.PrefabTag))
 									{
-										if (component3.PrefabTag == wire_id)
+										if (component6.PrefabTag == wire_id)
 										{
 											this.wireControllers.Add(root.GetComponent<KBatchedAnimController>());
 										}
-										else if (component3.PrefabTag == bridge_id)
+										else if (component6.PrefabTag == bridge_id)
 										{
-											KBatchedAnimController component4 = root.GetComponent<KBatchedAnimController>();
-											LogicUtilityNetworkLink component5 = root.GetComponent<LogicUtilityNetworkLink>();
-											int num;
+											KBatchedAnimController component7 = root.GetComponent<KBatchedAnimController>();
+											LogicUtilityNetworkLink component8 = root.GetComponent<LogicUtilityNetworkLink>();
 											int num2;
-											component5.GetCells(out num, out num2);
+											int num3;
+											component8.GetCells(out num2, out num3);
 											this.bridgeControllers.Add(new Logic.BridgeInfo
 											{
-												cell = num,
-												controller = component4
+												cell = num2,
+												controller = component7
 											});
 										}
 									}
@@ -204,9 +204,9 @@ namespace OverlayModes
 									Vector3 position = root.transform.GetPosition();
 									position.z += 2f;
 									root.transform.SetPosition(position);
-									KBatchedAnimController component6 = root.GetComponent<KBatchedAnimController>();
-									component6.enabled = false;
-									component6.enabled = true;
+									KBatchedAnimController component9 = root.GetComponent<KBatchedAnimController>();
+									component9.enabled = false;
+									component9.enabled = true;
 								}, null);
 							}
 						}
@@ -242,6 +242,25 @@ namespace OverlayModes
 						disposable2.Dispose();
 					}
 				}
+				this.connectedNetworks.Clear();
+				float num = 1f;
+				GameObject gameObject = null;
+				if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
+				{
+					gameObject = SelectTool.Instance.hover.gameObject;
+				}
+				if (gameObject != null)
+				{
+					IBridgedNetworkItem component2 = gameObject.GetComponent<IBridgedNetworkItem>();
+					if (component2 != null)
+					{
+						int networkCell = component2.GetNetworkCell();
+						this.visited.Clear();
+						this.FindConnectedNetworks(networkCell, Game.Instance.logicCircuitSystem, this.connectedNetworks, this.visited);
+						this.visited.Clear();
+						num = ModeUtil.GetHighlightScale();
+					}
+				}
 				LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
 				Color32 colourOn = this.uiAsset.colourOn;
 				Color32 colourOff = this.uiAsset.colourOff;
@@ -256,6 +275,16 @@ namespace OverlayModes
 						{
 							color = ((networkForCell.OutputValue <= 0) ? colourOff : colourOn);
 						}
+						if (this.connectedNetworks.Count > 0)
+						{
+							IBridgedNetworkItem component3 = kbatchedAnimController.GetComponent<IBridgedNetworkItem>();
+							if (component3 != null && component3.IsConnectedToNetworks(this.connectedNetworks))
+							{
+								color.r = (byte)((float)color.r * num);
+								color.g = (byte)((float)color.g * num);
+								color.b = (byte)((float)color.b * num);
+							}
+						}
 						kbatchedAnimController.TintColour = color;
 					}
 				}
@@ -268,6 +297,16 @@ namespace OverlayModes
 						if (networkForCell2 != null)
 						{
 							color2 = ((networkForCell2.OutputValue <= 0) ? colourOff : colourOn);
+						}
+						if (this.connectedNetworks.Count > 0)
+						{
+							IBridgedNetworkItem component4 = bridgeInfo.controller.GetComponent<IBridgedNetworkItem>();
+							if (component4 != null && component4.IsConnectedToNetworks(this.connectedNetworks))
+							{
+								color2.r = (byte)((float)color2.r * num);
+								color2.g = (byte)((float)color2.g * num);
+								color2.b = (byte)((float)color2.b * num);
+							}
 						}
 						bridgeInfo.controller.TintColour = color2;
 					}
@@ -341,6 +380,37 @@ namespace OverlayModes
 			return uniformGrid;
 		}
 
+		private void FindConnectedNetworks(int cell, IUtilityNetworkMgr mgr, ICollection<UtilityNetwork> networks, List<int> visited)
+		{
+			if (visited.Contains(cell))
+			{
+				return;
+			}
+			visited.Add(cell);
+			UtilityNetwork networkForCell = mgr.GetNetworkForCell(cell);
+			if (networkForCell != null)
+			{
+				networks.Add(networkForCell);
+				UtilityConnections connections = mgr.GetConnections(cell, false);
+				if ((connections & UtilityConnections.Right) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellRight(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Left) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellLeft(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Up) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellAbove(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Down) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellBelow(cell), mgr, networks, visited);
+				}
+			}
+		}
+
 		public static HashSet<Tag> HighlightItemIDs = new HashSet<Tag>();
 
 		private int conduitTargetLayer;
@@ -358,6 +428,10 @@ namespace OverlayModes
 		private HashSet<ILogicUIElement> workingIOTargets = new HashSet<ILogicUIElement>();
 
 		private HashSet<KBatchedAnimController> wireControllers = new HashSet<KBatchedAnimController>();
+
+		private HashSet<UtilityNetwork> connectedNetworks = new HashSet<UtilityNetwork>();
+
+		private List<int> visited = new List<int>();
 
 		private HashSet<Logic.BridgeInfo> bridgeControllers = new HashSet<Logic.BridgeInfo>();
 

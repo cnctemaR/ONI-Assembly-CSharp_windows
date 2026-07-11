@@ -43,11 +43,11 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			this.movetoranch.MoveTo((RancherChore.RancherChoreStates.Instance smi) => Grid.PosToCell(smi.transform.GetPosition()), this.waitforcreature_pre, null, false).Target(this.masterTarget).EventTransition(GameHashes.CreatureAbandonedRanchStation, this.checkformoreranchables, null);
 			this.waitforcreature_pre.Enter("CheckIfCreatureIsNull", delegate(RancherChore.RancherChoreStates.Instance smi)
 			{
-				if (smi.ranchStation == null)
+				if (smi.ranchStation.IsNullOrStopped())
 				{
 					smi.GoTo(null);
 				}
-				else if (smi.ranchStation.targetRanchable == null)
+				else if (smi.ranchStation.targetRanchable.IsNullOrStopped())
 				{
 					smi.GoTo(this.checkformoreranchables);
 				}
@@ -56,8 +56,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 					smi.GoTo(this.waitforcreature);
 				}
 			});
-			this.waitforcreature.ToggleAnims("anim_interacts_rancherstation_kanim", 0f).ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).PlayAnim("calling_loop", KAnim.PlayMode.Loop)
-				.Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.FaceCreature))
+			this.waitforcreature.ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).PlayAnim("calling_loop", KAnim.PlayMode.Loop).Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.FaceCreature))
 				.Enter("TellCreatureToGoGetRanched", delegate(RancherChore.RancherChoreStates.Instance smi)
 				{
 					smi.ranchStation.SetRancherIsAvailableForRanching();
@@ -69,8 +68,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 				.Target(this.masterTarget)
 				.EventTransition(GameHashes.CreatureArrivedAtRanchStation, this.ranchcreature, null)
 				.EventTransition(GameHashes.CreatureAbandonedRanchStation, this.checkformoreranchables, null);
-			this.ranchcreature.ToggleAnims("anim_interacts_rancherstation_kanim", 0f).ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).DefaultState(this.ranchcreature.pre)
-				.EventTransition(GameHashes.CreatureAbandonedRanchStation, this.checkformoreranchables, null)
+			this.ranchcreature.ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).DefaultState(this.ranchcreature.pre).EventTransition(GameHashes.CreatureAbandonedRanchStation, this.checkformoreranchables, null)
 				.Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.SetCreatureLayer))
 				.Exit(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.ClearCreatureLayer));
 			this.ranchcreature.pre.Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.FaceCreature)).Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.PlayBuildingWorkingPre)).QueueAnim("working_pre", false, null)
@@ -92,7 +90,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 
 		private static void SetCreatureLayer(RancherChore.RancherChoreStates.Instance smi)
 		{
-			if (smi.ranchStation.targetRanchable == null)
+			if (smi.ranchStation.targetRanchable.IsNullOrStopped())
 			{
 				return;
 			}
@@ -101,7 +99,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 
 		private static void ClearCreatureLayer(RancherChore.RancherChoreStates.Instance smi)
 		{
-			if (smi.ranchStation.targetRanchable == null)
+			if (smi.ranchStation.targetRanchable.IsNullOrStopped())
 			{
 				return;
 			}

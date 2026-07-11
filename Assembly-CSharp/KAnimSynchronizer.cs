@@ -16,7 +16,6 @@ public class KAnimSynchronizer
 	public void Add(KAnimControllerBase controller)
 	{
 		this.Targets.Add(controller);
-		this.Sync(controller);
 	}
 
 	public void Remove(KAnimControllerBase controller)
@@ -34,7 +33,7 @@ public class KAnimSynchronizer
 		this.Targets.Clear();
 	}
 
-	private void Sync(KAnimControllerBase controller)
+	public void Sync(KAnimControllerBase controller)
 	{
 		if (this.masterController == null)
 		{

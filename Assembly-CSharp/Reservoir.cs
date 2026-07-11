@@ -8,7 +8,7 @@ public class Reservoir : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.log = new LoggerFS("Reservoir");
+		this.log = new LoggerFS("Reservoir", 35);
 		TreeFilterable treeFilterable = this.filterable;
 		treeFilterable.OnFilterChanged = (Action<Tag[]>)Delegate.Combine(treeFilterable.OnFilterChanged, new Action<Tag[]>(this.OnFilterChanged));
 	}
@@ -63,7 +63,9 @@ public class Reservoir : KMonoBehaviour
 		{
 			this.fetchList = new FetchList2(component3, Db.Get().ChoreTypes.Fetch, null);
 			this.fetchList.ShowStatusItem = false;
-			this.fetchList.Add(tags, null, (float)num, FetchOrder2.OperationalRequirement.None);
+			FetchList2 fetchList = this.fetchList;
+			float num2 = (float)num;
+			fetchList.Add(tags, null, null, num2, FetchOrder2.OperationalRequirement.None);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
 		}
 		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoStorageFilterSet, !flag, this);
@@ -98,7 +100,7 @@ public class Reservoir : KMonoBehaviour
 		{
 			this.OnFilterChanged(this.filterable.GetTags());
 		}
-		base.GetComponent<UserMenu>().Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	[MyCmpAdd]
@@ -111,8 +113,8 @@ public class Reservoir : KMonoBehaviour
 	private LoggerFS log;
 
 	[SerializeField]
-	public Color noFilterTint = Color.white;
+	public Color noFilterTint = FilteredStorage.NO_FILTER_TINT;
 
 	[SerializeField]
-	public Color filterTint = Color.white;
+	public Color filterTint = FilteredStorage.FILTER_TINT;
 }

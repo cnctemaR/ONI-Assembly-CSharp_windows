@@ -194,18 +194,18 @@ public class DebugTool : DragTool
 	public void ClearCell(int cell)
 	{
 		Vector2I vector2I = Grid.CellToXY(cell);
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, list);
-		for (int i = 0; i < list.Count; i++)
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.pickupablesLayer, pooledList);
+		for (int i = 0; i < pooledList.Count; i++)
 		{
-			ScenePartitionerEntry scenePartitionerEntry = list[i];
+			ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
 			Pickupable pickupable = scenePartitionerEntry.obj as Pickupable;
 			if (pickupable != null && pickupable.GetComponent<MinionBrain>() == null)
 			{
 				Util.KDestroyGameObject(pickupable.gameObject);
 			}
 		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+		pooledList.Recycle();
 	}
 
 	public static DebugTool Instance;

@@ -42,7 +42,8 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		base.Subscribe(856640610, new Action<object>(this.OnStore));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Trappable.Register");
 		this.registered = true;
 	}
 
@@ -52,6 +53,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
+		base.Unsubscribe(856640610, new Action<object>(this.OnStore));
 		CellChangeMonitor.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.registered = false;
 	}
@@ -62,6 +64,20 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_TRAP, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_TRAP, Descriptor.DescriptorType.Effect, false)
 		};
+	}
+
+	public void OnStore(object data)
+	{
+		Storage storage = data as Storage;
+		Trap trap = ((!storage) ? null : storage.GetComponent<Trap>());
+		if (trap)
+		{
+			base.gameObject.AddTag(GameTags.Trapped);
+		}
+		else
+		{
+			base.gameObject.RemoveTag(GameTags.Trapped);
+		}
 	}
 
 	private bool registered;

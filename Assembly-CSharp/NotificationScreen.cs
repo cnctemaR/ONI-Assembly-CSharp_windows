@@ -53,7 +53,7 @@ public class NotificationScreen : KScreen
 		notifiers.OnAdd = (Action<Notifier>)Delegate.Combine(notifiers.OnAdd, new Action<Notifier>(this.OnAddNotifier));
 		Components.Cmps<Notifier> notifiers2 = Components.Notifiers;
 		notifiers2.OnRemove = (Action<Notifier>)Delegate.Combine(notifiers2.OnRemove, new Action<Notifier>(this.OnRemoveNotifier));
-		foreach (Notifier notifier in Components.Notifiers)
+		foreach (Notifier notifier in Components.Notifiers.Items)
 		{
 			this.OnAddNotifier(notifier);
 		}
@@ -70,11 +70,8 @@ public class NotificationScreen : KScreen
 
 	private void ShowMessage(MessageNotification mn)
 	{
-		if (mn.message.OnClick != null)
-		{
-			mn.message.OnClick();
-		}
-		else
+		mn.message.OnClick();
+		if (mn.message.ShowDialog())
 		{
 			for (int i = 0; i < this.dialogPrefabs.Count; i++)
 			{
@@ -265,24 +262,9 @@ public class NotificationScreen : KScreen
 		{
 			if (n1.Type == n2.Type)
 			{
-				if (n1.Idx < n2.Idx)
-				{
-					return -1;
-				}
-				if (n1.Idx > n2.Idx)
-				{
-					return 1;
-				}
-				return 0;
+				return n1.Idx - n2.Idx;
 			}
-			else
-			{
-				if (n1.Type < n2.Type)
-				{
-					return -1;
-				}
-				return 1;
-			}
+			return n1.Type - n2.Type;
 		});
 		foreach (Notification notification in this.notifications)
 		{

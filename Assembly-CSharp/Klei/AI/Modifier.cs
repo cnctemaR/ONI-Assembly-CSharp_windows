@@ -23,7 +23,7 @@ namespace Klei.AI
 		{
 			foreach (AttributeModifier attributeModifier in this.SelfModifiers)
 			{
-				attributes.Add(this.Name, attributeModifier);
+				attributes.Add(attributeModifier);
 			}
 		}
 

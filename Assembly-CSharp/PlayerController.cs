@@ -36,7 +36,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 
 	private Vector3 GetCursorPos()
 	{
-		return PlayerController.GetCursorPos(Input.mousePosition);
+		return PlayerController.GetCursorPos(KInputManager.GetMousePos());
 	}
 
 	public static Vector3 GetCursorPos(Vector3 mouse_pos)
@@ -154,7 +154,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		if (this.dragAction == global::Action.Invalid)
 		{
 			this.dragAction = action;
-			this.startDragPos = Input.mousePosition;
+			this.startDragPos = KInputManager.GetMousePos();
 			this.startDragTime = Time.unscaledTime;
 		}
 	}
@@ -162,16 +162,16 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	private void UpdateDrag()
 	{
 		this.dragDelta = Vector2.zero;
-		Vector3 mousePosition = Input.mousePosition;
-		if (!this.dragging && this.dragAction != global::Action.Invalid && ((mousePosition - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
+		Vector3 mousePos = KInputManager.GetMousePos();
+		if (!this.dragging && this.dragAction != global::Action.Invalid && ((mousePos - this.startDragPos).magnitude > 6f || Time.unscaledTime - this.startDragTime > 0.3f))
 		{
 			this.dragging = true;
 		}
 		if (this.dragging)
 		{
-			this.dragDelta = mousePosition - this.startDragPos;
-			this.worldDragDelta = Camera.main.ScreenToWorldPoint(mousePosition) - Camera.main.ScreenToWorldPoint(this.startDragPos);
-			this.startDragPos = mousePosition;
+			this.dragDelta = mousePos - this.startDragPos;
+			this.worldDragDelta = Camera.main.ScreenToWorldPoint(mousePos) - Camera.main.ScreenToWorldPoint(this.startDragPos);
+			this.startDragPos = mousePos;
 		}
 	}
 
@@ -196,7 +196,7 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 		}
 		List<RaycastResult> list = new List<RaycastResult>();
 		PointerEventData pointerEventData = new PointerEventData(global::UnityEngine.EventSystems.EventSystem.current);
-		pointerEventData.position = Input.mousePosition;
+		pointerEventData.position = KInputManager.GetMousePos();
 		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
 		if (current != null)
 		{

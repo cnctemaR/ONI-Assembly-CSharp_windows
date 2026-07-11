@@ -87,4 +87,6 @@ public static class PuftTuning
 	public static float STANDARD_STOMACH_SIZE = PuftTuning.STANDARD_CALORIES_PER_CYCLE * PuftTuning.STANDARD_STARVE_CYCLES;
 
 	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER4;
+
+	public static float EGG_MASS = 0.5f;
 }

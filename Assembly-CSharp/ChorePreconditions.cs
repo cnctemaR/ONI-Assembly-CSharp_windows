@@ -135,7 +135,7 @@ public class ChorePreconditions
 				return true;
 			}
 			PeeChoreMonitor.Instance smi = context.consumerState.gameObject.GetSMI<PeeChoreMonitor.Instance>();
-			return smi.IsInsideState(smi.sm.critical);
+			return smi != null && smi.IsInsideState(smi.sm.critical);
 		};
 		this.IsPreferredAssignableOrUrgentBladder = precondition8;
 		Chore.Precondition precondition9 = default(Chore.Precondition);
@@ -279,7 +279,7 @@ public class ChorePreconditions
 		precondition17.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Pickupable pickupable = (Pickupable)data;
-			return !(pickupable == null) && !(context.consumerState.consumer == null) && pickupable.CouldBePickedUp(context.consumerState.gameObject) && context.consumerState.consumer.CanReach(pickupable);
+			return !(pickupable == null) && !(context.consumerState.consumer == null) && pickupable.CouldBePickedUp(context.consumerState.gameObject, context.consumerState.hasSolidTransferArm) && context.consumerState.consumer.CanReach(pickupable);
 		};
 		this.CanPickup = precondition17;
 		Chore.Precondition precondition18 = default(Chore.Precondition);
@@ -405,7 +405,7 @@ public class ChorePreconditions
 		precondition31.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			Automatable automatable = (Automatable)data;
-			return automatable.AllowedByAutomation(context.consumerState.gameObject);
+			return automatable.AllowedByAutomation(context.consumerState.hasSolidTransferArm);
 		};
 		this.IsAllowedByAutomation = precondition31;
 		Chore.Precondition precondition32 = default(Chore.Precondition);

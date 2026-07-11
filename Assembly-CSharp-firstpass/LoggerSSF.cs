@@ -1,31 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
 
-public class LoggerSSF : Logger<LoggerSSF.Entry>
+public struct LoggerSSF
 {
-	public LoggerSSF(string name, int maxEntries = 35)
-		: base(name, maxEntries)
+	public LoggerSSF(string name, int max_entries = 35)
 	{
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	public string GetName()
+	{
+		return string.Empty;
+	}
+
+	public void SetName(string name)
+	{
+	}
+
+	[Conditional("ENABLE_LOGGER")]
 	public void Log(string evt, string param, float value)
 	{
-	}
-
-	public struct Entry
-	{
-		public override string ToString()
-		{
-			return string.Concat(new object[] { this.idx, ": ", this.evt, " ", this.param, " ", this.value });
-		}
-
-		public uint idx;
-
-		public string evt;
-
-		public string param;
-
-		public float value;
 	}
 }

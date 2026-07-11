@@ -412,7 +412,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.animQueue = null;
 		this.overrideAnims = null;
 		this.anims = null;
-		this.hiddenSymbols = null;
 		this.synchronizer = null;
 		this.layering = null;
 		this.overrideAnimFiles = null;
@@ -729,6 +728,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			this.OnUpdateBounds(this.bounds);
 		}
+	}
+
+	public float GetPositionPercent()
+	{
+		return this.GetElapsedTime() / this.GetDuration();
 	}
 
 	public void SetPositionPercent(float percent)

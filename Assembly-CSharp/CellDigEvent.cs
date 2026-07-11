@@ -8,7 +8,7 @@ public class CellDigEvent : CellEvent
 	{
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void Log(int cell, int callback_id)
 	{
 		if (!this.enableLogging)

@@ -35,7 +35,7 @@ public class WorldInspector : MonoBehaviour
 
 	private void UpdateAsSimCell(CellSelectionObject cellObject)
 	{
-		string[] array = WorldInspector.MassStrings(cellObject.mouseCell);
+		string[] array = WorldInspector.MassStringsReadOnly(cellObject.mouseCell);
 		this.PropertyLeftText.text = array[0] + array[1] + " " + array[2];
 		this.PropertyIcon_Left.sprite = this.propertySprites.Mass;
 		this.PropertyRightText.text = cellObject.tags.ProperName();
@@ -232,57 +232,58 @@ public class WorldInspector : MonoBehaviour
 		return Mathf.Clamp(num3 + num6 * num5 / num2, num3, num4);
 	}
 
-	public static string[] MassStrings(int cell)
+	public static string[] MassStringsReadOnly(int cell)
 	{
-		string[] array = new string[]
+		if (!Grid.IsValidCell(cell))
 		{
-			string.Empty,
-			string.Empty,
-			string.Empty,
-			string.Empty
-		};
-		if (Grid.IsValidCell(cell))
-		{
-			Element element = Grid.Element[cell];
-			float num = Grid.Mass[cell];
-			array[3] = " " + GameUtil.GetBreathableString(element, num);
-			if (element.id == SimHashes.Vacuum)
-			{
-				array[0] = "N/A";
-				array[1] = string.Empty;
-				array[2] = string.Empty;
-			}
-			else if (element.id == SimHashes.Unobtanium)
-			{
-				array[0] = UI.NEUTRONIUMMASS;
-				array[1] = string.Empty;
-				array[2] = string.Empty;
-			}
-			else
-			{
-				array[2] = UI.UNITSUFFIXES.MASS.KILOGRAM;
-				if (num < 5f)
-				{
-					num *= 1000f;
-					array[2] = UI.UNITSUFFIXES.MASS.GRAM;
-				}
-				if (num < 5f)
-				{
-					num *= 1000f;
-					array[2] = UI.UNITSUFFIXES.MASS.MILLIGRAM;
-				}
-				if (num < 5f)
-				{
-					num *= 1000f;
-					array[2] = UI.UNITSUFFIXES.MASS.MICROGRAM;
-					num = Mathf.Floor(num);
-				}
-				int num2 = Mathf.FloorToInt(num);
-				array[0] = string.Format("{0}", num2);
-				array[1] = "." + ((float)Mathf.FloorToInt(10f * (num - (float)num2))).ToString();
-			}
+			return WorldInspector.invalidCellMassStrings;
 		}
-		return array;
+		Element element = Grid.Element[cell];
+		float num = Grid.Mass[cell];
+		if (element == WorldInspector.cachedElement && num == WorldInspector.cachedMass)
+		{
+			return WorldInspector.massStrings;
+		}
+		WorldInspector.cachedElement = element;
+		WorldInspector.cachedMass = num;
+		WorldInspector.massStrings[3] = " " + GameUtil.GetBreathableString(element, num);
+		if (element.id == SimHashes.Vacuum)
+		{
+			WorldInspector.massStrings[0] = "N/A";
+			WorldInspector.massStrings[1] = string.Empty;
+			WorldInspector.massStrings[2] = string.Empty;
+		}
+		else if (element.id == SimHashes.Unobtanium)
+		{
+			WorldInspector.massStrings[0] = UI.NEUTRONIUMMASS;
+			WorldInspector.massStrings[1] = string.Empty;
+			WorldInspector.massStrings[2] = string.Empty;
+		}
+		else
+		{
+			WorldInspector.massStrings[2] = UI.UNITSUFFIXES.MASS.KILOGRAM;
+			if (num < 5f)
+			{
+				num *= 1000f;
+				WorldInspector.massStrings[2] = UI.UNITSUFFIXES.MASS.GRAM;
+			}
+			if (num < 5f)
+			{
+				num *= 1000f;
+				WorldInspector.massStrings[2] = UI.UNITSUFFIXES.MASS.MILLIGRAM;
+			}
+			if (num < 5f)
+			{
+				num *= 1000f;
+				WorldInspector.massStrings[2] = UI.UNITSUFFIXES.MASS.MICROGRAM;
+				num = Mathf.Floor(num);
+			}
+			int num2 = Mathf.FloorToInt(num);
+			WorldInspector.massStrings[0] = num2.ToString();
+			float num3 = (float)Mathf.FloorToInt(10f * (num - (float)num2));
+			WorldInspector.massStrings[1] = "." + num3.ToString();
+		}
+		return WorldInspector.massStrings;
 	}
 
 	public Text PropertyLeftText;
@@ -320,6 +321,20 @@ public class WorldInspector : MonoBehaviour
 	private float temperaturePositionWidgetX_Min = 30f;
 
 	private float temperaturePositionWidgetX_Max = 172f;
+
+	private static string[] massStrings = new string[4];
+
+	private static string[] invalidCellMassStrings = new string[]
+	{
+		string.Empty,
+		string.Empty,
+		string.Empty,
+		string.Empty
+	};
+
+	private static float cachedMass = -1f;
+
+	private static Element cachedElement;
 
 	[Serializable]
 	public struct StateSetting

@@ -6,6 +6,8 @@ using STRINGS;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Equipment : Assignables
 {
+	public bool destroyed { get; private set; }
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -29,6 +31,7 @@ public class Equipment : Assignables
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		this.refreshHandle.ClearScheduler();
 		Components.Equipment.Remove(this);
 	}
 
@@ -40,10 +43,9 @@ public class Equipment : Assignables
 		equippable.Trigger(-1617557748, this);
 		KBatchedAnimController component = slot.gameObject.GetComponent<KBatchedAnimController>();
 		Attributes attributes = base.gameObject.GetAttributes();
-		string name = base.GetComponent<KSelectable>().GetName();
 		foreach (AttributeModifier attributeModifier in equippable.def.AttributeModifiers)
 		{
-			attributes.Add(name, attributeModifier);
+			attributes.Add(attributeModifier);
 		}
 		SnapOn component2 = slot.gameObject.GetComponent<SnapOn>();
 		component2.AttachSnapOnByName(equippable.def.SnapOn);
@@ -139,7 +141,7 @@ public class Equipment : Assignables
 			{
 				EquipmentSlotInstance slot_iter = equipmentSlotInstance;
 				string text = string.Format(UI.USERMENUACTIONS.UNEQUIP.NAME, equipmentSlotInstance.assignable.GetComponent<Equippable>().def.GenericName);
-				this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
+				Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("iconDown", text, delegate
 				{
 					((Equippable)slot_iter.assignable).Unassign();
 				}, global::Action.NumActions, null, null, null, string.Empty, true), 2f);
@@ -158,10 +160,5 @@ public class Equipment : Assignables
 		}
 	}
 
-	[MyCmpAdd]
-	private UserMenu userMenu;
-
 	private SchedulerHandle refreshHandle;
-
-	private bool destroyed;
 }

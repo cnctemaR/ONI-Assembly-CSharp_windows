@@ -196,7 +196,7 @@ public class CircuitManager
 		this.dirty = false;
 	}
 
-	private float GetBatteryJoulesAvailable(IList<Battery> batteries, out int num_powered)
+	private float GetBatteryJoulesAvailable(List<Battery> batteries, out int num_powered)
 	{
 		float num = 0f;
 		num_powered = 0;
@@ -400,7 +400,7 @@ public class CircuitManager
 			for (int num16 = 0; num16 < circuitInfo4.generators.Count; num16++)
 			{
 				Generator generator5 = circuitInfo4.generators[num16];
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -generator5.JoulesAvailable, BUILDINGS.PREFABS.GENERATOR.OVERPRODUCTION.ToString().Replace("{Generator}", generator5.gameObject.GetProperName()), null);
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.EnergyWasted, -generator5.JoulesAvailable, StringFormatter.Replace(BUILDINGS.PREFABS.GENERATOR.OVERPRODUCTION, "{Generator}", generator5.gameObject.GetProperName()), null);
 			}
 		}
 		for (int num17 = 0; num17 < this.circuitInfo.Count; num17++)
@@ -409,7 +409,7 @@ public class CircuitManager
 		}
 	}
 
-	private float PowerFromBatteries(float joules_needed, IList<Battery> batteries, IEnergyConsumer c)
+	private float PowerFromBatteries(float joules_needed, List<Battery> batteries, IEnergyConsumer c)
 	{
 		int num;
 		do
@@ -439,7 +439,7 @@ public class CircuitManager
 		return joules_needed;
 	}
 
-	private float GetBatteryChargeCapacity(Generator g, IList<Battery> batteries, out int num_to_charge)
+	private float GetBatteryChargeCapacity(Generator g, List<Battery> batteries, out int num_to_charge)
 	{
 		float num = 0f;
 		num_to_charge = 0;
@@ -456,7 +456,7 @@ public class CircuitManager
 		return num;
 	}
 
-	private void ChargeBatteries(int circuit_id, IList<Generator> generators, IList<Battery> batteries, ref float joules_used)
+	private void ChargeBatteries(int circuit_id, List<Generator> generators, List<Battery> batteries, ref float joules_used)
 	{
 		if (batteries.Count == 0)
 		{
@@ -470,7 +470,7 @@ public class CircuitManager
 		}
 	}
 
-	private bool ChargeBattery(Generator g, IList<Battery> batteries, ref float joules_used)
+	private bool ChargeBattery(Generator g, List<Battery> batteries, ref float joules_used)
 	{
 		int num;
 		float batteryChargeCapacity = this.GetBatteryChargeCapacity(g, batteries, out num);
@@ -492,7 +492,7 @@ public class CircuitManager
 		return true;
 	}
 
-	private void UpdateBatteryConnectionStatus(IList<Battery> batteries, bool is_connected_to_something_useful, int circuit_id)
+	private void UpdateBatteryConnectionStatus(List<Battery> batteries, bool is_connected_to_something_useful, int circuit_id)
 	{
 		foreach (Battery battery in batteries)
 		{
@@ -514,7 +514,7 @@ public class CircuitManager
 		}
 	}
 
-	private void ChargeTransformer(Battery transformer, IList<Battery> batteries, ref float joules_used)
+	private void ChargeTransformer(Battery transformer, List<Battery> batteries, ref float joules_used)
 	{
 		if (batteries.Count <= 0)
 		{
@@ -695,13 +695,13 @@ public class CircuitManager
 		return this.circuitInfo[(int)circuitID].inputTransformers.AsReadOnly();
 	}
 
-	public ReadOnlyCollection<Battery> GetBatteriesOnCircuit(ushort circuitID)
+	public List<Battery> GetBatteriesOnCircuit(ushort circuitID)
 	{
 		if (circuitID == 65535)
 		{
 			return null;
 		}
-		return this.circuitInfo[(int)circuitID].batteries.AsReadOnly();
+		return this.circuitInfo[(int)circuitID].batteries;
 	}
 
 	public float GetMinBatteryPercentFullOnCircuit(ushort circuitID)

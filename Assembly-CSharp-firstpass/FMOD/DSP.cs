@@ -1,252 +1,220 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD
 {
-	public class DSP : HandleBase
+	public struct DSP
 	{
-		public DSP(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT release()
 		{
-			RESULT result = DSP.FMOD5_DSP_Release(base.getRaw());
-			if (result == RESULT.OK)
-			{
-				this.rawPtr = IntPtr.Zero;
-			}
-			return result;
+			return DSP.FMOD5_DSP_Release(this.handle);
 		}
 
 		public RESULT getSystemObject(out FMOD.System system)
 		{
-			system = null;
-			IntPtr intPtr;
-			RESULT result = DSP.FMOD5_DSP_GetSystemObject(this.rawPtr, out intPtr);
-			system = new FMOD.System(intPtr);
-			return result;
+			return DSP.FMOD5_DSP_GetSystemObject(this.handle, out system.handle);
 		}
 
 		public RESULT addInput(DSP target, out DSPConnection connection, DSPCONNECTION_TYPE type)
 		{
-			connection = null;
-			IntPtr intPtr;
-			RESULT result = DSP.FMOD5_DSP_AddInput(this.rawPtr, target.getRaw(), out intPtr, type);
-			connection = new DSPConnection(intPtr);
-			return result;
+			return DSP.FMOD5_DSP_AddInput(this.handle, target.handle, out connection.handle, type);
 		}
 
 		public RESULT disconnectFrom(DSP target, DSPConnection connection)
 		{
-			return DSP.FMOD5_DSP_DisconnectFrom(this.rawPtr, target.getRaw(), connection.getRaw());
+			return DSP.FMOD5_DSP_DisconnectFrom(this.handle, target.handle, connection.handle);
 		}
 
 		public RESULT disconnectAll(bool inputs, bool outputs)
 		{
-			return DSP.FMOD5_DSP_DisconnectAll(this.rawPtr, inputs, outputs);
+			return DSP.FMOD5_DSP_DisconnectAll(this.handle, inputs, outputs);
 		}
 
 		public RESULT getNumInputs(out int numinputs)
 		{
-			return DSP.FMOD5_DSP_GetNumInputs(this.rawPtr, out numinputs);
+			return DSP.FMOD5_DSP_GetNumInputs(this.handle, out numinputs);
 		}
 
 		public RESULT getNumOutputs(out int numoutputs)
 		{
-			return DSP.FMOD5_DSP_GetNumOutputs(this.rawPtr, out numoutputs);
+			return DSP.FMOD5_DSP_GetNumOutputs(this.handle, out numoutputs);
 		}
 
 		public RESULT getInput(int index, out DSP input, out DSPConnection inputconnection)
 		{
-			input = null;
-			inputconnection = null;
-			IntPtr intPtr;
-			IntPtr intPtr2;
-			RESULT result = DSP.FMOD5_DSP_GetInput(this.rawPtr, index, out intPtr, out intPtr2);
-			input = new DSP(intPtr);
-			inputconnection = new DSPConnection(intPtr2);
-			return result;
+			return DSP.FMOD5_DSP_GetInput(this.handle, index, out input.handle, out inputconnection.handle);
 		}
 
 		public RESULT getOutput(int index, out DSP output, out DSPConnection outputconnection)
 		{
-			output = null;
-			outputconnection = null;
-			IntPtr intPtr;
-			IntPtr intPtr2;
-			RESULT result = DSP.FMOD5_DSP_GetOutput(this.rawPtr, index, out intPtr, out intPtr2);
-			output = new DSP(intPtr);
-			outputconnection = new DSPConnection(intPtr2);
-			return result;
+			return DSP.FMOD5_DSP_GetOutput(this.handle, index, out output.handle, out outputconnection.handle);
 		}
 
 		public RESULT setActive(bool active)
 		{
-			return DSP.FMOD5_DSP_SetActive(this.rawPtr, active);
+			return DSP.FMOD5_DSP_SetActive(this.handle, active);
 		}
 
 		public RESULT getActive(out bool active)
 		{
-			return DSP.FMOD5_DSP_GetActive(this.rawPtr, out active);
+			return DSP.FMOD5_DSP_GetActive(this.handle, out active);
 		}
 
 		public RESULT setBypass(bool bypass)
 		{
-			return DSP.FMOD5_DSP_SetBypass(this.rawPtr, bypass);
+			return DSP.FMOD5_DSP_SetBypass(this.handle, bypass);
 		}
 
 		public RESULT getBypass(out bool bypass)
 		{
-			return DSP.FMOD5_DSP_GetBypass(this.rawPtr, out bypass);
+			return DSP.FMOD5_DSP_GetBypass(this.handle, out bypass);
 		}
 
 		public RESULT setWetDryMix(float prewet, float postwet, float dry)
 		{
-			return DSP.FMOD5_DSP_SetWetDryMix(this.rawPtr, prewet, postwet, dry);
+			return DSP.FMOD5_DSP_SetWetDryMix(this.handle, prewet, postwet, dry);
 		}
 
 		public RESULT getWetDryMix(out float prewet, out float postwet, out float dry)
 		{
-			return DSP.FMOD5_DSP_GetWetDryMix(this.rawPtr, out prewet, out postwet, out dry);
+			return DSP.FMOD5_DSP_GetWetDryMix(this.handle, out prewet, out postwet, out dry);
 		}
 
 		public RESULT setChannelFormat(CHANNELMASK channelmask, int numchannels, SPEAKERMODE source_speakermode)
 		{
-			return DSP.FMOD5_DSP_SetChannelFormat(this.rawPtr, channelmask, numchannels, source_speakermode);
+			return DSP.FMOD5_DSP_SetChannelFormat(this.handle, channelmask, numchannels, source_speakermode);
 		}
 
 		public RESULT getChannelFormat(out CHANNELMASK channelmask, out int numchannels, out SPEAKERMODE source_speakermode)
 		{
-			return DSP.FMOD5_DSP_GetChannelFormat(this.rawPtr, out channelmask, out numchannels, out source_speakermode);
+			return DSP.FMOD5_DSP_GetChannelFormat(this.handle, out channelmask, out numchannels, out source_speakermode);
 		}
 
 		public RESULT getOutputChannelFormat(CHANNELMASK inmask, int inchannels, SPEAKERMODE inspeakermode, out CHANNELMASK outmask, out int outchannels, out SPEAKERMODE outspeakermode)
 		{
-			return DSP.FMOD5_DSP_GetOutputChannelFormat(this.rawPtr, inmask, inchannels, inspeakermode, out outmask, out outchannels, out outspeakermode);
+			return DSP.FMOD5_DSP_GetOutputChannelFormat(this.handle, inmask, inchannels, inspeakermode, out outmask, out outchannels, out outspeakermode);
 		}
 
 		public RESULT reset()
 		{
-			return DSP.FMOD5_DSP_Reset(this.rawPtr);
+			return DSP.FMOD5_DSP_Reset(this.handle);
 		}
 
 		public RESULT setParameterFloat(int index, float value)
 		{
-			return DSP.FMOD5_DSP_SetParameterFloat(this.rawPtr, index, value);
+			return DSP.FMOD5_DSP_SetParameterFloat(this.handle, index, value);
 		}
 
 		public RESULT setParameterInt(int index, int value)
 		{
-			return DSP.FMOD5_DSP_SetParameterInt(this.rawPtr, index, value);
+			return DSP.FMOD5_DSP_SetParameterInt(this.handle, index, value);
 		}
 
 		public RESULT setParameterBool(int index, bool value)
 		{
-			return DSP.FMOD5_DSP_SetParameterBool(this.rawPtr, index, value);
+			return DSP.FMOD5_DSP_SetParameterBool(this.handle, index, value);
 		}
 
 		public RESULT setParameterData(int index, byte[] data)
 		{
-			return DSP.FMOD5_DSP_SetParameterData(this.rawPtr, index, Marshal.UnsafeAddrOfPinnedArrayElement(data, 0), (uint)data.Length);
+			return DSP.FMOD5_DSP_SetParameterData(this.handle, index, Marshal.UnsafeAddrOfPinnedArrayElement(data, 0), (uint)data.Length);
 		}
 
 		public RESULT getParameterFloat(int index, out float value)
 		{
-			IntPtr zero = IntPtr.Zero;
-			return DSP.FMOD5_DSP_GetParameterFloat(this.rawPtr, index, out value, zero, 0);
+			return DSP.FMOD5_DSP_GetParameterFloat(this.handle, index, out value, IntPtr.Zero, 0);
 		}
 
 		public RESULT getParameterInt(int index, out int value)
 		{
-			IntPtr zero = IntPtr.Zero;
-			return DSP.FMOD5_DSP_GetParameterInt(this.rawPtr, index, out value, zero, 0);
+			return DSP.FMOD5_DSP_GetParameterInt(this.handle, index, out value, IntPtr.Zero, 0);
 		}
 
 		public RESULT getParameterBool(int index, out bool value)
 		{
-			return DSP.FMOD5_DSP_GetParameterBool(this.rawPtr, index, out value, IntPtr.Zero, 0);
+			return DSP.FMOD5_DSP_GetParameterBool(this.handle, index, out value, IntPtr.Zero, 0);
 		}
 
 		public RESULT getParameterData(int index, out IntPtr data, out uint length)
 		{
-			return DSP.FMOD5_DSP_GetParameterData(this.rawPtr, index, out data, out length, IntPtr.Zero, 0);
+			return DSP.FMOD5_DSP_GetParameterData(this.handle, index, out data, out length, IntPtr.Zero, 0);
 		}
 
 		public RESULT getNumParameters(out int numparams)
 		{
-			return DSP.FMOD5_DSP_GetNumParameters(this.rawPtr, out numparams);
+			return DSP.FMOD5_DSP_GetNumParameters(this.handle, out numparams);
 		}
 
 		public RESULT getParameterInfo(int index, out DSP_PARAMETER_DESC desc)
 		{
-			IntPtr intPtr;
-			RESULT result = DSP.FMOD5_DSP_GetParameterInfo(this.rawPtr, index, out intPtr);
-			if (result == RESULT.OK)
-			{
-				desc = (DSP_PARAMETER_DESC)Marshal.PtrToStructure(intPtr, typeof(DSP_PARAMETER_DESC));
-			}
-			else
-			{
-				desc = default(DSP_PARAMETER_DESC);
-			}
-			return result;
+			return DSP.FMOD5_DSP_GetParameterInfo(this.handle, index, out desc);
 		}
 
 		public RESULT getDataParameterIndex(int datatype, out int index)
 		{
-			return DSP.FMOD5_DSP_GetDataParameterIndex(this.rawPtr, datatype, out index);
+			return DSP.FMOD5_DSP_GetDataParameterIndex(this.handle, datatype, out index);
 		}
 
 		public RESULT showConfigDialog(IntPtr hwnd, bool show)
 		{
-			return DSP.FMOD5_DSP_ShowConfigDialog(this.rawPtr, hwnd, show);
+			return DSP.FMOD5_DSP_ShowConfigDialog(this.handle, hwnd, show);
 		}
 
-		public RESULT getInfo(StringBuilder name, out uint version, out int channels, out int configwidth, out int configheight)
+		public RESULT getInfo(out string name, out uint version, out int channels, out int configwidth, out int configheight)
 		{
 			IntPtr intPtr = Marshal.AllocHGlobal(32);
-			RESULT result = DSP.FMOD5_DSP_GetInfo(this.rawPtr, intPtr, out version, out channels, out configwidth, out configheight);
-			StringMarshalHelper.NativeToBuilder(name, intPtr);
+			RESULT result = DSP.FMOD5_DSP_GetInfo(this.handle, intPtr, out version, out channels, out configwidth, out configheight);
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				name = freeHelper.stringFromNative(intPtr);
+			}
 			Marshal.FreeHGlobal(intPtr);
 			return result;
 		}
 
+		public RESULT getInfo(out uint version, out int channels, out int configwidth, out int configheight)
+		{
+			return DSP.FMOD5_DSP_GetInfo(this.handle, IntPtr.Zero, out version, out channels, out configwidth, out configheight);
+		}
+
 		public RESULT getType(out DSP_TYPE type)
 		{
-			return DSP.FMOD5_DSP_GetType(this.rawPtr, out type);
+			return DSP.FMOD5_DSP_GetType(this.handle, out type);
 		}
 
 		public RESULT getIdle(out bool idle)
 		{
-			return DSP.FMOD5_DSP_GetIdle(this.rawPtr, out idle);
+			return DSP.FMOD5_DSP_GetIdle(this.handle, out idle);
 		}
 
 		public RESULT setUserData(IntPtr userdata)
 		{
-			return DSP.FMOD5_DSP_SetUserData(this.rawPtr, userdata);
+			return DSP.FMOD5_DSP_SetUserData(this.handle, userdata);
 		}
 
 		public RESULT getUserData(out IntPtr userdata)
 		{
-			return DSP.FMOD5_DSP_GetUserData(this.rawPtr, out userdata);
+			return DSP.FMOD5_DSP_GetUserData(this.handle, out userdata);
 		}
 
 		public RESULT setMeteringEnabled(bool inputEnabled, bool outputEnabled)
 		{
-			return DSP.FMOD5_DSP_SetMeteringEnabled(this.rawPtr, inputEnabled, outputEnabled);
+			return DSP.FMOD5_DSP_SetMeteringEnabled(this.handle, inputEnabled, outputEnabled);
 		}
 
 		public RESULT getMeteringEnabled(out bool inputEnabled, out bool outputEnabled)
 		{
-			return DSP.FMOD5_DSP_GetMeteringEnabled(this.rawPtr, out inputEnabled, out outputEnabled);
+			return DSP.FMOD5_DSP_GetMeteringEnabled(this.handle, out inputEnabled, out outputEnabled);
 		}
 
-		public RESULT getMeteringInfo(DSP_METERING_INFO inputInfo, DSP_METERING_INFO outputInfo)
+		public RESULT getMeteringInfo(IntPtr zero, out DSP_METERING_INFO outputInfo)
 		{
-			return DSP.FMOD5_DSP_GetMeteringInfo(this.rawPtr, inputInfo, outputInfo);
+			return DSP.FMOD5_DSP_GetMeteringInfo(this.handle, zero, out outputInfo);
+		}
+
+		public RESULT getMeteringInfo(out DSP_METERING_INFO inputInfo, IntPtr zero)
+		{
+			return DSP.FMOD5_DSP_GetMeteringInfo(this.handle, out inputInfo, zero);
 		}
 
 		[DllImport("fmodstudio")]
@@ -334,7 +302,7 @@ namespace FMOD
 		private static extern RESULT FMOD5_DSP_GetNumParameters(IntPtr dsp, out int numparams);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_DSP_GetParameterInfo(IntPtr dsp, int index, out IntPtr desc);
+		private static extern RESULT FMOD5_DSP_GetParameterInfo(IntPtr dsp, int index, out DSP_PARAMETER_DESC desc);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_DSP_GetDataParameterIndex(IntPtr dsp, int datatype, out int index);
@@ -364,6 +332,21 @@ namespace FMOD
 		public static extern RESULT FMOD5_DSP_GetMeteringEnabled(IntPtr dsp, out bool inputEnabled, out bool outputEnabled);
 
 		[DllImport("fmodstudio")]
-		public static extern RESULT FMOD5_DSP_GetMeteringInfo(IntPtr dsp, [Out] DSP_METERING_INFO inputInfo, [Out] DSP_METERING_INFO outputInfo);
+		public static extern RESULT FMOD5_DSP_GetMeteringInfo(IntPtr dsp, IntPtr zero, out DSP_METERING_INFO outputInfo);
+
+		[DllImport("fmodstudio")]
+		public static extern RESULT FMOD5_DSP_GetMeteringInfo(IntPtr dsp, out DSP_METERING_INFO inputInfo, IntPtr zero);
+
+		public bool hasHandle()
+		{
+			return this.handle != IntPtr.Zero;
+		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public IntPtr handle;
 	}
 }

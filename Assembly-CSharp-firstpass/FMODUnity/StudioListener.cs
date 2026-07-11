@@ -9,10 +9,17 @@ namespace FMODUnity
 		private void OnEnable()
 		{
 			RuntimeUtils.EnforceLibraryOrder();
-			this.rigidBody = base.gameObject.GetComponent<Rigidbody>();
-			this.rigidBody2D = base.gameObject.GetComponent<Rigidbody2D>();
-			RuntimeManager.HasListener[this.ListenerNumber] = true;
-			this.SetListenerLocation();
+			if (RuntimeManager.IsInitialized)
+			{
+				this.rigidBody = base.gameObject.GetComponent<Rigidbody>();
+				this.rigidBody2D = base.gameObject.GetComponent<Rigidbody2D>();
+				RuntimeManager.HasListener[this.ListenerNumber] = true;
+				this.SetListenerLocation();
+			}
+			else
+			{
+				base.enabled = false;
+			}
 		}
 
 		private void OnDisable()

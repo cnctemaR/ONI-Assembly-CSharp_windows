@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, IStateMachineTarget, AgeMonitor.Def>
@@ -7,13 +8,35 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.alive;
-		this.alive.ToggleAttributeModifier("Aging", (AgeMonitor.Instance smi) => this.aging, null).Transition(this.time_to_die, (AgeMonitor.Instance smi) => smi.age.value >= smi.age.GetMax(), UpdateRate.SIM_1000ms);
-		this.time_to_die.Enter(delegate(AgeMonitor.Instance smi)
-		{
-			smi.Die();
-		});
-		this.aging = new AttributeModifier(Db.Get().Amounts.Age.deltaAttribute.Id, 0.0016666667f, null, false, false, true);
+		this.alive.ToggleAttributeModifier("Aging", (AgeMonitor.Instance smi) => this.aging, null).Transition(this.time_to_die, new StateMachine<AgeMonitor, AgeMonitor.Instance, IStateMachineTarget, AgeMonitor.Def>.Transition.ConditionCallback(AgeMonitor.TimeToDie), UpdateRate.SIM_1000ms).Update(new Action<AgeMonitor.Instance, float>(AgeMonitor.UpdateOldStatusItem), UpdateRate.SIM_1000ms, false);
+		this.time_to_die.Enter(new StateMachine<AgeMonitor, AgeMonitor.Instance, IStateMachineTarget, AgeMonitor.Def>.State.Callback(AgeMonitor.Die));
+		this.aging = new AttributeModifier(Db.Get().Amounts.Age.deltaAttribute.Id, 0.0016666667f, CREATURES.MODIFIERS.AGE.NAME, false, false, true);
 	}
+
+	private static void Die(AgeMonitor.Instance smi)
+	{
+		smi.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Generic);
+	}
+
+	private static bool TimeToDie(AgeMonitor.Instance smi)
+	{
+		return smi.age.value >= smi.age.GetMax();
+	}
+
+	private static void UpdateOldStatusItem(AgeMonitor.Instance smi, float dt)
+	{
+		KSelectable component = smi.GetComponent<KSelectable>();
+		if (smi.age.value > smi.age.GetMax() - 5f)
+		{
+			component.AddStatusItem(Db.Get().CreatureStatusItems.Old, smi);
+		}
+		else
+		{
+			component.RemoveStatusItem(Db.Get().CreatureStatusItems.Old, false);
+		}
+	}
+
+	private const float OLD_WARNING = 5f;
 
 	public GameStateMachine<AgeMonitor, AgeMonitor.Instance, IStateMachineTarget, AgeMonitor.Def>.State alive;
 
@@ -43,18 +66,22 @@ public class AgeMonitor : GameStateMachine<AgeMonitor, AgeMonitor.Instance, ISta
 			});
 		}
 
-		public void Die()
-		{
-			base.gameObject.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Generic);
-		}
-
 		public void RandomizeAge()
 		{
 			this.age.value = global::UnityEngine.Random.value * this.age.GetMax() * base.def.maxAgePercentOnSpawn;
 			AmountInstance amountInstance = Db.Get().Amounts.Fertility.Lookup(base.gameObject);
 			if (amountInstance != null)
 			{
-				amountInstance.value = this.age.value / this.age.GetMax() * amountInstance.GetMax();
+				amountInstance.value = this.age.value / this.age.GetMax() * amountInstance.GetMax() * 1.75f;
+				amountInstance.value = Mathf.Min(amountInstance.value, amountInstance.GetMax() * 0.9f);
+			}
+		}
+
+		public float CyclesUntilDeath
+		{
+			get
+			{
+				return this.age.GetMax() - this.age.value;
 			}
 		}
 

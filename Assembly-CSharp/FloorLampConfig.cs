@@ -19,7 +19,7 @@ public class FloorLampConfig : IBuildingConfig
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.RequiresPowerInput = true;
-		buildingDef.EnergyConsumptionWhenActive = 5f;
+		buildingDef.EnergyConsumptionWhenActive = 8f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
 		buildingDef.ViewMode = SimViewMode.Light;
 		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
@@ -30,6 +30,7 @@ public class FloorLampConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		LightShapePreview lightShapePreview = go.AddComponent<LightShapePreview>();
+		lightShapePreview.lux = 1000;
 		lightShapePreview.radius = 4f;
 		lightShapePreview.shape = LightShape.Circle;
 		lightShapePreview.offset = new CellOffset((int)def.BuildingComplete.GetComponent<Light2D>().Offset.x, (int)def.BuildingComplete.GetComponent<Light2D>().Offset.y);

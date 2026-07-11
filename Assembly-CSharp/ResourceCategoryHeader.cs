@@ -186,7 +186,12 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 		available = 0f;
 		total = 0f;
 		reserved = 0f;
-		foreach (Tag tag in WorldInventory.Instance.GetDiscoveredResourcesFromTag(this.ResourceCategoryTag))
+		HashSet<Tag> hashSet = null;
+		if (!WorldInventory.Instance.TryGetDiscoveredResourcesFromTag(this.ResourceCategoryTag, out hashSet))
+		{
+			return;
+		}
+		foreach (Tag tag in hashSet)
 		{
 			this.anyDiscovered = true;
 			if (!this.ResourcesDiscovered.ContainsKey(tag))

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using FMODUnity;
 using STRINGS;
 using UnityEngine;
@@ -112,10 +111,9 @@ public class AudioOptionsScreen : KModalScreen
 		for (int i = 0; i < num; i++)
 		{
 			KFMOD.AudioDevice audioDevice = default(KFMOD.AudioDevice);
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Capacity = 64;
-			RuntimeManager.LowlevelSystem.getDriverInfo(i, stringBuilder, stringBuilder.Capacity, out audioDevice.guid, out audioDevice.systemRate, out audioDevice.speakerMode, out audioDevice.speakerModeChannels);
-			audioDevice.name = stringBuilder.ToString();
+			string text;
+			RuntimeManager.LowlevelSystem.getDriverInfo(i, out text, 64, out audioDevice.guid, out audioDevice.systemRate, out audioDevice.speakerMode, out audioDevice.speakerModeChannels);
+			audioDevice.name = text;
 			audioDevice.fmod_id = i;
 			this.audioDevices.Add(audioDevice);
 			this.audioDeviceOptions.Add(new Dropdown.OptionData(audioDevice.name));

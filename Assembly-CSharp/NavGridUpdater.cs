@@ -10,13 +10,13 @@ public class NavGridUpdater
 		NavGridUpdater.CreateLinks(nav_table, gridBitFields, max_links_per_cell, links, transitions);
 	}
 
-	public static void UpdateNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[] transitions, ushort[] gridBitFields, ICollection<int> dirty_nav_cells)
+	public static void UpdateNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[] transitions, ushort[] gridBitFields, HashSet<int> dirty_nav_cells)
 	{
 		NavGridUpdater.UpdateValidCells(dirty_nav_cells, gridBitFields, nav_table, valid_nav_types, validators, bounding_offsets);
 		NavGridUpdater.UpdateLinks(dirty_nav_cells, nav_table, gridBitFields, max_links_per_cell, links, transitions);
 	}
 
-	private static void UpdateValidCells(IEnumerable<int> dirty_solid_cells, ushort[] gridBitFields, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
+	private static void UpdateValidCells(HashSet<int> dirty_solid_cells, ushort[] gridBitFields, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
 	{
 		foreach (int num in dirty_solid_cells)
 		{
@@ -32,7 +32,7 @@ public class NavGridUpdater
 		NavGridUpdater.CreateLinks(cell, nav_table, gridBitFields, max_links_per_cell, links, link_offsets);
 	}
 
-	private static void UpdateLinks(IEnumerable<int> dirty_nav_cells, NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
+	private static void UpdateLinks(HashSet<int> dirty_nav_cells, NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
 	{
 		foreach (int num in dirty_nav_cells)
 		{
@@ -42,12 +42,13 @@ public class NavGridUpdater
 
 	private static void CreateLinks(NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[] link_offsets)
 	{
-		List<NavGridUpdater.CreateLinkWorkItem> list = new List<NavGridUpdater.CreateLinkWorkItem>();
+		WorkItemCollection<NavGridUpdater.CreateLinkWorkItem, object> workItemCollection = new WorkItemCollection<NavGridUpdater.CreateLinkWorkItem, object>();
+		workItemCollection.Reset(null);
 		for (int i = 0; i < Grid.HeightInCells; i++)
 		{
-			list.Add(new NavGridUpdater.CreateLinkWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, gridBitFields, max_links_per_cell, links, link_offsets));
+			workItemCollection.Add(new NavGridUpdater.CreateLinkWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, gridBitFields, max_links_per_cell, links, link_offsets));
 		}
-		App.instance.jobManager.Run<NavGridUpdater.CreateLinkWorkItem, object>(list, null);
+		App.instance.jobManager.Run(workItemCollection);
 	}
 
 	private static void CreateLinks(int cell, NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[] transitions)
@@ -73,12 +74,13 @@ public class NavGridUpdater
 
 	private static void MarkValidCells(ushort[] gridBitFields, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
 	{
-		List<NavGridUpdater.MarkValidCellWorkItem> list = new List<NavGridUpdater.MarkValidCellWorkItem>();
+		WorkItemCollection<NavGridUpdater.MarkValidCellWorkItem, object> workItemCollection = new WorkItemCollection<NavGridUpdater.MarkValidCellWorkItem, object>();
+		workItemCollection.Reset(null);
 		for (int i = 0; i < Grid.HeightInCells; i++)
 		{
-			list.Add(new NavGridUpdater.MarkValidCellWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, bounding_offsets, validators));
+			workItemCollection.Add(new NavGridUpdater.MarkValidCellWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, bounding_offsets, validators));
 		}
-		App.instance.jobManager.Run<NavGridUpdater.MarkValidCellWorkItem, object>(list, null);
+		App.instance.jobManager.Run(workItemCollection);
 	}
 
 	public static void DebugDrawPath(int start_cell, int end_cell)

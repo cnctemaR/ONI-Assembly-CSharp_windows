@@ -23,7 +23,6 @@ public class FloorSwitchConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;

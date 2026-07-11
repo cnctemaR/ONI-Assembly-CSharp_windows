@@ -7,10 +7,6 @@ public class GameInputManager : KInputManager
 		GameInputMapping.SetDefaultKeyBindings(default_keybindings);
 		GameInputMapping.LoadBindings();
 		this.AddKeyboardMouseController();
-		for (int i = 0; i < 4; i++)
-		{
-			this.AddGamepadController(i);
-		}
 	}
 
 	public KInputController AddKeyboardMouseController()

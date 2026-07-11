@@ -6,7 +6,7 @@ public static class BaseLightBugConfig
 {
 	public static GameObject BaseLightBug(string id, string name, string desc, string anim_file, string traitId, Color lightColor, EffectorValues decor, bool is_baby, string symbolOverridePrefix = null)
 	{
-		float num = 50f;
+		float num = 5f;
 		KAnimFile anim = Assets.GetAnim(anim_file);
 		string text = "idle_loop";
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, decor, default(EffectorValues), SimHashes.Creature, null, 293f);
@@ -19,8 +19,7 @@ public static class BaseLightBugConfig
 		int num2 = 0;
 		float freezing_ = CREATURES.TEMPERATURE.FREEZING_1;
 		float hot_ = CREATURES.TEMPERATURE.HOT_1;
-		float hot_2 = CREATURES.TEMPERATURE.HOT_2;
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text2, navType, 32, num, text3, num2, true, true, 30f, freezing_, hot_, CREATURES.TEMPERATURE.FREEZING_2, hot_2);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text2, navType, 32, num, text3, num2, true, true, freezing_, hot_, CREATURES.TEMPERATURE.FREEZING_2, CREATURES.TEMPERATURE.HOT_2);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim(anim_file), symbolOverridePrefix, 0);
@@ -31,6 +30,8 @@ public static class BaseLightBugConfig
 		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
 		def.lures = new Tag[] { GameTags.Phosphorite };
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();
+		gameObject.AddOrGetDef<SubmergedMonitor.Def>();
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true);
 		if (is_baby)
 		{
 			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
@@ -48,14 +49,19 @@ public static class BaseLightBugConfig
 			light2D.Offset = LIGHT2D.LIGHTBUG_OFFSET;
 			light2D.shape = LightShape.Circle;
 			light2D.drawOverlay = true;
+			light2D.Lux = 1800;
+			gameObject.AddOrGet<LightSymbolTracker>().targetSymbol = "snapTo_light_locator";
+			gameObject.AddOrGetDef<CreatureLightToggleController.Def>();
 		}
-		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new TrappedStates.Def(), true)
+		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
+			.Add(new IncubatingStates.Def(), true)
+			.Add(new BaggedStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)
 			.Add(new DebugGoToStates.Def(), true)
-			.Add(new DrowningStates.Def(), true)
+			.Add(new SubmergedStates.Def(), true)
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new GrowUpStates.Def(), true)
+			.Add(new FixedCaptureStates.Def(), true)
 			.Add(new RanchedStates.Def(), true)
 			.Add(new LayEggStates.Def(), true)
 			.Add(new EatStates.Def(), true)
@@ -84,7 +90,6 @@ public static class BaseLightBugConfig
 	public static void SetupLoopingSounds(GameObject inst)
 	{
 		LoopingSounds component = inst.GetComponent<LoopingSounds>();
-		component.AddLoopingSoundUpdater();
-		component.StartSound(GlobalAssets.GetSound("ShineBug_wings_LP", false), component.transform.GetPosition());
+		component.StartSound(GlobalAssets.GetSound("ShineBug_wings_LP", false));
 	}
 }

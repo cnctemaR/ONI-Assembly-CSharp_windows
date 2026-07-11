@@ -501,6 +501,15 @@ namespace TUNING
 			public const float BREATH_RATE = 0.90909094f;
 		}
 
+		public class LIGHT
+		{
+			public const int LUX_SUNBURN = 71999;
+
+			public const float SUNBURN_DELAY_TIME = 120f;
+
+			public const int LUX_PLEASANT_LIGHT = 40000;
+		}
+
 		public class MOVEMENT
 		{
 			public static float NEUTRAL = 1f;

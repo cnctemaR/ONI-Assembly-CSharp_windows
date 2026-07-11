@@ -24,7 +24,7 @@ public class BuildingComplete : Building
 			{
 				attributes.Add(attribute2);
 			}
-			attributes.Add("Base", attributeModifier);
+			attributes.Add(attributeModifier);
 		}
 		foreach (AttributeInstance attributeInstance in attributes)
 		{
@@ -93,14 +93,6 @@ public class BuildingComplete : Building
 		{
 			component5.folder = Folder.Entities;
 		}
-		if (!this.Def.IsTilePiece)
-		{
-		}
-		Texture buildingTexture = component4.Element.substance.buildingTexture;
-		if (buildingTexture != null)
-		{
-			RenderUtil.SetMaterialBlockTexture(base.transform, "_FillTex", buildingTexture);
-		}
 		base.RegisterBlockTileRenderer();
 		if (this.Def.PreventIdlingInFrontOfBuilding)
 		{
@@ -116,6 +108,7 @@ public class BuildingComplete : Building
 		}
 		Components.BuildingCompletes.Add(this);
 		BuildingConfigManager.Instance.AddBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
+		this.hasSpawnedKComponents = true;
 	}
 
 	private string GetInspectSound()
@@ -130,7 +123,10 @@ public class BuildingComplete : Building
 		{
 			return;
 		}
-		BuildingConfigManager.Instance.DestroyBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
+		if (this.hasSpawnedKComponents)
+		{
+			BuildingConfigManager.Instance.DestroyBuildingCompleteKComponents(base.gameObject, this.Def.Tag);
+		}
 		if (this.Def.UseStructureTemperature)
 		{
 			GameComps.StructureTemperatures.Remove(base.gameObject);
@@ -167,9 +163,6 @@ public class BuildingComplete : Building
 		base.Trigger(-21016276, this);
 	}
 
-	[MyCmpAdd]
-	private UserMenu userMenu;
-
 	[MyCmpReq]
 	private Modifiers modifiers;
 
@@ -182,6 +175,8 @@ public class BuildingComplete : Building
 	public bool isManuallyOperated;
 
 	public bool isArtable;
+
+	private bool hasSpawnedKComponents;
 
 	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
 }

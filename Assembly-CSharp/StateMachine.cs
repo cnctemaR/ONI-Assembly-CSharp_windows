@@ -170,6 +170,7 @@ public abstract class StateMachine
 		{
 			this.stateMachine = state_machine;
 			this.CreateParameterContexts();
+			this.log = new LoggerFSSSS(this.stateMachine.name, 35);
 		}
 
 		public abstract StateMachine.BaseState GetCurrentState();
@@ -235,7 +236,7 @@ public abstract class StateMachine
 
 		public LoggerFSSSS GetLog()
 		{
-			return null;
+			return this.log;
 		}
 
 		public StateMachine.Parameter.Context[] GetParameterContexts()
@@ -378,6 +379,8 @@ public abstract class StateMachine
 				return this.gameObject.transform;
 			}
 		}
+
+		protected LoggerFSSSS log;
 
 		protected StateMachine.Status status;
 

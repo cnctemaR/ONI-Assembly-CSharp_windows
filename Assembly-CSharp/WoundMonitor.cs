@@ -72,73 +72,77 @@ public class WoundMonitor : GameStateMachine<WoundMonitor, WoundMonitor.Instance
 
 		private void PlayHitAnimation()
 		{
-			string name = this.animController.CurrentAnim.name;
-			KAnim.PlayMode playMode = this.animController.PlayMode;
-			if (name != null)
+			string text = null;
+			if (this.animController.CurrentAnim != null)
 			{
-				if (name.Contains("hit"))
+				text = this.animController.CurrentAnim.name;
+			}
+			KAnim.PlayMode playMode = this.animController.PlayMode;
+			if (text != null)
+			{
+				if (text.Contains("hit"))
 				{
 					return;
 				}
-				if (name.Contains("2_0"))
+				if (text.Contains("2_0"))
 				{
 					return;
 				}
-				if (name.Contains("2_1"))
+				if (text.Contains("2_1"))
 				{
 					return;
 				}
-				if (name.Contains("2_-1"))
+				if (text.Contains("2_-1"))
 				{
 					return;
 				}
-				if (name.Contains("2_-2"))
+				if (text.Contains("2_-2"))
 				{
 					return;
 				}
-				if (name.Contains("1_-1"))
+				if (text.Contains("1_-1"))
 				{
 					return;
 				}
-				if (name.Contains("1_-2"))
+				if (text.Contains("1_-2"))
 				{
 					return;
 				}
-				if (name.Contains("1_1"))
+				if (text.Contains("1_1"))
 				{
 					return;
 				}
-				if (name.Contains("1_2"))
+				if (text.Contains("1_2"))
 				{
 					return;
 				}
-				if (name.Contains("breathe_"))
+				if (text.Contains("breathe_"))
 				{
 					return;
 				}
-				if (name.Contains("death_"))
+				if (text.Contains("death_"))
 				{
 					return;
 				}
 			}
-			string text = "hit";
+			string text2 = "hit";
 			AttackChore.StatesInstance smi = base.gameObject.GetSMI<AttackChore.StatesInstance>();
 			if (smi != null && smi.GetCurrentState() == smi.sm.attack)
 			{
-				text = smi.master.GetHitAnim();
+				text2 = smi.master.GetHitAnim();
 			}
 			if (this.worker.GetComponent<Navigator>().CurrentNavType == NavType.Ladder)
 			{
-				text = "hit_ladder";
+				text2 = "hit_ladder";
 			}
 			else if (this.worker.GetComponent<Navigator>().CurrentNavType == NavType.Pole)
 			{
-				text = "hit_ladder";
+				text2 = "hit_ladder";
 			}
-			this.animController.Play(text, KAnim.PlayMode.Once, 1f, 0f);
-			if (name != null)
+			this.animController.Play(text2, KAnim.PlayMode.Once, 1f, 0f);
+			if (text != null)
 			{
-				this.animController.Queue(name, playMode, 1f, 0f);
+				this.animController.Queue(text, playMode, 1f, 0f);
 			}
 		}
 

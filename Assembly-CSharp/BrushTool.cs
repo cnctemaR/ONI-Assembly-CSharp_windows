@@ -107,7 +107,6 @@ public class BrushTool : InterfaceTool
 		cursor_pos -= this.placementPivot;
 		this.dragging = true;
 		this.downPos = cursor_pos;
-		this.previousCursorPos = cursor_pos;
 		KScreenManager.Instance.SetEventSystemEnabled(false);
 		this.Paint();
 	}
@@ -177,20 +176,18 @@ public class BrushTool : InterfaceTool
 	public override void OnMouseMove(Vector3 cursorPos)
 	{
 		int num = Grid.PosToCell(cursorPos);
-		Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.FXFront);
 		this.currentCell = num;
 		base.OnMouseMove(cursorPos);
 		this.cellsInRadius.Clear();
-		foreach (Vector2 vector2 in this.brushOffsets)
+		foreach (Vector2 vector in this.brushOffsets)
 		{
-			this.cellsInRadius.Add(Grid.OffsetCell(Grid.PosToCell(cursorPos), new CellOffset((int)vector2.x, (int)vector2.y)));
+			this.cellsInRadius.Add(Grid.OffsetCell(Grid.PosToCell(cursorPos), new CellOffset((int)vector.x, (int)vector.y)));
 		}
 		if (!this.dragging)
 		{
 			return;
 		}
 		this.Paint();
-		this.previousCursorPos = cursorPos;
 	}
 
 	protected virtual void OnPaintCell(int cell, int distFromOrigin)
@@ -305,8 +302,6 @@ public class BrushTool : InterfaceTool
 	private bool dragging;
 
 	protected int brushRadius = -1;
-
-	private Vector3 previousCursorPos;
 
 	private BrushTool.DragAxis dragAxis = BrushTool.DragAxis.Invalid;
 

@@ -71,13 +71,21 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 			return flag;
 		}
 
+		private bool IsDirty(int cell)
+		{
+			if (!Grid.IsValidCell(cell))
+			{
+				return false;
+			}
+			Element element = Grid.Element[cell];
+			return element.IsLiquid && element.id != SimHashes.Water;
+		}
+
 		public void UpdateDirtiness()
 		{
 			int num = Grid.PosToCell(base.master.transform.GetPosition());
 			int num2 = Grid.CellAbove(num);
-			Element element = Grid.Element[num];
-			Element element2 = Grid.Element[num2];
-			if ((element.IsLiquid && element.id != SimHashes.Water) || (element2.IsLiquid && element2.id != SimHashes.Water))
+			if (this.IsDirty(num) || this.IsDirty(num2))
 			{
 				base.master.GetComponent<Effects>().Add("Unclean", true);
 			}

@@ -12,6 +12,7 @@ namespace FMOD
 		SURROUND,
 		_5POINT1,
 		_7POINT1,
+		_7POINT1POINT4,
 		MAX
 	}
 }

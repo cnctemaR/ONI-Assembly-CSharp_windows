@@ -14,7 +14,7 @@ namespace STRINGS
 
 		public static LocString BREATHABLEDESC = "<color=#{0}>({1})</color>";
 
-		public static LocString THERMALPROPERTIES = "\nSpecific Heat Capacity: {0} " + UI.UNITSUFFIXES.HEAT.SPECIFICHEATCAPACITY + "\nThermal Conductivity: {1} " + UI.UNITSUFFIXES.HEAT.THERMALCONDUCTIVITY;
+		public static LocString THERMALPROPERTIES = "\nSpecific Heat Capacity: {SPECIFIC_HEAT_CAPACITY}\nThermal Conductivity: {THERMAL_CONDUCTIVITY}";
 
 		public static LocString ELEMENTPROPERTIES = "Properties: {0}";
 
@@ -130,6 +130,15 @@ namespace STRINGS
 			public static LocString BUILD_DESC = string.Empty;
 		}
 
+		public class REFINEDCARBON
+		{
+			public static LocString NAME = UI.FormatAsLink("Refined Carbon", "REFINEDCARBON");
+
+			public static LocString DESC = "Refined carbon is...";
+
+			public static LocString BUILD_DESC = string.Empty;
+		}
+
 		public class CARBONDIOXIDE
 		{
 			public static LocString NAME = UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE");
@@ -180,7 +189,16 @@ namespace STRINGS
 
 		public class BRICK
 		{
-			public static LocString NAME = UI.FormatAsLink("Ceramic", "BRICK");
+			public static LocString NAME = UI.FormatAsLink("Brick", "BRICK");
+
+			public static LocString DESC = "Brick is a hard, brittle material formed from heated " + ELEMENTS.CLAY.NAME + ".\n\nIt is a reliable Construction Material.";
+
+			public static LocString BUILD_DESC = string.Empty;
+		}
+
+		public class CERAMIC
+		{
+			public static LocString NAME = UI.FormatAsLink("Ceramic", "CERAMIC");
 
 			public static LocString DESC = "Ceramic is a hard, brittle material formed from heated " + ELEMENTS.CLAY.NAME + ".\n\nIt is a reliable Construction Material.";
 
@@ -500,6 +518,22 @@ namespace STRINGS
 			public static LocString BUILD_DESC = string.Empty;
 		}
 
+		public class MAFICROCK
+		{
+			public static LocString NAME = UI.FormatAsLink("Mafic Rock", "MAFICROCK");
+
+			public static LocString DESC = string.Concat(new string[]
+			{
+				"Mafic Rock an ",
+				UI.FormatAsLink("Iron", "IRON"),
+				"-rich variation of ",
+				UI.FormatAsLink("Igneous Rock", "IGNEOUSROCK"),
+				".\n\nIt is useful as a Construction Material."
+			});
+
+			public static LocString BUILD_DESC = string.Empty;
+		}
+
 		public class IRON
 		{
 			public static LocString NAME = UI.FormatAsLink("Iron", "IRON");
@@ -555,6 +589,13 @@ namespace STRINGS
 			public static LocString DESC = "(Ab) Abyssalite is a resilient, crystalline element.";
 
 			public static LocString BUILD_DESC = string.Empty;
+		}
+
+		public class LIME
+		{
+			public static LocString NAME = UI.FormatAsLink("Lime", "LIME");
+
+			public static LocString DESC = "Lime is a mineral. It has various uses including soil fertilization and steel making.\n\nIt is useful as a Construction Material.";
 		}
 
 		public class LIQUIDCARBONDIOXIDE
@@ -842,6 +883,13 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Rock Gas", "ROCKGAS");
 
 			public static LocString DESC = "Rock Gas is rock that has been superheated into a " + UI.FormatAsLink("Gaseous", "ELEMENTS_GAS") + " state.";
+		}
+
+		public class REGOLITH
+		{
+			public static LocString NAME = UI.FormatAsLink("Regolith", "REGOLITH");
+
+			public static LocString DESC = "Regolith is a sandy substance composed of the various particles that collect atop terrestrial objects.\n\nIt is useful as a Filtration Medium.";
 		}
 
 		public class SAND

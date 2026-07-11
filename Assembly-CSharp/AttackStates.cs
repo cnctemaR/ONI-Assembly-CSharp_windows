@@ -8,7 +8,7 @@ internal class AttackStates : GameStateMachine<AttackStates, AttackStates.Instan
 		default_state = this.approach;
 		this.root.Enter("SetTarget", delegate(AttackStates.Instance smi)
 		{
-			this.target.Set(smi.GetSMI<ThreatMonitor.Instance>().GetMainThreat, smi);
+			this.target.Set(smi.GetSMI<ThreatMonitor.Instance>().MainThreat, smi);
 		});
 		GameStateMachine<AttackStates, AttackStates.Instance, IStateMachineTarget, AttackStates.Def>.State state = this.approach.InitializeStates(this.masterTarget, this.target, this.attack, null, new CellOffset[]
 		{

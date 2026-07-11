@@ -11,17 +11,17 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		base.OnSpawn();
 		this.overlayFilterMap.Add(SimViewMode.OxygenMap, delegate
 		{
-			int num = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+			int num = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
 			return Grid.Element[num].IsGas;
 		});
 		this.overlayFilterMap.Add(SimViewMode.GasVentMap, delegate
 		{
-			int num2 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+			int num2 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
 			return Grid.Element[num2].IsGas;
 		});
 		this.overlayFilterMap.Add(SimViewMode.LiquidVentMap, delegate
 		{
-			int num3 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+			int num3 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
 			return Grid.Element[num3].IsLiquid;
 		});
 		this.overlayFilterMap.Add(SimViewMode.Decor, () => false);
@@ -34,6 +34,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		HoverTextScreen instance = HoverTextScreen.Instance;
 		this.iconWarning = instance.GetSprite("iconWarning");
 		this.iconDash = instance.GetSprite("dash");
+		this.maskOverlay = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
 	}
 
 	private bool IsStatusItemWarning(StatusItemGroup.Entry item)
@@ -47,7 +48,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		{
 			this.ConfigureHoverScreen();
 		}
-		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
 		if (OverlayScreen.Instance == null || !Grid.IsValidCell(num))
 		{
 			return;
@@ -93,185 +94,205 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		string text = string.Empty;
 		string text2 = string.Empty;
 		SimViewMode mode2 = SimDebugView.Instance.GetMode();
-		if (mode2 != SimViewMode.HeatFlow)
+		if (mode2 != SimViewMode.Rooms)
 		{
-			if (mode2 != SimViewMode.Decor)
+			if (mode2 != SimViewMode.HeatFlow)
 			{
-				if (mode2 == SimViewMode.Rooms)
+				if (mode2 != SimViewMode.Light)
 				{
-					CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
-					if (cavityForCell != null)
+					if (mode2 == SimViewMode.Decor)
 					{
-						Room room = cavityForCell.room;
-						RoomType roomType = null;
-						if (room != null)
-						{
-							roomType = Db.Get().RoomTypes.GetRoomType(room);
-							text2 = roomType.Name;
-						}
-						else
-						{
-							text2 = UI.OVERLAYS.ROOMS.NOROOM.HEADER;
-						}
+						List<DecorProvider> list = new List<DecorProvider>();
+						GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.decorProviderLayer, list);
+						float decorAtCell = GameUtil.GetDecorAtCell(num);
 						hoverTextDrawer.BeginShadowBar(false);
-						hoverTextDrawer.DrawText(text2, this.Styles_Title.Standard);
-						text = string.Empty;
-						if (room != null)
+						hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HOVERTITLE, this.Styles_Title.Standard);
+						hoverTextDrawer.NewLine(26);
+						hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.TOTAL + GameUtil.GetFormattedDecor(decorAtCell), this.Styles_BodyText.Standard);
+						if (!Grid.Solid[num] && flag3)
 						{
-							string text3 = string.Empty;
-							text3 = RoomDetails.EFFECT.resolve_string_function(room);
-							string text4 = string.Empty;
-							text4 = RoomDetails.ASSIGNED_TO.resolve_string_function(room);
-							string text5 = string.Empty;
-							text5 = RoomConstraints.RoomCriteriaString(room);
-							if (text3 != string.Empty)
+							List<EffectorEntry> list2 = new List<EffectorEntry>();
+							List<EffectorEntry> list3 = new List<EffectorEntry>();
+							foreach (DecorProvider decorProvider in list)
+							{
+								float decorForCell = decorProvider.GetDecorForCell(num);
+								if (decorForCell != 0f)
+								{
+									string name = decorProvider.GetName();
+									KMonoBehaviour component = decorProvider.GetComponent<KMonoBehaviour>();
+									if (component != null && component.gameObject != null)
+									{
+										SelectToolHoverTextCard.highlightedObjects.Add(component.gameObject);
+									}
+									bool flag4 = false;
+									if (decorForCell > 0f)
+									{
+										for (int i = 0; i < list2.Count; i++)
+										{
+											if (list2[i].name == name)
+											{
+												EffectorEntry effectorEntry = list2[i];
+												effectorEntry.count++;
+												effectorEntry.value += decorForCell;
+												list2[i] = effectorEntry;
+												flag4 = true;
+												break;
+											}
+										}
+										if (!flag4)
+										{
+											list2.Add(new EffectorEntry(name, decorForCell));
+										}
+									}
+									else
+									{
+										for (int j = 0; j < list3.Count; j++)
+										{
+											if (list3[j].name == name)
+											{
+												EffectorEntry effectorEntry2 = list3[j];
+												effectorEntry2.count++;
+												effectorEntry2.value += decorForCell;
+												list3[j] = effectorEntry2;
+												flag4 = true;
+												break;
+											}
+										}
+										if (!flag4)
+										{
+											list3.Add(new EffectorEntry(name, decorForCell));
+										}
+									}
+								}
+							}
+							int lightDecorBonus = DecorProvider.GetLightDecorBonus(num);
+							if (lightDecorBonus > 0)
+							{
+								list2.Add(new EffectorEntry(UI.OVERLAYS.DECOR.LIGHTING, (float)lightDecorBonus));
+							}
+							list2.Sort((EffectorEntry x, EffectorEntry y) => y.value.CompareTo(x.value));
+							if (list2.Count > 0)
 							{
 								hoverTextDrawer.NewLine(26);
-								hoverTextDrawer.DrawText(text3, this.Styles_BodyText.Standard);
+								hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HEADER_POSITIVE, this.Styles_BodyText.Standard);
 							}
-							if (text4 != string.Empty && roomType != Db.Get().RoomTypes.Neutral)
+							foreach (EffectorEntry effectorEntry3 in list2)
+							{
+								hoverTextDrawer.NewLine(18);
+								hoverTextDrawer.DrawIcon(this.iconDash, 18);
+								hoverTextDrawer.DrawText(effectorEntry3.ToString(), this.Styles_BodyText.Standard);
+							}
+							list3.Sort((EffectorEntry x, EffectorEntry y) => Mathf.Abs(y.value).CompareTo(Mathf.Abs(x.value)));
+							if (list3.Count > 0)
 							{
 								hoverTextDrawer.NewLine(26);
-								hoverTextDrawer.DrawText(text4, this.Styles_BodyText.Standard);
+								hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HEADER_NEGATIVE, this.Styles_BodyText.Standard);
 							}
-							hoverTextDrawer.NewLine(22);
-							hoverTextDrawer.DrawText(RoomDetails.RoomDetailString(room), this.Styles_BodyText.Standard);
-							if (text5 != string.Empty)
+							foreach (EffectorEntry effectorEntry4 in list3)
 							{
-								hoverTextDrawer.NewLine(26);
-								hoverTextDrawer.DrawText(text5, this.Styles_BodyText.Standard);
+								hoverTextDrawer.NewLine(18);
+								hoverTextDrawer.DrawIcon(this.iconDash, 18);
+								hoverTextDrawer.DrawText(effectorEntry4.ToString(), this.Styles_BodyText.Standard);
 							}
-						}
-						else
-						{
-							hoverTextDrawer.NewLine(26);
-							hoverTextDrawer.DrawText(UI.OVERLAYS.ROOMS.NOROOM.DESC, this.Styles_BodyText.Standard);
 						}
 						hoverTextDrawer.EndShadowBar();
 					}
 				}
-			}
-			else
-			{
-				List<DecorProvider> list = new List<DecorProvider>();
-				GameScenePartitioner.Instance.TriggerEvent(num, GameScenePartitioner.Instance.decorProviderLayer, list);
-				float decorAtCell = GameUtil.GetDecorAtCell(num);
-				hoverTextDrawer.BeginShadowBar(false);
-				hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HOVERTITLE, this.Styles_Title.Standard);
-				hoverTextDrawer.NewLine(26);
-				hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.TOTAL + GameUtil.GetFormattedDecor(decorAtCell), this.Styles_BodyText.Standard);
-				if (!Grid.Solid[num] && flag3)
+				else if (flag3)
 				{
-					List<EffectorEntry> list2 = new List<EffectorEntry>();
-					List<EffectorEntry> list3 = new List<EffectorEntry>();
-					foreach (DecorProvider decorProvider in list)
+					string text3 = text;
+					text = string.Concat(new string[]
 					{
-						float decorForCell = decorProvider.GetDecorForCell(num);
-						if (decorForCell != 0f)
-						{
-							string name = decorProvider.GetName();
-							KMonoBehaviour component = decorProvider.GetComponent<KMonoBehaviour>();
-							if (component != null && component.gameObject != null)
-							{
-								SelectToolHoverTextCard.highlightedObjects.Add(component.gameObject);
-							}
-							bool flag4 = false;
-							if (decorForCell > 0f)
-							{
-								for (int i = 0; i < list2.Count; i++)
-								{
-									if (list2[i].name == name)
-									{
-										EffectorEntry effectorEntry = list2[i];
-										effectorEntry.count++;
-										effectorEntry.value += decorForCell;
-										list2[i] = effectorEntry;
-										flag4 = true;
-										break;
-									}
-								}
-								if (!flag4)
-								{
-									list2.Add(new EffectorEntry(name, decorForCell));
-								}
-							}
-							else
-							{
-								for (int j = 0; j < list3.Count; j++)
-								{
-									if (list3[j].name == name)
-									{
-										EffectorEntry effectorEntry2 = list3[j];
-										effectorEntry2.count++;
-										effectorEntry2.value += decorForCell;
-										list3[j] = effectorEntry2;
-										flag4 = true;
-										break;
-									}
-								}
-								if (!flag4)
-								{
-									list3.Add(new EffectorEntry(name, decorForCell));
-								}
-							}
-						}
-					}
-					int lightDecorBonus = DecorProvider.GetLightDecorBonus(num);
-					if (lightDecorBonus > 0)
-					{
-						list2.Add(new EffectorEntry(UI.OVERLAYS.DECOR.LIGHTING, (float)lightDecorBonus));
-					}
-					list2.Sort((EffectorEntry x, EffectorEntry y) => y.value.CompareTo(x.value));
-					if (list2.Count > 0)
-					{
-						hoverTextDrawer.NewLine(26);
-						hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HEADER_POSITIVE, this.Styles_BodyText.Standard);
-					}
-					foreach (EffectorEntry effectorEntry3 in list2)
-					{
-						hoverTextDrawer.NewLine(18);
-						hoverTextDrawer.DrawIcon(this.iconDash, 18);
-						hoverTextDrawer.DrawText(effectorEntry3.ToString(), this.Styles_BodyText.Standard);
-					}
-					list3.Sort((EffectorEntry x, EffectorEntry y) => Mathf.Abs(y.value).CompareTo(Mathf.Abs(x.value)));
-					if (list3.Count > 0)
-					{
-						hoverTextDrawer.NewLine(26);
-						hoverTextDrawer.DrawText(UI.OVERLAYS.DECOR.HEADER_NEGATIVE, this.Styles_BodyText.Standard);
-					}
-					foreach (EffectorEntry effectorEntry4 in list3)
-					{
-						hoverTextDrawer.NewLine(18);
-						hoverTextDrawer.DrawIcon(this.iconDash, 18);
-						hoverTextDrawer.DrawText(effectorEntry4.ToString(), this.Styles_BodyText.Standard);
-					}
+						text3,
+						string.Format(UI.OVERLAYS.LIGHTING.DESC, Grid.LightIntensity[num]),
+						" (",
+						GameUtil.GetLightDescription(Grid.LightIntensity[num]),
+						")"
+					});
+					hoverTextDrawer.BeginShadowBar(false);
+					hoverTextDrawer.DrawText(UI.OVERLAYS.LIGHTING.HOVERTITLE, this.Styles_Title.Standard);
+					hoverTextDrawer.NewLine(26);
+					hoverTextDrawer.DrawText(text, this.Styles_BodyText.Standard);
+					hoverTextDrawer.EndShadowBar();
 				}
+			}
+			else if (!Grid.Solid[num] && flag3)
+			{
+				float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
+				float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.083680004f);
+				float num2 = 0f;
+				if (thermalComfort2 * 0.001f > -0.27893335f - num2 && thermalComfort2 * 0.001f < 0.27893335f + num2)
+				{
+					text = UI.OVERLAYS.HEATFLOW.NEUTRAL;
+				}
+				else if (thermalComfort2 <= ExternalTemperatureMonitor.GetExternalColdThreshold(null))
+				{
+					text = UI.OVERLAYS.HEATFLOW.COOLING;
+				}
+				else if (thermalComfort2 >= ExternalTemperatureMonitor.GetExternalWarmThreshold(null))
+				{
+					text = UI.OVERLAYS.HEATFLOW.HEATING;
+				}
+				text = text + " (" + GameUtil.GetFormattedWattage(thermalComfort, GameUtil.WattageFormatterUnit.Automatic) + ")";
+				hoverTextDrawer.BeginShadowBar(false);
+				hoverTextDrawer.DrawText(UI.OVERLAYS.HEATFLOW.HOVERTITLE, this.Styles_Title.Standard);
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawText(text, this.Styles_BodyText.Standard);
 				hoverTextDrawer.EndShadowBar();
 			}
 		}
-		else if (!Grid.Solid[num] && flag3)
+		else
 		{
-			float thermalComfort = GameUtil.GetThermalComfort(num, 0f);
-			float thermalComfort2 = GameUtil.GetThermalComfort(num, -0.083680004f);
-			float num2 = 0f;
-			if (thermalComfort2 * 0.001f > -0.27893335f - num2 && thermalComfort2 * 0.001f < 0.27893335f + num2)
+			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
+			if (cavityForCell != null)
 			{
-				text = UI.OVERLAYS.HEATFLOW.NEUTRAL;
+				Room room = cavityForCell.room;
+				RoomType roomType = null;
+				if (room != null)
+				{
+					roomType = Db.Get().RoomTypes.GetRoomType(room);
+					text2 = roomType.Name;
+				}
+				else
+				{
+					text2 = UI.OVERLAYS.ROOMS.NOROOM.HEADER;
+				}
+				hoverTextDrawer.BeginShadowBar(false);
+				hoverTextDrawer.DrawText(text2, this.Styles_Title.Standard);
+				text = string.Empty;
+				if (room != null)
+				{
+					string text4 = string.Empty;
+					text4 = RoomDetails.EFFECT.resolve_string_function(room);
+					string text5 = string.Empty;
+					text5 = RoomDetails.ASSIGNED_TO.resolve_string_function(room);
+					string text6 = string.Empty;
+					text6 = RoomConstraints.RoomCriteriaString(room);
+					if (text4 != string.Empty)
+					{
+						hoverTextDrawer.NewLine(26);
+						hoverTextDrawer.DrawText(text4, this.Styles_BodyText.Standard);
+					}
+					if (text5 != string.Empty && roomType != Db.Get().RoomTypes.Neutral)
+					{
+						hoverTextDrawer.NewLine(26);
+						hoverTextDrawer.DrawText(text5, this.Styles_BodyText.Standard);
+					}
+					hoverTextDrawer.NewLine(22);
+					hoverTextDrawer.DrawText(RoomDetails.RoomDetailString(room), this.Styles_BodyText.Standard);
+					if (text6 != string.Empty)
+					{
+						hoverTextDrawer.NewLine(26);
+						hoverTextDrawer.DrawText(text6, this.Styles_BodyText.Standard);
+					}
+				}
+				else
+				{
+					hoverTextDrawer.NewLine(26);
+					hoverTextDrawer.DrawText(UI.OVERLAYS.ROOMS.NOROOM.DESC, this.Styles_BodyText.Standard);
+				}
+				hoverTextDrawer.EndShadowBar();
 			}
-			else if (thermalComfort2 <= ExternalTemperatureMonitor.GetExternalColdThreshold(null))
-			{
-				text = UI.OVERLAYS.HEATFLOW.COOLING;
-			}
-			else if (thermalComfort2 >= ExternalTemperatureMonitor.GetExternalWarmThreshold(null))
-			{
-				text = UI.OVERLAYS.HEATFLOW.HEATING;
-			}
-			text = text + " (" + GameUtil.GetFormattedWattage(thermalComfort, GameUtil.WattageFormatterUnit.Automatic) + ")";
-			hoverTextDrawer.BeginShadowBar(false);
-			hoverTextDrawer.DrawText(UI.OVERLAYS.HEATFLOW.HOVERTITLE, this.Styles_Title.Standard);
-			hoverTextDrawer.NewLine(26);
-			hoverTextDrawer.DrawText(text, this.Styles_BodyText.Standard);
-			hoverTextDrawer.EndShadowBar();
 		}
 		int num3 = 0;
 		ChoreConsumer choreConsumer = null;
@@ -279,16 +300,16 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		{
 			choreConsumer = SelectTool.Instance.selected.GetComponent<ChoreConsumer>();
 		}
-		int mask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
 		for (int k = 0; k < this.overlayValidHoverObjects.Count; k++)
 		{
 			if (this.overlayValidHoverObjects[k] != null && this.overlayValidHoverObjects[k].GetComponent<CellSelectionObject>() == null)
 			{
 				KSelectable kselectable2 = this.overlayValidHoverObjects[k];
-				if (!(OverlayScreen.Instance != null) || OverlayScreen.Instance.mode == SimViewMode.None || (kselectable2.gameObject.layer & mask) == 0)
+				if (!(OverlayScreen.Instance != null) || OverlayScreen.Instance.mode == SimViewMode.None || (kselectable2.gameObject.layer & this.maskOverlay) == 0)
 				{
 					if (flag3)
 					{
+						PrimaryElement component2 = kselectable2.GetComponent<PrimaryElement>();
 						bool flag5 = SelectTool.Instance.selected == this.overlayValidHoverObjects[k];
 						if (flag5)
 						{
@@ -296,15 +317,19 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 						}
 						num3++;
 						hoverTextDrawer.BeginShadowBar(flag5);
-						hoverTextDrawer.DrawText(GameUtil.GetUnitFormattedName(this.overlayValidHoverObjects[k].gameObject, true), this.Styles_Title.Standard);
+						string text7 = GameUtil.GetUnitFormattedName(this.overlayValidHoverObjects[k].gameObject, true);
+						if (component2 != null && kselectable2.GetComponent<Building>() != null)
+						{
+							text7 = StringFormatter.Replace(StringFormatter.Replace(UI.TOOLS.GENERIC.BUILDING_HOVER_NAME_FMT, "{Name}", text7), "{Element}", component2.Element.nameUpperCase);
+						}
+						hoverTextDrawer.DrawText(text7, this.Styles_Title.Standard);
 						bool flag6 = false;
-						string text6 = UI.OVERLAYS.DISEASE.NO_DISEASE;
-						PrimaryElement component2 = kselectable2.GetComponent<PrimaryElement>();
+						string text8 = UI.OVERLAYS.DISEASE.NO_DISEASE;
 						if (flag)
 						{
 							if (component2 != null && component2.DiseaseIdx != 255)
 							{
-								text6 = GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true);
+								text8 = GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true);
 							}
 							flag6 = true;
 							Storage component3 = kselectable2.GetComponent<Storage>();
@@ -319,7 +344,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 										PrimaryElement component4 = gameObject.GetComponent<PrimaryElement>();
 										if (component4.DiseaseIdx != 255)
 										{
-											text6 += string.Format(UI.OVERLAYS.DISEASE.CONTAINER_FORMAT, gameObject.GetComponent<KSelectable>().GetProperName(), GameUtil.GetFormattedDisease(component4.DiseaseIdx, component4.DiseaseCount, true));
+											text8 += string.Format(UI.OVERLAYS.DISEASE.CONTAINER_FORMAT, gameObject.GetComponent<KSelectable>().GetProperName(), GameUtil.GetFormattedDisease(component4.DiseaseIdx, component4.DiseaseCount, true));
 										}
 									}
 								}
@@ -339,15 +364,15 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 									Color32 badColorBG = NotificationScreen.Instance.BadColorBG;
 									badColorBG.a = byte.MaxValue;
 									Color32 color = ((!flag7) ? new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue) : badColorBG);
-									string text7 = string.Format(UI.OVERLAYS.DISEASE.IMMUNITY, GameUtil.GetFormattedPercent(value, GameUtil.TimeSlice.None));
+									string text9 = string.Format(UI.OVERLAYS.DISEASE.IMMUNITY, GameUtil.GetFormattedPercent(value, GameUtil.TimeSlice.None));
 									hoverTextDrawer.NewLine(26);
 									hoverTextDrawer.DrawIcon(this.iconDash, 18);
-									hoverTextDrawer.DrawText(GameUtil.ColourizeString(color, text7), this.Styles_Values.Property.Standard);
+									hoverTextDrawer.DrawText(GameUtil.ColourizeString(color, text9), this.Styles_Values.Property.Standard);
 								}
 							}
 							hoverTextDrawer.NewLine(26);
 							hoverTextDrawer.DrawIcon(this.iconDash, 18);
-							hoverTextDrawer.DrawText(text6, this.Styles_Values.Property.Standard);
+							hoverTextDrawer.DrawText(text8, this.Styles_Values.Property.Standard);
 						}
 						int num4 = 0;
 						foreach (StatusItemGroup.Entry entry in this.overlayValidHoverObjects[k].GetStatusItemGroup())
@@ -465,7 +490,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			}
 			Element element = Grid.Element[num];
 			hoverTextDrawer.BeginShadowBar(flag11);
-			hoverTextDrawer.DrawText(element.name.ToUpper(), this.Styles_Title.Standard);
+			hoverTextDrawer.DrawText(element.nameUpperCase, this.Styles_Title.Standard);
 			if (Grid.DiseaseCount[num] > 0 || flag)
 			{
 				hoverTextDrawer.NewLine(26);
@@ -478,7 +503,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				hoverTextDrawer.DrawText(ElementLoader.elements[(int)Grid.ElementIdx[num]].GetMaterialCategoryTag().ProperName(), this.Styles_BodyText.Standard);
 			}
-			string[] array = WorldInspector.MassStrings(num);
+			string[] array = WorldInspector.MassStringsReadOnly(num);
 			hoverTextDrawer.NewLine(26);
 			hoverTextDrawer.DrawIcon(this.iconDash, 18);
 			for (int m = 0; m < array.Length; m++)
@@ -493,8 +518,22 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
 				Element element2 = Grid.Element[num];
-				string text8 = ((element2.specificHeatCapacity != 0f) ? GameUtil.GetFormattedTemperature(Grid.Temperature[num], GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true) : "N/A");
-				hoverTextDrawer.DrawText(text8, this.Styles_BodyText.Standard);
+				string formattedTemperature = this.cachedTemperatureString;
+				float num6 = Grid.Temperature[num];
+				if (num6 != this.cachedTemperature)
+				{
+					this.cachedTemperature = num6;
+					formattedTemperature = GameUtil.GetFormattedTemperature(Grid.Temperature[num], GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true);
+					this.cachedTemperatureString = formattedTemperature;
+				}
+				string text10 = ((element2.specificHeatCapacity != 0f) ? formattedTemperature : "N/A");
+				hoverTextDrawer.DrawText(text10, this.Styles_BodyText.Standard);
+			}
+			if (CellSelectionObject.IsExposedToSpace(num))
+			{
+				hoverTextDrawer.NewLine(26);
+				hoverTextDrawer.DrawIcon(this.iconDash, 18);
+				hoverTextDrawer.DrawText(MISC.STATUSITEMS.SPACE.NAME, this.Styles_BodyText.Standard);
 			}
 			if (Game.Instance.GetComponent<EntombedItemVisualizer>().IsEntombedItem(num))
 			{
@@ -504,31 +543,31 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 			}
 			if (element.id == SimHashes.OxyRock)
 			{
-				float num6 = Grid.AccumulatedFlow[num] / 3f;
-				string text9 = BUILDING.STATUSITEMS.EMITTINGOXYGENAVG.NAME;
-				text9 = text9.Replace("{FlowRate}", GameUtil.GetFormattedMass(num6, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				float num7 = Grid.AccumulatedFlow[num] / 3f;
+				string text11 = BUILDING.STATUSITEMS.EMITTINGOXYGENAVG.NAME;
+				text11 = text11.Replace("{FlowRate}", GameUtil.GetFormattedMass(num7, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(this.iconDash, 18);
-				hoverTextDrawer.DrawText(text9, this.Styles_BodyText.Standard);
-				if (num6 <= 0f)
+				hoverTextDrawer.DrawText(text11, this.Styles_BodyText.Standard);
+				if (num7 <= 0f)
 				{
 					bool flag12;
 					bool flag13;
 					GameUtil.IsEmissionBlocked(num, out flag12, out flag13);
-					string text10 = null;
+					string text12 = null;
 					if (flag12)
 					{
-						text10 = MISC.STATUSITEMS.OXYROCK.NEIGHBORSBLOCKED.NAME;
+						text12 = MISC.STATUSITEMS.OXYROCK.NEIGHBORSBLOCKED.NAME;
 					}
 					else if (flag13)
 					{
-						text10 = MISC.STATUSITEMS.OXYROCK.OVERPRESSURE.NAME;
+						text12 = MISC.STATUSITEMS.OXYROCK.OVERPRESSURE.NAME;
 					}
-					if (text10 != null)
+					if (text12 != null)
 					{
 						hoverTextDrawer.NewLine(26);
 						hoverTextDrawer.DrawIcon(this.iconDash, 18);
-						hoverTextDrawer.DrawText(text10, this.Styles_BodyText.Standard);
+						hoverTextDrawer.DrawText(text12, this.Styles_BodyText.Standard);
 					}
 				}
 			}
@@ -538,7 +577,7 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 		{
 			hoverTextDrawer.BeginShadowBar(false);
 			hoverTextDrawer.DrawIcon(this.iconWarning, 18);
-			hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.UNKNOWN.ToString().ToUpper(), this.Styles_BodyText.Standard);
+			hoverTextDrawer.DrawText(UI.TOOLS.GENERIC.UNKNOWN, this.Styles_BodyText.Standard);
 			hoverTextDrawer.EndShadowBar();
 		}
 		this.recentNumberOfDisplayedSelectables = num3 + 1;
@@ -644,6 +683,12 @@ public class SelectToolHoverTextCard : HoverTextConfiguration
 	public static List<GameObject> highlightedObjects = new List<GameObject>();
 
 	private static readonly List<Type> hiddenChoreConsumerTypes = new List<Type> { typeof(KSelectableHealthBar) };
+
+	private int maskOverlay;
+
+	private string cachedTemperatureString;
+
+	private float cachedTemperature = float.MinValue;
 
 	private List<KSelectable> overlayValidHoverObjects = new List<KSelectable>();
 }

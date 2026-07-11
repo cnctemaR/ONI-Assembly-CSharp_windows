@@ -56,53 +56,97 @@ public class RefinerySideScreen : SideScreenContent
 		}
 		this.targetFab = target;
 		base.gameObject.SetActive(true);
-		RefinementRecipe[] recipes = this.targetFab.GetRecipes();
-		Array.Sort<RefinementRecipe>(recipes, (RefinementRecipe a, RefinementRecipe b) => a.sortOrder - b.sortOrder);
-		this.recipeMap = new Dictionary<KToggle, RefinementRecipe>();
+		ComplexRecipe[] recipes = this.targetFab.GetRecipes();
+		Array.Sort<ComplexRecipe>(recipes, (ComplexRecipe a, ComplexRecipe b) => a.sortOrder - b.sortOrder);
+		this.recipeMap = new Dictionary<KToggle, ComplexRecipe>();
 		this.recipeToggles.ForEach(delegate(KToggle rbi)
 		{
 			global::UnityEngine.Object.Destroy(rbi.gameObject);
 		});
 		this.recipeToggles.Clear();
-		RefinementRecipe[] array = recipes;
+		GridLayoutGroup component = this.recipeGrid.GetComponent<GridLayoutGroup>();
+		component.constraintCount = ((this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListResult && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInput && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInputOutput) ? 3 : 1);
+		component.cellSize = new Vector2((float)((this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListResult && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInput && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInputOutput) ? 116 : 348), component.cellSize.y);
+		int num = 0;
+		ComplexRecipe[] array = recipes;
 		for (int i = 0; i < array.Length; i++)
 		{
-			RefinementRecipe refinementRecipe = array[i];
-			if (WorldInventory.Instance.IsDiscovered(refinementRecipe.material) || DebugHandler.InstantBuildMode)
+			ComplexRecipe complexRecipe = array[i];
+			bool flag = true;
+			foreach (ComplexRecipe.RecipeElement recipeElement in complexRecipe.ingredients)
 			{
-				GameObject prefab = Assets.GetPrefab(refinementRecipe.material);
-				KToggle newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
-				newToggle.GetComponentInChildren<LocText>().text = refinementRecipe.material.ProperName();
-				KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui");
-				if (uispriteFromMultiObjectAnim == null)
+				if (!WorldInventory.Instance.IsDiscovered(recipeElement.material) && !DebugHandler.InstantBuildMode)
 				{
-					uispriteFromMultiObjectAnim = this.elementPlaceholderSpr;
+					flag = false;
+					break;
 				}
-				Image componentInChildrenOnly = newToggle.gameObject.GetComponentInChildrenOnly<Image>();
-				componentInChildrenOnly.sprite = uispriteFromMultiObjectAnim;
+			}
+			if (flag)
+			{
+				num++;
+				Tuple<Sprite, Color> uisprite = Def.GetUISprite(complexRecipe.ingredients[0].material, "ui");
+				Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(complexRecipe.results[0].material, "ui");
+				KToggle newToggle;
+				if (target.sideScreenStyle == RefinerySideScreen.StyleSetting.GridInputOutput || target.sideScreenStyle == RefinerySideScreen.StyleSetting.ListInputOutput || target.sideScreenStyle == RefinerySideScreen.StyleSetting.ListInputOutput)
+				{
+					newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButtonMultiple, this.recipeGrid, false);
+					HierarchyReferences component2 = newToggle.GetComponent<HierarchyReferences>();
+					foreach (ComplexRecipe.RecipeElement recipeElement2 in complexRecipe.ingredients)
+					{
+						GameObject gameObject = global::Util.KInstantiateUI(component2.GetReference("FromIconPrefab").gameObject, component2.GetReference("FromIcons").gameObject, true);
+						gameObject.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement2.material, "ui").first;
+						gameObject.GetComponent<Image>().color = Def.GetUISprite(recipeElement2.material, "ui").second;
+						gameObject.gameObject.name = recipeElement2.material.Name;
+					}
+					foreach (ComplexRecipe.RecipeElement recipeElement3 in complexRecipe.results)
+					{
+						GameObject gameObject2 = global::Util.KInstantiateUI(component2.GetReference("ToIconPrefab").gameObject, component2.GetReference("ToIcons").gameObject, true);
+						gameObject2.GetComponent<Image>().sprite = Def.GetUISprite(recipeElement3.material, "ui").first;
+						gameObject2.GetComponent<Image>().color = Def.GetUISprite(recipeElement3.material, "ui").second;
+						gameObject2.gameObject.name = recipeElement3.material.Name;
+					}
+				}
+				else
+				{
+					newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
+					if (target.sideScreenStyle == RefinerySideScreen.StyleSetting.GridInput || target.sideScreenStyle == RefinerySideScreen.StyleSetting.ListInput)
+					{
+						Image image = newToggle.gameObject.GetComponentsInChildrenOnly<Image>()[0];
+						image.sprite = uisprite.first;
+						image.color = uisprite.second;
+					}
+					else
+					{
+						Image image2 = newToggle.gameObject.GetComponentsInChildrenOnly<Image>()[0];
+						image2.sprite = uisprite2.first;
+						image2.color = uisprite2.second;
+					}
+				}
+				newToggle.GetComponentInChildren<LocText>().text = string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO, complexRecipe.ingredients[0].material.ProperName(), complexRecipe.results[0].material.ProperName());
+				newToggle.GetComponent<ToolTip>().SetSimpleTooltip(complexRecipe.description);
 				newToggle.onClick += delegate
 				{
 					this.ToggleClicked(newToggle);
 				};
 				newToggle.gameObject.SetActive(true);
-				this.recipeMap.Add(newToggle, refinementRecipe);
+				this.recipeMap.Add(newToggle, complexRecipe);
 				this.recipeToggles.Add(newToggle);
 			}
 		}
+		this.buttonScrollContainer.GetComponent<LayoutElement>().minHeight = Mathf.Min(232f, 4f + (float)num * this.recipeButtonMultiple.GetComponent<LayoutElement>().minHeight);
 		if (this.recipeToggles.Count > 0)
 		{
-			bool flag = false;
+			bool flag2 = false;
 			if (this.selectedRecipeFabricatorMap.ContainsKey(this.targetFab))
 			{
-				int num = this.selectedRecipeFabricatorMap[this.targetFab];
-				if (num < this.recipeToggles.Count)
+				int num2 = this.selectedRecipeFabricatorMap[this.targetFab];
+				if (num2 < this.recipeToggles.Count)
 				{
-					this.ToggleClicked(this.recipeToggles[num]);
-					flag = true;
+					this.ToggleClicked(this.recipeToggles[num2]);
+					flag2 = true;
 				}
 			}
-			if (!flag)
+			if (!flag2)
 			{
 				this.recipeToggles.ForEach(delegate(KToggle tg)
 				{
@@ -138,7 +182,6 @@ public class RefinerySideScreen : SideScreenContent
 			this.buildBtn.isInteractable = false;
 			this.infiniteBuildBtn.isInteractable = false;
 		}
-		this.scrollBarContainer.SetActive(this.recipeToggles.Count > 4);
 	}
 
 	private void ToggleClicked(KToggle toggle)
@@ -162,8 +205,8 @@ public class RefinerySideScreen : SideScreenContent
 		});
 		this.selectedRecipe = this.recipeMap[toggle];
 		this.selectedRecipeFabricatorMap[this.targetFab] = this.recipeToggles.IndexOf(toggle);
-		this.buildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE, this.selectedRecipe.material.ProperName());
-		this.infiniteBuildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE_INFINITE, this.selectedRecipe.material.ProperName());
+		this.buildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE, this.selectedRecipe.results[0].material.ProperName());
+		this.infiniteBuildBtn.GetComponent<ToolTip>().toolTip = string.Format(UI.TOOLTIPS.RECIPE_QUEUE_INFINITE, this.selectedRecipe.results[0].material.ProperName());
 		this.buildBtn.ClearOnClick();
 		this.infiniteBuildBtn.ClearOnClick();
 		this.buildBtn.onClick += delegate
@@ -174,7 +217,7 @@ public class RefinerySideScreen : SideScreenContent
 		{
 			this.CreateOrder(true);
 		};
-		this.subtitleLabel.SetText(this.selectedRecipe.material.ProperName());
+		this.subtitleLabel.SetText(this.selectedRecipe.results[0].material.ProperName());
 		if (this.noRecipeSelectedLabel != null)
 		{
 			this.noRecipeSelectedLabel.gameObject.SetActive(false);
@@ -219,65 +262,81 @@ public class RefinerySideScreen : SideScreenContent
 		this.RefreshIngredientDescriptors();
 	}
 
-	public Descriptor GetIngredientDescription(RefinementRecipe recipe)
+	public Descriptor GetIngredientDescription(ComplexRecipe recipe)
 	{
-		GameObject prefab = Assets.GetPrefab(recipe.material);
-		float amount = WorldInventory.Instance.GetAmount(recipe.material);
-		LocString reciperquirement = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT;
-		LocString locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_INSUFFICIENT;
-		if (WorldInventory.Instance.GetAmount(recipe.material) >= recipe.amount)
+		string text = string.Empty;
+		string text2 = string.Empty;
+		for (int i = 0; i < recipe.ingredients.Length; i++)
 		{
-			locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_SUFFICIENT;
-		}
-		string text;
-		string text2;
-		if (GameTags.DisplayAsCalories.Contains(recipe.material))
-		{
-			EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(recipe.material.Name);
-			float num = foodInfo.CaloriesPerUnit * recipe.amount;
-			text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-			text2 = GameUtil.GetFormattedCalories(amount * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true);
-		}
-		else if (GameTags.DisplayAsUnits.Contains(recipe.material))
-		{
-			text = GameUtil.GetFormattedUnits(recipe.amount, GameUtil.TimeSlice.None, false);
-			text2 = GameUtil.GetFormattedUnits(amount, GameUtil.TimeSlice.None, false);
-		}
-		else
-		{
-			text = GameUtil.GetFormattedMass(recipe.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			text2 = GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-		}
-		return new Descriptor(string.Format(reciperquirement, prefab.GetProperName(), text, text2), string.Format(locString, prefab.GetProperName(), text, text2), Descriptor.DescriptorType.Requirement, false);
-	}
-
-	public List<Descriptor> GetResultDescription(RefinementRecipe recipe)
-	{
-		List<Descriptor> list = new List<Descriptor>();
-		foreach (RefinementRecipe.Result result in recipe.results)
-		{
-			GameObject prefab = Assets.GetPrefab(result.tag);
-			string text;
-			if (GameTags.DisplayAsCalories.Contains(result.tag))
+			ComplexRecipe.RecipeElement recipeElement = recipe.ingredients[i];
+			GameObject prefab = Assets.GetPrefab(recipeElement.material);
+			float amount = WorldInventory.Instance.GetAmount(recipeElement.material);
+			LocString reciperquirement = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT;
+			LocString locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_INSUFFICIENT;
+			if (WorldInventory.Instance.GetAmount(recipeElement.material) >= recipeElement.amount)
 			{
-				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(result.tag.Name);
-				float num = foodInfo.CaloriesPerUnit * result.amount;
-				text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+				locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_SUFFICIENT;
 			}
-			else if (GameTags.DisplayAsUnits.Contains(result.tag))
+			string text3;
+			string text4;
+			if (GameTags.DisplayAsCalories.Contains(recipeElement.material))
 			{
-				text = GameUtil.GetFormattedUnits(result.amount, GameUtil.TimeSlice.None, true);
+				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(recipeElement.material.Name);
+				float num = foodInfo.CaloriesPerUnit * recipeElement.amount;
+				text3 = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+				text4 = GameUtil.GetFormattedCalories(amount * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true);
+			}
+			else if (GameTags.DisplayAsUnits.Contains(recipeElement.material))
+			{
+				text3 = GameUtil.GetFormattedUnits(recipeElement.amount, GameUtil.TimeSlice.None, false);
+				text4 = GameUtil.GetFormattedUnits(amount, GameUtil.TimeSlice.None, false);
 			}
 			else
 			{
-				text = GameUtil.GetFormattedMass(result.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+				text3 = GameUtil.GetFormattedMass(recipeElement.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+				text4 = GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+			}
+			text += string.Format(reciperquirement, prefab.GetProperName(), text3, text4);
+			if (i != recipe.ingredients.Length - 1)
+			{
+				text += "\n    ";
+			}
+			text2 += string.Format(locString, prefab.GetProperName(), text3, text4);
+		}
+		return new Descriptor(text, text2, Descriptor.DescriptorType.Requirement, false);
+	}
+
+	public List<Descriptor> GetResultDescription(ComplexRecipe recipe)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.results)
+		{
+			GameObject prefab = Assets.GetPrefab(recipeElement.material);
+			string text;
+			if (GameTags.DisplayAsCalories.Contains(recipeElement.material))
+			{
+				EdiblesManager.FoodInfo foodInfo = EdiblesManager.instance.GetFoodInfo(recipeElement.material.Name);
+				float num = foodInfo.CaloriesPerUnit * recipeElement.amount;
+				text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
+			}
+			else if (GameTags.DisplayAsUnits.Contains(recipeElement.material))
+			{
+				text = GameUtil.GetFormattedUnits(recipeElement.amount, GameUtil.TimeSlice.None, true);
+			}
+			else
+			{
+				text = GameUtil.GetFormattedMass(recipeElement.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
 			}
 			LocString recipeproduct = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPEPRODUCT;
 			LocString recipeproduct2 = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPEPRODUCT;
 			list.Add(new Descriptor(string.Format(recipeproduct, prefab.GetProperName(), text), string.Format(recipeproduct2, prefab.GetProperName(), text), Descriptor.DescriptorType.Requirement, false));
-			List<Descriptor> materialDescriptors = GameUtil.GetMaterialDescriptors(ElementLoader.GetElement(result.tag));
-			GameUtil.IndentListOfDescriptors(materialDescriptors);
-			list.AddRange(materialDescriptors);
+			Element element = ElementLoader.GetElement(recipeElement.material);
+			if (element != null)
+			{
+				List<Descriptor> materialDescriptors = GameUtil.GetMaterialDescriptors(element);
+				GameUtil.IndentListOfDescriptors(materialDescriptors);
+				list.AddRange(materialDescriptors);
+			}
 		}
 		return list;
 	}
@@ -323,6 +382,9 @@ public class RefinerySideScreen : SideScreenContent
 	private GameObject recipeButton;
 
 	[SerializeField]
+	private GameObject recipeButtonMultiple;
+
+	[SerializeField]
 	private Sprite buttonSelectedBG;
 
 	[SerializeField]
@@ -332,6 +394,10 @@ public class RefinerySideScreen : SideScreenContent
 	private Sprite elementPlaceholderSpr;
 
 	private KToggle selectedToggle;
+
+	public LayoutElement buttonScrollContainer;
+
+	public RectTransform buttonContentContainer;
 
 	[SerializeField]
 	private GameObject elementContainer;
@@ -344,9 +410,6 @@ public class RefinerySideScreen : SideScreenContent
 
 	[SerializeField]
 	private BuildQueue queue;
-
-	[SerializeField]
-	private GameObject scrollBarContainer;
 
 	[SerializeField]
 	private LocText descriptionLabel;
@@ -362,11 +425,24 @@ public class RefinerySideScreen : SideScreenContent
 	[EventRef]
 	public string createOrderSound;
 
+	[SerializeField]
+	private RectTransform content;
+
 	private Refinery targetFab;
 
-	private RefinementRecipe selectedRecipe;
+	private ComplexRecipe selectedRecipe;
 
-	private Dictionary<KToggle, RefinementRecipe> recipeMap;
+	private Dictionary<KToggle, ComplexRecipe> recipeMap;
 
 	private List<KToggle> recipeToggles = new List<KToggle>();
+
+	public enum StyleSetting
+	{
+		GridResult,
+		ListResult,
+		GridInput,
+		ListInput,
+		ListInputOutput,
+		GridInputOutput
+	}
 }

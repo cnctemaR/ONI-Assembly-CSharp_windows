@@ -35,20 +35,29 @@ public class RockCrusherConfig : IBuildingConfig
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Refinery refinery = go.AddOrGet<Refinery>();
+		refinery.sideScreenStyle = RefinerySideScreen.StyleSetting.ListInputOutput;
+		refinery.duplicantOperated = true;
+		RefineryWorkable refineryWorkable = go.AddOrGet<RefineryWorkable>();
 		BuildingTemplates.CreateRefineryStorage(go, refinery);
-		refinery.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_rockrefinery_kanim") };
+		refineryWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_rockrefinery_kanim") };
 		Tag tag = SimHashes.Sand.CreateTag();
 		List<Element> list = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.Crushable));
+		ComplexRecipe complexRecipe;
 		foreach (Element element in list)
 		{
-			new RefinementRecipe
+			ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 			{
-				material = element.tag,
-				amount = 100f,
-				time = 40f,
-				description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION, element.name, tag.ProperName()),
-				fabricators = new List<Tag> { TagManager.Create("RockCrusher") }
-			}.AddResult(tag, 100f);
+				new ComplexRecipe.RecipeElement(element.tag, 100f)
+			};
+			ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+			{
+				new ComplexRecipe.RecipeElement(tag, 100f)
+			};
+			complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", element.tag), array, array2);
+			complexRecipe.time = 40f;
+			complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.RECIPE_DESCRIPTION, element.name, tag.ProperName());
+			complexRecipe.useResultAsDescription = true;
+			complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 		}
 		List<Element> list2 = ElementLoader.elements.FindAll((Element e) => e.IsSolid && e.HasTag(GameTags.Metal));
 		foreach (Element element2 in list2)
@@ -57,16 +66,35 @@ public class RockCrusherConfig : IBuildingConfig
 			Element lowTempTransition = highTempTransition.lowTempTransition;
 			if (lowTempTransition != element2)
 			{
-				new RefinementRecipe
+				ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 				{
-					material = element2.tag,
-					amount = 100f,
-					time = 40f,
-					description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.METAL_RECIPE_DESCRIPTION, lowTempTransition.name, element2.name),
-					fabricators = new List<Tag> { TagManager.Create("RockCrusher") }
-				}.AddResult(lowTempTransition.tag, 50f).AddResult(tag, 50f);
+					new ComplexRecipe.RecipeElement(element2.tag, 100f)
+				};
+				ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
+				{
+					new ComplexRecipe.RecipeElement(lowTempTransition.tag, 50f),
+					new ComplexRecipe.RecipeElement(tag, 50f)
+				};
+				complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", lowTempTransition.tag), array3, array4);
+				complexRecipe.time = 40f;
+				complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.METAL_RECIPE_DESCRIPTION, lowTempTransition.name, element2.name);
+				complexRecipe.useResultAsDescription = true;
+				complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 			}
 		}
+		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("EggShell", 5f)
+		};
+		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Lime).tag, 5f)
+		};
+		complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("RockCrusher", ElementLoader.FindElementByHash(SimHashes.Lime).tag), array5, array6);
+		complexRecipe.time = 40f;
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.LIME_RECIPE_DESCRIPTION, SimHashes.Lime.CreateTag().ProperName(), "EggShell".ToTag().ProperName());
+		complexRecipe.useResultAsDescription = true;
+		complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 		Prioritizable.AddRef(go);
 	}
 

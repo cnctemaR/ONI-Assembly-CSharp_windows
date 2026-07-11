@@ -179,6 +179,8 @@ public class KAnimBatchManager
 		}
 		foreach (BatchSet batchSet in this.activeBatchSets)
 		{
+			DebugUtil.Assert(batchSet != null, "Assert!");
+			DebugUtil.Assert(batchSet.group != null, "Assert!");
 			if (batchSet.active && batchSet.group.dataType == KAnimBatchGroup.DataType.Default)
 			{
 				Mesh mesh = batchSet.group.mesh;

@@ -28,6 +28,7 @@ namespace KSerialization
 		HashSet,
 		Colour,
 		IS_GENERIC_TYPE = 128,
-		VALUE_MASK = 127
+		IS_VALUE_TYPE = 64,
+		VALUE_MASK = 63
 	}
 }

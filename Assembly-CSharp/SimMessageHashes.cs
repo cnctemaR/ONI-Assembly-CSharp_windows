@@ -4,6 +4,8 @@ public enum SimMessageHashes
 {
 	Elements_CreateTable = 1108437482,
 	Elements_CreateInteractions = -930289787,
+	SetWorldZones = -457308393,
+	ModifyCellWorldZone = -449718014,
 	Disease_CreateTable = 825301935,
 	Load = -672538170,
 	PrepareGameData = 1078620451,

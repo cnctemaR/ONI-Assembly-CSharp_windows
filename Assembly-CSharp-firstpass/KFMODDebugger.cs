@@ -39,7 +39,7 @@ public class KFMODDebugger : KMonoBehaviour
 		KFMODDebugger.instance = null;
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("ENABLE_KFMOD_LOGGER")]
 	public void Log(string s)
 	{
 	}

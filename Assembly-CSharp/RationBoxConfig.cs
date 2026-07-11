@@ -36,10 +36,7 @@ public class RationBoxConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.FOOD;
 		storage.allowItemRemoval = true;
 		go.AddOrGet<TreeFilterable>();
-		go.AddOrGet<UserMenu>();
-		RationBox rationBox = go.AddOrGet<RationBox>();
-		rationBox.noFilterTint = new Color(0.5147059f, 0.5147059f, 0.5147059f, 1f);
-		rationBox.filterTint = new Color(1f, 1f, 1f, 1f);
+		go.AddOrGet<RationBox>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

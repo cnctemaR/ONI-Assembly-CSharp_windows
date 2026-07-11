@@ -14,13 +14,13 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 			ScaleGrowthMonitor.UpdateScales(smi, 0f);
 		}).Update(new Action<ScaleGrowthMonitor.Instance, float>(ScaleGrowthMonitor.UpdateScales), UpdateRate.SIM_1000ms, false);
 		this.growing.DefaultState(this.growing.growing).Transition(this.fullyGrown, new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.AreScalesFullyGrown), UpdateRate.SIM_1000ms);
-		this.growing.growing.Transition(this.growing.stunted, new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.IsInWrongAtmosphere), UpdateRate.SIM_1000ms).Enter(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.State.Callback(ScaleGrowthMonitor.ApplyModifier)).Exit(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.State.Callback(ScaleGrowthMonitor.RemoveModifier));
+		this.growing.growing.Transition(this.growing.stunted, GameStateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Not(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.IsInCorrectAtmosphere)), UpdateRate.SIM_1000ms).Enter(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.State.Callback(ScaleGrowthMonitor.ApplyModifier)).Exit(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.State.Callback(ScaleGrowthMonitor.RemoveModifier));
 		GameStateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.State state = this.growing.stunted.Transition(this.growing.growing, new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.IsInCorrectAtmosphere), UpdateRate.SIM_1000ms);
 		string text = CREATURES.STATUSITEMS.STUNTED_SCALE_GROWTH.NAME;
 		string text2 = CREATURES.STATUSITEMS.STUNTED_SCALE_GROWTH.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, main);
-		this.fullyGrown.Transition(this.growing, new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.AreScalesStillGrowing), UpdateRate.SIM_1000ms);
+		this.fullyGrown.Transition(this.growing, GameStateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Not(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.AreScalesFullyGrown)), UpdateRate.SIM_1000ms);
 	}
 
 	private static bool IsInCorrectAtmosphere(ScaleGrowthMonitor.Instance smi)
@@ -29,24 +29,14 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 		return Grid.Element[num].id == smi.def.targetAtmosphere;
 	}
 
-	private static bool IsInWrongAtmosphere(ScaleGrowthMonitor.Instance smi)
-	{
-		return !ScaleGrowthMonitor.IsInCorrectAtmosphere(smi);
-	}
-
 	private static bool AreScalesFullyGrown(ScaleGrowthMonitor.Instance smi)
 	{
 		return smi.scaleGrowth.value >= smi.scaleGrowth.GetMax();
 	}
 
-	private static bool AreScalesStillGrowing(ScaleGrowthMonitor.Instance smi)
-	{
-		return !ScaleGrowthMonitor.AreScalesFullyGrown(smi);
-	}
-
 	private static void ApplyModifier(ScaleGrowthMonitor.Instance smi)
 	{
-		smi.scaleGrowth.deltaAttribute.Add(CREATURES.MODIFIERS.SCALE_GROWTH_RATE.NAME, smi.scaleGrowthModifier);
+		smi.scaleGrowth.deltaAttribute.Add(smi.scaleGrowthModifier);
 	}
 
 	private static void RemoveModifier(ScaleGrowthMonitor.Instance smi)

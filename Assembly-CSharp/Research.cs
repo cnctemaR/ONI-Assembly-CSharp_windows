@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using KSerialization;
 using STRINGS;
@@ -156,7 +155,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			}
 			if (this.queuedTech.Count > 0)
 			{
-				this.queuedTech = this.queuedTech.OrderBy<TechInstance, int>((TechInstance tc) => tc.tech.tier).ToList<TechInstance>();
+				this.queuedTech.Sort((TechInstance x, TechInstance y) => x.tech.tier.CompareTo(y.tech.tier));
 				this.activeResearch = this.queuedTech[0];
 			}
 		}
@@ -326,7 +325,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			if (keyValuePair.Value > 0f)
 			{
 				flag = false;
-				foreach (ResearchCenter researchCenter in Components.ResearchCenters)
+				foreach (ResearchCenter researchCenter in Components.ResearchCenters.Items)
 				{
 					if (researchCenter.research_point_type_id == keyValuePair.Key)
 					{
@@ -379,9 +378,9 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	private TechInstance activeResearch;
 
-	private Notification NoResearcherRole = new Notification(RESEARCH.MESSAGING.NO_RESEARCHER_ROLE, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.NO_RESEARCHER_ROLE_TOOLTIP, null, false, 12f, null, null, null);
+	private Notification NoResearcherRole = new Notification(RESEARCH.MESSAGING.NO_RESEARCHER_ROLE, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.NO_RESEARCHER_ROLE_TOOLTIP, null, false, 12f, null, null);
 
-	private Notification MissingResearchStation = new Notification(RESEARCH.MESSAGING.MISSING_RESEARCH_STATION, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.MISSING_RESEARCH_STATION_TOOLTIP.ToString().Replace("{0}", Research.Instance.GetMissingResearchBuildingName()), null, false, 11f, null, null, null);
+	private Notification MissingResearchStation = new Notification(RESEARCH.MESSAGING.MISSING_RESEARCH_STATION, NotificationType.Bad, HashedString.Invalid, (List<Notification> list, object data) => RESEARCH.MESSAGING.MISSING_RESEARCH_STATION_TOOLTIP.ToString().Replace("{0}", Research.Instance.GetMissingResearchBuildingName()), null, false, 11f, null, null);
 
 	private List<ResearchCenter> researchCenterPrefabs = new List<ResearchCenter>();
 

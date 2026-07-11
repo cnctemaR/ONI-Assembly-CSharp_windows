@@ -29,6 +29,8 @@ namespace TUNING
 
 		public const float HIGH_ROT_TEMPERATURE = 308.15f;
 
+		public const float EGG_COOK_TEMPERATURE = 344.15f;
+
 		public const float DEFAULT_MASS = 1f;
 
 		public const float DEFAULT_SPICE_MASS = 1f;
@@ -93,6 +95,8 @@ namespace TUNING
 			public static EdiblesManager.FoodInfo SPICENUT = new EdiblesManager.FoodInfo(SpiceNutConfig.ID, 0f, 0, 255.15f, 277.15f, 1200f, true);
 
 			public static EdiblesManager.FoodInfo COLD_WHEAT_SEED = new EdiblesManager.FoodInfo("ColdWheatSeed", 0f, 0, 283.15f, 308.15f, 4800f, true);
+
+			public static EdiblesManager.FoodInfo RAWEGG = new EdiblesManager.FoodInfo("RawEgg", 0f, -1, 255.15f, 277.15f, 2400f, true);
 		}
 
 		public class RECIPES

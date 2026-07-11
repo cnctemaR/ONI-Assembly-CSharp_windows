@@ -35,9 +35,9 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 		Attributes attributes = base.gameObject.GetAttributes();
 		AttributeInstance attributeInstance = attributes.Add(Db.Get().Attributes.ThermalConductivityBarrier);
 		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Attributes.ThermalConductivityBarrier.Id, this.thickness, DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, false, false, true);
-		attributeInstance.Add(DUPLICANTS.STATS.SKIN_THICKNESS.NAME, attributeModifier);
+		attributeInstance.Add(attributeModifier);
 		this.averageTemperatureTransferPerSecond = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.TEMPEXCHANGE.NAME, false, true, false);
-		this.GetAttributes().Add(DUPLICANTS.MODIFIERS.TEMPEXCHANGE.NAME, this.averageTemperatureTransferPerSecond);
+		this.GetAttributes().Add(this.averageTemperatureTransferPerSecond);
 		base.OnPrefabInit();
 	}
 

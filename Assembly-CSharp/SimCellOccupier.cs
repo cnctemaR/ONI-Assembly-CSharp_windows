@@ -43,6 +43,7 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 			Grid.RenderedByWorld[offset_cell] = false;
 			Game.Instance.GetComponent<EntombedItemVisualizer>().ForceClear(offset_cell);
 		});
+		base.Subscribe(-1699355994, new Action<object>(this.OnBuildingRepaired));
 	}
 
 	protected override void OnCleanUp()
@@ -63,6 +64,10 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 		if (this.setLiquidImpermeable)
 		{
 			properties |= Sim.Cell.Properties.LiquidImpermeable;
+		}
+		if (this.setTransparent)
+		{
+			properties |= Sim.Cell.Properties.Transparent;
 		}
 		return properties;
 	}
@@ -126,6 +131,8 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 		}
 		this.isReady = true;
 		base.GetComponent<PrimaryElement>().SetUseSimDiseaseInfo(true);
+		Vector2I vector2I = Grid.PosToXY(base.transform.GetPosition());
+		GameScenePartitioner.Instance.TriggerEvent(vector2I.x, vector2I.y, 1, 1, GameScenePartitioner.Instance.solidChangedLayer, null);
 	}
 
 	private void ForceSetGameCellData(int cell)
@@ -151,6 +158,16 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 		return list;
 	}
 
+	private void OnBuildingRepaired(object data)
+	{
+		BuildingHP buildingHP = (BuildingHP)data;
+		float damage = 1f - (float)buildingHP.HitPoints / (float)buildingHP.MaxHitPoints;
+		this.building.RunOnArea(delegate(int offset_cell)
+		{
+			WorldDamage.Instance.RestoreDamageToValue(offset_cell, damage);
+		});
+	}
+
 	[MyCmpReq]
 	private Building building;
 
@@ -165,6 +182,9 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 
 	[SerializeField]
 	public bool setLiquidImpermeable;
+
+	[SerializeField]
+	public bool setTransparent;
 
 	[SerializeField]
 	public float strengthMultiplier = 1f;

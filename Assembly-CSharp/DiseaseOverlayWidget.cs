@@ -48,7 +48,7 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 			}
 			int num2 = 0;
 			Amounts amounts = gameObject.GetComponent<Modifiers>().GetAmounts();
-			foreach (Disease disease in Db.Get().Diseases)
+			foreach (Disease disease in Db.Get().Diseases.resources)
 			{
 				float value = amounts.Get(disease.amount).value;
 				if (value > 0f)

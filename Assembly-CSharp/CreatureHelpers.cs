@@ -278,9 +278,4 @@ public static class CreatureHelpers
 	{
 		return nav.CanReach(cell) || nav.CanReach(Grid.OffsetCell(cell, -1, -1)) || nav.CanReach(Grid.OffsetCell(cell, 1, -1)) || nav.CanReach(Grid.OffsetCell(cell, -1, 1)) || nav.CanReach(Grid.OffsetCell(cell, 1, 1));
 	}
-
-	public static bool WillEngageNonEssentialTargets(GameObject self, Health.HealthState fleeThresholdState = Health.HealthState.Injured)
-	{
-		return self.GetSMI<ThreatMonitor.Instance>().WillEngageNonEssentialTargets();
-	}
 }

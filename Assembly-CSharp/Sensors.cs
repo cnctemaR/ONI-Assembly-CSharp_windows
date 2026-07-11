@@ -3,11 +3,6 @@ using System.Collections.Generic;
 
 public class Sensors : KMonoBehaviour
 {
-	public IEnumerator<Sensor> GetEnumerator()
-	{
-		return this.sensors.GetEnumerator();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -54,5 +49,5 @@ public class Sensors : KMonoBehaviour
 		}
 	}
 
-	private List<Sensor> sensors = new List<Sensor>();
+	public List<Sensor> sensors = new List<Sensor>();
 }

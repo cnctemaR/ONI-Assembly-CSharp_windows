@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
-	public FetchChore(ChoreType choreType, Storage destination, float amount, Tag[] tags, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0, Tag[] chore_tags = null)
+	public FetchChore(ChoreType choreType, Storage destination, float amount, Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0, Tag[] chore_tags = null)
 		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 0, false, true, priority_mod, chore_tags)
 	{
 		if (choreType == null)
@@ -21,10 +21,11 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		this.smi.sm.destination.Set(destination, this.smi);
 		this.tags = tags;
 		this.tagBits = new TagBits(tags);
+		this.requiredTagBits = new TagBits(required_tags);
 		this.forbiddenTagBits = new TagBits(forbidden_tags);
 		if (destination.GetOnlyFetchMarkedItems())
 		{
-			this.requiredTagBits = new TagBits(GameTags.Garbage);
+			this.requiredTagBits.SetTag(GameTags.Garbage);
 		}
 		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, destination);
 		base.AddPrecondition(FetchChore.IsFetchTargetAvailable, null);
@@ -118,14 +119,6 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		}
 	}
 
-	public Tag[] tags { get; private set; }
-
-	public TagBits tagBits { get; private set; }
-
-	public TagBits requiredTagBits { get; private set; }
-
-	public TagBits forbiddenTagBits { get; private set; }
-
 	public void FetchAreaBegin(Chore.Precondition.Context context, float amount_to_be_fetched)
 	{
 		this.amount = amount_to_be_fetched;
@@ -215,11 +208,11 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		if (this.smi.sm.destination.Get<Storage>(this.smi).GetOnlyFetchMarkedItems())
 		{
-			this.requiredTagBits = new TagBits(GameTags.Garbage);
+			this.requiredTagBits.SetTag(GameTags.Garbage);
 		}
 		else
 		{
-			this.requiredTagBits = default(TagBits);
+			this.requiredTagBits.Clear(GameTags.Garbage);
 		}
 	}
 
@@ -239,6 +232,14 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			storage.Unsubscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		}
 	}
+
+	public Tag[] tags;
+
+	public TagBits tagBits;
+
+	public TagBits requiredTagBits;
+
+	public TagBits forbiddenTagBits;
 
 	public bool allowMultifetch = true;
 
@@ -260,7 +261,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 			}
 			else
 			{
-				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.GetComponent<KPrefabID>(), pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, context.consumerState.storage);
+				flag = FetchManagerUpdater.IsFetchablePickup(pickupable.KPrefabID, pickupable.storage, pickupable.UnreservedAmount, pickupable.MinTakeAmount, fetchChore.originalAmount, fetchChore.tagBits, fetchChore.requiredTagBits, fetchChore.forbiddenTagBits, context.consumerState.storage);
 			}
 			if (flag)
 			{

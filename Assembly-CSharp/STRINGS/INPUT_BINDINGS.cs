@@ -242,6 +242,8 @@ namespace STRINGS
 
 			public static LocString SREENSHOT32X = "SreenShot32x";
 
+			public static LocString DEBUGLOCKCURSOR = "DebugLockCursor";
+
 			public static LocString DEBUGTOGGLEPERSONALPRIORITYCOMPARISON = "DebugTogglePersonalPriorityComparison";
 
 			public static LocString DEBUGREPORTBUG = "DebugReportBug";
@@ -268,6 +270,8 @@ namespace STRINGS
 			public static LocString SANDBOXSPAWNENTITY = "SandboxSpawnEntity";
 
 			public static LocString TOGGLESANDBOXTOOLS = "ToggleSandboxTools";
+
+			public static LocString SANDBOXREVEAL = "SandboxReveal";
 		}
 	}
 }

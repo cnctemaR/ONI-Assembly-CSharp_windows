@@ -8,7 +8,7 @@ public class CellSolidFilterEvent : CellEvent
 	{
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void Log(int cell, bool solid)
 	{
 		if (!this.enableLogging)

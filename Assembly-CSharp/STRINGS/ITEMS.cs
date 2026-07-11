@@ -19,7 +19,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Placebo";
 
-				public static LocString DESC = "A general, all-purpose " + UI.FormatAsLink("Medicine", "MEDICINE") + ".\n\nThe less you know about it, the better it works.";
+				public static LocString DESC = "A general, all-purpose " + UI.FormatAsLink("Medicine", "MEDICINE") + ".\n\nThe less one knows about it, the better it works.";
 
 				public static LocString RECIPEDESC = "All-purpose " + UI.FormatAsLink("Medicine", "MEDICINE") + ".";
 			}
@@ -170,6 +170,15 @@ namespace STRINGS
 				public static LocString DESC = "Deep fried, solidified mudslop.\n\nThe inside is almost completely uncooked, despite the crunch on the outside.";
 
 				public static LocString RECIPEDESC = "Deep fried, solidified mudslop.";
+			}
+
+			public class RAWEGG
+			{
+				public static LocString NAME = UI.FormatAsLink("Raw Egg", "RAWEGG");
+
+				public static LocString DESC = "A raw egg that has been cracked open for use in " + UI.FormatAsLink("Food", "FOOD") + " preparation.\n\nIt will never hatch.";
+
+				public static LocString RECIPEDESC = "A raw egg that has been cracked open for use in " + UI.FormatAsLink("Food", "FOOD") + " preparation.";
 			}
 
 			public class COOKEDEGG
@@ -360,6 +369,13 @@ namespace STRINGS
 				public static LocString TINKER_EFFECT_NAME = "Engie's Jerry Rig: {0} {1}";
 
 				public static LocString TINKER_EFFECT_TOOLTIP = "Can be used to Jerry Rig upgrades to a machine building, increasing its {0} by {1}.";
+			}
+
+			public class EGG_SHELL
+			{
+				public static LocString NAME = "Egg Shell";
+
+				public static LocString DESC = "Can be crushed to produce " + ELEMENTS.LIME.NAME;
 			}
 		}
 	}

@@ -50,7 +50,7 @@ public class ResourceRemainingDisplayScreen : KScreen
 			{
 				this.rect = base.GetComponent<RectTransform>();
 			}
-			this.rect.anchoredPosition = base.WorldToScreen(PlayerController.GetCursorPos(Input.mousePosition));
+			this.rect.anchoredPosition = base.WorldToScreen(PlayerController.GetCursorPos(KInputManager.GetMousePos()));
 		}
 		if (this.displayedConstructionCostMultiplier == this.numberOfPendingConstructions)
 		{

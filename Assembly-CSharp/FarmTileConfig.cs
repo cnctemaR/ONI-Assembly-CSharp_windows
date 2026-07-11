@@ -20,7 +20,6 @@ public class FarmTileConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, farmable, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;

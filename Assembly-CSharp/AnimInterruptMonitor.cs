@@ -5,7 +5,7 @@ public class AnimInterruptMonitor : GameStateMachine<AnimInterruptMonitor, AnimI
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		this.root.ToggleBehaviour(GameTags.Creatures.Behaviours.PlayInterruptAnim, new Func<AnimInterruptMonitor.Instance, bool>(AnimInterruptMonitor.ShoulPlayAnim), new Action<AnimInterruptMonitor.Instance>(AnimInterruptMonitor.ClearAnim));
+		this.root.ToggleBehaviour(GameTags.Creatures.Behaviours.PlayInterruptAnim, new StateMachine<AnimInterruptMonitor, AnimInterruptMonitor.Instance, IStateMachineTarget, AnimInterruptMonitor.Def>.Transition.ConditionCallback(AnimInterruptMonitor.ShoulPlayAnim), new Action<AnimInterruptMonitor.Instance>(AnimInterruptMonitor.ClearAnim));
 	}
 
 	private static bool ShoulPlayAnim(AnimInterruptMonitor.Instance smi)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -48,22 +49,18 @@ public class PowerControlStationConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		BuildingTemplates.DoPostConfigure(go);
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 1000f;
+		storage.capacityKg = 50f;
 		storage.showInUI = true;
-		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
-		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = PowerControlStationConfig.MATERIAL_FOR_TINKER;
-		manualDeliveryKG.refillMass = 5f;
-		manualDeliveryKG.capacity = 50f;
-		manualDeliveryKG.choreTags = new Tag[] { GameTags.ChoreTypes.Power };
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.PowerFetch.IdHash;
+		storage.storageFilters = new List<Tag> { PowerControlStationConfig.MATERIAL_FOR_TINKER };
 		TinkerStation tinkerStation = go.AddOrGet<TinkerStation>();
 		tinkerStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_electricianworkdesk_kanim") };
 		tinkerStation.inputMaterial = PowerControlStationConfig.MATERIAL_FOR_TINKER;
-		tinkerStation.metalPerTinker = 5f;
+		tinkerStation.massPerTinker = 5f;
 		tinkerStation.outputPrefab = PowerControlStationConfig.TINKER_TOOLS;
 		tinkerStation.requiredRolePerk = PowerControlStationConfig.ROLE_PERK;
 		tinkerStation.choreType = Db.Get().ChoreTypes.PowerFabricate.IdHash;
+		tinkerStation.useFilteredStorage = true;
+		tinkerStation.fetchChoreType = Db.Get().ChoreTypes.PowerFetch.IdHash;
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.PowerPlant.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
@@ -80,7 +77,7 @@ public class PowerControlStationConfig : IBuildingConfig
 
 	public static Tag TINKER_TOOLS = PowerStationToolsConfig.tag;
 
-	public const float METAL_PER_TINKER = 5f;
+	public const float MASS_PER_TINKER = 5f;
 
 	public static string ROLE_PERK = "CanPowerTinker";
 

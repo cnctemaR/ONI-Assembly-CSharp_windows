@@ -51,10 +51,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		storage.capacityKg = 100f;
 		Prioritizable.AddRef(go);
 		go.AddOrGet<TreeFilterable>();
-		Refrigerator refrigerator = go.AddOrGet<Refrigerator>();
-		refrigerator.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		refrigerator.filterTint = new Color(1f, 1f, 1f, 1f);
-		go.AddOrGet<UserMenu>();
+		go.AddOrGet<Refrigerator>();
 		go.AddOrGet<DropAllWorkable>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{

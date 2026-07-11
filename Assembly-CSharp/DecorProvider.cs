@@ -52,12 +52,12 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		{
 			AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, this.baseDecor, UI.TOOLTIPS.BASE_VALUE, false, false, true);
 			AttributeModifier attributeModifier2 = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, this.baseRadius, UI.TOOLTIPS.BASE_VALUE, false, false, true);
-			this.GetAttributes().Add("Base", attributeModifier);
-			this.GetAttributes().Add("Base", attributeModifier2);
+			this.GetAttributes().Add(attributeModifier);
+			this.GetAttributes().Add(attributeModifier2);
 		}
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component != null && component.isMovable;
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "DecorProvider.OnSpawn");
 		AttributeInstance attributeInstance = this.decor;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.decorRadius;
@@ -126,7 +126,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 
 	public static int GetLightDecorBonus(int cell)
 	{
-		if (Grid.LightCount[cell] > 0)
+		if (Grid.LightIntensity[cell] > 0)
 		{
 			return DECOR.LIT_BONUS;
 		}
@@ -209,7 +209,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			{
 				return;
 			}
-			if (Grid.Solid[num] && provider.simCellOccupier == null)
+			if (!Grid.Transparent[num] && Grid.Solid[num] && provider.simCellOccupier == null)
 			{
 				this.decor = 0f;
 			}

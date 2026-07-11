@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class ConduitBridge : KMonoBehaviour
+public class ConduitBridge : KMonoBehaviour, IBridgedNetworkItem
 {
 	protected override void OnPrefabInit()
 	{
@@ -20,8 +21,8 @@ public class ConduitBridge : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.accumulators.Remove(this.accumulator);
 		Conduit.GetFlowManager(this.type).RemoveConduitUpdater(new Action<float>(this.ConduitUpdate));
+		Game.Instance.accumulators.Remove(this.accumulator);
 		base.OnCleanUp();
 	}
 
@@ -42,6 +43,33 @@ public class ConduitBridge : KMonoBehaviour
 				Game.Instance.accumulators.Accumulate(this.accumulator, contents.mass);
 			}
 		}
+	}
+
+	public void AddNetworks(ICollection<UtilityNetwork> networks)
+	{
+		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.type);
+		UtilityNetwork utilityNetwork = networkManager.GetNetworkForCell(this.inputCell);
+		if (utilityNetwork != null)
+		{
+			networks.Add(utilityNetwork);
+		}
+		utilityNetwork = networkManager.GetNetworkForCell(this.outputCell);
+		if (utilityNetwork != null)
+		{
+			networks.Add(utilityNetwork);
+		}
+	}
+
+	public bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
+	{
+		bool flag = false;
+		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.type);
+		return flag || networks.Contains(networkManager.GetNetworkForCell(this.inputCell)) || networks.Contains(networkManager.GetNetworkForCell(this.outputCell));
+	}
+
+	public int GetNetworkCell()
+	{
+		return this.inputCell;
 	}
 
 	[SerializeField]

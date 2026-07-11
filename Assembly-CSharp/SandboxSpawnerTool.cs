@@ -23,6 +23,10 @@ public class SandboxSpawnerTool : InterfaceTool
 
 	private void Place(int cell)
 	{
+		if (!Grid.IsValidBuildingCell(cell))
+		{
+			return;
+		}
 		if (SandboxToolParameterMenu.instance.settings.Entity.PrefabID() == MinionConfig.ID)
 		{
 			this.SpawnMinion();

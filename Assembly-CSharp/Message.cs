@@ -12,12 +12,9 @@ public abstract class Message : ISaveLoadable
 
 	public abstract string GetTooltip();
 
-	public virtual Message.clickFn OnClick
+	public virtual bool ShowDialog()
 	{
-		get
-		{
-			return null;
-		}
+		return true;
 	}
 
 	public virtual void OnCleanUp()
@@ -34,5 +31,7 @@ public abstract class Message : ISaveLoadable
 		return true;
 	}
 
-	public delegate void clickFn();
+	public virtual void OnClick()
+	{
+	}
 }

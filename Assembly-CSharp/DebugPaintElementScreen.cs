@@ -57,7 +57,7 @@ public class DebugPaintElementScreen : KScreen
 		this.ConfigureElements();
 		List<string> list = new List<string>();
 		list.Insert(0, "None");
-		foreach (Disease disease in Db.Get().Diseases)
+		foreach (Disease disease in Db.Get().Diseases.resources)
 		{
 			list.Add(disease.Name);
 		}

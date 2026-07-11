@@ -33,11 +33,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
-	public IEnumerator<GameObject> GetEnumerator()
-	{
-		return this.items.GetEnumerator();
-	}
-
 	public int Count
 	{
 		get
@@ -83,6 +78,10 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		foreach (GameObject gameObject in this.items)
 		{
 			this.ApplyStoredItemModifiers(gameObject, true, true);
+			if (this.sendOnStoreOnSpawn)
+			{
+				EventSystem.Trigger(gameObject, 856640610, this);
+			}
 		}
 	}
 
@@ -163,11 +162,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 					this.OnStorageIncreased();
 				}
 			}
-			if (this.temperatureAdjuster != null)
-			{
-				SimTemperatureTransfer component2 = go.GetComponent<SimTemperatureTransfer>();
-				this.temperatureAdjuster.Register(component2);
-			}
 		}
 		return gameObject;
 	}
@@ -238,10 +232,9 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public float Transfer(Storage dest_storage, Tag tag, float amount, bool block_events = false, bool hide_popups = false)
 	{
-		List<GameObject> list = this.Find(tag);
-		if (list.Count > 0)
+		GameObject gameObject = this.FindFirst(tag);
+		if (gameObject != null)
 		{
-			GameObject gameObject = list[0];
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			if (amount < component.Units)
 			{
@@ -272,11 +265,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			{
 				this.items.RemoveAt(i);
 				this.ApplyStoredItemModifiers(go, false, false);
-				if (this.temperatureAdjuster != null)
-				{
-					SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
-					this.temperatureAdjuster.Unregister(component);
-				}
 				target.Store(go, hide_popups, block_events, true, false);
 				if (!block_events)
 				{
@@ -325,12 +313,14 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public List<GameObject> Drop(Tag t)
 	{
-		List<GameObject> list = this.Find(t);
-		foreach (GameObject gameObject in list)
+		ListPool<GameObject, Storage>.PooledList pooledList = ListPool<GameObject, Storage>.Allocate();
+		this.Find(t, pooledList);
+		foreach (GameObject gameObject in pooledList)
 		{
 			this.Drop(gameObject);
 		}
-		return list;
+		pooledList.Recycle();
+		return pooledList;
 	}
 
 	public GameObject Drop(GameObject go)
@@ -352,6 +342,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			}
 		}
 		return go;
+	}
+
+	public void RenotifyAll()
+	{
+		this.items.RemoveAll((GameObject it) => it == null);
+		foreach (GameObject gameObject in this.items)
+		{
+			gameObject.Trigger(856640610, this);
+		}
 	}
 
 	public override void AwardExperience(float work_dt, MinionResume resume)
@@ -398,18 +397,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			base.Trigger(-1697596308, go);
 			EventSystem.Trigger(go, 856640610, null);
 			this.ApplyStoredItemModifiers(go, false, false);
-			if (this.temperatureAdjuster != null)
-			{
-				SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
-				this.temperatureAdjuster.Unregister(component);
-			}
 			if (go != null)
 			{
-				PrimaryElement component2 = go.GetComponent<PrimaryElement>();
-				if (component2 != null && component2.KeepZeroMassObject)
+				PrimaryElement component = go.GetComponent<PrimaryElement>();
+				if (component != null && component.KeepZeroMassObject)
 				{
-					component2.KeepZeroMassObject = false;
-					if (component2.Mass <= 0f)
+					component.KeepZeroMassObject = false;
+					if (component.Mass <= 0f)
 					{
 						Util.KDestroyGameObject(go);
 					}
@@ -432,11 +426,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			}
 		}
 		return result;
-	}
-
-	public List<GameObject> Find(Tag tag)
-	{
-		return this.Find(tag, new List<GameObject>());
 	}
 
 	public GameObject FindFirst(Tag tag)
@@ -574,7 +563,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 		if (!flag)
 		{
-			global::Debug.LogWarning("TODO(YOG): Why are the ingredients not in storage?", null);
 			aggregate_temperature = base.GetComponent<PrimaryElement>().Temperature;
 		}
 		if (list != null)
@@ -666,6 +654,23 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		return (float)Mathf.RoundToInt(num * 1000f) / 1000f;
 	}
 
+	public float UnitsStored()
+	{
+		float num = 0f;
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			if (!(this.items[i] == null))
+			{
+				PrimaryElement component = this.items[i].GetComponent<PrimaryElement>();
+				if (component != null)
+				{
+					num += component.Units;
+				}
+			}
+		}
+		return (float)Mathf.RoundToInt(num * 1000f) / 1000f;
+	}
+
 	public bool Has(Tag tag)
 	{
 		bool flag = false;
@@ -679,21 +684,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			}
 		}
 		return flag;
-	}
-
-	public List<PrimaryElement> FindPrimaryElements(Tag tag)
-	{
-		List<PrimaryElement> list = new List<PrimaryElement>();
-		List<GameObject> list2 = this.Find(tag);
-		foreach (GameObject gameObject in list2)
-		{
-			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			if (component != null && component.Mass > 0f)
-			{
-				list.Add(component);
-			}
-		}
-		return list;
 	}
 
 	public PrimaryElement AddToPrimaryElement(SimHashes element, float additional_mass, float temperature)
@@ -751,6 +741,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		{
 			global::Debug.LogWarning("Storage for [" + base.gameObject.name + "] is being destroyed but it still contains items!", base.gameObject);
 		}
+		base.OnCleanUp();
 	}
 
 	private void OnQueueDestroyObject(object data)
@@ -769,6 +760,20 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	}
 
 	public float GetAmountAvailable(Tag tag)
+	{
+		float num = 0f;
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			GameObject gameObject = this.items[i];
+			if (gameObject != null && gameObject.HasTag(tag))
+			{
+				num += gameObject.GetComponent<PrimaryElement>().Units;
+			}
+		}
+		return num;
+	}
+
+	public float GetUnitsAvailable(Tag tag)
 	{
 		float num = 0f;
 		for (int i = 0; i < this.items.Count; i++)
@@ -1074,14 +1079,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public bool useGunForDelivery = true;
 
+	public bool sendOnStoreOnSpawn;
+
 	public int storageNetworkID = -1;
 
 	public Storage.FXPrefix fxPrefix;
 
 	public List<GameObject> items = new List<GameObject>();
-
-	[MyCmpAdd]
-	protected UserMenu userMenu;
 
 	[MyCmpGet]
 	public Prioritizable prioritizable;
@@ -1100,9 +1104,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	[Serialize]
 	private bool onlyFetchMarkedItems;
-
-	[NonSerialized]
-	public SimulatedTemperatureAdjuster temperatureAdjuster;
 
 	private static readonly List<Storage.StoredItemModifierInfo> StoredItemModifierHandlers;
 

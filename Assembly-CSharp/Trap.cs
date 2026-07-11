@@ -8,7 +8,12 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 {
 	private void SetStoredPosition(GameObject go)
 	{
-		go.transform.SetPosition(Grid.CellToPosCBC(Grid.PosToCell(base.transform.GetPosition()), Grid.SceneLayer.BuildingBack));
+		Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(base.transform.GetPosition()), Grid.SceneLayer.BuildingBack);
+		vector.x += this.trappedOffset.x;
+		vector.y += this.trappedOffset.y;
+		go.transform.SetPosition(vector);
+		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
+		component.SetSceneLayer(Grid.SceneLayer.BuildingBack);
 	}
 
 	private static void CreateStatusItems()
@@ -40,14 +45,19 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 		foreach (GameObject gameObject in items)
 		{
 			this.SetStoredPosition(gameObject);
+			KBoxCollider2D component2 = gameObject.GetComponent<KBoxCollider2D>();
+			if (component2 != null)
+			{
+				component2.enabled = true;
+			}
 		}
 		base.smi.StartSM();
 		if (!component.IsEmpty())
 		{
-			KPrefabID component2 = component.items[0].GetComponent<KPrefabID>();
-			if (component2 != null)
+			KPrefabID component3 = component.items[0].GetComponent<KPrefabID>();
+			if (component3 != null)
 			{
-				this.contents.Set(component2);
+				this.contents.Set(component3);
 				base.smi.GoTo(base.smi.sm.occupied);
 			}
 			else
@@ -64,8 +74,7 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 
 	public Tag[] trappableCreatures;
 
-	[MyCmpReq]
-	private UserMenu userMenu;
+	public Vector2 trappedOffset = Vector2.zero;
 
 	[Serialize]
 	private Ref<KPrefabID> contents;
@@ -92,8 +101,19 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 				return;
 			}
 			Trappable trappable = (Trappable)data;
+			if (trappable.HasTag(GameTags.Stored))
+			{
+				return;
+			}
+			if (trappable.HasTag(GameTags.Trapped))
+			{
+				return;
+			}
+			if (trappable.HasTag(GameTags.Creatures.Bagged))
+			{
+				return;
+			}
 			bool flag = false;
-			KPrefabID component2 = trappable.GetComponent<KPrefabID>();
 			foreach (Tag tag in base.master.trappableCreatures)
 			{
 				if (trappable.HasTag(tag))
@@ -106,15 +126,10 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 			{
 				return;
 			}
-			Tag baggedCreatureTag = EntityTemplates.GetBaggedCreatureTag(component2.PrefabTag);
-			GameObject prefab = Assets.GetPrefab(baggedCreatureTag);
-			GameObject gameObject = Util.KInstantiate(prefab, Folder.Entities, base.master.transform.GetPosition());
-			KPrefabID component3 = gameObject.GetComponent<KPrefabID>();
-			base.master.contents.Set(component3);
-			gameObject.SetActive(true);
-			component.Store(gameObject, true, false, true, false);
-			base.master.SetStoredPosition(gameObject);
-			Util.KDestroyGameObject(trappable.gameObject);
+			KPrefabID component2 = trappable.GetComponent<KPrefabID>();
+			base.master.contents.Set(component2);
+			component.Store(trappable.gameObject, true, false, true, false);
+			base.master.SetStoredPosition(trappable.gameObject);
 			base.smi.sm.trapTriggered.Trigger(base.smi);
 		}
 
@@ -147,28 +162,10 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 			{
 				smi.DisableEvents();
 			});
-			this.trapping.PlayAnim("working_pre").Enter(delegate(Trap.StatesInstance smi)
-			{
-				KPrefabID kprefabID = smi.master.contents.Get();
-				if (kprefabID != null)
-				{
-					kprefabID.GetComponent<KBatchedAnimController>().Play("working_idle", KAnim.PlayMode.Once, 1f, 0f);
-				}
-			}).OnAnimQueueComplete(this.occupied);
+			this.trapping.PlayAnim("working_pre").OnAnimQueueComplete(this.occupied);
 			this.occupied.ToggleTag(GameTags.Trapped).ToggleStatusItem(Trap.statusSprung, (Trap.StatesInstance smi) => smi).DefaultState(this.occupied.idle)
 				.EventTransition(GameHashes.OnStorageChange, this.finishedUsing, (Trap.StatesInstance smi) => smi.master.GetComponent<Storage>().IsEmpty());
-			this.occupied.idle.PlayAnim("working_idle_loop").Enter(delegate(Trap.StatesInstance smi)
-			{
-				smi.master.contents.Get().GetComponent<KBatchedAnimController>().Play("working_idle_loop", KAnim.PlayMode.Loop, 1f, 0f);
-			}).ScheduleGoTo((Trap.StatesInstance smi) => 7f + global::UnityEngine.Random.value * 5f, this.occupied.reacting);
-			this.occupied.reacting.PlayAnim("working_loop").Enter(delegate(Trap.StatesInstance smi)
-			{
-				KPrefabID kprefabID2 = smi.master.contents.Get();
-				if (kprefabID2 != null)
-				{
-					kprefabID2.GetComponent<KBatchedAnimController>().Play("working_loop", KAnim.PlayMode.Once, 1f, 0f);
-				}
-			}).OnAnimQueueComplete(this.occupied.idle);
+			this.occupied.idle.PlayAnim("working_loop", KAnim.PlayMode.Loop);
 			this.finishedUsing.PlayAnim("working_pst").OnAnimQueueComplete(this.destroySelf);
 			this.destroySelf.Enter(delegate(Trap.StatesInstance smi)
 			{
@@ -191,8 +188,6 @@ public class Trap : StateMachineComponent<Trap.StatesInstance>
 		public class OccupiedStates : GameStateMachine<Trap.States, Trap.StatesInstance, Trap, object>.State
 		{
 			public GameStateMachine<Trap.States, Trap.StatesInstance, Trap, object>.State idle;
-
-			public GameStateMachine<Trap.States, Trap.StatesInstance, Trap, object>.State reacting;
 		}
 	}
 }

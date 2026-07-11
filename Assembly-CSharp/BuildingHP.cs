@@ -61,7 +61,7 @@ public class BuildingHP : Workable
 		{
 			this.hitpoints = Math.Min(this.hitpoints + repair_amount, this.building.Def.HitPoints);
 		}
-		base.Trigger(-1699355994, null);
+		base.Trigger(-1699355994, this);
 		if (this.hitpoints >= this.building.Def.HitPoints)
 		{
 			base.Trigger(-1735440190, this);
@@ -182,7 +182,7 @@ public class BuildingHP : Workable
 
 		public Notification CreateBrokenMachineNotification()
 		{
-			return new Notification(MISC.NOTIFICATIONS.BROKENMACHINE.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BROKENMACHINE.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.master.damageSourceInfo.source, false, 0f, null, null, null);
+			return new Notification(MISC.NOTIFICATIONS.BROKENMACHINE.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BROKENMACHINE.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.master.damageSourceInfo.source, false, 0f, null, null);
 		}
 
 		public void ShowProgressBar(bool show)

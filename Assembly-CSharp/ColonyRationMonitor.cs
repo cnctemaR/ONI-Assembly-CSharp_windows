@@ -30,7 +30,7 @@ public class ColonyRationMonitor : GameStateMachine<ColonyRationMonitor, ColonyR
 		public void UpdateIsOutOfRations()
 		{
 			bool flag = true;
-			foreach (Edible edible in Components.Edibles)
+			foreach (Edible edible in Components.Edibles.Items)
 			{
 				if (edible.GetComponent<Pickupable>().UnreservedAmount > 0f)
 				{

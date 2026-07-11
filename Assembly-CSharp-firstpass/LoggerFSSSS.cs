@@ -1,39 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
 
-public class LoggerFSSSS : Logger<LoggerFSSSS.Entry>
+public struct LoggerFSSSS
 {
-	public LoggerFSSSS(string name)
-		: base(name, 35)
+	public LoggerFSSSS(string name, int max_entries = 35)
 	{
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	public string GetName()
+	{
+		return string.Empty;
+	}
+
+	public void SetName(string name)
+	{
+	}
+
+	[Conditional("ENABLE_LOGGER")]
 	public void Log(string evt, string param0 = "", string param1 = "", string param2 = "")
 	{
-	}
-
-	public struct Entry
-	{
-		public override string ToString()
-		{
-			return string.Concat(new object[]
-			{
-				this.frame, "_", this.idx, ": ", this.evt, " ", this.param0, " ", this.param1, " ",
-				this.param2
-			});
-		}
-
-		public uint idx;
-
-		public int frame;
-
-		public string evt;
-
-		public string param0;
-
-		public string param1;
-
-		public string param2;
 	}
 }

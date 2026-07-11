@@ -72,7 +72,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			AmountInstance amountInstance = this.immuneLevel;
 			amountInstance.OnDelta = (Action<float>)Delegate.Combine(amountInstance.OnDelta, new Action<float>(this.OnImmuneDelta));
 			AttributeConverterInstance attributeConverterInstance = master.GetComponent<Klei.AI.AttributeConverters>().Get(Db.Get().AttributeConverters.ImmuneLevelBoost);
-			this.immuneLevel.deltaAttribute.Add("immunity stat", new AttributeModifier(this.immuneLevel.deltaAttribute.Id, attributeConverterInstance.Evaluate(), DUPLICANTS.ATTRIBUTES.IMMUNITY.BOOST_STAT, false, false, true));
+			this.immuneLevel.deltaAttribute.Add(new AttributeModifier(this.immuneLevel.deltaAttribute.Id, attributeConverterInstance.Evaluate(), DUPLICANTS.ATTRIBUTES.IMMUNITY.BOOST_STAT, false, false, true));
 			this.immuneSuppress = new AttributeModifier(this.immuneLevel.deltaAttribute.Id, -0.025f, DUPLICANTS.DISEASES.INFECTED_MODIFIER, false, false, true);
 			this.activeDiseases = master.GetComponent<MinionModifiers>().diseases;
 			this.primaryElement = master.GetComponent<PrimaryElement>();
@@ -81,12 +81,12 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			this.activeImmuneModifiers = new Dictionary<HashedString, AttributeModifier>();
 			this.diseaseCountMultModifiers = new Dictionary<HashedString, AttributeModifier>();
 			Klei.AI.Attributes attributes = base.gameObject.GetAttributes();
-			foreach (Disease disease in Db.Get().Diseases)
+			foreach (Disease disease in Db.Get().Diseases.resources)
 			{
-				attributes.Add("linear disease loss", new AttributeModifier(disease.amountDeltaAttribute.Id, -0.8333333f, disease.Name, false, false, false));
+				attributes.Add(new AttributeModifier(disease.amountDeltaAttribute.Id, -0.8333333f, disease.Name, false, false, false));
 				AttributeModifier attributeModifier = new AttributeModifier(disease.amountDeltaAttribute.Id, -0.00066666666f, disease.Name, false, false, false);
 				this.diseaseCountMultModifiers[disease.id] = attributeModifier;
-				attributes.Add("geometric disease loss", attributeModifier);
+				attributes.Add(attributeModifier);
 			}
 			GameClock.Instance.Subscribe(-722330267, new Action<object>(this.OnNightTime));
 			this.modifiers = base.gameObject.GetComponent<Modifiers>();
@@ -174,9 +174,9 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 							{
 								Disease disease2 = disease;
 								float value2 = amounts.Get(disease2.amount).value;
-								return string.Format(DUPLICANTS.DISEASES.INFECTION_MODIFIER, disease2.Name, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value2)));
+								return StringFormatter.Replace(DUPLICANTS.DISEASES.INFECTION_MODIFIER, "{0}", disease2.Name).Replace("{1}", GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(value2)));
 							}, false, false);
-							base.gameObject.GetAttributes().Add("immune damage from " + disease.id, attributeModifier);
+							base.gameObject.GetAttributes().Add(attributeModifier);
 							this.activeImmuneModifiers[disease.id] = attributeModifier;
 						}
 						attributeModifier.SetValue(num4);
@@ -269,7 +269,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		private void UpdateReports()
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, string.Format(UI.ENDOFDAYREPORT.NOTES.GERMS, base.master.name), base.master.gameObject.GetProperName());
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.GERMS, "{0}", base.master.name), base.master.gameObject.GetProperName());
 		}
 
 		private const float LOW_IMMUNE_LEVEL = 40f;

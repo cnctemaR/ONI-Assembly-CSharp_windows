@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 namespace FMODUnity
@@ -53,6 +54,38 @@ namespace FMODUnity
 			}
 		}
 
+		public string SourceProjectPath
+		{
+			get
+			{
+				if (string.IsNullOrEmpty(this.sourceProjectPath) && !string.IsNullOrEmpty(this.SourceProjectPathUnformatted))
+				{
+					this.sourceProjectPath = this.GetPlatformSpecificPath(this.SourceProjectPathUnformatted);
+				}
+				return this.sourceProjectPath;
+			}
+			set
+			{
+				this.sourceProjectPath = this.GetPlatformSpecificPath(value);
+			}
+		}
+
+		public string SourceBankPath
+		{
+			get
+			{
+				if (string.IsNullOrEmpty(this.sourceBankPath) && !string.IsNullOrEmpty(this.SourceBankPathUnformatted))
+				{
+					this.sourceBankPath = this.GetPlatformSpecificPath(this.SourceBankPathUnformatted);
+				}
+				return this.sourceBankPath;
+			}
+			set
+			{
+				this.sourceBankPath = this.GetPlatformSpecificPath(value);
+			}
+		}
+
 		public static FMODPlatform GetParent(FMODPlatform platform)
 		{
 			switch (platform)
@@ -68,6 +101,7 @@ namespace FMODUnity
 			case FMODPlatform.WindowsPhone:
 			case FMODPlatform.PSVita:
 			case FMODPlatform.AppleTV:
+			case FMODPlatform.Switch:
 				return FMODPlatform.Mobile;
 			case FMODPlatform.Windows:
 			case FMODPlatform.Mac:
@@ -158,6 +192,19 @@ namespace FMODUnity
 			return Settings.GetSetting<PlatformStringSetting, string>(this.BankDirectorySettings, platform, "Desktop");
 		}
 
+		private string GetPlatformSpecificPath(string path)
+		{
+			if (string.IsNullOrEmpty(path))
+			{
+				return path;
+			}
+			if (Path.DirectorySeparatorChar == '/')
+			{
+				return path.Replace('\\', '/');
+			}
+			return path.Replace('/', '\\');
+		}
+
 		private const string SettingsAssetName = "FMODStudioSettings";
 
 		private static Settings instance;
@@ -169,10 +216,15 @@ namespace FMODUnity
 		public bool HasPlatforms = true;
 
 		[SerializeField]
-		public string SourceProjectPath;
+		private string sourceProjectPath;
 
 		[SerializeField]
-		public string SourceBankPath;
+		public string SourceProjectPathUnformatted;
+
+		private string sourceBankPath;
+
+		[SerializeField]
+		public string SourceBankPathUnformatted;
 
 		[SerializeField]
 		public bool AutomaticEventLoading;

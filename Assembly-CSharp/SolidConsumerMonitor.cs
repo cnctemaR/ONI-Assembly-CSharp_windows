@@ -10,7 +10,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		this.root.EventHandler(GameHashes.EatSolidComplete, delegate(SolidConsumerMonitor.Instance smi, object data)
 		{
 			smi.OnEatSolidComplete(data);
-		}).ToggleBehaviour(GameTags.Creatures.WantsToEat, (SolidConsumerMonitor.Instance smi) => smi.targetEdible != null, null);
+		}).ToggleBehaviour(GameTags.Creatures.WantsToEat, (SolidConsumerMonitor.Instance smi) => smi.targetEdible != null && !smi.targetEdible.HasTag(GameTags.Creatures.ReservedByCreature), null);
 		this.satisfied.TagTransition(GameTags.Creatures.Hungry, this.lookingforfood, false);
 		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update(new Action<SolidConsumerMonitor.Instance, float>(SolidConsumerMonitor.FindFood), UpdateRate.SIM_200ms, false);
 	}
@@ -23,7 +23,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		Grid.CellToXY(num3, out num, out num2);
 		int num4 = 8;
 		SolidConsumerMonitor.EdibleIterator edibleIterator = new SolidConsumerMonitor.EdibleIterator(smi.GetComponent<Navigator>(), smi.def.diet);
-		foreach (CreatureFeeder creatureFeeder in Components.CreatureFeeders)
+		foreach (CreatureFeeder creatureFeeder in Components.CreatureFeeders.Items)
 		{
 			edibleIterator.Iterate(creatureFeeder);
 		}
@@ -59,6 +59,10 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 		{
 			KMonoBehaviour kmonoBehaviour = target_obj as KMonoBehaviour;
 			if (kmonoBehaviour == null)
+			{
+				return;
+			}
+			if (kmonoBehaviour.HasTag(GameTags.Creatures.ReservedByCreature))
 			{
 				return;
 			}

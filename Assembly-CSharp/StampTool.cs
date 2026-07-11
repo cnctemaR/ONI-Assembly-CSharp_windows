@@ -26,7 +26,7 @@ public class StampTool : InterfaceTool
 
 	private Vector3 GetCursorPos()
 	{
-		return PlayerController.GetCursorPos(Input.mousePosition);
+		return PlayerController.GetCursorPos(KInputManager.GetMousePos());
 	}
 
 	public override void OnLeftClickDown(Vector3 cursor_pos)

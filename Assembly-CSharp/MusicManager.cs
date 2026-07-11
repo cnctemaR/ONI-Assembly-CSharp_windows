@@ -49,14 +49,14 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		if (this.activeSongs.Count == 0)
 		{
 			songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
-			if (songInfo.ev == null)
+			if (!songInfo.ev.isValid())
 			{
 				Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 			}
 			int num = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
 			if (num != -1)
 			{
-				songInfo.ev.setParameterValue(MusicManager.VARIATION_ID, (float)num);
+				songInfo.ev.setParameterValue("variation", (float)num);
 			}
 			songInfo.ev.start();
 			this.activeSongs[song_name] = songInfo;
@@ -75,17 +75,18 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 					if (!this.activeSongs[list[i]].stinger)
 					{
 						MusicManager.SongInfo songInfo2 = this.activeSongs[list[i]];
-						songInfo2.ev.setParameterValue(MusicManager.INTERRUPTED_DIMMED_ID, 1f);
+						songInfo2.ev.setParameterValue("interrupted_dimmed", 1f);
 						this.Log("Dimming: " + Assets.GetSimpleSoundEventName(songInfo2.fmodEvent));
 						songInfo.songsOnHold.Add(list[i]);
 					}
 				}
 				songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
-				if (songInfo.ev == null)
+				if (!songInfo.ev.isValid())
 				{
 					Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 				}
 				songInfo.ev.start();
+				songInfo.ev.release();
 				this.activeSongs[song_name] = songInfo;
 			}
 			else
@@ -107,21 +108,21 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 						FMOD.Studio.EventInstance ev = songInfo4.ev;
 						if (!songInfo4.stinger)
 						{
-							ev.setParameterValue(MusicManager.INTERRUPTED_DIMMED_ID, 1f);
+							ev.setParameterValue("interrupted_dimmed", 1f);
 							ev.stop(STOP_MODE.ALLOWFADEOUT);
 							this.activeSongs.Remove(list[j]);
 							list.Remove(list[j]);
 						}
 					}
 					songInfo.ev = KFMOD.CreateInstance(songInfo.fmodEvent);
-					if (songInfo.ev == null)
+					if (!songInfo.ev.isValid())
 					{
 						Output.LogWarning(new object[] { "Failed to find FMOD event [" + songInfo.fmodEvent + "]" });
 					}
 					int num3 = ((songInfo.numberOfVariations <= 0) ? (-1) : global::UnityEngine.Random.Range(1, songInfo.numberOfVariations + 1));
 					if (num3 != -1)
 					{
-						songInfo.ev.setParameterValue(MusicManager.VARIATION_ID, (float)num3);
+						songInfo.ev.setParameterValue("variation", (float)num3);
 					}
 					songInfo.ev.start();
 					this.activeSongs[song_name] = songInfo;
@@ -159,11 +160,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			for (int i = 0; i < songInfo.songsOnHold.Count; i++)
 			{
 				MusicManager.SongInfo songInfo2;
-				if (this.activeSongs.TryGetValue(songInfo.songsOnHold[i], out songInfo2) && songInfo2.ev != null)
+				if (this.activeSongs.TryGetValue(songInfo.songsOnHold[i], out songInfo2) && songInfo2.ev.isValid())
 				{
 					FMOD.Studio.EventInstance ev2 = songInfo2.ev;
 					this.Log("Undimming: " + Assets.GetSimpleSoundEventName(songInfo2.fmodEvent));
-					ev2.setParameterValue(MusicManager.INTERRUPTED_DIMMED_ID, 0f);
+					ev2.setParameterValue("interrupted_dimmed", 0f);
 					songInfo.songsOnHold.Remove(songInfo.songsOnHold[i]);
 				}
 				else
@@ -213,7 +214,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			return;
 		}
 		FMOD.Studio.EventInstance ev = songInfo.ev;
-		if (ev != null)
+		if (ev.isValid())
 		{
 			ev.setParameterValue(parameter_name, parameter_value);
 		}
@@ -247,25 +248,27 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		if (this.activeSongs.Count > 0)
 		{
-			List<string> list = new List<string>(this.activeSongs.Keys);
-			for (int i = 0; i < list.Count; i++)
+			ListPool<string, MusicManager>.PooledList pooledList = ListPool<string, MusicManager>.Allocate();
+			foreach (KeyValuePair<string, MusicManager.SongInfo> keyValuePair in this.activeSongs)
 			{
-				MusicManager.SongInfo songInfo = this.activeSongs[list[i]];
-				FMOD.Studio.EventInstance ev = songInfo.ev;
-				ev.getPlaybackState(out songInfo.musicPlaybackState);
-				if (songInfo.musicPlaybackState == PLAYBACK_STATE.STOPPED || songInfo.musicPlaybackState == PLAYBACK_STATE.STOPPING)
+				MusicManager.SongInfo value = keyValuePair.Value;
+				FMOD.Studio.EventInstance ev = value.ev;
+				ev.getPlaybackState(out value.musicPlaybackState);
+				if (value.musicPlaybackState == PLAYBACK_STATE.STOPPED || value.musicPlaybackState == PLAYBACK_STATE.STOPPING)
 				{
-					this.activeSongs.Remove(list[i]);
-					if (songInfo.songsOnHold.Count > 0)
+					pooledList.Add(keyValuePair.Key);
+					foreach (string text in value.songsOnHold)
 					{
-						for (int j = 0; j < songInfo.songsOnHold.Count; j++)
-						{
-							this.SetSongParameter(songInfo.songsOnHold[j], "interrupted_dimmed", 0f, true);
-							songInfo.songsOnHold.Remove(songInfo.songsOnHold[j]);
-						}
+						this.SetSongParameter(text, "interrupted_dimmed", 0f, true);
 					}
+					value.songsOnHold.Clear();
 				}
 			}
+			foreach (string text2 in pooledList)
+			{
+				this.activeSongs.Remove(text2);
+			}
+			pooledList.Recycle();
 		}
 	}
 
@@ -295,8 +298,9 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	private IEnumerator FadeToPause(FMOD.Studio.EventInstance inst, float fadeTime)
 	{
 		float startVolume;
-		inst.getVolume(out startVolume);
-		float targetVolume = 0f;
+		float targetVolume;
+		inst.getVolume(out startVolume, out targetVolume);
+		targetVolume = 0f;
 		float lerpTime = 0f;
 		float lerpedVolume = 0f;
 		while (lerpTime < 1f)
@@ -313,8 +317,9 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	private IEnumerator FadeToUnpause(FMOD.Studio.EventInstance inst, float fadeTime)
 	{
 		float startVolume;
-		inst.getVolume(out startVolume);
-		float targetVolume = 1f;
+		float targetVolume;
+		inst.getVolume(out startVolume, out targetVolume);
+		targetVolume = 1f;
 		float lerpTime = 0f;
 		float lerpedVolume = 0f;
 		inst.setPaused(false);
@@ -331,6 +336,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (!RuntimeManager.IsInitialized)
+		{
+			base.enabled = false;
+			return;
+		}
 		if (KPlayerPrefs.HasKey(AudioOptionsScreen.AlwaysPlayMusicKey))
 		{
 			this.alwaysPlayMusic = KPlayerPrefs.GetInt(AudioOptionsScreen.AlwaysPlayMusicKey) == 1;
@@ -487,8 +497,11 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public void SetDynamicMusicPlayHook()
 	{
-		this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "playHook", (!this.activeDynamicSong.playHook) ? 0f : 1f, true);
-		this.activeDynamicSong.playHook = !this.activeDynamicSong.playHook;
+		if (this.DynamicMusicIsActive())
+		{
+			this.SetSongParameter(Assets.GetSimpleSoundEventName(this.activeDynamicSong.fmodEvent), "playHook", (!this.activeDynamicSong.playHook) ? 0f : 1f, true);
+			this.activeDynamicSong.playHook = !this.activeDynamicSong.playHook;
+		}
 	}
 
 	public bool ShouldPlayDynamicMusicStartOfDay()
@@ -546,9 +559,9 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 		this.ReloadSongs();
 	}
 
-	private static ParameterID VARIATION_ID = new ParameterID("variation");
+	private const string VARIATION_ID = "variation";
 
-	private static ParameterID INTERRUPTED_DIMMED_ID = new ParameterID("interrupted_dimmed");
+	private const string INTERRUPTED_DIMMED_ID = "interrupted_dimmed";
 
 	[SerializeField]
 	private MusicManager.SongInfo[] songs;
@@ -586,7 +599,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 
 	private float timeOfDayUpdateRate = 2f;
 
-	private static MusicManager _instance = null;
+	private static MusicManager _instance;
 
 	[DebuggerDisplay("{fmodEvent}")]
 	[Serializable]

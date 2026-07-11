@@ -198,6 +198,7 @@ public enum Action
 	DebugDumpSceneParitionerLeakData,
 	DebugCrashSim,
 	DebugNextCall,
+	DebugLockCursor,
 	DialogSubmit,
 	SandboxBrush,
 	SandboxSprinkle,
@@ -209,5 +210,6 @@ public enum Action
 	SandboxDestroy,
 	SandboxSpawnEntity,
 	ToggleSandboxTools,
+	SandboxReveal,
 	NumActions
 }

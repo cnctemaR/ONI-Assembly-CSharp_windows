@@ -102,9 +102,6 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 
 	public SimHashes outputElement = SimHashes.Vacuum;
 
-	[MyCmpAdd]
-	private UserMenu userMenu;
-
 	private WorkableReactable reactable;
 
 	private MeterController cleanMeter;

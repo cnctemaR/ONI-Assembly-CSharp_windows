@@ -13,7 +13,7 @@ public class CreatureVariationSoundEvent : SoundEvent
 		CreatureBrain component = behaviour.GetComponent<CreatureBrain>();
 		if (component != null && !string.IsNullOrEmpty(component.symbolPrefix))
 		{
-			string sound = GlobalAssets.GetSound(component.symbolPrefix + base.name, false);
+			string sound = GlobalAssets.GetSound(StringFormatter.Combine(component.symbolPrefix, base.name), false);
 			if (!string.IsNullOrEmpty(sound))
 			{
 				text = sound;

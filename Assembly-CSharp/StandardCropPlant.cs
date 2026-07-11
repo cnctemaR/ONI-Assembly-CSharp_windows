@@ -31,7 +31,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 
 	public Notification CreateDeathNotification()
 	{
-		return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.gameObject.GetProperName(), true, 0f, null, null, null);
+		return new Notification(CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => CREATURES.STATUSITEMS.PLANTDEATH.NOTIFICATION_TOOLTIP + notificationList.ReduceMessages(false), "/t• " + base.gameObject.GetProperName(), true, 0f, null, null);
 	}
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)
@@ -125,8 +125,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			{
 				smi.master.harvestable.SetCanBeHarvested(false);
 			}).GoTo(this.alive.idle);
-			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null);
-			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.fruiting.fruiting_harvest, null)
+			this.alive.wilting.PlayAnim("wilt", KAnim.PlayMode.Loop, (StandardCropPlant.StatesInstance smi) => smi.WiltStage().ToString()).EventTransition(GameHashes.WiltRecover, this.alive.idle, (StandardCropPlant.StatesInstance smi) => !smi.master.wiltCondition.IsWilting()).EventTransition(GameHashes.Harvest, this.alive.harvest, null);
+			this.alive.fruiting.DefaultState(this.alive.fruiting.fruiting_idle).EventTransition(GameHashes.Wilt, this.alive.wilting, null).EventTransition(GameHashes.Harvest, this.alive.harvest, null)
 				.EventTransition(GameHashes.Grow, this.alive.fruiting_lost, (StandardCropPlant.StatesInstance smi) => !smi.master.growing.ReachedNextHarvest());
 			this.alive.fruiting.fruiting_idle.PlayAnim("idle_full", KAnim.PlayMode.Loop).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
@@ -148,7 +148,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 					smi.GoTo(this.alive.fruiting.fruiting_idle);
 				}
 			}, UpdateRate.SIM_4000ms, false);
-			this.alive.fruiting.fruiting_harvest.PlayAnim("harvest", KAnim.PlayMode.Once).Enter(delegate(StandardCropPlant.StatesInstance smi)
+			this.alive.harvest.PlayAnim("harvest", KAnim.PlayMode.Once).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
 				if (GameScheduler.Instance != null && smi.master != null)
 				{
@@ -177,6 +177,8 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State wilting;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State destroy;
+
+			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State harvest;
 		}
 
 		public class FruitingState : GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State
@@ -184,8 +186,6 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting_idle;
 
 			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting_old;
-
-			public GameStateMachine<StandardCropPlant.States, StandardCropPlant.StatesInstance, StandardCropPlant, object>.State fruiting_harvest;
 		}
 	}
 }

@@ -42,6 +42,8 @@ public class ManualPressureDoorConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = true;
+		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
+		component2.initialAnim = "closed";
 	}
 
 	public const string ID = "ManualPressureDoor";

@@ -25,7 +25,7 @@ public class HatchConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = HatchConfig.CreateHatch("Hatch", global::STRINGS.CREATURES.SPECIES.HATCH.NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, "hatch_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchEgg", global::STRINGS.CREATURES.SPECIES.HATCH.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, "egg_hatch_kanim", "HatchBaby", HatchTuning.EGG_CHANCES_BASE, HatchConfig.EGG_SORT_ORDER, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "HatchEgg", global::STRINGS.CREATURES.SPECIES.HATCH.EGG_NAME, global::STRINGS.CREATURES.SPECIES.HATCH.DESC, "egg_hatch_kanim", HatchTuning.EGG_MASS, "HatchBaby", 60.000004f, 20f, HatchTuning.EGG_CHANCES_BASE, HatchConfig.EGG_SORT_ORDER, true, false, true);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

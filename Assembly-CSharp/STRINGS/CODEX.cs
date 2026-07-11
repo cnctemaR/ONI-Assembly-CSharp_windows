@@ -39,6 +39,12 @@ namespace STRINGS
 			public static LocString COMFORTRANGE = "Temperature Range";
 
 			public static LocString ELEMENTTRANSITIONS = "Transitions";
+
+			public static LocString SECTION_UNLOCKABLES = "Unlockable Data";
+
+			public static LocString CONTENTLOCKED = "Additional content locked";
+
+			public static LocString CONTENTLOCKED_SUBTITLE = "More exploration and research is necessary";
 		}
 
 		public class CREATURE_DESCRIPTORS
@@ -476,6 +482,18 @@ namespace STRINGS
 			}
 		}
 
+		public class ANALYSIS
+		{
+			public static LocString TITLE = UI.FormatAsLink("Geographical Feature Analysis", "ANALYSIS");
+
+			public static LocString SUBTITLE = "Study of world features";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Description of analysis/study mechanic";
+			}
+		}
+
 		public class ATMOSPHERE
 		{
 			public static LocString TITLE = "Atmosphere";
@@ -497,6 +515,18 @@ namespace STRINGS
 			public class BODY
 			{
 				public static LocString CONTAINER1 = "Description of decor, stress, expectations";
+			}
+		}
+
+		public class ELEMENTHARDNESS
+		{
+			public static LocString TITLE = UI.FormatAsLink("Hardness", "HARDNESS");
+
+			public static LocString SUBTITLE = "Ease of digging";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Description of dig speed and miner role dig restrictions";
 			}
 		}
 

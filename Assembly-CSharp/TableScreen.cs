@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using FMOD.Studio;
 using STRINGS;
 using TMPro;
 using UnityEngine;
@@ -228,7 +227,7 @@ public class TableScreen : KScreen
 	protected void AddRow(MinionIdentity minion)
 	{
 		bool flag = minion == null;
-		GameObject gameObject = global::Util.KInstantiateUI((!flag) ? this.prefab_row_empty : this.prefab_row_header, (!(minion == null)) ? this.scroll_content_transform.gameObject : this.header_content_transform.gameObject, true);
+		GameObject gameObject = Util.KInstantiateUI((!flag) ? this.prefab_row_empty : this.prefab_row_header, (!(minion == null)) ? this.scroll_content_transform.gameObject : this.header_content_transform.gameObject, true);
 		TableRow component = gameObject.GetComponent<TableRow>();
 		component.rowType = ((!flag) ? TableRow.RowType.Minion : TableRow.RowType.Header);
 		this.rows.Add(component);
@@ -245,7 +244,7 @@ public class TableScreen : KScreen
 
 	protected void AddDefaultRow()
 	{
-		GameObject gameObject = global::Util.KInstantiateUI(this.prefab_row_empty, this.scroll_content_transform.gameObject, true);
+		GameObject gameObject = Util.KInstantiateUI(this.prefab_row_empty, this.scroll_content_transform.gameObject, true);
 		this.default_row = gameObject;
 		TableRow component = gameObject.GetComponent<TableRow>();
 		component.rowType = TableRow.RowType.Default;
@@ -549,7 +548,7 @@ public class TableScreen : KScreen
 	{
 		if (this.active_cascade_coroutine_count == 0)
 		{
-			this.current_looping_sound = LoopingSoundManager.StartSound(this.cascade_sound_path, Vector3.zero, false);
+			this.current_looping_sound = LoopingSoundManager.StartSound(this.cascade_sound_path, Vector3.zero, false, false);
 		}
 		this.active_cascade_coroutine_count++;
 		for (int i = 0; i < checkBoxToggleColumns.Length; i++)
@@ -596,7 +595,7 @@ public class TableScreen : KScreen
 	{
 		if (this.active_cascade_coroutine_count == 0)
 		{
-			this.current_looping_sound = LoopingSoundManager.StartSound(this.cascade_sound_path, Vector3.zero, false);
+			this.current_looping_sound = LoopingSoundManager.StartSound(this.cascade_sound_path, Vector3.zero, false, true);
 		}
 		this.active_cascade_coroutine_count++;
 		for (int i = 0; i < rows.Count; i++)
@@ -639,10 +638,10 @@ public class TableScreen : KScreen
 
 	private void StopLoopingCascadeSound()
 	{
-		if (this.current_looping_sound != null)
+		if (this.current_looping_sound.IsValid())
 		{
-			LoopingSoundManager.StopSound(this.cascade_sound_path, this.current_looping_sound);
-			this.current_looping_sound = null;
+			LoopingSoundManager.StopSound(this.current_looping_sound);
+			this.current_looping_sound.Clear();
 		}
 	}
 
@@ -700,7 +699,7 @@ public class TableScreen : KScreen
 
 	private int active_cascade_coroutine_count;
 
-	private EventInstance current_looping_sound;
+	private HandleVector<int>.Handle current_looping_sound = HandleVector<int>.InvalidHandle;
 
 	private bool incubating;
 

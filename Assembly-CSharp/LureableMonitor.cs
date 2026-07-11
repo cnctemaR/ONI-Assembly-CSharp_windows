@@ -92,12 +92,11 @@ public class LureableMonitor : GameStateMachine<LureableMonitor, LureableMonitor
 					return;
 				}
 				int navigationCost = this.navigator.GetNavigationCost(Grid.PosToCell(instance.transform.GetPosition()), instance.def.lurePoints);
-				if (this.cost != PathProber.InvalidCost && navigationCost > this.cost)
+				if (navigationCost != PathProber.InvalidCost && (this.cost == PathProber.InvalidCost || navigationCost < this.cost))
 				{
-					return;
+					this.cost = navigationCost;
+					this.result = instance.gameObject;
 				}
-				this.cost = navigationCost;
-				this.result = instance.gameObject;
 			}
 
 			public void Cleanup()

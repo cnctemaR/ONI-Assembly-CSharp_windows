@@ -44,18 +44,18 @@ public class SpriteSheetAnimManager : KMonoBehaviour, IRenderEveryTick
 
 	public void UpdateAnims(float dt)
 	{
-		foreach (SpriteSheetAnimator spriteSheetAnimator in this.nameIndexMap.Values)
+		foreach (KeyValuePair<int, SpriteSheetAnimator> keyValuePair in this.nameIndexMap)
 		{
-			spriteSheetAnimator.UpdateAnims(dt);
+			keyValuePair.Value.UpdateAnims(dt);
 		}
 	}
 
 	public void Render()
 	{
 		Vector3 zero = Vector3.zero;
-		foreach (SpriteSheetAnimator spriteSheetAnimator in this.nameIndexMap.Values)
+		foreach (KeyValuePair<int, SpriteSheetAnimator> keyValuePair in this.nameIndexMap)
 		{
-			spriteSheetAnimator.Render();
+			keyValuePair.Value.Render();
 		}
 	}
 

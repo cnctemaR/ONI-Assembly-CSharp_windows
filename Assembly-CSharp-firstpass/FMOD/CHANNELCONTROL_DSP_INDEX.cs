@@ -8,8 +8,6 @@ namespace FMOD
 
 		public const int FADER = -2;
 
-		public const int PANNER = -3;
-
-		public const int TAIL = -4;
+		public const int TAIL = -3;
 	}
 }

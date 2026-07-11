@@ -45,6 +45,7 @@ public static class CodexCache
 		}
 		CodexCache.CollectYAMLEntries(list);
 		CodexCache.CollectYAMLSubEntries(list);
+		CodexCache.CheckUnlockableContent();
 		list.Add(categoryEntry);
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair2 in CodexCache.entries)
 		{
@@ -56,19 +57,46 @@ public static class CodexCache
 					keyValuePair2.Value.icon = keyValuePair2.Value.subEntries[0].icon;
 					keyValuePair2.Value.iconColor = keyValuePair2.Value.subEntries[0].iconColor;
 				}
+				int num = 0;
+				foreach (SubEntry subEntry in keyValuePair2.Value.subEntries)
+				{
+					if (subEntry.lockID != null && Game.Instance.unlocks.IsLocked(subEntry.lockID))
+					{
+						num++;
+					}
+				}
 				List<CodexWidget> list2 = new List<CodexWidget>();
 				list2.Add(new CodexWidget(CodexWidget.ContentType.Spacer));
 				list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
 				{
 					{
 						"string",
-						CODEX.HEADERS.SUBENTRIES
+						string.Concat(new object[]
+						{
+							CODEX.HEADERS.SUBENTRIES,
+							" (",
+							keyValuePair2.Value.subEntries.Count - num,
+							"/",
+							keyValuePair2.Value.subEntries.Count,
+							")"
+						})
 					},
 					{ "style", "subtitle" }
 				}));
-				foreach (SubEntry subEntry in keyValuePair2.Value.subEntries)
+				foreach (SubEntry subEntry2 in keyValuePair2.Value.subEntries)
 				{
-					list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string> { { "string", subEntry.name } }));
+					if (subEntry2.lockID != null && Game.Instance.unlocks.IsLocked(subEntry2.lockID))
+					{
+						list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string> { 
+						{
+							"string",
+							UI.FormatAsLink(CODEX.HEADERS.CONTENTLOCKED, UI.ExtractLinkID(subEntry2.name))
+						} }));
+					}
+					else
+					{
+						list2.Add(new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string> { { "string", subEntry2.name } }));
+					}
 				}
 				list2.Add(new CodexWidget(CodexWidget.ContentType.Spacer));
 				keyValuePair2.Value.contentContainers.Insert(keyValuePair2.Value.customContentLength, new ContentContainer(list2, ContentContainer.ContentLayout.Vertical));
@@ -94,6 +122,26 @@ public static class CodexCache
 			}
 		}
 		return null;
+	}
+
+	private static void CheckUnlockableContent()
+	{
+		foreach (KeyValuePair<string, CodexEntry> keyValuePair in CodexCache.entries)
+		{
+			foreach (SubEntry subEntry in keyValuePair.Value.subEntries)
+			{
+				if (subEntry.lockedContentContainer != null)
+				{
+					foreach (ContentContainer contentContainer in subEntry.contentContainers)
+					{
+						if (!string.IsNullOrEmpty(contentContainer.lockID))
+						{
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private static void CollectYAMLEntries(List<CategoryEntry> categories)
@@ -148,9 +196,43 @@ public static class CodexCache
 					if (CodexCache.entries.ContainsKey(v.parentEntryID.ToUpper()))
 					{
 						SubEntry subEntry = CodexCache.entries[v.parentEntryID.ToUpper()].subEntries.Find((SubEntry match) => match.id == v.id);
+						if (!string.IsNullOrEmpty(v.lockID))
+						{
+							foreach (ContentContainer contentContainer in v.contentContainers)
+							{
+								contentContainer.lockID = v.lockID;
+							}
+						}
 						if (subEntry != null)
 						{
-							subEntry.contentContainers.InsertRange(0, v.contentContainers);
+							if (!string.IsNullOrEmpty(v.lockID))
+							{
+								foreach (ContentContainer contentContainer2 in subEntry.contentContainers)
+								{
+									contentContainer2.lockID = v.lockID;
+								}
+								subEntry.lockID = v.lockID;
+							}
+							for (int i = 0; i < v.contentContainers.Count; i++)
+							{
+								if (!string.IsNullOrEmpty(v.contentContainers[i].lockID))
+								{
+									int num = subEntry.contentContainers.IndexOf(subEntry.lockedContentContainer);
+									subEntry.contentContainers.Insert(num + 1, v.contentContainers[i]);
+								}
+								else if (v.contentContainers[i].showBeforeGeneratedContent)
+								{
+									subEntry.contentContainers.Insert(0, v.contentContainers[i]);
+								}
+								else
+								{
+									subEntry.contentContainers.Add(v.contentContainers[i]);
+								}
+							}
+							subEntry.contentContainers.Add(new ContentContainer(new List<CodexWidget>
+							{
+								new CodexWidget(CodexWidget.ContentType.LargeSpacer)
+							}, ContentContainer.ContentLayout.Vertical));
 							subEntry.layoutPriority = v.layoutPriority;
 						}
 						else

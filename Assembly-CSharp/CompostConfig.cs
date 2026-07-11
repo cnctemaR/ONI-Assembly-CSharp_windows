@@ -35,8 +35,6 @@ public class CompostConfig : IBuildingConfig
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 2000f;
 		Compost compost = go.AddOrGet<Compost>();
-		compost.emitHash = SimHashes.Fertilizer;
-		compost.emitMassThreshold = 10f;
 		compost.simulatedInternalTemperature = 348.15f;
 		CompostWorkable compostWorkable = go.AddOrGet<CompostWorkable>();
 		compostWorkable.workTime = 20f;
@@ -44,15 +42,19 @@ public class CompostConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(GameTags.Compostable, 0.1f)
+			new ElementConverter.ConsumedElement(CompostConfig.COMPOST_TAG, 0.1f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.1f, SimHashes.Fertilizer, 348.15f, true, 0.5f, 1f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.1f, SimHashes.Dirt, 348.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
+		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
+		elementDropper.emitMass = 10f;
+		elementDropper.emitTag = SimHashes.Dirt.CreateTag();
+		elementDropper.emitOffset = new Vector3(0.5f, 1f, 0f);
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = GameTags.Compostable;
+		manualDeliveryKG.requestedItemTag = CompostConfig.COMPOST_TAG;
 		manualDeliveryKG.capacity = 300f;
 		manualDeliveryKG.refillMass = 60f;
 		manualDeliveryKG.minimumMass = 1f;
@@ -68,6 +70,8 @@ public class CompostConfig : IBuildingConfig
 
 	public const string ID = "Compost";
 
+	public static readonly Tag COMPOST_TAG = GameTags.Compostable;
+
 	public const float SAND_INPUT_PER_SECOND = 0.1f;
 
 	public const float FERTILIZER_OUTPUT_PER_SECOND = 0.1f;
@@ -75,4 +79,6 @@ public class CompostConfig : IBuildingConfig
 	public const float FERTILIZER_OUTPUT_TEMP = 348.15f;
 
 	public const float INPUT_CAPACITY = 300f;
+
+	private const SimHashes OUTPUT_ELEMENT = SimHashes.Dirt;
 }

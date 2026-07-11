@@ -38,6 +38,9 @@ public class MetalRefineryConfig : IBuildingConfig
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		LiquidCooledRefinery liquidCooledRefinery = go.AddOrGet<LiquidCooledRefinery>();
+		liquidCooledRefinery.duplicantOperated = true;
+		liquidCooledRefinery.sideScreenStyle = RefinerySideScreen.StyleSetting.ListInputOutput;
+		RefineryWorkable refineryWorkable = go.AddOrGet<RefineryWorkable>();
 		BuildingTemplates.CreateRefineryStorage(go, liquidCooledRefinery);
 		liquidCooledRefinery.coolantTag = MetalRefineryConfig.COOLANT_TAG;
 		liquidCooledRefinery.minCoolantMass = 400f;
@@ -47,7 +50,7 @@ public class MetalRefineryConfig : IBuildingConfig
 		liquidCooledRefinery.buildStorage.SetDefaultStoredItemModifiers(MetalRefineryConfig.RefineryStoredItemModifiers);
 		liquidCooledRefinery.outStorage.SetDefaultStoredItemModifiers(MetalRefineryConfig.RefineryStoredItemModifiers);
 		liquidCooledRefinery.outputOffset = new Vector3(1f, 0.5f);
-		liquidCooledRefinery.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
+		refineryWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_metalrefinery_kanim") };
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.capacityTag = GameTags.Liquid;
 		conduitConsumer.capacityKG = 800f;
@@ -60,22 +63,43 @@ public class MetalRefineryConfig : IBuildingConfig
 		conduitDispenser.elementFilter = null;
 		conduitDispenser.alwaysDispense = true;
 		List<Element> list = ElementLoader.elements.FindAll((Element e) => e.IsSolid && e.HasTag(GameTags.Metal));
+		ComplexRecipe complexRecipe;
 		foreach (Element element in list)
 		{
 			Element highTempTransition = element.highTempTransition;
 			Element lowTempTransition = highTempTransition.lowTempTransition;
 			if (lowTempTransition != element)
 			{
-				new RefinementRecipe
+				ComplexRecipe.RecipeElement[] array = new ComplexRecipe.RecipeElement[]
 				{
-					material = element.tag,
-					amount = 100f,
-					time = 40f,
-					description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name),
-					fabricators = new List<Tag> { TagManager.Create("MetalRefinery") }
-				}.AddResult(lowTempTransition.tag, 100f);
+					new ComplexRecipe.RecipeElement(element.tag, 100f)
+				};
+				ComplexRecipe.RecipeElement[] array2 = new ComplexRecipe.RecipeElement[]
+				{
+					new ComplexRecipe.RecipeElement(lowTempTransition.tag, 100f)
+				};
+				complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MetalRefinery", element.tag), array, array2);
+				complexRecipe.time = 40f;
+				complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, lowTempTransition.name, element.name);
+				complexRecipe.useResultAsDescription = true;
+				complexRecipe.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
 			}
 		}
+		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Iron).tag, 70f),
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.RefinedCarbon).tag, 20f),
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Lime).tag, 10f)
+		};
+		ComplexRecipe.RecipeElement[] array4 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement(ElementLoader.FindElementByHash(SimHashes.Steel).tag, 100f)
+		};
+		complexRecipe = new ComplexRecipe(ComplexRecipeManager.MakeRecipeID("MetalRefinery", ElementLoader.FindElementByHash(SimHashes.Steel).tag), array3, array4);
+		complexRecipe.time = 40f;
+		complexRecipe.useResultAsDescription = true;
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.METALREFINERY.RECIPE_DESCRIPTION, ElementLoader.FindElementByHash(SimHashes.Steel).name, ElementLoader.FindElementByHash(SimHashes.Iron).name);
+		complexRecipe.fabricators = new List<Tag> { TagManager.Create("MetalRefinery") };
 		Prioritizable.AddRef(go);
 	}
 

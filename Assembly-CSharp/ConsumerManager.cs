@@ -93,7 +93,7 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 				}
 			}
 		}
-		foreach (Crop crop in Components.Crops)
+		foreach (Crop crop in Components.Crops.Items)
 		{
 			if (Grid.IsVisible(Grid.PosToCell(crop.gameObject)) && crop.cropId == food_id.Name)
 			{

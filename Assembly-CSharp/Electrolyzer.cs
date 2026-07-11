@@ -31,13 +31,13 @@ public class Electrolyzer : StateMachineComponent<Electrolyzer.StatesInstance>
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			num = Grid.CellAbove(num);
-			return !GameUtil.FloodFillCheck(new Func<int, bool>(this.OverPressure), num, 3, true, true);
+			return !GameUtil.FloodFillCheck<Electrolyzer>(new Func<int, Electrolyzer, bool>(Electrolyzer.OverPressure), this, num, 3, true, true);
 		}
 	}
 
-	public bool OverPressure(int cell)
+	private static bool OverPressure(int cell, Electrolyzer electrolyzer)
 	{
-		return Grid.Mass[cell] > this.maxMass;
+		return Grid.Mass[cell] > electrolyzer.maxMass;
 	}
 
 	[SerializeField]

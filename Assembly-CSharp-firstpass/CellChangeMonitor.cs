@@ -68,7 +68,7 @@ public class CellChangeMonitor
 		this.UnregisterMovementStateChanged(transform.GetInstanceID(), callback);
 	}
 
-	public void RegisterCellChangedHandler(Transform transform, global::System.Action handler)
+	public void RegisterCellChangedHandler(Transform transform, global::System.Action callback, string debug_name)
 	{
 		int instanceID = transform.GetInstanceID();
 		CellChangeMonitor.CellChangedEntry cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
@@ -76,24 +76,40 @@ public class CellChangeMonitor
 		{
 			cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
 			cellChangedEntry.transform = transform;
-			cellChangedEntry.handlers = new List<global::System.Action>();
+			cellChangedEntry.handlers = new List<CellChangeMonitor.CellChangedEntry.Handler>();
 		}
+		CellChangeMonitor.CellChangedEntry.Handler handler = new CellChangeMonitor.CellChangedEntry.Handler
+		{
+			name = debug_name,
+			callback = callback
+		};
 		cellChangedEntry.handlers.Add(handler);
 		this.cellChangedHandlers[instanceID] = cellChangedEntry;
 	}
 
-	public void UnregisterCellChangedHandler(Transform transform, global::System.Action callback)
+	public void UnregisterCellChangedHandler(int instance_id, global::System.Action callback)
 	{
-		int instanceID = transform.GetInstanceID();
 		CellChangeMonitor.CellChangedEntry cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
-		if (this.cellChangedHandlers.TryGetValue(instanceID, out cellChangedEntry))
+		if (this.cellChangedHandlers.TryGetValue(instance_id, out cellChangedEntry))
 		{
-			cellChangedEntry.handlers.Remove(callback);
+			for (int i = 0; i < cellChangedEntry.handlers.Count; i++)
+			{
+				if (!(cellChangedEntry.handlers[i].callback != callback))
+				{
+					cellChangedEntry.handlers.RemoveAt(i);
+					break;
+				}
+			}
 			if (cellChangedEntry.handlers.Count == 0)
 			{
-				this.cellChangedHandlers.Remove(instanceID);
+				this.cellChangedHandlers.Remove(instance_id);
 			}
 		}
+	}
+
+	public void UnregisterCellChangedHandler(Transform transform, global::System.Action callback)
+	{
+		this.UnregisterCellChangedHandler(transform.GetInstanceID(), callback);
 	}
 
 	public int PosToCell(Vector3 pos)
@@ -125,6 +141,10 @@ public class CellChangeMonitor
 			CellChangeMonitor.CellChangedEntry cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
 			if (this.cellChangedHandlers.TryGetValue(num, out cellChangedEntry))
 			{
+				if (cellChangedEntry.transform == null)
+				{
+					continue;
+				}
 				int num2 = -1;
 				this.transformLastKnownCell.TryGetValue(num, out num2);
 				int num3 = this.PosToCell(cellChangedEntry.transform.GetPosition());
@@ -132,11 +152,15 @@ public class CellChangeMonitor
 				{
 					this.cellChangedCallbacksToRun.Clear();
 					this.cellChangedCallbacksToRun.AddRange(cellChangedEntry.handlers);
-					foreach (global::System.Action action in this.cellChangedCallbacksToRun)
+					foreach (CellChangeMonitor.CellChangedEntry.Handler handler in this.cellChangedCallbacksToRun)
 					{
-						if (cellChangedEntry.handlers.Contains(action))
+						foreach (CellChangeMonitor.CellChangedEntry.Handler handler2 in cellChangedEntry.handlers)
 						{
-							action();
+							if (handler2.callback == handler.callback)
+							{
+								handler2.callback();
+								break;
+							}
 						}
 					}
 					this.transformLastKnownCell[num] = num3;
@@ -193,7 +217,7 @@ public class CellChangeMonitor
 
 	private Dictionary<int, int> transformLastKnownCell = new Dictionary<int, int>();
 
-	private List<global::System.Action> cellChangedCallbacksToRun = new List<global::System.Action>();
+	private List<CellChangeMonitor.CellChangedEntry.Handler> cellChangedCallbacksToRun = new List<CellChangeMonitor.CellChangedEntry.Handler>();
 
 	private List<Action<Transform, bool>> moveChangedCallbacksToRun = new List<Action<Transform, bool>>();
 
@@ -203,7 +227,14 @@ public class CellChangeMonitor
 	{
 		public Transform transform;
 
-		public List<global::System.Action> handlers;
+		public List<CellChangeMonitor.CellChangedEntry.Handler> handlers;
+
+		public struct Handler
+		{
+			public string name;
+
+			public global::System.Action callback;
+		}
 	}
 
 	private struct MovementStateChangedEntry

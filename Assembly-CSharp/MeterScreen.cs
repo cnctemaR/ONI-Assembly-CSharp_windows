@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using FMOD.Studio;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -44,19 +43,19 @@ public class MeterScreen : KScreen, IRender1000ms
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_ON", false));
-			if (this.loopInstance == null)
+			if (!this.loopInstance.IsValid())
 			{
-				this.loopInstance = LoopingSoundManager.StartSound(GlobalAssets.GetSound("RedAlert_LP", false), Vector3.zero, true);
+				this.loopInstance = LoopingSoundManager.StartSound(GlobalAssets.GetSound("RedAlert_LP", false), Vector3.zero, true, false);
 			}
 		}
 		else
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_OFF", false));
-			if (this.loopInstance != null)
+			if (this.loopInstance.IsValid())
 			{
-				LoopingSoundManager.StopSound(GlobalAssets.GetSound("RedAlert_LP", false), this.loopInstance);
-				this.loopInstance = null;
+				LoopingSoundManager.StopSound(this.loopInstance);
+				this.loopInstance.Clear();
 			}
 		}
 	}
@@ -87,6 +86,11 @@ public class MeterScreen : KScreen, IRender1000ms
 	private void RefreshMinions()
 	{
 		int count = Components.LiveMinionIdentities.Count;
+		if (count == this.cachedMinionCount)
+		{
+			return;
+		}
+		this.cachedMinionCount = count;
 		this.currentMinions.text = count.ToString("0");
 		this.MinionsTooltip.ClearMultiStringTooltip();
 		this.MinionsTooltip.AddMultiStringTooltip(string.Format(UI.TOOLTIPS.METERSCREEN_POPULATION, count.ToString("0")), this.ToolTipStyle_Header);
@@ -129,7 +133,7 @@ public class MeterScreen : KScreen, IRender1000ms
 	private IList<MinionIdentity> GetStressedMinions()
 	{
 		Amount stress_amount = Db.Get().Amounts.Stress;
-		List<MinionIdentity> list = new List<MinionIdentity>(Components.LiveMinionIdentities);
+		List<MinionIdentity> list = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
 		return new List<MinionIdentity>(list.OrderByDescending<MinionIdentity, float>((MinionIdentity x) => stress_amount.Lookup(x).value));
 	}
 
@@ -152,7 +156,7 @@ public class MeterScreen : KScreen, IRender1000ms
 	private IList<MinionIdentity> GetImmunityLevels()
 	{
 		Amount amounts = Db.Get().Amounts.ImmuneLevel;
-		List<MinionIdentity> list = new List<MinionIdentity>(Components.LiveMinionIdentities);
+		List<MinionIdentity> list = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
 		return new List<MinionIdentity>(list.OrderBy<MinionIdentity, float>((MinionIdentity x) => amounts.Lookup(x).value));
 	}
 
@@ -290,7 +294,7 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	public ToolTip RedAlertTooltip;
 
-	private EventInstance loopInstance;
+	private HandleVector<int>.Handle loopInstance = HandleVector<int>.InvalidHandle;
 
 	private MeterScreen.DisplayInfo stressDisplayInfo = new MeterScreen.DisplayInfo
 	{
@@ -301,6 +305,8 @@ public class MeterScreen : KScreen, IRender1000ms
 	{
 		selectedIndex = -1
 	};
+
+	private int cachedMinionCount = -1;
 
 	private long cachedCalories = -1L;
 

@@ -6,16 +6,16 @@ namespace FMOD.Studio
 	{
 		public int size;
 
-		public IntPtr userData;
+		public IntPtr userdata;
 
-		public int userDataLength;
+		public int userdatalength;
 
-		public FILE_OPENCALLBACK openCallback;
+		public FILE_OPENCALLBACK opencallback;
 
-		public FILE_CLOSECALLBACK closeCallback;
+		public FILE_CLOSECALLBACK closecallback;
 
-		public FILE_READCALLBACK readCallback;
+		public FILE_READCALLBACK readcallback;
 
-		public FILE_SEEKCALLBACK seekCallback;
+		public FILE_SEEKCALLBACK seekcallback;
 	}
 }

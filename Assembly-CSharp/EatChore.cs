@@ -155,7 +155,6 @@ public class EatChore : Chore<EatChore.StatesInstance>
 				.Exit(delegate(EatChore.StatesInstance smi)
 				{
 					smi.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.Move));
-					this.eater.Get(smi).gameObject.GetComponent<Effects>().Remove("EatInMessHall");
 				});
 			this.eatonfloorstate.DefaultState(this.eatonfloorstate.moveto).Enter("CreateLocator", delegate(EatChore.StatesInstance smi)
 			{

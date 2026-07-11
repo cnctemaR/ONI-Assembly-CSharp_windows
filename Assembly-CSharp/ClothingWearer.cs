@@ -17,15 +17,15 @@ public class ClothingWearer : KMonoBehaviour
 		{
 			AttributeInstance attributeInstance = base.gameObject.GetAttributes().Get("ThermalConductivityBarrier");
 			this.conductivityModifier = new AttributeModifier("ThermalConductivityBarrier", ClothingWearer.ClothingInfo.BASIC_CLOTHING.conductivityMod, DUPLICANTS.MODIFIERS.CLOTHING.NAME, false, false, false);
-			attributeInstance.Add(DUPLICANTS.MODIFIERS.CLOTHING.NAME, this.conductivityModifier);
+			attributeInstance.Add(this.conductivityModifier);
 		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.decorProvider.decor.Add("Clothing", this.decorModifier);
-		this.decorProvider.decorRadius.Add("radius", new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 3f, null, false, false, true));
+		this.decorProvider.decor.Add(this.decorModifier);
+		this.decorProvider.decorRadius.Add(new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, 3f, null, false, false, true));
 		this.decorProvider.overrideName = string.Format(UI.OVERLAYS.DECOR.CLOTHING, base.gameObject.GetProperName());
 		if (this.currentClothing == null)
 		{

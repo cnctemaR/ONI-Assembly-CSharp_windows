@@ -10,13 +10,7 @@ public class EntityPrefabs : KMonoBehaviour
 		EntityPrefabs.Instance = this;
 	}
 
-	public GameObject Portrait;
-
 	public GameObject SelectMarker;
 
 	public GameObject ForegroundLayer;
-
-	public GameObject Bones;
-
-	public GameObject GenericBuildingPackage;
 }

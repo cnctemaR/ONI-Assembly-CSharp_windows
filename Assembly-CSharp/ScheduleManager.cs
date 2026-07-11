@@ -33,7 +33,7 @@ public class ScheduleManager : KMonoBehaviour
 
 	private void EnableAll(Schedule schedule, int idx)
 	{
-		foreach (ScheduleBlockType scheduleBlockType in Db.Get().ScheduleBlockTypes)
+		foreach (ScheduleBlockType scheduleBlockType in Db.Get().ScheduleBlockTypes.resources)
 		{
 			schedule.Add(idx, scheduleBlockType);
 		}
@@ -41,7 +41,7 @@ public class ScheduleManager : KMonoBehaviour
 
 	private void DisableAll(Schedule schedule, int idx)
 	{
-		foreach (ScheduleBlockType scheduleBlockType in Db.Get().ScheduleBlockTypes)
+		foreach (ScheduleBlockType scheduleBlockType in Db.Get().ScheduleBlockTypes.resources)
 		{
 			schedule.Remove(idx, scheduleBlockType);
 		}

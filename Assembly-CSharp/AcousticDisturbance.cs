@@ -87,25 +87,29 @@ public class AcousticDisturbance
 			int num3 = Grid.CellAbove(cell);
 			int num4 = cell - 1;
 			int num5 = cell + 1;
-			if (!Grid.Solid[num2] || !Grid.Solid[num4])
+			bool flag = Grid.IsValidCell(num2) && !Grid.Solid[num2];
+			bool flag2 = Grid.IsValidCell(num3) && !Grid.Solid[num3];
+			bool flag3 = Grid.IsValidCell(num4) && !Grid.Solid[num4];
+			bool flag4 = Grid.IsValidCell(num5) && !Grid.Solid[num5];
+			if (flag || flag3)
 			{
-				AcousticDisturbance.DetermineCellsInRadius(num2 - 1, num, max_depth, AcousticDisturbance.cellsInRange);
+				AcousticDisturbance.DetermineCellsInRadius(num2 - 1, num, max_depth, cells_in_range);
 			}
-			AcousticDisturbance.DetermineCellsInRadius(num2, num, max_depth, AcousticDisturbance.cellsInRange);
-			if (!Grid.Solid[num2] || !Grid.Solid[num5])
+			AcousticDisturbance.DetermineCellsInRadius(num2, num, max_depth, cells_in_range);
+			if (flag || flag4)
 			{
-				AcousticDisturbance.DetermineCellsInRadius(num2 + 1, num, max_depth, AcousticDisturbance.cellsInRange);
+				AcousticDisturbance.DetermineCellsInRadius(num2 + 1, num, max_depth, cells_in_range);
 			}
-			AcousticDisturbance.DetermineCellsInRadius(Grid.CellLeft(cell), num, max_depth, AcousticDisturbance.cellsInRange);
-			AcousticDisturbance.DetermineCellsInRadius(Grid.CellRight(cell), num, max_depth, AcousticDisturbance.cellsInRange);
-			if (!Grid.Solid[num3] || !Grid.Solid[num4])
+			AcousticDisturbance.DetermineCellsInRadius(num4, num, max_depth, cells_in_range);
+			AcousticDisturbance.DetermineCellsInRadius(num5, num, max_depth, cells_in_range);
+			if (flag2 || flag3)
 			{
-				AcousticDisturbance.DetermineCellsInRadius(num3 - 1, num, max_depth, AcousticDisturbance.cellsInRange);
+				AcousticDisturbance.DetermineCellsInRadius(num3 - 1, num, max_depth, cells_in_range);
 			}
 			AcousticDisturbance.DetermineCellsInRadius(num3, num, max_depth, AcousticDisturbance.cellsInRange);
-			if (!Grid.Solid[num3] || !Grid.Solid[num5])
+			if (flag2 || flag4)
 			{
-				AcousticDisturbance.DetermineCellsInRadius(num3 + 1, num, max_depth, AcousticDisturbance.cellsInRange);
+				AcousticDisturbance.DetermineCellsInRadius(num3 + 1, num, max_depth, cells_in_range);
 			}
 		}
 	}

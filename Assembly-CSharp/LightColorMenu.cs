@@ -19,7 +19,7 @@ public class LightColorMenu : KMonoBehaviour
 				if (i != this.currentColor)
 				{
 					int new_color = i;
-					this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo(this.lightColors[i].name, this.lightColors[i].name, delegate
+					Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo(this.lightColors[i].name, this.lightColors[i].name, delegate
 					{
 						this.SetColor(new_color);
 					}, global::Action.NumActions, null, null, null, string.Empty, true), 1f);
@@ -53,9 +53,6 @@ public class LightColorMenu : KMonoBehaviour
 	public LightColorMenu.LightColor[] lightColors;
 
 	private int currentColor;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[Serializable]
 	public struct LightColor

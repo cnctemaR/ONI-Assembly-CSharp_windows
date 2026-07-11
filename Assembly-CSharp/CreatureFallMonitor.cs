@@ -32,7 +32,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 		{
 			Vector3 position = base.smi.transform.GetPosition();
 			Vector3 vector = Grid.CellToPosCBC(Grid.PosToCell(position), Grid.SceneLayer.Creatures);
-			vector.z = position.z;
+			vector.x = position.x;
 			base.smi.transform.SetPosition(vector);
 			if (this.navigator.IsValidNavType(NavType.Floor))
 			{
@@ -42,18 +42,14 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 
 		public bool ShouldFall()
 		{
+			if (base.gameObject.HasTag(GameTags.Stored))
+			{
+				return false;
+			}
 			Vector3 position = base.smi.transform.GetPosition();
 			int num = Grid.PosToCell(position);
 			bool flag = Grid.Solid[num];
 			if (flag)
-			{
-				return false;
-			}
-			Vector3 vector = position;
-			vector.y += CreatureFallMonitor.FLOOR_DISTANCE;
-			int num2 = Grid.PosToCell(vector);
-			bool flag2 = Grid.Solid[num2];
-			if (flag2)
 			{
 				return false;
 			}
@@ -67,13 +63,21 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			}
 			if (this.navigator.CurrentNavType != NavType.Swim)
 			{
-				bool flag3 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
-				if (flag3)
+				bool flag2 = this.navigator.NavGrid.NavTable.IsValid(num, this.navigator.CurrentNavType);
+				if (flag2)
 				{
 					return false;
 				}
+				if (this.navigator.CurrentNavType != NavType.Floor)
+				{
+					return true;
+				}
 			}
-			return true;
+			Vector3 vector = position;
+			vector.y += CreatureFallMonitor.FLOOR_DISTANCE;
+			int num2 = Grid.PosToCell(vector);
+			bool flag3 = Grid.Solid[num2];
+			return !flag3;
 		}
 
 		public bool CanSwimAtCurrentLocation(bool check_head)

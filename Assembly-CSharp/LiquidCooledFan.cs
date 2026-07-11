@@ -10,15 +10,17 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 {
 	public bool HasMaterial()
 	{
-		List<GameObject> list = base.smi.master.gasStorage.Find(GameTags.Water);
-		if (list != null && list.Count > 0)
+		ListPool<GameObject, LiquidCooledFan>.PooledList pooledList = ListPool<GameObject, LiquidCooledFan>.Allocate();
+		base.smi.master.gasStorage.Find(GameTags.Water, pooledList);
+		if (pooledList.Count > 0)
 		{
 			global::Debug.LogWarning("Liquid Cooled fan Gas storage contains water - A duplicant probably delivered to the wrong storage - moving it to liquid storage.", null);
-			foreach (GameObject gameObject in list)
+			foreach (GameObject gameObject in pooledList)
 			{
 				base.smi.master.gasStorage.Transfer(gameObject, base.smi.master.liquidStorage, false, false);
 			}
 		}
+		pooledList.Recycle();
 		this.UpdateMeter();
 		return this.liquidStorage.MassStored() > 0f;
 	}
@@ -107,7 +109,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 		}
 		float num = float.PositiveInfinity;
 		float num2 = 0f;
-		foreach (GameObject gameObject in this.gasStorage)
+		foreach (GameObject gameObject in this.gasStorage.items)
 		{
 			PrimaryElement primaryElement = gameObject.GetComponent<PrimaryElement>();
 			if (!(primaryElement == null) && primaryElement.Mass >= 0.1f && primaryElement.Temperature >= this.minCooledTemperature)
@@ -119,7 +121,7 @@ public class LiquidCooledFan : StateMachineComponent<LiquidCooledFan.StatesInsta
 				}
 			}
 		}
-		foreach (GameObject gameObject2 in this.gasStorage)
+		foreach (GameObject gameObject2 in this.gasStorage.items)
 		{
 			PrimaryElement primaryElement = gameObject2.GetComponent<PrimaryElement>();
 			if (!(primaryElement == null) && primaryElement.Mass >= 0.1f && primaryElement.Temperature >= this.minCooledTemperature)

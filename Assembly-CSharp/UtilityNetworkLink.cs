@@ -80,6 +80,14 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 		this.Connect();
 	}
 
+	public int GetNetworkCell()
+	{
+		int num;
+		int num2;
+		this.GetCells(out num, out num2);
+		return num;
+	}
+
 	[MyCmpGet]
 	private Rotatable rotatable;
 

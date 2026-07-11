@@ -15,6 +15,13 @@ public class SubEntry : YamlIO<SubEntry>
 		this.parentEntryID = parentEntryID;
 		this.name = name;
 		this.contentContainers = contentContainers;
+		if (!string.IsNullOrEmpty(this.lockID))
+		{
+			foreach (ContentContainer contentContainer in contentContainers)
+			{
+				contentContainer.lockID = this.lockID;
+			}
+		}
 	}
 
 	public List<ContentContainer> contentContainers { get; set; }
@@ -34,6 +41,10 @@ public class SubEntry : YamlIO<SubEntry>
 	public int layoutPriority { get; set; }
 
 	public bool disabled { get; set; }
+
+	public string lockID { get; set; }
+
+	public ContentContainer lockedContentContainer;
 
 	public Color iconColor = Color.white;
 }

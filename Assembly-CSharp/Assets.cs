@@ -96,8 +96,14 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static string GetSimpleSoundEventName(string path)
 	{
-		int num = path.LastIndexOf('/');
-		return (num == -1) ? path : path.Substring(num + 1);
+		string text = null;
+		if (!Assets.simpleSoundEventNames.TryGetValue(path, out text))
+		{
+			int num = path.LastIndexOf('/');
+			text = ((num == -1) ? path : path.Substring(num + 1));
+			Assets.simpleSoundEventNames[path] = text;
+		}
+		return text;
 	}
 
 	private static Def GetDef(Def[] defs, string prefab_id)
@@ -417,6 +423,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public Sprite LegendColourBox;
 
+	public Texture2D invalidAreaTex;
+
 	public Assets.UIPrefabData UIPrefabAssets;
 
 	public static Assets.UIPrefabData UIPrefabs;
@@ -460,6 +468,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public MopPlacerConfig.MopPlacerAssets mopPlacerAssets;
 
 	public static Assets instance;
+
+	private static Dictionary<string, string> simpleSoundEventNames = new Dictionary<string, string>();
 
 	public Assets.PlacementOverrideData[] PlacementOverrides;
 

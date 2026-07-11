@@ -68,4 +68,6 @@ public static class OilFloaterTuning
 	public static float STANDARD_STOMACH_SIZE = OilFloaterTuning.STANDARD_CALORIES_PER_CYCLE * OilFloaterTuning.STANDARD_STARVE_CYCLES;
 
 	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER3;
+
+	public static float EGG_MASS = 2f;
 }

@@ -107,7 +107,7 @@ namespace Database
 			this.InvalidBuildingLocation = this.CreateStatusItem("InvalidBuildingLocation", "BUILDING", "status_item_missing_foundation", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.LiquidVentObstructed = this.CreateStatusItem("LiquidVentObstructed", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, true, 63486);
 			this.LiquidVentOverPressure = this.CreateStatusItem("LiquidVentOverPressure", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, true, 63486);
-			this.MaterialsUnavailable = new MaterialsUnavailableStatusItem("MaterialsUnavailable", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, true, SimViewMode.None);
+			this.MaterialsUnavailable = new MaterialsStatusItem("MaterialsUnavailable", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, true, SimViewMode.None);
 			this.MaterialsUnavailable.AddNotification(null, null, null, 0f);
 			this.MaterialsUnavailable.resolveStringCallback = delegate(string str, object data)
 			{
@@ -140,7 +140,7 @@ namespace Database
 				str = str.Replace("{ItemsRemaining}", text3);
 				return str;
 			};
-			this.MaterialsUnavailableForRefill = new MaterialsUnavailableForRefillStatusItem("MaterialsUnavailableForRefill", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, true, SimViewMode.None);
+			this.MaterialsUnavailableForRefill = new MaterialsStatusItem("MaterialsUnavailableForRefill", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, true, SimViewMode.None);
 			this.MaterialsUnavailableForRefill.resolveStringCallback = delegate(string str, object data)
 			{
 				IFetchList fetchList2 = (IFetchList)data;
@@ -189,7 +189,7 @@ namespace Database
 				}
 				return str;
 			};
-			this.WaitingForMaterials = new WaitingForMaterialsStatusItem("WaitingForMaterials", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Neutral, true, SimViewMode.None);
+			this.WaitingForMaterials = new MaterialsStatusItem("WaitingForMaterials", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.Neutral, true, SimViewMode.None);
 			this.WaitingForMaterials.resolveStringCallback = delegate(string str, object data)
 			{
 				IFetchList fetchList3 = (IFetchList)data;
@@ -427,7 +427,7 @@ namespace Database
 					return str;
 				}
 				float num3 = 0f;
-				foreach (GameObject gameObject in component3)
+				foreach (GameObject gameObject in component3.items)
 				{
 					Edible component4 = gameObject.GetComponent<Edible>();
 					if (component4)
@@ -470,6 +470,7 @@ namespace Database
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(averageRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
+			this.PipeMayMelt = this.CreateStatusItem("PipeMayMelt", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.NoLiquidElementToPump = this.CreateStatusItem("NoLiquidElementToPump", "BUILDING", "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, true, 63486);
 			this.NoGasElementToPump = this.CreateStatusItem("NoGasElementToPump", "BUILDING", "status_item_no_gas_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.GasVentMap, true, 63486);
 			this.NoFilterElementSelected = this.CreateStatusItem("NoFilterElementSelected", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
@@ -508,6 +509,13 @@ namespace Database
 			{
 				Generator generator = (Generator)data;
 				str = str.Replace("{Wattage}", GameUtil.GetFormattedWattage(generator.WattageRating, GameUtil.WattageFormatterUnit.Automatic));
+				return str;
+			};
+			this.SolarPanelWattage = this.CreateStatusItem("SolarPanelWattage", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.PowerMap, true, 63486);
+			this.SolarPanelWattage.resolveStringCallback = delegate(string str, object data)
+			{
+				SolarPanel solarPanel = (SolarPanel)data;
+				str = str.Replace("{Wattage}", GameUtil.GetFormattedWattage(solarPanel.CurrentWattage, GameUtil.WattageFormatterUnit.Automatic));
 				return str;
 			};
 			this.Wattson = this.CreateStatusItem("Wattson", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
@@ -607,6 +615,8 @@ namespace Database
 				return str;
 			};
 			this.HabitatNeedsEmptying = this.CreateStatusItem("HabitatNeedsEmptying", "BUILDING", "status_item_need_supply_out", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.DetectorScanning = this.CreateStatusItem("DetectorScanning", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			this.IncomingMeteors = this.CreateStatusItem("IncomingMeteors", "BUILDING", string.Empty, StatusItem.IconType.Exclamation, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 		}
 
 		private static bool ShowInUtilityOverlay(SimViewMode mode, object data)
@@ -729,7 +739,7 @@ namespace Database
 
 		public StatusItem Entombed;
 
-		public WaitingForMaterialsStatusItem WaitingForMaterials;
+		public MaterialsStatusItem WaitingForMaterials;
 
 		public StatusItem WaitingForRepairMaterials;
 
@@ -831,6 +841,8 @@ namespace Database
 
 		public StatusItem PipeFull;
 
+		public StatusItem PipeMayMelt;
+
 		public StatusItem ElementConsumer;
 
 		public StatusItem ElementEmitterOutput;
@@ -842,6 +854,8 @@ namespace Database
 		public StatusItem JoulesAvailable;
 
 		public StatusItem Wattage;
+
+		public StatusItem SolarPanelWattage;
 
 		public StatusItem Wattson;
 
@@ -926,5 +940,9 @@ namespace Database
 		public StatusItem IncubatorProgress;
 
 		public StatusItem HabitatNeedsEmptying;
+
+		public StatusItem DetectorScanning;
+
+		public StatusItem IncomingMeteors;
 	}
 }

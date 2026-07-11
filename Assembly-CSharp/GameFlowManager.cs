@@ -57,7 +57,7 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 			else
 			{
 				flag = true;
-				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 				{
 					if (!this.IsIncapacitated(minionIdentity.gameObject))
 					{
@@ -72,7 +72,7 @@ public class GameFlowManager : StateMachineComponent<GameFlowManager.StatesInsta
 			}
 		}
 
-		public Notification colonyLostNotification = new Notification(MISC.NOTIFICATIONS.COLONYLOST.NAME, NotificationType.Bad, HashedString.Invalid, null, null, false, 0f, null, null, null);
+		public Notification colonyLostNotification = new Notification(MISC.NOTIFICATIONS.COLONYLOST.NAME, NotificationType.Bad, HashedString.Invalid, null, null, false, 0f, null, null);
 	}
 
 	public class States : GameStateMachine<GameFlowManager.States, GameFlowManager.StatesInstance, GameFlowManager>

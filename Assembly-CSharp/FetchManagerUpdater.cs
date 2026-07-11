@@ -16,7 +16,7 @@ public class FetchManagerUpdater
 		for (int i = 0; i < pickupables.Count; i++)
 		{
 			Pickupable pickupable = pickupables[i];
-			if (pickupable.CouldBePickedUp(component.gameObject))
+			if (pickupable.CouldBePickedUp(component.gameObject, false))
 			{
 				int navigationCost = pickupable.GetNavigationCost(component, pickupable.cachedCell);
 				if (navigationCost != PathProber.InvalidCost)

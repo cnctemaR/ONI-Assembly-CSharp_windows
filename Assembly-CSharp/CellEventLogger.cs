@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 {
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void LogCallbackSend(int cell, int callback_id)
 	{
 		if (callback_id != -1)
@@ -13,7 +13,7 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		}
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void LogCallbackReceive(int callback_id)
 	{
 		int invalidCell = Grid.InvalidCell;
@@ -59,6 +59,7 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 		this.ConstructTile = base.AddEvent(new CellAddRemoveSubstanceEvent("ConstructTile", "ConstructTile", false)) as CellAddRemoveSubstanceEvent;
 		this.Dumpable = base.AddEvent(new CellAddRemoveSubstanceEvent("Dympable", "Dumpable", false)) as CellAddRemoveSubstanceEvent;
 		this.Cough = base.AddEvent(new CellAddRemoveSubstanceEvent("Cough", "Cough", false)) as CellAddRemoveSubstanceEvent;
+		this.Meteor = base.AddEvent(new CellAddRemoveSubstanceEvent("Meteor", "Meteor", false)) as CellAddRemoveSubstanceEvent;
 		this.ElementChunkTransition = base.AddEvent(new CellAddRemoveSubstanceEvent("ElementChunkTransition", "Element Chunk Transition", false)) as CellAddRemoveSubstanceEvent;
 		this.OxyrockEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("OxyrockEmit", "Oxyrock Emit", false)) as CellAddRemoveSubstanceEvent;
 		this.BleachstoneEmit = base.AddEvent(new CellAddRemoveSubstanceEvent("BleachstoneEmit", "Bleachstone Emit", false)) as CellAddRemoveSubstanceEvent;
@@ -189,6 +190,8 @@ public class CellEventLogger : EventLogger<CellEventInstance, CellEvent>
 	public CellAddRemoveSubstanceEvent Dumpable;
 
 	public CellAddRemoveSubstanceEvent Cough;
+
+	public CellAddRemoveSubstanceEvent Meteor;
 
 	public CellModifyMassEvent CO2ManagerFixedUpdate;
 

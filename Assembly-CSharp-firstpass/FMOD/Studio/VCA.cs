@@ -1,70 +1,80 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD.Studio
 {
-	public class VCA : HandleBase
+	public struct VCA
 	{
-		public VCA(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT getID(out Guid id)
 		{
-			byte[] array = new byte[16];
-			RESULT result = VCA.FMOD_Studio_VCA_GetID(this.rawPtr, array);
-			id = new Guid(array);
-			return result;
+			return VCA.FMOD_Studio_VCA_GetID(this.handle, out id);
 		}
 
 		public RESULT getPath(out string path)
 		{
 			path = null;
-			byte[] array = new byte[256];
-			int num = 0;
-			RESULT result = VCA.FMOD_Studio_VCA_GetPath(this.rawPtr, array, array.Length, out num);
-			if (result == RESULT.ERR_TRUNCATED)
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				array = new byte[num];
-				result = VCA.FMOD_Studio_VCA_GetPath(this.rawPtr, array, array.Length, out num);
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				RESULT result = VCA.FMOD_Studio_VCA_GetPath(this.handle, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = VCA.FMOD_Studio_VCA_GetPath(this.handle, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					path = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
 			}
-			if (result == RESULT.OK)
-			{
-				path = Encoding.UTF8.GetString(array, 0, num - 1);
-			}
-			return result;
+			return result2;
 		}
 
-		public RESULT getFaderLevel(out float volume)
+		public RESULT getVolume(out float volume, out float finalvolume)
 		{
-			return VCA.FMOD_Studio_VCA_GetFaderLevel(this.rawPtr, out volume);
+			return VCA.FMOD_Studio_VCA_GetVolume(this.handle, out volume, out finalvolume);
 		}
 
-		public RESULT setFaderLevel(float volume)
+		public RESULT setVolume(float volume)
 		{
-			return VCA.FMOD_Studio_VCA_SetFaderLevel(this.rawPtr, volume);
+			return VCA.FMOD_Studio_VCA_SetVolume(this.handle, volume);
 		}
 
 		[DllImport("fmodstudio")]
 		private static extern bool FMOD_Studio_VCA_IsValid(IntPtr vca);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_VCA_GetID(IntPtr vca, [Out] byte[] id);
+		private static extern RESULT FMOD_Studio_VCA_GetID(IntPtr vca, out Guid id);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_VCA_GetPath(IntPtr vca, [Out] byte[] path, int size, out int retrieved);
+		private static extern RESULT FMOD_Studio_VCA_GetPath(IntPtr vca, IntPtr path, int size, out int retrieved);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_VCA_GetFaderLevel(IntPtr vca, out float value);
+		private static extern RESULT FMOD_Studio_VCA_GetVolume(IntPtr vca, out float volume, out float finalvolume);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_VCA_SetFaderLevel(IntPtr vca, float value);
+		private static extern RESULT FMOD_Studio_VCA_SetVolume(IntPtr vca, float value);
 
-		protected override bool isValidInternal()
+		public bool hasHandle()
 		{
-			return VCA.FMOD_Studio_VCA_IsValid(this.rawPtr);
+			return this.handle != IntPtr.Zero;
 		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public bool isValid()
+		{
+			return this.hasHandle() && VCA.FMOD_Studio_VCA_IsValid(this.handle);
+		}
+
+		public IntPtr handle;
 	}
 }

@@ -6,6 +6,7 @@ public class LightBufferCompositor : MonoBehaviour
 	private void Start()
 	{
 		this.material = new Material(Shader.Find("Klei/PostFX/LightBufferCompositor"));
+		this.material.SetTexture("_InvalidTex", Assets.instance.invalidAreaTex);
 		this.blurMaterial = new Material(Shader.Find("Klei/PostFX/Blur"));
 		this.OnShadersReloaded();
 		ShaderReloader.Register(new global::System.Action(this.OnShadersReloaded));

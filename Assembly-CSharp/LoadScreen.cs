@@ -140,7 +140,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 269773U;
+		return header.buildVersion > 273433U;
 	}
 
 	private void SetSelectedGame(string filename)
@@ -168,7 +168,7 @@ public class LoadScreen : KModalScreen
 			string text3 = Path.GetFileName(filename);
 			if (gameInfo.isAutoSave)
 			{
-				text3 += UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
+				text3 = text3 + "\n" + UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
 			}
 			string text4 = string.Format(text, new object[]
 			{
@@ -181,13 +181,13 @@ public class LoadScreen : KModalScreen
 			this.saveDetails.text = text4;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 269773U);
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 273433U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
 			else if (gameInfo.saveMajorVersion < 7)
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 3 });
+				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 4 });
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -222,15 +222,15 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(this.selectedFileName, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 269773U)
+		if (header.buildVersion > 273433U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 269773U.ToString();
+			text2 = 273433U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
 			text = string.Format("v{0}.{1}", gameInfo.saveMajorVersion, gameInfo.saveMinorVersion);
-			text2 = string.Format("v{0}.{1}", 7, 3);
+			text2 = string.Format("v{0}.{1}", 7, 4);
 		}
 		if (!flag)
 		{

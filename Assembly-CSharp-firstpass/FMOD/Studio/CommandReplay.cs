@@ -1,155 +1,138 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD.Studio
 {
-	public class CommandReplay : HandleBase
+	public struct CommandReplay
 	{
-		public CommandReplay(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT getSystem(out FMOD.Studio.System system)
 		{
-			system = null;
-			IntPtr intPtr = 0;
-			RESULT result = CommandReplay.FMOD_Studio_CommandReplay_GetSystem(this.rawPtr, out intPtr);
-			if (result == RESULT.OK)
-			{
-				system = new FMOD.Studio.System(intPtr);
-			}
-			return result;
+			return CommandReplay.FMOD_Studio_CommandReplay_GetSystem(this.handle, out system.handle);
 		}
 
 		public RESULT getLength(out float totalTime)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_GetLength(this.rawPtr, out totalTime);
+			return CommandReplay.FMOD_Studio_CommandReplay_GetLength(this.handle, out totalTime);
 		}
 
 		public RESULT getCommandCount(out int count)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_GetCommandCount(this.rawPtr, out count);
+			return CommandReplay.FMOD_Studio_CommandReplay_GetCommandCount(this.handle, out count);
 		}
 
 		public RESULT getCommandInfo(int commandIndex, out COMMAND_INFO info)
 		{
-			COMMAND_INFO_INTERNAL command_INFO_INTERNAL = default(COMMAND_INFO_INTERNAL);
-			RESULT result = CommandReplay.FMOD_Studio_CommandReplay_GetCommandInfo(this.rawPtr, commandIndex, out command_INFO_INTERNAL);
-			if (result != RESULT.OK)
-			{
-				info = default(COMMAND_INFO);
-				return result;
-			}
-			info = command_INFO_INTERNAL.createPublic();
-			return result;
+			return CommandReplay.FMOD_Studio_CommandReplay_GetCommandInfo(this.handle, commandIndex, out info);
 		}
 
 		public RESULT getCommandString(int commandIndex, out string description)
 		{
 			description = null;
-			byte[] array = new byte[8];
-			RESULT result;
-			for (;;)
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				result = CommandReplay.FMOD_Studio_CommandReplay_GetCommandString(this.rawPtr, commandIndex, array, array.Length);
-				if (result != RESULT.ERR_TRUNCATED)
+				int num = 256;
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				RESULT result;
+				for (result = CommandReplay.FMOD_Studio_CommandReplay_GetCommandString(this.handle, commandIndex, intPtr, num); result == RESULT.ERR_TRUNCATED; result = CommandReplay.FMOD_Studio_CommandReplay_GetCommandString(this.handle, commandIndex, intPtr, num))
 				{
-					break;
+					Marshal.FreeHGlobal(intPtr);
+					num *= 2;
+					intPtr = Marshal.AllocHGlobal(num);
 				}
-				array = new byte[2 * array.Length];
-			}
-			if (result == RESULT.OK)
-			{
-				int num = 0;
-				while (array[num] != 0)
+				if (result == RESULT.OK)
 				{
-					num++;
+					description = freeHelper.stringFromNative(intPtr);
 				}
-				description = Encoding.UTF8.GetString(array, 0, num);
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
 			}
-			return result;
+			return result2;
 		}
 
 		public RESULT getCommandAtTime(float time, out int commandIndex)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_GetCommandAtTime(this.rawPtr, time, out commandIndex);
+			return CommandReplay.FMOD_Studio_CommandReplay_GetCommandAtTime(this.handle, time, out commandIndex);
 		}
 
 		public RESULT setBankPath(string bankPath)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SetBankPath(this.rawPtr, Encoding.UTF8.GetBytes(bankPath + '\0'));
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = CommandReplay.FMOD_Studio_CommandReplay_SetBankPath(this.handle, freeHelper.byteFromStringUTF8(bankPath));
+			}
+			return result;
 		}
 
 		public RESULT start()
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_Start(this.rawPtr);
+			return CommandReplay.FMOD_Studio_CommandReplay_Start(this.handle);
 		}
 
 		public RESULT stop()
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_Stop(this.rawPtr);
+			return CommandReplay.FMOD_Studio_CommandReplay_Stop(this.handle);
 		}
 
 		public RESULT seekToTime(float time)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SeekToTime(this.rawPtr, time);
+			return CommandReplay.FMOD_Studio_CommandReplay_SeekToTime(this.handle, time);
 		}
 
 		public RESULT seekToCommand(int commandIndex)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SeekToCommand(this.rawPtr, commandIndex);
+			return CommandReplay.FMOD_Studio_CommandReplay_SeekToCommand(this.handle, commandIndex);
 		}
 
 		public RESULT getPaused(out bool paused)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_GetPaused(this.rawPtr, out paused);
+			return CommandReplay.FMOD_Studio_CommandReplay_GetPaused(this.handle, out paused);
 		}
 
 		public RESULT setPaused(bool paused)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SetPaused(this.rawPtr, paused);
+			return CommandReplay.FMOD_Studio_CommandReplay_SetPaused(this.handle, paused);
 		}
 
 		public RESULT getPlaybackState(out PLAYBACK_STATE state)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_GetPlaybackState(this.rawPtr, out state);
+			return CommandReplay.FMOD_Studio_CommandReplay_GetPlaybackState(this.handle, out state);
 		}
 
 		public RESULT getCurrentCommand(out int commandIndex, out float currentTime)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_GetCurrentCommand(this.rawPtr, out commandIndex, out currentTime);
+			return CommandReplay.FMOD_Studio_CommandReplay_GetCurrentCommand(this.handle, out commandIndex, out currentTime);
 		}
 
 		public RESULT release()
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_Release(this.rawPtr);
+			return CommandReplay.FMOD_Studio_CommandReplay_Release(this.handle);
 		}
 
 		public RESULT setFrameCallback(COMMANDREPLAY_FRAME_CALLBACK callback)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SetFrameCallback(this.rawPtr, callback);
+			return CommandReplay.FMOD_Studio_CommandReplay_SetFrameCallback(this.handle, callback);
 		}
 
 		public RESULT setLoadBankCallback(COMMANDREPLAY_LOAD_BANK_CALLBACK callback)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SetLoadBankCallback(this.rawPtr, callback);
+			return CommandReplay.FMOD_Studio_CommandReplay_SetLoadBankCallback(this.handle, callback);
 		}
 
 		public RESULT setCreateInstanceCallback(COMMANDREPLAY_CREATE_INSTANCE_CALLBACK callback)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SetCreateInstanceCallback(this.rawPtr, callback);
+			return CommandReplay.FMOD_Studio_CommandReplay_SetCreateInstanceCallback(this.handle, callback);
 		}
 
-		public RESULT getUserData(out IntPtr userData)
+		public RESULT getUserData(out IntPtr userdata)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_GetUserData(this.rawPtr, out userData);
+			return CommandReplay.FMOD_Studio_CommandReplay_GetUserData(this.handle, out userdata);
 		}
 
-		public RESULT setUserData(IntPtr userData)
+		public RESULT setUserData(IntPtr userdata)
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_SetUserData(this.rawPtr, userData);
+			return CommandReplay.FMOD_Studio_CommandReplay_SetUserData(this.handle, userdata);
 		}
 
 		[DllImport("fmodstudio")]
@@ -165,10 +148,10 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_CommandReplay_GetCommandCount(IntPtr replay, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_CommandReplay_GetCommandInfo(IntPtr replay, int commandIndex, out COMMAND_INFO_INTERNAL info);
+		private static extern RESULT FMOD_Studio_CommandReplay_GetCommandInfo(IntPtr replay, int commandIndex, out COMMAND_INFO info);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_CommandReplay_GetCommandString(IntPtr replay, int commandIndex, [Out] byte[] description, int capacity);
+		private static extern RESULT FMOD_Studio_CommandReplay_GetCommandString(IntPtr replay, int commandIndex, IntPtr description, int capacity);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_CommandReplay_GetCommandAtTime(IntPtr replay, float time, out int commandIndex);
@@ -218,9 +201,21 @@ namespace FMOD.Studio
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_CommandReplay_SetUserData(IntPtr replay, IntPtr userdata);
 
-		protected override bool isValidInternal()
+		public bool hasHandle()
 		{
-			return CommandReplay.FMOD_Studio_CommandReplay_IsValid(this.rawPtr);
+			return this.handle != IntPtr.Zero;
 		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public bool isValid()
+		{
+			return this.hasHandle() && CommandReplay.FMOD_Studio_CommandReplay_IsValid(this.handle);
+		}
+
+		public IntPtr handle;
 	}
 }

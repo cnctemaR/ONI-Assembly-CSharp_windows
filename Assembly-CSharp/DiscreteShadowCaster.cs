@@ -5,6 +5,7 @@ public static class DiscreteShadowCaster
 {
 	public static void GetVisibleCells(int cell, List<int> visiblePoints, int range, LightShape shape)
 	{
+		visiblePoints.Add(cell);
 		Vector2I vector2I = Grid.CellToXY(cell);
 		if (shape == LightShape.Circle)
 		{
@@ -27,7 +28,7 @@ public static class DiscreteShadowCaster
 	private static bool DoesOcclude(int x, int y)
 	{
 		int num = Grid.XYToCell(x, y);
-		return Grid.Solid[num] && Grid.Element[num].IsSolid;
+		return Grid.IsValidCell(num) && !Grid.Transparent[num] && Grid.Solid[num];
 	}
 
 	private static void ScanOctant(Vector2I cellPos, int range, int depth, DiscreteShadowCaster.Octant octant, double startSlope, double endSlope, List<int> visiblePoints)
@@ -65,7 +66,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -104,7 +105,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 - 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -142,7 +143,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -180,7 +181,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 - 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -219,7 +220,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 + 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -258,7 +259,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, false);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1))
+						if (!DiscreteShadowCaster.DoesOcclude(num2, num3 + 1) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -296,7 +297,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 - 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}
@@ -334,7 +335,7 @@ public static class DiscreteShadowCaster
 						{
 							startSlope = -DiscreteShadowCaster.GetSlope((double)num2 - 0.5, (double)num3 + 0.5, (double)cellPos.x, (double)cellPos.y, true);
 						}
-						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3))
+						if (!DiscreteShadowCaster.DoesOcclude(num2 + 1, num3) && !visiblePoints.Contains(Grid.XYToCell(num2, num3)))
 						{
 							visiblePoints.Add(Grid.XYToCell(num2, num3));
 						}

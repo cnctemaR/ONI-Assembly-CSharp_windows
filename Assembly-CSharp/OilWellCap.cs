@@ -6,7 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class OilWellCap : Workable, ISliderControl, IElementEmitter
+public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISliderControl
 {
 	public SimHashes Element
 	{
@@ -68,8 +68,7 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.smi = new OilWellCap.StatesInstance(this);
-		this.smi.StartSM();
+		Prioritizable.AddRef(base.gameObject);
 		this.accumulator = Game.Instance.accumulators.Add("pressuregas", this);
 		this.showProgressBar = false;
 		base.SetWorkTime(float.PositiveInfinity);
@@ -79,8 +78,9 @@ public class OilWellCap : Workable, ISliderControl, IElementEmitter
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.pressureMeter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, new Vector3(0f, 0f, 0f), null);
+		this.smi = new OilWellCap.StatesInstance(this);
+		this.smi.StartSM();
 		this.UpdatePressurePercent();
-		Prioritizable.AddRef(base.gameObject);
 	}
 
 	protected override void OnCleanUp()

@@ -8,7 +8,7 @@ internal class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, IS
 		default_state = this.plan;
 		GameStateMachine<FleeStates, FleeStates.Instance, IStateMachineTarget, FleeStates.Def>.State state = this.root.Enter("SetFleeTarget", delegate(FleeStates.Instance smi)
 		{
-			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi.GetSMI<ThreatMonitor.Instance>().GetMainThreat), smi);
+			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi.GetSMI<ThreatMonitor.Instance>().MainThreat), smi);
 		});
 		string text = CREATURES.STATUSITEMS.FLEEING.NAME;
 		string text2 = CREATURES.STATUSITEMS.FLEEING.TOOLTIP;
@@ -17,7 +17,7 @@ internal class FleeStates : GameStateMachine<FleeStates, FleeStates.Instance, IS
 		this.plan.Enter(delegate(FleeStates.Instance smi)
 		{
 			ThreatMonitor.Instance smi2 = smi.master.gameObject.GetSMI<ThreatMonitor.Instance>();
-			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi2.GetMainThreat), smi);
+			this.fleeToTarget.Set(CreatureHelpers.GetFleeTargetLocatorObject(smi.master.gameObject, smi2.MainThreat), smi);
 			if (this.fleeToTarget.Get(smi) != null)
 			{
 				smi.GoTo(this.approach);

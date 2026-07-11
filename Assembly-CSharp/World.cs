@@ -114,7 +114,7 @@ public class World : KMonoBehaviour
 		KAnimBatchManager.Instance().Render();
 		if (Camera.main != null)
 		{
-			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.GetPosition().z));
+			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, -Camera.main.transform.GetPosition().z));
 			Shader.SetGlobalVector("_CursorPos", new Vector4(vector.x, vector.y, vector.z, 0f));
 		}
 		FallingWater.instance.UpdateParticles(Time.deltaTime);

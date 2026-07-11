@@ -159,6 +159,12 @@ public class Substance
 
 	public Color32 overlayColour = Color.white;
 
+	public Texture2D colourMap;
+
+	public Texture2D shineMask;
+
+	public Texture2D normalMap;
+
 	public GameObject hitEffect;
 
 	[EventRef]
@@ -174,8 +180,6 @@ public class Substance
 
 	[NonSerialized]
 	public int idx;
-
-	public Texture2D buildingTexture;
 
 	public Material material;
 

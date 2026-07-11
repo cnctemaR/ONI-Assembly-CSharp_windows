@@ -55,6 +55,8 @@ public class POIDoorInternalConfig : IBuildingConfig
 		component2.hasComplexUserControls = false;
 		component.controlEnabled = false;
 		go.GetComponent<Deconstructable>().allowDeconstruction = false;
+		KBatchedAnimController component3 = go.GetComponent<KBatchedAnimController>();
+		component3.initialAnim = "closed";
 	}
 
 	public static string ID = "POIDoorInternal";

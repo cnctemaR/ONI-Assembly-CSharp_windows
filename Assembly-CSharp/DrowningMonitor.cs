@@ -28,7 +28,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.stamina = this.maxStamina;
+		this.timeToDrown = 15f;
 	}
 
 	protected override void OnSpawn()
@@ -36,7 +36,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		base.OnSpawn();
 		this.OnMove();
 		this.CheckDrowning(null);
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "DrowningMonitor.OnSpawn");
 	}
 
 	private void OnMove()
@@ -63,17 +63,9 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		base.OnCleanUp();
 	}
 
-	public void Configure(float maxStamina, float staminaRegenRate, float cellLiquidThreshold = 0.95f)
-	{
-		this.maxStamina = maxStamina;
-		this.stamina = maxStamina;
-		this.staminaRegenRate = staminaRegenRate;
-		this.cellLiquidThreshold = cellLiquidThreshold;
-	}
-
 	private void CheckDrowning(object data = null)
 	{
-		if (this.incapacitated)
+		if (this.drowned)
 		{
 			return;
 		}
@@ -86,7 +78,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 				base.Trigger(1949704522, null);
 				base.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Drowning);
 			}
-			if (this.stamina <= 0f)
+			if (this.timeToDrown <= 0f)
 			{
 				DeathMonitor.Instance smi = this.GetSMI<DeathMonitor.Instance>();
 				if (smi != null)
@@ -94,7 +86,7 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 					smi.Kill(Db.Get().Deaths.Drowned);
 				}
 				base.Trigger(-750750377, null);
-				this.SetIncapacitated(true);
+				this.drowned = true;
 			}
 		}
 		else if (this.drowning)
@@ -105,14 +97,34 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		}
 	}
 
+	private static bool CellSafeTest(int testCell, object data)
+	{
+		int num = Grid.CellAbove(testCell);
+		if (!Grid.IsValidCell(testCell) || !Grid.IsValidCell(num))
+		{
+			return false;
+		}
+		if (Grid.IsSubstantialLiquid(testCell, 0.95f))
+		{
+			return false;
+		}
+		if (Grid.IsLiquid(testCell))
+		{
+			if (Grid.Element[num].IsLiquid)
+			{
+				return false;
+			}
+			if (Grid.Element[num].IsSolid)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public bool IsCellSafe(int cell)
 	{
-		return this.occupyArea.TestArea(cell, this, delegate(int testCell, object data)
-		{
-			DrowningMonitor drowningMonitor = (DrowningMonitor)data;
-			int num = Grid.CellAbove(testCell);
-			return Grid.IsValidCell(testCell) && Grid.IsValidCell(num) && (!Grid.IsLiquid(num) || !Grid.IsLiquid(testCell)) && !Grid.IsSubstantialLiquid(testCell, drowningMonitor.cellLiquidThreshold);
-		});
+		return this.occupyArea.TestArea(cell, this, new Func<int, object, bool>(DrowningMonitor.CellSafeTest));
 	}
 
 	WiltCondition.Condition[] IWiltCause.Conditions
@@ -145,10 +157,10 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		this.CheckDrowning(null);
 		if (this.drowning)
 		{
-			if (!this.incapacitated)
+			if (!this.drowned)
 			{
-				this.stamina -= this.staminaUpdateFrequency;
-				if (this.stamina <= 0f)
+				this.timeToDrown -= dt;
+				if (this.timeToDrown <= 0f)
 				{
 					this.CheckDrowning(null);
 				}
@@ -156,37 +168,27 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		}
 		else
 		{
-			this.stamina = Mathf.Clamp(this.stamina + this.staminaUpdateFrequency * this.staminaRegenRate, 0f, this.maxStamina);
+			this.timeToDrown += dt * 5f;
+			this.timeToDrown = Mathf.Clamp(this.timeToDrown, 0f, 15f);
 		}
 	}
 
-	public void SetIncapacitated(bool state)
-	{
-		this.incapacitated = state;
-	}
-
-	[MyCmpReq]
-	private KSelectable selectable;
-
 	private OccupyArea _occupyArea;
 
-	private int position;
+	[Serialize]
+	[SerializeField]
+	private float timeToDrown;
 
 	[Serialize]
-	private float stamina = -1f;
-
-	[Serialize]
-	private bool incapacitated;
+	private bool drowned;
 
 	private bool drowning;
 
-	protected float maxStamina = 10f;
+	protected const float MaxDrownTime = 15f;
 
-	protected float staminaRegenRate = 5f;
+	protected const float RegenRate = 5f;
 
-	protected float cellLiquidThreshold = 0.95f;
-
-	private float staminaUpdateFrequency = 1f;
+	protected const float CellLiquidThreshold = 0.95f;
 
 	private Extents extents;
 

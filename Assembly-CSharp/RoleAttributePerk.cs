@@ -8,18 +8,17 @@ public class RoleAttributePerk : RolePerk
 		{
 		}, false)
 	{
-		RoleAttributePerk $this = this;
 		this.modifier = new AttributeModifier(attributeId, modifierBonus, modifierDesc, false, false, true);
 		base.OnApply = delegate(MinionResume identity)
 		{
-			if (identity.GetAttributes().Get($this.modifier.AttributeId).Modifiers.Find((AttributeInstance.AttributeModifierEntry mod) => mod.Modifier == $this.modifier) == null)
+			if (identity.GetAttributes().Get(this.modifier.AttributeId).Modifiers.Find((AttributeModifier mod) => mod == this.modifier) == null)
 			{
-				identity.GetAttributes().Add("RolePerk_" + id, $this.modifier);
+				identity.GetAttributes().Add(this.modifier);
 			}
 		};
 		base.OnRemove = delegate(MinionResume identity)
 		{
-			identity.GetAttributes().Remove($this.modifier);
+			identity.GetAttributes().Remove(this.modifier);
 		};
 	}
 

@@ -19,7 +19,7 @@ public class AssignableRegionCharacterSelection : KMonoBehaviour
 	{
 		base.gameObject.SetActive(true);
 		this.buttonPool.ClearAll();
-		foreach (MinionIdentity minionIdentity in Components.MinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
 		{
 			KButton btn = this.buttonPool.GetFreeElement(this.buttonParent, true);
 			CrewPortrait componentInChildren = btn.GetComponentInChildren<CrewPortrait>();

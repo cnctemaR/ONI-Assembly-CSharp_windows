@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -152,23 +151,9 @@ public static class Util
 	public static void SetLayer(Transform t, int layer)
 	{
 		t.gameObject.layer = layer;
-		IEnumerator enumerator = t.GetEnumerator();
-		try
+		for (int i = 0; i < t.childCount; i++)
 		{
-			while (enumerator.MoveNext())
-			{
-				object obj = enumerator.Current;
-				Transform transform = (Transform)obj;
-				Util.SetLayer(transform, layer);
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
-			}
+			Util.SetLayer(t.GetChild(i), layer);
 		}
 	}
 
@@ -315,7 +300,7 @@ public static class Util
 			{
 				component.InstanceID = KPrefabID.GetUniqueID();
 			}
-			KPrefabIDTracker.Get().Register(component, original.GetComponent<KPrefabID>());
+			KPrefabIDTracker.Get().Register(component);
 			KPrefabID component2 = original.GetComponent<KPrefabID>();
 			component.CopyInitFunctions(component2);
 			component.RunInstantiateFn();
@@ -431,26 +416,13 @@ public static class Util
 			return root.gameObject;
 		}
 		GameObject gameObject = null;
-		IEnumerator enumerator = root.GetEnumerator();
-		try
+		for (int i = 0; i < root.childCount; i++)
 		{
-			while (enumerator.MoveNext())
+			Transform child = root.GetChild(i);
+			gameObject = child.FindChildGameObject(name);
+			if (gameObject != null)
 			{
-				object obj = enumerator.Current;
-				Transform transform = (Transform)obj;
-				gameObject = transform.FindChildGameObject(name);
-				if (gameObject != null)
-				{
-					break;
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				break;
 			}
 		}
 		return gameObject;
@@ -502,23 +474,10 @@ public static class Util
 					bounds.Encapsulate(component.bounds);
 				}
 			}
-			IEnumerator enumerator = go.transform.GetEnumerator();
-			try
+			for (int i = 0; i < go.transform.childCount; i++)
 			{
-				while (enumerator.MoveNext())
-				{
-					object obj = enumerator.Current;
-					Transform transform = (Transform)obj;
-					Util.GetBounds(transform.gameObject, ref bounds, ref first);
-				}
-			}
-			finally
-			{
-				IDisposable disposable;
-				if ((disposable = enumerator as IDisposable) != null)
-				{
-					disposable.Dispose();
-				}
+				Transform child = go.transform.GetChild(i);
+				Util.GetBounds(child.gameObject, ref bounds, ref first);
 			}
 		}
 	}
@@ -676,26 +635,12 @@ public static class Util
 		{
 			return node;
 		}
-		IEnumerator enumerator = node.GetEnumerator();
-		try
+		for (int i = 0; i < node.childCount; i++)
 		{
-			while (enumerator.MoveNext())
+			Transform transform = Util.FindTransformRecursive(node.GetChild(i), name);
+			if (transform != null)
 			{
-				object obj = enumerator.Current;
-				Transform transform = (Transform)obj;
-				Transform transform2 = Util.FindTransformRecursive(transform, name);
-				if (transform2 != null)
-				{
-					return transform2;
-				}
-			}
-		}
-		finally
-		{
-			IDisposable disposable;
-			if ((disposable = enumerator as IDisposable) != null)
-			{
-				disposable.Dispose();
+				return transform;
 			}
 		}
 		return null;

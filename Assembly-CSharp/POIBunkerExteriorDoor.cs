@@ -48,6 +48,8 @@ public class POIBunkerExteriorDoor : IBuildingConfig
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = false;
 		go.GetComponent<Deconstructable>().allowDeconstruction = false;
+		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
+		component2.initialAnim = "closed";
 	}
 
 	public const string ID = "POIBunkerExteriorDoor";

@@ -148,7 +148,7 @@ public class CrewRationsScreen : CrewListScreen<CrewRationsEntry>
 	protected override void SpawnEntries()
 	{
 		base.SpawnEntries();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.Prefab_CrewEntry, this.EntriesPanelTransform.gameObject, false);
 			CrewRationsEntry component = gameObject.GetComponent<CrewRationsEntry>();

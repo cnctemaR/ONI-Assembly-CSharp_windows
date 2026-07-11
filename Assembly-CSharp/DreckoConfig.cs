@@ -45,9 +45,12 @@ public class DreckoConfig : IEntityConfig
 		string text2 = CREATURES.SPECIES.DRECKO.EGG_NAME;
 		string text3 = CREATURES.SPECIES.DRECKO.DESC;
 		string text4 = "egg_drecko_kanim";
+		float egg_MASS = DreckoTuning.EGG_MASS;
 		string text5 = "DreckoBaby";
+		float num = 90f;
+		float num2 = 30f;
 		int egg_SORT_ORDER = DreckoConfig.EGG_SORT_ORDER;
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject2, text, text2, text3, text4, text5, DreckoTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject2, text, text2, text3, text4, egg_MASS, text5, num, num2, DreckoTuning.EGG_CHANCES_BASE, egg_SORT_ORDER, true, false, true);
 	}
 
 	public void OnPrefabInit(GameObject prefab)
@@ -72,7 +75,7 @@ public class DreckoConfig : IEntityConfig
 
 	private static float CALORIES_PER_DAY_OF_PLANT_EATEN = DreckoTuning.STANDARD_CALORIES_PER_CYCLE / DreckoConfig.DAYS_PLANT_GROWTH_EATEN_PER_CYCLE;
 
-	private static float KG_POOP_PER_DAY_OF_PLANT = 0.8f;
+	private static float KG_POOP_PER_DAY_OF_PLANT = 5f;
 
 	private static float MIN_POOP_SIZE_IN_KG = 1.5f;
 

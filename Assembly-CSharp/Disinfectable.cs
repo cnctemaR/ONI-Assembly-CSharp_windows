@@ -21,7 +21,6 @@ public class Disinfectable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		if (this.isMarkedForDisinfect)
 		{
 			this.MarkForDisinfect(true);
@@ -57,7 +56,7 @@ public class Disinfectable : Workable
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.MarkedForDisinfection, this);
 		this.isMarkedForDisinfect = false;
 		this.chore = null;
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 		Prioritizable.RemoveRef(base.gameObject);
 	}
 
@@ -98,17 +97,10 @@ public class Disinfectable : Workable
 		}
 	}
 
-	private void OnRefreshUserMenu(object data)
-	{
-	}
-
 	private void OnCancel(object data)
 	{
 		this.CancelDisinfection();
 	}
-
-	[MyCmpGet]
-	private UserMenu userMenu;
 
 	private Chore chore;
 

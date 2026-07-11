@@ -12,6 +12,7 @@ namespace Database
 			this.ColdBrain = base.Add(new ColdBrain());
 			this.HeatRash = base.Add(new HeatRash());
 			this.SlimeLung = base.Add(new SlimeLung());
+			this.Sunburn = base.Add(new Sunburn());
 			this.PutridOdour = base.Add(new PutridOdour());
 			this.PutridOdour.Disabled = true;
 			this.Spores = base.Add(new Spores());
@@ -21,7 +22,7 @@ namespace Database
 		public static bool IsValidDiseaseID(string id)
 		{
 			bool flag = false;
-			foreach (Disease disease in Db.Get().Diseases)
+			foreach (Disease disease in Db.Get().Diseases.resources)
 			{
 				if (disease.Id == id)
 				{
@@ -67,5 +68,7 @@ namespace Database
 		public Disease HeatRash;
 
 		public Disease SlimeLung;
+
+		public Disease Sunburn;
 	}
 }

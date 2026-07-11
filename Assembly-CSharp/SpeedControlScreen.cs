@@ -217,10 +217,6 @@ public class SpeedControlScreen : KScreen
 		{
 			Time.timeScale = this.ultraSpeed;
 		}
-		if (this.OnGameSpeedChanged != null)
-		{
-			this.OnGameSpeedChanged();
-		}
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -298,8 +294,6 @@ public class SpeedControlScreen : KScreen
 	public float fastSpeed;
 
 	public float ultraSpeed;
-
-	public global::System.Action OnGameSpeedChanged;
 
 	private KToggle pauseButton;
 

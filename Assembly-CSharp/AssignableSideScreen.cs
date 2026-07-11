@@ -64,7 +64,7 @@ public class AssignableSideScreen : SideScreenContent
 			this.rowPool = new UIPool<AssignableSideScreenRow>(this.rowPrefab);
 		}
 		base.gameObject.SetActive(true);
-		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
+		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
 		this.dupeSortingToggle.ChangeState(0);
 		this.generalSortingToggle.ChangeState(0);
 		this.activeSortToggle = null;

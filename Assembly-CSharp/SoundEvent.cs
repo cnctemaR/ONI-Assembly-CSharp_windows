@@ -33,7 +33,7 @@ public class SoundEvent : AnimEvent
 
 	public bool looping { get; private set; }
 
-	public bool playAtTarget { get; private set; }
+	public bool ignorePause { get; set; }
 
 	public float minInterval { get; private set; }
 
@@ -49,7 +49,7 @@ public class SoundEvent : AnimEvent
 		SpeedControlScreen instance2 = SpeedControlScreen.Instance;
 		if (is_dynamic)
 		{
-			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(behaviour.position, 0f);
+			return (!(instance2 != null) || !instance2.IsPaused) && instance.IsAudibleSound(behaviour.position);
 		}
 		if (sound == null || SoundEvent.IsLowPrioritySound(sound))
 		{
@@ -80,12 +80,10 @@ public class SoundEvent : AnimEvent
 	protected void PlaySound(AnimEventManager.EventPlayerData behaviour, string sound)
 	{
 		Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-		Vector3 position2 = behaviour.position;
 		AudioDebug audioDebug = AudioDebug.Get();
 		if (audioDebug != null && audioDebug.debugSoundEvents)
 		{
-			Vector3 vector = ((!this.playAtTarget) ? position : position2);
-			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", vector }), null);
+			global::Debug.Log(string.Concat(new object[] { behaviour.name, ", ", sound, ", ", base.frame, ", ", position }), null);
 		}
 		try
 		{
@@ -96,12 +94,12 @@ public class SoundEvent : AnimEvent
 				{
 					global::Debug.Log(behaviour.name + " is missing LoopingSounds component. ", null);
 				}
-				else if (!component.StartSound(sound, behaviour, this.playAtTarget, this.noiseValues))
+				else if (!component.StartSound(sound, behaviour, this.noiseValues, this.ignorePause))
 				{
 					Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 				}
 			}
-			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.playAtTarget, this.noiseValues))
+			else if (!SoundEvent.PlayOneShot(sound, behaviour, this.noiseValues))
 			{
 				Output.LogWarning(new object[] { string.Format("SoundEvent has invalid sound [{0}] on behaviour [{1}]", sound, behaviour.name) });
 			}
@@ -121,22 +119,17 @@ public class SoundEvent : AnimEvent
 
 	public static Vector3 GetCameraScaledPosition(Vector3 pos)
 	{
-		Vector3 zero = Vector3.zero;
-		return CameraController.Instance.GetVerticallyScaledPosition(pos);
+		Vector3 vector = Vector3.zero;
+		if (CameraController.Instance != null)
+		{
+			vector = CameraController.Instance.GetVerticallyScaledPosition(pos);
+		}
+		return vector;
 	}
 
 	public static FMOD.Studio.EventInstance BeginOneShot(string ev, Vector3 pos)
 	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos));
-		LoopingSoundManager.UpdateSpeed(eventInstance);
-		return eventInstance;
-	}
-
-	public static FMOD.Studio.EventInstance BeginOneShot(FMOD.Studio.EventInstance instance, Vector3 pos)
-	{
-		FMOD.Studio.EventInstance eventInstance = KFMOD.BeginOneShot(instance, SoundEvent.GetCameraScaledPosition(pos));
-		LoopingSoundManager.UpdateSpeed(eventInstance);
-		return eventInstance;
+		return KFMOD.BeginOneShot(ev, SoundEvent.GetCameraScaledPosition(pos));
 	}
 
 	public static bool EndOneShot(FMOD.Studio.EventInstance instance)
@@ -150,7 +143,7 @@ public class SoundEvent : AnimEvent
 		if (!string.IsNullOrEmpty(sound))
 		{
 			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, pos);
-			if (eventInstance != null)
+			if (eventInstance.isValid())
 			{
 				flag = SoundEvent.EndOneShot(eventInstance);
 			}
@@ -158,16 +151,14 @@ public class SoundEvent : AnimEvent
 		return flag;
 	}
 
-	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, bool playAtTarget, EffectorValues noiseValues)
+	public static bool PlayOneShot(string sound, AnimEventManager.EventPlayerData behaviour, EffectorValues noiseValues)
 	{
 		bool flag = false;
 		if (!string.IsNullOrEmpty(sound))
 		{
 			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
-			Vector3 position2 = behaviour.position;
-			Vector3 vector = ((!playAtTarget) ? position : position2);
-			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, vector);
-			if (eventInstance != null)
+			FMOD.Studio.EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);
+			if (eventInstance.isValid())
 			{
 				flag = SoundEvent.EndOneShot(eventInstance);
 			}

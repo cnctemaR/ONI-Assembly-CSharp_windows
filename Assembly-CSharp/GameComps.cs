@@ -57,5 +57,7 @@ public class GameComps : KComponents
 
 	public static RequiresFoundation RequiresFoundations;
 
+	public static WhiteBoard WhiteBoards;
+
 	private static Dictionary<Type, IKComponentManager> kcomponentManagers = new Dictionary<Type, IKComponentManager>();
 }

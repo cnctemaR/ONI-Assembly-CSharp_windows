@@ -1,80 +1,68 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
-public class KFMOD : KMonoBehaviour
+public class KFMOD
 {
-	public static void PlayOneShot(string path, Vector3 position)
+	public static SoundDescription GetSoundEventDescription(HashedString path)
 	{
-		Vector3 vector = new Vector3(position.x, position.y, 0f);
-		RuntimeManager.PlayOneShot(path, vector);
-		if (KFMODDebugger.instance != null)
-		{
-		}
+		return KFMOD.soundDescriptions[path];
 	}
 
-	public static void PlayOneShot(Guid guid, Vector3 position = default(Vector3))
+	public static void Initialize()
 	{
-		Vector3 vector = new Vector3(position.x, position.y, 0f);
-		RuntimeManager.PlayOneShot(guid, vector);
-		if (KFMODDebugger.instance != null)
-		{
-		}
+		KFMOD.CollectParameterUpdaters();
+		KFMOD.CollectSoundDescriptions();
+	}
+
+	public static void PlayOneShot(string sound, Vector3 position)
+	{
+		EventInstance eventInstance = KFMOD.BeginOneShot(sound, position);
+		KFMOD.EndOneShot(eventInstance);
 	}
 
 	public static void PlayOneShot(string sound)
 	{
-		RuntimeManager.PlayOneShot(sound, default(Vector3));
-		if (KFMODDebugger.instance != null)
-		{
-		}
+		KFMOD.PlayOneShot(sound, Vector3.zero);
 	}
 
-	public static EventInstance BeginOneShot(string ev, Vector3 position)
+	public static EventInstance BeginOneShot(string sound, Vector3 position)
 	{
-		if (ev == null)
+		if (string.IsNullOrEmpty(sound) || App.IsExiting || !RuntimeManager.IsInitialized)
 		{
-			return null;
+			return default(EventInstance);
 		}
-		if (App.IsExiting)
-		{
-			return null;
-		}
-		EventInstance eventInstance = RuntimeManager.CreateInstance(ev);
-		if (eventInstance == null)
+		EventInstance eventInstance = KFMOD.CreateInstance(sound);
+		if (!eventInstance.isValid())
 		{
 			if (KFMODDebugger.instance != null)
 			{
 			}
-			return null;
+			return eventInstance;
 		}
 		Vector3 vector = new Vector3(position.x, position.y, 0f);
 		if (KFMODDebugger.instance != null)
 		{
 		}
-		return KFMOD.BeginOneShot(eventInstance, vector);
-	}
-
-	public static EventInstance BeginOneShot(EventInstance instance, Vector3 position)
-	{
-		Vector3 vector = new Vector3(position.x, position.y, 0f);
 		ATTRIBUTES_3D attributes_3D = vector.To3DAttributes();
-		instance.set3DAttributes(attributes_3D);
-		instance.setVolume(1f);
-		return instance;
+		eventInstance.set3DAttributes(attributes_3D);
+		eventInstance.setVolume(1f);
+		return eventInstance;
 	}
 
 	public static bool EndOneShot(EventInstance instance)
 	{
-		if (instance != null)
+		if (!instance.isValid())
 		{
-			instance.start();
-			instance.release();
-			return true;
+			return false;
 		}
-		return false;
+		instance.start();
+		instance.release();
+		return true;
 	}
 
 	public static EventInstance CreateInstance(string path)
@@ -82,24 +70,121 @@ public class KFMOD : KMonoBehaviour
 		if (KFMODDebugger.instance != null)
 		{
 		}
-		return RuntimeManager.CreateInstance(path);
+		if (!RuntimeManager.IsInitialized)
+		{
+			return default(EventInstance);
+		}
+		EventInstance eventInstance = RuntimeManager.CreateInstance(path);
+		HashedString hashedString = path;
+		SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(hashedString);
+		OneShotSoundParameterUpdater.Sound sound = new OneShotSoundParameterUpdater.Sound
+		{
+			ev = eventInstance,
+			path = hashedString,
+			description = soundEventDescription
+		};
+		foreach (OneShotSoundParameterUpdater oneShotSoundParameterUpdater in soundEventDescription.oneShotParameterUpdaters)
+		{
+			oneShotSoundParameterUpdater.Play(sound);
+		}
+		return eventInstance;
 	}
 
-	public static Vector3 GetInstancePosition(EventInstance instance)
+	private static void CollectSoundDescriptions()
 	{
-		ATTRIBUTES_3D attributes_3D;
-		instance.get3DAttributes(out attributes_3D);
-		Vector3 vector = new Vector3(attributes_3D.position.x, attributes_3D.position.y, attributes_3D.position.z);
-		return vector;
+		Bank[] array = null;
+		RuntimeManager.StudioSystem.getBankList(out array);
+		foreach (Bank bank in array)
+		{
+			EventDescription[] array3;
+			bank.getEventList(out array3);
+			foreach (EventDescription eventDescription in array3)
+			{
+				string text;
+				eventDescription.getPath(out text);
+				HashedString hashedString = text;
+				SoundDescription soundDescription = default(SoundDescription);
+				soundDescription.path = text;
+				float num = 0f;
+				eventDescription.getMaximumDistance(out num);
+				soundDescription.falloffDistanceSq = num * num;
+				List<OneShotSoundParameterUpdater> list = new List<OneShotSoundParameterUpdater>();
+				int num2 = 0;
+				eventDescription.getParameterCount(out num2);
+				SoundDescription.Parameter[] array4 = new SoundDescription.Parameter[num2];
+				for (int k = 0; k < num2; k++)
+				{
+					PARAMETER_DESCRIPTION parameter_DESCRIPTION;
+					eventDescription.getParameterByIndex(k, out parameter_DESCRIPTION);
+					string text2 = parameter_DESCRIPTION.name;
+					array4[k] = new SoundDescription.Parameter
+					{
+						name = new HashedString(text2),
+						idx = k
+					};
+					OneShotSoundParameterUpdater oneShotSoundParameterUpdater = null;
+					if (KFMOD.parameterUpdaters.TryGetValue(text2, out oneShotSoundParameterUpdater))
+					{
+						list.Add(oneShotSoundParameterUpdater);
+					}
+				}
+				soundDescription.parameters = array4;
+				soundDescription.oneShotParameterUpdaters = list.ToArray();
+				KFMOD.soundDescriptions[hashedString] = soundDescription;
+			}
+		}
 	}
 
-	public static Vector3 GetZFlattenedPosition(Vector3 pos)
+	private static void CollectParameterUpdaters()
 	{
-		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-		return vector;
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			foreach (Type type in assembly.GetTypes())
+			{
+				if (!type.IsAbstract)
+				{
+					bool flag = false;
+					for (Type type2 = type.BaseType; type2 != null; type2 = type2.BaseType)
+					{
+						if (type2 == typeof(OneShotSoundParameterUpdater))
+						{
+							flag = true;
+							break;
+						}
+					}
+					if (flag)
+					{
+						OneShotSoundParameterUpdater oneShotSoundParameterUpdater = (OneShotSoundParameterUpdater)Activator.CreateInstance(type);
+						DebugUtil.Assert(!KFMOD.parameterUpdaters.ContainsKey(oneShotSoundParameterUpdater.parameter), "Assert!");
+						KFMOD.parameterUpdaters[oneShotSoundParameterUpdater.parameter] = oneShotSoundParameterUpdater;
+					}
+				}
+			}
+		}
 	}
+
+	public static void RenderEveryTick(float dt)
+	{
+		foreach (KeyValuePair<HashedString, OneShotSoundParameterUpdater> keyValuePair in KFMOD.parameterUpdaters)
+		{
+			keyValuePair.Value.Update(dt);
+		}
+	}
+
+	private static Dictionary<HashedString, SoundDescription> soundDescriptions = new Dictionary<HashedString, SoundDescription>();
+
+	private static Dictionary<HashedString, OneShotSoundParameterUpdater> parameterUpdaters = new Dictionary<HashedString, OneShotSoundParameterUpdater>();
 
 	public static KFMOD.AudioDevice currentDevice;
+
+	private struct SoundCountEntry
+	{
+		public int count;
+
+		public float minObjects;
+
+		public float maxObjects;
+	}
 
 	public struct AudioDevice
 	{

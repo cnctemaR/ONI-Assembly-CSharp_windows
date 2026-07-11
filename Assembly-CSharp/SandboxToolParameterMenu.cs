@@ -133,12 +133,11 @@ public class SandboxToolParameterMenu : KScreen
 
 	private void ConfigureElementSelector()
 	{
-		Func<object, bool> solidFilter = (object element) => (element as Element).IsSolid;
-		Func<object, bool> liquidFilter = (object element) => (element as Element).IsLiquid;
-		Func<object, bool> gasFilter = (object element) => (element as Element).IsGas;
-		Func<object, bool> func = (object element) => !solidFilter(element) && !liquidFilter(element) && !gasFilter(element);
+		Func<object, bool> func = (object element) => (element as Element).IsSolid;
+		Func<object, bool> func2 = (object element) => (element as Element).IsLiquid;
+		Func<object, bool> func3 = (object element) => (element as Element).IsGas;
 		List<Element> commonElements = new List<Element>();
-		Func<object, bool> func2 = (object element) => commonElements.Contains(element as Element);
+		Func<object, bool> func4 = (object element) => commonElements.Contains(element as Element);
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Oxygen));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Water));
 		commonElements.Insert(0, ElementLoader.FindElementByHash(SimHashes.Vacuum));
@@ -153,7 +152,10 @@ public class SandboxToolParameterMenu : KScreen
 		List<Element> list = new List<Element>();
 		foreach (Element element2 in ElementLoader.elements)
 		{
-			list.Add(element2);
+			if (!element2.disabled)
+			{
+				list.Add(element2);
+			}
 		}
 		list.Sort((Element a, Element b) => a.name.CompareTo(b.name));
 		object[] array = list.ToArray();
@@ -161,27 +163,27 @@ public class SandboxToolParameterMenu : KScreen
 		{
 			this.settings.SelectElement(element as Element);
 		};
-		Func<object, string> func3 = (object element) => (element as Element).name + " (" + (element as Element).GetStateString() + ")";
-		Func<string, object, bool> func4 = (string filterString, object option) => ((option as Element).name.ToUpper() + (option as Element).GetStateString().ToUpper()).Contains(filterString.ToUpper());
-		Func<object, Tuple<Sprite, Color>> func5 = (object element) => Def.GetUISprite(element as Element, "ui");
+		Func<object, string> func5 = (object element) => (element as Element).name + " (" + (element as Element).GetStateString() + ")";
+		Func<string, object, bool> func6 = (string filterString, object option) => ((option as Element).name.ToUpper() + (option as Element).GetStateString().ToUpper()).Contains(filterString.ToUpper());
+		Func<object, Tuple<Sprite, Color>> func7 = (object element) => Def.GetUISprite(element as Element, "ui");
 		SandboxToolParameterMenu.SelectorValue.SearchFilter[] array2 = new SandboxToolParameterMenu.SelectorValue.SearchFilter[4];
-		array2[0] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.COMMON, func2, null, null);
+		array2[0] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(UI.SANDBOXTOOLS.FILTERS.COMMON, func4, null, null);
 		int num = 1;
 		string text = UI.SANDBOXTOOLS.FILTERS.SOLID;
-		Func<object, bool> func6 = solidFilter;
+		Func<object, bool> func8 = func;
 		Tuple<Sprite, Color> tuple = Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.SandStone), "ui");
-		array2[num] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func6, null, tuple);
+		array2[num] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func8, null, tuple);
 		int num2 = 2;
 		text = UI.SANDBOXTOOLS.FILTERS.LIQUID;
-		func6 = liquidFilter;
+		func8 = func2;
 		tuple = Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.Water), "ui");
-		array2[num2] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func6, null, tuple);
+		array2[num2] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func8, null, tuple);
 		int num3 = 3;
 		text = UI.SANDBOXTOOLS.FILTERS.GAS;
-		func6 = gasFilter;
+		func8 = func3;
 		tuple = Def.GetUISprite(ElementLoader.FindElementByHash(SimHashes.Oxygen), "ui");
-		array2[num3] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func6, null, tuple);
-		this.elementSelector = new SandboxToolParameterMenu.SelectorValue(array, action, func3, func4, func5, array2);
+		array2[num3] = new SandboxToolParameterMenu.SelectorValue.SearchFilter(text, func8, null, tuple);
+		this.elementSelector = new SandboxToolParameterMenu.SelectorValue(array, action, func5, func6, func7, array2);
 	}
 
 	private void ConfigureEntitySelector()

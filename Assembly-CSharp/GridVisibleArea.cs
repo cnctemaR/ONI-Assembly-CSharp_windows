@@ -73,11 +73,6 @@ public class GridVisibleArea
 		}
 	}
 
-	public bool IsVisible(int cell)
-	{
-		return this.CurrentArea.Contains(cell);
-	}
-
 	public void RunIfVisible(int cell, Action<int> action)
 	{
 		this.CurrentArea.RunIfInside(cell, action);
@@ -93,11 +88,6 @@ public class GridVisibleArea
 			gridArea.SetExtents(Math.Max((int)(vector2.x - 0.5f), 0), Math.Max((int)(vector2.y - 0.5f), 0), Math.Min((int)(vector.x + 1.5f), Grid.WidthInCells), Math.Min((int)(vector.y + 1.5f), Grid.HeightInCells));
 		}
 		return gridArea;
-	}
-
-	public int GetVisibleCellCount()
-	{
-		return this.CurrentArea.GetCellCount();
 	}
 
 	private GridArea[] Areas = new GridArea[3];

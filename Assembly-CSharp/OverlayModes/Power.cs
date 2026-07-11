@@ -113,31 +113,58 @@ namespace OverlayModes
 						disposable.Dispose();
 					}
 				}
+				this.connectedNetworks.Clear();
+				float num = 1f;
+				GameObject gameObject = null;
+				if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
+				{
+					gameObject = SelectTool.Instance.hover.gameObject;
+				}
+				if (gameObject != null)
+				{
+					IBridgedNetworkItem component = gameObject.GetComponent<IBridgedNetworkItem>();
+					if (component != null)
+					{
+						int networkCell = component.GetNetworkCell();
+						this.visited.Clear();
+						this.FindConnectedNetworks(networkCell, Game.Instance.electricalConduitSystem, this.connectedNetworks, this.visited);
+						this.visited.Clear();
+						num = ModeUtil.GetHighlightScale();
+					}
+				}
 				CircuitManager circuitManager = Game.Instance.circuitManager;
 				foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 				{
 					if (!(saveLoadRoot2 == null))
 					{
-						IUtilityNetworkItem component = saveLoadRoot2.GetComponent<IUtilityNetworkItem>();
-						if (component != null)
+						IBridgedNetworkItem component2 = saveLoadRoot2.GetComponent<IBridgedNetworkItem>();
+						if (component2 != null)
 						{
-							KMonoBehaviour kmonoBehaviour = component as KMonoBehaviour;
-							KBatchedAnimController component2 = kmonoBehaviour.GetComponent<KBatchedAnimController>();
-							ushort networkID = component.NetworkID;
-							bool flag = circuitManager.HasGenerators(networkID) || circuitManager.HasBatteries(networkID);
+							KMonoBehaviour kmonoBehaviour = component2 as KMonoBehaviour;
+							KBatchedAnimController component3 = kmonoBehaviour.GetComponent<KBatchedAnimController>();
+							int networkCell2 = component2.GetNetworkCell();
+							UtilityNetwork networkForCell = Game.Instance.electricalConduitSystem.GetNetworkForCell(networkCell2);
+							ushort num2 = ((networkForCell == null) ? ushort.MaxValue : ((ushort)networkForCell.id));
+							bool flag = circuitManager.HasGenerators(num2) || circuitManager.HasBatteries(num2);
 							Color32 color;
 							if (flag)
 							{
-								float potentialWattsGeneratedByCircuit = circuitManager.GetPotentialWattsGeneratedByCircuit(networkID);
-								float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(networkID);
-								float num = wattsUsedByCircuit / potentialWattsGeneratedByCircuit;
-								color = ((num >= 0.85f) ? this.circuitStrainingColour : this.circuitSafeColour);
+								float potentialWattsGeneratedByCircuit = circuitManager.GetPotentialWattsGeneratedByCircuit(num2);
+								float wattsUsedByCircuit = circuitManager.GetWattsUsedByCircuit(num2);
+								float num3 = wattsUsedByCircuit / potentialWattsGeneratedByCircuit;
+								color = ((num3 >= 0.85f) ? this.circuitStrainingColour : this.circuitSafeColour);
 							}
 							else
 							{
 								color = this.circuitUnpoweredColour;
 							}
-							component2.TintColour = color;
+							if (this.connectedNetworks.Count > 0 && component2.IsConnectedToNetworks(this.connectedNetworks))
+							{
+								color.r = (byte)((float)color.r * num);
+								color.g = (byte)((float)color.g * num);
+								color.b = (byte)((float)color.b * num);
+							}
+							component3.TintColour = color;
 						}
 					}
 				}
@@ -145,28 +172,28 @@ namespace OverlayModes
 			this.queuedAdds.Clear();
 			using (new KProfiler.Region("BatteryUI", null))
 			{
-				foreach (Battery battery in Components.Batteries)
+				foreach (Battery battery in Components.Batteries.Items)
 				{
 					Vector2I vector2I3 = Grid.PosToXY(battery.transform.GetPosition());
 					if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
 					{
-						SaveLoadRoot component3 = battery.GetComponent<SaveLoadRoot>();
-						if (!this.privateTargets.Contains(component3))
+						SaveLoadRoot component4 = battery.GetComponent<SaveLoadRoot>();
+						if (!this.privateTargets.Contains(component4))
 						{
 							this.AddBatteryUI(battery);
-							this.queuedAdds.Add(component3);
+							this.queuedAdds.Add(component4);
 						}
 					}
 				}
-				foreach (Generator generator in Components.Generators)
+				foreach (Generator generator in Components.Generators.Items)
 				{
 					Vector2I vector2I4 = Grid.PosToXY(generator.transform.GetPosition());
 					if (vector2I <= vector2I4 && vector2I4 <= vector2I2)
 					{
-						SaveLoadRoot component4 = generator.GetComponent<SaveLoadRoot>();
-						if (!this.privateTargets.Contains(component4))
+						SaveLoadRoot component5 = generator.GetComponent<SaveLoadRoot>();
+						if (!this.privateTargets.Contains(component5))
 						{
-							this.privateTargets.Add(component4);
+							this.privateTargets.Add(component5);
 							if (generator.GetComponent<PowerTransformer>() == null)
 							{
 								this.AddPowerLabels(generator);
@@ -174,15 +201,15 @@ namespace OverlayModes
 						}
 					}
 				}
-				foreach (EnergyConsumer energyConsumer in Components.EnergyConsumers)
+				foreach (EnergyConsumer energyConsumer in Components.EnergyConsumers.Items)
 				{
 					Vector2I vector2I5 = Grid.PosToXY(energyConsumer.transform.GetPosition());
 					if (vector2I <= vector2I5 && vector2I5 <= vector2I2)
 					{
-						SaveLoadRoot component5 = energyConsumer.GetComponent<SaveLoadRoot>();
-						if (!this.privateTargets.Contains(component5))
+						SaveLoadRoot component6 = energyConsumer.GetComponent<SaveLoadRoot>();
+						if (!this.privateTargets.Contains(component6))
 						{
-							this.privateTargets.Add(component5);
+							this.privateTargets.Add(component6);
 							this.AddPowerLabels(energyConsumer);
 						}
 					}
@@ -382,6 +409,37 @@ namespace OverlayModes
 			return batteryUI;
 		}
 
+		private void FindConnectedNetworks(int cell, IUtilityNetworkMgr mgr, ICollection<UtilityNetwork> networks, List<int> visited)
+		{
+			if (visited.Contains(cell))
+			{
+				return;
+			}
+			visited.Add(cell);
+			UtilityNetwork networkForCell = mgr.GetNetworkForCell(cell);
+			if (networkForCell != null)
+			{
+				networks.Add(networkForCell);
+				UtilityConnections connections = mgr.GetConnections(cell, false);
+				if ((connections & UtilityConnections.Right) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellRight(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Left) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellLeft(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Up) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellAbove(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Down) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellBelow(cell), mgr, networks, visited);
+				}
+			}
+		}
+
 		private int targetLayer;
 
 		private int cameraLayerMask;
@@ -431,6 +489,10 @@ namespace OverlayModes
 		private HashSet<SaveLoadRoot> layerTargets = new HashSet<SaveLoadRoot>();
 
 		private HashSet<SaveLoadRoot> privateTargets = new HashSet<SaveLoadRoot>();
+
+		private HashSet<UtilityNetwork> connectedNetworks = new HashSet<UtilityNetwork>();
+
+		private List<int> visited = new List<int>();
 
 		private struct UpdatePowerInfo
 		{

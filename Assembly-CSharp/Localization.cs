@@ -253,7 +253,7 @@ public static class Localization
 					LocString locString2 = new LocString(text2, text);
 					if (Localization.AreParametersPreserved(locString.text, text2))
 					{
-						if (Localization.HasSameLinkCountAsEnglish(locString.text, text2))
+						if (Localization.HasSameOrLessLinkCountAsEnglish(locString.text, text2))
 						{
 							if (Localization.HasMatchingLinkTags(text2, 0))
 							{
@@ -518,16 +518,16 @@ public static class Localization
 		}
 	}
 
-	private static bool HasSameTokenCount(string first, string second, string token)
+	private static bool HasSameOrLessTokenCount(string english_string, string translated_string, string token)
 	{
-		int num = first.Split(new string[] { token }, StringSplitOptions.None).Length;
-		int num2 = second.Split(new string[] { token }, StringSplitOptions.None).Length;
-		return num == num2;
+		int num = english_string.Split(new string[] { token }, StringSplitOptions.None).Length;
+		int num2 = translated_string.Split(new string[] { token }, StringSplitOptions.None).Length;
+		return num >= num2;
 	}
 
-	private static bool HasSameLinkCountAsEnglish(string english_string, string translated_string)
+	private static bool HasSameOrLessLinkCountAsEnglish(string english_string, string translated_string)
 	{
-		return Localization.HasSameTokenCount(english_string, translated_string, "<link") && Localization.HasSameTokenCount(english_string, translated_string, "</link");
+		return Localization.HasSameOrLessTokenCount(english_string, translated_string, "<link") && Localization.HasSameOrLessTokenCount(english_string, translated_string, "</link");
 	}
 
 	private static bool HasMatchingLinkTags(string str, int idx = 0)

@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using UnityEngine;
 
 public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
@@ -18,7 +19,12 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 	{
 		if (Grid.Solid[this.smi.sm.wallCellToBreak] && Grid.StrengthInfo[this.smi.sm.wallCellToBreak] < 100)
 		{
-			WorldDamage.Instance.ApplyDamage(this.smi.sm.wallCellToBreak, 0.06f * dt, this.smi.sm.wallCellToBreak, -1);
+			WorldDamage instance = WorldDamage.Instance;
+			int wallCellToBreak = this.smi.sm.wallCellToBreak;
+			float num = 0.06f * dt;
+			int wallCellToBreak2 = this.smi.sm.wallCellToBreak;
+			string text = BUILDINGS.DAMAGESOURCES.MINION_DESTRUCTION;
+			instance.ApplyDamage(wallCellToBreak, num, wallCellToBreak2, -1, text, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.MINION_DESTRUCTION);
 		}
 	}
 
@@ -37,7 +43,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			Breakable breakable = null;
 			if (global::UnityEngine.Random.Range(0, 100) >= 50)
 			{
-				foreach (Breakable breakable2 in Components.Breakables)
+				foreach (Breakable breakable2 in Components.Breakables.Items)
 				{
 					if (!(breakable2 == null))
 					{
@@ -58,7 +64,7 @@ public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 			}
 			if (breakable == null)
 			{
-				int num2 = GameUtil.FloodFillFind((int cell) => !Grid.Solid[cell] && navigator.CanReach(cell) && (Grid.Solid[Grid.CellLeft(cell)] || Grid.Solid[Grid.CellRight(cell)] || Grid.Solid[Grid.OffsetCell(cell, 1, 1)] || Grid.Solid[Grid.OffsetCell(cell, -1, 1)]), Grid.PosToCell(navigator.gameObject), 128, true, true);
+				int num2 = GameUtil.FloodFillFind<object>((int cell, object arg) => !Grid.Solid[cell] && navigator.CanReach(cell) && (Grid.Solid[Grid.CellLeft(cell)] || Grid.Solid[Grid.CellRight(cell)] || Grid.Solid[Grid.OffsetCell(cell, 1, 1)] || Grid.Solid[Grid.OffsetCell(cell, -1, 1)]), null, Grid.PosToCell(navigator.gameObject), 128, true, true);
 				base.sm.moveToWallTarget.Set(num2, base.smi);
 				this.GoTo(base.sm.move_notarget);
 			}

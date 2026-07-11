@@ -3,8 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace FMOD
 {
-	[StructLayout(LayoutKind.Sequential)]
-	public class DSP_METERING_INFO
+	public struct DSP_METERING_INFO
 	{
 		public int numsamples;
 

@@ -40,7 +40,7 @@ public class MachineShopConfig : IBuildingConfig
 
 	public static readonly Tag MATERIAL_FOR_TINKER = GameTags.RefinedMetal;
 
-	public const float METAL_PER_TINKER = 5f;
+	public const float MASS_PER_TINKER = 5f;
 
 	public static readonly string ROLE_PERK = "IncreaseMachinery";
 }

@@ -615,7 +615,6 @@ namespace ProcGen
 					}
 				}
 				TagSet tagSet = new TagSet();
-				tagSet.Add(WorldGenTags.NearSurface);
 				tagSet.Add(WorldGenTags.NearDepths);
 				for (int l = 0; l < this.voronoiTree.ChildCount(); l++)
 				{
@@ -644,7 +643,7 @@ namespace ProcGen
 								edge = this.overworldGraph.GetEdge(corner, corner2, cell2, cell3, true);
 								SubWorld subWorld = WorldGen.Settings.GetSubWorld(node2.type);
 								SubWorld subWorld2 = WorldGen.Settings.GetSubWorld(node3.type);
-								if (node2.type == node3.type || subWorld.zoneType == subWorld2.zoneType || (cell2.tags.ContainsOne(tagSet) && cell3.tags.ContainsOne(tagSet)))
+								if (node2.type == node3.type || subWorld.zoneType == subWorld2.zoneType || (subWorld.zoneType == SubWorld.ZoneType.Space && subWorld2.zoneType == SubWorld.ZoneType.Space) || (cell2.tags.ContainsOne(tagSet) && cell3.tags.ContainsOne(tagSet)))
 								{
 									edge.tags.Add(WorldGenTags.EdgeOpen);
 								}

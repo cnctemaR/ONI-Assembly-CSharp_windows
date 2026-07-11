@@ -49,6 +49,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 	{
 		Game.Instance.accumulators.Remove(this.o2Accumulator);
 		Game.Instance.accumulators.Remove(this.co2Accumulator);
+		this.SetGasProvider(null);
 		base.OnCleanUp();
 	}
 
@@ -205,7 +206,10 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 			this.gasProvider.OnClearOxygenBreather(this);
 		}
 		this.gasProvider = gas_provider;
-		this.gasProvider.OnSetOxygenBreather(this);
+		if (this.gasProvider != null)
+		{
+			this.gasProvider.OnSetOxygenBreather(this);
+		}
 	}
 
 	public float O2toCO2conversion = 0.5f;

@@ -65,7 +65,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		{
 			return;
 		}
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string text = "status_item_toilet_needs_emptying";
 		string text2 = UI.USERMENUACTIONS.CLEANTOILET.NAME;
 		global::System.Action action = delegate
@@ -73,7 +74,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			base.smi.GoTo(base.smi.sm.earlyclean);
 		};
 		string text3 = UI.USERMENUACTIONS.CLEANTOILET.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void SpawnMonster()
@@ -86,9 +87,9 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
-		Tag requestedItemTag = component.requestedItemTag;
+		string text = component.requestedItemTag.ProperName();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, requestedItemTag, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		return list;
 	}
@@ -98,8 +99,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		List<Descriptor> list = new List<Descriptor>();
 		Element element = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID);
 		string text = element.tag.ProperName();
-		string keywordStyle = GameUtil.GetKeywordStyle(element);
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, keywordStyle, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect, false));
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect, false));
 		Disease disease = Db.Get().Diseases.Get(this.diseaseId);
 		int num = this.diseasePerFlush + this.diseaseOnDupePerFlush;
 		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), Descriptor.DescriptorType.DiseaseSource, false));
@@ -159,9 +159,6 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	[MyCmpReq]
 	private Storage storage;
 
-	[MyCmpAdd]
-	private UserMenu userMenu;
-
 	[Serializable]
 	public struct SpawnInfo
 	{
@@ -213,7 +210,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		public bool IsToxicSandRemoved()
 		{
 			Tag tag = GameTagExtensions.Create(base.master.solidWastePerUse.elementID);
-			return base.master.storage.Find(tag).Count == 0;
+			return base.master.storage.FindFirst(tag) == null;
 		}
 
 		public void CreateCleanChore()
@@ -239,11 +236,13 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		{
 			this.cleanChore = null;
 			Tag tag = GameTagExtensions.Create(base.master.solidWastePerUse.elementID);
-			List<GameObject> list = base.master.storage.Find(tag);
-			foreach (GameObject gameObject in list)
+			ListPool<GameObject, Toilet>.PooledList pooledList = ListPool<GameObject, Toilet>.Allocate();
+			base.master.storage.Find(tag, pooledList);
+			foreach (GameObject gameObject in pooledList)
 			{
 				base.master.storage.Drop(gameObject);
 			}
+			pooledList.Recycle();
 		}
 
 		public void Flush()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor.Instance>
 {
@@ -71,11 +70,11 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 				this.lastReactable = null;
 			}
 			int num = Grid.PosToCell(base.smi.gameObject);
-			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, 1, 1, GameScenePartitioner.Instance.objectLayers[0], list);
-			for (int i = 0; i < list.Count; i++)
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, 1, 1, GameScenePartitioner.Instance.objectLayers[0], pooledList);
+			for (int i = 0; i < pooledList.Count; i++)
 			{
-				Reactable reactable = list[i].obj as Reactable;
+				Reactable reactable = pooledList[i].obj as Reactable;
 				if (reactable != null && reactable != this.lastReactable)
 				{
 					if (reactable.CanBegin(base.gameObject, transition))
@@ -88,7 +87,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 					}
 				}
 			}
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+			pooledList.Recycle();
 		}
 
 		public void StopReaction()

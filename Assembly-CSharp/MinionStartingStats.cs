@@ -28,7 +28,7 @@ public class MinionStartingStats
 		int num3 = this.GenerateTraits(is_starter_minion, list);
 		this.GenerateAttributes(num3, list);
 		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
-		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots)
+		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots.resources)
 		{
 			if (accessorySlot.accessories.Count != 0)
 			{

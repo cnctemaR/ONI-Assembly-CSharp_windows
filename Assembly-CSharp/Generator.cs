@@ -225,6 +225,8 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 
 	public static readonly Operational.Flag generatorConnectedFlag = new Operational.Flag("GeneratorConnected", Operational.Flag.Type.Requirement);
 
+	protected static Operational.Flag wireConnectedFlag = new Operational.Flag("generatorWireConnected", Operational.Flag.Type.Requirement);
+
 	private float capacity;
 
 	private StatusItem currentStatusItem;

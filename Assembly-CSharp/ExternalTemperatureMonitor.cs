@@ -126,7 +126,7 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 		public override void StartSM()
 		{
 			base.StartSM();
-			base.smi.attributes.Get(Db.Get().Attributes.ScaldingThreshold).Add("base", this.baseScalindingThreshold);
+			base.smi.attributes.Get(Db.Get().Attributes.ScaldingThreshold).Add(this.baseScalindingThreshold);
 		}
 
 		public float GetCurrentColdThreshold

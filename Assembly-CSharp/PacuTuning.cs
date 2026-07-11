@@ -68,4 +68,6 @@ public static class PacuTuning
 	public static float STANDARD_STOMACH_SIZE = PacuTuning.STANDARD_CALORIES_PER_CYCLE * PacuTuning.STANDARD_STARVE_CYCLES;
 
 	public static int PEN_SIZE_PER_CREATURE = CREATURES.SPACE_REQUIREMENTS.TIER2;
+
+	public static float EGG_MASS = 4f;
 }

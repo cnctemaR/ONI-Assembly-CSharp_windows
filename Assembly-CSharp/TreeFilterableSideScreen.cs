@@ -243,6 +243,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 			dictionary.Add(tag, this.targetFilterable.ContainsTag(tag) || this.targetFilterable.ContainsTag(rowTag));
 		}
 		freeElement.SetElement(rowTag, this.targetFilterable.ContainsTag(rowTag), dictionary);
+		freeElement.transform.SetAsLastSibling();
 		return freeElement;
 	}
 
@@ -260,6 +261,7 @@ public class TreeFilterableSideScreen : SideScreenContent
 		if (this.storage.storageFilters != null && this.storage.storageFilters.Count >= 1)
 		{
 			bool flag = this.target.GetComponent<CreatureDeliveryPoint>() != null;
+			this.storage.storageFilters.Sort((Tag x, Tag y) => x.ProperName().CompareTo(y.ProperName()));
 			foreach (Tag tag in this.storage.storageFilters)
 			{
 				bool flag2 = flag || WorldInventory.Instance.IsDiscovered(tag);

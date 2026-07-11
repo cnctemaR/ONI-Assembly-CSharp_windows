@@ -34,20 +34,19 @@ public class EODReportMessage : Message
 		return this.title;
 	}
 
-	public override Message.clickFn OnClick
-	{
-		get
-		{
-			return delegate
-			{
-				this.OpenReport();
-			};
-		}
-	}
-
 	public void OpenReport()
 	{
 		ManagementMenu.Instance.OpenReports(this.day);
+	}
+
+	public override bool ShowDialog()
+	{
+		return false;
+	}
+
+	public override void OnClick()
+	{
+		this.OpenReport();
 	}
 
 	[Serialize]

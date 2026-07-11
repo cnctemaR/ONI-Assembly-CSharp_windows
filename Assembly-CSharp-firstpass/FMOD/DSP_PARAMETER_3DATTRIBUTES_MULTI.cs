@@ -7,8 +7,11 @@ namespace FMOD
 	{
 		public int numlisteners;
 
-		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 5)]
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
 		public ATTRIBUTES_3D[] relative;
+
+		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
+		public float[] weight;
 
 		public ATTRIBUTES_3D absolute;
 	}

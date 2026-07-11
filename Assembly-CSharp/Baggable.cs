@@ -1,4 +1,5 @@
 ﻿using System;
+using KSerialization;
 using UnityEngine;
 
 public class Baggable : KMonoBehaviour
@@ -6,58 +7,98 @@ public class Baggable : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		Pickupable component = base.GetComponent<Pickupable>();
-		component.workAnims = new HashedString[]
+		this.minionAnimOverride = Assets.GetAnim("anim_restrain_creature_kanim");
+		Pickupable pickupable = base.gameObject.AddOrGet<Pickupable>();
+		pickupable.workAnims = new HashedString[]
 		{
 			new HashedString("capture"),
 			new HashedString("pickup")
 		};
-		component.overrideAnims = new KAnimFile[] { this.animOverride };
-		component.trackOnPickup = false;
-		component.useGunforPickup = false;
+		pickupable.overrideAnims = new KAnimFile[] { this.minionAnimOverride };
+		pickupable.trackOnPickup = false;
+		pickupable.useGunforPickup = false;
+		pickupable.synchronizeAnims = false;
 		if (this.mustStandOntopOfTrapForPickup)
 		{
-			component.SetOffsets(new CellOffset[] { default(CellOffset) });
+			pickupable.SetOffsets(new CellOffset[]
+			{
+				default(CellOffset),
+				new CellOffset(0, -1)
+			});
 		}
-		if (this.animOverride != null)
+		base.Subscribe(856640610, new Action<object>(this.OnStore));
+		if (base.transform.parent != null)
 		{
-			base.Subscribe(856640610, new Action<object>(this.OnStorageChanged));
+			if (base.transform.parent.GetComponent<Trap>() != null)
+			{
+				base.GetComponent<KBatchedAnimController>().enabled = true;
+			}
+			if (base.transform.parent.GetComponent<EggIncubator>() != null)
+			{
+				this.wrangled = true;
+			}
 		}
-		if (base.transform.parent != null && base.transform.parent.GetComponent<Trap>() != null)
+		if (this.wrangled)
 		{
-			base.GetComponent<KBatchedAnimController>().enabled = true;
+			this.SetWrangled();
 		}
 	}
 
-	private void OnStorageChanged(object data)
+	private void OnStore(object data)
 	{
-		if (!(data is Storage) && (data == null || !(bool)data))
+		Storage storage = data as Storage;
+		bool flag = storage != null || (data != null && (bool)data);
+		if (flag)
 		{
-			GameObject prefab = Assets.GetPrefab(this.creatureTag);
-			Vector3 vector = Grid.CellToPosCCC(Grid.PosToCell(base.gameObject.transform.GetPosition()), Grid.SceneLayer.Creatures);
-			GameObject gameObject = Util.KInstantiate(prefab, vector, Quaternion.identity, Folder.Entities);
-			gameObject.SetActive(true);
-			Util.KDestroyGameObject(base.gameObject);
+			base.gameObject.AddTag(GameTags.Creatures.Bagged);
+			if (storage && storage.HasTag(GameTags.Minion))
+			{
+				this.SetVisible(false);
+			}
 		}
 		else
 		{
-			Storage storage = data as Storage;
-			MinionIdentity minionIdentity = ((storage == null) ? null : storage.GetComponent<MinionIdentity>());
-			if (minionIdentity != null)
-			{
-				KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
-				component.enabled = false;
-			}
+			this.Free();
 		}
 	}
 
-	[SerializeField]
-	public KAnimFile animOverride;
+	private void SetVisible(bool visible)
+	{
+		KAnimControllerBase component = base.gameObject.GetComponent<KAnimControllerBase>();
+		if (component != null && component.enabled != visible)
+		{
+			component.enabled = visible;
+		}
+		KSelectable component2 = base.gameObject.GetComponent<KSelectable>();
+		if (component2 != null && component2.enabled != visible)
+		{
+			component2.enabled = visible;
+		}
+	}
+
+	public void SetWrangled()
+	{
+		this.wrangled = true;
+		Navigator component = base.GetComponent<Navigator>();
+		if (component && component.IsValidNavType(NavType.Floor))
+		{
+			component.SetCurrentNavType(NavType.Floor);
+		}
+		base.gameObject.AddTag(GameTags.Creatures.Bagged);
+	}
+
+	public void Free()
+	{
+		base.gameObject.RemoveTag(GameTags.Creatures.Bagged);
+		this.wrangled = false;
+		this.SetVisible(true);
+	}
 
 	[SerializeField]
-	public Tag creatureTag;
-
-	private MinionIdentity minion;
+	private KAnimFile minionAnimOverride;
 
 	public bool mustStandOntopOfTrapForPickup;
+
+	[Serialize]
+	public bool wrangled;
 }

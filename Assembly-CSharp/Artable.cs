@@ -104,7 +104,7 @@ public class Artable : Workable
 			if (stage.decor != 0)
 			{
 				AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, (float)stage.decor, "Art Quality", false, false, true);
-				this.GetAttributes().Add("Art Quality", attributeModifier);
+				this.GetAttributes().Add(attributeModifier);
 			}
 			KSelectable component = base.GetComponent<KSelectable>();
 			component.SetName(stage.name);

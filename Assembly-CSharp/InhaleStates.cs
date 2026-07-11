@@ -24,8 +24,8 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 		{
 			smi.GetSMI<GasAndLiquidConsumerMonitor.Instance>().Consume(dt);
 		}, UpdateRate.SIM_200ms, false)
-			.EventTransition(GameHashes.ElementNoLongerAvailable, this.behaviourcomplete, null)
-			.TagTransition(GameTags.Creatures.Hungry, this.inhaling.full, true)
+			.EventTransition(GameHashes.ElementNoLongerAvailable, this.inhaling.pst, null)
+			.TagTransition(GameTags.Creatures.Hungry, this.inhaling.pst, true)
 			.Enter("StartInhaleSound", delegate(InhaleStates.Instance smi)
 			{
 				smi.StartInhaleSound();
@@ -34,9 +34,16 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 			{
 				smi.StopInhaleSound();
 			})
-			.ScheduleGoTo((InhaleStates.Instance smi) => smi.def.maximumInhaleTime, this.inhaling.full);
+			.ScheduleGoTo((InhaleStates.Instance smi) => smi.def.maximumInhaleTime, this.inhaling.pst);
+		this.inhaling.pst.Transition(this.inhaling.full, new StateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Transition.ConditionCallback(InhaleStates.IsFull), UpdateRate.SIM_200ms).Transition(this.behaviourcomplete, GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Not(new StateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Transition.ConditionCallback(InhaleStates.IsFull)), UpdateRate.SIM_200ms);
 		this.inhaling.full.QueueAnim("inhale_pst", false, null).QueueAnim("idle_loop", true, null).ScheduleGoTo(3f, this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToEat, false);
+	}
+
+	private static bool IsFull(InhaleStates.Instance smi)
+	{
+		CreatureCalorieMonitor.Instance smi2 = smi.GetSMI<CreatureCalorieMonitor.Instance>();
+		return smi2 != null && smi2.stomach.GetFullness() >= 1f;
 	}
 
 	public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State goingtoeat;
@@ -68,8 +75,7 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 			LoopingSounds component = base.GetComponent<LoopingSounds>();
 			if (component != null)
 			{
-				component.AddLoopingSoundUpdater();
-				component.StartSound(base.smi.inhaleSound, base.transform.GetPosition());
+				component.StartSound(base.smi.inhaleSound);
 			}
 		}
 
@@ -79,7 +85,6 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 			if (component != null)
 			{
 				component.StopSound(base.smi.inhaleSound);
-				component.RemoveLoopingSoundUpdater();
 			}
 		}
 
@@ -89,6 +94,8 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 	public class InhalingStates : GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State
 	{
 		public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State pre;
+
+		public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State pst;
 
 		public GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.State full;
 	}

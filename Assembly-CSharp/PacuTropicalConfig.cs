@@ -5,13 +5,20 @@ using UnityEngine;
 
 public class PacuTropicalConfig : IEntityConfig
 {
-	public GameObject CreatePrefab()
+	public static GameObject CreatePacu(string id, string name, string desc, string anim_file, bool is_baby)
 	{
-		GameObject gameObject = BasePacuConfig.CreatePrefab("PacuTropical", "PacuTropicalBaseTrait", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.DESC, "trp_", 303.15f, 353.15f);
+		GameObject gameObject = BasePacuConfig.CreatePrefab(id, "PacuTropicalBaseTrait", name, desc, anim_file, is_baby, "trp_", 303.15f, 353.15f);
+		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, 25f);
 		DecorProvider decorProvider = gameObject.AddOrGet<DecorProvider>();
 		decorProvider.SetValues(PacuTropicalConfig.DECOR);
+		return gameObject;
+	}
+
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = PacuTropicalConfig.CreatePacu("PacuTropical", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.DESC, "pacu_kanim", false);
 		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, 25f);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuTropicalEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.DESC, "egg_pacu_kanim", "PacuTropical", PacuTuning.EGG_CHANCES_TROPICAL, PacuTropicalConfig.EGG_SORT_ORDER, false, true);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuTropicalEgg", global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PACU.VARIANT_TROPICAL.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuTropicalBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_TROPICAL, PacuTropicalConfig.EGG_SORT_ORDER, false, true, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

@@ -25,6 +25,9 @@ namespace FMOD
 		AUDIOOUT,
 		AUDIO3D,
 		ATMOS,
+		WEBAUDIO,
+		NNAUDIO,
+		WINSONIC,
 		MAX
 	}
 }

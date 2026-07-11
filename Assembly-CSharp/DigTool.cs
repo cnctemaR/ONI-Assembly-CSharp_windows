@@ -13,7 +13,7 @@ public class DigTool : DragTool
 	{
 		if (!Grid.Solid[cell])
 		{
-			foreach (Uprootable uprootable in Components.Uprootables)
+			foreach (Uprootable uprootable in Components.Uprootables.Items)
 			{
 				if (Grid.PosToCell(uprootable.gameObject) == cell)
 				{

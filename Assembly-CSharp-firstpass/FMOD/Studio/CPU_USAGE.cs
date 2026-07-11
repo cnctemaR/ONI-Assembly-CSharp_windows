@@ -4,14 +4,14 @@ namespace FMOD.Studio
 {
 	public struct CPU_USAGE
 	{
-		public float dspUsage;
+		public float dspusage;
 
-		public float streamUsage;
+		public float streamusage;
 
-		public float geometryUsage;
+		public float geometryusage;
 
-		public float updateUsage;
+		public float updateusage;
 
-		public float studioUsage;
+		public float studiousage;
 	}
 }

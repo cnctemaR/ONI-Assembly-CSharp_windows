@@ -15,7 +15,7 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 		{
 			return;
 		}
-		int num = TMP_TextUtilities.FindIntersectingLink(this.text, Input.mousePosition, null);
+		int num = TMP_TextUtilities.FindIntersectingLink(this.text, KInputManager.GetMousePos(), null);
 		if (num != -1)
 		{
 			string text = CodexCache.FormatLinkID(this.text.textInfo.linkInfo[num].GetLinkID());
@@ -100,7 +100,7 @@ public class TextLinkHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 		{
 			return;
 		}
-		if (TMP_TextUtilities.FindIntersectingLink(this.text, Input.mousePosition, null) != -1)
+		if (TMP_TextUtilities.FindIntersectingLink(this.text, KInputManager.GetMousePos(), null) != -1)
 		{
 			this.SetMouseOver();
 			this.hoverLink = true;

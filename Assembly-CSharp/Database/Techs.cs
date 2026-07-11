@@ -94,7 +94,7 @@ namespace Database
 			},
 			{
 				"FineDining",
-				new string[] { "DiningTable", "FarmTile", "CookingStation" }
+				new string[] { "DiningTable", "FarmTile", "CookingStation", "EggCracker" }
 			},
 			{
 				"Agriculture",
@@ -150,8 +150,13 @@ namespace Database
 				{
 					LuxuryBedConfig.ID,
 					"LadderFast",
-					"PlasticTile"
+					"PlasticTile",
+					"ExteriorWall"
 				}
+			},
+			{
+				"RefractiveDecor",
+				new string[] { "GlassTile" }
 			},
 			{
 				"ImprovedLiquidPiping",
@@ -211,7 +216,7 @@ namespace Database
 			},
 			{
 				"RenewableEnergy",
-				new string[] { "SteamTurbine" }
+				new string[] { "SteamTurbine", "SolarPanel" }
 			},
 			{
 				"Combustion",
@@ -247,7 +252,7 @@ namespace Database
 			},
 			{
 				"BasicRefinement",
-				new string[] { "RockCrusher" }
+				new string[] { "RockCrusher", "Kiln" }
 			},
 			{
 				"MedicalResearch",
@@ -264,6 +269,10 @@ namespace Database
 			{
 				"Smelting",
 				new string[] { "MetalRefinery", "MetalTile" }
+			},
+			{
+				"HighTempForging",
+				new string[] { "GlassForge", "BunkerTile", "BunkerDoor" }
 			},
 			{
 				"TemperatureModulation",
@@ -325,6 +334,10 @@ namespace Database
 				}
 			},
 			{
+				"SkyDetectors",
+				new string[] { CometDetectorConfig.ID }
+			},
+			{
 				"TravelTubes",
 				new string[] { "TravelTubeEntrance", "TravelTube", "TravelTubeWallBridge" }
 			},
@@ -363,6 +376,11 @@ namespace Database
 			{
 				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 40f),
 				new Tuple<string, float>(ResearchTypes.ID.BETA, 50f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>(ResearchTypes.ID.ALPHA, 50f),
+				new Tuple<string, float>(ResearchTypes.ID.BETA, 70f)
 			}
 		};
 	}

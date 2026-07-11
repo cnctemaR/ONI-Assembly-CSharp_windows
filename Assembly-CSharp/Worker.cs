@@ -43,19 +43,18 @@ public class Worker : KMonoBehaviour
 		}
 		if (this.workable != null)
 		{
+			this.DetachAnimOverrides();
 			this.workable.CompleteWork(this);
 		}
 		this.InternalStopWork(this.workable, false);
 	}
 
-	public bool Work()
+	public bool Work(float dt)
 	{
 		if (this.state == Worker.State.PendingCompletion)
 		{
 			return base.GetComponent<KAnimControllerBase>().IsStopped() || Time.time - this.workCompleteTime > 2f;
 		}
-		float num = Time.time - this.lastWorkTick;
-		this.lastWorkTick = Time.time;
 		if (this.facing)
 		{
 			if (this.workable.ShouldFaceTargetWhenWorking())
@@ -73,15 +72,15 @@ public class Worker : KMonoBehaviour
 			if (workAttribute != null && workAttribute.IsTrainable)
 			{
 				float attributeExperienceMultiplier = this.workable.GetAttributeExperienceMultiplier();
-				base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, num, attributeExperienceMultiplier);
+				base.GetComponent<AttributeLevels>().AddExperience(workAttribute.Id, dt, attributeExperienceMultiplier);
 			}
 			float efficiencyMultiplier = this.workable.GetEfficiencyMultiplier(this);
-			float num2 = num * efficiencyMultiplier * 1f;
+			float num = dt * efficiencyMultiplier * 1f;
 			if (this.resume != null)
 			{
-				this.workable.AwardExperience(num2, this.resume);
+				this.workable.AwardExperience(num, this.resume);
 			}
-			if (this.workable.WorkTick(this, num2) && this.state == Worker.State.Working)
+			if (this.workable.WorkTick(this, num) && this.state == Worker.State.Working)
 			{
 				base.GetComponent<KPrefabID>().AddTag(GameTags.PreventChoreInterruption);
 				this.state = Worker.State.PendingCompletion;
@@ -188,7 +187,6 @@ public class Worker : KMonoBehaviour
 		try
 		{
 			this.state = Worker.State.Working;
-			this.lastWorkTick = Time.time;
 			if (this.workable != null)
 			{
 				this.animInfo = this.workable.GetAnim(this);
@@ -209,7 +207,7 @@ public class Worker : KMonoBehaviour
 				Vector3 workOffset = this.workable.GetWorkOffset();
 				this.workAnimOffset = workOffset;
 				component.Offset += workOffset;
-				if (this.animInfo.smi == null && workAnims != null)
+				if (this.usesMultiTool && this.animInfo.smi == null && workAnims != null)
 				{
 					if (this.workable.synchronizeAnims)
 					{
@@ -281,8 +279,6 @@ public class Worker : KMonoBehaviour
 
 	[MyCmpGet]
 	private MinionResume resume;
-
-	private float lastWorkTick;
 
 	private float workCompleteTime;
 

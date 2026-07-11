@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkMgr
+public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkMgr, IBridgedNetworkItem
 {
 	protected override void OnSpawn()
 	{
@@ -101,6 +102,28 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 	public IUtilityNetworkMgr GetNetworkManager()
 	{
 		return Game.Instance.logicCircuitSystem;
+	}
+
+	public void AddNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num = Grid.PosToCell(base.transform.GetPosition());
+		UtilityNetwork networkForCell = Game.Instance.logicCircuitSystem.GetNetworkForCell(num);
+		if (networkForCell != null)
+		{
+			networks.Add(networkForCell);
+		}
+	}
+
+	public bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num = Grid.PosToCell(base.transform.GetPosition());
+		UtilityNetwork networkForCell = Game.Instance.logicCircuitSystem.GetNetworkForCell(num);
+		return networks.Contains(networkForCell);
+	}
+
+	public int GetNetworkCell()
+	{
+		return Grid.PosToCell(this);
 	}
 
 	[SerializeField]

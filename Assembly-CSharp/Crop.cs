@@ -68,7 +68,7 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 				Edible component2 = gameObject.GetComponent<Edible>();
 				if (component2)
 				{
-					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, string.Format(UI.ENDOFDAYREPORT.NOTES.HARVESTED, component2.GetProperName()), UI.ENDOFDAYREPORT.NOTES.HARVESTED_CONTEXT);
+					ReportManager.Instance.ReportValue(ReportManager.ReportType.CaloriesCreated, component2.Calories, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.HARVESTED, "{0}", component2.GetProperName()), UI.ENDOFDAYREPORT.NOTES.HARVESTED_CONTEXT);
 				}
 			}
 			else

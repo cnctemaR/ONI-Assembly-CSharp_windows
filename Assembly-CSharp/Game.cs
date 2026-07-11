@@ -55,6 +55,7 @@ public class Game : KMonoBehaviour
 			"Level Loaded....",
 			SceneManager.GetActiveScene().name
 		});
+		this.userMenu = new UserMenu();
 		SimTemperatureTransfer.ClearInstanceMap();
 		StructureTemperatureComponents.ClearInstanceMap();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Combine(App.OnPreLoadScene, new global::System.Action(this.StopBE));
@@ -110,6 +111,7 @@ public class Game : KMonoBehaviour
 		this.roomProber = new RoomProber();
 		this.roomProber.Init();
 		CellChangeMonitor.Instance.SetGridSize(Grid.WidthInCells, Grid.HeightInCells);
+		this.unlocks = base.GetComponent<Unlocks>();
 	}
 
 	public void SetGameStarted()
@@ -124,7 +126,7 @@ public class Game : KMonoBehaviour
 
 	private void UnsafePrefabInit()
 	{
-		this.StepTheSim(0.2f);
+		this.StepTheSim(0f);
 	}
 
 	protected override void OnLoadLevel()
@@ -286,8 +288,10 @@ public class Game : KMonoBehaviour
 				Grid.diseaseIdx = ptr2->diseaseIdx;
 				Grid.diseaseCount = ptr2->diseaseCount;
 				Grid.AccumulatedFlowValues = ptr2->accumulatedFlow;
+				Grid.exposedToSunlight = (byte*)(void*)ptr2->propertyTextureExposedToSunlight;
 				PropertyTextures.externalFlowTex = ptr2->propertyTextureFlow;
 				PropertyTextures.externalLiquidTex = ptr2->propertyTextureLiquid;
+				PropertyTextures.externalExposedToSunlight = ptr2->propertyTextureExposedToSunlight;
 				List<Element> elements = ElementLoader.elements;
 				this.simData.emittedMassEntries = ptr2->emittedMassEntries;
 				this.simData.elementChunks = ptr2->elementChunkInfos;
@@ -383,12 +387,12 @@ public class Game : KMonoBehaviour
 				{
 					Sim.MassConsumedCallback massConsumedCallback = ptr2->massConsumedCallbacks[num5];
 					handle2.index = massConsumedCallback.callbackIdx;
-					Game.ComplexCallbackInfo complexCallbackInfo = this.complexCallbackManager.Release(handle2);
+					Game.ComplexCallbackInfo complexCallbackInfo = this.complexCallbackManager.Release(handle2, "massConsumedCB");
 					if (complexCallbackInfo.cb != null)
 					{
 						if (massConsumedCallback.GetType() != typeof(Sim.MassConsumedCallback))
 						{
-							Output.LogError(new object[] { "Somehow a callback from", complexCallbackInfo.debugInfo, "got into the MassEmittedCallbacks list" });
+							Output.LogError(new object[] { "Somehow a callback from", complexCallbackInfo.debugInfo, "got into the MassConsumedCallbacks list" });
 						}
 						complexCallbackInfo.cb(massConsumedCallback);
 					}
@@ -427,7 +431,7 @@ public class Game : KMonoBehaviour
 				{
 					Sim.ComponentStateChangedMessage componentStateChangedMessage = ptr2->componentStateChangedMessages[num8];
 					handle5.index = componentStateChangedMessage.callbackIdx;
-					Game.ComplexCallbackInfo complexCallbackInfo2 = this.complexCallbackManager.Release(handle5);
+					Game.ComplexCallbackInfo complexCallbackInfo2 = this.complexCallbackManager.Release(handle5, "component state changed cb");
 					if (complexCallbackInfo2.cb != null)
 					{
 						complexCallbackInfo2.cb(componentStateChangedMessage.simHandle);
@@ -457,13 +461,16 @@ public class Game : KMonoBehaviour
 					Sim.MeltedInfo meltedInfo4 = ptr2->buildingMeltedInfos[num12];
 					StructureTemperatureComponents.DoStateTransition(meltedInfo4.handle);
 				}
-				this.conduitTemperatureManager.Sim200ms(0.2f);
-				this.conduitDiseaseManager.Sim200ms(0.2f);
-				this.gasConduitFlow.Sim200ms(0.2f);
-				this.liquidConduitFlow.Sim200ms(0.2f);
-				this.solidConduitFlow.Sim200ms(0.2f);
-				this.accumulators.Sim200ms(0.2f);
-				this.plantElementAbsorbers.Sim200ms(0.2f);
+				if (dt > 0f)
+				{
+					this.conduitTemperatureManager.Sim200ms(0.2f);
+					this.conduitDiseaseManager.Sim200ms(0.2f);
+					this.gasConduitFlow.Sim200ms(0.2f);
+					this.liquidConduitFlow.Sim200ms(0.2f);
+					this.solidConduitFlow.Sim200ms(0.2f);
+					this.accumulators.Sim200ms(0.2f);
+					this.plantElementAbsorbers.Sim200ms(0.2f);
+				}
 				Sim.DebugProperties debugProperties;
 				debugProperties.buildingTemperatureScale = 100f;
 				debugProperties.contaminatedOxygenEmitProbability = 0.001f;
@@ -473,21 +480,24 @@ public class Game : KMonoBehaviour
 				debugProperties.pad0 = (debugProperties.pad1 = (debugProperties.pad2 = 0));
 				SimMessages.NewGameFrame(dt, this.simActiveRegionMin, this.simActiveRegionMax);
 				SimMessages.SetDebugProperties(debugProperties);
-				if (this.circuitManager != null)
+				if (dt > 0f)
 				{
-					this.circuitManager.Sim200msFirst(dt);
-				}
-				if (this.emergySim != null)
-				{
-					this.emergySim.EnergySim200ms(dt);
-				}
-				if (this.logicCircuitManager != null)
-				{
-					this.logicCircuitManager.Sim200ms(dt);
-				}
-				if (this.circuitManager != null)
-				{
-					this.circuitManager.Sim200msLast(dt);
+					if (this.circuitManager != null)
+					{
+						this.circuitManager.Sim200msFirst(dt);
+					}
+					if (this.emergySim != null)
+					{
+						this.emergySim.EnergySim200ms(dt);
+					}
+					if (this.logicCircuitManager != null)
+					{
+						this.logicCircuitManager.Sim200ms(dt);
+					}
+					if (this.circuitManager != null)
+					{
+						this.circuitManager.Sim200msLast(dt);
+					}
 				}
 				ptr = ptr2;
 			}
@@ -544,7 +554,6 @@ public class Game : KMonoBehaviour
 	public void ForceSimStep()
 	{
 		Output.Log(new object[] { "Force-stepping the sim" });
-		this.forceSimStep = true;
 		this.simDt = 0.2f;
 	}
 
@@ -554,59 +563,59 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		using (new KProfiler.Region("Game.Update", null))
+		float deltaTime = Time.deltaTime;
+		if (global::Debug.developerConsoleVisible)
 		{
-			float deltaTime = Time.deltaTime;
-			if (global::Debug.developerConsoleVisible)
-			{
-				global::Debug.developerConsoleVisible = false;
-			}
-			if (DebugHandler.DebugCellInfo)
-			{
-				this.ShowDebugCellInfo();
-			}
-			this.gasConduitSystem.Update();
-			this.liquidConduitSystem.Update();
-			this.solidConduitSystem.Update();
-			this.circuitManager.RenderEveryTick(deltaTime);
-			this.logicCircuitManager.RenderEveryTick(deltaTime);
-			this.solidConduitFlow.RenderEveryTick(deltaTime);
-			if (this.forceActiveArea)
-			{
-				this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
-				this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
-			}
-			this.simActiveRegionMin = new Vector2I(0, 0);
-			this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
-			LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
-			Pathfinding.Instance.RenderEveryTick();
-			CellChangeMonitor.Instance.RenderEveryTick();
-			if (this.forceSimStep || Mathf.CeilToInt(Time.timeScale) != 0)
-			{
-				this.SimEveryTick(deltaTime);
-				this.forceSimStep = false;
-			}
+			global::Debug.developerConsoleVisible = false;
 		}
+		if (DebugHandler.DebugCellInfo)
+		{
+			this.ShowDebugCellInfo();
+		}
+		this.gasConduitSystem.Update();
+		this.liquidConduitSystem.Update();
+		this.solidConduitSystem.Update();
+		this.circuitManager.RenderEveryTick(deltaTime);
+		this.logicCircuitManager.RenderEveryTick(deltaTime);
+		this.solidConduitFlow.RenderEveryTick(deltaTime);
+		if (this.forceActiveArea)
+		{
+			this.simActiveRegionMin = new Vector2I((int)Mathf.Max(0f, this.minForcedActiveArea.x), (int)Mathf.Max(0f, this.minForcedActiveArea.y));
+			this.simActiveRegionMax = new Vector2I((int)Mathf.Min((float)(Grid.WidthInCells - 1), this.maxForcedActiveArea.x), (int)Mathf.Min((float)(Grid.HeightInCells - 1), this.maxForcedActiveArea.y));
+		}
+		this.simActiveRegionMin = new Vector2I(0, 0);
+		this.simActiveRegionMax = new Vector2I(Grid.WidthInCells, Grid.HeightInCells);
+		LightGridManager.SetActiveWindow(this.simActiveRegionMin, this.simActiveRegionMax);
+		Pathfinding.Instance.RenderEveryTick();
+		CellChangeMonitor.Instance.RenderEveryTick();
+		this.SimEveryTick(deltaTime);
 	}
 
 	private void SimEveryTick(float dt)
 	{
 		dt = Mathf.Min(dt, 0.2f);
 		this.simDt += dt;
-		while (this.simDt >= 0.016666668f)
+		if (this.simDt >= 0.016666668f)
 		{
-			this.simSubTick++;
-			this.simSubTick %= 12;
-			if (this.simSubTick == 0)
+			while (this.simDt >= 0.016666668f)
 			{
-				this.hasFirstSimTickRun = true;
-				this.UnsafeSim200ms(0.2f);
+				this.simSubTick++;
+				this.simSubTick %= 12;
+				if (this.simSubTick == 0)
+				{
+					this.hasFirstSimTickRun = true;
+					this.UnsafeSim200ms(0.2f);
+				}
+				if (this.hasFirstSimTickRun)
+				{
+					StateMachineUpdater.instance.AdvanceOneSimSubTick();
+				}
+				this.simDt -= 0.016666668f;
 			}
-			if (this.hasFirstSimTickRun)
-			{
-				StateMachineUpdater.instance.AdvanceOneSimSubTick();
-			}
-			this.simDt -= 0.016666668f;
+		}
+		else
+		{
+			this.UnsafeSim200ms(0f);
 		}
 	}
 
@@ -637,7 +646,7 @@ public class Game : KMonoBehaviour
 		if (OverlayScreen.Instance != null)
 		{
 			SimViewMode mode = OverlayScreen.Instance.GetMode();
-			foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers)
+			foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers.Items)
 			{
 				buildingCellVisualizer.Tick(mode);
 			}
@@ -674,8 +683,6 @@ public class Game : KMonoBehaviour
 		this.gasConduitSystem.Update();
 		this.liquidConduitSystem.Update();
 		this.solidConduitSystem.Update();
-		this.flowBlock = new MaterialPropertyBlock();
-		this.flowBlock.SetColor("_Color", this.flowColour);
 		SimViewMode mode = SimDebugView.Instance.GetMode();
 		if (mode != this.previousOverlayMode)
 		{
@@ -736,6 +743,7 @@ public class Game : KMonoBehaviour
 				component.DrawPath();
 			}
 		}
+		KFMOD.RenderEveryTick(Time.deltaTime);
 	}
 
 	public void Reset(GameSpawnData gsd)
@@ -857,7 +865,10 @@ public class Game : KMonoBehaviour
 	public void SpawnFX(SpawnFXHashes fx_id, int cell, float rotation)
 	{
 		Vector3 vector = Grid.CellToPosCBC(cell, Grid.SceneLayer.Front);
-		this.fxSpawner[fx_id](vector, rotation);
+		if (CameraController.Instance.IsVisiblePos(vector))
+		{
+			this.fxSpawner[fx_id](vector, rotation);
+		}
 	}
 
 	public void SpawnFX(SpawnFXHashes fx_id, Vector3 pos, float rotation)
@@ -893,6 +904,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.customGameSettings = this.customSettings;
 		gameSaveData.autoPrioritizeRoles = this.autoPrioritizeRoles;
 		gameSaveData.advancedPersonalPriorities = this.advancedPersonalPriorities;
+		gameSaveData.savedInfo = this.savedInfo;
 		if (this.OnSave != null)
 		{
 			this.OnSave(gameSaveData);
@@ -921,6 +933,7 @@ public class Game : KMonoBehaviour
 		this.customSettings = gameSaveData.customGameSettings;
 		this.autoPrioritizeRoles = gameSaveData.autoPrioritizeRoles;
 		this.advancedPersonalPriorities = gameSaveData.advancedPersonalPriorities;
+		this.savedInfo = gameSaveData.savedInfo;
 		if (this.customSettings != null)
 		{
 			this.customSettings.Print();
@@ -1193,6 +1206,8 @@ public class Game : KMonoBehaviour
 	[NonSerialized]
 	public bool advancedPersonalPriorities;
 
+	public Game.SavedInfo savedInfo;
+
 	public static bool quitting;
 
 	public AssignmentManager assignmentManager;
@@ -1215,11 +1230,17 @@ public class Game : KMonoBehaviour
 
 	public static Element VisualTunerElement;
 
+	public float currentSunlightIntensity;
+
 	public RoomProber roomProber;
 
 	public RoleManager roleManager;
 
 	public CustomGameSettings customSettings;
+
+	public UserMenu userMenu;
+
+	public Unlocks unlocks;
 
 	private bool sandboxModeActive;
 
@@ -1330,8 +1351,6 @@ public class Game : KMonoBehaviour
 
 	private Vector3 solidFlowPos;
 
-	private MaterialPropertyBlock flowBlock;
-
 	public bool drawStatusItems = true;
 
 	private List<SolidInfo> solidInfo = new List<SolidInfo>();
@@ -1374,8 +1393,6 @@ public class Game : KMonoBehaviour
 
 	private bool isLoading;
 
-	private bool forceSimStep;
-
 	private SimViewMode previousOverlayMode;
 
 	private float previousGasConduitFlowDiscreteLerpPercent = -1f;
@@ -1401,6 +1418,12 @@ public class Game : KMonoBehaviour
 	public Game.UIColours uiColours = new Game.UIColours();
 
 	private float lastTimeWorkStarted = float.NegativeInfinity;
+
+	[Serializable]
+	public struct SavedInfo
+	{
+		public bool discoveredSurface;
+	}
 
 	public struct CallbackInfo
 	{
@@ -1428,19 +1451,87 @@ public class Game : KMonoBehaviour
 		public string debugInfo;
 	}
 
-	public class ComplexCallbackHandleVector : FrameDelayedHandleVector<Game.ComplexCallbackInfo>
+	public class ComplexCallbackHandleVector
 	{
 		public ComplexCallbackHandleVector(int initial_size)
-			: base(initial_size)
 		{
+			this.baseMgr = new FrameDelayedHandleVector<Game.ComplexCallbackInfo>(initial_size);
 		}
 
-		public override void Reset(HandleVector<Game.ComplexCallbackInfo>.Handle handle)
+		public HandleVector<Game.ComplexCallbackInfo>.Handle Add(Game.ComplexCallbackInfo item)
 		{
-			Game.ComplexCallbackInfo complexCallbackInfo = this.items[handle.index];
-			complexCallbackInfo.cb = null;
-			this.items[handle.index] = complexCallbackInfo;
+			return this.baseMgr.Add(item);
 		}
+
+		public Game.ComplexCallbackInfo GetItem(HandleVector<Game.ComplexCallbackInfo>.Handle handle)
+		{
+			Game.ComplexCallbackInfo item;
+			try
+			{
+				item = this.baseMgr.GetItem(handle);
+			}
+			catch (Exception ex)
+			{
+				byte b;
+				int num;
+				this.baseMgr.UnpackHandleUnchecked(handle, out b, out num);
+				string text = null;
+				if (this.releaseInfo.TryGetValue(num, out text))
+				{
+					KCrashReporter.Assert(false, "Trying to get data for handle that was already released by " + text);
+				}
+				else
+				{
+					KCrashReporter.Assert(false, "Trying to get data for handle that was released ...... magically");
+				}
+				throw ex;
+			}
+			return item;
+		}
+
+		public Game.ComplexCallbackInfo Release(HandleVector<Game.ComplexCallbackInfo>.Handle handle, string release_info)
+		{
+			Game.ComplexCallbackInfo complexCallbackInfo;
+			try
+			{
+				byte b;
+				int num;
+				this.baseMgr.UnpackHandle(handle, out b, out num);
+				this.releaseInfo[num] = release_info;
+				complexCallbackInfo = this.baseMgr.Release(handle);
+			}
+			catch (Exception ex)
+			{
+				byte b;
+				int num;
+				this.baseMgr.UnpackHandleUnchecked(handle, out b, out num);
+				string text = null;
+				if (this.releaseInfo.TryGetValue(num, out text))
+				{
+					KCrashReporter.Assert(false, release_info + "is trying to release handle but it was already released by " + text);
+				}
+				else
+				{
+					KCrashReporter.Assert(false, release_info + "is trying to release a handle that was already released by some unknown thing");
+				}
+				throw ex;
+			}
+			return complexCallbackInfo;
+		}
+
+		public void NextFrame()
+		{
+			this.baseMgr.NextFrame();
+		}
+
+		public void Clear()
+		{
+			this.baseMgr.Clear();
+		}
+
+		private FrameDelayedHandleVector<Game.ComplexCallbackInfo> baseMgr;
+
+		private Dictionary<int, string> releaseInfo = new Dictionary<int, string>();
 	}
 
 	[Serializable]
@@ -1548,6 +1639,8 @@ public class Game : KMonoBehaviour
 		public bool autoPrioritizeRoles;
 
 		public bool advancedPersonalPriorities;
+
+		public Game.SavedInfo savedInfo;
 	}
 
 	public delegate void CansaveCB();

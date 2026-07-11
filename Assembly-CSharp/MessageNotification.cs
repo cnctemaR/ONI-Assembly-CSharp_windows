@@ -4,12 +4,8 @@ using System.Collections.Generic;
 public class MessageNotification : Notification
 {
 	public MessageNotification(Message m)
+		: base(m.GetTitle(), NotificationType.Messages, HashedString.Invalid, null, null, false, 0f, null, null)
 	{
-		string title = m.GetTitle();
-		NotificationType notificationType = NotificationType.Messages;
-		HashedString invalid = HashedString.Invalid;
-		string sound = m.GetSound();
-		base..ctor(title, notificationType, invalid, null, null, false, 0f, null, null, sound);
 		MessageNotification $this = this;
 		this.message = m;
 		if (!this.message.PlayNotificationSound())

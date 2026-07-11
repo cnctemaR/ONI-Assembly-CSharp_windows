@@ -184,6 +184,18 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public void SetTag(Tag tag, bool set)
+	{
+		if (set)
+		{
+			this.AddTag(tag);
+		}
+		else
+		{
+			this.RemoveTag(tag);
+		}
+	}
+
 	public bool HasTag(Tag tag)
 	{
 		bool flag = false;
@@ -266,41 +278,11 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		return string.Concat(new object[] { base.name, "(", this.InstanceID, ")" });
 	}
 
-	public KPrefabID GetOriginalPrefab()
-	{
-		return KPrefabIDTracker.Get().GetOriginalPrefab(this);
-	}
-
 	protected override void OnCleanUp()
 	{
 		this.pendingDestruction = true;
 		KPrefabIDTracker.Get().Unregister(this);
 		base.Trigger(1969584890, null);
-	}
-
-	[Conditional("UNITY_EDITOR")]
-	public void AddLog(global::Logger logger)
-	{
-		if (this.logs == null)
-		{
-			this.logs = new List<global::Logger>();
-		}
-		this.logs.Add(logger);
-	}
-
-	[Conditional("UNITY_EDITOR")]
-	public void RemoveLog(global::Logger logger)
-	{
-		this.logs.Remove(logger);
-		if (this.logs.Count == 0)
-		{
-			this.logs = null;
-		}
-	}
-
-	public List<global::Logger> GetLogs()
-	{
-		return this.logs;
 	}
 
 	[OnDeserialized]
@@ -333,10 +315,6 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	public int InstanceID;
 
 	public int defaultLayer;
-
-	private List<global::Logger> logs;
-
-	private LoggerFSS tagLog = new LoggerFSS("Tags");
 
 	public List<Descriptor> AdditionalRequirements;
 

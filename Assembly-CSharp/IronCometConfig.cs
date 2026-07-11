@@ -1,0 +1,44 @@
+﻿using System;
+using UnityEngine;
+
+public class IronCometConfig : IEntityConfig
+{
+	public GameObject CreatePrefab()
+	{
+		GameObject gameObject = EntityTemplates.CreateEntity(IronCometConfig.ID, IronCometConfig.ID);
+		gameObject.AddOrGet<SaveLoadRoot>();
+		gameObject.AddOrGet<SavedObject>();
+		Comet comet = gameObject.AddComponent<Comet>();
+		comet.massRange = new Vector2(3f, 20f);
+		comet.temperatureRange = new Vector2(323.15f, 423.15f);
+		comet.entityDamage = 15;
+		comet.totalTileDamage = 1f;
+		comet.splashRadius = 1;
+		comet.impactSound = "Meteor_Medium_Impact";
+		comet.flyingSoundID = 1;
+		comet.explosionEffectHash = SpawnFXHashes.MeteorImpactMetal;
+		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
+		primaryElement.SetElement(SimHashes.Iron);
+		primaryElement.Temperature = (comet.temperatureRange.x + comet.temperatureRange.y) / 2f;
+		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim("meteor_metal_kanim") };
+		kbatchedAnimController.isMovable = true;
+		kbatchedAnimController.initialAnim = "fall_loop";
+		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
+		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
+		KCircleCollider2D kcircleCollider2D = gameObject.AddComponent<KCircleCollider2D>();
+		kcircleCollider2D.radius = 0.5f;
+		gameObject.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject go)
+	{
+	}
+
+	public void OnSpawn(GameObject go)
+	{
+	}
+
+	public static string ID = "IronComet";
+}

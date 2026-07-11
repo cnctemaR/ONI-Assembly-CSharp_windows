@@ -21,11 +21,10 @@ public class FertilizerMakerConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.ExhaustKilowattsWhenActive = 0.25f;
-		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
+		buildingDef.ExhaustKilowattsWhenActive = 1f;
+		buildingDef.SelfHeatKilowattsWhenActive = 2f;
 		buildingDef.InputConduitType = ConduitType.Liquid;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
-		buildingDef.MaterialCategory = MATERIALS.ALL_METALS;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
@@ -38,31 +37,43 @@ public class FertilizerMakerConfig : IBuildingConfig
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<WaterPurifier>();
-		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
-		elementDropper.emitMass = 4f;
-		elementDropper.emitTag = new Tag("Fertilizer");
-		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
+		ManualDeliveryKG manualDeliveryKG = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
+		manualDeliveryKG.requestedItemTag = new Tag("Dirt");
+		manualDeliveryKG.capacity = 136.5f;
+		manualDeliveryKG.refillMass = 19.5f;
+		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
+		manualDeliveryKG2.SetStorage(storage);
+		manualDeliveryKG2.requestedItemTag = new Tag("Phosphorite");
+		manualDeliveryKG2.capacity = 54.6f;
+		manualDeliveryKG2.refillMass = 7.7999997f;
+		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
+		conduitConsumer.conduitType = ConduitType.Liquid;
+		conduitConsumer.consumptionRate = 10f;
+		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
+		conduitConsumer.capacityKG = 0.19500001f;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
+		conduitConsumer.forceAlwaysSatisfied = true;
 		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 0.15f)
+			new ElementConverter.ConsumedElement(new Tag("DirtyWater"), 0.039f),
+			new ElementConverter.ConsumedElement(new Tag("Dirt"), 0.065f),
+			new ElementConverter.ConsumedElement(new Tag("Phosphorite"), 0.025999999f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(0.12f, SimHashes.Fertilizer, 323.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
 		};
-		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
-		conduitConsumer.conduitType = ConduitType.Liquid;
-		conduitConsumer.consumptionRate = 10f;
-		conduitConsumer.capacityTag = ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag;
-		conduitConsumer.capacityKG = 0.75f;
-		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
-		conduitConsumer.forceAlwaysSatisfied = true;
 		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
-		buildingElementEmitter.emitRate = 0.02f;
-		buildingElementEmitter.temperature = 303f;
+		buildingElementEmitter.emitRate = 0.01f;
+		buildingElementEmitter.temperature = 349.15f;
 		buildingElementEmitter.element = SimHashes.Methane;
 		buildingElementEmitter.modifierOffset = new Vector2(2f, 2f);
+		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
+		elementDropper.emitMass = 10f;
+		elementDropper.emitTag = new Tag("Fertilizer");
+		elementDropper.emitOffset = new Vector3(0f, 1f, 0f);
 		Prioritizable.AddRef(go);
 	}
 
@@ -90,19 +101,19 @@ public class FertilizerMakerConfig : IBuildingConfig
 
 	public const string ID = "FertilizerMaker";
 
-	public const float METHANE_EMIT_RATE = 0.02f;
+	private const float FERTILIZER_PER_LOAD = 10f;
 
-	private const float _NUM_PLANTS_PER_DUPE = 3f;
+	private const float FERTILIZER_PRODUCTION_RATE = 0.12f;
 
-	private const float _NUM_DUPES = 6f;
+	private const float METHANE_PRODUCTION_RATE = 0.01f;
 
-	private const float _PLANTS_FED = 18f;
+	private const float _TOTAL_PRODUCTION = 0.13f;
 
-	private const float FERTILIZER_PER_LOAD = 4f;
+	private const float DIRT_CONSUMPTION_RATE = 0.065f;
 
-	private const float FERTILIZER_PER_CYCLE = 72f;
+	private const float DIRTY_WATER_CONSUMPTION_RATE = 0.039f;
 
-	private const float WATER_PER_CYCLE = 90f;
+	private const float PHOSPHORITE_CONSUMPTION_RATE = 0.025999999f;
 
 	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(-1, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
 }

@@ -79,7 +79,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Air Systems", "IMPROVEDOXYGEN");
 
-				public static LocString DESC = "Make the air in your colony clean and breathable.";
+				public static LocString DESC = "Make the air in the colony clean and breathable.";
 			}
 
 			public class FARMINGTECH
@@ -107,7 +107,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Animal Control", "ANIMALCONTROL");
 
-				public static LocString DESC = "Useful techniques to manage critter populations in your base.";
+				public static LocString DESC = "Useful techniques to manage critter populations in the colony.";
 			}
 
 			public class FINEDINING
@@ -135,7 +135,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Temperature Modulation", "TEMPERATUREMODULATION");
 
-				public static LocString DESC = "Unlock " + UI.FormatAsLink("Temperature", "HEAT") + " changing technologies to keep your colony at the perfect Kelvin.";
+				public static LocString DESC = "Perfect " + UI.FormatAsLink("Temperature", "HEAT") + " changing technologies to keep my colony at the perfect Kelvin.";
 			}
 
 			public class HVAC
@@ -146,7 +146,7 @@ namespace STRINGS
 				{
 					"Regulate ",
 					UI.FormatAsLink("Temperature", "HEAT"),
-					" in your colony for ",
+					" in the colony for ",
 					UI.FormatAsLink("Plant", "PLANTS"),
 					" cultivation and Duplicant comfort."
 				});
@@ -170,7 +170,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Insulation", "INSULATION");
 
-				public static LocString DESC = "Improve " + UI.FormatAsLink("Heat", "Heat") + " distribution in your base and guard buildings from extreme temperatures.";
+				public static LocString DESC = "Improve " + UI.FormatAsLink("Heat", "Heat") + " distribution in my base and guard buildings from extreme temperatures.";
 			}
 
 			public class PRESSUREMANAGEMENT
@@ -184,7 +184,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Decontamination", "DIRECTEDAIRSTREAMS");
 
-				public static LocString DESC = "Instruments to help you reduce " + UI.FormatAsLink("Germ", "DISEASE") + " spread in your base.";
+				public static LocString DESC = "Instruments to help reduce " + UI.FormatAsLink("Germ", "DISEASE") + " spread in my base.";
 			}
 
 			public class LIQUIDPIPING
@@ -226,7 +226,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Healthcare", "MEDBAY");
 
-				public static LocString DESC = "Prevent injury and " + UI.FormatAsLink("Disease", "DISEASE") + " from running rampant in your colony.";
+				public static LocString DESC = "Prevent injury and " + UI.FormatAsLink("Disease", "DISEASE") + " from running rampant in the colony.";
 			}
 
 			public class ADVANCEDFILTRATION
@@ -317,21 +317,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Advanced Research", "ADVANCEDRESEARCH");
 
-				public static LocString DESC = "The tools your colony needs to conduct more advanced and in depth research.";
+				public static LocString DESC = "The tools my colony needs to conduct more advanced and in-depth research.";
 			}
 
 			public class LOGICCONTROL
 			{
 				public static LocString NAME = UI.FormatAsLink("Automatic Control", "LOGICCONTROL");
 
-				public static LocString DESC = "Use switches to control your buildings.";
+				public static LocString DESC = "Switches for controlling colony buildings.";
 			}
 
 			public class LOGICCIRCUITS
 			{
 				public static LocString NAME = UI.FormatAsLink("Advanced Automation", "LOGICCIRCUITS");
 
-				public static LocString DESC = "Logic gates and wiring to allow you to program your base.";
+				public static LocString DESC = "Logic gates and wiring to allow me to program my base.";
 			}
 
 			public class VALVEMINIATURIZATION
@@ -387,7 +387,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Duplicant Traffic Control", "DUPETRAFFICCONTROL");
 
-				public static LocString DESC = "Prevent your Duplicants from getting into dangerous situations.";
+				public static LocString DESC = "Prevent my Duplicants from getting into dangerous situations.";
 			}
 
 			public class SMELTING
@@ -401,14 +401,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Transit Tubes", "TRAVELTUBES");
 
-				public static LocString DESC = "Get around your base quickly, safely, and in style!";
+				public static LocString DESC = "Get Duplicants around the base quickly, safely, and in style!";
 			}
 
 			public class SMARTSTORAGE
 			{
 				public static LocString NAME = UI.FormatAsLink("Smart Storage", "SMARTSTORAGE");
 
-				public static LocString DESC = "Automate the storage of your solids.";
+				public static LocString DESC = "Automate the storage of solids.";
 			}
 
 			public class SOLIDTRANSPORT
@@ -416,6 +416,27 @@ namespace STRINGS
 				public static LocString NAME = UI.FormatAsLink("Solid Transport", "SOLIDTRANSPORT");
 
 				public static LocString DESC = "Save so much wear and tear on tired Duplicant feet.";
+			}
+
+			public class HIGHTEMPFORGING
+			{
+				public static LocString NAME = UI.FormatAsLink("High-Temperature Forging", "HIGHTEMPFORGING");
+
+				public static LocString DESC = "Heat allows the creation of entirely new materials.";
+			}
+
+			public class SKYDETECTORS
+			{
+				public static LocString NAME = UI.FormatAsLink("Celestial Detection", "SKYDETECTORS");
+
+				public static LocString DESC = "Space: It's not quite as empty as you might think.";
+			}
+
+			public class REFRACTIVEDECOR
+			{
+				public static LocString NAME = UI.FormatAsLink("Refractive Decor", "REFRACTIVEDECOR");
+
+				public static LocString DESC = "The ultimate solution to ugly things? Make them transparent.";
 			}
 		}
 	}

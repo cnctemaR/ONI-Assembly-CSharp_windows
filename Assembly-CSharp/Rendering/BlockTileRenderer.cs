@@ -152,14 +152,15 @@ namespace Rendering
 			GridArea visibleArea = GridVisibleArea.GetVisibleArea();
 			Vector2I vector2I = new Vector2I(visibleArea.Min.x / 16, visibleArea.Min.y / 16);
 			Vector2I vector2I2 = new Vector2I((visibleArea.Max.x + 16 - 1) / 16, (visibleArea.Max.y + 16 - 1) / 16);
-			foreach (BlockTileRenderer.RenderInfo renderInfo in this.renderInfo.Values)
+			foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
 			{
+				BlockTileRenderer.RenderInfo value = keyValuePair.Value;
 				for (int i = vector2I.y; i < vector2I2.y; i++)
 				{
 					for (int j = vector2I.x; j < vector2I2.x; j++)
 					{
-						renderInfo.Rebuild(this, j, i, MeshUtil.vertices, MeshUtil.uvs, MeshUtil.indices, MeshUtil.colours);
-						renderInfo.Render(j, i);
+						value.Rebuild(this, j, i, MeshUtil.vertices, MeshUtil.uvs, MeshUtil.indices, MeshUtil.colours);
+						value.Render(j, i);
 					}
 				}
 			}

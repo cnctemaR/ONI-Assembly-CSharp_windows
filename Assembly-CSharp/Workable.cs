@@ -6,7 +6,6 @@ using KSerialization;
 using STRINGS;
 using TUNING;
 using UnityEngine;
-using UnityEngine.UI;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
@@ -156,7 +155,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	{
 		this.worker = workerToStart;
 		this.UpdateStatusItem(null);
-		this.ShowProgressBar(true);
+		if (this.showProgressBar)
+		{
+			this.ShowProgressBar(true);
+		}
 		this.OnStartWork(this.worker);
 		if (this.OnWorkableEventCB != null)
 		{
@@ -232,8 +234,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		if (this.resetProgressOnStop)
 		{
 			this.workTimeRemaining = this.GetWorkTime();
-			this.ShowProgressBar(false);
 		}
+		this.ShowProgressBar(false);
 		this.worker = null;
 		this.UpdateStatusItem(null);
 	}
@@ -318,40 +320,11 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return this.faceTargetWhenWorking;
 	}
 
-	protected virtual void CreateProgressBar()
-	{
-		if (this.progressBar != null)
-		{
-			return;
-		}
-		if (!this.showProgressBar)
-		{
-			return;
-		}
-		this.progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
-		this.progressBar.SetUpdateFunc(new Func<float>(this.GetPercentComplete));
-		this.progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
-		this.progressBar.name = base.name + "." + base.GetType().Name + " ProgressBar";
-		this.progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
-		this.progressBar.Update();
-		Building component = base.GetComponent<Building>();
-		Vector3 vector = base.gameObject.transform.GetPosition() + Vector3.down * this.progressbar_y_offset;
-		if (component != null)
-		{
-			vector = vector - Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2) + component.Def.placementPivot;
-		}
-		else
-		{
-			vector -= Vector3.right * 0.5f;
-		}
-		this.progressBar.transform.SetPosition(vector);
-	}
-
 	public void ShowProgressBar(bool show)
 	{
 		if (show)
 		{
-			this.CreateProgressBar();
+			this.progressBar = ProgressBar.CreateProgressBar(this, new Func<float>(this.GetPercentComplete));
 		}
 		else if (this.progressBar != null)
 		{

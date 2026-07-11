@@ -25,6 +25,8 @@ namespace FMODUnity
 		PSVita,
 		AppleTV,
 		UWP,
+		Switch,
+		WebGL,
 		Count
 	}
 }

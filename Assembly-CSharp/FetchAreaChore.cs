@@ -50,22 +50,22 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		if (this.smi.deliveries.Count > 0 && this.smi.deliveries[0].destination != null)
 		{
 			string text = DUPLICANTS.CHORES.FETCH.REPORT_NAME;
-			return text.Replace("{0}", this.smi.deliveries[0].destination.GetProperName());
+			return StringFormatter.Replace(DUPLICANTS.CHORES.FETCH.REPORT_NAME, "{0}", this.smi.deliveries[0].destination.GetProperName());
 		}
 		return base.GetReportName();
 	}
 
 	public static void GatherNearbyFetchChores(FetchChore root_chore, Chore.Precondition.Context context, int x, int y, int radius, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts)
 	{
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		GameScenePartitioner.Instance.GatherEntries(x - radius, y - radius, radius * 2 + 1, radius * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, list);
-		for (int i = 0; i < list.Count; i++)
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		GameScenePartitioner.Instance.GatherEntries(x - radius, y - radius, radius * 2 + 1, radius * 2 + 1, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
+		for (int i = 0; i < pooledList.Count; i++)
 		{
-			ScenePartitionerEntry scenePartitionerEntry = list[i];
+			ScenePartitionerEntry scenePartitionerEntry = pooledList[i];
 			Chore chore = scenePartitionerEntry.obj as Chore;
 			chore.CollectChores(context.consumerState, succeeded_contexts, failed_contexts, true);
 		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+		pooledList.Recycle();
 	}
 
 	public class StatesInstance : GameStateMachine<FetchAreaChore.States, FetchAreaChore.StatesInstance, FetchAreaChore, object>.GameInstance
@@ -85,24 +85,24 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num;
 			int num2;
 			Grid.CellToXY(Grid.PosToCell(this.rootChore.destination.transform.GetPosition()), out num, out num2);
-			List<Chore.Precondition.Context> list = ListPool<Chore.Precondition.Context, FetchAreaChore>.Allocate();
-			List<Chore.Precondition.Context> list2 = ListPool<Chore.Precondition.Context, FetchAreaChore>.Allocate();
+			ListPool<Chore.Precondition.Context, FetchAreaChore>.PooledList pooledList = ListPool<Chore.Precondition.Context, FetchAreaChore>.Allocate();
+			ListPool<Chore.Precondition.Context, FetchAreaChore>.PooledList pooledList2 = ListPool<Chore.Precondition.Context, FetchAreaChore>.Allocate();
 			if (this.rootChore.allowMultifetch)
 			{
 				if (context.consumerState.resume != null && context.consumerState.resume.CurrentRole != "NoRole")
 				{
 					RoleConfig role = Game.Instance.roleManager.GetRole(context.consumerState.resume.CurrentRole);
-					role.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, list, list2);
+					role.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, pooledList, pooledList2);
 				}
 				else
 				{
-					FetchAreaChore.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, list, list2);
+					FetchAreaChore.GatherNearbyFetchChores(this.rootChore, context, num, num2, 3, pooledList, pooledList2);
 				}
 			}
 			float num3 = Mathf.Max(1f, Db.Get().Attributes.CarryAmount.Lookup(context.consumerState.consumer).GetTotalValue());
 			Pickupable pickupable = context.data as Pickupable;
-			List<Pickupable> list3 = new List<Pickupable>();
-			list3.Add(pickupable);
+			List<Pickupable> list = new List<Pickupable>();
+			list.Add(pickupable);
 			float num4 = pickupable.UnreservedAmount;
 			float minTakeAmount = pickupable.MinTakeAmount;
 			int num5 = 0;
@@ -111,33 +111,46 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			int num7 = 6;
 			num5 -= num7 / 2;
 			num6 -= num7 / 2;
-			List<ScenePartitionerEntry> list4 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(num5, num6, num7, num7, GameScenePartitioner.Instance.pickupablesLayer, list4);
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList3 = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			GameScenePartitioner.Instance.GatherEntries(num5, num6, num7, num7, GameScenePartitioner.Instance.pickupablesLayer, pooledList3);
 			Tag prefabTag = pickupable.GetComponent<KPrefabID>().PrefabTag;
-			for (int i = 0; i < list4.Count; i++)
+			for (int i = 0; i < pooledList3.Count; i++)
 			{
-				ScenePartitionerEntry scenePartitionerEntry = list4[i];
+				ScenePartitionerEntry scenePartitionerEntry = pooledList3[i];
 				if (num4 > num3)
 				{
 					break;
 				}
 				Pickupable pickupable2 = scenePartitionerEntry.obj as Pickupable;
-				Tag prefabTag2 = pickupable2.GetComponent<KPrefabID>().PrefabTag;
-				if (!list3.Contains(pickupable2) && prefabTag2 == prefabTag && pickupable2.UnreservedAmount > 0f)
+				KPrefabID component = pickupable2.GetComponent<KPrefabID>();
+				if (!(component.PrefabTag != prefabTag))
 				{
-					if (this.rootContext.consumerState.consumer.CanReach(pickupable2))
+					if (pickupable2.UnreservedAmount > 0f)
 					{
-						float unreservedAmount = pickupable2.UnreservedAmount;
-						list3.Add(pickupable2);
-						num4 += unreservedAmount;
-						if (list3.Count >= 10)
+						TagBits tagBits = component.GetTagBits();
+						if (tagBits.HasAll(this.rootChore.requiredTagBits))
 						{
-							break;
+							if (!tagBits.HasAny(this.rootChore.forbiddenTagBits))
+							{
+								if (!list.Contains(pickupable2))
+								{
+									if (this.rootContext.consumerState.consumer.CanReach(pickupable2))
+									{
+										float unreservedAmount = pickupable2.UnreservedAmount;
+										list.Add(pickupable2);
+										num4 += unreservedAmount;
+										if (list.Count >= 10)
+										{
+											break;
+										}
+									}
+								}
+							}
 						}
 					}
 				}
 			}
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list4);
+			pooledList3.Recycle();
 			num4 = Mathf.Min(num3, num4);
 			if (minTakeAmount > 0f)
 			{
@@ -151,13 +164,13 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			}
 			this.deliveries.Add(new FetchAreaChore.StatesInstance.Delivery(this.rootContext, num8, new Action<FetchChore>(this.OnFetchChoreCancelled)));
 			float num9 = num8;
-			for (int j = 0; j < list.Count; j++)
+			for (int j = 0; j < pooledList.Count; j++)
 			{
 				if (num9 >= num4)
 				{
 					break;
 				}
-				Chore.Precondition.Context context2 = list[j];
+				Chore.Precondition.Context context2 = pooledList[j];
 				FetchChore fetchChore = context2.chore as FetchChore;
 				if (fetchChore != this.rootChore && context2.IsSuccess() && fetchChore.overrideTarget == null && fetchChore.driver == null && fetchChore.tagBits.AreEqual(this.rootChore.tagBits))
 				{
@@ -178,20 +191,20 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			num9 = Mathf.Min(num9, num4);
 			float num10 = num9;
 			this.fetchables.Clear();
-			for (int k = 0; k < list3.Count; k++)
+			for (int k = 0; k < list.Count; k++)
 			{
 				if (num10 <= 0f)
 				{
 					break;
 				}
-				Pickupable pickupable3 = list3[k];
+				Pickupable pickupable3 = list[k];
 				num10 -= pickupable3.UnreservedAmount;
 				this.fetchables.Add(pickupable3);
 			}
 			this.fetchAmountRequested = num9;
 			this.reservations.Clear();
-			ListPool<Chore.Precondition.Context, FetchAreaChore>.Free(list);
-			ListPool<Chore.Precondition.Context, FetchAreaChore>.Free(list2);
+			pooledList.Recycle();
+			pooledList2.Recycle();
 		}
 
 		public void End()
@@ -290,7 +303,6 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			Pickupable pickupable = base.sm.deliveryObject.Get<Pickupable>(base.smi);
 			if (pickupable == null || pickupable.TotalAmount <= 0f)
 			{
-				global::Debug.LogWarning("How did the thing that I am holding disappear?", null);
 				base.smi.GoTo(base.sm.delivering.deliverfail);
 			}
 			else
@@ -326,7 +338,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public void SetupDeliverables()
 		{
-			foreach (GameObject gameObject in base.sm.fetcher.Get<Storage>(base.smi))
+			foreach (GameObject gameObject in base.sm.fetcher.Get<Storage>(base.smi).items)
 			{
 				if (!(gameObject == null))
 				{

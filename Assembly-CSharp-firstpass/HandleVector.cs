@@ -8,6 +8,7 @@ public class HandleVector<T>
 	{
 		this.freeHandles = new Stack<HandleVector<T>.Handle>(initial_size);
 		this.items = new List<T>(initial_size);
+		this.versions = new List<byte>(initial_size);
 		this.Initialize(initial_size);
 	}
 
@@ -31,6 +32,7 @@ public class HandleVector<T>
 	{
 		this.items.Clear();
 		this.freeHandles.Clear();
+		this.versions.Clear();
 	}
 
 	private void Initialize(int size)
@@ -42,6 +44,7 @@ public class HandleVector<T>
 				index = i
 			});
 			this.items.Add(default(T));
+			this.versions.Add(0);
 		}
 	}
 
@@ -51,14 +54,15 @@ public class HandleVector<T>
 		if (this.freeHandles.Count > 0)
 		{
 			handle = this.freeHandles.Pop();
-			this.items[handle.index] = item;
+			byte b;
+			int num;
+			this.UnpackHandle(handle, out b, out num);
+			this.items[num] = item;
 		}
 		else
 		{
-			handle = new HandleVector<T>.Handle
-			{
-				index = this.items.Count
-			};
+			this.versions.Add(0);
+			handle = this.PackHandle(this.items.Count);
 			this.items.Add(item);
 		}
 		return handle;
@@ -70,15 +74,61 @@ public class HandleVector<T>
 		{
 			return default(T);
 		}
+		byte b;
+		int num;
+		this.UnpackHandle(handle, out b, out num);
+		b += 1;
+		this.versions[num] = b;
+		handle = this.PackHandle(num);
 		this.freeHandles.Push(handle);
-		T t = this.items[handle.index];
-		this.items[handle.index] = default(T);
+		T t = this.items[num];
+		this.items[num] = default(T);
 		return t;
 	}
 
 	public T GetItem(HandleVector<T>.Handle handle)
 	{
-		return this.items[handle.index];
+		byte b;
+		int num;
+		this.UnpackHandle(handle, out b, out num);
+		return this.items[num];
+	}
+
+	private HandleVector<T>.Handle PackHandle(int index)
+	{
+		byte b = this.versions[index];
+		this.versions[index] = b;
+		HandleVector<T>.Handle handle;
+		handle.index = ((int)b << 24) | index;
+		return handle;
+	}
+
+	public void UnpackHandle(HandleVector<T>.Handle handle, out byte version, out int index)
+	{
+		version = (byte)(handle.index >> 24);
+		index = handle.index & 16777215;
+		if (this.versions[index] != version)
+		{
+			throw new ArgumentException("Accessing mismatched handle version. Expected version=" + this.versions[index].ToString() + " but got version=" + version.ToString());
+		}
+	}
+
+	public void UnpackHandleUnchecked(HandleVector<T>.Handle handle, out byte version, out int index)
+	{
+		version = (byte)(handle.index >> 24);
+		index = handle.index & 16777215;
+	}
+
+	public bool IsValid(HandleVector<T>.Handle handle)
+	{
+		return (handle.index & 16777215) != 16777215;
+	}
+
+	public bool IsVersionValid(HandleVector<T>.Handle handle)
+	{
+		byte b = (byte)(handle.index >> 24);
+		int num = handle.index & 16777215;
+		return b == this.versions[num];
 	}
 
 	public static readonly HandleVector<T>.Handle InvalidHandle = new HandleVector<T>.Handle
@@ -89,6 +139,8 @@ public class HandleVector<T>
 	protected Stack<HandleVector<T>.Handle> freeHandles;
 
 	protected List<T> items;
+
+	protected List<byte> versions;
 
 	[DebuggerDisplay("{index}")]
 	public struct Handle : IComparable<HandleVector<T>.Handle>, IEquatable<HandleVector<T>.Handle>

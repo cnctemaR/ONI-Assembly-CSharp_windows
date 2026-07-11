@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei;
 using Klei.AI;
 using UnityEngine;
@@ -142,14 +141,13 @@ public class SimDebugView : KMonoBehaviour
 		int num3;
 		int num4;
 		Grid.GetVisibleExtents(out num, out num2, out num3, out num4);
-		this.updateSimViewWorkItems.Clear();
 		PathProber pathProber = null;
 		KSelectable selected = SelectTool.Instance.selected;
 		if (selected != null)
 		{
 			pathProber = selected.GetComponent<PathProber>();
 		}
-		SimDebugView.UpdateSimViewSharedData updateSimViewSharedData = new SimDebugView.UpdateSimViewSharedData(this.texBytes, viewMode, this.gameGridMode, pathProber, this);
+		this.updateSimViewWorkItems.Reset(new SimDebugView.UpdateSimViewSharedData(this.texBytes, viewMode, this.gameGridMode, pathProber, this));
 		int num5 = 16;
 		for (int i = num2; i <= num4; i += num5)
 		{
@@ -157,8 +155,8 @@ public class SimDebugView : KMonoBehaviour
 			this.updateSimViewWorkItems.Add(new SimDebugView.UpdateSimViewWorkItem(num, i, num3, num6));
 		}
 		this.currentFrame = Time.frameCount;
-		this.selectedCell = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-		App.instance.jobManager.Run<SimDebugView.UpdateSimViewWorkItem, SimDebugView.UpdateSimViewSharedData>(this.updateSimViewWorkItems, updateSimViewSharedData);
+		this.selectedCell = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
+		App.instance.jobManager.Run(this.updateSimViewWorkItems);
 		texture.LoadRawTextureData(textureBytes);
 		texture.Apply();
 	}
@@ -435,7 +433,14 @@ public class SimDebugView : KMonoBehaviour
 													}
 													if (viewMode == SimViewMode.Light)
 													{
-														return (Grid.LightCount[cell] <= 0 && !LightGridManager.previewLightCells.Contains(cell)) ? new Color32(0, 0, 0, byte.MaxValue) : Lighting.Instance.Settings.LightColour;
+														color = new Color(0.8f, 0.7f, 0.3f, Mathf.Clamp(Mathf.Sqrt((float)(Grid.LightIntensity[cell] + LightGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f));
+														if (Grid.LightIntensity[cell] > 71999)
+														{
+															float num3 = ((float)Grid.LightIntensity[cell] + (float)LightGridManager.previewLux[cell] - 71999f) / 8001f;
+															num3 /= 10f;
+															color.r += Mathf.Min(0.1f, PerlinSimplexNoise.noise(Grid.CellToPos2D(cell).x / 8f, Grid.CellToPos2D(cell).y / 8f + (float)this.currentFrame / 32f) * num3);
+														}
+														return color;
 													}
 													if (viewMode != SimViewMode.StateMap)
 													{
@@ -478,9 +483,9 @@ public class SimDebugView : KMonoBehaviour
 				}
 				else
 				{
-					float num3 = Grid.Element[cell].specificHeatCapacity * Grid.Temperature[cell] * (Grid.Mass[cell] * 1000f);
-					float num4 = 0.5f * num3 / (ElementLoader.FindElementByHash(SimHashes.SandStone).specificHeatCapacity * 294f * 1000000f);
-					color = Color.Lerp(Color.black, Color.red, num4);
+					float num4 = Grid.Element[cell].specificHeatCapacity * Grid.Temperature[cell] * (Grid.Mass[cell] * 1000f);
+					float num5 = 0.5f * num4 / (ElementLoader.FindElementByHash(SimHashes.SandStone).specificHeatCapacity * 294f * 1000000f);
+					color = Color.Lerp(Color.black, Color.red, num5);
 				}
 			}
 			else
@@ -504,7 +509,7 @@ public class SimDebugView : KMonoBehaviour
 			color = ((!Grid.Solid[cell]) ? Color.black : Color.white);
 			break;
 		case SimDebugView.GameGridMode.Lighting:
-			color = ((Grid.LightCount[cell] <= 0 && !LightGridManager.previewLightCells.Contains(cell)) ? Color.black : Color.white);
+			color = ((Grid.LightCount[cell] <= 0 && LightGridManager.previewLux[cell] <= 0) ? Color.black : Color.white);
 			break;
 		case SimDebugView.GameGridMode.DigAmount:
 			if (Grid.Element[cell].IsSolid)
@@ -928,7 +933,7 @@ public class SimDebugView : KMonoBehaviour
 
 	public static SimDebugView Instance;
 
-	private List<SimDebugView.UpdateSimViewWorkItem> updateSimViewWorkItems = new List<SimDebugView.UpdateSimViewWorkItem>();
+	private WorkItemCollection<SimDebugView.UpdateSimViewWorkItem, SimDebugView.UpdateSimViewSharedData> updateSimViewWorkItems = new WorkItemCollection<SimDebugView.UpdateSimViewWorkItem, SimDebugView.UpdateSimViewSharedData>();
 
 	private int selectedCell;
 

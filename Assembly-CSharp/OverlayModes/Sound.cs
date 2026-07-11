@@ -17,7 +17,7 @@ namespace OverlayModes
 				float num = 0.8f;
 				if (np != null)
 				{
-					int num2 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(Input.mousePosition));
+					int num2 = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
 					float noiseForCell = (np as NoisePolluter).GetNoiseForCell(num2);
 					if (noiseForCell < 36f)
 					{

@@ -14,60 +14,81 @@ public class WorldDamage : KMonoBehaviour
 		WorldDamage.Instance = this;
 	}
 
-	public bool ApplyDamage(Sim.WorldDamageInfo damage_info)
+	public void RestoreDamageToValue(int cell, float amount)
 	{
-		return this.ApplyDamage(damage_info.gameCell, this.damageAmount, damage_info.damageSourceOffset, -1);
+		if (Grid.Damage[cell] > amount)
+		{
+			Grid.Damage[cell] = amount;
+		}
 	}
 
-	public bool ApplyDamage(int cell, float amount, int src_cell, int destroy_cb_index = -1)
+	public float ApplyDamage(Sim.WorldDamageInfo damage_info)
 	{
+		int gameCell = damage_info.gameCell;
+		float num = this.damageAmount;
+		int damageSourceOffset = damage_info.damageSourceOffset;
+		string text = BUILDINGS.DAMAGESOURCES.LIQUID_PRESSURE;
+		return this.ApplyDamage(gameCell, num, damageSourceOffset, -1, text, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.LIQUID_PRESSURE);
+	}
+
+	public float ApplyDamage(int cell, float amount, int src_cell, int destroy_cb_index = -1, string source_name = null, string pop_text = null)
+	{
+		float num = 0f;
 		if (Grid.Solid[cell])
 		{
-			float num = Grid.Damage[cell];
-			num += amount;
-			bool flag = num > 0.15f;
+			float num2 = Grid.Damage[cell];
+			num = Mathf.Min(amount, 1f - num2);
+			num2 += amount;
+			bool flag = num2 > 0.15f;
 			if (flag)
 			{
 				GameObject gameObject = Grid.Objects[cell, 9];
-				if (gameObject != null && gameObject.GetComponent<BuildingHP>() != null)
+				if (gameObject != null)
 				{
-					gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+					BuildingHP component = gameObject.GetComponent<BuildingHP>();
+					if (component != null)
 					{
-						damage = 10,
-						source = BUILDINGS.DAMAGESOURCES.LIQUID_PRESSURE,
-						popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.LIQUID_PRESSURE
-					});
-					num = 0f;
+						float num3 = (float)component.HitPoints - (1f - num2) * (float)component.MaxHitPoints;
+						int num4 = Mathf.RoundToInt(Mathf.Max(num3, 0f));
+						gameObject.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+						{
+							damage = num4,
+							source = source_name,
+							popString = pop_text
+						});
+					}
 				}
 			}
-			Grid.Damage[cell] = Mathf.Min(1f, num);
+			Grid.Damage[cell] = Mathf.Min(1f, num2);
 			if (Grid.Damage[cell] >= 1f)
 			{
 				this.DestroyCell(cell, destroy_cb_index);
-				return true;
 			}
-			if (src_cell != -1 && flag)
+			else if (Grid.IsValidCell(src_cell) && flag)
 			{
 				Element element = Grid.Element[src_cell];
 				if (element.IsLiquid && Grid.Mass[src_cell] > 1f)
 				{
-					int num2 = cell - src_cell;
-					if (num2 == 1 || num2 == -1 || num2 == Grid.WidthInCells || num2 == -Grid.WidthInCells)
+					int num5 = cell - src_cell;
+					if (num5 == 1 || num5 == -1 || num5 == Grid.WidthInCells || num5 == -Grid.WidthInCells)
 					{
-						int num3 = cell + num2;
-						Element element2 = Grid.Element[num3];
-						if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Mass[num3] <= 100f)) && (Grid.Properties[num3] & 2) == 0 && !this.spawnTimes.ContainsKey(num3))
+						int num6 = cell + num5;
+						if (Grid.IsValidCell(num6))
 						{
-							this.spawnTimes[num3] = Time.realtimeSinceStartup;
-							int elementIndex = ElementLoader.GetElementIndex(element.id);
-							float num4 = Grid.Temperature[src_cell];
-							base.StartCoroutine(this.DelayedSpawnFX(src_cell, num3, num2, element, elementIndex, num4));
+							Element element2 = Grid.Element[num6];
+							if (!element2.IsSolid && (!element2.IsLiquid || (element2.id == element.id && Grid.Mass[num6] <= 100f)) && (Grid.Properties[num6] & 2) == 0 && !this.spawnTimes.ContainsKey(num6))
+							{
+								this.spawnTimes[num6] = Time.realtimeSinceStartup;
+								int elementIndex = ElementLoader.GetElementIndex(element.id);
+								float num7 = Grid.Temperature[src_cell];
+								base.StartCoroutine(this.DelayedSpawnFX(src_cell, num6, num5, element, elementIndex, num7));
+							}
 						}
 					}
 				}
 			}
 		}
-		return false;
+		return num;
 	}
 
 	private void ReleaseGO(GameObject go)

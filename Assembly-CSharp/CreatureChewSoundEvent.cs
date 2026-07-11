@@ -11,14 +11,14 @@ public class CreatureChewSoundEvent : SoundEvent
 
 	public override void OnPlay(AnimEventManager.EventPlayerData behaviour)
 	{
-		string sound = GlobalAssets.GetSound(base.name + "_" + CreatureChewSoundEvent.GetChewSound(behaviour), false);
+		string sound = GlobalAssets.GetSound(StringFormatter.Combine(base.name, "_", CreatureChewSoundEvent.GetChewSound(behaviour)), false);
 		if (SoundEvent.ShouldPlaySound(behaviour, sound, base.looping, this.isDynamic))
 		{
 			Vector3 position = behaviour.GetComponent<Transform>().GetPosition();
 			EventInstance eventInstance = SoundEvent.BeginOneShot(sound, position);
 			if (behaviour.controller.gameObject.GetDef<BabyMonitor.Def>() != null)
 			{
-				eventInstance.setParameterValue(CreatureChewSoundEvent.IS_BABY_ID, 1f);
+				eventInstance.setParameterValue("isBaby", 1f);
 			}
 			SoundEvent.EndOneShot(eventInstance);
 		}
@@ -45,5 +45,5 @@ public class CreatureChewSoundEvent : SoundEvent
 
 	private static string DEFAULT_CHEW_SOUND = "Rock";
 
-	private static ParameterID IS_BABY_ID = new ParameterID("isBaby");
+	private const string FMOD_PARAM_IS_BABY_ID = "isBaby";
 }

@@ -20,13 +20,14 @@ public class AirConditionerConfig : IBuildingConfig
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier2, 0.2f);
 		BuildingTemplates.CreateElectricalBuildingDef(buildingDef);
-		buildingDef.ViewMode = SimViewMode.PowerMap;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0f;
 		buildingDef.ThermalConductivity = 5f;
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.OutputConduitType = ConduitType.Gas;
 		buildingDef.PowerInputOffset = new CellOffset(1, 0);
+		buildingDef.PermittedRotations = PermittedRotations.FlipH;
+		buildingDef.ViewMode = SimViewMode.GasVentMap;
 		return buildingDef;
 	}
 

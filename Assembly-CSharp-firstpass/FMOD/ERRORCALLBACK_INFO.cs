@@ -1,34 +1,17 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace FMOD
 {
 	public struct ERRORCALLBACK_INFO
 	{
-		public string functionname
-		{
-			get
-			{
-				return Marshal.PtrToStringAnsi(this.functionname_internal);
-			}
-		}
-
-		public string functionparams
-		{
-			get
-			{
-				return Marshal.PtrToStringAnsi(this.functionparams_internal);
-			}
-		}
-
 		public RESULT result;
 
 		public ERRORCALLBACK_INSTANCETYPE instancetype;
 
 		public IntPtr instance;
 
-		private IntPtr functionname_internal;
+		public StringWrapper functionname;
 
-		private IntPtr functionparams_internal;
+		public StringWrapper functionparams;
 	}
 }

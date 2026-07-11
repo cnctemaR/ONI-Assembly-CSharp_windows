@@ -167,6 +167,11 @@ public class Grid
 		return Grid.PosToCell(cmp.transform.GetPosition());
 	}
 
+	public static bool IsValidBuildingCell(int cell)
+	{
+		return cell >= 0 && cell < Grid.CellCount - Grid.WidthInCells * Grid.TopBorderHeight;
+	}
+
 	public static bool IsValidCell(int cell)
 	{
 		return cell >= 0 && cell < Grid.CellCount;
@@ -507,14 +512,15 @@ public class Grid
 		int num11 = num9 >> 1;
 		for (int i = 0; i <= num9; i++)
 		{
+			int num12 = Grid.XYToCell(x, y);
 			bool flag;
 			if (all_tiles_block)
 			{
-				flag = Grid.Solid[Grid.XYToCell(x, y)];
+				flag = !Grid.Transparent[num12] && Grid.Solid[num12];
 			}
 			else
 			{
-				flag = Grid.Element[Grid.XYToCell(x, y)].IsSolid;
+				flag = !Grid.Transparent[num12] && Grid.Element[num12].IsSolid;
 			}
 			if ((x != num || y != num2) && flag)
 			{
@@ -572,6 +578,8 @@ public class Grid
 
 	public static int InvalidCell = -1;
 
+	public static int TopBorderHeight = 2;
+
 	public unsafe static byte* elementIdx;
 
 	public unsafe static float* temperature;
@@ -587,6 +595,8 @@ public class Grid
 	public unsafe static byte* diseaseIdx;
 
 	public unsafe static int* diseaseCount;
+
+	public unsafe static byte* exposedToSunlight;
 
 	public unsafe static float* AccumulatedFlowValues = null;
 
@@ -622,9 +632,13 @@ public class Grid
 
 	public static float[] Decor;
 
+	public static bool[] GravitasFacility;
+
 	public static float[] Loudness;
 
 	public static Grid.PressureIndexer Pressure;
+
+	public static Grid.TransparentIndexer Transparent;
 
 	public static Grid.ElementIdxIndexer ElementIdx;
 
@@ -634,6 +648,8 @@ public class Grid
 
 	public static Grid.PropertiesIndexer Properties;
 
+	public static Grid.ExposedToSunlightIndexer ExposedToSunlight;
+
 	public static Grid.StrengthInfoIndexer StrengthInfo;
 
 	public static Grid.Insulationndexer Insulation;
@@ -641,6 +657,8 @@ public class Grid
 	public static Grid.DiseaseIdxIndexer DiseaseIdx;
 
 	public static Grid.DiseaseCountIndexer DiseaseCount;
+
+	public static Grid.LightIntensityIndexer LightIntensity;
 
 	public static Grid.AccumulatedFlowIndexer AccumulatedFlow;
 
@@ -664,7 +682,7 @@ public class Grid
 
 	public static Element[] Element;
 
-	public static byte[] LightCount;
+	public static int[] LightCount;
 
 	public static Grid.ObjectLayerIndexer Objects;
 
@@ -758,6 +776,17 @@ public class Grid
 		}
 	}
 
+	public struct TransparentIndexer
+	{
+		public unsafe bool this[int i]
+		{
+			get
+			{
+				return (Grid.properties[i] & 16) != 0;
+			}
+		}
+	}
+
 	public struct ElementIdxIndexer
 	{
 		public unsafe byte this[int i]
@@ -798,6 +827,17 @@ public class Grid
 			get
 			{
 				return Grid.properties[i];
+			}
+		}
+	}
+
+	public struct ExposedToSunlightIndexer
+	{
+		public unsafe byte this[int i]
+		{
+			get
+			{
+				return Grid.exposedToSunlight[i];
 			}
 		}
 	}
@@ -853,6 +893,19 @@ public class Grid
 			get
 			{
 				return Grid.AccumulatedFlowValues[i];
+			}
+		}
+	}
+
+	public struct LightIntensityIndexer
+	{
+		public unsafe int this[int i]
+		{
+			get
+			{
+				int num = (int)((float)Grid.exposedToSunlight[i] / 255f * Game.Instance.currentSunlightIntensity);
+				int num2 = Grid.LightCount[i];
+				return num + num2;
 			}
 		}
 	}
@@ -942,7 +995,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.BitFields[i] & 2) != 0;
+				return (Grid.BitFields[i] & 512) != 0;
 			}
 			set
 			{

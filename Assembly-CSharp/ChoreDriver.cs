@@ -124,7 +124,7 @@ public class ChoreDriver : StateMachineComponent<ChoreDriver.StatesInstance>
 					Chore chore = this.currentChore.Get(smi);
 					if (chore != null)
 					{
-						ReportManager.Instance.ReportValue(ReportManager.ReportType.TimeSpent, dt, string.Format(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, chore.GetReportName()), smi.master.context.consumerState.consumer.GetProperName());
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.TimeSpent, dt, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.TIME_SPENT, "{0}", chore.GetReportName()), smi.master.context.consumerState.consumer.GetProperName());
 					}
 				}, UpdateRate.SIM_200ms, false);
 		}

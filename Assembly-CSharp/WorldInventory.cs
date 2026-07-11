@@ -144,6 +144,11 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		return flag;
 	}
 
+	public bool TryGetDiscoveredResourcesFromTag(Tag tag, out HashSet<Tag> resources)
+	{
+		return this.DiscoveredCategories.TryGetValue(tag, out resources);
+	}
+
 	public HashSet<Tag> GetDiscoveredResourcesFromTag(Tag tag)
 	{
 		HashSet<Tag> hashSet;

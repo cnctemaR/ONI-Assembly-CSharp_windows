@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
+public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderControl, ISliderControl
 {
 	public string SliderTitleKey
 	{
@@ -113,12 +112,12 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 			this.meter.SetPositionPercent(num);
 		}
 		ushort circuitID = base.CircuitID;
-		this.operational.SetFlag(EnergyGenerator.wireConnectedFlag, circuitID != ushort.MaxValue);
+		this.operational.SetFlag(Generator.wireConnectedFlag, circuitID != ushort.MaxValue);
 		bool flag = false;
 		if (this.operational.IsOperational)
 		{
 			bool flag2 = false;
-			ReadOnlyCollection<Battery> batteriesOnCircuit = Game.Instance.circuitManager.GetBatteriesOnCircuit(circuitID);
+			List<Battery> batteriesOnCircuit = Game.Instance.circuitManager.GetBatteriesOnCircuit(circuitID);
 			if (!this.ignoreBatteryRefillPercent && batteriesOnCircuit.Count > 0)
 			{
 				foreach (Battery battery in batteriesOnCircuit)
@@ -255,7 +254,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 		{
 			formula.outputs = new EnergyGenerator.OutputItem[]
 			{
-				new EnergyGenerator.OutputItem(output_element, output_mass_rate, store_output_mass)
+				new EnergyGenerator.OutputItem(output_element, output_mass_rate, store_output_mass, 0f)
 			};
 		}
 		else
@@ -289,18 +288,19 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 		{
 			int num2 = Grid.PosToCell(base.transform.GetPosition());
 			int num3 = Grid.OffsetCell(num2, output.emitOffset);
+			float num4 = Mathf.Max(root_pe.Temperature, output.minTemperature);
 			if (element.IsGas)
 			{
-				SimMessages.ModifyMass(num3, num, byte.MaxValue, 0, CellEventLogger.Instance.EnergyGeneratorModifyMass, root_pe.Temperature, output.element);
+				SimMessages.ModifyMass(num3, num, byte.MaxValue, 0, CellEventLogger.Instance.EnergyGeneratorModifyMass, num4, output.element);
 			}
 			else if (element.IsLiquid)
 			{
 				int elementIndex = ElementLoader.GetElementIndex(output.element);
-				FallingWater.instance.AddParticle(num3, (byte)elementIndex, num, root_pe.Temperature, byte.MaxValue, 0, false, false, false, false);
+				FallingWater.instance.AddParticle(num3, (byte)elementIndex, num, num4, byte.MaxValue, 0, true, false, false, false);
 			}
 			else
 			{
-				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Front), num, root_pe.Temperature, byte.MaxValue, 0, true, false);
+				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Front), num, num4, byte.MaxValue, 0, true, false);
 			}
 		}
 	}
@@ -330,8 +330,6 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 
 	private MeterController meter;
 
-	private static Operational.Flag wireConnectedFlag = new Operational.Flag("generatorWireConnected", Operational.Flag.Type.Requirement);
-
 	[DebuggerDisplay("{tag} -{consumptionRate} kg/s")]
 	[Serializable]
 	public struct InputItem
@@ -354,17 +352,18 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 	[Serializable]
 	public struct OutputItem
 	{
-		public OutputItem(SimHashes element, float creation_rate, bool store)
+		public OutputItem(SimHashes element, float creation_rate, bool store, float min_temperature = 0f)
 		{
-			this = new EnergyGenerator.OutputItem(element, creation_rate, store, CellOffset.none);
+			this = new EnergyGenerator.OutputItem(element, creation_rate, store, CellOffset.none, min_temperature);
 		}
 
-		public OutputItem(SimHashes element, float creation_rate, bool store, CellOffset emit_offset)
+		public OutputItem(SimHashes element, float creation_rate, bool store, CellOffset emit_offset, float min_temperature = 0f)
 		{
 			this.element = element;
 			this.creationRate = creation_rate;
 			this.store = store;
 			this.emitOffset = emit_offset;
+			this.minTemperature = min_temperature;
 		}
 
 		public SimHashes element;
@@ -374,6 +373,8 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISliderControl
 		public bool store;
 
 		public CellOffset emitOffset;
+
+		public float minTemperature;
 	}
 
 	[Serializable]

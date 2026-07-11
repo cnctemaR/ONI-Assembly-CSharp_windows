@@ -63,6 +63,14 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				break;
 			}
 		}
+		if (list != null)
+		{
+			list.RemoveAll((Wire x) => x == null);
+		}
+		if (list2 != null)
+		{
+			list2.RemoveAll((WireUtilityNetworkLink x) => x == null);
+		}
 		if (flag)
 		{
 			this.timeOverloaded += dt;
@@ -91,7 +99,7 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				if (this.overloadedNotification == null)
 				{
 					this.timeOverloadNotificationDisplayed = 0f;
-					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null, null);
+					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null);
 					Notifier notifier = Game.Instance.FindOrAdd<Notifier>();
 					notifier.Add(this.overloadedNotification, string.Empty);
 					this.overloadedNotification.Position = this.targetOverloadedWire.transform.GetPosition();

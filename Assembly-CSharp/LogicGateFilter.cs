@@ -4,7 +4,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class LogicGateFilter : LogicGate, ISliderControl
+public class LogicGateFilter : LogicGate, ISingleSliderControl, ISliderControl
 {
 	public float DelayAmount
 	{

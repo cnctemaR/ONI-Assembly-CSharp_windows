@@ -10,7 +10,7 @@ public class NameDisplayScreen : KScreen
 	{
 		base.OnSpawn();
 		UIRegistry.nameDisplayScreen = this;
-		foreach (Health health2 in Components.Health)
+		foreach (Health health2 in Components.Health.Items)
 		{
 			this.RegisterComponent(health2.gameObject, health2);
 		}
@@ -18,7 +18,7 @@ public class NameDisplayScreen : KScreen
 		{
 			this.RegisterComponent(health.gameObject, health);
 		}, null);
-		foreach (Equipment equipment2 in Components.Equipment)
+		foreach (Equipment equipment2 in Components.Equipment.Items)
 		{
 			this.RegisterComponent(equipment2.gameObject, equipment2);
 		}

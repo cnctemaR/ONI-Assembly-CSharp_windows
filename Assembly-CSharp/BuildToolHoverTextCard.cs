@@ -17,7 +17,7 @@ public class BuildToolHoverTextCard : HoverTextConfiguration
 		}
 		base.DrawTitle(instance, hoverTextDrawer);
 		base.DrawInstructions(instance, hoverTextDrawer);
-		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
 		int num2 = 26;
 		int num3 = 8;
 		if (this.currentDef != null)

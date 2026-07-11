@@ -11,13 +11,10 @@ internal class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Ins
 		string text2 = CREATURES.STATUSITEMS.TRAPPED.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
-		this.trapped.PlayAnim("trapped_pre").QueueAnim("trapped", true, null).TagTransition(GameTags.Trapped, this.pst, true);
-		this.pst.PlayAnim("escape").OnAnimQueueComplete(null);
+		this.trapped.ToggleTag(GameTags.Creatures.Deliverable).PlayAnim("trapped", KAnim.PlayMode.Loop).TagTransition(GameTags.Trapped, null, true);
 	}
 
 	private GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>.State trapped;
-
-	private GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>.State pst;
 
 	public class Def : StateMachine.BaseDef
 	{

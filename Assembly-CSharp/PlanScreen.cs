@@ -83,7 +83,7 @@ public class PlanScreen : KIconToggleMenu
 				global::Action action = ((i >= 12) ? global::Action.NumActions : (global::Action.Plan1 + i));
 				string text = PlanScreen.iconNameMap[planInfo.category];
 				string text2 = planInfo.category.ToString().ToUpper();
-				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".NAME"), text, planInfo.category, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".TOOLTIP"), string.Empty);
+				KIconToggleMenu.ToggleInfo toggleInfo = new KIconToggleMenu.ToggleInfo(UI.StripLinkFormatting(Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".NAME")), text, planInfo.category, action, Strings.Get("STRINGS.UI.BUILDCATEGORIES." + text2 + ".TOOLTIP"), string.Empty);
 				list.Add(toggleInfo);
 				PlanScreen.PopulateOrderInfo(planInfo.category, planInfo.data, this.tagCategoryMap, this.tagOrderMap, ref num);
 				List<BuildingDef> list2 = new List<BuildingDef>();
@@ -208,7 +208,7 @@ public class PlanScreen : KIconToggleMenu
 			num = Assets.BuildingDefs.Length;
 			this.buildable_state_update_idx = 0;
 		}
-		List<PlanScreen.PlanCategory> list = new List<PlanScreen.PlanCategory>();
+		ListPool<PlanScreen.PlanCategory, PlanScreen>.PooledList pooledList = ListPool<PlanScreen.PlanCategory, PlanScreen>.Allocate();
 		for (int i = 0; i < num; i++)
 		{
 			this.buildable_state_update_idx = (this.buildable_state_update_idx + 1) % Assets.BuildingDefs.Length;
@@ -254,9 +254,9 @@ public class PlanScreen : KIconToggleMenu
 								{
 									string text = "NotificationPing";
 									Animator component = toggleInfo.toggle.GetComponent<Animator>();
-									if (!component.GetCurrentAnimatorStateInfo(0).IsTag(text) && !list.Contains(planCategory))
+									if (!component.GetCurrentAnimatorStateInfo(0).IsTag(text) && !pooledList.Contains(planCategory))
 									{
-										list.Add(planCategory);
+										pooledList.Add(planCategory);
 										toggleInfo.toggle.gameObject.GetComponent<Animator>().Play(text);
 										if (KTime.Instance.UnscaledGameTime - this.initTime > 1.5f)
 										{
@@ -287,6 +287,7 @@ public class PlanScreen : KIconToggleMenu
 				}
 			}
 		}
+		pooledList.Recycle();
 	}
 
 	private void SetCategoryButtonState()
@@ -508,7 +509,7 @@ public class PlanScreen : KIconToggleMenu
 	private GameObject CreateButton(BuildingDef def, GameObject parent, string plan_category, int btnIndex)
 	{
 		GameObject button_go = global::Util.KInstantiateUI(this.planButtonPrefab, parent, true);
-		button_go.name = def.name + " Group:" + plan_category;
+		button_go.name = UI.StripLinkFormatting(def.name) + " Group:" + plan_category;
 		KToggle componentInChildren = button_go.GetComponentInChildren<KToggle>();
 		componentInChildren.soundPlayer.Enabled = false;
 		this.ActiveToggles.Add(def, componentInChildren);

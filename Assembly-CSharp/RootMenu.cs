@@ -199,7 +199,7 @@ public class RootMenu : KScreen
 	{
 		HashSet<Tag> hashSet = new HashSet<Tag>();
 		List<KToggleMenu.ToggleInfo> list = new List<KToggleMenu.ToggleInfo>();
-		foreach (Pickupable pickupable in Components.Pickupables)
+		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{
 			KPrefabID kprefabID = pickupable.KPrefabID;
 			if (kprefabID.HasTag(GameTags.Filler) && hashSet.Add(kprefabID.PrefabTag))

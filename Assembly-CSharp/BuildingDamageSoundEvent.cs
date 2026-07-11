@@ -25,7 +25,7 @@ public class BuildingDamageSoundEvent : SoundEvent
 			if (component2 != null)
 			{
 				BuildingDef def = component2.Def;
-				string text = base.name + "_" + def.AudioCategory;
+				string text = StringFormatter.Combine(base.name, "_", def.AudioCategory);
 				string text2 = GlobalAssets.GetSound(text, false);
 				if (text2 == null)
 				{

@@ -39,7 +39,7 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 		CellOffset rotatedOffset = this.building.GetRotatedOffset(this.portInfo.offset);
 		this.filteredCell = Grid.OffsetCell(num, rotatedOffset);
 		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.portInfo.conduitType);
-		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.portInfo.conduitType, Endpoint.Source, this.filteredCell);
+		this.itemFilter = new FlowUtilityNetwork.NetworkItem(this.portInfo.conduitType, Endpoint.Source, this.filteredCell, base.gameObject);
 		networkManager.AddToNetworks(this.filteredCell, this.itemFilter, true);
 		base.GetComponent<ConduitConsumer>().isConsuming = false;
 		this.OnFilterChanged(ElementLoader.FindElementByHash(this.filteredElem).tag);

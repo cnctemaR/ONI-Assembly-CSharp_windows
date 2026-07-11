@@ -200,7 +200,7 @@ public class MinMaxSlider : KMonoBehaviour
 		{
 			this.lockRange = shouldLock;
 			this.range = this.maxSlider.value - this.minSlider.value;
-			this.mousePos = Input.mousePosition;
+			this.mousePos = KInputManager.GetMousePos();
 		}
 	}
 
@@ -228,13 +228,13 @@ public class MinMaxSlider : KMonoBehaviour
 		}
 		if (this.lockRange && this.lockType == MinMaxSlider.LockingType.Drag)
 		{
-			float num = Input.mousePosition.x - this.mousePos.x;
+			float num = KInputManager.GetMousePos().x - this.mousePos.x;
 			if (this.direction == Slider.Direction.TopToBottom || this.direction == Slider.Direction.BottomToTop)
 			{
-				num = Input.mousePosition.y - this.mousePos.y;
+				num = KInputManager.GetMousePos().y - this.mousePos.y;
 			}
 			this.currentMinValue = Mathf.Max(this.currentMinValue + num, this.minLimit);
-			this.mousePos = Input.mousePosition;
+			this.mousePos = KInputManager.GetMousePos();
 		}
 	}
 

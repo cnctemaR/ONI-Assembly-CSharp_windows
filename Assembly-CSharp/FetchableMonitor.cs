@@ -56,7 +56,7 @@ public class FetchableMonitor : GameStateMachine<FetchableMonitor, FetchableMoni
 
 		public bool IsFetchable()
 		{
-			return !base.sm.forceUnfetchable.Get(this) && this.pickupable != null && !this.pickupable.IsEntombed && this.pickupable.IsReachable() && (this.equippable == null || !this.equippable.isEquipped);
+			return !base.sm.forceUnfetchable.Get(this) && !this.pickupable.IsEntombed && this.pickupable.IsReachable() && (!(this.equippable != null) || !this.equippable.isEquipped);
 		}
 
 		private Pickupable pickupable;

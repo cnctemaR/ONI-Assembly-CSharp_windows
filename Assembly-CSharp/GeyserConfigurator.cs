@@ -121,6 +121,20 @@ public class GeyserConfigurator : KMonoBehaviour
 	[Serializable]
 	public class GeyserInstanceConfiguration
 	{
+		private void Init()
+		{
+			if (this.didInit)
+			{
+				return;
+			}
+			this.didInit = true;
+			this.scaledRate = this.Resample(this.rateRoll, this.geyserType.minRatePerCycle, this.geyserType.maxRatePerCycle);
+			this.scaledIterationLength = this.Resample(this.iterationLengthRoll, this.geyserType.minIterationLength, this.geyserType.maxIterationLength);
+			this.scaledIterationPercent = this.Resample(this.iterationPercentRoll, this.geyserType.minIterationPercent, this.geyserType.maxIterationPercent);
+			this.scaledYearLength = this.Resample(this.yearLengthRoll, this.geyserType.minYearLength, this.geyserType.maxYearLength);
+			this.scaledYearPercent = this.Resample(this.yearPercentRoll, this.geyserType.minYearPercent, this.geyserType.maxYearPercent);
+		}
+
 		public GeyserConfigurator.GeyserType geyserType
 		{
 			get
@@ -136,12 +150,14 @@ public class GeyserConfigurator : KMonoBehaviour
 
 		public float GetIterationLength()
 		{
-			return Mathf.Lerp(this.geyserType.minIterationLength, this.geyserType.maxIterationLength, this.iterationLengthRoll);
+			this.Init();
+			return this.scaledIterationLength;
 		}
 
 		public float GetIterationPercent()
 		{
-			return Mathf.Lerp(this.geyserType.minIterationPercent, this.geyserType.maxIterationPercent, this.iterationPercentRoll);
+			this.Init();
+			return this.scaledIterationPercent;
 		}
 
 		public float GetOnDuration()
@@ -156,7 +172,8 @@ public class GeyserConfigurator : KMonoBehaviour
 
 		public float GetMassPerCycle()
 		{
-			return Mathf.Lerp(this.geyserType.minRatePerCycle, this.geyserType.maxRatePerCycle, this.rateRoll);
+			this.Init();
+			return this.scaledRate;
 		}
 
 		public float GetEmitRate()
@@ -168,12 +185,14 @@ public class GeyserConfigurator : KMonoBehaviour
 
 		public float GetYearLength()
 		{
-			return Mathf.Lerp(this.geyserType.minYearLength, this.geyserType.maxYearLength, this.yearLengthRoll);
+			this.Init();
+			return this.scaledYearLength;
 		}
 
 		public float GetYearPercent()
 		{
-			return Mathf.Lerp(this.geyserType.minYearPercent, this.geyserType.maxYearPercent, this.yearPercentRoll);
+			this.Init();
+			return this.scaledYearPercent;
 		}
 
 		public float GetYearOnDuration()
@@ -206,6 +225,16 @@ public class GeyserConfigurator : KMonoBehaviour
 			return this.geyserType.diseaseInfo.count;
 		}
 
+		private float Resample(float t, float min, float max)
+		{
+			float num = 6f;
+			float num2 = 0.002472623f;
+			float num3 = t * (1f - num2 * 2f) + num2;
+			float num4 = -Mathf.Log(1f / num3 - 1f);
+			num4 = (num4 + num) / (num * 2f);
+			return num4 * (max - min) + min;
+		}
+
 		public HashedString typeId;
 
 		public float rateRoll;
@@ -217,5 +246,17 @@ public class GeyserConfigurator : KMonoBehaviour
 		public float yearLengthRoll;
 
 		public float yearPercentRoll;
+
+		private float scaledRate;
+
+		private float scaledIterationLength;
+
+		private float scaledIterationPercent;
+
+		private float scaledYearLength;
+
+		private float scaledYearPercent;
+
+		private bool didInit;
 	}
 }

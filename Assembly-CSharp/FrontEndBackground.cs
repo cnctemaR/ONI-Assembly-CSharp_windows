@@ -6,6 +6,7 @@ public class FrontEndBackground : UIDupeRandomizer
 {
 	protected override void Start()
 	{
+		this.tuning = TuningData<FrontEndBackground.Tuning>.Get();
 		this.SetupCameras();
 		base.Start();
 		for (int i = 0; i < this.anims.Length; i++)
@@ -20,7 +21,7 @@ public class FrontEndBackground : UIDupeRandomizer
 		}
 		this.dreckoController = base.transform.GetChild(0).Find("startmenu_drecko").GetComponent<KBatchedAnimController>();
 		this.dreckoController.enabled = false;
-		this.nextDreckoTime = global::UnityEngine.Random.Range(3f, 5f) + Time.unscaledTime;
+		this.nextDreckoTime = global::UnityEngine.Random.Range(this.tuning.minFirstDreckoInterval, this.tuning.maxFirstDreckoInterval) + Time.unscaledTime;
 	}
 
 	private void Update()
@@ -29,7 +30,7 @@ public class FrontEndBackground : UIDupeRandomizer
 		{
 			this.dreckoController.enabled = true;
 			this.dreckoController.Play("idle", KAnim.PlayMode.Once, 1f, 0f);
-			this.nextDreckoTime = global::UnityEngine.Random.Range(this.minDreckoInterval, this.maxDreckoInterval) + Time.unscaledTime;
+			this.nextDreckoTime = global::UnityEngine.Random.Range(this.tuning.minDreckoInterval, this.tuning.maxDreckoInterval) + Time.unscaledTime;
 		}
 	}
 
@@ -63,12 +64,21 @@ public class FrontEndBackground : UIDupeRandomizer
 
 	private KBatchedAnimController dreckoController;
 
-	private float minDreckoInterval = 15f;
-
-	private float maxDreckoInterval = 30f;
-
 	private float nextDreckoTime;
+
+	private FrontEndBackground.Tuning tuning;
 
 	[NonSerialized]
 	public Camera baseCamera;
+
+	public class Tuning : TuningData<FrontEndBackground.Tuning>
+	{
+		public float minDreckoInterval;
+
+		public float maxDreckoInterval;
+
+		public float minFirstDreckoInterval;
+
+		public float maxFirstDreckoInterval;
+	}
 }

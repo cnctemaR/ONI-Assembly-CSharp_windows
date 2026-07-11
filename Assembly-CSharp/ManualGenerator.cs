@@ -6,7 +6,7 @@ using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ManualGenerator : Workable, ISliderControl
+public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 {
 	private ManualGenerator()
 	{

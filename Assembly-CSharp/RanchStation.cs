@@ -120,13 +120,13 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			{
 				this.TriggerRanchStationNoLongerAvailable();
 			}
-			if (this.targetRanchable == null)
+			if (this.targetRanchable.IsNullOrStopped())
 			{
 				RanchStation.Instance.RanchableIterator ranchableIterator = new RanchStation.Instance.RanchableIterator(this, cavityForCell, num);
 				GameScenePartitioner.Instance.Iterate<RanchStation.Instance.RanchableIterator>(cavityForCell.minX, cavityForCell.minY, cavityForCell.maxX - cavityForCell.minX + 1, cavityForCell.maxY - cavityForCell.minY + 1, GameScenePartitioner.Instance.collisionLayer, ref ranchableIterator);
 				ranchableIterator.Cleanup();
 				this.targetRanchable = ranchableIterator.result;
-				if (this.targetRanchable != null)
+				if (!this.targetRanchable.IsNullOrStopped())
 				{
 					this.targetRanchable.targetRanchStation = this;
 				}
@@ -135,7 +135,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public void TriggerRanchStationNoLongerAvailable()
 		{
-			if (this.targetRanchable != null && this.targetRanchable.IsRunning())
+			if (!this.targetRanchable.IsNullOrStopped())
 			{
 				this.targetRanchable.targetRanchStation = null;
 				this.targetRanchable.Trigger(1689625967, null);
@@ -145,7 +145,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public void RanchCreature()
 		{
-			if (this.targetRanchable != null && this.targetRanchable.IsRunning())
+			if (!this.targetRanchable.IsNullOrStopped())
 			{
 				base.def.onRanchCompleteCb(this.targetRanchable.gameObject);
 				this.targetRanchable.Trigger(1827504087, null);
@@ -172,7 +172,7 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 					return;
 				}
 				RanchableMonitor.Instance smi = kmonoBehaviour.GetSMI<RanchableMonitor.Instance>();
-				if (smi == null)
+				if (smi.IsNullOrStopped())
 				{
 					return;
 				}

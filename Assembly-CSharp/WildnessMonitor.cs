@@ -43,7 +43,6 @@ public class WildnessMonitor : GameStateMachine<WildnessMonitor, WildnessMonitor
 		Db.Get().Amounts.Happiness.Lookup(smi.gameObject).hide = flag;
 		Db.Get().Amounts.Calories.Lookup(smi.gameObject).hide = flag;
 		Db.Get().Amounts.Temperature.Lookup(smi.gameObject).hide = flag;
-		Db.Get().Amounts.Age.Lookup(smi.gameObject).hide = flag;
 		AmountInstance amountInstance = Db.Get().Amounts.Fertility.Lookup(smi.gameObject);
 		if (amountInstance != null)
 		{

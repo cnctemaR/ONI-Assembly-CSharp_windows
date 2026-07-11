@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Klei;
+using STRINGS;
 using UnityEngine;
 
 public class DebugHandler : IInputHandler
@@ -18,21 +19,30 @@ public class DebugHandler : IInputHandler
 
 	public static int GetMouseCell()
 	{
-		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
-		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
+		Vector3 mousePos = KInputManager.GetMousePos();
+		mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
+		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePos);
 		return Grid.PosToCell(vector);
 	}
 
 	public static Vector3 GetMousePos()
 	{
-		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
-		return Camera.main.ScreenToWorldPoint(mousePosition);
+		Vector3 mousePos = KInputManager.GetMousePos();
+		mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
+		return Camera.main.ScreenToWorldPoint(mousePos);
 	}
 
 	private void SpawnMinion()
 	{
+		if (Immigration.Instance == null)
+		{
+			return;
+		}
+		if (!Grid.IsValidBuildingCell(DebugHandler.GetMouseCell()))
+		{
+			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.DEBUG_TOOLS.INVALID_LOCATION, null, DebugHandler.GetMousePos(), 1.5f, false, true);
+			return;
+		}
 		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), SceneOrganizer.Instance.GetFolder(Folder.Entities), null);
 		gameObject.name = Assets.GetPrefab(MinionConfig.ID).name;
 		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
@@ -128,10 +138,18 @@ public class DebugHandler : IInputHandler
 		}
 		else if (e.TryConsume(global::Action.DebugExplosion))
 		{
-			Vector3 mousePosition = Input.mousePosition;
-			mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
-			Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
+			Vector3 mousePos = KInputManager.GetMousePos();
+			mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
+			Vector3 vector = Camera.main.ScreenToWorldPoint(mousePos);
 			GameUtil.CreateExplosion(vector);
+		}
+		else if (e.TryConsume(global::Action.DebugLockCursor))
+		{
+			if (GenericGameSettings.instance.developerDebugEnable)
+			{
+				KInputManager.isMousePosLocked = !KInputManager.isMousePosLocked;
+				KInputManager.lockedMousePos = KInputManager.GetMousePos();
+			}
 		}
 		else if (e.TryConsume(global::Action.DebugDiscoverAllElements))
 		{
@@ -230,7 +248,7 @@ public class DebugHandler : IInputHandler
 		{
 			global::Debug.Log("Debug GoTo", null);
 			Game.Instance.Trigger(775300118, null);
-			foreach (Brain brain in Components.Brains)
+			foreach (Brain brain in Components.Brains.Items)
 			{
 				DebugGoToMonitor.Instance smi = brain.GetSMI<DebugGoToMonitor.Instance>();
 				if (smi != null)
@@ -254,8 +272,9 @@ public class DebugHandler : IInputHandler
 			if (selected != null)
 			{
 				int mouseCell2 = DebugHandler.GetMouseCell();
-				if (!Grid.IsValidCell(mouseCell2))
+				if (!Grid.IsValidBuildingCell(mouseCell2))
 				{
+					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.DEBUG_TOOLS.INVALID_LOCATION, null, DebugHandler.GetMousePos(), 1.5f, false, true);
 					return;
 				}
 				selected.transform.SetPosition(Grid.CellToPosCBC(mouseCell2, Grid.SceneLayer.Move));
@@ -281,11 +300,17 @@ public class DebugHandler : IInputHandler
 				}
 				else if (e.TryConsume(global::Action.DebugSuperSpeed))
 				{
-					SpeedControlScreen.Instance.ToggleRidiculousSpeed();
+					if (SpeedControlScreen.Instance != null)
+					{
+						SpeedControlScreen.Instance.ToggleRidiculousSpeed();
+					}
 				}
 				else if (e.TryConsume(global::Action.DebugGameStep))
 				{
-					SpeedControlScreen.Instance.DebugStepFrame();
+					if (SpeedControlScreen.Instance != null)
+					{
+						SpeedControlScreen.Instance.DebugStepFrame();
+					}
 				}
 				else if (e.TryConsume(global::Action.DebugSimStep))
 				{

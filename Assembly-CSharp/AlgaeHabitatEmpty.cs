@@ -17,11 +17,6 @@ public class AlgaeHabitatEmpty : Workable
 		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
 	}
 
-	protected override void OnCompleteWork(Worker worker)
-	{
-		base.OnCompleteWork(worker);
-	}
-
 	public override HashedString[] GetWorkAnims(Worker worker)
 	{
 		return AlgaeHabitatEmpty.CLEAN_ANIMS;

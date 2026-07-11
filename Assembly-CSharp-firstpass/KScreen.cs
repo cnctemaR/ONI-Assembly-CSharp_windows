@@ -36,6 +36,8 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 		}
 	}
 
+	public string screenName { get; private set; }
+
 	public bool GetMouseOver
 	{
 		get
@@ -215,8 +217,6 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 	private Canvas _canvas;
 
 	private RectTransform _rectTransform;
-
-	private string screenName;
 
 	private bool isActive;
 

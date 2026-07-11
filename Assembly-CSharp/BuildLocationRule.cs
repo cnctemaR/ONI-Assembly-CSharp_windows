@@ -9,5 +9,6 @@ public enum BuildLocationRule
 	Conduit,
 	NotInTiles,
 	BuildingAttachPoint,
-	LogicBridge
+	LogicBridge,
+	OnFloorOverSpace
 }

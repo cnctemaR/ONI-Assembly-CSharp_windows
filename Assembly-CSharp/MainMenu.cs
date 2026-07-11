@@ -155,7 +155,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 269773U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 273433U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -222,7 +222,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void CheckForAudioDriverIssue()
 	{
-		if (RuntimeManager.Instance != null && !RuntimeManager.Instance.initializedSuccessfully)
+		if (!RuntimeManager.IsInitialized)
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupeAudio;

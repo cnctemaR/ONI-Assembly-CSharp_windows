@@ -37,7 +37,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		Tag saveLoadTag = prefab.GetSaveLoadTag();
 		this.prefabMap[saveLoadTag] = prefab.gameObject;
-		if (!prefab.gameObject.activeSelf && prefab.gameObject.GetComponent<KAnimControllerBase>() != null && prefab.gameObject.GetComponent<Pickupable>() != null)
+		bool flag = prefab.gameObject.GetComponent<KAnimControllerBase>() != null;
+		bool flag2 = prefab.gameObject.GetComponent<Pickupable>() != null;
+		if (!prefab.gameObject.activeSelf && flag && flag2)
 		{
 			GameObject gameObject = Util.KInstantiate(prefab.gameObject, null, null);
 			KAnimControllerBase component = gameObject.GetComponent<KAnimControllerBase>();
@@ -122,7 +124,7 @@ public class SaveManager : KMonoBehaviour
 	{
 		writer.Write(SaveManager.SAVE_HEADER);
 		writer.Write(7);
-		writer.Write(3);
+		writer.Write(4);
 		int num = 0;
 		foreach (KeyValuePair<Tag, List<SaveLoadRoot>> keyValuePair in this.sceneObjects)
 		{
@@ -221,9 +223,9 @@ public class SaveManager : KMonoBehaviour
 		}
 		int num = reader.ReadInt32();
 		int num2 = reader.ReadInt32();
-		if (num != 7 || num2 > 3)
+		if (num != 7 || num2 > 4)
 		{
-			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 3, num, num2 }) });
+			Output.LogWarning(new object[] { string.Format("SAVE FILE VERSION MISMATCH! Expected {0}.{1} but got {2}.{3}", new object[] { 7, 4, num, num2 }) });
 			return false;
 		}
 		this.ClearScene();
@@ -284,7 +286,7 @@ public class SaveManager : KMonoBehaviour
 
 	public const int SAVE_MAJOR_VERSION = 7;
 
-	public const int SAVE_MINOR_VERSION = 3;
+	public const int SAVE_MINOR_VERSION = 4;
 
 	private Dictionary<Tag, GameObject> prefabMap = new Dictionary<Tag, GameObject>();
 

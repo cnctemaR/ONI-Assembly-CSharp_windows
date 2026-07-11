@@ -55,7 +55,7 @@ public class AccessControlSideScreen : SideScreenContent
 			this.rowPool = new UIPool<AccessControlSideScreenRow>(this.rowPrefab);
 		}
 		base.gameObject.SetActive(true);
-		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities);
+		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
 		this.Refresh(this.identityList, true);
 	}
 

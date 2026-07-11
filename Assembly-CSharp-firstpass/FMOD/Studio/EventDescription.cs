@@ -1,172 +1,140 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD.Studio
 {
-	public class EventDescription : HandleBase
+	public struct EventDescription
 	{
-		public EventDescription(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT getID(out Guid id)
 		{
-			byte[] array = new byte[16];
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetID(this.rawPtr, array);
-			id = new Guid(array);
-			return result;
+			return EventDescription.FMOD_Studio_EventDescription_GetID(this.handle, out id);
 		}
 
 		public RESULT getPath(out string path)
 		{
 			path = null;
-			byte[] array = new byte[256];
-			int num = 0;
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetPath(this.rawPtr, array, array.Length, out num);
-			if (result == RESULT.ERR_TRUNCATED)
+			RESULT result2;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				array = new byte[num];
-				result = EventDescription.FMOD_Studio_EventDescription_GetPath(this.rawPtr, array, array.Length, out num);
+				IntPtr intPtr = Marshal.AllocHGlobal(256);
+				int num = 0;
+				RESULT result = EventDescription.FMOD_Studio_EventDescription_GetPath(this.handle, intPtr, 256, out num);
+				if (result == RESULT.ERR_TRUNCATED)
+				{
+					Marshal.FreeHGlobal(intPtr);
+					intPtr = Marshal.AllocHGlobal(num);
+					result = EventDescription.FMOD_Studio_EventDescription_GetPath(this.handle, intPtr, num, out num);
+				}
+				if (result == RESULT.OK)
+				{
+					path = freeHelper.stringFromNative(intPtr);
+				}
+				Marshal.FreeHGlobal(intPtr);
+				result2 = result;
 			}
-			if (result == RESULT.OK)
-			{
-				path = Encoding.UTF8.GetString(array, 0, num - 1);
-			}
-			return result;
+			return result2;
 		}
 
 		public RESULT getParameterCount(out int count)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetParameterCount(this.rawPtr, out count);
+			return EventDescription.FMOD_Studio_EventDescription_GetParameterCount(this.handle, out count);
 		}
 
 		public RESULT getParameterByIndex(int index, out PARAMETER_DESCRIPTION parameter)
 		{
-			parameter = default(PARAMETER_DESCRIPTION);
-			PARAMETER_DESCRIPTION_INTERNAL parameter_DESCRIPTION_INTERNAL;
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetParameterByIndex(this.rawPtr, index, out parameter_DESCRIPTION_INTERNAL);
-			if (result != RESULT.OK)
-			{
-				return result;
-			}
-			parameter_DESCRIPTION_INTERNAL.assign(out parameter);
-			return result;
+			return EventDescription.FMOD_Studio_EventDescription_GetParameterByIndex(this.handle, index, out parameter);
 		}
 
 		public RESULT getParameter(string name, out PARAMETER_DESCRIPTION parameter)
 		{
-			parameter = default(PARAMETER_DESCRIPTION);
-			PARAMETER_DESCRIPTION_INTERNAL parameter_DESCRIPTION_INTERNAL;
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetParameter(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out parameter_DESCRIPTION_INTERNAL);
-			if (result != RESULT.OK)
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				return result;
+				result = EventDescription.FMOD_Studio_EventDescription_GetParameter(this.handle, freeHelper.byteFromStringUTF8(name), out parameter);
 			}
-			parameter_DESCRIPTION_INTERNAL.assign(out parameter);
 			return result;
 		}
 
 		public RESULT getUserPropertyCount(out int count)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetUserPropertyCount(this.rawPtr, out count);
+			return EventDescription.FMOD_Studio_EventDescription_GetUserPropertyCount(this.handle, out count);
 		}
 
 		public RESULT getUserPropertyByIndex(int index, out USER_PROPERTY property)
 		{
-			USER_PROPERTY_INTERNAL user_PROPERTY_INTERNAL;
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetUserPropertyByIndex(this.rawPtr, index, out user_PROPERTY_INTERNAL);
-			if (result != RESULT.OK)
-			{
-				property = default(USER_PROPERTY);
-				return result;
-			}
-			property = user_PROPERTY_INTERNAL.createPublic();
-			return RESULT.OK;
+			return EventDescription.FMOD_Studio_EventDescription_GetUserPropertyByIndex(this.handle, index, out property);
 		}
 
 		public RESULT getUserProperty(string name, out USER_PROPERTY property)
 		{
-			USER_PROPERTY_INTERNAL user_PROPERTY_INTERNAL;
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetUserProperty(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out user_PROPERTY_INTERNAL);
-			if (result != RESULT.OK)
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				property = default(USER_PROPERTY);
-				return result;
+				result = EventDescription.FMOD_Studio_EventDescription_GetUserProperty(this.handle, freeHelper.byteFromStringUTF8(name), out property);
 			}
-			property = user_PROPERTY_INTERNAL.createPublic();
-			return RESULT.OK;
+			return result;
 		}
 
 		public RESULT getLength(out int length)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetLength(this.rawPtr, out length);
+			return EventDescription.FMOD_Studio_EventDescription_GetLength(this.handle, out length);
 		}
 
 		public RESULT getMinimumDistance(out float distance)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetMinimumDistance(this.rawPtr, out distance);
+			return EventDescription.FMOD_Studio_EventDescription_GetMinimumDistance(this.handle, out distance);
 		}
 
 		public RESULT getMaximumDistance(out float distance)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetMaximumDistance(this.rawPtr, out distance);
+			return EventDescription.FMOD_Studio_EventDescription_GetMaximumDistance(this.handle, out distance);
 		}
 
 		public RESULT getSoundSize(out float size)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetSoundSize(this.rawPtr, out size);
+			return EventDescription.FMOD_Studio_EventDescription_GetSoundSize(this.handle, out size);
 		}
 
 		public RESULT isSnapshot(out bool snapshot)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_IsSnapshot(this.rawPtr, out snapshot);
+			return EventDescription.FMOD_Studio_EventDescription_IsSnapshot(this.handle, out snapshot);
 		}
 
 		public RESULT isOneshot(out bool oneshot)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_IsOneshot(this.rawPtr, out oneshot);
+			return EventDescription.FMOD_Studio_EventDescription_IsOneshot(this.handle, out oneshot);
 		}
 
 		public RESULT isStream(out bool isStream)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_IsStream(this.rawPtr, out isStream);
+			return EventDescription.FMOD_Studio_EventDescription_IsStream(this.handle, out isStream);
 		}
 
 		public RESULT is3D(out bool is3D)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_Is3D(this.rawPtr, out is3D);
+			return EventDescription.FMOD_Studio_EventDescription_Is3D(this.handle, out is3D);
 		}
 
 		public RESULT hasCue(out bool cue)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_HasCue(this.rawPtr, out cue);
+			return EventDescription.FMOD_Studio_EventDescription_HasCue(this.handle, out cue);
 		}
 
 		public RESULT createInstance(out EventInstance instance)
 		{
-			instance = null;
-			IntPtr intPtr = 0;
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_CreateInstance(this.rawPtr, out intPtr);
-			if (result != RESULT.OK)
-			{
-				return result;
-			}
-			instance = new EventInstance(intPtr);
-			return result;
+			return EventDescription.FMOD_Studio_EventDescription_CreateInstance(this.handle, out instance.handle);
 		}
 
 		public RESULT getInstanceCount(out int count)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetInstanceCount(this.rawPtr, out count);
+			return EventDescription.FMOD_Studio_EventDescription_GetInstanceCount(this.handle, out count);
 		}
 
 		public RESULT getInstanceList(out EventInstance[] array)
 		{
 			array = null;
 			int num;
-			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetInstanceCount(this.rawPtr, out num);
+			RESULT result = EventDescription.FMOD_Studio_EventDescription_GetInstanceCount(this.handle, out num);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -178,7 +146,7 @@ namespace FMOD.Studio
 			}
 			IntPtr[] array2 = new IntPtr[num];
 			int num2;
-			result = EventDescription.FMOD_Studio_EventDescription_GetInstanceList(this.rawPtr, array2, num, out num2);
+			result = EventDescription.FMOD_Studio_EventDescription_GetInstanceList(this.handle, array2, num, out num2);
 			if (result != RESULT.OK)
 			{
 				return result;
@@ -190,72 +158,72 @@ namespace FMOD.Studio
 			array = new EventInstance[num2];
 			for (int i = 0; i < num2; i++)
 			{
-				array[i] = new EventInstance(array2[i]);
+				array[i].handle = array2[i];
 			}
 			return RESULT.OK;
 		}
 
 		public RESULT loadSampleData()
 		{
-			return EventDescription.FMOD_Studio_EventDescription_LoadSampleData(this.rawPtr);
+			return EventDescription.FMOD_Studio_EventDescription_LoadSampleData(this.handle);
 		}
 
 		public RESULT unloadSampleData()
 		{
-			return EventDescription.FMOD_Studio_EventDescription_UnloadSampleData(this.rawPtr);
+			return EventDescription.FMOD_Studio_EventDescription_UnloadSampleData(this.handle);
 		}
 
 		public RESULT getSampleLoadingState(out LOADING_STATE state)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetSampleLoadingState(this.rawPtr, out state);
+			return EventDescription.FMOD_Studio_EventDescription_GetSampleLoadingState(this.handle, out state);
 		}
 
 		public RESULT releaseAllInstances()
 		{
-			return EventDescription.FMOD_Studio_EventDescription_ReleaseAllInstances(this.rawPtr);
+			return EventDescription.FMOD_Studio_EventDescription_ReleaseAllInstances(this.handle);
 		}
 
 		public RESULT setCallback(EVENT_CALLBACK callback, EVENT_CALLBACK_TYPE callbackmask = EVENT_CALLBACK_TYPE.ALL)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_SetCallback(this.rawPtr, callback, callbackmask);
+			return EventDescription.FMOD_Studio_EventDescription_SetCallback(this.handle, callback, callbackmask);
 		}
 
-		public RESULT getUserData(out IntPtr userData)
+		public RESULT getUserData(out IntPtr userdata)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_GetUserData(this.rawPtr, out userData);
+			return EventDescription.FMOD_Studio_EventDescription_GetUserData(this.handle, out userdata);
 		}
 
-		public RESULT setUserData(IntPtr userData)
+		public RESULT setUserData(IntPtr userdata)
 		{
-			return EventDescription.FMOD_Studio_EventDescription_SetUserData(this.rawPtr, userData);
+			return EventDescription.FMOD_Studio_EventDescription_SetUserData(this.handle, userdata);
 		}
 
 		[DllImport("fmodstudio")]
 		private static extern bool FMOD_Studio_EventDescription_IsValid(IntPtr eventdescription);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetID(IntPtr eventdescription, [Out] byte[] id);
+		private static extern RESULT FMOD_Studio_EventDescription_GetID(IntPtr eventdescription, out Guid id);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetPath(IntPtr eventdescription, [Out] byte[] path, int size, out int retrieved);
+		private static extern RESULT FMOD_Studio_EventDescription_GetPath(IntPtr eventdescription, IntPtr path, int size, out int retrieved);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetParameterCount(IntPtr eventdescription, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetParameterByIndex(IntPtr eventdescription, int index, out PARAMETER_DESCRIPTION_INTERNAL parameter);
+		private static extern RESULT FMOD_Studio_EventDescription_GetParameterByIndex(IntPtr eventdescription, int index, out PARAMETER_DESCRIPTION parameter);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetParameter(IntPtr eventdescription, byte[] name, out PARAMETER_DESCRIPTION_INTERNAL parameter);
+		private static extern RESULT FMOD_Studio_EventDescription_GetParameter(IntPtr eventdescription, byte[] name, out PARAMETER_DESCRIPTION parameter);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetUserPropertyCount(IntPtr eventdescription, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetUserPropertyByIndex(IntPtr eventdescription, int index, out USER_PROPERTY_INTERNAL property);
+		private static extern RESULT FMOD_Studio_EventDescription_GetUserPropertyByIndex(IntPtr eventdescription, int index, out USER_PROPERTY property);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetUserProperty(IntPtr eventdescription, byte[] name, out USER_PROPERTY_INTERNAL property);
+		private static extern RESULT FMOD_Studio_EventDescription_GetUserProperty(IntPtr eventdescription, byte[] name, out USER_PROPERTY property);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventDescription_GetLength(IntPtr eventdescription, out int length);
@@ -309,14 +277,26 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventDescription_SetCallback(IntPtr eventdescription, EVENT_CALLBACK callback, EVENT_CALLBACK_TYPE callbackmask);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_GetUserData(IntPtr eventdescription, out IntPtr userData);
+		private static extern RESULT FMOD_Studio_EventDescription_GetUserData(IntPtr eventdescription, out IntPtr userdata);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventDescription_SetUserData(IntPtr eventdescription, IntPtr userData);
+		private static extern RESULT FMOD_Studio_EventDescription_SetUserData(IntPtr eventdescription, IntPtr userdata);
 
-		protected override bool isValidInternal()
+		public bool hasHandle()
 		{
-			return EventDescription.FMOD_Studio_EventDescription_IsValid(this.rawPtr);
+			return this.handle != IntPtr.Zero;
 		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public bool isValid()
+		{
+			return this.hasHandle() && EventDescription.FMOD_Studio_EventDescription_IsValid(this.handle);
+		}
+
+		public IntPtr handle;
 	}
 }

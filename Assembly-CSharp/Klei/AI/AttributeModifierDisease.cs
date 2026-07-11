@@ -18,7 +18,7 @@ namespace Klei.AI
 			for (int i = 0; i < this.attributeModifiers.Length; i++)
 			{
 				AttributeModifier attributeModifier = this.attributeModifiers[i];
-				attributes.Add(attributeModifier.AttributeId, attributeModifier);
+				attributes.Add(attributeModifier);
 			}
 			return null;
 		}

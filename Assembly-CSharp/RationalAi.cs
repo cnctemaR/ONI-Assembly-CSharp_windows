@@ -24,6 +24,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new ExternalTemperatureMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BladderMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new SteppedInMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new LightMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new RedAlertMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new CringeMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new HygieneMonitor.Instance(smi.master))
@@ -60,11 +61,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 
 		public void RefreshUserMenu()
 		{
-			UserMenu component = base.GetComponent<UserMenu>();
-			if (component != null)
-			{
-				component.Refresh();
-			}
+			Game.Instance.userMenu.Refresh(base.master.gameObject);
 		}
 	}
 }

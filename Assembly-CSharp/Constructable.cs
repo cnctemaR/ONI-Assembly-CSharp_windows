@@ -14,8 +14,6 @@ public class Constructable : Workable, ISaveLoadable
 		base.preferPrimaryCell = false;
 	}
 
-	public GameObject Source { get; set; }
-
 	public Recipe Recipe
 	{
 		get
@@ -182,7 +180,7 @@ public class Constructable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
+		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null);
 		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
 		if (this.building.Def.IsTilePiece)
 		{
@@ -233,7 +231,10 @@ public class Constructable : Workable, ISaveLoadable
 		primaryElement.Temperature = num;
 		foreach (Recipe.Ingredient ingredient in this.Recipe.GetAllIngredients(this.selectedElements))
 		{
-			this.fetchList.Add(ingredient.tag, null, ingredient.amount, FetchOrder2.OperationalRequirement.None);
+			FetchList2 fetchList = this.fetchList;
+			Tag tag = ingredient.tag;
+			num = ingredient.amount;
+			fetchList.Add(tag, null, null, num, FetchOrder2.OperationalRequirement.None);
 			MaterialNeeds.Instance.UpdateNeed(ingredient.tag, ingredient.amount);
 		}
 		if (!this.building.Def.IsTilePiece)
@@ -668,20 +669,17 @@ public class Constructable : Workable, ISaveLoadable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string text = "icon_cancel";
 		string text2 = UI.USERMENUACTIONS.CANCELCONSTRUCTION.NAME;
 		global::System.Action action = new global::System.Action(this.OnPressCancel);
 		string text3 = UI.USERMENUACTIONS.CANCELCONSTRUCTION.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void OnPressCancel()
 	{
-		if (this.Source != null)
-		{
-			this.Source.Trigger(2127324410, null);
-		}
 		base.gameObject.Trigger(2127324410, null);
 	}
 
@@ -693,9 +691,6 @@ public class Constructable : Workable, ISaveLoadable
 
 	[MyCmpAdd]
 	private Storage storage;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[MyCmpAdd]
 	private Notifier notifier;
@@ -749,7 +744,7 @@ public class Constructable : Workable, ISaveLoadable
 
 	private GameScenePartitionerEntry ladderParititonerEntry;
 
-	private LoggerFSS log = new LoggerFSS("Constructable");
+	private LoggerFSS log = new LoggerFSS("Constructable", 35);
 
 	private Element[] selectedElements;
 

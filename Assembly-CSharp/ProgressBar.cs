@@ -93,6 +93,27 @@ public class ProgressBar : KMonoBehaviour
 		base.enabled = true;
 	}
 
+	public static ProgressBar CreateProgressBar(KMonoBehaviour entity, Func<float> updateFunc)
+	{
+		ProgressBar progressBar = Util.KInstantiateUI<ProgressBar>(ProgressBarsConfig.Instance.progressBarPrefab, null, false);
+		progressBar.SetUpdateFunc(updateFunc);
+		progressBar.transform.SetParent(GameScreenManager.Instance.worldSpaceCanvas.transform);
+		progressBar.name = ((!(entity != null)) ? string.Empty : (entity.name + "_")) + " ProgressBar";
+		progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
+		progressBar.Update();
+		Vector3 vector = entity.transform.GetPosition() + Vector3.down * 0.5f;
+		if (entity is Building)
+		{
+			vector = vector - Vector3.right * 0.5f * (float)((entity as Building).Def.WidthInCells % 2) + (entity as Building).Def.placementPivot;
+		}
+		else
+		{
+			vector -= Vector3.right * 0.5f;
+		}
+		progressBar.transform.SetPosition(vector);
+		return progressBar;
+	}
+
 	public Image bar;
 
 	private Func<float> updatePercentFull;

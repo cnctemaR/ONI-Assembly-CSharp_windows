@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 
-public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMgr
+public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMgr, IBridgedNetworkItem
 {
 	protected override void OnSpawn()
 	{
@@ -21,5 +22,28 @@ public class LogicUtilityNetworkLink : UtilityNetworkLink, IHaveUtilityNetworkMg
 	public IUtilityNetworkMgr GetNetworkManager()
 	{
 		return Game.Instance.logicCircuitSystem;
+	}
+
+	public void AddNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num;
+		int num2;
+		base.GetCells(out num, out num2);
+		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
+		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		if (networkForCell != null)
+		{
+			networks.Add(networkForCell);
+		}
+	}
+
+	public bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num;
+		int num2;
+		base.GetCells(out num, out num2);
+		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
+		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		return networks.Contains(networkForCell);
 	}
 }

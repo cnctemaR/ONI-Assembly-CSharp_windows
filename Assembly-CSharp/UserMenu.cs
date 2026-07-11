@@ -3,41 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-[SkipSaveFileSerialization]
-public class UserMenu : KMonoBehaviour
+public class UserMenu
 {
-	public void AppendToScreen(UserMenuScreen screen)
+	public void Refresh(GameObject go)
 	{
-		this.sortedButtons.Clear();
-		this.buttons.Clear();
-		this.sliders.Clear();
-		base.Trigger(493375141, null);
-		this.buttons.Sort(delegate(KeyValuePair<KIconButtonMenu.ButtonInfo, float> x, KeyValuePair<KIconButtonMenu.ButtonInfo, float> y)
-		{
-			if (x.Value == y.Value)
-			{
-				return 0;
-			}
-			if (x.Value > y.Value)
-			{
-				return 1;
-			}
-			return -1;
-		});
-		for (int i = 0; i < this.buttons.Count; i++)
-		{
-			this.sortedButtons[i] = this.buttons[i].Key;
-		}
-		screen.AddButtons(this.sortedButtons);
-		screen.AddSliders(this.sliders);
+		Game.Instance.Trigger(1980521255, go);
 	}
 
-	public void Refresh()
-	{
-		Game.Instance.Trigger(1980521255, base.gameObject);
-	}
-
-	public void AddButton(KIconButtonMenu.ButtonInfo button, float sort_order = 1f)
+	public void AddButton(GameObject go, KIconButtonMenu.ButtonInfo button, float sort_order = 1f)
 	{
 		if (button.onClick != null)
 		{
@@ -45,23 +18,54 @@ public class UserMenu : KMonoBehaviour
 			button.onClick = delegate
 			{
 				callback();
-				this.Refresh();
+				Game.Instance.Trigger(1980521255, go);
 			};
 		}
 		this.buttons.Add(new KeyValuePair<KIconButtonMenu.ButtonInfo, float>(button, sort_order));
-		this.sortedButtons.Add(null);
 	}
 
-	public void AddSlider(UserMenu.SliderInfo slider)
+	public void AddSlider(GameObject go, UserMenu.SliderInfo slider)
 	{
 		this.sliders.Add(slider);
 	}
 
+	public void AppendToScreen(GameObject go, UserMenuScreen screen)
+	{
+		this.buttons.Clear();
+		this.sliders.Clear();
+		go.Trigger(493375141, null);
+		if (this.buttons.Count > 0)
+		{
+			this.buttons.Sort(delegate(KeyValuePair<KIconButtonMenu.ButtonInfo, float> x, KeyValuePair<KIconButtonMenu.ButtonInfo, float> y)
+			{
+				if (x.Value == y.Value)
+				{
+					return 0;
+				}
+				if (x.Value > y.Value)
+				{
+					return 1;
+				}
+				return -1;
+			});
+			for (int i = 0; i < this.buttons.Count; i++)
+			{
+				this.sortedButtons.Add(this.buttons[i].Key);
+			}
+			screen.AddButtons(this.sortedButtons);
+			this.sortedButtons.Clear();
+		}
+		if (this.sliders.Count > 0)
+		{
+			screen.AddSliders(this.sliders);
+		}
+	}
+
 	private List<KeyValuePair<KIconButtonMenu.ButtonInfo, float>> buttons = new List<KeyValuePair<KIconButtonMenu.ButtonInfo, float>>();
 
-	private List<KIconButtonMenu.ButtonInfo> sortedButtons = new List<KIconButtonMenu.ButtonInfo>();
-
 	private List<UserMenu.SliderInfo> sliders = new List<UserMenu.SliderInfo>();
+
+	private List<KIconButtonMenu.ButtonInfo> sortedButtons = new List<KIconButtonMenu.ButtonInfo>();
 
 	public class SliderInfo
 	{

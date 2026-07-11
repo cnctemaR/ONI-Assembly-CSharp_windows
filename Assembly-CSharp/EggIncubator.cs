@@ -1,7 +1,6 @@
 ﻿using System;
 using Klei.AI;
 using KSerialization;
-using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -26,10 +25,16 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		base.OnSpawn();
 		if (base.occupyingObject)
 		{
-			base.occupyingObject.Trigger(1309017699, this.storage);
+			if (base.occupyingObject.HasTag(GameTags.Creature))
+			{
+				this.storage.allowItemRemoval = true;
+			}
+			this.storage.RenotifyAll();
+			this.PositionOccupyingObject();
 		}
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(-731304873, new Action<object>(this.OnOccupantChanged));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		this.smi = new EggIncubatorStates.Instance(this);
 		this.smi.StartSM();
 	}
@@ -45,7 +50,6 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		base.SubscribeToOccupant();
 		if (base.occupyingObject != null)
 		{
-			base.Subscribe(base.occupyingObject, 657149762, new Action<object>(this.OnReadyToHatch));
 			this.tracker = base.occupyingObject.AddComponent<KBatchedAnimTracker>();
 			this.tracker.symbol = "egg_target";
 			this.tracker.forceAlwaysVisible = true;
@@ -58,21 +62,11 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		base.UnsubscribeFromOccupant();
 		global::UnityEngine.Object.Destroy(this.tracker);
 		this.tracker = null;
-		if (base.occupyingObject != null)
-		{
-			base.Unsubscribe(base.occupyingObject, 657149762, new Action<object>(this.OnReadyToHatch));
-		}
 		this.UpdateProgress();
-	}
-
-	private void OnReadyToHatch(object data = null)
-	{
-		this.UpdateChore();
 	}
 
 	private void OnOperationalChanged(object data = null)
 	{
-		this.UpdateChore();
 		if (!base.occupyingObject)
 		{
 			this.storage.DropAll(false);
@@ -81,53 +75,19 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 
 	private void OnOccupantChanged(object data = null)
 	{
-		this.UpdateChore();
-	}
-
-	private void UpdateChore()
-	{
-		this.smi.sm.readyToHatch.Set(this.HasHatchableEgg(), this.smi);
-		if (this.operational.IsOperational && this.HasHatchableEgg())
+		if (!base.occupyingObject)
 		{
-			if (this.chore == null)
-			{
-				this.chore = new WorkChore<CompleteIncubationWorkable>(Db.Get().ChoreTypes.CreatureHatch, this, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
-			}
-		}
-		else if (this.chore != null)
-		{
-			this.chore.Cancel("Can't hatch");
-			this.chore = null;
+			this.storage.allowItemRemoval = false;
 		}
 	}
 
-	private bool HasHatchableEgg()
+	private void OnStorageChange(object data = null)
 	{
-		return base.occupyingObject && base.occupyingObject.HasTag(GameTags.FullyIncubated);
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole("Rancher", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-		resume.AddExperienceIfRole("SeniorRancher", work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-	}
-
-	public void CompleteHatch()
-	{
-		if (this.chore != null)
+		if (base.occupyingObject && !this.storage.items.Contains(base.occupyingObject))
 		{
-			this.chore.Cancel("completed");
-			this.chore = null;
-		}
-		GameObject occupyingObject = base.occupyingObject;
-		base.occupyingObject = null;
-		this.ClearOccupant();
-		global::UnityEngine.Object.Destroy(this.tracker);
-		this.tracker = null;
-		if (occupyingObject)
-		{
-			this.storage.Remove(occupyingObject);
-			occupyingObject.Trigger(1922945024, null);
+			this.UnsubscribeFromOccupant();
+			base.occupyingObject = null;
+			this.ClearOccupant();
 		}
 	}
 
@@ -164,7 +124,14 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		{
 			Amounts amounts = base.occupyingObject.GetAmounts();
 			AmountInstance amountInstance = amounts.Get(Db.Get().Amounts.Incubation);
-			num = amountInstance.value / amountInstance.GetMax();
+			if (amountInstance != null)
+			{
+				num = amountInstance.value / amountInstance.GetMax();
+			}
+			else
+			{
+				num = 1f;
+			}
 		}
 		return num;
 	}
@@ -177,14 +144,52 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	public void Sim1000ms(float dt)
 	{
 		this.UpdateProgress();
+		this.UpdateChore();
+	}
+
+	public void StoreBaby(GameObject baby)
+	{
+		this.UnsubscribeFromOccupant();
+		this.storage.DropAll(false);
+		this.storage.allowItemRemoval = true;
+		this.storage.Store(baby, false, false, true, false);
+		base.occupyingObject = baby;
+		this.SubscribeToOccupant();
+		base.Trigger(-731304873, base.occupyingObject);
+	}
+
+	private void UpdateChore()
+	{
+		if (this.operational.IsOperational && this.EggNeedsAttention())
+		{
+			if (this.chore == null)
+			{
+				this.chore = new WorkChore<EggIncubatorWorkable>(Db.Get().ChoreTypes.EggSing, this.workable, null, null, true, null, null, null, true, null, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+			}
+		}
+		else if (this.chore != null)
+		{
+			this.chore.Cancel("now is not the time for song");
+			this.chore = null;
+		}
+	}
+
+	private bool EggNeedsAttention()
+	{
+		if (!base.Occupant)
+		{
+			return false;
+		}
+		IncubationMonitor.Instance instance = base.Occupant.GetSMI<IncubationMonitor.Instance>();
+		return instance != null && !instance.HasSongBuff();
 	}
 
 	[MyCmpAdd]
-	private CompleteIncubationWorkable completeIncubationWorkable;
-
-	private EggIncubatorStates.Instance smi;
+	private EggIncubatorWorkable workable;
 
 	private Chore chore;
+
+	private EggIncubatorStates.Instance smi;
 
 	private KBatchedAnimTracker tracker;
 

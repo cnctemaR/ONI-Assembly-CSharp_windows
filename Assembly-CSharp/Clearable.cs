@@ -105,24 +105,25 @@ public class Clearable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		if (!this.isMarkedForClear)
+		KIconButtonMenu.ButtonInfo buttonInfo;
+		if (this.isMarkedForClear)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_move_to_storage";
-			string text2 = UI.USERMENUACTIONS.CLEAR.NAME;
-			global::System.Action action = new global::System.Action(this.OnClickClear);
-			string text3 = UI.USERMENUACTIONS.CLEAR.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			string text2 = UI.USERMENUACTIONS.CLEAR.NAME_OFF;
+			global::System.Action action = new global::System.Action(this.OnClickCancel);
+			string text3 = UI.USERMENUACTIONS.CLEAR.TOOLTIP_OFF;
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_move_to_storage";
-			string text2 = UI.USERMENUACTIONS.CLEAR.NAME_OFF;
-			global::System.Action action = new global::System.Action(this.OnClickCancel);
-			string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			string text2 = UI.USERMENUACTIONS.CLEAR.NAME;
+			global::System.Action action = new global::System.Action(this.OnClickClear);
+			string text = UI.USERMENUACTIONS.CLEAR.TOOLTIP;
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
 	private void OnAbsorb(object data)
@@ -138,26 +139,13 @@ public class Clearable : Workable, ISaveLoadable
 		}
 	}
 
-	public bool IsMarkedForClear()
-	{
-		return this.isMarkedForClear;
-	}
-
-	public void SetIsClearable(bool is_clearable)
-	{
-		this.isClearable = is_clearable;
-	}
-
 	[MyCmpReq]
 	private Pickupable pickupable;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	private Chore chore;
 
 	[Serialize]
 	private bool isMarkedForClear;
 
-	private bool isClearable = true;
+	public bool isClearable = true;
 }

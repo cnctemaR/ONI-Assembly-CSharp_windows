@@ -29,8 +29,8 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 		this.modifiersInitialized = true;
 		AttributeModifier attributeModifier = new AttributeModifier(this.overheatTemp.Id, this.baseOverheatTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
 		AttributeModifier attributeModifier2 = new AttributeModifier(this.fatalTemp.Id, this.baseFatalTemp, UI.TOOLTIPS.BASE_VALUE, false, false, true);
-		this.GetAttributes().Add("Base", attributeModifier);
-		this.GetAttributes().Add("Base", attributeModifier2);
+		this.GetAttributes().Add(attributeModifier);
+		this.GetAttributes().Add(attributeModifier2);
 	}
 
 	protected override void OnSpawn()
@@ -62,7 +62,7 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 	public Notification CreateOverheatedNotification()
 	{
 		KSelectable component = base.GetComponent<KSelectable>();
-		return new Notification(MISC.NOTIFICATIONS.BUILDINGOVERHEATED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BUILDINGOVERHEATED.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), false, 0f, null, null, null);
+		return new Notification(MISC.NOTIFICATIONS.BUILDINGOVERHEATED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.BUILDINGOVERHEATED.TOOLTIP + notificationList.ReduceMessages(false), "/t• " + component.GetProperName(), false, 0f, null, null);
 	}
 
 	private static string ToolTipResolver(List<Notification> notificationList, object data)

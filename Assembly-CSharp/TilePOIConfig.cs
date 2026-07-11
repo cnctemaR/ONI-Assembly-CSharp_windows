@@ -22,7 +22,6 @@ public class TilePOIConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.Repairable = false;
 		buildingDef.Replaceable = false;
 		buildingDef.Invincible = true;

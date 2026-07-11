@@ -19,7 +19,7 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 		}).TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update("FindFood", delegate(GasAndLiquidConsumerMonitor.Instance smi, float dt)
 		{
 			smi.FindFood();
-		}, UpdateRate.SIM_200ms, false);
+		}, UpdateRate.SIM_1000ms, false);
 	}
 
 	private GameStateMachine<GasAndLiquidConsumerMonitor, GasAndLiquidConsumerMonitor.Instance, IStateMachineTarget, GasAndLiquidConsumerMonitor.Def>.State cooldown;
@@ -56,23 +56,25 @@ public class GasAndLiquidConsumerMonitor : GameStateMachine<GasAndLiquidConsumer
 			this.FindTargetGasCell();
 		}
 
+		private static bool CheckTargetGasCellCb(int test_cell, GasAndLiquidConsumerMonitor.Instance smi)
+		{
+			Element element = Grid.Element[test_cell];
+			TagBits tagBits = new TagBits(element.tag);
+			foreach (Diet.Info info in smi.def.diet.infos)
+			{
+				if (info.IsMatch(tagBits))
+				{
+					smi.targetCell = test_cell;
+					smi.targetElement = element;
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void FindTargetGasCell()
 		{
-			GameUtil.FloodFillFind(delegate(int test_cell)
-			{
-				Element element = Grid.Element[test_cell];
-				TagBits tagBits = new TagBits(element.tag);
-				foreach (Diet.Info info in base.def.diet.infos)
-				{
-					if (info.IsMatch(tagBits))
-					{
-						this.targetCell = test_cell;
-						this.targetElement = element;
-						return true;
-					}
-				}
-				return false;
-			}, Grid.PosToCell(base.gameObject), 5, true, true);
+			GameUtil.FloodFillFind<GasAndLiquidConsumerMonitor.Instance>(new Func<int, GasAndLiquidConsumerMonitor.Instance, bool>(GasAndLiquidConsumerMonitor.Instance.CheckTargetGasCellCb), this, Grid.PosToCell(base.gameObject), 5, true, true);
 		}
 
 		public void Consume(float dt)

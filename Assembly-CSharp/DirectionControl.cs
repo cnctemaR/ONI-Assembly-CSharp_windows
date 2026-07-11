@@ -1,6 +1,7 @@
 ﻿using System;
 using KSerialization;
 using STRINGS;
+using UnityEngine;
 
 public class DirectionControl : KMonoBehaviour
 {
@@ -74,21 +75,19 @@ public class DirectionControl : KMonoBehaviour
 	{
 		int num = (int)((WorkableReactable.AllowedDirection.Left + (int)this.allowedDirection) % (WorkableReactable.AllowedDirection)this.directionInfos.Length);
 		DirectionControl.DirectionInfo directionInfo = this.directionInfos[num];
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string iconName = directionInfo.iconName;
 		string name = directionInfo.name;
 		global::System.Action action = new global::System.Action(this.OnChangeWorkableDirection);
 		string tooltip = directionInfo.tooltip;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(iconName, name, action, global::Action.NumActions, null, null, null, tooltip, true), 0f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(iconName, name, action, global::Action.NumActions, null, null, null, tooltip, true), 0f);
 	}
 
 	[Serialize]
 	public WorkableReactable.AllowedDirection allowedDirection;
 
 	private DirectionControl.DirectionInfo[] directionInfos;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	public Action<WorkableReactable.AllowedDirection> onDirectionChanged;
 

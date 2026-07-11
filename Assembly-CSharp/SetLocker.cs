@@ -28,24 +28,25 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	{
 		if (base.smi.IsInsideState(base.smi.sm.closed) && !this.used)
 		{
+			KIconButtonMenu.ButtonInfo buttonInfo;
 			if (this.chore != null)
 			{
-				UserMenu userMenu = this.userMenu;
 				string text = "action_empty_contents";
 				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME_OFF;
 				global::System.Action action = new global::System.Action(this.OnClickCancel);
 				string text3 = UI.USERMENUACTIONS.OPENPOI.TOOLTIP_OFF;
-				userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+				buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 			}
 			else
 			{
-				UserMenu userMenu2 = this.userMenu;
 				string text3 = "action_empty_contents";
 				string text2 = UI.USERMENUACTIONS.OPENPOI.NAME;
 				global::System.Action action = new global::System.Action(this.OnClickOpen);
 				string text = UI.USERMENUACTIONS.OPENPOI.TOOLTIP;
-				userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+				buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 			}
+			KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+			Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 		}
 	}
 
@@ -88,7 +89,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 		this.used = true;
 		base.smi.GoTo(base.smi.sm.open);
 		this.chore = null;
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	public string[] possible_contents_ids;
@@ -106,9 +107,6 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	private bool used;
 
 	private Chore chore;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	public class StatesInstance : GameStateMachine<SetLocker.States, SetLocker.StatesInstance, SetLocker, object>.GameInstance
 	{
@@ -131,7 +129,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 					LoopingSounds component = smi.master.GetComponent<LoopingSounds>();
 					if (component != null)
 					{
-						component.StartSound(GlobalAssets.GetSound(smi.master.machineSound, false), smi.master.transform.GetPosition());
+						component.StartSound(GlobalAssets.GetSound(smi.master.machineSound, false));
 					}
 				}
 			});

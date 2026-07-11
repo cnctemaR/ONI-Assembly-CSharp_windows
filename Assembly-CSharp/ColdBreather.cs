@@ -17,7 +17,8 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 
 	protected override void OnCleanUp()
 	{
-		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle);
+		Game.Instance.complexCallbackManager.Release(this.simEmitCBHandle, "coldbreather");
+		this.simEmitCBHandle.Clear();
 		if (this.storage)
 		{
 			this.storage.DropAll(true);
@@ -55,11 +56,12 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		{
 			int num = this.nextGasEmitIndex++;
 			PrimaryElement component = this.gases[num].GetComponent<PrimaryElement>();
-			if (component != null && component.Mass > 0f)
+			if (component != null && component.Mass > 0f && this.simEmitCBHandle.IsValid())
 			{
 				float num2 = Mathf.Max(component.Element.lowTemp + 5f, component.Temperature + this.deltaEmitTemperature);
 				int num3 = Grid.PosToCell(base.transform.GetPosition() + this.emitOffsetCell);
 				byte elementIndex = ElementLoader.GetElementIndex(component.Element.tag);
+				Game.Instance.complexCallbackManager.GetItem(this.simEmitCBHandle);
 				SimMessages.EmitMass(num3, elementIndex, component.Mass, num2, component.DiseaseIdx, component.DiseaseCount, this.simEmitCBHandle.index);
 				this.lastEmitTag = component.Element.tag;
 				break;

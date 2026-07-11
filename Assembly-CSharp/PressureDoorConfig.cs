@@ -48,7 +48,10 @@ public class PressureDoorConfig : IBuildingConfig
 	{
 		Door door = go.AddOrGet<Door>();
 		door.hasComplexUserControls = true;
-		door.unpoweredAnimSpeed = 1f;
+		door.unpoweredAnimSpeed = 0.65f;
+		door.poweredAnimSpeed = 5f;
+		door.doorClosingSoundEventName = "MechanizedAirlock_closing";
+		door.doorOpeningSoundEventName = "MechanizedAirlock_opening";
 		go.AddOrGet<AccessControl>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
@@ -59,6 +62,8 @@ public class PressureDoorConfig : IBuildingConfig
 		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = true;
+		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();
+		component2.initialAnim = "closed";
 	}
 
 	public const string ID = "PressureDoor";

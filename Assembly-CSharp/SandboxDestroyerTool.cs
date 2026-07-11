@@ -72,38 +72,44 @@ public class SandboxDestroyerTool : BrushTool
 		float num2 = 0f;
 		int num3 = index;
 		SimMessages.ReplaceElement(cell2, simHashes, sandBoxTool, num, num2, Db.Get().Diseases.GetIndex(this.settings.Disease.IdHash), 0, num3);
-		foreach (Pickupable pickupable in Components.Pickupables)
+		HashSetPool<GameObject, SandboxDestroyerTool>.PooledHashSet pooledHashSet = HashSetPool<GameObject, SandboxDestroyerTool>.Allocate();
+		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{
 			if (Grid.PosToCell(pickupable) == cell)
 			{
-				Util.KDestroyGameObject(pickupable.gameObject);
+				pooledHashSet.Add(pickupable.gameObject);
 			}
 		}
-		foreach (BuildingComplete buildingComplete in Components.BuildingCompletes)
+		foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
 		{
 			if (Grid.PosToCell(buildingComplete) == cell)
 			{
-				Util.KDestroyGameObject(buildingComplete.gameObject);
+				pooledHashSet.Add(buildingComplete.gameObject);
 			}
 		}
 		if (Grid.Objects[cell, 1] != null)
 		{
-			Util.KDestroyGameObject(Grid.Objects[cell, 1]);
+			pooledHashSet.Add(Grid.Objects[cell, 1]);
 		}
-		foreach (Crop crop in Components.Crops)
+		foreach (Crop crop in Components.Crops.Items)
 		{
 			if (Grid.PosToCell(crop) == cell)
 			{
-				Util.KDestroyGameObject(crop.gameObject);
+				pooledHashSet.Add(crop.gameObject);
 			}
 		}
-		foreach (Health health in Components.Health)
+		foreach (Health health in Components.Health.Items)
 		{
 			if (Grid.PosToCell(health) == cell)
 			{
-				Util.KDestroyGameObject(health.gameObject);
+				pooledHashSet.Add(health.gameObject);
 			}
 		}
+		foreach (GameObject gameObject in pooledHashSet)
+		{
+			Util.KDestroyGameObject(gameObject);
+		}
+		pooledHashSet.Recycle();
 	}
 
 	public static SandboxDestroyerTool instance;

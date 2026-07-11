@@ -43,22 +43,25 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 		this.UpdateState(dt);
 	}
 
+	private static bool UpdateStateCb(int cell, object data)
+	{
+		AirConditioner airConditioner = data as AirConditioner;
+		airConditioner.cellCount++;
+		airConditioner.envTemp += Grid.Temperature[cell];
+		return true;
+	}
+
 	private void UpdateState(float dt)
 	{
 		bool flag = this.consumer.IsSatisfied;
-		int cells = 0;
-		float envTemp = 0f;
+		this.envTemp = 0f;
+		this.cellCount = 0;
 		if (this.occupyArea != null && base.gameObject != null)
 		{
-			this.occupyArea.TestArea(Grid.PosToCell(base.gameObject), null, delegate(int cell, object data)
-			{
-				cells++;
-				envTemp += Grid.Temperature[cell];
-				return true;
-			});
-			envTemp /= (float)cells;
+			this.occupyArea.TestArea(Grid.PosToCell(base.gameObject), this, new Func<int, object, bool>(AirConditioner.UpdateStateCb));
+			this.envTemp /= (float)this.cellCount;
 		}
-		this.lastEnvTemp = envTemp;
+		this.lastEnvTemp = this.envTemp;
 		List<GameObject> items = this.storage.items;
 		for (int i = 0; i < items.Count; i++)
 		{
@@ -206,4 +209,8 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 	private int cooledAirOutputCell = -1;
 
 	private float lastSampleTime = -1f;
+
+	private float envTemp;
+
+	private int cellCount;
 }

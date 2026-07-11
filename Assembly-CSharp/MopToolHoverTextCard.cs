@@ -8,7 +8,7 @@ public class MopToolHoverTextCard : HoverTextConfiguration
 {
 	public override void UpdateHoverElements(List<KSelectable> selected)
 	{
-		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
 		if (!Grid.IsValidCell(num))
 		{
 			return;
@@ -24,13 +24,13 @@ public class MopToolHoverTextCard : HoverTextConfiguration
 			if (element.IsLiquid)
 			{
 				hoverTextDrawer.NewLine(26);
-				hoverTextDrawer.DrawText(element.name.ToUpper(), this.Styles_Title.Standard);
+				hoverTextDrawer.DrawText(element.nameUpperCase, this.Styles_Title.Standard);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(instance.GetSprite("dash"), 18);
 				hoverTextDrawer.DrawText(element.GetMaterialCategoryTag().ProperName(), this.Styles_BodyText.Standard);
 				hoverTextDrawer.NewLine(26);
 				hoverTextDrawer.DrawIcon(instance.GetSprite("dash"), 18);
-				string[] array = WorldInspector.MassStrings(num);
+				string[] array = WorldInspector.MassStringsReadOnly(num);
 				hoverTextDrawer.DrawText(array[0], this.Styles_Values.Property.Standard);
 				hoverTextDrawer.DrawText(array[1], this.Styles_Values.Property_Decimal.Standard);
 				hoverTextDrawer.DrawText(array[2], this.Styles_Values.Property.Standard);

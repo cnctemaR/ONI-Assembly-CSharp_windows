@@ -4,14 +4,14 @@ namespace FMOD.Studio
 {
 	public struct BUFFER_INFO
 	{
-		public int currentUsage;
+		public int currentusage;
 
-		public int peakUsage;
+		public int peakusage;
 
 		public int capacity;
 
-		public int stallCount;
+		public int stallcount;
 
-		public float stallTime;
+		public float stalltime;
 	}
 }

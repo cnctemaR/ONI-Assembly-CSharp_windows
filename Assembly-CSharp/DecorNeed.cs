@@ -13,7 +13,7 @@ public class DecorNeed : Need, ISim200ms
 		Attributes attributes = base.gameObject.GetAttributes();
 		this.modifier = new AttributeModifier(Db.Get().Amounts.Decor.deltaAttribute.Id, 1f, DUPLICANTS.NEEDS.DECOR.OBSERVED_DECOR, false, false, false);
 		this.expectationAttribute = attributes.Add(Db.Get().Attributes.DecorExpectation);
-		attributes.Add("Decor", this.modifier);
+		attributes.Add(this.modifier);
 		base.Name = DUPLICANTS.NEEDS.DECOR.NAME;
 		base.ExpectationTooltip = string.Format(DUPLICANTS.NEEDS.DECOR.EXPECTATION_TOOLTIP, Db.Get().Attributes.DecorExpectation.Lookup(this).GetTotalValue());
 		this.decorStressBonus = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.DECOR.NAME, false, false, true);
@@ -90,7 +90,7 @@ public class DecorNeed : Need, ISim200ms
 			}
 			if (attributeModifier != null)
 			{
-				attributes.Add(attributeModifier.GetDescription(), attributeModifier);
+				attributes.Add(attributeModifier);
 			}
 			ThoughtGraph.Instance smi = this.GetSMI<ThoughtGraph.Instance>();
 			if (smi != null)

@@ -1,211 +1,198 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD.Studio
 {
-	public class EventInstance : HandleBase
+	public struct EventInstance
 	{
-		public EventInstance(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT getDescription(out EventDescription description)
 		{
-			description = null;
-			IntPtr intPtr;
-			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetDescription(this.rawPtr, out intPtr);
-			if (result != RESULT.OK)
-			{
-				return result;
-			}
-			description = new EventDescription(intPtr);
-			return result;
+			return EventInstance.FMOD_Studio_EventInstance_GetDescription(this.handle, out description.handle);
 		}
 
-		public RESULT getVolume(out float volume)
+		public RESULT getVolume(out float volume, out float finalvolume)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetVolume(this.rawPtr, out volume);
+			return EventInstance.FMOD_Studio_EventInstance_GetVolume(this.handle, out volume, out finalvolume);
 		}
 
 		public RESULT setVolume(float volume)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetVolume(this.rawPtr, volume);
+			return EventInstance.FMOD_Studio_EventInstance_SetVolume(this.handle, volume);
 		}
 
-		public RESULT getPitch(out float pitch)
+		public RESULT getPitch(out float pitch, out float finalpitch)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetPitch(this.rawPtr, out pitch);
+			return EventInstance.FMOD_Studio_EventInstance_GetPitch(this.handle, out pitch, out finalpitch);
 		}
 
 		public RESULT setPitch(float pitch)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetPitch(this.rawPtr, pitch);
+			return EventInstance.FMOD_Studio_EventInstance_SetPitch(this.handle, pitch);
 		}
 
 		public RESULT get3DAttributes(out ATTRIBUTES_3D attributes)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_Get3DAttributes(this.rawPtr, out attributes);
+			return EventInstance.FMOD_Studio_EventInstance_Get3DAttributes(this.handle, out attributes);
 		}
 
 		public RESULT set3DAttributes(ATTRIBUTES_3D attributes)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_Set3DAttributes(this.rawPtr, ref attributes);
+			return EventInstance.FMOD_Studio_EventInstance_Set3DAttributes(this.handle, ref attributes);
 		}
 
 		public RESULT getListenerMask(out uint mask)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetListenerMask(this.rawPtr, out mask);
+			return EventInstance.FMOD_Studio_EventInstance_GetListenerMask(this.handle, out mask);
 		}
 
 		public RESULT setListenerMask(uint mask)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetListenerMask(this.rawPtr, mask);
+			return EventInstance.FMOD_Studio_EventInstance_SetListenerMask(this.handle, mask);
 		}
 
 		public RESULT getProperty(EVENT_PROPERTY index, out float value)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetProperty(this.rawPtr, index, out value);
+			return EventInstance.FMOD_Studio_EventInstance_GetProperty(this.handle, index, out value);
 		}
 
 		public RESULT setProperty(EVENT_PROPERTY index, float value)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetProperty(this.rawPtr, index, value);
+			return EventInstance.FMOD_Studio_EventInstance_SetProperty(this.handle, index, value);
+		}
+
+		public RESULT getReverbLevel(int index, out float level)
+		{
+			return EventInstance.FMOD_Studio_EventInstance_GetReverbLevel(this.handle, index, out level);
+		}
+
+		public RESULT setReverbLevel(int index, float level)
+		{
+			return EventInstance.FMOD_Studio_EventInstance_SetReverbLevel(this.handle, index, level);
 		}
 
 		public RESULT getPaused(out bool paused)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetPaused(this.rawPtr, out paused);
+			return EventInstance.FMOD_Studio_EventInstance_GetPaused(this.handle, out paused);
 		}
 
 		public RESULT setPaused(bool paused)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetPaused(this.rawPtr, paused);
+			return EventInstance.FMOD_Studio_EventInstance_SetPaused(this.handle, paused);
 		}
 
 		public RESULT start()
 		{
-			return EventInstance.FMOD_Studio_EventInstance_Start(this.rawPtr);
+			return EventInstance.FMOD_Studio_EventInstance_Start(this.handle);
 		}
 
 		public RESULT stop(STOP_MODE mode)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_Stop(this.rawPtr, mode);
+			return EventInstance.FMOD_Studio_EventInstance_Stop(this.handle, mode);
 		}
 
 		public RESULT getTimelinePosition(out int position)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetTimelinePosition(this.rawPtr, out position);
+			return EventInstance.FMOD_Studio_EventInstance_GetTimelinePosition(this.handle, out position);
 		}
 
 		public RESULT setTimelinePosition(int position)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetTimelinePosition(this.rawPtr, position);
+			return EventInstance.FMOD_Studio_EventInstance_SetTimelinePosition(this.handle, position);
 		}
 
 		public RESULT getPlaybackState(out PLAYBACK_STATE state)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetPlaybackState(this.rawPtr, out state);
+			return EventInstance.FMOD_Studio_EventInstance_GetPlaybackState(this.handle, out state);
 		}
 
 		public RESULT getChannelGroup(out ChannelGroup group)
 		{
-			group = null;
-			IntPtr intPtr = 0;
-			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetChannelGroup(this.rawPtr, out intPtr);
-			if (result != RESULT.OK)
-			{
-				return result;
-			}
-			group = new ChannelGroup(intPtr);
-			return result;
+			return EventInstance.FMOD_Studio_EventInstance_GetChannelGroup(this.handle, out group.handle);
 		}
 
 		public RESULT release()
 		{
-			return EventInstance.FMOD_Studio_EventInstance_Release(this.rawPtr);
+			return EventInstance.FMOD_Studio_EventInstance_Release(this.handle);
 		}
 
 		public RESULT isVirtual(out bool virtualState)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_IsVirtual(this.rawPtr, out virtualState);
+			return EventInstance.FMOD_Studio_EventInstance_IsVirtual(this.handle, out virtualState);
 		}
 
 		public RESULT getParameter(string name, out ParameterInstance instance)
 		{
-			instance = null;
-			IntPtr intPtr = 0;
-			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetParameter(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out intPtr);
-			if (result != RESULT.OK)
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
 			{
-				return result;
+				result = EventInstance.FMOD_Studio_EventInstance_GetParameter(this.handle, freeHelper.byteFromStringUTF8(name), out instance.handle);
 			}
-			instance = new ParameterInstance(intPtr);
 			return result;
 		}
 
 		public RESULT getParameterCount(out int count)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetParameterCount(this.rawPtr, out count);
+			return EventInstance.FMOD_Studio_EventInstance_GetParameterCount(this.handle, out count);
 		}
 
 		public RESULT getParameterByIndex(int index, out ParameterInstance instance)
 		{
-			instance = null;
-			IntPtr intPtr = 0;
-			RESULT result = EventInstance.FMOD_Studio_EventInstance_GetParameterByIndex(this.rawPtr, index, out intPtr);
-			if (result != RESULT.OK)
-			{
-				return result;
-			}
-			instance = new ParameterInstance(intPtr);
-			return result;
+			return EventInstance.FMOD_Studio_EventInstance_GetParameterByIndex(this.handle, index, out instance.handle);
 		}
 
-		public RESULT getParameterValue(string name, out float value)
+		public RESULT getParameterValue(string name, out float value, out float finalvalue)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetParameterValue(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), out value);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = EventInstance.FMOD_Studio_EventInstance_GetParameterValue(this.handle, freeHelper.byteFromStringUTF8(name), out value, out finalvalue);
+			}
+			return result;
 		}
 
 		public RESULT setParameterValue(string name, float value)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetParameterValue(this.rawPtr, Encoding.UTF8.GetBytes(name + '\0'), value);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = EventInstance.FMOD_Studio_EventInstance_SetParameterValue(this.handle, freeHelper.byteFromStringUTF8(name), value);
+			}
+			return result;
 		}
 
-		public RESULT setParameterValue(ParameterID id, float value)
+		public RESULT getParameterValueByIndex(int index, out float value, out float finalvalue)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetParameterValue(this.rawPtr, id.bytes, value);
-		}
-
-		public RESULT getParameterValueByIndex(int index, out float value)
-		{
-			return EventInstance.FMOD_Studio_EventInstance_GetParameterValueByIndex(this.rawPtr, index, out value);
+			return EventInstance.FMOD_Studio_EventInstance_GetParameterValueByIndex(this.handle, index, out value, out finalvalue);
 		}
 
 		public RESULT setParameterValueByIndex(int index, float value)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetParameterValueByIndex(this.rawPtr, index, value);
+			return EventInstance.FMOD_Studio_EventInstance_SetParameterValueByIndex(this.handle, index, value);
+		}
+
+		public RESULT setParameterValuesByIndices(int[] indices, float[] values, int count)
+		{
+			return EventInstance.FMOD_Studio_EventInstance_SetParameterValuesByIndices(this.handle, indices, values, count);
 		}
 
 		public RESULT triggerCue()
 		{
-			return EventInstance.FMOD_Studio_EventInstance_TriggerCue(this.rawPtr);
+			return EventInstance.FMOD_Studio_EventInstance_TriggerCue(this.handle);
 		}
 
 		public RESULT setCallback(EVENT_CALLBACK callback, EVENT_CALLBACK_TYPE callbackmask = EVENT_CALLBACK_TYPE.ALL)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetCallback(this.rawPtr, callback, callbackmask);
+			return EventInstance.FMOD_Studio_EventInstance_SetCallback(this.handle, callback, callbackmask);
 		}
 
-		public RESULT getUserData(out IntPtr userData)
+		public RESULT getUserData(out IntPtr userdata)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_GetUserData(this.rawPtr, out userData);
+			return EventInstance.FMOD_Studio_EventInstance_GetUserData(this.handle, out userdata);
 		}
 
-		public RESULT setUserData(IntPtr userData)
+		public RESULT setUserData(IntPtr userdata)
 		{
-			return EventInstance.FMOD_Studio_EventInstance_SetUserData(this.rawPtr, userData);
+			return EventInstance.FMOD_Studio_EventInstance_SetUserData(this.handle, userdata);
 		}
 
 		[DllImport("fmodstudio")]
@@ -215,13 +202,13 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventInstance_GetDescription(IntPtr _event, out IntPtr description);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventInstance_GetVolume(IntPtr _event, out float volume);
+		private static extern RESULT FMOD_Studio_EventInstance_GetVolume(IntPtr _event, out float volume, out float finalvolume);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetVolume(IntPtr _event, float volume);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventInstance_GetPitch(IntPtr _event, out float pitch);
+		private static extern RESULT FMOD_Studio_EventInstance_GetPitch(IntPtr _event, out float pitch, out float finalpitch);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetPitch(IntPtr _event, float pitch);
@@ -243,6 +230,12 @@ namespace FMOD.Studio
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetProperty(IntPtr _event, EVENT_PROPERTY index, float value);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_GetReverbLevel(IntPtr _event, int index, out float level);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_SetReverbLevel(IntPtr _event, int index, float level);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_GetPaused(IntPtr _event, out bool paused);
@@ -284,16 +277,19 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventInstance_GetParameterCount(IntPtr _event, out int count);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventInstance_GetParameterValue(IntPtr _event, byte[] name, out float value);
+		private static extern RESULT FMOD_Studio_EventInstance_GetParameterValue(IntPtr _event, byte[] name, out float value, out float finalvalue);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetParameterValue(IntPtr _event, byte[] name, float value);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventInstance_GetParameterValueByIndex(IntPtr _event, int index, out float value);
+		private static extern RESULT FMOD_Studio_EventInstance_GetParameterValueByIndex(IntPtr _event, int index, out float value, out float finalvalue);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_SetParameterValueByIndex(IntPtr _event, int index, float value);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD_Studio_EventInstance_SetParameterValuesByIndices(IntPtr _event, int[] indices, float[] values, int count);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD_Studio_EventInstance_TriggerCue(IntPtr _event);
@@ -302,14 +298,26 @@ namespace FMOD.Studio
 		private static extern RESULT FMOD_Studio_EventInstance_SetCallback(IntPtr _event, EVENT_CALLBACK callback, EVENT_CALLBACK_TYPE callbackmask);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventInstance_GetUserData(IntPtr _event, out IntPtr userData);
+		private static extern RESULT FMOD_Studio_EventInstance_GetUserData(IntPtr _event, out IntPtr userdata);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD_Studio_EventInstance_SetUserData(IntPtr _event, IntPtr userData);
+		private static extern RESULT FMOD_Studio_EventInstance_SetUserData(IntPtr _event, IntPtr userdata);
 
-		protected override bool isValidInternal()
+		public bool hasHandle()
 		{
-			return EventInstance.FMOD_Studio_EventInstance_IsValid(this.rawPtr);
+			return this.handle != IntPtr.Zero;
 		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public bool isValid()
+		{
+			return this.hasHandle() && EventInstance.FMOD_Studio_EventInstance_IsValid(this.handle);
+		}
+
+		public IntPtr handle;
 	}
 }

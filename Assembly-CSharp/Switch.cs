@@ -77,7 +77,7 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 			}
 			if (this.manuallyControlled)
 			{
-				this.userMenu.Refresh();
+				Game.Instance.userMenu.Refresh(base.gameObject);
 			}
 		}
 	}
@@ -85,7 +85,7 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 	protected virtual void OnRefreshUserMenu(object data)
 	{
 		LocString locString = ((!this.switchedOn) ? BUILDINGS.PREFABS.SWITCH.TURN_ON : BUILDINGS.PREFABS.SWITCH.TURN_OFF);
-		this.userMenu.AddButton(new KIconButtonMenu.ButtonInfo("action_power", locString, new global::System.Action(this.OnMinionToggle), global::Action.ToggleEnabled, null, null, null, string.Empty, true), 1f);
+		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_power", locString, new global::System.Action(this.OnMinionToggle), global::Action.ToggleEnabled, null, null, null, string.Empty, true), 1f);
 	}
 
 	protected void UpdateSwitchStatus()
@@ -102,9 +102,6 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 
 	[Serialize]
 	protected bool switchedOn = true;
-
-	[MyCmpAdd]
-	protected UserMenu userMenu;
 
 	[MyCmpAdd]
 	private Toggleable openSwitch;

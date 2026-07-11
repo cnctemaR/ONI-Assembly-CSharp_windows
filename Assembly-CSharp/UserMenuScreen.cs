@@ -66,14 +66,7 @@ public class UserMenuScreen : KIconButtonMenu
 		}
 		this.buttonInfos.Clear();
 		this.slidersInfos.Clear();
-		UserMenu[] components = go.GetComponents<UserMenu>();
-		if (components != null)
-		{
-			foreach (UserMenu userMenu in components)
-			{
-				userMenu.AppendToScreen(this);
-			}
-		}
+		Game.Instance.userMenu.AppendToScreen(go, this);
 		base.SetButtons(this.buttonInfos);
 		base.RefreshButtons();
 		this.RefreshSliders();

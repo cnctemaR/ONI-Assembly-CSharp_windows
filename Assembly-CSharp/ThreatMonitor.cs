@@ -26,67 +26,51 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		{
 			smi.RefreshThreat(null);
 		}, UpdateRate.SIM_1000ms, true);
-		this.threatned.duplicant.Transition(this.safe, (ThreatMonitor.Instance smi) => !smi.CheckForThreats(), UpdateRate.SIM_200ms);
-		this.threatned.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe).Update(new Action<ThreatMonitor.Instance, float>(ThreatMonitor.ShouldFight), UpdateRate.SIM_200ms, false);
-		this.threatned.duplicant.ShoudFlee.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateFleeChore), this.safe);
-		this.threatned.creature.ToggleBehaviour(GameTags.Creatures.Flee, (ThreatMonitor.Instance smi) => !CreatureHelpers.WillEngageNonEssentialTargets(smi.gameObject, smi.def.fleethresholdState), delegate(ThreatMonitor.Instance smi)
+		this.threatened.duplicant.Transition(this.safe, (ThreatMonitor.Instance smi) => !smi.CheckForThreats(), UpdateRate.SIM_200ms);
+		this.threatened.duplicant.ShouldFight.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateAttackChore), this.safe).Update("DupeUpdateTarget", new Action<ThreatMonitor.Instance, float>(ThreatMonitor.DupeUpdateTarget), UpdateRate.SIM_200ms, false);
+		this.threatened.duplicant.ShoudFlee.ToggleChore(new Func<ThreatMonitor.Instance, Chore>(this.CreateFleeChore), this.safe);
+		this.threatened.creature.ToggleBehaviour(GameTags.Creatures.Flee, (ThreatMonitor.Instance smi) => !smi.WillFight(), delegate(ThreatMonitor.Instance smi)
 		{
 			smi.GoTo(this.safe);
-		}).ToggleBehaviour(GameTags.Creatures.Attack, (ThreatMonitor.Instance smi) => CreatureHelpers.WillEngageNonEssentialTargets(smi.gameObject, smi.def.fleethresholdState), delegate(ThreatMonitor.Instance smi)
+		}).ToggleBehaviour(GameTags.Creatures.Attack, (ThreatMonitor.Instance smi) => smi.WillFight(), delegate(ThreatMonitor.Instance smi)
 		{
 			smi.GoTo(this.safe);
-		}).Enter(delegate(ThreatMonitor.Instance smi)
-		{
-			this.ReportThreat(smi);
-		})
-			.Update("Threatened", delegate(ThreatMonitor.Instance smi, float dt)
-			{
-				if (smi.isMasterNull)
-				{
-					return;
-				}
-				if (smi.revengeThreat.target != null && smi.revengeThreat.Calm(dt, smi.master.gameObject))
-				{
-					smi.Trigger(-21431934, null);
-					return;
-				}
-				if (!smi.CheckForThreats())
-				{
-					smi.GoTo(this.safe);
-				}
-				else
-				{
-					this.ReportThreat(smi);
-				}
-			}, UpdateRate.SIM_200ms, false);
+		}).Update("Threatened", new Action<ThreatMonitor.Instance, float>(ThreatMonitor.CritterUpdateThreats), UpdateRate.SIM_200ms, false);
 	}
 
-	private static void ShouldFight(ThreatMonitor.Instance smi, float dt)
+	private static void DupeUpdateTarget(ThreatMonitor.Instance smi, float dt)
 	{
-		if (ThreatMonitor.GetMainThreat(smi) == null || !ThreatMonitor.GetMainThreat(smi).GetComponent<FactionAlignment>().targeted)
+		if (smi.MainThreat == null || !smi.MainThreat.GetComponent<FactionAlignment>().targeted)
 		{
 			smi.Trigger(2144432245, null);
 		}
 	}
 
-	private static GameObject GetMainThreat(ThreatMonitor.Instance smi)
+	private static void CritterUpdateThreats(ThreatMonitor.Instance smi, float dt)
 	{
-		return smi.GetMainThreat;
-	}
-
-	private void ReportThreat(ThreatMonitor.Instance smi)
-	{
-		smi.master.Trigger(229718515, smi.GetMainThreat);
+		if (smi.isMasterNull)
+		{
+			return;
+		}
+		if (smi.revengeThreat.target != null && smi.revengeThreat.Calm(dt, smi.alignment))
+		{
+			smi.Trigger(-21431934, null);
+			return;
+		}
+		if (!smi.CheckForThreats())
+		{
+			smi.GoTo(smi.sm.safe);
+		}
 	}
 
 	private Chore CreateAttackChore(ThreatMonitor.Instance smi)
 	{
-		return new AttackChore(smi.master, smi.GetMainThreat);
+		return new AttackChore(smi.master, smi.MainThreat);
 	}
 
 	private Chore CreateFleeChore(ThreatMonitor.Instance smi)
 	{
-		return new FleeChore(smi.master, smi.GetMainThreat);
+		return new FleeChore(smi.master, smi.MainThreat);
 	}
 
 	private FactionAlignment alignment;
@@ -95,21 +79,21 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 	public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State safe;
 
-	public ThreatMonitor.ThreatnedStates threatned;
+	public ThreatMonitor.ThreatenedStates threatened;
 
 	public class Def : StateMachine.BaseDef
 	{
 		public Health.HealthState fleethresholdState = Health.HealthState.Injured;
 	}
 
-	public class ThreatnedStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State
+	public class ThreatenedStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State
 	{
-		public ThreatMonitor.ThreatnedDuplicantStates duplicant;
+		public ThreatMonitor.ThreatenedDuplicantStates duplicant;
 
 		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State creature;
 	}
 
-	public class ThreatnedDuplicantStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State
+	public class ThreatenedDuplicantStates : GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State
 	{
 		public GameStateMachine<ThreatMonitor, ThreatMonitor.Instance, IStateMachineTarget, ThreatMonitor.Def>.State ShoudFlee;
 
@@ -118,14 +102,14 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 	public struct Grudge
 	{
-		public void reset(GameObject revengeTarget)
+		public void Reset(FactionAlignment revengeTarget)
 		{
 			this.target = revengeTarget;
 			float num = 10f;
 			this.grudgeTime = num;
 		}
 
-		public bool Calm(float dt, GameObject self)
+		public bool Calm(float dt, FactionAlignment self)
 		{
 			if (this.grudgeTime <= 0f)
 			{
@@ -134,7 +118,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			this.grudgeTime = Mathf.Max(0f, this.grudgeTime - dt);
 			if (this.grudgeTime == 0f)
 			{
-				if (FactionManager.Instance.GetDisposition(self.GetComponent<FactionAlignment>().Alignment, this.target.GetComponent<FactionAlignment>().Alignment) != FactionManager.Disposition.Attack)
+				if (FactionManager.Instance.GetDisposition(self.Alignment, this.target.Alignment) != FactionManager.Disposition.Attack)
 				{
 					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.FORGAVEATTACKER, self.transform, 2f, true);
 				}
@@ -150,7 +134,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			this.target = null;
 		}
 
-		public GameObject target;
+		public FactionAlignment target;
 
 		public float grudgeTime;
 	}
@@ -167,11 +151,19 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			this.choreConsumer = master.GetComponent<ChoreConsumer>();
 		}
 
-		public GameObject GetMainThreat
+		public GameObject MainThreat
 		{
 			get
 			{
 				return this.mainThreat;
+			}
+		}
+
+		public bool IAmADuplicant
+		{
+			get
+			{
+				return this.alignment.Alignment == FactionManager.FactionID.Duplicant;
 			}
 		}
 
@@ -212,7 +204,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		{
 			if (this.revengeThreat.target != null)
 			{
-				if (!this.revengeThreat.target.GetComponent<FactionAlignment>().CheckAlignmentActive)
+				if (!this.revengeThreat.target.GetComponent<FactionAlignment>().IsAlignmentActive())
 				{
 					this.revengeThreat.Clear();
 				}
@@ -223,49 +215,56 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public void OnAttacked(object data)
 		{
 			FactionAlignment factionAlignment = (FactionAlignment)data;
-			this.revengeThreat.reset(factionAlignment.gameObject);
+			this.revengeThreat.Reset(factionAlignment);
 			if (this.mainThreat == null)
 			{
 				this.SetMainThreat(factionAlignment.gameObject);
-				this.GoToThreatned();
+				this.GoToThreatened();
 			}
-			else if (!this.WillEngageNonEssentialTargets())
+			else if (!this.WillFight())
 			{
-				this.GoToThreatned();
+				this.GoToThreatened();
 			}
 		}
 
-		public bool WillEngageNonEssentialTargets()
+		public bool WillFight()
 		{
-			return (!(this.choreConsumer != null) || (this.choreConsumer.IsPermittedByUser(Db.Get().ChoreGroups.Combat) && this.choreConsumer.IsPermittedByTraits(Db.Get().ChoreGroups.Combat))) && this.health.State < base.smi.def.fleethresholdState;
-		}
-
-		public void OnOffended(FactionAlignment offender)
-		{
-			this.OnAttacked(offender);
+			if (this.choreConsumer != null)
+			{
+				if (!this.choreConsumer.IsPermittedByUser(Db.Get().ChoreGroups.Combat))
+				{
+					return false;
+				}
+				if (!this.choreConsumer.IsPermittedByTraits(Db.Get().ChoreGroups.Combat))
+				{
+					return false;
+				}
+			}
+			bool flag = this.health.State >= base.smi.def.fleethresholdState;
+			return !flag;
 		}
 
 		private void GotoThreatResponse()
 		{
-			if (this.WillEngageNonEssentialTargets() && this.mainThreat.GetComponent<FactionAlignment>().targeted)
+			if (this.WillFight() && this.mainThreat.GetComponent<FactionAlignment>().targeted)
 			{
-				base.smi.GoTo(base.smi.sm.threatned.duplicant.ShouldFight);
+				base.smi.GoTo(base.smi.sm.threatened.duplicant.ShouldFight);
 			}
 			else
 			{
-				base.smi.GoTo(base.smi.sm.threatned.duplicant.ShoudFlee);
+				base.smi.GoTo(base.smi.sm.threatened.duplicant.ShoudFlee);
 			}
 		}
 
-		public void GoToThreatned()
+		public void GoToThreatened()
 		{
-			if (base.GetComponent<MinionIdentity>() != null)
+			if (this.IAmADuplicant)
 			{
 				this.GotoThreatResponse();
 			}
 			else
 			{
-				base.smi.GoTo(base.sm.threatned.creature);
+				base.smi.GoTo(base.sm.threatened.creature);
 			}
 		}
 
@@ -287,7 +286,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			bool flag = base.smi.CheckForThreats();
 			if (flag)
 			{
-				this.GoToThreatned();
+				this.GoToThreatened();
 			}
 			else if (base.smi.GetCurrentState() != base.sm.safe)
 			{
@@ -299,9 +298,9 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		public bool CheckForThreats()
 		{
 			GameObject gameObject;
-			if (this.revengeThreat.target != null && this.revengeThreat.target.GetComponent<FactionAlignment>().CheckAlignmentActive && !this.revengeThreat.target.GetComponent<Health>().IsDefeated() && (this.alignment.Alignment != FactionManager.FactionID.Duplicant || !this.revengeThreat.target.GetComponent<FactionAlignment>().targeted))
+			if (this.revengeThreat.target != null && this.revengeThreat.target.IsAlignmentActive() && !this.revengeThreat.target.health.IsDefeated() && (!this.IAmADuplicant || !this.revengeThreat.target.targeted))
 			{
-				gameObject = this.revengeThreat.target;
+				gameObject = this.revengeThreat.target.gameObject;
 			}
 			else
 			{
@@ -318,53 +317,18 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			{
 				return null;
 			}
-			int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), new CellOffset(-this.maxThreatDistance / 2, -this.maxThreatDistance / 2));
-			bool flag = this.WillEngageNonEssentialTargets();
-			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-			GameScenePartitioner.Instance.GatherEntries(Grid.CellToXY(num).x, Grid.CellToXY(num).y, this.maxThreatDistance, this.maxThreatDistance, GameScenePartitioner.Instance.attackableEntitiesLayer, list);
-			for (int i = 0; i < list.Count; i++)
+			bool flag = this.WillFight();
+			if (this.IAmADuplicant && flag)
 			{
-				ScenePartitionerEntry scenePartitionerEntry = list[i];
-				FactionAlignment factionAlignment = scenePartitionerEntry.obj as FactionAlignment;
-				if (!(factionAlignment.transform == null))
+				for (int i = 0; i < 6; i++)
 				{
-					if (!(factionAlignment == this.alignment))
+					if (i != 0)
 					{
-						if (factionAlignment.CheckAlignmentActive)
+						foreach (FactionAlignment factionAlignment in FactionManager.Instance.GetFaction((FactionManager.FactionID)i).Members)
 						{
-							if (this.alignment.Alignment != FactionManager.FactionID.Duplicant || factionAlignment.targeted)
+							if (factionAlignment.targeted && !factionAlignment.health.IsDefeated() && !this.threats.Contains(factionAlignment) && this.navigator.CanReach(factionAlignment.attackable))
 							{
-								if (flag && this.alignment.Alignment == FactionManager.FactionID.Duplicant && factionAlignment.targeted)
-								{
-									if (this.navigator.CanReach(factionAlignment.attackable))
-									{
-										this.threats.Add(factionAlignment);
-									}
-								}
-								else if (FactionManager.Instance.GetDisposition(this.alignment.Alignment, factionAlignment.Alignment) == FactionManager.Disposition.Attack)
-								{
-									if (this.navigator.CanReach(factionAlignment.attackable))
-									{
-										this.threats.Add(factionAlignment);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
-			if (this.alignment.Alignment == FactionManager.FactionID.Duplicant && flag)
-			{
-				for (int j = 0; j < 6; j++)
-				{
-					if (j != 0)
-					{
-						foreach (FactionAlignment factionAlignment2 in FactionManager.Instance.GetFaction((FactionManager.FactionID)j).Members)
-						{
-							if (factionAlignment2.targeted && !this.threats.Contains(factionAlignment2) && this.navigator.CanReach(factionAlignment2.attackable))
-							{
-								this.threats.Add(factionAlignment2);
+								this.threats.Add(factionAlignment);
 							}
 						}
 					}
@@ -411,7 +375,5 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		private GameObject mainThreat;
 
 		private List<FactionAlignment> threats = new List<FactionAlignment>();
-
-		private int maxThreatDistance = 12;
 	}
 }

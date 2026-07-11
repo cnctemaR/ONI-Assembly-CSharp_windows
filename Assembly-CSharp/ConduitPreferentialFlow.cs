@@ -14,7 +14,7 @@ public class ConduitPreferentialFlow : KMonoBehaviour, ISecondaryInput
 		int num2 = Grid.OffsetCell(num, rotatedOffset);
 		Conduit.GetFlowManager(this.portInfo.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
 		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.portInfo.conduitType);
-		this.secondaryInput = new FlowUtilityNetwork.NetworkItem(this.portInfo.conduitType, Endpoint.Sink, num2);
+		this.secondaryInput = new FlowUtilityNetwork.NetworkItem(this.portInfo.conduitType, Endpoint.Sink, num2, base.gameObject);
 		networkManager.AddToNetworks(this.secondaryInput.Cell, this.secondaryInput, true);
 	}
 

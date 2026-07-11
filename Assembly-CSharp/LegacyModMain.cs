@@ -137,7 +137,7 @@ public class LegacyModMain
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Katairite,
-				overheatMod = 2000f
+				overheatMod = 200f
 			},
 			new LegacyModMain.ElementInfo
 			{
@@ -189,6 +189,12 @@ public class LegacyModMain
 			},
 			new LegacyModMain.ElementInfo
 			{
+				id = SimHashes.Ceramic,
+				overheatMod = 200f,
+				decor = 0.2f
+			},
+			new LegacyModMain.ElementInfo
+			{
 				id = SimHashes.Iron,
 				overheatMod = 50f
 			},
@@ -200,7 +206,7 @@ public class LegacyModMain
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Steel,
-				overheatMod = 50f
+				overheatMod = 200f
 			},
 			new LegacyModMain.ElementInfo
 			{
@@ -211,7 +217,7 @@ public class LegacyModMain
 			new LegacyModMain.ElementInfo
 			{
 				id = SimHashes.Diamond,
-				overheatMod = 2000f,
+				overheatMod = 200f,
 				decor = 1f
 			}
 		};

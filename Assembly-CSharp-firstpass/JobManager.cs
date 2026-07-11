@@ -19,7 +19,13 @@ public class JobManager
 
 	public bool DoNextWorkItem()
 	{
-		return this.currentJob.DoNextWorkItem();
+		int num = Interlocked.Increment(ref this.nextWorkIndex);
+		if (num < this.workItems.Count)
+		{
+			this.workItems.InternalDoWorkItem(num);
+			return true;
+		}
+		return false;
 	}
 
 	public void Cleanup()
@@ -33,20 +39,24 @@ public class JobManager
 		this.threads.Clear();
 	}
 
-	public void Run<WorkItemType, SharedDataType>(List<WorkItemType> work_items, SharedDataType shared_data) where WorkItemType : IWorkItem<SharedDataType>
+	public void Run(IWorkItemCollection work_items)
 	{
 		if (JobManager.runSingleThreaded)
 		{
-			foreach (WorkItemType workItemType in work_items)
+			for (int i = 0; i < work_items.Count; i++)
 			{
-				workItemType.Run(shared_data);
+				work_items.InternalDoWorkItem(i);
 			}
 		}
 		else
 		{
-			this.currentJob = new Job<WorkItemType, SharedDataType>(work_items, shared_data, this.threads.Count);
+			this.workerThreadCount = this.threads.Count;
+			this.nextWorkIndex = -1;
+			this.workItems = work_items;
+			Thread.MemoryBarrier();
 			this.semaphore.Release(this.threads.Count);
-			this.currentJob.Wait();
+			this.manualResetEvent.WaitOne();
+			this.manualResetEvent.Reset();
 			if (JobManager.errorOccured)
 			{
 				foreach (JobManager.WorkerThread workerThread in this.threads)
@@ -59,7 +69,10 @@ public class JobManager
 
 	public void DecrementActiveWorkerThreadCount()
 	{
-		this.currentJob.DecrementWorkerThreadCount();
+		if (Interlocked.Decrement(ref this.workerThreadCount) == 0)
+		{
+			this.manualResetEvent.Set();
+		}
 	}
 
 	public static bool errorOccured;
@@ -68,7 +81,13 @@ public class JobManager
 
 	private Semaphore semaphore;
 
-	private Job currentJob;
+	private IWorkItemCollection workItems;
+
+	private int nextWorkIndex = -1;
+
+	private int workerThreadCount;
+
+	private ManualResetEvent manualResetEvent = new ManualResetEvent(false);
 
 	private static bool runSingleThreaded;
 

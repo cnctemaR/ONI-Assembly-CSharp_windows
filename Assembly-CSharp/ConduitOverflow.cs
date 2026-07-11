@@ -14,7 +14,7 @@ public class ConduitOverflow : KMonoBehaviour, ISecondaryOutput
 		int num2 = Grid.OffsetCell(num, rotatedOffset);
 		Conduit.GetFlowManager(this.portInfo.conduitType).AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
 		IUtilityNetworkMgr networkManager = Conduit.GetNetworkManager(this.portInfo.conduitType);
-		this.secondaryOutput = new FlowUtilityNetwork.NetworkItem(this.portInfo.conduitType, Endpoint.Sink, num2);
+		this.secondaryOutput = new FlowUtilityNetwork.NetworkItem(this.portInfo.conduitType, Endpoint.Sink, num2, base.gameObject);
 		networkManager.AddToNetworks(this.secondaryOutput.Cell, this.secondaryOutput, true);
 	}
 

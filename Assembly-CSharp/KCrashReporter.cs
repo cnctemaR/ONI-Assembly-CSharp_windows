@@ -195,7 +195,8 @@ public class KCrashReporter : MonoBehaviour
 				Uri uri = new Uri("http://crashes.klei.ca/submitSave");
 				try
 				{
-					webClient.UploadData(uri, "POST", bytes);
+					byte[] array2 = webClient.UploadData(uri, "POST", bytes);
+					string string2 = Encoding.UTF8.GetString(array2);
 					return text3;
 				}
 				catch (Exception ex)
@@ -210,10 +211,6 @@ public class KCrashReporter : MonoBehaviour
 
 	private static string GetUserID()
 	{
-		if (Application.isEditor)
-		{
-			return Environment.UserName;
-		}
 		if (DistributionPlatform.Initialized)
 		{
 			return string.Concat(new object[]
@@ -225,7 +222,7 @@ public class KCrashReporter : MonoBehaviour
 				DistributionPlatform.Inst.LocalUser.Id
 			});
 		}
-		return "NO_PLATFORM";
+		return Environment.UserName;
 	}
 
 	private static string GetLogContents()
@@ -285,7 +282,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		string text6;
+		string text7;
 		using (WebClient webClient = new WebClient())
 		{
 			webClient.Encoding = Encoding.UTF8;
@@ -301,42 +298,30 @@ public class KCrashReporter : MonoBehaviour
 				string fileName = Path.GetFileName(text);
 				msg = string.Concat(new string[] { "Failed to load '", fileName, "' with error '", text2, "'." });
 			}
-			string text3 = save_file_hash;
-			if (string.IsNullOrEmpty(save_file_hash))
-			{
-				text3 = "No save file uploaded";
-			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
 				stack_trace = string.Format("No stack trace.\n\n{0}", msg);
 			}
-			else
-			{
-				msg = string.Format("{0}\n\nSave File: {1}", msg, text3);
-			}
 			int num = stack_trace.IndexOf('\n');
-			string text4 = stack_trace;
-			if (num > 0)
+			string text3 = string.Empty;
+			string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug:LogError", "UnityEngine.Debug:Assert(Boolean, String)", "Output:LogError(String)", "Output:LogErrorWithObj(Object, String)", "Output:LogErrorWithObj(Object, Object[])", "DebugUtil:Assert(Boolean, String)", "KCrashReporter.Assert(Boolean condition, System.String message)", "No stack trace." };
+			foreach (string text4 in stack_trace.Split(new char[] { '\n' }))
 			{
-				text4 = stack_trace.Substring(0, num);
-			}
-			while (text4 == string.Empty || text4.StartsWith("UnityEngine.Debug:LogError(Object)") || text4.StartsWith("UnityEngine.Debug:LogError(Object, Object)") || text4.StartsWith("UnityEngine.Debug:Assert(Boolean, String)") || text4.StartsWith("Output:LogError(String)") || text4.StartsWith("Output:LogErrorWithObj(Object, String)") || text4.StartsWith("Output:LogErrorWithObj(Object, Object[])") || text4.StartsWith("DebugUtil:Assert(Boolean, String)") || text4.StartsWith("KCrashReporter.Assert(Boolean condition, System.String message)") || text4.StartsWith("No stack trace."))
-			{
-				int num2 = num + 1;
-				bool flag = false;
-				if (num2 < stack_trace.Length)
+				if (!string.IsNullOrEmpty(text4))
 				{
-					num = stack_trace.IndexOf('\n', num2);
-					if (num < stack_trace.Length)
+					bool flag = false;
+					foreach (string text5 in array)
 					{
-						text4 = stack_trace.Substring(num2, num - num2);
-						flag = true;
+						if (text4.StartsWith(text5))
+						{
+							flag = true;
+							break;
+						}
 					}
-				}
-				if (!flag)
-				{
-					text4 = string.Empty;
-					break;
+					if (!flag)
+					{
+						text3 = text3 + text4 + "\n";
+					}
 				}
 			}
 			if (userMessage == UI.CRASHSCREEN.BODY.text)
@@ -350,10 +335,10 @@ public class KCrashReporter : MonoBehaviour
 			{
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
-			error.fullstack = "UNITY_OUTPUT:\n" + msg;
-			error.build = 269773;
+			error.fullstack = msg;
+			error.build = 273433;
 			error.log = KCrashReporter.GetLogContents();
-			error.summaryline = text4;
+			error.summaryline = text3;
 			error.user_message = userMessage;
 			if (!string.IsNullOrEmpty(save_file_hash))
 			{
@@ -363,13 +348,13 @@ public class KCrashReporter : MonoBehaviour
 			{
 				error.steam64_verified = DistributionPlatform.Inst.LocalUser.Id.ToInt64();
 			}
-			string text5 = JsonConvert.SerializeObject(error);
+			string text6 = JsonConvert.SerializeObject(error);
 			string empty = string.Empty;
 			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
 			global::Debug.Log("Submitting crash:", null);
 			try
 			{
-				webClient.UploadStringAsync(uri, text5);
+				webClient.UploadStringAsync(uri, text6);
 			}
 			catch (Exception ex)
 			{
@@ -380,11 +365,11 @@ public class KCrashReporter : MonoBehaviour
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
 				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null);
 			}
-			text6 = empty;
+			text7 = empty;
 		}
 		if (KCrashReporter.onCrashReported != null)
 		{
-			KCrashReporter.onCrashReported(text6);
+			KCrashReporter.onCrashReported(text7);
 		}
 	}
 
@@ -403,8 +388,36 @@ public class KCrashReporter : MonoBehaviour
 	{
 		if (!condition && !KCrashReporter.hasReportedError)
 		{
-			StackTrace stackTrace = new StackTrace(0, true);
-			KCrashReporter.ReportError(message, stackTrace.ToString(), null, null, string.Empty);
+			StackTrace stackTrace = new StackTrace(1, true);
+			KCrashReporter.ReportError("ASSERT: " + message, stackTrace.ToString(), null, null, string.Empty);
+		}
+	}
+
+	public static void ReportDLLCrash(string msg, string stack_trace, string dmp_filename)
+	{
+		if (KCrashReporter.hasReportedError)
+		{
+			return;
+		}
+		string text = null;
+		string text2 = null;
+		string text3 = null;
+		if (dmp_filename != null)
+		{
+			string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(dmp_filename);
+			text2 = Path.Combine(Path.GetDirectoryName(Application.dataPath), dmp_filename);
+			text3 = Path.Combine(Path.GetDirectoryName(Application.dataPath), fileNameWithoutExtension + ".sav");
+			File.Move(text2, text3);
+			text = KCrashReporter.UploadSaveFile(text3, stack_trace, new Dictionary<string, string> { 
+			{
+				"user",
+				KCrashReporter.GetUserID()
+			} });
+		}
+		KCrashReporter.ReportError(msg, stack_trace, text, null, string.Empty);
+		if (dmp_filename != null)
+		{
+			File.Move(text3, text2);
 		}
 	}
 

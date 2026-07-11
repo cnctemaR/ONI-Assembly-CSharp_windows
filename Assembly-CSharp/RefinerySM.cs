@@ -28,12 +28,12 @@ public class RefinerySM : StateMachineComponent<RefinerySM.StatesInstance>
 			this.idle.DefaultState(this.idle.idleQueue).PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.off, (RefinerySM.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
 				.EventTransition(GameHashes.ActiveChanged, this.operating, (RefinerySM.StatesInstance smi) => smi.GetComponent<Operational>().IsActive);
 			this.idle.idleQueue.ToggleStatusItem(Db.Get().BuildingStatusItems.FabricatorEmpty, null).EventTransition(GameHashes.FabricatorOrdersUpdated, this.idle.waitingForMaterial, (RefinerySM.StatesInstance smi) => smi.master.refinery.NumOrders > 0);
-			this.idle.waitingForMaterial.EventTransition(GameHashes.FabricatorOrdersUpdated, this.idle.waitingForWorker, (RefinerySM.StatesInstance smi) => smi.master.refinery.NeedsWorker);
-			this.idle.waitingForWorker.ToggleStatusItem(Db.Get().BuildingStatusItems.PendingWork, null).EventTransition(GameHashes.FabricatorOrdersUpdated, this.idle.idleQueue, (RefinerySM.StatesInstance smi) => !smi.master.refinery.NeedsWorker);
+			this.idle.waitingForMaterial.EventTransition(GameHashes.FabricatorOrdersUpdated, this.idle.waitingForWorker, (RefinerySM.StatesInstance smi) => smi.master.refinery.WaitingForWorker);
+			this.idle.waitingForWorker.ToggleStatusItem(Db.Get().BuildingStatusItems.PendingWork, null).EventTransition(GameHashes.FabricatorOrdersUpdated, this.idle.idleQueue, (RefinerySM.StatesInstance smi) => !smi.master.refinery.WaitingForWorker).EnterTransition(this.operating, (RefinerySM.StatesInstance smi) => !smi.master.refinery.duplicantOperated);
 			this.operating.DefaultState(this.operating.working_pre);
 			this.operating.working_pre.PlayAnim("working_pre").OnAnimQueueComplete(this.operating.working_loop);
 			this.operating.working_loop.PlayAnim("working_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.operating.working_pst, (RefinerySM.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.operating.working_pst, (RefinerySM.StatesInstance smi) => !smi.GetComponent<Operational>().IsActive);
-			this.operating.working_pst.PlayAnim("working_pst").WorkableCompleteTransition((RefinerySM.StatesInstance smi) => smi.master.refinery, this.operating.working_pst_complete).OnAnimQueueComplete(this.idle);
+			this.operating.working_pst.PlayAnim("working_pst").WorkableCompleteTransition((RefinerySM.StatesInstance smi) => smi.master.refinery.GetWorkable, this.operating.working_pst_complete).OnAnimQueueComplete(this.idle);
 			this.operating.working_pst_complete.PlayAnim("working_pst_complete").OnAnimQueueComplete(this.idle);
 		}
 

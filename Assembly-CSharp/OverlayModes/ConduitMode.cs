@@ -87,6 +87,26 @@ namespace OverlayModes
 					disposable.Dispose();
 				}
 			}
+			GameObject gameObject = null;
+			if (SelectTool.Instance != null && SelectTool.Instance.hover != null)
+			{
+				gameObject = SelectTool.Instance.hover.gameObject;
+			}
+			this.connectedNetworks.Clear();
+			float num = 1f;
+			if (gameObject != null)
+			{
+				IBridgedNetworkItem component = gameObject.GetComponent<IBridgedNetworkItem>();
+				if (component != null)
+				{
+					int networkCell = component.GetNetworkCell();
+					UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((this.ViewMode() != SimViewMode.LiquidVentMap) ? Game.Instance.gasConduitSystem : Game.Instance.liquidConduitSystem);
+					this.visited.Clear();
+					this.FindConnectedNetworks(networkCell, utilityNetworkManager, this.connectedNetworks, this.visited);
+					this.visited.Clear();
+					num = ModeUtil.GetHighlightScale();
+				}
+			}
 			Game.ConduitVisInfo conduitVisInfo = ((this.ViewMode() != SimViewMode.LiquidVentMap) ? Game.Instance.gasConduitVisInfo : Game.Instance.liquidConduitVisInfo);
 			foreach (SaveLoadRoot saveLoadRoot2 in this.layerTargets)
 			{
@@ -106,8 +126,62 @@ namespace OverlayModes
 					{
 						color = conduitVisInfo.overlayRadiantTint;
 					}
-					KBatchedAnimController component = saveLoadRoot2.GetComponent<KBatchedAnimController>();
-					component.TintColour = color;
+					if (this.connectedNetworks.Count > 0)
+					{
+						IBridgedNetworkItem component2 = saveLoadRoot2.GetComponent<IBridgedNetworkItem>();
+						if (component2 != null && component2.IsConnectedToNetworks(this.connectedNetworks))
+						{
+							color.r = (byte)((float)color.r * num);
+							color.g = (byte)((float)color.g * num);
+							color.b = (byte)((float)color.b * num);
+						}
+					}
+					KBatchedAnimController component3 = saveLoadRoot2.GetComponent<KBatchedAnimController>();
+					component3.TintColour = color;
+				}
+			}
+		}
+
+		private void FindConnectedNetworks(int cell, IUtilityNetworkMgr mgr, ICollection<UtilityNetwork> networks, List<int> visited)
+		{
+			if (visited.Contains(cell))
+			{
+				return;
+			}
+			visited.Add(cell);
+			UtilityNetwork networkForCell = mgr.GetNetworkForCell(cell);
+			if (networkForCell != null)
+			{
+				networks.Add(networkForCell);
+				UtilityConnections connections = mgr.GetConnections(cell, false);
+				if ((connections & UtilityConnections.Right) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellRight(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Left) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellLeft(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Up) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellAbove(cell), mgr, networks, visited);
+				}
+				if ((connections & UtilityConnections.Down) != (UtilityConnections)0)
+				{
+					this.FindConnectedNetworks(Grid.CellBelow(cell), mgr, networks, visited);
+				}
+				object endpoint = mgr.GetEndpoint(cell);
+				if (endpoint != null)
+				{
+					FlowUtilityNetwork.NetworkItem networkItem = endpoint as FlowUtilityNetwork.NetworkItem;
+					if (networkItem != null)
+					{
+						IBridgedNetworkItem component = networkItem.GameObject.GetComponent<IBridgedNetworkItem>();
+						if (component != null)
+						{
+							component.AddNetworks(networks);
+						}
+					}
 				}
 			}
 		}
@@ -115,6 +189,10 @@ namespace OverlayModes
 		private UniformGrid<SaveLoadRoot> partition;
 
 		private HashSet<SaveLoadRoot> layerTargets = new HashSet<SaveLoadRoot>();
+
+		private HashSet<UtilityNetwork> connectedNetworks = new HashSet<UtilityNetwork>();
+
+		private List<int> visited = new List<int>();
 
 		private ICollection<Tag> targetIDs;
 

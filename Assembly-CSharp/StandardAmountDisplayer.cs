@@ -67,9 +67,9 @@ public class StandardAmountDisplayer : IAmountDisplayer, IAttributeFormatter
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, null));
 			text += "\n";
 		}
-		foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in instance.deltaAttribute)
+		foreach (AttributeModifier attributeModifier in instance.deltaAttribute.Modifiers)
 		{
-			text = text + "\n" + string.Format("{0}: {1}", attributeModifierEntry.Modifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifierEntry.Modifier, instance.gameObject));
+			text = text + "\n" + string.Format("{0}: {1}", attributeModifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifier, instance.gameObject));
 		}
 		return text;
 	}

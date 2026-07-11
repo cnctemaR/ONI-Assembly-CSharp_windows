@@ -301,7 +301,7 @@ public class OverlayLegend : KScreen
 			this.PopulateOverlayInfoUnits(info);
 		}
 		List<OverlayLegend.DiseaseSortInfo> list = new List<OverlayLegend.DiseaseSortInfo>();
-		foreach (Disease disease in Db.Get().Diseases)
+		foreach (Disease disease in Db.Get().Diseases.resources)
 		{
 			list.Add(new OverlayLegend.DiseaseSortInfo(disease));
 		}

@@ -21,7 +21,6 @@ public class TravelTubeConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.TileLayer = ObjectLayer.TravelTubeTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTravelTube;

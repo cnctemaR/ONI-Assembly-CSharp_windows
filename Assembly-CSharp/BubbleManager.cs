@@ -24,8 +24,8 @@ public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 
 	public void Sim33ms(float dt)
 	{
-		List<BubbleManager.Bubble> list = ListPool<BubbleManager.Bubble, BubbleManager>.Allocate();
-		List<BubbleManager.Bubble> list2 = ListPool<BubbleManager.Bubble, BubbleManager>.Allocate();
+		ListPool<BubbleManager.Bubble, BubbleManager>.PooledList pooledList = ListPool<BubbleManager.Bubble, BubbleManager>.Allocate();
+		ListPool<BubbleManager.Bubble, BubbleManager>.PooledList pooledList2 = ListPool<BubbleManager.Bubble, BubbleManager>.Allocate();
 		foreach (BubbleManager.Bubble bubble in this.bubbles)
 		{
 			BubbleManager.Bubble bubble2 = bubble;
@@ -34,27 +34,27 @@ public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 			int num = Grid.PosToCell(bubble2.position);
 			if (!Grid.IsVisiblyInLiquid(bubble2.position) || Grid.Element[num].id == bubble2.element)
 			{
-				list2.Add(bubble2);
+				pooledList2.Add(bubble2);
 			}
 			else
 			{
-				list.Add(bubble2);
+				pooledList.Add(bubble2);
 			}
 		}
-		foreach (BubbleManager.Bubble bubble3 in list2)
+		foreach (BubbleManager.Bubble bubble3 in pooledList2)
 		{
 			int num2 = Grid.PosToCell(bubble3.position);
 			SimMessages.AddRemoveSubstance(num2, bubble3.element, CellEventLogger.Instance.FallingWaterAddToSim, bubble3.mass, bubble3.temperature, byte.MaxValue, 0, -1);
 		}
 		this.bubbles.Clear();
-		this.bubbles.AddRange(list);
-		ListPool<BubbleManager.Bubble, BubbleManager>.Free(list2);
-		ListPool<BubbleManager.Bubble, BubbleManager>.Free(list);
+		this.bubbles.AddRange(pooledList);
+		pooledList2.Recycle();
+		pooledList.Recycle();
 	}
 
 	public void RenderEveryTick(float dt)
 	{
-		List<SpriteSheetAnimator.AnimInfo> list = ListPool<SpriteSheetAnimator.AnimInfo, BubbleManager>.Allocate();
+		ListPool<SpriteSheetAnimator.AnimInfo, BubbleManager>.PooledList pooledList = ListPool<SpriteSheetAnimator.AnimInfo, BubbleManager>.Allocate();
 		SpriteSheetAnimator spriteSheetAnimator = SpriteSheetAnimManager.instance.GetSpriteSheetAnimator("liquid_splash1");
 		foreach (BubbleManager.Bubble bubble in this.bubbles)
 		{
@@ -68,9 +68,9 @@ public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 				size = Vector2.one,
 				colour = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue)
 			};
-			list.Add(animInfo);
+			pooledList.Add(animInfo);
 		}
-		ListPool<SpriteSheetAnimator.AnimInfo, BubbleManager>.Free(list);
+		pooledList.Recycle();
 	}
 
 	public static BubbleManager instance;

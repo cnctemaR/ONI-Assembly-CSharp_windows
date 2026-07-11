@@ -15,6 +15,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		this.PlatformUserIDFieldName = DistributionPlatform.Inst.MetricsUserIDField;
 		KleiMetrics.sessionID = -1;
 		this.enabled = !KPrivacyPrefs.instance.disableDataCollection;
+		KleiMetrics.GameID();
 		this.isMultiThreaded = true;
 	}
 

@@ -74,7 +74,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 	{
 		int num = Grid.PosToCell(this);
 		int num2 = Immigration.Instance.SpawnMinions();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", true);
 		}

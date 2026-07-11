@@ -20,13 +20,11 @@ public class LiquidCooledRefinery : Refinery
 		this.meter_metal.SetPositionPercent(1f);
 		this.smi = new LiquidCooledRefinery.StatesInstance(this);
 		this.smi.StartSM();
-	}
-
-	protected override bool OnWorkTick(Worker worker, float dt)
-	{
-		float percentComplete = this.GetPercentComplete();
-		this.meter_metal.SetPositionPercent(percentComplete);
-		return base.OnWorkTick(worker, dt);
+		this.workable.OnWorkTickActions = delegate(Worker worker, float dt)
+		{
+			float percentComplete = this.workable.GetPercentComplete();
+			this.meter_metal.SetPositionPercent(percentComplete);
+		};
 	}
 
 	public bool HasEnoughCoolant()
@@ -54,8 +52,9 @@ public class LiquidCooledRefinery : Refinery
 		component.Temperature = this.outputTemperature;
 		float num = GameUtil.CalculateEnergyDeltaForElementChange(component.Element.specificHeatCapacity, component.Mass, component.Element.highTemp, this.outputTemperature);
 		this.inStorage.Transfer(this.outStorage, this.coolantTag, this.minCoolantMass, false, true);
-		List<GameObject> list2 = this.outStorage.Find(this.coolantTag);
-		foreach (GameObject gameObject in list2)
+		ListPool<GameObject, LiquidCooledRefinery>.PooledList pooledList = ListPool<GameObject, LiquidCooledRefinery>.Allocate();
+		this.outStorage.Find(this.coolantTag, pooledList);
+		foreach (GameObject gameObject in pooledList)
 		{
 			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 			if (component2.Mass != 0f)
@@ -67,6 +66,7 @@ public class LiquidCooledRefinery : Refinery
 				component2.Temperature += num4;
 			}
 		}
+		pooledList.Recycle();
 		return list;
 	}
 
@@ -77,10 +77,10 @@ public class LiquidCooledRefinery : Refinery
 		return descriptors;
 	}
 
-	public override List<Descriptor> AdditionalEffectsForRecipe(RefinementRecipe recipe)
+	public override List<Descriptor> AdditionalEffectsForRecipe(ComplexRecipe recipe)
 	{
 		List<Descriptor> list = base.AdditionalEffectsForRecipe(recipe);
-		GameObject prefab = Assets.GetPrefab(recipe.results[0].tag);
+		GameObject prefab = Assets.GetPrefab(recipe.results[0].material);
 		PrimaryElement component = prefab.GetComponent<PrimaryElement>();
 		PrimaryElement primaryElement = this.inStorage.FindFirstWithMass(this.coolantTag);
 		string text = UI.BUILDINGEFFECTS.TOOLTIPS.REFINEMENT_ENERGY_HAS_COOLANT;

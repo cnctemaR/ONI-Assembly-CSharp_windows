@@ -12,7 +12,7 @@ public class AttackTool : DragTool
 
 	public static void MarkForAttack(Vector2 min, Vector2 max, bool mark)
 	{
-		foreach (FactionAlignment factionAlignment in Components.FactionAlignments)
+		foreach (FactionAlignment factionAlignment in Components.FactionAlignments.Items)
 		{
 			Vector2 vector = Grid.PosToXY(factionAlignment.transform.GetPosition());
 			if (vector.x >= min.x && vector.x < max.x && vector.y >= min.y && vector.y < max.y)

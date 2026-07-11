@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class EventSystem
 {
+	public EventSystem()
+	{
+		this.log = new LoggerFIO("Events", 35);
+	}
+
 	public static void Trigger(GameObject go, int hash, object data = null)
 	{
 		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(go);
@@ -159,11 +164,6 @@ public class EventSystem
 		}
 	}
 
-	public global::Logger GetLog()
-	{
-		return null;
-	}
-
 	private static bool ENABLE_DETAILED_EVENT_PROFILE_INFO;
 
 	private int nextId;
@@ -175,6 +175,8 @@ public class EventSystem
 	private List<EventSystem.SubscribedEntry> subscribedEvents = new List<EventSystem.SubscribedEntry>();
 
 	private List<EventSystem.Entry> entries = new List<EventSystem.Entry>();
+
+	private LoggerFIO log;
 
 	private struct Entry
 	{

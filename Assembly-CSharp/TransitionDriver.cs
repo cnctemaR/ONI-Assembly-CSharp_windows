@@ -6,7 +6,7 @@ public class TransitionDriver
 {
 	public TransitionDriver(Navigator navigator)
 	{
-		this.log = new LoggerFS("TransitionDriver");
+		this.log = new LoggerFS("TransitionDriver", 35);
 	}
 
 	public void BeginTransition(Navigator navigator, Navigator.ActiveTransition transition)

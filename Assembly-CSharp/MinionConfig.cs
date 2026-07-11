@@ -270,7 +270,6 @@ public class MinionConfig : IEntityConfig
 		decorProvider.baseRadius = 3f;
 		decorProvider.isMovable = true;
 		gameObject.AddOrGet<ConsumableConsumer>();
-		gameObject.AddOrGet<Needs>();
 		gameObject.AddOrGet<NoiseListener>();
 		gameObject.AddOrGet<MinionResume>();
 		DuplicantNoiseLevels.SetupNoiseLevels();

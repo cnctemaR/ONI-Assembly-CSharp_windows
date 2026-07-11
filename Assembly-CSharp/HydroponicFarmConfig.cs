@@ -21,7 +21,6 @@ public class HydroponicFarmConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.UseStructureTemperature = false;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
+using STRINGS;
 using UnityEngine;
 
 public class BaseUtilityBuildTool : DragTool
@@ -9,6 +10,7 @@ public class BaseUtilityBuildTool : DragTool
 	protected override void OnPrefabInit()
 	{
 		this.buildingCount = global::UnityEngine.Random.Range(1, 14);
+		this.canChangeDragAxis = false;
 	}
 
 	private void Play(GameObject go, string anim)
@@ -20,7 +22,7 @@ public class BaseUtilityBuildTool : DragTool
 	protected override void OnActivateTool()
 	{
 		base.OnActivateTool();
-		Vector3 cursorPos = PlayerController.GetCursorPos(Input.mousePosition);
+		Vector3 cursorPos = PlayerController.GetCursorPos(KInputManager.GetMousePos());
 		GameObject buildingPreview = this.def.BuildingPreview;
 		Vector3 vector = cursorPos;
 		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Ore;
@@ -333,9 +335,13 @@ public class BaseUtilityBuildTool : DragTool
 				}
 				else
 				{
-					gameObject = this.def.TryPlace(vector, Orientation.Neutral, this.selectedElements, 0, false);
+					gameObject = this.def.TryPlace(null, vector, Orientation.Neutral, this.selectedElements, 0, false);
 					if (gameObject != null)
 					{
+						if (!this.def.MaterialsAvailable(this.selectedElements) && !DebugHandler.InstantBuildMode)
+						{
+							PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, vector, 1.5f, false, false);
+						}
 						Constructable component = gameObject.GetComponent<Constructable>();
 						if (component.IconConnectionAnimation(0.1f * (float)num, num, "Wire", "OutletConnected_release") || component.IconConnectionAnimation(0.1f * (float)num, num, "Pipe", "OutletConnected_release"))
 						{
@@ -382,6 +388,10 @@ public class BaseUtilityBuildTool : DragTool
 						component5.IsReplacementTile = true;
 						gameObject = this.def.Instantiate(vector, Orientation.Neutral, this.selectedElements, 0, false);
 						component5.IsReplacementTile = false;
+						if (!this.def.MaterialsAvailable(this.selectedElements) && !DebugHandler.InstantBuildMode)
+						{
+							PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, UI.TOOLTIPS.NOMATERIAL, null, vector, 1.5f, false, false);
+						}
 						Grid.Objects[pathNode.cell, (int)this.def.ReplacementLayer] = gameObject;
 						IUtilityItem component6 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
 						if (component6 != null)

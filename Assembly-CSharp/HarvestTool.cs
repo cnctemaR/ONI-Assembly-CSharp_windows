@@ -17,7 +17,7 @@ public class HarvestTool : DragTool
 	{
 		if (Grid.IsValidCell(cell))
 		{
-			foreach (Harvestable harvestable in Components.Harvestables)
+			foreach (Harvestable harvestable in Components.Harvestables.Items)
 			{
 				OccupyArea area = harvestable.area;
 				if (Grid.PosToCell(harvestable) == cell || (area != null && area.CheckIsOccupying(cell)))

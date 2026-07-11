@@ -60,7 +60,7 @@ public class OilRefineryConfig : IBuildingConfig
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
 			new ElementConverter.OutputElement(5f, SimHashes.Petroleum, 348.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.06f, SimHashes.Methane, 348.15f, false, 0f, 3f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.09f, SimHashes.Methane, 348.15f, false, 0f, 3f, false, 1f, byte.MaxValue, 0)
 		};
 		Prioritizable.AddRef(go);
 	}
@@ -87,5 +87,5 @@ public class OilRefineryConfig : IBuildingConfig
 
 	public const float OUTPUT_LIQUID_RATE = 5f;
 
-	public const float OUTPUT_GAS_RATE = 0.06f;
+	public const float OUTPUT_GAS_RATE = 0.09f;
 }

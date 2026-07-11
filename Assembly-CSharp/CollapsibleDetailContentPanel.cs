@@ -12,7 +12,7 @@ public class CollapsibleDetailContentPanel : KMonoBehaviour
 		this.CollapseButton.onClick.AddListener(new UnityAction(this.ToggleOpen));
 		this.SetColors(this.colors);
 		this.ArrowIcon.SetActive();
-		this.log = new LoggerFSS("detailpanel");
+		this.log = new LoggerFSS("detailpanel", 35);
 		this.labels = new Dictionary<string, CollapsibleDetailContentPanel.Label<DetailLabel>>();
 		this.buttonLabels = new Dictionary<string, CollapsibleDetailContentPanel.Label<DetailLabelWithButton>>();
 		this.Commit();

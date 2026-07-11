@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using FMOD.Studio;
 using UnityEngine;
 
@@ -58,7 +57,7 @@ public class SelectTool : InterfaceTool
 		{
 			return;
 		}
-		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+		int num = Grid.PosToCell(Camera.main.ScreenToWorldPoint(KInputManager.GetMousePos()));
 		if (!Grid.IsValidCell(num))
 		{
 			return;
@@ -88,7 +87,7 @@ public class SelectTool : InterfaceTool
 	private void GetObjectUnderCursor2D<T>(List<SelectTool.Intersection> intersections, Func<T, bool> condition, int layer_mask) where T : MonoBehaviour
 	{
 		Camera main = Camera.main;
-		Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -main.transform.GetPosition().z);
+		Vector3 vector = new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, -main.transform.GetPosition().z);
 		Vector3 vector2 = main.ScreenToWorldPoint(vector);
 		Vector2 vector3 = new Vector2(vector2.x, vector2.y);
 		if (this.hoverOverride != null)
@@ -103,12 +102,12 @@ public class SelectTool : InterfaceTool
 		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
 			Game.Instance.statusItemRenderer.GetIntersections(vector3, intersections);
-			List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+			ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
 			int num2 = 0;
 			int num3 = 0;
 			Grid.CellToXY(num, out num2, out num3);
-			GameScenePartitioner.Instance.GatherEntries(num2, num3, 1, 1, GameScenePartitioner.Instance.collisionLayer, list);
-			foreach (ScenePartitionerEntry scenePartitionerEntry in list)
+			GameScenePartitioner.Instance.GatherEntries(num2, num3, 1, 1, GameScenePartitioner.Instance.collisionLayer, pooledList);
+			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 			{
 				KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;
 				if (!(kcollider2D == null))
@@ -153,7 +152,7 @@ public class SelectTool : InterfaceTool
 					}
 				}
 			}
-			ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+			pooledList.Recycle();
 		}
 	}
 
@@ -164,7 +163,7 @@ public class SelectTool : InterfaceTool
 			hits.Add(this.hoverOverride);
 		}
 		Camera main = Camera.main;
-		Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, -main.transform.GetPosition().z);
+		Vector3 vector = new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, -main.transform.GetPosition().z);
 		Vector3 vector2 = main.ScreenToWorldPoint(vector);
 		Vector2 vector3 = new Vector2(vector2.x, vector2.y);
 		int num = Grid.PosToCell(vector2);
@@ -173,10 +172,10 @@ public class SelectTool : InterfaceTool
 			return;
 		}
 		Game.Instance.statusItemRenderer.GetIntersections(vector3, hits);
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-		list.OrderBy<ScenePartitionerEntry, float>((ScenePartitionerEntry x) => (x.obj as Transform).GetPosition().z);
-		GameScenePartitioner.Instance.GatherEntries((int)vector3.x, (int)vector3.y, 1, 1, GameScenePartitioner.Instance.collisionLayer, list);
-		foreach (ScenePartitionerEntry scenePartitionerEntry in list)
+		ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+		pooledList.Sort((ScenePartitionerEntry x, ScenePartitionerEntry y) => (x.obj as Transform).GetPosition().z.CompareTo((y.obj as Transform).GetPosition().z));
+		GameScenePartitioner.Instance.GatherEntries((int)vector3.x, (int)vector3.y, 1, 1, GameScenePartitioner.Instance.collisionLayer, pooledList);
+		foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 		{
 			KCollider2D kcollider2D = scenePartitionerEntry.obj as KCollider2D;
 			if (!(kcollider2D == null))
@@ -204,23 +203,23 @@ public class SelectTool : InterfaceTool
 				}
 			}
 		}
-		ListPool<ScenePartitionerEntry, GameScenePartitioner>.Free(list);
+		pooledList.Recycle();
 	}
 
 	private T GetObjectUnderCursor<T>(bool cycleSelection, Func<T, bool> condition = null, Component previous_selection = null) where T : MonoBehaviour
 	{
 		this.intersections.Clear();
 		this.GetObjectUnderCursor2D<T>(this.intersections, condition, this.layerMask);
-		this.intersections.RemoveAll((SelectTool.Intersection intersection) => !intersection.component);
+		this.intersections.RemoveAll(SelectTool.is_component_null);
 		if (this.intersections.Count <= 0)
 		{
 			this.prevIntersectionGroup.Clear();
 			return (T)((object)null);
 		}
 		this.curIntersectionGroup.Clear();
-		foreach (SelectTool.Intersection intersection2 in this.intersections)
+		foreach (SelectTool.Intersection intersection in this.intersections)
 		{
-			this.curIntersectionGroup.Add(intersection2.component);
+			this.curIntersectionGroup.Add(intersection.component);
 		}
 		if (!this.prevIntersectionGroup.Equals(this.curIntersectionGroup))
 		{
@@ -394,6 +393,8 @@ public class SelectTool : InterfaceTool
 	private HashSet<Component> prevIntersectionGroup = new HashSet<Component>();
 
 	private HashSet<Component> curIntersectionGroup = new HashSet<Component>();
+
+	private static Predicate<SelectTool.Intersection> is_component_null = (SelectTool.Intersection intersection) => !intersection.component;
 
 	private KSelectable delayedNextSelection;
 

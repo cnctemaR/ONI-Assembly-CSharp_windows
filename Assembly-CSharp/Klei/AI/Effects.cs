@@ -8,11 +8,6 @@ namespace Klei.AI
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class Effects : KMonoBehaviour, ISaveLoadable, ISim1000ms
 	{
-		public IEnumerator<EffectInstance> GetEnumerator()
-		{
-			return this.effects.GetEnumerator();
-		}
-
 		protected override void OnPrefabInit()
 		{
 			this.autoRegisterSimRender = false;
@@ -81,7 +76,7 @@ namespace Klei.AI
 			Traits component = base.GetComponent<Traits>();
 			if (component != null)
 			{
-				foreach (Trait trait in component)
+				foreach (Trait trait in component.TraitList)
 				{
 					if (trait.ignoredEffects != null && Array.IndexOf<string>(trait.ignoredEffects, effect.Id) != -1)
 					{

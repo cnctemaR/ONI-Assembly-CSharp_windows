@@ -8,7 +8,6 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 	{
 		this.smi = new AttackChore.StatesInstance(this);
 		this.smi.sm.attackTarget.Set(enemy, this.smi);
-		base.AddPrecondition(AttackChore.IsTargetable, enemy);
 	}
 
 	protected override void OnStateMachineStop(string reason, StateMachine.Status status)
@@ -89,16 +88,6 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 			this.multiTool = null;
 		}
 	}
-
-	public static Chore.Precondition IsTargetable = new Chore.Precondition
-	{
-		id = "IsTargetable",
-		fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			GameObject gameObject = (GameObject)data;
-			return gameObject != null && gameObject.GetComponent<FactionAlignment>().targetable;
-		}
-	};
 
 	private MultitoolController.Instance multiTool;
 

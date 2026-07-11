@@ -79,7 +79,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		base.OnSpawn();
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		Element element = component.Element;
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "SimTemperatureTransfer.OnSpawn");
 		if (component.Element.HasTag(GameTags.Special) || element.specificHeatCapacity == 0f)
 		{
 			base.enabled = false;

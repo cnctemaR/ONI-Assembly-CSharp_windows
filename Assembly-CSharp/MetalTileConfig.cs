@@ -21,7 +21,6 @@ public class MetalTileConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.Overheatable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.UseStructureTemperature = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;

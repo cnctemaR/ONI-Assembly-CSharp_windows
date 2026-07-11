@@ -61,8 +61,8 @@ namespace TUNING
 		{
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new string[]
 			{
-				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "Door",
-				"ManualPressureDoor", "PressureDoor", "StorageLocker", "StorageLockerSmart", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
+				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
+				"BunkerTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new string[] { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new string[]
@@ -73,6 +73,7 @@ namespace TUNING
 				"MethaneGenerator",
 				"PetroleumGenerator",
 				"SteamTurbine",
+				"SolarPanel",
 				"Wire",
 				"WireBridge",
 				"HighWattageWire",
@@ -94,7 +95,7 @@ namespace TUNING
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new string[]
 			{
 				"MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder",
-				"FishFeeder", "EggIncubator", "CreatureTrap", "FishTrap", "AirborneCreatureLure"
+				"FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure"
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Plumbing, new string[]
 			{
@@ -138,7 +139,7 @@ namespace TUNING
 				GasConduitDiseaseSensorConfig.ID,
 				GasConduitTemperatureSensorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[] { "Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "MetalRefinery", "OilRefinery", "Polymerizer" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[] { "Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "Grave" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new string[]
 			{
@@ -158,7 +159,7 @@ namespace TUNING
 				"ResearchCenter", "AdvancedResearchCenter", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator", "SuitFabricator", "SuitMarker",
 				"SuitLocker"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "ExteriorWall" }),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new string[]
 			{
 				"LogicWire",
@@ -178,7 +179,8 @@ namespace TUNING
 				LogicDiseaseSensorConfig.ID,
 				LogicElementSensorGasConfig.ID,
 				"FloorSwitch",
-				"Checkpoint"
+				"Checkpoint",
+				CometDetectorConfig.ID
 			}),
 			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Conveyance, new string[] { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge" })
 		};
@@ -319,7 +321,7 @@ namespace TUNING
 
 			public const float HIGH_2 = 50f;
 
-			public const float HIGH_3 = 2000f;
+			public const float HIGH_3 = 200f;
 		}
 
 		public class DECOR_MATERIAL_MOD
@@ -456,19 +458,23 @@ namespace TUNING
 			public const int TIER2 = 100;
 
 			public const int TIER3 = 250;
+
+			public const int TIER4 = 1000;
 		}
 
 		public class DAMAGE_SOURCES
 		{
-			public const int CONDUIT_CONTENTS_BOILED = 2147483647;
+			public const int CONDUIT_CONTENTS_BOILED = 1;
 
-			public const int CONDUIT_CONTENTS_FROZE = 2147483647;
+			public const int CONDUIT_CONTENTS_FROZE = 1;
 
 			public const int BAD_INPUT_ELEMENT = 1;
 
 			public const int BUILDING_OVERHEATED = 1;
 
 			public const int HIGH_LIQUID_PRESSURE = 10;
+
+			public const int MICROMETEORITE = 1;
 		}
 
 		public class RELOCATION_TIME_SECONDS

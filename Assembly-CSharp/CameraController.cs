@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using FMOD.Studio;
 using UnityEngine;
 using UnityStandardAssets.ImageEffects;
 
@@ -28,7 +27,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	protected override void OnPrefabInit()
 	{
-		global::Util.Reset(base.transform);
+		Util.Reset(base.transform);
 		base.transform.SetLocalPosition(new Vector3(Grid.WidthInMeters / 2f, Grid.HeightInMeters / 2f, -100f));
 		this.targetOrthographicSize = this.maxOrthographicSize;
 		CameraController.Instance = this;
@@ -39,7 +38,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.baseCamera.gameObject.AddComponent<LightBufferCompositor>();
 		this.baseCamera.transparencySortMode = TransparencySortMode.Orthographic;
 		this.baseCamera.transform.parent = base.transform;
-		global::Util.Reset(this.baseCamera.transform);
+		Util.Reset(this.baseCamera.transform);
 		int mask = LayerMask.GetMask(new string[] { "PlaceWithDepth", "Overlay" });
 		int mask2 = LayerMask.GetMask(new string[] { "Construction" });
 		this.cameras.Add(this.baseCamera);
@@ -283,11 +282,12 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		float num = ((this.overrideZoomSpeed <= 0f) ? this.zoomSpeed : this.overrideZoomSpeed);
 		float unscaledDeltaTime = Time.unscaledDeltaTime;
 		Camera main = Camera.main;
-		Vector3 vector = ((this.overrideZoomSpeed <= 0f) ? Input.mousePosition : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
+		Vector3 vector = ((this.overrideZoomSpeed <= 0f) ? KInputManager.GetMousePos() : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
 		Vector3 vector2 = this.PointUnderCursor(vector, main);
 		Vector3 vector3 = main.ScreenToViewportPoint(vector);
 		Vector3 localPosition = base.transform.GetLocalPosition();
-		this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num * unscaledDeltaTime));
+		float num2 = Mathf.Min(num * unscaledDeltaTime, 0.1f);
+		this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num2));
 		base.transform.SetLocalPosition(localPosition);
 		Vector3 vector4 = main.WorldToViewportPoint(vector2);
 		vector3.z = vector4.z;
@@ -367,7 +367,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 		this.ConstrainToWorld();
 		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(base.transform.GetPosition().x, base.transform.GetPosition().y, base.transform.GetPosition().z, main.orthographicSize));
+		Shader.SetGlobalVector("_WorldCursorPos", new Vector4(vector2.x, vector2.y, 0f, 0f));
 		this.VisibleArea.Update();
+		this.soundCuller = SoundCuller.CreateCuller();
 	}
 
 	private Vector3 GetFollowPos()
@@ -417,7 +419,7 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		vector = base.transform.GetPosition() - ray2.origin;
 		vector2 = point2;
 		vector2.x = Mathf.Min(Grid.WidthInMeters, vector2.x);
-		vector2.y = Mathf.Min(Grid.HeightInMeters, vector2.y);
+		vector2.y = Mathf.Min(Grid.HeightInMeters * this.MAX_Y_SCALE, vector2.y);
 		ray2.origin = vector2;
 		ray2.direction = -ray2.direction;
 		vector2 = ray2.GetPoint(num2);
@@ -454,93 +456,19 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.cameras.Add(cam);
 	}
 
-	public bool IsAudibleSound(Vector3 pos, float modifiedAudibleDistanceScale = 0f)
+	public bool IsAudibleSound(Vector2 pos)
 	{
-		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		Vector2 vector = visibleArea.Max + visibleArea.Min;
-		vector *= 0.5f;
-		Vector2 vector2 = visibleArea.Max - visibleArea.Min;
-		float num = this.maxAudibleDistanceScale;
-		if (modifiedAudibleDistanceScale != 0f)
-		{
-			num = modifiedAudibleDistanceScale;
-		}
-		vector2 *= num;
-		Vector2 vector3 = vector - vector2 * 0.5f;
-		Vector2 vector4 = vector + vector2 * 0.5f;
-		Vector2 vector5 = new Vector2(pos.x, pos.y);
-		return vector3.LessEqual(vector5) && vector5.LessEqual(vector4);
+		return this.soundCuller.IsAudible(pos);
 	}
 
-	public bool IsAudibleSound(Vector3 pos, string soundPath)
+	public bool IsAudibleSound(Vector3 pos, string sound_path)
 	{
-		bool flag = false;
-		if (soundPath != null && soundPath.Length > 0)
-		{
-			try
-			{
-				EventDescription soundEventDescription = GlobalAssets.GetSoundEventDescription(soundPath);
-				if (soundEventDescription != null)
-				{
-					float num;
-					soundEventDescription.getMaximumDistance(out num);
-					num *= this.maxAudibleDistanceScale;
-					float num2 = (pos.x - base.transform.GetPosition().x) * (pos.x - base.transform.GetPosition().x) + (pos.y - base.transform.GetPosition().y) * (pos.y - base.transform.GetPosition().y);
-					flag = num2 < num * num;
-				}
-			}
-			catch
-			{
-				Output.LogError(new object[] { "IsAudibleSound could not find event description for [" + ((soundPath == null) ? "null" : soundPath) + "]" });
-			}
-		}
-		return flag;
+		return this.soundCuller.IsAudible(pos, sound_path);
 	}
 
-	public Vector3 GetVerticallyScaledPosition(Vector3 pos)
+	public Vector3 GetVerticallyScaledPosition(Vector2 pos)
 	{
-		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		bool flag = false;
-		float num;
-		if (pos.y > (float)visibleArea.Max.y)
-		{
-			num = Mathf.Abs(pos.y - (float)visibleArea.Max.y);
-			flag = true;
-		}
-		else if (pos.y < (float)visibleArea.Min.y)
-		{
-			num = Mathf.Abs(pos.y - (float)visibleArea.Min.y);
-			flag = false;
-		}
-		else
-		{
-			num = 0f;
-		}
-		Audio audio = Audio.Get();
-		float orthographicSize = this.cameras[0].orthographicSize;
-		float num2 = orthographicSize / (audio.listenerReferenceZ - audio.listenerMinZ);
-		if (num2 <= 0f)
-		{
-			num2 = 2f;
-		}
-		else
-		{
-			num2 = 1f;
-		}
-		num = ((num >= 20f) ? 0f : num);
-		float num3 = num * num / (4f * num2);
-		if (num > 0f && !flag)
-		{
-			num3 *= -1f;
-		}
-		Vector3 vector = new Vector3(pos.x, pos.y + num3, pos.z);
-		return vector;
-	}
-
-	public float GetZoom0To1()
-	{
-		float orthographicSize = this.cameras[0].orthographicSize;
-		return Mathf.Clamp01((orthographicSize - this.minOrthographicSize) / (this.maxOrthographicSize - this.minOrthographicSize));
+		return this.soundCuller.GetVerticallyScaledPosition(pos);
 	}
 
 	public bool IsVisiblePos(Vector3 pos)
@@ -593,6 +521,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public const float DEFAULT_MAX_ORTHO_SIZE = 20f;
 
+	public float MAX_Y_SCALE = 1.1f;
+
 	private const float FIXED_Z = -100f;
 
 	public bool FreeCameraEnabled;
@@ -617,16 +547,11 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public Material LightConeOverlay;
 
-	public Material GasMaterial;
-
 	public Transform followTarget;
 
 	public Vector3 followTargetPos;
 
 	public GridVisibleArea VisibleArea = new GridVisibleArea();
-
-	[SerializeField]
-	private float maxAudibleDistanceScale = 1.5f;
 
 	private float targetOrthographicSize;
 
@@ -673,7 +598,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	[NonSerialized]
 	public Camera infraredCamera;
 
-	private List<Camera> cameras = new List<Camera>();
+	public List<Camera> cameras = new List<Camera>();
 
 	private MultipleRenderTarget mrt;
+
+	public SoundCuller soundCuller;
 }

@@ -29,9 +29,9 @@ public class DuplicantTemperatureDeltaAsEnergyAmountDisplayer : StandardAmountDi
 			text = text + "\n" + string.Format(UI.CHANGEPERSECOND, GameUtil.GetFormattedJoules(instance.deltaAttribute.GetTotalDisplayValue() * num, "F1", GameUtil.TimeSlice.None));
 		}
 		text += "\n";
-		foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in instance.deltaAttribute)
+		foreach (AttributeModifier attributeModifier in instance.deltaAttribute.Modifiers)
 		{
-			text = text + "\n" + string.Format("{0}: {1}", attributeModifierEntry.Modifier.GetDescription(), GameUtil.GetFormattedWattage(attributeModifierEntry.Modifier.Value * num, GameUtil.WattageFormatterUnit.Automatic));
+			text = text + "\n" + string.Format("{0}: {1}", attributeModifier.GetDescription(), GameUtil.GetFormattedWattage(attributeModifier.Value * num, GameUtil.WattageFormatterUnit.Automatic));
 		}
 		return text;
 	}

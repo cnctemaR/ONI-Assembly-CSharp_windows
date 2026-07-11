@@ -9,14 +9,6 @@ public class FactionAlignment : KMonoBehaviour
 
 	public AttackableBase attackable { get; private set; }
 
-	public bool CheckAlignmentActive
-	{
-		get
-		{
-			return FactionManager.Instance.GetFaction(this.Alignment).Members.Contains(this);
-		}
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -37,10 +29,10 @@ public class FactionAlignment : KMonoBehaviour
 
 	private void OnDeath(object data)
 	{
-		this.ToggleAlignmentActive(false);
+		this.SetAlignmentActive(false);
 	}
 
-	public void ToggleAlignmentActive(bool active)
+	public void SetAlignmentActive(bool active)
 	{
 		this.SetPlayerTargetable(active);
 		this.alignmentActive = active;
@@ -52,6 +44,11 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Remove(this);
 		}
+	}
+
+	public bool IsAlignmentActive()
+	{
+		return FactionManager.Instance.GetFaction(this.Alignment).Members.Contains(this);
 	}
 
 	public void SetPlayerTargetable(bool state)
@@ -78,9 +75,9 @@ public class FactionAlignment : KMonoBehaviour
 
 	public void SwitchAlignment(FactionManager.FactionID newAlignment)
 	{
-		this.ToggleAlignmentActive(false);
+		this.SetAlignmentActive(false);
 		this.Alignment = newAlignment;
-		this.ToggleAlignmentActive(true);
+		this.SetAlignmentActive(true);
 	}
 
 	protected override void OnCleanUp()
@@ -96,7 +93,7 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			return;
 		}
-		if (!this.CheckAlignmentActive)
+		if (!this.IsAlignmentActive())
 		{
 			return;
 		}
@@ -123,14 +120,9 @@ public class FactionAlignment : KMonoBehaviour
 			string text = UI.USERMENUACTIONS.CANCELATTACK.TOOLTIP;
 			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
-		if (buttonInfo != null)
-		{
-			this.userMenu.AddButton(buttonInfo, 1f);
-		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[Serialize]
 	private bool alignmentActive = true;

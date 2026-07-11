@@ -376,15 +376,15 @@ public class Scenario : KMonoBehaviour
 
 	public void Clear()
 	{
-		foreach (Brain brain in Components.Brains)
+		foreach (Brain brain in Components.Brains.Items)
 		{
 			global::UnityEngine.Object.Destroy(brain.gameObject);
 		}
-		foreach (Pickupable pickupable in Components.Pickupables)
+		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{
 			global::UnityEngine.Object.Destroy(pickupable.gameObject);
 		}
-		foreach (BuildingComplete buildingComplete in Components.BuildingCompletes)
+		foreach (BuildingComplete buildingComplete in Components.BuildingCompletes.Items)
 		{
 			global::UnityEngine.Object.Destroy(buildingComplete.gameObject);
 		}
@@ -887,7 +887,7 @@ public class Scenario : KMonoBehaviour
 			this.Left += buildingDef.WidthInCells;
 			this.Scenario.RunAfterNextUpdate(delegate
 			{
-				Assets.GetBuildingDef(prefab_id).TryPlace(pos, Orientation.Neutral, new Element[]
+				Assets.GetBuildingDef(prefab_id).TryPlace(null, pos, Orientation.Neutral, new Element[]
 				{
 					element,
 					ElementLoader.FindElementByHash(SimHashes.SedimentaryRock)

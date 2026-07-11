@@ -18,7 +18,7 @@ public class SubmersionMonitor : KMonoBehaviour, IGameObjectEffectDescriptor, IW
 		base.OnSpawn();
 		this.OnMove();
 		this.CheckDry();
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnMove), "SubmersionMonitor.OnSpawn");
 	}
 
 	private void OnMove()

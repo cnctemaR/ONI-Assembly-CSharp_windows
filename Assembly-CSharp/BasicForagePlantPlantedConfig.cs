@@ -19,8 +19,7 @@ public class BasicForagePlantPlantedConfig : IEntityConfig
 		OccupyArea occupyArea = gameObject.AddOrGet<OccupyArea>();
 		occupyArea.objectLayers = new ObjectLayer[] { ObjectLayer.Building };
 		gameObject.AddOrGet<EntombVulnerable>();
-		DrowningMonitor drowningMonitor = gameObject.AddOrGet<DrowningMonitor>();
-		drowningMonitor.Configure(15f, 5f, 0.95f);
+		gameObject.AddOrGet<DrowningMonitor>();
 		gameObject.AddOrGet<Uprootable>();
 		gameObject.AddOrGet<UprootedMonitor>();
 		gameObject.AddOrGet<Harvestable>();

@@ -31,13 +31,12 @@ public class FishDeliveryPointConfig : IBuildingConfig
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
 		CreatureDeliveryPoint creatureDeliveryPoint = go.AddOrGet<CreatureDeliveryPoint>();
-		creatureDeliveryPoint.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		creatureDeliveryPoint.filterTint = new Color(1f, 1f, 1f, 1f);
 		creatureDeliveryPoint.deliveryOffsets = new CellOffset[]
 		{
 			new CellOffset(0, 1)
 		};
 		creatureDeliveryPoint.spawnOffset = new CellOffset(0, -1);
+		go.AddOrGet<TreeFilterable>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

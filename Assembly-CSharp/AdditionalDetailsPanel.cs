@@ -98,52 +98,52 @@ public class AdditionalDetailsPanel : TargetScreen
 		}
 		bool flag2 = element.id == SimHashes.Vacuum || element.id == SimHashes.Void;
 		float specificHeatCapacity = element.specificHeatCapacity;
-		float num5 = element.thermalConductivity;
-		Building component3 = this.selectedTarget.GetComponent<Building>();
-		num5 *= ((!(component3 != null)) ? 1f : component3.Def.ThermalConductivity);
 		float highTemp = element.highTemp;
 		float lowTemp = element.lowTemp;
 		this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.NAME, element.name)).Tooltip(this.drawer.Format(UI.ELEMENTAL.PRIMARYELEMENT.TOOLTIP, element.name)).NewLabel(this.drawer.Format(UI.ELEMENTAL.MASS.NAME, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")))
 			.Tooltip(this.drawer.Format(UI.ELEMENTAL.MASS.TOOLTIP, GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")));
 		if (!flag2)
 		{
+			bool flag3 = false;
+			float num5 = element.thermalConductivity;
+			Building component3 = this.selectedTarget.GetComponent<Building>();
+			if (component3 != null)
+			{
+				num5 *= component3.Def.ThermalConductivity;
+				flag3 = component3.Def.ThermalConductivity < 1f;
+			}
+			string temperatureUnitSuffix = GameUtil.GetTemperatureUnitSuffix();
+			string text = string.Format(UI.ELEMENTAL.SHC.NAME, GameUtil.GetDisplaySHC(specificHeatCapacity).ToString("0.000"));
+			string text2 = UI.ELEMENTAL.SHC.TOOLTIP;
+			text2 = text2.Replace("{SPECIFIC_HEAT_CAPACITY}", text + GameUtil.GetSHCSuffix());
+			text2 = text2.Replace("{TEMPERATURE_UNIT}", temperatureUnitSuffix);
+			string text3 = string.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, GameUtil.GetDisplayThermalConductivity(num5).ToString("0.000"));
+			string text4 = UI.ELEMENTAL.THERMALCONDUCTIVITY.TOOLTIP;
+			text4 = text4.Replace("{THERMAL_CONDUCTIVITY}", text3 + GameUtil.GetThermalConductivitySuffix());
+			text4 = text4.Replace("{TEMPERATURE_UNIT}", temperatureUnitSuffix);
 			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.TEMPERATURE.NAME, GameUtil.GetFormattedTemperature(num3, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).Tooltip(this.drawer.Format(UI.ELEMENTAL.TEMPERATURE.TOOLTIP, GameUtil.GetFormattedTemperature(num3, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true))).NewLabel(this.drawer.Format(UI.ELEMENTAL.DISEASE.NAME, GameUtil.GetFormattedDisease(b, num4, false)))
 				.Tooltip(this.drawer.Format(UI.ELEMENTAL.DISEASE.TOOLTIP, GameUtil.GetFormattedDisease(b, num4, true)))
-				.NewLabel(string.Concat(new string[]
-				{
-					this.drawer.Format(UI.ELEMENTAL.SHC.NAME, specificHeatCapacity),
-					" (",
-					UI.UNITSUFFIXES.ELECTRICAL.JOULE,
-					"/",
-					UI.UNITSUFFIXES.MASS.GRAM,
-					")/",
-					UI.UNITSUFFIXES.TEMPERATURE.KELVIN
-				}))
-				.Tooltip(this.drawer.Format(UI.ELEMENTAL.SHC.TOOLTIP, specificHeatCapacity))
-				.NewLabel(string.Concat(new string[]
-				{
-					this.drawer.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.NAME, num5),
-					" (",
-					UI.UNITSUFFIXES.ELECTRICAL.WATT,
-					"/",
-					UI.UNITSUFFIXES.DISTANCE.METER,
-					")/",
-					UI.UNITSUFFIXES.TEMPERATURE.KELVIN
-				}))
-				.Tooltip(this.drawer.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.TOOLTIP, num5));
+				.NewLabel(text)
+				.Tooltip(text2)
+				.NewLabel(text3)
+				.Tooltip(text4);
+			if (flag3)
+			{
+				this.drawer.NewLabel(UI.GAMEOBJECTEFFECTS.INSULATED.NAME).Tooltip(UI.GAMEOBJECTEFFECTS.INSULATED.TOOLTIP);
+			}
 		}
 		if (flag)
 		{
 			this.drawer.NewLabel(this.drawer.Format(UI.ELEMENTAL.CONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(num))).Tooltip(delegate
 			{
 				AttributeInstance attributeInstance3 = this.selectedTarget.GetAttributes().Get("ThermalConductivityBarrier");
-				string text = this.drawer.Format(UI.ELEMENTAL.CONDUCTIVITYBARRIER.NAME, attributeInstance3.GetFormattedValue());
-				text += UI.HORIZONTAL_BR_RULE;
-				foreach (AttributeInstance.AttributeModifierEntry attributeModifierEntry in attributeInstance3.Modifiers)
+				string text5 = this.drawer.Format(UI.ELEMENTAL.CONDUCTIVITYBARRIER.NAME, attributeInstance3.GetFormattedValue());
+				text5 += UI.HORIZONTAL_BR_RULE;
+				foreach (AttributeModifier attributeModifier2 in attributeInstance3.Modifiers)
 				{
-					text += this.drawer.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifierEntry.Modifier.GetDescription(), attributeModifierEntry.Modifier.GetFormattedString(attributeInstance3.gameObject));
+					text5 += this.drawer.Format(DUPLICANTS.ATTRIBUTES.MODIFIER_ENTRY, attributeModifier2.GetDescription(), attributeModifier2.GetFormattedString(attributeInstance3.gameObject));
 				}
-				return text;
+				return text5;
 			});
 		}
 		if (element.IsSolid)

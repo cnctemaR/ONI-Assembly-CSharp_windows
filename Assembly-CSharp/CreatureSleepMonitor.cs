@@ -5,7 +5,7 @@ public class CreatureSleepMonitor : GameStateMachine<CreatureSleepMonitor, Creat
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		this.root.ToggleBehaviour(GameTags.Creatures.Behaviours.SleepBehaviour, new Func<CreatureSleepMonitor.Instance, bool>(CreatureSleepMonitor.ShouldSleep), null);
+		this.root.ToggleBehaviour(GameTags.Creatures.Behaviours.SleepBehaviour, new StateMachine<CreatureSleepMonitor, CreatureSleepMonitor.Instance, IStateMachineTarget, CreatureSleepMonitor.Def>.Transition.ConditionCallback(CreatureSleepMonitor.ShouldSleep), null);
 	}
 
 	public static bool ShouldSleep(CreatureSleepMonitor.Instance smi)

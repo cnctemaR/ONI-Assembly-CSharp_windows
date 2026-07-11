@@ -11,11 +11,12 @@ public class KCompactedVector<T>
 
 	public HandleVector<int>.Handle Allocate(T initial_data)
 	{
-		this.Validate();
 		HandleVector<int>.Handle handle = this.handles.Add(this.data.Count);
-		this.dataHandleIndices.Add(handle.index);
+		byte b;
+		int num;
+		this.handles.UnpackHandle(handle, out b, out num);
+		this.dataHandleIndices.Add(num);
 		this.data.Add(initial_data);
-		this.Validate();
 		return handle;
 	}
 
@@ -25,7 +26,6 @@ public class KCompactedVector<T>
 		{
 			return handle;
 		}
-		this.Validate();
 		int num = this.handles.Release(handle);
 		int num2 = this.data.Count - 1;
 		if (num < num2)
@@ -41,39 +41,35 @@ public class KCompactedVector<T>
 		}
 		this.data.RemoveAt(num2);
 		this.dataHandleIndices.RemoveAt(num2);
-		this.Validate();
-		handle = HandleVector<int>.InvalidHandle;
-		return handle;
+		return HandleVector<int>.InvalidHandle;
+	}
+
+	public bool IsValid(HandleVector<int>.Handle handle)
+	{
+		return this.handles.IsValid(handle);
+	}
+
+	public bool IsVersionValid(HandleVector<int>.Handle handle)
+	{
+		return this.handles.IsVersionValid(handle);
 	}
 
 	public T GetData(HandleVector<int>.Handle handle)
 	{
-		int num = this.handles.Items[handle.index];
-		return this.data[num];
+		byte b;
+		int num;
+		this.handles.UnpackHandle(handle, out b, out num);
+		int num2 = this.handles.Items[num];
+		return this.data[num2];
 	}
 
 	public void SetData(HandleVector<int>.Handle handle, T new_data)
 	{
-		int num = this.handles.Items[handle.index];
-		this.data[num] = new_data;
-	}
-
-	private void Validate()
-	{
-	}
-
-	private bool IsFreeHandle(int index)
-	{
-		bool flag = false;
-		foreach (HandleVector<int>.Handle handle in this.handles.Handles)
-		{
-			if (handle.index == index)
-			{
-				flag = true;
-				break;
-			}
-		}
-		return flag;
+		byte b;
+		int num;
+		this.handles.UnpackHandle(handle, out b, out num);
+		int num2 = this.handles.Items[num];
+		this.data[num2] = new_data;
 	}
 
 	public virtual void Clear()

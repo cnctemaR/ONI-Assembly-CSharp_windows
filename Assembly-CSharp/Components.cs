@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 
 public class Components
@@ -76,7 +75,9 @@ public class Components
 
 	public static Components.Cmps<DiseaseSourceVisualizer> DiseaseSourceVisualizers = new Components.Cmps<DiseaseSourceVisualizer>();
 
-	public class Cmps<T> : IEnumerable<T>, IEnumerable
+	public static Components.Cmps<DetectorNetwork.Instance> DetectorNetworks = new Components.Cmps<DetectorNetwork.Instance>();
+
+	public class Cmps<T>
 	{
 		public Cmps()
 		{
@@ -101,22 +102,12 @@ public class Components
 			}
 		}
 
-		public IEnumerator<T> GetEnumerator()
-		{
-			return this.Items.GetEnumerator();
-		}
-
 		public T this[int idx]
 		{
 			get
 			{
 				return this.Items[idx];
 			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
 		}
 
 		private void Clear()

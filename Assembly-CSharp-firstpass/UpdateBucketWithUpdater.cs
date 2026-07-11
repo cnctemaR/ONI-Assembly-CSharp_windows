@@ -62,8 +62,6 @@ public class UpdateBucketWithUpdater<DataType> : StateMachineUpdater.BaseUpdateB
 
 	private List<HandleVector<int>.Handle> pendingRemovals = new List<HandleVector<int>.Handle>();
 
-	private float accumulatedtime;
-
 	public struct Entry
 	{
 		public DataType data;

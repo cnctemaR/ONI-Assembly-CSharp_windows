@@ -11,7 +11,7 @@ internal class StunnedStates : GameStateMachine<StunnedStates, StunnedStates.Ins
 		string text2 = CREATURES.STATUSITEMS.GETTING_WRANGLED.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
-		this.stunned.PlayAnim("idle", KAnim.PlayMode.Loop).TagTransition(GameTags.Creatures.Stunned, null, true);
+		this.stunned.PlayAnim("idle_loop", KAnim.PlayMode.Loop).TagTransition(GameTags.Creatures.Stunned, null, true);
 	}
 
 	public GameStateMachine<StunnedStates, StunnedStates.Instance, IStateMachineTarget, StunnedStates.Def>.State stunned;

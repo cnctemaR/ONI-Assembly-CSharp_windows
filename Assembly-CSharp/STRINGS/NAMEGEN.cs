@@ -697,6 +697,10 @@ namespace STRINGS
 					public static LocString BLUMP = "Blump";
 
 					public static LocString SELDEMER = "Seldemer";
+
+					public static LocString SCRUNGO = "Scrungo";
+
+					public static LocString BRUMPO = "Brumpo";
 				}
 			}
 		}

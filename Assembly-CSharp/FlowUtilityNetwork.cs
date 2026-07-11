@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class FlowUtilityNetwork : UtilityNetwork
 {
@@ -21,31 +22,29 @@ public class FlowUtilityNetwork : UtilityNetwork
 		FlowUtilityNetwork.IItem item = (FlowUtilityNetwork.IItem)generic_item;
 		if (item != null)
 		{
-			Endpoint endpointType = item.EndpointType;
-			if (endpointType != Endpoint.Source)
+			switch (item.EndpointType)
 			{
-				if (endpointType != Endpoint.Sink)
-				{
-					item.Network = this;
-				}
-				else
-				{
-					if (this.sinks.Contains(item))
-					{
-						return;
-					}
-					this.sinks.Add(item);
-					item.Network = this;
-				}
-			}
-			else
-			{
+			case Endpoint.Source:
 				if (this.sources.Contains(item))
 				{
 					return;
 				}
 				this.sources.Add(item);
 				item.Network = this;
+				break;
+			case Endpoint.Sink:
+				if (this.sinks.Contains(item))
+				{
+					return;
+				}
+				this.sinks.Add(item);
+				item.Network = this;
+				break;
+			case Endpoint.Conduit:
+				break;
+			default:
+				item.Network = this;
+				break;
 			}
 		}
 	}
@@ -84,15 +83,18 @@ public class FlowUtilityNetwork : UtilityNetwork
 		Endpoint EndpointType { get; }
 
 		ConduitType ConduitType { get; }
+
+		GameObject GameObject { get; }
 	}
 
 	public class NetworkItem : FlowUtilityNetwork.IItem
 	{
-		public NetworkItem(ConduitType conduit_type, Endpoint endpoint_type, int cell)
+		public NetworkItem(ConduitType conduit_type, Endpoint endpoint_type, int cell, GameObject parent)
 		{
 			this.conduitType = conduit_type;
 			this.endpointType = endpoint_type;
 			this.cell = cell;
+			this.parent = parent;
 		}
 
 		public Endpoint EndpointType
@@ -131,6 +133,14 @@ public class FlowUtilityNetwork : UtilityNetwork
 			}
 		}
 
+		public GameObject GameObject
+		{
+			get
+			{
+				return this.parent;
+			}
+		}
+
 		private int cell;
 
 		private FlowUtilityNetwork network;
@@ -138,5 +148,7 @@ public class FlowUtilityNetwork : UtilityNetwork
 		private Endpoint endpointType;
 
 		private ConduitType conduitType;
+
+		private GameObject parent;
 	}
 }

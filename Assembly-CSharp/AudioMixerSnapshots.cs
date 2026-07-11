@@ -87,6 +87,9 @@ public class AudioMixerSnapshots : ScriptableObject
 	[EventRef]
 	public string FabricatorSideScreenOpenSnapshot;
 
+	[EventRef]
+	public string SpaceVisibleSnapshot;
+
 	[SerializeField]
 	[EventRef]
 	private string[] snapshots;

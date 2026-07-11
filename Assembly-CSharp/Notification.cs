@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Notification
 {
-	public Notification(string title, NotificationType type, HashedString group, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, string soundPath = null)
+	public Notification(string title, NotificationType type, HashedString group, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null)
 	{
 		this.titleText = title;
 		this.Group = group;
@@ -16,7 +16,6 @@ public class Notification
 		this.Delay = delay;
 		this.customClickCallback = custom_click_callback;
 		this.customClickData = custom_click_data;
-		this.soundPath = GlobalAssets.GetSound(soundPath, true);
 	}
 
 	public NotificationType Type { get; set; }
@@ -120,8 +119,6 @@ public class Notification
 	public Notification.ClickCallback customClickCallback;
 
 	public object customClickData;
-
-	public string soundPath;
 
 	private string notifierName;
 

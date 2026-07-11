@@ -174,7 +174,7 @@ public class Harvestable : Workable
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 		component.RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	public void SetHarvestWhenReady(bool state)
@@ -217,7 +217,7 @@ public class Harvestable : Workable
 			component.RemoveStatusItem(Db.Get().CreatureStatusItems.ReadyForHarvest, false);
 			component.RemoveStatusItem(Db.Get().MiscStatusItems.NotMarkedForHarvest, false);
 		}
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	public virtual void MarkForHarvest()
@@ -275,14 +275,14 @@ public class Harvestable : Workable
 		this.OnCancel(null);
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	public virtual void OnRefreshUserMenu(object data)
 	{
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (this.harvestWhenReady)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_harvest";
 			string text2 = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.NAME;
 			global::System.Action action = delegate
@@ -291,11 +291,10 @@ public class Harvestable : Workable
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Negative, UI.GAMEOBJECTEFFECTS.PLANT_DO_NOT_HARVEST, base.transform, 1.5f, false);
 			};
 			string text3 = UI.USERMENUACTIONS.CANCEL_HARVEST_WHEN_READY.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_harvest";
 			string text2 = UI.USERMENUACTIONS.HARVEST_WHEN_READY.NAME;
 			global::System.Action action = delegate
@@ -304,8 +303,10 @@ public class Harvestable : Workable
 				PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.GAMEOBJECTEFFECTS.PLANT_MARK_FOR_HARVEST, base.transform, 1.5f, false);
 			};
 			string text = UI.USERMENUACTIONS.HARVEST_WHEN_READY.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
 	protected override void OnCleanUp()
@@ -324,9 +325,6 @@ public class Harvestable : Workable
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.RemoveStatusItem(Db.Get().MiscStatusItems.PendingHarvest, false);
 	}
-
-	[MyCmpAdd]
-	protected UserMenu userMenu;
 
 	[Serialize]
 	protected bool isMarkedForHarvest;

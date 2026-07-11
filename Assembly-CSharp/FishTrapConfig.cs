@@ -18,8 +18,10 @@ public class FishTrapConfig : IBuildingConfig
 		Storage storage = go.AddOrGet<Storage>();
 		storage.allowItemRemoval = true;
 		storage.SetDefaultStoredItemModifiers(FishTrapConfig.StoredItemModifiers);
-		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
-		go.AddOrGet<Trap>().trappableCreatures = new Tag[] { GameTags.Creatures.Swimmer };
+		storage.sendOnStoreOnSpawn = true;
+		Trap trap = go.AddOrGet<Trap>();
+		trap.trappableCreatures = new Tag[] { GameTags.Creatures.Swimmer };
+		trap.trappedOffset = new Vector2(0f, 1f);
 	}
 
 	public override void DoPostConfigureComplete(GameObject prefab)

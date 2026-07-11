@@ -47,18 +47,6 @@ public class KBatchedAnimTracker : MonoBehaviour
 		}
 	}
 
-	private void OnDisable()
-	{
-		if (this.myAnim != null)
-		{
-			KBatchedAnimInstanceData batchInstanceData = this.myAnim.GetBatchInstanceData();
-			if (batchInstanceData != null)
-			{
-				batchInstanceData.ClearOverrideTransformMatrix();
-			}
-		}
-	}
-
 	private void OnDestroy()
 	{
 		if (this.controller != null)

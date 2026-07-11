@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
@@ -87,8 +86,12 @@ public class ConduitFlow : IConduitFlow
 			GameObject gameObject = Grid.Objects[num, (int)objectLayer];
 			if (!(gameObject == null))
 			{
-				int num2 = this.soaInfo.AddConduit(this, gameObject, num);
-				this.grid[num].conduitIdx = num2;
+				global::Conduit component = gameObject.GetComponent<global::Conduit>();
+				if (!(component != null) || !component.IsDisconnected())
+				{
+					int num2 = this.soaInfo.AddConduit(this, gameObject, num);
+					this.grid[num].conduitIdx = num2;
+				}
 			}
 		}
 		Game.Instance.conduitTemperatureManager.Sim200ms(0f);
@@ -847,11 +850,6 @@ public class ConduitFlow : IConduitFlow
 		return this.networkMgr.GetNetworkForCell(cell);
 	}
 
-	public IEnumerator<ConduitFlow.Conduit> VisibleConduitsEnumerator(Vector2I min, Vector2I max)
-	{
-		return new ConduitFlow.VisibleConduitIterator(min, max, this);
-	}
-
 	public void ForceRebuildNetworks()
 	{
 		this.networkMgr.ForceRebuildNetworks();
@@ -872,7 +870,7 @@ public class ConduitFlow : IConduitFlow
 	public void FreezeConduitContents(int conduit_idx)
 	{
 		GameObject conduitGO = this.soaInfo.GetConduitGO(conduit_idx);
-		if (conduitGO != null)
+		if (conduitGO != null && this.soaInfo.GetConduit(conduit_idx).GetContents(this).mass > this.MaxMass * 0.1f)
 		{
 			conduitGO.Trigger(-700727624, null);
 		}
@@ -881,7 +879,7 @@ public class ConduitFlow : IConduitFlow
 	public void MeltConduitContents(int conduit_idx)
 	{
 		GameObject conduitGO = this.soaInfo.GetConduitGO(conduit_idx);
-		if (conduitGO != null)
+		if (conduitGO != null && this.soaInfo.GetConduit(conduit_idx).GetContents(this).mass > this.MaxMass * 0.1f)
 		{
 			conduitGO.Trigger(-1152799878, null);
 		}
@@ -891,6 +889,8 @@ public class ConduitFlow : IConduitFlow
 
 	private float MaxMass = 10f;
 
+	private const float PERCENT_MAX_MASS_FOR_STATE_CHANGE_DAMAGE = 0.1f;
+
 	public const float TickRate = 1f;
 
 	public const float WaitTime = 1f;
@@ -899,7 +899,7 @@ public class ConduitFlow : IConduitFlow
 
 	private float lastUpdateTime = float.NegativeInfinity;
 
-	private ConduitFlow.SOAInfo soaInfo = new ConduitFlow.SOAInfo();
+	public ConduitFlow.SOAInfo soaInfo = new ConduitFlow.SOAInfo();
 
 	private bool dirtyConduitUpdaters;
 
@@ -935,7 +935,7 @@ public class ConduitFlow : IConduitFlow
 		diseaseCount = 0
 	};
 
-	private class SOAInfo
+	public class SOAInfo
 	{
 		public int NumEntries
 		{
@@ -1344,7 +1344,7 @@ public class ConduitFlow : IConduitFlow
 		Num
 	}
 
-	private struct ConduitConnections
+	public struct ConduitConnections
 	{
 		public int left;
 
@@ -1552,64 +1552,5 @@ public class ConduitFlow : IConduitFlow
 		public byte diseaseIdx;
 
 		public int diseaseCount;
-	}
-
-	private class VisibleConduitIterator : IEnumerator<ConduitFlow.Conduit>, IDisposable, IEnumerator
-	{
-		public VisibleConduitIterator(Vector2I min, Vector2I max, ConduitFlow manager)
-		{
-			this.min = min;
-			this.max = max;
-			this.manager = manager;
-		}
-
-		public ConduitFlow.Conduit Current
-		{
-			get
-			{
-				return this.manager.soaInfo.GetConduit(this.idx);
-			}
-		}
-
-		object IEnumerator.Current
-		{
-			get
-			{
-				return this.Current;
-			}
-		}
-
-		public void Dispose()
-		{
-		}
-
-		public bool MoveNext()
-		{
-			this.idx++;
-			while (this.idx < this.manager.soaInfo.NumEntries)
-			{
-				int cell = this.manager.soaInfo.GetCell(this.idx);
-				Vector2I vector2I = new Vector2I(cell % Grid.WidthInCells, cell / Grid.WidthInCells);
-				if (this.min <= vector2I && vector2I <= this.max)
-				{
-					return true;
-				}
-				this.idx++;
-			}
-			return false;
-		}
-
-		public void Reset()
-		{
-			this.idx = -1;
-		}
-
-		public int idx = -1;
-
-		private Vector2I min;
-
-		private Vector2I max;
-
-		private ConduitFlow manager;
 	}
 }

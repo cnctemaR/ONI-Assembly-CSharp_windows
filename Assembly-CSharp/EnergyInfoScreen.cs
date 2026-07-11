@@ -124,7 +124,7 @@ public class EnergyInfoScreen : TargetScreen
 			gameObject.SetActive(true);
 			ReadOnlyCollection<Generator> generatorsOnCircuit = circuitManager.GetGeneratorsOnCircuit(num);
 			ReadOnlyCollection<IEnergyConsumer> consumersOnCircuit = circuitManager.GetConsumersOnCircuit(num);
-			ReadOnlyCollection<Battery> batteriesOnCircuit = circuitManager.GetBatteriesOnCircuit(num);
+			List<Battery> batteriesOnCircuit = circuitManager.GetBatteriesOnCircuit(num);
 			ReadOnlyCollection<Battery> transformersOnCircuit = circuitManager.GetTransformersOnCircuit(num);
 			if (generatorsOnCircuit.Count > 0)
 			{

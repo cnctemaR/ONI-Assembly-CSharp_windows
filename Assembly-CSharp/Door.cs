@@ -47,6 +47,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	{
 		base.OnPrefabInit();
 		this.overrideAnims = Door.OVERRIDE_ANIMS;
+		this.doorClosingSound = GlobalAssets.GetSound(this.doorClosingSoundEventName, false);
+		this.doorOpeningSound = GlobalAssets.GetSound(this.doorOpeningSoundEventName, false);
 	}
 
 	private Door.ControlState GetNextState(Door.ControlState wantedState)
@@ -65,7 +67,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		KPrefabID component = base.GetComponent<KPrefabID>();
 		if (component != null)
 		{
-			this.log = new LoggerFSS("Door");
+			this.log = new LoggerFSS("Door", 35);
+		}
+		if (!this.allowAutoControl && this.controlState == Door.ControlState.Auto)
+		{
+			this.controlState = Door.ControlState.Closed;
 		}
 		StructureTemperatureComponents structureTemperatures = GameComps.StructureTemperatures;
 		HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
@@ -79,6 +85,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		{
 			this.Seal();
 		}
+		this.UpdateDoorSpeed(this.operational.IsOperational);
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
 		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
@@ -107,7 +114,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				list.Add(Grid.CellLeft(num2));
 				list.Add(Grid.CellRight(num2));
 			}
-			SimMessages.SetCellProperties(num2, 12);
+			SimMessages.SetCellProperties(num2, 8);
 			Grid.RenderedByWorld[num2] = false;
 		}
 		List<int> list2 = new List<int>(this.building.PlacementCells);
@@ -170,19 +177,16 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			{
 				if (controlState == Door.ControlState.Closed)
 				{
-					this.operational.SetActive(false, true);
 					this.controller.sm.isLocked.Set(true, this.controller);
 				}
 			}
 			else
 			{
-				this.operational.SetActive(true, true);
 				this.controller.sm.isLocked.Set(false, this.controller);
 			}
 		}
 		else
 		{
-			this.operational.SetActive(false, true);
 			this.controller.sm.isLocked.Set(false, this.controller);
 		}
 		base.Trigger(279163026, this.controlState);
@@ -195,19 +199,60 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		bool isOperational = this.operational.IsOperational;
 		if (isOperational != this.on)
 		{
-			this.on = isOperational;
-			if (isOperational)
+			this.UpdateDoorSpeed(isOperational);
+			if (this.on && base.GetComponent<KPrefabID>().HasTag(GameTags.Transition))
 			{
-				this.animController.PlaySpeedMultiplier = 1f;
-				if (this.controlState == Door.ControlState.Auto)
-				{
-					this.operational.SetActive(false, false);
-				}
+				this.SetActive(true);
 			}
 			else
 			{
-				this.animController.PlaySpeedMultiplier = this.unpoweredAnimSpeed;
+				this.SetActive(false);
 			}
+		}
+	}
+
+	private void UpdateDoorSpeed(bool powered)
+	{
+		this.on = powered;
+		this.UpdateAnimAndSoundParams(powered);
+		float positionPercent = this.animController.GetPositionPercent();
+		this.animController.Play(this.animController.CurrentAnim.hash, this.animController.PlayMode, 1f, 0f);
+		this.animController.SetPositionPercent(positionPercent);
+	}
+
+	private void UpdateAnimAndSoundParams(bool powered)
+	{
+		if (powered)
+		{
+			this.animController.PlaySpeedMultiplier = this.poweredAnimSpeed;
+			if (this.doorClosingSound != null)
+			{
+				this.loopingSounds.UpdateFirstParameter(this.doorClosingSound, Door.SOUND_POWERED_PARAMETER, 1f);
+			}
+			if (this.doorOpeningSound != null)
+			{
+				this.loopingSounds.UpdateFirstParameter(this.doorOpeningSound, Door.SOUND_POWERED_PARAMETER, 1f);
+			}
+		}
+		else
+		{
+			this.animController.PlaySpeedMultiplier = this.unpoweredAnimSpeed;
+			if (this.doorClosingSound != null)
+			{
+				this.loopingSounds.UpdateFirstParameter(this.doorClosingSound, Door.SOUND_POWERED_PARAMETER, 0f);
+			}
+			if (this.doorOpeningSound != null)
+			{
+				this.loopingSounds.UpdateFirstParameter(this.doorOpeningSound, Door.SOUND_POWERED_PARAMETER, 0f);
+			}
+		}
+	}
+
+	private void SetActive(bool active)
+	{
+		if (this.operational.IsOperational)
+		{
+			this.operational.SetActive(active, false);
 		}
 	}
 
@@ -265,6 +310,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 						float num5 = -1f;
 						int num6 = handle.index;
 						SimMessages.ReplaceElement(num3, simHashes, cellElementEvent, num4, num5, byte.MaxValue, 0, num6);
+						SimMessages.ClearCellProperties(num2, 4);
 					}
 					else
 					{
@@ -285,6 +331,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 					float num4 = component.Temperature;
 					int num3 = handle2.index;
 					SimMessages.ReplaceAndDisplaceElement(num6, simHashes, cellElementEvent, num5, num4, byte.MaxValue, 0, num3);
+					SimMessages.SetCellProperties(num2, 4);
 				}
 			}
 		}
@@ -415,10 +462,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		else
 		{
 			this.controller.sm.isOpen.Set(true, this.controller);
-			if (this.operational.IsOperational)
-			{
-				this.operational.SetActive(true, false);
-			}
 		}
 		return num4;
 	}
@@ -446,9 +489,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				{
 					if (this.openCount == 0)
 					{
-						this.operational.SetActive(false, false);
 						this.controller.sm.isOpen.Set(false, this.controller);
-						this.userMenu.Refresh();
+						Game.Instance.userMenu.Refresh(base.gameObject);
 					}
 				}
 			}
@@ -531,9 +573,6 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	}
 
 	[MyCmpReq]
-	private UserMenu userMenu;
-
-	[MyCmpReq]
 	private Operational operational;
 
 	[MyCmpGet]
@@ -548,6 +587,9 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	[MyCmpGet]
 	private EnergyConsumer consumer;
 
+	[MyCmpAdd]
+	private LoopingSounds loopingSounds;
+
 	[SerializeField]
 	public bool hasComplexUserControls;
 
@@ -555,7 +597,27 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	public float unpoweredAnimSpeed = 0.25f;
 
 	[SerializeField]
+	public float poweredAnimSpeed = 1f;
+
+	[SerializeField]
 	public Door.DoorType doorType;
+
+	[SerializeField]
+	public bool allowAutoControl = true;
+
+	[SerializeField]
+	public string doorClosingSoundEventName;
+
+	[SerializeField]
+	public string doorOpeningSoundEventName;
+
+	private string doorClosingSound;
+
+	private string doorOpeningSound;
+
+	private static readonly HashedString SOUND_POWERED_PARAMETER = "doorPowered";
+
+	private static readonly HashedString SOUND_PROGRESS_PARAMETER = "doorProgress";
 
 	[Serialize]
 	private bool hasBeenUnsealed;
@@ -563,7 +625,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	[Serialize]
 	private Door.ControlState controlState;
 
-	private bool on = true;
+	private bool on;
 
 	private bool do_melt_check;
 
@@ -612,7 +674,28 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			this.closeblocked.PlayAnim("open").ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p).ParamTransition<bool>(this.isBlocked, this.closedelay, (Door.Controller.Instance smi, bool p) => !p);
 			this.closedelay.PlayAnim("open").ScheduleGoTo(0.5f, this.closing).ParamTransition<bool>(this.isOpen, this.open, (Door.Controller.Instance smi, bool p) => p)
 				.ParamTransition<bool>(this.isBlocked, this.closeblocked, (Door.Controller.Instance smi, bool p) => p);
-			this.closing.PlayAnim("closing").OnAnimQueueComplete(this.closed).ParamTransition<bool>(this.isBlocked, this.closeblocked, (Door.Controller.Instance smi, bool p) => p);
+			this.closing.ParamTransition<bool>(this.isBlocked, this.closeblocked, (Door.Controller.Instance smi, bool p) => p).ToggleTag(GameTags.Transition).ToggleLoopingSound("Closing loop", (Door.Controller.Instance smi) => smi.master.doorClosingSound, (Door.Controller.Instance smi) => !string.IsNullOrEmpty(smi.master.doorClosingSound))
+				.Enter("SetParams", delegate(Door.Controller.Instance smi)
+				{
+					smi.master.UpdateAnimAndSoundParams(smi.master.on);
+				})
+				.Update(delegate(Door.Controller.Instance smi, float dt)
+				{
+					if (smi.master.doorClosingSound != null)
+					{
+						smi.master.loopingSounds.UpdateSecondParameter(smi.master.doorClosingSound, Door.SOUND_PROGRESS_PARAMETER, smi.animController.GetPositionPercent());
+					}
+				}, UpdateRate.SIM_33ms, false)
+				.Enter("SetActive", delegate(Door.Controller.Instance smi)
+				{
+					smi.master.SetActive(true);
+				})
+				.Exit("SetActive", delegate(Door.Controller.Instance smi)
+				{
+					smi.master.SetActive(false);
+				})
+				.PlayAnim("closing")
+				.OnAnimQueueComplete(this.closed);
 			this.open.PlayAnim("open").ParamTransition<bool>(this.isOpen, this.closeblocked, (Door.Controller.Instance smi, bool p) => !p).Enter("SetWorldStateOpen", delegate(Door.Controller.Instance smi)
 			{
 				smi.master.SetWorldState();
@@ -628,7 +711,27 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			});
 			this.locked.PlayAnim("locked").ParamTransition<bool>(this.isLocked, this.unlocking, (Door.Controller.Instance smi, bool p) => !p);
 			this.unlocking.PlayAnim("locked_pst").OnAnimQueueComplete(this.closed);
-			this.opening.PlayAnim("opening").OnAnimQueueComplete(this.open);
+			this.opening.ToggleTag(GameTags.Transition).ToggleLoopingSound("Opening loop", (Door.Controller.Instance smi) => smi.master.doorOpeningSound, (Door.Controller.Instance smi) => !string.IsNullOrEmpty(smi.master.doorOpeningSound)).Enter("SetParams", delegate(Door.Controller.Instance smi)
+			{
+				smi.master.UpdateAnimAndSoundParams(smi.master.on);
+			})
+				.Update(delegate(Door.Controller.Instance smi, float dt)
+				{
+					if (smi.master.doorOpeningSound != null)
+					{
+						smi.master.loopingSounds.UpdateSecondParameter(smi.master.doorOpeningSound, Door.SOUND_PROGRESS_PARAMETER, smi.animController.GetPositionPercent());
+					}
+				}, UpdateRate.SIM_33ms, false)
+				.Enter("SetActive", delegate(Door.Controller.Instance smi)
+				{
+					smi.master.SetActive(true);
+				})
+				.Exit("SetActive", delegate(Door.Controller.Instance smi)
+				{
+					smi.master.SetActive(false);
+				})
+				.PlayAnim("opening")
+				.OnAnimQueueComplete(this.open);
 			this.Sealed.Enter(delegate(Door.Controller.Instance smi)
 			{
 				OccupyArea component = smi.master.GetComponent<OccupyArea>();

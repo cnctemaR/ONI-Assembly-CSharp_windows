@@ -25,7 +25,7 @@ namespace Klei
 				{
 					try
 					{
-						YamlIO<GenericGameSettings>.LoadFile(Path.GetDirectoryName(Application.dataPath) + "/settings.yml");
+						YamlIO<GenericGameSettings>.LoadFile(GenericGameSettings.Path);
 					}
 					catch
 					{
@@ -59,6 +59,28 @@ namespace Klei
 		public bool acceleratedLifecycle { get; private set; }
 
 		public bool enableEditorCrashReporting { get; private set; }
+
+		public bool allowInsufficientMaterialBuild { get; private set; }
+
+		private static string Path
+		{
+			get
+			{
+				return global::System.IO.Path.GetDirectoryName(Application.dataPath) + "/settings.yml";
+			}
+		}
+
+		public void SaveSettings()
+		{
+			try
+			{
+				base.Save(GenericGameSettings.Path);
+			}
+			catch (Exception ex)
+			{
+				global::Debug.LogWarning("Failed to save settings.yml: " + ex.ToString(), null);
+			}
+		}
 
 		private static GenericGameSettings _instance;
 	}

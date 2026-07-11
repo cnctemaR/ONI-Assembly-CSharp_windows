@@ -1,5 +1,6 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
 public class LoreBearer : KMonoBehaviour
 {
@@ -11,12 +12,6 @@ public class LoreBearer : KMonoBehaviour
 		}
 	}
 
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-		this.userMenu = base.GetComponent<UserMenu>();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -25,12 +20,13 @@ public class LoreBearer : KMonoBehaviour
 
 	private void RefreshUserMenu(object data = null)
 	{
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string text = "action_follow_cam";
 		string text2 = UI.USERMENUACTIONS.READLORE.NAME;
 		global::System.Action action = new global::System.Action(this.OnClickRead);
 		string text3 = UI.USERMENUACTIONS.READLORE.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void OnClickRead()
@@ -38,6 +34,4 @@ public class LoreBearer : KMonoBehaviour
 		InfoDialogScreen infoDialogScreen = (InfoDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.InfoDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
 		infoDialogScreen.SetHeader(Strings.Get("STRINGS.LORE.BUILDINGS." + base.gameObject.name + ".HEADER")).AddPlainText(this.content);
 	}
-
-	private UserMenu userMenu;
 }

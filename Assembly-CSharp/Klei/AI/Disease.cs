@@ -359,25 +359,25 @@ namespace Klei.AI
 		public List<Descriptor> GetQualitativeDescriptors()
 		{
 			List<Descriptor> list = new List<Descriptor>();
-			foreach (Disease.InfectionVector infectionVector in this.infectionVectors)
+			using (List<Disease.InfectionVector>.Enumerator enumerator = this.infectionVectors.GetEnumerator())
 			{
-				if (infectionVector != Disease.InfectionVector.Contact)
+				while (enumerator.MoveNext())
 				{
-					if (infectionVector != Disease.InfectionVector.Inhalation)
+					switch (enumerator.Current)
 					{
-						if (infectionVector == Disease.InfectionVector.Digestion)
-						{
-							list.Add(new Descriptor(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.FOODBORNE, DUPLICANTS.DISEASES.DESCRIPTORS.INFO.FOODBORNE_TOOLTIP, Descriptor.DescriptorType.Information, false));
-						}
-					}
-					else
-					{
+					case Disease.InfectionVector.Contact:
+						list.Add(new Descriptor(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SKINBORNE, DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SKINBORNE_TOOLTIP, Descriptor.DescriptorType.Information, false));
+						break;
+					case Disease.InfectionVector.Digestion:
+						list.Add(new Descriptor(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.FOODBORNE, DUPLICANTS.DISEASES.DESCRIPTORS.INFO.FOODBORNE_TOOLTIP, Descriptor.DescriptorType.Information, false));
+						break;
+					case Disease.InfectionVector.Inhalation:
 						list.Add(new Descriptor(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.AIRBORNE, DUPLICANTS.DISEASES.DESCRIPTORS.INFO.AIRBORNE_TOOLTIP, Descriptor.DescriptorType.Information, false));
+						break;
+					case Disease.InfectionVector.Exposure:
+						list.Add(new Descriptor(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SUNBORNE, DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SUNBORNE_TOOLTIP, Descriptor.DescriptorType.Information, false));
+						break;
 					}
-				}
-				else
-				{
-					list.Add(new Descriptor(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SKINBORNE, DUPLICANTS.DISEASES.DESCRIPTORS.INFO.SKINBORNE_TOOLTIP, Descriptor.DescriptorType.Information, false));
 				}
 			}
 			list.Add(new Descriptor(Strings.Get(this.descriptiveSymptoms), string.Empty, Descriptor.DescriptorType.Information, false));
@@ -606,7 +606,8 @@ namespace Klei.AI
 		{
 			Contact,
 			Digestion,
-			Inhalation
+			Inhalation,
+			Exposure
 		}
 
 		public enum DiseaseType

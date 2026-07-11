@@ -95,9 +95,6 @@ public class Ownable : Assignable, ISaveLoadable, IEffectDescriptor
 		return list;
 	}
 
-	[MyCmpAdd]
-	private UserMenu userMenu;
-
 	private Color unownedTint = Color.gray;
 
 	private Color ownedTint = Color.white;

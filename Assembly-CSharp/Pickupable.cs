@@ -64,12 +64,12 @@ public class Pickupable : Workable
 		}
 	}
 
-	public bool CouldBePickedUp(GameObject carrier)
+	public bool CouldBePickedUp(GameObject carrier, bool is_carrier_transfer_arm)
 	{
 		bool flag = this.UnreservedAmount > 0f || this.GetReservedAmount(carrier) > 0f;
 		bool flag2 = !this.KPrefabID.HasTag(GameTags.StoredPrivate);
 		bool flag3 = !this.KPrefabID.HasTag(GameTags.Equipped);
-		bool flag4 = !this.storage || !this.storage.automatable || this.storage.automatable.AllowedByAutomation(carrier);
+		bool flag4 = !this.storage || !this.storage.automatable || this.storage.automatable.AllowedByAutomation(is_carrier_transfer_arm);
 		bool flag5 = this.UnreservedAmount >= this.MinTakeAmount;
 		return flag && flag2 && flag4 && flag5 && flag3;
 	}
@@ -180,6 +180,7 @@ public class Pickupable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.log = new LoggerFSSF("Pickupable");
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.PickingUp;
 		base.SetWorkTime(1.5f);
 		this.targetWorkable = this;
@@ -198,7 +199,6 @@ public class Pickupable : Workable
 
 	protected override void OnLoadLevel()
 	{
-		this.log = null;
 		base.OnLoadLevel();
 	}
 
@@ -257,7 +257,7 @@ public class Pickupable : Workable
 		this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
 		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.RegisterListeners");
 	}
 
 	public void UnregisterListeners()
@@ -348,10 +348,16 @@ public class Pickupable : Workable
 
 	private void OnCellChange()
 	{
-		int num = Grid.PosToCell(this);
+		Vector3 position = base.transform.GetPosition();
+		int num = Grid.PosToCell(position);
 		if (!Grid.IsValidCell(num))
 		{
-			this.DeleteObject();
+			Vector2 vector = new Vector2(-0.1f * (float)Grid.WidthInCells, 1.1f * (float)Grid.WidthInCells);
+			Vector2 vector2 = new Vector2(-0.1f * (float)Grid.HeightInCells, 1.1f * (float)Grid.HeightInCells);
+			if (position.x < vector.x || vector.y < position.x || position.y < vector2.x || vector2.y < position.y)
+			{
+				this.DeleteObject();
+			}
 		}
 		else
 		{
@@ -457,6 +463,10 @@ public class Pickupable : Workable
 				this.OnReservationsChanged();
 			}
 		}
+		if (Grid.IsValidCell(this.cachedCell))
+		{
+			this.NotifyChanged(this.cachedCell);
+		}
 		base.OnCleanUp();
 	}
 
@@ -538,6 +548,7 @@ public class Pickupable : Workable
 		}
 		if (flag)
 		{
+			int cachedCell = this.cachedCell;
 			this.RefreshStorageTags(data);
 			KCollider2D component = base.GetComponent<KCollider2D>();
 			if (component != null)
@@ -556,6 +567,7 @@ public class Pickupable : Workable
 				}
 				this.cachedCell = Grid.PosToCell(this.storage);
 			}
+			this.NotifyChanged(cachedCell);
 		}
 		else
 		{

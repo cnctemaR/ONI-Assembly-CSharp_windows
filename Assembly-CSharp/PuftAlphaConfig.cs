@@ -25,7 +25,7 @@ public class PuftAlphaConfig : IEntityConfig
 	public GameObject CreatePrefab()
 	{
 		GameObject gameObject = PuftAlphaConfig.CreatePuftAlpha("PuftAlpha", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.DESC, "puft_kanim", false);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftAlphaEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.DESC, "egg_puft_kanim", "PuftAlphaBaby", PuftTuning.EGG_CHANCES_ALPHA, PuftAlphaConfig.EGG_SORT_ORDER, true, false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PuftAlphaEgg", global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.EGG_NAME, global::STRINGS.CREATURES.SPECIES.PUFT.VARIANT_ALPHA.DESC, "egg_puft_kanim", PuftTuning.EGG_MASS, "PuftAlphaBaby", 45f, 15f, PuftTuning.EGG_CHANCES_ALPHA, PuftAlphaConfig.EGG_SORT_ORDER, true, false, true);
 	}
 
 	public void OnPrefabInit(GameObject inst)

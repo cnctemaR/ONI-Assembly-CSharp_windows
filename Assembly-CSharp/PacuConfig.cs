@@ -4,11 +4,16 @@ using UnityEngine;
 
 public class PacuConfig : IEntityConfig
 {
+	public static GameObject CreatePacu(string id, string name, string desc, string anim_file, bool is_baby)
+	{
+		GameObject gameObject = BasePacuConfig.CreatePrefab(id, "PacuBaseTrait", name, desc, anim_file, is_baby, null, 273.15f, 333.15f);
+		return EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, 25f);
+	}
+
 	public GameObject CreatePrefab()
 	{
-		GameObject gameObject = BasePacuConfig.CreatePrefab("Pacu", "PacuBaseTrait", CREATURES.SPECIES.PACU.NAME, CREATURES.SPECIES.PACU.DESC, null, 273.15f, 333.15f);
-		gameObject = EntityTemplates.ExtendEntityToWildCreature(gameObject, PacuTuning.PEN_SIZE_PER_CREATURE, 25f);
-		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuEgg", CREATURES.SPECIES.PACU.EGG_NAME, CREATURES.SPECIES.PACU.DESC, "egg_pacu_kanim", "Pacu", PacuTuning.EGG_CHANCES_BASE, PacuConfig.EGG_SORT_ORDER, false, true);
+		GameObject gameObject = PacuConfig.CreatePacu("Pacu", CREATURES.SPECIES.PACU.NAME, CREATURES.SPECIES.PACU.DESC, "pacu_kanim", false);
+		return EntityTemplates.ExtendEntityToFertileCreature(gameObject, "PacuEgg", CREATURES.SPECIES.PACU.EGG_NAME, CREATURES.SPECIES.PACU.DESC, "egg_pacu_kanim", PacuTuning.EGG_MASS, "PacuBaby", 15.000001f, 5f, PacuTuning.EGG_CHANCES_BASE, PacuConfig.EGG_SORT_ORDER, false, true, false);
 	}
 
 	public void OnPrefabInit(GameObject prefab)

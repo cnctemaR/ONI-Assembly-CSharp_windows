@@ -14,7 +14,6 @@ public class CommonPlacerConfig
 		gameObject.AddOrGet<StateMachineController>();
 		Prioritizable prioritizable = gameObject.AddOrGet<Prioritizable>();
 		prioritizable.iconOffset = new Vector2(0.3f, 0.32f);
-		gameObject.AddOrGet<UserMenu>();
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
 		kboxCollider2D.offset = new Vector2(0f, 0.5f);
 		kboxCollider2D.size = new Vector2(1f, 1f);

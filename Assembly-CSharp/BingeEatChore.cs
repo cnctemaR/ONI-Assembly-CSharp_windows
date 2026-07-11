@@ -46,7 +46,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 				this.GoTo(base.sm.eat_pst);
 				return;
 			}
-			foreach (Edible edible2 in Components.Edibles)
+			foreach (Edible edible2 in Components.Edibles.Items)
 			{
 				if (!(edible2 == null))
 				{
@@ -54,7 +54,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 					{
 						if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
 						{
-							if (edible2.GetComponent<Pickupable>().CouldBePickedUp(base.gameObject))
+							if (edible2.GetComponent<Pickupable>().CouldBePickedUp(base.gameObject, false))
 							{
 								int navigationCost = component.GetNavigationCost(edible2);
 								if (navigationCost != PathProber.InvalidCost)

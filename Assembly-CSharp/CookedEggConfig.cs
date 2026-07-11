@@ -12,7 +12,7 @@ public class CookedEggConfig : IEntityConfig
 		string text = "CookedEgg";
 		string text2 = ITEMS.FOOD.COOKEDEGG.RECIPEDESC;
 		Recipe recipe = new Recipe(text, 1f, (SimHashes)0, null, text2, 1).SetFabricator("CookingStation", FOOD.RECIPES.STANDARD_COOK_TIME);
-		recipe.AddIngredient(new Recipe.Ingredient(GameTags.Egg, 1f));
+		recipe.AddIngredient(new Recipe.Ingredient("RawEgg", 1f));
 		return gameObject;
 	}
 

@@ -429,10 +429,10 @@ public class DebugBaseTemplateButton : KScreen
 				}
 			}
 		}
-		this.GetEntities<Crop>(Components.Crops, num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<Health>(Components.Health, num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<Harvestable>(Components.Harvestables, num7, num8, ref list4, ref list5, ref hashSet);
-		this.GetEntities<Edible>(Components.Edibles, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Crop>(Components.Crops.Items, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Health>(Components.Health.Items, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Harvestable>(Components.Harvestables.Items, num7, num8, ref list4, ref list5, ref hashSet);
+		this.GetEntities<Edible>(Components.Edibles.Items, num7, num8, ref list4, ref list5, ref hashSet);
 		this.GetEntities<Geyser>(num7, num8, ref list4, ref list5, ref hashSet);
 		this.GetEntities<OccupyArea>(num7, num8, ref list4, ref list5, ref hashSet);
 		this.GetEntities<FogOfWarMask>(num7, num8, ref list4, ref list5, ref hashSet);

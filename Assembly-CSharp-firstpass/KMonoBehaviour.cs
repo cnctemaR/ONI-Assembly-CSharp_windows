@@ -183,6 +183,10 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 	{
 	}
 
+	public virtual void CreateDef()
+	{
+	}
+
 	public T FindOrAdd<T>() where T : KMonoBehaviour
 	{
 		return this.FindOrAddComponent<T>();
@@ -196,11 +200,6 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 	public T Require<T>() where T : Component
 	{
 		return this.RequireComponent<T>();
-	}
-
-	public global::Logger GetEventLog()
-	{
-		return this.obj.GetEventSystem().GetLog();
 	}
 
 	public int Subscribe(int hash, Action<object> handler)

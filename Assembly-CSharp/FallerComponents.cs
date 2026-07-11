@@ -30,7 +30,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		int num = Grid.PosToCell(position);
 		data.cellChangedCB = delegate
 		{
-			FallerComponents.OnSolidChanged(h, null);
+			FallerComponents.OnSolidChanged(h);
 		};
 		float num2 = -GravityComponent.GetRadius(data.transform) - 0.07f;
 		int num3 = Grid.PosToCell(new Vector3(position.x, position.y + num2, position.z));
@@ -40,7 +40,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		{
 			data.solidChangedCB = delegate(object ev_data)
 			{
-				FallerComponents.OnSolidChanged(h, ev_data);
+				FallerComponents.OnSolidChanged(h);
 			};
 			int num4 = 2;
 			Vector2I vector2I = Grid.CellToXY(num);
@@ -68,7 +68,7 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 	{
 		base.OnSpawn(h);
 		FallerComponent data = base.GetData(h);
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(data.transform, data.cellChangedCB);
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(data.transform, data.cellChangedCB, "FallerComponent.OnSpawn");
 	}
 
 	private void OnCleanUpImmediate(HandleVector<int>.Handle h)
@@ -78,11 +78,10 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		{
 			data.partitionerEntry.Release();
 			data.partitionerEntry = null;
-			base.SetData(h, data);
 		}
-		if (data.cellChangedCB != null && data.transform != null)
+		if (data.cellChangedCB != null)
 		{
-			CellChangeMonitor.Instance.UnregisterCellChangedHandler(data.transform, data.cellChangedCB);
+			CellChangeMonitor.Instance.UnregisterCellChangedHandler(data.transformInstanceId, data.cellChangedCB);
 			data.cellChangedCB = null;
 		}
 		if (GameComps.Gravities.Has(data.transform.gameObject))
@@ -118,21 +117,22 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 			GameComps.Gravities.Remove(transform.gameObject);
 			HandleVector<int>.Handle h = GameComps.Fallers.GetHandle(transform.gameObject);
 			FallerComponent data = GameComps.Fallers.GetData(h);
-			Action<object> action = delegate(object ev_data)
-			{
-				FallerComponents.OnSolidChanged(h, ev_data);
-			};
 			int num = Grid.PosToCell(transform.GetPosition());
 			int num2 = Grid.CellBelow(num);
 			if (data.partitionerEntry != null)
 			{
 				data.partitionerEntry.Release();
+				data.partitionerEntry = null;
 			}
 			if (Grid.IsValidCell(num2))
 			{
-				data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", transform.gameObject, num2, GameScenePartitioner.Instance.solidChangedLayer, action);
-				GameComps.Fallers.SetData(h, data);
+				data.solidChangedCB = delegate(object ev_data)
+				{
+					FallerComponents.OnSolidChanged(h);
+				};
+				data.partitionerEntry = GameScenePartitioner.Instance.Add("Faller", transform.gameObject, num2, GameScenePartitioner.Instance.solidChangedLayer, data.solidChangedCB);
 			}
+			GameComps.Fallers.SetData(h, data);
 		}
 	}
 
@@ -141,9 +141,13 @@ public class FallerComponents : KGameObjectComponentManager<FallerComponent>
 		FallerComponents.RemoveGravity(transform);
 	}
 
-	private static void OnSolidChanged(HandleVector<int>.Handle handle, object ev_data)
+	private static void OnSolidChanged(HandleVector<int>.Handle handle)
 	{
 		FallerComponent data = GameComps.Fallers.GetData(handle);
+		if (data.transform == null)
+		{
+			return;
+		}
 		Vector3 position = data.transform.GetPosition();
 		position.y = position.y - data.offset - 0.1f;
 		int num = Grid.PosToCell(position);

@@ -12,8 +12,8 @@ namespace FMOD.Studio
 
 		public float tempo;
 
-		public int timeSignatureUpper;
+		public int timesignatureupper;
 
-		public int timeSignatureLower;
+		public int timesignaturelower;
 	}
 }

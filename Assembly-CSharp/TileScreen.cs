@@ -20,9 +20,9 @@ public class TileScreen : KScreen
 
 	private void DisplayTileInfo()
 	{
-		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
-		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
+		Vector3 mousePos = KInputManager.GetMousePos();
+		mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
+		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePos);
 		int num = Grid.PosToCell(vector);
 		if (Grid.IsValidCell(num) && Grid.IsVisible(num))
 		{
@@ -113,9 +113,9 @@ public class TileScreen : KScreen
 		SimViewMode mode = OverlayScreen.Instance.GetMode();
 		UtilityNetworkManager<FlowUtilityNetwork, Vent> utilityNetworkManager = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitSystem : Game.Instance.gasConduitSystem);
 		ConduitFlow conduitFlow = ((mode != SimViewMode.GasVentMap) ? Game.Instance.liquidConduitFlow : Game.Instance.gasConduitFlow);
-		Vector3 mousePosition = Input.mousePosition;
-		mousePosition.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
-		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePosition);
+		Vector3 mousePos = KInputManager.GetMousePos();
+		mousePos.z = -Camera.main.transform.GetPosition().z - Grid.CellSizeInMeters;
+		Vector3 vector = Camera.main.ScreenToWorldPoint(mousePos);
 		int num = Grid.PosToCell(vector);
 		if (Grid.IsValidCell(num) && utilityNetworkManager.GetConnections(num, true) != (UtilityConnections)0)
 		{
@@ -174,7 +174,7 @@ public class TileScreen : KScreen
 
 	private void Update()
 	{
-		base.transform.SetPosition(Input.mousePosition);
+		base.transform.SetPosition(KInputManager.GetMousePos());
 		SimViewMode mode = OverlayScreen.Instance.GetMode();
 		if (mode != SimViewMode.GasVentMap && mode != SimViewMode.LiquidVentMap)
 		{

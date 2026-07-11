@@ -10,7 +10,7 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 		base.Subscribe(-1503271301, new Action<object>(this.OnSelect));
 		if (this.movable)
 		{
-			CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+			CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "StationaryChoreRangeVisualizer.OnSpawn");
 		}
 	}
 
@@ -51,7 +51,10 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 			for (int j = -this.range; j <= this.range; j++)
 			{
 				int num3 = Grid.XYToCell(num + j, num2 + i);
-				this.newCells.Add(num3);
+				if (Grid.IsValidCell(num3) && Grid.VisibilityTest(num, num2, num + j, num2 + i, true, true))
+				{
+					this.newCells.Add(num3);
+				}
 			}
 		}
 		for (int k = this.visualizers.Count - 1; k >= 0; k--)

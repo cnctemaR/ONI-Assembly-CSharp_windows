@@ -112,7 +112,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stress";
 
-				public static LocString TOOLTIP = "Stress" + UI.HORIZONTAL_BR_RULE + "Duplicants exhibit their Stress Responses at one hundred percent stress";
+				public static LocString TOOLTIP = "Stress" + UI.HORIZONTAL_BR_RULE + "Duplicants exhibit their Stress Reactions at one hundred percent stress";
 			}
 
 			public class TOXICITY
@@ -414,13 +414,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Rancher Duplicant is moving a critter";
 			}
 
-			public class HATCHCREATURE
+			public class SINGTOEGG
 			{
-				public static LocString NAME = "Assist Newborn Critter";
+				public static LocString NAME = "Sing To Egg";
 
-				public static LocString STATUS = "Assisting Newborn Critter";
+				public static LocString STATUS = "Singing To Egg";
 
-				public static LocString TOOLTIP = "This Rancher Duplicant is welcoming a newborn critter into the colony";
+				public static LocString TOOLTIP = "Singing to critter eggs improves their incubation rate, and really who doesn't love singing?";
 			}
 
 			public class USETOILET
@@ -816,7 +816,7 @@ namespace STRINGS
 
 				public static LocString STATUS = "Going to flip compost";
 
-				public static LocString TOOLTIP = "Composts need to be flipped to produce Fertilizer";
+				public static LocString TOOLTIP = "Composts need to be flipped in order for their contents to compost";
 			}
 
 			public class DEPRESSURIZE
@@ -995,6 +995,8 @@ namespace STRINGS
 				public static LocString IS_NOT_BURROWED = "Is not burrowed";
 
 				public static LocString IS_CREATURE_AVAILABLE_FOR_RANCHING = "No Critters Available";
+
+				public static LocString IS_CREATURE_AVAILABLE_FOR_FIXED_CAPTURE = "Pen Status OK";
 
 				public static LocString IS_MARKED_FOR_DISABLE = "Being disabled";
 
@@ -1456,14 +1458,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Misty Eyed";
 
-				public static LocString TOOLTIP = "This Duplicant is trying to swallow their emotions and failing";
+				public static LocString TOOLTIP = "This Duplicant is trying and failing to swallow their emotions";
 			}
 
 			public class STRESS_SIGNAL_VOMITER
 			{
 				public static LocString NAME = "Stress Burp";
 
-				public static LocString TOOLTIP = "Kind of like having butterflies in your stomach, except they're burps";
+				public static LocString TOOLTIP = "It's kind of like having butterflies in your stomach, except they're burps";
 			}
 
 			public class ENTOMBEDCHORE
@@ -1618,7 +1620,7 @@ namespace STRINGS
 
 				public static LocString NOTIFICATION_NAME = "No restrooms built";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These Duplicants are distressed by the lack of toilets:";
+				public static LocString NOTIFICATION_TOOLTIP = "Duplicants with no bathroom access will make \"messes\", causing stress and spreading germs\n\nThese Duplicants are in need of an outhouse:";
 			}
 
 			public class FULLBLADDER
@@ -2272,6 +2274,10 @@ namespace STRINGS
 
 					public static LocString SKINBORNE_TOOLTIP = "Duplicants contract this disease by coming into physical contact with germs";
 
+					public static LocString SUNBORNE = "Contracted via environmental exposure\n" + UI.HORIZONTAL_RULE;
+
+					public static LocString SUNBORNE_TOOLTIP = "Duplicants contract this disease through exposure to harmful environmental factors";
+
 					public static LocString GROWS_ON = "Multiplies in:";
 
 					public static LocString GROWS_ON_TOOLTIP = "These substances allow germs to spread and reproduce";
@@ -2379,6 +2385,17 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "\nThis Duplicant's thought processes have been slowed to a crawl from extreme cold exposure";
 
 				public static LocString LEGEND_HOVERTEXT = "Area Causes Hypothermia\n";
+			}
+
+			public class SUNBURN
+			{
+				public static LocString NAME = UI.FormatAsLink("Sunburn", "SUNBURN");
+
+				public static LocString DESCRIPTION = "\nExtreme sun exposure has given this Duplicant a nasty burn";
+
+				public static LocString LEGEND_HOVERTEXT = "Area Causes Sunburn\n";
+
+				public static LocString DESCRIPTIVE_SYMPTOMS = "Nonlethal. Duplicants experience temporary discomfort due to dermatological damage.";
 			}
 
 			public class HEATRASH
@@ -2573,7 +2590,7 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This Duplicant recently had a crying fit and it shows";
 
-				public static LocString CAUSE = "Obtained through the Ugly Crier stress response";
+				public static LocString CAUSE = "Obtained from the Ugly Crier stress reaction";
 			}
 
 			public class UNCLEAN
@@ -3149,6 +3166,20 @@ namespace STRINGS
 				public static LocString NAME = "Vitamin Supplement";
 
 				public static LocString TOOLTIP = ITEMS.PILLS.VITAMINSUPPLEMENT.DESC;
+			}
+
+			public class SUNLIGHT_PLEASANT
+			{
+				public static LocString NAME = "Bright and Cheerful";
+
+				public static LocString TOOLTIP = "The strong natural light is making this Duplicant feel light on their feet";
+			}
+
+			public class SUNLIGHT_BURNING
+			{
+				public static LocString NAME = "Intensely Bright";
+
+				public static LocString TOOLTIP = "The extremely bright light here is making this Duplicant happy, but prolonged exposure will result in burning.";
 			}
 
 			public class POWERTINKER
@@ -4314,6 +4345,13 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Scale Growth" + UI.HORIZONTAL_BR_RULE + "How long until this creatures scales will grow back.";
 			}
+
+			public class VIABILITYDELTA
+			{
+				public static LocString NAME = "Viability Loss Rate";
+
+				public static LocString DESC = string.Empty;
+			}
 		}
 
 		public class OPINIONS
@@ -4334,7 +4372,7 @@ namespace STRINGS
 
 			public static LocString LIGHTOPINION = string.Concat(new string[]
 			{
-				"Duplicants are drawn to lit places, and dislike being in the dark.\nMake sure your Duplicants have plenty of ",
+				"Duplicants are drawn to lit places, and dislike being in the dark.\nI should make sure my Duplicants have plenty of ",
 				UI.FormatAsLink("Light", "LIGHT"),
 				" to keep their eyes unstrained and their ",
 				UI.FormatAsLink("Stress", "STRESS"),
@@ -4548,7 +4586,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Plumber", "PLUMBER");
 
-				public static LocString DESCRIPTION = "Becoming a plumber allows you to empty pipes without leaking water everywhere.";
+				public static LocString DESCRIPTION = "Becoming a Plumber allows a Duplicant to empty plumbing pipes without making a mess.";
 			}
 
 			public class RANCHER

@@ -3,16 +3,24 @@ using System.Collections.Generic;
 
 public static class HashSetPool<ObjectType, PoolIdentifier>
 {
-	public static HashSet<ObjectType> Allocate()
+	public static HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet Allocate()
 	{
 		return HashSetPool<ObjectType, PoolIdentifier>.pool.Allocate();
 	}
 
-	public static void Free(HashSet<ObjectType> hash_set)
+	private static void Free(HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet hash_set)
 	{
 		hash_set.Clear();
 		HashSetPool<ObjectType, PoolIdentifier>.pool.Free(hash_set);
 	}
 
-	private static ContainerPool<HashSet<ObjectType>, PoolIdentifier> pool = new ContainerPool<HashSet<ObjectType>, PoolIdentifier>();
+	private static ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier> pool = new ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier>();
+
+	public class PooledHashSet : HashSet<ObjectType>
+	{
+		public void Recycle()
+		{
+			HashSetPool<ObjectType, PoolIdentifier>.Free(this);
+		}
+	}
 }

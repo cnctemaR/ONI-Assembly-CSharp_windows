@@ -22,7 +22,19 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		byte b = reader.ReadByte();
 		NavType navType = (NavType)b;
-		this.CurrentNavType = navType;
+		bool flag = false;
+		foreach (NavType navType2 in this.NavGrid.ValidNavTypes)
+		{
+			if (navType2 == navType)
+			{
+				flag = true;
+				break;
+			}
+		}
+		if (flag)
+		{
+			this.CurrentNavType = navType;
+		}
 	}
 
 	protected override void OnPrefabInit()
@@ -31,20 +43,21 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.targetLocator = new GameObject("TargetLocator").AddComponent<KPrefabID>();
 		this.targetLocator.transform.parent = SceneOrganizer.Instance.GetFolder(Folder.Misc).transform;
 		this.targetLocator.PrefabTag = new Tag("TargetLocator");
-		this.log = new LoggerFS("Navigator");
+		this.log = new LoggerFS("Navigator", 35);
 		this.simRenderLoadBalance = true;
 		this.autoRegisterSimRender = false;
+		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
 		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
 		base.Subscribe(1623392196, new Action<object>(this.OnDefeated));
 		base.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
+		base.Subscribe(856640610, new Action<object>(this.OnStore));
 		this.maxUnderwaterTravelCost = Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(this);
 		if (this.updateProber)
 		{
@@ -315,30 +328,32 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		string text2;
 		global::System.Action action;
 		string text3;
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (NavPathDrawer.Instance.GetNavigator() != this)
 		{
-			UserMenu userMenu = this.userMenu;
 			text = "action_navigable_regions";
 			text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME;
 			action = new global::System.Action(this.OnDrawPaths);
 			text3 = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			text3 = "action_navigable_regions";
 			text2 = UI.USERMENUACTIONS.DRAWPATHS.NAME_OFF;
 			action = new global::System.Action(this.OnDrawPaths);
 			text = UI.USERMENUACTIONS.DRAWPATHS.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 0.1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
-		UserMenu userMenu3 = this.userMenu;
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 0.1f);
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		text = "action_follow_cam";
 		text2 = UI.USERMENUACTIONS.FOLLOWCAM.NAME;
 		action = new global::System.Action(this.OnFollowCam);
 		text3 = UI.USERMENUACTIONS.FOLLOWCAM.TOOLTIP;
-		userMenu3.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.3f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 0.3f);
 	}
 
 	private void OnFollowCam()
@@ -368,6 +383,15 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	private void OnSelectObject(object data)
 	{
 		NavPathDrawer.Instance.ClearNavigator();
+	}
+
+	public void OnStore(object data)
+	{
+		bool flag = data is Storage || (data != null && (bool)data);
+		if (flag)
+		{
+			this.Stop(false);
+		}
 	}
 
 	public PathFinderAbilities GetCurrentAbilities()
@@ -476,9 +500,6 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	[MyCmpAdd]
 	public PathProber PathProber;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[MyCmpAdd]
 	private Facing facing;

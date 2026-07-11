@@ -12,13 +12,14 @@ public class CopyBuildingSettings : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string text = "action_mirror";
 		string text2 = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.NAME;
 		global::System.Action action = new global::System.Action(this.ActivateCopyTool);
 		global::Action action2 = global::Action.BuildingUtility1;
 		string text3 = UI.USERMENUACTIONS.COPY_BUILDING_SETTINGS.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, action2, null, null, null, text3, true), 1f);
 	}
 
 	private void ActivateCopyTool()
@@ -52,9 +53,6 @@ public class CopyBuildingSettings : KMonoBehaviour
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, UI.COPIED_SETTINGS, gameObject.transform, new Vector3(0f, 0.5f, 0f), 1.5f, false, false);
 		return true;
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[MyCmpReq]
 	private KPrefabID id;

@@ -24,16 +24,6 @@ public class Traces : KMonoBehaviour
 		{
 			this.DestroyTraces.RemoveAt(0);
 		}
-		GameObject gameObject = null;
-		KPrefabID component = go.GetComponent<KPrefabID>();
-		if (component != null)
-		{
-			KPrefabID originalPrefab = component.GetOriginalPrefab();
-			if (originalPrefab != null)
-			{
-				gameObject = originalPrefab.gameObject;
-			}
-		}
 		Traces.Entry entry = new Traces.Entry
 		{
 			Name = string.Concat(new object[]
@@ -45,7 +35,6 @@ public class Traces : KMonoBehaviour
 				go.GetInstanceID(),
 				"]"
 			}),
-			Prefab = gameObject,
 			StackTrace = stack_trace
 		};
 		this.DestroyTraces.Add(entry);
@@ -57,8 +46,6 @@ public class Traces : KMonoBehaviour
 	public class Entry
 	{
 		public string Name;
-
-		public GameObject Prefab;
 
 		public StackTrace StackTrace;
 

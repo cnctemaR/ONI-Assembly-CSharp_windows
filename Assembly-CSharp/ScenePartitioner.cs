@@ -276,43 +276,43 @@ public class ScenePartitioner : ISim1000ms
 
 	public void TriggerEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
 		this.queryId++;
 		for (int i = 0; i < cells.Count; i++)
 		{
 			int num = 0;
 			int num2 = 0;
 			Grid.CellToXY(cells[i], out num, out num2);
-			this.GatherEntries(num, num2, 1, 1, layer, event_data, list, this.queryId);
+			this.GatherEntries(num, num2, 1, 1, layer, event_data, pooledList, this.queryId);
 		}
 		this.RunLayerGlobalEvent(cells, layer, event_data);
-		this.RunEntries(list, event_data);
-		ListPool<ScenePartitionerEntry, ScenePartitioner>.Free(list);
+		this.RunEntries(pooledList, event_data);
+		pooledList.Recycle();
 	}
 
 	public void TriggerEvent(HashSet<int> cells, ScenePartitionerLayer layer, object event_data)
 	{
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
+		ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
 		this.queryId++;
 		foreach (int num in cells)
 		{
 			int num2 = 0;
 			int num3 = 0;
 			Grid.CellToXY(num, out num2, out num3);
-			this.GatherEntries(num2, num3, 1, 1, layer, event_data, list, this.queryId);
+			this.GatherEntries(num2, num3, 1, 1, layer, event_data, pooledList, this.queryId);
 		}
 		this.RunLayerGlobalEvent(cells, layer, event_data);
-		this.RunEntries(list, event_data);
-		ListPool<ScenePartitionerEntry, ScenePartitioner>.Free(list);
+		this.RunEntries(pooledList, event_data);
+		pooledList.Recycle();
 	}
 
 	public void TriggerEvent(int x, int y, int width, int height, ScenePartitionerLayer layer, object event_data)
 	{
-		List<ScenePartitionerEntry> list = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
-		this.GatherEntries(x, y, width, height, layer, event_data, list);
+		ListPool<ScenePartitionerEntry, ScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, ScenePartitioner>.Allocate();
+		this.GatherEntries(x, y, width, height, layer, event_data, pooledList);
 		this.RunLayerGlobalEvent(x, y, width, height, layer, event_data);
-		this.RunEntries(list, event_data);
-		ListPool<ScenePartitionerEntry, ScenePartitioner>.Free(list);
+		this.RunEntries(pooledList, event_data);
+		pooledList.Recycle();
 	}
 
 	private void RunLayerGlobalEvent(List<int> cells, ScenePartitionerLayer layer, object event_data)

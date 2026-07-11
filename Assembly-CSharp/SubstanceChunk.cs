@@ -17,12 +17,13 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string text = "action_deconstruct";
 		string text2 = UI.USERMENUACTIONS.RELEASEELEMENT.NAME;
 		global::System.Action action = new global::System.Action(this.OnRelease);
 		string text3 = UI.USERMENUACTIONS.RELEASEELEMENT.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void OnRelease()
@@ -35,9 +36,6 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 		}
 		base.gameObject.DeleteObject();
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	private static KAnimHashedString symbolToTint = new KAnimHashedString("substance_tinter");
 }

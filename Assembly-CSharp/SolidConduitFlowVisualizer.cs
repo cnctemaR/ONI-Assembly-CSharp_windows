@@ -89,83 +89,87 @@ public class SolidConduitFlowVisualizer
 			this.staticBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
 			this.staticBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num, 0f));
 			this.staticBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
-			IEnumerator<SolidConduitFlow.Conduit> enumerator = this.flowManager.VisibleConduitsEnumerator(vector2I, vector2I2);
-			while (enumerator.MoveNext())
+			for (int j = 0; j < this.flowManager.GetSOAInfo().NumEntries; j++)
 			{
-				SolidConduitFlow.Conduit conduit = enumerator.Current;
-				SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this.flowManager);
-				SolidConduitFlow.ConduitContents initialContents = conduit.GetInitialContents(this.flowManager);
-				if (lastFlowInfo.contents.pickupableHandle.IsValid())
+				int cell = this.flowManager.GetSOAInfo().GetCell(j);
+				Vector2I vector2I3 = Grid.CellToXY(cell);
+				if (!(vector2I3 < vector2I) && !(vector2I3 > vector2I2))
 				{
-					int cell = conduit.GetCell(this.flowManager);
-					int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
-					Vector2I vector2I3 = Grid.CellToXY(cell);
-					Vector2I vector2I4 = Grid.CellToXY(cellFromDirection);
-					Vector2 vector = vector2I3;
-					if (cell != -1)
+					SolidConduitFlow.Conduit conduit = this.flowManager.GetSOAInfo().GetConduit(j);
+					SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this.flowManager);
+					SolidConduitFlow.ConduitContents initialContents = conduit.GetInitialContents(this.flowManager);
+					if (lastFlowInfo.contents.pickupableHandle.IsValid())
 					{
-						vector = Vector2.Lerp(new Vector2((float)vector2I3.x, (float)vector2I3.y), new Vector2((float)vector2I4.x, (float)vector2I4.y), lerp_percent);
-					}
-					float num4 = ((!this.insulatedCells.Contains(cell)) ? 0f : 1f);
-					float num5 = ((!this.insulatedCells.Contains(cellFromDirection)) ? 0f : 1f);
-					float num6 = Mathf.Lerp(num4, num5, lerp_percent);
-					Color color = this.GetBackgroundColor(num6);
-					Vector2I vector2I5 = new Vector2I(0, 0);
-					Vector2I vector2I6 = new Vector2I(0, 1);
-					Vector2I vector2I7 = new Vector2I(1, 0);
-					Vector2I vector2I8 = new Vector2I(1, 1);
-					float num7 = 0f;
-					if (this.showContents)
-					{
-						if (lastFlowInfo.contents.pickupableHandle.IsValid() != initialContents.pickupableHandle.IsValid())
+						int cell2 = conduit.GetCell(this.flowManager);
+						int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell2, lastFlowInfo.direction);
+						Vector2I vector2I4 = Grid.CellToXY(cell2);
+						Vector2I vector2I5 = Grid.CellToXY(cellFromDirection);
+						Vector2 vector = vector2I4;
+						if (cell2 != -1)
 						{
-							this.movingBallMesh.AddQuad(vector, color, this.tuning.size, 0f, 0f, vector2I5, vector2I6, vector2I7, vector2I8);
+							vector = Vector2.Lerp(new Vector2((float)vector2I4.x, (float)vector2I4.y), new Vector2((float)vector2I5.x, (float)vector2I5.y), lerp_percent);
+						}
+						float num4 = ((!this.insulatedCells.Contains(cell2)) ? 0f : 1f);
+						float num5 = ((!this.insulatedCells.Contains(cellFromDirection)) ? 0f : 1f);
+						float num6 = Mathf.Lerp(num4, num5, lerp_percent);
+						Color color = this.GetBackgroundColor(num6);
+						Vector2I vector2I6 = new Vector2I(0, 0);
+						Vector2I vector2I7 = new Vector2I(0, 1);
+						Vector2I vector2I8 = new Vector2I(1, 0);
+						Vector2I vector2I9 = new Vector2I(1, 1);
+						float num7 = 0f;
+						if (this.showContents)
+						{
+							if (lastFlowInfo.contents.pickupableHandle.IsValid() != initialContents.pickupableHandle.IsValid())
+							{
+								this.movingBallMesh.AddQuad(vector, color, this.tuning.size, 0f, 0f, vector2I6, vector2I7, vector2I8, vector2I9);
+							}
+						}
+						else
+						{
+							element = null;
+							int num8 = Grid.PosToCell(new Vector3(vector.x + SolidConduitFlowVisualizer.GRID_OFFSET.x, vector.y + SolidConduitFlowVisualizer.GRID_OFFSET.y, 0f));
+							if (num8 == this.highlightedCell)
+							{
+								num7 = 1f;
+							}
+						}
+						Color32 contentsColor = this.GetContentsColor(element, color);
+						float num9 = 1f;
+						this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num9, 1f, num7, vector2I6, vector2I7, vector2I8, vector2I9);
+						if (trigger_audio)
+						{
+							this.AddAudioSource(conduit, position);
 						}
 					}
-					else
+					if (initialContents.pickupableHandle.IsValid() && !lastFlowInfo.contents.pickupableHandle.IsValid())
 					{
-						element = null;
-						int num8 = Grid.PosToCell(new Vector3(vector.x + SolidConduitFlowVisualizer.GRID_OFFSET.x, vector.y + SolidConduitFlowVisualizer.GRID_OFFSET.y, 0f));
-						if (num8 == this.highlightedCell)
+						int cell3 = conduit.GetCell(this.flowManager);
+						Vector2I vector2I10 = Grid.CellToXY(cell3);
+						Vector2 vector2 = vector2I10;
+						float num10 = ((!this.insulatedCells.Contains(cell3)) ? 0f : 1f);
+						Vector2I vector2I11 = new Vector2I(0, 0);
+						Vector2I vector2I12 = new Vector2I(0, 1);
+						Vector2I vector2I13 = new Vector2I(1, 0);
+						Vector2I vector2I14 = new Vector2I(1, 1);
+						float num11 = 0f;
+						Color color2 = this.GetBackgroundColor(num10);
+						float num12 = 1f;
+						if (this.showContents)
 						{
-							num7 = 1f;
+							this.staticBallMesh.AddQuad(vector2, color2, this.tuning.size * num12, 0f, 0f, vector2I11, vector2I12, vector2I13, vector2I14);
 						}
-					}
-					Color32 contentsColor = this.GetContentsColor(element, color);
-					float num9 = 1f;
-					this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num9, 1f, num7, vector2I5, vector2I6, vector2I7, vector2I8);
-					if (trigger_audio)
-					{
-						this.AddAudioSource(conduit, position);
-					}
-				}
-				if (initialContents.pickupableHandle.IsValid() && !lastFlowInfo.contents.pickupableHandle.IsValid())
-				{
-					int cell2 = conduit.GetCell(this.flowManager);
-					Vector2I vector2I9 = Grid.CellToXY(cell2);
-					Vector2 vector2 = vector2I9;
-					float num10 = ((!this.insulatedCells.Contains(cell2)) ? 0f : 1f);
-					Vector2I vector2I10 = new Vector2I(0, 0);
-					Vector2I vector2I11 = new Vector2I(0, 1);
-					Vector2I vector2I12 = new Vector2I(1, 0);
-					Vector2I vector2I13 = new Vector2I(1, 1);
-					float num11 = 0f;
-					Color color2 = this.GetBackgroundColor(num10);
-					float num12 = 1f;
-					if (this.showContents)
-					{
-						this.staticBallMesh.AddQuad(vector2, color2, this.tuning.size * num12, 0f, 0f, vector2I10, vector2I11, vector2I12, vector2I13);
-					}
-					else
-					{
-						element = null;
-						if (cell2 == this.highlightedCell)
+						else
 						{
-							num11 = 1f;
+							element = null;
+							if (cell3 == this.highlightedCell)
+							{
+								num11 = 1f;
+							}
 						}
+						Color32 contentsColor2 = this.GetContentsColor(element, color2);
+						this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num12, 1f, num11, vector2I11, vector2I12, vector2I13, vector2I14);
 					}
-					Color32 contentsColor2 = this.GetContentsColor(element, color2);
-					this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num12, 1f, num11, vector2I10, vector2I11, vector2I12, vector2I13);
 				}
 			}
 			this.movingBallMesh.End(z, this.layer);

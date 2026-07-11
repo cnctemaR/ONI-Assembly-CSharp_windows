@@ -1,39 +1,189 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 
-public class LoopingSoundManager : KMonoBehaviour
+public class LoopingSoundManager : KMonoBehaviour, IRenderEveryTick
 {
 	protected override void OnPrefabInit()
 	{
 		LoopingSoundManager.instance = this;
+		this.CollectParameterUpdaters();
 	}
 
 	protected override void OnSpawn()
 	{
 		if (SpeedControlScreen.Instance != null && Game.Instance != null)
 		{
-			SpeedControlScreen speedControlScreen = SpeedControlScreen.Instance;
-			speedControlScreen.OnGameSpeedChanged = (global::System.Action)Delegate.Combine(speedControlScreen.OnGameSpeedChanged, new global::System.Action(LoopingSoundManager.instance.OnGameSpeedChanged));
 			Game.Instance.Subscribe(-1788536802, new Action<object>(LoopingSoundManager.instance.OnPauseChanged));
 		}
 	}
 
-	protected override void OnCleanUp()
+	private void CollectParameterUpdaters()
 	{
-		if (SpeedControlScreen.Instance != null)
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 		{
-			SpeedControlScreen speedControlScreen = SpeedControlScreen.Instance;
-			speedControlScreen.OnGameSpeedChanged = (global::System.Action)Delegate.Remove(speedControlScreen.OnGameSpeedChanged, new global::System.Action(LoopingSoundManager.instance.OnGameSpeedChanged));
+			foreach (Type type in assembly.GetTypes())
+			{
+				if (!type.IsAbstract)
+				{
+					bool flag = false;
+					for (Type type2 = type.BaseType; type2 != null; type2 = type2.BaseType)
+					{
+						if (type2 == typeof(LoopingSoundParameterUpdater))
+						{
+							flag = true;
+							break;
+						}
+					}
+					if (flag)
+					{
+						LoopingSoundParameterUpdater loopingSoundParameterUpdater = (LoopingSoundParameterUpdater)Activator.CreateInstance(type);
+						DebugUtil.Assert(!this.parameterUpdaters.ContainsKey(loopingSoundParameterUpdater.parameter), "Assert!");
+						this.parameterUpdaters[loopingSoundParameterUpdater.parameter] = loopingSoundParameterUpdater;
+					}
+				}
+			}
 		}
 	}
 
-	private void Update()
+	public void UpdateFirstParameter(HandleVector<int>.Handle handle, HashedString parameter, float value)
 	{
-		this.RefreshAllSounds();
+		LoopingSoundManager.Sound data = this.sounds.GetData(handle);
+		data.firstParameterValue = value;
+		data.firstParameter = parameter;
+		if (data.IsPlaying)
+		{
+			data.ev.setParameterValueByIndex(this.GetSoundDescription(data.path).GetParameterIdx(parameter), value);
+		}
+		this.sounds.SetData(handle, data);
+	}
+
+	public void UpdateSecondParameter(HandleVector<int>.Handle handle, HashedString parameter, float value)
+	{
+		LoopingSoundManager.Sound data = this.sounds.GetData(handle);
+		data.secondParameterValue = value;
+		data.secondParameter = parameter;
+		if (data.IsPlaying)
+		{
+			data.ev.setParameterValueByIndex(this.GetSoundDescription(data.path).GetParameterIdx(parameter), value);
+		}
+		this.sounds.SetData(handle, data);
+	}
+
+	public void UpdateVelocity(HandleVector<int>.Handle handle, Vector2 velocity)
+	{
+		LoopingSoundManager.Sound data = this.sounds.GetData(handle);
+		data.velocity = velocity;
+		this.sounds.SetData(handle, data);
+	}
+
+	public void RenderEveryTick(float dt)
+	{
+		ListPool<LoopingSoundManager.Sound, LoopingSoundManager>.PooledList pooledList = ListPool<LoopingSoundManager.Sound, LoopingSoundManager>.Allocate();
+		ListPool<int, LoopingSoundManager>.PooledList pooledList2 = ListPool<int, LoopingSoundManager>.Allocate();
+		ListPool<int, LoopingSoundManager>.PooledList pooledList3 = ListPool<int, LoopingSoundManager>.Allocate();
+		List<LoopingSoundManager.Sound> dataList = this.sounds.GetDataList();
+		bool flag = Time.timeScale == 0f;
+		SoundCuller soundCuller = CameraController.Instance.soundCuller;
+		for (int i = 0; i < dataList.Count; i++)
+		{
+			LoopingSoundManager.Sound sound = dataList[i];
+			if (sound.transform != null)
+			{
+				sound.pos = sound.transform.GetPosition();
+			}
+			bool flag2 = !sound.IsCullingEnabled || soundCuller.IsAudible(sound.pos, sound.falloffDistanceSq);
+			bool isPlaying = sound.IsPlaying;
+			if (flag2)
+			{
+				pooledList.Add(sound);
+				if (!isPlaying)
+				{
+					sound.ev = KFMOD.CreateInstance(this.GetSoundDescription(sound.path).path);
+					dataList[i] = sound;
+					pooledList2.Add(i);
+				}
+			}
+			else if (isPlaying)
+			{
+				pooledList3.Add(i);
+			}
+		}
+		foreach (int num in pooledList2)
+		{
+			LoopingSoundManager.Sound sound2 = dataList[num];
+			SoundDescription soundDescription = this.GetSoundDescription(sound2.path);
+			sound2.ev.setPaused(flag && sound2.ShouldPauseOnGamePaused);
+			sound2.ev.set3DAttributes(SoundEvent.GetCameraScaledPosition(sound2.pos).To3DAttributes());
+			sound2.ev.start();
+			sound2.flags |= LoopingSoundManager.Sound.Flags.PLAYING;
+			if (sound2.firstParameter != HashedString.Invalid)
+			{
+				sound2.ev.setParameterValueByIndex(soundDescription.GetParameterIdx(sound2.firstParameter), sound2.firstParameterValue);
+			}
+			if (sound2.secondParameter != HashedString.Invalid)
+			{
+				sound2.ev.setParameterValueByIndex(soundDescription.GetParameterIdx(sound2.secondParameter), sound2.secondParameterValue);
+			}
+			LoopingSoundParameterUpdater.Sound sound3 = new LoopingSoundParameterUpdater.Sound
+			{
+				ev = sound2.ev,
+				path = sound2.path,
+				description = soundDescription,
+				transform = sound2.transform
+			};
+			foreach (SoundDescription.Parameter parameter in soundDescription.parameters)
+			{
+				LoopingSoundParameterUpdater loopingSoundParameterUpdater = null;
+				if (this.parameterUpdaters.TryGetValue(parameter.name, out loopingSoundParameterUpdater))
+				{
+					loopingSoundParameterUpdater.Add(sound3);
+				}
+			}
+			dataList[num] = sound2;
+		}
+		pooledList2.Recycle();
+		foreach (int num2 in pooledList3)
+		{
+			LoopingSoundManager.Sound sound4 = dataList[num2];
+			SoundDescription soundDescription2 = this.GetSoundDescription(sound4.path);
+			LoopingSoundParameterUpdater.Sound sound5 = new LoopingSoundParameterUpdater.Sound
+			{
+				ev = sound4.ev,
+				path = sound4.path,
+				description = soundDescription2,
+				transform = sound4.transform
+			};
+			foreach (SoundDescription.Parameter parameter2 in soundDescription2.parameters)
+			{
+				LoopingSoundParameterUpdater loopingSoundParameterUpdater2 = null;
+				if (this.parameterUpdaters.TryGetValue(parameter2.name, out loopingSoundParameterUpdater2))
+				{
+					loopingSoundParameterUpdater2.Remove(sound5);
+				}
+			}
+			sound4.ev.stop(STOP_MODE.IMMEDIATE);
+			sound4.flags &= ~LoopingSoundManager.Sound.Flags.PLAYING;
+			sound4.ev.release();
+			dataList[num2] = sound4;
+		}
+		pooledList3.Recycle();
+		float velocityScale = TuningData<LoopingSoundManager.Tuning>.Get().velocityScale;
+		foreach (LoopingSoundManager.Sound sound6 in pooledList)
+		{
+			ATTRIBUTES_3D attributes_3D = SoundEvent.GetCameraScaledPosition(sound6.pos).To3DAttributes();
+			attributes_3D.velocity = (sound6.velocity * velocityScale).ToFMODVector();
+			sound6.ev.set3DAttributes(attributes_3D);
+		}
+		foreach (KeyValuePair<HashedString, LoopingSoundParameterUpdater> keyValuePair in this.parameterUpdaters)
+		{
+			keyValuePair.Value.Update(dt);
+		}
+		pooledList.Recycle();
 	}
 
 	public static LoopingSoundManager Get()
@@ -41,279 +191,148 @@ public class LoopingSoundManager : KMonoBehaviour
 		return LoopingSoundManager.instance;
 	}
 
-	public void RefreshAllSounds()
+	public void StopAllSounds()
 	{
-		if (this.entries.Count > 0)
+		foreach (LoopingSoundManager.Sound sound in this.sounds.GetDataList())
 		{
-			foreach (LoopingSoundManager.Entry entry in this.entries.Values)
+			if (sound.IsPlaying)
 			{
-				entry.Refresh();
+				sound.ev.stop(STOP_MODE.IMMEDIATE);
+				sound.ev.release();
 			}
 		}
 	}
 
-	public void StopAllSounds()
+	private SoundDescription GetSoundDescription(HashedString path)
 	{
-		foreach (LoopingSoundManager.Entry entry in this.entries.Values)
-		{
-			entry.StopAll(STOP_MODE.IMMEDIATE);
-		}
+		return KFMOD.GetSoundEventDescription(path);
 	}
 
-	public void Add(string path, EventInstance ev, bool pauseOnGamePause = true)
+	public HandleVector<int>.Handle Add(string path, Vector2 pos, Transform transform = null, bool pause_on_game_pause = true, bool enable_culling = true)
 	{
-		LoopingSoundManager.Entry entry = null;
-		if (!this.entries.TryGetValue(path, out entry))
+		SoundDescription soundEventDescription = KFMOD.GetSoundEventDescription(path);
+		LoopingSoundManager.Sound.Flags flags = (LoopingSoundManager.Sound.Flags)0;
+		if (pause_on_game_pause)
 		{
-			entry = new LoopingSoundManager.Entry(path, ev, pauseOnGamePause);
-			this.entries[path] = entry;
+			flags |= LoopingSoundManager.Sound.Flags.PAUSE_ON_GAME_PAUSED;
 		}
-		entry.Add(ev);
+		if (enable_culling)
+		{
+			flags |= LoopingSoundManager.Sound.Flags.ENABLE_CULLING;
+		}
+		LoopingSoundManager.Sound sound = new LoopingSoundManager.Sound
+		{
+			transform = transform,
+			falloffDistanceSq = soundEventDescription.falloffDistanceSq,
+			path = path,
+			pos = pos,
+			flags = flags,
+			firstParameter = HashedString.Invalid,
+			secondParameter = HashedString.Invalid
+		};
+		return this.sounds.Allocate(sound);
 	}
 
-	public void Remove(string path, EventInstance ev)
+	public static HandleVector<int>.Handle StartSound(string path, Vector3 pos, bool pause_on_game_pause = true, bool enable_culling = true)
 	{
-		if (this.entries.ContainsKey(path))
-		{
-			this.entries[path].Remove(ev);
-		}
-	}
-
-	public static EventInstance PrepareSound(string path, Vector3 pos, bool pauseOnGamePause = true)
-	{
-		if (path == null)
+		if (string.IsNullOrEmpty(path))
 		{
 			global::Debug.LogWarning("Missing sound", null);
-			return null;
+			return HandleVector<int>.InvalidHandle;
 		}
-		EventInstance eventInstance = KFMOD.CreateInstance(path);
-		if (eventInstance == null)
-		{
-			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
-			return null;
-		}
-		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
-		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
-		LoopingSoundManager.UpdateSpeed(eventInstance);
-		if (Time.timeScale == 0f)
-		{
-			eventInstance.setPaused(true);
-		}
-		return eventInstance;
+		return LoopingSoundManager.Get().Add(path, pos, null, pause_on_game_pause, enable_culling);
 	}
 
-	public static EventInstance StartSound(string path, Vector3 pos, bool pauseOnGamePause = true)
+	public static void StopSound(HandleVector<int>.Handle handle)
 	{
-		if (path == null)
+		LoopingSoundManager.Sound data = LoopingSoundManager.Get().sounds.GetData(handle);
+		if (data.IsPlaying)
 		{
-			global::Debug.LogWarning("Missing sound", null);
-			return null;
+			data.ev.stop(STOP_MODE.ALLOWFADEOUT);
+			data.ev.release();
 		}
-		EventInstance eventInstance = KFMOD.CreateInstance(path);
-		if (eventInstance == null)
-		{
-			Output.LogError(new object[] { "StartSound() Couldnt Get FMOD event for asset [" + path + "]" });
-			return null;
-		}
-		LoopingSoundManager.Get().Add(path, eventInstance, pauseOnGamePause);
-		Vector3 vector = new Vector3(pos.x, pos.y, 0f);
-		eventInstance.set3DAttributes(SoundEvent.GetCameraScaledPosition(vector).To3DAttributes());
-		LoopingSoundManager.UpdateSpeed(eventInstance);
-		bool flag = CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f);
-		if (flag)
-		{
-			eventInstance.start();
-		}
-		else
-		{
-			eventInstance.stop(STOP_MODE.IMMEDIATE);
-		}
-		if (Time.timeScale == 0f && pauseOnGamePause)
-		{
-			eventInstance.setPaused(true);
-		}
-		return eventInstance;
-	}
-
-	public static RESULT StopSound(string path, EventInstance ev)
-	{
-		RESULT result = ev.stop(STOP_MODE.ALLOWFADEOUT);
-		result = ev.release();
-		LoopingSoundManager.Get().Remove(path, ev);
-		return result;
-	}
-
-	private void OnGameSpeedChanged()
-	{
-		float num = Time.timeScale * 1f;
-		foreach (KeyValuePair<HashedString, LoopingSoundManager.Entry> keyValuePair in this.entries)
-		{
-			keyValuePair.Value.UpdateSpeed(num);
-		}
-	}
-
-	public static void UpdateSpeed(EventInstance ev)
-	{
-		if (ev != null)
-		{
-			ev.setParameterValue(LoopingSoundManager.SPEED_ID, Time.timeScale * 1f);
-		}
+		LoopingSoundManager.Get().sounds.Free(handle);
 	}
 
 	private void OnPauseChanged(object data)
 	{
 		bool flag = (bool)data;
-		foreach (KeyValuePair<HashedString, LoopingSoundManager.Entry> keyValuePair in this.entries)
+		foreach (LoopingSoundManager.Sound sound in this.sounds.GetDataList())
 		{
-			if (keyValuePair.Value.pauseOnGamePaused)
+			if (sound.IsPlaying)
 			{
-				keyValuePair.Value.SetPaused(flag);
+				sound.ev.setPaused(flag && sound.ShouldPauseOnGamePaused);
 			}
 		}
 	}
 
 	private static LoopingSoundManager instance;
 
-	private Dictionary<HashedString, LoopingSoundManager.Entry> entries = new Dictionary<HashedString, LoopingSoundManager.Entry>();
+	private const string OBJECT_COUNT_ID = "objectCount";
 
-	private static ParameterID OBJECT_COUNT_ID = new ParameterID("objectCount");
+	private Dictionary<HashedString, LoopingSoundParameterUpdater> parameterUpdaters = new Dictionary<HashedString, LoopingSoundParameterUpdater>();
 
-	private static ParameterID SPEED_ID = new ParameterID("Speed");
+	private KCompactedVector<LoopingSoundManager.Sound> sounds = new KCompactedVector<LoopingSoundManager.Sound>(0);
 
-	private class Entry
+	public class Tuning : TuningData<LoopingSoundManager.Tuning>
 	{
-		public Entry(string path, EventInstance ev, bool pauseOnGamePaused = true)
+		public float velocityScale;
+	}
+
+	public struct Sound
+	{
+		public bool IsPlaying
 		{
-			this.pauseOnGamePaused = pauseOnGamePaused;
-			EventDescription eventDescription;
-			ev.getDescription(out eventDescription);
-			USER_PROPERTY user_PROPERTY;
-			if (eventDescription.getUserProperty("minObj", out user_PROPERTY) == RESULT.OK)
+			get
 			{
-				this.minObjects = user_PROPERTY.floatValue;
-			}
-			else
-			{
-				this.minObjects = 1f;
-			}
-			USER_PROPERTY user_PROPERTY2;
-			if (eventDescription.getUserProperty("maxObj", out user_PROPERTY2) == RESULT.OK)
-			{
-				this.maxObjects = user_PROPERTY2.floatValue;
-			}
-			else
-			{
-				this.maxObjects = 0f;
-			}
-			USER_PROPERTY user_PROPERTY3;
-			if (eventDescription.getUserProperty("curveType", out user_PROPERTY3) == RESULT.OK)
-			{
-				this.curveType = user_PROPERTY2.stringValue;
-			}
-			else
-			{
-				this.curveType = string.Empty;
+				return (this.flags & LoopingSoundManager.Sound.Flags.PLAYING) != (LoopingSoundManager.Sound.Flags)0;
 			}
 		}
 
-		public void Add(EventInstance ev)
+		public bool ShouldPauseOnGamePaused
 		{
-			this.events.Add(ev);
-		}
-
-		public void Remove(EventInstance ev)
-		{
-			this.events.Remove(ev);
-		}
-
-		public void Refresh()
-		{
-			float num = 0f;
-			foreach (EventInstance eventInstance in this.events)
+			get
 			{
-				bool flag = CameraController.Instance == null || CameraController.Instance.IsAudibleSound(KFMOD.GetInstancePosition(eventInstance), 0f);
-				PLAYBACK_STATE playback_STATE;
-				eventInstance.getPlaybackState(out playback_STATE);
-				bool flag2 = playback_STATE == PLAYBACK_STATE.STOPPED || playback_STATE == PLAYBACK_STATE.STOPPING;
-				if (flag)
-				{
-					num += 1f;
-				}
-				if (flag2 && flag)
-				{
-					eventInstance.start();
-				}
-				else if (!flag2 && !flag)
-				{
-					eventInstance.stop(STOP_MODE.IMMEDIATE);
-				}
-			}
-			if (this.events.Count > 0)
-			{
-				float num2;
-				if (this.maxObjects == this.minObjects)
-				{
-					num2 = 0f;
-				}
-				else
-				{
-					num2 = (num - this.minObjects) / (this.maxObjects - this.minObjects);
-					num2 = Mathf.Clamp01(num2);
-				}
-				if (this.curveType == "exp")
-				{
-					num2 *= num2;
-				}
-				foreach (EventInstance eventInstance2 in this.events)
-				{
-					eventInstance2.setParameterValue(LoopingSoundManager.OBJECT_COUNT_ID, num2);
-				}
+				return (this.flags & LoopingSoundManager.Sound.Flags.PAUSE_ON_GAME_PAUSED) != (LoopingSoundManager.Sound.Flags)0;
 			}
 		}
 
-		public void UpdateSpeed(float speed)
+		public bool IsCullingEnabled
 		{
-			foreach (EventInstance eventInstance in this.events)
+			get
 			{
-				if (eventInstance != null)
-				{
-					eventInstance.setParameterValue(LoopingSoundManager.SPEED_ID, speed);
-				}
+				return (this.flags & LoopingSoundManager.Sound.Flags.ENABLE_CULLING) != (LoopingSoundManager.Sound.Flags)0;
 			}
 		}
 
-		public void SetPaused(bool paused)
+		public EventInstance ev;
+
+		public Transform transform;
+
+		public float falloffDistanceSq;
+
+		public HashedString path;
+
+		public Vector2 pos;
+
+		public Vector2 velocity;
+
+		public HashedString firstParameter;
+
+		public HashedString secondParameter;
+
+		public float firstParameterValue;
+
+		public float secondParameterValue;
+
+		public LoopingSoundManager.Sound.Flags flags;
+
+		[Flags]
+		public enum Flags
 		{
-			foreach (EventInstance eventInstance in this.events)
-			{
-				if (eventInstance != null)
-				{
-					eventInstance.setPaused(paused);
-				}
-			}
+			PLAYING = 1,
+			PAUSE_ON_GAME_PAUSED = 2,
+			ENABLE_CULLING = 4
 		}
-
-		public void StopAll(STOP_MODE stop_mode = STOP_MODE.IMMEDIATE)
-		{
-			foreach (EventInstance eventInstance in this.events)
-			{
-				if (eventInstance != null)
-				{
-					eventInstance.stop(stop_mode);
-				}
-			}
-			this.events.Clear();
-		}
-
-		private List<EventInstance> events = new List<EventInstance>();
-
-		private float minObjects;
-
-		private float maxObjects;
-
-		private string curveType;
-
-		public bool pauseOnGamePaused;
 	}
 }

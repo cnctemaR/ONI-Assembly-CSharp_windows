@@ -1,6 +1,5 @@
 ﻿using System;
 using KSerialization;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Automatable : KMonoBehaviour
@@ -15,9 +14,9 @@ public class Automatable : KMonoBehaviour
 		this.automationOnly = only;
 	}
 
-	public bool AllowedByAutomation(GameObject worker)
+	public bool AllowedByAutomation(bool is_transfer_arm)
 	{
-		return !this.GetAutomationOnly() || worker.GetComponent<SolidTransferArm>() != null;
+		return !this.GetAutomationOnly() || is_transfer_arm;
 	}
 
 	[Serialize]

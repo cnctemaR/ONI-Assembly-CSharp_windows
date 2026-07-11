@@ -8,26 +8,31 @@ using UnityEngine;
 
 public static class GameUtil
 {
-	private static string AddTemperatureUnitSuffix(string text)
+	public static string GetTemperatureUnitSuffix()
 	{
-		string text2 = string.Empty;
 		GameUtil.TemperatureUnit temperatureUnit = GameUtil.temperatureUnit;
+		string text;
 		if (temperatureUnit != GameUtil.TemperatureUnit.Celsius)
 		{
 			if (temperatureUnit != GameUtil.TemperatureUnit.Fahrenheit)
 			{
-				text2 = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
+				text = UI.UNITSUFFIXES.TEMPERATURE.KELVIN;
 			}
 			else
 			{
-				text2 = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
+				text = UI.UNITSUFFIXES.TEMPERATURE.FAHRENHEIT;
 			}
 		}
 		else
 		{
-			text2 = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
+			text = UI.UNITSUFFIXES.TEMPERATURE.CELSIUS;
 		}
-		return text + text2;
+		return text;
+	}
+
+	private static string AddTemperatureUnitSuffix(string text)
+	{
+		return text + GameUtil.GetTemperatureUnitSuffix();
 	}
 
 	public static float GetConvertedTemperature(float temperature)
@@ -206,7 +211,7 @@ public static class GameUtil
 			PrimaryElement component2 = go.GetComponent<PrimaryElement>();
 			return GameUtil.GetUnitFormattedName(go.GetProperName(), component2.Units, upperName);
 		}
-		return (!upperName) ? go.GetProperName() : go.GetProperName().ToUpper();
+		return (!upperName) ? go.GetProperName() : StringFormatter.ToUpper(go.GetProperName());
 	}
 
 	public static string GetUnitFormattedName(string name, float count, bool upperName = false)
@@ -215,7 +220,7 @@ public static class GameUtil
 		{
 			name = name.ToUpper();
 		}
-		return string.Format(UI.NAME_WITH_UNITS, name, string.Format("{0:0.##}", count));
+		return StringFormatter.Replace(UI.NAME_WITH_UNITS, "{0}", name).Replace("{1}", string.Format("{0:0.##}", count));
 	}
 
 	public static string GetFormattedUnits(float units, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool displaySuffix = true)
@@ -420,6 +425,35 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(text, timeSlice);
 	}
 
+	public static string GetLightDescription(int lux)
+	{
+		if (lux == 0)
+		{
+			return UI.OVERLAYS.LIGHTING.RANGES.NO_LIGHT;
+		}
+		if (lux < 100)
+		{
+			return UI.OVERLAYS.LIGHTING.RANGES.VERY_LOW_LIGHT;
+		}
+		if (lux < 1000)
+		{
+			return UI.OVERLAYS.LIGHTING.RANGES.LOW_LIGHT;
+		}
+		if (lux < 10000)
+		{
+			return UI.OVERLAYS.LIGHTING.RANGES.MEDIUM_LIGHT;
+		}
+		if (lux < 50000)
+		{
+			return UI.OVERLAYS.LIGHTING.RANGES.HIGH_LIGHT;
+		}
+		if (lux < 100000)
+		{
+			return UI.OVERLAYS.LIGHTING.RANGES.VERY_HIGH_LIGHT;
+		}
+		return UI.OVERLAYS.LIGHTING.RANGES.MAX_LIGHT;
+	}
+
 	public static string GetFormattedFoodQuality(int quality)
 	{
 		if (GameUtil.adjectives == null)
@@ -544,6 +578,46 @@ public static class GameUtil
 		return GameUtil.GetFormattedTime(seconds);
 	}
 
+	public static float GetDisplaySHC(float shc)
+	{
+		if (GameUtil.temperatureUnit == GameUtil.TemperatureUnit.Fahrenheit)
+		{
+			shc /= 1.8f;
+		}
+		return shc;
+	}
+
+	public static string GetSHCSuffix()
+	{
+		return string.Format("(J/g)/{0}", GameUtil.GetTemperatureUnitSuffix());
+	}
+
+	public static string GetFormattedSHC(float shc)
+	{
+		shc = GameUtil.GetDisplaySHC(shc);
+		return string.Format("{0} (J/g)/{1}", shc.ToString("0.000"), GameUtil.GetTemperatureUnitSuffix());
+	}
+
+	public static float GetDisplayThermalConductivity(float tc)
+	{
+		if (GameUtil.temperatureUnit == GameUtil.TemperatureUnit.Fahrenheit)
+		{
+			tc /= 1.8f;
+		}
+		return tc;
+	}
+
+	public static string GetThermalConductivitySuffix()
+	{
+		return string.Format("(W/m)/{0}", GameUtil.GetTemperatureUnitSuffix());
+	}
+
+	public static string GetFormattedThermalConductivity(float tc)
+	{
+		tc = GameUtil.GetDisplayThermalConductivity(tc);
+		return string.Format("{0} (W/m)/{1}", tc.ToString("0.000"), GameUtil.GetTemperatureUnitSuffix());
+	}
+
 	public static string GetElementNameByElementHash(SimHashes elementHash)
 	{
 		return ElementLoader.FindElementByHash(elementHash).tag.ProperName();
@@ -617,13 +691,13 @@ public static class GameUtil
 		GameUtil.probeFromCell(Grid.CellBelow(start_cell), is_valid, cells, invalidCells, maxSize);
 	}
 
-	public static bool FloodFillCheck(Func<int, bool> fn, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
+	public static bool FloodFillCheck<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
 	{
-		int num = GameUtil.FloodFillFind(fn, start_cell, max_depth, stop_at_solid, stop_at_liquid);
+		int num = GameUtil.FloodFillFind<ArgType>(fn, arg, start_cell, max_depth, stop_at_solid, stop_at_liquid);
 		return num != -1;
 	}
 
-	public static int FloodFillFind(Func<int, bool> fn, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
+	public static int FloodFillFind<ArgType>(Func<int, ArgType, bool> fn, ArgType arg, int start_cell, int max_depth, bool stop_at_solid, bool stop_at_liquid)
 	{
 		GameUtil.FloodFillNext.Enqueue(new GameUtil.FloodFillInfo
 		{
@@ -646,7 +720,7 @@ public static class GameUtil
 							if (!GameUtil.FloodFillVisited.Contains(floodFillInfo.cell))
 							{
 								GameUtil.FloodFillVisited.Add(floodFillInfo.cell);
-								if (fn(floodFillInfo.cell))
+								if (fn(floodFillInfo.cell, arg))
 								{
 									num = floodFillInfo.cell;
 									break;
@@ -874,11 +948,6 @@ public static class GameUtil
 			text = string.Format(UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.VALUE_WITH_ADJECTIVE, element.thermalConductivity.ToString(), text);
 		}
 		return text;
-	}
-
-	public static string GetFormattedThermalConductivity(float tc)
-	{
-		return string.Empty;
 	}
 
 	public static string GetBreathableString(Element element, float Mass)
@@ -1209,7 +1278,7 @@ public static class GameUtil
 		Vector2 vector = new Vector2(explosion_pos.x, explosion_pos.y);
 		float num = 5f;
 		float num2 = num * num;
-		foreach (Health health in Components.Health)
+		foreach (Health health in Components.Health.Items)
 		{
 			Vector3 position = health.transform.GetPosition();
 			Vector2 vector2 = new Vector2(position.x, position.y);
@@ -1249,7 +1318,7 @@ public static class GameUtil
 			return 0f;
 		}
 		float num = 0f;
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			num = Mathf.Max(num, Db.Get().Amounts.Stress.Lookup(minionIdentity).value);
 		}
@@ -1263,7 +1332,7 @@ public static class GameUtil
 			return 0f;
 		}
 		float num = 0f;
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			num += Db.Get().Amounts.Stress.Lookup(minionIdentity).value;
 		}
@@ -1319,10 +1388,7 @@ public static class GameUtil
 			List<Descriptor> descriptors = effectDescriptor.GetDescriptors(def);
 			if (descriptors != null)
 			{
-				foreach (Descriptor descriptor in descriptors)
-				{
-					list.Add(descriptor);
-				}
+				list.AddRange(descriptors);
 			}
 		}
 		return list;
@@ -1373,7 +1439,6 @@ public static class GameUtil
 				}
 			}
 		}
-		GameUtil.SortGameObjectDescriptors(list2);
 		return list;
 	}
 

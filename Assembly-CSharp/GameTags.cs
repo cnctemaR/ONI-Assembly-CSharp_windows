@@ -47,11 +47,23 @@ public class GameTags
 
 	public static readonly Tag Other = TagManager.Create("Other");
 
+	public static readonly Tag ManufacturedMaterial = TagManager.Create("ManufacturedMaterial");
+
 	public static readonly Tag Plastic = TagManager.Create("Plastic");
+
+	public static readonly Tag Steel = TagManager.Create("Steel");
 
 	public static readonly Tag BuildableAny = TagManager.Create("BuildableAny");
 
 	public static readonly Tag Decoration = TagManager.Create("Decoration");
+
+	public static readonly Tag Window = TagManager.Create("Window");
+
+	public static readonly Tag Bunker = TagManager.Create("Bunker");
+
+	public static readonly Tag Transition = TagManager.Create("Transition");
+
+	public static readonly Tag Detecting = TagManager.Create("Detecting");
 
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
@@ -267,6 +279,8 @@ public class GameTags
 
 	public static readonly Tag Hanging = TagManager.Create("Hanging");
 
+	public static readonly Tag FarmingMaterial = TagManager.Create("FarmingMaterial");
+
 	public static readonly Tag MassChunk = TagManager.Create("MassChunk");
 
 	public static readonly Tag UnitChunk = TagManager.Create("UnitChunk");
@@ -281,19 +295,16 @@ public class GameTags
 
 	public static TagSet GasElements = new TagSet();
 
-	public static TagSet CalorieCategories = new TagSet
-	{
-		GameTags.Edible,
-		GameTags.MarkedForCompost
-	};
+	public static TagSet CalorieCategories = new TagSet { GameTags.Edible };
 
 	public static TagSet UnitCategories = new TagSet
 	{
-		GameTags.CookingIngredient,
 		GameTags.Medicine,
 		GameTags.Seed,
+		GameTags.Egg,
 		GameTags.Clothes,
-		GameTags.IndustrialIngredient
+		GameTags.IndustrialIngredient,
+		GameTags.MarkedForCompost
 	};
 
 	public static TagSet IgnoredMaterialCategories = new TagSet
@@ -318,7 +329,8 @@ public class GameTags
 		GameTags.Farmable,
 		GameTags.Agriculture,
 		GameTags.Other,
-		GameTags.Plastic
+		GameTags.ManufacturedMaterial,
+		GameTags.CookingIngredient
 	};
 
 	public static TagSet OtherEntityTags = new TagSet { GameTags.BagableCreature };
@@ -388,6 +400,14 @@ public class GameTags
 
 	public static class Creatures
 	{
+		public static readonly Tag ReservedByCreature = TagManager.Create("ReservedByCreature");
+
+		public static readonly Tag Bagged = TagManager.Create("Bagged");
+
+		public static readonly Tag InIncubator = TagManager.Create("InIncubator");
+
+		public static readonly Tag Deliverable = TagManager.Create("Deliverable");
+
 		public static readonly Tag Stunned = TagManager.Create("Stunned");
 
 		public static readonly Tag Falling = TagManager.Create("Falling");
@@ -403,6 +423,8 @@ public class GameTags
 		public static readonly Tag WantsToEat = TagManager.Create("WantsToEat");
 
 		public static readonly Tag WantsToGetRanched = TagManager.Create("WantsToGetRanched");
+
+		public static readonly Tag WantsToGetCaptured = TagManager.Create("WantsToGetCaptured");
 
 		public static readonly Tag Flee = TagManager.Create("Flee");
 
@@ -437,6 +459,12 @@ public class GameTags
 		public static readonly Tag OriginallyWild = TagManager.Create("Wild");
 
 		public static readonly Tag Wild = TagManager.Create("Wild");
+
+		public static readonly Tag Overcrowded = TagManager.Create("Overcrowded");
+
+		public static readonly Tag Expecting = TagManager.Create("Expecting");
+
+		public static readonly Tag Confined = TagManager.Create("Confined");
 
 		public static class Species
 		{

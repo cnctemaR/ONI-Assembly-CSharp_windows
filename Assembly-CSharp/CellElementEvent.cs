@@ -8,7 +8,7 @@ public class CellElementEvent : CellEvent
 	{
 	}
 
-	[Conditional("UNITY_EDITOR")]
+	[Conditional("ENABLE_CELL_EVENT_LOGGER")]
 	public void Log(int cell, SimHashes element, int callback_id)
 	{
 		if (!this.enableLogging)

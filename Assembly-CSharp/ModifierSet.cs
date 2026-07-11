@@ -60,6 +60,9 @@ public class ModifierSet : ScriptableObject
 		effect2.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, 5f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
 		effect2.Add(new AttributeModifier(Db.Get().Amounts.Wildness.deltaAttribute.Id, -0.09166667f, global::STRINGS.CREATURES.MODIFIERS.RANCHED.NAME, false, false, true));
 		this.effects.Add(effect2);
+		Effect effect3 = new Effect("EggSong", global::STRINGS.CREATURES.MODIFIERS.INCUBATOR_SONG.NAME, global::STRINGS.CREATURES.MODIFIERS.INCUBATOR_SONG.TOOLTIP, 600f, true, false, false);
+		effect3.Add(new AttributeModifier(Db.Get().Amounts.Incubation.deltaAttribute.Id, 4f, global::STRINGS.CREATURES.MODIFIERS.INCUBATOR_SONG.NAME, true, false, true));
+		this.effects.Add(effect3);
 	}
 
 	public Trait CreateTrait(string id, string name, string description, string group_name, bool should_save, ChoreGroup[] disabled_chore_groups, bool positive_trait, bool is_valid_starter_trait)

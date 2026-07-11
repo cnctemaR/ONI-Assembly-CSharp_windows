@@ -32,15 +32,15 @@ public class BatchAnimCamera : MonoBehaviour
 			if (Input.GetMouseButtonDown(0))
 			{
 				this.do_pan = true;
-				this.last_pan = Input.mousePosition;
+				this.last_pan = KInputManager.GetMousePos();
 			}
 			else if (Input.GetMouseButton(0) && this.do_pan)
 			{
-				Vector3 vector = this.cam.ScreenToViewportPoint(this.last_pan - Input.mousePosition);
+				Vector3 vector = this.cam.ScreenToViewportPoint(this.last_pan - KInputManager.GetMousePos());
 				Vector3 vector2 = new Vector3(vector.x * BatchAnimCamera.pan_speed, vector.y * BatchAnimCamera.pan_speed, 0f);
 				base.transform.Translate(vector2, Space.World);
 				this.ClampToBounds();
-				this.last_pan = Input.mousePosition;
+				this.last_pan = KInputManager.GetMousePos();
 			}
 		}
 		if (Input.GetMouseButtonUp(0))

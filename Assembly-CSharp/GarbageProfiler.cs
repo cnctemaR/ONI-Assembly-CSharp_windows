@@ -10,11 +10,6 @@ public static class GarbageProfiler
 		Resources.UnloadUnusedAssets();
 	}
 
-	private static void DebugGarbageCollect()
-	{
-		GC.Collect();
-	}
-
 	private static void ClearFileName()
 	{
 		GarbageProfiler.filename_suffix = null;

@@ -56,7 +56,7 @@ public class SandboxClearFloorTool : BrushTool
 	{
 		base.OnPaintCell(cell, distFromOrigin);
 		bool flag = false;
-		using (IEnumerator<Pickupable> enumerator = Components.Pickupables.GetEnumerator())
+		using (List<Pickupable>.Enumerator enumerator = Components.Pickupables.Items.GetEnumerator())
 		{
 			while (enumerator.MoveNext())
 			{

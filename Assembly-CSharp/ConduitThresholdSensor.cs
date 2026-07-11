@@ -9,6 +9,11 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 
 	protected override void ConduitUpdate(float dt)
 	{
+		float containedMass = this.GetContainedMass();
+		if (containedMass <= 0f)
+		{
+			return;
+		}
 		float currentValue = this.CurrentValue;
 		if (this.activateAboveThreshold)
 		{
@@ -21,6 +26,13 @@ public abstract class ConduitThresholdSensor : ConduitSensor
 		{
 			this.Toggle();
 		}
+	}
+
+	private float GetContainedMass()
+	{
+		int num = Grid.PosToCell(this);
+		ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+		return flowManager.GetContents(num).mass;
 	}
 
 	public float Threshold

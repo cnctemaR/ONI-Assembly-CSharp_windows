@@ -6,7 +6,10 @@ public class Sensor
 	public Sensor(Sensors sensors)
 	{
 		this.sensors = sensors;
+		this.Name = base.GetType().Name;
 	}
+
+	public string Name { get; private set; }
 
 	public ComponentType GetComponent<ComponentType>()
 	{

@@ -6,7 +6,7 @@ public class CallAdultMonitor : GameStateMachine<CallAdultMonitor, CallAdultMoni
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		this.root.ToggleBehaviour(GameTags.Creatures.Behaviours.CallAdultBehaviour, new Func<CallAdultMonitor.Instance, bool>(CallAdultMonitor.ShouldCallAdult), delegate(CallAdultMonitor.Instance smi)
+		this.root.ToggleBehaviour(GameTags.Creatures.Behaviours.CallAdultBehaviour, new StateMachine<CallAdultMonitor, CallAdultMonitor.Instance, IStateMachineTarget, CallAdultMonitor.Def>.Transition.ConditionCallback(CallAdultMonitor.ShouldCallAdult), delegate(CallAdultMonitor.Instance smi)
 		{
 			smi.RefreshCallTime();
 		});

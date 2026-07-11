@@ -57,7 +57,7 @@ public class DropDown : KMonoBehaviour
 			return;
 		}
 		float canvasScale = this.canvasScaler.GetCanvasScale();
-		if (this.scrollRect.rectTransform().GetPosition().x + this.scrollRect.rectTransform().sizeDelta.x * canvasScale < Input.mousePosition.x || this.scrollRect.rectTransform().GetPosition().x > Input.mousePosition.x || this.scrollRect.rectTransform().GetPosition().y - this.scrollRect.rectTransform().sizeDelta.y * canvasScale > Input.mousePosition.y || this.scrollRect.rectTransform().GetPosition().y < Input.mousePosition.y)
+		if (this.scrollRect.rectTransform().GetPosition().x + this.scrollRect.rectTransform().sizeDelta.x * canvasScale < KInputManager.GetMousePos().x || this.scrollRect.rectTransform().GetPosition().x > KInputManager.GetMousePos().x || this.scrollRect.rectTransform().GetPosition().y - this.scrollRect.rectTransform().sizeDelta.y * canvasScale > KInputManager.GetMousePos().y || this.scrollRect.rectTransform().GetPosition().y < KInputManager.GetMousePos().y)
 		{
 			this.Close();
 		}

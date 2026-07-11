@@ -6,7 +6,7 @@ public class FabricatorListScreen : KToggleMenu
 	private void Refresh()
 	{
 		List<KToggleMenu.ToggleInfo> list = new List<KToggleMenu.ToggleInfo>();
-		foreach (Fabricator fabricator in Components.Fabricators)
+		foreach (Fabricator fabricator in Components.Fabricators.Items)
 		{
 			Fabricator fabricator2 = fabricator;
 			KSelectable component = fabricator2.GetComponent<KSelectable>();

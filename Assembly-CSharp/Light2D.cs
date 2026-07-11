@@ -22,7 +22,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			this.Refresh();
 		}
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "Light2D.OnCmpEnable");
 	}
 
 	protected override void OnSpawn()
@@ -111,7 +111,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 			}
 			this.cell = num;
 			this.litCells.Clear();
-			this.emitter = new LightGridManager.LightGridEmitter(this.cell, this.litCells, 1, this.Range, this.Color, this.shape);
+			this.emitter = new LightGridManager.LightGridEmitter(this.cell, this.litCells, this.Lux, this.Range, this.Color, this.shape, 0.5f);
 			this.emitter.Add();
 			this.isRegistered = true;
 		}
@@ -141,6 +141,8 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	public float Range = 5f;
 
 	public float Angle;
+
+	public int Lux = 1000;
 
 	public Vector2 Direction;
 

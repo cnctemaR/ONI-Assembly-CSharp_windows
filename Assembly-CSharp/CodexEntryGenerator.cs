@@ -120,15 +120,6 @@ public static class CodexEntryGenerator
 							CodexEntryGenerator.GenerateImageContainers(first, list);
 						}
 						CodexEntryGenerator.GenerateCreatureDescriptionContainers(gameObject, list);
-						list.Add(new ContentContainer(new List<CodexWidget>
-						{
-							new CodexWidget(CodexWidget.ContentType.Spacer),
-							new CodexWidget(CodexWidget.ContentType.Spacer),
-							new CodexWidget(CodexWidget.ContentType.Spacer),
-							new CodexWidget(CodexWidget.ContentType.Spacer),
-							new CodexWidget(CodexWidget.ContentType.Spacer),
-							new CodexWidget(CodexWidget.ContentType.Spacer)
-						}, ContentContainer.ContentLayout.Vertical));
 						SubEntry subEntry = new SubEntry(component.PrefabID().ToString(), speciesTag.ToString(), list, component.GetProperName());
 						subEntry.icon = first;
 						subEntry.iconColor = Color.white;
@@ -389,41 +380,44 @@ public static class CodexEntryGenerator
 		string text7;
 		foreach (Element element2 in ElementLoader.elements)
 		{
-			List<ContentContainer> list = new List<ContentContainer>();
-			string text6 = element2.name + " (" + element2.GetStateString() + ")";
-			CodexEntryGenerator.GenerateTitleContainers(text6, list);
-			Tuple<Sprite, Color> uisprite = Def.GetUISprite(element2, "ui");
-			CodexEntryGenerator.GenerateImageContainers(new Tuple<Sprite, Color>[] { Def.GetUISprite(element2, "ui") }, list, ContentContainer.ContentLayout.Horizontal);
-			action(element2, list);
-			text7 = element2.id.ToString();
-			string text8;
-			Dictionary<string, CodexEntry> dictionary6;
-			if (element2.IsSolid)
+			if (!element2.disabled)
 			{
-				text8 = text2;
-				dictionary6 = dictionary2;
+				List<ContentContainer> list = new List<ContentContainer>();
+				string text6 = element2.name + " (" + element2.GetStateString() + ")";
+				CodexEntryGenerator.GenerateTitleContainers(text6, list);
+				Tuple<Sprite, Color> uisprite = Def.GetUISprite(element2, "ui");
+				CodexEntryGenerator.GenerateImageContainers(new Tuple<Sprite, Color>[] { Def.GetUISprite(element2, "ui") }, list, ContentContainer.ContentLayout.Horizontal);
+				action(element2, list);
+				text7 = element2.id.ToString();
+				string text8;
+				Dictionary<string, CodexEntry> dictionary6;
+				if (element2.IsSolid)
+				{
+					text8 = text2;
+					dictionary6 = dictionary2;
+				}
+				else if (element2.IsLiquid)
+				{
+					text8 = text3;
+					dictionary6 = dictionary3;
+				}
+				else if (element2.IsGas)
+				{
+					text8 = text4;
+					dictionary6 = dictionary4;
+				}
+				else
+				{
+					text8 = text5;
+					dictionary6 = dictionary5;
+				}
+				CodexEntry codexEntry = new CodexEntry(text8, list, text6);
+				codexEntry.parentId = text8;
+				codexEntry.icon = uisprite.first;
+				codexEntry.iconColor = uisprite.second;
+				CodexCache.AddEntry(text7, codexEntry, null);
+				dictionary6.Add(text7, codexEntry);
 			}
-			else if (element2.IsLiquid)
-			{
-				text8 = text3;
-				dictionary6 = dictionary3;
-			}
-			else if (element2.IsGas)
-			{
-				text8 = text4;
-				dictionary6 = dictionary4;
-			}
-			else
-			{
-				text8 = text5;
-				dictionary6 = dictionary5;
-			}
-			CodexEntry codexEntry = new CodexEntry(text8, list, text6);
-			codexEntry.parentId = text8;
-			codexEntry.icon = uisprite.first;
-			codexEntry.iconColor = uisprite.second;
-			CodexCache.AddEntry(text7, codexEntry, null);
-			dictionary6.Add(text7, codexEntry);
 		}
 		text7 = text2;
 		CodexEntry codexEntry2 = CodexEntryGenerator.GenerateCategoryEntry(text7, UI.CODEX.CATEGORYNAMES.ELEMENTSSOLID, dictionary2, null);
@@ -452,7 +446,7 @@ public static class CodexEntryGenerator
 	public static Dictionary<string, CodexEntry> GenerateDiseaseEntries()
 	{
 		Dictionary<string, CodexEntry> dictionary = new Dictionary<string, CodexEntry>();
-		foreach (Disease disease in Db.Get().Diseases)
+		foreach (Disease disease in Db.Get().Diseases.resources)
 		{
 			if (!disease.Disabled)
 			{
@@ -1242,6 +1236,14 @@ public static class CodexEntryGenerator
 				},
 				{ "style", "body" }
 			}),
+			new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
+			{
+				{
+					"string",
+					string.Format(UI.CODEX.FOOD.CALORIES, GameUtil.GetFormattedCalories(food.CaloriesPerUnit, GameUtil.TimeSlice.None, true))
+				},
+				{ "style", "body" }
+			}),
 			new CodexWidget(CodexWidget.ContentType.Spacer),
 			new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
 			{
@@ -1424,6 +1426,25 @@ public static class CodexEntryGenerator
 				objectProperties = { { "sprite", sprite } }
 			}
 		}, ContentContainer.ContentLayout.Vertical));
+	}
+
+	public static void CreateUnlockablesContentContainer(SubEntry subentry)
+	{
+		subentry.lockedContentContainer = new ContentContainer(new List<CodexWidget>
+		{
+			new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
+			{
+				{
+					"string",
+					CODEX.HEADERS.SECTION_UNLOCKABLES
+				},
+				{ "style", "subtitle" }
+			}),
+			new CodexWidget(CodexWidget.ContentType.DividerLine)
+		}, ContentContainer.ContentLayout.Vertical)
+		{
+			showBeforeGeneratedContent = false
+		};
 	}
 
 	private static void GenerateFabricatorContainers(GameObject entity, List<ContentContainer> containers)

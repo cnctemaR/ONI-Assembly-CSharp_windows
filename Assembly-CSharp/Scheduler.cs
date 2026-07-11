@@ -36,8 +36,6 @@ public class Scheduler : IScheduler
 
 	public void FreeResources()
 	{
-		this.log = null;
-		this.addRemovelog = null;
 		this.clock = null;
 		if (this.entries != null)
 		{
@@ -99,21 +97,7 @@ public class Scheduler : IScheduler
 		}
 	}
 
-	public global::Logger GetAddRemoveLog()
-	{
-		return this.addRemovelog;
-	}
-
-	public global::Logger GetLog()
-	{
-		return this.log;
-	}
-
 	public FloatHOTQueue<SchedulerEntry> entries = new FloatHOTQueue<SchedulerEntry>();
-
-	private LoggerFSSF log = new LoggerFSSF("Scheduler");
-
-	private LoggerFSSF addRemovelog = new LoggerFSSF("Scheduler");
 
 	private SchedulerClock clock;
 

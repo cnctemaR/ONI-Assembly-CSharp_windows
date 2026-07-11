@@ -11,7 +11,7 @@ namespace Klei.AI
 		{
 			this.AttributeId = attribute_id;
 			this.Value = value;
-			this.Description = string.Intern((description != null) ? description : string.Empty);
+			this.Description = ((description != null) ? description : string.Empty);
 			this.DescriptionCB = null;
 			this.IsMultiplier = is_multiplier;
 			this.UIOnly = uiOnly;

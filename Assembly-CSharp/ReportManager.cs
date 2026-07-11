@@ -107,7 +107,7 @@ public class ReportManager : KMonoBehaviour
 		Notification notification = new Notification(string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TITLE, day), NotificationType.Good, HashedString.Invalid, (List<Notification> n, object d) => string.Format(UI.ENDOFDAYREPORT.NOTIFICATION_TOOLTIP, day), null, true, 0f, delegate(object d)
 		{
 			ManagementMenu.Instance.OpenReports(day);
-		}, null, null);
+		}, null);
 		if (this.notifier == null)
 		{
 			Debug.LogError("Cant notify, null notifier", null);

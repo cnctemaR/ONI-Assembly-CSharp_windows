@@ -4,12 +4,19 @@ using UnityEngine;
 
 public static class LightGridManager
 {
+	private static int CalculateFalloff(float falloffRate, int cell, int origin)
+	{
+		return Mathf.Max(1, Mathf.RoundToInt(falloffRate * (float)Mathf.Max(Grid.GetCellDistance(origin, cell), 1)));
+	}
+
 	public static void Initialise()
 	{
+		LightGridManager.previewLux = new int[Grid.CellCount];
 	}
 
 	public static void Shutdown()
 	{
+		LightGridManager.previewLux = null;
 		LightGridManager.previewLightCells.Clear();
 	}
 
@@ -19,21 +26,34 @@ public static class LightGridManager
 
 	public static void DestroyPreview()
 	{
+		foreach (Tuple<int, int> tuple in LightGridManager.previewLightCells)
+		{
+			LightGridManager.previewLux[tuple.first] = 0;
+		}
 		LightGridManager.previewLightCells.Clear();
 	}
 
-	public static void CreatePreview(int origin_cell, float radius, LightShape shape)
+	public static void CreatePreview(int origin_cell, float radius, LightShape shape, int lux)
 	{
 		LightGridManager.previewLightCells.Clear();
-		LightGridManager.previewLightCells.Add(origin_cell);
-		DiscreteShadowCaster.GetVisibleCells(origin_cell, LightGridManager.previewLightCells, (int)radius, shape);
+		List<int> list = new List<int>();
+		list.Add(origin_cell);
+		DiscreteShadowCaster.GetVisibleCells(origin_cell, list, (int)radius, shape);
+		foreach (int num in list)
+		{
+			int num2 = lux / LightGridManager.CalculateFalloff(0.5f, num, origin_cell);
+			LightGridManager.previewLightCells.Add(new Tuple<int, int>(num, num2));
+			LightGridManager.previewLux[num] = num2;
+		}
 	}
 
-	public static List<int> previewLightCells = new List<int>();
+	public static List<Tuple<int, int>> previewLightCells = new List<Tuple<int, int>>();
+
+	public static int[] previewLux;
 
 	public class LightGridEmitter
 	{
-		public LightGridEmitter(int cell, List<int> lit_cells, int intensity, float radius, Color colour, LightShape shape)
+		public LightGridEmitter(int cell, List<int> lit_cells, int intensity, float radius, Color colour, LightShape shape, float falloffRate = 0.5f)
 		{
 			this.cell = cell;
 			this.radius = radius;
@@ -41,20 +61,20 @@ public static class LightGridManager
 			this.colour = colour;
 			this.shape = shape;
 			this.litCells = lit_cells;
+			this.falloffRate = falloffRate;
 		}
 
 		public void Add()
 		{
 			this.Remove();
 			DiscreteShadowCaster.GetVisibleCells(this.cell, this.litCells, (int)this.radius, this.shape);
-			if (!this.litCells.Contains(this.cell))
-			{
-				this.litCells.Add(this.cell);
-			}
 			for (int i = 0; i < this.litCells.Count; i++)
 			{
 				int num = this.litCells[i];
-				Grid.LightCount[num] = (byte)Mathf.Max(0, (int)Grid.LightCount[num] + this.intensity);
+				int num2 = Mathf.Max(1, Mathf.RoundToInt(this.falloffRate * (float)Mathf.Max(Grid.GetCellDistance(num, this.cell), 1)));
+				int num3 = Mathf.Max(0, Grid.LightCount[num] + this.intensity / num2);
+				Grid.LightCount[num] = num3;
+				LightGridManager.previewLux[num] = num3;
 			}
 		}
 
@@ -63,7 +83,9 @@ public static class LightGridManager
 			for (int i = 0; i < this.litCells.Count; i++)
 			{
 				int num = this.litCells[i];
-				Grid.LightCount[num] = (byte)Mathf.Max(0, (int)Grid.LightCount[num] - this.intensity);
+				int num2 = LightGridManager.CalculateFalloff(this.falloffRate, num, this.cell);
+				Grid.LightCount[num] = Mathf.Max(0, Grid.LightCount[num] - this.intensity / num2);
+				LightGridManager.previewLux[num] = 0;
 			}
 			this.litCells.Clear();
 		}
@@ -77,6 +99,8 @@ public static class LightGridManager
 		public int intensity = 1;
 
 		public Color colour = Color.white;
+
+		public float falloffRate = 0.5f;
 
 		private List<int> litCells;
 	}

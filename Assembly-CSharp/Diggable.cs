@@ -307,7 +307,7 @@ public class Diggable : Workable
 		float num5 = 4f * num4;
 		float num6 = num5 + num3 * num5;
 		float num7 = dt / num6;
-		WorldDamage.Instance.ApplyDamage(num, num7, -1, -1);
+		WorldDamage.Instance.ApplyDamage(num, num7, -1, -1, null, null);
 		return false;
 	}
 
@@ -474,12 +474,13 @@ public class Diggable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string text = "icon_cancel";
 		string text2 = UI.USERMENUACTIONS.CANCELDIG.NAME;
 		global::System.Action action = new global::System.Action(this.OnCancel);
 		string text3 = UI.USERMENUACTIONS.CANCELDIG.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private GameScenePartitionerEntry partitionerEntry;
@@ -491,9 +492,6 @@ public class Diggable : Workable
 	private bool isReachable;
 
 	private Element cellElementReference;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[MyCmpAdd]
 	private Prioritizable prioritizable;

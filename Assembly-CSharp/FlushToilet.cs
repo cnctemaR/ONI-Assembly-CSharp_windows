@@ -43,10 +43,11 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 	private void Flush(Worker worker)
 	{
-		List<GameObject> list = this.storage.Find(FlushToilet.WaterTag);
+		ListPool<GameObject, Storage>.PooledList pooledList = ListPool<GameObject, Storage>.Allocate();
+		this.storage.Find(FlushToilet.WaterTag, pooledList);
 		float num = 0f;
 		float num2 = this.massConsumedPerUse;
-		foreach (GameObject gameObject in list)
+		foreach (GameObject gameObject in pooledList)
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			float num3 = Mathf.Min(component.Mass, num2);
@@ -54,6 +55,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			num2 -= num3;
 			num += num3 * component.Temperature;
 		}
+		pooledList.Recycle();
 		float num4 = num / this.massConsumedPerUse;
 		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
 		this.storage.AddLiquid(SimHashes.DirtyWater, this.massEmittedPerUse, num4, index, this.diseasePerFlush, false, true);
@@ -168,12 +170,14 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		public bool UpdateFullnessState()
 		{
 			float num = 0f;
-			List<GameObject> list = base.master.storage.Find(FlushToilet.WaterTag);
-			foreach (GameObject gameObject in list)
+			ListPool<GameObject, FlushToilet>.PooledList pooledList = ListPool<GameObject, FlushToilet>.Allocate();
+			base.master.storage.Find(FlushToilet.WaterTag, pooledList);
+			foreach (GameObject gameObject in pooledList)
 			{
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 				num += component.Mass;
 			}
+			pooledList.Recycle();
 			bool flag = num >= base.master.massConsumedPerUse;
 			base.master.conduitConsumer.enabled = !flag;
 			float num2 = Mathf.Clamp01(num / base.master.massConsumedPerUse);

@@ -22,8 +22,11 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 		if (this.sampleIdx < 8)
 		{
 			int num = Grid.PosToCell(this);
-			this.samples[this.sampleIdx] = Grid.DiseaseCount[num];
-			this.sampleIdx++;
+			if (Grid.Mass[num] > 0f)
+			{
+				this.samples[this.sampleIdx] = Grid.DiseaseCount[num];
+				this.sampleIdx++;
+			}
 			return;
 		}
 		this.sampleIdx = 0;

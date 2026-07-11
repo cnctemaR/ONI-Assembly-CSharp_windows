@@ -6,6 +6,7 @@ public struct FallerComponent
 	public FallerComponent(Transform transform, Vector2 initial_velocity)
 	{
 		this.transform = transform;
+		this.transformInstanceId = transform.GetInstanceID();
 		this.isFalling = false;
 		this.initialVelocity = initial_velocity;
 		this.partitionerEntry = null;
@@ -31,6 +32,8 @@ public struct FallerComponent
 	}
 
 	public Transform transform;
+
+	public int transformInstanceId;
 
 	public bool isFalling;
 

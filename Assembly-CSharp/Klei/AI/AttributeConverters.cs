@@ -5,11 +5,6 @@ namespace Klei.AI
 {
 	public class AttributeConverters : KMonoBehaviour
 	{
-		public IEnumerator<AttributeConverterInstance> GetEnumerator()
-		{
-			return this.converters.GetEnumerator();
-		}
-
 		public int Count
 		{
 			get
@@ -32,7 +27,7 @@ namespace Klei.AI
 
 		public AttributeConverterInstance Get(AttributeConverter converter)
 		{
-			foreach (AttributeConverterInstance attributeConverterInstance in this)
+			foreach (AttributeConverterInstance attributeConverterInstance in this.converters)
 			{
 				if (attributeConverterInstance.converter == converter)
 				{
@@ -44,7 +39,7 @@ namespace Klei.AI
 
 		public AttributeConverterInstance GetConverter(string id)
 		{
-			foreach (AttributeConverterInstance attributeConverterInstance in this)
+			foreach (AttributeConverterInstance attributeConverterInstance in this.converters)
 			{
 				if (attributeConverterInstance.converter.Id == id)
 				{
@@ -54,6 +49,6 @@ namespace Klei.AI
 			return null;
 		}
 
-		private List<AttributeConverterInstance> converters = new List<AttributeConverterInstance>();
+		public List<AttributeConverterInstance> converters = new List<AttributeConverterInstance>();
 	}
 }

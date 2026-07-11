@@ -23,6 +23,7 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		this.requiredRolePerk = RoleManager.rolePerks.CanWrangleCreatures.id;
 		this.resetProgressOnStop = true;
 		this.faceTargetWhenWorking = true;
+		this.synchronizeAnims = false;
 		this.multitoolContext = "capture";
 		this.multitoolHitEffectTag = "fx_capture_splash";
 	}
@@ -32,6 +33,7 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		base.OnSpawn();
 		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 		if (this.markedForCapture)
 		{
 			Prioritizable.AddRef(base.gameObject);
@@ -53,8 +55,14 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		this.markedForCapture = false;
 	}
 
+	private void OnTagsChanged(object data)
+	{
+		this.MarkForCapture(this.markedForCapture);
+	}
+
 	public void MarkForCapture(bool mark)
 	{
+		mark = mark && this.IsCapturable();
 		if (this.markedForCapture && !mark)
 		{
 			Prioritizable.RemoveRef(base.gameObject);
@@ -63,16 +71,21 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		{
 			Prioritizable.AddRef(base.gameObject);
 		}
-		this.markedForCapture = this.allowCapture && mark;
+		this.markedForCapture = mark;
 		this.UpdateStatusItem();
 		this.UpdateChore();
 	}
 
+	public bool IsCapturable()
+	{
+		return this.allowCapture && !base.gameObject.HasTag(GameTags.Trapped) && !base.gameObject.HasTag(GameTags.Stored) && !base.gameObject.HasTag(GameTags.Creatures.Bagged);
+	}
+
 	private void OnRefreshUserMenu(object data)
 	{
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.markedForCapture)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_capture";
 			string text2 = UI.USERMENUACTIONS.CAPTURE.NAME;
 			global::System.Action action = delegate
@@ -80,11 +93,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 				this.MarkForCapture(true);
 			};
 			string text3 = UI.USERMENUACTIONS.CAPTURE.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_capture";
 			string text2 = UI.USERMENUACTIONS.CANCELCAPTURE.NAME;
 			global::System.Action action = delegate
@@ -92,8 +104,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 				this.MarkForCapture(false);
 			};
 			string text = UI.USERMENUACTIONS.CANCELCAPTURE.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
 	private void UpdateStatusItem()
@@ -148,12 +162,9 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 				num = num2;
 			}
 		}
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		Tag baggedCreatureTag = EntityTemplates.GetBaggedCreatureTag(component.PrefabTag);
-		GameObject prefab = Assets.GetPrefab(baggedCreatureTag);
-		GameObject gameObject = Util.KInstantiate(prefab, Folder.Entities, Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
-		gameObject.SetActive(true);
-		Util.KDestroyGameObject(base.gameObject);
+		this.MarkForCapture(false);
+		this.baggable.SetWrangled();
+		this.baggable.transform.SetPosition(Grid.CellToPosCCC(num, Grid.SceneLayer.Ore));
 	}
 
 	public override List<Descriptor> GetDescriptors(GameObject go)
@@ -164,10 +175,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	}
 
 	[MyCmpAdd]
-	private Prioritizable prioritizable;
+	private Baggable baggable;
 
-	[MyCmpReq]
-	private UserMenu userMenu;
+	[MyCmpAdd]
+	private Prioritizable prioritizable;
 
 	[Serialize]
 	private bool allowCapture = true;

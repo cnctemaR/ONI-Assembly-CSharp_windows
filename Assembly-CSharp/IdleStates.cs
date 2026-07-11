@@ -15,17 +15,47 @@ internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IS
 		string text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main).ToggleTag(GameTags.Idle);
-		this.loop.Enter(delegate(IdleStates.Instance smi)
-		{
-			smi.PlayIdle();
-		}).ToggleScheduleCallback("IdleMove", (IdleStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(IdleStates.Instance smi)
+		this.loop.Enter(new StateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State.Callback(this.PlayIdle)).ToggleScheduleCallback("IdleMove", (IdleStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(IdleStates.Instance smi)
 		{
 			smi.GoTo(this.move);
 		});
-		this.move.Enter("MoveToNewCell", delegate(IdleStates.Instance smi)
+		this.move.Enter(new StateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State.Callback(this.MoveToNewCell)).EventTransition(GameHashes.DestinationReached, this.loop, null).EventTransition(GameHashes.NavigationFailed, this.loop, null);
+	}
+
+	public void MoveToNewCell(IdleStates.Instance smi)
+	{
+		Navigator component = smi.GetComponent<Navigator>();
+		IdleStates.MoveCellQuery moveCellQuery = new IdleStates.MoveCellQuery(component.CurrentNavType);
+		component.RunQuery(moveCellQuery);
+		component.GoTo(moveCellQuery.GetResultCell(), null);
+	}
+
+	public void PlayIdle(IdleStates.Instance smi)
+	{
+		KAnimControllerBase component = smi.GetComponent<KAnimControllerBase>();
+		Navigator component2 = smi.GetComponent<Navigator>();
+		NavType navType = component2.CurrentNavType;
+		Facing component3 = smi.GetComponent<Facing>();
+		if (component3.GetFacing())
 		{
-			smi.MoveToNewCell();
-		}).EventTransition(GameHashes.DestinationReached, this.loop, null).EventTransition(GameHashes.NavigationFailed, this.loop, null);
+			navType = NavGrid.MirrorNavType(navType);
+		}
+		if (smi.def.customIdleAnim != null)
+		{
+			HashedString invalid = HashedString.Invalid;
+			HashedString hashedString = smi.def.customIdleAnim(smi, ref invalid);
+			if (hashedString != HashedString.Invalid)
+			{
+				if (invalid != HashedString.Invalid)
+				{
+					component.Play(invalid, KAnim.PlayMode.Once, 1f, 0f);
+				}
+				component.Queue(hashedString, KAnim.PlayMode.Loop, 1f, 0f);
+				return;
+			}
+		}
+		HashedString idleAnim = component2.NavGrid.GetIdleAnim(navType);
+		component.Play(idleAnim, KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	private GameStateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State loop;
@@ -34,7 +64,9 @@ internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IS
 
 	public class Def : StateMachine.BaseDef
 	{
-		public Func<IdleStates.Instance, HashedString> customIdleAnim;
+		public IdleStates.Def.IdleAnimCallback customIdleAnim;
+
+		public delegate HashedString IdleAnimCallback(IdleStates.Instance smi, ref HashedString pre_anim);
 	}
 
 	public new class Instance : GameStateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.GameInstance
@@ -42,36 +74,6 @@ internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IS
 		public Instance(Chore<IdleStates.Instance> chore, IdleStates.Def def)
 			: base(chore, def)
 		{
-		}
-
-		public void MoveToNewCell()
-		{
-			Navigator component = base.GetComponent<Navigator>();
-			IdleStates.MoveCellQuery moveCellQuery = new IdleStates.MoveCellQuery(component.CurrentNavType);
-			component.RunQuery(moveCellQuery);
-			component.GoTo(moveCellQuery.GetResultCell(), null);
-		}
-
-		public void PlayIdle()
-		{
-			KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-			Navigator component2 = base.GetComponent<Navigator>();
-			NavType navType = component2.CurrentNavType;
-			Facing component3 = base.GetComponent<Facing>();
-			if (component3.GetFacing())
-			{
-				navType = NavGrid.MirrorNavType(navType);
-			}
-			HashedString hashedString = HashedString.Invalid;
-			if (base.def.customIdleAnim != null)
-			{
-				hashedString = base.def.customIdleAnim(this);
-			}
-			if (hashedString == HashedString.Invalid)
-			{
-				hashedString = component2.NavGrid.GetIdleAnim(navType);
-			}
-			component.Play(hashedString, KAnim.PlayMode.Loop, 1f, 0f);
 		}
 	}
 

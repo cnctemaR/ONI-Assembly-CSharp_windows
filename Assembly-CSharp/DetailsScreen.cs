@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using FMOD.Studio;
 using STRINGS;
 using UnityEngine;
@@ -382,7 +381,7 @@ public class DetailsScreen : KTabMenu
 
 	private void SortScreenOrder()
 	{
-		this.screens = this.screens.OrderBy<DetailsScreen.Screens, int>((DetailsScreen.Screens x) => x.displayOrderPriority).ToArray<DetailsScreen.Screens>();
+		Array.Sort<DetailsScreen.Screens>(this.screens, (DetailsScreen.Screens x, DetailsScreen.Screens y) => x.displayOrderPriority.CompareTo(y.displayOrderPriority));
 	}
 
 	public void UpdatePortrait(GameObject target)

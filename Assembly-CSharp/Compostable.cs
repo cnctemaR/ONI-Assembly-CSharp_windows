@@ -1,21 +1,15 @@
 ﻿using System;
-using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 public class Compostable : KMonoBehaviour
 {
-	protected override void OnPrefabInit()
-	{
-		base.OnPrefabInit();
-	}
-
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		if (this.isMarkedForCompost)
 		{
-			this.MarkForCompost(true);
+			this.MarkForCompost(false);
 		}
 		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
 		base.Subscribe(856640610, new Action<object>(this.OnStore));
@@ -23,28 +17,13 @@ public class Compostable : KMonoBehaviour
 
 	private void MarkForCompost(bool force = false)
 	{
-		if (!this.isMarkedForCompost || force)
+		this.RefreshStatusItem();
+		base.GetComponent<KPrefabID>().AddTag(GameTags.MarkedForCompost);
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Compostable);
+		Storage storage = base.GetComponent<Pickupable>().storage;
+		if (storage != null)
 		{
-			this.RefreshStatusItem();
-			base.GetComponent<KPrefabID>().AddTag(GameTags.MarkedForCompost);
-			base.GetComponent<KPrefabID>().AddTag(GameTags.Compostable);
-			this.isMarkedForCompost = true;
-			Storage storage = base.GetComponent<Pickupable>().storage;
-			if (storage != null)
-			{
-				storage.Drop(base.gameObject);
-			}
-		}
-	}
-
-	private void CancelCompost()
-	{
-		if (this.isMarkedForCompost)
-		{
-			this.RefreshStatusItem();
-			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Compostable);
-			base.GetComponent<KPrefabID>().RemoveTag(GameTags.MarkedForCompost);
-			this.isMarkedForCompost = false;
+			storage.Drop(base.gameObject);
 		}
 	}
 
@@ -60,15 +39,14 @@ public class Compostable : KMonoBehaviour
 			Pickupable pickupable = EntitySplitter.Split(component, component.TotalAmount, this.compostPrefab);
 			if (pickupable != null)
 			{
-				pickupable.GetComponent<Compostable>().MarkForCompost(false);
-				UIScheduler.Instance.Schedule("SelectCompostObject", 0f, new Action<object>(this.SelectCompostObject), pickupable, null);
+				SelectTool.Instance.SelectNextFrame(pickupable.GetComponent<KSelectable>(), true);
 			}
 		}
 		else
 		{
 			Pickupable component2 = base.GetComponent<Pickupable>();
 			Pickupable pickupable2 = EntitySplitter.Split(component2, component2.TotalAmount, this.originalPrefab);
-			UIScheduler.Instance.Schedule("SelectCompostObject", 0f, new Action<object>(this.SelectCompostObject), pickupable2, null);
+			SelectTool.Instance.SelectNextFrame(pickupable2.GetComponent<KSelectable>(), true);
 		}
 	}
 
@@ -90,15 +68,6 @@ public class Compostable : KMonoBehaviour
 		}
 	}
 
-	private void SelectCompostObject(object data)
-	{
-		Pickupable pickupable = (Pickupable)data;
-		if (pickupable != null)
-		{
-			SelectTool.Instance.Select(pickupable.GetComponent<KSelectable>(), true);
-		}
-	}
-
 	private void OnStore(object data)
 	{
 		this.RefreshStatusItem();
@@ -106,31 +75,28 @@ public class Compostable : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.isMarkedForCompost)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_compost";
 			string text2 = UI.USERMENUACTIONS.COMPOST.NAME;
 			global::System.Action action = new global::System.Action(this.OnToggleCompost);
 			string text3 = UI.USERMENUACTIONS.COMPOST.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_compost";
 			string text2 = UI.USERMENUACTIONS.COMPOST.NAME_OFF;
 			global::System.Action action = new global::System.Action(this.OnToggleCompost);
 			string text = UI.USERMENUACTIONS.COMPOST.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 1f);
 	}
 
-	[MyCmpAdd]
-	private UserMenu userMenu;
-
-	[Serialize]
-	private bool isMarkedForCompost;
+	[SerializeField]
+	public bool isMarkedForCompost;
 
 	public GameObject originalPrefab;
 

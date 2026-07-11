@@ -22,9 +22,8 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 		this.reactable = new SuitMarker.SuitMarkerReactable(this);
 	}
 
-	public List<SuitLocker> GetAttachedLockers()
+	public void GetAttachedLockers(List<SuitLocker> suit_lockers)
 	{
-		List<SuitLocker> list = new List<SuitLocker>();
 		int num = -1;
 		if (base.GetComponent<Rotatable>().IsRotated)
 		{
@@ -40,32 +39,38 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			{
 				break;
 			}
+			if (!gameObject.HasTag("SuitLocker"))
+			{
+				break;
+			}
 			SuitLocker component = gameObject.GetComponent<SuitLocker>();
 			if (component == null)
 			{
 				break;
 			}
-			if (!list.Contains(component))
+			if (!suit_lockers.Contains(component))
 			{
-				list.Add(component);
+				suit_lockers.Add(component);
 			}
 			num3++;
 		}
-		return list;
 	}
 
 	private KPrefabID GetAvailableSuit()
 	{
-		List<SuitLocker> attachedLockers = this.GetAttachedLockers();
-		foreach (SuitLocker suitLocker in attachedLockers)
+		ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
+		this.GetAttachedLockers(pooledList);
+		KPrefabID kprefabID = null;
+		foreach (SuitLocker suitLocker in pooledList)
 		{
-			KPrefabID storedOutfit = suitLocker.GetStoredOutfit();
-			if (storedOutfit != null)
+			kprefabID = suitLocker.GetStoredOutfit();
+			if (kprefabID != null)
 			{
-				return storedOutfit;
+				break;
 			}
 		}
-		return null;
+		pooledList.Recycle();
+		return kprefabID;
 	}
 
 	public bool DoesTraversalDirectionRequireSuit(int source_cell, int dest_cell)
@@ -84,14 +89,16 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 	private int GetFullyChargedSuitCount()
 	{
 		int num = 0;
-		List<SuitLocker> attachedLockers = this.GetAttachedLockers();
-		foreach (SuitLocker suitLocker in attachedLockers)
+		ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
+		this.GetAttachedLockers(pooledList);
+		foreach (SuitLocker suitLocker in pooledList)
 		{
 			if (suitLocker.GetFullyChargedOutfit() != null)
 			{
 				num++;
 			}
 		}
+		pooledList.Recycle();
 		return num;
 	}
 
@@ -105,14 +112,16 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 	public bool IsUnequipAvailableForSuitWearer(SuitWearer.Instance suit_wearer)
 	{
 		int num = 0;
-		List<SuitLocker> attachedLockers = this.GetAttachedLockers();
-		foreach (SuitLocker suitLocker in attachedLockers)
+		ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
+		this.GetAttachedLockers(pooledList);
+		foreach (SuitLocker suitLocker in pooledList)
 		{
 			if (suitLocker.CanDropOffSuit())
 			{
 				num++;
 			}
 		}
+		pooledList.Recycle();
 		return num > this.unequipReservations.Count || (num == this.unequipReservations.Count && this.unequipReservations.Contains(suit_wearer));
 	}
 
@@ -238,24 +247,25 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 
 	private void OnRefreshUserMenu(object data)
 	{
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.onlyTraverseIfUnequipAvailable)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_clearance";
 			string text2 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.NAME;
 			global::System.Action action = new global::System.Action(this.OnEnableTraverseIfUnequipAvailable);
 			string text3 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ONLY_WHEN_ROOM_AVAILABLE.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_clearance";
 			string text2 = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.NAME;
 			global::System.Action action = new global::System.Action(this.OnDisableTraverseIfUnequipAvailable);
 			string text = UI.USERMENUACTIONS.SUIT_MARKER_TRAVERSAL.ALWAYS.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
 	protected override void OnCleanUp()
@@ -275,9 +285,6 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			this.reactable.Cleanup();
 		}
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	private ScenePartitionerEntry partitionerEntry;
 
@@ -357,9 +364,10 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 				reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(Assets.GetAnim("anim_equip_clothing_kanim"));
 				if (this.suitMarker != null)
 				{
-					List<SuitLocker> attachedLockers = this.suitMarker.GetAttachedLockers();
+					ListPool<SuitLocker, SuitMarker>.PooledList pooledList = ListPool<SuitLocker, SuitMarker>.Allocate();
+					this.suitMarker.GetAttachedLockers(pooledList);
 					bool flag2 = false;
-					foreach (SuitLocker suitLocker in attachedLockers)
+					foreach (SuitLocker suitLocker in pooledList)
 					{
 						KPrefabID fullyChargedOutfit = suitLocker.GetFullyChargedOutfit();
 						if (fullyChargedOutfit != null && flag)
@@ -375,11 +383,12 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 							break;
 						}
 					}
+					pooledList.Recycle();
 					if (!flag2 && !flag)
 					{
 						Assignable assignable = reactor.GetComponent<Equipment>().GetAssignable(Db.Get().AssignableSlots.Suit);
 						assignable.Unassign();
-						Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null, null);
+						Notification notification = new Notification(MISC.NOTIFICATIONS.SUIT_DROPPED.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.SUIT_DROPPED.TOOLTIP, null, true, 0f, null, null);
 						assignable.GetComponent<Notifier>().Add(notification, string.Empty);
 					}
 				}

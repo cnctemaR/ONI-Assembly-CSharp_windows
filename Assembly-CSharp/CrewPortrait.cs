@@ -206,7 +206,7 @@ public class CrewPortrait : KMonoBehaviour
 		SymbolOverrideController component = controller.GetComponent<SymbolOverrideController>();
 		component.RemoveAllSymbolOverrides(0);
 		Accessorizer component2 = minionIdentity.GetComponent<Accessorizer>();
-		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots)
+		foreach (AccessorySlot accessorySlot in Db.Get().AccessorySlots.resources)
 		{
 			Accessory accessory = component2.GetAccessory(accessorySlot);
 			if (accessory != null)

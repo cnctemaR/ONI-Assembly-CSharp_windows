@@ -30,6 +30,7 @@ public class CeilingLightConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		LightShapePreview lightShapePreview = go.AddComponent<LightShapePreview>();
+		lightShapePreview.lux = 1800;
 		lightShapePreview.radius = 8f;
 		lightShapePreview.shape = LightShape.Cone;
 	}
@@ -46,6 +47,7 @@ public class CeilingLightConfig : IBuildingConfig
 		light2D.Offset = LIGHT2D.CEILINGLIGHT_OFFSET;
 		light2D.shape = LightShape.Cone;
 		light2D.drawOverlay = true;
+		light2D.Lux = 1800;
 		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{

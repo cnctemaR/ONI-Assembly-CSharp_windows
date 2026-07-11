@@ -220,7 +220,7 @@ public class LightingSettings : ScriptableObject
 
 		public float edgeIntensity;
 
-		public float diffuseIntensity;
+		public float directSunlightScale;
 
 		public float power;
 	}

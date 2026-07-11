@@ -122,7 +122,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 					}
 					foreach (AttributeModifier attributeModifier in base.sm.modifiers)
 					{
-						attributes.Add(global::STRINGS.BUILDINGS.PREFABS.TRAVELTUBE.NAME, attributeModifier);
+						attributes.Add(attributeModifier);
 					}
 				}
 				else

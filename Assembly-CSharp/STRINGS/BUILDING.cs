@@ -349,7 +349,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Manually Controlled";
 
-				public static LocString TOOLTIP = "This Duplicant is under your control";
+				public static LocString TOOLTIP = "This Duplicant is under my control";
 			}
 
 			public class MATERIALSUNAVAILABLE
@@ -524,11 +524,11 @@ namespace STRINGS
 			{
 				public static LocString NAME = "New Duplicants Available";
 
-				public static LocString TOOLTIP = "A new colony member is ready to be printed";
+				public static LocString TOOLTIP = "I am ready to print a new colony member";
 
 				public static LocString NOTIFICATION_NAME = "New Duplicants are available";
 
-				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod <color=#F44A47>[H]</color> is ready to print a new Duplicant.\nPlease select a DNA blueprint:";
+				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod <color=#F44A47>[H]</color> is ready to print a new Duplicant.\nI'll need to select a DNA blueprint:";
 			}
 
 			public class NOAPPLICABLERESEARCHSELECTED
@@ -684,9 +684,9 @@ namespace STRINGS
 
 			public class STORAGELOCKER
 			{
-				public static LocString NAME = "Storing: {Stored} / {Capacity} kg";
+				public static LocString NAME = "Storing: {Stored} / {Capacity} {Units}";
 
-				public static LocString TOOLTIP = "This container is storing {Stored} kg of material";
+				public static LocString TOOLTIP = "This container is storing {Stored} {Units} of a maximum {Capacity} {Units}.";
 			}
 
 			public class UNASSIGNED
@@ -840,7 +840,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Tinkering: {0}";
 
-				public static LocString TOOLTIP = "The duplicant working this station is creating {0} for use elsewhere.";
+				public static LocString TOOLTIP = "This Duplicant is creating {0} to use somewhere else";
 			}
 
 			public class VALVE
@@ -1009,6 +1009,13 @@ namespace STRINGS
 				public static LocString NAME = "Wattage: {Wattage}";
 
 				public static LocString TOOLTIP = "This building is generating {Wattage} of power";
+			}
+
+			public class SOLARPANELWATTAGE
+			{
+				public static LocString NAME = "Current Wattage: {Wattage}";
+
+				public static LocString TOOLTIP = "This panel is generating {Wattage} of power";
 			}
 
 			public class WATTSON
@@ -1510,6 +1517,41 @@ namespace STRINGS
 				public static LocString NAME = "Incubating: {Percent}";
 
 				public static LocString TOOLTIP = "This egg incubating cozily" + UI.HORIZONTAL_BR_RULE + "It will hatch when Incubation reaches 100%";
+			}
+
+			public class SPACENOTVISIBLE
+			{
+				public static LocString NAME = "Space Not Visible";
+
+				public static LocString TOOLTIP = "This detector must be able to see the sky in order to detect anything.";
+			}
+
+			public class DETECTORQUALITY
+			{
+				public static LocString NAME = "Dish Quality: {Quality}";
+
+				public static LocString TOOLTIP = "This detector dish is currently scanning at {Quality} effectiveness.\n\nLow quality may be due to:\n    • Interference from nearby heavy machinery\n    • Rock or tiles obstructing a wide view of the sky";
+			}
+
+			public class NETWORKQUALITY
+			{
+				public static LocString NAME = "Detector Network Quality: {TotalQuality}";
+
+				public static LocString TOOLTIP = "Your detector network is scanning at {TotalQuality} effectiveness, and will detect meteor showers {WorstTime} to {BestTime} before they strike.\n\nAdd more detectors and ensure they are each scanning effectively for best results.";
+			}
+
+			public class DETECTORSCANNING
+			{
+				public static LocString NAME = "Scanning";
+
+				public static LocString TOOLTIP = "This detector is currently peering in to the sky to find objects of interest.";
+			}
+
+			public class INCOMINGMETEORS
+			{
+				public static LocString NAME = "Incoming Meteors";
+
+				public static LocString TOOLTIP = "There are high speed objects approaching!";
 			}
 		}
 

@@ -18,6 +18,7 @@ public class ResourceCategoryScreen : KScreen
 			this.DisplayedCategories.Add(GameTags.Miscellaneous, resourceCategoryHeader);
 			resourceCategoryHeader.gameObject.SetActive(false);
 		}
+		this.DisplayedCategoryKeys = this.DisplayedCategories.Keys.ToArray<Tag>();
 	}
 
 	private void CreateTagSetHeaders(IEnumerable<Tag> set, GameUtil.MeasureUnit measure)
@@ -38,13 +39,13 @@ public class ResourceCategoryScreen : KScreen
 		}
 		for (int i = 0; i < 1; i++)
 		{
-			Tag tag = this.DisplayedCategories.Keys.ElementAt<Tag>(this.categoryUpdatePacer);
+			Tag tag = this.DisplayedCategoryKeys[this.categoryUpdatePacer];
 			if (WorldInventory.Instance.IsDiscovered(tag) && !this.DisplayedCategories[tag].gameObject.activeInHierarchy)
 			{
 				this.DisplayedCategories[tag].gameObject.SetActive(true);
 			}
 			this.DisplayedCategories[tag].UpdateContents();
-			this.categoryUpdatePacer = (this.categoryUpdatePacer + 1) % this.DisplayedCategories.Keys.Count;
+			this.categoryUpdatePacer = (this.categoryUpdatePacer + 1) % this.DisplayedCategoryKeys.Length;
 		}
 		if (MeterScreen.Instance != null && !MeterScreen.Instance.StartValuesSet)
 		{
@@ -82,6 +83,8 @@ public class ResourceCategoryScreen : KScreen
 	public Transform CategoryContainer;
 
 	public Dictionary<Tag, ResourceCategoryHeader> DisplayedCategories = new Dictionary<Tag, ResourceCategoryHeader>();
+
+	private Tag[] DisplayedCategoryKeys;
 
 	private int categoryUpdatePacer;
 }

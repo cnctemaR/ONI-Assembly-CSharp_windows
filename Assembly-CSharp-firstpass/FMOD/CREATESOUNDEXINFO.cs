@@ -1,9 +1,82 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace FMOD
 {
 	public struct CREATESOUNDEXINFO
 	{
+		public SOUND_PCMREADCALLBACK pcmreadcallback
+		{
+			set
+			{
+				this.pcmreadcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public SOUND_PCMSETPOSCALLBACK pcmsetposcallback
+		{
+			set
+			{
+				this.pcmsetposcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public SOUND_NONBLOCKCALLBACK nonblockcallback
+		{
+			set
+			{
+				this.nonblockcallback_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public FILE_OPENCALLBACK fileuseropen
+		{
+			set
+			{
+				this.fileuseropen_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public FILE_CLOSECALLBACK fileuserclose
+		{
+			set
+			{
+				this.fileuserclose_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public FILE_READCALLBACK fileuserread
+		{
+			set
+			{
+				this.fileuserread_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public FILE_SEEKCALLBACK fileuserseek
+		{
+			set
+			{
+				this.fileuserseek_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public FILE_ASYNCREADCALLBACK fileuserasyncread
+		{
+			set
+			{
+				this.fileuserasyncread_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
+		public FILE_ASYNCCANCELCALLBACK fileuserasynccancel
+		{
+			set
+			{
+				this.fileuserasynccancel_handle = ((value != null) ? Marshal.GetFunctionPointerForDelegate(value) : IntPtr.Zero);
+			}
+		}
+
 		public int cbsize;
 
 		public uint length;
@@ -26,11 +99,11 @@ namespace FMOD
 
 		public int inclusionlistnum;
 
-		public SOUND_PCMREADCALLBACK pcmreadcallback;
+		public IntPtr pcmreadcallback_handle;
 
-		public SOUND_PCMSETPOSCALLBACK pcmsetposcallback;
+		public IntPtr pcmsetposcallback_handle;
 
-		public SOUND_NONBLOCKCALLBACK nonblockcallback;
+		public IntPtr nonblockcallback_handle;
 
 		public IntPtr dlsname;
 
@@ -42,17 +115,17 @@ namespace FMOD
 
 		public SOUND_TYPE suggestedsoundtype;
 
-		public FILE_OPENCALLBACK fileuseropen;
+		public IntPtr fileuseropen_handle;
 
-		public FILE_CLOSECALLBACK fileuserclose;
+		public IntPtr fileuserclose_handle;
 
-		public FILE_READCALLBACK fileuserread;
+		public IntPtr fileuserread_handle;
 
-		public FILE_SEEKCALLBACK fileuserseek;
+		public IntPtr fileuserseek_handle;
 
-		public FILE_ASYNCREADCALLBACK fileuserasyncread;
+		public IntPtr fileuserasyncread_handle;
 
-		public FILE_ASYNCCANCELCALLBACK fileuserasynccancel;
+		public IntPtr fileuserasynccancel_handle;
 
 		public IntPtr fileuserdata;
 

@@ -64,28 +64,26 @@ public class Dumpable : Workable
 		{
 			return;
 		}
-		if (!this.isMarkedForDumping)
+		KIconButtonMenu.ButtonInfo buttonInfo;
+		if (this.isMarkedForDumping)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_empty_contents";
-			string text2 = UI.USERMENUACTIONS.DUMP.NAME;
+			string text2 = UI.USERMENUACTIONS.DUMP.NAME_OFF;
 			global::System.Action action = new global::System.Action(this.ToggleDumping);
-			string text3 = UI.USERMENUACTIONS.DUMP.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			string text3 = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_empty_contents";
-			string text2 = UI.USERMENUACTIONS.DUMP.NAME_OFF;
+			string text2 = UI.USERMENUACTIONS.DUMP.NAME;
 			global::System.Action action = new global::System.Action(this.ToggleDumping);
-			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			string text = UI.USERMENUACTIONS.DUMP.TOOLTIP;
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	private Chore chore;
 

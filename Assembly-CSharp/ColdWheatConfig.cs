@@ -16,7 +16,7 @@ public class ColdWheatConfig : IEntityConfig
 		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER1;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 255f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 15f, 5f, 188.15f, 218.15f, 233.15f, 238.15f, 278.15f, 358.15f, new SimHashes[]
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 188.15f, 218.15f, 233.15f, 238.15f, 278.15f, 358.15f, new SimHashes[]
 		{
 			SimHashes.Oxygen,
 			SimHashes.ContaminatedOxygen,
@@ -26,8 +26,8 @@ public class ColdWheatConfig : IEntityConfig
 		{
 			new PlantElementAbsorber.ConsumeInfo
 			{
-				tag = GameTags.Fertilizer,
-				massConsumptionRate = 0.006666667f
+				tag = GameTags.Dirt,
+				massConsumptionRate = 0.008333334f
 			}
 		});
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
@@ -66,7 +66,7 @@ public class ColdWheatConfig : IEntityConfig
 
 	public const string SEED_ID = "ColdWheatSeed";
 
-	public const float FERTILIZATION_RATE = 0.006666667f;
+	public const float FERTILIZATION_RATE = 0.008333334f;
 
 	public const float WATER_RATE = 0.033333335f;
 }

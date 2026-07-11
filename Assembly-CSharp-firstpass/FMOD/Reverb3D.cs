@@ -3,61 +3,51 @@ using System.Runtime.InteropServices;
 
 namespace FMOD
 {
-	public class Reverb3D : HandleBase
+	public struct Reverb3D
 	{
-		public Reverb3D(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT release()
 		{
-			RESULT result = Reverb3D.FMOD5_Reverb3D_Release(base.getRaw());
-			if (result == RESULT.OK)
-			{
-				this.rawPtr = IntPtr.Zero;
-			}
-			return result;
+			return Reverb3D.FMOD5_Reverb3D_Release(this.handle);
 		}
 
 		public RESULT set3DAttributes(ref VECTOR position, float mindistance, float maxdistance)
 		{
-			return Reverb3D.FMOD5_Reverb3D_Set3DAttributes(this.rawPtr, ref position, mindistance, maxdistance);
+			return Reverb3D.FMOD5_Reverb3D_Set3DAttributes(this.handle, ref position, mindistance, maxdistance);
 		}
 
 		public RESULT get3DAttributes(ref VECTOR position, ref float mindistance, ref float maxdistance)
 		{
-			return Reverb3D.FMOD5_Reverb3D_Get3DAttributes(this.rawPtr, ref position, ref mindistance, ref maxdistance);
+			return Reverb3D.FMOD5_Reverb3D_Get3DAttributes(this.handle, ref position, ref mindistance, ref maxdistance);
 		}
 
 		public RESULT setProperties(ref REVERB_PROPERTIES properties)
 		{
-			return Reverb3D.FMOD5_Reverb3D_SetProperties(this.rawPtr, ref properties);
+			return Reverb3D.FMOD5_Reverb3D_SetProperties(this.handle, ref properties);
 		}
 
 		public RESULT getProperties(ref REVERB_PROPERTIES properties)
 		{
-			return Reverb3D.FMOD5_Reverb3D_GetProperties(this.rawPtr, ref properties);
+			return Reverb3D.FMOD5_Reverb3D_GetProperties(this.handle, ref properties);
 		}
 
 		public RESULT setActive(bool active)
 		{
-			return Reverb3D.FMOD5_Reverb3D_SetActive(this.rawPtr, active);
+			return Reverb3D.FMOD5_Reverb3D_SetActive(this.handle, active);
 		}
 
 		public RESULT getActive(out bool active)
 		{
-			return Reverb3D.FMOD5_Reverb3D_GetActive(this.rawPtr, out active);
+			return Reverb3D.FMOD5_Reverb3D_GetActive(this.handle, out active);
 		}
 
 		public RESULT setUserData(IntPtr userdata)
 		{
-			return Reverb3D.FMOD5_Reverb3D_SetUserData(this.rawPtr, userdata);
+			return Reverb3D.FMOD5_Reverb3D_SetUserData(this.handle, userdata);
 		}
 
 		public RESULT getUserData(out IntPtr userdata)
 		{
-			return Reverb3D.FMOD5_Reverb3D_GetUserData(this.rawPtr, out userdata);
+			return Reverb3D.FMOD5_Reverb3D_GetUserData(this.handle, out userdata);
 		}
 
 		[DllImport("fmodstudio")]
@@ -86,5 +76,17 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_Reverb3D_GetUserData(IntPtr reverb, out IntPtr userdata);
+
+		public bool hasHandle()
+		{
+			return this.handle != IntPtr.Zero;
+		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public IntPtr handle;
 	}
 }

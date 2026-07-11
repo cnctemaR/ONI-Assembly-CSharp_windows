@@ -444,7 +444,7 @@ public class CharacterContainer : KScreen
 
 	private bool IsCharacterRedundant()
 	{
-		return CharacterContainer.containers.Find((CharacterContainer c) => c != null && c.stats != null && c != this && c.stats.Name == this.stats.Name) != null || Components.LiveMinionIdentities.Any<MinionIdentity>((MinionIdentity id) => id.GetProperName() == this.stats.Name);
+		return CharacterContainer.containers.Find((CharacterContainer c) => c != null && c.stats != null && c != this && c.stats.Name == this.stats.Name) != null || Components.LiveMinionIdentities.Items.Any<MinionIdentity>((MinionIdentity id) => id.GetProperName() == this.stats.Name);
 	}
 
 	public string GetValueColor(bool isPositive)

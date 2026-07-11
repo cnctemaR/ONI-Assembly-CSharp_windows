@@ -36,9 +36,7 @@ public class CreatureFeederConfig : IBuildingConfig
 		storage.showInUI = true;
 		storage.showDescriptor = true;
 		storage.allowItemRemoval = false;
-		StorageLocker storageLocker = go.AddOrGet<StorageLocker>();
-		storageLocker.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		storageLocker.filterTint = new Color(1f, 1f, 1f, 1f);
+		go.AddOrGet<StorageLocker>();
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<CreatureFeeder>();
 	}

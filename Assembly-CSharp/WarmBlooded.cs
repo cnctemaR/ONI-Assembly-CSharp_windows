@@ -55,9 +55,9 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 			this.baseTemperatureModification = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, false, true, false);
 			this.bodyRegulator = new AttributeModifier("TemperatureDelta", 0f, DUPLICANTS.MODIFIERS.HOMEOSTASIS.NAME, false, true, false);
 			this.burningCalories = new AttributeModifier("CaloriesDelta", 0f, DUPLICANTS.MODIFIERS.BURNINGCALORIES.NAME, false, false, false);
-			base.master.GetAttributes().Add(DUPLICANTS.MODIFIERS.HOMEOSTASIS.NAME, this.bodyRegulator);
-			base.master.GetAttributes().Add(DUPLICANTS.MODIFIERS.BURNINGCALORIES.NAME, this.burningCalories);
-			base.master.GetAttributes().Add(DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, this.baseTemperatureModification);
+			base.master.GetAttributes().Add(this.bodyRegulator);
+			base.master.GetAttributes().Add(this.burningCalories);
+			base.master.GetAttributes().Add(this.baseTemperatureModification);
 			base.master.SetTemperatureImmediate(310.15f);
 		}
 

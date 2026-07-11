@@ -4,16 +4,6 @@ using UnityEngine;
 
 public static class KPrefabIDExtensions
 {
-	public static T CloneOriginalPrefab<T>(this T cmp) where T : Component
-	{
-		KPrefabID component = cmp.GetComponent<KPrefabID>();
-		GameObject prefab = Assets.GetPrefab(component.PrefabTag);
-		GameObject gameObject = Util.KInstantiate(prefab, null, null);
-		gameObject.transform.SetPosition(cmp.transform.GetPosition());
-		gameObject.transform.parent = cmp.transform.parent;
-		return gameObject.GetComponent<T>();
-	}
-
 	public static Tag PrefabID(this Component cmp)
 	{
 		return cmp.gameObject.PrefabID();
@@ -22,11 +12,6 @@ public static class KPrefabIDExtensions
 	public static Tag PrefabID(this GameObject go)
 	{
 		return go.GetComponent<KPrefabID>().PrefabTag;
-	}
-
-	public static int PrefabIDHash(this Component cmp)
-	{
-		return cmp.gameObject.GetComponent<KPrefabID>().GetHashCode();
 	}
 
 	public static bool HasTag(this Component cmp, Tag tag)
@@ -51,29 +36,12 @@ public static class KPrefabIDExtensions
 
 	public static void SetTag(this GameObject go, Tag tag, bool set)
 	{
-		if (set)
-		{
-			go.AddTag(tag);
-		}
-		else
-		{
-			go.RemoveTag(tag);
-		}
+		go.GetComponent<KPrefabID>().SetTag(tag, set);
 	}
 
 	public static bool HasTags(this GameObject go, IList<Tag> tags)
 	{
 		KPrefabID component = go.GetComponent<KPrefabID>();
 		return component.HasTags(tags);
-	}
-
-	public static string DebugName(this Component cmp)
-	{
-		return cmp.gameObject.DebugName();
-	}
-
-	public static string DebugName(this GameObject go)
-	{
-		return go.GetComponent<KPrefabID>().GetDebugName();
 	}
 }

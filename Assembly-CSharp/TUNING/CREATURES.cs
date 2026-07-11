@@ -9,11 +9,15 @@ namespace TUNING
 	{
 		public const int DEFAULT_PROBING_RADIUS = 32;
 
-		public const float BASE_INCUBATION_RATE = 0.008333334f;
+		public const float FERTILITY_TIME_BY_LIFESPAN = 0.6f;
+
+		public const float INCUBATION_TIME_BY_LIFESPAN = 0.2f;
 
 		public const float INCUBATOR_INCUBATION_MULTIPLIER = 4f;
 
 		public const float WILD_CALORIE_BURN_RATIO = 0.25f;
+
+		public const float VIABILITY_LOSS_RATE = -0.016666668f;
 
 		public class HITPOINTS
 		{
@@ -30,6 +34,21 @@ namespace TUNING
 			public const float TIER5 = 200f;
 
 			public const float TIER6 = 400f;
+		}
+
+		public class MASS_KG
+		{
+			public const float TIER0 = 5f;
+
+			public const float TIER1 = 25f;
+
+			public const float TIER2 = 50f;
+
+			public const float TIER3 = 100f;
+
+			public const float TIER4 = 200f;
+
+			public const float TIER5 = 400f;
 		}
 
 		public class TEMPERATURE

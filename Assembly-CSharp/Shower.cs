@@ -53,7 +53,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 		if (Shower.EffectsRemoved.Length > 0)
 		{
 			Descriptor descriptor = default(Descriptor);
-			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE, UI.BUILDINGEFFECTS.TOOLTIPS.FABRICATES, Descriptor.DescriptorType.Effect);
+			descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.REMOVESEFFECTSUBTITLE, UI.BUILDINGEFFECTS.TOOLTIPS.REMOVESEFFECTSUBTITLE, Descriptor.DescriptorType.Effect);
 			list.Add(descriptor);
 			for (int i = 0; i < Shower.EffectsRemoved.Length; i++)
 			{

@@ -5,7 +5,7 @@ public class CreatureDebugGoToMonitor : GameStateMachine<CreatureDebugGoToMonito
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		this.root.ToggleBehaviour(GameTags.HasDebugDestination, new Func<CreatureDebugGoToMonitor.Instance, bool>(CreatureDebugGoToMonitor.HasTargetCell), new Action<CreatureDebugGoToMonitor.Instance>(CreatureDebugGoToMonitor.ClearTargetCell));
+		this.root.ToggleBehaviour(GameTags.HasDebugDestination, new StateMachine<CreatureDebugGoToMonitor, CreatureDebugGoToMonitor.Instance, IStateMachineTarget, CreatureDebugGoToMonitor.Def>.Transition.ConditionCallback(CreatureDebugGoToMonitor.HasTargetCell), new Action<CreatureDebugGoToMonitor.Instance>(CreatureDebugGoToMonitor.ClearTargetCell));
 	}
 
 	private static bool HasTargetCell(CreatureDebugGoToMonitor.Instance smi)

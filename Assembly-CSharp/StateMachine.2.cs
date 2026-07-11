@@ -925,6 +925,15 @@ public class StateMachine<StateMachineType, StateMachineInstanceType, MasterType
 			return num;
 		}
 
+		public float DeltaClamp(float delta_value, float min_value, float max_value, StateMachineInstanceType smi)
+		{
+			float num = base.Get(smi);
+			num += delta_value;
+			num = Mathf.Clamp(num, min_value, max_value);
+			base.Set(num, smi);
+			return num;
+		}
+
 		public override StateMachine.Parameter.Context CreateContext()
 		{
 			return new StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.FloatParameter.Context(this, this.defaultValue);

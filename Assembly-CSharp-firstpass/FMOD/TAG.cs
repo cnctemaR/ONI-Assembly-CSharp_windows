@@ -1,23 +1,14 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace FMOD
 {
 	public struct TAG
 	{
-		public string name
-		{
-			get
-			{
-				return Marshal.PtrToStringAnsi(this.name_internal);
-			}
-		}
-
 		public TAGTYPE type;
 
 		public TAGDATATYPE datatype;
 
-		private IntPtr name_internal;
+		public StringWrapper name;
 
 		public IntPtr data;
 

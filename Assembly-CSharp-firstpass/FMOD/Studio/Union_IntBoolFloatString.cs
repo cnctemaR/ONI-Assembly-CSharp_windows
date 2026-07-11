@@ -7,15 +7,15 @@ namespace FMOD.Studio
 	internal struct Union_IntBoolFloatString
 	{
 		[FieldOffset(0)]
-		public int intValue;
+		public int intvalue;
 
 		[FieldOffset(0)]
-		public bool boolValue;
+		public bool boolvalue;
 
 		[FieldOffset(0)]
-		public float floatValue;
+		public float floatvalue;
 
 		[FieldOffset(0)]
-		public IntPtr stringValue;
+		public StringWrapper stringvalue;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -82,17 +83,22 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 	public void UpdateValue()
 	{
 		this.SetName(this.Resource.ProperName());
+		bool allowInsufficientMaterialBuild = GenericGameSettings.instance.allowInsufficientMaterialBuild;
 		float num;
 		float num2;
 		float num3;
-		this.GetAmounts(false, out num, out num2, out num3);
-		if (this.quantityText == null || this.currentQuantity != num)
+		this.GetAmounts(allowInsufficientMaterialBuild, out num, out num2, out num3);
+		if (this.currentQuantity != num)
 		{
 			this.currentQuantity = num;
 			this.QuantityLabel.text = ResourceCategoryScreen.QuantityTextForMeasure(num, this.Measure);
 		}
 		Color color = this.AvailableColor;
-		if (num == 0f)
+		if (num3 > num2)
+		{
+			color = this.OverdrawnColor;
+		}
+		else if (num == 0f)
 		{
 			color = this.UnavailableColor;
 		}
@@ -211,6 +217,9 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 	private Color UnavailableColor;
 
 	[SerializeField]
+	private Color OverdrawnColor;
+
+	[SerializeField]
 	private Color HighlightColor;
 
 	[SerializeField]
@@ -227,7 +236,5 @@ public class ResourceEntry : KMonoBehaviour, IPointerEnterHandler, IPointerExitH
 
 	private int selectionIdx;
 
-	private string quantityText;
-
-	private float currentQuantity;
+	private float currentQuantity = float.MinValue;
 }

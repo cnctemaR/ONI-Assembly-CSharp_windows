@@ -10,7 +10,7 @@ public class GasConduitRadiantConfig : IBuildingConfig
 		int num = 1;
 		int num2 = 1;
 		string text2 = "utilities_gas_radiant_kanim";
-		int num3 = 30;
+		int num3 = 10;
 		float num4 = 10f;
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER0;
 		string[] raw_METALS = MATERIALS.RAW_METALS;
@@ -22,7 +22,6 @@ public class GasConduitRadiantConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.ViewMode = SimViewMode.GasVentMap;
 		buildingDef.ObjectLayer = ObjectLayer.GasConduit;
 		buildingDef.TileLayer = ObjectLayer.GasConduitTile;

@@ -3,64 +3,51 @@ using System.Runtime.InteropServices;
 
 namespace FMOD
 {
-	public class DSPConnection : HandleBase
+	public struct DSPConnection
 	{
-		public DSPConnection(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT getInput(out DSP input)
 		{
-			input = null;
-			IntPtr intPtr;
-			RESULT result = DSPConnection.FMOD5_DSPConnection_GetInput(this.rawPtr, out intPtr);
-			input = new DSP(intPtr);
-			return result;
+			return DSPConnection.FMOD5_DSPConnection_GetInput(this.handle, out input.handle);
 		}
 
 		public RESULT getOutput(out DSP output)
 		{
-			output = null;
-			IntPtr intPtr;
-			RESULT result = DSPConnection.FMOD5_DSPConnection_GetOutput(this.rawPtr, out intPtr);
-			output = new DSP(intPtr);
-			return result;
+			return DSPConnection.FMOD5_DSPConnection_GetOutput(this.handle, out output.handle);
 		}
 
 		public RESULT setMix(float volume)
 		{
-			return DSPConnection.FMOD5_DSPConnection_SetMix(this.rawPtr, volume);
+			return DSPConnection.FMOD5_DSPConnection_SetMix(this.handle, volume);
 		}
 
 		public RESULT getMix(out float volume)
 		{
-			return DSPConnection.FMOD5_DSPConnection_GetMix(this.rawPtr, out volume);
+			return DSPConnection.FMOD5_DSPConnection_GetMix(this.handle, out volume);
 		}
 
 		public RESULT setMixMatrix(float[] matrix, int outchannels, int inchannels, int inchannel_hop)
 		{
-			return DSPConnection.FMOD5_DSPConnection_SetMixMatrix(this.rawPtr, matrix, outchannels, inchannels, inchannel_hop);
+			return DSPConnection.FMOD5_DSPConnection_SetMixMatrix(this.handle, matrix, outchannels, inchannels, inchannel_hop);
 		}
 
 		public RESULT getMixMatrix(float[] matrix, out int outchannels, out int inchannels, int inchannel_hop)
 		{
-			return DSPConnection.FMOD5_DSPConnection_GetMixMatrix(this.rawPtr, matrix, out outchannels, out inchannels, inchannel_hop);
+			return DSPConnection.FMOD5_DSPConnection_GetMixMatrix(this.handle, matrix, out outchannels, out inchannels, inchannel_hop);
 		}
 
 		public RESULT getType(out DSPCONNECTION_TYPE type)
 		{
-			return DSPConnection.FMOD5_DSPConnection_GetType(this.rawPtr, out type);
+			return DSPConnection.FMOD5_DSPConnection_GetType(this.handle, out type);
 		}
 
 		public RESULT setUserData(IntPtr userdata)
 		{
-			return DSPConnection.FMOD5_DSPConnection_SetUserData(this.rawPtr, userdata);
+			return DSPConnection.FMOD5_DSPConnection_SetUserData(this.handle, userdata);
 		}
 
 		public RESULT getUserData(out IntPtr userdata)
 		{
-			return DSPConnection.FMOD5_DSPConnection_GetUserData(this.rawPtr, out userdata);
+			return DSPConnection.FMOD5_DSPConnection_GetUserData(this.handle, out userdata);
 		}
 
 		[DllImport("fmodstudio")]
@@ -89,5 +76,17 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_DSPConnection_GetUserData(IntPtr dspconnection, out IntPtr userdata);
+
+		public bool hasHandle()
+		{
+			return this.handle != IntPtr.Zero;
+		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public IntPtr handle;
 	}
 }

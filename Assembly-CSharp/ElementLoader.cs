@@ -188,6 +188,8 @@ public class ElementLoader
 		{
 			Element element = new Element();
 			element.id = simHashes;
+			element.name = Strings.Get("STRINGS.ELEMENTS." + simHashes.ToString().ToUpper() + ".NAME");
+			element.nameUpperCase = element.name.ToUpper();
 			ElementLoader.elements.Add(element);
 			ElementLoader.elementTable[(int)element.id] = element;
 		}
@@ -305,43 +307,49 @@ public class ElementLoader
 			try
 			{
 				float num = float.Parse(grid[1, i]);
-				float num2 = float.Parse(grid[6, i]);
-				element.strength = float.Parse(grid[7, i]);
-				float num3 = float.Parse(grid[17, i]);
-				float num4 = float.Parse(grid[14, i]);
-				float num5 = float.Parse(grid[8, i]);
-				physicsData.mass = float.Parse(grid[13, i]);
+				element.strength = float.Parse(grid[6, i]);
+				float num2 = float.Parse(grid[16, i]);
+				float num3 = float.Parse(grid[13, i]);
+				float num4 = float.Parse(grid[7, i]);
+				physicsData.mass = float.Parse(grid[12, i]);
 				if (id != SimHashes.Void && id != SimHashes.Vacuum)
 				{
 					element.state = Element.State.Solid;
 				}
 				element.lowTemp = 0f;
-				element.highTemp = num5;
+				element.highTemp = num4;
 				element.specificHeatCapacity = num;
 				element.thermalConductivity = float.Parse(grid[2, i]);
 				element.solidSurfaceAreaMultiplier = float.Parse(grid[3, i]);
 				element.liquidSurfaceAreaMultiplier = float.Parse(grid[4, i]);
 				element.gasSurfaceAreaMultiplier = float.Parse(grid[5, i]);
-				element.electricalConductivity = num2;
-				element.molarMass = num3;
+				element.molarMass = num2;
 				physicsData.pressure = 0f;
-				physicsData.temperature = float.Parse(grid[12, i]);
+				physicsData.temperature = float.Parse(grid[11, i]);
 				element.defaultValues = physicsData;
-				element.maxMass = num4;
-				element.emitDistance = float.Parse(grid[18, i]);
-				element.emitIntensity = int.Parse(grid[19, i]);
-				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Solid"), grid[20, i]);
-				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Solid"), grid[21, i]);
+				element.maxMass = num3;
+				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Solid"), grid[17, i]);
+				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Solid"), grid[18, i]);
 				if (!flag)
 				{
 					ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable);
 				}
-				element.highTempTransitionTarget = ElementLoader.GetID(9, i, grid, SimHashes.Unobtanium);
-				element.sublimateId = ElementLoader.GetID(10, i, grid, (SimHashes)0);
-				element.sublimateFX = ElementLoader.GetSpawnFX(11, i, grid);
-				element.hardness = byte.Parse(grid[16, i]);
+				element.highTempTransitionTarget = ElementLoader.GetID(8, i, grid, SimHashes.Unobtanium);
+				element.sublimateId = ElementLoader.GetID(9, i, grid, (SimHashes)0);
+				element.sublimateFX = ElementLoader.GetSpawnFX(10, i, grid);
+				element.hardness = byte.Parse(grid[15, i]);
 				element.tag = TagManager.Create(element.id.ToString(), element.name);
 				GameTags.SolidElements.Add(element.tag);
+				int num5 = -1;
+				int.TryParse(grid[19, i], out num5);
+				if (num5 != -1)
+				{
+					element.disabled = num5 == 1;
+				}
+				else
+				{
+					element.disabled = bool.Parse(grid[19, i]);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -365,12 +373,12 @@ public class ElementLoader
 			try
 			{
 				float num = float.Parse(grid[6, i]);
-				float num2 = float.Parse(grid[23, i]);
+				float num2 = float.Parse(grid[22, i]);
 				float num3 = float.Parse(grid[1, i]);
 				float num4 = float.Parse(grid[2, i]);
-				float num5 = float.Parse(grid[13, i]);
-				float num6 = float.Parse(grid[12, i]);
-				physicsData.mass = float.Parse(grid[22, i]);
+				float num5 = float.Parse(grid[12, i]);
+				float num6 = float.Parse(grid[11, i]);
+				physicsData.mass = float.Parse(grid[21, i]);
 				element.state = Element.State.Liquid;
 				element.lowTemp = num6;
 				element.highTemp = num5;
@@ -384,29 +392,27 @@ public class ElementLoader
 				element.viscosity = float.Parse(grid[3, i]);
 				element.minHorizontalLiquidFlow = float.Parse(grid[4, i]);
 				element.minVerticalLiquidFlow = float.Parse(grid[5, i]);
-				physicsData.temperature = float.Parse(grid[21, i]);
+				physicsData.temperature = float.Parse(grid[20, i]);
 				physicsData.pressure = 0f;
 				if (physicsData.temperature < 5f)
 				{
 				}
 				element.defaultValues = physicsData;
 				element.maxMass = num3;
-				element.emitDistance = float.Parse(grid[24, i]);
-				element.emitIntensity = int.Parse(grid[25, i]);
-				element.toxicity = float.Parse(grid[26, i]);
-				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Liquid"), grid[27, i]);
-				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Liquid"), grid[28, i]);
+				element.toxicity = float.Parse(grid[23, i]);
+				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Liquid"), grid[24, i]);
+				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Liquid"), grid[25, i]);
 				if (!flag && !ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable))
 				{
 					Output.Log(new object[] { "no substance for", id });
 				}
-				element.lowTempTransitionTarget = ElementLoader.GetID(14, i, grid, SimHashes.Unobtanium);
-				element.highTempTransitionTarget = ElementLoader.GetID(15, i, grid, SimHashes.Unobtanium);
-				element.sublimateId = ElementLoader.GetID(16, i, grid, (SimHashes)0);
-				element.sublimateFX = ElementLoader.GetSpawnFX(17, i, grid);
-				element.convertId = ElementLoader.GetID(18, i, grid, (SimHashes)0);
-				string text = grid[19, i];
-				string text2 = grid[20, i];
+				element.lowTempTransitionTarget = ElementLoader.GetID(13, i, grid, SimHashes.Unobtanium);
+				element.highTempTransitionTarget = ElementLoader.GetID(14, i, grid, SimHashes.Unobtanium);
+				element.sublimateId = ElementLoader.GetID(15, i, grid, (SimHashes)0);
+				element.sublimateFX = ElementLoader.GetSpawnFX(16, i, grid);
+				element.convertId = ElementLoader.GetID(17, i, grid, (SimHashes)0);
+				string text = grid[18, i];
+				string text2 = grid[19, i];
 				if (text != null && text != string.Empty)
 				{
 					object obj = Enum.Parse(typeof(SimHashes), text);
@@ -420,6 +426,16 @@ public class ElementLoader
 				{
 					element.highTempTransitionOreID = SimHashes.Vacuum;
 					element.highTempTransitionOreMassConversion = 0f;
+				}
+				int num7 = -1;
+				int.TryParse(grid[26, i], out num7);
+				if (num7 != -1)
+				{
+					element.disabled = num7 == 1;
+				}
+				else
+				{
+					element.disabled = bool.Parse(grid[26, i]);
 				}
 				element.tag = TagManager.Create(element.id.ToString(), element.name);
 				GameTags.LiquidElements.Add(element.tag);
@@ -458,9 +474,7 @@ public class ElementLoader
 				element.liquidSurfaceAreaMultiplier = float.Parse(grid[4, i]);
 				element.gasSurfaceAreaMultiplier = float.Parse(grid[5, i]);
 				element.flow = num4;
-				element.emitDistance = float.Parse(grid[12, i]);
-				element.emitIntensity = int.Parse(grid[13, i]);
-				element.toxicity = float.Parse(grid[14, i]);
+				element.toxicity = float.Parse(grid[12, i]);
 				physicsData.pressure = float.Parse(grid[10, i]);
 				physicsData.temperature = float.Parse(grid[9, i]);
 				physicsData.mass = 1f;
@@ -470,13 +484,23 @@ public class ElementLoader
 				element.defaultValues = physicsData;
 				float num5 = 1.8f;
 				element.maxMass = num5;
-				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Gas"), grid[15, i]);
-				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Gas"), grid[16, i]);
+				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, TagManager.Create("Gas"), grid[13, i]);
+				element.oreTags = ElementLoader.CreateOreTags(element, TagManager.Create("Gas"), grid[14, i]);
 				if (!flag)
 				{
 					ElementLoader.SetOrCreateSubstanceForElement(id, ref substanceList, substanceTable);
 				}
 				element.lowTempTransitionTarget = ElementLoader.GetID(8, i, grid, SimHashes.Unobtanium);
+				int num6 = -1;
+				int.TryParse(grid[15, i], out num6);
+				if (num6 != -1)
+				{
+					element.disabled = num6 == 1;
+				}
+				else
+				{
+					element.disabled = bool.Parse(grid[15, i]);
+				}
 				element.tag = TagManager.Create(element.id.ToString(), element.name);
 				GameTags.GasElements.Add(element.tag);
 			}
@@ -579,7 +603,6 @@ public class ElementLoader
 		SolidSurfaceAreaMultiplier,
 		LiquidSurfaceAreaMultiplier,
 		GasSurfaceAreaMultiplier,
-		ElectricalConductivity,
 		Strength,
 		HighTemperature,
 		HighTemperatureTransition,
@@ -591,13 +614,9 @@ public class ElementLoader
 		HardnessTier,
 		Hardness,
 		MolarMass,
-		EmitDistance,
-		EmitIntensity,
 		MaterialCategory,
 		Tags,
-		KeywordStyle,
-		AmbienceType,
-		MiningSound,
+		Disabled,
 		Notes
 	}
 
@@ -614,7 +633,6 @@ public class ElementLoader
 		SolidSurfaceAreaMultiplier,
 		LiquidSurfaceAreaMultiplier,
 		GasSurfaceAreaMultiplier,
-		ElectricalConductivity,
 		LowTemperature,
 		HighTemperature,
 		LowTemeratureTransition,
@@ -627,13 +645,10 @@ public class ElementLoader
 		DefaultTemperature,
 		DefaultMass,
 		MolarMass,
-		EmitDistance,
-		EmitIntensity,
 		Toxicity,
 		MaterialCategory,
 		Tags,
-		KeywordStyle,
-		AmbienceType,
+		Disabled,
 		Notes
 	}
 
@@ -651,13 +666,10 @@ public class ElementLoader
 		DefaultTemperature,
 		DefaultPressure,
 		MolarMass,
-		EmitDistance,
-		EmitIntensity,
 		Toxicity,
 		MaterialCategory,
 		Tags,
-		KeywordStyle,
-		AmbienceType,
+		Disabled,
 		Notes
 	}
 }

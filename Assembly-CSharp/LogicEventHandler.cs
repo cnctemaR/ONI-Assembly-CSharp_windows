@@ -63,7 +63,7 @@ internal class LogicEventHandler : ILogicEventReceiver, ILogicUIElement, ILogicN
 				return;
 			}
 			string text = "Logic_Building_Toggle";
-			if (!CameraController.Instance.IsAudibleSound(Grid.CellToPosCCC(this.cell, Grid.SceneLayer.BuildingFront), 0f))
+			if (!CameraController.Instance.IsAudibleSound(Grid.CellToPosCCC(this.cell, Grid.SceneLayer.BuildingFront)))
 			{
 				return;
 			}

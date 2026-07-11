@@ -37,6 +37,10 @@ public class OffsetTableTracker : OffsetTracker
 		for (int i = 1; i < row.Length; i++)
 		{
 			int num = Grid.OffsetCell(current_cell, row[i]);
+			if (!Grid.IsValidCell(num))
+			{
+				return false;
+			}
 			if (Grid.Solid[num])
 			{
 				return false;

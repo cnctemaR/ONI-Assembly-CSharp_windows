@@ -89,7 +89,7 @@ public class AutoDisinfectable : Workable
 		component.AddDisease(component.DiseaseIdx, -component.DiseaseCount, "Disinfectable.OnCompleteWork");
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.MarkedForDisinfection, this);
 		this.chore = null;
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	private void EnableAutoDisinfect()
@@ -106,28 +106,25 @@ public class AutoDisinfectable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (!this.enableAutoDisinfect)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_disinfect";
 			string text2 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.NAME;
 			global::System.Action action = new global::System.Action(this.EnableAutoDisinfect);
 			string text3 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.ENABLE_AUTODISINFECT.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 10f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_disinfect";
 			string text2 = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.NAME;
 			global::System.Action action = new global::System.Action(this.DisableAutoDisinfect);
 			string text = global::STRINGS.BUILDINGS.AUTODISINFECTABLE.DISABLE_AUTODISINFECT.TOOLTIP;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 10f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo, 10f);
 	}
-
-	[MyCmpGet]
-	private UserMenu userMenu;
 
 	private Chore chore;
 

@@ -142,8 +142,8 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		{
 			AttributeModifier attributeModifier = new AttributeModifier(db.BuildingAttributes.NoisePollution.Id, (float)this.noise, UI.TOOLTIPS.BASE_VALUE, false, false, true);
 			AttributeModifier attributeModifier2 = new AttributeModifier(db.BuildingAttributes.NoisePollutionRadius.Id, (float)this.radius, UI.TOOLTIPS.BASE_VALUE, false, false, true);
-			attributes.Add("Base", attributeModifier);
-			attributes.Add("Base", attributeModifier2);
+			attributes.Add(attributeModifier);
+			attributes.Add(attributeModifier2);
 		}
 		else
 		{
@@ -160,7 +160,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		}
 		KBatchedAnimController component2 = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component2 != null && component2.isMovable;
-		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
+		CellChangeMonitor.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "NoisePolluter.OnSpawn");
 		AttributeInstance attributeInstance = this.dB;
 		attributeInstance.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance.OnDirty, this.refreshCallback);
 		AttributeInstance attributeInstance2 = this.dBRadius;

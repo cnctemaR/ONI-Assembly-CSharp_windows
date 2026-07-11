@@ -9,6 +9,11 @@ public class AmbienceManager : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
+		if (!RuntimeManager.IsInitialized)
+		{
+			base.enabled = false;
+			return;
+		}
 		for (int i = 0; i < this.quadrants.Length; i++)
 		{
 			this.quadrants[i] = new AmbienceManager.Quadrant(this.quadrantDefs[i]);
@@ -52,6 +57,14 @@ public class AmbienceManager : KMonoBehaviour
 		this.quadrants[1].Update(new Vector2I(vector2I3.x, vector2I.y), new Vector2I(vector2I2.x, vector2I3.y), new Vector3(vector3.x + vector6.x, vector2.y + vector6.y, this.emitterZPosition));
 		this.quadrants[2].Update(new Vector2I(vector2I.x, vector2I3.y), new Vector2I(vector2I3.x, vector2I2.y), new Vector3(vector2.x + vector6.x, vector3.y + vector6.y, this.emitterZPosition));
 		this.quadrants[3].Update(new Vector2I(vector2I3.x, vector2I3.y), new Vector2I(vector2I2.x, vector2I2.y), new Vector3(vector3.x + vector6.x, vector3.y + vector6.y, this.emitterZPosition));
+		float num = 0f;
+		float num2 = 0f;
+		for (int i = 0; i < this.quadrants.Length; i++)
+		{
+			num += (float)this.quadrants[i].spaceLayer.tileCount;
+			num2 += (float)this.quadrants[i].totalTileCount;
+		}
+		AudioMixer.instance.UpdateSpaceVisibleSnapshot(num / num2);
 	}
 
 	private float emitterZPosition;
@@ -86,13 +99,14 @@ public class AmbienceManager : KMonoBehaviour
 
 		public void UpdateParameters(Vector3 emitter_position)
 		{
-			if (this.soundEvent != null)
+			if (!this.soundEvent.isValid())
 			{
-				Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
-				this.soundEvent.set3DAttributes(vector.To3DAttributes());
-				this.soundEvent.setParameterValue(AmbienceManager.Layer.TILE_PERCENTAGE_ID, this.tilePercentage);
-				this.soundEvent.setParameterValue(AmbienceManager.Layer.AVERAGE_TEMPERATURE_ID, this.averageTemperature);
+				return;
 			}
+			Vector3 vector = new Vector3(emitter_position.x, emitter_position.y, 0f);
+			this.soundEvent.set3DAttributes(vector.To3DAttributes());
+			this.soundEvent.setParameterValue("tilePercentage", this.tilePercentage);
+			this.soundEvent.setParameterValue("averageTemperature", this.averageTemperature);
 		}
 
 		public int CompareTo(AmbienceManager.Layer layer)
@@ -102,15 +116,12 @@ public class AmbienceManager : KMonoBehaviour
 
 		public void Stop()
 		{
-			if (this.isRunning && this.oneShotSound == null)
+			if (this.soundEvent.isValid())
 			{
-				if (this.soundEvent != null)
-				{
-					this.soundEvent.stop(STOP_MODE.ALLOWFADEOUT);
-					this.soundEvent.release();
-				}
-				this.isRunning = false;
+				this.soundEvent.stop(STOP_MODE.ALLOWFADEOUT);
+				this.soundEvent.release();
 			}
+			this.isRunning = false;
 		}
 
 		public void Start(Vector3 emitter_position)
@@ -120,7 +131,7 @@ public class AmbienceManager : KMonoBehaviour
 				if (this.oneShotSound != null)
 				{
 					EventInstance eventInstance = KFMOD.CreateInstance(this.oneShotSound);
-					if (eventInstance == null)
+					if (!eventInstance.isValid())
 					{
 						global::Debug.LogWarning("Could not find event: " + this.oneShotSound, null);
 						return;
@@ -135,7 +146,7 @@ public class AmbienceManager : KMonoBehaviour
 				else
 				{
 					this.soundEvent = KFMOD.CreateInstance(this.sound);
-					if (this.soundEvent != null)
+					if (this.soundEvent.isValid())
 					{
 						this.soundEvent.start();
 					}
@@ -144,9 +155,9 @@ public class AmbienceManager : KMonoBehaviour
 			}
 		}
 
-		private static ParameterID TILE_PERCENTAGE_ID = new ParameterID("tilePercentage");
+		private const string TILE_PERCENTAGE_ID = "tilePercentage";
 
-		private static ParameterID AVERAGE_TEMPERATURE_ID = new ParameterID("averageTemperature");
+		private const string AVERAGE_TEMPERATURE_ID = "averageTemperature";
 
 		public string sound;
 
@@ -181,6 +192,9 @@ public class AmbienceManager : KMonoBehaviour
 
 		[EventRef]
 		public string fogSound;
+
+		[EventRef]
+		public string spaceSound;
 	}
 
 	public class Quadrant
@@ -191,6 +205,9 @@ public class AmbienceManager : KMonoBehaviour
 			this.fogLayer = new AmbienceManager.Layer(def.fogSound, null);
 			this.allLayers.Add(this.fogLayer);
 			this.loopingLayers.Add(this.fogLayer);
+			this.spaceLayer = new AmbienceManager.Layer(def.spaceSound, null);
+			this.allLayers.Add(this.spaceLayer);
+			this.loopingLayers.Add(this.spaceLayer);
 			for (int i = 0; i < 4; i++)
 			{
 				this.gasLayers[i] = new AmbienceManager.Layer(def.gasSounds[i], null);
@@ -222,6 +239,7 @@ public class AmbienceManager : KMonoBehaviour
 		public void Update(Vector2I min, Vector2I max, Vector3 emitter_position)
 		{
 			this.emitterPosition = emitter_position;
+			this.totalTileCount = 0;
 			for (int i = 0; i < this.allLayers.Count; i++)
 			{
 				AmbienceManager.Layer layer = this.allLayers[i];
@@ -238,6 +256,7 @@ public class AmbienceManager : KMonoBehaviour
 							int num = Grid.XYToCell(k, j);
 							if (Grid.IsValidCell(num))
 							{
+								this.totalTileCount++;
 								if (Grid.IsVisible(num))
 								{
 									Element element = Grid.Element[num];
@@ -276,6 +295,10 @@ public class AmbienceManager : KMonoBehaviour
 													this.solidLayers[(int)solidAmbience].tileCount++;
 												}
 											}
+										}
+										else if (element.id == SimHashes.Vacuum && CellSelectionObject.IsExposedToSpace(num))
+										{
+											this.spaceLayer.tileCount++;
 										}
 									}
 								}
@@ -332,6 +355,8 @@ public class AmbienceManager : KMonoBehaviour
 
 		public AmbienceManager.Layer fogLayer;
 
+		public AmbienceManager.Layer spaceLayer;
+
 		public AmbienceManager.Layer[] solidLayers = new AmbienceManager.Layer[11];
 
 		private List<AmbienceManager.Layer> allLayers = new List<AmbienceManager.Layer>();
@@ -343,6 +368,8 @@ public class AmbienceManager : KMonoBehaviour
 		private List<AmbienceManager.Layer> topLayers = new List<AmbienceManager.Layer>();
 
 		public static int activeSolidLayerCount = 2;
+
+		public int totalTileCount;
 
 		private AmbienceManager.Quadrant.SolidTimer[] solidTimers;
 

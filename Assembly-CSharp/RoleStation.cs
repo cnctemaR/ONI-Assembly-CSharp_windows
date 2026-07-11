@@ -79,9 +79,6 @@ public class RoleStation : Workable, IEffectDescriptor
 	private RolesScreen rolesScreen;
 
 	[MyCmpAdd]
-	private UserMenu userMenu;
-
-	[MyCmpAdd]
 	private Notifier notifier;
 
 	[MyCmpAdd]

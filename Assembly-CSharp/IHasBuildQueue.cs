@@ -11,5 +11,5 @@ public interface IHasBuildQueue
 
 	bool HasWorker { get; }
 
-	bool NeedsWorker { get; }
+	bool WaitingForWorker { get; }
 }

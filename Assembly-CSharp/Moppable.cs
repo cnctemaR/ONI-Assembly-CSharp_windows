@@ -48,12 +48,13 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 
 	private void OnRefreshUserMenu(object data)
 	{
-		UserMenu userMenu = this.userMenu;
+		UserMenu userMenu = Game.Instance.userMenu;
+		GameObject gameObject = base.gameObject;
 		string text = "icon_cancel";
 		string text2 = UI.USERMENUACTIONS.CANCELMOP.NAME;
 		global::System.Action action = new global::System.Action(this.OnCancel);
 		string text3 = UI.USERMENUACTIONS.CANCELMOP.TOOLTIP;
-		userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+		userMenu.AddButton(gameObject, new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
 	}
 
 	private void OnCancel()
@@ -232,9 +233,6 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 
 	[MyCmpAdd]
 	private Prioritizable prioritizable;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	public float amountMoppedPerTick = 1000f;
 

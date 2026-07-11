@@ -48,7 +48,6 @@ public class FarmStationConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		BuildingTemplates.DoPostConfigure(go);
 		Storage storage = go.AddOrGet<Storage>();
-		storage.capacityKg = 1000f;
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
@@ -60,10 +59,11 @@ public class FarmStationConfig : IBuildingConfig
 		TinkerStation tinkerStation = go.AddOrGet<TinkerStation>();
 		tinkerStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_planttender_kanim") };
 		tinkerStation.inputMaterial = FarmStationConfig.MATERIAL_FOR_TINKER;
-		tinkerStation.metalPerTinker = 5f;
+		tinkerStation.massPerTinker = 5f;
 		tinkerStation.outputPrefab = FarmStationConfig.TINKER_TOOLS;
 		tinkerStation.requiredRolePerk = RoleManager.rolePerks.CanFarmTinker.id;
 		tinkerStation.choreType = Db.Get().ChoreTypes.FarmingFabricate.IdHash;
+		tinkerStation.fetchChoreType = Db.Get().ChoreTypes.FarmFetch.IdHash;
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Farm.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
@@ -80,7 +80,7 @@ public class FarmStationConfig : IBuildingConfig
 
 	public static Tag TINKER_TOOLS = FarmStationToolsConfig.tag;
 
-	public const float METAL_PER_TINKER = 5f;
+	public const float MASS_PER_TINKER = 5f;
 
 	public const string ROLE_TYPE = "Farmer";
 

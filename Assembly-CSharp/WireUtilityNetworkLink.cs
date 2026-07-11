@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveUtilityNetworkMgr, IUtilityNetworkItem
+public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveUtilityNetworkMgr, IUtilityNetworkItem, IBridgedNetworkItem
 {
 	public Wire.WattageRating GetMaxWattageRating()
 	{
@@ -41,6 +42,29 @@ public class WireUtilityNetworkLink : UtilityNetworkLink, IWattageRating, IHaveU
 			ElectricalUtilityNetwork electricalUtilityNetwork = Game.Instance.electricalConduitSystem.GetNetworkForCell(num) as ElectricalUtilityNetwork;
 			return (electricalUtilityNetwork == null) ? ushort.MaxValue : ((ushort)electricalUtilityNetwork.id);
 		}
+	}
+
+	public void AddNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num;
+		int num2;
+		base.GetCells(out num, out num2);
+		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
+		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		if (networkForCell != null)
+		{
+			networks.Add(networkForCell);
+		}
+	}
+
+	public bool IsConnectedToNetworks(ICollection<UtilityNetwork> networks)
+	{
+		int num;
+		int num2;
+		base.GetCells(out num, out num2);
+		IUtilityNetworkMgr networkManager = this.GetNetworkManager();
+		UtilityNetwork networkForCell = networkManager.GetNetworkForCell(num);
+		return networks.Contains(networkForCell);
 	}
 
 	[SerializeField]

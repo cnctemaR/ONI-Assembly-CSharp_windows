@@ -50,6 +50,8 @@ public class DoorConfig : IBuildingConfig
 		accessControl.controlEnabled = true;
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 3f;
+		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
+		component.initialAnim = "closed";
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
 		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS);

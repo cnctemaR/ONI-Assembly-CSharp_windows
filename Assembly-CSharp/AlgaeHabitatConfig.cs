@@ -116,7 +116,11 @@ public class AlgaeHabitatConfig : IBuildingConfig
 
 	private const float WATER_CAPACITY = 360f;
 
-	private static readonly List<Storage.StoredItemModifier> PollutedWaterStorageModifiers = new List<Storage.StoredItemModifier> { Storage.StoredItemModifier.Seal };
+	private static readonly List<Storage.StoredItemModifier> PollutedWaterStorageModifiers = new List<Storage.StoredItemModifier>
+	{
+		Storage.StoredItemModifier.Hide,
+		Storage.StoredItemModifier.Seal
+	};
 
 	public static List<Tag> pollutedWaterFilter = new List<Tag> { ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag };
 }

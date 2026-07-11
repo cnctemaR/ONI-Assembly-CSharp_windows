@@ -31,7 +31,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			attributes.Add(Db.Get().Attributes.CarryAmount);
 		}
 		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Attributes.CarryAmount.Id, this.max_carry_weight, base.gameObject.GetProperName(), false, false, true);
-		this.GetAttributes().Add("base", attributeModifier);
+		this.GetAttributes().Add(attributeModifier);
 		this.worker.usesMultiTool = false;
 		this.storage.fxPrefix = Storage.FXPrefix.PickedUp;
 		this.simRenderLoadBalance = true;
@@ -176,7 +176,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 				{
 					if (this.IsPickupableRelevantToMyInterests(pickupable))
 					{
-						if (pickupable.CouldBePickedUp(base.gameObject))
+						if (pickupable.CouldBePickedUp(base.gameObject, true))
 						{
 							this.pickupables.Add(pickupable);
 						}
@@ -357,7 +357,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	{
 		if (!this.rotateSoundPlaying)
 		{
-			this.looping_sounds.StartSound(this.rotateSound, base.transform.GetPosition());
+			this.looping_sounds.StartSound(this.rotateSound);
 			this.rotateSoundPlaying = true;
 		}
 	}
@@ -366,7 +366,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	{
 		if (this.rotateSoundPlaying)
 		{
-			this.looping_sounds.SetParameter(this.rotateSound, "rotation", arm_rot);
+			this.looping_sounds.SetParameter(this.rotateSound, SolidTransferArm.HASH_ROTATION, arm_rot);
 		}
 	}
 
@@ -434,6 +434,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	private SolidTransferArm.ArmAnim arm_anim;
 
 	private List<int> reachableCells = new List<int>(100);
+
+	private static HashedString HASH_ROTATION = "rotation";
 
 	private enum ArmAnim
 	{

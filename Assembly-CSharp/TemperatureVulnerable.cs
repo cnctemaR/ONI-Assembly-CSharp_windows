@@ -132,22 +132,25 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 		}
 	}
 
+	private static bool GetAverageTemperatureCb(int cell, object data)
+	{
+		TemperatureVulnerable temperatureVulnerable = data as TemperatureVulnerable;
+		if (Grid.Mass[cell] > 0.1f)
+		{
+			temperatureVulnerable.averageTemp += Grid.Temperature[cell];
+			temperatureVulnerable.cellCount++;
+		}
+		return true;
+	}
+
 	private float GetAverageTemperature(int cell)
 	{
-		float temperature = 0f;
-		int count = 0;
-		this.occupyArea.TestArea(cell, null, delegate(int testCell, object data)
+		this.averageTemp = 0f;
+		this.cellCount = 0;
+		this.occupyArea.TestArea(cell, this, new Func<int, object, bool>(TemperatureVulnerable.GetAverageTemperatureCb));
+		if (this.cellCount > 0)
 		{
-			if (Grid.Mass[testCell] > 0.1f)
-			{
-				temperature += Grid.Temperature[testCell];
-				count++;
-			}
-			return true;
-		});
-		if (count > 0)
-		{
-			return temperature / (float)count;
+			return this.averageTemp / (float)this.cellCount;
 		}
 		return -1f;
 	}
@@ -185,6 +188,10 @@ public class TemperatureVulnerable : StateMachineComponent<TemperatureVulnerable
 	private AmountInstance displayTemperatureAmount;
 
 	private TemperatureVulnerable.TemperatureState internalTemperatureState = TemperatureVulnerable.TemperatureState.Normal;
+
+	private float averageTemp;
+
+	private int cellCount;
 
 	public class StatesInstance : GameStateMachine<TemperatureVulnerable.States, TemperatureVulnerable.StatesInstance, TemperatureVulnerable, object>.GameInstance
 	{

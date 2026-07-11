@@ -18,12 +18,12 @@ public class FloorSoundEvent : SoundEvent
 		int num = Grid.PosToCell(vector);
 		int num2 = Grid.CellBelow(num);
 		string audioCategory = FloorSoundEvent.GetAudioCategory(num2);
-		string text = audioCategory + "_" + base.name;
+		string text = StringFormatter.Combine(audioCategory, "_", base.name);
 		string text2 = GlobalAssets.GetSound(text, true);
 		if (text2 == null)
 		{
-			text = "Rock_" + base.name;
-			text2 = GlobalAssets.GetSound("Rock_" + base.name, true);
+			text = StringFormatter.Combine("Rock_", base.name);
+			text2 = GlobalAssets.GetSound(text, true);
 			if (text2 == null)
 			{
 				text = base.name;
@@ -58,7 +58,7 @@ public class FloorSoundEvent : SoundEvent
 		if (text2 != null)
 		{
 			FMOD.Studio.EventInstance eventInstance2 = SoundEvent.BeginOneShot(text2, vector);
-			if (eventInstance2 != null)
+			if (eventInstance2.isValid())
 			{
 				if (num3 > 0f)
 				{

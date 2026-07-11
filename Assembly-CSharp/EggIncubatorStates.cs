@@ -1,40 +1,64 @@
 ﻿using System;
+using UnityEngine;
 
 public class EggIncubatorStates : GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.empty;
-		this.empty.PlayAnim("off", KAnim.PlayMode.Loop).EventTransition(GameHashes.OccupantChanged, this.occupied, (EggIncubatorStates.Instance smi) => smi.GetComponent<EggIncubator>().Occupant != null);
-		this.occupied.DefaultState(this.occupied.unpowered).EventTransition(GameHashes.OccupantChanged, this.empty, (EggIncubatorStates.Instance smi) => smi.GetComponent<EggIncubator>().Occupant == null).ParamTransition<bool>(this.readyToHatch, this.occupied.readytohatch, (EggIncubatorStates.Instance smi, bool p) => p)
+		this.empty.PlayAnim("off", KAnim.PlayMode.Loop).EventTransition(GameHashes.OccupantChanged, this.egg, new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.HasEgg)).EventTransition(GameHashes.OccupantChanged, this.baby, new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.HasBaby));
+		this.egg.DefaultState(this.egg.unpowered).EventTransition(GameHashes.OccupantChanged, this.empty, GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Not(new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.HasAny))).EventTransition(GameHashes.OccupantChanged, this.baby, new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.HasBaby))
 			.ToggleStatusItem(Db.Get().BuildingStatusItems.IncubatorProgress, (EggIncubatorStates.Instance smi) => smi.master.GetComponent<EggIncubator>());
-		this.occupied.unpowered_pre.PlayAnim("no_power_pre").OnAnimQueueComplete(this.occupied.unpowered);
-		this.occupied.unpowered.PlayAnim("no_power_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.occupied.incubating, (EggIncubatorStates.Instance smi) => smi.GetComponent<Operational>().IsOperational);
-		this.occupied.incubating.PlayAnim("no_power_post").QueueAnim("working_loop", true, null).EventTransition(GameHashes.OperationalChanged, this.occupied.unpowered_pre, (EggIncubatorStates.Instance smi) => !smi.GetComponent<Operational>().IsOperational);
-		this.occupied.readytohatch.PlayAnim("working_pst").QueueAnim("ready_to_hatch_loop", true, null).WorkableStartTransition((EggIncubatorStates.Instance smi) => smi.master.GetComponent<CompleteIncubationWorkable>(), this.occupied.hatch);
-		this.occupied.hatch.WorkableStopTransition((EggIncubatorStates.Instance smi) => smi.master.GetComponent<CompleteIncubationWorkable>(), this.empty).Exit("CompleteHatch", delegate(EggIncubatorStates.Instance smi)
-		{
-			smi.GetComponent<EggIncubator>().CompleteHatch();
-		});
+		this.egg.lose_power.PlayAnim("no_power_pre").EventTransition(GameHashes.OperationalChanged, this.egg.incubating, new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.IsOperational)).OnAnimQueueComplete(this.egg.unpowered);
+		this.egg.unpowered.PlayAnim("no_power_loop", KAnim.PlayMode.Loop).EventTransition(GameHashes.OperationalChanged, this.egg.incubating, new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.IsOperational));
+		this.egg.incubating.PlayAnim("no_power_pst").QueueAnim("working_loop", true, null).EventTransition(GameHashes.OperationalChanged, this.egg.lose_power, GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Not(new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.IsOperational)));
+		this.baby.DefaultState(this.baby.idle).EventTransition(GameHashes.OccupantChanged, this.empty, GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Not(new StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(EggIncubatorStates.HasBaby)));
+		this.baby.idle.PlayAnim("no_power_pre").QueueAnim("no_power_loop", true, null);
+	}
+
+	public static bool IsOperational(EggIncubatorStates.Instance smi)
+	{
+		return smi.GetComponent<Operational>().IsOperational;
+	}
+
+	public static bool HasEgg(EggIncubatorStates.Instance smi)
+	{
+		GameObject occupant = smi.GetComponent<EggIncubator>().Occupant;
+		return occupant && occupant.HasTag(GameTags.Egg);
+	}
+
+	public static bool HasBaby(EggIncubatorStates.Instance smi)
+	{
+		GameObject occupant = smi.GetComponent<EggIncubator>().Occupant;
+		return occupant && occupant.HasTag(GameTags.Creature);
+	}
+
+	public static bool HasAny(EggIncubatorStates.Instance smi)
+	{
+		GameObject occupant = smi.GetComponent<EggIncubator>().Occupant;
+		return occupant;
 	}
 
 	public StateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.BoolParameter readyToHatch;
 
 	public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State empty;
 
-	public EggIncubatorStates.OccupiedStates occupied;
+	public EggIncubatorStates.EggStates egg;
 
-	public class OccupiedStates : GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State
+	public EggIncubatorStates.BabyStates baby;
+
+	public class EggStates : GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State
 	{
 		public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State incubating;
 
-		public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State unpowered_pre;
+		public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State lose_power;
 
 		public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State unpowered;
+	}
 
-		public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State readytohatch;
-
-		public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State hatch;
+	public class BabyStates : GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State
+	{
+		public GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.State idle;
 	}
 
 	public new class Instance : GameStateMachine<EggIncubatorStates, EggIncubatorStates.Instance, IStateMachineTarget, object>.GameInstance

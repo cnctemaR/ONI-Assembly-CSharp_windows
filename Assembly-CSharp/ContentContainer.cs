@@ -18,10 +18,12 @@ public class ContentContainer : YamlIO<ContentContainer>
 
 	public List<CodexWidget> content { get; set; }
 
-	public object contentLock { get; set; }
+	public string lockID { get; set; }
 
 	[StringEnumConverter]
 	public ContentContainer.ContentLayout contentLayout { get; set; }
+
+	public bool showBeforeGeneratedContent { get; set; }
 
 	public enum ContentLayout
 	{

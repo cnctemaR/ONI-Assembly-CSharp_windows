@@ -11,7 +11,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 	protected override void OnActivate()
 	{
 		CrewJobsScreen.Instance = this;
-		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+		foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 		{
 			this.choreGroups.Add(choreGroup);
 		}
@@ -28,7 +28,7 @@ public class CrewJobsScreen : CrewListScreen<CrewJobsEntry>
 	protected override void SpawnEntries()
 	{
 		base.SpawnEntries();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.Prefab_CrewEntry, this.EntriesPanelTransform.gameObject, false);
 			CrewJobsEntry component = gameObject.GetComponent<CrewJobsEntry>();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -8,7 +9,7 @@ public static class BaseHatchConfig
 {
 	public static GameObject BaseHatch(string id, string name, string desc, string anim_file, string traitId, bool is_baby, string symbolOverridePrefix = null)
 	{
-		float num = 400f;
+		float num = 100f;
 		KAnimFile anim = Assets.GetAnim(anim_file);
 		string text = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
@@ -18,15 +19,13 @@ public static class BaseHatchConfig
 		{
 			text2 = "HatchBabyNavGrid";
 		}
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text2, NavType.Floor, 32, 2f, "Meat", 2, true, false, 30f, 283f, 294f, 243f, 343f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, traitId, text2, NavType.Floor, 32, 2f, "Meat", 2, true, false, 283f, 294f, 243f, 343f);
 		if (symbolOverridePrefix != null)
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim(anim_file), symbolOverridePrefix, 0);
 		}
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGet<Capturable>();
-		gameObject.AddOrGet<FloorSwitchActivator>();
-		gameObject.AddOrGetDef<TrappedMonitor.Def>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();
 		gameObject.AddOrGetDef<BurrowMonitor.Def>();
 		WorldSpawnableMonitor.Def def = gameObject.AddOrGetDef<WorldSpawnableMonitor.Def>();
@@ -42,14 +41,20 @@ public static class BaseHatchConfig
 		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_voice_die", NOISE_POLLUTION.CREATURES.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_drill_emerge", NOISE_POLLUTION.CREATURES.TIER6);
 		SoundEventVolumeCache.instance.AddVolume("hatch_kanim", "Hatch_drill_hide", NOISE_POLLUTION.CREATURES.TIER6);
-		string text3 = id + "_Preview";
-		EntityTemplates.CreateAndRegisterPreview(text3, Assets.GetAnim("hatch_kanim"), "idle_loop", ObjectLayer.NumLayers, 1, 1);
-		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, string.Format(global::STRINGS.CREATURES.BAGGED_NAME_FMT, name), string.Format(global::STRINGS.CREATURES.BAGGED_DESC_FMT, name), Assets.GetAnim("creature_sack_kanim"), "object", new Tag(text3), true);
-		gameObject.GetComponent<KPrefabID>().AddPrefabTag(GameTags.Creatures.GroundBased);
+		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true);
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		component.AddPrefabTag(GameTags.Creatures.GroundBased);
+		component.prefabInitFn += delegate(GameObject inst)
+		{
+			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
+		};
 		bool flag = !is_baby;
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new ExitBurrowStates.Def(), flag)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Burrowed, true, "idle_mound", global::STRINGS.CREATURES.STATUSITEMS.BURROWED.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWED.TOOLTIP), flag)
+			.Add(new GrowUpStates.Def(), true)
 			.Add(new TrappedStates.Def(), true)
+			.Add(new IncubatingStates.Def(), true)
+			.Add(new BaggedStates.Def(), true)
 			.Add(new FallStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)
 			.Add(new DrowningStates.Def(), true)
@@ -58,7 +63,7 @@ public static class BaseHatchConfig
 			.Add(new AttackStates.Def(), flag)
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true)
-			.Add(new GrowUpStates.Def(), true)
+			.Add(new FixedCaptureStates.Def(), true)
 			.Add(new RanchedStates.Def(), true)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.WantsToEnterBurrow, false, "hide", global::STRINGS.CREATURES.STATUSITEMS.BURROWING.NAME, global::STRINGS.CREATURES.STATUSITEMS.BURROWING.TOOLTIP), flag)
 			.Add(new LayEggStates.Def(), true)

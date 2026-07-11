@@ -88,7 +88,7 @@ public class Uprootable : Workable
 		base.Trigger(-216549700, this);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.Operating, false);
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	public void SetCanBeUprooted(bool state)
@@ -98,7 +98,7 @@ public class Uprootable : Workable
 		{
 			this.SetUprootedComplete(false);
 		}
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	public void SetUprootedComplete(bool state)
@@ -138,7 +138,7 @@ public class Uprootable : Workable
 			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
 		}
 		this.isMarkedForUproot = false;
-		this.userMenu.Refresh();
+		Game.Instance.userMenu.Refresh(base.gameObject);
 	}
 
 	public bool HasChore()
@@ -179,24 +179,25 @@ public class Uprootable : Workable
 		{
 			return;
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (this.chore != null)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_uproot";
 			string text2 = this.cancelButtonLabel;
 			global::System.Action action = new global::System.Action(this.OnClickCancelUproot);
 			string text3 = this.cancelButtonTooltip;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_uproot";
 			string text2 = this.buttonLabel;
 			global::System.Action action = new global::System.Action(this.OnClickUproot);
 			string text = this.buttonTooltip;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
 	protected override void OnCleanUp()
@@ -210,9 +211,6 @@ public class Uprootable : Workable
 		base.OnStartWork(worker);
 		base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingUproot, false);
 	}
-
-	[MyCmpAdd]
-	protected UserMenu userMenu;
 
 	[Serialize]
 	protected bool isMarkedForUproot;

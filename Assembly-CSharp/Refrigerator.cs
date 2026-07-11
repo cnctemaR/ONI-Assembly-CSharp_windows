@@ -8,7 +8,7 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 {
 	protected override void OnPrefabInit()
 	{
-		this.filteredStorage = new FilteredStorage(this, new Tag[] { GameTags.MarkedForCompost }, this.filterTint, this.noFilterTint, this, true, Db.Get().ChoreTypes.FoodFetch);
+		this.filteredStorage = new FilteredStorage(this, null, new Tag[] { GameTags.MarkedForCompost }, this, true, Db.Get().ChoreTypes.FoodFetch);
 	}
 
 	protected override void OnSpawn()
@@ -80,6 +80,14 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 		}
 	}
 
+	public float AmountStored
+	{
+		get
+		{
+			return this.storage.MassStored();
+		}
+	}
+
 	public float MinCapacity
 	{
 		get
@@ -93,6 +101,14 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 		get
 		{
 			return this.storage.capacityKg;
+		}
+	}
+
+	public bool WholeValues
+	{
+		get
+		{
+			return false;
 		}
 	}
 
@@ -132,9 +148,6 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 	}
 
 	[MyCmpGet]
-	private PrimaryElement primaryElement;
-
-	[MyCmpGet]
 	private Storage storage;
 
 	[MyCmpGet]
@@ -142,12 +155,6 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 
 	[MyCmpGet]
 	private LogicPorts ports;
-
-	[SerializeField]
-	public Color noFilterTint = Color.white;
-
-	[SerializeField]
-	public Color filterTint = Color.white;
 
 	[SerializeField]
 	public float simulatedInternalTemperature = 277.15f;

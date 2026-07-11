@@ -4,7 +4,7 @@ namespace FMOD.Studio
 {
 	public struct PARAMETER_DESCRIPTION
 	{
-		public string name;
+		public StringWrapper name;
 
 		public int index;
 
@@ -12,7 +12,7 @@ namespace FMOD.Studio
 
 		public float maximum;
 
-		public float defaultValue;
+		public float defaultvalue;
 
 		public PARAMETER_TYPE type;
 	}

@@ -21,7 +21,6 @@ public class GasConduitConfig : IBuildingConfig
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;
-		buildingDef.Relocatable = false;
 		buildingDef.ViewMode = SimViewMode.GasVentMap;
 		buildingDef.ObjectLayer = ObjectLayer.GasConduit;
 		buildingDef.TileLayer = ObjectLayer.GasConduitTile;

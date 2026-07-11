@@ -100,7 +100,9 @@ public class KAnimLayering
 			this.foregroundController.initialAnim = this.controller.initialAnim;
 			this.link = new KAnimLink(this.controller, this.foregroundController);
 			this.Dirty();
-			this.controller.GetSynchronizer().Add(this.foregroundController);
+			KAnimSynchronizer synchronizer = this.controller.GetSynchronizer();
+			synchronizer.Add(this.foregroundController);
+			synchronizer.Sync(this.foregroundController);
 			Vector3 vector = new Vector3(0f, 0f, Grid.GetLayerZ(this.layer) - this.controller.gameObject.transform.GetPosition().z - 0.1f);
 			gameObject.transform.SetLocalPosition(vector);
 			gameObject.SetActive(true);

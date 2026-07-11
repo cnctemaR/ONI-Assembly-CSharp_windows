@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Klei;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
@@ -102,7 +103,10 @@ public class MaterialSelector : KScreen
 		{
 			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimMaterialUIDesaturated;
 			toggle.GetComponentsInChildren<Image>()[1].color = new Color(1f, 1f, 1f, 0.6f);
-			toggle.GetComponent<ImageToggleState>().SetDisabled();
+			if (!MaterialSelector.AllowInsufficientMaterialBuild())
+			{
+				toggle.GetComponent<ImageToggleState>().SetDisabled();
+			}
 		}
 	}
 
@@ -168,7 +172,7 @@ public class MaterialSelector : KScreen
 
 	private bool IsEnoughMass(Tag t)
 	{
-		return WorldInventory.Instance.GetAmount(t) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive;
+		return WorldInventory.Instance.GetAmount(t) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive || MaterialSelector.AllowInsufficientMaterialBuild();
 	}
 
 	public bool AutoSelectAvailableMaterial()
@@ -308,6 +312,11 @@ public class MaterialSelector : KScreen
 		{
 			this.MaterialEffectsPane.gameObject.SetActive(false);
 		}
+	}
+
+	public static bool AllowInsufficientMaterialBuild()
+	{
+		return GenericGameSettings.instance.allowInsufficientMaterialBuild;
 	}
 
 	public Element CurrentSelectedElement;

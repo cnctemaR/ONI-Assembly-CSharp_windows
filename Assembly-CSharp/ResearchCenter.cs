@@ -75,7 +75,11 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 			return 0f;
 		}
 		float num = Research.Instance.GetActiveResearch().progressInventory.PointsByTypeID[this.research_point_type_id];
-		float num2 = Research.Instance.GetActiveResearch().tech.costsByResearchTypeID[this.research_point_type_id];
+		float num2 = 0f;
+		if (!Research.Instance.GetActiveResearch().tech.costsByResearchTypeID.TryGetValue(this.research_point_type_id, out num2))
+		{
+			return 1f;
+		}
 		return num / num2;
 	}
 
@@ -118,7 +122,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	private bool IsAllResearchComplete()
 	{
-		foreach (Tech tech in Db.Get().Techs)
+		foreach (Tech tech in Db.Get().Techs.resources)
 		{
 			if (!tech.IsComplete())
 			{
@@ -284,7 +288,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, this.inputMaterial.Name, GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false),
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false),
 			new Descriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect, false)
 		};
 	}
@@ -292,9 +296,6 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	private Chore chore;
 
 	private ResearchScreen researchScreen;
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[MyCmpAdd]
 	private Notifier notifier;

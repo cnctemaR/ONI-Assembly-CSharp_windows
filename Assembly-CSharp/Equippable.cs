@@ -17,12 +17,20 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		this.quality = level;
 	}
 
+	public EquipmentDef def
+	{
+		get
+		{
+			return this.defHandle.Get<EquipmentDef>();
+		}
+		set
+		{
+			this.defHandle.Set<EquipmentDef>(value);
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
-		KPrefabID component = base.GetComponent<KPrefabID>();
-		KPrefabID originalPrefab = component.GetOriginalPrefab();
-		Equippable component2 = originalPrefab.GetComponent<Equippable>();
-		this.def = component2.def;
 		base.OnPrefabInit();
 		if (this.def.AdditionalTags != null)
 		{
@@ -155,7 +163,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 	[MyCmpReq]
 	private KSelectable selectable;
 
-	public EquipmentDef def;
+	public DefHandle defHandle;
 
 	[Serialize]
 	public bool isEquipped;

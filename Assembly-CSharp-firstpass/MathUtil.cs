@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public static class MathUtil
@@ -109,6 +110,40 @@ public static class MathUtil
 		closest_point = Mathf.Max(0f, Mathf.Min(1f, num2 / num));
 		Vector2 vector = segment.First + (segment.Second - segment.First) * closest_point;
 		return Vector2.Distance(vector, point);
+	}
+
+	[StructLayout(LayoutKind.Sequential, Size = 1)]
+	public struct MinMax
+	{
+		public MinMax(float min, float max)
+		{
+			this.min = min;
+			this.max = max;
+		}
+
+		public float min { get; private set; }
+
+		public float max { get; private set; }
+
+		public float Get(SeededRandom rnd)
+		{
+			return rnd.RandomRange(this.min, this.max);
+		}
+
+		public float Get()
+		{
+			return global::UnityEngine.Random.Range(this.min, this.max);
+		}
+
+		public float Lerp(float t)
+		{
+			return Mathf.Lerp(this.min, this.max, t);
+		}
+
+		public override string ToString()
+		{
+			return string.Format("[{0}:{1}]", this.min, this.max);
+		}
 	}
 
 	public class Pair<T, U>

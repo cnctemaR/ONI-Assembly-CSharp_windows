@@ -13,10 +13,16 @@ public class InterfaceTool : KMonoBehaviour
 		}
 	}
 
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		this.hoverTextConfiguration = base.GetComponent<HoverTextConfiguration>();
+	}
+
 	public void ActivateTool()
 	{
 		this.OnActivateTool();
-		this.OnMouseMove(PlayerController.GetCursorPos(Input.mousePosition));
+		this.OnMouseMove(PlayerController.GetCursorPos(KInputManager.GetMousePos()));
 		Game.Instance.Trigger(1174281782, this);
 	}
 
@@ -26,7 +32,7 @@ public class InterfaceTool : KMonoBehaviour
 		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
 		if (current != null)
 		{
-			Vector3 vector = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f);
+			Vector3 vector = new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, 0f);
 			current.RaycastAll(new PointerEventData(current)
 			{
 				position = vector
@@ -137,10 +143,9 @@ public class InterfaceTool : KMonoBehaviour
 
 	protected void UpdateHoverElements(List<KSelectable> hits)
 	{
-		HoverTextConfiguration component = base.GetComponent<HoverTextConfiguration>();
-		if (component != null)
+		if (this.hoverTextConfiguration != null)
 		{
-			component.UpdateHoverElements(hits);
+			this.hoverTextConfiguration.UpdateHoverElements(hits);
 		}
 	}
 
@@ -179,6 +184,8 @@ public class InterfaceTool : KMonoBehaviour
 	private static SimViewMode toolActivatedViewMode;
 
 	protected SimViewMode viewMode;
+
+	private HoverTextConfiguration hoverTextConfiguration;
 
 	private List<RaycastResult> castResults = new List<RaycastResult>();
 

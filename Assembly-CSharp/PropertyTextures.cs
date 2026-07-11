@@ -45,15 +45,16 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		this.FogOfWarScaleID = Shader.PropertyToID("_FogOfWarScale");
 		this.PropTexWsToCsID = Shader.PropertyToID("_PropTexWsToCs");
 		this.PropTexCsToWsID = Shader.PropertyToID("_PropTexCsToWs");
+		this.TopBorderHeightID = Shader.PropertyToID("_TopBorderHeight");
 	}
 
 	public void OnReset(object data = null)
 	{
-		this.lerpers = new TextureLerper[11];
+		this.lerpers = new TextureLerper[12];
 		this.texturePagePool = new TexturePagePool();
-		this.textureBuffers = new TextureBuffer[11];
-		this.externallyUpdatedTextures = new Texture2D[11];
-		for (int i = 0; i < 11; i++)
+		this.textureBuffers = new TextureBuffer[12];
+		this.externallyUpdatedTextures = new Texture2D[12];
+		for (int i = 0; i < 12; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties = new PropertyTextures.TextureProperties
 			{
@@ -69,6 +70,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 					textureProperties = this.textureProperties[j];
 				}
 			}
+			PropertyTextures.Property property = (PropertyTextures.Property)i;
+			textureProperties.name = property.ToString();
 			if (this.externallyUpdatedTextures[i] != null)
 			{
 				global::UnityEngine.Object.Destroy(this.externallyUpdatedTextures[i]);
@@ -79,14 +82,13 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			{
 				this.externallyUpdatedTextures[i] = new Texture2D(Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, false);
 				texture = this.externallyUpdatedTextures[i];
-				texture.name = "LerpTexture" + i.ToString();
 			}
 			else
 			{
 				TextureBuffer[] array = this.textureBuffers;
 				int num = i;
-				PropertyTextures.Property property = (PropertyTextures.Property)i;
-				array[num] = new TextureBuffer(property.ToString(), Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, textureProperties.filterMode, this.texturePagePool);
+				PropertyTextures.Property property2 = (PropertyTextures.Property)i;
+				array[num] = new TextureBuffer(property2.ToString(), Grid.WidthInCells, Grid.HeightInCells, textureProperties.textureFormat, textureProperties.filterMode, this.texturePagePool);
 				texture = this.textureBuffers[i].texture;
 			}
 			if (textureProperties.blend)
@@ -94,11 +96,12 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				TextureLerper[] array2 = this.lerpers;
 				int num2 = i;
 				Texture texture2 = texture;
-				PropertyTextures.Property property2 = (PropertyTextures.Property)i;
-				array2[num2] = new TextureLerper(texture2, property2.ToString(), texture.filterMode, textureProperties.textureFormat);
+				PropertyTextures.Property property3 = (PropertyTextures.Property)i;
+				array2[num2] = new TextureLerper(texture2, property3.ToString(), texture.filterMode, textureProperties.textureFormat);
 				this.lerpers[i].Speed = textureProperties.blendSpeed;
 			}
 			string shaderPropertyName = this.GetShaderPropertyName((PropertyTextures.Property)i);
+			texture.name = shaderPropertyName;
 			textureProperties.texturePropertyName = shaderPropertyName;
 			Shader.SetGlobalTexture(shaderPropertyName, texture);
 			this.allTextureProperties.Add(textureProperties);
@@ -107,7 +110,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private void OnShadersReloaded()
 	{
-		for (int i = 0; i < 11; i++)
+		for (int i = 0; i < 12; i++)
 		{
 			TextureLerper textureLerper = this.lerpers[i];
 			if (textureLerper != null)
@@ -135,14 +138,14 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private void UpdateTextureThreaded(TextureRegion texture_region, int x0, int y0, int x1, int y1, PropertyTextures.WorkItem.Callback update_texture_cb)
 	{
-		this.workItems.Clear();
+		this.workItems.Reset(null);
 		int num = 16;
 		for (int i = y0; i <= y1; i += num)
 		{
 			int num2 = Math.Min(i + num - 1, y1);
 			this.workItems.Add(new PropertyTextures.WorkItem(texture_region, x0, i, x1, num2, update_texture_cb));
 		}
-		App.instance.jobManager.Run<PropertyTextures.WorkItem, object>(this.workItems, null);
+		App.instance.jobManager.Run(this.workItems);
 	}
 
 	private void UpdateProperty(ref PropertyTextures.TextureProperties p, int x0, int y0, int x1, int y1)
@@ -158,31 +161,31 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			switch (p.simProperty)
 			{
 			case PropertyTextures.Property.StateChange:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateStateChange));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateStateChange));
 				break;
 			case PropertyTextures.Property.GasPressure:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdatePressure));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdatePressure));
 				break;
 			case PropertyTextures.Property.GasColour:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateGasColour));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateGasColour));
 				break;
 			case PropertyTextures.Property.GasDanger:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateDanger));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateDanger));
 				break;
 			case PropertyTextures.Property.FogOfWar:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateFogOfWar));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateFogOfWar));
 				break;
 			case PropertyTextures.Property.SolidDigAmount:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateSolidDigAmount));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateSolidDigAmount));
 				break;
 			case PropertyTextures.Property.SolidLiquidGasMass:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateSolidLiquidGasMass));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateSolidLiquidGasMass));
 				break;
 			case PropertyTextures.Property.WorldLight:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateWorldLight));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateWorldLight));
 				break;
 			case PropertyTextures.Property.Temperature:
-				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(this.UpdateTemperature));
+				this.UpdateTextureThreaded(textureRegion, x0, y0, x1, y1, new PropertyTextures.WorkItem.Callback(PropertyTextures.UpdateTemperature));
 				break;
 			}
 			textureRegion.Unlock();
@@ -192,7 +195,14 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			PropertyTextures.Property simProperty2 = p.simProperty;
 			if (simProperty2 != PropertyTextures.Property.Flow)
 			{
-				if (simProperty2 == PropertyTextures.Property.Liquid)
+				if (simProperty2 != PropertyTextures.Property.Liquid)
+				{
+					if (simProperty2 == PropertyTextures.Property.ExposedToSunlight)
+					{
+						this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalExposedToSunlight, Grid.WidthInCells * Grid.HeightInCells);
+					}
+				}
+				else
 				{
 					this.externallyUpdatedTextures[simProperty].LoadRawTextureData(PropertyTextures.externalLiquidTex, 4 * Grid.WidthInCells * Grid.HeightInCells);
 				}
@@ -214,6 +224,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		Shader.SetGlobalVector(this.WorldSizeID, new Vector4((float)Grid.WidthInCells, (float)Grid.HeightInCells, 1f / (float)Grid.WidthInCells, 1f / (float)Grid.HeightInCells));
 		Shader.SetGlobalVector(this.PropTexWsToCsID, new Vector4(0f, 0f, 1f, 1f));
 		Shader.SetGlobalVector(this.PropTexCsToWsID, new Vector4(0f, 0f, 1f, 1f));
+		Shader.SetGlobalFloat(this.TopBorderHeightID, (float)Grid.TopBorderHeight);
 		int num;
 		int num2;
 		int num3;
@@ -235,7 +246,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
 			}
 		}
-		for (int j = 0; j < 11; j++)
+		for (int j = 0; j < 12; j++)
 		{
 			TextureLerper textureLerper = this.lerpers[j];
 			if (textureLerper != null)
@@ -265,7 +276,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		y1 = Mathf.Min(y1, Grid.HeightInCells - 1);
 	}
 
-	private void UpdateFogOfWar(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateFogOfWar(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		byte[] visible = Grid.Visible;
 		for (int i = y0; i <= y1; i++)
@@ -278,9 +289,11 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void UpdatePressure(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdatePressure(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
-		float num = this.PressureRange.y - this.PressureRange.x;
+		Vector2 pressureRange = PropertyTextures.instance.PressureRange;
+		float minPressureVisibility = PropertyTextures.instance.MinPressureVisibility;
+		float num = pressureRange.y - pressureRange.x;
 		for (int i = y0; i <= y1; i++)
 		{
 			for (int j = x0; j <= x1; j++)
@@ -290,14 +303,18 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				Element element = Grid.Element[num2];
 				if (element.IsGas)
 				{
-					num3 = Mathf.Clamp01((Grid.Pressure[num2] - this.PressureRange.x) / num);
+					float num4 = Grid.Pressure[num2];
+					float num5 = ((num4 <= 0f) ? 0f : minPressureVisibility);
+					num3 = Mathf.Max(Mathf.Clamp01((num4 - pressureRange.x) / num), num5);
 				}
 				else if (element.IsLiquid)
 				{
-					int num4 = Grid.CellAbove(num2);
-					if (Grid.IsValidCell(num4) && Grid.Element[num4].IsGas)
+					int num6 = Grid.CellAbove(num2);
+					if (Grid.IsValidCell(num6) && Grid.Element[num6].IsGas)
 					{
-						num3 = Mathf.Clamp01((Grid.Pressure[num4] - this.PressureRange.x) / num);
+						float num7 = Grid.Pressure[num6];
+						float num8 = ((num7 <= 0f) ? 0f : minPressureVisibility);
+						num3 = Mathf.Max(Mathf.Clamp01((num7 - pressureRange.x) / num), num8);
 					}
 				}
 				region.SetBytes(j, i, (byte)(num3 * 255f));
@@ -305,7 +322,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void UpdateDanger(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateDanger(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		for (int i = y0; i <= y1; i++)
 		{
@@ -319,8 +336,9 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void UpdateStateChange(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateStateChange(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
+		float temperatureStateChangeRange = PropertyTextures.instance.TemperatureStateChangeRange;
 		for (int i = y0; i <= y1; i++)
 		{
 			for (int j = x0; j <= x1; j++)
@@ -331,10 +349,10 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				if (!element.IsVacuum)
 				{
 					float num3 = Grid.Temperature[num];
-					float num4 = element.lowTemp * this.TemperatureStateChangeRange;
+					float num4 = element.lowTemp * temperatureStateChangeRange;
 					float num5 = Mathf.Abs(num3 - element.lowTemp);
 					float num6 = num5 / num4;
-					float num7 = element.highTemp * this.TemperatureStateChangeRange;
+					float num7 = element.highTemp * temperatureStateChangeRange;
 					float num8 = Mathf.Abs(num3 - element.highTemp);
 					float num9 = num8 / num7;
 					num2 = Mathf.Max(num2, 1f - Mathf.Min(num6, num9));
@@ -344,7 +362,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void UpdateGasColour(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateGasColour(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		for (int i = y0; i <= y1; i++)
 		{
@@ -376,7 +394,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void UpdateLiquid(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateLiquid(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		for (int i = x0; i <= x1; i++)
 		{
@@ -412,7 +430,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void UpdateSolidDigAmount(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateSolidDigAmount(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		int elementIndex = ElementLoader.GetElementIndex(SimHashes.Void);
 		for (int i = y0; i <= y1; i++)
@@ -442,7 +460,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void UpdateSolidLiquidGasMass(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateSolidLiquidGasMass(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
 		for (int i = y0; i <= y1; i++)
 		{
@@ -465,31 +483,37 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				{
 					b3 = byte.MaxValue;
 				}
-				float num2 = Grid.Mass[num] / 2000f;
-				num2 = Mathf.Min(num2, 1f);
-				region.SetBytes(j, i, b, b2, b3, (byte)(num2 * 255f));
+				float num2 = Grid.Mass[num];
+				float num3 = Mathf.Min(1f, num2 / 2000f);
+				if (num2 > 0f)
+				{
+					num3 = Mathf.Max(0.003921569f, num3);
+				}
+				region.SetBytes(j, i, b, b2, b3, (byte)(num3 * 255f));
 			}
 		}
 	}
 
-	private void GetTemperatureAlpha(float t, out byte cold_alpha, out byte hot_alpha)
+	private static void GetTemperatureAlpha(float t, Vector2 cold_range, Vector2 hot_range, out byte cold_alpha, out byte hot_alpha)
 	{
 		cold_alpha = 0;
 		hot_alpha = 0;
-		if (t <= this.coldRange.y)
+		if (t <= cold_range.y)
 		{
-			float num = Mathf.Clamp01((this.coldRange.y - t) / (this.coldRange.y - this.coldRange.x));
+			float num = Mathf.Clamp01((cold_range.y - t) / (cold_range.y - cold_range.x));
 			cold_alpha = (byte)(num * 255f);
 		}
-		else if (t >= this.hotRange.x)
+		else if (t >= hot_range.x)
 		{
-			float num2 = Mathf.Clamp01((t - this.hotRange.x) / (this.hotRange.y - this.hotRange.x));
+			float num2 = Mathf.Clamp01((t - hot_range.x) / (hot_range.y - hot_range.x));
 			hot_alpha = (byte)(num2 * 255f);
 		}
 	}
 
-	private void UpdateTemperature(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateTemperature(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
+		Vector2 vector = PropertyTextures.instance.coldRange;
+		Vector2 vector2 = PropertyTextures.instance.hotRange;
 		for (int i = y0; i <= y1; i++)
 		{
 			for (int j = x0; j <= x1; j++)
@@ -498,16 +522,16 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 				float num2 = Grid.Temperature[num];
 				byte b;
 				byte b2;
-				this.GetTemperatureAlpha(num2, out b, out b2);
+				PropertyTextures.GetTemperatureAlpha(num2, vector, vector2, out b, out b2);
 				byte b3 = (byte)(255f * Mathf.Pow(Mathf.Clamp(num2 / 1000f, 0f, 1f), 0.45f));
 				region.SetBytes(j, i, b, b2, b3);
 			}
 		}
 	}
 
-	private void UpdateWorldLight(TextureRegion region, int x0, int y0, int x1, int y1)
+	private static void UpdateWorldLight(TextureRegion region, int x0, int y0, int x1, int y1)
 	{
-		if (!this.ForceLightEverywhere)
+		if (!PropertyTextures.instance.ForceLightEverywhere)
 		{
 			for (int i = y0; i <= y1; i++)
 			{
@@ -543,6 +567,9 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 	private Vector2 PressureRange = new Vector2(15f, 200f);
 
 	[SerializeField]
+	private float MinPressureVisibility = 0.1f;
+
+	[SerializeField]
 	[Range(0f, 1f)]
 	private float TemperatureStateChangeRange = 0.05f;
 
@@ -551,6 +578,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 	public static IntPtr externalFlowTex;
 
 	public static IntPtr externalLiquidTex;
+
+	public static IntPtr externalExposedToSunlight;
 
 	public static IntPtr externalSolidDigAmountTex;
 
@@ -562,10 +591,6 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	public static float FogOfWarScale;
 
-	public float MaxFlow;
-
-	public float FlowTextureScale;
-
 	private int WorldSizeID;
 
 	private int FogOfWarScaleID;
@@ -573,6 +598,8 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 	private int PropTexWsToCsID;
 
 	private int PropTexCsToWsID;
+
+	private int TopBorderHeightID;
 
 	private int NextPropertyIdx;
 
@@ -582,6 +609,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private TexturePagePool texturePagePool;
 
+	[SerializeField]
 	private Texture2D[] externallyUpdatedTextures;
 
 	private PropertyTextures.TextureProperties[] textureProperties = new PropertyTextures.TextureProperties[]
@@ -605,6 +633,16 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 			updatedExternally = true,
 			blend = true,
 			blendSpeed = 1f
+		},
+		new PropertyTextures.TextureProperties
+		{
+			simProperty = PropertyTextures.Property.ExposedToSunlight,
+			textureFormat = TextureFormat.Alpha8,
+			filterMode = FilterMode.Bilinear,
+			updateEveryFrame = true,
+			updatedExternally = true,
+			blend = false,
+			blendSpeed = 0f
 		},
 		new PropertyTextures.TextureProperties
 		{
@@ -700,7 +738,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 
 	private List<PropertyTextures.TextureProperties> allTextureProperties = new List<PropertyTextures.TextureProperties>();
 
-	private List<PropertyTextures.WorkItem> workItems = new List<PropertyTextures.WorkItem>();
+	private WorkItemCollection<PropertyTextures.WorkItem, object> workItems = new WorkItemCollection<PropertyTextures.WorkItem, object>();
 
 	public enum Property
 	{
@@ -715,11 +753,14 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		WorldLight,
 		Liquid,
 		Temperature,
+		ExposedToSunlight,
 		Num
 	}
 
 	private struct TextureProperties
 	{
+		public string name;
+
 		public PropertyTextures.Property simProperty;
 
 		public TextureFormat textureFormat;

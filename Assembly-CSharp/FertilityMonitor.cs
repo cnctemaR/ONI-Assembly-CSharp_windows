@@ -3,16 +3,28 @@ using System.Collections.Generic;
 using Klei;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.root;
+		default_state = this.fertile;
 		base.serializable = true;
-		this.root.ToggleBehaviour(GameTags.Creatures.Fertile, (FertilityMonitor.Instance smi) => smi.IsReadyToLayEgg(), null);
+		this.root.DefaultState(this.fertile);
+		this.fertile.ToggleBehaviour(GameTags.Creatures.Fertile, (FertilityMonitor.Instance smi) => smi.IsReadyToLayEgg(), null).ToggleEffect((FertilityMonitor.Instance smi) => smi.fertileEffect).Transition(this.infertile, GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.Not(new StateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.Transition.ConditionCallback(FertilityMonitor.IsFertile)), UpdateRate.SIM_1000ms);
+		this.infertile.Transition(this.fertile, new StateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.Transition.ConditionCallback(FertilityMonitor.IsFertile), UpdateRate.SIM_1000ms);
 	}
+
+	public static bool IsFertile(FertilityMonitor.Instance smi)
+	{
+		return !smi.HasTag(GameTags.Creatures.Confined) && !smi.HasTag(GameTags.Creatures.Expecting);
+	}
+
+	private GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.State fertile;
+
+	private GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.State infertile;
 
 	[Serializable]
 	public class BreedingChance
@@ -32,6 +44,8 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 		public Tag eggPrefab;
 
 		public List<FertilityMonitor.BreedingChance> initialBreedingWeights;
+
+		public float baseFertileCycles;
 	}
 
 	public new class Instance : GameStateMachine<FertilityMonitor, FertilityMonitor.Instance, IStateMachineTarget, FertilityMonitor.Def>.GameInstance
@@ -42,8 +56,11 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			this.fertility = Db.Get().Amounts.Fertility.Lookup(base.gameObject);
 			if (GenericGameSettings.instance.acceleratedLifecycle)
 			{
-				this.fertility.deltaAttribute.Add("AcceleratedLifeCycle", new AttributeModifier(this.fertility.deltaAttribute.Id, 33.333332f, null, false, false, true));
+				this.fertility.deltaAttribute.Add(new AttributeModifier(this.fertility.deltaAttribute.Id, 33.333332f, null, false, false, true));
 			}
+			float num = 100f / (def.baseFertileCycles * 600f);
+			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false);
+			this.fertileEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num, CREATURES.MODIFIERS.BASE_FERTILITY.NAME, false, false, true));
 			this.breedingChances = new List<FertilityMonitor.BreedingChance>();
 			if (def.initialBreedingWeights != null)
 			{
@@ -165,6 +182,8 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 
 		[Serialize]
 		public List<FertilityMonitor.BreedingChance> breedingChances;
+
+		public Effect fertileEffect;
 
 		private static HashedString targetEggSymbol = "snapto_egg";
 	}

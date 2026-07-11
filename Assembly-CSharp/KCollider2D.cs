@@ -52,7 +52,7 @@ public abstract class KCollider2D : KMonoBehaviour, IRenderEveryTick
 		{
 			return;
 		}
-		this.cachedExtents = this.GetExtents();
+		this.cachedExtents = extents;
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();

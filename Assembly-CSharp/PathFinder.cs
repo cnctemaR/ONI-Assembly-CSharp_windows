@@ -15,10 +15,10 @@ public class PathFinder
 		{
 			if (Grid.Visible[j] > 0 || Grid.Spawnable[j] > 0)
 			{
-				List<int> list = ListPool<int, PathFinder>.Allocate();
-				GameUtil.FloodFillConditional(j, PathFinder.allowPathfindingFloodFillCb, list, null);
+				ListPool<int, PathFinder>.PooledList pooledList = ListPool<int, PathFinder>.Allocate();
+				GameUtil.FloodFillConditional(j, PathFinder.allowPathfindingFloodFillCb, pooledList, null);
 				Grid.AllowPathfinding[j] = true;
-				ListPool<int, PathFinder>.Free(list);
+				pooledList.Recycle();
 			}
 		}
 		Grid.OnReveal = (Action<int>)Delegate.Combine(Grid.OnReveal, new Action<int>(PathFinder.OnReveal));
@@ -26,10 +26,6 @@ public class PathFinder
 
 	private static void OnReveal(int cell)
 	{
-		List<int> list = ListPool<int, PathFinder>.Allocate();
-		GameUtil.FloodFillConditional(cell, PathFinder.allowPathfindingFloodFillCb, list, null);
-		Grid.AllowPathfinding[cell] = true;
-		ListPool<int, PathFinder>.Free(list);
 	}
 
 	public static void UpdatePath(NavGrid nav_grid, PathFinderAbilities abilities, PathFinder.PotentialPath potential_path, PathFinderQuery query, ref PathFinder.Path path)
@@ -198,8 +194,12 @@ public class PathFinder
 
 	public static bool IsSubmerged(int cell)
 	{
+		if (!Grid.IsValidCell(cell))
+		{
+			return false;
+		}
 		int num = Grid.CellAbove(cell);
-		return Grid.IsValidCell(num) && Grid.Element[num].IsLiquid;
+		return (Grid.IsValidCell(num) && Grid.Element[num].IsLiquid) || (Grid.Element[cell].IsLiquid && Grid.IsValidCell(num) && Grid.Element[num].IsSolid);
 	}
 
 	public static void AddPotentials(PathFinder.PotentialPath potential, int cost, int underwater_cost, ref PathFinderAbilities abilities, PathFinderQuery query, int max_links_per_cell, NavGrid.Link[] links, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, int parent_cell, NavType parent_nav_type)

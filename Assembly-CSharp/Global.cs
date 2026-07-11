@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Steamworks;
 using UnityEngine;
 
@@ -125,6 +126,7 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha2, Modifier.Alt, global::Action.SreenShot2x, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha3, Modifier.Alt, global::Action.SreenShot8x, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha4, Modifier.Alt, global::Action.SreenShot32x, true, false),
+			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha5, Modifier.Alt, global::Action.DebugLockCursor, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha0, Modifier.Alt, global::Action.DebugTogglePersonalPriorityComparison, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.Return, Modifier.None, global::Action.DialogSubmit, false, false),
 			new BindingEntry("BuildingsMenu", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.BuildMenuKeyA, false, true),
@@ -161,7 +163,8 @@ public class Global : MonoBehaviour
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.C, Modifier.Shift, global::Action.SandboxClearFloor, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.X, Modifier.Shift, global::Action.SandboxDestroy, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.E, Modifier.Shift, global::Action.SandboxSpawnEntity, true, false),
-			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.S, Modifier.Shift, global::Action.ToggleSandboxTools, true, false)
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.S, Modifier.Shift, global::Action.ToggleSandboxTools, true, false),
+			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.R, Modifier.Shift, global::Action.SandboxReveal, true, false)
 		};
 		return list.ToArray();
 	}
@@ -193,7 +196,6 @@ public class Global : MonoBehaviour
 		this.OutputSystemInfo();
 		Global.Instance = this;
 		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings());
-		this.mCoroutineManager = base.gameObject.AddComponent<CoroutineManager>();
 		this.mAnimEventManager = new AnimEventManager();
 		KBatchedAnimUpdater.CreateInstance();
 		DistributionPlatform.Initialize();
@@ -222,11 +224,6 @@ public class Global : MonoBehaviour
 		}
 	}
 
-	private void Start()
-	{
-		base.StartCoroutine(this.mCoroutineManager.UpdateCoroutines());
-	}
-
 	private void RestoreLegacyMetricsSetting()
 	{
 		if (KPlayerPrefs.GetInt("ENABLE_METRICS", 1) == 0)
@@ -241,11 +238,6 @@ public class Global : MonoBehaviour
 	public GameInputManager GetInputManager()
 	{
 		return this.mInputManager;
-	}
-
-	public CoroutineManager GetCoroutineManager()
-	{
-		return this.mCoroutineManager;
 	}
 
 	public AnimEventManager GetAnimEventManager()
@@ -290,7 +282,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 269773U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 273433U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -351,7 +343,13 @@ public class Global : MonoBehaviour
 			Dictionary<string, object> hardwareStats = KleiMetrics.GetHardwareStats();
 			foreach (KeyValuePair<string, object> keyValuePair in hardwareStats)
 			{
-				Console.WriteLine(string.Format("    {0}={1}", keyValuePair.Key.ToString(), keyValuePair.Value.ToString()));
+				try
+				{
+					Console.WriteLine(string.Format("    {0}={1}", keyValuePair.Key.ToString(), keyValuePair.Value.ToString()));
+				}
+				catch
+				{
+				}
 			}
 			Console.WriteLine(string.Format("    {0}={1}", "System Language", Application.systemLanguage.ToString()));
 		}
@@ -362,11 +360,11 @@ public class Global : MonoBehaviour
 
 	private GameInputManager mInputManager;
 
-	private CoroutineManager mCoroutineManager;
-
 	private AnimEventManager mAnimEventManager;
 
 	private bool gotKleiUserID;
+
+	private Thread mainThread;
 
 	public static readonly string LanguagePackKey = "LanguagePack";
 

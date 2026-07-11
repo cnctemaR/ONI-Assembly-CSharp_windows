@@ -217,7 +217,7 @@ public enum GameHashes
 	IncapacitationRecovery = -1256572400,
 	FullyHealed = -1491582671,
 	DebugGoTo = 775300118,
-	Threatned = 229718515,
+	Threatened = -96307134,
 	SafeFromThreats = -21431934,
 	BeginWalk = 1773898642,
 	EndWalk = 1597112836,
@@ -274,10 +274,16 @@ public enum GameHashes
 	RanchingComplete = 1827504087,
 	CreatureAbandonedRanchStation = -364750427,
 	RanchStationNoLongerAvailable = 1689625967,
+	CreatureArrivedAtCapturePoint = -1992722293,
+	RancherReadyAtCapturePoint = 449143823,
+	FixedCaptureComplete = 643180843,
+	CreatureAbandonedCapturePoint = -1000356449,
+	CapturePointNoLongerAvailable = 1034952693,
 	ElementNoLongerAvailable = 801383139,
 	BreedingChancesChanged = 1059811075,
 	ToggleSandbox = -1948169901,
 	ConsumePlant = -1793167409,
 	AteFromStorage = -1452790913,
-	SpawnedFrom = -2027483228
+	SpawnedFrom = -2027483228,
+	UserSettingsChanged = -543130682
 }

@@ -20,7 +20,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		Traits component = base.GetComponent<Traits>();
 		Trait trait = Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID);
 		component.Add(trait);
-		foreach (Disease disease in Db.Get().Diseases)
+		foreach (Disease disease in Db.Get().Diseases.resources)
 		{
 			AmountInstance amountInstance = this.AddAmount(disease.amount);
 			this.attributes.Add(disease.cureSpeedBase);
@@ -30,7 +30,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		if (component2 != null)
 		{
 			Ownables component3 = base.GetComponent<Ownables>();
-			foreach (AssignableSlot assignableSlot in Db.Get().AssignableSlots)
+			foreach (AssignableSlot assignableSlot in Db.Get().AssignableSlots.resources)
 			{
 				if (assignableSlot is OwnableSlot)
 				{
@@ -84,7 +84,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		Klei.AI.Attribute attribute = attributeConverter.attribute;
 		AttributeInstance attributeInstance = attribute.Lookup(this);
 		AttributeModifier target_modifier = new AttributeModifier(targetAttribute.Id, attributeConverter.Lookup(this).Evaluate(), attribute.Name, false, false, false);
-		this.GetAttributes().Add("dependent from " + attribute.Id, target_modifier);
+		this.GetAttributes().Add(target_modifier);
 		AttributeInstance attributeInstance2 = attributeInstance;
 		attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, new global::System.Action(delegate
 		{
@@ -94,7 +94,7 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 
 	private void OnDeath(object data)
 	{
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			minionIdentity.GetComponent<Effects>().Add("Mourning", true);
 		}

@@ -3,5 +3,6 @@
 public enum Endpoint
 {
 	Source,
-	Sink
+	Sink,
+	Conduit
 }

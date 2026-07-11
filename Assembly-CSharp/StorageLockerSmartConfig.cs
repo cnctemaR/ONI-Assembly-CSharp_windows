@@ -49,10 +49,7 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		storage.allowItemRemoval = true;
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
-		StorageLockerSmart storageLockerSmart = go.AddOrGet<StorageLockerSmart>();
-		storageLockerSmart.noFilterTint = new Color(0.5019608f, 0.5019608f, 0.5019608f, 1f);
-		storageLockerSmart.filterTint = new Color(1f, 1f, 1f, 1f);
-		go.AddOrGet<UserMenu>();
+		go.AddOrGet<StorageLockerSmart>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
 			StorageController.Instance instance = new StorageController.Instance(game_object.GetComponent<KPrefabID>());

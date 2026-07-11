@@ -71,7 +71,7 @@ public static class RoomConstraints
 					if (!flag)
 					{
 						bool flag2 = false;
-						foreach (RoomType roomType3 in Db.Get().RoomTypes)
+						foreach (RoomType roomType3 in Db.Get().RoomTypes.resources)
 						{
 							if (roomType3 != roomType2 && roomType3 != Db.Get().RoomTypes.Neutral)
 							{

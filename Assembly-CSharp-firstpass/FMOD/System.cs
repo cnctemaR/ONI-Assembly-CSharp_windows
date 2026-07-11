@@ -1,125 +1,132 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace FMOD
 {
-	public class System : HandleBase
+	public struct System
 	{
-		public System(IntPtr raw)
-			: base(raw)
-		{
-		}
-
 		public RESULT release()
 		{
-			RESULT result = FMOD.System.FMOD5_System_Release(this.rawPtr);
-			if (result == RESULT.OK)
-			{
-				this.rawPtr = IntPtr.Zero;
-			}
-			return result;
+			return FMOD.System.FMOD5_System_Release(this.handle);
 		}
 
 		public RESULT setOutput(OUTPUTTYPE output)
 		{
-			return FMOD.System.FMOD5_System_SetOutput(this.rawPtr, output);
+			return FMOD.System.FMOD5_System_SetOutput(this.handle, output);
 		}
 
 		public RESULT getOutput(out OUTPUTTYPE output)
 		{
-			return FMOD.System.FMOD5_System_GetOutput(this.rawPtr, out output);
+			return FMOD.System.FMOD5_System_GetOutput(this.handle, out output);
 		}
 
 		public RESULT getNumDrivers(out int numdrivers)
 		{
-			return FMOD.System.FMOD5_System_GetNumDrivers(this.rawPtr, out numdrivers);
+			return FMOD.System.FMOD5_System_GetNumDrivers(this.handle, out numdrivers);
 		}
 
-		public RESULT getDriverInfo(int id, StringBuilder name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels)
+		public RESULT getDriverInfo(int id, out string name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels)
 		{
-			IntPtr intPtr = Marshal.AllocHGlobal(name.Capacity);
-			RESULT result = FMOD.System.FMOD5_System_GetDriverInfo(this.rawPtr, id, intPtr, namelen, out guid, out systemrate, out speakermode, out speakermodechannels);
-			StringMarshalHelper.NativeToBuilder(name, intPtr);
+			IntPtr intPtr = Marshal.AllocHGlobal(namelen);
+			RESULT result = FMOD.System.FMOD5_System_GetDriverInfo(this.handle, id, intPtr, namelen, out guid, out systemrate, out speakermode, out speakermodechannels);
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				name = freeHelper.stringFromNative(intPtr);
+			}
 			Marshal.FreeHGlobal(intPtr);
 			return result;
 		}
 
+		public RESULT getDriverInfo(int id, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels)
+		{
+			return FMOD.System.FMOD5_System_GetDriverInfo(this.handle, id, IntPtr.Zero, 0, out guid, out systemrate, out speakermode, out speakermodechannels);
+		}
+
 		public RESULT setDriver(int driver)
 		{
-			return FMOD.System.FMOD5_System_SetDriver(this.rawPtr, driver);
+			return FMOD.System.FMOD5_System_SetDriver(this.handle, driver);
 		}
 
 		public RESULT getDriver(out int driver)
 		{
-			return FMOD.System.FMOD5_System_GetDriver(this.rawPtr, out driver);
+			return FMOD.System.FMOD5_System_GetDriver(this.handle, out driver);
 		}
 
 		public RESULT setSoftwareChannels(int numsoftwarechannels)
 		{
-			return FMOD.System.FMOD5_System_SetSoftwareChannels(this.rawPtr, numsoftwarechannels);
+			return FMOD.System.FMOD5_System_SetSoftwareChannels(this.handle, numsoftwarechannels);
 		}
 
 		public RESULT getSoftwareChannels(out int numsoftwarechannels)
 		{
-			return FMOD.System.FMOD5_System_GetSoftwareChannels(this.rawPtr, out numsoftwarechannels);
+			return FMOD.System.FMOD5_System_GetSoftwareChannels(this.handle, out numsoftwarechannels);
 		}
 
 		public RESULT setSoftwareFormat(int samplerate, SPEAKERMODE speakermode, int numrawspeakers)
 		{
-			return FMOD.System.FMOD5_System_SetSoftwareFormat(this.rawPtr, samplerate, speakermode, numrawspeakers);
+			return FMOD.System.FMOD5_System_SetSoftwareFormat(this.handle, samplerate, speakermode, numrawspeakers);
 		}
 
 		public RESULT getSoftwareFormat(out int samplerate, out SPEAKERMODE speakermode, out int numrawspeakers)
 		{
-			return FMOD.System.FMOD5_System_GetSoftwareFormat(this.rawPtr, out samplerate, out speakermode, out numrawspeakers);
+			return FMOD.System.FMOD5_System_GetSoftwareFormat(this.handle, out samplerate, out speakermode, out numrawspeakers);
 		}
 
 		public RESULT setDSPBufferSize(uint bufferlength, int numbuffers)
 		{
-			return FMOD.System.FMOD5_System_SetDSPBufferSize(this.rawPtr, bufferlength, numbuffers);
+			return FMOD.System.FMOD5_System_SetDSPBufferSize(this.handle, bufferlength, numbuffers);
 		}
 
 		public RESULT getDSPBufferSize(out uint bufferlength, out int numbuffers)
 		{
-			return FMOD.System.FMOD5_System_GetDSPBufferSize(this.rawPtr, out bufferlength, out numbuffers);
+			return FMOD.System.FMOD5_System_GetDSPBufferSize(this.handle, out bufferlength, out numbuffers);
 		}
 
 		public RESULT setFileSystem(FILE_OPENCALLBACK useropen, FILE_CLOSECALLBACK userclose, FILE_READCALLBACK userread, FILE_SEEKCALLBACK userseek, FILE_ASYNCREADCALLBACK userasyncread, FILE_ASYNCCANCELCALLBACK userasynccancel, int blockalign)
 		{
-			return FMOD.System.FMOD5_System_SetFileSystem(this.rawPtr, useropen, userclose, userread, userseek, userasyncread, userasynccancel, blockalign);
+			return FMOD.System.FMOD5_System_SetFileSystem(this.handle, useropen, userclose, userread, userseek, userasyncread, userasynccancel, blockalign);
 		}
 
 		public RESULT attachFileSystem(FILE_OPENCALLBACK useropen, FILE_CLOSECALLBACK userclose, FILE_READCALLBACK userread, FILE_SEEKCALLBACK userseek)
 		{
-			return FMOD.System.FMOD5_System_AttachFileSystem(this.rawPtr, useropen, userclose, userread, userseek);
+			return FMOD.System.FMOD5_System_AttachFileSystem(this.handle, useropen, userclose, userread, userseek);
 		}
 
 		public RESULT setAdvancedSettings(ref ADVANCEDSETTINGS settings)
 		{
 			settings.cbSize = Marshal.SizeOf(settings);
-			return FMOD.System.FMOD5_System_SetAdvancedSettings(this.rawPtr, ref settings);
+			return FMOD.System.FMOD5_System_SetAdvancedSettings(this.handle, ref settings);
 		}
 
 		public RESULT getAdvancedSettings(ref ADVANCEDSETTINGS settings)
 		{
 			settings.cbSize = Marshal.SizeOf(settings);
-			return FMOD.System.FMOD5_System_GetAdvancedSettings(this.rawPtr, ref settings);
+			return FMOD.System.FMOD5_System_GetAdvancedSettings(this.handle, ref settings);
 		}
 
 		public RESULT setCallback(SYSTEM_CALLBACK callback, SYSTEM_CALLBACK_TYPE callbackmask)
 		{
-			return FMOD.System.FMOD5_System_SetCallback(this.rawPtr, callback, callbackmask);
+			return FMOD.System.FMOD5_System_SetCallback(this.handle, callback, callbackmask);
 		}
 
 		public RESULT setPluginPath(string path)
 		{
-			return FMOD.System.FMOD5_System_SetPluginPath(this.rawPtr, Encoding.UTF8.GetBytes(path + '\0'));
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.System.FMOD5_System_SetPluginPath(this.handle, freeHelper.byteFromStringUTF8(path));
+			}
+			return result;
 		}
 
 		public RESULT loadPlugin(string filename, out uint handle, uint priority)
 		{
-			return FMOD.System.FMOD5_System_LoadPlugin(this.rawPtr, Encoding.UTF8.GetBytes(filename + '\0'), out handle, priority);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.System.FMOD5_System_LoadPlugin(this.handle, freeHelper.byteFromStringUTF8(filename), out handle, priority);
+			}
+			return result;
 		}
 
 		public RESULT loadPlugin(string filename, out uint handle)
@@ -129,206 +136,209 @@ namespace FMOD
 
 		public RESULT unloadPlugin(uint handle)
 		{
-			return FMOD.System.FMOD5_System_UnloadPlugin(this.rawPtr, handle);
+			return FMOD.System.FMOD5_System_UnloadPlugin(this.handle, handle);
 		}
 
 		public RESULT getNumNestedPlugins(uint handle, out int count)
 		{
-			return FMOD.System.FMOD5_System_GetNumNestedPlugins(this.rawPtr, handle, out count);
+			return FMOD.System.FMOD5_System_GetNumNestedPlugins(this.handle, handle, out count);
 		}
 
 		public RESULT getNestedPlugin(uint handle, int index, out uint nestedhandle)
 		{
-			return FMOD.System.FMOD5_System_GetNestedPlugin(this.rawPtr, handle, index, out nestedhandle);
+			return FMOD.System.FMOD5_System_GetNestedPlugin(this.handle, handle, index, out nestedhandle);
 		}
 
 		public RESULT getNumPlugins(PLUGINTYPE plugintype, out int numplugins)
 		{
-			return FMOD.System.FMOD5_System_GetNumPlugins(this.rawPtr, plugintype, out numplugins);
+			return FMOD.System.FMOD5_System_GetNumPlugins(this.handle, plugintype, out numplugins);
 		}
 
 		public RESULT getPluginHandle(PLUGINTYPE plugintype, int index, out uint handle)
 		{
-			return FMOD.System.FMOD5_System_GetPluginHandle(this.rawPtr, plugintype, index, out handle);
+			return FMOD.System.FMOD5_System_GetPluginHandle(this.handle, plugintype, index, out handle);
 		}
 
-		public RESULT getPluginInfo(uint handle, out PLUGINTYPE plugintype, StringBuilder name, int namelen, out uint version)
+		public RESULT getPluginInfo(uint handle, out PLUGINTYPE plugintype, out string name, int namelen, out uint version)
 		{
-			IntPtr intPtr = Marshal.AllocHGlobal(name.Capacity);
-			RESULT result = FMOD.System.FMOD5_System_GetPluginInfo(this.rawPtr, handle, out plugintype, intPtr, namelen, out version);
-			StringMarshalHelper.NativeToBuilder(name, intPtr);
+			IntPtr intPtr = Marshal.AllocHGlobal(namelen);
+			RESULT result = FMOD.System.FMOD5_System_GetPluginInfo(this.handle, handle, out plugintype, intPtr, namelen, out version);
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				name = freeHelper.stringFromNative(intPtr);
+			}
 			Marshal.FreeHGlobal(intPtr);
 			return result;
 		}
 
+		public RESULT getPluginInfo(uint handle, out PLUGINTYPE plugintype, out uint version)
+		{
+			return FMOD.System.FMOD5_System_GetPluginInfo(this.handle, handle, out plugintype, IntPtr.Zero, 0, out version);
+		}
+
 		public RESULT setOutputByPlugin(uint handle)
 		{
-			return FMOD.System.FMOD5_System_SetOutputByPlugin(this.rawPtr, handle);
+			return FMOD.System.FMOD5_System_SetOutputByPlugin(this.handle, handle);
 		}
 
 		public RESULT getOutputByPlugin(out uint handle)
 		{
-			return FMOD.System.FMOD5_System_GetOutputByPlugin(this.rawPtr, out handle);
+			return FMOD.System.FMOD5_System_GetOutputByPlugin(this.handle, out handle);
 		}
 
 		public RESULT createDSPByPlugin(uint handle, out DSP dsp)
 		{
-			dsp = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateDSPByPlugin(this.rawPtr, handle, out intPtr);
-			dsp = new DSP(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_CreateDSPByPlugin(this.handle, handle, out dsp.handle);
 		}
 
 		public RESULT getDSPInfoByPlugin(uint handle, out IntPtr description)
 		{
-			return FMOD.System.FMOD5_System_GetDSPInfoByPlugin(this.rawPtr, handle, out description);
+			return FMOD.System.FMOD5_System_GetDSPInfoByPlugin(this.handle, handle, out description);
 		}
 
 		public RESULT registerDSP(ref DSP_DESCRIPTION description, out uint handle)
 		{
-			return FMOD.System.FMOD5_System_RegisterDSP(this.rawPtr, ref description, out handle);
+			return FMOD.System.FMOD5_System_RegisterDSP(this.handle, ref description, out handle);
 		}
 
 		public RESULT init(int maxchannels, INITFLAGS flags, IntPtr extradriverdata)
 		{
-			return FMOD.System.FMOD5_System_Init(this.rawPtr, maxchannels, flags, extradriverdata);
+			return FMOD.System.FMOD5_System_Init(this.handle, maxchannels, flags, extradriverdata);
 		}
 
 		public RESULT close()
 		{
-			return FMOD.System.FMOD5_System_Close(this.rawPtr);
+			return FMOD.System.FMOD5_System_Close(this.handle);
 		}
 
 		public RESULT update()
 		{
-			return FMOD.System.FMOD5_System_Update(this.rawPtr);
+			return FMOD.System.FMOD5_System_Update(this.handle);
 		}
 
 		public RESULT setSpeakerPosition(SPEAKER speaker, float x, float y, bool active)
 		{
-			return FMOD.System.FMOD5_System_SetSpeakerPosition(this.rawPtr, speaker, x, y, active);
+			return FMOD.System.FMOD5_System_SetSpeakerPosition(this.handle, speaker, x, y, active);
 		}
 
 		public RESULT getSpeakerPosition(SPEAKER speaker, out float x, out float y, out bool active)
 		{
-			return FMOD.System.FMOD5_System_GetSpeakerPosition(this.rawPtr, speaker, out x, out y, out active);
+			return FMOD.System.FMOD5_System_GetSpeakerPosition(this.handle, speaker, out x, out y, out active);
 		}
 
 		public RESULT setStreamBufferSize(uint filebuffersize, TIMEUNIT filebuffersizetype)
 		{
-			return FMOD.System.FMOD5_System_SetStreamBufferSize(this.rawPtr, filebuffersize, filebuffersizetype);
+			return FMOD.System.FMOD5_System_SetStreamBufferSize(this.handle, filebuffersize, filebuffersizetype);
 		}
 
 		public RESULT getStreamBufferSize(out uint filebuffersize, out TIMEUNIT filebuffersizetype)
 		{
-			return FMOD.System.FMOD5_System_GetStreamBufferSize(this.rawPtr, out filebuffersize, out filebuffersizetype);
+			return FMOD.System.FMOD5_System_GetStreamBufferSize(this.handle, out filebuffersize, out filebuffersizetype);
 		}
 
 		public RESULT set3DSettings(float dopplerscale, float distancefactor, float rolloffscale)
 		{
-			return FMOD.System.FMOD5_System_Set3DSettings(this.rawPtr, dopplerscale, distancefactor, rolloffscale);
+			return FMOD.System.FMOD5_System_Set3DSettings(this.handle, dopplerscale, distancefactor, rolloffscale);
 		}
 
 		public RESULT get3DSettings(out float dopplerscale, out float distancefactor, out float rolloffscale)
 		{
-			return FMOD.System.FMOD5_System_Get3DSettings(this.rawPtr, out dopplerscale, out distancefactor, out rolloffscale);
+			return FMOD.System.FMOD5_System_Get3DSettings(this.handle, out dopplerscale, out distancefactor, out rolloffscale);
 		}
 
 		public RESULT set3DNumListeners(int numlisteners)
 		{
-			return FMOD.System.FMOD5_System_Set3DNumListeners(this.rawPtr, numlisteners);
+			return FMOD.System.FMOD5_System_Set3DNumListeners(this.handle, numlisteners);
 		}
 
 		public RESULT get3DNumListeners(out int numlisteners)
 		{
-			return FMOD.System.FMOD5_System_Get3DNumListeners(this.rawPtr, out numlisteners);
+			return FMOD.System.FMOD5_System_Get3DNumListeners(this.handle, out numlisteners);
 		}
 
 		public RESULT set3DListenerAttributes(int listener, ref VECTOR pos, ref VECTOR vel, ref VECTOR forward, ref VECTOR up)
 		{
-			return FMOD.System.FMOD5_System_Set3DListenerAttributes(this.rawPtr, listener, ref pos, ref vel, ref forward, ref up);
+			return FMOD.System.FMOD5_System_Set3DListenerAttributes(this.handle, listener, ref pos, ref vel, ref forward, ref up);
 		}
 
 		public RESULT get3DListenerAttributes(int listener, out VECTOR pos, out VECTOR vel, out VECTOR forward, out VECTOR up)
 		{
-			return FMOD.System.FMOD5_System_Get3DListenerAttributes(this.rawPtr, listener, out pos, out vel, out forward, out up);
+			return FMOD.System.FMOD5_System_Get3DListenerAttributes(this.handle, listener, out pos, out vel, out forward, out up);
 		}
 
 		public RESULT set3DRolloffCallback(CB_3D_ROLLOFFCALLBACK callback)
 		{
-			return FMOD.System.FMOD5_System_Set3DRolloffCallback(this.rawPtr, callback);
+			return FMOD.System.FMOD5_System_Set3DRolloffCallback(this.handle, callback);
 		}
 
 		public RESULT mixerSuspend()
 		{
-			return FMOD.System.FMOD5_System_MixerSuspend(this.rawPtr);
+			return FMOD.System.FMOD5_System_MixerSuspend(this.handle);
 		}
 
 		public RESULT mixerResume()
 		{
-			return FMOD.System.FMOD5_System_MixerResume(this.rawPtr);
+			return FMOD.System.FMOD5_System_MixerResume(this.handle);
 		}
 
 		public RESULT getDefaultMixMatrix(SPEAKERMODE sourcespeakermode, SPEAKERMODE targetspeakermode, float[] matrix, int matrixhop)
 		{
-			return FMOD.System.FMOD5_System_GetDefaultMixMatrix(this.rawPtr, sourcespeakermode, targetspeakermode, matrix, matrixhop);
+			return FMOD.System.FMOD5_System_GetDefaultMixMatrix(this.handle, sourcespeakermode, targetspeakermode, matrix, matrixhop);
 		}
 
 		public RESULT getSpeakerModeChannels(SPEAKERMODE mode, out int channels)
 		{
-			return FMOD.System.FMOD5_System_GetSpeakerModeChannels(this.rawPtr, mode, out channels);
+			return FMOD.System.FMOD5_System_GetSpeakerModeChannels(this.handle, mode, out channels);
 		}
 
 		public RESULT getVersion(out uint version)
 		{
-			return FMOD.System.FMOD5_System_GetVersion(this.rawPtr, out version);
+			return FMOD.System.FMOD5_System_GetVersion(this.handle, out version);
 		}
 
 		public RESULT getOutputHandle(out IntPtr handle)
 		{
-			return FMOD.System.FMOD5_System_GetOutputHandle(this.rawPtr, out handle);
+			return FMOD.System.FMOD5_System_GetOutputHandle(this.handle, out handle);
 		}
 
 		public RESULT getChannelsPlaying(out int channels, out int realchannels)
 		{
-			return FMOD.System.FMOD5_System_GetChannelsPlaying(this.rawPtr, out channels, out realchannels);
+			return FMOD.System.FMOD5_System_GetChannelsPlaying(this.handle, out channels, out realchannels);
 		}
 
 		public RESULT getCPUUsage(out float dsp, out float stream, out float geometry, out float update, out float total)
 		{
-			return FMOD.System.FMOD5_System_GetCPUUsage(this.rawPtr, out dsp, out stream, out geometry, out update, out total);
+			return FMOD.System.FMOD5_System_GetCPUUsage(this.handle, out dsp, out stream, out geometry, out update, out total);
 		}
 
 		public RESULT getFileUsage(out long sampleBytesRead, out long streamBytesRead, out long otherBytesRead)
 		{
-			return FMOD.System.FMOD5_System_GetFileUsage(this.rawPtr, out sampleBytesRead, out streamBytesRead, out otherBytesRead);
+			return FMOD.System.FMOD5_System_GetFileUsage(this.handle, out sampleBytesRead, out streamBytesRead, out otherBytesRead);
 		}
 
 		public RESULT getSoundRAM(out int currentalloced, out int maxalloced, out int total)
 		{
-			return FMOD.System.FMOD5_System_GetSoundRAM(this.rawPtr, out currentalloced, out maxalloced, out total);
+			return FMOD.System.FMOD5_System_GetSoundRAM(this.handle, out currentalloced, out maxalloced, out total);
 		}
 
 		public RESULT createSound(string name, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
 		{
-			sound = null;
-			byte[] bytes = Encoding.UTF8.GetBytes(name + '\0');
-			CREATESOUNDEXINFO_INTERNAL createsoundexinfo_INTERNAL = CREATESOUNDEXINFO_INTERNAL.CreateFromExternal(ref exinfo);
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateSound(this.rawPtr, bytes, mode, ref createsoundexinfo_INTERNAL, out intPtr);
-			sound = new Sound(intPtr);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.System.FMOD5_System_CreateSound(this.handle, freeHelper.byteFromStringUTF8(name), mode, ref exinfo, out sound.handle);
+			}
 			return result;
 		}
 
 		public RESULT createSound(byte[] data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
 		{
-			sound = null;
-			CREATESOUNDEXINFO_INTERNAL createsoundexinfo_INTERNAL = CREATESOUNDEXINFO_INTERNAL.CreateFromExternal(ref exinfo);
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateSound(this.rawPtr, data, mode, ref createsoundexinfo_INTERNAL, out intPtr);
-			sound = new Sound(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_CreateSound(this.handle, data, mode, ref exinfo, out sound.handle);
+		}
+
+		public RESULT createSound(IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+		{
+			return FMOD.System.FMOD5_System_CreateSound(this.handle, name_or_data, mode, ref exinfo, out sound.handle);
 		}
 
 		public RESULT createSound(string name, MODE mode, out Sound sound)
@@ -340,23 +350,22 @@ namespace FMOD
 
 		public RESULT createStream(string name, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
 		{
-			sound = null;
-			byte[] bytes = Encoding.UTF8.GetBytes(name + '\0');
-			CREATESOUNDEXINFO_INTERNAL createsoundexinfo_INTERNAL = CREATESOUNDEXINFO_INTERNAL.CreateFromExternal(ref exinfo);
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateStream(this.rawPtr, bytes, mode, ref createsoundexinfo_INTERNAL, out intPtr);
-			sound = new Sound(intPtr);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.System.FMOD5_System_CreateStream(this.handle, freeHelper.byteFromStringUTF8(name), mode, ref exinfo, out sound.handle);
+			}
 			return result;
 		}
 
 		public RESULT createStream(byte[] data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
 		{
-			sound = null;
-			CREATESOUNDEXINFO_INTERNAL createsoundexinfo_INTERNAL = CREATESOUNDEXINFO_INTERNAL.CreateFromExternal(ref exinfo);
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateStream(this.rawPtr, data, mode, ref createsoundexinfo_INTERNAL, out intPtr);
-			sound = new Sound(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_CreateStream(this.handle, data, mode, ref exinfo, out sound.handle);
+		}
+
+		public RESULT createStream(IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out Sound sound)
+		{
+			return FMOD.System.FMOD5_System_CreateStream(this.handle, name_or_data, mode, ref exinfo, out sound.handle);
 		}
 
 		public RESULT createStream(string name, MODE mode, out Sound sound)
@@ -368,226 +377,201 @@ namespace FMOD
 
 		public RESULT createDSP(ref DSP_DESCRIPTION description, out DSP dsp)
 		{
-			dsp = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateDSP(this.rawPtr, ref description, out intPtr);
-			dsp = new DSP(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_CreateDSP(this.handle, ref description, out dsp.handle);
 		}
 
 		public RESULT createDSPByType(DSP_TYPE type, out DSP dsp)
 		{
-			dsp = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateDSPByType(this.rawPtr, type, out intPtr);
-			dsp = new DSP(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_CreateDSPByType(this.handle, type, out dsp.handle);
 		}
 
 		public RESULT createChannelGroup(string name, out ChannelGroup channelgroup)
 		{
-			channelgroup = null;
-			byte[] bytes = Encoding.UTF8.GetBytes(name + '\0');
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateChannelGroup(this.rawPtr, bytes, out intPtr);
-			channelgroup = new ChannelGroup(intPtr);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.System.FMOD5_System_CreateChannelGroup(this.handle, freeHelper.byteFromStringUTF8(name), out channelgroup.handle);
+			}
 			return result;
 		}
 
 		public RESULT createSoundGroup(string name, out SoundGroup soundgroup)
 		{
-			soundgroup = null;
-			byte[] bytes = Encoding.UTF8.GetBytes(name + '\0');
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateSoundGroup(this.rawPtr, bytes, out intPtr);
-			soundgroup = new SoundGroup(intPtr);
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.System.FMOD5_System_CreateSoundGroup(this.handle, freeHelper.byteFromStringUTF8(name), out soundgroup.handle);
+			}
 			return result;
 		}
 
 		public RESULT createReverb3D(out Reverb3D reverb)
 		{
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateReverb3D(this.rawPtr, out intPtr);
-			reverb = new Reverb3D(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_CreateReverb3D(this.handle, out reverb.handle);
 		}
 
 		public RESULT playSound(Sound sound, ChannelGroup channelGroup, bool paused, out Channel channel)
 		{
-			channel = null;
-			IntPtr intPtr = ((!(channelGroup != null)) ? IntPtr.Zero : channelGroup.getRaw());
-			IntPtr intPtr2;
-			RESULT result = FMOD.System.FMOD5_System_PlaySound(this.rawPtr, sound.getRaw(), intPtr, paused, out intPtr2);
-			channel = new Channel(intPtr2);
-			return result;
+			return FMOD.System.FMOD5_System_PlaySound(this.handle, sound.handle, channelGroup.handle, paused, out channel.handle);
 		}
 
 		public RESULT playDSP(DSP dsp, ChannelGroup channelGroup, bool paused, out Channel channel)
 		{
-			channel = null;
-			IntPtr intPtr = ((!(channelGroup != null)) ? IntPtr.Zero : channelGroup.getRaw());
-			IntPtr intPtr2;
-			RESULT result = FMOD.System.FMOD5_System_PlayDSP(this.rawPtr, dsp.getRaw(), intPtr, paused, out intPtr2);
-			channel = new Channel(intPtr2);
-			return result;
+			return FMOD.System.FMOD5_System_PlayDSP(this.handle, dsp.handle, channelGroup.handle, paused, out channel.handle);
 		}
 
 		public RESULT getChannel(int channelid, out Channel channel)
 		{
-			channel = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_GetChannel(this.rawPtr, channelid, out intPtr);
-			channel = new Channel(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_GetChannel(this.handle, channelid, out channel.handle);
 		}
 
 		public RESULT getMasterChannelGroup(out ChannelGroup channelgroup)
 		{
-			channelgroup = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_GetMasterChannelGroup(this.rawPtr, out intPtr);
-			channelgroup = new ChannelGroup(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_GetMasterChannelGroup(this.handle, out channelgroup.handle);
 		}
 
 		public RESULT getMasterSoundGroup(out SoundGroup soundgroup)
 		{
-			soundgroup = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_GetMasterSoundGroup(this.rawPtr, out intPtr);
-			soundgroup = new SoundGroup(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_GetMasterSoundGroup(this.handle, out soundgroup.handle);
 		}
 
 		public RESULT attachChannelGroupToPort(uint portType, ulong portIndex, ChannelGroup channelgroup, bool passThru = false)
 		{
-			return FMOD.System.FMOD5_System_AttachChannelGroupToPort(this.rawPtr, portType, portIndex, channelgroup.getRaw(), passThru);
+			return FMOD.System.FMOD5_System_AttachChannelGroupToPort(this.handle, portType, portIndex, channelgroup.handle, passThru);
 		}
 
 		public RESULT detachChannelGroupFromPort(ChannelGroup channelgroup)
 		{
-			return FMOD.System.FMOD5_System_DetachChannelGroupFromPort(this.rawPtr, channelgroup.getRaw());
+			return FMOD.System.FMOD5_System_DetachChannelGroupFromPort(this.handle, channelgroup.handle);
 		}
 
 		public RESULT setReverbProperties(int instance, ref REVERB_PROPERTIES prop)
 		{
-			return FMOD.System.FMOD5_System_SetReverbProperties(this.rawPtr, instance, ref prop);
+			return FMOD.System.FMOD5_System_SetReverbProperties(this.handle, instance, ref prop);
 		}
 
 		public RESULT getReverbProperties(int instance, out REVERB_PROPERTIES prop)
 		{
-			return FMOD.System.FMOD5_System_GetReverbProperties(this.rawPtr, instance, out prop);
+			return FMOD.System.FMOD5_System_GetReverbProperties(this.handle, instance, out prop);
 		}
 
 		public RESULT lockDSP()
 		{
-			return FMOD.System.FMOD5_System_LockDSP(this.rawPtr);
+			return FMOD.System.FMOD5_System_LockDSP(this.handle);
 		}
 
 		public RESULT unlockDSP()
 		{
-			return FMOD.System.FMOD5_System_UnlockDSP(this.rawPtr);
+			return FMOD.System.FMOD5_System_UnlockDSP(this.handle);
 		}
 
 		public RESULT getRecordNumDrivers(out int numdrivers, out int numconnected)
 		{
-			return FMOD.System.FMOD5_System_GetRecordNumDrivers(this.rawPtr, out numdrivers, out numconnected);
+			return FMOD.System.FMOD5_System_GetRecordNumDrivers(this.handle, out numdrivers, out numconnected);
 		}
 
-		public RESULT getRecordDriverInfo(int id, StringBuilder name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels, out DRIVER_STATE state)
+		public RESULT getRecordDriverInfo(int id, out string name, int namelen, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels, out DRIVER_STATE state)
 		{
-			IntPtr intPtr = Marshal.AllocHGlobal(name.Capacity);
-			RESULT result = FMOD.System.FMOD5_System_GetRecordDriverInfo(this.rawPtr, id, intPtr, namelen, out guid, out systemrate, out speakermode, out speakermodechannels, out state);
-			StringMarshalHelper.NativeToBuilder(name, intPtr);
+			IntPtr intPtr = Marshal.AllocHGlobal(namelen);
+			RESULT result = FMOD.System.FMOD5_System_GetRecordDriverInfo(this.handle, id, intPtr, namelen, out guid, out systemrate, out speakermode, out speakermodechannels, out state);
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				name = freeHelper.stringFromNative(intPtr);
+			}
 			Marshal.FreeHGlobal(intPtr);
 			return result;
 		}
 
+		public RESULT getRecordDriverInfo(int id, out Guid guid, out int systemrate, out SPEAKERMODE speakermode, out int speakermodechannels, out DRIVER_STATE state)
+		{
+			return FMOD.System.FMOD5_System_GetRecordDriverInfo(this.handle, id, IntPtr.Zero, 0, out guid, out systemrate, out speakermode, out speakermodechannels, out state);
+		}
+
 		public RESULT getRecordPosition(int id, out uint position)
 		{
-			return FMOD.System.FMOD5_System_GetRecordPosition(this.rawPtr, id, out position);
+			return FMOD.System.FMOD5_System_GetRecordPosition(this.handle, id, out position);
 		}
 
 		public RESULT recordStart(int id, Sound sound, bool loop)
 		{
-			return FMOD.System.FMOD5_System_RecordStart(this.rawPtr, id, sound.getRaw(), loop);
+			return FMOD.System.FMOD5_System_RecordStart(this.handle, id, sound.handle, loop);
 		}
 
 		public RESULT recordStop(int id)
 		{
-			return FMOD.System.FMOD5_System_RecordStop(this.rawPtr, id);
+			return FMOD.System.FMOD5_System_RecordStop(this.handle, id);
 		}
 
 		public RESULT isRecording(int id, out bool recording)
 		{
-			return FMOD.System.FMOD5_System_IsRecording(this.rawPtr, id, out recording);
+			return FMOD.System.FMOD5_System_IsRecording(this.handle, id, out recording);
 		}
 
 		public RESULT createGeometry(int maxpolygons, int maxvertices, out Geometry geometry)
 		{
-			geometry = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_CreateGeometry(this.rawPtr, maxpolygons, maxvertices, out intPtr);
-			geometry = new Geometry(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_CreateGeometry(this.handle, maxpolygons, maxvertices, out geometry.handle);
 		}
 
 		public RESULT setGeometrySettings(float maxworldsize)
 		{
-			return FMOD.System.FMOD5_System_SetGeometrySettings(this.rawPtr, maxworldsize);
+			return FMOD.System.FMOD5_System_SetGeometrySettings(this.handle, maxworldsize);
 		}
 
 		public RESULT getGeometrySettings(out float maxworldsize)
 		{
-			return FMOD.System.FMOD5_System_GetGeometrySettings(this.rawPtr, out maxworldsize);
+			return FMOD.System.FMOD5_System_GetGeometrySettings(this.handle, out maxworldsize);
 		}
 
 		public RESULT loadGeometry(IntPtr data, int datasize, out Geometry geometry)
 		{
-			geometry = null;
-			IntPtr intPtr;
-			RESULT result = FMOD.System.FMOD5_System_LoadGeometry(this.rawPtr, data, datasize, out intPtr);
-			geometry = new Geometry(intPtr);
-			return result;
+			return FMOD.System.FMOD5_System_LoadGeometry(this.handle, data, datasize, out geometry.handle);
 		}
 
 		public RESULT getGeometryOcclusion(ref VECTOR listener, ref VECTOR source, out float direct, out float reverb)
 		{
-			return FMOD.System.FMOD5_System_GetGeometryOcclusion(this.rawPtr, ref listener, ref source, out direct, out reverb);
+			return FMOD.System.FMOD5_System_GetGeometryOcclusion(this.handle, ref listener, ref source, out direct, out reverb);
 		}
 
 		public RESULT setNetworkProxy(string proxy)
 		{
-			return FMOD.System.FMOD5_System_SetNetworkProxy(this.rawPtr, Encoding.UTF8.GetBytes(proxy + '\0'));
+			RESULT result;
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				result = FMOD.System.FMOD5_System_SetNetworkProxy(this.handle, freeHelper.byteFromStringUTF8(proxy));
+			}
+			return result;
 		}
 
-		public RESULT getNetworkProxy(StringBuilder proxy, int proxylen)
+		public RESULT getNetworkProxy(out string proxy, int proxylen)
 		{
-			IntPtr intPtr = Marshal.AllocHGlobal(proxy.Capacity);
-			RESULT result = FMOD.System.FMOD5_System_GetNetworkProxy(this.rawPtr, intPtr, proxylen);
-			StringMarshalHelper.NativeToBuilder(proxy, intPtr);
+			IntPtr intPtr = Marshal.AllocHGlobal(proxylen);
+			RESULT result = FMOD.System.FMOD5_System_GetNetworkProxy(this.handle, intPtr, proxylen);
+			using (StringHelper.ThreadSafeEncoding freeHelper = StringHelper.GetFreeHelper())
+			{
+				proxy = freeHelper.stringFromNative(intPtr);
+			}
 			Marshal.FreeHGlobal(intPtr);
 			return result;
 		}
 
 		public RESULT setNetworkTimeout(int timeout)
 		{
-			return FMOD.System.FMOD5_System_SetNetworkTimeout(this.rawPtr, timeout);
+			return FMOD.System.FMOD5_System_SetNetworkTimeout(this.handle, timeout);
 		}
 
 		public RESULT getNetworkTimeout(out int timeout)
 		{
-			return FMOD.System.FMOD5_System_GetNetworkTimeout(this.rawPtr, out timeout);
+			return FMOD.System.FMOD5_System_GetNetworkTimeout(this.handle, out timeout);
 		}
 
 		public RESULT setUserData(IntPtr userdata)
 		{
-			return FMOD.System.FMOD5_System_SetUserData(this.rawPtr, userdata);
+			return FMOD.System.FMOD5_System_SetUserData(this.handle, userdata);
 		}
 
 		public RESULT getUserData(out IntPtr userdata)
 		{
-			return FMOD.System.FMOD5_System_GetUserData(this.rawPtr, out userdata);
+			return FMOD.System.FMOD5_System_GetUserData(this.handle, out userdata);
 		}
 
 		[DllImport("fmodstudio")]
@@ -636,6 +620,15 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_AttachFileSystem(IntPtr system, FILE_OPENCALLBACK useropen, FILE_CLOSECALLBACK userclose, FILE_READCALLBACK userread, FILE_SEEKCALLBACK userseek);
 
 		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_SetAdvancedSettings(IntPtr system, ref ADVANCEDSETTINGS settings);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_GetAdvancedSettings(IntPtr system, ref ADVANCEDSETTINGS settings);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_SetCallback(IntPtr system, SYSTEM_CALLBACK callback, SYSTEM_CALLBACK_TYPE callbackmask);
+
+		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_SetPluginPath(IntPtr system, byte[] path);
 
 		[DllImport("fmodstudio")]
@@ -660,13 +653,13 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_GetPluginInfo(IntPtr system, uint handle, out PLUGINTYPE plugintype, IntPtr name, int namelen, out uint version);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_CreateDSPByPlugin(IntPtr system, uint handle, out IntPtr dsp);
-
-		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_SetOutputByPlugin(IntPtr system, uint handle);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_GetOutputByPlugin(IntPtr system, out uint handle);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_CreateDSPByPlugin(IntPtr system, uint handle, out IntPtr dsp);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_GetDSPInfoByPlugin(IntPtr system, uint handle, out IntPtr description);
@@ -684,34 +677,16 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_Update(IntPtr system);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_SetAdvancedSettings(IntPtr system, ref ADVANCEDSETTINGS settings);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_GetAdvancedSettings(IntPtr system, ref ADVANCEDSETTINGS settings);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_Set3DRolloffCallback(IntPtr system, CB_3D_ROLLOFFCALLBACK callback);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_MixerSuspend(IntPtr system);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_MixerResume(IntPtr system);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_GetDefaultMixMatrix(IntPtr system, SPEAKERMODE sourcespeakermode, SPEAKERMODE targetspeakermode, float[] matrix, int matrixhop);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_GetSpeakerModeChannels(IntPtr system, SPEAKERMODE mode, out int channels);
-
-		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_SetCallback(IntPtr system, SYSTEM_CALLBACK callback, SYSTEM_CALLBACK_TYPE callbackmask);
-
-		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_SetSpeakerPosition(IntPtr system, SPEAKER speaker, float x, float y, bool active);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_GetSpeakerPosition(IntPtr system, SPEAKER speaker, out float x, out float y, out bool active);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_SetStreamBufferSize(IntPtr system, uint filebuffersize, TIMEUNIT filebuffersizetype);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_GetStreamBufferSize(IntPtr system, out uint filebuffersize, out TIMEUNIT filebuffersizetype);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_Set3DSettings(IntPtr system, float dopplerscale, float distancefactor, float rolloffscale);
@@ -732,10 +707,19 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_Get3DListenerAttributes(IntPtr system, int listener, out VECTOR pos, out VECTOR vel, out VECTOR forward, out VECTOR up);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_SetStreamBufferSize(IntPtr system, uint filebuffersize, TIMEUNIT filebuffersizetype);
+		private static extern RESULT FMOD5_System_Set3DRolloffCallback(IntPtr system, CB_3D_ROLLOFFCALLBACK callback);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_GetStreamBufferSize(IntPtr system, out uint filebuffersize, out TIMEUNIT filebuffersizetype);
+		private static extern RESULT FMOD5_System_MixerSuspend(IntPtr system);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_MixerResume(IntPtr system);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_GetDefaultMixMatrix(IntPtr system, SPEAKERMODE sourcespeakermode, SPEAKERMODE targetspeakermode, float[] matrix, int matrixhop);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_GetSpeakerModeChannels(IntPtr system, SPEAKERMODE mode, out int channels);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_GetVersion(IntPtr system, out uint version);
@@ -756,10 +740,16 @@ namespace FMOD
 		private static extern RESULT FMOD5_System_GetSoundRAM(IntPtr system, out int currentalloced, out int maxalloced, out int total);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_CreateSound(IntPtr system, byte[] name_or_data, MODE mode, ref CREATESOUNDEXINFO_INTERNAL exinfo, out IntPtr sound);
+		private static extern RESULT FMOD5_System_CreateSound(IntPtr system, byte[] name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out IntPtr sound);
 
 		[DllImport("fmodstudio")]
-		private static extern RESULT FMOD5_System_CreateStream(IntPtr system, byte[] name_or_data, MODE mode, ref CREATESOUNDEXINFO_INTERNAL exinfo, out IntPtr sound);
+		private static extern RESULT FMOD5_System_CreateSound(IntPtr system, IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out IntPtr sound);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_CreateStream(IntPtr system, byte[] name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out IntPtr sound);
+
+		[DllImport("fmodstudio")]
+		private static extern RESULT FMOD5_System_CreateStream(IntPtr system, IntPtr name_or_data, MODE mode, ref CREATESOUNDEXINFO exinfo, out IntPtr sound);
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_CreateDSP(IntPtr system, ref DSP_DESCRIPTION description, out IntPtr dsp);
@@ -859,5 +849,17 @@ namespace FMOD
 
 		[DllImport("fmodstudio")]
 		private static extern RESULT FMOD5_System_GetUserData(IntPtr system, out IntPtr userdata);
+
+		public bool hasHandle()
+		{
+			return this.handle != IntPtr.Zero;
+		}
+
+		public void clearHandle()
+		{
+			this.handle = IntPtr.Zero;
+		}
+
+		public IntPtr handle;
 	}
 }

@@ -12,7 +12,7 @@ public class MainMenuSoundEvent : SoundEvent
 	public override void PlaySound(AnimEventManager.EventPlayerData behaviour)
 	{
 		EventInstance eventInstance = KFMOD.BeginOneShot(base.sound, Vector3.zero);
-		if (eventInstance != null)
+		if (eventInstance.isValid())
 		{
 			eventInstance.setParameterValue("frame", (float)base.frame);
 			KFMOD.EndOneShot(eventInstance);

@@ -16,11 +16,12 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 			{
 				this.animController.Play(ConduitSensor.ON_ANIMS, KAnim.PlayMode.Loop);
 				int num = Grid.PosToCell(this);
-				byte b = Grid.DiseaseIdx[num];
+				ConduitFlow flowManager = Conduit.GetFlowManager(this.conduitType);
+				ConduitFlow.ConduitContents contents = flowManager.GetContents(num);
 				Color32 color = Color.white;
-				if (b != 255)
+				if (contents.diseaseIdx != 255)
 				{
-					Disease disease = Db.Get().Diseases[(int)b];
+					Disease disease = Db.Get().Diseases[(int)contents.diseaseIdx];
 					color = disease.overlayColour;
 				}
 				this.animController.SetSymbolTint(ConduitDiseaseSensor.TINT_SYMBOL, color);

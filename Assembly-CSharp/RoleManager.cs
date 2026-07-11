@@ -48,7 +48,7 @@ public class RoleManager
 		this.roleAssignmentRequirements = new RoleAssignmentRequirements(this);
 		this.InitRoleConfigs();
 		this.RestoreSlots();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			MinionResume component = minionIdentity.GetComponent<MinionResume>();
 			if (component != null)
@@ -104,7 +104,7 @@ public class RoleManager
 			}
 			return;
 		}
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities)
+		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 		{
 			if (minionIdentity == changedID)
 			{
@@ -383,10 +383,12 @@ public class RoleManager
 				if (resume.CurrentRole == "NoRole")
 				{
 					text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.ALREADY_IS_JOBLESS, resume.GetProperName());
+					text += "\n\n";
 				}
 				else
 				{
 					text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.ALREADY_IS_ROLE, resume.GetProperName(), role.name);
+					text += "\n\n";
 				}
 			}
 			else if (resume.CurrentRole == roleID && resume.TargetRole != roleID)
@@ -400,8 +402,8 @@ public class RoleManager
 				if (resume.CurrentRole != "NoRole")
 				{
 					text = text + "\n" + string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.WILL_BE_UNASSIGNED, resume.GetProperName(), role.name, this.GetRole(resume.CurrentRole).name);
-					text += "\n\n";
 				}
+				text += "\n\n";
 			}
 			else
 			{
@@ -585,7 +587,7 @@ public class RoleManager
 		Navigator component = from_go.GetComponent<Navigator>();
 		RoleStation roleStation = null;
 		float num = float.PositiveInfinity;
-		foreach (RoleStation roleStation2 in Components.RoleStations)
+		foreach (RoleStation roleStation2 in Components.RoleStations.Items)
 		{
 			float num2 = (float)component.GetNavigationCost(roleStation2);
 			if (num2 < num)
@@ -600,18 +602,21 @@ public class RoleManager
 	public void AssignToRole(string roleID, MinionResume resume, bool instant = false, bool restoring = false)
 	{
 		RoleConfig role = this.GetRole(roleID);
+		if (!restoring)
+		{
+			this.Unassign(resume, true);
+		}
 		if (!instant && resume.CurrentRole != roleID)
 		{
 			if (resume.GetComponent<ChoreProvider>().chores.Find((Chore chore) => chore.choreType == Db.Get().ChoreTypes.SwitchRole) == null && !DebugHandler.InstantBuildMode)
 			{
-				this.Unassign(resume, true);
 				resume.SetTargetRole(roleID);
-				goto IL_008C;
+				goto IL_0093;
 			}
 		}
 		resume.OnEnterRole(roleID, !instant);
 		RoleManager.ApplyRoleHat(role, resume.GetComponent<Accessorizer>(), resume.GetComponent<KBatchedAnimController>());
-		IL_008C:
+		IL_0093:
 		if (!restoring)
 		{
 			this.AutoAssignPersonalPriorities(roleID, resume.gameObject);
@@ -636,7 +641,7 @@ public class RoleManager
 			RoleGroup roleGroup;
 			if (role != null && Game.Instance.roleManager.RoleGroups.TryGetValue(role.roleGroup, out roleGroup))
 			{
-				foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+				foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 				{
 					if (roleGroup.choreGroupID == choreGroup.Id)
 					{
@@ -651,7 +656,9 @@ public class RoleManager
 				}
 			}
 		}
-		new TakeOffHatChore(resume.GetComponent<Worker>(), Db.Get().ChoreTypes.SwitchHat);
+		Worker component2 = resume.GetComponent<Worker>();
+		resume.GetComponent<ChoreConsumer>();
+		new TakeOffHatChore(component2, Db.Get().ChoreTypes.SwitchHat);
 		if (!skip_refresh && JobsTableScreen.Instance != null)
 		{
 			JobsTableScreen.Instance.Refresh(resume);
@@ -676,7 +683,7 @@ public class RoleManager
 				RoleGroup roleGroup;
 				if (role != null && Game.Instance.roleManager.RoleGroups.TryGetValue(role.roleGroup, out roleGroup))
 				{
-					foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups)
+					foreach (ChoreGroup choreGroup in Db.Get().ChoreGroups.resources)
 					{
 						if (roleGroup.choreGroupID == choreGroup.Id)
 						{

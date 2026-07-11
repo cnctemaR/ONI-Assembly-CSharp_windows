@@ -8,6 +8,22 @@ namespace FMODUnity
 	[AddComponentMenu("FMOD Studio/FMOD Studio Event Emitter")]
 	public class StudioEventEmitter : MonoBehaviour
 	{
+		public EventDescription EventDescription
+		{
+			get
+			{
+				return this.eventDescription;
+			}
+		}
+
+		public EventInstance EventInstance
+		{
+			get
+			{
+				return this.instance;
+			}
+		}
+
 		private void Start()
 		{
 			RuntimeUtils.EnforceLibraryOrder();
@@ -37,7 +53,7 @@ namespace FMODUnity
 			if (!this.isQuitting)
 			{
 				this.HandleGameEvent(EmitterGameEvent.ObjectDestroy);
-				if (this.instance != null && this.instance.isValid())
+				if (this.instance.isValid())
 				{
 					RuntimeManager.DetachInstanceFromGameObject(this.instance);
 				}
@@ -137,7 +153,7 @@ namespace FMODUnity
 			{
 				return;
 			}
-			if (this.eventDescription == null)
+			if (!this.eventDescription.isValid())
 			{
 				this.Lookup();
 			}
@@ -148,16 +164,16 @@ namespace FMODUnity
 			}
 			bool flag2;
 			this.eventDescription.is3D(out flag2);
-			if (this.instance != null && !this.instance.isValid())
+			if (!this.instance.isValid())
 			{
-				this.instance = null;
+				this.instance.clearHandle();
 			}
-			if (flag && this.instance != null)
+			if (flag && this.instance.isValid())
 			{
 				this.instance.release();
-				this.instance = null;
+				this.instance.clearHandle();
 			}
-			if (this.instance == null)
+			if (!this.instance.isValid())
 			{
 				this.eventDescription.createInstance(out this.instance);
 				if (flag2)
@@ -192,17 +208,17 @@ namespace FMODUnity
 
 		public void Stop()
 		{
-			if (this.instance != null)
+			if (this.instance.isValid())
 			{
 				this.instance.stop((!this.AllowFadeout) ? STOP_MODE.IMMEDIATE : STOP_MODE.ALLOWFADEOUT);
 				this.instance.release();
-				this.instance = null;
+				this.instance.clearHandle();
 			}
 		}
 
 		public void SetParameter(string name, float value)
 		{
-			if (this.instance != null)
+			if (this.instance.isValid())
 			{
 				this.instance.setParameterValue(name, value);
 			}
@@ -210,7 +226,7 @@ namespace FMODUnity
 
 		public bool IsPlaying()
 		{
-			if (this.instance != null && this.instance.isValid())
+			if (this.instance.isValid() && this.instance.isValid())
 			{
 				PLAYBACK_STATE playback_STATE;
 				this.instance.getPlaybackState(out playback_STATE);

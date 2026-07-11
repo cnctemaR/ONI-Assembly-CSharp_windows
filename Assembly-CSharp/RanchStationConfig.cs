@@ -60,10 +60,10 @@ public class RanchStationConfig : IBuildingConfig
 		def.getTargetRanchCell = delegate(RanchStation.Instance smi)
 		{
 			int num = Grid.InvalidCell;
-			if (smi != null && smi.IsRunning())
+			if (!smi.IsNullOrStopped())
 			{
 				num = Grid.CellRight(Grid.PosToCell(smi.transform.GetPosition()));
-				if (smi.targetRanchable != null && smi.targetRanchable.HasTag(GameTags.Creatures.Flyer))
+				if (!smi.targetRanchable.IsNullOrStopped() && smi.targetRanchable.HasTag(GameTags.Creatures.Flyer))
 				{
 					num = Grid.CellAbove(num);
 				}

@@ -313,9 +313,10 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 				if (!element.IsTemperatureInsulated)
 				{
 					data.simHandle = -2;
+					string dbg_name = primaryElement.name;
 					HandleVector<Game.ComplexCallbackInfo>.Handle handle2 = Game.Instance.complexCallbackManager.Add(new Game.ComplexCallbackInfo(delegate(object ev_data)
 					{
-						StructureTemperatureComponents.OnSimRegistered(handle, ev_data);
+						StructureTemperatureComponents.OnSimRegistered(handle, ev_data, dbg_name);
 					}, "StructureTemperature.SimRegister"));
 					BuildingDef def = primaryElement.GetComponent<Building>().Def;
 					float internalTemperature = primaryElement.InternalTemperature;
@@ -330,8 +331,16 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		}
 	}
 
-	private static void OnSimRegistered(HandleVector<int>.Handle handle, object ev_data)
+	private static void OnSimRegistered(HandleVector<int>.Handle handle, object ev_data, string dbg_name)
 	{
+		if (!GameComps.StructureTemperatures.IsValid(handle))
+		{
+			return;
+		}
+		if (!GameComps.StructureTemperatures.IsVersionValid(handle))
+		{
+			return;
+		}
 		int num = (int)ev_data;
 		StructureTemperatureData data = GameComps.StructureTemperatures.GetData(handle);
 		if (data.simHandle == -2)
@@ -348,6 +357,11 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 
 	protected unsafe void SimUnregister(HandleVector<int>.Handle handle)
 	{
+		if (!GameComps.StructureTemperatures.IsVersionValid(handle))
+		{
+			KCrashReporter.Assert(false, "Handle version mismatch in StructureTemperature.SimUnregister");
+			return;
+		}
 		StructureTemperatureData data = base.GetData(handle);
 		if (data.simHandle != -1 && !KMonoBehaviour.isLoadingScene)
 		{

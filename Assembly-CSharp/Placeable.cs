@@ -51,7 +51,7 @@ public class Placeable : KMonoBehaviour
 		this.chore = new FetchChore(Db.Get().ChoreTypes.Fetch, this.preview.GetComponent<Storage>(), 1f, new Tag[]
 		{
 			new Tag(this.prefabId.InstanceID.ToString())
-		}, null, null, true, new Action<Chore>(this.OnChoreComplete), null, null, FetchOrder2.OperationalRequirement.None, 0, null);
+		}, null, null, null, true, new Action<Chore>(this.OnChoreComplete), null, null, FetchOrder2.OperationalRequirement.None, 0, null);
 	}
 
 	private void OnChoreComplete(Chore completed_chore)
@@ -74,24 +74,25 @@ public class Placeable : KMonoBehaviour
 
 	private void OnRefreshUserMenu(object data)
 	{
+		KIconButtonMenu.ButtonInfo buttonInfo;
 		if (this.targetCell == -1)
 		{
-			UserMenu userMenu = this.userMenu;
 			string text = "action_deconstruct";
 			string text2 = UI.USERMENUACTIONS.RELOCATE.NAME;
 			global::System.Action action = new global::System.Action(this.OpenPlaceTool);
 			string text3 = UI.USERMENUACTIONS.RELOCATE.TOOLTIP;
-			userMenu.AddButton(new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text, text2, action, global::Action.NumActions, null, null, null, text3, true);
 		}
 		else
 		{
-			UserMenu userMenu2 = this.userMenu;
 			string text3 = "action_deconstruct";
 			string text2 = UI.USERMENUACTIONS.RELOCATE.NAME_OFF;
 			global::System.Action action = new global::System.Action(this.CancelRelocation);
 			string text = UI.USERMENUACTIONS.RELOCATE.TOOLTIP_OFF;
-			userMenu2.AddButton(new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true), 1f);
+			buttonInfo = new KIconButtonMenu.ButtonInfo(text3, text2, action, global::Action.NumActions, null, null, null, text, true);
 		}
+		KIconButtonMenu.ButtonInfo buttonInfo2 = buttonInfo;
+		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
 	private void CancelRelocation()
@@ -103,9 +104,6 @@ public class Placeable : KMonoBehaviour
 		}
 		this.targetCell = -1;
 	}
-
-	[MyCmpAdd]
-	private UserMenu userMenu;
 
 	[MyCmpReq]
 	private KPrefabID prefabId;

@@ -12,6 +12,7 @@ public class SteamManager : MonoBehaviour
 		{
 			if (SteamManager.s_instance == null)
 			{
+				global::Debug.LogFormat("Creating SteamManager.", Array.Empty<object>());
 				return new GameObject("SteamManager").AddComponent<SteamManager>();
 			}
 			return SteamManager.s_instance;
@@ -112,6 +113,8 @@ public class SteamManager : MonoBehaviour
 	}
 
 	public const uint STEAM_APPLICATION_ID = 457140U;
+
+	public const uint STEAM_EXPANSION1_APPLICATION_ID = 1452490U;
 
 	private static SteamManager s_instance;
 

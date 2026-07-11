@@ -389,6 +389,13 @@ namespace STRINGS
 			Standby
 		}
 
+		public class DLC1
+		{
+			public static LocString NAME = "Spaced Out!";
+
+			public static LocString NAME_ITAL = "<i>" + UI.DLC1.NAME + "</i>";
+		}
+
 		public class MATH_PICTURES
 		{
 			public class AXIS_LABELS
@@ -1498,6 +1505,17 @@ namespace STRINGS
 				public static LocString DESKTOPQUITCONFIRM = "Should I really quit?\nAll unsaved progress will be lost.";
 
 				public static LocString RESUMEBUTTON_BASENAME = "{0}: Cycle {1}";
+
+				public class DLC
+				{
+					public static LocString ACTIVATE_EXPANSION1 = "ACTIVATE DLC";
+
+					public static LocString ACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to download and install <i>Spaced Out!</i>";
+
+					public static LocString DEACTIVATE_EXPANSION1 = "DECTIVATE DLC";
+
+					public static LocString DEACTIVATE_EXPANSION1_DESC = "The game will need to restart in order to download and install the base version of the game.";
+				}
 			}
 
 			public class NEWGAMESETTINGS
@@ -1590,6 +1608,10 @@ namespace STRINGS
 
 				public static LocString CORRUPTEDSAVE = "<b><color=#ff0000>Could not load file {0}. Its data may be corrupted.</color></b>";
 
+				public static LocString SAVE_FROM_SPACED_OUT = "<b><color=#ff0000>This save is from <i>Spaced Out!</i> Activate the DLC to play it! (v{2}/v{4})</color></b>";
+
+				public static LocString SAVE_FROM_SPACED_OUT_TOOLTIP = "This save was created in the <i>Spaced Out!</i> DLC and can't be loaded in the base game.";
+
 				public static LocString SAVE_TOO_NEW = "<b><color=#ff0000>Could not load file {0}. File is using build {1}, v{2}. This build is {3}, v{4}.</color></b>";
 
 				public static LocString UNSUPPORTED_SAVE_VERSION = "<b><color=#ff0000>This save file is from a previous version of the game and is no longer supported.</color></b>";
@@ -1607,6 +1629,8 @@ namespace STRINGS
 				public static LocString WORLD_NAME = "Asteroid Type";
 
 				public static LocString NO_FILE_SELECTED = "No file selected";
+
+				public static LocString COLONY_INFO_FMT = "{0}: {1}";
 
 				public static LocString SAVE_INFO = "{0} saves  {1} autosaves  {2}";
 

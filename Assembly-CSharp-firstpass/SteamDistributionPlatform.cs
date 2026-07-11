@@ -93,6 +93,55 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 		handler(array2);
 	}
 
+	public bool PurchasedDLC
+	{
+		get
+		{
+			bool purchasedDLC = false;
+			if (SteamManager.Initialized)
+			{
+				this.GetAuthTicket(delegate(byte[] ticket)
+				{
+					CSteamID steamID = global::Steamworks.SteamUser.GetSteamID();
+					global::Steamworks.SteamUser.BeginAuthSession(ticket, ticket.Length, steamID);
+					EUserHasLicenseForAppResult euserHasLicenseForAppResult = global::Steamworks.SteamUser.UserHasLicenseForApp(steamID, new AppId_t(1452490U));
+					purchasedDLC = euserHasLicenseForAppResult == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense;
+					global::Steamworks.SteamUser.EndAuthSession(steamID);
+				});
+			}
+			return purchasedDLC;
+		}
+	}
+
+	public bool IsExpansion1Active
+	{
+		get
+		{
+			return SteamManager.Initialized && SteamApps.BIsSubscribedApp(new AppId_t(1452490U));
+		}
+	}
+
+	public void ToggleDLC()
+	{
+		global::Debug.Log("Steam: Toggling DLC");
+		if (this.PurchasedDLC)
+		{
+			if (this.IsExpansion1Active)
+			{
+				SteamApps.UninstallDLC(new AppId_t(1452490U));
+				global::Debug.Log("Switching to base game");
+			}
+			else
+			{
+				SteamApps.InstallDLC(new AppId_t(1452490U));
+				global::Debug.Log("Switching to Spaced Out");
+			}
+			SteamApps.MarkContentCorrupt(false);
+			Application.OpenURL("steam://rungameid/" + 457140U);
+			App.Quit();
+		}
+	}
+
 	private void InitializeLocalUser()
 	{
 		if (SteamManager.Initialized)

@@ -72,6 +72,12 @@ public class DistributionPlatform : MonoBehaviour
 		string ApplyWordFilter(string text);
 
 		void GetAuthTicket(DistributionPlatform.AuthTicketHandler callback);
+
+		bool PurchasedDLC { get; }
+
+		bool IsExpansion1Active { get; }
+
+		void ToggleDLC();
 	}
 
 	public delegate void AuthTicketHandler(byte[] ticket);

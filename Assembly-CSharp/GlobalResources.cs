@@ -49,5 +49,9 @@ public class GlobalResources : ScriptableObject
 
 	public Sprite sadDupe;
 
+	public Sprite baseGameLogoSmall;
+
+	public Sprite expansion1LogoSmall;
+
 	private static GlobalResources _Instance;
 }

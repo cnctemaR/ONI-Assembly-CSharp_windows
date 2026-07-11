@@ -179,15 +179,15 @@ namespace KMod
 			List<Mod.ArchivedVersion> list2;
 			if (flag3)
 			{
-				list2 = archivedVersionArray.archivedVersions.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion versionInfo) => (long)versionInfo.lastWorkingBuild == 442712L).ToList<Mod.ArchivedVersion>();
+				list2 = archivedVersionArray.archivedVersions.Where<Mod.ArchivedVersion>((Mod.ArchivedVersion versionInfo) => (long)versionInfo.lastWorkingBuild == 444111L).ToList<Mod.ArchivedVersion>();
 			}
 			else
 			{
 				list2 = (from versionInfo in archivedVersionArray.archivedVersions
-					where (long)versionInfo.lastWorkingBuild >= 442712L
+					where (long)versionInfo.lastWorkingBuild >= 444111L
 					orderby versionInfo.lastWorkingBuild
 					select versionInfo).Concat<Mod.ArchivedVersion>(from versionInfo in archivedVersionArray.archivedVersions
-					where (long)versionInfo.lastWorkingBuild < 442712L
+					where (long)versionInfo.lastWorkingBuild < 444111L
 					orderby versionInfo.lastWorkingBuild descending
 					select versionInfo).ToList<Mod.ArchivedVersion>();
 			}

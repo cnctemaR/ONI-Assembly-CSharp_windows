@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{8F268BA9-118D-4485-BA41-626FA958E56B}</ProjectGuid>
+    <ProjectGuid>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9121}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UIElementsModule</AssemblyName>
@@ -481,27 +481,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{8F268BA9-118D-4485-BA41-626FA958E54A}</Project>
+      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9100}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
-      <Project>{8F268BA9-118D-4485-BA41-626FA958E553}</Project>
+      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9109}</Project>
       <Name>UnityEngine.IMGUIModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.InputLegacyModule\UnityEngine.InputLegacyModule.csproj">
-      <Project>{8F268BA9-118D-4485-BA41-626FA958E554}</Project>
+      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E910A}</Project>
       <Name>UnityEngine.InputLegacyModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{8F268BA9-118D-4485-BA41-626FA958E55E}</Project>
+      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E9114}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextCoreModule\UnityEngine.TextCoreModule.csproj">
-      <Project>{8F268BA9-118D-4485-BA41-626FA958E566}</Project>
+      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E911C}</Project>
       <Name>UnityEngine.TextCoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{8F268BA9-118D-4485-BA41-626FA958E567}</Project>
+      <Project>{5F58BEAA-DFD5-4052-82A9-33E0AD0E911D}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
   </ItemGroup>

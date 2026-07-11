@@ -38,7 +38,7 @@ public class MainMenu : KScreen
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 22, this.normalButtonStyle));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.RETIREDCOLONIES, delegate
 		{
-			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, "");
+			MainMenu.ActivateRetiredColoniesScreen(this.transform.gameObject, "");
 		}, 14, this.normalButtonStyle));
 		if (DistributionPlatform.Initialized)
 		{
@@ -60,13 +60,22 @@ public class MainMenu : KScreen
 		this.CheckDoubleBoundKeys();
 		this.topLeftAlphaMessage.gameObject.SetActive(false);
 		this.nextUpdateTimer.gameObject.SetActive(false);
+		this.expansion1Toggle.gameObject.SetActive(false);
+		bool ownsExpansion1 = DistributionPlatform.Inst.PurchasedDLC;
 		this.m_motdServerClient = new MotdServerClient();
 		this.m_motdServerClient.GetMotd(delegate(MotdServerClient.MotdResponse response, string error)
 		{
 			if (error == null)
 			{
 				this.topLeftAlphaMessage.gameObject.SetActive(true);
-				this.nextUpdateTimer.gameObject.SetActive(true);
+				if (ownsExpansion1)
+				{
+					this.expansion1Toggle.gameObject.SetActive(true);
+				}
+				else
+				{
+					this.nextUpdateTimer.gameObject.SetActive(true);
+				}
 				this.motdImageHeader.text = response.image_header_text;
 				this.motdNewsHeader.text = response.news_header_text;
 				this.motdNewsBody.text = response.news_body_text;
@@ -375,7 +384,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 442712U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 17)
+				if (header.buildVersion > 444111U || gameInfo.saveMajorVersion != 7 || gameInfo.saveMinorVersion > 17)
 				{
 					flag = false;
 				}
@@ -559,6 +568,9 @@ public class MainMenu : KScreen
 
 	[SerializeField]
 	private NextUpdateTimer nextUpdateTimer;
+
+	[SerializeField]
+	private DLCToggle expansion1Toggle;
 
 	[SerializeField]
 	private BuildWatermark buildWatermark;

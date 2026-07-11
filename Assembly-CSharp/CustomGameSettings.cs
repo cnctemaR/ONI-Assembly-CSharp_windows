@@ -97,7 +97,11 @@ public class CustomGameSettings : KMonoBehaviour
 		bool flag2 = true;
 		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
 		{
-			if (this.QualitySettings[keyValuePair.Key].triggers_custom_game)
+			if (!this.QualitySettings.ContainsKey(keyValuePair.Key))
+			{
+				DebugUtil.LogWarningArgs(new object[] { "Quality settings missing " + keyValuePair.Key });
+			}
+			else if (this.QualitySettings[keyValuePair.Key].triggers_custom_game)
 			{
 				if (keyValuePair.Value != this.QualitySettings[keyValuePair.Key].default_level_id)
 				{

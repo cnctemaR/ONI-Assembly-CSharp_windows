@@ -462,6 +462,16 @@ public static class SimMessages
 		{
 			return;
 		}
+		if (temperature < 0f || 10000f < temperature)
+		{
+			KCrashReporter.Assert(false, string.Format("Invalid cell modification: Cell={0}, EIdx={1}, T={2}, M={3}", new object[] { gameCell, elementIdx, temperature, mass }));
+			return;
+		}
+		if (temperature == 0f && mass > 0f && elementIdx >= 0)
+		{
+			KCrashReporter.Assert(false, string.Format("RESET TEMPERATURE: Invalid cell modification: Cell={0}, EIdx={1}, T={2}, M={3}", new object[] { gameCell, elementIdx, temperature, mass }));
+			temperature = ElementLoader.elements[elementIdx].defaultValues.temperature;
+		}
 		SimMessages.ModifyCellMessage* ptr = stackalloc SimMessages.ModifyCellMessage[checked(1 * sizeof(SimMessages.ModifyCellMessage))];
 		ptr->cellIdx = gameCell;
 		ptr->callbackIdx = callbackIdx;

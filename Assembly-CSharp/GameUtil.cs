@@ -1747,9 +1747,12 @@ public static class GameUtil
 		for (int i = 0; i < 4; i++)
 		{
 			int num = ptr[i];
-			Element element = Grid.Element[num];
-			all_not_gaseous = all_not_gaseous && (!element.IsGas && !element.IsVacuum);
-			all_over_pressure = all_over_pressure && ((!element.IsGas && !element.IsVacuum) || Grid.Mass[num] >= 1.8f);
+			if (Grid.IsValidCell(num))
+			{
+				Element element = Grid.Element[num];
+				all_not_gaseous = all_not_gaseous && (!element.IsGas && !element.IsVacuum);
+				all_over_pressure = all_over_pressure && ((!element.IsGas && !element.IsVacuum) || Grid.Mass[num] >= 1.8f);
+			}
 		}
 	}
 

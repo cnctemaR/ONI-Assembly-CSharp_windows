@@ -342,7 +342,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = msg;
-			error.build = 273961;
+			error.build = 274136;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = text3;
 			error.user_message = userMessage;

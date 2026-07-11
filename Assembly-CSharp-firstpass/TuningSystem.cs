@@ -20,12 +20,20 @@ public class TuningSystem
 
 	private static void ListenForFileChanges()
 	{
-		FileSystemWatcher fileSystemWatcher = new FileSystemWatcher();
-		fileSystemWatcher.NotifyFilter = NotifyFilters.LastWrite;
-		fileSystemWatcher.Changed += TuningSystem.OnFileChanged;
-		fileSystemWatcher.Path = Path.GetDirectoryName(TuningSystem._TuningPath);
-		fileSystemWatcher.Filter = Path.GetFileName(TuningSystem._TuningPath);
-		fileSystemWatcher.EnableRaisingEvents = true;
+		string directoryName = Path.GetDirectoryName(TuningSystem._TuningPath);
+		try
+		{
+			FileSystemWatcher fileSystemWatcher = new FileSystemWatcher();
+			fileSystemWatcher.NotifyFilter = NotifyFilters.LastWrite;
+			fileSystemWatcher.Changed += TuningSystem.OnFileChanged;
+			fileSystemWatcher.Path = directoryName;
+			fileSystemWatcher.Filter = Path.GetFileName(TuningSystem._TuningPath);
+			fileSystemWatcher.EnableRaisingEvents = true;
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning("Error when attempting to monitor path: " + directoryName + "\n" + ex.ToString(), null);
+		}
 	}
 
 	private static void OnFileChanged(object source, FileSystemEventArgs e)

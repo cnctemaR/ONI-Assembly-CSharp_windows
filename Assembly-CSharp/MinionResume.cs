@@ -74,6 +74,10 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 					this.ForceAddSkillPoint();
 				}
 			}
+			foreach (KeyValuePair<HashedString, float> keyValuePair2 in this.AptitudeByRoleGroup)
+			{
+				this.AptitudeBySkillGroup[keyValuePair2.Key] = keyValuePair2.Value;
+			}
 		}
 	}
 
@@ -577,6 +581,9 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	[Serialize]
 	public Dictionary<string, bool> MasteryBySkillID = new Dictionary<string, bool>();
+
+	[Serialize]
+	public Dictionary<HashedString, float> AptitudeByRoleGroup = new Dictionary<HashedString, float>();
 
 	[Serialize]
 	public Dictionary<HashedString, float> AptitudeBySkillGroup = new Dictionary<HashedString, float>();

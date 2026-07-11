@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{FDE6F529-5CA8-424D-8CEE-15B333A20F8C}</ProjectGuid>
+    <ProjectGuid>{60E7D178-8426-4935-B9FB-1FC0CDBB83EB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.GameCenterModule</AssemblyName>
@@ -38,19 +38,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{FDE6F529-5CA8-424D-8CEE-15B333A20F6E}</Project>
+      <Project>{60E7D178-8426-4935-B9FB-1FC0CDBB83CD}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{FDE6F529-5CA8-424D-8CEE-15B333A20F71}</Project>
+      <Project>{60E7D178-8426-4935-B9FB-1FC0CDBB83D0}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{FDE6F529-5CA8-424D-8CEE-15B333A20F86}</Project>
+      <Project>{60E7D178-8426-4935-B9FB-1FC0CDBB83E5}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{FDE6F529-5CA8-424D-8CEE-15B333A20F9C}</Project>
+      <Project>{60E7D178-8426-4935-B9FB-1FC0CDBB83FB}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

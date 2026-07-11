@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{DB8D0B3B-4CD8-4D23-9C7A-2D8F3A5B6E86}</ProjectGuid>
+    <ProjectGuid>{92FFBCC1-8049-47DB-B601-FE10CFBBEFC5}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.UnityWebRequestModule</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestModule</AssemblyName>
@@ -34,19 +34,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{DB8D0B3B-4CD8-4D23-9C7A-2D8F3A5B6E42}</Project>
+      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEF81}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{DB8D0B3B-4CD8-4D23-9C7A-2D8F3A5B6E47}</Project>
+      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEF86}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{DB8D0B3B-4CD8-4D23-9C7A-2D8F3A5B6E59}</Project>
+      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEF98}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{DB8D0B3B-4CD8-4D23-9C7A-2D8F3A5B6E6F}</Project>
+      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEFAE}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

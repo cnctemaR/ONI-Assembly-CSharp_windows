@@ -4261,6 +4261,8 @@ namespace STRINGS
 
 				public static LocString GOOD_MODIFIER = "High Morale";
 
+				public static LocString NEUTRAL_MODIFIER = "Sufficient Morale";
+
 				public static LocString BAD_MODIFIER = "Low Morale";
 			}
 

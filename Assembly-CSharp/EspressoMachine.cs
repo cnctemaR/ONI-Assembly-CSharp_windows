@@ -6,6 +6,10 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule);
+		}, null, null);
 	}
 
 	protected override void OnCleanUp()

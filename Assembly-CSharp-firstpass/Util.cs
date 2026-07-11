@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 using TMPro;
 using UnityEngine;
 
@@ -587,6 +589,14 @@ public static class Util
 	public static bool IsNullOrWhiteSpace(this string str)
 	{
 		return string.IsNullOrEmpty(str) || str == " ";
+	}
+
+	public static void ApplyInvariantCultureToThread(Thread thread)
+	{
+		if (Application.platform != RuntimePlatform.WindowsEditor)
+		{
+			thread.CurrentCulture = CultureInfo.InvariantCulture;
+		}
 	}
 
 	private static HashSet<char> defaultInvalidUserInputChars = new HashSet<char>(Path.GetInvalidPathChars());

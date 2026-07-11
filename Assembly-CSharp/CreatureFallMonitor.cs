@@ -48,7 +48,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			}
 			Vector3 position = base.smi.transform.GetPosition();
 			int num = Grid.PosToCell(position);
-			bool flag = Grid.Solid[num];
+			bool flag = Grid.IsValidCell(num) && Grid.Solid[num];
 			if (flag)
 			{
 				return false;

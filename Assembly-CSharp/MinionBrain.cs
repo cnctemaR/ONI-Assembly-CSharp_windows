@@ -124,6 +124,7 @@ public class MinionBrain : Brain
 
 	protected override void OnCleanUp()
 	{
+		base.OnCleanUp();
 		Game.Instance.Unsubscribe(-107300940, new Action<object>(this.OnResearchComplete));
 	}
 

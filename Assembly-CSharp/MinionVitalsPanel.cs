@@ -18,12 +18,12 @@ public class MinionVitalsPanel : KMonoBehaviour
 		this.AddAmountLine(Db.Get().Amounts.Fertility, this.icon_reproduction, null);
 		this.AddAmountLine(Db.Get().Amounts.Age, this.icon_age, null);
 		this.AddAmountLine(Db.Get().Amounts.Stress, this.icon_stress, null);
+		this.AddAttributeLine(Db.Get().Attributes.QualityOfLife, this.icon_qualityoflife, null);
 		this.AddAmountLine(Db.Get().Amounts.Bladder, this.icon_bladder, null);
 		this.AddAmountLine(Db.Get().Amounts.Breath, this.icon_breath, null);
 		this.AddAmountLine(Db.Get().Amounts.Stamina, this.icon_stamina, null);
 		this.AddAmountLine(Db.Get().Amounts.Calories, this.icon_calories, null);
 		this.AddAmountLine(Db.Get().Amounts.ImmuneLevel, this.icon_disease, null);
-		this.AddAttributeLine(Db.Get().Attributes.QualityOfLife, this.icon_qualityoflife, null);
 		this.AddAmountLine(Db.Get().Amounts.ScaleGrowth, this.icon_scale_growth, null);
 		this.AddAmountLine(Db.Get().Amounts.Temperature, this.icon_temperature, null);
 		this.AddAmountLine(Db.Get().Amounts.Decor, this.icon_decor, null);

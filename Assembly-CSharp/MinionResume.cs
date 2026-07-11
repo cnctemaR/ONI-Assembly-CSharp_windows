@@ -238,6 +238,13 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		{
 			newRole = JuniorResearcher.ID;
 		}
+		if (newRole != "NoRole")
+		{
+			GameScheduler.Instance.Schedule("MoraleTutorial", 5f, delegate(object obj)
+			{
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Morale);
+			}, null, null);
+		}
 		RoleManager.ApplyRoleHat(Game.Instance.roleManager.GetRole(this.targetRole), base.GetComponent<Accessorizer>(), base.GetComponent<KBatchedAnimController>());
 		if (changeTargetRole)
 		{

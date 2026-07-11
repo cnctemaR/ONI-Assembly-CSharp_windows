@@ -10,6 +10,10 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedW
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
+		{
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule);
+		}, null, null);
 		this.workables = new PhonoboxWorkable[this.choreOffsets.Length];
 		this.chores = new Chore[this.choreOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)

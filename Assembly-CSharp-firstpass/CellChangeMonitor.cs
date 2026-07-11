@@ -55,7 +55,7 @@ public class CellChangeMonitor : Singleton<CellChangeMonitor>
 		this.UnregisterMovementStateChanged(transform.GetInstanceID(), callback);
 	}
 
-	public void RegisterCellChangedHandler(Transform transform, global::System.Action callback, string debug_name)
+	public int RegisterCellChangedHandler(Transform transform, global::System.Action callback, string debug_name)
 	{
 		int instanceID = transform.GetInstanceID();
 		CellChangeMonitor.CellChangedEntry cellChangedEntry = default(CellChangeMonitor.CellChangedEntry);
@@ -72,6 +72,7 @@ public class CellChangeMonitor : Singleton<CellChangeMonitor>
 		};
 		cellChangedEntry.handlers.Add(handler);
 		this.cellChangedHandlers[instanceID] = cellChangedEntry;
+		return instanceID;
 	}
 
 	public void UnregisterCellChangedHandler(int instance_id, global::System.Action callback)

@@ -12,13 +12,20 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 	{
 		this.splat.Clear();
 		this.splat = new DecorProvider.Splat(this);
-		if (this.decor.GetTotalValue() >= 20f)
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		bool flag = component.HasTag(RoomConstraints.ConstraintTags.Decor20);
+		bool flag2 = this.decor.GetTotalValue() >= 20f;
+		if (flag != flag2)
 		{
-			base.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Decor20);
-		}
-		else
-		{
-			base.GetComponent<KPrefabID>().RemoveTag(RoomConstraints.ConstraintTags.Decor20);
+			if (flag2)
+			{
+				component.AddTag(RoomConstraints.ConstraintTags.Decor20);
+			}
+			else
+			{
+				component.RemoveTag(RoomConstraints.ConstraintTags.Decor20);
+			}
+			Game.Instance.roomProber.SolidChangedEvent(Grid.PosToCell(this), true);
 		}
 	}
 

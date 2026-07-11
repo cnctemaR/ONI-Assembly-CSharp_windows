@@ -523,7 +523,7 @@ namespace STRINGS
 							{
 								public static LocString NAME = "Regular";
 
-								public static LocString TOOLTIP = "Duplicants regain immunity normally";
+								public static LocString TOOLTIP = "Duplicants have average expectations.";
 							}
 
 							public static class EASY
@@ -2887,9 +2887,9 @@ namespace STRINGS
 
 			public static LocString FOOD_AVAILABLE = "Available: {0}";
 
-			public static LocString FOOD_QUALITY = "Quality: {0}";
+			public static LocString FOOD_QUALITY = "Morale: {0}";
 
-			public static LocString FOOD_QUALITY_VS_EXPECTATION = UI.HORIZONTAL_RULE + "\nThis food has a quality of {0}\nIt will give these bonuses if {1} eats it:";
+			public static LocString FOOD_QUALITY_VS_EXPECTATION = UI.HORIZONTAL_RULE + "\nThis food will give {0} Morale if {1} eats it:";
 		}
 
 		public class JOBSSCREEN

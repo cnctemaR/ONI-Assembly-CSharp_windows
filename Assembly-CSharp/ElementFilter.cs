@@ -110,13 +110,14 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 			ElementFilter.filterStatusItem = new StatusItem("Filter", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.LiquidVentMap, true, 63486);
 			ElementFilter.filterStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
-				if (this.filteredElem == SimHashes.Void)
+				ElementFilter elementFilter = (ElementFilter)data;
+				if (elementFilter.filteredElem == SimHashes.Void)
 				{
 					str = string.Format(BUILDINGS.PREFABS.GASFILTER.STATUS_ITEM, BUILDINGS.PREFABS.GASFILTER.ELEMENT_NOT_SPECIFIED);
 				}
 				else
 				{
-					Element element = ElementLoader.FindElementByHash(this.filteredElem);
+					Element element = ElementLoader.FindElementByHash(elementFilter.filteredElem);
 					str = string.Format(BUILDINGS.PREFABS.GASFILTER.STATUS_ITEM, element.name);
 				}
 				return str;

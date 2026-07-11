@@ -100,7 +100,7 @@ public class RockCrusherConfig : IBuildingConfig
 		string text6 = ComplexRecipeManager.MakeRecipeID("RockCrusher", array5, array6);
 		complexRecipe = new ComplexRecipe(text6, array5, array6);
 		complexRecipe.time = 40f;
-		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.LIME_RECIPE_DESCRIPTION, SimHashes.Lime.CreateTag().ProperName(), "EggShell".ToTag().ProperName());
+		complexRecipe.description = string.Format(global::STRINGS.BUILDINGS.PREFABS.ROCKCRUSHER.LIME_RECIPE_DESCRIPTION, SimHashes.Lime.CreateTag().ProperName(), MISC.TAGS.EGGSHELL);
 		complexRecipe.useResultAsDescription = true;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("RockCrusher") };
 		ComplexRecipeManager.Get().AddObsoleteIDMapping(text5, text6);

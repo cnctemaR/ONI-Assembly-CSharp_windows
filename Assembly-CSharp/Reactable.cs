@@ -18,7 +18,7 @@ public abstract class Reactable
 		this.UpdateLocation();
 		if (follow_transform)
 		{
-			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(gameObject.transform, new global::System.Action(this.UpdateLocation), "Reactable follow transform");
+			this.transformId = Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(gameObject.transform, new global::System.Action(this.UpdateLocation), "Reactable follow transform");
 		}
 	}
 
@@ -108,7 +108,11 @@ public abstract class Reactable
 	{
 		this.End();
 		this.InternalCleanup();
-		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(this.gameObject.transform, new global::System.Action(this.UpdateLocation));
+		if (this.transformId != -1)
+		{
+			Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(this.transformId, new global::System.Action(this.UpdateLocation));
+			this.transformId = -1;
+		}
 		if (this.partitionerEntry != null)
 		{
 			this.partitionerEntry.Release();
@@ -159,6 +163,8 @@ public abstract class Reactable
 	private int rangeWidth;
 
 	private int rangeHeight;
+
+	private int transformId = -1;
 
 	public float minReactableTime;
 

@@ -140,9 +140,13 @@ namespace STRINGS
 
 			public static LocString EGG = "Critter Egg";
 
+			public static LocString EGGSHELL = "Egg Shell";
+
 			public static LocString MANUFACTUREDMATERIAL = "Manufactured Material";
 
 			public static LocString STEEL = "Steel";
+
+			public static LocString ANY = "Any";
 
 			public static LocString TRANSPARENT = "Transparent";
 
@@ -808,6 +812,24 @@ namespace STRINGS
 					UI.FormatAsLink("Gas", "ELEMENTS_GAS"),
 					". In order to utilize these suits, I'll need to hook up an Exosuit Dock to a Suit Checkpoint, then store one of the suits inside.\n\nDuplicants will equip an exosuit when they walk past the Checkpoint in the chosen direction, and will unequip their suit when walking back the opposite way."
 				});
+			}
+
+			public class MORALE
+			{
+				public static LocString NAME = "TIP: Morale";
+
+				public static LocString TOOLTIP = "Notes on Duplicant expectations";
+
+				public static LocString MESSAGEBODY = "The Foods, Rooms, Decor, and Recreation a Duplicant experiences will have an efffect on their Morale. Good experiences improve their Morale and poor experiences drop it. When Morale is below their Expectations, Duplicants will become Stressed.\n\nAs Duplicants are assigned to Jobs, they gain increased Expectations, and so the colony will have to be improved to keep up their Morale. An overview of Morale and Stress can be viewed on the Vitals screen.";
+			}
+
+			public class SCHEDULE
+			{
+				public static LocString NAME = "TIP: Scheduling";
+
+				public static LocString TOOLTIP = "Notes on managing Duplicant schedules";
+
+				public static LocString MESSAGEBODY = "Duplicants will generally only perform certain activities during certain times of day. This helps them avoid long trips to the toilet from remote work sites, and to meet up with their friends at meal time. Depending on the shape and progress of the colony, it may be useful to modify the default schedule to improve the Duplicants' efficiency and Morale.\n\nIncreasing the length of Downtime can improve their Morale, and different schedules for large numbers of Duplicants can help avoid crowding in the bathrooms or keep a Manual Generator running all night.";
 			}
 
 			public class NOMESSAGES

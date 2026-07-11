@@ -97,7 +97,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 	{
 		if (this.tutorialMessagesRemaining.Count == 0)
 		{
-			for (int i = 0; i <= 14; i++)
+			for (int i = 0; i <= 16; i++)
 			{
 				this.tutorialMessagesRemaining.Add((Tutorial.TutorialMessages)i);
 			}
@@ -214,6 +214,12 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			break;
 		case Tutorial.TutorialMessages.TM_Suits:
 			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Suits, MISC.NOTIFICATIONS.SUITS.NAME, MISC.NOTIFICATIONS.SUITS.MESSAGEBODY, MISC.NOTIFICATIONS.SUITS.TOOLTIP);
+			break;
+		case Tutorial.TutorialMessages.TM_Morale:
+			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Morale, MISC.NOTIFICATIONS.MORALE.NAME, MISC.NOTIFICATIONS.MORALE.MESSAGEBODY, MISC.NOTIFICATIONS.MORALE.TOOLTIP);
+			break;
+		case Tutorial.TutorialMessages.TM_Schedule:
+			message = new TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, MISC.NOTIFICATIONS.SCHEDULE.NAME, MISC.NOTIFICATIONS.SCHEDULE.MESSAGEBODY, MISC.NOTIFICATIONS.SCHEDULE.TOOLTIP);
 			break;
 		}
 		this.tutorialMessagesRemaining.Remove(tm);
@@ -468,6 +474,8 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		TM_BeingInfected,
 		TM_DiseaseCooking,
 		TM_Suits,
+		TM_Morale,
+		TM_Schedule,
 		TM_COUNT
 	}
 

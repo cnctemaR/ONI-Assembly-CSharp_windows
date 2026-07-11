@@ -16,12 +16,15 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		base.ExpectationTooltip = string.Format(DUPLICANTS.NEEDS.QUALITYOFLIFE.EXPECTATION_TOOLTIP, Db.Get().Attributes.QualityOfLifeExpectation.Lookup(this).GetTotalValue());
 		this.stressBonus = new Need.ModifierType
 		{
-			modifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.033333335f, DUPLICANTS.NEEDS.QUALITYOFLIFE.GOOD_MODIFIER, false, false, false)
+			modifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.QUALITYOFLIFE.GOOD_MODIFIER, false, false, false)
 		};
-		this.stressNeutral = new Need.ModifierType();
+		this.stressNeutral = new Need.ModifierType
+		{
+			modifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, -0.008333334f, DUPLICANTS.NEEDS.QUALITYOFLIFE.NEUTRAL_MODIFIER, false, false, true)
+		};
 		this.stressPenalty = new Need.ModifierType
 		{
-			modifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.016666668f, DUPLICANTS.NEEDS.QUALITYOFLIFE.BAD_MODIFIER, false, false, false),
+			modifier = new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0f, DUPLICANTS.NEEDS.QUALITYOFLIFE.BAD_MODIFIER, false, false, false),
 			statusItem = Db.Get().DuplicantStatusItems.PoorQualityOfLife
 		};
 		this.qolAttribute = Db.Get().Attributes.QualityOfLife.Lookup(base.gameObject);
@@ -33,36 +36,40 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		{
 			return;
 		}
-		float num = 1f;
+		float num = 0.004166667f;
+		float num2 = 0.041666668f;
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting("Morale");
 		if (currentQualitySetting.id == "Disabled")
 		{
-			base.SetModifier(this.stressNeutral);
+			base.SetModifier(null);
 			return;
 		}
 		if (currentQualitySetting.id == "Easy")
 		{
-			num = 0.5f;
+			num = 0.0033333334f;
+			num2 = 0.016666668f;
 		}
 		else if (currentQualitySetting.id == "Hard")
 		{
-			num = 1.5f;
+			num = 0.008333334f;
+			num2 = 0.05f;
 		}
 		else if (currentQualitySetting.id == "VeryHard")
 		{
-			num = 2f;
+			num = 0.016666668f;
+			num2 = 0.083333336f;
 		}
 		float totalValue = this.qolAttribute.GetTotalValue();
 		float totalValue2 = this.expectationAttribute.GetTotalValue();
-		float num2 = totalValue2 - totalValue;
+		float num3 = totalValue2 - totalValue;
 		if (totalValue < totalValue2)
 		{
-			this.stressPenalty.modifier.SetValue(Mathf.Min(num2 * 0.008333334f, 0.041666668f) * num);
+			this.stressPenalty.modifier.SetValue(Mathf.Min(num3 * num, num2));
 			base.SetModifier(this.stressPenalty);
 		}
 		else if (totalValue > totalValue2)
 		{
-			this.stressBonus.modifier.SetValue(Mathf.Max(-num2 * -0.016666668f, -0.041666668f) * num);
+			this.stressBonus.modifier.SetValue(Mathf.Max(-num3 * -0.016666668f, -0.033333335f));
 			base.SetModifier(this.stressBonus);
 		}
 		else

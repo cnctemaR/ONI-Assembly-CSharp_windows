@@ -368,6 +368,25 @@ public class ConsumablesTableScreen : TableScreen
 		ConsumableInfoTableColumn consumableInfoTableColumn = base.GetWidgetColumn(widget_go) as ConsumableInfoTableColumn;
 		TableRow widgetRow = base.GetWidgetRow(widget_go);
 		EdiblesManager.FoodInfo foodInfo = consumableInfoTableColumn.consumable_info as EdiblesManager.FoodInfo;
+		int num = 0;
+		if (foodInfo != null)
+		{
+			int num2 = foodInfo.Quality;
+			if (minion != null)
+			{
+				AttributeInstance attributeInstance = minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation);
+				num2 += Mathf.RoundToInt(attributeInstance.GetTotalValue());
+			}
+			string effectForFoodQuality = Edible.GetEffectForFoodQuality(num2);
+			Effect effect = Db.Get().effects.Get(effectForFoodQuality);
+			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
+			{
+				if (attributeModifier.AttributeId == Db.Get().Attributes.QualityOfLife.Id)
+				{
+					num += Mathf.RoundToInt(attributeModifier.Value);
+				}
+			}
+		}
 		TableRow.RowType rowType = widgetRow.rowType;
 		if (rowType != TableRow.RowType.Header)
 		{
@@ -387,12 +406,7 @@ public class ConsumablesTableScreen : TableScreen
 						}
 						if (foodInfo != null)
 						{
-							AttributeInstance attributeInstance = minion.GetAttributes().Get(Db.Get().Attributes.FoodExpectation);
-							tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, foodInfo.Quality, minion.GetProperName(), attributeInstance.GetTotalValue()), null);
-							int num = foodInfo.Quality + Mathf.RoundToInt(attributeInstance.GetTotalValue());
-							string effectForFoodQuality = Edible.GetEffectForFoodQuality(num);
-							Effect effect = Db.Get().effects.Get(effectForFoodQuality);
-							tooltip.AddMultiStringTooltip(Effect.CreateTooltip(effect, false), null);
+							tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY_VS_EXPECTATION, GameUtil.AddPositiveSign(num.ToString(), num > 0), minion.GetProperName()), null);
 						}
 					}
 				}
@@ -412,7 +426,7 @@ public class ConsumablesTableScreen : TableScreen
 			if (foodInfo != null)
 			{
 				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedCalories(WorldInventory.Instance.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag()) * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), null);
-				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY, foodInfo.Quality), null);
+				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY, GameUtil.AddPositiveSign(num.ToString(), num > 0)), null);
 			}
 			else
 			{

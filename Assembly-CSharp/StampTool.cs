@@ -124,34 +124,42 @@ public class StampTool : InterfaceTool
 		{
 			if (this.placementCell != Grid.InvalidCell)
 			{
-				list.Add(Grid.OffsetCell(this.placementCell, new CellOffset(cell.location_x, cell.location_y)));
+				int num = Grid.OffsetCell(this.placementCell, new CellOffset(cell.location_x, cell.location_y));
+				if (Grid.IsValidCell(num))
+				{
+					list.Add(num);
+				}
 			}
 			if (new_placement_cell != Grid.InvalidCell)
 			{
-				list2.Add(Grid.OffsetCell(new_placement_cell, new CellOffset(cell.location_x, cell.location_y)));
+				int num2 = Grid.OffsetCell(new_placement_cell, new CellOffset(cell.location_x, cell.location_y));
+				if (Grid.IsValidCell(num2))
+				{
+					list2.Add(num2);
+				}
 			}
 		}
 		this.placementCell = new_placement_cell;
-		foreach (int num in list)
+		foreach (int num3 in list)
 		{
-			if (!list2.Contains(num))
+			if (!list2.Contains(num3))
 			{
-				GameObject gameObject = Grid.Objects[num, 6];
+				GameObject gameObject = Grid.Objects[num3, 6];
 				if (gameObject != null)
 				{
 					gameObject.DeleteObject();
 				}
 			}
 		}
-		foreach (int num2 in list2)
+		foreach (int num4 in list2)
 		{
-			if (!list.Contains(num2) && Grid.Objects[num2, 6] == null)
+			if (!list.Contains(num4) && Grid.Objects[num4, 6] == null)
 			{
 				GameObject gameObject2 = Util.KInstantiate(this.PlacerPrefab, null, null);
-				Grid.Objects[num2, 6] = gameObject2;
-				Vector3 vector = Grid.CellToPosCBC(num2, this.visualizerLayer);
-				float num3 = -0.15f;
-				vector.z += num3;
+				Grid.Objects[num4, 6] = gameObject2;
+				Vector3 vector = Grid.CellToPosCBC(num4, this.visualizerLayer);
+				float num5 = -0.15f;
+				vector.z += num5;
 				gameObject2.transform.SetPosition(vector);
 			}
 		}

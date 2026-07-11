@@ -126,6 +126,10 @@ public class EmoteReactable : Reactable
 			if (this.emoteSteps[this.currentStep].anim != HashedString.Invalid)
 			{
 				this.kbac.Play(this.emoteSteps[this.currentStep].anim, this.emoteSteps[this.currentStep].mode, 1f, 0f);
+				if (this.kbac.IsStopped())
+				{
+					this.emoteSteps[this.currentStep].timeout = 0.25f;
+				}
 			}
 			if (this.emoteSteps[this.currentStep].timeout <= 0f)
 			{

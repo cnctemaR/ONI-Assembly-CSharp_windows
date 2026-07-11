@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
 using System.Threading;
 using UnityEngine;
@@ -13,8 +12,8 @@ public class LaunchInitializer : MonoBehaviour
 			return;
 		}
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
-		LaunchInitializer.ApplyCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: EU-" + 279899U.ToString(), null);
+		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
+		global::Debug.Log("Development Build: EU-" + 280216U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();
@@ -48,14 +47,6 @@ public class LaunchInitializer : MonoBehaviour
 			{
 				global::Debug.LogWarning(ex, null);
 			}
-		}
-	}
-
-	public static void ApplyCultureToThread(Thread thread)
-	{
-		if (Application.platform != RuntimePlatform.WindowsEditor)
-		{
-			thread.CurrentCulture = CultureInfo.InvariantCulture;
 		}
 	}
 

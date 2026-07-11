@@ -38,14 +38,6 @@ namespace TUNING
 
 		public const float STANDARD_STRESS_BONUS = -0.033333335f;
 
-		public const float STRESS_ABOVE_EXPECTATIONS_QOL = -0.016666668f;
-
-		public const float STRESS_BELOW_EXPECTATIONS_QOL = 0.008333334f;
-
-		public const float MAX_STRESS_QOL = 0.041666668f;
-
-		public const float MIN_STRESS_QOL = -0.041666668f;
-
 		public const float STRESS_BELOW_EXPECTATIONS_FOOD = 0.25f;
 
 		public const float STRESS_ABOVE_EXPECTATIONS_FOOD = -0.5f;
@@ -572,6 +564,37 @@ namespace TUNING
 			public static float PENALTY_3 = 0.5f;
 
 			public static float PENALTY_4 = 0.25f;
+		}
+
+		public class QOL_STRESS
+		{
+			public const float ABOVE_EXPECTATIONS = -0.016666668f;
+
+			public const float AT_EXPECTATIONS = -0.008333334f;
+
+			public const float MIN_STRESS = -0.033333335f;
+
+			public class BELOW_EXPECTATIONS
+			{
+				public const float EASY = 0.0033333334f;
+
+				public const float NEUTRAL = 0.004166667f;
+
+				public const float HARD = 0.008333334f;
+
+				public const float VERYHARD = 0.016666668f;
+			}
+
+			public class MAX_STRESS
+			{
+				public const float EASY = 0.016666668f;
+
+				public const float NEUTRAL = 0.041666668f;
+
+				public const float HARD = 0.05f;
+
+				public const float VERYHARD = 0.083333336f;
+			}
 		}
 
 		public class COMBAT

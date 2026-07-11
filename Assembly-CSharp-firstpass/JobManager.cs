@@ -97,6 +97,7 @@ public class JobManager
 		{
 			this.semaphore = semaphore;
 			this.thread = new Thread(new ParameterizedThreadStart(JobManager.WorkerThread.ThreadMain), 131072);
+			Util.ApplyInvariantCultureToThread(this.thread);
 			this.thread.Priority = global::System.Threading.ThreadPriority.AboveNormal;
 			this.thread.Name = "JobManagerWorkerThread";
 			this.jobManager = job_manager;

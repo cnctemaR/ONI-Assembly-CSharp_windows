@@ -303,7 +303,7 @@ namespace ProcGenGame
 			}
 			WorldGen.running = true;
 			WorldGen.generateThread = new Thread(new ThreadStart(this.GenerateOffline));
-			LaunchInitializer.ApplyCultureToThread(WorldGen.generateThread);
+			global::Util.ApplyInvariantCultureToThread(WorldGen.generateThread);
 			WorldGen.generateThread.Start();
 		}
 
@@ -316,7 +316,7 @@ namespace ProcGenGame
 			}
 			WorldGen.running = true;
 			WorldGen.renderThread = new Thread(new ThreadStart(this.RenderOfflineThreadFn));
-			LaunchInitializer.ApplyCultureToThread(WorldGen.renderThread);
+			global::Util.ApplyInvariantCultureToThread(WorldGen.renderThread);
 			WorldGen.renderThread.Start();
 		}
 

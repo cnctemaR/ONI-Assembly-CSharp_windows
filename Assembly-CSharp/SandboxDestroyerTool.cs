@@ -70,13 +70,7 @@ public class SandboxDestroyerTool : BrushTool
 			this.recentlyAffectedCells.Remove(cell);
 		}, false);
 		int index = Game.Instance.callbackManager.Add(callbackInfo).index;
-		int cell2 = cell;
-		SimHashes simHashes = SimHashes.Vacuum;
-		CellElementEvent sandBoxTool = CellEventLogger.Instance.SandBoxTool;
-		float num = 0f;
-		float num2 = 0f;
-		int num3 = index;
-		SimMessages.ReplaceElement(cell2, simHashes, sandBoxTool, num, num2, Db.Get().Diseases.GetIndex(Db.Get().Diseases.Get(this.settings.GetStringSetting("SandboxTools.SelectedDisease")).id), 0, num3);
+		SimMessages.ReplaceElement(cell, SimHashes.Vacuum, CellEventLogger.Instance.SandBoxTool, 0f, 0f, byte.MaxValue, 0, index);
 		HashSetPool<GameObject, SandboxDestroyerTool>.PooledHashSet pooledHashSet = HashSetPool<GameObject, SandboxDestroyerTool>.Allocate();
 		foreach (Pickupable pickupable in Components.Pickupables.Items)
 		{

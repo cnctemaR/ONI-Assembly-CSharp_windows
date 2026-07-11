@@ -27,12 +27,12 @@ public class SkillMasteredMessage : Message
 
 	public override string GetTitle()
 	{
-		return string.Format(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME, this.minionName);
+		return MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME.Replace("{Duplicant}", this.minionName);
 	}
 
 	public override string GetTooltip()
 	{
-		return string.Format(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.TOOLTIP, this.minionName);
+		return MISC.NOTIFICATIONS.SKILL_POINT_EARNED.TOOLTIP.Replace("{Duplicant}", this.minionName);
 	}
 
 	public override bool IsValid()

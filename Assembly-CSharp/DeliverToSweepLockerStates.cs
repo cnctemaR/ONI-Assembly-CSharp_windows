@@ -82,7 +82,7 @@ public class DeliverToSweepLockerStates : GameStateMachine<DeliverToSweepLockerS
 		public override void StartSM()
 		{
 			base.StartSM();
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().RobotStatusItems.UnloadingStorage, null);
+			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().RobotStatusItems.UnloadingStorage, base.gameObject);
 		}
 
 		protected override void OnCleanUp()

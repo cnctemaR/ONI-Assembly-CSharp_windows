@@ -459,7 +459,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		Game.Instance.Trigger(1505456302, this);
 		if (this.AvailableSkillpoints == 1)
 		{
-			this.lastSkillNotification = new Notification(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME.Replace("{Duplicant}", this.identity.GetProperName()), NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip), null, true, 0f, delegate(object d)
+			this.lastSkillNotification = new Notification(MISC.NOTIFICATIONS.SKILL_POINT_EARNED.NAME.Replace("{Duplicant}", this.identity.GetProperName()), NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(this.GetSkillPointGainedTooltip), this.identity, true, 0f, delegate(object d)
 			{
 				ManagementMenu.Instance.OpenSkills(this.identity);
 			}, null, null, true);

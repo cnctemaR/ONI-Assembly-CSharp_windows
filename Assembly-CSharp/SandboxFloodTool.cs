@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using UnityEngine;
 
 public class SandboxFloodTool : FloodTool
@@ -31,6 +32,12 @@ public class SandboxFloodTool : FloodTool
 			this.recentlyAffectedCells.Remove(cell);
 		}, false);
 		Element element = ElementLoader.elements[this.settings.GetIntSetting("SandboxTools.SelectedElement")];
+		byte b = Db.Get().Diseases.GetIndex(Db.Get().Diseases.Get("FoodPoisoning").id);
+		Disease disease = Db.Get().Diseases.TryGet(this.settings.GetStringSetting("SandboxTools.SelectedDisease"));
+		if (disease != null)
+		{
+			b = Db.Get().Diseases.GetIndex(disease.id);
+		}
 		int index = Game.Instance.callbackManager.Add(callbackInfo).index;
 		int cell2 = cell;
 		SimHashes id = element.id;
@@ -38,7 +45,7 @@ public class SandboxFloodTool : FloodTool
 		float floatSetting = this.settings.GetFloatSetting("SandboxTools.Mass");
 		float floatSetting2 = this.settings.GetFloatSetting("SandbosTools.Temperature");
 		int num = index;
-		SimMessages.ReplaceElement(cell2, id, sandBoxTool, floatSetting, floatSetting2, Db.Get().Diseases.GetIndex(Db.Get().Diseases.Get(this.settings.GetStringSetting("SandboxTools.SelectedDisease")).id), this.settings.GetIntSetting("SandboxTools.DiseaseCount"), num);
+		SimMessages.ReplaceElement(cell2, id, sandBoxTool, floatSetting, floatSetting2, b, this.settings.GetIntSetting("SandboxTools.DiseaseCount"), num);
 	}
 
 	private SandboxSettings settings

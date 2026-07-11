@@ -254,7 +254,7 @@ public class SweepStates : GameStateMachine<SweepStates, SweepStates.Instance, I
 		public override void StartSM()
 		{
 			base.StartSM();
-			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().RobotStatusItems.Working, null);
+			base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().RobotStatusItems.Working, base.gameObject);
 		}
 
 		protected override void OnCleanUp()

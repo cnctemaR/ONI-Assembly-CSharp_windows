@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{A30B2E18-1D87-4EC9-BC11-CE12BCDF3255}</ProjectGuid>
+    <ProjectGuid>{D810DD35-51BA-4229-ADC5-2DCED9AB0D8A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System.Xml.Linq</RootNamespace>
     <AssemblyName>System.Xml.Linq</AssemblyName>
@@ -74,23 +74,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{A30B2E18-1D87-4EC9-BC11-CE12BCDF3248}</Project>
+      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D7D}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{A30B2E18-1D87-4EC9-BC11-CE12BCDF324B}</Project>
+      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D80}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Runtime.Serialization\System.Runtime.Serialization.csproj">
-      <Project>{A30B2E18-1D87-4EC9-BC11-CE12BCDF3250}</Project>
+      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D85}</Project>
       <Name>System.Runtime.Serialization</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{A30B2E18-1D87-4EC9-BC11-CE12BCDF3254}</Project>
+      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D89}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{A30B2E18-1D87-4EC9-BC11-CE12BCDF324D}</Project>
+      <Project>{D810DD35-51BA-4229-ADC5-2DCED9AB0D82}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

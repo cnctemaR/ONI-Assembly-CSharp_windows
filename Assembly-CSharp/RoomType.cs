@@ -1,9 +1,10 @@
 ﻿using System;
+using Klei.AI;
 using STRINGS;
 
 public class RoomType : Resource
 {
-	public RoomType(string id, string name, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false)
+	public RoomType(string id, string name, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false, string[] effects = null)
 		: base(id, name)
 	{
 		this.tooltip = tooltip;
@@ -16,6 +17,7 @@ public class RoomType : Resource
 		this.upgrade_paths = upgrade_paths;
 		this.single_assignee = single_assignee;
 		this.priority_building_use = priority_building_use;
+		this.effects = effects;
 	}
 
 	public string tooltip { get; private set; }
@@ -37,6 +39,8 @@ public class RoomType : Resource
 	public RoomTypeCategory category { get; private set; }
 
 	public RoomType[] upgrade_paths { get; private set; }
+
+	public string[] effects { get; private set; }
 
 	public RoomType.RoomIdentificationResult isSatisfactory(Room candidate_room)
 	{
@@ -81,6 +85,32 @@ public class RoomType : Resource
 			}
 		}
 		return text;
+	}
+
+	public string GetRoomEffectsString()
+	{
+		if (this.effects != null && this.effects.Length > 0)
+		{
+			string text = ROOMS.EFFECTS.HEADER;
+			foreach (string text2 in this.effects)
+			{
+				Effect effect = Db.Get().effects.Get(text2);
+				text += Effect.CreateTooltip(effect, false, "\n    • ");
+			}
+			return text;
+		}
+		return null;
+	}
+
+	public void TriggerRoomEffects(KPrefabID triggerer, Effects target)
+	{
+		if (this.primary_constraint.building_criteria(triggerer))
+		{
+			foreach (string text in this.effects)
+			{
+				target.Add(text, true);
+			}
+		}
 	}
 
 	public enum RoomIdentificationResult

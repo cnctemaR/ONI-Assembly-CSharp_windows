@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IApproachable
+public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IApproachable, IEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -136,12 +139,33 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		throw new NotImplementedException();
 	}
 
+	private void AddRequirementDesc(List<Descriptor> descs, Tag tag, float mass)
+	{
+		string text = tag.ProperName();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+		descs.Add(descriptor);
+	}
+
+	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		Effect.AddModifierDescriptions(base.gameObject, list, "Socialized", true);
+		this.AddRequirementDesc(list, GameTags.Water, 1f);
+		return list;
+	}
+
 	Transform IApproachable.get_transform()
 	{
 		return base.transform;
 	}
 
 	public const float DRINK_MASS = 1f;
+
+	public const string SPECIFIC_EFFECT = "Socialized";
 
 	public CellOffset[] socializeOffsets = new CellOffset[]
 	{

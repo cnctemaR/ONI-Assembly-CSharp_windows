@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using STRINGS;
+using UnityEngine;
 
 namespace Klei.AI
 {
 	[DebuggerDisplay("{Id}")]
 	public class Effect : Modifier
 	{
-		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emote_anim = null, float emote_cooldown = 0f)
+		public Effect(string id, string name, string description, float duration, bool show_in_ui, bool trigger_floating_text, bool is_bad, string emote_anim = null, float emote_cooldown = 0f, string stompGroup = null)
 			: base(id, name, description)
 		{
 			this.duration = duration;
@@ -17,6 +18,7 @@ namespace Klei.AI
 			this.isBad = is_bad;
 			this.emoteAnim = emote_anim;
 			this.emoteCooldown = emote_cooldown;
+			this.stompGroup = stompGroup;
 		}
 
 		public override void AddTo(Attributes attributes)
@@ -38,7 +40,7 @@ namespace Klei.AI
 			this.emotePreconditions.Add(precon);
 		}
 
-		public static string CreateTooltip(Effect effect, bool showDuration)
+		public static string CreateTooltip(Effect effect, bool showDuration, string linePrefix = "\n")
 		{
 			string text = string.Empty;
 			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
@@ -50,19 +52,33 @@ namespace Klei.AI
 				}
 				if (attribute != null && attribute.ShowInUI != Attribute.Display.Never)
 				{
-					text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString(null));
+					text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.MODIFIER_FORMAT, attribute.Name, attributeModifier.GetFormattedString(null));
 				}
 			}
 			StringEntry stringEntry;
 			if (Strings.TryGet("STRINGS.DUPLICANTS.MODIFIERS." + effect.Id.ToUpper() + ".ADDITIONAL_EFFECTS", out stringEntry))
 			{
-				text = text + "\n" + stringEntry;
+				text = text + linePrefix + stringEntry;
 			}
 			if (showDuration && effect.duration > 0f)
 			{
-				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1"));
+				text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1"));
 			}
 			return text;
+		}
+
+		public static void AddModifierDescriptions(GameObject parent, List<Descriptor> descs, string effect_id, bool increase_indent = false)
+		{
+			Effect effect = Db.Get().effects.Get(effect_id);
+			foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
+			{
+				Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(parent), string.Empty, Descriptor.DescriptorType.Effect, false);
+				if (increase_indent)
+				{
+					descriptor.IncreaseIndent();
+				}
+				descs.Add(descriptor);
+			}
 		}
 
 		public float duration;
@@ -78,5 +94,7 @@ namespace Klei.AI
 		public float emoteCooldown;
 
 		public List<Reactable.ReactablePrecondition> emotePreconditions;
+
+		public string stompGroup;
 	}
 }

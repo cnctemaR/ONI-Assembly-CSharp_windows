@@ -24,14 +24,23 @@ public class FilteredStorage
 			FilteredStorage.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				FilteredStorage filteredStorage = (FilteredStorage)data;
-				string text = Util.FormatWholeNumber(Mathf.Floor(filteredStorage.GetAmountStored()));
-				float num = filteredStorage.storage.capacityKg;
+				float num = filteredStorage.GetAmountStored();
+				float num2 = filteredStorage.storage.capacityKg;
+				if (num > num2 - filteredStorage.storage.storageFullMargin && num < num2)
+				{
+					num = num2;
+				}
+				else
+				{
+					num = Mathf.Floor(num);
+				}
+				string text = Util.FormatWholeNumber(num);
 				IUserControlledCapacity component = filteredStorage.root.GetComponent<IUserControlledCapacity>();
 				if (component != null)
 				{
-					num = Mathf.Min(component.UserMaxCapacity, num);
+					num2 = Mathf.Min(component.UserMaxCapacity, num2);
 				}
-				string text2 = Util.FormatWholeNumber(num);
+				string text2 = Util.FormatWholeNumber(num2);
 				str = str.Replace("{Stored}", text);
 				str = str.Replace("{Capacity}", text2);
 				if (component != null)
@@ -120,8 +129,8 @@ public class FilteredStorage
 
 	private void UpdateMeter()
 	{
-		float maxCapacity = this.GetMaxCapacity();
-		float num = Mathf.Clamp01(this.GetAmountStored() / maxCapacity);
+		float maxCapacityMinusStorageMargin = this.GetMaxCapacityMinusStorageMargin();
+		float num = Mathf.Clamp01(this.GetAmountStored() / maxCapacityMinusStorageMargin);
 		if (this.meter != null)
 		{
 			this.meter.SetPositionPercent(num);
@@ -130,8 +139,8 @@ public class FilteredStorage
 
 	public bool IsFull()
 	{
-		float maxCapacity = this.GetMaxCapacity();
-		float num = Mathf.Clamp01(this.GetAmountStored() / maxCapacity);
+		float maxCapacityMinusStorageMargin = this.GetMaxCapacityMinusStorageMargin();
+		float num = Mathf.Clamp01(this.GetAmountStored() / maxCapacityMinusStorageMargin);
 		if (this.meter != null)
 		{
 			this.meter.SetPositionPercent(num);
@@ -154,6 +163,11 @@ public class FilteredStorage
 		return num;
 	}
 
+	private float GetMaxCapacityMinusStorageMargin()
+	{
+		return this.GetMaxCapacity() - this.storage.storageFullMargin;
+	}
+
 	private float GetAmountStored()
 	{
 		float num = this.storage.MassStored();
@@ -174,15 +188,12 @@ public class FilteredStorage
 			this.fetchList.Cancel(string.Empty);
 			this.fetchList = null;
 		}
-		float maxCapacity = this.GetMaxCapacity();
+		float maxCapacityMinusStorageMargin = this.GetMaxCapacityMinusStorageMargin();
 		float amountStored = this.GetAmountStored();
-		float num = Mathf.Max(0f, maxCapacity - amountStored);
-		if (num < 0.001f)
+		float num = Mathf.Max(0f, maxCapacityMinusStorageMargin - amountStored);
+		if (num > 0f && flag)
 		{
-			return;
-		}
-		if (flag)
-		{
+			num = Mathf.Max(0f, this.GetMaxCapacity() - amountStored);
 			this.fetchList = new FetchList2(this.storage, this.choreType, null);
 			this.fetchList.ShowStatusItem = false;
 			this.fetchList.Add(tags, this.requiredTags, this.forbiddenTags, num, FetchOrder2.OperationalRequirement.None);
@@ -214,8 +225,6 @@ public class FilteredStorage
 			this.logicMeter.SetPositionPercent((!on) ? 0f : 1f);
 		}
 	}
-
-	private const float MIN_FETCH_AMT = 0.001f;
 
 	public static readonly HashedString FULL_PORT_ID = "FULL";
 

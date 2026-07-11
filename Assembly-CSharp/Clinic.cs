@@ -122,30 +122,16 @@ public class Clinic : Workable, IEffectDescriptor
 		return this.IsValidEffect(this.doctoredDiseaseEffect) || this.IsValidEffect(this.doctoredHealthEffect);
 	}
 
-	private void AddModifierDescriptions(List<Descriptor> descs, string effect_id, bool increase_indent = false)
-	{
-		Effect effect = Db.Get().effects.Get(effect_id);
-		foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
-		{
-			Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(base.gameObject), string.Empty, Descriptor.DescriptorType.Effect, false);
-			if (increase_indent)
-			{
-				descriptor.IncreaseIndent();
-			}
-			descs.Add(descriptor);
-		}
-	}
-
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		if (this.IsValidEffect(this.healthEffect))
 		{
-			this.AddModifierDescriptions(list, this.healthEffect, false);
+			Effect.AddModifierDescriptions(base.gameObject, list, this.healthEffect, false);
 		}
 		if (this.diseaseEffect != this.healthEffect && this.IsValidEffect(this.diseaseEffect))
 		{
-			this.AddModifierDescriptions(list, this.diseaseEffect, false);
+			Effect.AddModifierDescriptions(base.gameObject, list, this.diseaseEffect, false);
 		}
 		if (this.AllowDoctoring())
 		{
@@ -154,11 +140,11 @@ public class Clinic : Workable, IEffectDescriptor
 			list.Add(descriptor);
 			if (this.IsValidEffect(this.doctoredHealthEffect))
 			{
-				this.AddModifierDescriptions(list, this.doctoredHealthEffect, true);
+				Effect.AddModifierDescriptions(base.gameObject, list, this.doctoredHealthEffect, true);
 			}
 			if (this.doctoredDiseaseEffect != this.doctoredHealthEffect && this.IsValidEffect(this.doctoredDiseaseEffect))
 			{
-				this.AddModifierDescriptions(list, this.doctoredDiseaseEffect, true);
+				Effect.AddModifierDescriptions(base.gameObject, list, this.doctoredDiseaseEffect, true);
 			}
 		}
 		return list;

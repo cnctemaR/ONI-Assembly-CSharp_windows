@@ -163,10 +163,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		int num = Mathf.RoundToInt(attributeInstance.GetTotalValue());
 		int num2 = this.FoodInfo.Quality + num;
 		Effects component = worker.GetComponent<Effects>();
-		foreach (KeyValuePair<int, string> keyValuePair in Edible.qualityEffects)
-		{
-			component.Remove(keyValuePair.Value);
-		}
 		component.Add(Edible.GetEffectForFoodQuality(num2), true);
 	}
 

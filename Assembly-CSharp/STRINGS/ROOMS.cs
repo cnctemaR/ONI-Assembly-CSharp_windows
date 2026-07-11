@@ -417,5 +417,10 @@ namespace STRINGS
 				public static LocString NAME = "Critters: {0}";
 			}
 		}
+
+		public class EFFECTS
+		{
+			public static LocString HEADER = "Room Effects";
+		}
 	}
 }

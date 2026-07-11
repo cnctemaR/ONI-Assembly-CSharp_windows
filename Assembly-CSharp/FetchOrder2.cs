@@ -153,7 +153,7 @@ public class FetchOrder2
 		{
 			Pickupable pickupable = null;
 			this.UnfetchedAmount = this.GetRemaining(out pickupable);
-			if (this.UnfetchedAmount == 0f)
+			if (this.UnfetchedAmount <= this.Destination.storageFullMargin)
 			{
 				if (this.OnComplete != null)
 				{

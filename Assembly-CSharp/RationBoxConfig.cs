@@ -35,6 +35,7 @@ public class RationBoxConfig : IBuildingConfig
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.FOOD;
 		storage.allowItemRemoval = true;
+		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<RationBox>();
 	}

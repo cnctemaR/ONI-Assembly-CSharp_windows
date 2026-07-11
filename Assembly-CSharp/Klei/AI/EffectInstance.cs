@@ -105,7 +105,7 @@ namespace Klei.AI
 		{
 			string text = str;
 			EffectInstance effectInstance = (EffectInstance)data;
-			string text2 = Effect.CreateTooltip(effectInstance.effect, false);
+			string text2 = Effect.CreateTooltip(effectInstance.effect, false, "\n");
 			if (!string.IsNullOrEmpty(text2))
 			{
 				text = text + "\n" + text2;

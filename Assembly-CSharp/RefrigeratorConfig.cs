@@ -49,6 +49,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.FOOD;
 		storage.allowItemRemoval = true;
 		storage.capacityKg = 100f;
+		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		Prioritizable.AddRef(go);
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<Refrigerator>();

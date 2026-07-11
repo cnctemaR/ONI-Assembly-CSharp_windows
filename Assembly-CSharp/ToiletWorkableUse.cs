@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 
@@ -22,17 +21,7 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		if (roomOfGameObject != null)
 		{
 			RoomType roomType = roomOfGameObject.roomType;
-			foreach (KeyValuePair<string, string> keyValuePair in ToiletWorkableUse.roomEffects)
-			{
-				if (keyValuePair.Key == roomType.Id)
-				{
-					worker.GetComponent<Effects>().Add(keyValuePair.Value, true);
-				}
-				else
-				{
-					worker.GetComponent<Effects>().Remove(keyValuePair.Value);
-				}
-			}
+			roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), worker.GetComponent<Effects>());
 		}
 	}
 
@@ -46,10 +35,4 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 
 	[Serialize]
 	public int timesUsed;
-
-	private static Dictionary<string, string> roomEffects = new Dictionary<string, string>
-	{
-		{ "Latrine", "RoomLatrine" },
-		{ "PlumbedBathroom", "RoomBathroom" }
-	};
 }

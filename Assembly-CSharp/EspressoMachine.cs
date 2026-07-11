@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using Klei.AI;
+using STRINGS;
 
-public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInstance>
+public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInstance>, IEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -17,7 +20,35 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 		base.OnCleanUp();
 	}
 
+	private void AddRequirementDesc(List<Descriptor> descs, Tag tag, float mass)
+	{
+		string text = tag.ProperName();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+		descs.Add(descriptor);
+	}
+
+	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		Effect.AddModifierDescriptions(base.gameObject, list, "Espresso", true);
+		this.AddRequirementDesc(list, EspressoMachine.INGREDIENT_TAG, EspressoMachine.INGREDIENT_MASS_PER_USE);
+		this.AddRequirementDesc(list, GameTags.Water, EspressoMachine.WATER_MASS_PER_USE);
+		return list;
+	}
+
+	public const string SPECIFIC_EFFECT = "Espresso";
+
+	public const string TRACKING_EFFECT = "RecentlyEspresso";
+
 	public static Tag INGREDIENT_TAG = new Tag("SpiceNut");
+
+	public static float INGREDIENT_MASS_PER_USE = 1f;
+
+	public static float WATER_MASS_PER_USE = 1f;
 
 	public class States : GameStateMachine<EspressoMachine.States, EspressoMachine.StatesInstance, EspressoMachine>
 	{
@@ -52,12 +83,12 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 			{
 				return false;
 			}
-			if (primaryElement.Mass < 1f)
+			if (primaryElement.Mass < EspressoMachine.WATER_MASS_PER_USE)
 			{
 				return false;
 			}
 			float amountAvailable = smi.GetComponent<Storage>().GetAmountAvailable(EspressoMachine.INGREDIENT_TAG);
-			return amountAvailable >= 1f;
+			return amountAvailable >= EspressoMachine.INGREDIENT_MASS_PER_USE;
 		}
 
 		private GameStateMachine<EspressoMachine.States, EspressoMachine.StatesInstance, EspressoMachine, object>.State unoperational;

@@ -18,13 +18,13 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 	{
 		Effects component = worker.GetComponent<Effects>();
 		component.Add("TookABreak", true);
-		if (!string.IsNullOrEmpty(this.trackingEffect))
+		if (!string.IsNullOrEmpty(ArcadeMachineWorkable.trackingEffect))
 		{
-			component.Add(this.trackingEffect, true);
+			component.Add(ArcadeMachineWorkable.trackingEffect, true);
 		}
-		if (!string.IsNullOrEmpty(this.specificEffect))
+		if (!string.IsNullOrEmpty(ArcadeMachineWorkable.specificEffect))
 		{
-			component.Add(this.specificEffect, true);
+			component.Add(ArcadeMachineWorkable.specificEffect, true);
 		}
 	}
 
@@ -32,33 +32,21 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();
-		if (!string.IsNullOrEmpty(this.trackingEffect) && component.HasEffect(this.trackingEffect))
+		if (!string.IsNullOrEmpty(ArcadeMachineWorkable.trackingEffect) && component.HasEffect(ArcadeMachineWorkable.trackingEffect))
 		{
 			priority = 0;
 			return false;
 		}
-		if (!string.IsNullOrEmpty(this.specificEffect) && component.HasEffect(this.specificEffect))
+		if (!string.IsNullOrEmpty(ArcadeMachineWorkable.specificEffect) && component.HasEffect(ArcadeMachineWorkable.specificEffect))
 		{
 			priority = RELAXATION.PRIORITY.RECENTLY_USED;
 		}
 		return true;
 	}
 
-	protected override void OnStartWork(Worker worker)
-	{
-		this.owner.AddWorker(worker);
-	}
-
-	protected override void OnStopWork(Worker worker)
-	{
-		this.owner.RemoveWorker(worker);
-	}
-
-	public ISharedWorkable owner;
-
 	public int basePriority = RELAXATION.PRIORITY.TIER4;
 
-	public string specificEffect = "PlayedArcade";
+	private static string specificEffect = "PlayedArcade";
 
-	public string trackingEffect = "RecentlyPlayedArcade";
+	private static string trackingEffect = "RecentlyPlayedArcade";
 }

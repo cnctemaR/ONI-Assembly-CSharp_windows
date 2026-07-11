@@ -148,6 +148,8 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		reference.ClearMultiStringTooltip();
 		if (occupier != null)
 		{
+			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(occupier);
+			AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(occupier);
 			reference.AddMultiStringTooltip(occupier.GetProperName() + "\n\n", this.TooltipTextStyle_Header);
 			if (this.roleID != "NoRole")
 			{
@@ -156,10 +158,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 				component.GetReference("ProgressBar").gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").text = GameUtil.GetFormattedPercent(Mathf.Floor(100f * (occupier.ExperienceByRoleID[this.roleID] / Game.Instance.roleManager.GetRole(this.roleID).experienceRequired)), GameUtil.TimeSlice.None);
 				component.GetReference("ProgressBar").gameObject.GetComponent<HierarchyReferences>().GetReference<Image>("Progress").fillAmount = ((!occupier.ExperienceByRoleID.ContainsKey(this.roleID)) ? 0f : (occupier.ExperienceByRoleID[this.roleID] / Game.Instance.roleManager.GetRole(this.roleID).experienceRequired));
 				component.GetReference("ProgressBar").GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.ROLES_SCREEN.ROLE_PROGRESS, Mathf.RoundToInt(occupier.ExperienceByRoleID[this.roleID]), Game.Instance.roleManager.GetRole(this.roleID).experienceRequired));
-				component.GetComponent<ToolTip>().enabled = false;
 				component.GetReference<DropDown>("DropDown").gameObject.SetActive(false);
-				AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(occupier);
-				AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(occupier);
 				RoleConfig role = Game.Instance.roleManager.GetRole(this.roleID);
 				if (attributeInstance2.GetTotalValue() > attributeInstance.GetTotalValue())
 				{
@@ -187,11 +186,17 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			}
 			else
 			{
-				component.GetComponent<ToolTip>().enabled = false;
-				List<IListableOption> list = new List<IListableOption>();
-				foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+				if (attributeInstance2.GetTotalValue() > attributeInstance.GetTotalValue())
 				{
-					list.Add(minionIdentity);
+					reference.AddMultiStringTooltip(string.Format(UI.ROLES_SCREEN.EXPECTATION_ALERT_EXPECTATION, attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue()), this.TooltipTextStyle_AbilityNegativeModifier);
+					reference.AddMultiStringTooltip(UI.ROLES_SCREEN.EXPECTATION_ALERT_DESC_EXPECTATION, null);
+					component.GetReference<Image>("AlertIcon").color = new Color(0.7529412f, 0.7529412f, 0.7529412f);
+					component.GetReference<Image>("AlertIcon").gameObject.SetActive(true);
+				}
+				else
+				{
+					reference.AddMultiStringTooltip(string.Format(UI.ROLES_SCREEN.EXPECTATION_ALERT_EXPECTATION, attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue()), null);
+					component.GetReference<Image>("AlertIcon").gameObject.SetActive(false);
 				}
 				DropDown reference2 = component.GetReference<DropDown>("DropDown");
 				reference2.gameObject.SetActive(true);
@@ -254,10 +259,10 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			slot.GetComponent<MultiToggle>().onClick = delegate
 			{
 			};
-			List<IListableOption> list2 = new List<IListableOption>();
-			foreach (MinionIdentity minionIdentity2 in Components.LiveMinionIdentities.Items)
+			List<IListableOption> list = new List<IListableOption>();
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
 			{
-				list2.Add(minionIdentity2);
+				list.Add(minionIdentity);
 			}
 			Action<IListableOption, object> action = delegate(IListableOption minion, object data)
 			{
@@ -271,7 +276,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			};
 			DropDown reference4 = component.GetReference<DropDown>("DropDown");
 			reference4.gameObject.SetActive(true);
-			reference4.Initialize(list2, action, new Func<IListableOption, IListableOption, object, int>(this.roleSlotDropDownSort), new Action<DropDownEntry, object>(this.roleRefreshAction), false, Game.Instance.roleManager.GetRole(this.roleID));
+			reference4.Initialize(list, action, new Func<IListableOption, IListableOption, object, int>(this.roleSlotDropDownSort), new Action<DropDownEntry, object>(this.roleRefreshAction), false, Game.Instance.roleManager.GetRole(this.roleID));
 			component.GetReference<LocText>("Label").gameObject.SetActive(false);
 			component.GetReference<LayoutElement>("DropDownLayout").minWidth = 156f;
 			component.GetReference<LayoutElement>("DropDownLayout").GetComponentInChildren<LocText>().text = ((!(this.roleID == "NoRole")) ? UI.ROLES_SCREEN.SLOTS.UNASSIGNED : UI.ROLES_SCREEN.SLOTS.PICK_DUPLICANT);

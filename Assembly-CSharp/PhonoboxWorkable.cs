@@ -62,7 +62,7 @@ public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 		return base.GetAnim(worker);
 	}
 
-	public ISharedWorkable owner;
+	public Phonobox owner;
 
 	public int basePriority = RELAXATION.PRIORITY.TIER3;
 

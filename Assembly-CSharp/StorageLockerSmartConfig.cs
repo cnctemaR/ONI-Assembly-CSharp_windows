@@ -49,6 +49,7 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		storage.allowItemRemoval = true;
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
+		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		go.AddOrGet<StorageLockerSmart>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{

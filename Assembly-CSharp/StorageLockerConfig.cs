@@ -33,6 +33,7 @@ public class StorageLockerConfig : IBuildingConfig
 		storage.allowItemRemoval = true;
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
+		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		go.AddOrGet<StorageLocker>();
 	}
 

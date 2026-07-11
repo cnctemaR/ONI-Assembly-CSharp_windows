@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>, ISharedWorkable
+public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>, IEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -22,7 +24,12 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 			GameObject gameObject = ChoreHelpers.CreateLocator("ArcadeMachineWorkable", vector);
 			ArcadeMachineWorkable arcadeMachineWorkable = gameObject.AddOrGet<ArcadeMachineWorkable>();
 			arcadeMachineWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Gaming);
-			arcadeMachineWorkable.owner = this;
+			int player_index = i;
+			ArcadeMachineWorkable arcadeMachineWorkable2 = arcadeMachineWorkable;
+			arcadeMachineWorkable2.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(arcadeMachineWorkable2.OnWorkableEventCB, new Action<Workable.WorkableEvent>(delegate(Workable.WorkableEvent ev)
+			{
+				this.OnWorkableEvent(player_index, ev);
+			}));
 			arcadeMachineWorkable.overrideAnims = this.overrideAnims[i];
 			arcadeMachineWorkable.workAnims = this.workAnims[i];
 			this.workables[i] = arcadeMachineWorkable;
@@ -83,17 +90,33 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 		}
 	}
 
-	public void AddWorker(Worker player)
+	public void OnWorkableEvent(int player, Workable.WorkableEvent ev)
 	{
-		this.players.Add(player);
+		bool flag = ev == Workable.WorkableEvent.WorkStarted;
+		if (flag)
+		{
+			this.players.Add(player);
+		}
+		else
+		{
+			this.players.Remove(player);
+		}
 		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
 	}
 
-	public void RemoveWorker(Worker player)
+	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
 	{
-		this.players.Remove(player);
-		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		Effect.AddModifierDescriptions(base.gameObject, list, "PlayedArcade", true);
+		return list;
 	}
+
+	public const string SPECIFIC_EFFECT = "PlayedArcade";
+
+	public const string TRACKING_EFFECT = "RecentlyPlayedArcade";
 
 	public CellOffset[] choreOffsets = new CellOffset[]
 	{
@@ -105,7 +128,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 
 	private Chore[] chores;
 
-	private HashSet<Worker> players = new HashSet<Worker>();
+	public HashSet<int> players = new HashSet<int>();
 
 	public KAnimFile[][] overrideAnims = new KAnimFile[][]
 	{
@@ -143,11 +166,25 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 			this.operational.pre.Enter(delegate(ArcadeMachine.StatesInstance smi)
 			{
 				smi.SetActive(true);
-			}).PlayAnim("working_pre").OnAnimQueueComplete(this.operational.player_transition);
-			this.operational.player_transition.ParamTransition<int>(this.playerCount, this.operational.post, (ArcadeMachine.StatesInstance smi, int p) => p == 0).ParamTransition<int>(this.playerCount, this.operational.one_player, (ArcadeMachine.StatesInstance smi, int p) => p == 1).ParamTransition<int>(this.playerCount, this.operational.two_player, (ArcadeMachine.StatesInstance smi, int p) => p == 2);
-			this.operational.one_player.PlayAnim("working_loop_one_p", KAnim.PlayMode.Loop).ParamTransition<int>(this.playerCount, this.operational.post, (ArcadeMachine.StatesInstance smi, int p) => p == 0).ParamTransition<int>(this.playerCount, this.operational.two_player, (ArcadeMachine.StatesInstance smi, int p) => p == 2);
-			this.operational.two_player.PlayAnim("working_loop_two_p", KAnim.PlayMode.Loop).ParamTransition<int>(this.playerCount, this.operational.post, (ArcadeMachine.StatesInstance smi, int p) => p == 0).ParamTransition<int>(this.playerCount, this.operational.one_player, (ArcadeMachine.StatesInstance smi, int p) => p == 1);
+			}).PlayAnim("working_pre").OnAnimQueueComplete(this.operational.playing);
+			this.operational.playing.PlayAnim(new Func<ArcadeMachine.StatesInstance, string>(this.GetPlayingAnim), KAnim.PlayMode.Loop).ParamTransition<int>(this.playerCount, this.operational.post, (ArcadeMachine.StatesInstance smi, int p) => p == 0).ParamTransition<int>(this.playerCount, this.operational.playing_coop, (ArcadeMachine.StatesInstance smi, int p) => p > 1);
+			this.operational.playing_coop.PlayAnim(new Func<ArcadeMachine.StatesInstance, string>(this.GetPlayingAnim), KAnim.PlayMode.Loop).ParamTransition<int>(this.playerCount, this.operational.post, (ArcadeMachine.StatesInstance smi, int p) => p == 0).ParamTransition<int>(this.playerCount, this.operational.playing, (ArcadeMachine.StatesInstance smi, int p) => p == 1);
 			this.operational.post.PlayAnim("working_pst").OnAnimQueueComplete(this.operational.stopped);
+		}
+
+		private string GetPlayingAnim(ArcadeMachine.StatesInstance smi)
+		{
+			bool flag = smi.master.players.Contains(0);
+			bool flag2 = smi.master.players.Contains(1);
+			if (flag && !flag2)
+			{
+				return "working_loop_one_p";
+			}
+			if (flag2 && !flag)
+			{
+				return "working_loop_two_p";
+			}
+			return "working_loop_coop_p";
 		}
 
 		public StateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.IntParameter playerCount;
@@ -162,11 +199,9 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 
 			public GameStateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.State pre;
 
-			public GameStateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.State player_transition;
+			public GameStateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.State playing;
 
-			public GameStateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.State one_player;
-
-			public GameStateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.State two_player;
+			public GameStateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.State playing_coop;
 
 			public GameStateMachine<ArcadeMachine.States, ArcadeMachine.StatesInstance, ArcadeMachine, object>.State post;
 		}

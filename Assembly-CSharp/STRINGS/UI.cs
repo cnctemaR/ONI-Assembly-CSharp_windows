@@ -5403,6 +5403,8 @@ namespace STRINGS
 
 			public static LocString DOCTORING = "Doctoring";
 
+			public static LocString RECREATION = "Recreation";
+
 			public static LocString COOLANT = "Coolant: {1} {0}";
 
 			public static LocString REFINEMENT_ENERGY = "Heat: {0}";
@@ -5562,6 +5564,8 @@ namespace STRINGS
 				public static LocString REMOVES_DISEASE = "Cooking pasteurizes ingredients and removes their disease risk";
 
 				public static LocString DOCTORING = "Doctoring increases existing health benefits and can allow treatment of otherwise stubborn diseases";
+
+				public static LocString RECREATION = "Duplicants will use recreation buildings during Downtime, improving their Morale.";
 
 				public static LocString HEATGENERATED_AIRCONDITIONER = "Generates heat based on the volume, temperature, and specific heat capacity of the pumped gas" + UI.HORIZONTAL_BR_RULE + "Cooling 1 Kg of room temperature oxygen will output {0} per second";
 

@@ -73,16 +73,14 @@ public class DecorMonitor : GameStateMachine<DecorMonitor, DecorMonitor.Instance
 			float num = this.yesterdaysTotalDecor / 600f;
 			num += totalValue;
 			Effects component = base.gameObject.GetComponent<Effects>();
-			string text = null;
 			foreach (KeyValuePair<float, string> keyValuePair in this.effectLookup)
 			{
-				component.Remove(keyValuePair.Value);
-				if (text == null && num < keyValuePair.Key)
+				if (num < keyValuePair.Key)
 				{
-					text = keyValuePair.Value;
+					component.Add(keyValuePair.Value, true);
+					break;
 				}
 			}
-			component.Add(text, true);
 		}
 
 		public float GetTodaysAverageDecor()

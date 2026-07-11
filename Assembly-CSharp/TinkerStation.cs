@@ -141,7 +141,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim200ms
 		if (list2.Count > 0)
 		{
 			Effect effect = Db.Get().effects.Get(list2[0].addedEffect);
-			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ADDED_EFFECT, effect.Name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ADDED_EFFECT, effect.Name, Effect.CreateTooltip(effect, true)), Descriptor.DescriptorType.Effect, false));
+			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ADDED_EFFECT, effect.Name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ADDED_EFFECT, effect.Name, Effect.CreateTooltip(effect, true, "\n")), Descriptor.DescriptorType.Effect, false));
 			list.Add(new Descriptor(UI.BUILDINGEFFECTS.IMPROVED_BUILDINGS, UI.BUILDINGEFFECTS.TOOLTIPS.IMPROVED_BUILDINGS, Descriptor.DescriptorType.Effect, false));
 			foreach (Tinkerable tinkerable in list2)
 			{

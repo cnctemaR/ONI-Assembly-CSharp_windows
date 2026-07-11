@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{92FFBCC1-8049-47DB-B601-FE10CFBBEFBE}</ProjectGuid>
+    <ProjectGuid>{01CA4091-7CA7-4E22-8BB1-BEBF5B109711}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UIModule</AssemblyName>
@@ -26,19 +26,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEF81}</Project>
+      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096D4}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEF98}</Project>
+      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B1096EB}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEFAE}</Project>
+      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B109701}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
-      <Project>{92FFBCC1-8049-47DB-B601-FE10CFBBEFB7}</Project>
+      <Project>{01CA4091-7CA7-4E22-8BB1-BEBF5B10970A}</Project>
       <Name>UnityEngine.TextRenderingModule</Name>
     </ProjectReference>
   </ItemGroup>

@@ -26,9 +26,9 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 		Storage component = base.GetComponent<Storage>();
 		SimUtil.DiseaseInfo diseaseInfo;
 		float num;
-		component.ConsumeAndGetDisease(GameTags.Water, 1f, out diseaseInfo, out num);
+		component.ConsumeAndGetDisease(GameTags.Water, EspressoMachine.WATER_MASS_PER_USE, out diseaseInfo, out num);
 		SimUtil.DiseaseInfo diseaseInfo2;
-		component.ConsumeAndGetDisease(EspressoMachine.INGREDIENT_TAG, 1f, out diseaseInfo2, out num);
+		component.ConsumeAndGetDisease(EspressoMachine.INGREDIENT_TAG, EspressoMachine.INGREDIENT_MASS_PER_USE, out diseaseInfo2, out num);
 		ImmuneSystemMonitor.Instance smi = worker.GetSMI<ImmuneSystemMonitor.Instance>();
 		if (smi != null)
 		{
@@ -37,13 +37,13 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 		}
 		Effects component2 = worker.GetComponent<Effects>();
 		component2.Add("TookABreak", true);
-		if (!string.IsNullOrEmpty(this.specificEffect))
+		if (!string.IsNullOrEmpty(EspressoMachineWorkable.specificEffect))
 		{
-			component2.Add(this.specificEffect, true);
+			component2.Add(EspressoMachineWorkable.specificEffect, true);
 		}
-		if (!string.IsNullOrEmpty(this.trackingEffect))
+		if (!string.IsNullOrEmpty(EspressoMachineWorkable.trackingEffect))
 		{
-			component2.Add(this.trackingEffect, true);
+			component2.Add(EspressoMachineWorkable.trackingEffect, true);
 		}
 	}
 
@@ -56,12 +56,12 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();
-		if (!string.IsNullOrEmpty(this.trackingEffect) && component.HasEffect(this.trackingEffect))
+		if (!string.IsNullOrEmpty(EspressoMachineWorkable.trackingEffect) && component.HasEffect(EspressoMachineWorkable.trackingEffect))
 		{
 			priority = 0;
 			return false;
 		}
-		if (!string.IsNullOrEmpty(this.specificEffect) && component.HasEffect(this.specificEffect))
+		if (!string.IsNullOrEmpty(EspressoMachineWorkable.specificEffect) && component.HasEffect(EspressoMachineWorkable.specificEffect))
 		{
 			priority = RELAXATION.PRIORITY.RECENTLY_USED;
 		}
@@ -73,7 +73,7 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 
 	public int basePriority = RELAXATION.PRIORITY.TIER5;
 
-	public string specificEffect = "Espresso";
+	private static string specificEffect = "Espresso";
 
-	public string trackingEffect = "RecentlyEspresso";
+	private static string trackingEffect = "RecentlyEspresso";
 }

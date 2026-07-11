@@ -78,6 +78,8 @@ public class RoomDetails
 
 	public static readonly RoomDetails.Detail EFFECT = new RoomDetails.Detail((Room room) => room.roomType.effect);
 
+	public static readonly RoomDetails.Detail EFFECTS = new RoomDetails.Detail((Room room) => room.roomType.GetRoomEffectsString());
+
 	public class Detail
 	{
 		public Detail(Func<Room, string> resolve_string_function)

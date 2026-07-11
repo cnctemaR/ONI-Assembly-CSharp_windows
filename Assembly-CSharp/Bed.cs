@@ -53,17 +53,7 @@ public class Bed : Workable, IEffectDescriptor
 				this.targetWorker.GetComponent<Effects>().Add(keyValuePair.Value, false);
 			}
 		}
-		foreach (KeyValuePair<string, string> keyValuePair2 in Bed.roomEffects)
-		{
-			if (keyValuePair2.Key == roomType.Id)
-			{
-				this.targetWorker.GetComponent<Effects>().Add(keyValuePair2.Value, true);
-			}
-			else
-			{
-				this.targetWorker.GetComponent<Effects>().Remove(keyValuePair2.Value);
-			}
-		}
+		roomType.TriggerRoomEffects(base.GetComponent<KPrefabID>(), this.targetWorker.GetComponent<Effects>());
 	}
 
 	private void RemoveEffects()
@@ -86,20 +76,6 @@ public class Bed : Workable, IEffectDescriptor
 		this.targetWorker = null;
 	}
 
-	private void AddModifierDescriptions(List<Descriptor> descs, string effect_id, bool increase_indent = false)
-	{
-		Effect effect = Db.Get().effects.Get(effect_id);
-		foreach (AttributeModifier attributeModifier in effect.SelfModifiers)
-		{
-			Descriptor descriptor = new Descriptor(Strings.Get("STRINGS.DUPLICANTS.ATTRIBUTES." + attributeModifier.AttributeId.ToUpper() + ".NAME") + ": " + attributeModifier.GetFormattedString(base.gameObject), string.Empty, Descriptor.DescriptorType.Effect, false);
-			if (increase_indent)
-			{
-				descriptor.IncreaseIndent();
-			}
-			descs.Add(descriptor);
-		}
-	}
-
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -109,7 +85,7 @@ public class Bed : Workable, IEffectDescriptor
 			{
 				if (text != null && text != string.Empty)
 				{
-					this.AddModifierDescriptions(list, text, false);
+					Effect.AddModifierDescriptions(base.gameObject, list, text, false);
 				}
 			}
 		}
@@ -137,11 +113,5 @@ public class Bed : Workable, IEffectDescriptor
 	{
 		{ "Barracks", "BarracksStamina" },
 		{ "Bedroom", "BedroomStamina" }
-	};
-
-	private static Dictionary<string, string> roomEffects = new Dictionary<string, string>
-	{
-		{ "Barracks", "RoomBarracks" },
-		{ "Bedroom", "RoomBedroom" }
 	};
 }

@@ -50,8 +50,10 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			return;
 		}
 		this.smi.sm.ediblesource.Set(edible.gameObject, this.smi);
+		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs");
 		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
 		float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
+		KCrashReporter.Assert(num > 0f, "EatChore is requesting an invalid amount of food");
 		this.smi.sm.requestedfoodunits.Set(num, this.smi);
 		this.smi.sm.eater.Set(context.consumerState.gameObject, this.smi);
 		base.Begin(context);
@@ -120,27 +122,11 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			if (roomOfGameObject != null)
 			{
 				RoomType roomType = roomOfGameObject.roomType;
-				foreach (KeyValuePair<string, string> keyValuePair in EatChore.StatesInstance.roomEffects)
-				{
-					if (keyValuePair.Key == roomType.Id)
-					{
-						base.sm.eater.Get(base.smi).gameObject.GetComponent<Effects>().Add(keyValuePair.Value, true);
-					}
-					else
-					{
-						base.sm.eater.Get(base.smi).gameObject.GetComponent<Effects>().Remove(keyValuePair.Value);
-					}
-				}
+				roomType.TriggerRoomEffects(base.sm.messstation.Get(base.smi).gameObject.GetComponent<KPrefabID>(), base.sm.eater.Get(base.smi).gameObject.GetComponent<Effects>());
 			}
 		}
 
 		private int locatorCell;
-
-		private static Dictionary<string, string> roomEffects = new Dictionary<string, string>
-		{
-			{ "MessHall", "RoomMessHall" },
-			{ "GreatHall", "RoomGreatHall" }
-		};
 	}
 
 	public class States : GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore>

@@ -87,6 +87,16 @@ namespace Klei.AI
 			}
 			if (flag)
 			{
+				if (!string.IsNullOrEmpty(effect.stompGroup))
+				{
+					for (int i = this.effects.Count - 1; i >= 0; i--)
+					{
+						if (this.effects[i].effect.stompGroup == effect.stompGroup)
+						{
+							this.Remove(this.effects[i].effect);
+						}
+					}
+				}
 				Attributes attributes = this.GetAttributes();
 				EffectInstance effectInstance = this.Get(effect);
 				if (effectInstance == null)

@@ -90,7 +90,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 			list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER, new object[0]), string.Format(DUPLICANTS.DISEASES.MEDICINE.BOOSTER_TOOLTIP, new object[0]), Descriptor.DescriptorType.Effect, false));
 		}
 		Effect effect = Db.Get().effects.Get(this.info.effect);
-		list.Add(new Descriptor(string.Format("Applies the <style=\"disease\">{0}</style> effect", effect.Name), string.Format("{0}\n{1}", effect.description, Effect.CreateTooltip(effect, true)), Descriptor.DescriptorType.Effect, false));
+		list.Add(new Descriptor(string.Format("Applies the <style=\"disease\">{0}</style> effect", effect.Name), string.Format("{0}\n{1}", effect.description, Effect.CreateTooltip(effect, true, "\n")), Descriptor.DescriptorType.Effect, false));
 		return list;
 	}
 

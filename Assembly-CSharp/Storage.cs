@@ -1101,6 +1101,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public int storageNetworkID = -1;
 
+	public float storageFullMargin;
+
 	public Storage.FXPrefix fxPrefix;
 
 	public List<GameObject> items = new List<GameObject>();

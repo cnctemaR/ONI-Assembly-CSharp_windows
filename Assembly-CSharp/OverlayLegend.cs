@@ -426,7 +426,12 @@ public class OverlayLegend : KScreen
 			component.type = Image.Type.Simple;
 			ToolTip component2 = freeUnitObject.GetComponent<ToolTip>();
 			component2.enabled = true;
-			component2.toolTip = roomType.GetCriteriaString();
+			component2.ClearMultiStringTooltip();
+			component2.AddMultiStringTooltip(roomType.GetCriteriaString(), null);
+			if (roomType.effects != null && roomType.effects.Length > 0)
+			{
+				component2.AddMultiStringTooltip(roomType.GetRoomEffectsString(), null);
+			}
 			freeUnitObject.SetActive(true);
 			freeUnitObject.transform.SetParent(this.activeUnitsParent.transform);
 		}

@@ -15,31 +15,58 @@ namespace Database
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT,
 				RoomDetails.CREATURE_COUNT
-			}, 0, null, false, false));
-			this.PlumbedBathroom = base.Add(new RoomType("PlumbedBathroom", ROOMS.TYPES.PLUMBEDBATHROOM.NAME, ROOMS.TYPES.PLUMBEDBATHROOM.TOOLTIP, ROOMS.TYPES.PLUMBEDBATHROOM.EFFECT, Db.Get().RoomTypeCategories.Bathroom, RoomConstraints.FLUSH_TOILET, new RoomConstraints.Constraint[]
+			}, 0, null, false, false, null));
+			string text = "PlumbedBathroom";
+			string text2 = ROOMS.TYPES.PLUMBEDBATHROOM.NAME;
+			string text3 = ROOMS.TYPES.PLUMBEDBATHROOM.TOOLTIP;
+			string text4 = ROOMS.TYPES.PLUMBEDBATHROOM.EFFECT;
+			RoomTypeCategory roomTypeCategory = Db.Get().RoomTypeCategories.Bathroom;
+			RoomConstraints.Constraint constraint = RoomConstraints.FLUSH_TOILET;
+			RoomConstraints.Constraint[] array = new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.ADVANCED_WASH_STATION,
 				RoomConstraints.NO_OUTHOUSES,
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_64
-			}, new RoomDetails.Detail[]
+			};
+			RoomDetails.Detail[] array2 = new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, null, false, false));
-			this.Latrine = base.Add(new RoomType("Latrine", ROOMS.TYPES.LATRINE.NAME, ROOMS.TYPES.LATRINE.TOOLTIP, ROOMS.TYPES.LATRINE.EFFECT, Db.Get().RoomTypeCategories.Bathroom, RoomConstraints.TOILET, new RoomConstraints.Constraint[]
+			};
+			int num = 1;
+			string[] array3 = new string[] { "RoomBathroom" };
+			this.PlumbedBathroom = base.Add(new RoomType(text, text2, text3, text4, roomTypeCategory, constraint, array, array2, num, null, false, false, array3));
+			text4 = "Latrine";
+			text3 = ROOMS.TYPES.LATRINE.NAME;
+			text2 = ROOMS.TYPES.LATRINE.TOOLTIP;
+			text = ROOMS.TYPES.LATRINE.EFFECT;
+			roomTypeCategory = Db.Get().RoomTypeCategories.Bathroom;
+			constraint = RoomConstraints.TOILET;
+			array = new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.WASH_STATION,
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_64
-			}, new RoomDetails.Detail[]
+			};
+			array2 = new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, new RoomType[] { this.PlumbedBathroom }, false, false));
-			this.Bedroom = base.Add(new RoomType("Bedroom", ROOMS.TYPES.BEDROOM.NAME, ROOMS.TYPES.BEDROOM.TOOLTIP, ROOMS.TYPES.BEDROOM.EFFECT, Db.Get().RoomTypeCategories.Sleep, RoomConstraints.LUXURY_BED_SINGLE, new RoomConstraints.Constraint[]
+			};
+			num = 1;
+			RoomType[] array4 = new RoomType[] { this.PlumbedBathroom };
+			array3 = new string[] { "RoomLatrine" };
+			this.Latrine = base.Add(new RoomType(text4, text3, text2, text, roomTypeCategory, constraint, array, array2, num, array4, false, false, array3));
+			text = "Bedroom";
+			text2 = ROOMS.TYPES.BEDROOM.NAME;
+			text3 = ROOMS.TYPES.BEDROOM.TOOLTIP;
+			text4 = ROOMS.TYPES.BEDROOM.EFFECT;
+			roomTypeCategory = Db.Get().RoomTypeCategories.Sleep;
+			constraint = RoomConstraints.LUXURY_BED_SINGLE;
+			array = new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_COTS,
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
@@ -47,43 +74,79 @@ namespace Database
 				RoomConstraints.MAXIMUM_SIZE_64,
 				RoomConstraints.DECORATIVE_ITEM,
 				RoomConstraints.CEILING_HEIGHT_4
-			}, new RoomDetails.Detail[]
+			};
+			array2 = new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, null, false, false));
-			this.Barracks = base.Add(new RoomType("Barracks", ROOMS.TYPES.BARRACKS.NAME, ROOMS.TYPES.BARRACKS.TOOLTIP, ROOMS.TYPES.BARRACKS.EFFECT, Db.Get().RoomTypeCategories.Sleep, RoomConstraints.BED_SINGLE, new RoomConstraints.Constraint[]
+			};
+			num = 1;
+			array3 = new string[] { "RoomBedroom" };
+			this.Bedroom = base.Add(new RoomType(text, text2, text3, text4, roomTypeCategory, constraint, array, array2, num, null, false, false, array3));
+			text4 = "Barracks";
+			text3 = ROOMS.TYPES.BARRACKS.NAME;
+			text2 = ROOMS.TYPES.BARRACKS.TOOLTIP;
+			text = ROOMS.TYPES.BARRACKS.EFFECT;
+			roomTypeCategory = Db.Get().RoomTypeCategories.Sleep;
+			constraint = RoomConstraints.BED_SINGLE;
+			array = new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_64
-			}, new RoomDetails.Detail[]
+			};
+			array2 = new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, new RoomType[] { this.Bedroom }, false, false));
-			this.GreatHall = base.Add(new RoomType("GreatHall", ROOMS.TYPES.GREATHALL.NAME, ROOMS.TYPES.GREATHALL.TOOLTIP, ROOMS.TYPES.GREATHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.MESS_STATION_SINGLE, new RoomConstraints.Constraint[]
+			};
+			num = 1;
+			array4 = new RoomType[] { this.Bedroom };
+			array3 = new string[] { "RoomBarracks" };
+			this.Barracks = base.Add(new RoomType(text4, text3, text2, text, roomTypeCategory, constraint, array, array2, num, array4, false, false, array3));
+			text = "GreatHall";
+			text2 = ROOMS.TYPES.GREATHALL.NAME;
+			text3 = ROOMS.TYPES.GREATHALL.TOOLTIP;
+			text4 = ROOMS.TYPES.GREATHALL.EFFECT;
+			roomTypeCategory = Db.Get().RoomTypeCategories.Food;
+			constraint = RoomConstraints.MESS_STATION_SINGLE;
+			array = new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_32,
 				RoomConstraints.MAXIMUM_SIZE_120,
 				RoomConstraints.DECORATIVE_ITEM_20,
 				RoomConstraints.REC_BUILDING
-			}, new RoomDetails.Detail[]
+			};
+			array2 = new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, null, false, false));
-			this.MessHall = base.Add(new RoomType("MessHall", ROOMS.TYPES.MESSHALL.NAME, ROOMS.TYPES.MESSHALL.TOOLTIP, ROOMS.TYPES.MESSHALL.EFFECT, Db.Get().RoomTypeCategories.Food, RoomConstraints.MESS_STATION_SINGLE, new RoomConstraints.Constraint[]
+			};
+			num = 1;
+			array3 = new string[] { "RoomGreatHall" };
+			this.GreatHall = base.Add(new RoomType(text, text2, text3, text4, roomTypeCategory, constraint, array, array2, num, null, false, false, array3));
+			text4 = "MessHall";
+			text3 = ROOMS.TYPES.MESSHALL.NAME;
+			text2 = ROOMS.TYPES.MESSHALL.TOOLTIP;
+			text = ROOMS.TYPES.MESSHALL.EFFECT;
+			roomTypeCategory = Db.Get().RoomTypeCategories.Food;
+			constraint = RoomConstraints.MESS_STATION_SINGLE;
+			array = new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_64
-			}, new RoomDetails.Detail[]
+			};
+			array2 = new RoomDetails.Detail[]
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 1, new RoomType[] { this.GreatHall }, false, false));
+			};
+			num = 1;
+			array4 = new RoomType[] { this.GreatHall };
+			array3 = new string[] { "RoomMessHall" };
+			this.MessHall = base.Add(new RoomType(text4, text3, text2, text, roomTypeCategory, constraint, array, array2, num, array4, false, false, array3));
 			this.Hospital = base.Add(new RoomType("Hospital", ROOMS.TYPES.HOSPITAL.NAME, ROOMS.TYPES.HOSPITAL.TOOLTIP, ROOMS.TYPES.HOSPITAL.EFFECT, Db.Get().RoomTypeCategories.Hospital, RoomConstraints.CLINIC, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.TOILET,
@@ -95,7 +158,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true));
+			}, 2, null, true, true, null));
 			this.MassageClinic = base.Add(new RoomType("MassageClinic", ROOMS.TYPES.MASSAGE_CLINIC.NAME, ROOMS.TYPES.MASSAGE_CLINIC.TOOLTIP, ROOMS.TYPES.MASSAGE_CLINIC.EFFECT, Db.Get().RoomTypeCategories.Hospital, RoomConstraints.MASSAGE_TABLE, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
@@ -106,7 +169,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true));
+			}, 2, null, true, true, null));
 			this.PowerPlant = base.Add(new RoomType("PowerPlant", ROOMS.TYPES.POWER_PLANT.NAME, ROOMS.TYPES.POWER_PLANT.TOOLTIP, ROOMS.TYPES.POWER_PLANT.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.POWER_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -115,7 +178,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true));
+			}, 2, null, true, true, null));
 			this.Farm = base.Add(new RoomType("Farm", ROOMS.TYPES.FARM.NAME, ROOMS.TYPES.FARM.TOOLTIP, ROOMS.TYPES.FARM.EFFECT, Db.Get().RoomTypeCategories.Agricultural, RoomConstraints.FARM_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -124,7 +187,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true));
+			}, 2, null, true, true, null));
 			this.CreaturePen = base.Add(new RoomType("CreaturePen", ROOMS.TYPES.CREATUREPEN.NAME, ROOMS.TYPES.CREATUREPEN.TOOLTIP, ROOMS.TYPES.CREATUREPEN.EFFECT, Db.Get().RoomTypeCategories.Agricultural, RoomConstraints.RANCH_STATION, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -134,7 +197,7 @@ namespace Database
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT,
 				RoomDetails.CREATURE_COUNT
-			}, 2, null, true, true));
+			}, 2, null, true, true, null));
 			this.MachineShop = new RoomType("MachineShop", ROOMS.TYPES.MACHINE_SHOP.NAME, ROOMS.TYPES.MACHINE_SHOP.TOOLTIP, ROOMS.TYPES.MACHINE_SHOP.EFFECT, Db.Get().RoomTypeCategories.Industrial, RoomConstraints.MACHINE_SHOP, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.MINIMUM_SIZE_12,
@@ -143,7 +206,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 2, null, true, true);
+			}, 2, null, true, true, null);
 			this.RecRoom = base.Add(new RoomType("RecRoom", ROOMS.TYPES.REC_ROOM.NAME, ROOMS.TYPES.REC_ROOM.TOOLTIP, ROOMS.TYPES.REC_ROOM.EFFECT, Db.Get().RoomTypeCategories.Recreation, RoomConstraints.REC_BUILDING, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
@@ -154,7 +217,7 @@ namespace Database
 			{
 				RoomDetails.SIZE,
 				RoomDetails.BUILDING_COUNT
-			}, 0, null, true, true));
+			}, 0, null, true, true, null));
 		}
 
 		public Assignables[] GetAssignees(Room room)

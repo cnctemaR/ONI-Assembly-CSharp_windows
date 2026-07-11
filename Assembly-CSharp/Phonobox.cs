@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedWorkable
+public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectDescriptor
 {
 	protected override void OnSpawn()
 	{
@@ -92,6 +94,20 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedW
 		this.players.Remove(player);
 		base.smi.sm.playerCount.Set(this.players.Count, base.smi);
 	}
+
+	List<Descriptor> IEffectDescriptor.GetDescriptors(BuildingDef def)
+	{
+		List<Descriptor> list = new List<Descriptor>();
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(UI.BUILDINGEFFECTS.RECREATION, UI.BUILDINGEFFECTS.TOOLTIPS.RECREATION, Descriptor.DescriptorType.Effect);
+		list.Add(descriptor);
+		Effect.AddModifierDescriptions(base.gameObject, list, "Danced", true);
+		return list;
+	}
+
+	public const string SPECIFIC_EFFECT = "Danced";
+
+	public const string TRACKING_EFFECT = "RecentlyDanced";
 
 	public CellOffset[] choreOffsets = new CellOffset[]
 	{

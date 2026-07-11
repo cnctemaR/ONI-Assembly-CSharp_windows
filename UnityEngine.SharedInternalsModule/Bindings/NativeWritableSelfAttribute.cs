@@ -2,8 +2,8 @@
 
 namespace UnityEngine.Bindings
 {
-	[VisibleToOtherModules]
 	[AttributeUsage(AttributeTargets.Method)]
+	[VisibleToOtherModules]
 	internal sealed class NativeWritableSelfAttribute : Attribute, IBindingsWritableSelfProviderAttribute, IBindingsAttribute
 	{
 		public NativeWritableSelfAttribute()

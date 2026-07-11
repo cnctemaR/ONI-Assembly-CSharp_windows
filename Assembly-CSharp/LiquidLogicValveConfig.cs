@@ -62,7 +62,6 @@ public class LiquidLogicValveConfig : IBuildingConfig
 		go.AddOrGet<LogicOperationalController>();
 		LogicOperationalController logicOperationalController = go.AddOrGet<LogicOperationalController>();
 		logicOperationalController.unNetworkedValue = 0;
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "LiquidLogicValve";

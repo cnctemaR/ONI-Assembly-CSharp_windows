@@ -55,20 +55,22 @@ public class LiquidFuelTankConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		FuelTank fuelTank = go.AddOrGet<FuelTank>();
-		fuelTank.FuelType = ElementLoader.FindElementByHash(SimHashes.Petroleum).tag;
 		fuelTank.capacityKg = fuelTank.minimumLaunchMass;
+		fuelTank.SetDefaultStoredItemModifiers(GasReservoirConfig.ReservoirStoredItemModifiers);
+		fuelTank.allowUIItemRemoval = true;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
-		conduitConsumer.capacityTag = fuelTank.FuelType;
+		conduitConsumer.capacityTag = GameTags.Liquid;
 		conduitConsumer.capacityKG = fuelTank.capacityKg;
 		conduitConsumer.forceAlwaysSatisfied = true;
-		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
 		go.AddOrGet<RocketModule>();
-		EntityTemplates.ExtendEntityToRocketModule(go);
+		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 
 	public const string ID = "LiquidFuelTank";
+
+	public const float FuelCapacity = 900f;
 }

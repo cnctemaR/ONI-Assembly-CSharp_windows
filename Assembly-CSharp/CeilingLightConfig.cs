@@ -47,12 +47,7 @@ public class CeilingLightConfig : IBuildingConfig
 		light2D.shape = LightShape.Cone;
 		light2D.drawOverlay = true;
 		light2D.Lux = 1800;
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			LightController.Instance instance = new LightController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<LightController.Def>();
 	}
 
 	public const string ID = "CeilingLight";

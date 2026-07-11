@@ -29,10 +29,7 @@ public class HydroponicFarmConfig : IBuildingConfig
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.isSolidTile = true;
 		buildingDef.PermittedRotations = PermittedRotations.FlipV;
 		buildingDef.InputConduitType = ConduitType.Liquid;
@@ -67,7 +64,6 @@ public class HydroponicFarmConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		FarmTileConfig.SetUpFarmPlotTags(go);
 		go.GetComponent<RequireInputs>().requireConduitHasMass = false;
 	}

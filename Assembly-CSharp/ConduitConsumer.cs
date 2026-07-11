@@ -95,16 +95,26 @@ public class ConduitConsumer : KMonoBehaviour
 	{
 		get
 		{
-			int utilityInputCell = this.building.GetUtilityInputCell();
+			int inputCell = this.GetInputCell();
 			ConduitFlow conduitManager = this.GetConduitManager();
-			return conduitManager.GetContents(utilityInputCell).mass;
+			return conduitManager.GetContents(inputCell).mass;
 		}
+	}
+
+	private int GetInputCell()
+	{
+		if (this.useSecondaryInput)
+		{
+			ISecondaryInput component = base.GetComponent<ISecondaryInput>();
+			return Grid.OffsetCell(this.building.NaturalBuildingCell(), component.GetSecondaryConduitOffset());
+		}
+		return this.building.GetUtilityInputCell();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.utilityCell = this.building.GetUtilityInputCell();
+		this.utilityCell = this.GetInputCell();
 		ScenePartitionerLayer scenePartitionerLayer = GameScenePartitioner.Instance.objectLayers[(this.conduitType != ConduitType.Gas) ? 16 : 12];
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("ConduitConsumer.OnSpawn", base.gameObject, this.utilityCell, scenePartitionerLayer, new Action<object>(this.OnConduitConnectionChanged));
 		this.GetConduitManager().AddConduitUpdater(new Action<float>(this.ConduitUpdate), ConduitFlowPriority.Default);
@@ -136,7 +146,7 @@ public class ConduitConsumer : KMonoBehaviour
 	{
 		if (this.building.Def.CanMove)
 		{
-			this.utilityCell = this.building.GetUtilityInputCell();
+			this.utilityCell = this.GetInputCell();
 		}
 		if (this.IsConnected)
 		{
@@ -236,6 +246,9 @@ public class ConduitConsumer : KMonoBehaviour
 
 	[SerializeField]
 	public bool keepZeroMassObject = true;
+
+	[SerializeField]
+	public bool useSecondaryInput;
 
 	[NonSerialized]
 	public bool isConsuming = true;

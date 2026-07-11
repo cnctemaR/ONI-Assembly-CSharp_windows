@@ -7,7 +7,7 @@ public class Reservoir : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_fill", "meter_OL" });
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<Reservoir>(-1697596308, Reservoir.OnStorageChangeDelegate);
 		this.OnStorageChange(null);
 	}
 
@@ -20,4 +20,9 @@ public class Reservoir : KMonoBehaviour
 
 	[MyCmpGet]
 	private Storage storage;
+
+	private static readonly EventSystem.IntraObjectHandler<Reservoir> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<Reservoir>(delegate(Reservoir component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 }

@@ -87,16 +87,16 @@ public class PlanScreen : KIconToggleMenu
 			int num = 0;
 			this.tagCategoryMap = new Dictionary<Tag, PlanScreen.PlanCategory>();
 			this.tagOrderMap = new Dictionary<Tag, int>();
-			if (global::TUNING.BUILDINGS.PLANORDER.Length > 12)
+			if (global::TUNING.BUILDINGS.PLANORDER.Count > 12)
 			{
 				Output.LogWarning(new object[]
 				{
 					"Insufficient keys to cover root plan menu",
-					"Max of 12 keys supported but TUNING.BUILDINGS.PLANORDER has " + global::TUNING.BUILDINGS.PLANORDER.Length
+					"Max of 12 keys supported but TUNING.BUILDINGS.PLANORDER has " + global::TUNING.BUILDINGS.PLANORDER.Count
 				});
 			}
 			this.toggleEntries.Clear();
-			for (int i = 0; i < global::TUNING.BUILDINGS.PLANORDER.Length; i++)
+			for (int i = 0; i < global::TUNING.BUILDINGS.PLANORDER.Count; i++)
 			{
 				PlanScreen.PlanInfo planInfo = global::TUNING.BUILDINGS.PLANORDER[i];
 				global::Action action = ((i >= 12) ? global::Action.NumActions : (global::Action.Plan1 + i));
@@ -150,8 +150,8 @@ public class PlanScreen : KIconToggleMenu
 		}
 		else
 		{
-			string[] array = (string[])data;
-			foreach (string text in array)
+			IList<string> list = (IList<string>)data;
+			foreach (string text in list)
 			{
 				Tag tag = new Tag(text);
 				category_map[tag] = category;

@@ -105,7 +105,14 @@ public class ConduitDispenser : KMonoBehaviour, ISaveLoadable
 
 	private bool IsFilteredElement(SimHashes element)
 	{
-		return Array.IndexOf<SimHashes>(this.elementFilter, element) >= 0;
+		for (int num = 0; num != this.elementFilter.Length; num++)
+		{
+			if (this.elementFilter[num] == element)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public bool IsConnected

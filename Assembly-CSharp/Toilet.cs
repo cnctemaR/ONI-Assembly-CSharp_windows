@@ -30,7 +30,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Behind, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
 		this.FlushesUsed = this._flushesUsed;
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Toilet>(493375141, Toilet.OnRefreshUserMenuDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -159,6 +159,11 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	[MyCmpReq]
 	private Storage storage;
 
+	private static readonly EventSystem.IntraObjectHandler<Toilet> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Toilet>(delegate(Toilet component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
 	[Serializable]
 	public struct SpawnInfo
 	{
@@ -266,16 +271,13 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			default_state = this.needsdirt;
 			this.root.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => !smi.HasDirt()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
 			this.needsdirt.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => smi.HasDirt());
-			this.ready.DefaultState(this.ready.idle).ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet)
-				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
+			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet).ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
 				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateBreakUseChore), null)
-				.ToggleTag(GameTags.Usable);
-			this.ready.idle.WorkableStartTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.inuse);
-			this.ready.inuse.WorkableStopTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.idle).WorkableCompleteTransition((Toilet.StatesInstance smi) => smi.master.GetComponent<ToiletWorkableUse>(), this.ready.flush);
-			this.ready.flush.Enter(delegate(Toilet.StatesInstance smi)
-			{
-				smi.Flush();
-			}).GoTo(this.ready.idle);
+				.ToggleTag(GameTags.Usable)
+				.EventHandler(GameHashes.Flush, delegate(Toilet.StatesInstance smi, object data)
+				{
+					smi.Flush();
+				});
 			this.earlyclean.PlayAnims((Toilet.StatesInstance smi) => Toilet.States.FULL_ANIMS, KAnim.PlayMode.Once).OnAnimQueueComplete(this.earlyWaitingForClean);
 			this.earlyWaitingForClean.Enter(delegate(Toilet.StatesInstance smi)
 			{
@@ -326,6 +328,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		{
 			Chore chore = this.CreateUseChore(smi, Db.Get().ChoreTypes.BreakPee);
 			chore.AddPrecondition(ChorePreconditions.instance.IsBladderNotFull, null);
+			chore.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);
 			return chore;
 		}
 
@@ -349,7 +352,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State notoperational;
 
-		public Toilet.States.ReadyStates ready;
+		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State ready;
 
 		public GameStateMachine<Toilet.States, Toilet.StatesInstance, Toilet, object>.State earlyclean;
 

@@ -53,6 +53,31 @@ public struct Extents
 		this.height = num4 - num2 + 1;
 	}
 
+	public Extents(int cell, CellOffset[] offsets, Orientation orientation)
+	{
+		int num = 0;
+		int num2 = 0;
+		Grid.CellToXY(cell, out num, out num2);
+		int num3 = num;
+		int num4 = num2;
+		for (int i = 0; i < offsets.Length; i++)
+		{
+			CellOffset rotatedCellOffset = Rotatable.GetRotatedCellOffset(offsets[i], orientation);
+			int num5 = 0;
+			int num6 = 0;
+			int num7 = Grid.OffsetCell(cell, rotatedCellOffset);
+			Grid.CellToXY(num7, out num5, out num6);
+			num = Math.Min(num, num5);
+			num2 = Math.Min(num2, num6);
+			num3 = Math.Max(num3, num5);
+			num4 = Math.Max(num4, num6);
+		}
+		this.x = num;
+		this.y = num2;
+		this.width = num3 - num + 1;
+		this.height = num4 - num2 + 1;
+	}
+
 	public Extents(int cell, CellOffset[][] offset_table)
 	{
 		int num = 0;

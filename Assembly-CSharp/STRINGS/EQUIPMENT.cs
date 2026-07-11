@@ -12,7 +12,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Make sure your Duplicants can breathe easy, anytime, anywhere.";
 
-				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.\n\nMust be refilled with oxygen at an Exosuit Recharger when depleted.";
+				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.\n\nMust be refilled with oxygen at an Exosuit Dock when depleted.";
 
 				public static LocString RECIPE_DESC = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.";
 
@@ -25,7 +25,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Because breathing underwater is better than... not.";
 
-				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in underwater environments.\n\nMust be refilled with oxygen at an Exosuit Recharger when depleted.";
+				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in underwater environments.\n\nMust be refilled with oxygen at an Exosuit Dock when depleted.";
 
 				public static LocString RECIPE_DESC = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in underwater environments.";
 			}
@@ -36,9 +36,24 @@ namespace STRINGS
 
 				public static LocString DESC = "Keep your Duplicants cool in case things heat up.";
 
-				public static LocString EFFECT = "Provides insulation in regions with extreme <style=\"heat\">Temperatures</style>.\n\nMust be powered at an Exosuit Recharger when depleted.";
+				public static LocString EFFECT = "Provides insulation in regions with extreme <style=\"heat\">Temperatures</style>.\n\nMust be powered at an Exosuit Dock when depleted.";
 
 				public static LocString RECIPE_DESC = "Provides insulation in regions with extreme <style=\"heat\">Temperatures</style>.";
+			}
+
+			public class JET_SUIT
+			{
+				public static LocString NAME = "Jet Suit";
+
+				public static LocString DESC = "Make sure your Duplicants can breathe easy, anytime, anywhere.";
+
+				public static LocString EFFECT = "Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.\n\nMust be refilled with oxygen and petroleum at a Jet Suit Dock when depleted.";
+
+				public static LocString RECIPE_DESC = "Allows flight. Supplies Duplicants with <style=\"oxygen\">Oxygen</style> in toxic and low breathability environments.";
+
+				public static LocString GENERICNAME = "Jet Suit";
+
+				public static LocString TANK_EFFECT_NAME = "Fuel Tank";
 			}
 
 			public class BORING_MACHINE

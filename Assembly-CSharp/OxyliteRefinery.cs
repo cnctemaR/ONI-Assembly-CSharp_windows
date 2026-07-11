@@ -38,7 +38,9 @@ public class OxyliteRefinery : StateMachineComponent<OxyliteRefinery.StatesInsta
 				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 				if (component.Mass >= base.master.emitMass)
 				{
-					gameObject.transform.SetPosition(base.transform.position + base.master.dropOffset);
+					Vector3 vector = base.transform.GetPosition() + base.master.dropOffset;
+					vector.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
+					gameObject.transform.SetPosition(vector);
 					storage.Drop(gameObject);
 				}
 			}

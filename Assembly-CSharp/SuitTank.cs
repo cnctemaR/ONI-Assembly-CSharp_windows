@@ -7,38 +7,17 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreather.IGasProvider
 {
-	public float LowThreshold
-	{
-		get
-		{
-			return this.lowThreshold;
-		}
-		set
-		{
-			this.lowThreshold = value;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.amount = this.capacity;
-		base.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
-		base.Subscribe(-170173755, new Action<object>(this.OnUnequipped));
+		base.Subscribe<SuitTank>(-1617557748, SuitTank.OnEquippedDelegate);
+		base.Subscribe<SuitTank>(-170173755, SuitTank.OnUnequippedDelegate);
 	}
 
 	public float PercentFull()
 	{
-		if (this.amount == 0f)
-		{
-			return 0f;
-		}
 		return this.amount / this.capacity;
-	}
-
-	public bool IsElement(string elementComparisson)
-	{
-		return this.element == elementComparisson;
 	}
 
 	public bool IsEmpty()
@@ -46,19 +25,14 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 		return this.amount <= 0f;
 	}
 
-	public bool IsLow()
+	public bool IsFull()
 	{
-		return this.PercentFull() < this.lowThreshold;
+		return this.PercentFull() >= 1f;
 	}
 
 	public bool NeedsRecharging()
 	{
 		return this.PercentFull() < 0.25f;
-	}
-
-	public void Refill()
-	{
-		this.amount = this.capacity;
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)
@@ -145,9 +119,6 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	[Serialize]
 	public float amount;
 
-	[Serialize]
-	private float lowThreshold = 0.333f;
-
 	public float capacity;
 
 	public const float REFILL_PERCENT = 0.25f;
@@ -155,4 +126,14 @@ public class SuitTank : KMonoBehaviour, IGameObjectEffectDescriptor, OxygenBreat
 	public bool underwaterSupport;
 
 	private SuitSuffocationMonitor.Instance suitSuffocationMonitor;
+
+	private static readonly EventSystem.IntraObjectHandler<SuitTank> OnEquippedDelegate = new EventSystem.IntraObjectHandler<SuitTank>(delegate(SuitTank component, object data)
+	{
+		component.OnEquipped(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<SuitTank> OnUnequippedDelegate = new EventSystem.IntraObjectHandler<SuitTank>(delegate(SuitTank component, object data)
+	{
+		component.OnUnequipped(data);
+	});
 }

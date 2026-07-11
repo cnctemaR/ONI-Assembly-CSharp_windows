@@ -26,6 +26,20 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		return base.GetFacingTarget();
 	}
 
+	protected override bool OnWorkTick(Worker worker, float dt)
+	{
+		Schedulable component = worker.GetComponent<Schedulable>();
+		if (!component.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation))
+		{
+			Effects component2 = worker.GetComponent<Effects>();
+			if (string.IsNullOrEmpty(this.specificEffect) || component2.HasEffect(this.specificEffect))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);

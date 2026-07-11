@@ -3,14 +3,25 @@ using Klei;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
-public class ElementChunk : KMonoBehaviour
+public class ElementChunk : KMonoBehaviour, IHasSortOrder
 {
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		GameComps.OreSizeVisualizers.Add(base.gameObject);
 		GameComps.ElementSplitters.Add(base.gameObject);
-		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		base.Subscribe<ElementChunk>(-2064133523, ElementChunk.OnAbsorbDelegate);
+	}
+
+	public int sortOrder
+	{
+		get
+		{
+			return base.GetComponent<PrimaryElement>().Element.buildMenuSort;
+		}
+		set
+		{
+		}
 	}
 
 	protected override void OnSpawn()
@@ -62,4 +73,9 @@ public class ElementChunk : KMonoBehaviour
 			}
 		}
 	}
+
+	private static readonly EventSystem.IntraObjectHandler<ElementChunk> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<ElementChunk>(delegate(ElementChunk component, object data)
+	{
+		component.OnAbsorb(data);
+	});
 }

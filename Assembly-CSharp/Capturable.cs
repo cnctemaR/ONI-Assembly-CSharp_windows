@@ -31,9 +31,9 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+		base.Subscribe<Capturable>(1623392196, Capturable.OnDeathDelegate);
+		base.Subscribe<Capturable>(493375141, Capturable.OnRefreshUserMenuDelegate);
+		base.Subscribe<Capturable>(-1582839653, Capturable.OnTagsChangedDelegate);
 		if (this.markedForCapture)
 		{
 			Prioritizable.AddRef(base.gameObject);
@@ -174,7 +174,10 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	public override List<Descriptor> GetDescriptors(GameObject go)
 	{
 		List<Descriptor> descriptors = base.GetDescriptors(go);
-		descriptors.Add(new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_WRANGLE, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_WRANGLE, Descriptor.DescriptorType.Effect, false));
+		if (this.allowCapture)
+		{
+			descriptors.Add(new Descriptor(UI.BUILDINGEFFECTS.CAPTURE_METHOD_WRANGLE, UI.BUILDINGEFFECTS.TOOLTIPS.CAPTURE_METHOD_WRANGLE, Descriptor.DescriptorType.Effect, false));
+		}
 		return descriptors;
 	}
 
@@ -190,4 +193,19 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	private bool markedForCapture;
 
 	private Chore chore;
+
+	private static readonly EventSystem.IntraObjectHandler<Capturable> OnDeathDelegate = new EventSystem.IntraObjectHandler<Capturable>(delegate(Capturable component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Capturable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Capturable>(delegate(Capturable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Capturable> OnTagsChangedDelegate = new EventSystem.IntraObjectHandler<Capturable>(delegate(Capturable component, object data)
+	{
+		component.OnTagsChanged(data);
+	});
 }

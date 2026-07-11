@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using UnityStandardAssets.ImageEffects;
 
 public class CameraController : KMonoBehaviour, IInputHandler
@@ -152,6 +155,21 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.Restore();
 	}
 
+	private static bool WithinInputField()
+	{
+		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
+		if (current == null)
+		{
+			return false;
+		}
+		bool flag = false;
+		if (current.currentSelectedGameObject != null && (current.currentSelectedGameObject.GetComponent<TMP_InputField>() != null || current.currentSelectedGameObject.GetComponent<InputField>() != null))
+		{
+			flag = true;
+		}
+		return flag;
+	}
+
 	public void OnKeyDown(KButtonEvent e)
 	{
 		if (e.Consumed)
@@ -159,6 +177,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			return;
 		}
 		if (this.DisableUserCameraControl)
+		{
+			return;
+		}
+		if (CameraController.WithinInputField())
 		{
 			return;
 		}
@@ -200,6 +222,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	public void OnKeyUp(KButtonEvent e)
 	{
 		if (this.DisableUserCameraControl)
+		{
+			return;
+		}
+		if (CameraController.WithinInputField())
 		{
 			return;
 		}

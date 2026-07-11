@@ -159,7 +159,14 @@ namespace STRINGS
 				{
 					public static LocString NAME = "Current Status: No Oxygen";
 
-					public static LocString TOOLTIP = "This Dock is not receiving enough oxygen to refill an Exosuit";
+					public static LocString TOOLTIP = "This Dock does not contain enough oxygen to refill a suit";
+				}
+
+				public class NO_FUEL
+				{
+					public static LocString NAME = "Current Status: No Fuel";
+
+					public static LocString TOOLTIP = "This Dock does not contain enough fuel to refill a suit";
 				}
 
 				public class NOT_OPERATIONAL
@@ -563,6 +570,17 @@ namespace STRINGS
 				public static LocString NOTIFICATION_TOOLTIP = "These buildings cannot produce the correct <b>Research Type</b> for the selected " + UI.FormatAsLink("Research Focus", "TECH") + ":";
 			}
 
+			public class NOAPPLICABLEANALYSISSELECTED
+			{
+				public static LocString NAME = "No studyable starmap destination selected";
+
+				public static LocString TOOLTIP = "Select an unknown destination in the starmap to study";
+
+				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Telescope", UI.StripLinkFormatting(BUILDINGS.PREFABS.TELESCOPE.NAME)) + " idle";
+
+				public static LocString NOTIFICATION_TOOLTIP = "These buildings need a space destination to study";
+			}
+
 			public class NOAVAILABLESEED
 			{
 				public static LocString NAME = "No Seed Available";
@@ -878,11 +896,22 @@ namespace STRINGS
 			{
 				public static LocString NAME = "No Research Focus Selected";
 
-				public static LocString TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new " + UI.FormatAsLink("Research", "TECH") + " project";
+				public static LocString TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> {RESEARCH_MENU_KEY} to select a new " + UI.FormatAsLink("Research", "TECH") + " project";
 
 				public static LocString NOTIFICATION_NAME = "No " + UI.FormatAsLink("Research Focus", "TECH") + " selected";
 
-				public static LocString NOTIFICATION_TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> [R] to select a new " + UI.FormatAsLink("Research", "TECH") + " project";
+				public static LocString NOTIFICATION_TOOLTIP = "Open the <color=#833A5FFF>Research Tree</color> to select a new " + UI.FormatAsLink("Research", "TECH") + " project";
+			}
+
+			public class NORESEARCHORDESTINATIONSELECTED
+			{
+				public static LocString NAME = "No Research Focus or Starmap Destination Selected";
+
+				public static LocString TOOLTIP = "Select a Project in the <color=#833A5FFF>Research Tree</color> {RESEARCH_MENU_KEY} or a Destination in the <color=#833A5FFF>Starmap</color> {STARMAP_MENU_KEY}";
+
+				public static LocString NOTIFICATION_NAME = "No " + UI.FormatAsLink("Research Focus", "TECH") + " or Starmap destination selected";
+
+				public static LocString NOTIFICATION_TOOLTIP = "Select a Project in the <color=#833A5FFF>Research Tree</color> {RESEARCH_MENU_KEY} or a Destination in the <color=#833A5FFF>Starmap</color> {STARMAP_MENU_KEY}";
 			}
 
 			public class RESEARCHING
@@ -1507,6 +1536,17 @@ namespace STRINGS
 				public static LocString LOGIC_CONTROLLED_DISABLED = "Disabled by Automation Grid";
 			}
 
+			public class GANTRY
+			{
+				public static LocString AUTOMATION_CONTROL = "Automation Control: {0}";
+
+				public static LocString MANUAL_CONTROL = "Manual Control: {0}";
+
+				public static LocString EXTENDED = "Extended";
+
+				public static LocString RETRACTED = "Retracted";
+			}
+
 			public class TOO_COLD
 			{
 				public static LocString NAME = "Too Cold";
@@ -1599,14 +1639,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Scan Quality: {Quality}";
 
-				public static LocString TOOLTIP = "This scanner dish is currently scanning at {Quality} effectiveness\n\nDecreased scan quality may be due to:\n    • Interference from nearby heavy machinery\n    • Rock or tile obstructing the dish's view of the sky";
+				public static LocString TOOLTIP = "This scanner dish is currently scanning at {Quality} effectiveness\n\nDecreased scan quality may be due to:\n    • Interference from nearby heavy machinery\n    • Rock or tile obstructing the dish's line of sight on space";
 			}
 
 			public class NETWORKQUALITY
 			{
 				public static LocString NAME = "Scan Network Quality: {TotalQuality}";
 
-				public static LocString TOOLTIP = "Your scanner network is scanning at {TotalQuality} effectiveness, and will detect meteor showers {WorstTime} to {BestTime} before they strike\n\nBuild multiple detectors and ensure they're each scanning effectively for the best results";
+				public static LocString TOOLTIP = "Your scanner network is scanning at {TotalQuality} effectiveness\n\nIt will detect incoming objects {WorstTime} to {BestTime} before they arrive\n\nBuild multiple detectors and ensure they're each scanning effectively for the best detection results";
 			}
 
 			public class DETECTORSCANNING
@@ -1618,7 +1658,7 @@ namespace STRINGS
 
 			public class INCOMINGMETEORS
 			{
-				public static LocString NAME = "Incoming Meteors";
+				public static LocString NAME = "Incoming Object Detected";
 
 				public static LocString TOOLTIP = "Warning!\n\nHigh velocity objects on approach!";
 			}
@@ -1635,6 +1675,15 @@ namespace STRINGS
 				public static LocString NAME = "Reduced Visibility";
 
 				public static LocString TOOLTIP = "This building has an inadequate or obscured view of space\n\nEnsure an unblocked view of the sky is available to collect research data\nVisibility: {VISIBILITY}\nScan Radius: {RADIUS} cells";
+			}
+
+			public class PATH_NOT_CLEAR
+			{
+				public static LocString NAME = "Launch Path Blocked";
+
+				public static LocString TOOLTIP = "There are solid obstructions in this rocket's launch trajectory:\n    • {0}\n\nThis rocket requires a clear flight path for launch";
+
+				public static LocString TILE_FORMAT = "Solid {0}";
 			}
 		}
 

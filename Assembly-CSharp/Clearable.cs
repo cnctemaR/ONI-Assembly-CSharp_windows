@@ -7,11 +7,11 @@ public class Clearable : Workable, ISaveLoadable
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		base.Subscribe(856640610, new Action<object>(this.OnStore));
-		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
+		base.Subscribe<Clearable>(2127324410, Clearable.OnCancelDelegate);
+		base.Subscribe<Clearable>(856640610, Clearable.OnStoreDelegate);
+		base.Subscribe<Clearable>(-2064133523, Clearable.OnAbsorbDelegate);
+		base.Subscribe<Clearable>(493375141, Clearable.OnRefreshUserMenuDelegate);
+		base.Subscribe<Clearable>(-1617557748, Clearable.OnEquippedDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Clearing;
 	}
 
@@ -158,4 +158,29 @@ public class Clearable : Workable, ISaveLoadable
 	private HandleVector<int>.Handle clearHandle;
 
 	public bool isClearable = true;
+
+	private static readonly EventSystem.IntraObjectHandler<Clearable> OnCancelDelegate = new EventSystem.IntraObjectHandler<Clearable>(delegate(Clearable component, object data)
+	{
+		component.OnCancel(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Clearable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Clearable>(delegate(Clearable component, object data)
+	{
+		component.OnStore(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Clearable> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<Clearable>(delegate(Clearable component, object data)
+	{
+		component.OnAbsorb(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Clearable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Clearable>(delegate(Clearable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Clearable> OnEquippedDelegate = new EventSystem.IntraObjectHandler<Clearable>(delegate(Clearable component, object data)
+	{
+		component.OnEquipped(data);
+	});
 }

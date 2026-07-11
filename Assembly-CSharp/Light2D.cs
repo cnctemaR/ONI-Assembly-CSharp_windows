@@ -9,7 +9,7 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<Light2D>(-592767678, Light2D.OnOperationalChangedDelegate);
 		this.IntensityAnimation = 1f;
 	}
 
@@ -151,4 +151,9 @@ public class Light2D : KMonoBehaviour, IGameObjectEffectDescriptor
 	private LightGridManager.LightGridEmitter emitter;
 
 	private List<int> litCells = new List<int>();
+
+	private static readonly EventSystem.IntraObjectHandler<Light2D> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Light2D>(delegate(Light2D component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 }

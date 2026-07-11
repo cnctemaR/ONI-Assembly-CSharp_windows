@@ -31,15 +31,15 @@ public class BuildMenuCategoriesScreen : KIconToggleMenu
 		this.categorizedCategoryMap = categorized_category_map;
 		this.buildingsScreen = buildings_screen;
 		List<KIconToggleMenu.ToggleInfo> list = new List<KIconToggleMenu.ToggleInfo>();
-		if (data.GetType() == typeof(BuildMenu.BuildingInfo[]))
+		if (typeof(IList<BuildMenu.BuildingInfo>).IsAssignableFrom(data.GetType()))
 		{
-			this.buildingInfos = (BuildMenu.BuildingInfo[])data;
+			this.buildingInfos = (IList<BuildMenu.BuildingInfo>)data;
 		}
-		else if (data.GetType() == typeof(BuildMenu.DisplayInfo[]))
+		else if (typeof(IList<BuildMenu.DisplayInfo>).IsAssignableFrom(data.GetType()))
 		{
 			this.subcategories = new List<BuildMenu.Category>();
-			BuildMenu.DisplayInfo[] array = (BuildMenu.DisplayInfo[])data;
-			foreach (BuildMenu.DisplayInfo displayInfo in array)
+			IList<BuildMenu.DisplayInfo> list2 = (IList<BuildMenu.DisplayInfo>)data;
+			foreach (BuildMenu.DisplayInfo displayInfo in list2)
 			{
 				string iconName = displayInfo.iconName;
 				string text = displayInfo.category.ToString().ToUpper();

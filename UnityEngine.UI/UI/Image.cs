@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine.Serialization;
 using UnityEngine.Sprites;
+using UnityEngine.U2D;
 
 namespace UnityEngine.UI
 {
@@ -23,6 +25,7 @@ namespace UnityEngine.UI
 				if (SetPropertyUtility.SetClass<Sprite>(ref this.m_Sprite, value))
 				{
 					this.SetAllDirty();
+					this.TrackSprite();
 				}
 			}
 		}
@@ -38,6 +41,7 @@ namespace UnityEngine.UI
 				if (SetPropertyUtility.SetClass<Sprite>(ref this.m_OverrideSprite, value))
 				{
 					this.SetAllDirty();
+					this.TrackSprite();
 				}
 			}
 		}
@@ -357,6 +361,30 @@ namespace UnityEngine.UI
 					this.GenerateFilledSprite(toFill, this.m_PreserveAspect);
 					break;
 				}
+			}
+		}
+
+		private void TrackSprite()
+		{
+			if (this.activeSprite != null && this.activeSprite.texture == null)
+			{
+				Image.TrackImage(this);
+				this.m_Tracked = true;
+			}
+		}
+
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+			this.TrackSprite();
+		}
+
+		protected override void OnDisable()
+		{
+			base.OnDisable();
+			if (this.m_Tracked)
+			{
+				Image.UnTrackImage(this);
 			}
 		}
 
@@ -1154,6 +1182,34 @@ namespace UnityEngine.UI
 			return vector;
 		}
 
+		private static void RebuildImage(SpriteAtlas spriteAtlas)
+		{
+			for (int i = Image.m_TrackedTexturelessImages.Count - 1; i >= 0; i--)
+			{
+				Image image = Image.m_TrackedTexturelessImages[i];
+				if (spriteAtlas.CanBindTo(image.activeSprite))
+				{
+					image.SetAllDirty();
+					Image.m_TrackedTexturelessImages.RemoveAt(i);
+				}
+			}
+		}
+
+		private static void TrackImage(Image g)
+		{
+			if (!Image.s_Initialized)
+			{
+				SpriteAtlasManager.atlasRegistered += Image.RebuildImage;
+				Image.s_Initialized = true;
+			}
+			Image.m_TrackedTexturelessImages.Add(g);
+		}
+
+		private static void UnTrackImage(Image g)
+		{
+			Image.m_TrackedTexturelessImages.Remove(g);
+		}
+
 		protected static Material s_ETC1DefaultUI = null;
 
 		[FormerlySerializedAs("m_Frame")]
@@ -1187,6 +1243,8 @@ namespace UnityEngine.UI
 
 		private float m_AlphaHitTestMinimumThreshold = 0f;
 
+		private bool m_Tracked = false;
+
 		private static readonly Vector2[] s_VertScratch = new Vector2[4];
 
 		private static readonly Vector2[] s_UVScratch = new Vector2[4];
@@ -1194,6 +1252,10 @@ namespace UnityEngine.UI
 		private static readonly Vector3[] s_Xy = new Vector3[4];
 
 		private static readonly Vector3[] s_Uv = new Vector3[4];
+
+		private static List<Image> m_TrackedTexturelessImages = new List<Image>();
+
+		private static bool s_Initialized;
 
 		public enum Type
 		{

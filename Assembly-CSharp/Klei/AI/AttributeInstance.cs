@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using STRINGS;
 using UnityEngine;
@@ -12,7 +11,7 @@ namespace Klei.AI
 		public AttributeInstance(GameObject game_object, Attribute attribute)
 			: base(game_object, attribute)
 		{
-			DebugUtil.Assert(attribute != null, "Assert!");
+			DebugUtil.Assert(attribute != null, "Assert!", string.Empty, string.Empty);
 			this.Attribute = attribute;
 		}
 
@@ -49,8 +48,9 @@ namespace Klei.AI
 		{
 			float num = this.Attribute.BaseValue;
 			float num2 = 0f;
-			foreach (AttributeModifier attributeModifier in this.Modifiers)
+			for (int num3 = 0; num3 != this.Modifiers.Count; num3++)
 			{
+				AttributeModifier attributeModifier = this.Modifiers[num3];
 				if (!attributeModifier.IsMultiplier)
 				{
 					num += attributeModifier.Value;
@@ -71,8 +71,9 @@ namespace Klei.AI
 		{
 			float num = this.Attribute.BaseValue;
 			float num2 = 0f;
-			foreach (AttributeModifier attributeModifier in this.Modifiers)
+			for (int num3 = 0; num3 != this.Modifiers.Count; num3++)
 			{
+				AttributeModifier attributeModifier = this.Modifiers[num3];
 				if (!attributeModifier.UIOnly)
 				{
 					if (!attributeModifier.IsMultiplier)
@@ -99,8 +100,9 @@ namespace Klei.AI
 				return testModifier.Value;
 			}
 			float num = this.Attribute.BaseValue;
-			foreach (AttributeModifier attributeModifier in this.Modifiers)
+			for (int num2 = 0; num2 != this.Modifiers.Count; num2++)
 			{
+				AttributeModifier attributeModifier = this.Modifiers[num2];
 				if (!attributeModifier.IsMultiplier)
 				{
 					num += attributeModifier.Value;
@@ -165,7 +167,7 @@ namespace Klei.AI
 
 		public global::System.Action OnDirty;
 
-		public List<AttributeModifier> Modifiers = new List<AttributeModifier>();
+		public ArrayRef<AttributeModifier> Modifiers;
 
 		public bool hide;
 	}

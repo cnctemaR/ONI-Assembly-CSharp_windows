@@ -62,8 +62,6 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 				Assets.AnimTable[hashedString2] = kanimFile;
 			}
 		}
-		Singleton<StateMachineUpdater>.CreateInstance();
-		Singleton<StateMachineManager>.CreateInstance();
 		LegacyModMain.Load();
 	}
 
@@ -99,7 +97,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	{
 		Hashtable hashtable = new Hashtable();
 		ElementsAudio.Instance.LoadData(AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<ElementAudioFileLoader>.Get().entries);
-		ElementLoader.Load(ref hashtable, AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<SolidFileLoader>.Get().entries, AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<LiquidFileLoader>.Get().entries, AsyncLoadManager<IGlobalAsyncLoader>.AsyncLoader<GasFileLoader>.Get().entries, this.substanceTable);
+		ElementLoader.Load(ref hashtable, this.elementsFile.text, this.substanceTable);
 		Assets.SubstanceTable = this.substanceTable;
 	}
 
@@ -427,13 +425,7 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static SubstanceTable SubstanceTable;
 
 	[SerializeField]
-	public TextAsset simElementsSolidsFile;
-
-	[SerializeField]
-	public TextAsset simElementsLiquidsFile;
-
-	[SerializeField]
-	public TextAsset simElementsGasesFile;
+	public TextAsset elementsFile;
 
 	[SerializeField]
 	public TextAsset elementAudio;

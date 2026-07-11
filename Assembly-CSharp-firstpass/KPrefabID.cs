@@ -48,12 +48,13 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		if (this.instantiateFn != null)
 		{
 			this.instantiateFn(base.gameObject);
+			this.instantiateFn = null;
 		}
 	}
 
 	public void InitializeTags()
 	{
-		DebugUtil.Assert(this.PrefabTag.IsValid, "Assert!");
+		DebugUtil.Assert(this.PrefabTag.IsValid, "Assert!", string.Empty, string.Empty);
 		this.tags.Add(this.PrefabTag);
 		this.dirtyTagBits = true;
 	}
@@ -86,11 +87,12 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(1969584890, new Action<object>(this.OnObjectDestroyed));
+		base.Subscribe<KPrefabID>(1969584890, KPrefabID.OnObjectDestroyedDelegate);
 		this.InitializeTags();
 		if (this.prefabInitFn != null)
 		{
 			this.prefabInitFn(base.gameObject);
+			this.prefabInitFn = null;
 		}
 		IStateMachineControllerHack component = base.GetComponent<IStateMachineControllerHack>();
 		if (component != null)
@@ -109,12 +111,13 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 		if (this.prefabSpawnFn != null)
 		{
 			this.prefabSpawnFn(base.gameObject);
+			this.prefabSpawnFn = null;
 		}
 	}
 
 	public void AddTag(Tag tag)
 	{
-		DebugUtil.Assert(tag.IsValid, "Assert!");
+		DebugUtil.Assert(tag.IsValid, "Assert!", string.Empty, string.Empty);
 		if (this.Tags.Add(tag))
 		{
 			this.dirtyTagBits = true;
@@ -218,7 +221,7 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 
 	public const int InvalidInstanceID = -1;
 
-	public static int NextUniqueID;
+	public static int NextUniqueID = 0;
 
 	[ReadOnly]
 	public Tag SaveLoadTag;
@@ -239,6 +242,11 @@ public class KPrefabID : KMonoBehaviour, ISaveLoadable
 	public List<Descriptor> AdditionalEffects;
 
 	private HashSet<Tag> tags = new HashSet<Tag>();
+
+	private static readonly EventSystem.IntraObjectHandler<KPrefabID> OnObjectDestroyedDelegate = new EventSystem.IntraObjectHandler<KPrefabID>(delegate(KPrefabID component, object data)
+	{
+		component.OnObjectDestroyed(data);
+	});
 
 	public delegate void PrefabFn(GameObject go);
 }

@@ -80,6 +80,7 @@ public class MinionConfig : IEntityConfig
 			Assets.GetAnim("anim_loco_firepole_kanim"),
 			Assets.GetAnim("anim_loco_new_kanim"),
 			Assets.GetAnim("anim_loco_tube_kanim"),
+			Assets.GetAnim("anim_loco_hover_kanim"),
 			Assets.GetAnim("anim_construction_firepole_kanim")
 		};
 		KBoxCollider2D kboxCollider2D = gameObject.AddOrGet<KBoxCollider2D>();
@@ -297,104 +298,91 @@ public class MinionConfig : IEntityConfig
 				id = "DigEffect",
 				animFile = "laser_kanim",
 				anim = "idle",
-				context = "dig",
-				renderQueueOverride = 3800
+				context = "dig"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "BuildEffect",
 				animFile = "construct_beam_kanim",
 				anim = "loop",
-				context = "build",
-				renderQueueOverride = -1
+				context = "build"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "FetchLiquidEffect",
 				animFile = "hose_fx_kanim",
 				anim = "loop",
-				context = "fetchliquid",
-				renderQueueOverride = -1
+				context = "fetchliquid"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "PaintEffect",
 				animFile = "paint_beam_kanim",
 				anim = "loop",
-				context = "paint",
-				renderQueueOverride = -1
+				context = "paint"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "HarvestEffect",
 				animFile = "plant_harvest_beam_kanim",
 				anim = "loop",
-				context = "harvest",
-				renderQueueOverride = -1
+				context = "harvest"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "CaptureEffect",
 				animFile = "net_gun_fx_kanim",
 				anim = "loop",
-				context = "capture",
-				renderQueueOverride = -1
+				context = "capture"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "AttackEffect",
 				animFile = "attack_beam_fx_kanim",
 				anim = "loop",
-				context = "attack",
-				renderQueueOverride = -1
+				context = "attack"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "PickupEffect",
 				animFile = "vacuum_fx_kanim",
 				anim = "loop",
-				context = "pickup",
-				renderQueueOverride = -1
+				context = "pickup"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "StoreEffect",
 				animFile = "vacuum_reverse_fx_kanim",
 				anim = "loop",
-				context = "store",
-				renderQueueOverride = -1
+				context = "store"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "DisinfectEffect",
 				animFile = "plant_spray_beam_kanim",
 				anim = "loop",
-				context = "disinfect",
-				renderQueueOverride = -1
+				context = "disinfect"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "TendEffect",
 				animFile = "plant_tending_beam_fx_kanim",
 				anim = "loop",
-				context = "tend",
-				renderQueueOverride = -1
+				context = "tend"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "PowerTinkerEffect",
 				animFile = "electrician_beam_fx_kanim",
 				anim = "idle",
-				context = "powertinker",
-				renderQueueOverride = -1
+				context = "powertinker"
 			},
 			new MinionConfig.LaserEffect
 			{
 				id = "SpecialistDigEffect",
 				animFile = "senior_miner_beam_fx_kanim",
 				anim = "idle",
-				context = "specialistdig",
-				renderQueueOverride = -1
+				context = "specialistdig"
 			}
 		};
 		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
@@ -411,7 +399,6 @@ public class MinionConfig : IEntityConfig
 			kbatchedAnimTracker.useTargetPoint = true;
 			KBatchedAnimController kbatchedAnimController = gameObject2.AddOrGet<KBatchedAnimController>();
 			kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(laserEffect.animFile) };
-			kbatchedAnimController.renderQueueOverride = laserEffect.renderQueueOverride;
 			KBatchedAnimEventToggler.Entry entry = new KBatchedAnimEventToggler.Entry
 			{
 				anim = laserEffect.anim,
@@ -528,7 +515,5 @@ public class MinionConfig : IEntityConfig
 		public string anim;
 
 		public HashedString context;
-
-		public int renderQueueOverride;
 	}
 }

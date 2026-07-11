@@ -107,7 +107,7 @@ public class ScheduleMinionWidget : KMonoBehaviour
 		return 0;
 	}
 
-	private new void OnDestroy()
+	protected override void OnCleanUp()
 	{
 		Components.LiveMinionIdentities.OnAdd -= this.OnLivingMinionsChanged;
 		Components.LiveMinionIdentities.OnRemove -= this.OnLivingMinionsChanged;

@@ -80,6 +80,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 			this.detectorNetworkDef.worstWarningTime = 1f;
 			this.detectorNetworkDef.bestWarningTime = 200f;
 			this.detectorNetworkDef.bestNetworkSize = 6;
+			this.targetCraft = new Ref<LaunchConditionManager>();
 			this.RerollAccuracy();
 		}
 
@@ -103,13 +104,33 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 		{
 			float detectTime = this.GetDetectTime();
 			KPrefabID component = base.GetComponent<KPrefabID>();
-			if (SaveGame.Instance.GetComponent<SeasonManager>().TimeUntilNextBombardment() <= detectTime)
+			if (this.targetCraft.Get() == null)
 			{
-				component.AddTag(GameTags.Detecting);
+				if (SaveGame.Instance.GetComponent<SeasonManager>().TimeUntilNextBombardment() <= detectTime)
+				{
+					component.AddTag(GameTags.Detecting);
+				}
+				else
+				{
+					component.RemoveTag(GameTags.Detecting);
+				}
 			}
 			else
 			{
-				component.RemoveTag(GameTags.Detecting);
+				Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.targetCraft.Get());
+				if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Destroyed)
+				{
+					this.targetCraft.Set(null);
+					component.RemoveTag(GameTags.Detecting);
+				}
+				else if (spacecraftFromLaunchConditionManager.state != Spacecraft.MissionState.Underway)
+				{
+					component.AddTag(GameTags.Detecting);
+				}
+				else
+				{
+					component.RemoveTag(GameTags.Detecting);
+				}
 			}
 		}
 
@@ -128,6 +149,16 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 			return this.detectorNetwork.GetDetectTimeRange().Lerp(this.nextAccuracy);
 		}
 
+		public void SetTargetCraft(LaunchConditionManager target)
+		{
+			this.targetCraft.Set(target);
+		}
+
+		public LaunchConditionManager GetTargetCraft()
+		{
+			return this.targetCraft.Get();
+		}
+
 		public bool ShowWorkingStatus;
 
 		private const float BEST_WARNING_TIME = 200f;
@@ -142,6 +173,9 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 
 		[Serialize]
 		private float nextAccuracy;
+
+		[Serialize]
+		private Ref<LaunchConditionManager> targetCraft;
 
 		private DetectorNetwork.Def detectorNetworkDef;
 

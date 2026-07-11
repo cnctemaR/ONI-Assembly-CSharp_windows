@@ -34,8 +34,8 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
-		base.Subscribe(643180843, new Action<object>(this.RefreshCreatureCount));
+		base.Subscribe<CreatureDeliveryPoint>(-905833192, CreatureDeliveryPoint.OnCopySettingsDelegate);
+		base.Subscribe<CreatureDeliveryPoint>(643180843, CreatureDeliveryPoint.RefreshCreatureCountDelegate);
 		this.RefreshCreatureCount(null);
 	}
 
@@ -155,6 +155,12 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	private void OnFetchComplete(FetchOrder2 fetchOrder, Pickupable fetchedItem)
 	{
 		this.RebalanceFetches();
+		if (this.playAnimsOnFetch)
+		{
+			KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+			component.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
+			component.Queue("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+		}
 	}
 
 	private void OnFetchBegun(FetchOrder2 fetchOrder, Pickupable fetchedItem)
@@ -244,6 +250,18 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 	private List<FetchOrder2> fetches;
 
 	private static StatusItem capacityStatusItem;
+
+	public bool playAnimsOnFetch;
+
+	private static readonly EventSystem.IntraObjectHandler<CreatureDeliveryPoint> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<CreatureDeliveryPoint>(delegate(CreatureDeliveryPoint component, object data)
+	{
+		component.OnCopySettings(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<CreatureDeliveryPoint> RefreshCreatureCountDelegate = new EventSystem.IntraObjectHandler<CreatureDeliveryPoint>(delegate(CreatureDeliveryPoint component, object data)
+	{
+		component.RefreshCreatureCount(data);
+	});
 
 	private Tag[] requiredFetchTags = new Tag[] { GameTags.Creatures.Deliverable };
 

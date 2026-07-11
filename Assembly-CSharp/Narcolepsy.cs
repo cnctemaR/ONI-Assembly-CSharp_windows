@@ -9,8 +9,8 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe<Narcolepsy>(1623392196, Narcolepsy.OnDeathDelegate);
+		base.Subscribe<Narcolepsy>(-1117766961, Narcolepsy.OnRevivedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -43,10 +43,20 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NARCOLEPSING,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			Narcolepsy component = context.consumerState.consumer.GetComponent<Narcolepsy>();
-			return component != null && component.IsNarcolepsing();
+			Narcolepsy component2 = context.consumerState.consumer.GetComponent<Narcolepsy>();
+			return component2 != null && component2.IsNarcolepsing();
 		}
 	};
+
+	private static readonly EventSystem.IntraObjectHandler<Narcolepsy> OnDeathDelegate = new EventSystem.IntraObjectHandler<Narcolepsy>(delegate(Narcolepsy component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Narcolepsy> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Narcolepsy>(delegate(Narcolepsy component, object data)
+	{
+		component.OnRevived(data);
+	});
 
 	public class StatesInstance : GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.GameInstance
 	{

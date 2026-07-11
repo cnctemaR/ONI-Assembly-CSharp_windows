@@ -7,9 +7,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Representation of four-dimensional vectors.</para>
 	/// </summary>
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Math/Vector4.h")]
 	[NativeClass("Vector4f")]
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct Vector4 : IEquatable<Vector4>
 	{
 		/// <summary>

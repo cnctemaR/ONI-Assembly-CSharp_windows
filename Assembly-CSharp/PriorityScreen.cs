@@ -154,6 +154,7 @@ public class PriorityScreen : KScreen
 
 	public enum PriorityClass
 	{
+		idle = -1,
 		basic,
 		high,
 		emergency

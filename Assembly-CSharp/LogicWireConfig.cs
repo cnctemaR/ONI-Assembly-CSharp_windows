@@ -22,7 +22,7 @@ public class LogicWireConfig : IBuildingConfig
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.ObjectLayer = ObjectLayer.LogicWires;
 		buildingDef.TileLayer = ObjectLayer.LogicWiresTiling;
-		buildingDef.SceneLayer = Grid.SceneLayer.Wires;
+		buildingDef.SceneLayer = Grid.SceneLayer.LogicWires;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.Entombable = false;

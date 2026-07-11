@@ -23,6 +23,11 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 		}).Exit("DestroyHitEffect", delegate(MultitoolController.Instance smi)
 		{
 			smi.DestroyHitEffect();
+		})
+			.EventTransition(GameHashes.WorkerPlayPostAnim, this.pst, null);
+		this.pst.Enter("PlayPost", delegate(MultitoolController.Instance smi)
+		{
+			smi.PlayPost();
 		});
 	}
 
@@ -84,6 +89,8 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 
 	public GameStateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.State loop;
 
+	public GameStateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.State pst;
+
 	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter worker;
 
 	public StateMachine<MultitoolController, MultitoolController.Instance, Worker, object>.TargetParameter workable;
@@ -92,33 +99,33 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 	{
 		new string[][]
 		{
-			new string[] { "{verb}_dn_pre", "{verb}_dn_loop" },
-			new string[] { "ladder_{verb}_dn_pre", "ladder_{verb}_dn_loop" },
-			new string[] { "pole_{verb}_dn_pre", "pole_{verb}_dn_loop" }
+			new string[] { "{verb}_dn_pre", "{verb}_dn_loop", "{verb}_dn_pst" },
+			new string[] { "ladder_{verb}_dn_pre", "ladder_{verb}_dn_loop", "ladder_{verb}_dn_pst" },
+			new string[] { "pole_{verb}_dn_pre", "pole_{verb}_dn_loop", "pole_{verb}_dn_pst" }
 		},
 		new string[][]
 		{
-			new string[] { "{verb}_diag_dn_pre", "{verb}_diag_dn_loop" },
-			new string[] { "ladder_{verb}_diag_dn_pre", "ladder_{verb}_loop_diag_dn" },
-			new string[] { "pole_{verb}_diag_dn_pre", "pole_{verb}_loop_diag_dn" }
+			new string[] { "{verb}_diag_dn_pre", "{verb}_diag_dn_loop", "{verb}_diag_dn_pst" },
+			new string[] { "ladder_{verb}_diag_dn_pre", "ladder_{verb}_loop_diag_dn", "ladder_{verb}_diag_dn_pst" },
+			new string[] { "pole_{verb}_diag_dn_pre", "pole_{verb}_loop_diag_dn", "pole_{verb}_diag_dn_pst" }
 		},
 		new string[][]
 		{
-			new string[] { "{verb}_fwd_pre", "{verb}_fwd_loop" },
-			new string[] { "ladder_{verb}_pre", "ladder_{verb}_loop" },
-			new string[] { "pole_{verb}_pre", "pole_{verb}_loop" }
+			new string[] { "{verb}_fwd_pre", "{verb}_fwd_loop", "{verb}_fwd_pst" },
+			new string[] { "ladder_{verb}_pre", "ladder_{verb}_loop", "ladder_{verb}_pst" },
+			new string[] { "pole_{verb}_pre", "pole_{verb}_loop", "pole_{verb}_pst" }
 		},
 		new string[][]
 		{
-			new string[] { "{verb}_diag_up_pre", "{verb}_diag_up_loop" },
-			new string[] { "ladder_{verb}_diag_up_pre", "ladder_{verb}_loop_diag_up" },
-			new string[] { "pole_{verb}_diag_up_pre", "pole_{verb}_loop_diag_up" }
+			new string[] { "{verb}_diag_up_pre", "{verb}_diag_up_loop", "{verb}_diag_up_pst" },
+			new string[] { "ladder_{verb}_diag_up_pre", "ladder_{verb}_loop_diag_up", "ladder_{verb}_diag_up_pst" },
+			new string[] { "pole_{verb}_diag_up_pre", "pole_{verb}_loop_diag_up", "pole_{verb}_diag_up_pst" }
 		},
 		new string[][]
 		{
-			new string[] { "{verb}_up_pre", "{verb}_up_loop" },
-			new string[] { "ladder_{verb}_up_pre", "ladder_{verb}_up_loop" },
-			new string[] { "pole_{verb}_up_pre", "pole_{verb}_up_loop" }
+			new string[] { "{verb}_up_pre", "{verb}_up_loop", "{verb}_up_pst" },
+			new string[] { "ladder_{verb}_up_pre", "ladder_{verb}_up_loop", "ladder_{verb}_up_pst" },
+			new string[] { "pole_{verb}_up_pre", "pole_{verb}_up_loop", "pole_{verb}_up_pst" }
 		}
 	};
 
@@ -147,6 +154,15 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			if (kanimControllerBase.currentAnim != this.anims[1])
 			{
 				base.sm.worker.Get<KAnimControllerBase>(base.smi).Play(this.anims[1], KAnim.PlayMode.Loop, 1f, 0f);
+			}
+		}
+
+		public void PlayPost()
+		{
+			KAnimControllerBase kanimControllerBase = base.sm.worker.Get<KAnimControllerBase>(base.smi);
+			if (kanimControllerBase.currentAnim != this.anims[2])
+			{
+				base.sm.worker.Get<KAnimControllerBase>(base.smi).Play(this.anims[2], KAnim.PlayMode.Once, 1f, 0f);
 			}
 		}
 
@@ -193,7 +209,11 @@ public class MultitoolController : GameStateMachine<MultitoolController, Multito
 			Vector3 targetPoint = workable.GetTargetPoint();
 			component.SetTargetPos(targetPoint);
 			this.hitEffect = GameUtil.KInstantiate(this.hitEffectPrefab, targetPoint, Grid.SceneLayer.FXFront2, null, 0);
+			KBatchedAnimController component2 = this.hitEffect.GetComponent<KBatchedAnimController>();
 			this.hitEffect.SetActive(true);
+			component2.sceneLayer = Grid.SceneLayer.FXFront2;
+			component2.enabled = false;
+			component2.enabled = true;
 			component.UpdateWorkTarget(workable.GetTargetPoint());
 		}
 

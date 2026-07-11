@@ -29,10 +29,7 @@ public class FarmTileConfig : IBuildingConfig
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileFront;
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.PermittedRotations = PermittedRotations.FlipV;
 		buildingDef.isSolidTile = false;
 		buildingDef.DragBuild = true;
@@ -45,6 +42,7 @@ public class FarmTileConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
@@ -59,7 +57,7 @@ public class FarmTileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RemoveLoopingSounds(go);
 		FarmTileConfig.SetUpFarmPlotTags(go);
 	}
 

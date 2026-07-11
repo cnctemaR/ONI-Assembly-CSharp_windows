@@ -21,7 +21,7 @@ public class DreckoPlasticConfig : IEntityConfig
 			{
 				"BasicSingleHarvestPlant".ToTag(),
 				"PrickleFlower".ToTag()
-			}, DreckoPlasticConfig.POOP_ELEMENT, DreckoPlasticConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoPlasticConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f)
+			}, DreckoPlasticConfig.POOP_ELEMENT, DreckoPlasticConfig.CALORIES_PER_DAY_OF_PLANT_EATEN, DreckoPlasticConfig.KG_POOP_PER_DAY_OF_PLANT, null, 0f, false)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();

@@ -202,8 +202,6 @@ public class LiquidPumpingStation : Workable, ISim200ms
 		float amount = pickupableStartWorkInfo.amount;
 		Element element = pickupableStartWorkInfo.originalPickupable.GetComponent<PrimaryElement>().Element;
 		this.session = new LiquidPumpingStation.WorkSession(Grid.PosToCell(this), element.id, pickupableStartWorkInfo.originalPickupable.GetComponent<SubstanceChunk>(), amount, base.gameObject);
-		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		component.Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
 		this.meter.SetPositionPercent(0f);
 		this.meter.SetSymbolTint(new KAnimHashedString("meter_target"), element.substance.colour);
 	}

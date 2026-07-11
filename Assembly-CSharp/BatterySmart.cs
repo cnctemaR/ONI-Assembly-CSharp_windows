@@ -17,8 +17,8 @@ public class BatterySmart : Battery, IActivationRangeTarget
 	{
 		base.OnSpawn();
 		this.CreateLogicMeter();
-		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
-		base.Subscribe(-592767678, new Action<object>(this.UpdateLogicCircuit));
+		base.Subscribe<BatterySmart>(-801688580, BatterySmart.OnLogicValueChangedDelegate);
+		base.Subscribe<BatterySmart>(-592767678, BatterySmart.UpdateLogicCircuitDelegate);
 	}
 
 	private void CreateLogicMeter()
@@ -173,4 +173,14 @@ public class BatterySmart : Battery, IActivationRangeTarget
 	private LogicPorts logicPorts;
 
 	private MeterController logicMeter;
+
+	private static readonly EventSystem.IntraObjectHandler<BatterySmart> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<BatterySmart>(delegate(BatterySmart component, object data)
+	{
+		component.OnLogicValueChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<BatterySmart> UpdateLogicCircuitDelegate = new EventSystem.IntraObjectHandler<BatterySmart>(delegate(BatterySmart component, object data)
+	{
+		component.UpdateLogicCircuit(data);
+	});
 }

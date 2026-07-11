@@ -151,10 +151,12 @@ public class IncubationMonitor : GameStateMachine<IncubationMonitor, IncubationM
 			: base(master, def)
 		{
 			this.incubation = Db.Get().Amounts.Incubation.Lookup(base.gameObject);
-			master.Subscribe(856640610, new Action<object>(this.OnStore));
-			master.Subscribe(1309017699, new Action<object>(this.OnStore));
-			master.Subscribe(1628751838, new Action<object>(this.OnOperationalChanged));
-			master.Subscribe(960378201, new Action<object>(this.OnOperationalChanged));
+			Action<object> action = new Action<object>(this.OnStore);
+			master.Subscribe(856640610, action);
+			master.Subscribe(1309017699, action);
+			Action<object> action2 = new Action<object>(this.OnOperationalChanged);
+			master.Subscribe(1628751838, action2);
+			master.Subscribe(960378201, action2);
 			this.wildness = Db.Get().Amounts.Wildness.Lookup(base.gameObject);
 			this.wildness.value = this.wildness.GetMax();
 			this.viability = Db.Get().Amounts.Viability.Lookup(base.gameObject);

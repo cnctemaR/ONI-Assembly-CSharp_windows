@@ -44,12 +44,7 @@ public class CreatureFeederConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			StorageController.Instance instance = new StorageController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<StorageController.Def>();
 	}
 
 	public override void ConfigurePost(BuildingDef def)
@@ -58,7 +53,8 @@ public class CreatureFeederConfig : IBuildingConfig
 		Tag[] array = new Tag[]
 		{
 			GameTags.Creatures.Species.LightBugSpecies,
-			GameTags.Creatures.Species.HatchSpecies
+			GameTags.Creatures.Species.HatchSpecies,
+			GameTags.Creatures.Species.MoleSpecies
 		};
 		foreach (KeyValuePair<Tag, Diet> keyValuePair in DietManager.CollectDiets(array))
 		{

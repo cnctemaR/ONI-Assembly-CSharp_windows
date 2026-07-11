@@ -112,7 +112,7 @@ public class Pickupable : Workable
 		}
 		set
 		{
-			DebugUtil.Assert(this.primaryElement != null, "Assert!");
+			DebugUtil.Assert(this.primaryElement != null, "Assert!", string.Empty, string.Empty);
 			this.primaryElement.Units = value;
 			if (value <= 0.001f)
 			{
@@ -188,6 +188,8 @@ public class Pickupable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.workingPstComplete = HashedString.Invalid;
+		this.workingPstFailed = HashedString.Invalid;
 		this.log = new LoggerFSSF("Pickupable");
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.PickingUp;
 		base.SetWorkTime(1.5f);
@@ -196,11 +198,11 @@ public class Pickupable : Workable
 		base.gameObject.layer = Game.PickupableLayer;
 		Vector3 position = base.transform.GetPosition();
 		this.UpdateCachedCell(Grid.PosToCell(position));
-		base.Subscribe(856640610, new Action<object>(this.OnStore));
-		base.Subscribe(1188683690, new Action<object>(this.OnLanded));
-		base.Subscribe(1807976145, new Action<object>(this.OnOreSizeChanged));
-		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
-		base.Subscribe(-778359855, new Action<object>(this.RefreshStorageTags));
+		base.Subscribe<Pickupable>(856640610, Pickupable.OnStoreDelegate);
+		base.Subscribe<Pickupable>(1188683690, Pickupable.OnLandedDelegate);
+		base.Subscribe<Pickupable>(1807976145, Pickupable.OnOreSizeChangedDelegate);
+		base.Subscribe<Pickupable>(-1432940121, Pickupable.OnReachableChangedDelegate);
+		base.Subscribe<Pickupable>(-778359855, Pickupable.RefreshStorageTagsDelegate);
 		this.KPrefabID.AddTag(GameTags.Pickupable);
 		Components.Pickupables.Add(this);
 	}
@@ -239,7 +241,7 @@ public class Pickupable : Workable
 			component2.overrideName = UI.OVERLAYS.DECOR.CLUTTER;
 		}
 		this.UpdateEntombedVisualizer();
-		base.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
+		base.Subscribe<Pickupable>(-1582839653, Pickupable.OnTagsChangedDelegate);
 	}
 
 	public void RegisterListeners()
@@ -257,6 +259,7 @@ public class Pickupable : Workable
 		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.RegisterListeners");
+		Singleton<CellChangeMonitor>.Instance.MarkDirty(base.transform);
 	}
 
 	public void UnregisterListeners()
@@ -387,7 +390,6 @@ public class Pickupable : Workable
 			{
 				this.NotifyChanged(this.cachedCell);
 			}
-			this.cachedCell = num;
 			this.UpdateCachedCell(num);
 		}
 	}
@@ -574,6 +576,7 @@ public class Pickupable : Workable
 	private void RemovedFromStorage()
 	{
 		this.storage = null;
+		this.UpdateCachedCell(Grid.PosToCell(this));
 		this.RefreshStorageTags(null);
 		this.AddFaller(Vector2.zero);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
@@ -618,7 +621,16 @@ public class Pickupable : Workable
 			{
 				component.Store(pickupable.gameObject, false, false, true, false);
 				worker.workCompleteData = pickupable;
+				pickupableStartWorkInfo.setResultCb(pickupable.gameObject);
 			}
+			else
+			{
+				pickupableStartWorkInfo.setResultCb(null);
+			}
+		}
+		else
+		{
+			pickupableStartWorkInfo.setResultCb(null);
 		}
 	}
 
@@ -857,6 +869,36 @@ public class Pickupable : Workable
 
 	private LoggerFSSF log;
 
+	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
+	{
+		component.OnStore(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnLandedDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
+	{
+		component.OnLanded(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnOreSizeChangedDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
+	{
+		component.OnOreSizeChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnReachableChangedDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
+	{
+		component.OnReachableChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Pickupable> RefreshStorageTagsDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
+	{
+		component.RefreshStorageTags(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Pickupable> OnTagsChangedDelegate = new EventSystem.IntraObjectHandler<Pickupable>(delegate(Pickupable component, object data)
+	{
+		component.OnTagsChanged(data);
+	});
+
 	private int entombedCell = -1;
 
 	private struct Reservation
@@ -889,15 +931,18 @@ public class Pickupable : Workable
 
 	public class PickupableStartWorkInfo : Worker.StartWorkInfo
 	{
-		public PickupableStartWorkInfo(Pickupable pickupable, float amount)
+		public PickupableStartWorkInfo(Pickupable pickupable, float amount, Action<GameObject> set_result_cb)
 			: base(pickupable.targetWorkable)
 		{
 			this.originalPickupable = pickupable;
 			this.amount = amount;
+			this.setResultCb = set_result_cb;
 		}
 
 		public float amount { get; private set; }
 
 		public Pickupable originalPickupable { get; private set; }
+
+		public Action<GameObject> setResultCb { get; private set; }
 	}
 }

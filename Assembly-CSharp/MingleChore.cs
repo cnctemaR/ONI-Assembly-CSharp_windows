@@ -46,6 +46,7 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 		{
 			default_state = this.mingle;
 			base.Target(this.mingler);
+			this.root.EventTransition(GameHashes.ScheduleBlocksChanged, null, (MingleChore.StatesInstance smi) => !smi.IsRecTime());
 			this.mingle.Transition(this.walk, (MingleChore.StatesInstance smi) => smi.IsSameRoom(), UpdateRate.SIM_200ms).Transition(this.move, (MingleChore.StatesInstance smi) => !smi.IsSameRoom(), UpdateRate.SIM_200ms);
 			this.move.Transition(null, (MingleChore.StatesInstance smi) => !smi.HasMingleCell(), UpdateRate.SIM_200ms).MoveTo((MingleChore.StatesInstance smi) => smi.GetMingleCell(), this.onfloor, null, false);
 			this.walk.Transition(null, (MingleChore.StatesInstance smi) => !smi.HasMingleCell(), UpdateRate.SIM_200ms).TriggerOnEnter(GameHashes.BeginWalk, null).TriggerOnExit(GameHashes.EndWalk)
@@ -77,6 +78,12 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 			this.mingler = mingler;
 			base.sm.mingler.Set(mingler, base.smi);
 			this.mingleCellSensor = base.GetComponent<Sensors>().GetSensor<MingleCellSensor>();
+		}
+
+		public bool IsRecTime()
+		{
+			Schedulable component = base.master.GetComponent<Schedulable>();
+			return component.IsAllowed(Db.Get().ScheduleBlockTypes.Recreation);
 		}
 
 		public int GetMingleCell()

@@ -16,9 +16,9 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-216549700, new Action<object>(this.DropSeed));
-		base.Subscribe(1623392196, new Action<object>(this.DropSeed));
-		base.Subscribe(-1072826864, new Action<object>(this.CropPicked));
+		base.Subscribe<SeedProducer>(-216549700, SeedProducer.DropSeedDelegate);
+		base.Subscribe<SeedProducer>(1623392196, SeedProducer.DropSeedDelegate);
+		base.Subscribe<SeedProducer>(-1072826864, SeedProducer.CropPickedDelegate);
 	}
 
 	public GameObject ProduceSeed(string seedId, int units = 1)
@@ -96,6 +96,16 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 	public SeedProducer.SeedInfo seedInfo;
 
 	private bool droppedSeedAlready;
+
+	private static readonly EventSystem.IntraObjectHandler<SeedProducer> DropSeedDelegate = new EventSystem.IntraObjectHandler<SeedProducer>(delegate(SeedProducer component, object data)
+	{
+		component.DropSeed(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<SeedProducer> CropPickedDelegate = new EventSystem.IntraObjectHandler<SeedProducer>(delegate(SeedProducer component, object data)
+	{
+		component.CropPicked(data);
+	});
 
 	[Serializable]
 	public struct SeedInfo

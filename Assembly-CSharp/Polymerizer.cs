@@ -19,7 +19,7 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 		}
 		this.oilMeter.SetPositionPercent(num);
 		base.smi.StartSM();
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe<Polymerizer>(-1697596308, Polymerizer.OnStorageChangedDelegate);
 	}
 
 	private void TryEmit()
@@ -109,6 +109,11 @@ public class Polymerizer : StateMachineComponent<Polymerizer.StatesInstance>
 	private MeterController plasticMeter;
 
 	private MeterController oilMeter;
+
+	private static readonly EventSystem.IntraObjectHandler<Polymerizer> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<Polymerizer>(delegate(Polymerizer component, object data)
+	{
+		component.OnStorageChanged(data);
+	});
 
 	public class StatesInstance : GameStateMachine<Polymerizer.States, Polymerizer.StatesInstance, Polymerizer, object>.GameInstance
 	{

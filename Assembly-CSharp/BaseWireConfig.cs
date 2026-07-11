@@ -71,6 +71,5 @@ public abstract class BaseWireConfig : IBuildingConfig
 			def.EffectDescription = new List<Descriptor>();
 		}
 		def.EffectDescription.Add(descriptor);
-		BuildingTemplates.DoPostConfigure(go);
 	}
 }

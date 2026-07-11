@@ -58,10 +58,10 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 		ChoreConsumer component = base.GetComponent<ChoreConsumer>();
 		if (component != null)
 		{
-			base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-			base.Subscribe(-1506069671, new Action<object>(this.OnAttachFollowCam));
-			base.Subscribe(-485480405, new Action<object>(this.OnDetachFollowCam));
-			base.Subscribe(-1988963660, new Action<object>(this.OnBeginChore));
+			base.Subscribe<MinionModifiers>(1623392196, MinionModifiers.OnDeathDelegate);
+			base.Subscribe<MinionModifiers>(-1506069671, MinionModifiers.OnAttachFollowCamDelegate);
+			base.Subscribe<MinionModifiers>(-485480405, MinionModifiers.OnDetachFollowCamDelegate);
+			base.Subscribe<MinionModifiers>(-1988963660, MinionModifiers.OnBeginChoreDelegate);
 			AmountInstance amountInstance = this.GetAmounts().Get("Calories");
 			amountInstance.OnMaxValueReached = (global::System.Action)Delegate.Combine(amountInstance.OnMaxValueReached, new global::System.Action(this.OnMaxCaloriesReached));
 			Vector3 position = base.transform.GetPosition();
@@ -132,4 +132,24 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	{
 		base.GetComponent<Effects>().Remove("CenterOfAttention");
 	}
+
+	private static readonly EventSystem.IntraObjectHandler<MinionModifiers> OnDeathDelegate = new EventSystem.IntraObjectHandler<MinionModifiers>(delegate(MinionModifiers component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<MinionModifiers> OnAttachFollowCamDelegate = new EventSystem.IntraObjectHandler<MinionModifiers>(delegate(MinionModifiers component, object data)
+	{
+		component.OnAttachFollowCam(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<MinionModifiers> OnDetachFollowCamDelegate = new EventSystem.IntraObjectHandler<MinionModifiers>(delegate(MinionModifiers component, object data)
+	{
+		component.OnDetachFollowCam(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<MinionModifiers> OnBeginChoreDelegate = new EventSystem.IntraObjectHandler<MinionModifiers>(delegate(MinionModifiers component, object data)
+	{
+		component.OnBeginChore(data);
+	});
 }

@@ -7,7 +7,7 @@ public class CreatureFeeder : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		Components.CreatureFeeders.Add(this);
-		base.Subscribe(-1452790913, new Action<object>(this.OnAteFromStorage));
+		base.Subscribe<CreatureFeeder>(-1452790913, CreatureFeeder.OnAteFromStorageDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -26,4 +26,9 @@ public class CreatureFeeder : KMonoBehaviour
 	}
 
 	public string effectId;
+
+	private static readonly EventSystem.IntraObjectHandler<CreatureFeeder> OnAteFromStorageDelegate = new EventSystem.IntraObjectHandler<CreatureFeeder>(delegate(CreatureFeeder component, object data)
+	{
+		component.OnAteFromStorage(data);
+	});
 }

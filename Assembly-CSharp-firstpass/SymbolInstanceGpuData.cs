@@ -39,7 +39,7 @@ public class SymbolInstanceGpuData
 
 	public void SetVisible(int symbol_idx, bool is_visible)
 	{
-		DebugUtil.Assert(symbol_idx < this.symbolCount, "Assert!");
+		DebugUtil.Assert(symbol_idx < this.symbolCount, "Assert!", string.Empty, string.Empty);
 		float num = 0f;
 		if (is_visible)
 		{
@@ -54,13 +54,13 @@ public class SymbolInstanceGpuData
 
 	public bool IsVisible(int symbol_idx)
 	{
-		DebugUtil.Assert(symbol_idx < this.symbolCount, "Assert!");
+		DebugUtil.Assert(symbol_idx < this.symbolCount, "Assert!", string.Empty, string.Empty);
 		return this.symbolInstances[symbol_idx].isVisible > 0.5f;
 	}
 
 	public void SetSymbolScale(int symbol_index, float scale)
 	{
-		DebugUtil.Assert(symbol_index < this.symbolCount, "Assert!");
+		DebugUtil.Assert(symbol_index < this.symbolCount, "Assert!", string.Empty, string.Empty);
 		if (this.symbolInstances[symbol_index].scale != scale)
 		{
 			this.symbolInstances[symbol_index].scale = scale;
@@ -70,7 +70,7 @@ public class SymbolInstanceGpuData
 
 	public void SetSymbolTint(int symbol_index, Color color)
 	{
-		DebugUtil.Assert(symbol_index < this.symbolCount, "Assert!");
+		DebugUtil.Assert(symbol_index < this.symbolCount, "Assert!", string.Empty, string.Empty);
 		if (this.symbolInstances[symbol_index].color != color)
 		{
 			this.symbolInstances[symbol_index].color = color;

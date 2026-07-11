@@ -15,6 +15,7 @@ namespace EventSystem2Syntax
 		private void OnObjectDestroyed(object data)
 		{
 			bool flag = (bool)data;
+			Debug.Log(flag, null);
 		}
 	}
 }

@@ -32,17 +32,18 @@ public class Unsealable : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		KBatchedAnimController component = base.gameObject.GetComponent<KBatchedAnimController>();
-		component.Play("working_pre", KAnim.PlayMode.Once, 1f, 0f);
-		component.Queue("working_loop", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
 		this.unsealed = true;
 		base.OnCompleteWork(worker);
-		KBatchedAnimController component = base.gameObject.GetComponent<KBatchedAnimController>();
-		component.Play("working_pst", KAnim.PlayMode.Once, 1f, 0f);
+		Deconstructable component = base.GetComponent<Deconstructable>();
+		if (component != null)
+		{
+			component.allowDeconstruction = true;
+			Game.Instance.Trigger(1980521255, base.gameObject);
+		}
 	}
 
 	[Serialize]

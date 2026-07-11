@@ -27,11 +27,6 @@ public abstract class BaseBatteryConfig : IBuildingConfig
 	{
 		Battery battery = go.AddOrGet<Battery>();
 		battery.powerSortOrder = 1000;
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 }

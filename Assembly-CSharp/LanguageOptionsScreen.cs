@@ -79,7 +79,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 
 	private void RebuildUGCButtons()
 	{
-		List<SteamUGCService.Subscibed> subs = SteamUGCService.Instance.GetSubscribed("language");
+		List<SteamUGCService.Subscribed> subs = SteamUGCService.Instance.GetSubscribed("language");
 		if (subs.Count != 0)
 		{
 			for (int i = 0; i < subs.Count; i++)
@@ -171,13 +171,13 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 			this.currentLanguage = PublishedFileId_t.Invalid;
 			this.InstallLanguageFile(this.currentLanguage, false);
 		}
-		SteamUGCService.Instance.ugcEventHandler = this;
+		SteamUGCService.Instance.ugcEventHandlers.Add(this);
 	}
 
 	protected override void OnDeactivate()
 	{
 		base.OnDeactivate();
-		SteamUGCService.Instance.ugcEventHandler = null;
+		SteamUGCService.Instance.ugcEventHandlers.Remove(this);
 	}
 
 	private void OnClickUninstall()
@@ -190,7 +190,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140&requiredtags[]=language");
 	}
 
-	public void OnItemInstalled(ItemInstalled_t pCallback)
+	public void OnUGCItemInstalled(ItemInstalled_t pCallback)
 	{
 	}
 
@@ -199,7 +199,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		return (ulong)((long)KPlayerPrefs.GetInt("InstalledLanguage"));
 	}
 
-	public void OnItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback)
+	public void OnUGCItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback)
 	{
 		ulong currentLanguage = this.GetCurrentLanguage();
 		if (currentLanguage == pCallback.m_nPublishedFileId.m_PublishedFileId)
@@ -209,7 +209,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		}
 	}
 
-	public void OnItemUnsubscibed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
+	public void OnUGCItemUnsubscribed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
 	{
 		ulong currentLanguage = this.GetCurrentLanguage();
 		if (pCallback.m_nPublishedFileId.m_PublishedFileId == currentLanguage)
@@ -219,7 +219,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		}
 	}
 
-	public void OnRefresh()
+	public void OnUGCRefresh()
 	{
 		this.RebuildScreen();
 	}
@@ -235,7 +235,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 		}
 	}
 
-	public void OnItemDownloaded(DownloadItemResult_t pCallback)
+	public void OnUGCItemDownloaded(DownloadItemResult_t pCallback)
 	{
 		ulong currentLanguage = this.GetCurrentLanguage();
 		if (currentLanguage == pCallback.m_nPublishedFileId.m_PublishedFileId)
@@ -398,6 +398,8 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IUGCEventHand
 	private static readonly string[] poFile = new string[] { "strings.po" };
 
 	private const string KPLAYER_PREFS_LANGUAGE_KEY = "InstalledLanguage";
+
+	public const string TAG_LANGUAGE = "language";
 
 	public KButton textButton;
 

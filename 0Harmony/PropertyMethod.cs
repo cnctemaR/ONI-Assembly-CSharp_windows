@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace Harmony
+{
+	[Obsolete("This enum will be removed in the next major version. To define special methods, use MethodType")]
+	public enum PropertyMethod
+	{
+		Getter,
+		Setter
+	}
+}

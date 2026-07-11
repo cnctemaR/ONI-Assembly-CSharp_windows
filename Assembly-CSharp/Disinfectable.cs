@@ -15,7 +15,7 @@ public class Disinfectable : Workable
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "disinfect";
 		this.multitoolHitEffectTag = "fx_disinfect_splash";
-		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe<Disinfectable>(2127324410, Disinfectable.OnCancelDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -110,4 +110,9 @@ public class Disinfectable : Workable
 	private const float MAX_WORK_TIME = 10f;
 
 	private float diseasePerSecond;
+
+	private static readonly EventSystem.IntraObjectHandler<Disinfectable> OnCancelDelegate = new EventSystem.IntraObjectHandler<Disinfectable>(delegate(Disinfectable component, object data)
+	{
+		component.OnCancel(data);
+	});
 }

@@ -20,7 +20,7 @@ public class AutoDisinfectable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<AutoDisinfectable>(493375141, AutoDisinfectable.OnRefreshUserMenuDelegate);
 		base.SetWorkTime(10f);
 		this.shouldTransferDiseaseWithWorker = false;
 	}
@@ -137,4 +137,9 @@ public class AutoDisinfectable : Workable
 
 	[Serialize]
 	private bool enableAutoDisinfect = true;
+
+	private static readonly EventSystem.IntraObjectHandler<AutoDisinfectable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<AutoDisinfectable>(delegate(AutoDisinfectable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

@@ -78,7 +78,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		{
 			this.CreateOrder(this.requestedEntityTag);
 		}
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<SingleEntityReceptacle>(-592767678, SingleEntityReceptacle.OnOperationalChangedDelegate);
 	}
 
 	public void AddDepositTag(Tag t)
@@ -170,7 +170,7 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	{
 		if (this.occupyingObject)
 		{
-			Util.KDestroyGameObject(this.occupyingObject);
+			this.storage.DropAll(false);
 		}
 		this.occupyingObject = null;
 		this.UpdateActive();
@@ -221,6 +221,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 		this.SetPreview(Tag.Invalid, false);
 		Pickupable fetchTarget = this.fetchChore.fetchTarget;
 		MaterialNeeds.Instance.UpdateNeed(this.requestedEntityTag, -1f);
+		KBatchedAnimController component = fetchTarget.GetComponent<KBatchedAnimController>();
+		if (component != null)
+		{
+			component.GetBatchInstanceData().ClearOverrideTransformMatrix();
+		}
 		this.occupyingObject = this.SpawnOccupyingObject(fetchTarget.gameObject);
 		if (this.occupyingObject != null)
 		{
@@ -324,6 +329,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 	protected StatusItem statusItemNeed;
 
 	protected StatusItem statusItemNoneAvailable;
+
+	private static readonly EventSystem.IntraObjectHandler<SingleEntityReceptacle> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<SingleEntityReceptacle>(delegate(SingleEntityReceptacle component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 
 	public enum ReceptacleDirection
 	{

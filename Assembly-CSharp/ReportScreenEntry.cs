@@ -21,16 +21,15 @@ public class ReportScreenEntry : KMonoBehaviour
 			componentInChildren4.onClick = (global::System.Action)Delegate.Combine(componentInChildren4.onClick, new global::System.Action(this.ToggleContext));
 		}
 		this.mainRow.SetLine(entry, reportGroup);
-		List<ReportManager.ReportEntry> contextEntries = entry.GetContextEntries();
-		this.currentContextCount = contextEntries.Count;
-		for (int i = 0; i < contextEntries.Count; i++)
+		this.currentContextCount = entry.contextEntries.Count;
+		for (int i = 0; i < entry.contextEntries.Count; i++)
 		{
 			if (i >= this.contextRows.Count)
 			{
 				ReportScreenEntryRow component = Util.KInstantiateUI(this.rowTemplate.gameObject, base.gameObject, false).GetComponent<ReportScreenEntryRow>();
 				this.contextRows.Add(component);
 			}
-			this.contextRows[i].SetLine(contextEntries[i], reportGroup);
+			this.contextRows[i].SetLine(entry.contextEntries[i], reportGroup);
 		}
 		this.UpdateVisibility();
 	}

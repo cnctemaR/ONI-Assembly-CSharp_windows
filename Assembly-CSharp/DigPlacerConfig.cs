@@ -8,15 +8,9 @@ public class DigPlacerConfig : CommonPlacerConfig, IEntityConfig
 	{
 		GameObject gameObject = base.CreatePrefab(DigPlacerConfig.ID, MISC.PLACERS.DIGPLACER.NAME, Assets.instance.digPlacerAssets.materials[0]);
 		Diggable diggable = gameObject.AddOrGet<Diggable>();
-		diggable.workLayer = Grid.SceneLayer.BuildingUse;
 		diggable.workTime = 5f;
 		diggable.synchronizeAnims = false;
-		diggable.workAnims = new HashedString[]
-		{
-			new HashedString("place"),
-			new HashedString("release")
-		};
-		diggable.workPstAnim = new HashedString("working_pst");
+		diggable.workAnims = new HashedString[] { "place", "release" };
 		diggable.materials = Assets.instance.digPlacerAssets.materials;
 		diggable.materialDisplay = gameObject.GetComponentInChildren<MeshRenderer>(true);
 		gameObject.AddOrGet<CancellableDig>();

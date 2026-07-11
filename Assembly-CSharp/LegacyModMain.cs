@@ -9,12 +9,21 @@ public class LegacyModMain
 {
 	public static void Load()
 	{
+		List<Type> list = new List<Type>();
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			Type[] types = assembly.GetTypes();
+			if (types != null)
+			{
+				list.AddRange(types);
+			}
+		}
 		EntityTemplates.CreateTemplates();
 		EntityTemplates.CreateBaseOreTemplates();
-		LegacyModMain.LoadOre();
-		LegacyModMain.LoadBuildings();
+		LegacyModMain.LoadOre(list);
+		LegacyModMain.LoadBuildings(list);
 		LegacyModMain.ConfigElements();
-		LegacyModMain.LoadEntities();
+		LegacyModMain.LoadEntities(list);
 		LegacyModMain.LoadEquipment();
 		EntityTemplates.DestroyBaseOreTemplates();
 	}
@@ -104,23 +113,23 @@ public class LegacyModMain
 		global::Debug.Log(component, null);
 	}
 
-	private static void LoadOre()
+	private static void LoadOre(List<Type> types)
 	{
-		GeneratedOre.LoadGeneratedOre();
+		GeneratedOre.LoadGeneratedOre(types);
 	}
 
-	private static void LoadBuildings()
+	private static void LoadBuildings(List<Type> types)
 	{
 		LocString.CreateLocStringKeys(typeof(BUILDINGS.PREFABS), "STRINGS.BUILDINGS.");
 		LocString.CreateLocStringKeys(typeof(BUILDINGS.DAMAGESOURCES), "STRINGS.BUILDINGS.DAMAGESOURCES");
 		LocString.CreateLocStringKeys(typeof(BUILDINGS.REPAIRABLE), "STRINGS.BUILDINGS.REPAIRABLE");
 		LocString.CreateLocStringKeys(typeof(BUILDINGS.DISINFECTABLE), "STRINGS.BUILDINGS.DISINFECTABLE");
-		GeneratedBuildings.LoadGeneratedBuildings();
+		GeneratedBuildings.LoadGeneratedBuildings(types);
 	}
 
-	private static void LoadEntities()
+	private static void LoadEntities(List<Type> types)
 	{
-		EntityConfigManager.Instance.LoadGeneratedEntities();
+		EntityConfigManager.Instance.LoadGeneratedEntities(types);
 		BuildingConfigManager.Instance.ConfigurePost();
 	}
 
@@ -219,6 +228,17 @@ public class LegacyModMain
 				id = SimHashes.Diamond,
 				overheatMod = 200f,
 				decor = 1f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.Niobium,
+				decor = 0.5f,
+				overheatMod = 500f
+			},
+			new LegacyModMain.ElementInfo
+			{
+				id = SimHashes.TempConductorSolid,
+				overheatMod = 900f
 			}
 		};
 		foreach (LegacyModMain.ElementInfo elementInfo in array)

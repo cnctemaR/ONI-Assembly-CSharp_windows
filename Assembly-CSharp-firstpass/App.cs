@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using Klei;
@@ -33,6 +35,21 @@ public class App : MonoBehaviour
 	private void OnApplicationQuit()
 	{
 		App.IsExiting = true;
+	}
+
+	public void Restart()
+	{
+		string fileName = Process.GetCurrentProcess().MainModule.FileName;
+		string fullPath = Path.GetFullPath(fileName);
+		string directoryName = Path.GetDirectoryName(fullPath);
+		string text = Path.Combine(directoryName, "Restarter.exe");
+		Process.Start(new ProcessStartInfo(text)
+		{
+			UseShellExecute = true,
+			CreateNoWindow = true,
+			Arguments = fullPath
+		});
+		Application.Quit();
 	}
 
 	private void Awake()
@@ -125,6 +142,10 @@ public class App : MonoBehaviour
 	private static string currentSceneName = null;
 
 	private float lastSuspendTime;
+
+	private const string PIPE_NAME = "KLEI_ONI_EXIT_CODE_PIPE";
+
+	private const string RESTART_FILENAME = "Restarter.exe";
 
 	private static List<Type> types = new List<Type>();
 

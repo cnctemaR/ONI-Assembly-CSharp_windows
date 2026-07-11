@@ -21,7 +21,7 @@ public class SuitLockerConfig : IBuildingConfig
 		}, refined_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
-		buildingDef.PreventIdlingInFrontOfBuilding = true;
+		buildingDef.PreventIdleTraversalPastBuilding = true;
 		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.UtilityInputOffset = new CellOffset(0, 0);
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "SuitLocker");
@@ -31,7 +31,7 @@ public class SuitLockerConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		SuitLocker suitLocker = go.AddOrGet<SuitLocker>();
-		suitLocker.OutfitTags = new Tag[] { GameTags.Suit };
+		suitLocker.OutfitTags = new Tag[] { GameTags.AtmoSuit };
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 1f;
@@ -52,7 +52,6 @@ public class SuitLockerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "SuitLocker";

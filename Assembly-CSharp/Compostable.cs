@@ -11,8 +11,8 @@ public class Compostable : KMonoBehaviour
 		{
 			this.MarkForCompost(false);
 		}
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(856640610, new Action<object>(this.OnStore));
+		base.Subscribe<Compostable>(493375141, Compostable.OnRefreshUserMenuDelegate);
+		base.Subscribe<Compostable>(856640610, Compostable.OnStoreDelegate);
 	}
 
 	private void MarkForCompost(bool force = false)
@@ -101,4 +101,14 @@ public class Compostable : KMonoBehaviour
 	public GameObject originalPrefab;
 
 	public GameObject compostPrefab;
+
+	private static readonly EventSystem.IntraObjectHandler<Compostable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Compostable>(delegate(Compostable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Compostable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Compostable>(delegate(Compostable component, object data)
+	{
+		component.OnStore(data);
+	});
 }

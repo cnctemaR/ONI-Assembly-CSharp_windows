@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using STRINGS;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class ResearchScreen : KModalScreen
@@ -21,6 +24,17 @@ public class ResearchScreen : KModalScreen
 	{
 		base.Subscribe(Research.Instance.gameObject, -1914338957, new Action<object>(this.OnActiveResearchChanged));
 		base.Subscribe(Game.Instance.gameObject, -107300940, new Action<object>(this.OnResearchComplete));
+		base.Subscribe(Game.Instance.gameObject, -1974454597, delegate(object o)
+		{
+			base.Show(false);
+		});
+		this.filterField.placeholder.GetComponent<TextMeshProUGUI>().text = UI.FILTER;
+		this.filterField.onValueChanged.AddListener(new UnityAction<string>(this.OnFilterChanged));
+		this.filterClearButton.onClick += delegate
+		{
+			this.filterField.text = string.Empty;
+			this.OnFilterChanged(string.Empty);
+		};
 		this.pointDisplayMap = new Dictionary<string, LocText>();
 		foreach (ResearchType researchType in Research.Instance.researchTypes.Types)
 		{
@@ -73,12 +87,12 @@ public class ResearchScreen : KModalScreen
 							}
 							list.Add(edge.path[edge.path.Count - 1]);
 							list.Add(edge.SrcTarget[1]);
-							goto IL_03A7;
+							goto IL_041A;
 						}
 						}
 						list.AddRange(edge.path);
 					}
-					IL_03A7:;
+					IL_041A:;
 				}
 			}
 		}
@@ -100,6 +114,15 @@ public class ResearchScreen : KModalScreen
 		this.foreground.GetComponent<KScrollRect>().allowHorizontalScrollWheel = false;
 		base.OnSpawn();
 		base.Show(false);
+	}
+
+	protected override void OnCleanUp()
+	{
+		base.OnCleanUp();
+		base.Unsubscribe(Game.Instance.gameObject, -1974454597, delegate(object o)
+		{
+			this.Deactivate();
+		});
 	}
 
 	private IEnumerator WaitAndSetActiveResearch()
@@ -252,6 +275,8 @@ public class ResearchScreen : KModalScreen
 	protected override void OnShow(bool show)
 	{
 		base.OnShow(show);
+		this.filterField.text = string.Empty;
+		this.OnFilterChanged(string.Empty);
 		this.UpdateProgressBars();
 		this.UpdatePointDisplay();
 	}
@@ -264,6 +289,16 @@ public class ResearchScreen : KModalScreen
 			return;
 		}
 		base.OnKeyDown(e);
+	}
+
+	private void OnFilterChanged(string filter_text)
+	{
+		filter_text = filter_text.ToLower();
+		foreach (KeyValuePair<Tech, ResearchEntry> keyValuePair in this.entryMap)
+		{
+			ResearchEntry value = keyValuePair.Value;
+			value.UpdateFilterState(filter_text);
+		}
 	}
 
 	[SerializeField]
@@ -282,6 +317,12 @@ public class ResearchScreen : KModalScreen
 	private Dictionary<string, LocText> pointDisplayMap;
 
 	private Dictionary<Tech, ResearchEntry> entryMap;
+
+	[SerializeField]
+	private TMP_InputField filterField;
+
+	[SerializeField]
+	private KButton filterClearButton;
 
 	private Tech currentResearch;
 

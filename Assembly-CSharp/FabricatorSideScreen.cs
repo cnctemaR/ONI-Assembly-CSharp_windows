@@ -75,27 +75,35 @@ public class FabricatorSideScreen : SideScreenContent
 			{
 				global::Debug.LogErrorFormat("Cant proceed without a recipe end product! [{0}]", new object[] { recipe.Name });
 			}
-			if (!target.hideRecipesUndiscoveredIngredients)
+			if (string.IsNullOrEmpty(recipe.TechUnlock))
 			{
-				goto IL_0159;
+				goto IL_012D;
 			}
-			bool flag = false;
-			foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
+			TechItem techItem = Db.Get().TechItems.TryGet(recipe.TechUnlock);
+			if (DebugHandler.InstantBuildMode || techItem == null || techItem.IsComplete())
 			{
-				if (!WorldInventory.Instance.IsDiscovered(ingredient.tag) && !DebugHandler.InstantBuildMode)
-				{
-					flag = true;
-					break;
-				}
+				goto IL_012D;
 			}
-			if (!flag)
-			{
-				goto IL_0159;
-			}
-			IL_02D9:
+			IL_0329:
 			i++;
 			continue;
-			IL_0159:
+			IL_012D:
+			if (target.hideRecipesUndiscoveredIngredients)
+			{
+				bool flag = false;
+				foreach (Recipe.Ingredient ingredient in recipe.Ingredients)
+				{
+					if (!WorldInventory.Instance.IsDiscovered(ingredient.tag) && !DebugHandler.InstantBuildMode)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (flag)
+				{
+					goto IL_0329;
+				}
+			}
 			GameObject prefab = Assets.GetPrefab(recipe.Result);
 			KToggle newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 			newToggle.GetComponentInChildren<LocText>().text = recipe.Name;
@@ -124,7 +132,7 @@ public class FabricatorSideScreen : SideScreenContent
 			}
 			this.recipeMap.Add(newToggle, recipe);
 			this.recipeToggles.Add(newToggle);
-			goto IL_02D9;
+			goto IL_0329;
 		}
 		if (this.recipeToggles.Count > 0)
 		{
@@ -256,27 +264,9 @@ public class FabricatorSideScreen : SideScreenContent
 			{
 				locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_SUFFICIENT;
 			}
-			string text;
-			string text2;
-			if (GameTags.DisplayAsCalories.Contains(tag))
-			{
-				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
-				float num = foodInfo.CaloriesPerUnit * ingredient.amount;
-				text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-				float num2 = WorldInventory.Instance.GetAmount(tag) * foodInfo.CaloriesPerUnit;
-				text2 = GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true);
-			}
-			else if (GameTags.DisplayAsUnits.Contains(tag))
-			{
-				text = GameUtil.GetFormattedUnits(ingredient.amount, GameUtil.TimeSlice.None, false);
-				text2 = GameUtil.GetFormattedUnits(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, false);
-			}
-			else
-			{
-				text = GameUtil.GetFormattedMass(ingredient.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-				text2 = GameUtil.GetFormattedMass(WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			}
-			Descriptor descriptor = new Descriptor(string.Format(reciperquirement, tag.ProperName(), text, text2), string.Format(locString, tag.ProperName(), text, text2), Descriptor.DescriptorType.Requirement, false);
+			string formattedByTag = GameUtil.GetFormattedByTag(tag, ingredient.amount, GameUtil.TimeSlice.None);
+			string formattedByTag2 = GameUtil.GetFormattedByTag(tag, WorldInventory.Instance.GetAmount(tag), GameUtil.TimeSlice.None);
+			Descriptor descriptor = new Descriptor(string.Format(reciperquirement, tag.ProperName(), formattedByTag, formattedByTag2), string.Format(locString, tag.ProperName(), formattedByTag, formattedByTag2), Descriptor.DescriptorType.Requirement, false);
 			list.Add(descriptor);
 		}
 		return list;

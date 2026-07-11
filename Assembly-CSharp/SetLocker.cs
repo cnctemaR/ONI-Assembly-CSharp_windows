@@ -15,7 +15,7 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<SetLocker>(493375141, SetLocker.OnRefreshUserMenuDelegate);
 	}
 
 	public void DropContents()
@@ -102,6 +102,11 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 
 	[Serialize]
 	private string contents = string.Empty;
+
+	private static readonly EventSystem.IntraObjectHandler<SetLocker> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<SetLocker>(delegate(SetLocker component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	[Serialize]
 	private bool used;

@@ -15,7 +15,7 @@ public class Repairable : Workable
 	{
 		base.OnPrefabInit();
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTableWithCorners);
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Repairable>(493375141, Repairable.OnRefreshUserMenuDelegate);
 		this.attributeConverter = Db.Get().AttributeConverters.ConstructionSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.showProgressBar = false;
@@ -90,6 +90,7 @@ public class Repairable : Workable
 	{
 		if (DebugHandler.InstantBuildMode)
 		{
+			this.hp.Repair(this.hp.MaxHitPoints);
 			this.OnCompleteWork(null);
 		}
 		this.smi.sm.allow.Trigger(this.smi);
@@ -225,6 +226,11 @@ public class Repairable : Workable
 	private float timeSpentRepairing;
 
 	private static readonly Operational.Flag repairedFlag = new Operational.Flag("repaired", Operational.Flag.Type.Functional);
+
+	private static readonly EventSystem.IntraObjectHandler<Repairable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Repairable>(delegate(Repairable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	public class SMInstance : GameStateMachine<Repairable.States, Repairable.SMInstance, Repairable, object>.GameInstance
 	{

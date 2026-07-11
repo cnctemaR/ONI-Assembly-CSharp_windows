@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using STRINGS;
 using UnityEngine;
@@ -52,10 +51,6 @@ public class ResearchEntry : KMonoBehaviour
 				}
 			}
 		}
-	}
-
-	protected override void OnCmpEnable()
-	{
 	}
 
 	public void SetTech(Tech newTech)
@@ -122,34 +117,12 @@ public class ResearchEntry : KMonoBehaviour
 		this.toggle.soundPlayer.AcceptClickCondition = () => !this.targetTech.IsComplete();
 		this.toggle.onPointerExit += delegate
 		{
-			if (this.turnEverythingOn != null)
-			{
-				base.StopCoroutine(this.turnEverythingOn);
-			}
 			this.researchScreen.TurnEverythingOff();
 		};
 	}
 
-	private IEnumerator TurnEverythingOnWithDelay(float delay)
-	{
-		float currentTime = Time.realtimeSinceStartup;
-		float targetTime = currentTime + delay;
-		while (currentTime < targetTime)
-		{
-			yield return new WaitForEndOfFrame();
-			currentTime += Time.unscaledDeltaTime;
-		}
-		this.researchScreen.TurnEverythingOn();
-		yield break;
-	}
-
 	public void SetEverythingOff()
 	{
-		if (this.turnEverythingOn != null)
-		{
-			base.StopCoroutine(this.turnEverythingOn);
-			this.turnEverythingOn = null;
-		}
 		if (!this.isOn)
 		{
 			return;
@@ -165,10 +138,6 @@ public class ResearchEntry : KMonoBehaviour
 
 	public void SetEverythingOn()
 	{
-		if (this.turnEverythingOn != null)
-		{
-			this.turnEverythingOn = null;
-		}
 		if (this.isOn)
 		{
 			return;
@@ -286,6 +255,36 @@ public class ResearchEntry : KMonoBehaviour
 		}
 	}
 
+	public void UpdateFilterState(string filter_string)
+	{
+		bool flag = false;
+		if (!string.IsNullOrEmpty(filter_string))
+		{
+			string text = UI.StripLinkFormatting(this.researchName.text).ToLower();
+			flag = text.Contains(filter_string);
+			if (!flag)
+			{
+				foreach (TechItem techItem in this.targetTech.unlockedItems)
+				{
+					string text2 = UI.StripLinkFormatting(techItem.Name).ToLower();
+					if (text2.Contains(filter_string))
+					{
+						flag = true;
+						break;
+					}
+					string text3 = UI.StripLinkFormatting(techItem.description).ToLower();
+					if (text3.Contains(filter_string))
+					{
+						flag = true;
+						break;
+					}
+				}
+			}
+		}
+		this.filterHighlight.gameObject.SetActive(flag);
+		this.filterLowlight.gameObject.SetActive(!flag && !string.IsNullOrEmpty(filter_string));
+	}
+
 	public void SetPercentage(float percent)
 	{
 	}
@@ -380,6 +379,12 @@ public class ResearchEntry : KMonoBehaviour
 	private Image borderHighlight;
 
 	[SerializeField]
+	private Image filterHighlight;
+
+	[SerializeField]
+	private Image filterLowlight;
+
+	[SerializeField]
 	private Sprite hoverBG;
 
 	[SerializeField]
@@ -406,10 +411,10 @@ public class ResearchEntry : KMonoBehaviour
 
 	private Sprite defaultBG;
 
-	private ResearchScreen researchScreen;
-
 	[MyCmpGet]
 	private KToggle toggle;
+
+	private ResearchScreen researchScreen;
 
 	private Dictionary<Tech, UILineRenderer> techLineMap;
 
@@ -432,8 +437,6 @@ public class ResearchEntry : KMonoBehaviour
 	public Material DesaturatedUIMaterial;
 
 	private Dictionary<string, GameObject> progressBarsByResearchTypeID = new Dictionary<string, GameObject>();
-
-	private Coroutine turnEverythingOn;
 
 	public static readonly string UnlockedTechKey = "UnlockedTech";
 

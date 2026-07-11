@@ -289,7 +289,7 @@ public class ToolMenu : KScreen
 					PlayerController.Instance.ActivateTool(interfaceTool);
 					if (tool.forceViewMode && OverlayScreen.Instance.GetMode() != tool.viewMode)
 					{
-						EventSystem.Trigger(Game.Instance.gameObject, 1248612973, tool.viewMode);
+						Game.Instance.gameObject.Trigger(1248612973, tool.viewMode);
 					}
 					break;
 				}

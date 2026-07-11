@@ -74,7 +74,7 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 							gravityComponent.elapsedTime = -1f;
 							gravityComponent.transform.SetPosition(new Vector3(vector3.x, vector3.y, position.z));
 							this.data[i] = gravityComponent;
-							EventSystem.Trigger(gravityComponent.transform.gameObject, 1188683690, vector2);
+							gravityComponent.transform.gameObject.Trigger(1188683690, vector2);
 							if (gravityComponent.onLanded != null)
 							{
 								gravityComponent.onLanded();

@@ -1,30 +1,31 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.XR
 {
 	/// <summary>
 	///   <para>Timing and other statistics from the XR subsystem.</para>
 	/// </summary>
+	[NativeConditional("ENABLE_VR")]
 	public static class XRStats
 	{
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool TryGetGPUTimeLastFrame(out float gpuTimeLastFrame);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool TryGetDroppedFrameCount(out int droppedFrameCount);
 
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool TryGetFramePresentCount(out int framePresentCount);
 
 		/// <summary>
 		///   <para>Total GPU time utilized last frame as measured by the XR subsystem.</para>
 		/// </summary>
-		[Obsolete("gpuTimeLastFrame is deprecated. Use XRStats.TryGetGPUTimeLastFrame instead.")]
+		[Obsolete("gpuTimeLastFrame is deprecated. Use XRStats.TryGetGPUTimeLastFrame instead.", false)]
 		public static float gpuTimeLastFrame
 		{
 			get

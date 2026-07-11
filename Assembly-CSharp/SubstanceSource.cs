@@ -7,7 +7,6 @@ public abstract class SubstanceSource : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		this.pickupable.SetWorkTime(SubstanceSource.MaxPickupTime);
-		this.pickupable.preferPrimaryCell = false;
 	}
 
 	protected override void OnSpawn()
@@ -53,6 +52,4 @@ public abstract class SubstanceSource : KMonoBehaviour
 
 	[MyCmpReq]
 	private PrimaryElement primaryElement;
-
-	public int consumeCell;
 }

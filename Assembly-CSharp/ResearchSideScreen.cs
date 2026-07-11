@@ -6,6 +6,11 @@ using UnityEngine.UI;
 
 public class ResearchSideScreen : SideScreenContent
 {
+	public ResearchSideScreen()
+	{
+		this.refreshDisplayStateDelegate = new Action<object>(this.RefreshDisplayState);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -13,8 +18,8 @@ public class ResearchSideScreen : SideScreenContent
 		{
 			ManagementMenu.Instance.ToggleResearch();
 		};
-		Research.Instance.Subscribe(-1914338957, new Action<object>(this.RefreshDisplayState));
-		Research.Instance.Subscribe(-125623018, new Action<object>(this.RefreshDisplayState));
+		Research.Instance.Subscribe(-1914338957, this.refreshDisplayStateDelegate);
+		Research.Instance.Subscribe(-125623018, this.refreshDisplayStateDelegate);
 		this.RefreshDisplayState(null);
 	}
 
@@ -23,8 +28,8 @@ public class ResearchSideScreen : SideScreenContent
 		base.OnCmpEnable();
 		this.RefreshDisplayState(null);
 		this.target = SelectTool.Instance.selected.GetComponent<KMonoBehaviour>().gameObject;
-		this.target.gameObject.Subscribe(-1852328367, new Action<object>(this.RefreshDisplayState));
-		this.target.gameObject.Subscribe(-592767678, new Action<object>(this.RefreshDisplayState));
+		this.target.gameObject.Subscribe(-1852328367, this.refreshDisplayStateDelegate);
+		this.target.gameObject.Subscribe(-592767678, this.refreshDisplayStateDelegate);
 	}
 
 	protected override void OnCmpDisable()
@@ -32,8 +37,8 @@ public class ResearchSideScreen : SideScreenContent
 		base.OnCmpDisable();
 		if (this.target)
 		{
-			this.target.gameObject.Unsubscribe(-1852328367, new Action<object>(this.RefreshDisplayState));
-			this.target.gameObject.Unsubscribe(187661686, new Action<object>(this.RefreshDisplayState));
+			this.target.gameObject.Unsubscribe(-1852328367, this.refreshDisplayStateDelegate);
+			this.target.gameObject.Unsubscribe(187661686, this.refreshDisplayStateDelegate);
 			this.target = null;
 		}
 	}
@@ -41,12 +46,12 @@ public class ResearchSideScreen : SideScreenContent
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.RefreshDisplayState));
-		Research.Instance.Unsubscribe(-125623018, new Action<object>(this.RefreshDisplayState));
+		Research.Instance.Unsubscribe(-1914338957, this.refreshDisplayStateDelegate);
+		Research.Instance.Unsubscribe(-125623018, this.refreshDisplayStateDelegate);
 		if (this.target)
 		{
-			this.target.gameObject.Unsubscribe(-1852328367, new Action<object>(this.RefreshDisplayState));
-			this.target.gameObject.Unsubscribe(187661686, new Action<object>(this.RefreshDisplayState));
+			this.target.gameObject.Unsubscribe(-1852328367, this.refreshDisplayStateDelegate);
+			this.target.gameObject.Unsubscribe(187661686, this.refreshDisplayStateDelegate);
 			this.target = null;
 		}
 	}
@@ -125,6 +130,8 @@ public class ResearchSideScreen : SideScreenContent
 	public GameObject content;
 
 	private GameObject target;
+
+	private Action<object> refreshDisplayStateDelegate;
 
 	public LocText DescriptionText;
 }

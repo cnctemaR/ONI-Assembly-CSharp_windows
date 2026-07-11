@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class PoweredActiveController : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance>
+public class PoweredActiveController : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -9,13 +9,13 @@ public class PoweredActiveController : GameStateMachine<PoweredActiveController,
 		this.on.PlayAnim("on").EventTransition(GameHashes.OperationalChanged, this.off, (PoweredActiveController.Instance smi) => !smi.GetComponent<Operational>().IsOperational).EventTransition(GameHashes.ActiveChanged, this.working.pre, (PoweredActiveController.Instance smi) => smi.GetComponent<Operational>().IsActive);
 		this.working.Enter(delegate(PoweredActiveController.Instance smi)
 		{
-			if (smi.ShowWorkingStatus)
+			if (smi.def.showWorkingStatus)
 			{
 				smi.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.Working, null);
 			}
 		}).Exit(delegate(PoweredActiveController.Instance smi)
 		{
-			if (smi.ShowWorkingStatus)
+			if (smi.def.showWorkingStatus)
 			{
 				smi.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().BuildingStatusItems.Working, false);
 			}
@@ -25,28 +25,31 @@ public class PoweredActiveController : GameStateMachine<PoweredActiveController,
 		this.working.pst.PlayAnim("working_pst").OnAnimQueueComplete(this.on);
 	}
 
-	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State off;
+	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>.State off;
 
-	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State on;
+	public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>.State on;
 
 	public PoweredActiveController.WorkingStates working;
 
-	public class WorkingStates : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State
+	public class Def : StateMachine.BaseDef
 	{
-		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State pre;
-
-		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State loop;
-
-		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.State pst;
+		public bool showWorkingStatus;
 	}
 
-	public new class Instance : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, object>.GameInstance
+	public class WorkingStates : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>.State
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>.State pre;
+
+		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>.State loop;
+
+		public GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>.State pst;
+	}
+
+	public new class Instance : GameStateMachine<PoweredActiveController, PoweredActiveController.Instance, IStateMachineTarget, PoweredActiveController.Def>.GameInstance
+	{
+		public Instance(IStateMachineTarget master, PoweredActiveController.Def def)
+			: base(master, def)
 		{
 		}
-
-		public bool ShowWorkingStatus;
 	}
 }

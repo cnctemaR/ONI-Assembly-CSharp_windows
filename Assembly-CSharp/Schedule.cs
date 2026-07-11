@@ -6,12 +6,12 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Schedule : ISaveLoadable, IListableOption
 {
-	public Schedule(string name, List<ScheduleGroup> defaultGroups)
+	public Schedule(string name, List<ScheduleGroup> defaultGroups, bool alarmActivated)
 	{
 		this.name = name;
+		this.alarmActivated = alarmActivated;
 		this.blocks = new List<ScheduleBlock>(24);
 		this.assigned = new List<Ref<Schedulable>>();
-		this.alarmActivated = true;
 		this.tones = this.GenerateTones();
 		this.SetBlocksToGroupDefaults(defaultGroups);
 	}

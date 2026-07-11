@@ -239,14 +239,6 @@ namespace FMODUnity
 			}
 		}
 
-		private void OnGUI()
-		{
-			if (this.studioSystem.isValid() && Settings.Instance.IsOverlayEnabled(this.fmodPlatform))
-			{
-				this.windowRect = GUI.Window(0, this.windowRect, new GUI.WindowFunction(this.DrawDebugOverlay), "FMOD Studio Debug");
-			}
-		}
-
 		private void DrawDebugOverlay(int windowID)
 		{
 			if (this.lastDebugUpdate + 0.25f < Time.unscaledTime)
@@ -715,8 +707,6 @@ namespace FMODUnity
 		private List<RuntimeManager.AttachedInstance> attachedInstances = new List<RuntimeManager.AttachedInstance>(128);
 
 		private bool listenerWarningIssued;
-
-		private Rect windowRect = new Rect(10f, 10f, 300f, 100f);
 
 		private string lastDebugText;
 

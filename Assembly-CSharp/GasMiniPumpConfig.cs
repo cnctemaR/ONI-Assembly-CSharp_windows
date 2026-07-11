@@ -63,11 +63,7 @@ public class GasMiniPumpConfig : IBuildingConfig
 		conduitDispenser.conduitType = ConduitType.Gas;
 		conduitDispenser.alwaysDispense = true;
 		conduitDispenser.elementFilter = null;
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			OperationalController.Instance instance = new OperationalController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<OperationalController.Def>();
 	}
 
 	public const string ID = "GasMiniPump";

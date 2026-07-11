@@ -210,10 +210,8 @@ public class CharacterContainer : KScreen
 				AttributeInstance attributeInstance = attribute.Lookup(this.animController);
 				locText3.text = string.Format(UI.CHARACTERCONTAINER_NEED, attribute.Name, attributeInstance.GetFormattedValue());
 				this.expectationLabels.Add(locText3);
-				string text = attributeInstance.Description;
-				text += UI.HORIZONTAL_BR_RULE;
-				text += attribute.GetTooltip(attributeInstance);
-				locText3.GetComponent<ToolTip>().SetSimpleTooltip(text);
+				string tooltip = attribute.GetTooltip(attributeInstance);
+				locText3.GetComponent<ToolTip>().SetSimpleTooltip(tooltip);
 			}
 		}
 		foreach (KeyValuePair<HashedString, float> keyValuePair in this.stats.roleAptitudes)
@@ -229,8 +227,8 @@ public class CharacterContainer : KScreen
 					LocText locText4 = Util.KInstantiateUI<LocText>(this.aptitudeLabel.gameObject, this.aptitudeContainer.gameObject, false);
 					locText4.gameObject.SetActive(true);
 					locText4.text = Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name;
-					string text2 = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name, keyValuePair.Value * ROLES.APTITUDE_EXPERIENCE_SCALE);
-					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text2);
+					string text = string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name, keyValuePair.Value * ROLES.APTITUDE_EXPERIENCE_SCALE);
+					locText4.GetComponent<ToolTip>().SetSimpleTooltip(text);
 					this.aptitudeLabels.Add(locText4);
 				}
 			}

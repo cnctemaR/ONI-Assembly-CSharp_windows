@@ -16,7 +16,6 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		base.GetComponent<KAnimControllerBase>().Play(Workable.DefaultWorkAnims, KAnim.PlayMode.Loop);
 		Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
 		if (roomOfGameObject != null)
 		{
@@ -30,6 +29,7 @@ public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 		AmountInstance amountInstance = Db.Get().Amounts.Bladder.Lookup(worker);
 		amountInstance.SetValue(0f);
 		this.timesUsed++;
+		base.Trigger(-350347868, worker);
 		base.OnCompleteWork(worker);
 	}
 

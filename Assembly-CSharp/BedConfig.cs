@@ -31,10 +31,9 @@ public class BedConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
 		Bed bed = go.AddOrGet<Bed>();
-		bed.effects = new string[] { "BedStamina" };
+		bed.effects = new string[] { "BedStamina", "BedHealth" };
 		bed.workLayer = Grid.SceneLayer.BuildingFront;
 		Sleepable sleepable = go.AddOrGet<Sleepable>();
 		sleepable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_sleep_bed_kanim") };

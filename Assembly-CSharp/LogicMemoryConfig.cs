@@ -50,7 +50,6 @@ public class LogicMemoryConfig : IBuildingConfig
 		GeneratedBuildings.MakeBuildingAlwaysOperational(go);
 		go.AddOrGet<LogicMemory>();
 		GeneratedBuildings.RegisterLogicPorts(go, LogicMemoryConfig.INPUT_PORTS, LogicMemoryConfig.OUTPUT_PORTS);
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public static string ID = "LogicMemory";

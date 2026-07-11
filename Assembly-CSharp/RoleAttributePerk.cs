@@ -11,7 +11,7 @@ public class RoleAttributePerk : RolePerk
 		this.modifier = new AttributeModifier(attributeId, modifierBonus, modifierDesc, false, false, true);
 		base.OnApply = delegate(MinionResume identity)
 		{
-			if (identity.GetAttributes().Get(this.modifier.AttributeId).Modifiers.Find((AttributeModifier mod) => mod == this.modifier) == null)
+			if (identity.GetAttributes().Get(this.modifier.AttributeId).Modifiers.FindIndex((AttributeModifier mod) => mod == this.modifier) == -1)
 			{
 				identity.GetAttributes().Add(this.modifier);
 			}

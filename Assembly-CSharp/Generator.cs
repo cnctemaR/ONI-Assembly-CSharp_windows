@@ -80,7 +80,13 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		get
 		{
-			return Grid.Objects[this.PowerCell, 24] != null;
+			bool flag = false;
+			GameObject gameObject = Grid.Objects[this.PowerCell, 24];
+			if (gameObject != null && gameObject.GetComponent<BuildingComplete>() != null)
+			{
+				flag = true;
+			}
+			return flag;
 		}
 	}
 
@@ -113,7 +119,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	{
 		base.OnSpawn();
 		Components.Generators.Add(this);
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<Generator>(-592767678, Generator.OnOperationalChangedDelegate);
 		this.capacity = Generator.CalculateCapacity(this.building.Def, null);
 		this.PowerCell = this.building.GetPowerOutputCell();
 		this.CheckConnectionStatus();
@@ -239,4 +245,9 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 	private Guid statusItemID;
 
 	private AttributeInstance generatorOutputAttribute;
+
+	private static readonly EventSystem.IntraObjectHandler<Generator> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Generator>(delegate(Generator component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 }

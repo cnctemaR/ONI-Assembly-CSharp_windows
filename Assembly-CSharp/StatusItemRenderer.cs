@@ -72,6 +72,7 @@ public class StatusItemRenderer
 		}
 		int idx = this.GetIdx(transform);
 		StatusItemRenderer.Entry entry = this.entries[idx];
+		entry.isBuilding = transform.GetComponent<Building>() != null;
 		entry.Add(status_item);
 		this.entries[idx] = entry;
 	}
@@ -266,6 +267,14 @@ public class StatusItemRenderer
 				return;
 			}
 			vector = this.transform.GetPosition();
+			if (this.isBuilding)
+			{
+				Building component = this.transform.GetComponent<Building>();
+				if (component != null)
+				{
+					vector.x += (float)((component.Def.WidthInCells - 1) % 2) / 2f;
+				}
+			}
 			if (vector.x < camera_bl.x || vector.x > camera_tr.x || vector.y < camera_bl.y || vector.y > camera_tr.y)
 			{
 				return;
@@ -275,8 +284,8 @@ public class StatusItemRenderer
 			{
 				return;
 			}
-			KSelectable component = this.transform.GetComponent<KSelectable>();
-			if (!component.IsSelectable)
+			KSelectable component2 = this.transform.GetComponent<KSelectable>();
+			if (!component2.IsSelectable)
 			{
 				return;
 			}
@@ -439,6 +448,8 @@ public class StatusItemRenderer
 		public Vector3 offset;
 
 		public bool hasVisibleStatusItems;
+
+		public bool isBuilding;
 
 		private struct MeshBuilder
 		{

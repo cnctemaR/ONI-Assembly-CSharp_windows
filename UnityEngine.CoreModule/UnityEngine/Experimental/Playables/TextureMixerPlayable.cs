@@ -10,10 +10,10 @@ namespace UnityEngine.Experimental.Playables
 	///   <para>An implementation of IPlayable that allows mixing two textures.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Export/Director/TextureMixerPlayable.bindings.h")]
-	[NativeHeader("Runtime/Graphics/Director/TextureMixerPlayable.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("TextureMixerPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Graphics/Director/TextureMixerPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	public struct TextureMixerPlayable : IPlayable, IEquatable<TextureMixerPlayable>
 	{
 		internal TextureMixerPlayable(PlayableHandle handle)

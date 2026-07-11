@@ -31,7 +31,9 @@ public class EquipmentConfigManager : KMonoBehaviour
 	{
 		string id = def.Id;
 		string recipeDescription = def.RecipeDescription;
-		Recipe recipe = new Recipe(id, 1f, (SimHashes)0, null, recipeDescription, 0).SetFabricator(def.FabricatorId, def.FabricationTime);
+		Recipe recipe = new Recipe(id, 1f, (SimHashes)0, null, recipeDescription, 0);
+		recipe.SetFabricator(def.FabricatorId, def.FabricationTime);
+		recipe.TechUnlock = def.RecipeTechUnlock;
 		foreach (KeyValuePair<string, float> keyValuePair in def.InputElementMassMap)
 		{
 			recipe.AddIngredient(new Recipe.Ingredient(keyValuePair.Key, keyValuePair.Value));

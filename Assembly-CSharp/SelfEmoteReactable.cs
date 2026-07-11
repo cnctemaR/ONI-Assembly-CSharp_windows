@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class SelfEmoteReactable : EmoteReactable
 {
-	public SelfEmoteReactable(GameObject gameObject, HashedString id, ChoreType chore_type, HashedString animset, float min_reactable_time = 0f, float min_reactor_time = 0f, float max_trigger_time = float.PositiveInfinity)
+	public SelfEmoteReactable(GameObject gameObject, HashedString id, ChoreType chore_type, HashedString animset, float min_reactable_time = 0f, float min_reactor_time = 20f, float max_trigger_time = float.PositiveInfinity)
 		: base(gameObject, id, chore_type, animset, 3, 3, min_reactable_time, min_reactor_time, max_trigger_time)
 	{
 	}

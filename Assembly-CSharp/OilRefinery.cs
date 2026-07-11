@@ -8,7 +8,7 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 {
 	protected override void OnSpawn()
 	{
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe<OilRefinery>(-1697596308, OilRefinery.OnStorageChangedDelegate);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.meter = new MeterController(component, "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, Vector3.zero, null);
 		base.smi.StartSM();
@@ -51,6 +51,11 @@ public class OilRefinery : StateMachineComponent<OilRefinery.StatesInstance>
 	private const bool hasMeter = true;
 
 	private MeterController meter;
+
+	private static readonly EventSystem.IntraObjectHandler<OilRefinery> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<OilRefinery>(delegate(OilRefinery component, object data)
+	{
+		component.OnStorageChanged(data);
+	});
 
 	public class StatesInstance : GameStateMachine<OilRefinery.States, OilRefinery.StatesInstance, OilRefinery, object>.GameInstance
 	{

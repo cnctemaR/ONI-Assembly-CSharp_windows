@@ -42,12 +42,7 @@ public class RationBoxConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			StorageController.Instance instance = new StorageController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<StorageController.Def>();
 	}
 
 	public const string ID = "RationBox";

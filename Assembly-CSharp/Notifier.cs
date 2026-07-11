@@ -59,7 +59,7 @@ public class Notifier : KMonoBehaviour
 		}
 		else
 		{
-			DebugUtil.Assert(notification.Notifier == this, "Assert!");
+			DebugUtil.Assert(notification.Notifier == this, "Assert!", string.Empty, string.Empty);
 		}
 		notification.Time = KTime.Instance.UnscaledGameTime;
 	}

@@ -8,8 +8,8 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe<EarlyBird>(1623392196, EarlyBird.OnDeathDelegate);
+		base.Subscribe<EarlyBird>(-1117766961, EarlyBird.OnRevivedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -65,6 +65,16 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 	private KPrefabID kPrefabID;
 
 	private AttributeModifier[] attributeModifiers;
+
+	private static readonly EventSystem.IntraObjectHandler<EarlyBird> OnDeathDelegate = new EventSystem.IntraObjectHandler<EarlyBird>(delegate(EarlyBird component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<EarlyBird> OnRevivedDelegate = new EventSystem.IntraObjectHandler<EarlyBird>(delegate(EarlyBird component, object data)
+	{
+		component.OnRevived(data);
+	});
 
 	public class StatesInstance : GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird, object>.GameInstance
 	{

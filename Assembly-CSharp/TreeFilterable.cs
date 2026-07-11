@@ -15,58 +15,53 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
-	private void OnDiscover(Tag tag)
+	private void OnDiscover(Tag category_tag, Tag tag)
 	{
-		Element element = ElementLoader.GetElement(tag);
-		if (element != null)
+		if (this.storage.storageFilters.Contains(category_tag))
 		{
-			Tag materialCategoryTag = element.GetMaterialCategoryTag();
-			if (this.storage.storageFilters.Contains(materialCategoryTag))
+			bool flag = false;
+			if (WorldInventory.Instance.GetDiscoveredResourcesFromTag(category_tag).Count <= 1)
 			{
-				bool flag = false;
-				if (WorldInventory.Instance.GetDiscoveredResourcesFromTag(materialCategoryTag).Count <= 1)
+				foreach (Tag tag2 in this.storage.storageFilters)
 				{
-					foreach (Tag tag2 in this.storage.storageFilters)
+					if (!(tag2 == category_tag))
 					{
-						if (!(tag2 == materialCategoryTag))
+						if (WorldInventory.Instance.IsDiscovered(tag2))
 						{
-							if (WorldInventory.Instance.IsDiscovered(tag2))
+							flag = true;
+							foreach (Tag tag3 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2))
 							{
-								flag = true;
-								foreach (Tag tag3 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(tag2))
+								if (!this.acceptedTags.Contains(tag3))
 								{
-									if (!this.acceptedTags.Contains(tag3))
-									{
-										return;
-									}
+									return;
 								}
 							}
 						}
 					}
-					if (!flag)
+				}
+				if (!flag)
+				{
+					return;
+				}
+			}
+			foreach (Tag tag4 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(category_tag))
+			{
+				if (!(tag4 == tag))
+				{
+					if (!this.acceptedTags.Contains(tag4))
 					{
 						return;
 					}
 				}
-				foreach (Tag tag4 in WorldInventory.Instance.GetDiscoveredResourcesFromTag(materialCategoryTag))
-				{
-					if (!(tag4 == tag))
-					{
-						if (!this.acceptedTags.Contains(tag4))
-						{
-							return;
-						}
-					}
-				}
-				this.AddTagToFilter(tag);
 			}
+			this.AddTagToFilter(tag);
 		}
 	}
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe<TreeFilterable>(-905833192, TreeFilterable.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -233,4 +228,9 @@ public class TreeFilterable : KMonoBehaviour, ISaveLoadable
 	private List<Tag> acceptedTags = new List<Tag>();
 
 	public Action<Tag[]> OnFilterChanged;
+
+	private static readonly EventSystem.IntraObjectHandler<TreeFilterable> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<TreeFilterable>(delegate(TreeFilterable component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

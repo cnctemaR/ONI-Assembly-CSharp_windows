@@ -22,8 +22,8 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe<AirConditioner>(-592767678, AirConditioner.OnOperationalChangedDelegate);
+		base.Subscribe<AirConditioner>(824508782, AirConditioner.OnActiveChangedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -75,9 +75,9 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 						flag = true;
 						this.lastGasTemp = component.Temperature;
 						float num = component.Temperature + this.temperatureDelta;
-						if (num < 5f)
+						if (num < 1f)
 						{
-							num = 5f;
+							num = 1f;
 							this.lowTempLag = Mathf.Min(this.lowTempLag + dt / 5f, 1f);
 						}
 						else
@@ -208,6 +208,16 @@ public class AirConditioner : KMonoBehaviour, ISaveLoadable, IEffectDescriptor, 
 	private float targetTemperature;
 
 	private int cooledAirOutputCell = -1;
+
+	private static readonly EventSystem.IntraObjectHandler<AirConditioner> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<AirConditioner>(delegate(AirConditioner component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<AirConditioner> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<AirConditioner>(delegate(AirConditioner component, object data)
+	{
+		component.OnActiveChanged(data);
+	});
 
 	private float lastSampleTime = -1f;
 

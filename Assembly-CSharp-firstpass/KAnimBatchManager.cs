@@ -197,18 +197,19 @@ public class KAnimBatchManager
 		}
 		foreach (BatchSet batchSet in this.activeBatchSets)
 		{
-			DebugUtil.Assert(batchSet != null, "Assert!");
-			DebugUtil.Assert(batchSet.group != null, "Assert!");
+			DebugUtil.Assert(batchSet != null, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(batchSet.group != null, "Assert!", string.Empty, string.Empty);
 			Mesh mesh = batchSet.group.mesh;
 			for (int i = 0; i < batchSet.batchCount; i++)
 			{
 				KAnimBatch batch = batchSet.GetBatch(i);
+				float num = 0.01f / (float)(1 + batch.id % 256);
 				if (batch.size != 0 && batch.active)
 				{
 					if (batch.materialType != KAnimBatchGroup.MaterialType.UI)
 					{
 						Vector3 zero = Vector3.zero;
-						zero.z = batch.position.z;
+						zero.z = batch.position.z + num;
 						int layer = batch.layer;
 						Graphics.DrawMesh(mesh, zero, Quaternion.identity, batchSet.group.GetMaterial(batch.materialType), layer, null, 0, batch.matProperties);
 					}

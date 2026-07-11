@@ -15,8 +15,8 @@ namespace Unity.Collections
 	[NativeContainerSupportsMinMaxWriteRestriction]
 	[NativeContainerSupportsDeallocateOnJobCompletion]
 	[NativeContainerSupportsDeferredConvertListToArray]
-	[DebuggerDisplay("Length = {Length}")]
 	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
+	[DebuggerDisplay("Length = {Length}")]
 	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEnumerable where T : struct
 	{
 		public NativeArray(int length, Allocator allocator, NativeArrayOptions options = NativeArrayOptions.ClearMemory)

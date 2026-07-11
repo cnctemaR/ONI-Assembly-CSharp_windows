@@ -270,17 +270,18 @@ public class ChorePreconditions
 		precondition17.description = DUPLICANTS.CHORES.PRECONDITIONS.CAN_MOVE_TO;
 		precondition17.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			Workable workable = (Workable)data;
 			if (context.consumerState.consumer == null)
 			{
 				return false;
 			}
-			if (workable == null)
+			KMonoBehaviour kmonoBehaviour2 = (KMonoBehaviour)data;
+			if (kmonoBehaviour2 == null)
 			{
 				return false;
 			}
+			IApproachable approachable = (IApproachable)kmonoBehaviour2;
 			int num;
-			if (context.consumerState.consumer.GetNavigationCost(workable, out num))
+			if (context.consumerState.consumer.GetNavigationCost(approachable, out num))
 			{
 				context.cost += num;
 				return true;

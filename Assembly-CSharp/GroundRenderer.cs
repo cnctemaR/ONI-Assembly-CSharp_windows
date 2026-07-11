@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using ProcGen;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class GroundRenderer : KMonoBehaviour
 {
@@ -45,8 +46,6 @@ public class GroundRenderer : KMonoBehaviour
 		int num = LayerMask.NameToLayer("World");
 		Vector2I vector2I = new Vector2I(vis_min.x / 16, vis_min.y / 16);
 		Vector2I vector2I2 = new Vector2I((vis_max.x + 16 - 1) / 16, (vis_max.y + 16 - 1) / 16);
-		float layerZ = Grid.GetLayerZ(Grid.SceneLayer.Ground);
-		Matrix4x4 matrix4x = Matrix4x4.TRS(new Vector3(0f, 0f, layerZ), Quaternion.identity, Vector3.one);
 		for (int i = vector2I.y; i < vector2I2.y; i++)
 		{
 			for (int j = vector2I.x; j < vector2I2.x; j++)
@@ -57,7 +56,7 @@ public class GroundRenderer : KMonoBehaviour
 					this.dirtyChunks[j, i] = false;
 					worldChunk.Rebuild(this.biomeMasks, this.elementMaterials);
 				}
-				worldChunk.Render(num, ref matrix4x);
+				worldChunk.Render(num);
 			}
 		}
 		this.RebuildDirtyChunks();
@@ -146,7 +145,7 @@ public class GroundRenderer : KMonoBehaviour
 	private void InitOpaqueMaterial(Material material, Element element)
 	{
 		material.name = element.id.ToString() + "_opaque";
-		material.renderQueue = RenderQueues.WorldOpaque + element.substance.idx;
+		material.renderQueue = RenderQueues.WorldOpaque;
 		material.EnableKeyword("OPAQUE");
 		material.DisableKeyword("ALPHA");
 		this.ConfigureMaterialShine(material);
@@ -159,7 +158,7 @@ public class GroundRenderer : KMonoBehaviour
 	private void InitAlphaMaterial(Material material, Element element)
 	{
 		material.name = element.id.ToString() + "_alpha";
-		material.renderQueue = RenderQueues.WorldTransparent + element.substance.idx;
+		material.renderQueue = RenderQueues.WorldTransparent;
 		material.EnableKeyword("ALPHA");
 		material.DisableKeyword("OPAQUE");
 		this.ConfigureMaterialShine(material);
@@ -327,10 +326,12 @@ public class GroundRenderer : KMonoBehaviour
 			this.alpha.Build();
 		}
 
-		public void Render(int layer, ref Matrix4x4 transform)
+		public void Render(int layer, int element_idx)
 		{
-			this.opaque.Render(layer, ref transform);
-			this.alpha.Render(layer, ref transform);
+			float num = Grid.GetLayerZ(Grid.SceneLayer.Ground);
+			num -= 0.0001f * (float)element_idx;
+			this.opaque.Render(new Vector3(0f, 0f, num), layer);
+			this.alpha.Render(new Vector3(0f, 0f, num), layer);
 		}
 
 		public void FreeResources()
@@ -428,11 +429,11 @@ public class GroundRenderer : KMonoBehaviour
 				this.uv.Add(uvs.tr);
 			}
 
-			public void Render(int layer, ref Matrix4x4 transform)
+			public void Render(Vector3 position, int layer)
 			{
 				if (this.pos.Count != 0)
 				{
-					Graphics.DrawMesh(this.mesh, transform, this.material, layer);
+					Graphics.DrawMesh(this.mesh, position, Quaternion.identity, this.material, layer, null, 0, null, ShadowCastingMode.Off, false, null, false);
 				}
 			}
 
@@ -445,6 +446,13 @@ public class GroundRenderer : KMonoBehaviour
 			public List<Vector2> uv;
 
 			public List<int> indices;
+		}
+
+		private class Tuning : TuningData<GroundRenderer.ElementChunk.Tuning>
+		{
+			public bool _DrawAlpha;
+
+			public bool _DrawOpaque;
 		}
 	}
 
@@ -594,12 +602,12 @@ public class GroundRenderer : KMonoBehaviour
 			return PerlinSimplexNoise.noise((float)x * GroundRenderer.WorldChunk.NoiseScale.x, (float)y * GroundRenderer.WorldChunk.NoiseScale.y);
 		}
 
-		public void Render(int layer, ref Matrix4x4 transform)
+		public void Render(int layer)
 		{
 			for (int i = 0; i < this.elementChunks.Count; i++)
 			{
 				GroundRenderer.ElementChunk elementChunk = this.elementChunks[i];
-				elementChunk.Render(layer, ref transform);
+				elementChunk.Render(layer, ElementLoader.FindElementByHash(elementChunk.element).substance.idx);
 			}
 		}
 

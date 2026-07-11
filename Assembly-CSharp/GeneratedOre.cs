@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 public class GeneratedOre
 {
-	public static void LoadGeneratedOre()
+	public static void LoadGeneratedOre(List<Type> types)
 	{
 		Type typeFromHandle = typeof(IOreConfig);
-		Assembly assembly = Assembly.GetAssembly(typeof(GeneratedOre));
-		Type[] types = assembly.GetTypes();
 		HashSet<SimHashes> hashSet = new HashSet<SimHashes>();
 		foreach (Type type in types)
 		{

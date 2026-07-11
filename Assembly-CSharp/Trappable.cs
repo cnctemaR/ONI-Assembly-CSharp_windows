@@ -42,7 +42,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		base.Subscribe(856640610, new Action<object>(this.OnStore));
+		base.Subscribe<Trappable>(856640610, Trappable.OnStoreDelegate);
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Trappable.Register");
 		this.registered = true;
 	}
@@ -53,7 +53,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		base.Unsubscribe(856640610, new Action<object>(this.OnStore));
+		base.Unsubscribe<Trappable>(856640610, Trappable.OnStoreDelegate);
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.registered = false;
 	}
@@ -81,4 +81,9 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 	}
 
 	private bool registered;
+
+	private static readonly EventSystem.IntraObjectHandler<Trappable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Trappable>(delegate(Trappable component, object data)
+	{
+		component.OnStore(data);
+	});
 }

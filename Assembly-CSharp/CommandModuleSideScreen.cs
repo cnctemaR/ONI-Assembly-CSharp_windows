@@ -53,11 +53,10 @@ public class CommandModuleSideScreen : SideScreenContent
 
 	private void ConfigureConditions()
 	{
-		this.target.EvaluateConditions();
-		for (int i = 0; i < this.target.NumConditions; i++)
+		foreach (RocketLaunchCondition rocketLaunchCondition in this.target.GetLaunchConditionList())
 		{
 			GameObject gameObject = Util.KInstantiateUI(this.prefabConditionLineItem, this.conditionListContainer, true);
-			this.conditionTable.Add(this.target.conditions[i], gameObject);
+			this.conditionTable.Add(rocketLaunchCondition, gameObject);
 		}
 		this.RefreshConditions();
 	}
@@ -65,56 +64,48 @@ public class CommandModuleSideScreen : SideScreenContent
 	public void RefreshConditions()
 	{
 		bool flag = false;
-		foreach (RocketLaunchCondition rocketLaunchCondition in this.target.conditions)
+		List<RocketLaunchCondition> launchConditionList = this.target.GetLaunchConditionList();
+		foreach (RocketLaunchCondition rocketLaunchCondition in launchConditionList)
 		{
-			bool flag2 = false;
-			foreach (KeyValuePair<RocketLaunchCondition, GameObject> keyValuePair in this.conditionTable)
+			if (!this.conditionTable.ContainsKey(rocketLaunchCondition))
 			{
-				if (keyValuePair.Key == rocketLaunchCondition)
-				{
-					flag2 = true;
-					HierarchyReferences component = keyValuePair.Value.GetComponent<HierarchyReferences>();
-					bool flag3 = false;
-					bool flag4 = false;
-					for (int i = 0; i < this.target.conditions.Count; i++)
-					{
-						if (this.target.conditions[i] == keyValuePair.Key)
-						{
-							flag4 = true;
-							flag3 = this.target.conditions[i].EvaluateLaunchCondition();
-						}
-					}
-					if (!flag4)
-					{
-						flag = true;
-						break;
-					}
-					if (rocketLaunchCondition.GetParentCondition() != null && !rocketLaunchCondition.GetParentCondition().EvaluateLaunchCondition())
-					{
-						keyValuePair.Value.SetActive(false);
-					}
-					else if (!keyValuePair.Value.activeSelf)
-					{
-						keyValuePair.Value.SetActive(true);
-					}
-					component.GetReference<LocText>("Label").text = keyValuePair.Key.GetLaunchStatusMessage(true);
-					component.GetReference<LocText>("Label").color = ((!flag3) ? Color.red : Color.black);
-					component.GetReference<Image>("Box").color = ((!flag3) ? Color.red : Color.black);
-					component.GetReference<Image>("Check").gameObject.SetActive(flag3);
-					keyValuePair.Value.GetComponent<ToolTip>().SetSimpleTooltip(keyValuePair.Key.GetLaunchStatusTooltip(flag3));
-				}
+				flag = true;
+				break;
 			}
-			flag = flag || !flag2;
+			GameObject gameObject = this.conditionTable[rocketLaunchCondition];
+			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
+			if (rocketLaunchCondition.GetParentCondition() != null && !rocketLaunchCondition.GetParentCondition().EvaluateLaunchCondition())
+			{
+				gameObject.SetActive(false);
+			}
+			else if (!gameObject.activeSelf)
+			{
+				gameObject.SetActive(true);
+			}
+			bool flag2 = rocketLaunchCondition.EvaluateLaunchCondition();
+			component.GetReference<LocText>("Label").text = rocketLaunchCondition.GetLaunchStatusMessage(true);
+			component.GetReference<LocText>("Label").color = ((!flag2) ? Color.red : Color.black);
+			component.GetReference<Image>("Box").color = ((!flag2) ? Color.red : Color.black);
+			component.GetReference<Image>("Check").gameObject.SetActive(flag2);
+			gameObject.GetComponent<ToolTip>().SetSimpleTooltip(rocketLaunchCondition.GetLaunchStatusTooltip(flag2));
 		}
-		this.destinationButton.onClick = delegate
+		foreach (KeyValuePair<RocketLaunchCondition, GameObject> keyValuePair in this.conditionTable)
 		{
-			ManagementMenu.Instance.ToggleStarmap();
-		};
+			if (!launchConditionList.Contains(keyValuePair.Key))
+			{
+				flag = true;
+				break;
+			}
+		}
 		if (flag)
 		{
 			this.ClearConditions();
 			this.ConfigureConditions();
 		}
+		this.destinationButton.onClick = delegate
+		{
+			ManagementMenu.Instance.ToggleStarmap();
+		};
 	}
 
 	protected override void OnCleanUp()

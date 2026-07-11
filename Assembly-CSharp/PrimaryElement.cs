@@ -258,8 +258,8 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		base.OnPrefabInit();
 		GameComps.InfraredVisualizers.Add(base.gameObject);
-		base.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
-		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		base.Subscribe<PrimaryElement>(1335436905, PrimaryElement.OnSplitFromChunkDelegate);
+		base.Subscribe<PrimaryElement>(-2064133523, PrimaryElement.OnAbsorbDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -492,6 +492,16 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 
 	[NonSerialized]
 	private bool forcePermanentDiseaseContainer;
+
+	private static readonly EventSystem.IntraObjectHandler<PrimaryElement> OnSplitFromChunkDelegate = new EventSystem.IntraObjectHandler<PrimaryElement>(delegate(PrimaryElement component, object data)
+	{
+		component.OnSplitFromChunk(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<PrimaryElement> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<PrimaryElement>(delegate(PrimaryElement component, object data)
+	{
+		component.OnAbsorb(data);
+	});
 
 	public delegate float GetTemperatureCallback(PrimaryElement primary_element);
 

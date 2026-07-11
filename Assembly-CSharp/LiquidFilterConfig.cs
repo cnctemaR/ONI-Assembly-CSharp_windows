@@ -63,14 +63,7 @@ public class LiquidFilterConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>())
-			{
-				ShowWorkingStatus = true
-			}.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>().showWorkingStatus = true;
 	}
 
 	public const string ID = "LiquidFilter";

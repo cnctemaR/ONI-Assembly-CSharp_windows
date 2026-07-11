@@ -10,9 +10,9 @@ namespace UnityEngine
 	///   <para>Represents a Sprite object for use in 2D gameplay.</para>
 	/// </summary>
 	[NativeHeader("Runtime/2D/Common/ScriptBindings/SpritesMarshalling.h")]
+	[NativeType("Runtime/Graphics/SpriteFrame.h")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[NativeHeader("Runtime/Graphics/SpriteUtility.h")]
-	[NativeType("Runtime/Graphics/SpriteFrame.h")]
 	public sealed class Sprite : Object
 	{
 		[RequiredByNativeCode]

@@ -10,6 +10,7 @@ public class MemorySnapshot
 {
 	public MemorySnapshot()
 	{
+		MemorySnapshot.Lineage lineage = new MemorySnapshot.Lineage(null, null, null, null, null, null);
 		foreach (Type type in App.GetCurrentDomainTypes())
 		{
 			foreach (FieldInfo fieldInfo in type.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy))
@@ -17,17 +18,19 @@ public class MemorySnapshot
 				if (fieldInfo.IsStatic)
 				{
 					this.statics.Add(fieldInfo);
+					lineage.parent0 = fieldInfo.DeclaringType;
+					this.fieldsToProcess.Add(new MemorySnapshot.FieldArgs(fieldInfo, lineage));
 				}
 			}
 		}
-		foreach (FieldInfo fieldInfo2 in this.statics)
-		{
-			MemorySnapshot.CountField(fieldInfo2, null, this.types, this.walked, this.fieldCounts, this.detailTypeCount, null, null, null, null, fieldInfo2.DeclaringType);
-		}
+		this.CountAll();
 		foreach (global::UnityEngine.Object @object in Resources.FindObjectsOfTypeAll(typeof(global::UnityEngine.Object)))
 		{
-			MemorySnapshot.CountReference(@object.GetType(), @object, this.types, this.walked, this.fieldCounts, this.detailTypeCount, "Object." + @object.name, null, null, null, null, @object.GetType());
+			lineage.obj = @object;
+			lineage.parent0 = @object.GetType();
+			this.refsToProcess.Add(new MemorySnapshot.ReferenceArgs(@object.GetType(), "Object." + @object.name, lineage));
 		}
+		this.CountAll();
 	}
 
 	public static MemorySnapshot.TypeData GetTypeData(Type type, Dictionary<int, MemorySnapshot.TypeData> types)
@@ -55,100 +58,115 @@ public class MemorySnapshot
 		fieldCount.count++;
 	}
 
-	public static void CountReference(Type reference_type, object obj, Dictionary<int, MemorySnapshot.TypeData> types, HashSet<object> walked, Dictionary<int, MemorySnapshot.FieldCount> field_counts, Dictionary<string, MemorySnapshot.DetailInfo> detailTypeCount, string field_name, Type parent_4, Type parent_3, Type parent_2, Type parent_1, Type parent_0)
+	private void CountReference(MemorySnapshot.ReferenceArgs refArgs)
 	{
-		if (MemorySnapshot.ShouldExclude(reference_type))
+		if (MemorySnapshot.ShouldExclude(refArgs.reference_type))
 		{
 			return;
 		}
-		if (reference_type == MemorySnapshot.detailType)
+		if (refArgs.reference_type == MemorySnapshot.detailType)
 		{
 			string text;
-			if (obj as global::UnityEngine.Object != null)
+			if (refArgs.lineage.obj as global::UnityEngine.Object != null)
 			{
-				text = "\"" + ((global::UnityEngine.Object)obj).name;
+				text = "\"" + ((global::UnityEngine.Object)refArgs.lineage.obj).name;
 			}
 			else
 			{
 				text = "\"" + MemorySnapshot.detailTypeStr;
 			}
-			if (parent_0 != null)
+			if (refArgs.lineage.parent0 != null)
 			{
 				text += "\",\"";
-				text += parent_0.ToString();
+				text += refArgs.lineage.parent0.ToString();
 			}
-			if (parent_1 != null)
+			if (refArgs.lineage.parent1 != null)
 			{
-				text = text + "\",\"" + parent_1.ToString();
+				text = text + "\",\"" + refArgs.lineage.parent1.ToString();
 			}
-			if (parent_2 != null)
+			if (refArgs.lineage.parent2 != null)
 			{
-				text = text + "\",\"" + parent_2.ToString();
+				text = text + "\",\"" + refArgs.lineage.parent2.ToString();
 			}
-			if (parent_3 != null)
+			if (refArgs.lineage.parent3 != null)
 			{
-				text = text + "\",\"" + parent_3.ToString();
+				text = text + "\",\"" + refArgs.lineage.parent3.ToString();
 			}
-			if (parent_4 != null)
+			if (refArgs.lineage.parent4 != null)
 			{
-				text = text + "\",\"" + parent_4.ToString();
+				text = text + "\",\"" + refArgs.lineage.parent4.ToString();
 			}
 			text += "\"\n";
 			MemorySnapshot.DetailInfo detailInfo;
-			detailTypeCount.TryGetValue(text, out detailInfo);
+			this.detailTypeCount.TryGetValue(text, out detailInfo);
 			detailInfo.count++;
-			if (typeof(Array).IsAssignableFrom(reference_type) && obj != null)
+			if (typeof(Array).IsAssignableFrom(refArgs.reference_type) && refArgs.lineage.obj != null)
 			{
-				Array array = obj as Array;
-				detailInfo.numArrayEntries += array.Length;
+				Array array = refArgs.lineage.obj as Array;
+				detailInfo.numArrayEntries += ((array == null) ? 0 : array.Length);
 			}
-			detailTypeCount[text] = detailInfo;
+			this.detailTypeCount[text] = detailInfo;
 		}
-		if (reference_type.IsClass)
+		if (refArgs.reference_type.IsClass)
 		{
-			MemorySnapshot.TypeData typeData = MemorySnapshot.GetTypeData(reference_type, types);
+			MemorySnapshot.TypeData typeData = MemorySnapshot.GetTypeData(refArgs.reference_type, this.types);
 			typeData.refCount++;
-			MemorySnapshot.IncrementFieldCount(field_counts, field_name);
+			MemorySnapshot.IncrementFieldCount(this.fieldCounts, refArgs.field_name);
 		}
-		if (obj != null && (!obj.GetType().IsClass || walked.Add(obj)))
+		if (refArgs.lineage.obj == null)
 		{
-			MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(obj.GetType(), types);
-			if (typeData2.type.IsClass)
+			return;
+		}
+		try
+		{
+			if (refArgs.lineage.obj.GetType().IsClass && !this.walked.Add(refArgs.lineage.obj))
 			{
-				typeData2.instanceCount++;
-				if (typeof(Array).IsAssignableFrom(typeData2.type))
-				{
-					Array array2 = obj as Array;
-					typeData2.numArrayEntries += array2.Length;
-				}
-				MemorySnapshot.HierarchyNode hierarchyNode = new MemorySnapshot.HierarchyNode(parent_0, parent_1, parent_2, parent_3, parent_4);
-				int num = 0;
-				typeData2.hierarchies.TryGetValue(hierarchyNode, out num);
-				typeData2.hierarchies[hierarchyNode] = num + 1;
+				return;
 			}
-			foreach (FieldInfo fieldInfo in typeData2.fields)
+		}
+		catch
+		{
+			return;
+		}
+		MemorySnapshot.TypeData typeData2 = MemorySnapshot.GetTypeData(refArgs.lineage.obj.GetType(), this.types);
+		if (typeData2.type.IsClass)
+		{
+			typeData2.instanceCount++;
+			if (typeof(Array).IsAssignableFrom(typeData2.type))
 			{
-				MemorySnapshot.CountField(fieldInfo, obj, types, walked, field_counts, detailTypeCount, parent_3, parent_2, parent_1, parent_0, fieldInfo.DeclaringType);
+				Array array2 = refArgs.lineage.obj as Array;
+				typeData2.numArrayEntries += ((array2 == null) ? 0 : array2.Length);
 			}
-			ICollection collection = obj as ICollection;
-			if (collection != null)
+			MemorySnapshot.HierarchyNode hierarchyNode = new MemorySnapshot.HierarchyNode(refArgs.lineage.parent0, refArgs.lineage.parent1, refArgs.lineage.parent2, refArgs.lineage.parent3, refArgs.lineage.parent4);
+			int num = 0;
+			typeData2.hierarchies.TryGetValue(hierarchyNode, out num);
+			typeData2.hierarchies[hierarchyNode] = num + 1;
+		}
+		foreach (FieldInfo fieldInfo in typeData2.fields)
+		{
+			this.fieldsToProcess.Add(new MemorySnapshot.FieldArgs(fieldInfo, new MemorySnapshot.Lineage(refArgs.lineage.obj, refArgs.lineage.parent3, refArgs.lineage.parent2, refArgs.lineage.parent1, refArgs.lineage.parent0, fieldInfo.DeclaringType)));
+		}
+		ICollection collection = refArgs.lineage.obj as ICollection;
+		if (collection != null)
+		{
+			Type type = typeof(object);
+			if (collection.GetType().GetElementType() != null)
 			{
-				Type type = typeof(object);
-				if (collection.GetType().GetElementType() != null)
-				{
-					type = collection.GetType().GetElementType();
-				}
-				else if (collection.GetType().GetGenericArguments().Length > 0)
-				{
-					type = collection.GetType().GetGenericArguments()[0];
-				}
+				type = collection.GetType().GetElementType();
+			}
+			else if (collection.GetType().GetGenericArguments().Length > 0)
+			{
+				type = collection.GetType().GetGenericArguments()[0];
+			}
+			if (!MemorySnapshot.ShouldExclude(type))
+			{
 				IEnumerator enumerator2 = collection.GetEnumerator();
 				try
 				{
 					while (enumerator2.MoveNext())
 					{
-						object obj2 = enumerator2.Current;
-						MemorySnapshot.CountReference(type, obj2, types, walked, field_counts, detailTypeCount, field_name + ".Item", parent_3, parent_2, parent_1, parent_0, collection.GetType());
+						object obj = enumerator2.Current;
+						this.refsToProcess.Add(new MemorySnapshot.ReferenceArgs(type, refArgs.field_name + ".Item", new MemorySnapshot.Lineage(obj, refArgs.lineage.parent3, refArgs.lineage.parent2, refArgs.lineage.parent1, refArgs.lineage.parent0, collection.GetType())));
 					}
 				}
 				finally
@@ -163,32 +181,50 @@ public class MemorySnapshot
 		}
 	}
 
-	public static void CountField(FieldInfo field, object obj, Dictionary<int, MemorySnapshot.TypeData> types, HashSet<object> walked, Dictionary<int, MemorySnapshot.FieldCount> field_counts, Dictionary<string, MemorySnapshot.DetailInfo> detailTypeCount, Type parent_4, Type parent_3, Type parent_2, Type parent_1, Type parent_0)
+	private void CountField(MemorySnapshot.FieldArgs fieldArgs)
 	{
-		if (!MemorySnapshot.ShouldExclude(field.FieldType))
+		if (MemorySnapshot.ShouldExclude(fieldArgs.field.FieldType))
 		{
-			object obj2 = null;
-			try
+			return;
+		}
+		object obj = null;
+		try
+		{
+			if (!fieldArgs.field.FieldType.Name.Contains("*"))
 			{
-				if (!field.FieldType.Name.Contains("*"))
-				{
-					obj2 = field.GetValue(obj);
-				}
-				string text = field.DeclaringType.ToString() + "." + field.Name;
-				MemorySnapshot.CountReference(field.FieldType, obj2, types, walked, field_counts, detailTypeCount, text, parent_3, parent_2, parent_1, parent_0, field.DeclaringType);
-			}
-			catch
-			{
-				obj2 = null;
-				string text2 = field.DeclaringType.ToString() + "." + field.Name;
-				MemorySnapshot.CountReference(field.FieldType, obj2, types, walked, field_counts, detailTypeCount, text2, parent_3, parent_2, parent_1, parent_0, field.DeclaringType);
+				obj = fieldArgs.field.GetValue(fieldArgs.lineage.obj);
 			}
 		}
+		catch
+		{
+			obj = null;
+		}
+		string text = fieldArgs.field.DeclaringType.ToString() + "." + fieldArgs.field.Name;
+		this.refsToProcess.Add(new MemorySnapshot.ReferenceArgs(fieldArgs.field.FieldType, text, new MemorySnapshot.Lineage(obj, fieldArgs.lineage.parent3, fieldArgs.lineage.parent2, fieldArgs.lineage.parent1, fieldArgs.lineage.parent0, fieldArgs.field.DeclaringType)));
 	}
 
 	private static bool ShouldExclude(Type type)
 	{
 		return type.IsPrimitive || type.IsEnum || type == typeof(MemorySnapshot);
+	}
+
+	private void CountAll()
+	{
+		while (this.refsToProcess.Count > 0 || this.fieldsToProcess.Count > 0)
+		{
+			while (this.fieldsToProcess.Count > 0)
+			{
+				MemorySnapshot.FieldArgs fieldArgs = this.fieldsToProcess[this.fieldsToProcess.Count - 1];
+				this.fieldsToProcess.RemoveAt(this.fieldsToProcess.Count - 1);
+				this.CountField(fieldArgs);
+			}
+			while (this.refsToProcess.Count > 0)
+			{
+				MemorySnapshot.ReferenceArgs referenceArgs = this.refsToProcess[this.refsToProcess.Count - 1];
+				this.refsToProcess.RemoveAt(this.refsToProcess.Count - 1);
+				this.CountReference(referenceArgs);
+			}
+		}
 	}
 
 	public void WriteTypeDetails(MemorySnapshot compare)
@@ -244,6 +280,10 @@ public class MemorySnapshot
 	private static readonly Type detailType = typeof(byte[]);
 
 	private static readonly string detailTypeStr = MemorySnapshot.detailType.ToString();
+
+	private List<MemorySnapshot.FieldArgs> fieldsToProcess = new List<MemorySnapshot.FieldArgs>();
+
+	private List<MemorySnapshot.ReferenceArgs> refsToProcess = new List<MemorySnapshot.ReferenceArgs>();
 
 	public struct HierarchyNode
 	{
@@ -389,5 +429,59 @@ public class MemorySnapshot
 		public int count;
 
 		public int numArrayEntries;
+	}
+
+	private struct Lineage
+	{
+		public Lineage(object obj, Type parent4, Type parent3, Type parent2, Type parent1, Type parent0)
+		{
+			this.obj = obj;
+			this.parent0 = parent0;
+			this.parent1 = parent1;
+			this.parent2 = parent2;
+			this.parent3 = parent3;
+			this.parent4 = parent4;
+		}
+
+		public object obj;
+
+		public Type parent0;
+
+		public Type parent1;
+
+		public Type parent2;
+
+		public Type parent3;
+
+		public Type parent4;
+	}
+
+	private struct ReferenceArgs
+	{
+		public ReferenceArgs(Type reference_type, string field_name, MemorySnapshot.Lineage lineage)
+		{
+			this.reference_type = reference_type;
+			this.lineage = lineage;
+			this.field_name = field_name;
+		}
+
+		public Type reference_type;
+
+		public string field_name;
+
+		public MemorySnapshot.Lineage lineage;
+	}
+
+	private struct FieldArgs
+	{
+		public FieldArgs(FieldInfo field, MemorySnapshot.Lineage lineage)
+		{
+			this.field = field;
+			this.lineage = lineage;
+		}
+
+		public FieldInfo field;
+
+		public MemorySnapshot.Lineage lineage;
 	}
 }

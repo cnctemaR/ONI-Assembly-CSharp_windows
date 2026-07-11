@@ -16,6 +16,7 @@ public class Toggleable : Workable
 		this.workTime = 1f;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Toggling;
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_use_remote_kanim") };
+		this.synchronizeAnims = false;
 	}
 
 	public int SetTarget(IToggleHandler handler)

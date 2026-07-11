@@ -50,8 +50,8 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		Game.Instance.electricalConduitSystem.AddToNetworks(num, this, false);
 		this.InitializeSwitchState();
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Subscribe<Wire>(774203113, Wire.OnBuildingBrokenDelegate);
+		base.Subscribe<Wire>(-1735440190, Wire.OnBuildingFullyRepairedDelegate);
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireMaxWattageStatus, this);
 		base.GetComponent<KSelectable>().AddStatusItem(Wire.WireCircuitStatus, this);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
@@ -66,8 +66,8 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		{
 			Game.Instance.electricalConduitSystem.RemoveFromNetworks(num, this, false);
 		}
-		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe<Wire>(774203113, Wire.OnBuildingBrokenDelegate);
+		base.Unsubscribe<Wire>(-1735440190, Wire.OnBuildingFullyRepairedDelegate);
 		base.OnCleanUp();
 	}
 
@@ -235,6 +235,16 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 	public static readonly KAnimHashedString OutlineSymbol = new KAnimHashedString("outline");
 
 	public float circuitOverloadTime;
+
+	private static readonly EventSystem.IntraObjectHandler<Wire> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<Wire>(delegate(Wire component, object data)
+	{
+		component.OnBuildingBroken(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Wire> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<Wire>(delegate(Wire component, object data)
+	{
+		component.OnBuildingFullyRepaired(data);
+	});
 
 	private static StatusItem WireCircuitStatus = null;
 

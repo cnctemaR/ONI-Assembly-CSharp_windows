@@ -35,7 +35,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		{
 			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486);
 		}
-		base.Subscribe(279163026, new Action<object>(this.OnControlStateChanged));
+		base.Subscribe<AccessControl>(279163026, AccessControl.OnControlStateChangedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -172,6 +172,11 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	public Door.ControlState overrideAccess;
 
 	private static StatusItem accessControlActive;
+
+	private static readonly EventSystem.IntraObjectHandler<AccessControl> OnControlStateChangedDelegate = new EventSystem.IntraObjectHandler<AccessControl>(delegate(AccessControl component, object data)
+	{
+		component.OnControlStateChanged(data);
+	});
 
 	public enum Permission
 	{

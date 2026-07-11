@@ -62,6 +62,7 @@ public class AirborneCreatureLureConfig : IBuildingConfig
 			new CellOffset(0, 1)
 		};
 		def.radius = 32;
+		Prioritizable.AddRef(prefab);
 	}
 
 	public const string ID = "AirborneCreatureLure";

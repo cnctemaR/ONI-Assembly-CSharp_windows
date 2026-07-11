@@ -112,13 +112,8 @@ public class MetalRefineryConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		SymbolOverrideControllerUtil.AddToPrefab(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveStoppableController.Instance instance = new PoweredActiveStoppableController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveStoppableController.Def>();
 	}
 
 	public const string ID = "MetalRefinery";

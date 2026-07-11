@@ -20,6 +20,8 @@ namespace UnityEngine
 				float num;
 				float num2;
 				base.style.CalcMinMaxWidth(this.m_Content, out num, out num2);
+				num = Mathf.Ceil(num);
+				num2 = Mathf.Ceil(num2);
 				if (this.minWidth == 0f)
 				{
 					this.minWidth = num;

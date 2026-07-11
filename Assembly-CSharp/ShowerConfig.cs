@@ -66,7 +66,6 @@ public class ShowerConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public static string ID = "Shower";

@@ -29,7 +29,7 @@ public class KInputManager
 
 	public KInputController GetController(int controller_index)
 	{
-		DebugUtil.Assert(controller_index < this.mControllers.Count, "Assert!");
+		DebugUtil.Assert(controller_index < this.mControllers.Count, "Assert!", string.Empty, string.Empty);
 		return this.mControllers[controller_index];
 	}
 

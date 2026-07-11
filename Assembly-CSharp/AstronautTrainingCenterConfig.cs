@@ -43,12 +43,7 @@ public class AstronautTrainingCenterConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
-		BuildingTemplates.DoPostConfigure(go);
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "AstronautTrainingCenter";

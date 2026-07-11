@@ -45,21 +45,25 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		this.updatePickupsWorkItems.Reset(null);
 		foreach (KeyValuePair<Tag, FetchManager.FecthablesByPrefabId> keyValuePair in this.prefabIdToFetchables)
 		{
+			FetchManager.FecthablesByPrefabId value = keyValuePair.Value;
+			value.UpdateOffsetTables();
 			this.updatePickupsWorkItems.Add(new FetchManager.UpdatePickupWorkItem
 			{
-				fetchablesByPrefabId = keyValuePair.Value,
+				fetchablesByPrefabId = value,
 				pathProber = path_prober,
 				navigator = worker.GetComponent<Navigator>(),
 				worker = worker.gameObject
 			});
 		}
+		OffsetTracker.isExecutingWithinJob = true;
 		GlobalJobManager.Run(this.updatePickupsWorkItems);
+		OffsetTracker.isExecutingWithinJob = false;
 		this.pickups.Clear();
 		foreach (KeyValuePair<Tag, FetchManager.FecthablesByPrefabId> keyValuePair2 in this.prefabIdToFetchables)
 		{
 			this.pickups.AddRange(keyValuePair2.Value.finalPickups);
 		}
-		this.pickups.Sort(FetchManager.Comparer);
+		this.pickups.Sort(FetchManager.ComparerNoPriority);
 	}
 
 	public static bool IsFetchablePickup(KPrefabID pickup_id, Storage source, float pickup_unreserved_amount, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, Storage destination)
@@ -151,7 +155,9 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 
 	public static readonly TagBits disallowedTagMask = ~new TagBits(new Tag[] { GameTags.Preserved });
 
-	private static readonly FetchManager.PickupComparer Comparer = new FetchManager.PickupComparer();
+	private static readonly FetchManager.PickupComparerIncludingPriority ComparerIncludingPriority = new FetchManager.PickupComparerIncludingPriority();
+
+	private static readonly FetchManager.PickupComparerNoPriority ComparerNoPriority = new FetchManager.PickupComparerNoPriority();
 
 	private List<FetchManager.Pickup> pickups = new List<FetchManager.Pickup>();
 
@@ -188,7 +194,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		public byte foodQuality;
 	}
 
-	private class PickupComparer : IComparer<FetchManager.Pickup>
+	private class PickupComparerIncludingPriority : IComparer<FetchManager.Pickup>
 	{
 		public int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
 		{
@@ -201,6 +207,22 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			{
 				return (int)(b.masterPriority - a.masterPriority);
 			}
+			if (a.PathCost != b.PathCost)
+			{
+				return (int)(a.PathCost - b.PathCost);
+			}
+			if (a.foodQuality != b.foodQuality)
+			{
+				return (int)(b.foodQuality - a.foodQuality);
+			}
+			return (int)(b.freshness - a.freshness);
+		}
+	}
+
+	private class PickupComparerNoPriority : IComparer<FetchManager.Pickup>
+	{
+		public int Compare(FetchManager.Pickup a, FetchManager.Pickup b)
+		{
 			if (a.PathCost != b.PathCost)
 			{
 				return (int)(a.PathCost - b.PathCost);
@@ -279,7 +301,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			this.GatherPickupablesWhichCanBePickedUp(worker_go);
 			this.GatherReachablePickups(worker_navigator);
 			FetchManager.FecthablesByPrefabId.BeginSample("SortPickups", this.finalPickups.Count);
-			this.finalPickups.Sort(FetchManager.Comparer);
+			this.finalPickups.Sort(FetchManager.ComparerIncludingPriority);
 			FetchManager.FecthablesByPrefabId.EndSample();
 			if (this.finalPickups.Count > 0)
 			{
@@ -353,6 +375,14 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 				}
 			}
 			FetchManager.FecthablesByPrefabId.EndSample();
+		}
+
+		public void UpdateOffsetTables()
+		{
+			foreach (FetchManager.Fetchable fetchable in this.fetchables.GetDataList())
+			{
+				fetchable.pickupable.GetOffsets(fetchable.pickupable.cachedCell);
+			}
 		}
 
 		private void GatherReachablePickups(Navigator navigator)

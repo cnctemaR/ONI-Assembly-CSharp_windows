@@ -7,7 +7,7 @@ public class Dumpable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Dumpable>(493375141, Dumpable.OnRefreshUserMenuDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
 	}
 
@@ -89,4 +89,9 @@ public class Dumpable : Workable
 
 	[Serialize]
 	private bool isMarkedForDumping;
+
+	private static readonly EventSystem.IntraObjectHandler<Dumpable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Dumpable>(delegate(Dumpable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

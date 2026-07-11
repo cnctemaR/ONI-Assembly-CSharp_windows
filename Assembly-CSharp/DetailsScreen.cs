@@ -40,7 +40,7 @@ public class DetailsScreen : KTabMenu
 		this.CloseButton.onClick += this.DeselectAndClose;
 		this.TabTitle.OnNameChanged += this.OnNameChanged;
 		this.TabTitle.OnStartedEditing += this.OnStartedEditing;
-		base.Subscribe(-1514841199, new Action<object>(this.OnRefreshData));
+		base.Subscribe<DetailsScreen>(-1514841199, DetailsScreen.OnRefreshDataDelegate);
 	}
 
 	private void OnStartedEditing()
@@ -503,6 +503,11 @@ public class DetailsScreen : KTabMenu
 	private bool isEditing;
 
 	private SideScreenContent currentSideScreen;
+
+	private static readonly EventSystem.IntraObjectHandler<DetailsScreen> OnRefreshDataDelegate = new EventSystem.IntraObjectHandler<DetailsScreen>(delegate(DetailsScreen component, object data)
+	{
+		component.OnRefreshData(data);
+	});
 
 	[Serializable]
 	private struct Screens

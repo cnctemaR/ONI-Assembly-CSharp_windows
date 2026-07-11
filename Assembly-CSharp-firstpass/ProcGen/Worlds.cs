@@ -7,13 +7,14 @@ namespace ProcGen
 {
 	public class Worlds
 	{
-		public World GetWorld(string name)
+		public bool HasWorld(string name)
 		{
-			if (this.worldCache.ContainsKey(name))
-			{
-				return this.worldCache[name];
-			}
-			return null;
+			return this.worldCache.ContainsKey(name);
+		}
+
+		public Worlds.Data GetWorldData(string name)
+		{
+			return this.worldCache[name];
 		}
 
 		public List<string> GetNames()
@@ -21,64 +22,36 @@ namespace ProcGen
 			return new List<string>(this.worldCache.Keys);
 		}
 
-		public void LoadFiles(string path)
+		public static string GetWorldName(string path)
+		{
+			return "worlds/" + Path.GetFileNameWithoutExtension(path);
+		}
+
+		public void LoadFiles(string path, IFileSystem filesystem)
 		{
 			this.worldCache.Clear();
-			string[] files = Directory.GetFiles(path + "/worlds/", "*.yaml");
-			if (files == null || files.Length == 0)
+			this.UpdateWorldCache(path, filesystem);
+		}
+
+		private void UpdateWorldCache(string path, IFileSystem filesystem)
+		{
+			List<string> list = new List<string>();
+			FSUtil.GetFiles(filesystem, Path.Combine(path, "worlds"), "*.yaml", list);
+			foreach (string text in list)
 			{
-				Debug.LogError("WorldGen: No world lookup table files will be loaded", null);
-			}
-			else
-			{
-				WorkItemCollection<Worlds.LoadWorldfileWorkItem, object> workItemCollection = new WorkItemCollection<Worlds.LoadWorldfileWorkItem, object>();
-				workItemCollection.Reset(null);
-				foreach (string text in files)
+				World world = YamlIO<World>.LoadFile(text);
+				string worldName = Worlds.GetWorldName(text);
+				this.worldCache[worldName] = new Worlds.Data
 				{
-					workItemCollection.Add(new Worlds.LoadWorldfileWorkItem
-					{
-						path = text
-					});
-				}
-				GlobalJobManager.Run(workItemCollection);
-				for (int j = 0; j < workItemCollection.Count; j++)
-				{
-					Worlds.LoadWorldfileWorkItem workItem = workItemCollection.GetWorkItem(j);
-					if (workItem.world != null)
-					{
-						this.worldCache[workItem.worldName] = workItem.world;
-					}
-					else
-					{
-						Debug.LogWarning("WorldGen: Attempting to load world: " + workItem.worldName + " failed", null);
-					}
-				}
+					world = world
+				};
 			}
 		}
 
-		public Dictionary<string, World> worldCache = new Dictionary<string, World>();
+		public Dictionary<string, Worlds.Data> worldCache = new Dictionary<string, Worlds.Data>();
 
-		private struct LoadWorldfileWorkItem : IWorkItem<object>
+		public struct Data
 		{
-			public void Run(object shared_data)
-			{
-				int num = this.path.LastIndexOf("//");
-				this.worldName = ((num != -1) ? this.path.Substring(num + 2, this.path.Length - 2 - num) : this.path);
-				this.world = YamlIO<World>.LoadFile(this.path);
-				if (this.world != null)
-				{
-					this.worldName = this.worldName.Replace(".yaml", string.Empty);
-				}
-				else
-				{
-					Debug.LogWarning("WorldGen: Attempting to load world: " + this.worldName + " failed", null);
-				}
-			}
-
-			public string path;
-
-			public string worldName;
-
 			public World world;
 		}
 	}

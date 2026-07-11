@@ -126,7 +126,7 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 		Operational component = base.GetComponent<Operational>();
 		if (component != null)
 		{
-			base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+			base.Subscribe<NoisePolluter>(824508782, NoisePolluter.OnActiveChangedDelegate);
 		}
 		this.refreshCallback = new global::System.Action(this.Refresh);
 		this.refreshPartionerCallback = delegate(object data)
@@ -275,4 +275,9 @@ public class NoisePolluter : KMonoBehaviour, IPolluter
 
 	[MyCmpReq]
 	public OccupyArea occupyArea;
+
+	private static readonly EventSystem.IntraObjectHandler<NoisePolluter> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<NoisePolluter>(delegate(NoisePolluter component, object data)
+	{
+		component.OnActiveChanged(data);
+	});
 }

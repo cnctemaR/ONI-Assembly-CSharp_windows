@@ -47,7 +47,6 @@ public class RanchStationConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, RanchStationConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
-		BuildingTemplates.DoPostConfigure(go);
 		RanchStation.Def def = go.AddOrGetDef<RanchStation.Def>();
 		def.isCreatureEligibleToBeRanchedCb = (GameObject creature_go, RanchStation.Instance ranch_station_smi) => !creature_go.GetComponent<Effects>().HasEffect("Ranched");
 		def.onRanchCompleteCb = delegate(GameObject creature_go)

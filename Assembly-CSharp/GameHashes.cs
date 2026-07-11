@@ -231,7 +231,6 @@ public enum GameHashes
 	StartMining = -1762453998,
 	StopMining = 939543986,
 	OreSizeChanged = 1807976145,
-	DuplicantDig = 963113026,
 	UIScaleChange = -810220474,
 	Stressed = 402754227,
 	StressedHadEnough = -115777784,
@@ -304,5 +303,14 @@ public enum GameHashes
 	IgniteEngine = -1358394196,
 	StoragePriorityChanged = -1626373771,
 	AttachmentNetworkChanged = 486707561,
-	LaunchConditionChanged = 1655598572
+	LaunchConditionChanged = 1655598572,
+	ChoreInterrupt = 1485595942,
+	Flush = -350347868,
+	WorkerPlayPostAnim = -1142962013,
+	DeactivateResearchScreen = -1974454597,
+	StarmapDestinationChanged = 929158128,
+	DuplicantDied = 282337316,
+	DiscoveredSpace = -818188514,
+	StarmapAnalysisTargetChanged = 532901469,
+	BeginMeteorBombardment = -84771526
 }

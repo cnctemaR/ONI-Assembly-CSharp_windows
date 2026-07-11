@@ -31,15 +31,13 @@ public class GlassTileConfig : IBuildingConfig
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isSolidTile = true;
+		buildingDef.BlockTileIsTransparent = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_glass");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_glass_place");
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_glass_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_glass_tops_decor_place_info");
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		return buildingDef;
 	}
 
@@ -49,6 +47,7 @@ public class GlassTileConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.setTransparent = true;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
 		kanimGridTileVisualizer.blockTileConnectorID = GlassTileConfig.BlockTileConnectorID;
@@ -60,8 +59,7 @@ public class GlassTileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.AddComponent<SimTemperatureTransfer>();
+		GeneratedBuildings.RemoveLoopingSounds(go);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

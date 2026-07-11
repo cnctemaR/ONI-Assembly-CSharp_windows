@@ -53,7 +53,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		UtilityConnections connections = Game.Instance.travelTubeSystem.GetConnections(Grid.XYToCell(num, num2), true);
 		this.TubeConnectionsChanged(connections);
 		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[32], new Action<object>(this.TubeChanged));
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<TravelTubeEntrance>(-592767678, TravelTubeEntrance.OnOperationalChangedDelegate);
 		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
 		this.CreateNewWaitReactable();
 		Grid.HasTubeEntrance[Grid.PosToCell(this)] = true;
@@ -288,6 +288,11 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	private static readonly Operational.Flag tubeConnected = new Operational.Flag("tubeConnected", Operational.Flag.Type.Functional);
 
 	private HandleVector<int>.Handle tubeChangedEntry;
+
+	private static readonly EventSystem.IntraObjectHandler<TravelTubeEntrance> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<TravelTubeEntrance>(delegate(TravelTubeEntrance component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 
 	private Guid connectedStatus;
 

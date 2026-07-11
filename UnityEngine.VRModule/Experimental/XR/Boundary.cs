@@ -1,36 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using UnityEngine.Bindings;
 using UnityEngine.Internal;
-using UnityEngine.Scripting;
-using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Experimental.XR
 {
-	[MovedFrom("UnityEngine.Experimental.VR")]
+	[NativeConditional("ENABLE_VR")]
 	public static class Boundary
 	{
-		[ExcludeFromDocs]
 		public static bool TryGetDimensions(out Vector3 dimensionsOut)
 		{
-			Boundary.Type type = Boundary.Type.PlayArea;
-			return Boundary.TryGetDimensions(out dimensionsOut, type);
+			return Boundary.TryGetDimensions(out dimensionsOut, Boundary.Type.PlayArea);
 		}
 
 		public static bool TryGetDimensions(out Vector3 dimensionsOut, [DefaultValue("Type.PlayArea")] Boundary.Type boundaryType)
 		{
-			return Boundary.TryGetDimensionsInternal(out dimensionsOut, (int)boundaryType);
+			return Boundary.TryGetDimensionsInternal(out dimensionsOut, boundaryType);
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeName("TryGetBoundaryDimensions")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryGetDimensionsInternal(out Vector3 dimensionsOut, int boundaryType);
+		private static extern bool TryGetDimensionsInternal(out Vector3 dimensionsOut, Boundary.Type boundaryType);
 
-		[ExcludeFromDocs]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("BoundaryVisible")]
+		public static extern bool visible
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[NativeName("BoundaryConfigured")]
+		public static extern bool configured
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		public static bool TryGetGeometry(List<Vector3> geometry)
 		{
-			Boundary.Type type = Boundary.Type.PlayArea;
-			return Boundary.TryGetGeometry(geometry, type);
+			return Boundary.TryGetGeometry(geometry, Boundary.Type.PlayArea);
 		}
 
 		public static bool TryGetGeometry(List<Vector3> geometry, [DefaultValue("Type.PlayArea")] Boundary.Type boundaryType)
@@ -40,29 +54,16 @@ namespace UnityEngine.Experimental.XR
 				throw new ArgumentNullException("geometry");
 			}
 			geometry.Clear();
-			return Boundary.TryGetGeometryInternal(geometry, (int)boundaryType);
+			return Boundary.TryGetGeometryScriptingInternal(geometry, boundaryType);
 		}
 
-		[GeneratedByOldBindingsGenerator]
+		[NativeConditional("!ENABLE_DOTNET")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool TryGetGeometryInternal(object geometryOut, int boundaryType);
+		private static extern bool TryGetGeometryScriptingInternal(List<Vector3> geometry, Boundary.Type boundaryType);
 
-		public static extern bool visible
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
-
-		public static extern bool configured
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-		}
+		[NativeConditional("ENABLE_DOTNET")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern Vector3[] TryGetGeometryArrayInternal(Boundary.Type boundaryType);
 
 		public enum Type
 		{

@@ -54,8 +54,8 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	{
 		base.OnPrefabInit();
 		this.log.SetName(base.name);
-		base.Subscribe(1969584890, new Action<object>(this.OnTargetDestroyed));
-		base.Subscribe(1502190696, new Action<object>(this.OnTargetDestroyed));
+		base.Subscribe<StateMachineController>(1969584890, StateMachineController.OnTargetDestroyedDelegate);
+		base.Subscribe<StateMachineController>(1502190696, StateMachineController.OnTargetDestroyedDelegate);
 	}
 
 	private void OnTargetDestroyed(object data)
@@ -223,6 +223,11 @@ public class StateMachineController : KMonoBehaviour, ISaveLoadableDetails, ISta
 	private LoggerFSSSS log = new LoggerFSSSS("StateMachineController", 35);
 
 	private StateMachineSerializer serializer = new StateMachineSerializer();
+
+	private static readonly EventSystem.IntraObjectHandler<StateMachineController> OnTargetDestroyedDelegate = new EventSystem.IntraObjectHandler<StateMachineController>(delegate(StateMachineController component, object data)
+	{
+		component.OnTargetDestroyed(data);
+	});
 
 	public class CmpDef
 	{

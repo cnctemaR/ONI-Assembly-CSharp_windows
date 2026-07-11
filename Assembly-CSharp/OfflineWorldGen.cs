@@ -374,8 +374,9 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private void DoWordGenInitialise()
 	{
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World);
 		WorldGen.LoadSettings();
-		WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id, WorldGen.GetPath());
+		WorldGen.Settings.SetWorld(currentQualitySetting.id, WorldGen.GetPath());
 		Vector2I worldsize = WorldGen.Settings.GetWorld().worldsize;
 		GridSettings.Reset(worldsize.x, worldsize.y);
 		if (KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) != 0)

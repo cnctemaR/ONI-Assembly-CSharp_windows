@@ -153,9 +153,10 @@ public class EntityTemplates
 		return template;
 	}
 
-	public static GameObject ExtendEntityToRocketModule(GameObject template)
+	public static GameObject ExtendBuildingToRocketModule(GameObject template)
 	{
 		template.GetComponent<KBatchedAnimController>().isMovable = true;
+		template.GetComponent<Building>().Def.ThermalConductivity = 0.1f;
 		return template;
 	}
 
@@ -233,7 +234,7 @@ public class EntityTemplates
 		return prefab;
 	}
 
-	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, string eggId, string eggName, string eggDesc, string egg_anim, float egg_mass, string baby_id, float fertility_cycles, float incubation_cycles, List<FertilityMonitor.BreedingChance> egg_chances = null, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, bool add_fixed_capturable_monitor = true, float egg_anim_scale = 1f)
+	public static GameObject ExtendEntityToFertileCreature(GameObject prefab, string eggId, string eggName, string eggDesc, string egg_anim, float egg_mass, string baby_id, float fertility_cycles, float incubation_cycles, List<FertilityMonitor.BreedingChance> egg_chances, int eggSortOrder = -1, bool is_ranchable = true, bool add_fish_overcrowding_monitor = false, bool add_fixed_capturable_monitor = true, float egg_anim_scale = 1f)
 	{
 		FertilityMonitor.Def def = prefab.AddOrGetDef<FertilityMonitor.Def>();
 		def.baseFertileCycles = fertility_cycles;
@@ -445,6 +446,10 @@ public class EntityTemplates
 				kprefabID.AddTag(tag);
 			}
 		}
+		if (element.lowTemp < 296.15f && element.highTemp > 296.15f)
+		{
+			kprefabID.AddTag(GameTags.PedestalDisplayable);
+		}
 		PrimaryElement primaryElement = gameObject.AddOrGet<PrimaryElement>();
 		primaryElement.SetElement(elementID);
 		primaryElement.Mass = 1f;
@@ -498,6 +503,7 @@ public class EntityTemplates
 			EntityTemplates.CreateAndRegisterCompostableFromPrefab(template);
 		}
 		KPrefabID component = template.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.PedestalDisplayable);
 		if (foodInfo.CaloriesPerUnit > 0f)
 		{
 			Edible edible = template.AddOrGet<Edible>();
@@ -511,6 +517,7 @@ public class EntityTemplates
 		else
 		{
 			component.AddTag(GameTags.CookingIngredient);
+			template.AddOrGet<HasSortOrder>();
 		}
 		return template;
 	}
@@ -620,6 +627,7 @@ public class EntityTemplates
 			component.AddTag(tag);
 		}
 		component.AddTag(GameTags.Seed);
+		component.AddTag(GameTags.PedestalDisplayable);
 		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
 		Assets.AddPrefab(component2);
 		SeedProducer seedProducer = plant.AddOrGet<SeedProducer>();

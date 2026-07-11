@@ -94,7 +94,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-1524118282, sizeof(SimMessages.RemoveElementEmitterMessage), (byte*)ptr);
 	}
 
-	public unsafe static void AddElementChunk(int gameCell, SimHashes element, float mass, float temperature, float surface_area, float thickness, int cb_handle)
+	public unsafe static void AddElementChunk(int gameCell, SimHashes element, float mass, float temperature, float surface_area, float thickness, float ground_transfer_scale, int cb_handle)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -110,6 +110,7 @@ public static class SimMessages
 			ptr->temperature = temperature;
 			ptr->surfaceArea = surface_area;
 			ptr->thickness = thickness;
+			ptr->groundTransferScale = ground_transfer_scale;
 			ptr->elementIdx = (byte)elementIndex;
 			Sim.SIM_HandleMessage(1445724082, sizeof(SimMessages.AddElementChunkMessage), (byte*)ptr);
 		}
@@ -281,6 +282,34 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(468135926, sizeof(SimMessages.RemoveDiseaseEmitterMessage), (byte*)ptr);
 	}
 
+	public unsafe static void SetSavedOptionValue(SimMessages.SimSavedOptions option, int zero_or_one)
+	{
+		SimMessages.SetSavedOptionsMessage* ptr = stackalloc SimMessages.SetSavedOptionsMessage[checked(1 * sizeof(SimMessages.SetSavedOptionsMessage))];
+		if (zero_or_one == 0)
+		{
+			SimMessages.SetSavedOptionsMessage* ptr2 = ptr;
+			ptr2->clearBits = ptr2->clearBits | (byte)option;
+			ptr->setBits = 0;
+		}
+		else
+		{
+			ptr->clearBits = 0;
+			SimMessages.SetSavedOptionsMessage* ptr3 = ptr;
+			ptr3->setBits = ptr3->setBits | (byte)option;
+		}
+		Sim.SIM_HandleMessage(1154135737, sizeof(SimMessages.SetSavedOptionsMessage), (byte*)ptr);
+	}
+
+	private static void WriteKleiString(this BinaryWriter writer, string str)
+	{
+		byte[] bytes = Encoding.UTF8.GetBytes(str);
+		writer.Write(bytes.Length);
+		if (bytes.Length > 0)
+		{
+			writer.Write(bytes);
+		}
+	}
+
 	public unsafe static void CreateSimElementsTable(List<Element> elements)
 	{
 		MemoryStream memoryStream = new MemoryStream(Marshal.SizeOf(typeof(int)) + Marshal.SizeOf(typeof(Sim.Element)) * elements.Count);
@@ -293,9 +322,7 @@ public static class SimMessages
 		}
 		for (int j = 0; j < elements.Count; j++)
 		{
-			byte[] bytes = Encoding.UTF8.GetBytes(UI.StripLinkFormatting(elements[j].name));
-			binaryWriter.Write(bytes.Length);
-			binaryWriter.Write(bytes);
+			binaryWriter.WriteKleiString(UI.StripLinkFormatting(elements[j].name));
 		}
 		byte[] buffer = memoryStream.GetBuffer();
 		fixed (byte* ptr = (ref buffer != null && buffer.Length != 0 ? ref buffer[0] : ref *null))
@@ -323,6 +350,7 @@ public static class SimMessages
 		rangeInfo2.maxViable = float.PositiveInfinity;
 		for (int i = 0; i < diseaseIds.Count; i++)
 		{
+			binaryWriter.WriteKleiString(string.Empty);
 			BinaryWriter binaryWriter2 = binaryWriter;
 			HashedString hashedString = new HashedString(diseaseIds[i]);
 			binaryWriter2.Write(hashedString.GetHashCode());
@@ -354,6 +382,7 @@ public static class SimMessages
 		for (int i = 0; i < diseases.Count; i++)
 		{
 			Disease disease = diseases[i];
+			binaryWriter.WriteKleiString(UI.StripLinkFormatting(disease.Name));
 			binaryWriter.Write(disease.id.GetHashCode());
 			binaryWriter.Write(disease.strength);
 			disease.temperatureRange.Write(binaryWriter);
@@ -529,7 +558,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(1727657959, sizeof(SimMessages.MassConsumptionMessage), (byte*)ptr);
 	}
 
-	public unsafe static void EmitMass(int gameCell, byte element_idx, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx)
+	public unsafe static void EmitMass(int gameCell, byte element_idx, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -785,6 +814,8 @@ public static class SimMessages
 
 		public float thickness;
 
+		public float groundTransferScale;
+
 		public byte elementIdx;
 
 		public byte pad0;
@@ -956,6 +987,19 @@ public static class SimMessages
 		public int handle;
 
 		public int callbackIdx;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	private struct SetSavedOptionsMessage
+	{
+		public byte clearBits;
+
+		public byte setBits;
+	}
+
+	public enum SimSavedOptions : byte
+	{
+		ENABLE_DIAGONAL_FALLING_SAND = 1
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

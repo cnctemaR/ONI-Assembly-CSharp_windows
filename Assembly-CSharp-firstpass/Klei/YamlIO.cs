@@ -18,7 +18,7 @@ namespace Klei
 
 		public static T LoadFile(string filename)
 		{
-			string text = File.ReadAllText(filename);
+			string text = ((LayeredFileSystem.instance == null) ? File.ReadAllText(filename) : LayeredFileSystem.instance.ReadText(filename));
 			text = text.Replace("\t", "    ");
 			T t = YamlIO<T>.Parse(text, filename);
 			if (t == null)

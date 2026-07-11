@@ -9,10 +9,10 @@ namespace UnityEngine
 	///   <para>Low-level graphics library.</para>
 	/// </summary>
 	[NativeHeader("Runtime/GfxDevice/GfxDevice.h")]
-	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Camera/CameraUtil.h")]
+	[StaticAccessor("GetGfxDevice()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	public sealed class GL
 	{
 		/// <summary>

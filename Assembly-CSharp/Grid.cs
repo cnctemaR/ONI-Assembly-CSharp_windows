@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class Grid
@@ -374,6 +375,11 @@ public class Grid
 		bitFields[cell] |= ((!solid) ? 0 : 32);
 	}
 
+	public static bool IsSolidCell(int cell)
+	{
+		return Grid.IsValidCell(cell) && Grid.Solid[cell];
+	}
+
 	public unsafe static bool IsSubstantialLiquid(int cell, float threshold = 0.35f)
 	{
 		if (Grid.IsValidCell(cell))
@@ -460,90 +466,22 @@ public class Grid
 		}
 	}
 
-	public static bool VisibilityTest(int x, int y, int x2, int y2, bool all_tiles_block = false, bool blocking_tile_visible = false)
+	public static bool IsVisible(int cell)
 	{
-		int num = x;
-		int num2 = y;
-		int num3 = x2 - x;
-		int num4 = y2 - y;
-		int num5 = 0;
-		int num6 = 0;
-		int num7 = 0;
-		int num8 = 0;
-		if (num3 < 0)
-		{
-			num5 = -1;
-		}
-		else if (num3 > 0)
-		{
-			num5 = 1;
-		}
-		if (num4 < 0)
-		{
-			num6 = -1;
-		}
-		else if (num4 > 0)
-		{
-			num6 = 1;
-		}
-		if (num3 < 0)
-		{
-			num7 = -1;
-		}
-		else if (num3 > 0)
-		{
-			num7 = 1;
-		}
-		int num9 = Math.Abs(num3);
-		int num10 = Math.Abs(num4);
-		if (num9 <= num10)
-		{
-			num9 = Math.Abs(num4);
-			num10 = Math.Abs(num3);
-			if (num4 < 0)
-			{
-				num8 = -1;
-			}
-			else if (num4 > 0)
-			{
-				num8 = 1;
-			}
-			num7 = 0;
-		}
-		int num11 = num9 >> 1;
-		for (int i = 0; i <= num9; i++)
-		{
-			int num12 = Grid.XYToCell(x, y);
-			bool flag;
-			if (all_tiles_block)
-			{
-				flag = !Grid.Transparent[num12] && Grid.Solid[num12];
-			}
-			else
-			{
-				flag = !Grid.Transparent[num12] && Grid.Element[num12].IsSolid;
-			}
-			if ((x != num || y != num2) && flag)
-			{
-				return blocking_tile_visible && x == x2 && y == y2;
-			}
-			num11 += num10;
-			if (num11 >= num9)
-			{
-				num11 -= num9;
-				x += num5;
-				y += num6;
-			}
-			else
-			{
-				x += num7;
-				y += num8;
-			}
-		}
-		return true;
+		return Grid.Visible[cell] > 0 || !PropertyTextures.IsFogOfWarEnabled;
 	}
 
-	public static bool VisibilityTest(int cell, int target_cell, bool all_tiles_block = false, bool blocking_tile_visible = false)
+	public static bool VisibleBlockingCB(int cell)
+	{
+		return !Grid.Transparent[cell] && Grid.Element[cell].IsSolid;
+	}
+
+	public static bool VisibilityTest(int x, int y, int x2, int y2, bool blocking_tile_visible = false)
+	{
+		return Grid.TestLineOfSight(x, y, x2, y2, new Func<int, bool>(Grid.VisibleBlockingCB), blocking_tile_visible);
+	}
+
+	public static bool VisibilityTest(int cell, int target_cell, bool blocking_tile_visible = false)
 	{
 		int num = 0;
 		int num2 = 0;
@@ -551,15 +489,20 @@ public class Grid
 		int num3 = 0;
 		int num4 = 0;
 		Grid.CellToXY(target_cell, out num3, out num4);
-		return Grid.VisibilityTest(num, num2, num3, num4, all_tiles_block, blocking_tile_visible);
+		return Grid.VisibilityTest(num, num2, num3, num4, blocking_tile_visible);
 	}
 
-	public static bool IsVisible(int cell)
+	public static bool PhysicalBlockingCB(int cell)
 	{
-		return Grid.Visible[cell] > 0 || !PropertyTextures.IsFogOfWarEnabled;
+		return Grid.Solid[cell];
 	}
 
-	public static bool IsPhysicallyAccessible(int x, int y, int x2, int y2, bool all_tiles_block = false, bool blocking_tile_visible = false)
+	public static bool IsPhysicallyAccessible(int x, int y, int x2, int y2, bool blocking_tile_visible = false)
+	{
+		return Grid.TestLineOfSight(x, y, x2, y2, new Func<int, bool>(Grid.PhysicalBlockingCB), blocking_tile_visible);
+	}
+
+	public static bool TestLineOfSight(int x, int y, int x2, int y2, Func<int, bool> blocking_cb, bool blocking_tile_visible = false)
 	{
 		int num = x;
 		int num2 = y;
@@ -613,11 +556,11 @@ public class Grid
 		for (int i = 0; i <= num9; i++)
 		{
 			int num12 = Grid.XYToCell(x, y);
-			bool flag = !Grid.IsValidCell(num12);
-			if (!flag)
+			if (!Grid.IsValidCell(num12))
 			{
-				flag = ((!all_tiles_block) ? Grid.Element[num12].IsSolid : Grid.Solid[num12]);
+				return false;
 			}
+			bool flag = blocking_cb(num12);
 			if ((x != num || y != num2) && flag)
 			{
 				return blocking_tile_visible && x == x2 && y == y2;
@@ -636,6 +579,13 @@ public class Grid
 			}
 		}
 		return true;
+	}
+
+	[Conditional("UNITY_EDITOR")]
+	public static void DrawBoxOnCell(int cell, Color color, float offset = 0f)
+	{
+		Vector3 vector = Grid.CellToPos(cell) + new Vector3(0.5f, 0.5f, 0f);
+		float num = 0.5f + offset;
 	}
 
 	public static readonly CellOffset[] DefaultOffset = new CellOffset[] { default(CellOffset) };
@@ -708,7 +658,7 @@ public class Grid
 
 	public static bool[] PreventFogOfWarReveal;
 
-	public static bool[] PreventIdlingOnCell;
+	public static bool[] PreventIdleTraversal;
 
 	public static float[] Decor;
 
@@ -802,6 +752,9 @@ public class Grid
 		Wires,
 		WireBridges,
 		WireBridgesFront,
+		LogicWires,
+		LogicWireBridges,
+		LogicWireBridgesFront,
 		Paintings,
 		BuildingBack,
 		Building,
@@ -863,7 +816,7 @@ public class Grid
 		{
 			get
 			{
-				return (Grid.properties[i] & 32) != 0;
+				return (Grid.properties[i] & 16) != 0;
 			}
 		}
 	}

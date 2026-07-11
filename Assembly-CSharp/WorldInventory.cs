@@ -11,7 +11,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 	public static WorldInventory Instance { get; private set; }
 
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
-	public event Action<Tag> OnDiscover;
+	public event Action<Tag, Tag> OnDiscover;
 
 	protected override void OnPrefabInit()
 	{
@@ -93,7 +93,7 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		this.DiscoverCategory(categoryTag, tag);
 		if (flag && this.OnDiscover != null)
 		{
-			this.OnDiscover(tag);
+			this.OnDiscover(categoryTag, tag);
 		}
 	}
 

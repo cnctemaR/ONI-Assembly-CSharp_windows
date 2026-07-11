@@ -21,10 +21,14 @@ public class VentController : GameStateMachine<VentController, VentController.In
 
 	public StateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.BoolParameter isAnimating;
 
+	public class Def : StateMachine.BaseDef
+	{
+	}
+
 	public new class Instance : GameStateMachine<VentController, VentController.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public Instance(IStateMachineTarget master, VentController.Def def)
+			: base(master, def)
 		{
 		}
 	}

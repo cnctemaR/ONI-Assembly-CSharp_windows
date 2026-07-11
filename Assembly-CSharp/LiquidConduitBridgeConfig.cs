@@ -24,6 +24,7 @@ public class LiquidConduitBridgeConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Liquid;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
+		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
@@ -48,7 +49,6 @@ public class LiquidConduitBridgeConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<RequireInputs>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitConsumer>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "LiquidConduitBridge";

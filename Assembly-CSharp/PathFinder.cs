@@ -5,7 +5,7 @@ public class PathFinder
 {
 	public static void Initialize()
 	{
-		NavType[] array = new NavType[9];
+		NavType[] array = new NavType[10];
 		for (int i = 0; i < array.Length; i++)
 		{
 			array[i] = (NavType)i;
@@ -53,7 +53,7 @@ public class PathFinder
 					if (link.link == node2.cell && node2.navType == link.endNavType && node.navType == link.startNavType)
 					{
 						PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(node.cell, node.navType, PathFinder.PotentialPath.Flags.None);
-						flag = abilities.TraversePath(ref potentialPath, node.cell, node.navType, 0, link.transitionId, 0);
+						flag = abilities.TraversePath(ref potentialPath, node.cell, node.navType, 0, (int)link.transitionId, 0);
 						if (flag)
 						{
 							break;
@@ -212,7 +212,7 @@ public class PathFinder
 			if (startNavType == potential.navType && (parent_cell != num2 || parent_nav_type != link.startNavType) && path_grid.IsCellInRange(num2))
 			{
 				PathFinder.Cell cell = path_grid.GetCell(num2, link.endNavType, query_id);
-				int num3 = cost + link.cost;
+				int num3 = cost + (int)link.cost;
 				bool flag = query_id != cell.queryId;
 				bool flag2 = num3 < cell.cost;
 				if (flag || flag2)
@@ -229,9 +229,9 @@ public class PathFinder
 					{
 						num4 = 0;
 					}
-					if (abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num3, link.transitionId, num4))
+					if (abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num3, (int)link.transitionId, num4))
 					{
-						PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num3, num4, link.transitionId, potentials, query_id, path_grid, ref cell);
+						PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num3, num4, (int)link.transitionId, potentials, query_id, path_grid, ref cell);
 					}
 				}
 			}
@@ -315,8 +315,8 @@ public class PathFinder
 		public enum Flags : byte
 		{
 			None = 0,
-			HasSuit = 1,
-			UnlimitedSubmergedTravel = 2,
+			HasAtmoSuit = 1,
+			HasJetPack = 2,
 			PerformSuitChecks = 4
 		}
 	}

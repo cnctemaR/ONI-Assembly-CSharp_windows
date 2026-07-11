@@ -27,6 +27,7 @@ public class FishDeliveryPointConfig : IBuildingConfig
 			new HashedString("place"),
 			new HashedString("release")
 		};
+		storage.workAnimPlayMode = KAnim.PlayMode.Once;
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
@@ -37,12 +38,12 @@ public class FishDeliveryPointConfig : IBuildingConfig
 			new CellOffset(0, 1)
 		};
 		creatureDeliveryPoint.spawnOffset = new CellOffset(0, -1);
+		creatureDeliveryPoint.playAnimsOnFetch = true;
 		go.AddOrGet<TreeFilterable>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		go.AddOrGetDef<MakeBaseSolid.Def>();
 	}
 

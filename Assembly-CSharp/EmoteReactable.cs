@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EmoteReactable : Reactable
 {
-	public EmoteReactable(GameObject gameObject, HashedString id, ChoreType chore_type, HashedString animset, int range_width = 15, int range_height = 8, float min_reactable_time = 0f, float min_reactor_time = 0f, float max_trigger_time = float.PositiveInfinity)
+	public EmoteReactable(GameObject gameObject, HashedString id, ChoreType chore_type, HashedString animset, int range_width = 15, int range_height = 8, float min_reactable_time = 0f, float min_reactor_time = 20f, float max_trigger_time = float.PositiveInfinity)
 		: base(gameObject, id, chore_type, range_width, range_height, true, min_reactable_time, min_reactor_time, max_trigger_time)
 	{
 		this.animset = Assets.GetAnim(animset);

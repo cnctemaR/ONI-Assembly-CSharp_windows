@@ -58,7 +58,6 @@ public class PressureDoorConfig : IBuildingConfig
 		workable.workTime = 5f;
 		GeneratedBuildings.RegisterLogicPorts(go, DoorConfig.INPUT_PORTS);
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<BuildingEnabledButton>());
-		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = true;
 		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();

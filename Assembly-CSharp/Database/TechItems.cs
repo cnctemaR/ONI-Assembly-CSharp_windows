@@ -15,6 +15,7 @@ namespace Database
 			this.betaResearchPoint = this.AddTechItem("BetaResearchPoint", RESEARCH.OTHER_TECH_ITEMS.BETA_RESEARCH_POINT.NAME, RESEARCH.OTHER_TECH_ITEMS.BETA_RESEARCH_POINT.DESC, this.GetSpriteFnBuilder("research_type_beta_icon"));
 			this.gammaResearchPoint = this.AddTechItem("GammaResearchPoint", RESEARCH.OTHER_TECH_ITEMS.GAMMA_RESEARCH_POINT.NAME, RESEARCH.OTHER_TECH_ITEMS.GAMMA_RESEARCH_POINT.DESC, this.GetSpriteFnBuilder("research_type_gamma_icon"));
 			this.conveyorOverlay = this.AddTechItem("ConveyorOverlay", RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.NAME, RESEARCH.OTHER_TECH_ITEMS.CONVEYOR_OVERLAY.DESC, this.GetSpriteFnBuilder("overlay_conveyor"));
+			this.jetSuit = this.AddTechItem("JetSuit", RESEARCH.OTHER_TECH_ITEMS.JET_SUIT.NAME, RESEARCH.OTHER_TECH_ITEMS.JET_SUIT.DESC, this.GetSpriteFnBuilder("overlay_suit"));
 		}
 
 		private Func<string, bool, Sprite> GetSpriteFnBuilder(string spriteName)
@@ -72,16 +73,20 @@ namespace Database
 
 		public TechItem suitsOverlay;
 
+		public const string JET_SUIT_ID = "JetSuit";
+
+		public TechItem jetSuit;
+
 		public const string BETA_RESEARCH_POINT_ID = "BetaResearchPoint";
-
-		public const string GAMMA_RESEARCH_POINT_ID = "GammaResearchPoint";
-
-		public TechItem conveyorOverlay;
-
-		public const string CONVEYOR_OVERLAY_ID = "ConveyorOverlay";
 
 		public TechItem betaResearchPoint;
 
+		public const string GAMMA_RESEARCH_POINT_ID = "GammaResearchPoint";
+
 		public TechItem gammaResearchPoint;
+
+		public const string CONVEYOR_OVERLAY_ID = "ConveyorOverlay";
+
+		public TechItem conveyorOverlay;
 	}
 }

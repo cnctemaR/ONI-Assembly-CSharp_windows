@@ -10,9 +10,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>MonoBehaviour is the base class from which every Unity script derives.</para>
 	/// </summary>
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[NativeHeader("Runtime/Scripting/DelayedCallUtility.h")]
+	[RequiredByNativeCode]
 	public class MonoBehaviour : Behaviour
 	{
 		/// <summary>

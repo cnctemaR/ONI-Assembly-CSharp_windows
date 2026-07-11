@@ -6,7 +6,7 @@ public class GlassForge : Refinery
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-2094018600, new Action<object>(this.CheckPipes));
+		base.Subscribe<GlassForge>(-2094018600, GlassForge.CheckPipesDelegate);
 	}
 
 	private void CheckPipes(object data)
@@ -33,4 +33,9 @@ public class GlassForge : Refinery
 	}
 
 	private Guid statusHandle;
+
+	private static readonly EventSystem.IntraObjectHandler<GlassForge> CheckPipesDelegate = new EventSystem.IntraObjectHandler<GlassForge>(delegate(GlassForge component, object data)
+	{
+		component.CheckPipes(data);
+	});
 }

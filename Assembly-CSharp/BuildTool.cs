@@ -139,7 +139,7 @@ public class BuildTool : DragTool
 				if ((gameObject == null || gameObject.GetComponent<Constructable>() == null) && (gameObject2 == null || gameObject2 == this.visualizer))
 				{
 					World.Instance.blockTileRenderer.RemoveBlock(this.def, SimHashes.Void, this.lastCell);
-					TileVisualizer.RefreshCell(this.lastCell, this.def.TileLayer);
+					TileVisualizer.RefreshCell(this.lastCell, this.def.TileLayer, this.def.ReplacementLayer);
 				}
 			}
 		}
@@ -194,7 +194,7 @@ public class BuildTool : DragTool
 						}
 						if (gameObject == null || (gameObject.GetComponent<Constructable>() == null && gameObject2 == null))
 						{
-							TileVisualizer.RefreshCell(num2, this.def.TileLayer);
+							TileVisualizer.RefreshCell(num2, this.def.TileLayer, this.def.ReplacementLayer);
 							if (this.def.BlockTileAtlas != null)
 							{
 								int num3 = LayerMask.NameToLayer("Overlay");

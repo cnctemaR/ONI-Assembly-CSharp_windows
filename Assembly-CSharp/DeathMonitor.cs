@@ -27,6 +27,7 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			.Enter(delegate(DeathMonitor.Instance smi)
 			{
 				smi.ApplyDeath();
+				Game.Instance.Trigger(282337316, smi.gameObject);
 			});
 		this.dead.ground.Enter(delegate(DeathMonitor.Instance smi)
 		{

@@ -17,6 +17,10 @@ public class RecentThingConversation : ConversationType
 
 	public override Conversation.Topic GetNextTopic(MinionIdentity speaker, Conversation.Topic lastTopic)
 	{
+		if (string.IsNullOrEmpty(this.target))
+		{
+			return null;
+		}
 		List<Conversation.ModeType> list;
 		if (lastTopic == null)
 		{

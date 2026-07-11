@@ -10,7 +10,7 @@ public class AttachableBuilding : KMonoBehaviour
 		base.OnPrefabInit();
 		this.RegisterWithAttachPoint(true);
 		Components.AttachableBuildings.Add(this);
-		base.Subscribe(486707561, new Action<object>(this.AttachmentNetworkChanged));
+		base.Subscribe<AttachableBuilding>(486707561, AttachableBuilding.AttachmentNetworkChangedDelegate);
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this))
 		{
 			gameObject.Trigger(486707561, this);
@@ -135,4 +135,9 @@ public class AttachableBuilding : KMonoBehaviour
 	public Tag attachableToTag;
 
 	public Action<AttachableBuilding> onAttachmentNetworkChanged;
+
+	private static readonly EventSystem.IntraObjectHandler<AttachableBuilding> AttachmentNetworkChangedDelegate = new EventSystem.IntraObjectHandler<AttachableBuilding>(delegate(AttachableBuilding component, object data)
+	{
+		component.AttachmentNetworkChanged(data);
+	});
 }

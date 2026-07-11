@@ -33,14 +33,14 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		base.SetWorkTime(float.PositiveInfinity);
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForMop, null);
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Moppable>(493375141, Moppable.OnRefreshUserMenuDelegate);
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_mop_dirtywater_kanim") };
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Moppable.OnSpawn", base.gameObject, new Extents(Grid.PosToCell(this), new CellOffset[]
 		{
 			new CellOffset(0, 0)
 		}), GameScenePartitioner.Instance.liquidChangedLayer, new Action<object>(this.OnLiquidChanged));
 		this.Refresh();
-		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		base.Subscribe<Moppable>(-1432940121, Moppable.OnReachableChangedDelegate);
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
 		SimAndRenderScheduler.instance.Remove(this);
@@ -246,4 +246,14 @@ public class Moppable : Workable, ISim1000ms, ISim200ms
 		new CellOffset(1, 0),
 		new CellOffset(-1, 0)
 	};
+
+	private static readonly EventSystem.IntraObjectHandler<Moppable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Moppable>(delegate(Moppable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Moppable> OnReachableChangedDelegate = new EventSystem.IntraObjectHandler<Moppable>(delegate(Moppable component, object data)
+	{
+		component.OnReachableChanged(data);
+	});
 }

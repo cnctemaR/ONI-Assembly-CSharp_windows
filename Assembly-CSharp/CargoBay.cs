@@ -14,9 +14,9 @@ public class CargoBay : KMonoBehaviour
 	{
 		base.OnSpawn();
 		base.GetComponent<KBatchedAnimController>().Play("grounded", KAnim.PlayMode.Loop, 1f, 0f);
-		base.Subscribe(-1056989049, new Action<object>(this.OnLaunch));
-		base.Subscribe(238242047, new Action<object>(this.OnLand));
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<CargoBay>(-1056989049, CargoBay.OnLaunchDelegate);
+		base.Subscribe<CargoBay>(238242047, CargoBay.OnLandDelegate);
+		base.Subscribe<CargoBay>(493375141, CargoBay.OnRefreshUserMenuDelegate);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -125,6 +125,21 @@ public class CargoBay : KMonoBehaviour
 	public Storage storage;
 
 	public CargoBay.CargoType storageType;
+
+	private static readonly EventSystem.IntraObjectHandler<CargoBay> OnLaunchDelegate = new EventSystem.IntraObjectHandler<CargoBay>(delegate(CargoBay component, object data)
+	{
+		component.OnLaunch(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<CargoBay> OnLandDelegate = new EventSystem.IntraObjectHandler<CargoBay>(delegate(CargoBay component, object data)
+	{
+		component.OnLand(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<CargoBay> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<CargoBay>(delegate(CargoBay component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	public enum CargoType
 	{

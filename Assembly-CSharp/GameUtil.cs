@@ -150,6 +150,19 @@ public static class GameUtil
 		throw new ArgumentException(action.ToString() + " is not bound in GameInputBindings");
 	}
 
+	public static string GetIdentityDescriptor(GameObject go)
+	{
+		if (go.GetComponent<MinionIdentity>())
+		{
+			return DUPLICANTS.STATS.SUBJECTS.DUPLICANT;
+		}
+		if (go.GetComponent<CreatureBrain>())
+		{
+			return DUPLICANTS.STATS.SUBJECTS.CREATURE;
+		}
+		return DUPLICANTS.STATS.SUBJECTS.PLANT;
+	}
+
 	public static float GetEnergyInPrimaryElement(PrimaryElement element)
 	{
 		return 0.001f * (element.Temperature * (element.Mass * 1000f * element.Element.specificHeatCapacity));
@@ -279,6 +292,13 @@ public static class GameUtil
 			text = GameUtil.AddTemperatureUnitSuffix(text);
 		}
 		return GameUtil.AddTimeSliceText(text, timeSlice);
+	}
+
+	public static string GetFormattedCaloriesForItem(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
+	{
+		EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
+		float num = foodInfo.CaloriesPerUnit * amount;
+		return GameUtil.GetFormattedCalories(num, timeSlice, forceKcal);
 	}
 
 	public static string GetFormattedCalories(float calories, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
@@ -514,6 +534,19 @@ public static class GameUtil
 		return UI.OVERLAYS.LIGHTING.RANGES.MAX_LIGHT;
 	}
 
+	public static string GetFormattedByTag(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		if (GameTags.DisplayAsCalories.Contains(tag))
+		{
+			return GameUtil.GetFormattedCaloriesForItem(tag, amount, timeSlice, true);
+		}
+		if (GameTags.DisplayAsUnits.Contains(tag))
+		{
+			return GameUtil.GetFormattedUnits(amount, timeSlice, true);
+		}
+		return GameUtil.GetFormattedMass(amount, timeSlice, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
+	}
+
 	public static string GetFormattedFoodQuality(int quality)
 	{
 		if (GameUtil.adjectives == null)
@@ -524,6 +557,27 @@ public static class GameUtil
 		int num = quality - DUPLICANTS.NEEDS.FOOD_QUALITY.ADJECTIVE_INDEX_OFFSET;
 		num = Mathf.Clamp(num, 0, GameUtil.adjectives.Length);
 		return string.Format(locString, GameUtil.adjectives[num], GameUtil.AddPositiveSign(quality.ToString(), quality > 0));
+	}
+
+	public static string GetFormattedInfomation(float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		amount = GameUtil.ApplyTimeSlice(amount, timeSlice);
+		string text = string.Empty;
+		if (amount < 1024f)
+		{
+			text = UI.UNITSUFFIXES.INFORMATION.KILOBYTE;
+		}
+		else if (amount < 1048576f)
+		{
+			amount /= 1000f;
+			text = UI.UNITSUFFIXES.INFORMATION.MEGABYTE;
+		}
+		else if (amount < 1.0737418E+09f)
+		{
+			amount /= 1048576f;
+			text = UI.UNITSUFFIXES.INFORMATION.GIGABYTE;
+		}
+		return GameUtil.AddTimeSliceText(amount + text, timeSlice);
 	}
 
 	public static string GetFormattedMass(float mass, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, GameUtil.MetricMassFormat massFormat = GameUtil.MetricMassFormat.UseThreshold, bool includeSuffix = true, string floatFormat = "{0:0.#}")
@@ -619,6 +673,11 @@ public static class GameUtil
 		return string.Format(UI.FORMATSECONDS, seconds.ToString("F0"));
 	}
 
+	public static string GetFormattedEngineEfficiency(float amount)
+	{
+		return amount + " km /" + UI.UNITSUFFIXES.MASS.KILOGRAM;
+	}
+
 	public static string GetFormattedDistance(float meters)
 	{
 		if (Mathf.Abs(meters) < 1f)
@@ -631,7 +690,11 @@ public static class GameUtil
 			}
 			return text2 + " cm";
 		}
-		return meters + " m";
+		if (meters < 1000f)
+		{
+			return meters + " m";
+		}
+		return Util.FormatOneDecimalPlace(meters / 1000f) + " km";
 	}
 
 	public static string GetFormattedCycles(float seconds, string formatString = "F1")
@@ -1425,8 +1488,8 @@ public static class GameUtil
 	{
 		descriptorList.Sort(delegate(IEffectDescriptor e1, IEffectDescriptor e2)
 		{
-			int num = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e1.GetType().Name);
-			int num2 = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e2.GetType().Name);
+			int num = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e1.GetType());
+			int num2 = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e2.GetType());
 			return num.CompareTo(num2);
 		});
 	}
@@ -1435,8 +1498,8 @@ public static class GameUtil
 	{
 		descriptorList.Sort(delegate(IGameObjectEffectDescriptor e1, IGameObjectEffectDescriptor e2)
 		{
-			int num = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e1.GetType().Name);
-			int num2 = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e2.GetType().Name);
+			int num = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e1.GetType());
+			int num2 = global::TUNING.BUILDINGS.COMPONENT_DESCRIPTION_ORDER.IndexOf(e2.GetType());
 			return num.CompareTo(num2);
 		});
 	}

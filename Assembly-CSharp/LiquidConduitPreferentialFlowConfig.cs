@@ -65,7 +65,6 @@ public class LiquidConduitPreferentialFlowConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<RequireInputs>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitConsumer>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "LiquidConduitPreferentialFlow";

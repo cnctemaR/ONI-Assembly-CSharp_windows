@@ -45,7 +45,7 @@ public class UIDupeRandomizer : MonoBehaviour
 		{
 			dupe.SetSymbolVisiblity("snapto_neck", false);
 		}
-		if (global::UnityEngine.Random.value < 0.5f)
+		if (this.applyHat && global::UnityEngine.Random.value < 0.5f)
 		{
 			List<string> list = new List<string>();
 			foreach (KeyValuePair<string, string> keyValuePair in RoleManager.roleHatIndex)
@@ -75,7 +75,7 @@ public class UIDupeRandomizer : MonoBehaviour
 		if (accessory != null)
 		{
 			SymbolOverrideController component = minion.GetComponent<SymbolOverrideController>();
-			DebugUtil.Assert(component != null, minion.name + " is missing symbol override controller");
+			DebugUtil.Assert(component != null, minion.name + " is missing symbol override controller", string.Empty, string.Empty);
 			component.TryRemoveSymbolOverride(accessory.slot.targetSymbolId, 0);
 			component.AddSymbolOverride(accessory.slot.targetSymbolId, accessory.symbol, 0);
 			minion.SetSymbolVisiblity(accessory.slot.targetSymbolId, true);
@@ -90,11 +90,17 @@ public class UIDupeRandomizer : MonoBehaviour
 		return UIDupeRandomizer.AddAccessory(minion, accessory);
 	}
 
+	protected virtual void Update()
+	{
+	}
+
 	public KAnimFile head_default_anim;
 
 	public KAnimFile head_swap_anim;
 
 	public KAnimFile body_swap_anim;
+
+	public bool applyHat = true;
 
 	public UIDupeRandomizer.AnimChoice[] anims;
 

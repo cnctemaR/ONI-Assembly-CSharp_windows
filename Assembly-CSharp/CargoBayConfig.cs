@@ -12,12 +12,17 @@ public class CargoBayConfig : IBuildingConfig
 		string text2 = "rocket_storage_solid_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
-		float[] cargo_MASS = BUILDINGS.ROCKETRY_MASS_KG.CARGO_MASS;
-		string[] array = new string[] { SimHashes.Steel.ToString() };
-		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
+		string[] array = new string[]
+		{
+			"BuildableRaw",
+			SimHashes.Steel.ToString()
+		};
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, cargo_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
+		{
+			ROCKETRY.CARGO_CONTAINER_MASS.STATIC_MASS,
+			ROCKETRY.CARGO_CONTAINER_MASS.STATIC_MASS
+		}, array, 9999f, BuildLocationRule.BuildingAttachPoint, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.ViewMode = SimViewMode.None;
@@ -29,6 +34,8 @@ public class CargoBayConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		buildingDef.CanMove = true;
+		buildingDef.OutputConduitType = ConduitType.Solid;
+		buildingDef.UtilityOutputOffset = new CellOffset(0, 3);
 		return buildingDef;
 	}
 
@@ -54,14 +61,14 @@ public class CargoBayConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		CargoBay cargoBay = go.AddOrGet<CargoBay>();
 		cargoBay.storage = go.AddOrGet<Storage>();
 		cargoBay.storageType = CargoBay.CargoType.solids;
 		cargoBay.storage.capacityKg = 1000f;
 		cargoBay.storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<RocketModule>();
-		EntityTemplates.ExtendEntityToRocketModule(go);
+		EntityTemplates.ExtendBuildingToRocketModule(go);
+		go.AddOrGet<SolidConduitDispenser>();
 	}
 
 	public const string ID = "CargoBay";

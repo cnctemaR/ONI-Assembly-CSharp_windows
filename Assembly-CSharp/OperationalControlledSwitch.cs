@@ -13,7 +13,7 @@ public class OperationalControlledSwitch : CircuitSwitch
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<OperationalControlledSwitch>(-592767678, OperationalControlledSwitch.OnOperationalChangedDelegate);
 	}
 
 	private void OnOperationalChanged(object data)
@@ -21,4 +21,9 @@ public class OperationalControlledSwitch : CircuitSwitch
 		bool flag = (bool)data;
 		this.SetState(flag);
 	}
+
+	private static readonly EventSystem.IntraObjectHandler<OperationalControlledSwitch> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<OperationalControlledSwitch>(delegate(OperationalControlledSwitch component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 }

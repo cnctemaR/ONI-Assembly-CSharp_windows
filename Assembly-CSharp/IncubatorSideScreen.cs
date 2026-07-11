@@ -3,12 +3,6 @@ using UnityEngine;
 
 public class IncubatorSideScreen : ReceptacleSideScreen
 {
-	protected override void OnPrefabInit()
-	{
-		this.hideUndiscoveredEntities = true;
-		base.OnPrefabInit();
-	}
-
 	public override bool IsValidForTarget(GameObject target)
 	{
 		return target.GetComponent<EggIncubator>() != null;

@@ -47,7 +47,6 @@ public class MassageTableConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
 		go.AddOrGet<CopyBuildingSettings>();
 	}

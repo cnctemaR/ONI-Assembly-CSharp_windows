@@ -74,7 +74,6 @@ public class OilWellCapConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		GeneratedBuildings.RegisterLogicPorts(go, OilWellCapConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
 	}

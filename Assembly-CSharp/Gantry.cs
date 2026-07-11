@@ -1,10 +1,17 @@
 ﻿using System;
+using STRINGS;
 
-public class Gantry : KMonoBehaviour
+public class Gantry : Switch
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		if (Gantry.infoStatusItem == null)
+		{
+			Gantry.infoStatusItem = new StatusItem("GantryAutomationInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
+			Gantry.infoStatusItem.resolveStringCallback = new Func<string, object, string>(Gantry.ResolveInfoStatusItemString);
+		}
+		base.GetComponent<KAnimControllerBase>().PlaySpeedMultiplier = 0.5f;
 		int num = Grid.PosToCell(this);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		for (int i = 0; i < Gantry.TileOffsets.Length; i++)
@@ -20,8 +27,9 @@ public class Gantry : KMonoBehaviour
 			World.Instance.OnSolidChanged(num2);
 			GameScenePartitioner.Instance.TriggerEvent(num2, GameScenePartitioner.Instance.solidChangedLayer, null);
 		}
-		this.smi = new Gantry.Instance(this);
+		this.smi = new Gantry.Instance(this, base.IsSwitchedOn);
 		this.smi.StartSM();
+		base.GetComponent<KSelectable>().ToggleStatusItem(Gantry.infoStatusItem, true, this.smi);
 	}
 
 	protected override void OnCleanUp()
@@ -70,7 +78,35 @@ public class Gantry : KMonoBehaviour
 		}
 	}
 
-	[MyCmpGet]
+	protected override void Toggle()
+	{
+		base.Toggle();
+		this.smi.SetSwitchState(this.switchedOn);
+	}
+
+	protected override void OnRefreshUserMenu(object data)
+	{
+		if (!this.smi.IsAutomated())
+		{
+			base.OnRefreshUserMenu(data);
+		}
+	}
+
+	protected override void UpdateSwitchStatus()
+	{
+	}
+
+	private static string ResolveInfoStatusItemString(string format_str, object data)
+	{
+		Gantry.Instance instance = (Gantry.Instance)data;
+		string text = ((!instance.IsAutomated()) ? BUILDING.STATUSITEMS.GANTRY.MANUAL_CONTROL : BUILDING.STATUSITEMS.GANTRY.AUTOMATION_CONTROL);
+		string text2 = ((!instance.IsExtended()) ? BUILDING.STATUSITEMS.GANTRY.RETRACTED : BUILDING.STATUSITEMS.GANTRY.EXTENDED);
+		return string.Format(text, text2);
+	}
+
+	public static readonly HashedString PORT_ID = "Gantry";
+
+	[MyCmpReq]
 	private Building building;
 
 	public static CellOffset[] TileOffsets = new CellOffset[]
@@ -88,6 +124,8 @@ public class Gantry : KMonoBehaviour
 	};
 
 	private Gantry.Instance smi;
+
+	private static StatusItem infoStatusItem;
 
 	public class States : GameStateMachine<Gantry.States, Gantry.Instance, Gantry>
 	{
@@ -131,19 +169,35 @@ public class Gantry : KMonoBehaviour
 		public GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.State extended;
 
 		public StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.BoolParameter should_extend;
-
-		public StateMachine<Gantry.States, Gantry.Instance, Gantry, object>.BoolParameter logic_on;
 	}
 
 	public class Instance : GameStateMachine<Gantry.States, Gantry.Instance, Gantry, object>.GameInstance
 	{
-		public Instance(Gantry master)
+		public Instance(Gantry master, bool manual_start_state)
 			: base(master)
 		{
+			this.manual_on = manual_start_state;
 			this.operational = base.GetComponent<Operational>();
+			this.logic = base.GetComponent<LogicPorts>();
 			base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
 			base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
 			base.smi.sm.should_extend.Set(true, base.smi);
+		}
+
+		public bool IsAutomated()
+		{
+			return this.logic.IsPortConnected(Gantry.PORT_ID);
+		}
+
+		public bool IsExtended()
+		{
+			return (!this.IsAutomated()) ? this.manual_on : this.logic_on;
+		}
+
+		public void SetSwitchState(bool on)
+		{
+			this.manual_on = on;
+			this.UpdateShouldExtend();
 		}
 
 		public void SetActive(bool active)
@@ -159,24 +213,36 @@ public class Gantry : KMonoBehaviour
 		private void OnLogicValueChanged(object data)
 		{
 			LogicValueChanged logicValueChanged = (LogicValueChanged)data;
-			if (logicValueChanged.portID != LogicOperationalController.PORT_ID)
+			if (logicValueChanged.portID != Gantry.PORT_ID)
 			{
 				return;
 			}
-			base.smi.sm.logic_on.Set(logicValueChanged.newValue == 1, base.smi);
+			this.logic_on = logicValueChanged.newValue != 0;
 			this.UpdateShouldExtend();
 		}
 
 		private void UpdateShouldExtend()
 		{
-			bool flag = base.smi.sm.logic_on.Get(base.smi);
 			if (!this.operational.IsOperational)
 			{
 				return;
 			}
-			base.smi.sm.should_extend.Set(flag, base.smi);
+			if (this.IsAutomated())
+			{
+				base.smi.sm.should_extend.Set(this.logic_on, base.smi);
+			}
+			else
+			{
+				base.smi.sm.should_extend.Set(this.manual_on, base.smi);
+			}
 		}
 
 		private Operational operational;
+
+		public LogicPorts logic;
+
+		public bool logic_on = true;
+
+		private bool manual_on;
 	}
 }

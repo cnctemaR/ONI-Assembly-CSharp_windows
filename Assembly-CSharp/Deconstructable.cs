@@ -29,10 +29,15 @@ public class Deconstructable : Workable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		base.Subscribe(-790448070, new Action<object>(this.OnDeconstruct));
+		base.Subscribe<Deconstructable>(493375141, Deconstructable.OnRefreshUserMenuDelegate);
+		base.Subscribe<Deconstructable>(-111137758, Deconstructable.OnRefreshUserMenuDelegate);
+		base.Subscribe<Deconstructable>(2127324410, Deconstructable.OnCancelDelegate);
+		base.Subscribe<Deconstructable>(-790448070, Deconstructable.OnDeconstructDelegate);
+		if (this.constructionElements == null || this.constructionElements.Length == 0)
+		{
+			this.constructionElements = new SimHashes[1];
+			this.constructionElements[0] = base.GetComponent<PrimaryElement>().ElementID;
+		}
 		if (this.isMarkedForDeconstruction)
 		{
 			this.QueueDeconstruction();
@@ -63,9 +68,7 @@ public class Deconstructable : Workable
 		{
 			DetailsScreen.Instance.Show(false);
 		}
-		float mass = component.Mass;
 		float temperature = component.Temperature;
-		SimHashes element = component.ElementID;
 		byte disease_idx = component.DiseaseIdx;
 		int disease_count = component.DiseaseCount;
 		if (component2 != null)
@@ -78,17 +81,17 @@ public class Deconstructable : Workable
 					Grid.Objects[num, (int)building.Def.ObjectLayer] = null;
 					Grid.Objects[num, (int)building.Def.TileLayer] = null;
 					Grid.Foundation[num] = false;
-					TileVisualizer.RefreshCell(num, building.Def.TileLayer);
+					TileVisualizer.RefreshCell(num, building.Def.TileLayer, building.Def.ReplacementLayer);
 				}
 			}
 			component2.DestroySelf(delegate
 			{
-				this.TriggerDestroy(building, element, mass, temperature, disease_idx, disease_count);
+				this.TriggerDestroy(building, temperature, disease_idx, disease_count);
 			});
 		}
 		else
 		{
-			this.TriggerDestroy(building, element, mass, temperature, disease_idx, disease_count);
+			this.TriggerDestroy(building, temperature, disease_idx, disease_count);
 		}
 		string sound = GlobalAssets.GetSound("Finish_Deconstruction_" + building.Def.AudioSize, false);
 		if (sound != null)
@@ -98,32 +101,39 @@ public class Deconstructable : Workable
 		base.Trigger(-702296337, this);
 	}
 
-	private void TriggerDestroy(Building building, SimHashes element, float mass, float temperature, byte disease_idx, int disease_count)
+	private void TriggerDestroy(Building building, float temperature, byte disease_idx, int disease_count)
 	{
 		if (this == null || this.destroyed)
 		{
 			return;
 		}
-		GameObject gameObject = Deconstructable.SpawnItem(base.transform.GetPosition(), building.Def, element, mass, temperature, disease_idx, disease_count);
-		gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
-		int num = Grid.PosToCell(gameObject.transform.GetPosition());
-		int num2 = Grid.CellAbove(num);
-		Vector2 zero;
-		if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
+		for (int i = 0; i < this.constructionElements.Length; i++)
 		{
-			zero = Vector2.zero;
+			if (building.Def.Mass.Length <= i)
+			{
+				break;
+			}
+			GameObject gameObject = Deconstructable.SpawnItem(base.transform.GetPosition(), building.Def, this.constructionElements[i], building.Def.Mass[i], temperature, disease_idx, disease_count);
+			gameObject.transform.SetPosition(gameObject.transform.GetPosition() + Vector3.up * 0.5f);
+			int num = Grid.PosToCell(gameObject.transform.GetPosition());
+			int num2 = Grid.CellAbove(num);
+			Vector2 zero;
+			if ((Grid.IsValidCell(num) && Grid.Solid[num]) || (Grid.IsValidCell(num2) && Grid.Solid[num2]))
+			{
+				zero = Vector2.zero;
+			}
+			else
+			{
+				Vector3 vector;
+				gameObject.transform.GetPosition().x = vector.x + (global::UnityEngine.Random.value - 0.5f) * 0.5f;
+				zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
+			}
+			if (GameComps.Fallers.Has(gameObject))
+			{
+				GameComps.Fallers.Remove(gameObject);
+			}
+			GameComps.Fallers.Add(gameObject, zero);
 		}
-		else
-		{
-			Vector3 vector;
-			gameObject.transform.GetPosition().x = vector.x + (global::UnityEngine.Random.value - 0.5f) * 0.5f;
-			zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
-		}
-		if (GameComps.Fallers.Has(gameObject))
-		{
-			GameComps.Fallers.Remove(gameObject);
-		}
-		GameComps.Fallers.Add(gameObject, zero);
 		this.destroyed = true;
 		base.gameObject.DeleteObject();
 	}
@@ -247,6 +257,24 @@ public class Deconstructable : Workable
 
 	[Serialize]
 	private bool isMarkedForDeconstruction;
+
+	[Serialize]
+	public SimHashes[] constructionElements;
+
+	private static readonly EventSystem.IntraObjectHandler<Deconstructable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Deconstructable>(delegate(Deconstructable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Deconstructable> OnCancelDelegate = new EventSystem.IntraObjectHandler<Deconstructable>(delegate(Deconstructable component, object data)
+	{
+		component.OnCancel(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Deconstructable> OnDeconstructDelegate = new EventSystem.IntraObjectHandler<Deconstructable>(delegate(Deconstructable component, object data)
+	{
+		component.OnDeconstruct(data);
+	});
 
 	private static readonly Vector2 INITIAL_VELOCITY_RANGE = new Vector2(0.5f, 4f);
 

@@ -20,7 +20,7 @@ public class DiseaseInfoScreen : TargetScreen
 		this.infoPanel.SetTitle(UI.DETAILTABS.DISEASE.GERMS_INFO);
 		this.infectionPanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false).GetComponent<CollapsibleDetailContentPanel>();
 		this.infectionPanel.SetTitle(UI.DETAILTABS.DISEASE.INFECTION_INFO);
-		base.Subscribe(-1514841199, new Action<object>(this.OnRefreshData));
+		base.Subscribe<DiseaseInfoScreen>(-1514841199, DiseaseInfoScreen.OnRefreshDataDelegate);
 	}
 
 	private void LateUpdate()
@@ -276,4 +276,9 @@ public class DiseaseInfoScreen : TargetScreen
 	private CollapsibleDetailContentPanel currentGermsPanel;
 
 	private CollapsibleDetailContentPanel infoPanel;
+
+	private static readonly EventSystem.IntraObjectHandler<DiseaseInfoScreen> OnRefreshDataDelegate = new EventSystem.IntraObjectHandler<DiseaseInfoScreen>(delegate(DiseaseInfoScreen component, object data)
+	{
+		component.OnRefreshData(data);
+	});
 }

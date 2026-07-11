@@ -32,9 +32,9 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 			this.storage.RenotifyAll();
 			this.PositionOccupyingObject();
 		}
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(-731304873, new Action<object>(this.OnOccupantChanged));
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<EggIncubator>(-592767678, EggIncubator.OnOperationalChangedDelegate);
+		base.Subscribe<EggIncubator>(-731304873, EggIncubator.OnOccupantChangedDelegate);
+		base.Subscribe<EggIncubator>(-1697596308, EggIncubator.OnStorageChangeDelegate);
 		this.smi = new EggIncubatorStates.Instance(this);
 		this.smi.StartSM();
 	}
@@ -189,4 +189,19 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 	private KBatchedAnimTracker tracker;
 
 	private MeterController meter;
+
+	private static readonly EventSystem.IntraObjectHandler<EggIncubator> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<EggIncubator>(delegate(EggIncubator component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<EggIncubator> OnOccupantChangedDelegate = new EventSystem.IntraObjectHandler<EggIncubator>(delegate(EggIncubator component, object data)
+	{
+		component.OnOccupantChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<EggIncubator> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<EggIncubator>(delegate(EggIncubator component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 }

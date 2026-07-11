@@ -20,25 +20,30 @@ public class SuitMarkerConfig : IBuildingConfig
 			BUILDINGS.CONSTRUCTION_MASS_KG.TIER1[0]
 		}, refined_METALS, 1600f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
-		buildingDef.PreventIdlingInFrontOfBuilding = true;
+		buildingDef.PreventIdleTraversalPastBuilding = true;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.SuitIDs, "SuitMarker");
 		return buildingDef;
 	}
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.AddOrGet<SuitMarker>();
+		SuitMarker suitMarker = go.AddOrGet<SuitMarker>();
+		suitMarker.LockerTags = new Tag[]
+		{
+			new Tag("SuitLocker")
+		};
+		suitMarker.PathFlag = PathFinder.PotentialPath.Flags.HasAtmoSuit;
 		AnimTileable animTileable = go.AddOrGet<AnimTileable>();
 		animTileable.tags = new Tag[]
 		{
 			new Tag("SuitMarker"),
 			new Tag("SuitLocker")
 		};
+		go.AddTag(GameTags.JetSuitBlocker);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "SuitMarker";

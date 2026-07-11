@@ -13,8 +13,8 @@ public class DropAllWorkable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<DropAllWorkable>(493375141, DropAllWorkable.OnRefreshUserMenuDelegate);
+		base.Subscribe<DropAllWorkable>(-1697596308, DropAllWorkable.OnStorageChangeDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Emptying;
 		this.synchronizeAnims = false;
 		base.SetWorkTime(0.1f);
@@ -129,4 +129,14 @@ public class DropAllWorkable : Workable
 	private bool showCmd;
 
 	private Storage[] storages;
+
+	private static readonly EventSystem.IntraObjectHandler<DropAllWorkable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<DropAllWorkable>(delegate(DropAllWorkable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<DropAllWorkable> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<DropAllWorkable>(delegate(DropAllWorkable component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 }

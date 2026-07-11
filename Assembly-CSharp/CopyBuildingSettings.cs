@@ -7,7 +7,7 @@ public class CopyBuildingSettings : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<CopyBuildingSettings>(493375141, CopyBuildingSettings.OnRefreshUserMenuDelegate);
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -56,4 +56,9 @@ public class CopyBuildingSettings : KMonoBehaviour
 
 	[MyCmpReq]
 	private KPrefabID id;
+
+	private static readonly EventSystem.IntraObjectHandler<CopyBuildingSettings> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<CopyBuildingSettings>(delegate(CopyBuildingSettings component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

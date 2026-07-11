@@ -134,6 +134,7 @@ public class DebugHandler : IInputHandler
 			{
 				ManagementMenu.Instance.CheckResearch(null);
 				ManagementMenu.Instance.CheckRoles(null);
+				ManagementMenu.Instance.CheckStarmap(null);
 			}
 		}
 		else if (e.TryConsume(global::Action.DebugExplosion))
@@ -381,9 +382,13 @@ public class DebugHandler : IInputHandler
 							global::Debug.LogError("Oooops! Testing error!", null);
 						}
 					}
-					else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
+					else if (e.TryConsume(global::Action.DebugDumpGCRoots))
 					{
 						GarbageProfiler.DebugDumpRootItems();
+					}
+					else if (e.TryConsume(global::Action.DebugDumpGarbageReferences))
+					{
+						GarbageProfiler.DebugDumpGarbageStats();
 					}
 					else if (e.TryConsume(global::Action.DebugDumpEventData))
 					{

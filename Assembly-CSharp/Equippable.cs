@@ -5,7 +5,7 @@ using KSerialization;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor, IQuality
+public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor, IQuality, IHasSortOrder
 {
 	public global::QualityLevel GetQuality()
 	{
@@ -28,6 +28,8 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 			this.defHandle.Set<EquipmentDef>(value);
 		}
 	}
+
+	public int sortOrder { get; set; }
 
 	protected override void OnPrefabInit()
 	{
@@ -55,10 +57,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 				this.isEquipped = false;
 			}
 		}
-		base.Subscribe(1969584890, delegate(object o)
-		{
-			this.destroyed = true;
-		});
+		base.Subscribe<Equippable>(1969584890, Equippable.SetDestroyedTrueDelegate);
 	}
 
 	public override void Assign(IAssignableIdentity new_assignee)
@@ -175,4 +174,9 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 	public bool isEquipped;
 
 	private bool destroyed;
+
+	private static readonly EventSystem.IntraObjectHandler<Equippable> SetDestroyedTrueDelegate = new EventSystem.IntraObjectHandler<Equippable>(delegate(Equippable component, object data)
+	{
+		component.destroyed = true;
+	});
 }

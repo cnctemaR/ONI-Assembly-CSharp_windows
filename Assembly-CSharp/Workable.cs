@@ -10,11 +10,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 {
-	public Workable()
-	{
-		this.preferPrimaryCell = true;
-	}
-
 	public Worker worker { get; protected set; }
 
 	public float WorkTimeRemaining
@@ -28,8 +23,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			this.workTimeRemaining = value;
 		}
 	}
-
-	public bool preferPrimaryCell { get; set; }
 
 	public bool preferUnreservedCell { get; set; }
 
@@ -59,7 +52,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			animInfo.smi = new MultitoolController.Instance(this, worker, this.multitoolContext, Assets.GetPrefab(this.multitoolHitEffectTag));
 		}
-		animInfo.forcePlayPst = this.forcePlayPst;
 		return animInfo;
 	}
 
@@ -73,9 +65,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		return this.workAnimPlayMode;
 	}
 
-	public virtual HashedString GetWorkPstAnim(Worker worker)
+	public virtual HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
 	{
-		return this.workPstAnim;
+		if (successfully_completed)
+		{
+			return this.workingPstComplete;
+		}
+		return this.workingPstFailed;
 	}
 
 	public virtual Vector3 GetWorkOffset()
@@ -401,7 +397,16 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		{
 			return;
 		}
-		PrimaryElement component = base.GetComponent<PrimaryElement>();
+		Workable.TransferDiseaseWithWorker(base.gameObject, worker.gameObject);
+	}
+
+	public static void TransferDiseaseWithWorker(GameObject workable, GameObject worker)
+	{
+		if (workable == null || worker == null)
+		{
+			return;
+		}
+		PrimaryElement component = workable.GetComponent<PrimaryElement>();
 		if (component == null)
 		{
 			return;
@@ -460,8 +465,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	protected bool showProgressBar = true;
 
-	protected float progressbar_y_offset = 0.45f;
-
 	protected StatusItem workerStatusItem;
 
 	protected StatusItem workingStatusItem;
@@ -471,8 +474,6 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected OffsetTracker offsetTracker;
 
 	protected AttributeConverter attributeConverter;
-
-	protected bool forcePlayPst;
 
 	public bool resetProgressOnStop;
 
@@ -523,15 +524,13 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public HashedString[] workAnims = new HashedString[] { "working_pre", "working_loop" };
 
-	public HashedString workPstAnim = "working_pst";
+	public HashedString workingPstComplete = "working_pst";
+
+	public HashedString workingPstFailed = "working_pst";
 
 	public KAnim.PlayMode workAnimPlayMode;
 
 	protected bool faceTargetWhenWorking;
-
-	protected static readonly HashedString[] DefaultWorkAnims = new HashedString[] { "working_pre", "working_loop" };
-
-	protected static readonly HashedString DefaultPstWorkAnim = "working_pst";
 
 	protected ProgressBar progressBar;
 
@@ -547,7 +546,5 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		public KAnimFile[] overrideAnims;
 
 		public StateMachine.Instance smi;
-
-		public bool forcePlayPst;
 	}
 }

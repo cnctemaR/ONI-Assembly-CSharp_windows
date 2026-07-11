@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Klei;
 using Klei.AI;
 using KSerialization;
@@ -61,10 +62,24 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			float num = 100f / (def.baseFertileCycles * 600f);
 			this.fertileEffect = new Effect("Fertile", CREATURES.MODIFIERS.BASE_FERTILITY.NAME, CREATURES.MODIFIERS.BASE_FERTILITY.TOOLTIP, 0f, false, false, false, null, 0f, null);
 			this.fertileEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, num, CREATURES.MODIFIERS.BASE_FERTILITY.NAME, false, false, true));
-			this.breedingChances = new List<FertilityMonitor.BreedingChance>();
-			if (def.initialBreedingWeights != null)
+			this.InitializeBreedingChances();
+		}
+
+		[OnDeserialized]
+		private void OnDeserialized()
+		{
+			if (this.breedingChances.Count == 0)
 			{
-				foreach (FertilityMonitor.BreedingChance breedingChance in def.initialBreedingWeights)
+				this.InitializeBreedingChances();
+			}
+		}
+
+		private void InitializeBreedingChances()
+		{
+			this.breedingChances = new List<FertilityMonitor.BreedingChance>();
+			if (base.def.initialBreedingWeights != null)
+			{
+				foreach (FertilityMonitor.BreedingChance breedingChance in base.def.initialBreedingWeights)
 				{
 					this.breedingChances.Add(new FertilityMonitor.BreedingChance
 					{
@@ -87,10 +102,14 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			{
 				bool flag;
 				Vector3 vector = base.GetComponent<KBatchedAnimController>().GetSymbolTransform(FertilityMonitor.Instance.targetEggSymbol, out flag).MultiplyPoint3x4(Vector3.zero);
-				vector.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
-				if (!Grid.Solid[Grid.PosToCell(vector)])
+				if (flag)
 				{
-					this.egg.transform.SetPosition(vector);
+					vector.z = Grid.GetLayerZ(Grid.SceneLayer.Ore);
+					int num = Grid.PosToCell(vector);
+					if (Grid.IsValidCell(num) && !Grid.Solid[num])
+					{
+						this.egg.transform.SetPosition(vector);
+					}
 				}
 				this.egg.SetActive(true);
 				Db.Get().Amounts.Wildness.Copy(this.egg, base.gameObject);

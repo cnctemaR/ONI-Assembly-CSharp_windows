@@ -6,7 +6,7 @@ public class LogicOperationalController : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
+		base.Subscribe<LogicOperationalController>(-801688580, LogicOperationalController.OnLogicValueChangedDelegate);
 		if (LogicOperationalController.infoStatusItem == null)
 		{
 			LogicOperationalController.infoStatusItem = new StatusItem("LogicOperationalInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
@@ -56,4 +56,9 @@ public class LogicOperationalController : KMonoBehaviour
 	private static StatusItem infoStatusItem;
 
 	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(LogicOperationalController.PORT_ID, new CellOffset(0, 0), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
+
+	private static readonly EventSystem.IntraObjectHandler<LogicOperationalController> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<LogicOperationalController>(delegate(LogicOperationalController component, object data)
+	{
+		component.OnLogicValueChanged(data);
+	});
 }

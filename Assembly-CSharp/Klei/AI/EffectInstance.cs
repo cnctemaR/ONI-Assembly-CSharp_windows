@@ -33,10 +33,11 @@ namespace Klei.AI
 				{
 					if (effect.emoteCooldown < 0f)
 					{
-						SelfEmoteReactable selfEmoteReactable = (SelfEmoteReactable)new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, 100000f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+						SelfEmoteReactable selfEmoteReactable = (SelfEmoteReactable)new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, 100000f, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 						{
 							anim = "react"
 						});
+						selfEmoteReactable.AddPrecondition(new Reactable.ReactablePrecondition(this.NotInATube));
 						if (effect.emotePreconditions != null)
 						{
 							foreach (Reactable.ReactablePrecondition reactablePrecondition in effect.emotePreconditions)
@@ -48,10 +49,11 @@ namespace Klei.AI
 					}
 					else
 					{
-						this.reactable = new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, effect.emoteCooldown, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+						this.reactable = new SelfEmoteReactable(game_object, effect.Name + "_Emote", Db.Get().ChoreTypes.Emote, effect.emoteAnim, effect.emoteCooldown, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 						{
 							anim = "react"
 						});
+						this.reactable.AddPrecondition(new Reactable.ReactablePrecondition(this.NotInATube));
 						if (effect.emotePreconditions != null)
 						{
 							foreach (Reactable.ReactablePrecondition reactablePrecondition2 in effect.emotePreconditions)
@@ -62,6 +64,11 @@ namespace Klei.AI
 					}
 				}
 			}
+		}
+
+		private bool NotInATube(GameObject go, Navigator.ActiveTransition transition)
+		{
+			return transition.navGridTransition.start != NavType.Tube && transition.navGridTransition.end != NavType.Tube;
 		}
 
 		public override void OnCleanUp()

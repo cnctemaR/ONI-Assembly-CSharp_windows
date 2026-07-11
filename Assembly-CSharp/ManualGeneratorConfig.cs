@@ -56,7 +56,6 @@ public class ManualGeneratorConfig : IBuildingConfig
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;
 		kbatchedAnimController.initialAnim = "off";
 		Tinkerable.MakePowerTinkerable(go);
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "ManualGenerator";

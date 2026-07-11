@@ -14,6 +14,8 @@ namespace TUNING
 
 		public const string PLASTIC = "Plastic";
 
+		public const string BUILDABLERAW = "BuildableRaw";
+
 		public static readonly string[] ALL_METALS = new string[] { "Metal" };
 
 		public static readonly string[] RAW_METALS = new string[] { "Metal" };

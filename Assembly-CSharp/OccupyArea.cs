@@ -165,6 +165,11 @@ public class OccupyArea : KMonoBehaviour
 		return new Extents(Grid.PosToCell(base.gameObject), this.OccupiedCellsOffsets);
 	}
 
+	public Extents GetExtents(Orientation orientation)
+	{
+		return new Extents(Grid.PosToCell(base.gameObject), this.OccupiedCellsOffsets, orientation);
+	}
+
 	private void OnDrawGizmosSelected()
 	{
 		int num = Grid.PosToCell(base.gameObject);

@@ -51,7 +51,7 @@ public class Diet
 
 	public class Info
 	{
-		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f)
+		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f, bool produce_solid_tile = false)
 		{
 			this.consumedTags = consumed_tags;
 			this.producedElement = produced_element;
@@ -65,6 +65,7 @@ public class Diet
 			{
 				this.diseaseIdx = byte.MaxValue;
 			}
+			this.produceSolidTile = produce_solid_tile;
 		}
 
 		public HashSet<Tag> consumedTags { get; private set; }
@@ -78,6 +79,8 @@ public class Diet
 		public byte diseaseIdx { get; private set; }
 
 		public float diseasePerKgProduced { get; private set; }
+
+		public bool produceSolidTile { get; private set; }
 
 		public bool IsMatch(Tag tag)
 		{

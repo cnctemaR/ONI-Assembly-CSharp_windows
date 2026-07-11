@@ -6,7 +6,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe<AlgaeHabitat>(-905833192, AlgaeHabitat.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -72,6 +72,11 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 	public float lightBonusMultiplier = 1.1f;
 
 	public CellOffset pressureSampleOffset = CellOffset.none;
+
+	private static readonly EventSystem.IntraObjectHandler<AlgaeHabitat> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<AlgaeHabitat>(delegate(AlgaeHabitat component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	public class SMInstance : GameStateMachine<AlgaeHabitat.States, AlgaeHabitat.SMInstance, AlgaeHabitat, object>.GameInstance
 	{

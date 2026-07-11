@@ -8,8 +8,8 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-1503271301, new Action<object>(this.OnSelectionChanged));
-		base.Subscribe(-1201923725, new Action<object>(this.OnHighlightChanged));
+		base.Subscribe<KAnimGridTileVisualizer>(-1503271301, KAnimGridTileVisualizer.OnSelectionChangedDelegate);
+		base.Subscribe<KAnimGridTileVisualizer>(-1201923725, KAnimGridTileVisualizer.OnHighlightChangedDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -23,7 +23,7 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 			{
 				Grid.Objects[num, (int)tileLayer] = null;
 			}
-			TileVisualizer.RefreshCell(num, tileLayer);
+			TileVisualizer.RefreshCell(num, tileLayer, component.Def.ReplacementLayer);
 		}
 		base.OnCleanUp();
 	}
@@ -47,4 +47,14 @@ public class KAnimGridTileVisualizer : KMonoBehaviour, IBlockTileInfo
 
 	[SerializeField]
 	public int blockTileConnectorID;
+
+	private static readonly EventSystem.IntraObjectHandler<KAnimGridTileVisualizer> OnSelectionChangedDelegate = new EventSystem.IntraObjectHandler<KAnimGridTileVisualizer>(delegate(KAnimGridTileVisualizer component, object data)
+	{
+		component.OnSelectionChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<KAnimGridTileVisualizer> OnHighlightChangedDelegate = new EventSystem.IntraObjectHandler<KAnimGridTileVisualizer>(delegate(KAnimGridTileVisualizer component, object data)
+	{
+		component.OnHighlightChanged(data);
+	});
 }

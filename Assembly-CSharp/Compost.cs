@@ -7,7 +7,7 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe<Compost>(-1697596308, Compost.OnStorageChangedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -62,6 +62,11 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 	public float simulatedThermalConductivity = 1000f;
 
 	private SimulatedTemperatureAdjuster temperatureAdjuster;
+
+	private static readonly EventSystem.IntraObjectHandler<Compost> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<Compost>(delegate(Compost component, object data)
+	{
+		component.OnStorageChanged(data);
+	});
 
 	public class StatesInstance : GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.GameInstance
 	{
@@ -118,12 +123,10 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 				smi.master.operational.SetActive(true, false);
 			}).EventTransition(GameHashes.OnStorageChange, this.empty, (Compost.StatesInstance smi) => !smi.CanContinueConverting()).EventTransition(GameHashes.OperationalChanged, this.disabled, (Compost.StatesInstance smi) => !smi.GetComponent<Operational>().IsOperational)
 				.ScheduleGoTo((Compost.StatesInstance smi) => smi.master.flipInterval, this.inert)
-				.PlayAnims((Compost.StatesInstance smi) => Compost.States.compostingAnims, KAnim.PlayMode.Loop)
 				.Exit(delegate(Compost.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);
 				});
-			this.compostingPst.PlayAnim("composting_pst").OnAnimQueueComplete(this.empty);
 			this.disabled.Enter("disabledEmpty", delegate(Compost.StatesInstance smi)
 			{
 				smi.ResetWorkable();
@@ -150,9 +153,5 @@ public class Compost : StateMachineComponent<Compost.StatesInstance>, IEffectDes
 		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State inert;
 
 		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State composting;
-
-		public GameStateMachine<Compost.States, Compost.StatesInstance, Compost, object>.State compostingPst;
-
-		private static readonly HashedString[] compostingAnims = new HashedString[] { "composting_pre", "composting_loop" };
 	}
 }

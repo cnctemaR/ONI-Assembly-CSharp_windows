@@ -41,7 +41,7 @@ namespace ProcGen
 			{
 				return this.features.TerrainFeatures[name].defaultBiome.type;
 			}
-			Debug.LogError("Couldnt get default biome [" + name + "]", null);
+			Debug.LogError("Couldn't get default biome [" + name + "]", null);
 			return null;
 		}
 
@@ -290,11 +290,12 @@ namespace ProcGen
 			this.SetWorld("worlds/Default", path);
 		}
 
-		public void SetWorld(string name, string path)
+		public bool SetWorld(string name, string path)
 		{
-			this.world = this.worlds.GetWorld(name);
-			if (this.world != null)
+			bool flag = false;
+			if (this.worlds.HasWorld(name))
 			{
+				this.world = this.worlds.GetWorldData(name).world;
 				Debug.Log("Set world to [" + name + "] " + path, null);
 				WorldGenSettings.biomeSettingsCache.Clear();
 				this.base_path = path;
@@ -325,7 +326,9 @@ namespace ProcGen
 				{
 					keyValuePair3.Value.ConvertBandSizeToMaxSize();
 				}
+				flag = true;
 			}
+			return flag;
 		}
 
 		public List<string> GetWorldNames()
@@ -333,7 +336,7 @@ namespace ProcGen
 			return this.worlds.GetNames();
 		}
 
-		public Dictionary<string, World> GetWorlds()
+		public Dictionary<string, Worlds.Data> GetAllWorldData()
 		{
 			return this.worlds.worldCache;
 		}
@@ -354,10 +357,10 @@ namespace ProcGen
 			this.mobs.Save(path + WorldGenSettings.MOBS_FILE + ".yaml");
 		}
 
-		public static WorldGenSettings LoadFile(string path)
+		public static WorldGenSettings LoadFile(string path, IFileSystem filesystem)
 		{
 			WorldGenSettings worldGenSettings = new WorldGenSettings();
-			worldGenSettings.worlds.LoadFiles(path);
+			worldGenSettings.worlds.LoadFiles(path, filesystem);
 			worldGenSettings.layers = YamlIO<LevelLayerSettings>.LoadFile(path + WorldGenSettings.LAYERS_FILE + ".yaml");
 			worldGenSettings.layers.LevelLayers.ConvertBandSizeToMaxSize();
 			worldGenSettings.features = YamlIO<TerrainFeatureSettings>.LoadFile(path + WorldGenSettings.FEATURES_FILE + ".yaml");

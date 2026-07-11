@@ -77,9 +77,9 @@ namespace UnityEngine.Profiling
 		/// </summary>
 		/// <param name="threadGroupName">The name of the thread group to which the thread belongs.</param>
 		/// <param name="threadName">The name of the thread.</param>
+		[Conditional("ENABLE_PROFILER")]
 		[ThreadAndSerializationSafe]
 		[GeneratedByOldBindingsGenerator]
-		[Conditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void BeginThreadProfiling(string threadGroupName, string threadName);
 
@@ -122,9 +122,9 @@ namespace UnityEngine.Profiling
 		/// <summary>
 		///   <para>Ends the current profiling sample.</para>
 		/// </summary>
+		[GeneratedByOldBindingsGenerator]
 		[Conditional("ENABLE_PROFILER")]
 		[ThreadAndSerializationSafe]
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndSample();
 

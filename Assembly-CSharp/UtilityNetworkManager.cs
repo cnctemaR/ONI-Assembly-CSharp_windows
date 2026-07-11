@@ -367,7 +367,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 					}
 					Vector2I vector2I = Grid.CellToXY(num2);
 					int num3 = 0;
-					if (vector2I.x > 1)
+					if (vector2I.x > 0)
 					{
 						ptr[num3] = Grid.CellLeft(num2);
 						ptr2[num3] = 1;
@@ -379,7 +379,7 @@ public class UtilityNetworkManager<NetworkType, ItemType> : IUtilityNetworkMgr w
 						ptr2[num3] = 2;
 						num3++;
 					}
-					if (vector2I.y > 1)
+					if (vector2I.y > 0)
 					{
 						ptr[num3] = Grid.CellBelow(num2);
 						ptr2[num3] = 8;

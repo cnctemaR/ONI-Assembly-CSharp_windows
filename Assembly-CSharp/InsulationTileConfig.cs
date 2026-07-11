@@ -45,6 +45,7 @@ public class InsulationTileConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.doReplaceElement = true;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<Insulator>();
 		go.AddOrGet<TileTemperature>();
 		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
@@ -55,7 +56,6 @@ public class InsulationTileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

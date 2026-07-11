@@ -211,6 +211,11 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		this.obj.GetEventSystem().Subscribe(target, hash, handler);
 	}
 
+	public void Subscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler)
+	{
+		this.obj.GetEventSystem().Subscribe<ComponentType>(hash, handler);
+	}
+
 	public void Unsubscribe(int hash, Action<object> handler)
 	{
 		if (this.obj != null)
@@ -229,11 +234,19 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		this.obj.GetEventSystem().Unsubscribe(target, hash, handler);
 	}
 
-	public void Trigger(int hash, object data = null)
+	public void Unsubscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler)
 	{
 		if (this.obj != null)
 		{
-			this.obj.GetEventSystem().Trigger(hash, data);
+			this.obj.GetEventSystem().Unsubscribe<ComponentType>(hash, handler);
+		}
+	}
+
+	public void Trigger(int hash, object data = null)
+	{
+		if (this.obj != null && this.obj.hasEventSystem)
+		{
+			this.obj.GetEventSystem().Trigger(base.gameObject, hash, data);
 		}
 	}
 

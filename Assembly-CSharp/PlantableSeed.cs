@@ -19,8 +19,8 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
-		base.Subscribe(1335436905, new Action<object>(this.OnSplit));
+		base.Subscribe<PlantableSeed>(-2064133523, PlantableSeed.OnAbsorbDelegate);
+		base.Subscribe<PlantableSeed>(1335436905, PlantableSeed.OnSplitDelegate);
 		this.timeUntilSelfPlant = Util.RandomVariance(2400f, 600f);
 	}
 
@@ -143,4 +143,14 @@ public class PlantableSeed : KMonoBehaviour, IHasSortOrder, IReceptacleDirection
 	public string domesticatedDescription;
 
 	public SingleEntityReceptacle.ReceptacleDirection direction;
+
+	private static readonly EventSystem.IntraObjectHandler<PlantableSeed> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<PlantableSeed>(delegate(PlantableSeed component, object data)
+	{
+		component.OnAbsorb(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<PlantableSeed> OnSplitDelegate = new EventSystem.IntraObjectHandler<PlantableSeed>(delegate(PlantableSeed component, object data)
+	{
+		component.OnSplit(data);
+	});
 }

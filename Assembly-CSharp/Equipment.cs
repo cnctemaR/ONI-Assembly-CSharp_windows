@@ -17,15 +17,9 @@ public class Equipment : Assignables
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(1502190696, delegate(object o)
-		{
-			this.destroyed = true;
-		});
-		base.Subscribe(1969584890, delegate(object o)
-		{
-			this.destroyed = true;
-		});
+		base.Subscribe<Equipment>(493375141, Equipment.OnRefreshUserMenuDelegate);
+		base.Subscribe<Equipment>(1502190696, Equipment.SetDestroyedTrueDelegate);
+		base.Subscribe<Equipment>(1969584890, Equipment.SetDestroyedTrueDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -173,4 +167,14 @@ public class Equipment : Assignables
 	}
 
 	private SchedulerHandle refreshHandle;
+
+	private static readonly EventSystem.IntraObjectHandler<Equipment> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Equipment>(delegate(Equipment component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Equipment> SetDestroyedTrueDelegate = new EventSystem.IntraObjectHandler<Equipment>(delegate(Equipment component, object data)
+	{
+		component.destroyed = true;
+	});
 }

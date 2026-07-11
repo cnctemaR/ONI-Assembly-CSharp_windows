@@ -186,6 +186,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					num7 += num9;
 					diseaseInfo = SimUtil.CalculateFinalDiseaseInfo(diseaseInfo.idx, diseaseInfo.count, component2.DiseaseIdx, num11);
 					num2 = component2.Temperature;
+					num8 -= num9;
 					if (num8 <= 0f)
 					{
 						break;
@@ -252,7 +253,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					}
 					else
 					{
-						primaryElement.AddDisease(diseaseInfo2.idx, diseaseInfo2.count, "ElementCovnerter.ConvertMass");
+						primaryElement.AddDisease(diseaseInfo2.idx, diseaseInfo2.count, "ElementConverter.ConvertMass");
 					}
 				}
 				else
@@ -293,7 +294,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 			{
 				ElementConverter.ConsumedElement consumedElement = (ElementConverter.ConsumedElement)data;
 				str = str.Replace("{ElementTypes}", consumedElement.Name);
-				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(consumedElement.Rate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+				str = str.Replace("{FlowRate}", GameUtil.GetFormattedByTag(consumedElement.tag, consumedElement.Rate, GameUtil.TimeSlice.PerSecond));
 				return str;
 			});
 		}

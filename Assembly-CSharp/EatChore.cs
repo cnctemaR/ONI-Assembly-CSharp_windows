@@ -79,12 +79,13 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		public void UpdateMessStation()
 		{
 			Ownables component = base.sm.eater.Get(base.smi).GetComponent<Ownables>();
-			List<Assignable> preferredAssignables = Game.Instance.assignmentManager.GetPreferredAssignables(component, Db.Get().AssignableSlots.MessStation);
-			Assignable assignable = ((preferredAssignables.Count <= 0) ? null : preferredAssignables[0]);
-			if (assignable == null)
+			List<Assignable> list = Game.Instance.assignmentManager.GetPreferredAssignables(component, Db.Get().AssignableSlots.MessStation);
+			if (list.Count == 0)
 			{
 				component.AutoAssignSlot(Db.Get().AssignableSlots.MessStation);
+				list = Game.Instance.assignmentManager.GetPreferredAssignables(component, Db.Get().AssignableSlots.MessStation);
 			}
+			Assignable assignable = ((list.Count <= 0) ? null : list[0]);
 			base.smi.sm.messstation.Set(assignable, base.smi);
 		}
 

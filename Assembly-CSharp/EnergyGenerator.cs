@@ -53,7 +53,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	{
 		base.OnPrefabInit();
 		EnergyGenerator.EnsureStatusItemAvailable();
-		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe<EnergyGenerator>(824508782, EnergyGenerator.OnActiveChangedDelegate);
 	}
 
 	protected void OnActiveChanged(object data)
@@ -323,6 +323,11 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	public EnergyGenerator.Formula formula;
 
 	private MeterController meter;
+
+	private static readonly EventSystem.IntraObjectHandler<EnergyGenerator> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<EnergyGenerator>(delegate(EnergyGenerator component, object data)
+	{
+		component.OnActiveChanged(data);
+	});
 
 	[DebuggerDisplay("{tag} -{consumptionRate} kg/s")]
 	[Serializable]

@@ -77,17 +77,17 @@ public class ScheduleManager : KMonoBehaviour, ISim33ms
 
 	private void SetupDefaultSchedule()
 	{
-		this.AddSchedule(Db.Get().ScheduleGroups.allGroups, UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT);
+		this.AddSchedule(Db.Get().ScheduleGroups.allGroups, UI.SCHEDULESCREEN.SCHEDULE_NAME_DEFAULT, true);
 	}
 
-	public void AddSchedule(List<ScheduleGroup> groups, string name = null)
+	public void AddSchedule(List<ScheduleGroup> groups, string name = null, bool alarmOn = false)
 	{
 		this.scheduleNameIncrementor++;
 		if (name == null)
 		{
 			name = string.Format(UI.SCHEDULESCREEN.SCHEDULE_NAME_FORMAT, this.scheduleNameIncrementor.ToString());
 		}
-		Schedule schedule = new Schedule(name, groups);
+		Schedule schedule = new Schedule(name, groups, alarmOn);
 		this.schedules.Add(schedule);
 		if (this.onSchedulesChanged != null)
 		{

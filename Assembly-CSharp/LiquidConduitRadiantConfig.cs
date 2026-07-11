@@ -60,7 +60,6 @@ public class LiquidConduitRadiantConfig : IBuildingConfig
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Liquid;
 		kanimGraphTileVisualizer.isPhysicalBuilding = true;
-		BuildingTemplates.DoPostConfigure(go);
 		LiquidConduitConfig.CommonConduitPostConfigureComplete(go);
 	}
 

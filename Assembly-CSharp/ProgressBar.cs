@@ -31,10 +31,13 @@ public class ProgressBar : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.overlayUpdateHandle = Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
-		if (OverlayScreen.Instance != null && OverlayScreen.Instance.GetMode() != SimViewMode.None)
+		if (this.autoHide)
 		{
-			base.gameObject.SetActive(false);
+			this.overlayUpdateHandle = Game.Instance.Subscribe(1798162660, new Action<object>(this.OnOverlayChanged));
+			if (OverlayScreen.Instance != null && OverlayScreen.Instance.GetMode() != SimViewMode.None)
+			{
+				base.gameObject.SetActive(false);
+			}
 		}
 		base.enabled = this.updatePercentFull != null;
 	}
@@ -53,14 +56,12 @@ public class ProgressBar : KMonoBehaviour
 		}
 	}
 
-	public void ClearPercentFunction()
-	{
-		this.updatePercentFull = null;
-		base.enabled = this.updatePercentFull != null;
-	}
-
 	public virtual void OnOverlayChanged(object data = null)
 	{
+		if (!this.autoHide)
+		{
+			return;
+		}
 		if ((SimViewMode)data == SimViewMode.None)
 		{
 			if (!base.gameObject.activeSelf)
@@ -102,9 +103,10 @@ public class ProgressBar : KMonoBehaviour
 		progressBar.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("ProgressBar");
 		progressBar.Update();
 		Vector3 vector = entity.transform.GetPosition() + Vector3.down * 0.5f;
-		if (entity is Building)
+		Building component = entity.GetComponent<Building>();
+		if (component != null)
 		{
-			vector = vector - Vector3.right * 0.5f * (float)((entity as Building).Def.WidthInCells % 2) + (entity as Building).Def.placementPivot;
+			vector = vector - Vector3.right * 0.5f * (float)(component.Def.WidthInCells % 2) + component.Def.placementPivot;
 		}
 		else
 		{
@@ -119,4 +121,6 @@ public class ProgressBar : KMonoBehaviour
 	private Func<float> updatePercentFull;
 
 	private int overlayUpdateHandle = -1;
+
+	public bool autoHide = true;
 }

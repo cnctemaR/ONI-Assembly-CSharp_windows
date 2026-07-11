@@ -31,7 +31,7 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 			statusItem = Db.Get().DuplicantStatusItems.PoorQualityOfLife
 		};
 		this.qolAttribute = Db.Get().Attributes.QualityOfLife.Lookup(base.gameObject);
-		base.Subscribe(1714332666, new Action<object>(this.OnScheduleBlocksTick));
+		base.Subscribe<QualityOfLifeNeed>(1714332666, QualityOfLifeNeed.OnScheduleBlocksTickDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -147,6 +147,11 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 
 	[Serialize]
 	private List<bool> breakBlocks;
+
+	private static readonly EventSystem.IntraObjectHandler<QualityOfLifeNeed> OnScheduleBlocksTickDelegate = new EventSystem.IntraObjectHandler<QualityOfLifeNeed>(delegate(QualityOfLifeNeed component, object data)
+	{
+		component.OnScheduleBlocksTick(data);
+	});
 
 	private static List<string> breakLengthEffects = new List<string> { "Break1", "Break2", "Break3", "Break4", "Break5" };
 }

@@ -27,10 +27,7 @@ public class FloorSwitchConfig : IBuildingConfig
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;

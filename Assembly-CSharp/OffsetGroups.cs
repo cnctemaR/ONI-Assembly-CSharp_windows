@@ -20,14 +20,21 @@ public static class OffsetGroups
 
 	public static CellOffset[][] BuildReachabilityTable(CellOffset[] area_offsets, CellOffset[][] table, CellOffset[] filter)
 	{
+		Dictionary<CellOffset[][], Dictionary<CellOffset[], CellOffset[][]>> dictionary = null;
+		Dictionary<CellOffset[], CellOffset[][]> dictionary2 = null;
+		CellOffset[][] array = null;
+		if (OffsetGroups.reachabilityTableCache.TryGetValue(area_offsets, out dictionary) && dictionary.TryGetValue(table, out dictionary2) && dictionary2.TryGetValue((filter != null) ? filter : OffsetGroups.nullFilter, out array))
+		{
+			return array;
+		}
 		HashSet<CellOffset> hashSet = new HashSet<CellOffset>();
 		foreach (CellOffset cellOffset in area_offsets)
 		{
-			foreach (CellOffset[] array in table)
+			foreach (CellOffset[] array2 in table)
 			{
-				if (filter == null || Array.IndexOf<CellOffset>(filter, array[0]) == -1)
+				if (filter == null || Array.IndexOf<CellOffset>(filter, array2[0]) == -1)
 				{
-					CellOffset cellOffset2 = cellOffset + array[0];
+					CellOffset cellOffset2 = cellOffset + array2[0];
 					hashSet.Add(cellOffset2);
 				}
 			}
@@ -43,25 +50,36 @@ public static class OffsetGroups
 					cellOffset4 = cellOffset5;
 				}
 			}
-			foreach (CellOffset[] array2 in table)
+			foreach (CellOffset[] array3 in table)
 			{
-				if (filter == null || Array.IndexOf<CellOffset>(filter, array2[0]) == -1)
+				if (filter == null || Array.IndexOf<CellOffset>(filter, array3[0]) == -1)
 				{
-					if (array2[0] + cellOffset4 == cellOffset3)
+					if (array3[0] + cellOffset4 == cellOffset3)
 					{
-						CellOffset[] array3 = new CellOffset[array2.Length];
-						for (int m = 0; m < array2.Length; m++)
+						CellOffset[] array4 = new CellOffset[array3.Length];
+						for (int m = 0; m < array3.Length; m++)
 						{
-							array3[m] = array2[m] + cellOffset4;
+							array4[m] = array3[m] + cellOffset4;
 						}
-						list.Add(array3);
+						list.Add(array4);
 					}
 				}
 			}
 		}
-		CellOffset[][] array4 = list.ToArray();
-		Array.Sort<CellOffset[]>(array4, (CellOffset[] x, CellOffset[] y) => x[0].GetOffsetDistance().CompareTo(y[0].GetOffsetDistance()));
-		return array4;
+		array = list.ToArray();
+		Array.Sort<CellOffset[]>(array, (CellOffset[] x, CellOffset[] y) => x[0].GetOffsetDistance().CompareTo(y[0].GetOffsetDistance()));
+		if (dictionary == null)
+		{
+			dictionary = new Dictionary<CellOffset[][], Dictionary<CellOffset[], CellOffset[][]>>();
+			OffsetGroups.reachabilityTableCache.Add(area_offsets, dictionary);
+		}
+		if (dictionary2 == null)
+		{
+			dictionary2 = new Dictionary<CellOffset[], CellOffset[][]>();
+			dictionary.Add(table, dictionary2);
+		}
+		dictionary2.Add((filter != null) ? filter : OffsetGroups.nullFilter, array);
+		return array;
 	}
 
 	public static CellOffset[] Use = new CellOffset[] { default(CellOffset) };
@@ -408,6 +426,10 @@ public static class OffsetGroups
 			new CellOffset(1, -2)
 		}
 	});
+
+	private static Dictionary<CellOffset[], Dictionary<CellOffset[][], Dictionary<CellOffset[], CellOffset[][]>>> reachabilityTableCache = new Dictionary<CellOffset[], Dictionary<CellOffset[][], Dictionary<CellOffset[], CellOffset[][]>>>();
+
+	private static readonly CellOffset[] nullFilter = new CellOffset[0];
 
 	private class CellOffsetComparer : IComparer<CellOffset>
 	{

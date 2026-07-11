@@ -114,7 +114,8 @@ public class MinionStatsPanel : TargetScreen
 		this.stressDrawer.BeginDrawing();
 		float num = 0f;
 		this.stressNotes.Clear();
-		ReportManager.ReportEntry reportEntry2 = reportEntry.contextEntries.Find((ReportManager.ReportEntry entry) => entry.context == identity.GetProperName());
+		int num2 = reportEntry.contextEntries.FindIndex((ReportManager.ReportEntry entry) => entry.context == identity.GetProperName());
+		ReportManager.ReportEntry reportEntry2 = ((num2 == -1) ? null : reportEntry.contextEntries[num2]);
 		if (reportEntry2 != null)
 		{
 			reportEntry2.IterateNotes(delegate(ReportManager.ReportEntry.Note note)

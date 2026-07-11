@@ -24,7 +24,7 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 			this.ChangeBaitSetting(this.activeBaitSetting);
 			this.OnStorageChange(null);
 		}
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<CreatureLure>(-1697596308, CreatureLure.OnStorageChangeDelegate);
 	}
 
 	private void OnStorageChange(object data = null)
@@ -89,6 +89,11 @@ public class CreatureLure : StateMachineComponent<CreatureLure.StatesInstance>
 	private Operational operational;
 
 	private Operational.Flag baited = new Operational.Flag("Baited", Operational.Flag.Type.Requirement);
+
+	private static readonly EventSystem.IntraObjectHandler<CreatureLure> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<CreatureLure>(delegate(CreatureLure component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 
 	public class StatesInstance : GameStateMachine<CreatureLure.States, CreatureLure.StatesInstance, CreatureLure, object>.GameInstance
 	{

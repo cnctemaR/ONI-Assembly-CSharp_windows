@@ -18,7 +18,7 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 		this.UpdateLogicCircuit();
 		this.UpdateVisualState(true);
 		this.wasOn = this.switchedOn;
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<LogicElementSensor>(-592767678, LogicElementSensor.OnOperationalChangedDelegate);
 	}
 
 	public void Sim200ms(float dt)
@@ -87,4 +87,9 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 	private int sampleIdx;
 
 	private byte desiredElementIdx = byte.MaxValue;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicElementSensor> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<LogicElementSensor>(delegate(LogicElementSensor component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 }

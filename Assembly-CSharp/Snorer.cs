@@ -7,8 +7,8 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe<Snorer>(1623392196, Snorer.OnDeathDelegate);
+		base.Subscribe<Snorer>(-1117766961, Snorer.OnRevivedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -31,6 +31,16 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 	}
 
 	private static readonly HashedString HeadHash = "snapTo_mouth";
+
+	private static readonly EventSystem.IntraObjectHandler<Snorer> OnDeathDelegate = new EventSystem.IntraObjectHandler<Snorer>(delegate(Snorer component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Snorer> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Snorer>(delegate(Snorer component, object data)
+	{
+		component.OnRevived(data);
+	});
 
 	public class StatesInstance : GameStateMachine<Snorer.States, Snorer.StatesInstance, Snorer, object>.GameInstance
 	{

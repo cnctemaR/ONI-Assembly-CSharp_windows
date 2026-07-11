@@ -41,7 +41,6 @@ public class BatterySmartConfig : BaseBatteryConfig
 		batterySmart.joulesLostPerSecond = batterySmart.capacity * 0.02f / 600f;
 		batterySmart.powerSortOrder = 1000;
 		GeneratedBuildings.RegisterLogicPorts(go, null, BatterySmartConfig.OUTPUT_PORTS);
-		BuildingTemplates.DoPostConfigure(go);
 		base.DoPostConfigureComplete(go);
 	}
 

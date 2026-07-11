@@ -57,7 +57,14 @@ public class StandardAmountDisplayer : IAmountDisplayer
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
 		string text = master.Name;
-		text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
+		if (master.description.IndexOf("{1}") > -1)
+		{
+			text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), GameUtil.GetIdentityDescriptor(instance.gameObject));
+		}
+		else
+		{
+			text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
+		}
 		text += "\n\n";
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)
 		{
@@ -67,8 +74,9 @@ public class StandardAmountDisplayer : IAmountDisplayer
 		{
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(instance.deltaAttribute.GetTotalDisplayValue(), GameUtil.TimeSlice.PerSecond, null));
 		}
-		foreach (AttributeModifier attributeModifier in instance.deltaAttribute.Modifiers)
+		for (int num = 0; num != instance.deltaAttribute.Modifiers.Count; num++)
 		{
+			AttributeModifier attributeModifier = instance.deltaAttribute.Modifiers[num];
 			text = text + "\n" + string.Format(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.formatter.GetFormattedModifier(attributeModifier, instance.gameObject));
 		}
 		return text;

@@ -7,6 +7,7 @@ namespace UnityEngine.Bindings
 	{
 		Dot,
 		Arrow,
-		DoubleColon
+		DoubleColon,
+		ArrowWithDefaultReturnIfNull
 	}
 }

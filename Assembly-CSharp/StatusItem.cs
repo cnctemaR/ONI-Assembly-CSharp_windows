@@ -105,7 +105,7 @@ public class StatusItem : Resource
 		}
 		else
 		{
-			DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!");
+			DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!", string.Empty, string.Empty);
 			this.notificationText = Strings.Get(this.composedPrefix + ".NOTIFICATION_NAME");
 		}
 		if (notification_tooltip != null)
@@ -114,7 +114,7 @@ public class StatusItem : Resource
 		}
 		else
 		{
-			DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!");
+			DebugUtil.Assert(this.composedPrefix != null, "When adding a notification, either set the status prefix or specify strings!", string.Empty, string.Empty);
 			this.notificationTooltipText = Strings.Get(this.composedPrefix + ".NOTIFICATION_TOOLTIP");
 		}
 	}

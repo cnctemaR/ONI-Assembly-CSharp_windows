@@ -215,6 +215,7 @@ public enum Action
 	DebugReportBug,
 	DebugFocus,
 	DebugCellInfo,
+	DebugDumpGCRoots,
 	DebugDumpGarbageReferences,
 	DebugDumpEventData,
 	DebugDumpSceneParitionerLeakData,

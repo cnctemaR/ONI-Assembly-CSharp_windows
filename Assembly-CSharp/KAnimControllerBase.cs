@@ -200,6 +200,9 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			{
 				this.layering.Dirty();
 			}
+			this.DeRegister();
+			this.Register();
+			this.RefreshVisibilityListener();
 			this.SetDirty();
 		}
 	}
@@ -235,6 +238,14 @@ public abstract class KAnimControllerBase : MonoBehaviour
 				this.layering.Dirty();
 			}
 			this.SetDirty();
+		}
+	}
+
+	public Vector3 PositionIncludingOffset
+	{
+		get
+		{
+			return base.transform.GetPosition() + this.Offset;
 		}
 	}
 
@@ -367,6 +378,12 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	protected abstract void OnStartQueuedAnim();
 
 	public abstract void SetDirty();
+
+	protected abstract void RefreshVisibilityListener();
+
+	protected abstract void DeRegister();
+
+	protected abstract void Register();
 
 	protected abstract void OnAwake();
 
@@ -584,7 +601,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		this.currentFrame = this.curAnimFrameIdx;
 		this.mode = animData.mode;
 		this.playSpeed = animData.speed * this.PlaySpeedMultiplier;
-		this.elapsedTime = (float)num / this.curAnim.frameRate + animData.timeOffset;
+		this.SetElapsedTime((float)num / this.curAnim.frameRate + animData.timeOffset);
 		this.synchronizer.Sync();
 		this.StartAnimEventSequence();
 		this.AnimEnter(animData.anim);
@@ -616,7 +633,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
-			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
+			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.", string.Empty, string.Empty);
 			component.AddBuildOverride(kanim_file.GetData(), 0);
 		}
 		this.overrideAnimFiles.Add(new KAnimControllerBase.OverrideAnimFileData
@@ -633,7 +650,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		if (kanim_file.GetData().build != null && kanim_file.GetData().build.symbols.Length > 0)
 		{
 			SymbolOverrideController component = base.GetComponent<SymbolOverrideController>();
-			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.");
+			DebugUtil.Assert(component != null, "Anim overrides containing additional symbols require a symbol override controller.", string.Empty, string.Empty);
 			component.TryRemoveBuildOverride(kanim_file.GetData(), 0);
 		}
 		for (int i = 0; i < this.overrideAnimFiles.Count; i++)
@@ -727,11 +744,11 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		}
 		set
 		{
-			DebugUtil.Assert(value.Length > 0, "Controller has no anim files.");
-			DebugUtil.Assert(value[0].buildFile != null, "First anim file needs to be the build file.");
+			DebugUtil.Assert(value.Length > 0, "Controller has no anim files.", string.Empty, string.Empty);
+			DebugUtil.Assert(value[0].buildFile != null, "First anim file needs to be the build file.", string.Empty, string.Empty);
 			for (int i = 0; i < value.Length; i++)
 			{
-				DebugUtil.Assert(value[i] != null, "Anim file is null");
+				DebugUtil.Assert(value[i] != null, "Anim file is null", string.Empty, string.Empty);
 			}
 			this.animFiles = new KAnimFile[value.Length];
 			for (int j = 0; j < value.Length; j++)
@@ -781,7 +798,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			return;
 		}
-		this.elapsedTime = (float)this.curAnim.numFrames / this.curAnim.frameRate * percent;
+		this.SetElapsedTime((float)this.curAnim.numFrames / this.curAnim.frameRate * percent);
 		int frameIdx = this.curAnim.GetFrameIdx(this.mode, this.elapsedTime);
 		if (this.currentFrame != frameIdx)
 		{
@@ -813,7 +830,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 		{
 			if (!this.stopped && this.mode != KAnim.PlayMode.Paused)
 			{
-				this.elapsedTime = this.aem.GetElapsedTime(this.eventManagerHandle);
+				this.SetElapsedTime(this.aem.GetElapsedTime(this.eventManagerHandle));
 			}
 			this.aem.StopAnim(this.eventManagerHandle);
 			this.eventManagerHandle = HandleVector<int>.InvalidHandle;

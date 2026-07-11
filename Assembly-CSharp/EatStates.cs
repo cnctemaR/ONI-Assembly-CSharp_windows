@@ -34,7 +34,7 @@ internal class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStat
 		GameObject gameObject = smi.sm.target.Get(smi);
 		if (gameObject != null)
 		{
-			DebugUtil.Assert(!gameObject.HasTag(GameTags.Creatures.ReservedByCreature), "Assert!");
+			DebugUtil.Assert(!gameObject.HasTag(GameTags.Creatures.ReservedByCreature), "Assert!", string.Empty, string.Empty);
 			gameObject.AddTag(GameTags.Creatures.ReservedByCreature);
 		}
 	}
@@ -44,7 +44,7 @@ internal class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStat
 		GameObject gameObject = smi.sm.target.Get(smi);
 		if (gameObject != null)
 		{
-			DebugUtil.Assert(gameObject.HasTag(GameTags.Creatures.ReservedByCreature), "Assert!");
+			DebugUtil.Assert(gameObject.HasTag(GameTags.Creatures.ReservedByCreature), "Assert!", string.Empty, string.Empty);
 			gameObject.RemoveTag(GameTags.Creatures.ReservedByCreature);
 		}
 	}

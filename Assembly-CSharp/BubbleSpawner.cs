@@ -7,7 +7,7 @@ public class BubbleSpawner : KMonoBehaviour
 	{
 		this.emitMass += (global::UnityEngine.Random.value - 0.5f) * this.emitVariance * this.emitMass;
 		base.OnSpawn();
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe<BubbleSpawner>(-1697596308, BubbleSpawner.OnStorageChangedDelegate);
 	}
 
 	private void OnStorageChanged(object data)
@@ -37,4 +37,9 @@ public class BubbleSpawner : KMonoBehaviour
 
 	[MyCmpGet]
 	private Storage storage;
+
+	private static readonly EventSystem.IntraObjectHandler<BubbleSpawner> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<BubbleSpawner>(delegate(BubbleSpawner component, object data)
+	{
+		component.OnStorageChanged(data);
+	});
 }

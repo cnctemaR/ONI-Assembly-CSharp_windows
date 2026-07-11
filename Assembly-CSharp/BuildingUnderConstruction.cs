@@ -32,7 +32,7 @@ public class BuildingUnderConstruction : Building
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			this.Def.RunOnArea(num, base.Orientation, delegate(int c)
 			{
-				TileVisualizer.RefreshCell(c, this.Def.TileLayer);
+				TileVisualizer.RefreshCell(c, this.Def.TileLayer, this.Def.ReplacementLayer);
 			});
 		}
 		base.RegisterBlockTileRenderer();

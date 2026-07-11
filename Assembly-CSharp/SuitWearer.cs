@@ -23,27 +23,31 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			master.GetComponent<Navigator>().SetFlags(PathFinder.PotentialPath.Flags.PerformSuitChecks);
-			master.GetComponent<KBatchedAnimController>().SetSymbolVisiblity("snapto_neck", false);
+			this.navigator = master.GetComponent<Navigator>();
+			this.navigator.SetFlags(PathFinder.PotentialPath.Flags.PerformSuitChecks);
+			KBatchedAnimController component = master.GetComponent<KBatchedAnimController>();
+			component.SetSymbolVisiblity("snapto_neck", false);
 		}
 
 		public void OnPathAdvanced(object data)
 		{
+			if (this.navigator.CurrentNavType == NavType.Hover && (byte)(this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) == 0)
+			{
+				this.navigator.SetCurrentNavType(NavType.Floor);
+			}
 			this.UnreserveSuits();
 			this.ReserveSuits();
 		}
 
 		public void ReserveSuits()
 		{
-			Navigator component = base.GetComponent<Navigator>();
-			PathFinder.Path path = component.path;
+			PathFinder.Path path = this.navigator.path;
 			if (path.nodes == null)
 			{
 				return;
 			}
-			bool flag = (byte)(component.flags & PathFinder.PotentialPath.Flags.HasSuit) != 0;
-			int num = 0;
-			int num2 = 0;
+			bool flag = (byte)(this.navigator.flags & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
+			bool flag2 = (byte)(this.navigator.flags & PathFinder.PotentialPath.Flags.HasJetPack) != 0;
 			for (int i = 0; i < path.nodes.Count - 1; i++)
 			{
 				int cell = path.nodes[i].cell;
@@ -53,37 +57,49 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 					SuitMarker suitMarker = navigationFeature as SuitMarker;
 					if (!(suitMarker == null))
 					{
-						num++;
-						bool flag2 = suitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell);
-						if (flag2 && !flag)
+						bool flag3 = (byte)(suitMarker.PathFlag & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
+						bool flag4 = (byte)(suitMarker.PathFlag & PathFinder.PotentialPath.Flags.HasJetPack) != 0;
+						bool flag5 = flag2 || flag;
+						bool flag6 = flag3 == flag && flag4 == flag2;
+						bool flag7 = suitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell);
+						if (flag7 && !flag5)
 						{
 							SuitWearer.Instance.Reservation reservation = new SuitWearer.Instance.Reservation
 							{
 								suitMarker = suitMarker,
-								isForEquipping = flag2
+								isForEquipping = flag7
 							};
-							suitMarker.Reserve(this, flag2);
+							suitMarker.Reserve(this, flag7);
 							this.reservations.Add(reservation);
-							flag = true;
-							num2++;
+							if (flag3)
+							{
+								flag = true;
+							}
+							if (flag4)
+							{
+								flag2 = true;
+							}
 						}
-						else if (!flag2 && flag && suitMarker.IsUnequipAvailableForSuitWearer(this))
+						else if (!flag7 && flag6 && suitMarker.IsUnequipAvailableForSuitWearer(this))
 						{
 							SuitWearer.Instance.Reservation reservation2 = new SuitWearer.Instance.Reservation
 							{
 								suitMarker = suitMarker,
-								isForEquipping = flag2
+								isForEquipping = flag7
 							};
-							suitMarker.Reserve(this, flag2);
+							suitMarker.Reserve(this, flag7);
 							this.reservations.Add(reservation2);
-							flag = false;
-							num2++;
+							if (flag3)
+							{
+								flag = false;
+							}
+							if (flag4)
+							{
+								flag2 = false;
+							}
 						}
 					}
 				}
-			}
-			if (num > 1)
-			{
 			}
 		}
 
@@ -100,6 +116,8 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 		}
 
 		private List<SuitWearer.Instance.Reservation> reservations = new List<SuitWearer.Instance.Reservation>();
+
+		private Navigator navigator;
 
 		private struct Reservation
 		{

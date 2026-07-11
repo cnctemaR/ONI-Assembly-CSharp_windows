@@ -6,6 +6,7 @@ public class KAnimBatch
 {
 	public KAnimBatch(KAnimBatchGroup group, int layer, float z, KAnimBatchGroup.MaterialType material_type)
 	{
+		this.id = KAnimBatch.nextBatchId++;
 		this.active = true;
 		this.group = group;
 		this.layer = layer;
@@ -15,6 +16,8 @@ public class KAnimBatch
 		this.symbolInstanceSlots = new KAnimBatch.SymbolInstanceSlot[group.maxGroupSize];
 		this.symbolOverrideInfoSlots = new KAnimBatch.SymbolOverrideInfoSlot[group.maxGroupSize];
 	}
+
+	public int id { get; private set; }
 
 	public bool dirty
 	{
@@ -359,6 +362,8 @@ public class KAnimBatch
 
 	private List<int> dirtySet = new List<int>();
 
+	private static int nextBatchId;
+
 	private int currentOffset;
 
 	private static int ShaderProperty_SYMBOL_INSTANCE_TEXTURE_SIZE = Shader.PropertyToID("SYMBOL_INSTANCE_TEXTURE_SIZE");
@@ -404,8 +409,8 @@ public class KAnimBatch
 
 		public int Add(Texture2D atlas)
 		{
-			DebugUtil.Assert(atlas != null, "Assert!");
-			DebugUtil.Assert(this.atlases.Count < KAnimBatchManager.instance.atlasNames.Length, "Assert!");
+			DebugUtil.Assert(atlas != null, "Assert!", string.Empty, string.Empty);
+			DebugUtil.Assert(this.atlases.Count < KAnimBatchManager.instance.atlasNames.Length, "Assert!", string.Empty, string.Empty);
 			int num = this.atlases.IndexOf(atlas);
 			if (num == -1)
 			{

@@ -8,8 +8,8 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe<NightOwl>(1623392196, NightOwl.OnDeathDelegate);
+		base.Subscribe<NightOwl>(-1117766961, NightOwl.OnRevivedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -69,6 +69,16 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 	private KPrefabID kPrefabID;
 
 	private AttributeModifier[] attributeModifiers;
+
+	private static readonly EventSystem.IntraObjectHandler<NightOwl> OnDeathDelegate = new EventSystem.IntraObjectHandler<NightOwl>(delegate(NightOwl component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<NightOwl> OnRevivedDelegate = new EventSystem.IntraObjectHandler<NightOwl>(delegate(NightOwl component, object data)
+	{
+		component.OnRevived(data);
+	});
 
 	public class StatesInstance : GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl, object>.GameInstance
 	{

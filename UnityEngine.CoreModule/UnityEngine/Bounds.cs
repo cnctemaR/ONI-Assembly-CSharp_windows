@@ -8,14 +8,14 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Represents an axis aligned bounding box.</para>
 	/// </summary>
+	[NativeHeader("Runtime/Geometry/Ray.h")]
+	[ThreadAndSerializationSafe]
 	[NativeHeader("Runtime/Geometry/AABB.h")]
 	[NativeType(Header = "Runtime/Geometry/AABB.h")]
 	[NativeClass("AABB")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[ThreadAndSerializationSafe]
-	[NativeHeader("Runtime/Geometry/Ray.h")]
 	[NativeHeader("Runtime/Geometry/Intersection.h")]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
 	public struct Bounds : IEquatable<Bounds>
 	{
 		/// <summary>

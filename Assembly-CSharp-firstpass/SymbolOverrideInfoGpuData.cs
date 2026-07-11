@@ -37,7 +37,7 @@ public class SymbolOverrideInfoGpuData
 	{
 		if (symbol_idx >= this.symbolCount)
 		{
-			DebugUtil.Assert(false, "Assert!");
+			DebugUtil.Assert(false, "Assert!", string.Empty, string.Empty);
 		}
 		SymbolOverrideInfoGpuData.SymbolOverrideInfo symbolOverrideInfo = this.symbolOverrideInfos[symbol_idx];
 		symbolOverrideInfo.atlas = (float)symbol_frame_instance.buildImageIdx;
@@ -52,7 +52,7 @@ public class SymbolOverrideInfoGpuData
 
 	public void WriteToTexture(byte[] data, int data_idx, int instance_idx)
 	{
-		DebugUtil.Assert(instance_idx * this.symbolCount * 12 * 4 == data_idx, "Assert!");
+		DebugUtil.Assert(instance_idx * this.symbolCount * 12 * 4 == data_idx, "Assert!", string.Empty, string.Empty);
 		Buffer.BlockCopy(this.symbolOverrideInfoConverter.bytes, 0, data, data_idx, this.symbolCount * 12 * 4);
 	}
 

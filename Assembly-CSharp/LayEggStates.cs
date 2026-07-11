@@ -12,9 +12,10 @@ internal class LayEggStates : GameStateMachine<LayEggStates, LayEggStates.Instan
 		string text = CREATURES.STATUSITEMS.LAYINGANEGG.NAME;
 		string text2 = CREATURES.STATUSITEMS.LAYINGANEGG.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main).Enter(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.LayEgg));
-		this.layeggpre.Enter(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.SetLayEggCell)).PlayAnim("lay_egg_pre").OnAnimQueueComplete(this.layeggpst);
-		this.layeggpst.Enter(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.ShowEgg)).PlayAnim("lay_egg_pst").OnAnimQueueComplete(this.moveaside);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, 63486, null, null, main);
+		this.layeggpre.Enter(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.LayEgg)).Exit(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.ShowEgg)).PlayAnim("lay_egg_pre")
+			.OnAnimQueueComplete(this.layeggpst);
+		this.layeggpst.PlayAnim("lay_egg_pst").OnAnimQueueComplete(this.moveaside);
 		this.moveaside.MoveTo(new Func<LayEggStates.Instance, int>(LayEggStates.GetMoveAsideCell), this.lookategg, this.behaviourcomplete, false);
 		this.lookategg.Enter(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.FaceEgg)).GoTo(this.behaviourcomplete);
 		this.behaviourcomplete.QueueAnim("idle_loop", true, null).BehaviourComplete(GameTags.Creatures.Fertile, false);
@@ -22,17 +23,13 @@ internal class LayEggStates : GameStateMachine<LayEggStates, LayEggStates.Instan
 
 	private static void LayEgg(LayEggStates.Instance smi)
 	{
+		smi.eggPos = smi.transform.GetPosition();
 		smi.GetSMI<FertilityMonitor.Instance>().LayEgg();
 	}
 
 	private static void ShowEgg(LayEggStates.Instance smi)
 	{
 		smi.GetSMI<FertilityMonitor.Instance>().ShowEgg();
-	}
-
-	private static void SetLayEggCell(LayEggStates.Instance smi)
-	{
-		smi.eggPos = smi.transform.GetPosition();
 	}
 
 	private static void FaceEgg(LayEggStates.Instance smi)

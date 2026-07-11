@@ -8,8 +8,8 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe<Stinky>(1623392196, Stinky.OnDeathDelegate);
+		base.Subscribe<Stinky>(-1117766961, Stinky.OnRevivedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -66,6 +66,16 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 	private const float MaxDistanceSq = 2.25f;
 
 	private KBatchedAnimController stinkyController;
+
+	private static readonly EventSystem.IntraObjectHandler<Stinky> OnDeathDelegate = new EventSystem.IntraObjectHandler<Stinky>(delegate(Stinky component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Stinky> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Stinky>(delegate(Stinky component, object data)
+	{
+		component.OnRevived(data);
+	});
 
 	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop", "working_pst" };
 

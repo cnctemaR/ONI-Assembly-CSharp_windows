@@ -22,7 +22,7 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 
 	protected override void OnSpawn()
 	{
-		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
+		base.Subscribe<RationTracker>(631075836, RationTracker.OnNewDayDelegate);
 	}
 
 	private void OnNewDay(object data)
@@ -75,6 +75,11 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	public RationTracker.Frame previousFrame = default(RationTracker.Frame);
+
+	private static readonly EventSystem.IntraObjectHandler<RationTracker> OnNewDayDelegate = new EventSystem.IntraObjectHandler<RationTracker>(delegate(RationTracker component, object data)
+	{
+		component.OnNewDay(data);
+	});
 
 	public struct Frame
 	{

@@ -29,11 +29,11 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 		{
 			throw new ArgumentException("No consumable elements specified");
 		}
-		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe<ElementConsumer>(824508782, ElementConsumer.OnActiveChangedDelegate);
 		if (this.capacityKG != float.PositiveInfinity)
 		{
 			this.hasAvailableCapacity = !this.IsStorageFull();
-			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+			base.Subscribe<ElementConsumer>(-1697596308, ElementConsumer.OnStorageChangeDelegate);
 		}
 	}
 
@@ -351,6 +351,16 @@ public class ElementConsumer : SimComponent, ISaveLoadable, IEffectDescriptor
 	private bool hasAvailableCapacity = true;
 
 	private static Dictionary<int, ElementConsumer> handleInstanceMap = new Dictionary<int, ElementConsumer>();
+
+	private static readonly EventSystem.IntraObjectHandler<ElementConsumer> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<ElementConsumer>(delegate(ElementConsumer component, object data)
+	{
+		component.OnActiveChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<ElementConsumer> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<ElementConsumer>(delegate(ElementConsumer component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 
 	public enum Configuration
 	{

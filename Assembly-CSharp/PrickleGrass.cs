@@ -9,10 +9,7 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(1309017699, delegate(object o)
-		{
-			this.replanted = true;
-		});
+		base.Subscribe<PrickleGrass>(1309017699, PrickleGrass.SetReplantedTrueDelegate);
 		this.growth_bonus.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.GROWTH_BONUS;
 		this.wilt_penalty.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.WILT_PENALTY;
 	}
@@ -40,6 +37,11 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 	private AttributeModifier growth_bonus = new AttributeModifier("Effect", (float)DECOR.BONUS.TIER3.amount, null, false, false, true);
 
 	private AttributeModifier wilt_penalty = new AttributeModifier("Effect", (float)DECOR.PENALTY.TIER1.amount, null, false, false, true);
+
+	private static readonly EventSystem.IntraObjectHandler<PrickleGrass> SetReplantedTrueDelegate = new EventSystem.IntraObjectHandler<PrickleGrass>(delegate(PrickleGrass component, object data)
+	{
+		component.replanted = true;
+	});
 
 	public class StatesInstance : GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.GameInstance
 	{

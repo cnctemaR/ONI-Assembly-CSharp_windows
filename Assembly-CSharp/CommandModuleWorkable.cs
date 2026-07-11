@@ -11,12 +11,11 @@ public class CommandModuleWorkable : Workable
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_incubator_kanim") };
 		base.SetWorkTime(float.PositiveInfinity);
 		this.showProgressBar = false;
-		base.Subscribe(-1056989049, new Action<object>(this.OnLaunch));
+		base.Subscribe<CommandModuleWorkable>(-1056989049, CommandModuleWorkable.OnLaunchDelegate);
 	}
 
 	private void OnLaunch(object data)
 	{
-		this.launching = true;
 	}
 
 	public override void AwardExperience(float work_dt, MinionResume resume)
@@ -49,8 +48,6 @@ public class CommandModuleWorkable : Workable
 	{
 	}
 
-	private bool launching;
-
 	private static CellOffset[] entryOffsets = new CellOffset[]
 	{
 		new CellOffset(0, 0),
@@ -59,4 +56,9 @@ public class CommandModuleWorkable : Workable
 		new CellOffset(0, 3),
 		new CellOffset(0, 4)
 	};
+
+	private static readonly EventSystem.IntraObjectHandler<CommandModuleWorkable> OnLaunchDelegate = new EventSystem.IntraObjectHandler<CommandModuleWorkable>(delegate(CommandModuleWorkable component, object data)
+	{
+		component.OnLaunch(data);
+	});
 }

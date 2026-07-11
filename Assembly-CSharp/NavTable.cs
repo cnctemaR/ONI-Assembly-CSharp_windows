@@ -5,8 +5,8 @@ public class NavTable
 	public NavTable(int cell_count)
 	{
 		this.ValidCells = new short[cell_count];
-		this.NavTypeMasks = new short[9];
-		for (short num = 0; num < 9; num += 1)
+		this.NavTypeMasks = new short[10];
+		for (short num = 0; num < 10; num += 1)
 		{
 			this.NavTypeMasks[(int)num] = (short)(1 << (int)num);
 		}

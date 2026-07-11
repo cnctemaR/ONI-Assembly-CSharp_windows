@@ -53,7 +53,6 @@ public class InsulatedGasConduitConfig : IBuildingConfig
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Gas;
 		kanimGraphTileVisualizer.isPhysicalBuilding = true;
-		BuildingTemplates.DoPostConfigure(go);
 		LiquidConduitConfig.CommonConduitPostConfigureComplete(go);
 	}
 

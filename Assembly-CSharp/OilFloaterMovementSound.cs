@@ -6,7 +6,7 @@ internal class OilFloaterMovementSound : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.sound = GlobalAssets.GetSound(this.sound, false);
-		base.Subscribe(1027377649, new Action<object>(this.OnObjectMovementStateChanged));
+		base.Subscribe<OilFloaterMovementSound>(1027377649, OilFloaterMovementSound.OnObjectMovementStateChangedDelegate);
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChanged), "OilFloaterMovementSound");
 	}
 
@@ -52,4 +52,9 @@ internal class OilFloaterMovementSound : KMonoBehaviour
 	public bool isPlayingSound;
 
 	public bool isMoving;
+
+	private static readonly EventSystem.IntraObjectHandler<OilFloaterMovementSound> OnObjectMovementStateChangedDelegate = new EventSystem.IntraObjectHandler<OilFloaterMovementSound>(delegate(OilFloaterMovementSound component, object data)
+	{
+		component.OnObjectMovementStateChanged(data);
+	});
 }

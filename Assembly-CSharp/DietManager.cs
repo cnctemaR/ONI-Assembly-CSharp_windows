@@ -21,7 +21,7 @@ public class DietManager : KMonoBehaviour
 		base.OnSpawn();
 		foreach (Tag tag in WorldInventory.Instance.GetDiscovered())
 		{
-			this.OnWorldInventoryDiscover(tag);
+			this.Discover(tag);
 		}
 		foreach (KeyValuePair<Tag, Diet> keyValuePair in this.diets)
 		{
@@ -40,15 +40,20 @@ public class DietManager : KMonoBehaviour
 		WorldInventory.Instance.OnDiscover += this.OnWorldInventoryDiscover;
 	}
 
-	private void OnWorldInventoryDiscover(Tag t)
+	private void Discover(Tag tag)
 	{
 		foreach (KeyValuePair<Tag, Diet> keyValuePair in this.diets)
 		{
-			if (keyValuePair.Value.GetDietInfo(t) != null)
+			if (keyValuePair.Value.GetDietInfo(tag) != null)
 			{
-				WorldInventory.Instance.Discover(t, keyValuePair.Key);
+				WorldInventory.Instance.Discover(tag, keyValuePair.Key);
 			}
 		}
+	}
+
+	private void OnWorldInventoryDiscover(Tag category_tag, Tag tag)
+	{
+		this.Discover(tag);
 	}
 
 	public static Dictionary<Tag, Diet> CollectDiets(Tag[] target_species)

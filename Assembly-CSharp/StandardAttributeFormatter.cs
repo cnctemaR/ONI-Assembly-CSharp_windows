@@ -58,8 +58,9 @@ public class StandardAttributeFormatter : IAttributeFormatter
 		{
 			text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, instance.GetBaseValue());
 		}
-		foreach (AttributeModifier attributeModifier in instance.Modifiers)
+		for (int num = 0; num != instance.Modifiers.Count; num++)
 		{
+			AttributeModifier attributeModifier = instance.Modifiers[num];
 			string formattedString = attributeModifier.GetFormattedString(instance.gameObject, false);
 			if (formattedString != null)
 			{

@@ -17,7 +17,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: RU-" + 285480U.ToString(), null);
+		global::Debug.Log("Development Build: SU-" + 290148U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();
@@ -54,7 +54,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "RU";
+	public const string BUILD_PREFIX = "SU";
 
 	public GameObject[] SpawnPrefabs;
 

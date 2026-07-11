@@ -39,11 +39,9 @@ public class SuitFabricatorConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
+		go.AddOrGetDef<PoweredActiveController.Def>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits);
 		};
 	}

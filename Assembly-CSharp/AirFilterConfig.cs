@@ -71,12 +71,7 @@ public class AirFilterConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			ActiveController.Instance instance = new ActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<ActiveController.Def>();
 	}
 
 	public const string ID = "AirFilter";

@@ -13,7 +13,7 @@ public class CoolVestConfig : IEquipmentConfig
 		dictionary.Add("BasicFabric", (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS);
 		ClothingWearer.ClothingInfo clothingInfo = ClothingWearer.ClothingInfo.COOL_CLOTHING;
 		List<AttributeModifier> list = new List<AttributeModifier>();
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Cool_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, global::TUNING.EQUIPMENT.VESTS.FABRICATOR, 300f, SimHashes.Carbon, dictionary, (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ANIM0, 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef("Cool_Vest", global::TUNING.EQUIPMENT.CLOTHING.SLOT, global::TUNING.EQUIPMENT.VESTS.FABRICATOR, 300f, SimHashes.Carbon, dictionary, (float)global::TUNING.EQUIPMENT.VESTS.COOL_VEST_MASS, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ICON0, global::TUNING.EQUIPMENT.VESTS.SNAPON0, global::TUNING.EQUIPMENT.VESTS.COOL_VEST_ANIM0, 4, list, global::TUNING.EQUIPMENT.VESTS.SNAPON1, true, EntityTemplates.CollisionShape.RECTANGLE, 0.75f, 0.4f, null, null);
 		Descriptor descriptor = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.COOL_CLOTHING.conductivityMod)), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.THERMALCONDUCTIVITYBARRIER.NAME, GameUtil.GetFormattedDistance(ClothingWearer.ClothingInfo.COOL_CLOTHING.conductivityMod)), Descriptor.DescriptorType.Effect, false);
 		Descriptor descriptor2 = new Descriptor(string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.COOL_CLOTHING.decorMod), string.Format("{0}: {1}", DUPLICANTS.ATTRIBUTES.DECOR.NAME, ClothingWearer.ClothingInfo.COOL_CLOTHING.decorMod), Descriptor.DescriptorType.Effect, false);
 		equipmentDef.additionalDescriptors.Add(descriptor);
@@ -80,6 +80,8 @@ public class CoolVestConfig : IEquipmentConfig
 	public void DoPostConfigure(GameObject go)
 	{
 		CoolVestConfig.SetupVest(go);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.PedestalDisplayable);
 	}
 
 	public const string ID = "Cool_Vest";

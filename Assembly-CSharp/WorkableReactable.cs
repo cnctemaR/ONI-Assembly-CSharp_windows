@@ -64,9 +64,8 @@ public class WorkableReactable : Reactable
 			base.End();
 			return;
 		}
-		if (this.worker.Work(dt))
+		if (this.worker.Work(dt) != Worker.WorkResult.InProgress)
 		{
-			this.worker.CompleteWork();
 			base.End();
 		}
 	}

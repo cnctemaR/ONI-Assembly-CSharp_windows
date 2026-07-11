@@ -158,8 +158,8 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Fabricate;
 		this.choreTags = new Tag[] { GameTags.ChoreTypes.Fabricating };
-		base.Subscribe(-1957399615, new Action<object>(this.OnDroppedAll));
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<Refinery>(-1957399615, Refinery.OnDroppedAllDelegate);
+		base.Subscribe<Refinery>(-592767678, Refinery.OnOperationalChangedDelegate);
 		if (this.duplicantOperated)
 		{
 			this.GetWorkable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Processing;
@@ -176,7 +176,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		{
 			this.workable = base.GetComponent<RefineryWorkable>();
 		}
-		base.Subscribe(-235298596, new Action<object>(this.OnBuildingUpgraded));
+		base.Subscribe<Refinery>(-235298596, Refinery.OnBuildingUpgradedDelegate);
 		this.ReloadSavedQueue();
 		this.buildStorage.Transfer(this.inStorage, true, true);
 		this.UpdateOrderQueue(true);
@@ -293,8 +293,15 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 					KBatchedAnimController component4 = list[0].GetComponent<KBatchedAnimController>();
 					KAnim.Build build = component4.AnimFiles[0].GetData().build;
 					KAnim.Build.Symbol symbol = build.GetSymbol(build.name);
-					component3.TryRemoveSymbolOverride("output_tracker", 0);
-					component3.AddSymbolOverride("output_tracker", symbol, 0);
+					if (symbol != null)
+					{
+						component3.TryRemoveSymbolOverride("output_tracker", 0);
+						component3.AddSymbolOverride("output_tracker", symbol, 0);
+					}
+					else
+					{
+						global::Debug.LogWarning(component3.name + " is missing symbol " + build.name, null);
+					}
 				}
 			}
 		}
@@ -736,6 +743,21 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 	protected ChoreType choreType;
 
 	protected Tag[] choreTags;
+
+	private static readonly EventSystem.IntraObjectHandler<Refinery> OnDroppedAllDelegate = new EventSystem.IntraObjectHandler<Refinery>(delegate(Refinery component, object data)
+	{
+		component.OnDroppedAll(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Refinery> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Refinery>(delegate(Refinery component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Refinery> OnBuildingUpgradedDelegate = new EventSystem.IntraObjectHandler<Refinery>(delegate(Refinery component, object data)
+	{
+		component.OnBuildingUpgraded(data);
+	});
 
 	private float orderProgress;
 

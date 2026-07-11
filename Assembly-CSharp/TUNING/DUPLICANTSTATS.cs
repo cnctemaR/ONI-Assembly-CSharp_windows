@@ -472,6 +472,8 @@ namespace TUNING
 
 			public const float SURFACE_AREA = 1f;
 
+			public const float GROUND_TRANSFER_SCALE = 0f;
+
 			public class EXTERNAL
 			{
 				public const float THRESHOLD_COLD = 283.15f;

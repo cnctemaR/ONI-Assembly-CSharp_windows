@@ -34,10 +34,7 @@ public class GasPermeableMembraneConfig : IBuildingConfig
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_mesh_tops_decor_place_info");
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		return buildingDef;
 	}
 
@@ -57,7 +54,6 @@ public class GasPermeableMembraneConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

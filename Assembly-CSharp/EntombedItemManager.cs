@@ -9,6 +9,7 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 	private void OnDeserialized()
 	{
 		this.SpawnUncoveredObjects();
+		this.AddMassToWorlIfPossible();
 		this.PopulateEntombedItemVisualizers();
 	}
 
@@ -73,13 +74,21 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 			float temperature = component2.Temperature;
 			byte diseaseIdx = component2.DiseaseIdx;
 			int diseaseCount = component2.DiseaseCount;
-			component.AddItem(num);
-			this.cells.Add(num);
-			this.elementIds.Add((int)elementID);
-			this.masses.Add(mass);
-			this.temperatures.Add(temperature);
-			this.diseaseIndices.Add(diseaseIdx);
-			this.diseaseCounts.Add(diseaseCount);
+			Element element = Grid.Element[num];
+			if (elementID == element.id && Grid.Mass[num] + mass < element.maxMass)
+			{
+				SimMessages.AddRemoveSubstance(num, (int)ElementLoader.FindElementByHash(elementID).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, temperature, diseaseIdx, diseaseCount, true, -1);
+			}
+			else
+			{
+				component.AddItem(num);
+				this.cells.Add(num);
+				this.elementIds.Add((int)elementID);
+				this.masses.Add(mass);
+				this.temperatures.Add(temperature);
+				this.diseaseIndices.Add(diseaseIdx);
+				this.diseaseCounts.Add(diseaseCount);
+			}
 			Util.KDestroyGameObject(pickupable2.gameObject);
 		}
 		pooledHashSet.Recycle();
@@ -128,6 +137,54 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 		pooledList.Recycle();
 	}
 
+	private void AddMassToWorlIfPossible()
+	{
+		ListPool<int, EntombedItemManager>.PooledList pooledList = ListPool<int, EntombedItemManager>.Allocate();
+		for (int i = 0; i < this.cells.Count; i++)
+		{
+			int num = this.cells[i];
+			if (Grid.Solid[num])
+			{
+				if (Grid.Element[num].id == (SimHashes)this.elementIds[i])
+				{
+					pooledList.Add(i);
+				}
+			}
+		}
+		pooledList.Sort();
+		pooledList.Reverse();
+		foreach (int num2 in pooledList)
+		{
+			EntombedItemManager.Item item = this.GetItem(num2);
+			this.RemoveItem(num2);
+			SimMessages.AddRemoveSubstance(item.cell, (int)ElementLoader.FindElementByHash((SimHashes)item.elementId).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, true, -1);
+		}
+		pooledList.Recycle();
+	}
+
+	private void RemoveItem(int item_idx)
+	{
+		this.cells.RemoveAt(item_idx);
+		this.elementIds.RemoveAt(item_idx);
+		this.masses.RemoveAt(item_idx);
+		this.temperatures.RemoveAt(item_idx);
+		this.diseaseIndices.RemoveAt(item_idx);
+		this.diseaseCounts.RemoveAt(item_idx);
+	}
+
+	private EntombedItemManager.Item GetItem(int item_idx)
+	{
+		return new EntombedItemManager.Item
+		{
+			cell = this.cells[item_idx],
+			elementId = this.elementIds[item_idx],
+			mass = this.masses[item_idx],
+			temperature = this.temperatures[item_idx],
+			diseaseIdx = this.diseaseIndices[item_idx],
+			diseaseCount = this.diseaseCounts[item_idx]
+		};
+	}
+
 	private void SpawnObjects(List<int> uncovered_item_indices)
 	{
 		uncovered_item_indices.Sort();
@@ -135,24 +192,14 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 		EntombedItemVisualizer component = Game.Instance.GetComponent<EntombedItemVisualizer>();
 		foreach (int num in uncovered_item_indices)
 		{
-			int num2 = this.cells[num];
-			int num3 = this.elementIds[num];
-			float num4 = this.masses[num];
-			float num5 = this.temperatures[num];
-			byte b = this.diseaseIndices[num];
-			int num6 = this.diseaseCounts[num];
-			component.RemoveItem(num2);
-			this.cells.RemoveAt(num);
-			this.elementIds.RemoveAt(num);
-			this.masses.RemoveAt(num);
-			this.temperatures.RemoveAt(num);
-			this.diseaseIndices.RemoveAt(num);
-			this.diseaseCounts.RemoveAt(num);
-			SimHashes simHashes = (SimHashes)num3;
-			Element element = ElementLoader.FindElementByHash(simHashes);
+			EntombedItemManager.Item item = this.GetItem(num);
+			component.RemoveItem(item.cell);
+			this.RemoveItem(num);
+			SimHashes elementId = (SimHashes)item.elementId;
+			Element element = ElementLoader.FindElementByHash(elementId);
 			if (element != null)
 			{
-				element.substance.SpawnResource(Grid.CellToPosCCC(num2, Grid.SceneLayer.Ore), num4, num5, b, num6, false, false);
+				element.substance.SpawnResource(Grid.CellToPosCCC(item.cell, Grid.SceneLayer.Ore), item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, false, false);
 			}
 		}
 	}
@@ -185,4 +232,19 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 	private List<int> diseaseCounts = new List<int>();
 
 	private List<Pickupable> pickupables = new List<Pickupable>();
+
+	private struct Item
+	{
+		public int cell;
+
+		public int elementId;
+
+		public float mass;
+
+		public float temperature;
+
+		public byte diseaseIdx;
+
+		public int diseaseCount;
+	}
 }

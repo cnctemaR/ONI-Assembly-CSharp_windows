@@ -15,19 +15,19 @@ public static class CodexEntryGenerator
 		{
 			string text2 = CodexCache.FormatLinkID(text + planInfo.category.ToString());
 			Dictionary<string, CodexEntry> dictionary2 = new Dictionary<string, CodexEntry>();
-			for (int j = 0; j < (planInfo.data as string[]).Length; j++)
+			for (int i = 0; i < (planInfo.data as IList<string>).Count; i++)
 			{
-				BuildingDef buildingDef = Assets.GetBuildingDef((planInfo.data as string[])[j]);
+				BuildingDef buildingDef = Assets.GetBuildingDef((planInfo.data as IList<string>)[i]);
 				List<ContentContainer> list = new List<ContentContainer>();
 				CodexEntryGenerator.GenerateTitleContainers(buildingDef.Name, list);
 				CodexEntryGenerator.GenerateImageContainers(buildingDef.GetUISprite("ui", false), list);
 				CodexEntryGenerator.GenerateBuildingDescriptionContainers(buildingDef, list);
 				CodexEntryGenerator.GenerateFabricatorContainers(buildingDef.BuildingComplete, list);
 				CodexEntryGenerator.GenerateReceptacleContainers(buildingDef.BuildingComplete, list);
-				CodexEntry codexEntry = new CodexEntry(text2, list, Strings.Get("STRINGS.BUILDINGS.PREFABS." + (planInfo.data as string[])[j].ToUpper() + ".NAME"));
+				CodexEntry codexEntry = new CodexEntry(text2, list, Strings.Get("STRINGS.BUILDINGS.PREFABS." + (planInfo.data as IList<string>)[i].ToUpper() + ".NAME"));
 				codexEntry.icon = buildingDef.GetUISprite("ui", false);
 				codexEntry.parentId = text2;
-				CodexCache.AddEntry((planInfo.data as string[])[j], codexEntry, null);
+				CodexCache.AddEntry((planInfo.data as IList<string>)[i], codexEntry, null);
 				dictionary2.Add(codexEntry.id, codexEntry);
 			}
 			CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID(text2), Strings.Get("STRINGS.UI.BUILDCATEGORIES." + planInfo.category.ToString().ToUpper() + ".NAME"), dictionary2, null);
@@ -136,6 +136,7 @@ public static class CodexEntryGenerator
 		action(GameTags.Creatures.Species.GlomSpecies, global::STRINGS.CREATURES.FAMILY.GLOM);
 		action(GameTags.Creatures.Species.DreckoSpecies, global::STRINGS.CREATURES.FAMILY.DRECKO);
 		action(GameTags.Creatures.Species.MooSpecies, global::STRINGS.CREATURES.FAMILY.MOO);
+		action(GameTags.Creatures.Species.MoleSpecies, global::STRINGS.CREATURES.FAMILY.MOLE);
 		return results;
 	}
 

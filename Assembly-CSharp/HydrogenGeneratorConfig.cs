@@ -61,12 +61,7 @@ public class HydrogenGeneratorConfig : IBuildingConfig
 		energyGenerator.ignoreBatteryRefillPercent = true;
 		energyGenerator.meterOffset = Meter.Offset.Behind;
 		Tinkerable.MakePowerTinkerable(go);
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "HydrogenGenerator";

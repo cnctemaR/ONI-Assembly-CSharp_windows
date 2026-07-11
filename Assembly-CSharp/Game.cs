@@ -130,7 +130,7 @@ public class Game : KMonoBehaviour
 
 	protected override void OnLoadLevel()
 	{
-		base.Unsubscribe(1798162660, new Action<object>(this.MarkStatusItemRendererDirty));
+		base.Unsubscribe<Game>(1798162660, Game.MarkStatusItemRendererDirtyDelegate);
 		base.OnLoadLevel();
 	}
 
@@ -204,7 +204,7 @@ public class Game : KMonoBehaviour
 		{
 			meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
 		}
-		base.Subscribe(1798162660, new Action<object>(this.MarkStatusItemRendererDirty));
+		base.Subscribe<Game>(1798162660, Game.MarkStatusItemRendererDirtyDelegate);
 		this.solidConduitFlow.Initialize();
 		SimAndRenderScheduler.instance.Add(this.roomProber, false);
 		SimAndRenderScheduler.instance.Add(KComponentSpawn.instance, false);
@@ -218,6 +218,11 @@ public class Game : KMonoBehaviour
 		if (Global.Instance != null)
 		{
 			Global.Instance.GetComponent<PerformanceMonitor>().Reset();
+		}
+		if (Game.modLoadErrors != null)
+		{
+			ModErrorsScreen.ShowErrors(Game.modLoadErrors);
+			Game.modLoadErrors = null;
 		}
 	}
 
@@ -477,6 +482,17 @@ public class Game : KMonoBehaviour
 				{
 					Sim.MeltedInfo meltedInfo4 = ptr2->buildingMeltedInfos[num12];
 					StructureTemperatureComponents.DoStateTransition(meltedInfo4.handle);
+				}
+				int numCellMeltedInfos = ptr2->numCellMeltedInfos;
+				for (int num13 = 0; num13 < numCellMeltedInfos; num13++)
+				{
+					Sim.CellMeltedInfo cellMeltedInfo = ptr2->cellMeltedInfos[num13];
+					int gameCell = cellMeltedInfo.gameCell;
+					GameObject gameObject = Grid.Objects[gameCell, 9];
+					if (gameObject != null)
+					{
+						global::Util.KDestroyGameObject(gameObject);
+					}
 				}
 				if (dt > 0f)
 				{
@@ -758,6 +774,62 @@ public class Game : KMonoBehaviour
 			}
 		}
 		KFMOD.RenderEveryTick(Time.deltaTime);
+		if (GenericGameSettings.instance.developerDebugEnable)
+		{
+			this.UpdateGCProfileCapture();
+		}
+	}
+
+	private void UpdateGCProfileCapture()
+	{
+		if (GenericGameSettings.instance.developerCaptureGCStatsTime == 0f)
+		{
+			return;
+		}
+		if (this.IsPaused && SpeedControlScreen.Instance != null)
+		{
+			SpeedControlScreen.Instance.Unpause(true);
+		}
+		if (Time.timeSinceLevelLoad < GenericGameSettings.instance.developerCaptureGCStatsTime)
+		{
+			return;
+		}
+		global::Debug.Log("Begin GC profiling...", null);
+		float realtimeSinceStartup = Time.realtimeSinceStartup;
+		GC.Collect();
+		float num = Time.realtimeSinceStartup - realtimeSinceStartup;
+		global::Debug.Log("\tGC.Collect() took " + num.ToString() + " seconds", null);
+		uint num2 = 290148U;
+		string text = global::System.DateTime.Now.ToShortDateString();
+		string text2 = global::System.DateTime.Now.ToShortTimeString();
+		string fileName = Path.GetFileName(SaveLoader.GetLatestSaveFile());
+		string text3 = "Version,Date,Time,SaveGame";
+		string text4 = string.Format("{0},{1},{2},{3}", new object[] { num2, text, text2, fileName });
+		using (StreamWriter streamWriter = new StreamWriter("./memory/GCDuration.csv"))
+		{
+			string text5 = "{0},{1}";
+			streamWriter.WriteLine(string.Format(text5, text3, "GCDuration"));
+			streamWriter.WriteLine(string.Format(text5, text4, num));
+		}
+		MemorySnapshot memorySnapshot = new MemorySnapshot();
+		using (StreamWriter streamWriter2 = new StreamWriter("./memory/GCTypeMetrics.csv"))
+		{
+			string text6 = "{0},{1},{2},{3}";
+			streamWriter2.WriteLine(string.Format(text6, new object[] { text3, "Type", "Instances", "References" }));
+			foreach (MemorySnapshot.TypeData typeData in memorySnapshot.types.Values)
+			{
+				streamWriter2.WriteLine(string.Format(text6, new object[]
+				{
+					text4,
+					"\"" + typeData.type.ToString() + "\"",
+					typeData.instanceCount,
+					typeData.refCount
+				}));
+			}
+		}
+		GenericGameSettings.instance.developerCaptureGCStatsTime = 0f;
+		global::Debug.Log("...end GC profiling", null);
+		Application.Quit();
 	}
 
 	public void Reset(GameSpawnData gsd)
@@ -1094,6 +1166,10 @@ public class Game : KMonoBehaviour
 
 	public void StopFE()
 	{
+		if (SteamUGCService.Instance)
+		{
+			SteamUGCService.Instance.enabled = false;
+		}
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndSnapshot, STOP_MODE.ALLOWFADEOUT);
 		if (MusicManager.instance.SongIsPlaying("Music_FrontEnd"))
 		{
@@ -1108,9 +1184,10 @@ public class Game : KMonoBehaviour
 	public void StartBE()
 	{
 		Resources.UnloadUnusedAssets();
-		if (TimeOfDay.Instance != null && !MusicManager.instance.SongIsPlaying("Underscore_Night_LP") && TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
+		if (TimeOfDay.Instance != null && !MusicManager.instance.SongIsPlaying("Stinger_Loop_Night") && TimeOfDay.Instance.GetCurrentTimeRegion() == TimeOfDay.TimeRegion.Night)
 		{
-			MusicManager.instance.PlaySong("Underscore_Night_LP", false);
+			MusicManager.instance.PlaySong("Stinger_Loop_Night", false);
+			MusicManager.instance.SetSongParameter("Stinger_Loop_Night", "Music_PlayStinger", 0f, true);
 		}
 		AudioMixer.instance.Reset();
 		AudioMixer.instance.StartPersistentSnapshots();
@@ -1118,14 +1195,14 @@ public class Game : KMonoBehaviour
 		{
 			MusicManager.instance.PlayDynamicMusic();
 		}
-		else
-		{
-			MusicManager.instance.daysSinceDynamicMusic = MusicManager.instance.daysBetweenDynamicMusic;
-		}
 	}
 
 	public void StopBE()
 	{
+		if (SteamUGCService.Instance)
+		{
+			SteamUGCService.Instance.enabled = true;
+		}
 		LoopingSoundManager loopingSoundManager = LoopingSoundManager.Get();
 		if (loopingSoundManager != null)
 		{
@@ -1285,6 +1362,7 @@ public class Game : KMonoBehaviour
 		MopTool.DestroyInstance();
 		MoveToLocationTool.DestroyInstance();
 		PlaceTool.DestroyInstance();
+		SpacecraftManager.DestroyInstance();
 		SandboxDestroyerTool.DestroyInstance();
 		SandboxFOWTool.DestroyInstance();
 		SandboxFloodTool.DestroyInstance();
@@ -1324,6 +1402,8 @@ public class Game : KMonoBehaviour
 		Singleton<StateMachineUpdater>.Instance.Clear();
 		UpdateObjectCountParameter.Clear();
 		MaterialSelectionPanel.ClearStatics();
+		StarmapScreen.DestroyInstance();
+		SpacecraftManager.DestroyInstance();
 		Game.Instance = null;
 		Grid.OnReveal = null;
 		this.VisualTunerElement = null;
@@ -1335,6 +1415,10 @@ public class Game : KMonoBehaviour
 	}
 
 	private static readonly string NextUniqueIDKey = "NextUniqueID";
+
+	public static string worldID = null;
+
+	public static List<ModError> modLoadErrors;
 
 	private PlayerController playerController;
 
@@ -1355,7 +1439,7 @@ public class Game : KMonoBehaviour
 
 	public Game.SavedInfo savedInfo;
 
-	public static bool quitting;
+	public static bool quitting = false;
 
 	public AssignmentManager assignmentManager;
 
@@ -1512,6 +1596,11 @@ public class Game : KMonoBehaviour
 	private GameScenePartitioner gameScenePartitioner;
 
 	private bool gameStarted;
+
+	private static readonly EventSystem.IntraObjectHandler<Game> MarkStatusItemRendererDirtyDelegate = new EventSystem.IntraObjectHandler<Game>(delegate(Game component, object data)
+	{
+		component.MarkStatusItemRendererDirty(data);
+	});
 
 	private ushort[] activeFX;
 
@@ -1742,7 +1831,6 @@ public class Game : KMonoBehaviour
 	{
 		public Settings(Game game)
 		{
-			this.baseAlreadyCreated = game.baseAlreadyCreated;
 			this.nextUniqueID = KPrefabID.NextUniqueID;
 			this.gameID = KleiMetrics.GameID();
 		}
@@ -1750,8 +1838,6 @@ public class Game : KMonoBehaviour
 		public Settings()
 		{
 		}
-
-		public bool baseAlreadyCreated;
 
 		public int nextUniqueID;
 

@@ -70,6 +70,13 @@ public enum SimHashes
 	SolidNaphtha = -1112594153,
 	SolidPetroleum = -473261502,
 	Bitumen = 1433229102,
+	Isoresin = -2008682336,
+	Niobium = -1779895821,
+	Fullerene = 245514112,
+	SuperInsulator = -1713958528,
+	TempConductorSolid = 1559722904,
+	SolidViscoGel = -1495120499,
+	SolidSuperCoolant = -389019570,
 	LiquidHydrogen = -751997156,
 	Chlorine = -878033482,
 	LiquidOxygen = -1908044868,
@@ -93,6 +100,9 @@ public enum SimHashes
 	Naphtha = 1157157570,
 	Petroleum = -486269331,
 	LiquidSulfur = -1108652427,
+	MoltenNiobium = 1499134368,
+	SuperCoolant = -123825053,
+	ViscoGel = -1683093854,
 	Hydrogen = -1046145888,
 	ChlorineGas = -1324664829,
 	Oxygen = -1528777920,
@@ -112,5 +122,7 @@ public enum SimHashes
 	Steam = -899515856,
 	RockGas = -432557516,
 	SteelGas = -1406916018,
-	CarbonDioxide = 1960575215
+	CarbonDioxide = 1960575215,
+	SuperCoolantGas = -3376362,
+	NiobiumGas = -1616033402
 }

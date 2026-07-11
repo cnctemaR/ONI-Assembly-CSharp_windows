@@ -32,7 +32,7 @@ public class UpgradeFX : GameStateMachine<UpgradeFX, UpgradeFX.Instance>
 
 		public Reactable CreateReactable()
 		{
-			return new EmoteReactable(base.master.gameObject, "UpgradeFX", Db.Get().ChoreTypes.Emote, "anim_cheer_kanim", 15, 8, 0f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+			return new EmoteReactable(base.master.gameObject, "UpgradeFX", Db.Get().ChoreTypes.Emote, "anim_cheer_kanim", 15, 8, 0f, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 			{
 				anim = "cheer_pre"
 			}).AddStep(new EmoteReactable.EmoteStep

@@ -64,7 +64,7 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 		public Instance(IStateMachineTarget master)
 			: base(master)
 		{
-			NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
+			NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this, false);
 		}
 
 		public bool HasThoughts()
@@ -113,13 +113,22 @@ public class ThoughtGraph : GameStateMachine<ThoughtGraph, ThoughtGraph.Instance
 			base.sm.thoughtsChanged.Trigger(base.smi);
 		}
 
+		private int SortThoughts(Thought a, Thought b)
+		{
+			if (a.showImmediately != b.showImmediately)
+			{
+				return (!a.showImmediately) ? 1 : (-1);
+			}
+			return b.priority.CompareTo(a.priority);
+		}
+
 		public void CreateBubble()
 		{
 			if (this.thoughts.Count == 0)
 			{
 				return;
 			}
-			this.thoughts.Sort((Thought a, Thought b) => b.priority.CompareTo(a.priority));
+			this.thoughts.Sort(new Comparison<Thought>(this.SortThoughts));
 			Thought thought = this.thoughts[0];
 			if (thought.modeSprite != null)
 			{

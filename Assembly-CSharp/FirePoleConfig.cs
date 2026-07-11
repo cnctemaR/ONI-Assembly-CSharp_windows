@@ -40,7 +40,6 @@ public class FirePoleConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "FirePole";

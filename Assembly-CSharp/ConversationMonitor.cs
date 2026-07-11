@@ -36,8 +36,8 @@ public class ConversationMonitor : GameStateMachine<ConversationMonitor, Convers
 			: base(master)
 		{
 			this.recentTopics = new Queue<string>();
-			this.favouriteTopics = new List<string>();
-			this.personalTopics = new List<string> { ConversationMonitor.Instance.randomTopics[global::UnityEngine.Random.Range(0, ConversationMonitor.Instance.randomTopics.Count)] };
+			this.favouriteTopics = new List<string> { ConversationMonitor.Instance.randomTopics[global::UnityEngine.Random.Range(0, ConversationMonitor.Instance.randomTopics.Count)] };
+			this.personalTopics = new List<string>();
 		}
 
 		public string GetATopic()
@@ -59,7 +59,11 @@ public class ConversationMonitor : GameStateMachine<ConversationMonitor, Convers
 				return this.favouriteTopics[num2];
 			}
 			num2 -= this.favouriteTopics.Count;
-			return this.personalTopics[num2];
+			if (num2 < this.personalTopics.Count)
+			{
+				return this.personalTopics[num2];
+			}
+			return string.Empty;
 		}
 
 		public void OnTopicDiscovered(object data)
@@ -108,6 +112,6 @@ public class ConversationMonitor : GameStateMachine<ConversationMonitor, Convers
 
 		private List<string> personalTopics;
 
-		private static readonly List<string> randomTopics = new List<string> { "ManualGenerator", "Hatch", "Mushbar", "FriedMushbar" };
+		private static readonly List<string> randomTopics = new List<string> { "Headquarters" };
 	}
 }

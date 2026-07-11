@@ -12,7 +12,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<BottleEmptier>(493375141, BottleEmptier.OnRefreshUserMenuDelegate);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -59,6 +59,11 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 
 	[SerializeField]
 	public Color filterTint = FilteredStorage.FILTER_TINT;
+
+	private static readonly EventSystem.IntraObjectHandler<BottleEmptier> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<BottleEmptier>(delegate(BottleEmptier component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	public class StatesInstance : GameStateMachine<BottleEmptier.States, BottleEmptier.StatesInstance, BottleEmptier, object>.GameInstance
 	{

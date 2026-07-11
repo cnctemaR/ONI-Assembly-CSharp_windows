@@ -24,10 +24,9 @@ public class FishTrapConfig : IBuildingConfig
 		trap.trappedOffset = new Vector2(0f, 1f);
 	}
 
-	public override void DoPostConfigureComplete(GameObject prefab)
+	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(prefab);
-		Lure.Def def = prefab.AddOrGetDef<Lure.Def>();
+		Lure.Def def = go.AddOrGetDef<Lure.Def>();
 		def.lurePoints = new CellOffset[]
 		{
 			new CellOffset(0, 0)

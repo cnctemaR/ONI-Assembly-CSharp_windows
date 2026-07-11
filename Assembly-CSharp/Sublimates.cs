@@ -16,8 +16,8 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
-		base.Subscribe(1335436905, new Action<object>(this.OnSplitFromChunk));
+		base.Subscribe<Sublimates>(-2064133523, Sublimates.OnAbsorbDelegate);
+		base.Subscribe<Sublimates>(1335436905, Sublimates.OnSplitFromChunkDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -179,6 +179,16 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 	private float sublimatedMass;
 
 	private HandleVector<int>.Handle flowAccumulator = HandleVector<int>.InvalidHandle;
+
+	private static readonly EventSystem.IntraObjectHandler<Sublimates> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<Sublimates>(delegate(Sublimates component, object data)
+	{
+		component.OnAbsorb(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Sublimates> OnSplitFromChunkDelegate = new EventSystem.IntraObjectHandler<Sublimates>(delegate(Sublimates component, object data)
+	{
+		component.OnSplitFromChunk(data);
+	});
 
 	[Serializable]
 	public struct Info

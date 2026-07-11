@@ -258,7 +258,7 @@ public class ReportManager : KMonoBehaviour
 		[OnDeserializing]
 		private void OnDeserialize()
 		{
-			this.contextEntries = new List<ReportManager.ReportEntry>();
+			this.contextEntries.Clear();
 		}
 
 		public void IterateNotes(Action<ReportManager.ReportEntry.Note> callback)
@@ -321,11 +321,6 @@ public class ReportManager : KMonoBehaviour
 			return this.contextEntries.Count > 0;
 		}
 
-		public List<ReportManager.ReportEntry> GetContextEntries()
-		{
-			return this.contextEntries;
-		}
-
 		[Serialize]
 		public int noteStorageId;
 
@@ -348,7 +343,7 @@ public class ReportManager : KMonoBehaviour
 		public float accNegative;
 
 		[Serialize]
-		public List<ReportManager.ReportEntry> contextEntries = new List<ReportManager.ReportEntry>();
+		public ArrayRef<ReportManager.ReportEntry> contextEntries;
 
 		public struct Note
 		{

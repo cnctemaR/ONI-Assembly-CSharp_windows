@@ -22,8 +22,8 @@ public class ConditionDestinationReachable : RocketLaunchCondition
 
 	public bool CanReachDestination(SpaceDestination destination)
 	{
-		float rocketMaxDistance = this.commandModule.GetRocketMaxDistance();
-		return (float)destination.distance * 10000f <= rocketMaxDistance;
+		float rocketMaxDistance = this.commandModule.rocketStats.GetRocketMaxDistance();
+		return (float)destination.OneBasedDistance * 10000f <= rocketMaxDistance;
 	}
 
 	public SpaceDestination GetDestination()

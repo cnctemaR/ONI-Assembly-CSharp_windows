@@ -16,17 +16,16 @@ public class AnimTileable : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		OccupyArea component = base.GetComponent<OccupyArea>();
-		Extents extents;
 		if (component != null)
 		{
-			extents = component.GetExtents();
+			this.extents = component.GetExtents();
 		}
 		else
 		{
 			Building component2 = base.GetComponent<Building>();
-			extents = component2.GetExtents();
+			this.extents = component2.GetExtents();
 		}
-		extents = new Extents(extents.x - 1, extents.y - 1, extents.width + 2, extents.height + 2);
+		Extents extents = new Extents(this.extents.x - 1, this.extents.y - 1, this.extents.width + 2, this.extents.height + 2);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("AnimTileable.OnSpawn", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[(int)this.objectLayer], new Action<object>(this.OnNeighbourCellsUpdated));
 		this.UpdateEndCaps();
 	}
@@ -44,25 +43,40 @@ public class AnimTileable : KMonoBehaviour
 		bool flag2 = true;
 		bool flag3 = true;
 		bool flag4 = true;
-		int num2 = Grid.CellLeft(num);
-		int num3 = Grid.CellRight(num);
-		int num4 = Grid.CellAbove(num);
-		int num5 = Grid.CellBelow(num);
-		if (Grid.IsValidCell(num2))
+		int num2;
+		int num3;
+		Grid.CellToXY(num, out num2, out num3);
+		CellOffset rotatedCellOffset = new CellOffset(this.extents.x - num2 - 1, 0);
+		CellOffset rotatedCellOffset2 = new CellOffset(this.extents.x - num2 + this.extents.width, 0);
+		CellOffset rotatedCellOffset3 = new CellOffset(0, this.extents.y - num3 + this.extents.height);
+		CellOffset rotatedCellOffset4 = new CellOffset(0, this.extents.y - num3 - 1);
+		Rotatable component = base.GetComponent<Rotatable>();
+		if (component)
 		{
-			flag = !this.HasTileableNeighbour(num2);
+			rotatedCellOffset = component.GetRotatedCellOffset(rotatedCellOffset);
+			rotatedCellOffset2 = component.GetRotatedCellOffset(rotatedCellOffset2);
+			rotatedCellOffset3 = component.GetRotatedCellOffset(rotatedCellOffset3);
+			rotatedCellOffset4 = component.GetRotatedCellOffset(rotatedCellOffset4);
 		}
-		if (Grid.IsValidCell(num3))
-		{
-			flag2 = !this.HasTileableNeighbour(num3);
-		}
+		int num4 = Grid.OffsetCell(num, rotatedCellOffset);
+		int num5 = Grid.OffsetCell(num, rotatedCellOffset2);
+		int num6 = Grid.OffsetCell(num, rotatedCellOffset3);
+		int num7 = Grid.OffsetCell(num, rotatedCellOffset4);
 		if (Grid.IsValidCell(num4))
 		{
-			flag3 = !this.HasTileableNeighbour(num4);
+			flag = !this.HasTileableNeighbour(num4);
 		}
 		if (Grid.IsValidCell(num5))
 		{
-			flag4 = !this.HasTileableNeighbour(num5);
+			flag2 = !this.HasTileableNeighbour(num5);
+		}
+		if (Grid.IsValidCell(num6))
+		{
+			flag3 = !this.HasTileableNeighbour(num6);
+		}
+		if (Grid.IsValidCell(num7))
+		{
+			flag4 = !this.HasTileableNeighbour(num7);
 		}
 		KBatchedAnimController[] componentsInChildren = base.GetComponentsInChildren<KBatchedAnimController>();
 		foreach (KBatchedAnimController kbatchedAnimController in componentsInChildren)
@@ -125,6 +139,8 @@ public class AnimTileable : KMonoBehaviour
 	public ObjectLayer objectLayer = ObjectLayer.Building;
 
 	public Tag[] tags;
+
+	private Extents extents;
 
 	private static readonly KAnimHashedString[] leftSymbols = new KAnimHashedString[]
 	{

@@ -11,5 +11,6 @@ public enum NavType : byte
 	Swim,
 	Pole,
 	Tube,
+	Solid,
 	NumNavTypes
 }

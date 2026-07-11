@@ -75,7 +75,6 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();

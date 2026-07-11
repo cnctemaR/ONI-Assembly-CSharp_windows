@@ -67,7 +67,6 @@ public class WireBridgeConfig : IBuildingConfig
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	protected virtual WireUtilityNetworkLink AddNetworkLink(GameObject go)

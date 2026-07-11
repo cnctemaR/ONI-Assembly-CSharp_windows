@@ -198,6 +198,7 @@ public static class Sim
 		ReportMessage
 	}
 
+	[Serializable]
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]
 	public struct PhysicsData
 	{
@@ -267,9 +268,9 @@ public static class Sim
 			LiquidImpermeable,
 			SolidImpermeable = 4,
 			Unbreakable = 8,
-			Foundation = 16,
-			Transparent = 32,
-			Opaque = 64
+			Transparent = 16,
+			Opaque = 32,
+			NotifyOnMelt = 64
 		}
 	}
 
@@ -298,8 +299,8 @@ public static class Sim
 			this.strength = e.strength;
 			this.flow = e.flow;
 			this.viscosity = e.viscosity;
-			this.minHorizontalLiquidFlow = e.minHorizontalLiquidFlow;
-			this.minVerticalLiquidFlow = e.minVerticalLiquidFlow;
+			this.minHorizontalFlow = e.minHorizontalFlow;
+			this.minVerticalFlow = e.minVerticalFlow;
 			this.maxMass = e.maxMass;
 			this.lowTemp = e.lowTemp;
 			this.highTemp = e.highTemp;
@@ -340,8 +341,8 @@ public static class Sim
 			writer.Write(this.gasSurfaceAreaMultiplier);
 			writer.Write(this.flow);
 			writer.Write(this.viscosity);
-			writer.Write(this.minHorizontalLiquidFlow);
-			writer.Write(this.minVerticalLiquidFlow);
+			writer.Write(this.minHorizontalFlow);
+			writer.Write(this.minVerticalFlow);
 			writer.Write(this.maxMass);
 			writer.Write(this.lowTemp);
 			writer.Write(this.highTemp);
@@ -386,9 +387,9 @@ public static class Sim
 
 		public float viscosity;
 
-		public float minHorizontalLiquidFlow;
+		public float minHorizontalFlow;
 
-		public float minVerticalLiquidFlow;
+		public float minVerticalFlow;
 
 		public float maxMass;
 
@@ -609,6 +610,10 @@ public static class Sim
 		public int numBuildingMeltedInfos;
 
 		public unsafe Sim.MeltedInfo* buildingMeltedInfos;
+
+		public int numCellMeltedInfos;
+
+		public unsafe Sim.CellMeltedInfo* cellMeltedInfos;
 
 		public int numDiseaseEmittedInfos;
 
@@ -883,6 +888,12 @@ public static class Sim
 	public struct MeltedInfo
 	{
 		public int handle;
+	}
+
+	[StructLayout(LayoutKind.Sequential, Pack = 4)]
+	public struct CellMeltedInfo
+	{
+		public int gameCell;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

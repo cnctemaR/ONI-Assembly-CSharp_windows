@@ -25,10 +25,10 @@ public class RocketThrustWidget : KMonoBehaviour, IPointerEnterHandler, IPointer
 	private void UpdateGraphDotPos(CommandModule rocket)
 	{
 		this.totalWidth = this.rectTransform.rect.width;
-		float num = Mathf.Lerp(0f, this.totalWidth, rocket.GetTotalMass() / this.maxMass);
+		float num = Mathf.Lerp(0f, this.totalWidth, rocket.rocketStats.GetTotalMass() / this.maxMass);
 		num = Mathf.Clamp(num, 0f, this.totalWidth);
 		this.graphDot.rectTransform.SetLocalPosition(new Vector3(num, 0f, 0f));
-		this.graphDotText.text = "-" + Util.FormatWholeNumber(rocket.GetTotalThrust() - rocket.GetRocketMaxDistance()) + "km";
+		this.graphDotText.text = "-" + Util.FormatWholeNumber(rocket.rocketStats.GetTotalThrust() - rocket.rocketStats.GetRocketMaxDistance()) + "km";
 	}
 
 	private void Update()
@@ -45,6 +45,8 @@ public class RocketThrustWidget : KMonoBehaviour, IPointerEnterHandler, IPointer
 			num = Mathf.Clamp(num, 0f, this.totalWidth);
 			this.hoverMarker.rectTransform.SetLocalPosition(new Vector3(num, 0f, 0f));
 			float num2 = Mathf.Lerp(0f, this.maxMass, num / this.totalWidth);
+			float totalThrust = this.commandModule.rocketStats.GetTotalThrust();
+			float rocketMaxDistance = this.commandModule.rocketStats.GetRocketMaxDistance();
 			this.hoverTooltip.SetSimpleTooltip(string.Concat(new string[]
 			{
 				UI.STARMAP.ROCKETWEIGHT.MASS,
@@ -55,10 +57,10 @@ public class RocketThrustWidget : KMonoBehaviour, IPointerEnterHandler, IPointer
 				UI.UNITSUFFIXES.DISTANCE.KILOMETER,
 				"\n\n",
 				UI.STARMAP.ROCKETWEIGHT.CURRENTMASS,
-				GameUtil.GetFormattedMass(this.commandModule.GetTotalMass(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"),
+				GameUtil.GetFormattedMass(this.commandModule.rocketStats.GetTotalMass(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"),
 				"\n",
 				UI.STARMAP.ROCKETWEIGHT.CURRENTMASSPENALTY,
-				Util.FormatWholeNumber(this.commandModule.GetTotalThrust() - this.commandModule.GetRocketMaxDistance()),
+				Util.FormatWholeNumber(totalThrust - rocketMaxDistance),
 				UI.UNITSUFFIXES.DISTANCE.KILOMETER
 			}));
 		}

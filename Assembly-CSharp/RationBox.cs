@@ -8,8 +8,8 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 	protected override void OnPrefabInit()
 	{
 		this.filteredStorage = new FilteredStorage(this, null, new Tag[] { GameTags.MarkedForCompost }, this, false, Db.Get().ChoreTypes.FoodFetch);
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe<RationBox>(-592767678, RationBox.OnOperationalChangedDelegate);
+		base.Subscribe<RationBox>(-905833192, RationBox.OnCopySettingsDelegate);
 		WorldInventory.Instance.Discover("FieldRation".ToTag(), GameTags.Edible);
 	}
 
@@ -124,4 +124,14 @@ public class RationBox : KMonoBehaviour, IUserControlledCapacity, IRender1000ms
 	private float userMaxCapacity = float.PositiveInfinity;
 
 	private FilteredStorage filteredStorage;
+
+	private static readonly EventSystem.IntraObjectHandler<RationBox> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<RationBox>(delegate(RationBox component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<RationBox> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<RationBox>(delegate(RationBox component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 }

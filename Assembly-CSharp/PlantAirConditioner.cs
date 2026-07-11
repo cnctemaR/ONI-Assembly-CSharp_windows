@@ -7,8 +7,8 @@ public class PlantAirConditioner : AirConditioner
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-1396791468, new Action<object>(this.OnFertilized));
-		base.Subscribe(-1073674739, new Action<object>(this.OnUnfertilized));
+		base.Subscribe<PlantAirConditioner>(-1396791468, PlantAirConditioner.OnFertilizedDelegate);
+		base.Subscribe<PlantAirConditioner>(-1073674739, PlantAirConditioner.OnUnfertilizedDelegate);
 	}
 
 	private void OnFertilized(object data)
@@ -22,4 +22,14 @@ public class PlantAirConditioner : AirConditioner
 	}
 
 	private Operational.Flag fertilizedFlag = new Operational.Flag("fertilized", Operational.Flag.Type.Requirement);
+
+	private static readonly EventSystem.IntraObjectHandler<PlantAirConditioner> OnFertilizedDelegate = new EventSystem.IntraObjectHandler<PlantAirConditioner>(delegate(PlantAirConditioner component, object data)
+	{
+		component.OnFertilized(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<PlantAirConditioner> OnUnfertilizedDelegate = new EventSystem.IntraObjectHandler<PlantAirConditioner>(delegate(PlantAirConditioner component, object data)
+	{
+		component.OnUnfertilized(data);
+	});
 }

@@ -8,8 +8,8 @@ namespace UnityEngine.XR.WSA
 	[StaticAccessor("HolographicEmulation::HolographicEmulationManager::Get()", StaticAccessorType.Dot)]
 	internal class HolographicEmulationHelper
 	{
-		[NativeName("GetEmulationMode")]
 		[NativeConditional("ENABLE_HOLOLENS_MODULE", StubReturnStatement = "HolographicEmulation::EmulationMode_None")]
+		[NativeName("GetEmulationMode")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern EmulationMode GetEmulationMode();
 	}

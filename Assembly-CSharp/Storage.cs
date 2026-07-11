@@ -64,13 +64,15 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(1502190696, new Action<object>(this.OnQueueDestroyObject));
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe<Storage>(1623392196, Storage.OnDeathDelegate);
+		base.Subscribe<Storage>(1502190696, Storage.OnQueueDestroyObjectDelegate);
+		base.Subscribe<Storage>(-905833192, Storage.OnCopySettingsDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Storing;
 		this.faceTargetWhenWorking = true;
 		this.resetProgressOnStop = true;
 		this.synchronizeAnims = false;
+		this.workingPstComplete = HashedString.Invalid;
+		this.workingPstFailed = HashedString.Invalid;
 	}
 
 	[OnDeserialized]
@@ -90,7 +92,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			this.ApplyStoredItemModifiers(gameObject, true, true);
 			if (this.sendOnStoreOnSpawn)
 			{
-				EventSystem.Trigger(gameObject, 856640610, this);
+				gameObject.Trigger(856640610, this);
 			}
 		}
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
@@ -175,7 +177,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			}
 			if (!block_events)
 			{
-				EventSystem.Trigger(go, 856640610, this);
+				go.Trigger(856640610, this);
 				base.Trigger(-1697596308, go);
 				base.Trigger(-778359855, null);
 				if (this.OnStorageIncreased != null)
@@ -413,7 +415,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		go.transform.parent = null;
 		base.Trigger(-1697596308, go);
-		EventSystem.Trigger(go, 856640610, null);
+		go.Trigger(856640610, null);
 		this.ApplyStoredItemModifiers(go, false, false);
 		if (go != null)
 		{
@@ -522,6 +524,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 
 	public void ConsumeAndGetDisease(Tag tag, float amount, out SimUtil.DiseaseInfo disease_info, out float aggregate_temperature)
 	{
+		DebugUtil.Assert(tag.IsValid, "Assert!", string.Empty, string.Empty);
 		disease_info = SimUtil.DiseaseInfo.Invalid;
 		List<GameObject> list = null;
 		aggregate_temperature = 0f;
@@ -943,7 +946,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	{
 		foreach (GameObject gameObject in this.items)
 		{
-			EventSystem.Trigger(gameObject, -1626373771, this);
+			gameObject.Trigger(-1626373771, this);
 		}
 	}
 
@@ -1073,6 +1076,18 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			Storage.StoredItemModifier.Hide,
 			Storage.StoredItemModifier.Preserve
 		};
+		Storage.OnDeathDelegate = new EventSystem.IntraObjectHandler<Storage>(delegate(Storage component, object data)
+		{
+			component.OnDeath(data);
+		});
+		Storage.OnQueueDestroyObjectDelegate = new EventSystem.IntraObjectHandler<Storage>(delegate(Storage component, object data)
+		{
+			component.OnQueueDestroyObject(data);
+		});
+		Storage.OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<Storage>(delegate(Storage component, object data)
+		{
+			component.OnCopySettings(data);
+		});
 	}
 
 	public bool allowItemRemoval;
@@ -1086,6 +1101,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	public bool showInUI = true;
 
 	public bool showDescriptor;
+
+	public bool allowUIItemRemoval;
 
 	public bool doDiseaseTransfer = true;
 
@@ -1131,6 +1148,12 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 	public static readonly List<Storage.StoredItemModifier> StandardSealedStorage;
 
 	public static readonly List<Storage.StoredItemModifier> StandardFabricatorStorage;
+
+	private static readonly EventSystem.IntraObjectHandler<Storage> OnDeathDelegate;
+
+	private static readonly EventSystem.IntraObjectHandler<Storage> OnQueueDestroyObjectDelegate;
+
+	private static readonly EventSystem.IntraObjectHandler<Storage> OnCopySettingsDelegate;
 
 	public enum StoredItemModifier
 	{

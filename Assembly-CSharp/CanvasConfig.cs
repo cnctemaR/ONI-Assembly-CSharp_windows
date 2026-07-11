@@ -41,7 +41,6 @@ public class CanvasConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		Artable artable = go.AddComponent<Painting>();
 		artable.requiredRolePerk = RoleManager.rolePerks.CanArt.id;
 		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.CANVAS.NAME, "off", 0, 0, false, Artable.Status.Ready));

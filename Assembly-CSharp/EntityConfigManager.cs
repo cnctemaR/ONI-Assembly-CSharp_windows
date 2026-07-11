@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 public class EntityConfigManager : KMonoBehaviour
@@ -27,12 +26,10 @@ public class EntityConfigManager : KMonoBehaviour
 		return 0;
 	}
 
-	public void LoadGeneratedEntities()
+	public void LoadGeneratedEntities(List<Type> types)
 	{
 		Type typeFromHandle = typeof(IEntityConfig);
 		Type typeFromHandle2 = typeof(IMultiEntityConfig);
-		Assembly assembly = Assembly.GetAssembly(typeof(EntityConfigManager));
-		Type[] types = assembly.GetTypes();
 		List<EntityConfigManager.ConfigEntry> list = new List<EntityConfigManager.ConfigEntry>();
 		foreach (Type type in types)
 		{

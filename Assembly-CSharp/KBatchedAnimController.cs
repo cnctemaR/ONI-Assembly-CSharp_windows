@@ -69,11 +69,12 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public Vector2I GetCellXY()
 	{
+		Vector3 positionIncludingOffset = base.PositionIncludingOffset;
 		if (Grid.CellSizeInMeters == 0f)
 		{
-			return new Vector2I((int)base.transform.GetPosition().x, (int)base.transform.GetPosition().y);
+			return new Vector2I((int)positionIncludingOffset.x, (int)positionIncludingOffset.y);
 		}
-		return Grid.PosToXY(base.transform.GetPosition());
+		return Grid.PosToXY(positionIncludingOffset);
 	}
 
 	public float GetZ()
@@ -124,9 +125,11 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void SetBatchGroup(KAnimFileData kafd)
 	{
-		DebugUtil.Assert(!this.batchGroupID.IsValid, "Should only be setting the batch group once.");
+		DebugUtil.Assert(!this.batchGroupID.IsValid, "Should only be setting the batch group once.", string.Empty, string.Empty);
+		DebugUtil.Assert(kafd != null, "Null anim data!! For", base.name, string.Empty);
 		base.curBuild = kafd.build;
-		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(kafd.build.batchTag);
+		DebugUtil.Assert(base.curBuild != null, "Null build for anim!! ", base.name, kafd.name);
+		KAnimGroupFile.Group group = KAnimGroupFile.GetGroup(base.curBuild.batchTag);
 		HashedString hashedString = kafd.build.batchTag;
 		if (group.renderType == KAnimBatchGroup.RendererType.DontRender || group.renderType == KAnimBatchGroup.RendererType.AnimOnly)
 		{
@@ -149,7 +152,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		if (this.animFiles.Length <= 0)
 		{
-			DebugUtil.Assert(false, "KBatchedAnimController has no anim files:" + base.name);
+			DebugUtil.Assert(false, "KBatchedAnimController has no anim files:" + base.name, string.Empty, string.Empty);
 		}
 		if (this.animFiles[0].buildFile == null)
 		{
@@ -169,7 +172,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		if (this.usingNewSymbolOverrideSystem)
 		{
-			DebugUtil.Assert(base.GetComponent<SymbolOverrideController>() != null, "Assert!");
+			DebugUtil.Assert(base.GetComponent<SymbolOverrideController>() != null, "Assert!", string.Empty, string.Empty);
 		}
 	}
 
@@ -182,8 +185,8 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			{
 				this.batch.OverrideZ(base.transform.GetPosition().z);
 			}
-			Vector3 position = base.transform.GetPosition();
-			this.lastPos = position;
+			Vector3 positionIncludingOffset = base.PositionIncludingOffset;
+			this.lastPos = positionIncludingOffset;
 			if (this.visibilityType != KAnimControllerBase.VisibilityType.Always)
 			{
 				Vector2I vector2I = KAnimBatchManager.ControllerToChunkXY(this);
@@ -215,7 +218,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		this.UpdateFrame(this.elapsedTime);
 		if (!this.stopped && this.mode != KAnim.PlayMode.Paused)
 		{
-			this.elapsedTime += dt * this.playSpeed;
+			base.SetElapsedTime(this.elapsedTime + dt * this.playSpeed);
 		}
 		this.forceRebuild = false;
 	}
@@ -258,7 +261,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			base.currentFrame = this.curAnim.numFrames - 1;
 			base.Stop();
-			EventSystem.Trigger(base.gameObject, -1061186183, null);
+			base.gameObject.Trigger(-1061186183, null);
 			if (this.destroyOnAnimComplete)
 			{
 				base.DestroySelf();
@@ -314,7 +317,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 				kbatchedAnimCanvasRenderer.SetBatch(this);
 			}
 		}
-		this.SetBatchGroupRenderQueueOverride();
 	}
 
 	public int GetCurrentNumFrames()
@@ -348,7 +350,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public override Matrix2x3 GetTransformMatrix()
 	{
-		Vector3 vector = base.transform.GetPosition() + this.offset;
+		Vector3 vector = base.PositionIncludingOffset;
 		vector.z = 0f;
 		Vector2 vector2 = new Vector2(this.animScale * this.animWidth, -this.animScale * this.animHeight);
 		if (this.materialType == KAnimBatchGroup.MaterialType.UI)
@@ -452,18 +454,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		symbolVisible = false;
 		return Matrix2x3.identity;
-	}
-
-	public void SetBatchGroupRenderQueueOverride()
-	{
-		if (this.batch != null)
-		{
-			if (this.originalRenderQueue < 0)
-			{
-				this.originalRenderQueue = this.batch.group.GetMaterial(this.batch.materialType).renderQueue;
-			}
-			this.batch.group.GetMaterial(this.batch.materialType).renderQueue = this.renderQueueOverride;
-		}
 	}
 
 	public override void SetLayer(int layer)
@@ -629,11 +619,11 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public void SetSymbolOverride(int symbol_idx, KAnim.Build.SymbolFrameInstance symbol_frame_instance)
 	{
-		DebugUtil.Assert(this.usingNewSymbolOverrideSystem, "KBatchedAnimController requires usingNewSymbolOverrideSystem to bet to true to enable symbol overrides.");
+		DebugUtil.Assert(this.usingNewSymbolOverrideSystem, "KBatchedAnimController requires usingNewSymbolOverrideSystem to bet to true to enable symbol overrides.", string.Empty, string.Empty);
 		base.symbolOverrideInfoGpuData.SetSymbolOverrideInfo(symbol_idx, symbol_frame_instance);
 	}
 
-	private void Register()
+	protected override void Register()
 	{
 		if (!this.IsActive())
 		{
@@ -652,7 +642,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 	}
 
-	private void DeRegister()
+	protected override void DeRegister()
 	{
 		if (this.batch != null)
 		{
@@ -714,16 +704,26 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 	}
 
+	protected override void RefreshVisibilityListener()
+	{
+		if (!this.visibilityListenerRegistered)
+		{
+			return;
+		}
+		this.ConfigureVisibilityListener(false);
+		this.ConfigureVisibilityListener(true);
+	}
+
 	private void RegisterVisibilityListener()
 	{
-		DebugUtil.Assert(!this.visibilityListenerRegistered, "Assert!");
+		DebugUtil.Assert(!this.visibilityListenerRegistered, "Assert!", string.Empty, string.Empty);
 		Singleton<KBatchedAnimUpdater>.Instance.VisibilityRegister(this);
 		this.visibilityListenerRegistered = true;
 	}
 
 	private void UnregisterVisibilityListener()
 	{
-		DebugUtil.Assert(this.visibilityListenerRegistered, "Assert!");
+		DebugUtil.Assert(this.visibilityListenerRegistered, "Assert!", string.Empty, string.Empty);
 		Singleton<KBatchedAnimUpdater>.Instance.VisibilityUnregister(this);
 		this.visibilityListenerRegistered = false;
 	}
@@ -762,11 +762,6 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	[NonSerialized]
 	public KBatchedAnimUpdater.RegistrationState updateRegistrationState = KBatchedAnimUpdater.RegistrationState.Unregistered;
-
-	public int renderQueueOverride = -1;
-
-	[NonSerialized]
-	public int originalRenderQueue = -1;
 
 	public Grid.SceneLayer sceneLayer;
 

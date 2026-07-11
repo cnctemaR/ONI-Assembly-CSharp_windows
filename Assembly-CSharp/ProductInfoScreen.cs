@@ -302,7 +302,7 @@ public class ProductInfoScreen : KScreen
 		{
 			this.onElementsFullySelected.Signal();
 		}
-		else if (!MaterialSelector.AllowInsufficientMaterialBuild())
+		else if (!MaterialSelector.AllowInsufficientMaterialBuild() && !DebugHandler.InstantBuildMode)
 		{
 			if (PlayerController.Instance.ActiveTool == BuildTool.Instance)
 			{

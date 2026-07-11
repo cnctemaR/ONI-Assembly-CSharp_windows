@@ -213,13 +213,20 @@ namespace ProcGenGame
 			{
 				WorldGen.PATH = global::System.IO.Path.Combine(Application.streamingAssetsPath, "worldgen/");
 			}
-			return WorldGen.PATH;
+			return FSUtil.Normalize(WorldGen.PATH);
 		}
 
 		public static void LoadSettings()
 		{
 			WorldGen.isRunningDebugGen = false;
-			WorldGen.settings = WorldGenSettings.LoadFile(WorldGen.GetPath());
+			if (Global.Instance != null && Global.Instance.layeredFileSystem != null)
+			{
+				WorldGen.settings = WorldGenSettings.LoadFile(WorldGen.GetPath(), Global.Instance.layeredFileSystem);
+			}
+			else
+			{
+				WorldGen.settings = WorldGenSettings.LoadFile(WorldGen.GetPath(), new StandardFileSystem());
+			}
 			if (WorldGen.settings == null)
 			{
 				return;

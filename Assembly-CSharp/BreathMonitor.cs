@@ -57,7 +57,7 @@ public class BreathMonitor : GameStateMachine<BreathMonitor, BreathMonitor.Insta
 	{
 		if (NameDisplayScreen.Instance != null)
 		{
-			NameDisplayScreen.Instance.SetBreathDisplay(smi.gameObject, new Func<float>(smi.GetBreath), false);
+			NameDisplayScreen.Instance.SetBreathDisplay(smi.gameObject, null, false);
 		}
 	}
 

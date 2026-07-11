@@ -13,7 +13,7 @@ public class IronCometConfig : IEntityConfig
 		comet.temperatureRange = new Vector2(323.15f, 423.15f);
 		comet.explosionOreCount = new Vector2I(2, 4);
 		comet.entityDamage = 15;
-		comet.totalTileDamage = 1f;
+		comet.totalTileDamage = 0.5f;
 		comet.splashRadius = 1;
 		comet.impactSound = "Meteor_Medium_Impact";
 		comet.flyingSoundID = 1;

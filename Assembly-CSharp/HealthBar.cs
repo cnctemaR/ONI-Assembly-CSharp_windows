@@ -3,11 +3,19 @@ using UnityEngine;
 
 public class HealthBar : ProgressBar
 {
+	private bool ShouldShow
+	{
+		get
+		{
+			return this.showTimer > 0f || base.PercentFull < this.alwaysShowThreshold;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		base.barColor = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
-		base.gameObject.SetActive(this.showTimer > 0f);
+		base.gameObject.SetActive(this.ShouldShow);
 	}
 
 	public void OnChange()
@@ -23,7 +31,7 @@ public class HealthBar : ProgressBar
 		{
 			this.showTimer = Mathf.Max(0f, this.showTimer - Time.unscaledDeltaTime);
 		}
-		if (this.showTimer == 0f)
+		if (!this.ShouldShow)
 		{
 			base.gameObject.SetActive(false);
 		}
@@ -41,9 +49,13 @@ public class HealthBar : ProgressBar
 
 	public override void OnOverlayChanged(object data = null)
 	{
+		if (!this.autoHide)
+		{
+			return;
+		}
 		if ((SimViewMode)data == SimViewMode.None)
 		{
-			if (!base.gameObject.activeSelf && this.showTimer != 0f)
+			if (!base.gameObject.activeSelf && this.ShouldShow)
 			{
 				base.enabled = true;
 				base.gameObject.SetActive(true);
@@ -58,5 +70,7 @@ public class HealthBar : ProgressBar
 
 	private float showTimer;
 
-	private float maxShowTime = 3f;
+	private float maxShowTime = 10f;
+
+	private float alwaysShowThreshold = 0.8f;
 }

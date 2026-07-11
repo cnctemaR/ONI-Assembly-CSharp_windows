@@ -69,7 +69,6 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		TravelTubeUtilityNetworkLink travelTubeUtilityNetworkLink = this.AddNetworkLink(go);
 		travelTubeUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	protected virtual TravelTubeUtilityNetworkLink AddNetworkLink(GameObject go)

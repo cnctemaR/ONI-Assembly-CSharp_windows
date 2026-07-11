@@ -76,7 +76,7 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			Vector3 vector = position;
 			vector.y += CreatureFallMonitor.FLOOR_DISTANCE;
 			int num2 = Grid.PosToCell(vector);
-			bool flag3 = Grid.Solid[num2];
+			bool flag3 = Grid.IsValidCell(num2) && Grid.Solid[num2];
 			return !flag3;
 		}
 

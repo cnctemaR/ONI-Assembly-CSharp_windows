@@ -28,7 +28,7 @@ public struct BindingEntry : IEquatable<BindingEntry>
 		case 3:
 			return (KKeyCode)(button + 410);
 		default:
-			DebugUtil.Assert(false, "Assert!");
+			DebugUtil.Assert(false, "Assert!", string.Empty, string.Empty);
 			return KKeyCode.None;
 		}
 	}

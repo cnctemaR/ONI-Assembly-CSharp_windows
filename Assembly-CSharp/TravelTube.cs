@@ -30,7 +30,7 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 		base.OnSpawn();
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		Game.Instance.travelTubeSystem.AddToNetworks(num, this, false);
-		base.Subscribe(-1041684577, new Action<object>(this.OnConnectionsChanged));
+		base.Subscribe<TravelTube>(-1041684577, TravelTube.OnConnectionsChangedDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -150,6 +150,11 @@ public class TravelTube : KMonoBehaviour, IFirstFrameCallback, ITravelTubePiece,
 	private bool hasValidExitTransitions;
 
 	private UtilityConnections connections;
+
+	private static readonly EventSystem.IntraObjectHandler<TravelTube> OnConnectionsChangedDelegate = new EventSystem.IntraObjectHandler<TravelTube>(delegate(TravelTube component, object data)
+	{
+		component.OnConnectionsChanged(data);
+	});
 
 	private Guid connectedStatus;
 

@@ -40,8 +40,8 @@ public static class BasePacuConfig
 		ChoreTable.Builder builder2 = builder.Add(def, true).Add(new DebugGoToStates.Def(), true).Add(new FlopStates.Def(), true)
 			.PushInterruptGroup()
 			.Add(new FixedCaptureStates.Def(), true)
-			.Add(new EatStates.Def(), true)
 			.Add(new LayEggStates.Def(), true)
+			.Add(new EatStates.Def(), true)
 			.Add(new PlayAnimsStates.Def(GameTags.Creatures.Poop, false, "lay_egg_pre", global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME, global::STRINGS.CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP), true)
 			.Add(new MoveToLureStates.Def(), true)
 			.PopInterruptGroup()
@@ -55,7 +55,7 @@ public static class BasePacuConfig
 		EntityTemplates.AddCreatureBrain(gameObject, builder2, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { SimHashes.Algae.CreateTag() }, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f)
+			new Diet.Info(new HashSet<Tag> { SimHashes.Algae.CreateTag() }, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();

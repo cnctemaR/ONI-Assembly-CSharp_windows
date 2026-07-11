@@ -54,11 +54,7 @@ public class RefrigeratorConfig : IBuildingConfig
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<Refrigerator>();
 		go.AddOrGet<DropAllWorkable>();
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			StorageController.Instance instance = new StorageController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<StorageController.Def>();
 	}
 
 	public const string ID = "Refrigerator";

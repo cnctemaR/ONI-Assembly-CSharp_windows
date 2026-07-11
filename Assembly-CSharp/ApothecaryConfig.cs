@@ -40,11 +40,9 @@ public class ApothecaryConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
+		go.AddOrGetDef<PoweredActiveStoppableController.Def>();
 		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
 		{
-			PoweredActiveStoppableController.Instance instance = new PoweredActiveStoppableController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
 			Fabricator component = game_object.GetComponent<Fabricator>();
 			component.SetAttributeConverter(Db.Get().AttributeConverters.CompoundingSpeed);
 		};

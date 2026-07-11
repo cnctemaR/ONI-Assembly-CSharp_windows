@@ -21,5 +21,5 @@ using UnityEngine;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: InternalsVisibleTo("Assembly-CSharp-testable")]
 [assembly: InternalsVisibleTo("Assembly-CSharp-Editor-testable")]
-[assembly: UnityAPICompatibilityVersion("2018.2.0f2")]
+[assembly: UnityAPICompatibilityVersion("2018.2.7f1")]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]

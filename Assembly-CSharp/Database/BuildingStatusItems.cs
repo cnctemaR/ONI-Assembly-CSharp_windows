@@ -339,7 +339,7 @@ namespace Database
 				str = str.Replace("{Roles}", string.Join(", ", list2.ToArray()));
 				return str;
 			};
-			this.ColonyLacksRequiredRolePerk = this.CreateStatusItem("ColonyLacksRequiredRolePerk", "BUILDING", "status_item_pending_repair", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.ColonyLacksRequiredRolePerk = this.CreateStatusItem("ColonyLacksRequiredRolePerk", "BUILDING", "status_item_role_required", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.ColonyLacksRequiredRolePerk.resolveStringCallback = delegate(string str, object data)
 			{
 				HashedString hashedString3 = (HashedString)data;
@@ -433,8 +433,26 @@ namespace Database
 			this.Unusable = this.CreateStatusItem("Unusable", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.NoResearchSelected = this.CreateStatusItem("NoResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.NoResearchSelected.AddNotification(null, null, null, 0f);
+			StatusItem noResearchSelected = this.NoResearchSelected;
+			noResearchSelected.resolveTooltipCallback = (Func<string, object, string>)Delegate.Combine(noResearchSelected.resolveTooltipCallback, new Func<string, object, string>(delegate(string str, object data)
+			{
+				string text12 = GameInputMapping.FindEntry(global::Action.ManageResearch).mKeyCode.ToString();
+				str = str.Replace("{RESEARCH_MENU_KEY}", text12);
+				return str;
+			}));
 			this.NoApplicableResearchSelected = this.CreateStatusItem("NoApplicableResearchSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			this.NoApplicableResearchSelected.AddNotification(null, null, null, 0f);
+			this.NoApplicableAnalysisSelected = this.CreateStatusItem("NoApplicableAnalysisSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.NoApplicableAnalysisSelected.AddNotification(null, null, null, 0f);
+			StatusItem noApplicableAnalysisSelected = this.NoApplicableAnalysisSelected;
+			noApplicableAnalysisSelected.resolveTooltipCallback = (Func<string, object, string>)Delegate.Combine(noApplicableAnalysisSelected.resolveTooltipCallback, new Func<string, object, string>(delegate(string str, object data)
+			{
+				string text13 = GameInputMapping.FindEntry(global::Action.ManageStarmap).mKeyCode.ToString();
+				str = str.Replace("{STARMAP_MENU_KEY}", text13);
+				return str;
+			}));
+			this.NoResearchOrDestinationSelected = this.CreateStatusItem("NoResearchOrDestinationSelected", "BUILDING", "status_item_no_research_selected", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.NoResearchOrDestinationSelected.AddNotification(null, null, null, 0f);
 			this.ValveRequest = this.CreateStatusItem("ValveRequest", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.ValveRequest.resolveStringCallback = delegate(string str, object data)
 			{
@@ -445,8 +463,8 @@ namespace Database
 			this.EmittingLight = this.CreateStatusItem("EmittingLight", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.EmittingLight.resolveStringCallback = delegate(string str, object data)
 			{
-				string text12 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
-				str = str.Replace("{LightGridOverlay}", text12);
+				string text14 = GameInputMapping.FindEntry(global::Action.Overlay5).mKeyCode.ToString();
+				str = str.Replace("{LightGridOverlay}", text14);
 				return str;
 			};
 			this.RationBoxContents = this.CreateStatusItem("RationBoxContents", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
@@ -478,8 +496,8 @@ namespace Database
 			this.EmittingElement.resolveStringCallback = delegate(string str, object data)
 			{
 				IElementEmitter elementEmitter = (IElementEmitter)data;
-				string text13 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
-				str = str.Replace("{ElementType}", text13);
+				string text15 = ElementLoader.FindElementByHash(elementEmitter.Element).tag.ProperName();
+				str = str.Replace("{ElementType}", text15);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementEmitter.AverageEmitRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -515,8 +533,8 @@ namespace Database
 			this.ElementConsumer.resolveStringCallback = delegate(string str, object data)
 			{
 				ElementConsumer elementConsumer = (ElementConsumer)data;
-				string text14 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
-				str = str.Replace("{ElementTypes}", text14);
+				string text16 = ElementLoader.FindElementByHash(elementConsumer.elementToConsume).tag.ProperName();
+				str = str.Replace("{ElementTypes}", text16);
 				str = str.Replace("{FlowRate}", GameUtil.GetFormattedMass(elementConsumer.AverageConsumeRate, GameUtil.TimeSlice.PerSecond, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
 				return str;
 			};
@@ -610,10 +628,10 @@ namespace Database
 			this.Grave.resolveStringCallback = delegate(string str, object data)
 			{
 				Grave.StatesInstance statesInstance2 = (Grave.StatesInstance)data;
-				string text15 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
+				string text17 = str.Replace("{DeadDupe}", statesInstance2.master.graveName);
 				string[] strings = LocString.GetStrings(typeof(NAMEGEN.GRAVE.EPITAPHS));
 				int num4 = statesInstance2.master.epitaphIdx % strings.Length;
-				return text15.Replace("{Epitaph}", strings[num4]);
+				return text17.Replace("{Epitaph}", strings[num4]);
 			};
 			this.GraveEmpty = this.CreateStatusItem("GraveEmpty", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			this.CannotCoolFurther = this.CreateStatusItem("CannotCoolFurther", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
@@ -671,6 +689,16 @@ namespace Database
 				if (rocketModule2 != null)
 				{
 					return str.Replace("{0}", rocketModule2.GetParentRocketName());
+				}
+				return str;
+			};
+			this.PathNotClear = new StatusItem("PATH_NOT_CLEAR", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
+			this.PathNotClear.resolveTooltipCallback = delegate(string str, object data)
+			{
+				ConditionFlightPathIsClear conditionFlightPathIsClear = (ConditionFlightPathIsClear)data;
+				if (conditionFlightPathIsClear != null)
+				{
+					str = string.Format(str, conditionFlightPathIsClear.GetObstruction());
 				}
 				return str;
 			};
@@ -882,6 +910,10 @@ namespace Database
 
 		public StatusItem NoApplicableResearchSelected;
 
+		public StatusItem NoApplicableAnalysisSelected;
+
+		public StatusItem NoResearchOrDestinationSelected;
+
 		public StatusItem Researching;
 
 		public StatusItem ValveRequest;
@@ -1011,5 +1043,7 @@ namespace Database
 		public StatusItem MissingGantry;
 
 		public StatusItem RocketName;
+
+		public StatusItem PathNotClear;
 	}
 }

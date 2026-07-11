@@ -122,10 +122,10 @@ public class WorldGenSpawner : KMonoBehaviour
 			Grid.Revealed[i] = false;
 			Grid.Spawnable[i] = 0;
 		}
-		float floatSetting = WorldGen.Settings.GetFloatSetting("NewBaseVisibiltyInnerRadius");
-		float floatSetting2 = WorldGen.Settings.GetFloatSetting("NewBaseVisibiltyRadius");
+		float num = 16.5f;
+		float num2 = 18f;
 		Vector2I baseStartPos = WorldGen.SpawnData.baseStartPos;
-		GridVisibility.Reveal(baseStartPos.x, baseStartPos.y, floatSetting2, floatSetting);
+		GridVisibility.Reveal(baseStartPos.x, baseStartPos.y, num2, num);
 	}
 
 	[Serialize]
@@ -215,7 +215,7 @@ public class WorldGenSpawner : KMonoBehaviour
 			if (prefab != null)
 			{
 				bool flag = false;
-				if (prefab.GetComponent<Pickupable>() != null)
+				if (prefab.GetComponent<Pickupable>() != null && !prefab.HasTag(GameTags.Creatures.Digger))
 				{
 					flag = true;
 				}

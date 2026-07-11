@@ -32,7 +32,6 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			}
 		}
 		this.providers.Add(this.choreProvider);
-		this.choreTypePriorities[Db.Get().ChoreTypes.Idle.IdHash] = 0;
 	}
 
 	protected override void OnSpawn()
@@ -177,7 +176,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public void AddProvider(ChoreProvider provider)
 	{
-		DebugUtil.Assert(provider != null, "Assert!");
+		DebugUtil.Assert(provider != null, "Assert!", string.Empty, string.Empty);
 		this.providers.Add(provider);
 	}
 
@@ -188,7 +187,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public void AddUrge(Urge urge)
 	{
-		DebugUtil.Assert(urge != null, "Assert!");
+		DebugUtil.Assert(urge != null, "Assert!", string.Empty, string.Empty);
 		this.urges.Add(urge);
 		base.Trigger(-736698276, urge);
 	}
@@ -430,26 +429,23 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		ChoreGroups choreGroups = Db.Get().ChoreGroups;
 		foreach (ChoreType choreType in group.choreTypes)
 		{
-			if (!(choreType.IdHash == Db.Get().ChoreTypes.Idle.IdHash))
+			int num = 0;
+			foreach (ChoreGroup choreGroup in choreGroups.resources)
 			{
-				int num = 0;
-				foreach (ChoreGroup choreGroup in choreGroups.resources)
+				if (choreGroup.choreTypes != null)
 				{
-					if (choreGroup.choreTypes != null)
+					foreach (ChoreType choreType2 in choreGroup.choreTypes)
 					{
-						foreach (ChoreType choreType2 in choreGroup.choreTypes)
+						if (choreType2.IdHash == choreType.IdHash)
 						{
-							if (choreType2.IdHash == choreType.IdHash)
-							{
-								bool flag;
-								int personalPriority = this.GetPersonalPriority(choreGroup, out flag);
-								num = Mathf.Max(num, personalPriority);
-							}
+							bool flag;
+							int personalPriority = this.GetPersonalPriority(choreGroup, out flag);
+							num = Mathf.Max(num, personalPriority);
 						}
 					}
 				}
-				this.choreTypePriorities[choreType.IdHash] = num;
 			}
+			this.choreTypePriorities[choreType.IdHash] = num;
 		}
 	}
 
@@ -465,7 +461,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	public void AddBehaviourPrecondition(Tag tag, Func<object, bool> precondition, object arg)
 	{
-		DebugUtil.Assert(!this.behaviourPreconditions.ContainsKey(tag), "Assert!");
+		DebugUtil.Assert(!this.behaviourPreconditions.ContainsKey(tag), "Assert!", string.Empty, string.Empty);
 		this.behaviourPreconditions[tag] = new ChoreConsumer.BehaviourPrecondition
 		{
 			cb = precondition,

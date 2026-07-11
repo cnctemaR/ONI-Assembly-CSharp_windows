@@ -14,12 +14,11 @@ public class SteamUGCService : MonoBehaviour
 	{
 		get
 		{
-			SteamUGCService.Init();
 			return SteamUGCService.instance;
 		}
 	}
 
-	public static void Init()
+	public static void Initialize()
 	{
 		if (SteamUGCService.instance == null)
 		{
@@ -37,14 +36,9 @@ public class SteamUGCService : MonoBehaviour
 	{
 	}
 
-	public List<SteamUGCService.Subscibed> GetSubscribedScenarios()
+	public List<SteamUGCService.Subscribed> GetSubscribed(string required_tag)
 	{
-		return this.GetSubscribed("scenario");
-	}
-
-	public List<SteamUGCService.Subscibed> GetSubscribed(string required_tag)
-	{
-		List<SteamUGCService.Subscibed> list = new List<SteamUGCService.Subscibed>();
+		List<SteamUGCService.Subscribed> list = new List<SteamUGCService.Subscribed>();
 		if (this.details != null && this.subscribed != null)
 		{
 			for (int i = 0; i < this.details.Length; i++)
@@ -56,12 +50,30 @@ public class SteamUGCService : MonoBehaviour
 					PublishedFileId_t nPublishedFileId = steamUGCDetails_t.m_nPublishedFileId;
 					if (this.subscribed.Contains(nPublishedFileId))
 					{
-						list.Add(new SteamUGCService.Subscibed(steamUGCDetails_t));
+						list.Add(new SteamUGCService.Subscribed(steamUGCDetails_t));
 					}
 				}
 			}
 		}
 		return list;
+	}
+
+	public SteamUGCService.Subscribed GetSubscribed(PublishedFileId_t id)
+	{
+		SteamUGCService.Subscribed subscribed = null;
+		if (this.subscribed != null)
+		{
+			for (int i = 0; i < this.details.Length; i++)
+			{
+				SteamUGCDetails_t steamUGCDetails_t = this.details[i];
+				if (steamUGCDetails_t.m_nPublishedFileId == id)
+				{
+					subscribed = new SteamUGCService.Subscribed(steamUGCDetails_t);
+					break;
+				}
+			}
+		}
+		return subscribed;
 	}
 
 	public bool IsSubscribedTo(PublishedFileId_t id)
@@ -90,7 +102,7 @@ public class SteamUGCService : MonoBehaviour
 		return null;
 	}
 
-	public void OnEnable()
+	public void Awake()
 	{
 		this.setupComplete = false;
 		SteamUGCService.instance = this;
@@ -164,9 +176,8 @@ public class SteamUGCService : MonoBehaviour
 	{
 		this.m_ItemInstalled = Callback<ItemInstalled_t>.Create(new Callback<ItemInstalled_t>.DispatchDelegate(this.OnItemInstalled));
 		this.m_DownloadItemResult = Callback<DownloadItemResult_t>.Create(new Callback<DownloadItemResult_t>.DispatchDelegate(this.OnDownloadItemResult));
-		this.m_ItemUnsubscribed = Callback<RemoteStoragePublishedFileUnsubscribed_t>.Create(new Callback<RemoteStoragePublishedFileUnsubscribed_t>.DispatchDelegate(this.OnItemUnsubscibed));
+		this.m_ItemUnsubscribed = Callback<RemoteStoragePublishedFileUnsubscribed_t>.Create(new Callback<RemoteStoragePublishedFileUnsubscribed_t>.DispatchDelegate(this.OnItemUnsubscribed));
 		this.m_ItemUpdated = Callback<RemoteStoragePublishedFileUpdated_t>.Create(new Callback<RemoteStoragePublishedFileUpdated_t>.DispatchDelegate(this.OnItemUpdated));
-		this.OnSteamUGCQueryCompletedCallResult = CallResult<SteamUGCQueryCompleted_t>.Create(new CallResult<SteamUGCQueryCompleted_t>.APIDispatchDelegate(this.OnSteamUGCQueryCompleted));
 		this.OnSteamUGCQueryDetailsCompletedCallResult = CallResult<SteamUGCQueryCompleted_t>.Create(new CallResult<SteamUGCQueryCompleted_t>.APIDispatchDelegate(this.OnSteamUGCQueryDetailsCompleted));
 		this.doClearList = true;
 		this.setupComplete = true;
@@ -226,11 +237,6 @@ public class SteamUGCService : MonoBehaviour
 			this.subscribed = new List<PublishedFileId_t>(array);
 			this.listPending = true;
 			this.m_UGCQueryHandle = SteamUGC.CreateQueryUGCDetailsRequest(array, (uint)array.Length);
-			foreach (string text in SteamUGCService.QUERY_TAGS)
-			{
-				SteamUGC.AddRequiredTag(this.m_UGCQueryHandle, text);
-			}
-			SteamUGC.SetMatchAnyTag(this.m_UGCQueryHandle, true);
 			SteamAPICall_t steamAPICall_t = SteamUGC.SendQueryUGCRequest(this.m_UGCQueryHandle);
 			this.OnSteamUGCQueryDetailsCompletedCallResult.Set(steamAPICall_t, null);
 		}
@@ -282,9 +288,9 @@ public class SteamUGCService : MonoBehaviour
 			}
 			uint numSubscribedItems = SteamUGC.GetNumSubscribedItems();
 			this.UpdateSubscription(numSubscribedItems);
-			if (this.ugcEventHandler != null)
+			foreach (SteamUGCService.IUGCEventHandler iugceventHandler in this.ugcEventHandlers)
 			{
-				this.ugcEventHandler.OnRefresh();
+				iugceventHandler.OnUGCRefresh();
 			}
 			this.listPending = false;
 		}
@@ -309,9 +315,9 @@ public class SteamUGCService : MonoBehaviour
 					this.AddPreviewToDownloadQueue(this.details[(int)((UIntPtr)num)].m_hPreviewFile);
 				}
 			}
-			if (this.ugcEventHandler != null)
+			foreach (SteamUGCService.IUGCEventHandler iugceventHandler in this.ugcEventHandlers)
 			{
-				this.ugcEventHandler.OnRefresh();
+				iugceventHandler.OnUGCRefresh();
 			}
 			this.listPending = false;
 		}
@@ -349,36 +355,32 @@ public class SteamUGCService : MonoBehaviour
 		if (this.m_DownloadPreviewResult.Count == 0)
 		{
 			this.doClearList = true;
-			if (this.ugcEventHandler != null)
-			{
-				this.ugcEventHandler.OnRefresh();
-			}
 		}
 	}
 
 	private void OnItemInstalled(ItemInstalled_t pCallback)
 	{
-		if (this.ugcEventHandler != null)
+		foreach (SteamUGCService.IUGCEventHandler iugceventHandler in this.ugcEventHandlers)
 		{
-			this.ugcEventHandler.OnItemInstalled(pCallback);
+			iugceventHandler.OnUGCItemInstalled(pCallback);
 		}
 		this.doClearList = true;
 	}
 
 	private void OnItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback)
 	{
-		if (this.ugcEventHandler != null)
+		foreach (SteamUGCService.IUGCEventHandler iugceventHandler in this.ugcEventHandlers)
 		{
-			this.ugcEventHandler.OnItemUpdated(pCallback);
+			iugceventHandler.OnUGCItemUpdated(pCallback);
 		}
 		this.doClearList = true;
 	}
 
-	private void OnItemUnsubscibed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
+	private void OnItemUnsubscribed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
 	{
-		if (this.ugcEventHandler != null)
+		foreach (SteamUGCService.IUGCEventHandler iugceventHandler in this.ugcEventHandlers)
 		{
-			this.ugcEventHandler.OnItemUnsubscibed(pCallback);
+			iugceventHandler.OnUGCItemUnsubscribed(pCallback);
 		}
 		this.doClearList = true;
 	}
@@ -390,9 +392,9 @@ public class SteamUGCService : MonoBehaviour
 			global::Debug.Log("Download complete for waitingForDownload [" + SteamUGCService.waitingForDownload + "]", null);
 			SteamUGCService.waitingForDownload = PublishedFileId_t.Invalid;
 		}
-		if (this.ugcEventHandler != null)
+		foreach (SteamUGCService.IUGCEventHandler iugceventHandler in this.ugcEventHandlers)
 		{
-			this.ugcEventHandler.OnItemDownloaded(pCallback);
+			iugceventHandler.OnUGCItemDownloaded(pCallback);
 		}
 		this.doClearList = true;
 	}
@@ -447,14 +449,6 @@ public class SteamUGCService : MonoBehaviour
 		return array;
 	}
 
-	public static uint kModUploaderAppID = 636750U;
-
-	public const string TAG_SCENARIO = "scenario";
-
-	public const string TAG_LANGUAGE = "language";
-
-	private static readonly string[] QUERY_TAGS = new string[] { "language", "scenario" };
-
 	private UGCQueryHandle_t m_UGCQueryHandle;
 
 	protected Callback<RemoteStoragePublishedFileUpdated_t> m_ItemUpdated;
@@ -466,8 +460,6 @@ public class SteamUGCService : MonoBehaviour
 	protected Callback<DownloadItemResult_t> m_DownloadItemResult;
 
 	protected Dictionary<UGCHandle_t, CallResult<RemoteStorageDownloadUGCResult_t>> m_DownloadPreviewResult = new Dictionary<UGCHandle_t, CallResult<RemoteStorageDownloadUGCResult_t>>();
-
-	private CallResult<SteamUGCQueryCompleted_t> OnSteamUGCQueryCompletedCallResult;
 
 	private CallResult<SteamUGCQueryCompleted_t> OnSteamUGCQueryDetailsCompletedCallResult;
 
@@ -491,7 +483,7 @@ public class SteamUGCService : MonoBehaviour
 
 	private static readonly string[] previewFileNames = new string[] { "preview.png", "preview.png", ".png", ".jpg" };
 
-	public SteamUGCService.IUGCEventHandler ugcEventHandler;
+	public List<SteamUGCService.IUGCEventHandler> ugcEventHandlers = new List<SteamUGCService.IUGCEventHandler>();
 
 	private static SteamUGCService instance;
 
@@ -499,24 +491,25 @@ public class SteamUGCService : MonoBehaviour
 
 	public interface IUGCEventHandler
 	{
-		void OnItemInstalled(ItemInstalled_t pCallback);
+		void OnUGCItemInstalled(ItemInstalled_t pCallback);
 
-		void OnItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback);
+		void OnUGCItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback);
 
-		void OnItemUnsubscibed(RemoteStoragePublishedFileUnsubscribed_t pCallback);
+		void OnUGCItemUnsubscribed(RemoteStoragePublishedFileUnsubscribed_t pCallback);
 
-		void OnItemDownloaded(DownloadItemResult_t pCallback);
+		void OnUGCItemDownloaded(DownloadItemResult_t pCallback);
 
-		void OnRefresh();
+		void OnUGCRefresh();
 	}
 
-	public class Subscibed
+	public class Subscribed
 	{
-		public Subscibed(SteamUGCDetails_t item)
+		public Subscribed(SteamUGCDetails_t item)
 		{
 			this.title = item.m_rgchTitle;
 			this.description = item.m_rgchDescription;
 			this.fileId = item.m_nPublishedFileId;
+			this.lastUpdateTime = (ulong)item.m_rtimeUpdated;
 		}
 
 		public string title { get; private set; }
@@ -524,5 +517,7 @@ public class SteamUGCService : MonoBehaviour
 		public string description { get; private set; }
 
 		public PublishedFileId_t fileId { get; private set; }
+
+		public ulong lastUpdateTime { get; private set; }
 	}
 }

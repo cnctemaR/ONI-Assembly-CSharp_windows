@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
-using UnityEngine;
+using ProcGen;
 
-public class Unlocks : MonoBehaviour
+public class Unlocks : KMonoBehaviour, ISim4000ms
 {
-	private void Awake()
+	protected override void OnPrefabInit()
 	{
 		foreach (KeyValuePair<string, string[]> keyValuePair in this.lockCollections)
 		{
@@ -15,7 +15,23 @@ public class Unlocks : MonoBehaviour
 				this.defaultLocked.Add(text, true);
 			}
 		}
+		foreach (KeyValuePair<int, string> keyValuePair2 in this.cycleLocked)
+		{
+			this.defaultLocked.Add(keyValuePair2.Value, true);
+		}
 		this.LoadLocks();
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
+		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
+		Game.Instance.Subscribe(-1056989049, new Action<object>(this.OnLaunchRocket));
+		Game.Instance.Subscribe(282337316, new Action<object>(this.OnDuplicantDied));
+		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
+		Game.Instance.Subscribe(-818188514, new Action<object>(this.OnDiscoveredSpace));
+		this.UnlockCycleCodexes();
+		Components.LiveMinionIdentities.OnAdd += this.OnNewDupe;
 	}
 
 	public bool IsLocked(string lockID)
@@ -51,15 +67,15 @@ public class Unlocks : MonoBehaviour
 	{
 		get
 		{
-			return Path.Combine(Util.RootFolder(), "unlocks.json");
+			return global::System.IO.Path.Combine(global::Util.RootFolder(), "unlocks.json");
 		}
 	}
 
 	public static void SaveUnlocks(Dictionary<string, bool> locks)
 	{
-		if (!Directory.Exists(Util.RootFolder()))
+		if (!Directory.Exists(global::Util.RootFolder()))
 		{
-			Directory.CreateDirectory(Util.RootFolder());
+			Directory.CreateDirectory(global::Util.RootFolder());
 		}
 		if (File.Exists(Unlocks.UnlocksFilename))
 		{
@@ -140,6 +156,132 @@ public class Unlocks : MonoBehaviour
 		return null;
 	}
 
+	private void UnlockCycleCodexes()
+	{
+		foreach (KeyValuePair<int, string> keyValuePair in this.cycleLocked)
+		{
+			if (GameClock.Instance.GetCycle() + 1 >= keyValuePair.Key)
+			{
+				this.Unlock(keyValuePair.Value);
+			}
+		}
+	}
+
+	private void OnNewDay(object data)
+	{
+		this.UnlockCycleCodexes();
+	}
+
+	private void OnLaunchRocket(object data)
+	{
+		this.Unlock("firstrocketlaunch");
+	}
+
+	private void OnDuplicantDied(object data)
+	{
+		this.Unlock("duplicantdeath");
+		if (Components.LiveMinionIdentities.Count == 1)
+		{
+			this.Unlock("onedupeleft");
+		}
+	}
+
+	private void OnNewDupe(MinionIdentity minion_identity)
+	{
+		if (Components.LiveMinionIdentities.Count >= 20)
+		{
+			this.Unlock("twentydupecolony");
+		}
+		else if (Components.LiveMinionIdentities.Count >= 35)
+		{
+			this.Unlock("fulldupecolony");
+		}
+	}
+
+	private void OnResearchComplete(object data)
+	{
+		Tech tech = (Tech)data;
+		this.Unlock("firstresearch");
+		if (tech.Id == "BasicRocketry")
+		{
+			this.Unlock("rocketryresearch");
+		}
+	}
+
+	private void OnDiscoveredSpace(object data)
+	{
+		this.Unlock("surfacebreach");
+	}
+
+	public void Sim4000ms(float dt)
+	{
+		int num = int.MinValue;
+		int num2 = int.MinValue;
+		int num3 = int.MaxValue;
+		int num4 = int.MaxValue;
+		foreach (MinionIdentity minionIdentity in Components.MinionIdentities.Items)
+		{
+			if (!(minionIdentity == null))
+			{
+				int num5 = Grid.PosToCell(minionIdentity);
+				if (Grid.IsValidCell(num5))
+				{
+					int num6;
+					int num7;
+					Grid.CellToXY(num5, out num6, out num7);
+					if (num7 > num2)
+					{
+						num2 = num7;
+						num = num6;
+					}
+					if (num7 < num4)
+					{
+						num3 = num6;
+						num4 = num7;
+					}
+				}
+			}
+		}
+		if (num2 != -2147483648)
+		{
+			int num8 = num2;
+			for (int i = 0; i < 30; i++)
+			{
+				num8++;
+				int num9 = Grid.XYToCell(num, num8);
+				if (!Grid.IsValidCell(num9))
+				{
+					break;
+				}
+				SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num9);
+				if (subWorldZoneType == SubWorld.ZoneType.Space)
+				{
+					this.Unlock("nearingsurface");
+					break;
+				}
+			}
+		}
+		if (num4 != 2147483647)
+		{
+			int num10 = num4;
+			for (int j = 0; j < 30; j++)
+			{
+				num10--;
+				int num11 = Grid.XYToCell(num3, num10);
+				if (!Grid.IsValidCell(num11))
+				{
+					break;
+				}
+				SubWorld.ZoneType subWorldZoneType2 = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num11);
+				if (subWorldZoneType2 == SubWorld.ZoneType.ToxicJungle && Grid.Element[num11].id == SimHashes.Magma)
+				{
+					this.Unlock("nearingmagma");
+					break;
+				}
+			}
+		}
+	}
+
 	public Dictionary<string, bool> locked = new Dictionary<string, bool>();
 
 	public Dictionary<string, bool> defaultLocked = new Dictionary<string, bool>
@@ -147,7 +289,18 @@ public class Unlocks : MonoBehaviour
 		{ "poi_surface_facillity_1", true },
 		{ "poi_surface_facillity_2", true },
 		{ "poi_surface_facillity_3", true },
-		{ "poi_surface_facillity_4", true }
+		{ "poi_surface_facillity_4", true },
+		{ "firstrocketlaunch", true },
+		{ "duplicantdeath", true },
+		{ "onedupeleft", true },
+		{ "twentydupecolony", true },
+		{ "fulldupecolony", true },
+		{ "firstresearch", true },
+		{ "rocketryresearch", true },
+		{ "surfacebreach", true },
+		{ "nearingsurface", true },
+		{ "nearingmagma", true },
+		{ "neuralvacillator", true }
 	};
 
 	public Dictionary<string, string[]> lockCollections = new Dictionary<string, string[]>
@@ -169,7 +322,8 @@ public class Unlocks : MonoBehaviour
 			new string[]
 			{
 				"journal_cleanup", "journal_employeeprocessing", "journal_sunflowerseeds", "journal_B835_1", "journal_B835_2", "journal_B835_3", "journal_B835_4", "journal_B835_5", "journal_B835_6", "journal_pipedream",
-				"journal_spittingimage", "journal_A046_1", "journal_A046_2", "journal_A046_3", "journal_A046_4", "journal_ants", "journal_debrief", "journal_movedrats", "journal_revisitednumbers"
+				"journal_spittingimage", "journal_A046_1", "journal_A046_2", "journal_A046_3", "journal_A046_4", "journal_ants", "journal_debrief", "journal_B327_1", "journal_B327_2", "journal_B327_3",
+				"journal_B327_4", "journal_movedrats", "journal_revisitednumbers"
 			}
 		},
 		{
@@ -182,11 +336,17 @@ public class Unlocks : MonoBehaviour
 		},
 		{
 			"special_set_items",
-			new string[0]
-		},
-		{
-			"main_log",
-			new string[] { "log2", "log3" }
+			new string[] { "display_prop1", "display_prop2", "display_prop3", "pod_evacuation", "printingpod" }
 		}
+	};
+
+	public Dictionary<int, string> cycleLocked = new Dictionary<int, string>
+	{
+		{ 3, "log2" },
+		{ 10, "log3" },
+		{ 15, "log4" },
+		{ 20, "log5" },
+		{ 30, "log6" },
+		{ 35, "log7" }
 	};
 }

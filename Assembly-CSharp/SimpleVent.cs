@@ -4,8 +4,8 @@ public class SimpleVent : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(-592767678, new Action<object>(this.OnChanged));
-		base.Subscribe(-111137758, new Action<object>(this.OnChanged));
+		base.Subscribe<SimpleVent>(-592767678, SimpleVent.OnChangedDelegate);
+		base.Subscribe<SimpleVent>(-111137758, SimpleVent.OnChangedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -27,4 +27,9 @@ public class SimpleVent : KMonoBehaviour
 
 	[MyCmpGet]
 	private Operational operational;
+
+	private static readonly EventSystem.IntraObjectHandler<SimpleVent> OnChangedDelegate = new EventSystem.IntraObjectHandler<SimpleVent>(delegate(SimpleVent component, object data)
+	{
+		component.OnChanged(data);
+	});
 }

@@ -25,15 +25,16 @@ public class Diggable : Workable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.progressbar_y_offset = 0.21f;
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Digging;
 		this.readyForRoleWorkStatusItem = Db.Get().BuildingStatusItems.DigRequiresRolePerk;
 		this.faceTargetWhenWorking = true;
-		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		base.Subscribe<Diggable>(-1432940121, Diggable.OnReachableChangedDelegate);
 		this.attributeConverter = Db.Get().AttributeConverters.DiggingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 		this.multitoolContext = "dig";
 		this.multitoolHitEffectTag = "fx_dig_splash";
+		this.workingPstComplete = HashedString.Invalid;
+		this.workingPstFailed = HashedString.Invalid;
 		Prioritizable.AddRef(base.gameObject);
 	}
 
@@ -41,6 +42,7 @@ public class Diggable : Workable
 	{
 		base.OnSpawn();
 		int num = Grid.PosToCell(this);
+		this.originalDigElement = Grid.Element[num];
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.WaitingForDig, null);
 		this.UpdateColor(this.isReachable);
@@ -56,7 +58,7 @@ public class Diggable : Workable
 		this.OnSolidChanged(null);
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Diggable>(493375141, Diggable.OnRefreshUserMenuDelegate);
 		this.handle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 		Components.Diggables.Add(this);
 		Diggable.UpdateBuildableDiggables(num);
@@ -73,7 +75,6 @@ public class Diggable : Workable
 		{
 			animInfo.smi = new MultitoolController.Instance(this, worker, this.multitoolContext, Assets.GetPrefab(this.multitoolHitEffectTag));
 		}
-		animInfo.forcePlayPst = this.forcePlayPst;
 		return animInfo;
 	}
 
@@ -261,11 +262,15 @@ public class Diggable : Workable
 		}
 		if (flag3)
 		{
-			if (base.worker != null)
+			this.isDigComplete = true;
+			if (this.chore == null || !this.chore.InProgress())
 			{
-				base.Trigger(963113026, base.worker.gameObject);
+				Util.KDestroyGameObject(base.gameObject);
 			}
-			Util.KDestroyGameObject(base.gameObject);
+			else
+			{
+				base.GetComponentInChildren<MeshRenderer>().enabled = false;
+			}
 		}
 		else if (num2 != -1)
 		{
@@ -277,13 +282,6 @@ public class Diggable : Workable
 		}
 	}
 
-	private IEnumerator DestroyWithDelay(float delay)
-	{
-		yield return new WaitForSeconds(delay);
-		Util.KDestroyGameObject(base.gameObject);
-		yield break;
-	}
-
 	public Element GetTargetElement()
 	{
 		int num = Grid.PosToCell(base.transform.GetPosition());
@@ -292,25 +290,38 @@ public class Diggable : Workable
 
 	public override string GetConversationTopic()
 	{
-		return this.GetTargetElement().tag.Name;
+		return this.originalDigElement.tag.Name;
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
 	{
 		int num = Grid.PosToCell(this);
-		float num2 = (float)Grid.Element[num].hardness;
-		if (num2 == 255f)
+		Diggable.DoDigTick(num, dt);
+		return this.isDigComplete;
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		if (this.isDigComplete)
 		{
-			return false;
+			Util.KDestroyGameObject(base.gameObject);
+		}
+	}
+
+	public static void DoDigTick(int cell, float dt)
+	{
+		float num = (float)Grid.Element[cell].hardness;
+		if (num == 255f)
+		{
+			return;
 		}
 		Element element = ElementLoader.FindElementByHash(SimHashes.Ice);
-		float num3 = num2 / (float)element.hardness;
-		float num4 = Mathf.Min(Grid.Mass[num], 400f) / 400f;
-		float num5 = 4f * num4;
-		float num6 = num5 + num3 * num5;
-		float num7 = dt / num6;
-		WorldDamage.Instance.ApplyDamage(num, num7, -1, -1, null, null);
-		return false;
+		float num2 = num / (float)element.hardness;
+		float num3 = Mathf.Min(Grid.Mass[cell], 400f) / 400f;
+		float num4 = 4f * num3;
+		float num5 = num4 + num2 * num4;
+		float num6 = dt / num5;
+		WorldDamage.Instance.ApplyDamage(cell, num6, -1, -1, null, null);
 	}
 
 	public static Diggable GetDiggable(int cell)
@@ -487,7 +498,7 @@ public class Diggable : Workable
 
 	private bool isReachable;
 
-	private Element cellElementReference;
+	private Element originalDigElement;
 
 	[MyCmpAdd]
 	private Prioritizable prioritizable;
@@ -504,6 +515,8 @@ public class Diggable : Workable
 	[SerializeField]
 	public MeshRenderer materialDisplay;
 
+	private bool isDigComplete;
+
 	private static List<Tuple<string, Tag>> lasersForHardness = new List<Tuple<string, Tag>>
 	{
 		new Tuple<string, Tag>("dig", "fx_dig_splash"),
@@ -511,6 +524,16 @@ public class Diggable : Workable
 	};
 
 	private int handle;
+
+	private static readonly EventSystem.IntraObjectHandler<Diggable> OnReachableChangedDelegate = new EventSystem.IntraObjectHandler<Diggable>(delegate(Diggable component, object data)
+	{
+		component.OnReachableChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Diggable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Diggable>(delegate(Diggable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	public Chore chore;
 }

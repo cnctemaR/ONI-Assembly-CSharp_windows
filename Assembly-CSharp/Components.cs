@@ -75,6 +75,8 @@ public class Components
 
 	public static Components.Cmps<RoleStation> RoleStations = new Components.Cmps<RoleStation>();
 
+	public static Components.Cmps<Telescope> Telescopes = new Components.Cmps<Telescope>();
+
 	public static Components.Cmps<Capturable> Capturables = new Components.Cmps<Capturable>();
 
 	public static Components.Cmps<NotCapturable> NotCapturables = new Components.Cmps<NotCapturable>();

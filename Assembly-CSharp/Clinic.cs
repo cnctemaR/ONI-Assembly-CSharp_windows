@@ -59,7 +59,6 @@ public class Clinic : Workable, IEffectDescriptor
 	{
 		base.OnStartWork(worker);
 		worker.GetComponent<Effects>().Add("Sleep", false);
-		base.GetComponent<KAnimControllerBase>().Play(Clinic.SICK_ANIMS, KAnim.PlayMode.Loop);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -76,7 +75,6 @@ public class Clinic : Workable, IEffectDescriptor
 	protected override void OnStopWork(Worker worker)
 	{
 		worker.GetComponent<Effects>().Remove("Sleep");
-		base.GetComponent<KAnimControllerBase>().Play(Clinic.SICK_PST_ANIMS, KAnim.PlayMode.Once);
 		base.OnStopWork(worker);
 	}
 
@@ -176,10 +174,6 @@ public class Clinic : Workable, IEffectDescriptor
 	public string doctoredPlaceholderEffect;
 
 	private Clinic.ClinicSM.Instance clinicSMI;
-
-	private static readonly HashedString[] SICK_ANIMS = new HashedString[] { "working_pre", "working_loop" };
-
-	private static readonly HashedString[] SICK_PST_ANIMS = new HashedString[] { "working_pst" };
 
 	public class ClinicSM : GameStateMachine<Clinic.ClinicSM, Clinic.ClinicSM.Instance, Clinic>
 	{

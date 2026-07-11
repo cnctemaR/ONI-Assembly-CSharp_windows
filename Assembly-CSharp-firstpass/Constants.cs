@@ -77,5 +77,7 @@ public static class Constants
 
 	public const float DefaultSurfaceArea = 10f;
 
+	public const float DefaultGroundTransferScale = 0.0625f;
+
 	public const float SPACE_DISTANCE_TO_KILOMETERS = 10000f;
 }

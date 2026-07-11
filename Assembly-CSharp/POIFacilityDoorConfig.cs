@@ -45,7 +45,6 @@ public class POIFacilityDoorConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = false;
 		go.GetComponent<Deconstructable>().allowDeconstruction = true;

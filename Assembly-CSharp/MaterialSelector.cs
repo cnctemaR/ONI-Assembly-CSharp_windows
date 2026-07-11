@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Klei;
 using STRINGS;
 using UnityEngine;
@@ -27,10 +26,10 @@ public class MaterialSelector : KScreen
 	{
 		this.CurrentSelectedElement = null;
 		this.NoMaterialDiscovered.gameObject.SetActive(false);
-		foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+		foreach (KeyValuePair<Element, KToggle> keyValuePair in this.ElementToggles)
 		{
-			keyValuePair.Key.gameObject.SetActive(false);
-			Util.KDestroyGameObject(keyValuePair.Key.gameObject);
+			keyValuePair.Value.gameObject.SetActive(false);
+			Util.KDestroyGameObject(keyValuePair.Value.gameObject);
 		}
 		this.ElementToggles.Clear();
 	}
@@ -42,42 +41,22 @@ public class MaterialSelector : KScreen
 		this.activeRecipe = recipe;
 		this.activeMass = ingredient.amount;
 		List<Element> list = new List<Element>();
-		List<string> list2 = new List<string>();
 		foreach (Element element in ElementLoader.elements)
 		{
-			if (element.IsSolid)
+			if (element.IsSolid && (element.tag == ingredient.tag || element.HasTag(ingredient.tag)))
 			{
-				if (!list.Contains(element))
-				{
-					if (!list2.Contains(element.tag.ProperName()))
-					{
-						if (element.tag != ingredient.tag)
-						{
-							bool flag = false;
-							if (element.HasTag(ingredient.tag))
-							{
-								flag = true;
-							}
-							if (!flag)
-							{
-								continue;
-							}
-						}
-						list.Add(element);
-						list2.Add(element.tag.ProperName());
-					}
-				}
+				list.Add(element);
 			}
 		}
 		foreach (Element element2 in list)
 		{
-			if (!this.ElementToggles.ContainsValue(element2))
+			if (!this.ElementToggles.ContainsKey(element2))
 			{
 				GameObject gameObject = Util.KInstantiate(this.TogglePrefab, this.LayoutContainer, "MaterialSelection_" + element2.name);
 				gameObject.transform.localScale = Vector3.one;
 				gameObject.SetActive(true);
 				KToggle component = gameObject.GetComponent<KToggle>();
-				this.ElementToggles.Add(component, element2);
+				this.ElementToggles.Add(element2, component);
 				component.group = this.toggleGroup;
 				ToolTip component2 = gameObject.gameObject.GetComponent<ToolTip>();
 				component2.toolTip = element2.name;
@@ -86,14 +65,14 @@ public class MaterialSelector : KScreen
 		this.RefreshToggleContents();
 	}
 
-	private void SetToggleBGImage(KToggle toggle)
+	private void SetToggleBGImage(KToggle toggle, Element elem)
 	{
 		if (toggle == this.selectedToggle)
 		{
 			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimUIMaterial;
 			toggle.GetComponent<ImageToggleState>().SetActive();
 		}
-		else if (WorldInventory.Instance.GetAmount(this.ElementToggles[toggle].tag) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
+		else if (WorldInventory.Instance.GetAmount(elem.tag) >= this.activeMass || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
 		{
 			toggle.GetComponentsInChildren<Image>()[1].material = GlobalResources.Instance().AnimUIMaterial;
 			toggle.GetComponentsInChildren<Image>()[1].color = Color.white;
@@ -110,24 +89,24 @@ public class MaterialSelector : KScreen
 		}
 	}
 
-	public void OnSelectMaterial(KToggle toggle, Recipe recipe)
+	public void OnSelectMaterial(Element elem, Recipe recipe)
 	{
-		if (toggle != this.selectedToggle)
+		KToggle ktoggle = this.ElementToggles[elem];
+		if (ktoggle != this.selectedToggle)
 		{
-			this.selectedToggle = toggle;
-			Element element = this.ElementToggles[toggle];
+			this.selectedToggle = ktoggle;
 			if (recipe != null)
 			{
-				this.previouslySelectedElements[recipe] = element;
+				this.previouslySelectedElements[recipe] = elem;
 			}
-			this.CurrentSelectedElement = this.ElementToggles[toggle];
+			this.CurrentSelectedElement = elem;
 			if (this.selectMaterialActions != null)
 			{
 				this.selectMaterialActions();
 			}
 			this.UpdateHeader();
-			this.SetDescription(element);
-			this.SetEffects(element);
+			this.SetDescription(elem);
+			this.SetEffects(elem);
 			if (!this.MaterialDescriptionPane.gameObject.activeSelf && !this.MaterialEffectsPane.gameObject.activeSelf)
 			{
 				this.DescriptorsPanel.SetActive(false);
@@ -142,31 +121,32 @@ public class MaterialSelector : KScreen
 
 	public void RefreshToggleContents()
 	{
-		foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+		foreach (KeyValuePair<Element, KToggle> keyValuePair in this.ElementToggles)
 		{
-			KToggle toggle = keyValuePair.Key;
-			GameObject gameObject = toggle.gameObject;
+			KToggle value = keyValuePair.Value;
+			Element elem = keyValuePair.Key;
+			GameObject gameObject = value.gameObject;
 			LocText[] componentsInChildren = gameObject.GetComponentsInChildren<LocText>();
 			LocText locText = componentsInChildren[0];
 			LocText locText2 = componentsInChildren[1];
 			Image image = gameObject.GetComponentsInChildren<Image>()[1];
-			locText2.text = Util.FormatWholeNumber(WorldInventory.Instance.GetAmount(keyValuePair.Value.tag));
+			locText2.text = Util.FormatWholeNumber(WorldInventory.Instance.GetAmount(elem.tag));
 			locText.text = Util.FormatWholeNumber(this.activeMass);
-			image.sprite = Def.GetUISpriteFromMultiObjectAnim(keyValuePair.Value.substance.anim, "ui", false);
-			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(keyValuePair.Value.tag) || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive);
-			this.SetToggleBGImage(keyValuePair.Key);
-			Tag tag = keyValuePair.Value.tag;
-			toggle.soundPlayer.AcceptClickCondition = () => this.IsEnoughMass(tag);
-			toggle.ClearOnClick();
-			if (this.IsEnoughMass(keyValuePair.Value.tag))
+			image.sprite = Def.GetUISpriteFromMultiObjectAnim(keyValuePair.Key.substance.anim, "ui", false);
+			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(elem.tag) || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive);
+			this.SetToggleBGImage(keyValuePair.Value, keyValuePair.Key);
+			value.soundPlayer.AcceptClickCondition = () => this.IsEnoughMass(elem.tag);
+			value.ClearOnClick();
+			if (this.IsEnoughMass(elem.tag))
 			{
-				toggle.onClick += delegate
+				value.onClick += delegate
 				{
-					this.OnSelectMaterial(toggle, this.activeRecipe);
+					this.OnSelectMaterial(elem, this.activeRecipe);
 				};
 			}
 		}
 		this.SortElementToggles();
+		this.UpdateMaterialTooltips();
 		this.UpdateHeader();
 	}
 
@@ -177,36 +157,47 @@ public class MaterialSelector : KScreen
 
 	public bool AutoSelectAvailableMaterial()
 	{
-		if (this.activeRecipe != null && this.previouslySelectedElements.ContainsKey(this.activeRecipe))
+		if (this.activeRecipe == null || this.ElementToggles.Count == 0)
 		{
-			foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+			return false;
+		}
+		Element element;
+		this.previouslySelectedElements.TryGetValue(this.activeRecipe, out element);
+		if (element != null)
+		{
+			KToggle ktoggle;
+			this.ElementToggles.TryGetValue(element, out ktoggle);
+			if (ktoggle != null && (DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive || WorldInventory.Instance.GetAmount(element.tag) >= this.activeMass))
 			{
-				if (keyValuePair.Value == this.previouslySelectedElements[this.activeRecipe] && WorldInventory.Instance.GetAmount(keyValuePair.Value.tag) >= this.activeMass)
-				{
-					this.OnSelectMaterial(keyValuePair.Key, this.activeRecipe);
-					return true;
-				}
+				this.OnSelectMaterial(element, this.activeRecipe);
+				return true;
 			}
 		}
 		float num = -1f;
-		KToggle ktoggle = null;
-		foreach (KeyValuePair<KToggle, Element> keyValuePair2 in this.ElementToggles)
+		List<Element> list = new List<Element>();
+		foreach (KeyValuePair<Element, KToggle> keyValuePair in this.ElementToggles)
 		{
-			float amount = WorldInventory.Instance.GetAmount(keyValuePair2.Value.tag);
-			if (DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
-			{
-				this.OnSelectMaterial(keyValuePair2.Key, this.activeRecipe);
-				return true;
-			}
+			list.Add(keyValuePair.Key);
+		}
+		list.Sort(new Comparison<Element>(this.ElementSorter));
+		if (DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive)
+		{
+			this.OnSelectMaterial(list[0], this.activeRecipe);
+			return true;
+		}
+		Element element2 = null;
+		foreach (Element element3 in list)
+		{
+			float amount = WorldInventory.Instance.GetAmount(element3.tag);
 			if (amount >= this.activeMass && amount > num)
 			{
 				num = amount;
-				ktoggle = keyValuePair2.Key;
+				element2 = element3;
 			}
 		}
-		if (ktoggle != null)
+		if (element2 != null)
 		{
-			this.OnSelectMaterial(ktoggle, this.activeRecipe);
+			this.OnSelectMaterial(element2, this.activeRecipe);
 			return true;
 		}
 		return false;
@@ -214,28 +205,34 @@ public class MaterialSelector : KScreen
 
 	private void SortElementToggles()
 	{
-		List<KToggle> list = new List<KToggle>();
-		List<Element> list2 = new List<Element>();
-		foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+		List<Element> list = new List<Element>();
+		foreach (KeyValuePair<Element, KToggle> keyValuePair in this.ElementToggles)
 		{
 			list.Add(keyValuePair.Key);
-			list2.Add(keyValuePair.Value);
 		}
-		list2 = list2.OrderByDescending<Element, bool>((Element e) => WorldInventory.Instance.IsDiscovered(e.tag)).ToList<Element>();
-		foreach (KeyValuePair<KToggle, Element> keyValuePair2 in this.ElementToggles)
+		list.Sort(new Comparison<Element>(this.ElementSorter));
+		foreach (Element element in list)
 		{
-			ToolTip component = keyValuePair2.Key.gameObject.GetComponent<ToolTip>();
-			component.toolTip = GameUtil.GetMaterialTooltips(keyValuePair2.Value);
+			this.ElementToggles[element].transform.SetAsLastSibling();
 		}
 		this.UpdateScrollBar();
+	}
+
+	private void UpdateMaterialTooltips()
+	{
+		foreach (KeyValuePair<Element, KToggle> keyValuePair in this.ElementToggles)
+		{
+			ToolTip component = keyValuePair.Value.gameObject.GetComponent<ToolTip>();
+			component.toolTip = GameUtil.GetMaterialTooltips(keyValuePair.Key);
+		}
 	}
 
 	private void UpdateScrollBar()
 	{
 		int num = 0;
-		foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+		foreach (KeyValuePair<Element, KToggle> keyValuePair in this.ElementToggles)
 		{
-			if (keyValuePair.Key.gameObject.activeSelf)
+			if (keyValuePair.Value.gameObject.activeSelf)
 			{
 				num++;
 			}
@@ -250,10 +247,10 @@ public class MaterialSelector : KScreen
 			return;
 		}
 		int num = 0;
-		foreach (KeyValuePair<KToggle, Element> keyValuePair in this.ElementToggles)
+		foreach (KeyValuePair<Element, KToggle> keyValuePair in this.ElementToggles)
 		{
-			KToggle key = keyValuePair.Key;
-			if (key.gameObject.activeSelf)
+			KToggle value = keyValuePair.Value;
+			if (value.gameObject.activeSelf)
 			{
 				num++;
 			}
@@ -321,9 +318,18 @@ public class MaterialSelector : KScreen
 		return GenericGameSettings.instance.allowInsufficientMaterialBuild;
 	}
 
+	private int ElementSorter(Element a, Element b)
+	{
+		if (a.buildMenuSort != b.buildMenuSort)
+		{
+			return a.buildMenuSort.CompareTo(b.buildMenuSort);
+		}
+		return a.idx.CompareTo(b.idx);
+	}
+
 	public Element CurrentSelectedElement;
 
-	public Dictionary<KToggle, Element> ElementToggles = new Dictionary<KToggle, Element>();
+	public Dictionary<Element, KToggle> ElementToggles = new Dictionary<Element, KToggle>();
 
 	public Dictionary<Recipe, Element> previouslySelectedElements = new Dictionary<Recipe, Element>();
 

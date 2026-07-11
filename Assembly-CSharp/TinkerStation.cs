@@ -19,7 +19,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 			this.filteredStorage = new FilteredStorage(this, null, null, null, false, byHash);
 		}
 		base.SetWorkTime(15f);
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<TinkerStation>(-592767678, TinkerStation.OnOperationalChangedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -182,4 +182,9 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 	public Tag inputMaterial;
 
 	public Tag outputPrefab;
+
+	private static readonly EventSystem.IntraObjectHandler<TinkerStation> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<TinkerStation>(delegate(TinkerStation component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 }

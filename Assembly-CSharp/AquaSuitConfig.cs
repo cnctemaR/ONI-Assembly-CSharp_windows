@@ -28,7 +28,7 @@ public class AquaSuitConfig : IEquipmentConfig
 		int num3 = 6;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, snapon, text3, num3, list2, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, snapon, text3, num3, list2, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array, null);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.AQUA_SUIT.RECIPE_DESC;
 		return equipmentDef;
 	}

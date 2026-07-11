@@ -10,21 +10,10 @@ public class AlgaeHabitatEmpty : Workable
 		this.workingStatusItem = Db.Get().MiscStatusItems.Cleaning;
 		this.attributeConverter = Db.Get().AttributeConverters.TidyingSpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
-	}
-
-	public override void AwardExperience(float work_dt, MinionResume resume)
-	{
-		resume.AddExperienceIfRole(Handyman.ID, work_dt * ROLES.ACTIVE_EXPERIENCE_QUICK);
-	}
-
-	public override HashedString[] GetWorkAnims(Worker worker)
-	{
-		return AlgaeHabitatEmpty.CLEAN_ANIMS;
-	}
-
-	public override HashedString GetWorkPstAnim(Worker worker)
-	{
-		return AlgaeHabitatEmpty.PST_ANIM;
+		this.workAnims = AlgaeHabitatEmpty.CLEAN_ANIMS;
+		this.workingPstComplete = AlgaeHabitatEmpty.PST_ANIM;
+		this.workingPstFailed = AlgaeHabitatEmpty.PST_ANIM;
+		this.synchronizeAnims = false;
 	}
 
 	private static readonly HashedString[] CLEAN_ANIMS = new HashedString[] { "unclog_pre", "unclog_loop" };

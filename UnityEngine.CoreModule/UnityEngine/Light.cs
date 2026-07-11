@@ -9,9 +9,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Script interface for.</para>
 	/// </summary>
+	[RequireComponent(typeof(Transform))]
+	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Camera/Light.h")]
-	[RequireComponent(typeof(Transform))]
-	[RequireComponent(typeof(Transform))]
 	public sealed class Light : Behaviour
 	{
 		/// <summary>

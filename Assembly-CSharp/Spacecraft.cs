@@ -62,6 +62,11 @@ public class Spacecraft
 		this.state = state;
 	}
 
+	public void ForceComplete()
+	{
+		this.missionElapsed = this.missionDuration;
+	}
+
 	public void ProgressMission(float deltaTime)
 	{
 		if (this.state == Spacecraft.MissionState.Underway)
@@ -95,7 +100,7 @@ public class Spacecraft
 			SpacecraftManager.instance.savedSpacecraftDestinations[this.id] = destination.id;
 		}
 		this.missionElapsed = 0f;
-		this.missionDuration = (float)destination.distance * ROCKETRY.MISSION_DURATION_SCALE;
+		this.missionDuration = (float)destination.OneBasedDistance * ROCKETRY.MISSION_DURATION_SCALE;
 	}
 
 	private void CompleteMission()
@@ -114,9 +119,13 @@ public class Spacecraft
 
 	private void Land()
 	{
+		this.launchConditions.Trigger(1366341636, SpacecraftManager.instance.GetActiveMission(this.id));
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.launchConditions.GetComponent<AttachableBuilding>()))
 		{
-			gameObject.Trigger(1366341636, SpacecraftManager.instance.GetActiveMission(this.id));
+			if (gameObject != this.launchConditions.gameObject)
+			{
+				gameObject.Trigger(1366341636, SpacecraftManager.instance.GetActiveMission(this.id));
+			}
 		}
 	}
 
@@ -127,9 +136,10 @@ public class Spacecraft
 	public string rocketName = UI.STARMAP.DEFAULT_NAME;
 
 	[Serialize]
-	public Ref<LaunchConditionManager> refLaunchConditions = new Ref<LaunchConditionManager>();
+	public int moduleCount;
 
-	private int takeOffLocation;
+	[Serialize]
+	public Ref<LaunchConditionManager> refLaunchConditions = new Ref<LaunchConditionManager>();
 
 	[Serialize]
 	public Spacecraft.MissionState state;
@@ -145,6 +155,7 @@ public class Spacecraft
 		Grounded,
 		Launching,
 		Underway,
-		WaitingToLand
+		WaitingToLand,
+		Destroyed
 	}
 }

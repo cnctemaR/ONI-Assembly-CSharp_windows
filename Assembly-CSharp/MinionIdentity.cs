@@ -39,7 +39,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			KAnimControllerBase kanimControllerBase = component;
 			kanimControllerBase.OnUpdateBounds = (Action<Bounds>)Delegate.Combine(kanimControllerBase.OnUpdateBounds, new Action<Bounds>(this.OnUpdateBounds));
 		}
-		base.Subscribe(1623392196, new Action<object>(this.OnDied));
+		base.Subscribe<MinionIdentity>(1623392196, MinionIdentity.OnDiedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -76,6 +76,9 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			{
 				this.bodyData = default(KCompBuilder.BodyData);
 				component3.GetBodySlots(ref this.bodyData);
+				string text = HashCache.Get().Get(component3.GetAccessory(Db.Get().AccessorySlots.HeadShape).symbol.hash);
+				string text2 = text.Replace("headshape", "cheek");
+				component2.AddSymbolOverride("snapto_cheek", Assets.GetAnim("head_swap_kanim").GetData().build.GetSymbol(text2), 1);
 				component2.AddSymbolOverride(Db.Get().AccessorySlots.HairAlways.targetSymbolId, component3.GetAccessory(Db.Get().AccessorySlots.Hair).symbol, 1);
 				component2.AddSymbolOverride(Db.Get().AccessorySlots.HatHair.targetSymbolId, Db.Get().AccessorySlots.HatHair.Lookup("hat_" + HashCache.Get().Get(component3.GetAccessory(Db.Get().AccessorySlots.Hair).symbol.hash)).symbol, 1);
 			}
@@ -114,6 +117,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		}
 		base.gameObject.name = name;
 		NameDisplayScreen.Instance.UpdateName(base.gameObject);
+	}
+
+	public bool IsNull()
+	{
+		return this == null;
 	}
 
 	public void SetGender(string gender)
@@ -238,7 +246,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		SettingLevel currentQualitySetting3 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.CalorieBurn);
 		if (currentQualitySetting3.id == "VeryHard")
 		{
-			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -3333.3333f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.VERYHARD.ATTRIBUTE_MODIFIER_NAME, false, false, true));
+			Db.Get().Amounts.Calories.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -1666.6666f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.CALORIE_BURN.LEVELS.VERYHARD.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 		}
 		else if (currentQualitySetting3.id == "Hard")
 		{
@@ -292,6 +300,11 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 	private static MinionIdentity.NameList maleNameList;
 
 	private static MinionIdentity.NameList femaleNameList;
+
+	private static readonly EventSystem.IntraObjectHandler<MinionIdentity> OnDiedDelegate = new EventSystem.IntraObjectHandler<MinionIdentity>(delegate(MinionIdentity component, object data)
+	{
+		component.OnDied(data);
+	});
 
 	private class NameList
 	{

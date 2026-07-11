@@ -47,13 +47,6 @@ public class SaveLoader : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		WorldGen.LoadSettings();
-		WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id, WorldGen.GetPath());
-		this.CheckForLoad();
-	}
-
-	public void CheckForLoad()
-	{
 		string activeSaveFilePath = SaveLoader.GetActiveSaveFilePath();
 		if (WorldGen.CanLoad(activeSaveFilePath))
 		{
@@ -172,6 +165,13 @@ public class SaveLoader : KMonoBehaviour
 			saveFileRoot.streamed["GridSpawnable"] = Grid.Spawnable;
 			saveFileRoot.streamed["GridDamage"] = this.FloatToBytes(Grid.Damage);
 		}
+		ICollection<ModInfo> activeMods = Global.Instance.modManager.ActiveMods;
+		if (activeMods != null && activeMods.Count > 0)
+		{
+			saveFileRoot.requiredMods = new List<ModInfo>(activeMods);
+		}
+		string text = ((Game.worldID == null) ? CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id : Game.worldID);
+		saveFileRoot.worldID = text;
 		using (MemoryStream memoryStream2 = new MemoryStream())
 		{
 			using (BinaryWriter binaryWriter2 = new BinaryWriter(memoryStream2))
@@ -199,6 +199,48 @@ public class SaveLoader : KMonoBehaviour
 		Deserializer deserializer = new Deserializer(reader);
 		SaveFileRoot saveFileRoot = new SaveFileRoot();
 		deserializer.Deserialize(saveFileRoot);
+		List<ModError> list = null;
+		ModManager modManager = Global.Instance.modManager;
+		if (saveFileRoot.requiredMods != null && modManager != null)
+		{
+			foreach (ModInfo modInfo in saveFileRoot.requiredMods)
+			{
+				if (!modManager.ActivateMod(modInfo))
+				{
+					if (list == null)
+					{
+						list = new List<ModError>();
+					}
+					list.Add(new ModError
+					{
+						errorType = ModError.ErrorType.LoadError,
+						modInfo = modInfo
+					});
+					Output.LogWarning(new object[] { string.Format("Failed to load {0} mod {1} - {2}", modInfo.source, modInfo.assetID, modInfo.assetPath) });
+				}
+			}
+		}
+		Game.modLoadErrors = list;
+		string text2 = saveFileRoot.worldID;
+		if (text2 == null)
+		{
+			try
+			{
+				text2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id;
+			}
+			catch
+			{
+				text2 = "worlds/Default";
+			}
+		}
+		Game.worldID = text2;
+		WorldGen.LoadSettings();
+		string path = WorldGen.GetPath();
+		if (!WorldGen.Settings.SetWorld(text2, path))
+		{
+			Output.LogWarning(new object[] { string.Format("Failed to get worldGen data for {0}. Using worlds/Default instead", text2) });
+			WorldGen.Settings.SetDefaultWorld(path);
+		}
 		Game.LoadSettings(deserializer);
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));

@@ -12,7 +12,7 @@ public class DustCometConfig : IEntityConfig
 		comet.massRange = new Vector2(0.2f, 0.5f);
 		comet.temperatureRange = new Vector2(223.15f, 253.15f);
 		comet.entityDamage = 2;
-		comet.totalTileDamage = 0.35f;
+		comet.totalTileDamage = 0.15f;
 		comet.splashRadius = 0;
 		comet.impactSound = "Meteor_Small_Impact";
 		comet.flyingSoundID = 0;

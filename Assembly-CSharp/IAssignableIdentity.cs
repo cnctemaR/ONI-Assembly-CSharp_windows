@@ -8,4 +8,6 @@ public interface IAssignableIdentity
 	List<Ownables> GetOwners();
 
 	Ownables GetSoleOwner();
+
+	bool IsNull();
 }

@@ -15,16 +15,13 @@ public class FactionAlignment : KMonoBehaviour
 		this.health = base.GetComponent<Health>();
 		this.attackable = base.GetComponent<AttackableBase>();
 		Components.FactionAlignments.Add(this);
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(2127324410, delegate(object d)
-		{
-			this.SetPlayerTargeted(false);
-		});
+		base.Subscribe<FactionAlignment>(493375141, FactionAlignment.OnRefreshUserMenuDelegate);
+		base.Subscribe<FactionAlignment>(2127324410, FactionAlignment.SetPlayerTargetedFalseDelegate);
 		if (this.alignmentActive)
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
 		}
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
+		base.Subscribe<FactionAlignment>(1623392196, FactionAlignment.OnDeathDelegate);
 	}
 
 	private void OnDeath(object data)
@@ -134,4 +131,19 @@ public class FactionAlignment : KMonoBehaviour
 
 	[Serialize]
 	public bool targetable = true;
+
+	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnDeathDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> SetPlayerTargetedFalseDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)
+	{
+		component.SetPlayerTargeted(false);
+	});
 }

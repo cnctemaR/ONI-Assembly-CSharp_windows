@@ -39,11 +39,10 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	public Extents GetValidPlacementExtents()
 	{
 		Extents extents = this.GetExtents();
-		if (this.Def.BuildLocationRule != BuildLocationRule.OnCeiling)
-		{
-			extents.y--;
-		}
-		extents.height++;
+		extents.x--;
+		extents.y--;
+		extents.width += 2;
+		extents.height += 2;
 		return extents;
 	}
 

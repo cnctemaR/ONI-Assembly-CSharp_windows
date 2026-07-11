@@ -41,24 +41,24 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IUGCEventHandler
 
 	private void RebuildUGCButtons()
 	{
-		List<SteamUGCService.Subscibed> subscribedScenarios = SteamUGCService.Instance.GetSubscribedScenarios();
-		bool flag = subscribedScenarios.Count > 0;
+		List<SteamUGCService.Subscribed> subscribed = SteamUGCService.Instance.GetSubscribed("scenario");
+		bool flag = subscribed.Count > 0;
 		this.noScenariosText.gameObject.SetActive(!flag);
 		this.contentRoot.gameObject.SetActive(flag);
 		bool flag2 = true;
-		if (subscribedScenarios.Count != 0)
+		if (subscribed.Count != 0)
 		{
-			for (int i = 0; i < subscribedScenarios.Count; i++)
+			for (int i = 0; i < subscribed.Count; i++)
 			{
 				GameObject gameObject = Util.KInstantiateUI(this.ugcButtonPrefab, this.ugcContainer, false);
-				gameObject.name = subscribedScenarios[i].title + "_button";
+				gameObject.name = subscribed[i].title + "_button";
 				gameObject.gameObject.SetActive(true);
 				HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-				TMP_FontAsset fontForLangage = LanguageOptionsScreen.GetFontForLangage(subscribedScenarios[i].fileId);
+				TMP_FontAsset fontForLangage = LanguageOptionsScreen.GetFontForLangage(subscribed[i].fileId);
 				LocText reference = component.GetReference<LocText>("Title");
-				reference.SetText(subscribedScenarios[i].title);
+				reference.SetText(subscribed[i].title);
 				reference.font = fontForLangage;
-				Texture2D previewImage = SteamUGCService.Instance.GetPreviewImage(subscribedScenarios[i].fileId);
+				Texture2D previewImage = SteamUGCService.Instance.GetPreviewImage(subscribed[i].fileId);
 				if (previewImage != null)
 				{
 					Image reference2 = component.GetReference<Image>("Image");
@@ -66,7 +66,7 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IUGCEventHandler
 				}
 				KButton component2 = gameObject.GetComponent<KButton>();
 				int num = i;
-				PublishedFileId_t item = subscribedScenarios[num].fileId;
+				PublishedFileId_t item = subscribed[num].fileId;
 				component2.onClick += delegate
 				{
 					this.ShowDetails(item);
@@ -90,7 +90,6 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IUGCEventHandler
 
 	private void LoadScenario(PublishedFileId_t item)
 	{
-		string rgchTitle = SteamUGCService.Instance.GetDetails(item).m_rgchTitle;
 		ulong num;
 		string text;
 		uint num2;
@@ -134,14 +133,14 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IUGCEventHandler
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		SteamUGCService.Instance.ugcEventHandler = this;
+		SteamUGCService.Instance.ugcEventHandlers.Add(this);
 		this.HideDetails();
 	}
 
 	protected override void OnDeactivate()
 	{
 		base.OnDeactivate();
-		SteamUGCService.Instance.ugcEventHandler = null;
+		SteamUGCService.Instance.ugcEventHandlers.Remove(this);
 	}
 
 	private void OnClickOpenWorkshop()
@@ -149,28 +148,30 @@ public class ScenariosMenu : KModalScreen, SteamUGCService.IUGCEventHandler
 		Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140&requiredtags[]=scenario");
 	}
 
-	public void OnItemInstalled(ItemInstalled_t pCallback)
+	public void OnUGCItemInstalled(ItemInstalled_t pCallback)
 	{
 	}
 
-	public void OnItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback)
+	public void OnUGCItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback)
 	{
 		this.RebuildScreen();
 	}
 
-	public void OnItemUnsubscibed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
+	public void OnUGCItemUnsubscribed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
 	{
 		this.RebuildScreen();
 	}
 
-	public void OnItemDownloaded(DownloadItemResult_t pCallback)
+	public void OnUGCItemDownloaded(DownloadItemResult_t pCallback)
 	{
 	}
 
-	public void OnRefresh()
+	public void OnUGCRefresh()
 	{
 		this.RebuildScreen();
 	}
+
+	public const string TAG_SCENARIO = "scenario";
 
 	public KButton textButton;
 

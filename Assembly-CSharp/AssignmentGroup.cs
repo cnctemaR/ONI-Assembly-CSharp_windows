@@ -40,6 +40,11 @@ public class AssignmentGroup : IAssignableIdentity
 		return this.members.Contains(member);
 	}
 
+	public bool IsNull()
+	{
+		return false;
+	}
+
 	public List<Ownables> GetOwners()
 	{
 		this.current_owners.Clear();

@@ -34,17 +34,12 @@ public class CookingStationConfig : IBuildingConfig
 		cookingStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_cookstation_kanim") };
 		Prioritizable.AddRef(go);
 		go.AddOrGet<DropAllWorkable>();
+		go.AddOrGetDef<PoweredController.Def>();
 		BuildingTemplates.CreateFabricatorStorage(go, cookingStation);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
 	}
 
 	public const string ID = "CookingStation";

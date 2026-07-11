@@ -44,6 +44,13 @@ public class KObjectManager : MonoBehaviour
 		return kobject;
 	}
 
+	public KObject Get(GameObject go)
+	{
+		KObject kobject = null;
+		this.objects.TryGetValue(go.GetInstanceID(), out kobject);
+		return kobject;
+	}
+
 	public void QueueDestroy(KObject obj)
 	{
 		int id = obj.id;

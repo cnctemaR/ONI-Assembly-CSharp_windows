@@ -10,11 +10,11 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Raw interface to Unity's drawing functions.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Camera/LightProbeProxyVolume.h")]
-	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
 	[NativeHeader("Runtime/Graphics/CopyTexture.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/ColorGamut.h")]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Camera/LightProbeProxyVolume.h")]
 	public class Graphics
 	{
 		[FreeFunction("GraphicsScripting::GetMaxDrawMeshInstanceCount")]

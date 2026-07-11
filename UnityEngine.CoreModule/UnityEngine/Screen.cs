@@ -9,9 +9,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Access to display information.</para>
 	/// </summary>
+	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
-	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
 	public sealed class Screen
 	{
 		/// <summary>

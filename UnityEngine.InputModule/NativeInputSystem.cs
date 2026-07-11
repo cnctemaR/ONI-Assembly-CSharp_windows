@@ -60,6 +60,18 @@ namespace UnityEngineInternal.Input
 			set;
 		} = false;
 
+		public static extern double currentTime
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
+		public static extern double currentTimeOffsetToRealtimeSinceStartup
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+		}
+
 		[FreeFunction("AllocateInputDeviceId")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern int AllocateDeviceId();

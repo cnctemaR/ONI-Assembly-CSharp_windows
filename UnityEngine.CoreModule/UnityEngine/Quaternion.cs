@@ -9,10 +9,10 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Quaternions are used to represent rotations.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[ThreadAndSerializationSafe]
 	[UsedByNativeCode]
 	[NativeType(Header = "Runtime/Math/Quaternion.h")]
-	[ThreadAndSerializationSafe]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
 	public struct Quaternion : IEquatable<Quaternion>
 	{
 		/// <summary>

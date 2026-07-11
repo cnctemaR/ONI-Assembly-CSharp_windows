@@ -4,11 +4,11 @@ using UnityEngine;
 
 public static class DebugUtil
 {
-	public static void Assert(bool test, string message = "Assert!")
+	public static void Assert(bool test, string message = "Assert!", string message1 = "", string message2 = "")
 	{
 		if (!test)
 		{
-			global::Debug.LogError(message, null);
+			global::Debug.LogError(string.Concat(new string[] { message, " ", message1, " ", message2 }), null);
 			global::Debug.Break();
 		}
 	}

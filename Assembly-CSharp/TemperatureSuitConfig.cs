@@ -27,7 +27,7 @@ public class TemperatureSuitConfig : IEquipmentConfig
 		int num3 = 6;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, anim, snapon, text2, num3, list2, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, anim, snapon, text2, num3, list2, null, false, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array, null);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.TEMPERATURE_SUIT.RECIPE_DESC;
 		return equipmentDef;
 	}
@@ -37,6 +37,8 @@ public class TemperatureSuitConfig : IEquipmentConfig
 		SuitTank suitTank = go.AddComponent<SuitTank>();
 		suitTank.element = "Water";
 		suitTank.amount = 100f;
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.PedestalDisplayable);
 	}
 
 	public const string ID = "Temperature_Suit";

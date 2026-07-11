@@ -11,8 +11,8 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 		base.OnSpawn();
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		Game.Instance.logicCircuitSystem.AddToNetworks(num, this, false);
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Subscribe<LogicWire>(774203113, LogicWire.OnBuildingBrokenDelegate);
+		base.Subscribe<LogicWire>(-1735440190, LogicWire.OnBuildingFullyRepairedDelegate);
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.SetSymbolVisiblity(LogicWire.OutlineSymbol, false);
 	}
@@ -25,8 +25,8 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 		{
 			Game.Instance.logicCircuitSystem.RemoveFromNetworks(num, this, false);
 		}
-		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe<LogicWire>(774203113, LogicWire.OnBuildingBrokenDelegate);
+		base.Unsubscribe<LogicWire>(-1735440190, LogicWire.OnBuildingFullyRepairedDelegate);
 		base.OnCleanUp();
 	}
 
@@ -130,6 +130,16 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 	private bool disconnected = true;
 
 	public static readonly KAnimHashedString OutlineSymbol = new KAnimHashedString("outline");
+
+	private static readonly EventSystem.IntraObjectHandler<LogicWire> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<LogicWire>(delegate(LogicWire component, object data)
+	{
+		component.OnBuildingBroken(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<LogicWire> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<LogicWire>(delegate(LogicWire component, object data)
+	{
+		component.OnBuildingFullyRepaired(data);
+	});
 
 	private global::System.Action firstFrameCallback;
 }

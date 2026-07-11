@@ -9,9 +9,9 @@ namespace UnityEngine.U2D
 	/// <summary>
 	///   <para>Manages SpriteAtlas during runtime.</para>
 	/// </summary>
-	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
 	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
 	[StaticAccessor("GetSpriteAtlasManager()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
 	public class SpriteAtlasManager
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -33,6 +33,18 @@ namespace UnityEngine.U2D
 			return flag;
 		}
 
+		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static event Action<SpriteAtlas> atlasRegistered;
+
+		[RequiredByNativeCode]
+		private static void PostRegisteredAtlas(SpriteAtlas spriteAtlas)
+		{
+			if (SpriteAtlasManager.atlasRegistered != null)
+			{
+				SpriteAtlasManager.atlasRegistered(spriteAtlas);
+			}
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void Register(SpriteAtlas spriteAtlas);
 
@@ -40,6 +52,7 @@ namespace UnityEngine.U2D
 		static SpriteAtlasManager()
 		{
 			SpriteAtlasManager.atlasRequested = null;
+			SpriteAtlasManager.atlasRegistered = null;
 		}
 
 		/// <summary>

@@ -29,10 +29,7 @@ public class MeshTileConfig : IBuildingConfig
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.isKAnimTile = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_mesh");
 		buildingDef.BlockTilePlaceAtlas = Assets.GetTextureAtlas("tiles_mesh_place");
@@ -58,7 +55,7 @@ public class MeshTileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RemoveLoopingSounds(go);
 		go.AddComponent<SimTemperatureTransfer>();
 	}
 

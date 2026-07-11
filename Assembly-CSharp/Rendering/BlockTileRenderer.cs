@@ -323,6 +323,10 @@ namespace Rendering
 				if (def.SceneLayer == Grid.SceneLayer.TileMain)
 				{
 					this.material.renderQueue = RenderQueues.BlockTiles;
+					if (def.BlockTileIsTransparent)
+					{
+						this.material.renderQueue = RenderQueues.Liquid - 1;
+					}
 				}
 				this.material.DisableKeyword("ENABLE_SHINE");
 				if (element != SimHashes.Void)

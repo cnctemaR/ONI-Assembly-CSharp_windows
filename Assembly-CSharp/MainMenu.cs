@@ -11,26 +11,26 @@ public class MainMenu : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		Global.Instance.modManager.DeactivateWorldGenMod();
+		MainMenu.ButtonInfo[] array = new MainMenu.ButtonInfo[]
+		{
+			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.NEWGAME, new global::System.Action(this.NewGame), 22),
+			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14),
+			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.TRANSLATIONS, new global::System.Action(this.Translations), 14),
+			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14),
+			new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14)
+		};
+		foreach (MainMenu.ButtonInfo buttonInfo in array)
+		{
+			KButton kbutton = Util.KInstantiateUI<KButton>(this.buttonPrefab.gameObject, this.buttonParent, true);
+			kbutton.onClick += buttonInfo.action;
+			LocText componentInChildren = kbutton.GetComponentInChildren<LocText>();
+			componentInChildren.text = buttonInfo.text;
+			componentInChildren.fontSize = (float)buttonInfo.fontSize;
+		}
 		KCrashReporter.MOST_RECENT_SAVEFILE = null;
 		this.RefreshResumeButton();
 		this.Button_ResumeGame.onClick += this.ResumeGame;
-		this.Button_NewGame.onClick += this.NewGame;
-		this.Button_LoadGame.onClick += this.LoadGame;
-		this.Button_Options.onClick += this.Options;
-		this.Button_QuitGame.onClick += this.QuitGame;
-		this.Button_Translations.onClick += this.Translations;
-		this.Button_Scenarios.gameObject.SetActive(false);
-		if (GenericGameSettings.instance != null && GenericGameSettings.instance.demoMode)
-		{
-			this.Button_ResumeGame.gameObject.SetActive(false);
-			this.Button_LoadGame.gameObject.SetActive(false);
-			this.Button_Options.gameObject.SetActive(false);
-			this.Button_Translations.gameObject.SetActive(false);
-			this.Button_Translations.gameObject.SetActive(false);
-			this.Button_Scenarios.gameObject.SetActive(false);
-			this.topLeftAlphaMessage.gameObject.SetActive(false);
-		}
-		this.Button_Scenarios.gameObject.SetActive(false);
 		this.StartFEAudio();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
@@ -187,7 +187,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 285480U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 290148U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -329,21 +329,14 @@ public class MainMenu : KMonoBehaviour
 		}
 	}
 
+	private void RestartGame()
+	{
+		App.instance.Restart();
+	}
+
 	public RectTransform LogoAndMenu;
 
 	public KButton Button_ResumeGame;
-
-	public KButton Button_NewGame;
-
-	public KButton Button_LoadGame;
-
-	public KButton Button_Scenarios;
-
-	public KButton Button_Translations;
-
-	public KButton Button_Options;
-
-	public KButton Button_QuitGame;
 
 	public GameObject patchNotesScreen;
 
@@ -353,9 +346,31 @@ public class MainMenu : KMonoBehaviour
 
 	private GameObject GameSettingsScreen;
 
+	[SerializeField]
+	private KButton buttonPrefab;
+
+	[SerializeField]
+	private GameObject buttonParent;
+
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 
 	private Dictionary<string, MainMenu.SaveFileEntry> saveFileEntries = new Dictionary<string, MainMenu.SaveFileEntry>();
+
+	private struct ButtonInfo
+	{
+		public ButtonInfo(LocString text, global::System.Action action, int font_size)
+		{
+			this.text = text;
+			this.action = action;
+			this.fontSize = font_size;
+		}
+
+		public LocString text;
+
+		public global::System.Action action;
+
+		public int fontSize;
+	}
 
 	private struct SaveFileEntry
 	{

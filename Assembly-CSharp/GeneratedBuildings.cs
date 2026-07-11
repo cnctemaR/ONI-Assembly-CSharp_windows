@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 public class GeneratedBuildings
 {
-	public static void LoadGeneratedBuildings()
+	public static void LoadGeneratedBuildings(List<Type> types)
 	{
 		Type typeFromHandle = typeof(IBuildingConfig);
-		Assembly assembly = Assembly.GetAssembly(typeof(TileConfig));
-		Type[] types = assembly.GetTypes();
 		List<Type> list = new List<Type>();
 		foreach (Type type in types)
 		{

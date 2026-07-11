@@ -53,7 +53,7 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 			this.energy = base.GetComponent<IEnergyConsumer>();
 			this.button = base.GetComponent<BuildingEnabledButton>();
 		}
-		if (this.requireConduit)
+		if (this.requireConduit && !this.conduitConsumer)
 		{
 			this.conduitConsumer = base.GetComponent<ConduitConsumer>();
 		}
@@ -178,7 +178,7 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 
 	private IEnergyConsumer energy;
 
-	private ConduitConsumer conduitConsumer;
+	public ConduitConsumer conduitConsumer;
 
 	[MyCmpReq]
 	private KSelectable selectable;

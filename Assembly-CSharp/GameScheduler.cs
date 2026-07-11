@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 public class GameScheduler : KMonoBehaviour, IScheduler
 {
@@ -48,7 +47,7 @@ public class GameScheduler : KMonoBehaviour, IScheduler
 	{
 		public override float GetTime()
 		{
-			return Time.time;
+			return GameClock.Instance.GetTime();
 		}
 	}
 }

@@ -9,7 +9,6 @@ public class GasBottler : Workable
 		base.OnSpawn();
 		this.smi = new GasBottler.Controller.Instance(this);
 		this.smi.StartSM();
-		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_fill", "meter_OL" });
 		this.UpdateStoredItemState();
 	}
 
@@ -41,8 +40,6 @@ public class GasBottler : Workable
 	}
 
 	public Storage storage;
-
-	private MeterController meter;
 
 	private GasBottler.Controller.Instance smi;
 

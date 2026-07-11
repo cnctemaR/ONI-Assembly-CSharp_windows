@@ -15,21 +15,13 @@ public class NameDisplayScreen : KScreen
 	{
 		base.OnSpawn();
 		UIRegistry.nameDisplayScreen = this;
-		foreach (Health health2 in Components.Health.Items)
-		{
-			this.RegisterComponent(health2.gameObject, health2, true);
-		}
 		Components.Health.Register(delegate(Health health)
 		{
-			this.RegisterComponent(health.gameObject, health);
+			this.RegisterComponent(health.gameObject, health, false);
 		}, null);
-		foreach (Equipment equipment2 in Components.Equipment.Items)
-		{
-			this.RegisterComponent(equipment2.gameObject, equipment2, false);
-		}
 		Components.Equipment.Register(delegate(Equipment equipment)
 		{
-			this.RegisterComponent(equipment.gameObject, equipment);
+			this.RegisterComponent(equipment.gameObject, equipment, false);
 		}, null);
 	}
 
@@ -80,12 +72,7 @@ public class NameDisplayScreen : KScreen
 		}
 	}
 
-	public void RegisterComponent(GameObject representedObject, object component)
-	{
-		this.RegisterComponent(representedObject, component, false);
-	}
-
-	public void RegisterComponent(GameObject representedObject, object component, bool force_new_entry)
+	public void RegisterComponent(GameObject representedObject, object component, bool force_new_entry = false)
 	{
 		NameDisplayScreen.Entry entry = ((!force_new_entry) ? this.GetEntry(representedObject) : null);
 		if (entry == null)
@@ -105,40 +92,84 @@ public class NameDisplayScreen : KScreen
 		entry.bars_go = reference.gameObject;
 		if (component is Health)
 		{
-			Health health = (Health)component;
-			GameObject gameObject = Util.KInstantiateUI(ProgressBarsConfig.Instance.healthBarPrefab, reference.gameObject, false);
-			gameObject.name = "Health Bar";
-			health.healthBar = gameObject.GetComponent<HealthBar>();
-			health.healthBar.GetComponent<KSelectable>().entityName = UI.METERS.HEALTH.TOOLTIP;
-			health.healthBar.GetComponent<KSelectableHealthBar>().IsSelectable = representedObject.GetComponent<MinionBrain>() != null;
-			entry.healthBar = health.healthBar;
-			gameObject.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
+			if (!entry.healthBar)
+			{
+				Health health = (Health)component;
+				GameObject gameObject = Util.KInstantiateUI(ProgressBarsConfig.Instance.healthBarPrefab, reference.gameObject, false);
+				gameObject.name = "Health Bar";
+				health.healthBar = gameObject.GetComponent<HealthBar>();
+				health.healthBar.GetComponent<KSelectable>().entityName = UI.METERS.HEALTH.TOOLTIP;
+				health.healthBar.GetComponent<KSelectableHealthBar>().IsSelectable = representedObject.GetComponent<MinionBrain>() != null;
+				entry.healthBar = health.healthBar;
+				entry.healthBar.autoHide = false;
+				gameObject.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("HealthBar");
+			}
+			else
+			{
+				global::Debug.LogWarningFormat("Health added twice {0}", new object[] { component });
+			}
 		}
 		else if (component is OxygenBreather)
 		{
-			GameObject gameObject2 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, reference.gameObject, false);
-			entry.breathBar = gameObject2.GetComponent<ProgressBar>();
-			gameObject2.gameObject.GetComponent<ToolTip>().AddMultiStringTooltip("Breath", this.ToolTipStyle_Property);
-			gameObject2.name = "Breath Bar";
-			gameObject2.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("BreathBar");
-			gameObject2.GetComponent<KSelectable>().entityName = UI.METERS.BREATH.TOOLTIP;
+			if (!entry.breathBar)
+			{
+				GameObject gameObject2 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, reference.gameObject, false);
+				entry.breathBar = gameObject2.GetComponent<ProgressBar>();
+				entry.breathBar.autoHide = false;
+				gameObject2.gameObject.GetComponent<ToolTip>().AddMultiStringTooltip("Breath", this.ToolTipStyle_Property);
+				gameObject2.name = "Breath Bar";
+				gameObject2.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("BreathBar");
+				gameObject2.GetComponent<KSelectable>().entityName = UI.METERS.BREATH.TOOLTIP;
+			}
+			else
+			{
+				global::Debug.LogWarningFormat("OxygenBreather added twice {0}", new object[] { component });
+			}
 		}
 		else if (component is Equipment)
 		{
-			GameObject gameObject3 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, reference.gameObject, false);
-			entry.suitBar = gameObject3.GetComponent<ProgressBar>();
-			gameObject3.name = "Suit Tank Bar";
-			gameObject3.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("OxygenTankBar");
-			gameObject3.GetComponent<KSelectable>().entityName = UI.METERS.BREATH.TOOLTIP;
+			if (!entry.suitBar)
+			{
+				GameObject gameObject3 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, reference.gameObject, false);
+				entry.suitBar = gameObject3.GetComponent<ProgressBar>();
+				entry.suitBar.autoHide = false;
+				gameObject3.name = "Suit Tank Bar";
+				gameObject3.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("OxygenTankBar");
+				gameObject3.GetComponent<KSelectable>().entityName = UI.METERS.BREATH.TOOLTIP;
+			}
+			else
+			{
+				global::Debug.LogWarningFormat("SuitBar added twice {0}", new object[] { component });
+			}
+			if (!entry.suitFuelBar)
+			{
+				GameObject gameObject4 = Util.KInstantiateUI(ProgressBarsConfig.Instance.progressBarUIPrefab, reference.gameObject, false);
+				entry.suitFuelBar = gameObject4.GetComponent<ProgressBar>();
+				entry.suitFuelBar.autoHide = false;
+				gameObject4.name = "Suit Fuel Bar";
+				gameObject4.transform.Find("Bar").GetComponent<Image>().color = ProgressBarsConfig.Instance.GetBarColor("FuelTankBar");
+				gameObject4.GetComponent<KSelectable>().entityName = UI.METERS.FUEL.TOOLTIP;
+			}
+			else
+			{
+				global::Debug.LogWarningFormat("FuelBar added twice {0}", new object[] { component });
+			}
 		}
 		else if (component is ThoughtGraph.Instance)
 		{
-			GameObject gameObject4 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubble, entry.display_go, false);
-			entry.thoughtBubble = gameObject4.GetComponent<HierarchyReferences>();
-			gameObject4.name = "Thought Bubble";
-			GameObject gameObject5 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubbleConvo, entry.display_go, false);
-			entry.thoughtBubbleConvo = gameObject5.GetComponent<HierarchyReferences>();
-			gameObject5.name = "Thought Bubble Convo";
+			if (!entry.thoughtBubble)
+			{
+				GameObject gameObject5 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubble, entry.display_go, false);
+				entry.thoughtBubble = gameObject5.GetComponent<HierarchyReferences>();
+				gameObject5.name = "Thought Bubble";
+				GameObject gameObject6 = Util.KInstantiateUI(EffectPrefabs.Instance.ThoughtBubbleConvo, entry.display_go, false);
+				entry.thoughtBubbleConvo = gameObject6.GetComponent<HierarchyReferences>();
+				gameObject6.name = "Thought Bubble Convo";
+			}
+			else
+			{
+				global::Debug.LogWarningFormat("ThoughtGraph added twice {0}", new object[] { component });
+			}
 		}
 	}
 
@@ -298,6 +329,17 @@ public class NameDisplayScreen : KScreen
 		entry.suitBar.gameObject.SetActive(bVisible);
 	}
 
+	public void SetSuitFuelDisplay(GameObject minion_go, Func<float> updatePercentFull, bool bVisible)
+	{
+		NameDisplayScreen.Entry entry = this.GetEntry(minion_go);
+		if (entry == null || entry.suitFuelBar == null)
+		{
+			return;
+		}
+		entry.suitFuelBar.SetUpdateFunc(updatePercentFull);
+		entry.suitFuelBar.gameObject.SetActive(bVisible);
+	}
+
 	private NameDisplayScreen.Entry GetEntry(GameObject worldObject)
 	{
 		return this.entries.Find((NameDisplayScreen.Entry entry) => entry.world_go == worldObject);
@@ -350,6 +392,8 @@ public class NameDisplayScreen : KScreen
 		public ProgressBar breathBar;
 
 		public ProgressBar suitBar;
+
+		public ProgressBar suitFuelBar;
 
 		public HierarchyReferences thoughtBubble;
 

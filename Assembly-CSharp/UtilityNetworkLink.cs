@@ -6,15 +6,15 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Subscribe<UtilityNetworkLink>(774203113, UtilityNetworkLink.OnBuildingBrokenDelegate);
+		base.Subscribe<UtilityNetworkLink>(-1735440190, UtilityNetworkLink.OnBuildingFullyRepairedDelegate);
 		this.Connect();
 	}
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe<UtilityNetworkLink>(774203113, UtilityNetworkLink.OnBuildingBrokenDelegate);
+		base.Unsubscribe<UtilityNetworkLink>(-1735440190, UtilityNetworkLink.OnBuildingFullyRepairedDelegate);
 		this.Disconnect();
 		base.OnCleanUp();
 	}
@@ -106,4 +106,14 @@ public abstract class UtilityNetworkLink : KMonoBehaviour
 	public bool visualizeOnly;
 
 	private bool connected;
+
+	private static readonly EventSystem.IntraObjectHandler<UtilityNetworkLink> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<UtilityNetworkLink>(delegate(UtilityNetworkLink component, object data)
+	{
+		component.OnBuildingBroken(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<UtilityNetworkLink> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<UtilityNetworkLink>(delegate(UtilityNetworkLink component, object data)
+	{
+		component.OnBuildingFullyRepaired(data);
+	});
 }

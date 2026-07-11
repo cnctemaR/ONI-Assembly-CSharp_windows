@@ -8,5 +8,5 @@ using UnityEngine;
 
 [assembly: AssemblyVersion("0.0.0.0")]
 [assembly: InternalsVisibleTo("UnityEditor.SpatialTracking")]
-[assembly: UnityAPICompatibilityVersion("2018.2.0f2")]
+[assembly: UnityAPICompatibilityVersion("2018.2.7f1")]
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]

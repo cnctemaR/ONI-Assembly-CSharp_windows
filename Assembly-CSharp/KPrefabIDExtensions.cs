@@ -28,8 +28,18 @@ public static class KPrefabIDExtensions
 		go.GetComponent<KPrefabID>().AddTag(tag);
 	}
 
+	public static void AddTag(this Component cmp, Tag tag)
+	{
+		cmp.gameObject.AddTag(tag);
+	}
+
 	public static void RemoveTag(this GameObject go, Tag tag)
 	{
 		go.GetComponent<KPrefabID>().RemoveTag(tag);
+	}
+
+	public static void RemoveTag(this Component cmp, Tag tag)
+	{
+		cmp.gameObject.RemoveTag(tag);
 	}
 }

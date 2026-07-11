@@ -14,6 +14,9 @@ public class Baggable : KMonoBehaviour
 			new HashedString("capture"),
 			new HashedString("pickup")
 		};
+		pickupable.workAnimPlayMode = KAnim.PlayMode.Once;
+		pickupable.workingPstComplete = HashedString.Invalid;
+		pickupable.workingPstFailed = HashedString.Invalid;
 		pickupable.overrideAnims = new KAnimFile[] { this.minionAnimOverride };
 		pickupable.trackOnPickup = false;
 		pickupable.useGunforPickup = false;
@@ -27,7 +30,7 @@ public class Baggable : KMonoBehaviour
 				new CellOffset(0, -1)
 			});
 		}
-		base.Subscribe(856640610, new Action<object>(this.OnStore));
+		base.Subscribe<Baggable>(856640610, Baggable.OnStoreDelegate);
 		if (base.transform.parent != null)
 		{
 			if (base.transform.parent.GetComponent<Trap>() != null)
@@ -102,4 +105,9 @@ public class Baggable : KMonoBehaviour
 
 	[Serialize]
 	public bool wrangled;
+
+	private static readonly EventSystem.IntraObjectHandler<Baggable> OnStoreDelegate = new EventSystem.IntraObjectHandler<Baggable>(delegate(Baggable component, object data)
+	{
+		component.OnStore(data);
+	});
 }

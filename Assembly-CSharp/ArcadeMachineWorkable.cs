@@ -8,7 +8,6 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 	{
 		base.OnPrefabInit();
 		this.synchronizeAnims = false;
-		this.forcePlayPst = true;
 		this.showProgressBar = true;
 		this.resetProgressOnStop = true;
 		base.SetWorkTime(15f);

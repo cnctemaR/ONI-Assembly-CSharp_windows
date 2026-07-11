@@ -40,6 +40,13 @@ namespace UnityEngine.U2D
 		}
 
 		/// <summary>
+		///   <para>Return true if Sprite is packed into this SpriteAtlas.</para>
+		/// </summary>
+		/// <param name="sprite"></param>
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public extern bool CanBindTo(Sprite sprite);
+
+		/// <summary>
 		///   <para>Clone the first Sprite in this atlas that matches the name packed in this atlas and return it.</para>
 		/// </summary>
 		/// <param name="name">The name of the Sprite.</param>

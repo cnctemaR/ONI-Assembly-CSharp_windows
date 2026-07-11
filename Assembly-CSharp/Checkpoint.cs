@@ -15,8 +15,8 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<Checkpoint>(-801688580, Checkpoint.OnLogicValueChangedDelegate);
+		base.Subscribe<Checkpoint>(-592767678, Checkpoint.OnOperationalChangedDelegate);
 		base.smi.StartSM();
 		if (Checkpoint.infoStatusItem_Logic == null)
 		{
@@ -147,6 +147,16 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 
 	private bool statusDirty = true;
 
+	private static readonly EventSystem.IntraObjectHandler<Checkpoint> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<Checkpoint>(delegate(Checkpoint component, object data)
+	{
+		component.OnLogicValueChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Checkpoint> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Checkpoint>(delegate(Checkpoint component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
 	private class CheckpointReactable : Reactable
 	{
 		public CheckpointReactable(Checkpoint checkpoint)
@@ -206,7 +216,7 @@ public class Checkpoint : StateMachineComponent<Checkpoint.SMInstance>
 				else
 				{
 					NavGrid.Transition nextTransition = this.reactor_navigator.GetNextTransition();
-					if (!((!this.rotated) ? (nextTransition.x > 0) : (nextTransition.x < 0)))
+					if (!((!this.rotated) ? ((int)nextTransition.x > 0) : ((int)nextTransition.x < 0)))
 					{
 						base.Cleanup();
 					}

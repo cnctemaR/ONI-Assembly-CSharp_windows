@@ -14,7 +14,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
+		base.Subscribe<SeasonManager>(631075836, SeasonManager.OnNewDayDelegate);
 		if (this.currentSeasonIndex >= this.SeasonLoop.Length)
 		{
 			this.currentSeasonIndex = this.SeasonLoop.Length - 1;
@@ -26,10 +26,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		if (GameClock.Instance != null)
-		{
-			GameClock.Instance.Unsubscribe(631075836, new Action<object>(this.OnNewDay));
-		}
+		base.Unsubscribe<SeasonManager>(631075836, SeasonManager.OnNewDayDelegate);
 	}
 
 	private void OnNewDay(object data)
@@ -118,6 +115,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 			num -= bombardmentInfo2.weight;
 			bombardmentInfo2 = bombardment_info[++num2];
 		}
+		Game.Instance.Trigger(-84771526, null);
 		this.SpawnBombard(bombardmentInfo2.prefab);
 	}
 
@@ -138,6 +136,16 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	public float TimeUntilNextBombardment()
 	{
 		return (!this.CurrentSeasonHasBombardment()) ? float.MaxValue : ((!this.bombardmentOn) ? this.bombardmentPeriodRemaining : 0f);
+	}
+
+	public float GetBombardmentDuration()
+	{
+		if (this.CurrentSeasonHasBombardment())
+		{
+			SeasonManager.Season season = this.seasons[this.SeasonLoop[this.currentSeasonIndex]];
+			return (!this.bombardmentOn) ? season.secondsBombardmentOn.Get() : 0f;
+		}
+		return 0f;
 	}
 
 	public void ForceBeginMeteorSeasonWithShower()
@@ -165,6 +173,8 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	[ContextMenu("Force Shower")]
 	public void Debug_ForceShower()
 	{
+		this.currentSeasonIndex = Array.IndexOf<string>(this.SeasonLoop, "MeteorShower");
+		this.ResetSeasonProgress();
 		this.bombardmentOn = true;
 		this.bombardmentPeriodRemaining = float.MaxValue;
 		this.secondsUntilNextBombardment = 0f;
@@ -236,6 +246,11 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	};
 
 	private string[] SeasonLoop = new string[] { "Default", "MeteorShower" };
+
+	private static readonly EventSystem.IntraObjectHandler<SeasonManager> OnNewDayDelegate = new EventSystem.IntraObjectHandler<SeasonManager>(delegate(SeasonManager component, object data)
+	{
+		component.OnNewDay(data);
+	});
 
 	private struct BombardmentInfo
 	{

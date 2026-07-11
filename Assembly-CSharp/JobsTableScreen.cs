@@ -608,26 +608,15 @@ public class JobsTableScreen : TableScreen
 		{
 			JobsTableScreen.SkillEventHandlerID skillEventHandlerID = default(JobsTableScreen.SkillEventHandlerID);
 			MinionIdentity id2 = Components.LiveMinionIdentities[j];
-			skillEventHandlerID.level_up = Components.LiveMinionIdentities[j].gameObject.Subscribe(-110704193, delegate(object o)
+			Action<object> action = delegate(object o)
 			{
 				this.MarkSingleMinionRowDirty(id2);
-			});
-			skillEventHandlerID.effect_added = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1901442097, delegate(object o)
-			{
-				this.MarkSingleMinionRowDirty(id2);
-			});
-			skillEventHandlerID.effect_removed = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1157678353, delegate(object o)
-			{
-				this.MarkSingleMinionRowDirty(id2);
-			});
-			skillEventHandlerID.disease_added = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1089020, delegate(object o)
-			{
-				this.MarkSingleMinionRowDirty(id2);
-			});
-			skillEventHandlerID.disease_cured = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1516186173, delegate(object o)
-			{
-				this.MarkSingleMinionRowDirty(id2);
-			});
+			};
+			skillEventHandlerID.level_up = Components.LiveMinionIdentities[j].gameObject.Subscribe(-110704193, action);
+			skillEventHandlerID.effect_added = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1901442097, action);
+			skillEventHandlerID.effect_removed = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1157678353, action);
+			skillEventHandlerID.disease_added = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1089020, action);
+			skillEventHandlerID.disease_cured = Components.LiveMinionIdentities[j].gameObject.Subscribe(-1516186173, action);
 		}
 		for (int k = 0; k < Components.LiveMinionIdentities.Count; k++)
 		{

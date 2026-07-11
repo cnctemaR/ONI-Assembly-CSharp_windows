@@ -65,8 +65,8 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe<ManualGenerator>(-592767678, ManualGenerator.OnOperationalChangedDelegate);
+		base.Subscribe<ManualGenerator>(824508782, ManualGenerator.OnActiveChangedDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.GeneratingPower;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
@@ -235,6 +235,16 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 	private int powerCell;
 
 	private ManualGenerator.GeneratePowerSM.Instance smi;
+
+	private static readonly EventSystem.IntraObjectHandler<ManualGenerator> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<ManualGenerator>(delegate(ManualGenerator component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<ManualGenerator> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<ManualGenerator>(delegate(ManualGenerator component, object data)
+	{
+		component.OnActiveChanged(data);
+	});
 
 	private static readonly KAnimHashedString[] symbol_names = new KAnimHashedString[] { "meter", "meter_target", "meter_fill", "meter_frame", "meter_light", "meter_tubing" };
 

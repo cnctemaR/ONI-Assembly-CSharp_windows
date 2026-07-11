@@ -17,13 +17,10 @@ public class MushroomConfig : IEntityConfig
 
 	public void OnSpawn(GameObject inst)
 	{
-		inst.Subscribe(-10536414, delegate(object data)
-		{
-			this.OnEatComplete(inst.GetComponent<Edible>());
-		});
+		inst.Subscribe<Edible>(-10536414, MushroomConfig.OnEatCompleteDelegate);
 	}
 
-	private void OnEatComplete(Edible edible)
+	private static void OnEatComplete(Edible edible)
 	{
 		if (edible != null)
 		{
@@ -59,4 +56,9 @@ public class MushroomConfig : IEntityConfig
 	public static float SEEDS_PER_FRUIT_CHANCE = 0.05f;
 
 	public static string ID = "Mushroom";
+
+	private static readonly EventSystem.IntraObjectHandler<Edible> OnEatCompleteDelegate = new EventSystem.IntraObjectHandler<Edible>(delegate(Edible component, object data)
+	{
+		MushroomConfig.OnEatComplete(component);
+	});
 }

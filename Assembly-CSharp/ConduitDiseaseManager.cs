@@ -40,7 +40,8 @@ public class ConduitDiseaseManager : KCompactedVector<ConduitDiseaseManager.Data
 		if (contents.diseaseIdx != data.diseaseIdx)
 		{
 			data.diseaseIdx = contents.diseaseIdx;
-			data.growthInfo = ConduitDiseaseManager.GetGrowthInfo(contents.diseaseIdx, data.elemIdx);
+			byte b = (byte)ElementLoader.GetElementIndex(contents.element);
+			data.growthInfo = ConduitDiseaseManager.GetGrowthInfo(contents.diseaseIdx, b);
 		}
 		base.SetData(handle, data);
 	}

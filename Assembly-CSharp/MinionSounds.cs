@@ -5,8 +5,8 @@ public class MinionSounds : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(-1762453998, new Action<object>(this.OnStartMiningSound));
-		base.Subscribe(939543986, new Action<object>(this.OnStopMiningSound));
+		base.Subscribe<MinionSounds>(-1762453998, MinionSounds.OnStartMiningSoundDelegate);
+		base.Subscribe<MinionSounds>(939543986, MinionSounds.OnStopMiningSoundDelegate);
 	}
 
 	private void OnStartMiningSound(object data)
@@ -52,4 +52,14 @@ public class MinionSounds : KMonoBehaviour
 
 	[EventRef]
 	private string miningSoundMigrated;
+
+	private static readonly EventSystem.IntraObjectHandler<MinionSounds> OnStartMiningSoundDelegate = new EventSystem.IntraObjectHandler<MinionSounds>(delegate(MinionSounds component, object data)
+	{
+		component.OnStartMiningSound(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<MinionSounds> OnStopMiningSoundDelegate = new EventSystem.IntraObjectHandler<MinionSounds>(delegate(MinionSounds component, object data)
+	{
+		component.OnStopMiningSound(data);
+	});
 }

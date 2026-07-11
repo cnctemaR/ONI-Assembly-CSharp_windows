@@ -57,6 +57,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 		{
 			worker.GetComponent<Effects>().Add(RelaxationPoint.stressReductionEffect, false);
 		}
+		base.GetComponent<Operational>().SetActive(true, false);
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -74,6 +75,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	{
 		worker.GetComponent<Effects>().Remove(RelaxationPoint.stressReductionEffect);
 		worker.GetComponent<Effects>().Remove(RelaxationPoint.roomStressReductionEffect);
+		base.GetComponent<Operational>().SetActive(false, false);
 		base.OnStopWork(worker);
 	}
 
@@ -118,39 +120,12 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 		{
 			default_state = this.unoperational;
 			this.unoperational.EventTransition(GameHashes.OperationalChanged, this.operational, (RelaxationPoint.RelaxationPointSM.Instance smi) => smi.GetComponent<Operational>().IsOperational).PlayAnim("off");
-			this.operational.DefaultState(this.operational.idle).ToggleChore((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master.CreateWorkChore(), this.unoperational);
-			this.operational.idle.WorkableStartTransition((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master, this.operational.healing);
-			this.operational.healing.WorkableStopTransition((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master, this.operational.exiting).EventTransition(GameHashes.OperationalChanged, this.operational.exiting, (RelaxationPoint.RelaxationPointSM.Instance smi) => !smi.GetComponent<Operational>().IsOperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
-			{
-				if (!smi.master.GetComponent<Operational>().IsOperational)
-				{
-					smi.GoTo(this.operational.exiting);
-				}
-				else
-				{
-					smi.master.gameObject.GetComponent<Operational>().SetActive(true, false);
-					smi.Queue("working_pre", KAnim.PlayMode.Once);
-					smi.Queue("working_loop", KAnim.PlayMode.Loop);
-				}
-			});
-			this.operational.exiting.PlayAnim("working_pst").OnAnimQueueComplete(this.unoperational).Enter(delegate(RelaxationPoint.RelaxationPointSM.Instance smi)
-			{
-				smi.master.gameObject.GetComponent<Operational>().SetActive(false, false);
-			});
+			this.operational.ToggleChore((RelaxationPoint.RelaxationPointSM.Instance smi) => smi.master.CreateWorkChore(), this.unoperational);
 		}
 
 		public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State unoperational;
 
-		public RelaxationPoint.RelaxationPointSM.OperationalStates operational;
-
-		public class OperationalStates : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State
-		{
-			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State idle;
-
-			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State healing;
-
-			public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State exiting;
-		}
+		public GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.State operational;
 
 		public new class Instance : GameStateMachine<RelaxationPoint.RelaxationPointSM, RelaxationPoint.RelaxationPointSM.Instance, RelaxationPoint, object>.GameInstance
 		{

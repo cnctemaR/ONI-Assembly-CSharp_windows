@@ -52,7 +52,6 @@ public class TravelTubeEntranceConfig : IBuildingConfig
 	{
 		go.GetComponent<RequireInputs>().visualizeRequirements = false;
 		GeneratedBuildings.RegisterLogicPorts(go, TravelTubeEntranceConfig.INPUT_PORTS);
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "TravelTubeEntrance";

@@ -275,6 +275,8 @@ namespace STRINGS
 
 			public static LocString DEBUGTRIGGERERROR = "DebugTriggerError";
 
+			public static LocString DEBUGDUMPGCROOTS = "DebugDumpGCRoots";
+
 			public static LocString DEBUGDUMPGARBAGEREFERENCES = "DebugDumpGarbageReferences";
 
 			public static LocString DEBUGDUMPEVENTDATA = "DebugDumpEventData";

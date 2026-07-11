@@ -84,6 +84,10 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 		networkManager.RemoveFromNetworks(this.filteredCell, this.itemFilter, true);
 		ConduitFlow flowManager = Conduit.GetFlowManager(this.portInfo.conduitType);
 		flowManager.RemoveConduitUpdater(new Action<float>(this.OnConduitTick));
+		if (this.partitionerEntry.IsValid() && GameScenePartitioner.Instance != null)
+		{
+			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
+		}
 		base.OnCleanUp();
 	}
 
@@ -241,8 +245,6 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 
 	public Filterable filterable;
 
-	private static readonly Operational.Flag canFilterFlag = new Operational.Flag("output_connected", Operational.Flag.Type.Requirement);
-
 	private Guid needsConduitStatusItemGuid;
 
 	private Guid conduitBlockedStatusItemGuid;
@@ -253,13 +255,9 @@ public class ElementFilter : KMonoBehaviour, ISaveLoadable, ISecondaryOutput
 
 	private int filteredCell = -1;
 
-	private FlowUtilityNetwork.NetworkItem itemInput;
-
-	private FlowUtilityNetwork.NetworkItem itemOutput;
-
 	private FlowUtilityNetwork.NetworkItem itemFilter;
 
 	private HandleVector<int>.Handle partitionerEntry;
 
-	private static StatusItem filterStatusItem = null;
+	private static StatusItem filterStatusItem;
 }

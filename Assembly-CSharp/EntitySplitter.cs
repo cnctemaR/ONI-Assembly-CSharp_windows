@@ -25,7 +25,7 @@ public class EntitySplitter : KMonoBehaviour
 			KPrefabID component2 = other.GetComponent<KPrefabID>();
 			return component != null && component2 != null && component.PrefabTag == component2.PrefabTag && pickupable.TotalAmount + other.TotalAmount <= this.maxStackSize;
 		};
-		base.Subscribe(-2064133523, new Action<object>(this.OnAbsorb));
+		base.Subscribe<EntitySplitter>(-2064133523, EntitySplitter.OnAbsorbDelegate);
 	}
 
 	public static Pickupable Split(Pickupable pickupable, float amount, GameObject prefab = null)
@@ -100,4 +100,9 @@ public class EntitySplitter : KMonoBehaviour
 	}
 
 	public float maxStackSize = float.MaxValue;
+
+	private static readonly EventSystem.IntraObjectHandler<EntitySplitter> OnAbsorbDelegate = new EventSystem.IntraObjectHandler<EntitySplitter>(delegate(EntitySplitter component, object data)
+	{
+		component.OnAbsorb(data);
+	});
 }

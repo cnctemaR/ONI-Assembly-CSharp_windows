@@ -24,7 +24,13 @@ public class FrontEndBackground : UIDupeRandomizer
 		this.nextDreckoTime = global::UnityEngine.Random.Range(this.tuning.minFirstDreckoInterval, this.tuning.maxFirstDreckoInterval) + Time.unscaledTime;
 	}
 
-	private void Update()
+	protected override void Update()
+	{
+		base.Update();
+		this.UpdateDrecko();
+	}
+
+	private void UpdateDrecko()
 	{
 		if (Time.unscaledTime > this.nextDreckoTime)
 		{

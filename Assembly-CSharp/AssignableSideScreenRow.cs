@@ -90,7 +90,7 @@ public class AssignableSideScreenRow : KMonoBehaviour
 	{
 		ToolTip component = base.GetComponent<ToolTip>();
 		component.ClearMultiStringTooltip();
-		if (this.targetIdentity != null)
+		if (this.targetIdentity != null && !this.targetIdentity.IsNull())
 		{
 			AssignableSideScreenRow.AssignableState assignableState = this.currentState;
 			if (assignableState != AssignableSideScreenRow.AssignableState.Selected)

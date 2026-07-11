@@ -51,11 +51,7 @@ public class StorageLockerSmartConfig : IBuildingConfig
 		storage.storageFilters = STORAGEFILTERS.NOT_EDIBLE_SOLIDS;
 		storage.storageFullMargin = STORAGE.STORAGE_LOCKER_FILLED_MARGIN;
 		go.AddOrGet<StorageLockerSmart>();
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			StorageController.Instance instance = new StorageController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<StorageController.Def>();
 	}
 
 	public const string ID = "StorageLockerSmart";

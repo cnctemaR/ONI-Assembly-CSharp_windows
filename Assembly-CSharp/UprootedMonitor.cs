@@ -15,14 +15,7 @@ public class UprootedMonitor : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-216549700, delegate(object d)
-		{
-			if (!this.uprooted)
-			{
-				this.uprooted = true;
-				base.Trigger(-216549700, null);
-			}
-		});
+		base.Subscribe<UprootedMonitor>(-216549700, UprootedMonitor.OnUprootedDelegate);
 		this.position = Grid.PosToCell(base.gameObject);
 		this.ground = Grid.OffsetCell(this.position, this.monitorCell);
 		if (Grid.IsValidCell(this.position) && Grid.IsValidCell(this.ground))
@@ -76,4 +69,13 @@ public class UprootedMonitor : KMonoBehaviour
 	public CellOffset monitorCell = new CellOffset(0, -1);
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	private static readonly EventSystem.IntraObjectHandler<UprootedMonitor> OnUprootedDelegate = new EventSystem.IntraObjectHandler<UprootedMonitor>(delegate(UprootedMonitor component, object data)
+	{
+		if (!component.uprooted)
+		{
+			component.uprooted = true;
+			component.Trigger(-216549700, null);
+		}
+	});
 }

@@ -22,10 +22,14 @@ public class PoweredActiveStoppableController : GameStateMachine<PoweredActiveSt
 
 	public GameStateMachine<PoweredActiveStoppableController, PoweredActiveStoppableController.Instance, IStateMachineTarget, object>.State stop;
 
+	public class Def : StateMachine.BaseDef
+	{
+	}
+
 	public new class Instance : GameStateMachine<PoweredActiveStoppableController, PoweredActiveStoppableController.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public Instance(IStateMachineTarget master, PoweredActiveStoppableController.Def def)
+			: base(master, def)
 		{
 		}
 	}

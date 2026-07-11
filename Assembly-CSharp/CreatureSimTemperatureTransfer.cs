@@ -32,6 +32,7 @@ public class CreatureSimTemperatureTransfer : SimTemperatureTransfer, ISim200ms
 		this.average_kilowatts_exchanged = new RunningWeightedAverage(-10f, 10f, 20, true);
 		this.surfaceArea = 1f;
 		this.thickness = 0.002f;
+		this.groundTransferScale = 0f;
 		Attributes attributes = base.gameObject.GetAttributes();
 		AttributeInstance attributeInstance = attributes.Add(Db.Get().Attributes.ThermalConductivityBarrier);
 		AttributeModifier attributeModifier = new AttributeModifier(Db.Get().Attributes.ThermalConductivityBarrier.Id, this.thickness, DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, false, false, true);

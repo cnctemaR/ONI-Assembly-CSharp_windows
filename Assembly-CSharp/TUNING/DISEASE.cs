@@ -74,6 +74,8 @@ namespace TUNING
 
 			public const float DEATH_MAX = 10f;
 
+			public const float DEATH_INSTANT = 0f;
+
 			public const float GROWTH_1 = -12000f;
 
 			public const float GROWTH_2 = -6000f;

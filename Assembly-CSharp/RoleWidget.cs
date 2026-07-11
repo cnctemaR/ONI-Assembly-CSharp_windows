@@ -252,7 +252,16 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 				}
 			}
 			reference.AddMultiStringTooltip("\n" + UI.ROLES_SCREEN.HIGHEST_EXPECTATIONS_TIER + "\n\n", this.TooltipTextStyle_Header);
-			reference.AddMultiStringTooltip("    • " + RolesScreen.tierNames[occupier.GetComponent<MinionResume>().HighestTierRole()], null);
+			int num = 0;
+			foreach (Expectation expectation in Expectations.ExpectationsByTier[occupier.GetComponent<MinionResume>().HighestTierRole()])
+			{
+				AttributeModifierExpectation attributeModifierExpectation = expectation as AttributeModifierExpectation;
+				if (attributeModifierExpectation != null && attributeModifierExpectation.modifier.AttributeId == Db.Get().Attributes.QualityOfLifeExpectation.Id)
+				{
+					num = Mathf.RoundToInt(attributeModifierExpectation.modifier.Value);
+				}
+			}
+			reference.AddMultiStringTooltip("    • " + RolesScreen.tierNames[occupier.GetComponent<MinionResume>().HighestTierRole()] + string.Format(UI.ROLES_SCREEN.ADDED_EXPECTATIONS_AMOUNT, num), null);
 		}
 		else
 		{

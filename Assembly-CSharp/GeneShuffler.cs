@@ -36,6 +36,13 @@ public class GeneShuffler : Workable
 		this.geneShufflerSMI = new GeneShuffler.GeneShufflerSM.Instance(this);
 		this.geneShufflerSMI.StartSM();
 		this.showProgressBar = false;
+		this.RefreshRechargeChore();
+		this.RefreshConsumedState();
+		base.Subscribe<GeneShuffler>(-1697596308, GeneShuffler.OnStorageChangeDelegate);
+	}
+
+	private void RefreshConsumedState()
+	{
 		if (!this.IsConsumed)
 		{
 			if (this.assignable.assignee != null)
@@ -69,6 +76,47 @@ public class GeneShuffler : Workable
 		{
 			this.CancelChore(null);
 		}
+	}
+
+	private void Recharge()
+	{
+		this.IsConsumed = false;
+		this.RechargeRequested = false;
+		this.assignable.SetCanBeAssigned(true);
+		this.geneShufflerSMI.GoTo(this.geneShufflerSMI.sm.idle);
+		this.RefreshRechargeChore();
+		this.RefreshConsumedState();
+		KSelectable component = base.GetComponent<KSelectable>();
+		if (component.IsSelected)
+		{
+			DetailsScreen.Instance.Refresh(base.gameObject);
+		}
+	}
+
+	private void OnStorageChange(object data)
+	{
+		if (this.storage_recursion_guard)
+		{
+			return;
+		}
+		this.storage_recursion_guard = true;
+		if (this.IsConsumed)
+		{
+			for (int i = this.storage.items.Count - 1; i >= 0; i--)
+			{
+				GameObject gameObject = this.storage.items[i];
+				if (!(gameObject == null))
+				{
+					if (gameObject.HasTag(GeneShuffler.RechargeTag))
+					{
+						this.storage.ConsumeIgnoringDisease(gameObject);
+						this.Recharge();
+						break;
+					}
+				}
+			}
+		}
+		this.storage_recursion_guard = false;
 	}
 
 	protected override void OnStartWork(Worker worker)
@@ -182,20 +230,49 @@ public class GeneShuffler : Workable
 		this.chore = null;
 	}
 
+	public void RequestRecharge(bool request)
+	{
+		this.RechargeRequested = request;
+		this.RefreshRechargeChore();
+	}
+
+	private void RefreshRechargeChore()
+	{
+		this.delivery.Pause(!this.RechargeRequested, "No recharge requested");
+	}
+
 	[MyCmpReq]
 	public Assignable assignable;
 
 	[MyCmpAdd]
 	public Notifier notifier;
 
-	private Notification notification;
+	[MyCmpReq]
+	public ManualDeliveryKG delivery;
+
+	[MyCmpReq]
+	public Storage storage;
+
+	[Serialize]
+	public bool IsConsumed;
+
+	[Serialize]
+	public bool RechargeRequested;
 
 	private Chore chore;
 
 	private GeneShuffler.GeneShufflerSM.Instance geneShufflerSMI;
 
-	[Serialize]
-	public bool IsConsumed;
+	private Notification notification;
+
+	private static Tag RechargeTag = new Tag("GeneShufflerRecharge");
+
+	private static readonly EventSystem.IntraObjectHandler<GeneShuffler> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<GeneShuffler>(delegate(GeneShuffler component, object data)
+	{
+		component.OnStorageChange(data);
+	});
+
+	private bool storage_recursion_guard;
 
 	public class GeneShufflerSM : GameStateMachine<GeneShuffler.GeneShufflerSM, GeneShuffler.GeneShufflerSM.Instance, GeneShuffler>
 	{

@@ -39,8 +39,7 @@ public class GlobalChoreProvider : ChoreProvider
 			int num = -1;
 			if (fetchChore.destination != null)
 			{
-				Automatable component2 = fetchChore.destination.GetComponent<Automatable>();
-				if (component2 != null && component2.GetAutomationOnly())
+				if (fetchChore.automatable != null && fetchChore.automatable.GetAutomationOnly())
 				{
 					continue;
 				}

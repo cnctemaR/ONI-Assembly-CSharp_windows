@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Delaunay.Geo;
+using Klei;
 using KSerialization;
-using ProcGenGame;
 using Steamworks;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -144,7 +143,8 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F1, Modifier.Ctrl, global::Action.DebugDumpSceneParitionerLeakData, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F12, Modifier.Ctrl, global::Action.DebugTriggerException, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F12, (Modifier)6, global::Action.DebugTriggerError, true, false),
-			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F10, Modifier.Ctrl, global::Action.DebugDumpGarbageReferences, true, false),
+			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F10, Modifier.Ctrl, global::Action.DebugDumpGCRoots, true, false),
+			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F10, (Modifier)3, global::Action.DebugDumpGarbageReferences, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F11, Modifier.Ctrl, global::Action.DebugDumpEventData, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F7, (Modifier)3, global::Action.DebugCrashSim, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.Alpha9, Modifier.Alt, global::Action.DebugNextCall, true, false),
@@ -192,8 +192,8 @@ public class Global : MonoBehaviour
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.S, Modifier.Shift, global::Action.ToggleSandboxTools, true, false),
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.R, Modifier.Shift, global::Action.SandboxReveal, true, false)
 		};
-		BuildMenu.DisplayInfo[] array = (BuildMenu.DisplayInfo[])BuildMenu.OrderedBuildings.data;
-		foreach (BuildMenu.DisplayInfo displayInfo in array)
+		IList<BuildMenu.DisplayInfo> list2 = (IList<BuildMenu.DisplayInfo>)BuildMenu.OrderedBuildings.data;
+		foreach (BuildMenu.DisplayInfo displayInfo in list2)
 		{
 			Global.AddBindings(BuildMenu.Category.INVALID, displayInfo, list);
 		}
@@ -205,15 +205,15 @@ public class Global : MonoBehaviour
 		if (display_info.data != null)
 		{
 			Type type = display_info.data.GetType();
-			if (type == typeof(BuildMenu.DisplayInfo[]))
+			if (typeof(IList<BuildMenu.DisplayInfo>).IsAssignableFrom(type))
 			{
-				BuildMenu.DisplayInfo[] array = (BuildMenu.DisplayInfo[])display_info.data;
-				foreach (BuildMenu.DisplayInfo displayInfo in array)
+				IList<BuildMenu.DisplayInfo> list = (IList<BuildMenu.DisplayInfo>)display_info.data;
+				foreach (BuildMenu.DisplayInfo displayInfo in list)
 				{
 					Global.AddBindings(display_info.category, displayInfo, bindings);
 				}
 			}
-			else if (type == typeof(BuildMenu.BuildingInfo[]))
+			else if (typeof(IList<BuildMenu.BuildingInfo>).IsAssignableFrom(type))
 			{
 				string text = parent_category.ToString() + "Menu";
 				BindingEntry bindingEntry = new BindingEntry(text, GamepadButton.NumButtons, display_info.keyCode, Modifier.None, display_info.hotkey, true, true);
@@ -224,6 +224,8 @@ public class Global : MonoBehaviour
 
 	private void Awake()
 	{
+		this.globalCanvas = GameObject.Find("Canvas");
+		global::UnityEngine.Object.DontDestroyOnLoad(this.globalCanvas.gameObject);
 		this.OutputSystemInfo();
 		Global.Instance = this;
 		if (this.forcedAtlasInitializationList != null)
@@ -245,12 +247,15 @@ public class Global : MonoBehaviour
 				}
 			}
 		}
-		Manager.Initialize(new Type[]
-		{
-			typeof(WorldGen),
-			typeof(Polygon),
-			typeof(Vector2)
-		});
+		LayeredFileSystem.CreateInstance();
+		this.layeredFileSystem = LayeredFileSystem.instance;
+		this.standardFS = new StandardFileSystem();
+		this.layeredFileSystem.AddFileSystem(this.standardFS);
+		Singleton<StateMachineUpdater>.CreateInstance();
+		Singleton<StateMachineManager>.CreateInstance();
+		this.modManager = new ModManager();
+		this.modManager.Start();
+		Manager.Initialize();
 		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings());
 		Audio.Get();
 		KAnimBatchManager.CreateInstance();
@@ -329,10 +334,14 @@ public class Global : MonoBehaviour
 		{
 			this.mAnimEventManager.Update();
 		}
+		if (DistributionPlatform.Initialized && SteamUGCService.Instance == null)
+		{
+			SteamUGCService.Initialize();
+			this.modManager.RegisterUGCEventHandlers(SteamUGCService.Instance);
+		}
 		if (this.gotKleiUserID)
 		{
 			this.gotKleiUserID = false;
-			SteamUGCService.Init();
 			ThreadedHttps<KleiMetrics>.Instance.SetCallBacks(new global::System.Action(this.SetONIStaticSessionVariables), new Action<Dictionary<string, object>>(this.SetONIDynamicSessionVariables));
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
 		}
@@ -342,7 +351,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 285480U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 290148U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -381,6 +390,10 @@ public class Global : MonoBehaviour
 
 	private void OnDestroy()
 	{
+		if (this.modManager != null)
+		{
+			this.modManager.Shutdown();
+		}
 		Global.Instance = null;
 		if (this.mAnimEventManager != null)
 		{
@@ -420,9 +433,21 @@ public class Global : MonoBehaviour
 
 	public SpriteAtlas[] forcedAtlasInitializationList;
 
+	public GameObject modErrorsPrefab;
+
+	public GameObject globalCanvas;
+
 	private GameInputManager mInputManager;
 
 	private AnimEventManager mAnimEventManager;
+
+	public ModManager modManager;
+
+	public LayeredFileSystem layeredFileSystem;
+
+	public StandardFileSystem standardFS;
+
+	public ZipFileSystem worldGenZipFS;
 
 	private bool gotKleiUserID;
 

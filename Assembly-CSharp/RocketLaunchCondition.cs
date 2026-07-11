@@ -12,17 +12,4 @@ public abstract class RocketLaunchCondition
 	{
 		return null;
 	}
-
-	private void TryRegister(LaunchConditionManager manager)
-	{
-		if (manager != null)
-		{
-			manager.RegisterCondition(this);
-		}
-	}
-
-	private void CleanUp(LaunchConditionManager manager)
-	{
-		manager.UnregisterCondition(this);
-	}
 }

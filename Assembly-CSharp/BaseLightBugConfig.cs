@@ -77,7 +77,7 @@ public static class BaseLightBugConfig
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f)
+			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f, false)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();

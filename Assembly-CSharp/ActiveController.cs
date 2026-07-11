@@ -19,10 +19,14 @@ public class ActiveController : GameStateMachine<ActiveController, ActiveControl
 
 	public GameStateMachine<ActiveController, ActiveController.Instance, IStateMachineTarget, object>.State working_pst;
 
+	public class Def : StateMachine.BaseDef
+	{
+	}
+
 	public new class Instance : GameStateMachine<ActiveController, ActiveController.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public Instance(IStateMachineTarget master, ActiveController.Def def)
+			: base(master, def)
 		{
 		}
 	}

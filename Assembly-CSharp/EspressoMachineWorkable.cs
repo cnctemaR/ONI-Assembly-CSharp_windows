@@ -9,7 +9,6 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 	{
 		base.OnPrefabInit();
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_espresso_machine_kanim") };
-		this.forcePlayPst = true;
 		this.showProgressBar = true;
 		this.resetProgressOnStop = true;
 		this.synchronizeAnims = false;

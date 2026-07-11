@@ -53,7 +53,6 @@ public class GasValveConfig : IBuildingConfig
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitConsumer>());
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<ConduitDispenser>());
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "GasValve";

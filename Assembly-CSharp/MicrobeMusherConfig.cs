@@ -39,16 +39,11 @@ public class MicrobeMusherConfig : IBuildingConfig
 		microbeMusher.mushbarSpawnOffset = new Vector3(1f, 0f, 0f);
 		microbeMusher.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_musher_kanim") };
 		BuildingTemplates.CreateFabricatorStorage(go, microbeMusher);
+		go.AddOrGetDef<PoweredController.Def>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveStoppableController.Instance instance = new PoweredActiveStoppableController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
 	}
 
 	public const string ID = "MicrobeMusher";

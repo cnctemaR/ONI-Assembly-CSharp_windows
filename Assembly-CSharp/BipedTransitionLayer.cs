@@ -18,6 +18,7 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		});
 		this.floorSpeed = floor_speed;
 		this.ladderSpeed = ladder_speed;
+		this.jetPackSpeed = floor_speed;
 		this.movementSpeed = Db.Get().AttributeConverters.MovementSpeed.Lookup(navigator.gameObject);
 		this.attributeLevels = navigator.GetComponent<AttributeLevels>();
 	}
@@ -28,8 +29,9 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		float num = 1f;
 		bool flag = (transition.start == NavType.Pole || transition.end == NavType.Pole) && transition.y < 0 && transition.x == 0;
 		bool flag2 = transition.start == NavType.Tube || transition.end == NavType.Tube;
-		bool flag3 = !flag && !flag2;
-		if (flag3)
+		bool flag3 = transition.start == NavType.Hover || transition.end == NavType.Hover;
+		bool flag4 = !flag && !flag2 && !flag3;
+		if (flag4)
 		{
 			if (this.isWalking)
 			{
@@ -67,6 +69,10 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 		else if (flag2)
 		{
 			transition.speed = this.tubeSpeed;
+		}
+		else if (flag3)
+		{
+			transition.speed = this.jetPackSpeed;
 		}
 		else
 		{
@@ -122,6 +128,8 @@ public class BipedTransitionLayer : TransitionDriver.OverrideLayer
 	private float ladderSpeed;
 
 	private float startTime;
+
+	private float jetPackSpeed;
 
 	private float tubeSpeed = 18f;
 

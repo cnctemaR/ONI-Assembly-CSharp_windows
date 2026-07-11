@@ -10,12 +10,13 @@ public class RockCometConfig : IEntityConfig
 		gameObject.AddOrGet<LoopingSounds>();
 		Comet comet = gameObject.AddOrGet<Comet>();
 		float mass = ElementLoader.FindElementByHash(SimHashes.Regolith).defaultValues.mass;
-		comet.massRange = new Vector2(mass * 0.8f * 6f, mass * 1.2f * 6f);
+		comet.massRange = new Vector2(600f, 1000f);
 		comet.temperatureRange = new Vector2(323.15f, 423.15f);
 		comet.addTiles = 6;
-		comet.dissimilarElementAddTiles = 2;
+		comet.addTilesMinHeight = 2;
+		comet.addTilesMaxHeight = 8;
 		comet.entityDamage = 20;
-		comet.totalTileDamage = 0.2f;
+		comet.totalTileDamage = 0f;
 		comet.splashRadius = 1;
 		comet.impactSound = "Meteor_Large_Impact";
 		comet.flyingSoundID = 2;
@@ -35,9 +36,6 @@ public class RockCometConfig : IEntityConfig
 
 	public void OnPrefabInit(GameObject go)
 	{
-		Comet comet = go.AddOrGet<Comet>();
-		comet.addTilesMinHeight = Grid.HeightInCells - 35;
-		comet.addTilesMaxHeight = Grid.HeightInCells - 15;
 	}
 
 	public void OnSpawn(GameObject go)

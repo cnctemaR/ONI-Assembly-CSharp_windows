@@ -143,7 +143,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 							structureTemperatureData.energySourcesKW = this.AccumulateProducedEnergyKW(structureTemperatureData.energySourcesKW, structureTemperatureData.ExhaustKilowatts, BUILDING.STATUSITEMS.OPERATINGENERGY.EXHAUSTING);
 						}
 					}
-					else if (!structureTemperatureData.isActiveStatusItemSet)
+					else if (structureTemperatureData.isActiveStatusItemSet)
 					{
 						structureTemperatureData.primaryElement.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.OperatingEnergy, null, null);
 						structureTemperatureData.isActiveStatusItemSet = false;

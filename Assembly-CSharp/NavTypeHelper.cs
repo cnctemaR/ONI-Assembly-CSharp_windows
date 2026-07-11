@@ -22,6 +22,8 @@ public static class NavTypeHelper
 			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 		case NavType.Tube:
 			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
+		case NavType.Solid:
+			return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 		}
 		return Grid.CellToPosCCC(cell, Grid.SceneLayer.Move);
 	}
@@ -44,6 +46,9 @@ public static class NavTypeHelper
 				break;
 			case NavType.Ceiling:
 				num = Grid.CellAbove(cell);
+				break;
+			case NavType.Solid:
+				num = cell;
 				break;
 			}
 		}

@@ -17,29 +17,35 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	{
 		float num = 0f;
 		PrimaryElement primaryElement = base.GetComponent<Storage>().FindPrimaryElement(this.consumedElement);
+		float num2 = (float)this.maxUses * this.massConsumedPerUse;
+		ConduitConsumer component = base.GetComponent<ConduitConsumer>();
+		if (component != null)
+		{
+			num2 = component.capacityKG;
+		}
 		if (primaryElement != null)
 		{
-			num = Mathf.Clamp01(primaryElement.Mass / ((float)this.maxUses * this.massConsumedPerUse));
+			num = Mathf.Clamp01(primaryElement.Mass / num2);
 		}
-		float num2 = 0f;
+		float num3 = 0f;
 		PrimaryElement primaryElement2 = base.GetComponent<Storage>().FindPrimaryElement(this.outputElement);
 		if (primaryElement2 != null)
 		{
-			num2 = Mathf.Clamp01(primaryElement2.Mass / ((float)this.maxUses * this.massConsumedPerUse));
+			num3 = Mathf.Clamp01(primaryElement2.Mass / ((float)this.maxUses * this.massConsumedPerUse));
 		}
 		this.cleanMeter.SetPositionPercent(num);
-		this.dirtyMeter.SetPositionPercent(num2);
+		this.dirtyMeter.SetPositionPercent(num3);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_clean_target" });
-		this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_dirty_target" });
+		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", this.cleanMeterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_clean_target" });
+		this.dirtyMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_dirty_target", "meter_dirty", this.dirtyMeterOffset, Grid.SceneLayer.NoLayer, new string[] { "meter_dirty_target" });
 		this.RefreshMeters();
 		Components.HandSanitizers.Add(this);
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<HandSanitizer>(-1697596308, HandSanitizer.OnStorageChangeDelegate);
 		DirectionControl component = base.GetComponent<DirectionControl>();
 		component.onDirectionChanged = (Action<WorkableReactable.AllowedDirection>)Delegate.Combine(component.onDirectionChanged, new Action<WorkableReactable.AllowedDirection>(this.OnDirectionChanged));
 		this.OnDirectionChanged(base.GetComponent<DirectionControl>().allowedDirection);
@@ -108,8 +114,17 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 
 	private MeterController dirtyMeter;
 
+	public Meter.Offset cleanMeterOffset;
+
+	public Meter.Offset dirtyMeterOffset;
+
 	[Serialize]
 	public int maxPossiblyRemoved;
+
+	private static readonly EventSystem.IntraObjectHandler<HandSanitizer> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<HandSanitizer>(delegate(HandSanitizer component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 
 	private class WashHandsReactable : WorkableReactable
 	{

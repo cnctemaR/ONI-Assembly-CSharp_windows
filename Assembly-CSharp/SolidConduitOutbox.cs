@@ -14,7 +14,7 @@ public class SolidConduitOutbox : StateMachineComponent<SolidConduitOutbox.SMIns
 	{
 		base.OnSpawn();
 		this.meter = new MeterController(this, Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[0]);
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe<SolidConduitOutbox>(-1697596308, SolidConduitOutbox.OnStorageChangedDelegate);
 		this.UpdateMeter();
 		base.smi.StartSM();
 	}
@@ -50,6 +50,11 @@ public class SolidConduitOutbox : StateMachineComponent<SolidConduitOutbox.SMIns
 	private Storage storage;
 
 	private MeterController meter;
+
+	private static readonly EventSystem.IntraObjectHandler<SolidConduitOutbox> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<SolidConduitOutbox>(delegate(SolidConduitOutbox component, object data)
+	{
+		component.OnStorageChanged(data);
+	});
 
 	public class SMInstance : GameStateMachine<SolidConduitOutbox.States, SolidConduitOutbox.SMInstance, SolidConduitOutbox, object>.GameInstance
 	{

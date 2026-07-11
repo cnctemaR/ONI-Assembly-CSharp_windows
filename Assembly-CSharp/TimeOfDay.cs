@@ -105,23 +105,18 @@ public class TimeOfDay : KMonoBehaviour, ISaveLoadable
 			if (new_region == TimeOfDay.TimeRegion.Night)
 			{
 				AudioMixer.instance.Start(AudioMixerSnapshots.Get().NightStartedMigrated);
-				MusicManager.instance.PlaySong("Stinger_Night", false);
-				MusicManager.instance.PlaySong("Underscore_Night_LP", false);
+				MusicManager.instance.PlaySong("Stinger_Loop_Night", false);
 			}
 		}
 		else
 		{
 			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().NightStartedMigrated, STOP_MODE.ALLOWFADEOUT);
-			if (MusicManager.instance.SongIsPlaying("Underscore_Night_LP"))
+			if (MusicManager.instance.SongIsPlaying("Stinger_Loop_Night"))
 			{
-				MusicManager.instance.StopSong("Underscore_Night_LP", true, STOP_MODE.ALLOWFADEOUT);
+				MusicManager.instance.StopSong("Stinger_Loop_Night", true, STOP_MODE.ALLOWFADEOUT);
 			}
 			MusicManager.instance.PlaySong("Stinger_Day", false);
-			MusicManager.instance.daysSinceDynamicMusic++;
-			if (MusicManager.instance.ShouldPlayDynamicMusicStartOfDay())
-			{
-				MusicManager.instance.PlayDynamicMusic();
-			}
+			MusicManager.instance.PlayDynamicMusic();
 		}
 	}
 

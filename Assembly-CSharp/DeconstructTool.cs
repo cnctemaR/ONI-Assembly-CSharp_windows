@@ -45,11 +45,11 @@ public class DeconstructTool : FilteredDragTool
 				if (base.IsActiveLayer(filterLayerFromGameObject))
 				{
 					gameObject.Trigger(-790448070, null);
-				}
-				Prioritizable component = gameObject.GetComponent<Prioritizable>();
-				if (component != null)
-				{
-					component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+					Prioritizable component = gameObject.GetComponent<Prioritizable>();
+					if (component != null)
+					{
+						component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());
+					}
 				}
 			}
 		}

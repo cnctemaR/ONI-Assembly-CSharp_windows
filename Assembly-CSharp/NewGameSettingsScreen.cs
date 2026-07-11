@@ -18,6 +18,7 @@ public class NewGameSettingsScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		CustomGameSettings.Instance.LoadWorlds();
 		MultiToggle multiToggle = this.toggle_standard_game;
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
@@ -202,6 +203,12 @@ public class NewGameSettingsScreen : KModalScreen
 
 	private void NewGame()
 	{
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World);
+		if (currentQualitySetting.userdata != null)
+		{
+			ModInfo modInfo = (ModInfo)currentQualitySetting.userdata;
+			Global.Instance.modManager.ActivateWorldGenMod(modInfo);
+		}
 		this.TriggerLoadingMusic();
 		WorldGen.Reset();
 		SaveLoader.SetActiveSaveFilePath(null);

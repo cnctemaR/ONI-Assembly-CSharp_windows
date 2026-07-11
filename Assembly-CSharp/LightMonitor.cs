@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using STRINGS;
 
 public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance>
 {
@@ -21,7 +22,7 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 		}, UpdateRate.SIM_200ms, false).ToggleEffect("Sunlight_Burning");
 		this.get_burnt.Enter(delegate(LightMonitor.Instance smi)
 		{
-			smi.gameObject.GetDiseases().Infect(new DiseaseExposureInfo(Db.Get().Diseases.Sunburn.Id, "bright light exposure"));
+			smi.gameObject.GetDiseases().Infect(new DiseaseExposureInfo(Db.Get().Diseases.Sunburn.Id, DUPLICANTS.DISEASES.SUNBURN.SUNEXPOSURE));
 		}).GoTo(this.burnt);
 		this.burnt.EventTransition(GameHashes.DiseaseCured, this.unburnt, (LightMonitor.Instance smi) => !smi.gameObject.GetDiseases().Has(Db.Get().Diseases.Sunburn)).Exit(delegate(LightMonitor.Instance smi)
 		{

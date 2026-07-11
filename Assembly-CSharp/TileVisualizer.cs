@@ -26,12 +26,22 @@ public class TileVisualizer
 		}
 	}
 
-	public static void RefreshCell(int cell, ObjectLayer tile_layer)
+	private static void RefreshCell(int cell, ObjectLayer tile_layer)
 	{
+		if (tile_layer == ObjectLayer.NumLayers)
+		{
+			return;
+		}
 		TileVisualizer.RefreshCellInternal(cell, tile_layer);
 		TileVisualizer.RefreshCellInternal(Grid.CellAbove(cell), tile_layer);
 		TileVisualizer.RefreshCellInternal(Grid.CellBelow(cell), tile_layer);
 		TileVisualizer.RefreshCellInternal(Grid.CellLeft(cell), tile_layer);
 		TileVisualizer.RefreshCellInternal(Grid.CellRight(cell), tile_layer);
+	}
+
+	public static void RefreshCell(int cell, ObjectLayer tile_layer, ObjectLayer replacement_layer)
+	{
+		TileVisualizer.RefreshCell(cell, tile_layer);
+		TileVisualizer.RefreshCell(cell, replacement_layer);
 	}
 }

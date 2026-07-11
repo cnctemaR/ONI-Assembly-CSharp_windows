@@ -25,5 +25,15 @@ public class CaloriesDisplayer : StandardAmountDisplayer
 			}
 			return base.GetFormattedModifier(modifier, parent_instance);
 		}
+
+		public override string GetTooltip(Klei.AI.Attribute master, AttributeInstance instance)
+		{
+			return "TEST";
+		}
+
+		public override string GetTooltipDescription(Klei.AI.Attribute master, AttributeInstance instance)
+		{
+			return "TEST";
+		}
 	}
 }

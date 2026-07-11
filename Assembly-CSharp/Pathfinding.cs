@@ -6,6 +6,7 @@ public class Pathfinding : KMonoBehaviour
 	public static void DestroyInstance()
 	{
 		Pathfinding.Instance = null;
+		OffsetTableTracker.OnPathfindingInvalidated();
 	}
 
 	protected override void OnPrefabInit()
@@ -119,6 +120,7 @@ public class Pathfinding : KMonoBehaviour
 	protected override void OnCleanUp()
 	{
 		this.NavGrids.Clear();
+		OffsetTableTracker.OnPathfindingInvalidated();
 	}
 
 	private List<NavGrid> NavGrids = new List<NavGrid>();

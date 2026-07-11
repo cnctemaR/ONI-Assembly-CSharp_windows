@@ -14,7 +14,11 @@ public class DecorDisplayer : StandardAmountDisplayer
 	{
 		string text = master.Name;
 		text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
-		text += string.Format(DUPLICANTS.STATS.DECOR.TOOLTIP_CURRENT, GameUtil.GetDecorAtCell(Grid.PosToCell(instance.gameObject)));
+		int num = Grid.PosToCell(instance.gameObject);
+		if (Grid.IsValidCell(num))
+		{
+			text += string.Format(DUPLICANTS.STATS.DECOR.TOOLTIP_CURRENT, GameUtil.GetDecorAtCell(num));
+		}
 		text += "\n";
 		DecorMonitor.Instance smi = instance.gameObject.GetSMI<DecorMonitor.Instance>();
 		if (smi != null)

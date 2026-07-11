@@ -6,7 +6,7 @@ public class ElementDropper : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe<ElementDropper>(-1697596308, ElementDropper.OnStorageChangedDelegate);
 	}
 
 	private void OnStorageChanged(object data)
@@ -45,4 +45,9 @@ public class ElementDropper : KMonoBehaviour
 
 	[MyCmpGet]
 	private Storage storage;
+
+	private static readonly EventSystem.IntraObjectHandler<ElementDropper> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<ElementDropper>(delegate(ElementDropper component, object data)
+	{
+		component.OnStorageChanged(data);
+	});
 }

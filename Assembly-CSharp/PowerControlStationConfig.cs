@@ -47,7 +47,6 @@ public class PowerControlStationConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, PowerControlStationConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
-		BuildingTemplates.DoPostConfigure(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 50f;
 		storage.showInUI = true;
@@ -65,11 +64,7 @@ public class PowerControlStationConfig : IBuildingConfig
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.PowerPlant.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
 		Prioritizable.AddRef(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "PowerControlStation";

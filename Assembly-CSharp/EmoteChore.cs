@@ -81,9 +81,13 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 		{
 			default_state = this.root;
 			base.Target(this.emoter);
-			this.root.ToggleAnims((EmoteChore.StatesInstance smi) => smi.emoteKAnim).PlayAnims((EmoteChore.StatesInstance smi) => smi.emoteAnims, (EmoteChore.StatesInstance smi) => smi.mode).OnAnimQueueComplete(null);
+			this.root.ToggleAnims((EmoteChore.StatesInstance smi) => smi.emoteKAnim).PlayAnims((EmoteChore.StatesInstance smi) => smi.emoteAnims, (EmoteChore.StatesInstance smi) => smi.mode).ScheduleGoTo(10f, this.finish)
+				.OnAnimQueueComplete(this.finish);
+			this.finish.ReturnSuccess();
 		}
 
 		public StateMachine<EmoteChore.States, EmoteChore.StatesInstance, EmoteChore, object>.TargetParameter emoter;
+
+		public GameStateMachine<EmoteChore.States, EmoteChore.StatesInstance, EmoteChore, object>.State finish;
 	}
 }

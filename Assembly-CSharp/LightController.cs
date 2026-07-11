@@ -17,10 +17,14 @@ public class LightController : GameStateMachine<LightController, LightController
 
 	public GameStateMachine<LightController, LightController.Instance, IStateMachineTarget, object>.State on;
 
+	public class Def : StateMachine.BaseDef
+	{
+	}
+
 	public new class Instance : GameStateMachine<LightController, LightController.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
-			: base(master)
+		public Instance(IStateMachineTarget master, LightController.Def def)
+			: base(master, def)
 		{
 		}
 	}

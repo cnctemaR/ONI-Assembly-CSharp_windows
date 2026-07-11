@@ -18,10 +18,10 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 		this.filteredStorage.FilterChanged();
 		this.temperatureAdjuster = new SimulatedTemperatureAdjuster(this.simulatedInternalTemperature, this.simulatedInternalHeatCapacity, this.simulatedThermalConductivity, base.GetComponent<Storage>());
 		this.UpdateLogicCircuit();
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
-		base.Subscribe(-1697596308, new Action<object>(this.UpdateLogicCircuitCB));
-		base.Subscribe(-592767678, new Action<object>(this.UpdateLogicCircuitCB));
+		base.Subscribe<Refrigerator>(-592767678, Refrigerator.OnOperationalChangedDelegate);
+		base.Subscribe<Refrigerator>(-905833192, Refrigerator.OnCopySettingsDelegate);
+		base.Subscribe<Refrigerator>(-1697596308, Refrigerator.UpdateLogicCircuitCBDelegate);
+		base.Subscribe<Refrigerator>(-592767678, Refrigerator.UpdateLogicCircuitCBDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -171,4 +171,19 @@ public class Refrigerator : KMonoBehaviour, IUserControlledCapacity, IEffectDesc
 	private FilteredStorage filteredStorage;
 
 	private SimulatedTemperatureAdjuster temperatureAdjuster;
+
+	private static readonly EventSystem.IntraObjectHandler<Refrigerator> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Refrigerator>(delegate(Refrigerator component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Refrigerator> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<Refrigerator>(delegate(Refrigerator component, object data)
+	{
+		component.OnCopySettings(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Refrigerator> UpdateLogicCircuitCBDelegate = new EventSystem.IntraObjectHandler<Refrigerator>(delegate(Refrigerator component, object data)
+	{
+		component.UpdateLogicCircuitCB(data);
+	});
 }

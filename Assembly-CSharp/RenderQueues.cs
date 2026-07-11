@@ -4,6 +4,8 @@ public static class RenderQueues
 {
 	public static int WorldOpaque = 2000;
 
+	public static int WorldTransparent = 3500;
+
 	public static int Backwall = 2499;
 
 	public static int Stars = 2501;
@@ -12,9 +14,5 @@ public static class RenderQueues
 
 	public static int Liquid = 3500;
 
-	public static int WorldTransparent = 4002;
-
-	public static int BuriedObjects = 4500;
-
-	public static int BlockTiles = 3499;
+	public static int BlockTiles = 4500;
 }

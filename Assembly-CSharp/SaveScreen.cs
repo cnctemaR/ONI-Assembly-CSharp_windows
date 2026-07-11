@@ -33,9 +33,12 @@ public class SaveScreen : KModalScreen
 	private void AddExistingSaveFile(string filename)
 	{
 		KButton kbutton = Util.KInstantiateUI<KButton>(this.oldSaveButtonPrefab.gameObject, this.oldSavesRoot.gameObject, true);
-		LocText componentInChildren = kbutton.GetComponentInChildren<LocText>();
+		HierarchyReferences component = kbutton.GetComponent<HierarchyReferences>();
+		LocText component2 = component.GetReference<RectTransform>("Title").GetComponent<LocText>();
+		LocText component3 = component.GetReference<RectTransform>("Date").GetComponent<LocText>();
 		global::System.DateTime lastWriteTime = File.GetLastWriteTime(filename);
-		componentInChildren.text = string.Format("{0}\n{1:H:mm:ss}\n" + Localization.GetFileDateFormat(1), Path.GetFileNameWithoutExtension(filename), lastWriteTime);
+		component2.text = string.Format("{0}", Path.GetFileNameWithoutExtension(filename));
+		component3.text = string.Format("{0:H:mm:ss}" + Localization.GetFileDateFormat(0), lastWriteTime);
 		kbutton.onClick += delegate
 		{
 			this.Save(filename);

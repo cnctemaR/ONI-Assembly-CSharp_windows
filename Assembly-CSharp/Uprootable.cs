@@ -39,15 +39,15 @@ public class Uprootable : Workable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Uprooting;
 		this.multitoolContext = "harvest";
 		this.multitoolHitEffectTag = "fx_harvest_splash";
-		base.Subscribe(1309017699, new Action<object>(this.OnPlanterStorage));
+		base.Subscribe<Uprootable>(1309017699, Uprootable.OnPlanterStorageDelegate);
 	}
 
 	protected override void OnSpawn()
 	{
-		base.Subscribe(2127324410, new Action<object>(this.ForceCancelUproot));
+		base.Subscribe<Uprootable>(2127324410, Uprootable.ForceCancelUprootDelegate);
 		base.SetWorkTime(12.5f);
-		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Uprootable>(2127324410, Uprootable.OnCancelDelegate);
+		base.Subscribe<Uprootable>(493375141, Uprootable.OnRefreshUserMenuDelegate);
 		this.faceTargetWhenWorking = true;
 		Components.Uprootables.Add(this);
 		this.area = base.GetComponent<OccupyArea>();
@@ -240,4 +240,24 @@ public class Uprootable : Workable
 	public OccupyArea area;
 
 	private Storage planterStorage;
+
+	private static readonly EventSystem.IntraObjectHandler<Uprootable> OnPlanterStorageDelegate = new EventSystem.IntraObjectHandler<Uprootable>(delegate(Uprootable component, object data)
+	{
+		component.OnPlanterStorage(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Uprootable> ForceCancelUprootDelegate = new EventSystem.IntraObjectHandler<Uprootable>(delegate(Uprootable component, object data)
+	{
+		component.ForceCancelUproot(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Uprootable> OnCancelDelegate = new EventSystem.IntraObjectHandler<Uprootable>(delegate(Uprootable component, object data)
+	{
+		component.OnCancel(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Uprootable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Uprootable>(delegate(Uprootable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

@@ -132,6 +132,7 @@ public class ScheduleScreenEntry : KMonoBehaviour
 		ToolTip component = reference.GetComponent<ToolTip>();
 		component.SetSimpleTooltip((!this.schedule.alarmActivated) ? UI.SCHEDULESCREEN.ALARM_BUTTON_OFF_TOOLTIP : UI.SCHEDULESCREEN.ALARM_BUTTON_ON_TOOLTIP);
 		ToolTipScreen.Instance.MarkTooltipDirty(component);
+		this.alarmField.text = ((!this.schedule.alarmActivated) ? UI.SCHEDULESCREEN.ALARM_TITLE_DISABLED : UI.SCHEDULESCREEN.ALARM_TITLE_ENABLED);
 	}
 
 	private void OnResetClicked()
@@ -224,6 +225,9 @@ public class ScheduleScreenEntry : KMonoBehaviour
 
 	[SerializeField]
 	private EditableTitleBar title;
+
+	[SerializeField]
+	private LocText alarmField;
 
 	[SerializeField]
 	private KButton deleteButton;

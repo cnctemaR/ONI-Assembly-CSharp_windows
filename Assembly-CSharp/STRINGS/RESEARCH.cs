@@ -14,7 +14,7 @@ namespace STRINGS
 
 			public static LocString NO_RESEARCHER_ROLE = "No Researchers assigned";
 
-			public static LocString NO_RESEARCHER_ROLE_TOOLTIP = "The selected research focus requires an advanced type of research to complete\n\nAssign a Duplicant to the Research Assistant job using the Jobs Panel <color=#F44A47>[L]</color> to enable this task";
+			public static LocString NO_RESEARCHER_ROLE_TOOLTIP = "The selected research focus requires an advanced type of research to complete\n\nAssign a Duplicant to the Research Assistant job using the Jobs Panel <color=#F44A47>[L]</color> to enable this errand";
 
 			public static LocString MISSING_RESEARCH_STATION = "Missing Research Station";
 
@@ -45,7 +45,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Interstellar Research";
 
-				public static LocString DESC = UI.FormatAsLink("Interstellar Research", "RESEARCH") + " is required to unlock space technologies.\nIt can be conducted at a " + BUILDINGS.PREFABS.TELESCOPE.NAME + ".";
+				public static LocString DESC = UI.FormatAsLink("Interstellar Research", "RESEARCH") + " is required to unlock space technologies.\nIt can be conducted at a " + BUILDINGS.PREFABS.COSMICRESEARCHCENTER.NAME + ".";
 
 				public static LocString RECIPEDESC = "Unlocks cutting-edge technologies.";
 			}
@@ -67,18 +67,25 @@ namespace STRINGS
 				public static LocString DESC = "Enables access to the Exosuit Overlay.";
 			}
 
+			public class JET_SUIT
+			{
+				public static LocString NAME = "Jet Suit Pattern";
+
+				public static LocString DESC = "Enables fabrication of Jet Suits at the Exosuit Forge.";
+			}
+
 			public class BETA_RESEARCH_POINT
 			{
-				public static LocString NAME = "Advanced Research Point";
+				public static LocString NAME = "Advanced Research Capability";
 
-				public static LocString DESC = "Allows improved technology tiers to be researched.";
+				public static LocString DESC = "Allows Advanced Research Points to be acculumated, unlocking higher technology tiers.";
 			}
 
 			public class GAMMA_RESEARCH_POINT
 			{
-				public static LocString NAME = "Interstellar Research Point";
+				public static LocString NAME = "Interstellar Research Capability";
 
-				public static LocString DESC = "Allows space technology tiers to be researched.";
+				public static LocString DESC = "Allows Interstellar Research Points to be acculumated, unlocking higher technology tiers.";
 			}
 
 			public class CONVEYOR_OVERLAY
@@ -91,6 +98,13 @@ namespace STRINGS
 
 		public class TECHS
 		{
+			public class JOBS
+			{
+				public static LocString NAME = UI.FormatAsLink("Jobs", "JOBS");
+
+				public static LocString DESC = "Assign Duplicants jobs";
+			}
+
 			public class IMPROVEDOXYGEN
 			{
 				public static LocString NAME = UI.FormatAsLink("Air Systems", "IMPROVEDOXYGEN");
@@ -476,6 +490,13 @@ namespace STRINGS
 				public static LocString DESC = "The ultimate solution to ugly things? Make them transparent.";
 			}
 
+			public class JETPACKS
+			{
+				public static LocString NAME = UI.FormatAsLink("Jetpacks", "JETPACKS");
+
+				public static LocString DESC = "Continue your space program";
+			}
+
 			public class BASICROCKETRY
 			{
 				public static LocString NAME = UI.FormatAsLink("Basic Rocketry", "BASICROCKETRY");
@@ -483,9 +504,44 @@ namespace STRINGS
 				public static LocString DESC = "Start your space program";
 			}
 
-			public class INTERMEDIATEROCKETRY
+			public class ENGINESI
 			{
-				public static LocString NAME = UI.FormatAsLink("Intermediate Rocketry", "INTERMEDIATEROCKETRY");
+				public static LocString NAME = UI.FormatAsLink("Solid Fuel Combustion", "ENGINESI");
+
+				public static LocString DESC = "Continue your space program";
+			}
+
+			public class ENGINESII
+			{
+				public static LocString NAME = UI.FormatAsLink("Hydrocarbon Combustion", "ENGINESII");
+
+				public static LocString DESC = "Continue your space program";
+			}
+
+			public class ENGINESIII
+			{
+				public static LocString NAME = UI.FormatAsLink("Cryofuel Combustion", "ENGINESIII");
+
+				public static LocString DESC = "Continue your space program";
+			}
+
+			public class CARGOI
+			{
+				public static LocString NAME = UI.FormatAsLink("Solid Cargos", "CARGOI");
+
+				public static LocString DESC = "Continue your space program";
+			}
+
+			public class CARGOII
+			{
+				public static LocString NAME = UI.FormatAsLink("Liquid and Gas Cargos", "CARGOII");
+
+				public static LocString DESC = "Continue your space program";
+			}
+
+			public class CARGOIII
+			{
+				public static LocString NAME = UI.FormatAsLink("Special Cargos", "CARGOIII");
 
 				public static LocString DESC = "Continue your space program";
 			}

@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class MinionEquipmentPanel : KMonoBehaviour
 {
+	public MinionEquipmentPanel()
+	{
+		this.refreshDelegate = new Action<object>(this.Refresh);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -20,14 +25,14 @@ public class MinionEquipmentPanel : KMonoBehaviour
 	{
 		if (this.SelectedMinion != null)
 		{
-			this.SelectedMinion.Unsubscribe(-448952673, new Action<object>(this.Refresh));
-			this.SelectedMinion.Unsubscribe(-1285462312, new Action<object>(this.Refresh));
-			this.SelectedMinion.Unsubscribe(-1585839766, new Action<object>(this.Refresh));
+			this.SelectedMinion.Unsubscribe(-448952673, this.refreshDelegate);
+			this.SelectedMinion.Unsubscribe(-1285462312, this.refreshDelegate);
+			this.SelectedMinion.Unsubscribe(-1585839766, this.refreshDelegate);
 		}
 		this.SelectedMinion = minion;
-		this.SelectedMinion.Subscribe(-448952673, new Action<object>(this.Refresh));
-		this.SelectedMinion.Subscribe(-1285462312, new Action<object>(this.Refresh));
-		this.SelectedMinion.Subscribe(-1585839766, new Action<object>(this.Refresh));
+		this.SelectedMinion.Subscribe(-448952673, this.refreshDelegate);
+		this.SelectedMinion.Subscribe(-1285462312, this.refreshDelegate);
+		this.SelectedMinion.Subscribe(-1585839766, this.refreshDelegate);
 		this.Refresh(null);
 	}
 
@@ -45,9 +50,9 @@ public class MinionEquipmentPanel : KMonoBehaviour
 		base.OnCleanUp();
 		if (this.SelectedMinion != null)
 		{
-			this.SelectedMinion.Unsubscribe(-448952673, new Action<object>(this.Refresh));
-			this.SelectedMinion.Unsubscribe(-1285462312, new Action<object>(this.Refresh));
-			this.SelectedMinion.Unsubscribe(-1585839766, new Action<object>(this.Refresh));
+			this.SelectedMinion.Unsubscribe(-448952673, this.refreshDelegate);
+			this.SelectedMinion.Unsubscribe(-1285462312, this.refreshDelegate);
+			this.SelectedMinion.Unsubscribe(-1585839766, this.refreshDelegate);
 		}
 	}
 
@@ -155,4 +160,6 @@ public class MinionEquipmentPanel : KMonoBehaviour
 	private Storage storage;
 
 	private Dictionary<string, GameObject> labels = new Dictionary<string, GameObject>();
+
+	private Action<object> refreshDelegate;
 }

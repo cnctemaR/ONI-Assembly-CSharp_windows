@@ -1,16 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class FuelTank : Storage
+public class FuelTank : Storage, ISingleSliderControl, ISliderControl
 {
 	public bool IsSuspended
 	{
 		get
 		{
 			return this.isSuspended;
+		}
+	}
+
+	public float TargetFillMass
+	{
+		get
+		{
+			return this.targetFillMass;
+		}
+		set
+		{
+			this.targetFillMass = value;
+			this.capacityKg = this.targetFillMass;
+			float num = base.MassStored();
+			if (this.capacityKg < num)
+			{
+				base.DropAll(false);
+			}
 		}
 	}
 
@@ -31,6 +50,22 @@ public class FuelTank : Storage
 		}
 	}
 
+	public string SliderTitleKey
+	{
+		get
+		{
+			return "STRINGS.BUILDINGS.PREFABS.LIQUIDFUELTANK.NAME";
+		}
+	}
+
+	public string SliderUnits
+	{
+		get
+		{
+			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+		}
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -41,14 +76,37 @@ public class FuelTank : Storage
 		base.OnSpawn();
 		base.GetComponent<KBatchedAnimController>().Play("grounded", KAnim.PlayMode.Loop, 1f, 0f);
 		base.gameObject.Subscribe(1366341636, new Action<object>(this.OnReturn));
-		RocketModule component = base.GetComponent<RocketModule>();
-		FuelTank.HasFuel hasFuel = new FuelTank.HasFuel(this);
-		component.AddCondition(hasFuel);
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.UserSpecified, Grid.SceneLayer.TransferArm, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		base.Subscribe(-1697596308, delegate(object data)
+		{
+			this.meter.SetPositionPercent(base.MassStored() / this.capacityKg);
+		});
 	}
 
 	public void FillTank()
 	{
-		base.AddLiquid(ElementLoader.GetElementID(this.fuelType), this.minimumLaunchMass, ElementLoader.GetElement(this.fuelType).defaultValues.temperature, 0, 0, false, true);
+		CommandModule commandModule = null;
+		List<GameObject> attachedNetwork = AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>());
+		foreach (GameObject gameObject in attachedNetwork)
+		{
+			commandModule = gameObject.GetComponent<CommandModule>();
+			if (commandModule)
+			{
+				break;
+			}
+		}
+		if (commandModule != null)
+		{
+			RocketEngine mainEngine = commandModule.rocketStats.GetMainEngine();
+			if (mainEngine != null)
+			{
+				base.AddLiquid(ElementLoader.GetElementID(mainEngine.fuelTag), this.minimumLaunchMass - base.MassStored(), ElementLoader.GetElement(mainEngine.fuelTag).defaultValues.temperature, 0, 0, false, true);
+			}
+		}
+		else
+		{
+			global::Debug.LogWarning("Fuel tank couldn't find command module", null);
+		}
 	}
 
 	private void OnReturn(object data)
@@ -60,40 +118,40 @@ public class FuelTank : Storage
 		this.items.Clear();
 	}
 
+	public float GetSliderMin(int index)
+	{
+		return 0f;
+	}
+
+	public float GetSliderMax(int index)
+	{
+		return 900f;
+	}
+
+	public float GetSliderValue(int index)
+	{
+		return this.TargetFillMass;
+	}
+
+	public void SetSliderValue(float mass, int index)
+	{
+		this.TargetFillMass = mass;
+	}
+
+	public string GetSliderTooltipKey(int index)
+	{
+		return "STRINGS.UI.UISIDESCREENS.LIQUIDFUELTANK.FUELAMOUNT";
+	}
+
 	private bool isSuspended;
+
+	private MeterController meter;
+
+	[Serialize]
+	public float targetFillMass = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
 
 	[SerializeField]
 	private Tag fuelType;
 
 	public float minimumLaunchMass = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
-
-	public class HasFuel : RocketLaunchCondition
-	{
-		public HasFuel(FuelTank fuelTank)
-		{
-			this.fuelTank = fuelTank;
-		}
-
-		public override bool EvaluateLaunchCondition()
-		{
-			return this.fuelTank.MassStored() >= this.fuelTank.minimumLaunchMass;
-		}
-
-		public override string GetLaunchStatusMessage(bool ready)
-		{
-			return (!ready) ? UI.STARMAP.FULLTANK.TOOLTIP : UI.STARMAP.EMPTYTANK.NAME;
-		}
-
-		public override string GetLaunchStatusTooltip(bool ready)
-		{
-			return (!ready) ? UI.STARMAP.EMPTYTANK.TOOLTIP : UI.STARMAP.FULLTANK.NAME;
-		}
-
-		public override RocketLaunchCondition GetParentCondition()
-		{
-			return null;
-		}
-
-		private FuelTank fuelTank;
-	}
 }

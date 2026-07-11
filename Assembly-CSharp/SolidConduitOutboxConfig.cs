@@ -52,7 +52,6 @@ public class SolidConduitOutboxConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		Prioritizable.AddRef(go);
-		BuildingTemplates.DoPostConfigure(go);
 		go.AddOrGet<Automatable>();
 	}
 

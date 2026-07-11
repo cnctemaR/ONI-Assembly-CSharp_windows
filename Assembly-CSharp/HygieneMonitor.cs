@@ -42,11 +42,6 @@ public class HygieneMonitor : GameStateMachine<HygieneMonitor, HygieneMonitor.In
 			this.effects = master.GetComponent<Effects>();
 		}
 
-		public void AddUncleanEffect()
-		{
-			this.effects.Add("Unclean", true);
-		}
-
 		public void BecomeDirty()
 		{
 			this.SetDirtiness(1f);

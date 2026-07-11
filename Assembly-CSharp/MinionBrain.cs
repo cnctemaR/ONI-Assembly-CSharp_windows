@@ -15,8 +15,8 @@ public class MinionBrain : Brain
 	{
 		base.OnPrefabInit();
 		this.Navigator.SetAbilities(new MinionPathFinderAbilities(this.Navigator));
-		base.Subscribe(-1697596308, new Action<object>(this.AnimTrackStoredItem));
-		base.Subscribe(-975551167, new Action<object>(this.OnUnstableGroundImpact));
+		base.Subscribe<MinionBrain>(-1697596308, MinionBrain.AnimTrackStoredItemDelegate);
+		base.Subscribe<MinionBrain>(-975551167, MinionBrain.OnUnstableGroundImpactDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -84,11 +84,12 @@ public class MinionBrain : Brain
 				Vector3 position = base.gameObject.transform.GetPosition();
 				DiscoveredSpaceMessage discoveredSpaceMessage = new DiscoveredSpaceMessage(position);
 				Messenger.Instance.QueueMessage(discoveredSpaceMessage);
+				Game.Instance.Trigger(-818188514, base.gameObject);
 			}
 		}
 	}
 
-	private void RegisterReactEmotePair(string kanim_file_name, float max_trigger_time)
+	private void RegisterReactEmotePair(string reactable_id, string kanim_file_name, float max_trigger_time)
 	{
 		if (base.gameObject == null)
 		{
@@ -98,7 +99,7 @@ public class MinionBrain : Brain
 		if (smi != null)
 		{
 			EmoteChore emoteChore = new EmoteChore(base.gameObject.GetComponent<ChoreProvider>(), Db.Get().ChoreTypes.EmoteIdle, kanim_file_name, new HashedString[] { "react" }, null);
-			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.gameObject, "GolfClap_React", Db.Get().ChoreTypes.Cough, kanim_file_name, max_trigger_time, 0f, float.PositiveInfinity);
+			SelfEmoteReactable selfEmoteReactable = new SelfEmoteReactable(base.gameObject, reactable_id, Db.Get().ChoreTypes.Cough, kanim_file_name, max_trigger_time, 20f, float.PositiveInfinity);
 			emoteChore.PairReactable(selfEmoteReactable);
 			selfEmoteReactable.AddStep(new EmoteReactable.EmoteStep
 			{
@@ -111,12 +112,16 @@ public class MinionBrain : Brain
 
 	private void OnResearchComplete(object data)
 	{
-		this.RegisterReactEmotePair("anim_react_research_complete_kanim", 3f);
+		if (Time.time - this.lastResearchCompleteEmoteTime > 1f)
+		{
+			this.RegisterReactEmotePair("ResearchComplete", "anim_react_research_complete_kanim", 3f);
+			this.lastResearchCompleteEmoteTime = Time.time;
+		}
 	}
 
 	private void OnUnstableGroundImpact(object data)
 	{
-		this.RegisterReactEmotePair("anim_react_shock_kanim", 1f);
+		this.RegisterReactEmotePair("UnstableGroundShock", "anim_react_shock_kanim", 1f);
 	}
 
 	protected override void OnCleanUp()
@@ -130,4 +135,16 @@ public class MinionBrain : Brain
 
 	[MyCmpGet]
 	public OxygenBreather OxygenBreather;
+
+	private float lastResearchCompleteEmoteTime;
+
+	private static readonly EventSystem.IntraObjectHandler<MinionBrain> AnimTrackStoredItemDelegate = new EventSystem.IntraObjectHandler<MinionBrain>(delegate(MinionBrain component, object data)
+	{
+		component.AnimTrackStoredItem(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<MinionBrain> OnUnstableGroundImpactDelegate = new EventSystem.IntraObjectHandler<MinionBrain>(delegate(MinionBrain component, object data)
+	{
+		component.OnUnstableGroundImpact(data);
+	});
 }

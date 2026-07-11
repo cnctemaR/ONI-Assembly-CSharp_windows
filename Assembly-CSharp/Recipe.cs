@@ -274,6 +274,8 @@ public class Recipe : IHasSortOrder
 
 	public float FabricationTime;
 
+	public string TechUnlock;
+
 	[DebuggerDisplay("{tag} {amount}")]
 	[Serializable]
 	public class Ingredient

@@ -39,6 +39,7 @@ public class RockCrusherConfig : IBuildingConfig
 		RefineryWorkable refineryWorkable = go.AddOrGet<RefineryWorkable>();
 		BuildingTemplates.CreateRefineryStorage(go, refinery);
 		refineryWorkable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_rockrefinery_kanim") };
+		refineryWorkable.workingPstComplete = "working_pst_complete";
 		Tag tag = SimHashes.Sand.CreateTag();
 		List<Element> list = ElementLoader.elements.FindAll((Element e) => e.HasTag(GameTags.Crushable));
 		ComplexRecipe complexRecipe;
@@ -124,7 +125,6 @@ public class RockCrusherConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 

@@ -94,7 +94,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 		Components.Batteries.Add(this);
 		Building component = base.GetComponent<Building>();
 		this.PowerCell = component.GetPowerInputCell();
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<Battery>(-592767678, Battery.OnOperationalChangedDelegate);
 		this.OnOperationalChanged(null);
 		bool flag = base.GetComponent<PowerTransformer>();
 		this.meter = ((!flag) ? new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" }) : null);
@@ -229,6 +229,11 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 	private float PreviousJoulesAvailable;
 
 	private CircuitManager.ConnectionStatus connectionStatus;
+
+	private static readonly EventSystem.IntraObjectHandler<Battery> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Battery>(delegate(Battery component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 
 	private float dt;
 

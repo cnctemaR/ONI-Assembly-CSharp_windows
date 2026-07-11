@@ -130,7 +130,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		this.enableRaycast = this.building as BuildingComplete != null;
 		this.icons = new Dictionary<GameObject, Image>();
 		this.RefreshState();
-		base.Subscribe(-235298596, new Action<object>(this.OnBuildingUpgraded));
+		base.Subscribe<BuildingCellVisualizer>(-235298596, BuildingCellVisualizer.OnBuildingUpgradedDelegate);
 	}
 
 	private void OnBuildingUpgraded(object data)
@@ -579,4 +579,9 @@ public class BuildingCellVisualizer : KMonoBehaviour
 	private Dictionary<GameObject, Image> icons;
 
 	private SimViewMode previousMode;
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingCellVisualizer> OnBuildingUpgradedDelegate = new EventSystem.IntraObjectHandler<BuildingCellVisualizer>(delegate(BuildingCellVisualizer component, object data)
+	{
+		component.OnBuildingUpgraded(data);
+	});
 }

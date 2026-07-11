@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.XR.WSA
 {
-	[NativeConditional("ENABLE_HOLOLENS_MODULE")]
 	[NativeHeader("Runtime/VR/HoloLens/PerceptionRemoting.h")]
+	[NativeConditional("ENABLE_HOLOLENS_MODULE")]
 	internal class PerceptionRemoting
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]

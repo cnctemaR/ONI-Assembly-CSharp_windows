@@ -8,6 +8,7 @@ public class SolidTransferArmConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef("SolidTransferArm", 3, 1, "conveyor_transferarm_kanim", 10, 10f, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER3, MATERIALS.REFINED_METALS, 1600f, BuildLocationRule.Anywhere, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, NOISE_POLLUTION.NOISY.TIER0, 0.2f);
+		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
@@ -27,16 +28,13 @@ public class SolidTransferArmConfig : IBuildingConfig
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, SolidTransferArmConfig.INPUT_PORTS);
-		StationaryChoreRangeVisualizer stationaryChoreRangeVisualizer = go.AddOrGet<StationaryChoreRangeVisualizer>();
-		stationaryChoreRangeVisualizer.range = 4;
-		stationaryChoreRangeVisualizer.movable = true;
+		SolidTransferArmConfig.AddVisualizer(go, true);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, SolidTransferArmConfig.INPUT_PORTS);
-		StationaryChoreRangeVisualizer stationaryChoreRangeVisualizer = go.AddOrGet<StationaryChoreRangeVisualizer>();
-		stationaryChoreRangeVisualizer.range = 4;
+		SolidTransferArmConfig.AddVisualizer(go, false);
 		Constructable component = go.GetComponent<Constructable>();
 		component.choreTags = GameTags.ChoreTypes.ConveyorChores;
 		component.requiredRolePerk = RoleManager.rolePerks.ConveyorBuild.id;
@@ -44,13 +42,21 @@ public class SolidTransferArmConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		GeneratedBuildings.RegisterLogicPorts(go, SolidTransferArmConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
 		SolidTransferArm solidTransferArm = go.AddOrGet<SolidTransferArm>();
 		solidTransferArm.pickupRange = 4;
-		StationaryChoreRangeVisualizer stationaryChoreRangeVisualizer = go.AddOrGet<StationaryChoreRangeVisualizer>();
-		stationaryChoreRangeVisualizer.range = 4;
+		SolidTransferArmConfig.AddVisualizer(go, false);
+	}
+
+	private static void AddVisualizer(GameObject prefab, bool movable)
+	{
+		StationaryChoreRangeVisualizer stationaryChoreRangeVisualizer = prefab.AddOrGet<StationaryChoreRangeVisualizer>();
+		stationaryChoreRangeVisualizer.x = -4;
+		stationaryChoreRangeVisualizer.y = -4;
+		stationaryChoreRangeVisualizer.width = 9;
+		stationaryChoreRangeVisualizer.height = 9;
+		stationaryChoreRangeVisualizer.movable = movable;
 	}
 
 	public const string ID = "SolidTransferArm";

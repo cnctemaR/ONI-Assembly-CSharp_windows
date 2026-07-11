@@ -30,7 +30,7 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 		base.smi.StartSM();
 		this.cleanMeter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_clean_target", "meter_clean", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_clean_target" });
 		this.RefreshMeters();
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<OreScrubber>(-1697596308, OreScrubber.OnStorageChangeDelegate);
 		DirectionControl component = base.GetComponent<DirectionControl>();
 		component.onDirectionChanged = (Action<WorkableReactable.AllowedDirection>)Delegate.Combine(component.onDirectionChanged, new Action<WorkableReactable.AllowedDirection>(this.OnDirectionChanged));
 		this.OnDirectionChanged(base.GetComponent<DirectionControl>().allowedDirection);
@@ -103,6 +103,11 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IEffec
 
 	[Serialize]
 	public int maxPossiblyRemoved;
+
+	private static readonly EventSystem.IntraObjectHandler<OreScrubber> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<OreScrubber>(delegate(OreScrubber component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 
 	private class ScrubOreReactable : WorkableReactable
 	{

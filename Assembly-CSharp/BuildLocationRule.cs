@@ -12,5 +12,6 @@ public enum BuildLocationRule
 	LogicBridge,
 	OnFloorOverSpace,
 	WireTile,
-	OnFloorOrBuildingAttachPoint
+	OnFloorOrBuildingAttachPoint,
+	OnFoundationRotatable
 }

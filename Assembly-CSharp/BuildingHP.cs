@@ -81,10 +81,10 @@ public class BuildingHP : Workable
 		base.OnSpawn();
 		this.smi = new BuildingHP.SMInstance(this);
 		this.smi.StartSM();
-		base.Subscribe(-794517298, new Action<object>(this.OnDoBuildingDamage));
+		base.Subscribe<BuildingHP>(-794517298, BuildingHP.OnDoBuildingDamageDelegate);
 		if (this.destroyOnDamaged)
 		{
-			base.Subscribe(774203113, new Action<object>(this.DestroyOnDamaged));
+			base.Subscribe<BuildingHP>(774203113, BuildingHP.DestroyOnDamagedDelegate);
 		}
 		if (this.hitpoints <= 0)
 		{
@@ -147,6 +147,16 @@ public class BuildingHP : Workable
 
 	[Serialize]
 	private BuildingHP.DamageSourceInfo damageSourceInfo;
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingHP> OnDoBuildingDamageDelegate = new EventSystem.IntraObjectHandler<BuildingHP>(delegate(BuildingHP component, object data)
+	{
+		component.OnDoBuildingDamage(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingHP> DestroyOnDamagedDelegate = new EventSystem.IntraObjectHandler<BuildingHP>(delegate(BuildingHP component, object data)
+	{
+		component.DestroyOnDamaged(data);
+	});
 
 	public static List<Meter> kbacQueryList = new List<Meter>();
 
@@ -235,8 +245,17 @@ public class BuildingHP : Workable
 			float num = 0.15f;
 			Vector3 vector = base.gameObject.transform.GetPosition() + Vector3.down * num;
 			vector.z += 0.05f;
-			vector -= Vector3.right * 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2);
+			Rotatable component2 = base.GetComponent<Rotatable>();
+			if (component2 == null || component2.GetOrientation() == Orientation.Neutral)
+			{
+				vector -= Vector3.right * 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2);
+			}
+			else
+			{
+				vector += Vector3.left * (1f + 0.5f * (float)(base.smi.master.building.Def.WidthInCells % 2));
+			}
 			this.progressBar.transform.SetPosition(vector);
+			this.progressBar.gameObject.SetActive(true);
 		}
 
 		private static string ToolTipResolver(List<Notification> notificationList, object data)

@@ -136,7 +136,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 				this.requestSelectedEntityBtn.isInteractable = true;
 				this.subtitleLabel.SetText(string.Format(Strings.Get(this.subtitleStringEntityDeposited).ToString(), this.targetReceptacle.Occupant.GetProperName()));
 			}
-			this.ToggleSeedSelector(false);
+			this.ToggleObjectPicker(false);
 			Tag tag = this.targetReceptacle.Occupant.GetComponent<KSelectable>().PrefabID();
 			this.ConfigureActiveEntity(tag);
 			this.SetResultDescriptions(this.targetReceptacle.Occupant);
@@ -152,7 +152,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			};
 			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringCancelDeposit).ToString();
 			this.requestSelectedEntityBtn.isInteractable = true;
-			this.ToggleSeedSelector(false);
+			this.ToggleObjectPicker(false);
 			this.ConfigureActiveEntity(this.targetReceptacle.GetActiveRequest.tags[0]);
 			GameObject prefab = Assets.GetPrefab(this.targetReceptacle.GetActiveRequest.tags[0]);
 			if (prefab != null)
@@ -174,7 +174,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 			bool flag = this.ValidRotationForDeposit(this.depositObjectMap[this.selectedEntityToggle].direction) && this.GetAvailableAmount(this.depositObjectMap[this.selectedEntityToggle].tag) > 0f && this.AdditionalCanDepositTest();
 			this.requestSelectedEntityBtn.isInteractable = flag;
 			this.SetImageToggleState(this.selectedEntityToggle.toggle, (!flag) ? ImageToggleState.State.DisabledActive : ImageToggleState.State.Active);
-			this.ToggleSeedSelector(true);
+			this.ToggleObjectPicker(true);
 			GameObject prefab2 = Assets.GetPrefab(this.selectedDepositObjectTag);
 			if (prefab2 != null)
 			{
@@ -186,7 +186,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		{
 			this.requestSelectedEntityBtn.GetComponentInChildren<LocText>().text = Strings.Get(this.requestStringDeposit).ToString();
 			this.requestSelectedEntityBtn.isInteractable = false;
-			this.ToggleSeedSelector(true);
+			this.ToggleObjectPicker(true);
 		}
 		this.UpdateAvailableAmounts(null);
 		this.UpdateListeners();
@@ -198,7 +198,7 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		{
 			if (this.onObjectDestroyedHandle == -1)
 			{
-				this.onObjectDestroyedHandle = this.targetReceptacle.Occupant.gameObject.Subscribe(1969584890, delegate
+				this.onObjectDestroyedHandle = this.targetReceptacle.Occupant.gameObject.Subscribe(1969584890, delegate(object d)
 				{
 					this.UpdateState(null);
 				});
@@ -249,10 +249,13 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 		}
 	}
 
-	private void ToggleSeedSelector(bool Show)
+	private void ToggleObjectPicker(bool Show)
 	{
 		this.requestObjectListContainer.SetActive(Show);
-		this.scrollBarContainer.SetActive(Show);
+		if (this.scrollBarContainer != null)
+		{
+			this.scrollBarContainer.SetActive(Show);
+		}
 		this.requestObjectList.SetActive(Show);
 		this.activeEntityContainer.SetActive(!Show);
 	}
@@ -523,6 +526,9 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	[SerializeField]
 	private Sprite elementPlaceholderSpr;
 
+	[SerializeField]
+	private bool hideUndiscoveredEntities;
+
 	private ReceptacleToggle selectedEntityToggle;
 
 	protected SingleEntityReceptacle targetReceptacle;
@@ -532,8 +538,6 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	private Dictionary<ReceptacleToggle, ReceptacleSideScreen.SelectableEntity> depositObjectMap;
 
 	private List<ReceptacleToggle> entityToggles = new List<ReceptacleToggle>();
-
-	protected bool hideUndiscoveredEntities;
 
 	private int onObjectDestroyedHandle = -1;
 

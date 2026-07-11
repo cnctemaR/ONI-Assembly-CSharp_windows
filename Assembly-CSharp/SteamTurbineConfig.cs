@@ -65,7 +65,6 @@ public class SteamTurbineConfig : IBuildingConfig
 		go.AddOrGet<Generator>();
 		go.AddOrGet<LogicOperationalController>();
 		Prioritizable.AddRef(go);
-		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)
 		{
 			HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(game_object);

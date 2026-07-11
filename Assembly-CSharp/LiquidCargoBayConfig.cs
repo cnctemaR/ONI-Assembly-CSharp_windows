@@ -26,7 +26,7 @@ public class LiquidCargoBayConfig : IBuildingConfig
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.OutputConduitType = ConduitType.Liquid;
-		buildingDef.UtilityOutputOffset = new CellOffset(-2, 3);
+		buildingDef.UtilityOutputOffset = new CellOffset(0, 3);
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
 		return buildingDef;
@@ -54,7 +54,6 @@ public class LiquidCargoBayConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		CargoBay cargoBay = go.AddOrGet<CargoBay>();
 		cargoBay.storage = go.AddOrGet<Storage>();
 		cargoBay.storageType = CargoBay.CargoType.liquids;

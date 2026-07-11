@@ -36,10 +36,7 @@ public class TileConfig : IBuildingConfig
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_solid_tops_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_solid_tops_place_info");
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.DragBuild = true;
 		return buildingDef;
 	}
@@ -52,6 +49,7 @@ public class TileConfig : IBuildingConfig
 		simCellOccupier.doReplaceElement = true;
 		simCellOccupier.strengthMultiplier = 1.5f;
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.BONUS_2;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
 		kanimGridTileVisualizer.blockTileConnectorID = TileConfig.BlockTileConnectorID;
@@ -61,7 +59,6 @@ public class TileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		GeneratedBuildings.RemoveLoopingSounds(go);
 	}
 

@@ -64,10 +64,10 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		}
 		this.partitionerEntry = GameScenePartitioner.Instance.Add(destination.name, this, Grid.PosToCell(destination), GameScenePartitioner.Instance.fetchChoreLayer, null);
 		destination.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
-		Automatable component5 = destination.GetComponent<Automatable>();
-		if (component5)
+		this.automatable = destination.GetComponent<Automatable>();
+		if (this.automatable)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, component5);
+			base.AddPrecondition(ChorePreconditions.instance.IsAllowedByAutomation, this.automatable);
 		}
 	}
 
@@ -255,6 +255,8 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	public TagBits requiredTagBits;
 
 	public TagBits forbiddenTagBits;
+
+	public Automatable automatable;
 
 	public bool allowMultifetch = true;
 

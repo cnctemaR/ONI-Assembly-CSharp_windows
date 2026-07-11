@@ -36,10 +36,7 @@ public class BunkerTileConfig : IBuildingConfig
 		buildingDef.BlockTileMaterial = Assets.GetMaterial("tiles_solid");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_bunker_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_bunker_tops_decor_place_info");
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		return buildingDef;
 	}
 
@@ -49,6 +46,7 @@ public class BunkerTileConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.strengthMultiplier = 10f;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
 		kanimGridTileVisualizer.blockTileConnectorID = BunkerTileConfig.BlockTileConnectorID;
@@ -58,8 +56,7 @@ public class BunkerTileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.AddComponent<SimTemperatureTransfer>();
+		GeneratedBuildings.RemoveLoopingSounds(go);
 		KPrefabID component = go.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Bunker);
 	}

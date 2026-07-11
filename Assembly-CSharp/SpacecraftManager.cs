@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Database;
 using KSerialization;
 using STRINGS;
 using TUNING;
@@ -8,28 +9,150 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class SpacecraftManager : KMonoBehaviour
 {
+	public static void DestroyInstance()
+	{
+		SpacecraftManager.instance = null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		SpacecraftManager.instance = this;
+		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
 		if (this.savedSpacecraftDestinations == null)
 		{
 			this.savedSpacecraftDestinations = new Dictionary<int, int>();
 		}
-		this.destinations = new List<SpaceDestination>
+		if (this.destinations == null)
 		{
-			new CarbonaceousAsteroid(0, 1, 0.2f, ROCKETRY.DESTINATION_THRUST_COSTS.LOW),
-			new MetallicAsteroid(1, 2, 0.4f, ROCKETRY.DESTINATION_THRUST_COSTS.LOW),
-			new RockyAsteroid(2, 2, 0.7f, ROCKETRY.DESTINATION_THRUST_COSTS.LOW),
-			new IcyDwarf(3, 3, 0.3f, ROCKETRY.DESTINATION_THRUST_COSTS.MID),
-			new OrganicDwarf(4, 4, 0.1f, ROCKETRY.DESTINATION_THRUST_COSTS.HIGH)
+			this.destinations = new List<SpaceDestination>
+			{
+				new SpaceDestination(0, spaceDestinationTypes.CarbonaceousAsteroid.Id, 0),
+				new SpaceDestination(1, spaceDestinationTypes.CarbonaceousAsteroid.Id, 0),
+				new SpaceDestination(2, spaceDestinationTypes.MetallicAsteroid.Id, 1),
+				new SpaceDestination(3, spaceDestinationTypes.RockyAsteroid.Id, 2),
+				new SpaceDestination(4, spaceDestinationTypes.IcyDwarf.Id, 3),
+				new SpaceDestination(5, spaceDestinationTypes.OrganicDwarf.Id, 4)
+			};
+		}
+	}
+
+	private void GenerateRandomDestinations()
+	{
+		global::System.Random random = new global::System.Random(SaveLoader.Instance.worldDetailSave.globalWorldSeed);
+		SpaceDestinationTypes spaceDestinationTypes = Db.Get().SpaceDestinationTypes;
+		List<List<string>> list = new List<List<string>>
+		{
+			new List<string>(),
+			new List<string>(),
+			new List<string> { spaceDestinationTypes.Satellite.Id },
+			new List<string>
+			{
+				spaceDestinationTypes.Satellite.Id,
+				spaceDestinationTypes.MetallicAsteroid.Id,
+				spaceDestinationTypes.RockyAsteroid.Id,
+				spaceDestinationTypes.CarbonaceousAsteroid.Id
+			},
+			new List<string>
+			{
+				spaceDestinationTypes.MetallicAsteroid.Id,
+				spaceDestinationTypes.RockyAsteroid.Id,
+				spaceDestinationTypes.CarbonaceousAsteroid.Id
+			},
+			new List<string>
+			{
+				spaceDestinationTypes.MetallicAsteroid.Id,
+				spaceDestinationTypes.RockyAsteroid.Id,
+				spaceDestinationTypes.CarbonaceousAsteroid.Id,
+				spaceDestinationTypes.IcyDwarf.Id,
+				spaceDestinationTypes.OrganicDwarf.Id
+			},
+			new List<string>
+			{
+				spaceDestinationTypes.IcyDwarf.Id,
+				spaceDestinationTypes.OrganicDwarf.Id,
+				spaceDestinationTypes.DustyMoon.Id
+			},
+			new List<string>
+			{
+				spaceDestinationTypes.IcyDwarf.Id,
+				spaceDestinationTypes.OrganicDwarf.Id,
+				spaceDestinationTypes.DustyMoon.Id
+			},
+			new List<string>
+			{
+				spaceDestinationTypes.DustyMoon.Id,
+				spaceDestinationTypes.TerraPlanet.Id,
+				spaceDestinationTypes.VolcanoPlanet.Id
+			},
+			new List<string>
+			{
+				spaceDestinationTypes.TerraPlanet.Id,
+				spaceDestinationTypes.VolcanoPlanet.Id,
+				spaceDestinationTypes.GasGiant.Id,
+				spaceDestinationTypes.IceGiant.Id
+			},
+			new List<string>
+			{
+				spaceDestinationTypes.GasGiant.Id,
+				spaceDestinationTypes.IceGiant.Id
+			}
 		};
+		List<int> list2 = new List<int>();
+		int num = 3;
+		int num2 = 10;
+		int num3 = 20;
+		for (int i = 0; i < list.Count; i++)
+		{
+			if (list[i].Count != 0)
+			{
+				for (int j = 0; j < num; j++)
+				{
+					list2.Add(i);
+				}
+			}
+		}
+		int num4 = random.Next(num2, num3);
+		for (int k = 0; k < num4; k++)
+		{
+			int num5 = random.Next(0, list2.Count - 1);
+			int num6 = list2[num5];
+			list2.RemoveAt(num5);
+			List<string> list3 = list[num6];
+			string text = list3[random.Next(0, list3.Count)];
+			SpaceDestination spaceDestination = new SpaceDestination(this.destinations.Count, text, num6);
+			this.destinations.Add(spaceDestination);
+		}
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		Game.Instance.spacecraftManager = this;
+		if (!this.destinationsGenerated)
+		{
+			this.GenerateRandomDestinations();
+			this.destinations.Sort((SpaceDestination a, SpaceDestination b) => a.distance.CompareTo(b.distance));
+			List<float> list = new List<float>();
+			for (int i = 0; i < 10; i++)
+			{
+				list.Add((float)i / 10f);
+			}
+			for (int j = 0; j < 20; j++)
+			{
+				list.Shuffle<float>();
+				int num = 0;
+				foreach (SpaceDestination spaceDestination in this.destinations)
+				{
+					if (spaceDestination.distance == j)
+					{
+						num++;
+						spaceDestination.startingOrbitPercentage = list[num];
+					}
+				}
+			}
+			this.destinationsGenerated = true;
+		}
 	}
 
 	public SpaceDestination GetActiveMission(int spacecraftID)
@@ -82,7 +205,9 @@ public class SpacecraftManager : KMonoBehaviour
 
 	public void UnregisterSpacecraft(LaunchConditionManager conditionManager)
 	{
-		this.spacecraft.Remove(this.GetSpacecraftFromLaunchConditionManager(conditionManager));
+		Spacecraft spacecraftFromLaunchConditionManager = this.GetSpacecraftFromLaunchConditionManager(conditionManager);
+		spacecraftFromLaunchConditionManager.SetState(Spacecraft.MissionState.Destroyed);
+		this.spacecraft.Remove(spacecraftFromLaunchConditionManager);
 	}
 
 	public List<Spacecraft> GetSpacecraft()
@@ -149,12 +274,31 @@ public class SpacecraftManager : KMonoBehaviour
 		{
 			this.destinationAnalysisScores.Add(destinationID, 0f);
 		}
+		SpaceDestination destination = this.GetDestination(destinationID);
+		SpacecraftManager.DestinationAnalysisState destinationAnalysisState = this.GetDestinationAnalysisState(destination);
 		Dictionary<int, float> dictionary;
 		(dictionary = this.destinationAnalysisScores)[destinationID] = dictionary[destinationID] + points;
+		SpacecraftManager.DestinationAnalysisState destinationAnalysisState2 = this.GetDestinationAnalysisState(destination);
+		if (destinationAnalysisState != destinationAnalysisState2)
+		{
+			int starmapAnalysisDestinationID = SpacecraftManager.instance.GetStarmapAnalysisDestinationID();
+			if (starmapAnalysisDestinationID == destinationID)
+			{
+				if (destinationAnalysisState2 == SpacecraftManager.DestinationAnalysisState.Complete)
+				{
+					SpacecraftManager.instance.SetStarmapAnalysisDestinationID(-1);
+				}
+				Game.Instance.Trigger(929158128, null);
+			}
+		}
 	}
 
 	public SpacecraftManager.DestinationAnalysisState GetDestinationAnalysisState(SpaceDestination destination)
 	{
+		if (destination.startAnalyzed)
+		{
+			return SpacecraftManager.DestinationAnalysisState.Complete;
+		}
 		float destinationAnalysisScore = this.GetDestinationAnalysisScore(destination);
 		if (destinationAnalysisScore >= (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE)
 		{
@@ -167,18 +311,43 @@ public class SpacecraftManager : KMonoBehaviour
 		return SpacecraftManager.DestinationAnalysisState.Hidden;
 	}
 
+	public void SetStarmapAnalysisDestinationID(int id)
+	{
+		this.analyzeDestinationID = id;
+		base.Trigger(532901469, id);
+	}
+
+	public int GetStarmapAnalysisDestinationID()
+	{
+		return this.analyzeDestinationID;
+	}
+
+	public bool HasAnalysisTarget()
+	{
+		return this.analyzeDestinationID != -1;
+	}
+
 	public static SpacecraftManager instance;
 
 	[Serialize]
 	private List<Spacecraft> spacecraft = new List<Spacecraft>();
 
-	public List<SpaceDestination> destinations = new List<SpaceDestination>();
+	[Serialize]
+	public List<SpaceDestination> destinations;
 
 	[Serialize]
 	public Dictionary<int, int> savedSpacecraftDestinations;
 
 	[Serialize]
 	private int nextSpacecraftID;
+
+	[Serialize]
+	public bool destinationsGenerated;
+
+	public const int INVALID_DESTINATION_ID = -1;
+
+	[Serialize]
+	private int analyzeDestinationID = -1;
 
 	[Serialize]
 	public Dictionary<int, float> destinationAnalysisScores = new Dictionary<int, float>();

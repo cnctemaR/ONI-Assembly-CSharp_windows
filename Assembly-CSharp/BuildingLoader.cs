@@ -149,7 +149,10 @@ public class BuildingLoader : KMonoBehaviour
 		global::UnityEngine.Object.DontDestroyOnLoad(gameObject);
 		KSelectable component = gameObject.GetComponent<KSelectable>();
 		component.SetName(def.Name);
-		gameObject.GetComponent<PrimaryElement>().MassPerUnit = def.Mass[0];
+		for (int i = 0; i < def.Mass.Length; i++)
+		{
+			gameObject.GetComponent<PrimaryElement>().MassPerUnit += def.Mass[i];
+		}
 		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "UnderConstruction");
 		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
 		Constructable component2 = gameObject.GetComponent<Constructable>();
@@ -181,7 +184,12 @@ public class BuildingLoader : KMonoBehaviour
 		KSelectable component = go.GetComponent<KSelectable>();
 		component.SetName(def.Name);
 		PrimaryElement component2 = go.GetComponent<PrimaryElement>();
-		component2.MassPerUnit = def.Mass[0];
+		component2.MassPerUnit = 0f;
+		for (int i = 0; i < def.Mass.Length; i++)
+		{
+			component2.MassPerUnit += def.Mass[i];
+		}
+		component2.Temperature = 273.15f;
 		BuildingHP buildingHP = go.AddOrGet<BuildingHP>();
 		if (def.Invincible)
 		{

@@ -59,6 +59,15 @@ namespace STRINGS
 
 		public class STATS
 		{
+			public class SUBJECTS
+			{
+				public static LocString DUPLICANT = "Duplicant";
+
+				public static LocString CREATURE = "critter";
+
+				public static LocString PLANT = "plant";
+			}
+
 			public class BREATH
 			{
 				public static LocString NAME = "Breath";
@@ -77,7 +86,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Calories";
 
-				public static LocString TOOLTIP = "This Duplicant can burn {0} before starving";
+				public static LocString TOOLTIP = "This {1} can burn {0} before starving";
 			}
 
 			public class TEMPERATURE
@@ -185,7 +194,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Overheated";
 
-				public static LocString DESCRIPTION = "{Target} has overheated to death.";
+				public static LocString DESCRIPTION = "{Target} overheated to death.";
 			}
 
 			public class DROWNED
@@ -206,7 +215,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Slain";
 
-				public static LocString DESCRIPTION = "{Target} was slain in combat.";
+				public static LocString DESCRIPTION = "{Target} was slain in combat by a fearsome creature.";
 			}
 
 			public class FATALDISEASE
@@ -1189,7 +1198,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Storage";
 
-				public static LocString DESC = "Fill non-critical storage buildings with resources.";
+				public static LocString DESC = "Fill storage buildings with resources when no other errands are available.";
 			}
 
 			public class BASEKEEPING
@@ -1565,7 +1574,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Night Owl";
 
-				public static LocString TOOLTIP = "This Duplicant is impassioned by the night\n• +2 to all Attributes";
+				public static LocString TOOLTIP = "This Duplicant is impassioned by the night\n• +3 to all Attributes";
 			}
 
 			public class SUFFOCATING
@@ -2500,6 +2509,8 @@ namespace STRINGS
 
 				public static LocString LEGEND_HOVERTEXT = "Area Causes Sunburn\n";
 
+				public static LocString SUNEXPOSURE = "Sun Exposure";
+
 				public static LocString DESCRIPTIVE_SYMPTOMS = "Nonlethal. Duplicants experience temporary discomfort due to dermatological damage.";
 			}
 
@@ -2574,6 +2585,13 @@ namespace STRINGS
 				public static LocString NAME = "Bedroom";
 
 				public static LocString TOOLTIP = "This Duplicant slept in a private Bedroom last night and feels extra refreshed";
+			}
+
+			public class BEDHEALTH
+			{
+				public static LocString NAME = "Bed Rest";
+
+				public static LocString TOOLTIP = "This Duplicant will incrementally heal over while on Bed Rest";
 			}
 
 			public class BEDSTAMINA
@@ -3324,6 +3342,8 @@ namespace STRINGS
 				public static LocString NAME = "Placebo";
 
 				public static LocString TOOLTIP = ITEMS.PILLS.PLACEBO.DESC;
+
+				public static LocString EFFECT_DESC = "Applies the <style=\"disease\">{0}</style> effect";
 			}
 
 			public class MEDICINE_VITAMINSUPPLEMENT
@@ -4068,7 +4088,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Lindsay";
 
-				public static LocString DESC = "A {0} is a charming, delightful woman, unless you make the mistake of messing with one of her friends.";
+				public static LocString DESC = "A {0} is a charming woman, unless you make the mistake of messing with one of her friends.";
 			}
 
 			public class DEVON
@@ -4145,7 +4165,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Burt";
 
-				public static LocString DESC = "Every single {0} has perpetually damp hands. It must be genetic.";
+				public static LocString DESC = "This {0} always feels great after a bubble bath and a good long cry.";
 			}
 
 			public class TRAVALDO
@@ -4159,7 +4179,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Harold";
 
-				public static LocString DESC = "This {0} is cripplingly self-conscious of his long middle toes.";
+				public static LocString DESC = "Get a bunch of {0}s together in a room, and you'll have... a bunch of {0}s together in a room.";
 			}
 
 			public class MAX
@@ -4310,9 +4330,9 @@ namespace STRINGS
 
 			public class QUALITYOFLIFE
 			{
-				public static LocString NAME = "Morale Expectation";
+				public static LocString NAME = "Morale Requirements";
 
-				public static LocString EXPECTATION_TOOLTIP = "Duplicants love digging in the dirt as much as anyone, but sometimes they need a little more in their lives to inspire them to greater things. Failing to keep a Duplicant's Morale up will cause " + UI.FormatAsLink("Stressed", "STRESS") + ".";
+				public static LocString EXPECTATION_TOOLTIP = "The more responsibilities a Duplicant has, the more they will desire additional leisure time and improved amenities.\n\nFailing to keep a Duplicant's Morale at or above their Morale Requirements means they will not be able to unwind, causing them " + UI.FormatAsLink("Stress", "STRESS") + " over time.";
 
 				public static LocString EXPECTATION_MOD_NAME = "Job Tier Request";
 
@@ -4333,7 +4353,7 @@ namespace STRINGS
 		{
 			public static LocString VALUE = "{0}: {1}";
 
-			public static LocString TOTAL_VALUE = "\n\nCurrent value: {0}";
+			public static LocString TOTAL_VALUE = "\n\nTotal Value: {0}";
 
 			public static LocString BASE_VALUE = "\nBase: {0}";
 
@@ -4592,9 +4612,9 @@ namespace STRINGS
 
 			public class QUALITYOFLIFEEXPECTATION
 			{
-				public static LocString NAME = "Morale Expectation";
+				public static LocString NAME = "Morale Need";
 
-				public static LocString DESC = "Morale Expectation";
+				public static LocString DESC = "Morale Need";
 			}
 
 			public class HYGIENE
@@ -4615,15 +4635,15 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Morale";
 
-				public static LocString DESC = "How well this Duplicant's expectations and aspirations are being met.";
+				public static LocString DESC = "Duplicants must have a Morale rating that exceeds their Morale Need, or they'll begin to accumulate Stress.\n\nMorale ratings can be increased by providing Duplicants higher quality food, allotting more Downtime in the colony schedule, or building better bathrooms and bedrooms for them to live in.";
 
 				public static LocString DESC_FORMAT = "{0} / {1}";
 
-				public static LocString TOOLTIP_EXPECTATION = "Current Jobs expectations: {0}";
+				public static LocString TOOLTIP_EXPECTATION = "Job Assignment: +{0} Morale Need";
 
-				public static LocString TOOLTIP_EXPECTATION_OVER = "This Duplicant's morale is meeting their expectations";
+				public static LocString TOOLTIP_EXPECTATION_OVER = "This Duplicant has sufficiently high Morale";
 
-				public static LocString TOOLTIP_EXPECTATION_UNDER = "This Duplicant's morale is below expectations and requires improvement";
+				public static LocString TOOLTIP_EXPECTATION_UNDER = "This Duplicant's low Morale will gain Stress over time";
 			}
 
 			public class AIRCONSUMPTIONRATE
@@ -4684,7 +4704,7 @@ namespace STRINGS
 
 			public class TOILETEFFICIENCY
 			{
-				public static LocString NAME = "Bathroom Hustle";
+				public static LocString NAME = "Bathroom Use Speed";
 
 				public static LocString DESC = "Determines how long a Duplicant needs to do their \"business\".";
 			}

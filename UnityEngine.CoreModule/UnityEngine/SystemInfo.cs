@@ -9,9 +9,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Access system and hardware information.</para>
 	/// </summary>
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
 	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
 	public sealed class SystemInfo

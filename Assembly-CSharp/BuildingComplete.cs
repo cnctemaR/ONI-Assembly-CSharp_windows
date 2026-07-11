@@ -35,8 +35,8 @@ public class BuildingComplete : Building
 		{
 			GameComps.StructureTemperatures.Add(base.gameObject);
 		}
-		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
-		base.Subscribe(1606648047, new Action<object>(this.OnObjectReplaced));
+		base.Subscribe<BuildingComplete>(-1503271301, BuildingComplete.OnSelectObjectDelegate);
+		base.Subscribe<BuildingComplete>(1606648047, BuildingComplete.OnObjectReplacedDelegate);
 	}
 
 	private void OnSelectObject(object data)
@@ -45,7 +45,7 @@ public class BuildingComplete : Building
 		{
 			bool flag = (bool)data;
 			GameHashes gameHashes = ((!flag) ? GameHashes.DisableOverlay : GameHashes.EnableOverlay);
-			EventSystem.Trigger(Game.Instance.gameObject, (int)gameHashes, this.Def.SelectMode);
+			Game.Instance.gameObject.Trigger((int)gameHashes, this.Def.SelectMode);
 		}
 	}
 
@@ -91,15 +91,15 @@ public class BuildingComplete : Building
 			this.Def.MarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
 			this.Def.RunOnArea(num, base.Orientation, delegate(int c)
 			{
-				TileVisualizer.RefreshCell(c, this.Def.TileLayer);
+				TileVisualizer.RefreshCell(c, this.Def.TileLayer, this.Def.ReplacementLayer);
 			});
 		}
 		base.RegisterBlockTileRenderer();
-		if (this.Def.PreventIdlingInFrontOfBuilding)
+		if (this.Def.PreventIdleTraversalPastBuilding)
 		{
 			for (int j = 0; j < base.PlacementCells.Length; j++)
 			{
-				Grid.PreventIdlingOnCell[base.PlacementCells[j]] = true;
+				Grid.PreventIdleTraversal[base.PlacementCells[j]] = true;
 			}
 		}
 		KSelectable component5 = base.GetComponent<KSelectable>();
@@ -142,7 +142,7 @@ public class BuildingComplete : Building
 				this.Def.UnmarkArea(num, base.Orientation, this.Def.TileLayer, base.gameObject);
 				this.Def.RunOnArea(num, base.Orientation, delegate(int c)
 				{
-					TileVisualizer.RefreshCell(c, this.Def.TileLayer);
+					TileVisualizer.RefreshCell(c, this.Def.TileLayer, this.Def.ReplacementLayer);
 				});
 			}
 			if (this.Def.IsFoundation)
@@ -154,11 +154,11 @@ public class BuildingComplete : Building
 					Game.Instance.roomProber.SolidChangedEvent(num2, false);
 				}
 			}
-			if (this.Def.PreventIdlingInFrontOfBuilding)
+			if (this.Def.PreventIdleTraversalPastBuilding)
 			{
 				for (int j = 0; j < base.PlacementCells.Length; j++)
 				{
-					Grid.PreventIdlingOnCell[base.PlacementCells[j]] = false;
+					Grid.PreventIdleTraversal[base.PlacementCells[j]] = false;
 				}
 			}
 		}
@@ -185,4 +185,14 @@ public class BuildingComplete : Building
 	private bool wasReplaced;
 
 	public List<AttributeModifier> regionModifiers = new List<AttributeModifier>();
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingComplete> OnSelectObjectDelegate = new EventSystem.IntraObjectHandler<BuildingComplete>(delegate(BuildingComplete component, object data)
+	{
+		component.OnSelectObject(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingComplete> OnObjectReplacedDelegate = new EventSystem.IntraObjectHandler<BuildingComplete>(delegate(BuildingComplete component, object data)
+	{
+		component.OnObjectReplaced(data);
+	});
 }

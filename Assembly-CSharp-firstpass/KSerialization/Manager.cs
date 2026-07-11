@@ -7,18 +7,9 @@ namespace KSerialization
 {
 	public class Manager
 	{
-		public static void Initialize(IList<Type> root_types)
+		public static void Initialize()
 		{
-			List<Assembly> list = new List<Assembly>();
-			foreach (Type type in root_types)
-			{
-				Assembly assembly = type.Assembly;
-				if (!list.Contains(assembly))
-				{
-					list.Add(assembly);
-				}
-			}
-			Manager.assemblies = list.ToArray();
+			Manager.assemblies = AppDomain.CurrentDomain.GetAssemblies();
 		}
 
 		public static Type GetType(string type_name)

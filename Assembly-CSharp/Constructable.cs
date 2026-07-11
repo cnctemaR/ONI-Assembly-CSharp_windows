@@ -9,11 +9,6 @@ using UnityEngine;
 [SerializationConfig(MemberSerialization.OptIn)]
 public class Constructable : Workable, ISaveLoadable
 {
-	private Constructable()
-	{
-		base.preferPrimaryCell = false;
-	}
-
 	public Recipe Recipe
 	{
 		get
@@ -196,7 +191,7 @@ public class Constructable : Workable, ISaveLoadable
 		base.SetOffsetTable(array2);
 		this.storage.SetOffsetTable(array2);
 		this.faceTargetWhenWorking = true;
-		base.Subscribe(-1432940121, new Action<object>(this.OnReachableChanged));
+		base.Subscribe<Constructable>(-1432940121, Constructable.OnReachableChangedDelegate);
 		if (this.rotatable == null)
 		{
 			this.MarkArea();
@@ -209,12 +204,14 @@ public class Constructable : Workable, ISaveLoadable
 		this.synchronizeAnims = false;
 		this.multitoolContext = "build";
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
+		this.workingPstComplete = HashedString.Invalid;
+		this.workingPstFailed = HashedString.Invalid;
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
+		base.Subscribe<Constructable>(2127324410, Constructable.OnCancelDelegate);
 		if (this.rotatable != null)
 		{
 			this.MarkArea();
@@ -271,7 +268,7 @@ public class Constructable : Workable, ISaveLoadable
 					int num3 = LayerMask.NameToLayer("Overlay");
 					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, SimHashes.Void, num2);
 				}
-				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer);
+				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer, this.building.Def.ReplacementLayer);
 			}
 			else
 			{
@@ -296,7 +293,7 @@ public class Constructable : Workable, ISaveLoadable
 		this.PlaceDiggables();
 		ReachabilityMonitor.Instance instance = new ReachabilityMonitor.Instance(this);
 		instance.StartSM();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Constructable>(493375141, Constructable.OnRefreshUserMenuDelegate);
 		Prioritizable component2 = base.GetComponent<Prioritizable>();
 		Prioritizable prioritizable = component2;
 		prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnPriorityChanged));
@@ -330,7 +327,7 @@ public class Constructable : Workable, ISaveLoadable
 				def.MarkArea(num, orientation, def.TileLayer, base.gameObject);
 				def.RunOnArea(num, orientation, delegate(int c)
 				{
-					TileVisualizer.RefreshCell(c, def.TileLayer);
+					TileVisualizer.RefreshCell(c, def.TileLayer, def.ReplacementLayer);
 				});
 			}
 			Grid.IsTileUnderConstruction[num] = true;
@@ -742,4 +739,19 @@ public class Constructable : Workable, ISaveLoadable
 
 	[Serialize]
 	private int[] ids;
+
+	private static readonly EventSystem.IntraObjectHandler<Constructable> OnReachableChangedDelegate = new EventSystem.IntraObjectHandler<Constructable>(delegate(Constructable component, object data)
+	{
+		component.OnReachableChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Constructable> OnCancelDelegate = new EventSystem.IntraObjectHandler<Constructable>(delegate(Constructable component, object data)
+	{
+		component.OnCancel(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Constructable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Constructable>(delegate(Constructable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

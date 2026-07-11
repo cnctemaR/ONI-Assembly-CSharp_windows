@@ -185,7 +185,7 @@ public class UnstableGroundManager : KMonoBehaviour
 						if (scenePartitionerEntry.obj is KCollider2D)
 						{
 							GameObject gameObject2 = (scenePartitionerEntry.obj as KCollider2D).gameObject;
-							EventSystem.Trigger(gameObject2, -975551167, null);
+							gameObject2.Trigger(-975551167, null);
 						}
 					}
 					pooledList.Recycle();

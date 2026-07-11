@@ -121,13 +121,14 @@ public class RoomProber : ISim1000ms
 
 	private void RebuildDirtyCavities(ICollection<int> visited_cells)
 	{
+		int maxRoomSize = TuningData<RoomProber.Tuning>.Get().maxRoomSize;
 		foreach (int num in visited_cells)
 		{
 			HandleVector<int>.Handle handle = this.CellCavityID[num];
 			if (handle.IsValid())
 			{
 				CavityInfo data = this.cavityInfos.GetData(handle);
-				if (0 < data.numCells && data.numCells <= RoomProber.MaxRoomSize)
+				if (0 < data.numCells && data.numCells <= maxRoomSize)
 				{
 					GameObject gameObject = Grid.Objects[num, 1];
 					if (gameObject != null)
@@ -181,13 +182,14 @@ public class RoomProber : ISim1000ms
 
 	private void RefreshRooms()
 	{
+		int maxRoomSize = TuningData<RoomProber.Tuning>.Get().maxRoomSize;
 		foreach (CavityInfo cavityInfo in this.cavityInfos.GetDataList())
 		{
 			if (cavityInfo.dirty)
 			{
 				if (cavityInfo.numCells > 0)
 				{
-					if (cavityInfo.numCells <= RoomProber.MaxRoomSize)
+					if (cavityInfo.numCells <= maxRoomSize)
 					{
 						this.CreateRoom(cavityInfo);
 					}
@@ -285,8 +287,6 @@ public class RoomProber : ISim1000ms
 		return this.GetCavityInfo(handle);
 	}
 
-	public static int MaxRoomSize = 128;
-
 	public List<Room> rooms = new List<Room>();
 
 	private KCompactedVector<CavityInfo> cavityInfos = new KCompactedVector<CavityInfo>(1024);
@@ -304,6 +304,11 @@ public class RoomProber : ISim1000ms
 	private HashSet<HandleVector<int>.Handle> releasedIDs = new HashSet<HandleVector<int>.Handle>();
 
 	private RoomProber.CavityFloodFiller floodFiller;
+
+	public class Tuning : TuningData<RoomProber.Tuning>
+	{
+		public int maxRoomSize;
+	}
 
 	private class CavityFloodFiller
 	{

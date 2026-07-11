@@ -78,6 +78,10 @@ public class MeterController
 		component2.isMovable = true;
 		component2.FlipX = building_controller.FlipX;
 		component2.FlipY = building_controller.FlipY;
+		if (front_back == Meter.Offset.UserSpecified)
+		{
+			component2.sceneLayer = user_specified_render_layer;
+		}
 		this.meterController = component2;
 		KBatchedAnimTracker component3 = gameObject.GetComponent<KBatchedAnimTracker>();
 		component3.offset = tracker_offset;

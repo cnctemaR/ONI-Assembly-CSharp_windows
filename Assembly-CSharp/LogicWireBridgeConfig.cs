@@ -22,7 +22,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier_TINY, refined_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
-		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
+		buildingDef.SceneLayer = Grid.SceneLayer.LogicWireBridges;
 		buildingDef.Overheatable = false;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
@@ -67,7 +67,6 @@ public class LogicWireBridgeConfig : IBuildingConfig
 		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
 		logicUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
-		BuildingTemplates.DoPostConfigure(go);
 		GeneratedBuildings.RegisterLogicPorts(go, LogicWireBridgeConfig.INPUT_PORTS);
 	}
 

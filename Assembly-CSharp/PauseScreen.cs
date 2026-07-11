@@ -170,7 +170,6 @@ public class PauseScreen : KModalButtonMenu
 		LoadingOverlay.Load(delegate
 		{
 			this.Deactivate();
-			MusicManager.instance.StopDynamicMusic(false);
 			PauseScreen.TriggerQuitGame();
 		});
 	}

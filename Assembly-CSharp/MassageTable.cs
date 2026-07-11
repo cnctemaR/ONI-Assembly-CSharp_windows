@@ -26,7 +26,7 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe<MassageTable>(-905833192, MassageTable.OnCopySettingsDelegate);
 	}
 
 	private void OnCopySettings(object data)
@@ -163,6 +163,11 @@ public class MassageTable : RelaxationPoint, IEffectDescriptor, IActivationRange
 	private float activateValue = 50f;
 
 	private static readonly string[] EffectsRemoved = new string[] { "SoreBack" };
+
+	private static readonly EventSystem.IntraObjectHandler<MassageTable> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<MassageTable>(delegate(MassageTable component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private static readonly Chore.Precondition IsStressAboveActivationRange = new Chore.Precondition
 	{

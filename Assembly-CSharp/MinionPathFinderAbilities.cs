@@ -8,6 +8,7 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	{
 		this.accessControlNavMask = new AccessControlNavMask(navigator);
 		this.travelTubeNavMask = new TravelTubeNavMask(navigator);
+		this.jetPackNavMask = new JetPackNavMask(navigator);
 		this.navigationFeatureMask = new NavigationFeatureMask(navigator);
 		this.idleNavMask = default(IdleNavMask);
 	}
@@ -40,6 +41,10 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		{
 			return false;
 		}
+		if (!this.jetPackNavMask.IsTraversable(base.navigator, path, from_cell, from_nav_type, cost, transition_id))
+		{
+			return false;
+		}
 		if (!this.navigationFeatureMask.IsTraversable(base.navigator, path, from_cell, cost, transition_id, this))
 		{
 			return false;
@@ -48,7 +53,7 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		{
 			return false;
 		}
-		if (path.HasFlag(PathFinder.PotentialPath.Flags.HasSuit) || path.navType == NavType.Tube || underwater_cost <= this.maxUnderwaterCost)
+		if (path.HasFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit) || path.HasFlag(PathFinder.PotentialPath.Flags.HasJetPack) || path.navType == NavType.Tube || underwater_cost <= this.maxUnderwaterCost)
 		{
 			this.navigationFeatureMask.ApplyTraversalToPath(base.navigator, ref path, from_cell);
 			return true;
@@ -71,6 +76,8 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	private AccessControlNavMask accessControlNavMask;
 
 	private TravelTubeNavMask travelTubeNavMask;
+
+	private JetPackNavMask jetPackNavMask;
 
 	private NavigationFeatureMask navigationFeatureMask;
 

@@ -73,10 +73,10 @@ public class Tinkerable : Workable
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.faceTargetWhenWorking = true;
 		this.synchronizeAnims = false;
-		base.Subscribe(-1157678353, new Action<object>(this.OnEffectRemoved));
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
-		base.Subscribe(144050788, new Action<object>(this.OnUpdateRoom));
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<Tinkerable>(-1157678353, Tinkerable.OnEffectRemovedDelegate);
+		base.Subscribe<Tinkerable>(-1697596308, Tinkerable.OnStorageChangeDelegate);
+		base.Subscribe<Tinkerable>(144050788, Tinkerable.OnUpdateRoomDelegate);
+		base.Subscribe<Tinkerable>(-592767678, Tinkerable.OnOperationalChangedDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -232,6 +232,26 @@ public class Tinkerable : Workable
 	public HashedString choreTypeTinker = Db.Get().ChoreTypes.PowerTinker.IdHash;
 
 	public HashedString choreTypeFetch = Db.Get().ChoreTypes.PowerFetch.IdHash;
+
+	private static readonly EventSystem.IntraObjectHandler<Tinkerable> OnEffectRemovedDelegate = new EventSystem.IntraObjectHandler<Tinkerable>(delegate(Tinkerable component, object data)
+	{
+		component.OnEffectRemoved(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Tinkerable> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<Tinkerable>(delegate(Tinkerable component, object data)
+	{
+		component.OnStorageChange(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Tinkerable> OnUpdateRoomDelegate = new EventSystem.IntraObjectHandler<Tinkerable>(delegate(Tinkerable component, object data)
+	{
+		component.OnUpdateRoom(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Tinkerable> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Tinkerable>(delegate(Tinkerable component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 
 	private bool hasReservedMaterial;
 }

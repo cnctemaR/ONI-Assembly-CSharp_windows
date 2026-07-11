@@ -5,8 +5,8 @@ public class SuitDiseaseHandler : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-1617557748, new Action<object>(this.OnEquipped));
-		base.Subscribe(-170173755, new Action<object>(this.OnUnequipped));
+		base.Subscribe<SuitDiseaseHandler>(-1617557748, SuitDiseaseHandler.OnEquippedDelegate);
+		base.Subscribe<SuitDiseaseHandler>(-170173755, SuitDiseaseHandler.OnUnequippedDelegate);
 	}
 
 	private void OnEquipped(object data)
@@ -44,4 +44,14 @@ public class SuitDiseaseHandler : KMonoBehaviour
 	{
 		base.GetComponent<PrimaryElement>().AddDisease(disease_idx, delta, reason);
 	}
+
+	private static readonly EventSystem.IntraObjectHandler<SuitDiseaseHandler> OnEquippedDelegate = new EventSystem.IntraObjectHandler<SuitDiseaseHandler>(delegate(SuitDiseaseHandler component, object data)
+	{
+		component.OnEquipped(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<SuitDiseaseHandler> OnUnequippedDelegate = new EventSystem.IntraObjectHandler<SuitDiseaseHandler>(delegate(SuitDiseaseHandler component, object data)
+	{
+		component.OnUnequipped(data);
+	});
 }

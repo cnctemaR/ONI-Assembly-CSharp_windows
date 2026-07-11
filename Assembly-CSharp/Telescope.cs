@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
-public class Telescope : KMonoBehaviour, ISim1000ms, OxygenBreather.IGasProvider, IEffectDescriptor
+public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescriptor, ISim200ms
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		Game.Instance.Subscribe(929158128, new Action<object>(this.UpdateWorkingState));
+		Components.Telescopes.Add(this);
 		if (Telescope.reducedVisibilityStatusItem == null)
 		{
 			Telescope.reducedVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_REDUCED", "BUILDING", "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
@@ -15,14 +18,19 @@ public class Telescope : KMonoBehaviour, ISim1000ms, OxygenBreather.IGasProvider
 			Telescope.noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
 			Telescope.noVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
 		}
-		ResearchCenter component = base.GetComponent<ResearchCenter>();
-		ResearchCenter researchCenter = component;
-		researchCenter.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(researchCenter.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
-		ResearchCenter researchCenter2 = component;
-		researchCenter2.onCreateChore = (Action<Chore>)Delegate.Combine(researchCenter2.onCreateChore, new Action<Chore>(Telescope.OnCreateChore));
+		this.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
+		this.operational = base.GetComponent<Operational>();
+		this.storage = base.GetComponent<Storage>();
 	}
 
-	public void Sim1000ms(float dt)
+	protected override void OnCleanUp()
+	{
+		Components.Telescopes.Remove(this);
+		Game.Instance.Unsubscribe(929158128, new Action<object>(this.UpdateWorkingState));
+		base.OnCleanUp();
+	}
+
+	public void Sim200ms(float dt)
 	{
 		Building component = base.GetComponent<Building>();
 		Extents extents = component.GetExtents();
@@ -55,8 +63,11 @@ public class Telescope : KMonoBehaviour, ISim1000ms, OxygenBreather.IGasProvider
 			component3.ToggleStatusItem(Telescope.reducedVisibilityStatusItem, false, null);
 		}
 		this.percentClear = (float)num7 / (float)num4;
-		ResearchCenter component4 = base.GetComponent<ResearchCenter>();
-		component4.Effectiveness = this.percentClear;
+		if (!component2.IsActive && component2.IsOperational && this.chore == null)
+		{
+			this.chore = this.CreateChore();
+			base.SetWorkTime(float.PositiveInfinity);
+		}
 	}
 
 	private static string GetStatusItemString(string src_str, object data)
@@ -68,41 +79,89 @@ public class Telescope : KMonoBehaviour, ISim1000ms, OxygenBreather.IGasProvider
 
 	private void OnWorkableEvent(Workable.WorkableEvent ev)
 	{
-		ResearchCenter component = base.GetComponent<ResearchCenter>();
-		if (component == null || component.worker == null)
+		Worker worker = base.worker;
+		if (worker == null)
 		{
 			return;
 		}
-		OxygenBreather component2 = component.worker.GetComponent<OxygenBreather>();
+		OxygenBreather component = worker.GetComponent<OxygenBreather>();
 		if (ev != Workable.WorkableEvent.WorkStarted)
 		{
 			if (ev == Workable.WorkableEvent.WorkStopped)
 			{
-				component2.SetGasProvider(this.workerGasProvider);
-				component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
+				component.SetGasProvider(this.workerGasProvider);
+				component.GetComponent<CreatureSimTemperatureTransfer>().enabled = true;
+				base.ShowProgressBar(false);
 			}
 		}
 		else
 		{
-			this.workerGasProvider = component2.GetGasProvider();
-			component2.SetGasProvider(this);
-			component2.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
+			base.ShowProgressBar(true);
+			this.progressBar.SetUpdateFunc(delegate
+			{
+				if (SpacecraftManager.instance.HasAnalysisTarget())
+				{
+					return SpacecraftManager.instance.GetDestinationAnalysisScore(SpacecraftManager.instance.GetStarmapAnalysisDestinationID()) / (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE;
+				}
+				return 0f;
+			});
+			this.workerGasProvider = component.GetGasProvider();
+			component.SetGasProvider(this);
+			component.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
 		}
+	}
+
+	protected override bool OnWorkTick(Worker worker, float dt)
+	{
+		if (SpacecraftManager.instance.HasAnalysisTarget())
+		{
+			float num = 1f + Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
+			int starmapAnalysisDestinationID = SpacecraftManager.instance.GetStarmapAnalysisDestinationID();
+			SpaceDestination destination = SpacecraftManager.instance.GetDestination(starmapAnalysisDestinationID);
+			float num2 = 1f / (float)destination.OneBasedDistance;
+			float num3 = (float)ROCKETRY.DESTINATION_ANALYSIS.DISCOVERED;
+			float default_CYCLES_PER_DISCOVERY = ROCKETRY.DESTINATION_ANALYSIS.DEFAULT_CYCLES_PER_DISCOVERY;
+			float num4 = num3 / default_CYCLES_PER_DISCOVERY;
+			float num5 = num4 / 600f;
+			float num6 = dt * num * num2 * num5;
+			SpacecraftManager.instance.EarnDestinationAnalysisPoints(starmapAnalysisDestinationID, num6);
+		}
+		return base.OnWorkTick(worker, dt);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
-		Descriptor descriptor = default(Descriptor);
 		Element element = ElementLoader.FindElementByHash(SimHashes.Oxygen);
-		descriptor.SetupDescriptor(element.tag.ProperName(), string.Format(BUILDINGS.PREFABS.TELESCOPE.REQUIREMENT_TOOLTIP, element.tag.ProperName()), Descriptor.DescriptorType.Requirement);
+		Descriptor descriptor = default(Descriptor);
+		descriptor.SetupDescriptor(element.tag.ProperName(), string.Format(global::STRINGS.BUILDINGS.PREFABS.TELESCOPE.REQUIREMENT_TOOLTIP, element.tag.ProperName()), Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		return list;
 	}
 
-	public static void OnCreateChore(Chore chore)
+	protected Chore CreateChore()
 	{
-		chore.AddPrecondition(Telescope.ContainsOxygen, null);
+		ChoreType research = Db.Get().ChoreTypes.Research;
+		Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
+		WorkChore<Telescope> workChore = new WorkChore<Telescope>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
+		workChore.AddPrecondition(Telescope.ContainsOxygen, null);
+		return workChore;
+	}
+
+	protected void UpdateWorkingState(object data)
+	{
+		bool flag = false;
+		if (SpacecraftManager.instance.HasAnalysisTarget() && SpacecraftManager.instance.GetDestinationAnalysisState(SpacecraftManager.instance.GetDestination(SpacecraftManager.instance.GetStarmapAnalysisDestinationID())) != SpacecraftManager.DestinationAnalysisState.Complete)
+		{
+			flag = true;
+		}
+		KSelectable component = base.GetComponent<KSelectable>();
+		component.ToggleStatusItem(Db.Get().BuildingStatusItems.NoApplicableAnalysisSelected, !flag, null);
+		this.operational.SetFlag(this.flag, flag);
+		if (!flag && base.worker)
+		{
+			base.StopWork(base.worker, true);
+		}
 	}
 
 	public void OnSetOxygenBreather(OxygenBreather oxygen_breather)
@@ -139,6 +198,8 @@ public class Telescope : KMonoBehaviour, ISim1000ms, OxygenBreather.IGasProvider
 
 	private OxygenBreather.IGasProvider workerGasProvider;
 
+	private Operational operational;
+
 	private float percentClear;
 
 	private static readonly Operational.Flag visibleSkyFlag = new Operational.Flag("VisibleSky", Operational.Flag.Type.Requirement);
@@ -147,7 +208,6 @@ public class Telescope : KMonoBehaviour, ISim1000ms, OxygenBreather.IGasProvider
 
 	private static StatusItem noVisibilityStatusItem;
 
-	[MyCmpGet]
 	private Storage storage;
 
 	public static readonly Chore.Precondition ContainsOxygen = new Chore.Precondition
@@ -162,4 +222,8 @@ public class Telescope : KMonoBehaviour, ISim1000ms, OxygenBreather.IGasProvider
 			return primaryElement != null;
 		}
 	};
+
+	private Chore chore;
+
+	private Operational.Flag flag = new Operational.Flag("ValidTarget", Operational.Flag.Type.Requirement);
 }

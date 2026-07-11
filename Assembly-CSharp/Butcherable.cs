@@ -12,8 +12,8 @@ public class Butcherable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(1272413801, new Action<object>(this.SetReadyToButcher));
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Butcherable>(1272413801, Butcherable.SetReadyToButcherDelegate);
+		base.Subscribe<Butcherable>(493375141, Butcherable.OnRefreshUserMenuDelegate);
 		this.workTime = 3f;
 		this.multitoolContext = "harvest";
 		this.multitoolHitEffectTag = "fx_harvest_splash";
@@ -133,4 +133,14 @@ public class Butcherable : Workable, ISaveLoadable
 	public string[] Drops;
 
 	private Chore chore;
+
+	private static readonly EventSystem.IntraObjectHandler<Butcherable> SetReadyToButcherDelegate = new EventSystem.IntraObjectHandler<Butcherable>(delegate(Butcherable component, object data)
+	{
+		component.SetReadyToButcher(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Butcherable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Butcherable>(delegate(Butcherable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

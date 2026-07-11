@@ -188,6 +188,16 @@ namespace Klei.AI
 				diffusionScale = 1f,
 				minDiffusionInfestationTickCount = byte.MaxValue
 			};
+			infoArray[ElementLoader.GetElementIndex(SimHashes.Vacuum)] = new ElemGrowthInfo
+			{
+				underPopulationDeathRate = 0f,
+				populationHalfLife = 0f,
+				overPopulationHalfLife = 0f,
+				minCountPerKG = 0f,
+				maxCountPerKG = float.PositiveInfinity,
+				diffusionScale = 0f,
+				minDiffusionInfestationTickCount = byte.MaxValue
+			};
 		}
 
 		protected void InitializeElemExposureArray(ref ElemExposureInfo[] infoArray, ElemExposureInfo default_value)
@@ -524,7 +534,7 @@ namespace Klei.AI
 
 		public Attribute cureSpeedBase;
 
-		public static ElemGrowthInfo DEFAULT_GROWTH_INFO = new ElemGrowthInfo
+		public static readonly ElemGrowthInfo DEFAULT_GROWTH_INFO = new ElemGrowthInfo
 		{
 			underPopulationDeathRate = 0f,
 			populationHalfLife = float.PositiveInfinity,

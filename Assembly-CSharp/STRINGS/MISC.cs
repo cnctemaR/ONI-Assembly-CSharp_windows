@@ -152,6 +152,8 @@ namespace STRINGS
 
 			public static LocString TRANSPARENT = "Transparent";
 
+			public static LocString RAREMATERIALS = "Rare Material";
+
 			public static LocString FARMINGMATERIAL = "Fertilizer";
 
 			public static LocString COMMAND_MODULE = "Command Module";
@@ -369,6 +371,10 @@ namespace STRINGS
 				public static LocString NAME = "Buried Object";
 
 				public static LocString TOOLTIP = "Something seems to be hidden here";
+
+				public static LocString NOTIFICATION = "Buried object discovered";
+
+				public static LocString NOTIFICATION_TOOLTIP = "My Duplicants have uncovered a {Uncoverable}!\n\nClick to jump to its location.";
 			}
 
 			public class HEALTHSTATUS
@@ -503,7 +509,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "High Priority";
 
-				public static LocString TOOLTIP = "This errand has been mark as important and will be preferred over other pending tasks";
+				public static LocString TOOLTIP = "This errand has been mark as important and will be preferred over other pending errands";
 			}
 
 			public class USING
@@ -580,7 +586,7 @@ namespace STRINGS
 					UI.FormatAsLink("[WASD]", "CONTROLS"),
 					"</b></color> keys pan my view and the <color=#F44A47><b>",
 					UI.FormatAsLink("[MOUSE WHEEL]", "CONTROLS"),
-					"</b></color> zooms it in and out.\n\n• <color=#F44A47><b>[H]</b></color> returns me back to the Printing Pod at the asteroid's center.\n\n• I can speed or slow my perception of time using the top left corner buttons, or by pressing <color=#F44A47><b>[TAB]</b></color>. <color=#F44A47><b>[SPACE]</b></color> will pause the flow of time entirely.\n\n• I'll keep records of everything I discover in my personal DATABASE <color=#F44A47><b>[U]</b></color> to refer back to if I forget anything important."
+					"</b></color> zooms it in and out.\n\n• <color=#F44A47><b>[H]</b></color> returns my view to the Printing Pod.\n\n• I can speed or slow my perception of time using the top left corner buttons, or by pressing <color=#F44A47><b>[TAB]</b></color>. <color=#F44A47><b>[SPACE]</b></color> will pause the flow of time entirely.\n\n• I'll keep records of everything I discover in my personal DATABASE <color=#F44A47><b>[U]</b></color> to refer back to if I forget anything important."
 				});
 
 				public static LocString TOOLTIP = "Notes on using my HUD";
@@ -663,7 +669,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Duplicant Movement";
 
-				public static LocString MESSAGEBODY = "In order to perform the errands I set, Duplicants must first be able to reach them.\n\nWhen placing errands I should keep in mind that Duplicants can only climb two tiles high, and cannot fit into spaces smaller than two tiles.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <color=#F44A47><b>SHOW NAVIGATION</b></color> to view all areas currently within their reach.";
+				public static LocString MESSAGEBODY = "Duplicants can't work on the errands I set if they are unable to reach them.\n\nDuplicants can only climb two tiles high and cannot fit into spaces smaller that two tiles, which I should keep in mind while placing errands.\n\nTo check if an errand I've placed is accessible, I can select a Duplicant and click <color=#F44A47><b>SHOW NAVIGATION</b></color> to view all areas within their reach.";
 
 				public static LocString TOOLTIP = "Notes on my Duplicants' maneuverability";
 			}
@@ -692,12 +698,12 @@ namespace STRINGS
 				{
 					"In order to carry ",
 					UI.FormatAsLink("Liquids", "LIQUIDS"),
-					" from place to place, my Duplicants will need to be able to bottle them for transport.\n\nIf I build Pitcher Pumps from the ",
+					" from place to place, my Duplicants will first need to be able to bottle them for transport.\n\nIf I build Pitcher Pumps from the ",
 					UI.FormatAsLink("PLUMBING TAB", "MISC"),
-					" <color=#F44A47><b>[5]</b></color> over pools of liquid, my Duplicants will be able to bottle them up and deliver them wherever they need to go."
+					" <color=#F44A47><b>[5]</b></color> over pools of liquid, my Duplicants should be able to bottle them up and deliver them wherever they need to go."
 				});
 
-				public static LocString TOOLTIP = "Notes liquid resource gathering";
+				public static LocString TOOLTIP = "Notes on liquid resource gathering";
 			}
 
 			public class SCHEDULEMESSAGE
@@ -740,18 +746,22 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Germs and Disease";
 
-				public static LocString TOOLTIP = "Notes on the risks of Duplicant disease";
+				public static LocString TOOLTIP = "Notes on Duplicant disease risks";
 
 				public static LocString MESSAGEBODY = string.Concat(new string[]
 				{
 					UI.FormatAsLink("Germs", "DISEASE"),
-					" are an invisible peril that cause ",
+					" such as ",
+					UI.FormatAsLink("Food Poisoning", "FOODPOISONING"),
+					" and ",
+					UI.FormatAsLink("Slimelung", "SLIMELUNG"),
+					" can cause ",
 					UI.FormatAsLink("Disease", "DISEASE"),
-					" in my Duplicants. The ",
+					" in my Duplicants. I can use the ",
 					UI.FormatAsLink("GERM OVERLAY", "MISC"),
-					" <color=#F44A47><b>[F9]</b></color> allows me to view all germ concentrations in the colony and the sources that are spawning them.\n\nI can build Wash Basins in dirty areas from the ",
+					" <color=#F44A47><b>[F9]</b></color> to view all germ concentrations in my colony and even detect the sources spawning them.\n\nBuilding Wash Basins from the ",
 					UI.FormatAsLink("MEDICINE TAB", "MISC"),
-					" <color=#F44A47><b>[8]</b></color> to tell Duplicants to where to wash up. If I keep the base clean and the Duplicants hygienic, their ",
+					" <color=#F44A47><b>[8]</b></color> by colony toilets will tell my Duplicants they need to wash up.\n\nIf I keep my colony free of contaminated materials and encourage good Duplicant hygiene, their natural ",
 					UI.FormatAsLink("Immunity", "IMMUNE SYSTEM"),
 					" should handle the rest."
 				});
@@ -831,9 +841,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = "TIP: Duplicant Thermal Units";
 
-				public static LocString TOOLTIP = "How Duplicants measure heat energy.";
+				public static LocString TOOLTIP = "Notes on measuring heat energy";
 
-				public static LocString MESSAGEBODY = "For historical reasons, Duplicants measure heat energy using Duplicant Thermal Units or DTU.\n\n1 DTU = 1055.06 J";
+				public static LocString MESSAGEBODY = "My Duplicants measure heat energy in Duplicant Thermal Units or DTU.\n\n1 DTU = 1055.06 J";
 			}
 
 			public class NOMESSAGES
@@ -861,7 +871,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Research Complete";
 
-				public static LocString MESSAGEBODY = "Eureka! My Duplicants have discovered {0} Technology.\n\nNew buildings have become available to me:\n  • {1}";
+				public static LocString MESSAGEBODY = "Eureka! My Duplicants have discovered {0} Technology.\n\nNew buildings have become available:\n  • {1}";
 
 				public static LocString TOOLTIP = "{0} research complete!";
 			}
@@ -1144,8 +1154,6 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "These Duplicants' skills have improved:";
 
-				public static LocString TOOLTIP_PST = "\n\nTheir expectations have increased accordingly.";
-
 				public static LocString SUFFIX = " - {0} raised to {1}";
 			}
 
@@ -1311,7 +1319,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "ALERT - Surface Breach";
 
-				public static LocString TOOLTIP = "Amazing!\n\nMy Duplicants have managed to breach the surface of the asteroid.\n\nI should be careful; the region is extremely inhospitable and I could easily lose resources to the vaccuum of space.";
+				public static LocString TOOLTIP = "Amazing!\n\nMy Duplicants have managed to breach the surface of our rocky prison.\n\nI should be careful; the region is extremely inhospitable and I could easily lose resources to the vaccuum of space.";
 			}
 		}
 

@@ -92,7 +92,7 @@ namespace Klei.AI
 
 		private static string OnLevelUpTooltip(List<Notification> notifications, object data)
 		{
-			return MISC.NOTIFICATIONS.LEVELUP.TOOLTIP + notifications.ReduceMessages(false) + MISC.NOTIFICATIONS.LEVELUP.TOOLTIP_PST;
+			return MISC.NOTIFICATIONS.LEVELUP.TOOLTIP + notifications.ReduceMessages(false);
 		}
 
 		public float experience;

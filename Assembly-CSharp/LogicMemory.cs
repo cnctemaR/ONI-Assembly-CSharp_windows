@@ -12,7 +12,7 @@ public class LogicMemory : KMonoBehaviour
 			LogicMemory.infoStatusItem = new StatusItem("StoredValue", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 			LogicMemory.infoStatusItem.resolveStringCallback = new Func<string, object, string>(LogicMemory.ResolveInfoStatusItemString);
 		}
-		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
+		base.Subscribe<LogicMemory>(-801688580, LogicMemory.OnLogicValueChangedDelegate);
 	}
 
 	public void OnLogicValueChanged(object data)
@@ -67,4 +67,9 @@ public class LogicMemory : KMonoBehaviour
 	public static readonly HashedString SET_PORT_ID = new HashedString("LogicMemorySet");
 
 	public static readonly HashedString RESET_PORT_ID = new HashedString("LogicMemoryReset");
+
+	private static readonly EventSystem.IntraObjectHandler<LogicMemory> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<LogicMemory>(delegate(LogicMemory component, object data)
+	{
+		component.OnLogicValueChanged(data);
+	});
 }

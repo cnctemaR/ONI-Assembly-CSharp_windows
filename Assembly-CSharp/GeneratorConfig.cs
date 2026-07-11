@@ -70,12 +70,7 @@ public class GeneratorConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, GeneratorConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "Generator";

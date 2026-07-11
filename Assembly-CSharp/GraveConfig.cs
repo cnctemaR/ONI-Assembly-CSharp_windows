@@ -34,7 +34,7 @@ public class GraveConfig : IBuildingConfig
 		storage.SetDefaultStoredItemModifiers(GraveConfig.StorageModifiers);
 		storage.overrideAnims = GraveConfig.STORAGE_OVERRIDE_ANIM_FILES;
 		storage.workAnims = GraveConfig.STORAGE_WORK_ANIMS;
-		storage.workPstAnim = GraveConfig.STORAGE_PST_ANIM;
+		storage.workingPstComplete = GraveConfig.STORAGE_PST_ANIM;
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
 		storage.workAnimPlayMode = KAnim.PlayMode.Once;
@@ -44,7 +44,6 @@ public class GraveConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "Grave";

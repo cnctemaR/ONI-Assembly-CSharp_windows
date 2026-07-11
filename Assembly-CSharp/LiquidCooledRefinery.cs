@@ -8,7 +8,7 @@ public class LiquidCooledRefinery : Refinery
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<LiquidCooledRefinery>(-1697596308, LiquidCooledRefinery.OnStorageChangeDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -114,6 +114,11 @@ public class LiquidCooledRefinery : Refinery
 	private MeterController meter_metal;
 
 	private LiquidCooledRefinery.StatesInstance smi;
+
+	private static readonly EventSystem.IntraObjectHandler<LiquidCooledRefinery> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<LiquidCooledRefinery>(delegate(LiquidCooledRefinery component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 
 	public class StatesInstance : GameStateMachine<LiquidCooledRefinery.States, LiquidCooledRefinery.StatesInstance, LiquidCooledRefinery, object>.GameInstance
 	{

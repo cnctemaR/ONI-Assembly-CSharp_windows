@@ -247,7 +247,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	{
 		if (base.gameObject != null)
 		{
-			EventSystem.Trigger(base.gameObject, -801688580, new LogicValueChanged
+			base.gameObject.Trigger(-801688580, new LogicValueChanged
 			{
 				portID = port_id,
 				newValue = new_value
@@ -322,6 +322,14 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 			}
 		}
 		return 0;
+	}
+
+	public bool IsPortConnected(HashedString port_id)
+	{
+		int portCell = this.GetPortCell(port_id);
+		LogicCircuitManager logicCircuitManager = Game.Instance.logicCircuitManager;
+		LogicCircuitNetwork networkForCell = logicCircuitManager.GetNetworkForCell(portCell);
+		return networkForCell != null;
 	}
 
 	private void OnOverlayChanged(SimViewMode mode)

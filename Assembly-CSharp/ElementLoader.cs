@@ -1,23 +1,296 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using ProcGenGame;
 using UnityEngine;
 
 public class ElementLoader
 {
-	public static void Load(ref Hashtable substanceList, ElementLoader.SolidEntry[] solid_entries, ElementLoader.LiquidEntry[] liquid_entries, ElementLoader.GasEntry[] gas_entries, SubstanceTable substanceTable)
+	public static void Load(ref Hashtable substanceList, string elementsFileContent, SubstanceTable substanceTable)
 	{
 		ElementLoader.SetupElementsTable();
-		ElementLoader.ParseCommon(solid_entries, ref substanceList, substanceTable, TagManager.Create("Solid"), Element.State.Solid);
-		ElementLoader.ParseSolid(solid_entries);
-		ElementLoader.ParseCommon(liquid_entries, ref substanceList, substanceTable, TagManager.Create("Liquid"), Element.State.Liquid);
-		ElementLoader.ParseLiquid(liquid_entries);
-		ElementLoader.ParseCommon(gas_entries, ref substanceList, substanceTable, TagManager.Create("Gas"), Element.State.Gas);
-		ElementLoader.ParseGas(gas_entries);
+		ElementLoader.ElementEntry[] array = JsonConvert.DeserializeObject<ElementLoader.ElementEntry[]>(elementsFileContent);
+		foreach (ElementLoader.ElementEntry elementEntry in array)
+		{
+			int num = Hash.SDBMLower(elementEntry.elementId);
+			Element element = ElementLoader.FindElementByHash((SimHashes)num);
+			element.name = Strings.Get(elementEntry.localizationID);
+			element.nameUpperCase = element.name.ToUpper();
+			element.tag = TagManager.Create(element.id.ToString(), element.name);
+			ElementLoader.Copy(elementEntry, element);
+		}
+		ElementLoader.LoadUserElementData();
+		foreach (Element element2 in ElementLoader.elements)
+		{
+			if (!ElementLoader.SetOrCreateSubstanceForElement(element2.id, ref substanceList, substanceTable))
+			{
+				global::Debug.LogWarning("Missing substance for element: " + element2.id.ToString(), null);
+			}
+		}
 		ElementLoader.FinaliseElementsTable(ref substanceList, substanceTable);
 		WorldGen.SetupDefaultElements();
+	}
+
+	private static void LoadUserElementData()
+	{
+		string text = Path.Combine(Application.dataPath, "elements.json");
+		if (Global.Instance == null || Global.Instance.layeredFileSystem == null)
+		{
+			return;
+		}
+		if (!Global.Instance.layeredFileSystem.Exists(text))
+		{
+			return;
+		}
+		string text2 = Global.Instance.layeredFileSystem.ReadText(text);
+		ElementLoader.ElementEntry[] array = JsonConvert.DeserializeObject<ElementLoader.ElementEntry[]>(text2);
+		ElementLoader.ElementEntry elementEntry = new ElementLoader.ElementEntry();
+		foreach (ElementLoader.ElementEntry elementEntry2 in array)
+		{
+			int num = Hash.SDBMLower(elementEntry2.elementId);
+			Element element = ElementLoader.FindElementByHash((SimHashes)num);
+			if (element == null)
+			{
+				element = new Element();
+				element.id = (SimHashes)num;
+				element.name = Strings.Get(elementEntry2.localizationID);
+				element.nameUpperCase = element.name.ToUpper();
+				element.tag = TagManager.Create(element.id.ToString(), element.name);
+				ElementLoader.elements.Add(element);
+				ElementLoader.elementTable[(int)element.id] = element;
+			}
+			if (elementEntry2.specificHeatCapacity != elementEntry.specificHeatCapacity)
+			{
+				element.specificHeatCapacity = elementEntry2.specificHeatCapacity;
+			}
+			if (elementEntry2.thermalConductivity != elementEntry.thermalConductivity)
+			{
+				element.thermalConductivity = elementEntry2.thermalConductivity;
+			}
+			if (elementEntry2.molarMass != elementEntry.molarMass)
+			{
+				element.molarMass = elementEntry2.molarMass;
+			}
+			if (elementEntry2.strength != elementEntry.strength)
+			{
+				element.strength = elementEntry2.strength;
+			}
+			if (elementEntry2.flow != elementEntry.flow)
+			{
+				element.flow = elementEntry2.flow;
+			}
+			if (elementEntry2.maxMass != elementEntry.maxMass)
+			{
+				element.maxMass = elementEntry2.maxMass;
+			}
+			if (elementEntry2.liquidCompression != elementEntry.liquidCompression)
+			{
+				element.maxCompression = elementEntry2.liquidCompression;
+			}
+			if (elementEntry2.speed != elementEntry.speed)
+			{
+				element.viscosity = elementEntry2.speed;
+			}
+			if (elementEntry2.minHorizontalFlow != elementEntry.minHorizontalFlow)
+			{
+				element.minHorizontalFlow = elementEntry2.minHorizontalFlow;
+			}
+			if (elementEntry2.minVerticalFlow != elementEntry.minVerticalFlow)
+			{
+				element.minVerticalFlow = elementEntry2.minVerticalFlow;
+			}
+			if (elementEntry2.maxMass != elementEntry.maxMass)
+			{
+				element.maxMass = elementEntry2.maxMass;
+			}
+			if (elementEntry2.solidSurfaceAreaMultiplier != elementEntry.solidSurfaceAreaMultiplier)
+			{
+				element.solidSurfaceAreaMultiplier = elementEntry2.solidSurfaceAreaMultiplier;
+			}
+			if (elementEntry2.liquidSurfaceAreaMultiplier != elementEntry.liquidSurfaceAreaMultiplier)
+			{
+				element.liquidSurfaceAreaMultiplier = elementEntry2.liquidSurfaceAreaMultiplier;
+			}
+			if (elementEntry2.gasSurfaceAreaMultiplier != elementEntry.gasSurfaceAreaMultiplier)
+			{
+				element.gasSurfaceAreaMultiplier = elementEntry2.gasSurfaceAreaMultiplier;
+			}
+			if (elementEntry2.state != elementEntry.state)
+			{
+				element.state = elementEntry2.state;
+			}
+			if (elementEntry2.hardness != elementEntry.hardness)
+			{
+				element.hardness = elementEntry2.hardness;
+			}
+			if (elementEntry2.lowTemp != elementEntry.lowTemp)
+			{
+				element.lowTemp = elementEntry2.lowTemp;
+			}
+			if (elementEntry2.lowTempTransitionTarget != elementEntry.lowTempTransitionTarget)
+			{
+				element.lowTempTransitionTarget = (SimHashes)Hash.SDBMLower(elementEntry2.lowTempTransitionTarget);
+			}
+			if (elementEntry2.highTemp != elementEntry.highTemp)
+			{
+				element.highTemp = elementEntry2.highTemp;
+			}
+			if (elementEntry2.highTempTransitionTarget != elementEntry.highTempTransitionTarget)
+			{
+				element.highTempTransitionTarget = (SimHashes)Hash.SDBMLower(elementEntry2.highTempTransitionTarget);
+			}
+			if (elementEntry2.highTempTransitionOreId != elementEntry.highTempTransitionOreId)
+			{
+				element.highTempTransitionOreID = (SimHashes)Hash.SDBMLower(elementEntry2.highTempTransitionOreId);
+			}
+			if (elementEntry2.highTempTransitionOreMassConversion != elementEntry.highTempTransitionOreMassConversion)
+			{
+				element.highTempTransitionOreMassConversion = elementEntry2.highTempTransitionOreMassConversion;
+			}
+			if (elementEntry2.lowTempTransitionOreId != elementEntry.lowTempTransitionOreId)
+			{
+				element.lowTempTransitionOreID = (SimHashes)Hash.SDBMLower(elementEntry2.lowTempTransitionOreId);
+			}
+			if (elementEntry2.lowTempTransitionOreMassConversion != elementEntry.lowTempTransitionOreMassConversion)
+			{
+				element.lowTempTransitionOreMassConversion = elementEntry2.lowTempTransitionOreMassConversion;
+			}
+			if (elementEntry2.sublimateId != elementEntry.sublimateId)
+			{
+				element.sublimateId = (SimHashes)Hash.SDBMLower(elementEntry2.sublimateId);
+			}
+			if (elementEntry2.convertId != elementEntry.convertId)
+			{
+				element.convertId = (SimHashes)Hash.SDBMLower(elementEntry2.convertId);
+			}
+			if (elementEntry2.sublimateFx != elementEntry.sublimateFx)
+			{
+				element.sublimateFX = (SpawnFXHashes)Hash.SDBMLower(elementEntry2.sublimateFx);
+			}
+			if (elementEntry2.lightAbsorptionFactor != elementEntry.lightAbsorptionFactor)
+			{
+				element.lightAbsorptionFactor = elementEntry2.lightAbsorptionFactor;
+			}
+			Sim.PhysicsData defaultValues = element.defaultValues;
+			if (elementEntry2.defaultTemperature != elementEntry.defaultTemperature)
+			{
+				defaultValues.temperature = elementEntry2.defaultTemperature;
+			}
+			if (elementEntry2.defaultMass != elementEntry.defaultMass)
+			{
+				defaultValues.mass = elementEntry2.defaultMass;
+			}
+			if (elementEntry2.defaultPressure != elementEntry.defaultPressure)
+			{
+				defaultValues.pressure = elementEntry2.defaultPressure;
+			}
+			element.defaultValues = defaultValues;
+			if (elementEntry2.toxicity != elementEntry.toxicity)
+			{
+				element.toxicity = elementEntry2.toxicity;
+			}
+			Tag tag = TagManager.Create(elementEntry2.state.ToString());
+			if (elementEntry2.materialCategory != elementEntry.materialCategory)
+			{
+				element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element.id, tag, elementEntry2.materialCategory);
+			}
+			if (elementEntry2.tags != elementEntry.tags)
+			{
+				element.oreTags = ElementLoader.CreateOreTags(element.materialCategory, tag, elementEntry2.tags);
+			}
+			if (elementEntry2.buildMenuSort != elementEntry.buildMenuSort)
+			{
+				element.buildMenuSort = elementEntry2.buildMenuSort;
+			}
+			Element.State state = elementEntry2.state;
+			if (state != Element.State.Solid)
+			{
+				if (state != Element.State.Liquid)
+				{
+					if (state == Element.State.Gas)
+					{
+						GameTags.GasElements.Add(element.tag);
+					}
+				}
+				else
+				{
+					GameTags.LiquidElements.Add(element.tag);
+				}
+			}
+			else
+			{
+				GameTags.SolidElements.Add(element.tag);
+			}
+		}
+	}
+
+	private static void Copy(ElementLoader.ElementEntry entry, Element elem)
+	{
+		int num = Hash.SDBMLower(entry.elementId);
+		elem.tag = TagManager.Create(entry.elementId.ToString());
+		elem.specificHeatCapacity = entry.specificHeatCapacity;
+		elem.thermalConductivity = entry.thermalConductivity;
+		elem.molarMass = entry.molarMass;
+		elem.strength = entry.strength;
+		elem.flow = entry.flow;
+		elem.maxMass = entry.maxMass;
+		elem.maxCompression = entry.liquidCompression;
+		elem.viscosity = entry.speed;
+		elem.minHorizontalFlow = entry.minHorizontalFlow;
+		elem.minVerticalFlow = entry.minVerticalFlow;
+		elem.maxMass = entry.maxMass;
+		elem.solidSurfaceAreaMultiplier = entry.solidSurfaceAreaMultiplier;
+		elem.liquidSurfaceAreaMultiplier = entry.liquidSurfaceAreaMultiplier;
+		elem.gasSurfaceAreaMultiplier = entry.gasSurfaceAreaMultiplier;
+		elem.state = entry.state;
+		elem.hardness = entry.hardness;
+		elem.lowTemp = entry.lowTemp;
+		elem.lowTempTransitionTarget = (SimHashes)Hash.SDBMLower(entry.lowTempTransitionTarget);
+		elem.highTemp = entry.highTemp;
+		elem.highTempTransitionTarget = (SimHashes)Hash.SDBMLower(entry.highTempTransitionTarget);
+		elem.highTempTransitionOreID = (SimHashes)Hash.SDBMLower(entry.highTempTransitionOreId);
+		elem.highTempTransitionOreMassConversion = entry.highTempTransitionOreMassConversion;
+		elem.lowTempTransitionOreID = (SimHashes)Hash.SDBMLower(entry.lowTempTransitionOreId);
+		elem.lowTempTransitionOreMassConversion = entry.lowTempTransitionOreMassConversion;
+		elem.sublimateId = (SimHashes)Hash.SDBMLower(entry.sublimateId);
+		elem.convertId = (SimHashes)Hash.SDBMLower(entry.convertId);
+		elem.sublimateFX = (SpawnFXHashes)Hash.SDBMLower(entry.sublimateFx);
+		elem.lightAbsorptionFactor = entry.lightAbsorptionFactor;
+		elem.toxicity = entry.toxicity;
+		Tag tag = TagManager.Create(entry.state.ToString());
+		elem.materialCategory = ElementLoader.CreateMaterialCategoryTag(elem.id, tag, entry.materialCategory);
+		elem.oreTags = ElementLoader.CreateOreTags(elem.materialCategory, tag, entry.tags);
+		elem.buildMenuSort = entry.buildMenuSort;
+		Sim.PhysicsData physicsData = default(Sim.PhysicsData);
+		physicsData.temperature = entry.defaultTemperature;
+		physicsData.mass = entry.defaultMass;
+		physicsData.pressure = entry.defaultPressure;
+		Element.State state = entry.state;
+		if (state != Element.State.Solid)
+		{
+			if (state != Element.State.Liquid)
+			{
+				if (state == Element.State.Gas)
+				{
+					GameTags.GasElements.Add(elem.tag);
+					physicsData.mass = 1f;
+					elem.maxMass = 1.8f;
+				}
+			}
+			else
+			{
+				GameTags.LiquidElements.Add(elem.tag);
+			}
+		}
+		else
+		{
+			GameTags.SolidElements.Add(elem.tag);
+		}
+		elem.defaultValues = physicsData;
 	}
 
 	private static bool SetOrCreateSubstanceForElement(SimHashes key, ref Hashtable substanceList, SubstanceTable substanceTable)
@@ -147,8 +420,6 @@ public class ElementLoader
 		{
 			Element element = new Element();
 			element.id = simHashes;
-			element.name = Strings.Get("STRINGS.ELEMENTS." + simHashes.ToString().ToUpper() + ".NAME");
-			element.nameUpperCase = element.name.ToUpper();
 			ElementLoader.elements.Add(element);
 			ElementLoader.elementTable[(int)element.id] = element;
 		}
@@ -216,27 +487,26 @@ public class ElementLoader
 		return (SpawnFXHashes)obj;
 	}
 
-	private static Tag CreateMaterialCategoryTag(Element element, Tag phaseTag, string materialCategoryField)
+	private static Tag CreateMaterialCategoryTag(SimHashes element_id, Tag phaseTag, string materialCategoryField)
 	{
 		if (!string.IsNullOrEmpty(materialCategoryField))
 		{
 			Tag tag = TagManager.Create(materialCategoryField);
 			if (!GameTags.MaterialCategories.Contains(tag) && !GameTags.IgnoredMaterialCategories.Contains(tag))
 			{
-				global::Debug.LogWarningFormat("Element {0} has category {1}, but that isn't in GameTags.MaterialCategores!", new object[] { element.id, materialCategoryField });
+				global::Debug.LogWarningFormat("Element {0} has category {1}, but that isn't in GameTags.MaterialCategores!", new object[] { element_id, materialCategoryField });
 			}
 			return tag;
 		}
 		return phaseTag;
 	}
 
-	private static Tag[] CreateOreTags(Element element, Tag phaseTag, string tagsField)
+	private static Tag[] CreateOreTags(Tag materialCategory, Tag phaseTag, string[] ore_tags_split)
 	{
 		List<Tag> list = new List<Tag>();
-		if (!string.IsNullOrEmpty(tagsField))
+		if (ore_tags_split != null)
 		{
-			string[] array = tagsField.Split(ElementLoader.listSeparators);
-			foreach (string text in array)
+			foreach (string text in ore_tags_split)
 			{
 				if (!string.IsNullOrEmpty(text))
 				{
@@ -245,126 +515,11 @@ public class ElementLoader
 			}
 		}
 		list.Add(phaseTag);
-		if (element.materialCategory.IsValid && !list.Contains(element.materialCategory))
+		if (materialCategory.IsValid && !list.Contains(materialCategory))
 		{
-			list.Add(element.materialCategory);
+			list.Add(materialCategory);
 		}
 		return list.ToArray();
-	}
-
-	private static void ParseCommon(ElementLoader.ElementEntry[] entries, ref Hashtable substance_list, SubstanceTable substance_table, Tag phase_tag, Element.State state)
-	{
-		foreach (ElementLoader.ElementEntry elementEntry in entries)
-		{
-			ElementLoader.ParseCommon(elementEntry, ref substance_list, substance_table, phase_tag, state);
-		}
-	}
-
-	private static void ParseCommon(ElementLoader.ElementEntry entry, ref Hashtable substance_list, SubstanceTable substance_table, Tag phase_tag, Element.State state)
-	{
-		Element element = ElementLoader.FindElementByHash(entry.elementId);
-		element.tag = TagManager.Create(element.id.ToString(), element.name);
-		element.defaultValues = new Sim.PhysicsData
-		{
-			temperature = entry.defaultTemperature,
-			mass = entry.defaultMass,
-			pressure = entry.defaultPressure
-		};
-		element.state = state;
-		if (element.id == SimHashes.Void || element.id == SimHashes.Vacuum)
-		{
-			element.state = Element.State.Vacuum;
-		}
-		element.molarMass = entry.molarMass;
-		element.specificHeatCapacity = entry.specificHeatCapacity;
-		element.thermalConductivity = entry.thermalConductivity;
-		element.solidSurfaceAreaMultiplier = entry.solidSurfaceAreaMultiplier;
-		element.liquidSurfaceAreaMultiplier = entry.liquidSurfaceAreaMultiplier;
-		element.gasSurfaceAreaMultiplier = entry.gasSurfaceAreaMultiplier;
-		element.lightAbsorptionFactor = entry.lightAbsorptionFactor;
-		element.lowTempTransitionTarget = entry.lowTempTransitionTarget;
-		element.lowTemp = entry.lowTemp;
-		element.highTempTransitionTarget = entry.highTempTransitionTarget;
-		element.highTemp = entry.highTemp;
-		element.sublimateId = entry.sublimateId;
-		element.sublimateFX = entry.sublimateFx;
-		element.materialCategory = ElementLoader.CreateMaterialCategoryTag(element, phase_tag, entry.materialCategory);
-		element.oreTags = ElementLoader.CreateOreTags(element, phase_tag, entry.tags);
-		element.disabled = entry.isDisabled;
-		if (substance_table != null && !ElementLoader.SetOrCreateSubstanceForElement(element.id, ref substance_list, substance_table))
-		{
-			global::Debug.LogWarning("Missing substance for element: " + element.id.ToString(), null);
-		}
-	}
-
-	private static void ParseSolid(ElementLoader.SolidEntry entry)
-	{
-		Element element = ElementLoader.FindElementByHash(entry.elementId);
-		element.strength = entry.strength;
-		element.maxMass = entry.maxMass;
-		element.hardness = entry.hardness;
-		GameTags.SolidElements.Add(element.tag);
-	}
-
-	private static void ParseSolid(ElementLoader.SolidEntry[] solid_entries)
-	{
-		foreach (ElementLoader.SolidEntry solidEntry in solid_entries)
-		{
-			ElementLoader.ParseSolid(solidEntry);
-		}
-	}
-
-	private static void ParseLiquid(ElementLoader.LiquidEntry entry)
-	{
-		Element element = ElementLoader.FindElementByHash(entry.elementId);
-		element.maxMass = entry.maxMassForLiquidUnderCompression;
-		element.maxCompression = entry.maxMassForLiquidUnderCompression;
-		element.viscosity = entry.speed;
-		element.minHorizontalLiquidFlow = entry.minHorizontalLiquidFlow;
-		element.minVerticalLiquidFlow = entry.minVerticalLiquidFlow;
-		element.toxicity = entry.toxicity;
-		element.convertId = entry.convertId;
-		element.highTempTransitionOreID = SimHashes.Vacuum;
-		element.highTempTransitionOreMassConversion = 0f;
-		if (entry.highTempTransitionOreId != (SimHashes)0)
-		{
-			element.highTempTransitionOreID = entry.highTempTransitionOreId;
-			element.highTempTransitionOreMassConversion = entry.highTempTransitionOreMassConversion;
-		}
-		GameTags.LiquidElements.Add(element.tag);
-	}
-
-	private static void ParseLiquid(ElementLoader.LiquidEntry[] liquid_entries)
-	{
-		foreach (ElementLoader.LiquidEntry liquidEntry in liquid_entries)
-		{
-			ElementLoader.ParseLiquid(liquidEntry);
-		}
-	}
-
-	private static void ParseGas(ElementLoader.GasEntry[] gas_entries)
-	{
-		foreach (ElementLoader.GasEntry gasEntry in gas_entries)
-		{
-			ElementLoader.ParseGas(gasEntry);
-		}
-	}
-
-	private static void ParseGas(ElementLoader.GasEntry entry)
-	{
-		Element element = ElementLoader.FindElementByHash(entry.elementId);
-		element.defaultValues.mass = 1f;
-		element.flow = entry.flow;
-		element.toxicity = entry.toxicity;
-		element.maxMass = 1.8f;
-		element.lowTempTransitionOreID = SimHashes.Vacuum;
-		element.lowTempTransitionOreMassConversion = 0f;
-		if (entry.lowTempTransitionOreId != (SimHashes)0)
-		{
-			element.lowTempTransitionOreID = entry.lowTempTransitionOreId;
-			element.lowTempTransitionOreMassConversion = entry.lowTempTransitionOreMassConversion;
-		}
-		GameTags.GasElements.Add(element.tag);
 	}
 
 	private static void FinaliseElementsTable(ref Hashtable substanceList, SubstanceTable substanceTable)
@@ -446,15 +601,13 @@ public class ElementLoader
 
 	private static readonly Color noColour = new Color(0f, 0f, 0f, 0f);
 
-	private static readonly char[] listSeparators = new char[] { ',', ' ', '|' };
-
 	private static SimHashes getElementIndexHash;
 
 	private static Predicate<Element> getElementIndexCallback = (Element e) => ElementLoader.getElementIndexHash == e.id;
 
 	public class ElementEntry : Resource
 	{
-		public SimHashes elementId;
+		public string elementId;
 
 		public float specificHeatCapacity;
 
@@ -476,39 +629,37 @@ public class ElementLoader
 
 		public float lightAbsorptionFactor;
 
-		public SimHashes lowTempTransitionTarget = SimHashes.Unobtanium;
+		public string lowTempTransitionTarget;
 
 		public float lowTemp;
 
-		public SimHashes highTempTransitionTarget = SimHashes.Unobtanium;
+		public string highTempTransitionTarget;
 
 		public float highTemp = 10000f;
 
-		public SimHashes sublimateId;
+		public string lowTempTransitionOreId;
 
-		public SpawnFXHashes sublimateFx;
+		public float lowTempTransitionOreMassConversion;
+
+		public string highTempTransitionOreId;
+
+		public float highTempTransitionOreMassConversion;
+
+		public string sublimateId;
+
+		public string sublimateFx;
 
 		public string materialCategory;
 
-		public string tags;
+		public string[] tags;
 
 		public bool isDisabled;
 
-		public string notes;
-	}
-
-	public class SolidEntry : ElementLoader.ElementEntry
-	{
 		public float strength;
 
 		public float maxMass;
 
 		public byte hardness;
-	}
-
-	public class LiquidEntry : ElementLoader.ElementEntry
-	{
-		public float maxMassForLiquidUnderCompression;
 
 		public float toxicity;
 
@@ -516,25 +667,19 @@ public class ElementLoader
 
 		public float speed;
 
-		public float minHorizontalLiquidFlow;
+		public float minHorizontalFlow;
 
-		public float minVerticalLiquidFlow;
+		public float minVerticalFlow;
 
-		public SimHashes convertId;
+		public string convertId;
 
-		public SimHashes highTempTransitionOreId;
-
-		public float highTempTransitionOreMassConversion;
-	}
-
-	public class GasEntry : ElementLoader.ElementEntry
-	{
 		public float flow;
 
-		public float toxicity;
+		public int buildMenuSort;
 
-		public SimHashes lowTempTransitionOreId;
+		[JsonConverter(typeof(StringEnumConverter))]
+		public Element.State state;
 
-		public float lowTempTransitionOreMassConversion;
+		public string localizationID;
 	}
 }

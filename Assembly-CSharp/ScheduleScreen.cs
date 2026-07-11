@@ -65,7 +65,7 @@ public class ScheduleScreen : KScreen
 
 	private void OnAddScheduleClick()
 	{
-		ScheduleManager.Instance.AddSchedule(Db.Get().ScheduleGroups.allGroups, null);
+		ScheduleManager.Instance.AddSchedule(Db.Get().ScheduleGroups.allGroups, null, false);
 	}
 
 	private void OnPaintButtonClick(SchedulePaintButton clicked)

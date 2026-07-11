@@ -14,6 +14,9 @@ namespace UnityEngine.Experimental.Rendering
 			this.m_OffsetUnits = offsetUnits;
 			this.m_OffsetFactor = offsetFactor;
 			this.m_DepthClip = Convert.ToByte(depthClip);
+			this.m_Padding1 = 0;
+			this.m_Padding2 = 0;
+			this.m_Padding3 = 0;
 		}
 
 		/// <summary>
@@ -88,5 +91,11 @@ namespace UnityEngine.Experimental.Rendering
 		private float m_OffsetFactor;
 
 		private byte m_DepthClip;
+
+		private byte m_Padding1;
+
+		private byte m_Padding2;
+
+		private byte m_Padding3;
 	}
 }

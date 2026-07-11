@@ -87,7 +87,7 @@ public class BaseUtilityBuildTool : DragTool
 				this.CheckForConnection(cell, "Pipe", string.Empty, ref this.previousCellConnection, false);
 			}
 			global::UnityEngine.Object.Destroy(this.path[this.path.Count - 1].visualizer);
-			TileVisualizer.RefreshCell(this.path[this.path.Count - 1].cell, this.def.TileLayer);
+			TileVisualizer.RefreshCell(this.path[this.path.Count - 1].cell, this.def.TileLayer, this.def.ReplacementLayer);
 			this.path.RemoveAt(this.path.Count - 1);
 			this.buildingCount = ((this.buildingCount != 1) ? (this.buildingCount - 1) : (this.buildingCount = 14));
 			eventInstance.setParameterValue("tileCount", (float)this.buildingCount);
@@ -306,7 +306,7 @@ public class BaseUtilityBuildTool : DragTool
 				}
 				string text2;
 				component.TintColour = ((!this.def.IsValidBuildLocation(null, pathNode2.cell, Orientation.Neutral, out text2)) ? Color.red : Color.white);
-				TileVisualizer.RefreshCell(pathNode2.cell, this.def.TileLayer);
+				TileVisualizer.RefreshCell(pathNode2.cell, this.def.TileLayer, this.def.ReplacementLayer);
 			}
 			this.conduitMgr.UnstashVisualGrids();
 			yield return null;
@@ -420,7 +420,7 @@ public class BaseUtilityBuildTool : DragTool
 					component7.Connections = utilityConnections;
 				}
 			}
-			TileVisualizer.RefreshCell(pathNode.cell, this.def.TileLayer);
+			TileVisualizer.RefreshCell(pathNode.cell, this.def.TileLayer, this.def.ReplacementLayer);
 		}
 		ResourceRemainingDisplayScreen.instance.SetNumberOfPendingConstructions(0);
 	}

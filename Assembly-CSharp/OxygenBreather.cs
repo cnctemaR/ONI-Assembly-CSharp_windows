@@ -24,8 +24,8 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe<OxygenBreather>(1623392196, OxygenBreather.OnDeathDelegate);
+		base.Subscribe<OxygenBreather>(-1117766961, OxygenBreather.OnRevivedDelegate);
 	}
 
 	public bool IsLowOxygen()
@@ -42,7 +42,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		component.AddStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, this);
 		component.AddStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, this);
 		this.temperature = Db.Get().Amounts.Temperature.Lookup(this);
-		NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this);
+		NameDisplayScreen.Instance.RegisterComponent(base.gameObject, this, false);
 	}
 
 	protected override void OnCleanUp()
@@ -257,6 +257,16 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 	public Action<Sim.MassConsumedCallback> onSimConsume;
 
 	private OxygenBreather.IGasProvider gasProvider;
+
+	private static readonly EventSystem.IntraObjectHandler<OxygenBreather> OnDeathDelegate = new EventSystem.IntraObjectHandler<OxygenBreather>(delegate(OxygenBreather component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<OxygenBreather> OnRevivedDelegate = new EventSystem.IntraObjectHandler<OxygenBreather>(delegate(OxygenBreather component, object data)
+	{
+		component.OnRevived(data);
+	});
 
 	public interface IGasProvider
 	{

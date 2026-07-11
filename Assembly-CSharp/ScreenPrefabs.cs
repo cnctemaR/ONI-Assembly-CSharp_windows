@@ -68,6 +68,8 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public ScenariosMenu scenariosMenu;
 
+	public ModsScreen modsMenu;
+
 	public GameObject GameOverScreen;
 
 	public GameObject StatusItemIndicatorScreen;

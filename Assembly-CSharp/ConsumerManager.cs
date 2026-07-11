@@ -37,9 +37,9 @@ public class ConsumerManager : KMonoBehaviour, ISaveLoadable
 		return !this.undiscoveredConsumableTags.Contains(id);
 	}
 
-	private void OnWorldInventoryDiscover(Tag t)
+	private void OnWorldInventoryDiscover(Tag category_tag, Tag tag)
 	{
-		if (this.undiscoveredConsumableTags.Contains(t))
+		if (this.undiscoveredConsumableTags.Contains(tag))
 		{
 			this.RefreshDiscovered(null);
 		}

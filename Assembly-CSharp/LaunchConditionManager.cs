@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using UnityEngine;
 
-public class LaunchConditionManager : KMonoBehaviour
+public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 {
-	public List<RocketLaunchCondition> conditions { get; private set; }
+	public List<RocketModule> rocketModules { get; private set; }
 
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.conditions = new List<RocketLaunchCondition>();
+		this.rocketModules = new List<RocketModule>();
 	}
 
 	protected override void OnSpawn()
@@ -22,22 +21,26 @@ public class LaunchConditionManager : KMonoBehaviour
 		{
 			this.FindModules();
 		};
-		this.ScheduleUpdate();
 	}
 
 	protected override void OnCleanUp()
 	{
-		UIScheduler.Instance.GetScheduler().Clear(this.updateHandle);
 		base.OnCleanUp();
 	}
 
-	private void ScheduleUpdate()
+	public void Sim1000ms(float dt)
 	{
-		this.updateHandle = UIScheduler.Instance.Schedule("LaunchConditionManagerEvaluateConditions", 1f, delegate(object o)
+		Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
+		if (spacecraftFromLaunchConditionManager == null)
 		{
-			this.EvaluateConditions();
-			this.ScheduleUpdate();
-		}, null, null);
+			return;
+		}
+		SpaceDestination activeMission = SpacecraftManager.instance.GetActiveMission(spacecraftFromLaunchConditionManager.id);
+		LogicPorts component = base.gameObject.GetComponent<LogicPorts>();
+		if (component.GetInputValue(this.triggerPort) == 1 && activeMission != null && activeMission.id != -1)
+		{
+			this.Launch(activeMission);
+		}
 	}
 
 	public void FindModules()
@@ -49,41 +52,40 @@ public class LaunchConditionManager : KMonoBehaviour
 			if (component != null && component.conditionManager == null)
 			{
 				component.conditionManager = this;
-				component.RegisterConditions();
+				component.RegisterWithConditionManager();
 			}
+		}
+		Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
+		if (spacecraftFromLaunchConditionManager != null)
+		{
+			spacecraftFromLaunchConditionManager.moduleCount = attachedNetwork.Count;
 		}
 	}
 
-	public void RegisterCondition(RocketLaunchCondition condition)
+	public void RegisterRocketModule(RocketModule module)
 	{
-		foreach (RocketLaunchCondition rocketLaunchCondition in this.conditions)
+		if (!this.rocketModules.Contains(module))
 		{
-			if (rocketLaunchCondition == condition)
+			this.rocketModules.Add(module);
+		}
+	}
+
+	public void UnregisterRocketModule(RocketModule module)
+	{
+		this.rocketModules.Remove(module);
+	}
+
+	public List<RocketLaunchCondition> GetLaunchConditionList()
+	{
+		List<RocketLaunchCondition> list = new List<RocketLaunchCondition>();
+		foreach (RocketModule rocketModule in this.rocketModules)
+		{
+			foreach (RocketLaunchCondition rocketLaunchCondition in rocketModule.launchConditions)
 			{
-				return;
+				list.Add(rocketLaunchCondition);
 			}
 		}
-		this.conditions.Add(condition);
-	}
-
-	public void UnregisterCondition(RocketLaunchCondition condition)
-	{
-		for (int i = this.conditions.Count - 1; i >= 0; i--)
-		{
-			if (this.conditions[i] == condition)
-			{
-				this.conditions.RemoveAt(i);
-				break;
-			}
-		}
-	}
-
-	public int NumConditions
-	{
-		get
-		{
-			return this.conditions.Count;
-		}
+		return list;
 	}
 
 	public void Launch(SpaceDestination destination)
@@ -92,7 +94,7 @@ public class LaunchConditionManager : KMonoBehaviour
 		{
 			global::Debug.LogError("Null destination passed to launch", null);
 		}
-		if (this.CheckReadyToLaunch())
+		if (this.CheckReadyToLaunch() && this.CheckAbleToFly())
 		{
 			this.launchable.Trigger(-1056989049, null);
 			Spacecraft spacecraftFromLaunchConditionManager = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this);
@@ -103,61 +105,83 @@ public class LaunchConditionManager : KMonoBehaviour
 
 	public bool CheckReadyToLaunch()
 	{
-		foreach (RocketLaunchCondition rocketLaunchCondition in this.conditions)
+		foreach (RocketModule rocketModule in this.rocketModules)
 		{
-			if (!rocketLaunchCondition.EvaluateLaunchCondition())
+			foreach (RocketLaunchCondition rocketLaunchCondition in rocketModule.launchConditions)
 			{
-				return false;
+				if (!rocketLaunchCondition.EvaluateLaunchCondition())
+				{
+					return false;
+				}
 			}
 		}
 		return true;
 	}
 
-	public string GetStatusReport()
+	public bool CheckAbleToFly()
 	{
-		if (this.CheckReadyToLaunch())
+		foreach (RocketModule rocketModule in this.rocketModules)
 		{
-			return UI.STARMAP.MISSION_STATUS.GO;
-		}
-		return this.FailedConditionStatusReport();
-	}
-
-	private string AllConditionStatusReport()
-	{
-		string text = string.Empty;
-		foreach (RocketLaunchCondition rocketLaunchCondition in this.conditions)
-		{
-			if (!string.IsNullOrEmpty(text))
+			foreach (RocketFlightCondition rocketFlightCondition in rocketModule.flightConditions)
 			{
-				text += "\n";
-			}
-			text += rocketLaunchCondition.GetLaunchStatusMessage(rocketLaunchCondition.EvaluateLaunchCondition());
-		}
-		return text;
-	}
-
-	private string FailedConditionStatusReport()
-	{
-		string text = string.Empty;
-		foreach (RocketLaunchCondition rocketLaunchCondition in this.conditions)
-		{
-			if (!rocketLaunchCondition.EvaluateLaunchCondition())
-			{
-				if (!string.IsNullOrEmpty(text))
+				if (!rocketFlightCondition.EvaluateFlightCondition())
 				{
-					text += "\n";
+					return false;
 				}
-				text += rocketLaunchCondition.GetLaunchStatusMessage(rocketLaunchCondition.EvaluateLaunchCondition());
 			}
 		}
-		return text;
+		return true;
 	}
 
-	public void EvaluateConditions()
+	private void ClearFlightStatuses()
 	{
+		KSelectable component = base.GetComponent<KSelectable>();
+		foreach (KeyValuePair<RocketFlightCondition, Guid> keyValuePair in this.conditionStatuses)
+		{
+			component.RemoveStatusItem(keyValuePair.Value, false);
+		}
+		this.conditionStatuses.Clear();
 	}
+
+	public void Sim4000ms(float dt)
+	{
+		bool flag = this.CheckReadyToLaunch();
+		LogicPorts component = base.gameObject.GetComponent<LogicPorts>();
+		component.SendSignal(this.statusPort, (!flag) ? 0 : 1);
+		if (flag)
+		{
+			KSelectable component2 = base.GetComponent<KSelectable>();
+			foreach (RocketModule rocketModule in this.rocketModules)
+			{
+				foreach (RocketFlightCondition rocketFlightCondition in rocketModule.flightConditions)
+				{
+					if (!rocketFlightCondition.EvaluateFlightCondition())
+					{
+						if (!this.conditionStatuses.ContainsKey(rocketFlightCondition))
+						{
+							StatusItem failureStatusItem = rocketFlightCondition.GetFailureStatusItem();
+							this.conditionStatuses[rocketFlightCondition] = component2.AddStatusItem(failureStatusItem, rocketFlightCondition);
+						}
+					}
+					else if (this.conditionStatuses.ContainsKey(rocketFlightCondition))
+					{
+						component2.RemoveStatusItem(this.conditionStatuses[rocketFlightCondition], false);
+						this.conditionStatuses.Remove(rocketFlightCondition);
+					}
+				}
+			}
+		}
+		else
+		{
+			this.ClearFlightStatuses();
+		}
+	}
+
+	public HashedString triggerPort;
+
+	public HashedString statusPort;
 
 	private LaunchableRocket launchable;
 
-	private SchedulerHandle updateHandle;
+	private Dictionary<RocketFlightCondition, Guid> conditionStatuses = new Dictionary<RocketFlightCondition, Guid>();
 }

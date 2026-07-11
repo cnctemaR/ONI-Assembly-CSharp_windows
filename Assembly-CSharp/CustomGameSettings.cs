@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.Serialization;
+using Klei;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGen;
 using ProcGenGame;
+using Steamworks;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class CustomGameSettings : KMonoBehaviour
@@ -36,7 +40,6 @@ public class CustomGameSettings : KMonoBehaviour
 		this.AddSettingConfig(CustomGameSettingConfigs.CalorieBurn);
 		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
 		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
-		this.InitWorldGenOptions();
 		this.AddSettingConfig(CustomGameSettingConfigs.World);
 	}
 
@@ -137,19 +140,42 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 	}
 
-	public void InitWorldGenOptions()
+	public void LoadWorlds()
 	{
-		WorldGen.LoadSettings();
-		Dictionary<string, global::ProcGen.World> worlds = WorldGen.Settings.GetWorlds();
-		if (worlds.Count > 1)
+		List<SettingLevel> list = new List<SettingLevel>();
+		this.AddLevels(Global.Instance.standardFS, null, list);
+		if (DistributionPlatform.Initialized)
 		{
-			List<SettingLevel> list = new List<SettingLevel>();
-			foreach (KeyValuePair<string, global::ProcGen.World> keyValuePair in worlds)
+			List<SteamUGCService.Subscribed> subscribed = SteamUGCService.Instance.GetSubscribed("worldgen");
+			foreach (SteamUGCService.Subscribed subscribed2 in subscribed)
 			{
-				list.Add(new SettingLevel(keyValuePair.Key, keyValuePair.Value.name, keyValuePair.Value.description));
+				ulong num;
+				string text;
+				uint num2;
+				SteamUGC.GetItemInstallInfo(subscribed2.fileId, out num, out text, 1024U, out num2);
+				string path = WorldGen.GetPath();
+				string text2 = subscribed2.fileId.m_PublishedFileId.ToString();
+				ModInfo modInfo = new ModInfo(ModInfo.Source.Steam, ModInfo.ModType.WorldGen, text2, subscribed2.description, path, 0UL);
+				FileStream fileStream = File.OpenRead(text);
+				ZipFileSystem zipFileSystem = new ZipFileSystem(text2, fileStream, path);
+				Global.Instance.layeredFileSystem.AddFileSystem(zipFileSystem);
+				this.AddLevels(zipFileSystem, modInfo, list);
+				Global.Instance.layeredFileSystem.RemoveFileSystem(zipFileSystem);
 			}
-			ListSettingConfig listSettingConfig = (ListSettingConfig)CustomGameSettingConfigs.World;
-			listSettingConfig.StompLevels(list, "worlds/Default", "worlds/Default");
+		}
+		CustomGameSettingConfigs.World.StompLevels(list, "worlds/Default", "worlds/Default");
+	}
+
+	private void AddLevels(IFileSystem fs, object user_data, List<SettingLevel> levels)
+	{
+		string text = FSUtil.Normalize(global::System.IO.Path.Combine(WorldGen.GetPath(), "worlds"));
+		List<string> list = new List<string>();
+		FSUtil.GetFiles(fs, text, "*.yaml", list);
+		foreach (string text2 in list)
+		{
+			global::ProcGen.World world = YamlIO<global::ProcGen.World>.LoadFile(text2);
+			string worldName = Worlds.GetWorldName(text2);
+			levels.Add(new SettingLevel(worldName, world.name, world.description, user_data));
 		}
 	}
 
@@ -162,6 +188,35 @@ public class CustomGameSettings : KMonoBehaviour
 			text = string.Concat(new string[] { text2, keyValuePair.Key, "=", keyValuePair.Value, "," });
 		}
 		Debug.Log(text, null);
+	}
+
+	private bool AllValuesMatch(Dictionary<string, string> data, CustomGameSettings.CustomGameMode mode)
+	{
+		bool flag = true;
+		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
+		{
+			if (!(keyValuePair.Key == CustomGameSettingConfigs.WorldgenSeed.id))
+			{
+				string text = null;
+				if (mode != CustomGameSettings.CustomGameMode.Nosweat)
+				{
+					if (mode == CustomGameSettings.CustomGameMode.Survival)
+					{
+						text = keyValuePair.Value.default_level_id;
+					}
+				}
+				else
+				{
+					text = keyValuePair.Value.nosweat_default_level_id;
+				}
+				if (data.ContainsKey(keyValuePair.Key) && data[keyValuePair.Key] != text)
+				{
+					flag = false;
+					break;
+				}
+			}
+		}
+		return flag;
 	}
 
 	public List<CustomGameSettings.MetricSettingsData> GetSettingsForMetrics()
@@ -180,8 +235,41 @@ public class CustomGameSettings : KMonoBehaviour
 				Value = keyValuePair.Value
 			});
 		}
+		CustomGameSettings.MetricSettingsData metricSettingsData = new CustomGameSettings.MetricSettingsData
+		{
+			Name = "CustomGameModeActual",
+			Value = CustomGameSettings.CustomGameMode.Custom.ToString()
+		};
+		IEnumerator enumerator2 = Enum.GetValues(typeof(CustomGameSettings.CustomGameMode)).GetEnumerator();
+		try
+		{
+			while (enumerator2.MoveNext())
+			{
+				object obj = enumerator2.Current;
+				CustomGameSettings.CustomGameMode customGameMode = (CustomGameSettings.CustomGameMode)obj;
+				if (customGameMode != CustomGameSettings.CustomGameMode.Custom)
+				{
+					if (this.AllValuesMatch(this.CurrentQualityLevelsBySetting, customGameMode))
+					{
+						metricSettingsData.Value = customGameMode.ToString();
+						break;
+					}
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator2 as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
+		}
+		list.Add(metricSettingsData);
 		return list;
 	}
+
+	public const string TAG_WORLDGEN = "worldgen";
 
 	private static CustomGameSettings instance;
 

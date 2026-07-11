@@ -8,8 +8,8 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-592767678, new Action<object>(this.OnConduitStateChanged));
-		base.Subscribe(-111137758, new Action<object>(this.OnConduitStateChanged));
+		base.Subscribe<Exhaust>(-592767678, Exhaust.OnConduitStateChangedDelegate);
+		base.Subscribe<Exhaust>(-111137758, Exhaust.OnConduitStateChangedDelegate);
 		base.GetComponent<RequireInputs>().visualizeRequirements = false;
 	}
 
@@ -152,4 +152,9 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 	private const float MinSwitchTime = 1f;
 
 	private float elapsedSwitchTime;
+
+	private static readonly EventSystem.IntraObjectHandler<Exhaust> OnConduitStateChangedDelegate = new EventSystem.IntraObjectHandler<Exhaust>(delegate(Exhaust component, object data)
+	{
+		component.OnConduitStateChanged(data);
+	});
 }

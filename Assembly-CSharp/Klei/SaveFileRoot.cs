@@ -15,5 +15,9 @@ namespace Klei
 		public int HeightInCells;
 
 		public Dictionary<string, byte[]> streamed;
+
+		public string worldID;
+
+		public List<ModInfo> requiredMods;
 	}
 }

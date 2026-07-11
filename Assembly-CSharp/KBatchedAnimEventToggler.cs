@@ -7,7 +7,7 @@ public class KBatchedAnimEventToggler : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		Vector3 position = this.eventSource.transform.GetPosition();
-		position.z = Grid.GetLayerZ(Grid.SceneLayer.FXFront);
+		position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
 		int num = LayerMask.NameToLayer("Default");
 		foreach (KBatchedAnimEventToggler.Entry entry in this.entries)
 		{

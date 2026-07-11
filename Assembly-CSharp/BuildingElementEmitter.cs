@@ -34,7 +34,7 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 	{
 		base.OnSpawn();
 		this.accumulator = Game.Instance.accumulators.Add("Element", this);
-		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
+		base.Subscribe<BuildingElementEmitter>(824508782, BuildingElementEmitter.OnActiveChangedDelegate);
 		this.SimRegister();
 	}
 
@@ -180,4 +180,9 @@ public class BuildingElementEmitter : KMonoBehaviour, IEffectDescriptor, IElemen
 	private bool dirty = true;
 
 	private Guid statusHandle;
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingElementEmitter> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<BuildingElementEmitter>(delegate(BuildingElementEmitter component, object data)
+	{
+		component.OnActiveChanged(data);
+	});
 }

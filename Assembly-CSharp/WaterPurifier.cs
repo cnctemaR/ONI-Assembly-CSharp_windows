@@ -9,7 +9,7 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 		base.OnSpawn();
 		this.deliveryComponents = base.GetComponents<ManualDeliveryKG>();
 		this.OnConduitConnectionChanged(base.GetComponent<ConduitConsumer>().IsConnected);
-		base.Subscribe(-2094018600, new Action<object>(this.OnConduitConnectionChanged));
+		base.Subscribe<WaterPurifier>(-2094018600, WaterPurifier.OnConduitConnectionChangedDelegate);
 		base.smi.StartSM();
 	}
 
@@ -30,6 +30,11 @@ public class WaterPurifier : StateMachineComponent<WaterPurifier.StatesInstance>
 	private Operational operational;
 
 	private ManualDeliveryKG[] deliveryComponents;
+
+	private static readonly EventSystem.IntraObjectHandler<WaterPurifier> OnConduitConnectionChangedDelegate = new EventSystem.IntraObjectHandler<WaterPurifier>(delegate(WaterPurifier component, object data)
+	{
+		component.OnConduitConnectionChanged(data);
+	});
 
 	public class StatesInstance : GameStateMachine<WaterPurifier.States, WaterPurifier.StatesInstance, WaterPurifier, object>.GameInstance
 	{

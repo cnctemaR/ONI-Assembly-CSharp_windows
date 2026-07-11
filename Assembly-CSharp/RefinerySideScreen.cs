@@ -68,7 +68,7 @@ public class RefinerySideScreen : SideScreenContent
 		this.recipeToggles.Clear();
 		GridLayoutGroup component = this.recipeGrid.GetComponent<GridLayoutGroup>();
 		component.constraintCount = ((this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListResult && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInput && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInputOutput) ? 3 : 1);
-		component.cellSize = new Vector2((float)((this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListResult && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInput && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInputOutput) ? 116 : 348), component.cellSize.y);
+		component.cellSize = new Vector2((float)((this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListResult && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInput && this.targetFab.sideScreenStyle != RefinerySideScreen.StyleSetting.ListInputOutput) ? 116 : 272), component.cellSize.y);
 		int num = 0;
 		ComplexRecipe[] array = recipes;
 		for (int i = 0; i < array.Length; i++)
@@ -272,38 +272,20 @@ public class RefinerySideScreen : SideScreenContent
 		{
 			ComplexRecipe.RecipeElement recipeElement = recipe.ingredients[i];
 			GameObject prefab = Assets.GetPrefab(recipeElement.material);
-			float amount = WorldInventory.Instance.GetAmount(recipeElement.material);
 			LocString reciperquirement = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPERQUIREMENT;
 			LocString locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_INSUFFICIENT;
 			if (WorldInventory.Instance.GetAmount(recipeElement.material) >= recipeElement.amount)
 			{
 				locString = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPERQUIREMENT_SUFFICIENT;
 			}
-			string text3;
-			string text4;
-			if (GameTags.DisplayAsCalories.Contains(recipeElement.material))
-			{
-				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(recipeElement.material.Name);
-				float num = foodInfo.CaloriesPerUnit * recipeElement.amount;
-				text3 = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-				text4 = GameUtil.GetFormattedCalories(amount * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true);
-			}
-			else if (GameTags.DisplayAsUnits.Contains(recipeElement.material))
-			{
-				text3 = GameUtil.GetFormattedUnits(recipeElement.amount, GameUtil.TimeSlice.None, false);
-				text4 = GameUtil.GetFormattedUnits(amount, GameUtil.TimeSlice.None, false);
-			}
-			else
-			{
-				text3 = GameUtil.GetFormattedMass(recipeElement.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-				text4 = GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			}
-			text += string.Format(reciperquirement, prefab.GetProperName(), text3, text4);
+			string formattedByTag = GameUtil.GetFormattedByTag(recipeElement.material, recipeElement.amount, GameUtil.TimeSlice.None);
+			string formattedByTag2 = GameUtil.GetFormattedByTag(recipeElement.material, WorldInventory.Instance.GetAmount(recipeElement.material), GameUtil.TimeSlice.None);
+			text += string.Format(reciperquirement, prefab.GetProperName(), formattedByTag, formattedByTag2);
 			if (i != recipe.ingredients.Length - 1)
 			{
 				text += "\n    ";
 			}
-			text2 += string.Format(locString, prefab.GetProperName(), text3, text4);
+			text2 += string.Format(locString, prefab.GetProperName(), formattedByTag, formattedByTag2);
 		}
 		return new Descriptor(text, text2, Descriptor.DescriptorType.Requirement, false);
 	}
@@ -314,24 +296,10 @@ public class RefinerySideScreen : SideScreenContent
 		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.results)
 		{
 			GameObject prefab = Assets.GetPrefab(recipeElement.material);
-			string text;
-			if (GameTags.DisplayAsCalories.Contains(recipeElement.material))
-			{
-				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(recipeElement.material.Name);
-				float num = foodInfo.CaloriesPerUnit * recipeElement.amount;
-				text = GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true);
-			}
-			else if (GameTags.DisplayAsUnits.Contains(recipeElement.material))
-			{
-				text = GameUtil.GetFormattedUnits(recipeElement.amount, GameUtil.TimeSlice.None, true);
-			}
-			else
-			{
-				text = GameUtil.GetFormattedMass(recipeElement.amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-			}
+			string formattedByTag = GameUtil.GetFormattedByTag(recipeElement.material, recipeElement.amount, GameUtil.TimeSlice.None);
 			LocString recipeproduct = UI.UISIDESCREENS.FABRICATORSIDESCREEN.RECIPEPRODUCT;
 			LocString recipeproduct2 = UI.UISIDESCREENS.FABRICATORSIDESCREEN.TOOLTIPS.RECIPEPRODUCT;
-			list.Add(new Descriptor(string.Format(recipeproduct, prefab.GetProperName(), text), string.Format(recipeproduct2, prefab.GetProperName(), text), Descriptor.DescriptorType.Requirement, false));
+			list.Add(new Descriptor(string.Format(recipeproduct, prefab.GetProperName(), formattedByTag), string.Format(recipeproduct2, prefab.GetProperName(), formattedByTag), Descriptor.DescriptorType.Requirement, false));
 			Element element = ElementLoader.GetElement(recipeElement.material);
 			if (element != null)
 			{

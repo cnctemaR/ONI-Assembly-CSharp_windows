@@ -170,7 +170,7 @@ public class KIconButtonMenu : KScreen
 
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(315865555, new Action<object>(this.OnSetActivator));
+		base.Subscribe<KIconButtonMenu>(315865555, KIconButtonMenu.OnSetActivatorDelegate);
 	}
 
 	private void OnSetActivator(object data)
@@ -294,6 +294,11 @@ public class KIconButtonMenu : KScreen
 	protected GameObject go;
 
 	protected IList<KIconButtonMenu.ButtonInfo> buttons;
+
+	private static readonly global::EventSystem.IntraObjectHandler<KIconButtonMenu> OnSetActivatorDelegate = new global::EventSystem.IntraObjectHandler<KIconButtonMenu>(delegate(KIconButtonMenu component, object data)
+	{
+		component.OnSetActivator(data);
+	});
 
 	public class ButtonInfo
 	{

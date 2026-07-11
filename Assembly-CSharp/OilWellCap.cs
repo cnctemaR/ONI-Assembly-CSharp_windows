@@ -252,10 +252,10 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 
 		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State idle;
 
-		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PLPState active;
+		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PreLoopPostState active;
 
 		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.State overpressure;
 
-		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PLPState releasing_pressure;
+		public GameStateMachine<OilWellCap.States, OilWellCap.StatesInstance, OilWellCap, object>.PreLoopPostState releasing_pressure;
 	}
 }

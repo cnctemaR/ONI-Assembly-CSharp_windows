@@ -61,7 +61,6 @@ public class GasLogicValveConfig : IBuildingConfig
 		GeneratedBuildings.RegisterLogicPorts(go, GasLogicValveConfig.INPUT_PORTS);
 		LogicOperationalController logicOperationalController = go.AddOrGet<LogicOperationalController>();
 		logicOperationalController.unNetworkedValue = 0;
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "GasLogicValve";

@@ -18,15 +18,14 @@ public class BuildingTemplates
 		buildingDef.SceneLayer = Grid.SceneLayer.Building;
 		buildingDef.MaterialCategory = construction_materials;
 		buildingDef.BaseMeltingPoint = melting_point;
-		switch (build_location_rule)
+		if (build_location_rule != BuildLocationRule.Tile && build_location_rule != BuildLocationRule.Anywhere)
 		{
-		case BuildLocationRule.Anywhere:
-		case BuildLocationRule.Tile:
-			buildingDef.ContinuouslyCheckFoundation = false;
-			goto IL_0097;
+			buildingDef.ContinuouslyCheckFoundation = true;
 		}
-		buildingDef.ContinuouslyCheckFoundation = true;
-		IL_0097:
+		else
+		{
+			buildingDef.ContinuouslyCheckFoundation = false;
+		}
 		buildingDef.BuildLocationRule = build_location_rule;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.AnimFiles = new KAnimFile[] { Assets.GetAnim(anim) };
@@ -55,6 +54,7 @@ public class BuildingTemplates
 	{
 		BuildingTemplates.CreateStandardBuildingDef(def);
 		def.Invincible = true;
+		def.DefaultAnimState = "grounded";
 	}
 
 	public static Storage CreateDefaultStorage(GameObject go, bool forceCreate = false)

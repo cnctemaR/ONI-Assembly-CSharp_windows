@@ -24,6 +24,7 @@ public class SolidConduitBridgeConfig : IBuildingConfig
 		buildingDef.OutputConduitType = ConduitType.Solid;
 		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
+		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = SimViewMode.SolidConveyorMap;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "small";
@@ -51,7 +52,6 @@ public class SolidConduitBridgeConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		go.AddOrGet<SolidConduitBridge>();
 	}
 

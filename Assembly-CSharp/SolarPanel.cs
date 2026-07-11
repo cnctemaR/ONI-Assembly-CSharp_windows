@@ -8,8 +8,7 @@ public class SolarPanel : Generator
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(824508782, new Action<object>(this.OnActiveChanged));
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<SolarPanel>(824508782, SolarPanel.OnActiveChangedDelegate);
 		this.smi = new SolarPanel.StatesInstance(this);
 		this.smi.StartSM();
 		this.accumulator = Game.Instance.accumulators.Add("Element", this);
@@ -19,7 +18,7 @@ public class SolarPanel : Generator
 		{
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.SetCellProperties(num3, 87);
+			SimMessages.SetCellProperties(num3, 39);
 			Grid.Foundation[num3] = true;
 			Grid.PreviousSolid[num3] = Grid.Solid[num3];
 			Grid.SetSolid(num3, true, CellEventLogger.Instance.SimCellOccupierForceSolid);
@@ -39,7 +38,7 @@ public class SolarPanel : Generator
 		{
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			SimMessages.ClearCellProperties(num3, 87);
+			SimMessages.ClearCellProperties(num3, 39);
 			Grid.Foundation[num3] = false;
 			Grid.PreviousSolid[num3] = Grid.Solid[num3];
 			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
@@ -56,12 +55,6 @@ public class SolarPanel : Generator
 		bool isActive = ((Operational)data).IsActive;
 		StatusItem statusItem = ((!isActive) ? Db.Get().BuildingStatusItems.GeneratorOffline : Db.Get().BuildingStatusItems.Wattage);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, this);
-	}
-
-	private void OnOperationalChanged(object data)
-	{
-		bool isOperational = this.operational.IsOperational;
-		this.operational.SetActive(isOperational, false);
 	}
 
 	private void UpdateStatusItem()
@@ -92,6 +85,7 @@ public class SolarPanel : Generator
 			int num2 = Grid.LightIntensity[Grid.OffsetCell(Grid.PosToCell(this), cellOffset)];
 			num += (float)num2 * 0.00053f;
 		}
+		this.operational.SetActive(num > 0f, false);
 		num = Mathf.Clamp(num, 0f, 380f);
 		Game.Instance.accumulators.Accumulate(this.accumulator, num * dt);
 		if (num > 0f)
@@ -120,7 +114,7 @@ public class SolarPanel : Generator
 
 	private Guid statusHandle;
 
-	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)87;
+	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
 
 	private CellOffset[] solarCellOffsets = new CellOffset[]
 	{
@@ -139,6 +133,11 @@ public class SolarPanel : Generator
 		new CellOffset(2, 1),
 		new CellOffset(3, 1)
 	};
+
+	private static readonly EventSystem.IntraObjectHandler<SolarPanel> OnActiveChangedDelegate = new EventSystem.IntraObjectHandler<SolarPanel>(delegate(SolarPanel component, object data)
+	{
+		component.OnActiveChanged(data);
+	});
 
 	public class StatesInstance : GameStateMachine<SolarPanel.States, SolarPanel.StatesInstance, SolarPanel, object>.GameInstance
 	{

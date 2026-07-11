@@ -33,7 +33,7 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 		}
 		if (this.manuallyControlled)
 		{
-			base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+			base.Subscribe<global::Switch>(493375141, global::Switch.OnRefreshUserMenuDelegate);
 		}
 		this.UpdateSwitchStatus();
 	}
@@ -88,7 +88,7 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 		Game.Instance.userMenu.AddButton(base.gameObject, new KIconButtonMenu.ButtonInfo("action_power", locString, new global::System.Action(this.OnMinionToggle), global::Action.ToggleEnabled, null, null, null, string.Empty, true), 1f);
 	}
 
-	protected void UpdateSwitchStatus()
+	protected virtual void UpdateSwitchStatus()
 	{
 		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.SwitchStatusInactive : Db.Get().BuildingStatusItems.SwitchStatusActive);
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
@@ -107,4 +107,9 @@ public class Switch : KMonoBehaviour, ISaveLoadable, IToggleHandler
 	private Toggleable openSwitch;
 
 	private int openToggleIndex;
+
+	private static readonly EventSystem.IntraObjectHandler<global::Switch> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<global::Switch>(delegate(global::Switch component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

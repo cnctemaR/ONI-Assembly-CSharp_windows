@@ -15,12 +15,12 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker", 35);
 		this.filteredStorage = new FilteredStorage(this, null, null, this, use_logic_meter, Db.Get().ChoreTypes.Fetch);
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe<StorageLocker>(-905833192, StorageLocker.OnCopySettingsDelegate);
 	}
 
 	protected override void OnSpawn()
 	{
-		base.Subscribe(1088293757, new Action<object>(this.OnToggleClosed));
+		base.Subscribe<StorageLocker>(1088293757, StorageLocker.OnToggleClosedDelegate);
 		this.filteredStorage.FilterChanged();
 	}
 
@@ -124,4 +124,14 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	private float userMaxCapacity = float.PositiveInfinity;
 
 	protected FilteredStorage filteredStorage;
+
+	private static readonly EventSystem.IntraObjectHandler<StorageLocker> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<StorageLocker>(delegate(StorageLocker component, object data)
+	{
+		component.OnCopySettings(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<StorageLocker> OnToggleClosedDelegate = new EventSystem.IntraObjectHandler<StorageLocker>(delegate(StorageLocker component, object data)
+	{
+		component.OnToggleClosed(data);
+	});
 }

@@ -17,14 +17,14 @@ public class TravelTubeBridge : KMonoBehaviour, ITravelTubePiece
 		base.OnPrefabInit();
 		Grid.HasTube[Grid.PosToCell(this)] = true;
 		Components.ITravelTubePieces.Add(this);
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Subscribe<TravelTubeBridge>(774203113, TravelTubeBridge.OnBuildingBrokenDelegate);
+		base.Subscribe<TravelTubeBridge>(-1735440190, TravelTubeBridge.OnBuildingFullyRepairedDelegate);
 	}
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe<TravelTubeBridge>(774203113, TravelTubeBridge.OnBuildingBrokenDelegate);
+		base.Unsubscribe<TravelTubeBridge>(-1735440190, TravelTubeBridge.OnBuildingFullyRepairedDelegate);
 		Grid.HasTube[Grid.PosToCell(this)] = false;
 		Components.ITravelTubePieces.Remove(this);
 		base.OnCleanUp();
@@ -37,4 +37,14 @@ public class TravelTubeBridge : KMonoBehaviour, ITravelTubePiece
 	private void OnBuildingFullyRepaired(object data)
 	{
 	}
+
+	private static readonly EventSystem.IntraObjectHandler<TravelTubeBridge> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<TravelTubeBridge>(delegate(TravelTubeBridge component, object data)
+	{
+		component.OnBuildingBroken(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<TravelTubeBridge> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<TravelTubeBridge>(delegate(TravelTubeBridge component, object data)
+	{
+		component.OnBuildingFullyRepaired(data);
+	});
 }

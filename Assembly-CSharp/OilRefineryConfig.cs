@@ -23,6 +23,7 @@ public class OilRefineryConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = 480f;
 		buildingDef.ExhaustKilowattsWhenActive = 2f;
 		buildingDef.SelfHeatKilowattsWhenActive = 8f;
+		buildingDef.PermittedRotations = PermittedRotations.FlipH;
 		buildingDef.ViewMode = SimViewMode.LiquidVentMap;
 		buildingDef.AudioCategory = "HollowMetal";
 		buildingDef.InputConduitType = ConduitType.Liquid;
@@ -66,12 +67,7 @@ public class OilRefineryConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "OilRefinery";

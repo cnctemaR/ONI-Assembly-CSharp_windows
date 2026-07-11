@@ -19,12 +19,9 @@ public class CreatureDeliveryPointConfig : IBuildingConfig
 		storage.allowItemRemoval = false;
 		storage.showDescriptor = true;
 		storage.storageFilters = STORAGEFILTERS.BAGABLE_CREATURES;
-		storage.workAnims = new HashedString[]
-		{
-			new HashedString("place"),
-			new HashedString("release")
-		};
+		storage.workAnims = new HashedString[] { "place", "release" };
 		storage.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_restrain_creature_kanim") };
+		storage.workAnimPlayMode = KAnim.PlayMode.Once;
 		storage.synchronizeAnims = false;
 		storage.useGunForDelivery = false;
 		storage.allowSettingOnlyFetchMarkedItems = false;
@@ -35,7 +32,6 @@ public class CreatureDeliveryPointConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGetDef<FixedCapturePoint.Def>();
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "CreatureDeliveryPoint";

@@ -80,7 +80,7 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 
 	private Reactable GetReactable(MinionIdentity minion)
 	{
-		return new SelfEmoteReactable(minion.gameObject, "NavigatorPassingGreeting", Db.Get().ChoreTypes.Emote, DupeGreetingManager.waveAnims[global::UnityEngine.Random.Range(0, DupeGreetingManager.waveAnims.Count)], 1000f, 0f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
+		return new SelfEmoteReactable(minion.gameObject, "NavigatorPassingGreeting", Db.Get().ChoreTypes.Emote, DupeGreetingManager.waveAnims[global::UnityEngine.Random.Range(0, DupeGreetingManager.waveAnims.Count)], 1000f, 20f, float.PositiveInfinity).AddStep(new EmoteReactable.EmoteStep
 		{
 			anim = "react",
 			startcb = new Action<GameObject>(this.BeginReacting)

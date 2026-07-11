@@ -29,7 +29,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		this.chores = new Chore[this.socializeOffsets.Length];
 		Extents extents = new Extents(Grid.PosToCell(this), this.socializeOffsets);
 		this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("WaterCooler", this, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		base.Subscribe<WaterCooler>(-1697596308, WaterCooler.OnStorageChangeDelegate);
 		base.smi.StartSM();
 	}
 
@@ -181,6 +181,11 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 	private Storage storage;
 
 	public bool choresDirty;
+
+	private static readonly EventSystem.IntraObjectHandler<WaterCooler> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<WaterCooler>(delegate(WaterCooler component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 
 	public class States : GameStateMachine<WaterCooler.States, WaterCooler.StatesInstance, WaterCooler>
 	{

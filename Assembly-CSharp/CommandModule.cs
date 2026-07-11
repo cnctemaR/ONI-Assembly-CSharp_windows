@@ -1,34 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
-using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>, IEffectDescriptor
 {
-	public bool IsSuspended
-	{
-		get
-		{
-			return this.isSuspended;
-		}
-	}
-
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
 		this.characterOverlay = base.gameObject.AddComponent<CharacterOverlay>();
 		this.characterOverlay.Register();
+		this.rocketStats = new RocketStats(this);
 	}
 
-	public void SetSuspended(bool state)
-	{
-		this.isSuspended = state;
-		base.smi.GetComponent<KSelectable>().IsSelectable = !this.isSuspended;
-	}
-
-	public void ReleaseAstronaut(object data)
+	public void ReleaseAstronaut()
 	{
 		if (this.releasingAstronaut)
 		{
@@ -39,85 +25,13 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		List<MinionStorage.Info> storedMinionInfo = component.GetStoredMinionInfo();
 		for (int i = storedMinionInfo.Count - 1; i >= 0; i--)
 		{
-			GameObject gameObject = component.DeserializeMinion(storedMinionInfo[i].id, Grid.CellToPos(Grid.PosToCell(base.smi.master.transform.position)));
+			GameObject gameObject = component.DeserializeMinion(storedMinionInfo[i].id, Grid.CellToPos(Grid.PosToCell(base.smi.master.transform.GetPosition())));
 			if (Grid.FakeFloor[Grid.OffsetCell(Grid.PosToCell(base.smi.master.gameObject), 0, -1)])
 			{
 				gameObject.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
 			}
 		}
 		this.releasingAstronaut = false;
-	}
-
-	public void OnSuspend(object data)
-	{
-		Storage component = base.GetComponent<Storage>();
-		if (component != null)
-		{
-			component.capacityKg = component.MassStored();
-			component.allowItemRemoval = false;
-		}
-		if (base.GetComponent<ManualDeliveryKG>() != null)
-		{
-			global::UnityEngine.Object.Destroy(base.GetComponent<ManualDeliveryKG>());
-		}
-		this.SetSuspended(true);
-		this.ClearFloor(null);
-	}
-
-	public float GetRocketMaxDistance()
-	{
-		float totalMass = this.GetTotalMass();
-		float totalThrust = this.GetTotalThrust();
-		return Mathf.Max(0f, totalThrust - ROCKETRY.CalculateMassWithPenalty(totalMass));
-	}
-
-	public float GetTotalThrust()
-	{
-		float num = 0f;
-		foreach (Tuple<RocketModule, float> tuple in this.GetModuleThrustContributions(base.GetComponent<LaunchableRocket>()))
-		{
-			num += tuple.second;
-		}
-		return num;
-	}
-
-	public float GetTotalMass()
-	{
-		float num = 0f;
-		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
-		{
-			RocketModule component = gameObject.GetComponent<RocketModule>();
-			if (component != null)
-			{
-				num += component.GetComponent<PrimaryElement>().Mass;
-			}
-		}
-		return num;
-	}
-
-	public List<Tuple<RocketModule, float>> GetModuleThrustContributions(LaunchableRocket rocket)
-	{
-		this.moduleThrustContribution.Clear();
-		RocketEngine rocketEngine = null;
-		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
-		{
-			rocketEngine = gameObject.GetComponent<RocketEngine>();
-			if (rocketEngine != null)
-			{
-				break;
-			}
-		}
-		if (rocketEngine != null)
-		{
-			foreach (GameObject gameObject2 in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
-			{
-				if (gameObject2.GetComponent<FuelTank>())
-				{
-					this.moduleThrustContribution.Add(new Tuple<RocketModule, float>(gameObject2.GetComponent<RocketModule>(), rocketEngine.thrustAmount));
-				}
-			}
-		}
-		return this.moduleThrustContribution;
 	}
 
 	protected override void OnSpawn()
@@ -130,26 +44,12 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		int num = Grid.OffsetCell(Grid.PosToCell(base.gameObject), 0, -1);
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("CommandModule.gantryChanged", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnGantryChanged));
 		this.OnGantryChanged(null);
-		if (this.IsSuspended)
-		{
-			base.GetComponent<KSelectable>().IsSelectable = false;
-		}
-		else
-		{
-			base.GetComponent<KSelectable>().IsSelectable = true;
-		}
-		if (this.reachable == null)
-		{
-			this.reachable = new ConditionDestinationReachable(this);
-			base.GetComponent<RocketModule>().AddCondition(this.reachable);
-		}
-		if (this.hasAstronaut == null)
-		{
-			this.hasAstronaut = new ConditionHasAstronaut(this);
-			base.GetComponent<RocketModule>().AddCondition(this.hasAstronaut);
-		}
-		base.Subscribe(-1056989049, new Action<object>(this.OnSuspend));
-		base.Subscribe(684616645, new Action<object>(this.OnAssigneeChanged));
+		RocketModule component = base.GetComponent<RocketModule>();
+		this.reachable = (ConditionDestinationReachable)component.AddLaunchCondition(new ConditionDestinationReachable(this));
+		this.hasAstronaut = (ConditionHasAstronaut)component.AddLaunchCondition(new ConditionHasAstronaut(this));
+		this.hasSuit = (ConditionHasAtmoSuit)component.AddLaunchCondition(new ConditionHasAtmoSuit(this));
+		this.cargoEmpty = (CargoBayIsEmpty)component.AddLaunchCondition(new CargoBayIsEmpty(this));
+		this.flightPathIsClear = (ConditionFlightPathIsClear)component.AddFlightCondition(new ConditionFlightPathIsClear(base.gameObject, 1));
 	}
 
 	private void OnGantryChanged(object data)
@@ -180,44 +80,12 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		return workChore;
 	}
 
-	private void OnAssigneeChanged(object data)
-	{
-		if (base.GetComponent<MinionStorage>().GetStoredMinionInfo().Count > 0)
-		{
-			this.ReleaseAstronaut(null);
-			Game.Instance.userMenu.Refresh(base.gameObject);
-		}
-	}
-
-	private void ClearFloor(object data)
-	{
-		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < def.WidthInCells; i++)
-		{
-			int num2 = i - (def.WidthInCells - 1) / 2;
-			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
-			if (num3 == Grid.PosToCell(base.gameObject))
-			{
-				num3 = Grid.OffsetCell(num3, 0, -1);
-			}
-			SimMessages.ClearCellProperties(num3, 23);
-			Grid.Foundation[num3] = false;
-			Grid.PreviousSolid[num3] = Grid.Solid[num3];
-			Grid.SetSolid(num3, false, CellEventLogger.Instance.SimCellOccupierForceSolid);
-			World.Instance.OnSolidChanged(num3);
-			GameScenePartitioner.Instance.TriggerEvent(num3, GameScenePartitioner.Instance.solidChangedLayer, null);
-			Grid.RenderedByWorld[num3] = true;
-		}
-	}
-
 	protected override void OnCleanUp()
 	{
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		this.partitionerEntry.Clear();
-		this.ReleaseAstronaut(null);
+		this.ReleaseAstronaut();
 		base.smi.StopSM("cleanup");
-		this.ClearFloor(null);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -227,16 +95,21 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 	public Storage storage;
 
-	[Serialize]
-	private bool isSuspended;
+	public RocketStats rocketStats;
 
 	private bool releasingAstronaut;
 
-	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)23;
+	private const Sim.Cell.Properties floorCellProperties = (Sim.Cell.Properties)39;
 
 	public ConditionDestinationReachable reachable;
 
 	public ConditionHasAstronaut hasAstronaut;
+
+	public ConditionHasAtmoSuit hasSuit;
+
+	public CargoBayIsEmpty cargoEmpty;
+
+	public ConditionFlightPathIsClear flightPathIsClear;
 
 	public Assignable assignable;
 
@@ -244,18 +117,25 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 
 	private HandleVector<int>.Handle partitionerEntry;
 
-	private List<Tuple<RocketModule, float>> moduleThrustContribution = new List<Tuple<RocketModule, float>>();
-
 	public class StatesInstance : GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.GameInstance
 	{
-		public StatesInstance(CommandModule smi)
-			: base(smi)
+		public StatesInstance(CommandModule master)
+			: base(master)
 		{
-			smi.gameObject.Subscribe(238242047, delegate(object data)
+		}
+
+		public void SetSuspended(bool suspended)
+		{
+			Storage component = base.GetComponent<Storage>();
+			if (component != null)
 			{
-				smi.SetSuspended(false);
-				smi.ReleaseAstronaut(null);
-			});
+				component.allowItemRemoval = !suspended;
+			}
+			ManualDeliveryKG component2 = base.GetComponent<ManualDeliveryKG>();
+			if (component2 != null)
+			{
+				component2.Pause(suspended, "Rocket is suspended");
+			}
 		}
 	}
 
@@ -263,16 +143,49 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
-			default_state = this.idle;
-			this.idle.PlayAnim("grounded", KAnim.PlayMode.Loop).GoTo(this.awaitingAstronaut);
-			this.awaitingAstronaut.PlayAnim("grounded", KAnim.PlayMode.Loop).ToggleChore((CommandModule.StatesInstance smi) => smi.master.CreateWorkChore(), this.hasAstronaut);
-			this.hasAstronaut.PlayAnim("grounded", KAnim.PlayMode.Loop).EventTransition(GameHashes.LandRocket, this.idle, null).EventTransition(GameHashes.AssigneeChanged, this.idle, null);
+			default_state = this.grounded.idle;
+			this.grounded.DefaultState(this.grounded.idle).TagTransition(GameTags.RocketNotOnGround, this.spaceborne, false);
+			this.grounded.idle.PlayAnim("grounded", KAnim.PlayMode.Loop).GoTo(this.grounded.awaitingAstronaut);
+			this.grounded.awaitingAstronaut.PlayAnim("grounded", KAnim.PlayMode.Loop).EnterTransition(this.grounded.hasAstronaut, (CommandModule.StatesInstance smi) => smi.GetComponent<MinionStorage>().GetStoredMinionInfo().Count > 0).ToggleChore((CommandModule.StatesInstance smi) => smi.master.CreateWorkChore(), this.grounded.hasAstronaut);
+			this.grounded.hasAstronaut.PlayAnim("grounded", KAnim.PlayMode.Loop).EventHandler(GameHashes.AssigneeChanged, delegate(CommandModule.StatesInstance smi)
+			{
+				smi.master.ReleaseAstronaut();
+				Game.Instance.userMenu.Refresh(smi.gameObject);
+			}).EventTransition(GameHashes.AssigneeChanged, this.grounded.idle, null);
+			this.spaceborne.DefaultState(this.spaceborne.launch);
+			this.spaceborne.launch.Enter(delegate(CommandModule.StatesInstance smi)
+			{
+				smi.SetSuspended(true);
+			}).GoTo(this.spaceborne.idle);
+			this.spaceborne.idle.TagTransition(GameTags.RocketNotOnGround, this.spaceborne.land, true);
+			this.spaceborne.land.Enter(delegate(CommandModule.StatesInstance smi)
+			{
+				smi.SetSuspended(false);
+				smi.master.ReleaseAstronaut();
+				Game.Instance.userMenu.Refresh(smi.gameObject);
+			}).GoTo(this.grounded);
 		}
 
-		public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State idle;
+		public CommandModule.States.GroundedStates grounded;
 
-		public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State awaitingAstronaut;
+		public CommandModule.States.SpaceborneStates spaceborne;
 
-		public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State hasAstronaut;
+		public class GroundedStates : GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State
+		{
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State idle;
+
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State awaitingAstronaut;
+
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State hasAstronaut;
+		}
+
+		public class SpaceborneStates : GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State
+		{
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State launch;
+
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State idle;
+
+			public GameStateMachine<CommandModule.States, CommandModule.StatesInstance, CommandModule, object>.State land;
+		}
 	}
 }

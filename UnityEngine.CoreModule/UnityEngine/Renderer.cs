@@ -14,9 +14,9 @@ namespace UnityEngine
 	///   <para>General functionality for all renderers.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[NativeHeader("Runtime/Graphics/Renderer.h")]
 	[RequireComponent(typeof(Transform))]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/Renderer.h")]
 	public class Renderer : Component
 	{
 		[EditorBrowsable(EditorBrowsableState.Never)]

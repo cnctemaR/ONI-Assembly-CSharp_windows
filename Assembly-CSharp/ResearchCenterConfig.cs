@@ -53,16 +53,11 @@ public class ResearchCenterConfig : IBuildingConfig
 			new ElementConverter.ConsumedElement(ResearchCenterConfig.INPUT_MATERIAL, 1.16f)
 		};
 		elementConverter.showDescriptors = false;
+		go.AddOrGetDef<PoweredController.Def>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const float BASE_RESEARCH_SPEED = 1.16f;

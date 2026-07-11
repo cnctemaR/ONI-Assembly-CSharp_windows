@@ -45,6 +45,10 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 	{
 		this.baseDecor = (float)values.amount;
 		this.baseRadius = (float)values.radius;
+		if (base.IsInitialized())
+		{
+			this.UpdateBaseDecorModifiers();
+		}
 	}
 
 	protected override void OnPrefabInit()
@@ -52,6 +56,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		base.OnPrefabInit();
 		this.decor = this.GetAttributes().Add(Db.Get().BuildingAttributes.Decor);
 		this.decorRadius = this.GetAttributes().Add(Db.Get().BuildingAttributes.DecorRadius);
+		this.UpdateBaseDecorModifiers();
 	}
 
 	protected override void OnSpawn()
@@ -63,13 +68,6 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			this.Refresh();
 		};
 		this.onCollectDecorProvidersCallback = new Action<object>(this.OnCollectDecorProviders);
-		if (this.baseDecor != 0f)
-		{
-			AttributeModifier attributeModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, this.baseDecor, UI.TOOLTIPS.BASE_VALUE, false, false, true);
-			AttributeModifier attributeModifier2 = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, this.baseRadius, UI.TOOLTIPS.BASE_VALUE, false, false, true);
-			this.GetAttributes().Add(attributeModifier);
-			this.GetAttributes().Add(attributeModifier2);
-		}
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		this.isMovable = component != null && component.isMovable;
 		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "DecorProvider.OnSpawn");
@@ -78,6 +76,25 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		AttributeInstance attributeInstance2 = this.decorRadius;
 		attributeInstance2.OnDirty = (global::System.Action)Delegate.Combine(attributeInstance2.OnDirty, this.refreshCallback);
 		this.Refresh();
+	}
+
+	private void UpdateBaseDecorModifiers()
+	{
+		Attributes attributes = this.GetAttributes();
+		if (this.baseDecorModifier != null)
+		{
+			attributes.Remove(this.baseDecorModifier);
+			attributes.Remove(this.baseDecorRadiusModifier);
+			this.baseDecorModifier = null;
+			this.baseDecorRadiusModifier = null;
+		}
+		if (this.baseDecor != 0f)
+		{
+			this.baseDecorModifier = new AttributeModifier(Db.Get().BuildingAttributes.Decor.Id, this.baseDecor, UI.TOOLTIPS.BASE_VALUE, false, false, true);
+			this.baseDecorRadiusModifier = new AttributeModifier(Db.Get().BuildingAttributes.DecorRadius.Id, this.baseRadius, UI.TOOLTIPS.BASE_VALUE, false, false, true);
+			attributes.Add(this.baseDecorModifier);
+			attributes.Add(this.baseDecorRadiusModifier);
+		}
 	}
 
 	private void OnCellChange()
@@ -184,6 +201,10 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 
 	public AttributeInstance decorRadius;
 
+	private AttributeModifier baseDecorModifier;
+
+	private AttributeModifier baseDecorRadiusModifier;
+
 	public bool isMovable;
 
 	[MyCmpReq]
@@ -191,6 +212,9 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 
 	[MyCmpGet]
 	public Pickupable pickupable;
+
+	[MyCmpGet]
+	public Rotatable rotatable;
 
 	[MyCmpGet]
 	public SimCellOccupier simCellOccupier;
@@ -233,24 +257,24 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 				return;
 			}
 			provider.cellCount = 0;
-			OccupyArea occupyArea = provider.occupyArea;
-			int widthInCells = occupyArea.GetWidthInCells();
-			int heightInCells = occupyArea.GetHeightInCells();
 			this.provider = provider;
-			this.radius = 5;
+			int num2 = 5;
 			AttributeInstance decorRadius = provider.decorRadius;
 			if (decorRadius != null)
 			{
-				this.radius = (int)decorRadius.GetTotalValue();
+				num2 = (int)decorRadius.GetTotalValue();
 			}
-			int num2 = 0;
-			int num3 = 0;
-			Grid.CellToXY(num, out num2, out num3);
-			Vector2I vector2I = new Vector2I(num2 - this.radius, num3 - this.radius);
-			Vector2I vector2I2 = vector2I + new Vector2I(this.radius * 2 + widthInCells, this.radius * 2 + heightInCells);
-			vector2I = Vector2I.Max(vector2I, Vector2I.zero);
-			vector2I2 = Vector2I.Min(vector2I2, new Vector2I(Grid.WidthInCells - 1, Grid.HeightInCells - 1));
-			this.extents = new Extents(vector2I.x, vector2I.y, vector2I2.x - vector2I.x, vector2I2.y - vector2I.y);
+			Orientation orientation = Orientation.Neutral;
+			if (provider.rotatable)
+			{
+				orientation = provider.rotatable.GetOrientation();
+			}
+			OccupyArea occupyArea = provider.occupyArea;
+			this.extents = occupyArea.GetExtents(orientation);
+			this.extents.x = Mathf.Max(this.extents.x - num2, 0);
+			this.extents.y = Mathf.Max(this.extents.y - num2, 0);
+			this.extents.width = Mathf.Min(this.extents.width + num2 * 2, Grid.WidthInCells - 1);
+			this.extents.height = Mathf.Min(this.extents.height + num2 * 2, Grid.HeightInCells - 1);
 			this.partitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatCollectDecorProviders", provider.gameObject, this.extents, GameScenePartitioner.Instance.decorProviderLayer, provider.onCollectDecorProvidersCallback);
 			this.solidChangedPartitionerEntry = GameScenePartitioner.Instance.Add("DecorProvider.SplatSolidCheck", provider.gameObject, this.extents, GameScenePartitioner.Instance.solidChangedLayer, provider.refreshPartionerCallback);
 			this.AddDecor();
@@ -287,7 +311,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 			{
 				for (int j = num5; j < num3; j++)
 				{
-					if (Grid.VisibilityTest(num6, num7, i, j, false, false))
+					if (Grid.VisibilityTest(num6, num7, i, j, false))
 					{
 						int num8 = Grid.XYToCell(i, j);
 						if (Grid.IsValidCell(num8))
@@ -321,8 +345,6 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		}
 
 		private DecorProvider provider;
-
-		private int radius;
 
 		private Extents extents;
 

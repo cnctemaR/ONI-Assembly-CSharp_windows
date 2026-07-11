@@ -33,13 +33,24 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 	public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State root = new GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State();
 
-	public class PLPState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
+	public class PreLoopPostState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
 	{
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State pre;
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State loop;
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State pst;
+	}
+
+	public class WorkingState : GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State
+	{
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State waiting;
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State working_pre;
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State working_loop;
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State working_pst;
 	}
 
 	public class GameInstance : StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.GenericInstance
@@ -509,7 +520,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				if (condition == null || condition(smi))
 				{
 					AttributeModifier attributeModifier = callback(smi);
-					DebugUtil.Assert(smi.dataTable[data_idx] == null, "Assert!");
+					DebugUtil.Assert(smi.dataTable[data_idx] == null, "Assert!", string.Empty, string.Empty);
 					smi.dataTable[data_idx] = attributeModifier;
 					state_target.Get(smi).GetAttributes().Add(attributeModifier);
 				}
@@ -919,13 +930,14 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleTag(Tag tag)
 		{
+			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			this.Enter("AddTag(" + tag.Name + ")", delegate(StateMachineInstanceType smi)
 			{
-				smi.GetComponent<KPrefabID>().AddTag(tag);
+				state_target.Get<KPrefabID>(smi).AddTag(tag);
 			});
 			this.Exit("RemoveTag(" + tag.Name + ")", delegate(StateMachineInstanceType smi)
 			{
-				smi.GetComponent<KPrefabID>().RemoveTag(tag);
+				state_target.Get<KPrefabID>(smi).RemoveTag(tag);
 			});
 			return this;
 		}
@@ -1418,7 +1430,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleWork(string work_type, Action<StateMachineInstanceType> callback, Func<StateMachineInstanceType, bool> validate_callback, Action<StateMachineInstanceType> complete_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleWork(string work_type, Action<StateMachineInstanceType> callback, Func<StateMachineInstanceType, bool> validate_callback, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State success_state, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State failure_state)
 		{
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			this.Enter("StartWork(" + work_type + ")", delegate(StateMachineInstanceType smi)
@@ -1437,21 +1449,21 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				if (validate_callback(smi))
 				{
 					Worker worker = state_target.Get<Worker>(smi);
-					if (worker.Work(dt))
+					Worker.WorkResult workResult = worker.Work(dt);
+					if (workResult == Worker.WorkResult.Success)
 					{
-						worker.CompleteWork();
-						if (complete_callback != null)
-						{
-							complete_callback(smi);
-						}
 						smi.GoTo(success_state);
+					}
+					else if (workResult == Worker.WorkResult.Failed)
+					{
+						smi.GoTo(failure_state);
 					}
 				}
 				else
 				{
 					smi.GoTo(failure_state);
 				}
-			}, UpdateRate.SIM_200ms, false);
+			}, UpdateRate.SIM_33ms, false);
 			this.Exit("StopWork()", delegate(StateMachineInstanceType smi)
 			{
 				state_target.Get<Worker>(smi).StopWork();
@@ -1467,7 +1479,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				Workable workable = source_target.Get<WorkableType>(smi);
 				Worker worker = state_target.Get<Worker>(smi);
 				worker.StartWork(new Worker.StartWorkInfo(workable));
-			}, (StateMachineInstanceType smi) => source_target.Get<WorkableType>(smi) != null && (is_valid_cb == null || is_valid_cb(smi)), null, success_state, failure_state);
+			}, (StateMachineInstanceType smi) => source_target.Get<WorkableType>(smi) != null && (is_valid_cb == null || is_valid_cb(smi)), success_state, failure_state);
 			return this;
 		}
 
@@ -1480,7 +1492,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				Worker worker = state_target.Get<Worker>(smi);
 				float num = amount.Get(smi);
 				worker.StartWork(new Edible.EdibleStartWorkInfo(edible, num));
-			}, (StateMachineInstanceType smi) => source_target.Get<Edible>(smi) != null, null, success_state, failure_state);
+			}, (StateMachineInstanceType smi) => source_target.Get<Edible>(smi) != null, success_state, failure_state);
 			return this;
 		}
 
@@ -1492,7 +1504,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				Worker worker = state_target.Get<Worker>(smi);
 				Sleepable sleepable = bed.Get<Sleepable>(smi);
 				worker.StartWork(new Worker.StartWorkInfo(sleepable));
-			}, (StateMachineInstanceType smi) => bed.Get<Sleepable>(smi) != null, null, success_state, failure_state);
+			}, (StateMachineInstanceType smi) => bed.Get<Sleepable>(smi) != null, success_state, failure_state);
 			return this;
 		}
 
@@ -1503,9 +1515,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				Worker worker = worker_param.Get<Worker>(smi);
 				Storage storage = storage_param.Get<Storage>(smi);
 				worker.StartWork(new Worker.StartWorkInfo(storage));
-			}, (StateMachineInstanceType smi) => storage_param.Get<Storage>(smi) != null, delegate(StateMachineInstanceType smi)
-			{
-			}, success_state, failure_state);
+			}, (StateMachineInstanceType smi) => storage_param.Get<Storage>(smi) != null, success_state, failure_state);
 			return this;
 		}
 
@@ -1517,19 +1527,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				Pickupable pickupable = source_target.Get<Pickupable>(smi);
 				Worker worker = state_target.Get<Worker>(smi);
 				float num = amount.Get(smi);
-				worker.StartWork(new Pickupable.PickupableStartWorkInfo(pickupable, num));
-			}, (StateMachineInstanceType smi) => source_target.Get<Pickupable>(smi) != null || result_target.Get<Pickupable>(smi) != null, delegate(StateMachineInstanceType smi)
-			{
-				Pickupable pickupable2 = (Pickupable)state_target.Get<Worker>(smi).workCompleteData;
-				if (pickupable2 == null || pickupable2.TotalAmount <= 0f)
+				worker.StartWork(new Pickupable.PickupableStartWorkInfo(pickupable, num, delegate(GameObject result)
 				{
-					result_target.Set(null, smi);
-				}
-				else
-				{
-					result_target.Set(pickupable2.gameObject, smi);
-				}
-			}, success_state, failure_state);
+					result_target.Set(result, smi);
+				}));
+			}, (StateMachineInstanceType smi) => source_target.Get<Pickupable>(smi) != null || result_target.Get<Pickupable>(smi) != null, success_state, failure_state);
 			return this;
 		}
 
@@ -1604,7 +1606,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 				{
 					callback((StateMachineInstanceType)((object)smi_data));
 				}, smi, null);
-				DebugUtil.Assert(smi.dataTable[data_idx] == null, "Assert!");
+				DebugUtil.Assert(smi.dataTable[data_idx] == null, "Assert!", string.Empty, string.Empty);
 				smi.dataTable[data_idx] = schedulerHandle;
 			});
 			this.Exit("RemoveScheduledCallback(" + name + ")", delegate(StateMachineInstanceType smi)

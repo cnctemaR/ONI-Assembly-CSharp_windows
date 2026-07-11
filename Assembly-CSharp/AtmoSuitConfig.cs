@@ -32,7 +32,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 		int num3 = 6;
 		List<AttributeModifier> list2 = list;
 		Tag[] array = new Tag[] { GameTags.Suit };
-		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, empty, text3, num3, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array);
+		EquipmentDef equipmentDef = EquipmentTemplates.CreateEquipmentDef(text, slot, fabricator, num, simHashes, dictionary2, num2, text2, empty, text3, num3, list2, null, true, EntityTemplates.CollisionShape.CIRCLE, 0.325f, 0.325f, array, null);
 		equipmentDef.RecipeDescription = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC;
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
@@ -46,7 +46,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 				Navigator component = soleOwner.GetComponent<Navigator>();
 				if (component != null)
 				{
-					component.SetFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+					component.SetFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
 				}
 				MinionResume component2 = soleOwner.GetComponent<MinionResume>();
 				if (component2 != null && component2.HasPerk(RoleManager.rolePerks.ExosuitExpertise.id))
@@ -69,7 +69,7 @@ public class AtmoSuitConfig : IEquipmentConfig
 				Navigator component3 = soleOwner2.GetComponent<Navigator>();
 				if (component3 != null)
 				{
-					component3.ClearFlags(PathFinder.PotentialPath.Flags.HasSuit | PathFinder.PotentialPath.Flags.UnlimitedSubmergedTravel);
+					component3.ClearFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
 				}
 			}
 		};
@@ -84,9 +84,13 @@ public class AtmoSuitConfig : IEquipmentConfig
 		suitTank.element = "Oxygen";
 		suitTank.capacity = 75f;
 		go.AddComponent<HelmetController>();
-		go.GetComponent<KPrefabID>().AddTag(GameTags.Clothes);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.Clothes);
+		component.AddTag(GameTags.PedestalDisplayable);
 		go.AddComponent<SuitDiseaseHandler>();
 	}
 
 	public const string ID = "Atmo_Suit";
+
+	private const PathFinder.PotentialPath.Flags suit_flags = PathFinder.PotentialPath.Flags.HasAtmoSuit;
 }

@@ -10,10 +10,10 @@ namespace Unity.Collections
 	/// <summary>
 	///   <para>Native Slice.</para>
 	/// </summary>
-	[NativeContainer]
 	[NativeContainerSupportsMinMaxWriteRestriction]
-	[DebuggerDisplay("Length = {Length}")]
 	[DebuggerTypeProxy(typeof(NativeSliceDebugView<>))]
+	[NativeContainer]
+	[DebuggerDisplay("Length = {Length}")]
 	public struct NativeSlice<T> : IEnumerable<T>, IEnumerable where T : struct
 	{
 		public NativeSlice(NativeSlice<T> slice, int start)

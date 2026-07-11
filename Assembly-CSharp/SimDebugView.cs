@@ -180,7 +180,7 @@ public class SimDebugView : KMonoBehaviour
 	public void SetMode(SimViewMode mode)
 	{
 		this.mode = mode;
-		EventSystem.Trigger(Game.Instance.gameObject, 1798162660, mode);
+		Game.Instance.gameObject.Trigger(1798162660, mode);
 	}
 
 	public SimViewMode GetMode()

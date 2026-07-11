@@ -55,6 +55,8 @@ public class OffsetTracker
 		}
 	}
 
+	public static bool isExecutingWithinJob;
+
 	protected CellOffset[] offsets;
 
 	private int previousCell = Grid.InvalidCell;

@@ -89,14 +89,9 @@ public class KilnConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		GeneratedBuildings.RegisterLogicPorts(go, KilnConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 		SymbolOverrideControllerUtil.AddToPrefab(go);
 	}
 

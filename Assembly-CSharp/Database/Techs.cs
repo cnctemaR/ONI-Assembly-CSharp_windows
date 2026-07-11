@@ -110,7 +110,7 @@ namespace Database
 			},
 			{
 				"ImprovedOxygen",
-				new string[] { "CO2Scrubber", "Electrolyzer" }
+				new string[] { "Electrolyzer" }
 			},
 			{
 				"GasPiping",
@@ -138,7 +138,7 @@ namespace Database
 			},
 			{
 				"DirectedAirStreams",
-				new string[] { "PressureDoor", "OreScrubber", "AirFilter" }
+				new string[] { "PressureDoor", "OreScrubber", "AirFilter", "CO2Scrubber" }
 			},
 			{
 				"LiquidPiping",
@@ -166,7 +166,8 @@ namespace Database
 					LogicPressureSensorLiquidConfig.ID,
 					"LiquidLogicValve",
 					"LiquidConduitPreferentialFlow",
-					"LiquidConduitOverflow"
+					"LiquidConduitOverflow",
+					"LiquidReservoir"
 				}
 			},
 			{
@@ -199,11 +200,11 @@ namespace Database
 			},
 			{
 				"Distillation",
-				new string[] { "WaterPurifier", "AlgaeDistillery" }
+				new string[] { "WaterPurifier", "AlgaeDistillery", "GasBottler", "BottleEmptierGas" }
 			},
 			{
 				"Catalytics",
-				new string[] { "OxyliteRefinery" }
+				new string[] { "OxyliteRefinery", "SupermaterialRefinery" }
 			},
 			{
 				"PowerRegulation",
@@ -216,7 +217,7 @@ namespace Database
 			},
 			{
 				"AdvancedPowerRegulation",
-				new string[] { "HighWattageWire", "WireBridgeHighWattage", "PowerTransformerSmall", "PowerControlStation" }
+				new string[] { "HydrogenGenerator", "HighWattageWire", "WireBridgeHighWattage", "PowerTransformerSmall", "PowerControlStation" }
 			},
 			{
 				"PrettyGoodConductors",
@@ -228,7 +229,7 @@ namespace Database
 			},
 			{
 				"Combustion",
-				new string[] { "Generator", "HydrogenGenerator" }
+				new string[] { "Generator" }
 			},
 			{
 				"ImprovedCombustion",
@@ -255,8 +256,12 @@ namespace Database
 				new string[] { "SuitMarker", "SuitLocker", "SuitFabricator", "SuitsOverlay" }
 			},
 			{
+				"Jobs",
+				new string[] { "RoleStation", "WaterCooler" }
+			},
+			{
 				"AdvancedResearch",
-				new string[] { "AdvancedResearchCenter", "RoleStation", "BetaResearchPoint", "WaterCooler" }
+				new string[] { "AdvancedResearchCenter", "BetaResearchPoint" }
 			},
 			{
 				"BasicRefinement",
@@ -294,7 +299,8 @@ namespace Database
 					LogicTemperatureSensorConfig.ID,
 					"GasConduitRadiant",
 					GasConduitTemperatureSensorConfig.ID,
-					GasConduitElementSensorConfig.ID
+					GasConduitElementSensorConfig.ID,
+					"GasReservoir"
 				}
 			},
 			{
@@ -339,7 +345,8 @@ namespace Database
 				{
 					"Checkpoint",
 					LogicMemoryConfig.ID,
-					"ArcadeMachine"
+					"ArcadeMachine",
+					"CosmicResearchCenter"
 				}
 			},
 			{
@@ -361,19 +368,39 @@ namespace Database
 			},
 			{
 				"SolidTransport",
-				new string[] { "SolidConduit", "SolidConduitBridge", "SolidConduitInbox", "SolidConduitOutbox" }
+				new string[] { "SolidConduit", "SolidConduitBridge", "SolidConduitInbox", "SolidConduitOutbox", "AutoMiner" }
 			},
 			{
 				"BasicRocketry",
-				new string[] { "LiquidFuelTank", "KeroseneEngine", "CommandModule", "CargoBay", "Gantry" }
+				new string[] { "CommandModule", "SteamEngine", "ResearchModule", "Gantry" }
 			},
 			{
-				"IntermediateRocketry",
-				new string[] { "LiquidCargoBay", "GasCargoBay", "SpecialCargoBay" }
+				"CargoI",
+				new string[] { "CargoBay" }
 			},
 			{
-				"IndustrialStorage",
-				new string[] { "LiquidReservoir", "GasReservoir", "GasBottler", "BottleEmptierGas" }
+				"CargoII",
+				new string[] { "LiquidCargoBay", "GasCargoBay" }
+			},
+			{
+				"CargoIII",
+				new string[] { "TouristModule", "SpecialCargoBay" }
+			},
+			{
+				"EnginesI",
+				new string[] { "SolidBooster" }
+			},
+			{
+				"EnginesII",
+				new string[] { "KeroseneEngine", "LiquidFuelTank", "OxidizerTank" }
+			},
+			{
+				"EnginesIII",
+				new string[] { "HydrogenEngine" }
+			},
+			{
+				"Jetpacks",
+				new string[] { "JetSuit", "JetSuitMarker", "JetSuitLocker" }
 			}
 		};
 
@@ -385,8 +412,7 @@ namespace Database
 			},
 			new List<Tuple<string, float>>
 			{
-				new Tuple<string, float>("alpha", 20f),
-				new Tuple<string, float>("beta", 10f)
+				new Tuple<string, float>("alpha", 20f)
 			},
 			new List<Tuple<string, float>>
 			{
@@ -411,20 +437,31 @@ namespace Database
 			new List<Tuple<string, float>>
 			{
 				new Tuple<string, float>("alpha", 70f),
-				new Tuple<string, float>("beta", 100f),
-				new Tuple<string, float>("gamma", 20f)
+				new Tuple<string, float>("beta", 100f)
 			},
 			new List<Tuple<string, float>>
 			{
 				new Tuple<string, float>("alpha", 70f),
 				new Tuple<string, float>("beta", 100f),
-				new Tuple<string, float>("gamma", 40f)
+				new Tuple<string, float>("gamma", 200f)
 			},
 			new List<Tuple<string, float>>
 			{
 				new Tuple<string, float>("alpha", 70f),
 				new Tuple<string, float>("beta", 100f),
-				new Tuple<string, float>("gamma", 60f)
+				new Tuple<string, float>("gamma", 400f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>("alpha", 70f),
+				new Tuple<string, float>("beta", 100f),
+				new Tuple<string, float>("gamma", 800f)
+			},
+			new List<Tuple<string, float>>
+			{
+				new Tuple<string, float>("alpha", 70f),
+				new Tuple<string, float>("beta", 100f),
+				new Tuple<string, float>("gamma", 1600f)
 			}
 		};
 	}

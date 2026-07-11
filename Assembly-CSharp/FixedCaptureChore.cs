@@ -17,6 +17,14 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 0, false, true, 0, null);
 		base.AddPrecondition(this.IsCreatureAvailableForFixedCapture, capture_point.GetSMI<FixedCapturePoint.Instance>());
 		base.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanWrangleCreatures.id);
+		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
+		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, capture_point.GetComponent<Building>());
+		Operational component = capture_point.GetComponent<Operational>();
+		base.AddPrecondition(ChorePreconditions.instance.IsOperational, component);
+		Deconstructable component2 = capture_point.GetComponent<Deconstructable>();
+		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
+		BuildingEnabledButton component3 = capture_point.GetComponent<BuildingEnabledButton>();
+		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
 		this.smi = new FixedCaptureChore.FixedCaptureChoreStates.Instance(capture_point);
 		base.SetPrioritizable(capture_point.GetComponent<Prioritizable>());
 	}

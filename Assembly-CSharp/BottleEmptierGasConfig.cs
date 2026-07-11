@@ -7,7 +7,7 @@ public class BottleEmptierGasConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "BottleEmptierGas";
-		int num = 2;
+		int num = 1;
 		int num2 = 3;
 		string text2 = "gas_emptying_station_kanim";
 		int num3 = 30;
@@ -40,7 +40,6 @@ public class BottleEmptierGasConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "BottleEmptierGas";

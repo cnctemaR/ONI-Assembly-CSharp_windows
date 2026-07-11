@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class OneshotReactableLocator : IEntityConfig
 {
-	public static EmoteReactable CreateOneshotReactable(GameObject source, float lifetime, string id, ChoreType chore_type, HashedString animset, int range_width = 15, int range_height = 15)
+	public static EmoteReactable CreateOneshotReactable(GameObject source, float lifetime, string id, ChoreType chore_type, HashedString animset, int range_width = 15, int range_height = 15, float min_reactor_time = 20f)
 	{
-		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(OneshotReactableLocator.ID), source.transform.position);
-		EmoteReactable emoteReactable = new EmoteReactable(gameObject, id, chore_type, animset, range_width, range_height, 100000f, 0f, float.PositiveInfinity);
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(OneshotReactableLocator.ID), source.transform.GetPosition());
+		EmoteReactable emoteReactable = new EmoteReactable(gameObject, id, chore_type, animset, range_width, range_height, 100000f, min_reactor_time, float.PositiveInfinity);
 		emoteReactable.AddPrecondition(OneshotReactableLocator.ReactorIsNotSource(source));
 		OneshotReactableHost component = gameObject.GetComponent<OneshotReactableHost>();
 		component.lifetime = lifetime;

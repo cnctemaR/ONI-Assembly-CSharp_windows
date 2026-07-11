@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Klei.AI;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using STRINGS;
 
 [DebuggerDisplay("{id}")]
@@ -177,6 +179,7 @@ public class Element : IComparable<Element>
 		return this.id - other.id;
 	}
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SimHashes id;
 
 	public Tag tag;
@@ -197,9 +200,9 @@ public class Element : IComparable<Element>
 
 	public float viscosity;
 
-	public float minHorizontalLiquidFlow = float.PositiveInfinity;
+	public float minHorizontalFlow = float.PositiveInfinity;
 
-	public float minVerticalLiquidFlow = float.PositiveInfinity;
+	public float minVerticalFlow = float.PositiveInfinity;
 
 	public float maxMass = 10000f;
 
@@ -209,34 +212,42 @@ public class Element : IComparable<Element>
 
 	public float gasSurfaceAreaMultiplier;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public Element.State state;
 
 	public byte hardness;
 
 	public float lowTemp;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SimHashes lowTempTransitionTarget;
 
 	public Element lowTempTransition;
 
 	public float highTemp;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SimHashes highTempTransitionTarget;
 
 	public Element highTempTransition;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SimHashes highTempTransitionOreID = SimHashes.Vacuum;
 
 	public float highTempTransitionOreMassConversion;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SimHashes lowTempTransitionOreID = SimHashes.Vacuum;
 
 	public float lowTempTransitionOreMassConversion;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SimHashes sublimateId;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SimHashes convertId;
 
+	[JsonConverter(typeof(StringEnumConverter))]
 	public SpawnFXHashes sublimateFX;
 
 	public float lightAbsorptionFactor;
@@ -249,6 +260,8 @@ public class Element : IComparable<Element>
 
 	public Tag materialCategory;
 
+	public int buildMenuSort;
+
 	public Tag[] oreTags = new Tag[0];
 
 	public List<AttributeModifier> attributeModifiers = new List<AttributeModifier>();
@@ -257,6 +270,7 @@ public class Element : IComparable<Element>
 
 	public const byte StateMask = 3;
 
+	[Serializable]
 	public enum State : byte
 	{
 		Vacuum,

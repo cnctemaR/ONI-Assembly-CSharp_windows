@@ -326,13 +326,41 @@ namespace UnityEngine.Timeline
 			}
 			scriptableObject.name = requestedType.Name;
 			TimelineCreateUtilities.SaveAssetIntoObject(scriptableObject, this);
-			TimelineClip timelineClip = this.CreateNewClipContainerInternal();
-			timelineClip.displayName = scriptableObject.name;
-			timelineClip.asset = scriptableObject;
-			IPlayableAsset playableAsset = scriptableObject as IPlayableAsset;
-			if (playableAsset != null)
+			return this.CreateClipFromAsset(scriptableObject);
+		}
+
+		internal TimelineClip CreateClipFromPlayableAsset(IPlayableAsset asset)
+		{
+			if (asset == null)
 			{
-				double duration = playableAsset.duration;
+				throw new ArgumentNullException("asset");
+			}
+			if (asset as ScriptableObject == null)
+			{
+				throw new ArgumentException("CreateClipFromPlayableAsset  only supports ScriptableObject-derived Types");
+			}
+			if (!this.ValidateClipType(asset.GetType()))
+			{
+				throw new InvalidOperationException(string.Concat(new object[]
+				{
+					"Clips of type ",
+					asset.GetType(),
+					" are not permitted on tracks of type ",
+					base.GetType()
+				}));
+			}
+			return this.CreateClipFromAsset(asset as ScriptableObject);
+		}
+
+		private TimelineClip CreateClipFromAsset(ScriptableObject playableAsset)
+		{
+			TimelineClip timelineClip = this.CreateNewClipContainerInternal();
+			timelineClip.displayName = playableAsset.name;
+			timelineClip.asset = playableAsset;
+			IPlayableAsset playableAsset2 = playableAsset as IPlayableAsset;
+			if (playableAsset2 != null)
+			{
+				double duration = playableAsset2.duration;
 				if (!double.IsInfinity(duration) && duration >= TimelineClip.kMinDuration && duration < TimelineClip.kMaxTimeValue)
 				{
 					timelineClip.duration = duration;
@@ -344,7 +372,7 @@ namespace UnityEngine.Timeline
 			}
 			catch (Exception ex)
 			{
-				Debug.LogError(ex.Message, scriptableObject);
+				Debug.LogError(ex.Message, playableAsset);
 				return null;
 			}
 			return timelineClip;

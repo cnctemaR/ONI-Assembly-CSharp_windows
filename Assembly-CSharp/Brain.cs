@@ -43,7 +43,14 @@ public class Brain : KMonoBehaviour
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
 		if (this.FindBetterChore(ref context))
 		{
-			base.GetComponent<ChoreDriver>().SetChore(context);
+			if (this.HasTag(GameTags.PerformingWorkRequest))
+			{
+				base.Trigger(1485595942, null);
+			}
+			else
+			{
+				base.GetComponent<ChoreDriver>().SetChore(context);
+			}
 		}
 	}
 

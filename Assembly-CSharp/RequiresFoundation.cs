@@ -25,8 +25,8 @@ public class RequiresFoundation : KGameObjectComponentManager<RequiresFoundation
 			};
 			Vector2I vector2I = Grid.CellToXY(num);
 			int xoffset = BuildingDef.GetXOffset(def.WidthInCells);
-			data.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.solidChangedLayer, action);
-			data.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("Overheatable.OnSpawn", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.objectLayers[1], action);
+			data.solidPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.solidChangedLayer, action);
+			data.buildingPartitionerEntry = GameScenePartitioner.Instance.Add("RequiresFoundation.Add", go, vector2I.x + xoffset, vector2I.y - 1, def.WidthInCells, def.HeightInCells + 1, GameScenePartitioner.Instance.objectLayers[1], action);
 			base.SetData(h, data);
 			this.OnSolidChanged(h);
 		}

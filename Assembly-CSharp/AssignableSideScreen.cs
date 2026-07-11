@@ -39,6 +39,8 @@ public class AssignableSideScreen : SideScreenContent
 			this.targetAssignableSubscriptionHandle = -1;
 		}
 		this.targetAssignable = null;
+		Components.LiveMinionIdentities.OnAdd -= this.OnMinionIdentitiesChanged;
+		Components.LiveMinionIdentities.OnRemove -= this.OnMinionIdentitiesChanged;
 		base.ClearTarget();
 	}
 
@@ -49,6 +51,8 @@ public class AssignableSideScreen : SideScreenContent
 
 	public override void SetTarget(GameObject target)
 	{
+		Components.LiveMinionIdentities.OnAdd += this.OnMinionIdentitiesChanged;
+		Components.LiveMinionIdentities.OnRemove += this.OnMinionIdentitiesChanged;
 		if (this.targetAssignableSubscriptionHandle != -1 && this.targetAssignable != null)
 		{
 			this.targetAssignable.Unsubscribe(this.targetAssignableSubscriptionHandle);
@@ -82,22 +86,9 @@ public class AssignableSideScreen : SideScreenContent
 		this.SortByAssignment(false);
 	}
 
-	protected override void OnActivate()
-	{
-		base.OnActivate();
-		Components.LiveMinionIdentities.OnAdd += this.OnMinionIdentitiesChanged;
-		Components.LiveMinionIdentities.OnRemove += this.OnMinionIdentitiesChanged;
-	}
-
-	protected override void OnDeactivate()
-	{
-		base.OnDeactivate();
-		Components.LiveMinionIdentities.OnAdd -= this.OnMinionIdentitiesChanged;
-		Components.LiveMinionIdentities.OnRemove -= this.OnMinionIdentitiesChanged;
-	}
-
 	private void OnMinionIdentitiesChanged(MinionIdentity change)
 	{
+		this.identityList = new List<MinionIdentity>(Components.LiveMinionIdentities.Items);
 		this.Refresh(this.identityList);
 	}
 

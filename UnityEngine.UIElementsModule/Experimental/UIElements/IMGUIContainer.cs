@@ -254,13 +254,10 @@ namespace UnityEngine.Experimental.UIElements
 				{
 					if (!evt.isPropagationStopped)
 					{
-						if (this.m_OnGUIHandler != null && base.elementPanel != null && base.elementPanel.IMGUIEventInterests.WantsEvent(evt.imguiEvent.type))
+						if (this.HandleIMGUIEvent(evt.imguiEvent))
 						{
-							if (this.HandleIMGUIEvent(evt.imguiEvent))
-							{
-								evt.StopPropagation();
-								evt.PreventDefault();
-							}
+							evt.StopPropagation();
+							evt.PreventDefault();
 						}
 					}
 				}
@@ -270,7 +267,7 @@ namespace UnityEngine.Experimental.UIElements
 		internal bool HandleIMGUIEvent(Event e)
 		{
 			bool flag;
-			if (e == null)
+			if (e == null || this.m_OnGUIHandler == null || base.elementPanel == null || !base.elementPanel.IMGUIEventInterests.WantsEvent(e.type))
 			{
 				flag = false;
 			}

@@ -17,7 +17,7 @@ public class LoadScreen : KModalScreen
 	{
 		LoadScreen.Instance = this;
 		base.OnPrefabInit();
-		this.saveButtonPool = new UIPool<KButton>(this.saveButtonPrefab);
+		this.savenameRowPool = new UIPool<HierarchyReferences>(this.saveButtonPrefab);
 		if (SpeedControlScreen.Instance != null)
 		{
 			SpeedControlScreen.Instance.Pause(false);
@@ -40,10 +40,7 @@ public class LoadScreen : KModalScreen
 		if (this.deleteButton != null)
 		{
 			this.deleteButton.onClick += this.Delete;
-		}
-		if (this.moreInfoButton != null)
-		{
-			this.moreInfoButton.onClick += this.MoreInfo;
+			this.deleteButton.isInteractable = false;
 		}
 	}
 
@@ -53,32 +50,96 @@ public class LoadScreen : KModalScreen
 		this.RefreshFiles();
 	}
 
-	private void RefreshFiles()
+	private void GetFilesList()
 	{
-		if (this.saveButtonPool != null)
-		{
-			this.saveButtonPool.ClearAll();
-		}
-		if (this.fileButtonMap != null)
-		{
-			this.fileButtonMap.Clear();
-		}
+		this.saveFiles = new Dictionary<string, List<LoadScreen.SaveGameFileDetails>>();
 		List<string> allFiles = SaveLoader.GetAllFiles();
 		if (allFiles.Count > 0)
 		{
 			for (int i = 0; i < allFiles.Count; i++)
 			{
-				this.AddExistingSaveFile(allFiles[i]);
+				bool flag = this.IsFileValid(allFiles[i]);
+				if (flag)
+				{
+					Tuple<SaveGame.Header, SaveGame.GameInfo> fileInfo = this.GetFileInfo(allFiles[i]);
+					SaveGame.Header first = fileInfo.first;
+					SaveGame.GameInfo second = fileInfo.second;
+					global::System.DateTime lastWriteTime = File.GetLastWriteTime(allFiles[i]);
+					string text = ((!(second.originalSaveName != string.Empty)) ? allFiles[i] : second.originalSaveName);
+					text = Path.GetFileNameWithoutExtension(text);
+					LoadScreen.SaveGameFileDetails saveGameFileDetails = default(LoadScreen.SaveGameFileDetails);
+					saveGameFileDetails.BaseName = second.baseName;
+					saveGameFileDetails.FileName = allFiles[i];
+					saveGameFileDetails.FileDate = lastWriteTime;
+					saveGameFileDetails.FileHeader = first;
+					saveGameFileDetails.FileInfo = second;
+					if (!this.saveFiles.ContainsKey(text))
+					{
+						this.saveFiles.Add(text, new List<LoadScreen.SaveGameFileDetails>());
+					}
+					this.saveFiles[text].Add(saveGameFileDetails);
+				}
 			}
-			this.SetSelectedGame(allFiles[0]);
-			this.deleteButton.isInteractable = true;
 		}
-		else
+	}
+
+	private bool IsFileValid(string filename)
+	{
+		bool flag = false;
+		try
 		{
-			this.saveDetails.text = string.Empty;
-			this.deleteButton.isInteractable = false;
-			this.loadButton.isInteractable = false;
+			SaveGame.Header header;
+			flag = SaveLoader.LoadHeader(filename, out header).saveMajorVersion >= 7;
 		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning("Corrupted save file: " + filename + "\n" + ex.ToString(), null);
+		}
+		return flag;
+	}
+
+	private Tuple<SaveGame.Header, SaveGame.GameInfo> GetFileInfo(string filename)
+	{
+		try
+		{
+			SaveGame.Header header;
+			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
+			if (gameInfo.saveMajorVersion >= 7)
+			{
+				return new Tuple<SaveGame.Header, SaveGame.GameInfo>(header, gameInfo);
+			}
+		}
+		catch (Exception ex)
+		{
+			global::Debug.LogWarning(ex, null);
+			this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
+		}
+		return null;
+	}
+
+	private void RefreshFiles()
+	{
+		if (this.savenameRowPool != null)
+		{
+			this.savenameRowPool.ClearAll();
+		}
+		if (this.fileButtonMap != null)
+		{
+			this.fileButtonMap.Clear();
+		}
+		this.GetFilesList();
+		if (this.saveFiles.Count > 0)
+		{
+			foreach (KeyValuePair<string, List<LoadScreen.SaveGameFileDetails>> keyValuePair in this.saveFiles)
+			{
+				this.AddExistingSaveFile(keyValuePair.Key, keyValuePair.Value);
+			}
+		}
+		this.InfoText.text = string.Empty;
+		this.CyclesSurvivedValue.text = "-";
+		this.DuplicantsAliveValue.text = "-";
+		this.deleteButton.isInteractable = false;
+		this.loadButton.isInteractable = false;
 	}
 
 	protected override void OnShow(bool show)
@@ -97,42 +158,82 @@ public class LoadScreen : KModalScreen
 		base.OnDeactivate();
 	}
 
-	private void AddExistingSaveFile(string filename)
+	private void AddExistingSaveFile(string savename, List<LoadScreen.SaveGameFileDetails> fileDetailsList)
 	{
-		KButton freeElement = this.saveButtonPool.GetFreeElement(this.saveButtonRoot, true);
-		freeElement.ClearOnClick();
-		LocText componentInChildren = freeElement.GetComponentInChildren<LocText>();
-		global::System.DateTime lastWriteTime = File.GetLastWriteTime(filename);
-		componentInChildren.text = string.Format("{0}\n{1:H:mm:ss}\n" + Localization.GetFileDateFormat(1), Path.GetFileNameWithoutExtension(filename), lastWriteTime);
-		freeElement.onClick += delegate
+		HierarchyReferences savenameRow = this.savenameRowPool.GetFreeElement(this.saveButtonRoot, true);
+		KButton component = savenameRow.GetReference<RectTransform>("Button").GetComponent<KButton>();
+		component.ClearOnClick();
+		LocText headerTitle = savenameRow.GetReference<RectTransform>("HeaderTitle").GetComponent<LocText>();
+		LocText component2 = savenameRow.GetReference<RectTransform>("HeaderDate").GetComponent<LocText>();
+		RectTransform saveDetailsRow = savenameRow.GetReference<RectTransform>("SaveDetailsRow");
+		LocText component3 = savenameRow.GetReference<RectTransform>("SaveDetailsBaseName").GetComponent<LocText>();
+		RectTransform savefileRowTemplate = savenameRow.GetReference<RectTransform>("SavefileRowTemplate");
+		fileDetailsList.Sort((LoadScreen.SaveGameFileDetails x, LoadScreen.SaveGameFileDetails y) => y.FileDate.CompareTo(x.FileDate));
+		headerTitle.text = savename;
+		component2.text = string.Format("{0:H:mm:ss} " + Localization.GetFileDateFormat(0), fileDetailsList[0].FileDate);
+		component3.text = string.Format("Base Name: {0}", fileDetailsList[0].BaseName);
+		for (int i = 0; i < savenameRow.transform.childCount; i++)
 		{
-			this.onClick(filename);
-		};
-		bool flag = false;
-		try
-		{
-			SaveGame.Header header;
-			flag = SaveLoader.LoadHeader(filename, out header).saveMajorVersion >= 7;
-		}
-		catch (Exception ex)
-		{
-			global::Debug.LogWarning("Corrupted save file: " + filename + "\n" + ex.ToString(), null);
-		}
-		if (flag)
-		{
-			freeElement.onDoubleClick += delegate
+			GameObject gameObject = savenameRow.transform.GetChild(i).gameObject;
+			if (gameObject != null && gameObject.name.Contains("Clone"))
 			{
-				this.onClick(filename);
-				this.DoLoad();
-			};
+				global::UnityEngine.Object.Destroy(gameObject);
+			}
 		}
-		ImageToggleState component = freeElement.GetComponent<ImageToggleState>();
-		component.colorStyleSetting = ((!flag) ? this.invalidSaveFileStyle : this.validSaveFileStyle);
-		component.RefreshColorStyle();
-		component.SetState(ImageToggleState.State.Inactive);
-		component.ResetColor();
-		freeElement.transform.SetAsLastSibling();
-		this.fileButtonMap.Add(filename, freeElement);
+		bool flag = true;
+		using (List<LoadScreen.SaveGameFileDetails>.Enumerator enumerator = fileDetailsList.GetEnumerator())
+		{
+			while (enumerator.MoveNext())
+			{
+				LoadScreen.SaveGameFileDetails fileDetails = enumerator.Current;
+				RectTransform rectTransform = global::UnityEngine.Object.Instantiate<RectTransform>(savefileRowTemplate, savenameRow.transform);
+				HierarchyReferences component4 = rectTransform.GetComponent<HierarchyReferences>();
+				KButton component5 = rectTransform.GetComponent<KButton>();
+				RectTransform reference = component4.GetReference<RectTransform>("NewestLabel");
+				RectTransform reference2 = component4.GetReference<RectTransform>("AutoLabel");
+				LocText component6 = component4.GetReference<RectTransform>("SaveText").GetComponent<LocText>();
+				LocText component7 = component4.GetReference<RectTransform>("DateText").GetComponent<LocText>();
+				reference.gameObject.SetActive(flag);
+				flag = false;
+				reference2.gameObject.SetActive(fileDetails.FileInfo.isAutoSave);
+				component6.text = Path.GetFileNameWithoutExtension(fileDetails.FileName);
+				component7.text = string.Format("{0:H:mm:ss} " + Localization.GetFileDateFormat(0), fileDetails.FileDate);
+				component5.onClick += delegate
+				{
+					this.onClick(fileDetails.FileName);
+				};
+				component5.onDoubleClick += delegate
+				{
+					this.onClick(fileDetails.FileName);
+					this.Load();
+				};
+				this.fileButtonMap.Add(fileDetails.FileName, component5);
+			}
+		}
+		component.onClick += delegate
+		{
+			bool activeSelf = saveDetailsRow.gameObject.activeSelf;
+			for (int j = 0; j < savenameRow.transform.childCount; j++)
+			{
+				GameObject gameObject2 = savenameRow.transform.GetChild(j).gameObject;
+				if (gameObject2 != null)
+				{
+					gameObject2.SetActive(!activeSelf);
+				}
+			}
+			headerTitle.transform.parent.gameObject.SetActive(true);
+			savefileRowTemplate.gameObject.SetActive(false);
+			if (!activeSelf)
+			{
+				this.onClick(fileDetailsList[0].FileName);
+			}
+		};
+		component.onDoubleClick += delegate
+		{
+			this.onClick(fileDetailsList[0].FileName);
+			this.DoLoad();
+		};
+		savenameRow.transform.SetAsLastSibling();
 	}
 
 	public static void ForceStopGame()
@@ -145,7 +246,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 285480U;
+		return header.buildVersion > 290148U;
 	}
 
 	private void SetSelectedGame(string filename)
@@ -153,46 +254,40 @@ public class LoadScreen : KModalScreen
 		if (string.IsNullOrEmpty(filename) || !File.Exists(filename))
 		{
 			global::Debug.LogError("The filename provided is not valid.", null);
+			this.deleteButton.isInteractable = false;
 			return;
 		}
+		this.deleteButton.isInteractable = true;
 		KButton kbutton = ((this.selectedFileName == null) ? null : this.fileButtonMap[this.selectedFileName]);
 		if (kbutton != null)
 		{
 			kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 		}
 		this.selectedFileName = filename;
+		this.FileName.text = Path.GetFileName(this.selectedFileName);
 		kbutton = this.fileButtonMap[this.selectedFileName];
 		kbutton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Active);
-		this.moreInfoButton.gameObject.SetActive(false);
 		try
 		{
 			SaveGame.Header header;
 			SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
-			string text = UI.FRONTEND.LOADSCREEN.SAVEDETAILS;
-			string text2 = string.Format("{0:H:mm:ss}\n" + Localization.GetFileDateFormat(0), File.GetLastWriteTime(filename));
-			string text3 = Path.GetFileName(filename);
+			string text = Path.GetFileName(filename);
 			if (gameInfo.isAutoSave)
 			{
-				text3 = text3 + "\n" + UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
+				text = text + "\n" + UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
 			}
-			string text4 = string.Format(text, new object[]
-			{
-				text3,
-				text2,
-				gameInfo.baseName,
-				gameInfo.numberOfDuplicants.ToString(),
-				gameInfo.numberOfCycles.ToString()
-			});
-			this.saveDetails.text = text4;
+			this.CyclesSurvivedValue.text = gameInfo.numberOfCycles.ToString();
+			this.DuplicantsAliveValue.text = gameInfo.numberOfDuplicants.ToString();
+			this.InfoText.text = string.Empty;
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 285480U);
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 290148U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
 			else if (gameInfo.saveMajorVersion < 7)
 			{
-				this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 6 });
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.UNSUPPORTED_SAVE_VERSION, new object[] { filename, gameInfo.saveMajorVersion, gameInfo.saveMinorVersion, 7, 6 });
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -201,16 +296,21 @@ public class LoadScreen : KModalScreen
 				this.loadButton.isInteractable = true;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 			}
+			if (this.InfoText.text == string.Empty && gameInfo.isAutoSave)
+			{
+				this.InfoText.text = UI.FRONTEND.LOADSCREEN.AUTOSAVEWARNING;
+			}
 		}
 		catch (Exception ex)
 		{
 			global::Debug.LogWarning(ex, null);
-			this.saveDetails.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
+			this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.CORRUPTEDSAVE, filename);
 			if (this.loadButton.isInteractable)
 			{
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
+			this.deleteButton.isInteractable = false;
 		}
 	}
 
@@ -233,10 +333,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 285480U)
+		if (header.buildVersion > 290148U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 285480U.ToString();
+			text2 = 290148U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -275,7 +375,6 @@ public class LoadScreen : KModalScreen
 		{
 			this.fileButtonMap[this.selectedFileName].GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Inactive);
 			this.fileButtonMap[this.selectedFileName].isInteractable = true;
-			this.saveButtonPool.ClearElement(this.fileButtonMap[this.selectedFileName]);
 			File.Delete(this.selectedFileName);
 			this.selectedFileName = null;
 			this.RefreshFiles();
@@ -306,7 +405,7 @@ public class LoadScreen : KModalScreen
 	private InspectSaveScreen inspectScreenInstance;
 
 	[SerializeField]
-	private KButton saveButtonPrefab;
+	private HierarchyReferences saveButtonPrefab;
 
 	[SerializeField]
 	private GameObject saveButtonRoot;
@@ -324,23 +423,43 @@ public class LoadScreen : KModalScreen
 	private KButton deleteButton;
 
 	[SerializeField]
-	private KButton moreInfoButton;
-
-	[SerializeField]
 	private ColorStyleSetting validSaveFileStyle;
 
 	[SerializeField]
 	private ColorStyleSetting invalidSaveFileStyle;
 
+	public LocText FileName;
+
+	public LocText CyclesSurvivedValue;
+
+	public LocText DuplicantsAliveValue;
+
+	public LocText InfoText;
+
 	public Action<string> onClick;
 
 	public bool requireConfirmation = true;
 
-	private UIPool<KButton> saveButtonPool;
+	private UIPool<HierarchyReferences> savenameRowPool;
 
 	private Dictionary<string, KButton> fileButtonMap = new Dictionary<string, KButton>();
 
 	private ConfirmDialogScreen confirmScreen;
 
 	private string selectedFileName;
+
+	private Dictionary<string, List<LoadScreen.SaveGameFileDetails>> saveFiles;
+
+	private struct SaveGameFileDetails
+	{
+		public string BaseName;
+
+		public string FileName;
+
+		public global::System.DateTime FileDate;
+
+		public SaveGame.Header FileHeader;
+
+		public SaveGame.GameInfo FileInfo;
+	}
 }

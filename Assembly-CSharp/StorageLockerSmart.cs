@@ -11,8 +11,8 @@ public class StorageLockerSmart : StorageLocker
 	{
 		base.OnSpawn();
 		this.ports = base.gameObject.GetComponent<LogicPorts>();
-		base.Subscribe(-1697596308, new Action<object>(this.UpdateLogicCircuitCB));
-		base.Subscribe(-592767678, new Action<object>(this.UpdateLogicCircuitCB));
+		base.Subscribe<StorageLockerSmart>(-1697596308, StorageLockerSmart.UpdateLogicCircuitCBDelegate);
+		base.Subscribe<StorageLockerSmart>(-592767678, StorageLockerSmart.UpdateLogicCircuitCBDelegate);
 		this.UpdateLogicCircuit();
 	}
 
@@ -48,4 +48,9 @@ public class StorageLockerSmart : StorageLocker
 
 	[MyCmpGet]
 	private Operational operational;
+
+	private static readonly EventSystem.IntraObjectHandler<StorageLockerSmart> UpdateLogicCircuitCBDelegate = new EventSystem.IntraObjectHandler<StorageLockerSmart>(delegate(StorageLockerSmart component, object data)
+	{
+		component.UpdateLogicCircuitCB(data);
+	});
 }

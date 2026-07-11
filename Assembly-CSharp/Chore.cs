@@ -18,7 +18,7 @@ public abstract class Chore
 		if (chore_provider == null)
 		{
 			chore_provider = GlobalChoreProvider.Instance;
-			DebugUtil.Assert(chore_provider != null, "Assert!");
+			DebugUtil.Assert(chore_provider != null, "Assert!", string.Empty, string.Empty);
 		}
 		this.choreType = chore_type;
 		this.choreTags = chore_tags;
@@ -173,7 +173,7 @@ public abstract class Chore
 
 	public virtual void Begin(Chore.Precondition.Context context)
 	{
-		DebugUtil.Assert(this.driver == null, "Assert!");
+		DebugUtil.Assert(this.driver == null, "Assert!", string.Empty, string.Empty);
 		if (this.provider == null)
 		{
 			global::Debug.LogError(string.Concat(new object[]

@@ -4,8 +4,8 @@ using UnityEngine.Bindings;
 
 namespace UnityEngine.XR.WSA
 {
-	[StaticAccessor("HolographicEmulation::HolographicEmulationManager::Get()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/VR/HoloLens/HolographicEmulation/HolographicEmulationManager.h")]
+	[StaticAccessor("HolographicEmulation::HolographicEmulationManager::Get()", StaticAccessorType.Dot)]
 	[NativeConditional("ENABLE_HOLOLENS_MODULE")]
 	internal class HolographicAutomation
 	{

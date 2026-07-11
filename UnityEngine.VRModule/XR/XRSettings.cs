@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Bindings;
-using UnityEngine.Scripting;
 
 namespace UnityEngine.XR
 {
 	/// <summary>
 	///   <para>Global XR related settings.</para>
 	/// </summary>
-	[NativeHeader("Runtime/VR/VRDevice.h")]
-	[NativeHeader("Runtime/VR/PluginInterface/Headers/IUnityVR.h")]
+	[NativeConditional("ENABLE_VR")]
+	[NativeHeader("Runtime/VR/VRModule.h")]
+	[NativeHeader("Runtime/Interfaces/IVRDevice.h")]
+	[NativeHeader("Runtime/VR/ScriptBindings/XR.bindings.h")]
 	public static class XRSettings
 	{
 		/// <summary>
@@ -17,10 +18,22 @@ namespace UnityEngine.XR
 		/// </summary>
 		public static extern bool enabled
 		{
-			[GeneratedByOldBindingsGenerator]
+			[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
+			[NativeMethod("VRModuleBindings::SetDeviceEnabled", true)]
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
+		/// <summary>
+		///   <para>Sets the render mode for the XR device. The render mode controls how the view of the XR device renders in the Game view and in the main window on a host PC.</para>
+		/// </summary>
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		public static extern GameViewRenderMode gameViewRenderMode
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -28,9 +41,10 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>Read-only value that can be used to determine if the XR device is active.</para>
 		/// </summary>
+		[NativeName("Active")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool isDeviceActive
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -38,12 +52,11 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>This property has been deprecated. Use XRSettings.gameViewRenderMode instead.</para>
 		/// </summary>
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool showDeviceView
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -51,13 +64,12 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>This field has been deprecated. Use XRSettings.eyeTextureResolutionScale instead.</para>
 		/// </summary>
-		[Obsolete("renderScale is deprecated, use XRSettings.eyeTextureResolutionScale instead (UnityUpgradable) -> eyeTextureResolutionScale")]
+		[Obsolete("renderScale is deprecated, use XRSettings.eyeTextureResolutionScale instead (UnityUpgradable) -> eyeTextureResolutionScale", false)]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float renderScale
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -65,12 +77,12 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>Controls the actual size of eye textures as a multiplier of the device's default resolution.</para>
 		/// </summary>
+		[NativeName("RenderScale")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float eyeTextureResolutionScale
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -78,9 +90,9 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>The current width of an eye texture for the loaded device.</para>
 		/// </summary>
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern int eyeTextureWidth
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -88,39 +100,28 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>The current height of an eye texture for the loaded device.</para>
 		/// </summary>
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern int eyeTextureHeight
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-		}
-
-		internal static extern float renderViewportScaleInternal
-		{
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[GeneratedByOldBindingsGenerator]
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
 		}
 
 		/// <summary>
 		///   <para>Fetch the eye texture RenderTextureDescriptor from the active stereo device.</para>
 		/// </summary>
+		[NativeName("DefaultEyeTextureDesc")]
+		[NativeConditional("ENABLE_VR", "RenderTextureDesc()")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static RenderTextureDescriptor eyeTextureDesc
 		{
 			get
 			{
 				RenderTextureDescriptor renderTextureDescriptor;
-				XRSettings.INTERNAL_get_eyeTextureDesc(out renderTextureDescriptor);
+				XRSettings.get_eyeTextureDesc_Injected(out renderTextureDescriptor);
 				return renderTextureDescriptor;
 			}
 		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_get_eyeTextureDesc(out RenderTextureDescriptor value);
 
 		/// <summary>
 		///   <para>Controls how much of the allocated eye texture should be used for rendering.</para>
@@ -141,15 +142,24 @@ namespace UnityEngine.XR
 			}
 		}
 
+		[NativeName("RenderViewportScale")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		internal static extern float renderViewportScaleInternal
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
+
 		/// <summary>
 		///   <para>A scale applied to the standard occulsion mask for each platform.</para>
 		/// </summary>
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float occlusionMaskScale
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -157,12 +167,11 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>Specifies whether or not the occlusion mesh should be used when rendering. Enabled by default.</para>
 		/// </summary>
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool useOcclusionMesh
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}
@@ -170,9 +179,10 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>Type of XR device that is currently loaded.</para>
 		/// </summary>
+		[NativeName("DeviceName")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern string loadedDeviceName
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -192,7 +202,6 @@ namespace UnityEngine.XR
 		/// </summary>
 		/// <param name="deviceName">Name of the device from XRSettings.supportedDevices.</param>
 		/// <param name="prioritizedDeviceNameList">Prioritized list of device names from XRSettings.supportedDevices.</param>
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void LoadDeviceByName(string[] prioritizedDeviceNameList);
 
@@ -201,20 +210,11 @@ namespace UnityEngine.XR
 		/// </summary>
 		public static extern string[] supportedDevices
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
 
-		/// <summary>
-		///   <para>Sets the render mode for the XR device. The render mode controls how the view of the XR device renders in the Game view and in the main window on a host PC.</para>
-		/// </summary>
-		public static extern GameViewRenderMode gameViewRenderMode
-		{
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			get;
-			[MethodImpl(MethodImplOptions.InternalCall)]
-			set;
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern void get_eyeTextureDesc_Injected(out RenderTextureDescriptor ret);
 	}
 }

@@ -12,15 +12,15 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>A Camera is a device through which the player views the world.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
-	[UsedByNativeCode]
+	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Camera/RenderManager.h")]
 	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
-	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
+	[UsedByNativeCode]
+	[RequireComponent(typeof(Transform))]
 	public sealed class Camera : Behaviour
 	{
 		/// <summary>

@@ -11,13 +11,10 @@ public class AttackableBase : Workable, IApproachable
 		this.attributeConverter = Db.Get().AttributeConverters.AttackDamage;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.BARELY_EVER_EXPERIENCE;
 		this.SetupScenePartitioner(null);
-		base.Subscribe(1088554450, delegate(object o)
-		{
-			GameScenePartitioner.Instance.UpdatePosition(this.scenePartitionerEntry, Grid.PosToCell(base.gameObject));
-		});
-		base.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
-		base.Subscribe(-1256572400, new Action<object>(this.SetupScenePartitioner));
-		base.Subscribe(1623392196, new Action<object>(this.OnDefeated));
+		base.Subscribe<AttackableBase>(1088554450, AttackableBase.OnCellChangedDelegate);
+		base.Subscribe<AttackableBase>(-1506500077, AttackableBase.OnDefeatedDelegate);
+		base.Subscribe<AttackableBase>(-1256572400, AttackableBase.SetupScenePartitionerDelegate);
+		base.Subscribe<AttackableBase>(1623392196, AttackableBase.OnDefeatedDelegate);
 	}
 
 	public float GetDamageMultiplier()
@@ -55,12 +52,27 @@ public class AttackableBase : Workable, IApproachable
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe(-1506500077, new Action<object>(this.OnDefeated));
-		base.Unsubscribe(1623392196, new Action<object>(this.OnDefeated));
-		base.Unsubscribe(-1256572400, new Action<object>(this.SetupScenePartitioner));
+		base.Unsubscribe<AttackableBase>(-1506500077, AttackableBase.OnDefeatedDelegate);
+		base.Unsubscribe<AttackableBase>(1623392196, AttackableBase.OnDefeatedDelegate);
+		base.Unsubscribe<AttackableBase>(-1256572400, AttackableBase.SetupScenePartitionerDelegate);
 		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		base.OnCleanUp();
 	}
 
 	private HandleVector<int>.Handle scenePartitionerEntry;
+
+	private static readonly EventSystem.IntraObjectHandler<AttackableBase> OnDefeatedDelegate = new EventSystem.IntraObjectHandler<AttackableBase>(delegate(AttackableBase component, object data)
+	{
+		component.OnDefeated(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<AttackableBase> SetupScenePartitionerDelegate = new EventSystem.IntraObjectHandler<AttackableBase>(delegate(AttackableBase component, object data)
+	{
+		component.SetupScenePartitioner(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<AttackableBase> OnCellChangedDelegate = new EventSystem.IntraObjectHandler<AttackableBase>(delegate(AttackableBase component, object data)
+	{
+		GameScenePartitioner.Instance.UpdatePosition(component.scenePartitionerEntry, Grid.PosToCell(component.gameObject));
+	});
 }

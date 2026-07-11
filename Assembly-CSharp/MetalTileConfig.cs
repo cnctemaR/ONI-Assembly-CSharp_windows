@@ -37,10 +37,7 @@ public class MetalTileConfig : IBuildingConfig
 		buildingDef.BlockTileShineAtlas = Assets.GetTextureAtlas("tiles_metal_spec");
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_metal_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_metal_tops_decor_place_info");
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		return buildingDef;
 	}
 
@@ -50,6 +47,7 @@ public class MetalTileConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		SimCellOccupier simCellOccupier = go.AddOrGet<SimCellOccupier>();
 		simCellOccupier.movementSpeedMultiplier = DUPLICANTSTATS.MOVEMENT.BONUS_3;
+		simCellOccupier.notifyOnMelt = true;
 		go.AddOrGet<TileTemperature>();
 		KAnimGridTileVisualizer kanimGridTileVisualizer = go.AddOrGet<KAnimGridTileVisualizer>();
 		kanimGridTileVisualizer.blockTileConnectorID = MetalTileConfig.BlockTileConnectorID;
@@ -59,8 +57,7 @@ public class MetalTileConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
-		go.AddComponent<SimTemperatureTransfer>();
+		GeneratedBuildings.RemoveLoopingSounds(go);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

@@ -17,9 +17,13 @@ public class StorageController : GameStateMachine<StorageController, StorageCont
 
 	public GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget, object>.State working;
 
+	public class Def : StateMachine.BaseDef
+	{
+	}
+
 	public new class Instance : GameStateMachine<StorageController, StorageController.Instance, IStateMachineTarget, object>.GameInstance
 	{
-		public Instance(IStateMachineTarget master)
+		public Instance(IStateMachineTarget master, StorageController.Def def)
 			: base(master)
 		{
 		}

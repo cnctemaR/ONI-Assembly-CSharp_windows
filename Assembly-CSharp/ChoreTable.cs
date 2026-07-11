@@ -33,7 +33,7 @@ public class ChoreTable
 
 		public ChoreTable.Builder PopInterruptGroup()
 		{
-			DebugUtil.Assert(this.interruptGroupId > 0, "Assert!");
+			DebugUtil.Assert(this.interruptGroupId > 0, "Assert!", string.Empty, string.Empty);
 			this.interruptGroupId--;
 			return this;
 		}
@@ -54,7 +54,7 @@ public class ChoreTable
 
 		public ChoreTable CreateTable()
 		{
-			DebugUtil.Assert(this.interruptGroupId == 0, "Assert!");
+			DebugUtil.Assert(this.interruptGroupId == 0, "Assert!", string.Empty, string.Empty);
 			ChoreTable.Entry[] array = new ChoreTable.Entry[this.infos.Count];
 			Stack<int> stack = new Stack<int>();
 			for (int i = 0; i < this.infos.Count; i++)

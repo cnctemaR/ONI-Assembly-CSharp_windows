@@ -9,7 +9,7 @@ public class Placeable : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Placeable>(493375141, Placeable.OnRefreshUserMenuDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -118,4 +118,9 @@ public class Placeable : KMonoBehaviour
 	private GameObject preview;
 
 	private FetchChore chore;
+
+	private static readonly EventSystem.IntraObjectHandler<Placeable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Placeable>(delegate(Placeable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

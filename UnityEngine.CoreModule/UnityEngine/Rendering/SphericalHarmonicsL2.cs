@@ -9,8 +9,8 @@ namespace UnityEngine.Rendering
 	/// <summary>
 	///   <para>Spherical harmonics up to the second order (3 bands, 9 coefficients).</para>
 	/// </summary>
-	[NativeHeader("Runtime/Export/SphericalHarmonicsL2.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Export/SphericalHarmonicsL2.bindings.h")]
 	public struct SphericalHarmonicsL2 : IEquatable<SphericalHarmonicsL2>
 	{
 		/// <summary>

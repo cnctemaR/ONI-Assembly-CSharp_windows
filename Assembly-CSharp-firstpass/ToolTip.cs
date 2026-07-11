@@ -39,7 +39,7 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 		{
 			global::Debug.LogError("The object " + base.gameObject.name + " has more than one ToolTip, it conflict when displaying this tooltip.", null);
 		}
-		base.Subscribe(2098165161, new Action<object>(this.OnClick));
+		base.Subscribe<ToolTip>(2098165161, ToolTip.OnClickDelegate);
 		if (this.UseFixedStringKey)
 		{
 			string text = Strings.Get(new StringKey(this.FixedStringKey));
@@ -257,6 +257,11 @@ public class ToolTip : KMonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 	public float WrapWidth = 256f;
 
 	private Func<string> _OnToolTip;
+
+	private static readonly global::EventSystem.IntraObjectHandler<ToolTip> OnClickDelegate = new global::EventSystem.IntraObjectHandler<ToolTip>(delegate(ToolTip component, object data)
+	{
+		component.OnClick(data);
+	});
 
 	public enum TooltipPosition
 	{

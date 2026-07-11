@@ -29,7 +29,6 @@ public class AstronautTrainingCenter : Workable
 		WorkChore<AstronautTrainingCenter> workChore = new WorkChore<AstronautTrainingCenter>(Db.Get().ChoreTypes.Train, this, null, null, true, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsRole, AstronautTrainee.ID);
 		workChore.AddPrecondition(ChorePreconditions.instance.HasNotMasteredRole, AstronautTrainee.ID);
-		workChore.AddPrecondition(ResearchCenter.IsBuildingReady, this);
 		return workChore;
 	}
 

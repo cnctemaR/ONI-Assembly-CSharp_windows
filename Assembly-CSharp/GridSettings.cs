@@ -31,7 +31,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.Loudness = new float[Grid.CellCount];
 		Grid.PreventFogOfWarReveal = new bool[Grid.CellCount];
 		Grid.IsTileUnderConstruction = new bool[Grid.CellCount];
-		Grid.PreventIdlingOnCell = new bool[Grid.CellCount];
+		Grid.PreventIdleTraversal = new bool[Grid.CellCount];
 		Grid.AllowPathfinding = new bool[Grid.CellCount];
 		Grid.GravitasFacility = new bool[Grid.CellCount];
 		Grid.ObjectLayers = new Dictionary<int, GameObject>[37];
@@ -86,7 +86,7 @@ public class GridSettings : KMonoBehaviour
 		Grid.Loudness = null;
 		Grid.PreventFogOfWarReveal = null;
 		Grid.IsTileUnderConstruction = null;
-		Grid.PreventIdlingOnCell = null;
+		Grid.PreventIdleTraversal = null;
 		Grid.AllowPathfinding = null;
 		Grid.GravitasFacility = null;
 		Grid.ObjectLayers = null;

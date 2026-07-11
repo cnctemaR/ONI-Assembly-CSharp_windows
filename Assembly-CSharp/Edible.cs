@@ -4,7 +4,7 @@ using Klei.AI;
 using STRINGS;
 using UnityEngine;
 
-public class Edible : Workable, IGameObjectEffectDescriptor
+public class Edible : Workable, IGameObjectEffectDescriptor, IHasSortOrder
 {
 	private Edible()
 	{
@@ -50,6 +50,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		}
 	}
 
+	public int sortOrder { get; set; }
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -62,8 +64,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			this.foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.FoodID);
 		}
 		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
-		base.Subscribe(748399584, new Action<object>(this.OnCraft));
-		base.Subscribe(1272413801, new Action<object>(this.OnCraft));
+		base.Subscribe<Edible>(748399584, Edible.OnCraftDelegate);
+		base.Subscribe<Edible>(1272413801, Edible.OnCraftDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Eating;
 		this.synchronizeAnims = false;
 		Components.Edibles.Add(this);
@@ -73,6 +75,16 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	{
 		base.OnSpawn();
 		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().MiscStatusItems.Edible, this);
+	}
+
+	public override HashedString[] GetWorkAnims(Worker worker)
+	{
+		MinionResume component = worker.GetComponent<MinionResume>();
+		if (component != null && component.CurrentRole != "NoRole")
+		{
+			return Edible.hatWorkAnims;
+		}
+		return Edible.normalWorkAnims;
 	}
 
 	private void OnCraft(object data)
@@ -168,9 +180,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private void AddQualityEffects(Worker worker)
 	{
-		Attributes attributes = base.gameObject.GetAttributes();
+		Attributes attributes = worker.GetAttributes();
 		AttributeInstance attributeInstance = attributes.Add(Db.Get().Attributes.FoodExpectation);
-		int num = Mathf.RoundToInt(attributeInstance.GetTotalValue());
+		float totalValue = attributeInstance.GetTotalValue();
+		int num = Mathf.RoundToInt(totalValue);
 		int num2 = this.FoodInfo.Quality + num;
 		Effects component = worker.GetComponent<Effects>();
 		component.Add(Edible.GetEffectForFoodQuality(num2), true);
@@ -210,6 +223,19 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	public float caloriesConsumed = float.NaN;
 
 	private AttributeModifier caloriesModifier = new AttributeModifier("CaloriesDelta", 50000f, DUPLICANTS.MODIFIERS.EATINGCALORIES.NAME, false, false, true);
+
+	private static readonly EventSystem.IntraObjectHandler<Edible> OnCraftDelegate = new EventSystem.IntraObjectHandler<Edible>(delegate(Edible component, object data)
+	{
+		component.OnCraft(data);
+	});
+
+	private static readonly HashedString[] normalWorkAnims = new HashedString[] { "working_pre", "working_loop" };
+
+	private static readonly HashedString[] hatWorkAnims = new HashedString[] { "hat_pre", "working_loop" };
+
+	private static readonly HashedString normalWorkPstAnim = "working_pst";
+
+	private static readonly HashedString hatWorkPstAnim = "hat_pst";
 
 	private static Dictionary<int, string> qualityEffects = new Dictionary<int, string>
 	{

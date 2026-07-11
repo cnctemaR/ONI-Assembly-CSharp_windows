@@ -28,6 +28,14 @@ public class StateMachineManager : Singleton<StateMachineManager>, IScheduler
 			stateMachine.BindStates();
 			stateMachine.InitializeStateMachine();
 			this.stateMachines[type] = stateMachine;
+			List<Action<StateMachine>> list;
+			if (this.stateMachineCreatedCBs.TryGetValue(type, out list))
+			{
+				foreach (Action<StateMachine> action in list)
+				{
+					action(stateMachine);
+				}
+			}
 		}
 		return stateMachine;
 	}
@@ -66,9 +74,31 @@ public class StateMachineManager : Singleton<StateMachineManager>, IScheduler
 		}
 	}
 
+	public void AddStateMachineCreatedCallback(Type sm_type, Action<StateMachine> cb)
+	{
+		List<Action<StateMachine>> list;
+		if (!this.stateMachineCreatedCBs.TryGetValue(sm_type, out list))
+		{
+			list = new List<Action<StateMachine>>();
+			this.stateMachineCreatedCBs[sm_type] = list;
+		}
+		list.Add(cb);
+	}
+
+	public void RemoveStateMachineCreatedCallback(Type sm_type, Action<StateMachine> cb)
+	{
+		List<Action<StateMachine>> list;
+		if (this.stateMachineCreatedCBs.TryGetValue(sm_type, out list))
+		{
+			list.Remove(cb);
+		}
+	}
+
 	private Scheduler scheduler;
 
 	private Dictionary<Type, StateMachine> stateMachines = new Dictionary<Type, StateMachine>();
+
+	private Dictionary<Type, List<Action<StateMachine>>> stateMachineCreatedCBs = new Dictionary<Type, List<Action<StateMachine>>>();
 
 	private static object[] parameters = new object[2];
 }

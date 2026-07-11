@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Scripting;
+using UnityEngine.Bindings;
 
 namespace UnityEngine.XR
 {
 	/// <summary>
 	///   <para>Contains all functionality related to a XR device.</para>
 	/// </summary>
+	[NativeConditional("ENABLE_VR")]
 	public static class XRDevice
 	{
 		/// <summary>
 		///   <para>Successfully detected a XR device in working order.</para>
 		/// </summary>
+		[NativeName("DeviceConnected")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern bool isPresent
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -24,7 +26,6 @@ namespace UnityEngine.XR
 		/// </summary>
 		public static extern UserPresenceState userPresence
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -32,10 +33,11 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>The name of the family of the loaded XR device.</para>
 		/// </summary>
-		[Obsolete("family is deprecated.  Use XRSettings.loadedDeviceName instead.")]
+		[NativeName("DeviceName")]
+		[Obsolete("family is deprecated.  Use XRSettings.loadedDeviceName instead.", false)]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern string family
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -43,9 +45,10 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>Specific model of loaded XR device.</para>
 		/// </summary>
+		[NativeName("DeviceModel")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern string model
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
@@ -53,12 +56,23 @@ namespace UnityEngine.XR
 		/// <summary>
 		///   <para>Refresh rate of the display in Hertz.</para>
 		/// </summary>
+		[NativeName("DeviceRefreshRate")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		public static extern float refreshRate
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
 		}
+
+		/// <summary>
+		///   <para>This method returns an IntPtr representing the native pointer to the XR device if one is available, otherwise the value will be IntPtr.Zero.</para>
+		/// </summary>
+		/// <returns>
+		///   <para>The native pointer to the XR device.</para>
+		/// </returns>
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		public static extern IntPtr GetNativePtr();
 
 		/// <summary>
 		///   <para>Returns the device's current TrackingSpaceType. This value determines how the camera is positioned relative to its starting position. For more, see the section "Understanding the camera" in.</para>
@@ -66,7 +80,7 @@ namespace UnityEngine.XR
 		/// <returns>
 		///   <para>The device's current TrackingSpaceType.</para>
 		/// </returns>
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern TrackingSpaceType GetTrackingSpaceType();
 
@@ -78,49 +92,24 @@ namespace UnityEngine.XR
 		/// <returns>
 		///   <para>True on success. False if the given TrackingSpaceType is not supported or the device fails to switch.</para>
 		/// </returns>
-		[GeneratedByOldBindingsGenerator]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool SetTrackingSpaceType(TrackingSpaceType trackingSpaceType);
 
-		/// <summary>
-		///   <para>This method returns an IntPtr representing the native pointer to the XR device if one is available, otherwise the value will be IntPtr.Zero.</para>
-		/// </summary>
-		/// <returns>
-		///   <para>The native pointer to the XR device.</para>
-		/// </returns>
-		public static IntPtr GetNativePtr()
-		{
-			IntPtr intPtr;
-			XRDevice.INTERNAL_CALL_GetNativePtr(out intPtr);
-			return intPtr;
-		}
-
-		[GeneratedByOldBindingsGenerator]
+		[NativeName("DisableAutoVRCameraTracking")]
+		[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void INTERNAL_CALL_GetNativePtr(out IntPtr value);
-
-		public static void DisableAutoXRCameraTracking(Camera camera, bool disabled)
-		{
-			if (camera == null)
-			{
-				throw new ArgumentNullException("camera");
-			}
-			XRDevice.DisableAutoXRCameraTrackingInternal(camera, disabled);
-		}
-
-		[GeneratedByOldBindingsGenerator]
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void DisableAutoXRCameraTrackingInternal(Camera camera, bool disabled);
+		public static extern void DisableAutoXRCameraTracking([NotNull] Camera camera, bool disabled);
 
 		/// <summary>
 		///   <para>Zooms the XR projection.</para>
 		/// </summary>
 		public static extern float fovZoomFactor
 		{
-			[GeneratedByOldBindingsGenerator]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			get;
-			[GeneratedByOldBindingsGenerator]
+			[StaticAccessor("GetIVRDevice()", StaticAccessorType.ArrowWithDefaultReturnIfNull)]
+			[NativeName("SetProjectionZoomFactor")]
 			[MethodImpl(MethodImplOptions.InternalCall)]
 			set;
 		}

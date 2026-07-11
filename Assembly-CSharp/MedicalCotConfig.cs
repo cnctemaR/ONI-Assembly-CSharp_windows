@@ -31,7 +31,6 @@ public class MedicalCotConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		go.GetComponent<KAnimControllerBase>().initialAnim = "off";
 		go.GetComponent<KPrefabID>().AddTag(TagManager.Create("Bed"));
 		Clinic clinic = go.AddOrGet<Clinic>();

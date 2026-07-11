@@ -70,8 +70,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		{
 			this.choreConsumer.SetPermittedByUser(choreGroups[i], true);
 		}
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(1745615042, new Action<object>(this.OnEndChore));
+		base.Subscribe<SolidTransferArm>(-592767678, SolidTransferArm.OnOperationalChangedDelegate);
+		base.Subscribe<SolidTransferArm>(1745615042, SolidTransferArm.OnEndChoreDelegate);
 		this.RotateArm(this.rotatable.GetRotatedOffset(Vector3.up), true, 0f);
 		this.DropLeftovers();
 		component.enabled = false;
@@ -136,7 +136,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			for (int j = num - this.pickupRange; j < num + this.pickupRange + 1; j++)
 			{
 				int num3 = Grid.XYToCell(j, i);
-				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, j, i, true, true))
+				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, j, i, true))
 				{
 					this.reachableCells.Add(num3);
 				}
@@ -318,6 +318,8 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	{
 		this.arm_rot = rot;
 		this.arm_go.transform.rotation = Quaternion.Euler(0f, 0f, this.arm_rot);
+		this.arm_anim_ctrl.enabled = false;
+		this.arm_anim_ctrl.enabled = true;
 	}
 
 	private void RotateArm(Vector3 target_dir, bool warp, float dt)
@@ -434,6 +436,16 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	private SolidTransferArm.ArmAnim arm_anim;
 
 	private List<int> reachableCells = new List<int>(100);
+
+	private static readonly EventSystem.IntraObjectHandler<SolidTransferArm> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<SolidTransferArm>(delegate(SolidTransferArm component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<SolidTransferArm> OnEndChoreDelegate = new EventSystem.IntraObjectHandler<SolidTransferArm>(delegate(SolidTransferArm component, object data)
+	{
+		component.OnEndChore(data);
+	});
 
 	private static HashedString HASH_ROTATION = "rotation";
 

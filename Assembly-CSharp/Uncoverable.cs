@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
+using STRINGS;
 
 public class Uncoverable : KMonoBehaviour
 {
@@ -44,7 +45,7 @@ public class Uncoverable : KMonoBehaviour
 			GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 			this.hasBeenUncovered = true;
 			base.GetComponent<KSelectable>().IsSelectable = true;
-			Notification notification = new Notification("Buried Object Discovered!", NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null);
+			Notification notification = new Notification(MISC.STATUSITEMS.BURIEDITEM.NOTIFICATION, NotificationType.Good, HashedString.Invalid, new Func<List<Notification>, object, string>(Uncoverable.OnNotificationToolTip), this, true, 0f, null, null);
 			base.gameObject.AddOrGet<Notifier>().Add(notification, string.Empty);
 		}
 	}
@@ -52,7 +53,7 @@ public class Uncoverable : KMonoBehaviour
 	private static string OnNotificationToolTip(List<Notification> notifications, object data)
 	{
 		Uncoverable uncoverable = (Uncoverable)data;
-		return "Miners have uncovered a {Uncoverable}!\n\nClick to jump to its location.".Replace("{Uncoverable}", uncoverable.GetProperName());
+		return MISC.STATUSITEMS.BURIEDITEM.NOTIFICATION_TOOLTIP.Replace("{Uncoverable}", uncoverable.GetProperName());
 	}
 
 	protected override void OnCleanUp()

@@ -46,5 +46,6 @@ public enum SimMessageHashes
 	RemoveDiseaseConsumer = -781641650,
 	ConsumeDisease = -1019841536,
 	CellDiseaseModification = -1853671274,
-	ToggleProfiler = -409964931
+	ToggleProfiler = -409964931,
+	SetSavedOptions = 1154135737
 }

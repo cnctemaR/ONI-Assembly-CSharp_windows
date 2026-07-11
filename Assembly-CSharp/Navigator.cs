@@ -51,11 +51,11 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		base.OnSpawn();
 		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
-		base.Subscribe(1623392196, new Action<object>(this.OnDefeated));
-		base.Subscribe(-1506500077, new Action<object>(this.OnDefeated));
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
-		base.Subscribe(856640610, new Action<object>(this.OnStore));
+		base.Subscribe<Navigator>(1623392196, Navigator.OnDefeatedDelegate);
+		base.Subscribe<Navigator>(-1506500077, Navigator.OnDefeatedDelegate);
+		base.Subscribe<Navigator>(493375141, Navigator.OnRefreshUserMenuDelegate);
+		base.Subscribe<Navigator>(-1503271301, Navigator.OnSelectObjectDelegate);
+		base.Subscribe<Navigator>(856640610, Navigator.OnStoreDelegate);
 		if (this.updateProber)
 		{
 			SimAndRenderScheduler.instance.Add(this, false);
@@ -521,12 +521,32 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	private NavTactic tactic;
 
+	private static readonly EventSystem.IntraObjectHandler<Navigator> OnDefeatedDelegate = new EventSystem.IntraObjectHandler<Navigator>(delegate(Navigator component, object data)
+	{
+		component.OnDefeated(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Navigator> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Navigator>(delegate(Navigator component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Navigator> OnSelectObjectDelegate = new EventSystem.IntraObjectHandler<Navigator>(delegate(Navigator component, object data)
+	{
+		component.OnSelectObject(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Navigator> OnStoreDelegate = new EventSystem.IntraObjectHandler<Navigator>(delegate(Navigator component, object data)
+	{
+		component.OnStore(data);
+	});
+
 	public class ActiveTransition
 	{
 		public ActiveTransition(NavGrid.Transition transition, float default_speed)
 		{
-			this.x = transition.x;
-			this.y = transition.y;
+			this.x = (int)transition.x;
+			this.y = (int)transition.y;
 			this.isLooping = transition.isLooping;
 			this.start = transition.start;
 			this.end = transition.end;

@@ -9,10 +9,10 @@ namespace UnityEngine.Playables
 	/// <summary>
 	///   <para>Use the PlayableGraph to manage Playable creations and destructions.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
 	public struct PlayableGraph
 	{
 		/// <summary>

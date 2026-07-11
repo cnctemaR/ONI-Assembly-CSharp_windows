@@ -72,6 +72,11 @@ public class Room : IAssignableIdentity
 		}
 	}
 
+	public bool IsNull()
+	{
+		return false;
+	}
+
 	public void CleanUp()
 	{
 		Game.Instance.assignmentManager.RemoveFromAllGroups(this);

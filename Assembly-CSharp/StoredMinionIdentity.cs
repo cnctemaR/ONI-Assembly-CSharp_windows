@@ -38,7 +38,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	public string GetProperName()
 	{
-		return base.name;
+		return this.storedName;
 	}
 
 	public List<Ownables> GetOwners()
@@ -49,6 +49,11 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	public Ownables GetSoleOwner()
 	{
 		return base.GetComponent<Ownables>();
+	}
+
+	public bool IsNull()
+	{
+		return this == null;
 	}
 
 	[Serialize]

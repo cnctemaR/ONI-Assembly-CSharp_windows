@@ -43,7 +43,7 @@ public class DirectionControl : KMonoBehaviour
 	{
 		base.OnSpawn();
 		this.SetAllowedDirection(this.allowedDirection);
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<DirectionControl>(493375141, DirectionControl.OnRefreshUserMenuDelegate);
 	}
 
 	private void SetAllowedDirection(WorkableReactable.AllowedDirection new_direction)
@@ -90,6 +90,11 @@ public class DirectionControl : KMonoBehaviour
 	private DirectionControl.DirectionInfo[] directionInfos;
 
 	public Action<WorkableReactable.AllowedDirection> onDirectionChanged;
+
+	private static readonly EventSystem.IntraObjectHandler<DirectionControl> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<DirectionControl>(delegate(DirectionControl component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	private struct DirectionInfo
 	{

@@ -13,7 +13,7 @@ public class EmptyConduitWorkable : Workable
 		this.faceTargetWhenWorking = true;
 		this.multitoolContext = "build";
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
-		base.Subscribe(2127324410, new Action<object>(this.OnEmptyConduitCancelled));
+		base.Subscribe<EmptyConduitWorkable>(2127324410, EmptyConduitWorkable.OnEmptyConduitCancelledDelegate);
 		if (EmptyConduitWorkable.emptyLiquidConduitStatusItem == null)
 		{
 			EmptyConduitWorkable.emptyLiquidConduitStatusItem = new StatusItem("EmptyLiquidConduit", BUILDINGS.PREFABS.CONDUIT.STATUS_ITEM.NAME, BUILDINGS.PREFABS.CONDUIT.STATUS_ITEM.TOOLTIP, "status_item_empty_pipe", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.LiquidVentMap, 66);
@@ -202,4 +202,9 @@ public class EmptyConduitWorkable : Workable
 	private float elapsedTime = -1f;
 
 	private bool emptiedPipe = true;
+
+	private static readonly EventSystem.IntraObjectHandler<EmptyConduitWorkable> OnEmptyConduitCancelledDelegate = new EventSystem.IntraObjectHandler<EmptyConduitWorkable>(delegate(EmptyConduitWorkable component, object data)
+	{
+		component.OnEmptyConduitCancelled(data);
+	});
 }

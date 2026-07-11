@@ -18,7 +18,7 @@ public class CheckpointConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, global::TUNING.BUILDINGS.CONSTRUCTION_MASS_KG.TIER2, refined_METALS, 1600f, BuildLocationRule.OnFloor, global::TUNING.BUILDINGS.DECOR.BONUS.TIER1, tier, 0.2f);
 		buildingDef.ForegroundLayer = Grid.SceneLayer.Front;
 		buildingDef.PermittedRotations = PermittedRotations.FlipH;
-		buildingDef.PreventIdlingInFrontOfBuilding = true;
+		buildingDef.PreventIdleTraversalPastBuilding = true;
 		buildingDef.Floodable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.PowerInputOffset = new CellOffset(0, 2);
@@ -44,7 +44,6 @@ public class CheckpointConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		GeneratedBuildings.RegisterLogicPorts(go, CheckpointConfig.INPUT_PORTS);
 	}
 

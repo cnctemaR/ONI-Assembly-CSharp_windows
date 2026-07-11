@@ -32,7 +32,7 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 	protected override void OnPrefabInit()
 	{
 		this.ToggleIdx = this.Toggleable.SetTarget(this);
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<BuildingEnabledButton>(493375141, BuildingEnabledButton.OnRefreshUserMenuDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -113,4 +113,9 @@ public class BuildingEnabledButton : KMonoBehaviour, ISaveLoadable, IToggleHandl
 	private bool buildingEnabled = true;
 
 	public static readonly Operational.Flag EnabledFlag = new Operational.Flag("building_enabled", Operational.Flag.Type.Functional);
+
+	private static readonly EventSystem.IntraObjectHandler<BuildingEnabledButton> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<BuildingEnabledButton>(delegate(BuildingEnabledButton component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

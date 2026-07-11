@@ -28,17 +28,17 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-1201923725, new Action<object>(this.OnHighlighted));
-		base.Subscribe(-700727624, new Action<object>(this.OnConduitFrozen));
-		base.Subscribe(-1152799878, new Action<object>(this.OnConduitBoiling));
-		base.Subscribe(-1555603773, new Action<object>(this.OnStructureTemperatureRegistered));
+		base.Subscribe<Conduit>(-1201923725, Conduit.OnHighlightedDelegate);
+		base.Subscribe<Conduit>(-700727624, Conduit.OnConduitFrozenDelegate);
+		base.Subscribe<Conduit>(-1152799878, Conduit.OnConduitBoilingDelegate);
+		base.Subscribe<Conduit>(-1555603773, Conduit.OnStructureTemperatureRegisteredDelegate);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Subscribe<Conduit>(774203113, Conduit.OnBuildingBrokenDelegate);
+		base.Subscribe<Conduit>(-1735440190, Conduit.OnBuildingFullyRepairedDelegate);
 	}
 
 	private void OnStructureTemperatureRegistered(object data)
@@ -57,8 +57,8 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe<Conduit>(774203113, Conduit.OnBuildingBrokenDelegate);
+		base.Unsubscribe<Conduit>(-1735440190, Conduit.OnBuildingFullyRepairedDelegate);
 		BuildingDef def = base.GetComponent<Building>().Def;
 		if (def != null && def.ThermalConductivity != 1f)
 		{
@@ -231,4 +231,34 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 	public ConduitType type;
 
 	private global::System.Action firstFrameCallback;
+
+	private static readonly EventSystem.IntraObjectHandler<Conduit> OnHighlightedDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	{
+		component.OnHighlighted(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Conduit> OnConduitFrozenDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	{
+		component.OnConduitFrozen(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Conduit> OnConduitBoilingDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	{
+		component.OnConduitBoiling(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Conduit> OnStructureTemperatureRegisteredDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	{
+		component.OnStructureTemperatureRegistered(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Conduit> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	{
+		component.OnBuildingBroken(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Conduit> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<Conduit>(delegate(Conduit component, object data)
+	{
+		component.OnBuildingFullyRepaired(data);
+	});
 }

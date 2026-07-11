@@ -31,14 +31,13 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
-		Research.Instance.Subscribe(-1914338957, new Action<object>(this.CheckValidResearchSelected));
-		Research.Instance.Subscribe(-125623018, new Action<object>(this.CheckValidResearchSelected));
-		base.Subscribe(187661686, new Action<object>(this.CheckValidResearchSelected));
-		base.Subscribe(-1697596308, new Action<object>(this.CheckHasMaterial));
-		this.CheckValidResearchSelected(null);
+		base.Subscribe<ResearchCenter>(-1503271301, ResearchCenter.OnSelectObjectDelegate);
+		Research.Instance.Subscribe(-1914338957, new Action<object>(this.UpdateWorkingState));
+		Research.Instance.Subscribe(-125623018, new Action<object>(this.UpdateWorkingState));
+		base.Subscribe<ResearchCenter>(187661686, ResearchCenter.UpdateWorkingStateDelegate);
+		base.Subscribe<ResearchCenter>(-1697596308, ResearchCenter.CheckHasMaterialDelegate);
 		Components.ResearchCenters.Add(this);
-		this.CheckValidResearchSelected(null);
+		this.UpdateWorkingState(null);
 	}
 
 	private void ConvertMassToResearchPoints(float mass_consumed)
@@ -69,16 +68,16 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	{
 		if (!this.operational.IsActive && this.operational.IsOperational && this.chore == null && this.HasMaterial())
 		{
-			ChoreType research = Db.Get().ChoreTypes.Research;
-			Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-			this.chore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
-			this.chore.AddPrecondition(ResearchCenter.IsBuildingReady, this);
-			if (this.onCreateChore != null)
-			{
-				this.onCreateChore(this.chore);
-			}
+			this.chore = this.CreateChore();
 			base.SetWorkTime(float.PositiveInfinity);
 		}
+	}
+
+	protected virtual Chore CreateChore()
+	{
+		ChoreType research = Db.Get().ChoreTypes.Research;
+		Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
+		return new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 0, false);
 	}
 
 	public override float GetPercentComplete()
@@ -119,7 +118,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		this.operational.SetActive(false, false);
 	}
 
-	private bool ResearchComponentCompleted()
+	protected bool ResearchComponentCompleted()
 	{
 		TechInstance activeResearch = Research.Instance.GetActiveResearch();
 		if (activeResearch != null)
@@ -136,7 +135,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		return false;
 	}
 
-	private bool IsAllResearchComplete()
+	protected bool IsAllResearchComplete()
 	{
 		foreach (Tech tech in Db.Get().Techs.resources)
 		{
@@ -148,7 +147,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		return true;
 	}
 
-	private void CheckValidResearchSelected(object data)
+	protected virtual void UpdateWorkingState(object data)
 	{
 		bool flag = false;
 		bool flag2 = false;
@@ -196,24 +195,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	private void ClearResearchScreen()
 	{
-		if (this.researchScreen != null)
-		{
-			this.researchScreen.Deactivate();
-			this.researchScreen = null;
-		}
-	}
-
-	private void OnSelectResearchClick()
-	{
-		DetailsScreen.Instance.Show(false);
-		if (this.researchScreen == null)
-		{
-			ManagementMenu.Instance.ToggleResearch();
-		}
-		else
-		{
-			this.ClearResearchScreen();
-		}
+		Game.Instance.Trigger(-1974454597, null);
 	}
 
 	private void OnSelectObject(object data)
@@ -238,9 +220,9 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.CheckValidResearchSelected));
-		Research.Instance.Unsubscribe(-125623018, new Action<object>(this.CheckValidResearchSelected));
-		base.Unsubscribe(-1852328367, new Action<object>(this.CheckValidResearchSelected));
+		Research.Instance.Unsubscribe(-1914338957, new Action<object>(this.UpdateWorkingState));
+		Research.Instance.Unsubscribe(-125623018, new Action<object>(this.UpdateWorkingState));
+		base.Unsubscribe(-1852328367, new Action<object>(this.UpdateWorkingState));
 		Components.ResearchCenters.Remove(this);
 		this.ClearResearchScreen();
 	}
@@ -304,23 +286,21 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedMass(this.mass_per_point, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false),
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedByTag(this.inputMaterial, this.mass_per_point, GameUtil.TimeSlice.None)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.RESEARCH_MATERIALS, this.inputMaterial.ProperName(), GameUtil.GetFormattedByTag(this.inputMaterial, this.mass_per_point, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Requirement, false),
 			new Descriptor(string.Format(UI.BUILDINGEFFECTS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.PRODUCES_RESEARCH_POINTS, Research.Instance.researchTypes.GetResearchType(this.research_point_type_id).name), Descriptor.DescriptorType.Effect, false)
 		};
 	}
 
 	private Chore chore;
 
-	private ResearchScreen researchScreen;
+	[MyCmpAdd]
+	protected Notifier notifier;
 
 	[MyCmpAdd]
-	private Notifier notifier;
+	protected Operational operational;
 
 	[MyCmpAdd]
-	private Operational operational;
-
-	[MyCmpAdd]
-	private Storage storage;
+	protected Storage storage;
 
 	[MyCmpGet]
 	private ElementConverter elementConverter;
@@ -337,26 +317,22 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	[SerializeField]
 	private float remainder_mass_points;
 
-	public Action<Chore> onCreateChore;
-
 	private float effectiveness = 1f;
 
 	public static readonly Operational.Flag ResearchSelectedFlag = new Operational.Flag("researchSelected", Operational.Flag.Type.Requirement);
 
-	public static readonly Chore.Precondition IsBuildingReady = new Chore.Precondition
+	private static readonly EventSystem.IntraObjectHandler<ResearchCenter> OnSelectObjectDelegate = new EventSystem.IntraObjectHandler<ResearchCenter>(delegate(ResearchCenter component, object data)
 	{
-		id = "IsBuildingReady",
-		sortOrder = 1,
-		description = DUPLICANTS.CHORES.PRECONDITIONS.CHORE_DRIVER_IS_NULL,
-		fn = delegate(ref Chore.Precondition.Context context, object data)
-		{
-			Workable workable = (Workable)data;
-			Worker worker = workable.worker;
-			PoweredActiveController.Instance smi = workable.gameObject.GetSMI<PoweredActiveController.Instance>();
-			StateMachine.BaseState currentState = smi.GetCurrentState();
-			bool flag = currentState == smi.sm.on;
-			bool flag2 = worker != null && worker.gameObject == context.chore.driver.gameObject;
-			return flag || flag2;
-		}
-	};
+		component.OnSelectObject(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<ResearchCenter> UpdateWorkingStateDelegate = new EventSystem.IntraObjectHandler<ResearchCenter>(delegate(ResearchCenter component, object data)
+	{
+		component.UpdateWorkingState(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<ResearchCenter> CheckHasMaterialDelegate = new EventSystem.IntraObjectHandler<ResearchCenter>(delegate(ResearchCenter component, object data)
+	{
+		component.CheckHasMaterial(data);
+	});
 }

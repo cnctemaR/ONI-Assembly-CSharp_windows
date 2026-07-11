@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 public class OffsetTableTracker : OffsetTracker
 {
@@ -7,6 +6,18 @@ public class OffsetTableTracker : OffsetTracker
 	{
 		this.table = table;
 		this.cmp = cmp;
+	}
+
+	private static NavGrid navGrid
+	{
+		get
+		{
+			if (OffsetTableTracker.navGridImpl == null)
+			{
+				OffsetTableTracker.navGridImpl = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
+			}
+			return OffsetTableTracker.navGridImpl;
+		}
 	}
 
 	protected override void UpdateCell(int previous_cell, int current_cell)
@@ -49,44 +60,42 @@ public class OffsetTableTracker : OffsetTracker
 		return true;
 	}
 
-	public static void GetOffsets(int cell, CellOffset[][] table, NavGrid nav_grid, List<CellOffset> offsets)
+	private unsafe void UpdateOffsets(int cell, CellOffset[][] table)
 	{
-		foreach (CellOffset[] array in table)
+		int* ptr = stackalloc int[checked(192 * 4)];
+		int num = 0;
+		if (Grid.IsValidCell(cell))
 		{
-			int num = Grid.OffsetCell(cell, array[0]);
-			for (int j = 0; j < nav_grid.ValidNavTypes.Length; j++)
+			for (int i = 0; i < table.Length; i++)
 			{
-				NavType navType = nav_grid.ValidNavTypes[j];
-				if (navType != NavType.Tube && nav_grid.NavTable.IsValid(num, navType) && OffsetTableTracker.IsValidRow(cell, array))
+				CellOffset[] array = table[i];
+				int num2 = Grid.OffsetCell(cell, array[0]);
+				for (int j = 0; j < OffsetTableTracker.navGrid.ValidNavTypes.Length; j++)
 				{
-					offsets.Add(array[0]);
-					break;
+					NavType navType = OffsetTableTracker.navGrid.ValidNavTypes[j];
+					if (navType != NavType.Tube && OffsetTableTracker.navGrid.NavTable.IsValid(num2, navType) && OffsetTableTracker.IsValidRow(cell, array))
+					{
+						ptr[num] = i;
+						num++;
+						break;
+					}
 				}
 			}
+		}
+		if (this.offsets == null || this.offsets.Length != num)
+		{
+			this.offsets = new CellOffset[num];
+		}
+		for (int num3 = 0; num3 != num; num3++)
+		{
+			this.offsets[num3] = table[ptr[num3]][0];
 		}
 	}
 
 	protected override void UpdateOffsets(int current_cell)
 	{
 		base.UpdateOffsets(current_cell);
-		if (!Grid.IsValidCell(current_cell))
-		{
-			return;
-		}
-		if (this.navGrid == null)
-		{
-			this.navGrid = Pathfinding.Instance.GetNavGrid("MinionNavGrid");
-		}
-		this.newOffsets.Clear();
-		OffsetTableTracker.GetOffsets(current_cell, this.table, this.navGrid, this.newOffsets);
-		if (this.offsets != null && this.newOffsets.Count == this.offsets.Length)
-		{
-			this.newOffsets.CopyTo(this.offsets);
-		}
-		else
-		{
-			this.offsets = this.newOffsets.ToArray();
-		}
+		this.UpdateOffsets(current_cell, this.table);
 	}
 
 	private void OnCellChanged(object data)
@@ -100,15 +109,18 @@ public class OffsetTableTracker : OffsetTracker
 		GameScenePartitioner.Instance.Free(ref this.validNavCellChangedPartitionerEntry);
 	}
 
-	private CellOffset[][] table;
+	public static void OnPathfindingInvalidated()
+	{
+		OffsetTableTracker.navGridImpl = null;
+	}
+
+	private readonly CellOffset[][] table;
 
 	public HandleVector<int>.Handle solidPartitionerEntry;
 
 	public HandleVector<int>.Handle validNavCellChangedPartitionerEntry;
 
-	private NavGrid navGrid;
+	private static NavGrid navGridImpl;
 
 	private KMonoBehaviour cmp;
-
-	private List<CellOffset> newOffsets = new List<CellOffset>();
 }

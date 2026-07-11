@@ -46,9 +46,9 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		this.maturity.maxAttribute.Add(this.baseMaturityMax);
 		this.oldAge = amounts.Add(new AmountInstance(Db.Get().Amounts.OldAge, base.gameObject));
 		base.OnPrefabInit();
-		base.Subscribe(1119167081, new Action<object>(this.OnNewGameSpawn));
-		base.Subscribe(1309017699, new Action<object>(this.OnReplant));
-		base.Subscribe(1272413801, new Action<object>(this.ResetGrowth));
+		base.Subscribe<Growing>(1119167081, Growing.OnNewGameSpawnDelegate);
+		base.Subscribe<Growing>(1309017699, Growing.OnReplantDelegate);
+		base.Subscribe<Growing>(1272413801, Growing.ResetGrowthDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -163,6 +163,21 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	private Modifiers modifiers;
 
 	private Crop _crop;
+
+	private static readonly EventSystem.IntraObjectHandler<Growing> OnNewGameSpawnDelegate = new EventSystem.IntraObjectHandler<Growing>(delegate(Growing component, object data)
+	{
+		component.OnNewGameSpawn(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Growing> OnReplantDelegate = new EventSystem.IntraObjectHandler<Growing>(delegate(Growing component, object data)
+	{
+		component.OnReplant(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Growing> ResetGrowthDelegate = new EventSystem.IntraObjectHandler<Growing>(delegate(Growing component, object data)
+	{
+		component.ResetGrowth(data);
+	});
 
 	public class StatesInstance : GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.GameInstance
 	{

@@ -15,9 +15,10 @@ public class SteamEngineConfig : IBuildingConfig
 		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER7;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloorOrBuildingAttachPoint;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
+		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.ViewMode = SimViewMode.None;
 		buildingDef.OverheatTemperature = 2273.15f;
@@ -25,6 +26,8 @@ public class SteamEngineConfig : IBuildingConfig
 		buildingDef.AttachmentSlotTag = GameTags.Rocket;
 		buildingDef.ObjectLayer = ObjectLayer.Building;
 		buildingDef.attachablePosition = new CellOffset(0, 0);
+		buildingDef.UtilityInputOffset = new CellOffset(2, 3);
+		buildingDef.InputConduitType = ConduitType.Gas;
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.CanMove = true;
 		return buildingDef;
@@ -52,11 +55,27 @@ public class SteamEngineConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		RocketEngine rocketEngine = go.AddOrGet<RocketEngine>();
+		rocketEngine.fuelTag = ElementLoader.FindElementByHash(SimHashes.Steam).tag;
+		rocketEngine.efficiency = ROCKETRY.ENGINE_EFFICIENCY.WEAK;
 		rocketEngine.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
+		rocketEngine.requireOxidizer = false;
+		rocketEngine.exhaustElement = SimHashes.Steam;
+		rocketEngine.exhaustTemperature = ElementLoader.FindElementByHash(SimHashes.Steam).lowTemp + 50f;
+		FuelTank fuelTank = go.AddOrGet<FuelTank>();
+		fuelTank.capacityKg = fuelTank.minimumLaunchMass;
+		fuelTank.FuelType = ElementLoader.FindElementByHash(SimHashes.Steam).tag;
+		fuelTank.SetDefaultStoredItemModifiers(GasReservoirConfig.ReservoirStoredItemModifiers);
+		fuelTank.allowItemRemoval = true;
+		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
+		conduitConsumer.conduitType = ConduitType.Gas;
+		conduitConsumer.consumptionRate = 10f;
+		conduitConsumer.capacityTag = fuelTank.FuelType;
+		conduitConsumer.capacityKG = fuelTank.capacityKg;
+		conduitConsumer.forceAlwaysSatisfied = true;
+		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		go.AddOrGet<RocketModule>();
-		EntityTemplates.ExtendEntityToRocketModule(go);
+		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 
 	public const string ID = "SteamEngine";

@@ -70,10 +70,7 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 				MedicinalPill medicinalPill = this.chunk.Get<MedicinalPill>(smi);
 				Worker worker = this.eater.Get<Worker>(smi);
 				worker.StartWork(new Worker.StartWorkInfo(medicinalPill));
-			}, (TakeMedicineChore.StatesInstance smi) => this.chunk.Get<MedicinalPill>(smi) != null, delegate(TakeMedicineChore.StatesInstance smi)
-			{
-				this.chunk.Get<MedicinalPill>(smi).gameObject.DeleteObject();
-			}, null, null);
+			}, (TakeMedicineChore.StatesInstance smi) => this.chunk.Get<MedicinalPill>(smi) != null, null, null);
 		}
 
 		public StateMachine<TakeMedicineChore.States, TakeMedicineChore.StatesInstance, TakeMedicineChore, object>.TargetParameter eater;

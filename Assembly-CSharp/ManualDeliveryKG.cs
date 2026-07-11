@@ -35,8 +35,8 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		{
 			this.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
 		}
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
-		base.Subscribe(-111137758, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<ManualDeliveryKG>(493375141, ManualDeliveryKG.OnRefreshUserMenuDelegate);
+		base.Subscribe<ManualDeliveryKG>(-111137758, ManualDeliveryKG.OnRefreshUserMenuDelegate);
 		if (this.storage != null)
 		{
 			this.SetStorage(this.storage);
@@ -60,14 +60,18 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 	{
 		if (this.storage != null)
 		{
-			this.storage.Unsubscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+			this.storage.Unsubscribe(this.onStorageChangeSubscription);
+			this.onStorageChangeSubscription = -1;
 		}
 		this.AbortDelivery("storage pointer changed");
 		this.filteredStoredItems.Clear();
 		this.storage = storage;
 		if (this.storage != null && base.isSpawned)
 		{
-			this.storage.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+			this.onStorageChangeSubscription = this.storage.Subscribe(-1697596308, delegate(object eventData)
+			{
+				this.OnStorageChanged(this.storage);
+			});
 		}
 	}
 
@@ -152,9 +156,12 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	private void OnStorageChanged(object data)
+	private void OnStorageChanged(Storage storage)
 	{
-		this.UpdateFilteredItems();
+		if (storage == this.storage)
+		{
+			this.UpdateFilteredItems();
+		}
 	}
 
 	private void UpdateFilteredItems()
@@ -251,4 +258,11 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 	private FetchList2 fetchList;
 
 	private List<PrimaryElement> filteredStoredItems = new List<PrimaryElement>();
+
+	private int onStorageChangeSubscription = -1;
+
+	private static readonly EventSystem.IntraObjectHandler<ManualDeliveryKG> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<ManualDeliveryKG>(delegate(ManualDeliveryKG component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 }

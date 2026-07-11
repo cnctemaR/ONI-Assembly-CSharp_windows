@@ -51,14 +51,8 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		this.statusItemAwaitingDelivery = Db.Get().BuildingStatusItems.AwaitingSeedDelivery;
 		this.plantRef = new Ref<KPrefabID>();
 		this.destroyEntityOnDeposit = true;
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
-		base.Subscribe(144050788, delegate(object room)
-		{
-			if (this.plantRef.Get() != null)
-			{
-				this.plantRef.Get().Trigger(144050788, room);
-			}
-		});
+		base.Subscribe<PlantablePlot>(-905833192, PlantablePlot.OnCopySettingsDelegate);
+		base.Subscribe<PlantablePlot>(144050788, PlantablePlot.OnUpdateRoomDelegate);
 	}
 
 	private void OnCopySettings(object data)
@@ -337,4 +331,17 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 
 	[SerializeField]
 	public bool has_liquid_pipe_input;
+
+	private static readonly EventSystem.IntraObjectHandler<PlantablePlot> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<PlantablePlot>(delegate(PlantablePlot component, object data)
+	{
+		component.OnCopySettings(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<PlantablePlot> OnUpdateRoomDelegate = new EventSystem.IntraObjectHandler<PlantablePlot>(delegate(PlantablePlot component, object data)
+	{
+		if (component.plantRef.Get() != null)
+		{
+			component.plantRef.Get().Trigger(144050788, data);
+		}
+	});
 }

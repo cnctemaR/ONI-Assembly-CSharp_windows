@@ -75,7 +75,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 
 	private void OnSimEmitted(Sim.MassEmittedCallback info)
 	{
-		if (info.suceeded == 1 && this.storage)
+		if (info.suceeded == 1 && this.storage && this.lastEmitTag.IsValid)
 		{
 			this.storage.ConsumeIgnoringDisease(this.lastEmitTag, info.mass);
 		}

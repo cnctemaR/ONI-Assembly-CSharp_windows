@@ -366,9 +366,16 @@ namespace STRINGS
 
 				public static LocString TINKER_REQUIREMENT_TOOLTIP = "Can only be used by the " + DUPLICANTS.ROLES.MECHATRONIC_ENGINEER.NAME + " to apply a Jerry Rig.";
 
-				public static LocString TINKER_EFFECT_NAME = "Engie's Jerry Rig: {0} {1}";
+				public static LocString TINKER_EFFECT_NAME = "Engineer's Jerry Rig: {0} {1}";
 
 				public static LocString TINKER_EFFECT_TOOLTIP = "Can be used to Jerry Rig upgrades to a machine building, increasing its {0} by {1}.";
+			}
+
+			public class RESEARCH_DATABANK
+			{
+				public static LocString NAME = "Data Bank";
+
+				public static LocString DESC = "Raw data that can be processed into research points.";
 			}
 
 			public class EGG_SHELL
@@ -376,6 +383,13 @@ namespace STRINGS
 				public static LocString NAME = "Egg Shell";
 
 				public static LocString DESC = "Can be crushed to produce " + ELEMENTS.LIME.NAME + ".";
+			}
+
+			public class GENE_SHUFFLER_RECHARGE
+			{
+				public static LocString NAME = "Vacillator Recharge";
+
+				public static LocString DESC = "Replenishes one charge to a depleted Neural Vacillator.";
 			}
 		}
 	}

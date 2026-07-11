@@ -29,6 +29,18 @@ public class SimTemperatureTransfer : KMonoBehaviour
 		}
 	}
 
+	public float GroundTransferScale
+	{
+		get
+		{
+			return this.GroundTransferScale;
+		}
+		set
+		{
+			this.groundTransferScale = value;
+		}
+	}
+
 	public int SimHandle
 	{
 		get
@@ -211,7 +223,7 @@ public class SimTemperatureTransfer : KMonoBehaviour
 						component.InternalTemperature = 293f;
 						num2 = 293f;
 					}
-					SimMessages.AddElementChunk(num, component.ElementID, component.Mass, num2, this.surfaceArea, this.thickness, handle.index);
+					SimMessages.AddElementChunk(num, component.ElementID, component.Mass, num2, this.surfaceArea, this.thickness, this.groundTransferScale, handle.index);
 				}
 			}
 		}
@@ -281,6 +293,9 @@ public class SimTemperatureTransfer : KMonoBehaviour
 
 	[SerializeField]
 	protected float thickness = 0.01f;
+
+	[SerializeField]
+	protected float groundTransferScale = 0.0625f;
 
 	private static Dictionary<int, SimTemperatureTransfer> handleInstanceMap = new Dictionary<int, SimTemperatureTransfer>();
 }

@@ -28,6 +28,8 @@ public class EquipmentDef : Def
 
 	public float FabricationTime;
 
+	public string RecipeTechUnlock;
+
 	public SimHashes OutputElement;
 
 	public Dictionary<string, float> InputElementMassMap;

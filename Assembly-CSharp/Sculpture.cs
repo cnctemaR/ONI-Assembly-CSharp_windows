@@ -11,6 +11,7 @@ public class Sculpture : Artable
 			Sculpture.sculptureOverrides = new KAnimFile[] { Assets.GetAnim("anim_interacts_sculpture_kanim") };
 		}
 		this.overrideAnims = Sculpture.sculptureOverrides;
+		this.synchronizeAnims = false;
 	}
 
 	public override void SetStage(string stage_id, bool skip_effect)

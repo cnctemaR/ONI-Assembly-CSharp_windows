@@ -30,7 +30,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 		{
 			this.globalPointInventory = new ResearchPointInventory();
 		}
-		base.Subscribe(-1523247426, new Action<object>(this.OnRolesUpdated));
+		base.Subscribe<Research>(-1523247426, Research.OnRolesUpdatedDelegate);
 		Components.ResearchCenters.OnAdd += new Action<ResearchCenter>(this.CheckResearchBuildings);
 		Components.ResearchCenters.OnRemove += new Action<ResearchCenter>(this.CheckResearchBuildings);
 		foreach (KPrefabID kprefabID in Assets.Prefabs)
@@ -186,7 +186,7 @@ public class Research : KMonoBehaviour, ISaveLoadable
 			}
 			if (this.activeResearch.tech.costsByResearchTypeID.Count > 2)
 			{
-				if (Game.Instance.roleManager.GetRoleAssigneesWithPerk(RoleManager.rolePerks.AllowTelescopeResearch.id).Count == 0)
+				if (Game.Instance.roleManager.GetRoleAssigneesWithPerk(RoleManager.rolePerks.AllowInterstellarResearch.id).Count == 0)
 				{
 					this.notifier.Remove(this.NoResearcherRole);
 					this.notifier.Add(this.NoResearcherRole, string.Empty);
@@ -407,6 +407,11 @@ public class Research : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	private Research.SaveData saveData = default(Research.SaveData);
+
+	private static readonly EventSystem.IntraObjectHandler<Research> OnRolesUpdatedDelegate = new EventSystem.IntraObjectHandler<Research>(delegate(Research component, object data)
+	{
+		component.OnRolesUpdated(data);
+	});
 
 	private struct SaveData
 	{

@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class StationaryChoreRangeVisualizer : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-1503271301, new Action<object>(this.OnSelect));
+		base.Subscribe<StationaryChoreRangeVisualizer>(-1503271301, StationaryChoreRangeVisualizer.OnSelectDelegate);
 		if (this.movable)
 		{
 			Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "StationaryChoreRangeVisualizer.OnSpawn");
+			base.Subscribe<StationaryChoreRangeVisualizer>(-1643076535, StationaryChoreRangeVisualizer.OnRotatedDelegate);
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
-		base.Unsubscribe(-1503271301, new Action<object>(this.OnSelect));
+		base.Unsubscribe<StationaryChoreRangeVisualizer>(-1503271301, StationaryChoreRangeVisualizer.OnSelectDelegate);
+		base.Unsubscribe<StationaryChoreRangeVisualizer>(-1643076535, StationaryChoreRangeVisualizer.OnRotatedDelegate);
 		this.ClearVisualizers();
 		base.OnCleanUp();
 	}
@@ -37,6 +38,11 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 		}
 	}
 
+	private void OnRotated(object data)
+	{
+		this.UpdateVisualizers();
+	}
+
 	private void OnCellChange()
 	{
 		this.UpdateVisualizers();
@@ -45,17 +51,35 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 	private void UpdateVisualizers()
 	{
 		this.newCells.Clear();
-		Vector3 position = base.transform.GetPosition();
-		int num = Mathf.FloorToInt(position.x);
-		int num2 = Mathf.FloorToInt(position.y);
-		for (int i = -this.range; i <= this.range; i++)
+		CellOffset rotatedCellOffset = this.vision_offset;
+		if (this.rotatable)
 		{
-			for (int j = -this.range; j <= this.range; j++)
+			rotatedCellOffset = this.rotatable.GetRotatedCellOffset(this.vision_offset);
+		}
+		int num = Grid.PosToCell(base.transform.gameObject);
+		int num2 = Grid.OffsetCell(num, rotatedCellOffset);
+		int num3;
+		int num4;
+		Grid.CellToXY(num2, out num3, out num4);
+		for (int i = 0; i < this.height; i++)
+		{
+			for (int j = 0; j < this.width; j++)
 			{
-				int num3 = Grid.XYToCell(num + j, num2 + i);
-				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, num + j, num2 + i, true, true))
+				CellOffset rotatedCellOffset2 = new CellOffset(this.x + j, this.y + i);
+				if (this.rotatable)
 				{
-					this.newCells.Add(num3);
+					rotatedCellOffset2 = this.rotatable.GetRotatedCellOffset(rotatedCellOffset2);
+				}
+				int num5 = Grid.OffsetCell(num, rotatedCellOffset2);
+				if (Grid.IsValidCell(num5))
+				{
+					int num6;
+					int num7;
+					Grid.CellToXY(num5, out num6, out num7);
+					if (Grid.TestLineOfSight(num3, num4, num6, num7, this.blocking_cb, this.blocking_tile_visible))
+					{
+						this.newCells.Add(num5);
+					}
 				}
 			}
 		}
@@ -93,7 +117,7 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 
 	private KBatchedAnimController CreateEffect(int cell)
 	{
-		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect(StationaryChoreRangeVisualizer.AnimName, Grid.CellToPosCCC(cell, Grid.SceneLayer.Background), null, false, Grid.SceneLayer.Background, true);
+		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect(StationaryChoreRangeVisualizer.AnimName, Grid.CellToPosCCC(cell, this.sceneLayer), null, false, this.sceneLayer, true);
 		kbatchedAnimController.destroyOnAnimComplete = false;
 		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
 		kbatchedAnimController.gameObject.SetActive(true);
@@ -110,9 +134,26 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 	[MyCmpReq]
 	private KSelectable selectable;
 
+	[MyCmpGet]
+	private Rotatable rotatable;
+
+	public int x;
+
+	public int y;
+
+	public int width;
+
+	public int height;
+
 	public bool movable;
 
-	public int range;
+	public Grid.SceneLayer sceneLayer = Grid.SceneLayer.FXFront;
+
+	public CellOffset vision_offset;
+
+	public Func<int, bool> blocking_cb = new Func<int, bool>(Grid.PhysicalBlockingCB);
+
+	public bool blocking_tile_visible = true;
 
 	private static readonly string AnimName = "transferarmgrid_kanim";
 
@@ -123,6 +164,16 @@ public class StationaryChoreRangeVisualizer : KMonoBehaviour
 	private List<StationaryChoreRangeVisualizer.VisData> visualizers = new List<StationaryChoreRangeVisualizer.VisData>();
 
 	private List<int> newCells = new List<int>();
+
+	private static readonly EventSystem.IntraObjectHandler<StationaryChoreRangeVisualizer> OnSelectDelegate = new EventSystem.IntraObjectHandler<StationaryChoreRangeVisualizer>(delegate(StationaryChoreRangeVisualizer component, object data)
+	{
+		component.OnSelect(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<StationaryChoreRangeVisualizer> OnRotatedDelegate = new EventSystem.IntraObjectHandler<StationaryChoreRangeVisualizer>(delegate(StationaryChoreRangeVisualizer component, object data)
+	{
+		component.OnRotated(data);
+	});
 
 	private struct VisData
 	{

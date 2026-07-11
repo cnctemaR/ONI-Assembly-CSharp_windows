@@ -735,6 +735,10 @@ namespace UnityEngine
 		/// </returns>
 		public Transform Find(string n)
 		{
+			if (n == null)
+			{
+				throw new ArgumentNullException("Name cannot be null");
+			}
 			return Transform.FindRelativeTransformWithPath(this, n, false);
 		}
 

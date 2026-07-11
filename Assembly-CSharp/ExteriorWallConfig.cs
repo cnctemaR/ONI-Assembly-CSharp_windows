@@ -41,7 +41,6 @@ public class ExteriorWallConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RemoveLoopingSounds(go);
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "ExteriorWall";

@@ -15,7 +15,7 @@ public class LoreBearer : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(493375141, new Action<object>(this.RefreshUserMenu));
+		base.Subscribe<LoreBearer>(493375141, LoreBearer.RefreshUserMenuDelegate);
 	}
 
 	private void RefreshUserMenu(object data = null)
@@ -56,6 +56,10 @@ public class LoreBearer : KMonoBehaviour
 			return;
 		}
 		this.BeenClicked = true;
+		if (base.gameObject.name == "GeneShuffler")
+		{
+			Game.Instance.unlocks.Unlock("neuralvacillator");
+		}
 		if (base.gameObject.name == "PropDesk" || base.gameObject.name == "PropFacilityDesk" || base.gameObject.name == "PropReceptionDesk")
 		{
 			string text = Game.Instance.unlocks.UnlockNext("emails");
@@ -130,4 +134,9 @@ public class LoreBearer : KMonoBehaviour
 	private bool BeenClicked;
 
 	public string BeenSearched = UI.USERMENUACTIONS.READLORE.ALREADY_SEARCHED;
+
+	private static readonly EventSystem.IntraObjectHandler<LoreBearer> RefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<LoreBearer>(delegate(LoreBearer component, object data)
+	{
+		component.RefreshUserMenu(data);
+	});
 }

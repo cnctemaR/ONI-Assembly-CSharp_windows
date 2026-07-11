@@ -8,7 +8,7 @@ public class PowerTransformer : Generator
 	{
 		base.OnSpawn();
 		this.battery = base.GetComponent<Battery>();
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<PowerTransformer>(-592767678, PowerTransformer.OnOperationalChangedDelegate);
 	}
 
 	public override void ApplyDeltaJoules(float joules_delta, bool can_over_power = false)
@@ -35,4 +35,9 @@ public class PowerTransformer : Generator
 	}
 
 	private Battery battery;
+
+	private static readonly EventSystem.IntraObjectHandler<PowerTransformer> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<PowerTransformer>(delegate(PowerTransformer component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 }

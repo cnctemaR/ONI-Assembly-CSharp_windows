@@ -38,7 +38,6 @@ public class ManualPressureDoorConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		component.controlEnabled = true;
 		KBatchedAnimController component2 = go.GetComponent<KBatchedAnimController>();

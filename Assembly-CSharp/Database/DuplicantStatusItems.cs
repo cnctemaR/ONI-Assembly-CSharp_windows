@@ -226,9 +226,10 @@ namespace Database
 				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
 				string text2 = attributeInstance.GetFormattedValue();
-				text2 += "\n----------\n";
-				foreach (AttributeModifier attributeModifier in attributeInstance.Modifiers)
+				text2 += UI.HORIZONTAL_BR_RULE;
+				for (int num2 = 0; num2 != attributeInstance.Modifiers.Count; num2++)
 				{
+					AttributeModifier attributeModifier = attributeInstance.Modifiers[num2];
 					text2 = text2 + attributeModifier.GetDescription() + " " + attributeModifier.GetFormattedString(attributeInstance.gameObject, false);
 					text2 += "\n";
 				}
@@ -239,13 +240,14 @@ namespace Database
 			this.Hot.resolveTooltipCallback = delegate(string str, object data)
 			{
 				str = str.Replace("{StressModification}", GameUtil.GetFormattedPercent(Db.Get().effects.Get("WarmAir").SelfModifiers[0].Value, GameUtil.TimeSlice.PerCycle));
-				float num2 = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
-				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num2, GameUtil.HeatEnergyFormatterUnit.Automatic));
+				float num3 = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
+				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance2 = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
 				string text3 = attributeInstance2.GetFormattedValue();
-				text3 += "\n----------\n";
-				foreach (AttributeModifier attributeModifier2 in attributeInstance2.Modifiers)
+				text3 += UI.HORIZONTAL_BR_RULE;
+				for (int num4 = 0; num4 != attributeInstance2.Modifiers.Count; num4++)
 				{
+					AttributeModifier attributeModifier2 = attributeInstance2.Modifiers[num4];
 					text3 = text3 + attributeModifier2.GetDescription() + " " + attributeModifier2.GetFormattedString(attributeInstance2.gameObject, false);
 					text3 += "\n";
 				}

@@ -149,6 +149,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			this.choreDriver = master.GetComponent<ChoreDriver>();
 			this.health = master.GetComponent<Health>();
 			this.choreConsumer = master.GetComponent<ChoreConsumer>();
+			this.refreshThreatDelegate = new Action<object>(this.RefreshThreat);
 		}
 
 		public GameObject MainThreat
@@ -180,8 +181,8 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 			if (this.mainThreat != null)
 			{
-				this.mainThreat.Unsubscribe(1623392196, new Action<object>(this.RefreshThreat));
-				this.mainThreat.Unsubscribe(1969584890, new Action<object>(this.RefreshThreat));
+				this.mainThreat.Unsubscribe(1623392196, this.refreshThreatDelegate);
+				this.mainThreat.Unsubscribe(1969584890, this.refreshThreatDelegate);
 				if (threat == null)
 				{
 					base.Trigger(2144432245, null);
@@ -189,14 +190,14 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 			}
 			if (this.mainThreat != null)
 			{
-				this.mainThreat.Unsubscribe(1623392196, new Action<object>(this.RefreshThreat));
-				this.mainThreat.Unsubscribe(1969584890, new Action<object>(this.RefreshThreat));
+				this.mainThreat.Unsubscribe(1623392196, this.refreshThreatDelegate);
+				this.mainThreat.Unsubscribe(1969584890, this.refreshThreatDelegate);
 			}
 			this.mainThreat = threat;
 			if (this.mainThreat != null)
 			{
-				this.mainThreat.Subscribe(1623392196, new Action<object>(this.RefreshThreat));
-				this.mainThreat.Subscribe(1969584890, new Action<object>(this.RefreshThreat));
+				this.mainThreat.Subscribe(1623392196, this.refreshThreatDelegate);
+				this.mainThreat.Subscribe(1969584890, this.refreshThreatDelegate);
 			}
 		}
 
@@ -272,8 +273,8 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		{
 			if (this.mainThreat)
 			{
-				this.mainThreat.Unsubscribe(1623392196, new Action<object>(this.RefreshThreat));
-				this.mainThreat.Unsubscribe(1969584890, new Action<object>(this.RefreshThreat));
+				this.mainThreat.Unsubscribe(1623392196, this.refreshThreatDelegate);
+				this.mainThreat.Unsubscribe(1969584890, this.refreshThreatDelegate);
 			}
 		}
 
@@ -375,5 +376,7 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 		private GameObject mainThreat;
 
 		private List<FactionAlignment> threats = new List<FactionAlignment>();
+
+		private Action<object> refreshThreatDelegate;
 	}
 }

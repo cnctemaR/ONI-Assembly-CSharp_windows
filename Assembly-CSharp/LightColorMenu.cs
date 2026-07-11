@@ -5,7 +5,7 @@ public class LightColorMenu : KMonoBehaviour
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<LightColorMenu>(493375141, LightColorMenu.OnRefreshUserMenuDelegate);
 		this.SetColor(0);
 	}
 
@@ -53,6 +53,11 @@ public class LightColorMenu : KMonoBehaviour
 	public LightColorMenu.LightColor[] lightColors;
 
 	private int currentColor;
+
+	private static readonly EventSystem.IntraObjectHandler<LightColorMenu> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<LightColorMenu>(delegate(LightColorMenu component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
 
 	[Serializable]
 	public struct LightColor

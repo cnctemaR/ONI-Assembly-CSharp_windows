@@ -7,7 +7,7 @@ public class OperationalValve : ValveBase
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<OperationalValve>(-592767678, OperationalValve.OnOperationalChangedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -18,7 +18,7 @@ public class OperationalValve : ValveBase
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Unsubscribe<OperationalValve>(-592767678, OperationalValve.OnOperationalChangedDelegate);
 		base.OnCleanUp();
 	}
 
@@ -61,4 +61,9 @@ public class OperationalValve : ValveBase
 
 	[MyCmpReq]
 	private Operational operational;
+
+	private static readonly EventSystem.IntraObjectHandler<OperationalValve> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<OperationalValve>(delegate(OperationalValve component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
 }

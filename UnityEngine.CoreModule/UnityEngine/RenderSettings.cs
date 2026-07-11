@@ -8,9 +8,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>The Render Settings contain values for a range of visual elements in your scene, like fog and ambient light.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Camera/RenderSettings.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[StaticAccessor("GetRenderSettings()", StaticAccessorType.Dot)]
+	[NativeHeader("Runtime/Camera/RenderSettings.h")]
 	public sealed class RenderSettings : Object
 	{
 		private RenderSettings()

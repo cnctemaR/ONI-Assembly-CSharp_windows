@@ -149,7 +149,7 @@ public class Def : ScriptableObject
 		KAnim.Build.Symbol symbol = data.build.GetSymbol(frameElement.symbol);
 		if (symbol == null)
 		{
-			Output.LogWarning(new object[] { animName, "placeSymbol [", frameElement.symbol, "] is missing" });
+			Output.LogWarning(new object[] { animFile.name, animName, "placeSymbol [", frameElement.symbol, "] is missing" });
 			return null;
 		}
 		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frameElement.frame).symbolFrame;

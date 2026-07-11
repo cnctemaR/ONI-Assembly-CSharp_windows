@@ -8,8 +8,8 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 {
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe(1623392196, new Action<object>(this.OnDeath));
-		base.Subscribe(-1117766961, new Action<object>(this.OnRevived));
+		base.Subscribe<Flatulence>(1623392196, Flatulence.OnDeathDelegate);
+		base.Subscribe<Flatulence>(-1117766961, Flatulence.OnRevivedDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -66,6 +66,16 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 	private const float EmissionRadius = 1.5f;
 
 	private const float MaxDistanceSq = 2.25f;
+
+	private static readonly EventSystem.IntraObjectHandler<Flatulence> OnDeathDelegate = new EventSystem.IntraObjectHandler<Flatulence>(delegate(Flatulence component, object data)
+	{
+		component.OnDeath(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Flatulence> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Flatulence>(delegate(Flatulence component, object data)
+	{
+		component.OnRevived(data);
+	});
 
 	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop", "working_pst" };
 

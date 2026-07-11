@@ -11,7 +11,7 @@ public class RoleStation : Workable, IEffectDescriptor
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-1503271301, new Action<object>(this.OnSelectObject));
+		base.Subscribe<RoleStation>(-1503271301, RoleStation.OnSelectObjectDelegate);
 		Components.RoleStations.Add(this);
 		this.smi = new RoleStation.RoleStationSM.Instance(this);
 		this.smi.StartSM();
@@ -85,6 +85,11 @@ public class RoleStation : Workable, IEffectDescriptor
 	private Operational operational;
 
 	private RoleStation.RoleStationSM.Instance smi;
+
+	private static readonly EventSystem.IntraObjectHandler<RoleStation> OnSelectObjectDelegate = new EventSystem.IntraObjectHandler<RoleStation>(delegate(RoleStation component, object data)
+	{
+		component.OnSelectObject(data);
+	});
 
 	public class RoleStationSM : GameStateMachine<RoleStation.RoleStationSM, RoleStation.RoleStationSM.Instance, RoleStation>
 	{

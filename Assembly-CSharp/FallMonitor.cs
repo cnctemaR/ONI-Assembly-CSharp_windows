@@ -106,7 +106,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 				{
 					if (this.navigator.CurrentNavType == transition.start)
 					{
-						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable, Grid.BitFields, false);
+						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable, Grid.BitFields);
 						if (Grid.InvalidCell != num2)
 						{
 							Vector2I vector2I = Grid.CellToXY(num);
@@ -148,7 +148,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 				{
 					if (this.navigator.CurrentNavType == transition.start)
 					{
-						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable, Grid.BitFields, false);
+						int num2 = transition.IsValid(num, this.navigator.NavGrid.NavTable, Grid.BitFields);
 						if (Grid.InvalidCell != num2)
 						{
 							base.smi.GoTo(base.smi.sm.recoverinitialfall);

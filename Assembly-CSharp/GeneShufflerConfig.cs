@@ -17,6 +17,14 @@ public class GeneShufflerConfig : IEntityConfig
 		gameObject.AddOrGet<LoreBearer>();
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject.AddOrGet<Ownable>();
+		Storage storage = gameObject.AddOrGet<Storage>();
+		storage.dropOnLoad = true;
+		ManualDeliveryKG manualDeliveryKG = gameObject.AddOrGet<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
+		manualDeliveryKG.requestedItemTag = new Tag("GeneShufflerRecharge");
+		manualDeliveryKG.refillMass = 1f;
+		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.capacity = 1f;
 		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
 		kbatchedAnimController.sceneLayer = Grid.SceneLayer.BuildingBack;
 		kbatchedAnimController.fgLayer = Grid.SceneLayer.BuildingFront;

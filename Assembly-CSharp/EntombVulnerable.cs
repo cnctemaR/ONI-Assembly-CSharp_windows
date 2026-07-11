@@ -28,7 +28,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 	{
 		get
 		{
-			return Db.Get().CreatureStatusItems.Entombed.resolveStringCallback(CREATURES.STATUSITEMS.ENTOMBED.LINE_ITEM, this);
+			return Db.Get().CreatureStatusItems.Entombed.resolveStringCallback(CREATURES.STATUSITEMS.ENTOMBED.LINE_ITEM, base.gameObject);
 		}
 	}
 
@@ -74,7 +74,7 @@ public class EntombVulnerable : KMonoBehaviour, IWiltCause
 			if (!this.isEntombed)
 			{
 				this.isEntombed = true;
-				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, null);
+				this.selectable.AddStatusItem(Db.Get().CreatureStatusItems.Entombed, base.gameObject);
 				base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed);
 				base.Trigger(-1089732772, true);
 			}

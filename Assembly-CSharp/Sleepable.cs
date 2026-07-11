@@ -15,7 +15,6 @@ public class Sleepable : Workable
 		base.OnPrefabInit();
 		this.workerStatusItem = null;
 		this.synchronizeAnims = false;
-		this.forcePlayPst = true;
 		this.triggerWorkReactions = false;
 	}
 
@@ -28,17 +27,17 @@ public class Sleepable : Workable
 	public override HashedString[] GetWorkAnims(Worker worker)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
-		if (component != null && component.CurrentRole != "NoRole")
+		if (base.GetComponent<Building>() != null && component != null && component.CurrentRole != "NoRole")
 		{
 			return Sleepable.hatWorkAnims;
 		}
 		return Sleepable.normalWorkAnims;
 	}
 
-	public override HashedString GetWorkPstAnim(Worker worker)
+	public override HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
-		if (component != null && component.CurrentRole != "NoRole")
+		if (base.GetComponent<Building>() != null && component != null && component.CurrentRole != "NoRole")
 		{
 			return Sleepable.hatWorkPstAnim;
 		}

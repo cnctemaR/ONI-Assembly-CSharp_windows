@@ -12,9 +12,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Base class for everything attached to GameObjects.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Export/Component.bindings.h")]
 	[RequiredByNativeCode]
 	[NativeClass("Unity::Component")]
+	[NativeHeader("Runtime/Export/Component.bindings.h")]
 	public class Component : Object
 	{
 		/// <summary>

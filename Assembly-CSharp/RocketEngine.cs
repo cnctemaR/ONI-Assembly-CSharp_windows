@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -12,16 +11,17 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>, 
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		RequireAttachedComponent requireAttachedComponent = new RequireAttachedComponent(base.gameObject.GetComponent<AttachableBuilding>(), typeof(FuelTank), UI.STARMAP.COMPONENT.FUEL_TANK);
-		base.GetComponent<RocketModule>().AddCondition(requireAttachedComponent);
+		if (this.mainEngine)
+		{
+			RequireAttachedComponent requireAttachedComponent = new RequireAttachedComponent(base.gameObject.GetComponent<AttachableBuilding>(), typeof(FuelTank), UI.STARMAP.COMPONENT.FUEL_TANK);
+			base.GetComponent<RocketModule>().AddLaunchCondition(requireAttachedComponent);
+		}
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		return null;
 	}
-
-	public float thrustAmount = (float)ROCKETRY.MODULE_THRUST_SCORE.ENGINES.MEDIUM;
 
 	public float exhaustEmitRate = 50f;
 
@@ -30,6 +30,14 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>, 
 	public SpawnFXHashes explosionEffectHash;
 
 	public SimHashes exhaustElement = SimHashes.CarbonDioxide;
+
+	public Tag fuelTag;
+
+	public float efficiency = 1f;
+
+	public bool requireOxidizer = true;
+
+	public bool mainEngine = true;
 
 	public class StatesInstance : GameStateMachine<RocketEngine.States, RocketEngine.StatesInstance, RocketEngine, object>.GameInstance
 	{
@@ -48,31 +56,29 @@ public class RocketEngine : StateMachineComponent<RocketEngine.StatesInstance>, 
 			this.burning.EventTransition(GameHashes.LandRocket, this.burnComplete, null).PlayAnim("launch_pre").QueueAnim("launch_loop", true, null)
 				.Update(delegate(RocketEngine.StatesInstance smi, float dt)
 				{
-					Vector3 vector = smi.master.gameObject.transform.position + smi.master.GetComponent<KBatchedAnimController>().Offset;
+					Vector3 vector = smi.master.gameObject.transform.GetPosition() + smi.master.GetComponent<KBatchedAnimController>().Offset;
 					int num = Grid.PosToCell(vector);
-					int num2 = Grid.CellBelow(num);
 					if (Grid.IsValidCell(num))
 					{
-						SimMessages.EmitMass(num, (byte)ElementLoader.GetElementIndex(smi.master.exhaustElement), dt * smi.master.exhaustEmitRate, smi.master.exhaustTemperature, 0, 0, 0);
+						SimMessages.EmitMass(num, (byte)ElementLoader.GetElementIndex(smi.master.exhaustElement), dt * smi.master.exhaustEmitRate, smi.master.exhaustTemperature, 0, 0, -1);
 					}
-					Game.Instance.SpawnFX(smi.master.explosionEffectHash, num2, 0f);
-					int num3 = 10;
-					for (int i = 1; i < num3; i++)
+					int num2 = 10;
+					for (int i = 1; i < num2; i++)
 					{
-						int num4 = Grid.OffsetCell(num, -1, -i);
-						int num5 = Grid.OffsetCell(num, 0, -i);
-						int num6 = Grid.OffsetCell(num, 1, -i);
+						int num3 = Grid.OffsetCell(num, -1, -i);
+						int num4 = Grid.OffsetCell(num, 0, -i);
+						int num5 = Grid.OffsetCell(num, 1, -i);
+						if (Grid.IsValidCell(num3))
+						{
+							SimMessages.ModifyEnergy(num3, smi.master.exhaustTemperature / (float)(i + 1), 3200f, SimMessages.EnergySourceID.Burner);
+						}
 						if (Grid.IsValidCell(num4))
 						{
-							SimMessages.ModifyEnergy(num4, smi.master.exhaustTemperature / (float)(i + 1), 3200f, SimMessages.EnergySourceID.Burner);
+							SimMessages.ModifyEnergy(num4, smi.master.exhaustTemperature / (float)i, 3200f, SimMessages.EnergySourceID.Burner);
 						}
 						if (Grid.IsValidCell(num5))
 						{
-							SimMessages.ModifyEnergy(num5, smi.master.exhaustTemperature / (float)i, 3200f, SimMessages.EnergySourceID.Burner);
-						}
-						if (Grid.IsValidCell(num6))
-						{
-							SimMessages.ModifyEnergy(num6, smi.master.exhaustTemperature / (float)(i + 1), 3200f, SimMessages.EnergySourceID.Burner);
+							SimMessages.ModifyEnergy(num5, smi.master.exhaustTemperature / (float)(i + 1), 3200f, SimMessages.EnergySourceID.Burner);
 						}
 					}
 				}, UpdateRate.SIM_200ms, false);

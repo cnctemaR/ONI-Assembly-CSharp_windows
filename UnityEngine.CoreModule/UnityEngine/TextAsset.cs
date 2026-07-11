@@ -11,8 +11,8 @@ namespace UnityEngine
 	public class TextAsset : Object
 	{
 		public TextAsset()
+			: this(TextAsset.CreateOptions.CreateNativeObject, null)
 		{
-			TextAsset.Internal_CreateInstance(this, null);
 		}
 
 		/// <summary>
@@ -22,8 +22,16 @@ namespace UnityEngine
 		/// </summary>
 		/// <param name="text">The text contents for the TextAsset.</param>
 		public TextAsset(string text)
+			: this(TextAsset.CreateOptions.CreateNativeObject, text)
 		{
-			TextAsset.Internal_CreateInstance(this, text);
+		}
+
+		internal TextAsset(TextAsset.CreateOptions options, string text)
+		{
+			if (options == TextAsset.CreateOptions.CreateNativeObject)
+			{
+				TextAsset.Internal_CreateInstance(this, text);
+			}
 		}
 
 		/// <summary>
@@ -54,5 +62,11 @@ namespace UnityEngine
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void Internal_CreateInstance([Writable] TextAsset self, string text);
+
+		internal enum CreateOptions
+		{
+			None,
+			CreateNativeObject
+		}
 	}
 }

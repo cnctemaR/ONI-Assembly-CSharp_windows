@@ -9,7 +9,7 @@ public class Prioritizable : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-905833192, new Action<object>(this.OnCopySettings));
+		base.Subscribe<Prioritizable>(-905833192, Prioritizable.OnCopySettingsDelegate);
 	}
 
 	private void OnCopySettings(object data)
@@ -120,6 +120,11 @@ public class Prioritizable : KMonoBehaviour
 
 	[SerializeField]
 	private int refCount;
+
+	private static readonly EventSystem.IntraObjectHandler<Prioritizable> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<Prioritizable>(delegate(Prioritizable component, object data)
+	{
+		component.OnCopySettings(data);
+	});
 
 	private static Dictionary<PrioritySetting, PrioritySetting> conversions = new Dictionary<PrioritySetting, PrioritySetting>
 	{

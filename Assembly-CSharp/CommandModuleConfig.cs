@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 using TUNING;
 using UnityEngine;
 
@@ -12,12 +13,12 @@ public class CommandModuleConfig : IBuildingConfig
 		string text2 = "rocket_command_module_kanim";
 		int num3 = 1000;
 		float num4 = 60f;
-		float[] command_MODULE_MASS = BUILDINGS.ROCKETRY_MASS_KG.COMMAND_MODULE_MASS;
+		float[] command_MODULE_MASS = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.COMMAND_MODULE_MASS;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.BuildingAttachPoint;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, command_MODULE_MASS, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, command_MODULE_MASS, array, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
 		buildingDef.ViewMode = SimViewMode.None;
@@ -37,7 +38,10 @@ public class CommandModuleConfig : IBuildingConfig
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
 		go.AddOrGet<RocketModule>();
-		go.AddOrGet<LaunchConditionManager>();
+		LaunchConditionManager launchConditionManager = go.AddOrGet<LaunchConditionManager>();
+		launchConditionManager.triggerPort = "TriggerLaunch";
+		launchConditionManager.statusPort = "LaunchReady";
+		go.AddOrGet<Storage>();
 		go.AddOrGet<CommandModule>();
 		go.AddOrGet<CommandModuleWorkable>();
 		go.AddOrGet<MinionStorage>();
@@ -46,20 +50,30 @@ public class CommandModuleConfig : IBuildingConfig
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, CommandModuleConfig.INPUT_PORTS, CommandModuleConfig.OUTPUT_PORTS);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
+		GeneratedBuildings.RegisterLogicPorts(go, CommandModuleConfig.INPUT_PORTS, CommandModuleConfig.OUTPUT_PORTS);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
+		GeneratedBuildings.RegisterLogicPorts(go, CommandModuleConfig.INPUT_PORTS, CommandModuleConfig.OUTPUT_PORTS);
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.RocketCommandModule.Id;
-		ownable.canBePublic = true;
-		EntityTemplates.ExtendEntityToRocketModule(go);
+		ownable.canBePublic = false;
+		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 
 	public const string ID = "CommandModule";
+
+	private const string TRIGGER_LAUNCH_PORT_ID = "TriggerLaunch";
+
+	private const string LAUNCH_READY_PORT_ID = "LaunchReady";
+
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort("TriggerLaunch", new CellOffset(0, 1), UI.LOGIC_PORTS.CONTROL_OPERATIONAL, false) };
+
+	private static readonly LogicPorts.Port[] OUTPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.OutputPort("LaunchReady", new CellOffset(0, 2), "Ready For Launch", false) };
 }

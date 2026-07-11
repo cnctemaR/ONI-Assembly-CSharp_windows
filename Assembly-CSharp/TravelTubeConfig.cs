@@ -56,7 +56,6 @@ public class TravelTubeConfig : IBuildingConfig
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddComponent<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Tube;
 		kanimGraphTileVisualizer.isPhysicalBuilding = true;
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "TravelTube";

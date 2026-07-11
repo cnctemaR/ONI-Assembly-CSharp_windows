@@ -92,22 +92,8 @@ public class BuildQueueButton : KMonoBehaviour
 			}
 			if (!flag2)
 			{
-				string text;
-				if (GameTags.DisplayAsCalories.Contains(keyValuePair.Key))
-				{
-					EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(keyValuePair.Key.Name);
-					float num = foodInfo.CaloriesPerUnit * keyValuePair.Value;
-					text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CALS, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
-				}
-				else if (GameTags.DisplayAsUnits.Contains(keyValuePair.Key))
-				{
-					text = GameUtil.GetFormattedUnits(keyValuePair.Value, GameUtil.TimeSlice.None, true);
-				}
-				else
-				{
-					text = GameUtil.GetFormattedMass(keyValuePair.Value, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}");
-				}
-				newTooltip += string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.QUEUED_MISSING_INGREDIENTS_TOOLTIP, text, keyValuePair.Key.ProperName());
+				string formattedByTag = GameUtil.GetFormattedByTag(keyValuePair.Key, keyValuePair.Value, GameUtil.TimeSlice.None);
+				newTooltip += string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.QUEUED_MISSING_INGREDIENTS_TOOLTIP, formattedByTag, keyValuePair.Key.ProperName());
 			}
 			flag = flag && flag2;
 		}

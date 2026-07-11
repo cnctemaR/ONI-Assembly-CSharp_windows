@@ -11,8 +11,8 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 		{
 			this.inputTwo = new LogicEventHandler(base.InputCellTwo, new Action<int>(this.UpdateState), null, LogicPortSpriteType.Input);
 		}
-		base.Subscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Subscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Subscribe<LogicGate>(774203113, LogicGate.OnBuildingBrokenDelegate);
+		base.Subscribe<LogicGate>(-1735440190, LogicGate.OnBuildingFullyRepairedDelegate);
 		BuildingHP component = base.GetComponent<BuildingHP>();
 		if (component == null || !component.IsBroken)
 		{
@@ -24,8 +24,8 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 	{
 		this.cleaningUp = true;
 		this.Disconnect();
-		base.Unsubscribe(774203113, new Action<object>(this.OnBuildingBroken));
-		base.Unsubscribe(-1735440190, new Action<object>(this.OnBuildingFullyRepaired));
+		base.Unsubscribe<LogicGate>(774203113, LogicGate.OnBuildingBrokenDelegate);
+		base.Unsubscribe<LogicGate>(-1735440190, LogicGate.OnBuildingFullyRepairedDelegate);
 		base.OnCleanUp();
 	}
 
@@ -184,4 +184,14 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 	private LogicEventHandler inputTwo;
 
 	private LogicPortVisualizer output;
+
+	private static readonly EventSystem.IntraObjectHandler<LogicGate> OnBuildingBrokenDelegate = new EventSystem.IntraObjectHandler<LogicGate>(delegate(LogicGate component, object data)
+	{
+		component.OnBuildingBroken(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<LogicGate> OnBuildingFullyRepairedDelegate = new EventSystem.IntraObjectHandler<LogicGate>(delegate(LogicGate component, object data)
+	{
+		component.OnBuildingFullyRepaired(data);
+	});
 }

@@ -40,7 +40,6 @@ public class SculptureConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		Artable artable = go.AddComponent<Sculpture>();
 		artable.requiredRolePerk = RoleManager.rolePerks.CanArt.id;
 		artable.stages.Add(new Artable.Stage("Default", global::STRINGS.BUILDINGS.PREFABS.SCULPTURE.NAME, "slab", 0, 0, false, Artable.Status.Ready));

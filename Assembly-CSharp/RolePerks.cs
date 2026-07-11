@@ -48,7 +48,7 @@ public class RolePerks
 		this.IncreaseCaringMedium = new RoleAttributePerk("IncreaseCaringMedium", UI.ROLES_SCREEN.PERKS.INCREASED_CARING.DESCRIPTION, Db.Get().Attributes.Caring.Id, (float)ROLES.ATTRIBUTE_BONUS_SECOND, DUPLICANTS.ROLES.MEDIC.NAME);
 		this.ExosuitExpertise = new SimpleRolePerk("ExosuitExpertise", UI.ROLES_SCREEN.PERKS.EXOSUIT_EXPERTISE.DESCRIPTION);
 		this.AllowAdvancedResearch = new SimpleRolePerk("AllowAdvancedResearch", UI.ROLES_SCREEN.PERKS.ADVANCED_RESEARCH.DESCRIPTION);
-		this.AllowTelescopeResearch = new SimpleRolePerk("AllowTelescopeResearch", UI.ROLES_SCREEN.PERKS.TELESCOPE_RESEARCH.DESCRIPTION);
+		this.AllowInterstellarResearch = new SimpleRolePerk("AllowInterStellarResearch", UI.ROLES_SCREEN.PERKS.INTERSTELLAR_RESEARCH.DESCRIPTION);
 		this.CanStudyWorldObjects = new SimpleRolePerk("CanStudyWorldObjects", UI.ROLES_SCREEN.PERKS.CAN_STUDY_WORLD_OBJECTS.DESCRIPTION);
 		this.CanDoPlumbing = new SimpleRolePerk("CanDoPlumbing", UI.ROLES_SCREEN.PERKS.CAN_DO_PLUMBING.DESCRIPTION);
 		this.CanUseRockets = new SimpleRolePerk("CanUseRockets", UI.ROLES_SCREEN.PERKS.CAN_USE_ROCKETS.DESCRIPTION);
@@ -143,7 +143,7 @@ public class RolePerks
 
 	public SimpleRolePerk AllowAdvancedResearch;
 
-	public SimpleRolePerk AllowTelescopeResearch;
+	public SimpleRolePerk AllowInterstellarResearch;
 
 	public SimpleRolePerk CanStudyWorldObjects;
 

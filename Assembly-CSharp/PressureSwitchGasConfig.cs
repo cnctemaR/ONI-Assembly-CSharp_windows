@@ -44,7 +44,6 @@ public class PressureSwitchGasConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		go.AddComponent<BuildingCellVisualizer>();
 	}
 

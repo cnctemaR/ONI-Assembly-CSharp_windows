@@ -48,12 +48,7 @@ public class FloorLampConfig : IBuildingConfig
 		light2D.Offset = LIGHT2D.FLOORLAMP_OFFSET;
 		light2D.shape = LightShape.Circle;
 		light2D.drawOverlay = true;
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			LightController.Instance instance = new LightController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<LightController.Def>();
 	}
 
 	public const string ID = "FloorLamp";

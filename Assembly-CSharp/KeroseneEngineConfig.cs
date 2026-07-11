@@ -15,7 +15,7 @@ public class KeroseneEngineConfig : IBuildingConfig
 		float[] engine_MASS_SMALL = BUILDINGS.ROCKETRY_MASS_KG.ENGINE_MASS_SMALL;
 		string[] array = new string[] { SimHashes.Steel.ToString() };
 		float num5 = 9999f;
-		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloorOrBuildingAttachPoint;
+		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, engine_MASS_SMALL, array, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier, 0.2f);
 		BuildingTemplates.CreateRocketBuildingDef(buildingDef);
@@ -53,11 +53,11 @@ public class KeroseneEngineConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		RocketEngine rocketEngine = go.AddOrGet<RocketEngine>();
-		rocketEngine.thrustAmount = (float)ROCKETRY.MODULE_THRUST_SCORE.ENGINES.MEDIUM;
+		rocketEngine.fuelTag = ElementLoader.FindElementByHash(SimHashes.Petroleum).tag;
+		rocketEngine.efficiency = ROCKETRY.ENGINE_EFFICIENCY.MEDIUM;
 		rocketEngine.explosionEffectHash = SpawnFXHashes.MeteorImpactDust;
-		EntityTemplates.ExtendEntityToRocketModule(go);
+		EntityTemplates.ExtendBuildingToRocketModule(go);
 		go.AddOrGet<RocketModule>();
 	}
 

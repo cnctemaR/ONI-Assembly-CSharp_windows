@@ -37,9 +37,9 @@ namespace UnityEngine.Profiling
 		///   <para>Begin profiling a piece of code with a custom label defined by this instance of CustomSampler.</para>
 		/// </summary>
 		/// <param name="targetObject"></param>
-		[GeneratedByOldBindingsGenerator]
 		[Conditional("ENABLE_PROFILER")]
 		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Begin();
 
@@ -61,9 +61,9 @@ namespace UnityEngine.Profiling
 		/// <summary>
 		///   <para>End profiling a piece of code with a custom label.</para>
 		/// </summary>
+		[GeneratedByOldBindingsGenerator]
 		[Conditional("ENABLE_PROFILER")]
 		[ThreadAndSerializationSafe]
-		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void End();
 

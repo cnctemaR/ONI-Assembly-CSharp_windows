@@ -53,13 +53,12 @@ public class SpecialCargoBayConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		CargoBay cargoBay = go.AddOrGet<CargoBay>();
 		cargoBay.storage = go.AddOrGet<Storage>();
 		cargoBay.storageType = CargoBay.CargoType.entities;
 		cargoBay.storage.capacityKg = 100f;
 		go.AddOrGet<RocketModule>();
-		EntityTemplates.ExtendEntityToRocketModule(go);
+		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 
 	public const string ID = "SpecialCargoBay";

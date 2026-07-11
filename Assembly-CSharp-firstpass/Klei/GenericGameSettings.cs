@@ -48,6 +48,8 @@ namespace Klei
 
 		public bool developerDebugEnable { get; private set; }
 
+		public float developerCaptureGCStatsTime { get; set; }
+
 		public bool disableGameOver { get; private set; }
 
 		public bool disablePopFx { get; private set; }

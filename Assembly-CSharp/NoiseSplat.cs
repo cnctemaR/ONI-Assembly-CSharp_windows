@@ -131,7 +131,7 @@ public class NoiseSplat : IUniformGridObject
 		{
 			for (int j = num4; j < num2; j++)
 			{
-				if (Grid.VisibilityTest(num6, num7, j, i, false, false))
+				if (Grid.VisibilityTest(num6, num7, j, i, false))
 				{
 					int num8 = Grid.XYToCell(j, i);
 					float dbforCell = this.GetDBForCell(num8);

@@ -65,6 +65,8 @@ public class GameTags
 
 	public static readonly Tag Detecting = TagManager.Create("Detecting");
 
+	public static readonly Tag RareMaterials = TagManager.Create("RareMaterials");
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted");
@@ -193,11 +195,17 @@ public class GameTags
 
 	public static readonly Tag Usable = TagManager.Create("Usable");
 
+	public static readonly Tag PedestalDisplayable = TagManager.Create("PedestalDisplayable");
+
 	public static readonly Tag Suit = TagManager.Create("Suit");
 
 	public static readonly Tag AtmoSuit = TagManager.Create("Atmo_Suit");
 
 	public static readonly Tag AquaSuit = TagManager.Create("Aqua_Suit");
+
+	public static readonly Tag JetSuit = TagManager.Create("Jet_Suit");
+
+	public static readonly Tag JetSuitOutOfFuel = TagManager.Create("JetSuitOutOfFuel");
 
 	public static readonly Tag TemperatureSuit = TagManager.Create("Temperature_Suit");
 
@@ -206,13 +214,15 @@ public class GameTags
 		GameTags.Suit,
 		GameTags.AquaSuit,
 		GameTags.AtmoSuit,
+		GameTags.JetSuit,
 		GameTags.TemperatureSuit
 	};
 
 	public static readonly List<Tag> OxygenSuitTags = new List<Tag>
 	{
 		GameTags.AtmoSuit,
-		GameTags.AquaSuit
+		GameTags.AquaSuit,
+		GameTags.JetSuit
 	};
 
 	public static readonly Tag Clothes = TagManager.Create("Clothes");
@@ -255,6 +265,8 @@ public class GameTags
 
 	public static readonly Tag PreventChoreInterruption = TagManager.Create("PreventChoreInterruption");
 
+	public static readonly Tag PerformingWorkRequest = TagManager.Create("PerformingWorkRequest");
+
 	public static readonly Tag RecoveringBreath = TagManager.Create("RecoveringBreath");
 
 	public static readonly Tag NoOxygen = TagManager.Create("NoOxygen");
@@ -275,7 +287,11 @@ public class GameTags
 
 	public static readonly Tag Operational = TagManager.Create("Operational");
 
+	public static readonly Tag JetSuitBlocker = TagManager.Create("JetSuitBlocker");
+
 	public static readonly Tag Rocket = TagManager.Create("Rocket");
+
+	public static readonly Tag RocketNotOnGround = TagManager.Create("RocketNotOnGround");
 
 	public static readonly Tag Stored = TagManager.Create("Stored");
 
@@ -347,7 +363,8 @@ public class GameTags
 		GameTags.Agriculture,
 		GameTags.Other,
 		GameTags.ManufacturedMaterial,
-		GameTags.CookingIngredient
+		GameTags.CookingIngredient,
+		GameTags.RareMaterials
 	};
 
 	public static TagSet OtherEntityTags = new TagSet
@@ -367,6 +384,8 @@ public class GameTags
 	public static TagSet DisplayAsCalories = new TagSet(GameTags.CalorieCategories);
 
 	public static TagSet DisplayAsUnits = new TagSet(GameTags.UnitCategories);
+
+	public static TagSet DisplayAsInformation = new TagSet();
 
 	public abstract class ChoreTypes
 	{
@@ -487,6 +506,10 @@ public class GameTags
 
 		public static readonly Tag Confined = TagManager.Create("Confined");
 
+		public static readonly Tag Digger = TagManager.Create("Digger");
+
+		public static readonly Tag Tunnel = TagManager.Create("Tunnel");
+
 		public static class Species
 		{
 			public static readonly Tag HatchSpecies = TagManager.Create("HatchSpecies");
@@ -504,6 +527,8 @@ public class GameTags
 			public static readonly Tag PacuSpecies = TagManager.Create("PacuSpecies");
 
 			public static readonly Tag MooSpecies = TagManager.Create("MooSpecies");
+
+			public static readonly Tag MoleSpecies = TagManager.Create("MoleSpecies");
 		}
 
 		public static class Behaviours

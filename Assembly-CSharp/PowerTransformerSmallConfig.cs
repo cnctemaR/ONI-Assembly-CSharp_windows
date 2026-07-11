@@ -52,12 +52,7 @@ public class PowerTransformerSmallConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		global::UnityEngine.Object.DestroyImmediate(go.GetComponent<EnergyConsumer>());
-		BuildingTemplates.DoPostConfigure(go);
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "PowerTransformerSmall";

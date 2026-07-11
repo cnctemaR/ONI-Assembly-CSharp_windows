@@ -7,7 +7,7 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
+		base.Subscribe<Grave>(-1697596308, Grave.OnStorageChangedDelegate);
 		this.epitaphIdx = global::UnityEngine.Random.Range(0, int.MaxValue);
 	}
 
@@ -83,6 +83,11 @@ public class Grave : StateMachineComponent<Grave.StatesInstance>
 	public float burialTime = -1f;
 
 	private static readonly CellOffset[] DELIVERY_OFFSETS = new CellOffset[] { default(CellOffset) };
+
+	private static readonly EventSystem.IntraObjectHandler<Grave> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<Grave>(delegate(Grave component, object data)
+	{
+		component.OnStorageChanged(data);
+	});
 
 	public class StatesInstance : GameStateMachine<Grave.States, Grave.StatesInstance, Grave, object>.GameInstance
 	{

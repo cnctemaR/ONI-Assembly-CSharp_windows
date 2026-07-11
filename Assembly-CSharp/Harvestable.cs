@@ -10,6 +10,7 @@ public class Harvestable : Workable
 	protected Harvestable()
 	{
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
+		this.onEnableOverlayDelegate = new Action<object>(this.OnEnableOverlay);
 	}
 
 	public Worker completed_by { get; protected set; }
@@ -140,18 +141,15 @@ public class Harvestable : Workable
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Harvesting;
 		this.multitoolContext = "harvest";
 		this.multitoolHitEffectTag = "fx_harvest_splash";
-		base.Subscribe(1309017699, delegate(object o)
-		{
-			this.SetInPlanterBox(true);
-		});
+		base.Subscribe<Harvestable>(1309017699, Harvestable.SetInPlanterBoxTrueDelegate);
 	}
 
 	protected override void OnSpawn()
 	{
-		base.Subscribe(2127324410, new Action<object>(this.ForceCancelHarvest));
+		base.Subscribe<Harvestable>(2127324410, Harvestable.ForceCancelHarvestDelegate);
 		base.SetWorkTime(10f);
-		base.Subscribe(2127324410, new Action<object>(this.OnCancel));
-		base.Subscribe(493375141, new Action<object>(this.OnRefreshUserMenu));
+		base.Subscribe<Harvestable>(2127324410, Harvestable.OnCancelDelegate);
+		base.Subscribe<Harvestable>(493375141, Harvestable.OnRefreshUserMenuDelegate);
 		this.faceTargetWhenWorking = true;
 		Components.Harvestables.Add(this);
 		this.attributeConverter = Db.Get().AttributeConverters.HarvestSpeed;
@@ -161,8 +159,8 @@ public class Harvestable : Workable
 		{
 			this.MarkForHarvest();
 		}
-		Game.Instance.Subscribe(1248612973, new Action<object>(this.OnEnableOverlay));
-		Game.Instance.Subscribe(1798162660, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Subscribe(1248612973, this.onEnableOverlayDelegate);
+		Game.Instance.Subscribe(1798162660, this.onEnableOverlayDelegate);
 		Game.Instance.Subscribe(2015652040, new Action<object>(this.OnDisableOverlay));
 	}
 
@@ -313,9 +311,9 @@ public class Harvestable : Workable
 	{
 		base.OnCleanUp();
 		this.DestroyOverlayIcon();
-		Game.Instance.Unsubscribe(1248612973, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Unsubscribe(1248612973, this.onEnableOverlayDelegate);
 		Game.Instance.Unsubscribe(2015652040, new Action<object>(this.OnDisableOverlay));
-		Game.Instance.Unsubscribe(1798162660, new Action<object>(this.OnEnableOverlay));
+		Game.Instance.Unsubscribe(1798162660, this.onEnableOverlayDelegate);
 		Components.Harvestables.Remove(this);
 	}
 
@@ -345,4 +343,26 @@ public class Harvestable : Workable
 	protected Chore chore;
 
 	public OccupyArea area;
+
+	private Action<object> onEnableOverlayDelegate;
+
+	private static readonly EventSystem.IntraObjectHandler<Harvestable> ForceCancelHarvestDelegate = new EventSystem.IntraObjectHandler<Harvestable>(delegate(Harvestable component, object data)
+	{
+		component.ForceCancelHarvest(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Harvestable> OnCancelDelegate = new EventSystem.IntraObjectHandler<Harvestable>(delegate(Harvestable component, object data)
+	{
+		component.OnCancel(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Harvestable> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Harvestable>(delegate(Harvestable component, object data)
+	{
+		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Harvestable> SetInPlanterBoxTrueDelegate = new EventSystem.IntraObjectHandler<Harvestable>(delegate(Harvestable component, object data)
+	{
+		component.SetInPlanterBox(true);
+	});
 }

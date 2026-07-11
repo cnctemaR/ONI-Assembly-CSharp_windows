@@ -36,7 +36,7 @@ public class TemplateSelectionInfoPanel : KMonoBehaviour, IRender1000ms
 		{
 			text = text + this.details[i](DebugBaseTemplateButton.Instance.SelectedCells) + "\n";
 		}
-		text += "\n-------------------\n";
+		text += UI.HORIZONTAL_BR_RULE;
 		text += this.saved_detail_label.text;
 		this.saved_detail_label.text = text;
 	}

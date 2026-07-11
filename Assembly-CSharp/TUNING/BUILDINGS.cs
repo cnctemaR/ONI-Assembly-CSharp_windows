@@ -57,16 +57,16 @@ namespace TUNING
 
 		public const int REPAIR_EFFECTIVENESS_BASE = 10;
 
-		public static readonly PlanScreen.PlanInfo[] PLANORDER = new PlanScreen.PlanInfo[]
+		public static List<PlanScreen.PlanInfo> PLANORDER = new List<PlanScreen.PlanInfo>
 		{
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Base, new List<string>
 			{
 				"Ladder", "FirePole", "LadderFast", "Tile", "GasPermeableMembrane", "MeshTile", "InsulationTile", "PlasticTile", "MetalTile", "GlassTile",
 				"BunkerTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir", "TravelTube",
 				"TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new string[] { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Oxygen, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Power, new List<string>
 			{
 				"ManualGenerator",
 				"Generator",
@@ -94,12 +94,12 @@ namespace TUNING
 				PressureSwitchLiquidConfig.ID,
 				PressureSwitchGasConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Food, new List<string>
 			{
 				"MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder",
 				"FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Plumbing, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Plumbing, new List<string>
 			{
 				"Outhouse",
 				"FlushToilet",
@@ -122,7 +122,7 @@ namespace TUNING
 				LiquidConduitDiseaseSensorConfig.ID,
 				LiquidConduitTemperatureSensorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.HVAC, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.HVAC, new List<string>
 			{
 				"GasConduit",
 				"InsulatedGasConduit",
@@ -143,13 +143,13 @@ namespace TUNING
 				GasConduitDiseaseSensorConfig.ID,
 				GasConduitTemperatureSensorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Refining, new List<string>
 			{
 				"Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer",
-				"OxyliteRefinery"
+				"OxyliteRefinery", "SupermaterialRefinery"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new string[] { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "MassageTable", "Grave" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Medical, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "MedicalCot", "MedicalBed", "MassageTable", "Grave" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Furniture, new List<string>
 			{
 				BedConfig.ID,
 				LuxuryBedConfig.ID,
@@ -162,16 +162,17 @@ namespace TUNING
 				"Canvas",
 				"Sculpture",
 				"IceSculpture",
+				"ItemPedestal",
 				"FloorLamp",
 				"CeilingLight"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Equipment, new List<string>
 			{
-				"ResearchCenter", "AdvancedResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator", "SuitFabricator",
-				"SuitMarker", "SuitLocker", "AstronautTrainingCenter"
+				"ResearchCenter", "AdvancedResearchCenter", "CosmicResearchCenter", "Telescope", "PowerControlStation", "FarmStation", "RanchStation", "ShearingStation", "RoleStation", "ClothingFabricator",
+				"SuitFabricator", "SuitMarker", "SuitLocker", "JetSuitMarker", "JetSuitLocker", "AstronautTrainingCenter"
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new string[] { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "ExteriorWall" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new string[]
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Utilities, new List<string> { "SpaceHeater", "LiquidHeater", "LiquidCooledFan", "AirConditioner", "LiquidConditioner", "OreScrubber", "OilWellCap", "ThermalBlock", "ExteriorWall" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Automation, new List<string>
 			{
 				"LogicWire",
 				"LogicWireBridge",
@@ -193,106 +194,112 @@ namespace TUNING
 				"Checkpoint",
 				CometDetectorConfig.ID
 			}),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Conveyance, new string[] { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge" }),
-			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Rocketry, new string[] { "KeroseneEngine", "LiquidFuelTank", "CargoBay", "GasCargoBay", "LiquidCargoBay", "CommandModule", "Gantry", "SpecialCargoBay" })
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Conveyance, new List<string> { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidConduitBridge", "AutoMiner" }),
+			new PlanScreen.PlanInfo(PlanScreen.PlanCategory.Rocketry, new List<string>
+			{
+				"Gantry", "SteamEngine", "KeroseneEngine", "SolidBooster", "LiquidFuelTank", "OxidizerTank", "CargoBay", "GasCargoBay", "LiquidCargoBay", "CommandModule",
+				"TouristModule", "ResearchModule", "SpecialCargoBay", "HydrogenEngine"
+			})
 		};
 
-		public static List<string> COMPONENT_DESCRIPTION_ORDER = new List<string>
+		public static List<Type> COMPONENT_DESCRIPTION_ORDER = new List<Type>
 		{
-			"AlgaeHabitat",
-			"BottleEmptier",
-			"Fabricator",
-			"MicrobeMusher",
-			"CookingStation",
-			"RoleStation",
-			"ResearchCenter",
-			"LiquidCooledFan",
-			"OxygenRecharger",
-			"HandSanitizer",
-			"PlantAirConditioner",
-			"Clinic",
-			"BuildingElementEmitter",
-			"ElementConverter",
-			"ElementConsumer",
-			"PassiveElementConsumer",
-			"TinkerStation",
-			"EnergyConsumer",
-			"AirConditioner",
-			"Storage",
-			"Battery",
-			"Switch",
-			"CircuitSwitch",
-			"ManualDelivery",
-			"ManualDeliveryKG",
-			"AirFilter",
-			"FlushToilet",
-			"Toilet",
-			"EnergyGenerator",
-			"MassageTable",
-			"Shower",
-			"LiquidHeater",
-			"Ownable",
-			"PlantablePlot",
-			"RelaxationPoint",
-			"BuildingComplete",
-			"Building",
-			"BuildingPreview",
-			"BuildingUnderConstruction",
-			"TemperatureControlledSwitch",
-			"TimedSwitch",
-			"Crop",
-			"Instance",
-			"Growing",
-			"Equippable",
-			"ColdBreather",
-			"SeedSplicer",
-			"ResearchPointObject",
-			"SuitTank",
-			"IlluminationVulnerable",
-			"TemperatureVulnerable",
-			"PressureVulnerable",
-			"SubmersionMonitor",
-			"PressureSwitch",
-			"FertilizationMonitor",
-			"RestRestoreHealth",
-			"GeneShuffler",
-			"BatterySmart",
-			"Polymerizer",
-			"OilRefinery",
-			"Compost",
-			"Refrigerator",
-			BedConfig.ID,
-			"OreScrubber",
-			"Refinery",
-			"LiquidCooledRefinery",
-			"MinimumOperatingTemperature",
-			"RoomTracker",
-			"EnergyConsumerSelfSustaining",
-			"Edible",
-			"PlantableSeed",
-			"FriedMushBar",
-			"BasicSingleHarvestPlant",
-			"PrickleFlower",
-			"DiseaseTrigger",
-			"MedicinalHerb",
-			"MedicinalPill",
-			"SeedProducer",
-			"Geyser",
-			"Def",
-			"Overheatable",
-			"Work",
-			"ToiletWorkableUse",
-			"ReceptacleMonitor",
-			"Light2D",
-			"Ladder",
-			"SimCellOccupier",
-			"Vent",
-			"TilePOI",
-			"LogicPorts",
-			"Capturable",
-			"Trappable",
-			"ScaleGrowthMonitor",
-			"DecorProvider"
+			typeof(BottleEmptier),
+			typeof(Fabricator),
+			typeof(MicrobeMusher),
+			typeof(CookingStation),
+			typeof(RoleStation),
+			typeof(ResearchCenter),
+			typeof(LiquidCooledFan),
+			typeof(HandSanitizer),
+			typeof(HandSanitizer.Work),
+			typeof(PlantAirConditioner),
+			typeof(Clinic),
+			typeof(BuildingElementEmitter),
+			typeof(ElementConverter),
+			typeof(ElementConsumer),
+			typeof(PassiveElementConsumer),
+			typeof(TinkerStation),
+			typeof(EnergyConsumer),
+			typeof(AirConditioner),
+			typeof(Storage),
+			typeof(Battery),
+			typeof(AirFilter),
+			typeof(FlushToilet),
+			typeof(Toilet),
+			typeof(EnergyGenerator),
+			typeof(MassageTable),
+			typeof(Shower),
+			typeof(Ownable),
+			typeof(PlantablePlot),
+			typeof(RelaxationPoint),
+			typeof(BuildingComplete),
+			typeof(Building),
+			typeof(BuildingPreview),
+			typeof(BuildingUnderConstruction),
+			typeof(Crop),
+			typeof(Growing),
+			typeof(Equippable),
+			typeof(ColdBreather),
+			typeof(SeedSplicer),
+			typeof(ResearchPointObject),
+			typeof(SuitTank),
+			typeof(IlluminationVulnerable),
+			typeof(TemperatureVulnerable),
+			typeof(PressureVulnerable),
+			typeof(SubmersionMonitor),
+			typeof(BatterySmart),
+			typeof(Compost),
+			typeof(Refrigerator),
+			typeof(Bed),
+			typeof(OreScrubber),
+			typeof(OreScrubber.Work),
+			typeof(Refinery),
+			typeof(LiquidCooledRefinery),
+			typeof(MinimumOperatingTemperature),
+			typeof(RoomTracker),
+			typeof(EnergyConsumerSelfSustaining),
+			typeof(ArcadeMachine),
+			typeof(GlassForge),
+			typeof(Telescope),
+			typeof(EspressoMachine),
+			typeof(EspressoMachineWorkable),
+			typeof(JetSuitTank),
+			typeof(Phonobox),
+			typeof(ArcadeMachine),
+			typeof(BottleEmptier),
+			typeof(CommandModule),
+			typeof(FuelTank),
+			typeof(LaunchableRocket),
+			typeof(OxidizerTank),
+			typeof(RocketEngine),
+			typeof(SolidBooster),
+			typeof(TouristModule),
+			typeof(WaterCooler),
+			typeof(Edible),
+			typeof(PlantableSeed),
+			typeof(DiseaseTrigger),
+			typeof(MedicinalPill),
+			typeof(SeedProducer),
+			typeof(Geyser),
+			typeof(Overheatable),
+			typeof(CreatureCalorieMonitor.Def),
+			typeof(LureableMonitor.Def),
+			typeof(CropSleepingMonitor.Def),
+			typeof(FertilizationMonitor.Def),
+			typeof(IrrigationMonitor.Def),
+			typeof(ScaleGrowthMonitor.Def),
+			typeof(TravelTubeEntrance.Work),
+			typeof(ToiletWorkableUse),
+			typeof(ReceptacleMonitor),
+			typeof(Light2D),
+			typeof(Ladder),
+			typeof(SimCellOccupier),
+			typeof(Vent),
+			typeof(LogicPorts),
+			typeof(Capturable),
+			typeof(Trappable),
+			typeof(DecorProvider)
 		};
 
 		public class OVERPRESSURE
@@ -334,6 +341,10 @@ namespace TUNING
 			public const float HIGH_2 = 50f;
 
 			public const float HIGH_3 = 200f;
+
+			public const float HIGH_4 = 500f;
+
+			public const float HIGH_5 = 900f;
 		}
 
 		public class DECOR_MATERIAL_MOD
@@ -374,11 +385,13 @@ namespace TUNING
 		{
 			public static float[] COMMAND_MODULE_MASS = new float[] { 200f };
 
-			public static float[] CARGO_MASS = new float[] { 1000f };
+			public static float[] CARGO_MASS = new float[] { 1000f, 1000f };
 
 			public static float[] FUEL_TANK_DRY_MASS = new float[] { 100f };
 
 			public static float[] FUEL_TANK_WET_MASS = new float[] { 900f };
+
+			public static float[] OXIDIZER_TANK_OXIDIZER_MASS = new float[] { 900f };
 
 			public static float[] ENGINE_MASS_SMALL = new float[] { 200f };
 

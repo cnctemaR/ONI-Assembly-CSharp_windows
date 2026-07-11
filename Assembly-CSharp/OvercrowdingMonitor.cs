@@ -19,7 +19,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 
 	private static bool IsConfined(OvercrowdingMonitor.Instance smi)
 	{
-		return !smi.HasTag(GameTags.Creatures.Burrowed) && (smi.cavity == null || smi.cavity.numCells < smi.def.spaceRequiredPerCreature);
+		return !smi.HasTag(GameTags.Creatures.Burrowed) && !smi.HasTag(GameTags.Creatures.Digger) && (smi.cavity == null || smi.cavity.numCells < smi.def.spaceRequiredPerCreature);
 	}
 
 	private static bool IsFutureOvercrowded(OvercrowdingMonitor.Instance smi)

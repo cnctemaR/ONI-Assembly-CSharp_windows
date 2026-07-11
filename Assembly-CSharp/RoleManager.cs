@@ -886,11 +886,11 @@ public class RoleManager
 		},
 		{
 			AstronautTrainee.ID,
-			"hat_role_basekeeping1"
+			"hat_role_astronaut1"
 		},
 		{
 			Astronaut.ID,
-			"hat_role_basekeeping1"
+			"hat_role_astronaut2"
 		}
 	};
 

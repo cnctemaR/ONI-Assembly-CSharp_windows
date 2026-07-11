@@ -8,6 +8,11 @@ using UnityEngine.UI;
 
 public class SimpleInfoScreen : TargetScreen
 {
+	public SimpleInfoScreen()
+	{
+		this.onStorageChangeDelegate = new Action<object>(this.OnStorageChange);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -27,14 +32,14 @@ public class SimpleInfoScreen : TargetScreen
 		this.descriptionContainer = Util.KInstantiateUI<DescriptionContainer>(this.DescriptionContainerTemplate, gameObject, false);
 		this.storagePanel = Util.KInstantiateUI(ScreenPrefabs.Instance.CollapsableContentPanel, base.gameObject, false);
 		this.stampContainer = Util.KInstantiateUI(this.StampContainerTemplate, gameObject, false);
-		base.Subscribe(-1514841199, new Action<object>(this.OnRefreshData));
+		base.Subscribe<SimpleInfoScreen>(-1514841199, SimpleInfoScreen.OnRefreshDataDelegate);
 	}
 
 	public override void OnSelectTarget(GameObject target)
 	{
 		base.OnSelectTarget(target);
-		base.Subscribe(target, -1697596308, new Action<object>(this.OnStorageChange));
-		base.Subscribe(target, -1197125120, new Action<object>(this.OnStorageChange));
+		base.Subscribe(target, -1697596308, this.onStorageChangeDelegate);
+		base.Subscribe(target, -1197125120, this.onStorageChangeDelegate);
 		this.RefreshStorage();
 		base.Subscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
 		this.RefreshBreedingChance();
@@ -67,7 +72,7 @@ public class SimpleInfoScreen : TargetScreen
 		}
 		this.statusItemPanel.gameObject.SetActive(true);
 		this.statusItemPanel.scalerMask.UpdateSize();
-		this.Refresh(false);
+		this.Refresh(true);
 	}
 
 	public override void OnDeselectTarget(GameObject target)
@@ -75,8 +80,8 @@ public class SimpleInfoScreen : TargetScreen
 		base.OnDeselectTarget(target);
 		if (target != null)
 		{
-			base.Unsubscribe(target, -1697596308, new Action<object>(this.OnStorageChange));
-			base.Unsubscribe(target, -1197125120, new Action<object>(this.OnStorageChange));
+			base.Unsubscribe(target, -1697596308, this.onStorageChangeDelegate);
+			base.Unsubscribe(target, -1197125120, this.onStorageChangeDelegate);
 			base.Unsubscribe(target, 1059811075, new Action<object>(this.OnBreedingChanceChanged));
 		}
 		KSelectable component = target.GetComponent<KSelectable>();
@@ -362,27 +367,43 @@ public class SimpleInfoScreen : TargetScreen
 				{
 					GameObject gameObject2 = this.AddOrGetStorageLabel(this.storageLabels, this.storagePanel, "storage_" + num.ToString());
 					num++;
-					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					if (storage.allowUIItemRemoval)
+					{
+						Transform transform = gameObject2.transform.Find("removeAttributeButton");
+						if (transform != null)
+						{
+							KButton component = transform.GetComponent<KButton>();
+							component.enabled = true;
+							component.gameObject.SetActive(true);
+							GameObject select_item = gameObject;
+							Storage selected_storage = storage;
+							component.onClick += delegate
+							{
+								selected_storage.Remove(select_item);
+							};
+						}
+					}
+					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 					Rottable.Instance smi = gameObject.GetSMI<Rottable.Instance>();
 					gameObject2.GetComponentInChildren<ToolTip>().ClearMultiStringTooltip();
 					string text2 = GameUtil.GetUnitFormattedName(gameObject, false);
-					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
-					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
+					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_MASS, text2, GameUtil.GetFormattedMass(component2.Mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+					text2 = string.Format(UI.DETAILTABS.DETAILS.CONTENTS_TEMPERATURE, text2, GameUtil.GetFormattedTemperature(component2.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true));
 					if (smi != null)
 					{
 						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_ROTTABLE, smi.StateString());
 						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(smi.GetToolTip(), PluginAssets.Instance.defaultTextStyleSetting);
 					}
-					if (component.DiseaseIdx != 255)
+					if (component2.DiseaseIdx != 255)
 					{
-						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, false));
-						string formattedDisease = GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true);
+						text2 += string.Format(UI.DETAILTABS.DETAILS.CONTENTS_DISEASED, GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, false));
+						string formattedDisease = GameUtil.GetFormattedDisease(component2.DiseaseIdx, component2.DiseaseCount, true);
 						gameObject2.GetComponentInChildren<ToolTip>().AddMultiStringTooltip(formattedDisease, PluginAssets.Instance.defaultTextStyleSetting);
 					}
 					gameObject2.GetComponentInChildren<LocText>().text = text2;
-					KButton component2 = gameObject2.GetComponent<KButton>();
+					KButton component3 = gameObject2.GetComponent<KButton>();
 					GameObject select_target = gameObject;
-					component2.onClick += delegate
+					component3.onClick += delegate
 					{
 						SelectTool.Instance.Select(select_target.GetComponent<KSelectable>(), false);
 					};
@@ -404,6 +425,14 @@ public class SimpleInfoScreen : TargetScreen
 			gameObject = labels[id];
 			KButton component = gameObject.GetComponent<KButton>();
 			component.ClearOnClick();
+			Transform transform = gameObject.transform.Find("removeAttributeButton");
+			if (transform != null)
+			{
+				KButton kbutton = transform.FindComponent<KButton>();
+				kbutton.enabled = false;
+				kbutton.gameObject.SetActive(false);
+				kbutton.ClearOnClick();
+			}
 		}
 		else
 		{
@@ -510,6 +539,13 @@ public class SimpleInfoScreen : TargetScreen
 	private List<SimpleInfoScreen.StatusItemEntry> oldStatusItems = new List<SimpleInfoScreen.StatusItemEntry>();
 
 	private List<LocText> attributeLabels = new List<LocText>();
+
+	private Action<object> onStorageChangeDelegate;
+
+	private static readonly EventSystem.IntraObjectHandler<SimpleInfoScreen> OnRefreshDataDelegate = new EventSystem.IntraObjectHandler<SimpleInfoScreen>(delegate(SimpleInfoScreen component, object data)
+	{
+		component.OnRefreshData(data);
+	});
 
 	[DebuggerDisplay("{item.item.Name}")]
 	public class StatusItemEntry : IRenderEveryTick

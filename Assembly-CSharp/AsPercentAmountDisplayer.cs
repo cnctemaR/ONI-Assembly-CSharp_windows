@@ -58,8 +58,9 @@ public class AsPercentAmountDisplayer : IAmountDisplayer
 		{
 			text += string.Format(UI.CHANGEPERSECOND, this.formatter.GetFormattedValue(this.ToPercent(instance.deltaAttribute.GetTotalDisplayValue(), instance), GameUtil.TimeSlice.PerSecond, null));
 		}
-		foreach (AttributeModifier attributeModifier in instance.deltaAttribute.Modifiers)
+		for (int num = 0; num != instance.deltaAttribute.Modifiers.Count; num++)
 		{
+			AttributeModifier attributeModifier = instance.deltaAttribute.Modifiers[num];
 			float modifierContribution = instance.deltaAttribute.GetModifierContribution(attributeModifier);
 			text = text + "\n" + string.Format(UI.MODIFIER_ITEM_TEMPLATE, attributeModifier.GetDescription(), this.formatter.GetFormattedValue(this.ToPercent(modifierContribution, instance), this.formatter.DeltaTimeSlice, null));
 		}

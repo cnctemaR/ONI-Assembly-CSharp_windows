@@ -116,6 +116,7 @@ namespace Database
 				new ChoreType[] { this.StressVomit },
 				new ChoreType[] { this.MoveTo },
 				new ChoreType[] { this.RecoverBreath },
+				new ChoreType[] { this.ReturnSuitUrgent },
 				new ChoreType[] { this.UglyCry },
 				new ChoreType[] { this.BingeEat },
 				new ChoreType[] { this.EmoteHighPriority, this.StressActingOut, this.Vomit, this.Cough, this.Pee, this.StressIdle, this.RescueIncapacitated, this.SwitchHat },
@@ -138,7 +139,7 @@ namespace Database
 					this.ResearchFetch, this.Mop, this.Toggle, this.Deconstruct, this.Capture, this.CreatureFetch, this.EggSing, this.Fetch, this.Transport, this.Art,
 					this.GeneratePower, this.CropTend, this.PowerTinker, this.MachineTinker, this.DropUnusedInventory, this.Harvest, this.FarmFetch, this.Uproot, this.FarmingFabricate, this.PowerFabricate,
 					this.Fabricate, this.Train, this.Cook, this.Build, this.Dig, this.BuildDig, this.FlipCompost, this.Depressurize, this.BuildFetch, this.CookFetch,
-					this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.StressEmote, this.ReturnSuitUrgent, this.FoodFetch, this.Astronaut
+					this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.StressEmote, this.FoodFetch, this.Astronaut
 				},
 				new ChoreType[] { this.ReturnSuitIdle, this.EmoteIdle },
 				new ChoreType[] { this.Idle }

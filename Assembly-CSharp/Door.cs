@@ -86,9 +86,9 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			this.Seal();
 		}
 		this.UpdateDoorSpeed(this.operational.IsOperational);
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(824508782, new Action<object>(this.OnOperationalChanged));
-		base.Subscribe(-801688580, new Action<object>(this.OnLogicValueChanged));
+		base.Subscribe<Door>(-592767678, Door.OnOperationalChangedDelegate);
+		base.Subscribe<Door>(824508782, Door.OnOperationalChangedDelegate);
+		base.Subscribe<Door>(-801688580, Door.OnLogicValueChangedDelegate);
 		this.requestedState = this.CurrentState;
 		this.ApplyRequestedControlState(true);
 		if (this.rotatable.IsRotated)
@@ -639,6 +639,16 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	public static readonly HashedString OPEN_CLOSE_PORT_ID = new HashedString("DoorOpenClose");
 
 	private static readonly KAnimFile[] OVERRIDE_ANIMS = new KAnimFile[] { Assets.GetAnim("anim_use_remote_kanim") };
+
+	private static readonly EventSystem.IntraObjectHandler<Door> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Door>(delegate(Door component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Door> OnLogicValueChangedDelegate = new EventSystem.IntraObjectHandler<Door>(delegate(Door component, object data)
+	{
+		component.OnLogicValueChanged(data);
+	});
 
 	private bool applyLogicChange;
 

@@ -36,30 +36,12 @@ public class TelescopeConfig : IBuildingConfig
 		Prioritizable.AddRef(go);
 		Telescope telescope = go.AddOrGet<Telescope>();
 		telescope.clearScanCellRadius = 5;
+		telescope.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_telescope_kanim") };
+		telescope.requiredRolePerk = RoleManager.rolePerks.CanStudyWorldObjects.id;
+		telescope.workLayer = Grid.SceneLayer.BuildingFront;
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 1000f;
 		storage.showInUI = true;
-		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
-		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = TelescopeConfig.INPUT_MATERIAL;
-		manualDeliveryKG.refillMass = 6f;
-		manualDeliveryKG.capacity = 30f;
-		manualDeliveryKG.choreTags = GameTags.ChoreTypes.ResearchChores;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.ResearchFetch.IdHash;
-		ResearchCenter researchCenter = go.AddOrGet<ResearchCenter>();
-		researchCenter.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_telescope_kanim") };
-		researchCenter.research_point_type_id = "gamma";
-		researchCenter.requiredRolePerk = RoleManager.rolePerks.CanStudyWorldObjects.id;
-		researchCenter.inputMaterial = TelescopeConfig.INPUT_MATERIAL;
-		researchCenter.mass_per_point = 2f;
-		researchCenter.workLayer = Grid.SceneLayer.BuildingFront;
-		float num = 0.0076190475f;
-		ElementConverter elementConverter = go.AddOrGet<ElementConverter>();
-		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
-		{
-			new ElementConverter.ConsumedElement(TelescopeConfig.INPUT_MATERIAL, num)
-		};
-		elementConverter.showDescriptors = false;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Gas;
 		conduitConsumer.consumptionRate = 1f;
@@ -67,16 +49,11 @@ public class TelescopeConfig : IBuildingConfig
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
 		conduitConsumer.capacityKG = 10f;
 		conduitConsumer.forceAlwaysSatisfied = true;
+		go.AddOrGetDef<PoweredController.Def>();
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
-		BuildingTemplates.DoPostConfigure(go);
 	}
 
 	public const string ID = "Telescope";

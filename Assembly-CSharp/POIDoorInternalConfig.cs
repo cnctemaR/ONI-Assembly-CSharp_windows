@@ -48,7 +48,6 @@ public class POIDoorInternalConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
 		AccessControl component = go.GetComponent<AccessControl>();
 		Door component2 = go.GetComponent<Door>();
 		component2.hasComplexUserControls = false;

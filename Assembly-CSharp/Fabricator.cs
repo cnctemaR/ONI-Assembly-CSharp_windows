@@ -146,8 +146,8 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 		{
 			this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.Fetch.IdHash;
 		}
-		base.Subscribe(-1957399615, new Action<object>(this.OnDroppedAll));
-		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
+		base.Subscribe<Fabricator>(-1957399615, Fabricator.OnDroppedAllDelegate);
+		base.Subscribe<Fabricator>(-592767678, Fabricator.OnOperationalChangedDelegate);
 		Components.Fabricators.Add(this);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Fabricating;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
@@ -157,7 +157,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe(-235298596, new Action<object>(this.OnBuildingUpgraded));
+		base.Subscribe<Fabricator>(-235298596, Fabricator.OnBuildingUpgradedDelegate);
 		this.ReloadSavedQueue();
 		this.buildStorage.Transfer(this.inStorage, true, true);
 		this.UpdateOrderQueue(true);
@@ -618,6 +618,21 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 
 	[SerializeField]
 	public Tag[] choreTags;
+
+	private static readonly EventSystem.IntraObjectHandler<Fabricator> OnDroppedAllDelegate = new EventSystem.IntraObjectHandler<Fabricator>(delegate(Fabricator component, object data)
+	{
+		component.OnDroppedAll(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Fabricator> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<Fabricator>(delegate(Fabricator component, object data)
+	{
+		component.OnOperationalChanged(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Fabricator> OnBuildingUpgradedDelegate = new EventSystem.IntraObjectHandler<Fabricator>(delegate(Fabricator component, object data)
+	{
+		component.OnBuildingUpgraded(data);
+	});
 
 	[Serializable]
 	public class UserOrder : IBuildQueueOrder

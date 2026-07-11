@@ -125,7 +125,12 @@ namespace Database
 				return str;
 			};
 			this.Entombed = new StatusItem("Entombed", "CREATURES", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
-			this.Entombed.resolveStringCallback = (string str, object data) => str;
+			this.Entombed.resolveStringCallback = (string str, object go) => str;
+			this.Entombed.resolveTooltipCallback = delegate(string str, object go)
+			{
+				GameObject gameObject = go as GameObject;
+				return string.Format(str, GameUtil.GetIdentityDescriptor(gameObject));
+			};
 			this.Wilting = new StatusItem("Wilting", "CREATURES", "status_item_need_plant", StatusItem.IconType.Custom, NotificationType.BadMinor, false, SimViewMode.None, false, 1026);
 			this.Wilting.resolveStringCallback = delegate(string str, object data)
 			{

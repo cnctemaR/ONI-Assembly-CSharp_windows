@@ -7,10 +7,7 @@ public class GeneShufflerSideScreen : SideScreenContent
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.button.onClick += delegate
-		{
-			this.target.SetWorkTime(0f);
-		};
+		this.button.onClick += this.OnButtonClick;
 		this.Refresh();
 	}
 
@@ -31,6 +28,19 @@ public class GeneShufflerSideScreen : SideScreenContent
 		this.Refresh();
 	}
 
+	private void OnButtonClick()
+	{
+		if (this.target.WorkComplete)
+		{
+			this.target.SetWorkTime(0f);
+		}
+		else if (this.target.IsConsumed)
+		{
+			this.target.RequestRecharge(!this.target.RechargeRequested);
+			this.Refresh();
+		}
+	}
+
 	private void Refresh()
 	{
 		if (this.target != null)
@@ -40,12 +50,22 @@ public class GeneShufflerSideScreen : SideScreenContent
 				this.contents.SetActive(true);
 				this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.COMPLETE;
 				this.button.gameObject.SetActive(true);
+				this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON;
 			}
 			else if (this.target.IsConsumed)
 			{
 				this.contents.SetActive(true);
-				this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.CONSUMED;
-				this.button.gameObject.SetActive(false);
+				this.button.gameObject.SetActive(true);
+				if (this.target.RechargeRequested)
+				{
+					this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.CONSUMED_WAITING;
+					this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON_RECHARGE_CANCEL;
+				}
+				else
+				{
+					this.label.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.CONSUMED;
+					this.buttonLabel.text = UI.UISIDESCREENS.GENESHUFFLERSIDESREEN.BUTTON_RECHARGE;
+				}
 			}
 			else if (this.target.IsWorking)
 			{
@@ -69,6 +89,9 @@ public class GeneShufflerSideScreen : SideScreenContent
 
 	[SerializeField]
 	private KButton button;
+
+	[SerializeField]
+	private LocText buttonLabel;
 
 	[SerializeField]
 	private GeneShuffler target;

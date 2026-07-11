@@ -8,9 +8,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>A 2D Rectangle defined by X and Y position, width and height.</para>
 	/// </summary>
+	[NativeHeader("Runtime/Math/Rect.h")]
 	[NativeClass("Rectf", "template<typename T> class RectT; typedef RectT<float> Rectf;")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
-	[NativeHeader("Runtime/Math/Rect.h")]
 	public struct Rect : IEquatable<Rect>
 	{
 		/// <summary>

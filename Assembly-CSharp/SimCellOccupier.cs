@@ -43,7 +43,7 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 			Grid.RenderedByWorld[offset_cell] = false;
 			Game.Instance.GetComponent<EntombedItemVisualizer>().ForceClear(offset_cell);
 		});
-		base.Subscribe(-1699355994, new Action<object>(this.OnBuildingRepaired));
+		base.Subscribe<SimCellOccupier>(-1699355994, SimCellOccupier.OnBuildingRepairedDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -72,6 +72,10 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 		if (this.setOpaque)
 		{
 			properties |= Sim.Cell.Properties.Opaque;
+		}
+		if (this.notifyOnMelt)
+		{
+			properties |= Sim.Cell.Properties.NotifyOnMelt;
 		}
 		return properties;
 	}
@@ -194,6 +198,9 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 	public bool setOpaque;
 
 	[SerializeField]
+	public bool notifyOnMelt;
+
+	[SerializeField]
 	public float strengthMultiplier = 1f;
 
 	[SerializeField]
@@ -202,4 +209,9 @@ public class SimCellOccupier : KMonoBehaviour, IEffectDescriptor
 	private bool isReady;
 
 	private bool callDestroy = true;
+
+	private static readonly EventSystem.IntraObjectHandler<SimCellOccupier> OnBuildingRepairedDelegate = new EventSystem.IntraObjectHandler<SimCellOccupier>(delegate(SimCellOccupier component, object data)
+	{
+		component.OnBuildingRepaired(data);
+	});
 }

@@ -17,7 +17,7 @@ public abstract class LogicGateBaseConfig : IBuildingConfig
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(ID, width, height, anim, num, num2, tier, refined_METALS, num3, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER0, none, 0.2f);
 		buildingDef.ViewMode = SimViewMode.Logic;
 		buildingDef.ObjectLayer = ObjectLayer.LogicGates;
-		buildingDef.SceneLayer = Grid.SceneLayer.WireBridges;
+		buildingDef.SceneLayer = Grid.SceneLayer.LogicWireBridges;
 		buildingDef.ThermalConductivity = 0.05f;
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;

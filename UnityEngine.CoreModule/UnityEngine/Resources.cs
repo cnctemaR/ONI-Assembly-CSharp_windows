@@ -52,7 +52,6 @@ namespace UnityEngine
 		///   <para>Loads an asset stored at path in a Resources folder.</para>
 		/// </summary>
 		/// <param name="path">Pathname of the target folder. When using the empty string (i.e., ""), the function will load the entire contents of the Resources folder.</param>
-		/// <param name="systemTypeInstance">Type filter for objects returned.</param>
 		public static Object Load(string path)
 		{
 			return Resources.Load(path, typeof(Object));
@@ -122,6 +121,7 @@ namespace UnityEngine
 		///   <para>Loads all assets in a folder or file at path in a Resources folder.</para>
 		/// </summary>
 		/// <param name="path">Pathname of the target folder. When using the empty string (i.e., ""), the function will load the entire contents of the Resources folder.</param>
+		/// <param name="systemTypeInstance">Type filter for objects returned.</param>
 		public static Object[] LoadAll(string path)
 		{
 			return Resources.LoadAll(path, typeof(Object));

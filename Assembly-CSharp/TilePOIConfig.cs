@@ -32,10 +32,7 @@ public class TilePOIConfig : IBuildingConfig
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
-		buildingDef.ConstructionOffsetFilter = new CellOffset[]
-		{
-			new CellOffset(0, -1)
-		};
+		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isSolidTile = true;
 		buildingDef.BlockTileAtlas = Assets.GetTextureAtlas("tiles_POI");
@@ -58,7 +55,8 @@ public class TilePOIConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		BuildingTemplates.DoPostConfigure(go);
+		KPrefabID component = go.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.Bunker);
 		go.AddComponent<SimTemperatureTransfer>();
 		go.GetComponent<Deconstructable>().allowDeconstruction = true;
 	}

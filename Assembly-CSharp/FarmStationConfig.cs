@@ -46,7 +46,6 @@ public class FarmStationConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, FarmStationConfig.INPUT_PORTS);
 		go.AddOrGet<LogicOperationalController>();
-		BuildingTemplates.DoPostConfigure(go);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
@@ -67,11 +66,7 @@ public class FarmStationConfig : IBuildingConfig
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.Farm.Id;
 		roomTracker.requirement = RoomTracker.Requirement.Required;
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
-		{
-			PoweredActiveController.Instance instance = new PoweredActiveController.Instance(game_object.GetComponent<KPrefabID>());
-			instance.StartSM();
-		};
+		go.AddOrGetDef<PoweredActiveController.Def>();
 	}
 
 	public const string ID = "FarmStation";

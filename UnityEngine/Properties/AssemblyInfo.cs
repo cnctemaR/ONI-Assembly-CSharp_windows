@@ -419,6 +419,7 @@ using UnityEngineInternal.Video;
 [assembly: TypeForwardedTo(typeof(CrashReport))]
 [assembly: TypeForwardedTo(typeof(CrashReporting))]
 [assembly: TypeForwardedTo(typeof(CreateAssetMenuAttribute))]
+[assembly: TypeForwardedTo(typeof(TextAsset.CreateOptions))]
 [assembly: TypeForwardedTo(typeof(PlayableBinding.CreateOutputMethod))]
 [assembly: TypeForwardedTo(typeof(Cubemap))]
 [assembly: TypeForwardedTo(typeof(CubemapArray))]

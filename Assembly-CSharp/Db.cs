@@ -41,6 +41,7 @@ public class Db : EntityModifierSet
 		this.ScheduleGroups = new ScheduleGroups(this.Root);
 		this.RoomTypeCategories = new RoomTypeCategories(this.Root);
 		this.RoomTypes = new RoomTypes(this.Root);
+		this.SpaceDestinationTypes = new SpaceDestinationTypes(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
@@ -141,6 +142,8 @@ public class Db : EntityModifierSet
 	public RoomTypeCategories RoomTypeCategories;
 
 	public RoomTypes RoomTypes;
+
+	public SpaceDestinationTypes SpaceDestinationTypes;
 
 	[Serializable]
 	public class SlotInfo : Resource

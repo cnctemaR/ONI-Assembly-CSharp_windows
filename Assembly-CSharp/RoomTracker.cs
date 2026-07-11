@@ -9,7 +9,7 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe(144050788, new Action<object>(this.OnUpdateRoom));
+		base.Subscribe<RoomTracker>(144050788, RoomTracker.OnUpdateRoomDelegate);
 		this.FindAndSetRoom();
 	}
 
@@ -104,6 +104,11 @@ public class RoomTracker : KMonoBehaviour, IEffectDescriptor
 	public string customStatusItemID;
 
 	private Guid statusItemGuid;
+
+	private static readonly EventSystem.IntraObjectHandler<RoomTracker> OnUpdateRoomDelegate = new EventSystem.IntraObjectHandler<RoomTracker>(delegate(RoomTracker component, object data)
+	{
+		component.OnUpdateRoom(data);
+	});
 
 	public enum Requirement
 	{

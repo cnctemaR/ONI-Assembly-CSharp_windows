@@ -145,6 +145,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			Tag tag = Tag.Invalid;
 			byte b = byte.MaxValue;
 			int num2 = 0;
+			bool flag = false;
 			for (int i = 0; i < this.caloriesConsumed.Count; i++)
 			{
 				CreatureCalorieMonitor.Stomach.CaloriesConsumedEntry caloriesConsumedEntry = this.caloriesConsumed[i];
@@ -161,6 +162,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 							num2 = (int)(dietInfo.diseasePerKgProduced * num);
 							caloriesConsumedEntry.calories = 0f;
 							this.caloriesConsumed[i] = caloriesConsumedEntry;
+							flag = flag || dietInfo.produceSolidTile;
 						}
 					}
 				}
@@ -179,6 +181,12 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			else if (element.IsGas)
 			{
 				SimMessages.AddRemoveSubstance(num3, (int)element.idx, CellEventLogger.Instance.ElementConsumerSimUpdate, num, temperature, b, num2, true, -1);
+			}
+			else if (flag)
+			{
+				Facing component = this.owner.GetComponent<Facing>();
+				int frontCell = component.GetFrontCell();
+				SimMessages.AddRemoveSubstance(frontCell, (int)element.idx, CellEventLogger.Instance.ElementConsumerSimUpdate, num, temperature, b, num2, true, -1);
 			}
 			else
 			{
@@ -240,6 +248,26 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			caloriesConsumedEntry2.tag = tag;
 			caloriesConsumedEntry2.calories = calories;
 			this.caloriesConsumed.Add(caloriesConsumedEntry2);
+		}
+
+		public Tag GetNextPoopEntry()
+		{
+			for (int i = 0; i < this.caloriesConsumed.Count; i++)
+			{
+				CreatureCalorieMonitor.Stomach.CaloriesConsumedEntry caloriesConsumedEntry = this.caloriesConsumed[i];
+				if (caloriesConsumedEntry.calories > 0f)
+				{
+					Diet.Info dietInfo = this.diet.GetDietInfo(caloriesConsumedEntry.tag);
+					if (dietInfo != null)
+					{
+						if (!(dietInfo.producedElement == Tag.Invalid))
+						{
+							return dietInfo.producedElement;
+						}
+					}
+				}
+			}
+			return Tag.Invalid;
 		}
 
 		[Serialize]
@@ -306,6 +334,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		{
 			return this.GetCalories0to1() <= 0f;
 		}
+
+		public const float HUNGRY_RATIO = 0.9f;
 
 		public AmountInstance calories;
 

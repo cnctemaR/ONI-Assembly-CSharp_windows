@@ -394,6 +394,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	private void OnRoleMastered()
 	{
 		RoleMasteredMessage roleMasteredMessage = new RoleMasteredMessage(this);
+		MusicManager.instance.PlaySong("Stinger_JobMastered", false);
 		Messenger.Instance.QueueMessage(roleMasteredMessage);
 		if (PopFXManager.Instance != null)
 		{

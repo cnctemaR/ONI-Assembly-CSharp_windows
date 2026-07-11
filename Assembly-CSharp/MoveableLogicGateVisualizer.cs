@@ -13,7 +13,7 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 		OverlayScreen instance = OverlayScreen.Instance;
 		instance.OnOverlayChanged = (Action<SimViewMode>)Delegate.Combine(instance.OnOverlayChanged, new Action<SimViewMode>(this.OnOverlayChanged));
 		this.OnOverlayChanged(OverlayScreen.Instance.mode);
-		base.Subscribe(-1643076535, new Action<object>(this.OnRotated));
+		base.Subscribe<MoveableLogicGateVisualizer>(-1643076535, MoveableLogicGateVisualizer.OnRotatedDelegate);
 	}
 
 	protected override void OnCleanUp()
@@ -100,4 +100,9 @@ public class MoveableLogicGateVisualizer : LogicGateBase
 	private int cell;
 
 	protected List<GameObject> visChildren = new List<GameObject>();
+
+	private static readonly EventSystem.IntraObjectHandler<MoveableLogicGateVisualizer> OnRotatedDelegate = new EventSystem.IntraObjectHandler<MoveableLogicGateVisualizer>(delegate(MoveableLogicGateVisualizer component, object data)
+	{
+		component.OnRotated(data);
+	});
 }

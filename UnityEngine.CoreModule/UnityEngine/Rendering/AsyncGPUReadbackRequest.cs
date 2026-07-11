@@ -10,10 +10,10 @@ namespace UnityEngine.Rendering
 	/// <summary>
 	///   <para>Represents an asynchronous request for a GPU resource.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
 	[NativeHeader("Runtime/Graphics/Texture.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
+	[NativeHeader("Runtime/Graphics/AsyncGPUReadbackManaged.h")]
+	[UsedByNativeCode]
 	public struct AsyncGPUReadbackRequest
 	{
 		/// <summary>

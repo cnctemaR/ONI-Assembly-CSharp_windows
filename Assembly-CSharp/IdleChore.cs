@@ -4,7 +4,7 @@ using UnityEngine;
 public class IdleChore : Chore<IdleChore.StatesInstance>
 {
 	public IdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 0, false, true, 0, null)
 	{
 		this.showAvailabilityInHoverText = false;
 		this.smi = new IdleChore.StatesInstance(this, target.gameObject);
@@ -80,6 +80,10 @@ public class IdleChore : Chore<IdleChore.StatesInstance>
 				.Exit("UpdateNavType", delegate(IdleChore.StatesInstance smi)
 				{
 					smi.UpdateNavType();
+				})
+				.Exit("ClearWalk", delegate(IdleChore.StatesInstance smi)
+				{
+					smi.GetComponent<KBatchedAnimController>().Play("idle_default", KAnim.PlayMode.Once, 1f, 0f);
 				});
 		}
 

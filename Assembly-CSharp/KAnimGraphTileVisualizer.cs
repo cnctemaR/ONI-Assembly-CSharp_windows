@@ -49,7 +49,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		this.connectionManager.SetConnections(this.Connections, num, this.isPhysicalBuilding);
 		Building component = base.GetComponent<Building>();
-		TileVisualizer.RefreshCell(num, component.Def.TileLayer);
+		TileVisualizer.RefreshCell(num, component.Def.TileLayer, component.Def.ReplacementLayer);
 	}
 
 	protected override void OnCleanUp()
@@ -60,7 +60,7 @@ public class KAnimGraphTileVisualizer : KMonoBehaviour, ISaveLoadable, IUtilityI
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			this.connectionManager.ClearCell(num, this.isPhysicalBuilding);
 			Building component = base.GetComponent<Building>();
-			TileVisualizer.RefreshCell(num, component.Def.TileLayer);
+			TileVisualizer.RefreshCell(num, component.Def.TileLayer, component.Def.ReplacementLayer);
 		}
 	}
 

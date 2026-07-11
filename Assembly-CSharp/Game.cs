@@ -613,10 +613,6 @@ public class Game : KMonoBehaviour
 				this.simDt -= 0.016666668f;
 			}
 		}
-		else
-		{
-			this.UnsafeSim200ms(0f);
-		}
 	}
 
 	private unsafe void UnsafeSim200ms(float dt)

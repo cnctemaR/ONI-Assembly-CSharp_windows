@@ -37,6 +37,12 @@ public class LogicSwitch : Switch
 		component.SendSignal(LogicSwitch.PORT_ID, (!this.switchedOn) ? 0 : 1);
 	}
 
+	protected override void UpdateSwitchStatus()
+	{
+		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSwitchStatusInactive : Db.Get().BuildingStatusItems.LogicSwitchStatusActive);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
+	}
+
 	public void SetFirstFrameCallback(global::System.Action ffCb)
 	{
 		this.firstFrameCallback = ffCb;

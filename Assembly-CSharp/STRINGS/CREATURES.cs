@@ -279,8 +279,8 @@ namespace STRINGS
 
 				public static LocString DESC = string.Concat(new string[]
 				{
-					"Pips are pesky, nonhostile critters that subsist on raw ",
-					UI.FormatAsLink("Lumber", "WOOD"),
+					"Pips are pesky, nonhostile critters that subsist on the branches of ",
+					UI.FormatAsLink("Arbor Trees", "FOREST_TREE"),
 					".\n\nThey are known to bury ",
 					UI.FormatAsLink("Seeds", "PLANTS"),
 					" in the ground whenever they can find a suitable area with enough space."
@@ -824,9 +824,9 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Palmera Tree", "JUNGLEGASPLANT");
 
-				public static LocString DESC = "A large, chlorine-dwelling " + UI.FormatAsLink("Plant", "PLANTS") + " that can be grown in farm buildings.\n\nPalmeras grow inedible buds that emit toxic hydrogen gas.";
+				public static LocString DESC = "A large, chlorine-dwelling " + UI.FormatAsLink("Plant", "PLANTS") + " that can be grown in farm buildings.\n\nPalmeras grow inedible buds that emit unbreathable hydrogen gas.";
 
-				public static LocString DOMESTICATEDDESC = "A large, chlorine-dwelling " + UI.FormatAsLink("Plant", "PLANTS") + " that grows inedible buds which emit toxic hydrogen gas.";
+				public static LocString DOMESTICATEDDESC = "A large, chlorine-dwelling " + UI.FormatAsLink("Plant", "PLANTS") + " that grows inedible buds which emit unbreathable hydrogen gas.";
 			}
 
 			public class PRICKLEFLOWER
@@ -1072,30 +1072,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Arbor Tree", "FOREST_TREE");
 
-				public static LocString DESC = string.Concat(new string[]
-				{
-					"Arbor Trees grow ",
-					UI.FormatAsLink("Arbor Tree Branches", "FOREST_TREE"),
-					" that can be harvested for ",
-					UI.FormatAsLink("Lumber", "WOOD"),
-					"."
-				});
+				public static LocString DESC = "Arbor Trees grow " + UI.FormatAsLink("Arbor Tree Branches", "FOREST_TREE") + " and can be harvested for lumber.";
 
-				public static LocString DOMESTICATEDDESC = string.Concat(new string[]
-				{
-					"This plant produces ",
-					UI.FormatAsLink("Arbor Tree Branches", "FOREST_TREE"),
-					" that can be harvested for ",
-					UI.FormatAsLink("Lumber", "WOOD"),
-					"."
-				});
+				public static LocString DOMESTICATEDDESC = "This plant produces " + UI.FormatAsLink("Arbor Tree Branches", "FOREST_TREE") + " that can be harvested for lumber.";
 			}
 
 			public class WOOD_TREE_BRANCH
 			{
 				public static LocString NAME = UI.FormatAsLink("Arbor Tree Branch", "FOREST_TREE");
 
-				public static LocString DESC = "Arbor Trees Branches can be harvested for " + UI.FormatAsLink("Lumber", "WOOD") + ".";
+				public static LocString DESC = "Arbor Trees Branches can be harvested for lumber.";
 			}
 
 			public class SEALETTUCE
@@ -1345,14 +1331,14 @@ namespace STRINGS
 
 				public class WOOD_TREE
 				{
-					public static LocString NAME = UI.FormatAsLink("Arbor Acorn", "WOOD_TREE");
+					public static LocString NAME = UI.FormatAsLink("Arbor Acorn", "FOREST_TREE");
 
 					public static LocString DESC = string.Concat(new string[]
 					{
 						"The ",
 						UI.FormatAsLink("Seed", "PLANTS"),
 						" of an ",
-						UI.FormatAsLink("Arbor Tree", "WOOD_TREE"),
+						UI.FormatAsLink("Arbor Tree", "FOREST_TREE"),
 						".\n\nDigging up Buried Objects may uncover an Arbor Acorn."
 					});
 				}
@@ -1366,7 +1352,7 @@ namespace STRINGS
 						"The ",
 						UI.FormatAsLink("Seed", "PLANTS"),
 						" of a ",
-						UI.FormatAsLink("plant", "Ink Bloom"),
+						UI.FormatAsLink("Plant", "Ink Bloom"),
 						".\n\nDigging up Buried Objects may uncover an Ink Bloom Seed."
 					});
 				}

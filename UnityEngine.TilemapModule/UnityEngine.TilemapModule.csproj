@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7584D4AD-D63C-4B20-A824-1AB7ECE89918}</ProjectGuid>
+    <ProjectGuid>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA52}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.TilemapModule</AssemblyName>
@@ -29,23 +29,23 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE898E0}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA1A}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE898F8}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA32}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.GridModule\UnityEngine.GridModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE898FF}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA39}</Project>
       <Name>UnityEngine.GridModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.Physics2DModule\UnityEngine.Physics2DModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE8990A}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA44}</Project>
       <Name>UnityEngine.Physics2DModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE8990E}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA48}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

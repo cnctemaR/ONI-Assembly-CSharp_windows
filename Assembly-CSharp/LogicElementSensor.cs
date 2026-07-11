@@ -87,6 +87,12 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 		this.UpdateVisualState(false);
 	}
 
+	protected override void UpdateSwitchStatus()
+	{
+		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
+	}
+
 	private bool wasOn;
 
 	public Element.State desiredState = Element.State.Gas;

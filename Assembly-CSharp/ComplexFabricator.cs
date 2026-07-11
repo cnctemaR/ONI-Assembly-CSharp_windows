@@ -171,6 +171,16 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	public void Sim1000ms(float dt)
 	{
 		this.RefreshAndStartNextOrder();
+		if (this.materialNeedCache.Count > 0 && this.fetchListList.Count == 0)
+		{
+			global::Debug.LogWarningFormat(base.gameObject, "{0} has material needs cached, but no open fetches. materialNeedCache={1}, fetchListList={2}", new object[]
+			{
+				base.gameObject,
+				this.materialNeedCache.Count,
+				this.fetchListList.Count
+			});
+			this.queueDirty = true;
+		}
 	}
 
 	public void Sim200ms(float dt)
@@ -261,8 +271,8 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		float num = this.buildStorage.MassStored();
 		if (num != 0f)
 		{
-			global::Debug.LogWarningFormat(base.gameObject, "{0} build storage contains mass {1} after order completion. Dropping...", new object[] { base.gameObject, num });
-			this.buildStorage.DropAll(false, false, default(Vector3), true);
+			global::Debug.LogWarningFormat(base.gameObject, "{0} build storage contains mass {1} after order completion.", new object[] { base.gameObject, num });
+			this.buildStorage.Transfer(this.inStorage, true, true);
 		}
 		this.DecrementRecipeQueueCountInternal(complexRecipe, true);
 		this.workingOrderIdx = -1;
@@ -371,7 +381,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		}
 		DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary = DictionaryPool<Tag, float, ComplexFabricator>.Allocate();
 		DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary2 = DictionaryPool<Tag, float, ComplexFabricator>.Allocate();
-		DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary3 = DictionaryPool<Tag, float, ComplexFabricator>.Allocate();
 		for (int j = 0; j < this.openOrderCounts.Count; j++)
 		{
 			int num2 = this.openOrderCounts[j];
@@ -405,9 +414,9 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 					}
 					else
 					{
-						DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary4;
+						DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary3;
 						Tag material;
-						(pooledDictionary4 = pooledDictionary)[material = recipeElement2.material] = pooledDictionary4[material] - num4;
+						(pooledDictionary3 = pooledDictionary)[material = recipeElement2.material] = pooledDictionary3[material] - num4;
 					}
 				}
 			}
@@ -415,23 +424,13 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		if (flag)
 		{
 			this.CancelFetches();
-			if (pooledDictionary2.Count > 0)
-			{
-				this.AddFetch(pooledDictionary2);
-			}
 		}
-		else
+		if (pooledDictionary2.Count > 0)
 		{
-			bool flag2 = this.CheckNeedsDeltas(pooledDictionary2, pooledDictionary3);
-			if (flag2)
-			{
-				global::Debug.Assert(pooledDictionary3.Count > 0, "expected missingAmountsDelta to have entries");
-				this.AddFetch(pooledDictionary3);
-			}
+			this.UpdateFetches(pooledDictionary2);
 		}
 		this.UpdateMaterialNeeds(pooledDictionary2);
 		pooledDictionary2.Recycle();
-		pooledDictionary3.Recycle();
 		pooledDictionary.Recycle();
 	}
 
@@ -454,32 +453,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		this.materialNeedCache.Clear();
 	}
 
-	private bool CheckNeedsDeltas(Dictionary<Tag, float> missingAmounts, Dictionary<Tag, float> missingAmountsDelta)
-	{
-		bool flag = false;
-		HashSetPool<Tag, ComplexFabricator>.PooledHashSet pooledHashSet = HashSetPool<Tag, ComplexFabricator>.Allocate();
-		pooledHashSet.UnionWith(this.materialNeedCache.Keys);
-		pooledHashSet.UnionWith(missingAmounts.Keys);
-		foreach (Tag tag in pooledHashSet)
-		{
-			float num;
-			this.materialNeedCache.TryGetValue(tag, out num);
-			float num2;
-			missingAmounts.TryGetValue(tag, out num2);
-			float num3 = num2 - num;
-			if (num3 >= 0f)
-			{
-				if (num3 > 0f)
-				{
-					flag = true;
-				}
-			}
-			missingAmountsDelta.Add(tag, num3);
-		}
-		pooledHashSet.Recycle();
-		return flag;
-	}
-
 	private void OnFetchComplete()
 	{
 		for (int i = this.fetchListList.Count - 1; i >= 0; i--)
@@ -488,6 +461,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 			if (fetchList.IsComplete)
 			{
 				this.fetchListList.RemoveAt(i);
+				this.queueDirty = true;
 			}
 		}
 	}
@@ -757,23 +731,41 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		this.cancelling = false;
 	}
 
-	private void AddFetch(DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary missingAmounts)
+	private void UpdateFetches(DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary missingAmounts)
 	{
 		ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreTypeIdHash);
-		FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
-		fetchList.ShowStatusItem = false;
 		foreach (KeyValuePair<Tag, float> keyValuePair in missingAmounts)
 		{
-			if (keyValuePair.Value > 0f)
+			if (keyValuePair.Value >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 			{
-				FetchList2 fetchList2 = fetchList;
-				Tag key = keyValuePair.Key;
-				float value = keyValuePair.Value;
-				fetchList2.Add(key, null, null, value, FetchOrder2.OperationalRequirement.None);
+				bool flag = this.HasPendingFetch(keyValuePair.Key);
+				if (!flag)
+				{
+					FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
+					FetchList2 fetchList2 = fetchList;
+					Tag key = keyValuePair.Key;
+					float value = keyValuePair.Value;
+					fetchList2.Add(key, null, null, value, FetchOrder2.OperationalRequirement.None);
+					fetchList.ShowStatusItem = false;
+					fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+					this.fetchListList.Add(fetchList);
+				}
 			}
 		}
-		fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-		this.fetchListList.Add(fetchList);
+	}
+
+	private bool HasPendingFetch(Tag tag)
+	{
+		foreach (FetchList2 fetchList in this.fetchListList)
+		{
+			float num;
+			fetchList.MinimumAmount.TryGetValue(tag, out num);
+			if (num > 0f)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void CancelFetches()
@@ -788,16 +780,32 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 	protected virtual void TransferCurrentRecipeIngredientsForBuild()
 	{
 		ComplexRecipe.RecipeElement[] ingredients = this.recipe_list[this.workingOrderIdx].ingredients;
-		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
+		ComplexRecipe.RecipeElement[] array = ingredients;
+		int i = 0;
+		while (i < array.Length)
 		{
-			while (this.buildStorage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
+			ComplexRecipe.RecipeElement recipeElement = array[i];
+			float num;
+			for (;;)
 			{
-				this.inStorage.Transfer(this.buildStorage, recipeElement.material, recipeElement.amount, false, true);
-				if (this.inStorage.GetAmountAvailable(recipeElement.material) <= 0f)
+				num = recipeElement.amount - this.buildStorage.GetAmountAvailable(recipeElement.material);
+				if (num <= 0f)
 				{
 					break;
 				}
+				if (this.inStorage.GetAmountAvailable(recipeElement.material) <= 0f)
+				{
+					goto Block_2;
+				}
+				this.inStorage.Transfer(this.buildStorage, recipeElement.material, num, false, true);
 			}
+			IL_00B4:
+			i++;
+			continue;
+			goto IL_00B4;
+			Block_2:
+			global::Debug.LogWarningFormat("TransferCurrentRecipeIngredientsForBuild ran out of {0} but still needed {1} more.", new object[] { recipeElement.material, num });
+			goto IL_00B4;
 		}
 	}
 
@@ -807,7 +815,8 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
 		{
 			float amountAvailable = storage.GetAmountAvailable(recipeElement.material);
-			if (amountAvailable < recipeElement.amount)
+			float num = recipeElement.amount - amountAvailable;
+			if (num >= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 			{
 				return false;
 			}

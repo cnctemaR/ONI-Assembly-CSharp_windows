@@ -9,17 +9,17 @@ public class LineLayer : GraphLayer
 		base.OnPrefabInit();
 	}
 
-	public void NewLine(Tuple<float, float>[] points, string ID = "")
+	public GraphedLine NewLine(Tuple<float, float>[] points, string ID = "")
 	{
 		Vector2[] array = new Vector2[points.Length];
 		for (int i = 0; i < points.Length; i++)
 		{
 			array[i] = new Vector2(points[i].first, points[i].second);
 		}
-		this.NewLine(array, ID, 128, LineLayer.DataScalingType.DropValues);
+		return this.NewLine(array, ID, 128, LineLayer.DataScalingType.DropValues);
 	}
 
-	public void NewLine(Vector2[] points, string ID = "", int compressDataToPointCount = 128, LineLayer.DataScalingType compressType = LineLayer.DataScalingType.DropValues)
+	public GraphedLine NewLine(Vector2[] points, string ID = "", int compressDataToPointCount = 128, LineLayer.DataScalingType compressType = LineLayer.DataScalingType.DropValues)
 	{
 		GameObject gameObject = Util.KInstantiateUI(this.prefab_line, this.line_container, true);
 		if (ID == string.Empty)
@@ -49,6 +49,10 @@ public class LineLayer : GraphLayer
 						array[num3] = points[i];
 						num3++;
 					}
+				}
+				if (array[compressDataToPointCount - 1] == Vector2.zero)
+				{
+					array[compressDataToPointCount - 1] = array[compressDataToPointCount - 2];
 				}
 			}
 			else
@@ -87,6 +91,7 @@ public class LineLayer : GraphLayer
 		component.line_renderer.color = this.line_formatting[this.lines.Count % this.line_formatting.Length].color;
 		component.line_renderer.LineThickness = (float)this.line_formatting[this.lines.Count % this.line_formatting.Length].thickness;
 		this.lines.Add(component);
+		return component;
 	}
 
 	public void ClearLines()
@@ -120,7 +125,14 @@ public class LineLayer : GraphLayer
 			if (this.lines[j].PointCount != 0)
 			{
 				Vector2 closestDataToPointOnXAxis = this.lines[j].GetClosestDataToPointOnXAxis(vector);
-				this.lines[j].SetPointHighlight(closestDataToPointOnXAxis);
+				if (!float.IsNaN(closestDataToPointOnXAxis.x) && !float.IsNaN(closestDataToPointOnXAxis.y))
+				{
+					this.lines[j].SetPointHighlight(closestDataToPointOnXAxis);
+				}
+				else
+				{
+					this.lines[j].HidePointHighlight();
+				}
 			}
 		}
 	}

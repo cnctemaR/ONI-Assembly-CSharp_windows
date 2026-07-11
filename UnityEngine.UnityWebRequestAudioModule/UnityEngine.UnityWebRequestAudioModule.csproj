@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7584D4AD-D63C-4B20-A824-1AB7ECE89924}</ProjectGuid>
+    <ProjectGuid>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA5E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.UnityWebRequestAudioModule</AssemblyName>
@@ -21,27 +21,27 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE898E0}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA1A}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE898E5}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA1F}</Project>
       <Name>System</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.AudioModule\UnityEngine.AudioModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE898F2}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA2C}</Project>
       <Name>UnityEngine.AudioModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE898F8}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA32}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE8990E}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA48}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.UnityWebRequestModule\UnityEngine.UnityWebRequestModule.csproj">
-      <Project>{7584D4AD-D63C-4B20-A824-1AB7ECE89925}</Project>
+      <Project>{73B1C4C4-CE02-48F1-B7F8-99D1E620EA5F}</Project>
       <Name>UnityEngine.UnityWebRequestModule</Name>
     </ProjectReference>
   </ItemGroup>

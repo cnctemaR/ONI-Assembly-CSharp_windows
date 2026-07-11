@@ -219,9 +219,11 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.colonyDataRoot.transform.parent.rectTransform().SetPosition(new Vector3(this.colonyDataRoot.transform.parent.rectTransform().position.x, 0f, 0f));
 	}
 
-	private void LoadSlideshow(RetiredColonyData data)
+	private bool LoadSlideshow(RetiredColonyData data)
 	{
-		this.slideshow.SetSprites(RetireColonyUtility.LoadColonySlideshow(data.colonyName));
+		Sprite[] array = RetireColonyUtility.LoadColonySlideshow(data.colonyName);
+		this.slideshow.SetSprites(array);
+		return array != null && array.Length > 2;
 	}
 
 	private void LoadScreenshot(RetiredColonyData data)
@@ -250,7 +252,14 @@ public class RetiredColonyInfoScreen : KModalScreen
 			component.GetReference<LocText>("descriptionLabel").SetText(colonyAchievement.description);
 			if (string.IsNullOrEmpty(colonyAchievement.icon) || Assets.GetSprite(colonyAchievement.icon) == null)
 			{
-				component.GetReference<Image>("icon").sprite = Assets.GetSprite("check");
+				if (Assets.GetSprite(colonyAchievement.Name) != null)
+				{
+					component.GetReference<Image>("icon").sprite = Assets.GetSprite(colonyAchievement.Name);
+				}
+				else
+				{
+					component.GetReference<Image>("icon").sprite = Assets.GetSprite("check");
+				}
 			}
 			else
 			{
@@ -313,6 +322,10 @@ public class RetiredColonyInfoScreen : KModalScreen
 	{
 		int num = 1;
 		float num2 = 1f;
+		if (newlyAchieved != null && newlyAchieved.Length > 0)
+		{
+			this.retiredColonyData = RetireColonyUtility.LoadRetiredColonies();
+		}
 		foreach (KeyValuePair<string, GameObject> keyValuePair in this.achievementEntries)
 		{
 			bool flag = false;
@@ -341,22 +354,25 @@ public class RetiredColonyInfoScreen : KModalScreen
 					}
 				}
 			}
-			if (flag)
+			bool flag3 = false;
+			if (newlyAchieved != null)
 			{
-				bool flag3 = false;
-				if (newlyAchieved != null)
+				for (int l = 0; l < newlyAchieved.Length; l++)
 				{
-					for (int l = 0; l < newlyAchieved.Length; l++)
+					if (newlyAchieved[l] == keyValuePair.Key)
 					{
-						if (newlyAchieved[l] == keyValuePair.Key)
-						{
-							flag3 = true;
-							keyValuePair.Value.GetComponent<AchievementWidget>().ActivateNewlyAchievedFlourish(num2 + (float)num * 1f);
-							num++;
-						}
+						flag3 = true;
 					}
 				}
-				if (!flag3)
+			}
+			if (flag || flag3)
+			{
+				if (flag3)
+				{
+					keyValuePair.Value.GetComponent<AchievementWidget>().ActivateNewlyAchievedFlourish(num2 + (float)num * 1f);
+					num++;
+				}
+				else
 				{
 					keyValuePair.Value.GetComponent<AchievementWidget>().SetAchievedNow();
 				}
@@ -390,7 +406,16 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private void DisplayTimelapse(RetiredColonyData data, GameObject container)
 	{
 		this.slideshow = container.GetComponent<HierarchyReferences>().GetReference<Slideshow>("Slideshow");
-		this.LoadSlideshow(data);
+		if (!this.LoadSlideshow(data))
+		{
+			container.GetComponent<HierarchyReferences>().GetReference<Slideshow>("Slideshow").gameObject.SetActive(false);
+			container.GetComponent<HierarchyReferences>().GetReference<RectTransform>("PlayIcon").gameObject.SetActive(false);
+		}
+		else
+		{
+			container.GetComponent<HierarchyReferences>().GetReference<Slideshow>("Slideshow").gameObject.SetActive(true);
+			container.GetComponent<HierarchyReferences>().GetReference<RectTransform>("PlayIcon").gameObject.SetActive(true);
+		}
 	}
 
 	private void DisplayScreenshotBlock(RetiredColonyData data, GameObject container)
@@ -399,35 +424,59 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.LoadScreenshot(data);
 	}
 
-	private void DisplayDuplicants(RetiredColonyData data, GameObject container)
+	private void DisplayDuplicants(RetiredColonyData data, GameObject container, int range_min = -1, int range_max = -1)
 	{
 		for (int i = container.transform.childCount - 1; i >= 0; i--)
 		{
-			global::UnityEngine.Object.Destroy(container.transform.GetChild(i).gameObject);
+			global::UnityEngine.Object.DestroyImmediate(container.transform.GetChild(i).gameObject);
 		}
-		foreach (RetiredColonyData.RetiredDuplicantData retiredDuplicantData in data.Duplicants)
+		for (int j = 0; j < data.Duplicants.Length; j++)
 		{
-			GameObject gameObject = global::Util.KInstantiateUI(this.duplicantPrefab, container, true);
-			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			component.GetReference<LocText>("NameLabel").SetText(retiredDuplicantData.name);
-			component.GetReference<LocText>("AgeLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.DUPLICANT_AGE, retiredDuplicantData.age.ToString()));
-			component.GetReference<LocText>("SkillLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.SKILL_LEVEL, retiredDuplicantData.skillPointsGained.ToString()));
-			SymbolOverrideController reference = component.GetReference<SymbolOverrideController>("SymbolOverrideController");
-			reference.RemoveAllSymbolOverrides(0);
-			KBatchedAnimController componentInChildren = gameObject.GetComponentInChildren<KBatchedAnimController>();
-			componentInChildren.SetSymbolVisiblity("snapTo_neck", false);
-			componentInChildren.SetSymbolVisiblity("snapTo_goggles", false);
-			componentInChildren.SetSymbolVisiblity("snapTo_hat", false);
-			componentInChildren.SetSymbolVisiblity("snapTo_hat_hair", false);
-			foreach (KeyValuePair<string, string> keyValuePair in retiredDuplicantData.accessories)
+			if (j < range_min || (j > range_max && range_max != -1))
 			{
-				KAnim.Build.Symbol symbol = Db.Get().Accessories.Get(keyValuePair.Value).symbol;
-				AccessorySlot accessorySlot = Db.Get().AccessorySlots.Get(keyValuePair.Key);
-				reference.AddSymbolOverride(accessorySlot.targetSymbolId, symbol, 0);
-				gameObject.GetComponentInChildren<KBatchedAnimController>().SetSymbolVisiblity(keyValuePair.Key, true);
+				GameObject gameObject = new GameObject();
+				gameObject.transform.SetParent(container.transform);
 			}
-			reference.ApplyOverrides();
+			else
+			{
+				RetiredColonyData.RetiredDuplicantData retiredDuplicantData = data.Duplicants[j];
+				GameObject gameObject2 = global::Util.KInstantiateUI(this.duplicantPrefab, container, true);
+				HierarchyReferences component = gameObject2.GetComponent<HierarchyReferences>();
+				component.GetReference<LocText>("NameLabel").SetText(retiredDuplicantData.name);
+				component.GetReference<LocText>("AgeLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.DUPLICANT_AGE, retiredDuplicantData.age.ToString()));
+				component.GetReference<LocText>("SkillLabel").SetText(string.Format(UI.RETIRED_COLONY_INFO_SCREEN.SKILL_LEVEL, retiredDuplicantData.skillPointsGained.ToString()));
+				SymbolOverrideController reference = component.GetReference<SymbolOverrideController>("SymbolOverrideController");
+				reference.RemoveAllSymbolOverrides(0);
+				KBatchedAnimController componentInChildren = gameObject2.GetComponentInChildren<KBatchedAnimController>();
+				componentInChildren.SetSymbolVisiblity("snapTo_neck", false);
+				componentInChildren.SetSymbolVisiblity("snapTo_goggles", false);
+				componentInChildren.SetSymbolVisiblity("snapTo_hat", false);
+				componentInChildren.SetSymbolVisiblity("snapTo_hat_hair", false);
+				foreach (KeyValuePair<string, string> keyValuePair in retiredDuplicantData.accessories)
+				{
+					KAnim.Build.Symbol symbol = Db.Get().Accessories.Get(keyValuePair.Value).symbol;
+					AccessorySlot accessorySlot = Db.Get().AccessorySlots.Get(keyValuePair.Key);
+					reference.AddSymbolOverride(accessorySlot.targetSymbolId, symbol, 0);
+					gameObject2.GetComponentInChildren<KBatchedAnimController>().SetSymbolVisiblity(keyValuePair.Key, true);
+				}
+				reference.ApplyOverrides();
+			}
 		}
+		base.StartCoroutine(this.ActivatePortraitsWhenReady(container));
+	}
+
+	private IEnumerator ActivatePortraitsWhenReady(GameObject container)
+	{
+		yield return 0;
+		for (int i = 0; i < container.transform.childCount; i++)
+		{
+			KBatchedAnimController componentInChildren = container.transform.GetChild(i).GetComponentInChildren<KBatchedAnimController>();
+			if (componentInChildren != null)
+			{
+				componentInChildren.transform.localScale = Vector3.one;
+			}
+		}
+		yield break;
 	}
 
 	private void DisplayBuildings(RetiredColonyData data, GameObject container)
@@ -494,27 +543,32 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.activeColonyWidgets.Add("timelapse", gameObject);
 		this.DisplayTimelapse(data, gameObject);
 		this.DisplayScreenshotBlock(data, gameObject);
+		GameObject duplicantBlock = global::Util.KInstantiateUI(this.tallFeatureBlock, this.statsContainer, true);
+		this.activeColonyWidgetContainers.Add(duplicantBlock);
+		this.activeColonyWidgets.Add("duplicants", duplicantBlock);
+		duplicantBlock.GetComponent<HierarchyReferences>().GetReference<LocText>("Title").SetText(UI.RETIRED_COLONY_INFO_SCREEN.TITLES.DUPLICANTS);
+		PageView pageView = duplicantBlock.GetComponentInChildren<PageView>();
+		pageView.OnChangePage = delegate(int page)
+		{
+			this.DisplayDuplicants(data, duplicantBlock.GetComponent<HierarchyReferences>().GetReference("Content").gameObject, page * pageView.ChildrenPerPage, (page + 1) * pageView.ChildrenPerPage);
+		};
+		this.DisplayDuplicants(data, duplicantBlock.GetComponent<HierarchyReferences>().GetReference("Content").gameObject, -1, -1);
 		GameObject gameObject2 = global::Util.KInstantiateUI(this.tallFeatureBlock, this.statsContainer, true);
 		this.activeColonyWidgetContainers.Add(gameObject2);
-		this.activeColonyWidgets.Add("duplicants", gameObject2);
-		gameObject2.GetComponent<HierarchyReferences>().GetReference<LocText>("Title").SetText(UI.RETIRED_COLONY_INFO_SCREEN.TITLES.DUPLICANTS);
-		this.DisplayDuplicants(data, gameObject2.GetComponent<HierarchyReferences>().GetReference("Content").gameObject);
-		GameObject gameObject3 = global::Util.KInstantiateUI(this.tallFeatureBlock, this.statsContainer, true);
-		this.activeColonyWidgetContainers.Add(gameObject3);
-		this.activeColonyWidgets.Add("buildings", gameObject3);
-		gameObject3.GetComponent<HierarchyReferences>().GetReference<LocText>("Title").SetText(UI.RETIRED_COLONY_INFO_SCREEN.TITLES.BUILDINGS);
-		this.DisplayBuildings(data, gameObject3.GetComponent<HierarchyReferences>().GetReference("Content").gameObject);
+		this.activeColonyWidgets.Add("buildings", gameObject2);
+		gameObject2.GetComponent<HierarchyReferences>().GetReference<LocText>("Title").SetText(UI.RETIRED_COLONY_INFO_SCREEN.TITLES.BUILDINGS);
+		this.DisplayBuildings(data, gameObject2.GetComponent<HierarchyReferences>().GetReference("Content").gameObject);
 		int num = 2;
 		for (int i = 0; i < data.Stats.Length; i += num)
 		{
-			GameObject gameObject4 = global::Util.KInstantiateUI(this.standardStatBlock, this.statsContainer, true);
-			this.activeColonyWidgetContainers.Add(gameObject4);
+			GameObject gameObject3 = global::Util.KInstantiateUI(this.standardStatBlock, this.statsContainer, true);
+			this.activeColonyWidgetContainers.Add(gameObject3);
 			for (int j = 0; j < num; j++)
 			{
 				if (i + j <= data.Stats.Length - 1)
 				{
 					RetiredColonyData.RetiredColonyStatistic retiredColonyStatistic = data.Stats[i + j];
-					this.ConfigureGraph(this.GetStatistic(retiredColonyStatistic.id, data), gameObject4);
+					this.ConfigureGraph(this.GetStatistic(retiredColonyStatistic.id, data), gameObject3);
 				}
 			}
 		}
@@ -541,7 +595,12 @@ public class RetiredColonyInfoScreen : KModalScreen
 		componentInChildren.axis_y.guide_frequency = (componentInChildren.axis_y.max_value - componentInChildren.axis_y.min_value) / 10f;
 		componentInChildren.RefreshGuides();
 		Tuple<float, float>[] value = statistic.value;
-		componentInChildren2.NewLine(value, statistic.id);
+		GraphedLine graphedLine = componentInChildren2.NewLine(value, statistic.id);
+		if (this.statColors.ContainsKey(statistic.id))
+		{
+			componentInChildren2.line_formatting[componentInChildren2.line_formatting.Length - 1].color = this.statColors[statistic.id];
+		}
+		graphedLine.line_renderer.color = componentInChildren2.line_formatting[componentInChildren2.line_formatting.Length - 1].color;
 	}
 
 	private RetiredColonyData.RetiredColonyStatistic GetStatistic(string id, RetiredColonyData data)
@@ -606,7 +665,14 @@ public class RetiredColonyInfoScreen : KModalScreen
 			{
 				this.LoadColony(data);
 			};
-			this.explorerColonyWidgets.Add(retiredColonyData.colonyName, gameObject);
+			string text2 = retiredColonyData.colonyName;
+			int num = 0;
+			while (this.explorerColonyWidgets.ContainsKey(text2))
+			{
+				num++;
+				text2 = retiredColonyData.colonyName + "_" + num;
+			}
+			this.explorerColonyWidgets.Add(text2, gameObject);
 		}
 	}
 
@@ -775,6 +841,78 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private const float maxAchievementWidth = 830f;
 
 	private Canvas canvasRef;
+
+	private Dictionary<string, Color> statColors = new Dictionary<string, Color>
+	{
+		{
+			RetiredColonyData.DataIDs.OxygenProduced,
+			new Color(0.17f, 0.91f, 0.91f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.OxygenConsumed,
+			new Color(0.17f, 0.91f, 0.91f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.CaloriesProduced,
+			new Color(0.24f, 0.49f, 0.32f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.CaloriesRemoved,
+			new Color(0.24f, 0.49f, 0.32f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.PowerProduced,
+			new Color(0.98f, 0.69f, 0.23f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.PowerWasted,
+			new Color(0.82f, 0.3f, 0.35f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.WorkTime,
+			new Color(0.99f, 0.51f, 0.28f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.TravelTime,
+			new Color(0.55f, 0.55f, 0.75f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.AverageWorkTime,
+			new Color(0.99f, 0.51f, 0.28f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.AverageTravelTime,
+			new Color(0.55f, 0.55f, 0.75f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.LiveDuplicants,
+			new Color(0.98f, 0.69f, 0.23f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.RocketsInFlight,
+			new Color(0.9f, 0.9f, 0.16f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.AverageStressCreated,
+			new Color(0.8f, 0.32f, 0.33f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.AverageStressRemoved,
+			new Color(0.8f, 0.32f, 0.33f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.AverageGerms,
+			new Color(0.68f, 0.79f, 0.18f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.DomesticatedCritters,
+			new Color(0.62f, 0.31f, 0.47f, 1f)
+		},
+		{
+			RetiredColonyData.DataIDs.WildCritters,
+			new Color(0.62f, 0.31f, 0.47f, 1f)
+		}
+	};
 
 	private Dictionary<string, GameObject> explorerColonyWidgets = new Dictionary<string, GameObject>();
 }

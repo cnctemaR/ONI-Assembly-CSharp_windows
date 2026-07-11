@@ -533,7 +533,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 								}
 							}
 						}
-						if (pickupable != null && this.chore.overrideTarget != null)
+						if (this.chore.overrideTarget != null)
 						{
 							this.chore.FetchAreaEnd(this.chore.overrideTarget.GetComponent<ChoreDriver>(), pickupable, true);
 						}

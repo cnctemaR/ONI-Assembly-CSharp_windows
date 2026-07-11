@@ -13,6 +13,21 @@ public class Artable : Workable
 		this.statuses = new Dictionary<Artable.Status, StatusItem>();
 	}
 
+	public Artable.Status CurrentStatus
+	{
+		get
+		{
+			foreach (Artable.Stage stage in this.stages)
+			{
+				if (this.CurrentStage == stage.id)
+				{
+					return stage.statusItem;
+				}
+			}
+			return Artable.Status.Ready;
+		}
+	}
+
 	public string CurrentStage
 	{
 		get

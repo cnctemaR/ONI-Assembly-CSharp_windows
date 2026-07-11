@@ -486,7 +486,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Sick bays can be placed in hospital rooms to decrease the likelihood of disease spreading.";
 
-				public static LocString EFFECT = "Allows Duplicants to administer basic treatments to sick Duplicants.\n\nDuplicants must possess the Medicine Compounding " + UI.FormatAsLink("Skill", "ROLES") + " to treat peers.";
+				public static LocString EFFECT = "Allows Duplicants to administer basic treatments to sick Duplicants.\n\nDuplicants must possess the Bedside Manner " + UI.FormatAsLink("Skill", "ROLES") + " to treat peers.";
 			}
 
 			public class ADVANCEDDOCTORSTATION
@@ -495,7 +495,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Disease clinics require power, but treat more serious illnesses than sick bays alone.";
 
-				public static LocString EFFECT = "Allows Duplicants to administer powerful treatments to sick Duplicants.\n\nDuplicants must possess the Duplicant Care " + UI.FormatAsLink("Skill", "ROLES") + " to treat peers.";
+				public static LocString EFFECT = "Allows Duplicants to administer powerful treatments to sick Duplicants.\n\nDuplicants must possess the Advanced Medical Care " + UI.FormatAsLink("Skill", "ROLES") + " to treat peers.";
 			}
 
 			public class MASSAGETABLE
@@ -1921,7 +1921,9 @@ namespace STRINGS
 					UI.FormatAsLink("Medicine", "MEDICINE"),
 					" to cure most basic ",
 					UI.FormatAsLink("Diseases", "DISEASE"),
-					".\n\nDuplicants will not fabricate items unless recipes are queued."
+					".\n\nDuplicants must possess the Medicine Compounding ",
+					UI.FormatAsLink("Skill", "ROLES"),
+					" to fabricate medicines.\n\nDuplicants will not fabricate items unless recipes are queued."
 				});
 			}
 
@@ -2095,7 +2097,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Large Sculpting Block", "SCULPTURE");
 
-				public static LocString DESC = "Duplicants with high art skill will produce better, more decorative sculptures.";
+				public static LocString DESC = "Duplicants who have learned art skills can produce more decorative sculptures.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -2139,7 +2141,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Marble Block", "MARBLESCULPTURE");
 
-				public static LocString DESC = "Duplicants with high art skill will produce better, more decorative sculptures.";
+				public static LocString DESC = "Duplicants who have learned art skills can produce more decorative sculptures.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -2161,7 +2163,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Metal Block", "METALSCULPTURE");
 
-				public static LocString DESC = "Duplicants with high art skill will produce better, more decorative sculptures.";
+				public static LocString DESC = "Duplicants who have learned art skills can produce more decorative sculptures.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -2183,7 +2185,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Sculpting Block", "SMALLSCULPTURE");
 
-				public static LocString DESC = "Duplicants who have learned art skills can produce decorative artworks.";
+				public static LocString DESC = "Duplicants who have learned art skills can produce more decorative sculptures.";
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
@@ -2966,7 +2968,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Build this feeder above a body of water to feed the fish within.";
 
-				public static LocString EFFECT = "Automatically dispenses stored " + UI.FormatAsLink("Critter", "CRITTERS") + "food into the area below.\n\nDispenses once per day.";
+				public static LocString EFFECT = "Automatically dispenses stored " + UI.FormatAsLink("Critter", "CRITTERS") + " food into the area below.\n\nDispenses once per day.";
 			}
 
 			public class FISHTRAP

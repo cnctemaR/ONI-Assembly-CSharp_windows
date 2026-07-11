@@ -223,6 +223,11 @@ public class SingleEntityReceptacle : Workable, IRender1000ms
 			global::Debug.LogWarningFormat(base.gameObject, "{0} OnFetchComplete fetchChore null", new object[] { base.gameObject });
 			return;
 		}
+		if (this.fetchChore.fetchTarget == null)
+		{
+			global::Debug.LogWarningFormat(base.gameObject, "{0} OnFetchComplete fetchChore.fetchTarget null", new object[] { base.gameObject });
+			return;
+		}
 		this.OnDepositObject(this.fetchChore.fetchTarget.GetComponent<Pickupable>());
 	}
 

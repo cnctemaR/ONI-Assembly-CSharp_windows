@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using FMOD.Studio;
 using Klei;
 using Klei.AI;
@@ -70,6 +71,7 @@ public class Game : KMonoBehaviour
 		this.statusItemRenderer = new StatusItemRenderer();
 		this.prioritizableRenderer = new PrioritizableRenderer();
 		this.LoadEventHashes();
+		this.savedInfo.creaturePoopAmount = new Dictionary<Tag, float>();
 		this.gasFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasConduits) - 0.4f);
 		this.liquidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.LiquidConduits) - 0.4f);
 		this.solidFlowPos = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.SolidConduitContents) - 0.4f);
@@ -826,7 +828,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 356355U;
+		uint num = 357226U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1721,9 +1723,22 @@ public class Game : KMonoBehaviour
 	[Serializable]
 	public struct SavedInfo
 	{
+		[OnDeserialized]
+		private void OnDeserialized()
+		{
+			if (this.creaturePoopAmount == null)
+			{
+				this.creaturePoopAmount = new Dictionary<Tag, float>();
+			}
+		}
+
 		public bool discoveredSurface;
 
 		public bool discoveredOilField;
+
+		public bool curedDisease;
+
+		public Dictionary<Tag, float> creaturePoopAmount;
 	}
 
 	public struct CallbackInfo

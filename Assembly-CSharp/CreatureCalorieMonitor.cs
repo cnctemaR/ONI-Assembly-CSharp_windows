@@ -232,6 +232,14 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			{
 				element.substance.SpawnResource(Grid.CellToPosCCC(num3, Grid.SceneLayer.Ore), num, temperature, b, num2, false, false, false);
 			}
+			KPrefabID component2 = this.owner.GetComponent<KPrefabID>();
+			if (!Game.Instance.savedInfo.creaturePoopAmount.ContainsKey(component2.PrefabTag))
+			{
+				Game.Instance.savedInfo.creaturePoopAmount.Add(component2.PrefabTag, 0f);
+			}
+			Dictionary<Tag, float> creaturePoopAmount;
+			Tag prefabTag;
+			(creaturePoopAmount = Game.Instance.savedInfo.creaturePoopAmount)[prefabTag = component2.PrefabTag] = creaturePoopAmount[prefabTag] + num;
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, element.name, this.owner.transform, 1.5f, false);
 		}
 

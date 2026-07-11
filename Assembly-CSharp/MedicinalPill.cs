@@ -37,6 +37,7 @@ public class MedicinalPill : Workable, IGameObjectEffectDescriptor, IConsumableU
 			SicknessInstance sicknessInstance = sicknesses.Get(text);
 			if (sicknessInstance != null)
 			{
+				Game.Instance.savedInfo.curedDisease = true;
 				sicknessInstance.Cure();
 			}
 		}

@@ -13,6 +13,7 @@ namespace ProcGen
 			this.globalFeatureTemplateMods = new Dictionary<string, int>();
 			this.globalFeatureMods = new Dictionary<string, int>();
 			this.elementBandModifiers = new List<WorldTrait.ElementBandModifier>();
+			this.exclusiveWith = new List<string>();
 		}
 
 		public string name { get; private set; }
@@ -20,6 +21,8 @@ namespace ProcGen
 		public string description { get; private set; }
 
 		public string colorHex { get; private set; }
+
+		public List<string> exclusiveWith { get; private set; }
 
 		public MinMax startingBasePositionHorizontalMod { get; private set; }
 

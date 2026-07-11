@@ -101,6 +101,7 @@ public class DoctorStation : Workable
 				Tag tag;
 				if (this.treatments_available.TryGetValue(sicknessInstance.Sickness.id, out tag))
 				{
+					Game.Instance.savedInfo.curedDisease = true;
 					sicknessInstance.Cure();
 					this.storage.ConsumeIgnoringDisease(tag, 1f);
 					flag = true;

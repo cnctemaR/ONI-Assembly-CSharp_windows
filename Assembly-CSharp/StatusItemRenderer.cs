@@ -147,7 +147,7 @@ public class StatusItemRenderer
 		}
 	}
 
-	public void GetIntersections(Vector2 pos, List<SelectTool.Intersection> intersections)
+	public void GetIntersections(Vector2 pos, List<InterfaceTool.Intersection> intersections)
 	{
 		foreach (StatusItemRenderer.Entry entry in this.visibleEntries)
 		{
@@ -393,14 +393,14 @@ public class StatusItemRenderer
 			return pos.x >= vector4.x && pos.x <= vector5.x && pos.y >= vector4.y && pos.y <= vector5.y;
 		}
 
-		public void GetIntersection(Vector2 pos, List<SelectTool.Intersection> intersections, float scale)
+		public void GetIntersection(Vector2 pos, List<InterfaceTool.Intersection> intersections, float scale)
 		{
 			if (this.Intersects(pos, scale))
 			{
 				KSelectable component = this.transform.GetComponent<KSelectable>();
 				if (component.IsSelectable)
 				{
-					intersections.Add(new SelectTool.Intersection
+					intersections.Add(new InterfaceTool.Intersection
 					{
 						component = this.transform.GetComponent<KSelectable>(),
 						distance = -100f

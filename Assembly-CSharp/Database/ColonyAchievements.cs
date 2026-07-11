@@ -20,7 +20,7 @@ namespace Database
 			this.ReachedDistantPlanet = base.Add(new ColonyAchievement("ReachedDistantPlanet", "WINCONDITION_LEAVE", COLONY_ACHIEVEMENTS.DISTANT_PLANET_REACHED.NAME, COLONY_ACHIEVEMENTS.DISTANT_PLANET_REACHED.DESCRIPTION, true, new List<ColonyAchievementRequirement>
 			{
 				new ReachedSpace(Db.Get().SpaceDestinationTypes.Wormhole)
-			}, COLONY_ACHIEVEMENTS.DISTANT_PLANET_REACHED.MESSAGE_TITLE, COLONY_ACHIEVEMENTS.DISTANT_PLANET_REACHED.MESSAGE_BODY, "victoryShorts/Leave", "victoryLoops/Leave_loop", new Action<KMonoBehaviour>(ReachedDistantPlanetSequence.Start), AudioMixerSnapshots.Get().VictoryNISRocketSnapshot, string.Empty));
+			}, COLONY_ACHIEVEMENTS.DISTANT_PLANET_REACHED.MESSAGE_TITLE, COLONY_ACHIEVEMENTS.DISTANT_PLANET_REACHED.MESSAGE_BODY, "victoryShorts/Leave", "victoryLoops/Leave_loop", new Action<KMonoBehaviour>(ReachedDistantPlanetSequence.Start), AudioMixerSnapshots.Get().VictoryNISRocketSnapshot, "rocket"));
 			this.Survived100Cycles = base.Add(new ColonyAchievement("Survived100Cycles", "SURVIVE_HUNDRED_CYCLES", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_HUNDRED_CYCLES, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.SURVIVE_HUNDRED_CYCLES_DESCRIPTION, false, new List<ColonyAchievementRequirement>
 			{
 				new CycleNumber(100)
@@ -147,6 +147,42 @@ namespace Database
 				new UpgradeAllBasicBuildings("Outhouse", "FlushToilet"),
 				new UpgradeAllBasicBuildings("WashBasin", "WashSink")
 			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, "royal_flush"));
+			this.AutomateABuilding = base.Add(new ColonyAchievement("AutomateABuilding", "AUTOMATE_A_BUILDING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.AUTOMATE_A_BUILDING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.AUTOMATE_A_BUILDING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new AutomateABuilding()
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.MasterpiecePainting = base.Add(new ColonyAchievement("MasterpiecePainting", "MASTERPIECE_PAINTING", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MASTERPIECE_PAINTING, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.MASTERPIECE_PAINTING_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new CreateMasterPainting()
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.InspectPOI = base.Add(new ColonyAchievement("InspectPOI", "INSPECT_POI", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.INSPECT_POI, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.INSPECT_POI_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new ActivateLorePOI()
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.HatchACritter = base.Add(new ColonyAchievement("HatchACritter", "HATCH_A_CRITTER", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_A_CRITTER, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_A_CRITTER_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new CritterTypeExists(new List<Tag>
+				{
+					"DreckoPlasticBaby", "HatchHardBaby", "HatchMetalBaby", "HatchVeggieBaby", "LightBugBlackBaby", "LightBugBlueBaby", "LightBugCrystalBaby", "LightBugOrangeBaby", "LightBugPinkBaby", "LightBugPurpleBaby",
+					"OilfloaterDecorBaby", "OilfloaterHighTempBaby", "PacuCleanerBaby", "PacuTropicalBaby", "PuftBleachstoneBaby", "PuftOxyliteBaby"
+				})
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.CuredDisease = base.Add(new ColonyAchievement("CuredDisease", "CURED_DISEASE", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CURED_DISEASE_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new CureDisease()
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.GeneratorTuneup = base.Add(new ColonyAchievement("GeneratorTuneup", "GENERATOR_TUNEUP", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GENERATOR_TUNEUP, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.GENERATOR_TUNEUP_DESCRIPTION, 100), false, new List<ColonyAchievementRequirement>
+			{
+				new TuneUpGenerator(100f)
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.ClearFOW = base.Add(new ColonyAchievement("ClearFOW", "CLEAR_FOW", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAR_FOW, COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.CLEAR_FOW_DESCRIPTION, false, new List<ColonyAchievementRequirement>
+			{
+				new RevealAsteriod(0.8f)
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
+			this.HatchRefinement = base.Add(new ColonyAchievement("HatchRefinement", "HATCH_REFINEMENT", COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_REFINEMENT, string.Format(COLONY_ACHIEVEMENTS.MISC_REQUIREMENTS.HATCH_REFINEMENT_DESCRIPTION, GameUtil.GetFormattedMass(10000f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}")), false, new List<ColonyAchievementRequirement>
+			{
+				new CreaturePoopKGProduction("HatchMetal", 10000f)
+			}, string.Empty, string.Empty, string.Empty, string.Empty, null, string.Empty, string.Empty));
 		}
 
 		public ColonyAchievement Thriving;
@@ -196,5 +232,21 @@ namespace Database
 		public ColonyAchievement BasicComforts;
 
 		public ColonyAchievement PlumbedWashrooms;
+
+		public ColonyAchievement AutomateABuilding;
+
+		public ColonyAchievement MasterpiecePainting;
+
+		public ColonyAchievement InspectPOI;
+
+		public ColonyAchievement HatchACritter;
+
+		public ColonyAchievement CuredDisease;
+
+		public ColonyAchievement GeneratorTuneup;
+
+		public ColonyAchievement ClearFOW;
+
+		public ColonyAchievement HatchRefinement;
 	}
 }

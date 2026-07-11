@@ -373,7 +373,19 @@ namespace ProcGen
 			{
 				int num2 = random.Next(list.Count);
 				string text = list[num2];
-				list2.Add(text);
+				bool flag = false;
+				foreach (string text2 in SettingsCache.GetCachedTrait(text).exclusiveWith)
+				{
+					if (list2.Contains(text2))
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (!flag)
+				{
+					list2.Add(text);
+				}
 				list.RemoveAt(num2);
 			}
 			DebugUtil.LogArgs(new object[]

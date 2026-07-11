@@ -3,6 +3,14 @@ using UnityEngine;
 
 public class PageView : KMonoBehaviour
 {
+	public int ChildrenPerPage
+	{
+		get
+		{
+			return this.childrenPerPage;
+		}
+	}
+
 	private void Update()
 	{
 		if (this.oldChildCount != base.transform.childCount)
@@ -19,6 +27,10 @@ public class PageView : KMonoBehaviour
 		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
 		{
 			this.currentPage = (this.currentPage + 1) % this.pageCount;
+			if (this.OnChangePage != null)
+			{
+				this.OnChangePage(this.currentPage);
+			}
 			this.RefreshPage();
 		}));
 		MultiToggle multiToggle2 = this.prevButton;
@@ -28,6 +40,10 @@ public class PageView : KMonoBehaviour
 			if (this.currentPage < 0)
 			{
 				this.currentPage += this.pageCount;
+			}
+			if (this.OnChangePage != null)
+			{
+				this.OnChangePage(this.currentPage);
 			}
 			this.RefreshPage();
 		}));
@@ -81,4 +97,6 @@ public class PageView : KMonoBehaviour
 	private int currentPage;
 
 	private int oldChildCount;
+
+	public Action<int> OnChangePage;
 }

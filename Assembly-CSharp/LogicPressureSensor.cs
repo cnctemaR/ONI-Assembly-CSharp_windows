@@ -239,6 +239,12 @@ public class LogicPressureSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim
 		}
 	}
 
+	protected override void UpdateSwitchStatus()
+	{
+		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
+	}
+
 	[SerializeField]
 	[Serialize]
 	private float threshold;

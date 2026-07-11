@@ -18,6 +18,50 @@ public class WorldInventory : KMonoBehaviour, ISaveLoadable
 		WorldInventory.Instance = this;
 		base.Subscribe(Game.Instance.gameObject, -1588644844, new Action<object>(this.OnAddedFetchable));
 		base.Subscribe(Game.Instance.gameObject, -1491270284, new Action<object>(this.OnRemovedFetchable));
+		GameClock.Instance.Subscribe(631075836, new Action<object>(this.GenerateInventoryReport));
+	}
+
+	private void GenerateInventoryReport(object data)
+	{
+		int num = 0;
+		int num2 = 0;
+		IEnumerator enumerator = Components.Brains.GetEnumerator();
+		try
+		{
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				CreatureBrain creatureBrain = obj as CreatureBrain;
+				if (creatureBrain != null)
+				{
+					if (creatureBrain.HasTag(GameTags.Creatures.Wild))
+					{
+						num++;
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.WildCritters, 1f, creatureBrain.GetProperName(), creatureBrain.GetProperName());
+					}
+					else
+					{
+						num2++;
+						ReportManager.Instance.ReportValue(ReportManager.ReportType.DomesticatedCritters, 1f, creatureBrain.GetProperName(), creatureBrain.GetProperName());
+					}
+				}
+			}
+		}
+		finally
+		{
+			IDisposable disposable;
+			if ((disposable = enumerator as IDisposable) != null)
+			{
+				disposable.Dispose();
+			}
+		}
+		foreach (Spacecraft spacecraft in SpacecraftManager.instance.GetSpacecraft())
+		{
+			if (spacecraft.state != Spacecraft.MissionState.Grounded && spacecraft.state != Spacecraft.MissionState.Destroyed)
+			{
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.RocketsInFlight, 1f, spacecraft.rocketName, null);
+			}
+		}
 	}
 
 	protected override void OnSpawn()

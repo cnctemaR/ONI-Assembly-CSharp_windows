@@ -177,6 +177,10 @@ public class MainMenu : KScreen
 		RetiredColonyInfoScreen.Instance.Show(true);
 		if (!string.IsNullOrEmpty(colonyID))
 		{
+			if (SaveGame.Instance != null)
+			{
+				RetireColonyUtility.SaveColonySummaryData();
+			}
 			RetiredColonyInfoScreen.Instance.LoadColony(RetiredColonyInfoScreen.Instance.GetColonyDataByBaseName(colonyID));
 		}
 	}
@@ -228,7 +232,7 @@ public class MainMenu : KScreen
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 356355U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 357226U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

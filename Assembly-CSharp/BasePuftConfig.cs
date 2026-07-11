@@ -6,14 +6,22 @@ using UnityEngine;
 
 public static class BasePuftConfig
 {
-	public static GameObject BasePuft(string id, string name, string desc, string traitId, string anim_file, bool is_baby, string symbol_override_prefix)
+	public static GameObject BasePuft(string id, string name, string desc, string traitId, string anim_file, bool is_baby, string symbol_override_prefix, float warningLowTemperature, float warningHighTemperature)
 	{
 		float num = 50f;
 		KAnimFile anim = Assets.GetAnim(anim_file);
 		string text = "idle_loop";
 		EffectorValues tier = DECOR.BONUS.TIER0;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 1, true, true, 302f, 318f, 243.15f, 343.15f);
+		GameObject gameObject2 = gameObject;
+		FactionManager.FactionID factionID = FactionManager.FactionID.Prey;
+		string text2 = "FlyerNavGrid1x1";
+		NavType navType = NavType.Hover;
+		string text3 = "Meat";
+		int num2 = 1;
+		num = warningLowTemperature - 45f;
+		float num3 = warningHighTemperature + 50f;
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text2, navType, 32, 2f, text3, num2, true, true, warningLowTemperature, warningHighTemperature, num, num3);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
 			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
@@ -36,10 +44,10 @@ public static class BasePuftConfig
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_die", NOISE_POLLUTION.CREATURES.TIER5);
 		SoundEventVolumeCache.instance.AddVolume("puft_kanim", "Puft_voice_hurt", NOISE_POLLUTION.CREATURES.TIER5);
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, false, false);
-		string text2 = "Puft_air_intake";
+		string text4 = "Puft_air_intake";
 		if (is_baby)
 		{
-			text2 = "PuftBaby_air_intake";
+			text4 = "PuftBaby_air_intake";
 		}
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new GrowUpStates.Def(), true)
 			.Add(new IncubatingStates.Def(), true)
@@ -55,7 +63,7 @@ public static class BasePuftConfig
 			.Add(new LayEggStates.Def(), true)
 			.Add(new InhaleStates.Def
 			{
-				inhaleSound = text2
+				inhaleSound = text4
 			}, true)
 			.Add(new MoveToLureStates.Def(), true)
 			.Add(new CallAdultStates.Def(), true)

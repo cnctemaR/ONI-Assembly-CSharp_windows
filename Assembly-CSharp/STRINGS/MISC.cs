@@ -854,7 +854,7 @@ namespace STRINGS
 					UI.FormatAsLink("Cold", "HEAT"),
 					" affect my Duplicants' internal body temperature and cause undue ",
 					UI.FormatAsLink("Stress", "STRESS"),
-					".\n\nThe THERMAL TOLERANCE OVERLAY <color=#F44A47><b>[F4]</b></color> allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
+					".\n\nOpening the TEMPERATURE OVERLAY <color=#F44A47><b>[F3]</b></color> and checking the \"Thermal Tolerance\" box allows me to view all areas where my Duplicants will feel discomfort and be unable to regulate their internal body temperature."
 				});
 			}
 
@@ -1108,7 +1108,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Invalid construction location";
 
-				public static LocString TOOLTIP = "These buildings cannot be constructed in the planned areas:\n";
+				public static LocString TOOLTIP = "These buildings cannot be constructed in the planned areas:";
 			}
 
 			public class MISSINGMATERIALS
@@ -1122,7 +1122,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Damage: Overheated";
 
-				public static LocString TOOLTIP = "Extreme heat is damaging these buildings:\n";
+				public static LocString TOOLTIP = "Extreme heat is damaging these buildings:";
 			}
 
 			public class NO_OXYGEN_GENERATOR

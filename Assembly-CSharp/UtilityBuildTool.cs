@@ -11,6 +11,7 @@ public class UtilityBuildTool : BaseUtilityBuildTool
 	{
 		UtilityBuildTool.Instance = this;
 		base.OnPrefabInit();
+		this.populateHitsList = true;
 		this.canChangeDragAxis = false;
 	}
 

@@ -170,6 +170,12 @@ public class LogicDuplicantSensor : Switch, ISim1000ms, ISim200ms
 		}
 	}
 
+	protected override void UpdateSwitchStatus()
+	{
+		StatusItem statusItem = ((!this.switchedOn) ? Db.Get().BuildingStatusItems.LogicSensorStatusInactive : Db.Get().BuildingStatusItems.LogicSensorStatusActive);
+		base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Power, statusItem, null);
+	}
+
 	[MyCmpGet]
 	private KSelectable selectable;
 

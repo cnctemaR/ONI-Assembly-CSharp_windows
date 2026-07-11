@@ -71,7 +71,7 @@ public class ColonyAchievementTracker : KMonoBehaviour, ISaveLoadableDetails
 			global::Debug.LogWarningFormat("UnlockPlatformAchievement {0} skipping: instant build mode", new object[] { achievement_id });
 			return;
 		}
-		if (Game.Instance.SandboxModeActive)
+		if (SaveGame.Instance.sandboxEnabled)
 		{
 			global::Debug.LogWarningFormat("UnlockPlatformAchievement {0} skipping: sandbox mode", new object[] { achievement_id });
 			return;

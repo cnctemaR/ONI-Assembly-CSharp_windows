@@ -152,7 +152,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	{
 		for (int i = 0; i < this.SeasonLoop.Length; i++)
 		{
-			if (this.SeasonLoop[i] == "MeteorShower")
+			if (this.SeasonLoop[i] == "MeteorShowerIron")
 			{
 				this.currentSeasonIndex = i;
 			}
@@ -173,7 +173,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	[ContextMenu("Force Shower")]
 	public void Debug_ForceShower()
 	{
-		this.currentSeasonIndex = Array.IndexOf<string>(this.SeasonLoop, "MeteorShower");
+		this.currentSeasonIndex = Array.IndexOf<string>(this.SeasonLoop, "MeteorShowerIron");
 		this.ResetSeasonProgress();
 		this.bombardmentOn = true;
 		this.bombardmentPeriodRemaining = float.MaxValue;
@@ -203,7 +203,11 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 
 	private const string SEASONNAME_DEFAULT = "Default";
 
-	private const string SEASONNAME_METEORSHOWER = "MeteorShower";
+	private const string SEASONNAME_METEORSHOWER_IRON = "MeteorShowerIron";
+
+	private const string SEASONNAME_METEORSHOWER_GOLD = "MeteorShowerGold";
+
+	private const string SEASONNAME_METEORSHOWER_COPPER = "MeteorShowerCopper";
 
 	private Dictionary<string, SeasonManager.Season> seasons = new Dictionary<string, SeasonManager.Season>
 	{
@@ -215,7 +219,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 			}
 		},
 		{
-			"MeteorShower",
+			"MeteorShowerIron",
 			new SeasonManager.Season
 			{
 				durationInCycles = 10,
@@ -233,7 +237,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 					new SeasonManager.BombardmentInfo
 					{
 						prefab = RockCometConfig.ID,
-						weight = 1f
+						weight = 2f
 					},
 					new SeasonManager.BombardmentInfo
 					{
@@ -242,10 +246,63 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 					}
 				}
 			}
+		},
+		{
+			"MeteorShowerGold",
+			new SeasonManager.Season
+			{
+				durationInCycles = 5,
+				secondsBombardmentOff = new MathUtil.MinMax(800f, 1200f),
+				secondsBombardmentOn = new MathUtil.MinMax(50f, 100f),
+				secondsBetweenBombardments = new MathUtil.MinMax(0.3f, 0.5f),
+				meteorBackground = true,
+				bombardmentInfo = new SeasonManager.BombardmentInfo[]
+				{
+					new SeasonManager.BombardmentInfo
+					{
+						prefab = GoldCometConfig.ID,
+						weight = 2f
+					},
+					new SeasonManager.BombardmentInfo
+					{
+						prefab = RockCometConfig.ID,
+						weight = 0.5f
+					},
+					new SeasonManager.BombardmentInfo
+					{
+						prefab = DustCometConfig.ID,
+						weight = 5f
+					}
+				}
+			}
+		},
+		{
+			"MeteorShowerCopper",
+			new SeasonManager.Season
+			{
+				durationInCycles = 7,
+				secondsBombardmentOff = new MathUtil.MinMax(300f, 1200f),
+				secondsBombardmentOn = new MathUtil.MinMax(100f, 400f),
+				secondsBetweenBombardments = new MathUtil.MinMax(4f, 6.5f),
+				meteorBackground = true,
+				bombardmentInfo = new SeasonManager.BombardmentInfo[]
+				{
+					new SeasonManager.BombardmentInfo
+					{
+						prefab = CopperCometConfig.ID,
+						weight = 1f
+					},
+					new SeasonManager.BombardmentInfo
+					{
+						prefab = RockCometConfig.ID,
+						weight = 1f
+					}
+				}
+			}
 		}
 	};
 
-	private string[] SeasonLoop = new string[] { "Default", "MeteorShower" };
+	private string[] SeasonLoop = new string[] { "Default", "MeteorShowerIron", "Default", "MeteorShowerCopper", "Default", "MeteorShowerGold" };
 
 	private static readonly EventSystem.IntraObjectHandler<SeasonManager> OnNewDayDelegate = new EventSystem.IntraObjectHandler<SeasonManager>(delegate(SeasonManager component, object data)
 	{

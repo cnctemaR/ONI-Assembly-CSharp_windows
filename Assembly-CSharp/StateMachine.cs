@@ -262,7 +262,6 @@ public abstract class StateMachine
 			{
 				this.isCrashed = true;
 				StateMachine.Instance.error = true;
-				RestartWarning.ShouldWarn = true;
 			}
 		}
 

@@ -288,7 +288,16 @@ public static class CodexCache
 
 	public static string GetEntryForLock(string lockId)
 	{
-		if (CodexCache.unlockedEntryLookup.ContainsKey(lockId) && CodexCache.unlockedEntryLookup[lockId].Count > 0)
+		if (CodexCache.unlockedEntryLookup == null)
+		{
+			global::Debug.LogWarningFormat("Trying to get lock entry {0} before codex cache has been initialized.", new object[] { lockId });
+			return null;
+		}
+		if (string.IsNullOrEmpty(lockId))
+		{
+			return null;
+		}
+		if (CodexCache.unlockedEntryLookup.ContainsKey(lockId) && CodexCache.unlockedEntryLookup[lockId] != null && CodexCache.unlockedEntryLookup[lockId].Count > 0)
 		{
 			return CodexCache.unlockedEntryLookup[lockId][0];
 		}

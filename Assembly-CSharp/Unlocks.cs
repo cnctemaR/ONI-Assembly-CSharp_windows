@@ -176,6 +176,10 @@ public class Unlocks : KMonoBehaviour
 	private MessageNotification GenerateCodexUnlockNotification(string lockID)
 	{
 		string entryForLock = CodexCache.GetEntryForLock(lockID);
+		if (string.IsNullOrEmpty(entryForLock))
+		{
+			return null;
+		}
 		string text = null;
 		if (CodexCache.FindSubEntry(lockID) != null)
 		{

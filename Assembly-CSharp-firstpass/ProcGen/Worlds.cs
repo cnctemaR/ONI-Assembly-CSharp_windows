@@ -15,7 +15,12 @@ namespace ProcGen
 
 		public World GetWorldData(string name)
 		{
-			return this.worldCache[name];
+			World world;
+			if (this.worldCache.TryGetValue(name, out world))
+			{
+				return world;
+			}
+			return this.worldCache["worlds/SandstoneDefault"];
 		}
 
 		public List<string> GetNames()

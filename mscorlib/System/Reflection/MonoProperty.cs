@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Security;
 
 namespace System.Reflection
 {
 	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	internal class MonoProperty : RuntimePropertyInfo
+	internal class MonoProperty : PropertyInfo, ISerializable
 	{
 		private void CachePropertyInfo(PInfo flags)
 		{
@@ -55,8 +53,8 @@ namespace System.Reflection
 				{
 					return this.info.get_method.ReturnType;
 				}
-				ParameterInfo[] parametersInternal = this.info.set_method.GetParametersInternal();
-				return parametersInternal[parametersInternal.Length - 1].ParameterType;
+				ParameterInfo[] parameters = this.info.set_method.GetParameters();
+				return parameters[parameters.Length - 1].ParameterType;
 			}
 		}
 
@@ -74,7 +72,7 @@ namespace System.Reflection
 			get
 			{
 				this.CachePropertyInfo(PInfo.DeclaringType);
-				return this.info.declaring_type;
+				return this.info.parent;
 			}
 		}
 
@@ -127,27 +125,26 @@ namespace System.Reflection
 		{
 			this.CachePropertyInfo(PInfo.GetMethod | PInfo.SetMethod);
 			ParameterInfo[] array;
-			int num;
 			if (this.info.get_method != null)
 			{
-				array = this.info.get_method.GetParametersInternal();
-				num = array.Length;
+				array = this.info.get_method.GetParameters();
 			}
 			else
 			{
-				if (!(this.info.set_method != null))
+				if (this.info.set_method == null)
 				{
-					return EmptyArray<ParameterInfo>.Value;
+					return new ParameterInfo[0];
 				}
-				array = this.info.set_method.GetParametersInternal();
-				num = array.Length - 1;
+				ParameterInfo[] parameters = this.info.set_method.GetParameters();
+				array = new ParameterInfo[parameters.Length - 1];
+				Array.Copy(parameters, array, array.Length);
 			}
-			ParameterInfo[] array2 = new ParameterInfo[num];
-			for (int i = 0; i < num; i++)
+			for (int i = 0; i < array.Length; i++)
 			{
-				array2[i] = ParameterInfo.New(array[i], this);
+				ParameterInfo parameterInfo = array[i];
+				array[i] = new ParameterInfo(parameterInfo, this);
 			}
-			return array2;
+			return array;
 		}
 
 		public override MethodInfo GetSetMethod(bool nonPublic)
@@ -158,16 +155,6 @@ namespace System.Reflection
 				return this.info.set_method;
 			}
 			return null;
-		}
-
-		public override object GetConstantValue()
-		{
-			return MonoPropertyInfo.get_default_value(this);
-		}
-
-		public override object GetRawConstantValue()
-		{
-			return MonoPropertyInfo.get_default_value(this);
 		}
 
 		public override bool IsDefined(Type attributeType, bool inherit)
@@ -212,7 +199,8 @@ namespace System.Reflection
 				type = typeof(MonoProperty.Getter<, >);
 				text = "GetterAdapterFrame";
 			}
-			object obj = Delegate.CreateDelegate(type.MakeGenericType(array), method);
+			Type type2 = type.MakeGenericType(array);
+			object obj = Delegate.CreateDelegate(type2, method);
 			MethodInfo methodInfo = typeof(MonoProperty).GetMethod(text, BindingFlags.Static | BindingFlags.NonPublic);
 			methodInfo = methodInfo.MakeGenericMethod(array);
 			return (MonoProperty.GetterAdapter)Delegate.CreateDelegate(typeof(MonoProperty.GetterAdapter), obj, methodInfo, true);
@@ -220,10 +208,6 @@ namespace System.Reflection
 
 		public override object GetValue(object obj, object[] index)
 		{
-			if (index != null)
-			{
-				int num = index.Length;
-			}
 			return this.GetValue(obj, BindingFlags.Default, null, index, null);
 		}
 
@@ -275,6 +259,11 @@ namespace System.Reflection
 			setMethod.Invoke(obj, invokeAttr, binder, array, culture);
 		}
 
+		public override string ToString()
+		{
+			return this.PropertyType.ToString() + " " + this.Name;
+		}
+
 		public override Type[] GetOptionalCustomModifiers()
 		{
 			Type[] typeModifiers = MonoPropertyInfo.GetTypeModifiers(this, true);
@@ -295,9 +284,9 @@ namespace System.Reflection
 			return typeModifiers;
 		}
 
-		public override IList<CustomAttributeData> GetCustomAttributesData()
+		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			return CustomAttributeData.GetCustomAttributes(this);
+			MemberInfoSerializationHolder.Serialize(info, this.Name, this.ReflectedType, this.ToString(), MemberTypes.Property);
 		}
 
 		internal IntPtr klass;

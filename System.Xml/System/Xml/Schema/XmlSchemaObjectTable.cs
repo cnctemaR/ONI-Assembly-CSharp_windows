@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace System.Xml.Schema
 {
@@ -8,65 +8,7 @@ namespace System.Xml.Schema
 	{
 		internal XmlSchemaObjectTable()
 		{
-		}
-
-		internal void Add(XmlQualifiedName name, XmlSchemaObject value)
-		{
-			this.table.Add(name, value);
-			this.entries.Add(new XmlSchemaObjectTable.XmlSchemaObjectEntry(name, value));
-		}
-
-		internal void Insert(XmlQualifiedName name, XmlSchemaObject value)
-		{
-			XmlSchemaObject xmlSchemaObject = null;
-			if (this.table.TryGetValue(name, out xmlSchemaObject))
-			{
-				this.table[name] = value;
-				int num = this.FindIndexByValue(xmlSchemaObject);
-				this.entries[num] = new XmlSchemaObjectTable.XmlSchemaObjectEntry(name, value);
-				return;
-			}
-			this.Add(name, value);
-		}
-
-		internal void Replace(XmlQualifiedName name, XmlSchemaObject value)
-		{
-			XmlSchemaObject xmlSchemaObject;
-			if (this.table.TryGetValue(name, out xmlSchemaObject))
-			{
-				this.table[name] = value;
-				int num = this.FindIndexByValue(xmlSchemaObject);
-				this.entries[num] = new XmlSchemaObjectTable.XmlSchemaObjectEntry(name, value);
-			}
-		}
-
-		internal void Clear()
-		{
-			this.table.Clear();
-			this.entries.Clear();
-		}
-
-		internal void Remove(XmlQualifiedName name)
-		{
-			XmlSchemaObject xmlSchemaObject;
-			if (this.table.TryGetValue(name, out xmlSchemaObject))
-			{
-				this.table.Remove(name);
-				int num = this.FindIndexByValue(xmlSchemaObject);
-				this.entries.RemoveAt(num);
-			}
-		}
-
-		private int FindIndexByValue(XmlSchemaObject xso)
-		{
-			for (int i = 0; i < this.entries.Count; i++)
-			{
-				if (this.entries[i].xso == xso)
-				{
-					return i;
-				}
-			}
-			return -1;
+			this.table = new HybridDictionary();
 		}
 
 		public int Count
@@ -77,21 +19,11 @@ namespace System.Xml.Schema
 			}
 		}
 
-		public bool Contains(XmlQualifiedName name)
-		{
-			return this.table.ContainsKey(name);
-		}
-
 		public XmlSchemaObject this[XmlQualifiedName name]
 		{
 			get
 			{
-				XmlSchemaObject xmlSchemaObject;
-				if (this.table.TryGetValue(name, out xmlSchemaObject))
-				{
-					return xmlSchemaObject;
-				}
-				return null;
+				return (XmlSchemaObject)this.table[name];
 			}
 		}
 
@@ -99,7 +31,7 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return new XmlSchemaObjectTable.NamesCollection(this.entries, this.table.Count);
+				return this.table.Keys;
 			}
 		}
 
@@ -107,294 +39,127 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return new XmlSchemaObjectTable.ValuesCollection(this.entries, this.table.Count);
+				return this.table.Values;
 			}
+		}
+
+		public bool Contains(XmlQualifiedName name)
+		{
+			return this.table.Contains(name);
 		}
 
 		public IDictionaryEnumerator GetEnumerator()
 		{
-			return new XmlSchemaObjectTable.XSODictionaryEnumerator(this.entries, this.table.Count, XmlSchemaObjectTable.EnumeratorType.DictionaryEntry);
+			return new XmlSchemaObjectTable.XmlSchemaObjectTableEnumerator(this);
 		}
 
-		private Dictionary<XmlQualifiedName, XmlSchemaObject> table = new Dictionary<XmlQualifiedName, XmlSchemaObject>();
-
-		private List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries = new List<XmlSchemaObjectTable.XmlSchemaObjectEntry>();
-
-		internal enum EnumeratorType
+		internal void Add(XmlQualifiedName name, XmlSchemaObject value)
 		{
-			Keys,
-			Values,
-			DictionaryEntry
+			this.table[name] = value;
 		}
 
-		internal struct XmlSchemaObjectEntry
+		internal void Clear()
 		{
-			public XmlSchemaObjectEntry(XmlQualifiedName name, XmlSchemaObject value)
-			{
-				this.qname = name;
-				this.xso = value;
-			}
-
-			public XmlSchemaObject IsMatch(string localName, string ns)
-			{
-				if (localName == this.qname.Name && ns == this.qname.Namespace)
-				{
-					return this.xso;
-				}
-				return null;
-			}
-
-			public void Reset()
-			{
-				this.qname = null;
-				this.xso = null;
-			}
-
-			internal XmlQualifiedName qname;
-
-			internal XmlSchemaObject xso;
+			this.table.Clear();
 		}
 
-		internal class NamesCollection : ICollection, IEnumerable
+		internal void Set(XmlQualifiedName name, XmlSchemaObject value)
 		{
-			internal NamesCollection(List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries, int size)
-			{
-				this.entries = entries;
-				this.size = size;
-			}
-
-			public int Count
-			{
-				get
-				{
-					return this.size;
-				}
-			}
-
-			public object SyncRoot
-			{
-				get
-				{
-					return ((ICollection)this.entries).SyncRoot;
-				}
-			}
-
-			public bool IsSynchronized
-			{
-				get
-				{
-					return ((ICollection)this.entries).IsSynchronized;
-				}
-			}
-
-			public void CopyTo(Array array, int arrayIndex)
-			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (arrayIndex < 0)
-				{
-					throw new ArgumentOutOfRangeException("arrayIndex");
-				}
-				for (int i = 0; i < this.size; i++)
-				{
-					array.SetValue(this.entries[i].qname, arrayIndex++);
-				}
-			}
-
-			public IEnumerator GetEnumerator()
-			{
-				return new XmlSchemaObjectTable.XSOEnumerator(this.entries, this.size, XmlSchemaObjectTable.EnumeratorType.Keys);
-			}
-
-			private List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries;
-
-			private int size;
+			this.table[name] = value;
 		}
 
-		internal class ValuesCollection : ICollection, IEnumerable
+		private HybridDictionary table;
+
+		internal class XmlSchemaObjectTableEnumerator : IEnumerator, IDictionaryEnumerator
 		{
-			internal ValuesCollection(List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries, int size)
+			internal XmlSchemaObjectTableEnumerator(XmlSchemaObjectTable table)
 			{
-				this.entries = entries;
-				this.size = size;
+				this.tmp = table.table;
+				this.xenum = (IDictionaryEnumerator)this.tmp.GetEnumerator();
 			}
 
-			public int Count
+			bool IEnumerator.MoveNext()
+			{
+				return this.xenum.MoveNext();
+			}
+
+			void IEnumerator.Reset()
+			{
+				this.xenum.Reset();
+			}
+
+			object IEnumerator.Current
 			{
 				get
 				{
-					return this.size;
+					return this.xenum.Entry;
 				}
 			}
 
-			public object SyncRoot
+			DictionaryEntry IDictionaryEnumerator.Entry
 			{
 				get
 				{
-					return ((ICollection)this.entries).SyncRoot;
+					return this.xenum.Entry;
 				}
 			}
 
-			public bool IsSynchronized
+			object IDictionaryEnumerator.Key
 			{
 				get
 				{
-					return ((ICollection)this.entries).IsSynchronized;
+					return (XmlQualifiedName)this.xenum.Key;
 				}
 			}
 
-			public void CopyTo(Array array, int arrayIndex)
-			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (arrayIndex < 0)
-				{
-					throw new ArgumentOutOfRangeException("arrayIndex");
-				}
-				for (int i = 0; i < this.size; i++)
-				{
-					array.SetValue(this.entries[i].xso, arrayIndex++);
-				}
-			}
-
-			public IEnumerator GetEnumerator()
-			{
-				return new XmlSchemaObjectTable.XSOEnumerator(this.entries, this.size, XmlSchemaObjectTable.EnumeratorType.Values);
-			}
-
-			private List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries;
-
-			private int size;
-		}
-
-		internal class XSOEnumerator : IEnumerator
-		{
-			internal XSOEnumerator(List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries, int size, XmlSchemaObjectTable.EnumeratorType enumType)
-			{
-				this.entries = entries;
-				this.size = size;
-				this.enumType = enumType;
-				this.currentIndex = -1;
-			}
-
-			public object Current
+			object IDictionaryEnumerator.Value
 			{
 				get
 				{
-					if (this.currentIndex == -1)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has not started. Call MoveNext.", new object[] { string.Empty }));
-					}
-					if (this.currentIndex >= this.size)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has already finished.", new object[] { string.Empty }));
-					}
-					switch (this.enumType)
-					{
-					case XmlSchemaObjectTable.EnumeratorType.Keys:
-						return this.currentKey;
-					case XmlSchemaObjectTable.EnumeratorType.Values:
-						return this.currentValue;
-					case XmlSchemaObjectTable.EnumeratorType.DictionaryEntry:
-						return new DictionaryEntry(this.currentKey, this.currentValue);
-					default:
-						return null;
-					}
+					return (XmlSchemaObject)this.xenum.Value;
 				}
 			}
 
-			public bool MoveNext()
+			public XmlSchemaObject Current
 			{
-				if (this.currentIndex >= this.size - 1)
+				get
 				{
-					this.currentValue = null;
-					this.currentKey = null;
-					return false;
+					return (XmlSchemaObject)this.xenum.Value;
 				}
-				this.currentIndex++;
-				this.currentValue = this.entries[this.currentIndex].xso;
-				this.currentKey = this.entries[this.currentIndex].qname;
-				return true;
-			}
-
-			public void Reset()
-			{
-				this.currentIndex = -1;
-				this.currentValue = null;
-				this.currentKey = null;
-			}
-
-			private List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries;
-
-			private XmlSchemaObjectTable.EnumeratorType enumType;
-
-			protected int currentIndex;
-
-			protected int size;
-
-			protected XmlQualifiedName currentKey;
-
-			protected XmlSchemaObject currentValue;
-		}
-
-		internal class XSODictionaryEnumerator : XmlSchemaObjectTable.XSOEnumerator, IDictionaryEnumerator, IEnumerator
-		{
-			internal XSODictionaryEnumerator(List<XmlSchemaObjectTable.XmlSchemaObjectEntry> entries, int size, XmlSchemaObjectTable.EnumeratorType enumType)
-				: base(entries, size, enumType)
-			{
 			}
 
 			public DictionaryEntry Entry
 			{
 				get
 				{
-					if (this.currentIndex == -1)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has not started. Call MoveNext.", new object[] { string.Empty }));
-					}
-					if (this.currentIndex >= this.size)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has already finished.", new object[] { string.Empty }));
-					}
-					return new DictionaryEntry(this.currentKey, this.currentValue);
+					return this.xenum.Entry;
 				}
 			}
 
-			public object Key
+			public XmlQualifiedName Key
 			{
 				get
 				{
-					if (this.currentIndex == -1)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has not started. Call MoveNext.", new object[] { string.Empty }));
-					}
-					if (this.currentIndex >= this.size)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has already finished.", new object[] { string.Empty }));
-					}
-					return this.currentKey;
+					return (XmlQualifiedName)this.xenum.Key;
 				}
 			}
 
-			public object Value
+			public XmlSchemaObject Value
 			{
 				get
 				{
-					if (this.currentIndex == -1)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has not started. Call MoveNext.", new object[] { string.Empty }));
-					}
-					if (this.currentIndex >= this.size)
-					{
-						throw new InvalidOperationException(Res.GetString("Enumeration has already finished.", new object[] { string.Empty }));
-					}
-					return this.currentValue;
+					return (XmlSchemaObject)this.xenum.Value;
 				}
 			}
+
+			public bool MoveNext()
+			{
+				return this.xenum.MoveNext();
+			}
+
+			private IDictionaryEnumerator xenum;
+
+			private IEnumerable tmp;
 		}
 	}
 }

@@ -3,8 +3,8 @@
 namespace Mono.Unix.Native
 {
 	[Flags]
-	[Map]
 	[CLSCompliant(false)]
+	[Map]
 	public enum FilePermissions : uint
 	{
 		S_ISUID = 2048U,

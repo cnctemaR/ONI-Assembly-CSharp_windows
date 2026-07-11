@@ -16,7 +16,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public LinkedResource(string fileName, ContentType contentType)
+		public LinkedResource(string fileName, global::System.Net.Mime.ContentType contentType)
 			: base(fileName, contentType)
 		{
 			if (fileName == null)
@@ -43,7 +43,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public LinkedResource(Stream contentStream, ContentType contentType)
+		public LinkedResource(Stream contentStream, global::System.Net.Mime.ContentType contentType)
 			: base(contentStream, contentType)
 		{
 			if (contentStream == null)
@@ -61,7 +61,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public Uri ContentLink
+		public global::System.Uri ContentLink
 		{
 			get
 			{
@@ -79,21 +79,23 @@ namespace System.Net.Mail
 			{
 				throw new ArgumentNullException();
 			}
-			return new LinkedResource(new MemoryStream(Encoding.Default.GetBytes(content)))
+			MemoryStream memoryStream = new MemoryStream(Encoding.Default.GetBytes(content));
+			return new LinkedResource(memoryStream)
 			{
-				TransferEncoding = TransferEncoding.QuotedPrintable
+				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable
 			};
 		}
 
-		public static LinkedResource CreateLinkedResourceFromString(string content, ContentType contentType)
+		public static LinkedResource CreateLinkedResourceFromString(string content, global::System.Net.Mime.ContentType contentType)
 		{
 			if (content == null)
 			{
 				throw new ArgumentNullException();
 			}
-			return new LinkedResource(new MemoryStream(Encoding.Default.GetBytes(content)), contentType)
+			MemoryStream memoryStream = new MemoryStream(Encoding.Default.GetBytes(content));
+			return new LinkedResource(memoryStream, contentType)
 			{
-				TransferEncoding = TransferEncoding.QuotedPrintable
+				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable
 			};
 		}
 
@@ -103,12 +105,13 @@ namespace System.Net.Mail
 			{
 				throw new ArgumentNullException();
 			}
-			return new LinkedResource(new MemoryStream(contentEncoding.GetBytes(content)), mediaType)
+			MemoryStream memoryStream = new MemoryStream(contentEncoding.GetBytes(content));
+			return new LinkedResource(memoryStream, mediaType)
 			{
-				TransferEncoding = TransferEncoding.QuotedPrintable
+				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable
 			};
 		}
 
-		private Uri contentLink;
+		private global::System.Uri contentLink;
 	}
 }

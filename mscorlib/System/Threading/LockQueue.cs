@@ -12,7 +12,7 @@ namespace System.Threading
 		public bool Wait(int timeout)
 		{
 			bool flag = false;
-			bool flag3;
+			bool flag2;
 			try
 			{
 				lock (this)
@@ -20,7 +20,7 @@ namespace System.Threading
 					this.lockCount++;
 					Monitor.Exit(this.rwlock);
 					flag = true;
-					flag3 = Monitor.Wait(this, timeout);
+					flag2 = Monitor.Wait(this, timeout);
 				}
 			}
 			finally
@@ -31,19 +31,19 @@ namespace System.Threading
 					this.lockCount--;
 				}
 			}
-			return flag3;
+			return flag2;
 		}
 
 		public bool IsEmpty
 		{
 			get
 			{
-				bool flag2;
+				bool flag;
 				lock (this)
 				{
-					flag2 = this.lockCount == 0;
+					flag = this.lockCount == 0;
 				}
-				return flag2;
+				return flag;
 			}
 		}
 
@@ -52,6 +52,14 @@ namespace System.Threading
 			lock (this)
 			{
 				Monitor.Pulse(this);
+			}
+		}
+
+		public void PulseAll()
+		{
+			lock (this)
+			{
+				Monitor.PulseAll(this);
 			}
 		}
 

@@ -8,26 +8,28 @@ namespace System.Runtime.InteropServices
 	public class MarshalDirectiveException : SystemException
 	{
 		public MarshalDirectiveException()
-			: base(Environment.GetResourceString("Marshaling directives are invalid."))
+			: base(Locale.GetText("Unsupported MarshalAsAttribute found"))
 		{
-			base.SetErrorCode(-2146233035);
+			base.HResult = -2146233035;
 		}
 
 		public MarshalDirectiveException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233035);
+			base.HResult = -2146233035;
 		}
 
 		public MarshalDirectiveException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233035);
+			base.HResult = -2146233035;
 		}
 
 		protected MarshalDirectiveException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private const int ErrorCode = -2146233035;
 	}
 }

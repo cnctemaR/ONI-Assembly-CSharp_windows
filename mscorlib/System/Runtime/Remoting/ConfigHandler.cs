@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Remoting.Channels;
@@ -72,248 +73,156 @@ namespace System.Runtime.Remoting
 				this.ReadCustomProviderData(name, attrs);
 				return;
 			}
-			uint num = <PrivateImplementationDetails>.ComputeStringHash(name);
-			if (num <= 1889220888U)
+			if (name != null)
 			{
-				if (num <= 1338032792U)
+				if (ConfigHandler.<>f__switch$map22 == null)
 				{
-					if (num <= 566383268U)
+					ConfigHandler.<>f__switch$map22 = new Dictionary<string, int>(19)
 					{
-						if (num != 524788293U)
-						{
-							if (num == 566383268U)
-							{
-								if (name == "channel")
-								{
-									this.ValidatePath(name, new string[] { "channels" });
-									if (this.currentXmlPath.IndexOf("application") != -1)
-									{
-										this.ReadChannel(attrs, false);
-										return;
-									}
-									this.ReadChannel(attrs, true);
-									return;
-								}
-							}
-						}
-						else if (name == "application")
-						{
-							this.ValidatePath(name, new string[] { "system.runtime.remoting" });
-							if (attrs.Names.Length != 0)
-							{
-								this.appName = attrs.Values[0];
-								return;
-							}
-							return;
-						}
-					}
-					else if (num != 653843437U)
-					{
-						if (num == 1338032792U)
-						{
-							if (name == "wellknown")
-							{
-								this.ValidatePath(name, new string[] { "client", "service" });
-								if (this.CheckPath("client"))
-								{
-									this.ReadClientWellKnown(attrs);
-									return;
-								}
-								this.ReadServiceWellKnown(attrs);
-								return;
-							}
-						}
-					}
-					else if (name == "interopXmlElement")
-					{
-						this.ValidatePath(name, new string[] { "soapInterop" });
-						this.ReadInteropXml(attrs, false);
-						return;
-					}
+						{ "application", 0 },
+						{ "lifetime", 1 },
+						{ "channels", 2 },
+						{ "channel", 3 },
+						{ "serverProviders", 4 },
+						{ "clientProviders", 5 },
+						{ "provider", 6 },
+						{ "formatter", 6 },
+						{ "client", 7 },
+						{ "service", 8 },
+						{ "wellknown", 9 },
+						{ "activated", 10 },
+						{ "soapInterop", 11 },
+						{ "interopXmlType", 12 },
+						{ "interopXmlElement", 13 },
+						{ "preLoad", 14 },
+						{ "debug", 15 },
+						{ "channelSinkProviders", 16 },
+						{ "customErrors", 17 }
+					};
 				}
-				else if (num <= 1457512036U)
+				int num;
+				if (ConfigHandler.<>f__switch$map22.TryGetValue(name, out num))
 				{
-					if (num != 1376955374U)
+					switch (num)
 					{
-						if (num == 1457512036U)
+					case 0:
+						this.ValidatePath(name, new string[] { "system.runtime.remoting" });
+						if (attrs.Names.Length > 0)
 						{
-							if (name == "service")
-							{
-								this.ValidatePath(name, new string[] { "application" });
-								return;
-							}
+							this.appName = attrs.Values[0];
 						}
-					}
-					else if (name == "lifetime")
-					{
+						break;
+					case 1:
 						this.ValidatePath(name, new string[] { "application" });
 						this.ReadLifetine(attrs);
-						return;
-					}
-				}
-				else if (num != 1483009432U)
-				{
-					if (num != 1743807633U)
-					{
-						if (num == 1889220888U)
+						break;
+					case 2:
+						this.ValidatePath(name, new string[] { "system.runtime.remoting", "application" });
+						break;
+					case 3:
+						this.ValidatePath(name, new string[] { "channels" });
+						if (this.currentXmlPath.IndexOf("application") != -1)
 						{
-							if (name == "clientProviders")
-							{
-								this.ValidatePath(name, new string[] { "channelSinkProviders", "channel" });
-								return;
-							}
+							this.ReadChannel(attrs, false);
 						}
-					}
-					else if (name == "customErrors")
-					{
-						this.ValidatePath(name, new string[] { "system.runtime.remoting" });
-						RemotingConfiguration.SetCustomErrorsMode(attrs.GetValue("mode"));
-						return;
-					}
-				}
-				else if (name == "debug")
-				{
-					this.ValidatePath(name, new string[] { "system.runtime.remoting" });
-					return;
-				}
-			}
-			else if (num <= 3082861500U)
-			{
-				if (num <= 2837523493U)
-				{
-					if (num != 2408750110U)
-					{
-						if (num != 2837523493U)
+						else
 						{
-							goto IL_05DF;
+							this.ReadChannel(attrs, true);
 						}
-						if (!(name == "formatter"))
+						break;
+					case 4:
+						this.ValidatePath(name, new string[] { "channelSinkProviders", "channel" });
+						break;
+					case 5:
+						this.ValidatePath(name, new string[] { "channelSinkProviders", "channel" });
+						break;
+					case 6:
+						if (this.CheckPath("application/channels/channel/serverProviders") || this.CheckPath("channels/channel/serverProviders"))
 						{
-							goto IL_05DF;
+							ProviderData providerData = this.ReadProvider(name, attrs, false);
+							this.currentChannel.ServerProviders.Add(providerData);
 						}
-					}
-					else
-					{
-						if (!(name == "client"))
+						else if (this.CheckPath("application/channels/channel/clientProviders") || this.CheckPath("channels/channel/clientProviders"))
 						{
-							goto IL_05DF;
+							ProviderData providerData = this.ReadProvider(name, attrs, false);
+							this.currentChannel.ClientProviders.Add(providerData);
 						}
+						else if (this.CheckPath("channelSinkProviders/serverProviders"))
+						{
+							ProviderData providerData = this.ReadProvider(name, attrs, true);
+							RemotingConfiguration.RegisterServerProviderTemplate(providerData);
+						}
+						else if (this.CheckPath("channelSinkProviders/clientProviders"))
+						{
+							ProviderData providerData = this.ReadProvider(name, attrs, true);
+							RemotingConfiguration.RegisterClientProviderTemplate(providerData);
+						}
+						else
+						{
+							this.ValidatePath(name, new string[0]);
+						}
+						break;
+					case 7:
 						this.ValidatePath(name, new string[] { "application" });
 						this.currentClientUrl = attrs.GetValue("url");
-						return;
-					}
-				}
-				else if (num != 2866667388U)
-				{
-					if (num != 2988283755U)
-					{
-						if (num != 3082861500U)
-						{
-							goto IL_05DF;
-						}
-						if (!(name == "provider"))
-						{
-							goto IL_05DF;
-						}
-					}
-					else
-					{
-						if (!(name == "soapInterop"))
-						{
-							goto IL_05DF;
-						}
+						break;
+					case 8:
 						this.ValidatePath(name, new string[] { "application" });
-						return;
-					}
-				}
-				else
-				{
-					if (!(name == "activated"))
-					{
-						goto IL_05DF;
-					}
-					this.ValidatePath(name, new string[] { "client", "service" });
-					if (this.CheckPath("client"))
-					{
-						this.ReadClientActivated(attrs);
-						return;
-					}
-					this.ReadServiceActivated(attrs);
-					return;
-				}
-				if (this.CheckPath("application/channels/channel/serverProviders") || this.CheckPath("channels/channel/serverProviders"))
-				{
-					ProviderData providerData = this.ReadProvider(name, attrs, false);
-					this.currentChannel.ServerProviders.Add(providerData);
-					return;
-				}
-				if (this.CheckPath("application/channels/channel/clientProviders") || this.CheckPath("channels/channel/clientProviders"))
-				{
-					ProviderData providerData = this.ReadProvider(name, attrs, false);
-					this.currentChannel.ClientProviders.Add(providerData);
-					return;
-				}
-				if (this.CheckPath("channelSinkProviders/serverProviders"))
-				{
-					ProviderData providerData = this.ReadProvider(name, attrs, true);
-					RemotingConfiguration.RegisterServerProviderTemplate(providerData);
-					return;
-				}
-				if (this.CheckPath("channelSinkProviders/clientProviders"))
-				{
-					ProviderData providerData = this.ReadProvider(name, attrs, true);
-					RemotingConfiguration.RegisterClientProviderTemplate(providerData);
-					return;
-				}
-				this.ValidatePath(name, Array.Empty<string>());
-				return;
-			}
-			else if (num <= 3638887060U)
-			{
-				if (num != 3588091843U)
-				{
-					if (num == 3638887060U)
-					{
-						if (name == "serverProviders")
+						break;
+					case 9:
+						this.ValidatePath(name, new string[] { "client", "service" });
+						if (this.CheckPath("client"))
 						{
-							this.ValidatePath(name, new string[] { "channelSinkProviders", "channel" });
-							return;
+							this.ReadClientWellKnown(attrs);
 						}
-					}
-				}
-				else if (name == "interopXmlType")
-				{
-					this.ValidatePath(name, new string[] { "soapInterop" });
-					this.ReadInteropXml(attrs, false);
-					return;
-				}
-			}
-			else if (num != 4033672166U)
-			{
-				if (num != 4187488551U)
-				{
-					if (num == 4226312309U)
-					{
-						if (name == "channels")
+						else
 						{
-							this.ValidatePath(name, new string[] { "system.runtime.remoting", "application" });
-							return;
+							this.ReadServiceWellKnown(attrs);
 						}
+						break;
+					case 10:
+						this.ValidatePath(name, new string[] { "client", "service" });
+						if (this.CheckPath("client"))
+						{
+							this.ReadClientActivated(attrs);
+						}
+						else
+						{
+							this.ReadServiceActivated(attrs);
+						}
+						break;
+					case 11:
+						this.ValidatePath(name, new string[] { "application" });
+						break;
+					case 12:
+						this.ValidatePath(name, new string[] { "soapInterop" });
+						this.ReadInteropXml(attrs, false);
+						break;
+					case 13:
+						this.ValidatePath(name, new string[] { "soapInterop" });
+						this.ReadInteropXml(attrs, false);
+						break;
+					case 14:
+						this.ValidatePath(name, new string[] { "soapInterop" });
+						this.ReadPreload(attrs);
+						break;
+					case 15:
+						this.ValidatePath(name, new string[] { "system.runtime.remoting" });
+						break;
+					case 16:
+						this.ValidatePath(name, new string[] { "system.runtime.remoting" });
+						break;
+					case 17:
+						this.ValidatePath(name, new string[] { "system.runtime.remoting" });
+						RemotingConfiguration.SetCustomErrorsMode(attrs.GetValue("mode"));
+						break;
+					default:
+						goto IL_0512;
 					}
-				}
-				else if (name == "channelSinkProviders")
-				{
-					this.ValidatePath(name, new string[] { "system.runtime.remoting" });
 					return;
 				}
 			}
-			else if (name == "preLoad")
-			{
-				this.ValidatePath(name, new string[] { "soapInterop" });
-				this.ReadPreload(attrs);
-				return;
-			}
-			IL_05DF:
+			IL_0512:
 			throw new RemotingException("Element '" + name + "' is not valid in system.remoting.configuration section");
 		}
 
@@ -344,41 +253,54 @@ namespace System.Runtime.Remoting
 
 		private void ReadLifetine(SmallXmlParser.IAttrList attrs)
 		{
-			for (int i = 0; i < attrs.Names.Length; i++)
+			int i = 0;
+			while (i < attrs.Names.Length)
 			{
 				string text = attrs.Names[i];
-				if (!(text == "leaseTime"))
+				if (text != null)
 				{
-					if (!(text == "sponsorshipTimeout"))
+					if (ConfigHandler.<>f__switch$map23 == null)
 					{
-						if (!(text == "renewOnCallTime"))
+						ConfigHandler.<>f__switch$map23 = new Dictionary<string, int>(4)
 						{
-							if (!(text == "leaseManagerPollTime"))
-							{
-								throw new RemotingException("Invalid attribute: " + attrs.Names[i]);
-							}
-							LifetimeServices.LeaseManagerPollTime = this.ParseTime(attrs.GetValue(i));
-						}
-						else
+							{ "leaseTime", 0 },
+							{ "sponsorshipTimeout", 1 },
+							{ "renewOnCallTime", 2 },
+							{ "leaseManagerPollTime", 3 }
+						};
+					}
+					int num;
+					if (ConfigHandler.<>f__switch$map23.TryGetValue(text, out num))
+					{
+						switch (num)
 						{
+						case 0:
+							LifetimeServices.LeaseTime = this.ParseTime(attrs.GetValue(i));
+							break;
+						case 1:
+							LifetimeServices.SponsorshipTimeout = this.ParseTime(attrs.GetValue(i));
+							break;
+						case 2:
 							LifetimeServices.RenewOnCallTime = this.ParseTime(attrs.GetValue(i));
+							break;
+						case 3:
+							LifetimeServices.LeaseManagerPollTime = this.ParseTime(attrs.GetValue(i));
+							break;
+						default:
+							goto IL_00E6;
 						}
-					}
-					else
-					{
-						LifetimeServices.SponsorshipTimeout = this.ParseTime(attrs.GetValue(i));
+						i++;
+						continue;
 					}
 				}
-				else
-				{
-					LifetimeServices.LeaseTime = this.ParseTime(attrs.GetValue(i));
-				}
+				IL_00E6:
+				throw new RemotingException("Invalid attribute: " + attrs.Names[i]);
 			}
 		}
 
 		private TimeSpan ParseTime(string s)
 		{
-			if (s == "" || s == null)
+			if (s == string.Empty || s == null)
 			{
 				throw new RemotingException("Invalid time value");
 			}
@@ -474,7 +396,7 @@ namespace System.Runtime.Remoting
 
 		private ProviderData ReadProvider(string name, SmallXmlParser.IAttrList attrs, bool isTemplate)
 		{
-			ProviderData providerData = ((name == "provider") ? new ProviderData() : new FormatterData());
+			ProviderData providerData = ((!(name == "provider")) ? new FormatterData() : new ProviderData());
 			SinkProviderData sinkProviderData = new SinkProviderData("root");
 			providerData.CustomData = sinkProviderData.Children;
 			this.currentProviderData = new Stack();
@@ -511,7 +433,7 @@ namespace System.Runtime.Remoting
 		{
 			string notNull = this.GetNotNull(attrs, "type");
 			string text = this.ExtractAssembly(ref notNull);
-			if (this.currentClientUrl == null || this.currentClientUrl == "")
+			if (this.currentClientUrl == null || this.currentClientUrl == string.Empty)
 			{
 				throw new RemotingException("url attribute is required in client element when it contains activated entries");
 			}
@@ -560,13 +482,15 @@ namespace System.Runtime.Remoting
 			Type type = Type.GetType(this.GetNotNull(attrs, "clr"));
 			string[] array = this.GetNotNull(attrs, "xml").Split(new char[] { ',' });
 			string text = array[0].Trim();
-			string text2 = ((array.Length != 0) ? array[1].Trim() : null);
+			string text2 = ((array.Length <= 0) ? null : array[1].Trim());
 			if (isElement)
 			{
 				SoapServices.RegisterInteropXmlElement(text, text2, type);
-				return;
 			}
-			SoapServices.RegisterInteropXmlType(text, text2, type);
+			else
+			{
+				SoapServices.RegisterInteropXmlType(text, text2, type);
+			}
 		}
 
 		private void ReadPreload(SmallXmlParser.IAttrList attrs)
@@ -580,20 +504,21 @@ namespace System.Runtime.Remoting
 			if (value != null)
 			{
 				SoapServices.PreLoad(Type.GetType(value));
-				return;
 			}
-			if (value2 != null)
+			else
 			{
+				if (value2 == null)
+				{
+					throw new RemotingException("Either type or assembly attributes must be specified");
+				}
 				SoapServices.PreLoad(Assembly.Load(value2));
-				return;
 			}
-			throw new RemotingException("Either type or assembly attributes must be specified");
 		}
 
 		private string GetNotNull(SmallXmlParser.IAttrList attrs, string name)
 		{
 			string value = attrs.GetValue(name);
-			if (value == null || value == "")
+			if (value == null || value == string.Empty)
 			{
 				throw new RemotingException(name + " attribute is required");
 			}
@@ -605,7 +530,7 @@ namespace System.Runtime.Remoting
 			int num = type.IndexOf(',');
 			if (num == -1)
 			{
-				return "";
+				return string.Empty;
 			}
 			string text = type.Substring(num + 1).Trim();
 			type = type.Substring(0, num).Trim();
@@ -641,7 +566,7 @@ namespace System.Runtime.Remoting
 
 		private string appName;
 
-		private string currentXmlPath = "";
+		private string currentXmlPath = string.Empty;
 
 		private bool onlyDelayedChannels;
 	}

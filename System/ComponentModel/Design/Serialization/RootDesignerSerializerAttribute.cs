@@ -3,43 +3,31 @@
 namespace System.ComponentModel.Design.Serialization
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface, AllowMultiple = true, Inherited = true)]
-	[Obsolete("This attribute has been deprecated. Use DesignerSerializerAttribute instead.  For example, to specify a root designer for CodeDom, use DesignerSerializerAttribute(...,typeof(TypeCodeDomSerializer)).  http://go.microsoft.com/fwlink/?linkid=14202")]
+	[Obsolete("Use DesignerSerializerAttribute instead")]
 	public sealed class RootDesignerSerializerAttribute : Attribute
 	{
-		public RootDesignerSerializerAttribute(Type serializerType, Type baseSerializerType, bool reloadable)
+		public RootDesignerSerializerAttribute(string serializerTypeName, string baseSerializerTypeName, bool reloadable)
 		{
-			this.serializerTypeName = serializerType.AssemblyQualifiedName;
-			this.serializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
-			this.reloadable = reloadable;
+			this.serializer = serializerTypeName;
+			this.baseserializer = baseSerializerTypeName;
+			this.reload = reloadable;
 		}
 
 		public RootDesignerSerializerAttribute(string serializerTypeName, Type baseSerializerType, bool reloadable)
+			: this(serializerTypeName, baseSerializerType.AssemblyQualifiedName, reloadable)
 		{
-			this.serializerTypeName = serializerTypeName;
-			this.serializerBaseTypeName = baseSerializerType.AssemblyQualifiedName;
-			this.reloadable = reloadable;
 		}
 
-		public RootDesignerSerializerAttribute(string serializerTypeName, string baseSerializerTypeName, bool reloadable)
+		public RootDesignerSerializerAttribute(Type serializerType, Type baseSerializerType, bool reloadable)
+			: this(serializerType.AssemblyQualifiedName, baseSerializerType.AssemblyQualifiedName, reloadable)
 		{
-			this.serializerTypeName = serializerTypeName;
-			this.serializerBaseTypeName = baseSerializerTypeName;
-			this.reloadable = reloadable;
 		}
 
 		public bool Reloadable
 		{
 			get
 			{
-				return this.reloadable;
-			}
-		}
-
-		public string SerializerTypeName
-		{
-			get
-			{
-				return this.serializerTypeName;
+				return this.reload;
 			}
 		}
 
@@ -47,7 +35,15 @@ namespace System.ComponentModel.Design.Serialization
 		{
 			get
 			{
-				return this.serializerBaseTypeName;
+				return this.baseserializer;
+			}
+		}
+
+		public string SerializerTypeName
+		{
+			get
+			{
+				return this.serializer;
 			}
 		}
 
@@ -55,26 +51,14 @@ namespace System.ComponentModel.Design.Serialization
 		{
 			get
 			{
-				if (this.typeId == null)
-				{
-					string text = this.serializerBaseTypeName;
-					int num = text.IndexOf(',');
-					if (num != -1)
-					{
-						text = text.Substring(0, num);
-					}
-					this.typeId = base.GetType().FullName + text;
-				}
-				return this.typeId;
+				return this.ToString() + this.baseserializer;
 			}
 		}
 
-		private bool reloadable;
+		private string serializer;
 
-		private string serializerTypeName;
+		private string baseserializer;
 
-		private string serializerBaseTypeName;
-
-		private string typeId;
+		private bool reload;
 	}
 }

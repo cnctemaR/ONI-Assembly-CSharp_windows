@@ -205,6 +205,13 @@ namespace STRINGS
 				public static LocString DESCRIPTION = "Requires Comfy Bed";
 			}
 
+			public class NO_COTS
+			{
+				public static LocString NAME = "No basic Cots";
+
+				public static LocString DESCRIPTION = "Cannot contain basic Cots";
+			}
+
 			public class BED_MULTIPLE
 			{
 				public static LocString NAME = "Beds";
@@ -343,6 +350,13 @@ namespace STRINGS
 				public static LocString NAME = "Flush Toilet";
 
 				public static LocString DESCRIPTION = "Requires one or more Lavatories";
+			}
+
+			public class NO_OUTHOUSES
+			{
+				public static LocString NAME = "No Outhouses";
+
+				public static LocString DESCRIPTION = "Cannot contain basic Outhouses";
 			}
 
 			public class WASH_STATION

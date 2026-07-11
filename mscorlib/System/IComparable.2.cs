@@ -2,7 +2,7 @@
 
 namespace System
 {
-	public interface IComparable<in T>
+	public interface IComparable<T>
 	{
 		int CompareTo(T other);
 	}

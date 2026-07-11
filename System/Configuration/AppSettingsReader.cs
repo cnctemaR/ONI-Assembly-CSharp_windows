@@ -47,6 +47,6 @@ namespace System.Configuration
 			return obj;
 		}
 
-		private NameValueCollection appSettings;
+		private global::System.Collections.Specialized.NameValueCollection appSettings;
 	}
 }

@@ -5,13 +5,31 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.All)]
 	public class CategoryAttribute : Attribute
 	{
+		public CategoryAttribute()
+		{
+			this.category = "Misc";
+		}
+
+		public CategoryAttribute(string category)
+		{
+			this.category = category;
+		}
+
 		public static CategoryAttribute Action
 		{
 			get
 			{
-				if (CategoryAttribute.action == null)
+				if (CategoryAttribute.action != null)
 				{
-					CategoryAttribute.action = new CategoryAttribute("Action");
+					return CategoryAttribute.action;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.action == null)
+					{
+						CategoryAttribute.action = new CategoryAttribute("Action");
+					}
 				}
 				return CategoryAttribute.action;
 			}
@@ -21,9 +39,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.appearance == null)
+				if (CategoryAttribute.appearance != null)
 				{
-					CategoryAttribute.appearance = new CategoryAttribute("Appearance");
+					return CategoryAttribute.appearance;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.appearance == null)
+					{
+						CategoryAttribute.appearance = new CategoryAttribute("Appearance");
+					}
 				}
 				return CategoryAttribute.appearance;
 			}
@@ -33,11 +59,19 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.asynchronous == null)
+				if (CategoryAttribute.behaviour != null)
 				{
-					CategoryAttribute.asynchronous = new CategoryAttribute("Asynchronous");
+					return CategoryAttribute.behaviour;
 				}
-				return CategoryAttribute.asynchronous;
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.async == null)
+					{
+						CategoryAttribute.async = new CategoryAttribute("Asynchronous");
+					}
+				}
+				return CategoryAttribute.async;
 			}
 		}
 
@@ -45,11 +79,19 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.behavior == null)
+				if (CategoryAttribute.behaviour != null)
 				{
-					CategoryAttribute.behavior = new CategoryAttribute("Behavior");
+					return CategoryAttribute.behaviour;
 				}
-				return CategoryAttribute.behavior;
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.behaviour == null)
+					{
+						CategoryAttribute.behaviour = new CategoryAttribute("Behavior");
+					}
+				}
+				return CategoryAttribute.behaviour;
 			}
 		}
 
@@ -57,9 +99,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.data == null)
+				if (CategoryAttribute.data != null)
 				{
-					CategoryAttribute.data = new CategoryAttribute("Data");
+					return CategoryAttribute.data;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.data == null)
+					{
+						CategoryAttribute.data = new CategoryAttribute("Data");
+					}
 				}
 				return CategoryAttribute.data;
 			}
@@ -69,11 +119,19 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.defAttr == null)
+				if (CategoryAttribute.def != null)
 				{
-					CategoryAttribute.defAttr = new CategoryAttribute();
+					return CategoryAttribute.def;
 				}
-				return CategoryAttribute.defAttr;
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.def == null)
+					{
+						CategoryAttribute.def = new CategoryAttribute();
+					}
+				}
+				return CategoryAttribute.def;
 			}
 		}
 
@@ -81,9 +139,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.design == null)
+				if (CategoryAttribute.design != null)
 				{
-					CategoryAttribute.design = new CategoryAttribute("Design");
+					return CategoryAttribute.design;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.design == null)
+					{
+						CategoryAttribute.design = new CategoryAttribute("Design");
+					}
 				}
 				return CategoryAttribute.design;
 			}
@@ -93,11 +159,19 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.dragDrop == null)
+				if (CategoryAttribute.drag_drop != null)
 				{
-					CategoryAttribute.dragDrop = new CategoryAttribute("DragDrop");
+					return CategoryAttribute.drag_drop;
 				}
-				return CategoryAttribute.dragDrop;
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.drag_drop == null)
+					{
+						CategoryAttribute.drag_drop = new CategoryAttribute("Drag Drop");
+					}
+				}
+				return CategoryAttribute.drag_drop;
 			}
 		}
 
@@ -105,9 +179,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.focus == null)
+				if (CategoryAttribute.focus != null)
 				{
-					CategoryAttribute.focus = new CategoryAttribute("Focus");
+					return CategoryAttribute.focus;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.focus == null)
+					{
+						CategoryAttribute.focus = new CategoryAttribute("Focus");
+					}
 				}
 				return CategoryAttribute.focus;
 			}
@@ -117,9 +199,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.format == null)
+				if (CategoryAttribute.format != null)
 				{
-					CategoryAttribute.format = new CategoryAttribute("Format");
+					return CategoryAttribute.format;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.format == null)
+					{
+						CategoryAttribute.format = new CategoryAttribute("Format");
+					}
 				}
 				return CategoryAttribute.format;
 			}
@@ -129,9 +219,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.key == null)
+				if (CategoryAttribute.key != null)
 				{
-					CategoryAttribute.key = new CategoryAttribute("Key");
+					return CategoryAttribute.key;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.key == null)
+					{
+						CategoryAttribute.key = new CategoryAttribute("Key");
+					}
 				}
 				return CategoryAttribute.key;
 			}
@@ -141,9 +239,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.layout == null)
+				if (CategoryAttribute.layout != null)
 				{
-					CategoryAttribute.layout = new CategoryAttribute("Layout");
+					return CategoryAttribute.layout;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.layout == null)
+					{
+						CategoryAttribute.layout = new CategoryAttribute("Layout");
+					}
 				}
 				return CategoryAttribute.layout;
 			}
@@ -153,9 +259,17 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.mouse == null)
+				if (CategoryAttribute.mouse != null)
 				{
-					CategoryAttribute.mouse = new CategoryAttribute("Mouse");
+					return CategoryAttribute.mouse;
+				}
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.mouse == null)
+					{
+						CategoryAttribute.mouse = new CategoryAttribute("Mouse");
+					}
 				}
 				return CategoryAttribute.mouse;
 			}
@@ -165,247 +279,91 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (CategoryAttribute.windowStyle == null)
+				if (CategoryAttribute.window_style != null)
 				{
-					CategoryAttribute.windowStyle = new CategoryAttribute("WindowStyle");
+					return CategoryAttribute.window_style;
 				}
-				return CategoryAttribute.windowStyle;
+				object obj = CategoryAttribute.lockobj;
+				lock (obj)
+				{
+					if (CategoryAttribute.window_style == null)
+					{
+						CategoryAttribute.window_style = new CategoryAttribute("Window Style");
+					}
+				}
+				return CategoryAttribute.window_style;
 			}
 		}
 
-		public CategoryAttribute()
-			: this("Default")
+		protected virtual string GetLocalizedString(string value)
 		{
-		}
-
-		public CategoryAttribute(string category)
-		{
-			this.categoryValue = category;
-			this.localized = false;
+			return global::Locale.GetText(value);
 		}
 
 		public string Category
 		{
 			get
 			{
-				if (!this.localized)
+				if (!this.IsLocalized)
 				{
-					this.localized = true;
-					string localizedString = this.GetLocalizedString(this.categoryValue);
+					this.IsLocalized = true;
+					string localizedString = this.GetLocalizedString(this.category);
 					if (localizedString != null)
 					{
-						this.categoryValue = localizedString;
+						this.category = localizedString;
 					}
 				}
-				return this.categoryValue;
+				return this.category;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj == this || (obj is CategoryAttribute && this.Category.Equals(((CategoryAttribute)obj).Category));
+			return obj is CategoryAttribute && (obj == this || ((CategoryAttribute)obj).Category == this.category);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.Category.GetHashCode();
-		}
-
-		protected virtual string GetLocalizedString(string value)
-		{
-			uint num = global::<PrivateImplementationDetails>.ComputeStringHash(value);
-			if (num <= 1062369733U)
-			{
-				if (num <= 630759034U)
-				{
-					if (num <= 433860734U)
-					{
-						if (num != 175614239U)
-						{
-							if (num == 433860734U)
-							{
-								if (value == "Default")
-								{
-									return "Misc";
-								}
-							}
-						}
-						else if (value == "Action")
-						{
-							return "Action";
-						}
-					}
-					else if (num != 521774151U)
-					{
-						if (num == 630759034U)
-						{
-							if (value == "DragDrop")
-							{
-								return "Drag Drop";
-							}
-						}
-					}
-					else if (value == "Behavior")
-					{
-						return "Behavior";
-					}
-				}
-				else if (num <= 723360612U)
-				{
-					if (num != 676498961U)
-					{
-						if (num == 723360612U)
-						{
-							if (value == "Mouse")
-							{
-								return "Mouse";
-							}
-						}
-					}
-					else if (value == "Scale")
-					{
-						return "Scale";
-					}
-				}
-				else if (num != 822184863U)
-				{
-					if (num != 1041509726U)
-					{
-						if (num == 1062369733U)
-						{
-							if (value == "Data")
-							{
-								return "Data";
-							}
-						}
-					}
-					else if (value == "Text")
-					{
-						return "Text";
-					}
-				}
-				else if (value == "Appearance")
-				{
-					return "Appearance";
-				}
-			}
-			else if (num <= 2809814704U)
-			{
-				if (num <= 1779622119U)
-				{
-					if (num != 1762750224U)
-					{
-						if (num == 1779622119U)
-						{
-							if (value == "Config")
-							{
-								return "Configurations";
-							}
-						}
-					}
-					else if (value == "DDE")
-					{
-						return "DDE";
-					}
-				}
-				else if (num != 2055433310U)
-				{
-					if (num != 2368288673U)
-					{
-						if (num == 2809814704U)
-						{
-							if (value == "Font")
-							{
-								return "Font";
-							}
-						}
-					}
-					else if (value == "List")
-					{
-						return "List";
-					}
-				}
-				else if (value == "WindowStyle")
-				{
-					return "Window Style";
-				}
-			}
-			else if (num <= 3441084684U)
-			{
-				if (num != 3159863731U)
-				{
-					if (num == 3441084684U)
-					{
-						if (value == "Key")
-						{
-							return "Key";
-						}
-					}
-				}
-				else if (value == "Focus")
-				{
-					return "Focus";
-				}
-			}
-			else if (num != 3799987242U)
-			{
-				if (num != 3901555439U)
-				{
-					if (num == 4152902175U)
-					{
-						if (value == "Layout")
-						{
-							return "Layout";
-						}
-					}
-				}
-				else if (value == "Design")
-				{
-					return "Design";
-				}
-			}
-			else if (value == "Position")
-			{
-				return "Position";
-			}
-			return value;
+			return this.category.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Category.Equals(CategoryAttribute.Default.Category);
+			return this.category == CategoryAttribute.Default.Category;
 		}
 
-		private static volatile CategoryAttribute appearance;
+		private string category;
 
-		private static volatile CategoryAttribute asynchronous;
-
-		private static volatile CategoryAttribute behavior;
-
-		private static volatile CategoryAttribute data;
-
-		private static volatile CategoryAttribute design;
+		private bool IsLocalized;
 
 		private static volatile CategoryAttribute action;
 
+		private static volatile CategoryAttribute appearance;
+
+		private static volatile CategoryAttribute behaviour;
+
+		private static volatile CategoryAttribute data;
+
+		private static volatile CategoryAttribute def;
+
+		private static volatile CategoryAttribute design;
+
+		private static volatile CategoryAttribute drag_drop;
+
+		private static volatile CategoryAttribute focus;
+
 		private static volatile CategoryAttribute format;
+
+		private static volatile CategoryAttribute key;
 
 		private static volatile CategoryAttribute layout;
 
 		private static volatile CategoryAttribute mouse;
 
-		private static volatile CategoryAttribute key;
+		private static volatile CategoryAttribute window_style;
 
-		private static volatile CategoryAttribute focus;
+		private static volatile CategoryAttribute async;
 
-		private static volatile CategoryAttribute windowStyle;
-
-		private static volatile CategoryAttribute dragDrop;
-
-		private static volatile CategoryAttribute defAttr;
-
-		private bool localized;
-
-		private string categoryValue;
+		private static object lockobj = new object();
 	}
 }

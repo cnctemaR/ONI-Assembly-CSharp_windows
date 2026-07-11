@@ -1,79 +1,110 @@
 ﻿using System;
-using System.ComponentModel;
-using System.IO;
-using System.Security;
-using System.Security.Permissions;
 using System.Xml.Schema;
-using System.Xml.XmlConfiguration;
-using Microsoft.Win32;
 
 namespace System.Xml
 {
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public sealed class XmlReaderSettings
 	{
 		public XmlReaderSettings()
 		{
-			this.Initialize();
+			this.Reset();
 		}
 
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public XmlReaderSettings(XmlResolver resolver)
+		public event ValidationEventHandler ValidationEventHandler;
+
+		public XmlReaderSettings Clone()
 		{
-			this.Initialize(resolver);
+			return (XmlReaderSettings)base.MemberwiseClone();
 		}
 
-		public bool Async
+		public void Reset()
+		{
+			this.checkCharacters = true;
+			this.closeInput = false;
+			this.conformance = ConformanceLevel.Document;
+			this.ignoreComments = false;
+			this.ignoreProcessingInstructions = false;
+			this.ignoreWhitespace = false;
+			this.lineNumberOffset = 0;
+			this.linePositionOffset = 0;
+			this.prohibitDtd = true;
+			this.schemas = null;
+			this.schemasNeedsInitialization = true;
+			this.validationFlags = XmlSchemaValidationFlags.ProcessIdentityConstraints | XmlSchemaValidationFlags.AllowXmlAttributes;
+			this.validationType = ValidationType.None;
+			this.xmlResolver = new XmlUrlResolver();
+		}
+
+		public bool CheckCharacters
 		{
 			get
 			{
-				return this.useAsync;
+				return this.checkCharacters;
 			}
 			set
 			{
-				this.CheckReadOnly("Async");
-				this.useAsync = value;
+				this.checkCharacters = value;
 			}
 		}
 
-		public XmlNameTable NameTable
+		public bool CloseInput
 		{
 			get
 			{
-				return this.nameTable;
+				return this.closeInput;
 			}
 			set
 			{
-				this.CheckReadOnly("NameTable");
-				this.nameTable = value;
+				this.closeInput = value;
 			}
 		}
 
-		internal bool IsXmlResolverSet { get; set; }
-
-		public XmlResolver XmlResolver
+		public ConformanceLevel ConformanceLevel
 		{
+			get
+			{
+				return this.conformance;
+			}
 			set
 			{
-				this.CheckReadOnly("XmlResolver");
-				this.xmlResolver = value;
-				this.IsXmlResolverSet = true;
+				this.conformance = value;
 			}
 		}
 
-		internal XmlResolver GetXmlResolver()
+		public bool IgnoreComments
 		{
-			return this.xmlResolver;
-		}
-
-		internal XmlResolver GetXmlResolver_CheckConfig()
-		{
-			if (XmlReaderSection.ProhibitDefaultUrlResolver && !this.IsXmlResolverSet)
+			get
 			{
-				return null;
+				return this.ignoreComments;
 			}
-			return this.xmlResolver;
+			set
+			{
+				this.ignoreComments = value;
+			}
+		}
+
+		public bool IgnoreProcessingInstructions
+		{
+			get
+			{
+				return this.ignoreProcessingInstructions;
+			}
+			set
+			{
+				this.ignoreProcessingInstructions = value;
+			}
+		}
+
+		public bool IgnoreWhitespace
+		{
+			get
+			{
+				return this.ignoreWhitespace;
+			}
+			set
+			{
+				this.ignoreWhitespace = value;
+			}
 		}
 
 		public int LineNumberOffset
@@ -84,7 +115,6 @@ namespace System.Xml
 			}
 			set
 			{
-				this.CheckReadOnly("LineNumberOffset");
 				this.lineNumberOffset = value;
 			}
 		}
@@ -97,155 +127,78 @@ namespace System.Xml
 			}
 			set
 			{
-				this.CheckReadOnly("LinePositionOffset");
 				this.linePositionOffset = value;
 			}
 		}
 
-		public ConformanceLevel ConformanceLevel
-		{
-			get
-			{
-				return this.conformanceLevel;
-			}
-			set
-			{
-				this.CheckReadOnly("ConformanceLevel");
-				if (value > ConformanceLevel.Document)
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
-				this.conformanceLevel = value;
-			}
-		}
-
-		public bool CheckCharacters
-		{
-			get
-			{
-				return this.checkCharacters;
-			}
-			set
-			{
-				this.CheckReadOnly("CheckCharacters");
-				this.checkCharacters = value;
-			}
-		}
-
-		public long MaxCharactersInDocument
-		{
-			get
-			{
-				return this.maxCharactersInDocument;
-			}
-			set
-			{
-				this.CheckReadOnly("MaxCharactersInDocument");
-				if (value < 0L)
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
-				this.maxCharactersInDocument = value;
-			}
-		}
-
-		public long MaxCharactersFromEntities
-		{
-			get
-			{
-				return this.maxCharactersFromEntities;
-			}
-			set
-			{
-				this.CheckReadOnly("MaxCharactersFromEntities");
-				if (value < 0L)
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
-				this.maxCharactersFromEntities = value;
-			}
-		}
-
-		public bool IgnoreWhitespace
-		{
-			get
-			{
-				return this.ignoreWhitespace;
-			}
-			set
-			{
-				this.CheckReadOnly("IgnoreWhitespace");
-				this.ignoreWhitespace = value;
-			}
-		}
-
-		public bool IgnoreProcessingInstructions
-		{
-			get
-			{
-				return this.ignorePIs;
-			}
-			set
-			{
-				this.CheckReadOnly("IgnoreProcessingInstructions");
-				this.ignorePIs = value;
-			}
-		}
-
-		public bool IgnoreComments
-		{
-			get
-			{
-				return this.ignoreComments;
-			}
-			set
-			{
-				this.CheckReadOnly("IgnoreComments");
-				this.ignoreComments = value;
-			}
-		}
-
-		[Obsolete("Use XmlReaderSettings.DtdProcessing property instead.")]
 		public bool ProhibitDtd
 		{
 			get
 			{
-				return this.dtdProcessing == DtdProcessing.Prohibit;
+				return this.prohibitDtd;
 			}
 			set
 			{
-				this.CheckReadOnly("ProhibitDtd");
-				this.dtdProcessing = (value ? DtdProcessing.Prohibit : DtdProcessing.Parse);
+				this.prohibitDtd = value;
 			}
 		}
 
-		public DtdProcessing DtdProcessing
+		public XmlNameTable NameTable
 		{
 			get
 			{
-				return this.dtdProcessing;
+				return this.nameTable;
 			}
 			set
 			{
-				this.CheckReadOnly("DtdProcessing");
-				if (value > DtdProcessing.Parse)
+				this.nameTable = value;
+			}
+		}
+
+		public XmlSchemaSet Schemas
+		{
+			get
+			{
+				if (this.schemasNeedsInitialization)
 				{
-					throw new ArgumentOutOfRangeException("value");
+					this.schemas = new XmlSchemaSet();
+					this.schemasNeedsInitialization = false;
 				}
-				this.dtdProcessing = value;
-			}
-		}
-
-		public bool CloseInput
-		{
-			get
-			{
-				return this.closeInput;
+				return this.schemas;
 			}
 			set
 			{
-				this.CheckReadOnly("CloseInput");
-				this.closeInput = value;
+				this.schemas = value;
+				this.schemasNeedsInitialization = false;
+			}
+		}
+
+		internal void OnValidationError(object o, ValidationEventArgs e)
+		{
+			if (this.ValidationEventHandler != null)
+			{
+				this.ValidationEventHandler(o, e);
+			}
+			else if (e.Severity == XmlSeverityType.Error)
+			{
+				throw e.Exception;
+			}
+		}
+
+		internal void SetSchemas(XmlSchemaSet schemas)
+		{
+			this.schemas = schemas;
+		}
+
+		public XmlSchemaValidationFlags ValidationFlags
+		{
+			get
+			{
+				return this.validationFlags;
+			}
+			set
+			{
+				this.validationFlags = value;
 			}
 		}
 
@@ -257,448 +210,50 @@ namespace System.Xml
 			}
 			set
 			{
-				this.CheckReadOnly("ValidationType");
-				if (value > ValidationType.Schema)
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
 				this.validationType = value;
 			}
 		}
 
-		public XmlSchemaValidationFlags ValidationFlags
+		public XmlResolver XmlResolver
 		{
-			get
+			internal get
 			{
-				return this.validationFlags;
+				return this.xmlResolver;
 			}
 			set
 			{
-				this.CheckReadOnly("ValidationFlags");
-				if (value > (XmlSchemaValidationFlags.ProcessInlineSchema | XmlSchemaValidationFlags.ProcessSchemaLocation | XmlSchemaValidationFlags.ReportValidationWarnings | XmlSchemaValidationFlags.ProcessIdentityConstraints | XmlSchemaValidationFlags.AllowXmlAttributes))
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
-				this.validationFlags = value;
+				this.xmlResolver = value;
 			}
 		}
 
-		public XmlSchemaSet Schemas
-		{
-			get
-			{
-				if (this.schemas == null)
-				{
-					this.schemas = new XmlSchemaSet();
-				}
-				return this.schemas;
-			}
-			set
-			{
-				this.CheckReadOnly("Schemas");
-				this.schemas = value;
-			}
-		}
+		private bool checkCharacters;
 
-		public event ValidationEventHandler ValidationEventHandler
-		{
-			add
-			{
-				this.CheckReadOnly("ValidationEventHandler");
-				this.valEventHandler = (ValidationEventHandler)Delegate.Combine(this.valEventHandler, value);
-			}
-			remove
-			{
-				this.CheckReadOnly("ValidationEventHandler");
-				this.valEventHandler = (ValidationEventHandler)Delegate.Remove(this.valEventHandler, value);
-			}
-		}
+		private bool closeInput;
 
-		public void Reset()
-		{
-			this.CheckReadOnly("Reset");
-			this.Initialize();
-		}
+		private ConformanceLevel conformance;
 
-		public XmlReaderSettings Clone()
-		{
-			XmlReaderSettings xmlReaderSettings = base.MemberwiseClone() as XmlReaderSettings;
-			xmlReaderSettings.ReadOnly = false;
-			return xmlReaderSettings;
-		}
+		private bool ignoreComments;
 
-		internal ValidationEventHandler GetEventHandler()
-		{
-			return this.valEventHandler;
-		}
+		private bool ignoreProcessingInstructions;
 
-		internal XmlReader CreateReader(string inputUri, XmlParserContext inputContext)
-		{
-			if (inputUri == null)
-			{
-				throw new ArgumentNullException("inputUri");
-			}
-			if (inputUri.Length == 0)
-			{
-				throw new ArgumentException(Res.GetString("The string was not recognized as a valid Uri."), "inputUri");
-			}
-			XmlResolver xmlResolver = this.GetXmlResolver();
-			if (xmlResolver == null)
-			{
-				xmlResolver = XmlReaderSettings.CreateDefaultResolver();
-			}
-			XmlReader xmlReader = new XmlTextReaderImpl(inputUri, this, inputContext, xmlResolver);
-			if (this.ValidationType != ValidationType.None)
-			{
-				xmlReader = this.AddValidation(xmlReader);
-			}
-			if (this.useAsync)
-			{
-				xmlReader = XmlAsyncCheckReader.CreateAsyncCheckWrapper(xmlReader);
-			}
-			return xmlReader;
-		}
-
-		internal XmlReader CreateReader(Stream input, Uri baseUri, string baseUriString, XmlParserContext inputContext)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			if (baseUriString == null)
-			{
-				if (baseUri == null)
-				{
-					baseUriString = string.Empty;
-				}
-				else
-				{
-					baseUriString = baseUri.ToString();
-				}
-			}
-			XmlReader xmlReader = new XmlTextReaderImpl(input, null, 0, this, baseUri, baseUriString, inputContext, this.closeInput);
-			if (this.ValidationType != ValidationType.None)
-			{
-				xmlReader = this.AddValidation(xmlReader);
-			}
-			if (this.useAsync)
-			{
-				xmlReader = XmlAsyncCheckReader.CreateAsyncCheckWrapper(xmlReader);
-			}
-			return xmlReader;
-		}
-
-		internal XmlReader CreateReader(TextReader input, string baseUriString, XmlParserContext inputContext)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			if (baseUriString == null)
-			{
-				baseUriString = string.Empty;
-			}
-			XmlReader xmlReader = new XmlTextReaderImpl(input, this, baseUriString, inputContext);
-			if (this.ValidationType != ValidationType.None)
-			{
-				xmlReader = this.AddValidation(xmlReader);
-			}
-			if (this.useAsync)
-			{
-				xmlReader = XmlAsyncCheckReader.CreateAsyncCheckWrapper(xmlReader);
-			}
-			return xmlReader;
-		}
-
-		internal XmlReader CreateReader(XmlReader reader)
-		{
-			if (reader == null)
-			{
-				throw new ArgumentNullException("reader");
-			}
-			return this.AddValidationAndConformanceWrapper(reader);
-		}
-
-		internal bool ReadOnly
-		{
-			get
-			{
-				return this.isReadOnly;
-			}
-			set
-			{
-				this.isReadOnly = value;
-			}
-		}
-
-		private void CheckReadOnly(string propertyName)
-		{
-			if (this.isReadOnly)
-			{
-				throw new XmlException("The '{0}' property is read only and cannot be set.", base.GetType().Name + "." + propertyName);
-			}
-		}
-
-		private void Initialize()
-		{
-			this.Initialize(null);
-		}
-
-		private void Initialize(XmlResolver resolver)
-		{
-			this.nameTable = null;
-			if (!XmlReaderSettings.EnableLegacyXmlSettings())
-			{
-				this.xmlResolver = resolver;
-				this.maxCharactersFromEntities = 10000000L;
-			}
-			else
-			{
-				this.xmlResolver = ((resolver == null) ? XmlReaderSettings.CreateDefaultResolver() : resolver);
-				this.maxCharactersFromEntities = 0L;
-			}
-			this.lineNumberOffset = 0;
-			this.linePositionOffset = 0;
-			this.checkCharacters = true;
-			this.conformanceLevel = ConformanceLevel.Document;
-			this.ignoreWhitespace = false;
-			this.ignorePIs = false;
-			this.ignoreComments = false;
-			this.dtdProcessing = DtdProcessing.Prohibit;
-			this.closeInput = false;
-			this.maxCharactersInDocument = 0L;
-			this.schemas = null;
-			this.validationType = ValidationType.None;
-			this.validationFlags = XmlSchemaValidationFlags.ProcessIdentityConstraints;
-			this.validationFlags |= XmlSchemaValidationFlags.AllowXmlAttributes;
-			this.useAsync = false;
-			this.isReadOnly = false;
-			this.IsXmlResolverSet = false;
-		}
-
-		private static XmlResolver CreateDefaultResolver()
-		{
-			return new XmlUrlResolver();
-		}
-
-		internal XmlReader AddValidation(XmlReader reader)
-		{
-			if (this.validationType == ValidationType.Schema)
-			{
-				XmlResolver xmlResolver = this.GetXmlResolver_CheckConfig();
-				if (xmlResolver == null && !this.IsXmlResolverSet && !XmlReaderSettings.EnableLegacyXmlSettings())
-				{
-					xmlResolver = new XmlUrlResolver();
-				}
-				reader = new XsdValidatingReader(reader, xmlResolver, this);
-			}
-			else if (this.validationType == ValidationType.DTD)
-			{
-				reader = this.CreateDtdValidatingReader(reader);
-			}
-			return reader;
-		}
-
-		private XmlReader AddValidationAndConformanceWrapper(XmlReader reader)
-		{
-			if (this.validationType == ValidationType.DTD)
-			{
-				reader = this.CreateDtdValidatingReader(reader);
-			}
-			reader = this.AddConformanceWrapper(reader);
-			if (this.validationType == ValidationType.Schema)
-			{
-				reader = new XsdValidatingReader(reader, this.GetXmlResolver_CheckConfig(), this);
-			}
-			return reader;
-		}
-
-		private XmlValidatingReaderImpl CreateDtdValidatingReader(XmlReader baseReader)
-		{
-			return new XmlValidatingReaderImpl(baseReader, this.GetEventHandler(), (this.ValidationFlags & XmlSchemaValidationFlags.ProcessIdentityConstraints) > XmlSchemaValidationFlags.None);
-		}
-
-		internal XmlReader AddConformanceWrapper(XmlReader baseReader)
-		{
-			XmlReaderSettings settings = baseReader.Settings;
-			bool flag = false;
-			bool flag2 = false;
-			bool flag3 = false;
-			bool flag4 = false;
-			DtdProcessing dtdProcessing = (DtdProcessing)(-1);
-			bool flag5 = false;
-			if (settings == null)
-			{
-				if (this.conformanceLevel != ConformanceLevel.Auto && this.conformanceLevel != XmlReader.GetV1ConformanceLevel(baseReader))
-				{
-					throw new InvalidOperationException(Res.GetString("Cannot change conformance checking to {0}. Make sure the ConformanceLevel in XmlReaderSettings is set to Auto for wrapping scenarios.", new object[] { this.conformanceLevel.ToString() }));
-				}
-				XmlTextReader xmlTextReader = baseReader as XmlTextReader;
-				if (xmlTextReader == null)
-				{
-					XmlValidatingReader xmlValidatingReader = baseReader as XmlValidatingReader;
-					if (xmlValidatingReader != null)
-					{
-						xmlTextReader = (XmlTextReader)xmlValidatingReader.Reader;
-					}
-				}
-				if (this.ignoreWhitespace)
-				{
-					WhitespaceHandling whitespaceHandling = WhitespaceHandling.All;
-					if (xmlTextReader != null)
-					{
-						whitespaceHandling = xmlTextReader.WhitespaceHandling;
-					}
-					if (whitespaceHandling == WhitespaceHandling.All)
-					{
-						flag2 = true;
-						flag5 = true;
-					}
-				}
-				if (this.ignoreComments)
-				{
-					flag3 = true;
-					flag5 = true;
-				}
-				if (this.ignorePIs)
-				{
-					flag4 = true;
-					flag5 = true;
-				}
-				DtdProcessing dtdProcessing2 = DtdProcessing.Parse;
-				if (xmlTextReader != null)
-				{
-					dtdProcessing2 = xmlTextReader.DtdProcessing;
-				}
-				if ((this.dtdProcessing == DtdProcessing.Prohibit && dtdProcessing2 != DtdProcessing.Prohibit) || (this.dtdProcessing == DtdProcessing.Ignore && dtdProcessing2 == DtdProcessing.Parse))
-				{
-					dtdProcessing = this.dtdProcessing;
-					flag5 = true;
-				}
-			}
-			else
-			{
-				if (this.conformanceLevel != settings.ConformanceLevel && this.conformanceLevel != ConformanceLevel.Auto)
-				{
-					throw new InvalidOperationException(Res.GetString("Cannot change conformance checking to {0}. Make sure the ConformanceLevel in XmlReaderSettings is set to Auto for wrapping scenarios.", new object[] { this.conformanceLevel.ToString() }));
-				}
-				if (this.checkCharacters && !settings.CheckCharacters)
-				{
-					flag = true;
-					flag5 = true;
-				}
-				if (this.ignoreWhitespace && !settings.IgnoreWhitespace)
-				{
-					flag2 = true;
-					flag5 = true;
-				}
-				if (this.ignoreComments && !settings.IgnoreComments)
-				{
-					flag3 = true;
-					flag5 = true;
-				}
-				if (this.ignorePIs && !settings.IgnoreProcessingInstructions)
-				{
-					flag4 = true;
-					flag5 = true;
-				}
-				if ((this.dtdProcessing == DtdProcessing.Prohibit && settings.DtdProcessing != DtdProcessing.Prohibit) || (this.dtdProcessing == DtdProcessing.Ignore && settings.DtdProcessing == DtdProcessing.Parse))
-				{
-					dtdProcessing = this.dtdProcessing;
-					flag5 = true;
-				}
-			}
-			if (!flag5)
-			{
-				return baseReader;
-			}
-			IXmlNamespaceResolver xmlNamespaceResolver = baseReader as IXmlNamespaceResolver;
-			if (xmlNamespaceResolver != null)
-			{
-				return new XmlCharCheckingReaderWithNS(baseReader, xmlNamespaceResolver, flag, flag2, flag3, flag4, dtdProcessing);
-			}
-			return new XmlCharCheckingReader(baseReader, flag, flag2, flag3, flag4, dtdProcessing);
-		}
-
-		internal static bool EnableLegacyXmlSettings()
-		{
-			if (XmlReaderSettings.s_enableLegacyXmlSettings != null)
-			{
-				return XmlReaderSettings.s_enableLegacyXmlSettings.Value;
-			}
-			if (!BinaryCompatibility.TargetsAtLeast_Desktop_V4_5_2)
-			{
-				XmlReaderSettings.s_enableLegacyXmlSettings = new bool?(true);
-				return XmlReaderSettings.s_enableLegacyXmlSettings.Value;
-			}
-			bool flag = false;
-			if (!XmlReaderSettings.ReadSettingsFromRegistry(Registry.LocalMachine, ref flag))
-			{
-				XmlReaderSettings.ReadSettingsFromRegistry(Registry.CurrentUser, ref flag);
-			}
-			XmlReaderSettings.s_enableLegacyXmlSettings = new bool?(flag);
-			return XmlReaderSettings.s_enableLegacyXmlSettings.Value;
-		}
-
-		[SecuritySafeCritical]
-		[RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
-		private static bool ReadSettingsFromRegistry(RegistryKey hive, ref bool value)
-		{
-			try
-			{
-				using (RegistryKey registryKey = hive.OpenSubKey("SOFTWARE\\Microsoft\\.NETFramework\\XML", false))
-				{
-					if (registryKey != null && registryKey.GetValueKind("EnableLegacyXmlSettings") == RegistryValueKind.DWord)
-					{
-						value = (int)registryKey.GetValue("EnableLegacyXmlSettings") == 1;
-						return true;
-					}
-				}
-			}
-			catch
-			{
-			}
-			return false;
-		}
-
-		private bool useAsync;
-
-		private XmlNameTable nameTable;
-
-		private XmlResolver xmlResolver;
+		private bool ignoreWhitespace;
 
 		private int lineNumberOffset;
 
 		private int linePositionOffset;
 
-		private ConformanceLevel conformanceLevel;
+		private bool prohibitDtd;
 
-		private bool checkCharacters;
-
-		private long maxCharactersInDocument;
-
-		private long maxCharactersFromEntities;
-
-		private bool ignoreWhitespace;
-
-		private bool ignorePIs;
-
-		private bool ignoreComments;
-
-		private DtdProcessing dtdProcessing;
-
-		private ValidationType validationType;
-
-		private XmlSchemaValidationFlags validationFlags;
+		private XmlNameTable nameTable;
 
 		private XmlSchemaSet schemas;
 
-		private ValidationEventHandler valEventHandler;
+		private bool schemasNeedsInitialization;
 
-		private bool closeInput;
+		private XmlSchemaValidationFlags validationFlags;
 
-		private bool isReadOnly;
+		private ValidationType validationType;
 
-		private static bool? s_enableLegacyXmlSettings;
+		private XmlResolver xmlResolver;
 	}
 }

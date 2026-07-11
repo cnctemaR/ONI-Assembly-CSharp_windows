@@ -1,42 +1,100 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct Char : IComparable, IConvertible, IComparable<char>, IEquatable<char>
+	public struct Char : IConvertible, IComparable, IComparable<char>, IEquatable<char>
 	{
-		private static bool IsLatin1(char ch)
+		static Char()
 		{
-			return ch <= 'ÿ';
+			char.GetDataTablePointers(out char.category_data, out char.numeric_data, out char.numeric_data_values, out char.to_lower_data_low, out char.to_lower_data_high, out char.to_upper_data_low, out char.to_upper_data_high);
 		}
 
-		private static bool IsAscii(char ch)
+		object IConvertible.ToType(Type targetType, IFormatProvider provider)
 		{
-			return ch <= '\u007f';
+			if (targetType == null)
+			{
+				throw new ArgumentNullException("targetType");
+			}
+			return Convert.ToType(this, targetType, provider, false);
 		}
 
-		private static UnicodeCategory GetLatin1UnicodeCategory(char ch)
+		bool IConvertible.ToBoolean(IFormatProvider provider)
 		{
-			return (UnicodeCategory)char.categoryForLatin1[(int)ch];
+			throw new InvalidCastException();
 		}
 
-		public override int GetHashCode()
+		byte IConvertible.ToByte(IFormatProvider provider)
 		{
-			return (int)(this | ((int)this << 16));
+			return Convert.ToByte(this);
 		}
 
-		public override bool Equals(object obj)
+		char IConvertible.ToChar(IFormatProvider provider)
 		{
-			return obj is char && this == (char)obj;
+			return this;
 		}
 
-		public bool Equals(char obj)
+		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			return this == obj;
+			throw new InvalidCastException();
 		}
+
+		decimal IConvertible.ToDecimal(IFormatProvider provider)
+		{
+			throw new InvalidCastException();
+		}
+
+		double IConvertible.ToDouble(IFormatProvider provider)
+		{
+			throw new InvalidCastException();
+		}
+
+		short IConvertible.ToInt16(IFormatProvider provider)
+		{
+			return Convert.ToInt16(this);
+		}
+
+		int IConvertible.ToInt32(IFormatProvider provider)
+		{
+			return Convert.ToInt32(this);
+		}
+
+		long IConvertible.ToInt64(IFormatProvider provider)
+		{
+			return Convert.ToInt64(this);
+		}
+
+		sbyte IConvertible.ToSByte(IFormatProvider provider)
+		{
+			return Convert.ToSByte(this);
+		}
+
+		float IConvertible.ToSingle(IFormatProvider provider)
+		{
+			throw new InvalidCastException();
+		}
+
+		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		{
+			return Convert.ToUInt16(this);
+		}
+
+		uint IConvertible.ToUInt32(IFormatProvider provider)
+		{
+			return Convert.ToUInt32(this);
+		}
+
+		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		{
+			return Convert.ToUInt64(this);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void GetDataTablePointers(out byte* category_data, out byte* numeric_data, out double* numeric_data_values, out ushort* to_lower_data_low, out ushort* to_lower_data_high, out ushort* to_upper_data_low, out ushort* to_upper_data_high);
 
 		public int CompareTo(object value)
 		{
@@ -46,29 +104,319 @@ namespace System
 			}
 			if (!(value is char))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Char."));
+				throw new ArgumentException(Locale.GetText("Value is not a System.Char"));
 			}
-			return (int)(this - (char)value);
+			char c = (char)value;
+			if (this == c)
+			{
+				return 0;
+			}
+			if (this > c)
+			{
+				return 1;
+			}
+			return -1;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is char && (char)obj == this;
 		}
 
 		public int CompareTo(char value)
 		{
-			return (int)(this - value);
+			if (this == value)
+			{
+				return 0;
+			}
+			if (this > value)
+			{
+				return 1;
+			}
+			return -1;
 		}
 
-		public override string ToString()
+		public static string ConvertFromUtf32(int utf32)
 		{
-			return char.ToString(this);
+			if (utf32 < 0 || utf32 > 1114111)
+			{
+				throw new ArgumentOutOfRangeException("utf32", "The argument must be from 0 to 0x10FFFF.");
+			}
+			if (55296 <= utf32 && utf32 <= 57343)
+			{
+				throw new ArgumentOutOfRangeException("utf32", "The argument must not be in surrogate pair range.");
+			}
+			if (utf32 < 65536)
+			{
+				return new string((char)utf32, 1);
+			}
+			utf32 -= 65536;
+			return new string(new char[]
+			{
+				(char)((utf32 >> 10) + 55296),
+				(char)(utf32 % 1024 + 56320)
+			});
 		}
 
-		public string ToString(IFormatProvider provider)
+		public static int ConvertToUtf32(char highSurrogate, char lowSurrogate)
 		{
-			return char.ToString(this);
+			if (highSurrogate < '\ud800' || '\udbff' < highSurrogate)
+			{
+				throw new ArgumentOutOfRangeException("highSurrogate");
+			}
+			if (lowSurrogate < '\udc00' || '\udfff' < lowSurrogate)
+			{
+				throw new ArgumentOutOfRangeException("lowSurrogate");
+			}
+			return 65536 + (int)((int)(highSurrogate - '\ud800') << 10) + (int)(lowSurrogate - '\udc00');
 		}
 
-		public static string ToString(char c)
+		public static int ConvertToUtf32(string s, int index)
 		{
-			return new string(c, 1);
+			char.CheckParameter(s, index);
+			if (!char.IsSurrogate(s[index]))
+			{
+				return (int)s[index];
+			}
+			if (!char.IsHighSurrogate(s[index]) || index == s.Length - 1 || !char.IsLowSurrogate(s[index + 1]))
+			{
+				throw new ArgumentException(string.Format("The string contains invalid surrogate pair character at {0}", index));
+			}
+			return char.ConvertToUtf32(s[index], s[index + 1]);
+		}
+
+		public bool Equals(char obj)
+		{
+			return this == obj;
+		}
+
+		public static bool IsSurrogatePair(char highSurrogate, char lowSurrogate)
+		{
+			return '\ud800' <= highSurrogate && highSurrogate <= '\udbff' && '\udc00' <= lowSurrogate && lowSurrogate <= '\udfff';
+		}
+
+		public static bool IsSurrogatePair(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return index + 1 < s.Length && char.IsSurrogatePair(s[index], s[index + 1]);
+		}
+
+		public override int GetHashCode()
+		{
+			return (int)this;
+		}
+
+		public unsafe static double GetNumericValue(char c)
+		{
+			if (c <= '㊉')
+			{
+				return char.numeric_data_values[char.numeric_data[c]];
+			}
+			if (c >= '０' && c <= '９')
+			{
+				return (double)(c - '０');
+			}
+			return -1.0;
+		}
+
+		public static double GetNumericValue(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.GetNumericValue(s[index]);
+		}
+
+		public unsafe static UnicodeCategory GetUnicodeCategory(char c)
+		{
+			return (UnicodeCategory)char.category_data[c];
+		}
+
+		public static UnicodeCategory GetUnicodeCategory(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.GetUnicodeCategory(s[index]);
+		}
+
+		public unsafe static bool IsControl(char c)
+		{
+			return char.category_data[c] == 14;
+		}
+
+		public static bool IsControl(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsControl(s[index]);
+		}
+
+		public unsafe static bool IsDigit(char c)
+		{
+			return char.category_data[c] == 8;
+		}
+
+		public static bool IsDigit(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsDigit(s[index]);
+		}
+
+		public static bool IsHighSurrogate(char c)
+		{
+			return c >= '\ud800' && c <= '\udbff';
+		}
+
+		public static bool IsHighSurrogate(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsHighSurrogate(s[index]);
+		}
+
+		public unsafe static bool IsLetter(char c)
+		{
+			return char.category_data[c] <= 4;
+		}
+
+		public static bool IsLetter(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsLetter(s[index]);
+		}
+
+		public unsafe static bool IsLetterOrDigit(char c)
+		{
+			int num = (int)char.category_data[c];
+			return num <= 4 || num == 8;
+		}
+
+		public static bool IsLetterOrDigit(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsLetterOrDigit(s[index]);
+		}
+
+		public unsafe static bool IsLower(char c)
+		{
+			return char.category_data[c] == 1;
+		}
+
+		public static bool IsLower(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsLower(s[index]);
+		}
+
+		public static bool IsLowSurrogate(char c)
+		{
+			return c >= '\udc00' && c <= '\udfff';
+		}
+
+		public static bool IsLowSurrogate(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsLowSurrogate(s[index]);
+		}
+
+		public unsafe static bool IsNumber(char c)
+		{
+			int num = (int)char.category_data[c];
+			return num >= 8 && num <= 10;
+		}
+
+		public static bool IsNumber(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsNumber(s[index]);
+		}
+
+		public unsafe static bool IsPunctuation(char c)
+		{
+			int num = (int)char.category_data[c];
+			return num >= 18 && num <= 24;
+		}
+
+		public static bool IsPunctuation(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsPunctuation(s[index]);
+		}
+
+		public unsafe static bool IsSeparator(char c)
+		{
+			int num = (int)char.category_data[c];
+			return num >= 11 && num <= 13;
+		}
+
+		public static bool IsSeparator(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsSeparator(s[index]);
+		}
+
+		public unsafe static bool IsSurrogate(char c)
+		{
+			return char.category_data[c] == 16;
+		}
+
+		public static bool IsSurrogate(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsSurrogate(s[index]);
+		}
+
+		public unsafe static bool IsSymbol(char c)
+		{
+			int num = (int)char.category_data[c];
+			return num >= 25 && num <= 28;
+		}
+
+		public static bool IsSymbol(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsSymbol(s[index]);
+		}
+
+		public unsafe static bool IsUpper(char c)
+		{
+			return char.category_data[c] == 0;
+		}
+
+		public static bool IsUpper(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsUpper(s[index]);
+		}
+
+		public unsafe static bool IsWhiteSpace(char c)
+		{
+			int num = (int)char.category_data[c];
+			return num > 10 && (num <= 13 || (c >= '\t' && c <= '\r') || c == '\u0085' || c == '\u205f');
+		}
+
+		public static bool IsWhiteSpace(string s, int index)
+		{
+			char.CheckParameter(s, index);
+			return char.IsWhiteSpace(s[index]);
+		}
+
+		private static void CheckParameter(string s, int index)
+		{
+			if (s == null)
+			{
+				throw new ArgumentNullException("s");
+			}
+			if (index < 0 || index >= s.Length)
+			{
+				throw new ArgumentOutOfRangeException(Locale.GetText("The value of index is less than zero, or greater than or equal to the length of s."));
+			}
+		}
+
+		public static bool TryParse(string s, out char result)
+		{
+			if (s == null || s.Length != 1)
+			{
+				result = '\0';
+				return false;
+			}
+			result = s[0];
+			return true;
 		}
 
 		public static char Parse(string s)
@@ -79,139 +427,27 @@ namespace System
 			}
 			if (s.Length != 1)
 			{
-				throw new FormatException(Environment.GetResourceString("String must be exactly one character long."));
+				throw new FormatException(Locale.GetText("s contains more than one character."));
 			}
 			return s[0];
 		}
 
-		public static bool TryParse(string s, out char result)
+		public static char ToLower(char c)
 		{
-			result = '\0';
-			if (s == null)
+			return CultureInfo.CurrentCulture.TextInfo.ToLower(c);
+		}
+
+		public unsafe static char ToLowerInvariant(char c)
+		{
+			if (c <= 'Ⓩ')
 			{
-				return false;
+				return (char)char.to_lower_data_low[c];
 			}
-			if (s.Length != 1)
+			if (c >= 'Ａ')
 			{
-				return false;
+				return (char)char.to_lower_data_high[c - 'Ａ'];
 			}
-			result = s[0];
-			return true;
-		}
-
-		public static bool IsDigit(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return c >= '0' && c <= '9';
-			}
-			return CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.DecimalDigitNumber;
-		}
-
-		internal static bool CheckLetter(UnicodeCategory uc)
-		{
-			return uc <= UnicodeCategory.OtherLetter;
-		}
-
-		public static bool IsLetter(char c)
-		{
-			if (!char.IsLatin1(c))
-			{
-				return char.CheckLetter(CharUnicodeInfo.GetUnicodeCategory(c));
-			}
-			if (char.IsAscii(c))
-			{
-				c |= ' ';
-				return c >= 'a' && c <= 'z';
-			}
-			return char.CheckLetter(char.GetLatin1UnicodeCategory(c));
-		}
-
-		private static bool IsWhiteSpaceLatin1(char c)
-		{
-			return c == ' ' || (c >= '\t' && c <= '\r') || c == '\u00a0' || c == '\u0085';
-		}
-
-		public static bool IsWhiteSpace(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return char.IsWhiteSpaceLatin1(c);
-			}
-			return CharUnicodeInfo.IsWhiteSpace(c);
-		}
-
-		public static bool IsUpper(char c)
-		{
-			if (!char.IsLatin1(c))
-			{
-				return CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.UppercaseLetter;
-			}
-			if (char.IsAscii(c))
-			{
-				return c >= 'A' && c <= 'Z';
-			}
-			return char.GetLatin1UnicodeCategory(c) == UnicodeCategory.UppercaseLetter;
-		}
-
-		public static bool IsLower(char c)
-		{
-			if (!char.IsLatin1(c))
-			{
-				return CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.LowercaseLetter;
-			}
-			if (char.IsAscii(c))
-			{
-				return c >= 'a' && c <= 'z';
-			}
-			return char.GetLatin1UnicodeCategory(c) == UnicodeCategory.LowercaseLetter;
-		}
-
-		internal static bool CheckPunctuation(UnicodeCategory uc)
-		{
-			return uc - UnicodeCategory.ConnectorPunctuation <= 6;
-		}
-
-		public static bool IsPunctuation(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return char.CheckPunctuation(char.GetLatin1UnicodeCategory(c));
-			}
-			return char.CheckPunctuation(CharUnicodeInfo.GetUnicodeCategory(c));
-		}
-
-		internal static bool CheckLetterOrDigit(UnicodeCategory uc)
-		{
-			return uc <= UnicodeCategory.OtherLetter || uc == UnicodeCategory.DecimalDigitNumber;
-		}
-
-		public static bool IsLetterOrDigit(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return char.CheckLetterOrDigit(char.GetLatin1UnicodeCategory(c));
-			}
-			return char.CheckLetterOrDigit(CharUnicodeInfo.GetUnicodeCategory(c));
-		}
-
-		public static char ToUpper(char c, CultureInfo culture)
-		{
-			if (culture == null)
-			{
-				throw new ArgumentNullException("culture");
-			}
-			return culture.TextInfo.ToUpper(c);
-		}
-
-		public static char ToUpper(char c)
-		{
-			return char.ToUpper(c, CultureInfo.CurrentCulture);
-		}
-
-		public static char ToUpperInvariant(char c)
-		{
-			return char.ToUpper(c, CultureInfo.InvariantCulture);
+			return c;
 		}
 
 		public static char ToLower(char c, CultureInfo culture)
@@ -220,17 +456,57 @@ namespace System
 			{
 				throw new ArgumentNullException("culture");
 			}
+			if (culture.LCID == 127)
+			{
+				return char.ToLowerInvariant(c);
+			}
 			return culture.TextInfo.ToLower(c);
 		}
 
-		public static char ToLower(char c)
+		public static char ToUpper(char c)
 		{
-			return char.ToLower(c, CultureInfo.CurrentCulture);
+			return CultureInfo.CurrentCulture.TextInfo.ToUpper(c);
 		}
 
-		public static char ToLowerInvariant(char c)
+		public unsafe static char ToUpperInvariant(char c)
 		{
-			return char.ToLower(c, CultureInfo.InvariantCulture);
+			if (c <= 'ⓩ')
+			{
+				return (char)char.to_upper_data_low[c];
+			}
+			if (c >= 'Ａ')
+			{
+				return (char)char.to_upper_data_high[c - 'Ａ'];
+			}
+			return c;
+		}
+
+		public static char ToUpper(char c, CultureInfo culture)
+		{
+			if (culture == null)
+			{
+				throw new ArgumentNullException("culture");
+			}
+			if (culture.LCID == 127)
+			{
+				return char.ToUpperInvariant(c);
+			}
+			return culture.TextInfo.ToUpper(c);
+		}
+
+		public override string ToString()
+		{
+			return new string(this, 1);
+		}
+
+		public static string ToString(char c)
+		{
+			return new string(c, 1);
+		}
+
+		public string ToString(IFormatProvider provider)
+		{
+			return new string(this, 1);
 		}
 
 		public TypeCode GetTypeCode()
@@ -238,576 +514,24 @@ namespace System
 			return TypeCode.Char;
 		}
 
-		bool IConvertible.ToBoolean(IFormatProvider provider)
-		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Boolean" }));
-		}
-
-		char IConvertible.ToChar(IFormatProvider provider)
-		{
-			return this;
-		}
-
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
-		{
-			return Convert.ToSByte(this);
-		}
-
-		byte IConvertible.ToByte(IFormatProvider provider)
-		{
-			return Convert.ToByte(this);
-		}
-
-		short IConvertible.ToInt16(IFormatProvider provider)
-		{
-			return Convert.ToInt16(this);
-		}
-
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
-		{
-			return Convert.ToUInt16(this);
-		}
-
-		int IConvertible.ToInt32(IFormatProvider provider)
-		{
-			return Convert.ToInt32(this);
-		}
-
-		uint IConvertible.ToUInt32(IFormatProvider provider)
-		{
-			return Convert.ToUInt32(this);
-		}
-
-		long IConvertible.ToInt64(IFormatProvider provider)
-		{
-			return Convert.ToInt64(this);
-		}
-
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
-		{
-			return Convert.ToUInt64(this);
-		}
-
-		float IConvertible.ToSingle(IFormatProvider provider)
-		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Single" }));
-		}
-
-		double IConvertible.ToDouble(IFormatProvider provider)
-		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Double" }));
-		}
-
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
-		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "Decimal" }));
-		}
-
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
-		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Char", "DateTime" }));
-		}
-
-		object IConvertible.ToType(Type type, IFormatProvider provider)
-		{
-			return Convert.DefaultToType(this, type, provider);
-		}
-
-		public static bool IsControl(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return char.GetLatin1UnicodeCategory(c) == UnicodeCategory.Control;
-			}
-			return CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.Control;
-		}
-
-		public static bool IsControl(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (char.IsLatin1(c))
-			{
-				return char.GetLatin1UnicodeCategory(c) == UnicodeCategory.Control;
-			}
-			return CharUnicodeInfo.GetUnicodeCategory(s, index) == UnicodeCategory.Control;
-		}
-
-		public static bool IsDigit(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (char.IsLatin1(c))
-			{
-				return c >= '0' && c <= '9';
-			}
-			return CharUnicodeInfo.GetUnicodeCategory(s, index) == UnicodeCategory.DecimalDigitNumber;
-		}
-
-		public static bool IsLetter(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (!char.IsLatin1(c))
-			{
-				return char.CheckLetter(CharUnicodeInfo.GetUnicodeCategory(s, index));
-			}
-			if (char.IsAscii(c))
-			{
-				c |= ' ';
-				return c >= 'a' && c <= 'z';
-			}
-			return char.CheckLetter(char.GetLatin1UnicodeCategory(c));
-		}
-
-		public static bool IsLetterOrDigit(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (char.IsLatin1(c))
-			{
-				return char.CheckLetterOrDigit(char.GetLatin1UnicodeCategory(c));
-			}
-			return char.CheckLetterOrDigit(CharUnicodeInfo.GetUnicodeCategory(s, index));
-		}
-
-		public static bool IsLower(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (!char.IsLatin1(c))
-			{
-				return CharUnicodeInfo.GetUnicodeCategory(s, index) == UnicodeCategory.LowercaseLetter;
-			}
-			if (char.IsAscii(c))
-			{
-				return c >= 'a' && c <= 'z';
-			}
-			return char.GetLatin1UnicodeCategory(c) == UnicodeCategory.LowercaseLetter;
-		}
-
-		internal static bool CheckNumber(UnicodeCategory uc)
-		{
-			return uc - UnicodeCategory.DecimalDigitNumber <= 2;
-		}
-
-		public static bool IsNumber(char c)
-		{
-			if (!char.IsLatin1(c))
-			{
-				return char.CheckNumber(CharUnicodeInfo.GetUnicodeCategory(c));
-			}
-			if (char.IsAscii(c))
-			{
-				return c >= '0' && c <= '9';
-			}
-			return char.CheckNumber(char.GetLatin1UnicodeCategory(c));
-		}
-
-		public static bool IsNumber(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (!char.IsLatin1(c))
-			{
-				return char.CheckNumber(CharUnicodeInfo.GetUnicodeCategory(s, index));
-			}
-			if (char.IsAscii(c))
-			{
-				return c >= '0' && c <= '9';
-			}
-			return char.CheckNumber(char.GetLatin1UnicodeCategory(c));
-		}
-
-		public static bool IsPunctuation(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (char.IsLatin1(c))
-			{
-				return char.CheckPunctuation(char.GetLatin1UnicodeCategory(c));
-			}
-			return char.CheckPunctuation(CharUnicodeInfo.GetUnicodeCategory(s, index));
-		}
-
-		internal static bool CheckSeparator(UnicodeCategory uc)
-		{
-			return uc - UnicodeCategory.SpaceSeparator <= 2;
-		}
-
-		private static bool IsSeparatorLatin1(char c)
-		{
-			return c == ' ' || c == '\u00a0';
-		}
-
-		public static bool IsSeparator(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return char.IsSeparatorLatin1(c);
-			}
-			return char.CheckSeparator(CharUnicodeInfo.GetUnicodeCategory(c));
-		}
-
-		public static bool IsSeparator(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (char.IsLatin1(c))
-			{
-				return char.IsSeparatorLatin1(c);
-			}
-			return char.CheckSeparator(CharUnicodeInfo.GetUnicodeCategory(s, index));
-		}
-
-		public static bool IsSurrogate(char c)
-		{
-			return c >= '\ud800' && c <= '\udfff';
-		}
-
-		public static bool IsSurrogate(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			return char.IsSurrogate(s[index]);
-		}
-
-		internal static bool CheckSymbol(UnicodeCategory uc)
-		{
-			return uc - UnicodeCategory.MathSymbol <= 3;
-		}
-
-		public static bool IsSymbol(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return char.CheckSymbol(char.GetLatin1UnicodeCategory(c));
-			}
-			return char.CheckSymbol(CharUnicodeInfo.GetUnicodeCategory(c));
-		}
-
-		public static bool IsSymbol(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			if (char.IsLatin1(s[index]))
-			{
-				return char.CheckSymbol(char.GetLatin1UnicodeCategory(s[index]));
-			}
-			return char.CheckSymbol(CharUnicodeInfo.GetUnicodeCategory(s, index));
-		}
-
-		public static bool IsUpper(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			char c = s[index];
-			if (!char.IsLatin1(c))
-			{
-				return CharUnicodeInfo.GetUnicodeCategory(s, index) == UnicodeCategory.UppercaseLetter;
-			}
-			if (char.IsAscii(c))
-			{
-				return c >= 'A' && c <= 'Z';
-			}
-			return char.GetLatin1UnicodeCategory(c) == UnicodeCategory.UppercaseLetter;
-		}
-
-		public static bool IsWhiteSpace(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			if (char.IsLatin1(s[index]))
-			{
-				return char.IsWhiteSpaceLatin1(s[index]);
-			}
-			return CharUnicodeInfo.IsWhiteSpace(s, index);
-		}
-
-		public static UnicodeCategory GetUnicodeCategory(char c)
-		{
-			if (char.IsLatin1(c))
-			{
-				return char.GetLatin1UnicodeCategory(c);
-			}
-			return CharUnicodeInfo.InternalGetUnicodeCategory((int)c);
-		}
-
-		public static UnicodeCategory GetUnicodeCategory(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			if (char.IsLatin1(s[index]))
-			{
-				return char.GetLatin1UnicodeCategory(s[index]);
-			}
-			return CharUnicodeInfo.InternalGetUnicodeCategory(s, index);
-		}
-
-		public static double GetNumericValue(char c)
-		{
-			return CharUnicodeInfo.GetNumericValue(c);
-		}
-
-		public static double GetNumericValue(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			return CharUnicodeInfo.GetNumericValue(s, index);
-		}
-
-		public static bool IsHighSurrogate(char c)
-		{
-			return c >= '\ud800' && c <= '\udbff';
-		}
-
-		public static bool IsHighSurrogate(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index < 0 || index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			return char.IsHighSurrogate(s[index]);
-		}
-
-		public static bool IsLowSurrogate(char c)
-		{
-			return c >= '\udc00' && c <= '\udfff';
-		}
-
-		public static bool IsLowSurrogate(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index < 0 || index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			return char.IsLowSurrogate(s[index]);
-		}
-
-		public static bool IsSurrogatePair(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index < 0 || index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index");
-			}
-			return index + 1 < s.Length && char.IsSurrogatePair(s[index], s[index + 1]);
-		}
-
-		public static bool IsSurrogatePair(char highSurrogate, char lowSurrogate)
-		{
-			return highSurrogate >= '\ud800' && highSurrogate <= '\udbff' && lowSurrogate >= '\udc00' && lowSurrogate <= '\udfff';
-		}
-
-		public static string ConvertFromUtf32(int utf32)
-		{
-			if (utf32 < 0 || utf32 > 1114111 || (utf32 >= 55296 && utf32 <= 57343))
-			{
-				throw new ArgumentOutOfRangeException("utf32", Environment.GetResourceString("A valid UTF32 value is between 0x000000 and 0x10ffff, inclusive, and should not include surrogate codepoint values (0x00d800 ~ 0x00dfff)."));
-			}
-			if (utf32 < 65536)
-			{
-				return char.ToString((char)utf32);
-			}
-			utf32 -= 65536;
-			return new string(new char[]
-			{
-				(char)(utf32 / 1024 + 55296),
-				(char)(utf32 % 1024 + 56320)
-			});
-		}
-
-		public static int ConvertToUtf32(char highSurrogate, char lowSurrogate)
-		{
-			if (!char.IsHighSurrogate(highSurrogate))
-			{
-				throw new ArgumentOutOfRangeException("highSurrogate", Environment.GetResourceString("A valid high surrogate character is between 0xd800 and 0xdbff, inclusive."));
-			}
-			if (!char.IsLowSurrogate(lowSurrogate))
-			{
-				throw new ArgumentOutOfRangeException("lowSurrogate", Environment.GetResourceString("A valid low surrogate character is between 0xdc00 and 0xdfff, inclusive."));
-			}
-			return (int)((highSurrogate - '\ud800') * 'Ѐ' + (lowSurrogate - '\udc00')) + 65536;
-		}
-
-		public static int ConvertToUtf32(string s, int index)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			if (index < 0 || index >= s.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			int num = (int)(s[index] - '\ud800');
-			if (num < 0 || num > 2047)
-			{
-				return (int)s[index];
-			}
-			if (num > 1023)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Found a low surrogate char without a preceding high surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", new object[] { index }), "s");
-			}
-			if (index >= s.Length - 1)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Found a high surrogate char without a following low surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", new object[] { index }), "s");
-			}
-			int num2 = (int)(s[index + 1] - '\udc00');
-			if (num2 >= 0 && num2 <= 1023)
-			{
-				return num * 1024 + num2 + 65536;
-			}
-			throw new ArgumentException(Environment.GetResourceString("Found a high surrogate char without a following low surrogate at index: {0}. The input may not be in this encoding, or may not contain valid Unicode (UTF-16) characters.", new object[] { index }), "s");
-		}
-
-		internal char m_value;
-
 		public const char MaxValue = '\uffff';
 
 		public const char MinValue = '\0';
 
-		private static readonly byte[] categoryForLatin1 = new byte[]
-		{
-			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-			14, 14, 11, 24, 24, 24, 26, 24, 24, 24,
-			20, 21, 24, 25, 24, 19, 24, 24, 8, 8,
-			8, 8, 8, 8, 8, 8, 8, 8, 24, 24,
-			25, 25, 25, 24, 24, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 20, 24, 21, 27, 18, 27, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 20, 25, 21, 25, 14, 14, 14,
-			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-			14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-			11, 24, 26, 26, 26, 26, 28, 28, 27, 28,
-			1, 22, 25, 19, 28, 27, 28, 25, 10, 10,
-			27, 1, 28, 24, 27, 10, 1, 23, 10, 10,
-			10, 24, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 25, 0, 0, 0, 0,
-			0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			1, 1, 1, 1, 1, 1, 1, 25, 1, 1,
-			1, 1, 1, 1, 1, 1
-		};
+		internal char m_value;
 
-		internal const int UNICODE_PLANE00_END = 65535;
+		private unsafe static readonly byte* category_data;
 
-		internal const int UNICODE_PLANE01_START = 65536;
+		private unsafe static readonly byte* numeric_data;
 
-		internal const int UNICODE_PLANE16_END = 1114111;
+		private unsafe static readonly double* numeric_data_values;
 
-		internal const int HIGH_SURROGATE_START = 55296;
+		private unsafe static readonly ushort* to_lower_data_low;
 
-		internal const int LOW_SURROGATE_END = 57343;
+		private unsafe static readonly ushort* to_lower_data_high;
+
+		private unsafe static readonly ushort* to_upper_data_low;
+
+		private unsafe static readonly ushort* to_upper_data_high;
 	}
 }

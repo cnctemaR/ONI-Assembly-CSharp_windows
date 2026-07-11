@@ -4,7 +4,7 @@ namespace System.Runtime.InteropServices.ComTypes
 {
 	[Flags]
 	[Serializable]
-	public enum IDLFLAG : short
+	public enum IDLFLAG
 	{
 		IDLFLAG_NONE = 0,
 		IDLFLAG_FIN = 1,

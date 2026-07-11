@@ -5,11 +5,6 @@ namespace System.Net.Configuration
 {
 	public sealed class AuthenticationModuleElement : ConfigurationElement
 	{
-		static AuthenticationModuleElement()
-		{
-			AuthenticationModuleElement.properties.Add(AuthenticationModuleElement.typeProp);
-		}
-
 		public AuthenticationModuleElement()
 		{
 		}
@@ -17,6 +12,11 @@ namespace System.Net.Configuration
 		public AuthenticationModuleElement(string typeName)
 		{
 			this.Type = typeName;
+		}
+
+		static AuthenticationModuleElement()
+		{
+			AuthenticationModuleElement.properties.Add(AuthenticationModuleElement.typeProp);
 		}
 
 		protected override ConfigurationPropertyCollection Properties

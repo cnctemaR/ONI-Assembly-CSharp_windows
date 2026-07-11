@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Xml.Schema;
 
 namespace System.Xml.Serialization
@@ -26,27 +27,15 @@ namespace System.Xml.Serialization
 			this.type = type;
 		}
 
-		public Type Type
-		{
-			get
-			{
-				return this.type;
-			}
-			set
-			{
-				this.type = value;
-			}
-		}
-
 		public string AttributeName
 		{
 			get
 			{
-				if (this.attributeName != null)
+				if (this.attributeName == null)
 				{
-					return this.attributeName;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.attributeName;
 			}
 			set
 			{
@@ -54,27 +43,15 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public string Namespace
-		{
-			get
-			{
-				return this.ns;
-			}
-			set
-			{
-				this.ns = value;
-			}
-		}
-
 		public string DataType
 		{
 			get
 			{
-				if (this.dataType != null)
+				if (this.dataType == null)
 				{
-					return this.dataType;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.dataType;
 			}
 			set
 			{
@@ -94,14 +71,49 @@ namespace System.Xml.Serialization
 			}
 		}
 
+		public string Namespace
+		{
+			get
+			{
+				return this.ns;
+			}
+			set
+			{
+				this.ns = value;
+			}
+		}
+
+		public Type Type
+		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.type = value;
+			}
+		}
+
+		internal void AddKeyHash(StringBuilder sb)
+		{
+			sb.Append("XAA ");
+			KeyHelper.AddField(sb, 1, this.ns);
+			KeyHelper.AddField(sb, 2, this.attributeName);
+			KeyHelper.AddField(sb, 3, this.form.ToString(), XmlSchemaForm.None.ToString());
+			KeyHelper.AddField(sb, 4, this.dataType);
+			KeyHelper.AddField(sb, 5, this.type);
+			sb.Append('|');
+		}
+
 		private string attributeName;
-
-		private Type type;
-
-		private string ns;
 
 		private string dataType;
 
+		private Type type;
+
 		private XmlSchemaForm form;
+
+		private string ns;
 	}
 }

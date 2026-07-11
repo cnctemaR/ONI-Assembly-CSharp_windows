@@ -36,7 +36,11 @@ namespace YamlDotNet.Core.Events
 
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "{0} Comment [{1}]", (!this.IsInline) ? "Block" : "Inline", this.Value);
+			return string.Format(CultureInfo.InvariantCulture, "{0} Comment [{1}]", new object[]
+			{
+				(!this.IsInline) ? "Block" : "Inline",
+				this.Value
+			});
 		}
 	}
 }

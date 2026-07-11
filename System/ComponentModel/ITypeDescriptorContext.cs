@@ -12,8 +12,8 @@ namespace System.ComponentModel
 
 		PropertyDescriptor PropertyDescriptor { get; }
 
-		bool OnComponentChanging();
-
 		void OnComponentChanged();
+
+		bool OnComponentChanging();
 	}
 }

@@ -6,7 +6,7 @@ namespace System.Transactions
 	[Serializable]
 	public class TransactionInDoubtException : TransactionException
 	{
-		public TransactionInDoubtException()
+		protected TransactionInDoubtException()
 		{
 		}
 

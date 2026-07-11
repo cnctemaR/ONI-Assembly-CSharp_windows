@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices
 {
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Interface, AllowMultiple = true)]
 	[ComVisible(false)]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method | AttributeTargets.Interface, AllowMultiple = true)]
 	public sealed class SecurityRoleAttribute : Attribute
 	{
 		public SecurityRoleAttribute(string role)

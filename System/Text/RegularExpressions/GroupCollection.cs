@@ -6,25 +6,17 @@ namespace System.Text.RegularExpressions
 	[Serializable]
 	public class GroupCollection : ICollection, IEnumerable
 	{
-		internal GroupCollection(Match match, Hashtable caps)
+		internal GroupCollection(int n, int gap)
 		{
-			this._match = match;
-			this._captureMap = caps;
+			this.list = new Group[n];
+			this.gap = gap;
 		}
 
-		public object SyncRoot
+		public int Count
 		{
 			get
 			{
-				return this._match;
-			}
-		}
-
-		public bool IsSynchronized
-		{
-			get
-			{
-				return false;
+				return this.list.Length;
 			}
 		}
 
@@ -36,96 +28,69 @@ namespace System.Text.RegularExpressions
 			}
 		}
 
-		public int Count
+		public bool IsSynchronized
 		{
 			get
 			{
-				return this._match._matchcount.Length;
+				return false;
 			}
 		}
 
-		public Group this[int groupnum]
+		public Group this[int i]
 		{
 			get
 			{
-				return this.GetGroup(groupnum);
+				if (i >= this.gap)
+				{
+					Match match = (Match)this.list[0];
+					i = ((match != Match.Empty) ? match.Regex.GetGroupIndex(i) : (-1));
+				}
+				return (i >= 0) ? this.list[i] : Group.Fail;
 			}
 		}
 
-		public Group this[string groupname]
+		internal void SetValue(Group g, int i)
+		{
+			this.list[i] = g;
+		}
+
+		public Group this[string groupName]
 		{
 			get
 			{
-				if (this._match._regex == null)
+				Match match = (Match)this.list[0];
+				if (match != Match.Empty)
 				{
-					return Group._emptygroup;
+					int num = match.Regex.GroupNumberFromName(groupName);
+					if (num != -1)
+					{
+						return this[num];
+					}
 				}
-				return this.GetGroup(this._match._regex.GroupNumberFromName(groupname));
+				return Group.Fail;
 			}
 		}
 
-		internal Group GetGroup(int groupnum)
+		public object SyncRoot
 		{
-			if (this._captureMap != null)
+			get
 			{
-				object obj = this._captureMap[groupnum];
-				if (obj == null)
-				{
-					return Group._emptygroup;
-				}
-				return this.GetGroupImpl((int)obj);
-			}
-			else
-			{
-				if (groupnum >= this._match._matchcount.Length || groupnum < 0)
-				{
-					return Group._emptygroup;
-				}
-				return this.GetGroupImpl(groupnum);
+				return this.list;
 			}
 		}
 
-		internal Group GetGroupImpl(int groupnum)
+		public void CopyTo(Array array, int index)
 		{
-			if (groupnum == 0)
-			{
-				return this._match;
-			}
-			if (this._groups == null)
-			{
-				this._groups = new Group[this._match._matchcount.Length - 1];
-				for (int i = 0; i < this._groups.Length; i++)
-				{
-					string text = this._match._regex.GroupNameFromNumber(i + 1);
-					this._groups[i] = new Group(this._match._text, this._match._matches[i + 1], this._match._matchcount[i + 1], text);
-				}
-			}
-			return this._groups[groupnum - 1];
-		}
-
-		public void CopyTo(Array array, int arrayIndex)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			int num = arrayIndex;
-			for (int i = 0; i < this.Count; i++)
-			{
-				array.SetValue(this[i], num);
-				num++;
-			}
+			this.list.CopyTo(array, index);
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return new GroupEnumerator(this);
+			return this.list.GetEnumerator();
 		}
 
-		internal Match _match;
+		private Group[] list;
 
-		internal Hashtable _captureMap;
-
-		internal Group[] _groups;
+		private int gap;
 	}
 }

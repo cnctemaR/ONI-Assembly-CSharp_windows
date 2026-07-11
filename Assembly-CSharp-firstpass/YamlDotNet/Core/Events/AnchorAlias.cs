@@ -42,7 +42,7 @@ namespace YamlDotNet.Core.Events
 
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "Alias [value = {0}]", this.value);
+			return string.Format(CultureInfo.InvariantCulture, "Alias [value = {0}]", new object[] { this.value });
 		}
 
 		public override void Accept(IParsingEventVisitor visitor)

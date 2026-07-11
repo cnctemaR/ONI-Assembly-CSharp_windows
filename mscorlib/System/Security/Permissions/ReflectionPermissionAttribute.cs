@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class ReflectionPermissionAttribute : CodeAccessSecurityAttribute
 	{
@@ -48,7 +48,6 @@ namespace System.Security.Permissions
 			}
 		}
 
-		[Obsolete]
 		public bool ReflectionEmit
 		{
 			get
@@ -80,9 +79,11 @@ namespace System.Security.Permissions
 				if (value)
 				{
 					this.flags |= ReflectionPermissionFlag.RestrictedMemberAccess;
-					return;
 				}
-				this.flags -= 8;
+				else
+				{
+					this.flags -= 8;
+				}
 			}
 		}
 

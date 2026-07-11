@@ -23,16 +23,17 @@ namespace System.Security.Permissions
 			{
 				return null;
 			}
-			byte[] array = new byte[s.Length / 2];
+			int num = s.Length / 2;
+			byte[] array = new byte[num];
 			int i = 0;
-			int num = 0;
+			int num2 = 0;
 			while (i < s.Length)
 			{
 				byte b = StrongNamePublicKeyBlob.CharToByte(s[i]);
 				byte b2 = StrongNamePublicKeyBlob.CharToByte(s[i + 1]);
-				array[num] = Convert.ToByte((int)(b * 16 + b2));
+				array[num2] = Convert.ToByte((int)(b * 16 + b2));
 				i += 2;
-				num++;
+				num2++;
 			}
 			return new StrongNamePublicKeyBlob(array);
 		}

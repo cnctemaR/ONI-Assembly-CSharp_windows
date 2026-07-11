@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
 	internal class Win32UnicastIPAddressInformation : UnicastIPAddressInformation
 	{
-		public Win32UnicastIPAddressInformation(Win32_IP_ADAPTER_UNICAST_ADDRESS info)
+		public Win32UnicastIPAddressInformation(int ifIndex, Win32_IP_ADAPTER_UNICAST_ADDRESS info)
 		{
+			this.if_index = ifIndex;
 			this.info = info;
-			IPAddress ipaddress = info.Address.GetIPAddress();
-			if (ipaddress.AddressFamily == AddressFamily.InterNetwork)
-			{
-				this.ipv4Mask = Win32UnicastIPAddressInformation.PrefixLengthToSubnetMask(info.OnLinkPrefixLength, ipaddress.AddressFamily);
-			}
 		}
 
 		public override IPAddress Address
@@ -75,11 +71,26 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				if (this.Address.AddressFamily != AddressFamily.InterNetwork)
+				Win32_IP_ADAPTER_INFO adapterInfoByIndex = Win32NetworkInterface2.GetAdapterInfoByIndex(this.if_index);
+				if (adapterInfoByIndex == null)
 				{
-					return IPAddress.Any;
+					throw new Exception("huh? " + this.if_index);
 				}
-				return this.ipv4Mask;
+				if (this.Address == null)
+				{
+					return null;
+				}
+				string text = this.Address.ToString();
+				Win32_IP_ADDR_STRING win32_IP_ADDR_STRING = adapterInfoByIndex.IpAddressList;
+				while (!(win32_IP_ADDR_STRING.IpAddress == text))
+				{
+					if (win32_IP_ADDR_STRING.Next == IntPtr.Zero)
+					{
+						return null;
+					}
+					win32_IP_ADDR_STRING = (Win32_IP_ADDR_STRING)Marshal.PtrToStructure(win32_IP_ADDR_STRING.Next, typeof(Win32_IP_ADDR_STRING));
+				}
+				return IPAddress.Parse(win32_IP_ADDR_STRING.IpMask);
 			}
 		}
 
@@ -99,28 +110,8 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		private static IPAddress PrefixLengthToSubnetMask(byte prefixLength, AddressFamily family)
-		{
-			byte[] array;
-			if (family == AddressFamily.InterNetwork)
-			{
-				array = new byte[4];
-			}
-			else
-			{
-				array = new byte[16];
-			}
-			for (int i = 0; i < (int)prefixLength; i++)
-			{
-				byte[] array2 = array;
-				int num = i / 8;
-				array2[num] |= (byte)(128 >> i % 8);
-			}
-			return new IPAddress(array);
-		}
+		private int if_index;
 
 		private Win32_IP_ADAPTER_UNICAST_ADDRESS info;
-
-		private IPAddress ipv4Mask;
 	}
 }

@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Interface, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Interface, Inherited = false)]
 	public sealed class TypeLibImportClassAttribute : Attribute
 	{
 		public TypeLibImportClassAttribute(Type importClass)
 		{
-			this._importClassName = importClass.ToString();
+			this._importClass = importClass.ToString();
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this._importClassName;
+				return this._importClass;
 			}
 		}
 
-		internal string _importClassName;
+		private string _importClass;
 	}
 }

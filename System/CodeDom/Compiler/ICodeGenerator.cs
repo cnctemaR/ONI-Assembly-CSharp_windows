@@ -5,26 +5,26 @@ namespace System.CodeDom.Compiler
 {
 	public interface ICodeGenerator
 	{
-		bool IsValidIdentifier(string value);
-
-		void ValidateIdentifier(string value);
-
 		string CreateEscapedIdentifier(string value);
 
 		string CreateValidIdentifier(string value);
 
+		void GenerateCodeFromCompileUnit(CodeCompileUnit compileUnit, TextWriter output, CodeGeneratorOptions options);
+
+		void GenerateCodeFromExpression(CodeExpression expression, TextWriter output, CodeGeneratorOptions options);
+
+		void GenerateCodeFromNamespace(CodeNamespace ns, TextWriter output, CodeGeneratorOptions options);
+
+		void GenerateCodeFromStatement(CodeStatement statement, TextWriter output, CodeGeneratorOptions options);
+
+		void GenerateCodeFromType(CodeTypeDeclaration typeDeclaration, TextWriter output, CodeGeneratorOptions options);
+
 		string GetTypeOutput(CodeTypeReference type);
+
+		bool IsValidIdentifier(string value);
 
 		bool Supports(GeneratorSupport supports);
 
-		void GenerateCodeFromExpression(CodeExpression e, TextWriter w, CodeGeneratorOptions o);
-
-		void GenerateCodeFromStatement(CodeStatement e, TextWriter w, CodeGeneratorOptions o);
-
-		void GenerateCodeFromNamespace(CodeNamespace e, TextWriter w, CodeGeneratorOptions o);
-
-		void GenerateCodeFromCompileUnit(CodeCompileUnit e, TextWriter w, CodeGeneratorOptions o);
-
-		void GenerateCodeFromType(CodeTypeDeclaration e, TextWriter w, CodeGeneratorOptions o);
+		void ValidateIdentifier(string value);
 	}
 }

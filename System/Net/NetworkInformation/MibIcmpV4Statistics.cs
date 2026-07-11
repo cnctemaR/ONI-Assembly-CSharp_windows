@@ -6,18 +6,14 @@ namespace System.Net.NetworkInformation
 {
 	internal class MibIcmpV4Statistics : IcmpV4Statistics
 	{
-		public MibIcmpV4Statistics(StringDictionary dic)
+		public MibIcmpV4Statistics(global::System.Collections.Specialized.StringDictionary dic)
 		{
 			this.dic = dic;
 		}
 
 		private long Get(string name)
 		{
-			if (this.dic[name] == null)
-			{
-				return 0L;
-			}
-			return long.Parse(this.dic[name], NumberFormatInfo.InvariantInfo);
+			return (this.dic[name] == null) ? 0L : long.Parse(this.dic[name], NumberFormatInfo.InvariantInfo);
 		}
 
 		public override long AddressMaskRepliesReceived
@@ -228,6 +224,6 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		private StringDictionary dic;
+		private global::System.Collections.Specialized.StringDictionary dic;
 	}
 }

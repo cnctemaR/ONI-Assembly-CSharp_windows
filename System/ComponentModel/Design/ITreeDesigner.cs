@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.ComponentModel.Design
 {
-	public interface ITreeDesigner : IDesigner, IDisposable
+	public interface ITreeDesigner : IDisposable, IDesigner
 	{
 		ICollection Children { get; }
 

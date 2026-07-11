@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
+using Klei;
 using KSerialization;
 using UnityEngine;
 
@@ -109,6 +110,10 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 
 	private void DoAutoSave(int day)
 	{
+		if (GenericGameSettings.instance.disableAutosave)
+		{
+			return;
+		}
 		day++;
 		this.newDayMetric[GameClock.NewCycleKey] = day;
 		ThreadedHttps<KleiMetrics>.Instance.SendEvent(this.newDayMetric);

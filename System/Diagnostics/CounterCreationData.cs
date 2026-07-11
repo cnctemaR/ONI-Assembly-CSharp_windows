@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace System.Diagnostics
 {
-	[TypeConverter("System.Diagnostics.Design.CounterCreationDataConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.CounterCreationDataConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 	[Serializable]
 	public class CounterCreationData
 	{
@@ -18,8 +18,8 @@ namespace System.Diagnostics
 			this.CounterType = counterType;
 		}
 
-		[DefaultValue("")]
 		[MonitoringDescription("Description of this counter.")]
+		[global::System.ComponentModel.DefaultValue("")]
 		public string CounterHelp
 		{
 			get
@@ -36,9 +36,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue("")]
 		[MonitoringDescription("Name of this counter.")]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.DefaultValue("")]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string CounterName
 		{
 			get
@@ -51,7 +51,7 @@ namespace System.Diagnostics
 				{
 					throw new ArgumentNullException("value");
 				}
-				if (value == "")
+				if (value == string.Empty)
 				{
 					throw new ArgumentException("value");
 				}
@@ -59,8 +59,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue(typeof(PerformanceCounterType), "NumberOfItems32")]
 		[MonitoringDescription("Type of this counter.")]
+		[global::System.ComponentModel.DefaultValue(typeof(PerformanceCounterType), "NumberOfItems32")]
 		public PerformanceCounterType CounterType
 		{
 			get
@@ -71,7 +71,7 @@ namespace System.Diagnostics
 			{
 				if (!Enum.IsDefined(typeof(PerformanceCounterType), value))
 				{
-					throw new InvalidEnumArgumentException();
+					throw new global::System.ComponentModel.InvalidEnumArgumentException();
 				}
 				this.type = value;
 			}

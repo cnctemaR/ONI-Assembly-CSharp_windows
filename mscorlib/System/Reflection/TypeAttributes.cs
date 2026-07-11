@@ -29,17 +29,15 @@ namespace System.Reflection
 		SpecialName = 1024,
 		Import = 4096,
 		Serializable = 8192,
-		[ComVisible(false)]
-		WindowsRuntime = 16384,
 		StringFormatMask = 196608,
 		AnsiClass = 0,
 		UnicodeClass = 65536,
 		AutoClass = 131072,
-		CustomFormatClass = 196608,
-		CustomFormatMask = 12582912,
 		BeforeFieldInit = 1048576,
 		ReservedMask = 264192,
 		RTSpecialName = 2048,
-		HasSecurity = 262144
+		HasSecurity = 262144,
+		CustomFormatClass = 196608,
+		CustomFormatMask = 12582912
 	}
 }

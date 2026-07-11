@@ -2,51 +2,50 @@
 
 namespace System.Xml.Serialization
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface)]
 	public sealed class XmlSerializerAssemblyAttribute : Attribute
 	{
 		public XmlSerializerAssemblyAttribute()
-			: this(null, null)
 		{
 		}
 
 		public XmlSerializerAssemblyAttribute(string assemblyName)
-			: this(assemblyName, null)
 		{
+			this._assemblyName = assemblyName;
 		}
 
 		public XmlSerializerAssemblyAttribute(string assemblyName, string codeBase)
+			: this(assemblyName)
 		{
-			this.assemblyName = assemblyName;
-			this.codeBase = codeBase;
-		}
-
-		public string CodeBase
-		{
-			get
-			{
-				return this.codeBase;
-			}
-			set
-			{
-				this.codeBase = value;
-			}
+			this._codeBase = codeBase;
 		}
 
 		public string AssemblyName
 		{
 			get
 			{
-				return this.assemblyName;
+				return this._assemblyName;
 			}
 			set
 			{
-				this.assemblyName = value;
+				this._assemblyName = value;
 			}
 		}
 
-		private string assemblyName;
+		public string CodeBase
+		{
+			get
+			{
+				return this._codeBase;
+			}
+			set
+			{
+				this._codeBase = value;
+			}
+		}
 
-		private string codeBase;
+		private string _assemblyName;
+
+		private string _codeBase;
 	}
 }

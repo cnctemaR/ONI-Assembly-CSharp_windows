@@ -2,7 +2,7 @@
 
 namespace System.Runtime.CompilerServices
 {
-	[AttributeUsage(AttributeTargets.All, Inherited = true)]
+	[AttributeUsage(AttributeTargets.All)]
 	[Serializable]
 	public sealed class CompilerGeneratedAttribute : Attribute
 	{

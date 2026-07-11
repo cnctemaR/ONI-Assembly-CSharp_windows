@@ -2,216 +2,110 @@
 using System.Collections;
 using System.Globalization;
 using System.IO;
-using System.Security;
 using System.Security.Permissions;
 using System.Text;
 using System.Xml.Schema;
 using System.Xml.XPath;
+using Mono.Xml;
+using Mono.Xml.XPath;
 
 namespace System.Xml
 {
-	public class XmlDocument : XmlNode
+	public class XmlDocument : XmlNode, IHasXmlChildNode
 	{
 		public XmlDocument()
-			: this(new XmlImplementation())
-		{
-		}
-
-		public XmlDocument(XmlNameTable nt)
-			: this(new XmlImplementation(nt))
+			: this(null, null)
 		{
 		}
 
 		protected internal XmlDocument(XmlImplementation imp)
+			: this(imp, null)
 		{
-			this.implementation = imp;
-			this.domNameTable = new DomNameTable(this);
-			XmlNameTable nameTable = this.NameTable;
-			nameTable.Add(string.Empty);
-			this.strDocumentName = nameTable.Add("#document");
-			this.strDocumentFragmentName = nameTable.Add("#document-fragment");
-			this.strCommentName = nameTable.Add("#comment");
-			this.strTextName = nameTable.Add("#text");
-			this.strCDataSectionName = nameTable.Add("#cdata-section");
-			this.strEntityName = nameTable.Add("#entity");
-			this.strID = nameTable.Add("id");
-			this.strNonSignificantWhitespaceName = nameTable.Add("#whitespace");
-			this.strSignificantWhitespaceName = nameTable.Add("#significant-whitespace");
-			this.strXmlns = nameTable.Add("xmlns");
-			this.strXml = nameTable.Add("xml");
-			this.strSpace = nameTable.Add("space");
-			this.strLang = nameTable.Add("lang");
-			this.strReservedXmlns = nameTable.Add("http://www.w3.org/2000/xmlns/");
-			this.strReservedXml = nameTable.Add("http://www.w3.org/XML/1998/namespace");
-			this.strEmpty = nameTable.Add(string.Empty);
-			this.baseURI = string.Empty;
-			this.objLock = new object();
 		}
 
-		internal SchemaInfo DtdSchemaInfo
+		public XmlDocument(XmlNameTable nt)
+			: this(null, nt)
+		{
+		}
+
+		private XmlDocument(XmlImplementation impl, XmlNameTable nt)
+			: base(null)
+		{
+			if (impl == null)
+			{
+				this.implementation = new XmlImplementation();
+			}
+			else
+			{
+				this.implementation = impl;
+			}
+			this.nameTable = ((nt == null) ? this.implementation.InternalNameTable : nt);
+			this.nameCache = new XmlNameEntryCache(this.nameTable);
+			this.AddDefaultNameTableKeys();
+			this.resolver = new XmlUrlResolver();
+			Type type = base.GetType();
+			this.optimal_create_element = type.GetMethod("CreateElement", XmlDocument.optimal_create_types).DeclaringType == typeof(XmlDocument);
+			this.optimal_create_attribute = type.GetMethod("CreateAttribute", XmlDocument.optimal_create_types).DeclaringType == typeof(XmlDocument);
+		}
+
+		public event XmlNodeChangedEventHandler NodeChanged;
+
+		public event XmlNodeChangedEventHandler NodeChanging;
+
+		public event XmlNodeChangedEventHandler NodeInserted;
+
+		public event XmlNodeChangedEventHandler NodeInserting;
+
+		public event XmlNodeChangedEventHandler NodeRemoved;
+
+		public event XmlNodeChangedEventHandler NodeRemoving;
+
+		XmlLinkedNode IHasXmlChildNode.LastLinkedChild
 		{
 			get
 			{
-				return this.schemaInfo;
+				return this.lastLinkedChild;
 			}
 			set
 			{
-				this.schemaInfo = value;
+				this.lastLinkedChild = value;
 			}
 		}
 
-		internal static void CheckName(string name)
+		internal XmlAttribute NsNodeXml
 		{
-			int num = ValidateNames.ParseNmtoken(name, 0);
-			if (num < name.Length)
+			get
 			{
-				throw new XmlException("The '{0}' character, hexadecimal value {1}, cannot be included in a name.", XmlException.BuildCharExceptionArgs(name, num));
-			}
-		}
-
-		internal XmlName AddXmlName(string prefix, string localName, string namespaceURI, IXmlSchemaInfo schemaInfo)
-		{
-			return this.domNameTable.AddName(prefix, localName, namespaceURI, schemaInfo);
-		}
-
-		internal XmlName GetXmlName(string prefix, string localName, string namespaceURI, IXmlSchemaInfo schemaInfo)
-		{
-			return this.domNameTable.GetName(prefix, localName, namespaceURI, schemaInfo);
-		}
-
-		internal XmlName AddAttrXmlName(string prefix, string localName, string namespaceURI, IXmlSchemaInfo schemaInfo)
-		{
-			XmlName xmlName = this.AddXmlName(prefix, localName, namespaceURI, schemaInfo);
-			if (!this.IsLoading)
-			{
-				object prefix2 = xmlName.Prefix;
-				object namespaceURI2 = xmlName.NamespaceURI;
-				object localName2 = xmlName.LocalName;
-				if ((prefix2 == this.strXmlns || (prefix2 == this.strEmpty && localName2 == this.strXmlns)) ^ (namespaceURI2 == this.strReservedXmlns))
+				if (this.nsNodeXml == null)
 				{
-					throw new ArgumentException(Res.GetString("The namespace declaration attribute has an incorrect 'namespaceURI': '{0}'.", new object[] { namespaceURI }));
+					this.nsNodeXml = this.CreateAttribute("xmlns", "xml", "http://www.w3.org/2000/xmlns/");
+					this.nsNodeXml.Value = "http://www.w3.org/XML/1998/namespace";
 				}
+				return this.nsNodeXml;
 			}
-			return xmlName;
 		}
 
-		internal bool AddIdInfo(XmlName eleName, XmlName attrName)
+		public override string BaseURI
 		{
-			if (this.htElementIDAttrDecl == null || this.htElementIDAttrDecl[eleName] == null)
+			get
 			{
-				if (this.htElementIDAttrDecl == null)
+				return this.baseURI;
+			}
+		}
+
+		public XmlElement DocumentElement
+		{
+			get
+			{
+				XmlNode xmlNode;
+				for (xmlNode = this.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
 				{
-					this.htElementIDAttrDecl = new Hashtable();
-				}
-				this.htElementIDAttrDecl.Add(eleName, attrName);
-				return true;
-			}
-			return false;
-		}
-
-		private XmlName GetIDInfoByElement_(XmlName eleName)
-		{
-			XmlName xmlName = this.GetXmlName(eleName.Prefix, eleName.LocalName, string.Empty, null);
-			if (xmlName != null)
-			{
-				return (XmlName)this.htElementIDAttrDecl[xmlName];
-			}
-			return null;
-		}
-
-		internal XmlName GetIDInfoByElement(XmlName eleName)
-		{
-			if (this.htElementIDAttrDecl == null)
-			{
-				return null;
-			}
-			return this.GetIDInfoByElement_(eleName);
-		}
-
-		private WeakReference GetElement(ArrayList elementList, XmlElement elem)
-		{
-			ArrayList arrayList = new ArrayList();
-			foreach (object obj in elementList)
-			{
-				WeakReference weakReference = (WeakReference)obj;
-				if (!weakReference.IsAlive)
-				{
-					arrayList.Add(weakReference);
-				}
-				else if ((XmlElement)weakReference.Target == elem)
-				{
-					return weakReference;
-				}
-			}
-			foreach (object obj2 in arrayList)
-			{
-				WeakReference weakReference2 = (WeakReference)obj2;
-				elementList.Remove(weakReference2);
-			}
-			return null;
-		}
-
-		internal void AddElementWithId(string id, XmlElement elem)
-		{
-			if (this.htElementIdMap == null || !this.htElementIdMap.Contains(id))
-			{
-				if (this.htElementIdMap == null)
-				{
-					this.htElementIdMap = new Hashtable();
-				}
-				ArrayList arrayList = new ArrayList();
-				arrayList.Add(new WeakReference(elem));
-				this.htElementIdMap.Add(id, arrayList);
-				return;
-			}
-			ArrayList arrayList2 = (ArrayList)this.htElementIdMap[id];
-			if (this.GetElement(arrayList2, elem) == null)
-			{
-				arrayList2.Add(new WeakReference(elem));
-			}
-		}
-
-		internal void RemoveElementWithId(string id, XmlElement elem)
-		{
-			if (this.htElementIdMap != null && this.htElementIdMap.Contains(id))
-			{
-				ArrayList arrayList = (ArrayList)this.htElementIdMap[id];
-				WeakReference element = this.GetElement(arrayList, elem);
-				if (element != null)
-				{
-					arrayList.Remove(element);
-					if (arrayList.Count == 0)
+					if (xmlNode is XmlElement)
 					{
-						this.htElementIdMap.Remove(id);
+						break;
 					}
 				}
-			}
-		}
-
-		public override XmlNode CloneNode(bool deep)
-		{
-			XmlDocument xmlDocument = this.Implementation.CreateDocument();
-			xmlDocument.SetBaseURI(this.baseURI);
-			if (deep)
-			{
-				xmlDocument.ImportChildren(this, xmlDocument, deep);
-			}
-			return xmlDocument;
-		}
-
-		public override XmlNodeType NodeType
-		{
-			get
-			{
-				return XmlNodeType.Document;
-			}
-		}
-
-		public override XmlNode ParentNode
-		{
-			get
-			{
-				return null;
+				return (xmlNode == null) ? null : (xmlNode as XmlElement);
 			}
 		}
 
@@ -219,17 +113,16 @@ namespace System.Xml
 		{
 			get
 			{
-				return (XmlDocumentType)this.FindChild(XmlNodeType.DocumentType);
-			}
-		}
-
-		internal virtual XmlDeclaration Declaration
-		{
-			get
-			{
-				if (this.HasChildNodes)
+				for (XmlNode xmlNode = this.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
 				{
-					return this.FirstChild as XmlDeclaration;
+					if (xmlNode.NodeType == XmlNodeType.DocumentType)
+					{
+						return (XmlDocumentType)xmlNode;
+					}
+					if (xmlNode.NodeType == XmlNodeType.Element)
+					{
+						return null;
+					}
 				}
 				return null;
 			}
@@ -240,979 +133,6 @@ namespace System.Xml
 			get
 			{
 				return this.implementation;
-			}
-		}
-
-		public override string Name
-		{
-			get
-			{
-				return this.strDocumentName;
-			}
-		}
-
-		public override string LocalName
-		{
-			get
-			{
-				return this.strDocumentName;
-			}
-		}
-
-		public XmlElement DocumentElement
-		{
-			get
-			{
-				return (XmlElement)this.FindChild(XmlNodeType.Element);
-			}
-		}
-
-		internal override bool IsContainer
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		internal override XmlLinkedNode LastNode
-		{
-			get
-			{
-				return this.lastChild;
-			}
-			set
-			{
-				this.lastChild = value;
-			}
-		}
-
-		public override XmlDocument OwnerDocument
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		public XmlSchemaSet Schemas
-		{
-			get
-			{
-				if (this.schemas == null)
-				{
-					this.schemas = new XmlSchemaSet(this.NameTable);
-				}
-				return this.schemas;
-			}
-			set
-			{
-				this.schemas = value;
-			}
-		}
-
-		internal bool CanReportValidity
-		{
-			get
-			{
-				return this.reportValidity;
-			}
-		}
-
-		internal bool HasSetResolver
-		{
-			get
-			{
-				return this.bSetResolver;
-			}
-		}
-
-		internal XmlResolver GetResolver()
-		{
-			return this.resolver;
-		}
-
-		public virtual XmlResolver XmlResolver
-		{
-			set
-			{
-				if (value != null)
-				{
-					try
-					{
-						new NamedPermissionSet("FullTrust").Demand();
-					}
-					catch (SecurityException ex)
-					{
-						throw new SecurityException(Res.GetString("XmlResolver can be set only by fully trusted code."), ex);
-					}
-				}
-				this.resolver = value;
-				if (!this.bSetResolver)
-				{
-					this.bSetResolver = true;
-				}
-				XmlDocumentType documentType = this.DocumentType;
-				if (documentType != null)
-				{
-					documentType.DtdSchemaInfo = null;
-				}
-			}
-		}
-
-		internal override bool IsValidChildType(XmlNodeType type)
-		{
-			if (type != XmlNodeType.Element)
-			{
-				switch (type)
-				{
-				case XmlNodeType.ProcessingInstruction:
-				case XmlNodeType.Comment:
-				case XmlNodeType.Whitespace:
-				case XmlNodeType.SignificantWhitespace:
-					return true;
-				case XmlNodeType.DocumentType:
-					if (this.DocumentType != null)
-					{
-						throw new InvalidOperationException(Res.GetString("This document already has a 'DocumentType' node."));
-					}
-					return true;
-				case XmlNodeType.XmlDeclaration:
-					if (this.Declaration != null)
-					{
-						throw new InvalidOperationException(Res.GetString("This document already has an 'XmlDeclaration' node."));
-					}
-					return true;
-				}
-				return false;
-			}
-			if (this.DocumentElement != null)
-			{
-				throw new InvalidOperationException(Res.GetString("This document already has a 'DocumentElement' node."));
-			}
-			return true;
-		}
-
-		private bool HasNodeTypeInPrevSiblings(XmlNodeType nt, XmlNode refNode)
-		{
-			if (refNode == null)
-			{
-				return false;
-			}
-			XmlNode xmlNode = null;
-			if (refNode.ParentNode != null)
-			{
-				xmlNode = refNode.ParentNode.FirstChild;
-			}
-			while (xmlNode != null)
-			{
-				if (xmlNode.NodeType == nt)
-				{
-					return true;
-				}
-				if (xmlNode == refNode)
-				{
-					break;
-				}
-				xmlNode = xmlNode.NextSibling;
-			}
-			return false;
-		}
-
-		private bool HasNodeTypeInNextSiblings(XmlNodeType nt, XmlNode refNode)
-		{
-			for (XmlNode xmlNode = refNode; xmlNode != null; xmlNode = xmlNode.NextSibling)
-			{
-				if (xmlNode.NodeType == nt)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		internal override bool CanInsertBefore(XmlNode newChild, XmlNode refChild)
-		{
-			if (refChild == null)
-			{
-				refChild = this.FirstChild;
-			}
-			if (refChild == null)
-			{
-				return true;
-			}
-			XmlNodeType nodeType = newChild.NodeType;
-			if (nodeType <= XmlNodeType.Comment)
-			{
-				if (nodeType != XmlNodeType.Element)
-				{
-					if (nodeType - XmlNodeType.ProcessingInstruction <= 1)
-					{
-						return refChild.NodeType != XmlNodeType.XmlDeclaration;
-					}
-				}
-				else if (refChild.NodeType != XmlNodeType.XmlDeclaration)
-				{
-					return !this.HasNodeTypeInNextSiblings(XmlNodeType.DocumentType, refChild);
-				}
-			}
-			else if (nodeType != XmlNodeType.DocumentType)
-			{
-				if (nodeType == XmlNodeType.XmlDeclaration)
-				{
-					return refChild == this.FirstChild;
-				}
-			}
-			else if (refChild.NodeType != XmlNodeType.XmlDeclaration)
-			{
-				return !this.HasNodeTypeInPrevSiblings(XmlNodeType.Element, refChild.PreviousSibling);
-			}
-			return false;
-		}
-
-		internal override bool CanInsertAfter(XmlNode newChild, XmlNode refChild)
-		{
-			if (refChild == null)
-			{
-				refChild = this.LastChild;
-			}
-			if (refChild == null)
-			{
-				return true;
-			}
-			XmlNodeType nodeType = newChild.NodeType;
-			if (nodeType != XmlNodeType.Element)
-			{
-				switch (nodeType)
-				{
-				case XmlNodeType.ProcessingInstruction:
-				case XmlNodeType.Comment:
-				case XmlNodeType.Whitespace:
-				case XmlNodeType.SignificantWhitespace:
-					return true;
-				case XmlNodeType.DocumentType:
-					return !this.HasNodeTypeInPrevSiblings(XmlNodeType.Element, refChild);
-				}
-				return false;
-			}
-			return !this.HasNodeTypeInNextSiblings(XmlNodeType.DocumentType, refChild.NextSibling);
-		}
-
-		public XmlAttribute CreateAttribute(string name)
-		{
-			string empty = string.Empty;
-			string empty2 = string.Empty;
-			string empty3 = string.Empty;
-			XmlNode.SplitName(name, out empty, out empty2);
-			this.SetDefaultNamespace(empty, empty2, ref empty3);
-			return this.CreateAttribute(empty, empty2, empty3);
-		}
-
-		internal void SetDefaultNamespace(string prefix, string localName, ref string namespaceURI)
-		{
-			if (prefix == this.strXmlns || (prefix.Length == 0 && localName == this.strXmlns))
-			{
-				namespaceURI = this.strReservedXmlns;
-				return;
-			}
-			if (prefix == this.strXml)
-			{
-				namespaceURI = this.strReservedXml;
-			}
-		}
-
-		public virtual XmlCDataSection CreateCDataSection(string data)
-		{
-			this.fCDataNodesPresent = true;
-			return new XmlCDataSection(data, this);
-		}
-
-		public virtual XmlComment CreateComment(string data)
-		{
-			return new XmlComment(data, this);
-		}
-
-		[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-		public virtual XmlDocumentType CreateDocumentType(string name, string publicId, string systemId, string internalSubset)
-		{
-			return new XmlDocumentType(name, publicId, systemId, internalSubset, this);
-		}
-
-		public virtual XmlDocumentFragment CreateDocumentFragment()
-		{
-			return new XmlDocumentFragment(this);
-		}
-
-		public XmlElement CreateElement(string name)
-		{
-			string empty = string.Empty;
-			string empty2 = string.Empty;
-			XmlNode.SplitName(name, out empty, out empty2);
-			return this.CreateElement(empty, empty2, string.Empty);
-		}
-
-		internal void AddDefaultAttributes(XmlElement elem)
-		{
-			SchemaInfo dtdSchemaInfo = this.DtdSchemaInfo;
-			SchemaElementDecl schemaElementDecl = this.GetSchemaElementDecl(elem);
-			if (schemaElementDecl != null && schemaElementDecl.AttDefs != null)
-			{
-				IDictionaryEnumerator dictionaryEnumerator = schemaElementDecl.AttDefs.GetEnumerator();
-				while (dictionaryEnumerator.MoveNext())
-				{
-					SchemaAttDef schemaAttDef = (SchemaAttDef)dictionaryEnumerator.Value;
-					if (schemaAttDef.Presence == SchemaDeclBase.Use.Default || schemaAttDef.Presence == SchemaDeclBase.Use.Fixed)
-					{
-						string text = string.Empty;
-						string name = schemaAttDef.Name.Name;
-						string text2 = string.Empty;
-						if (dtdSchemaInfo.SchemaType == SchemaType.DTD)
-						{
-							text = schemaAttDef.Name.Namespace;
-						}
-						else
-						{
-							text = schemaAttDef.Prefix;
-							text2 = schemaAttDef.Name.Namespace;
-						}
-						XmlAttribute xmlAttribute = this.PrepareDefaultAttribute(schemaAttDef, text, name, text2);
-						elem.SetAttributeNode(xmlAttribute);
-					}
-				}
-			}
-		}
-
-		private SchemaElementDecl GetSchemaElementDecl(XmlElement elem)
-		{
-			SchemaInfo dtdSchemaInfo = this.DtdSchemaInfo;
-			if (dtdSchemaInfo != null)
-			{
-				XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(elem.LocalName, (dtdSchemaInfo.SchemaType == SchemaType.DTD) ? elem.Prefix : elem.NamespaceURI);
-				SchemaElementDecl schemaElementDecl;
-				if (dtdSchemaInfo.ElementDecls.TryGetValue(xmlQualifiedName, out schemaElementDecl))
-				{
-					return schemaElementDecl;
-				}
-			}
-			return null;
-		}
-
-		private XmlAttribute PrepareDefaultAttribute(SchemaAttDef attdef, string attrPrefix, string attrLocalname, string attrNamespaceURI)
-		{
-			this.SetDefaultNamespace(attrPrefix, attrLocalname, ref attrNamespaceURI);
-			XmlAttribute xmlAttribute = this.CreateDefaultAttribute(attrPrefix, attrLocalname, attrNamespaceURI);
-			xmlAttribute.InnerXml = attdef.DefaultValueRaw;
-			XmlUnspecifiedAttribute xmlUnspecifiedAttribute = xmlAttribute as XmlUnspecifiedAttribute;
-			if (xmlUnspecifiedAttribute != null)
-			{
-				xmlUnspecifiedAttribute.SetSpecified(false);
-			}
-			return xmlAttribute;
-		}
-
-		public virtual XmlEntityReference CreateEntityReference(string name)
-		{
-			return new XmlEntityReference(name, this);
-		}
-
-		public virtual XmlProcessingInstruction CreateProcessingInstruction(string target, string data)
-		{
-			return new XmlProcessingInstruction(target, data, this);
-		}
-
-		public virtual XmlDeclaration CreateXmlDeclaration(string version, string encoding, string standalone)
-		{
-			return new XmlDeclaration(version, encoding, standalone, this);
-		}
-
-		public virtual XmlText CreateTextNode(string text)
-		{
-			return new XmlText(text, this);
-		}
-
-		public virtual XmlSignificantWhitespace CreateSignificantWhitespace(string text)
-		{
-			return new XmlSignificantWhitespace(text, this);
-		}
-
-		public override XPathNavigator CreateNavigator()
-		{
-			return this.CreateNavigator(this);
-		}
-
-		protected internal virtual XPathNavigator CreateNavigator(XmlNode node)
-		{
-			switch (node.NodeType)
-			{
-			case XmlNodeType.Text:
-			case XmlNodeType.CDATA:
-			case XmlNodeType.SignificantWhitespace:
-			{
-				XmlNode xmlNode = node.ParentNode;
-				if (xmlNode != null)
-				{
-					for (;;)
-					{
-						XmlNodeType xmlNodeType = xmlNode.NodeType;
-						if (xmlNodeType == XmlNodeType.Attribute)
-						{
-							break;
-						}
-						if (xmlNodeType != XmlNodeType.EntityReference)
-						{
-							goto IL_0074;
-						}
-						xmlNode = xmlNode.ParentNode;
-						if (xmlNode == null)
-						{
-							goto IL_0074;
-						}
-					}
-					return null;
-				}
-				IL_0074:
-				node = this.NormalizeText(node);
-				break;
-			}
-			case XmlNodeType.EntityReference:
-			case XmlNodeType.Entity:
-			case XmlNodeType.DocumentType:
-			case XmlNodeType.Notation:
-			case XmlNodeType.XmlDeclaration:
-				return null;
-			case XmlNodeType.Whitespace:
-			{
-				XmlNode xmlNode = node.ParentNode;
-				if (xmlNode != null)
-				{
-					for (;;)
-					{
-						XmlNodeType xmlNodeType = xmlNode.NodeType;
-						if (xmlNodeType == XmlNodeType.Document || xmlNodeType == XmlNodeType.Attribute)
-						{
-							break;
-						}
-						if (xmlNodeType != XmlNodeType.EntityReference)
-						{
-							goto IL_00A9;
-						}
-						xmlNode = xmlNode.ParentNode;
-						if (xmlNode == null)
-						{
-							goto IL_00A9;
-						}
-					}
-					return null;
-				}
-				IL_00A9:
-				node = this.NormalizeText(node);
-				break;
-			}
-			}
-			return new DocumentXPathNavigator(this, node);
-		}
-
-		internal static bool IsTextNode(XmlNodeType nt)
-		{
-			return nt - XmlNodeType.Text <= 1 || nt - XmlNodeType.Whitespace <= 1;
-		}
-
-		private XmlNode NormalizeText(XmlNode n)
-		{
-			XmlNode xmlNode = null;
-			while (XmlDocument.IsTextNode(n.NodeType))
-			{
-				xmlNode = n;
-				n = n.PreviousSibling;
-				if (n == null)
-				{
-					XmlNode xmlNode2 = xmlNode;
-					while (xmlNode2.ParentNode != null && xmlNode2.ParentNode.NodeType == XmlNodeType.EntityReference)
-					{
-						if (xmlNode2.ParentNode.PreviousSibling != null)
-						{
-							n = xmlNode2.ParentNode.PreviousSibling;
-							break;
-						}
-						xmlNode2 = xmlNode2.ParentNode;
-						if (xmlNode2 == null)
-						{
-							break;
-						}
-					}
-				}
-				if (n == null)
-				{
-					break;
-				}
-				while (n.NodeType == XmlNodeType.EntityReference)
-				{
-					n = n.LastChild;
-				}
-			}
-			return xmlNode;
-		}
-
-		public virtual XmlWhitespace CreateWhitespace(string text)
-		{
-			return new XmlWhitespace(text, this);
-		}
-
-		public virtual XmlNodeList GetElementsByTagName(string name)
-		{
-			return new XmlElementList(this, name);
-		}
-
-		public XmlAttribute CreateAttribute(string qualifiedName, string namespaceURI)
-		{
-			string empty = string.Empty;
-			string empty2 = string.Empty;
-			XmlNode.SplitName(qualifiedName, out empty, out empty2);
-			return this.CreateAttribute(empty, empty2, namespaceURI);
-		}
-
-		public XmlElement CreateElement(string qualifiedName, string namespaceURI)
-		{
-			string empty = string.Empty;
-			string empty2 = string.Empty;
-			XmlNode.SplitName(qualifiedName, out empty, out empty2);
-			return this.CreateElement(empty, empty2, namespaceURI);
-		}
-
-		public virtual XmlNodeList GetElementsByTagName(string localName, string namespaceURI)
-		{
-			return new XmlElementList(this, localName, namespaceURI);
-		}
-
-		public virtual XmlElement GetElementById(string elementId)
-		{
-			if (this.htElementIdMap != null)
-			{
-				ArrayList arrayList = (ArrayList)this.htElementIdMap[elementId];
-				if (arrayList != null)
-				{
-					foreach (object obj in arrayList)
-					{
-						XmlElement xmlElement = (XmlElement)((WeakReference)obj).Target;
-						if (xmlElement != null && xmlElement.IsConnected())
-						{
-							return xmlElement;
-						}
-					}
-				}
-			}
-			return null;
-		}
-
-		public virtual XmlNode ImportNode(XmlNode node, bool deep)
-		{
-			return this.ImportNodeInternal(node, deep);
-		}
-
-		private XmlNode ImportNodeInternal(XmlNode node, bool deep)
-		{
-			if (node == null)
-			{
-				throw new InvalidOperationException(Res.GetString("Cannot import a null node."));
-			}
-			switch (node.NodeType)
-			{
-			case XmlNodeType.Element:
-			{
-				XmlNode xmlNode = this.CreateElement(node.Prefix, node.LocalName, node.NamespaceURI);
-				this.ImportAttributes(node, xmlNode);
-				if (deep)
-				{
-					this.ImportChildren(node, xmlNode, deep);
-					return xmlNode;
-				}
-				return xmlNode;
-			}
-			case XmlNodeType.Attribute:
-			{
-				XmlNode xmlNode = this.CreateAttribute(node.Prefix, node.LocalName, node.NamespaceURI);
-				this.ImportChildren(node, xmlNode, true);
-				return xmlNode;
-			}
-			case XmlNodeType.Text:
-				return this.CreateTextNode(node.Value);
-			case XmlNodeType.CDATA:
-				return this.CreateCDataSection(node.Value);
-			case XmlNodeType.EntityReference:
-				return this.CreateEntityReference(node.Name);
-			case XmlNodeType.ProcessingInstruction:
-				return this.CreateProcessingInstruction(node.Name, node.Value);
-			case XmlNodeType.Comment:
-				return this.CreateComment(node.Value);
-			case XmlNodeType.DocumentType:
-			{
-				XmlDocumentType xmlDocumentType = (XmlDocumentType)node;
-				return this.CreateDocumentType(xmlDocumentType.Name, xmlDocumentType.PublicId, xmlDocumentType.SystemId, xmlDocumentType.InternalSubset);
-			}
-			case XmlNodeType.DocumentFragment:
-			{
-				XmlNode xmlNode = this.CreateDocumentFragment();
-				if (deep)
-				{
-					this.ImportChildren(node, xmlNode, deep);
-					return xmlNode;
-				}
-				return xmlNode;
-			}
-			case XmlNodeType.Whitespace:
-				return this.CreateWhitespace(node.Value);
-			case XmlNodeType.SignificantWhitespace:
-				return this.CreateSignificantWhitespace(node.Value);
-			case XmlNodeType.XmlDeclaration:
-			{
-				XmlDeclaration xmlDeclaration = (XmlDeclaration)node;
-				return this.CreateXmlDeclaration(xmlDeclaration.Version, xmlDeclaration.Encoding, xmlDeclaration.Standalone);
-			}
-			}
-			throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Res.GetString("Cannot import nodes of type '{0}'."), node.NodeType.ToString()));
-		}
-
-		private void ImportAttributes(XmlNode fromElem, XmlNode toElem)
-		{
-			int count = fromElem.Attributes.Count;
-			for (int i = 0; i < count; i++)
-			{
-				if (fromElem.Attributes[i].Specified)
-				{
-					toElem.Attributes.SetNamedItem(this.ImportNodeInternal(fromElem.Attributes[i], true));
-				}
-			}
-		}
-
-		private void ImportChildren(XmlNode fromNode, XmlNode toNode, bool deep)
-		{
-			for (XmlNode xmlNode = fromNode.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
-			{
-				toNode.AppendChild(this.ImportNodeInternal(xmlNode, deep));
-			}
-		}
-
-		public XmlNameTable NameTable
-		{
-			get
-			{
-				return this.implementation.NameTable;
-			}
-		}
-
-		public virtual XmlAttribute CreateAttribute(string prefix, string localName, string namespaceURI)
-		{
-			return new XmlAttribute(this.AddAttrXmlName(prefix, localName, namespaceURI, null), this);
-		}
-
-		protected internal virtual XmlAttribute CreateDefaultAttribute(string prefix, string localName, string namespaceURI)
-		{
-			return new XmlUnspecifiedAttribute(prefix, localName, namespaceURI, this);
-		}
-
-		public virtual XmlElement CreateElement(string prefix, string localName, string namespaceURI)
-		{
-			XmlElement xmlElement = new XmlElement(this.AddXmlName(prefix, localName, namespaceURI, null), true, this);
-			if (!this.IsLoading)
-			{
-				this.AddDefaultAttributes(xmlElement);
-			}
-			return xmlElement;
-		}
-
-		public bool PreserveWhitespace
-		{
-			get
-			{
-				return this.preserveWhitespace;
-			}
-			set
-			{
-				this.preserveWhitespace = value;
-			}
-		}
-
-		public override bool IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		internal XmlNamedNodeMap Entities
-		{
-			get
-			{
-				if (this.entities == null)
-				{
-					this.entities = new XmlNamedNodeMap(this);
-				}
-				return this.entities;
-			}
-			set
-			{
-				this.entities = value;
-			}
-		}
-
-		internal bool IsLoading
-		{
-			get
-			{
-				return this.isLoading;
-			}
-			set
-			{
-				this.isLoading = value;
-			}
-		}
-
-		internal bool ActualLoadingStatus
-		{
-			get
-			{
-				return this.actualLoadingStatus;
-			}
-			set
-			{
-				this.actualLoadingStatus = value;
-			}
-		}
-
-		public virtual XmlNode CreateNode(XmlNodeType type, string prefix, string name, string namespaceURI)
-		{
-			switch (type)
-			{
-			case XmlNodeType.Element:
-				if (prefix != null)
-				{
-					return this.CreateElement(prefix, name, namespaceURI);
-				}
-				return this.CreateElement(name, namespaceURI);
-			case XmlNodeType.Attribute:
-				if (prefix != null)
-				{
-					return this.CreateAttribute(prefix, name, namespaceURI);
-				}
-				return this.CreateAttribute(name, namespaceURI);
-			case XmlNodeType.Text:
-				return this.CreateTextNode(string.Empty);
-			case XmlNodeType.CDATA:
-				return this.CreateCDataSection(string.Empty);
-			case XmlNodeType.EntityReference:
-				return this.CreateEntityReference(name);
-			case XmlNodeType.ProcessingInstruction:
-				return this.CreateProcessingInstruction(name, string.Empty);
-			case XmlNodeType.Comment:
-				return this.CreateComment(string.Empty);
-			case XmlNodeType.Document:
-				return new XmlDocument();
-			case XmlNodeType.DocumentType:
-				return this.CreateDocumentType(name, string.Empty, string.Empty, string.Empty);
-			case XmlNodeType.DocumentFragment:
-				return this.CreateDocumentFragment();
-			case XmlNodeType.Whitespace:
-				return this.CreateWhitespace(string.Empty);
-			case XmlNodeType.SignificantWhitespace:
-				return this.CreateSignificantWhitespace(string.Empty);
-			case XmlNodeType.XmlDeclaration:
-				return this.CreateXmlDeclaration("1.0", null, null);
-			}
-			throw new ArgumentException(Res.GetString("Cannot create node of type {0}.", new object[] { type }));
-		}
-
-		public virtual XmlNode CreateNode(string nodeTypeString, string name, string namespaceURI)
-		{
-			return this.CreateNode(this.ConvertToNodeType(nodeTypeString), name, namespaceURI);
-		}
-
-		public virtual XmlNode CreateNode(XmlNodeType type, string name, string namespaceURI)
-		{
-			return this.CreateNode(type, null, name, namespaceURI);
-		}
-
-		[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-		public virtual XmlNode ReadNode(XmlReader reader)
-		{
-			XmlNode xmlNode = null;
-			try
-			{
-				this.IsLoading = true;
-				xmlNode = new XmlLoader().ReadCurrentNode(this, reader);
-			}
-			finally
-			{
-				this.IsLoading = false;
-			}
-			return xmlNode;
-		}
-
-		internal XmlNodeType ConvertToNodeType(string nodeTypeString)
-		{
-			if (nodeTypeString == "element")
-			{
-				return XmlNodeType.Element;
-			}
-			if (nodeTypeString == "attribute")
-			{
-				return XmlNodeType.Attribute;
-			}
-			if (nodeTypeString == "text")
-			{
-				return XmlNodeType.Text;
-			}
-			if (nodeTypeString == "cdatasection")
-			{
-				return XmlNodeType.CDATA;
-			}
-			if (nodeTypeString == "entityreference")
-			{
-				return XmlNodeType.EntityReference;
-			}
-			if (nodeTypeString == "entity")
-			{
-				return XmlNodeType.Entity;
-			}
-			if (nodeTypeString == "processinginstruction")
-			{
-				return XmlNodeType.ProcessingInstruction;
-			}
-			if (nodeTypeString == "comment")
-			{
-				return XmlNodeType.Comment;
-			}
-			if (nodeTypeString == "document")
-			{
-				return XmlNodeType.Document;
-			}
-			if (nodeTypeString == "documenttype")
-			{
-				return XmlNodeType.DocumentType;
-			}
-			if (nodeTypeString == "documentfragment")
-			{
-				return XmlNodeType.DocumentFragment;
-			}
-			if (nodeTypeString == "notation")
-			{
-				return XmlNodeType.Notation;
-			}
-			if (nodeTypeString == "significantwhitespace")
-			{
-				return XmlNodeType.SignificantWhitespace;
-			}
-			if (nodeTypeString == "whitespace")
-			{
-				return XmlNodeType.Whitespace;
-			}
-			throw new ArgumentException(Res.GetString("'{0}' does not represent any 'XmlNodeType'.", new object[] { nodeTypeString }));
-		}
-
-		private XmlTextReader SetupReader(XmlTextReader tr)
-		{
-			tr.XmlValidatingReaderCompatibilityMode = true;
-			tr.EntityHandling = EntityHandling.ExpandCharEntities;
-			if (this.HasSetResolver)
-			{
-				tr.XmlResolver = this.GetResolver();
-			}
-			return tr;
-		}
-
-		public virtual void Load(string filename)
-		{
-			XmlTextReader xmlTextReader = this.SetupReader(new XmlTextReader(filename, this.NameTable));
-			try
-			{
-				this.Load(xmlTextReader);
-			}
-			finally
-			{
-				xmlTextReader.Close();
-			}
-		}
-
-		public virtual void Load(Stream inStream)
-		{
-			XmlTextReader xmlTextReader = this.SetupReader(new XmlTextReader(inStream, this.NameTable));
-			try
-			{
-				this.Load(xmlTextReader);
-			}
-			finally
-			{
-				xmlTextReader.Impl.Close(false);
-			}
-		}
-
-		public virtual void Load(TextReader txtReader)
-		{
-			XmlTextReader xmlTextReader = this.SetupReader(new XmlTextReader(txtReader, this.NameTable));
-			try
-			{
-				this.Load(xmlTextReader);
-			}
-			finally
-			{
-				xmlTextReader.Impl.Close(false);
-			}
-		}
-
-		public virtual void Load(XmlReader reader)
-		{
-			try
-			{
-				this.IsLoading = true;
-				this.actualLoadingStatus = true;
-				this.RemoveAll();
-				this.fEntRefNodesPresent = false;
-				this.fCDataNodesPresent = false;
-				this.reportValidity = true;
-				new XmlLoader().Load(this, reader, this.preserveWhitespace);
-			}
-			finally
-			{
-				this.IsLoading = false;
-				this.actualLoadingStatus = false;
-				this.reportValidity = true;
-			}
-		}
-
-		public virtual void LoadXml(string xml)
-		{
-			XmlTextReader xmlTextReader = this.SetupReader(new XmlTextReader(new StringReader(xml), this.NameTable));
-			try
-			{
-				this.Load(xmlTextReader);
-			}
-			finally
-			{
-				xmlTextReader.Close();
-			}
-		}
-
-		internal Encoding TextEncoding
-		{
-			get
-			{
-				if (this.Declaration != null)
-				{
-					string encoding = this.Declaration.Encoding;
-					if (encoding.Length > 0)
-					{
-						return global::System.Text.Encoding.GetEncoding(encoding);
-					}
-				}
-				return null;
-			}
-		}
-
-		public override string InnerText
-		{
-			set
-			{
-				throw new InvalidOperationException(Res.GetString("The 'InnerText' of a 'Document' node is read-only and cannot be set."));
 			}
 		}
 
@@ -1228,442 +148,63 @@ namespace System.Xml
 			}
 		}
 
-		public virtual void Save(string filename)
-		{
-			if (this.DocumentElement == null)
-			{
-				throw new XmlException("Invalid XML document. {0}", Res.GetString("The document does not have a root element."));
-			}
-			XmlDOMTextWriter xmlDOMTextWriter = new XmlDOMTextWriter(filename, this.TextEncoding);
-			try
-			{
-				if (!this.preserveWhitespace)
-				{
-					xmlDOMTextWriter.Formatting = Formatting.Indented;
-				}
-				this.WriteTo(xmlDOMTextWriter);
-				xmlDOMTextWriter.Flush();
-			}
-			finally
-			{
-				xmlDOMTextWriter.Close();
-			}
-		}
-
-		public virtual void Save(Stream outStream)
-		{
-			XmlDOMTextWriter xmlDOMTextWriter = new XmlDOMTextWriter(outStream, this.TextEncoding);
-			if (!this.preserveWhitespace)
-			{
-				xmlDOMTextWriter.Formatting = Formatting.Indented;
-			}
-			this.WriteTo(xmlDOMTextWriter);
-			xmlDOMTextWriter.Flush();
-		}
-
-		public virtual void Save(TextWriter writer)
-		{
-			XmlDOMTextWriter xmlDOMTextWriter = new XmlDOMTextWriter(writer);
-			if (!this.preserveWhitespace)
-			{
-				xmlDOMTextWriter.Formatting = Formatting.Indented;
-			}
-			this.Save(xmlDOMTextWriter);
-		}
-
-		public virtual void Save(XmlWriter w)
-		{
-			XmlNode xmlNode = this.FirstChild;
-			if (xmlNode == null)
-			{
-				return;
-			}
-			if (w.WriteState == WriteState.Start)
-			{
-				if (xmlNode is XmlDeclaration)
-				{
-					if (this.Standalone.Length == 0)
-					{
-						w.WriteStartDocument();
-					}
-					else if (this.Standalone == "yes")
-					{
-						w.WriteStartDocument(true);
-					}
-					else if (this.Standalone == "no")
-					{
-						w.WriteStartDocument(false);
-					}
-					xmlNode = xmlNode.NextSibling;
-				}
-				else
-				{
-					w.WriteStartDocument();
-				}
-			}
-			while (xmlNode != null)
-			{
-				xmlNode.WriteTo(w);
-				xmlNode = xmlNode.NextSibling;
-			}
-			w.Flush();
-		}
-
-		public override void WriteTo(XmlWriter w)
-		{
-			this.WriteContentTo(w);
-		}
-
-		public override void WriteContentTo(XmlWriter xw)
-		{
-			foreach (object obj in this)
-			{
-				((XmlNode)obj).WriteTo(xw);
-			}
-		}
-
-		public void Validate(ValidationEventHandler validationEventHandler)
-		{
-			this.Validate(validationEventHandler, this);
-		}
-
-		public void Validate(ValidationEventHandler validationEventHandler, XmlNode nodeToValidate)
-		{
-			if (this.schemas == null || this.schemas.Count == 0)
-			{
-				throw new InvalidOperationException(Res.GetString("The XmlSchemaSet on the document is either null or has no schemas in it. Provide schema information before calling Validate."));
-			}
-			if (nodeToValidate.Document != this)
-			{
-				throw new ArgumentException(Res.GetString("Cannot validate '{0}' because its owner document is not the current document.", new object[] { "nodeToValidate" }));
-			}
-			if (nodeToValidate == this)
-			{
-				this.reportValidity = false;
-			}
-			new DocumentSchemaValidator(this, this.schemas, validationEventHandler).Validate(nodeToValidate);
-			if (nodeToValidate == this)
-			{
-				this.reportValidity = true;
-			}
-		}
-
-		public event XmlNodeChangedEventHandler NodeInserting
-		{
-			add
-			{
-				this.onNodeInsertingDelegate = (XmlNodeChangedEventHandler)Delegate.Combine(this.onNodeInsertingDelegate, value);
-			}
-			remove
-			{
-				this.onNodeInsertingDelegate = (XmlNodeChangedEventHandler)Delegate.Remove(this.onNodeInsertingDelegate, value);
-			}
-		}
-
-		public event XmlNodeChangedEventHandler NodeInserted
-		{
-			add
-			{
-				this.onNodeInsertedDelegate = (XmlNodeChangedEventHandler)Delegate.Combine(this.onNodeInsertedDelegate, value);
-			}
-			remove
-			{
-				this.onNodeInsertedDelegate = (XmlNodeChangedEventHandler)Delegate.Remove(this.onNodeInsertedDelegate, value);
-			}
-		}
-
-		public event XmlNodeChangedEventHandler NodeRemoving
-		{
-			add
-			{
-				this.onNodeRemovingDelegate = (XmlNodeChangedEventHandler)Delegate.Combine(this.onNodeRemovingDelegate, value);
-			}
-			remove
-			{
-				this.onNodeRemovingDelegate = (XmlNodeChangedEventHandler)Delegate.Remove(this.onNodeRemovingDelegate, value);
-			}
-		}
-
-		public event XmlNodeChangedEventHandler NodeRemoved
-		{
-			add
-			{
-				this.onNodeRemovedDelegate = (XmlNodeChangedEventHandler)Delegate.Combine(this.onNodeRemovedDelegate, value);
-			}
-			remove
-			{
-				this.onNodeRemovedDelegate = (XmlNodeChangedEventHandler)Delegate.Remove(this.onNodeRemovedDelegate, value);
-			}
-		}
-
-		public event XmlNodeChangedEventHandler NodeChanging
-		{
-			add
-			{
-				this.onNodeChangingDelegate = (XmlNodeChangedEventHandler)Delegate.Combine(this.onNodeChangingDelegate, value);
-			}
-			remove
-			{
-				this.onNodeChangingDelegate = (XmlNodeChangedEventHandler)Delegate.Remove(this.onNodeChangingDelegate, value);
-			}
-		}
-
-		public event XmlNodeChangedEventHandler NodeChanged
-		{
-			add
-			{
-				this.onNodeChangedDelegate = (XmlNodeChangedEventHandler)Delegate.Combine(this.onNodeChangedDelegate, value);
-			}
-			remove
-			{
-				this.onNodeChangedDelegate = (XmlNodeChangedEventHandler)Delegate.Remove(this.onNodeChangedDelegate, value);
-			}
-		}
-
-		internal override XmlNodeChangedEventArgs GetEventArgs(XmlNode node, XmlNode oldParent, XmlNode newParent, string oldValue, string newValue, XmlNodeChangedAction action)
-		{
-			this.reportValidity = false;
-			switch (action)
-			{
-			case XmlNodeChangedAction.Insert:
-				if (this.onNodeInsertingDelegate == null && this.onNodeInsertedDelegate == null)
-				{
-					return null;
-				}
-				break;
-			case XmlNodeChangedAction.Remove:
-				if (this.onNodeRemovingDelegate == null && this.onNodeRemovedDelegate == null)
-				{
-					return null;
-				}
-				break;
-			case XmlNodeChangedAction.Change:
-				if (this.onNodeChangingDelegate == null && this.onNodeChangedDelegate == null)
-				{
-					return null;
-				}
-				break;
-			}
-			return new XmlNodeChangedEventArgs(node, oldParent, newParent, oldValue, newValue, action);
-		}
-
-		internal XmlNodeChangedEventArgs GetInsertEventArgsForLoad(XmlNode node, XmlNode newParent)
-		{
-			if (this.onNodeInsertingDelegate == null && this.onNodeInsertedDelegate == null)
-			{
-				return null;
-			}
-			string value = node.Value;
-			return new XmlNodeChangedEventArgs(node, null, newParent, value, value, XmlNodeChangedAction.Insert);
-		}
-
-		internal override void BeforeEvent(XmlNodeChangedEventArgs args)
-		{
-			if (args != null)
-			{
-				switch (args.Action)
-				{
-				case XmlNodeChangedAction.Insert:
-					if (this.onNodeInsertingDelegate != null)
-					{
-						this.onNodeInsertingDelegate(this, args);
-						return;
-					}
-					break;
-				case XmlNodeChangedAction.Remove:
-					if (this.onNodeRemovingDelegate != null)
-					{
-						this.onNodeRemovingDelegate(this, args);
-						return;
-					}
-					break;
-				case XmlNodeChangedAction.Change:
-					if (this.onNodeChangingDelegate != null)
-					{
-						this.onNodeChangingDelegate(this, args);
-					}
-					break;
-				default:
-					return;
-				}
-			}
-		}
-
-		internal override void AfterEvent(XmlNodeChangedEventArgs args)
-		{
-			if (args != null)
-			{
-				switch (args.Action)
-				{
-				case XmlNodeChangedAction.Insert:
-					if (this.onNodeInsertedDelegate != null)
-					{
-						this.onNodeInsertedDelegate(this, args);
-						return;
-					}
-					break;
-				case XmlNodeChangedAction.Remove:
-					if (this.onNodeRemovedDelegate != null)
-					{
-						this.onNodeRemovedDelegate(this, args);
-						return;
-					}
-					break;
-				case XmlNodeChangedAction.Change:
-					if (this.onNodeChangedDelegate != null)
-					{
-						this.onNodeChangedDelegate(this, args);
-					}
-					break;
-				default:
-					return;
-				}
-			}
-		}
-
-		internal XmlAttribute GetDefaultAttribute(XmlElement elem, string attrPrefix, string attrLocalname, string attrNamespaceURI)
-		{
-			SchemaInfo dtdSchemaInfo = this.DtdSchemaInfo;
-			SchemaElementDecl schemaElementDecl = this.GetSchemaElementDecl(elem);
-			if (schemaElementDecl != null && schemaElementDecl.AttDefs != null)
-			{
-				IDictionaryEnumerator dictionaryEnumerator = schemaElementDecl.AttDefs.GetEnumerator();
-				while (dictionaryEnumerator.MoveNext())
-				{
-					SchemaAttDef schemaAttDef = (SchemaAttDef)dictionaryEnumerator.Value;
-					if ((schemaAttDef.Presence == SchemaDeclBase.Use.Default || schemaAttDef.Presence == SchemaDeclBase.Use.Fixed) && schemaAttDef.Name.Name == attrLocalname && ((dtdSchemaInfo.SchemaType == SchemaType.DTD && schemaAttDef.Name.Namespace == attrPrefix) || (dtdSchemaInfo.SchemaType != SchemaType.DTD && schemaAttDef.Name.Namespace == attrNamespaceURI)))
-					{
-						return this.PrepareDefaultAttribute(schemaAttDef, attrPrefix, attrLocalname, attrNamespaceURI);
-					}
-				}
-			}
-			return null;
-		}
-
-		internal string Version
+		public override bool IsReadOnly
 		{
 			get
 			{
-				XmlDeclaration declaration = this.Declaration;
-				if (declaration != null)
-				{
-					return declaration.Version;
-				}
-				return null;
+				return false;
 			}
 		}
 
-		internal string Encoding
+		internal bool IsStandalone
 		{
 			get
 			{
-				XmlDeclaration declaration = this.Declaration;
-				if (declaration != null)
-				{
-					return declaration.Encoding;
-				}
-				return null;
+				return this.FirstChild != null && this.FirstChild.NodeType == XmlNodeType.XmlDeclaration && ((XmlDeclaration)this.FirstChild).Standalone == "yes";
 			}
 		}
 
-		internal string Standalone
+		public override string LocalName
 		{
 			get
 			{
-				XmlDeclaration declaration = this.Declaration;
-				if (declaration != null)
-				{
-					return declaration.Standalone;
-				}
-				return null;
+				return "#document";
 			}
 		}
 
-		internal XmlEntity GetEntityNode(string name)
-		{
-			if (this.DocumentType != null)
-			{
-				XmlNamedNodeMap xmlNamedNodeMap = this.DocumentType.Entities;
-				if (xmlNamedNodeMap != null)
-				{
-					return (XmlEntity)xmlNamedNodeMap.GetNamedItem(name);
-				}
-			}
-			return null;
-		}
-
-		public override IXmlSchemaInfo SchemaInfo
+		public override string Name
 		{
 			get
 			{
-				if (this.reportValidity)
-				{
-					XmlElement documentElement = this.DocumentElement;
-					if (documentElement != null)
-					{
-						XmlSchemaValidity validity = documentElement.SchemaInfo.Validity;
-						if (validity == XmlSchemaValidity.Valid)
-						{
-							return XmlDocument.ValidSchemaInfo;
-						}
-						if (validity == XmlSchemaValidity.Invalid)
-						{
-							return XmlDocument.InvalidSchemaInfo;
-						}
-					}
-				}
-				return XmlDocument.NotKnownSchemaInfo;
+				return "#document";
 			}
 		}
 
-		public override string BaseURI
+		internal XmlNameEntryCache NameCache
 		{
 			get
 			{
-				return this.baseURI;
+				return this.nameCache;
 			}
 		}
 
-		internal void SetBaseURI(string inBaseURI)
+		public XmlNameTable NameTable
 		{
-			this.baseURI = inBaseURI;
+			get
+			{
+				return this.nameTable;
+			}
 		}
 
-		internal override XmlNode AppendChildForLoad(XmlNode newChild, XmlDocument doc)
+		public override XmlNodeType NodeType
 		{
-			if (!this.IsValidChildType(newChild.NodeType))
+			get
 			{
-				throw new InvalidOperationException(Res.GetString("The specified node cannot be inserted as the valid child of this node, because the specified node is the wrong type."));
+				return XmlNodeType.Document;
 			}
-			if (!this.CanInsertAfter(newChild, this.LastChild))
-			{
-				throw new InvalidOperationException(Res.GetString("Cannot insert the node in the specified location."));
-			}
-			XmlNodeChangedEventArgs insertEventArgsForLoad = this.GetInsertEventArgsForLoad(newChild, this);
-			if (insertEventArgsForLoad != null)
-			{
-				this.BeforeEvent(insertEventArgsForLoad);
-			}
-			XmlLinkedNode xmlLinkedNode = (XmlLinkedNode)newChild;
-			if (this.lastChild == null)
-			{
-				xmlLinkedNode.next = xmlLinkedNode;
-			}
-			else
-			{
-				xmlLinkedNode.next = this.lastChild.next;
-				this.lastChild.next = xmlLinkedNode;
-			}
-			this.lastChild = xmlLinkedNode;
-			xmlLinkedNode.SetParentForLoad(this);
-			if (insertEventArgsForLoad != null)
-			{
-				this.AfterEvent(insertEventArgsForLoad);
-			}
-			return xmlLinkedNode;
 		}
 
-		internal override XPathNodeType XPNodeType
+		internal override XPathNodeType XPathNodeType
 		{
 			get
 			{
@@ -1671,115 +212,1014 @@ namespace System.Xml
 			}
 		}
 
-		internal bool HasEntityReferences
+		public override XmlDocument OwnerDocument
 		{
 			get
 			{
-				return this.fEntRefNodesPresent;
+				return null;
 			}
 		}
 
-		internal XmlAttribute NamespaceXml
+		public bool PreserveWhitespace
 		{
 			get
 			{
-				if (this.namespaceXml == null)
-				{
-					this.namespaceXml = new XmlAttribute(this.AddAttrXmlName(this.strXmlns, this.strXml, this.strReservedXmlns, null), this);
-					this.namespaceXml.Value = this.strReservedXml;
-				}
-				return this.namespaceXml;
+				return this.preserveWhitespace;
+			}
+			set
+			{
+				this.preserveWhitespace = value;
 			}
 		}
+
+		internal XmlResolver Resolver
+		{
+			get
+			{
+				return this.resolver;
+			}
+		}
+
+		internal override string XmlLang
+		{
+			get
+			{
+				return string.Empty;
+			}
+		}
+
+		public virtual XmlResolver XmlResolver
+		{
+			set
+			{
+				this.resolver = value;
+			}
+		}
+
+		internal override XmlSpace XmlSpace
+		{
+			get
+			{
+				return XmlSpace.None;
+			}
+		}
+
+		internal Encoding TextEncoding
+		{
+			get
+			{
+				XmlDeclaration xmlDeclaration = this.FirstChild as XmlDeclaration;
+				if (xmlDeclaration == null || xmlDeclaration.Encoding == string.Empty)
+				{
+					return null;
+				}
+				return Encoding.GetEncoding(xmlDeclaration.Encoding);
+			}
+		}
+
+		public override XmlNode ParentNode
+		{
+			get
+			{
+				return null;
+			}
+		}
+
+		public XmlSchemaSet Schemas
+		{
+			get
+			{
+				if (this.schemas == null)
+				{
+					this.schemas = new XmlSchemaSet();
+				}
+				return this.schemas;
+			}
+			set
+			{
+				this.schemas = value;
+			}
+		}
+
+		public override IXmlSchemaInfo SchemaInfo
+		{
+			get
+			{
+				return this.schemaInfo;
+			}
+			internal set
+			{
+				this.schemaInfo = value;
+			}
+		}
+
+		internal void AddIdenticalAttribute(XmlAttribute attr)
+		{
+			this.idTable[attr.Value] = attr;
+		}
+
+		public override XmlNode CloneNode(bool deep)
+		{
+			XmlDocument xmlDocument = ((this.implementation == null) ? new XmlDocument() : this.implementation.CreateDocument());
+			xmlDocument.baseURI = this.baseURI;
+			if (deep)
+			{
+				for (XmlNode xmlNode = this.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
+				{
+					xmlDocument.AppendChild(xmlDocument.ImportNode(xmlNode, deep), false);
+				}
+			}
+			return xmlDocument;
+		}
+
+		public XmlAttribute CreateAttribute(string name)
+		{
+			string text = string.Empty;
+			string text2;
+			string text3;
+			this.ParseName(name, out text2, out text3);
+			if (text2 == "xmlns" || (text2 == string.Empty && text3 == "xmlns"))
+			{
+				text = "http://www.w3.org/2000/xmlns/";
+			}
+			else if (text2 == "xml")
+			{
+				text = "http://www.w3.org/XML/1998/namespace";
+			}
+			return this.CreateAttribute(text2, text3, text);
+		}
+
+		public XmlAttribute CreateAttribute(string qualifiedName, string namespaceURI)
+		{
+			string text;
+			string text2;
+			this.ParseName(qualifiedName, out text, out text2);
+			return this.CreateAttribute(text, text2, namespaceURI);
+		}
+
+		public virtual XmlAttribute CreateAttribute(string prefix, string localName, string namespaceURI)
+		{
+			if (localName == null || localName == string.Empty)
+			{
+				throw new ArgumentException("The attribute local name cannot be empty.");
+			}
+			return new XmlAttribute(prefix, localName, namespaceURI, this, false, true);
+		}
+
+		internal XmlAttribute CreateAttribute(string prefix, string localName, string namespaceURI, bool atomizedNames, bool checkNamespace)
+		{
+			if (this.optimal_create_attribute)
+			{
+				return new XmlAttribute(prefix, localName, namespaceURI, this, atomizedNames, checkNamespace);
+			}
+			return this.CreateAttribute(prefix, localName, namespaceURI);
+		}
+
+		public virtual XmlCDataSection CreateCDataSection(string data)
+		{
+			return new XmlCDataSection(data, this);
+		}
+
+		public virtual XmlComment CreateComment(string data)
+		{
+			return new XmlComment(data, this);
+		}
+
+		protected internal virtual XmlAttribute CreateDefaultAttribute(string prefix, string localName, string namespaceURI)
+		{
+			XmlAttribute xmlAttribute = this.CreateAttribute(prefix, localName, namespaceURI);
+			xmlAttribute.isDefault = true;
+			return xmlAttribute;
+		}
+
+		public virtual XmlDocumentFragment CreateDocumentFragment()
+		{
+			return new XmlDocumentFragment(this);
+		}
+
+		[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public virtual XmlDocumentType CreateDocumentType(string name, string publicId, string systemId, string internalSubset)
+		{
+			return new XmlDocumentType(name, publicId, systemId, internalSubset, this);
+		}
+
+		private XmlDocumentType CreateDocumentType(DTDObjectModel dtd)
+		{
+			return new XmlDocumentType(dtd, this);
+		}
+
+		public XmlElement CreateElement(string name)
+		{
+			return this.CreateElement(name, string.Empty);
+		}
+
+		public XmlElement CreateElement(string qualifiedName, string namespaceURI)
+		{
+			string text;
+			string text2;
+			this.ParseName(qualifiedName, out text, out text2);
+			return this.CreateElement(text, text2, namespaceURI);
+		}
+
+		public virtual XmlElement CreateElement(string prefix, string localName, string namespaceURI)
+		{
+			return new XmlElement((prefix == null) ? string.Empty : prefix, localName, (namespaceURI == null) ? string.Empty : namespaceURI, this, false);
+		}
+
+		internal XmlElement CreateElement(string prefix, string localName, string namespaceURI, bool nameAtomized)
+		{
+			if (localName == null || localName == string.Empty)
+			{
+				throw new ArgumentException("The local name for elements or attributes cannot be null or an empty string.");
+			}
+			if (this.optimal_create_element)
+			{
+				return new XmlElement((prefix == null) ? string.Empty : prefix, localName, (namespaceURI == null) ? string.Empty : namespaceURI, this, nameAtomized);
+			}
+			return this.CreateElement(prefix, localName, namespaceURI);
+		}
+
+		public virtual XmlEntityReference CreateEntityReference(string name)
+		{
+			return new XmlEntityReference(name, this);
+		}
+
+		public override XPathNavigator CreateNavigator()
+		{
+			return this.CreateNavigator(this);
+		}
+
+		protected internal virtual XPathNavigator CreateNavigator(XmlNode node)
+		{
+			return new XPathEditableDocument(node).CreateNavigator();
+		}
+
+		public virtual XmlNode CreateNode(string nodeTypeString, string name, string namespaceURI)
+		{
+			return this.CreateNode(this.GetNodeTypeFromString(nodeTypeString), name, namespaceURI);
+		}
+
+		public virtual XmlNode CreateNode(XmlNodeType type, string name, string namespaceURI)
+		{
+			string text = null;
+			string text2 = name;
+			if (type == XmlNodeType.Attribute || type == XmlNodeType.Element || type == XmlNodeType.EntityReference)
+			{
+				this.ParseName(name, out text, out text2);
+			}
+			return this.CreateNode(type, text, text2, namespaceURI);
+		}
+
+		public virtual XmlNode CreateNode(XmlNodeType type, string prefix, string name, string namespaceURI)
+		{
+			switch (type)
+			{
+			case XmlNodeType.Element:
+				return this.CreateElement(prefix, name, namespaceURI);
+			case XmlNodeType.Attribute:
+				return this.CreateAttribute(prefix, name, namespaceURI);
+			case XmlNodeType.Text:
+				return this.CreateTextNode(null);
+			case XmlNodeType.CDATA:
+				return this.CreateCDataSection(null);
+			case XmlNodeType.EntityReference:
+				return this.CreateEntityReference(null);
+			case XmlNodeType.ProcessingInstruction:
+				return this.CreateProcessingInstruction(null, null);
+			case XmlNodeType.Comment:
+				return this.CreateComment(null);
+			case XmlNodeType.Document:
+				return new XmlDocument();
+			case XmlNodeType.DocumentType:
+				return this.CreateDocumentType(null, null, null, null);
+			case XmlNodeType.DocumentFragment:
+				return this.CreateDocumentFragment();
+			case XmlNodeType.Whitespace:
+				return this.CreateWhitespace(string.Empty);
+			case XmlNodeType.SignificantWhitespace:
+				return this.CreateSignificantWhitespace(string.Empty);
+			case XmlNodeType.XmlDeclaration:
+				return this.CreateXmlDeclaration("1.0", null, null);
+			}
+			throw new ArgumentException(string.Format("{0}\nParameter name: {1}", "Specified argument was out of the range of valid values", type.ToString()));
+		}
+
+		public virtual XmlProcessingInstruction CreateProcessingInstruction(string target, string data)
+		{
+			return new XmlProcessingInstruction(target, data, this);
+		}
+
+		public virtual XmlSignificantWhitespace CreateSignificantWhitespace(string text)
+		{
+			if (!XmlChar.IsWhitespace(text))
+			{
+				throw new ArgumentException("Invalid whitespace characters.");
+			}
+			return new XmlSignificantWhitespace(text, this);
+		}
+
+		public virtual XmlText CreateTextNode(string text)
+		{
+			return new XmlText(text, this);
+		}
+
+		public virtual XmlWhitespace CreateWhitespace(string text)
+		{
+			if (!XmlChar.IsWhitespace(text))
+			{
+				throw new ArgumentException("Invalid whitespace characters.");
+			}
+			return new XmlWhitespace(text, this);
+		}
+
+		public virtual XmlDeclaration CreateXmlDeclaration(string version, string encoding, string standalone)
+		{
+			if (version != "1.0")
+			{
+				throw new ArgumentException("version string is not correct.");
+			}
+			if (standalone != null && standalone != string.Empty && !(standalone == "yes") && !(standalone == "no"))
+			{
+				throw new ArgumentException("standalone string is not correct.");
+			}
+			return new XmlDeclaration(version, encoding, standalone, this);
+		}
+
+		public virtual XmlElement GetElementById(string elementId)
+		{
+			XmlAttribute identicalAttribute = this.GetIdenticalAttribute(elementId);
+			return (identicalAttribute == null) ? null : identicalAttribute.OwnerElement;
+		}
+
+		public virtual XmlNodeList GetElementsByTagName(string name)
+		{
+			ArrayList arrayList = new ArrayList();
+			base.SearchDescendantElements(name, name == "*", arrayList);
+			return new XmlNodeArrayList(arrayList);
+		}
+
+		public virtual XmlNodeList GetElementsByTagName(string localName, string namespaceURI)
+		{
+			ArrayList arrayList = new ArrayList();
+			base.SearchDescendantElements(localName, localName == "*", namespaceURI, namespaceURI == "*", arrayList);
+			return new XmlNodeArrayList(arrayList);
+		}
+
+		private XmlNodeType GetNodeTypeFromString(string nodeTypeString)
+		{
+			if (nodeTypeString == null)
+			{
+				throw new ArgumentNullException("nodeTypeString");
+			}
+			switch (nodeTypeString)
+			{
+			case "attribute":
+				return XmlNodeType.Attribute;
+			case "cdatasection":
+				return XmlNodeType.CDATA;
+			case "comment":
+				return XmlNodeType.Comment;
+			case "document":
+				return XmlNodeType.Document;
+			case "documentfragment":
+				return XmlNodeType.DocumentFragment;
+			case "documenttype":
+				return XmlNodeType.DocumentType;
+			case "element":
+				return XmlNodeType.Element;
+			case "entityreference":
+				return XmlNodeType.EntityReference;
+			case "processinginstruction":
+				return XmlNodeType.ProcessingInstruction;
+			case "significantwhitespace":
+				return XmlNodeType.SignificantWhitespace;
+			case "text":
+				return XmlNodeType.Text;
+			case "whitespace":
+				return XmlNodeType.Whitespace;
+			}
+			throw new ArgumentException(string.Format("The string doesn't represent any node type : {0}.", nodeTypeString));
+		}
+
+		internal XmlAttribute GetIdenticalAttribute(string id)
+		{
+			XmlAttribute xmlAttribute = this.idTable[id] as XmlAttribute;
+			if (xmlAttribute == null)
+			{
+				return null;
+			}
+			if (xmlAttribute.OwnerElement == null || !xmlAttribute.OwnerElement.IsRooted)
+			{
+				return null;
+			}
+			return xmlAttribute;
+		}
+
+		public virtual XmlNode ImportNode(XmlNode node, bool deep)
+		{
+			if (node == null)
+			{
+				throw new NullReferenceException("Null node cannot be imported.");
+			}
+			switch (node.NodeType)
+			{
+			case XmlNodeType.None:
+				throw new XmlException("Illegal ImportNode call for NodeType.None");
+			case XmlNodeType.Element:
+			{
+				XmlElement xmlElement = (XmlElement)node;
+				XmlElement xmlElement2 = this.CreateElement(xmlElement.Prefix, xmlElement.LocalName, xmlElement.NamespaceURI);
+				for (int i = 0; i < xmlElement.Attributes.Count; i++)
+				{
+					XmlAttribute xmlAttribute = xmlElement.Attributes[i];
+					if (xmlAttribute.Specified)
+					{
+						xmlElement2.SetAttributeNode((XmlAttribute)this.ImportNode(xmlAttribute, deep));
+					}
+				}
+				if (deep)
+				{
+					for (XmlNode xmlNode = xmlElement.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
+					{
+						xmlElement2.AppendChild(this.ImportNode(xmlNode, deep));
+					}
+				}
+				return xmlElement2;
+			}
+			case XmlNodeType.Attribute:
+			{
+				XmlAttribute xmlAttribute2 = node as XmlAttribute;
+				XmlAttribute xmlAttribute3 = this.CreateAttribute(xmlAttribute2.Prefix, xmlAttribute2.LocalName, xmlAttribute2.NamespaceURI);
+				for (XmlNode xmlNode2 = xmlAttribute2.FirstChild; xmlNode2 != null; xmlNode2 = xmlNode2.NextSibling)
+				{
+					xmlAttribute3.AppendChild(this.ImportNode(xmlNode2, deep));
+				}
+				return xmlAttribute3;
+			}
+			case XmlNodeType.Text:
+				return this.CreateTextNode(node.Value);
+			case XmlNodeType.CDATA:
+				return this.CreateCDataSection(node.Value);
+			case XmlNodeType.EntityReference:
+				return this.CreateEntityReference(node.Name);
+			case XmlNodeType.ProcessingInstruction:
+			{
+				XmlProcessingInstruction xmlProcessingInstruction = node as XmlProcessingInstruction;
+				return this.CreateProcessingInstruction(xmlProcessingInstruction.Target, xmlProcessingInstruction.Data);
+			}
+			case XmlNodeType.Comment:
+				return this.CreateComment(node.Value);
+			case XmlNodeType.Document:
+				throw new XmlException("Document cannot be imported.");
+			case XmlNodeType.DocumentType:
+				throw new XmlException("DocumentType cannot be imported.");
+			case XmlNodeType.DocumentFragment:
+			{
+				XmlDocumentFragment xmlDocumentFragment = this.CreateDocumentFragment();
+				if (deep)
+				{
+					for (XmlNode xmlNode3 = node.FirstChild; xmlNode3 != null; xmlNode3 = xmlNode3.NextSibling)
+					{
+						xmlDocumentFragment.AppendChild(this.ImportNode(xmlNode3, deep));
+					}
+				}
+				return xmlDocumentFragment;
+			}
+			case XmlNodeType.Whitespace:
+				return this.CreateWhitespace(node.Value);
+			case XmlNodeType.SignificantWhitespace:
+				return this.CreateSignificantWhitespace(node.Value);
+			case XmlNodeType.EndElement:
+				throw new XmlException("Illegal ImportNode call for NodeType.EndElement");
+			case XmlNodeType.EndEntity:
+				throw new XmlException("Illegal ImportNode call for NodeType.EndEntity");
+			case XmlNodeType.XmlDeclaration:
+			{
+				XmlDeclaration xmlDeclaration = node as XmlDeclaration;
+				return this.CreateXmlDeclaration(xmlDeclaration.Version, xmlDeclaration.Encoding, xmlDeclaration.Standalone);
+			}
+			}
+			throw new InvalidOperationException("Cannot import specified node type: " + node.NodeType);
+		}
+
+		public virtual void Load(Stream inStream)
+		{
+			this.Load(new XmlValidatingReader(new XmlTextReader(inStream, this.NameTable)
+			{
+				XmlResolver = this.resolver
+			})
+			{
+				EntityHandling = EntityHandling.ExpandCharEntities,
+				ValidationType = ValidationType.None
+			});
+		}
+
+		public virtual void Load(string filename)
+		{
+			XmlTextReader xmlTextReader = null;
+			try
+			{
+				xmlTextReader = new XmlTextReader(filename, this.NameTable);
+				xmlTextReader.XmlResolver = this.resolver;
+				this.Load(new XmlValidatingReader(xmlTextReader)
+				{
+					EntityHandling = EntityHandling.ExpandCharEntities,
+					ValidationType = ValidationType.None
+				});
+			}
+			finally
+			{
+				if (xmlTextReader != null)
+				{
+					xmlTextReader.Close();
+				}
+			}
+		}
+
+		public virtual void Load(TextReader txtReader)
+		{
+			XmlTextReader xmlTextReader = new XmlTextReader(txtReader, this.NameTable);
+			XmlValidatingReader xmlValidatingReader = new XmlValidatingReader(xmlTextReader);
+			xmlValidatingReader.EntityHandling = EntityHandling.ExpandCharEntities;
+			xmlValidatingReader.ValidationType = ValidationType.None;
+			xmlTextReader.XmlResolver = this.resolver;
+			this.Load(xmlValidatingReader);
+		}
+
+		public virtual void Load(XmlReader xmlReader)
+		{
+			this.RemoveAll();
+			this.baseURI = xmlReader.BaseURI;
+			try
+			{
+				this.loadMode = true;
+				for (;;)
+				{
+					XmlNode xmlNode = this.ReadNode(xmlReader);
+					if (xmlNode == null)
+					{
+						break;
+					}
+					if (this.preserveWhitespace || xmlNode.NodeType != XmlNodeType.Whitespace)
+					{
+						base.AppendChild(xmlNode, false);
+					}
+				}
+				if (xmlReader.Settings != null)
+				{
+					this.schemas = xmlReader.Settings.Schemas;
+				}
+			}
+			finally
+			{
+				this.loadMode = false;
+			}
+		}
+
+		public virtual void LoadXml(string xml)
+		{
+			XmlTextReader xmlTextReader = new XmlTextReader(xml, XmlNodeType.Document, new XmlParserContext(this.NameTable, new XmlNamespaceManager(this.NameTable), null, XmlSpace.None));
+			try
+			{
+				xmlTextReader.XmlResolver = this.resolver;
+				this.Load(xmlTextReader);
+			}
+			finally
+			{
+				xmlTextReader.Close();
+			}
+		}
+
+		internal void onNodeChanged(XmlNode node, XmlNode parent, string oldValue, string newValue)
+		{
+			if (this.NodeChanged != null)
+			{
+				this.NodeChanged(node, new XmlNodeChangedEventArgs(node, parent, parent, oldValue, newValue, XmlNodeChangedAction.Change));
+			}
+		}
+
+		internal void onNodeChanging(XmlNode node, XmlNode parent, string oldValue, string newValue)
+		{
+			if (node.IsReadOnly)
+			{
+				throw new ArgumentException("Node is read-only.");
+			}
+			if (this.NodeChanging != null)
+			{
+				this.NodeChanging(node, new XmlNodeChangedEventArgs(node, parent, parent, oldValue, newValue, XmlNodeChangedAction.Change));
+			}
+		}
+
+		internal void onNodeInserted(XmlNode node, XmlNode newParent)
+		{
+			if (this.NodeInserted != null)
+			{
+				this.NodeInserted(node, new XmlNodeChangedEventArgs(node, null, newParent, null, null, XmlNodeChangedAction.Insert));
+			}
+		}
+
+		internal void onNodeInserting(XmlNode node, XmlNode newParent)
+		{
+			if (this.NodeInserting != null)
+			{
+				this.NodeInserting(node, new XmlNodeChangedEventArgs(node, null, newParent, null, null, XmlNodeChangedAction.Insert));
+			}
+		}
+
+		internal void onNodeRemoved(XmlNode node, XmlNode oldParent)
+		{
+			if (this.NodeRemoved != null)
+			{
+				this.NodeRemoved(node, new XmlNodeChangedEventArgs(node, oldParent, null, null, null, XmlNodeChangedAction.Remove));
+			}
+		}
+
+		internal void onNodeRemoving(XmlNode node, XmlNode oldParent)
+		{
+			if (this.NodeRemoving != null)
+			{
+				this.NodeRemoving(node, new XmlNodeChangedEventArgs(node, oldParent, null, null, null, XmlNodeChangedAction.Remove));
+			}
+		}
+
+		private void ParseName(string name, out string prefix, out string localName)
+		{
+			int num = name.IndexOf(':');
+			if (num != -1)
+			{
+				prefix = name.Substring(0, num);
+				localName = name.Substring(num + 1);
+			}
+			else
+			{
+				prefix = string.Empty;
+				localName = name;
+			}
+		}
+
+		private XmlAttribute ReadAttributeNode(XmlReader reader)
+		{
+			if (reader.NodeType == XmlNodeType.Element)
+			{
+				reader.MoveToFirstAttribute();
+			}
+			else if (reader.NodeType != XmlNodeType.Attribute)
+			{
+				throw new InvalidOperationException(this.MakeReaderErrorMessage("bad position to read attribute.", reader));
+			}
+			XmlAttribute xmlAttribute = this.CreateAttribute(reader.Prefix, reader.LocalName, reader.NamespaceURI);
+			if (reader.SchemaInfo != null)
+			{
+				this.SchemaInfo = new XmlSchemaInfo(reader.SchemaInfo);
+			}
+			bool isDefault = reader.IsDefault;
+			this.ReadAttributeNodeValue(reader, xmlAttribute);
+			if (isDefault)
+			{
+				xmlAttribute.SetDefault();
+			}
+			return xmlAttribute;
+		}
+
+		internal void ReadAttributeNodeValue(XmlReader reader, XmlAttribute attribute)
+		{
+			while (reader.ReadAttributeValue())
+			{
+				if (reader.NodeType == XmlNodeType.EntityReference)
+				{
+					attribute.AppendChild(this.CreateEntityReference(reader.Name), false);
+				}
+				else
+				{
+					attribute.AppendChild(this.CreateTextNode(reader.Value), false);
+				}
+			}
+		}
+
+		[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public virtual XmlNode ReadNode(XmlReader reader)
+		{
+			if (this.PreserveWhitespace)
+			{
+				return this.ReadNodeCore(reader);
+			}
+			XmlTextReader xmlTextReader = reader as XmlTextReader;
+			if (xmlTextReader != null && xmlTextReader.WhitespaceHandling == WhitespaceHandling.All)
+			{
+				try
+				{
+					xmlTextReader.WhitespaceHandling = WhitespaceHandling.Significant;
+					return this.ReadNodeCore(reader);
+				}
+				finally
+				{
+					xmlTextReader.WhitespaceHandling = WhitespaceHandling.All;
+				}
+			}
+			return this.ReadNodeCore(reader);
+		}
+
+		private XmlNode ReadNodeCore(XmlReader reader)
+		{
+			ReadState readState = reader.ReadState;
+			if (readState != ReadState.Initial)
+			{
+				if (readState != ReadState.Interactive)
+				{
+					return null;
+				}
+			}
+			else
+			{
+				if (reader.SchemaInfo != null)
+				{
+					this.SchemaInfo = new XmlSchemaInfo(reader.SchemaInfo);
+				}
+				reader.Read();
+			}
+			XmlNode xmlNode;
+			switch (reader.NodeType)
+			{
+			case XmlNodeType.None:
+				return null;
+			case XmlNodeType.Element:
+			{
+				XmlElement xmlElement = this.CreateElement(reader.Prefix, reader.LocalName, reader.NamespaceURI, reader.NameTable == this.NameTable);
+				if (reader.SchemaInfo != null)
+				{
+					this.SchemaInfo = new XmlSchemaInfo(reader.SchemaInfo);
+				}
+				xmlElement.IsEmpty = reader.IsEmptyElement;
+				for (int i = 0; i < reader.AttributeCount; i++)
+				{
+					reader.MoveToAttribute(i);
+					xmlElement.SetAttributeNode(this.ReadAttributeNode(reader));
+					reader.MoveToElement();
+				}
+				reader.MoveToElement();
+				int depth = reader.Depth;
+				if (reader.IsEmptyElement)
+				{
+					xmlNode = xmlElement;
+					goto IL_036A;
+				}
+				reader.Read();
+				while (reader.Depth > depth)
+				{
+					xmlNode = this.ReadNodeCore(reader);
+					if (this.preserveWhitespace || xmlNode.NodeType != XmlNodeType.Whitespace)
+					{
+						xmlElement.AppendChild(xmlNode, false);
+					}
+				}
+				xmlNode = xmlElement;
+				goto IL_036A;
+			}
+			case XmlNodeType.Attribute:
+			{
+				string localName = reader.LocalName;
+				string namespaceURI = reader.NamespaceURI;
+				xmlNode = this.ReadAttributeNode(reader);
+				reader.MoveToAttribute(localName, namespaceURI);
+				return xmlNode;
+			}
+			case XmlNodeType.Text:
+				xmlNode = this.CreateTextNode(reader.Value);
+				goto IL_036A;
+			case XmlNodeType.CDATA:
+				xmlNode = this.CreateCDataSection(reader.Value);
+				goto IL_036A;
+			case XmlNodeType.EntityReference:
+				if (this.loadMode && this.DocumentType != null && this.DocumentType.Entities.GetNamedItem(reader.Name) == null)
+				{
+					throw new XmlException("Reference to undeclared entity was found.");
+				}
+				xmlNode = this.CreateEntityReference(reader.Name);
+				if (reader.CanResolveEntity)
+				{
+					reader.ResolveEntity();
+					reader.Read();
+					XmlNode xmlNode2;
+					while (reader.NodeType != XmlNodeType.EndEntity && (xmlNode2 = this.ReadNode(reader)) != null)
+					{
+						xmlNode.InsertBefore(xmlNode2, null, false, false);
+					}
+				}
+				goto IL_036A;
+			case XmlNodeType.ProcessingInstruction:
+				xmlNode = this.CreateProcessingInstruction(reader.Name, reader.Value);
+				goto IL_036A;
+			case XmlNodeType.Comment:
+				xmlNode = this.CreateComment(reader.Value);
+				goto IL_036A;
+			case XmlNodeType.DocumentType:
+			{
+				DTDObjectModel dtdobjectModel = null;
+				IHasXmlParserContext hasXmlParserContext = reader as IHasXmlParserContext;
+				if (hasXmlParserContext != null)
+				{
+					dtdobjectModel = hasXmlParserContext.ParserContext.Dtd;
+				}
+				if (dtdobjectModel != null)
+				{
+					xmlNode = this.CreateDocumentType(dtdobjectModel);
+				}
+				else
+				{
+					xmlNode = this.CreateDocumentType(reader.Name, reader["PUBLIC"], reader["SYSTEM"], reader.Value);
+				}
+				goto IL_036A;
+			}
+			case XmlNodeType.Whitespace:
+				xmlNode = this.CreateWhitespace(reader.Value);
+				goto IL_036A;
+			case XmlNodeType.SignificantWhitespace:
+				xmlNode = this.CreateSignificantWhitespace(reader.Value);
+				goto IL_036A;
+			case XmlNodeType.XmlDeclaration:
+				xmlNode = this.CreateXmlDeclaration("1.0", string.Empty, string.Empty);
+				xmlNode.Value = reader.Value;
+				goto IL_036A;
+			}
+			throw new NullReferenceException("Unexpected node type " + reader.NodeType + ".");
+			IL_036A:
+			reader.Read();
+			return xmlNode;
+		}
+
+		private string MakeReaderErrorMessage(string message, XmlReader reader)
+		{
+			IXmlLineInfo xmlLineInfo = reader as IXmlLineInfo;
+			if (xmlLineInfo != null)
+			{
+				return string.Format(CultureInfo.InvariantCulture, "{0} Line number = {1}, Inline position = {2}.", new object[] { message, xmlLineInfo.LineNumber, xmlLineInfo.LinePosition });
+			}
+			return message;
+		}
+
+		internal void RemoveIdenticalAttribute(string id)
+		{
+			this.idTable.Remove(id);
+		}
+
+		public virtual void Save(Stream outStream)
+		{
+			XmlTextWriter xmlTextWriter = new XmlTextWriter(outStream, this.TextEncoding);
+			if (!this.PreserveWhitespace)
+			{
+				xmlTextWriter.Formatting = Formatting.Indented;
+			}
+			this.WriteContentTo(xmlTextWriter);
+			xmlTextWriter.Flush();
+		}
+
+		public virtual void Save(string filename)
+		{
+			XmlTextWriter xmlTextWriter = new XmlTextWriter(filename, this.TextEncoding);
+			try
+			{
+				if (!this.PreserveWhitespace)
+				{
+					xmlTextWriter.Formatting = Formatting.Indented;
+				}
+				this.WriteContentTo(xmlTextWriter);
+			}
+			finally
+			{
+				xmlTextWriter.Close();
+			}
+		}
+
+		public virtual void Save(TextWriter writer)
+		{
+			XmlTextWriter xmlTextWriter = new XmlTextWriter(writer);
+			if (!this.PreserveWhitespace)
+			{
+				xmlTextWriter.Formatting = Formatting.Indented;
+			}
+			if (this.FirstChild != null && this.FirstChild.NodeType != XmlNodeType.XmlDeclaration)
+			{
+				xmlTextWriter.WriteStartDocument();
+			}
+			this.WriteContentTo(xmlTextWriter);
+			xmlTextWriter.WriteEndDocument();
+			xmlTextWriter.Flush();
+		}
+
+		public virtual void Save(XmlWriter xmlWriter)
+		{
+			bool flag = this.FirstChild != null && this.FirstChild.NodeType != XmlNodeType.XmlDeclaration;
+			if (flag)
+			{
+				xmlWriter.WriteStartDocument();
+			}
+			this.WriteContentTo(xmlWriter);
+			if (flag)
+			{
+				xmlWriter.WriteEndDocument();
+			}
+			xmlWriter.Flush();
+		}
+
+		public override void WriteContentTo(XmlWriter w)
+		{
+			for (XmlNode xmlNode = this.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
+			{
+				xmlNode.WriteTo(w);
+			}
+		}
+
+		public override void WriteTo(XmlWriter w)
+		{
+			this.WriteContentTo(w);
+		}
+
+		private void AddDefaultNameTableKeys()
+		{
+			this.nameTable.Add("#text");
+			this.nameTable.Add("xml");
+			this.nameTable.Add("xmlns");
+			this.nameTable.Add("#entity");
+			this.nameTable.Add("#document-fragment");
+			this.nameTable.Add("#comment");
+			this.nameTable.Add("space");
+			this.nameTable.Add("id");
+			this.nameTable.Add("#whitespace");
+			this.nameTable.Add("http://www.w3.org/2000/xmlns/");
+			this.nameTable.Add("#cdata-section");
+			this.nameTable.Add("lang");
+			this.nameTable.Add("#document");
+			this.nameTable.Add("#significant-whitespace");
+		}
+
+		internal void CheckIdTableUpdate(XmlAttribute attr, string oldValue, string newValue)
+		{
+			if (this.idTable[oldValue] == attr)
+			{
+				this.idTable.Remove(oldValue);
+				this.idTable[newValue] = attr;
+			}
+		}
+
+		public void Validate(ValidationEventHandler handler)
+		{
+			this.Validate(handler, this, XmlSchemaValidationFlags.ProcessIdentityConstraints);
+		}
+
+		public void Validate(ValidationEventHandler handler, XmlNode node)
+		{
+			this.Validate(handler, node, XmlSchemaValidationFlags.ProcessIdentityConstraints);
+		}
+
+		private void Validate(ValidationEventHandler handler, XmlNode node, XmlSchemaValidationFlags flags)
+		{
+			XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+			xmlReaderSettings.NameTable = this.NameTable;
+			xmlReaderSettings.Schemas = this.schemas;
+			xmlReaderSettings.Schemas.XmlResolver = this.resolver;
+			xmlReaderSettings.XmlResolver = this.resolver;
+			xmlReaderSettings.ValidationFlags = flags;
+			xmlReaderSettings.ValidationType = ValidationType.Schema;
+			XmlReader xmlReader = XmlReader.Create(new XmlNodeReader(node), xmlReaderSettings);
+			while (!xmlReader.EOF)
+			{
+				xmlReader.Read();
+			}
+		}
+
+		private static readonly Type[] optimal_create_types = new Type[]
+		{
+			typeof(string),
+			typeof(string),
+			typeof(string)
+		};
+
+		private bool optimal_create_element;
+
+		private bool optimal_create_attribute;
+
+		private XmlNameTable nameTable;
+
+		private string baseURI = string.Empty;
 
 		private XmlImplementation implementation;
 
-		private DomNameTable domNameTable;
-
-		private XmlLinkedNode lastChild;
-
-		private XmlNamedNodeMap entities;
-
-		private Hashtable htElementIdMap;
-
-		private Hashtable htElementIDAttrDecl;
-
-		private SchemaInfo schemaInfo;
-
-		private XmlSchemaSet schemas;
-
-		private bool reportValidity;
-
-		private bool actualLoadingStatus;
-
-		private XmlNodeChangedEventHandler onNodeInsertingDelegate;
-
-		private XmlNodeChangedEventHandler onNodeInsertedDelegate;
-
-		private XmlNodeChangedEventHandler onNodeRemovingDelegate;
-
-		private XmlNodeChangedEventHandler onNodeRemovedDelegate;
-
-		private XmlNodeChangedEventHandler onNodeChangingDelegate;
-
-		private XmlNodeChangedEventHandler onNodeChangedDelegate;
-
-		internal bool fEntRefNodesPresent;
-
-		internal bool fCDataNodesPresent;
-
 		private bool preserveWhitespace;
-
-		private bool isLoading;
-
-		internal string strDocumentName;
-
-		internal string strDocumentFragmentName;
-
-		internal string strCommentName;
-
-		internal string strTextName;
-
-		internal string strCDataSectionName;
-
-		internal string strEntityName;
-
-		internal string strID;
-
-		internal string strXmlns;
-
-		internal string strXml;
-
-		internal string strSpace;
-
-		internal string strLang;
-
-		internal string strEmpty;
-
-		internal string strNonSignificantWhitespaceName;
-
-		internal string strSignificantWhitespaceName;
-
-		internal string strReservedXmlns;
-
-		internal string strReservedXml;
-
-		internal string baseURI;
 
 		private XmlResolver resolver;
 
-		internal bool bSetResolver;
+		private Hashtable idTable = new Hashtable();
 
-		internal object objLock;
+		private XmlNameEntryCache nameCache;
 
-		private XmlAttribute namespaceXml;
+		private XmlLinkedNode lastLinkedChild;
 
-		internal static EmptyEnumerator EmptyEnumerator = new EmptyEnumerator();
+		private XmlAttribute nsNodeXml;
 
-		internal static IXmlSchemaInfo NotKnownSchemaInfo = new XmlSchemaInfo(XmlSchemaValidity.NotKnown);
+		private XmlSchemaSet schemas;
 
-		internal static IXmlSchemaInfo ValidSchemaInfo = new XmlSchemaInfo(XmlSchemaValidity.Valid);
+		private IXmlSchemaInfo schemaInfo;
 
-		internal static IXmlSchemaInfo InvalidSchemaInfo = new XmlSchemaInfo(XmlSchemaValidity.Invalid);
+		private bool loadMode;
 	}
 }

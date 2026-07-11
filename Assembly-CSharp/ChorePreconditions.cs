@@ -498,6 +498,21 @@ public class ChorePreconditions
 			return MournChore.FindGraveToMournAt() != null;
 		};
 		this.ValidMourningSite = precondition39;
+		Chore.Precondition precondition40 = default(Chore.Precondition);
+		precondition40.id = "NotCurrentlyPeeing";
+		precondition40.description = DUPLICANTS.CHORES.PRECONDITIONS.CURRENTLY_PEEING;
+		precondition40.fn = delegate(ref Chore.Precondition.Context context, object data)
+		{
+			bool flag = true;
+			Chore currentChore2 = context.consumerState.choreDriver.GetCurrentChore();
+			if (currentChore2 != null)
+			{
+				string id = currentChore2.choreType.Id;
+				flag = id != Db.Get().ChoreTypes.BreakPee.Id && id != Db.Get().ChoreTypes.Pee.Id;
+			}
+			return flag;
+		};
+		this.NotCurrentlyPeeing = precondition40;
 		base..ctor();
 	}
 
@@ -597,4 +612,6 @@ public class ChorePreconditions
 	public Chore.Precondition NoDeadBodies;
 
 	public Chore.Precondition ValidMourningSite;
+
+	public Chore.Precondition NotCurrentlyPeeing;
 }

@@ -3,29 +3,25 @@ using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using Mono.Net.Security;
+using Mono.Security.Protocol.Tls;
 
 namespace System.Net
 {
 	internal class WebConnection
 	{
-		internal MonoChunkStream MonoChunkStream
+		public WebConnection(WebConnectionGroup group, ServicePoint sPoint)
 		{
-			get
-			{
-				return this.chunkStream;
-			}
-		}
-
-		public WebConnection(IWebConnectionState wcs, ServicePoint sPoint)
-		{
-			this.state = wcs;
 			this.sPoint = sPoint;
 			this.buffer = new byte[4096];
+			this.readState = ReadState.None;
 			this.Data = new WebConnectionData();
-			this.queue = wcs.Group.Queue;
+			this.initConn = new WaitCallback(this.InitConnection);
+			this.queue = group.Queue;
 			this.abortHelper = new WebConnection.AbortHelper();
 			this.abortHelper.Connection = this;
 			this.abortHandler = new EventHandler(this.abortHelper.Abort);
@@ -33,7 +29,75 @@ namespace System.Net
 
 		private bool CanReuse()
 		{
-			return !this.socket.Poll(0, SelectMode.SelectRead);
+			return !this.socket.Poll(0, global::System.Net.Sockets.SelectMode.SelectRead);
+		}
+
+		private void LoggedThrow(Exception e)
+		{
+			Console.WriteLine("Throwing this exception: " + e);
+			throw e;
+		}
+
+		internal static Stream DownloadPolicy(string url, string proxy)
+		{
+			HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+			if (proxy != null)
+			{
+				httpWebRequest.Proxy = new WebProxy(proxy);
+			}
+			return httpWebRequest.GetResponse().GetResponseStream();
+		}
+
+		private void CheckUnityWebSecurity(HttpWebRequest request)
+		{
+			if (!Environment.SocketSecurityEnabled)
+			{
+				return;
+			}
+			Console.WriteLine("CheckingSecurityForUrl: " + request.RequestUri.AbsoluteUri);
+			global::System.Uri requestUri = request.RequestUri;
+			string text = string.Empty;
+			if (!requestUri.IsDefaultPort)
+			{
+				text = ":" + requestUri.Port;
+			}
+			if (requestUri.ToString() == string.Concat(new string[] { requestUri.Scheme, "://", requestUri.Host, text, "/crossdomain.xml" }))
+			{
+				return;
+			}
+			try
+			{
+				if (WebConnection.method_GetSecurityPolicyFromNonMainThread == null)
+				{
+					Type type = Type.GetType("UnityEngine.UnityCrossDomainHelper, CrossDomainPolicyParser, Version=1.0.0.0, Culture=neutral");
+					if (type == null)
+					{
+						this.LoggedThrow(new SecurityException("Cant find type UnityCrossDomainHelper"));
+					}
+					WebConnection.method_GetSecurityPolicyFromNonMainThread = type.GetMethod("GetSecurityPolicyForDotNetWebRequest");
+					if (WebConnection.method_GetSecurityPolicyFromNonMainThread == null)
+					{
+						this.LoggedThrow(new SecurityException("Cant find GetSecurityPolicyFromNonMainThread"));
+					}
+				}
+				MethodInfo method = typeof(WebConnection).GetMethod("DownloadPolicy", BindingFlags.Static | BindingFlags.NonPublic);
+				if (method == null)
+				{
+					this.LoggedThrow(new SecurityException("Cannot find method DownloadPolicy"));
+				}
+				if (!(bool)WebConnection.method_GetSecurityPolicyFromNonMainThread.Invoke(null, new object[]
+				{
+					request.RequestUri.ToString(),
+					method
+				}))
+				{
+					this.LoggedThrow(new SecurityException("Webrequest was denied"));
+				}
+			}
+			catch (Exception ex)
+			{
+				this.LoggedThrow(new SecurityException("Unexpected error while trying to call method_GetSecurityPolicyBlocking : " + ex));
+			}
 		}
 
 		private void Connect(HttpWebRequest request)
@@ -57,34 +121,17 @@ namespace System.Net
 					IPHostEntry hostEntry = this.sPoint.HostEntry;
 					if (hostEntry == null)
 					{
-						this.status = (this.sPoint.UsesProxy ? WebExceptionStatus.ProxyNameResolutionFailure : WebExceptionStatus.NameResolutionFailure);
+						this.status = ((!this.sPoint.UsesProxy) ? WebExceptionStatus.NameResolutionFailure : WebExceptionStatus.ProxyNameResolutionFailure);
 					}
 					else
 					{
+						WebConnectionData data = this.Data;
 						foreach (IPAddress ipaddress in hostEntry.AddressList)
 						{
-							try
-							{
-								this.socket = new Socket(ipaddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-							}
-							catch (Exception ex)
-							{
-								if (!request.Aborted)
-								{
-									this.status = WebExceptionStatus.ConnectFailure;
-								}
-								this.connect_exception = ex;
-								break;
-							}
+							this.socket = new global::System.Net.Sockets.Socket(ipaddress.AddressFamily, global::System.Net.Sockets.SocketType.Stream, global::System.Net.Sockets.ProtocolType.Tcp);
 							IPEndPoint ipendPoint = new IPEndPoint(ipaddress, this.sPoint.Address.Port);
+							this.socket.SetSocketOption(global::System.Net.Sockets.SocketOptionLevel.Tcp, global::System.Net.Sockets.SocketOptionName.Debug, (!this.sPoint.UseNagleAlgorithm) ? 1 : 0);
 							this.socket.NoDelay = !this.sPoint.UseNagleAlgorithm;
-							try
-							{
-								this.sPoint.KeepAliveSetup(this.socket);
-							}
-							catch
-							{
-							}
 							if (!this.sPoint.CallEndPointDelegate(this.socket, ipendPoint))
 							{
 								this.socket.Close();
@@ -99,13 +146,14 @@ namespace System.Net
 									{
 										break;
 									}
-									this.socket.Connect(ipendPoint);
+									this.CheckUnityWebSecurity(request);
+									this.socket.Connect(ipendPoint, false);
 									this.status = WebExceptionStatus.Success;
 									break;
 								}
 								catch (ThreadAbortException)
 								{
-									Socket socket = this.socket;
+									global::System.Net.Sockets.Socket socket = this.socket;
 									this.socket = null;
 									if (socket != null)
 									{
@@ -113,13 +161,13 @@ namespace System.Net
 									}
 									break;
 								}
-								catch (ObjectDisposedException)
+								catch (ObjectDisposedException ex)
 								{
 									break;
 								}
 								catch (Exception ex2)
 								{
-									Socket socket2 = this.socket;
+									global::System.Net.Sockets.Socket socket2 = this.socket;
 									this.socket = null;
 									if (socket2 != null)
 									{
@@ -138,7 +186,27 @@ namespace System.Net
 			}
 		}
 
-		private bool CreateTunnel(HttpWebRequest request, Uri connectUri, Stream stream, out byte[] buffer)
+		private static void EnsureSSLStreamAvailable()
+		{
+			object obj = WebConnection.classLock;
+			lock (obj)
+			{
+				if (WebConnection.sslStream == null)
+				{
+					WebConnection.sslStream = Type.GetType("Mono.Security.Protocol.Tls.HttpsClientStream, Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756", false);
+					if (WebConnection.sslStream == null)
+					{
+						string text = "Missing Mono.Security.dll assembly. Support for SSL/TLS is unavailable.";
+						throw new NotSupportedException(text);
+					}
+					WebConnection.piClient = WebConnection.sslStream.GetProperty("SelectedClientCertificate");
+					WebConnection.piServer = WebConnection.sslStream.GetProperty("ServerCertificate");
+					WebConnection.piTrustFailure = WebConnection.sslStream.GetProperty("TrustFailure");
+				}
+			}
+		}
+
+		private bool CreateTunnel(HttpWebRequest request, Stream stream, out byte[] buffer)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append("CONNECT ");
@@ -156,81 +224,53 @@ namespace System.Net
 			}
 			stringBuilder.Append("\r\nHost: ");
 			stringBuilder.Append(request.Address.Authority);
-			bool flag = false;
-			string[] challenge = this.Data.Challenge;
+			string challenge = this.Data.Challenge;
 			this.Data.Challenge = null;
-			string text = request.Headers["Proxy-Authorization"];
-			bool flag2 = text != null;
-			if (flag2)
+			bool flag = request.Headers["Proxy-Authorization"] != null;
+			if (flag)
 			{
 				stringBuilder.Append("\r\nProxy-Authorization: ");
-				stringBuilder.Append(text);
-				flag = text.ToUpper().Contains("NTLM");
+				stringBuilder.Append(request.Headers["Proxy-Authorization"]);
 			}
 			else if (challenge != null && this.Data.StatusCode == 407)
 			{
+				flag = true;
 				ICredentials credentials = request.Proxy.Credentials;
-				flag2 = true;
-				if (this.connect_request == null)
+				Authorization authorization = AuthenticationManager.Authenticate(challenge, request, credentials);
+				if (authorization != null)
 				{
-					this.connect_request = (HttpWebRequest)WebRequest.Create(string.Concat(new object[] { connectUri.Scheme, "://", connectUri.Host, ":", connectUri.Port, "/" }));
-					this.connect_request.Method = "CONNECT";
-					this.connect_request.Credentials = credentials;
+					stringBuilder.Append("\r\nProxy-Authorization: ");
+					stringBuilder.Append(authorization.Message);
 				}
-				if (credentials != null)
-				{
-					for (int i = 0; i < challenge.Length; i++)
-					{
-						Authorization authorization = AuthenticationManager.Authenticate(challenge[i], this.connect_request, credentials);
-						if (authorization != null)
-						{
-							flag = authorization.ModuleAuthenticationType == "NTLM";
-							stringBuilder.Append("\r\nProxy-Authorization: ");
-							stringBuilder.Append(authorization.Message);
-							break;
-						}
-					}
-				}
-			}
-			if (flag)
-			{
-				stringBuilder.Append("\r\nProxy-Connection: keep-alive");
-				this.connect_ntlm_auth_state++;
 			}
 			stringBuilder.Append("\r\n\r\n");
 			this.Data.StatusCode = 0;
 			byte[] bytes = Encoding.Default.GetBytes(stringBuilder.ToString());
 			stream.Write(bytes, 0, bytes.Length);
 			int num;
-			WebHeaderCollection webHeaderCollection = this.ReadHeaders(stream, out buffer, out num);
-			if ((!flag2 || this.connect_ntlm_auth_state == WebConnection.NtlmAuthState.Challenge) && webHeaderCollection != null && num == 407)
+			WebHeaderCollection webHeaderCollection = this.ReadHeaders(request, stream, out buffer, out num);
+			if (!flag && webHeaderCollection != null && num == 407)
 			{
-				string text2 = webHeaderCollection["Connection"];
-				if (this.socket != null && !string.IsNullOrEmpty(text2) && text2.ToLower() == "close")
-				{
-					this.socket.Close();
-					this.socket = null;
-				}
 				this.Data.StatusCode = num;
-				this.Data.Challenge = webHeaderCollection.GetValues("Proxy-Authenticate");
-				this.Data.Headers = webHeaderCollection;
+				this.Data.Challenge = webHeaderCollection["Proxy-Authenticate"];
 				return false;
 			}
 			if (num != 200)
 			{
-				this.Data.StatusCode = num;
-				this.Data.Headers = webHeaderCollection;
+				string text = string.Format("The remote server returned a {0} status code.", num);
+				this.HandleError(WebExceptionStatus.SecureChannelFailure, null, text);
 				return false;
 			}
 			return webHeaderCollection != null;
 		}
 
-		private WebHeaderCollection ReadHeaders(Stream stream, out byte[] retBuffer, out int status)
+		private WebHeaderCollection ReadHeaders(HttpWebRequest request, Stream stream, out byte[] retBuffer, out int status)
 		{
 			retBuffer = null;
 			status = 200;
 			byte[] array = new byte[1024];
 			MemoryStream memoryStream = new MemoryStream();
+			bool flag = false;
 			int num2;
 			WebHeaderCollection webHeaderCollection;
 			for (;;)
@@ -243,7 +283,6 @@ namespace System.Net
 				memoryStream.Write(array, 0, num);
 				num2 = 0;
 				string text = null;
-				bool flag = false;
 				webHeaderCollection = new WebHeaderCollection();
 				while (WebConnection.ReadLine(memoryStream.GetBuffer(), ref num2, (int)memoryStream.Length, ref text))
 				{
@@ -257,28 +296,12 @@ namespace System.Net
 					}
 					else
 					{
-						string[] array2 = text.Split(new char[] { ' ' });
-						if (array2.Length < 2)
+						int num3 = text.IndexOf(' ');
+						if (num3 == -1)
 						{
-							goto Block_6;
+							goto Block_5;
 						}
-						if (string.Compare(array2[0], "HTTP/1.1", true) == 0)
-						{
-							this.Data.ProxyVersion = HttpVersion.Version11;
-						}
-						else
-						{
-							if (string.Compare(array2[0], "HTTP/1.0", true) != 0)
-							{
-								goto IL_0153;
-							}
-							this.Data.ProxyVersion = HttpVersion.Version10;
-						}
-						status = (int)uint.Parse(array2[1]);
-						if (array2.Length >= 3)
-						{
-							this.Data.StatusDescription = string.Join(" ", array2, 2, array2.Length - 2);
-						}
+						status = (int)uint.Parse(text.Substring(num3 + 1, 3));
 						flag = true;
 					}
 				}
@@ -286,87 +309,59 @@ namespace System.Net
 			this.HandleError(WebExceptionStatus.ServerProtocolViolation, null, "ReadHeaders");
 			return null;
 			Block_2:
-			int num3 = 0;
-			try
+			if (memoryStream.Length - (long)num2 > 0L)
 			{
-				num3 = int.Parse(webHeaderCollection["Content-Length"]);
-			}
-			catch
-			{
-				num3 = 0;
-			}
-			if (memoryStream.Length - (long)num2 - (long)num3 > 0L)
-			{
-				retBuffer = new byte[memoryStream.Length - (long)num2 - (long)num3];
-				Buffer.BlockCopy(memoryStream.GetBuffer(), num2 + num3, retBuffer, 0, retBuffer.Length);
-			}
-			else
-			{
-				this.FlushContents(stream, num3 - (int)(memoryStream.Length - (long)num2));
+				retBuffer = new byte[memoryStream.Length - (long)num2];
+				Buffer.BlockCopy(memoryStream.GetBuffer(), num2, retBuffer, 0, retBuffer.Length);
 			}
 			return webHeaderCollection;
-			Block_6:
+			Block_5:
 			this.HandleError(WebExceptionStatus.ServerProtocolViolation, null, "ReadHeaders2");
 			return null;
-			IL_0153:
-			this.HandleError(WebExceptionStatus.ServerProtocolViolation, null, "ReadHeaders2");
-			return null;
-		}
-
-		private void FlushContents(Stream stream, int contentLength)
-		{
-			while (contentLength > 0)
-			{
-				byte[] array = new byte[contentLength];
-				int num = stream.Read(array, 0, contentLength);
-				if (num <= 0)
-				{
-					break;
-				}
-				contentLength -= num;
-			}
 		}
 
 		private bool CreateStream(HttpWebRequest request)
 		{
 			try
 			{
-				NetworkStream networkStream = new NetworkStream(this.socket, false);
-				if (request.Address.Scheme == Uri.UriSchemeHttps)
+				global::System.Net.Sockets.NetworkStream networkStream = new global::System.Net.Sockets.NetworkStream(this.socket, false);
+				if (request.Address.Scheme == global::System.Uri.UriSchemeHttps)
 				{
-					if (!this.reused || this.nstream == null || this.tlsStream == null)
+					this.ssl = true;
+					WebConnection.EnsureSSLStreamAvailable();
+					if (!this.reused || this.nstream == null || this.nstream.GetType() != WebConnection.sslStream)
 					{
 						byte[] array = null;
-						if (this.sPoint.UseConnect && !this.CreateTunnel(request, this.sPoint.Address, networkStream, out array))
+						if (this.sPoint.UseConnect && !this.CreateTunnel(request, networkStream, out array))
 						{
 							return false;
 						}
-						this.tlsStream = new MonoTlsStream(request, networkStream);
-						this.nstream = this.tlsStream.CreateStream(array);
+						object[] array2 = new object[] { networkStream, request.ClientCertificates, request, array };
+						this.nstream = (Stream)Activator.CreateInstance(WebConnection.sslStream, array2);
+						SslClientStream sslClientStream = (SslClientStream)this.nstream;
+						ServicePointManager.ChainValidationHelper chainValidationHelper = new ServicePointManager.ChainValidationHelper(request);
+						sslClientStream.ServerCertValidation2 += chainValidationHelper.ValidateChain;
+						this.certsAvailable = false;
 					}
 				}
 				else
 				{
+					this.ssl = false;
 					this.nstream = networkStream;
 				}
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				if (this.tlsStream != null)
-				{
-					this.status = this.tlsStream.ExceptionStatus;
-				}
-				else if (!request.Aborted)
+				if (!request.Aborted)
 				{
 					this.status = WebExceptionStatus.ConnectFailure;
 				}
-				this.connect_exception = ex;
 				return false;
 			}
 			return true;
 		}
 
-		private void HandleError(WebExceptionStatus st, Exception ex, string where)
+		private void HandleError(WebExceptionStatus st, Exception e, string where)
 		{
 			this.status = st;
 			lock (this)
@@ -376,7 +371,7 @@ namespace System.Net
 					this.Data = new WebConnectionData();
 				}
 			}
-			if (ex == null)
+			if (e == null)
 			{
 				try
 				{
@@ -384,6 +379,7 @@ namespace System.Net
 				}
 				catch (Exception ex)
 				{
+					e = ex;
 				}
 			}
 			HttpWebRequest httpWebRequest = null;
@@ -395,17 +391,18 @@ namespace System.Net
 			if (httpWebRequest != null)
 			{
 				httpWebRequest.FinishedReading = true;
-				httpWebRequest.SetResponseError(st, ex, where);
+				httpWebRequest.SetResponseError(st, e, where);
 			}
 		}
 
-		private void ReadDone(IAsyncResult result)
+		private static void ReadDone(IAsyncResult result)
 		{
-			WebConnectionData data = this.Data;
-			Stream stream = this.nstream;
+			WebConnection webConnection = (WebConnection)result.AsyncState;
+			WebConnectionData data = webConnection.Data;
+			Stream stream = webConnection.nstream;
 			if (stream == null)
 			{
-				this.Close(true);
+				webConnection.Close(true);
 				return;
 			}
 			int num = -1;
@@ -413,154 +410,139 @@ namespace System.Net
 			{
 				num = stream.EndRead(result);
 			}
-			catch (ObjectDisposedException)
-			{
-				return;
-			}
 			catch (Exception ex)
 			{
-				if (ex.InnerException is ObjectDisposedException)
-				{
-					return;
-				}
-				this.HandleError(WebExceptionStatus.ReceiveFailure, ex, "ReadDone1");
+				webConnection.HandleError(WebExceptionStatus.ReceiveFailure, ex, "ReadDone1");
 				return;
 			}
 			if (num == 0)
 			{
-				this.HandleError(WebExceptionStatus.ReceiveFailure, null, "ReadDone2");
+				webConnection.HandleError(WebExceptionStatus.ReceiveFailure, null, "ReadDone2");
 				return;
 			}
 			if (num < 0)
 			{
-				this.HandleError(WebExceptionStatus.ServerProtocolViolation, null, "ReadDone3");
+				webConnection.HandleError(WebExceptionStatus.ServerProtocolViolation, null, "ReadDone3");
 				return;
 			}
 			int num2 = -1;
-			num += this.position;
-			if (data.ReadState == ReadState.None)
+			num += webConnection.position;
+			if (webConnection.readState == ReadState.None)
 			{
 				Exception ex2 = null;
 				try
 				{
-					num2 = WebConnection.GetResponse(data, this.sPoint, this.buffer, num);
-				}
-				catch (Exception ex2)
-				{
-				}
-				if (ex2 != null || num2 == -1)
-				{
-					this.HandleError(WebExceptionStatus.ServerProtocolViolation, ex2, "ReadDone4");
-					return;
-				}
-			}
-			if (data.ReadState == ReadState.Aborted)
-			{
-				this.HandleError(WebExceptionStatus.RequestCanceled, null, "ReadDone");
-				return;
-			}
-			if (data.ReadState != ReadState.Content)
-			{
-				int num3 = num * 2;
-				byte[] array = new byte[(num3 < this.buffer.Length) ? this.buffer.Length : num3];
-				Buffer.BlockCopy(this.buffer, 0, array, 0, num);
-				this.buffer = array;
-				this.position = num;
-				data.ReadState = ReadState.None;
-				this.InitRead();
-				return;
-			}
-			this.position = 0;
-			WebConnectionStream webConnectionStream = new WebConnectionStream(this, data);
-			bool flag = WebConnection.ExpectContent(data.StatusCode, data.request.Method);
-			string text = null;
-			if (flag)
-			{
-				text = data.Headers["Transfer-Encoding"];
-			}
-			this.chunkedRead = text != null && text.IndexOf("chunked", StringComparison.OrdinalIgnoreCase) != -1;
-			if (!this.chunkedRead)
-			{
-				webConnectionStream.ReadBuffer = this.buffer;
-				webConnectionStream.ReadBufferOffset = num2;
-				webConnectionStream.ReadBufferSize = num;
-				try
-				{
-					webConnectionStream.CheckResponseInBuffer();
-					goto IL_023A;
+					num2 = webConnection.GetResponse(webConnection.buffer, num);
 				}
 				catch (Exception ex3)
 				{
-					this.HandleError(WebExceptionStatus.ReceiveFailure, ex3, "ReadDone7");
-					goto IL_023A;
+					ex2 = ex3;
 				}
-			}
-			if (this.chunkStream == null)
-			{
-				try
+				if (ex2 != null)
 				{
-					this.chunkStream = new MonoChunkStream(this.buffer, num2, num, data.Headers);
-					goto IL_023A;
-				}
-				catch (Exception ex4)
-				{
-					this.HandleError(WebExceptionStatus.ServerProtocolViolation, ex4, "ReadDone5");
+					webConnection.HandleError(WebExceptionStatus.ServerProtocolViolation, ex2, "ReadDone4");
 					return;
 				}
 			}
-			this.chunkStream.ResetBuffer();
-			try
+			if (webConnection.readState != ReadState.Content)
 			{
-				this.chunkStream.Write(this.buffer, num2, num);
-			}
-			catch (Exception ex5)
-			{
-				this.HandleError(WebExceptionStatus.ServerProtocolViolation, ex5, "ReadDone6");
+				int num3 = num * 2;
+				int num4 = ((num3 >= webConnection.buffer.Length) ? num3 : webConnection.buffer.Length);
+				byte[] array = new byte[num4];
+				Buffer.BlockCopy(webConnection.buffer, 0, array, 0, num);
+				webConnection.buffer = array;
+				webConnection.position = num;
+				webConnection.readState = ReadState.None;
+				WebConnection.InitRead(webConnection);
 				return;
 			}
-			IL_023A:
+			webConnection.position = 0;
+			WebConnectionStream webConnectionStream = new WebConnectionStream(webConnection);
+			string text = data.Headers["Transfer-Encoding"];
+			webConnection.chunkedRead = text != null && text.ToLower().IndexOf("chunked") != -1;
+			if (!webConnection.chunkedRead)
+			{
+				webConnectionStream.ReadBuffer = webConnection.buffer;
+				webConnectionStream.ReadBufferOffset = num2;
+				webConnectionStream.ReadBufferSize = num;
+				webConnectionStream.CheckResponseInBuffer();
+			}
+			else if (webConnection.chunkStream == null)
+			{
+				try
+				{
+					webConnection.chunkStream = new ChunkStream(webConnection.buffer, num2, num, data.Headers);
+				}
+				catch (Exception ex4)
+				{
+					webConnection.HandleError(WebExceptionStatus.ServerProtocolViolation, ex4, "ReadDone5");
+					return;
+				}
+			}
+			else
+			{
+				webConnection.chunkStream.ResetBuffer();
+				try
+				{
+					webConnection.chunkStream.Write(webConnection.buffer, num2, num);
+				}
+				catch (Exception ex5)
+				{
+					webConnection.HandleError(WebExceptionStatus.ServerProtocolViolation, ex5, "ReadDone6");
+					return;
+				}
+			}
 			data.stream = webConnectionStream;
-			if (!flag)
+			if (!WebConnection.ExpectContent(data.StatusCode) || data.request.Method == "HEAD")
 			{
 				webConnectionStream.ForceCompletion();
 			}
 			data.request.SetResponseData(data);
 		}
 
-		private static bool ExpectContent(int statusCode, string method)
+		private static bool ExpectContent(int statusCode)
 		{
-			return !(method == "HEAD") && (statusCode >= 200 && statusCode != 204) && statusCode != 304;
+			return statusCode >= 200 && statusCode != 204 && statusCode != 304;
 		}
 
-		internal void InitRead()
+		internal void GetCertificates()
 		{
-			Stream stream = this.nstream;
+			X509Certificate x509Certificate = (X509Certificate)WebConnection.piClient.GetValue(this.nstream, null);
+			X509Certificate x509Certificate2 = (X509Certificate)WebConnection.piServer.GetValue(this.nstream, null);
+			this.sPoint.SetCertificates(x509Certificate, x509Certificate2);
+			this.certsAvailable = x509Certificate2 != null;
+		}
+
+		internal static void InitRead(object state)
+		{
+			WebConnection webConnection = (WebConnection)state;
+			Stream stream = webConnection.nstream;
 			try
 			{
-				int num = this.buffer.Length - this.position;
-				stream.BeginRead(this.buffer, this.position, num, new AsyncCallback(this.ReadDone), null);
+				int num = webConnection.buffer.Length - webConnection.position;
+				stream.BeginRead(webConnection.buffer, webConnection.position, num, WebConnection.readDoneDelegate, webConnection);
 			}
 			catch (Exception ex)
 			{
-				this.HandleError(WebExceptionStatus.ReceiveFailure, ex, "InitRead");
+				webConnection.HandleError(WebExceptionStatus.ReceiveFailure, ex, "InitRead");
 			}
 		}
 
-		private static int GetResponse(WebConnectionData data, ServicePoint sPoint, byte[] buffer, int max)
+		private int GetResponse(byte[] buffer, int max)
 		{
 			int num = 0;
 			string text = null;
 			bool flag = false;
 			bool flag2 = false;
-			while (data.ReadState != ReadState.Aborted)
+			for (;;)
 			{
-				if (data.ReadState != ReadState.None)
+				if (this.readState != ReadState.None)
 				{
-					goto IL_00DD;
+					goto IL_0114;
 				}
 				if (!WebConnection.ReadLine(buffer, ref num, max, ref text))
 				{
-					return 0;
+					break;
 				}
 				if (text == null)
 				{
@@ -569,7 +551,7 @@ namespace System.Net
 				else
 				{
 					flag2 = false;
-					data.ReadState = ReadState.Status;
+					this.readState = ReadState.Status;
 					string[] array = text.Split(new char[] { ' ' });
 					if (array.Length < 2)
 					{
@@ -577,47 +559,51 @@ namespace System.Net
 					}
 					if (string.Compare(array[0], "HTTP/1.1", true) == 0)
 					{
-						data.Version = HttpVersion.Version11;
-						sPoint.SetVersion(HttpVersion.Version11);
+						this.Data.Version = HttpVersion.Version11;
+						this.sPoint.SetVersion(HttpVersion.Version11);
 					}
 					else
 					{
-						data.Version = HttpVersion.Version10;
-						sPoint.SetVersion(HttpVersion.Version10);
+						this.Data.Version = HttpVersion.Version10;
+						this.sPoint.SetVersion(HttpVersion.Version10);
 					}
-					data.StatusCode = (int)uint.Parse(array[1]);
+					this.Data.StatusCode = (int)uint.Parse(array[1]);
 					if (array.Length >= 3)
 					{
-						data.StatusDescription = string.Join(" ", array, 2, array.Length - 2);
+						this.Data.StatusDescription = string.Join(" ", array, 2, array.Length - 2);
 					}
 					else
 					{
-						data.StatusDescription = "";
+						this.Data.StatusDescription = string.Empty;
 					}
 					if (num >= max)
 					{
 						return num;
 					}
-					goto IL_00DD;
+					goto IL_0114;
 				}
-				IL_0278:
+				IL_02CA:
 				if (!flag2 && !flag)
 				{
 					return -1;
 				}
 				continue;
-				IL_00DD:
+				IL_0114:
 				flag2 = false;
-				if (data.ReadState != ReadState.Status)
+				if (this.readState != ReadState.Status)
 				{
-					goto IL_0278;
+					goto IL_02CA;
 				}
-				data.ReadState = ReadState.Headers;
-				data.Headers = new WebHeaderCollection();
+				this.readState = ReadState.Headers;
+				this.Data.Headers = new WebHeaderCollection();
 				ArrayList arrayList = new ArrayList();
 				bool flag3 = false;
-				while (!flag3 && WebConnection.ReadLine(buffer, ref num, max, ref text))
+				while (!flag3)
 				{
+					if (!WebConnection.ReadLine(buffer, ref num, max, ref text))
+					{
+						break;
+					}
 					if (text == null)
 					{
 						flag3 = true;
@@ -639,115 +625,91 @@ namespace System.Net
 				}
 				if (!flag3)
 				{
-					return 0;
+					return -1;
 				}
 				foreach (object obj in arrayList)
 				{
 					string text3 = (string)obj;
-					int num3 = text3.IndexOf(':');
-					if (num3 == -1)
-					{
-						throw new ArgumentException("no colon found", "header");
-					}
-					string text4 = text3.Substring(0, num3);
-					string text5 = text3.Substring(num3 + 1).Trim();
-					WebHeaderCollection headers = data.Headers;
-					if (WebHeaderCollection.AllowMultiValues(text4))
-					{
-						headers.AddInternal(text4, text5);
-					}
-					else
-					{
-						headers.SetInternal(text4, text5);
-					}
+					this.Data.Headers.SetInternal(text3);
 				}
-				if (data.StatusCode != 100)
+				if (this.Data.StatusCode != 100)
 				{
-					data.ReadState = ReadState.Content;
-					return num;
+					goto IL_02C1;
 				}
-				sPoint.SendContinue = true;
+				this.sPoint.SendContinue = true;
 				if (num >= max)
 				{
 					return num;
 				}
-				if (data.request.ExpectContinue)
+				if (this.Data.request.ExpectContinue)
 				{
-					data.request.DoContinueDelegate(data.StatusCode, data.Headers);
-					data.request.ExpectContinue = false;
+					this.Data.request.DoContinueDelegate(this.Data.StatusCode, this.Data.Headers);
+					this.Data.request.ExpectContinue = false;
 				}
-				data.ReadState = ReadState.None;
+				this.readState = ReadState.None;
 				flag = true;
-				goto IL_0278;
+				goto IL_02CA;
 			}
 			return -1;
+			IL_02C1:
+			this.readState = ReadState.Content;
+			return num;
 		}
 
-		private void InitConnection(HttpWebRequest request)
+		private void InitConnection(object state)
 		{
-			request.WebConnection = this;
-			if (request.ReuseConnection)
-			{
-				request.StoredConnection = this;
-			}
-			if (request.Aborted)
+			HttpWebRequest httpWebRequest = (HttpWebRequest)state;
+			httpWebRequest.WebConnection = this;
+			if (httpWebRequest.Aborted)
 			{
 				return;
 			}
-			this.keepAlive = request.KeepAlive;
-			this.Data = new WebConnectionData(request);
+			this.keepAlive = httpWebRequest.KeepAlive;
+			this.Data = new WebConnectionData();
+			this.Data.request = httpWebRequest;
 			WebExceptionStatus webExceptionStatus;
 			for (;;)
 			{
-				this.Connect(request);
-				if (request.Aborted)
+				this.Connect(httpWebRequest);
+				if (httpWebRequest.Aborted)
 				{
 					break;
 				}
 				if (this.status != WebExceptionStatus.Success)
 				{
-					goto Block_4;
+					goto Block_3;
 				}
-				if (this.CreateStream(request))
+				if (this.CreateStream(httpWebRequest))
 				{
-					goto IL_0145;
+					goto IL_00D2;
 				}
-				if (request.Aborted)
+				if (httpWebRequest.Aborted)
 				{
 					return;
 				}
 				webExceptionStatus = this.status;
 				if (this.Data.Challenge == null)
 				{
-					goto Block_8;
+					goto IL_00B4;
 				}
 			}
 			return;
-			Block_4:
-			if (!request.Aborted)
+			Block_3:
+			if (!httpWebRequest.Aborted)
 			{
-				request.SetWriteStreamError(this.status, this.connect_exception);
+				httpWebRequest.SetWriteStreamError(this.status, this.connect_exception);
 				this.Close(true);
 			}
 			return;
-			Block_8:
+			IL_00B4:
 			Exception ex = this.connect_exception;
-			if (ex == null && (this.Data.StatusCode == 401 || this.Data.StatusCode == 407))
-			{
-				webExceptionStatus = WebExceptionStatus.ProtocolError;
-				if (this.Data.Headers == null)
-				{
-					this.Data.Headers = new WebHeaderCollection();
-				}
-				HttpWebResponse httpWebResponse = new HttpWebResponse(this.sPoint.Address, "CONNECT", this.Data, null);
-				ex = new WebException((this.Data.StatusCode == 407) ? "(407) Proxy Authentication Required" : "(401) Unauthorized", null, webExceptionStatus, httpWebResponse);
-			}
 			this.connect_exception = null;
-			request.SetWriteStreamError(webExceptionStatus, ex);
+			httpWebRequest.SetWriteStreamError(webExceptionStatus, ex);
 			this.Close(true);
 			return;
-			IL_0145:
-			request.SetWriteStream(new WebConnectionStream(this, request));
+			IL_00D2:
+			this.readState = ReadState.None;
+			httpWebRequest.SetWriteStream(new WebConnectionStream(this, httpWebRequest));
 		}
 
 		internal EventHandler SendRequest(HttpWebRequest request)
@@ -758,19 +720,11 @@ namespace System.Net
 			}
 			lock (this)
 			{
-				if (this.state.TrySetBusy())
+				if (!this.busy)
 				{
+					this.busy = true;
 					this.status = WebExceptionStatus.Success;
-					ThreadPool.QueueUserWorkItem(delegate(object o)
-					{
-						try
-						{
-							this.InitConnection((HttpWebRequest)o);
-						}
-						catch
-						{
-						}
-					}, request);
+					ThreadPool.QueueUserWorkItem(this.initConn, request);
 				}
 				else
 				{
@@ -800,27 +754,20 @@ namespace System.Net
 		{
 			lock (this)
 			{
-				if (this.Data.request != null)
-				{
-					this.Data.request.FinishedReading = true;
-				}
-				string text = (this.sPoint.UsesProxy ? "Proxy-Connection" : "Connection");
-				string text2 = ((this.Data.Headers != null) ? this.Data.Headers[text] : null);
-				bool flag2 = this.Data.Version == HttpVersion.Version11 && this.keepAlive;
-				if (this.Data.ProxyVersion != null && this.Data.ProxyVersion != HttpVersion.Version11)
-				{
-					flag2 = false;
-				}
+				this.Data.request.FinishedReading = true;
+				string text = ((!this.sPoint.UsesProxy) ? "Connection" : "Proxy-Connection");
+				string text2 = ((this.Data.Headers == null) ? null : this.Data.Headers[text]);
+				bool flag = this.Data.Version == HttpVersion.Version11 && this.keepAlive;
 				if (text2 != null)
 				{
 					text2 = text2.ToLower();
-					flag2 = this.keepAlive && text2.IndexOf("keep-alive", StringComparison.Ordinal) != -1;
+					flag = this.keepAlive && text2.IndexOf("keep-alive") != -1;
 				}
-				if ((this.socket != null && !this.socket.Connected) || !flag2 || (text2 != null && text2.IndexOf("close", StringComparison.Ordinal) != -1))
+				if ((this.socket != null && !this.socket.Connected) || !flag || (text2 != null && text2.IndexOf("close") != -1))
 				{
 					this.Close(false);
 				}
-				this.state.SetIdle();
+				this.busy = false;
 				if (this.priority_request != null)
 				{
 					this.SendRequest(this.priority_request);
@@ -840,25 +787,19 @@ namespace System.Net
 			int num = 0;
 			while (start < max)
 			{
-				int num2 = start;
-				start = num2 + 1;
-				num = (int)buffer[num2];
+				num = (int)buffer[start++];
 				if (num == 10)
 				{
 					if (stringBuilder.Length > 0 && stringBuilder[stringBuilder.Length - 1] == '\r')
 					{
-						StringBuilder stringBuilder2 = stringBuilder;
-						num2 = stringBuilder2.Length;
-						stringBuilder2.Length = num2 - 1;
+						stringBuilder.Length--;
 					}
 					flag = false;
 					break;
 				}
 				if (flag)
 				{
-					StringBuilder stringBuilder3 = stringBuilder;
-					num2 = stringBuilder3.Length;
-					stringBuilder3.Length = num2 - 1;
+					stringBuilder.Length--;
 					break;
 				}
 				if (num == 13)
@@ -878,9 +819,7 @@ namespace System.Net
 			}
 			if (flag)
 			{
-				StringBuilder stringBuilder4 = stringBuilder;
-				int num2 = stringBuilder4.Length;
-				stringBuilder4.Length = num2 - 1;
+				stringBuilder.Length--;
 			}
 			output = stringBuilder.ToString();
 			return true;
@@ -888,33 +827,36 @@ namespace System.Net
 
 		internal IAsyncResult BeginRead(HttpWebRequest request, byte[] buffer, int offset, int size, AsyncCallback cb, object state)
 		{
-			Stream stream = null;
 			lock (this)
 			{
 				if (this.Data.request != request)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
 				if (this.nstream == null)
 				{
 					return null;
 				}
-				stream = this.nstream;
 			}
 			IAsyncResult asyncResult = null;
-			if (!this.chunkedRead || (!this.chunkStream.DataAvailable && this.chunkStream.WantMore))
+			if (this.chunkedRead)
 			{
-				try
+				if (!this.chunkStream.WantMore)
 				{
-					asyncResult = stream.BeginRead(buffer, offset, size, cb, state);
-					cb = null;
-				}
-				catch (Exception)
-				{
-					this.HandleError(WebExceptionStatus.ReceiveFailure, null, "chunked BeginRead");
-					throw;
+					goto IL_009A;
 				}
 			}
+			try
+			{
+				asyncResult = this.nstream.BeginRead(buffer, offset, size, cb, state);
+				cb = null;
+			}
+			catch (Exception)
+			{
+				this.HandleError(WebExceptionStatus.ReceiveFailure, null, "chunked BeginRead");
+				throw;
+			}
+			IL_009A:
 			if (this.chunkedRead)
 			{
 				WebAsyncResult webAsyncResult = new WebAsyncResult(cb, state, buffer, offset, size);
@@ -931,25 +873,18 @@ namespace System.Net
 
 		internal int EndRead(HttpWebRequest request, IAsyncResult result)
 		{
-			Stream stream = null;
 			lock (this)
 			{
-				if (request.Aborted)
-				{
-					throw new WebException("Request aborted", WebExceptionStatus.RequestCanceled);
-				}
 				if (this.Data.request != request)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
 				if (this.nstream == null)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
-				stream = this.nstream;
 			}
 			int num = 0;
-			bool flag2 = false;
 			WebAsyncResult webAsyncResult = null;
 			IAsyncResult innerAsyncResult = ((WebAsyncResult)result).InnerAsyncResult;
 			if (this.chunkedRead && innerAsyncResult is WebAsyncResult)
@@ -958,22 +893,21 @@ namespace System.Net
 				IAsyncResult innerAsyncResult2 = webAsyncResult.InnerAsyncResult;
 				if (innerAsyncResult2 != null && !(innerAsyncResult2 is WebAsyncResult))
 				{
-					num = stream.EndRead(innerAsyncResult2);
-					flag2 = num == 0;
+					num = this.nstream.EndRead(innerAsyncResult2);
 				}
 			}
 			else if (!(innerAsyncResult is WebAsyncResult))
 			{
-				num = stream.EndRead(innerAsyncResult);
+				num = this.nstream.EndRead(innerAsyncResult);
 				webAsyncResult = (WebAsyncResult)result;
-				flag2 = num == 0;
 			}
 			if (this.chunkedRead)
 			{
+				bool flag = num == 0;
 				try
 				{
 					this.chunkStream.WriteAndReadBack(webAsyncResult.Buffer, webAsyncResult.Offset, webAsyncResult.Size, ref num);
-					if (!flag2 && num == 0 && this.chunkStream.WantMore)
+					if (!flag && num == 0 && this.chunkStream.WantMore)
 					{
 						num = this.EnsureRead(webAsyncResult.Buffer, webAsyncResult.Offset, webAsyncResult.Size);
 					}
@@ -986,17 +920,13 @@ namespace System.Net
 					}
 					throw new WebException("Invalid chunked data.", ex, WebExceptionStatus.ServerProtocolViolation, null);
 				}
-				if ((flag2 || num == 0) && this.chunkStream.ChunkLeft != 0)
+				if ((flag || num == 0) && this.chunkStream.ChunkLeft != 0)
 				{
 					this.HandleError(WebExceptionStatus.ReceiveFailure, null, "chunked EndRead");
 					throw new WebException("Read error", null, WebExceptionStatus.ReceiveFailure, null);
 				}
 			}
-			if (num == 0)
-			{
-				return -1;
-			}
-			return num;
+			return (num == 0) ? (-1) : num;
 		}
 
 		private int EnsureRead(byte[] buffer, int offset, int size)
@@ -1049,45 +979,21 @@ namespace System.Net
 
 		internal IAsyncResult BeginWrite(HttpWebRequest request, byte[] buffer, int offset, int size, AsyncCallback cb, object state)
 		{
-			Stream stream = null;
-			WebConnection webConnection = this;
-			lock (webConnection)
+			lock (this)
 			{
 				if (this.Data.request != request)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
 				if (this.nstream == null)
 				{
 					return null;
 				}
-				stream = this.nstream;
 			}
 			IAsyncResult asyncResult = null;
 			try
 			{
-				asyncResult = stream.BeginWrite(buffer, offset, size, cb, state);
-			}
-			catch (ObjectDisposedException)
-			{
-				webConnection = this;
-				lock (webConnection)
-				{
-					if (this.Data.request != request)
-					{
-						return null;
-					}
-				}
-				throw;
-			}
-			catch (IOException ex)
-			{
-				SocketException ex2 = ex.InnerException as SocketException;
-				if (ex2 != null && ex2.SocketErrorCode == SocketError.NotConnected)
-				{
-					return null;
-				}
-				throw;
+				asyncResult = this.nstream.BeginWrite(buffer, offset, size, cb, state);
 			}
 			catch (Exception)
 			{
@@ -1097,73 +1003,97 @@ namespace System.Net
 			return asyncResult;
 		}
 
-		internal bool EndWrite(HttpWebRequest request, bool throwOnError, IAsyncResult result)
+		internal void EndWrite2(HttpWebRequest request, IAsyncResult result)
 		{
-			Stream stream = null;
+			if (request.FinishedReading)
+			{
+				return;
+			}
 			lock (this)
 			{
-				if (this.status == WebExceptionStatus.RequestCanceled)
-				{
-					return true;
-				}
 				if (this.Data.request != request)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
 				if (this.nstream == null)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
-				stream = this.nstream;
 			}
-			bool flag2;
 			try
 			{
-				stream.EndWrite(result);
-				flag2 = true;
+				this.nstream.EndWrite(result);
 			}
 			catch (Exception ex)
 			{
 				this.status = WebExceptionStatus.SendFailure;
-				if (throwOnError && ex.InnerException != null)
+				if (ex.InnerException != null)
 				{
 					throw ex.InnerException;
 				}
-				flag2 = false;
+				throw;
 			}
-			return flag2;
 		}
 
-		internal int Read(HttpWebRequest request, byte[] buffer, int offset, int size)
+		internal bool EndWrite(HttpWebRequest request, IAsyncResult result)
 		{
-			Stream stream = null;
+			if (request.FinishedReading)
+			{
+				return true;
+			}
 			lock (this)
 			{
 				if (this.Data.request != request)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
+				}
+				if (this.nstream == null)
+				{
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
+				}
+			}
+			bool flag;
+			try
+			{
+				this.nstream.EndWrite(result);
+				flag = true;
+			}
+			catch
+			{
+				this.status = WebExceptionStatus.SendFailure;
+				flag = false;
+			}
+			return flag;
+		}
+
+		internal int Read(HttpWebRequest request, byte[] buffer, int offset, int size)
+		{
+			lock (this)
+			{
+				if (this.Data.request != request)
+				{
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
 				if (this.nstream == null)
 				{
 					return 0;
 				}
-				stream = this.nstream;
 			}
 			int num = 0;
 			try
 			{
-				bool flag2 = false;
+				bool flag = false;
 				if (!this.chunkedRead)
 				{
-					num = stream.Read(buffer, offset, size);
-					flag2 = num == 0;
+					num = this.nstream.Read(buffer, offset, size);
+					flag = num == 0;
 				}
 				if (this.chunkedRead)
 				{
 					try
 					{
 						this.chunkStream.WriteAndReadBack(buffer, offset, size, ref num);
-						if (!flag2 && num == 0 && this.chunkStream.WantMore)
+						if (!flag && num == 0 && this.chunkStream.WantMore)
 						{
 							num = this.EnsureRead(buffer, offset, size);
 						}
@@ -1173,7 +1103,7 @@ namespace System.Net
 						this.HandleError(WebExceptionStatus.ReceiveFailure, ex, "chunked Read1");
 						throw;
 					}
-					if ((flag2 || num == 0) && this.chunkStream.WantMore)
+					if ((flag || num == 0) && this.chunkStream.WantMore)
 					{
 						this.HandleError(WebExceptionStatus.ReceiveFailure, null, "chunked Read2");
 						throw new WebException("Read error", null, WebExceptionStatus.ReceiveFailure, null);
@@ -1190,29 +1120,40 @@ namespace System.Net
 		internal bool Write(HttpWebRequest request, byte[] buffer, int offset, int size, ref string err_msg)
 		{
 			err_msg = null;
-			Stream stream = null;
 			lock (this)
 			{
 				if (this.Data.request != request)
 				{
-					throw new ObjectDisposedException(typeof(NetworkStream).FullName);
+					throw new ObjectDisposedException(typeof(global::System.Net.Sockets.NetworkStream).FullName);
 				}
-				stream = this.nstream;
-				if (stream == null)
+				if (this.nstream == null)
 				{
 					return false;
 				}
 			}
 			try
 			{
-				stream.Write(buffer, offset, size);
+				this.nstream.Write(buffer, offset, size);
+				if (this.ssl && !this.certsAvailable)
+				{
+					this.GetCertificates();
+				}
 			}
 			catch (Exception ex)
 			{
 				err_msg = ex.Message;
 				WebExceptionStatus webExceptionStatus = WebExceptionStatus.SendFailure;
 				string text = "Write: " + err_msg;
-				WebException ex2 = ex as WebException;
+				if (ex is WebException)
+				{
+					this.HandleError(webExceptionStatus, ex, text);
+					return false;
+				}
+				if (this.ssl && (bool)WebConnection.piTrustFailure.GetValue(this.nstream, null))
+				{
+					webExceptionStatus = WebExceptionStatus.TrustFailure;
+					text = "Trust failure";
+				}
 				this.HandleError(webExceptionStatus, ex, text);
 				return false;
 			}
@@ -1223,54 +1164,33 @@ namespace System.Net
 		{
 			lock (this)
 			{
-				if (this.Data != null && this.Data.request != null && this.Data.request.ReuseConnection)
+				if (this.nstream != null)
 				{
-					this.Data.request.ReuseConnection = false;
+					try
+					{
+						this.nstream.Close();
+					}
+					catch
+					{
+					}
+					this.nstream = null;
 				}
-				else
+				if (this.socket != null)
 				{
-					if (this.nstream != null)
+					try
 					{
-						try
-						{
-							this.nstream.Close();
-						}
-						catch
-						{
-						}
-						this.nstream = null;
+						this.socket.Close();
 					}
-					if (this.socket != null)
+					catch
 					{
-						try
-						{
-							this.socket.Close();
-						}
-						catch
-						{
-						}
-						this.socket = null;
 					}
-					if (this.ntlm_authenticated)
-					{
-						this.ResetNtlm();
-					}
-					if (this.Data != null)
-					{
-						WebConnectionData data = this.Data;
-						lock (data)
-						{
-							this.Data.ReadState = ReadState.Aborted;
-						}
-					}
-					this.state.SetIdle();
-					this.Data = new WebConnectionData();
-					if (sendNext)
-					{
-						this.SendNext();
-					}
-					this.connect_request = null;
-					this.connect_ntlm_auth_state = WebConnection.NtlmAuthState.None;
+					this.socket = null;
+				}
+				this.busy = false;
+				this.Data = new WebConnectionData();
+				if (sendNext)
+				{
+					this.SendNext();
 				}
 			}
 		}
@@ -1283,7 +1203,7 @@ namespace System.Net
 				lock (queue)
 				{
 					HttpWebRequest httpWebRequest = (HttpWebRequest)sender;
-					if (this.Data.request == httpWebRequest || this.Data.request == null)
+					if (this.Data.request == httpWebRequest)
 					{
 						if (!httpWebRequest.FinishedReading)
 						{
@@ -1328,16 +1248,29 @@ namespace System.Net
 			this.unsafe_sharing = false;
 		}
 
+		internal bool Busy
+		{
+			get
+			{
+				bool flag;
+				lock (this)
+				{
+					flag = this.busy;
+				}
+				return flag;
+			}
+		}
+
 		internal bool Connected
 		{
 			get
 			{
-				bool flag2;
+				bool flag;
 				lock (this)
 				{
-					flag2 = this.socket != null && this.socket.Connected;
+					flag = this.socket != null && this.socket.Connected;
 				}
-				return flag2;
+				return flag;
 			}
 		}
 
@@ -1389,33 +1322,39 @@ namespace System.Net
 
 		private Stream nstream;
 
-		internal Socket socket;
+		private global::System.Net.Sockets.Socket socket;
 
 		private object socketLock = new object();
 
-		private IWebConnectionState state;
-
 		private WebExceptionStatus status;
+
+		private WaitCallback initConn;
 
 		private bool keepAlive;
 
 		private byte[] buffer;
 
+		private static AsyncCallback readDoneDelegate = new AsyncCallback(WebConnection.ReadDone);
+
 		private EventHandler abortHandler;
 
 		private WebConnection.AbortHelper abortHelper;
+
+		private ReadState readState;
 
 		internal WebConnectionData Data;
 
 		private bool chunkedRead;
 
-		private MonoChunkStream chunkStream;
+		private ChunkStream chunkStream;
 
 		private Queue queue;
 
 		private bool reused;
 
 		private int position;
+
+		private bool busy;
 
 		private HttpWebRequest priority_request;
 
@@ -1425,20 +1364,23 @@ namespace System.Net
 
 		private bool unsafe_sharing;
 
-		private WebConnection.NtlmAuthState connect_ntlm_auth_state;
+		private bool ssl;
 
-		private HttpWebRequest connect_request;
+		private bool certsAvailable;
 
 		private Exception connect_exception;
 
-		private MonoTlsStream tlsStream;
+		private static object classLock = new object();
 
-		private enum NtlmAuthState
-		{
-			None,
-			Challenge,
-			Response
-		}
+		private static Type sslStream;
+
+		private static PropertyInfo piClient;
+
+		private static PropertyInfo piServer;
+
+		private static PropertyInfo piTrustFailure;
+
+		private static MethodInfo method_GetSecurityPolicyFromNonMainThread;
 
 		private class AbortHelper
 		{

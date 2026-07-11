@@ -3,12 +3,12 @@
 namespace System.Runtime.InteropServices.ComTypes
 {
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("00020404-0000-0000-C000-000000000046")]
+	[Guid("00020404-0000-0000-c000-000000000046")]
 	[ComImport]
 	public interface IEnumVARIANT
 	{
 		[PreserveSig]
-		int Next(int celt, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] [Out] object[] rgVar, IntPtr pceltFetched);
+		int Next(int celt, [MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 0)] [Out] object[] rgVar, IntPtr pceltFetched);
 
 		[PreserveSig]
 		int Skip(int celt);

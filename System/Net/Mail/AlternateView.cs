@@ -16,7 +16,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public AlternateView(string fileName, ContentType contentType)
+		public AlternateView(string fileName, global::System.Net.Mime.ContentType contentType)
 			: base(fileName, contentType)
 		{
 			if (fileName == null)
@@ -44,12 +44,12 @@ namespace System.Net.Mail
 		{
 		}
 
-		public AlternateView(Stream contentStream, ContentType contentType)
+		public AlternateView(Stream contentStream, global::System.Net.Mime.ContentType contentType)
 			: base(contentStream, contentType)
 		{
 		}
 
-		public Uri BaseUri
+		public global::System.Uri BaseUri
 		{
 			get
 			{
@@ -75,41 +75,45 @@ namespace System.Net.Mail
 			{
 				throw new ArgumentNullException();
 			}
-			return new AlternateView(new MemoryStream(Encoding.UTF8.GetBytes(content)))
+			MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(content));
+			return new AlternateView(memoryStream)
 			{
-				TransferEncoding = TransferEncoding.QuotedPrintable
+				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable
 			};
 		}
 
-		public static AlternateView CreateAlternateViewFromString(string content, ContentType contentType)
+		public static AlternateView CreateAlternateViewFromString(string content, global::System.Net.Mime.ContentType contentType)
 		{
 			if (content == null)
 			{
 				throw new ArgumentNullException("content");
 			}
-			return new AlternateView(new MemoryStream(((contentType.CharSet != null) ? Encoding.GetEncoding(contentType.CharSet) : Encoding.UTF8).GetBytes(content)), contentType)
+			Encoding encoding = ((contentType.CharSet == null) ? Encoding.UTF8 : Encoding.GetEncoding(contentType.CharSet));
+			MemoryStream memoryStream = new MemoryStream(encoding.GetBytes(content));
+			return new AlternateView(memoryStream, contentType)
 			{
-				TransferEncoding = TransferEncoding.QuotedPrintable
+				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable
 			};
 		}
 
-		public static AlternateView CreateAlternateViewFromString(string content, Encoding contentEncoding, string mediaType)
+		public static AlternateView CreateAlternateViewFromString(string content, Encoding encoding, string mediaType)
 		{
 			if (content == null)
 			{
 				throw new ArgumentNullException("content");
 			}
-			if (contentEncoding == null)
+			if (encoding == null)
 			{
-				contentEncoding = Encoding.UTF8;
+				encoding = Encoding.UTF8;
 			}
-			return new AlternateView(new MemoryStream(contentEncoding.GetBytes(content)), new ContentType
+			MemoryStream memoryStream = new MemoryStream(encoding.GetBytes(content));
+			return new AlternateView(memoryStream, new global::System.Net.Mime.ContentType
 			{
 				MediaType = mediaType,
-				CharSet = contentEncoding.HeaderName
+				CharSet = encoding.HeaderName
 			})
 			{
-				TransferEncoding = TransferEncoding.QuotedPrintable
+				TransferEncoding = global::System.Net.Mime.TransferEncoding.QuotedPrintable
 			};
 		}
 
@@ -125,7 +129,7 @@ namespace System.Net.Mail
 			base.Dispose(disposing);
 		}
 
-		private Uri baseUri;
+		private global::System.Uri baseUri;
 
 		private LinkedResourceCollection linkedResources = new LinkedResourceCollection();
 	}

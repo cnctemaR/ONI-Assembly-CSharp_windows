@@ -9,33 +9,24 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.dataContractSurrogate;
+				return this.surrogate;
 			}
 			set
 			{
-				this.dataContractSurrogate = value;
+				this.surrogate = value;
 			}
-		}
-
-		internal IDataContractSurrogate GetSurrogate()
-		{
-			return this.dataContractSurrogate;
 		}
 
 		public Collection<Type> KnownTypes
 		{
 			get
 			{
-				if (this.knownTypes == null)
-				{
-					this.knownTypes = new Collection<Type>();
-				}
-				return this.knownTypes;
+				return this.known_types;
 			}
 		}
 
-		private Collection<Type> knownTypes;
+		private IDataContractSurrogate surrogate;
 
-		private IDataContractSurrogate dataContractSurrogate;
+		private KnownTypeCollection known_types;
 	}
 }

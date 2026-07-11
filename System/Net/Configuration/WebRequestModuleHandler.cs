@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Configuration;
 using System.Xml;
 
 namespace System.Net.Configuration
 {
-	internal class WebRequestModuleHandler : IConfigurationSectionHandler
+	internal class WebRequestModuleHandler : global::System.Configuration.IConfigurationSectionHandler
 	{
 		public virtual object Create(object parent, object configContext, XmlNode section)
 		{
@@ -13,7 +12,8 @@ namespace System.Net.Configuration
 			{
 				HandlersUtil.ThrowException("Unrecognized attribute", section);
 			}
-			foreach (object obj in section.ChildNodes)
+			XmlNodeList childNodes = section.ChildNodes;
+			foreach (object obj in childNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
 				XmlNodeType nodeType = xmlNode.NodeType;
@@ -30,27 +30,32 @@ namespace System.Net.Configuration
 						{
 							HandlersUtil.ThrowException("Unrecognized attribute", xmlNode);
 						}
-						WebRequest.PrefixList = new ArrayList();
+						WebRequest.ClearPrefixes();
 					}
 					else
 					{
+						string text = HandlersUtil.ExtractAttributeValue("prefix", xmlNode);
 						if (name == "add")
 						{
+							string text2 = HandlersUtil.ExtractAttributeValue("type", xmlNode, false);
 							if (xmlNode.Attributes != null && xmlNode.Attributes.Count != 0)
 							{
 								HandlersUtil.ThrowException("Unrecognized attribute", xmlNode);
 							}
-							throw new NotImplementedException();
+							WebRequest.AddPrefix(text, text2);
 						}
-						if (name == "remove")
+						else if (name == "remove")
 						{
 							if (xmlNode.Attributes != null && xmlNode.Attributes.Count != 0)
 							{
 								HandlersUtil.ThrowException("Unrecognized attribute", xmlNode);
 							}
-							throw new NotImplementedException();
+							WebRequest.RemovePrefix(text);
 						}
-						HandlersUtil.ThrowException("Unexpected element", xmlNode);
+						else
+						{
+							HandlersUtil.ThrowException("Unexpected element", xmlNode);
+						}
 					}
 				}
 			}

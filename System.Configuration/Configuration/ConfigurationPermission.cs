@@ -14,7 +14,7 @@ namespace System.Configuration
 
 		public override IPermission Copy()
 		{
-			return new ConfigurationPermission(this.unrestricted ? PermissionState.Unrestricted : PermissionState.None);
+			return new ConfigurationPermission((!this.unrestricted) ? PermissionState.None : PermissionState.Unrestricted);
 		}
 
 		public override void FromXml(SecurityElement securityElement)
@@ -45,7 +45,7 @@ namespace System.Configuration
 			{
 				throw new ArgumentException("target");
 			}
-			return new ConfigurationPermission((this.unrestricted && configurationPermission.IsUnrestricted()) ? PermissionState.Unrestricted : PermissionState.None);
+			return new ConfigurationPermission((!this.unrestricted || !configurationPermission.IsUnrestricted()) ? PermissionState.None : PermissionState.Unrestricted);
 		}
 
 		public override IPermission Union(IPermission target)
@@ -59,7 +59,7 @@ namespace System.Configuration
 			{
 				throw new ArgumentException("target");
 			}
-			return new ConfigurationPermission((this.unrestricted || configurationPermission.IsUnrestricted()) ? PermissionState.Unrestricted : PermissionState.None);
+			return new ConfigurationPermission((!this.unrestricted && !configurationPermission.IsUnrestricted()) ? PermissionState.None : PermissionState.Unrestricted);
 		}
 
 		public override bool IsSubsetOf(IPermission target)

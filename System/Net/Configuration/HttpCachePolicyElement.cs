@@ -55,11 +55,11 @@ namespace System.Net.Configuration
 		}
 
 		[ConfigurationProperty("policyLevel", DefaultValue = "Default", Options = ConfigurationPropertyOptions.IsRequired)]
-		public HttpRequestCacheLevel PolicyLevel
+		public global::System.Net.Cache.HttpRequestCacheLevel PolicyLevel
 		{
 			get
 			{
-				return (HttpRequestCacheLevel)base[HttpCachePolicyElement.policyLevelProp];
+				return (global::System.Net.Cache.HttpRequestCacheLevel)((int)base[HttpCachePolicyElement.policyLevelProp]);
 			}
 			set
 			{
@@ -75,13 +75,13 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void DeserializeElement(XmlReader reader, bool serializeCollectionKey)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void Reset(ConfigurationElement parentElement)
 		{
 			throw new NotImplementedException();
@@ -93,7 +93,7 @@ namespace System.Net.Configuration
 
 		private static ConfigurationProperty minimumFreshProp = new ConfigurationProperty("minimumFresh", typeof(TimeSpan), TimeSpan.MinValue);
 
-		private static ConfigurationProperty policyLevelProp = new ConfigurationProperty("policyLevel", typeof(HttpRequestCacheLevel), HttpRequestCacheLevel.Default, ConfigurationPropertyOptions.IsRequired);
+		private static ConfigurationProperty policyLevelProp = new ConfigurationProperty("policyLevel", typeof(global::System.Net.Cache.HttpRequestCacheLevel), global::System.Net.Cache.HttpRequestCacheLevel.Default, ConfigurationPropertyOptions.IsRequired);
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 	}

@@ -45,12 +45,13 @@ namespace System.Configuration
 
 		protected override ConfigurationElement CreateNewElement()
 		{
-			return new NameValueConfigurationElement("", "");
+			return new NameValueConfigurationElement(string.Empty, string.Empty);
 		}
 
 		protected override object GetElementKey(ConfigurationElement element)
 		{
-			return ((NameValueConfigurationElement)element).Name;
+			NameValueConfigurationElement nameValueConfigurationElement = (NameValueConfigurationElement)element;
+			return nameValueConfigurationElement.Name;
 		}
 
 		public void Remove(NameValueConfigurationElement nameValue)

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeLabeledStatement : CodeStatement
 	{
@@ -11,29 +14,50 @@ namespace System.CodeDom
 
 		public CodeLabeledStatement(string label)
 		{
-			this._label = label;
+			this.label = label;
 		}
 
 		public CodeLabeledStatement(string label, CodeStatement statement)
 		{
-			this._label = label;
-			this.Statement = statement;
+			this.label = label;
+			this.statement = statement;
 		}
 
 		public string Label
 		{
 			get
 			{
-				return this._label ?? string.Empty;
+				if (this.label == null)
+				{
+					return string.Empty;
+				}
+				return this.label;
 			}
 			set
 			{
-				this._label = value;
+				this.label = value;
 			}
 		}
 
-		public CodeStatement Statement { get; set; }
+		public CodeStatement Statement
+		{
+			get
+			{
+				return this.statement;
+			}
+			set
+			{
+				this.statement = value;
+			}
+		}
 
-		private string _label;
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private string label;
+
+		private CodeStatement statement;
 	}
 }

@@ -201,49 +201,6 @@ public class RolesScreen : KModalScreen
 		this.roleWidgets["NoRole"].GetComponent<RoleWidget>().Refresh("NoRole");
 	}
 
-	private void minionDropEntryRefreshAction(DropDownEntry entry, object targetData)
-	{
-		Image reference = entry.GetComponent<HierarchyReferences>().GetReference<Image>("SkillBox");
-		Image reference2 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("AptitudeBox");
-		RoleConfig roleConfig = entry.entryData as RoleConfig;
-		MinionResume minionResume = targetData as MinionResume;
-		if (roleConfig == null)
-		{
-			reference.transform.parent.gameObject.SetActive(false);
-			reference2.transform.parent.gameObject.SetActive(false);
-		}
-		else
-		{
-			entry.tooltip.SetSimpleTooltip(Game.Instance.roleManager.RoleCriteriaString(roleConfig.id, minionResume));
-			entry.button.isInteractable = Game.Instance.roleManager.CanAssignToRole(roleConfig.id, minionResume);
-			reference.transform.parent.gameObject.SetActive(true);
-			reference2.transform.parent.gameObject.SetActive(true);
-			float num = 0f;
-			for (int i = 0; i < roleConfig.relevantAttributes.Length; i++)
-			{
-				num += minionResume.GetAttributes().Get(roleConfig.relevantAttributes[i]).GetTotalDisplayValue();
-			}
-			float num2 = minionResume.AptitudeByRoleGroup[roleConfig.roleGroup];
-			reference.transform.parent.GetComponentInChildren<LocText>(true).text = num.ToString();
-			if (roleConfig.relevantAttributes.Length > 0)
-			{
-				reference.SetAlpha(GameUtil.AttributeSkillToAlpha(num));
-			}
-			else
-			{
-				reference.SetAlpha(0f);
-			}
-			if (roleConfig.relevantAttributes.Length > 0)
-			{
-				reference2.gameObject.SetActive(num2 > 0f);
-			}
-			else
-			{
-				reference2.gameObject.SetActive(false);
-			}
-		}
-	}
-
 	private int minionDropDownSort(IListableOption a, IListableOption b, object targetData)
 	{
 		RoleConfig roleConfig = a as RoleConfig;

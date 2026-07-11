@@ -13,7 +13,7 @@ namespace System.Reflection
 	[Serializable]
 	public class StrongNameKeyPair : ISerializable, IDeserializationCallback
 	{
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public StrongNameKeyPair(byte[] keyPairArray)
 		{
 			if (keyPairArray == null)
@@ -24,7 +24,7 @@ namespace System.Reflection
 			this.GetRSA();
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public StrongNameKeyPair(FileStream keyPairFile)
 		{
 			if (keyPairFile == null)
@@ -37,7 +37,7 @@ namespace System.Reflection
 			this.GetRSA();
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public StrongNameKeyPair(string keyPairContainer)
 		{
 			if (keyPairContainer == null)
@@ -79,22 +79,19 @@ namespace System.Reflection
 				try
 				{
 					this._rsa = CryptoConvert.FromCapiKeyBlob(this._keyPairArray);
-					goto IL_005A;
 				}
 				catch
 				{
 					this._keyPairArray = null;
-					goto IL_005A;
 				}
 			}
-			if (this._keyPairContainer != null)
+			else if (this._keyPairContainer != null)
 			{
 				this._rsa = new RSACryptoServiceProvider(new CspParameters
 				{
 					KeyContainerName = this._keyPairContainer
 				});
 			}
-			IL_005A:
 			return this._rsa;
 		}
 

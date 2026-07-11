@@ -46,7 +46,7 @@ public class Worker : KMonoBehaviour
 			if (this.workable.triggerWorkReactions && this.workable.GetWorkTime() > 30f)
 			{
 				string conversationTopic = this.workable.GetConversationTopic();
-				if (!string.IsNullOrWhiteSpace(conversationTopic))
+				if (!conversationTopic.IsNullOrWhiteSpace())
 				{
 					this.CreateCompletionReactable(conversationTopic);
 				}
@@ -307,7 +307,7 @@ public class Worker : KMonoBehaviour
 			anim = "clapcheer_pst"
 		})
 			.AddPrecondition(new Reactable.ReactablePrecondition(this.ReactorIsOnFloor));
-		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
+		Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic, "ui", true);
 		if (uisprite != null)
 		{
 			Thought thought = new Thought("Completion_" + topic, null, uisprite.first, "mode_satisfaction", "conversation_short", "bubble_conversation", SpeechMonitor.PREFIX_HAPPY, string.Empty, true, 4f);

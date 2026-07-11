@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -14,19 +15,56 @@ namespace System.Xml.Serialization
 			this.elementName = elementName;
 		}
 
+		public string DataType
+		{
+			get
+			{
+				if (this.dataType == null)
+				{
+					return string.Empty;
+				}
+				return this.dataType;
+			}
+			set
+			{
+				this.dataType = value;
+			}
+		}
+
 		public string ElementName
 		{
 			get
 			{
-				if (this.elementName != null)
+				if (this.elementName == null)
 				{
-					return this.elementName;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.elementName;
 			}
 			set
 			{
 				this.elementName = value;
+			}
+		}
+
+		public bool IsNullable
+		{
+			get
+			{
+				return this.isNullable;
+			}
+			set
+			{
+				this.isNullableSpecified = true;
+				this.isNullable = value;
+			}
+		}
+
+		public bool IsNullableSpecified
+		{
+			get
+			{
+				return this.isNullableSpecified;
 			}
 		}
 
@@ -42,66 +80,34 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public string DataType
+		internal void AddKeyHash(StringBuilder sb)
 		{
-			get
-			{
-				if (this.dataType != null)
-				{
-					return this.dataType;
-				}
-				return string.Empty;
-			}
-			set
-			{
-				this.dataType = value;
-			}
-		}
-
-		public bool IsNullable
-		{
-			get
-			{
-				return this.nullable;
-			}
-			set
-			{
-				this.nullable = value;
-				this.nullableSpecified = true;
-			}
-		}
-
-		internal bool IsNullableSpecified
-		{
-			get
-			{
-				return this.nullableSpecified;
-			}
+			sb.Append("XRA ");
+			KeyHelper.AddField(sb, 1, this.ns);
+			KeyHelper.AddField(sb, 2, this.elementName);
+			KeyHelper.AddField(sb, 3, this.dataType);
+			KeyHelper.AddField(sb, 4, this.isNullable);
+			sb.Append('|');
 		}
 
 		internal string Key
 		{
 			get
 			{
-				return string.Concat(new string[]
-				{
-					(this.ns == null) ? string.Empty : this.ns,
-					":",
-					this.ElementName,
-					":",
-					this.nullable.ToString()
-				});
+				StringBuilder stringBuilder = new StringBuilder();
+				this.AddKeyHash(stringBuilder);
+				return stringBuilder.ToString();
 			}
 		}
 
-		private string elementName;
-
-		private string ns;
-
 		private string dataType;
 
-		private bool nullable = true;
+		private string elementName;
 
-		private bool nullableSpecified;
+		private bool isNullable = true;
+
+		private bool isNullableSpecified;
+
+		private string ns;
 	}
 }

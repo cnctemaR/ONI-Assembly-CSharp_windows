@@ -6,7 +6,6 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Mono.Security.Protocol.Tls
 {
-	[Obsolete("This class is obsolete and will be removed shortly.")]
 	internal class HttpsClientStream : SslClientStream
 	{
 		public HttpsClientStream(Stream stream, X509CertificateCollection clientCertificates, HttpWebRequest request, byte[] buffer)
@@ -19,22 +18,11 @@ namespace Mono.Security.Protocol.Tls
 				base.InputBuffer.Write(buffer, 0, buffer.Length);
 			}
 			base.CheckCertRevocationStatus = ServicePointManager.CheckCertificateRevocationList;
-			base.ClientCertSelection += delegate(X509CertificateCollection clientCerts, X509Certificate serverCertificate, string targetHost, X509CertificateCollection serverRequestedCertificates)
-			{
-				if (clientCerts != null && clientCerts.Count != 0)
-				{
-					return clientCerts[0];
-				}
-				return null;
-			};
+			base.ClientCertSelection += (X509CertificateCollection clientCerts, X509Certificate serverCertificate, string targetHost, X509CertificateCollection serverRequestedCertificates) => (clientCerts != null && clientCerts.Count != 0) ? clientCerts[0] : null;
 			base.PrivateKeySelection += delegate(X509Certificate certificate, string targetHost)
 			{
 				X509Certificate2 x509Certificate = certificate as X509Certificate2;
-				if (x509Certificate != null)
-				{
-					return x509Certificate.PrivateKey;
-				}
-				return null;
+				return (x509Certificate != null) ? x509Certificate.PrivateKey : null;
 			};
 		}
 
@@ -43,14 +31,14 @@ namespace Mono.Security.Protocol.Tls
 			get
 			{
 				int status = this._status;
-				return status - -2146762487 <= 1;
+				return status == -2146762487 || status == -2146762486;
 			}
 		}
 
 		internal override bool RaiseServerCertificateValidation(X509Certificate certificate, int[] certificateErrors)
 		{
-			bool flag = certificateErrors.Length != 0;
-			this._status = (flag ? certificateErrors[0] : 0);
+			bool flag = certificateErrors.Length > 0;
+			this._status = ((!flag) ? 0 : certificateErrors[0]);
 			if (ServicePointManager.CertificatePolicy != null)
 			{
 				ServicePoint servicePoint = this._request.ServicePoint;

@@ -7,21 +7,21 @@ namespace System.Security.Cryptography
 	[Serializable]
 	public struct DSAParameters
 	{
+		public int Counter;
+
+		public byte[] G;
+
+		public byte[] J;
+
 		public byte[] P;
 
 		public byte[] Q;
 
-		public byte[] G;
-
-		public byte[] Y;
-
-		public byte[] J;
+		public byte[] Seed;
 
 		[NonSerialized]
 		public byte[] X;
 
-		public byte[] Seed;
-
-		public int Counter;
+		public byte[] Y;
 	}
 }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D33}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC838}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Newtonsoft.Json</RootNamespace>
     <AssemblyName>Newtonsoft.Json</AssemblyName>
@@ -244,15 +244,34 @@
     <EmbeddedResource Include="Dynamic.snk" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Core\System.Core.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83A}</Project>
+      <Name>System.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System.Data\System.Data.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D36}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83B}</Project>
       <Name>System.Data</Name>
     </ProjectReference>
+    <ProjectReference Include="..\System.Runtime.Serialization\System.Runtime.Serialization.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83E}</Project>
+      <Name>System.Runtime.Serialization</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Xml.Linq\System.Xml.Linq.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC842}</Project>
+      <Name>System.Xml.Linq</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Xml\System.Xml.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC841}</Project>
+      <Name>System.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83C}</Project>
+      <Name>System</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

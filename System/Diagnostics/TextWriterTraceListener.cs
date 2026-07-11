@@ -1,14 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Security.Permissions;
-using System.Text;
 
 namespace System.Diagnostics
 {
-	[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
 	public class TextWriterTraceListener : TraceListener
 	{
 		public TextWriterTraceListener()
+			: base("TextWriter")
 		{
 		}
 
@@ -17,8 +15,18 @@ namespace System.Diagnostics
 		{
 		}
 
+		public TextWriterTraceListener(string fileName)
+			: this(fileName, string.Empty)
+		{
+		}
+
+		public TextWriterTraceListener(TextWriter writer)
+			: this(writer, string.Empty)
+		{
+		}
+
 		public TextWriterTraceListener(Stream stream, string name)
-			: base(name)
+			: base((name == null) ? string.Empty : name)
 		{
 			if (stream == null)
 			{
@@ -27,13 +35,18 @@ namespace System.Diagnostics
 			this.writer = new StreamWriter(stream);
 		}
 
-		public TextWriterTraceListener(TextWriter writer)
-			: this(writer, string.Empty)
+		public TextWriterTraceListener(string fileName, string name)
+			: base((name == null) ? string.Empty : name)
 		{
+			if (fileName == null)
+			{
+				throw new ArgumentNullException("fileName");
+			}
+			this.writer = new StreamWriter(new FileStream(fileName, FileMode.Append, FileAccess.Write, FileShare.ReadWrite));
 		}
 
 		public TextWriterTraceListener(TextWriter writer, string name)
-			: base(name)
+			: base((name == null) ? string.Empty : name)
 		{
 			if (writer == null)
 			{
@@ -42,22 +55,10 @@ namespace System.Diagnostics
 			this.writer = writer;
 		}
 
-		public TextWriterTraceListener(string fileName)
-		{
-			this.fileName = fileName;
-		}
-
-		public TextWriterTraceListener(string fileName, string name)
-			: base(name)
-		{
-			this.fileName = fileName;
-		}
-
 		public TextWriter Writer
 		{
 			get
 			{
-				this.EnsureWriter();
 				return this.writer;
 			}
 			set
@@ -70,154 +71,54 @@ namespace System.Diagnostics
 		{
 			if (this.writer != null)
 			{
-				try
-				{
-					this.writer.Close();
-				}
-				catch (ObjectDisposedException)
-				{
-				}
+				this.writer.Flush();
+				this.writer.Close();
+				this.writer = null;
 			}
-			this.writer = null;
 		}
 
 		protected override void Dispose(bool disposing)
 		{
-			try
+			if (disposing)
 			{
-				if (disposing)
-				{
-					this.Close();
-				}
-				else
-				{
-					if (this.writer != null)
-					{
-						try
-						{
-							this.writer.Close();
-						}
-						catch (ObjectDisposedException)
-						{
-						}
-					}
-					this.writer = null;
-				}
+				this.Close();
 			}
-			finally
-			{
-				base.Dispose(disposing);
-			}
+			base.Dispose(disposing);
 		}
 
 		public override void Flush()
 		{
-			if (!this.EnsureWriter())
-			{
-				return;
-			}
-			try
+			if (this.writer != null)
 			{
 				this.writer.Flush();
-			}
-			catch (ObjectDisposedException)
-			{
 			}
 		}
 
 		public override void Write(string message)
 		{
-			if (!this.EnsureWriter())
+			if (this.writer != null)
 			{
-				return;
-			}
-			if (base.NeedIndent)
-			{
-				this.WriteIndent();
-			}
-			try
-			{
+				if (base.NeedIndent)
+				{
+					this.WriteIndent();
+				}
 				this.writer.Write(message);
-			}
-			catch (ObjectDisposedException)
-			{
 			}
 		}
 
 		public override void WriteLine(string message)
 		{
-			if (!this.EnsureWriter())
+			if (this.writer != null)
 			{
-				return;
-			}
-			if (base.NeedIndent)
-			{
-				this.WriteIndent();
-			}
-			try
-			{
+				if (base.NeedIndent)
+				{
+					this.WriteIndent();
+				}
 				this.writer.WriteLine(message);
 				base.NeedIndent = true;
 			}
-			catch (ObjectDisposedException)
-			{
-			}
 		}
 
-		private static Encoding GetEncodingWithFallback(Encoding encoding)
-		{
-			Encoding encoding2 = (Encoding)encoding.Clone();
-			encoding2.EncoderFallback = EncoderFallback.ReplacementFallback;
-			encoding2.DecoderFallback = DecoderFallback.ReplacementFallback;
-			return encoding2;
-		}
-
-		internal bool EnsureWriter()
-		{
-			bool flag = true;
-			if (this.writer == null)
-			{
-				flag = false;
-				if (this.fileName == null)
-				{
-					return flag;
-				}
-				Encoding encodingWithFallback = TextWriterTraceListener.GetEncodingWithFallback(new UTF8Encoding(false));
-				string text = Path.GetFullPath(this.fileName);
-				string directoryName = Path.GetDirectoryName(text);
-				string text2 = Path.GetFileName(text);
-				for (int i = 0; i < 2; i++)
-				{
-					try
-					{
-						this.writer = new StreamWriter(text, true, encodingWithFallback, 4096);
-						flag = true;
-						break;
-					}
-					catch (IOException)
-					{
-						text2 = Guid.NewGuid().ToString() + text2;
-						text = Path.Combine(directoryName, text2);
-					}
-					catch (UnauthorizedAccessException)
-					{
-						break;
-					}
-					catch (Exception)
-					{
-						break;
-					}
-				}
-				if (!flag)
-				{
-					this.fileName = null;
-				}
-			}
-			return flag;
-		}
-
-		internal TextWriter writer;
-
-		private string fileName;
+		private TextWriter writer;
 	}
 }

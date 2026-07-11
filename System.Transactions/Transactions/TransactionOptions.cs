@@ -34,16 +34,6 @@ namespace System.Transactions
 			}
 		}
 
-		public static bool operator ==(TransactionOptions x, TransactionOptions y)
-		{
-			return x.level == y.level && x.timeout == y.timeout;
-		}
-
-		public static bool operator !=(TransactionOptions x, TransactionOptions y)
-		{
-			return x.level != y.level || x.timeout != y.timeout;
-		}
-
 		public override bool Equals(object obj)
 		{
 			return obj is TransactionOptions && this == (TransactionOptions)obj;
@@ -52,6 +42,16 @@ namespace System.Transactions
 		public override int GetHashCode()
 		{
 			return (int)(this.level ^ (IsolationLevel)this.timeout.GetHashCode());
+		}
+
+		public static bool operator ==(TransactionOptions o1, TransactionOptions o2)
+		{
+			return o1.level == o2.level && o1.timeout == o2.timeout;
+		}
+
+		public static bool operator !=(TransactionOptions o1, TransactionOptions o2)
+		{
+			return o1.level != o2.level || o1.timeout != o2.timeout;
 		}
 
 		private IsolationLevel level;

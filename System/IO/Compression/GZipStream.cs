@@ -1,47 +1,86 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.IO.Compression
 {
 	public class GZipStream : Stream
 	{
-		public GZipStream(Stream stream, CompressionMode mode)
-			: this(stream, mode, false)
+		public GZipStream(Stream compressedStream, CompressionMode mode)
+			: this(compressedStream, mode, false)
 		{
 		}
 
-		public GZipStream(Stream stream, CompressionMode mode, bool leaveOpen)
+		public GZipStream(Stream compressedStream, CompressionMode mode, bool leaveOpen)
 		{
-			this._deflateStream = new DeflateStream(stream, mode, leaveOpen, 31);
+			this.deflateStream = new DeflateStream(compressedStream, mode, leaveOpen, true);
 		}
 
-		public GZipStream(Stream stream, CompressionLevel compressionLevel)
-			: this(stream, compressionLevel, false)
+		protected override void Dispose(bool disposing)
 		{
+			if (disposing)
+			{
+				this.deflateStream.Dispose();
+			}
+			base.Dispose(disposing);
 		}
 
-		public GZipStream(Stream stream, CompressionLevel compressionLevel, bool leaveOpen)
+		public override int Read(byte[] dest, int dest_offset, int count)
 		{
-			this._deflateStream = new DeflateStream(stream, compressionLevel, leaveOpen, 31);
+			return this.deflateStream.Read(dest, dest_offset, count);
+		}
+
+		public override void Write(byte[] src, int src_offset, int count)
+		{
+			this.deflateStream.Write(src, src_offset, count);
+		}
+
+		public override void Flush()
+		{
+			this.deflateStream.Flush();
+		}
+
+		public override long Seek(long offset, SeekOrigin origin)
+		{
+			return this.deflateStream.Seek(offset, origin);
+		}
+
+		public override void SetLength(long value)
+		{
+			this.deflateStream.SetLength(value);
+		}
+
+		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback cback, object state)
+		{
+			return this.deflateStream.BeginRead(buffer, offset, count, cback, state);
+		}
+
+		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback cback, object state)
+		{
+			return this.deflateStream.BeginWrite(buffer, offset, count, cback, state);
+		}
+
+		public override int EndRead(IAsyncResult async_result)
+		{
+			return this.deflateStream.EndRead(async_result);
+		}
+
+		public override void EndWrite(IAsyncResult async_result)
+		{
+			this.deflateStream.EndWrite(async_result);
+		}
+
+		public Stream BaseStream
+		{
+			get
+			{
+				return this.deflateStream.BaseStream;
+			}
 		}
 
 		public override bool CanRead
 		{
 			get
 			{
-				DeflateStream deflateStream = this._deflateStream;
-				return deflateStream != null && deflateStream.CanRead;
-			}
-		}
-
-		public override bool CanWrite
-		{
-			get
-			{
-				DeflateStream deflateStream = this._deflateStream;
-				return deflateStream != null && deflateStream.CanWrite;
+				return this.deflateStream.CanRead;
 			}
 		}
 
@@ -49,8 +88,15 @@ namespace System.IO.Compression
 		{
 			get
 			{
-				DeflateStream deflateStream = this._deflateStream;
-				return deflateStream != null && deflateStream.CanSeek;
+				return this.deflateStream.CanSeek;
+			}
+		}
+
+		public override bool CanWrite
+		{
+			get
+			{
+				return this.deflateStream.CanWrite;
 			}
 		}
 
@@ -58,7 +104,7 @@ namespace System.IO.Compression
 		{
 			get
 			{
-				throw new NotSupportedException("This operation is not supported.");
+				return this.deflateStream.Length;
 			}
 		}
 
@@ -66,182 +112,14 @@ namespace System.IO.Compression
 		{
 			get
 			{
-				throw new NotSupportedException("This operation is not supported.");
+				return this.deflateStream.Position;
 			}
 			set
 			{
-				throw new NotSupportedException("This operation is not supported.");
+				this.deflateStream.Position = value;
 			}
 		}
 
-		public override void Flush()
-		{
-			this.CheckDeflateStream();
-			this._deflateStream.Flush();
-		}
-
-		public override long Seek(long offset, SeekOrigin origin)
-		{
-			throw new NotSupportedException("This operation is not supported.");
-		}
-
-		public override void SetLength(long value)
-		{
-			throw new NotSupportedException("This operation is not supported.");
-		}
-
-		public override int ReadByte()
-		{
-			this.CheckDeflateStream();
-			return this._deflateStream.ReadByte();
-		}
-
-		public override IAsyncResult BeginRead(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-		{
-			return TaskToApm.Begin(this.ReadAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
-		}
-
-		public override int EndRead(IAsyncResult asyncResult)
-		{
-			return TaskToApm.End<int>(asyncResult);
-		}
-
-		public override int Read(byte[] array, int offset, int count)
-		{
-			this.CheckDeflateStream();
-			return this._deflateStream.Read(array, offset, count);
-		}
-
-		public override int Read(Span<byte> destination)
-		{
-			if (base.GetType() != typeof(GZipStream))
-			{
-				return base.Read(destination);
-			}
-			this.CheckDeflateStream();
-			return this._deflateStream.ReadCore(destination);
-		}
-
-		public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState)
-		{
-			return TaskToApm.Begin(this.WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
-		}
-
-		public override void EndWrite(IAsyncResult asyncResult)
-		{
-			TaskToApm.End(asyncResult);
-		}
-
-		public override void Write(byte[] array, int offset, int count)
-		{
-			this.CheckDeflateStream();
-			this._deflateStream.Write(array, offset, count);
-		}
-
-		public override void Write(ReadOnlySpan<byte> source)
-		{
-			if (base.GetType() != typeof(GZipStream))
-			{
-				base.Write(source);
-				return;
-			}
-			this.CheckDeflateStream();
-			this._deflateStream.WriteCore(source);
-		}
-
-		public override void CopyTo(Stream destination, int bufferSize)
-		{
-			this.CheckDeflateStream();
-			this._deflateStream.CopyTo(destination, bufferSize);
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			try
-			{
-				if (disposing && this._deflateStream != null)
-				{
-					this._deflateStream.Dispose();
-				}
-				this._deflateStream = null;
-			}
-			finally
-			{
-				base.Dispose(disposing);
-			}
-		}
-
-		public Stream BaseStream
-		{
-			get
-			{
-				DeflateStream deflateStream = this._deflateStream;
-				if (deflateStream == null)
-				{
-					return null;
-				}
-				return deflateStream.BaseStream;
-			}
-		}
-
-		public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
-		{
-			this.CheckDeflateStream();
-			return this._deflateStream.ReadAsync(array, offset, count, cancellationToken);
-		}
-
-		public override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default(CancellationToken))
-		{
-			if (base.GetType() != typeof(GZipStream))
-			{
-				return base.ReadAsync(destination, cancellationToken);
-			}
-			this.CheckDeflateStream();
-			return this._deflateStream.ReadAsyncMemory(destination, cancellationToken);
-		}
-
-		public override Task WriteAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
-		{
-			this.CheckDeflateStream();
-			return this._deflateStream.WriteAsync(array, offset, count, cancellationToken);
-		}
-
-		public override Task WriteAsync(ReadOnlyMemory<byte> source, CancellationToken cancellationToken = default(CancellationToken))
-		{
-			if (base.GetType() != typeof(GZipStream))
-			{
-				return base.WriteAsync(source, cancellationToken);
-			}
-			this.CheckDeflateStream();
-			return this._deflateStream.WriteAsyncMemory(source, cancellationToken);
-		}
-
-		public override Task FlushAsync(CancellationToken cancellationToken)
-		{
-			this.CheckDeflateStream();
-			return this._deflateStream.FlushAsync(cancellationToken);
-		}
-
-		public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
-		{
-			this.CheckDeflateStream();
-			return this._deflateStream.CopyToAsync(destination, bufferSize, cancellationToken);
-		}
-
-		private void CheckDeflateStream()
-		{
-			if (this._deflateStream == null)
-			{
-				GZipStream.ThrowStreamClosedException();
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		private static void ThrowStreamClosedException()
-		{
-			throw new ObjectDisposedException(null, "Can not access a closed Stream.");
-		}
-
-		private DeflateStream _deflateStream;
+		private DeflateStream deflateStream;
 	}
 }

@@ -9,26 +9,28 @@ namespace System
 	public class AppDomainUnloadedException : SystemException
 	{
 		public AppDomainUnloadedException()
-			: base(Environment.GetResourceString("Attempted to access an unloaded AppDomain."))
+			: base(Locale.GetText("Can't access an unloaded application domain."))
 		{
-			base.SetErrorCode(-2146234348);
+			base.HResult = -2146234348;
 		}
 
 		public AppDomainUnloadedException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146234348);
+			base.HResult = -2146234348;
 		}
 
 		public AppDomainUnloadedException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146234348);
+			base.HResult = -2146234348;
 		}
 
 		protected AppDomainUnloadedException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private const int Result = -2146234348;
 	}
 }

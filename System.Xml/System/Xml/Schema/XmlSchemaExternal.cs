@@ -49,67 +49,26 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.moreAttributes;
+				if (this.unhandledAttributeList != null)
+				{
+					this.unhandledAttributes = (XmlAttribute[])this.unhandledAttributeList.ToArray(typeof(XmlAttribute));
+					this.unhandledAttributeList = null;
+				}
+				return this.unhandledAttributes;
 			}
 			set
 			{
-				this.moreAttributes = value;
+				this.unhandledAttributes = value;
+				this.unhandledAttributeList = null;
 			}
 		}
-
-		[XmlIgnore]
-		internal Uri BaseUri
-		{
-			get
-			{
-				return this.baseUri;
-			}
-			set
-			{
-				this.baseUri = value;
-			}
-		}
-
-		[XmlIgnore]
-		internal override string IdAttribute
-		{
-			get
-			{
-				return this.Id;
-			}
-			set
-			{
-				this.Id = value;
-			}
-		}
-
-		internal override void SetUnhandledAttributes(XmlAttribute[] moreAttributes)
-		{
-			this.moreAttributes = moreAttributes;
-		}
-
-		internal Compositor Compositor
-		{
-			get
-			{
-				return this.compositor;
-			}
-			set
-			{
-				this.compositor = value;
-			}
-		}
-
-		private string location;
-
-		private Uri baseUri;
-
-		private XmlSchema schema;
 
 		private string id;
 
-		private XmlAttribute[] moreAttributes;
+		private XmlSchema schema;
 
-		private Compositor compositor;
+		private string location;
+
+		private XmlAttribute[] unhandledAttributes;
 	}
 }

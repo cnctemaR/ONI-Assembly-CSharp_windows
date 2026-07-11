@@ -1,344 +1,27 @@
 ﻿using System;
 using System.Configuration.Assemblies;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Activation;
-using System.Security;
+using System.Security.Permissions;
 using System.Security.Policy;
-using System.Threading;
+using System.Text;
 
 namespace System
 {
+	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_Activator))]
 	[ComVisible(true)]
-	[ClassInterface(ClassInterfaceType.None)]
 	public sealed class Activator : _Activator
 	{
 		private Activator()
 		{
 		}
 
-		public static object CreateInstance(Type type, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture)
-		{
-			return Activator.CreateInstance(type, bindingAttr, binder, args, culture, null);
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static object CreateInstance(Type type, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
-		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			if (type is TypeBuilder)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("CreateInstance cannot be used with an object of type TypeBuilder."));
-			}
-			if ((bindingAttr & (BindingFlags)255) == BindingFlags.Default)
-			{
-				bindingAttr |= BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance;
-			}
-			if (activationAttributes != null && activationAttributes.Length != 0)
-			{
-				if (!type.IsMarshalByRef)
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Activation Attributes are not supported for types not deriving from MarshalByRefObject."));
-				}
-				if (!type.IsContextful && (activationAttributes.Length > 1 || !(activationAttributes[0] is UrlAttribute)))
-				{
-					throw new NotSupportedException(Environment.GetResourceString("UrlAttribute is the only attribute supported for MarshalByRefObject."));
-				}
-			}
-			RuntimeType runtimeType = type.UnderlyingSystemType as RuntimeType;
-			if (runtimeType == null)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "type");
-			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return runtimeType.CreateInstanceImpl(bindingAttr, binder, args, culture, activationAttributes, ref stackCrawlMark);
-		}
-
-		public static object CreateInstance(Type type, params object[] args)
-		{
-			return Activator.CreateInstance(type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, args, null, null);
-		}
-
-		public static object CreateInstance(Type type, object[] args, object[] activationAttributes)
-		{
-			return Activator.CreateInstance(type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, args, null, activationAttributes);
-		}
-
-		public static object CreateInstance(Type type)
-		{
-			return Activator.CreateInstance(type, false);
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static ObjectHandle CreateInstance(string assemblyName, string typeName)
-		{
-			if (assemblyName == null)
-			{
-				assemblyName = Assembly.GetCallingAssembly().GetName().Name;
-			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Activator.CreateInstance(assemblyName, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, null, null, ref stackCrawlMark);
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes)
-		{
-			if (assemblyName == null)
-			{
-				assemblyName = Assembly.GetCallingAssembly().GetName().Name;
-			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Activator.CreateInstance(assemblyName, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, activationAttributes, null, ref stackCrawlMark);
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static object CreateInstance(Type type, bool nonPublic)
-		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			RuntimeType runtimeType = type.UnderlyingSystemType as RuntimeType;
-			if (runtimeType == null)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Type must be a type provided by the runtime."), "type");
-			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return runtimeType.CreateInstanceDefaultCtor(!nonPublic, false, true, ref stackCrawlMark);
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static T CreateInstance<T>()
-		{
-			RuntimeType runtimeType = typeof(T) as RuntimeType;
-			if (runtimeType.HasElementType)
-			{
-				throw new MissingMethodException(Environment.GetResourceString("No parameterless constructor defined for this object."));
-			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return (T)((object)runtimeType.CreateInstanceDefaultCtor(true, true, true, ref stackCrawlMark));
-		}
-
-		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
-		{
-			return Activator.CreateInstanceFrom(assemblyFile, typeName, null);
-		}
-
-		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes)
-		{
-			return Activator.CreateInstanceFrom(assemblyFile, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, activationAttributes);
-		}
-
-		[Obsolete("Methods which use evidence to sandbox are obsolete and will be removed in a future release of the .NET Framework. Please use an overload of CreateInstance which does not take an Evidence parameter. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo)
-		{
-			if (assemblyName == null)
-			{
-				assemblyName = Assembly.GetCallingAssembly().GetName().Name;
-			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Activator.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityInfo, ref stackCrawlMark);
-		}
-
-		[SecuritySafeCritical]
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
-		{
-			if (assemblyName == null)
-			{
-				assemblyName = Assembly.GetCallingAssembly().GetName().Name;
-			}
-			StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMyCaller;
-			return Activator.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, null, ref stackCrawlMark);
-		}
-
-		[SecurityCritical]
-		internal static ObjectHandle CreateInstance(string assemblyString, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo, ref StackCrawlMark stackMark)
-		{
-			Type type = null;
-			Assembly assembly = null;
-			if (assemblyString == null)
-			{
-				assembly = RuntimeAssembly.GetExecutingAssembly(ref stackMark);
-			}
-			else
-			{
-				RuntimeAssembly runtimeAssembly;
-				AssemblyName assemblyName = RuntimeAssembly.CreateAssemblyName(assemblyString, false, out runtimeAssembly);
-				if (runtimeAssembly != null)
-				{
-					assembly = runtimeAssembly;
-				}
-				else if (assemblyName.ContentType == AssemblyContentType.WindowsRuntime)
-				{
-					type = Type.GetType(typeName + ", " + assemblyString, true, ignoreCase);
-				}
-				else
-				{
-					assembly = RuntimeAssembly.InternalLoadAssemblyName(assemblyName, securityInfo, null, ref stackMark, true, false, false);
-				}
-			}
-			if (type == null)
-			{
-				if (assembly == null)
-				{
-					return null;
-				}
-				type = assembly.GetType(typeName, true, ignoreCase);
-			}
-			object obj = Activator.CreateInstance(type, bindingAttr, binder, args, culture, activationAttributes);
-			if (obj == null)
-			{
-				return null;
-			}
-			return new ObjectHandle(obj);
-		}
-
-		[Obsolete("Methods which use evidence to sandbox are obsolete and will be removed in a future release of the .NET Framework. Please use an overload of CreateInstanceFrom which does not take an Evidence parameter. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
-		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo)
-		{
-			return Activator.CreateInstanceFromInternal(assemblyFile, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityInfo);
-		}
-
-		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
-		{
-			return Activator.CreateInstanceFromInternal(assemblyFile, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, null);
-		}
-
-		private static ObjectHandle CreateInstanceFromInternal(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo)
-		{
-			object obj = Activator.CreateInstance(Assembly.LoadFrom(assemblyFile, securityInfo).GetType(typeName, true, ignoreCase), bindingAttr, binder, args, culture, activationAttributes);
-			if (obj == null)
-			{
-				return null;
-			}
-			return new ObjectHandle(obj);
-		}
-
-		[SecurityCritical]
-		public static ObjectHandle CreateInstance(AppDomain domain, string assemblyName, string typeName)
-		{
-			if (domain == null)
-			{
-				throw new ArgumentNullException("domain");
-			}
-			return domain.InternalCreateInstanceWithNoSecurity(assemblyName, typeName);
-		}
-
-		[Obsolete("Methods which use evidence to sandbox are obsolete and will be removed in a future release of the .NET Framework. Please use an overload of CreateInstance which does not take an Evidence parameter. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
-		[SecurityCritical]
-		public static ObjectHandle CreateInstance(AppDomain domain, string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
-		{
-			if (domain == null)
-			{
-				throw new ArgumentNullException("domain");
-			}
-			return domain.InternalCreateInstanceWithNoSecurity(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
-		}
-
-		[SecurityCritical]
-		public static ObjectHandle CreateInstance(AppDomain domain, string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
-		{
-			if (domain == null)
-			{
-				throw new ArgumentNullException("domain");
-			}
-			return domain.InternalCreateInstanceWithNoSecurity(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, null);
-		}
-
-		[SecurityCritical]
-		public static ObjectHandle CreateInstanceFrom(AppDomain domain, string assemblyFile, string typeName)
-		{
-			if (domain == null)
-			{
-				throw new ArgumentNullException("domain");
-			}
-			return domain.InternalCreateInstanceFromWithNoSecurity(assemblyFile, typeName);
-		}
-
-		[SecurityCritical]
-		[Obsolete("Methods which use Evidence to sandbox are obsolete and will be removed in a future release of the .NET Framework. Please use an overload of CreateInstanceFrom which does not take an Evidence parameter. See http://go.microsoft.com/fwlink/?LinkID=155570 for more information.")]
-		public static ObjectHandle CreateInstanceFrom(AppDomain domain, string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
-		{
-			if (domain == null)
-			{
-				throw new ArgumentNullException("domain");
-			}
-			return domain.InternalCreateInstanceFromWithNoSecurity(assemblyFile, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
-		}
-
-		[SecurityCritical]
-		public static ObjectHandle CreateInstanceFrom(AppDomain domain, string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
-		{
-			if (domain == null)
-			{
-				throw new ArgumentNullException("domain");
-			}
-			return domain.InternalCreateInstanceFromWithNoSecurity(assemblyFile, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, null);
-		}
-
-		public static ObjectHandle CreateComInstanceFrom(string assemblyName, string typeName)
-		{
-			return Activator.CreateComInstanceFrom(assemblyName, typeName, null, AssemblyHashAlgorithm.None);
-		}
-
-		public static ObjectHandle CreateComInstanceFrom(string assemblyName, string typeName, byte[] hashValue, AssemblyHashAlgorithm hashAlgorithm)
-		{
-			Assembly assembly = Assembly.LoadFrom(assemblyName, hashValue, hashAlgorithm);
-			Type type = assembly.GetType(typeName, true, false);
-			object[] customAttributes = type.GetCustomAttributes(typeof(ComVisibleAttribute), false);
-			if (customAttributes.Length != 0 && !((ComVisibleAttribute)customAttributes[0]).Value)
-			{
-				throw new TypeLoadException(Environment.GetResourceString("The specified type must be visible from COM."));
-			}
-			if (assembly == null)
-			{
-				return null;
-			}
-			object obj = Activator.CreateInstance(type, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, null);
-			if (obj == null)
-			{
-				return null;
-			}
-			return new ObjectHandle(obj);
-		}
-
-		[SecurityCritical]
-		public static object GetObject(Type type, string url)
-		{
-			return Activator.GetObject(type, url, null);
-		}
-
-		[SecurityCritical]
-		public static object GetObject(Type type, string url, object state)
-		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			return RemotingServices.Connect(type, url, state);
-		}
-
-		[Conditional("_DEBUG")]
-		private static void Log(bool test, string title, string success, string failure)
-		{
-		}
-
-		void _Activator.GetTypeInfoCount(out uint pcTInfo)
+		void _Activator.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
 		{
 			throw new NotImplementedException();
 		}
@@ -348,7 +31,7 @@ namespace System
 			throw new NotImplementedException();
 		}
 
-		void _Activator.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		void _Activator.GetTypeInfoCount(out uint pcTInfo)
 		{
 			throw new NotImplementedException();
 		}
@@ -358,10 +41,325 @@ namespace System
 			throw new NotImplementedException();
 		}
 
-		internal const int LookupMask = 255;
+		[MonoTODO("No COM support")]
+		public static ObjectHandle CreateComInstanceFrom(string assemblyName, string typeName)
+		{
+			if (assemblyName == null)
+			{
+				throw new ArgumentNullException("assemblyName");
+			}
+			if (typeName == null)
+			{
+				throw new ArgumentNullException("typeName");
+			}
+			if (assemblyName.Length == 0)
+			{
+				throw new ArgumentException("assemblyName");
+			}
+			throw new NotImplementedException();
+		}
 
-		internal const BindingFlags ConLookup = BindingFlags.Instance | BindingFlags.Public;
+		[MonoTODO("Mono does not support COM")]
+		public static ObjectHandle CreateComInstanceFrom(string assemblyName, string typeName, byte[] hashValue, AssemblyHashAlgorithm hashAlgorithm)
+		{
+			if (assemblyName == null)
+			{
+				throw new ArgumentNullException("assemblyName");
+			}
+			if (typeName == null)
+			{
+				throw new ArgumentNullException("typeName");
+			}
+			if (assemblyName.Length == 0)
+			{
+				throw new ArgumentException("assemblyName");
+			}
+			throw new NotImplementedException();
+		}
 
-		internal const BindingFlags ConstructorDefault = BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance;
+		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName)
+		{
+			return Activator.CreateInstanceFrom(assemblyFile, typeName, null);
+		}
+
+		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, object[] activationAttributes)
+		{
+			return Activator.CreateInstanceFrom(assemblyFile, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, activationAttributes, null);
+		}
+
+		public static ObjectHandle CreateInstanceFrom(string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo)
+		{
+			Assembly assembly = Assembly.LoadFrom(assemblyFile, securityInfo);
+			if (assembly == null)
+			{
+				return null;
+			}
+			Type type = assembly.GetType(typeName, true, ignoreCase);
+			if (type == null)
+			{
+				return null;
+			}
+			object obj = Activator.CreateInstance(type, bindingAttr, binder, args, culture, activationAttributes);
+			return (obj == null) ? null : new ObjectHandle(obj);
+		}
+
+		public static ObjectHandle CreateInstance(string assemblyName, string typeName)
+		{
+			if (assemblyName == null)
+			{
+				assemblyName = Assembly.GetCallingAssembly().GetName().Name;
+			}
+			return Activator.CreateInstance(assemblyName, typeName, null);
+		}
+
+		public static ObjectHandle CreateInstance(string assemblyName, string typeName, object[] activationAttributes)
+		{
+			if (assemblyName == null)
+			{
+				assemblyName = Assembly.GetCallingAssembly().GetName().Name;
+			}
+			return Activator.CreateInstance(assemblyName, typeName, false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, null, null, activationAttributes, null);
+		}
+
+		public static ObjectHandle CreateInstance(string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityInfo)
+		{
+			Assembly assembly;
+			if (assemblyName == null)
+			{
+				assembly = Assembly.GetCallingAssembly();
+			}
+			else
+			{
+				assembly = Assembly.Load(assemblyName, securityInfo);
+			}
+			Type type = assembly.GetType(typeName, true, ignoreCase);
+			object obj = Activator.CreateInstance(type, bindingAttr, binder, args, culture, activationAttributes);
+			return (obj == null) ? null : new ObjectHandle(obj);
+		}
+
+		[MonoNotSupported("no ClickOnce in mono")]
+		public static ObjectHandle CreateInstance(ActivationContext activationContext)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoNotSupported("no ClickOnce in mono")]
+		public static ObjectHandle CreateInstance(ActivationContext activationContext, string[] activationCustomData)
+		{
+			throw new NotImplementedException();
+		}
+
+		public static ObjectHandle CreateInstanceFrom(AppDomain domain, string assemblyFile, string typeName)
+		{
+			if (domain == null)
+			{
+				throw new ArgumentNullException("domain");
+			}
+			return domain.CreateInstanceFrom(assemblyFile, typeName);
+		}
+
+		public static ObjectHandle CreateInstanceFrom(AppDomain domain, string assemblyFile, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
+		{
+			if (domain == null)
+			{
+				throw new ArgumentNullException("domain");
+			}
+			return domain.CreateInstanceFrom(assemblyFile, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
+		}
+
+		public static ObjectHandle CreateInstance(AppDomain domain, string assemblyName, string typeName)
+		{
+			if (domain == null)
+			{
+				throw new ArgumentNullException("domain");
+			}
+			return domain.CreateInstance(assemblyName, typeName);
+		}
+
+		public static ObjectHandle CreateInstance(AppDomain domain, string assemblyName, string typeName, bool ignoreCase, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes, Evidence securityAttributes)
+		{
+			if (domain == null)
+			{
+				throw new ArgumentNullException("domain");
+			}
+			return domain.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes, securityAttributes);
+		}
+
+		public static T CreateInstance<T>()
+		{
+			return (T)((object)Activator.CreateInstance(typeof(T)));
+		}
+
+		public static object CreateInstance(Type type)
+		{
+			return Activator.CreateInstance(type, false);
+		}
+
+		public static object CreateInstance(Type type, params object[] args)
+		{
+			return Activator.CreateInstance(type, args, new object[0]);
+		}
+
+		public static object CreateInstance(Type type, object[] args, object[] activationAttributes)
+		{
+			return Activator.CreateInstance(type, BindingFlags.Default, Binder.DefaultBinder, args, null, activationAttributes);
+		}
+
+		public static object CreateInstance(Type type, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture)
+		{
+			return Activator.CreateInstance(type, bindingAttr, binder, args, culture, new object[0]);
+		}
+
+		public static object CreateInstance(Type type, BindingFlags bindingAttr, Binder binder, object[] args, CultureInfo culture, object[] activationAttributes)
+		{
+			Activator.CheckType(type);
+			if (type.ContainsGenericParameters)
+			{
+				throw new ArgumentException(type + " is an open generic type", "type");
+			}
+			if ((bindingAttr & (BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy)) == BindingFlags.Default)
+			{
+				bindingAttr |= BindingFlags.Instance | BindingFlags.Public;
+			}
+			int num = 0;
+			if (args != null)
+			{
+				num = args.Length;
+			}
+			Type[] array = ((num != 0) ? new Type[num] : Type.EmptyTypes);
+			for (int i = 0; i < num; i++)
+			{
+				if (args[i] != null)
+				{
+					array[i] = args[i].GetType();
+				}
+			}
+			if (binder == null)
+			{
+				binder = Binder.DefaultBinder;
+			}
+			ConstructorInfo constructorInfo = (ConstructorInfo)binder.SelectMethod(bindingAttr, type.GetConstructors(bindingAttr), array, null);
+			if (constructorInfo != null)
+			{
+				Activator.CheckAbstractType(type);
+				if (activationAttributes != null && activationAttributes.Length > 0)
+				{
+					if (!type.IsMarshalByRef)
+					{
+						string text = Locale.GetText("Type '{0}' doesn't derive from MarshalByRefObject.", new object[] { type.FullName });
+						throw new NotSupportedException(text);
+					}
+					object obj = ActivationServices.CreateProxyFromAttributes(type, activationAttributes);
+					if (obj != null)
+					{
+						constructorInfo.Invoke(obj, bindingAttr, binder, args, culture);
+						return obj;
+					}
+				}
+				return constructorInfo.Invoke(bindingAttr, binder, args, culture);
+			}
+			if (type.IsValueType && array.Length == 0)
+			{
+				return Activator.CreateInstanceInternal(type);
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (Type type2 in array)
+			{
+				stringBuilder.Append((type2 == null) ? "(unknown)" : type2.ToString());
+				stringBuilder.Append(", ");
+			}
+			if (stringBuilder.Length > 2)
+			{
+				stringBuilder.Length -= 2;
+			}
+			throw new MissingMethodException(string.Format(Locale.GetText("No constructor found for {0}::.ctor({1})"), type.FullName, stringBuilder));
+		}
+
+		public static object CreateInstance(Type type, bool nonPublic)
+		{
+			Activator.CheckType(type);
+			if (type.ContainsGenericParameters)
+			{
+				throw new ArgumentException(type + " is an open generic type", "type");
+			}
+			Activator.CheckAbstractType(type);
+			MonoType monoType = type as MonoType;
+			ConstructorInfo constructorInfo;
+			if (monoType != null)
+			{
+				constructorInfo = monoType.GetDefaultConstructor();
+				if (!nonPublic && constructorInfo != null && !constructorInfo.IsPublic)
+				{
+					constructorInfo = null;
+				}
+			}
+			else
+			{
+				BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
+				if (nonPublic)
+				{
+					bindingFlags |= BindingFlags.NonPublic;
+				}
+				constructorInfo = type.GetConstructor(bindingFlags, null, CallingConventions.Any, Type.EmptyTypes, null);
+			}
+			if (constructorInfo != null)
+			{
+				return constructorInfo.Invoke(null);
+			}
+			if (type.IsValueType)
+			{
+				return Activator.CreateInstanceInternal(type);
+			}
+			throw new MissingMethodException(Locale.GetText("Default constructor not found."), ".ctor() of " + type.FullName);
+		}
+
+		private static void CheckType(Type type)
+		{
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			if (type == typeof(TypedReference) || type == typeof(ArgIterator) || type == typeof(void) || type == typeof(RuntimeArgumentHandle))
+			{
+				string text = Locale.GetText("CreateInstance cannot be used to create this type ({0}).", new object[] { type.FullName });
+				throw new NotSupportedException(text);
+			}
+		}
+
+		private static void CheckAbstractType(Type type)
+		{
+			if (type.IsAbstract)
+			{
+				string text = Locale.GetText("Cannot create an abstract class '{0}'.", new object[] { type.FullName });
+				throw new MissingMethodException(text);
+			}
+		}
+
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"RemotingConfiguration\"/>\n</PermissionSet>\n")]
+		public static object GetObject(Type type, string url)
+		{
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			return RemotingServices.Connect(type, url);
+		}
+
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"RemotingConfiguration\"/>\n</PermissionSet>\n")]
+		public static object GetObject(Type type, string url, object state)
+		{
+			if (type == null)
+			{
+				throw new ArgumentNullException("type");
+			}
+			return RemotingServices.Connect(type, url, state);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern object CreateInstanceInternal(Type type);
+
+		private const BindingFlags _flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance;
+
+		private const BindingFlags _accessFlags = BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
 	}
 }

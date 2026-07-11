@@ -9,8 +9,8 @@ namespace System.Net
 		Digest = 1,
 		Negotiate = 2,
 		Ntlm = 4,
+		IntegratedWindowsAuthentication = 6,
 		Basic = 8,
-		Anonymous = 32768,
-		IntegratedWindowsAuthentication = 6
+		Anonymous = 32768
 	}
 }

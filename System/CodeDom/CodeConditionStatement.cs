@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeConditionStatement : CodeStatement
 	{
@@ -11,21 +14,62 @@ namespace System.CodeDom
 
 		public CodeConditionStatement(CodeExpression condition, params CodeStatement[] trueStatements)
 		{
-			this.Condition = condition;
+			this.condition = condition;
 			this.TrueStatements.AddRange(trueStatements);
 		}
 
 		public CodeConditionStatement(CodeExpression condition, CodeStatement[] trueStatements, CodeStatement[] falseStatements)
 		{
-			this.Condition = condition;
+			this.condition = condition;
 			this.TrueStatements.AddRange(trueStatements);
 			this.FalseStatements.AddRange(falseStatements);
 		}
 
-		public CodeExpression Condition { get; set; }
+		public CodeExpression Condition
+		{
+			get
+			{
+				return this.condition;
+			}
+			set
+			{
+				this.condition = value;
+			}
+		}
 
-		public CodeStatementCollection TrueStatements { get; } = new CodeStatementCollection();
+		public CodeStatementCollection FalseStatements
+		{
+			get
+			{
+				if (this.falseStatements == null)
+				{
+					this.falseStatements = new CodeStatementCollection();
+				}
+				return this.falseStatements;
+			}
+		}
 
-		public CodeStatementCollection FalseStatements { get; } = new CodeStatementCollection();
+		public CodeStatementCollection TrueStatements
+		{
+			get
+			{
+				if (this.trueStatements == null)
+				{
+					this.trueStatements = new CodeStatementCollection();
+				}
+				return this.trueStatements;
+			}
+		}
+
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeExpression condition;
+
+		private CodeStatementCollection trueStatements;
+
+		private CodeStatementCollection falseStatements;
 	}
 }

@@ -6,40 +6,40 @@ namespace System.ComponentModel
 	public sealed class ParenthesizePropertyNameAttribute : Attribute
 	{
 		public ParenthesizePropertyNameAttribute()
-			: this(false)
 		{
+			this.parenthesis = false;
 		}
 
 		public ParenthesizePropertyNameAttribute(bool needParenthesis)
 		{
-			this.needParenthesis = needParenthesis;
+			this.parenthesis = needParenthesis;
 		}
 
 		public bool NeedParenthesis
 		{
 			get
 			{
-				return this.needParenthesis;
+				return this.parenthesis;
 			}
 		}
 
 		public override bool Equals(object o)
 		{
-			return o is ParenthesizePropertyNameAttribute && ((ParenthesizePropertyNameAttribute)o).NeedParenthesis == this.needParenthesis;
+			return o is ParenthesizePropertyNameAttribute && (o == this || ((ParenthesizePropertyNameAttribute)o).NeedParenthesis == this.parenthesis);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.parenthesis.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(ParenthesizePropertyNameAttribute.Default);
+			return this.parenthesis == ParenthesizePropertyNameAttribute.Default.NeedParenthesis;
 		}
 
-		public static readonly ParenthesizePropertyNameAttribute Default = new ParenthesizePropertyNameAttribute();
+		private bool parenthesis;
 
-		private bool needParenthesis;
+		public static readonly ParenthesizePropertyNameAttribute Default = new ParenthesizePropertyNameAttribute();
 	}
 }

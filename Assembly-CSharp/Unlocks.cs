@@ -167,13 +167,18 @@ public class Unlocks : MonoBehaviour
 			"emails",
 			new string[]
 			{
-				"email_researchgiant", "email_preliminarycalculations", "email_atomiconrecruitment", "email_security2", "email_dinner1", "email_newemployee", "email_security3", "email_pens", "email_pens2", "email_memorychip",
-				"email_arthistoryrequest", "email_AIcontrol", "email_AIcontrol2", "email_AIcontrol3", "email_AIcontrol4"
+				"email_researchgiant", "email_preliminarycalculations", "email_atomiconrecruitment", "email_thejanitor", "email_security2", "email_dinner1", "email_newemployee", "email_security3", "email_hollandsdog", "email_pens",
+				"email_pens2", "email_memorychip", "email_arthistoryrequest", "email_AIcontrol", "email_AIcontrol2", "email_AIcontrol3", "email_AIcontrol4"
 			}
 		},
 		{
 			"journals",
-			new string[] { "journal_cleanup", "journal_employeeprocessing", "journal_sunflowerseeds", "journal_magazine", "journal_pipedream", "journal_spittingimage" }
+			new string[]
+			{
+				"journal_cleanup", "journal_employeeprocessing", "journal_sunflowerseeds", "journal_magazine", "journal_B835_1", "journal_B835_2", "journal_B835_3", "journal_B835_4", "journal_B835_5", "journal_B835_6",
+				"journal_pipedream", "journal_spittingimage", "journal_A046_1", "journal_A046_2", "journal_A046_3", "journal_A046_4", "journal_A046_5", "journal_A046_6", "journal_B327_1", "journal_B327_2",
+				"journal_B327_3"
+			}
 		},
 		{
 			"researchnotes",

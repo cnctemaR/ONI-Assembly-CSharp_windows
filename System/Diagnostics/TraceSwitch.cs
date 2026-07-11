@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
@@ -12,8 +11,9 @@ namespace System.Diagnostics
 		}
 
 		public TraceSwitch(string displayName, string description, string defaultSwitchValue)
-			: base(displayName, description, defaultSwitchValue)
+			: base(displayName, description)
 		{
+			base.Value = defaultSwitchValue;
 		}
 
 		public TraceLevel Level
@@ -22,12 +22,11 @@ namespace System.Diagnostics
 			{
 				return (TraceLevel)base.SwitchSetting;
 			}
-			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
-				if (value < TraceLevel.Off || value > TraceLevel.Verbose)
+				if (!Enum.IsDefined(typeof(TraceLevel), value))
 				{
-					throw new ArgumentException(global::SR.GetString("The Level must be set to a value in the enumeration TraceLevel."));
+					throw new ArgumentException("value");
 				}
 				base.SwitchSetting = (int)value;
 			}
@@ -37,7 +36,7 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.Level >= TraceLevel.Error;
+				return base.SwitchSetting >= 1;
 			}
 		}
 
@@ -45,7 +44,7 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.Level >= TraceLevel.Warning;
+				return base.SwitchSetting >= 2;
 			}
 		}
 
@@ -53,7 +52,7 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.Level >= TraceLevel.Info;
+				return base.SwitchSetting >= 3;
 			}
 		}
 
@@ -61,19 +60,17 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.Level == TraceLevel.Verbose;
+				return base.SwitchSetting >= 4;
 			}
 		}
 
 		protected override void OnSwitchSettingChanged()
 		{
-			int switchSetting = base.SwitchSetting;
-			if (switchSetting < 0)
+			if (base.SwitchSetting < 0)
 			{
 				base.SwitchSetting = 0;
-				return;
 			}
-			if (switchSetting > 4)
+			else if (base.SwitchSetting > 4)
 			{
 				base.SwitchSetting = 4;
 			}

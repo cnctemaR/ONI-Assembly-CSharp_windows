@@ -6,7 +6,7 @@ namespace System.Net.Configuration
 	[ConfigurationCollection(typeof(BypassElement), CollectionType = ConfigurationElementCollectionType.AddRemoveClearMap)]
 	public sealed class BypassElementCollection : ConfigurationElementCollection
 	{
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public BypassElement this[int index]
 		{
 			get
@@ -54,7 +54,7 @@ namespace System.Net.Configuration
 			return new BypassElement();
 		}
 
-		[MonoTODO("argument exception?")]
+		[global::System.MonoTODO("argument exception?")]
 		protected override object GetElementKey(ConfigurationElement element)
 		{
 			if (!(element is BypassElement))

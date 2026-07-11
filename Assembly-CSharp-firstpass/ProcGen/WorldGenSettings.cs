@@ -172,9 +172,23 @@ namespace ProcGen
 			return this.GetSetting<int>(target, new WorldGenSettings.ParserFn<int>(int.TryParse));
 		}
 
+		private static bool TryParseEnum<E>(string value, out E result) where E : struct
+		{
+			try
+			{
+				result = (E)((object)Enum.Parse(typeof(E), value));
+				return true;
+			}
+			catch (Exception)
+			{
+				result = new E();
+			}
+			return false;
+		}
+
 		public E GetEnumSetting<E>(string target) where E : struct
 		{
-			return this.GetSetting<E>(target, new WorldGenSettings.ParserFn<E>(Enum.TryParse<E>));
+			return this.GetSetting<E>(target, new WorldGenSettings.ParserFn<E>(WorldGenSettings.TryParseEnum<E>));
 		}
 
 		public List<SubWorld> GetSubWorldList()

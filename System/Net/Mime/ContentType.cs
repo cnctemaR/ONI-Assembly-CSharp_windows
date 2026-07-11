@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Specialized;
-using System.Net.Mail;
+using System.IO;
 using System.Text;
 
 namespace System.Net.Mime
@@ -8,8 +9,8 @@ namespace System.Net.Mime
 	public class ContentType
 	{
 		public ContentType()
-			: this(ContentType.Default)
 		{
+			this.mediaType = "application/octet-stream";
 		}
 
 		public ContentType(string contentType)
@@ -18,29 +19,60 @@ namespace System.Net.Mime
 			{
 				throw new ArgumentNullException("contentType");
 			}
-			if (contentType == string.Empty)
+			if (contentType.Length < 1)
 			{
-				throw new ArgumentException(global::SR.GetString("The parameter '{0}' cannot be an empty string.", new object[] { "contentType" }), "contentType");
+				throw new ArgumentException("contentType");
 			}
-			this.isChanged = true;
-			this.type = contentType;
-			this.ParseValue();
+			int num = contentType.IndexOf(';');
+			if (num > 0)
+			{
+				string[] array = contentType.Split(new char[] { ';' });
+				this.MediaType = array[0].Trim();
+				for (int i = 1; i < array.Length; i++)
+				{
+					this.Parse(array[i]);
+				}
+			}
+			else
+			{
+				this.MediaType = contentType.Trim();
+			}
+		}
+
+		private void Parse(string pair)
+		{
+			if (pair == null || pair.Length < 1)
+			{
+				return;
+			}
+			string[] array = pair.Split(new char[] { '=' });
+			if (array.Length == 2)
+			{
+				this.parameters.Add(array[0].Trim(), array[1].Trim());
+			}
+		}
+
+		private static Encoding UTF8Unmarked
+		{
+			get
+			{
+				if (ContentType.utf8unmarked == null)
+				{
+					ContentType.utf8unmarked = new UTF8Encoding(false);
+				}
+				return ContentType.utf8unmarked;
+			}
 		}
 
 		public string Boundary
 		{
 			get
 			{
-				return this.Parameters["boundary"];
+				return this.parameters["boundary"];
 			}
 			set
 			{
-				if (value == null || value == string.Empty)
-				{
-					this.Parameters.Remove("boundary");
-					return;
-				}
-				this.Parameters["boundary"] = value;
+				this.parameters["boundary"] = value;
 			}
 		}
 
@@ -48,16 +80,11 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.Parameters["charset"];
+				return this.parameters["charset"];
 			}
 			set
 			{
-				if (value == null || value == string.Empty)
-				{
-					this.Parameters.Remove("charset");
-					return;
-				}
-				this.Parameters["charset"] = value;
+				this.parameters["charset"] = value;
 			}
 		}
 
@@ -65,31 +92,27 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.mediaType + "/" + this.subType;
+				return this.mediaType;
 			}
 			set
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException();
 				}
-				if (value == string.Empty)
+				if (value.Length < 1)
 				{
-					throw new ArgumentException(global::SR.GetString("This property cannot be set to an empty string."), "value");
+					throw new ArgumentException();
 				}
-				int num = 0;
-				this.mediaType = MailBnfHelper.ReadToken(value, ref num, null);
-				if (this.mediaType.Length == 0 || num >= value.Length || value[num++] != '/')
+				if (value.IndexOf('/') < 1)
 				{
-					throw new FormatException(global::SR.GetString("The specified media type is invalid."));
+					throw new FormatException();
 				}
-				this.subType = MailBnfHelper.ReadToken(value, ref num, null);
-				if (this.subType.Length == 0 || num < value.Length)
+				if (value.IndexOf(';') != -1)
 				{
-					throw new FormatException(global::SR.GetString("The specified media type is invalid."));
+					throw new FormatException();
 				}
-				this.isChanged = true;
-				this.isPersisted = false;
+				this.mediaType = value;
 			}
 		}
 
@@ -97,207 +120,139 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				string text = this.Parameters["name"];
-				if (MimeBasePart.DecodeEncoding(text) != null)
-				{
-					text = MimeBasePart.DecodeHeaderValue(text);
-				}
-				return text;
+				return this.parameters["name"];
 			}
 			set
 			{
-				if (value == null || value == string.Empty)
-				{
-					this.Parameters.Remove("name");
-					return;
-				}
-				this.Parameters["name"] = value;
+				this.parameters["name"] = value;
 			}
 		}
 
-		public StringDictionary Parameters
+		public global::System.Collections.Specialized.StringDictionary Parameters
 		{
 			get
 			{
-				if (this.parameters == null && this.type == null)
-				{
-					this.parameters = new TrackingStringDictionary();
-				}
 				return this.parameters;
 			}
 		}
 
-		internal void Set(string contentType, HeaderCollection headers)
+		public override bool Equals(object obj)
 		{
-			this.type = contentType;
-			this.ParseValue();
-			headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentType), this.ToString());
-			this.isPersisted = true;
+			return this.Equals(obj as ContentType);
 		}
 
-		internal void PersistIfNeeded(HeaderCollection headers, bool forcePersist)
+		private bool Equals(ContentType other)
 		{
-			if (this.IsChanged || !this.isPersisted || forcePersist)
-			{
-				headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentType), this.ToString());
-				this.isPersisted = true;
-			}
-		}
-
-		internal bool IsChanged
-		{
-			get
-			{
-				return this.isChanged || (this.parameters != null && this.parameters.IsChanged);
-			}
-		}
-
-		public override string ToString()
-		{
-			if (this.type == null || this.IsChanged)
-			{
-				this.type = this.Encode(false);
-				this.isChanged = false;
-				this.parameters.IsChanged = false;
-				this.isPersisted = false;
-			}
-			return this.type;
-		}
-
-		internal string Encode(bool allowUnicode)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(this.mediaType);
-			stringBuilder.Append('/');
-			stringBuilder.Append(this.subType);
-			foreach (object obj in this.Parameters.Keys)
-			{
-				string text = (string)obj;
-				stringBuilder.Append("; ");
-				ContentType.EncodeToBuffer(text, stringBuilder, allowUnicode);
-				stringBuilder.Append('=');
-				ContentType.EncodeToBuffer(this.parameters[text], stringBuilder, allowUnicode);
-			}
-			return stringBuilder.ToString();
-		}
-
-		private static void EncodeToBuffer(string value, StringBuilder builder, bool allowUnicode)
-		{
-			Encoding encoding = MimeBasePart.DecodeEncoding(value);
-			if (encoding != null)
-			{
-				builder.Append("\"" + value + "\"");
-				return;
-			}
-			if ((allowUnicode && !MailBnfHelper.HasCROrLF(value)) || MimeBasePart.IsAscii(value, false))
-			{
-				MailBnfHelper.GetTokenOrQuotedString(value, builder, allowUnicode);
-				return;
-			}
-			encoding = Encoding.GetEncoding("utf-8");
-			builder.Append("\"" + MimeBasePart.EncodeHeaderValue(value, encoding, MimeBasePart.ShouldUseBase64Encoding(encoding)) + "\"");
-		}
-
-		public override bool Equals(object rparam)
-		{
-			return rparam != null && string.Compare(this.ToString(), rparam.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+			return other != null && this.ToString() == other.ToString();
 		}
 
 		public override int GetHashCode()
 		{
-			return this.ToString().ToLowerInvariant().GetHashCode();
+			return this.ToString().GetHashCode();
 		}
 
-		private void ParseValue()
+		public override string ToString()
 		{
-			int num = 0;
-			Exception ex = null;
-			this.parameters = new TrackingStringDictionary();
-			try
+			StringBuilder stringBuilder = new StringBuilder();
+			Encoding encoding = ((this.CharSet == null) ? Encoding.UTF8 : Encoding.GetEncoding(this.CharSet));
+			stringBuilder.Append(this.MediaType);
+			if (this.Parameters != null && this.Parameters.Count > 0)
 			{
-				this.mediaType = MailBnfHelper.ReadToken(this.type, ref num, null);
-				if (this.mediaType == null || this.mediaType.Length == 0 || num >= this.type.Length || this.type[num++] != '/')
+				foreach (object obj in this.parameters)
 				{
-					ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
-				}
-				if (ex == null)
-				{
-					this.subType = MailBnfHelper.ReadToken(this.type, ref num, null);
-					if (this.subType == null || this.subType.Length == 0)
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+					if (dictionaryEntry.Value != null && dictionaryEntry.Value.ToString().Length > 0)
 					{
-						ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
+						stringBuilder.Append("; ");
+						stringBuilder.Append(dictionaryEntry.Key);
+						stringBuilder.Append("=");
+						stringBuilder.Append(ContentType.WrapIfEspecialsExist(ContentType.EncodeSubjectRFC2047(dictionaryEntry.Value as string, encoding)));
 					}
 				}
-				if (ex == null)
-				{
-					while (MailBnfHelper.SkipCFWS(this.type, ref num))
-					{
-						if (this.type[num++] != ';')
-						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
-							break;
-						}
-						if (!MailBnfHelper.SkipCFWS(this.type, ref num))
-						{
-							break;
-						}
-						string text = MailBnfHelper.ReadParameterAttribute(this.type, ref num, null);
-						if (text == null || text.Length == 0)
-						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
-							break;
-						}
-						if (num >= this.type.Length || this.type[num++] != '=')
-						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
-							break;
-						}
-						if (!MailBnfHelper.SkipCFWS(this.type, ref num))
-						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
-							break;
-						}
-						string text2;
-						if (this.type[num] == '"')
-						{
-							text2 = MailBnfHelper.ReadQuotedString(this.type, ref num, null);
-						}
-						else
-						{
-							text2 = MailBnfHelper.ReadToken(this.type, ref num, null);
-						}
-						if (text2 == null)
-						{
-							ex = new FormatException(global::SR.GetString("The specified content type is invalid."));
-							break;
-						}
-						this.parameters.Add(text, text2);
-					}
-				}
-				this.parameters.IsChanged = false;
 			}
-			catch (FormatException)
-			{
-				throw new FormatException(global::SR.GetString("The specified content type is invalid."));
-			}
-			if (ex != null)
-			{
-				throw new FormatException(global::SR.GetString("The specified content type is invalid."));
-			}
+			return stringBuilder.ToString();
 		}
+
+		private static string WrapIfEspecialsExist(string s)
+		{
+			s = s.Replace("\"", "\\\"");
+			if (s.IndexOfAny(ContentType.especials) >= 0)
+			{
+				return '"' + s + '"';
+			}
+			return s;
+		}
+
+		internal static Encoding GuessEncoding(string s)
+		{
+			for (int i = 0; i < s.Length; i++)
+			{
+				if (s[i] >= '\u0080')
+				{
+					return ContentType.UTF8Unmarked;
+				}
+			}
+			return null;
+		}
+
+		internal static TransferEncoding GuessTransferEncoding(Encoding enc)
+		{
+			if (Encoding.ASCII.Equals(enc))
+			{
+				return TransferEncoding.SevenBit;
+			}
+			if (Encoding.UTF8.CodePage == enc.CodePage || Encoding.Unicode.CodePage == enc.CodePage || Encoding.UTF32.CodePage == enc.CodePage)
+			{
+				return TransferEncoding.Base64;
+			}
+			return TransferEncoding.QuotedPrintable;
+		}
+
+		internal static string To2047(byte[] bytes)
+		{
+			StringWriter stringWriter = new StringWriter();
+			foreach (byte b in bytes)
+			{
+				if (b > 127 || b == 9)
+				{
+					stringWriter.Write("=");
+					stringWriter.Write(Convert.ToString(b, 16).ToUpper());
+				}
+				else
+				{
+					stringWriter.Write(Convert.ToChar(b));
+				}
+			}
+			return stringWriter.GetStringBuilder().ToString();
+		}
+
+		internal static string EncodeSubjectRFC2047(string s, Encoding enc)
+		{
+			if (s == null || Encoding.ASCII.Equals(enc))
+			{
+				return s;
+			}
+			for (int i = 0; i < s.Length; i++)
+			{
+				if (s[i] >= '\u0080')
+				{
+					string text = ContentType.To2047(enc.GetBytes(s));
+					return string.Concat(new string[] { "=?", enc.HeaderName, "?Q?", text, "?=" });
+				}
+			}
+			return s;
+		}
+
+		private static Encoding utf8unmarked;
 
 		private string mediaType;
 
-		private string subType;
+		private global::System.Collections.Specialized.StringDictionary parameters = new global::System.Collections.Specialized.StringDictionary();
 
-		private bool isChanged;
-
-		private string type;
-
-		private bool isPersisted;
-
-		private TrackingStringDictionary parameters;
-
-		internal static readonly string Default = "application/octet-stream";
+		private static readonly char[] especials = new char[]
+		{
+			'(', ')', '<', '>', '@', ',', ';', ':', '<', '>',
+			'/', '[', ']', '?', '.', '='
+		};
 	}
 }

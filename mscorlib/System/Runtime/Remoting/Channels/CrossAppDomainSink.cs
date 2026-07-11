@@ -70,7 +70,8 @@ namespace System.Runtime.Remoting.Channels
 				CADMethodCallMessage cadmethodCallMessage = CADMethodCallMessage.Create(msgRequest);
 				if (cadmethodCallMessage == null)
 				{
-					array2 = CADSerializer.SerializeMessage(msgRequest).GetBuffer();
+					MemoryStream memoryStream = CADSerializer.SerializeMessage(msgRequest);
+					array2 = memoryStream.GetBuffer();
 				}
 				Context currentContext = Thread.CurrentContext;
 				try
@@ -85,7 +86,8 @@ namespace System.Runtime.Remoting.Channels
 				}
 				if (array != null)
 				{
-					message = CADSerializer.DeserializeMessage(new MemoryStream(array), msgRequest as IMethodCallMessage);
+					MemoryStream memoryStream2 = new MemoryStream(array);
+					message = CADSerializer.DeserializeMessage(memoryStream2, msgRequest as IMethodCallMessage);
 				}
 				else
 				{
@@ -108,16 +110,7 @@ namespace System.Runtime.Remoting.Channels
 		public virtual IMessageCtrl AsyncProcessMessage(IMessage reqMsg, IMessageSink replySink)
 		{
 			AsyncRequest asyncRequest = new AsyncRequest(reqMsg, replySink);
-			ThreadPool.QueueUserWorkItem(delegate(object data)
-			{
-				try
-				{
-					this.SendAsyncMessage(data);
-				}
-				catch
-				{
-				}
-			}, asyncRequest);
+			ThreadPool.QueueUserWorkItem(new WaitCallback(this.SendAsyncMessage), asyncRequest);
 			return null;
 		}
 

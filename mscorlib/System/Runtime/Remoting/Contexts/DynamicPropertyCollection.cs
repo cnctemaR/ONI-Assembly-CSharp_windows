@@ -16,7 +16,7 @@ namespace System.Runtime.Remoting.Contexts
 
 		public bool RegisterDynamicProperty(IDynamicProperty prop)
 		{
-			bool flag2;
+			bool flag;
 			lock (this)
 			{
 				if (this.FindProperty(prop.Name) != -1)
@@ -33,14 +33,14 @@ namespace System.Runtime.Remoting.Contexts
 				}
 				arrayList.Add(dynamicPropertyReg);
 				this._properties = arrayList;
-				flag2 = true;
+				flag = true;
 			}
-			return flag2;
+			return flag;
 		}
 
 		public bool UnregisterDynamicProperty(string name)
 		{
-			bool flag2;
+			bool flag;
 			lock (this)
 			{
 				int num = this.FindProperty(name);
@@ -49,9 +49,9 @@ namespace System.Runtime.Remoting.Contexts
 					throw new RemotingException("A property with the name " + name + " was not found");
 				}
 				this._properties.RemoveAt(num);
-				flag2 = true;
+				flag = true;
 			}
-			return flag2;
+			return flag;
 		}
 
 		public void NotifyMessage(bool start, IMessage msg, bool client_site, bool async)
@@ -59,26 +59,24 @@ namespace System.Runtime.Remoting.Contexts
 			ArrayList properties = this._properties;
 			if (start)
 			{
-				using (IEnumerator enumerator = properties.GetEnumerator())
+				foreach (object obj in properties)
 				{
-					while (enumerator.MoveNext())
+					DynamicPropertyCollection.DynamicPropertyReg dynamicPropertyReg = (DynamicPropertyCollection.DynamicPropertyReg)obj;
+					if (dynamicPropertyReg.Sink != null)
 					{
-						object obj = enumerator.Current;
-						DynamicPropertyCollection.DynamicPropertyReg dynamicPropertyReg = (DynamicPropertyCollection.DynamicPropertyReg)obj;
-						if (dynamicPropertyReg.Sink != null)
-						{
-							dynamicPropertyReg.Sink.ProcessMessageStart(msg, client_site, async);
-						}
+						dynamicPropertyReg.Sink.ProcessMessageStart(msg, client_site, async);
 					}
-					return;
 				}
 			}
-			foreach (object obj2 in properties)
+			else
 			{
-				DynamicPropertyCollection.DynamicPropertyReg dynamicPropertyReg2 = (DynamicPropertyCollection.DynamicPropertyReg)obj2;
-				if (dynamicPropertyReg2.Sink != null)
+				foreach (object obj2 in properties)
 				{
-					dynamicPropertyReg2.Sink.ProcessMessageFinish(msg, client_site, async);
+					DynamicPropertyCollection.DynamicPropertyReg dynamicPropertyReg2 = (DynamicPropertyCollection.DynamicPropertyReg)obj2;
+					if (dynamicPropertyReg2.Sink != null)
+					{
+						dynamicPropertyReg2.Sink.ProcessMessageFinish(msg, client_site, async);
+					}
 				}
 			}
 		}

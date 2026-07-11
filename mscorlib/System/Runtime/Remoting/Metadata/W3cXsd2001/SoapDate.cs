@@ -62,7 +62,8 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 
 		public static SoapDate Parse(string value)
 		{
-			SoapDate soapDate = new SoapDate(DateTime.ParseExact(value, SoapDate._datetimeFormats, null, DateTimeStyles.None));
+			DateTime dateTime = DateTime.ParseExact(value, SoapDate._datetimeFormats, null, DateTimeStyles.None);
+			SoapDate soapDate = new SoapDate(dateTime);
 			if (value.StartsWith("-"))
 			{
 				soapDate.Sign = -1;

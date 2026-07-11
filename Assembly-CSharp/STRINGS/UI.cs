@@ -32,7 +32,7 @@ namespace STRINGS
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no closing link tag: {0}", Array.Empty<object>());
+						Debug.LogWarningFormat("String has no closing link tag: {0}", new object[0]);
 					}
 					int num2 = text2.IndexOf("<link=");
 					if (num2 != -1)
@@ -41,7 +41,7 @@ namespace STRINGS
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no open link tag: {0}", Array.Empty<object>());
+						Debug.LogWarningFormat("String has no open link tag: {0}", new object[0]);
 					}
 					int num3 = text2.IndexOf("\">");
 					if (num3 != -1)
@@ -50,7 +50,7 @@ namespace STRINGS
 					}
 					else
 					{
-						Debug.LogWarningFormat("String has no open link tag: {0}", Array.Empty<object>());
+						Debug.LogWarningFormat("String has no open link tag: {0}", new object[0]);
 					}
 				}
 			}
@@ -1025,6 +1025,18 @@ namespace STRINGS
 
 			public static LocString AUTO_PRIORITIZE_DISABLED = "Duplicant priorities can only be changed manually";
 
+			public static LocString EXPECTATION_ALERT_EXPECTATION = "Morale: {0}, Current Expectation: {1}";
+
+			public static LocString EXPECTATION_ALERT_JOB = "Morale: {0}, {2} job expecations: {1}";
+
+			public static LocString EXPECTATION_ALERT_TARGET_JOB = "{2}'s Morale: {0}, {3} job expecations: {1}";
+
+			public static LocString EXPECTATION_ALERT_DESC_EXPECTATION = "Duplicant Morale is too low for their current expectations, so they will suffer Stress.";
+
+			public static LocString EXPECTATION_ALERT_DESC_JOB = "Duplicant Morale is too low for the assigned Job, so they will suffer Stress.";
+
+			public static LocString EXPECTATION_ALERT_DESC_TARGET_JOB = "Duplicant Morale is too low for the expectations of this job, so they will suffer Stress.";
+
 			public static LocString HIGHEST_EXPECTATIONS_TIER = "<b>Highest Expectations</b>";
 
 			public class WIDGET
@@ -1273,6 +1285,8 @@ namespace STRINGS
 				public static LocString ALREADY_IS_ROLE = "{0} <b>is already</b> assigned to the job {1}";
 
 				public static LocString ALREADY_IS_JOBLESS = "{0} <b>is already</b> unemployed";
+
+				public static LocString MASTERED = "{0} has mastered the job {1}";
 
 				public static LocString WILL_BE_UNASSIGNED = "Note: Assigning {0} to {1} will <color=#F44A47FF>unassign</color> them from {2}";
 

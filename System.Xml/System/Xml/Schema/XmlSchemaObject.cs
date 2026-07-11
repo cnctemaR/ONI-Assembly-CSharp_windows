@@ -1,22 +1,28 @@
 ﻿using System;
-using System.Security.Permissions;
+using System.Collections;
 using System.Xml.Serialization;
 
 namespace System.Xml.Schema
 {
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public abstract class XmlSchemaObject
 	{
+		protected XmlSchemaObject()
+		{
+			this.namespaces = new XmlSerializerNamespaces();
+			this.unhandledAttributeList = null;
+			this.CompilationId = Guid.Empty;
+		}
+
 		[XmlIgnore]
 		public int LineNumber
 		{
 			get
 			{
-				return this.lineNum;
+				return this.lineNumber;
 			}
 			set
 			{
-				this.lineNum = value;
+				this.lineNumber = value;
 			}
 		}
 
@@ -25,11 +31,11 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.linePos;
+				return this.linePosition;
 			}
 			set
 			{
-				this.linePos = value;
+				this.linePosition = value;
 			}
 		}
 
@@ -59,15 +65,31 @@ namespace System.Xml.Schema
 			}
 		}
 
+		internal XmlSchema AncestorSchema
+		{
+			get
+			{
+				for (XmlSchemaObject xmlSchemaObject = this.Parent; xmlSchemaObject != null; xmlSchemaObject = xmlSchemaObject.Parent)
+				{
+					if (xmlSchemaObject is XmlSchema)
+					{
+						return (XmlSchema)xmlSchemaObject;
+					}
+				}
+				throw new Exception(string.Format("INTERNAL ERROR: Parent object is not set properly : {0} ({1},{2})", this.SourceUri, this.LineNumber, this.LinePosition));
+			}
+		}
+
+		internal virtual void SetParent(XmlSchemaObject parent)
+		{
+			this.Parent = parent;
+		}
+
 		[XmlNamespaceDeclarations]
 		public XmlSerializerNamespaces Namespaces
 		{
 			get
 			{
-				if (this.namespaces == null)
-				{
-					this.namespaces = new XmlSerializerNamespaces();
-				}
 				return this.namespaces;
 			}
 			set
@@ -76,78 +98,84 @@ namespace System.Xml.Schema
 			}
 		}
 
-		internal virtual void OnAdd(XmlSchemaObjectCollection container, object item)
+		internal void error(ValidationEventHandler handle, string message)
 		{
+			this.errorCount++;
+			XmlSchemaObject.error(handle, message, null, this, null);
 		}
 
-		internal virtual void OnRemove(XmlSchemaObjectCollection container, object item)
+		internal void warn(ValidationEventHandler handle, string message)
 		{
+			XmlSchemaObject.warn(handle, message, null, this, null);
 		}
 
-		internal virtual void OnClear(XmlSchemaObjectCollection container)
+		internal static void error(ValidationEventHandler handle, string message, Exception innerException)
 		{
+			XmlSchemaObject.error(handle, message, innerException, null, null);
 		}
 
-		[XmlIgnore]
-		internal virtual string IdAttribute
+		internal static void warn(ValidationEventHandler handle, string message, Exception innerException)
 		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-			}
+			XmlSchemaObject.warn(handle, message, innerException, null, null);
 		}
 
-		internal virtual void SetUnhandledAttributes(XmlAttribute[] moreAttributes)
+		internal static void error(ValidationEventHandler handle, string message, Exception innerException, XmlSchemaObject xsobj, object sender)
 		{
+			ValidationHandler.RaiseValidationEvent(handle, innerException, message, xsobj, sender, null, XmlSeverityType.Error);
 		}
 
-		internal virtual void AddAnnotation(XmlSchemaAnnotation annotation)
+		internal static void warn(ValidationEventHandler handle, string message, Exception innerException, XmlSchemaObject xsobj, object sender)
 		{
+			ValidationHandler.RaiseValidationEvent(handle, innerException, message, xsobj, sender, null, XmlSeverityType.Warning);
 		}
 
-		[XmlIgnore]
-		internal virtual string NameAttribute
+		internal virtual int Compile(ValidationEventHandler h, XmlSchema schema)
 		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-			}
+			return 0;
 		}
 
-		[XmlIgnore]
-		internal bool IsProcessing
+		internal virtual int Validate(ValidationEventHandler h, XmlSchema schema)
 		{
-			get
-			{
-				return this.isProcessing;
-			}
-			set
-			{
-				this.isProcessing = value;
-			}
+			return 0;
 		}
 
-		internal virtual XmlSchemaObject Clone()
+		internal bool IsValidated(Guid validationId)
 		{
-			return (XmlSchemaObject)base.MemberwiseClone();
+			return this.ValidationId == validationId;
 		}
 
-		private int lineNum;
+		internal virtual void CopyInfo(XmlSchemaParticle obj)
+		{
+			obj.LineNumber = this.LineNumber;
+			obj.LinePosition = this.LinePosition;
+			obj.SourceUri = this.SourceUri;
+			obj.errorCount = this.errorCount;
+		}
 
-		private int linePos;
+		private int lineNumber;
+
+		private int linePosition;
 
 		private string sourceUri;
 
 		private XmlSerializerNamespaces namespaces;
 
-		private XmlSchemaObject parent;
+		internal ArrayList unhandledAttributeList;
 
-		private bool isProcessing;
+		internal bool isCompiled;
+
+		internal int errorCount;
+
+		internal Guid CompilationId;
+
+		internal Guid ValidationId;
+
+		internal bool isRedefineChild;
+
+		internal bool isRedefinedComponent;
+
+		internal XmlSchemaObject redefinedObject;
+
+		private XmlSchemaObject parent;
 	}
 }

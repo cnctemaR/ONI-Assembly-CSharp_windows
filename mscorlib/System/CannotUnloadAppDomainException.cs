@@ -9,26 +9,28 @@ namespace System
 	public class CannotUnloadAppDomainException : SystemException
 	{
 		public CannotUnloadAppDomainException()
-			: base(Environment.GetResourceString("Attempt to unload the AppDomain failed."))
+			: base(Locale.GetText("Attempt to unload application domain failed."))
 		{
-			base.SetErrorCode(-2146234347);
+			base.HResult = -2146234347;
 		}
 
 		public CannotUnloadAppDomainException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146234347);
-		}
-
-		public CannotUnloadAppDomainException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-			base.SetErrorCode(-2146234347);
+			base.HResult = -2146234347;
 		}
 
 		protected CannotUnloadAppDomainException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		public CannotUnloadAppDomainException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+			base.HResult = -2146234347;
+		}
+
+		private const int Result = -2146234347;
 	}
 }

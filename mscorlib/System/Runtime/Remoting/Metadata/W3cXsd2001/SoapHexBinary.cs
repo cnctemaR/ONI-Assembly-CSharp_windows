@@ -45,7 +45,8 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 
 		public static SoapHexBinary Parse(string value)
 		{
-			return new SoapHexBinary(SoapHexBinary.FromBinHexString(value));
+			byte[] array = SoapHexBinary.FromBinHexString(value);
+			return new SoapHexBinary(array);
 		}
 
 		internal static byte[] FromBinHexString(string value)
@@ -88,7 +89,11 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 
 		private static Exception CreateInvalidValueException(string value)
 		{
-			return new RemotingException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for xsd:{1}.", value, SoapHexBinary.XsdType));
+			return new RemotingException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for xsd:{1}.", new object[]
+			{
+				value,
+				SoapHexBinary.XsdType
+			}));
 		}
 
 		public override string ToString()

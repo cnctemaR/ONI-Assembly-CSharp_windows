@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeEventReferenceExpression : CodeExpression
 	{
@@ -11,24 +14,45 @@ namespace System.CodeDom
 
 		public CodeEventReferenceExpression(CodeExpression targetObject, string eventName)
 		{
-			this.TargetObject = targetObject;
-			this._eventName = eventName;
+			this.targetObject = targetObject;
+			this.eventName = eventName;
 		}
-
-		public CodeExpression TargetObject { get; set; }
 
 		public string EventName
 		{
 			get
 			{
-				return this._eventName ?? string.Empty;
+				if (this.eventName == null)
+				{
+					return string.Empty;
+				}
+				return this.eventName;
 			}
 			set
 			{
-				this._eventName = value;
+				this.eventName = value;
 			}
 		}
 
-		private string _eventName;
+		public CodeExpression TargetObject
+		{
+			get
+			{
+				return this.targetObject;
+			}
+			set
+			{
+				this.targetObject = value;
+			}
+		}
+
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private string eventName;
+
+		private CodeExpression targetObject;
 	}
 }

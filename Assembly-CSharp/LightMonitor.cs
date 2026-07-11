@@ -38,46 +38,6 @@ public class LightMonitor : GameStateMachine<LightMonitor, LightMonitor.Instance
 		}
 	}
 
-	private static void GetWetFeet(LightMonitor.Instance smi, float dt)
-	{
-		LightMonitor.GetWetFeet(smi);
-	}
-
-	private static void GetWetFeet(LightMonitor.Instance smi)
-	{
-		if (!smi.effects.HasEffect("SoakingWet"))
-		{
-			smi.effects.Add("WetFeet", true);
-		}
-	}
-
-	private static void GetSoaked(LightMonitor.Instance smi, float dt)
-	{
-		LightMonitor.GetSoaked(smi);
-	}
-
-	private static void GetSoaked(LightMonitor.Instance smi)
-	{
-		if (smi.effects.HasEffect("WetFeet"))
-		{
-			smi.effects.Remove("WetFeet");
-		}
-		smi.effects.Add("SoakingWet", true);
-	}
-
-	private static bool IsFloorWet(LightMonitor.Instance smi)
-	{
-		int num = Grid.PosToCell(smi);
-		return Grid.IsValidCell(num) && Grid.Element[num].IsLiquid;
-	}
-
-	private static bool IsSubmerged(LightMonitor.Instance smi)
-	{
-		int num = Grid.PosToCell(smi);
-		int num2 = Grid.CellAbove(num);
-		return Grid.IsValidCell(num2) && Grid.Element[num2].IsLiquid;
-	}
-
 	public const float BURN_RESIST_RECOVERY_FACTOR = 0.25f;
 
 	public StateMachine<LightMonitor, LightMonitor.Instance, IStateMachineTarget, object>.FloatParameter lightLevel;

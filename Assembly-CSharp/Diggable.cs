@@ -513,10 +513,10 @@ public class Diggable : Workable
 	[SerializeField]
 	public MeshRenderer materialDisplay;
 
-	private static List<global::Tuple<string, Tag>> lasersForHardness = new List<global::Tuple<string, Tag>>
+	private static List<Tuple<string, Tag>> lasersForHardness = new List<Tuple<string, Tag>>
 	{
-		new global::Tuple<string, Tag>("dig", "fx_dig_splash"),
-		new global::Tuple<string, Tag>("specialistdig", "fx_dig_splash")
+		new Tuple<string, Tag>("dig", "fx_dig_splash"),
+		new Tuple<string, Tag>("specialistdig", "fx_dig_splash")
 	};
 
 	private int handle;

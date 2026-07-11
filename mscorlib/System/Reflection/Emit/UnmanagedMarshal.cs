@@ -6,7 +6,6 @@ namespace System.Reflection.Emit
 	[Obsolete("An alternate API is available: Emit the MarshalAs custom attribute instead.")]
 	[ComVisible(true)]
 	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
 	public sealed class UnmanagedMarshal
 	{
 		private UnmanagedMarshal(UnmanagedType maint, int cnt)
@@ -27,11 +26,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				if (this.t == UnmanagedType.LPArray)
-				{
-					throw new ArgumentException();
-				}
-				if (this.t == UnmanagedType.SafeArray)
+				if (this.t == UnmanagedType.LPArray || this.t == UnmanagedType.SafeArray)
 				{
 					throw new ArgumentException();
 				}
@@ -88,7 +83,7 @@ namespace System.Reflection.Emit
 			return new UnmanagedMarshal(unmanagedType, unmanagedType);
 		}
 
-		internal static UnmanagedMarshal DefineCustom(Type typeref, string cookie, string mtype, Guid id)
+		public static UnmanagedMarshal DefineCustom(Type typeref, string cookie, string mtype, Guid id)
 		{
 			UnmanagedMarshal unmanagedMarshal = new UnmanagedMarshal(UnmanagedType.CustomMarshaler, UnmanagedType.CustomMarshaler);
 			unmanagedMarshal.mcookie = cookie;
@@ -115,6 +110,32 @@ namespace System.Reflection.Emit
 			};
 		}
 
+		internal MarshalAsAttribute ToMarshalAsAttribute()
+		{
+			MarshalAsAttribute marshalAsAttribute = new MarshalAsAttribute(this.t);
+			marshalAsAttribute.ArraySubType = this.tbase;
+			marshalAsAttribute.MarshalCookie = this.mcookie;
+			marshalAsAttribute.MarshalType = this.marshaltype;
+			marshalAsAttribute.MarshalTypeRef = this.marshaltyperef;
+			if (this.count == -1)
+			{
+				marshalAsAttribute.SizeConst = 0;
+			}
+			else
+			{
+				marshalAsAttribute.SizeConst = this.count;
+			}
+			if (this.param_num == -1)
+			{
+				marshalAsAttribute.SizeParamIndex = 0;
+			}
+			else
+			{
+				marshalAsAttribute.SizeParamIndex = (short)this.param_num;
+			}
+			return marshalAsAttribute;
+		}
+
 		private int count;
 
 		private UnmanagedType t;
@@ -127,7 +148,7 @@ namespace System.Reflection.Emit
 
 		private string marshaltype;
 
-		internal Type marshaltyperef;
+		private Type marshaltyperef;
 
 		private int param_num;
 

@@ -23,17 +23,17 @@ namespace YamlDotNet.Serialization.EventEmitters
 			case TypeCode.Empty:
 				eventInfo.Tag = "tag:yaml.org,2002:null";
 				eventInfo.RenderedValue = string.Empty;
-				goto IL_0206;
+				goto IL_020A;
 			case TypeCode.Boolean:
 				eventInfo.Tag = "tag:yaml.org,2002:bool";
 				eventInfo.RenderedValue = YamlFormatter.FormatBoolean(eventInfo.Source.Value);
-				goto IL_0206;
+				goto IL_020A;
 			case TypeCode.Char:
 			case TypeCode.String:
 				eventInfo.Tag = "tag:yaml.org,2002:str";
 				eventInfo.RenderedValue = eventInfo.Source.Value.ToString();
 				scalarStyle = ScalarStyle.Any;
-				goto IL_0206;
+				goto IL_020A;
 			case TypeCode.SByte:
 			case TypeCode.Byte:
 			case TypeCode.Int16:
@@ -44,30 +44,30 @@ namespace YamlDotNet.Serialization.EventEmitters
 			case TypeCode.UInt64:
 				eventInfo.Tag = "tag:yaml.org,2002:int";
 				eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-				goto IL_0206;
+				goto IL_020A;
 			case TypeCode.Single:
 				eventInfo.Tag = "tag:yaml.org,2002:float";
 				eventInfo.RenderedValue = YamlFormatter.FormatNumber((float)eventInfo.Source.Value);
-				goto IL_0206;
+				goto IL_020A;
 			case TypeCode.Double:
 				eventInfo.Tag = "tag:yaml.org,2002:float";
 				eventInfo.RenderedValue = YamlFormatter.FormatNumber((double)eventInfo.Source.Value);
-				goto IL_0206;
+				goto IL_020A;
 			case TypeCode.Decimal:
 				eventInfo.Tag = "tag:yaml.org,2002:float";
 				eventInfo.RenderedValue = YamlFormatter.FormatNumber(eventInfo.Source.Value);
-				goto IL_0206;
+				goto IL_020A;
 			case TypeCode.DateTime:
 				eventInfo.Tag = "tag:yaml.org,2002:timestamp";
 				eventInfo.RenderedValue = YamlFormatter.FormatDateTime(eventInfo.Source.Value);
-				goto IL_0206;
+				goto IL_020A;
 			}
-			if (!(eventInfo.Source.Type == typeof(TimeSpan)))
+			if (eventInfo.Source.Type != typeof(TimeSpan))
 			{
-				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", new object[] { typeCode }));
 			}
 			eventInfo.RenderedValue = YamlFormatter.FormatTimeSpan(eventInfo.Source.Value);
-			IL_0206:
+			IL_020A:
 			eventInfo.IsPlainImplicit = true;
 			if (eventInfo.Style == ScalarStyle.Any)
 			{
@@ -99,11 +99,17 @@ namespace YamlDotNet.Serialization.EventEmitters
 			{
 				throw new YamlException(string.Concat(new string[]
 				{
-					string.Format("Cannot serialize type '{0}' where a '{1}' was expected ", eventInfo.Source.Type.FullName, eventInfo.Source.StaticType.FullName),
-					string.Format("because no tag mapping has been registered for '{0}', ", eventInfo.Source.Type.FullName),
-					"which means that it won't be possible to deserialize the document.\n",
-					"Register a tag mapping using the SerializerBuilder.WithTagMapping method.\n\n",
-					string.Format("E.g: builder.WithTagMapping(\"!{0}\", typeof({1}));", eventInfo.Source.Type.Name, eventInfo.Source.Type.FullName)
+					"Cannot serialize type ",
+					eventInfo.Source.Type.FullName,
+					" where a ",
+					eventInfo.Source.StaticType.FullName,
+					" was expected because no tag mapping has been registered for ",
+					eventInfo.Source.Type.FullName,
+					"which means that it won't be possible to deserialize the document.\nRegister a tag mapping using the SerializerBuilder.WithTagMapping method.\n\nE.g: builder.WithTagMapping(\"!",
+					eventInfo.Source.Type.Name,
+					"\", typeof({",
+					eventInfo.Source.Type.FullName,
+					"}));"
 				}));
 			}
 		}

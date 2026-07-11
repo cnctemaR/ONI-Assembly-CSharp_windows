@@ -6,7 +6,6 @@ using Mono.Security.Cryptography;
 
 namespace Mono.Security.Protocol.Ntlm
 {
-	[Obsolete("Use of this API is highly discouraged, it selects legacy-mode LM/NTLM authentication, which sends your password in very weak encryption over the wire even if the server supports the more secure NTLMv2 / NTLMv2 Session. You need to use the new `Type3Message (Type2Message)' constructor to use the more secure NTLMv2 / NTLMv2 Session authentication modes. These require the Type 2 message from the server to compute the response.")]
 	public class ChallengeResponse : IDisposable
 	{
 		public ChallengeResponse()
@@ -52,7 +51,8 @@ namespace Mono.Security.Protocol.Ntlm
 				else
 				{
 					des.Key = this.PasswordToKey(value, 0);
-					des.CreateEncryptor().TransformBlock(ChallengeResponse.magic, 0, 8, this._lmpwd, 0);
+					ICryptoTransform cryptoTransform = des.CreateEncryptor();
+					cryptoTransform.TransformBlock(ChallengeResponse.magic, 0, 8, this._lmpwd, 0);
 				}
 				if (value == null || value.Length < 8)
 				{
@@ -61,11 +61,12 @@ namespace Mono.Security.Protocol.Ntlm
 				else
 				{
 					des.Key = this.PasswordToKey(value, 7);
-					des.CreateEncryptor().TransformBlock(ChallengeResponse.magic, 0, 8, this._lmpwd, 8);
+					ICryptoTransform cryptoTransform = des.CreateEncryptor();
+					cryptoTransform.TransformBlock(ChallengeResponse.magic, 0, 8, this._lmpwd, 8);
 				}
-				HashAlgorithm hashAlgorithm = MD4.Create();
-				byte[] array = ((value == null) ? new byte[0] : Encoding.Unicode.GetBytes(value));
-				byte[] array2 = hashAlgorithm.ComputeHash(array);
+				MD4 md = MD4.Create();
+				byte[] array = ((value != null) ? Encoding.Unicode.GetBytes(value) : new byte[0]);
+				byte[] array2 = md.ComputeHash(array);
 				Buffer.BlockCopy(array2, 0, this._ntpwd, 0, 16);
 				Array.Clear(array, 0, array.Length);
 				Array.Clear(array2, 0, array2.Length);
@@ -143,11 +144,14 @@ namespace Mono.Security.Protocol.Ntlm
 			DES des = DES.Create();
 			des.Mode = CipherMode.ECB;
 			des.Key = this.PrepareDESKey(pwd, 0);
-			des.CreateEncryptor().TransformBlock(this._challenge, 0, 8, array, 0);
+			ICryptoTransform cryptoTransform = des.CreateEncryptor();
+			cryptoTransform.TransformBlock(this._challenge, 0, 8, array, 0);
 			des.Key = this.PrepareDESKey(pwd, 7);
-			des.CreateEncryptor().TransformBlock(this._challenge, 0, 8, array, 8);
+			cryptoTransform = des.CreateEncryptor();
+			cryptoTransform.TransformBlock(this._challenge, 0, 8, array, 8);
 			des.Key = this.PrepareDESKey(pwd, 14);
-			des.CreateEncryptor().TransformBlock(this._challenge, 0, 8, array, 16);
+			cryptoTransform = des.CreateEncryptor();
+			cryptoTransform.TransformBlock(this._challenge, 0, 8, array, 16);
 			return array;
 		}
 

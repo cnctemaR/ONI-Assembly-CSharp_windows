@@ -107,32 +107,32 @@ namespace System.Runtime.Remoting.Activation
 			Context currentContext = Thread.CurrentContext;
 			if (flag)
 			{
-				using (IEnumerator enumerator = arrayList.GetEnumerator())
+				foreach (object obj in arrayList)
 				{
-					while (enumerator.MoveNext())
+					IContextAttribute contextAttribute = (IContextAttribute)obj;
+					if (!contextAttribute.IsContextOK(currentContext, constructionCall))
 					{
-						if (!((IContextAttribute)enumerator.Current).IsContextOK(currentContext, constructionCall))
-						{
-							flag = false;
-							break;
-						}
+						flag = false;
+						break;
 					}
 				}
 			}
-			foreach (object obj in type.GetCustomAttributes(true))
+			object[] customAttributes = type.GetCustomAttributes(true);
+			foreach (object obj2 in customAttributes)
 			{
-				if (obj is IContextAttribute)
+				if (obj2 is IContextAttribute)
 				{
-					flag = flag && ((IContextAttribute)obj).IsContextOK(currentContext, constructionCall);
-					arrayList.Add(obj);
+					flag = flag && ((IContextAttribute)obj2).IsContextOK(currentContext, constructionCall);
+					arrayList.Add(obj2);
 				}
 			}
 			if (!flag)
 			{
 				constructionCall.SetActivationAttributes(arrayList.ToArray());
-				foreach (object obj2 in arrayList)
+				foreach (object obj3 in arrayList)
 				{
-					((IContextAttribute)obj2).GetPropertiesForNewContext(constructionCall);
+					IContextAttribute contextAttribute2 = (IContextAttribute)obj3;
+					contextAttribute2.GetPropertiesForNewContext(constructionCall);
 				}
 			}
 			if (activationUrl != ChannelServices.CrossContextUrl)
@@ -153,7 +153,8 @@ namespace System.Runtime.Remoting.Activation
 			if (ctorCall.ActivationType.IsContextful && constructionCall != null && constructionCall.SourceProxy != null)
 			{
 				constructionCall.SourceProxy.AttachIdentity(serverIdentity);
-				RemotingServices.InternalExecuteMessage((MarshalByRefObject)constructionCall.SourceProxy.GetTransparentProxy(), ctorCall);
+				MarshalByRefObject marshalByRefObject = (MarshalByRefObject)constructionCall.SourceProxy.GetTransparentProxy();
+				RemotingServices.InternalExecuteMessage(marshalByRefObject, ctorCall);
 			}
 			else
 			{
@@ -183,14 +184,6 @@ namespace System.Runtime.Remoting.Activation
 				return RemotingServices.CreateClientProxyForComInterop(type);
 			}
 			return null;
-		}
-
-		internal static void PushActivationAttributes(Type serverType, object[] attributes)
-		{
-		}
-
-		internal static void PopActivationAttributes(Type serverType)
-		{
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]

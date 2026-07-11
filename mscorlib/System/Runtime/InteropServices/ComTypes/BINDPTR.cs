@@ -9,9 +9,9 @@ namespace System.Runtime.InteropServices.ComTypes
 		public IntPtr lpfuncdesc;
 
 		[FieldOffset(0)]
-		public IntPtr lpvardesc;
+		public IntPtr lptcomp;
 
 		[FieldOffset(0)]
-		public IntPtr lptcomp;
+		public IntPtr lpvardesc;
 	}
 }

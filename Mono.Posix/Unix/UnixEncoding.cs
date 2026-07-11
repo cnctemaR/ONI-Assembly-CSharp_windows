@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Mono.Unix
@@ -172,7 +171,6 @@ namespace Mono.Unix
 						if (--charCount >= 0)
 						{
 							bytes[num3++] = (byte)chars[charIndex++];
-							continue;
 						}
 						continue;
 					}
@@ -253,7 +251,7 @@ namespace Mono.Unix
 			return UnixEncoding.InternalGetBytes(chars, charIndex, charCount, bytes, byteIndex, ref num, true);
 		}
 
-		public unsafe override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
+		public override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
 			if (s == null)
 			{
@@ -275,46 +273,19 @@ namespace Mono.Unix
 			{
 				throw new ArgumentOutOfRangeException("byteIndex", UnixEncoding._("ArgRange_Array"));
 			}
-			char* ptr = s;
-			if (ptr != null)
-			{
-				ptr += RuntimeHelpers.OffsetToStringData / 2;
-			}
-			byte* ptr2;
-			if (bytes == null || bytes.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &bytes[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, bytes.Length - byteIndex);
-		}
-
-		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
-		{
-			if (bytes == null || chars == null)
-			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars");
-			}
-			if (charCount < 0 || byteCount < 0)
-			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount");
-			}
-			int num = 0;
-			int num2 = 0;
+			int num = bytes.Length;
+			int num2 = byteIndex;
 			while (charCount > 0)
 			{
-				char c = chars[num2++];
+				char c = s[charIndex++];
 				uint num3;
 				if (c >= '\ud800' && c <= '\udbff' && charCount > 1)
 				{
-					num3 = (uint)chars[num2];
+					num3 = (uint)s[charIndex];
 					if (num3 >= 56320U && num3 <= 57343U)
 					{
 						num3 = num3 - 56320U + (uint)((uint)(c - '\ud800') << 10) + 65536U;
-						num2++;
+						charIndex++;
 						charCount--;
 					}
 					else
@@ -324,15 +295,14 @@ namespace Mono.Unix
 				}
 				else if (c == UnixEncoding.EscapeByte && charCount > 1)
 				{
-					if (num >= byteCount)
+					if (num2 >= num)
 					{
 						throw new ArgumentException(UnixEncoding._("Arg_InsufficientSpace"), "bytes");
 					}
 					charCount -= 2;
 					if (charCount >= 0)
 					{
-						bytes[num++] = (byte)chars[num2++];
-						continue;
+						bytes[num2++] = (byte)s[charIndex++];
 					}
 					continue;
 				}
@@ -343,44 +313,44 @@ namespace Mono.Unix
 				charCount--;
 				if (num3 < 128U)
 				{
-					if (num >= byteCount)
+					if (num2 >= num)
 					{
 						throw new ArgumentException(UnixEncoding._("Arg_InsufficientSpace"), "bytes");
 					}
-					bytes[num++] = (byte)num3;
+					bytes[num2++] = (byte)num3;
 				}
 				else if (num3 < 2048U)
 				{
-					if (num + 2 > byteCount)
+					if (num2 + 2 > num)
 					{
 						throw new ArgumentException(UnixEncoding._("Arg_InsufficientSpace"), "bytes");
 					}
-					bytes[num++] = (byte)(192U | (num3 >> 6));
-					bytes[num++] = (byte)(128U | (num3 & 63U));
+					bytes[num2++] = (byte)(192U | (num3 >> 6));
+					bytes[num2++] = (byte)(128U | (num3 & 63U));
 				}
 				else if (num3 < 65536U)
 				{
-					if (num + 3 > byteCount)
+					if (num2 + 3 > num)
 					{
 						throw new ArgumentException(UnixEncoding._("Arg_InsufficientSpace"), "bytes");
 					}
-					bytes[num++] = (byte)(224U | (num3 >> 12));
-					bytes[num++] = (byte)(128U | ((num3 >> 6) & 63U));
-					bytes[num++] = (byte)(128U | (num3 & 63U));
+					bytes[num2++] = (byte)(224U | (num3 >> 12));
+					bytes[num2++] = (byte)(128U | ((num3 >> 6) & 63U));
+					bytes[num2++] = (byte)(128U | (num3 & 63U));
 				}
 				else
 				{
-					if (num + 4 > byteCount)
+					if (num2 + 4 > num)
 					{
 						throw new ArgumentException(UnixEncoding._("Arg_InsufficientSpace"), "bytes");
 					}
-					bytes[num++] = (byte)(240U | (num3 >> 18));
-					bytes[num++] = (byte)(128U | ((num3 >> 12) & 63U));
-					bytes[num++] = (byte)(128U | ((num3 >> 6) & 63U));
-					bytes[num++] = (byte)(128U | (num3 & 63U));
+					bytes[num2++] = (byte)(240U | (num3 >> 18));
+					bytes[num2++] = (byte)(128U | ((num3 >> 12) & 63U));
+					bytes[num2++] = (byte)(128U | ((num3 >> 6) & 63U));
+					bytes[num2++] = (byte)(128U | (num3 & 63U));
 				}
 			}
-			return num;
+			return num2 - byteIndex;
 		}
 
 		private static int InternalGetCharCount(byte[] bytes, int index, int count, uint leftOverBits, uint leftOverCount, bool throwOnInvalid, bool flush)
@@ -446,6 +416,9 @@ namespace Mono.Unix
 					}
 					else
 					{
+						if (throwOnInvalid)
+						{
+						}
 						num2 += num * 2;
 						num = 0;
 					}
@@ -499,6 +472,9 @@ namespace Mono.Unix
 				}
 				else
 				{
+					if (throwOnInvalid)
+					{
+					}
 					if (num6 < 128U)
 					{
 						index--;
@@ -510,7 +486,7 @@ namespace Mono.Unix
 					num = 0;
 				}
 			}
-			if (flush && num5 > 0U && throwOnInvalid)
+			if (flush && num5 != 0U && throwOnInvalid)
 			{
 				num2 += num * 2;
 			}
@@ -603,6 +579,9 @@ namespace Mono.Unix
 					}
 					else
 					{
+						if (throwOnInvalid)
+						{
+						}
 						num = 0;
 						chars[num3++] = UnixEncoding.EscapeByte;
 						chars[num3++] = (char)num7;
@@ -667,6 +646,9 @@ namespace Mono.Unix
 				}
 				else
 				{
+					if (throwOnInvalid)
+					{
+					}
 					if (num7 < 128U)
 					{
 						byteIndex--;
@@ -678,7 +660,7 @@ namespace Mono.Unix
 					num = 0;
 				}
 			}
-			if (flush && num6 > 0U && throwOnInvalid)
+			if (flush && num6 != 0U && throwOnInvalid)
 			{
 				UnixEncoding.CopyRaw(array, ref num, chars, ref num3, num2);
 			}
@@ -695,12 +677,8 @@ namespace Mono.Unix
 			}
 			for (int i = 0; i < next_raw; i++)
 			{
-				int num = posn;
-				posn = num + 1;
-				chars[num] = UnixEncoding.EscapeByte;
-				num = posn;
-				posn = num + 1;
-				chars[num] = (char)raw[i];
+				chars[posn++] = UnixEncoding.EscapeByte;
+				chars[posn++] = (char)raw[i];
 			}
 			next_raw = 0;
 		}
@@ -761,7 +739,8 @@ namespace Mono.Unix
 			{
 				throw new ArgumentNullException("s");
 			}
-			byte[] array = new byte[this.GetByteCount(s)];
+			int byteCount = this.GetByteCount(s);
+			byte[] array = new byte[byteCount];
 			this.GetBytes(s, 0, s.Length, array, 0);
 			return array;
 		}

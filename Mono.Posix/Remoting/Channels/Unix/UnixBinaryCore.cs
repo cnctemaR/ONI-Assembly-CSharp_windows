@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
@@ -21,16 +22,32 @@ namespace Mono.Remoting.Channels.Unix
 				{
 					throw new RemotingException(owner.GetType().Name + " does not recognize '" + text + "' configuration property");
 				}
-				if (!(text == "includeVersions"))
+				string text2 = text;
+				if (text2 != null)
 				{
-					if (text == "strictBinding")
+					if (UnixBinaryCore.<>f__switch$map0 == null)
 					{
-						this._strictBinding = Convert.ToBoolean(dictionaryEntry.Value);
+						UnixBinaryCore.<>f__switch$map0 = new Dictionary<string, int>(2)
+						{
+							{ "includeVersions", 0 },
+							{ "strictBinding", 1 }
+						};
 					}
-				}
-				else
-				{
-					this._includeVersions = Convert.ToBoolean(dictionaryEntry.Value);
+					int num;
+					if (UnixBinaryCore.<>f__switch$map0.TryGetValue(text2, out num))
+					{
+						if (num != 0)
+						{
+							if (num == 1)
+							{
+								this._strictBinding = Convert.ToBoolean(dictionaryEntry.Value);
+							}
+						}
+						else
+						{
+							this._includeVersions = Convert.ToBoolean(dictionaryEntry.Value);
+						}
+					}
 				}
 			}
 			this.Init();

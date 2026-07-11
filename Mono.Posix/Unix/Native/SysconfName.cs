@@ -2,8 +2,8 @@
 
 namespace Mono.Unix.Native
 {
-	[Map]
 	[CLSCompliant(false)]
+	[Map]
 	public enum SysconfName
 	{
 		_SC_ARG_MAX,

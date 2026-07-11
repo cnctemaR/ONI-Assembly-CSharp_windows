@@ -19,6 +19,7 @@ namespace Database
 			this.PlumbedBathroom = base.Add(new RoomType("PlumbedBathroom", ROOMS.TYPES.PLUMBEDBATHROOM.NAME, ROOMS.TYPES.PLUMBEDBATHROOM.TOOLTIP, ROOMS.TYPES.PLUMBEDBATHROOM.EFFECT, Db.Get().RoomTypeCategories.Bathroom, RoomConstraints.FLUSH_TOILET, new RoomConstraints.Constraint[]
 			{
 				RoomConstraints.ADVANCED_WASH_STATION,
+				RoomConstraints.NO_OUTHOUSES,
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_64
@@ -40,6 +41,7 @@ namespace Database
 			}, 1, new RoomType[] { this.PlumbedBathroom }, false, false));
 			this.Bedroom = base.Add(new RoomType("Bedroom", ROOMS.TYPES.BEDROOM.NAME, ROOMS.TYPES.BEDROOM.TOOLTIP, ROOMS.TYPES.BEDROOM.EFFECT, Db.Get().RoomTypeCategories.Sleep, RoomConstraints.LUXURY_BED_SINGLE, new RoomConstraints.Constraint[]
 			{
+				RoomConstraints.NO_COTS,
 				RoomConstraints.NO_INDUSTRIAL_MACHINERY,
 				RoomConstraints.MINIMUM_SIZE_12,
 				RoomConstraints.MAXIMUM_SIZE_64,

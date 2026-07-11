@@ -167,7 +167,7 @@ namespace System.EnterpriseServices
 		}
 
 		[MonoTODO]
-		public static void SetNamedProperty(string name, object value)
+		public static void SetNamedProperty(string name, object property)
 		{
 			throw new NotImplementedException();
 		}

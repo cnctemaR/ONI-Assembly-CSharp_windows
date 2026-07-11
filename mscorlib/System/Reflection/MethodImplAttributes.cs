@@ -20,9 +20,6 @@ namespace System.Reflection
 		InternalCall = 4096,
 		Synchronized = 32,
 		NoInlining = 8,
-		[ComVisible(false)]
-		AggressiveInlining = 256,
-		NoOptimization = 64,
 		MaxMethodImplVal = 65535
 	}
 }

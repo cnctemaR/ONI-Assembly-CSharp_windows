@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections;
 using System.Xml.Serialization;
 
 namespace System.Xml.Schema
 {
 	public class XmlSchemaGroup : XmlSchemaAnnotated
 	{
+		public XmlSchemaGroup()
+		{
+			this.qualifiedName = XmlQualifiedName.Empty;
+		}
+
 		[XmlAttribute("name")]
 		public string Name
 		{
@@ -18,8 +24,8 @@ namespace System.Xml.Schema
 			}
 		}
 
-		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("all", typeof(XmlSchemaAll))]
+		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("sequence", typeof(XmlSchemaSequence))]
 		public XmlSchemaGroupBase Particle
 		{
@@ -38,93 +44,199 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.qname;
+				return this.qualifiedName;
 			}
 		}
 
-		[XmlIgnore]
-		internal XmlSchemaParticle CanonicalParticle
+		internal bool IsCircularDefinition
 		{
 			get
 			{
-				return this.canonicalParticle;
-			}
-			set
-			{
-				this.canonicalParticle = value;
+				return this.isCircularDefinition;
 			}
 		}
 
-		[XmlIgnore]
-		internal XmlSchemaGroup Redefined
+		internal override void SetParent(XmlSchemaObject parent)
 		{
-			get
+			base.SetParent(parent);
+			if (this.Particle != null)
 			{
-				return this.redefined;
-			}
-			set
-			{
-				this.redefined = value;
+				this.Particle.SetParent(this);
 			}
 		}
 
-		[XmlIgnore]
-		internal int SelfReferenceCount
+		internal override int Compile(ValidationEventHandler h, XmlSchema schema)
 		{
-			get
+			if (this.CompilationId == schema.CompilationId)
 			{
-				return this.selfReferenceCount;
+				return 0;
 			}
-			set
+			if (this.Name == null)
 			{
-				this.selfReferenceCount = value;
+				base.error(h, "Required attribute name must be present");
 			}
+			else if (!XmlSchemaUtil.CheckNCName(this.name))
+			{
+				base.error(h, "attribute name must be NCName");
+			}
+			else
+			{
+				this.qualifiedName = new XmlQualifiedName(this.Name, base.AncestorSchema.TargetNamespace);
+			}
+			if (this.Particle == null)
+			{
+				base.error(h, "Particle is required");
+			}
+			else
+			{
+				if (this.Particle.MaxOccursString != null)
+				{
+					this.Particle.error(h, "MaxOccurs must not be present when the Particle is a child of Group");
+				}
+				if (this.Particle.MinOccursString != null)
+				{
+					this.Particle.error(h, "MinOccurs must not be present when the Particle is a child of Group");
+				}
+				this.Particle.Compile(h, schema);
+			}
+			XmlSchemaUtil.CompileID(base.Id, this, schema.IDCollection, h);
+			this.CompilationId = schema.CompilationId;
+			return this.errorCount;
 		}
 
-		[XmlIgnore]
-		internal override string NameAttribute
+		internal override int Validate(ValidationEventHandler h, XmlSchema schema)
 		{
-			get
+			if (base.IsValidated(schema.ValidationId))
 			{
-				return this.Name;
+				return this.errorCount;
 			}
-			set
+			if (this.Particle != null)
 			{
-				this.Name = value;
+				this.Particle.parentIsGroupDefinition = true;
+				try
+				{
+					this.Particle.CheckRecursion(0, h, schema);
+				}
+				catch (XmlSchemaException ex)
+				{
+					XmlSchemaObject.error(h, ex.Message, ex);
+					this.isCircularDefinition = true;
+					return this.errorCount;
+				}
+				this.errorCount += this.Particle.Validate(h, schema);
+				this.Particle.ValidateUniqueParticleAttribution(new XmlSchemaObjectTable(), new ArrayList(), h, schema);
+				this.Particle.ValidateUniqueTypeAttribution(new XmlSchemaObjectTable(), h, schema);
 			}
+			this.ValidationId = schema.ValidationId;
+			return this.errorCount;
 		}
 
-		internal void SetQualifiedName(XmlQualifiedName value)
+		internal static XmlSchemaGroup Read(XmlSchemaReader reader, ValidationEventHandler h)
 		{
-			this.qname = value;
-		}
-
-		internal override XmlSchemaObject Clone()
-		{
-			return this.Clone(null);
-		}
-
-		internal XmlSchemaObject Clone(XmlSchema parentSchema)
-		{
-			XmlSchemaGroup xmlSchemaGroup = (XmlSchemaGroup)base.MemberwiseClone();
-			if (XmlSchemaComplexType.HasParticleRef(this.particle, parentSchema))
+			XmlSchemaGroup xmlSchemaGroup = new XmlSchemaGroup();
+			reader.MoveToElement();
+			if (reader.NamespaceURI != "http://www.w3.org/2001/XMLSchema" || reader.LocalName != "group")
 			{
-				xmlSchemaGroup.particle = XmlSchemaComplexType.CloneParticle(this.particle, parentSchema) as XmlSchemaGroupBase;
+				XmlSchemaObject.error(h, "Should not happen :1: XmlSchemaGroup.Read, name=" + reader.Name, null);
+				reader.Skip();
+				return null;
 			}
-			xmlSchemaGroup.canonicalParticle = XmlSchemaParticle.Empty;
+			xmlSchemaGroup.LineNumber = reader.LineNumber;
+			xmlSchemaGroup.LinePosition = reader.LinePosition;
+			xmlSchemaGroup.SourceUri = reader.BaseURI;
+			while (reader.MoveToNextAttribute())
+			{
+				if (reader.Name == "id")
+				{
+					xmlSchemaGroup.Id = reader.Value;
+				}
+				else if (reader.Name == "name")
+				{
+					xmlSchemaGroup.name = reader.Value;
+				}
+				else if ((reader.NamespaceURI == string.Empty && reader.Name != "xmlns") || reader.NamespaceURI == "http://www.w3.org/2001/XMLSchema")
+				{
+					XmlSchemaObject.error(h, reader.Name + " is not a valid attribute for group", null);
+				}
+				else
+				{
+					XmlSchemaUtil.ReadUnhandledAttribute(reader, xmlSchemaGroup);
+				}
+			}
+			reader.MoveToElement();
+			if (reader.IsEmptyElement)
+			{
+				return xmlSchemaGroup;
+			}
+			int num = 1;
+			while (reader.ReadNextElement())
+			{
+				if (reader.NodeType == XmlNodeType.EndElement)
+				{
+					if (reader.LocalName != "group")
+					{
+						XmlSchemaObject.error(h, "Should not happen :2: XmlSchemaGroup.Read, name=" + reader.Name, null);
+					}
+					break;
+				}
+				if (num <= 1 && reader.LocalName == "annotation")
+				{
+					num = 2;
+					XmlSchemaAnnotation xmlSchemaAnnotation = XmlSchemaAnnotation.Read(reader, h);
+					if (xmlSchemaAnnotation != null)
+					{
+						xmlSchemaGroup.Annotation = xmlSchemaAnnotation;
+					}
+				}
+				else
+				{
+					if (num <= 2)
+					{
+						if (reader.LocalName == "all")
+						{
+							num = 3;
+							XmlSchemaAll xmlSchemaAll = XmlSchemaAll.Read(reader, h);
+							if (xmlSchemaAll != null)
+							{
+								xmlSchemaGroup.Particle = xmlSchemaAll;
+							}
+							continue;
+						}
+						if (reader.LocalName == "choice")
+						{
+							num = 3;
+							XmlSchemaChoice xmlSchemaChoice = XmlSchemaChoice.Read(reader, h);
+							if (xmlSchemaChoice != null)
+							{
+								xmlSchemaGroup.Particle = xmlSchemaChoice;
+							}
+							continue;
+						}
+						if (reader.LocalName == "sequence")
+						{
+							num = 3;
+							XmlSchemaSequence xmlSchemaSequence = XmlSchemaSequence.Read(reader, h);
+							if (xmlSchemaSequence != null)
+							{
+								xmlSchemaGroup.Particle = xmlSchemaSequence;
+							}
+							continue;
+						}
+					}
+					reader.RaiseInvalidElementError();
+				}
+			}
 			return xmlSchemaGroup;
 		}
+
+		private const string xmlname = "group";
 
 		private string name;
 
 		private XmlSchemaGroupBase particle;
 
-		private XmlSchemaParticle canonicalParticle;
+		private XmlQualifiedName qualifiedName;
 
-		private XmlQualifiedName qname = XmlQualifiedName.Empty;
-
-		private XmlSchemaGroup redefined;
-
-		private int selfReferenceCount;
+		private bool isCircularDefinition;
 	}
 }

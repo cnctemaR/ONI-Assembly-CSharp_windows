@@ -7,8 +7,6 @@ namespace System.Runtime
 	{
 		Batch,
 		Interactive,
-		LowLatency,
-		SustainedLowLatency,
-		NoGCRegion
+		LowLatency
 	}
 }

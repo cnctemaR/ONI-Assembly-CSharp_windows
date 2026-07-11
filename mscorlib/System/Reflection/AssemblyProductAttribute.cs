@@ -9,17 +9,17 @@ namespace System.Reflection
 	{
 		public AssemblyProductAttribute(string product)
 		{
-			this.m_product = product;
+			this.name = product;
 		}
 
 		public string Product
 		{
 			get
 			{
-				return this.m_product;
+				return this.name;
 			}
 		}
 
-		private string m_product;
+		private string name;
 	}
 }

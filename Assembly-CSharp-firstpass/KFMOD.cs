@@ -22,7 +22,7 @@ public class KFMOD
 		catch (Exception ex)
 		{
 			KFMOD.didFmodInitializeSuccessfully = false;
-			if (!(ex.GetType() == typeof(SystemNotInitializedException)))
+			if (ex.GetType() != typeof(SystemNotInitializedException))
 			{
 				throw ex;
 			}
@@ -164,15 +164,13 @@ public class KFMOD
 			if (!type.IsAbstract)
 			{
 				bool flag = false;
-				Type type2 = type.BaseType;
-				while (type2 != null)
+				for (Type type2 = type.BaseType; type2 != null; type2 = type2.BaseType)
 				{
 					if (type2 == typeof(OneShotSoundParameterUpdater))
 					{
 						flag = true;
 						break;
 					}
-					type2 = type2.BaseType;
 				}
 				if (flag)
 				{

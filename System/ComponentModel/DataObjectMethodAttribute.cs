@@ -16,14 +16,6 @@ namespace System.ComponentModel
 			this._isDefault = isDefault;
 		}
 
-		public bool IsDefault
-		{
-			get
-			{
-				return this._isDefault;
-			}
-		}
-
 		public DataObjectMethodType MethodType
 		{
 			get
@@ -32,34 +24,31 @@ namespace System.ComponentModel
 			}
 		}
 
-		public override bool Equals(object obj)
+		public bool IsDefault
 		{
-			if (obj == this)
+			get
 			{
-				return true;
+				return this._isDefault;
 			}
-			DataObjectMethodAttribute dataObjectMethodAttribute = obj as DataObjectMethodAttribute;
-			return dataObjectMethodAttribute != null && dataObjectMethodAttribute.MethodType == this.MethodType && dataObjectMethodAttribute.IsDefault == this.IsDefault;
-		}
-
-		public override int GetHashCode()
-		{
-			int methodType = (int)this._methodType;
-			return methodType.GetHashCode() ^ this._isDefault.GetHashCode();
 		}
 
 		public override bool Match(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			DataObjectMethodAttribute dataObjectMethodAttribute = obj as DataObjectMethodAttribute;
-			return dataObjectMethodAttribute != null && dataObjectMethodAttribute.MethodType == this.MethodType;
+			return obj is DataObjectMethodAttribute && ((DataObjectMethodAttribute)obj).MethodType == this.MethodType;
 		}
 
-		private bool _isDefault;
+		public override bool Equals(object obj)
+		{
+			return this.Match(obj) && ((DataObjectMethodAttribute)obj).IsDefault == this.IsDefault;
+		}
 
-		private DataObjectMethodType _methodType;
+		public override int GetHashCode()
+		{
+			return this.MethodType.GetHashCode() ^ this.IsDefault.GetHashCode();
+		}
+
+		private readonly DataObjectMethodType _methodType;
+
+		private readonly bool _isDefault;
 	}
 }

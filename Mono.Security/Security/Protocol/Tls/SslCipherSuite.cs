@@ -9,7 +9,7 @@ namespace Mono.Security.Protocol.Tls
 		public SslCipherSuite(short code, string name, CipherAlgorithmType cipherAlgorithmType, HashAlgorithmType hashAlgorithmType, ExchangeAlgorithmType exchangeAlgorithmType, bool exportable, bool blockMode, byte keyMaterialSize, byte expandedKeyMaterialSize, short effectiveKeyBytes, byte ivSize, byte blockSize)
 			: base(code, name, cipherAlgorithmType, hashAlgorithmType, exchangeAlgorithmType, exportable, blockMode, keyMaterialSize, expandedKeyMaterialSize, effectiveKeyBytes, ivSize, blockSize)
 		{
-			int num = ((hashAlgorithmType == HashAlgorithmType.Md5) ? 48 : 40);
+			int num = ((hashAlgorithmType != HashAlgorithmType.Md5) ? 40 : 48);
 			this.pad1 = new byte[num];
 			this.pad2 = new byte[num];
 			for (int i = 0; i < num; i++)
@@ -21,7 +21,7 @@ namespace Mono.Security.Protocol.Tls
 
 		public override byte[] ComputeServerRecordMAC(ContentType contentType, byte[] fragment)
 		{
-			HashAlgorithm hashAlgorithm = base.CreateHashAlgorithm();
+			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(base.HashAlgorithmName);
 			byte[] serverWriteMAC = base.Context.Read.ServerWriteMAC;
 			hashAlgorithm.TransformBlock(serverWriteMAC, 0, serverWriteMAC.Length, serverWriteMAC, 0);
 			hashAlgorithm.TransformBlock(this.pad1, 0, this.pad1.Length, this.pad1, 0);
@@ -29,7 +29,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				this.header = new byte[11];
 			}
-			ulong num = ((base.Context is ClientContext) ? base.Context.ReadSequenceNumber : base.Context.WriteSequenceNumber);
+			ulong num = ((!(base.Context is ClientContext)) ? base.Context.WriteSequenceNumber : base.Context.ReadSequenceNumber);
 			base.Write(this.header, 0, num);
 			this.header[8] = (byte)contentType;
 			base.Write(this.header, 9, (short)fragment.Length);
@@ -47,7 +47,7 @@ namespace Mono.Security.Protocol.Tls
 
 		public override byte[] ComputeClientRecordMAC(ContentType contentType, byte[] fragment)
 		{
-			HashAlgorithm hashAlgorithm = base.CreateHashAlgorithm();
+			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(base.HashAlgorithmName);
 			byte[] clientWriteMAC = base.Context.Current.ClientWriteMAC;
 			hashAlgorithm.TransformBlock(clientWriteMAC, 0, clientWriteMAC.Length, clientWriteMAC, 0);
 			hashAlgorithm.TransformBlock(this.pad1, 0, this.pad1.Length, this.pad1, 0);
@@ -55,7 +55,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				this.header = new byte[11];
 			}
-			ulong num = ((base.Context is ClientContext) ? base.Context.WriteSequenceNumber : base.Context.ReadSequenceNumber);
+			ulong num = ((!(base.Context is ClientContext)) ? base.Context.ReadSequenceNumber : base.Context.WriteSequenceNumber);
 			base.Write(this.header, 0, num);
 			this.header[8] = (byte)contentType;
 			base.Write(this.header, 9, (short)fragment.Length);
@@ -93,7 +93,7 @@ namespace Mono.Security.Protocol.Tls
 					text += c.ToString();
 				}
 				byte[] array = this.prf(base.Context.MasterSecret, text.ToString(), base.Context.RandomSC);
-				int num2 = ((tlsStream.Length + (long)array.Length > (long)base.KeyBlockSize) ? (base.KeyBlockSize - (int)tlsStream.Length) : array.Length);
+				int num2 = ((tlsStream.Length + (long)array.Length <= (long)base.KeyBlockSize) ? array.Length : (base.KeyBlockSize - (int)tlsStream.Length));
 				tlsStream.Write(array, 0, num2);
 				c += '\u0001';
 				num++;
@@ -103,15 +103,51 @@ namespace Mono.Security.Protocol.Tls
 			base.Context.Negotiating.ServerWriteMAC = tlsStream2.ReadBytes(base.HashSize);
 			base.Context.ClientWriteKey = tlsStream2.ReadBytes((int)base.KeyMaterialSize);
 			base.Context.ServerWriteKey = tlsStream2.ReadBytes((int)base.KeyMaterialSize);
-			if (base.IvSize != 0)
+			if (!base.IsExportable)
 			{
-				base.Context.ClientWriteIV = tlsStream2.ReadBytes((int)base.IvSize);
-				base.Context.ServerWriteIV = tlsStream2.ReadBytes((int)base.IvSize);
+				if (base.IvSize != 0)
+				{
+					base.Context.ClientWriteIV = tlsStream2.ReadBytes((int)base.IvSize);
+					base.Context.ServerWriteIV = tlsStream2.ReadBytes((int)base.IvSize);
+				}
+				else
+				{
+					base.Context.ClientWriteIV = CipherSuite.EmptyArray;
+					base.Context.ServerWriteIV = CipherSuite.EmptyArray;
+				}
 			}
 			else
 			{
-				base.Context.ClientWriteIV = CipherSuite.EmptyArray;
-				base.Context.ServerWriteIV = CipherSuite.EmptyArray;
+				HashAlgorithm hashAlgorithm = MD5.Create();
+				int num3 = hashAlgorithm.HashSize >> 3;
+				byte[] array2 = new byte[num3];
+				hashAlgorithm.TransformBlock(base.Context.ClientWriteKey, 0, base.Context.ClientWriteKey.Length, array2, 0);
+				hashAlgorithm.TransformFinalBlock(base.Context.RandomCS, 0, base.Context.RandomCS.Length);
+				byte[] array3 = new byte[(int)base.ExpandedKeyMaterialSize];
+				Buffer.BlockCopy(hashAlgorithm.Hash, 0, array3, 0, (int)base.ExpandedKeyMaterialSize);
+				hashAlgorithm.Initialize();
+				hashAlgorithm.TransformBlock(base.Context.ServerWriteKey, 0, base.Context.ServerWriteKey.Length, array2, 0);
+				hashAlgorithm.TransformFinalBlock(base.Context.RandomSC, 0, base.Context.RandomSC.Length);
+				byte[] array4 = new byte[(int)base.ExpandedKeyMaterialSize];
+				Buffer.BlockCopy(hashAlgorithm.Hash, 0, array4, 0, (int)base.ExpandedKeyMaterialSize);
+				base.Context.ClientWriteKey = array3;
+				base.Context.ServerWriteKey = array4;
+				if (base.IvSize > 0)
+				{
+					hashAlgorithm.Initialize();
+					array2 = hashAlgorithm.ComputeHash(base.Context.RandomCS, 0, base.Context.RandomCS.Length);
+					base.Context.ClientWriteIV = new byte[(int)base.IvSize];
+					Buffer.BlockCopy(array2, 0, base.Context.ClientWriteIV, 0, (int)base.IvSize);
+					hashAlgorithm.Initialize();
+					array2 = hashAlgorithm.ComputeHash(base.Context.RandomSC, 0, base.Context.RandomSC.Length);
+					base.Context.ServerWriteIV = new byte[(int)base.IvSize];
+					Buffer.BlockCopy(array2, 0, base.Context.ServerWriteIV, 0, (int)base.IvSize);
+				}
+				else
+				{
+					base.Context.ClientWriteIV = CipherSuite.EmptyArray;
+					base.Context.ServerWriteIV = CipherSuite.EmptyArray;
+				}
 			}
 			ClientSessionCache.SetContextInCache(base.Context);
 			tlsStream2.Reset();
@@ -135,11 +171,11 @@ namespace Mono.Security.Protocol.Tls
 			return array2;
 		}
 
+		private const int MacHeaderLength = 11;
+
 		private byte[] pad1;
 
 		private byte[] pad2;
-
-		private const int MacHeaderLength = 11;
 
 		private byte[] header;
 	}

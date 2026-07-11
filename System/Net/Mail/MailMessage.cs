@@ -15,7 +15,7 @@ namespace System.Net.Mail
 			this.bcc = new MailAddressCollection();
 			this.cc = new MailAddressCollection();
 			this.replyTo = new MailAddressCollection();
-			this.headers = new NameValueCollection();
+			this.headers = new global::System.Collections.Specialized.NameValueCollection();
 			this.headers.Add("MIME-Version", "1.0");
 		}
 
@@ -108,22 +108,22 @@ namespace System.Net.Mail
 			}
 		}
 
-		internal ContentType BodyContentType
+		internal global::System.Net.Mime.ContentType BodyContentType
 		{
 			get
 			{
-				return new ContentType(this.isHtml ? "text/html" : "text/plain")
+				return new global::System.Net.Mime.ContentType((!this.isHtml) ? "text/plain" : "text/html")
 				{
 					CharSet = (this.BodyEncoding ?? Encoding.ASCII).HeaderName
 				};
 			}
 		}
 
-		internal TransferEncoding ContentTransferEncoding
+		internal global::System.Net.Mime.TransferEncoding ContentTransferEncoding
 		{
 			get
 			{
-				return MailMessage.GuessTransferEncoding(this.BodyEncoding);
+				return global::System.Net.Mime.ContentType.GuessTransferEncoding(this.BodyEncoding);
 			}
 		}
 
@@ -136,18 +136,6 @@ namespace System.Net.Mail
 			set
 			{
 				this.bodyEncoding = value;
-			}
-		}
-
-		public TransferEncoding BodyTransferEncoding
-		{
-			get
-			{
-				return MailMessage.GuessTransferEncoding(this.BodyEncoding);
-			}
-			set
-			{
-				throw new NotImplementedException();
 			}
 		}
 
@@ -183,7 +171,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public NameValueCollection Headers
+		public global::System.Collections.Specialized.NameValueCollection Headers
 		{
 			get
 			{
@@ -215,7 +203,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public Encoding HeadersEncoding
+		internal Encoding HeadersEncoding
 		{
 			get
 			{
@@ -227,7 +215,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public MailAddressCollection ReplyToList
+		internal MailAddressCollection ReplyToList
 		{
 			get
 			{
@@ -235,7 +223,6 @@ namespace System.Net.Mail
 			}
 		}
 
-		[Obsolete("Use ReplyToList instead")]
 		public MailAddress ReplyTo
 		{
 			get
@@ -313,75 +300,7 @@ namespace System.Net.Mail
 
 		private Encoding GuessEncoding(string s)
 		{
-			for (int i = 0; i < s.Length; i++)
-			{
-				if (s[i] >= '\u0080')
-				{
-					return MailMessage.UTF8Unmarked;
-				}
-			}
-			return null;
-		}
-
-		internal static TransferEncoding GuessTransferEncoding(Encoding enc)
-		{
-			if (Encoding.ASCII.Equals(enc))
-			{
-				return TransferEncoding.SevenBit;
-			}
-			if (Encoding.UTF8.CodePage == enc.CodePage || Encoding.Unicode.CodePage == enc.CodePage || Encoding.UTF32.CodePage == enc.CodePage)
-			{
-				return TransferEncoding.Base64;
-			}
-			return TransferEncoding.QuotedPrintable;
-		}
-
-		internal static string To2047(byte[] bytes)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (byte b in bytes)
-			{
-				if (b < 33 || b > 126 || b == 63 || b == 61 || b == 95)
-				{
-					stringBuilder.Append('=');
-					stringBuilder.Append(MailMessage.hex[(b >> 4) & 15]);
-					stringBuilder.Append(MailMessage.hex[(int)(b & 15)]);
-				}
-				else
-				{
-					stringBuilder.Append((char)b);
-				}
-			}
-			return stringBuilder.ToString();
-		}
-
-		internal static string EncodeSubjectRFC2047(string s, Encoding enc)
-		{
-			if (s == null || Encoding.ASCII.Equals(enc))
-			{
-				return s;
-			}
-			for (int i = 0; i < s.Length; i++)
-			{
-				if (s[i] >= '\u0080')
-				{
-					string text = MailMessage.To2047(enc.GetBytes(s));
-					return string.Concat(new string[] { "=?", enc.HeaderName, "?Q?", text, "?=" });
-				}
-			}
-			return s;
-		}
-
-		private static Encoding UTF8Unmarked
-		{
-			get
-			{
-				if (MailMessage.utf8unmarked == null)
-				{
-					MailMessage.utf8unmarked = new UTF8Encoding(false);
-				}
-				return MailMessage.utf8unmarked;
-			}
+			return global::System.Net.Mime.ContentType.GuessEncoding(s);
 		}
 
 		private AlternateViewCollection alternateViews;
@@ -404,7 +323,7 @@ namespace System.Net.Mail
 
 		private MailAddress from;
 
-		private NameValueCollection headers;
+		private global::System.Collections.Specialized.NameValueCollection headers;
 
 		private MailAddressCollection to;
 
@@ -417,13 +336,5 @@ namespace System.Net.Mail
 		private Encoding headersEncoding = Encoding.UTF8;
 
 		private bool isHtml;
-
-		private static char[] hex = new char[]
-		{
-			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-			'A', 'B', 'C', 'D', 'E', 'F'
-		};
-
-		private static Encoding utf8unmarked;
 	}
 }

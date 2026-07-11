@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	public interface IRootDesigner : IDesigner, IDisposable
+	public interface IRootDesigner : IDisposable, IDesigner
 	{
 		ViewTechnology[] SupportedTechnologies { get; }
 

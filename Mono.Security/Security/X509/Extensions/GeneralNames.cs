@@ -38,9 +38,9 @@ namespace Mono.Security.X509.Extensions
 				{
 					string[] array = text3.Split(new char[] { '.', ':' });
 					byte[] array2 = new byte[array.Length];
-					for (int j = 0; j < array.Length; j++)
+					for (int l = 0; l < array.Length; l++)
 					{
-						array2[j] = byte.Parse(array[j]);
+						array2[l] = byte.Parse(array[l]);
 					}
 					this.asn.Add(new ASN1(135, array2));
 					this.ipAddr.Add(text3);
@@ -79,11 +79,14 @@ namespace Mono.Security.X509.Extensions
 					}
 					this.dnsName.Add(Encoding.ASCII.GetString(sequence[i].Value));
 					break;
-				case 131:
-				case 133:
+				default:
+					if (tag == 164)
+					{
+						goto IL_00CF;
+					}
 					break;
 				case 132:
-					goto IL_00C3;
+					goto IL_00CF;
 				case 134:
 					if (this.uris == null)
 					{
@@ -98,7 +101,7 @@ namespace Mono.Security.X509.Extensions
 						this.ipAddr = new ArrayList();
 					}
 					byte[] value = sequence[i].Value;
-					string text = ((value.Length == 4) ? "." : ":");
+					string text = ((value.Length != 4) ? ":" : ".");
 					StringBuilder stringBuilder = new StringBuilder();
 					for (int j = 0; j < value.Length; j++)
 					{
@@ -115,23 +118,17 @@ namespace Mono.Security.X509.Extensions
 					}
 					break;
 				}
-				default:
-					if (tag == 164)
-					{
-						goto IL_00C3;
-					}
-					break;
 				}
-				IL_01CC:
+				IL_01F9:
 				i++;
 				continue;
-				IL_00C3:
+				IL_00CF:
 				if (this.directoryNames == null)
 				{
 					this.directoryNames = new ArrayList();
 				}
 				this.directoryNames.Add(X501.ToString(sequence[i][0]));
-				goto IL_01CC;
+				goto IL_01F9;
 			}
 		}
 

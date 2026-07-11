@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,7 +12,7 @@ namespace Mono.Security.X509
 	{
 		public PKCS12()
 		{
-			this._iterations = 2000;
+			this._iterations = PKCS12.recommendedIterationCount;
 			this._keyBags = new ArrayList();
 			this._secretBags = new ArrayList();
 			this._certs = new X509CertificateCollection();
@@ -49,7 +50,8 @@ namespace Mono.Security.X509
 			{
 				throw new ArgumentException("invalid data");
 			}
-			if (asn[0].Tag != 2)
+			ASN1 asn2 = asn[0];
+			if (asn2.Tag != 2)
 			{
 				throw new ArgumentException("invalid PFX version");
 			}
@@ -60,84 +62,99 @@ namespace Mono.Security.X509
 			}
 			if (asn.Count > 2)
 			{
-				ASN1 asn2 = asn[2];
-				if (asn2.Tag != 48)
-				{
-					throw new ArgumentException("invalid MAC");
-				}
-				ASN1 asn3 = asn2[0];
+				ASN1 asn3 = asn[2];
 				if (asn3.Tag != 48)
 				{
 					throw new ArgumentException("invalid MAC");
 				}
-				if (ASN1Convert.ToOid(asn3[0][0]) != "1.3.14.3.2.26")
+				ASN1 asn4 = asn3[0];
+				if (asn4.Tag != 48)
+				{
+					throw new ArgumentException("invalid MAC");
+				}
+				ASN1 asn5 = asn4[0];
+				string text = ASN1Convert.ToOid(asn5[0]);
+				if (text != "1.3.14.3.2.26")
 				{
 					throw new ArgumentException("unsupported HMAC");
 				}
-				byte[] value = asn3[1].Value;
-				ASN1 asn4 = asn2[1];
-				if (asn4.Tag != 4)
+				byte[] value = asn4[1].Value;
+				ASN1 asn6 = asn3[1];
+				if (asn6.Tag != 4)
 				{
 					throw new ArgumentException("missing MAC salt");
 				}
 				this._iterations = 1;
-				if (asn2.Count > 2)
+				if (asn3.Count > 2)
 				{
-					ASN1 asn5 = asn2[2];
-					if (asn5.Tag != 2)
+					ASN1 asn7 = asn3[2];
+					if (asn7.Tag != 2)
 					{
 						throw new ArgumentException("invalid MAC iteration");
 					}
-					this._iterations = ASN1Convert.ToInt32(asn5);
+					this._iterations = ASN1Convert.ToInt32(asn7);
 				}
 				byte[] value2 = contentInfo.Content[0].Value;
-				byte[] array = this.MAC(this._password, asn4.Value, this._iterations, value2);
+				byte[] array = this.MAC(this._password, asn6.Value, this._iterations, value2);
 				if (!this.Compare(value, array))
 				{
-					byte[] array2 = new byte[2];
-					array = this.MAC(array2, asn4.Value, this._iterations, value2);
-					if (!this.Compare(value, array))
-					{
-						throw new CryptographicException("Invalid MAC - file may have been tampered with!");
-					}
-					this._password = array2;
+					throw new CryptographicException("Invalid MAC - file may have been tampered!");
 				}
 			}
-			ASN1 asn6 = new ASN1(contentInfo.Content[0].Value);
-			for (int i = 0; i < asn6.Count; i++)
+			ASN1 asn8 = new ASN1(contentInfo.Content[0].Value);
+			int i = 0;
+			while (i < asn8.Count)
 			{
-				PKCS7.ContentInfo contentInfo2 = new PKCS7.ContentInfo(asn6[i]);
+				PKCS7.ContentInfo contentInfo2 = new PKCS7.ContentInfo(asn8[i]);
 				string contentType = contentInfo2.ContentType;
-				if (!(contentType == "1.2.840.113549.1.7.1"))
+				if (contentType != null)
 				{
-					if (!(contentType == "1.2.840.113549.1.7.6"))
+					if (PKCS12.<>f__switch$mapA == null)
 					{
-						if (!(contentType == "1.2.840.113549.1.7.3"))
+						PKCS12.<>f__switch$mapA = new Dictionary<string, int>(3)
 						{
-							throw new ArgumentException("unknown authenticatedSafe");
-						}
-						throw new NotImplementedException("public key encrypted");
+							{ "1.2.840.113549.1.7.1", 0 },
+							{ "1.2.840.113549.1.7.6", 1 },
+							{ "1.2.840.113549.1.7.3", 2 }
+						};
 					}
-					else
+					int num;
+					if (PKCS12.<>f__switch$mapA.TryGetValue(contentType, out num))
 					{
-						PKCS7.EncryptedData encryptedData = new PKCS7.EncryptedData(contentInfo2.Content[0]);
-						ASN1 asn7 = new ASN1(this.Decrypt(encryptedData));
-						for (int j = 0; j < asn7.Count; j++)
+						switch (num)
 						{
-							ASN1 asn8 = asn7[j];
-							this.ReadSafeBag(asn8);
+						case 0:
+						{
+							ASN1 asn9 = new ASN1(contentInfo2.Content[0].Value);
+							for (int j = 0; j < asn9.Count; j++)
+							{
+								ASN1 asn10 = asn9[j];
+								this.ReadSafeBag(asn10);
+							}
+							break;
 						}
+						case 1:
+						{
+							PKCS7.EncryptedData encryptedData = new PKCS7.EncryptedData(contentInfo2.Content[0]);
+							ASN1 asn11 = new ASN1(this.Decrypt(encryptedData));
+							for (int k = 0; k < asn11.Count; k++)
+							{
+								ASN1 asn12 = asn11[k];
+								this.ReadSafeBag(asn12);
+							}
+							break;
+						}
+						case 2:
+							throw new NotImplementedException("public key encrypted");
+						default:
+							goto IL_0303;
+						}
+						i++;
+						continue;
 					}
 				}
-				else
-				{
-					ASN1 asn9 = new ASN1(contentInfo2.Content[0].Value);
-					for (int k = 0; k < asn9.Count; k++)
-					{
-						ASN1 asn10 = asn9[k];
-						this.ReadSafeBag(asn10);
-					}
-				}
+				IL_0303:
+				throw new ArgumentException("unknown authenticatedSafe");
 			}
 		}
 
@@ -154,11 +171,6 @@ namespace Mono.Security.X509
 		{
 			set
 			{
-				if (this._password != null)
-				{
-					Array.Clear(this._password, 0, this._password.Length);
-				}
-				this._password = null;
 				if (value != null)
 				{
 					if (value.Length > 0)
@@ -178,9 +190,15 @@ namespace Mono.Security.X509
 						}
 						this._password = new byte[num + num2 << 1];
 						Encoding.BigEndianUnicode.GetBytes(value, 0, num, this._password, 0);
-						return;
 					}
-					this._password = new byte[2];
+					else
+					{
+						this._password = new byte[2];
+					}
+				}
+				else
+				{
+					this._password = null;
 				}
 			}
 		}
@@ -209,7 +227,10 @@ namespace Mono.Security.X509
 						SafeBag safeBag = (SafeBag)obj;
 						if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.1"))
 						{
-							byte[] privateKey = new PKCS8.PrivateKeyInfo(safeBag.ASN1[1].Value).PrivateKey;
+							ASN1 asn = safeBag.ASN1;
+							ASN1 asn2 = asn[1];
+							PKCS8.PrivateKeyInfo privateKeyInfo = new PKCS8.PrivateKeyInfo(asn2.Value);
+							byte[] privateKey = privateKeyInfo.PrivateKey;
 							byte b = privateKey[0];
 							if (b != 2)
 							{
@@ -227,9 +248,12 @@ namespace Mono.Security.X509
 						}
 						else if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.2"))
 						{
-							PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(safeBag.ASN1[1].Value);
+							ASN1 asn3 = safeBag.ASN1;
+							ASN1 asn4 = asn3[1];
+							PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn4.Value);
 							byte[] array = this.Decrypt(encryptedPrivateKeyInfo.Algorithm, encryptedPrivateKeyInfo.Salt, encryptedPrivateKeyInfo.IterationCount, encryptedPrivateKeyInfo.EncryptedData);
-							byte[] privateKey2 = new PKCS8.PrivateKeyInfo(array).PrivateKey;
+							PKCS8.PrivateKeyInfo privateKeyInfo2 = new PKCS8.PrivateKeyInfo(array);
+							byte[] privateKey2 = privateKeyInfo2.PrivateKey;
 							byte b = privateKey2[0];
 							if (b != 2)
 							{
@@ -265,7 +289,9 @@ namespace Mono.Security.X509
 						SafeBag safeBag = (SafeBag)obj;
 						if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.5"))
 						{
-							byte[] value = safeBag.ASN1[1].Value;
+							ASN1 asn = safeBag.ASN1;
+							ASN1 asn2 = asn[1];
+							byte[] value = asn2.Value;
 							this._secretBags.Add(value);
 						}
 					}
@@ -287,7 +313,9 @@ namespace Mono.Security.X509
 						SafeBag safeBag = (SafeBag)obj;
 						if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.3"))
 						{
-							PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(safeBag.ASN1[1].Value);
+							ASN1 asn = safeBag.ASN1;
+							ASN1 asn2 = asn[1];
+							PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(asn2.Value);
 							this._certs.Add(new X509Certificate(contentInfo.Content[0].Value));
 						}
 					}
@@ -335,145 +363,105 @@ namespace Mono.Security.X509
 			deriveBytes.Password = this._password;
 			deriveBytes.Salt = salt;
 			deriveBytes.IterationCount = iterationCount;
-			uint num3 = <PrivateImplementationDetails>.ComputeStringHash(algorithmOid);
-			if (num3 <= 2949822700U)
+			if (algorithmOid != null)
 			{
-				if (num3 <= 2882712224U)
+				if (PKCS12.<>f__switch$mapB == null)
 				{
-					if (num3 != 1314512600U)
+					PKCS12.<>f__switch$mapB = new Dictionary<string, int>(12)
 					{
-						if (num3 != 1331290219U)
-						{
-							if (num3 == 2882712224U)
-							{
-								if (algorithmOid == "1.2.840.113549.1.12.1.6")
-								{
-									deriveBytes.HashName = "SHA1";
-									text = "RC2";
-									num = 5;
-									goto IL_02FE;
-								}
-							}
-						}
-						else if (algorithmOid == "1.2.840.113549.1.5.11")
-						{
-							deriveBytes.HashName = "SHA1";
-							text = "RC2";
-							num = 4;
-							goto IL_02FE;
-						}
-					}
-					else if (algorithmOid == "1.2.840.113549.1.5.10")
+						{ "1.2.840.113549.1.5.1", 0 },
+						{ "1.2.840.113549.1.5.3", 1 },
+						{ "1.2.840.113549.1.5.4", 2 },
+						{ "1.2.840.113549.1.5.6", 3 },
+						{ "1.2.840.113549.1.5.10", 4 },
+						{ "1.2.840.113549.1.5.11", 5 },
+						{ "1.2.840.113549.1.12.1.1", 6 },
+						{ "1.2.840.113549.1.12.1.2", 7 },
+						{ "1.2.840.113549.1.12.1.3", 8 },
+						{ "1.2.840.113549.1.12.1.4", 9 },
+						{ "1.2.840.113549.1.12.1.5", 10 },
+						{ "1.2.840.113549.1.12.1.6", 11 }
+					};
+				}
+				int num3;
+				if (PKCS12.<>f__switch$mapB.TryGetValue(algorithmOid, out num3))
+				{
+					switch (num3)
 					{
+					case 0:
+						deriveBytes.HashName = "MD2";
+						text = "DES";
+						break;
+					case 1:
+						deriveBytes.HashName = "MD5";
+						text = "DES";
+						break;
+					case 2:
+						deriveBytes.HashName = "MD2";
+						text = "RC2";
+						num = 4;
+						break;
+					case 3:
+						deriveBytes.HashName = "MD5";
+						text = "RC2";
+						num = 4;
+						break;
+					case 4:
 						deriveBytes.HashName = "SHA1";
 						text = "DES";
-						goto IL_02FE;
-					}
-				}
-				else if (num3 != 2916267462U)
-				{
-					if (num3 != 2933045081U)
-					{
-						if (num3 == 2949822700U)
-						{
-							if (algorithmOid == "1.2.840.113549.1.12.1.2")
-							{
-								deriveBytes.HashName = "SHA1";
-								text = "RC4";
-								num = 5;
-								num2 = 0;
-								goto IL_02FE;
-							}
-						}
-					}
-					else if (algorithmOid == "1.2.840.113549.1.12.1.5")
-					{
+						break;
+					case 5:
 						deriveBytes.HashName = "SHA1";
 						text = "RC2";
-						num = 16;
-						goto IL_02FE;
-					}
-				}
-				else if (algorithmOid == "1.2.840.113549.1.12.1.4")
-				{
-					deriveBytes.HashName = "SHA1";
-					text = "TripleDES";
-					num = 16;
-					goto IL_02FE;
-				}
-			}
-			else if (num3 <= 3543878904U)
-			{
-				if (num3 != 2966600319U)
-				{
-					if (num3 != 3000155557U)
-					{
-						if (num3 == 3543878904U)
-						{
-							if (algorithmOid == "1.2.840.113549.1.5.1")
-							{
-								deriveBytes.HashName = "MD2";
-								text = "DES";
-								goto IL_02FE;
-							}
-						}
-					}
-					else if (algorithmOid == "1.2.840.113549.1.12.1.1")
-					{
+						num = 4;
+						break;
+					case 6:
 						deriveBytes.HashName = "SHA1";
 						text = "RC4";
 						num = 16;
 						num2 = 0;
-						goto IL_02FE;
+						break;
+					case 7:
+						deriveBytes.HashName = "SHA1";
+						text = "RC4";
+						num = 5;
+						num2 = 0;
+						break;
+					case 8:
+						deriveBytes.HashName = "SHA1";
+						text = "TripleDES";
+						num = 24;
+						break;
+					case 9:
+						deriveBytes.HashName = "SHA1";
+						text = "TripleDES";
+						num = 16;
+						break;
+					case 10:
+						deriveBytes.HashName = "SHA1";
+						text = "RC2";
+						num = 16;
+						break;
+					case 11:
+						deriveBytes.HashName = "SHA1";
+						text = "RC2";
+						num = 5;
+						break;
+					default:
+						goto IL_025A;
 					}
-				}
-				else if (algorithmOid == "1.2.840.113549.1.12.1.3")
-				{
-					deriveBytes.HashName = "SHA1";
-					text = "TripleDES";
-					num = 24;
-					goto IL_02FE;
-				}
-			}
-			else if (num3 != 3577434142U)
-			{
-				if (num3 != 3627766999U)
-				{
-					if (num3 == 3661322237U)
+					SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(text);
+					symmetricAlgorithm.Key = deriveBytes.DeriveKey(num);
+					if (num2 > 0)
 					{
-						if (algorithmOid == "1.2.840.113549.1.5.6")
-						{
-							deriveBytes.HashName = "MD5";
-							text = "RC2";
-							num = 4;
-							goto IL_02FE;
-						}
+						symmetricAlgorithm.IV = deriveBytes.DeriveIV(num2);
+						symmetricAlgorithm.Mode = CipherMode.CBC;
 					}
-				}
-				else if (algorithmOid == "1.2.840.113549.1.5.4")
-				{
-					deriveBytes.HashName = "MD2";
-					text = "RC2";
-					num = 4;
-					goto IL_02FE;
+					return symmetricAlgorithm;
 				}
 			}
-			else if (algorithmOid == "1.2.840.113549.1.5.3")
-			{
-				deriveBytes.HashName = "MD5";
-				text = "DES";
-				goto IL_02FE;
-			}
+			IL_025A:
 			throw new NotSupportedException("unknown oid " + text);
-			IL_02FE:
-			SymmetricAlgorithm symmetricAlgorithm = SymmetricAlgorithm.Create(text);
-			symmetricAlgorithm.Key = deriveBytes.DeriveKey(num);
-			if (num2 > 0)
-			{
-				symmetricAlgorithm.IV = deriveBytes.DeriveIV(num2);
-				symmetricAlgorithm.Mode = CipherMode.CBC;
-			}
-			return symmetricAlgorithm;
 		}
 
 		public byte[] Decrypt(string algorithmOid, byte[] salt, int iterationCount, byte[] encryptedData)
@@ -483,7 +471,8 @@ namespace Mono.Security.X509
 			try
 			{
 				symmetricAlgorithm = this.GetSymmetricAlgorithm(algorithmOid, salt, iterationCount);
-				array = symmetricAlgorithm.CreateDecryptor().TransformFinalBlock(encryptedData, 0, encryptedData.Length);
+				ICryptoTransform cryptoTransform = symmetricAlgorithm.CreateDecryptor();
+				array = cryptoTransform.TransformFinalBlock(encryptedData, 0, encryptedData.Length);
 			}
 			finally
 			{
@@ -505,7 +494,8 @@ namespace Mono.Security.X509
 			byte[] array = null;
 			using (SymmetricAlgorithm symmetricAlgorithm = this.GetSymmetricAlgorithm(algorithmOid, salt, iterationCount))
 			{
-				array = symmetricAlgorithm.CreateEncryptor().TransformFinalBlock(data, 0, data.Length);
+				ICryptoTransform cryptoTransform = symmetricAlgorithm.CreateEncryptor();
+				array = cryptoTransform.TransformFinalBlock(data, 0, data.Length);
 			}
 			return array;
 		}
@@ -566,29 +556,38 @@ namespace Mono.Security.X509
 			}
 			ASN1 asn2 = safeBag[1];
 			string text = ASN1Convert.ToOid(asn);
-			if (!(text == "1.2.840.113549.1.12.10.1.1"))
+			string text2 = text;
+			if (text2 != null)
 			{
-				if (!(text == "1.2.840.113549.1.12.10.1.2"))
+				if (PKCS12.<>f__switch$mapC == null)
 				{
-					if (!(text == "1.2.840.113549.1.12.10.1.3"))
+					PKCS12.<>f__switch$mapC = new Dictionary<string, int>(6)
 					{
-						if (!(text == "1.2.840.113549.1.12.10.1.4"))
-						{
-							if (!(text == "1.2.840.113549.1.12.10.1.5"))
-							{
-								if (!(text == "1.2.840.113549.1.12.10.1.6"))
-								{
-									throw new ArgumentException("unknown safeBag oid");
-								}
-							}
-							else
-							{
-								byte[] value = asn2.Value;
-								this._secretBags.Add(value);
-							}
-						}
+						{ "1.2.840.113549.1.12.10.1.1", 0 },
+						{ "1.2.840.113549.1.12.10.1.2", 1 },
+						{ "1.2.840.113549.1.12.10.1.3", 2 },
+						{ "1.2.840.113549.1.12.10.1.4", 3 },
+						{ "1.2.840.113549.1.12.10.1.5", 4 },
+						{ "1.2.840.113549.1.12.10.1.6", 5 }
+					};
+				}
+				int num;
+				if (PKCS12.<>f__switch$mapC.TryGetValue(text2, out num))
+				{
+					switch (num)
+					{
+					case 0:
+						this.AddPrivateKey(new PKCS8.PrivateKeyInfo(asn2.Value));
+						break;
+					case 1:
+					{
+						PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn2.Value);
+						byte[] array = this.Decrypt(encryptedPrivateKeyInfo.Algorithm, encryptedPrivateKeyInfo.Salt, encryptedPrivateKeyInfo.IterationCount, encryptedPrivateKeyInfo.EncryptedData);
+						this.AddPrivateKey(new PKCS8.PrivateKeyInfo(array));
+						Array.Clear(array, 0, array.Length);
+						break;
 					}
-					else
+					case 2:
 					{
 						PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(asn2.Value);
 						if (contentInfo.ContentType != "1.2.840.113549.1.9.22.1")
@@ -597,62 +596,88 @@ namespace Mono.Security.X509
 						}
 						X509Certificate x509Certificate = new X509Certificate(contentInfo.Content[0].Value);
 						this._certs.Add(x509Certificate);
+						break;
 					}
-				}
-				else
-				{
-					PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn2.Value);
-					byte[] array = this.Decrypt(encryptedPrivateKeyInfo.Algorithm, encryptedPrivateKeyInfo.Salt, encryptedPrivateKeyInfo.IterationCount, encryptedPrivateKeyInfo.EncryptedData);
-					this.AddPrivateKey(new PKCS8.PrivateKeyInfo(array));
-					Array.Clear(array, 0, array.Length);
-				}
-			}
-			else
-			{
-				this.AddPrivateKey(new PKCS8.PrivateKeyInfo(asn2.Value));
-			}
-			if (safeBag.Count > 2)
-			{
-				ASN1 asn3 = safeBag[2];
-				if (asn3.Tag != 49)
-				{
-					throw new ArgumentException("invalid safeBag attributes id");
-				}
-				for (int i = 0; i < asn3.Count; i++)
-				{
-					ASN1 asn4 = asn3[i];
-					if (asn4.Tag != 48)
+					case 3:
+						break;
+					case 4:
 					{
-						throw new ArgumentException("invalid PKCS12 attributes id");
+						byte[] value = asn2.Value;
+						this._secretBags.Add(value);
+						break;
 					}
-					ASN1 asn5 = asn4[0];
-					if (asn5.Tag != 6)
-					{
-						throw new ArgumentException("invalid attribute id");
+					case 5:
+						break;
+					default:
+						goto IL_01CD;
 					}
-					string text2 = ASN1Convert.ToOid(asn5);
-					ASN1 asn6 = asn4[1];
-					for (int j = 0; j < asn6.Count; j++)
+					if (safeBag.Count > 2)
 					{
-						ASN1 asn7 = asn6[j];
-						if (!(text2 == "1.2.840.113549.1.9.20"))
+						ASN1 asn3 = safeBag[2];
+						if (asn3.Tag != 49)
 						{
-							if (text2 == "1.2.840.113549.1.9.21")
+							throw new ArgumentException("invalid safeBag attributes id");
+						}
+						for (int i = 0; i < asn3.Count; i++)
+						{
+							ASN1 asn4 = asn3[i];
+							if (asn4.Tag != 48)
 							{
-								if (asn7.Tag != 4)
+								throw new ArgumentException("invalid PKCS12 attributes id");
+							}
+							ASN1 asn5 = asn4[0];
+							if (asn5.Tag != 6)
+							{
+								throw new ArgumentException("invalid attribute id");
+							}
+							string text3 = ASN1Convert.ToOid(asn5);
+							ASN1 asn6 = asn4[1];
+							int j = 0;
+							while (j < asn6.Count)
+							{
+								ASN1 asn7 = asn6[j];
+								text2 = text3;
+								if (text2 != null)
 								{
-									throw new ArgumentException("invalid attribute value id");
+									if (PKCS12.<>f__switch$mapD == null)
+									{
+										PKCS12.<>f__switch$mapD = new Dictionary<string, int>(2)
+										{
+											{ "1.2.840.113549.1.9.20", 0 },
+											{ "1.2.840.113549.1.9.21", 1 }
+										};
+									}
+									if (PKCS12.<>f__switch$mapD.TryGetValue(text2, out num))
+									{
+										if (num != 0)
+										{
+											if (num == 1)
+											{
+												if (asn7.Tag != 4)
+												{
+													throw new ArgumentException("invalid attribute value id");
+												}
+											}
+										}
+										else if (asn7.Tag != 30)
+										{
+											throw new ArgumentException("invalid attribute value id");
+										}
+									}
 								}
+								IL_031F:
+								j++;
+								continue;
+								goto IL_031F;
 							}
 						}
-						else if (asn7.Tag != 30)
-						{
-							throw new ArgumentException("invalid attribute value id");
-						}
 					}
+					this._safeBags.Add(new SafeBag(text, safeBag));
+					return;
 				}
 			}
-			this._safeBags.Add(new SafeBag(text, safeBag));
+			IL_01CD:
+			throw new ArgumentException("unknown safeBag oid");
 		}
 
 		private ASN1 Pkcs8ShroudedKeyBagSafeBag(AsymmetricAlgorithm aa, IDictionary attributes)
@@ -688,47 +713,63 @@ namespace Mono.Security.X509
 				while (enumerator.MoveNext())
 				{
 					string text = (string)enumerator.Key;
-					if (!(text == "1.2.840.113549.1.9.20"))
+					string text2 = text;
+					if (text2 != null)
 					{
-						if (text == "1.2.840.113549.1.9.21")
+						if (PKCS12.<>f__switch$mapE == null)
 						{
-							ArrayList arrayList = (ArrayList)enumerator.Value;
-							if (arrayList.Count > 0)
+							PKCS12.<>f__switch$mapE = new Dictionary<string, int>(2)
 							{
-								ASN1 asn4 = new ASN1(48);
-								asn4.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
-								ASN1 asn5 = new ASN1(49);
-								foreach (object obj in arrayList)
-								{
-									byte[] array = (byte[])obj;
-									asn5.Add(new ASN1(4)
-									{
-										Value = array
-									});
-								}
-								asn4.Add(asn5);
-								asn3.Add(asn4);
-							}
+								{ "1.2.840.113549.1.9.20", 0 },
+								{ "1.2.840.113549.1.9.21", 1 }
+							};
 						}
-					}
-					else
-					{
-						ArrayList arrayList2 = (ArrayList)enumerator.Value;
-						if (arrayList2.Count > 0)
+						int num;
+						if (PKCS12.<>f__switch$mapE.TryGetValue(text2, out num))
 						{
-							ASN1 asn6 = new ASN1(48);
-							asn6.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
-							ASN1 asn7 = new ASN1(49);
-							foreach (object obj2 in arrayList2)
+							if (num != 0)
 							{
-								byte[] array2 = (byte[])obj2;
-								asn7.Add(new ASN1(30)
+								if (num == 1)
 								{
-									Value = array2
-								});
+									ArrayList arrayList = (ArrayList)enumerator.Value;
+									if (arrayList.Count > 0)
+									{
+										ASN1 asn4 = new ASN1(48);
+										asn4.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
+										ASN1 asn5 = new ASN1(49);
+										foreach (object obj in arrayList)
+										{
+											byte[] array = (byte[])obj;
+											asn5.Add(new ASN1(4)
+											{
+												Value = array
+											});
+										}
+										asn4.Add(asn5);
+										asn3.Add(asn4);
+									}
+								}
 							}
-							asn6.Add(asn7);
-							asn3.Add(asn6);
+							else
+							{
+								ArrayList arrayList2 = (ArrayList)enumerator.Value;
+								if (arrayList2.Count > 0)
+								{
+									ASN1 asn6 = new ASN1(48);
+									asn6.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
+									ASN1 asn7 = new ASN1(49);
+									foreach (object obj2 in arrayList2)
+									{
+										byte[] array2 = (byte[])obj2;
+										asn7.Add(new ASN1(30)
+										{
+											Value = array2
+										});
+									}
+									asn6.Add(asn7);
+									asn3.Add(asn6);
+								}
+							}
 						}
 					}
 				}
@@ -769,47 +810,63 @@ namespace Mono.Security.X509
 				while (enumerator.MoveNext())
 				{
 					string text = (string)enumerator.Key;
-					if (!(text == "1.2.840.113549.1.9.20"))
+					string text2 = text;
+					if (text2 != null)
 					{
-						if (text == "1.2.840.113549.1.9.21")
+						if (PKCS12.<>f__switch$mapF == null)
 						{
-							ArrayList arrayList = (ArrayList)enumerator.Value;
-							if (arrayList.Count > 0)
+							PKCS12.<>f__switch$mapF = new Dictionary<string, int>(2)
 							{
-								ASN1 asn4 = new ASN1(48);
-								asn4.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
-								ASN1 asn5 = new ASN1(49);
-								foreach (object obj in arrayList)
-								{
-									byte[] array = (byte[])obj;
-									asn5.Add(new ASN1(4)
-									{
-										Value = array
-									});
-								}
-								asn4.Add(asn5);
-								asn3.Add(asn4);
-							}
+								{ "1.2.840.113549.1.9.20", 0 },
+								{ "1.2.840.113549.1.9.21", 1 }
+							};
 						}
-					}
-					else
-					{
-						ArrayList arrayList2 = (ArrayList)enumerator.Value;
-						if (arrayList2.Count > 0)
+						int num;
+						if (PKCS12.<>f__switch$mapF.TryGetValue(text2, out num))
 						{
-							ASN1 asn6 = new ASN1(48);
-							asn6.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
-							ASN1 asn7 = new ASN1(49);
-							foreach (object obj2 in arrayList2)
+							if (num != 0)
 							{
-								byte[] array2 = (byte[])obj2;
-								asn7.Add(new ASN1(30)
+								if (num == 1)
 								{
-									Value = array2
-								});
+									ArrayList arrayList = (ArrayList)enumerator.Value;
+									if (arrayList.Count > 0)
+									{
+										ASN1 asn4 = new ASN1(48);
+										asn4.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
+										ASN1 asn5 = new ASN1(49);
+										foreach (object obj in arrayList)
+										{
+											byte[] array = (byte[])obj;
+											asn5.Add(new ASN1(4)
+											{
+												Value = array
+											});
+										}
+										asn4.Add(asn5);
+										asn3.Add(asn4);
+									}
+								}
 							}
-							asn6.Add(asn7);
-							asn3.Add(asn6);
+							else
+							{
+								ArrayList arrayList2 = (ArrayList)enumerator.Value;
+								if (arrayList2.Count > 0)
+								{
+									ASN1 asn6 = new ASN1(48);
+									asn6.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
+									ASN1 asn7 = new ASN1(49);
+									foreach (object obj2 in arrayList2)
+									{
+										byte[] array2 = (byte[])obj2;
+										asn7.Add(new ASN1(30)
+										{
+											Value = array2
+										});
+									}
+									asn6.Add(asn7);
+									asn3.Add(asn6);
+								}
+							}
 						}
 					}
 				}
@@ -834,47 +891,63 @@ namespace Mono.Security.X509
 				while (enumerator.MoveNext())
 				{
 					string text = (string)enumerator.Key;
-					if (!(text == "1.2.840.113549.1.9.20"))
+					string text2 = text;
+					if (text2 != null)
 					{
-						if (text == "1.2.840.113549.1.9.21")
+						if (PKCS12.<>f__switch$map10 == null)
 						{
-							ArrayList arrayList = (ArrayList)enumerator.Value;
-							if (arrayList.Count > 0)
+							PKCS12.<>f__switch$map10 = new Dictionary<string, int>(2)
 							{
-								ASN1 asn4 = new ASN1(48);
-								asn4.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
-								ASN1 asn5 = new ASN1(49);
-								foreach (object obj in arrayList)
-								{
-									byte[] array = (byte[])obj;
-									asn5.Add(new ASN1(4)
-									{
-										Value = array
-									});
-								}
-								asn4.Add(asn5);
-								asn3.Add(asn4);
-							}
+								{ "1.2.840.113549.1.9.20", 0 },
+								{ "1.2.840.113549.1.9.21", 1 }
+							};
 						}
-					}
-					else
-					{
-						ArrayList arrayList2 = (ArrayList)enumerator.Value;
-						if (arrayList2.Count > 0)
+						int num;
+						if (PKCS12.<>f__switch$map10.TryGetValue(text2, out num))
 						{
-							ASN1 asn6 = new ASN1(48);
-							asn6.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
-							ASN1 asn7 = new ASN1(49);
-							foreach (object obj2 in arrayList2)
+							if (num != 0)
 							{
-								byte[] array2 = (byte[])obj2;
-								asn7.Add(new ASN1(30)
+								if (num == 1)
 								{
-									Value = array2
-								});
+									ArrayList arrayList = (ArrayList)enumerator.Value;
+									if (arrayList.Count > 0)
+									{
+										ASN1 asn4 = new ASN1(48);
+										asn4.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
+										ASN1 asn5 = new ASN1(49);
+										foreach (object obj in arrayList)
+										{
+											byte[] array = (byte[])obj;
+											asn5.Add(new ASN1(4)
+											{
+												Value = array
+											});
+										}
+										asn4.Add(asn5);
+										asn3.Add(asn4);
+									}
+								}
 							}
-							asn6.Add(asn7);
-							asn3.Add(asn6);
+							else
+							{
+								ArrayList arrayList2 = (ArrayList)enumerator.Value;
+								if (arrayList2.Count > 0)
+								{
+									ASN1 asn6 = new ASN1(48);
+									asn6.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
+									ASN1 asn7 = new ASN1(49);
+									foreach (object obj2 in arrayList2)
+									{
+										byte[] array2 = (byte[])obj2;
+										asn7.Add(new ASN1(30)
+										{
+											Value = array2
+										});
+									}
+									asn6.Add(asn7);
+									asn3.Add(asn6);
+								}
+							}
 						}
 					}
 				}
@@ -904,47 +977,63 @@ namespace Mono.Security.X509
 				while (enumerator.MoveNext())
 				{
 					string text = (string)enumerator.Key;
-					if (!(text == "1.2.840.113549.1.9.20"))
+					string text2 = text;
+					if (text2 != null)
 					{
-						if (text == "1.2.840.113549.1.9.21")
+						if (PKCS12.<>f__switch$map11 == null)
 						{
-							ArrayList arrayList = (ArrayList)enumerator.Value;
-							if (arrayList.Count > 0)
+							PKCS12.<>f__switch$map11 = new Dictionary<string, int>(2)
 							{
-								ASN1 asn5 = new ASN1(48);
-								asn5.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
-								ASN1 asn6 = new ASN1(49);
-								foreach (object obj in arrayList)
-								{
-									byte[] array = (byte[])obj;
-									asn6.Add(new ASN1(4)
-									{
-										Value = array
-									});
-								}
-								asn5.Add(asn6);
-								asn4.Add(asn5);
-							}
+								{ "1.2.840.113549.1.9.20", 0 },
+								{ "1.2.840.113549.1.9.21", 1 }
+							};
 						}
-					}
-					else
-					{
-						ArrayList arrayList2 = (ArrayList)enumerator.Value;
-						if (arrayList2.Count > 0)
+						int num;
+						if (PKCS12.<>f__switch$map11.TryGetValue(text2, out num))
 						{
-							ASN1 asn7 = new ASN1(48);
-							asn7.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
-							ASN1 asn8 = new ASN1(49);
-							foreach (object obj2 in arrayList2)
+							if (num != 0)
 							{
-								byte[] array2 = (byte[])obj2;
-								asn8.Add(new ASN1(30)
+								if (num == 1)
 								{
-									Value = array2
-								});
+									ArrayList arrayList = (ArrayList)enumerator.Value;
+									if (arrayList.Count > 0)
+									{
+										ASN1 asn5 = new ASN1(48);
+										asn5.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.21"));
+										ASN1 asn6 = new ASN1(49);
+										foreach (object obj in arrayList)
+										{
+											byte[] array = (byte[])obj;
+											asn6.Add(new ASN1(4)
+											{
+												Value = array
+											});
+										}
+										asn5.Add(asn6);
+										asn4.Add(asn5);
+									}
+								}
 							}
-							asn7.Add(asn8);
-							asn4.Add(asn7);
+							else
+							{
+								ArrayList arrayList2 = (ArrayList)enumerator.Value;
+								if (arrayList2.Count > 0)
+								{
+									ASN1 asn7 = new ASN1(48);
+									asn7.Add(ASN1Convert.FromOid("1.2.840.113549.1.9.20"));
+									ASN1 asn8 = new ASN1(49);
+									foreach (object obj2 in arrayList2)
+									{
+										byte[] array2 = (byte[])obj2;
+										asn8.Add(new ASN1(30)
+										{
+											Value = array2
+										});
+									}
+									asn7.Add(asn8);
+									asn4.Add(asn7);
+								}
+							}
 						}
 					}
 				}
@@ -977,7 +1066,9 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)obj;
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.3"))
 				{
-					PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(safeBag.ASN1[1].Value);
+					ASN1 asn2 = safeBag.ASN1;
+					ASN1 asn3 = asn2[1];
+					PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(asn3.Value);
 					arrayList.Add(new X509Certificate(contentInfo.Content[0].Value));
 				}
 			}
@@ -1027,89 +1118,89 @@ namespace Mono.Security.X509
 			}
 			if (this._safeBags.Count > 0)
 			{
-				ASN1 asn2 = new ASN1(48);
+				ASN1 asn4 = new ASN1(48);
 				foreach (object obj6 in this._safeBags)
 				{
 					SafeBag safeBag2 = (SafeBag)obj6;
 					if (safeBag2.BagOID.Equals("1.2.840.113549.1.12.10.1.3"))
 					{
-						asn2.Add(safeBag2.ASN1);
+						asn4.Add(safeBag2.ASN1);
 					}
 				}
-				if (asn2.Count > 0)
+				if (asn4.Count > 0)
 				{
-					PKCS7.ContentInfo contentInfo2 = this.EncryptedContentInfo(asn2, "1.2.840.113549.1.12.1.3");
+					PKCS7.ContentInfo contentInfo2 = this.EncryptedContentInfo(asn4, "1.2.840.113549.1.12.1.3");
 					asn.Add(contentInfo2.ASN1);
 				}
 			}
 			if (this._safeBags.Count > 0)
 			{
-				ASN1 asn3 = new ASN1(48);
+				ASN1 asn5 = new ASN1(48);
 				foreach (object obj7 in this._safeBags)
 				{
 					SafeBag safeBag3 = (SafeBag)obj7;
 					if (safeBag3.BagOID.Equals("1.2.840.113549.1.12.10.1.1") || safeBag3.BagOID.Equals("1.2.840.113549.1.12.10.1.2"))
 					{
-						asn3.Add(safeBag3.ASN1);
+						asn5.Add(safeBag3.ASN1);
 					}
 				}
-				if (asn3.Count > 0)
+				if (asn5.Count > 0)
 				{
-					ASN1 asn4 = new ASN1(160);
-					asn4.Add(new ASN1(4, asn3.GetBytes()));
+					ASN1 asn6 = new ASN1(160);
+					asn6.Add(new ASN1(4, asn5.GetBytes()));
 					asn.Add(new PKCS7.ContentInfo("1.2.840.113549.1.7.1")
 					{
-						Content = asn4
+						Content = asn6
 					}.ASN1);
 				}
 			}
 			if (this._safeBags.Count > 0)
 			{
-				ASN1 asn5 = new ASN1(48);
+				ASN1 asn7 = new ASN1(48);
 				foreach (object obj8 in this._safeBags)
 				{
 					SafeBag safeBag4 = (SafeBag)obj8;
 					if (safeBag4.BagOID.Equals("1.2.840.113549.1.12.10.1.5"))
 					{
-						asn5.Add(safeBag4.ASN1);
+						asn7.Add(safeBag4.ASN1);
 					}
 				}
-				if (asn5.Count > 0)
+				if (asn7.Count > 0)
 				{
-					PKCS7.ContentInfo contentInfo3 = this.EncryptedContentInfo(asn5, "1.2.840.113549.1.12.1.3");
+					PKCS7.ContentInfo contentInfo3 = this.EncryptedContentInfo(asn7, "1.2.840.113549.1.12.1.3");
 					asn.Add(contentInfo3.ASN1);
 				}
 			}
-			ASN1 asn6 = new ASN1(4, asn.GetBytes());
-			ASN1 asn7 = new ASN1(160);
-			asn7.Add(asn6);
+			ASN1 asn8 = new ASN1(4, asn.GetBytes());
+			ASN1 asn9 = new ASN1(160);
+			asn9.Add(asn8);
 			PKCS7.ContentInfo contentInfo4 = new PKCS7.ContentInfo("1.2.840.113549.1.7.1");
-			contentInfo4.Content = asn7;
-			ASN1 asn8 = new ASN1(48);
+			contentInfo4.Content = asn9;
+			ASN1 asn10 = new ASN1(48);
 			if (this._password != null)
 			{
 				byte[] array = new byte[20];
 				this.RNG.GetBytes(array);
 				byte[] array2 = this.MAC(this._password, array, this._iterations, contentInfo4.Content[0].Value);
-				ASN1 asn9 = new ASN1(48);
-				asn9.Add(ASN1Convert.FromOid("1.3.14.3.2.26"));
-				asn9.Add(new ASN1(5));
-				ASN1 asn10 = new ASN1(48);
-				asn10.Add(asn9);
-				asn10.Add(new ASN1(4, array2));
-				asn8.Add(asn10);
-				asn8.Add(new ASN1(4, array));
-				asn8.Add(ASN1Convert.FromInt32(this._iterations));
+				ASN1 asn11 = new ASN1(48);
+				asn11.Add(ASN1Convert.FromOid("1.3.14.3.2.26"));
+				asn11.Add(new ASN1(5));
+				ASN1 asn12 = new ASN1(48);
+				asn12.Add(asn11);
+				asn12.Add(new ASN1(4, array2));
+				asn10.Add(asn12);
+				asn10.Add(new ASN1(4, array));
+				asn10.Add(ASN1Convert.FromInt32(this._iterations));
 			}
-			ASN1 asn11 = new ASN1(2, new byte[] { 3 });
-			ASN1 asn12 = new ASN1(48);
-			asn12.Add(asn11);
-			asn12.Add(contentInfo4.ASN1);
-			if (asn8.Count > 0)
+			ASN1 asn13 = new ASN1(2, new byte[] { 3 });
+			ASN1 asn14 = new ASN1(48);
+			asn14.Add(asn13);
+			asn14.Add(contentInfo4.ASN1);
+			if (asn10.Count > 0)
 			{
-				asn12.Add(asn8);
+				asn14.Add(asn10);
 			}
-			return asn12.GetBytes();
+			return asn14.GetBytes();
 		}
 
 		private PKCS7.ContentInfo EncryptedContentInfo(ASN1 safeBags, string algorithmOid)
@@ -1154,7 +1245,10 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)this._safeBags[num];
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.3"))
 				{
-					X509Certificate x509Certificate = new X509Certificate(new PKCS7.ContentInfo(safeBag.ASN1[1].Value).Content[0].Value);
+					ASN1 asn = safeBag.ASN1;
+					ASN1 asn2 = asn[1];
+					PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(asn2.Value);
+					X509Certificate x509Certificate = new X509Certificate(contentInfo.Content[0].Value);
 					if (this.Compare(cert.RawData, x509Certificate.RawData))
 					{
 						flag = true;
@@ -1184,43 +1278,46 @@ namespace Mono.Security.X509
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.3"))
 				{
 					ASN1 asn = safeBag.ASN1;
-					X509Certificate x509Certificate = new X509Certificate(new PKCS7.ContentInfo(asn[1].Value).Content[0].Value);
+					ASN1 asn2 = asn[1];
+					PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(asn2.Value);
+					X509Certificate x509Certificate = new X509Certificate(contentInfo.Content[0].Value);
 					if (this.Compare(cert.RawData, x509Certificate.RawData))
 					{
 						if (attrs != null)
 						{
 							if (asn.Count == 3)
 							{
-								ASN1 asn2 = asn[2];
+								ASN1 asn3 = asn[2];
 								int num3 = 0;
-								for (int i = 0; i < asn2.Count; i++)
+								for (int i = 0; i < asn3.Count; i++)
 								{
-									ASN1 asn3 = asn2[i];
-									string text = ASN1Convert.ToOid(asn3[0]);
+									ASN1 asn4 = asn3[i];
+									ASN1 asn5 = asn4[0];
+									string text = ASN1Convert.ToOid(asn5);
 									ArrayList arrayList = (ArrayList)attrs[text];
 									if (arrayList != null)
 									{
-										ASN1 asn4 = asn3[1];
-										if (arrayList.Count == asn4.Count)
+										ASN1 asn6 = asn4[1];
+										if (arrayList.Count == asn6.Count)
 										{
 											int num4 = 0;
-											for (int j = 0; j < asn4.Count; j++)
+											for (int j = 0; j < asn6.Count; j++)
 											{
-												ASN1 asn5 = asn4[j];
+												ASN1 asn7 = asn6[j];
 												byte[] array = (byte[])arrayList[j];
-												if (this.Compare(array, asn5.Value))
+												if (this.Compare(array, asn7.Value))
 												{
 													num4++;
 												}
 											}
-											if (num4 == asn4.Count)
+											if (num4 == asn6.Count)
 											{
 												num3++;
 											}
 										}
 									}
 								}
-								if (num3 == asn2.Count)
+								if (num3 == asn3.Count)
 								{
 									num = num2;
 								}
@@ -1260,9 +1357,11 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)this._safeBags[num];
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.2"))
 				{
-					PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(safeBag.ASN1[1].Value);
+					ASN1 asn = safeBag.ASN1[1];
+					PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn.Value);
 					byte[] array = this.Decrypt(encryptedPrivateKeyInfo.Algorithm, encryptedPrivateKeyInfo.Salt, encryptedPrivateKeyInfo.IterationCount, encryptedPrivateKeyInfo.EncryptedData);
-					byte[] privateKey = new PKCS8.PrivateKeyInfo(array).PrivateKey;
+					PKCS8.PrivateKeyInfo privateKeyInfo = new PKCS8.PrivateKeyInfo(array);
+					byte[] privateKey = privateKeyInfo.PrivateKey;
 					byte b = privateKey[0];
 					AsymmetricAlgorithm asymmetricAlgorithm;
 					if (b != 2)
@@ -1304,9 +1403,11 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)this._safeBags[num2];
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.2"))
 				{
-					PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(safeBag.ASN1[1].Value);
+					ASN1 asn = safeBag.ASN1[1];
+					PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn.Value);
 					byte[] array = this.Decrypt(encryptedPrivateKeyInfo.Algorithm, encryptedPrivateKeyInfo.Salt, encryptedPrivateKeyInfo.IterationCount, encryptedPrivateKeyInfo.EncryptedData);
-					byte[] privateKey = new PKCS8.PrivateKeyInfo(array).PrivateKey;
+					PKCS8.PrivateKeyInfo privateKeyInfo = new PKCS8.PrivateKeyInfo(array);
+					byte[] privateKey = privateKeyInfo.PrivateKey;
 					byte b = privateKey[0];
 					AsymmetricAlgorithm asymmetricAlgorithm;
 					if (b != 2)
@@ -1353,7 +1454,9 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)this._safeBags[num];
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.1"))
 				{
-					byte[] privateKey = new PKCS8.PrivateKeyInfo(safeBag.ASN1[1].Value).PrivateKey;
+					ASN1 asn = safeBag.ASN1[1];
+					PKCS8.PrivateKeyInfo privateKeyInfo = new PKCS8.PrivateKeyInfo(asn.Value);
+					byte[] privateKey = privateKeyInfo.PrivateKey;
 					byte b = privateKey[0];
 					AsymmetricAlgorithm asymmetricAlgorithm;
 					if (b != 2)
@@ -1393,7 +1496,9 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)this._safeBags[num2];
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.1"))
 				{
-					byte[] privateKey = new PKCS8.PrivateKeyInfo(safeBag.ASN1[1].Value).PrivateKey;
+					ASN1 asn = safeBag.ASN1[1];
+					PKCS8.PrivateKeyInfo privateKeyInfo = new PKCS8.PrivateKeyInfo(asn.Value);
+					byte[] privateKey = privateKeyInfo.PrivateKey;
 					byte b = privateKey[0];
 					AsymmetricAlgorithm asymmetricAlgorithm;
 					if (b != 2)
@@ -1438,7 +1543,8 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)this._safeBags[num];
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.5"))
 				{
-					byte[] value = safeBag.ASN1[1].Value;
+					ASN1 asn = safeBag.ASN1[1];
+					byte[] value = asn.Value;
 					if (this.Compare(secret, value))
 					{
 						flag = true;
@@ -1462,7 +1568,8 @@ namespace Mono.Security.X509
 				SafeBag safeBag = (SafeBag)this._safeBags[num2];
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.5"))
 				{
-					byte[] value = safeBag.ASN1[1].Value;
+					ASN1 asn = safeBag.ASN1[1];
+					byte[] value = asn.Value;
 					if (this.Compare(secret, value))
 					{
 						num = num2;
@@ -1492,24 +1599,25 @@ namespace Mono.Security.X509
 						for (int i = 0; i < asn2.Count; i++)
 						{
 							ASN1 asn3 = asn2[i];
-							string text = ASN1Convert.ToOid(asn3[0]);
+							ASN1 asn4 = asn3[0];
+							string text = ASN1Convert.ToOid(asn4);
 							ArrayList arrayList = (ArrayList)attrs[text];
 							if (arrayList != null)
 							{
-								ASN1 asn4 = asn3[1];
-								if (arrayList.Count == asn4.Count)
+								ASN1 asn5 = asn3[1];
+								if (arrayList.Count == asn5.Count)
 								{
 									int num2 = 0;
-									for (int j = 0; j < asn4.Count; j++)
+									for (int j = 0; j < asn5.Count; j++)
 									{
-										ASN1 asn5 = asn4[j];
+										ASN1 asn6 = asn5[j];
 										byte[] array = (byte[])arrayList[j];
-										if (this.Compare(array, asn5.Value))
+										if (this.Compare(array, asn6.Value))
 										{
 											num2++;
 										}
 									}
-									if (num2 == asn4.Count)
+									if (num2 == asn5.Count)
 									{
 										num++;
 									}
@@ -1518,11 +1626,12 @@ namespace Mono.Security.X509
 						}
 						if (num == asn2.Count)
 						{
-							ASN1 asn6 = asn[1];
+							ASN1 asn7 = asn[1];
 							AsymmetricAlgorithm asymmetricAlgorithm = null;
 							if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.1"))
 							{
-								byte[] privateKey = new PKCS8.PrivateKeyInfo(asn6.Value).PrivateKey;
+								PKCS8.PrivateKeyInfo privateKeyInfo = new PKCS8.PrivateKeyInfo(asn7.Value);
+								byte[] privateKey = privateKeyInfo.PrivateKey;
 								byte b = privateKey[0];
 								if (b != 2)
 								{
@@ -1539,9 +1648,10 @@ namespace Mono.Security.X509
 							}
 							else if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.2"))
 							{
-								PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn6.Value);
+								PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn7.Value);
 								byte[] array2 = this.Decrypt(encryptedPrivateKeyInfo.Algorithm, encryptedPrivateKeyInfo.Salt, encryptedPrivateKeyInfo.IterationCount, encryptedPrivateKeyInfo.EncryptedData);
-								byte[] privateKey2 = new PKCS8.PrivateKeyInfo(array2).PrivateKey;
+								PKCS8.PrivateKeyInfo privateKeyInfo2 = new PKCS8.PrivateKeyInfo(array2);
+								byte[] privateKey2 = privateKeyInfo2.PrivateKey;
 								byte b = privateKey2[0];
 								if (b != 2)
 								{
@@ -1580,24 +1690,25 @@ namespace Mono.Security.X509
 						for (int i = 0; i < asn2.Count; i++)
 						{
 							ASN1 asn3 = asn2[i];
-							string text = ASN1Convert.ToOid(asn3[0]);
+							ASN1 asn4 = asn3[0];
+							string text = ASN1Convert.ToOid(asn4);
 							ArrayList arrayList = (ArrayList)attrs[text];
 							if (arrayList != null)
 							{
-								ASN1 asn4 = asn3[1];
-								if (arrayList.Count == asn4.Count)
+								ASN1 asn5 = asn3[1];
+								if (arrayList.Count == asn5.Count)
 								{
 									int num2 = 0;
-									for (int j = 0; j < asn4.Count; j++)
+									for (int j = 0; j < asn5.Count; j++)
 									{
-										ASN1 asn5 = asn4[j];
+										ASN1 asn6 = asn5[j];
 										byte[] array = (byte[])arrayList[j];
-										if (this.Compare(array, asn5.Value))
+										if (this.Compare(array, asn6.Value))
 										{
 											num2++;
 										}
 									}
-									if (num2 == asn4.Count)
+									if (num2 == asn5.Count)
 									{
 										num++;
 									}
@@ -1606,7 +1717,8 @@ namespace Mono.Security.X509
 						}
 						if (num == asn2.Count)
 						{
-							return asn[1].Value;
+							ASN1 asn7 = asn[1];
+							return asn7.Value;
 						}
 					}
 				}
@@ -1629,24 +1741,25 @@ namespace Mono.Security.X509
 						for (int i = 0; i < asn2.Count; i++)
 						{
 							ASN1 asn3 = asn2[i];
-							string text = ASN1Convert.ToOid(asn3[0]);
+							ASN1 asn4 = asn3[0];
+							string text = ASN1Convert.ToOid(asn4);
 							ArrayList arrayList = (ArrayList)attrs[text];
 							if (arrayList != null)
 							{
-								ASN1 asn4 = asn3[1];
-								if (arrayList.Count == asn4.Count)
+								ASN1 asn5 = asn3[1];
+								if (arrayList.Count == asn5.Count)
 								{
 									int num2 = 0;
-									for (int j = 0; j < asn4.Count; j++)
+									for (int j = 0; j < asn5.Count; j++)
 									{
-										ASN1 asn5 = asn4[j];
+										ASN1 asn6 = asn5[j];
 										byte[] array = (byte[])arrayList[j];
-										if (this.Compare(array, asn5.Value))
+										if (this.Compare(array, asn6.Value))
 										{
 											num2++;
 										}
 									}
-									if (num2 == asn4.Count)
+									if (num2 == asn5.Count)
 									{
 										num++;
 									}
@@ -1655,7 +1768,9 @@ namespace Mono.Security.X509
 						}
 						if (num == asn2.Count)
 						{
-							return new X509Certificate(new PKCS7.ContentInfo(asn[1].Value).Content[0].Value);
+							ASN1 asn7 = asn[1];
+							PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(asn7.Value);
+							return new X509Certificate(contentInfo.Content[0].Value);
 						}
 					}
 				}
@@ -1676,7 +1791,8 @@ namespace Mono.Security.X509
 					AsymmetricAlgorithm asymmetricAlgorithm = null;
 					if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.1"))
 					{
-						byte[] privateKey = new PKCS8.PrivateKeyInfo(asn2.Value).PrivateKey;
+						PKCS8.PrivateKeyInfo privateKeyInfo = new PKCS8.PrivateKeyInfo(asn2.Value);
+						byte[] privateKey = privateKeyInfo.PrivateKey;
 						byte b = privateKey[0];
 						if (b != 2)
 						{
@@ -1695,7 +1811,8 @@ namespace Mono.Security.X509
 					{
 						PKCS8.EncryptedPrivateKeyInfo encryptedPrivateKeyInfo = new PKCS8.EncryptedPrivateKeyInfo(asn2.Value);
 						byte[] array = this.Decrypt(encryptedPrivateKeyInfo.Algorithm, encryptedPrivateKeyInfo.Salt, encryptedPrivateKeyInfo.IterationCount, encryptedPrivateKeyInfo.EncryptedData);
-						byte[] privateKey2 = new PKCS8.PrivateKeyInfo(array).PrivateKey;
+						PKCS8.PrivateKeyInfo privateKeyInfo2 = new PKCS8.PrivateKeyInfo(array);
+						byte[] privateKey2 = privateKeyInfo2.PrivateKey;
 						byte b = privateKey2[0];
 						if (b != 2)
 						{
@@ -1717,13 +1834,14 @@ namespace Mono.Security.X509
 						for (int i = 0; i < asn3.Count; i++)
 						{
 							ASN1 asn4 = asn3[i];
-							string text = ASN1Convert.ToOid(asn4[0]);
+							ASN1 asn5 = asn4[0];
+							string text = ASN1Convert.ToOid(asn5);
 							ArrayList arrayList = new ArrayList();
-							ASN1 asn5 = asn4[1];
-							for (int j = 0; j < asn5.Count; j++)
+							ASN1 asn6 = asn4[1];
+							for (int j = 0; j < asn6.Count; j++)
 							{
-								ASN1 asn6 = asn5[j];
-								arrayList.Add(asn6.Value);
+								ASN1 asn7 = asn6[j];
+								arrayList.Add(asn7.Value);
 							}
 							dictionary.Add(text, arrayList);
 						}
@@ -1742,20 +1860,23 @@ namespace Mono.Security.X509
 				if (safeBag.BagOID.Equals("1.2.840.113549.1.12.10.1.3"))
 				{
 					ASN1 asn = safeBag.ASN1;
-					X509Certificate x509Certificate = new X509Certificate(new PKCS7.ContentInfo(asn[1].Value).Content[0].Value);
+					ASN1 asn2 = asn[1];
+					PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(asn2.Value);
+					X509Certificate x509Certificate = new X509Certificate(contentInfo.Content[0].Value);
 					if (this.Compare(cert.RawData, x509Certificate.RawData) && asn.Count == 3)
 					{
-						ASN1 asn2 = asn[2];
-						for (int i = 0; i < asn2.Count; i++)
+						ASN1 asn3 = asn[2];
+						for (int i = 0; i < asn3.Count; i++)
 						{
-							ASN1 asn3 = asn2[i];
-							string text = ASN1Convert.ToOid(asn3[0]);
+							ASN1 asn4 = asn3[i];
+							ASN1 asn5 = asn4[0];
+							string text = ASN1Convert.ToOid(asn5);
 							ArrayList arrayList = new ArrayList();
-							ASN1 asn4 = asn3[1];
-							for (int j = 0; j < asn4.Count; j++)
+							ASN1 asn6 = asn4[1];
+							for (int j = 0; j < asn6.Count; j++)
 							{
-								ASN1 asn5 = asn4[j];
-								arrayList.Add(asn5.Value);
+								ASN1 asn7 = asn6[j];
+								arrayList.Add(asn7.Value);
 							}
 							dictionary.Add(text, arrayList);
 						}
@@ -1803,7 +1924,8 @@ namespace Mono.Security.X509
 			{
 				if (value < 32)
 				{
-					throw new ArgumentOutOfRangeException(Locale.GetText("Maximum password length cannot be less than {0}.", new object[] { 32 }));
+					string text = Locale.GetText("Maximum password length cannot be less than {0}.", new object[] { 32 });
+					throw new ArgumentOutOfRangeException(text);
 				}
 				PKCS12.password_max_length = value;
 			}
@@ -1869,7 +1991,9 @@ namespace Mono.Security.X509
 
 		public const string x509Crl = "1.2.840.113549.1.9.23.1";
 
-		private const int recommendedIterationCount = 2000;
+		public const int CryptoApiPasswordLimit = 32;
+
+		private static int recommendedIterationCount = 2000;
 
 		private byte[] _password;
 
@@ -1890,8 +2014,6 @@ namespace Mono.Security.X509
 		private ArrayList _safeBags;
 
 		private RandomNumberGenerator _rng;
-
-		public const int CryptoApiPasswordLimit = 32;
 
 		private static int password_max_length = int.MaxValue;
 
@@ -1932,9 +2054,11 @@ namespace Mono.Security.X509
 					if (value == null)
 					{
 						this._password = new byte[0];
-						return;
 					}
-					this._password = (byte[])value.Clone();
+					else
+					{
+						this._password = (byte[])value.Clone();
+					}
 				}
 			}
 
@@ -1949,9 +2073,11 @@ namespace Mono.Security.X509
 					if (value != null)
 					{
 						this._salt = (byte[])value.Clone();
-						return;
 					}
-					this._salt = null;
+					else
+					{
+						this._salt = null;
+					}
 				}
 			}
 
@@ -1970,7 +2096,7 @@ namespace Mono.Security.X509
 
 			private byte[] Derive(byte[] diversifier, int n)
 			{
-				HashAlgorithm hashAlgorithm = PKCS1.CreateFromName(this._hashName);
+				HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this._hashName);
 				int num = hashAlgorithm.HashSize >> 3;
 				int num2 = 64;
 				byte[] array = new byte[n];

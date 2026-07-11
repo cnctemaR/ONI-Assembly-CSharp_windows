@@ -5,23 +5,11 @@ using System.Threading;
 
 namespace System.IO.Ports
 {
-	internal class WinSerialStream : Stream, ISerialStream, IDisposable
+	internal class WinSerialStream : Stream, IDisposable, ISerialStream
 	{
-		[DllImport("kernel32", SetLastError = true)]
-		private static extern int CreateFile(string port_name, uint desired_access, uint share_mode, uint security_attrs, uint creation, uint flags, uint template);
-
-		[DllImport("kernel32", SetLastError = true)]
-		private static extern bool SetupComm(int handle, int read_buffer_size, int write_buffer_size);
-
-		[DllImport("kernel32", SetLastError = true)]
-		private static extern bool PurgeComm(int handle, uint flags);
-
-		[DllImport("kernel32", SetLastError = true)]
-		private static extern bool SetCommTimeouts(int handle, Timeouts timeouts);
-
 		public WinSerialStream(string port_name, int baud_rate, int data_bits, Parity parity, StopBits sb, bool dtr_enable, bool rts_enable, Handshake hs, int read_timeout, int write_timeout, int read_buffer_size, int write_buffer_size)
 		{
-			this.handle = WinSerialStream.CreateFile((port_name != null && !port_name.StartsWith("\\\\.\\")) ? ("\\\\.\\" + port_name) : port_name, 3221225472U, 0U, 0U, 3U, 1073741824U, 0U);
+			this.handle = WinSerialStream.CreateFile(port_name, 3221225472U, 0U, 0U, 3U, 1073741824U, 0U);
 			if (this.handle == -1)
 			{
 				this.ReportIOError(port_name);
@@ -47,13 +35,31 @@ namespace System.IO.Ports
 			this.write_event = new ManualResetEvent(false);
 			nativeOverlapped.EventHandle = this.write_event.Handle;
 			this.write_overlapped = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeOverlapped)));
-			Marshal.StructureToPtr<NativeOverlapped>(nativeOverlapped, this.write_overlapped, true);
+			Marshal.StructureToPtr(nativeOverlapped, this.write_overlapped, true);
 			NativeOverlapped nativeOverlapped2 = default(NativeOverlapped);
 			this.read_event = new ManualResetEvent(false);
 			nativeOverlapped2.EventHandle = this.read_event.Handle;
 			this.read_overlapped = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(NativeOverlapped)));
-			Marshal.StructureToPtr<NativeOverlapped>(nativeOverlapped2, this.read_overlapped, true);
+			Marshal.StructureToPtr(nativeOverlapped2, this.read_overlapped, true);
 		}
+
+		void IDisposable.Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		[DllImport("kernel32", SetLastError = true)]
+		private static extern int CreateFile(string port_name, uint desired_access, uint share_mode, uint security_attrs, uint creation, uint flags, uint template);
+
+		[DllImport("kernel32", SetLastError = true)]
+		private static extern bool SetupComm(int handle, int read_buffer_size, int write_buffer_size);
+
+		[DllImport("kernel32", SetLastError = true)]
+		private static extern bool PurgeComm(int handle, uint flags);
+
+		[DllImport("kernel32", SetLastError = true)]
+		private static extern bool SetCommTimeouts(int handle, Timeouts timeouts);
 
 		public override bool CanRead
 		{
@@ -164,12 +170,6 @@ namespace System.IO.Ports
 			Marshal.FreeHGlobal(this.read_overlapped);
 		}
 
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
 		public override void Close()
 		{
 			((IDisposable)this).Dispose();
@@ -217,17 +217,8 @@ namespace System.IO.Ports
 				throw new ArgumentException("offset+count", "The size of the buffer is less than offset + count.");
 			}
 			int num;
-			fixed (byte[] array = buffer)
+			fixed (byte* ptr = (ref buffer != null && buffer.Length != 0 ? ref buffer[0] : ref *null))
 			{
-				byte* ptr;
-				if (buffer == null || array.Length == 0)
-				{
-					ptr = null;
-				}
-				else
-				{
-					ptr = &array[0];
-				}
 				if (WinSerialStream.ReadFile(this.handle, ptr + offset, count, out num, this.read_overlapped))
 				{
 					return num;
@@ -267,17 +258,8 @@ namespace System.IO.Ports
 				throw new ArgumentException("offset+count", "The size of the buffer is less than offset + count.");
 			}
 			int num = 0;
-			fixed (byte[] array = buffer)
+			fixed (byte* ptr = (ref buffer != null && buffer.Length != 0 ? ref buffer[0] : ref *null))
 			{
-				byte* ptr;
-				if (buffer == null || array.Length == 0)
-				{
-					ptr = null;
-				}
-				else
-				{
-					ptr = &array[0];
-				}
 				if (WinSerialStream.WriteFile(this.handle, ptr + offset, count, out num, this.write_overlapped))
 				{
 					return;
@@ -320,12 +302,13 @@ namespace System.IO.Ports
 		private void ReportIOError(string optional_arg)
 		{
 			int lastWin32Error = Marshal.GetLastWin32Error();
+			int num = lastWin32Error;
 			string text;
-			if (lastWin32Error - 2 > 1)
+			if (num != 2 && num != 3)
 			{
-				if (lastWin32Error != 87)
+				if (num != 87)
 				{
-					text = new Win32Exception().Message;
+					text = new global::System.ComponentModel.Win32Exception().Message;
 				}
 				else
 				{
@@ -349,7 +332,7 @@ namespace System.IO.Ports
 
 		public void DiscardInBuffer()
 		{
-			if (!WinSerialStream.PurgeComm(this.handle, 8U))
+			if (!WinSerialStream.PurgeComm(this.handle, 4U))
 			{
 				this.ReportIOError(null);
 			}
@@ -457,7 +440,7 @@ namespace System.IO.Ports
 
 		public void SetBreakState(bool value)
 		{
-			if (!WinSerialStream.EscapeCommFunction(this.handle, value ? 8U : 9U))
+			if (!WinSerialStream.EscapeCommFunction(this.handle, (!value) ? 9U : 8U))
 			{
 				this.ReportIOError(null);
 			}
@@ -471,9 +454,9 @@ namespace System.IO.Ports
 
 		private const uint FileFlagOverlapped = 1073741824U;
 
-		private const uint PurgeRxClear = 8U;
+		private const uint PurgeRxClear = 4U;
 
-		private const uint PurgeTxClear = 4U;
+		private const uint PurgeTxClear = 8U;
 
 		private const uint WinInfiniteTimeout = 4294967295U;
 

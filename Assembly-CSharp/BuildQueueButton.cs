@@ -39,7 +39,6 @@ public class BuildQueueButton : KMonoBehaviour
 		this.texture.color = ((!currentAvailability) ? this.unavailableSpriteColor : this.order.IconColor);
 		this.texture.GetComponent<Image>().material = ((!currentAvailability) ? GlobalResources.Instance().AnimMaterialUIDesaturated : null);
 		this.BG.color = ((!currentAvailability) ? this.unavailableBGColor : Color.white);
-		this.materialsAvailable = currentAvailability;
 		str = str + "\n" + UI.UISIDESCREENS.FABRICATORSIDESCREEN.CANCEL;
 		this.toolTip.toolTip = str;
 	}
@@ -136,7 +135,6 @@ public class BuildQueueButton : KMonoBehaviour
 				this.BG.sprite = this.filledBG;
 				this.order = order;
 				this.infiniteImg.SetActive(order.Infinite);
-				string empty = string.Empty;
 			}
 			else
 			{
@@ -179,6 +177,4 @@ public class BuildQueueButton : KMonoBehaviour
 	private GameObject visualizer;
 
 	private Image BG;
-
-	private bool materialsAvailable = true;
 }

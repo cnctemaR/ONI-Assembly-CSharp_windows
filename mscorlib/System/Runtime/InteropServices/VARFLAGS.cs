@@ -2,10 +2,10 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete("Use System.Runtime.InteropServices.ComTypes.VARFLAGS instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
+	[Obsolete]
 	[Flags]
 	[Serializable]
-	public enum VARFLAGS : short
+	public enum VARFLAGS
 	{
 		VARFLAG_FREADONLY = 1,
 		VARFLAG_FSOURCE = 2,

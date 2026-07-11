@@ -9,25 +9,22 @@ namespace System
 	public class TypeUnloadedException : SystemException
 	{
 		public TypeUnloadedException()
-			: base(Environment.GetResourceString("Type had been unloaded."))
+			: base(Locale.GetText("Cannot access an unloaded class."))
 		{
-			base.SetErrorCode(-2146234349);
 		}
 
 		public TypeUnloadedException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146234349);
-		}
-
-		public TypeUnloadedException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-			base.SetErrorCode(-2146234349);
 		}
 
 		protected TypeUnloadedException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
+		{
+		}
+
+		public TypeUnloadedException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 	}

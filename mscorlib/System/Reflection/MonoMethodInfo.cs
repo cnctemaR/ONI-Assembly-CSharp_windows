@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
@@ -8,9 +8,6 @@ namespace System.Reflection
 	{
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern void get_method_info(IntPtr handle, out MonoMethodInfo info);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int get_method_attributes(IntPtr handle);
 
 		internal static MonoMethodInfo GetMethodInfo(IntPtr handle)
 		{
@@ -31,7 +28,7 @@ namespace System.Reflection
 
 		internal static MethodAttributes GetAttributes(IntPtr handle)
 		{
-			return (MethodAttributes)MonoMethodInfo.get_method_attributes(handle);
+			return MonoMethodInfo.GetMethodInfo(handle).attrs;
 		}
 
 		internal static CallingConventions GetCallingConvention(IntPtr handle)
@@ -53,11 +50,11 @@ namespace System.Reflection
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern MarshalAsAttribute get_retval_marshal(IntPtr handle);
+		private static extern UnmanagedMarshal get_retval_marshal(IntPtr handle);
 
 		internal static ParameterInfo GetReturnParameterInfo(MonoMethod method)
 		{
-			return ParameterInfo.New(MonoMethodInfo.GetReturnType(method.mhandle), method, MonoMethodInfo.get_retval_marshal(method.mhandle));
+			return new ParameterInfo(MonoMethodInfo.GetReturnType(method.mhandle), method, MonoMethodInfo.get_retval_marshal(method.mhandle));
 		}
 
 		private Type parent;

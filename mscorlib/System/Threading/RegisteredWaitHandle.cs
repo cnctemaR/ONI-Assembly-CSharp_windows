@@ -21,76 +21,48 @@ namespace System.Threading
 
 		internal void Wait(object state)
 		{
-			bool flag = false;
 			try
 			{
-				this._waitObject.SafeWaitHandle.DangerousAddRef(ref flag);
-				RegisteredWaitHandle registeredWaitHandle;
-				try
+				WaitHandle[] array = new WaitHandle[] { this._waitObject, this._cancelEvent };
+				do
 				{
-					WaitHandle[] array = new WaitHandle[] { this._waitObject, this._cancelEvent };
-					do
+					int num = WaitHandle.WaitAny(array, this._timeout, false);
+					if (!this._unregistered)
 					{
-						int num = WaitHandle.WaitAny(array, this._timeout, false);
-						if (!this._unregistered)
+						lock (this)
 						{
-							registeredWaitHandle = this;
-							lock (registeredWaitHandle)
-							{
-								this._callsInProcess++;
-							}
-							ThreadPool.QueueUserWorkItem(new WaitCallback(this.DoCallBack), num == 258);
+							this._callsInProcess++;
 						}
-					}
-					while (!this._unregistered && !this._executeOnlyOnce);
-				}
-				catch
-				{
-				}
-				registeredWaitHandle = this;
-				lock (registeredWaitHandle)
-				{
-					this._unregistered = true;
-					if (this._callsInProcess == 0 && this._finalEvent != null)
-					{
-						NativeEventCalls.SetEvent(this._finalEvent.SafeWaitHandle);
+						ThreadPool.QueueUserWorkItem(new WaitCallback(this.DoCallBack), num == 258);
 					}
 				}
+				while (!this._unregistered && !this._executeOnlyOnce);
 			}
-			catch (ObjectDisposedException)
+			catch
 			{
-				if (flag)
-				{
-					throw;
-				}
 			}
-			finally
+			lock (this)
 			{
-				if (flag)
+				this._unregistered = true;
+				if (this._callsInProcess == 0 && this._finalEvent != null)
 				{
-					this._waitObject.SafeWaitHandle.DangerousRelease();
+					NativeEventCalls.SetEvent_internal(this._finalEvent.Handle);
 				}
 			}
 		}
 
 		private void DoCallBack(object timedOut)
 		{
-			try
+			if (this._callback != null)
 			{
-				if (this._callback != null)
-				{
-					this._callback(this._state, (bool)timedOut);
-				}
+				this._callback(this._state, (bool)timedOut);
 			}
-			finally
+			lock (this)
 			{
-				lock (this)
+				this._callsInProcess--;
+				if (this._unregistered && this._callsInProcess == 0 && this._finalEvent != null)
 				{
-					this._callsInProcess--;
-					if (this._unregistered && this._callsInProcess == 0 && this._finalEvent != null)
-					{
-						NativeEventCalls.SetEvent(this._finalEvent.SafeWaitHandle);
-					}
+					NativeEventCalls.SetEvent_internal(this._finalEvent.Handle);
 				}
 			}
 		}
@@ -98,39 +70,39 @@ namespace System.Threading
 		[ComVisible(true)]
 		public bool Unregister(WaitHandle waitObject)
 		{
-			bool flag2;
+			bool flag;
 			lock (this)
 			{
 				if (this._unregistered)
 				{
-					flag2 = false;
+					flag = false;
 				}
 				else
 				{
 					this._finalEvent = waitObject;
 					this._unregistered = true;
 					this._cancelEvent.Set();
-					flag2 = true;
+					flag = true;
 				}
 			}
-			return flag2;
+			return flag;
 		}
 
 		private WaitHandle _waitObject;
 
 		private WaitOrTimerCallback _callback;
 
+		private TimeSpan _timeout;
+
 		private object _state;
+
+		private bool _executeOnlyOnce;
 
 		private WaitHandle _finalEvent;
 
 		private ManualResetEvent _cancelEvent;
 
-		private TimeSpan _timeout;
-
 		private int _callsInProcess;
-
-		private bool _executeOnlyOnce;
 
 		private bool _unregistered;
 	}

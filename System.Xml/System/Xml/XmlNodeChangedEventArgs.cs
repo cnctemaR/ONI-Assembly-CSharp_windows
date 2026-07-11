@@ -6,19 +6,19 @@ namespace System.Xml
 	{
 		public XmlNodeChangedEventArgs(XmlNode node, XmlNode oldParent, XmlNode newParent, string oldValue, string newValue, XmlNodeChangedAction action)
 		{
-			this.node = node;
-			this.oldParent = oldParent;
-			this.newParent = newParent;
-			this.action = action;
-			this.oldValue = oldValue;
-			this.newValue = newValue;
+			this._node = node;
+			this._oldParent = oldParent;
+			this._newParent = newParent;
+			this._oldValue = oldValue;
+			this._newValue = newValue;
+			this._action = action;
 		}
 
 		public XmlNodeChangedAction Action
 		{
 			get
 			{
-				return this.action;
+				return this._action;
 			}
 		}
 
@@ -26,7 +26,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.node;
+				return this._node;
 			}
 		}
 
@@ -34,7 +34,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.oldParent;
+				return this._oldParent;
 			}
 		}
 
@@ -42,7 +42,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.newParent;
+				return this._newParent;
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.oldValue;
+				return (this._oldValue == null) ? this._node.Value : this._oldValue;
 			}
 		}
 
@@ -58,20 +58,20 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.newValue;
+				return (this._newValue == null) ? this._node.Value : this._newValue;
 			}
 		}
 
-		private XmlNodeChangedAction action;
+		private XmlNode _oldParent;
 
-		private XmlNode node;
+		private XmlNode _newParent;
 
-		private XmlNode oldParent;
+		private XmlNodeChangedAction _action;
 
-		private XmlNode newParent;
+		private XmlNode _node;
 
-		private string oldValue;
+		private string _oldValue;
 
-		private string newValue;
+		private string _newValue;
 	}
 }

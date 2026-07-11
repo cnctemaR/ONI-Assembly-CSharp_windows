@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.ConstrainedExecution;
-using System.Security;
 
 namespace System.Runtime.CompilerServices
 {
@@ -61,24 +60,6 @@ namespace System.Runtime.CompilerServices
 			RuntimeHelpers.RunClassConstructor(type.Value);
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool SufficientExecutionStack();
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public static void EnsureSufficientExecutionStack()
-		{
-			if (RuntimeHelpers.SufficientExecutionStack())
-			{
-				return;
-			}
-			throw new InsufficientExecutionStackException();
-		}
-
-		public static bool TryEnsureSufficientExecutionStack()
-		{
-			return RuntimeHelpers.SufficientExecutionStack();
-		}
-
 		[MonoTODO("Currently a no-op")]
 		public static void ExecuteCodeWithGuaranteedCleanup(RuntimeHelpers.TryCode code, RuntimeHelpers.CleanupCode backoutCode, object userData)
 		{
@@ -96,13 +77,12 @@ namespace System.Runtime.CompilerServices
 		{
 		}
 
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[MonoTODO("Currently a no-op")]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public static void ProbeForSufficientStack()
 		{
 		}
 
-		[SecurityCritical]
 		[MonoTODO("Currently a no-op")]
 		public static void PrepareDelegate(Delegate d)
 		{
@@ -110,12 +90,6 @@ namespace System.Runtime.CompilerServices
 			{
 				throw new ArgumentNullException("d");
 			}
-		}
-
-		[MonoTODO("Currently a no-op")]
-		[SecurityCritical]
-		public static void PrepareContractedDelegate(Delegate d)
-		{
 		}
 
 		[MonoTODO("Currently a no-op")]
@@ -138,12 +112,7 @@ namespace System.Runtime.CompilerServices
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void RunModuleConstructor(IntPtr module);
-
-		public static bool IsReferenceOrContainsReferences<T>()
-		{
-			return !typeof(T).IsValueType || RuntimeTypeHandle.HasReferences(typeof(T) as RuntimeType);
-		}
+		public static extern void RunModuleConstructor(IntPtr module);
 
 		public delegate void TryCode(object userData);
 

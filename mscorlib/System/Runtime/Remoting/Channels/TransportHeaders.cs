@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Remoting.Channels
 {
-	[MonoTODO("Serialization format not compatible with .NET")]
 	[ComVisible(true)]
+	[MonoTODO("Serialization format not compatible with .NET")]
 	[Serializable]
 	public class TransportHeaders : ITransportHeaders
 	{

@@ -11,36 +11,36 @@ public class RoleManager
 	public RoleManager()
 	{
 		List<RoleSlotUnlock> list = new List<RoleSlotUnlock>();
-		list.Add(new RoleSlotUnlock("Default", "Default", "Default", new List<global::Tuple<string, int>>
+		list.Add(new RoleSlotUnlock("Default", "Default", "Default", new List<Tuple<string, int>>
 		{
-			new global::Tuple<string, int>("NoRole", 128),
-			new global::Tuple<string, int>(JuniorMiner.ID, 128),
-			new global::Tuple<string, int>(Miner.ID, 128),
-			new global::Tuple<string, int>(SeniorMiner.ID, 128),
-			new global::Tuple<string, int>("JuniorFarmer", 128),
-			new global::Tuple<string, int>("Farmer", 128),
-			new global::Tuple<string, int>("SeniorFarmer", 128),
-			new global::Tuple<string, int>("Rancher", 128),
-			new global::Tuple<string, int>("SeniorRancher", 128),
-			new global::Tuple<string, int>(JuniorResearcher.ID, 128),
-			new global::Tuple<string, int>(Researcher.ID, 128),
-			new global::Tuple<string, int>(SeniorResearcher.ID, 128),
-			new global::Tuple<string, int>("Hauler", 128),
-			new global::Tuple<string, int>(JuniorBuilder.ID, 128),
-			new global::Tuple<string, int>(Builder.ID, 128),
-			new global::Tuple<string, int>(SeniorBuilder.ID, 128),
-			new global::Tuple<string, int>(JuniorCook.ID, 128),
-			new global::Tuple<string, int>(Cook.ID, 128),
-			new global::Tuple<string, int>(MachineTechnician.ID, 128),
-			new global::Tuple<string, int>(JuniorArtist.ID, 128),
-			new global::Tuple<string, int>(Artist.ID, 128),
-			new global::Tuple<string, int>(Handyman.ID, 128),
-			new global::Tuple<string, int>("SuitExpert", 128),
-			new global::Tuple<string, int>("OilTechnician", 128),
-			new global::Tuple<string, int>("PowerTechnician", 128),
-			new global::Tuple<string, int>(MaterialsManager.ID, 128),
-			new global::Tuple<string, int>("MechatronicEngineer", 128),
-			new global::Tuple<string, int>(Plumber.ID, 128)
+			new Tuple<string, int>("NoRole", 128),
+			new Tuple<string, int>(JuniorMiner.ID, 128),
+			new Tuple<string, int>(Miner.ID, 128),
+			new Tuple<string, int>(SeniorMiner.ID, 128),
+			new Tuple<string, int>("JuniorFarmer", 128),
+			new Tuple<string, int>("Farmer", 128),
+			new Tuple<string, int>("SeniorFarmer", 128),
+			new Tuple<string, int>("Rancher", 128),
+			new Tuple<string, int>("SeniorRancher", 128),
+			new Tuple<string, int>(JuniorResearcher.ID, 128),
+			new Tuple<string, int>(Researcher.ID, 128),
+			new Tuple<string, int>(SeniorResearcher.ID, 128),
+			new Tuple<string, int>("Hauler", 128),
+			new Tuple<string, int>(JuniorBuilder.ID, 128),
+			new Tuple<string, int>(Builder.ID, 128),
+			new Tuple<string, int>(SeniorBuilder.ID, 128),
+			new Tuple<string, int>(JuniorCook.ID, 128),
+			new Tuple<string, int>(Cook.ID, 128),
+			new Tuple<string, int>(MachineTechnician.ID, 128),
+			new Tuple<string, int>(JuniorArtist.ID, 128),
+			new Tuple<string, int>(Artist.ID, 128),
+			new Tuple<string, int>(Handyman.ID, 128),
+			new Tuple<string, int>("SuitExpert", 128),
+			new Tuple<string, int>("OilTechnician", 128),
+			new Tuple<string, int>("PowerTechnician", 128),
+			new Tuple<string, int>(MaterialsManager.ID, 128),
+			new Tuple<string, int>("MechatronicEngineer", 128),
+			new Tuple<string, int>(Plumber.ID, 128)
 		}, () => true));
 		this.SlotUnlocks = list;
 		base..ctor();
@@ -127,7 +127,7 @@ public class RoleManager
 		int num = 0;
 		foreach (string text in this.achievedSlotUnlocks)
 		{
-			foreach (global::Tuple<string, int> tuple in this.GetSlotUnlock(text).slots)
+			foreach (Tuple<string, int> tuple in this.GetSlotUnlock(text).slots)
 			{
 				if (tuple.first == role_id)
 				{
@@ -288,7 +288,7 @@ public class RoleManager
 
 	public void UnlockSlots(RoleSlotUnlock roleSlotUnlock)
 	{
-		foreach (global::Tuple<string, int> tuple in roleSlotUnlock.slots)
+		foreach (Tuple<string, int> tuple in roleSlotUnlock.slots)
 		{
 			if (this.SlotsByRoleID.ContainsKey(tuple.first))
 			{
@@ -389,6 +389,11 @@ public class RoleManager
 					text += "\n\n";
 				}
 			}
+			else if (resume.HasMasteredRole(roleID))
+			{
+				text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.MASTERED, resume.GetProperName(), role.name);
+				text += "\n\n";
+			}
 			else if (resume.CurrentRole == roleID && resume.TargetRole != roleID)
 			{
 				text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.ELIGIBILITY.ELIGIBLE, resume.GetProperName(), role.name);
@@ -408,6 +413,20 @@ public class RoleManager
 				text += string.Format(UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.ELIGIBILITY.INELIGIBLE, resume.GetProperName(), role.name);
 				text += "\n\n";
 			}
+			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(resume);
+			int num = role.QOLExpectation();
+			if (role.tier > resume.HighestTierRoleMastered() && (float)num > attributeInstance.GetTotalValue())
+			{
+				text = text + UIConstants.ColorPrefixRed + string.Format(UI.ROLES_SCREEN.EXPECTATION_ALERT_TARGET_JOB, new object[]
+				{
+					attributeInstance.GetTotalValue(),
+					num,
+					resume.GetProperName(),
+					role.name
+				}) + UIConstants.ColorSuffix;
+				text = text + "\n" + UI.ROLES_SCREEN.EXPECTATION_ALERT_DESC_TARGET_JOB;
+				text += "\n\n";
+			}
 			text += UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.RELEVANT_APTITUDES;
 			bool flag = false;
 			foreach (KeyValuePair<HashedString, float> keyValuePair in resume.AptitudeByRoleGroup)
@@ -417,7 +436,7 @@ public class RoleManager
 				{
 					flag = true;
 					text += "\n";
-					string text2 = ((value <= 0f) ? "<color=#F44A47FF>" : "<color=#5FDB37FF>");
+					string text2 = ((value <= 0f) ? UIConstants.ColorPrefixRed : UIConstants.ColorPrefixGreen);
 					string text3 = text;
 					text = string.Concat(new object[]
 					{
@@ -428,7 +447,8 @@ public class RoleManager
 						text2,
 						"<b>",
 						value,
-						"</b></color>"
+						"</b>",
+						UIConstants.ColorSuffix
 					});
 				}
 			}

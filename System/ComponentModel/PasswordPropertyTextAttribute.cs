@@ -25,24 +25,24 @@ namespace System.ComponentModel
 
 		public override bool Equals(object o)
 		{
-			return o is PasswordPropertyTextAttribute && ((PasswordPropertyTextAttribute)o).Password == this._password;
+			return o is PasswordPropertyTextAttribute && ((PasswordPropertyTextAttribute)o).Password == this.Password;
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.Password.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(PasswordPropertyTextAttribute.Default);
+			return PasswordPropertyTextAttribute.Default.Equals(this);
 		}
 
-		public static readonly PasswordPropertyTextAttribute Yes = new PasswordPropertyTextAttribute(true);
+		public static readonly PasswordPropertyTextAttribute Default = PasswordPropertyTextAttribute.No;
 
 		public static readonly PasswordPropertyTextAttribute No = new PasswordPropertyTextAttribute(false);
 
-		public static readonly PasswordPropertyTextAttribute Default = PasswordPropertyTextAttribute.No;
+		public static readonly PasswordPropertyTextAttribute Yes = new PasswordPropertyTextAttribute(true);
 
 		private bool _password;
 	}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
@@ -11,29 +10,25 @@ namespace System.Runtime.CompilerServices
 	{
 		public DateTimeConstantAttribute(long ticks)
 		{
-			this.date = new DateTime(ticks);
+			this.ticks = ticks;
+		}
+
+		internal long Ticks
+		{
+			get
+			{
+				return this.ticks;
+			}
 		}
 
 		public override object Value
 		{
 			get
 			{
-				return this.date;
+				return this.ticks;
 			}
 		}
 
-		internal static DateTime GetRawDateTimeConstant(CustomAttributeData attr)
-		{
-			foreach (CustomAttributeNamedArgument customAttributeNamedArgument in attr.NamedArguments)
-			{
-				if (customAttributeNamedArgument.MemberInfo.Name.Equals("Value"))
-				{
-					return new DateTime((long)customAttributeNamedArgument.TypedValue.Value);
-				}
-			}
-			return new DateTime((long)attr.ConstructorArguments[0].Value);
-		}
-
-		private DateTime date;
+		private long ticks;
 	}
 }

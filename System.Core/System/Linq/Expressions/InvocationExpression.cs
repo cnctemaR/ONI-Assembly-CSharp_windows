@@ -1,92 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Dynamic.Utils;
 
 namespace System.Linq.Expressions
 {
-	[DebuggerTypeProxy(typeof(Expression.InvocationExpressionProxy))]
-	public class InvocationExpression : Expression, IArgumentProvider
+	public sealed class InvocationExpression : Expression
 	{
-		internal InvocationExpression(Expression expression, Type returnType)
+		internal InvocationExpression(Expression expression, Type type, ReadOnlyCollection<Expression> arguments)
+			: base(ExpressionType.Invoke, type)
 		{
-			this.Expression = expression;
-			this.Type = returnType;
+			this.expression = expression;
+			this.arguments = arguments;
 		}
 
-		public sealed override Type Type { get; }
-
-		public sealed override ExpressionType NodeType
+		public Expression Expression
 		{
 			get
 			{
-				return ExpressionType.Invoke;
+				return this.expression;
 			}
 		}
-
-		public Expression Expression { get; }
 
 		public ReadOnlyCollection<Expression> Arguments
 		{
 			get
 			{
-				return this.GetOrMakeArguments();
+				return this.arguments;
 			}
 		}
 
-		public InvocationExpression Update(Expression expression, IEnumerable<Expression> arguments)
+		internal override void Emit(EmitContext ec)
 		{
-			if (((expression == this.Expression) & (arguments != null)) && ExpressionUtils.SameElements<Expression>(ref arguments, this.Arguments))
-			{
-				return this;
-			}
-			return Expression.Invoke(expression, arguments);
+			ec.EmitCall(this.expression, this.arguments, this.expression.Type.GetInvokeMethod());
 		}
 
-		[ExcludeFromCodeCoverage]
-		internal virtual ReadOnlyCollection<Expression> GetOrMakeArguments()
-		{
-			throw ContractUtils.Unreachable;
-		}
+		private Expression expression;
 
-		[ExcludeFromCodeCoverage]
-		public virtual Expression GetArgument(int index)
-		{
-			throw ContractUtils.Unreachable;
-		}
-
-		[ExcludeFromCodeCoverage]
-		public virtual int ArgumentCount
-		{
-			get
-			{
-				throw ContractUtils.Unreachable;
-			}
-		}
-
-		protected internal override Expression Accept(ExpressionVisitor visitor)
-		{
-			return visitor.VisitInvocation(this);
-		}
-
-		[ExcludeFromCodeCoverage]
-		internal virtual InvocationExpression Rewrite(Expression lambda, Expression[] arguments)
-		{
-			throw ContractUtils.Unreachable;
-		}
-
-		internal LambdaExpression LambdaOperand
-		{
-			get
-			{
-				if (this.Expression.NodeType != ExpressionType.Quote)
-				{
-					return this.Expression as LambdaExpression;
-				}
-				return (LambdaExpression)((UnaryExpression)this.Expression).Operand;
-			}
-		}
+		private ReadOnlyCollection<Expression> arguments;
 	}
 }

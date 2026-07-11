@@ -102,7 +102,8 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			rsaparameters.InverseQ = rsaparameters2.InverseQ;
 			rsaparameters.P = rsaparameters2.P;
 			rsaparameters.Q = rsaparameters2.Q;
-			RSAManaged rsamanaged = new RSAManaged(rsaparameters.Modulus.Length << 3);
+			int num = rsaparameters.Modulus.Length << 3;
+			RSAManaged rsamanaged = new RSAManaged(num);
 			rsamanaged.ImportParameters(rsaparameters);
 			return rsamanaged;
 		}

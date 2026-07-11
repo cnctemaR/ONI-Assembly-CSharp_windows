@@ -1,43 +1,33 @@
 ﻿using System;
-using System.Globalization;
 using System.IO;
+using System.Security.Permissions;
 using System.Text;
 
 namespace System.CodeDom.Compiler
 {
+	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public class IndentedTextWriter : TextWriter
 	{
 		public IndentedTextWriter(TextWriter writer)
-			: this(writer, "    ")
 		{
+			this.writer = writer;
+			this.tabString = "    ";
+			this.newline = true;
 		}
 
 		public IndentedTextWriter(TextWriter writer, string tabString)
-			: base(CultureInfo.InvariantCulture)
 		{
-			this._writer = writer;
-			this._tabString = tabString;
-			this._indentLevel = 0;
-			this._tabsPending = false;
+			this.writer = writer;
+			this.tabString = tabString;
+			this.newline = true;
 		}
 
 		public override Encoding Encoding
 		{
 			get
 			{
-				return this._writer.Encoding;
-			}
-		}
-
-		public override string NewLine
-		{
-			get
-			{
-				return this._writer.NewLine;
-			}
-			set
-			{
-				this._writer.NewLine = value;
+				return this.writer.Encoding;
 			}
 		}
 
@@ -45,11 +35,15 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				return this._indentLevel;
+				return this.indent;
 			}
 			set
 			{
-				this._indentLevel = Math.Max(value, 0);
+				if (value < 0)
+				{
+					value = 0;
+				}
+				this.indent = value;
 			}
 		}
 
@@ -57,229 +51,242 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				return this._writer;
+				return this.writer;
+			}
+		}
+
+		public override string NewLine
+		{
+			get
+			{
+				return this.writer.NewLine;
+			}
+			set
+			{
+				this.writer.NewLine = value;
 			}
 		}
 
 		public override void Close()
 		{
-			this._writer.Close();
+			this.writer.Close();
 		}
 
 		public override void Flush()
 		{
-			this._writer.Flush();
-		}
-
-		protected virtual void OutputTabs()
-		{
-			if (this._tabsPending)
-			{
-				for (int i = 0; i < this._indentLevel; i++)
-				{
-					this._writer.Write(this._tabString);
-				}
-				this._tabsPending = false;
-			}
-		}
-
-		public override void Write(string s)
-		{
-			this.OutputTabs();
-			this._writer.Write(s);
+			this.writer.Flush();
 		}
 
 		public override void Write(bool value)
 		{
 			this.OutputTabs();
-			this._writer.Write(value);
+			this.writer.Write(value);
 		}
 
 		public override void Write(char value)
 		{
 			this.OutputTabs();
-			this._writer.Write(value);
+			this.writer.Write(value);
 		}
 
-		public override void Write(char[] buffer)
+		public override void Write(char[] value)
 		{
 			this.OutputTabs();
-			this._writer.Write(buffer);
-		}
-
-		public override void Write(char[] buffer, int index, int count)
-		{
-			this.OutputTabs();
-			this._writer.Write(buffer, index, count);
+			this.writer.Write(value);
 		}
 
 		public override void Write(double value)
 		{
 			this.OutputTabs();
-			this._writer.Write(value);
-		}
-
-		public override void Write(float value)
-		{
-			this.OutputTabs();
-			this._writer.Write(value);
+			this.writer.Write(value);
 		}
 
 		public override void Write(int value)
 		{
 			this.OutputTabs();
-			this._writer.Write(value);
+			this.writer.Write(value);
 		}
 
 		public override void Write(long value)
 		{
 			this.OutputTabs();
-			this._writer.Write(value);
+			this.writer.Write(value);
 		}
 
 		public override void Write(object value)
 		{
 			this.OutputTabs();
-			this._writer.Write(value);
+			this.writer.Write(value);
 		}
 
-		public override void Write(string format, object arg0)
+		public override void Write(float value)
 		{
 			this.OutputTabs();
-			this._writer.Write(format, arg0);
+			this.writer.Write(value);
+		}
+
+		public override void Write(string value)
+		{
+			this.OutputTabs();
+			this.writer.Write(value);
+		}
+
+		public override void Write(string format, object arg)
+		{
+			this.OutputTabs();
+			this.writer.Write(format, arg);
+		}
+
+		public override void Write(string format, params object[] args)
+		{
+			this.OutputTabs();
+			this.writer.Write(format, args);
+		}
+
+		public override void Write(char[] buffer, int index, int count)
+		{
+			this.OutputTabs();
+			this.writer.Write(buffer, index, count);
 		}
 
 		public override void Write(string format, object arg0, object arg1)
 		{
 			this.OutputTabs();
-			this._writer.Write(format, arg0, arg1);
-		}
-
-		public override void Write(string format, params object[] arg)
-		{
-			this.OutputTabs();
-			this._writer.Write(format, arg);
-		}
-
-		public void WriteLineNoTabs(string s)
-		{
-			this._writer.WriteLine(s);
-		}
-
-		public override void WriteLine(string s)
-		{
-			this.OutputTabs();
-			this._writer.WriteLine(s);
-			this._tabsPending = true;
+			this.writer.Write(format, arg0, arg1);
 		}
 
 		public override void WriteLine()
 		{
 			this.OutputTabs();
-			this._writer.WriteLine();
-			this._tabsPending = true;
+			this.writer.WriteLine();
+			this.newline = true;
 		}
 
 		public override void WriteLine(bool value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
 		public override void WriteLine(char value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
-		public override void WriteLine(char[] buffer)
+		public override void WriteLine(char[] value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(buffer);
-			this._tabsPending = true;
-		}
-
-		public override void WriteLine(char[] buffer, int index, int count)
-		{
-			this.OutputTabs();
-			this._writer.WriteLine(buffer, index, count);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
 		public override void WriteLine(double value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
-		}
-
-		public override void WriteLine(float value)
-		{
-			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
 		public override void WriteLine(int value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
 		public override void WriteLine(long value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
 		public override void WriteLine(object value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
-		public override void WriteLine(string format, object arg0)
+		public override void WriteLine(float value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(format, arg0);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
-		public override void WriteLine(string format, object arg0, object arg1)
+		public override void WriteLine(string value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(format, arg0, arg1);
-			this._tabsPending = true;
-		}
-
-		public override void WriteLine(string format, params object[] arg)
-		{
-			this.OutputTabs();
-			this._writer.WriteLine(format, arg);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
 		[CLSCompliant(false)]
 		public override void WriteLine(uint value)
 		{
 			this.OutputTabs();
-			this._writer.WriteLine(value);
-			this._tabsPending = true;
+			this.writer.WriteLine(value);
+			this.newline = true;
 		}
 
-		private readonly TextWriter _writer;
+		public override void WriteLine(string format, object arg)
+		{
+			this.OutputTabs();
+			this.writer.WriteLine(format, arg);
+			this.newline = true;
+		}
 
-		private readonly string _tabString;
+		public override void WriteLine(string format, params object[] args)
+		{
+			this.OutputTabs();
+			this.writer.WriteLine(format, args);
+			this.newline = true;
+		}
 
-		private int _indentLevel;
+		public override void WriteLine(char[] buffer, int index, int count)
+		{
+			this.OutputTabs();
+			this.writer.WriteLine(buffer, index, count);
+			this.newline = true;
+		}
 
-		private bool _tabsPending;
+		public override void WriteLine(string format, object arg0, object arg1)
+		{
+			this.OutputTabs();
+			this.writer.WriteLine(format, arg0, arg1);
+			this.newline = true;
+		}
+
+		public void WriteLineNoTabs(string value)
+		{
+			this.writer.WriteLine(value);
+			this.newline = true;
+		}
+
+		protected virtual void OutputTabs()
+		{
+			if (this.newline)
+			{
+				for (int i = 0; i < this.indent; i++)
+				{
+					this.writer.Write(this.tabString);
+				}
+				this.newline = false;
+			}
+		}
 
 		public const string DefaultTabString = "    ";
+
+		private TextWriter writer;
+
+		private string tabString;
+
+		private int indent;
+
+		private bool newline;
 	}
 }

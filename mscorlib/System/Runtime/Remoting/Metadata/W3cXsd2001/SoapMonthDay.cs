@@ -44,7 +44,8 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 
 		public static SoapMonthDay Parse(string value)
 		{
-			return new SoapMonthDay(DateTime.ParseExact(value, SoapMonthDay._datetimeFormats, null, DateTimeStyles.None));
+			DateTime dateTime = DateTime.ParseExact(value, SoapMonthDay._datetimeFormats, null, DateTimeStyles.None);
+			return new SoapMonthDay(dateTime);
 		}
 
 		public override string ToString()

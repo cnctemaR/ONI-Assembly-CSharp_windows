@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D34}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC839}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Configuration</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>net20</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultItems>False</EnableDefaultItems>
@@ -54,7 +54,6 @@
     <Compile Include="Configuration\ConfigurationUserLevel.cs" />
     <Compile Include="Configuration\ConfigurationValidatorAttribute.cs" />
     <Compile Include="Configuration\ConfigurationValidatorBase.cs" />
-    <Compile Include="Configuration\ConfigurationXmlDocument.cs" />
     <Compile Include="Configuration\ConnectionStringSettings.cs" />
     <Compile Include="Configuration\ConnectionStringSettingsCollection.cs" />
     <Compile Include="Configuration\ConnectionStringsSection.cs" />
@@ -148,19 +147,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D32}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Security\System.Security.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D3A}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83F}</Project>
       <Name>System.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D3D}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC841}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D37}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83C}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

@@ -134,7 +134,7 @@ namespace System
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public override bool Equals(object obj)
 		{
-			return obj != null && !(base.GetType() != obj.GetType()) && this.value == ((ModuleHandle)obj).Value;
+			return obj != null && base.GetType() == obj.GetType() && this.value == ((ModuleHandle)obj).Value;
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]

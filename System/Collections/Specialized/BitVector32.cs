@@ -5,30 +5,21 @@ namespace System.Collections.Specialized
 {
 	public struct BitVector32
 	{
-		public BitVector32(int data)
+		public BitVector32(BitVector32 source)
 		{
-			this.data = (uint)data;
+			this.bits = source.bits;
 		}
 
-		public BitVector32(BitVector32 value)
+		public BitVector32(int init)
 		{
-			this.data = value.data;
+			this.bits = init;
 		}
 
-		public bool this[int bit]
+		public int Data
 		{
 			get
 			{
-				return ((ulong)this.data & (ulong)((long)bit)) == (ulong)bit;
-			}
-			set
-			{
-				if (value)
-				{
-					this.data |= (uint)bit;
-					return;
-				}
-				this.data &= (uint)(~(uint)bit);
+				return this.bits;
 			}
 		}
 
@@ -36,124 +27,89 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				return (int)((this.data & (uint)((uint)section.Mask << (int)section.Offset)) >> (int)section.Offset);
+				return (this.bits >> (int)section.Offset) & (int)section.Mask;
 			}
 			set
 			{
-				value <<= (int)section.Offset;
-				int num = (65535 & (int)section.Mask) << (int)section.Offset;
-				this.data = (this.data & (uint)(~(uint)num)) | (uint)(value & num);
+				if (value < 0)
+				{
+					throw new ArgumentException("Section can't hold negative values");
+				}
+				if (value > (int)section.Mask)
+				{
+					throw new ArgumentException("Value too large to fit in section");
+				}
+				this.bits &= ~((int)section.Mask << (int)section.Offset);
+				this.bits |= value << (int)section.Offset;
 			}
 		}
 
-		public int Data
+		public bool this[int mask]
 		{
 			get
 			{
-				return (int)this.data;
+				return (this.bits & mask) == mask;
 			}
-		}
-
-		private static short CountBitsSet(short mask)
-		{
-			short num = 0;
-			while ((mask & 1) != 0)
+			set
 			{
-				num += 1;
-				mask = (short)(mask >> 1);
+				if (value)
+				{
+					this.bits |= mask;
+				}
+				else
+				{
+					this.bits &= ~mask;
+				}
 			}
-			return num;
 		}
 
 		public static int CreateMask()
 		{
-			return BitVector32.CreateMask(0);
+			return 1;
 		}
 
-		public static int CreateMask(int previous)
+		public static int CreateMask(int prev)
 		{
-			if (previous == 0)
+			if (prev == 0)
 			{
 				return 1;
 			}
-			if (previous == -2147483648)
+			if (prev == -2147483648)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Bit vector is full."));
+				throw new InvalidOperationException("all bits set");
 			}
-			return previous << 1;
-		}
-
-		private static short CreateMaskFromHighValue(short highValue)
-		{
-			short num = 16;
-			while (((int)highValue & 32768) == 0)
-			{
-				num -= 1;
-				highValue = (short)(highValue << 1);
-			}
-			ushort num2 = 0;
-			while (num > 0)
-			{
-				num -= 1;
-				num2 = (ushort)(num2 << 1);
-				num2 |= 1;
-			}
-			return (short)num2;
+			return prev << 1;
 		}
 
 		public static BitVector32.Section CreateSection(short maxValue)
 		{
-			return BitVector32.CreateSectionHelper(maxValue, 0, 0);
+			return BitVector32.CreateSection(maxValue, new BitVector32.Section(0, 0));
 		}
 
 		public static BitVector32.Section CreateSection(short maxValue, BitVector32.Section previous)
 		{
-			return BitVector32.CreateSectionHelper(maxValue, previous.Mask, previous.Offset);
-		}
-
-		private static BitVector32.Section CreateSectionHelper(short maxValue, short priorMask, short priorOffset)
-		{
 			if (maxValue < 1)
 			{
-				throw new ArgumentException(global::SR.GetString("Argument {0} should be larger than {1}.", new object[] { "maxValue", 0 }), "maxValue");
+				throw new ArgumentException("maxValue");
 			}
-			short num = priorOffset + BitVector32.CountBitsSet(priorMask);
-			if (num >= 32)
+			int num = BitVector32.HighestSetBit((int)maxValue);
+			int num2 = (1 << num) - 1;
+			int num3 = (int)previous.Offset + BitVector32.HighestSetBit((int)previous.Mask);
+			if (num3 + num > 32)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Bit vector is full."));
+				throw new ArgumentException("Sections cannot exceed 32 bits in total");
 			}
-			return new BitVector32.Section(BitVector32.CreateMaskFromHighValue(maxValue), num);
+			return new BitVector32.Section((short)num2, (short)num3);
 		}
 
 		public override bool Equals(object o)
 		{
-			return o is BitVector32 && this.data == ((BitVector32)o).data;
+			return o is BitVector32 && this.bits == ((BitVector32)o).bits;
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
-		}
-
-		public static string ToString(BitVector32 value)
-		{
-			StringBuilder stringBuilder = new StringBuilder(45);
-			stringBuilder.Append("BitVector32{");
-			int num = (int)value.data;
-			for (int i = 0; i < 32; i++)
-			{
-				if (((long)num & (long)((ulong)(-2147483648))) != 0L)
-				{
-					stringBuilder.Append("1");
-				}
-				else
-				{
-					stringBuilder.Append("0");
-				}
-				num <<= 1;
-			}
-			stringBuilder.Append("}");
-			return stringBuilder.ToString();
+			return this.bits.GetHashCode();
 		}
 
 		public override string ToString()
@@ -161,7 +117,29 @@ namespace System.Collections.Specialized
 			return BitVector32.ToString(this);
 		}
 
-		private uint data;
+		public static string ToString(BitVector32 value)
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append("BitVector32{");
+			for (long num = (long)((ulong)int.MinValue); num > 0L; num >>= 1)
+			{
+				stringBuilder.Append((((long)value.bits & num) != 0L) ? '1' : '0');
+			}
+			stringBuilder.Append('}');
+			return stringBuilder.ToString();
+		}
+
+		private static int HighestSetBit(int i)
+		{
+			int num = 0;
+			while (i >> num != 0)
+			{
+				num++;
+			}
+			return num;
+		}
+
+		private int bits;
 
 		public struct Section
 		{
@@ -187,41 +165,24 @@ namespace System.Collections.Specialized
 				}
 			}
 
-			public override bool Equals(object o)
-			{
-				return o is BitVector32.Section && this.Equals((BitVector32.Section)o);
-			}
-
 			public bool Equals(BitVector32.Section obj)
 			{
-				return obj.mask == this.mask && obj.offset == this.offset;
+				return this.mask == obj.mask && this.offset == obj.offset;
 			}
 
-			public static bool operator ==(BitVector32.Section a, BitVector32.Section b)
+			public override bool Equals(object o)
 			{
-				return a.Equals(b);
-			}
-
-			public static bool operator !=(BitVector32.Section a, BitVector32.Section b)
-			{
-				return !(a == b);
+				if (!(o is BitVector32.Section))
+				{
+					return false;
+				}
+				BitVector32.Section section = (BitVector32.Section)o;
+				return this.mask == section.mask && this.offset == section.offset;
 			}
 
 			public override int GetHashCode()
 			{
-				return base.GetHashCode();
-			}
-
-			public static string ToString(BitVector32.Section value)
-			{
-				return string.Concat(new string[]
-				{
-					"Section{0x",
-					Convert.ToString(value.Mask, 16),
-					", 0x",
-					Convert.ToString(value.Offset, 16),
-					"}"
-				});
+				return (int)this.mask << (int)this.offset;
 			}
 
 			public override string ToString()
@@ -229,9 +190,30 @@ namespace System.Collections.Specialized
 				return BitVector32.Section.ToString(this);
 			}
 
-			private readonly short mask;
+			public static string ToString(BitVector32.Section value)
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append("Section{0x");
+				stringBuilder.Append(Convert.ToString(value.Mask, 16));
+				stringBuilder.Append(", 0x");
+				stringBuilder.Append(Convert.ToString(value.Offset, 16));
+				stringBuilder.Append("}");
+				return stringBuilder.ToString();
+			}
 
-			private readonly short offset;
+			public static bool operator ==(BitVector32.Section v1, BitVector32.Section v2)
+			{
+				return v1.mask == v2.mask && v1.offset == v2.offset;
+			}
+
+			public static bool operator !=(BitVector32.Section v1, BitVector32.Section v2)
+			{
+				return v1.mask != v2.mask || v1.offset != v2.offset;
+			}
+
+			private short mask;
+
+			private short offset;
 		}
 	}
 }

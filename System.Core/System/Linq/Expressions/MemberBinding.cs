@@ -1,29 +1,69 @@
 ﻿using System;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
 	public abstract class MemberBinding
 	{
-		[Obsolete("Do not use this constructor. It will be removed in future releases.")]
-		protected MemberBinding(MemberBindingType type, MemberInfo member)
+		protected MemberBinding(MemberBindingType binding_type, MemberInfo member)
 		{
-			this.BindingType = type;
-			this.Member = member;
+			this.binding_type = binding_type;
+			this.member = member;
 		}
 
-		public MemberBindingType BindingType { get; }
+		public MemberBindingType BindingType
+		{
+			get
+			{
+				return this.binding_type;
+			}
+		}
 
-		public MemberInfo Member { get; }
+		public MemberInfo Member
+		{
+			get
+			{
+				return this.member;
+			}
+		}
 
 		public override string ToString()
 		{
-			return ExpressionStringBuilder.MemberBindingToString(this);
+			return ExpressionPrinter.ToString(this);
 		}
 
-		internal virtual void ValidateAsDefinedHere(int index)
+		internal abstract void Emit(EmitContext ec, LocalBuilder local);
+
+		internal LocalBuilder EmitLoadMember(EmitContext ec, LocalBuilder local)
 		{
-			throw Error.UnknownBindingType(index);
+			ec.EmitLoadSubject(local);
+			return this.member.OnFieldOrProperty<LocalBuilder>((FieldInfo field) => this.EmitLoadField(ec, field), (PropertyInfo prop) => this.EmitLoadProperty(ec, prop));
 		}
+
+		private LocalBuilder EmitLoadProperty(EmitContext ec, PropertyInfo property)
+		{
+			MethodInfo getMethod = property.GetGetMethod(true);
+			if (getMethod == null)
+			{
+				throw new NotSupportedException();
+			}
+			LocalBuilder localBuilder = ec.ig.DeclareLocal(property.PropertyType);
+			ec.EmitCall(getMethod);
+			ec.ig.Emit(OpCodes.Stloc, localBuilder);
+			return localBuilder;
+		}
+
+		private LocalBuilder EmitLoadField(EmitContext ec, FieldInfo field)
+		{
+			LocalBuilder localBuilder = ec.ig.DeclareLocal(field.FieldType);
+			ec.ig.Emit(OpCodes.Ldfld, field);
+			ec.ig.Emit(OpCodes.Stloc, localBuilder);
+			return localBuilder;
+		}
+
+		private MemberBindingType binding_type;
+
+		private MemberInfo member;
 	}
 }

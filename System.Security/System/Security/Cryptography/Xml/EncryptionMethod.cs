@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -7,20 +8,23 @@ namespace System.Security.Cryptography.Xml
 	{
 		public EncryptionMethod()
 		{
-			this._cachedXml = null;
+			this.KeyAlgorithm = null;
 		}
 
-		public EncryptionMethod(string algorithm)
+		public EncryptionMethod(string strAlgorithm)
 		{
-			this._algorithm = algorithm;
-			this._cachedXml = null;
+			this.KeyAlgorithm = strAlgorithm;
 		}
 
-		private bool CacheValid
+		public string KeyAlgorithm
 		{
 			get
 			{
-				return this._cachedXml != null;
+				return this.algorithm;
+			}
+			set
+			{
+				this.algorithm = value;
 			}
 		}
 
@@ -28,56 +32,35 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this._keySize;
+				return this.keySize;
 			}
 			set
 			{
 				if (value <= 0)
 				{
-					throw new ArgumentOutOfRangeException("value", "The key size should be a non negative integer.");
+					throw new ArgumentOutOfRangeException("The key size should be a non negative integer.");
 				}
-				this._keySize = value;
-				this._cachedXml = null;
-			}
-		}
-
-		public string KeyAlgorithm
-		{
-			get
-			{
-				return this._algorithm;
-			}
-			set
-			{
-				this._algorithm = value;
-				this._cachedXml = null;
+				this.keySize = value;
 			}
 		}
 
 		public XmlElement GetXml()
 		{
-			if (this.CacheValid)
-			{
-				return this._cachedXml;
-			}
-			return this.GetXml(new XmlDocument
-			{
-				PreserveWhitespace = true
-			});
+			return this.GetXml(new XmlDocument());
 		}
 
 		internal XmlElement GetXml(XmlDocument document)
 		{
 			XmlElement xmlElement = document.CreateElement("EncryptionMethod", "http://www.w3.org/2001/04/xmlenc#");
-			if (!string.IsNullOrEmpty(this._algorithm))
-			{
-				xmlElement.SetAttribute("Algorithm", this._algorithm);
-			}
-			if (this._keySize > 0)
+			if (this.KeySize != 0)
 			{
 				XmlElement xmlElement2 = document.CreateElement("KeySize", "http://www.w3.org/2001/04/xmlenc#");
-				xmlElement2.AppendChild(document.CreateTextNode(this._keySize.ToString(null, null)));
+				xmlElement2.InnerText = string.Format("{0}", this.keySize);
 				xmlElement.AppendChild(xmlElement2);
+			}
+			if (this.KeyAlgorithm != null)
+			{
+				xmlElement.SetAttribute("Algorithm", this.KeyAlgorithm);
 			}
 			return xmlElement;
 		}
@@ -88,21 +71,42 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("value");
 			}
-			XmlNamespaceManager xmlNamespaceManager = new XmlNamespaceManager(value.OwnerDocument.NameTable);
-			xmlNamespaceManager.AddNamespace("enc", "http://www.w3.org/2001/04/xmlenc#");
-			this._algorithm = Utils.GetAttribute(value, "Algorithm", "http://www.w3.org/2001/04/xmlenc#");
-			XmlNode xmlNode = value.SelectSingleNode("enc:KeySize", xmlNamespaceManager);
-			if (xmlNode != null)
+			if (value.LocalName != "EncryptionMethod" || value.NamespaceURI != "http://www.w3.org/2001/04/xmlenc#")
 			{
-				this.KeySize = Convert.ToInt32(Utils.DiscardWhiteSpaces(xmlNode.InnerText), null);
+				throw new CryptographicException("Malformed EncryptionMethod element.");
 			}
-			this._cachedXml = value;
+			this.KeyAlgorithm = null;
+			foreach (object obj in value.ChildNodes)
+			{
+				XmlNode xmlNode = (XmlNode)obj;
+				if (!(xmlNode is XmlWhitespace))
+				{
+					string localName = xmlNode.LocalName;
+					if (localName != null)
+					{
+						if (EncryptionMethod.<>f__switch$mapA == null)
+						{
+							EncryptionMethod.<>f__switch$mapA = new Dictionary<string, int>(1) { { "KeySize", 0 } };
+						}
+						int num;
+						if (EncryptionMethod.<>f__switch$mapA.TryGetValue(localName, out num))
+						{
+							if (num == 0)
+							{
+								this.KeySize = int.Parse(xmlNode.InnerText);
+							}
+						}
+					}
+				}
+			}
+			if (value.HasAttribute("Algorithm"))
+			{
+				this.KeyAlgorithm = value.Attributes["Algorithm"].Value;
+			}
 		}
 
-		private XmlElement _cachedXml;
+		private string algorithm;
 
-		private int _keySize;
-
-		private string _algorithm;
+		private int keySize;
 	}
 }

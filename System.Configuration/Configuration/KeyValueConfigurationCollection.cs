@@ -30,7 +30,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				string[] array = new string[base.Count];
+				string[] array = new string[this.Count];
 				int num = 0;
 				foreach (object obj in this)
 				{

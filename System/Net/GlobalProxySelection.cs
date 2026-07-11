@@ -2,24 +2,14 @@
 
 namespace System.Net
 {
-	[Obsolete("This class has been deprecated. Please use WebRequest.DefaultWebProxy instead to access and set the global default proxy. Use 'null' instead of GetEmptyWebProxy. http://go.microsoft.com/fwlink/?linkid=14202")]
+	[Obsolete("Use WebRequest.DefaultProxy instead")]
 	public class GlobalProxySelection
 	{
 		public static IWebProxy Select
 		{
 			get
 			{
-				IWebProxy defaultWebProxy = WebRequest.DefaultWebProxy;
-				if (defaultWebProxy == null)
-				{
-					return GlobalProxySelection.GetEmptyWebProxy();
-				}
-				WebRequest.WebProxyWrapper webProxyWrapper = defaultWebProxy as WebRequest.WebProxyWrapper;
-				if (webProxyWrapper != null)
-				{
-					return webProxyWrapper.WebProxy;
-				}
-				return defaultWebProxy;
+				return WebRequest.DefaultWebProxy;
 			}
 			set
 			{
@@ -29,7 +19,38 @@ namespace System.Net
 
 		public static IWebProxy GetEmptyWebProxy()
 		{
-			return new EmptyWebProxy();
+			return new GlobalProxySelection.EmptyWebProxy();
+		}
+
+		internal class EmptyWebProxy : IWebProxy
+		{
+			internal EmptyWebProxy()
+			{
+			}
+
+			public ICredentials Credentials
+			{
+				get
+				{
+					return this.credentials;
+				}
+				set
+				{
+					this.credentials = value;
+				}
+			}
+
+			public global::System.Uri GetProxy(global::System.Uri destination)
+			{
+				return destination;
+			}
+
+			public bool IsBypassed(global::System.Uri host)
+			{
+				return true;
+			}
+
+			private ICredentials credentials;
 		}
 	}
 }

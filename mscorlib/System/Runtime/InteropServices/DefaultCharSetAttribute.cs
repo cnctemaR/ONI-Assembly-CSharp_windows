@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public DefaultCharSetAttribute(CharSet charSet)
 		{
-			this._CharSet = charSet;
+			this._set = charSet;
 		}
 
 		public CharSet CharSet
 		{
 			get
 			{
-				return this._CharSet;
+				return this._set;
 			}
 		}
 
-		internal CharSet _CharSet;
+		private CharSet _set;
 	}
 }

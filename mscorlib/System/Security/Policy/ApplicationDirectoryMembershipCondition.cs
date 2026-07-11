@@ -9,7 +9,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class ApplicationDirectoryMembershipCondition : IConstantMembershipCondition, IMembershipCondition, ISecurityEncodable, ISecurityPolicyEncodable
+	public sealed class ApplicationDirectoryMembershipCondition : ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition, IMembershipCondition
 	{
 		public bool Check(Evidence evidence)
 		{
@@ -28,7 +28,8 @@ namespace System.Security.Policy
 				object obj = hostEnumerator.Current;
 				if (!flag && obj is ApplicationDirectory)
 				{
-					string directory = (obj as ApplicationDirectory).Directory;
+					ApplicationDirectory applicationDirectory = obj as ApplicationDirectory;
+					string directory = applicationDirectory.Directory;
 					flag = string.Compare(directory, 0, uri.ToString(), 0, directory.Length, true, CultureInfo.InvariantCulture) == 0;
 				}
 				else if (!flag2 && obj is Url)

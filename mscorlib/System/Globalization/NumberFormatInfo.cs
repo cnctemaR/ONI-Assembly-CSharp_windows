@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security;
 using System.Threading;
 
 namespace System.Globalization
@@ -10,174 +8,279 @@ namespace System.Globalization
 	[Serializable]
 	public sealed class NumberFormatInfo : ICloneable, IFormatProvider
 	{
+		internal NumberFormatInfo(int lcid, bool read_only)
+		{
+			this.isReadOnly = read_only;
+			if (lcid != 127)
+			{
+				lcid = 127;
+			}
+			int num = lcid;
+			if (num == 127)
+			{
+				this.isReadOnly = false;
+				this.currencyDecimalDigits = 2;
+				this.currencyDecimalSeparator = ".";
+				this.currencyGroupSeparator = ",";
+				this.currencyGroupSizes = new int[] { 3 };
+				this.currencyNegativePattern = 0;
+				this.currencyPositivePattern = 0;
+				this.currencySymbol = "$";
+				this.nanSymbol = "NaN";
+				this.negativeInfinitySymbol = "-Infinity";
+				this.negativeSign = "-";
+				this.numberDecimalDigits = 2;
+				this.numberDecimalSeparator = ".";
+				this.numberGroupSeparator = ",";
+				this.numberGroupSizes = new int[] { 3 };
+				this.numberNegativePattern = 1;
+				this.percentDecimalDigits = 2;
+				this.percentDecimalSeparator = ".";
+				this.percentGroupSeparator = ",";
+				this.percentGroupSizes = new int[] { 3 };
+				this.percentNegativePattern = 0;
+				this.percentPositivePattern = 0;
+				this.percentSymbol = "%";
+				this.perMilleSymbol = "‰";
+				this.positiveInfinitySymbol = "Infinity";
+				this.positiveSign = "+";
+			}
+		}
+
+		internal NumberFormatInfo(bool read_only)
+			: this(127, read_only)
+		{
+		}
+
 		public NumberFormatInfo()
-			: this(null)
+			: this(false)
 		{
 		}
 
-		[OnSerializing]
-		private void OnSerializing(StreamingContext ctx)
+		private void InitPatterns()
 		{
-			if (this.numberDecimalSeparator != this.numberGroupSeparator)
+			string[] array = this.decimalFormats.Split(new char[] { ';' }, 2);
+			string[] array2;
+			if (array.Length == 2)
 			{
-				this.validForParseAsNumber = true;
+				array2 = array[0].Split(new char[] { '.' }, 2);
+				if (array2.Length == 2)
+				{
+					this.numberDecimalDigits = 0;
+					for (int i = 0; i < array2[1].Length; i++)
+					{
+						if (array2[1][i] != this.digitPattern[0])
+						{
+							break;
+						}
+						this.numberDecimalDigits++;
+					}
+					string[] array3 = array2[0].Split(new char[] { ',' });
+					if (array3.Length > 1)
+					{
+						this.numberGroupSizes = new int[array3.Length - 1];
+						for (int j = 0; j < this.numberGroupSizes.Length; j++)
+						{
+							string text = array3[j + 1];
+							this.numberGroupSizes[j] = text.Length;
+						}
+					}
+					else
+					{
+						this.numberGroupSizes = new int[1];
+					}
+					if (array[1].StartsWith("(") && array[1].EndsWith(")"))
+					{
+						this.numberNegativePattern = 0;
+					}
+					else if (array[1].StartsWith("- "))
+					{
+						this.numberNegativePattern = 2;
+					}
+					else if (array[1].StartsWith("-"))
+					{
+						this.numberNegativePattern = 1;
+					}
+					else if (array[1].EndsWith(" -"))
+					{
+						this.numberNegativePattern = 4;
+					}
+					else if (array[1].EndsWith("-"))
+					{
+						this.numberNegativePattern = 3;
+					}
+					else
+					{
+						this.numberNegativePattern = 1;
+					}
+				}
+			}
+			array = this.currencyFormats.Split(new char[] { ';' }, 2);
+			if (array.Length == 2)
+			{
+				array2 = array[0].Split(new char[] { '.' }, 2);
+				if (array2.Length == 2)
+				{
+					this.currencyDecimalDigits = 0;
+					for (int k = 0; k < array2[1].Length; k++)
+					{
+						if (array2[1][k] != this.zeroPattern[0])
+						{
+							break;
+						}
+						this.currencyDecimalDigits++;
+					}
+					string[] array3 = array2[0].Split(new char[] { ',' });
+					if (array3.Length > 1)
+					{
+						this.currencyGroupSizes = new int[array3.Length - 1];
+						for (int l = 0; l < this.currencyGroupSizes.Length; l++)
+						{
+							string text2 = array3[l + 1];
+							this.currencyGroupSizes[l] = text2.Length;
+						}
+					}
+					else
+					{
+						this.currencyGroupSizes = new int[1];
+					}
+					if (array[1].StartsWith("(¤ ") && array[1].EndsWith(")"))
+					{
+						this.currencyNegativePattern = 14;
+					}
+					else if (array[1].StartsWith("(¤") && array[1].EndsWith(")"))
+					{
+						this.currencyNegativePattern = 0;
+					}
+					else if (array[1].StartsWith("¤ ") && array[1].EndsWith("-"))
+					{
+						this.currencyNegativePattern = 11;
+					}
+					else if (array[1].StartsWith("¤") && array[1].EndsWith("-"))
+					{
+						this.currencyNegativePattern = 3;
+					}
+					else if (array[1].StartsWith("(") && array[1].EndsWith(" ¤"))
+					{
+						this.currencyNegativePattern = 15;
+					}
+					else if (array[1].StartsWith("(") && array[1].EndsWith("¤"))
+					{
+						this.currencyNegativePattern = 4;
+					}
+					else if (array[1].StartsWith("-") && array[1].EndsWith(" ¤"))
+					{
+						this.currencyNegativePattern = 8;
+					}
+					else if (array[1].StartsWith("-") && array[1].EndsWith("¤"))
+					{
+						this.currencyNegativePattern = 5;
+					}
+					else if (array[1].StartsWith("-¤ "))
+					{
+						this.currencyNegativePattern = 9;
+					}
+					else if (array[1].StartsWith("-¤"))
+					{
+						this.currencyNegativePattern = 1;
+					}
+					else if (array[1].StartsWith("¤ -"))
+					{
+						this.currencyNegativePattern = 12;
+					}
+					else if (array[1].StartsWith("¤-"))
+					{
+						this.currencyNegativePattern = 2;
+					}
+					else if (array[1].EndsWith(" ¤-"))
+					{
+						this.currencyNegativePattern = 10;
+					}
+					else if (array[1].EndsWith("¤-"))
+					{
+						this.currencyNegativePattern = 7;
+					}
+					else if (array[1].EndsWith("- ¤"))
+					{
+						this.currencyNegativePattern = 13;
+					}
+					else if (array[1].EndsWith("-¤"))
+					{
+						this.currencyNegativePattern = 6;
+					}
+					else
+					{
+						this.currencyNegativePattern = 0;
+					}
+					if (array[0].StartsWith("¤ "))
+					{
+						this.currencyPositivePattern = 2;
+					}
+					else if (array[0].StartsWith("¤"))
+					{
+						this.currencyPositivePattern = 0;
+					}
+					else if (array[0].EndsWith(" ¤"))
+					{
+						this.currencyPositivePattern = 3;
+					}
+					else if (array[0].EndsWith("¤"))
+					{
+						this.currencyPositivePattern = 1;
+					}
+					else
+					{
+						this.currencyPositivePattern = 0;
+					}
+				}
+			}
+			if (this.percentFormats.StartsWith("%"))
+			{
+				this.percentPositivePattern = 2;
+				this.percentNegativePattern = 2;
+			}
+			else if (this.percentFormats.EndsWith(" %"))
+			{
+				this.percentPositivePattern = 0;
+				this.percentNegativePattern = 0;
+			}
+			else if (this.percentFormats.EndsWith("%"))
+			{
+				this.percentPositivePattern = 1;
+				this.percentNegativePattern = 1;
 			}
 			else
 			{
-				this.validForParseAsNumber = false;
+				this.percentPositivePattern = 0;
+				this.percentNegativePattern = 0;
 			}
-			if (this.numberDecimalSeparator != this.numberGroupSeparator && this.numberDecimalSeparator != this.currencyGroupSeparator && this.currencyDecimalSeparator != this.numberGroupSeparator && this.currencyDecimalSeparator != this.currencyGroupSeparator)
+			array2 = this.percentFormats.Split(new char[] { '.' }, 2);
+			if (array2.Length == 2)
 			{
-				this.validForParseAsCurrency = true;
-				return;
-			}
-			this.validForParseAsCurrency = false;
-		}
-
-		[OnDeserializing]
-		private void OnDeserializing(StreamingContext ctx)
-		{
-		}
-
-		[OnDeserialized]
-		private void OnDeserialized(StreamingContext ctx)
-		{
-		}
-
-		private static void VerifyDecimalSeparator(string decSep, string propertyName)
-		{
-			if (decSep == null)
-			{
-				throw new ArgumentNullException(propertyName, Environment.GetResourceString("String reference not set to an instance of a String."));
-			}
-			if (decSep.Length == 0)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Decimal separator cannot be the empty string."));
-			}
-		}
-
-		private static void VerifyGroupSeparator(string groupSep, string propertyName)
-		{
-			if (groupSep == null)
-			{
-				throw new ArgumentNullException(propertyName, Environment.GetResourceString("String reference not set to an instance of a String."));
-			}
-		}
-
-		private static void VerifyNativeDigits(string[] nativeDig, string propertyName)
-		{
-			if (nativeDig == null)
-			{
-				throw new ArgumentNullException(propertyName, Environment.GetResourceString("Array cannot be null."));
-			}
-			if (nativeDig.Length != 10)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The NativeDigits array must contain exactly ten members."), propertyName);
-			}
-			for (int i = 0; i < nativeDig.Length; i++)
-			{
-				if (nativeDig[i] == null)
+				this.percentDecimalDigits = 0;
+				for (int m = 0; m < array2[1].Length; m++)
 				{
-					throw new ArgumentNullException(propertyName, Environment.GetResourceString("Found a null value within an array."));
-				}
-				if (nativeDig[i].Length != 1)
-				{
-					if (nativeDig[i].Length != 2)
+					if (array2[1][m] != this.digitPattern[0])
 					{
-						throw new ArgumentException(Environment.GetResourceString("Each member of the NativeDigits array must be a single text element (one or more UTF16 code points) with a Unicode Nd (Number, Decimal Digit) property indicating it is a digit."), propertyName);
+						break;
 					}
-					if (!char.IsSurrogatePair(nativeDig[i][0], nativeDig[i][1]))
+					this.percentDecimalDigits++;
+				}
+				string[] array3 = array2[0].Split(new char[] { ',' });
+				if (array3.Length > 1)
+				{
+					this.percentGroupSizes = new int[array3.Length - 1];
+					for (int n = 0; n < this.percentGroupSizes.Length; n++)
 					{
-						throw new ArgumentException(Environment.GetResourceString("Each member of the NativeDigits array must be a single text element (one or more UTF16 code points) with a Unicode Nd (Number, Decimal Digit) property indicating it is a digit."), propertyName);
+						string text3 = array3[n + 1];
+						this.percentGroupSizes[n] = text3.Length;
 					}
 				}
-				if (CharUnicodeInfo.GetDecimalDigitValue(nativeDig[i], 0) != i && CharUnicodeInfo.GetUnicodeCategory(nativeDig[i], 0) != UnicodeCategory.PrivateUse)
+				else
 				{
-					throw new ArgumentException(Environment.GetResourceString("Each member of the NativeDigits array must be a single text element (one or more UTF16 code points) with a Unicode Nd (Number, Decimal Digit) property indicating it is a digit."), propertyName);
+					this.percentGroupSizes = new int[1];
 				}
 			}
-		}
-
-		private static void VerifyDigitSubstitution(DigitShapes digitSub, string propertyName)
-		{
-			if (digitSub > DigitShapes.NativeNational)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The DigitSubstitution property must be of a valid member of the DigitShapes enumeration. Valid entries include Context, NativeNational or None."), propertyName);
-			}
-		}
-
-		[SecuritySafeCritical]
-		internal NumberFormatInfo(CultureData cultureData)
-		{
-			if (cultureData != null)
-			{
-				cultureData.GetNFIValues(this);
-				if (cultureData.IsInvariantCulture)
-				{
-					this.m_isInvariant = true;
-				}
-			}
-		}
-
-		private void VerifyWritable()
-		{
-			if (this.isReadOnly)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("Instance is read-only."));
-			}
-		}
-
-		public static NumberFormatInfo InvariantInfo
-		{
-			get
-			{
-				if (NumberFormatInfo.invariantInfo == null)
-				{
-					NumberFormatInfo.invariantInfo = NumberFormatInfo.ReadOnly(new NumberFormatInfo
-					{
-						m_isInvariant = true
-					});
-				}
-				return NumberFormatInfo.invariantInfo;
-			}
-		}
-
-		public static NumberFormatInfo GetInstance(IFormatProvider formatProvider)
-		{
-			CultureInfo cultureInfo = formatProvider as CultureInfo;
-			if (cultureInfo != null && !cultureInfo.m_isInherited)
-			{
-				NumberFormatInfo numberFormatInfo = cultureInfo.numInfo;
-				if (numberFormatInfo != null)
-				{
-					return numberFormatInfo;
-				}
-				return cultureInfo.NumberFormat;
-			}
-			else
-			{
-				NumberFormatInfo numberFormatInfo = formatProvider as NumberFormatInfo;
-				if (numberFormatInfo != null)
-				{
-					return numberFormatInfo;
-				}
-				if (formatProvider != null)
-				{
-					numberFormatInfo = formatProvider.GetFormat(typeof(NumberFormatInfo)) as NumberFormatInfo;
-					if (numberFormatInfo != null)
-					{
-						return numberFormatInfo;
-					}
-				}
-				return NumberFormatInfo.CurrentInfo;
-			}
-		}
-
-		public object Clone()
-		{
-			NumberFormatInfo numberFormatInfo = (NumberFormatInfo)base.MemberwiseClone();
-			numberFormatInfo.isReadOnly = false;
-			return numberFormatInfo;
 		}
 
 		public int CurrencyDecimalDigits
@@ -190,9 +293,12 @@ namespace System.Globalization
 			{
 				if (value < 0 || value > 99)
 				{
-					throw new ArgumentOutOfRangeException("CurrencyDecimalDigits", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 99));
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 99");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.currencyDecimalDigits = value;
 			}
 		}
@@ -205,98 +311,15 @@ namespace System.Globalization
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyDecimalSeparator(value, "CurrencyDecimalSeparator");
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.currencyDecimalSeparator = value;
-			}
-		}
-
-		public bool IsReadOnly
-		{
-			get
-			{
-				return this.isReadOnly;
-			}
-		}
-
-		internal static void CheckGroupSize(string propName, int[] groupSize)
-		{
-			int i = 0;
-			while (i < groupSize.Length)
-			{
-				if (groupSize[i] < 1)
-				{
-					if (i == groupSize.Length - 1 && groupSize[i] == 0)
-					{
-						return;
-					}
-					throw new ArgumentException(Environment.GetResourceString("Every element in the value array should be between one and nine, except for the last element, which can be zero."), propName);
-				}
-				else
-				{
-					if (groupSize[i] > 9)
-					{
-						throw new ArgumentException(Environment.GetResourceString("Every element in the value array should be between one and nine, except for the last element, which can be zero."), propName);
-					}
-					i++;
-				}
-			}
-		}
-
-		public int[] CurrencyGroupSizes
-		{
-			get
-			{
-				return (int[])this.currencyGroupSizes.Clone();
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("CurrencyGroupSizes", Environment.GetResourceString("Object cannot be null."));
-				}
-				this.VerifyWritable();
-				int[] array = (int[])value.Clone();
-				NumberFormatInfo.CheckGroupSize("CurrencyGroupSizes", array);
-				this.currencyGroupSizes = array;
-			}
-		}
-
-		public int[] NumberGroupSizes
-		{
-			get
-			{
-				return (int[])this.numberGroupSizes.Clone();
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("NumberGroupSizes", Environment.GetResourceString("Object cannot be null."));
-				}
-				this.VerifyWritable();
-				int[] array = (int[])value.Clone();
-				NumberFormatInfo.CheckGroupSize("NumberGroupSizes", array);
-				this.numberGroupSizes = array;
-			}
-		}
-
-		public int[] PercentGroupSizes
-		{
-			get
-			{
-				return (int[])this.percentGroupSizes.Clone();
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("PercentGroupSizes", Environment.GetResourceString("Object cannot be null."));
-				}
-				this.VerifyWritable();
-				int[] array = (int[])value.Clone();
-				NumberFormatInfo.CheckGroupSize("PercentGroupSizes", array);
-				this.percentGroupSizes = array;
 			}
 		}
 
@@ -308,60 +331,64 @@ namespace System.Globalization
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyGroupSeparator(value, "CurrencyGroupSeparator");
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.currencyGroupSeparator = value;
 			}
 		}
 
-		public string CurrencySymbol
+		public int[] CurrencyGroupSizes
 		{
 			get
 			{
-				return this.currencySymbol;
+				return (int[])this.RawCurrencyGroupSizes.Clone();
+			}
+			set
+			{
+				this.RawCurrencyGroupSizes = value;
+			}
+		}
+
+		internal int[] RawCurrencyGroupSizes
+		{
+			get
+			{
+				return this.currencyGroupSizes;
 			}
 			set
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("CurrencySymbol", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentNullException("The value specified for the property is a null reference");
 				}
-				this.VerifyWritable();
-				this.currencySymbol = value;
-			}
-		}
-
-		public static NumberFormatInfo CurrentInfo
-		{
-			get
-			{
-				CultureInfo currentCulture = Thread.CurrentThread.CurrentCulture;
-				if (!currentCulture.m_isInherited)
+				if (this.isReadOnly)
 				{
-					NumberFormatInfo numInfo = currentCulture.numInfo;
-					if (numInfo != null)
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				if (value.Length == 0)
+				{
+					this.currencyGroupSizes = new int[0];
+					return;
+				}
+				int num = value.Length - 1;
+				for (int i = 0; i < num; i++)
+				{
+					if (value[i] < 1 || value[i] > 9)
 					{
-						return numInfo;
+						throw new ArgumentOutOfRangeException("One of the elements in the array specified is not between 1 and 9");
 					}
 				}
-				return (NumberFormatInfo)currentCulture.GetFormat(typeof(NumberFormatInfo));
-			}
-		}
-
-		public string NaNSymbol
-		{
-			get
-			{
-				return this.nanSymbol;
-			}
-			set
-			{
-				if (value == null)
+				if (value[num] < 0 || value[num] > 9)
 				{
-					throw new ArgumentNullException("NaNSymbol", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentOutOfRangeException("Last element in the array specified is not between 0 and 9");
 				}
-				this.VerifyWritable();
-				this.nanSymbol = value;
+				this.currencyGroupSizes = (int[])value.Clone();
 			}
 		}
 
@@ -375,61 +402,147 @@ namespace System.Globalization
 			{
 				if (value < 0 || value > 15)
 				{
-					throw new ArgumentOutOfRangeException("CurrencyNegativePattern", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 15));
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 15");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.currencyNegativePattern = value;
 			}
 		}
 
-		public int NumberNegativePattern
+		public int CurrencyPositivePattern
 		{
 			get
 			{
-				return this.numberNegativePattern;
-			}
-			set
-			{
-				if (value < 0 || value > 4)
-				{
-					throw new ArgumentOutOfRangeException("NumberNegativePattern", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 4));
-				}
-				this.VerifyWritable();
-				this.numberNegativePattern = value;
-			}
-		}
-
-		public int PercentPositivePattern
-		{
-			get
-			{
-				return this.percentPositivePattern;
+				return this.currencyPositivePattern;
 			}
 			set
 			{
 				if (value < 0 || value > 3)
 				{
-					throw new ArgumentOutOfRangeException("PercentPositivePattern", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 3));
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 3");
 				}
-				this.VerifyWritable();
-				this.percentPositivePattern = value;
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.currencyPositivePattern = value;
 			}
 		}
 
-		public int PercentNegativePattern
+		public string CurrencySymbol
 		{
 			get
 			{
-				return this.percentNegativePattern;
+				return this.currencySymbol;
 			}
 			set
 			{
-				if (value < 0 || value > 11)
+				if (value == null)
 				{
-					throw new ArgumentOutOfRangeException("PercentNegativePattern", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 11));
+					throw new ArgumentNullException("The value specified for the property is a null reference");
 				}
-				this.VerifyWritable();
-				this.percentNegativePattern = value;
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.currencySymbol = value;
+			}
+		}
+
+		public static NumberFormatInfo CurrentInfo
+		{
+			get
+			{
+				NumberFormatInfo numberFormat = Thread.CurrentThread.CurrentCulture.NumberFormat;
+				numberFormat.isReadOnly = true;
+				return numberFormat;
+			}
+		}
+
+		public static NumberFormatInfo InvariantInfo
+		{
+			get
+			{
+				return new NumberFormatInfo
+				{
+					NumberNegativePattern = 1,
+					isReadOnly = true
+				};
+			}
+		}
+
+		public bool IsReadOnly
+		{
+			get
+			{
+				return this.isReadOnly;
+			}
+		}
+
+		public string NaNSymbol
+		{
+			get
+			{
+				return this.nanSymbol;
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.nanSymbol = value;
+			}
+		}
+
+		[ComVisible(false)]
+		[MonoNotSupported("We don't have native digit info")]
+		public string[] NativeDigits
+		{
+			get
+			{
+				return this.nativeDigits;
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("value");
+				}
+				if (value.Length != 10)
+				{
+					throw new ArgumentException("Argument array length must be 10");
+				}
+				for (int i = 0; i < value.Length; i++)
+				{
+					string text = value[i];
+					if (string.IsNullOrEmpty(text))
+					{
+						throw new ArgumentException("Argument array contains one or more null strings");
+					}
+				}
+				this.nativeDigits = value;
+			}
+		}
+
+		[MonoNotSupported("We don't have native digit info")]
+		[ComVisible(false)]
+		public DigitShapes DigitSubstitution
+		{
+			get
+			{
+				return (DigitShapes)this.digitSubstitution;
+			}
+			set
+			{
+				this.digitSubstitution = (int)value;
 			}
 		}
 
@@ -443,9 +556,12 @@ namespace System.Globalization
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("NegativeInfinitySymbol", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentNullException("The value specified for the property is a null reference");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.negativeInfinitySymbol = value;
 			}
 		}
@@ -460,9 +576,12 @@ namespace System.Globalization
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("NegativeSign", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentNullException("The value specified for the property is a null reference");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.negativeSign = value;
 			}
 		}
@@ -477,9 +596,12 @@ namespace System.Globalization
 			{
 				if (value < 0 || value > 99)
 				{
-					throw new ArgumentOutOfRangeException("NumberDecimalDigits", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 99));
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 99");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.numberDecimalDigits = value;
 			}
 		}
@@ -492,8 +614,14 @@ namespace System.Globalization
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyDecimalSeparator(value, "NumberDecimalSeparator");
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.numberDecimalSeparator = value;
 			}
 		}
@@ -506,60 +634,84 @@ namespace System.Globalization
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyGroupSeparator(value, "NumberGroupSeparator");
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.numberGroupSeparator = value;
 			}
 		}
 
-		public int CurrencyPositivePattern
+		public int[] NumberGroupSizes
 		{
 			get
 			{
-				return this.currencyPositivePattern;
+				return (int[])this.RawNumberGroupSizes.Clone();
 			}
 			set
 			{
-				if (value < 0 || value > 3)
-				{
-					throw new ArgumentOutOfRangeException("CurrencyPositivePattern", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 3));
-				}
-				this.VerifyWritable();
-				this.currencyPositivePattern = value;
+				this.RawNumberGroupSizes = value;
 			}
 		}
 
-		public string PositiveInfinitySymbol
+		internal int[] RawNumberGroupSizes
 		{
 			get
 			{
-				return this.positiveInfinitySymbol;
+				return this.numberGroupSizes;
 			}
 			set
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("PositiveInfinitySymbol", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentNullException("The value specified for the property is a null reference");
 				}
-				this.VerifyWritable();
-				this.positiveInfinitySymbol = value;
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				if (value.Length == 0)
+				{
+					this.numberGroupSizes = new int[0];
+					return;
+				}
+				int num = value.Length - 1;
+				for (int i = 0; i < num; i++)
+				{
+					if (value[i] < 1 || value[i] > 9)
+					{
+						throw new ArgumentOutOfRangeException("One of the elements in the array specified is not between 1 and 9");
+					}
+				}
+				if (value[num] < 0 || value[num] > 9)
+				{
+					throw new ArgumentOutOfRangeException("Last element in the array specified is not between 0 and 9");
+				}
+				this.numberGroupSizes = (int[])value.Clone();
 			}
 		}
 
-		public string PositiveSign
+		public int NumberNegativePattern
 		{
 			get
 			{
-				return this.positiveSign;
+				return this.numberNegativePattern;
 			}
 			set
 			{
-				if (value == null)
+				if (value < 0 || value > 4)
 				{
-					throw new ArgumentNullException("PositiveSign", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 15");
 				}
-				this.VerifyWritable();
-				this.positiveSign = value;
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.numberNegativePattern = value;
 			}
 		}
 
@@ -573,9 +725,12 @@ namespace System.Globalization
 			{
 				if (value < 0 || value > 99)
 				{
-					throw new ArgumentOutOfRangeException("PercentDecimalDigits", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 99));
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 99");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.percentDecimalDigits = value;
 			}
 		}
@@ -588,8 +743,14 @@ namespace System.Globalization
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyDecimalSeparator(value, "PercentDecimalSeparator");
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.percentDecimalSeparator = value;
 			}
 		}
@@ -602,9 +763,108 @@ namespace System.Globalization
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyGroupSeparator(value, "PercentGroupSeparator");
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.percentGroupSeparator = value;
+			}
+		}
+
+		public int[] PercentGroupSizes
+		{
+			get
+			{
+				return (int[])this.RawPercentGroupSizes.Clone();
+			}
+			set
+			{
+				this.RawPercentGroupSizes = value;
+			}
+		}
+
+		internal int[] RawPercentGroupSizes
+		{
+			get
+			{
+				return this.percentGroupSizes;
+			}
+			set
+			{
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				if (this == CultureInfo.CurrentCulture.NumberFormat)
+				{
+					throw new Exception("HERE the value was modified");
+				}
+				if (value.Length == 0)
+				{
+					this.percentGroupSizes = new int[0];
+					return;
+				}
+				int num = value.Length - 1;
+				for (int i = 0; i < num; i++)
+				{
+					if (value[i] < 1 || value[i] > 9)
+					{
+						throw new ArgumentOutOfRangeException("One of the elements in the array specified is not between 1 and 9");
+					}
+				}
+				if (value[num] < 0 || value[num] > 9)
+				{
+					throw new ArgumentOutOfRangeException("Last element in the array specified is not between 0 and 9");
+				}
+				this.percentGroupSizes = (int[])value.Clone();
+			}
+		}
+
+		public int PercentNegativePattern
+		{
+			get
+			{
+				return this.percentNegativePattern;
+			}
+			set
+			{
+				if (value < 0 || value > 2)
+				{
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 15");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.percentNegativePattern = value;
+			}
+		}
+
+		public int PercentPositivePattern
+		{
+			get
+			{
+				return this.percentPositivePattern;
+			}
+			set
+			{
+				if (value < 0 || value > 2)
+				{
+					throw new ArgumentOutOfRangeException("The value specified for the property is less than 0 or greater than 3");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.percentPositivePattern = value;
 			}
 		}
 
@@ -618,9 +878,12 @@ namespace System.Globalization
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("PercentSymbol", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentNullException("The value specified for the property is a null reference");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.percentSymbol = value;
 			}
 		}
@@ -635,168 +898,164 @@ namespace System.Globalization
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("PerMilleSymbol", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentNullException("The value specified for the property is a null reference");
 				}
-				this.VerifyWritable();
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
 				this.perMilleSymbol = value;
 			}
 		}
 
-		[ComVisible(false)]
-		public string[] NativeDigits
+		public string PositiveInfinitySymbol
 		{
 			get
 			{
-				return (string[])this.nativeDigits.Clone();
+				return this.positiveInfinitySymbol;
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyNativeDigits(value, "NativeDigits");
-				this.nativeDigits = value;
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.positiveInfinitySymbol = value;
 			}
 		}
 
-		[ComVisible(false)]
-		public DigitShapes DigitSubstitution
+		public string PositiveSign
 		{
 			get
 			{
-				return (DigitShapes)this.digitSubstitution;
+				return this.positiveSign;
 			}
 			set
 			{
-				this.VerifyWritable();
-				NumberFormatInfo.VerifyDigitSubstitution(value, "DigitSubstitution");
-				this.digitSubstitution = (int)value;
+				if (value == null)
+				{
+					throw new ArgumentNullException("The value specified for the property is a null reference");
+				}
+				if (this.isReadOnly)
+				{
+					throw new InvalidOperationException("The current instance is read-only and a set operation was attempted");
+				}
+				this.positiveSign = value;
 			}
 		}
 
 		public object GetFormat(Type formatType)
 		{
-			if (!(formatType == typeof(NumberFormatInfo)))
-			{
-				return null;
-			}
-			return this;
+			return (formatType != typeof(NumberFormatInfo)) ? null : this;
+		}
+
+		public object Clone()
+		{
+			NumberFormatInfo numberFormatInfo = (NumberFormatInfo)base.MemberwiseClone();
+			numberFormatInfo.isReadOnly = false;
+			return numberFormatInfo;
 		}
 
 		public static NumberFormatInfo ReadOnly(NumberFormatInfo nfi)
 		{
-			if (nfi == null)
-			{
-				throw new ArgumentNullException("nfi");
-			}
-			if (nfi.IsReadOnly)
-			{
-				return nfi;
-			}
-			NumberFormatInfo numberFormatInfo = (NumberFormatInfo)nfi.MemberwiseClone();
+			NumberFormatInfo numberFormatInfo = (NumberFormatInfo)nfi.Clone();
 			numberFormatInfo.isReadOnly = true;
 			return numberFormatInfo;
 		}
 
-		internal static void ValidateParseStyleInteger(NumberStyles style)
+		public static NumberFormatInfo GetInstance(IFormatProvider formatProvider)
 		{
-			if ((style & ~(NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingSign | NumberStyles.AllowParentheses | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent | NumberStyles.AllowCurrencySymbol | NumberStyles.AllowHexSpecifier)) != NumberStyles.None)
+			if (formatProvider != null)
 			{
-				throw new ArgumentException(Environment.GetResourceString("An undefined NumberStyles value is being used."), "style");
+				NumberFormatInfo numberFormatInfo = (NumberFormatInfo)formatProvider.GetFormat(typeof(NumberFormatInfo));
+				if (numberFormatInfo != null)
+				{
+					return numberFormatInfo;
+				}
 			}
-			if ((style & NumberStyles.AllowHexSpecifier) != NumberStyles.None && (style & ~(NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowHexSpecifier)) != NumberStyles.None)
-			{
-				throw new ArgumentException(Environment.GetResourceString("With the AllowHexSpecifier bit set in the enum bit field, the only other valid bits that can be combined into the enum value must be a subset of those in HexNumber."));
-			}
+			return NumberFormatInfo.CurrentInfo;
 		}
 
-		internal static void ValidateParseStyleFloatingPoint(NumberStyles style)
-		{
-			if ((style & ~(NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingSign | NumberStyles.AllowParentheses | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent | NumberStyles.AllowCurrencySymbol | NumberStyles.AllowHexSpecifier)) != NumberStyles.None)
-			{
-				throw new ArgumentException(Environment.GetResourceString("An undefined NumberStyles value is being used."), "style");
-			}
-			if ((style & NumberStyles.AllowHexSpecifier) != NumberStyles.None)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The number style AllowHexSpecifier is not supported on floating point data types."));
-			}
-		}
+		private bool isReadOnly;
 
-		private static volatile NumberFormatInfo invariantInfo;
+		private string decimalFormats;
 
-		internal int[] numberGroupSizes = new int[] { 3 };
+		private string currencyFormats;
 
-		internal int[] currencyGroupSizes = new int[] { 3 };
+		private string percentFormats;
 
-		internal int[] percentGroupSizes = new int[] { 3 };
+		private string digitPattern = "#";
 
-		internal string positiveSign = "+";
+		private string zeroPattern = "0";
 
-		internal string negativeSign = "-";
+		private int currencyDecimalDigits;
 
-		internal string numberDecimalSeparator = ".";
+		private string currencyDecimalSeparator;
 
-		internal string numberGroupSeparator = ",";
+		private string currencyGroupSeparator;
 
-		internal string currencyGroupSeparator = ",";
+		private int[] currencyGroupSizes;
 
-		internal string currencyDecimalSeparator = ".";
+		private int currencyNegativePattern;
 
-		internal string currencySymbol = "¤";
+		private int currencyPositivePattern;
 
-		internal string ansiCurrencySymbol;
+		private string currencySymbol;
 
-		internal string nanSymbol = "NaN";
+		private string nanSymbol;
 
-		internal string positiveInfinitySymbol = "Infinity";
+		private string negativeInfinitySymbol;
 
-		internal string negativeInfinitySymbol = "-Infinity";
+		private string negativeSign;
 
-		internal string percentDecimalSeparator = ".";
+		private int numberDecimalDigits;
 
-		internal string percentGroupSeparator = ",";
+		private string numberDecimalSeparator;
 
-		internal string percentSymbol = "%";
+		private string numberGroupSeparator;
 
-		internal string perMilleSymbol = "‰";
+		private int[] numberGroupSizes;
 
-		[OptionalField(VersionAdded = 2)]
-		internal string[] nativeDigits = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+		private int numberNegativePattern;
 
-		[OptionalField(VersionAdded = 1)]
-		internal int m_dataItem;
+		private int percentDecimalDigits;
 
-		internal int numberDecimalDigits = 2;
+		private string percentDecimalSeparator;
 
-		internal int currencyDecimalDigits = 2;
+		private string percentGroupSeparator;
 
-		internal int currencyPositivePattern;
+		private int[] percentGroupSizes;
 
-		internal int currencyNegativePattern;
+		private int percentNegativePattern;
 
-		internal int numberNegativePattern = 1;
+		private int percentPositivePattern;
 
-		internal int percentPositivePattern;
+		private string percentSymbol;
 
-		internal int percentNegativePattern;
+		private string perMilleSymbol;
 
-		internal int percentDecimalDigits = 2;
+		private string positiveInfinitySymbol;
 
-		[OptionalField(VersionAdded = 2)]
-		internal int digitSubstitution = 1;
+		private string positiveSign;
 
-		internal bool isReadOnly;
+		private string ansiCurrencySymbol;
 
-		[OptionalField(VersionAdded = 1)]
-		internal bool m_useUserOverride;
+		private int m_dataItem;
 
-		[OptionalField(VersionAdded = 2)]
-		internal bool m_isInvariant;
+		private bool m_useUserOverride;
 
-		[OptionalField(VersionAdded = 1)]
-		internal bool validForParseAsNumber = true;
+		private bool validForParseAsNumber;
 
-		[OptionalField(VersionAdded = 1)]
-		internal bool validForParseAsCurrency = true;
+		private bool validForParseAsCurrency;
 
-		private const NumberStyles InvalidNumberStyles = ~(NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowTrailingSign | NumberStyles.AllowParentheses | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent | NumberStyles.AllowCurrencySymbol | NumberStyles.AllowHexSpecifier);
+		private string[] nativeDigits = NumberFormatInfo.invariantNativeDigits;
+
+		private int digitSubstitution = 1;
+
+		private static readonly string[] invariantNativeDigits = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 	}
 }

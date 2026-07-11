@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Globalization;
 
 namespace System.Security.Cryptography.X509Certificates
@@ -54,7 +53,7 @@ namespace System.Security.Cryptography.X509Certificates
 			return base.InnerList.Add(certificate);
 		}
 
-		[MonoTODO("Method isn't transactional (like documented)")]
+		[global::System.MonoTODO("Method isn't transactional (like documented)")]
 		public void AddRange(X509Certificate2[] certificates)
 		{
 			if (certificates == null)
@@ -67,7 +66,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		[MonoTODO("Method isn't transactional (like documented)")]
+		[global::System.MonoTODO("Method isn't transactional (like documented)")]
 		public void AddRange(X509Certificate2Collection certificates)
 		{
 			if (certificates == null)
@@ -83,26 +82,24 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				throw new ArgumentNullException("certificate");
 			}
-			using (IEnumerator enumerator = base.InnerList.GetEnumerator())
+			foreach (object obj in base.InnerList)
 			{
-				while (enumerator.MoveNext())
+				X509Certificate2 x509Certificate = (X509Certificate2)obj;
+				if (x509Certificate.Equals(certificate))
 				{
-					if (((X509Certificate2)enumerator.Current).Equals(certificate))
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 			return false;
 		}
 
-		[MonoTODO("only support X509ContentType.Cert")]
+		[global::System.MonoTODO("only support X509ContentType.Cert")]
 		public byte[] Export(X509ContentType contentType)
 		{
 			return this.Export(contentType, null);
 		}
 
-		[MonoTODO("only support X509ContentType.Cert")]
+		[global::System.MonoTODO("only support X509ContentType.Cert")]
 		public byte[] Export(X509ContentType contentType, string password)
 		{
 			switch (contentType)
@@ -110,21 +107,25 @@ namespace System.Security.Cryptography.X509Certificates
 			case X509ContentType.Cert:
 			case X509ContentType.SerializedCert:
 			case X509ContentType.Pfx:
-				if (base.Count > 0)
+				if (this.Count > 0)
 				{
-					return this[base.Count - 1].Export(contentType, password);
+					return this[this.Count - 1].Export(contentType, password);
 				}
 				break;
 			case X509ContentType.SerializedStore:
+				break;
 			case X509ContentType.Pkcs7:
 				break;
 			default:
-				throw new CryptographicException(global::Locale.GetText("Cannot export certificate(s) to the '{0}' format", new object[] { contentType }));
+			{
+				string text = global::Locale.GetText("Cannot export certificate(s) to the '{0}' format", new object[] { contentType });
+				throw new CryptographicException(text);
+			}
 			}
 			return null;
 		}
 
-		[MonoTODO("Does not support X509FindType.FindByTemplateName, FindByApplicationPolicy and FindByCertificatePolicy")]
+		[global::System.MonoTODO("Does not support X509FindType.FindByTemplateName, FindByApplicationPolicy and FindByCertificatePolicy")]
 		public X509Certificate2Collection Find(X509FindType findType, object findValue, bool validOnly)
 		{
 			if (findValue == null)
@@ -148,83 +149,81 @@ namespace System.Security.Cryptography.X509Certificates
 				try
 				{
 					text = (string)findValue;
-					goto IL_0190;
 				}
 				catch (Exception ex)
 				{
-					throw new CryptographicException(global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
+					string text3 = global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
 					{
 						findValue.GetType(),
 						"string"
-					}), ex);
+					});
+					throw new CryptographicException(text3, ex);
 				}
 				break;
 			case X509FindType.FindByTimeValid:
 			case X509FindType.FindByTimeNotYetValid:
 			case X509FindType.FindByTimeExpired:
-				goto IL_013C;
+				try
+				{
+					dateTime = (DateTime)findValue;
+				}
+				catch (Exception ex2)
+				{
+					string text4 = global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
+					{
+						findValue.GetType(),
+						"X509DateTime"
+					});
+					throw new CryptographicException(text4, ex2);
+				}
+				break;
 			case X509FindType.FindByApplicationPolicy:
 			case X509FindType.FindByCertificatePolicy:
 			case X509FindType.FindByExtension:
+				try
+				{
+					text2 = (string)findValue;
+				}
+				catch (Exception ex3)
+				{
+					string text5 = global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
+					{
+						findValue.GetType(),
+						"X509KeyUsageFlags"
+					});
+					throw new CryptographicException(text5, ex3);
+				}
+				try
+				{
+					CryptoConfig.EncodeOID(text2);
+				}
+				catch (CryptographicUnexpectedOperationException)
+				{
+					string text6 = global::Locale.GetText("Invalid OID value '{0}'.", new object[] { text2 });
+					throw new ArgumentException("findValue", text6);
+				}
 				break;
 			case X509FindType.FindByKeyUsage:
-				goto IL_0107;
+				try
+				{
+					x509KeyUsageFlags = (X509KeyUsageFlags)((int)findValue);
+				}
+				catch (Exception ex4)
+				{
+					string text7 = global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
+					{
+						findValue.GetType(),
+						"X509KeyUsageFlags"
+					});
+					throw new CryptographicException(text7, ex4);
+				}
+				break;
 			default:
-				goto IL_0171;
-			}
-			try
 			{
-				text2 = (string)findValue;
+				string text8 = global::Locale.GetText("Invalid find type '{0}'.", new object[] { findType });
+				throw new CryptographicException(text8);
 			}
-			catch (Exception ex2)
-			{
-				throw new CryptographicException(global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
-				{
-					findValue.GetType(),
-					"X509KeyUsageFlags"
-				}), ex2);
 			}
-			try
-			{
-				CryptoConfig.EncodeOID(text2);
-				goto IL_0190;
-			}
-			catch (CryptographicUnexpectedOperationException)
-			{
-				string text3 = global::Locale.GetText("Invalid OID value '{0}'.", new object[] { text2 });
-				throw new ArgumentException("findValue", text3);
-			}
-			IL_0107:
-			try
-			{
-				x509KeyUsageFlags = (X509KeyUsageFlags)findValue;
-				goto IL_0190;
-			}
-			catch (Exception ex3)
-			{
-				throw new CryptographicException(global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
-				{
-					findValue.GetType(),
-					"X509KeyUsageFlags"
-				}), ex3);
-			}
-			IL_013C:
-			try
-			{
-				dateTime = (DateTime)findValue;
-				goto IL_0190;
-			}
-			catch (Exception ex4)
-			{
-				throw new CryptographicException(global::Locale.GetText("Invalid find value type '{0}', expected '{1}'.", new object[]
-				{
-					findValue.GetType(),
-					"X509DateTime"
-				}), ex4);
-			}
-			IL_0171:
-			throw new CryptographicException(global::Locale.GetText("Invalid find type '{0}'.", new object[] { findType }));
-			IL_0190:
 			CultureInfo invariantCulture = CultureInfo.InvariantCulture;
 			X509Certificate2Collection x509Certificate2Collection = new X509Certificate2Collection();
 			foreach (object obj in base.InnerList)
@@ -237,22 +236,20 @@ namespace System.Security.Cryptography.X509Certificates
 					flag = string.Compare(text, x509Certificate.Thumbprint, true, invariantCulture) == 0 || string.Compare(text, x509Certificate.GetCertHashString(), true, invariantCulture) == 0;
 					break;
 				case X509FindType.FindBySubjectName:
-					foreach (string text4 in x509Certificate.SubjectName.Format(true).Split(X509Certificate2Collection.newline_split, StringSplitOptions.RemoveEmptyEntries))
-					{
-						int num = text4.IndexOf('=');
-						flag = text4.IndexOf(text, num, StringComparison.InvariantCultureIgnoreCase) >= 0;
-						if (flag)
-						{
-							break;
-						}
-					}
+				{
+					string nameInfo = x509Certificate.GetNameInfo(X509NameType.SimpleName, false);
+					flag = nameInfo.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) >= 0;
 					break;
+				}
 				case X509FindType.FindBySubjectDistinguishedName:
 					flag = string.Compare(text, x509Certificate.Subject, true, invariantCulture) == 0;
 					break;
 				case X509FindType.FindByIssuerName:
-					flag = x509Certificate.GetNameInfo(X509NameType.SimpleName, true).IndexOf(text, StringComparison.InvariantCultureIgnoreCase) >= 0;
+				{
+					string nameInfo2 = x509Certificate.GetNameInfo(X509NameType.SimpleName, true);
+					flag = nameInfo2.IndexOf(text, StringComparison.InvariantCultureIgnoreCase) >= 0;
 					break;
+				}
 				case X509FindType.FindByIssuerDistinguishedName:
 					flag = string.Compare(text, x509Certificate.Issuer, true, invariantCulture) == 0;
 					break;
@@ -300,14 +297,15 @@ namespace System.Security.Cryptography.X509Certificates
 							{
 								x509Certificate2Collection.Add(x509Certificate);
 							}
-							continue;
 						}
 						catch
 						{
-							continue;
 						}
 					}
-					x509Certificate2Collection.Add(x509Certificate);
+					else
+					{
+						x509Certificate2Collection.Add(x509Certificate);
+					}
 				}
 			}
 			return x509Certificate2Collection;
@@ -318,7 +316,7 @@ namespace System.Security.Cryptography.X509Certificates
 			return new X509Certificate2Enumerator(this);
 		}
 
-		[MonoTODO("same limitations as X509Certificate2.Import")]
+		[global::System.MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(byte[] rawData)
 		{
 			X509Certificate2 x509Certificate = new X509Certificate2();
@@ -326,7 +324,7 @@ namespace System.Security.Cryptography.X509Certificates
 			this.Add(x509Certificate);
 		}
 
-		[MonoTODO("same limitations as X509Certificate2.Import")]
+		[global::System.MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
 		{
 			X509Certificate2 x509Certificate = new X509Certificate2();
@@ -334,7 +332,7 @@ namespace System.Security.Cryptography.X509Certificates
 			this.Add(x509Certificate);
 		}
 
-		[MonoTODO("same limitations as X509Certificate2.Import")]
+		[global::System.MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(string fileName)
 		{
 			X509Certificate2 x509Certificate = new X509Certificate2();
@@ -342,7 +340,7 @@ namespace System.Security.Cryptography.X509Certificates
 			this.Add(x509Certificate);
 		}
 
-		[MonoTODO("same limitations as X509Certificate2.Import")]
+		[global::System.MonoTODO("same limitations as X509Certificate2.Import")]
 		public void Import(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
 		{
 			X509Certificate2 x509Certificate = new X509Certificate2();
@@ -375,7 +373,8 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			for (int i = 0; i < base.InnerList.Count; i++)
 			{
-				if (((X509Certificate)base.InnerList[i]).Equals(certificate))
+				X509Certificate x509Certificate = (X509Certificate)base.InnerList[i];
+				if (x509Certificate.Equals(certificate))
 				{
 					base.InnerList.RemoveAt(i);
 					return;
@@ -383,7 +382,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		[MonoTODO("Method isn't transactional (like documented)")]
+		[global::System.MonoTODO("Method isn't transactional (like documented)")]
 		public void RemoveRange(X509Certificate2[] certificates)
 		{
 			if (certificates == null)
@@ -396,7 +395,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		[MonoTODO("Method isn't transactional (like documented)")]
+		[global::System.MonoTODO("Method isn't transactional (like documented)")]
 		public void RemoveRange(X509Certificate2Collection certificates)
 		{
 			if (certificates == null)
@@ -408,7 +407,5 @@ namespace System.Security.Cryptography.X509Certificates
 				this.Remove(x509Certificate);
 			}
 		}
-
-		private static string[] newline_split = new string[] { Environment.NewLine };
 	}
 }

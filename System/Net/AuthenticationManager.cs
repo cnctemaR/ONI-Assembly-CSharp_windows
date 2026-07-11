@@ -20,16 +20,18 @@ namespace System.Net
 				if (AuthenticationManager.modules == null)
 				{
 					AuthenticationManager.modules = new ArrayList();
-					AuthenticationModulesSection authenticationModulesSection = ConfigurationManager.GetSection("system.net/authenticationModules") as AuthenticationModulesSection;
+					object section = ConfigurationManager.GetSection("system.net/authenticationModules");
+					global::System.Net.Configuration.AuthenticationModulesSection authenticationModulesSection = section as global::System.Net.Configuration.AuthenticationModulesSection;
 					if (authenticationModulesSection != null)
 					{
 						foreach (object obj2 in authenticationModulesSection.AuthenticationModules)
 						{
-							AuthenticationModuleElement authenticationModuleElement = (AuthenticationModuleElement)obj2;
+							global::System.Net.Configuration.AuthenticationModuleElement authenticationModuleElement = (global::System.Net.Configuration.AuthenticationModuleElement)obj2;
 							IAuthenticationModule authenticationModule = null;
 							try
 							{
-								authenticationModule = (IAuthenticationModule)Activator.CreateInstance(Type.GetType(authenticationModuleElement.Type, true));
+								Type type = Type.GetType(authenticationModuleElement.Type, true);
+								authenticationModule = (IAuthenticationModule)Activator.CreateInstance(type);
 							}
 							catch
 							{
@@ -58,8 +60,8 @@ namespace System.Net
 			return new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public static StringDictionary CustomTargetNameDictionary
+		[global::System.MonoTODO]
+		public static global::System.Collections.Specialized.StringDictionary CustomTargetNameDictionary
 		{
 			get
 			{
@@ -73,15 +75,6 @@ namespace System.Net
 			{
 				AuthenticationManager.EnsureModules();
 				return AuthenticationManager.modules.GetEnumerator();
-			}
-		}
-
-		[MonoTODO]
-		internal static bool OSSupportsExtendedProtection
-		{
-			get
-			{
-				return false;
 			}
 		}
 
@@ -124,7 +117,7 @@ namespace System.Net
 					Authorization authorization = authenticationModule.Authenticate(challenge, request, credentials);
 					if (authorization != null)
 					{
-						authorization.ModuleAuthenticationType = authenticationModule.AuthenticationType;
+						authorization.Module = authenticationModule;
 						return authorization;
 					}
 				}
@@ -152,7 +145,7 @@ namespace System.Net
 					Authorization authorization = authenticationModule.PreAuthenticate(request, credentials);
 					if (authorization != null)
 					{
-						authorization.ModuleAuthenticationType = authenticationModule.AuthenticationType;
+						authorization.Module = authenticationModule;
 						return authorization;
 					}
 				}
@@ -202,7 +195,8 @@ namespace System.Net
 				foreach (object obj in AuthenticationManager.modules)
 				{
 					IAuthenticationModule authenticationModule2 = (IAuthenticationModule)obj;
-					if (string.Compare(authenticationModule2.AuthenticationType, authenticationScheme, true) == 0)
+					string authenticationType = authenticationModule2.AuthenticationType;
+					if (string.Compare(authenticationType, authenticationScheme, true) == 0)
 					{
 						authenticationModule = authenticationModule2;
 						break;

@@ -8,40 +8,28 @@ namespace System
 	[Serializable]
 	public class DuplicateWaitObjectException : ArgumentException
 	{
-		private static string DuplicateWaitObjectMessage
-		{
-			get
-			{
-				if (DuplicateWaitObjectException._duplicateWaitObjectMessage == null)
-				{
-					DuplicateWaitObjectException._duplicateWaitObjectMessage = Environment.GetResourceString("Duplicate objects in argument.");
-				}
-				return DuplicateWaitObjectException._duplicateWaitObjectMessage;
-			}
-		}
-
 		public DuplicateWaitObjectException()
-			: base(DuplicateWaitObjectException.DuplicateWaitObjectMessage)
+			: base(Locale.GetText("Duplicate objects in argument."))
 		{
-			base.SetErrorCode(-2146233047);
+			base.HResult = -2146233047;
 		}
 
 		public DuplicateWaitObjectException(string parameterName)
-			: base(DuplicateWaitObjectException.DuplicateWaitObjectMessage, parameterName)
+			: base(Locale.GetText("Duplicate objects in argument."), parameterName)
 		{
-			base.SetErrorCode(-2146233047);
+			base.HResult = -2146233047;
 		}
 
 		public DuplicateWaitObjectException(string parameterName, string message)
 			: base(message, parameterName)
 		{
-			base.SetErrorCode(-2146233047);
+			base.HResult = -2146233047;
 		}
 
 		public DuplicateWaitObjectException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146233047);
+			base.HResult = -2146233047;
 		}
 
 		protected DuplicateWaitObjectException(SerializationInfo info, StreamingContext context)
@@ -49,6 +37,6 @@ namespace System
 		{
 		}
 
-		private static volatile string _duplicateWaitObjectMessage;
+		private const int Result = -2146233047;
 	}
 }

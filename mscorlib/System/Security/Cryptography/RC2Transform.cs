@@ -21,7 +21,8 @@ namespace System.Security.Cryptography
 			int num2 = key.Length;
 			if (!KeySizes.IsLegalKeySize(rc2Algo.LegalKeySizes, num2 << 3))
 			{
-				throw new CryptographicException(Locale.GetText("Key is too small ({0} bytes), it should be between {1} and {2} bytes long.", new object[] { num2, 5, 16 }));
+				string text = Locale.GetText("Key is too small ({0} bytes), it should be between {1} and {2} bytes long.", new object[] { num2, 5, 16 });
+				throw new CryptographicException(text);
 			}
 			byte[] array = new byte[128];
 			int num3 = num + 7 >> 3;
@@ -58,29 +59,13 @@ namespace System.Security.Cryptography
 				this.j = 0;
 				while (this.j <= 16)
 				{
-					ushort r = this.R0;
-					ushort[] k = this.K;
-					int num = this.j;
-					this.j = num + 1;
-					this.R0 = r + (k[num] + (this.R3 & this.R2) + (~this.R3 & this.R1));
+					this.R0 += this.K[this.j++] + (this.R3 & this.R2) + (~this.R3 & this.R1);
 					this.R0 = (ushort)(((int)this.R0 << 1) | (this.R0 >> 15));
-					ushort r2 = this.R1;
-					ushort[] k2 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R1 = r2 + (k2[num] + (this.R0 & this.R3) + (~this.R0 & this.R2));
+					this.R1 += this.K[this.j++] + (this.R0 & this.R3) + (~this.R0 & this.R2);
 					this.R1 = (ushort)(((int)this.R1 << 2) | (this.R1 >> 14));
-					ushort r3 = this.R2;
-					ushort[] k3 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R2 = r3 + (k3[num] + (this.R1 & this.R0) + (~this.R1 & this.R3));
+					this.R2 += this.K[this.j++] + (this.R1 & this.R0) + (~this.R1 & this.R3);
 					this.R2 = (ushort)(((int)this.R2 << 3) | (this.R2 >> 13));
-					ushort r4 = this.R3;
-					ushort[] k4 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R3 = r4 + (k4[num] + (this.R2 & this.R1) + (~this.R2 & this.R0));
+					this.R3 += this.K[this.j++] + (this.R2 & this.R1) + (~this.R2 & this.R0);
 					this.R3 = (ushort)(((int)this.R3 << 5) | (this.R3 >> 11));
 				}
 				this.R0 += this.K[(int)(this.R3 & 63)];
@@ -89,29 +74,13 @@ namespace System.Security.Cryptography
 				this.R3 += this.K[(int)(this.R2 & 63)];
 				while (this.j <= 40)
 				{
-					ushort r5 = this.R0;
-					ushort[] k5 = this.K;
-					int num = this.j;
-					this.j = num + 1;
-					this.R0 = r5 + (k5[num] + (this.R3 & this.R2) + (~this.R3 & this.R1));
+					this.R0 += this.K[this.j++] + (this.R3 & this.R2) + (~this.R3 & this.R1);
 					this.R0 = (ushort)(((int)this.R0 << 1) | (this.R0 >> 15));
-					ushort r6 = this.R1;
-					ushort[] k6 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R1 = r6 + (k6[num] + (this.R0 & this.R3) + (~this.R0 & this.R2));
+					this.R1 += this.K[this.j++] + (this.R0 & this.R3) + (~this.R0 & this.R2);
 					this.R1 = (ushort)(((int)this.R1 << 2) | (this.R1 >> 14));
-					ushort r7 = this.R2;
-					ushort[] k7 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R2 = r7 + (k7[num] + (this.R1 & this.R0) + (~this.R1 & this.R3));
+					this.R2 += this.K[this.j++] + (this.R1 & this.R0) + (~this.R1 & this.R3);
 					this.R2 = (ushort)(((int)this.R2 << 3) | (this.R2 >> 13));
-					ushort r8 = this.R3;
-					ushort[] k8 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R3 = r8 + (k8[num] + (this.R2 & this.R1) + (~this.R2 & this.R0));
+					this.R3 += this.K[this.j++] + (this.R2 & this.R1) + (~this.R2 & this.R0);
 					this.R3 = (ushort)(((int)this.R3 << 5) | (this.R3 >> 11));
 				}
 				this.R0 += this.K[(int)(this.R3 & 63)];
@@ -120,29 +89,13 @@ namespace System.Security.Cryptography
 				this.R3 += this.K[(int)(this.R2 & 63)];
 				while (this.j < 64)
 				{
-					ushort r9 = this.R0;
-					ushort[] k9 = this.K;
-					int num = this.j;
-					this.j = num + 1;
-					this.R0 = r9 + (k9[num] + (this.R3 & this.R2) + (~this.R3 & this.R1));
+					this.R0 += this.K[this.j++] + (this.R3 & this.R2) + (~this.R3 & this.R1);
 					this.R0 = (ushort)(((int)this.R0 << 1) | (this.R0 >> 15));
-					ushort r10 = this.R1;
-					ushort[] k10 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R1 = r10 + (k10[num] + (this.R0 & this.R3) + (~this.R0 & this.R2));
+					this.R1 += this.K[this.j++] + (this.R0 & this.R3) + (~this.R0 & this.R2);
 					this.R1 = (ushort)(((int)this.R1 << 2) | (this.R1 >> 14));
-					ushort r11 = this.R2;
-					ushort[] k11 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R2 = r11 + (k11[num] + (this.R1 & this.R0) + (~this.R1 & this.R3));
+					this.R2 += this.K[this.j++] + (this.R1 & this.R0) + (~this.R1 & this.R3);
 					this.R2 = (ushort)(((int)this.R2 << 3) | (this.R2 >> 13));
-					ushort r12 = this.R3;
-					ushort[] k12 = this.K;
-					num = this.j;
-					this.j = num + 1;
-					this.R3 = r12 + (k12[num] + (this.R2 & this.R1) + (~this.R2 & this.R0));
+					this.R3 += this.K[this.j++] + (this.R2 & this.R1) + (~this.R2 & this.R0);
 					this.R3 = (ushort)(((int)this.R3 << 5) | (this.R3 >> 11));
 				}
 			}
@@ -152,29 +105,13 @@ namespace System.Security.Cryptography
 				while (this.j >= 44)
 				{
 					this.R3 = (ushort)((this.R3 >> 5) | ((int)this.R3 << 11));
-					ushort r13 = this.R3;
-					ushort[] k13 = this.K;
-					int num = this.j;
-					this.j = num - 1;
-					this.R3 = r13 - (k13[num] + (this.R2 & this.R1) + (~this.R2 & this.R0));
+					this.R3 -= this.K[this.j--] + (this.R2 & this.R1) + (~this.R2 & this.R0);
 					this.R2 = (ushort)((this.R2 >> 3) | ((int)this.R2 << 13));
-					ushort r14 = this.R2;
-					ushort[] k14 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R2 = r14 - (k14[num] + (this.R1 & this.R0) + (~this.R1 & this.R3));
+					this.R2 -= this.K[this.j--] + (this.R1 & this.R0) + (~this.R1 & this.R3);
 					this.R1 = (ushort)((this.R1 >> 2) | ((int)this.R1 << 14));
-					ushort r15 = this.R1;
-					ushort[] k15 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R1 = r15 - (k15[num] + (this.R0 & this.R3) + (~this.R0 & this.R2));
+					this.R1 -= this.K[this.j--] + (this.R0 & this.R3) + (~this.R0 & this.R2);
 					this.R0 = (ushort)((this.R0 >> 1) | ((int)this.R0 << 15));
-					ushort r16 = this.R0;
-					ushort[] k16 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R0 = r16 - (k16[num] + (this.R3 & this.R2) + (~this.R3 & this.R1));
+					this.R0 -= this.K[this.j--] + (this.R3 & this.R2) + (~this.R3 & this.R1);
 				}
 				this.R3 -= this.K[(int)(this.R2 & 63)];
 				this.R2 -= this.K[(int)(this.R1 & 63)];
@@ -183,29 +120,13 @@ namespace System.Security.Cryptography
 				while (this.j >= 20)
 				{
 					this.R3 = (ushort)((this.R3 >> 5) | ((int)this.R3 << 11));
-					ushort r17 = this.R3;
-					ushort[] k17 = this.K;
-					int num = this.j;
-					this.j = num - 1;
-					this.R3 = r17 - (k17[num] + (this.R2 & this.R1) + (~this.R2 & this.R0));
+					this.R3 -= this.K[this.j--] + (this.R2 & this.R1) + (~this.R2 & this.R0);
 					this.R2 = (ushort)((this.R2 >> 3) | ((int)this.R2 << 13));
-					ushort r18 = this.R2;
-					ushort[] k18 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R2 = r18 - (k18[num] + (this.R1 & this.R0) + (~this.R1 & this.R3));
+					this.R2 -= this.K[this.j--] + (this.R1 & this.R0) + (~this.R1 & this.R3);
 					this.R1 = (ushort)((this.R1 >> 2) | ((int)this.R1 << 14));
-					ushort r19 = this.R1;
-					ushort[] k19 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R1 = r19 - (k19[num] + (this.R0 & this.R3) + (~this.R0 & this.R2));
+					this.R1 -= this.K[this.j--] + (this.R0 & this.R3) + (~this.R0 & this.R2);
 					this.R0 = (ushort)((this.R0 >> 1) | ((int)this.R0 << 15));
-					ushort r20 = this.R0;
-					ushort[] k20 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R0 = r20 - (k20[num] + (this.R3 & this.R2) + (~this.R3 & this.R1));
+					this.R0 -= this.K[this.j--] + (this.R3 & this.R2) + (~this.R3 & this.R1);
 				}
 				this.R3 -= this.K[(int)(this.R2 & 63)];
 				this.R2 -= this.K[(int)(this.R1 & 63)];
@@ -214,29 +135,13 @@ namespace System.Security.Cryptography
 				while (this.j >= 0)
 				{
 					this.R3 = (ushort)((this.R3 >> 5) | ((int)this.R3 << 11));
-					ushort r21 = this.R3;
-					ushort[] k21 = this.K;
-					int num = this.j;
-					this.j = num - 1;
-					this.R3 = r21 - (k21[num] + (this.R2 & this.R1) + (~this.R2 & this.R0));
+					this.R3 -= this.K[this.j--] + (this.R2 & this.R1) + (~this.R2 & this.R0);
 					this.R2 = (ushort)((this.R2 >> 3) | ((int)this.R2 << 13));
-					ushort r22 = this.R2;
-					ushort[] k22 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R2 = r22 - (k22[num] + (this.R1 & this.R0) + (~this.R1 & this.R3));
+					this.R2 -= this.K[this.j--] + (this.R1 & this.R0) + (~this.R1 & this.R3);
 					this.R1 = (ushort)((this.R1 >> 2) | ((int)this.R1 << 14));
-					ushort r23 = this.R1;
-					ushort[] k23 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R1 = r23 - (k23[num] + (this.R0 & this.R3) + (~this.R0 & this.R2));
+					this.R1 -= this.K[this.j--] + (this.R0 & this.R3) + (~this.R0 & this.R2);
 					this.R0 = (ushort)((this.R0 >> 1) | ((int)this.R0 << 15));
-					ushort r24 = this.R0;
-					ushort[] k24 = this.K;
-					num = this.j;
-					this.j = num - 1;
-					this.R0 = r24 - (k24[num] + (this.R3 & this.R2) + (~this.R3 & this.R1));
+					this.R0 -= this.K[this.j--] + (this.R3 & this.R2) + (~this.R3 & this.R1);
 				}
 			}
 			output[0] = (byte)this.R0;

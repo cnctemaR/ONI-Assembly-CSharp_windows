@@ -3,7 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
-	internal struct Win32_IP_ADAPTER_INFO
+	[StructLayout(LayoutKind.Sequential)]
+	internal class Win32_IP_ADAPTER_INFO
 	{
 		private const int MAX_ADAPTER_NAME_LENGTH = 256;
 

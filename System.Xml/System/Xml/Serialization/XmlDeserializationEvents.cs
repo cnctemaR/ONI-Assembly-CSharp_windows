@@ -4,18 +4,6 @@ namespace System.Xml.Serialization
 {
 	public struct XmlDeserializationEvents
 	{
-		public XmlNodeEventHandler OnUnknownNode
-		{
-			get
-			{
-				return this.onUnknownNode;
-			}
-			set
-			{
-				this.onUnknownNode = value;
-			}
-		}
-
 		public XmlAttributeEventHandler OnUnknownAttribute
 		{
 			get
@@ -40,6 +28,18 @@ namespace System.Xml.Serialization
 			}
 		}
 
+		public XmlNodeEventHandler OnUnknownNode
+		{
+			get
+			{
+				return this.onUnknownNode;
+			}
+			set
+			{
+				this.onUnknownNode = value;
+			}
+		}
+
 		public UnreferencedObjectEventHandler OnUnreferencedObject
 		{
 			get
@@ -52,14 +52,12 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		private XmlNodeEventHandler onUnknownNode;
-
 		private XmlAttributeEventHandler onUnknownAttribute;
 
 		private XmlElementEventHandler onUnknownElement;
 
-		private UnreferencedObjectEventHandler onUnreferencedObject;
+		private XmlNodeEventHandler onUnknownNode;
 
-		internal object sender;
+		private UnreferencedObjectEventHandler onUnreferencedObject;
 	}
 }

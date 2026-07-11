@@ -21,10 +21,10 @@ namespace System.Runtime.InteropServices.ComTypes
 		public struct DESCUNION
 		{
 			[FieldOffset(0)]
-			public int oInst;
+			public IntPtr lpvarValue;
 
 			[FieldOffset(0)]
-			public IntPtr lpvarValue;
+			public int oInst;
 		}
 	}
 }

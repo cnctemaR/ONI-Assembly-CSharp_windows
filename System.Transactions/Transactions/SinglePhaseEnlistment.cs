@@ -4,14 +4,10 @@ namespace System.Transactions
 {
 	public class SinglePhaseEnlistment : Enlistment
 	{
-		internal SinglePhaseEnlistment()
-		{
-		}
-
-		internal SinglePhaseEnlistment(Transaction tx, object abortingEnlisted)
+		internal SinglePhaseEnlistment(Transaction tx, ISinglePhaseNotification enlisted)
 		{
 			this.tx = tx;
-			this.abortingEnlisted = abortingEnlisted;
+			this.enlisted = enlisted;
 		}
 
 		public void Aborted()
@@ -21,10 +17,7 @@ namespace System.Transactions
 
 		public void Aborted(Exception e)
 		{
-			if (this.tx != null)
-			{
-				this.tx.Rollback(e, this.abortingEnlisted);
-			}
+			this.tx.Rollback(e, this.enlisted);
 		}
 
 		[MonoTODO]
@@ -46,6 +39,6 @@ namespace System.Transactions
 
 		private Transaction tx;
 
-		private object abortingEnlisted;
+		private ISinglePhaseNotification enlisted;
 	}
 }

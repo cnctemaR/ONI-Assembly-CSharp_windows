@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace System.Net.Configuration
 {
-	internal class DefaultProxyHandler : IConfigurationSectionHandler
+	internal class DefaultProxyHandler : global::System.Configuration.IConfigurationSectionHandler
 	{
 		public virtual object Create(object parent, object configContext, XmlNode section)
 		{
@@ -14,7 +14,8 @@ namespace System.Net.Configuration
 			{
 				HandlersUtil.ThrowException("Unrecognized attribute", section);
 			}
-			foreach (object obj in section.ChildNodes)
+			XmlNodeList childNodes = section.ChildNodes;
+			foreach (object obj in childNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
 				XmlNodeType nodeType = xmlNode.NodeType;
@@ -40,65 +41,60 @@ namespace System.Net.Configuration
 						{
 							HandlersUtil.ThrowException("Invalid boolean value", xmlNode);
 						}
-						if (!(webProxy is WebProxy))
+						if (webProxy is WebProxy)
 						{
-							continue;
-						}
-						((WebProxy)webProxy).BypassProxyOnLocal = flag;
-						if (text3 != null)
-						{
-							try
+							((WebProxy)webProxy).BypassProxyOnLocal = flag;
+							if (text3 != null)
 							{
-								((WebProxy)webProxy).Address = new Uri(text3);
-								continue;
-							}
-							catch (UriFormatException)
-							{
-							}
-						}
-						if (text == null || string.Compare(text, "true", true) != 0)
-						{
-							continue;
-						}
-						text3 = Environment.GetEnvironmentVariable("http_proxy");
-						if (text3 == null)
-						{
-							text3 = Environment.GetEnvironmentVariable("HTTP_PROXY");
-						}
-						if (text3 == null)
-						{
-							continue;
-						}
-						try
-						{
-							Uri uri = new Uri(text3);
-							IPAddress ipaddress;
-							if (IPAddress.TryParse(uri.Host, out ipaddress))
-							{
-								if (IPAddress.Any.Equals(ipaddress))
+								try
 								{
-									uri = new UriBuilder(uri)
-									{
-										Host = "127.0.0.1"
-									}.Uri;
+									((WebProxy)webProxy).Address = new global::System.Uri(text3);
+									continue;
 								}
-								else if (IPAddress.IPv6Any.Equals(ipaddress))
+								catch (global::System.UriFormatException)
 								{
-									uri = new UriBuilder(uri)
-									{
-										Host = "[::1]"
-									}.Uri;
 								}
 							}
-							((WebProxy)webProxy).Address = uri;
-							continue;
-						}
-						catch (UriFormatException)
-						{
-							continue;
+							if (text != null && string.Compare(text, "true", true) == 0)
+							{
+								text3 = Environment.GetEnvironmentVariable("http_proxy");
+								if (text3 == null)
+								{
+									text3 = Environment.GetEnvironmentVariable("HTTP_PROXY");
+								}
+								if (text3 != null)
+								{
+									try
+									{
+										global::System.Uri uri = new global::System.Uri(text3);
+										IPAddress ipaddress;
+										if (IPAddress.TryParse(uri.Host, out ipaddress))
+										{
+											if (IPAddress.Any.Equals(ipaddress))
+											{
+												uri = new global::System.UriBuilder(uri)
+												{
+													Host = "127.0.0.1"
+												}.Uri;
+											}
+											else if (IPAddress.IPv6Any.Equals(ipaddress))
+											{
+												uri = new global::System.UriBuilder(uri)
+												{
+													Host = "[::1]"
+												}.Uri;
+											}
+										}
+										((WebProxy)webProxy).Address = uri;
+									}
+									catch (global::System.UriFormatException)
+									{
+									}
+								}
+							}
 						}
 					}
-					if (name == "bypasslist")
+					else if (name == "bypasslist")
 					{
 						if (webProxy is WebProxy)
 						{
@@ -125,7 +121,8 @@ namespace System.Net.Configuration
 			{
 				HandlersUtil.ThrowException("Unrecognized attribute", node);
 			}
-			foreach (object obj in node.ChildNodes)
+			XmlNodeList childNodes = node.ChildNodes;
+			foreach (object obj in childNodes)
 			{
 				XmlNode xmlNode = (XmlNode)obj;
 				XmlNodeType nodeType = xmlNode.NodeType;

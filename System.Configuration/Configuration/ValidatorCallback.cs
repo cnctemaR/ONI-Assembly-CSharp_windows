@@ -2,5 +2,5 @@
 
 namespace System.Configuration
 {
-	public delegate void ValidatorCallback(object value);
+	public delegate void ValidatorCallback(object o);
 }

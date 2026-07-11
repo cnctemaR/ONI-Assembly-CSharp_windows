@@ -4,23 +4,18 @@ namespace System.Xml.Schema
 {
 	public sealed class XmlSchemaCompilationSettings
 	{
-		public XmlSchemaCompilationSettings()
-		{
-			this.enableUpaCheck = true;
-		}
-
 		public bool EnableUpaCheck
 		{
 			get
 			{
-				return this.enableUpaCheck;
+				return this.enable_upa_check;
 			}
 			set
 			{
-				this.enableUpaCheck = value;
+				this.enable_upa_check = value;
 			}
 		}
 
-		private bool enableUpaCheck;
+		private bool enable_upa_check = true;
 	}
 }

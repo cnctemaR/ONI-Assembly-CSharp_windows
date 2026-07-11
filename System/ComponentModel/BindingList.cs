@@ -3,282 +3,76 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	[Serializable]
-	public class BindingList<T> : Collection<T>, IBindingList, IList, ICollection, IEnumerable, ICancelAddNew, IRaiseItemChangedEvents
+	public class BindingList<T> : Collection<T>, IList, ICollection, IEnumerable, IBindingList, ICancelAddNew, IRaiseItemChangedEvents
 	{
-		public BindingList()
-		{
-			this.Initialize();
-		}
-
 		public BindingList(IList<T> list)
 			: base(list)
 		{
-			this.Initialize();
+			this.CheckType();
 		}
 
-		private void Initialize()
+		public BindingList()
 		{
-			this.allowNew = this.ItemTypeHasDefaultConstructor;
-			if (typeof(INotifyPropertyChanged).IsAssignableFrom(typeof(T)))
-			{
-				this.raiseItemChangedEvents = true;
-				foreach (T t in base.Items)
-				{
-					this.HookPropertyChanged(t);
-				}
-			}
+			this.CheckType();
 		}
 
-		private bool ItemTypeHasDefaultConstructor
-		{
-			get
-			{
-				Type typeFromHandle = typeof(T);
-				return typeFromHandle.IsPrimitive || typeFromHandle.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, new Type[0], null) != null;
-			}
-		}
+		public event AddingNewEventHandler AddingNew;
 
-		public event AddingNewEventHandler AddingNew
-		{
-			add
-			{
-				bool flag = this.AllowNew;
-				this.onAddingNew = (AddingNewEventHandler)Delegate.Combine(this.onAddingNew, value);
-				if (flag != this.AllowNew)
-				{
-					this.FireListChanged(ListChangedType.Reset, -1);
-				}
-			}
-			remove
-			{
-				bool flag = this.AllowNew;
-				this.onAddingNew = (AddingNewEventHandler)Delegate.Remove(this.onAddingNew, value);
-				if (flag != this.AllowNew)
-				{
-					this.FireListChanged(ListChangedType.Reset, -1);
-				}
-			}
-		}
+		public event ListChangedEventHandler ListChanged;
 
-		protected virtual void OnAddingNew(AddingNewEventArgs e)
+		void IBindingList.AddIndex(PropertyDescriptor index)
 		{
-			if (this.onAddingNew != null)
-			{
-				this.onAddingNew(this, e);
-			}
-		}
-
-		private object FireAddingNew()
-		{
-			AddingNewEventArgs e = new AddingNewEventArgs(null);
-			this.OnAddingNew(e);
-			return e.NewObject;
-		}
-
-		public event ListChangedEventHandler ListChanged
-		{
-			add
-			{
-				this.onListChanged = (ListChangedEventHandler)Delegate.Combine(this.onListChanged, value);
-			}
-			remove
-			{
-				this.onListChanged = (ListChangedEventHandler)Delegate.Remove(this.onListChanged, value);
-			}
-		}
-
-		protected virtual void OnListChanged(ListChangedEventArgs e)
-		{
-			if (this.onListChanged != null)
-			{
-				this.onListChanged(this, e);
-			}
-		}
-
-		public bool RaiseListChangedEvents
-		{
-			get
-			{
-				return this.raiseListChangedEvents;
-			}
-			set
-			{
-				if (this.raiseListChangedEvents != value)
-				{
-					this.raiseListChangedEvents = value;
-				}
-			}
-		}
-
-		public void ResetBindings()
-		{
-			this.FireListChanged(ListChangedType.Reset, -1);
-		}
-
-		public void ResetItem(int position)
-		{
-			this.FireListChanged(ListChangedType.ItemChanged, position);
-		}
-
-		private void FireListChanged(ListChangedType type, int index)
-		{
-			if (this.raiseListChangedEvents)
-			{
-				this.OnListChanged(new ListChangedEventArgs(type, index));
-			}
-		}
-
-		protected override void ClearItems()
-		{
-			this.EndNew(this.addNewPos);
-			if (this.raiseItemChangedEvents)
-			{
-				foreach (T t in base.Items)
-				{
-					this.UnhookPropertyChanged(t);
-				}
-			}
-			base.ClearItems();
-			this.FireListChanged(ListChangedType.Reset, -1);
-		}
-
-		protected override void InsertItem(int index, T item)
-		{
-			this.EndNew(this.addNewPos);
-			base.InsertItem(index, item);
-			if (this.raiseItemChangedEvents)
-			{
-				this.HookPropertyChanged(item);
-			}
-			this.FireListChanged(ListChangedType.ItemAdded, index);
-		}
-
-		protected override void RemoveItem(int index)
-		{
-			if (!this.allowRemove && (this.addNewPos < 0 || this.addNewPos != index))
-			{
-				throw new NotSupportedException();
-			}
-			this.EndNew(this.addNewPos);
-			if (this.raiseItemChangedEvents)
-			{
-				this.UnhookPropertyChanged(base[index]);
-			}
-			base.RemoveItem(index);
-			this.FireListChanged(ListChangedType.ItemDeleted, index);
-		}
-
-		protected override void SetItem(int index, T item)
-		{
-			if (this.raiseItemChangedEvents)
-			{
-				this.UnhookPropertyChanged(base[index]);
-			}
-			base.SetItem(index, item);
-			if (this.raiseItemChangedEvents)
-			{
-				this.HookPropertyChanged(item);
-			}
-			this.FireListChanged(ListChangedType.ItemChanged, index);
-		}
-
-		public virtual void CancelNew(int itemIndex)
-		{
-			if (this.addNewPos >= 0 && this.addNewPos == itemIndex)
-			{
-				this.RemoveItem(this.addNewPos);
-				this.addNewPos = -1;
-			}
-		}
-
-		public virtual void EndNew(int itemIndex)
-		{
-			if (this.addNewPos >= 0 && this.addNewPos == itemIndex)
-			{
-				this.addNewPos = -1;
-			}
-		}
-
-		public T AddNew()
-		{
-			return (T)((object)((IBindingList)this).AddNew());
 		}
 
 		object IBindingList.AddNew()
 		{
-			object obj = this.AddNewCore();
-			this.addNewPos = ((obj != null) ? base.IndexOf((T)((object)obj)) : (-1));
-			return obj;
+			return this.AddNew();
 		}
 
-		private bool AddingNewHandled
+		void IBindingList.ApplySort(PropertyDescriptor property, ListSortDirection direction)
+		{
+			this.ApplySortCore(property, direction);
+		}
+
+		int IBindingList.Find(PropertyDescriptor property, object key)
+		{
+			return this.FindCore(property, key);
+		}
+
+		void IBindingList.RemoveIndex(PropertyDescriptor property)
+		{
+		}
+
+		void IBindingList.RemoveSort()
+		{
+			this.RemoveSortCore();
+		}
+
+		bool IBindingList.IsSorted
 		{
 			get
 			{
-				return this.onAddingNew != null && this.onAddingNew.GetInvocationList().Length != 0;
+				return this.IsSortedCore;
 			}
 		}
 
-		protected virtual object AddNewCore()
-		{
-			object obj = this.FireAddingNew();
-			if (obj == null)
-			{
-				obj = SecurityUtils.SecureCreateInstance(typeof(T));
-			}
-			base.Add((T)((object)obj));
-			return obj;
-		}
-
-		public bool AllowNew
+		ListSortDirection IBindingList.SortDirection
 		{
 			get
 			{
-				if (this.userSetAllowNew || this.allowNew)
-				{
-					return this.allowNew;
-				}
-				return this.AddingNewHandled;
-			}
-			set
-			{
-				bool flag = this.AllowNew;
-				this.userSetAllowNew = true;
-				this.allowNew = value;
-				if (flag != value)
-				{
-					this.FireListChanged(ListChangedType.Reset, -1);
-				}
+				return this.SortDirectionCore;
 			}
 		}
 
-		bool IBindingList.AllowNew
+		PropertyDescriptor IBindingList.SortProperty
 		{
 			get
 			{
-				return this.AllowNew;
-			}
-		}
-
-		public bool AllowEdit
-		{
-			get
-			{
-				return this.allowEdit;
-			}
-			set
-			{
-				if (this.allowEdit != value)
-				{
-					this.allowEdit = value;
-					this.FireListChanged(ListChangedType.Reset, -1);
-				}
+				return this.SortPropertyCore;
 			}
 		}
 
@@ -290,19 +84,11 @@ namespace System.ComponentModel
 			}
 		}
 
-		public bool AllowRemove
+		bool IBindingList.AllowNew
 		{
 			get
 			{
-				return this.allowRemove;
-			}
-			set
-			{
-				if (this.allowRemove != value)
-				{
-					this.allowRemove = value;
-					this.FireListChanged(ListChangedType.Reset, -1);
-				}
+				return this.AllowNew;
 			}
 		}
 
@@ -322,27 +108,11 @@ namespace System.ComponentModel
 			}
 		}
 
-		protected virtual bool SupportsChangeNotificationCore
-		{
-			get
-			{
-				return true;
-			}
-		}
-
 		bool IBindingList.SupportsSearching
 		{
 			get
 			{
 				return this.SupportsSearchingCore;
-			}
-		}
-
-		protected virtual bool SupportsSearchingCore
-		{
-			get
-			{
-				return false;
 			}
 		}
 
@@ -354,19 +124,80 @@ namespace System.ComponentModel
 			}
 		}
 
-		protected virtual bool SupportsSortingCore
+		bool IRaiseItemChangedEvents.RaisesItemChangedEvents
 		{
 			get
 			{
-				return false;
+				return this.type_raises_item_changed_events;
 			}
 		}
 
-		bool IBindingList.IsSorted
+		private void CheckType()
+		{
+			ConstructorInfo constructor = typeof(T).GetConstructor(Type.EmptyTypes);
+			this.type_has_default_ctor = constructor != null;
+			this.type_raises_item_changed_events = typeof(INotifyPropertyChanged).IsAssignableFrom(typeof(T));
+		}
+
+		public bool AllowEdit
 		{
 			get
 			{
-				return this.IsSortedCore;
+				return this.allow_edit;
+			}
+			set
+			{
+				if (this.allow_edit != value)
+				{
+					this.allow_edit = value;
+					if (this.raise_list_changed_events)
+					{
+						this.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+					}
+				}
+			}
+		}
+
+		public bool AllowNew
+		{
+			get
+			{
+				if (this.allow_new_set)
+				{
+					return this.allow_new;
+				}
+				return this.type_has_default_ctor || this.AddingNew != null;
+			}
+			set
+			{
+				if (this.AllowNew != value)
+				{
+					this.allow_new_set = true;
+					this.allow_new = value;
+					if (this.raise_list_changed_events)
+					{
+						this.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+					}
+				}
+			}
+		}
+
+		public bool AllowRemove
+		{
+			get
+			{
+				return this.allow_remove;
+			}
+			set
+			{
+				if (this.allow_remove != value)
+				{
+					this.allow_remove = value;
+					if (this.raise_list_changed_events)
+					{
+						this.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+					}
+				}
 			}
 		}
 
@@ -378,27 +209,15 @@ namespace System.ComponentModel
 			}
 		}
 
-		PropertyDescriptor IBindingList.SortProperty
+		public bool RaiseListChangedEvents
 		{
 			get
 			{
-				return this.SortPropertyCore;
+				return this.raise_list_changed_events;
 			}
-		}
-
-		protected virtual PropertyDescriptor SortPropertyCore
-		{
-			get
+			set
 			{
-				return null;
-			}
-		}
-
-		ListSortDirection IBindingList.SortDirection
-		{
-			get
-			{
-				return this.SortDirectionCore;
+				this.raise_list_changed_events = value;
 			}
 		}
 
@@ -410,9 +229,64 @@ namespace System.ComponentModel
 			}
 		}
 
-		void IBindingList.ApplySort(PropertyDescriptor prop, ListSortDirection direction)
+		protected virtual PropertyDescriptor SortPropertyCore
 		{
-			this.ApplySortCore(prop, direction);
+			get
+			{
+				return null;
+			}
+		}
+
+		protected virtual bool SupportsChangeNotificationCore
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		protected virtual bool SupportsSearchingCore
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		protected virtual bool SupportsSortingCore
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public T AddNew()
+		{
+			return (T)((object)this.AddNewCore());
+		}
+
+		protected virtual object AddNewCore()
+		{
+			if (!this.AllowNew)
+			{
+				throw new InvalidOperationException();
+			}
+			AddingNewEventArgs e = new AddingNewEventArgs();
+			this.OnAddingNew(e);
+			T t = (T)((object)e.NewObject);
+			if (t == null)
+			{
+				if (!this.type_has_default_ctor)
+				{
+					throw new InvalidOperationException();
+				}
+				t = (T)((object)Activator.CreateInstance(typeof(T)));
+			}
+			this.Add(t);
+			this.pending_add_index = this.IndexOf(t);
+			this.add_pending = true;
+			return t;
 		}
 
 		protected virtual void ApplySortCore(PropertyDescriptor prop, ListSortDirection direction)
@@ -420,19 +294,42 @@ namespace System.ComponentModel
 			throw new NotSupportedException();
 		}
 
-		void IBindingList.RemoveSort()
+		public virtual void CancelNew(int itemIndex)
 		{
-			this.RemoveSortCore();
+			if (!this.add_pending)
+			{
+				return;
+			}
+			if (itemIndex != this.pending_add_index)
+			{
+				return;
+			}
+			this.add_pending = false;
+			base.RemoveItem(itemIndex);
+			if (this.raise_list_changed_events)
+			{
+				this.OnListChanged(new ListChangedEventArgs(ListChangedType.ItemDeleted, itemIndex));
+			}
 		}
 
-		protected virtual void RemoveSortCore()
+		protected override void ClearItems()
 		{
-			throw new NotSupportedException();
+			this.EndNew(this.pending_add_index);
+			base.ClearItems();
+			this.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
 		}
 
-		int IBindingList.Find(PropertyDescriptor prop, object key)
+		public virtual void EndNew(int itemIndex)
 		{
-			return this.FindCore(prop, key);
+			if (!this.add_pending)
+			{
+				return;
+			}
+			if (itemIndex != this.pending_add_index)
+			{
+				return;
+			}
+			this.add_pending = false;
 		}
 
 		protected virtual int FindCore(PropertyDescriptor prop, object key)
@@ -440,118 +337,83 @@ namespace System.ComponentModel
 			throw new NotSupportedException();
 		}
 
-		void IBindingList.AddIndex(PropertyDescriptor prop)
+		protected override void InsertItem(int index, T item)
 		{
-		}
-
-		void IBindingList.RemoveIndex(PropertyDescriptor prop)
-		{
-		}
-
-		private void HookPropertyChanged(T item)
-		{
-			INotifyPropertyChanged notifyPropertyChanged = item as INotifyPropertyChanged;
-			if (notifyPropertyChanged != null)
+			this.EndNew(this.pending_add_index);
+			base.InsertItem(index, item);
+			if (this.raise_list_changed_events)
 			{
-				if (this.propertyChangedEventHandler == null)
-				{
-					this.propertyChangedEventHandler = new PropertyChangedEventHandler(this.Child_PropertyChanged);
-				}
-				notifyPropertyChanged.PropertyChanged += this.propertyChangedEventHandler;
+				this.OnListChanged(new ListChangedEventArgs(ListChangedType.ItemAdded, index));
 			}
 		}
 
-		private void UnhookPropertyChanged(T item)
+		protected virtual void OnAddingNew(AddingNewEventArgs e)
 		{
-			INotifyPropertyChanged notifyPropertyChanged = item as INotifyPropertyChanged;
-			if (notifyPropertyChanged != null && this.propertyChangedEventHandler != null)
+			if (this.AddingNew != null)
 			{
-				notifyPropertyChanged.PropertyChanged -= this.propertyChangedEventHandler;
+				this.AddingNew(this, e);
 			}
 		}
 
-		private void Child_PropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected virtual void OnListChanged(ListChangedEventArgs e)
 		{
-			if (this.RaiseListChangedEvents)
+			if (this.ListChanged != null)
 			{
-				if (sender == null || e == null || string.IsNullOrEmpty(e.PropertyName))
-				{
-					this.ResetBindings();
-					return;
-				}
-				T t;
-				try
-				{
-					t = (T)((object)sender);
-				}
-				catch (InvalidCastException)
-				{
-					this.ResetBindings();
-					return;
-				}
-				int num = this.lastChangeIndex;
-				if (num >= 0 && num < base.Count)
-				{
-					T t2 = base[num];
-					if (t2.Equals(t))
-					{
-						goto IL_007B;
-					}
-				}
-				num = base.IndexOf(t);
-				this.lastChangeIndex = num;
-				IL_007B:
-				if (num == -1)
-				{
-					this.UnhookPropertyChanged(t);
-					this.ResetBindings();
-					return;
-				}
-				if (this.itemTypeProperties == null)
-				{
-					this.itemTypeProperties = TypeDescriptor.GetProperties(typeof(T));
-				}
-				PropertyDescriptor propertyDescriptor = this.itemTypeProperties.Find(e.PropertyName, true);
-				ListChangedEventArgs e2 = new ListChangedEventArgs(ListChangedType.ItemChanged, num, propertyDescriptor);
-				this.OnListChanged(e2);
+				this.ListChanged(this, e);
 			}
 		}
 
-		bool IRaiseItemChangedEvents.RaisesItemChangedEvents
+		protected override void RemoveItem(int index)
 		{
-			get
+			if (!this.AllowRemove)
 			{
-				return this.raiseItemChangedEvents;
+				throw new NotSupportedException();
+			}
+			this.EndNew(this.pending_add_index);
+			base.RemoveItem(index);
+			if (this.raise_list_changed_events)
+			{
+				this.OnListChanged(new ListChangedEventArgs(ListChangedType.ItemDeleted, index));
 			}
 		}
 
-		private int addNewPos = -1;
+		protected virtual void RemoveSortCore()
+		{
+			throw new NotSupportedException();
+		}
 
-		private bool raiseListChangedEvents = true;
+		public void ResetBindings()
+		{
+			this.OnListChanged(new ListChangedEventArgs(ListChangedType.Reset, -1));
+		}
 
-		private bool raiseItemChangedEvents;
+		public void ResetItem(int position)
+		{
+			this.OnListChanged(new ListChangedEventArgs(ListChangedType.ItemChanged, position));
+		}
 
-		[NonSerialized]
-		private PropertyDescriptorCollection itemTypeProperties;
+		protected override void SetItem(int index, T item)
+		{
+			base.SetItem(index, item);
+			this.OnListChanged(new ListChangedEventArgs(ListChangedType.ItemChanged, index));
+		}
 
-		[NonSerialized]
-		private PropertyChangedEventHandler propertyChangedEventHandler;
+		private bool allow_edit = true;
 
-		[NonSerialized]
-		private AddingNewEventHandler onAddingNew;
+		private bool allow_remove = true;
 
-		[NonSerialized]
-		private ListChangedEventHandler onListChanged;
+		private bool allow_new;
 
-		[NonSerialized]
-		private int lastChangeIndex = -1;
+		private bool allow_new_set;
 
-		private bool allowNew = true;
+		private bool raise_list_changed_events = true;
 
-		private bool allowEdit = true;
+		private bool type_has_default_ctor;
 
-		private bool allowRemove = true;
+		private bool type_raises_item_changed_events;
 
-		private bool userSetAllowNew;
+		private bool add_pending;
+
+		private int pending_add_index;
 	}
 }

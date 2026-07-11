@@ -5,7 +5,7 @@ using System.Reflection;
 namespace System.Runtime.Remoting.Messaging
 {
 	[Serializable]
-	internal class ErrorMessage : IMethodCallMessage, IMethodMessage, IMessage
+	internal class ErrorMessage : IMessage, IMethodCallMessage, IMethodMessage
 	{
 		public int ArgCount
 		{

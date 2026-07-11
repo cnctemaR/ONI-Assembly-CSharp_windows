@@ -1,28 +1,23 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class ComponentRenameEventArgs : EventArgs
 	{
+		public ComponentRenameEventArgs(object component, string oldName, string newName)
+		{
+			this.component = component;
+			this.oldName = oldName;
+			this.newName = newName;
+		}
+
 		public object Component
 		{
 			get
 			{
 				return this.component;
-			}
-		}
-
-		public virtual string OldName
-		{
-			get
-			{
-				return this.oldName;
 			}
 		}
 
@@ -34,11 +29,12 @@ namespace System.ComponentModel.Design
 			}
 		}
 
-		public ComponentRenameEventArgs(object component, string oldName, string newName)
+		public virtual string OldName
 		{
-			this.oldName = oldName;
-			this.newName = newName;
-			this.component = component;
+			get
+			{
+				return this.oldName;
+			}
 		}
 
 		private object component;

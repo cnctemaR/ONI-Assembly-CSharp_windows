@@ -4,7 +4,7 @@ namespace System.ComponentModel
 {
 	public enum LicenseUsageMode
 	{
-		Runtime,
-		Designtime
+		Designtime = 1,
+		Runtime = 0
 	}
 }

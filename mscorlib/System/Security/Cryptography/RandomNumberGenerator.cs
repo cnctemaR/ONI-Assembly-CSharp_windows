@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace System.Security.Cryptography
 {
 	[ComVisible(true)]
-	public abstract class RandomNumberGenerator : IDisposable
+	public abstract class RandomNumberGenerator
 	{
 		public static RandomNumberGenerator Create()
 		{
@@ -16,47 +16,8 @@ namespace System.Security.Cryptography
 			return (RandomNumberGenerator)CryptoConfig.CreateFromName(rngName);
 		}
 
-		public void Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-		}
-
 		public abstract void GetBytes(byte[] data);
 
-		public virtual void GetBytes(byte[] data, int offset, int count)
-		{
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
-			if (offset < 0)
-			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (offset + count > data.Length)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (count > 0)
-			{
-				byte[] array = new byte[count];
-				this.GetBytes(array);
-				Array.Copy(array, 0, data, offset, count);
-			}
-		}
-
-		public virtual void GetNonZeroBytes(byte[] data)
-		{
-			throw new NotImplementedException();
-		}
+		public abstract void GetNonZeroBytes(byte[] data);
 	}
 }

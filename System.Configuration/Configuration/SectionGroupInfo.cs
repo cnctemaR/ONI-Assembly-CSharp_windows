@@ -18,7 +18,6 @@ namespace System.Configuration
 
 		public void AddChild(ConfigInfo data)
 		{
-			this.modified = true;
 			data.Parent = this;
 			if (data is SectionInfo)
 			{
@@ -27,18 +26,19 @@ namespace System.Configuration
 					this.sections = new ConfigInfoCollection();
 				}
 				this.sections[data.Name] = data;
-				return;
 			}
-			if (this.groups == null)
+			else
 			{
-				this.groups = new ConfigInfoCollection();
+				if (this.groups == null)
+				{
+					this.groups = new ConfigInfoCollection();
+				}
+				this.groups[data.Name] = data;
 			}
-			this.groups[data.Name] = data;
 		}
 
 		public void Clear()
 		{
-			this.modified = true;
 			if (this.sections != null)
 			{
 				this.sections.Clear();
@@ -56,7 +56,6 @@ namespace System.Configuration
 
 		public void RemoveChild(string name)
 		{
-			this.modified = true;
 			if (this.sections != null)
 			{
 				this.sections.Remove(name);
@@ -116,7 +115,8 @@ namespace System.Configuration
 				foreach (object obj in configInfoCollection)
 				{
 					string text = (string)obj;
-					if (configInfoCollection[text].HasDataContent(config))
+					ConfigInfo configInfo = configInfoCollection[text];
+					if (configInfo.HasDataContent(config))
 					{
 						return true;
 					}
@@ -136,7 +136,8 @@ namespace System.Configuration
 				foreach (object obj in configInfoCollection)
 				{
 					string text = (string)obj;
-					if (configInfoCollection[text].HasConfigContent(cfg))
+					ConfigInfo configInfo = configInfoCollection[text];
+					if (configInfo.HasConfigContent(cfg))
 					{
 						return true;
 					}
@@ -255,7 +256,7 @@ namespace System.Configuration
 			{
 				writer.WriteStartElement("sectionGroup");
 				writer.WriteAttributeString("name", this.Name);
-				if (this.TypeName != null && this.TypeName != "" && this.TypeName != "System.Configuration.ConfigurationSectionGroup")
+				if (this.TypeName != null && this.TypeName != string.Empty && this.TypeName != "System.Configuration.ConfigurationSectionGroup")
 				{
 					writer.WriteAttributeString("type", this.TypeName);
 				}
@@ -314,9 +315,11 @@ namespace System.Configuration
 				this.ReadContent(reader, config, overrideAllowed, false);
 				reader.MoveToContent();
 				reader.ReadEndElement();
-				return;
 			}
-			reader.Read();
+			else
+			{
+				reader.Read();
+			}
 		}
 
 		private void ReadContent(XmlReader reader, Configuration config, bool overrideAllowed, bool root)
@@ -344,14 +347,14 @@ namespace System.Configuration
 					{
 						string text = reader.ReadOuterXml();
 						string[] array = attribute2.Split(new char[] { ',' });
-						for (int i = 0; i < array.Length; i++)
+						foreach (string text2 in array)
 						{
-							string text2 = array[i].Trim();
-							if (config.Locations.Find(text2) != null)
+							string text3 = text2.Trim();
+							if (config.Locations.Find(text3) != null)
 							{
 								base.ThrowException("Sections must only appear once per config file.", reader);
 							}
-							ConfigurationLocation configurationLocation = new ConfigurationLocation(text2, text, config, flag);
+							ConfigurationLocation configurationLocation = new ConfigurationLocation(text3, text, config, flag);
 							config.Locations.Add(configurationLocation);
 						}
 					}
@@ -422,7 +425,8 @@ namespace System.Configuration
 				foreach (object obj in sectionGroupInfo.sections.AllKeys)
 				{
 					string text = (string)obj;
-					if (this.sections[text] == null)
+					ConfigInfo configInfo = this.sections[text];
+					if (configInfo == null)
 					{
 						this.sections.Add(text, sectionGroupInfo.sections[text]);
 					}
@@ -433,7 +437,8 @@ namespace System.Configuration
 				foreach (object obj2 in sectionGroupInfo.groups.AllKeys)
 				{
 					string text2 = (string)obj2;
-					if (this.groups[text2] == null)
+					ConfigInfo configInfo = this.groups[text2];
+					if (configInfo == null)
 					{
 						this.groups.Add(text2, sectionGroupInfo.groups[text2]);
 					}
@@ -468,41 +473,6 @@ namespace System.Configuration
 				}
 			}
 		}
-
-		internal override bool HasValues(Configuration config, ConfigurationSaveMode mode)
-		{
-			if (this.modified && mode == ConfigurationSaveMode.Modified)
-			{
-				return true;
-			}
-			foreach (ConfigInfoCollection configInfoCollection in new object[] { this.Sections, this.Groups })
-			{
-				foreach (object obj in configInfoCollection)
-				{
-					string text = (string)obj;
-					if (configInfoCollection[text].HasValues(config, mode))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		internal override void ResetModified(Configuration config)
-		{
-			this.modified = false;
-			foreach (ConfigInfoCollection configInfoCollection in new object[] { this.Sections, this.Groups })
-			{
-				foreach (object obj in configInfoCollection)
-				{
-					string text = (string)obj;
-					configInfoCollection[text].ResetModified(config);
-				}
-			}
-		}
-
-		private bool modified;
 
 		private ConfigInfoCollection sections;
 

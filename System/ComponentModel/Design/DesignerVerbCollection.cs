@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class DesignerVerbCollection : CollectionBase
 	{
 		public DesignerVerbCollection()
@@ -17,77 +13,57 @@ namespace System.ComponentModel.Design
 
 		public DesignerVerbCollection(DesignerVerb[] value)
 		{
-			this.AddRange(value);
+			base.InnerList.AddRange(value);
 		}
 
 		public DesignerVerb this[int index]
 		{
 			get
 			{
-				return (DesignerVerb)base.List[index];
+				return (DesignerVerb)base.InnerList[index];
 			}
 			set
 			{
-				base.List[index] = value;
+				base.InnerList[index] = value;
 			}
 		}
 
 		public int Add(DesignerVerb value)
 		{
-			return base.List.Add(value);
+			return base.InnerList.Add(value);
 		}
 
 		public void AddRange(DesignerVerb[] value)
 		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			for (int i = 0; i < value.Length; i++)
-			{
-				this.Add(value[i]);
-			}
+			base.InnerList.AddRange(value);
 		}
 
 		public void AddRange(DesignerVerbCollection value)
 		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			int count = value.Count;
-			for (int i = 0; i < count; i++)
-			{
-				this.Add(value[i]);
-			}
-		}
-
-		public void Insert(int index, DesignerVerb value)
-		{
-			base.List.Insert(index, value);
-		}
-
-		public int IndexOf(DesignerVerb value)
-		{
-			return base.List.IndexOf(value);
+			base.InnerList.AddRange(value);
 		}
 
 		public bool Contains(DesignerVerb value)
 		{
-			return base.List.Contains(value);
-		}
-
-		public void Remove(DesignerVerb value)
-		{
-			base.List.Remove(value);
+			return base.InnerList.Contains(value);
 		}
 
 		public void CopyTo(DesignerVerb[] array, int index)
 		{
-			base.List.CopyTo(array, index);
+			base.InnerList.CopyTo(array, index);
 		}
 
-		protected override void OnSet(int index, object oldValue, object newValue)
+		public int IndexOf(DesignerVerb value)
+		{
+			return base.InnerList.IndexOf(value);
+		}
+
+		public void Insert(int index, DesignerVerb value)
+		{
+			base.InnerList.Insert(index, value);
+		}
+
+		protected override void OnClear()
 		{
 		}
 
@@ -95,16 +71,21 @@ namespace System.ComponentModel.Design
 		{
 		}
 
-		protected override void OnClear()
+		protected override void OnRemove(int index, object value)
 		{
 		}
 
-		protected override void OnRemove(int index, object value)
+		protected override void OnSet(int index, object oldValue, object newValue)
 		{
 		}
 
 		protected override void OnValidate(object value)
 		{
+		}
+
+		public void Remove(DesignerVerb value)
+		{
+			base.InnerList.Remove(value);
 		}
 	}
 }

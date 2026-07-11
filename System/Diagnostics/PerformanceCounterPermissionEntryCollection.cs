@@ -10,10 +10,10 @@ namespace System.Diagnostics
 		internal PerformanceCounterPermissionEntryCollection(PerformanceCounterPermission owner)
 		{
 			this.owner = owner;
-			ResourcePermissionBaseEntry[] entries = owner.GetEntries();
-			if (entries.Length != 0)
+			global::System.Security.Permissions.ResourcePermissionBaseEntry[] entries = owner.GetEntries();
+			if (entries.Length > 0)
 			{
-				foreach (ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
+				foreach (global::System.Security.Permissions.ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
 				{
 					PerformanceCounterPermissionAccess permissionAccess = (PerformanceCounterPermissionAccess)resourcePermissionBaseEntry.PermissionAccess;
 					string text = resourcePermissionBaseEntry.PermissionAccessPath[0];
@@ -24,9 +24,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		internal PerformanceCounterPermissionEntryCollection(ResourcePermissionBaseEntry[] entries)
+		internal PerformanceCounterPermissionEntryCollection(global::System.Security.Permissions.ResourcePermissionBaseEntry[] entries)
 		{
-			foreach (ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
+			foreach (global::System.Security.Permissions.ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
 			{
 				base.List.Add(new PerformanceCounterPermissionEntry((PerformanceCounterPermissionAccess)resourcePermissionBaseEntry.PermissionAccess, resourcePermissionBaseEntry.PermissionAccessPath[0], resourcePermissionBaseEntry.PermissionAccessPath[1]));
 			}

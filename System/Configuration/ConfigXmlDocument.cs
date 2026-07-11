@@ -7,9 +7,41 @@ using System.Xml;
 
 namespace System.Configuration
 {
-	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
-	public sealed class ConfigXmlDocument : XmlDocument, IConfigXmlNode, IConfigErrorInfo
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	public sealed class ConfigXmlDocument : XmlDocument, IConfigErrorInfo, IConfigXmlNode
 	{
+		string IConfigErrorInfo.Filename
+		{
+			get
+			{
+				return this.Filename;
+			}
+		}
+
+		int IConfigErrorInfo.LineNumber
+		{
+			get
+			{
+				return this.LineNumber;
+			}
+		}
+
+		string IConfigXmlNode.Filename
+		{
+			get
+			{
+				return this.Filename;
+			}
+		}
+
+		int IConfigXmlNode.LineNumber
+		{
+			get
+			{
+				return this.LineNumber;
+			}
+		}
+
 		public override XmlAttribute CreateAttribute(string prefix, string localName, string namespaceUri)
 		{
 			return new ConfigXmlDocument.ConfigXmlAttribute(this, prefix, localName, namespaceUri);
@@ -20,9 +52,9 @@ namespace System.Configuration
 			return new ConfigXmlDocument.ConfigXmlCDataSection(this, data);
 		}
 
-		public override XmlComment CreateComment(string data)
+		public override XmlComment CreateComment(string comment)
 		{
-			return new ConfigXmlDocument.ConfigXmlComment(this, data);
+			return new ConfigXmlDocument.ConfigXmlComment(this, comment);
 		}
 
 		public override XmlElement CreateElement(string prefix, string localName, string namespaceUri)
@@ -89,45 +121,13 @@ namespace System.Configuration
 			}
 		}
 
-		string IConfigErrorInfo.Filename
-		{
-			get
-			{
-				return this.Filename;
-			}
-		}
-
-		int IConfigErrorInfo.LineNumber
-		{
-			get
-			{
-				return this.LineNumber;
-			}
-		}
-
-		string IConfigXmlNode.Filename
-		{
-			get
-			{
-				return this.Filename;
-			}
-		}
-
-		int IConfigXmlNode.LineNumber
-		{
-			get
-			{
-				return this.LineNumber;
-			}
-		}
-
 		private XmlTextReader reader;
 
 		private string fileName;
 
 		private int lineNumber;
 
-		private class ConfigXmlAttribute : XmlAttribute, IConfigXmlNode, IConfigErrorInfo
+		private class ConfigXmlAttribute : XmlAttribute, IConfigErrorInfo, IConfigXmlNode
 		{
 			public ConfigXmlAttribute(ConfigXmlDocument document, string prefix, string localName, string namespaceUri)
 				: base(prefix, localName, namespaceUri, document)
@@ -161,7 +161,7 @@ namespace System.Configuration
 			private int lineNumber;
 		}
 
-		private class ConfigXmlCDataSection : XmlCDataSection, IConfigXmlNode, IConfigErrorInfo
+		private class ConfigXmlCDataSection : XmlCDataSection, IConfigErrorInfo, IConfigXmlNode
 		{
 			public ConfigXmlCDataSection(ConfigXmlDocument document, string data)
 				: base(data, document)
@@ -229,7 +229,7 @@ namespace System.Configuration
 			private int lineNumber;
 		}
 
-		private class ConfigXmlElement : XmlElement, IConfigXmlNode, IConfigErrorInfo
+		private class ConfigXmlElement : XmlElement, IConfigErrorInfo, IConfigXmlNode
 		{
 			public ConfigXmlElement(ConfigXmlDocument document, string prefix, string localName, string namespaceUri)
 				: base(prefix, localName, namespaceUri, document)
@@ -263,7 +263,7 @@ namespace System.Configuration
 			private int lineNumber;
 		}
 
-		private class ConfigXmlText : XmlText, IConfigXmlNode, IConfigErrorInfo
+		private class ConfigXmlText : XmlText, IConfigErrorInfo, IConfigXmlNode
 		{
 			public ConfigXmlText(ConfigXmlDocument document, string data)
 				: base(data, document)

@@ -15,7 +15,7 @@ namespace System.Configuration
 		{
 			if (value == null)
 			{
-				return "";
+				return string.Empty;
 			}
 			if (!(value is string))
 			{

@@ -9,25 +9,22 @@ namespace System.Threading
 	public class ThreadStateException : SystemException
 	{
 		public ThreadStateException()
-			: base(Environment.GetResourceString("Thread was in an invalid state for the operation being executed."))
+			: base("Thread State Error")
 		{
-			base.SetErrorCode(-2146233056);
 		}
 
 		public ThreadStateException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233056);
-		}
-
-		public ThreadStateException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-			base.SetErrorCode(-2146233056);
 		}
 
 		protected ThreadStateException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
+		{
+		}
+
+		public ThreadStateException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 	}

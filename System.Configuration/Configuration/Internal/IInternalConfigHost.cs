@@ -12,13 +12,13 @@ namespace System.Configuration.Internal
 
 		object CreateDeprecatedConfigContext(string configPath);
 
-		string DecryptSection(string encryptedXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedConfigSection);
+		string DecryptSection(string encryptedXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedSection);
 
 		void DeleteStream(string streamName);
 
-		string EncryptSection(string clearTextXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedConfigSection);
+		string EncryptSection(string encryptedXml, ProtectedConfigurationProvider protectionProvider, ProtectedConfigurationSection protectedSection);
 
-		string GetConfigPathFromLocationSubPath(string configPath, string locationSubPath);
+		string GetConfigPathFromLocationSubPath(string configPath, string locatinSubPath);
 
 		Type GetConfigType(string typeName, bool throwOnError);
 
@@ -34,9 +34,9 @@ namespace System.Configuration.Internal
 
 		IDisposable Impersonate();
 
-		void Init(IInternalConfigRoot configRoot, params object[] hostInitParams);
+		void Init(IInternalConfigRoot root, params object[] hostInitParams);
 
-		void InitForConfiguration(ref string locationSubPath, out string configPath, out string locationConfigPath, IInternalConfigRoot configRoot, params object[] hostInitConfigurationParams);
+		void InitForConfiguration(ref string locationSubPath, out string configPath, out string locationConfigPath, IInternalConfigRoot root, params object[] hostInitConfigurationParams);
 
 		bool IsAboveApplication(string configPath);
 

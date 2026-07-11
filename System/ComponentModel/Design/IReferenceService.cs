@@ -6,9 +6,9 @@ namespace System.ComponentModel.Design
 	{
 		IComponent GetComponent(object reference);
 
-		object GetReference(string name);
-
 		string GetName(object reference);
+
+		object GetReference(string name);
 
 		object[] GetReferences();
 

@@ -11,12 +11,7 @@ namespace System.Reflection
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern Type[] GetTypeModifiers(MonoProperty prop, bool optional);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern object get_default_value(MonoProperty prop);
-
 		public Type parent;
-
-		public Type declaring_type;
 
 		public string name;
 

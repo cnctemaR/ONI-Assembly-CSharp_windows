@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace System.Security.Cryptography
 {
 	[ComVisible(true)]
-	public class FromBase64Transform : ICryptoTransform, IDisposable
+	public class FromBase64Transform : IDisposable, ICryptoTransform
 	{
 		public FromBase64Transform()
 			: this(FromBase64TransformMode.IgnoreWhiteSpaces)
@@ -14,24 +13,21 @@ namespace System.Security.Cryptography
 
 		public FromBase64Transform(FromBase64TransformMode whitespaces)
 		{
-			this._whitespaces = whitespaces;
-			this._inputIndex = 0;
+			this.mode = whitespaces;
+			this.accumulator = new byte[4];
+			this.accPtr = 0;
+			this.m_disposed = false;
 		}
 
-		public int InputBlockSize
+		void IDisposable.Dispose()
 		{
-			get
-			{
-				return 1;
-			}
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
-		public int OutputBlockSize
+		~FromBase64Transform()
 		{
-			get
-			{
-				return 3;
-			}
+			this.Dispose(false);
 		}
 
 		public bool CanTransformMultipleBlocks
@@ -50,167 +46,248 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+		public int InputBlockSize
 		{
-			if (inputBuffer == null)
+			get
 			{
-				throw new ArgumentNullException("inputBuffer");
+				return 1;
 			}
-			if (inputOffset < 0)
-			{
-				throw new ArgumentOutOfRangeException("inputOffset", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (inputCount < 0 || inputCount > inputBuffer.Length)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
-			}
-			if (inputBuffer.Length - inputCount < inputOffset)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (this._inputBuffer == null)
-			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a disposed object."));
-			}
-			byte[] array = new byte[inputCount];
-			int num;
-			if (this._whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
-			{
-				array = this.DiscardWhiteSpaces(inputBuffer, inputOffset, inputCount);
-				num = array.Length;
-			}
-			else
-			{
-				Buffer.InternalBlockCopy(inputBuffer, inputOffset, array, 0, inputCount);
-				num = inputCount;
-			}
-			if (num + this._inputIndex < 4)
-			{
-				Buffer.InternalBlockCopy(array, 0, this._inputBuffer, this._inputIndex, num);
-				this._inputIndex += num;
-				return 0;
-			}
-			int num2 = (num + this._inputIndex) / 4;
-			byte[] array2 = new byte[this._inputIndex + num];
-			Buffer.InternalBlockCopy(this._inputBuffer, 0, array2, 0, this._inputIndex);
-			Buffer.InternalBlockCopy(array, 0, array2, this._inputIndex, num);
-			this._inputIndex = (num + this._inputIndex) % 4;
-			Buffer.InternalBlockCopy(array, num - this._inputIndex, this._inputBuffer, 0, this._inputIndex);
-			byte[] array3 = Convert.FromBase64CharArray(Encoding.ASCII.GetChars(array2, 0, 4 * num2), 0, 4 * num2);
-			Buffer.BlockCopy(array3, 0, outputBuffer, outputOffset, array3.Length);
-			return array3.Length;
 		}
 
-		public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+		public int OutputBlockSize
 		{
-			if (inputBuffer == null)
+			get
 			{
-				throw new ArgumentNullException("inputBuffer");
+				return 3;
 			}
-			if (inputOffset < 0)
-			{
-				throw new ArgumentOutOfRangeException("inputOffset", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (inputCount < 0 || inputCount > inputBuffer.Length)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Value was invalid."));
-			}
-			if (inputBuffer.Length - inputCount < inputOffset)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (this._inputBuffer == null)
-			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a disposed object."));
-			}
-			byte[] array = new byte[inputCount];
-			int num;
-			if (this._whitespaces == FromBase64TransformMode.IgnoreWhiteSpaces)
-			{
-				array = this.DiscardWhiteSpaces(inputBuffer, inputOffset, inputCount);
-				num = array.Length;
-			}
-			else
-			{
-				Buffer.InternalBlockCopy(inputBuffer, inputOffset, array, 0, inputCount);
-				num = inputCount;
-			}
-			if (num + this._inputIndex < 4)
-			{
-				this.Reset();
-				return EmptyArray<byte>.Value;
-			}
-			int num2 = (num + this._inputIndex) / 4;
-			byte[] array2 = new byte[this._inputIndex + num];
-			Buffer.InternalBlockCopy(this._inputBuffer, 0, array2, 0, this._inputIndex);
-			Buffer.InternalBlockCopy(array, 0, array2, this._inputIndex, num);
-			this._inputIndex = (num + this._inputIndex) % 4;
-			Buffer.InternalBlockCopy(array, num - this._inputIndex, this._inputBuffer, 0, this._inputIndex);
-			byte[] array3 = Convert.FromBase64CharArray(Encoding.ASCII.GetChars(array2, 0, 4 * num2), 0, 4 * num2);
-			this.Reset();
-			return array3;
-		}
-
-		private byte[] DiscardWhiteSpaces(byte[] inputBuffer, int inputOffset, int inputCount)
-		{
-			int num = 0;
-			for (int i = 0; i < inputCount; i++)
-			{
-				if (char.IsWhiteSpace((char)inputBuffer[inputOffset + i]))
-				{
-					num++;
-				}
-			}
-			byte[] array = new byte[inputCount - num];
-			num = 0;
-			for (int i = 0; i < inputCount; i++)
-			{
-				if (!char.IsWhiteSpace((char)inputBuffer[inputOffset + i]))
-				{
-					array[num++] = inputBuffer[inputOffset + i];
-				}
-			}
-			return array;
-		}
-
-		public void Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		private void Reset()
-		{
-			this._inputIndex = 0;
 		}
 
 		public void Clear()
 		{
-			this.Dispose();
+			this.Dispose(true);
 		}
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (!this.m_disposed)
 			{
-				if (this._inputBuffer != null)
+				if (this.accumulator != null)
 				{
-					Array.Clear(this._inputBuffer, 0, this._inputBuffer.Length);
+					Array.Clear(this.accumulator, 0, this.accumulator.Length);
 				}
-				this._inputBuffer = null;
-				this._inputIndex = 0;
+				if (disposing)
+				{
+					this.accumulator = null;
+				}
+				this.m_disposed = true;
 			}
 		}
 
-		~FromBase64Transform()
+		private byte lookup(byte input)
 		{
-			this.Dispose(false);
+			if ((int)input >= this.lookupTable.Length)
+			{
+				throw new FormatException(Locale.GetText("Invalid character in a Base-64 string."));
+			}
+			byte b = this.lookupTable[(int)input];
+			if (b == 255)
+			{
+				throw new FormatException(Locale.GetText("Invalid character in a Base-64 string."));
+			}
+			return b;
 		}
 
-		private byte[] _inputBuffer = new byte[4];
+		private int ProcessBlock(byte[] output, int offset)
+		{
+			int num = 0;
+			if (this.accumulator[3] == 61)
+			{
+				num++;
+			}
+			if (this.accumulator[2] == 61)
+			{
+				num++;
+			}
+			this.lookupTable = Base64Constants.DecodeTable;
+			switch (num)
+			{
+			case 0:
+			{
+				int num2 = (int)this.lookup(this.accumulator[0]);
+				int num3 = (int)this.lookup(this.accumulator[1]);
+				int num4 = (int)this.lookup(this.accumulator[2]);
+				int num5 = (int)this.lookup(this.accumulator[3]);
+				output[offset++] = (byte)((num2 << 2) | (num3 >> 4));
+				output[offset++] = (byte)((num3 << 4) | (num4 >> 2));
+				output[offset] = (byte)((num4 << 6) | num5);
+				break;
+			}
+			case 1:
+			{
+				int num2 = (int)this.lookup(this.accumulator[0]);
+				int num3 = (int)this.lookup(this.accumulator[1]);
+				int num4 = (int)this.lookup(this.accumulator[2]);
+				output[offset++] = (byte)((num2 << 2) | (num3 >> 4));
+				output[offset] = (byte)((num3 << 4) | (num4 >> 2));
+				break;
+			}
+			case 2:
+			{
+				int num2 = (int)this.lookup(this.accumulator[0]);
+				int num3 = (int)this.lookup(this.accumulator[1]);
+				output[offset] = (byte)((num2 << 2) | (num3 >> 4));
+				break;
+			}
+			}
+			return 3 - num;
+		}
 
-		private int _inputIndex;
+		private void CheckInputParameters(byte[] inputBuffer, int inputOffset, int inputCount)
+		{
+			if (inputBuffer == null)
+			{
+				throw new ArgumentNullException("inputBuffer");
+			}
+			if (inputOffset < 0)
+			{
+				throw new ArgumentOutOfRangeException("inputOffset", "< 0");
+			}
+			if (inputCount > inputBuffer.Length)
+			{
+				throw new OutOfMemoryException("inputCount " + Locale.GetText("Overflow"));
+			}
+			if (inputOffset > inputBuffer.Length - inputCount)
+			{
+				throw new ArgumentException("inputOffset", Locale.GetText("Overflow"));
+			}
+			if (inputCount < 0)
+			{
+				throw new OverflowException("inputCount < 0");
+			}
+		}
 
-		private FromBase64TransformMode _whitespaces;
+		public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+		{
+			if (this.m_disposed)
+			{
+				throw new ObjectDisposedException("FromBase64Transform");
+			}
+			this.CheckInputParameters(inputBuffer, inputOffset, inputCount);
+			if (outputBuffer == null || outputOffset < 0)
+			{
+				throw new FormatException("outputBuffer");
+			}
+			int num = 0;
+			while (inputCount > 0)
+			{
+				if (this.accPtr < 4)
+				{
+					byte b = inputBuffer[inputOffset++];
+					if (this.mode == FromBase64TransformMode.IgnoreWhiteSpaces)
+					{
+						if (!char.IsWhiteSpace((char)b))
+						{
+							this.accumulator[this.accPtr++] = b;
+						}
+					}
+					else
+					{
+						this.accumulator[this.accPtr++] = b;
+					}
+				}
+				if (this.accPtr == 4)
+				{
+					num += this.ProcessBlock(outputBuffer, outputOffset);
+					outputOffset += 3;
+					this.accPtr = 0;
+				}
+				inputCount--;
+			}
+			return num;
+		}
+
+		public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+		{
+			if (this.m_disposed)
+			{
+				throw new ObjectDisposedException("FromBase64Transform");
+			}
+			this.CheckInputParameters(inputBuffer, inputOffset, inputCount);
+			int num = 0;
+			int num2 = 0;
+			if (this.mode == FromBase64TransformMode.IgnoreWhiteSpaces)
+			{
+				int num3 = inputOffset;
+				for (int i = 0; i < inputCount; i++)
+				{
+					if (char.IsWhiteSpace((char)inputBuffer[num3]))
+					{
+						num++;
+					}
+					num3++;
+				}
+				if (num == inputCount)
+				{
+					return new byte[0];
+				}
+				int num4 = inputOffset + inputCount - 1;
+				int j = Math.Min(2, inputCount);
+				while (j > 0)
+				{
+					char c = (char)inputBuffer[num4--];
+					if (c == '=')
+					{
+						num2++;
+						j--;
+					}
+					else if (!char.IsWhiteSpace(c))
+					{
+						break;
+					}
+				}
+			}
+			else
+			{
+				if (inputBuffer[inputOffset + inputCount - 1] == 61)
+				{
+					num2++;
+				}
+				if (inputBuffer[inputOffset + inputCount - 2] == 61)
+				{
+					num2++;
+				}
+			}
+			if (inputCount < 4 && num2 < 2)
+			{
+				if (this.accPtr > 2 && this.accumulator[3] == 61)
+				{
+					num2++;
+				}
+				if (this.accPtr > 1 && this.accumulator[2] == 61)
+				{
+					num2++;
+				}
+			}
+			int num5 = (this.accPtr + inputCount - num >> 2) * 3 - num2;
+			if (num5 <= 0)
+			{
+				return new byte[0];
+			}
+			byte[] array = new byte[num5];
+			this.TransformBlock(inputBuffer, inputOffset, inputCount, array, 0);
+			return array;
+		}
+
+		private const byte TerminatorByte = 61;
+
+		private FromBase64TransformMode mode;
+
+		private byte[] accumulator;
+
+		private int accPtr;
+
+		private bool m_disposed;
+
+		private byte[] lookupTable;
 	}
 }

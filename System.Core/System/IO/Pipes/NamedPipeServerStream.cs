@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Security.Permissions;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	[global::System.MonoTODO("working only on win32 right now")]
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
+	[MonoTODO("working only on win32 right now")]
+	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 	public sealed class NamedPipeServerStream : PipeStream
 	{
 		public NamedPipeServerStream(string pipeName)
@@ -50,20 +48,24 @@ namespace System.IO.Pipes
 		{
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize, PipeSecurity pipeSecurity, HandleInheritability inheritability, PipeAccessRights additionalAccessRights)
 			: base(direction, transmissionMode, outBufferSize)
 		{
+			if (pipeSecurity != null)
+			{
+				throw base.ThrowACLException();
+			}
 			PipeAccessRights pipeAccessRights = PipeStream.ToAccessRights(direction) | additionalAccessRights;
 			if (PipeStream.IsWindows)
 			{
-				this.impl = new Win32NamedPipeServer(this, pipeName, maxNumberOfServerInstances, transmissionMode, pipeAccessRights, options, inBufferSize, outBufferSize, pipeSecurity, inheritability);
+				this.impl = new Win32NamedPipeServer(this, pipeName, maxNumberOfServerInstances, transmissionMode, pipeAccessRights, options, inBufferSize, outBufferSize, inheritability);
 			}
 			else
 			{
 				this.impl = new UnixNamedPipeServer(this, pipeName, maxNumberOfServerInstances, transmissionMode, pipeAccessRights, options, inBufferSize, outBufferSize, inheritability);
 			}
-			base.InitializeHandle(this.impl.Handle, false, (options & PipeOptions.Asynchronous) > PipeOptions.None);
+			base.InitializeHandle(this.impl.Handle, false, (options & PipeOptions.Asynchronous) != PipeOptions.None);
 		}
 
 		public NamedPipeServerStream(PipeDirection direction, bool isAsync, bool isConnected, SafePipeHandle safePipeHandle)
@@ -81,17 +83,13 @@ namespace System.IO.Pipes
 			base.InitializeHandle(safePipeHandle, true, isAsync);
 		}
 
-		~NamedPipeServerStream()
-		{
-		}
-
 		public void Disconnect()
 		{
 			this.impl.Disconnect();
 		}
 
-		[global::System.MonoTODO]
-		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlPrincipal)]
+		[MonoTODO]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
 		public void RunAsClient(PipeStreamImpersonationWorker impersonationWorker)
 		{
 			throw new NotImplementedException();
@@ -103,25 +101,14 @@ namespace System.IO.Pipes
 			base.IsConnected = true;
 		}
 
-		public Task WaitForConnectionAsync()
-		{
-			return this.WaitForConnectionAsync(CancellationToken.None);
-		}
-
-		[global::System.MonoTODO]
-		public Task WaitForConnectionAsync(CancellationToken cancellationToken)
-		{
-			throw new NotImplementedException();
-		}
-
-		[global::System.MonoTODO]
-		[SecurityPermission(SecurityAction.Demand, Flags = SecurityPermissionFlag.ControlPrincipal)]
+		[MonoTODO]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
 		public string GetImpersonationUserName()
 		{
 			throw new NotImplementedException();
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 		public IAsyncResult BeginWaitForConnection(AsyncCallback callback, object state)
 		{
 			if (this.wait_connect_delegate == null)
@@ -136,7 +123,8 @@ namespace System.IO.Pipes
 			this.wait_connect_delegate.EndInvoke(asyncResult);
 		}
 
-		public const int MaxAllowedServerInstances = -1;
+		[MonoTODO]
+		public const int MaxAllowedServerInstances = 1;
 
 		private INamedPipeServer impl;
 

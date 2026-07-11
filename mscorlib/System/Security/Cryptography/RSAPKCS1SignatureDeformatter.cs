@@ -52,7 +52,7 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("rgbSignature");
 			}
-			return PKCS1.Verify_v15(this.rsa, this.hashName, rgbHash, rgbSignature);
+			return PKCS1.Verify_v15(this.rsa, HashAlgorithm.Create(this.hashName), rgbHash, rgbSignature);
 		}
 
 		private RSA rsa;

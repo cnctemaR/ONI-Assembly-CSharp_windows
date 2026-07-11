@@ -6,11 +6,6 @@ namespace System.Runtime.Remoting.Lifetime
 	[ComVisible(true)]
 	public sealed class LifetimeServices
 	{
-		[Obsolete("Call the static methods directly on this type instead", true)]
-		public LifetimeServices()
-		{
-		}
-
 		public static TimeSpan LeaseManagerPollTime
 		{
 			get

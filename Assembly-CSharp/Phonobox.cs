@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
-using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -21,8 +20,6 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedW
 			PhonoboxWorkable phonoboxWorkable = gameObject.AddOrGet<PhonoboxWorkable>();
 			phonoboxWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Dancing);
 			phonoboxWorkable.owner = this;
-			phonoboxWorkable.basePriority = RELAXATION.PRIORITY.TIER3;
-			phonoboxWorkable.specificEffect = "Danced";
 			this.workables[i] = phonoboxWorkable;
 		}
 	}

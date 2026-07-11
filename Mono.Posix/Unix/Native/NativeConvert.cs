@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
 namespace Mono.Unix.Native
@@ -9,6 +7,10 @@ namespace Mono.Unix.Native
 	[CLSCompliant(false)]
 	public sealed class NativeConvert
 	{
+		private NativeConvert()
+		{
+		}
+
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromRealTimeSignum")]
 		private static extern int FromRealTimeSignum(int offset, out int rval);
 
@@ -29,7 +31,8 @@ namespace Mono.Unix.Native
 
 		public static FilePermissions FromOctalPermissionString(string value)
 		{
-			return NativeConvert.ToFilePermissions(Convert.ToUInt32(value, 8));
+			uint num = Convert.ToUInt32(value, 8);
+			return NativeConvert.ToFilePermissions(num);
 		}
 
 		public static string ToOctalPermissionString(FilePermissions value)
@@ -62,12 +65,11 @@ namespace Mono.Unix.Native
 
 		private static FilePermissions GetUnixPermissionDevice(char value)
 		{
-			if (value <= 'd')
+			switch (value)
 			{
-				if (value == '-')
-				{
-					return FilePermissions.S_IFREG;
-				}
+			case 'p':
+				return FilePermissions.S_IFIFO;
+			default:
 				switch (value)
 				{
 				case 'b':
@@ -76,24 +78,21 @@ namespace Mono.Unix.Native
 					return FilePermissions.S_IFCHR;
 				case 'd':
 					return FilePermissions.S_IFDIR;
-				}
-			}
-			else
-			{
-				if (value == 'l')
-				{
+				default:
+					if (value == '-')
+					{
+						return FilePermissions.S_IFREG;
+					}
+					if (value != 'l')
+					{
+						throw new ArgumentException("value", "invalid device specification: " + value);
+					}
 					return FilePermissions.S_IFLNK;
 				}
-				if (value == 'p')
-				{
-					return FilePermissions.S_IFIFO;
-				}
-				if (value == 's')
-				{
-					return FilePermissions.S_IFSOCK;
-				}
+				break;
+			case 's':
+				return FilePermissions.S_IFSOCK;
 			}
-			throw new ArgumentException("value", "invalid device specification: " + value.ToString());
 		}
 
 		private static FilePermissions GetUnixPermissionGroup(char read, FilePermissions readb, char write, FilePermissions writeb, char exec, FilePermissions execb, char xboth, char xbitonly, FilePermissions xbit)
@@ -127,60 +126,60 @@ namespace Mono.Unix.Native
 			char[] array = new char[] { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-' };
 			bool flag = true;
 			FilePermissions filePermissions = value & FilePermissions.S_IFMT;
-			if (filePermissions <= FilePermissions.S_IFDIR)
+			if (filePermissions != FilePermissions.S_IFIFO)
 			{
-				if (filePermissions == FilePermissions.S_IFIFO)
+				if (filePermissions != FilePermissions.S_IFCHR)
 				{
-					array[0] = 'p';
-					goto IL_009E;
+					if (filePermissions != FilePermissions.S_IFDIR)
+					{
+						if (filePermissions != FilePermissions.S_IFBLK)
+						{
+							if (filePermissions != FilePermissions.S_IFREG)
+							{
+								if (filePermissions != FilePermissions.S_IFLNK)
+								{
+									if (filePermissions != FilePermissions.S_IFSOCK)
+									{
+										flag = false;
+									}
+									else
+									{
+										array[0] = 's';
+									}
+								}
+								else
+								{
+									array[0] = 'l';
+								}
+							}
+							else
+							{
+								array[0] = '-';
+							}
+						}
+						else
+						{
+							array[0] = 'b';
+						}
+					}
+					else
+					{
+						array[0] = 'd';
+					}
 				}
-				if (filePermissions == FilePermissions.S_IFCHR)
+				else
 				{
 					array[0] = 'c';
-					goto IL_009E;
-				}
-				if (filePermissions == FilePermissions.S_IFDIR)
-				{
-					array[0] = 'd';
-					goto IL_009E;
-				}
-			}
-			else if (filePermissions <= FilePermissions.S_IFREG)
-			{
-				if (filePermissions == FilePermissions.S_IFBLK)
-				{
-					array[0] = 'b';
-					goto IL_009E;
-				}
-				if (filePermissions == FilePermissions.S_IFREG)
-				{
-					array[0] = '-';
-					goto IL_009E;
 				}
 			}
 			else
 			{
-				if (filePermissions == FilePermissions.S_IFLNK)
-				{
-					array[0] = 'l';
-					goto IL_009E;
-				}
-				if (filePermissions == FilePermissions.S_IFSOCK)
-				{
-					array[0] = 's';
-					goto IL_009E;
-				}
+				array[0] = 'p';
 			}
-			flag = false;
-			IL_009E:
 			NativeConvert.SetUnixPermissionGroup(value, array, 1, FilePermissions.S_IRUSR, FilePermissions.S_IWUSR, FilePermissions.S_IXUSR, 's', 'S', FilePermissions.S_ISUID);
 			NativeConvert.SetUnixPermissionGroup(value, array, 4, FilePermissions.S_IRGRP, FilePermissions.S_IWGRP, FilePermissions.S_IXGRP, 's', 'S', FilePermissions.S_ISGID);
 			NativeConvert.SetUnixPermissionGroup(value, array, 7, FilePermissions.S_IROTH, FilePermissions.S_IWOTH, FilePermissions.S_IXOTH, 't', 'T', FilePermissions.S_ISVTX);
-			if (!flag)
-			{
-				return new string(array, 1, 9);
-			}
-			return new string(array);
+			return (!flag) ? new string(array, 1, 9) : new string(array);
 		}
 
 		private static void SetUnixPermissionGroup(FilePermissions value, char[] access, int index, FilePermissions read, FilePermissions write, FilePermissions exec, char both, char setonly, FilePermissions setxbit)
@@ -220,11 +219,6 @@ namespace Mono.Unix.Native
 			return NativeConvert.FromTimeT(time);
 		}
 
-		public static DateTime ToDateTime(long time, long nanoTime)
-		{
-			return NativeConvert.FromTimeT(time).AddMilliseconds((double)(nanoTime / 1000L));
-		}
-
 		public static long FromDateTime(DateTime time)
 		{
 			return NativeConvert.ToTimeT(time);
@@ -232,20 +226,12 @@ namespace Mono.Unix.Native
 
 		public static DateTime FromTimeT(long time)
 		{
-			return NativeConvert.UnixEpoch.AddSeconds((double)time).ToLocalTime();
+			return NativeConvert.LocalUnixEpoch.AddSeconds((double)time + NativeConvert.LocalUtcOffset.TotalSeconds);
 		}
 
 		public static long ToTimeT(DateTime time)
 		{
-			if (time.Kind == DateTimeKind.Unspecified)
-			{
-				throw new ArgumentException("DateTimeKind.Unspecified is not supported. Use Local or Utc times.", "time");
-			}
-			if (time.Kind == DateTimeKind.Local)
-			{
-				time = time.ToUniversalTime();
-			}
-			return (long)(time - NativeConvert.UnixEpoch).TotalSeconds;
+			return (long)(time.Subtract(NativeConvert.LocalUnixEpoch) - NativeConvert.LocalUtcOffset).TotalSeconds;
 		}
 
 		public static OpenFlags ToOpenFlags(FileMode mode, FileAccess access)
@@ -382,22 +368,6 @@ namespace Mono.Unix.Native
 			return text;
 		}
 
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromStat")]
-		private static extern int FromStat(ref Stat source, IntPtr destination);
-
-		public static bool TryCopy(ref Stat source, IntPtr destination)
-		{
-			return NativeConvert.FromStat(ref source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToStat")]
-		private static extern int ToStat(IntPtr source, out Stat destination);
-
-		public static bool TryCopy(IntPtr source, out Stat destination)
-		{
-			return NativeConvert.ToStat(source, out destination) == 0;
-		}
-
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromStatvfs")]
 		private static extern int FromStatvfs(ref Statvfs source, IntPtr destination);
 
@@ -412,149 +382,6 @@ namespace Mono.Unix.Native
 		public static bool TryCopy(IntPtr source, out Statvfs destination)
 		{
 			return NativeConvert.ToStatvfs(source, out destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromInAddr")]
-		private static extern int FromInAddr(ref InAddr source, IntPtr destination);
-
-		public static bool TryCopy(ref InAddr source, IntPtr destination)
-		{
-			return NativeConvert.FromInAddr(ref source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToInAddr")]
-		private static extern int ToInAddr(IntPtr source, out InAddr destination);
-
-		public static bool TryCopy(IntPtr source, out InAddr destination)
-		{
-			return NativeConvert.ToInAddr(source, out destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromIn6Addr")]
-		private static extern int FromIn6Addr(ref In6Addr source, IntPtr destination);
-
-		public static bool TryCopy(ref In6Addr source, IntPtr destination)
-		{
-			return NativeConvert.FromIn6Addr(ref source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToIn6Addr")]
-		private static extern int ToIn6Addr(IntPtr source, out In6Addr destination);
-
-		public static bool TryCopy(IntPtr source, out In6Addr destination)
-		{
-			return NativeConvert.ToIn6Addr(source, out destination) == 0;
-		}
-
-		public static InAddr ToInAddr(IPAddress address)
-		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (address.AddressFamily != AddressFamily.InterNetwork)
-			{
-				throw new ArgumentException("address", "address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork");
-			}
-			return new InAddr(address.GetAddressBytes());
-		}
-
-		public static IPAddress ToIPAddress(InAddr address)
-		{
-			byte[] array = new byte[4];
-			address.CopyTo(array, 0);
-			return new IPAddress(array);
-		}
-
-		public static In6Addr ToIn6Addr(IPAddress address)
-		{
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (address.AddressFamily != AddressFamily.InterNetworkV6)
-			{
-				throw new ArgumentException("address", "address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6");
-			}
-			return new In6Addr(address.GetAddressBytes());
-		}
-
-		public static IPAddress ToIPAddress(In6Addr address)
-		{
-			byte[] array = new byte[16];
-			address.CopyTo(array, 0);
-			return new IPAddress(array);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromSockaddr")]
-		private unsafe static extern int FromSockaddr(_SockaddrHeader* source, IntPtr destination);
-
-		public unsafe static bool TryCopy(Sockaddr source, IntPtr destination)
-		{
-			if (source == null)
-			{
-				throw new ArgumentNullException("source");
-			}
-			byte[] dynamicData = Sockaddr.GetDynamicData(source);
-			if (source.type == (SockaddrType)32769)
-			{
-				Marshal.Copy(dynamicData, 0, destination, (int)source.GetDynamicLength());
-				return true;
-			}
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(source).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] array;
-				byte* ptr3;
-				if ((array = dynamicData) == null || array.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &array[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(source, ptr3, false);
-				return NativeConvert.FromSockaddr(Sockaddr.GetNative(&sockaddrDynamic, ptr2), destination) == 0;
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToSockaddr")]
-		private unsafe static extern int ToSockaddr(IntPtr source, long size, _SockaddrHeader* destination);
-
-		public unsafe static bool TryCopy(IntPtr source, long size, Sockaddr destination)
-		{
-			if (destination == null)
-			{
-				throw new ArgumentNullException("destination");
-			}
-			byte[] dynamicData = Sockaddr.GetDynamicData(destination);
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(destination).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData2;
-				byte* ptr3;
-				if ((dynamicData2 = Sockaddr.GetDynamicData(destination)) == null || dynamicData2.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData2[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(destination, ptr3, true);
-				int num = NativeConvert.ToSockaddr(source, size, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-				sockaddrDynamic.Update(destination);
-				if (num == 0 && destination.type == (SockaddrType)32769)
-				{
-					Marshal.Copy(source, dynamicData, 0, (int)destination.GetDynamicLength());
-				}
-				return num == 0;
-			}
-		}
-
-		private NativeConvert()
-		{
 		}
 
 		private static void ThrowArgumentException(object value)
@@ -596,58 +423,6 @@ namespace Mono.Unix.Native
 				NativeConvert.ThrowArgumentException(value);
 			}
 			return accessModes;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromAtFlags")]
-		private static extern int FromAtFlags(AtFlags value, out int rval);
-
-		public static bool TryFromAtFlags(AtFlags value, out int rval)
-		{
-			return NativeConvert.FromAtFlags(value, out rval) == 0;
-		}
-
-		public static int FromAtFlags(AtFlags value)
-		{
-			int num;
-			if (NativeConvert.FromAtFlags(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToAtFlags")]
-		private static extern int ToAtFlags(int value, out AtFlags rval);
-
-		public static bool TryToAtFlags(int value, out AtFlags rval)
-		{
-			return NativeConvert.ToAtFlags(value, out rval) == 0;
-		}
-
-		public static AtFlags ToAtFlags(int value)
-		{
-			AtFlags atFlags;
-			if (NativeConvert.ToAtFlags(value, out atFlags) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return atFlags;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromCmsghdr")]
-		private static extern int FromCmsghdr(ref Cmsghdr source, IntPtr destination);
-
-		public static bool TryCopy(ref Cmsghdr source, IntPtr destination)
-		{
-			return NativeConvert.FromCmsghdr(ref source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToCmsghdr")]
-		private static extern int ToCmsghdr(IntPtr source, out Cmsghdr destination);
-
-		public static bool TryCopy(IntPtr source, out Cmsghdr destination)
-		{
-			return NativeConvert.ToCmsghdr(source, out destination) == 0;
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromConfstrName")]
@@ -720,78 +495,6 @@ namespace Mono.Unix.Native
 				NativeConvert.ThrowArgumentException(value);
 			}
 			return directoryNotifyFlags;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromEpollEvents")]
-		private static extern int FromEpollEvents(EpollEvents value, out uint rval);
-
-		public static bool TryFromEpollEvents(EpollEvents value, out uint rval)
-		{
-			return NativeConvert.FromEpollEvents(value, out rval) == 0;
-		}
-
-		public static uint FromEpollEvents(EpollEvents value)
-		{
-			uint num;
-			if (NativeConvert.FromEpollEvents(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToEpollEvents")]
-		private static extern int ToEpollEvents(uint value, out EpollEvents rval);
-
-		public static bool TryToEpollEvents(uint value, out EpollEvents rval)
-		{
-			return NativeConvert.ToEpollEvents(value, out rval) == 0;
-		}
-
-		public static EpollEvents ToEpollEvents(uint value)
-		{
-			EpollEvents epollEvents;
-			if (NativeConvert.ToEpollEvents(value, out epollEvents) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return epollEvents;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromEpollFlags")]
-		private static extern int FromEpollFlags(EpollFlags value, out int rval);
-
-		public static bool TryFromEpollFlags(EpollFlags value, out int rval)
-		{
-			return NativeConvert.FromEpollFlags(value, out rval) == 0;
-		}
-
-		public static int FromEpollFlags(EpollFlags value)
-		{
-			int num;
-			if (NativeConvert.FromEpollFlags(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToEpollFlags")]
-		private static extern int ToEpollFlags(int value, out EpollFlags rval);
-
-		public static bool TryToEpollFlags(int value, out EpollFlags rval)
-		{
-			return NativeConvert.ToEpollFlags(value, out rval) == 0;
-		}
-
-		public static EpollFlags ToEpollFlags(int value)
-		{
-			EpollFlags epollFlags;
-			if (NativeConvert.ToEpollFlags(value, out epollFlags) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return epollFlags;
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromErrno")]
@@ -918,38 +621,6 @@ namespace Mono.Unix.Native
 			return NativeConvert.ToFlock(source, out destination) == 0;
 		}
 
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromIovec")]
-		private static extern int FromIovec(ref Iovec source, IntPtr destination);
-
-		public static bool TryCopy(ref Iovec source, IntPtr destination)
-		{
-			return NativeConvert.FromIovec(ref source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToIovec")]
-		private static extern int ToIovec(IntPtr source, out Iovec destination);
-
-		public static bool TryCopy(IntPtr source, out Iovec destination)
-		{
-			return NativeConvert.ToIovec(source, out destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromLinger")]
-		private static extern int FromLinger(ref Linger source, IntPtr destination);
-
-		public static bool TryCopy(ref Linger source, IntPtr destination)
-		{
-			return NativeConvert.FromLinger(ref source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToLinger")]
-		private static extern int ToLinger(IntPtr source, out Linger destination);
-
-		public static bool TryCopy(IntPtr source, out Linger destination)
-		{
-			return NativeConvert.ToLinger(source, out destination) == 0;
-		}
-
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromLockType")]
 		private static extern int FromLockType(LockType value, out short rval);
 
@@ -1020,42 +691,6 @@ namespace Mono.Unix.Native
 				NativeConvert.ThrowArgumentException(value);
 			}
 			return lockfCommand;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromMessageFlags")]
-		private static extern int FromMessageFlags(MessageFlags value, out int rval);
-
-		public static bool TryFromMessageFlags(MessageFlags value, out int rval)
-		{
-			return NativeConvert.FromMessageFlags(value, out rval) == 0;
-		}
-
-		public static int FromMessageFlags(MessageFlags value)
-		{
-			int num;
-			if (NativeConvert.FromMessageFlags(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToMessageFlags")]
-		private static extern int ToMessageFlags(int value, out MessageFlags rval);
-
-		public static bool TryToMessageFlags(int value, out MessageFlags rval)
-		{
-			return NativeConvert.ToMessageFlags(value, out rval) == 0;
-		}
-
-		public static MessageFlags ToMessageFlags(int value)
-		{
-			MessageFlags messageFlags;
-			if (NativeConvert.ToMessageFlags(value, out messageFlags) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return messageFlags;
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromMlockallFlags")]
@@ -1506,42 +1141,6 @@ namespace Mono.Unix.Native
 			return seekFlags;
 		}
 
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromShutdownOption")]
-		private static extern int FromShutdownOption(ShutdownOption value, out int rval);
-
-		public static bool TryFromShutdownOption(ShutdownOption value, out int rval)
-		{
-			return NativeConvert.FromShutdownOption(value, out rval) == 0;
-		}
-
-		public static int FromShutdownOption(ShutdownOption value)
-		{
-			int num;
-			if (NativeConvert.FromShutdownOption(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToShutdownOption")]
-		private static extern int ToShutdownOption(int value, out ShutdownOption rval);
-
-		public static bool TryToShutdownOption(int value, out ShutdownOption rval)
-		{
-			return NativeConvert.ToShutdownOption(value, out rval) == 0;
-		}
-
-		public static ShutdownOption ToShutdownOption(int value)
-		{
-			ShutdownOption shutdownOption;
-			if (NativeConvert.ToShutdownOption(value, out shutdownOption) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return shutdownOption;
-		}
-
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromSignum")]
 		private static extern int FromSignum(Signum value, out int rval);
 
@@ -1578,72 +1177,20 @@ namespace Mono.Unix.Native
 			return signum;
 		}
 
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromSockaddrIn")]
-		private static extern int FromSockaddrIn(SockaddrIn source, IntPtr destination);
+		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromStat")]
+		private static extern int FromStat(ref Stat source, IntPtr destination);
 
-		public static bool TryCopy(SockaddrIn source, IntPtr destination)
+		public static bool TryCopy(ref Stat source, IntPtr destination)
 		{
-			return NativeConvert.FromSockaddrIn(source, destination) == 0;
+			return NativeConvert.FromStat(ref source, destination) == 0;
 		}
 
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToSockaddrIn")]
-		private static extern int ToSockaddrIn(IntPtr source, SockaddrIn destination);
+		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToStat")]
+		private static extern int ToStat(IntPtr source, out Stat destination);
 
-		public static bool TryCopy(IntPtr source, SockaddrIn destination)
+		public static bool TryCopy(IntPtr source, out Stat destination)
 		{
-			return NativeConvert.ToSockaddrIn(source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromSockaddrIn6")]
-		private static extern int FromSockaddrIn6(SockaddrIn6 source, IntPtr destination);
-
-		public static bool TryCopy(SockaddrIn6 source, IntPtr destination)
-		{
-			return NativeConvert.FromSockaddrIn6(source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToSockaddrIn6")]
-		private static extern int ToSockaddrIn6(IntPtr source, SockaddrIn6 destination);
-
-		public static bool TryCopy(IntPtr source, SockaddrIn6 destination)
-		{
-			return NativeConvert.ToSockaddrIn6(source, destination) == 0;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromSockaddrType")]
-		private static extern int FromSockaddrType(SockaddrType value, out int rval);
-
-		internal static bool TryFromSockaddrType(SockaddrType value, out int rval)
-		{
-			return NativeConvert.FromSockaddrType(value, out rval) == 0;
-		}
-
-		internal static int FromSockaddrType(SockaddrType value)
-		{
-			int num;
-			if (NativeConvert.FromSockaddrType(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToSockaddrType")]
-		private static extern int ToSockaddrType(int value, out SockaddrType rval);
-
-		internal static bool TryToSockaddrType(int value, out SockaddrType rval)
-		{
-			return NativeConvert.ToSockaddrType(value, out rval) == 0;
-		}
-
-		internal static SockaddrType ToSockaddrType(int value)
-		{
-			SockaddrType sockaddrType;
-			if (NativeConvert.ToSockaddrType(value, out sockaddrType) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return sockaddrType;
+			return NativeConvert.ToStat(source, out destination) == 0;
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromSysconfName")]
@@ -1838,222 +1385,6 @@ namespace Mono.Unix.Native
 			return NativeConvert.ToTimezone(source, out destination) == 0;
 		}
 
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromUnixAddressFamily")]
-		private static extern int FromUnixAddressFamily(UnixAddressFamily value, out int rval);
-
-		public static bool TryFromUnixAddressFamily(UnixAddressFamily value, out int rval)
-		{
-			return NativeConvert.FromUnixAddressFamily(value, out rval) == 0;
-		}
-
-		public static int FromUnixAddressFamily(UnixAddressFamily value)
-		{
-			int num;
-			if (NativeConvert.FromUnixAddressFamily(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToUnixAddressFamily")]
-		private static extern int ToUnixAddressFamily(int value, out UnixAddressFamily rval);
-
-		public static bool TryToUnixAddressFamily(int value, out UnixAddressFamily rval)
-		{
-			return NativeConvert.ToUnixAddressFamily(value, out rval) == 0;
-		}
-
-		public static UnixAddressFamily ToUnixAddressFamily(int value)
-		{
-			UnixAddressFamily unixAddressFamily;
-			if (NativeConvert.ToUnixAddressFamily(value, out unixAddressFamily) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return unixAddressFamily;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromUnixSocketControlMessage")]
-		private static extern int FromUnixSocketControlMessage(UnixSocketControlMessage value, out int rval);
-
-		public static bool TryFromUnixSocketControlMessage(UnixSocketControlMessage value, out int rval)
-		{
-			return NativeConvert.FromUnixSocketControlMessage(value, out rval) == 0;
-		}
-
-		public static int FromUnixSocketControlMessage(UnixSocketControlMessage value)
-		{
-			int num;
-			if (NativeConvert.FromUnixSocketControlMessage(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToUnixSocketControlMessage")]
-		private static extern int ToUnixSocketControlMessage(int value, out UnixSocketControlMessage rval);
-
-		public static bool TryToUnixSocketControlMessage(int value, out UnixSocketControlMessage rval)
-		{
-			return NativeConvert.ToUnixSocketControlMessage(value, out rval) == 0;
-		}
-
-		public static UnixSocketControlMessage ToUnixSocketControlMessage(int value)
-		{
-			UnixSocketControlMessage unixSocketControlMessage;
-			if (NativeConvert.ToUnixSocketControlMessage(value, out unixSocketControlMessage) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return unixSocketControlMessage;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromUnixSocketFlags")]
-		private static extern int FromUnixSocketFlags(UnixSocketFlags value, out int rval);
-
-		public static bool TryFromUnixSocketFlags(UnixSocketFlags value, out int rval)
-		{
-			return NativeConvert.FromUnixSocketFlags(value, out rval) == 0;
-		}
-
-		public static int FromUnixSocketFlags(UnixSocketFlags value)
-		{
-			int num;
-			if (NativeConvert.FromUnixSocketFlags(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToUnixSocketFlags")]
-		private static extern int ToUnixSocketFlags(int value, out UnixSocketFlags rval);
-
-		public static bool TryToUnixSocketFlags(int value, out UnixSocketFlags rval)
-		{
-			return NativeConvert.ToUnixSocketFlags(value, out rval) == 0;
-		}
-
-		public static UnixSocketFlags ToUnixSocketFlags(int value)
-		{
-			UnixSocketFlags unixSocketFlags;
-			if (NativeConvert.ToUnixSocketFlags(value, out unixSocketFlags) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return unixSocketFlags;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromUnixSocketOptionName")]
-		private static extern int FromUnixSocketOptionName(UnixSocketOptionName value, out int rval);
-
-		public static bool TryFromUnixSocketOptionName(UnixSocketOptionName value, out int rval)
-		{
-			return NativeConvert.FromUnixSocketOptionName(value, out rval) == 0;
-		}
-
-		public static int FromUnixSocketOptionName(UnixSocketOptionName value)
-		{
-			int num;
-			if (NativeConvert.FromUnixSocketOptionName(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToUnixSocketOptionName")]
-		private static extern int ToUnixSocketOptionName(int value, out UnixSocketOptionName rval);
-
-		public static bool TryToUnixSocketOptionName(int value, out UnixSocketOptionName rval)
-		{
-			return NativeConvert.ToUnixSocketOptionName(value, out rval) == 0;
-		}
-
-		public static UnixSocketOptionName ToUnixSocketOptionName(int value)
-		{
-			UnixSocketOptionName unixSocketOptionName;
-			if (NativeConvert.ToUnixSocketOptionName(value, out unixSocketOptionName) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return unixSocketOptionName;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromUnixSocketProtocol")]
-		private static extern int FromUnixSocketProtocol(UnixSocketProtocol value, out int rval);
-
-		public static bool TryFromUnixSocketProtocol(UnixSocketProtocol value, out int rval)
-		{
-			return NativeConvert.FromUnixSocketProtocol(value, out rval) == 0;
-		}
-
-		public static int FromUnixSocketProtocol(UnixSocketProtocol value)
-		{
-			int num;
-			if (NativeConvert.FromUnixSocketProtocol(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToUnixSocketProtocol")]
-		private static extern int ToUnixSocketProtocol(int value, out UnixSocketProtocol rval);
-
-		public static bool TryToUnixSocketProtocol(int value, out UnixSocketProtocol rval)
-		{
-			return NativeConvert.ToUnixSocketProtocol(value, out rval) == 0;
-		}
-
-		public static UnixSocketProtocol ToUnixSocketProtocol(int value)
-		{
-			UnixSocketProtocol unixSocketProtocol;
-			if (NativeConvert.ToUnixSocketProtocol(value, out unixSocketProtocol) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return unixSocketProtocol;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromUnixSocketType")]
-		private static extern int FromUnixSocketType(UnixSocketType value, out int rval);
-
-		public static bool TryFromUnixSocketType(UnixSocketType value, out int rval)
-		{
-			return NativeConvert.FromUnixSocketType(value, out rval) == 0;
-		}
-
-		public static int FromUnixSocketType(UnixSocketType value)
-		{
-			int num;
-			if (NativeConvert.FromUnixSocketType(value, out num) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return num;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_ToUnixSocketType")]
-		private static extern int ToUnixSocketType(int value, out UnixSocketType rval);
-
-		public static bool TryToUnixSocketType(int value, out UnixSocketType rval)
-		{
-			return NativeConvert.ToUnixSocketType(value, out rval) == 0;
-		}
-
-		public static UnixSocketType ToUnixSocketType(int value)
-		{
-			UnixSocketType unixSocketType;
-			if (NativeConvert.ToUnixSocketType(value, out unixSocketType) == -1)
-			{
-				NativeConvert.ThrowArgumentException(value);
-			}
-			return unixSocketType;
-		}
-
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_FromUtimbuf")]
 		private static extern int FromUtimbuf(ref Utimbuf source, IntPtr destination);
 
@@ -2142,7 +1473,7 @@ namespace Mono.Unix.Native
 			return xattrFlags;
 		}
 
-		public static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		private const string LIB = "MonoPosixHelper";
 
 		public static readonly DateTime LocalUnixEpoch = new DateTime(1970, 1, 1);
 
@@ -2157,7 +1488,5 @@ namespace Mono.Unix.Native
 			new string[] { "Cannot Truncate and Read", "wb", "w+b" },
 			new string[] { "Cannot Append and Read", "ab", "a+b" }
 		};
-
-		private const string LIB = "MonoPosixHelper";
 	}
 }

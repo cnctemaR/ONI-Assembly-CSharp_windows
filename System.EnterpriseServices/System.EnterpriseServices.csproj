@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D38}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.EnterpriseServices</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>net20</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultItems>False</EnableDefaultItems>
@@ -135,11 +135,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D32}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Transactions\System.Transactions.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D3C}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC840}</Project>
       <Name>System.Transactions</Name>
     </ProjectReference>
   </ItemGroup>

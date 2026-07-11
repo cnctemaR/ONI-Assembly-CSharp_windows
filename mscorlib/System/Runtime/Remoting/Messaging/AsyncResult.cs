@@ -1,38 +1,14 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	[StructLayout(LayoutKind.Sequential)]
-	public class AsyncResult : IAsyncResult, IMessageSink, IThreadPoolWorkItem
+	public class AsyncResult : IAsyncResult, IMessageSink
 	{
 		internal AsyncResult()
 		{
-		}
-
-		internal AsyncResult(WaitCallback cb, object state, bool capture_context)
-		{
-			this.orig_cb = cb;
-			if (capture_context)
-			{
-				StackCrawlMark stackCrawlMark = StackCrawlMark.LookForMe;
-				this.current = ExecutionContext.Capture(ref stackCrawlMark, ExecutionContext.CaptureOptions.IgnoreSyncCtx | ExecutionContext.CaptureOptions.OptimizeDefaultCase);
-				cb = delegate
-				{
-					ExecutionContext.Run(this.current, AsyncResult.ccb, this, true);
-				};
-			}
-			this.async_state = state;
-			this.async_delegate = cb;
-		}
-
-		private static void WaitCallback_Context(object state)
-		{
-			AsyncResult asyncResult = (AsyncResult)state;
-			asyncResult.orig_cb(asyncResult.async_state);
 		}
 
 		public virtual object AsyncState
@@ -150,7 +126,8 @@ namespace System.Runtime.Remoting.Messaging
 			}
 			if (this.async_callback != null)
 			{
-				((AsyncCallback)this.async_callback)(this);
+				AsyncCallback asyncCallback = (AsyncCallback)this.async_callback;
+				asyncCallback(this);
 			}
 			return null;
 		}
@@ -166,18 +143,6 @@ namespace System.Runtime.Remoting.Messaging
 				this.call_message = value;
 			}
 		}
-
-		void IThreadPoolWorkItem.ExecuteWorkItem()
-		{
-			this.Invoke();
-		}
-
-		void IThreadPoolWorkItem.MarkAborted(ThreadAbortException tae)
-		{
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal extern object Invoke();
 
 		private object async_state;
 
@@ -201,16 +166,12 @@ namespace System.Runtime.Remoting.Messaging
 
 		private ExecutionContext original;
 
-		private long add_time;
+		private int gchandle;
 
 		private MonoMethodMessage call_message;
 
 		private IMessageCtrl message_ctrl;
 
 		private IMessage reply_message;
-
-		private WaitCallback orig_cb;
-
-		internal static ContextCallback ccb = new ContextCallback(AsyncResult.WaitCallback_Context);
 	}
 }

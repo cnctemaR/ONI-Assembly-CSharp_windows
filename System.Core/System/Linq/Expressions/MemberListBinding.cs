@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Dynamic.Utils;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
@@ -11,22 +10,26 @@ namespace System.Linq.Expressions
 		internal MemberListBinding(MemberInfo member, ReadOnlyCollection<ElementInit> initializers)
 			: base(MemberBindingType.ListBinding, member)
 		{
-			this.Initializers = initializers;
+			this.initializers = initializers;
 		}
 
-		public ReadOnlyCollection<ElementInit> Initializers { get; }
-
-		public MemberListBinding Update(IEnumerable<ElementInit> initializers)
+		public ReadOnlyCollection<ElementInit> Initializers
 		{
-			if (initializers != null && ExpressionUtils.SameElements<ElementInit>(ref initializers, this.Initializers))
+			get
 			{
-				return this;
+				return this.initializers;
 			}
-			return Expression.ListBind(base.Member, initializers);
 		}
 
-		internal override void ValidateAsDefinedHere(int index)
+		internal override void Emit(EmitContext ec, LocalBuilder local)
 		{
+			LocalBuilder localBuilder = base.EmitLoadMember(ec, local);
+			foreach (ElementInit elementInit in this.initializers)
+			{
+				elementInit.Emit(ec, localBuilder);
+			}
 		}
+
+		private ReadOnlyCollection<ElementInit> initializers;
 	}
 }

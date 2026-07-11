@@ -3,26 +3,22 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Field, Inherited = false)]
 	public sealed class OptionalFieldAttribute : Attribute
 	{
 		public int VersionAdded
 		{
 			get
 			{
-				return this.versionAdded;
+				return this.version_added;
 			}
 			set
 			{
-				if (value < 1)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Version value must be positive."));
-				}
-				this.versionAdded = value;
+				this.version_added = value;
 			}
 		}
 
-		private int versionAdded = 1;
+		private int version_added;
 	}
 }

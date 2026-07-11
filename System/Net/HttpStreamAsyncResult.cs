@@ -68,12 +68,12 @@ namespace System.Net
 			get
 			{
 				object obj = this.locker;
-				bool flag2;
+				bool flag;
 				lock (obj)
 				{
-					flag2 = this.completed;
+					flag = this.completed;
 				}
-				return flag2;
+				return flag;
 			}
 		}
 

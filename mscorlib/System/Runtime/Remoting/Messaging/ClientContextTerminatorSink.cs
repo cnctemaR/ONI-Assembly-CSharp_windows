@@ -22,7 +22,8 @@ namespace System.Runtime.Remoting.Messaging
 			}
 			else
 			{
-				message = RemotingServices.GetMessageTargetIdentity(msg).ChannelSink.SyncProcessMessage(msg);
+				Identity messageTargetIdentity = RemotingServices.GetMessageTargetIdentity(msg);
+				message = messageTargetIdentity.ChannelSink.SyncProcessMessage(msg);
 			}
 			Context.NotifyGlobalDynamicSinks(false, msg, true, false);
 			this._context.NotifyDynamicSinks(false, msg, true, false);
@@ -40,7 +41,8 @@ namespace System.Runtime.Remoting.Messaging
 					replySink = new ClientContextReplySink(this._context, replySink);
 				}
 			}
-			IMessageCtrl messageCtrl = RemotingServices.GetMessageTargetIdentity(msg).ChannelSink.AsyncProcessMessage(msg, replySink);
+			Identity messageTargetIdentity = RemotingServices.GetMessageTargetIdentity(msg);
+			IMessageCtrl messageCtrl = messageTargetIdentity.ChannelSink.AsyncProcessMessage(msg, replySink);
 			if (replySink == null && (this._context.HasDynamicSinks || Context.HasGlobalDynamicSinks))
 			{
 				Context.NotifyGlobalDynamicSinks(false, msg, true, true);

@@ -10,33 +10,38 @@ namespace System.Security.Cryptography
 		{
 			this.ModeValue = CipherMode.CBC;
 			this.PaddingValue = PaddingMode.PKCS7;
+			this.m_disposed = false;
 		}
 
-		public void Dispose()
+		void IDisposable.Dispose()
 		{
 			this.Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
+		~SymmetricAlgorithm()
+		{
+			this.Dispose(false);
+		}
+
 		public void Clear()
 		{
-			((IDisposable)this).Dispose();
+			this.Dispose(true);
 		}
 
 		protected virtual void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (!this.m_disposed)
 			{
 				if (this.KeyValue != null)
 				{
 					Array.Clear(this.KeyValue, 0, this.KeyValue.Length);
 					this.KeyValue = null;
 				}
-				if (this.IVValue != null)
+				if (disposing)
 				{
-					Array.Clear(this.IVValue, 0, this.IVValue.Length);
-					this.IVValue = null;
 				}
+				this.m_disposed = true;
 			}
 		}
 
@@ -48,34 +53,15 @@ namespace System.Security.Cryptography
 			}
 			set
 			{
-				for (int i = 0; i < this.LegalBlockSizesValue.Length; i++)
+				if (!KeySizes.IsLegalKeySize(this.LegalBlockSizesValue, value))
 				{
-					if (this.LegalBlockSizesValue[i].SkipSize == 0)
-					{
-						if (this.LegalBlockSizesValue[i].MinSize == value)
-						{
-							this.BlockSizeValue = value;
-							this.IVValue = null;
-							return;
-						}
-					}
-					else
-					{
-						for (int j = this.LegalBlockSizesValue[i].MinSize; j <= this.LegalBlockSizesValue[i].MaxSize; j += this.LegalBlockSizesValue[i].SkipSize)
-						{
-							if (j == value)
-							{
-								if (this.BlockSizeValue != value)
-								{
-									this.BlockSizeValue = value;
-									this.IVValue = null;
-								}
-								return;
-							}
-						}
-					}
+					throw new CryptographicException(Locale.GetText("block size not supported by algorithm"));
 				}
-				throw new CryptographicException(Environment.GetResourceString("Specified block size is not valid for this algorithm."));
+				if (this.BlockSizeValue != value)
+				{
+					this.BlockSizeValue = value;
+					this.IVValue = null;
+				}
 			}
 		}
 
@@ -87,9 +73,9 @@ namespace System.Security.Cryptography
 			}
 			set
 			{
-				if (value <= 0 || value > this.BlockSizeValue || value % 8 != 0)
+				if (value <= 0 || value > this.BlockSizeValue)
 				{
-					throw new CryptographicException(Environment.GetResourceString("Specified feedback size is invalid."));
+					throw new CryptographicException(Locale.GetText("feedback size larger than block size"));
 				}
 				this.FeedbackSizeValue = value;
 			}
@@ -109,11 +95,11 @@ namespace System.Security.Cryptography
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException("IV");
 				}
-				if (value.Length != this.BlockSizeValue / 8)
+				if (value.Length << 3 != this.BlockSizeValue)
 				{
-					throw new CryptographicException(Environment.GetResourceString("Specified initialization vector (IV) does not match the block size for this algorithm."));
+					throw new CryptographicException(Locale.GetText("IV length is different than block size"));
 				}
 				this.IVValue = (byte[])value.Clone();
 			}
@@ -133,30 +119,15 @@ namespace System.Security.Cryptography
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException("Key");
 				}
-				if (!this.ValidKeySize(value.Length * 8))
+				int num = value.Length << 3;
+				if (!KeySizes.IsLegalKeySize(this.LegalKeySizesValue, num))
 				{
-					throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+					throw new CryptographicException(Locale.GetText("Key size not supported by algorithm"));
 				}
+				this.KeySizeValue = num;
 				this.KeyValue = (byte[])value.Clone();
-				this.KeySizeValue = value.Length * 8;
-			}
-		}
-
-		public virtual KeySizes[] LegalBlockSizes
-		{
-			get
-			{
-				return (KeySizes[])this.LegalBlockSizesValue.Clone();
-			}
-		}
-
-		public virtual KeySizes[] LegalKeySizes
-		{
-			get
-			{
-				return (KeySizes[])this.LegalKeySizesValue.Clone();
 			}
 		}
 
@@ -168,12 +139,28 @@ namespace System.Security.Cryptography
 			}
 			set
 			{
-				if (!this.ValidKeySize(value))
+				if (!KeySizes.IsLegalKeySize(this.LegalKeySizesValue, value))
 				{
-					throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+					throw new CryptographicException(Locale.GetText("Key size not supported by algorithm"));
 				}
 				this.KeySizeValue = value;
 				this.KeyValue = null;
+			}
+		}
+
+		public virtual KeySizes[] LegalBlockSizes
+		{
+			get
+			{
+				return this.LegalBlockSizesValue;
+			}
+		}
+
+		public virtual KeySizes[] LegalKeySizes
+		{
+			get
+			{
+				return this.LegalKeySizesValue;
 			}
 		}
 
@@ -185,9 +172,9 @@ namespace System.Security.Cryptography
 			}
 			set
 			{
-				if (value < CipherMode.CBC || CipherMode.CFB < value)
+				if (!Enum.IsDefined(this.ModeValue.GetType(), value))
 				{
-					throw new CryptographicException(Environment.GetResourceString("Specified cipher mode is not valid for this algorithm."));
+					throw new CryptographicException(Locale.GetText("Cipher mode not available"));
 				}
 				this.ModeValue = value;
 			}
@@ -201,42 +188,35 @@ namespace System.Security.Cryptography
 			}
 			set
 			{
-				if (value < PaddingMode.None || PaddingMode.ISO10126 < value)
+				if (!Enum.IsDefined(this.PaddingValue.GetType(), value))
 				{
-					throw new CryptographicException(Environment.GetResourceString("Specified padding mode is not valid for this algorithm."));
+					throw new CryptographicException(Locale.GetText("Padding mode not available"));
 				}
 				this.PaddingValue = value;
 			}
 		}
 
+		public virtual ICryptoTransform CreateDecryptor()
+		{
+			return this.CreateDecryptor(this.Key, this.IV);
+		}
+
+		public abstract ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV);
+
+		public virtual ICryptoTransform CreateEncryptor()
+		{
+			return this.CreateEncryptor(this.Key, this.IV);
+		}
+
+		public abstract ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV);
+
+		public abstract void GenerateIV();
+
+		public abstract void GenerateKey();
+
 		public bool ValidKeySize(int bitLength)
 		{
-			KeySizes[] legalKeySizes = this.LegalKeySizes;
-			if (legalKeySizes == null)
-			{
-				return false;
-			}
-			for (int i = 0; i < legalKeySizes.Length; i++)
-			{
-				if (legalKeySizes[i].SkipSize == 0)
-				{
-					if (legalKeySizes[i].MinSize == bitLength)
-					{
-						return true;
-					}
-				}
-				else
-				{
-					for (int j = legalKeySizes[i].MinSize; j <= legalKeySizes[i].MaxSize; j += legalKeySizes[i].SkipSize)
-					{
-						if (j == bitLength)
-						{
-							return true;
-						}
-					}
-				}
-			}
-			return false;
+			return KeySizes.IsLegalKeySize(this.LegalKeySizesValue, bitLength);
 		}
 
 		public static SymmetricAlgorithm Create()
@@ -249,29 +229,11 @@ namespace System.Security.Cryptography
 			return (SymmetricAlgorithm)CryptoConfig.CreateFromName(algName);
 		}
 
-		public virtual ICryptoTransform CreateEncryptor()
-		{
-			return this.CreateEncryptor(this.Key, this.IV);
-		}
-
-		public abstract ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV);
-
-		public virtual ICryptoTransform CreateDecryptor()
-		{
-			return this.CreateDecryptor(this.Key, this.IV);
-		}
-
-		public abstract ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV);
-
-		public abstract void GenerateKey();
-
-		public abstract void GenerateIV();
-
 		protected int BlockSizeValue;
 
-		protected int FeedbackSizeValue;
-
 		protected byte[] IVValue;
+
+		protected int KeySizeValue;
 
 		protected byte[] KeyValue;
 
@@ -279,10 +241,12 @@ namespace System.Security.Cryptography
 
 		protected KeySizes[] LegalKeySizesValue;
 
-		protected int KeySizeValue;
+		protected int FeedbackSizeValue;
 
 		protected CipherMode ModeValue;
 
 		protected PaddingMode PaddingValue;
+
+		private bool m_disposed;
 	}
 }

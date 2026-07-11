@@ -32,9 +32,11 @@ namespace Mono.Security.Cryptography
 			if (x == null)
 			{
 				this.Initialize(new BigInteger(p), new BigInteger(g), null, 0, true);
-				return;
 			}
-			this.Initialize(new BigInteger(p), new BigInteger(g), new BigInteger(x), 0, true);
+			else
+			{
+				this.Initialize(new BigInteger(p), new BigInteger(g), new BigInteger(x), 0, true);
+			}
 		}
 
 		public DiffieHellmanManaged(byte[] p, byte[] g, int l)
@@ -70,9 +72,11 @@ namespace Mono.Security.Cryptography
 				{
 					this.m_X = BigInteger.GenerateRandom(secretLen);
 				}
-				return;
 			}
-			this.m_X = x;
+			else
+			{
+				this.m_X = x;
+			}
 		}
 
 		public override byte[] CreateKeyExchange()
@@ -85,9 +89,10 @@ namespace Mono.Security.Cryptography
 
 		public override byte[] DecryptKeyExchange(byte[] keyEx)
 		{
-			BigInteger bigInteger = new BigInteger(keyEx).ModPow(this.m_X, this.m_P);
-			byte[] bytes = bigInteger.GetBytes();
-			bigInteger.Clear();
+			BigInteger bigInteger = new BigInteger(keyEx);
+			BigInteger bigInteger2 = bigInteger.ModPow(this.m_X, this.m_P);
+			byte[] bytes = bigInteger2.GetBytes();
+			bigInteger2.Clear();
 			return bytes;
 		}
 
@@ -111,18 +116,9 @@ namespace Mono.Security.Cryptography
 		{
 			if (!this.m_Disposed)
 			{
-				if (this.m_P != null)
-				{
-					this.m_P.Clear();
-				}
-				if (this.m_G != null)
-				{
-					this.m_G.Clear();
-				}
-				if (this.m_X != null)
-				{
-					this.m_X.Clear();
-				}
+				this.m_P.Clear();
+				this.m_G.Clear();
+				this.m_X.Clear();
 			}
 			this.m_Disposed = true;
 		}
@@ -185,10 +181,12 @@ namespace Mono.Security.Cryptography
 					p = new BigInteger(DiffieHellmanManaged.m_OAKLEY1536);
 				}
 				g = new BigInteger(22U);
-				return;
 			}
-			p = BigInteger.GeneratePseudoPrime(bitlen);
-			g = new BigInteger(3U);
+			else
+			{
+				p = BigInteger.GeneratePseudoPrime(bitlen);
+				g = new BigInteger(3U);
+			}
 		}
 
 		private BigInteger m_P;

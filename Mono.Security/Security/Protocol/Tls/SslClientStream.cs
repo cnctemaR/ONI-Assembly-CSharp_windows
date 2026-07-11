@@ -2,8 +2,6 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading;
-using Mono.Security.Interface;
 using Mono.Security.Protocol.Tls.Handshake;
 using Mono.Security.X509;
 
@@ -11,11 +9,44 @@ namespace Mono.Security.Protocol.Tls
 {
 	public class SslClientStream : SslStreamBase
 	{
+		public SslClientStream(Stream stream, string targetHost, bool ownsStream)
+			: this(stream, targetHost, ownsStream, SecurityProtocolType.Default, null)
+		{
+		}
+
+		public SslClientStream(Stream stream, string targetHost, global::System.Security.Cryptography.X509Certificates.X509Certificate clientCertificate)
+			: this(stream, targetHost, false, SecurityProtocolType.Default, new global::System.Security.Cryptography.X509Certificates.X509CertificateCollection(new global::System.Security.Cryptography.X509Certificates.X509Certificate[] { clientCertificate }))
+		{
+		}
+
+		public SslClientStream(Stream stream, string targetHost, global::System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates)
+			: this(stream, targetHost, false, SecurityProtocolType.Default, clientCertificates)
+		{
+		}
+
+		public SslClientStream(Stream stream, string targetHost, bool ownsStream, SecurityProtocolType securityProtocolType)
+			: this(stream, targetHost, ownsStream, securityProtocolType, new global::System.Security.Cryptography.X509Certificates.X509CertificateCollection())
+		{
+		}
+
+		public SslClientStream(Stream stream, string targetHost, bool ownsStream, SecurityProtocolType securityProtocolType, global::System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates)
+			: base(stream, ownsStream)
+		{
+			if (targetHost == null || targetHost.Length == 0)
+			{
+				throw new ArgumentNullException("targetHost is null or an empty string.");
+			}
+			this.context = new ClientContext(this, securityProtocolType, targetHost, clientCertificates);
+			this.protocol = new ClientRecordProtocol(this.innerStream, (ClientContext)this.context);
+		}
+
 		internal event CertificateValidationCallback ServerCertValidation;
 
 		internal event CertificateSelectionCallback ClientCertSelection;
 
 		internal event PrivateKeySelectionCallback PrivateKeySelection;
+
+		public event CertificateValidationCallback2 ServerCertValidation2;
 
 		internal Stream InputBuffer
 		{
@@ -77,39 +108,6 @@ namespace Mono.Security.Protocol.Tls
 			}
 		}
 
-		public event CertificateValidationCallback2 ServerCertValidation2;
-
-		public SslClientStream(Stream stream, string targetHost, bool ownsStream)
-			: this(stream, targetHost, ownsStream, SecurityProtocolType.Default, null)
-		{
-		}
-
-		public SslClientStream(Stream stream, string targetHost, global::System.Security.Cryptography.X509Certificates.X509Certificate clientCertificate)
-			: this(stream, targetHost, false, SecurityProtocolType.Default, new global::System.Security.Cryptography.X509Certificates.X509CertificateCollection(new global::System.Security.Cryptography.X509Certificates.X509Certificate[] { clientCertificate }))
-		{
-		}
-
-		public SslClientStream(Stream stream, string targetHost, global::System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates)
-			: this(stream, targetHost, false, SecurityProtocolType.Default, clientCertificates)
-		{
-		}
-
-		public SslClientStream(Stream stream, string targetHost, bool ownsStream, SecurityProtocolType securityProtocolType)
-			: this(stream, targetHost, ownsStream, securityProtocolType, new global::System.Security.Cryptography.X509Certificates.X509CertificateCollection())
-		{
-		}
-
-		public SslClientStream(Stream stream, string targetHost, bool ownsStream, SecurityProtocolType securityProtocolType, global::System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates)
-			: base(stream, ownsStream)
-		{
-			if (targetHost == null || targetHost.Length == 0)
-			{
-				throw new ArgumentNullException("targetHost is null or an empty string.");
-			}
-			this.context = new ClientContext(this, securityProtocolType, targetHost, clientCertificates);
-			this.protocol = new ClientRecordProtocol(this.innerStream, (ClientContext)this.context);
-		}
-
 		~SslClientStream()
 		{
 			base.Dispose(false);
@@ -127,169 +125,90 @@ namespace Mono.Security.Protocol.Tls
 			}
 		}
 
-		private void SafeEndReceiveRecord(IAsyncResult ar, bool ignoreEmpty = false)
+		internal override IAsyncResult OnBeginNegotiateHandshake(AsyncCallback callback, object state)
 		{
-			byte[] array = this.protocol.EndReceiveRecord(ar);
-			if (!ignoreEmpty && (array == null || array.Length == 0))
+			IAsyncResult asyncResult;
+			try
+			{
+				if (this.context.HandshakeState != HandshakeState.None)
+				{
+					this.context.Clear();
+				}
+				this.context.SupportedCiphers = CipherSuiteFactory.GetSupportedCiphers(this.context.SecurityProtocol);
+				this.context.HandshakeState = HandshakeState.Started;
+				asyncResult = this.protocol.BeginSendRecord(HandshakeType.ClientHello, callback, state);
+			}
+			catch (TlsException ex)
+			{
+				this.protocol.SendAlert(ex.Alert);
+				throw new IOException("The authentication or decryption has failed.", ex);
+			}
+			catch (Exception ex2)
+			{
+				this.protocol.SendAlert(AlertDescription.InternalError);
+				throw new IOException("The authentication or decryption has failed.", ex2);
+			}
+			return asyncResult;
+		}
+
+		private void SafeReceiveRecord(Stream s)
+		{
+			byte[] array = this.protocol.ReceiveRecord(s);
+			if (array == null || array.Length == 0)
 			{
 				throw new TlsException(AlertDescription.HandshakeFailiure, "The server stopped the handshake.");
 			}
 		}
 
-		internal override IAsyncResult BeginNegotiateHandshake(AsyncCallback callback, object state)
+		internal override void OnNegotiateHandshakeCallback(IAsyncResult asyncResult)
 		{
-			if (this.context.HandshakeState != HandshakeState.None)
+			this.protocol.EndSendRecord(asyncResult);
+			while (this.context.LastHandshakeMsg != HandshakeType.ServerHelloDone)
 			{
-				this.context.Clear();
-			}
-			this.context.SupportedCiphers = CipherSuiteFactory.GetSupportedCiphers(false, this.context.SecurityProtocol);
-			this.context.HandshakeState = HandshakeState.Started;
-			SslClientStream.NegotiateAsyncResult negotiateAsyncResult = new SslClientStream.NegotiateAsyncResult(callback, state, SslClientStream.NegotiateState.SentClientHello);
-			this.protocol.BeginSendRecord(HandshakeType.ClientHello, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-			return negotiateAsyncResult;
-		}
-
-		internal override void EndNegotiateHandshake(IAsyncResult result)
-		{
-			SslClientStream.NegotiateAsyncResult negotiateAsyncResult = result as SslClientStream.NegotiateAsyncResult;
-			if (negotiateAsyncResult == null)
-			{
-				throw new ArgumentNullException();
-			}
-			if (!negotiateAsyncResult.IsCompleted)
-			{
-				negotiateAsyncResult.AsyncWaitHandle.WaitOne();
-			}
-			if (negotiateAsyncResult.CompletedWithError)
-			{
-				throw negotiateAsyncResult.AsyncException;
-			}
-		}
-
-		private void NegotiateAsyncWorker(IAsyncResult result)
-		{
-			SslClientStream.NegotiateAsyncResult negotiateAsyncResult = result.AsyncState as SslClientStream.NegotiateAsyncResult;
-			try
-			{
-				switch (negotiateAsyncResult.State)
+				this.SafeReceiveRecord(this.innerStream);
+				if (this.context.AbbreviatedHandshake && this.context.LastHandshakeMsg == HandshakeType.ServerHello)
 				{
-				case SslClientStream.NegotiateState.SentClientHello:
-					this.protocol.EndSendRecord(result);
-					negotiateAsyncResult.State = SslClientStream.NegotiateState.ReceiveClientHelloResponse;
-					this.protocol.BeginReceiveRecord(this.innerStream, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-					goto IL_03C2;
-				case SslClientStream.NegotiateState.ReceiveClientHelloResponse:
-				{
-					this.SafeEndReceiveRecord(result, true);
-					if (this.context.LastHandshakeMsg != HandshakeType.ServerHelloDone && (!this.context.AbbreviatedHandshake || this.context.LastHandshakeMsg != HandshakeType.ServerHello))
-					{
-						this.protocol.BeginReceiveRecord(this.innerStream, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-						goto IL_03C2;
-					}
-					if (this.context.AbbreviatedHandshake)
-					{
-						ClientSessionCache.SetContextFromCache(this.context);
-						this.context.Negotiating.Cipher.ComputeKeys();
-						this.context.Negotiating.Cipher.InitializeCipher();
-						negotiateAsyncResult.State = SslClientStream.NegotiateState.SentCipherSpec;
-						this.protocol.BeginSendChangeCipherSpec(new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-						goto IL_03C2;
-					}
-					bool flag = this.context.ServerSettings.CertificateRequest;
-					using (MemoryStream memoryStream = new MemoryStream())
-					{
-						if (this.context.SecurityProtocol == SecurityProtocolType.Ssl3)
-						{
-							flag = this.context.ClientSettings.Certificates != null && this.context.ClientSettings.Certificates.Count > 0;
-						}
-						byte[] array;
-						if (flag)
-						{
-							array = this.protocol.EncodeHandshakeRecord(HandshakeType.Certificate);
-							memoryStream.Write(array, 0, array.Length);
-						}
-						array = this.protocol.EncodeHandshakeRecord(HandshakeType.ClientKeyExchange);
-						memoryStream.Write(array, 0, array.Length);
-						this.context.Negotiating.Cipher.InitializeCipher();
-						if (flag && this.context.ClientSettings.ClientCertificate != null)
-						{
-							array = this.protocol.EncodeHandshakeRecord(HandshakeType.CertificateVerify);
-							memoryStream.Write(array, 0, array.Length);
-						}
-						this.protocol.SendChangeCipherSpec(memoryStream);
-						array = this.protocol.EncodeHandshakeRecord(HandshakeType.Finished);
-						memoryStream.Write(array, 0, array.Length);
-						negotiateAsyncResult.State = SslClientStream.NegotiateState.SentKeyExchange;
-						this.innerStream.BeginWrite(memoryStream.GetBuffer(), 0, (int)memoryStream.Length, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-						goto IL_03C2;
-					}
 					break;
 				}
-				case SslClientStream.NegotiateState.SentCipherSpec:
-					this.protocol.EndSendChangeCipherSpec(result);
-					negotiateAsyncResult.State = SslClientStream.NegotiateState.ReceiveCipherSpecResponse;
-					this.protocol.BeginReceiveRecord(this.innerStream, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-					goto IL_03C2;
-				case SslClientStream.NegotiateState.ReceiveCipherSpecResponse:
-					this.SafeEndReceiveRecord(result, true);
-					if (this.context.HandshakeState != HandshakeState.Finished)
-					{
-						this.protocol.BeginReceiveRecord(this.innerStream, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-						goto IL_03C2;
-					}
-					negotiateAsyncResult.State = SslClientStream.NegotiateState.SentFinished;
-					this.protocol.BeginSendRecord(HandshakeType.Finished, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-					goto IL_03C2;
-				case SslClientStream.NegotiateState.SentKeyExchange:
-					break;
-				case SslClientStream.NegotiateState.ReceiveFinishResponse:
-					this.SafeEndReceiveRecord(result, false);
-					if (this.context.HandshakeState != HandshakeState.Finished)
-					{
-						this.protocol.BeginReceiveRecord(this.innerStream, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-						goto IL_03C2;
-					}
-					this.context.HandshakeMessages.Reset();
-					this.context.ClearKeyInfo();
-					negotiateAsyncResult.SetComplete();
-					goto IL_03C2;
-				case SslClientStream.NegotiateState.SentFinished:
-					this.protocol.EndSendRecord(result);
-					this.context.HandshakeMessages.Reset();
-					this.context.ClearKeyInfo();
-					negotiateAsyncResult.SetComplete();
-					goto IL_03C2;
-				default:
-					goto IL_03C2;
-				}
-				this.innerStream.EndWrite(result);
-				negotiateAsyncResult.State = SslClientStream.NegotiateState.ReceiveFinishResponse;
-				this.protocol.BeginReceiveRecord(this.innerStream, new AsyncCallback(this.NegotiateAsyncWorker), negotiateAsyncResult);
-				IL_03C2:;
 			}
-			catch (TlsException ex)
+			if (this.context.AbbreviatedHandshake)
 			{
-				try
+				ClientSessionCache.SetContextFromCache(this.context);
+				this.context.Negotiating.Cipher.ComputeKeys();
+				this.context.Negotiating.Cipher.InitializeCipher();
+				this.protocol.SendChangeCipherSpec();
+				while (this.context.HandshakeState != HandshakeState.Finished)
 				{
-					Exception ex2 = ex;
-					this.protocol.SendAlert(ref ex2);
+					this.SafeReceiveRecord(this.innerStream);
 				}
-				catch
-				{
-				}
-				negotiateAsyncResult.SetComplete(new IOException("The authentication or decryption has failed.", ex));
+				this.protocol.SendRecord(HandshakeType.Finished);
 			}
-			catch (Exception ex3)
+			else
 			{
-				try
+				bool flag = this.context.ServerSettings.CertificateRequest;
+				if (this.context.SecurityProtocol == SecurityProtocolType.Ssl3)
 				{
-					this.protocol.SendAlert(AlertDescription.InternalError);
+					flag = this.context.ClientSettings.Certificates != null && this.context.ClientSettings.Certificates.Count > 0;
 				}
-				catch
+				if (flag)
 				{
+					this.protocol.SendRecord(HandshakeType.Certificate);
 				}
-				negotiateAsyncResult.SetComplete(new IOException("The authentication or decryption has failed.", ex3));
+				this.protocol.SendRecord(HandshakeType.ClientKeyExchange);
+				this.context.Negotiating.Cipher.InitializeCipher();
+				if (flag && this.context.ClientSettings.ClientCertificate != null)
+				{
+					this.protocol.SendRecord(HandshakeType.CertificateVerify);
+				}
+				this.protocol.SendChangeCipherSpec();
+				this.protocol.SendRecord(HandshakeType.Finished);
+				while (this.context.HandshakeState != HandshakeState.Finished)
+				{
+					this.SafeReceiveRecord(this.innerStream);
+				}
 			}
+			this.context.HandshakeMessages.Reset();
+			this.context.ClearKeyInfo();
 		}
 
 		internal override global::System.Security.Cryptography.X509Certificates.X509Certificate OnLocalCertificateSelection(global::System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates, global::System.Security.Cryptography.X509Certificates.X509Certificate serverCertificate, string targetHost, global::System.Security.Cryptography.X509Certificates.X509CertificateCollection serverRequestedCertificates)
@@ -355,141 +274,6 @@ namespace Mono.Security.Protocol.Tls
 		internal AsymmetricAlgorithm RaisePrivateKeySelection(global::System.Security.Cryptography.X509Certificates.X509Certificate certificate, string targetHost)
 		{
 			return base.RaiseLocalPrivateKeySelection(certificate, targetHost);
-		}
-
-		private enum NegotiateState
-		{
-			SentClientHello,
-			ReceiveClientHelloResponse,
-			SentCipherSpec,
-			ReceiveCipherSpecResponse,
-			SentKeyExchange,
-			ReceiveFinishResponse,
-			SentFinished
-		}
-
-		private class NegotiateAsyncResult : IAsyncResult
-		{
-			public NegotiateAsyncResult(AsyncCallback userCallback, object userState, SslClientStream.NegotiateState state)
-			{
-				this._userCallback = userCallback;
-				this._userState = userState;
-				this._state = state;
-			}
-
-			public SslClientStream.NegotiateState State
-			{
-				get
-				{
-					return this._state;
-				}
-				set
-				{
-					this._state = value;
-				}
-			}
-
-			public object AsyncState
-			{
-				get
-				{
-					return this._userState;
-				}
-			}
-
-			public Exception AsyncException
-			{
-				get
-				{
-					return this._asyncException;
-				}
-			}
-
-			public bool CompletedWithError
-			{
-				get
-				{
-					return this.IsCompleted && this._asyncException != null;
-				}
-			}
-
-			public WaitHandle AsyncWaitHandle
-			{
-				get
-				{
-					object obj = this.locker;
-					lock (obj)
-					{
-						if (this.handle == null)
-						{
-							this.handle = new ManualResetEvent(this.completed);
-						}
-					}
-					return this.handle;
-				}
-			}
-
-			public bool CompletedSynchronously
-			{
-				get
-				{
-					return false;
-				}
-			}
-
-			public bool IsCompleted
-			{
-				get
-				{
-					object obj = this.locker;
-					bool flag2;
-					lock (obj)
-					{
-						flag2 = this.completed;
-					}
-					return flag2;
-				}
-			}
-
-			public void SetComplete(Exception ex)
-			{
-				object obj = this.locker;
-				lock (obj)
-				{
-					if (!this.completed)
-					{
-						this.completed = true;
-						if (this.handle != null)
-						{
-							this.handle.Set();
-						}
-						if (this._userCallback != null)
-						{
-							this._userCallback.BeginInvoke(this, null, null);
-						}
-						this._asyncException = ex;
-					}
-				}
-			}
-
-			public void SetComplete()
-			{
-				this.SetComplete(null);
-			}
-
-			private object locker = new object();
-
-			private AsyncCallback _userCallback;
-
-			private object _userState;
-
-			private Exception _asyncException;
-
-			private ManualResetEvent handle;
-
-			private SslClientStream.NegotiateState _state;
-
-			private bool completed;
 		}
 	}
 }

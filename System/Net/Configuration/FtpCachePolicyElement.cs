@@ -13,11 +13,11 @@ namespace System.Net.Configuration
 		}
 
 		[ConfigurationProperty("policyLevel", DefaultValue = "Default")]
-		public RequestCacheLevel PolicyLevel
+		public global::System.Net.Cache.RequestCacheLevel PolicyLevel
 		{
 			get
 			{
-				return (RequestCacheLevel)base[FtpCachePolicyElement.policyLevelProp];
+				return (global::System.Net.Cache.RequestCacheLevel)((int)base[FtpCachePolicyElement.policyLevelProp]);
 			}
 			set
 			{
@@ -33,19 +33,19 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void DeserializeElement(XmlReader reader, bool serializeCollectionKey)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void Reset(ConfigurationElement parentElement)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static ConfigurationProperty policyLevelProp = new ConfigurationProperty("policyLevel", typeof(RequestCacheLevel), RequestCacheLevel.Default);
+		private static ConfigurationProperty policyLevelProp = new ConfigurationProperty("policyLevel", typeof(global::System.Net.Cache.RequestCacheLevel), global::System.Net.Cache.RequestCacheLevel.Default);
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 	}

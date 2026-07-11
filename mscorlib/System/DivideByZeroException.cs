@@ -9,26 +9,28 @@ namespace System
 	public class DivideByZeroException : ArithmeticException
 	{
 		public DivideByZeroException()
-			: base(Environment.GetResourceString("Attempted to divide by zero."))
+			: base(Locale.GetText("Division by zero"))
 		{
-			base.SetErrorCode(-2147352558);
+			base.HResult = -2147352558;
 		}
 
 		public DivideByZeroException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147352558);
+			base.HResult = -2147352558;
 		}
 
 		public DivideByZeroException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147352558);
+			base.HResult = -2147352558;
 		}
 
 		protected DivideByZeroException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private const int Result = -2147352558;
 	}
 }

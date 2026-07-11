@@ -7,12 +7,12 @@ namespace System
 	[ComVisible(true)]
 	public interface IAsyncResult
 	{
-		bool IsCompleted { get; }
+		object AsyncState { get; }
 
 		WaitHandle AsyncWaitHandle { get; }
 
-		object AsyncState { get; }
-
 		bool CompletedSynchronously { get; }
+
+		bool IsCompleted { get; }
 	}
 }

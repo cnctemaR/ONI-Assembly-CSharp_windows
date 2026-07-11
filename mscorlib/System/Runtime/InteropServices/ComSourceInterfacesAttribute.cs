@@ -2,43 +2,43 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Class, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
 	[ComVisible(true)]
 	public sealed class ComSourceInterfacesAttribute : Attribute
 	{
 		public ComSourceInterfacesAttribute(string sourceInterfaces)
 		{
-			this._val = sourceInterfaces;
+			this.internalValue = sourceInterfaces;
 		}
 
 		public ComSourceInterfacesAttribute(Type sourceInterface)
 		{
-			this._val = sourceInterface.FullName;
+			this.internalValue = sourceInterface.ToString();
 		}
 
 		public ComSourceInterfacesAttribute(Type sourceInterface1, Type sourceInterface2)
 		{
-			this._val = sourceInterface1.FullName + "\0" + sourceInterface2.FullName;
+			this.internalValue = sourceInterface1.ToString() + sourceInterface2.ToString();
 		}
 
 		public ComSourceInterfacesAttribute(Type sourceInterface1, Type sourceInterface2, Type sourceInterface3)
 		{
-			this._val = string.Concat(new string[] { sourceInterface1.FullName, "\0", sourceInterface2.FullName, "\0", sourceInterface3.FullName });
+			this.internalValue = sourceInterface1.ToString() + sourceInterface2.ToString() + sourceInterface3.ToString();
 		}
 
 		public ComSourceInterfacesAttribute(Type sourceInterface1, Type sourceInterface2, Type sourceInterface3, Type sourceInterface4)
 		{
-			this._val = string.Concat(new string[] { sourceInterface1.FullName, "\0", sourceInterface2.FullName, "\0", sourceInterface3.FullName, "\0", sourceInterface4.FullName });
+			this.internalValue = sourceInterface1.ToString() + sourceInterface2.ToString() + sourceInterface3.ToString() + sourceInterface4.ToString();
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this._val;
+				return this.internalValue;
 			}
 		}
 
-		internal string _val;
+		private string internalValue;
 	}
 }

@@ -10,22 +10,6 @@ namespace System.Diagnostics
 			this._impl = impl;
 		}
 
-		public int Count
-		{
-			get
-			{
-				return this._impl.EntryCount;
-			}
-		}
-
-		public virtual EventLogEntry this[int index]
-		{
-			get
-			{
-				return this._impl[index];
-			}
-		}
-
 		bool ICollection.IsSynchronized
 		{
 			get
@@ -42,21 +26,37 @@ namespace System.Diagnostics
 			}
 		}
 
-		public void CopyTo(EventLogEntry[] entries, int index)
+		void ICollection.CopyTo(Array array, int index)
 		{
-			EventLogEntry[] entries2 = this._impl.GetEntries();
-			Array.Copy(entries2, 0, entries, index, entries2.Length);
+			EventLogEntry[] entries = this._impl.GetEntries();
+			Array.Copy(entries, 0, array, index, entries.Length);
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this._impl.EntryCount;
+			}
+		}
+
+		public virtual EventLogEntry this[int index]
+		{
+			get
+			{
+				return this._impl[index];
+			}
+		}
+
+		public void CopyTo(EventLogEntry[] eventLogEntries, int index)
+		{
+			EventLogEntry[] entries = this._impl.GetEntries();
+			Array.Copy(entries, 0, eventLogEntries, index, entries.Length);
 		}
 
 		public IEnumerator GetEnumerator()
 		{
 			return new EventLogEntryCollection.EventLogEntryEnumerator(this._impl);
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			EventLogEntry[] entries = this._impl.GetEntries();
-			Array.Copy(entries, 0, array, index, entries.Length);
 		}
 
 		private readonly EventLogImpl _impl;

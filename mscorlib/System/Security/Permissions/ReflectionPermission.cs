@@ -5,21 +5,28 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class ReflectionPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
+	public sealed class ReflectionPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
 	{
 		public ReflectionPermission(PermissionState state)
 		{
 			if (CodeAccessPermission.CheckPermissionState(state, true) == PermissionState.Unrestricted)
 			{
 				this.flags = ReflectionPermissionFlag.AllFlags;
-				return;
 			}
-			this.flags = ReflectionPermissionFlag.NoFlags;
+			else
+			{
+				this.flags = ReflectionPermissionFlag.NoFlags;
+			}
 		}
 
 		public ReflectionPermission(ReflectionPermissionFlag flag)
 		{
 			this.Flags = flag;
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 4;
 		}
 
 		public ReflectionPermissionFlag Flags
@@ -32,7 +39,8 @@ namespace System.Security.Permissions
 			{
 				if ((value & (ReflectionPermissionFlag.TypeInformation | ReflectionPermissionFlag.MemberAccess | ReflectionPermissionFlag.ReflectionEmit | ReflectionPermissionFlag.RestrictedMemberAccess)) != value)
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid flags {0}"), value), "ReflectionPermissionFlag");
+					string text = string.Format(Locale.GetText("Invalid flags {0}"), value);
+					throw new ArgumentException(text, "ReflectionPermissionFlag");
 				}
 				this.flags = value;
 			}
@@ -49,21 +57,23 @@ namespace System.Security.Permissions
 			if (CodeAccessPermission.IsUnrestricted(esd))
 			{
 				this.flags = ReflectionPermissionFlag.AllFlags;
-				return;
 			}
-			this.flags = ReflectionPermissionFlag.NoFlags;
-			string text = esd.Attributes["Flags"] as string;
-			if (text.IndexOf("MemberAccess") >= 0)
+			else
 			{
-				this.flags |= ReflectionPermissionFlag.MemberAccess;
-			}
-			if (text.IndexOf("ReflectionEmit") >= 0)
-			{
-				this.flags |= ReflectionPermissionFlag.ReflectionEmit;
-			}
-			if (text.IndexOf("TypeInformation") >= 0)
-			{
-				this.flags |= ReflectionPermissionFlag.TypeInformation;
+				this.flags = ReflectionPermissionFlag.NoFlags;
+				string text = esd.Attributes["Flags"] as string;
+				if (text.IndexOf("MemberAccess") >= 0)
+				{
+					this.flags |= ReflectionPermissionFlag.MemberAccess;
+				}
+				if (text.IndexOf("ReflectionEmit") >= 0)
+				{
+					this.flags |= ReflectionPermissionFlag.ReflectionEmit;
+				}
+				if (text.IndexOf("TypeInformation") >= 0)
+				{
+					this.flags |= ReflectionPermissionFlag.TypeInformation;
+				}
 			}
 		}
 
@@ -82,23 +92,19 @@ namespace System.Security.Permissions
 				}
 				return reflectionPermission.Copy();
 			}
-			else if (reflectionPermission.IsUnrestricted())
+			else
 			{
+				if (!reflectionPermission.IsUnrestricted())
+				{
+					ReflectionPermission reflectionPermission2 = (ReflectionPermission)reflectionPermission.Copy();
+					reflectionPermission2.Flags &= this.flags;
+					return (reflectionPermission2.Flags != ReflectionPermissionFlag.NoFlags) ? reflectionPermission2 : null;
+				}
 				if (this.flags == ReflectionPermissionFlag.NoFlags)
 				{
 					return null;
 				}
 				return this.Copy();
-			}
-			else
-			{
-				ReflectionPermission reflectionPermission2 = (ReflectionPermission)reflectionPermission.Copy();
-				reflectionPermission2.Flags &= this.flags;
-				if (reflectionPermission2.Flags != ReflectionPermissionFlag.NoFlags)
-				{
-					return reflectionPermission2;
-				}
-				return null;
 			}
 		}
 
@@ -138,7 +144,7 @@ namespace System.Security.Permissions
 			}
 			else
 			{
-				string text = "";
+				string text = string.Empty;
 				if ((this.flags & ReflectionPermissionFlag.MemberAccess) == ReflectionPermissionFlag.MemberAccess)
 				{
 					text = "MemberAccess";
@@ -178,11 +184,6 @@ namespace System.Security.Permissions
 			ReflectionPermission reflectionPermission2 = (ReflectionPermission)reflectionPermission.Copy();
 			reflectionPermission2.Flags |= this.flags;
 			return reflectionPermission2;
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 4;
 		}
 
 		private ReflectionPermission Cast(IPermission target)

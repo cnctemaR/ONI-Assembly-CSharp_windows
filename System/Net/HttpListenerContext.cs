@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Net.WebSockets;
 using System.Security.Principal;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -116,37 +114,14 @@ namespace System.Net
 				{
 					text3 = text;
 				}
-				principal = new GenericPrincipal(new HttpListenerBasicIdentity(text3, text2), new string[0]);
+				HttpListenerBasicIdentity httpListenerBasicIdentity = new HttpListenerBasicIdentity(text3, text2);
+				principal = new GenericPrincipal(httpListenerBasicIdentity, new string[0]);
 			}
 			catch (Exception)
 			{
 				principal = null;
 			}
 			return principal;
-		}
-
-		[MonoTODO]
-		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, TimeSpan keepAliveInterval)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, TimeSpan keepAliveInterval)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		public Task<HttpListenerWebSocketContext> AcceptWebSocketAsync(string subProtocol, int receiveBufferSize, TimeSpan keepAliveInterval, ArraySegment<byte> internalBuffer)
-		{
-			throw new NotImplementedException();
 		}
 
 		private HttpListenerRequest request;

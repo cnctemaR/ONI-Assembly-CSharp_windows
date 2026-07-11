@@ -8,7 +8,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return (this.Flags & 1U) > 0U;
+				return (this.Flags & 1U) != 0U;
 			}
 		}
 
@@ -16,7 +16,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return (this.Flags & 2U) > 0U;
+				return (this.Flags & 2U) != 0U;
 			}
 		}
 

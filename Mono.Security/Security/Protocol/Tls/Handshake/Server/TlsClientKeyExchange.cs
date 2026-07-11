@@ -20,7 +20,8 @@ namespace Mono.Security.Protocol.Tls.Handshake.Server
 				throw new TlsException(AlertDescription.UserCancelled, "Server certificate Private Key unavailable.");
 			}
 			byte[] array = base.ReadBytes((int)this.Length);
-			byte[] array2 = new RSAPKCS1KeyExchangeDeformatter(asymmetricAlgorithm).DecryptKeyExchange(array);
+			RSAPKCS1KeyExchangeDeformatter rsapkcs1KeyExchangeDeformatter = new RSAPKCS1KeyExchangeDeformatter(asymmetricAlgorithm);
+			byte[] array2 = rsapkcs1KeyExchangeDeformatter.DecryptKeyExchange(array);
 			base.Context.Negotiating.Cipher.ComputeMasterSecret(array2);
 			base.Context.Negotiating.Cipher.ComputeKeys();
 			base.Context.Negotiating.Cipher.InitializeCipher();
@@ -35,7 +36,8 @@ namespace Mono.Security.Protocol.Tls.Handshake.Server
 				throw new TlsException(AlertDescription.UserCancelled, "Server certificate Private Key unavailable.");
 			}
 			byte[] array = base.ReadBytes((int)base.ReadInt16());
-			byte[] array2 = new RSAPKCS1KeyExchangeDeformatter(asymmetricAlgorithm).DecryptKeyExchange(array);
+			RSAPKCS1KeyExchangeDeformatter rsapkcs1KeyExchangeDeformatter = new RSAPKCS1KeyExchangeDeformatter(asymmetricAlgorithm);
+			byte[] array2 = rsapkcs1KeyExchangeDeformatter.DecryptKeyExchange(array);
 			base.Context.Negotiating.Cipher.ComputeMasterSecret(array2);
 			base.Context.Negotiating.Cipher.ComputeKeys();
 			base.Context.Negotiating.Cipher.InitializeCipher();

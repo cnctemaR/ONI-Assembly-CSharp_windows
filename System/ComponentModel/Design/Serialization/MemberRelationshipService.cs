@@ -1,152 +1,125 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Security.Permissions;
+using System.Collections;
 
 namespace System.ComponentModel.Design.Serialization
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class MemberRelationshipService
 	{
-		public MemberRelationship this[MemberRelationship source]
+		protected MemberRelationshipService()
 		{
-			get
-			{
-				if (source.Owner == null)
-				{
-					throw new ArgumentNullException("Owner");
-				}
-				if (source.Member == null)
-				{
-					throw new ArgumentNullException("Member");
-				}
-				return this.GetRelationship(source);
-			}
-			set
-			{
-				if (source.Owner == null)
-				{
-					throw new ArgumentNullException("Owner");
-				}
-				if (source.Member == null)
-				{
-					throw new ArgumentNullException("Member");
-				}
-				this.SetRelationship(source, value);
-			}
+			this._relations = new Hashtable();
 		}
 
-		public MemberRelationship this[object sourceOwner, MemberDescriptor sourceMember]
-		{
-			get
-			{
-				if (sourceOwner == null)
-				{
-					throw new ArgumentNullException("sourceOwner");
-				}
-				if (sourceMember == null)
-				{
-					throw new ArgumentNullException("sourceMember");
-				}
-				return this.GetRelationship(new MemberRelationship(sourceOwner, sourceMember));
-			}
-			set
-			{
-				if (sourceOwner == null)
-				{
-					throw new ArgumentNullException("sourceOwner");
-				}
-				if (sourceMember == null)
-				{
-					throw new ArgumentNullException("sourceMember");
-				}
-				this.SetRelationship(new MemberRelationship(sourceOwner, sourceMember), value);
-			}
-		}
+		public abstract bool SupportsRelationship(MemberRelationship source, MemberRelationship relationship);
 
 		protected virtual MemberRelationship GetRelationship(MemberRelationship source)
 		{
-			MemberRelationshipService.RelationshipEntry relationshipEntry;
-			if (this._relationships != null && this._relationships.TryGetValue(new MemberRelationshipService.RelationshipEntry(source), out relationshipEntry) && relationshipEntry.Owner.IsAlive)
+			if (source.IsEmpty)
 			{
-				return new MemberRelationship(relationshipEntry.Owner.Target, relationshipEntry.Member);
+				throw new ArgumentNullException("source");
+			}
+			MemberRelationshipService.MemberRelationshipWeakEntry memberRelationshipWeakEntry = this._relations[new MemberRelationshipService.MemberRelationshipWeakEntry(source)] as MemberRelationshipService.MemberRelationshipWeakEntry;
+			if (memberRelationshipWeakEntry != null)
+			{
+				return new MemberRelationship(memberRelationshipWeakEntry.Owner, memberRelationshipWeakEntry.Member);
 			}
 			return MemberRelationship.Empty;
 		}
 
 		protected virtual void SetRelationship(MemberRelationship source, MemberRelationship relationship)
 		{
+			if (source.IsEmpty)
+			{
+				throw new ArgumentNullException("source");
+			}
 			if (!relationship.IsEmpty && !this.SupportsRelationship(source, relationship))
 			{
-				string text = TypeDescriptor.GetComponentName(source.Owner);
-				string text2 = TypeDescriptor.GetComponentName(relationship.Owner);
-				if (text == null)
-				{
-					text = source.Owner.ToString();
-				}
-				if (text2 == null)
-				{
-					text2 = relationship.Owner.ToString();
-				}
-				throw new ArgumentException(global::SR.GetString("Relationships between {0}.{1} and {2}.{3} are not supported.", new object[]
-				{
-					text,
-					source.Member.Name,
-					text2,
-					relationship.Member.Name
-				}));
+				throw new ArgumentException("Relationship not supported.");
 			}
-			if (this._relationships == null)
-			{
-				this._relationships = new Dictionary<MemberRelationshipService.RelationshipEntry, MemberRelationshipService.RelationshipEntry>();
-			}
-			this._relationships[new MemberRelationshipService.RelationshipEntry(source)] = new MemberRelationshipService.RelationshipEntry(relationship);
+			this._relations[new MemberRelationshipService.MemberRelationshipWeakEntry(source)] = new MemberRelationshipService.MemberRelationshipWeakEntry(relationship);
 		}
 
-		public abstract bool SupportsRelationship(MemberRelationship source, MemberRelationship relationship);
-
-		private Dictionary<MemberRelationshipService.RelationshipEntry, MemberRelationshipService.RelationshipEntry> _relationships = new Dictionary<MemberRelationshipService.RelationshipEntry, MemberRelationshipService.RelationshipEntry>();
-
-		private struct RelationshipEntry
+		public MemberRelationship this[object owner, MemberDescriptor member]
 		{
-			internal RelationshipEntry(MemberRelationship rel)
+			get
 			{
-				this.Owner = new WeakReference(rel.Owner);
-				this.Member = rel.Member;
-				this.hashCode = ((rel.Owner == null) ? 0 : rel.Owner.GetHashCode());
+				return this.GetRelationship(new MemberRelationship(owner, member));
+			}
+			set
+			{
+				this.SetRelationship(new MemberRelationship(owner, member), value);
+			}
+		}
+
+		public MemberRelationship this[MemberRelationship source]
+		{
+			get
+			{
+				return this.GetRelationship(source);
+			}
+			set
+			{
+				this.SetRelationship(source, value);
+			}
+		}
+
+		private Hashtable _relations;
+
+		private class MemberRelationshipWeakEntry
+		{
+			public MemberRelationshipWeakEntry(MemberRelationship relation)
+			{
+				this._ownerWeakRef = new WeakReference(relation.Owner);
+				this._member = relation.Member;
 			}
 
-			public override bool Equals(object o)
+			public object Owner
 			{
-				if (o is MemberRelationshipService.RelationshipEntry)
+				get
 				{
-					MemberRelationshipService.RelationshipEntry relationshipEntry = (MemberRelationshipService.RelationshipEntry)o;
-					return this == relationshipEntry;
+					if (this._ownerWeakRef.IsAlive)
+					{
+						return this._ownerWeakRef.Target;
+					}
+					return null;
 				}
-				return false;
 			}
 
-			public static bool operator ==(MemberRelationshipService.RelationshipEntry re1, MemberRelationshipService.RelationshipEntry re2)
+			public MemberDescriptor Member
 			{
-				object obj = (re1.Owner.IsAlive ? re1.Owner.Target : null);
-				object obj2 = (re2.Owner.IsAlive ? re2.Owner.Target : null);
-				return obj == obj2 && re1.Member.Equals(re2.Member);
-			}
-
-			public static bool operator !=(MemberRelationshipService.RelationshipEntry re1, MemberRelationshipService.RelationshipEntry re2)
-			{
-				return !(re1 == re2);
+				get
+				{
+					return this._member;
+				}
 			}
 
 			public override int GetHashCode()
 			{
-				return this.hashCode;
+				if (this.Owner != null && this._member != null)
+				{
+					return this._member.GetHashCode() ^ this._ownerWeakRef.Target.GetHashCode();
+				}
+				return base.GetHashCode();
 			}
 
-			internal WeakReference Owner;
+			public override bool Equals(object o)
+			{
+				return o is MemberRelationshipService.MemberRelationshipWeakEntry && (MemberRelationshipService.MemberRelationshipWeakEntry)o == this;
+			}
 
-			internal MemberDescriptor Member;
+			public static bool operator ==(MemberRelationshipService.MemberRelationshipWeakEntry left, MemberRelationshipService.MemberRelationshipWeakEntry right)
+			{
+				return left.Owner == right.Owner && left.Member == right.Member;
+			}
 
-			private int hashCode;
+			public static bool operator !=(MemberRelationshipService.MemberRelationshipWeakEntry left, MemberRelationshipService.MemberRelationshipWeakEntry right)
+			{
+				return !(left == right);
+			}
+
+			private WeakReference _ownerWeakRef;
+
+			private MemberDescriptor _member;
 		}
 	}
 }

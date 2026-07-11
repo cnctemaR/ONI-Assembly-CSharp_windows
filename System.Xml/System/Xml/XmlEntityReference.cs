@@ -1,25 +1,93 @@
 ﻿using System;
+using System.Xml.XPath;
 
 namespace System.Xml
 {
-	public class XmlEntityReference : XmlLinkedNode
+	public class XmlEntityReference : XmlLinkedNode, IHasXmlChildNode
 	{
 		protected internal XmlEntityReference(string name, XmlDocument doc)
 			: base(doc)
 		{
-			if (!doc.IsLoading && name.Length > 0 && name[0] == '#')
-			{
-				throw new ArgumentException(Res.GetString("Cannot create an 'EntityReference' node with a name starting with '#'."));
-			}
-			this.name = doc.NameTable.Add(name);
-			doc.fEntRefNodesPresent = true;
+			XmlConvert.VerifyName(name);
+			this.entityName = doc.NameTable.Add(name);
 		}
 
-		public override string Name
+		XmlLinkedNode IHasXmlChildNode.LastLinkedChild
 		{
 			get
 			{
-				return this.name;
+				return this.lastLinkedChild;
+			}
+			set
+			{
+				this.lastLinkedChild = value;
+			}
+		}
+
+		public override string BaseURI
+		{
+			get
+			{
+				return base.BaseURI;
+			}
+		}
+
+		private XmlEntity Entity
+		{
+			get
+			{
+				XmlDocumentType documentType = this.OwnerDocument.DocumentType;
+				if (documentType == null)
+				{
+					return null;
+				}
+				if (documentType.Entities == null)
+				{
+					return null;
+				}
+				return documentType.Entities.GetNamedItem(this.Name) as XmlEntity;
+			}
+		}
+
+		internal override string ChildrenBaseURI
+		{
+			get
+			{
+				XmlEntity entity = this.Entity;
+				if (entity == null)
+				{
+					return string.Empty;
+				}
+				if (entity.SystemId == null || entity.SystemId.Length == 0)
+				{
+					return entity.BaseURI;
+				}
+				if (entity.BaseURI == null || entity.BaseURI.Length == 0)
+				{
+					return entity.SystemId;
+				}
+				Uri uri = null;
+				try
+				{
+					uri = new Uri(entity.BaseURI);
+				}
+				catch (UriFormatException)
+				{
+				}
+				XmlResolver resolver = this.OwnerDocument.Resolver;
+				if (resolver != null)
+				{
+					return resolver.ResolveUri(uri, entity.SystemId).ToString();
+				}
+				return new Uri(uri, entity.SystemId).ToString();
+			}
+		}
+
+		public override bool IsReadOnly
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -27,19 +95,15 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.name;
+				return this.entityName;
 			}
 		}
 
-		public override string Value
+		public override string Name
 		{
 			get
 			{
-				return null;
-			}
-			set
-			{
-				throw new InvalidOperationException(Res.GetString("'EntityReference' nodes have no support for setting value."));
+				return this.entityName;
 			}
 		}
 
@@ -51,129 +115,72 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlNode CloneNode(bool deep)
-		{
-			return this.OwnerDocument.CreateEntityReference(this.name);
-		}
-
-		public override bool IsReadOnly
+		public override string Value
 		{
 			get
 			{
-				return true;
-			}
-		}
-
-		internal override bool IsContainer
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		internal override void SetParent(XmlNode node)
-		{
-			base.SetParent(node);
-			if (this.LastNode == null && node != null && node != this.OwnerDocument)
-			{
-				new XmlLoader().ExpandEntityReference(this);
-			}
-		}
-
-		internal override void SetParentForLoad(XmlNode node)
-		{
-			this.SetParent(node);
-		}
-
-		internal override XmlLinkedNode LastNode
-		{
-			get
-			{
-				return this.lastChild;
+				return null;
 			}
 			set
 			{
-				this.lastChild = value;
+				throw new XmlException("entity reference cannot be set value.");
 			}
 		}
 
-		internal override bool IsValidChildType(XmlNodeType type)
+		internal override XPathNodeType XPathNodeType
 		{
-			switch (type)
+			get
 			{
-			case XmlNodeType.Element:
-			case XmlNodeType.Text:
-			case XmlNodeType.CDATA:
-			case XmlNodeType.EntityReference:
-			case XmlNodeType.ProcessingInstruction:
-			case XmlNodeType.Comment:
-			case XmlNodeType.Whitespace:
-			case XmlNodeType.SignificantWhitespace:
-				return true;
+				return XPathNodeType.Text;
 			}
-			return false;
 		}
 
-		public override void WriteTo(XmlWriter w)
+		public override XmlNode CloneNode(bool deep)
 		{
-			w.WriteEntityRef(this.name);
+			return new XmlEntityReference(this.Name, this.OwnerDocument);
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
-			foreach (object obj in this)
+			for (int i = 0; i < this.ChildNodes.Count; i++)
 			{
-				((XmlNode)obj).WriteTo(w);
+				this.ChildNodes[i].WriteTo(w);
 			}
 		}
 
-		public override string BaseURI
+		public override void WriteTo(XmlWriter w)
 		{
-			get
-			{
-				return this.OwnerDocument.BaseURI;
-			}
+			w.WriteRaw("&");
+			w.WriteName(this.Name);
+			w.WriteRaw(";");
 		}
 
-		private string ConstructBaseURI(string baseURI, string systemId)
+		internal void SetReferencedEntityContent()
 		{
-			if (baseURI == null)
+			if (this.FirstChild != null)
 			{
-				return systemId;
+				return;
 			}
-			int num = baseURI.LastIndexOf('/') + 1;
-			string text = baseURI;
-			if (num > 0 && num < baseURI.Length)
+			if (this.OwnerDocument.DocumentType == null)
 			{
-				text = baseURI.Substring(0, num);
+				return;
 			}
-			else if (num == 0)
+			XmlEntity entity = this.Entity;
+			if (entity == null)
 			{
-				text += "\\";
+				base.InsertBefore(this.OwnerDocument.CreateTextNode(string.Empty), null, false, true);
 			}
-			return text + systemId.Replace('\\', '/');
-		}
-
-		internal string ChildBaseURI
-		{
-			get
+			else
 			{
-				XmlEntity entityNode = this.OwnerDocument.GetEntityNode(this.name);
-				if (entityNode == null)
+				for (int i = 0; i < entity.ChildNodes.Count; i++)
 				{
-					return string.Empty;
+					base.InsertBefore(entity.ChildNodes[i].CloneNode(true), null, false, true);
 				}
-				if (entityNode.SystemId != null && entityNode.SystemId.Length > 0)
-				{
-					return this.ConstructBaseURI(entityNode.BaseURI, entityNode.SystemId);
-				}
-				return entityNode.BaseURI;
 			}
 		}
 
-		private string name;
+		private string entityName;
 
-		private XmlLinkedNode lastChild;
+		private XmlLinkedNode lastLinkedChild;
 	}
 }

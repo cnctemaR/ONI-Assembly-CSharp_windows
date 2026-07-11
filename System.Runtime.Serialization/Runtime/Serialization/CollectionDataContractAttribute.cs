@@ -5,27 +5,6 @@ namespace System.Runtime.Serialization
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
 	public sealed class CollectionDataContractAttribute : Attribute
 	{
-		public string Namespace
-		{
-			get
-			{
-				return this.ns;
-			}
-			set
-			{
-				this.ns = value;
-				this.isNamespaceSetExplicitly = true;
-			}
-		}
-
-		public bool IsNamespaceSetExplicitly
-		{
-			get
-			{
-				return this.isNamespaceSetExplicitly;
-			}
-		}
-
 		public string Name
 		{
 			get
@@ -35,15 +14,18 @@ namespace System.Runtime.Serialization
 			set
 			{
 				this.name = value;
-				this.isNameSetExplicitly = true;
 			}
 		}
 
-		public bool IsNameSetExplicitly
+		public string Namespace
 		{
 			get
 			{
-				return this.isNameSetExplicitly;
+				return this.ns;
+			}
+			set
+			{
+				this.ns = value;
 			}
 		}
 
@@ -51,20 +33,11 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.itemName;
+				return this.item_name;
 			}
 			set
 			{
-				this.itemName = value;
-				this.isItemNameSetExplicitly = true;
-			}
-		}
-
-		public bool IsItemNameSetExplicitly
-		{
-			get
-			{
-				return this.isItemNameSetExplicitly;
+				this.item_name = value;
 			}
 		}
 
@@ -72,41 +45,11 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.keyName;
+				return this.key_name;
 			}
 			set
 			{
-				this.keyName = value;
-				this.isKeyNameSetExplicitly = true;
-			}
-		}
-
-		public bool IsReference
-		{
-			get
-			{
-				return this.isReference;
-			}
-			set
-			{
-				this.isReference = value;
-				this.isReferenceSetExplicitly = true;
-			}
-		}
-
-		public bool IsReferenceSetExplicitly
-		{
-			get
-			{
-				return this.isReferenceSetExplicitly;
-			}
-		}
-
-		public bool IsKeyNameSetExplicitly
-		{
-			get
-			{
-				return this.isKeyNameSetExplicitly;
+				this.key_name = value;
 			}
 		}
 
@@ -114,45 +57,26 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.valueName;
+				return this.value_name;
 			}
 			set
 			{
-				this.valueName = value;
-				this.isValueNameSetExplicitly = true;
+				this.value_name = value;
 			}
 		}
 
-		public bool IsValueNameSetExplicitly
-		{
-			get
-			{
-				return this.isValueNameSetExplicitly;
-			}
-		}
+		public bool IsReference { get; set; }
 
 		private string name;
 
 		private string ns;
 
-		private string itemName;
+		private string item_name;
 
-		private string keyName;
+		private string key_name;
 
-		private string valueName;
+		private string value_name;
 
-		private bool isReference;
-
-		private bool isNameSetExplicitly;
-
-		private bool isNamespaceSetExplicitly;
-
-		private bool isReferenceSetExplicitly;
-
-		private bool isItemNameSetExplicitly;
-
-		private bool isKeyNameSetExplicitly;
-
-		private bool isValueNameSetExplicitly;
+		private bool is_reference;
 	}
 }

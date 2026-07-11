@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.CompilerServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class IDispatchConstantAttribute : CustomConstantAttribute
 	{
@@ -12,7 +12,7 @@ namespace System.Runtime.CompilerServices
 		{
 			get
 			{
-				return new DispatchWrapper(null);
+				return null;
 			}
 		}
 	}

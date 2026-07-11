@@ -30,13 +30,6 @@ namespace System.Runtime.Remoting.Channels
 			return memoryStream;
 		}
 
-		internal static object DeserializeObjectSafe(byte[] mem)
-		{
-			byte[] array = new byte[mem.Length];
-			Array.Copy(mem, array, mem.Length);
-			return CADSerializer.DeserializeObject(new MemoryStream(array));
-		}
-
 		internal static MemoryStream SerializeObject(object obj)
 		{
 			MemoryStream memoryStream = new MemoryStream();

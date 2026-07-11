@@ -1,95 +1,69 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D3E}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC842}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>System.Xml.Linq</RootNamespace>
+    <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Xml.Linq</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>net35</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XAttributeValuePropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XDeferredAxis.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XDeferredSingleton.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementAttributePropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementDescendantsPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementElementPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementElementsPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementValuePropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XElementXmlPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XPropertyDescriptor.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XTypeDescriptionProvider.cs" />
-    <Compile Include="MS\Internal\Xml\Linq\ComponentModel\XTypeDescriptor.cs" />
+    <Compile Include="Consts.cs" />
+    <Compile Include="Locale.cs" />
+    <Compile Include="MonoDocumentationNoteAttribute.cs" />
+    <Compile Include="MonoExtensionAttribute.cs" />
+    <Compile Include="MonoInternalNoteAttribute.cs" />
+    <Compile Include="MonoLimitationAttribute.cs" />
+    <Compile Include="MonoNotSupportedAttribute.cs" />
+    <Compile Include="MonoTODOAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="System\Xml\Linq\BaseUriAnnotation.cs" />
-    <Compile Include="System\Xml\Linq\ElementWriter.cs" />
-    <Compile Include="System\Xml\Linq\Extensions.cs" />
-    <Compile Include="System\Xml\Linq\Inserter.cs" />
-    <Compile Include="System\Xml\Linq\LineInfoAnnotation.cs" />
-    <Compile Include="System\Xml\Linq\LineInfoEndElementAnnotation.cs" />
-    <Compile Include="System\Xml\Linq\LoadOptions.cs" />
-    <Compile Include="System\Xml\Linq\NameSerializer.cs" />
-    <Compile Include="System\Xml\Linq\NamespaceCache.cs" />
-    <Compile Include="System\Xml\Linq\NamespaceResolver.cs" />
-    <Compile Include="System\Xml\Linq\ReaderOptions.cs" />
-    <Compile Include="System\Xml\Linq\Res.cs" />
-    <Compile Include="System\Xml\Linq\SaveOptions.cs" />
-    <Compile Include="System\Xml\Linq\StreamingElementWriter.cs" />
-    <Compile Include="System\Xml\Linq\XAttribute.cs" />
-    <Compile Include="System\Xml\Linq\XCData.cs" />
-    <Compile Include="System\Xml\Linq\XComment.cs" />
-    <Compile Include="System\Xml\Linq\XContainer.cs" />
-    <Compile Include="System\Xml\Linq\XDeclaration.cs" />
-    <Compile Include="System\Xml\Linq\XDocument.cs" />
-    <Compile Include="System\Xml\Linq\XDocumentType.cs" />
-    <Compile Include="System\Xml\Linq\XElement.cs" />
-    <Compile Include="System\Xml\Linq\XHashtable.cs" />
-    <Compile Include="System\Xml\Linq\XName.cs" />
-    <Compile Include="System\Xml\Linq\XNamespace.cs" />
-    <Compile Include="System\Xml\Linq\XNode.cs" />
-    <Compile Include="System\Xml\Linq\XNodeBuilder.cs" />
-    <Compile Include="System\Xml\Linq\XNodeDocumentOrderComparer.cs" />
-    <Compile Include="System\Xml\Linq\XNodeEqualityComparer.cs" />
-    <Compile Include="System\Xml\Linq\XNodeReader.cs" />
-    <Compile Include="System\Xml\Linq\XObject.cs" />
-    <Compile Include="System\Xml\Linq\XObjectChange.cs" />
-    <Compile Include="System\Xml\Linq\XObjectChangeAnnotation.cs" />
-    <Compile Include="System\Xml\Linq\XObjectChangeEventArgs.cs" />
-    <Compile Include="System\Xml\Linq\XProcessingInstruction.cs" />
-    <Compile Include="System\Xml\Linq\XStreamingElement.cs" />
-    <Compile Include="System\Xml\Linq\XText.cs" />
-    <Compile Include="System\Xml\Schema\Extensions.cs" />
-    <Compile Include="System\Xml\Schema\XmlSchemaInfoEqualityComparer.cs" />
-    <Compile Include="System\Xml\Schema\XNodeValidator.cs" />
-    <Compile Include="System\Xml\XPath\Extensions.cs" />
-    <Compile Include="System\Xml\XPath\XNodeNavigator.cs" />
-    <Compile Include="System\Xml\XPath\XPathEvaluator.cs" />
+    <Compile Include="Xml\Linq\Extensions.cs" />
+    <Compile Include="Xml\Linq\LoadOptions.cs" />
+    <Compile Include="Xml\Linq\SaveOptions.cs" />
+    <Compile Include="Xml\Linq\XAttribute.cs" />
+    <Compile Include="Xml\Linq\XCData.cs" />
+    <Compile Include="Xml\Linq\XChildrenIterator.cs" />
+    <Compile Include="Xml\Linq\XComment.cs" />
+    <Compile Include="Xml\Linq\XContainer.cs" />
+    <Compile Include="Xml\Linq\XDeclaration.cs" />
+    <Compile Include="Xml\Linq\XDocument.cs" />
+    <Compile Include="Xml\Linq\XDocumentType.cs" />
+    <Compile Include="Xml\Linq\XElement.cs" />
+    <Compile Include="Xml\Linq\XName.cs" />
+    <Compile Include="Xml\Linq\XNamespace.cs" />
+    <Compile Include="Xml\Linq\XNode.cs" />
+    <Compile Include="Xml\Linq\XNodeDocumentOrderComparer.cs" />
+    <Compile Include="Xml\Linq\XNodeEqualityComparer.cs" />
+    <Compile Include="Xml\Linq\XNodeNavigator.cs" />
+    <Compile Include="Xml\Linq\XNodeReader.cs" />
+    <Compile Include="Xml\Linq\XNodeWriter.cs" />
+    <Compile Include="Xml\Linq\XObject.cs" />
+    <Compile Include="Xml\Linq\XObjectChange.cs" />
+    <Compile Include="Xml\Linq\XObjectChangeEventArgs.cs" />
+    <Compile Include="Xml\Linq\XProcessingInstruction.cs" />
+    <Compile Include="Xml\Linq\XStreamingElement.cs" />
+    <Compile Include="Xml\Linq\XText.cs" />
+    <Compile Include="Xml\Linq\XUtil.cs" />
+    <Compile Include="Xml\Schema\Extensions.cs" />
+    <Compile Include="Xml\XPath\Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D32}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D35}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83A}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.Runtime.Serialization\System.Runtime.Serialization.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D39}</Project>
-      <Name>System.Runtime.Serialization</Name>
-    </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D3D}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC841}</Project>
       <Name>System.Xml</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System\System.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D37}</Project>
-      <Name>System</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

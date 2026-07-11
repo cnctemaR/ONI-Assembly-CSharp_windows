@@ -13,9 +13,9 @@ namespace System.Security.Permissions
 			}
 		}
 
-		public DataProtectionPermission(DataProtectionPermissionFlags flag)
+		public DataProtectionPermission(DataProtectionPermissionFlags flags)
 		{
-			this.Flags = flag;
+			this.Flags = flags;
 		}
 
 		public DataProtectionPermissionFlags Flags
@@ -28,7 +28,8 @@ namespace System.Security.Permissions
 			{
 				if ((value & ~(DataProtectionPermissionFlags.ProtectData | DataProtectionPermissionFlags.UnprotectData | DataProtectionPermissionFlags.ProtectMemory | DataProtectionPermissionFlags.UnprotectMemory)) != DataProtectionPermissionFlags.NoFlags)
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "DataProtectionPermissionFlags");
+					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
+					throw new ArgumentException(text, "DataProtectionPermissionFlags");
 				}
 				this._flags = value;
 			}
@@ -90,10 +91,10 @@ namespace System.Security.Permissions
 			return dataProtectionPermission.IsUnrestricted() || (!this.IsUnrestricted() && (this._flags & ~dataProtectionPermission._flags) == DataProtectionPermissionFlags.NoFlags);
 		}
 
-		public override void FromXml(SecurityElement securityElement)
+		public override void FromXml(SecurityElement e)
 		{
-			PermissionHelper.CheckSecurityElement(securityElement, "securityElement", 1, 1);
-			this._flags = (DataProtectionPermissionFlags)Enum.Parse(typeof(DataProtectionPermissionFlags), securityElement.Attribute("Flags"));
+			PermissionHelper.CheckSecurityElement(e, "e", 1, 1);
+			this._flags = (DataProtectionPermissionFlags)((int)Enum.Parse(typeof(DataProtectionPermissionFlags), e.Attribute("Flags")));
 		}
 
 		public override SecurityElement ToXml()

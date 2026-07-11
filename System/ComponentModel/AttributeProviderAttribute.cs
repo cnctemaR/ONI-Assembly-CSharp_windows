@@ -2,59 +2,43 @@
 
 namespace System.ComponentModel
 {
-	[AttributeUsage(AttributeTargets.Property)]
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 	public class AttributeProviderAttribute : Attribute
 	{
-		public AttributeProviderAttribute(string typeName)
+		public AttributeProviderAttribute(Type type)
 		{
-			if (typeName == null)
-			{
-				throw new ArgumentNullException("typeName");
-			}
-			this._typeName = typeName;
+			this.type_name = type.AssemblyQualifiedName;
 		}
 
 		public AttributeProviderAttribute(string typeName, string propertyName)
 		{
-			if (typeName == null)
-			{
-				throw new ArgumentNullException("typeName");
-			}
-			if (propertyName == null)
-			{
-				throw new ArgumentNullException("propertyName");
-			}
-			this._typeName = typeName;
-			this._propertyName = propertyName;
+			this.type_name = typeName;
+			this.property_name = propertyName;
 		}
 
-		public AttributeProviderAttribute(Type type)
+		public AttributeProviderAttribute(string typeName)
 		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			this._typeName = type.AssemblyQualifiedName;
-		}
-
-		public string TypeName
-		{
-			get
-			{
-				return this._typeName;
-			}
+			this.type_name = typeName;
 		}
 
 		public string PropertyName
 		{
 			get
 			{
-				return this._propertyName;
+				return this.property_name;
 			}
 		}
 
-		private string _typeName;
+		public string TypeName
+		{
+			get
+			{
+				return this.type_name;
+			}
+		}
 
-		private string _propertyName;
+		private string type_name;
+
+		private string property_name;
 	}
 }

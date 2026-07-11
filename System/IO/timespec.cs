@@ -4,8 +4,8 @@ namespace System.IO
 {
 	internal struct timespec
 	{
-		public IntPtr tv_sec;
+		public int tv_sec;
 
-		public IntPtr tv_nsec;
+		public int tv_usec;
 	}
 }

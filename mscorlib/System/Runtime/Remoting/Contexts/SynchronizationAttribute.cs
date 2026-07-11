@@ -6,8 +6,8 @@ using System.Threading;
 
 namespace System.Runtime.Remoting.Contexts
 {
-	[AttributeUsage(AttributeTargets.Class)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Class)]
 	[Serializable]
 	public class SynchronizationAttribute : ContextAttribute, IContributeClientContextSink, IContributeServerContextSink
 	{
@@ -49,30 +49,33 @@ namespace System.Runtime.Remoting.Contexts
 		{
 			get
 			{
-				return this._lockCount > 0;
+				return this._locked;
 			}
 			set
 			{
-				SynchronizationAttribute synchronizationAttribute;
 				if (value)
 				{
-					this.AcquireLock();
-					synchronizationAttribute = this;
-					lock (synchronizationAttribute)
+					this._mutex.WaitOne();
+					lock (this)
 					{
+						this._lockCount++;
 						if (this._lockCount > 1)
 						{
 							this.ReleaseLock();
 						}
-						return;
+						this._ownerThread = Thread.CurrentThread;
 					}
 				}
-				synchronizationAttribute = this;
-				lock (synchronizationAttribute)
+				else
 				{
-					while (this._lockCount > 0 && this._ownerThread == Thread.CurrentThread)
+					lock (this)
 					{
-						this.ReleaseLock();
+						while (this._lockCount > 0 && this._ownerThread == Thread.CurrentThread)
+						{
+							this._lockCount--;
+							this._mutex.ReleaseMutex();
+							this._ownerThread = null;
+						}
 					}
 				}
 			}
@@ -96,10 +99,7 @@ namespace System.Runtime.Remoting.Contexts
 				{
 					this._lockCount--;
 					this._mutex.ReleaseMutex();
-					if (this._lockCount == 0)
-					{
-						this._ownerThread = null;
-					}
+					this._ownerThread = null;
 				}
 			}
 		}
@@ -127,23 +127,16 @@ namespace System.Runtime.Remoting.Contexts
 		public override bool IsContextOK(Context ctx, IConstructionCallMessage msg)
 		{
 			SynchronizationAttribute synchronizationAttribute = ctx.GetProperty("Synchronization") as SynchronizationAttribute;
-			int flavor = this._flavor;
-			switch (flavor)
+			switch (this._flavor)
 			{
 			case 1:
 				return synchronizationAttribute == null;
 			case 2:
 				return true;
-			case 3:
-				break;
 			case 4:
 				return synchronizationAttribute != null;
-			default:
-				if (flavor == 8)
-				{
-					return false;
-				}
-				break;
+			case 8:
+				return false;
 			}
 			return false;
 		}
@@ -187,6 +180,9 @@ namespace System.Runtime.Remoting.Contexts
 		private bool _bReEntrant;
 
 		private int _flavor;
+
+		[NonSerialized]
+		private bool _locked;
 
 		[NonSerialized]
 		private int _lockCount;

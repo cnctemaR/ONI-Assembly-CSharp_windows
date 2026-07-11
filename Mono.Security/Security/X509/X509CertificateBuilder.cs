@@ -160,7 +160,8 @@ namespace Mono.Security.X509
 				asn3.Add(ASN1Convert.FromUnsignedBigInteger(dsaparameters.Q));
 				asn3.Add(ASN1Convert.FromUnsignedBigInteger(dsaparameters.G));
 				asn.Add(PKCS7.AlgorithmIdentifier("1.2.840.10040.4.1", asn3));
-				asn.Add(new ASN1(3)).Add(ASN1Convert.FromUnsignedBigInteger(dsaparameters.Y));
+				ASN1 asn4 = asn.Add(new ASN1(3));
+				asn4.Add(ASN1Convert.FromUnsignedBigInteger(dsaparameters.Y));
 			}
 			return asn;
 		}
@@ -180,14 +181,15 @@ namespace Mono.Security.X509
 			if (this.version > 1)
 			{
 				byte[] array = new byte[] { this.version - 1 };
-				asn.Add(new ASN1(160)).Add(new ASN1(2, array));
+				ASN1 asn2 = asn.Add(new ASN1(160));
+				asn2.Add(new ASN1(2, array));
 			}
 			asn.Add(new ASN1(2, this.sn));
 			asn.Add(PKCS7.AlgorithmIdentifier(oid));
 			asn.Add(X501.FromString(this.issuer));
-			ASN1 asn2 = asn.Add(new ASN1(48));
-			asn2.Add(ASN1Convert.FromDateTime(this.notBefore));
-			asn2.Add(ASN1Convert.FromDateTime(this.notAfter));
+			ASN1 asn3 = asn.Add(new ASN1(48));
+			asn3.Add(ASN1Convert.FromDateTime(this.notBefore));
+			asn3.Add(ASN1Convert.FromDateTime(this.notAfter));
 			asn.Add(X501.FromString(this.subject));
 			asn.Add(this.SubjectPublicKeyInfo());
 			if (this.version > 1)

@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace System.Net.NetworkInformation
 {
-	public class PingCompletedEventArgs : AsyncCompletedEventArgs
+	public class PingCompletedEventArgs : global::System.ComponentModel.AsyncCompletedEventArgs
 	{
 		internal PingCompletedEventArgs(Exception ex, bool cancelled, object userState, PingReply reply)
 			: base(ex, cancelled, userState)

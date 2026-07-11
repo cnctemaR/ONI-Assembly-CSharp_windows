@@ -395,12 +395,12 @@ namespace NodeEditorFramework.Utilities
 
 		public static T ObjectField<T>(T obj, bool allowSceneObjects) where T : global::UnityEngine.Object
 		{
-			return RTEditorGUI.ObjectField<T>(GUIContent.none, obj, allowSceneObjects, Array.Empty<GUILayoutOption>());
+			return RTEditorGUI.ObjectField<T>(GUIContent.none, obj, allowSceneObjects, new GUILayoutOption[0]);
 		}
 
 		public static T ObjectField<T>(string label, T obj, bool allowSceneObjects) where T : global::UnityEngine.Object
 		{
-			return RTEditorGUI.ObjectField<T>(new GUIContent(label), obj, allowSceneObjects, Array.Empty<GUILayoutOption>());
+			return RTEditorGUI.ObjectField<T>(new GUIContent(label), obj, allowSceneObjects, new GUILayoutOption[0]);
 		}
 
 		public static T ObjectField<T>(GUIContent label, T obj, bool allowSceneObjects, params GUILayoutOption[] options) where T : global::UnityEngine.Object
@@ -408,8 +408,8 @@ namespace NodeEditorFramework.Utilities
 			bool flag;
 			if (obj.GetType() == typeof(Texture2D))
 			{
-				GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-				GUILayout.Label(label, Array.Empty<GUILayoutOption>());
+				GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+				GUILayout.Label(label, new GUILayoutOption[0]);
 				flag = GUILayout.Button(obj as Texture2D, new GUILayoutOption[]
 				{
 					GUILayout.MaxWidth(64f),
@@ -420,7 +420,7 @@ namespace NodeEditorFramework.Utilities
 			else
 			{
 				GUIStyle guistyle = new GUIStyle(GUI.skin.box);
-				flag = GUILayout.Button(label, guistyle, Array.Empty<GUILayoutOption>());
+				flag = GUILayout.Button(label, guistyle, new GUILayoutOption[0]);
 			}
 			if (flag)
 			{
@@ -441,22 +441,22 @@ namespace NodeEditorFramework.Utilities
 		public static Enum EnumPopup(GUIContent label, Enum selected)
 		{
 			label.text = label.text + ": " + selected.ToString();
-			GUILayout.Label(label, Array.Empty<GUILayoutOption>());
+			GUILayout.Label(label, new GUILayoutOption[0]);
 			return selected;
 		}
 
 		public static int Popup(GUIContent label, int selected, string[] displayedOptions)
 		{
-			GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+			GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 			label.text = label.text + ": " + selected.ToString();
-			GUILayout.Label(label, Array.Empty<GUILayoutOption>());
+			GUILayout.Label(label, new GUILayoutOption[0]);
 			GUILayout.EndHorizontal();
 			return selected;
 		}
 
 		public static int Popup(string label, int selected, string[] displayedOptions)
 		{
-			GUILayout.Label(label + ": " + selected.ToString(), Array.Empty<GUILayoutOption>());
+			GUILayout.Label(label + ": " + selected.ToString(), new GUILayoutOption[0]);
 			return selected;
 		}
 

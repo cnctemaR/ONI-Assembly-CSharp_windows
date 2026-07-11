@@ -73,7 +73,7 @@ namespace System.Reflection.Emit
 
 		internal void PatchFilterClause(int start)
 		{
-			if (this.handlers != null && this.handlers.Length != 0)
+			if (this.handlers != null && this.handlers.Length > 0)
 			{
 				this.handlers[this.handlers.Length - 1].start = start;
 				this.handlers[this.handlers.Length - 1].type = 1;
@@ -93,17 +93,19 @@ namespace System.Reflection.Emit
 				Array.Copy(this.handlers, array, num);
 				this.handlers = array;
 				this.handlers[num].len = offset - this.handlers[num].start;
-				return;
 			}
-			this.handlers = new ILExceptionBlock[1];
-			this.len = offset - this.start;
+			else
+			{
+				this.handlers = new ILExceptionBlock[1];
+				this.len = offset - this.start;
+			}
 		}
 
-		internal ILExceptionBlock[] handlers;
+		private ILExceptionBlock[] handlers;
 
 		internal int start;
 
-		internal int len;
+		private int len;
 
 		internal Label end;
 	}

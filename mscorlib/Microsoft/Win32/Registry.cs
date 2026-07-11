@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32
@@ -14,86 +15,69 @@ namespace Microsoft.Win32
 			}
 			string[] array = keyName.Split(new char[] { '\\' });
 			string text = array[0];
-			uint num = <PrivateImplementationDetails>.ComputeStringHash(text);
-			RegistryKey registryKey;
-			if (num <= 1097425318U)
+			if (text != null)
 			{
-				if (num != 126972219U)
+				if (Registry.<>f__switch$map0 == null)
 				{
-					if (num != 457190004U)
+					Registry.<>f__switch$map0 = new Dictionary<string, int>(7)
 					{
-						if (num == 1097425318U)
-						{
-							if (text == "HKEY_CLASSES_ROOT")
-							{
-								registryKey = Registry.ClassesRoot;
-								goto IL_0146;
-							}
-						}
-					}
-					else if (text == "HKEY_LOCAL_MACHINE")
+						{ "HKEY_CLASSES_ROOT", 0 },
+						{ "HKEY_CURRENT_CONFIG", 1 },
+						{ "HKEY_CURRENT_USER", 2 },
+						{ "HKEY_DYN_DATA", 3 },
+						{ "HKEY_LOCAL_MACHINE", 4 },
+						{ "HKEY_PERFORMANCE_DATA", 5 },
+						{ "HKEY_USERS", 6 }
+					};
+				}
+				int num;
+				if (Registry.<>f__switch$map0.TryGetValue(text, out num))
+				{
+					RegistryKey registryKey;
+					switch (num)
 					{
+					case 0:
+						registryKey = Registry.ClassesRoot;
+						break;
+					case 1:
+						registryKey = Registry.CurrentConfig;
+						break;
+					case 2:
+						registryKey = Registry.CurrentUser;
+						break;
+					case 3:
+						registryKey = Registry.DynData;
+						break;
+					case 4:
 						registryKey = Registry.LocalMachine;
-						goto IL_0146;
-					}
-				}
-				else if (text == "HKEY_CURRENT_CONFIG")
-				{
-					registryKey = Registry.CurrentConfig;
-					goto IL_0146;
-				}
-			}
-			else if (num <= 1568329430U)
-			{
-				if (num != 1198714601U)
-				{
-					if (num == 1568329430U)
-					{
-						if (text == "HKEY_CURRENT_USER")
-						{
-							registryKey = Registry.CurrentUser;
-							goto IL_0146;
-						}
-					}
-				}
-				else if (text == "HKEY_USERS")
-				{
-					registryKey = Registry.Users;
-					goto IL_0146;
-				}
-			}
-			else if (num != 2823865611U)
-			{
-				if (num == 3554990456U)
-				{
-					if (text == "HKEY_PERFORMANCE_DATA")
-					{
+						break;
+					case 5:
 						registryKey = Registry.PerformanceData;
-						goto IL_0146;
+						break;
+					case 6:
+						registryKey = Registry.Users;
+						break;
+					default:
+						goto IL_0132;
 					}
-				}
-			}
-			else if (text == "HKEY_DYN_DATA")
-			{
-				registryKey = Registry.DynData;
-				goto IL_0146;
-			}
-			throw new ArgumentException("Keyname does not start with a valid registry root", "keyName");
-			IL_0146:
-			for (int i = 1; i < array.Length; i++)
-			{
-				RegistryKey registryKey2 = registryKey.OpenSubKey(array[i], setting);
-				if (registryKey2 == null)
-				{
-					if (!setting)
+					for (int i = 1; i < array.Length; i++)
 					{
-						return null;
+						RegistryKey registryKey2 = registryKey.OpenSubKey(array[i], setting);
+						if (registryKey2 == null)
+						{
+							if (!setting)
+							{
+								return null;
+							}
+							registryKey2 = registryKey.CreateSubKey(array[i]);
+						}
+						registryKey = registryKey2;
 					}
-					registryKey2 = registryKey.CreateSubKey(array[i]);
+					return registryKey;
 				}
-				registryKey = registryKey2;
 			}
-			return registryKey;
+			IL_0132:
+			throw new ArgumentException("Keyname does not start with a valid registry root", "keyName");
 		}
 
 		public static void SetValue(string keyName, string valueName, object value)
@@ -140,7 +124,6 @@ namespace Microsoft.Win32
 
 		public static readonly RegistryKey CurrentUser = new RegistryKey(RegistryHive.CurrentUser);
 
-		[Obsolete("Use PerformanceData instead")]
 		public static readonly RegistryKey DynData = new RegistryKey(RegistryHive.DynData);
 
 		public static readonly RegistryKey LocalMachine = new RegistryKey(RegistryHive.LocalMachine);

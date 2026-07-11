@@ -2,7 +2,7 @@
 
 namespace System.ComponentModel
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class DesignerCategoryAttribute : Attribute
 	{
 		public DesignerCategoryAttribute()
@@ -15,6 +15,14 @@ namespace System.ComponentModel
 			this.category = category;
 		}
 
+		public override object TypeId
+		{
+			get
+			{
+				return base.GetType();
+			}
+		}
+
 		public string Category
 		{
 			get
@@ -23,26 +31,9 @@ namespace System.ComponentModel
 			}
 		}
 
-		public override object TypeId
-		{
-			get
-			{
-				if (this.typeId == null)
-				{
-					this.typeId = base.GetType().FullName + this.Category;
-				}
-				return this.typeId;
-			}
-		}
-
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			DesignerCategoryAttribute designerCategoryAttribute = obj as DesignerCategoryAttribute;
-			return designerCategoryAttribute != null && designerCategoryAttribute.category == this.category;
+			return obj is DesignerCategoryAttribute && (obj == this || ((DesignerCategoryAttribute)obj).Category == this.category);
 		}
 
 		public override int GetHashCode()
@@ -52,19 +43,17 @@ namespace System.ComponentModel
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.category.Equals(DesignerCategoryAttribute.Default.Category);
+			return this.category == DesignerCategoryAttribute.Default.Category;
 		}
 
 		private string category;
 
-		private string typeId;
-
 		public static readonly DesignerCategoryAttribute Component = new DesignerCategoryAttribute("Component");
-
-		public static readonly DesignerCategoryAttribute Default = new DesignerCategoryAttribute();
 
 		public static readonly DesignerCategoryAttribute Form = new DesignerCategoryAttribute("Form");
 
 		public static readonly DesignerCategoryAttribute Generic = new DesignerCategoryAttribute("Designer");
+
+		public static readonly DesignerCategoryAttribute Default = new DesignerCategoryAttribute(string.Empty);
 	}
 }

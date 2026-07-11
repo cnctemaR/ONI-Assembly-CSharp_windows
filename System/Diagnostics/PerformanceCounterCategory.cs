@@ -4,9 +4,30 @@ using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
-	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public sealed class PerformanceCounterCategory
 	{
+		public PerformanceCounterCategory()
+			: this(string.Empty, ".")
+		{
+		}
+
+		public PerformanceCounterCategory(string categoryName)
+			: this(categoryName, ".")
+		{
+		}
+
+		public PerformanceCounterCategory(string categoryName, string machineName)
+		{
+			PerformanceCounterCategory.CheckCategory(categoryName);
+			if (machineName == null)
+			{
+				throw new ArgumentNullException("machineName");
+			}
+			this.categoryName = categoryName;
+			this.machineName = machineName;
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool CategoryDelete(string name);
 
@@ -37,31 +58,10 @@ namespace System.Diagnostics
 			{
 				throw new ArgumentNullException("categoryName");
 			}
-			if (categoryName == "")
+			if (categoryName == string.Empty)
 			{
 				throw new ArgumentException("categoryName");
 			}
-		}
-
-		public PerformanceCounterCategory()
-			: this("", ".")
-		{
-		}
-
-		public PerformanceCounterCategory(string categoryName)
-			: this(categoryName, ".")
-		{
-		}
-
-		public PerformanceCounterCategory(string categoryName, string machineName)
-		{
-			PerformanceCounterCategory.CheckCategory(categoryName);
-			if (machineName == null)
-			{
-				throw new ArgumentNullException("machineName");
-			}
-			this.categoryName = categoryName;
-			this.machineName = machineName;
 		}
 
 		public string CategoryHelp
@@ -89,7 +89,7 @@ namespace System.Diagnostics
 				{
 					throw new ArgumentNullException("value");
 				}
-				if (value == "")
+				if (value == string.Empty)
 				{
 					throw new ArgumentException("value");
 				}
@@ -109,7 +109,7 @@ namespace System.Diagnostics
 				{
 					throw new ArgumentNullException("value");
 				}
-				if (value == "")
+				if (value == string.Empty)
 				{
 					throw new ArgumentException("value");
 				}
@@ -236,7 +236,7 @@ namespace System.Diagnostics
 
 		public PerformanceCounter[] GetCounters()
 		{
-			return this.GetCounters("");
+			return this.GetCounters(string.Empty);
 		}
 
 		public PerformanceCounter[] GetCounters(string instanceName)
@@ -288,7 +288,7 @@ namespace System.Diagnostics
 			throw new InvalidOperationException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public InstanceDataCollectionCollection ReadCategory()
 		{
 			throw new NotImplementedException();

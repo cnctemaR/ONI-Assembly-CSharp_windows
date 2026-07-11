@@ -10,14 +10,16 @@ namespace System.Security.Permissions
 			if (PermissionHelper.CheckPermissionState(state, true) == PermissionState.Unrestricted)
 			{
 				this._flags = StorePermissionFlags.AllFlags;
-				return;
 			}
-			this._flags = StorePermissionFlags.NoFlags;
+			else
+			{
+				this._flags = StorePermissionFlags.NoFlags;
+			}
 		}
 
-		public StorePermission(StorePermissionFlags flag)
+		public StorePermission(StorePermissionFlags flags)
 		{
-			this.Flags = flag;
+			this.Flags = flags;
 		}
 
 		public StorePermissionFlags Flags
@@ -30,7 +32,8 @@ namespace System.Security.Permissions
 			{
 				if (value != StorePermissionFlags.NoFlags && (value & StorePermissionFlags.AllFlags) == StorePermissionFlags.NoFlags)
 				{
-					throw new ArgumentException(string.Format(global::Locale.GetText("Invalid enum {0}"), value), "StorePermissionFlags");
+					string text = string.Format(global::Locale.GetText("Invalid enum {0}"), value);
+					throw new ArgumentException(text, "StorePermissionFlags");
 				}
 				this._flags = value;
 			}
@@ -106,16 +109,18 @@ namespace System.Security.Permissions
 			return storePermission.IsUnrestricted() || (!this.IsUnrestricted() && (this._flags & ~storePermission._flags) == StorePermissionFlags.NoFlags);
 		}
 
-		public override void FromXml(SecurityElement securityElement)
+		public override void FromXml(SecurityElement e)
 		{
-			PermissionHelper.CheckSecurityElement(securityElement, "securityElement", 1, 1);
-			string text = securityElement.Attribute("Flags");
+			PermissionHelper.CheckSecurityElement(e, "e", 1, 1);
+			string text = e.Attribute("Flags");
 			if (text == null)
 			{
 				this._flags = StorePermissionFlags.NoFlags;
-				return;
 			}
-			this._flags = (StorePermissionFlags)Enum.Parse(typeof(StorePermissionFlags), text);
+			else
+			{
+				this._flags = (StorePermissionFlags)((int)Enum.Parse(typeof(StorePermissionFlags), text));
+			}
 		}
 
 		public override SecurityElement ToXml()

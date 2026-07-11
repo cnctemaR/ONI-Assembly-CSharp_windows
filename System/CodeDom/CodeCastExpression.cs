@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeCastExpression : CodeExpression
 	{
@@ -11,41 +14,57 @@ namespace System.CodeDom
 
 		public CodeCastExpression(CodeTypeReference targetType, CodeExpression expression)
 		{
-			this.TargetType = targetType;
-			this.Expression = expression;
+			this.targetType = targetType;
+			this.expression = expression;
 		}
 
 		public CodeCastExpression(string targetType, CodeExpression expression)
 		{
-			this.TargetType = new CodeTypeReference(targetType);
-			this.Expression = expression;
+			this.targetType = new CodeTypeReference(targetType);
+			this.expression = expression;
 		}
 
 		public CodeCastExpression(Type targetType, CodeExpression expression)
 		{
-			this.TargetType = new CodeTypeReference(targetType);
-			this.Expression = expression;
+			this.targetType = new CodeTypeReference(targetType);
+			this.expression = expression;
+		}
+
+		public CodeExpression Expression
+		{
+			get
+			{
+				return this.expression;
+			}
+			set
+			{
+				this.expression = value;
+			}
 		}
 
 		public CodeTypeReference TargetType
 		{
 			get
 			{
-				CodeTypeReference codeTypeReference;
-				if ((codeTypeReference = this._targetType) == null)
+				if (this.targetType == null)
 				{
-					codeTypeReference = (this._targetType = new CodeTypeReference(""));
+					this.targetType = new CodeTypeReference(string.Empty);
 				}
-				return codeTypeReference;
+				return this.targetType;
 			}
 			set
 			{
-				this._targetType = value;
+				this.targetType = value;
 			}
 		}
 
-		public CodeExpression Expression { get; set; }
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
 
-		private CodeTypeReference _targetType;
+		private CodeTypeReference targetType;
+
+		private CodeExpression expression;
 	}
 }

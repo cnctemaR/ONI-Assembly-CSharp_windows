@@ -1,13 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Principal;
-using System.Threading;
 
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	[SecurityCritical]
 	[Serializable]
 	public sealed class CallContext
 	{
@@ -15,122 +12,126 @@ namespace System.Runtime.Remoting.Messaging
 		{
 		}
 
-		internal static object SetCurrentCallContext(LogicalCallContext ctx)
+		public static object HostContext
 		{
-			return null;
+			get
+			{
+				throw new NotImplementedException();
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
 		}
 
-		internal static LogicalCallContext SetLogicalCallContext(LogicalCallContext callCtx)
+		public static void FreeNamedDataSlot(string name)
 		{
-			ExecutionContext mutableExecutionContext = Thread.CurrentThread.GetMutableExecutionContext();
-			LogicalCallContext logicalCallContext = mutableExecutionContext.LogicalCallContext;
-			mutableExecutionContext.LogicalCallContext = callCtx;
+			CallContext.Datastore.Remove(name);
+		}
+
+		public static object GetData(string name)
+		{
+			return CallContext.Datastore[name];
+		}
+
+		public static void SetData(string name, object data)
+		{
+			CallContext.Datastore[name] = data;
+		}
+
+		[MonoTODO]
+		public static object LogicalGetData(string name)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		public static void LogicalSetData(string name, object data)
+		{
+			throw new NotImplementedException();
+		}
+
+		public static Header[] GetHeaders()
+		{
+			return CallContext.Headers;
+		}
+
+		public static void SetHeaders(Header[] headers)
+		{
+			CallContext.Headers = headers;
+		}
+
+		internal static LogicalCallContext CreateLogicalCallContext(bool createEmpty)
+		{
+			LogicalCallContext logicalCallContext = null;
+			if (CallContext.datastore != null)
+			{
+				foreach (object obj in CallContext.datastore)
+				{
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+					if (dictionaryEntry.Value is ILogicalThreadAffinative)
+					{
+						if (logicalCallContext == null)
+						{
+							logicalCallContext = new LogicalCallContext();
+						}
+						logicalCallContext.SetData((string)dictionaryEntry.Key, dictionaryEntry.Value);
+					}
+				}
+			}
+			if (logicalCallContext == null && createEmpty)
+			{
+				return new LogicalCallContext();
+			}
 			return logicalCallContext;
 		}
 
-		[SecurityCritical]
-		public static void FreeNamedDataSlot(string name)
+		internal static object SetCurrentCallContext(LogicalCallContext ctx)
 		{
-			ExecutionContext mutableExecutionContext = Thread.CurrentThread.GetMutableExecutionContext();
-			mutableExecutionContext.LogicalCallContext.FreeNamedDataSlot(name);
-			mutableExecutionContext.IllogicalCallContext.FreeNamedDataSlot(name);
-		}
-
-		[SecurityCritical]
-		public static object LogicalGetData(string name)
-		{
-			return Thread.CurrentThread.GetExecutionContextReader().LogicalCallContext.GetData(name);
-		}
-
-		private static object IllogicalGetData(string name)
-		{
-			return Thread.CurrentThread.GetExecutionContextReader().IllogicalCallContext.GetData(name);
-		}
-
-		internal static IPrincipal Principal
-		{
-			[SecurityCritical]
-			get
+			object obj = CallContext.datastore;
+			if (ctx != null && ctx.HasInfo)
 			{
-				return Thread.CurrentThread.GetExecutionContextReader().LogicalCallContext.Principal;
+				CallContext.datastore = (Hashtable)ctx.Datastore.Clone();
 			}
-			[SecurityCritical]
-			set
+			else
 			{
-				Thread.CurrentThread.GetMutableExecutionContext().LogicalCallContext.Principal = value;
-			}
-		}
-
-		public static object HostContext
-		{
-			[SecurityCritical]
-			get
-			{
-				ExecutionContext.Reader executionContextReader = Thread.CurrentThread.GetExecutionContextReader();
-				object obj = executionContextReader.IllogicalCallContext.HostContext;
-				if (obj == null)
-				{
-					obj = executionContextReader.LogicalCallContext.HostContext;
-				}
-				return obj;
-			}
-			[SecurityCritical]
-			set
-			{
-				ExecutionContext mutableExecutionContext = Thread.CurrentThread.GetMutableExecutionContext();
-				if (value is ILogicalThreadAffinative)
-				{
-					mutableExecutionContext.IllogicalCallContext.HostContext = null;
-					mutableExecutionContext.LogicalCallContext.HostContext = value;
-					return;
-				}
-				mutableExecutionContext.IllogicalCallContext.HostContext = value;
-				mutableExecutionContext.LogicalCallContext.HostContext = null;
-			}
-		}
-
-		[SecurityCritical]
-		public static object GetData(string name)
-		{
-			object obj = CallContext.LogicalGetData(name);
-			if (obj == null)
-			{
-				return CallContext.IllogicalGetData(name);
+				CallContext.datastore = null;
 			}
 			return obj;
 		}
 
-		[SecurityCritical]
-		public static void SetData(string name, object data)
+		internal static void UpdateCurrentCallContext(LogicalCallContext ctx)
 		{
-			if (data is ILogicalThreadAffinative)
+			Hashtable hashtable = ctx.Datastore;
+			foreach (object obj in hashtable)
 			{
-				CallContext.LogicalSetData(name, data);
-				return;
+				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+				CallContext.SetData((string)dictionaryEntry.Key, dictionaryEntry.Value);
 			}
-			ExecutionContext mutableExecutionContext = Thread.CurrentThread.GetMutableExecutionContext();
-			mutableExecutionContext.LogicalCallContext.FreeNamedDataSlot(name);
-			mutableExecutionContext.IllogicalCallContext.SetData(name, data);
 		}
 
-		[SecurityCritical]
-		public static void LogicalSetData(string name, object data)
+		internal static void RestoreCallContext(object oldContext)
 		{
-			ExecutionContext mutableExecutionContext = Thread.CurrentThread.GetMutableExecutionContext();
-			mutableExecutionContext.IllogicalCallContext.FreeNamedDataSlot(name);
-			mutableExecutionContext.LogicalCallContext.SetData(name, data);
+			CallContext.datastore = (Hashtable)oldContext;
 		}
 
-		[SecurityCritical]
-		public static Header[] GetHeaders()
+		private static Hashtable Datastore
 		{
-			return Thread.CurrentThread.GetMutableExecutionContext().LogicalCallContext.InternalGetHeaders();
+			get
+			{
+				Hashtable hashtable = CallContext.datastore;
+				if (hashtable == null)
+				{
+					return CallContext.datastore = new Hashtable();
+				}
+				return hashtable;
+			}
 		}
 
-		[SecurityCritical]
-		public static void SetHeaders(Header[] headers)
-		{
-			Thread.CurrentThread.GetMutableExecutionContext().LogicalCallContext.InternalSetHeaders(headers);
-		}
+		[ThreadStatic]
+		private static Header[] Headers;
+
+		[ThreadStatic]
+		private static Hashtable datastore;
 	}
 }

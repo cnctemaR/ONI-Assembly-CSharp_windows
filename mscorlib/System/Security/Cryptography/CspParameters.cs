@@ -7,32 +7,71 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public sealed class CspParameters
 	{
+		public CspParameters()
+			: this(1)
+		{
+		}
+
+		public CspParameters(int dwTypeIn)
+			: this(dwTypeIn, null)
+		{
+		}
+
+		public CspParameters(int dwTypeIn, string strProviderNameIn)
+			: this(dwTypeIn, null, null)
+		{
+		}
+
+		public CspParameters(int dwTypeIn, string strProviderNameIn, string strContainerNameIn)
+		{
+			this.ProviderType = dwTypeIn;
+			this.ProviderName = strProviderNameIn;
+			this.KeyContainerName = strContainerNameIn;
+			this.KeyNumber = -1;
+		}
+
+		public CspParameters(int providerType, string providerName, string keyContainerName, CryptoKeySecurity cryptoKeySecurity, IntPtr parentWindowHandle)
+			: this(providerType, providerName, keyContainerName)
+		{
+			if (cryptoKeySecurity != null)
+			{
+				this.CryptoKeySecurity = cryptoKeySecurity;
+			}
+			this._windowHandle = parentWindowHandle;
+		}
+
+		public CspParameters(int providerType, string providerName, string keyContainerName, CryptoKeySecurity cryptoKeySecurity, SecureString keyPassword)
+			: this(providerType, providerName, keyContainerName)
+		{
+			if (cryptoKeySecurity != null)
+			{
+				this.CryptoKeySecurity = cryptoKeySecurity;
+			}
+			this._password = keyPassword;
+		}
+
 		public CspProviderFlags Flags
 		{
 			get
 			{
-				return (CspProviderFlags)this.m_flags;
+				return this._Flags;
 			}
 			set
 			{
-				int num = 255;
-				if ((value & (CspProviderFlags)(~(CspProviderFlags)num)) != CspProviderFlags.NoFlags)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Illegal enum value: {0}.", new object[] { (int)value }), "value");
-				}
-				this.m_flags = (int)value;
+				this._Flags = value;
 			}
 		}
 
+		[MonoTODO("access control isn't implemented")]
 		public CryptoKeySecurity CryptoKeySecurity
 		{
 			get
 			{
-				return this.m_cryptoKeySecurity;
+				throw new NotImplementedException();
 			}
 			set
 			{
-				this.m_cryptoKeySecurity = value;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -40,12 +79,11 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_keyPassword;
+				return this._password;
 			}
 			set
 			{
-				this.m_keyPassword = value;
-				this.m_parentWindowHandle = IntPtr.Zero;
+				this._password = value;
 			}
 		}
 
@@ -53,84 +91,26 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_parentWindowHandle;
+				return this._windowHandle;
 			}
 			set
 			{
-				this.m_parentWindowHandle = value;
-				this.m_keyPassword = null;
+				this._windowHandle = value;
 			}
 		}
 
-		public CspParameters()
-			: this(1, null, null)
-		{
-		}
-
-		public CspParameters(int dwTypeIn)
-			: this(dwTypeIn, null, null)
-		{
-		}
-
-		public CspParameters(int dwTypeIn, string strProviderNameIn)
-			: this(dwTypeIn, strProviderNameIn, null)
-		{
-		}
-
-		public CspParameters(int dwTypeIn, string strProviderNameIn, string strContainerNameIn)
-			: this(dwTypeIn, strProviderNameIn, strContainerNameIn, CspProviderFlags.NoFlags)
-		{
-		}
-
-		public CspParameters(int providerType, string providerName, string keyContainerName, CryptoKeySecurity cryptoKeySecurity, SecureString keyPassword)
-			: this(providerType, providerName, keyContainerName)
-		{
-			this.m_cryptoKeySecurity = cryptoKeySecurity;
-			this.m_keyPassword = keyPassword;
-		}
-
-		public CspParameters(int providerType, string providerName, string keyContainerName, CryptoKeySecurity cryptoKeySecurity, IntPtr parentWindowHandle)
-			: this(providerType, providerName, keyContainerName)
-		{
-			this.m_cryptoKeySecurity = cryptoKeySecurity;
-			this.m_parentWindowHandle = parentWindowHandle;
-		}
-
-		internal CspParameters(int providerType, string providerName, string keyContainerName, CspProviderFlags flags)
-		{
-			this.ProviderType = providerType;
-			this.ProviderName = providerName;
-			this.KeyContainerName = keyContainerName;
-			this.KeyNumber = -1;
-			this.Flags = flags;
-		}
-
-		internal CspParameters(CspParameters parameters)
-		{
-			this.ProviderType = parameters.ProviderType;
-			this.ProviderName = parameters.ProviderName;
-			this.KeyContainerName = parameters.KeyContainerName;
-			this.KeyNumber = parameters.KeyNumber;
-			this.Flags = parameters.Flags;
-			this.m_cryptoKeySecurity = parameters.m_cryptoKeySecurity;
-			this.m_keyPassword = parameters.m_keyPassword;
-			this.m_parentWindowHandle = parameters.m_parentWindowHandle;
-		}
-
-		public int ProviderType;
-
-		public string ProviderName;
+		private CspProviderFlags _Flags;
 
 		public string KeyContainerName;
 
 		public int KeyNumber;
 
-		private int m_flags;
+		public string ProviderName;
 
-		private CryptoKeySecurity m_cryptoKeySecurity;
+		public int ProviderType;
 
-		private SecureString m_keyPassword;
+		private SecureString _password;
 
-		private IntPtr m_parentWindowHandle;
+		private IntPtr _windowHandle;
 	}
 }

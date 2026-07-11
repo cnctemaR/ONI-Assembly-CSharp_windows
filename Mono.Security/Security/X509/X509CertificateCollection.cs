@@ -20,6 +20,11 @@ namespace Mono.Security.X509
 			this.AddRange(value);
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return base.InnerList.GetEnumerator();
+		}
+
 		public X509Certificate this[int index]
 		{
 			get
@@ -78,11 +83,6 @@ namespace Mono.Security.X509
 		public new X509CertificateCollection.X509CertificateEnumerator GetEnumerator()
 		{
 			return new X509CertificateCollection.X509CertificateEnumerator(this);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return base.InnerList.GetEnumerator();
 		}
 
 		public override int GetHashCode()
@@ -149,14 +149,6 @@ namespace Mono.Security.X509
 				this.enumerator = ((IEnumerable)mappings).GetEnumerator();
 			}
 
-			public X509Certificate Current
-			{
-				get
-				{
-					return (X509Certificate)this.enumerator.Current;
-				}
-			}
-
 			object IEnumerator.Current
 			{
 				get
@@ -173,6 +165,14 @@ namespace Mono.Security.X509
 			void IEnumerator.Reset()
 			{
 				this.enumerator.Reset();
+			}
+
+			public X509Certificate Current
+			{
+				get
+				{
+					return (X509Certificate)this.enumerator.Current;
+				}
 			}
 
 			public bool MoveNext()

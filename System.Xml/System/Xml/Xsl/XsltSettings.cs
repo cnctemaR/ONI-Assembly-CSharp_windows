@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 
 namespace System.Xml.Xsl
 {
@@ -11,15 +10,26 @@ namespace System.Xml.Xsl
 
 		public XsltSettings(bool enableDocumentFunction, bool enableScript)
 		{
-			this.enableDocumentFunction = enableDocumentFunction;
+			this.enableDocument = enableDocumentFunction;
 			this.enableScript = enableScript;
+		}
+
+		private XsltSettings(bool readOnly)
+		{
+			this.readOnly = readOnly;
+		}
+
+		static XsltSettings()
+		{
+			XsltSettings.trustedXslt.enableDocument = true;
+			XsltSettings.trustedXslt.enableScript = true;
 		}
 
 		public static XsltSettings Default
 		{
 			get
 			{
-				return new XsltSettings(false, false);
+				return XsltSettings.defaultSettings;
 			}
 		}
 
@@ -27,7 +37,7 @@ namespace System.Xml.Xsl
 		{
 			get
 			{
-				return new XsltSettings(true, true);
+				return XsltSettings.trustedXslt;
 			}
 		}
 
@@ -35,11 +45,14 @@ namespace System.Xml.Xsl
 		{
 			get
 			{
-				return this.enableDocumentFunction;
+				return this.enableDocument;
 			}
 			set
 			{
-				this.enableDocumentFunction = value;
+				if (!this.readOnly)
+				{
+					this.enableDocument = value;
+				}
 			}
 		}
 
@@ -51,82 +64,21 @@ namespace System.Xml.Xsl
 			}
 			set
 			{
-				this.enableScript = value;
+				if (!this.readOnly)
+				{
+					this.enableScript = value;
+				}
 			}
 		}
 
-		internal bool CheckOnly
-		{
-			get
-			{
-				return this.checkOnly;
-			}
-			set
-			{
-				this.checkOnly = value;
-			}
-		}
+		private static readonly XsltSettings defaultSettings = new XsltSettings(true);
 
-		internal bool IncludeDebugInformation
-		{
-			get
-			{
-				return this.includeDebugInformation;
-			}
-			set
-			{
-				this.includeDebugInformation = value;
-			}
-		}
+		private static readonly XsltSettings trustedXslt = new XsltSettings(true);
 
-		internal int WarningLevel
-		{
-			get
-			{
-				return this.warningLevel;
-			}
-			set
-			{
-				this.warningLevel = value;
-			}
-		}
+		private bool readOnly;
 
-		internal bool TreatWarningsAsErrors
-		{
-			get
-			{
-				return this.treatWarningsAsErrors;
-			}
-			set
-			{
-				this.treatWarningsAsErrors = value;
-			}
-		}
-
-		internal TempFileCollection TempFiles
-		{
-			get
-			{
-				return this.tempFiles;
-			}
-			set
-			{
-				this.tempFiles = value;
-			}
-		}
-
-		private bool enableDocumentFunction;
+		private bool enableDocument;
 
 		private bool enableScript;
-
-		private bool checkOnly;
-
-		private bool includeDebugInformation;
-
-		private int warningLevel = -1;
-
-		private bool treatWarningsAsErrors;
-
-		private TempFileCollection tempFiles;
 	}
 }

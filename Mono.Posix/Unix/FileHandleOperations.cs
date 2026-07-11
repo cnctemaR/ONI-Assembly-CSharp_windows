@@ -12,7 +12,8 @@ namespace Mono.Unix
 
 		public static void AdviseFileAccessPattern(int fd, FileAccessPattern pattern, long offset, long len)
 		{
-			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.posix_fadvise(fd, offset, len, (PosixFadviseAdvice)pattern));
+			int num = Syscall.posix_fadvise(fd, offset, len, (PosixFadviseAdvice)pattern);
+			UnixMarshal.ThrowExceptionForLastErrorIf(num);
 		}
 
 		public static void AdviseFileAccessPattern(int fd, FileAccessPattern pattern)
@@ -26,7 +27,8 @@ namespace Mono.Unix
 			{
 				throw new ArgumentNullException("file");
 			}
-			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.posix_fadvise(file.Handle.ToInt32(), offset, len, (PosixFadviseAdvice)pattern));
+			int num = Syscall.posix_fadvise(file.Handle.ToInt32(), offset, len, (PosixFadviseAdvice)pattern);
+			UnixMarshal.ThrowExceptionForLastErrorIf(num);
 		}
 
 		public static void AdviseFileAccessPattern(FileStream file, FileAccessPattern pattern)
@@ -40,7 +42,8 @@ namespace Mono.Unix
 			{
 				throw new ArgumentNullException("stream");
 			}
-			UnixMarshal.ThrowExceptionForLastErrorIf(Syscall.posix_fadvise(stream.Handle, offset, len, (PosixFadviseAdvice)pattern));
+			int num = Syscall.posix_fadvise(stream.Handle, offset, len, (PosixFadviseAdvice)pattern);
+			UnixMarshal.ThrowExceptionForLastErrorIf(num);
 		}
 
 		public static void AdviseFileAccessPattern(UnixStream stream, FileAccessPattern pattern)

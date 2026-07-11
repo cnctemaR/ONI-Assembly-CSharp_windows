@@ -6,149 +6,15 @@ namespace System.Diagnostics
 	public class TraceListenerCollection : IList, ICollection, IEnumerable
 	{
 		internal TraceListenerCollection()
+			: this(true)
 		{
-			this.list = new ArrayList(1);
 		}
 
-		public TraceListener this[int i]
+		internal TraceListenerCollection(bool addDefault)
 		{
-			get
+			if (addDefault)
 			{
-				return (TraceListener)this.list[i];
-			}
-			set
-			{
-				this.InitializeListener(value);
-				this.list[i] = value;
-			}
-		}
-
-		public TraceListener this[string name]
-		{
-			get
-			{
-				foreach (object obj in this)
-				{
-					TraceListener traceListener = (TraceListener)obj;
-					if (traceListener.Name == name)
-					{
-						return traceListener;
-					}
-				}
-				return null;
-			}
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.list.Count;
-			}
-		}
-
-		public int Add(TraceListener listener)
-		{
-			this.InitializeListener(listener);
-			object critSec = TraceInternal.critSec;
-			int num;
-			lock (critSec)
-			{
-				num = this.list.Add(listener);
-			}
-			return num;
-		}
-
-		public void AddRange(TraceListener[] value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			for (int i = 0; i < value.Length; i++)
-			{
-				this.Add(value[i]);
-			}
-		}
-
-		public void AddRange(TraceListenerCollection value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			int count = value.Count;
-			for (int i = 0; i < count; i++)
-			{
-				this.Add(value[i]);
-			}
-		}
-
-		public void Clear()
-		{
-			this.list = new ArrayList();
-		}
-
-		public bool Contains(TraceListener listener)
-		{
-			return ((IList)this).Contains(listener);
-		}
-
-		public void CopyTo(TraceListener[] listeners, int index)
-		{
-			((ICollection)this).CopyTo(listeners, index);
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this.list.GetEnumerator();
-		}
-
-		internal void InitializeListener(TraceListener listener)
-		{
-			if (listener == null)
-			{
-				throw new ArgumentNullException("listener");
-			}
-			listener.IndentSize = TraceInternal.IndentSize;
-			listener.IndentLevel = TraceInternal.IndentLevel;
-		}
-
-		public int IndexOf(TraceListener listener)
-		{
-			return ((IList)this).IndexOf(listener);
-		}
-
-		public void Insert(int index, TraceListener listener)
-		{
-			this.InitializeListener(listener);
-			object critSec = TraceInternal.critSec;
-			lock (critSec)
-			{
-				this.list.Insert(index, listener);
-			}
-		}
-
-		public void Remove(TraceListener listener)
-		{
-			((IList)this).Remove(listener);
-		}
-
-		public void Remove(string name)
-		{
-			TraceListener traceListener = this[name];
-			if (traceListener != null)
-			{
-				((IList)this).Remove(traceListener);
-			}
-		}
-
-		public void RemoveAt(int index)
-		{
-			object critSec = TraceInternal.critSec;
-			lock (critSec)
-			{
-				this.list.RemoveAt(index);
+				this.Add(new DefaultTraceListener());
 			}
 		}
 
@@ -156,92 +22,13 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.list[index];
+				return this.listeners[index];
 			}
 			set
 			{
-				TraceListener traceListener = value as TraceListener;
-				if (traceListener == null)
-				{
-					throw new ArgumentException(global::SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
-				}
+				TraceListener traceListener = (TraceListener)value;
 				this.InitializeListener(traceListener);
-				this.list[index] = traceListener;
-			}
-		}
-
-		bool IList.IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		bool IList.IsFixedSize
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		int IList.Add(object value)
-		{
-			TraceListener traceListener = value as TraceListener;
-			if (traceListener == null)
-			{
-				throw new ArgumentException(global::SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
-			}
-			this.InitializeListener(traceListener);
-			object critSec = TraceInternal.critSec;
-			int num;
-			lock (critSec)
-			{
-				num = this.list.Add(value);
-			}
-			return num;
-		}
-
-		bool IList.Contains(object value)
-		{
-			return this.list.Contains(value);
-		}
-
-		int IList.IndexOf(object value)
-		{
-			return this.list.IndexOf(value);
-		}
-
-		void IList.Insert(int index, object value)
-		{
-			TraceListener traceListener = value as TraceListener;
-			if (traceListener == null)
-			{
-				throw new ArgumentException(global::SR.GetString("Only TraceListeners can be added to a TraceListenerCollection."), "value");
-			}
-			this.InitializeListener(traceListener);
-			object critSec = TraceInternal.critSec;
-			lock (critSec)
-			{
-				this.list.Insert(index, value);
-			}
-		}
-
-		void IList.Remove(object value)
-		{
-			object critSec = TraceInternal.critSec;
-			lock (critSec)
-			{
-				this.list.Remove(value);
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				return this;
+				this[index] = traceListener;
 			}
 		}
 
@@ -249,19 +36,225 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return true;
+				return this.listeners.IsSynchronized;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return this.listeners.SyncRoot;
+			}
+		}
+
+		bool IList.IsFixedSize
+		{
+			get
+			{
+				return this.listeners.IsFixedSize;
+			}
+		}
+
+		bool IList.IsReadOnly
+		{
+			get
+			{
+				return this.listeners.IsReadOnly;
 			}
 		}
 
 		void ICollection.CopyTo(Array array, int index)
 		{
-			object critSec = TraceInternal.critSec;
-			lock (critSec)
+			this.listeners.CopyTo(array, index);
+		}
+
+		int IList.Add(object value)
+		{
+			if (value is TraceListener)
 			{
-				this.list.CopyTo(array, index);
+				return this.Add((TraceListener)value);
+			}
+			throw new NotSupportedException(global::Locale.GetText("You can only add TraceListener objects to the collection"));
+		}
+
+		bool IList.Contains(object value)
+		{
+			return value is TraceListener && this.listeners.Contains(value);
+		}
+
+		int IList.IndexOf(object value)
+		{
+			if (value is TraceListener)
+			{
+				return this.listeners.IndexOf(value);
+			}
+			return -1;
+		}
+
+		void IList.Insert(int index, object value)
+		{
+			if (value is TraceListener)
+			{
+				this.Insert(index, (TraceListener)value);
+				return;
+			}
+			throw new NotSupportedException(global::Locale.GetText("You can only insert TraceListener objects into the collection"));
+		}
+
+		void IList.Remove(object value)
+		{
+			if (value is TraceListener)
+			{
+				this.listeners.Remove(value);
 			}
 		}
 
-		private ArrayList list;
+		public int Count
+		{
+			get
+			{
+				return this.listeners.Count;
+			}
+		}
+
+		public TraceListener this[string name]
+		{
+			get
+			{
+				object syncRoot = this.listeners.SyncRoot;
+				lock (syncRoot)
+				{
+					foreach (object obj in this.listeners)
+					{
+						TraceListener traceListener = (TraceListener)obj;
+						if (traceListener.Name == name)
+						{
+							return traceListener;
+						}
+					}
+				}
+				return null;
+			}
+		}
+
+		public TraceListener this[int index]
+		{
+			get
+			{
+				return (TraceListener)this.listeners[index];
+			}
+			set
+			{
+				this.InitializeListener(value);
+				this.listeners[index] = value;
+			}
+		}
+
+		public int Add(TraceListener listener)
+		{
+			this.InitializeListener(listener);
+			return this.listeners.Add(listener);
+		}
+
+		internal void Add(TraceListener listener, TraceImplSettings settings)
+		{
+			listener.IndentLevel = settings.IndentLevel;
+			listener.IndentSize = settings.IndentSize;
+			this.listeners.Add(listener);
+		}
+
+		private void InitializeListener(TraceListener listener)
+		{
+			listener.IndentLevel = TraceImpl.IndentLevel;
+			listener.IndentSize = TraceImpl.IndentSize;
+		}
+
+		private void InitializeRange(IList listeners)
+		{
+			int count = listeners.Count;
+			for (int num = 0; num != count; num++)
+			{
+				this.InitializeListener((TraceListener)listeners[num]);
+			}
+		}
+
+		public void AddRange(TraceListener[] value)
+		{
+			this.InitializeRange(value);
+			this.listeners.AddRange(value);
+		}
+
+		public void AddRange(TraceListenerCollection value)
+		{
+			this.InitializeRange(value);
+			this.listeners.AddRange(value.listeners);
+		}
+
+		public void Clear()
+		{
+			this.listeners.Clear();
+		}
+
+		public bool Contains(TraceListener listener)
+		{
+			return this.listeners.Contains(listener);
+		}
+
+		public void CopyTo(TraceListener[] listeners, int index)
+		{
+			listeners.CopyTo(listeners, index);
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			return this.listeners.GetEnumerator();
+		}
+
+		public int IndexOf(TraceListener listener)
+		{
+			return this.listeners.IndexOf(listener);
+		}
+
+		public void Insert(int index, TraceListener listener)
+		{
+			this.InitializeListener(listener);
+			this.listeners.Insert(index, listener);
+		}
+
+		public void Remove(string name)
+		{
+			TraceListener traceListener = null;
+			object syncRoot = this.listeners.SyncRoot;
+			lock (syncRoot)
+			{
+				foreach (object obj in this.listeners)
+				{
+					TraceListener traceListener2 = (TraceListener)obj;
+					if (traceListener2.Name == name)
+					{
+						traceListener = traceListener2;
+						break;
+					}
+				}
+				if (traceListener == null)
+				{
+					throw new ArgumentException(global::Locale.GetText("TraceListener " + name + " was not in the collection"));
+				}
+				this.listeners.Remove(traceListener);
+			}
+		}
+
+		public void Remove(TraceListener listener)
+		{
+			this.listeners.Remove(listener);
+		}
+
+		public void RemoveAt(int index)
+		{
+			this.listeners.RemoveAt(index);
+		}
+
+		private ArrayList listeners = ArrayList.Synchronized(new ArrayList(1));
 	}
 }

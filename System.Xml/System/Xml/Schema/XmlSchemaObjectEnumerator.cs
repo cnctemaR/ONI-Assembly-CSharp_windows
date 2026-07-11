@@ -5,47 +5,47 @@ namespace System.Xml.Schema
 {
 	public class XmlSchemaObjectEnumerator : IEnumerator
 	{
-		internal XmlSchemaObjectEnumerator(IEnumerator enumerator)
+		internal XmlSchemaObjectEnumerator(IList list)
 		{
-			this.enumerator = enumerator;
-		}
-
-		public void Reset()
-		{
-			this.enumerator.Reset();
-		}
-
-		public bool MoveNext()
-		{
-			return this.enumerator.MoveNext();
-		}
-
-		public XmlSchemaObject Current
-		{
-			get
-			{
-				return (XmlSchemaObject)this.enumerator.Current;
-			}
-		}
-
-		void IEnumerator.Reset()
-		{
-			this.enumerator.Reset();
+			this.ienum = list.GetEnumerator();
 		}
 
 		bool IEnumerator.MoveNext()
 		{
-			return this.enumerator.MoveNext();
+			return this.ienum.MoveNext();
+		}
+
+		void IEnumerator.Reset()
+		{
+			this.ienum.Reset();
 		}
 
 		object IEnumerator.Current
 		{
 			get
 			{
-				return this.enumerator.Current;
+				return (XmlSchemaObject)this.ienum.Current;
 			}
 		}
 
-		private IEnumerator enumerator;
+		public XmlSchemaObject Current
+		{
+			get
+			{
+				return (XmlSchemaObject)this.ienum.Current;
+			}
+		}
+
+		public bool MoveNext()
+		{
+			return this.ienum.MoveNext();
+		}
+
+		public void Reset()
+		{
+			this.ienum.Reset();
+		}
+
+		private IEnumerator ienum;
 	}
 }

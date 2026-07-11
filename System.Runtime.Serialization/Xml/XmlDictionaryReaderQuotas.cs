@@ -1,207 +1,126 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.Serialization;
 
 namespace System.Xml
 {
 	public sealed class XmlDictionaryReaderQuotas
 	{
 		public XmlDictionaryReaderQuotas()
+			: this(false)
 		{
-			XmlDictionaryReaderQuotas.defaultQuota.CopyTo(this);
 		}
 
-		private XmlDictionaryReaderQuotas(int maxDepth, int maxStringContentLength, int maxArrayLength, int maxBytesPerRead, int maxNameTableCharCount, XmlDictionaryReaderQuotaTypes modifiedQuotas)
+		private XmlDictionaryReaderQuotas(bool max)
 		{
-			this.maxDepth = maxDepth;
-			this.maxStringContentLength = maxStringContentLength;
-			this.maxArrayLength = maxArrayLength;
-			this.maxBytesPerRead = maxBytesPerRead;
-			this.maxNameTableCharCount = maxNameTableCharCount;
-			this.modifiedQuotas = modifiedQuotas;
-			this.MakeReadOnly();
+			this.is_readonly = max;
+			this.array_len = ((!max) ? 16384 : int.MaxValue);
+			this.bytes = ((!max) ? 4096 : int.MaxValue);
+			this.depth = ((!max) ? 32 : int.MaxValue);
+			this.nt_chars = ((!max) ? 16384 : int.MaxValue);
+			this.text_len = ((!max) ? 8192 : int.MaxValue);
 		}
 
 		public static XmlDictionaryReaderQuotas Max
 		{
 			get
 			{
-				return XmlDictionaryReaderQuotas.maxQuota;
+				return XmlDictionaryReaderQuotas.max;
 			}
 		}
 
-		public void CopyTo(XmlDictionaryReaderQuotas quotas)
-		{
-			if (quotas == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("quotas"));
-			}
-			if (quotas.readOnly)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("Cannot copy XmlDictionaryReaderQuotas. Target is readonly.")));
-			}
-			this.InternalCopyTo(quotas);
-		}
-
-		internal void InternalCopyTo(XmlDictionaryReaderQuotas quotas)
-		{
-			quotas.maxStringContentLength = this.maxStringContentLength;
-			quotas.maxArrayLength = this.maxArrayLength;
-			quotas.maxDepth = this.maxDepth;
-			quotas.maxNameTableCharCount = this.maxNameTableCharCount;
-			quotas.maxBytesPerRead = this.maxBytesPerRead;
-			quotas.modifiedQuotas = this.modifiedQuotas;
-		}
-
-		[DefaultValue(8192)]
-		public int MaxStringContentLength
-		{
-			get
-			{
-				return this.maxStringContentLength;
-			}
-			set
-			{
-				if (this.readOnly)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("The '{0}' quota is readonly.", new object[] { "MaxStringContentLength" })));
-				}
-				if (value <= 0)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Quota must be a positive value."), "value"));
-				}
-				this.maxStringContentLength = value;
-				this.modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxStringContentLength;
-			}
-		}
-
-		[DefaultValue(16384)]
 		public int MaxArrayLength
 		{
 			get
 			{
-				return this.maxArrayLength;
+				return this.array_len;
 			}
 			set
 			{
-				if (this.readOnly)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("The '{0}' quota is readonly.", new object[] { "MaxArrayLength" })));
-				}
-				if (value <= 0)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Quota must be a positive value."), "value"));
-				}
-				this.maxArrayLength = value;
-				this.modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxArrayLength;
+				this.array_len = this.Check(value);
 			}
 		}
 
-		[DefaultValue(4096)]
 		public int MaxBytesPerRead
 		{
 			get
 			{
-				return this.maxBytesPerRead;
+				return this.bytes;
 			}
 			set
 			{
-				if (this.readOnly)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("The '{0}' quota is readonly.", new object[] { "MaxBytesPerRead" })));
-				}
-				if (value <= 0)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Quota must be a positive value."), "value"));
-				}
-				this.maxBytesPerRead = value;
-				this.modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxBytesPerRead;
+				this.bytes = this.Check(value);
 			}
 		}
 
-		[DefaultValue(32)]
 		public int MaxDepth
 		{
 			get
 			{
-				return this.maxDepth;
+				return this.depth;
 			}
 			set
 			{
-				if (this.readOnly)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("The '{0}' quota is readonly.", new object[] { "MaxDepth" })));
-				}
-				if (value <= 0)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Quota must be a positive value."), "value"));
-				}
-				this.maxDepth = value;
-				this.modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxDepth;
+				this.depth = this.Check(value);
 			}
 		}
 
-		[DefaultValue(16384)]
 		public int MaxNameTableCharCount
 		{
 			get
 			{
-				return this.maxNameTableCharCount;
+				return this.nt_chars;
 			}
 			set
 			{
-				if (this.readOnly)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("The '{0}' quota is readonly.", new object[] { "MaxNameTableCharCount" })));
-				}
-				if (value <= 0)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Quota must be a positive value."), "value"));
-				}
-				this.maxNameTableCharCount = value;
-				this.modifiedQuotas |= XmlDictionaryReaderQuotaTypes.MaxNameTableCharCount;
+				this.nt_chars = this.Check(value);
 			}
 		}
 
-		public XmlDictionaryReaderQuotaTypes ModifiedQuotas
+		public int MaxStringContentLength
 		{
 			get
 			{
-				return this.modifiedQuotas;
+				return this.text_len;
+			}
+			set
+			{
+				this.text_len = this.Check(value);
 			}
 		}
 
-		internal void MakeReadOnly()
+		private int Check(int value)
 		{
-			this.readOnly = true;
+			if (this.is_readonly)
+			{
+				throw new InvalidOperationException("This quota is read-only.");
+			}
+			if (value <= 0)
+			{
+				throw new ArgumentException("Value must be positive integer.");
+			}
+			return value;
 		}
 
-		private bool readOnly;
+		public void CopyTo(XmlDictionaryReaderQuotas quota)
+		{
+			quota.array_len = this.array_len;
+			quota.bytes = this.bytes;
+			quota.depth = this.depth;
+			quota.nt_chars = this.nt_chars;
+			quota.text_len = this.text_len;
+		}
 
-		private int maxStringContentLength;
+		private static XmlDictionaryReaderQuotas max = new XmlDictionaryReaderQuotas(true);
 
-		private int maxArrayLength;
+		private readonly bool is_readonly;
 
-		private int maxDepth;
+		private int array_len;
 
-		private int maxNameTableCharCount;
+		private int bytes;
 
-		private int maxBytesPerRead;
+		private int depth;
 
-		private XmlDictionaryReaderQuotaTypes modifiedQuotas;
+		private int nt_chars;
 
-		private const int DefaultMaxDepth = 32;
-
-		private const int DefaultMaxStringContentLength = 8192;
-
-		private const int DefaultMaxArrayLength = 16384;
-
-		private const int DefaultMaxBytesPerRead = 4096;
-
-		private const int DefaultMaxNameTableCharCount = 16384;
-
-		private static XmlDictionaryReaderQuotas defaultQuota = new XmlDictionaryReaderQuotas(32, 8192, 16384, 4096, 16384, (XmlDictionaryReaderQuotaTypes)0);
-
-		private static XmlDictionaryReaderQuotas maxQuota = new XmlDictionaryReaderQuotas(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue, XmlDictionaryReaderQuotaTypes.MaxDepth | XmlDictionaryReaderQuotaTypes.MaxStringContentLength | XmlDictionaryReaderQuotaTypes.MaxArrayLength | XmlDictionaryReaderQuotaTypes.MaxBytesPerRead | XmlDictionaryReaderQuotaTypes.MaxNameTableCharCount);
+		private int text_len;
 	}
 }

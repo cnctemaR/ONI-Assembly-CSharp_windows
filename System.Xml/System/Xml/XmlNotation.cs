@@ -4,19 +4,32 @@ namespace System.Xml
 {
 	public class XmlNotation : XmlNode
 	{
-		internal XmlNotation(string name, string publicId, string systemId, XmlDocument doc)
+		internal XmlNotation(string localName, string prefix, string publicId, string systemId, XmlDocument doc)
 			: base(doc)
 		{
-			this.name = doc.NameTable.Add(name);
+			this.localName = doc.NameTable.Add(localName);
+			this.prefix = doc.NameTable.Add(prefix);
 			this.publicId = publicId;
 			this.systemId = systemId;
 		}
 
-		public override string Name
+		public override string InnerXml
 		{
 			get
 			{
-				return this.name;
+				return string.Empty;
+			}
+			set
+			{
+				throw new InvalidOperationException("This operation is not allowed.");
+			}
+		}
+
+		public override bool IsReadOnly
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -24,7 +37,15 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.name;
+				return this.localName;
+			}
+		}
+
+		public override string Name
+		{
+			get
+			{
+				return (!(this.prefix != string.Empty)) ? this.localName : (this.prefix + ":" + this.localName);
 			}
 		}
 
@@ -36,35 +57,6 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlNode CloneNode(bool deep)
-		{
-			throw new InvalidOperationException(Res.GetString("'Entity' and 'Notation' nodes cannot be cloned."));
-		}
-
-		public override bool IsReadOnly
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		public string PublicId
-		{
-			get
-			{
-				return this.publicId;
-			}
-		}
-
-		public string SystemId
-		{
-			get
-			{
-				return this.systemId;
-			}
-		}
-
 		public override string OuterXml
 		{
 			get
@@ -73,30 +65,49 @@ namespace System.Xml
 			}
 		}
 
-		public override string InnerXml
+		public string PublicId
 		{
 			get
 			{
-				return string.Empty;
-			}
-			set
-			{
-				throw new InvalidOperationException(Res.GetString("Cannot set the 'InnerXml' for the current node because it is either read-only or cannot have children."));
+				if (this.publicId != null)
+				{
+					return this.publicId;
+				}
+				return null;
 			}
 		}
 
-		public override void WriteTo(XmlWriter w)
+		public string SystemId
 		{
+			get
+			{
+				if (this.systemId != null)
+				{
+					return this.systemId;
+				}
+				return null;
+			}
+		}
+
+		public override XmlNode CloneNode(bool deep)
+		{
+			throw new InvalidOperationException("This operation is not allowed.");
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
 		}
 
+		public override void WriteTo(XmlWriter w)
+		{
+		}
+
+		private string localName;
+
 		private string publicId;
 
 		private string systemId;
 
-		private string name;
+		private string prefix;
 	}
 }

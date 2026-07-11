@@ -1,96 +1,28 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Globalization
 {
 	[Serializable]
-	internal class CodePageDataItem
+	internal sealed class CodePageDataItem
 	{
-		[SecurityCritical]
-		internal CodePageDataItem(int dataIndex)
+		private CodePageDataItem()
 		{
-			this.m_dataIndex = dataIndex;
-			this.m_uiFamilyCodePage = (int)EncodingTable.codePageDataPtr[dataIndex].uiFamilyCodePage;
-			this.m_flags = EncodingTable.codePageDataPtr[dataIndex].flags;
 		}
 
-		[SecurityCritical]
-		internal static string CreateString(string pStrings, uint index)
-		{
-			if (pStrings[0] == '|')
-			{
-				return pStrings.Split(CodePageDataItem.sep, StringSplitOptions.RemoveEmptyEntries)[(int)index];
-			}
-			return pStrings;
-		}
+		private string m_bodyName;
 
-		public string WebName
-		{
-			[SecuritySafeCritical]
-			get
-			{
-				if (this.m_webName == null)
-				{
-					this.m_webName = CodePageDataItem.CreateString(EncodingTable.codePageDataPtr[this.m_dataIndex].Names, 0U);
-				}
-				return this.m_webName;
-			}
-		}
+		private int m_codePage;
 
-		public virtual int UIFamilyCodePage
-		{
-			get
-			{
-				return this.m_uiFamilyCodePage;
-			}
-		}
+		private int m_dataIndex;
 
-		public string HeaderName
-		{
-			[SecuritySafeCritical]
-			get
-			{
-				if (this.m_headerName == null)
-				{
-					this.m_headerName = CodePageDataItem.CreateString(EncodingTable.codePageDataPtr[this.m_dataIndex].Names, 1U);
-				}
-				return this.m_headerName;
-			}
-		}
+		private string m_description;
 
-		public string BodyName
-		{
-			[SecuritySafeCritical]
-			get
-			{
-				if (this.m_bodyName == null)
-				{
-					this.m_bodyName = CodePageDataItem.CreateString(EncodingTable.codePageDataPtr[this.m_dataIndex].Names, 2U);
-				}
-				return this.m_bodyName;
-			}
-		}
+		private uint m_flags;
 
-		public uint Flags
-		{
-			get
-			{
-				return this.m_flags;
-			}
-		}
+		private string m_headerName;
 
-		internal int m_dataIndex;
+		private int m_uiFamilyCodePage;
 
-		internal int m_uiFamilyCodePage;
-
-		internal string m_webName;
-
-		internal string m_headerName;
-
-		internal string m_bodyName;
-
-		internal uint m_flags;
-
-		private static readonly char[] sep = new char[] { '|' };
+		private string m_webName;
 	}
 }

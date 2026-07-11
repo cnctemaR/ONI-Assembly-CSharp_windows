@@ -67,7 +67,7 @@ public class LocString
 		text = text + type.Name + ".";
 		foreach (FieldInfo fieldInfo in fields)
 		{
-			if (!(fieldInfo.FieldType != typeof(LocString)))
+			if (fieldInfo.FieldType == typeof(LocString))
 			{
 				string text2 = text + fieldInfo.Name;
 				LocString locString = (LocString)fieldInfo.GetValue(null);

@@ -6,7 +6,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class StrongName : EvidenceBase, IIdentityPermissionFactory, IBuiltInEvidence
+	public sealed class StrongName : IBuiltInEvidence, IIdentityPermissionFactory
 	{
 		public StrongName(StrongNamePublicKeyBlob blob, string name, Version version)
 		{
@@ -29,6 +29,23 @@ namespace System.Security.Policy
 			this.publickey = blob;
 			this.name = name;
 			this.version = version;
+		}
+
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			return ((!verbose) ? 1 : 5) + this.name.Length;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return 0;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			return 0;
 		}
 
 		public string Name
@@ -84,23 +101,6 @@ namespace System.Security.Policy
 			securityElement.AddAttribute("Name", this.name);
 			securityElement.AddAttribute("Version", this.version.ToString());
 			return securityElement.ToString();
-		}
-
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			return (verbose ? 5 : 1) + this.name.Length;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return 0;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			return 0;
 		}
 
 		private StrongNamePublicKeyBlob publickey;

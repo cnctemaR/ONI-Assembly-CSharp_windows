@@ -19,11 +19,13 @@ namespace System.Security.Permissions
 			{
 				if (state != PermissionState.Unrestricted)
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), state), "state");
+					string text = string.Format(Locale.GetText("Invalid enum {0}"), state);
+					throw new ArgumentException(text, "state");
 				}
 				if (!allowUnrestricted)
 				{
-					throw new ArgumentException(Locale.GetText("Unrestricted isn't not allowed for identity permissions."), "state");
+					string text = Locale.GetText("Unrestricted isn't not allowed for identity permissions.");
+					throw new ArgumentException(text, "state");
 				}
 			}
 			return state;
@@ -37,24 +39,29 @@ namespace System.Security.Permissions
 			}
 			if (se.Attribute("class") == null)
 			{
-				throw new ArgumentException(Locale.GetText("Missing 'class' attribute."), parameterName);
+				string text = Locale.GetText("Missing 'class' attribute.");
+				throw new ArgumentException(text, parameterName);
 			}
 			int num = minimumVersion;
-			string text = se.Attribute("version");
-			if (text != null)
+			string text2 = se.Attribute("version");
+			if (text2 != null)
 			{
 				try
 				{
-					num = int.Parse(text);
+					num = int.Parse(text2);
 				}
 				catch (Exception ex)
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Couldn't parse version from '{0}'."), text), parameterName, ex);
+					string text3 = Locale.GetText("Couldn't parse version from '{0}'.");
+					text3 = string.Format(text3, text2);
+					throw new ArgumentException(text3, parameterName, ex);
 				}
 			}
 			if (num < minimumVersion || num > maximumVersion)
 			{
-				throw new ArgumentException(string.Format(Locale.GetText("Unknown version '{0}', expected versions between ['{1}','{2}']."), num, minimumVersion, maximumVersion), parameterName);
+				string text4 = Locale.GetText("Unknown version '{0}', expected versions between ['{1}','{2}'].");
+				text4 = string.Format(text4, num, minimumVersion, maximumVersion);
+				throw new ArgumentException(text4, parameterName);
 			}
 			return num;
 		}
@@ -67,7 +74,9 @@ namespace System.Security.Permissions
 
 		internal static void ThrowInvalidPermission(IPermission target, Type expected)
 		{
-			throw new ArgumentException(string.Format(Locale.GetText("Invalid permission type '{0}', expected type '{1}'."), target.GetType(), expected), "target");
+			string text = Locale.GetText("Invalid permission type '{0}', expected type '{1}'.");
+			text = string.Format(text, target.GetType(), expected);
+			throw new ArgumentException(text, "target");
 		}
 	}
 }

@@ -161,45 +161,48 @@ public class UnstableGroundManager : KMonoBehaviour
 		while (i < this.fallingObjects.Count)
 		{
 			GameObject gameObject = this.fallingObjects[i];
-			Vector3 position = gameObject.transform.GetPosition();
-			int cell = Grid.PosToCell(position);
-			int num = Grid.CellBelow(cell);
-			if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Properties[num] & 4) != 0)
+			if (!(gameObject == null))
 			{
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				this.pendingCells.Add(cell);
-				HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
+				Vector3 position = gameObject.transform.GetPosition();
+				int cell = Grid.PosToCell(position);
+				int num = Grid.CellBelow(cell);
+				if (!Grid.IsValidCell(num) || Grid.Element[num].IsSolid || (Grid.Properties[num] & 4) != 0)
 				{
-					this.RemoveFromPending(cell);
-				}, false));
-				SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, handle.index);
-				ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
-				Vector2I vector2I = Grid.CellToXY(cell);
-				vector2I.x = Mathf.Max(0, vector2I.x - 1);
-				vector2I.y = Mathf.Min(Grid.HeightInCells - 1, vector2I.y + 1);
-				GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 3, 3, GameScenePartitioner.Instance.collisionLayer, pooledList);
-				foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
-				{
-					if (scenePartitionerEntry.obj is KCollider2D)
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					this.pendingCells.Add(cell);
+					HandleVector<Game.CallbackInfo>.Handle handle = Game.Instance.callbackManager.Add(new Game.CallbackInfo(delegate
 					{
-						GameObject gameObject2 = (scenePartitionerEntry.obj as KCollider2D).gameObject;
-						EventSystem.Trigger(gameObject2, -975551167, null);
+						this.RemoveFromPending(cell);
+					}, false));
+					SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, handle.index);
+					ListPool<ScenePartitionerEntry, GameScenePartitioner>.PooledList pooledList = ListPool<ScenePartitionerEntry, GameScenePartitioner>.Allocate();
+					Vector2I vector2I = Grid.CellToXY(cell);
+					vector2I.x = Mathf.Max(0, vector2I.x - 1);
+					vector2I.y = Mathf.Min(Grid.HeightInCells - 1, vector2I.y + 1);
+					GameScenePartitioner.Instance.GatherEntries(vector2I.x, vector2I.y, 3, 3, GameScenePartitioner.Instance.collisionLayer, pooledList);
+					foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
+					{
+						if (scenePartitionerEntry.obj is KCollider2D)
+						{
+							GameObject gameObject2 = (scenePartitionerEntry.obj as KCollider2D).gameObject;
+							EventSystem.Trigger(gameObject2, -975551167, null);
+						}
 					}
+					pooledList.Recycle();
+					if (component.Element.substance != null && component.Element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, component.Element.substance.fallingStopSound))
+					{
+						SoundEvent.PlayOneShot(component.Element.substance.fallingStopSound, position);
+					}
+					GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position + this.landEffectOffset, Grid.SceneLayer.Front, null, 0);
+					gameObject3.SetActive(true);
+					this.fallingObjects[i] = this.fallingObjects[this.fallingObjects.Count - 1];
+					this.fallingObjects.RemoveAt(this.fallingObjects.Count - 1);
+					this.ReleaseGO(gameObject);
 				}
-				pooledList.Recycle();
-				if (component.Element.substance != null && component.Element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, component.Element.substance.fallingStopSound))
+				else
 				{
-					SoundEvent.PlayOneShot(component.Element.substance.fallingStopSound, position);
+					i++;
 				}
-				GameObject gameObject3 = GameUtil.KInstantiate(Assets.GetPrefab(EffectConfigs.OreAbsorbId), position + this.landEffectOffset, Grid.SceneLayer.Front, null, 0);
-				gameObject3.SetActive(true);
-				this.fallingObjects[i] = this.fallingObjects[this.fallingObjects.Count - 1];
-				this.fallingObjects.RemoveAt(this.fallingObjects.Count - 1);
-				this.ReleaseGO(gameObject);
-			}
-			else
-			{
-				i++;
 			}
 		}
 	}

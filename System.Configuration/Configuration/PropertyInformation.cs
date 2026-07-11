@@ -7,14 +7,6 @@ namespace System.Configuration
 	{
 		internal PropertyInformation(ConfigurationElement owner, ConfigurationProperty property)
 		{
-			if (owner == null)
-			{
-				throw new ArgumentNullException("owner");
-			}
-			if (property == null)
-			{
-				throw new ArgumentNullException("property");
-			}
 			this.owner = owner;
 			this.property = property;
 		}
@@ -84,6 +76,7 @@ namespace System.Configuration
 			}
 		}
 
+		[MonoTODO]
 		public int LineNumber
 		{
 			get
@@ -104,6 +97,7 @@ namespace System.Configuration
 			}
 		}
 
+		[MonoTODO]
 		public string Source
 		{
 			get
@@ -163,18 +157,22 @@ namespace System.Configuration
 
 		internal void Reset(PropertyInformation parentProperty)
 		{
-			if (parentProperty == null)
+			if (parentProperty != null)
+			{
+				if (this.property.IsElement)
+				{
+					((ConfigurationElement)this.Value).Reset((ConfigurationElement)parentProperty.Value);
+				}
+				else
+				{
+					this.val = parentProperty.Value;
+					this.origin = PropertyValueOrigin.Inherited;
+				}
+			}
+			else
 			{
 				this.origin = PropertyValueOrigin.Default;
-				return;
 			}
-			if (this.property.IsElement)
-			{
-				((ConfigurationElement)this.Value).Reset((ConfigurationElement)parentProperty.Value);
-				return;
-			}
-			this.val = parentProperty.Value;
-			this.origin = PropertyValueOrigin.Inherited;
 		}
 
 		internal bool IsElement

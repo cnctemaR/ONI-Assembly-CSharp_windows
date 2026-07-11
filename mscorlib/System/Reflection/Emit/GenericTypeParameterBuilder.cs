@@ -1,13 +1,22 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
 	[ComVisible(true)]
-	[StructLayout(LayoutKind.Sequential)]
-	public sealed class GenericTypeParameterBuilder : TypeInfo
+	public sealed class GenericTypeParameterBuilder : Type
 	{
+		internal GenericTypeParameterBuilder(TypeBuilder tbuilder, MethodBuilder mbuilder, string name, int index)
+		{
+			this.tbuilder = tbuilder;
+			this.mbuilder = mbuilder;
+			this.name = name;
+			this.index = index;
+			this.initialize();
+		}
+
 		public void SetBaseTypeConstraint(Type baseTypeConstraint)
 		{
 			this.base_type = baseTypeConstraint ?? typeof(object);
@@ -24,41 +33,26 @@ namespace System.Reflection.Emit
 			this.attrs = genericParameterAttributes;
 		}
 
-		internal GenericTypeParameterBuilder(TypeBuilder tbuilder, MethodBuilder mbuilder, string name, int index)
-		{
-			this.tbuilder = tbuilder;
-			this.mbuilder = mbuilder;
-			this.name = name;
-			this.index = index;
-		}
-
-		internal override Type InternalResolve()
-		{
-			if (this.mbuilder != null)
-			{
-				return MethodBase.GetMethodFromHandle(this.mbuilder.MethodHandleInternal, this.mbuilder.TypeBuilder.InternalResolve().TypeHandle).GetGenericArguments()[this.index];
-			}
-			return this.tbuilder.InternalResolve().GetGenericArguments()[this.index];
-		}
-
-		internal override Type RuntimeResolve()
-		{
-			if (this.mbuilder != null)
-			{
-				return MethodBase.GetMethodFromHandle(this.mbuilder.MethodHandleInternal, this.mbuilder.TypeBuilder.RuntimeResolve().TypeHandle).GetGenericArguments()[this.index];
-			}
-			return this.tbuilder.RuntimeResolve().GetGenericArguments()[this.index];
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void initialize();
 
 		[ComVisible(true)]
 		public override bool IsSubclassOf(Type c)
 		{
-			throw this.not_supported();
+			if (!((ModuleBuilder)this.tbuilder.Module).assemblyb.IsCompilerContext)
+			{
+				throw this.not_supported();
+			}
+			return this.BaseType != null && (this.BaseType == c || this.BaseType.IsSubclassOf(c));
 		}
 
 		protected override TypeAttributes GetAttributeFlagsImpl()
 		{
-			return TypeAttributes.Public;
+			if (((ModuleBuilder)this.tbuilder.Module).assemblyb.IsCompilerContext)
+			{
+				return TypeAttributes.Public;
+			}
+			throw this.not_supported();
 		}
 
 		protected override ConstructorInfo GetConstructorImpl(BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
@@ -155,11 +149,6 @@ namespace System.Reflection.Emit
 		public override bool IsAssignableFrom(Type c)
 		{
 			throw this.not_supported();
-		}
-
-		public override bool IsAssignableFrom(TypeInfo typeInfo)
-		{
-			return !(typeInfo == null) && this.IsAssignableFrom(typeInfo.AsType());
 		}
 
 		public override bool IsInstanceOfType(object o)
@@ -304,11 +293,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				if (!(this.mbuilder != null))
-				{
-					return this.tbuilder;
-				}
-				return this.mbuilder.DeclaringType;
+				return (this.mbuilder == null) ? this.tbuilder : this.mbuilder.DeclaringType;
 			}
 		}
 
@@ -374,6 +359,10 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
+				if (((ModuleBuilder)this.tbuilder.Module).assemblyb.IsCompilerContext)
+				{
+					return this.attrs;
+				}
 				throw new NotSupportedException();
 			}
 		}
@@ -388,7 +377,29 @@ namespace System.Reflection.Emit
 
 		public override Type[] GetGenericParameterConstraints()
 		{
-			throw new InvalidOperationException();
+			if (!((ModuleBuilder)this.tbuilder.Module).assemblyb.IsCompilerContext)
+			{
+				throw new InvalidOperationException();
+			}
+			if (this.base_type == null)
+			{
+				if (this.iface_constraints != null)
+				{
+					return this.iface_constraints;
+				}
+				return Type.EmptyTypes;
+			}
+			else
+			{
+				if (this.iface_constraints == null)
+				{
+					return new Type[] { this.base_type };
+				}
+				Type[] array = new Type[this.iface_constraints.Length + 1];
+				array[0] = this.base_type;
+				this.iface_constraints.CopyTo(array, 1);
+				return array;
+			}
 		}
 
 		public override MethodBase DeclaringMethod
@@ -411,10 +422,12 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
-				return;
 			}
-			this.cattrs = new CustomAttributeBuilder[1];
-			this.cattrs[0] = customBuilder;
+			else
+			{
+				this.cattrs = new CustomAttributeBuilder[1];
+				this.cattrs[0] = customBuilder;
+			}
 		}
 
 		[MonoTODO("unverified implementation")]
@@ -464,22 +477,15 @@ namespace System.Reflection.Emit
 			return new ByRefType(this);
 		}
 
+		[MonoTODO]
 		public override Type MakeGenericType(params Type[] typeArguments)
 		{
-			throw new InvalidOperationException(Environment.GetResourceString("{0} is not a GenericTypeDefinition. MakeGenericType may only be called on a type for which Type.IsGenericTypeDefinition is true."));
+			return base.MakeGenericType(typeArguments);
 		}
 
 		public override Type MakePointerType()
 		{
 			return new PointerType(this);
-		}
-
-		internal override bool IsUserType
-		{
-			get
-			{
-				return false;
-			}
 		}
 
 		private TypeBuilder tbuilder;

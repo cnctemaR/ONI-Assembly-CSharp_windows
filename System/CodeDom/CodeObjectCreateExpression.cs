@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeObjectCreateExpression : CodeExpression
 	{
@@ -11,19 +14,19 @@ namespace System.CodeDom
 
 		public CodeObjectCreateExpression(CodeTypeReference createType, params CodeExpression[] parameters)
 		{
-			this.CreateType = createType;
+			this.createType = createType;
 			this.Parameters.AddRange(parameters);
 		}
 
 		public CodeObjectCreateExpression(string createType, params CodeExpression[] parameters)
 		{
-			this.CreateType = new CodeTypeReference(createType);
+			this.createType = new CodeTypeReference(createType);
 			this.Parameters.AddRange(parameters);
 		}
 
 		public CodeObjectCreateExpression(Type createType, params CodeExpression[] parameters)
 		{
-			this.CreateType = new CodeTypeReference(createType);
+			this.createType = new CodeTypeReference(createType);
 			this.Parameters.AddRange(parameters);
 		}
 
@@ -31,21 +34,37 @@ namespace System.CodeDom
 		{
 			get
 			{
-				CodeTypeReference codeTypeReference;
-				if ((codeTypeReference = this._createType) == null)
+				if (this.createType == null)
 				{
-					codeTypeReference = (this._createType = new CodeTypeReference(""));
+					this.createType = new CodeTypeReference(string.Empty);
 				}
-				return codeTypeReference;
+				return this.createType;
 			}
 			set
 			{
-				this._createType = value;
+				this.createType = value;
 			}
 		}
 
-		public CodeExpressionCollection Parameters { get; } = new CodeExpressionCollection();
+		public CodeExpressionCollection Parameters
+		{
+			get
+			{
+				if (this.parameters == null)
+				{
+					this.parameters = new CodeExpressionCollection();
+				}
+				return this.parameters;
+			}
+		}
 
-		private CodeTypeReference _createType;
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeTypeReference createType;
+
+		private CodeExpressionCollection parameters;
 	}
 }

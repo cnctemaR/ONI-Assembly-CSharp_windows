@@ -26,7 +26,12 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 	{
 		priority = this.basePriority;
 		Effects component = worker.GetComponent<Effects>();
-		if (component.HasEffect("Socialized"))
+		if (!string.IsNullOrEmpty(this.trackingEffect) && component.HasEffect(this.trackingEffect))
+		{
+			priority = 0;
+			return false;
+		}
+		if (!string.IsNullOrEmpty(this.specificEffect) && component.HasEffect(this.specificEffect))
 		{
 			priority = RELAXATION.PRIORITY.RECENTLY_USED;
 		}
@@ -34,6 +39,10 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 	}
 
 	public int basePriority = RELAXATION.PRIORITY.TIER2;
+
+	public string specificEffect = "Socialized";
+
+	public string trackingEffect = "RecentlySocialized";
 
 	public class States : GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore>
 	{
@@ -63,13 +72,18 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 			{
 				smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Disease.InfectionVector.Digestion);
 			}
+			Effects component = worker.GetComponent<Effects>();
+			if (!string.IsNullOrEmpty(smi.master.trackingEffect))
+			{
+				component.Add(smi.master.trackingEffect, true);
+			}
 		}
 
 		public StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.TargetParameter drinker;
 
 		public StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.TargetParameter chitchatlocator;
 
-		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.ApproachSubState<IApproachable> drink_move;
+		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.ApproachSubState<WaterCooler> drink_move;
 
 		public WaterCoolerChore.States.DrinkStates drink;
 

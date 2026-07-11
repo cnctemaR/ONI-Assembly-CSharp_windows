@@ -1,13 +1,129 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net.NetworkInformation.MacOsStructs;
+using System.Runtime.InteropServices;
 
 namespace System.Net.NetworkInformation
 {
-	internal sealed class MacOsNetworkInterface : UnixNetworkInterface
+	internal class MacOsNetworkInterface : UnixNetworkInterface
 	{
-		internal MacOsNetworkInterface(string name, uint ifa_flags)
+		private MacOsNetworkInterface(string name)
 			: base(name)
 		{
-			this._ifa_flags = ifa_flags;
+		}
+
+		[DllImport("libc")]
+		private static extern int getifaddrs(out IntPtr ifap);
+
+		[DllImport("libc")]
+		private static extern void freeifaddrs(IntPtr ifap);
+
+		public static NetworkInterface[] ImplGetAllNetworkInterfaces()
+		{
+			Dictionary<string, MacOsNetworkInterface> dictionary = new Dictionary<string, MacOsNetworkInterface>();
+			IntPtr intPtr;
+			if (MacOsNetworkInterface.getifaddrs(out intPtr) != 0)
+			{
+				throw new SystemException("getifaddrs() failed");
+			}
+			try
+			{
+				IntPtr intPtr2 = intPtr;
+				while (intPtr2 != IntPtr.Zero)
+				{
+					global::System.Net.NetworkInformation.MacOsStructs.ifaddrs ifaddrs = (global::System.Net.NetworkInformation.MacOsStructs.ifaddrs)Marshal.PtrToStructure(intPtr2, typeof(global::System.Net.NetworkInformation.MacOsStructs.ifaddrs));
+					IPAddress ipaddress = IPAddress.None;
+					string ifa_name = ifaddrs.ifa_name;
+					int num = -1;
+					byte[] array = null;
+					NetworkInterfaceType networkInterfaceType = NetworkInterfaceType.Unknown;
+					if (ifaddrs.ifa_addr != IntPtr.Zero)
+					{
+						global::System.Net.NetworkInformation.MacOsStructs.sockaddr sockaddr = (global::System.Net.NetworkInformation.MacOsStructs.sockaddr)Marshal.PtrToStructure(ifaddrs.ifa_addr, typeof(global::System.Net.NetworkInformation.MacOsStructs.sockaddr));
+						if (sockaddr.sa_family == 30)
+						{
+							global::System.Net.NetworkInformation.MacOsStructs.sockaddr_in6 sockaddr_in = (global::System.Net.NetworkInformation.MacOsStructs.sockaddr_in6)Marshal.PtrToStructure(ifaddrs.ifa_addr, typeof(global::System.Net.NetworkInformation.MacOsStructs.sockaddr_in6));
+							ipaddress = new IPAddress(sockaddr_in.sin6_addr.u6_addr8, (long)((ulong)sockaddr_in.sin6_scope_id));
+						}
+						else if (sockaddr.sa_family == 2)
+						{
+							ipaddress = new IPAddress((long)((ulong)((global::System.Net.NetworkInformation.MacOsStructs.sockaddr_in)Marshal.PtrToStructure(ifaddrs.ifa_addr, typeof(global::System.Net.NetworkInformation.MacOsStructs.sockaddr_in))).sin_addr));
+						}
+						else if (sockaddr.sa_family == 18)
+						{
+							global::System.Net.NetworkInformation.MacOsStructs.sockaddr_dl sockaddr_dl = (global::System.Net.NetworkInformation.MacOsStructs.sockaddr_dl)Marshal.PtrToStructure(ifaddrs.ifa_addr, typeof(global::System.Net.NetworkInformation.MacOsStructs.sockaddr_dl));
+							array = new byte[(int)sockaddr_dl.sdl_alen];
+							Array.Copy(sockaddr_dl.sdl_data, (int)sockaddr_dl.sdl_nlen, array, 0, Math.Min(array.Length, sockaddr_dl.sdl_data.Length - (int)sockaddr_dl.sdl_nlen));
+							num = (int)sockaddr_dl.sdl_index;
+							int sdl_type = (int)sockaddr_dl.sdl_type;
+							if (Enum.IsDefined(typeof(MacOsArpHardware), sdl_type))
+							{
+								MacOsArpHardware macOsArpHardware = (MacOsArpHardware)sdl_type;
+								switch (macOsArpHardware)
+								{
+								case MacOsArpHardware.PPP:
+									networkInterfaceType = NetworkInterfaceType.Ppp;
+									break;
+								case MacOsArpHardware.LOOPBACK:
+									networkInterfaceType = NetworkInterfaceType.Loopback;
+									array = null;
+									break;
+								default:
+									if (macOsArpHardware != MacOsArpHardware.ETHER)
+									{
+										if (macOsArpHardware != MacOsArpHardware.FDDI)
+										{
+											if (macOsArpHardware == MacOsArpHardware.ATM)
+											{
+												networkInterfaceType = NetworkInterfaceType.Atm;
+											}
+										}
+										else
+										{
+											networkInterfaceType = NetworkInterfaceType.Fddi;
+										}
+									}
+									else
+									{
+										networkInterfaceType = NetworkInterfaceType.Ethernet;
+									}
+									break;
+								case MacOsArpHardware.SLIP:
+									networkInterfaceType = NetworkInterfaceType.Slip;
+									break;
+								}
+							}
+						}
+					}
+					MacOsNetworkInterface macOsNetworkInterface = null;
+					if (!dictionary.TryGetValue(ifa_name, out macOsNetworkInterface))
+					{
+						macOsNetworkInterface = new MacOsNetworkInterface(ifa_name);
+						dictionary.Add(ifa_name, macOsNetworkInterface);
+					}
+					if (!ipaddress.Equals(IPAddress.None))
+					{
+						macOsNetworkInterface.AddAddress(ipaddress);
+					}
+					if (array != null || networkInterfaceType == NetworkInterfaceType.Loopback)
+					{
+						macOsNetworkInterface.SetLinkLayerInfo(num, array, networkInterfaceType);
+					}
+					intPtr2 = ifaddrs.ifa_next;
+				}
+			}
+			finally
+			{
+				MacOsNetworkInterface.freeifaddrs(intPtr);
+			}
+			NetworkInterface[] array2 = new NetworkInterface[dictionary.Count];
+			int num2 = 0;
+			foreach (NetworkInterface networkInterface in dictionary.Values)
+			{
+				array2[num2] = networkInterface;
+				num2++;
+			}
+			return array2;
 		}
 
 		public override IPInterfaceProperties GetIPProperties()
@@ -32,10 +148,6 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				if ((this._ifa_flags & 1U) == 1U)
-				{
-					return OperationalStatus.Up;
-				}
 				return OperationalStatus.Unknown;
 			}
 		}
@@ -44,10 +156,14 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return (this._ifa_flags & 32768U) == 32768U;
+				return false;
 			}
 		}
 
-		private uint _ifa_flags;
+		private const int AF_INET = 2;
+
+		private const int AF_INET6 = 30;
+
+		private const int AF_LINK = 18;
 	}
 }

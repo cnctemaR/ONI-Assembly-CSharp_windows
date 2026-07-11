@@ -9,25 +9,22 @@ namespace System.Resources
 	public class MissingManifestResourceException : SystemException
 	{
 		public MissingManifestResourceException()
-			: base(Environment.GetResourceString("Unable to find manifest resource."))
+			: base(Locale.GetText("The assembly does not contain the resources for the required culture."))
 		{
-			base.SetErrorCode(-2146233038);
 		}
 
 		public MissingManifestResourceException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233038);
-		}
-
-		public MissingManifestResourceException(string message, Exception inner)
-			: base(message, inner)
-		{
-			base.SetErrorCode(-2146233038);
 		}
 
 		protected MissingManifestResourceException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
+		{
+		}
+
+		public MissingManifestResourceException(string message, Exception inner)
+			: base(message, inner)
 		{
 		}
 	}

@@ -4,11 +4,31 @@ namespace System.Xml
 {
 	public class NameTable : XmlNameTable
 	{
-		public NameTable()
+		public override string Add(char[] key, int start, int len)
 		{
-			this.mask = 31;
-			this.entries = new NameTable.Entry[this.mask + 1];
-			this.hashCodeRandomizer = Environment.TickCount;
+			if ((0 > start && start >= key.Length) || (0 > len && len >= key.Length - len))
+			{
+				throw new IndexOutOfRangeException("The Index is out of range.");
+			}
+			if (len == 0)
+			{
+				return string.Empty;
+			}
+			int num = 0;
+			int num2 = start + len;
+			for (int i = start; i < num2; i++)
+			{
+				num = (num << 5) - num + (int)key[i];
+			}
+			num &= int.MaxValue;
+			for (NameTable.Entry entry = this.buckets[num % this.count]; entry != null; entry = entry.next)
+			{
+				if (entry.hash == num && entry.len == len && NameTable.StrEqArray(entry.str, key, start))
+				{
+					return entry.str;
+				}
+			}
+			return this.AddEntry(new string(key, start, len), num);
 		}
 
 		public override string Add(string key)
@@ -22,17 +42,15 @@ namespace System.Xml
 			{
 				return string.Empty;
 			}
-			int num = length + this.hashCodeRandomizer;
-			for (int i = 0; i < key.Length; i++)
+			int num = 0;
+			for (int i = 0; i < length; i++)
 			{
-				num += (num << 7) ^ (int)key[i];
+				num = (num << 5) - num + (int)key[i];
 			}
-			num -= num >> 17;
-			num -= num >> 11;
-			num -= num >> 5;
-			for (NameTable.Entry entry = this.entries[num & this.mask]; entry != null; entry = entry.next)
+			num &= int.MaxValue;
+			for (NameTable.Entry entry = this.buckets[num % this.count]; entry != null; entry = entry.next)
 			{
-				if (entry.hashCode == num && entry.str.Equals(key))
+				if (entry.hash == num && entry.len == key.Length && entry.str == key)
 				{
 					return entry.str;
 				}
@@ -40,30 +58,31 @@ namespace System.Xml
 			return this.AddEntry(key, num);
 		}
 
-		public override string Add(char[] key, int start, int len)
+		public override string Get(char[] key, int start, int len)
 		{
+			if ((0 > start && start >= key.Length) || (0 > len && len >= key.Length - len))
+			{
+				throw new IndexOutOfRangeException("The Index is out of range.");
+			}
 			if (len == 0)
 			{
 				return string.Empty;
 			}
-			int num = len + this.hashCodeRandomizer;
-			num += (num << 7) ^ (int)key[start];
+			int num = 0;
 			int num2 = start + len;
-			for (int i = start + 1; i < num2; i++)
+			for (int i = start; i < num2; i++)
 			{
-				num += (num << 7) ^ (int)key[i];
+				num = (num << 5) - num + (int)key[i];
 			}
-			num -= num >> 17;
-			num -= num >> 11;
-			num -= num >> 5;
-			for (NameTable.Entry entry = this.entries[num & this.mask]; entry != null; entry = entry.next)
+			num &= int.MaxValue;
+			for (NameTable.Entry entry = this.buckets[num % this.count]; entry != null; entry = entry.next)
 			{
-				if (entry.hashCode == num && NameTable.TextEquals(entry.str, key, start, len))
+				if (entry.hash == num && entry.len == len && NameTable.StrEqArray(entry.str, key, start))
 				{
 					return entry.str;
 				}
 			}
-			return this.AddEntry(new string(key, start, len), num);
+			return null;
 		}
 
 		public override string Get(string value)
@@ -72,21 +91,20 @@ namespace System.Xml
 			{
 				throw new ArgumentNullException("value");
 			}
-			if (value.Length == 0)
+			int length = value.Length;
+			if (length == 0)
 			{
 				return string.Empty;
 			}
-			int num = value.Length + this.hashCodeRandomizer;
-			for (int i = 0; i < value.Length; i++)
+			int num = 0;
+			for (int i = 0; i < length; i++)
 			{
-				num += (num << 7) ^ (int)value[i];
+				num = (num << 5) - num + (int)value[i];
 			}
-			num -= num >> 17;
-			num -= num >> 11;
-			num -= num >> 5;
-			for (NameTable.Entry entry = this.entries[num & this.mask]; entry != null; entry = entry.next)
+			num &= int.MaxValue;
+			for (NameTable.Entry entry = this.buckets[num % this.count]; entry != null; entry = entry.next)
 			{
-				if (entry.hashCode == num && entry.str.Equals(value))
+				if (entry.hash == num && entry.len == value.Length && entry.str == value)
 				{
 					return entry.str;
 				}
@@ -94,104 +112,74 @@ namespace System.Xml
 			return null;
 		}
 
-		public override string Get(char[] key, int start, int len)
+		private string AddEntry(string str, int hash)
 		{
-			if (len == 0)
+			int num = hash % this.count;
+			this.buckets[num] = new NameTable.Entry(str, hash, this.buckets[num]);
+			if (this.size++ == this.count)
 			{
-				return string.Empty;
-			}
-			int num = len + this.hashCodeRandomizer;
-			num += (num << 7) ^ (int)key[start];
-			int num2 = start + len;
-			for (int i = start + 1; i < num2; i++)
-			{
-				num += (num << 7) ^ (int)key[i];
-			}
-			num -= num >> 17;
-			num -= num >> 11;
-			num -= num >> 5;
-			for (NameTable.Entry entry = this.entries[num & this.mask]; entry != null; entry = entry.next)
-			{
-				if (entry.hashCode == num && NameTable.TextEquals(entry.str, key, start, len))
+				this.count <<= 1;
+				int num2 = this.count - 1;
+				NameTable.Entry[] array = new NameTable.Entry[this.count];
+				for (int i = 0; i < this.buckets.Length; i++)
 				{
-					return entry.str;
+					NameTable.Entry entry = this.buckets[i];
+					NameTable.Entry next;
+					for (NameTable.Entry entry2 = entry; entry2 != null; entry2 = next)
+					{
+						int num3 = entry2.hash & num2;
+						next = entry2.next;
+						entry2.next = array[num3];
+						array[num3] = entry2;
+					}
+				}
+				this.buckets = array;
+			}
+			return str;
+		}
+
+		private static bool StrEqArray(string str, char[] str2, int start)
+		{
+			int num = str.Length;
+			num--;
+			start += num;
+			while (str[num] == str2[start])
+			{
+				num--;
+				start--;
+				if (num < 0)
+				{
+					return true;
 				}
 			}
-			return null;
+			return false;
 		}
 
-		private string AddEntry(string str, int hashCode)
-		{
-			int num = hashCode & this.mask;
-			NameTable.Entry entry = new NameTable.Entry(str, hashCode, this.entries[num]);
-			this.entries[num] = entry;
-			int num2 = this.count;
-			this.count = num2 + 1;
-			if (num2 == this.mask)
-			{
-				this.Grow();
-			}
-			return entry.str;
-		}
+		private const int INITIAL_BUCKETS = 128;
 
-		private void Grow()
-		{
-			int num = this.mask * 2 + 1;
-			NameTable.Entry[] array = this.entries;
-			NameTable.Entry[] array2 = new NameTable.Entry[num + 1];
-			foreach (NameTable.Entry entry in array)
-			{
-				while (entry != null)
-				{
-					int num2 = entry.hashCode & num;
-					NameTable.Entry next = entry.next;
-					entry.next = array2[num2];
-					array2[num2] = entry;
-					entry = next;
-				}
-			}
-			this.entries = array2;
-			this.mask = num;
-		}
+		private int count = 128;
 
-		private static bool TextEquals(string str1, char[] str2, int str2Start, int str2Length)
-		{
-			if (str1.Length != str2Length)
-			{
-				return false;
-			}
-			for (int i = 0; i < str1.Length; i++)
-			{
-				if (str1[i] != str2[str2Start + i])
-				{
-					return false;
-				}
-			}
-			return true;
-		}
+		private NameTable.Entry[] buckets = new NameTable.Entry[128];
 
-		private NameTable.Entry[] entries;
-
-		private int count;
-
-		private int mask;
-
-		private int hashCodeRandomizer;
+		private int size;
 
 		private class Entry
 		{
-			internal Entry(string str, int hashCode, NameTable.Entry next)
+			public Entry(string str, int hash, NameTable.Entry next)
 			{
 				this.str = str;
-				this.hashCode = hashCode;
+				this.len = str.Length;
+				this.hash = hash;
 				this.next = next;
 			}
 
-			internal string str;
+			public string str;
 
-			internal int hashCode;
+			public int hash;
 
-			internal NameTable.Entry next;
+			public int len;
+
+			public NameTable.Entry next;
 		}
 	}
 }

@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security;
-using Microsoft.Win32;
+using System.Security.Permissions;
 
 namespace System.IO
 {
 	[ComVisible(true)]
+	[PermissionSet(SecurityAction.InheritanceDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.FileIOPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Unrestricted=\"true\"/>\n</PermissionSet>\n")]
 	[Serializable]
 	public abstract class FileSystemInfo : MarshalByRefObject, ISerializable
 	{
 		protected FileSystemInfo()
 		{
+			this.valid = false;
+			this.FullPath = null;
 		}
 
 		protected FileSystemInfo(SerializationInfo info, StreamingContext context)
@@ -20,29 +22,23 @@ namespace System.IO
 			{
 				throw new ArgumentNullException("info");
 			}
-			this.FullPath = Path.GetFullPathInternal(info.GetString("FullPath"));
+			this.FullPath = info.GetString("FullPath");
 			this.OriginalPath = info.GetString("OriginalPath");
-			this._dataInitialised = -1;
 		}
 
-		[SecurityCritical]
-		internal void InitializeFrom(Win32Native.WIN32_FIND_DATA findData)
+		[ComVisible(false)]
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			throw new NotImplementedException();
+			info.AddValue("OriginalPath", this.OriginalPath, typeof(string));
+			info.AddValue("FullPath", this.FullPath, typeof(string));
 		}
+
+		public abstract bool Exists { get; }
+
+		public abstract string Name { get; }
 
 		public virtual string FullName
 		{
-			[SecuritySafeCritical]
-			get
-			{
-				return this.FullPath;
-			}
-		}
-
-		internal virtual string UnsafeGetFullName
-		{
-			[SecurityCritical]
 			get
 			{
 				return this.FullPath;
@@ -53,69 +49,57 @@ namespace System.IO
 		{
 			get
 			{
-				int length = this.FullPath.Length;
-				int num = length;
-				while (--num >= 0)
-				{
-					char c = this.FullPath[num];
-					if (c == '.')
-					{
-						return this.FullPath.Substring(num, length - num);
-					}
-					if (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar || c == Path.VolumeSeparatorChar)
-					{
-						break;
-					}
-				}
-				return string.Empty;
+				return Path.GetExtension(this.Name);
 			}
 		}
 
-		public abstract string Name { get; }
-
-		public abstract bool Exists { get; }
-
-		public abstract void Delete();
+		public FileAttributes Attributes
+		{
+			get
+			{
+				this.Refresh(false);
+				return this.stat.Attributes;
+			}
+			set
+			{
+				MonoIOError monoIOError;
+				if (!MonoIO.SetFileAttributes(this.FullName, value, out monoIOError))
+				{
+					throw MonoIO.GetException(this.FullName, monoIOError);
+				}
+				this.Refresh(true);
+			}
+		}
 
 		public DateTime CreationTime
 		{
 			get
 			{
-				return this.CreationTimeUtc.ToLocalTime();
+				this.Refresh(false);
+				return DateTime.FromFileTime(this.stat.CreationTime);
 			}
 			set
 			{
-				this.CreationTimeUtc = value.ToUniversalTime();
+				long num = value.ToFileTime();
+				MonoIOError monoIOError;
+				if (!MonoIO.SetFileTime(this.FullName, num, -1L, -1L, out monoIOError))
+				{
+					throw MonoIO.GetException(this.FullName, monoIOError);
+				}
+				this.Refresh(true);
 			}
 		}
 
 		[ComVisible(false)]
 		public DateTime CreationTimeUtc
 		{
-			[SecuritySafeCritical]
 			get
 			{
-				if (this._dataInitialised == -1)
-				{
-					this.Refresh();
-				}
-				if (this._dataInitialised != 0)
-				{
-					__Error.WinIOError(this._dataInitialised, this.DisplayPath);
-				}
-				return DateTime.FromFileTimeUtc(this._data.CreationTime);
+				return this.CreationTime.ToUniversalTime();
 			}
 			set
 			{
-				if (this is DirectoryInfo)
-				{
-					Directory.SetCreationTimeUtc(this.FullPath, value);
-				}
-				else
-				{
-					File.SetCreationTimeUtc(this.FullPath, value);
-				}
-				this._dataInitialised = -1;
+				this.CreationTime = value.ToLocalTime();
 			}
 		}
 
@@ -123,41 +107,32 @@ namespace System.IO
 		{
 			get
 			{
-				return this.LastAccessTimeUtc.ToLocalTime();
+				this.Refresh(false);
+				return DateTime.FromFileTime(this.stat.LastAccessTime);
 			}
 			set
 			{
-				this.LastAccessTimeUtc = value.ToUniversalTime();
+				long num = value.ToFileTime();
+				MonoIOError monoIOError;
+				if (!MonoIO.SetFileTime(this.FullName, -1L, num, -1L, out monoIOError))
+				{
+					throw MonoIO.GetException(this.FullName, monoIOError);
+				}
+				this.Refresh(true);
 			}
 		}
 
 		[ComVisible(false)]
 		public DateTime LastAccessTimeUtc
 		{
-			[SecuritySafeCritical]
 			get
 			{
-				if (this._dataInitialised == -1)
-				{
-					this.Refresh();
-				}
-				if (this._dataInitialised != 0)
-				{
-					__Error.WinIOError(this._dataInitialised, this.DisplayPath);
-				}
-				return DateTime.FromFileTimeUtc(this._data.LastAccessTime);
+				this.Refresh(false);
+				return this.LastAccessTime.ToUniversalTime();
 			}
 			set
 			{
-				if (this is DirectoryInfo)
-				{
-					Directory.SetLastAccessTimeUtc(this.FullPath, value);
-				}
-				else
-				{
-					File.SetLastAccessTimeUtc(this.FullPath, value);
-				}
-				this._dataInitialised = -1;
+				this.LastAccessTime = value.ToLocalTime();
 			}
 		}
 
@@ -165,118 +140,80 @@ namespace System.IO
 		{
 			get
 			{
-				return this.LastWriteTimeUtc.ToLocalTime();
+				this.Refresh(false);
+				return DateTime.FromFileTime(this.stat.LastWriteTime);
 			}
 			set
 			{
-				this.LastWriteTimeUtc = value.ToUniversalTime();
+				long num = value.ToFileTime();
+				MonoIOError monoIOError;
+				if (!MonoIO.SetFileTime(this.FullName, -1L, -1L, num, out monoIOError))
+				{
+					throw MonoIO.GetException(this.FullName, monoIOError);
+				}
+				this.Refresh(true);
 			}
 		}
 
 		[ComVisible(false)]
 		public DateTime LastWriteTimeUtc
 		{
-			[SecuritySafeCritical]
 			get
 			{
-				if (this._dataInitialised == -1)
-				{
-					this.Refresh();
-				}
-				if (this._dataInitialised != 0)
-				{
-					__Error.WinIOError(this._dataInitialised, this.DisplayPath);
-				}
-				return DateTime.FromFileTimeUtc(this._data.LastWriteTime);
+				this.Refresh(false);
+				return this.LastWriteTime.ToUniversalTime();
 			}
 			set
 			{
-				if (this is DirectoryInfo)
-				{
-					Directory.SetLastWriteTimeUtc(this.FullPath, value);
-				}
-				else
-				{
-					File.SetLastWriteTimeUtc(this.FullPath, value);
-				}
-				this._dataInitialised = -1;
+				this.LastWriteTime = value.ToLocalTime();
 			}
 		}
 
-		[SecuritySafeCritical]
+		public abstract void Delete();
+
 		public void Refresh()
 		{
-			this._dataInitialised = File.FillAttributeInfo(this.FullPath, ref this._data, false, false);
+			this.Refresh(true);
 		}
 
-		public FileAttributes Attributes
+		internal void Refresh(bool force)
 		{
-			[SecuritySafeCritical]
-			get
+			if (this.valid && !force)
 			{
-				if (this._dataInitialised == -1)
-				{
-					this.Refresh();
-				}
-				if (this._dataInitialised != 0)
-				{
-					__Error.WinIOError(this._dataInitialised, this.DisplayPath);
-				}
-				return this._data.fileAttributes;
+				return;
 			}
-			[SecuritySafeCritical]
-			set
-			{
-				MonoIOError monoIOError;
-				if (!MonoIO.SetFileAttributes(this.FullPath, value, out monoIOError))
-				{
-					MonoIOError monoIOError2 = monoIOError;
-					if (monoIOError2 == MonoIOError.ERROR_INVALID_PARAMETER)
-					{
-						throw new ArgumentException(Environment.GetResourceString("Invalid File or Directory attributes value."));
-					}
-					if (monoIOError2 == MonoIOError.ERROR_ACCESS_DENIED)
-					{
-						throw new ArgumentException(Environment.GetResourceString("Access to the path is denied."));
-					}
-					__Error.WinIOError((int)monoIOError2, this.DisplayPath);
-				}
-				this._dataInitialised = -1;
-			}
+			MonoIOError monoIOError;
+			MonoIO.GetFileStat(this.FullName, out this.stat, out monoIOError);
+			this.valid = true;
+			this.InternalRefresh();
 		}
 
-		[SecurityCritical]
-		[ComVisible(false)]
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		internal virtual void InternalRefresh()
 		{
-			info.AddValue("OriginalPath", this.OriginalPath, typeof(string));
-			info.AddValue("FullPath", this.FullPath, typeof(string));
 		}
 
-		internal string DisplayPath
+		internal void CheckPath(string path)
 		{
-			get
+			if (path == null)
 			{
-				return this._displayPath;
+				throw new ArgumentNullException("path");
 			}
-			set
+			if (path.Length == 0)
 			{
-				this._displayPath = value;
+				throw new ArgumentException("An empty file name is not valid.");
+			}
+			if (path.IndexOfAny(Path.InvalidPathChars) != -1)
+			{
+				throw new ArgumentException("Illegal characters in path.");
 			}
 		}
-
-		internal MonoIOStat _data;
-
-		internal int _dataInitialised = -1;
-
-		private const int ERROR_INVALID_PARAMETER = 87;
-
-		internal const int ERROR_ACCESS_DENIED = 5;
 
 		protected string FullPath;
 
 		protected string OriginalPath;
 
-		private string _displayPath = "";
+		internal MonoIOStat stat;
+
+		internal bool valid;
 	}
 }

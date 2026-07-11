@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
@@ -8,30 +9,47 @@ namespace System.Linq.Expressions
 		internal MemberAssignment(MemberInfo member, Expression expression)
 			: base(MemberBindingType.Assignment, member)
 		{
-			this._expression = expression;
+			this.expression = expression;
 		}
 
 		public Expression Expression
 		{
 			get
 			{
-				return this._expression;
+				return this.expression;
 			}
 		}
 
-		public MemberAssignment Update(Expression expression)
+		internal override void Emit(EmitContext ec, LocalBuilder local)
 		{
-			if (expression == this.Expression)
+			base.Member.OnFieldOrProperty(delegate(FieldInfo field)
 			{
-				return this;
-			}
-			return Expression.Bind(base.Member, expression);
+				this.EmitFieldAssignment(ec, field, local);
+			}, delegate(PropertyInfo prop)
+			{
+				this.EmitPropertyAssignment(ec, prop, local);
+			});
 		}
 
-		internal override void ValidateAsDefinedHere(int index)
+		private void EmitFieldAssignment(EmitContext ec, FieldInfo field, LocalBuilder local)
 		{
+			ec.EmitLoadSubject(local);
+			this.expression.Emit(ec);
+			ec.ig.Emit(OpCodes.Stfld, field);
 		}
 
-		private readonly Expression _expression;
+		private void EmitPropertyAssignment(EmitContext ec, PropertyInfo property, LocalBuilder local)
+		{
+			MethodInfo setMethod = property.GetSetMethod(true);
+			if (setMethod == null)
+			{
+				throw new InvalidOperationException();
+			}
+			ec.EmitLoadSubject(local);
+			this.expression.Emit(ec);
+			ec.EmitCall(setMethod);
+		}
+
+		private Expression expression;
 	}
 }

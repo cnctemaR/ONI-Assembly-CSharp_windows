@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace System.Xml
 {
@@ -8,29 +9,17 @@ namespace System.Xml
 		protected internal XmlDeclaration(string version, string encoding, string standalone, XmlDocument doc)
 			: base(doc)
 		{
-			if (!this.IsValidXmlVersion(version))
+			if (encoding == null)
 			{
-				throw new ArgumentException(Res.GetString("Wrong XML version information. The XML must match production \"VersionNum ::= '1.' [0-9]+\"."));
+				encoding = string.Empty;
 			}
-			if (standalone != null && standalone.Length > 0 && standalone != "yes" && standalone != "no")
+			if (standalone == null)
 			{
-				throw new ArgumentException(Res.GetString("Wrong value for the XML declaration standalone attribute of '{0}'.", new object[] { standalone }));
+				standalone = string.Empty;
 			}
-			this.Encoding = encoding;
-			this.Standalone = standalone;
-			this.Version = version;
-		}
-
-		public string Version
-		{
-			get
-			{
-				return this.version;
-			}
-			internal set
-			{
-				this.version = value;
-			}
+			this.version = version;
+			this.encoding = encoding;
+			this.standalone = standalone;
 		}
 
 		public string Encoding
@@ -41,41 +30,7 @@ namespace System.Xml
 			}
 			set
 			{
-				this.encoding = ((value == null) ? string.Empty : value);
-			}
-		}
-
-		public string Standalone
-		{
-			get
-			{
-				return this.standalone;
-			}
-			set
-			{
-				if (value == null)
-				{
-					this.standalone = string.Empty;
-					return;
-				}
-				if (value.Length == 0 || value == "yes" || value == "no")
-				{
-					this.standalone = value;
-					return;
-				}
-				throw new ArgumentException(Res.GetString("Wrong value for the XML declaration standalone attribute of '{0}'.", new object[] { value }));
-			}
-		}
-
-		public override string Value
-		{
-			get
-			{
-				return this.InnerText;
-			}
-			set
-			{
-				this.InnerText = value;
+				this.encoding = ((value != null) ? value : string.Empty);
 			}
 		}
 
@@ -83,53 +38,19 @@ namespace System.Xml
 		{
 			get
 			{
-				StringBuilder stringBuilder = new StringBuilder("version=\"" + this.Version + "\"");
-				if (this.Encoding.Length > 0)
-				{
-					stringBuilder.Append(" encoding=\"");
-					stringBuilder.Append(this.Encoding);
-					stringBuilder.Append("\"");
-				}
-				if (this.Standalone.Length > 0)
-				{
-					stringBuilder.Append(" standalone=\"");
-					stringBuilder.Append(this.Standalone);
-					stringBuilder.Append("\"");
-				}
-				return stringBuilder.ToString();
+				return this.Value;
 			}
 			set
 			{
-				string text = null;
-				string text2 = null;
-				string text3 = null;
-				string text4 = this.Encoding;
-				string text5 = this.Standalone;
-				string text6 = this.Version;
-				XmlLoader.ParseXmlDeclarationValue(value, out text, out text2, out text3);
-				try
-				{
-					if (text != null && !this.IsValidXmlVersion(text))
-					{
-						throw new ArgumentException(Res.GetString("Wrong XML version information. The XML must match production \"VersionNum ::= '1.' [0-9]+\"."));
-					}
-					this.Version = text;
-					if (text2 != null)
-					{
-						this.Encoding = text2;
-					}
-					if (text3 != null)
-					{
-						this.Standalone = text3;
-					}
-				}
-				catch
-				{
-					this.Encoding = text4;
-					this.Standalone = text5;
-					this.Version = text6;
-					throw;
-				}
+				this.ParseInput(value);
+			}
+		}
+
+		public override string LocalName
+		{
+			get
+			{
+				return "xml";
 			}
 		}
 
@@ -141,14 +62,6 @@ namespace System.Xml
 			}
 		}
 
-		public override string LocalName
-		{
-			get
-			{
-				return this.Name;
-			}
-		}
-
 		public override XmlNodeType NodeType
 		{
 			get
@@ -157,33 +70,218 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlNode CloneNode(bool deep)
+		public string Standalone
 		{
-			return this.OwnerDocument.CreateXmlDeclaration(this.Version, this.Encoding, this.Standalone);
+			get
+			{
+				return this.standalone;
+			}
+			set
+			{
+				if (value != null)
+				{
+					if (string.Compare(value, "YES", true, CultureInfo.InvariantCulture) == 0)
+					{
+						this.standalone = "yes";
+					}
+					if (string.Compare(value, "NO", true, CultureInfo.InvariantCulture) == 0)
+					{
+						this.standalone = "no";
+					}
+				}
+				else
+				{
+					this.standalone = string.Empty;
+				}
+			}
 		}
 
-		public override void WriteTo(XmlWriter w)
+		public override string Value
 		{
-			w.WriteProcessingInstruction(this.Name, this.InnerText);
+			get
+			{
+				string text = string.Empty;
+				string text2 = string.Empty;
+				if (this.encoding != string.Empty)
+				{
+					text = string.Format(" encoding=\"{0}\"", this.encoding);
+				}
+				if (this.standalone != string.Empty)
+				{
+					text2 = string.Format(" standalone=\"{0}\"", this.standalone);
+				}
+				return string.Format("version=\"{0}\"{1}{2}", this.Version, text, text2);
+			}
+			set
+			{
+				this.ParseInput(value);
+			}
+		}
+
+		public string Version
+		{
+			get
+			{
+				return this.version;
+			}
+		}
+
+		public override XmlNode CloneNode(bool deep)
+		{
+			return new XmlDeclaration(this.Version, this.Encoding, this.standalone, this.OwnerDocument);
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
 		}
 
-		private bool IsValidXmlVersion(string ver)
+		public override void WriteTo(XmlWriter w)
 		{
-			return ver.Length >= 3 && ver[0] == '1' && ver[1] == '.' && XmlCharType.IsOnlyDigits(ver, 2, ver.Length - 2);
+			w.WriteRaw(string.Format("<?xml {0}?>", this.Value));
 		}
 
-		private const string YES = "yes";
+		private int SkipWhitespace(string input, int index)
+		{
+			while (index < input.Length)
+			{
+				if (!XmlChar.IsWhitespace((int)input[index]))
+				{
+					break;
+				}
+				index++;
+			}
+			return index;
+		}
 
-		private const string NO = "no";
+		private void ParseInput(string input)
+		{
+			int num = this.SkipWhitespace(input, 0);
+			if (num + 7 > input.Length || input.IndexOf("version", num, 7) != num)
+			{
+				throw new XmlException("Missing 'version' specification.");
+			}
+			num = this.SkipWhitespace(input, num + 7);
+			char c = input[num];
+			if (c != '=')
+			{
+				throw new XmlException("Invalid 'version' specification.");
+			}
+			num++;
+			num = this.SkipWhitespace(input, num);
+			c = input[num];
+			if (c != '"' && c != '\'')
+			{
+				throw new XmlException("Invalid 'version' specification.");
+			}
+			num++;
+			int num2 = input.IndexOf(c, num);
+			if (num2 < 0 || input.IndexOf("1.0", num, 3) != num)
+			{
+				throw new XmlException("Invalid 'version' specification.");
+			}
+			num += 4;
+			if (num == input.Length)
+			{
+				return;
+			}
+			if (!XmlChar.IsWhitespace((int)input[num]))
+			{
+				throw new XmlException("Invalid XML declaration.");
+			}
+			num = this.SkipWhitespace(input, num + 1);
+			if (num == input.Length)
+			{
+				return;
+			}
+			if (input.Length > num + 8 && input.IndexOf("encoding", num, 8) > 0)
+			{
+				num = this.SkipWhitespace(input, num + 8);
+				c = input[num];
+				if (c != '=')
+				{
+					throw new XmlException("Invalid 'version' specification.");
+				}
+				num++;
+				num = this.SkipWhitespace(input, num);
+				c = input[num];
+				if (c != '"' && c != '\'')
+				{
+					throw new XmlException("Invalid 'encoding' specification.");
+				}
+				num2 = input.IndexOf(c, num + 1);
+				if (num2 < 0)
+				{
+					throw new XmlException("Invalid 'encoding' specification.");
+				}
+				this.Encoding = input.Substring(num + 1, num2 - num - 1);
+				num = num2 + 1;
+				if (num == input.Length)
+				{
+					return;
+				}
+				if (!XmlChar.IsWhitespace((int)input[num]))
+				{
+					throw new XmlException("Invalid XML declaration.");
+				}
+				num = this.SkipWhitespace(input, num + 1);
+			}
+			if (input.Length > num + 10 && input.IndexOf("standalone", num, 10) > 0)
+			{
+				num = this.SkipWhitespace(input, num + 10);
+				c = input[num];
+				if (c != '=')
+				{
+					throw new XmlException("Invalid 'version' specification.");
+				}
+				num++;
+				num = this.SkipWhitespace(input, num);
+				c = input[num];
+				if (c != '"' && c != '\'')
+				{
+					throw new XmlException("Invalid 'standalone' specification.");
+				}
+				num2 = input.IndexOf(c, num + 1);
+				if (num2 < 0)
+				{
+					throw new XmlException("Invalid 'standalone' specification.");
+				}
+				string text = input.Substring(num + 1, num2 - num - 1);
+				string text2 = text;
+				if (text2 != null)
+				{
+					if (XmlDeclaration.<>f__switch$map30 == null)
+					{
+						XmlDeclaration.<>f__switch$map30 = new Dictionary<string, int>(2)
+						{
+							{ "yes", 0 },
+							{ "no", 0 }
+						};
+					}
+					int num3;
+					if (XmlDeclaration.<>f__switch$map30.TryGetValue(text2, out num3))
+					{
+						if (num3 == 0)
+						{
+							this.Standalone = text;
+							num = num2 + 1;
+							num = this.SkipWhitespace(input, num);
+							goto IL_0308;
+						}
+					}
+				}
+				throw new XmlException("Invalid standalone specification.");
+			}
+			IL_0308:
+			if (num != input.Length)
+			{
+				throw new XmlException("Invalid XML declaration.");
+			}
+		}
 
-		private string version;
-
-		private string encoding;
+		private string encoding = "UTF-8";
 
 		private string standalone;
+
+		private string version;
 	}
 }

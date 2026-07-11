@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeAttributeArgument
 	{
@@ -11,29 +14,45 @@ namespace System.CodeDom
 
 		public CodeAttributeArgument(CodeExpression value)
 		{
-			this.Value = value;
+			this.value = value;
 		}
 
 		public CodeAttributeArgument(string name, CodeExpression value)
 		{
-			this.Name = name;
-			this.Value = value;
+			this.name = name;
+			this.value = value;
 		}
 
 		public string Name
 		{
 			get
 			{
-				return this._name ?? string.Empty;
+				if (this.name == null)
+				{
+					return string.Empty;
+				}
+				return this.name;
 			}
 			set
 			{
-				this._name = value;
+				this.name = value;
 			}
 		}
 
-		public CodeExpression Value { get; set; }
+		public CodeExpression Value
+		{
+			get
+			{
+				return this.value;
+			}
+			set
+			{
+				this.value = value;
+			}
+		}
 
-		private string _name;
+		private string name;
+
+		private CodeExpression value;
 	}
 }

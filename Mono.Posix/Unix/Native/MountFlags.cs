@@ -2,9 +2,9 @@
 
 namespace Mono.Unix.Native
 {
-	[Map]
-	[Flags]
 	[CLSCompliant(false)]
+	[Flags]
+	[Map]
 	public enum MountFlags : ulong
 	{
 		ST_RDONLY = 1UL,

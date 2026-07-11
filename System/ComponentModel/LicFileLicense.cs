@@ -1,0 +1,26 @@
+﻿using System;
+
+namespace System.ComponentModel
+{
+	internal class LicFileLicense : License
+	{
+		public LicFileLicense(string key)
+		{
+			this._key = key;
+		}
+
+		public override string LicenseKey
+		{
+			get
+			{
+				return this._key;
+			}
+		}
+
+		public override void Dispose()
+		{
+		}
+
+		private string _key;
+	}
+}

@@ -55,133 +55,77 @@ namespace System.Configuration
 			while (reader.MoveToNextAttribute())
 			{
 				string name = reader.Name;
-				uint num = <PrivateImplementationDetails>.ComputeStringHash(name);
-				if (num <= 1766272347U)
+				switch (name)
 				{
-					if (num != 1066839313U)
+				case "allowLocation":
+				{
+					string value = reader.Value;
+					this.allowLocation = value == "true";
+					if (!this.allowLocation && value != "false")
 					{
-						if (num != 1361572173U)
-						{
-							if (num != 1766272347U)
-							{
-								goto IL_0290;
-							}
-							if (!(name == "requirePermission"))
-							{
-								goto IL_0290;
-							}
-							string value = reader.Value;
-							bool flag = value == "true";
-							if (!flag && value != "false")
-							{
-								base.ThrowException("Invalid attribute value", reader);
-							}
-							this.requirePermission = flag;
-							continue;
-						}
-						else if (!(name == "type"))
-						{
-							goto IL_0290;
-						}
+						base.ThrowException("Invalid attribute value", reader);
 					}
-					else
-					{
-						if (!(name == "allowLocation"))
-						{
-							goto IL_0290;
-						}
-						string value2 = reader.Value;
-						this.allowLocation = value2 == "true";
-						if (!this.allowLocation && value2 != "false")
-						{
-							base.ThrowException("Invalid attribute value", reader);
-							continue;
-						}
-						continue;
-					}
+					continue;
 				}
-				else
+				case "allowDefinition":
 				{
-					if (num <= 1931054735U)
-					{
-						if (num != 1841158919U)
-						{
-							if (num != 1931054735U)
-							{
-								goto IL_0290;
-							}
-							if (!(name == "allowExeDefinition"))
-							{
-								goto IL_0290;
-							}
-						}
-						else
-						{
-							if (!(name == "restartOnExternalChanges"))
-							{
-								goto IL_0290;
-							}
-							string value3 = reader.Value;
-							bool flag2 = value3 == "true";
-							if (!flag2 && value3 != "false")
-							{
-								base.ThrowException("Invalid attribute value", reader);
-							}
-							this.restartOnExternalChanges = flag2;
-							continue;
-						}
-					}
-					else if (num != 2369371622U)
-					{
-						if (num != 3263379011U)
-						{
-							goto IL_0290;
-						}
-						if (!(name == "allowDefinition"))
-						{
-							goto IL_0290;
-						}
-						string value4 = reader.Value;
-						try
-						{
-							this.allowDefinition = (ConfigurationAllowDefinition)Enum.Parse(typeof(ConfigurationAllowDefinition), value4);
-							continue;
-						}
-						catch
-						{
-							base.ThrowException("Invalid attribute value", reader);
-							continue;
-						}
-					}
-					else
-					{
-						if (!(name == "name"))
-						{
-							goto IL_0290;
-						}
-						this.Name = reader.Value;
-						if (this.Name == "location")
-						{
-							base.ThrowException("location is a reserved section name", reader);
-							continue;
-						}
-						continue;
-					}
-					string value5 = reader.Value;
+					string value2 = reader.Value;
 					try
 					{
-						this.allowExeDefinition = (ConfigurationAllowExeDefinition)Enum.Parse(typeof(ConfigurationAllowExeDefinition), value5);
-						continue;
+						this.allowDefinition = (ConfigurationAllowDefinition)((int)Enum.Parse(typeof(ConfigurationAllowDefinition), value2));
 					}
 					catch
 					{
 						base.ThrowException("Invalid attribute value", reader);
-						continue;
 					}
+					continue;
 				}
-				this.TypeName = reader.Value;
-				continue;
-				IL_0290:
+				case "allowExeDefinition":
+				{
+					string value3 = reader.Value;
+					try
+					{
+						this.allowExeDefinition = (ConfigurationAllowExeDefinition)((int)Enum.Parse(typeof(ConfigurationAllowExeDefinition), value3));
+					}
+					catch
+					{
+						base.ThrowException("Invalid attribute value", reader);
+					}
+					continue;
+				}
+				case "type":
+					this.TypeName = reader.Value;
+					continue;
+				case "name":
+					this.Name = reader.Value;
+					if (this.Name == "location")
+					{
+						base.ThrowException("location is a reserved section name", reader);
+					}
+					continue;
+				case "requirePermission":
+				{
+					string value4 = reader.Value;
+					bool flag = value4 == "true";
+					if (!flag && value4 != "false")
+					{
+						base.ThrowException("Invalid attribute value", reader);
+					}
+					this.requirePermission = flag;
+					continue;
+				}
+				case "restartOnExternalChanges":
+				{
+					string value5 = reader.Value;
+					bool flag2 = value5 == "true";
+					if (!flag2 && value5 != "false")
+					{
+						base.ThrowException("Invalid attribute value", reader);
+					}
+					this.restartOnExternalChanges = flag2;
+					continue;
+				}
+				}
 				base.ThrowException(string.Format("Unrecognized attribute: {0}", reader.Name), reader);
 			}
 			if (this.Name == null || this.TypeName == null)
@@ -224,7 +168,7 @@ namespace System.Configuration
 			}
 			if (!config.ConfigHost.IsDefinitionAllowed(config.ConfigPath, this.allowDefinition, this.allowExeDefinition))
 			{
-				object obj = ((this.allowExeDefinition != ConfigurationAllowExeDefinition.MachineToApplication) ? this.allowExeDefinition : this.allowDefinition);
+				object obj = ((this.allowExeDefinition == ConfigurationAllowExeDefinition.MachineToApplication) ? this.allowDefinition : this.allowExeDefinition);
 				throw new ConfigurationErrorsException(string.Concat(new object[] { "The section <", this.Name, "> can't be defined in this configuration file (the allowed definition context is '", obj, "')." }), reader);
 			}
 			if (config.GetSectionXml(this) != null)
@@ -240,13 +184,14 @@ namespace System.Configuration
 			string text;
 			if (sectionInstance != null)
 			{
-				ConfigurationSection configurationSection = ((config.Parent != null) ? config.Parent.GetSectionInstance(this, false) : null);
+				ConfigurationSection configurationSection = ((config.Parent == null) ? null : config.Parent.GetSectionInstance(this, false));
 				text = sectionInstance.SerializeSection(configurationSection, this.Name, mode);
 				string externalDataXml = sectionInstance.ExternalDataXml;
 				string filePath = config.FilePath;
 				if (!string.IsNullOrEmpty(filePath) && !string.IsNullOrEmpty(externalDataXml))
 				{
-					using (StreamWriter streamWriter = new StreamWriter(Path.Combine(Path.GetDirectoryName(filePath), sectionInstance.SectionInformation.ConfigSource)))
+					string text2 = Path.Combine(Path.GetDirectoryName(filePath), sectionInstance.SectionInformation.ConfigSource);
+					using (StreamWriter streamWriter = new StreamWriter(text2))
 					{
 						streamWriter.Write(externalDataXml);
 					}
@@ -264,7 +209,7 @@ namespace System.Configuration
 			{
 				text = config.GetSectionXml(this);
 			}
-			if (!string.IsNullOrEmpty(text))
+			if (text != null)
 			{
 				writer.WriteRaw(text);
 			}
@@ -272,26 +217,6 @@ namespace System.Configuration
 
 		internal override void Merge(ConfigInfo data)
 		{
-		}
-
-		internal override bool HasValues(Configuration config, ConfigurationSaveMode mode)
-		{
-			ConfigurationSection sectionInstance = config.GetSectionInstance(this, false);
-			if (sectionInstance == null)
-			{
-				return false;
-			}
-			ConfigurationSection configurationSection = ((config.Parent != null) ? config.Parent.GetSectionInstance(this, false) : null);
-			return sectionInstance.HasValues(configurationSection, mode);
-		}
-
-		internal override void ResetModified(Configuration config)
-		{
-			ConfigurationSection sectionInstance = config.GetSectionInstance(this, false);
-			if (sectionInstance != null)
-			{
-				sectionInstance.ResetModified();
-			}
 		}
 
 		private bool allowLocation = true;

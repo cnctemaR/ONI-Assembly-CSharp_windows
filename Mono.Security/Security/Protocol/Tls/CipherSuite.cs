@@ -7,6 +7,26 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal abstract class CipherSuite
 	{
+		public CipherSuite(short code, string name, CipherAlgorithmType cipherAlgorithmType, HashAlgorithmType hashAlgorithmType, ExchangeAlgorithmType exchangeAlgorithmType, bool exportable, bool blockMode, byte keyMaterialSize, byte expandedKeyMaterialSize, short effectiveKeyBits, byte ivSize, byte blockSize)
+		{
+			this.code = code;
+			this.name = name;
+			this.cipherAlgorithmType = cipherAlgorithmType;
+			this.hashAlgorithmType = hashAlgorithmType;
+			this.exchangeAlgorithmType = exchangeAlgorithmType;
+			this.isExportable = exportable;
+			if (blockMode)
+			{
+				this.cipherMode = CipherMode.CBC;
+			}
+			this.keyMaterialSize = keyMaterialSize;
+			this.expandedKeyMaterialSize = expandedKeyMaterialSize;
+			this.effectiveKeyBits = effectiveKeyBits;
+			this.ivSize = ivSize;
+			this.blockSize = blockSize;
+			this.keyBlockSize = (int)this.keyMaterialSize + this.HashSize + (int)this.ivSize << 1;
+		}
+
 		protected ICryptoTransform EncryptionCipher
 		{
 			get
@@ -51,31 +71,15 @@ namespace Mono.Security.Protocol.Tls
 		{
 			get
 			{
-				HashAlgorithmType hashAlgorithmType = this.hashAlgorithmType;
-				if (hashAlgorithmType == HashAlgorithmType.Md5)
+				switch (this.hashAlgorithmType)
 				{
+				case HashAlgorithmType.Md5:
 					return "MD5";
+				case HashAlgorithmType.Sha1:
+					return "SHA1";
 				}
-				if (hashAlgorithmType != HashAlgorithmType.Sha1)
-				{
-					return "None";
-				}
-				return "SHA1";
+				return "None";
 			}
-		}
-
-		internal HashAlgorithm CreateHashAlgorithm()
-		{
-			HashAlgorithmType hashAlgorithmType = this.hashAlgorithmType;
-			if (hashAlgorithmType == HashAlgorithmType.Md5)
-			{
-				return MD5.Create();
-			}
-			if (hashAlgorithmType != HashAlgorithmType.Sha1)
-			{
-				return null;
-			}
-			return SHA1.Create();
 		}
 
 		public HashAlgorithmType HashAlgorithmType
@@ -90,16 +94,14 @@ namespace Mono.Security.Protocol.Tls
 		{
 			get
 			{
-				HashAlgorithmType hashAlgorithmType = this.hashAlgorithmType;
-				if (hashAlgorithmType == HashAlgorithmType.Md5)
+				switch (this.hashAlgorithmType)
 				{
+				case HashAlgorithmType.Md5:
 					return 16;
+				case HashAlgorithmType.Sha1:
+					return 20;
 				}
-				if (hashAlgorithmType != HashAlgorithmType.Sha1)
-				{
-					return 0;
-				}
-				return 20;
+				return 0;
 			}
 		}
 
@@ -193,26 +195,6 @@ namespace Mono.Security.Protocol.Tls
 			{
 				this.context = value;
 			}
-		}
-
-		public CipherSuite(short code, string name, CipherAlgorithmType cipherAlgorithmType, HashAlgorithmType hashAlgorithmType, ExchangeAlgorithmType exchangeAlgorithmType, bool exportable, bool blockMode, byte keyMaterialSize, byte expandedKeyMaterialSize, short effectiveKeyBits, byte ivSize, byte blockSize)
-		{
-			this.code = code;
-			this.name = name;
-			this.cipherAlgorithmType = cipherAlgorithmType;
-			this.hashAlgorithmType = hashAlgorithmType;
-			this.exchangeAlgorithmType = exchangeAlgorithmType;
-			this.isExportable = exportable;
-			if (blockMode)
-			{
-				this.cipherMode = CipherMode.CBC;
-			}
-			this.keyMaterialSize = keyMaterialSize;
-			this.expandedKeyMaterialSize = expandedKeyMaterialSize;
-			this.effectiveKeyBits = effectiveKeyBits;
-			this.ivSize = ivSize;
-			this.blockSize = blockSize;
-			this.keyBlockSize = (int)this.keyMaterialSize + this.HashSize + (int)this.ivSize << 1;
 		}
 
 		internal void Write(byte[] array, int offset, short value)
@@ -328,8 +310,8 @@ namespace Mono.Security.Protocol.Tls
 			Buffer.BlockCopy(secret, 0, array2, 0, num);
 			byte[] array3 = new byte[num];
 			Buffer.BlockCopy(secret, secret.Length - num, array3, 0, num);
-			byte[] array4 = this.Expand(MD5.Create(), array2, array, length);
-			byte[] array5 = this.Expand(SHA1.Create(), array3, array, length);
+			byte[] array4 = this.Expand("MD5", array2, array, length);
+			byte[] array5 = this.Expand("SHA1", array3, array, length);
 			byte[] array6 = new byte[length];
 			for (int i = 0; i < array6.Length; i++)
 			{
@@ -338,15 +320,15 @@ namespace Mono.Security.Protocol.Tls
 			return array6;
 		}
 
-		public byte[] Expand(HashAlgorithm hash, byte[] secret, byte[] seed, int length)
+		public byte[] Expand(string hashName, byte[] secret, byte[] seed, int length)
 		{
-			int num = hash.HashSize / 8;
+			int num = ((!(hashName == "MD5")) ? 20 : 16);
 			int num2 = length / num;
 			if (length % num > 0)
 			{
 				num2++;
 			}
-			Mono.Security.Cryptography.HMAC hmac = new Mono.Security.Cryptography.HMAC(hash, secret);
+			Mono.Security.Cryptography.HMAC hmac = new Mono.Security.Cryptography.HMAC(hashName, secret);
 			TlsStream tlsStream = new TlsStream();
 			byte[][] array = new byte[num2 + 1][];
 			array[0] = seed;
@@ -381,7 +363,7 @@ namespace Mono.Security.Protocol.Tls
 				this.encryptionAlgorithm = new ARC4Managed();
 				break;
 			case CipherAlgorithmType.Rijndael:
-				this.encryptionAlgorithm = Aes.Create();
+				this.encryptionAlgorithm = Rijndael.Create();
 				break;
 			case CipherAlgorithmType.TripleDes:
 				this.encryptionAlgorithm = TripleDES.Create();
@@ -407,10 +389,12 @@ namespace Mono.Security.Protocol.Tls
 			this.encryptionCipher = this.encryptionAlgorithm.CreateEncryptor();
 			if (this.context is ClientContext)
 			{
-				this.clientHMAC = new Mono.Security.Cryptography.HMAC(this.CreateHashAlgorithm(), this.context.Negotiating.ClientWriteMAC);
-				return;
+				this.clientHMAC = new Mono.Security.Cryptography.HMAC(this.HashAlgorithmName, this.context.Negotiating.ClientWriteMAC);
 			}
-			this.serverHMAC = new Mono.Security.Cryptography.HMAC(this.CreateHashAlgorithm(), this.context.Negotiating.ServerWriteMAC);
+			else
+			{
+				this.serverHMAC = new Mono.Security.Cryptography.HMAC(this.HashAlgorithmName, this.context.Negotiating.ServerWriteMAC);
+			}
 		}
 
 		private void createDecryptionCipher()
@@ -427,7 +411,7 @@ namespace Mono.Security.Protocol.Tls
 				this.decryptionAlgorithm = new ARC4Managed();
 				break;
 			case CipherAlgorithmType.Rijndael:
-				this.decryptionAlgorithm = Aes.Create();
+				this.decryptionAlgorithm = Rijndael.Create();
 				break;
 			case CipherAlgorithmType.TripleDes:
 				this.decryptionAlgorithm = TripleDES.Create();
@@ -453,10 +437,12 @@ namespace Mono.Security.Protocol.Tls
 			this.decryptionCipher = this.decryptionAlgorithm.CreateDecryptor();
 			if (this.context is ClientContext)
 			{
-				this.serverHMAC = new Mono.Security.Cryptography.HMAC(this.CreateHashAlgorithm(), this.context.Negotiating.ServerWriteMAC);
-				return;
+				this.serverHMAC = new Mono.Security.Cryptography.HMAC(this.HashAlgorithmName, this.context.Negotiating.ServerWriteMAC);
 			}
-			this.clientHMAC = new Mono.Security.Cryptography.HMAC(this.CreateHashAlgorithm(), this.context.Negotiating.ClientWriteMAC);
+			else
+			{
+				this.clientHMAC = new Mono.Security.Cryptography.HMAC(this.HashAlgorithmName, this.context.Negotiating.ClientWriteMAC);
+			}
 		}
 
 		public static byte[] EmptyArray = new byte[0];

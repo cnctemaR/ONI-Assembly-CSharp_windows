@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeArrayIndexerExpression : CodeExpression
 	{
@@ -11,25 +14,41 @@ namespace System.CodeDom
 
 		public CodeArrayIndexerExpression(CodeExpression targetObject, params CodeExpression[] indices)
 		{
-			this.TargetObject = targetObject;
+			this.targetObject = targetObject;
 			this.Indices.AddRange(indices);
 		}
-
-		public CodeExpression TargetObject { get; set; }
 
 		public CodeExpressionCollection Indices
 		{
 			get
 			{
-				CodeExpressionCollection codeExpressionCollection;
-				if ((codeExpressionCollection = this._indices) == null)
+				if (this.indices == null)
 				{
-					codeExpressionCollection = (this._indices = new CodeExpressionCollection());
+					this.indices = new CodeExpressionCollection();
 				}
-				return codeExpressionCollection;
+				return this.indices;
 			}
 		}
 
-		private CodeExpressionCollection _indices;
+		public CodeExpression TargetObject
+		{
+			get
+			{
+				return this.targetObject;
+			}
+			set
+			{
+				this.targetObject = value;
+			}
+		}
+
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeExpressionCollection indices;
+
+		private CodeExpression targetObject;
 	}
 }

@@ -1,15 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.Net
 {
 	[Serializable]
-	public class HttpListenerException : Win32Exception
+	public class HttpListenerException : global::System.ComponentModel.Win32Exception
 	{
 		public HttpListenerException()
-			: base(Marshal.GetLastWin32Error())
 		{
 		}
 
@@ -32,7 +30,7 @@ namespace System.Net
 		{
 			get
 			{
-				return base.NativeErrorCode;
+				return base.ErrorCode;
 			}
 		}
 	}

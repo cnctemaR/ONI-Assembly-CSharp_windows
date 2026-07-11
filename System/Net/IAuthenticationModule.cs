@@ -8,8 +8,8 @@ namespace System.Net
 
 		Authorization PreAuthenticate(WebRequest request, ICredentials credentials);
 
-		bool CanPreAuthenticate { get; }
-
 		string AuthenticationType { get; }
+
+		bool CanPreAuthenticate { get; }
 	}
 }

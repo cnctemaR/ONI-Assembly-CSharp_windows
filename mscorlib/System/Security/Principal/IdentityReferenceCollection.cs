@@ -18,6 +18,11 @@ namespace System.Security.Principal
 			this._list = new ArrayList(capacity);
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			throw new NotImplementedException();
+		}
+
 		public int Count
 		{
 			get
@@ -62,14 +67,12 @@ namespace System.Security.Principal
 
 		public bool Contains(IdentityReference identity)
 		{
-			using (IEnumerator enumerator = this._list.GetEnumerator())
+			foreach (object obj in this._list)
 			{
-				while (enumerator.MoveNext())
+				IdentityReference identityReference = (IdentityReference)obj;
+				if (identityReference.Equals(identity))
 				{
-					if (((IdentityReference)enumerator.Current).Equals(identity))
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 			return false;
@@ -81,11 +84,6 @@ namespace System.Security.Principal
 		}
 
 		public IEnumerator<IdentityReference> GetEnumerator()
-		{
-			throw new NotImplementedException();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
 		{
 			throw new NotImplementedException();
 		}

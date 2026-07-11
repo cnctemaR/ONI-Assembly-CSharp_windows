@@ -5,21 +5,28 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class FileDialogPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
+	public sealed class FileDialogPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
 	{
 		public FileDialogPermission(PermissionState state)
 		{
 			if (CodeAccessPermission.CheckPermissionState(state, true) == PermissionState.Unrestricted)
 			{
 				this._access = FileDialogPermissionAccess.OpenSave;
-				return;
 			}
-			this._access = FileDialogPermissionAccess.None;
+			else
+			{
+				this._access = FileDialogPermissionAccess.None;
+			}
 		}
 
 		public FileDialogPermission(FileDialogPermissionAccess access)
 		{
 			this.Access = access;
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 1;
 		}
 
 		public FileDialogPermissionAccess Access
@@ -32,7 +39,8 @@ namespace System.Security.Permissions
 			{
 				if (!Enum.IsDefined(typeof(FileDialogPermissionAccess), value))
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "FileDialogPermissionAccess");
+					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
+					throw new ArgumentException(text, "FileDialogPermissionAccess");
 				}
 				this._access = value;
 			}
@@ -49,15 +57,19 @@ namespace System.Security.Permissions
 			if (CodeAccessPermission.IsUnrestricted(esd))
 			{
 				this._access = FileDialogPermissionAccess.OpenSave;
-				return;
 			}
-			string text = esd.Attribute("Access");
-			if (text == null)
+			else
 			{
-				this._access = FileDialogPermissionAccess.None;
-				return;
+				string text = esd.Attribute("Access");
+				if (text == null)
+				{
+					this._access = FileDialogPermissionAccess.None;
+				}
+				else
+				{
+					this._access = (FileDialogPermissionAccess)((int)Enum.Parse(typeof(FileDialogPermissionAccess), text));
+				}
 			}
-			this._access = (FileDialogPermissionAccess)Enum.Parse(typeof(FileDialogPermissionAccess), text);
 		}
 
 		public override IPermission Intersect(IPermission target)
@@ -68,11 +80,7 @@ namespace System.Security.Permissions
 				return null;
 			}
 			FileDialogPermissionAccess fileDialogPermissionAccess = this._access & fileDialogPermission._access;
-			if (fileDialogPermissionAccess != FileDialogPermissionAccess.None)
-			{
-				return new FileDialogPermission(fileDialogPermissionAccess);
-			}
-			return null;
+			return (fileDialogPermissionAccess != FileDialogPermissionAccess.None) ? new FileDialogPermission(fileDialogPermissionAccess) : null;
 		}
 
 		public override bool IsSubsetOf(IPermission target)
@@ -116,11 +124,6 @@ namespace System.Security.Permissions
 				return new FileDialogPermission(PermissionState.Unrestricted);
 			}
 			return new FileDialogPermission(this._access | fileDialogPermission._access);
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 1;
 		}
 
 		private FileDialogPermission Cast(IPermission target)

@@ -31,7 +31,12 @@ namespace Mono.Security.Cryptography
 			{
 				if (this._filename == null)
 				{
-					this._filename = string.Format(CultureInfo.InvariantCulture, "[{0}][{1}][{2}].xml", this._params.ProviderType, this.ContainerName, this._params.KeyNumber);
+					this._filename = string.Format(CultureInfo.InvariantCulture, "[{0}][{1}][{2}].xml", new object[]
+					{
+						this._params.ProviderType,
+						this.ContainerName,
+						this._params.KeyNumber
+					});
 					if (this.UseMachineKeyStore)
 					{
 						this._filename = Path.Combine(KeyPairPersistence.MachinePath, this._filename);
@@ -92,9 +97,11 @@ namespace Mono.Security.Cryptography
 			if (this.UseMachineKeyStore)
 			{
 				KeyPairPersistence.ProtectMachine(this.Filename);
-				return;
 			}
-			KeyPairPersistence.ProtectUser(this.Filename);
+			else
+			{
+				KeyPairPersistence.ProtectUser(this.Filename);
+			}
 		}
 
 		public void Remove()
@@ -119,22 +126,21 @@ namespace Mono.Security.Cryptography
 							try
 							{
 								Directory.CreateDirectory(KeyPairPersistence._userPath);
+								KeyPairPersistence.ProtectUser(KeyPairPersistence._userPath);
+								KeyPairPersistence._userPathExists = true;
 							}
 							catch (Exception ex)
 							{
-								throw new CryptographicException(string.Format(Locale.GetText("Could not create user key store '{0}'."), KeyPairPersistence._userPath), ex);
+								string text = Locale.GetText("Could not create user key store '{0}'.");
+								throw new CryptographicException(string.Format(text, KeyPairPersistence._userPath), ex);
 							}
-							KeyPairPersistence._userPathExists = true;
 						}
-					}
-					if (!KeyPairPersistence.IsUserProtected(KeyPairPersistence._userPath) && !KeyPairPersistence.ProtectUser(KeyPairPersistence._userPath))
-					{
-						throw new IOException(string.Format(Locale.GetText("Could not secure user key store '{0}'."), KeyPairPersistence._userPath));
 					}
 				}
 				if (!KeyPairPersistence.IsUserProtected(KeyPairPersistence._userPath))
 				{
-					throw new CryptographicException(string.Format(Locale.GetText("Improperly protected user's key pairs in '{0}'."), KeyPairPersistence._userPath));
+					string text2 = Locale.GetText("Improperly protected user's key pairs in '{0}'.");
+					throw new CryptographicException(string.Format(text2, KeyPairPersistence._userPath));
 				}
 				return KeyPairPersistence._userPath;
 			}
@@ -157,22 +163,21 @@ namespace Mono.Security.Cryptography
 							try
 							{
 								Directory.CreateDirectory(KeyPairPersistence._machinePath);
+								KeyPairPersistence.ProtectMachine(KeyPairPersistence._machinePath);
+								KeyPairPersistence._machinePathExists = true;
 							}
 							catch (Exception ex)
 							{
-								throw new CryptographicException(string.Format(Locale.GetText("Could not create machine key store '{0}'."), KeyPairPersistence._machinePath), ex);
+								string text = Locale.GetText("Could not create machine key store '{0}'.");
+								throw new CryptographicException(string.Format(text, KeyPairPersistence._machinePath), ex);
 							}
-							KeyPairPersistence._machinePathExists = true;
 						}
-					}
-					if (!KeyPairPersistence.IsMachineProtected(KeyPairPersistence._machinePath) && !KeyPairPersistence.ProtectMachine(KeyPairPersistence._machinePath))
-					{
-						throw new IOException(string.Format(Locale.GetText("Could not secure machine key store '{0}'."), KeyPairPersistence._machinePath));
 					}
 				}
 				if (!KeyPairPersistence.IsMachineProtected(KeyPairPersistence._machinePath))
 				{
-					throw new CryptographicException(string.Format(Locale.GetText("Improperly protected machine's key pairs in '{0}'."), KeyPairPersistence._machinePath));
+					string text2 = Locale.GetText("Improperly protected machine's key pairs in '{0}'.");
+					throw new CryptographicException(string.Format(text2, KeyPairPersistence._machinePath));
 				}
 				return KeyPairPersistence._machinePath;
 			}
@@ -270,8 +275,10 @@ namespace Mono.Security.Cryptography
 					else
 					{
 						byte[] bytes = Encoding.UTF8.GetBytes(this._params.KeyContainerName);
-						byte[] array = MD5.Create().ComputeHash(bytes);
-						this._container = new Guid(array).ToString();
+						MD5 md = MD5.Create();
+						byte[] array = md.ComputeHash(bytes);
+						Guid guid = new Guid(array);
+						this._container = guid.ToString();
 					}
 				}
 				return this._container;
@@ -320,11 +327,11 @@ namespace Mono.Security.Cryptography
 			return stringBuilder.ToString();
 		}
 
-		private static bool _userPathExists;
+		private static bool _userPathExists = false;
 
 		private static string _userPath;
 
-		private static bool _machinePathExists;
+		private static bool _machinePathExists = false;
 
 		private static string _machinePath;
 

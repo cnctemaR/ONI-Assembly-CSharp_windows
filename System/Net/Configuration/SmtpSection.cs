@@ -7,28 +7,15 @@ namespace System.Net.Configuration
 	public sealed class SmtpSection : ConfigurationSection
 	{
 		[ConfigurationProperty("deliveryMethod", DefaultValue = "Network")]
-		public SmtpDeliveryMethod DeliveryMethod
+		public global::System.Net.Mail.SmtpDeliveryMethod DeliveryMethod
 		{
 			get
 			{
-				return (SmtpDeliveryMethod)base["deliveryMethod"];
+				return (global::System.Net.Mail.SmtpDeliveryMethod)((int)base["deliveryMethod"]);
 			}
 			set
 			{
 				base["deliveryMethod"] = value;
-			}
-		}
-
-		[ConfigurationProperty("deliveryFormat", DefaultValue = SmtpDeliveryFormat.SevenBit)]
-		public SmtpDeliveryFormat DeliveryFormat
-		{
-			get
-			{
-				return (SmtpDeliveryFormat)base["deliveryFormat"];
-			}
-			set
-			{
-				base["deliveryFormat"] = value;
 			}
 		}
 

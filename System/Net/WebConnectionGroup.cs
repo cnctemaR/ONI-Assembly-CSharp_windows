@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace System.Net
 {
@@ -10,58 +9,58 @@ namespace System.Net
 		{
 			this.sPoint = sPoint;
 			this.name = name;
-			this.connections = new LinkedList<WebConnectionGroup.ConnectionState>();
+			this.connections = new ArrayList(1);
 			this.queue = new Queue();
-		}
-
-		public event EventHandler ConnectionClosed;
-
-		private void OnConnectionClosed()
-		{
-			if (this.ConnectionClosed != null)
-			{
-				this.ConnectionClosed(this, null);
-			}
 		}
 
 		public void Close()
 		{
-			List<WebConnection> list = null;
-			ServicePoint servicePoint = this.sPoint;
-			lock (servicePoint)
+			ArrayList arrayList = this.connections;
+			lock (arrayList)
 			{
-				this.closing = true;
-				LinkedListNode<WebConnectionGroup.ConnectionState> linkedListNode = this.connections.First;
-				while (linkedListNode != null)
+				int count = this.connections.Count;
+				for (int i = 0; i < count; i++)
 				{
-					WebConnection connection = linkedListNode.Value.Connection;
-					LinkedListNode<WebConnectionGroup.ConnectionState> linkedListNode2 = linkedListNode;
-					linkedListNode = linkedListNode.Next;
-					if (list == null)
+					WeakReference weakReference = (WeakReference)this.connections[i];
+					WebConnection webConnection = weakReference.Target as WebConnection;
+					if (webConnection != null)
 					{
-						list = new List<WebConnection>();
+						webConnection.Close(false);
 					}
-					list.Add(connection);
-					this.connections.Remove(linkedListNode2);
 				}
-			}
-			if (list != null)
-			{
-				foreach (WebConnection webConnection in list)
-				{
-					webConnection.Close(false);
-					this.OnConnectionClosed();
-				}
+				this.connections.Clear();
 			}
 		}
 
-		public WebConnection GetConnection(HttpWebRequest request, out bool created)
+		public WebConnection GetConnection(HttpWebRequest request)
 		{
-			ServicePoint servicePoint = this.sPoint;
-			WebConnection webConnection;
-			lock (servicePoint)
+			WebConnection webConnection = null;
+			ArrayList arrayList = this.connections;
+			lock (arrayList)
 			{
-				webConnection = this.CreateOrReuseConnection(request, out created);
+				int count = this.connections.Count;
+				ArrayList arrayList2 = null;
+				for (int i = 0; i < count; i++)
+				{
+					WeakReference weakReference = (WeakReference)this.connections[i];
+					webConnection = weakReference.Target as WebConnection;
+					if (webConnection == null)
+					{
+						if (arrayList2 == null)
+						{
+							arrayList2 = new ArrayList(1);
+						}
+						arrayList2.Add(i);
+					}
+				}
+				if (arrayList2 != null)
+				{
+					for (int j = arrayList2.Count - 1; j >= 0; j--)
+					{
+						this.connections.RemoveAt((int)arrayList2[j]);
+					}
+				}
+				webConnection = this.CreateOrReuseConnection(request);
 			}
 			return webConnection;
 		}
@@ -74,9 +73,8 @@ namespace System.Net
 			}
 			bool flag = false;
 			NetworkCredential ntlmCredential = cnc.NtlmCredential;
-			ICredentials credentials = ((request.Proxy == null || request.Proxy.IsBypassed(request.RequestUri)) ? request.Credentials : request.Proxy.Credentials);
-			NetworkCredential networkCredential = ((credentials != null) ? credentials.GetCredential(request.RequestUri, "NTLM") : null);
-			if (ntlmCredential == null || networkCredential == null || ntlmCredential.Domain != networkCredential.Domain || ntlmCredential.UserName != networkCredential.UserName || ntlmCredential.Password != networkCredential.Password)
+			NetworkCredential credential = request.Credentials.GetCredential(request.RequestUri, "NTLM");
+			if (ntlmCredential.Domain != credential.Domain || ntlmCredential.UserName != credential.UserName || ntlmCredential.Password != credential.Password)
 			{
 				flag = true;
 			}
@@ -93,41 +91,46 @@ namespace System.Net
 			}
 		}
 
-		private WebConnectionGroup.ConnectionState FindIdleConnection()
+		private WebConnection CreateOrReuseConnection(HttpWebRequest request)
 		{
-			foreach (WebConnectionGroup.ConnectionState connectionState in this.connections)
+			int num = this.connections.Count;
+			WebConnection webConnection;
+			for (int i = 0; i < num; i++)
 			{
-				if (!connectionState.Busy)
+				WeakReference weakReference = this.connections[i] as WeakReference;
+				webConnection = weakReference.Target as WebConnection;
+				if (webConnection == null)
 				{
-					this.connections.Remove(connectionState);
-					this.connections.AddFirst(connectionState);
-					return connectionState;
+					this.connections.RemoveAt(i);
+					num--;
+					i--;
+				}
+				else if (!webConnection.Busy)
+				{
+					WebConnectionGroup.PrepareSharingNtlm(webConnection, request);
+					return webConnection;
 				}
 			}
-			return null;
-		}
-
-		private WebConnection CreateOrReuseConnection(HttpWebRequest request, out bool created)
-		{
-			WebConnectionGroup.ConnectionState connectionState = this.FindIdleConnection();
-			if (connectionState != null)
+			if (this.sPoint.ConnectionLimit > num)
 			{
-				created = false;
-				WebConnectionGroup.PrepareSharingNtlm(connectionState.Connection, request);
-				return connectionState.Connection;
+				webConnection = new WebConnection(this, this.sPoint);
+				this.connections.Add(new WeakReference(webConnection));
+				return webConnection;
 			}
-			if (this.sPoint.ConnectionLimit > this.connections.Count || this.connections.Count == 0)
+			if (this.rnd == null)
 			{
-				created = true;
-				connectionState = new WebConnectionGroup.ConnectionState(this);
-				this.connections.AddFirst(connectionState);
-				return connectionState.Connection;
+				this.rnd = new Random();
 			}
-			created = false;
-			connectionState = this.connections.Last.Value;
-			this.connections.Remove(connectionState);
-			this.connections.AddFirst(connectionState);
-			return connectionState.Connection;
+			int num2 = ((num <= 1) ? 0 : this.rnd.Next(0, num - 1));
+			WeakReference weakReference2 = (WeakReference)this.connections[num2];
+			webConnection = weakReference2.Target as WebConnection;
+			if (webConnection == null)
+			{
+				webConnection = new WebConnection(this, this.sPoint);
+				this.connections.RemoveAt(num2);
+				this.connections.Add(new WeakReference(webConnection));
+			}
+			return webConnection;
 		}
 
 		public string Name
@@ -146,150 +149,14 @@ namespace System.Net
 			}
 		}
 
-		internal bool TryRecycle(TimeSpan maxIdleTime, ref DateTime idleSince)
-		{
-			DateTime utcNow = DateTime.UtcNow;
-			bool flag2;
-			for (;;)
-			{
-				List<WebConnection> list = null;
-				ServicePoint servicePoint = this.sPoint;
-				lock (servicePoint)
-				{
-					if (this.closing)
-					{
-						idleSince = DateTime.MinValue;
-						return true;
-					}
-					int num = 0;
-					LinkedListNode<WebConnectionGroup.ConnectionState> linkedListNode = this.connections.First;
-					while (linkedListNode != null)
-					{
-						WebConnectionGroup.ConnectionState value = linkedListNode.Value;
-						LinkedListNode<WebConnectionGroup.ConnectionState> linkedListNode2 = linkedListNode;
-						linkedListNode = linkedListNode.Next;
-						num++;
-						if (!value.Busy)
-						{
-							if (num <= this.sPoint.ConnectionLimit && utcNow - value.IdleSince < maxIdleTime)
-							{
-								if (value.IdleSince > idleSince)
-								{
-									idleSince = value.IdleSince;
-								}
-							}
-							else
-							{
-								if (list == null)
-								{
-									list = new List<WebConnection>();
-								}
-								list.Add(value.Connection);
-								this.connections.Remove(linkedListNode2);
-							}
-						}
-					}
-					flag2 = this.connections.Count == 0;
-				}
-				if (list == null)
-				{
-					break;
-				}
-				using (List<WebConnection>.Enumerator enumerator = list.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						WebConnection webConnection = enumerator.Current;
-						webConnection.Close(false);
-					}
-					continue;
-				}
-				bool flag3;
-				return flag3;
-			}
-			return flag2;
-		}
-
 		private ServicePoint sPoint;
 
 		private string name;
 
-		private LinkedList<WebConnectionGroup.ConnectionState> connections;
+		private ArrayList connections;
+
+		private Random rnd;
 
 		private Queue queue;
-
-		private bool closing;
-
-		private class ConnectionState : IWebConnectionState
-		{
-			public WebConnection Connection { get; private set; }
-
-			public WebConnectionGroup Group { get; private set; }
-
-			public ServicePoint ServicePoint
-			{
-				get
-				{
-					return this.Group.sPoint;
-				}
-			}
-
-			public bool Busy
-			{
-				get
-				{
-					return this.busy;
-				}
-			}
-
-			public DateTime IdleSince
-			{
-				get
-				{
-					return this.idleSince;
-				}
-			}
-
-			public bool TrySetBusy()
-			{
-				ServicePoint servicePoint = this.ServicePoint;
-				bool flag2;
-				lock (servicePoint)
-				{
-					if (this.busy)
-					{
-						flag2 = false;
-					}
-					else
-					{
-						this.busy = true;
-						this.idleSince = DateTime.UtcNow + TimeSpan.FromDays(3650.0);
-						flag2 = true;
-					}
-				}
-				return flag2;
-			}
-
-			public void SetIdle()
-			{
-				ServicePoint servicePoint = this.ServicePoint;
-				lock (servicePoint)
-				{
-					this.busy = false;
-					this.idleSince = DateTime.UtcNow;
-				}
-			}
-
-			public ConnectionState(WebConnectionGroup group)
-			{
-				this.Group = group;
-				this.idleSince = DateTime.UtcNow;
-				this.Connection = new WebConnection(this, group.sPoint);
-			}
-
-			private bool busy;
-
-			private DateTime idleSince;
-		}
 	}
 }

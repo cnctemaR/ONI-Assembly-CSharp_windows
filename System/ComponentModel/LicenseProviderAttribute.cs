@@ -6,29 +6,25 @@ namespace System.ComponentModel
 	public sealed class LicenseProviderAttribute : Attribute
 	{
 		public LicenseProviderAttribute()
-			: this(null)
 		{
+			this.Provider = null;
 		}
 
 		public LicenseProviderAttribute(string typeName)
 		{
-			this.licenseProviderName = typeName;
+			this.Provider = Type.GetType(typeName, false);
 		}
 
 		public LicenseProviderAttribute(Type type)
 		{
-			this.licenseProviderType = type;
+			this.Provider = type;
 		}
 
 		public Type LicenseProvider
 		{
 			get
 			{
-				if (this.licenseProviderType == null && this.licenseProviderName != null)
-				{
-					this.licenseProviderType = Type.GetType(this.licenseProviderName);
-				}
-				return this.licenseProviderType;
+				return this.Provider;
 			}
 		}
 
@@ -36,41 +32,22 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				string fullName = this.licenseProviderName;
-				if (fullName == null && this.licenseProviderType != null)
-				{
-					fullName = this.licenseProviderType.FullName;
-				}
-				return base.GetType().FullName + fullName;
+				return base.ToString() + ((this.Provider == null) ? null : this.Provider.ToString());
 			}
 		}
 
-		public override bool Equals(object value)
+		public override bool Equals(object obj)
 		{
-			if (value is LicenseProviderAttribute && value != null)
-			{
-				Type licenseProvider = ((LicenseProviderAttribute)value).LicenseProvider;
-				if (licenseProvider == this.LicenseProvider)
-				{
-					return true;
-				}
-				if (licenseProvider != null && licenseProvider.Equals(this.LicenseProvider))
-				{
-					return true;
-				}
-			}
-			return false;
+			return obj is LicenseProviderAttribute && (obj == this || ((LicenseProviderAttribute)obj).LicenseProvider.Equals(this.Provider));
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.Provider.GetHashCode();
 		}
 
+		private Type Provider;
+
 		public static readonly LicenseProviderAttribute Default = new LicenseProviderAttribute();
-
-		private Type licenseProviderType;
-
-		private string licenseProviderName;
 	}
 }

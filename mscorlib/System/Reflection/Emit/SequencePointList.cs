@@ -122,12 +122,12 @@ namespace System.Reflection.Emit
 			this.count++;
 		}
 
+		private const int arrayGrow = 10;
+
 		private ISymbolDocumentWriter doc;
 
 		private SequencePoint[] points;
 
 		private int count;
-
-		private const int arrayGrow = 10;
 	}
 }

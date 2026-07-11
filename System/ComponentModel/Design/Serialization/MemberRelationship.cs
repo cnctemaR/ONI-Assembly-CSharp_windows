@@ -6,14 +6,6 @@ namespace System.ComponentModel.Design.Serialization
 	{
 		public MemberRelationship(object owner, MemberDescriptor member)
 		{
-			if (owner == null)
-			{
-				throw new ArgumentNullException("owner");
-			}
-			if (member == null)
-			{
-				throw new ArgumentNullException("member");
-			}
 			this._owner = owner;
 			this._member = member;
 		}
@@ -26,14 +18,6 @@ namespace System.ComponentModel.Design.Serialization
 			}
 		}
 
-		public MemberDescriptor Member
-		{
-			get
-			{
-				return this._member;
-			}
-		}
-
 		public object Owner
 		{
 			get
@@ -42,23 +26,26 @@ namespace System.ComponentModel.Design.Serialization
 			}
 		}
 
-		public override bool Equals(object obj)
+		public MemberDescriptor Member
 		{
-			if (!(obj is MemberRelationship))
+			get
 			{
-				return false;
+				return this._member;
 			}
-			MemberRelationship memberRelationship = (MemberRelationship)obj;
-			return memberRelationship.Owner == this.Owner && memberRelationship.Member == this.Member;
 		}
 
 		public override int GetHashCode()
 		{
-			if (this._owner == null)
+			if (this._owner != null && this._member != null)
 			{
-				return base.GetHashCode();
+				return this._member.GetHashCode() ^ this._owner.GetHashCode();
 			}
-			return this._owner.GetHashCode() ^ this._member.GetHashCode();
+			return base.GetHashCode();
+		}
+
+		public override bool Equals(object o)
+		{
+			return o is MemberRelationship && (MemberRelationship)o == this;
 		}
 
 		public static bool operator ==(MemberRelationship left, MemberRelationship right)
@@ -71,10 +58,10 @@ namespace System.ComponentModel.Design.Serialization
 			return !(left == right);
 		}
 
+		public static readonly MemberRelationship Empty = default(MemberRelationship);
+
 		private object _owner;
 
 		private MemberDescriptor _member;
-
-		public static readonly MemberRelationship Empty;
 	}
 }

@@ -11,7 +11,7 @@ namespace Mono.Security.Protocol.Ntlm
 		{
 			this._domain = Environment.UserDomainName;
 			this._host = Environment.MachineName;
-			base.Flags = NtlmFlags.NegotiateUnicode | NtlmFlags.NegotiateOem | NtlmFlags.RequestTarget | NtlmFlags.NegotiateNtlm | NtlmFlags.NegotiateDomainSupplied | NtlmFlags.NegotiateWorkstationSupplied | NtlmFlags.NegotiateAlwaysSign;
+			base.Flags = NtlmFlags.NegotiateUnicode | NtlmFlags.NegotiateOem | NtlmFlags.NegotiateNtlm | NtlmFlags.NegotiateDomainSupplied | NtlmFlags.NegotiateWorkstationSupplied | NtlmFlags.NegotiateAlwaysSign;
 		}
 
 		public Type1Message(byte[] message)
@@ -28,18 +28,6 @@ namespace Mono.Security.Protocol.Ntlm
 			}
 			set
 			{
-				if (value == null)
-				{
-					value = "";
-				}
-				if (value == "")
-				{
-					base.Flags &= ~NtlmFlags.NegotiateDomainSupplied;
-				}
-				else
-				{
-					base.Flags |= NtlmFlags.NegotiateDomainSupplied;
-				}
 				this._domain = value;
 			}
 		}
@@ -52,18 +40,6 @@ namespace Mono.Security.Protocol.Ntlm
 			}
 			set
 			{
-				if (value == null)
-				{
-					value = "";
-				}
-				if (value == "")
-				{
-					base.Flags &= ~NtlmFlags.NegotiateWorkstationSupplied;
-				}
-				else
-				{
-					base.Flags |= NtlmFlags.NegotiateWorkstationSupplied;
-				}
 				this._host = value;
 			}
 		}

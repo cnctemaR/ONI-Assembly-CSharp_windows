@@ -3,7 +3,7 @@
 namespace System.Xml
 {
 	[Flags]
-	public enum NamespaceHandling
+	internal enum NamespaceHandling
 	{
 		Default = 0,
 		OmitDuplicates = 1

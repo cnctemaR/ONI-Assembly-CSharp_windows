@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeTypeDelegate : CodeTypeDeclaration
 	{
 		public CodeTypeDelegate()
 		{
-			base.TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
-			base.TypeAttributes |= TypeAttributes.NotPublic;
-			base.BaseTypes.Clear();
 			base.BaseTypes.Add(new CodeTypeReference("System.Delegate"));
 		}
 
@@ -20,25 +19,36 @@ namespace System.CodeDom
 			base.Name = name;
 		}
 
+		public CodeParameterDeclarationExpressionCollection Parameters
+		{
+			get
+			{
+				if (this.parameters == null)
+				{
+					this.parameters = new CodeParameterDeclarationExpressionCollection();
+				}
+				return this.parameters;
+			}
+		}
+
 		public CodeTypeReference ReturnType
 		{
 			get
 			{
-				CodeTypeReference codeTypeReference;
-				if ((codeTypeReference = this._returnType) == null)
+				if (this.returnType == null)
 				{
-					codeTypeReference = (this._returnType = new CodeTypeReference(""));
+					this.returnType = new CodeTypeReference(string.Empty);
 				}
-				return codeTypeReference;
+				return this.returnType;
 			}
 			set
 			{
-				this._returnType = value;
+				this.returnType = value;
 			}
 		}
 
-		public CodeParameterDeclarationExpressionCollection Parameters { get; } = new CodeParameterDeclarationExpressionCollection();
+		private CodeParameterDeclarationExpressionCollection parameters;
 
-		private CodeTypeReference _returnType;
+		private CodeTypeReference returnType;
 	}
 }

@@ -5,13 +5,13 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.All)]
 	public sealed class ExtenderProvidedPropertyAttribute : Attribute
 	{
-		internal static ExtenderProvidedPropertyAttribute Create(PropertyDescriptor extenderProperty, Type receiverType, IExtenderProvider provider)
+		internal static ExtenderProvidedPropertyAttribute CreateAttribute(PropertyDescriptor extenderProperty, IExtenderProvider provider, Type receiverType)
 		{
 			return new ExtenderProvidedPropertyAttribute
 			{
-				extenderProperty = extenderProperty,
-				receiverType = receiverType,
-				provider = provider
+				extender = extenderProperty,
+				receiver = receiverType,
+				extenderProvider = provider
 			};
 		}
 
@@ -19,7 +19,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.extenderProperty;
+				return this.extender;
 			}
 		}
 
@@ -27,7 +27,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.provider;
+				return this.extenderProvider;
 			}
 		}
 
@@ -35,34 +35,29 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.receiverType;
+				return this.receiver;
 			}
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj == this)
-			{
-				return true;
-			}
-			ExtenderProvidedPropertyAttribute extenderProvidedPropertyAttribute = obj as ExtenderProvidedPropertyAttribute;
-			return extenderProvidedPropertyAttribute != null && extenderProvidedPropertyAttribute.extenderProperty.Equals(this.extenderProperty) && extenderProvidedPropertyAttribute.provider.Equals(this.provider) && extenderProvidedPropertyAttribute.receiverType.Equals(this.receiverType);
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.receiverType == null;
+			return this.extender == null && this.extenderProvider == null && this.receiver == null;
 		}
 
-		private PropertyDescriptor extenderProperty;
+		public override bool Equals(object obj)
+		{
+			return obj is ExtenderProvidedPropertyAttribute && (obj == this || (((ExtenderProvidedPropertyAttribute)obj).ExtenderProperty.Equals(this.extender) && ((ExtenderProvidedPropertyAttribute)obj).Provider.Equals(this.extenderProvider) && ((ExtenderProvidedPropertyAttribute)obj).ReceiverType.Equals(this.receiver)));
+		}
 
-		private IExtenderProvider provider;
+		public override int GetHashCode()
+		{
+			return this.extender.GetHashCode() ^ this.extenderProvider.GetHashCode() ^ this.receiver.GetHashCode();
+		}
 
-		private Type receiverType;
+		private PropertyDescriptor extender;
+
+		private IExtenderProvider extenderProvider;
+
+		private Type receiver;
 	}
 }

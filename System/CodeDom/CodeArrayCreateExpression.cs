@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeArrayCreateExpression : CodeExpression
 	{
@@ -9,74 +12,73 @@ namespace System.CodeDom
 		{
 		}
 
+		public CodeArrayCreateExpression(CodeTypeReference createType, CodeExpression size)
+		{
+			this.createType = createType;
+			this.sizeExpression = size;
+		}
+
 		public CodeArrayCreateExpression(CodeTypeReference createType, params CodeExpression[] initializers)
 		{
-			this._createType = createType;
-			this._initializers.AddRange(initializers);
-		}
-
-		public CodeArrayCreateExpression(string createType, params CodeExpression[] initializers)
-		{
-			this._createType = new CodeTypeReference(createType);
-			this._initializers.AddRange(initializers);
-		}
-
-		public CodeArrayCreateExpression(Type createType, params CodeExpression[] initializers)
-		{
-			this._createType = new CodeTypeReference(createType);
-			this._initializers.AddRange(initializers);
+			this.createType = createType;
+			this.Initializers.AddRange(initializers);
 		}
 
 		public CodeArrayCreateExpression(CodeTypeReference createType, int size)
 		{
-			this._createType = createType;
-			this.Size = size;
-		}
-
-		public CodeArrayCreateExpression(string createType, int size)
-		{
-			this._createType = new CodeTypeReference(createType);
-			this.Size = size;
-		}
-
-		public CodeArrayCreateExpression(Type createType, int size)
-		{
-			this._createType = new CodeTypeReference(createType);
-			this.Size = size;
-		}
-
-		public CodeArrayCreateExpression(CodeTypeReference createType, CodeExpression size)
-		{
-			this._createType = createType;
-			this.SizeExpression = size;
+			this.createType = createType;
+			this.size = size;
 		}
 
 		public CodeArrayCreateExpression(string createType, CodeExpression size)
 		{
-			this._createType = new CodeTypeReference(createType);
-			this.SizeExpression = size;
+			this.createType = new CodeTypeReference(createType);
+			this.sizeExpression = size;
+		}
+
+		public CodeArrayCreateExpression(string createType, params CodeExpression[] initializers)
+		{
+			this.createType = new CodeTypeReference(createType);
+			this.Initializers.AddRange(initializers);
+		}
+
+		public CodeArrayCreateExpression(string createType, int size)
+		{
+			this.createType = new CodeTypeReference(createType);
+			this.size = size;
 		}
 
 		public CodeArrayCreateExpression(Type createType, CodeExpression size)
 		{
-			this._createType = new CodeTypeReference(createType);
-			this.SizeExpression = size;
+			this.createType = new CodeTypeReference(createType);
+			this.sizeExpression = size;
+		}
+
+		public CodeArrayCreateExpression(Type createType, params CodeExpression[] initializers)
+		{
+			this.createType = new CodeTypeReference(createType);
+			this.Initializers.AddRange(initializers);
+		}
+
+		public CodeArrayCreateExpression(Type createType, int size)
+		{
+			this.createType = new CodeTypeReference(createType);
+			this.size = size;
 		}
 
 		public CodeTypeReference CreateType
 		{
 			get
 			{
-				CodeTypeReference codeTypeReference;
-				if ((codeTypeReference = this._createType) == null)
+				if (this.createType == null)
 				{
-					codeTypeReference = (this._createType = new CodeTypeReference(""));
+					this.createType = new CodeTypeReference(typeof(void));
 				}
-				return codeTypeReference;
+				return this.createType;
 			}
 			set
 			{
-				this._createType = value;
+				this.createType = value;
 			}
 		}
 
@@ -84,16 +86,49 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return this._initializers;
+				if (this.initializers == null)
+				{
+					this.initializers = new CodeExpressionCollection();
+				}
+				return this.initializers;
 			}
 		}
 
-		public int Size { get; set; }
+		public CodeExpression SizeExpression
+		{
+			get
+			{
+				return this.sizeExpression;
+			}
+			set
+			{
+				this.sizeExpression = value;
+			}
+		}
 
-		public CodeExpression SizeExpression { get; set; }
+		public int Size
+		{
+			get
+			{
+				return this.size;
+			}
+			set
+			{
+				this.size = value;
+			}
+		}
 
-		private readonly CodeExpressionCollection _initializers = new CodeExpressionCollection();
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
 
-		private CodeTypeReference _createType;
+		private CodeTypeReference createType;
+
+		private CodeExpressionCollection initializers;
+
+		private CodeExpression sizeExpression;
+
+		private int size;
 	}
 }

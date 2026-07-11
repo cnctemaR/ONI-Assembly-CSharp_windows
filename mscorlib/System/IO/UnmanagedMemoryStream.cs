@@ -1,165 +1,33 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.IO
 {
+	[CLSCompliant(false)]
 	public class UnmanagedMemoryStream : Stream
 	{
-		[SecuritySafeCritical]
 		protected UnmanagedMemoryStream()
 		{
-			this._mem = null;
-			this._isOpen = false;
+			this.closed = true;
 		}
 
-		[SecuritySafeCritical]
-		public UnmanagedMemoryStream(SafeBuffer buffer, long offset, long length)
-		{
-			this.Initialize(buffer, offset, length, FileAccess.Read, false);
-		}
-
-		[SecuritySafeCritical]
-		public UnmanagedMemoryStream(SafeBuffer buffer, long offset, long length, FileAccess access)
-		{
-			this.Initialize(buffer, offset, length, access, false);
-		}
-
-		[SecurityCritical]
-		internal UnmanagedMemoryStream(SafeBuffer buffer, long offset, long length, FileAccess access, bool skipSecurityCheck)
-		{
-			this.Initialize(buffer, offset, length, access, skipSecurityCheck);
-		}
-
-		[SecuritySafeCritical]
-		protected void Initialize(SafeBuffer buffer, long offset, long length, FileAccess access)
-		{
-			this.Initialize(buffer, offset, length, access, false);
-		}
-
-		[SecurityCritical]
-		internal unsafe void Initialize(SafeBuffer buffer, long offset, long length, FileAccess access, bool skipSecurityCheck)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer");
-			}
-			if (offset < 0L)
-			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (length < 0L)
-			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.ByteLength < (ulong)(offset + length))
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were greater than the size of the SafeBuffer."));
-			}
-			if (access < FileAccess.Read || access > FileAccess.ReadWrite)
-			{
-				throw new ArgumentOutOfRangeException("access");
-			}
-			if (this._isOpen)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("The method cannot be called twice on the same instance."));
-			}
-			byte* ptr = null;
-			RuntimeHelpers.PrepareConstrainedRegions();
-			try
-			{
-				buffer.AcquirePointer(ref ptr);
-				if (ptr + offset + length < ptr)
-				{
-					throw new ArgumentException(Environment.GetResourceString("The UnmanagedMemoryStream capacity would wrap around the high end of the address space."));
-				}
-			}
-			finally
-			{
-				if (ptr != null)
-				{
-					buffer.ReleasePointer();
-				}
-			}
-			this._offset = offset;
-			this._buffer = buffer;
-			this._length = length;
-			this._capacity = length;
-			this._access = access;
-			this._isOpen = true;
-		}
-
-		[SecurityCritical]
-		[CLSCompliant(false)]
 		public unsafe UnmanagedMemoryStream(byte* pointer, long length)
 		{
-			this.Initialize(pointer, length, length, FileAccess.Read, false);
+			this.Initialize(pointer, length, length, FileAccess.Read);
 		}
 
-		[SecurityCritical]
-		[CLSCompliant(false)]
 		public unsafe UnmanagedMemoryStream(byte* pointer, long length, long capacity, FileAccess access)
 		{
-			this.Initialize(pointer, length, capacity, access, false);
+			this.Initialize(pointer, length, capacity, access);
 		}
 
-		[SecurityCritical]
-		internal unsafe UnmanagedMemoryStream(byte* pointer, long length, long capacity, FileAccess access, bool skipSecurityCheck)
-		{
-			this.Initialize(pointer, length, capacity, access, skipSecurityCheck);
-		}
-
-		[SecurityCritical]
-		[CLSCompliant(false)]
-		protected unsafe void Initialize(byte* pointer, long length, long capacity, FileAccess access)
-		{
-			this.Initialize(pointer, length, capacity, access, false);
-		}
-
-		[SecurityCritical]
-		internal unsafe void Initialize(byte* pointer, long length, long capacity, FileAccess access, bool skipSecurityCheck)
-		{
-			if (pointer == null)
-			{
-				throw new ArgumentNullException("pointer");
-			}
-			if (length < 0L || capacity < 0L)
-			{
-				throw new ArgumentOutOfRangeException((length < 0L) ? "length" : "capacity", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (length > capacity)
-			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("The length cannot be greater than the capacity."));
-			}
-			if (pointer + capacity < pointer)
-			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("The UnmanagedMemoryStream capacity would wrap around the high end of the address space."));
-			}
-			if (access < FileAccess.Read || access > FileAccess.ReadWrite)
-			{
-				throw new ArgumentOutOfRangeException("access", Environment.GetResourceString("Enum value was out of legal range."));
-			}
-			if (this._isOpen)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("The method cannot be called twice on the same instance."));
-			}
-			this._mem = pointer;
-			this._offset = 0L;
-			this._length = length;
-			this._capacity = capacity;
-			this._access = access;
-			this._isOpen = true;
-		}
+		internal event EventHandler Closed;
 
 		public override bool CanRead
 		{
 			get
 			{
-				return this._isOpen && (this._access & FileAccess.Read) > (FileAccess)0;
+				return !this.closed && this.fileaccess != FileAccess.Write;
 			}
 		}
 
@@ -167,7 +35,7 @@ namespace System.IO
 		{
 			get
 			{
-				return this._isOpen;
+				return !this.closed;
 			}
 		}
 
@@ -175,56 +43,7 @@ namespace System.IO
 		{
 			get
 			{
-				return this._isOpen && (this._access & FileAccess.Write) > (FileAccess)0;
-			}
-		}
-
-		[SecuritySafeCritical]
-		protected override void Dispose(bool disposing)
-		{
-			this._isOpen = false;
-			this._mem = null;
-			base.Dispose(disposing);
-		}
-
-		public override void Flush()
-		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
-		}
-
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override Task FlushAsync(CancellationToken cancellationToken)
-		{
-			if (cancellationToken.IsCancellationRequested)
-			{
-				return Task.FromCancellation(cancellationToken);
-			}
-			Task task;
-			try
-			{
-				this.Flush();
-				task = Task.CompletedTask;
-			}
-			catch (Exception ex)
-			{
-				task = Task.FromException(ex);
-			}
-			return task;
-		}
-
-		public override long Length
-		{
-			get
-			{
-				if (!this._isOpen)
-				{
-					__Error.StreamIsClosed();
-				}
-				return Interlocked.Read(ref this._length);
+				return !this.closed && this.fileaccess != FileAccess.Read;
 			}
 		}
 
@@ -232,11 +51,23 @@ namespace System.IO
 		{
 			get
 			{
-				if (!this._isOpen)
+				if (this.closed)
 				{
-					__Error.StreamIsClosed();
+					throw new ObjectDisposedException("The stream is closed");
 				}
-				return this._capacity;
+				return this.capacity;
+			}
+		}
+
+		public override long Length
+		{
+			get
+			{
+				if (this.closed)
+				{
+					throw new ObjectDisposedException("The stream is closed");
+				}
+				return this.length;
 			}
 		}
 
@@ -244,508 +75,302 @@ namespace System.IO
 		{
 			get
 			{
-				if (!this.CanSeek)
+				if (this.closed)
 				{
-					__Error.StreamIsClosed();
+					throw new ObjectDisposedException("The stream is closed");
 				}
-				return Interlocked.Read(ref this._position);
+				return this.current_position;
 			}
-			[SecuritySafeCritical]
 			set
 			{
+				if (this.closed)
+				{
+					throw new ObjectDisposedException("The stream is closed");
+				}
 				if (value < 0L)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Non-negative number required."));
+					throw new ArgumentOutOfRangeException("value", "Non-negative number required.");
 				}
-				if (!this.CanSeek)
+				if (value > 2147483647L)
 				{
-					__Error.StreamIsClosed();
+					throw new ArgumentOutOfRangeException("value", "The position is larger than Int32.MaxValue.");
 				}
-				Interlocked.Exchange(ref this._position, value);
+				this.current_position = value;
 			}
 		}
 
-		[CLSCompliant(false)]
 		public unsafe byte* PositionPointer
 		{
-			[SecurityCritical]
 			get
 			{
-				if (this._buffer != null)
+				if (this.closed)
 				{
-					throw new NotSupportedException(Environment.GetResourceString("This operation is not supported for an UnmanagedMemoryStream created from a SafeBuffer."));
+					throw new ObjectDisposedException("The stream is closed");
 				}
-				long num = Interlocked.Read(ref this._position);
-				if (num > this._capacity)
+				if (this.current_position >= this.length)
 				{
-					throw new IndexOutOfRangeException(Environment.GetResourceString("Unmanaged memory stream position was beyond the capacity of the stream."));
+					throw new IndexOutOfRangeException("value");
 				}
-				byte* ptr = this._mem + num;
-				if (!this._isOpen)
-				{
-					__Error.StreamIsClosed();
-				}
-				return ptr;
+				return (byte*)(void*)this.initial_pointer + this.current_position;
 			}
-			[SecurityCritical]
 			set
 			{
-				if (this._buffer != null)
+				if (this.closed)
 				{
-					throw new NotSupportedException(Environment.GetResourceString("This operation is not supported for an UnmanagedMemoryStream created from a SafeBuffer."));
+					throw new ObjectDisposedException("The stream is closed");
 				}
-				if (!this._isOpen)
+				if (value < (byte*)(void*)this.initial_pointer)
 				{
-					__Error.StreamIsClosed();
+					throw new IOException("Address is below the inital address");
 				}
-				if (new IntPtr((long)(value - this._mem)).ToInt64() > 9223372036854775807L)
-				{
-					throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("UnmanagedMemoryStream length must be non-negative and less than 2^63 - 1 - baseAddress."));
-				}
-				if (value < this._mem)
-				{
-					throw new IOException(Environment.GetResourceString("An attempt was made to move the position before the beginning of the stream."));
-				}
-				Interlocked.Exchange(ref this._position, (long)(value - this._mem));
+				this.Position = (long)(value - (void*)this.initial_pointer);
 			}
 		}
 
-		internal unsafe byte* Pointer
+		public override int Read([In] [Out] byte[] buffer, int offset, int count)
 		{
-			[SecurityCritical]
-			get
+			if (this.closed)
 			{
-				if (this._buffer != null)
-				{
-					throw new NotSupportedException(Environment.GetResourceString("This operation is not supported for an UnmanagedMemoryStream created from a SafeBuffer."));
-				}
-				return this._mem;
+				throw new ObjectDisposedException("The stream is closed");
 			}
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int Read([In] [Out] byte[] buffer, int offset, int count)
-		{
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("The length of the buffer array minus the offset parameter is less than the count parameter");
 			}
-			if (!this._isOpen)
+			if (this.fileaccess == FileAccess.Write)
 			{
-				__Error.StreamIsClosed();
+				throw new NotSupportedException("Stream does not support reading");
 			}
-			if (!this.CanRead)
-			{
-				__Error.ReadNotSupported();
-			}
-			long num = Interlocked.Read(ref this._position);
-			long num2 = Interlocked.Read(ref this._length) - num;
-			if (num2 > (long)count)
-			{
-				num2 = (long)count;
-			}
-			if (num2 <= 0L)
+			if (this.current_position >= this.length)
 			{
 				return 0;
 			}
-			int num3 = (int)num2;
-			if (num3 < 0)
-			{
-				num3 = 0;
-			}
-			if (this._buffer != null)
-			{
-				byte* ptr = null;
-				RuntimeHelpers.PrepareConstrainedRegions();
-				try
-				{
-					this._buffer.AcquirePointer(ref ptr);
-					Buffer.Memcpy(buffer, offset, ptr + num + this._offset, 0, num3);
-					goto IL_0105;
-				}
-				finally
-				{
-					if (ptr != null)
-					{
-						this._buffer.ReleasePointer();
-					}
-				}
-			}
-			Buffer.Memcpy(buffer, offset, this._mem + num, 0, num3);
-			IL_0105:
-			Interlocked.Exchange(ref this._position, num + num2);
-			return num3;
+			int num = ((this.current_position + (long)count >= this.length) ? ((int)(this.length - this.current_position)) : count);
+			Marshal.Copy(new IntPtr(this.initial_pointer.ToInt64() + this.current_position), buffer, offset, num);
+			this.current_position += (long)num;
+			return num;
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		public override int ReadByte()
 		{
-			if (buffer == null)
+			if (this.closed)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ObjectDisposedException("The stream is closed");
 			}
-			if (offset < 0)
+			if (this.fileaccess == FileAccess.Write)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new NotSupportedException("Stream does not support reading");
 			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.Length - offset < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (cancellationToken.IsCancellationRequested)
-			{
-				return Task.FromCancellation<int>(cancellationToken);
-			}
-			Task<int> task;
-			try
-			{
-				int num = this.Read(buffer, offset, count);
-				Task<int> lastReadTask = this._lastReadTask;
-				Task<int> task2;
-				if (lastReadTask == null || lastReadTask.Result != num)
-				{
-					task = (this._lastReadTask = Task.FromResult<int>(num));
-					task2 = task;
-				}
-				else
-				{
-					task2 = lastReadTask;
-				}
-				task = task2;
-			}
-			catch (Exception ex)
-			{
-				task = Task.FromException<int>(ex);
-			}
-			return task;
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int ReadByte()
-		{
-			if (!this._isOpen)
-			{
-				__Error.StreamIsClosed();
-			}
-			if (!this.CanRead)
-			{
-				__Error.ReadNotSupported();
-			}
-			long num = Interlocked.Read(ref this._position);
-			long num2 = Interlocked.Read(ref this._length);
-			if (num >= num2)
+			if (this.current_position >= this.length)
 			{
 				return -1;
 			}
-			Interlocked.Exchange(ref this._position, num + 1L);
-			if (this._buffer != null)
-			{
-				byte* ptr = null;
-				RuntimeHelpers.PrepareConstrainedRegions();
-				try
-				{
-					this._buffer.AcquirePointer(ref ptr);
-					return (int)(ptr + num)[this._offset];
-				}
-				finally
-				{
-					if (ptr != null)
-					{
-						this._buffer.ReleasePointer();
-					}
-				}
-			}
-			return (int)this._mem[num];
+			IntPtr intPtr = this.initial_pointer;
+			long num;
+			this.current_position = (num = this.current_position) + 1L;
+			return (int)Marshal.ReadByte(intPtr, (int)num);
 		}
 
 		public override long Seek(long offset, SeekOrigin loc)
 		{
-			if (!this._isOpen)
+			if (this.closed)
 			{
-				__Error.StreamIsClosed();
+				throw new ObjectDisposedException("The stream is closed");
 			}
-			if (offset > 9223372036854775807L)
-			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("UnmanagedMemoryStream length must be non-negative and less than 2^63 - 1 - baseAddress."));
-			}
+			long num;
 			switch (loc)
 			{
 			case SeekOrigin.Begin:
 				if (offset < 0L)
 				{
-					throw new IOException(Environment.GetResourceString("An attempt was made to move the position before the beginning of the stream."));
+					throw new IOException("An attempt was made to seek before the beginning of the stream");
 				}
-				Interlocked.Exchange(ref this._position, offset);
+				num = this.initial_position;
 				break;
 			case SeekOrigin.Current:
-			{
-				long num = Interlocked.Read(ref this._position);
-				if (offset + num < 0L)
-				{
-					throw new IOException(Environment.GetResourceString("An attempt was made to move the position before the beginning of the stream."));
-				}
-				Interlocked.Exchange(ref this._position, offset + num);
+				num = this.current_position;
 				break;
-			}
 			case SeekOrigin.End:
-			{
-				long num2 = Interlocked.Read(ref this._length);
-				if (num2 + offset < 0L)
-				{
-					throw new IOException(Environment.GetResourceString("An attempt was made to move the position before the beginning of the stream."));
-				}
-				Interlocked.Exchange(ref this._position, num2 + offset);
+				num = this.length;
 				break;
-			}
 			default:
-				throw new ArgumentException(Environment.GetResourceString("Invalid seek origin."));
+				throw new ArgumentException("Invalid SeekOrigin option");
 			}
-			return Interlocked.Read(ref this._position);
+			num += offset;
+			if (num < this.initial_position)
+			{
+				throw new IOException("An attempt was made to seek before the beginning of the stream");
+			}
+			this.current_position = num;
+			return this.current_position;
 		}
 
-		[SecuritySafeCritical]
 		public override void SetLength(long value)
 		{
+			if (this.closed)
+			{
+				throw new ObjectDisposedException("The stream is closed");
+			}
 			if (value < 0L)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("length", "Non-negative number required.");
 			}
-			if (this._buffer != null)
+			if (value > this.capacity)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported for an UnmanagedMemoryStream created from a SafeBuffer."));
+				throw new IOException("Unable to expand length of this stream beyond its capacity.");
 			}
-			if (!this._isOpen)
+			if (this.fileaccess == FileAccess.Read)
 			{
-				__Error.StreamIsClosed();
+				throw new NotSupportedException("Stream does not support writing.");
 			}
-			if (!this.CanWrite)
+			this.length = value;
+			if (this.length < this.current_position)
 			{
-				__Error.WriteNotSupported();
-			}
-			if (value > this._capacity)
-			{
-				throw new IOException(Environment.GetResourceString("Unable to expand length of this stream beyond its capacity."));
-			}
-			long num = Interlocked.Read(ref this._position);
-			long num2 = Interlocked.Read(ref this._length);
-			if (value > num2)
-			{
-				Buffer.ZeroMemory(this._mem + num2, value - num2);
-			}
-			Interlocked.Exchange(ref this._length, value);
-			if (num > value)
-			{
-				Interlocked.Exchange(ref this._position, value);
+				this.current_position = this.length;
 			}
 		}
 
-		[SecuritySafeCritical]
-		public unsafe override void Write(byte[] buffer, int offset, int count)
+		public override void Flush()
 		{
+			if (this.closed)
+			{
+				throw new ObjectDisposedException("The stream is closed");
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			if (this.closed)
+			{
+				return;
+			}
+			this.closed = true;
+			if (this.Closed != null)
+			{
+				this.Closed(this, null);
+			}
+		}
+
+		public override void Write(byte[] buffer, int offset, int count)
+		{
+			if (this.closed)
+			{
+				throw new ObjectDisposedException("The stream is closed");
+			}
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("The buffer parameter is a null reference");
 			}
 			if (offset < 0)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("offset", "Non-negative number required.");
 			}
 			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("count", "Non-negative number required.");
 			}
 			if (buffer.Length - offset < count)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentException("The length of the buffer array minus the offset parameter is less than the count parameter");
 			}
-			if (!this._isOpen)
+			if (this.current_position > this.capacity - (long)count)
 			{
-				__Error.StreamIsClosed();
+				throw new NotSupportedException("Unable to expand length of this stream beyond its capacity.");
 			}
-			if (!this.CanWrite)
+			if (this.fileaccess == FileAccess.Read)
 			{
-				__Error.WriteNotSupported();
+				throw new NotSupportedException("Stream does not support writing.");
 			}
-			long num = Interlocked.Read(ref this._position);
-			long num2 = Interlocked.Read(ref this._length);
-			long num3 = num + (long)count;
-			if (num3 < 0L)
+			for (int i = 0; i < count; i++)
 			{
-				throw new IOException(Environment.GetResourceString("Stream was too long."));
+				IntPtr intPtr = this.initial_pointer;
+				long num;
+				this.current_position = (num = this.current_position) + 1L;
+				Marshal.WriteByte(intPtr, (int)num, buffer[offset + i]);
 			}
-			if (num3 > this._capacity)
+			if (this.current_position > this.length)
 			{
-				throw new NotSupportedException(Environment.GetResourceString("Unable to expand length of this stream beyond its capacity."));
+				this.length = this.current_position;
 			}
-			if (this._buffer == null)
-			{
-				if (num > num2)
-				{
-					Buffer.ZeroMemory(this._mem + num2, num - num2);
-				}
-				if (num3 > num2)
-				{
-					Interlocked.Exchange(ref this._length, num3);
-				}
-			}
-			if (this._buffer != null)
-			{
-				if (this._capacity - num < (long)count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Not enough space available in the buffer."));
-				}
-				byte* ptr = null;
-				RuntimeHelpers.PrepareConstrainedRegions();
-				try
-				{
-					this._buffer.AcquirePointer(ref ptr);
-					Buffer.Memcpy(ptr + num + this._offset, 0, buffer, offset, count);
-					goto IL_0168;
-				}
-				finally
-				{
-					if (ptr != null)
-					{
-						this._buffer.ReleasePointer();
-					}
-				}
-			}
-			Buffer.Memcpy(this._mem + num, 0, buffer, offset, count);
-			IL_0168:
-			Interlocked.Exchange(ref this._position, num3);
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+		public override void WriteByte(byte value)
 		{
-			if (buffer == null)
+			if (this.closed)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ObjectDisposedException("The stream is closed");
 			}
-			if (offset < 0)
+			if (this.current_position == this.capacity)
 			{
-				throw new ArgumentOutOfRangeException("offset", Environment.GetResourceString("Non-negative number required."));
+				throw new NotSupportedException("The current position is at the end of the capacity of the stream");
 			}
-			if (count < 0)
+			if (this.fileaccess == FileAccess.Read)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				throw new NotSupportedException("Stream does not support writing.");
 			}
-			if (buffer.Length - offset < count)
+			Marshal.WriteByte(this.initial_pointer, (int)this.current_position, value);
+			this.current_position += 1L;
+			if (this.current_position > this.length)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				this.length = this.current_position;
 			}
-			if (cancellationToken.IsCancellationRequested)
-			{
-				return Task.FromCancellation(cancellationToken);
-			}
-			Task task;
-			try
-			{
-				this.Write(buffer, offset, count);
-				task = Task.CompletedTask;
-			}
-			catch (Exception ex)
-			{
-				task = Task.FromException<int>(ex);
-			}
-			return task;
 		}
 
-		[SecuritySafeCritical]
-		public unsafe override void WriteByte(byte value)
+		protected unsafe void Initialize(byte* pointer, long length, long capacity, FileAccess access)
 		{
-			if (!this._isOpen)
+			if (pointer == null)
 			{
-				__Error.StreamIsClosed();
+				throw new ArgumentNullException("pointer");
 			}
-			if (!this.CanWrite)
+			if (length < 0L)
 			{
-				__Error.WriteNotSupported();
+				throw new ArgumentOutOfRangeException("length", "Non-negative number required.");
 			}
-			long num = Interlocked.Read(ref this._position);
-			long num2 = Interlocked.Read(ref this._length);
-			long num3 = num + 1L;
-			if (num >= num2)
+			if (capacity < 0L)
 			{
-				if (num3 < 0L)
-				{
-					throw new IOException(Environment.GetResourceString("Stream was too long."));
-				}
-				if (num3 > this._capacity)
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Unable to expand length of this stream beyond its capacity."));
-				}
-				if (this._buffer == null)
-				{
-					if (num > num2)
-					{
-						Buffer.ZeroMemory(this._mem + num2, num - num2);
-					}
-					Interlocked.Exchange(ref this._length, num3);
-				}
+				throw new ArgumentOutOfRangeException("capacity", "Non-negative number required.");
 			}
-			if (this._buffer != null)
+			if (length > capacity)
 			{
-				byte* ptr = null;
-				RuntimeHelpers.PrepareConstrainedRegions();
-				try
-				{
-					this._buffer.AcquirePointer(ref ptr);
-					(ptr + num)[this._offset] = value;
-					goto IL_00DC;
-				}
-				finally
-				{
-					if (ptr != null)
-					{
-						this._buffer.ReleasePointer();
-					}
-				}
+				throw new ArgumentOutOfRangeException("length", "The length cannot be greater than the capacity.");
 			}
-			this._mem[num] = value;
-			IL_00DC:
-			Interlocked.Exchange(ref this._position, num3);
+			if (access < FileAccess.Read || access > FileAccess.ReadWrite)
+			{
+				throw new ArgumentOutOfRangeException("access", "Enum value was out of legal range.");
+			}
+			this.fileaccess = access;
+			this.length = length;
+			this.capacity = capacity;
+			this.initial_position = 0L;
+			this.current_position = this.initial_position;
+			this.initial_pointer = new IntPtr((void*)pointer);
+			this.closed = false;
 		}
 
-		private const long UnmanagedMemStreamMaxLength = 9223372036854775807L;
+		private long length;
 
-		[SecurityCritical]
-		private SafeBuffer _buffer;
+		private bool closed;
 
-		[SecurityCritical]
-		private unsafe byte* _mem;
+		private long capacity;
 
-		private long _length;
+		private FileAccess fileaccess;
 
-		private long _capacity;
+		private IntPtr initial_pointer;
 
-		private long _position;
+		private long initial_position;
 
-		private long _offset;
-
-		private FileAccess _access;
-
-		internal bool _isOpen;
-
-		[NonSerialized]
-		private Task<int> _lastReadTask;
+		private long current_position;
 	}
 }

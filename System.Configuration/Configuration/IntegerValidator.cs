@@ -6,14 +6,8 @@ namespace System.Configuration
 	{
 		public IntegerValidator(int minValue, int maxValue, bool rangeIsExclusive, int resolution)
 		{
-			if (minValue != 0)
-			{
-				this.minValue = minValue;
-			}
-			if (maxValue != 0)
-			{
-				this.maxValue = maxValue;
-			}
+			this.minValue = minValue;
+			this.maxValue = maxValue;
 			this.rangeIsExclusive = rangeIsExclusive;
 			this.resolution = resolution;
 		}
@@ -57,7 +51,7 @@ namespace System.Configuration
 
 		private int minValue;
 
-		private int maxValue = int.MaxValue;
+		private int maxValue;
 
 		private int resolution;
 	}

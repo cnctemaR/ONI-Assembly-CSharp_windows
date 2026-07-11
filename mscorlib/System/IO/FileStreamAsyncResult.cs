@@ -18,7 +18,8 @@ namespace System.IO
 
 		private static void CBWrapper(IAsyncResult ares)
 		{
-			((FileStreamAsyncResult)ares).realcb.BeginInvoke(ares, null, null);
+			FileStreamAsyncResult fileStreamAsyncResult = (FileStreamAsyncResult)ares;
+			fileStreamAsyncResult.realcb.BeginInvoke(ares, null, null);
 		}
 
 		public void SetComplete(Exception e)

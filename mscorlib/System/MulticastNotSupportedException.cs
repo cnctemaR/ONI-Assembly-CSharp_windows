@@ -9,21 +9,18 @@ namespace System
 	public sealed class MulticastNotSupportedException : SystemException
 	{
 		public MulticastNotSupportedException()
-			: base(Environment.GetResourceString("Attempted to add multiple callbacks to a delegate that does not support multicast."))
+			: base(Locale.GetText("This operation cannot be performed with the specified delagates."))
 		{
-			base.SetErrorCode(-2146233068);
 		}
 
 		public MulticastNotSupportedException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233068);
 		}
 
 		public MulticastNotSupportedException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233068);
 		}
 
 		internal MulticastNotSupportedException(SerializationInfo info, StreamingContext context)

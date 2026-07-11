@@ -1,28 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security.Claims;
 
 namespace System.Security.Principal
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class GenericIdentity : ClaimsIdentity
+	public class GenericIdentity : IIdentity
 	{
-		[SecuritySafeCritical]
-		public GenericIdentity(string name)
-		{
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-			this.m_name = name;
-			this.m_type = "";
-			this.AddNameClaim();
-		}
-
-		[SecuritySafeCritical]
 		public GenericIdentity(string name, string type)
 		{
 			if (name == null)
@@ -35,42 +19,14 @@ namespace System.Security.Principal
 			}
 			this.m_name = name;
 			this.m_type = type;
-			this.AddNameClaim();
 		}
 
-		private GenericIdentity()
+		public GenericIdentity(string name)
+			: this(name, string.Empty)
 		{
 		}
 
-		protected GenericIdentity(GenericIdentity identity)
-			: base(identity)
-		{
-			this.m_name = identity.m_name;
-			this.m_type = identity.m_type;
-		}
-
-		public override ClaimsIdentity Clone()
-		{
-			return new GenericIdentity(this);
-		}
-
-		public override IEnumerable<Claim> Claims
-		{
-			get
-			{
-				return base.Claims;
-			}
-		}
-
-		public override string Name
-		{
-			get
-			{
-				return this.m_name;
-			}
-		}
-
-		public override string AuthenticationType
+		public virtual string AuthenticationType
 		{
 			get
 			{
@@ -78,38 +34,19 @@ namespace System.Security.Principal
 			}
 		}
 
-		public override bool IsAuthenticated
+		public virtual string Name
 		{
 			get
 			{
-				return !this.m_name.Equals("");
+				return this.m_name;
 			}
 		}
 
-		[OnDeserialized]
-		private void OnDeserializedMethod(StreamingContext context)
+		public virtual bool IsAuthenticated
 		{
-			bool flag = false;
-			using (IEnumerator<Claim> enumerator = base.Claims.GetEnumerator())
+			get
 			{
-				if (enumerator.MoveNext())
-				{
-					Claim claim = enumerator.Current;
-					flag = true;
-				}
-			}
-			if (!flag)
-			{
-				this.AddNameClaim();
-			}
-		}
-
-		[SecuritySafeCritical]
-		private void AddNameClaim()
-		{
-			if (this.m_name != null)
-			{
-				base.AddClaim(new Claim(base.NameClaimType, this.m_name, "http://www.w3.org/2001/XMLSchema#string", "LOCAL AUTHORITY", "LOCAL AUTHORITY", this));
+				return this.m_name.Length > 0;
 			}
 		}
 

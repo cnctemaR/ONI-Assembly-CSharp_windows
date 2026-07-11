@@ -8,24 +8,8 @@ using Mono.Unix.Native;
 
 namespace Mono.Remoting.Channels.Unix
 {
-	public class UnixServerChannel : IChannelReceiver, IChannel
+	public class UnixServerChannel : IChannel, IChannelReceiver
 	{
-		private void Init(IServerChannelSinkProvider serverSinkProvider)
-		{
-			if (serverSinkProvider == null)
-			{
-				serverSinkProvider = new UnixBinaryServerFormatterSinkProvider();
-			}
-			this.channel_data = new ChannelDataStore(null);
-			for (IServerChannelSinkProvider serverChannelSinkProvider = serverSinkProvider; serverChannelSinkProvider != null; serverChannelSinkProvider = serverChannelSinkProvider.Next)
-			{
-				serverChannelSinkProvider.GetChannelData(this.channel_data);
-			}
-			IServerChannelSink serverChannelSink = ChannelServices.CreateServerChannelSinkChain(serverSinkProvider, this);
-			this.sink = new UnixServerTransportSink(serverChannelSink);
-			this.StartListening(null);
-		}
-
 		public UnixServerChannel(string path)
 		{
 			this.path = path;
@@ -38,23 +22,17 @@ namespace Mono.Remoting.Channels.Unix
 			{
 				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
 				string text = (string)dictionaryEntry.Key;
-				if (!(text == "path"))
+				switch (text)
 				{
-					if (!(text == "priority"))
-					{
-						if (text == "supressChannelData")
-						{
-							this.supressChannelData = Convert.ToBoolean(dictionaryEntry.Value);
-						}
-					}
-					else
-					{
-						this.priority = Convert.ToInt32(dictionaryEntry.Value);
-					}
-				}
-				else
-				{
+				case "path":
 					this.path = dictionaryEntry.Value as string;
+					break;
+				case "priority":
+					this.priority = Convert.ToInt32(dictionaryEntry.Value);
+					break;
+				case "supressChannelData":
+					this.supressChannelData = Convert.ToBoolean(dictionaryEntry.Value);
+					break;
 				}
 			}
 			this.Init(serverSinkProvider);
@@ -72,6 +50,22 @@ namespace Mono.Remoting.Channels.Unix
 			this.name = name;
 			this.path = path;
 			this.Init(null);
+		}
+
+		private void Init(IServerChannelSinkProvider serverSinkProvider)
+		{
+			if (serverSinkProvider == null)
+			{
+				serverSinkProvider = new UnixBinaryServerFormatterSinkProvider();
+			}
+			this.channel_data = new ChannelDataStore(null);
+			for (IServerChannelSinkProvider serverChannelSinkProvider = serverSinkProvider; serverChannelSinkProvider != null; serverChannelSinkProvider = serverChannelSinkProvider.Next)
+			{
+				serverChannelSinkProvider.GetChannelData(this.channel_data);
+			}
+			IServerChannelSink serverChannelSink = ChannelServices.CreateServerChannelSinkChain(serverSinkProvider, this);
+			this.sink = new UnixServerTransportSink(serverChannelSink);
+			this.StartListening(null);
 		}
 
 		public object ChannelData
@@ -153,7 +147,8 @@ namespace Mono.Remoting.Channels.Unix
 				}
 				if (this.server_thread != null)
 				{
-					Thread thread = new Thread(new ThreadStart(new ClientConnection(this, client, this.sink).ProcessMessages));
+					ClientConnection clientConnection = new ClientConnection(this, client, this.sink);
+					Thread thread = new Thread(new ThreadStart(clientConnection.ProcessMessages));
 					thread.Start();
 					thread.IsBackground = true;
 					this._activeConnections.Add(thread);
@@ -201,7 +196,8 @@ namespace Mono.Remoting.Channels.Unix
 				this.listener.Stop();
 				foreach (object obj in this._activeConnections)
 				{
-					((Thread)obj).Abort();
+					Thread thread = (Thread)obj;
+					thread.Abort();
 				}
 				this._activeConnections.Clear();
 				Monitor.PulseAll(this._activeConnections);

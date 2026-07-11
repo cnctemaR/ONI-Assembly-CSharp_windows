@@ -13,19 +13,19 @@ namespace System.Security.Permissions
 			this.e = list.GetEnumerator();
 		}
 
-		public KeyContainerPermissionAccessEntry Current
-		{
-			get
-			{
-				return (KeyContainerPermissionAccessEntry)this.e.Current;
-			}
-		}
-
 		object IEnumerator.Current
 		{
 			get
 			{
 				return this.e.Current;
+			}
+		}
+
+		public KeyContainerPermissionAccessEntry Current
+		{
+			get
+			{
+				return (KeyContainerPermissionAccessEntry)this.e.Current;
 			}
 		}
 

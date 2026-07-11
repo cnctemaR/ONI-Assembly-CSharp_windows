@@ -4,25 +4,198 @@ using System.Runtime.InteropServices;
 namespace System.Globalization
 {
 	[ComVisible(true)]
+	[MonoTODO("Serialization format not compatible with .NET")]
 	[Serializable]
 	public class JulianCalendar : Calendar
 	{
-		[ComVisible(false)]
-		public override DateTime MinSupportedDateTime
+		public JulianCalendar()
 		{
-			get
+			this.M_AbbrEraNames = new string[] { "C.E." };
+			this.M_EraNames = new string[] { "Common Era" };
+			if (this.twoDigitYearMax == 99)
 			{
-				return DateTime.MinValue;
+				this.twoDigitYearMax = 2029;
 			}
 		}
 
-		[ComVisible(false)]
-		public override DateTime MaxSupportedDateTime
+		public override int[] Eras
 		{
 			get
 			{
-				return DateTime.MaxValue;
+				return new int[] { JulianCalendar.JulianEra };
 			}
+		}
+
+		public override int TwoDigitYearMax
+		{
+			get
+			{
+				return this.twoDigitYearMax;
+			}
+			set
+			{
+				base.CheckReadOnly();
+				base.M_ArgumentInRange("value", value, 100, this.M_MaxYear);
+				this.twoDigitYearMax = value;
+			}
+		}
+
+		internal void M_CheckEra(ref int era)
+		{
+			if (era == 0)
+			{
+				era = JulianCalendar.JulianEra;
+			}
+			if (era != JulianCalendar.JulianEra)
+			{
+				throw new ArgumentException("Era value was not valid.");
+			}
+		}
+
+		internal override void M_CheckYE(int year, ref int era)
+		{
+			this.M_CheckEra(ref era);
+			base.M_ArgumentInRange("year", year, 1, 9999);
+		}
+
+		internal void M_CheckYME(int year, int month, ref int era)
+		{
+			this.M_CheckYE(year, ref era);
+			if (month < 1 || month > 12)
+			{
+				throw new ArgumentOutOfRangeException("month", "Month must be between one and twelve.");
+			}
+		}
+
+		internal void M_CheckYMDE(int year, int month, int day, ref int era)
+		{
+			this.M_CheckYME(year, month, ref era);
+			base.M_ArgumentInRange("day", day, 1, this.GetDaysInMonth(year, month, era));
+			if (year == 9999 && ((month == 10 && day > 19) || month > 10))
+			{
+				throw new ArgumentOutOfRangeException("The maximum Julian date is 19. 10. 9999.");
+			}
+		}
+
+		public override DateTime AddMonths(DateTime time, int months)
+		{
+			int num = CCFixed.FromDateTime(time);
+			int num2;
+			int num3;
+			int num4;
+			CCJulianCalendar.dmy_from_fixed(out num2, out num3, out num4, num);
+			num3 += months;
+			num4 += CCMath.div_mod(out num3, num3, 12);
+			num = CCJulianCalendar.fixed_from_dmy(num2, num3, num4);
+			return CCFixed.ToDateTime(num).Add(time.TimeOfDay);
+		}
+
+		public override DateTime AddYears(DateTime time, int years)
+		{
+			int num = CCFixed.FromDateTime(time);
+			int num2;
+			int num3;
+			int num4;
+			CCJulianCalendar.dmy_from_fixed(out num2, out num3, out num4, num);
+			num4 += years;
+			num = CCJulianCalendar.fixed_from_dmy(num2, num3, num4);
+			return CCFixed.ToDateTime(num).Add(time.TimeOfDay);
+		}
+
+		public override int GetDayOfMonth(DateTime time)
+		{
+			int num = CCFixed.FromDateTime(time);
+			return CCJulianCalendar.day_from_fixed(num);
+		}
+
+		public override DayOfWeek GetDayOfWeek(DateTime time)
+		{
+			int num = CCFixed.FromDateTime(time);
+			return CCFixed.day_of_week(num);
+		}
+
+		public override int GetDayOfYear(DateTime time)
+		{
+			int num = CCFixed.FromDateTime(time);
+			int num2 = CCJulianCalendar.year_from_fixed(num);
+			int num3 = CCJulianCalendar.fixed_from_dmy(1, 1, num2);
+			return num - num3 + 1;
+		}
+
+		public override int GetDaysInMonth(int year, int month, int era)
+		{
+			this.M_CheckYME(year, month, ref era);
+			int num = CCJulianCalendar.fixed_from_dmy(1, month, year);
+			int num2 = CCJulianCalendar.fixed_from_dmy(1, month + 1, year);
+			return num2 - num;
+		}
+
+		public override int GetDaysInYear(int year, int era)
+		{
+			this.M_CheckYE(year, ref era);
+			int num = CCJulianCalendar.fixed_from_dmy(1, 1, year);
+			int num2 = CCJulianCalendar.fixed_from_dmy(1, 1, year + 1);
+			return num2 - num;
+		}
+
+		public override int GetEra(DateTime time)
+		{
+			return JulianCalendar.JulianEra;
+		}
+
+		[ComVisible(false)]
+		public override int GetLeapMonth(int year, int era)
+		{
+			return 0;
+		}
+
+		public override int GetMonth(DateTime time)
+		{
+			int num = CCFixed.FromDateTime(time);
+			return CCJulianCalendar.month_from_fixed(num);
+		}
+
+		public override int GetMonthsInYear(int year, int era)
+		{
+			this.M_CheckYE(year, ref era);
+			return 12;
+		}
+
+		public override int GetYear(DateTime time)
+		{
+			int num = CCFixed.FromDateTime(time);
+			return CCJulianCalendar.year_from_fixed(num);
+		}
+
+		public override bool IsLeapDay(int year, int month, int day, int era)
+		{
+			this.M_CheckYMDE(year, month, day, ref era);
+			return this.IsLeapYear(year) && month == 2 && day == 29;
+		}
+
+		public override bool IsLeapMonth(int year, int month, int era)
+		{
+			this.M_CheckYME(year, month, ref era);
+			return false;
+		}
+
+		public override bool IsLeapYear(int year, int era)
+		{
+			this.M_CheckYE(year, ref era);
+			return CCJulianCalendar.is_leap_year(year);
+		}
+
+		public override DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era)
+		{
+			this.M_CheckYMDE(year, month, day, ref era);
+			base.M_CheckHMSM(hour, minute, second, millisecond);
+			int num = CCJulianCalendar.fixed_from_dmy(day, month, year);
+			return CCFixed.ToDateTime(num, hour, minute, second, (double)millisecond);
+		}
+
+		public override int ToFourDigitYear(int year)
+		{
+			return base.ToFourDigitYear(year);
 		}
 
 		[ComVisible(false)]
@@ -34,298 +207,28 @@ namespace System.Globalization
 			}
 		}
 
-		public JulianCalendar()
-		{
-			this.twoDigitYearMax = 2029;
-		}
-
-		internal override int ID
+		[ComVisible(false)]
+		public override DateTime MinSupportedDateTime
 		{
 			get
 			{
-				return 13;
+				return JulianCalendar.JulianMin;
 			}
-		}
-
-		internal static void CheckEraRange(int era)
-		{
-			if (era != 0 && era != JulianCalendar.JulianEra)
-			{
-				throw new ArgumentOutOfRangeException("era", Environment.GetResourceString("Era value was not valid."));
-			}
-		}
-
-		internal void CheckYearEraRange(int year, int era)
-		{
-			JulianCalendar.CheckEraRange(era);
-			if (year <= 0 || year > this.MaxYear)
-			{
-				throw new ArgumentOutOfRangeException("year", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 1, this.MaxYear));
-			}
-		}
-
-		internal static void CheckMonthRange(int month)
-		{
-			if (month < 1 || month > 12)
-			{
-				throw new ArgumentOutOfRangeException("month", Environment.GetResourceString("Month must be between one and twelve."));
-			}
-		}
-
-		internal static void CheckDayRange(int year, int month, int day)
-		{
-			if (year == 1 && month == 1 && day < 3)
-			{
-				throw new ArgumentOutOfRangeException(null, Environment.GetResourceString("Year, Month, and Day parameters describe an un-representable DateTime."));
-			}
-			int[] array = ((year % 4 == 0) ? JulianCalendar.DaysToMonth366 : JulianCalendar.DaysToMonth365);
-			int num = array[month] - array[month - 1];
-			if (day < 1 || day > num)
-			{
-				throw new ArgumentOutOfRangeException("day", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 1, num));
-			}
-		}
-
-		internal static int GetDatePart(long ticks, int part)
-		{
-			int i = (int)((ticks + 1728000000000L) / 864000000000L);
-			int num = i / 1461;
-			i -= num * 1461;
-			int num2 = i / 365;
-			if (num2 == 4)
-			{
-				num2 = 3;
-			}
-			if (part == 0)
-			{
-				return num * 4 + num2 + 1;
-			}
-			i -= num2 * 365;
-			if (part == 1)
-			{
-				return i + 1;
-			}
-			int[] array = ((num2 == 3) ? JulianCalendar.DaysToMonth366 : JulianCalendar.DaysToMonth365);
-			int num3 = i >> 6;
-			while (i >= array[num3])
-			{
-				num3++;
-			}
-			if (part == 2)
-			{
-				return num3;
-			}
-			return i - array[num3 - 1] + 1;
-		}
-
-		internal static long DateToTicks(int year, int month, int day)
-		{
-			int[] array = ((year % 4 == 0) ? JulianCalendar.DaysToMonth366 : JulianCalendar.DaysToMonth365);
-			int num = year - 1;
-			return (long)(num * 365 + num / 4 + array[month - 1] + day - 1 - 2) * 864000000000L;
-		}
-
-		public override DateTime AddMonths(DateTime time, int months)
-		{
-			if (months < -120000 || months > 120000)
-			{
-				throw new ArgumentOutOfRangeException("months", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), -120000, 120000));
-			}
-			int num = JulianCalendar.GetDatePart(time.Ticks, 0);
-			int num2 = JulianCalendar.GetDatePart(time.Ticks, 2);
-			int num3 = JulianCalendar.GetDatePart(time.Ticks, 3);
-			int num4 = num2 - 1 + months;
-			if (num4 >= 0)
-			{
-				num2 = num4 % 12 + 1;
-				num += num4 / 12;
-			}
-			else
-			{
-				num2 = 12 + (num4 + 1) % 12;
-				num += (num4 - 11) / 12;
-			}
-			int[] array = ((num % 4 == 0 && (num % 100 != 0 || num % 400 == 0)) ? JulianCalendar.DaysToMonth366 : JulianCalendar.DaysToMonth365);
-			int num5 = array[num2] - array[num2 - 1];
-			if (num3 > num5)
-			{
-				num3 = num5;
-			}
-			long num6 = JulianCalendar.DateToTicks(num, num2, num3) + time.Ticks % 864000000000L;
-			Calendar.CheckAddResult(num6, this.MinSupportedDateTime, this.MaxSupportedDateTime);
-			return new DateTime(num6);
-		}
-
-		public override DateTime AddYears(DateTime time, int years)
-		{
-			return this.AddMonths(time, years * 12);
-		}
-
-		public override int GetDayOfMonth(DateTime time)
-		{
-			return JulianCalendar.GetDatePart(time.Ticks, 3);
-		}
-
-		public override DayOfWeek GetDayOfWeek(DateTime time)
-		{
-			return (DayOfWeek)(time.Ticks / 864000000000L + 1L) % (DayOfWeek)7;
-		}
-
-		public override int GetDayOfYear(DateTime time)
-		{
-			return JulianCalendar.GetDatePart(time.Ticks, 1);
-		}
-
-		public override int GetDaysInMonth(int year, int month, int era)
-		{
-			this.CheckYearEraRange(year, era);
-			JulianCalendar.CheckMonthRange(month);
-			int[] array = ((year % 4 == 0) ? JulianCalendar.DaysToMonth366 : JulianCalendar.DaysToMonth365);
-			return array[month] - array[month - 1];
-		}
-
-		public override int GetDaysInYear(int year, int era)
-		{
-			if (!this.IsLeapYear(year, era))
-			{
-				return 365;
-			}
-			return 366;
-		}
-
-		public override int GetEra(DateTime time)
-		{
-			return JulianCalendar.JulianEra;
-		}
-
-		public override int GetMonth(DateTime time)
-		{
-			return JulianCalendar.GetDatePart(time.Ticks, 2);
-		}
-
-		public override int[] Eras
-		{
-			get
-			{
-				return new int[] { JulianCalendar.JulianEra };
-			}
-		}
-
-		public override int GetMonthsInYear(int year, int era)
-		{
-			this.CheckYearEraRange(year, era);
-			return 12;
-		}
-
-		public override int GetYear(DateTime time)
-		{
-			return JulianCalendar.GetDatePart(time.Ticks, 0);
-		}
-
-		public override bool IsLeapDay(int year, int month, int day, int era)
-		{
-			JulianCalendar.CheckMonthRange(month);
-			if (this.IsLeapYear(year, era))
-			{
-				JulianCalendar.CheckDayRange(year, month, day);
-				return month == 2 && day == 29;
-			}
-			JulianCalendar.CheckDayRange(year, month, day);
-			return false;
 		}
 
 		[ComVisible(false)]
-		public override int GetLeapMonth(int year, int era)
-		{
-			this.CheckYearEraRange(year, era);
-			return 0;
-		}
-
-		public override bool IsLeapMonth(int year, int month, int era)
-		{
-			this.CheckYearEraRange(year, era);
-			JulianCalendar.CheckMonthRange(month);
-			return false;
-		}
-
-		public override bool IsLeapYear(int year, int era)
-		{
-			this.CheckYearEraRange(year, era);
-			return year % 4 == 0;
-		}
-
-		public override DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era)
-		{
-			this.CheckYearEraRange(year, era);
-			JulianCalendar.CheckMonthRange(month);
-			JulianCalendar.CheckDayRange(year, month, day);
-			if (millisecond < 0 || millisecond >= 1000)
-			{
-				throw new ArgumentOutOfRangeException("millisecond", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 999));
-			}
-			if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60 && second >= 0 && second < 60)
-			{
-				return new DateTime(JulianCalendar.DateToTicks(year, month, day) + new TimeSpan(0, hour, minute, second, millisecond).Ticks);
-			}
-			throw new ArgumentOutOfRangeException(null, Environment.GetResourceString("Hour, Minute, and Second parameters describe an un-representable DateTime."));
-		}
-
-		public override int TwoDigitYearMax
+		public override DateTime MaxSupportedDateTime
 		{
 			get
 			{
-				return this.twoDigitYearMax;
+				return JulianCalendar.JulianMax;
 			}
-			set
-			{
-				base.VerifyWritable();
-				if (value < 99 || value > this.MaxYear)
-				{
-					throw new ArgumentOutOfRangeException("year", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 99, this.MaxYear));
-				}
-				this.twoDigitYearMax = value;
-			}
-		}
-
-		public override int ToFourDigitYear(int year)
-		{
-			if (year < 0)
-			{
-				throw new ArgumentOutOfRangeException("year", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (year > this.MaxYear)
-			{
-				throw new ArgumentOutOfRangeException("year", string.Format(CultureInfo.CurrentCulture, Environment.GetResourceString("Argument must be between {0} and {1}."), 1, this.MaxYear));
-			}
-			return base.ToFourDigitYear(year);
 		}
 
 		public static readonly int JulianEra = 1;
 
-		private const int DatePartYear = 0;
+		private static DateTime JulianMin = new DateTime(1, 1, 1, 0, 0, 0);
 
-		private const int DatePartDayOfYear = 1;
-
-		private const int DatePartMonth = 2;
-
-		private const int DatePartDay = 3;
-
-		private const int JulianDaysPerYear = 365;
-
-		private const int JulianDaysPer4Years = 1461;
-
-		private static readonly int[] DaysToMonth365 = new int[]
-		{
-			0, 31, 59, 90, 120, 151, 181, 212, 243, 273,
-			304, 334, 365
-		};
-
-		private static readonly int[] DaysToMonth366 = new int[]
-		{
-			0, 31, 60, 91, 121, 152, 182, 213, 244, 274,
-			305, 335, 366
-		};
-
-		internal int MaxYear = 9999;
+		private static DateTime JulianMax = new DateTime(9999, 12, 31, 11, 59, 59);
 	}
 }

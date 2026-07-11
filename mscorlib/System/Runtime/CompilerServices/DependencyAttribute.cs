@@ -9,7 +9,7 @@ namespace System.Runtime.CompilerServices
 		public DependencyAttribute(string dependentAssemblyArgument, LoadHint loadHintArgument)
 		{
 			this.dependentAssembly = dependentAssemblyArgument;
-			this.loadHint = loadHintArgument;
+			this.hint = loadHintArgument;
 		}
 
 		public string DependentAssembly
@@ -24,12 +24,12 @@ namespace System.Runtime.CompilerServices
 		{
 			get
 			{
-				return this.loadHint;
+				return this.hint;
 			}
 		}
 
 		private string dependentAssembly;
 
-		private LoadHint loadHint;
+		private LoadHint hint;
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.Runtime.Remoting.Channels
 {
-	internal class AggregateEnumerator : IDictionaryEnumerator, IEnumerator
+	internal class AggregateEnumerator : IEnumerator, IDictionaryEnumerator
 	{
 		public AggregateEnumerator(IDictionary[] dics)
 		{
@@ -65,7 +65,7 @@ namespace System.Runtime.Remoting.Channels
 		public void Reset()
 		{
 			this.pos = 0;
-			if (this.dictionaries.Length != 0)
+			if (this.dictionaries.Length > 0)
 			{
 				this.currente = this.dictionaries[0].GetEnumerator();
 			}

@@ -18,27 +18,27 @@ namespace System.ComponentModel
 			}
 		}
 
-		public override bool Equals(object value)
+		public override bool Equals(object obj)
 		{
-			return value is RefreshPropertiesAttribute && ((RefreshPropertiesAttribute)value).RefreshProperties == this.refresh;
+			return obj is RefreshPropertiesAttribute && (obj == this || ((RefreshPropertiesAttribute)obj).RefreshProperties == this.refresh);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.refresh.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(RefreshPropertiesAttribute.Default);
+			return this == RefreshPropertiesAttribute.Default;
 		}
+
+		private RefreshProperties refresh;
 
 		public static readonly RefreshPropertiesAttribute All = new RefreshPropertiesAttribute(RefreshProperties.All);
 
-		public static readonly RefreshPropertiesAttribute Repaint = new RefreshPropertiesAttribute(RefreshProperties.Repaint);
-
 		public static readonly RefreshPropertiesAttribute Default = new RefreshPropertiesAttribute(RefreshProperties.None);
 
-		private RefreshProperties refresh;
+		public static readonly RefreshPropertiesAttribute Repaint = new RefreshPropertiesAttribute(RefreshProperties.Repaint);
 	}
 }

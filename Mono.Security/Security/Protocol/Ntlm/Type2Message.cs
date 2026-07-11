@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace Mono.Security.Protocol.Ntlm
 {
@@ -10,7 +9,8 @@ namespace Mono.Security.Protocol.Ntlm
 			: base(2)
 		{
 			this._nonce = new byte[8];
-			RandomNumberGenerator.Create().GetBytes(this._nonce);
+			RandomNumberGenerator randomNumberGenerator = RandomNumberGenerator.Create();
+			randomNumberGenerator.GetBytes(this._nonce);
 			base.Flags = NtlmFlags.NegotiateUnicode | NtlmFlags.NegotiateNtlm | NtlmFlags.NegotiateAlwaysSign;
 		}
 
@@ -43,25 +43,10 @@ namespace Mono.Security.Protocol.Ntlm
 				}
 				if (value.Length != 8)
 				{
-					throw new ArgumentException(Locale.GetText("Invalid Nonce Length (should be 8 bytes)."), "Nonce");
+					string text = Locale.GetText("Invalid Nonce Length (should be 8 bytes).");
+					throw new ArgumentException(text, "Nonce");
 				}
 				this._nonce = (byte[])value.Clone();
-			}
-		}
-
-		public string TargetName
-		{
-			get
-			{
-				return this._targetName;
-			}
-		}
-
-		public byte[] TargetInfo
-		{
-			get
-			{
-				return (byte[])this._targetInfo.Clone();
 			}
 		}
 
@@ -70,29 +55,6 @@ namespace Mono.Security.Protocol.Ntlm
 			base.Decode(message);
 			base.Flags = (NtlmFlags)BitConverterLE.ToUInt32(message, 20);
 			Buffer.BlockCopy(message, 24, this._nonce, 0, 8);
-			ushort num = BitConverterLE.ToUInt16(message, 12);
-			ushort num2 = BitConverterLE.ToUInt16(message, 16);
-			if (num > 0)
-			{
-				if ((base.Flags & NtlmFlags.NegotiateOem) != (NtlmFlags)0)
-				{
-					this._targetName = Encoding.ASCII.GetString(message, (int)num2, (int)num);
-				}
-				else
-				{
-					this._targetName = Encoding.Unicode.GetString(message, (int)num2, (int)num);
-				}
-			}
-			if (message.Length >= 48)
-			{
-				ushort num3 = BitConverterLE.ToUInt16(message, 40);
-				ushort num4 = BitConverterLE.ToUInt16(message, 44);
-				if (num3 > 0)
-				{
-					this._targetInfo = new byte[(int)num3];
-					Buffer.BlockCopy(message, (int)num4, this._targetInfo, 0, (int)num3);
-				}
-			}
 		}
 
 		public override byte[] GetBytes()
@@ -110,9 +72,5 @@ namespace Mono.Security.Protocol.Ntlm
 		}
 
 		private byte[] _nonce;
-
-		private string _targetName;
-
-		private byte[] _targetInfo;
 	}
 }

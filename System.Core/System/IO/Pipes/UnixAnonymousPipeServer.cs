@@ -3,7 +3,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	internal class UnixAnonymousPipeServer : UnixAnonymousPipe, IAnonymousPipeServer, IPipe
+	internal class UnixAnonymousPipeServer : UnixAnonymousPipe, IPipe, IAnonymousPipeServer
 	{
 		public UnixAnonymousPipeServer(AnonymousPipeServerStream owner, PipeDirection direction, HandleInheritability inheritability, int bufferSize)
 		{

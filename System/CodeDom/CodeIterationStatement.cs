@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeIterationStatement : CodeStatement
 	{
@@ -11,18 +14,71 @@ namespace System.CodeDom
 
 		public CodeIterationStatement(CodeStatement initStatement, CodeExpression testExpression, CodeStatement incrementStatement, params CodeStatement[] statements)
 		{
-			this.InitStatement = initStatement;
-			this.TestExpression = testExpression;
-			this.IncrementStatement = incrementStatement;
+			this.initStatement = initStatement;
+			this.testExpression = testExpression;
+			this.incrementStatement = incrementStatement;
 			this.Statements.AddRange(statements);
 		}
 
-		public CodeStatement InitStatement { get; set; }
+		public CodeStatement IncrementStatement
+		{
+			get
+			{
+				return this.incrementStatement;
+			}
+			set
+			{
+				this.incrementStatement = value;
+			}
+		}
 
-		public CodeExpression TestExpression { get; set; }
+		public CodeStatement InitStatement
+		{
+			get
+			{
+				return this.initStatement;
+			}
+			set
+			{
+				this.initStatement = value;
+			}
+		}
 
-		public CodeStatement IncrementStatement { get; set; }
+		public CodeStatementCollection Statements
+		{
+			get
+			{
+				if (this.statements == null)
+				{
+					this.statements = new CodeStatementCollection();
+				}
+				return this.statements;
+			}
+		}
 
-		public CodeStatementCollection Statements { get; } = new CodeStatementCollection();
+		public CodeExpression TestExpression
+		{
+			get
+			{
+				return this.testExpression;
+			}
+			set
+			{
+				this.testExpression = value;
+			}
+		}
+
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeStatement incrementStatement;
+
+		private CodeStatement initStatement;
+
+		private CodeStatementCollection statements;
+
+		private CodeExpression testExpression;
 	}
 }

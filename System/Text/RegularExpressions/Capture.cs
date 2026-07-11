@@ -5,18 +5,23 @@ namespace System.Text.RegularExpressions
 	[Serializable]
 	public class Capture
 	{
-		internal Capture(string text, int i, int l)
+		internal Capture(string text)
+			: this(text, 0, 0)
 		{
-			this._text = text;
-			this._index = i;
-			this._length = l;
+		}
+
+		internal Capture(string text, int index, int length)
+		{
+			this.text = text;
+			this.index = index;
+			this.length = length;
 		}
 
 		public int Index
 		{
 			get
 			{
-				return this._index;
+				return this.index;
 			}
 		}
 
@@ -24,7 +29,7 @@ namespace System.Text.RegularExpressions
 		{
 			get
 			{
-				return this._length;
+				return this.length;
 			}
 		}
 
@@ -32,7 +37,7 @@ namespace System.Text.RegularExpressions
 		{
 			get
 			{
-				return this._text.Substring(this._index, this._length);
+				return (this.text != null) ? this.text.Substring(this.index, this.length) : string.Empty;
 			}
 		}
 
@@ -41,25 +46,18 @@ namespace System.Text.RegularExpressions
 			return this.Value;
 		}
 
-		internal string GetOriginalString()
+		internal string Text
 		{
-			return this._text;
+			get
+			{
+				return this.text;
+			}
 		}
 
-		internal string GetLeftSubstring()
-		{
-			return this._text.Substring(0, this._index);
-		}
+		internal int index;
 
-		internal string GetRightSubstring()
-		{
-			return this._text.Substring(this._index + this._length, this._text.Length - this._index - this._length);
-		}
+		internal int length;
 
-		internal string _text;
-
-		internal int _index;
-
-		internal int _length;
+		internal string text;
 	}
 }

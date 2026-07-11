@@ -1,74 +1,22 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Security.Permissions;
 
 namespace System.Threading
 {
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
+	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 	public class ReaderWriterLockSlim : IDisposable
 	{
-		private void InitializeThreadCounts()
-		{
-			this.upgradeLockOwnerId = -1;
-			this.writeLockOwnerId = -1;
-		}
-
 		public ReaderWriterLockSlim()
-			: this(LockRecursionPolicy.NoRecursion)
 		{
 		}
 
 		public ReaderWriterLockSlim(LockRecursionPolicy recursionPolicy)
 		{
-			if (recursionPolicy == LockRecursionPolicy.SupportsRecursion)
+			this.recursionPolicy = recursionPolicy;
+			if (recursionPolicy != LockRecursionPolicy.NoRecursion)
 			{
-				this.fIsReentrant = true;
+				throw new NotImplementedException("recursionPolicy != NoRecursion not currently implemented");
 			}
-			this.InitializeThreadCounts();
-			this.fNoWaiters = true;
-			this.lockID = Interlocked.Increment(ref ReaderWriterLockSlim.s_nextLockID);
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static bool IsRWEntryEmpty(ReaderWriterCount rwc)
-		{
-			return rwc.lockID == 0L || (rwc.readercount == 0 && rwc.writercount == 0 && rwc.upgradecount == 0);
-		}
-
-		private bool IsRwHashEntryChanged(ReaderWriterCount lrwc)
-		{
-			return lrwc.lockID != this.lockID;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private ReaderWriterCount GetThreadRWCount(bool dontAllocate)
-		{
-			ReaderWriterCount next = ReaderWriterLockSlim.t_rwc;
-			ReaderWriterCount readerWriterCount = null;
-			while (next != null)
-			{
-				if (next.lockID == this.lockID)
-				{
-					return next;
-				}
-				if (!dontAllocate && readerWriterCount == null && ReaderWriterLockSlim.IsRWEntryEmpty(next))
-				{
-					readerWriterCount = next;
-				}
-				next = next.next;
-			}
-			if (dontAllocate)
-			{
-				return null;
-			}
-			if (readerWriterCount == null)
-			{
-				readerWriterCount = new ReaderWriterCount();
-				readerWriterCount.next = ReaderWriterLockSlim.t_rwc;
-				ReaderWriterLockSlim.t_rwc = readerWriterCount;
-			}
-			readerWriterCount.lockID = this.lockID;
-			return readerWriterCount;
 		}
 
 		public void EnterReadLock()
@@ -76,120 +24,65 @@ namespace System.Threading
 			this.TryEnterReadLock(-1);
 		}
 
-		public bool TryEnterReadLock(TimeSpan timeout)
-		{
-			return this.TryEnterReadLock(new ReaderWriterLockSlim.TimeoutTracker(timeout));
-		}
-
 		public bool TryEnterReadLock(int millisecondsTimeout)
 		{
-			return this.TryEnterReadLock(new ReaderWriterLockSlim.TimeoutTracker(millisecondsTimeout));
-		}
-
-		private bool TryEnterReadLock(ReaderWriterLockSlim.TimeoutTracker timeout)
-		{
-			return this.TryEnterReadLockCore(timeout);
-		}
-
-		private bool TryEnterReadLockCore(ReaderWriterLockSlim.TimeoutTracker timeout)
-		{
-			if (this.fDisposed)
+			if (millisecondsTimeout < -1)
+			{
+				throw new ArgumentOutOfRangeException("millisecondsTimeout");
+			}
+			if (this.read_locks == null)
 			{
 				throw new ObjectDisposedException(null);
 			}
-			int managedThreadId = Thread.CurrentThread.ManagedThreadId;
-			ReaderWriterCount readerWriterCount;
-			if (!this.fIsReentrant)
+			if (Thread.CurrentThread == this.write_thread)
 			{
-				if (managedThreadId == this.writeLockOwnerId)
-				{
-					throw new LockRecursionException(global::SR.GetString("A read lock may not be acquired with the write lock held in this mode."));
-				}
-				this.EnterMyLock();
-				readerWriterCount = this.GetThreadRWCount(false);
-				if (readerWriterCount.readercount > 0)
-				{
-					this.ExitMyLock();
-					throw new LockRecursionException(global::SR.GetString("Recursive read lock acquisitions not allowed in this mode."));
-				}
-				if (managedThreadId == this.upgradeLockOwnerId)
-				{
-					readerWriterCount.readercount++;
-					this.owners += 1U;
-					this.ExitMyLock();
-					return true;
-				}
+				throw new LockRecursionException("Read lock cannot be acquired while write lock is held");
 			}
-			else
+			this.EnterMyLock();
+			ReaderWriterLockSlim.LockDetails readLockDetails = this.GetReadLockDetails(Thread.CurrentThread.ManagedThreadId, true);
+			if (readLockDetails.ReadLocks != 0)
 			{
-				this.EnterMyLock();
-				readerWriterCount = this.GetThreadRWCount(false);
-				if (readerWriterCount.readercount > 0)
-				{
-					readerWriterCount.readercount++;
-					this.ExitMyLock();
-					return true;
-				}
-				if (managedThreadId == this.upgradeLockOwnerId)
-				{
-					readerWriterCount.readercount++;
-					this.owners += 1U;
-					this.ExitMyLock();
-					this.fUpgradeThreadHoldingRead = true;
-					return true;
-				}
-				if (managedThreadId == this.writeLockOwnerId)
-				{
-					readerWriterCount.readercount++;
-					this.owners += 1U;
-					this.ExitMyLock();
-					return true;
-				}
+				this.ExitMyLock();
+				throw new LockRecursionException("Recursive read lock can only be aquired in SupportsRecursion mode");
 			}
-			bool flag = true;
-			int num = 0;
-			while (this.owners >= 268435454U)
+			readLockDetails.ReadLocks++;
+			while (this.owners < 0 || this.numWriteWaiters != 0U)
 			{
-				if (num < 20)
+				if (millisecondsTimeout == 0)
 				{
 					this.ExitMyLock();
-					if (timeout.IsExpired)
-					{
-						return false;
-					}
-					num++;
-					ReaderWriterLockSlim.SpinWait(num);
-					this.EnterMyLock();
-					if (this.IsRwHashEntryChanged(readerWriterCount))
-					{
-						readerWriterCount = this.GetThreadRWCount(false);
-					}
+					return false;
 				}
-				else if (this.readEvent == null)
+				if (this.readEvent == null)
 				{
 					this.LazyCreateEvent(ref this.readEvent, false);
-					if (this.IsRwHashEntryChanged(readerWriterCount))
-					{
-						readerWriterCount = this.GetThreadRWCount(false);
-					}
 				}
-				else
+				else if (!this.WaitOnEvent(this.readEvent, ref this.numReadWaiters, millisecondsTimeout))
 				{
-					flag = this.WaitOnEvent(this.readEvent, ref this.numReadWaiters, timeout, false);
-					if (!flag)
-					{
-						return false;
-					}
-					if (this.IsRwHashEntryChanged(readerWriterCount))
-					{
-						readerWriterCount = this.GetThreadRWCount(false);
-					}
+					return false;
 				}
 			}
-			this.owners += 1U;
-			readerWriterCount.readercount++;
+			this.owners++;
 			this.ExitMyLock();
-			return flag;
+			return true;
+		}
+
+		public bool TryEnterReadLock(TimeSpan timeout)
+		{
+			return this.TryEnterReadLock(ReaderWriterLockSlim.CheckTimeout(timeout));
+		}
+
+		public void ExitReadLock()
+		{
+			this.EnterMyLock();
+			if (this.owners < 1)
+			{
+				this.ExitMyLock();
+				throw new SynchronizationLockException("Releasing lock and no read lock taken");
+			}
+			this.owners--;
+			this.GetReadLockDetails(Thread.CurrentThread.ManagedThreadId, false).ReadLocks--;
+			this.ExitAndWakeUpAppropriateWaiters();
 		}
 
 		public void EnterWriteLock()
@@ -197,141 +90,98 @@ namespace System.Threading
 			this.TryEnterWriteLock(-1);
 		}
 
-		public bool TryEnterWriteLock(TimeSpan timeout)
-		{
-			return this.TryEnterWriteLock(new ReaderWriterLockSlim.TimeoutTracker(timeout));
-		}
-
 		public bool TryEnterWriteLock(int millisecondsTimeout)
 		{
-			return this.TryEnterWriteLock(new ReaderWriterLockSlim.TimeoutTracker(millisecondsTimeout));
-		}
-
-		private bool TryEnterWriteLock(ReaderWriterLockSlim.TimeoutTracker timeout)
-		{
-			return this.TryEnterWriteLockCore(timeout);
-		}
-
-		private bool TryEnterWriteLockCore(ReaderWriterLockSlim.TimeoutTracker timeout)
-		{
-			if (this.fDisposed)
+			if (millisecondsTimeout < -1)
+			{
+				throw new ArgumentOutOfRangeException("millisecondsTimeout");
+			}
+			if (this.read_locks == null)
 			{
 				throw new ObjectDisposedException(null);
 			}
-			int managedThreadId = Thread.CurrentThread.ManagedThreadId;
-			bool flag = false;
-			ReaderWriterCount readerWriterCount;
-			if (!this.fIsReentrant)
+			if (this.IsWriteLockHeld)
 			{
-				if (managedThreadId == this.writeLockOwnerId)
-				{
-					throw new LockRecursionException(global::SR.GetString("Recursive write lock acquisitions not allowed in this mode."));
-				}
-				if (managedThreadId == this.upgradeLockOwnerId)
-				{
-					flag = true;
-				}
-				this.EnterMyLock();
-				readerWriterCount = this.GetThreadRWCount(true);
-				if (readerWriterCount != null && readerWriterCount.readercount > 0)
-				{
-					this.ExitMyLock();
-					throw new LockRecursionException(global::SR.GetString("Write lock may not be acquired with read lock held. This pattern is prone to deadlocks. Please ensure that read locks are released before taking a write lock. If an upgrade is necessary, use an upgrade lock in place of the read lock."));
-				}
+				throw new LockRecursionException();
 			}
-			else
+			this.EnterMyLock();
+			ReaderWriterLockSlim.LockDetails readLockDetails = this.GetReadLockDetails(Thread.CurrentThread.ManagedThreadId, false);
+			if (readLockDetails != null && readLockDetails.ReadLocks > 0)
 			{
-				this.EnterMyLock();
-				readerWriterCount = this.GetThreadRWCount(false);
-				if (managedThreadId == this.writeLockOwnerId)
+				this.ExitMyLock();
+				throw new LockRecursionException("Write lock cannot be acquired while read lock is held");
+			}
+			while (this.owners != 0)
+			{
+				if (this.owners == 1 && this.upgradable_thread == Thread.CurrentThread)
 				{
-					readerWriterCount.writercount++;
+					this.owners = -1;
+					this.write_thread = Thread.CurrentThread;
+					IL_0178:
 					this.ExitMyLock();
 					return true;
 				}
-				if (managedThreadId == this.upgradeLockOwnerId)
-				{
-					flag = true;
-				}
-				else if (readerWriterCount.readercount > 0)
+				if (millisecondsTimeout == 0)
 				{
 					this.ExitMyLock();
-					throw new LockRecursionException(global::SR.GetString("Write lock may not be acquired with read lock held. This pattern is prone to deadlocks. Please ensure that read locks are released before taking a write lock. If an upgrade is necessary, use an upgrade lock in place of the read lock."));
+					return false;
 				}
-			}
-			int num = 0;
-			while (!this.IsWriterAcquired())
-			{
-				if (flag)
+				if (this.upgradable_thread == Thread.CurrentThread)
 				{
-					uint numReaders = this.GetNumReaders();
-					if (numReaders == 1U)
+					if (this.upgradeEvent == null)
 					{
-						this.SetWriterAcquired();
+						this.LazyCreateEvent(ref this.upgradeEvent, false);
 					}
 					else
 					{
-						if (numReaders != 2U || readerWriterCount == null)
+						if (this.numUpgradeWaiters > 0U)
 						{
-							goto IL_012E;
+							this.ExitMyLock();
+							throw new ApplicationException("Upgrading lock to writer lock already in process, deadlock");
 						}
-						if (this.IsRwHashEntryChanged(readerWriterCount))
+						if (!this.WaitOnEvent(this.upgradeEvent, ref this.numUpgradeWaiters, millisecondsTimeout))
 						{
-							readerWriterCount = this.GetThreadRWCount(false);
+							return false;
 						}
-						if (readerWriterCount.readercount <= 0)
-						{
-							goto IL_012E;
-						}
-						this.SetWriterAcquired();
-					}
-					IL_01C6:
-					if (this.fIsReentrant)
-					{
-						if (this.IsRwHashEntryChanged(readerWriterCount))
-						{
-							readerWriterCount = this.GetThreadRWCount(false);
-						}
-						readerWriterCount.writercount++;
-					}
-					this.ExitMyLock();
-					this.writeLockOwnerId = managedThreadId;
-					return true;
-				}
-				IL_012E:
-				if (num < 20)
-				{
-					this.ExitMyLock();
-					if (timeout.IsExpired)
-					{
-						return false;
-					}
-					num++;
-					ReaderWriterLockSlim.SpinWait(num);
-					this.EnterMyLock();
-				}
-				else if (flag)
-				{
-					if (this.waitUpgradeEvent == null)
-					{
-						this.LazyCreateEvent(ref this.waitUpgradeEvent, true);
-					}
-					else if (!this.WaitOnEvent(this.waitUpgradeEvent, ref this.numWriteUpgradeWaiters, timeout, true))
-					{
-						return false;
 					}
 				}
 				else if (this.writeEvent == null)
 				{
 					this.LazyCreateEvent(ref this.writeEvent, true);
 				}
-				else if (!this.WaitOnEvent(this.writeEvent, ref this.numWriteWaiters, timeout, true))
+				else if (!this.WaitOnEvent(this.writeEvent, ref this.numWriteWaiters, millisecondsTimeout))
 				{
 					return false;
 				}
 			}
-			this.SetWriterAcquired();
-			goto IL_01C6;
+			this.owners = -1;
+			this.write_thread = Thread.CurrentThread;
+			goto IL_0178;
+		}
+
+		public bool TryEnterWriteLock(TimeSpan timeout)
+		{
+			return this.TryEnterWriteLock(ReaderWriterLockSlim.CheckTimeout(timeout));
+		}
+
+		public void ExitWriteLock()
+		{
+			this.EnterMyLock();
+			if (this.owners != -1)
+			{
+				this.ExitMyLock();
+				throw new SynchronizationLockException("Calling ExitWriterLock when no write lock is held");
+			}
+			if (this.upgradable_thread == Thread.CurrentThread)
+			{
+				this.owners = 1;
+			}
+			else
+			{
+				this.owners = 0;
+			}
+			this.write_thread = null;
+			this.ExitAndWakeUpAppropriateWaiters();
 		}
 
 		public void EnterUpgradeableReadLock()
@@ -339,486 +189,70 @@ namespace System.Threading
 			this.TryEnterUpgradeableReadLock(-1);
 		}
 
-		public bool TryEnterUpgradeableReadLock(TimeSpan timeout)
-		{
-			return this.TryEnterUpgradeableReadLock(new ReaderWriterLockSlim.TimeoutTracker(timeout));
-		}
-
 		public bool TryEnterUpgradeableReadLock(int millisecondsTimeout)
 		{
-			return this.TryEnterUpgradeableReadLock(new ReaderWriterLockSlim.TimeoutTracker(millisecondsTimeout));
-		}
-
-		private bool TryEnterUpgradeableReadLock(ReaderWriterLockSlim.TimeoutTracker timeout)
-		{
-			return this.TryEnterUpgradeableReadLockCore(timeout);
-		}
-
-		private bool TryEnterUpgradeableReadLockCore(ReaderWriterLockSlim.TimeoutTracker timeout)
-		{
-			if (this.fDisposed)
+			if (millisecondsTimeout < -1)
+			{
+				throw new ArgumentOutOfRangeException("millisecondsTimeout");
+			}
+			if (this.read_locks == null)
 			{
 				throw new ObjectDisposedException(null);
 			}
-			int managedThreadId = Thread.CurrentThread.ManagedThreadId;
-			ReaderWriterCount readerWriterCount;
-			if (!this.fIsReentrant)
+			if (this.IsUpgradeableReadLockHeld)
 			{
-				if (managedThreadId == this.upgradeLockOwnerId)
-				{
-					throw new LockRecursionException(global::SR.GetString("Recursive upgradeable lock acquisitions not allowed in this mode."));
-				}
-				if (managedThreadId == this.writeLockOwnerId)
-				{
-					throw new LockRecursionException(global::SR.GetString("Upgradeable lock may not be acquired with write lock held in this mode. Acquiring Upgradeable lock gives the ability to read along with an option to upgrade to a writer."));
-				}
-				this.EnterMyLock();
-				readerWriterCount = this.GetThreadRWCount(true);
-				if (readerWriterCount != null && readerWriterCount.readercount > 0)
-				{
-					this.ExitMyLock();
-					throw new LockRecursionException(global::SR.GetString("Upgradeable lock may not be acquired with read lock held."));
-				}
+				throw new LockRecursionException();
 			}
-			else
+			if (this.IsWriteLockHeld)
 			{
-				this.EnterMyLock();
-				readerWriterCount = this.GetThreadRWCount(false);
-				if (managedThreadId == this.upgradeLockOwnerId)
-				{
-					readerWriterCount.upgradecount++;
-					this.ExitMyLock();
-					return true;
-				}
-				if (managedThreadId == this.writeLockOwnerId)
-				{
-					this.owners += 1U;
-					this.upgradeLockOwnerId = managedThreadId;
-					readerWriterCount.upgradecount++;
-					if (readerWriterCount.readercount > 0)
-					{
-						this.fUpgradeThreadHoldingRead = true;
-					}
-					this.ExitMyLock();
-					return true;
-				}
-				if (readerWriterCount.readercount > 0)
-				{
-					this.ExitMyLock();
-					throw new LockRecursionException(global::SR.GetString("Upgradeable lock may not be acquired with read lock held."));
-				}
+				throw new LockRecursionException();
 			}
-			int num = 0;
-			while (this.upgradeLockOwnerId != -1 || this.owners >= 268435454U)
+			this.EnterMyLock();
+			while (this.owners != 0 || this.numWriteWaiters != 0U || this.upgradable_thread != null)
 			{
-				if (num < 20)
+				if (millisecondsTimeout == 0)
 				{
 					this.ExitMyLock();
-					if (timeout.IsExpired)
-					{
-						return false;
-					}
-					num++;
-					ReaderWriterLockSlim.SpinWait(num);
-					this.EnterMyLock();
+					return false;
 				}
-				else if (this.upgradeEvent == null)
+				if (this.readEvent == null)
 				{
-					this.LazyCreateEvent(ref this.upgradeEvent, true);
+					this.LazyCreateEvent(ref this.readEvent, false);
 				}
-				else if (!this.WaitOnEvent(this.upgradeEvent, ref this.numUpgradeWaiters, timeout, false))
+				else if (!this.WaitOnEvent(this.readEvent, ref this.numReadWaiters, millisecondsTimeout))
 				{
 					return false;
 				}
 			}
-			this.owners += 1U;
-			this.upgradeLockOwnerId = managedThreadId;
-			if (this.fIsReentrant)
-			{
-				if (this.IsRwHashEntryChanged(readerWriterCount))
-				{
-					readerWriterCount = this.GetThreadRWCount(false);
-				}
-				readerWriterCount.upgradecount++;
-			}
+			this.owners++;
+			this.upgradable_thread = Thread.CurrentThread;
 			this.ExitMyLock();
 			return true;
 		}
 
-		public void ExitReadLock()
+		public bool TryEnterUpgradeableReadLock(TimeSpan timeout)
 		{
-			this.EnterMyLock();
-			ReaderWriterCount threadRWCount = this.GetThreadRWCount(true);
-			if (threadRWCount == null || threadRWCount.readercount < 1)
-			{
-				this.ExitMyLock();
-				throw new SynchronizationLockException(global::SR.GetString("The read lock is being released without being held."));
-			}
-			if (this.fIsReentrant)
-			{
-				if (threadRWCount.readercount > 1)
-				{
-					threadRWCount.readercount--;
-					this.ExitMyLock();
-					return;
-				}
-				if (Thread.CurrentThread.ManagedThreadId == this.upgradeLockOwnerId)
-				{
-					this.fUpgradeThreadHoldingRead = false;
-				}
-			}
-			this.owners -= 1U;
-			threadRWCount.readercount--;
-			this.ExitAndWakeUpAppropriateWaiters();
-		}
-
-		public void ExitWriteLock()
-		{
-			if (!this.fIsReentrant)
-			{
-				if (Thread.CurrentThread.ManagedThreadId != this.writeLockOwnerId)
-				{
-					throw new SynchronizationLockException(global::SR.GetString("The write lock is being released without being held."));
-				}
-				this.EnterMyLock();
-			}
-			else
-			{
-				this.EnterMyLock();
-				ReaderWriterCount threadRWCount = this.GetThreadRWCount(false);
-				if (threadRWCount == null)
-				{
-					this.ExitMyLock();
-					throw new SynchronizationLockException(global::SR.GetString("The write lock is being released without being held."));
-				}
-				if (threadRWCount.writercount < 1)
-				{
-					this.ExitMyLock();
-					throw new SynchronizationLockException(global::SR.GetString("The write lock is being released without being held."));
-				}
-				threadRWCount.writercount--;
-				if (threadRWCount.writercount > 0)
-				{
-					this.ExitMyLock();
-					return;
-				}
-			}
-			this.ClearWriterAcquired();
-			this.writeLockOwnerId = -1;
-			this.ExitAndWakeUpAppropriateWaiters();
+			return this.TryEnterUpgradeableReadLock(ReaderWriterLockSlim.CheckTimeout(timeout));
 		}
 
 		public void ExitUpgradeableReadLock()
 		{
-			if (!this.fIsReentrant)
-			{
-				if (Thread.CurrentThread.ManagedThreadId != this.upgradeLockOwnerId)
-				{
-					throw new SynchronizationLockException(global::SR.GetString("The upgradeable lock is being released without being held."));
-				}
-				this.EnterMyLock();
-			}
-			else
-			{
-				this.EnterMyLock();
-				ReaderWriterCount threadRWCount = this.GetThreadRWCount(true);
-				if (threadRWCount == null)
-				{
-					this.ExitMyLock();
-					throw new SynchronizationLockException(global::SR.GetString("The upgradeable lock is being released without being held."));
-				}
-				if (threadRWCount.upgradecount < 1)
-				{
-					this.ExitMyLock();
-					throw new SynchronizationLockException(global::SR.GetString("The upgradeable lock is being released without being held."));
-				}
-				threadRWCount.upgradecount--;
-				if (threadRWCount.upgradecount > 0)
-				{
-					this.ExitMyLock();
-					return;
-				}
-				this.fUpgradeThreadHoldingRead = false;
-			}
-			this.owners -= 1U;
-			this.upgradeLockOwnerId = -1;
-			this.ExitAndWakeUpAppropriateWaiters();
-		}
-
-		private void LazyCreateEvent(ref EventWaitHandle waitEvent, bool makeAutoResetEvent)
-		{
-			this.ExitMyLock();
-			EventWaitHandle eventWaitHandle;
-			if (makeAutoResetEvent)
-			{
-				eventWaitHandle = new AutoResetEvent(false);
-			}
-			else
-			{
-				eventWaitHandle = new ManualResetEvent(false);
-			}
 			this.EnterMyLock();
-			if (waitEvent == null)
-			{
-				waitEvent = eventWaitHandle;
-				return;
-			}
-			eventWaitHandle.Close();
-		}
-
-		private bool WaitOnEvent(EventWaitHandle waitEvent, ref uint numWaiters, ReaderWriterLockSlim.TimeoutTracker timeout, bool isWriteWaiter)
-		{
-			waitEvent.Reset();
-			numWaiters += 1U;
-			this.fNoWaiters = false;
-			if (this.numWriteWaiters == 1U)
-			{
-				this.SetWritersWaiting();
-			}
-			if (this.numWriteUpgradeWaiters == 1U)
-			{
-				this.SetUpgraderWaiting();
-			}
-			bool flag = false;
-			this.ExitMyLock();
-			try
-			{
-				flag = waitEvent.WaitOne(timeout.RemainingMilliseconds);
-			}
-			finally
-			{
-				this.EnterMyLock();
-				numWaiters -= 1U;
-				if (this.numWriteWaiters == 0U && this.numWriteUpgradeWaiters == 0U && this.numUpgradeWaiters == 0U && this.numReadWaiters == 0U)
-				{
-					this.fNoWaiters = true;
-				}
-				if (this.numWriteWaiters == 0U)
-				{
-					this.ClearWritersWaiting();
-				}
-				if (this.numWriteUpgradeWaiters == 0U)
-				{
-					this.ClearUpgraderWaiting();
-				}
-				if (!flag)
-				{
-					if (isWriteWaiter)
-					{
-						this.ExitAndWakeUpAppropriateReadWaiters();
-					}
-					else
-					{
-						this.ExitMyLock();
-					}
-				}
-			}
-			return flag;
-		}
-
-		private void ExitAndWakeUpAppropriateWaiters()
-		{
-			if (this.fNoWaiters)
-			{
-				this.ExitMyLock();
-				return;
-			}
-			this.ExitAndWakeUpAppropriateWaitersPreferringWriters();
-		}
-
-		private void ExitAndWakeUpAppropriateWaitersPreferringWriters()
-		{
-			uint numReaders = this.GetNumReaders();
-			if (this.fIsReentrant && this.numWriteUpgradeWaiters > 0U && this.fUpgradeThreadHoldingRead && numReaders == 2U)
-			{
-				this.ExitMyLock();
-				this.waitUpgradeEvent.Set();
-				return;
-			}
-			if (numReaders == 1U && this.numWriteUpgradeWaiters > 0U)
-			{
-				this.ExitMyLock();
-				this.waitUpgradeEvent.Set();
-				return;
-			}
-			if (numReaders == 0U && this.numWriteWaiters > 0U)
-			{
-				this.ExitMyLock();
-				this.writeEvent.Set();
-				return;
-			}
-			this.ExitAndWakeUpAppropriateReadWaiters();
-		}
-
-		private void ExitAndWakeUpAppropriateReadWaiters()
-		{
-			if (this.numWriteWaiters != 0U || this.numWriteUpgradeWaiters != 0U || this.fNoWaiters)
-			{
-				this.ExitMyLock();
-				return;
-			}
-			bool flag = this.numReadWaiters > 0U;
-			bool flag2 = this.numUpgradeWaiters != 0U && this.upgradeLockOwnerId == -1;
-			this.ExitMyLock();
-			if (flag)
-			{
-				this.readEvent.Set();
-			}
-			if (flag2)
-			{
-				this.upgradeEvent.Set();
-			}
-		}
-
-		private bool IsWriterAcquired()
-		{
-			return (this.owners & 3221225471U) == 0U;
-		}
-
-		private void SetWriterAcquired()
-		{
-			this.owners |= 2147483648U;
-		}
-
-		private void ClearWriterAcquired()
-		{
-			this.owners &= 2147483647U;
-		}
-
-		private void SetWritersWaiting()
-		{
-			this.owners |= 1073741824U;
-		}
-
-		private void ClearWritersWaiting()
-		{
-			this.owners &= 3221225471U;
-		}
-
-		private void SetUpgraderWaiting()
-		{
-			this.owners |= 536870912U;
-		}
-
-		private void ClearUpgraderWaiting()
-		{
-			this.owners &= 3758096383U;
-		}
-
-		private uint GetNumReaders()
-		{
-			return this.owners & 268435455U;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void EnterMyLock()
-		{
-			if (Interlocked.CompareExchange(ref this.myLock, 1, 0) != 0)
-			{
-				this.EnterMyLockSpin();
-			}
-		}
-
-		private void EnterMyLockSpin()
-		{
-			int processorCount = Environment.ProcessorCount;
-			int num = 0;
-			for (;;)
-			{
-				if (num < 10 && processorCount > 1)
-				{
-					Thread.SpinWait(20 * (num + 1));
-				}
-				else if (num < 15)
-				{
-					Thread.Sleep(0);
-				}
-				else
-				{
-					Thread.Sleep(1);
-				}
-				if (this.myLock == 0 && Interlocked.CompareExchange(ref this.myLock, 1, 0) == 0)
-				{
-					break;
-				}
-				num++;
-			}
-		}
-
-		private void ExitMyLock()
-		{
-			Volatile.Write(ref this.myLock, 0);
-		}
-
-		private static void SpinWait(int SpinCount)
-		{
-			if (SpinCount < 5 && Environment.ProcessorCount > 1)
-			{
-				Thread.SpinWait(20 * SpinCount);
-				return;
-			}
-			if (SpinCount < 17)
-			{
-				Thread.Sleep(0);
-				return;
-			}
-			Thread.Sleep(1);
+			this.owners--;
+			this.upgradable_thread = null;
+			this.ExitAndWakeUpAppropriateWaiters();
 		}
 
 		public void Dispose()
 		{
-			this.Dispose(true);
-		}
-
-		private void Dispose(bool disposing)
-		{
-			if (disposing && !this.fDisposed)
-			{
-				if (this.WaitingReadCount > 0 || this.WaitingUpgradeCount > 0 || this.WaitingWriteCount > 0)
-				{
-					throw new SynchronizationLockException(global::SR.GetString("The lock is being disposed while still being used. It either is being held by a thread and/or has active waiters waiting to acquire the lock."));
-				}
-				if (this.IsReadLockHeld || this.IsUpgradeableReadLockHeld || this.IsWriteLockHeld)
-				{
-					throw new SynchronizationLockException(global::SR.GetString("The lock is being disposed while still being used. It either is being held by a thread and/or has active waiters waiting to acquire the lock."));
-				}
-				if (this.writeEvent != null)
-				{
-					this.writeEvent.Close();
-					this.writeEvent = null;
-				}
-				if (this.readEvent != null)
-				{
-					this.readEvent.Close();
-					this.readEvent = null;
-				}
-				if (this.upgradeEvent != null)
-				{
-					this.upgradeEvent.Close();
-					this.upgradeEvent = null;
-				}
-				if (this.waitUpgradeEvent != null)
-				{
-					this.waitUpgradeEvent.Close();
-					this.waitUpgradeEvent = null;
-				}
-				this.fDisposed = true;
-			}
+			this.read_locks = null;
 		}
 
 		public bool IsReadLockHeld
 		{
 			get
 			{
-				return this.RecursiveReadCount > 0;
-			}
-		}
-
-		public bool IsUpgradeableReadLockHeld
-		{
-			get
-			{
-				return this.RecursiveUpgradeCount > 0;
+				return this.RecursiveReadCount != 0;
 			}
 		}
 
@@ -826,19 +260,15 @@ namespace System.Threading
 		{
 			get
 			{
-				return this.RecursiveWriteCount > 0;
+				return this.RecursiveWriteCount != 0;
 			}
 		}
 
-		public LockRecursionPolicy RecursionPolicy
+		public bool IsUpgradeableReadLockHeld
 		{
 			get
 			{
-				if (this.fIsReentrant)
-				{
-					return LockRecursionPolicy.SupportsRecursion;
-				}
-				return LockRecursionPolicy.NoRecursion;
+				return this.RecursiveUpgradeCount != 0;
 			}
 		}
 
@@ -846,12 +276,7 @@ namespace System.Threading
 		{
 			get
 			{
-				int numReaders = (int)this.GetNumReaders();
-				if (this.upgradeLockOwnerId != -1)
-				{
-					return numReaders - 1;
-				}
-				return numReaders;
+				return this.owners & 268435455;
 			}
 		}
 
@@ -859,12 +284,10 @@ namespace System.Threading
 		{
 			get
 			{
-				int num = 0;
-				ReaderWriterCount threadRWCount = this.GetThreadRWCount(true);
-				if (threadRWCount != null)
-				{
-					num = threadRWCount.readercount;
-				}
+				this.EnterMyLock();
+				ReaderWriterLockSlim.LockDetails readLockDetails = this.GetReadLockDetails(Thread.CurrentThread.ManagedThreadId, false);
+				int num = ((readLockDetails != null) ? readLockDetails.ReadLocks : 0);
+				this.ExitMyLock();
 				return num;
 			}
 		}
@@ -873,21 +296,7 @@ namespace System.Threading
 		{
 			get
 			{
-				if (this.fIsReentrant)
-				{
-					int num = 0;
-					ReaderWriterCount threadRWCount = this.GetThreadRWCount(true);
-					if (threadRWCount != null)
-					{
-						num = threadRWCount.upgradecount;
-					}
-					return num;
-				}
-				if (Thread.CurrentThread.ManagedThreadId == this.upgradeLockOwnerId)
-				{
-					return 1;
-				}
-				return 0;
+				return (this.upgradable_thread != Thread.CurrentThread) ? 0 : 1;
 			}
 		}
 
@@ -895,21 +304,7 @@ namespace System.Threading
 		{
 			get
 			{
-				if (this.fIsReentrant)
-				{
-					int num = 0;
-					ReaderWriterCount threadRWCount = this.GetThreadRWCount(true);
-					if (threadRWCount != null)
-					{
-						num = threadRWCount.writercount;
-					}
-					return num;
-				}
-				if (Thread.CurrentThread.ManagedThreadId == this.writeLockOwnerId)
-				{
-					return 1;
-				}
-				return 0;
+				return (this.write_thread != Thread.CurrentThread) ? 0 : 1;
 			}
 		}
 
@@ -937,29 +332,178 @@ namespace System.Threading
 			}
 		}
 
-		private bool fIsReentrant;
+		public LockRecursionPolicy RecursionPolicy
+		{
+			get
+			{
+				return this.recursionPolicy;
+			}
+		}
+
+		private void EnterMyLock()
+		{
+			if (Interlocked.CompareExchange(ref this.myLock, 1, 0) != 0)
+			{
+				this.EnterMyLockSpin();
+			}
+		}
+
+		private void EnterMyLockSpin()
+		{
+			int num = 0;
+			for (;;)
+			{
+				if (num < 3 && ReaderWriterLockSlim.smp)
+				{
+					Thread.SpinWait(20);
+				}
+				else
+				{
+					Thread.Sleep(0);
+				}
+				if (Interlocked.CompareExchange(ref this.myLock, 1, 0) == 0)
+				{
+					break;
+				}
+				num++;
+			}
+		}
+
+		private void ExitMyLock()
+		{
+			this.myLock = 0;
+		}
+
+		private bool MyLockHeld
+		{
+			get
+			{
+				return this.myLock != 0;
+			}
+		}
+
+		private void ExitAndWakeUpAppropriateWaiters()
+		{
+			if (this.owners == 1 && this.numUpgradeWaiters != 0U)
+			{
+				this.ExitMyLock();
+				this.upgradeEvent.Set();
+			}
+			else if (this.owners == 0 && this.numWriteWaiters > 0U)
+			{
+				this.ExitMyLock();
+				this.writeEvent.Set();
+			}
+			else if (this.owners >= 0 && this.numReadWaiters != 0U)
+			{
+				this.ExitMyLock();
+				this.readEvent.Set();
+			}
+			else
+			{
+				this.ExitMyLock();
+			}
+		}
+
+		private void LazyCreateEvent(ref EventWaitHandle waitEvent, bool makeAutoResetEvent)
+		{
+			this.ExitMyLock();
+			EventWaitHandle eventWaitHandle;
+			if (makeAutoResetEvent)
+			{
+				eventWaitHandle = new AutoResetEvent(false);
+			}
+			else
+			{
+				eventWaitHandle = new ManualResetEvent(false);
+			}
+			this.EnterMyLock();
+			if (waitEvent == null)
+			{
+				waitEvent = eventWaitHandle;
+			}
+		}
+
+		private bool WaitOnEvent(EventWaitHandle waitEvent, ref uint numWaiters, int millisecondsTimeout)
+		{
+			waitEvent.Reset();
+			numWaiters += 1U;
+			bool flag = false;
+			this.ExitMyLock();
+			try
+			{
+				flag = waitEvent.WaitOne(millisecondsTimeout, false);
+			}
+			finally
+			{
+				this.EnterMyLock();
+				numWaiters -= 1U;
+				if (!flag)
+				{
+					this.ExitMyLock();
+				}
+			}
+			return flag;
+		}
+
+		private static int CheckTimeout(TimeSpan timeout)
+		{
+			int num;
+			try
+			{
+				num = checked((int)timeout.TotalMilliseconds);
+			}
+			catch (OverflowException)
+			{
+				throw new ArgumentOutOfRangeException("timeout");
+			}
+			return num;
+		}
+
+		private ReaderWriterLockSlim.LockDetails GetReadLockDetails(int threadId, bool create)
+		{
+			int i;
+			ReaderWriterLockSlim.LockDetails lockDetails;
+			for (i = 0; i < this.read_locks.Length; i++)
+			{
+				lockDetails = this.read_locks[i];
+				if (lockDetails == null)
+				{
+					break;
+				}
+				if (lockDetails.ThreadId == threadId)
+				{
+					return lockDetails;
+				}
+			}
+			if (!create)
+			{
+				return null;
+			}
+			if (i == this.read_locks.Length)
+			{
+				Array.Resize<ReaderWriterLockSlim.LockDetails>(ref this.read_locks, this.read_locks.Length * 2);
+			}
+			lockDetails = (this.read_locks[i] = new ReaderWriterLockSlim.LockDetails());
+			lockDetails.ThreadId = threadId;
+			return lockDetails;
+		}
+
+		private static readonly bool smp = Environment.ProcessorCount > 1;
 
 		private int myLock;
 
-		private const int LockSpinCycles = 20;
+		private int owners;
 
-		private const int LockSpinCount = 10;
+		private Thread upgradable_thread;
 
-		private const int LockSleep0Count = 5;
+		private Thread write_thread;
 
 		private uint numWriteWaiters;
 
 		private uint numReadWaiters;
 
-		private uint numWriteUpgradeWaiters;
-
 		private uint numUpgradeWaiters;
-
-		private bool fNoWaiters;
-
-		private int upgradeLockOwnerId;
-
-		private int writeLockOwnerId;
 
 		private EventWaitHandle writeEvent;
 
@@ -967,94 +511,15 @@ namespace System.Threading
 
 		private EventWaitHandle upgradeEvent;
 
-		private EventWaitHandle waitUpgradeEvent;
+		private readonly LockRecursionPolicy recursionPolicy;
 
-		private static long s_nextLockID;
+		private ReaderWriterLockSlim.LockDetails[] read_locks = new ReaderWriterLockSlim.LockDetails[8];
 
-		private long lockID;
-
-		[ThreadStatic]
-		private static ReaderWriterCount t_rwc;
-
-		private bool fUpgradeThreadHoldingRead;
-
-		private const int MaxSpinCount = 20;
-
-		private uint owners;
-
-		private const uint WRITER_HELD = 2147483648U;
-
-		private const uint WAITING_WRITERS = 1073741824U;
-
-		private const uint WAITING_UPGRADER = 536870912U;
-
-		private const uint MAX_READER = 268435454U;
-
-		private const uint READER_MASK = 268435455U;
-
-		private bool fDisposed;
-
-		private struct TimeoutTracker
+		private sealed class LockDetails
 		{
-			public TimeoutTracker(TimeSpan timeout)
-			{
-				long num = (long)timeout.TotalMilliseconds;
-				if (num < -1L || num > 2147483647L)
-				{
-					throw new ArgumentOutOfRangeException("timeout");
-				}
-				this.m_total = (int)num;
-				if (this.m_total != -1 && this.m_total != 0)
-				{
-					this.m_start = Environment.TickCount;
-					return;
-				}
-				this.m_start = 0;
-			}
+			public int ThreadId;
 
-			public TimeoutTracker(int millisecondsTimeout)
-			{
-				if (millisecondsTimeout < -1)
-				{
-					throw new ArgumentOutOfRangeException("millisecondsTimeout");
-				}
-				this.m_total = millisecondsTimeout;
-				if (this.m_total != -1 && this.m_total != 0)
-				{
-					this.m_start = Environment.TickCount;
-					return;
-				}
-				this.m_start = 0;
-			}
-
-			public int RemainingMilliseconds
-			{
-				get
-				{
-					if (this.m_total == -1 || this.m_total == 0)
-					{
-						return this.m_total;
-					}
-					int num = Environment.TickCount - this.m_start;
-					if (num < 0 || num >= this.m_total)
-					{
-						return 0;
-					}
-					return this.m_total - num;
-				}
-			}
-
-			public bool IsExpired
-			{
-				get
-				{
-					return this.RemainingMilliseconds == 0;
-				}
-			}
-
-			private int m_total;
-
-			private int m_start;
+			public int ReadLocks;
 		}
 	}
 }

@@ -26,21 +26,25 @@ namespace System.IO.Ports
 			this.flags &= -8965;
 			switch (hs)
 			{
-			case Handshake.None:
-				break;
 			case Handshake.XOnXOff:
 				this.flags |= 768;
-				return;
+				break;
 			case Handshake.RequestToSend:
 				this.flags |= 8196;
-				return;
+				break;
 			case Handshake.RequestToSendXOnXOff:
 				this.flags |= 8964;
 				break;
-			default:
-				return;
 			}
 		}
+
+		private const int fOutxCtsFlow = 4;
+
+		private const int fOutX = 256;
+
+		private const int fInX = 512;
+
+		private const int fRtsControl2 = 8192;
 
 		public int dcb_length;
 
@@ -71,13 +75,5 @@ namespace System.IO.Ports
 		public byte evt_char;
 
 		public short w_reserved1;
-
-		private const int fOutxCtsFlow = 4;
-
-		private const int fOutX = 256;
-
-		private const int fInX = 512;
-
-		private const int fRtsControl2 = 8192;
 	}
 }

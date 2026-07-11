@@ -12,7 +12,7 @@ namespace System.Diagnostics
 		Warning = 7,
 		Information = 15,
 		Verbose = 31,
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Advanced)]
 		ActivityTracing = 65280,
 		All = -1
 	}

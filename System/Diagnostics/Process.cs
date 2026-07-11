@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.Design;
-using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -11,347 +8,692 @@ using System.Security;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading;
-using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
 
 namespace System.Diagnostics
 {
-	[MonitoringDescription("Provides access to local and remote processes, enabling starting and stopping of local processes.")]
-	[DefaultEvent("Exited")]
-	[DefaultProperty("StartInfo")]
-	[Designer("System.Diagnostics.Design.ProcessDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true, Synchronization = true, ExternalProcessMgmt = true, SelfAffectingProcessMgmt = true)]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-	public class Process : Component
+	[global::System.ComponentModel.DefaultEvent("Exited")]
+	[MonitoringDescription("Represents a system process")]
+	[global::System.ComponentModel.Designer("System.Diagnostics.Design.ProcessDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	[global::System.ComponentModel.DefaultProperty("StartInfo")]
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	public class Process : global::System.ComponentModel.Component
 	{
-		[Browsable(true)]
-		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
-		public event DataReceivedEventHandler OutputDataReceived;
-
-		[Browsable(true)]
-		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
-		public event DataReceivedEventHandler ErrorDataReceived;
+		private Process(IntPtr handle, int id)
+		{
+			this.process_handle = handle;
+			this.pid = id;
+		}
 
 		public Process()
 		{
-			this.machineName = ".";
-			this.outputStreamReadMode = Process.StreamReadMode.undefined;
-			this.errorStreamReadMode = Process.StreamReadMode.undefined;
-			this.m_processAccess = 2035711;
 		}
 
-		private Process(string machineName, bool isRemoteMachine, int processId, ProcessInfo processInfo)
-		{
-			this.machineName = machineName;
-			this.isRemoteMachine = isRemoteMachine;
-			this.processId = processId;
-			this.haveProcessId = true;
-			this.outputStreamReadMode = Process.StreamReadMode.undefined;
-			this.errorStreamReadMode = Process.StreamReadMode.undefined;
-			this.m_processAccess = 2035711;
-		}
+		[MonitoringDescription("Raised when it receives output data")]
+		[global::System.ComponentModel.Browsable(true)]
+		public event DataReceivedEventHandler OutputDataReceived;
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Indicates if the process component is associated with a real process.")]
-		private bool Associated
+		[MonitoringDescription("Raised when it receives error data")]
+		[global::System.ComponentModel.Browsable(true)]
+		public event DataReceivedEventHandler ErrorDataReceived;
+
+		[MonitoringDescription("Raised when this process exits.")]
+		[global::System.ComponentModel.Category("Behavior")]
+		public event EventHandler Exited
 		{
-			get
+			add
 			{
-				return this.haveProcessId || this.haveProcessHandle;
+				if (this.process_handle != IntPtr.Zero && this.HasExited)
+				{
+					value.BeginInvoke(null, null, null, null);
+				}
+				else
+				{
+					this.exited_event = (EventHandler)Delegate.Combine(this.exited_event, value);
+					if (this.exited_event != null)
+					{
+						this.StartExitCallbackIfNeeded();
+					}
+				}
+			}
+			remove
+			{
+				this.exited_event = (EventHandler)Delegate.Remove(this.exited_event, value);
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The value returned from the associated process when it terminated.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Base process priority.")]
+		[global::System.MonoTODO]
+		public int BasePriority
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
+		private void StartExitCallbackIfNeeded()
+		{
+			bool flag = !this.already_waiting && this.enableRaisingEvents && this.exited_event != null;
+			if (flag && this.process_handle != IntPtr.Zero)
+			{
+				WaitOrTimerCallback waitOrTimerCallback = new WaitOrTimerCallback(Process.CBOnExit);
+				Process.ProcessWaitHandle processWaitHandle = new Process.ProcessWaitHandle(this.process_handle);
+				ThreadPool.RegisterWaitForSingleObject(processWaitHandle, waitOrTimerCallback, this, -1, true);
+				this.already_waiting = true;
+			}
+		}
+
+		[MonitoringDescription("Check for exiting of the process to raise the apropriate event.")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DefaultValue(false)]
+		public bool EnableRaisingEvents
+		{
+			get
+			{
+				return this.enableRaisingEvents;
+			}
+			set
+			{
+				bool flag = this.enableRaisingEvents;
+				this.enableRaisingEvents = value;
+				if (this.enableRaisingEvents && !flag)
+				{
+					this.StartExitCallbackIfNeeded();
+				}
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int ExitCode_internal(IntPtr handle);
+
+		[MonitoringDescription("The exit code of the process.")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public int ExitCode
 		{
 			get
 			{
-				this.EnsureState(Process.State.Exited);
-				if (this.exitCode == -1 && !Environment.IsRunningOnWindows)
+				if (this.process_handle == IntPtr.Zero)
 				{
-					throw new InvalidOperationException("Cannot get the exit code from a non-child process on Unix");
+					throw new InvalidOperationException("Process has not been started.");
 				}
-				return this.exitCode;
+				int num = Process.ExitCode_internal(this.process_handle);
+				if (num == 259)
+				{
+					throw new InvalidOperationException("The process must exit before getting the requested information.");
+				}
+				return num;
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Indicates if the associated process has been terminated.")]
-		public bool HasExited
-		{
-			get
-			{
-				if (!this.exited)
-				{
-					this.EnsureState(Process.State.Associated);
-					SafeProcessHandle safeProcessHandle = null;
-					try
-					{
-						safeProcessHandle = this.GetProcessHandle(1049600, false);
-						int num;
-						if (safeProcessHandle.IsInvalid)
-						{
-							this.exited = true;
-						}
-						else if (Microsoft.Win32.NativeMethods.GetExitCodeProcess(safeProcessHandle, out num) && num != 259)
-						{
-							this.exited = true;
-							this.exitCode = num;
-						}
-						else
-						{
-							if (!this.signaled)
-							{
-								ProcessWaitHandle processWaitHandle = null;
-								try
-								{
-									processWaitHandle = new ProcessWaitHandle(safeProcessHandle);
-									this.signaled = processWaitHandle.WaitOne(0, false);
-								}
-								finally
-								{
-									if (processWaitHandle != null)
-									{
-										processWaitHandle.Close();
-									}
-								}
-							}
-							if (this.signaled)
-							{
-								if (!Microsoft.Win32.NativeMethods.GetExitCodeProcess(safeProcessHandle, out num))
-								{
-									throw new Win32Exception();
-								}
-								this.exited = true;
-								this.exitCode = num;
-							}
-						}
-					}
-					finally
-					{
-						this.ReleaseProcessHandle(safeProcessHandle);
-					}
-					if (this.exited)
-					{
-						this.RaiseOnExited();
-					}
-				}
-				return this.exited;
-			}
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long ExitTime_internal(IntPtr handle);
 
-		private ProcessThreadTimes GetProcessTimes()
-		{
-			ProcessThreadTimes processThreadTimes = new ProcessThreadTimes();
-			SafeProcessHandle safeProcessHandle = null;
-			try
-			{
-				int num = 1024;
-				if (EnvironmentHelpers.IsWindowsVistaOrAbove())
-				{
-					num = 4096;
-				}
-				safeProcessHandle = this.GetProcessHandle(num, false);
-				if (safeProcessHandle.IsInvalid)
-				{
-					throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
-				}
-				if (!Microsoft.Win32.NativeMethods.GetProcessTimes(safeProcessHandle, out processThreadTimes.create, out processThreadTimes.exit, out processThreadTimes.kernel, out processThreadTimes.user))
-				{
-					throw new Win32Exception();
-				}
-			}
-			finally
-			{
-				this.ReleaseProcessHandle(safeProcessHandle);
-			}
-			return processThreadTimes;
-		}
-
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The time that the associated process exited.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.Browsable(false)]
+		[MonitoringDescription("The exit time of the process.")]
 		public DateTime ExitTime
 		{
 			get
 			{
-				if (!this.haveExitTime)
+				if (this.process_handle == IntPtr.Zero)
 				{
-					this.EnsureState((Process.State)20);
-					this.exitTime = this.GetProcessTimes().ExitTime;
-					this.haveExitTime = true;
+					throw new InvalidOperationException("Process has not been started.");
 				}
-				return this.exitTime;
+				if (!this.HasExited)
+				{
+					throw new InvalidOperationException("The process must exit before getting the requested information.");
+				}
+				return DateTime.FromFileTime(Process.ExitTime_internal(this.process_handle));
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Returns the native handle for this process.   The handle is only available if the process was started using this component.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("Handle for this process.")]
+		[global::System.ComponentModel.Browsable(false)]
 		public IntPtr Handle
 		{
 			get
 			{
-				this.EnsureState(Process.State.Associated);
-				return this.OpenProcessHandle(this.m_processAccess).DangerousGetHandle();
+				return this.process_handle;
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public SafeProcessHandle SafeHandle
+		[MonitoringDescription("Handles for this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.MonoTODO]
+		public int HandleCount
 		{
 			get
 			{
-				this.EnsureState(Process.State.Associated);
-				return this.OpenProcessHandle(this.m_processAccess);
+				return 0;
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The unique identifier for the process.")]
+		[MonitoringDescription("Determines if the process is still running.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.Browsable(false)]
+		public bool HasExited
+		{
+			get
+			{
+				if (this.process_handle == IntPtr.Zero)
+				{
+					throw new InvalidOperationException("Process has not been started.");
+				}
+				int num = Process.ExitCode_internal(this.process_handle);
+				return num != 259;
+			}
+		}
+
+		[MonitoringDescription("Process identifier.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public int Id
 		{
 			get
 			{
-				this.EnsureState(Process.State.HaveId);
-				return this.processId;
+				if (this.pid == 0)
+				{
+					throw new InvalidOperationException("Process ID has not been set.");
+				}
+				return this.pid;
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The name of the machine the running the process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The name of the computer running the process.")]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.Browsable(false)]
 		public string MachineName
 		{
 			get
 			{
-				this.EnsureState(Process.State.Associated);
-				return this.machineName;
+				return "localhost";
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of physical memory the process has required since it was started.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.Browsable(false)]
+		[MonitoringDescription("The main module of the process.")]
+		public ProcessModule MainModule
+		{
+			get
+			{
+				return this.Modules[0];
+			}
+		}
+
+		[MonitoringDescription("The handle of the main window of the process.")]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public IntPtr MainWindowHandle
+		{
+			get
+			{
+				return (IntPtr)0;
+			}
+		}
+
+		[MonitoringDescription("The title of the main window of the process.")]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public string MainWindowTitle
+		{
+			get
+			{
+				return "null";
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool GetWorkingSet_internal(IntPtr handle, out int min, out int max);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetWorkingSet_internal(IntPtr handle, int min, int max, bool use_min);
+
+		[MonitoringDescription("The maximum working set for this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public IntPtr MaxWorkingSet
 		{
 			get
 			{
-				this.EnsureWorkingSetLimits();
-				return this.maxWorkingSet;
+				if (this.HasExited)
+				{
+					throw new InvalidOperationException(string.Concat(new object[] { "The process ", this.ProcessName, " (ID ", this.Id, ") has exited" }));
+				}
+				int num;
+				int num2;
+				if (!Process.GetWorkingSet_internal(this.process_handle, out num, out num2))
+				{
+					throw new global::System.ComponentModel.Win32Exception();
+				}
+				return (IntPtr)num2;
 			}
 			set
 			{
-				this.SetWorkingSetLimits(null, value);
+				if (this.HasExited)
+				{
+					throw new InvalidOperationException(string.Concat(new object[] { "The process ", this.ProcessName, " (ID ", this.Id, ") has exited" }));
+				}
+				if (!Process.SetWorkingSet_internal(this.process_handle, 0, value.ToInt32(), false))
+				{
+					throw new global::System.ComponentModel.Win32Exception();
+				}
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The minimum amount of physical memory the process has required since it was started.")]
+		[MonitoringDescription("The minimum working set for this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public IntPtr MinWorkingSet
 		{
 			get
 			{
-				this.EnsureWorkingSetLimits();
-				return this.minWorkingSet;
+				if (this.HasExited)
+				{
+					throw new InvalidOperationException(string.Concat(new object[] { "The process ", this.ProcessName, " (ID ", this.Id, ") has exited" }));
+				}
+				int num;
+				int num2;
+				if (!Process.GetWorkingSet_internal(this.process_handle, out num, out num2))
+				{
+					throw new global::System.ComponentModel.Win32Exception();
+				}
+				return (IntPtr)num;
 			}
 			set
 			{
-				this.SetWorkingSetLimits(value, null);
+				if (this.HasExited)
+				{
+					throw new InvalidOperationException(string.Concat(new object[] { "The process ", this.ProcessName, " (ID ", this.Id, ") has exited" }));
+				}
+				if (!Process.SetWorkingSet_internal(this.process_handle, value.ToInt32(), 0, true))
+				{
+					throw new global::System.ComponentModel.Win32Exception();
+				}
 			}
 		}
 
-		private OperatingSystem OperatingSystem
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern ProcessModule[] GetModules_internal(IntPtr handle);
+
+		[MonitoringDescription("The modules that are loaded as part of this process.")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public ProcessModuleCollection Modules
 		{
 			get
 			{
-				if (this.operatingSystem == null)
+				if (this.module_collection == null)
 				{
-					this.operatingSystem = Environment.OSVersion;
+					this.module_collection = new ProcessModuleCollection(this.GetModules_internal(this.process_handle));
 				}
-				return this.operatingSystem;
+				return this.module_collection;
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The priority that the threads in the process run relative to.")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long GetProcessData(int pid, int data_type, out int error);
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Obsolete("Use NonpagedSystemMemorySize64")]
+		[global::System.MonoTODO]
+		[MonitoringDescription("The number of bytes that are not pageable.")]
+		public int NonpagedSystemMemorySize
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
+		[global::System.MonoTODO]
+		[MonitoringDescription("The number of bytes that are paged.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Obsolete("Use PagedMemorySize64")]
+		public int PagedMemorySize
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
+		[Obsolete("Use PagedSystemMemorySize64")]
+		[MonitoringDescription("The amount of paged system memory in bytes.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.MonoTODO]
+		public int PagedSystemMemorySize
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
+		[global::System.MonoTODO]
+		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Obsolete("Use PeakPagedMemorySize64")]
+		public int PeakPagedMemorySize
+		{
+			get
+			{
+				return 0;
+			}
+		}
+
+		[Obsolete("Use PeakVirtualMemorySize64")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
+		public int PeakVirtualMemorySize
+		{
+			get
+			{
+				int num;
+				return (int)Process.GetProcessData(this.pid, 8, out num);
+			}
+		}
+
+		[MonitoringDescription("The maximum amount of system memory used by this process.")]
+		[Obsolete("Use PeakWorkingSet64")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public int PeakWorkingSet
+		{
+			get
+			{
+				int num;
+				return (int)Process.GetProcessData(this.pid, 5, out num);
+			}
+		}
+
+		[ComVisible(false)]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The number of bytes that are not pageable.")]
+		public long NonpagedSystemMemorySize64
+		{
+			get
+			{
+				return 0L;
+			}
+		}
+
+		[MonitoringDescription("The number of bytes that are paged.")]
+		[ComVisible(false)]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public long PagedMemorySize64
+		{
+			get
+			{
+				return 0L;
+			}
+		}
+
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of paged system memory in bytes.")]
+		[ComVisible(false)]
+		public long PagedSystemMemorySize64
+		{
+			get
+			{
+				return 0L;
+			}
+		}
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
+		[ComVisible(false)]
+		[global::System.MonoTODO]
+		public long PeakPagedMemorySize64
+		{
+			get
+			{
+				return 0L;
+			}
+		}
+
+		[ComVisible(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
+		public long PeakVirtualMemorySize64
+		{
+			get
+			{
+				int num;
+				return Process.GetProcessData(this.pid, 8, out num);
+			}
+		}
+
+		[MonitoringDescription("The maximum amount of system memory used by this process.")]
+		[ComVisible(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public long PeakWorkingSet64
+		{
+			get
+			{
+				int num;
+				return Process.GetProcessData(this.pid, 5, out num);
+			}
+		}
+
+		[global::System.MonoTODO]
+		[MonitoringDescription("Process will be of higher priority while it is actively used.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public bool PriorityBoostEnabled
+		{
+			get
+			{
+				return false;
+			}
+			set
+			{
+			}
+		}
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.MonoLimitation("Under Unix, only root is allowed to raise the priority.")]
+		[MonitoringDescription("The relative process priority.")]
 		public ProcessPriorityClass PriorityClass
 		{
 			get
 			{
-				if (!this.havePriorityClass)
+				if (this.process_handle == IntPtr.Zero)
 				{
-					SafeProcessHandle safeProcessHandle = null;
-					try
-					{
-						safeProcessHandle = this.GetProcessHandle(1024);
-						int num = Microsoft.Win32.NativeMethods.GetPriorityClass(safeProcessHandle);
-						if (num == 0)
-						{
-							throw new Win32Exception();
-						}
-						this.priorityClass = (ProcessPriorityClass)num;
-						this.havePriorityClass = true;
-					}
-					finally
-					{
-						this.ReleaseProcessHandle(safeProcessHandle);
-					}
+					throw new InvalidOperationException("Process has not been started.");
 				}
-				return this.priorityClass;
+				int num;
+				int priorityClass = Process.GetPriorityClass(this.process_handle, out num);
+				if (priorityClass == 0)
+				{
+					throw new global::System.ComponentModel.Win32Exception(num);
+				}
+				return (ProcessPriorityClass)priorityClass;
 			}
 			set
 			{
 				if (!Enum.IsDefined(typeof(ProcessPriorityClass), value))
 				{
-					throw new InvalidEnumArgumentException("value", (int)value, typeof(ProcessPriorityClass));
+					throw new global::System.ComponentModel.InvalidEnumArgumentException("value", (int)value, typeof(ProcessPriorityClass));
 				}
-				SafeProcessHandle safeProcessHandle = null;
-				try
+				if (this.process_handle == IntPtr.Zero)
 				{
-					safeProcessHandle = this.GetProcessHandle(512);
-					if (!Microsoft.Win32.NativeMethods.SetPriorityClass(safeProcessHandle, (int)value))
-					{
-						throw new Win32Exception();
-					}
-					this.priorityClass = value;
-					this.havePriorityClass = true;
+					throw new InvalidOperationException("Process has not been started.");
 				}
-				finally
+				int num;
+				if (!Process.SetPriorityClass(this.process_handle, (int)value, out num))
 				{
-					this.ReleaseProcessHandle(safeProcessHandle);
+					throw new global::System.ComponentModel.Win32Exception(num);
 				}
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of CPU time the process spent inside the operating system core.")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPriorityClass(IntPtr handle, out int error);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool SetPriorityClass(IntPtr handle, int priority, out int error);
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of memory exclusively used by this process.")]
+		[Obsolete("Use PrivateMemorySize64")]
+		public int PrivateMemorySize
+		{
+			get
+			{
+				int num;
+				return (int)Process.GetProcessData(this.pid, 6, out num);
+			}
+		}
+
+		[MonitoringDescription("The session ID for this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.MonoNotSupported("")]
+		public int SessionId
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long Times(IntPtr handle, int type);
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of processing time spent in the OS core for this process.")]
 		public TimeSpan PrivilegedProcessorTime
 		{
 			get
 			{
-				this.EnsureState(Process.State.IsNt);
-				return this.GetProcessTimes().PrivilegedProcessorTime;
+				return new TimeSpan(Process.Times(this.process_handle, 1));
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-		[MonitoringDescription("Specifies information used to start a process.")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern string ProcessName_internal(IntPtr handle);
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The name of this process.")]
+		public string ProcessName
+		{
+			get
+			{
+				if (this.process_name == null)
+				{
+					if (this.process_handle == IntPtr.Zero)
+					{
+						throw new InvalidOperationException("No process is associated with this object.");
+					}
+					this.process_name = Process.ProcessName_internal(this.process_handle);
+					if (this.process_name == null)
+					{
+						throw new InvalidOperationException("Process has exited, so the requested information is not available.");
+					}
+					if (this.process_name.EndsWith(".exe") || this.process_name.EndsWith(".bat") || this.process_name.EndsWith(".com"))
+					{
+						this.process_name = this.process_name.Substring(0, this.process_name.Length - 4);
+					}
+				}
+				return this.process_name;
+			}
+		}
+
+		[MonitoringDescription("Allowed processor that can be used by this process.")]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public IntPtr ProcessorAffinity
+		{
+			get
+			{
+				return (IntPtr)0;
+			}
+			set
+			{
+			}
+		}
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.MonoTODO]
+		[MonitoringDescription("Is this process responsive.")]
+		public bool Responding
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		[MonitoringDescription("The standard error stream of this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.Browsable(false)]
+		public StreamReader StandardError
+		{
+			get
+			{
+				if (this.error_stream == null)
+				{
+					throw new InvalidOperationException("Standard error has not been redirected");
+				}
+				if ((this.async_mode & Process.AsyncModes.AsyncError) != Process.AsyncModes.NoneYet)
+				{
+					throw new InvalidOperationException("Cannot mix asynchronous and synchonous reads.");
+				}
+				this.async_mode |= Process.AsyncModes.SyncError;
+				return this.error_stream;
+			}
+		}
+
+		[MonitoringDescription("The standard input stream of this process.")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public StreamWriter StandardInput
+		{
+			get
+			{
+				if (this.input_stream == null)
+				{
+					throw new InvalidOperationException("Standard input has not been redirected");
+				}
+				return this.input_stream;
+			}
+		}
+
+		[global::System.ComponentModel.Browsable(false)]
+		[MonitoringDescription("The standard output stream of this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public StreamReader StandardOutput
+		{
+			get
+			{
+				if (this.output_stream == null)
+				{
+					throw new InvalidOperationException("Standard output has not been redirected");
+				}
+				if ((this.async_mode & Process.AsyncModes.AsyncOutput) != Process.AsyncModes.NoneYet)
+				{
+					throw new InvalidOperationException("Cannot mix asynchronous and synchonous reads.");
+				}
+				this.async_mode |= Process.AsyncModes.SyncOutput;
+				return this.output_stream;
+			}
+		}
+
+		[MonitoringDescription("Information for the start of this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Content)]
+		[global::System.ComponentModel.Browsable(false)]
 		public ProcessStartInfo StartInfo
 		{
 			get
 			{
-				if (this.startInfo == null)
+				if (this.start_info == null)
 				{
-					this.startInfo = new ProcessStartInfo(this);
+					this.start_info = new ProcessStartInfo();
 				}
-				return this.startInfo;
+				return this.start_info;
 			}
 			set
 			{
@@ -359,40 +701,30 @@ namespace System.Diagnostics
 				{
 					throw new ArgumentNullException("value");
 				}
-				this.startInfo = value;
+				this.start_info = value;
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The time at which the process was started.")]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern long StartTime_internal(IntPtr handle);
+
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The time this process started.")]
 		public DateTime StartTime
 		{
 			get
 			{
-				this.EnsureState(Process.State.IsNt);
-				return this.GetProcessTimes().StartTime;
+				return DateTime.FromFileTime(Process.StartTime_internal(this.process_handle));
 			}
 		}
 
-		[Browsable(false)]
-		[DefaultValue(null)]
-		[MonitoringDescription("The object used to marshal the event handler calls issued as a result of a Process exit.")]
-		public ISynchronizeInvoke SynchronizingObject
+		[global::System.ComponentModel.DefaultValue(null)]
+		[global::System.ComponentModel.Browsable(false)]
+		[MonitoringDescription("The object that is used to synchronize event handler calls for this process.")]
+		public global::System.ComponentModel.ISynchronizeInvoke SynchronizingObject
 		{
 			get
 			{
-				if (this.synchronizingObject == null && base.DesignMode)
-				{
-					IDesignerHost designerHost = (IDesignerHost)this.GetService(typeof(IDesignerHost));
-					if (designerHost != null)
-					{
-						object rootComponent = designerHost.RootComponent;
-						if (rootComponent != null && rootComponent is ISynchronizeInvoke)
-						{
-							this.synchronizingObject = (ISynchronizeInvoke)rootComponent;
-						}
-					}
-				}
 				return this.synchronizingObject;
 			}
 			set
@@ -401,523 +733,541 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of CPU time the process has used.")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.MonoTODO]
+		[MonitoringDescription("The number of threads of this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public ProcessThreadCollection Threads
+		{
+			get
+			{
+				return ProcessThreadCollection.GetEmpty();
+			}
+		}
+
+		[MonitoringDescription("The total CPU time spent for this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public TimeSpan TotalProcessorTime
 		{
 			get
 			{
-				this.EnsureState(Process.State.IsNt);
-				return this.GetProcessTimes().TotalProcessorTime;
+				return new TimeSpan(Process.Times(this.process_handle, 2));
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of CPU time the process spent outside the operating system core.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The CPU time spent for this process in user mode.")]
 		public TimeSpan UserProcessorTime
 		{
 			get
 			{
-				this.EnsureState(Process.State.IsNt);
-				return this.GetProcessTimes().UserProcessorTime;
+				return new TimeSpan(Process.Times(this.process_handle, 0));
 			}
 		}
 
-		[Browsable(false)]
-		[DefaultValue(false)]
-		[MonitoringDescription("Whether the process component should watch for the associated process to exit, and raise the Exited event.")]
-		public bool EnableRaisingEvents
+		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Obsolete("Use VirtualMemorySize64")]
+		public int VirtualMemorySize
 		{
 			get
 			{
-				return this.watchForExit;
-			}
-			set
-			{
-				if (value != this.watchForExit)
-				{
-					if (this.Associated)
-					{
-						if (value)
-						{
-							this.OpenProcessHandle();
-							this.EnsureWatchingForExit();
-						}
-						else
-						{
-							this.StopWatchingForExit();
-						}
-					}
-					this.watchForExit = value;
-				}
+				int num;
+				return (int)Process.GetProcessData(this.pid, 7, out num);
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Standard input stream of the process.")]
-		public StreamWriter StandardInput
+		[MonitoringDescription("The amount of physical memory currently used for this process.")]
+		[Obsolete("Use WorkingSet64")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		public int WorkingSet
 		{
 			get
 			{
-				if (this.standardInput == null)
-				{
-					throw new InvalidOperationException(global::SR.GetString("StandardIn has not been redirected."));
-				}
-				this.inputStreamReadMode = Process.StreamReadMode.syncMode;
-				return this.standardInput;
+				int num;
+				return (int)Process.GetProcessData(this.pid, 4, out num);
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Standard output stream of the process.")]
-		public StreamReader StandardOutput
+		[ComVisible(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of memory exclusively used by this process.")]
+		public long PrivateMemorySize64
 		{
 			get
 			{
-				if (this.standardOutput == null)
-				{
-					throw new InvalidOperationException(global::SR.GetString("StandardOut has not been redirected or the process hasn't started yet."));
-				}
-				if (this.outputStreamReadMode == Process.StreamReadMode.undefined)
-				{
-					this.outputStreamReadMode = Process.StreamReadMode.syncMode;
-				}
-				else if (this.outputStreamReadMode != Process.StreamReadMode.syncMode)
-				{
-					throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
-				}
-				return this.standardOutput;
+				int num;
+				return Process.GetProcessData(this.pid, 6, out num);
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Standard error stream of the process.")]
-		public StreamReader StandardError
+		[ComVisible(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
+		public long VirtualMemorySize64
 		{
 			get
 			{
-				if (this.standardError == null)
-				{
-					throw new InvalidOperationException(global::SR.GetString("StandardError has not been redirected."));
-				}
-				if (this.errorStreamReadMode == Process.StreamReadMode.undefined)
-				{
-					this.errorStreamReadMode = Process.StreamReadMode.syncMode;
-				}
-				else if (this.errorStreamReadMode != Process.StreamReadMode.syncMode)
-				{
-					throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
-				}
-				return this.standardError;
+				int num;
+				return Process.GetProcessData(this.pid, 7, out num);
 			}
 		}
 
-		[Category("Behavior")]
-		[MonitoringDescription("If the WatchForExit property is set to true, then this event is raised when the associated process exits.")]
-		public event EventHandler Exited
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[ComVisible(false)]
+		[MonitoringDescription("The amount of physical memory currently used for this process.")]
+		public long WorkingSet64
 		{
-			add
+			get
 			{
-				this.onExited = (EventHandler)Delegate.Combine(this.onExited, value);
-			}
-			remove
-			{
-				this.onExited = (EventHandler)Delegate.Remove(this.onExited, value);
-			}
-		}
-
-		private void ReleaseProcessHandle(SafeProcessHandle handle)
-		{
-			if (handle == null)
-			{
-				return;
-			}
-			if (this.haveProcessHandle && handle == this.m_processHandle)
-			{
-				return;
-			}
-			handle.Close();
-		}
-
-		private void CompletionCallback(object context, bool wasSignaled)
-		{
-			this.StopWatchingForExit();
-			this.RaiseOnExited();
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			if (!this.disposed)
-			{
-				if (disposing)
-				{
-					this.Close();
-				}
-				this.disposed = true;
-				base.Dispose(disposing);
+				int num;
+				return Process.GetProcessData(this.pid, 4, out num);
 			}
 		}
 
 		public void Close()
 		{
-			if (this.Associated)
-			{
-				if (this.haveProcessHandle)
-				{
-					this.StopWatchingForExit();
-					this.m_processHandle.Close();
-					this.m_processHandle = null;
-					this.haveProcessHandle = false;
-				}
-				this.haveProcessId = false;
-				this.isRemoteMachine = false;
-				this.machineName = ".";
-				this.raisedOnExited = false;
-				StreamWriter streamWriter = this.standardInput;
-				this.standardInput = null;
-				if (this.inputStreamReadMode == Process.StreamReadMode.undefined && streamWriter != null)
-				{
-					streamWriter.Close();
-				}
-				StreamReader streamReader = this.standardOutput;
-				this.standardOutput = null;
-				if (this.outputStreamReadMode == Process.StreamReadMode.undefined && streamReader != null)
-				{
-					streamReader.Close();
-				}
-				streamReader = this.standardError;
-				this.standardError = null;
-				if (this.errorStreamReadMode == Process.StreamReadMode.undefined && streamReader != null)
-				{
-					streamReader.Close();
-				}
-				AsyncStreamReader asyncStreamReader = this.output;
-				this.output = null;
-				if (this.outputStreamReadMode == Process.StreamReadMode.asyncMode && asyncStreamReader != null)
-				{
-					asyncStreamReader.CancelOperation();
-					asyncStreamReader.Close();
-				}
-				asyncStreamReader = this.error;
-				this.error = null;
-				if (this.errorStreamReadMode == Process.StreamReadMode.asyncMode && asyncStreamReader != null)
-				{
-					asyncStreamReader.CancelOperation();
-					asyncStreamReader.Close();
-				}
-				this.Refresh();
-			}
+			this.Dispose(true);
 		}
 
-		private void EnsureState(Process.State state)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool Kill_internal(IntPtr handle, int signo);
+
+		private bool Close(int signo)
 		{
-			if ((state & Process.State.Associated) != (Process.State)0 && !this.Associated)
+			if (this.process_handle == IntPtr.Zero)
 			{
-				throw new InvalidOperationException(global::SR.GetString("No process is associated with this object."));
+				throw new SystemException("No process to kill.");
 			}
-			if ((state & Process.State.HaveId) != (Process.State)0 && !this.haveProcessId)
+			int num = Process.ExitCode_internal(this.process_handle);
+			if (num != 259)
 			{
-				this.EnsureState(Process.State.Associated);
-				throw new InvalidOperationException(global::SR.GetString("Feature requires a process identifier."));
+				throw new InvalidOperationException("The process already finished.");
 			}
-			if ((state & Process.State.IsLocal) != (Process.State)0 && this.isRemoteMachine)
-			{
-				throw new NotSupportedException(global::SR.GetString("Feature is not supported for remote machines."));
-			}
-			if ((state & Process.State.HaveProcessInfo) != (Process.State)0)
-			{
-				throw new InvalidOperationException(global::SR.GetString("Process has exited, so the requested information is not available."));
-			}
-			if ((state & Process.State.Exited) != (Process.State)0)
-			{
-				if (!this.HasExited)
-				{
-					throw new InvalidOperationException(global::SR.GetString("Process must exit before requested information can be determined."));
-				}
-				if (!this.haveProcessHandle)
-				{
-					throw new InvalidOperationException(global::SR.GetString("Process was not started by this object, so requested information cannot be determined."));
-				}
-			}
+			return Process.Kill_internal(this.process_handle, signo);
 		}
 
-		private void EnsureWatchingForExit()
+		public bool CloseMainWindow()
 		{
-			if (!this.watchingForExit)
-			{
-				lock (this)
-				{
-					if (!this.watchingForExit)
-					{
-						this.watchingForExit = true;
-						try
-						{
-							this.waitHandle = new ProcessWaitHandle(this.m_processHandle);
-							this.registeredWaitHandle = ThreadPool.RegisterWaitForSingleObject(this.waitHandle, new WaitOrTimerCallback(this.CompletionCallback), null, -1, true);
-						}
-						catch
-						{
-							this.watchingForExit = false;
-							throw;
-						}
-					}
-				}
-			}
+			return this.Close(2);
 		}
 
-		private void EnsureWorkingSetLimits()
-		{
-			this.EnsureState(Process.State.IsNt);
-			if (!this.haveWorkingSetLimits)
-			{
-				SafeProcessHandle safeProcessHandle = null;
-				try
-				{
-					safeProcessHandle = this.GetProcessHandle(1024);
-					IntPtr intPtr;
-					IntPtr intPtr2;
-					if (!Microsoft.Win32.NativeMethods.GetProcessWorkingSetSize(safeProcessHandle, out intPtr, out intPtr2))
-					{
-						throw new Win32Exception();
-					}
-					this.minWorkingSet = intPtr;
-					this.maxWorkingSet = intPtr2;
-					this.haveWorkingSetLimits = true;
-				}
-				finally
-				{
-					this.ReleaseProcessHandle(safeProcessHandle);
-				}
-			}
-		}
-
+		[global::System.MonoTODO]
 		public static void EnterDebugMode()
 		{
 		}
 
-		public static void LeaveDebugMode()
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr GetProcess_internal(int pid);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int GetPid_internal();
+
+		public static Process GetCurrentProcess()
 		{
+			int pid_internal = Process.GetPid_internal();
+			IntPtr process_internal = Process.GetProcess_internal(pid_internal);
+			if (process_internal == IntPtr.Zero)
+			{
+				throw new SystemException("Can't find current process");
+			}
+			return new Process(process_internal, pid_internal);
 		}
 
 		public static Process GetProcessById(int processId)
 		{
-			return Process.GetProcessById(processId, ".");
+			IntPtr process_internal = Process.GetProcess_internal(processId);
+			if (process_internal == IntPtr.Zero)
+			{
+				throw new ArgumentException("Can't find process with ID " + processId.ToString());
+			}
+			return new Process(process_internal, processId);
+		}
+
+		[global::System.MonoTODO("There is no support for retrieving process information from a remote machine")]
+		public static Process GetProcessById(int processId, string machineName)
+		{
+			if (machineName == null)
+			{
+				throw new ArgumentNullException("machineName");
+			}
+			if (!Process.IsLocalMachine(machineName))
+			{
+				throw new NotImplementedException();
+			}
+			return Process.GetProcessById(processId);
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern int[] GetProcesses_internal();
+
+		public static Process[] GetProcesses()
+		{
+			int[] processes_internal = Process.GetProcesses_internal();
+			ArrayList arrayList = new ArrayList();
+			if (processes_internal == null)
+			{
+				return new Process[0];
+			}
+			for (int i = 0; i < processes_internal.Length; i++)
+			{
+				try
+				{
+					arrayList.Add(Process.GetProcessById(processes_internal[i]));
+				}
+				catch (SystemException)
+				{
+				}
+			}
+			return (Process[])arrayList.ToArray(typeof(Process));
+		}
+
+		[global::System.MonoTODO("There is no support for retrieving process information from a remote machine")]
+		public static Process[] GetProcesses(string machineName)
+		{
+			if (machineName == null)
+			{
+				throw new ArgumentNullException("machineName");
+			}
+			if (!Process.IsLocalMachine(machineName))
+			{
+				throw new NotImplementedException();
+			}
+			return Process.GetProcesses();
 		}
 
 		public static Process[] GetProcessesByName(string processName)
 		{
-			return Process.GetProcessesByName(processName, ".");
-		}
-
-		public static Process[] GetProcesses()
-		{
-			return Process.GetProcesses(".");
-		}
-
-		public static Process GetCurrentProcess()
-		{
-			return new Process(".", false, Microsoft.Win32.NativeMethods.GetCurrentProcessId(), null);
-		}
-
-		protected void OnExited()
-		{
-			EventHandler eventHandler = this.onExited;
-			if (eventHandler != null)
+			Process[] processes = Process.GetProcesses();
+			ArrayList arrayList = new ArrayList();
+			for (int i = 0; i < processes.Length; i++)
 			{
-				if (this.SynchronizingObject != null && this.SynchronizingObject.InvokeRequired)
+				try
 				{
-					this.SynchronizingObject.BeginInvoke(eventHandler, new object[]
+					if (string.Compare(processName, processes[i].ProcessName, true) == 0)
 					{
-						this,
-						EventArgs.Empty
-					});
-					return;
-				}
-				eventHandler(this, EventArgs.Empty);
-			}
-		}
-
-		private SafeProcessHandle GetProcessHandle(int access, bool throwIfExited)
-		{
-			if (this.haveProcessHandle)
-			{
-				if (throwIfExited)
-				{
-					ProcessWaitHandle processWaitHandle = null;
-					try
-					{
-						processWaitHandle = new ProcessWaitHandle(this.m_processHandle);
-						if (processWaitHandle.WaitOne(0, false))
-						{
-							if (this.haveProcessId)
-							{
-								throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
-							}
-							throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process has exited."));
-						}
-					}
-					finally
-					{
-						if (processWaitHandle != null)
-						{
-							processWaitHandle.Close();
-						}
+						arrayList.Add(processes[i]);
 					}
 				}
-				return this.m_processHandle;
-			}
-			this.EnsureState((Process.State)3);
-			SafeProcessHandle invalidHandle = SafeProcessHandle.InvalidHandle;
-			IntPtr currentProcess = Microsoft.Win32.NativeMethods.GetCurrentProcess();
-			if (!Microsoft.Win32.NativeMethods.DuplicateHandle(new HandleRef(this, currentProcess), new HandleRef(this, currentProcess), new HandleRef(this, currentProcess), out invalidHandle, 0, false, 3))
-			{
-				throw new Win32Exception();
-			}
-			if (throwIfExited && (access & 1024) != 0 && Microsoft.Win32.NativeMethods.GetExitCodeProcess(invalidHandle, out this.exitCode) && this.exitCode != 259)
-			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot process request because the process ({0}) has exited.", new object[] { this.processId.ToString(CultureInfo.CurrentCulture) }));
-			}
-			return invalidHandle;
-		}
-
-		private SafeProcessHandle GetProcessHandle(int access)
-		{
-			return this.GetProcessHandle(access, true);
-		}
-
-		private SafeProcessHandle OpenProcessHandle()
-		{
-			return this.OpenProcessHandle(2035711);
-		}
-
-		private SafeProcessHandle OpenProcessHandle(int access)
-		{
-			if (!this.haveProcessHandle)
-			{
-				if (this.disposed)
+				catch (Exception)
 				{
-					throw new ObjectDisposedException(base.GetType().Name);
 				}
-				this.SetProcessHandle(this.GetProcessHandle(access));
 			}
-			return this.m_processHandle;
+			return (Process[])arrayList.ToArray(typeof(Process));
+		}
+
+		[global::System.MonoTODO]
+		public static Process[] GetProcessesByName(string processName, string machineName)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void Kill()
+		{
+			this.Close(1);
+		}
+
+		[global::System.MonoTODO]
+		public static void LeaveDebugMode()
+		{
 		}
 
 		public void Refresh()
 		{
-			this.threads = null;
-			this.modules = null;
-			this.exited = false;
-			this.signaled = false;
-			this.haveWorkingSetLimits = false;
-			this.havePriorityClass = false;
-			this.haveExitTime = false;
 		}
 
-		private void SetProcessHandle(SafeProcessHandle processHandle)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ShellExecuteEx_internal(ProcessStartInfo startInfo, ref Process.ProcInfo proc_info);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool CreateProcess_internal(ProcessStartInfo startInfo, IntPtr stdin, IntPtr stdout, IntPtr stderr, ref Process.ProcInfo proc_info);
+
+		private static bool Start_shell(ProcessStartInfo startInfo, Process process)
 		{
-			this.m_processHandle = processHandle;
-			this.haveProcessHandle = true;
-			if (this.watchForExit)
+			Process.ProcInfo procInfo = default(Process.ProcInfo);
+			if (startInfo.RedirectStandardInput || startInfo.RedirectStandardOutput || startInfo.RedirectStandardError)
 			{
-				this.EnsureWatchingForExit();
+				throw new InvalidOperationException("UseShellExecute must be false when redirecting I/O.");
 			}
-		}
-
-		private void SetProcessId(int processId)
-		{
-			this.processId = processId;
-			this.haveProcessId = true;
-		}
-
-		private void SetWorkingSetLimits(object newMin, object newMax)
-		{
-			this.EnsureState(Process.State.IsNt);
-			SafeProcessHandle safeProcessHandle = null;
+			if (startInfo.HaveEnvVars)
+			{
+				throw new InvalidOperationException("UseShellExecute must be false in order to use environment variables.");
+			}
+			Process.FillUserInfo(startInfo, ref procInfo);
+			bool flag;
 			try
 			{
-				safeProcessHandle = this.GetProcessHandle(1280);
-				IntPtr intPtr;
-				IntPtr intPtr2;
-				if (!Microsoft.Win32.NativeMethods.GetProcessWorkingSetSize(safeProcessHandle, out intPtr, out intPtr2))
-				{
-					throw new Win32Exception();
-				}
-				if (newMin != null)
-				{
-					intPtr = (IntPtr)newMin;
-				}
-				if (newMax != null)
-				{
-					intPtr2 = (IntPtr)newMax;
-				}
-				if ((long)intPtr > (long)intPtr2)
-				{
-					if (newMin != null)
-					{
-						throw new ArgumentException(global::SR.GetString("Minimum working set size is invalid. It must be less than or equal to the maximum working set size."));
-					}
-					throw new ArgumentException(global::SR.GetString("Maximum working set size is invalid. It must be greater than or equal to the minimum working set size."));
-				}
-				else
-				{
-					if (!Microsoft.Win32.NativeMethods.SetProcessWorkingSetSize(safeProcessHandle, intPtr, intPtr2))
-					{
-						throw new Win32Exception();
-					}
-					if (!Microsoft.Win32.NativeMethods.GetProcessWorkingSetSize(safeProcessHandle, out intPtr, out intPtr2))
-					{
-						throw new Win32Exception();
-					}
-					this.minWorkingSet = intPtr;
-					this.maxWorkingSet = intPtr2;
-					this.haveWorkingSetLimits = true;
-				}
+				flag = Process.ShellExecuteEx_internal(startInfo, ref procInfo);
 			}
 			finally
 			{
-				this.ReleaseProcessHandle(safeProcessHandle);
+				if (procInfo.Password != IntPtr.Zero)
+				{
+					Marshal.FreeBSTR(procInfo.Password);
+				}
+				procInfo.Password = IntPtr.Zero;
 			}
+			if (!flag)
+			{
+				throw new global::System.ComponentModel.Win32Exception(-procInfo.pid);
+			}
+			process.process_handle = procInfo.process_handle;
+			process.pid = procInfo.pid;
+			process.StartExitCallbackIfNeeded();
+			return flag;
+		}
+
+		private static bool Start_noshell(ProcessStartInfo startInfo, Process process)
+		{
+			Process.ProcInfo procInfo = default(Process.ProcInfo);
+			IntPtr intPtr = IntPtr.Zero;
+			IntPtr intPtr2 = IntPtr.Zero;
+			if (startInfo.HaveEnvVars)
+			{
+				string[] array = new string[startInfo.EnvironmentVariables.Count];
+				startInfo.EnvironmentVariables.Keys.CopyTo(array, 0);
+				procInfo.envKeys = array;
+				array = new string[startInfo.EnvironmentVariables.Count];
+				startInfo.EnvironmentVariables.Values.CopyTo(array, 0);
+				procInfo.envValues = array;
+			}
+			bool flag;
+			if (startInfo.RedirectStandardInput)
+			{
+				if (Process.IsWindows)
+				{
+					int num = 2;
+					IntPtr intPtr3;
+					flag = global::System.IO.MonoIO.CreatePipe(out intPtr, out intPtr3);
+					if (flag)
+					{
+						flag = global::System.IO.MonoIO.DuplicateHandle(Process.GetCurrentProcess().Handle, intPtr3, Process.GetCurrentProcess().Handle, out intPtr2, 0, 0, num);
+						global::System.IO.MonoIOError monoIOError;
+						global::System.IO.MonoIO.Close(intPtr3, out monoIOError);
+					}
+				}
+				else
+				{
+					flag = global::System.IO.MonoIO.CreatePipe(out intPtr, out intPtr2);
+				}
+				if (!flag)
+				{
+					throw new IOException("Error creating standard input pipe");
+				}
+			}
+			else
+			{
+				intPtr = global::System.IO.MonoIO.ConsoleInput;
+				intPtr2 = (IntPtr)0;
+			}
+			IntPtr consoleOutput;
+			if (startInfo.RedirectStandardOutput)
+			{
+				IntPtr zero = IntPtr.Zero;
+				if (Process.IsWindows)
+				{
+					int num2 = 2;
+					IntPtr intPtr4;
+					flag = global::System.IO.MonoIO.CreatePipe(out intPtr4, out consoleOutput);
+					if (flag)
+					{
+						global::System.IO.MonoIO.DuplicateHandle(Process.GetCurrentProcess().Handle, intPtr4, Process.GetCurrentProcess().Handle, out zero, 0, 0, num2);
+						global::System.IO.MonoIOError monoIOError;
+						global::System.IO.MonoIO.Close(intPtr4, out monoIOError);
+					}
+				}
+				else
+				{
+					flag = global::System.IO.MonoIO.CreatePipe(out zero, out consoleOutput);
+				}
+				process.stdout_rd = zero;
+				if (!flag)
+				{
+					if (startInfo.RedirectStandardInput)
+					{
+						global::System.IO.MonoIOError monoIOError;
+						global::System.IO.MonoIO.Close(intPtr, out monoIOError);
+						global::System.IO.MonoIO.Close(intPtr2, out monoIOError);
+					}
+					throw new IOException("Error creating standard output pipe");
+				}
+			}
+			else
+			{
+				process.stdout_rd = (IntPtr)0;
+				consoleOutput = global::System.IO.MonoIO.ConsoleOutput;
+			}
+			IntPtr consoleError;
+			if (startInfo.RedirectStandardError)
+			{
+				IntPtr zero2 = IntPtr.Zero;
+				if (Process.IsWindows)
+				{
+					int num3 = 2;
+					IntPtr intPtr5;
+					flag = global::System.IO.MonoIO.CreatePipe(out intPtr5, out consoleError);
+					if (flag)
+					{
+						global::System.IO.MonoIO.DuplicateHandle(Process.GetCurrentProcess().Handle, intPtr5, Process.GetCurrentProcess().Handle, out zero2, 0, 0, num3);
+						global::System.IO.MonoIOError monoIOError;
+						global::System.IO.MonoIO.Close(intPtr5, out monoIOError);
+					}
+				}
+				else
+				{
+					flag = global::System.IO.MonoIO.CreatePipe(out zero2, out consoleError);
+				}
+				process.stderr_rd = zero2;
+				if (!flag)
+				{
+					if (startInfo.RedirectStandardInput)
+					{
+						global::System.IO.MonoIOError monoIOError;
+						global::System.IO.MonoIO.Close(intPtr, out monoIOError);
+						global::System.IO.MonoIO.Close(intPtr2, out monoIOError);
+					}
+					if (startInfo.RedirectStandardOutput)
+					{
+						global::System.IO.MonoIOError monoIOError;
+						global::System.IO.MonoIO.Close(process.stdout_rd, out monoIOError);
+						global::System.IO.MonoIO.Close(consoleOutput, out monoIOError);
+					}
+					throw new IOException("Error creating standard error pipe");
+				}
+			}
+			else
+			{
+				process.stderr_rd = (IntPtr)0;
+				consoleError = global::System.IO.MonoIO.ConsoleError;
+			}
+			Process.FillUserInfo(startInfo, ref procInfo);
+			try
+			{
+				flag = Process.CreateProcess_internal(startInfo, intPtr, consoleOutput, consoleError, ref procInfo);
+			}
+			finally
+			{
+				if (procInfo.Password != IntPtr.Zero)
+				{
+					Marshal.FreeBSTR(procInfo.Password);
+				}
+				procInfo.Password = IntPtr.Zero;
+			}
+			if (!flag)
+			{
+				if (startInfo.RedirectStandardInput)
+				{
+					global::System.IO.MonoIOError monoIOError;
+					global::System.IO.MonoIO.Close(intPtr, out monoIOError);
+					global::System.IO.MonoIO.Close(intPtr2, out monoIOError);
+				}
+				if (startInfo.RedirectStandardOutput)
+				{
+					global::System.IO.MonoIOError monoIOError;
+					global::System.IO.MonoIO.Close(process.stdout_rd, out monoIOError);
+					global::System.IO.MonoIO.Close(consoleOutput, out monoIOError);
+				}
+				if (startInfo.RedirectStandardError)
+				{
+					global::System.IO.MonoIOError monoIOError;
+					global::System.IO.MonoIO.Close(process.stderr_rd, out monoIOError);
+					global::System.IO.MonoIO.Close(consoleError, out monoIOError);
+				}
+				throw new global::System.ComponentModel.Win32Exception(-procInfo.pid, string.Concat(new string[] { "ApplicationName='", startInfo.FileName, "', CommandLine='", startInfo.Arguments, "', CurrentDirectory='", startInfo.WorkingDirectory, "'" }));
+			}
+			process.process_handle = procInfo.process_handle;
+			process.pid = procInfo.pid;
+			if (startInfo.RedirectStandardInput)
+			{
+				global::System.IO.MonoIOError monoIOError;
+				global::System.IO.MonoIO.Close(intPtr, out monoIOError);
+				process.input_stream = new StreamWriter(new global::System.IO.MonoSyncFileStream(intPtr2, FileAccess.Write, true, 8192), Console.Out.Encoding);
+				process.input_stream.AutoFlush = true;
+			}
+			Encoding encoding = startInfo.StandardOutputEncoding ?? Console.Out.Encoding;
+			Encoding encoding2 = startInfo.StandardErrorEncoding ?? Console.Out.Encoding;
+			if (startInfo.RedirectStandardOutput)
+			{
+				global::System.IO.MonoIOError monoIOError;
+				global::System.IO.MonoIO.Close(consoleOutput, out monoIOError);
+				process.output_stream = new StreamReader(new global::System.IO.MonoSyncFileStream(process.stdout_rd, FileAccess.Read, true, 8192), encoding, true, 8192);
+			}
+			if (startInfo.RedirectStandardError)
+			{
+				global::System.IO.MonoIOError monoIOError;
+				global::System.IO.MonoIO.Close(consoleError, out monoIOError);
+				process.error_stream = new StreamReader(new global::System.IO.MonoSyncFileStream(process.stderr_rd, FileAccess.Read, true, 8192), encoding2, true, 8192);
+			}
+			process.StartExitCallbackIfNeeded();
+			return flag;
+		}
+
+		private static void FillUserInfo(ProcessStartInfo startInfo, ref Process.ProcInfo proc_info)
+		{
+			if (startInfo.UserName != null)
+			{
+				proc_info.UserName = startInfo.UserName;
+				proc_info.Domain = startInfo.Domain;
+				if (startInfo.Password != null)
+				{
+					proc_info.Password = Marshal.SecureStringToBSTR(startInfo.Password);
+				}
+				else
+				{
+					proc_info.Password = IntPtr.Zero;
+				}
+				proc_info.LoadUserProfile = startInfo.LoadUserProfile;
+			}
+		}
+
+		private static bool Start_common(ProcessStartInfo startInfo, Process process)
+		{
+			if (startInfo.FileName == null || startInfo.FileName.Length == 0)
+			{
+				throw new InvalidOperationException("File name has not been set");
+			}
+			if (startInfo.StandardErrorEncoding != null && !startInfo.RedirectStandardError)
+			{
+				throw new InvalidOperationException("StandardErrorEncoding is only supported when standard error is redirected");
+			}
+			if (startInfo.StandardOutputEncoding != null && !startInfo.RedirectStandardOutput)
+			{
+				throw new InvalidOperationException("StandardOutputEncoding is only supported when standard output is redirected");
+			}
+			if (!startInfo.UseShellExecute)
+			{
+				return Process.Start_noshell(startInfo, process);
+			}
+			if (!string.IsNullOrEmpty(startInfo.UserName))
+			{
+				throw new InvalidOperationException("UserShellExecute must be false if an explicit UserName is specified when starting a process");
+			}
+			return Process.Start_shell(startInfo, process);
 		}
 
 		public bool Start()
 		{
-			this.Close();
-			ProcessStartInfo processStartInfo = this.StartInfo;
-			if (processStartInfo.FileName.Length == 0)
+			if (this.process_handle != IntPtr.Zero)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot start process because a file name has not been provided."));
+				this.Process_free_internal(this.process_handle);
+				this.process_handle = IntPtr.Zero;
 			}
-			if (processStartInfo.UseShellExecute)
-			{
-				return this.StartWithShellExecuteEx(processStartInfo);
-			}
-			return this.StartWithCreateProcess(processStartInfo);
+			return Process.Start_common(this.start_info, this);
 		}
 
-		public static Process Start(string fileName, string userName, SecureString password, string domain)
+		public static Process Start(ProcessStartInfo startInfo)
 		{
-			return Process.Start(new ProcessStartInfo(fileName)
+			if (startInfo == null)
 			{
-				UserName = userName,
-				Password = password,
-				Domain = domain,
-				UseShellExecute = false
-			});
-		}
-
-		public static Process Start(string fileName, string arguments, string userName, SecureString password, string domain)
-		{
-			return Process.Start(new ProcessStartInfo(fileName, arguments)
+				throw new ArgumentNullException("startInfo");
+			}
+			Process process = new Process();
+			process.StartInfo = startInfo;
+			if (Process.Start_common(startInfo, process))
 			{
-				UserName = userName,
-				Password = password,
-				Domain = domain,
-				UseShellExecute = false
-			});
+				return process;
+			}
+			return null;
 		}
 
 		public static Process Start(string fileName)
@@ -930,827 +1280,91 @@ namespace System.Diagnostics
 			return Process.Start(new ProcessStartInfo(fileName, arguments));
 		}
 
-		public static Process Start(ProcessStartInfo startInfo)
+		public static Process Start(string fileName, string username, SecureString password, string domain)
 		{
-			Process process = new Process();
-			if (startInfo == null)
-			{
-				throw new ArgumentNullException("startInfo");
-			}
-			process.StartInfo = startInfo;
-			if (process.Start())
-			{
-				return process;
-			}
-			return null;
+			return Process.Start(fileName, null, username, password, domain);
 		}
 
-		public void Kill()
+		public static Process Start(string fileName, string arguments, string username, SecureString password, string domain)
 		{
-			SafeProcessHandle safeProcessHandle = null;
-			try
+			return Process.Start(new ProcessStartInfo(fileName, arguments)
 			{
-				safeProcessHandle = this.GetProcessHandle(1);
-				if (!Microsoft.Win32.NativeMethods.TerminateProcess(safeProcessHandle, -1))
-				{
-					throw new Win32Exception();
-				}
-			}
-			finally
-			{
-				this.ReleaseProcessHandle(safeProcessHandle);
-			}
-		}
-
-		private void StopWatchingForExit()
-		{
-			if (this.watchingForExit)
-			{
-				lock (this)
-				{
-					if (this.watchingForExit)
-					{
-						this.watchingForExit = false;
-						this.registeredWaitHandle.Unregister(null);
-						this.waitHandle.Close();
-						this.waitHandle = null;
-						this.registeredWaitHandle = null;
-					}
-				}
-			}
+				UserName = username,
+				Password = password,
+				Domain = domain,
+				UseShellExecute = false
+			});
 		}
 
 		public override string ToString()
 		{
-			if (!this.Associated)
-			{
-				return base.ToString();
-			}
-			string text = string.Empty;
-			try
-			{
-				text = this.ProcessName;
-			}
-			catch (PlatformNotSupportedException)
-			{
-			}
-			if (text.Length != 0)
-			{
-				return string.Format(CultureInfo.CurrentCulture, "{0} ({1})", base.ToString(), text);
-			}
-			return base.ToString();
+			return base.ToString() + " (" + this.ProcessName + ")";
 		}
 
-		public bool WaitForExit(int milliseconds)
-		{
-			SafeProcessHandle safeProcessHandle = null;
-			ProcessWaitHandle processWaitHandle = null;
-			bool flag;
-			try
-			{
-				safeProcessHandle = this.GetProcessHandle(1048576, false);
-				if (safeProcessHandle.IsInvalid)
-				{
-					flag = true;
-				}
-				else
-				{
-					processWaitHandle = new ProcessWaitHandle(safeProcessHandle);
-					if (processWaitHandle.WaitOne(milliseconds, false))
-					{
-						flag = true;
-						this.signaled = true;
-					}
-					else
-					{
-						flag = false;
-						this.signaled = false;
-					}
-				}
-				if (this.output != null && milliseconds == -1)
-				{
-					this.output.WaitUtilEOF();
-				}
-				if (this.error != null && milliseconds == -1)
-				{
-					this.error.WaitUtilEOF();
-				}
-			}
-			finally
-			{
-				if (processWaitHandle != null)
-				{
-					processWaitHandle.Close();
-				}
-				this.ReleaseProcessHandle(safeProcessHandle);
-			}
-			if (flag && this.watchForExit)
-			{
-				this.RaiseOnExited();
-			}
-			return flag;
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool WaitForExit_internal(IntPtr handle, int ms);
 
 		public void WaitForExit()
 		{
 			this.WaitForExit(-1);
 		}
 
-		public bool WaitForInputIdle(int milliseconds)
+		public bool WaitForExit(int milliseconds)
 		{
-			SafeProcessHandle safeProcessHandle = null;
-			try
+			int num = milliseconds;
+			if (num == 2147483647)
 			{
-				safeProcessHandle = this.GetProcessHandle(1049600);
-				int num = Microsoft.Win32.NativeMethods.WaitForInputIdle(safeProcessHandle, milliseconds);
-				if (num != -1)
+				num = -1;
+			}
+			DateTime dateTime = DateTime.UtcNow;
+			if (this.async_output != null && !this.async_output.IsCompleted)
+			{
+				if (!this.async_output.WaitHandle.WaitOne(num, false))
 				{
-					if (num == 0)
+					return false;
+				}
+				if (num >= 0)
+				{
+					DateTime utcNow = DateTime.UtcNow;
+					num -= (int)(utcNow - dateTime).TotalMilliseconds;
+					if (num <= 0)
 					{
-						return true;
+						return false;
 					}
-					if (num == 258)
+					dateTime = utcNow;
+				}
+			}
+			if (this.async_error != null && !this.async_error.IsCompleted)
+			{
+				if (!this.async_error.WaitHandle.WaitOne(num, false))
+				{
+					return false;
+				}
+				if (num >= 0)
+				{
+					num -= (int)(DateTime.UtcNow - dateTime).TotalMilliseconds;
+					if (num <= 0)
 					{
 						return false;
 					}
 				}
-				throw new InvalidOperationException(global::SR.GetString("WaitForInputIdle failed.  This could be because the process does not have a graphical interface."));
 			}
-			finally
-			{
-				this.ReleaseProcessHandle(safeProcessHandle);
-			}
-			bool flag;
-			return flag;
+			return this.WaitForExit_internal(this.process_handle, num);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern bool WaitForInputIdle_internal(IntPtr handle, int ms);
+
+		[global::System.MonoTODO]
 		public bool WaitForInputIdle()
 		{
-			return this.WaitForInputIdle(int.MaxValue);
+			return this.WaitForInputIdle(-1);
 		}
 
-		[ComVisible(false)]
-		public void BeginOutputReadLine()
+		[global::System.MonoTODO]
+		public bool WaitForInputIdle(int milliseconds)
 		{
-			if (this.outputStreamReadMode == Process.StreamReadMode.undefined)
-			{
-				this.outputStreamReadMode = Process.StreamReadMode.asyncMode;
-			}
-			else if (this.outputStreamReadMode != Process.StreamReadMode.asyncMode)
-			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
-			}
-			if (this.pendingOutputRead)
-			{
-				throw new InvalidOperationException(global::SR.GetString("An async read operation has already been started on the stream."));
-			}
-			this.pendingOutputRead = true;
-			if (this.output == null)
-			{
-				if (this.standardOutput == null)
-				{
-					throw new InvalidOperationException(global::SR.GetString("StandardOut has not been redirected or the process hasn't started yet."));
-				}
-				Stream baseStream = this.standardOutput.BaseStream;
-				this.output = new AsyncStreamReader(this, baseStream, new UserCallBack(this.OutputReadNotifyUser), this.standardOutput.CurrentEncoding);
-			}
-			this.output.BeginReadLine();
-		}
-
-		[ComVisible(false)]
-		public void BeginErrorReadLine()
-		{
-			if (this.errorStreamReadMode == Process.StreamReadMode.undefined)
-			{
-				this.errorStreamReadMode = Process.StreamReadMode.asyncMode;
-			}
-			else if (this.errorStreamReadMode != Process.StreamReadMode.asyncMode)
-			{
-				throw new InvalidOperationException(global::SR.GetString("Cannot mix synchronous and asynchronous operation on process stream."));
-			}
-			if (this.pendingErrorRead)
-			{
-				throw new InvalidOperationException(global::SR.GetString("An async read operation has already been started on the stream."));
-			}
-			this.pendingErrorRead = true;
-			if (this.error == null)
-			{
-				if (this.standardError == null)
-				{
-					throw new InvalidOperationException(global::SR.GetString("StandardError has not been redirected."));
-				}
-				Stream baseStream = this.standardError.BaseStream;
-				this.error = new AsyncStreamReader(this, baseStream, new UserCallBack(this.ErrorReadNotifyUser), this.standardError.CurrentEncoding);
-			}
-			this.error.BeginReadLine();
-		}
-
-		[ComVisible(false)]
-		public void CancelOutputRead()
-		{
-			if (this.output != null)
-			{
-				this.output.CancelOperation();
-				this.pendingOutputRead = false;
-				return;
-			}
-			throw new InvalidOperationException(global::SR.GetString("No async read operation is in progress on the stream."));
-		}
-
-		[ComVisible(false)]
-		public void CancelErrorRead()
-		{
-			if (this.error != null)
-			{
-				this.error.CancelOperation();
-				this.pendingErrorRead = false;
-				return;
-			}
-			throw new InvalidOperationException(global::SR.GetString("No async read operation is in progress on the stream."));
-		}
-
-		internal void OutputReadNotifyUser(string data)
-		{
-			DataReceivedEventHandler outputDataReceived = this.OutputDataReceived;
-			if (outputDataReceived != null)
-			{
-				DataReceivedEventArgs e = new DataReceivedEventArgs(data);
-				if (this.SynchronizingObject != null && this.SynchronizingObject.InvokeRequired)
-				{
-					this.SynchronizingObject.Invoke(outputDataReceived, new object[] { this, e });
-					return;
-				}
-				outputDataReceived(this, e);
-			}
-		}
-
-		internal void ErrorReadNotifyUser(string data)
-		{
-			DataReceivedEventHandler errorDataReceived = this.ErrorDataReceived;
-			if (errorDataReceived != null)
-			{
-				DataReceivedEventArgs e = new DataReceivedEventArgs(data);
-				if (this.SynchronizingObject != null && this.SynchronizingObject.InvokeRequired)
-				{
-					this.SynchronizingObject.Invoke(errorDataReceived, new object[] { this, e });
-					return;
-				}
-				errorDataReceived(this, e);
-			}
-		}
-
-		private Process(SafeProcessHandle handle, int id)
-		{
-			this.SetProcessHandle(handle);
-			this.SetProcessId(id);
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Base process priority.")]
-		public int BasePriority
-		{
-			get
-			{
-				return 0;
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Handles for this process.")]
-		public int HandleCount
-		{
-			get
-			{
-				return 0;
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
-		[MonitoringDescription("The main module of the process.")]
-		public ProcessModule MainModule
-		{
-			get
-			{
-				if (this.processId == Microsoft.Win32.NativeMethods.GetCurrentProcessId())
-				{
-					if (Process.current_main_module == null)
-					{
-						Process.current_main_module = this.Modules[0];
-					}
-					return Process.current_main_module;
-				}
-				return this.Modules[0];
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The handle of the main window of the process.")]
-		public IntPtr MainWindowHandle
-		{
-			get
-			{
-				return (IntPtr)0;
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The title of the main window of the process.")]
-		public string MainWindowTitle
-		{
-			get
-			{
-				return "null";
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern ProcessModule[] GetModules_internal(IntPtr handle);
-
-		private ProcessModule[] GetModules_internal(SafeProcessHandle handle)
-		{
-			bool flag = false;
-			ProcessModule[] modules_internal;
-			try
-			{
-				handle.DangerousAddRef(ref flag);
-				modules_internal = this.GetModules_internal(handle.DangerousGetHandle());
-			}
-			finally
-			{
-				if (flag)
-				{
-					handle.DangerousRelease();
-				}
-			}
-			return modules_internal;
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[Browsable(false)]
-		[MonitoringDescription("The modules that are loaded as part of this process.")]
-		public ProcessModuleCollection Modules
-		{
-			get
-			{
-				if (this.modules == null)
-				{
-					SafeProcessHandle safeProcessHandle = null;
-					try
-					{
-						safeProcessHandle = this.GetProcessHandle(1024);
-						this.modules = new ProcessModuleCollection(this.GetModules_internal(safeProcessHandle));
-					}
-					finally
-					{
-						this.ReleaseProcessHandle(safeProcessHandle);
-					}
-				}
-				return this.modules;
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetProcessData(int pid, int data_type, out int error);
-
-		[MonoTODO]
-		[Obsolete("Use NonpagedSystemMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The number of bytes that are not pageable.")]
-		public int NonpagedSystemMemorySize
-		{
-			get
-			{
-				return 0;
-			}
-		}
-
-		[Obsolete("Use PagedMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The number of bytes that are paged.")]
-		public int PagedMemorySize
-		{
-			get
-			{
-				return (int)this.PagedMemorySize64;
-			}
-		}
-
-		[Obsolete("Use PagedSystemMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of paged system memory in bytes.")]
-		public int PagedSystemMemorySize
-		{
-			get
-			{
-				return (int)this.PagedMemorySize64;
-			}
-		}
-
-		[MonoTODO]
-		[Obsolete("Use PeakPagedMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
-		public int PeakPagedMemorySize
-		{
-			get
-			{
-				return 0;
-			}
-		}
-
-		[Obsolete("Use PeakVirtualMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
-		public int PeakVirtualMemorySize
-		{
-			get
-			{
-				int num;
-				return (int)Process.GetProcessData(this.processId, 8, out num);
-			}
-		}
-
-		[Obsolete("Use PeakWorkingSet64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of system memory used by this process.")]
-		public int PeakWorkingSet
-		{
-			get
-			{
-				int num;
-				return (int)Process.GetProcessData(this.processId, 5, out num);
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The number of bytes that are not pageable.")]
-		[ComVisible(false)]
-		public long NonpagedSystemMemorySize64
-		{
-			get
-			{
-				return 0L;
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The number of bytes that are paged.")]
-		[ComVisible(false)]
-		public long PagedMemorySize64
-		{
-			get
-			{
-				int num;
-				return Process.GetProcessData(this.processId, 12, out num);
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of paged system memory in bytes.")]
-		[ComVisible(false)]
-		public long PagedSystemMemorySize64
-		{
-			get
-			{
-				return this.PagedMemorySize64;
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of paged memory used by this process.")]
-		[ComVisible(false)]
-		public long PeakPagedMemorySize64
-		{
-			get
-			{
-				return 0L;
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of virtual memory used by this process.")]
-		[ComVisible(false)]
-		public long PeakVirtualMemorySize64
-		{
-			get
-			{
-				int num;
-				return Process.GetProcessData(this.processId, 8, out num);
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The maximum amount of system memory used by this process.")]
-		[ComVisible(false)]
-		public long PeakWorkingSet64
-		{
-			get
-			{
-				int num;
-				return Process.GetProcessData(this.processId, 5, out num);
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Process will be of higher priority while it is actively used.")]
-		public bool PriorityBoostEnabled
-		{
-			get
-			{
-				return false;
-			}
-			set
-			{
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of memory exclusively used by this process.")]
-		[Obsolete("Use PrivateMemorySize64")]
-		public int PrivateMemorySize
-		{
-			get
-			{
-				int num;
-				return (int)Process.GetProcessData(this.processId, 6, out num);
-			}
-		}
-
-		[MonoNotSupported("")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The session ID for this process.")]
-		public int SessionId
-		{
-			get
-			{
-				return 0;
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string ProcessName_internal(IntPtr handle);
-
-		private static string ProcessName_internal(SafeProcessHandle handle)
-		{
-			bool flag = false;
-			string text;
-			try
-			{
-				handle.DangerousAddRef(ref flag);
-				text = Process.ProcessName_internal(handle.DangerousGetHandle());
-			}
-			finally
-			{
-				if (flag)
-				{
-					handle.DangerousRelease();
-				}
-			}
-			return text;
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The name of this process.")]
-		public string ProcessName
-		{
-			get
-			{
-				if (this.process_name == null)
-				{
-					SafeProcessHandle safeProcessHandle = null;
-					try
-					{
-						safeProcessHandle = this.GetProcessHandle(1024);
-						this.process_name = Process.ProcessName_internal(safeProcessHandle);
-						if (this.process_name == null)
-						{
-							throw new InvalidOperationException("Process has exited or is inaccessible, so the requested information is not available.");
-						}
-						if (this.process_name.EndsWith(".exe") || this.process_name.EndsWith(".bat") || this.process_name.EndsWith(".com"))
-						{
-							this.process_name = this.process_name.Substring(0, this.process_name.Length - 4);
-						}
-					}
-					finally
-					{
-						this.ReleaseProcessHandle(safeProcessHandle);
-					}
-				}
-				return this.process_name;
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Allowed processor that can be used by this process.")]
-		public IntPtr ProcessorAffinity
-		{
-			get
-			{
-				return (IntPtr)0;
-			}
-			set
-			{
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("Is this process responsive.")]
-		public bool Responding
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		[MonoTODO]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The number of threads of this process.")]
-		public ProcessThreadCollection Threads
-		{
-			get
-			{
-				if (this.threads == null)
-				{
-					int num;
-					this.threads = new ProcessThreadCollection(new ProcessThread[Process.GetProcessData(this.processId, 0, out num)]);
-				}
-				return this.threads;
-			}
-		}
-
-		[Obsolete("Use VirtualMemorySize64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
-		public int VirtualMemorySize
-		{
-			get
-			{
-				int num;
-				return (int)Process.GetProcessData(this.processId, 7, out num);
-			}
-		}
-
-		[Obsolete("Use WorkingSet64")]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of physical memory currently used for this process.")]
-		public int WorkingSet
-		{
-			get
-			{
-				int num;
-				return (int)Process.GetProcessData(this.processId, 4, out num);
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of memory exclusively used by this process.")]
-		[ComVisible(false)]
-		public long PrivateMemorySize64
-		{
-			get
-			{
-				int num;
-				return Process.GetProcessData(this.processId, 6, out num);
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of virtual memory currently used for this process.")]
-		[ComVisible(false)]
-		public long VirtualMemorySize64
-		{
-			get
-			{
-				int num;
-				return Process.GetProcessData(this.processId, 7, out num);
-			}
-		}
-
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		[MonitoringDescription("The amount of physical memory currently used for this process.")]
-		[ComVisible(false)]
-		public long WorkingSet64
-		{
-			get
-			{
-				int num;
-				return Process.GetProcessData(this.processId, 4, out num);
-			}
-		}
-
-		public bool CloseMainWindow()
-		{
-			SafeProcessHandle safeProcessHandle = null;
-			bool flag;
-			try
-			{
-				safeProcessHandle = this.GetProcessHandle(1);
-				flag = Microsoft.Win32.NativeMethods.TerminateProcess(safeProcessHandle, -2);
-			}
-			finally
-			{
-				this.ReleaseProcessHandle(safeProcessHandle);
-			}
-			return flag;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr GetProcess_internal(int pid);
-
-		[MonoTODO("There is no support for retrieving process information from a remote machine")]
-		public static Process GetProcessById(int processId, string machineName)
-		{
-			if (machineName == null)
-			{
-				throw new ArgumentNullException("machineName");
-			}
-			if (!Process.IsLocalMachine(machineName))
-			{
-				throw new NotImplementedException();
-			}
-			IntPtr process_internal = Process.GetProcess_internal(processId);
-			if (process_internal == IntPtr.Zero)
-			{
-				throw new ArgumentException("Can't find process with ID " + processId.ToString());
-			}
-			return new Process(new SafeProcessHandle(process_internal, true), processId);
-		}
-
-		public static Process[] GetProcessesByName(string processName, string machineName)
-		{
-			if (machineName == null)
-			{
-				throw new ArgumentNullException("machineName");
-			}
-			if (!Process.IsLocalMachine(machineName))
-			{
-				throw new NotImplementedException();
-			}
-			Process[] processes = Process.GetProcesses();
-			if (processes.Length == 0)
-			{
-				return processes;
-			}
-			int num = 0;
-			for (int i = 0; i < processes.Length; i++)
-			{
-				try
-				{
-					if (string.Compare(processName, processes[i].ProcessName, true) == 0)
-					{
-						processes[num++] = processes[i];
-					}
-				}
-				catch (SystemException)
-				{
-				}
-			}
-			Array.Resize<Process>(ref processes, num);
-			return processes;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern int[] GetProcesses_internal();
-
-		[MonoTODO("There is no support for retrieving process information from a remote machine")]
-		public static Process[] GetProcesses(string machineName)
-		{
-			if (machineName == null)
-			{
-				throw new ArgumentNullException("machineName");
-			}
-			if (!Process.IsLocalMachine(machineName))
-			{
-				throw new NotImplementedException();
-			}
-			int[] processes_internal = Process.GetProcesses_internal();
-			if (processes_internal == null)
-			{
-				return new Process[0];
-			}
-			List<Process> list = new List<Process>(processes_internal.Length);
-			for (int i = 0; i < processes_internal.Length; i++)
-			{
-				try
-				{
-					list.Add(Process.GetProcessById(processes_internal[i]));
-				}
-				catch (SystemException)
-				{
-				}
-			}
-			return list.ToArray();
+			return this.WaitForInputIdle_internal(this.process_handle, milliseconds);
 		}
 
 		private static bool IsLocalMachine(string machineName)
@@ -1758,94 +1372,184 @@ namespace System.Diagnostics
 			return machineName == "." || machineName.Length == 0 || string.Compare(machineName, Environment.MachineName, true) == 0;
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool ShellExecuteEx_internal(ProcessStartInfo startInfo, ref Process.ProcInfo procInfo);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool CreateProcess_internal(ProcessStartInfo startInfo, IntPtr stdin, IntPtr stdout, IntPtr stderr, ref Process.ProcInfo procInfo);
-
-		private bool StartWithShellExecuteEx(ProcessStartInfo startInfo)
+		private void OnOutputDataReceived(string str)
 		{
-			if (this.disposed)
+			if (this.OutputDataReceived != null)
 			{
-				throw new ObjectDisposedException(base.GetType().Name);
+				this.OutputDataReceived(this, new DataReceivedEventArgs(str));
 			}
-			if (!string.IsNullOrEmpty(startInfo.UserName) || startInfo.Password != null)
-			{
-				throw new InvalidOperationException(global::SR.GetString("The Process object must have the UseShellExecute property set to false in order to start a process as a user."));
-			}
-			if (startInfo.RedirectStandardInput || startInfo.RedirectStandardOutput || startInfo.RedirectStandardError)
-			{
-				throw new InvalidOperationException(global::SR.GetString("The Process object must have the UseShellExecute property set to false in order to redirect IO streams."));
-			}
-			if (startInfo.StandardErrorEncoding != null)
-			{
-				throw new InvalidOperationException(global::SR.GetString("StandardErrorEncoding is only supported when standard error is redirected."));
-			}
-			if (startInfo.StandardOutputEncoding != null)
-			{
-				throw new InvalidOperationException(global::SR.GetString("StandardOutputEncoding is only supported when standard output is redirected."));
-			}
-			if (startInfo.environmentVariables != null)
-			{
-				throw new InvalidOperationException(global::SR.GetString("The Process object must have the UseShellExecute property set to false in order to use environment variables."));
-			}
-			Process.ProcInfo procInfo = default(Process.ProcInfo);
-			Process.FillUserInfo(startInfo, ref procInfo);
-			bool flag;
-			try
-			{
-				flag = Process.ShellExecuteEx_internal(startInfo, ref procInfo);
-			}
-			finally
-			{
-				if (procInfo.Password != IntPtr.Zero)
-				{
-					Marshal.ZeroFreeBSTR(procInfo.Password);
-				}
-				procInfo.Password = IntPtr.Zero;
-			}
-			if (!flag)
-			{
-				throw new Win32Exception(-procInfo.pid);
-			}
-			this.SetProcessHandle(new SafeProcessHandle(procInfo.process_handle, true));
-			this.SetProcessId(procInfo.pid);
-			return flag;
 		}
 
-		private static void CreatePipe(out IntPtr read, out IntPtr write, bool writeDirection)
+		private void OnErrorDataReceived(string str)
 		{
-			MonoIOError monoIOError;
-			if (!MonoIO.CreatePipe(out read, out write, out monoIOError))
+			if (this.ErrorDataReceived != null)
 			{
-				throw MonoIO.GetException(monoIOError);
+				this.ErrorDataReceived(this, new DataReceivedEventArgs(str));
 			}
-			if (Process.IsWindows)
+		}
+
+		[ComVisible(false)]
+		public void BeginOutputReadLine()
+		{
+			if (this.process_handle == IntPtr.Zero || this.output_stream == null || !this.StartInfo.RedirectStandardOutput)
 			{
-				IntPtr intPtr = (writeDirection ? write : read);
-				if (!MonoIO.DuplicateHandle(Process.GetCurrentProcess().Handle, intPtr, Process.GetCurrentProcess().Handle, out intPtr, 0, 0, 2, out monoIOError))
+				throw new InvalidOperationException("Standard output has not been redirected or process has not been started.");
+			}
+			if ((this.async_mode & Process.AsyncModes.SyncOutput) != Process.AsyncModes.NoneYet)
+			{
+				throw new InvalidOperationException("Cannot mix asynchronous and synchonous reads.");
+			}
+			this.async_mode |= Process.AsyncModes.AsyncOutput;
+			this.output_canceled = false;
+			if (this.async_output == null)
+			{
+				this.async_output = new Process.ProcessAsyncReader(this, this.stdout_rd, true);
+				this.async_output.ReadHandler.BeginInvoke(null, this.async_output);
+			}
+		}
+
+		[ComVisible(false)]
+		public void CancelOutputRead()
+		{
+			if (this.process_handle == IntPtr.Zero || this.output_stream == null || !this.StartInfo.RedirectStandardOutput)
+			{
+				throw new InvalidOperationException("Standard output has not been redirected or process has not been started.");
+			}
+			if ((this.async_mode & Process.AsyncModes.SyncOutput) != Process.AsyncModes.NoneYet)
+			{
+				throw new InvalidOperationException("OutputStream is not enabled for asynchronous read operations.");
+			}
+			if (this.async_output == null)
+			{
+				throw new InvalidOperationException("No async operation in progress.");
+			}
+			this.output_canceled = true;
+		}
+
+		[ComVisible(false)]
+		public void BeginErrorReadLine()
+		{
+			if (this.process_handle == IntPtr.Zero || this.error_stream == null || !this.StartInfo.RedirectStandardError)
+			{
+				throw new InvalidOperationException("Standard error has not been redirected or process has not been started.");
+			}
+			if ((this.async_mode & Process.AsyncModes.SyncError) != Process.AsyncModes.NoneYet)
+			{
+				throw new InvalidOperationException("Cannot mix asynchronous and synchonous reads.");
+			}
+			this.async_mode |= Process.AsyncModes.AsyncError;
+			this.error_canceled = false;
+			if (this.async_error == null)
+			{
+				this.async_error = new Process.ProcessAsyncReader(this, this.stderr_rd, false);
+				this.async_error.ReadHandler.BeginInvoke(null, this.async_error);
+			}
+		}
+
+		[ComVisible(false)]
+		public void CancelErrorRead()
+		{
+			if (this.process_handle == IntPtr.Zero || this.output_stream == null || !this.StartInfo.RedirectStandardOutput)
+			{
+				throw new InvalidOperationException("Standard output has not been redirected or process has not been started.");
+			}
+			if ((this.async_mode & Process.AsyncModes.SyncOutput) != Process.AsyncModes.NoneYet)
+			{
+				throw new InvalidOperationException("OutputStream is not enabled for asynchronous read operations.");
+			}
+			if (this.async_error == null)
+			{
+				throw new InvalidOperationException("No async operation in progress.");
+			}
+			this.error_canceled = true;
+		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Process_free_internal(IntPtr handle);
+
+		protected override void Dispose(bool disposing)
+		{
+			if (!this.disposed)
+			{
+				this.disposed = true;
+				if (disposing)
 				{
-					throw MonoIO.GetException(monoIOError);
-				}
-				if (writeDirection)
-				{
-					if (!MonoIO.Close(write, out monoIOError))
+					lock (this)
 					{
-						throw MonoIO.GetException(monoIOError);
+						if (this.async_output != null)
+						{
+							this.async_output.Close();
+						}
+						if (this.async_error != null)
+						{
+							this.async_error.Close();
+						}
 					}
-					write = intPtr;
-					return;
 				}
-				else
+				lock (this)
 				{
-					if (!MonoIO.Close(read, out monoIOError))
+					if (this.process_handle != IntPtr.Zero)
 					{
-						throw MonoIO.GetException(monoIOError);
+						this.Process_free_internal(this.process_handle);
+						this.process_handle = IntPtr.Zero;
 					}
-					read = intPtr;
+					if (this.input_stream != null)
+					{
+						this.input_stream.Close();
+						this.input_stream = null;
+					}
+					if (this.output_stream != null)
+					{
+						this.output_stream.Close();
+						this.output_stream = null;
+					}
+					if (this.error_stream != null)
+					{
+						this.error_stream.Close();
+						this.error_stream = null;
+					}
 				}
 			}
+			base.Dispose(disposing);
+		}
+
+		~Process()
+		{
+			this.Dispose(false);
+		}
+
+		private static void CBOnExit(object state, bool unused)
+		{
+			Process process = (Process)state;
+			process.OnExited();
+		}
+
+		protected void OnExited()
+		{
+			if (this.exited_event == null)
+			{
+				return;
+			}
+			if (this.synchronizingObject == null)
+			{
+				foreach (EventHandler eventHandler in this.exited_event.GetInvocationList())
+				{
+					try
+					{
+						eventHandler(this, EventArgs.Empty);
+					}
+					catch
+					{
+					}
+				}
+				return;
+			}
+			object[] array = new object[]
+			{
+				this,
+				EventArgs.Empty
+			};
+			this.synchronizingObject.BeginInvoke(this.exited_event, array);
 		}
 
 		private static bool IsWindows
@@ -1857,328 +1561,59 @@ namespace System.Diagnostics
 			}
 		}
 
-		private bool StartWithCreateProcess(ProcessStartInfo startInfo)
-		{
-			if (startInfo.StandardOutputEncoding != null && !startInfo.RedirectStandardOutput)
-			{
-				throw new InvalidOperationException(global::SR.GetString("StandardOutputEncoding is only supported when standard output is redirected."));
-			}
-			if (startInfo.StandardErrorEncoding != null && !startInfo.RedirectStandardError)
-			{
-				throw new InvalidOperationException(global::SR.GetString("StandardErrorEncoding is only supported when standard error is redirected."));
-			}
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException(base.GetType().Name);
-			}
-			Process.ProcInfo procInfo = default(Process.ProcInfo);
-			if (startInfo.HaveEnvVars)
-			{
-				List<string> list = null;
-				StringBuilder stringBuilder = null;
-				foreach (object obj in startInfo.EnvironmentVariables)
-				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-					if (dictionaryEntry.Value != null)
-					{
-						if (list == null)
-						{
-							list = new List<string>();
-						}
-						if (stringBuilder == null)
-						{
-							stringBuilder = new StringBuilder();
-						}
-						else
-						{
-							stringBuilder.Clear();
-						}
-						stringBuilder.Append((string)dictionaryEntry.Key);
-						stringBuilder.Append('=');
-						stringBuilder.Append((string)dictionaryEntry.Value);
-						list.Add(stringBuilder.ToString());
-					}
-				}
-				procInfo.envVariables = ((list != null) ? list.ToArray() : null);
-			}
-			IntPtr intPtr = IntPtr.Zero;
-			IntPtr intPtr2 = IntPtr.Zero;
-			IntPtr intPtr3 = IntPtr.Zero;
-			IntPtr intPtr4 = IntPtr.Zero;
-			IntPtr intPtr5 = IntPtr.Zero;
-			IntPtr intPtr6 = IntPtr.Zero;
-			try
-			{
-				if (startInfo.RedirectStandardInput)
-				{
-					Process.CreatePipe(out intPtr, out intPtr2, true);
-				}
-				else
-				{
-					intPtr = MonoIO.ConsoleInput;
-					intPtr2 = IntPtr.Zero;
-				}
-				if (startInfo.RedirectStandardOutput)
-				{
-					Process.CreatePipe(out intPtr3, out intPtr4, false);
-				}
-				else
-				{
-					intPtr3 = IntPtr.Zero;
-					intPtr4 = MonoIO.ConsoleOutput;
-				}
-				if (startInfo.RedirectStandardError)
-				{
-					Process.CreatePipe(out intPtr5, out intPtr6, false);
-				}
-				else
-				{
-					intPtr5 = IntPtr.Zero;
-					intPtr6 = MonoIO.ConsoleError;
-				}
-				Process.FillUserInfo(startInfo, ref procInfo);
-				if (!Process.CreateProcess_internal(startInfo, intPtr, intPtr4, intPtr6, ref procInfo))
-				{
-					throw new Win32Exception(-procInfo.pid, string.Concat(new string[]
-					{
-						"ApplicationName='",
-						startInfo.FileName,
-						"', CommandLine='",
-						startInfo.Arguments,
-						"', CurrentDirectory='",
-						startInfo.WorkingDirectory,
-						"', Native error= ",
-						Win32Exception.GetErrorMessage(-procInfo.pid)
-					}));
-				}
-			}
-			catch
-			{
-				if (startInfo.RedirectStandardInput)
-				{
-					if (intPtr != IntPtr.Zero)
-					{
-						MonoIOError monoIOError;
-						MonoIO.Close(intPtr, out monoIOError);
-					}
-					if (intPtr2 != IntPtr.Zero)
-					{
-						MonoIOError monoIOError;
-						MonoIO.Close(intPtr2, out monoIOError);
-					}
-				}
-				if (startInfo.RedirectStandardOutput)
-				{
-					if (intPtr3 != IntPtr.Zero)
-					{
-						MonoIOError monoIOError;
-						MonoIO.Close(intPtr3, out monoIOError);
-					}
-					if (intPtr4 != IntPtr.Zero)
-					{
-						MonoIOError monoIOError;
-						MonoIO.Close(intPtr4, out monoIOError);
-					}
-				}
-				if (startInfo.RedirectStandardError)
-				{
-					if (intPtr5 != IntPtr.Zero)
-					{
-						MonoIOError monoIOError;
-						MonoIO.Close(intPtr5, out monoIOError);
-					}
-					if (intPtr6 != IntPtr.Zero)
-					{
-						MonoIOError monoIOError;
-						MonoIO.Close(intPtr6, out monoIOError);
-					}
-				}
-				throw;
-			}
-			finally
-			{
-				if (procInfo.Password != IntPtr.Zero)
-				{
-					Marshal.ZeroFreeBSTR(procInfo.Password);
-					procInfo.Password = IntPtr.Zero;
-				}
-			}
-			this.SetProcessHandle(new SafeProcessHandle(procInfo.process_handle, true));
-			this.SetProcessId(procInfo.pid);
-			if (startInfo.RedirectStandardInput)
-			{
-				MonoIOError monoIOError;
-				MonoIO.Close(intPtr, out monoIOError);
-				Encoding inputEncoding = Console.InputEncoding;
-				this.standardInput = new StreamWriter(new FileStream(intPtr2, FileAccess.Write, true, 8192), inputEncoding)
-				{
-					AutoFlush = true
-				};
-			}
-			if (startInfo.RedirectStandardOutput)
-			{
-				MonoIOError monoIOError;
-				MonoIO.Close(intPtr4, out monoIOError);
-				Encoding encoding = startInfo.StandardOutputEncoding ?? Console.Out.Encoding;
-				this.standardOutput = new StreamReader(new FileStream(intPtr3, FileAccess.Read, true, 8192), encoding, true);
-			}
-			if (startInfo.RedirectStandardError)
-			{
-				MonoIOError monoIOError;
-				MonoIO.Close(intPtr6, out monoIOError);
-				Encoding encoding2 = startInfo.StandardErrorEncoding ?? Console.Out.Encoding;
-				this.standardError = new StreamReader(new FileStream(intPtr5, FileAccess.Read, true, 8192), encoding2, true);
-			}
-			return true;
-		}
+		private IntPtr process_handle;
 
-		private static void FillUserInfo(ProcessStartInfo startInfo, ref Process.ProcInfo procInfo)
-		{
-			if (startInfo.UserName.Length != 0)
-			{
-				procInfo.UserName = startInfo.UserName;
-				procInfo.Domain = startInfo.Domain;
-				if (startInfo.Password != null)
-				{
-					procInfo.Password = Marshal.SecureStringToBSTR(startInfo.Password);
-				}
-				else
-				{
-					procInfo.Password = IntPtr.Zero;
-				}
-				procInfo.LoadUserProfile = startInfo.LoadUserProfile;
-			}
-		}
+		private int pid;
 
-		private void RaiseOnExited()
-		{
-			if (!this.watchForExit)
-			{
-				return;
-			}
-			if (!this.raisedOnExited)
-			{
-				lock (this)
-				{
-					if (!this.raisedOnExited)
-					{
-						this.raisedOnExited = true;
-						this.OnExited();
-					}
-				}
-			}
-		}
+		private bool enableRaisingEvents;
 
-		private bool haveProcessId;
+		private bool already_waiting;
 
-		private int processId;
+		private global::System.ComponentModel.ISynchronizeInvoke synchronizingObject;
 
-		private bool haveProcessHandle;
+		private EventHandler exited_event;
 
-		private SafeProcessHandle m_processHandle;
+		private IntPtr stdout_rd;
 
-		private bool isRemoteMachine;
+		private IntPtr stderr_rd;
 
-		private string machineName;
-
-		private int m_processAccess;
-
-		private ProcessThreadCollection threads;
-
-		private ProcessModuleCollection modules;
-
-		private bool haveWorkingSetLimits;
-
-		private IntPtr minWorkingSet;
-
-		private IntPtr maxWorkingSet;
-
-		private bool havePriorityClass;
-
-		private ProcessPriorityClass priorityClass;
-
-		private ProcessStartInfo startInfo;
-
-		private bool watchForExit;
-
-		private bool watchingForExit;
-
-		private EventHandler onExited;
-
-		private bool exited;
-
-		private int exitCode;
-
-		private bool signaled;
-
-		private DateTime exitTime;
-
-		private bool haveExitTime;
-
-		private bool raisedOnExited;
-
-		private RegisteredWaitHandle registeredWaitHandle;
-
-		private WaitHandle waitHandle;
-
-		private ISynchronizeInvoke synchronizingObject;
-
-		private StreamReader standardOutput;
-
-		private StreamWriter standardInput;
-
-		private StreamReader standardError;
-
-		private OperatingSystem operatingSystem;
-
-		private bool disposed;
-
-		private Process.StreamReadMode outputStreamReadMode;
-
-		private Process.StreamReadMode errorStreamReadMode;
-
-		private Process.StreamReadMode inputStreamReadMode;
-
-		internal AsyncStreamReader output;
-
-		internal AsyncStreamReader error;
-
-		internal bool pendingOutputRead;
-
-		internal bool pendingErrorRead;
-
-		internal static TraceSwitch processTracing;
+		private ProcessModuleCollection module_collection;
 
 		private string process_name;
 
-		private static ProcessModule current_main_module;
+		private StreamReader error_stream;
 
-		private enum StreamReadMode
-		{
-			undefined,
-			syncMode,
-			asyncMode
-		}
+		private StreamWriter input_stream;
 
-		private enum State
-		{
-			HaveId = 1,
-			IsLocal,
-			IsNt = 4,
-			HaveProcessInfo = 8,
-			Exited = 16,
-			Associated = 32,
-			IsWin2k = 64,
-			HaveNtProcessInfo = 12
-		}
+		private StreamReader output_stream;
+
+		private ProcessStartInfo start_info;
+
+		private Process.AsyncModes async_mode;
+
+		private bool output_canceled;
+
+		private bool error_canceled;
+
+		private Process.ProcessAsyncReader async_output;
+
+		private Process.ProcessAsyncReader async_error;
+
+		private bool disposed;
 
 		private struct ProcInfo
 		{
 			public IntPtr process_handle;
 
+			public IntPtr thread_handle;
+
 			public int pid;
 
-			public string[] envVariables;
+			public int tid;
+
+			public string[] envKeys;
+
+			public string[] envValues;
 
 			public string UserName;
 
@@ -2188,5 +1623,228 @@ namespace System.Diagnostics
 
 			public bool LoadUserProfile;
 		}
+
+		[Flags]
+		private enum AsyncModes
+		{
+			NoneYet = 0,
+			SyncOutput = 1,
+			SyncError = 2,
+			AsyncOutput = 4,
+			AsyncError = 8
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		private sealed class ProcessAsyncReader
+		{
+			public ProcessAsyncReader(Process process, IntPtr handle, bool err_out)
+			{
+				if (err_out)
+				{
+					this.outputEncoding = process.StartInfo.StandardOutputEncoding ?? Console.Out.Encoding;
+				}
+				else
+				{
+					this.outputEncoding = process.StartInfo.StandardErrorEncoding ?? Console.Out.Encoding;
+				}
+				this.process = process;
+				this.handle = handle;
+				this.stream = new FileStream(handle, FileAccess.Read, false);
+				this.ReadHandler = new Process.AsyncReadHandler(this.AddInput);
+				this.err_out = err_out;
+			}
+
+			public void AddInput()
+			{
+				lock (this)
+				{
+					int num = this.stream.Read(this.buffer, 0, this.buffer.Length);
+					if (num == 0)
+					{
+						this.completed = true;
+						if (this.wait_handle != null)
+						{
+							this.wait_handle.Set();
+						}
+						this.FlushLast();
+					}
+					else
+					{
+						try
+						{
+							this.sb.Append(this.outputEncoding.GetString(this.buffer, 0, num));
+						}
+						catch
+						{
+							for (int i = 0; i < num; i++)
+							{
+								this.sb.Append((char)this.buffer[i]);
+							}
+						}
+						this.Flush(false);
+						this.ReadHandler.BeginInvoke(null, this);
+					}
+				}
+			}
+
+			private void FlushLast()
+			{
+				this.Flush(true);
+				if (this.err_out)
+				{
+					this.process.OnOutputDataReceived(null);
+				}
+				else
+				{
+					this.process.OnErrorDataReceived(null);
+				}
+			}
+
+			private void Flush(bool last)
+			{
+				if (this.sb.Length == 0 || (this.err_out && this.process.output_canceled) || (!this.err_out && this.process.error_canceled))
+				{
+					return;
+				}
+				string text = this.sb.ToString();
+				this.sb.Length = 0;
+				string[] array = text.Split(new char[] { '\n' });
+				int num = array.Length;
+				if (num == 0)
+				{
+					return;
+				}
+				for (int i = 0; i < num - 1; i++)
+				{
+					if (this.err_out)
+					{
+						this.process.OnOutputDataReceived(array[i]);
+					}
+					else
+					{
+						this.process.OnErrorDataReceived(array[i]);
+					}
+				}
+				string text2 = array[num - 1];
+				if (last || (num == 1 && text2 == string.Empty))
+				{
+					if (this.err_out)
+					{
+						this.process.OnOutputDataReceived(text2);
+					}
+					else
+					{
+						this.process.OnErrorDataReceived(text2);
+					}
+				}
+				else
+				{
+					this.sb.Append(text2);
+				}
+			}
+
+			public bool IsCompleted
+			{
+				get
+				{
+					return this.completed;
+				}
+			}
+
+			public WaitHandle WaitHandle
+			{
+				get
+				{
+					WaitHandle waitHandle;
+					lock (this)
+					{
+						if (this.wait_handle == null)
+						{
+							this.wait_handle = new ManualResetEvent(this.completed);
+						}
+						waitHandle = this.wait_handle;
+					}
+					return waitHandle;
+				}
+			}
+
+			public void Close()
+			{
+				this.stream.Close();
+			}
+
+			public object Sock;
+
+			public IntPtr handle;
+
+			public object state;
+
+			public AsyncCallback callback;
+
+			public ManualResetEvent wait_handle;
+
+			public Exception delayedException;
+
+			public object EndPoint;
+
+			private byte[] buffer = new byte[4196];
+
+			public int Offset;
+
+			public int Size;
+
+			public int SockFlags;
+
+			public object AcceptSocket;
+
+			public object[] Addresses;
+
+			public int port;
+
+			public object Buffers;
+
+			public bool ReuseSocket;
+
+			public object acc_socket;
+
+			public int total;
+
+			public bool completed_sync;
+
+			private bool completed;
+
+			private bool err_out;
+
+			internal int error;
+
+			public int operation = 8;
+
+			public object ares;
+
+			public int EndCalled;
+
+			private Process process;
+
+			private Stream stream;
+
+			private StringBuilder sb = new StringBuilder();
+
+			private Encoding outputEncoding;
+
+			public Process.AsyncReadHandler ReadHandler;
+		}
+
+		private class ProcessWaitHandle : WaitHandle
+		{
+			public ProcessWaitHandle(IntPtr handle)
+			{
+				this.Handle = Process.ProcessWaitHandle.ProcessHandle_duplicate(handle);
+			}
+
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			private static extern IntPtr ProcessHandle_duplicate(IntPtr handle);
+		}
+
+		private delegate void AsyncReadHandler();
 	}
 }

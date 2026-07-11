@@ -7,50 +7,50 @@ namespace System.ComponentModel
 	{
 		public InheritanceAttribute()
 		{
-			this.inheritanceLevel = InheritanceAttribute.Default.inheritanceLevel;
+			this.level = InheritanceLevel.NotInherited;
 		}
 
 		public InheritanceAttribute(InheritanceLevel inheritanceLevel)
 		{
-			this.inheritanceLevel = inheritanceLevel;
+			this.level = inheritanceLevel;
 		}
 
 		public InheritanceLevel InheritanceLevel
 		{
 			get
 			{
-				return this.inheritanceLevel;
+				return this.level;
 			}
 		}
 
-		public override bool Equals(object value)
+		public override bool Equals(object obj)
 		{
-			return value == this || (value is InheritanceAttribute && ((InheritanceAttribute)value).InheritanceLevel == this.inheritanceLevel);
+			return obj is InheritanceAttribute && (obj == this || ((InheritanceAttribute)obj).InheritanceLevel == this.level);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.level.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(InheritanceAttribute.Default);
+			return this.level == InheritanceAttribute.Default.InheritanceLevel;
 		}
 
 		public override string ToString()
 		{
-			return TypeDescriptor.GetConverter(typeof(InheritanceLevel)).ConvertToString(this.InheritanceLevel);
+			return this.level.ToString();
 		}
 
-		private readonly InheritanceLevel inheritanceLevel;
+		private InheritanceLevel level;
+
+		public static readonly InheritanceAttribute Default = new InheritanceAttribute();
 
 		public static readonly InheritanceAttribute Inherited = new InheritanceAttribute(InheritanceLevel.Inherited);
 
 		public static readonly InheritanceAttribute InheritedReadOnly = new InheritanceAttribute(InheritanceLevel.InheritedReadOnly);
 
 		public static readonly InheritanceAttribute NotInherited = new InheritanceAttribute(InheritanceLevel.NotInherited);
-
-		public static readonly InheritanceAttribute Default = InheritanceAttribute.NotInherited;
 	}
 }

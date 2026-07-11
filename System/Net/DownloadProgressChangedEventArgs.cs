@@ -3,20 +3,20 @@ using System.ComponentModel;
 
 namespace System.Net
 {
-	public class DownloadProgressChangedEventArgs : ProgressChangedEventArgs
+	public class DownloadProgressChangedEventArgs : global::System.ComponentModel.ProgressChangedEventArgs
 	{
-		internal DownloadProgressChangedEventArgs(int progressPercentage, object userToken, long bytesReceived, long totalBytesToReceive)
-			: base(progressPercentage, userToken)
+		internal DownloadProgressChangedEventArgs(long bytesReceived, long totalBytesToReceive, object userState)
+			: base((totalBytesToReceive == -1L) ? 0 : ((int)(bytesReceived * 100L / totalBytesToReceive)), userState)
 		{
-			this.m_BytesReceived = bytesReceived;
-			this.m_TotalBytesToReceive = totalBytesToReceive;
+			this.received = bytesReceived;
+			this.total = totalBytesToReceive;
 		}
 
 		public long BytesReceived
 		{
 			get
 			{
-				return this.m_BytesReceived;
+				return this.received;
 			}
 		}
 
@@ -24,12 +24,12 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_TotalBytesToReceive;
+				return this.total;
 			}
 		}
 
-		private long m_BytesReceived;
+		private long received;
 
-		private long m_TotalBytesToReceive;
+		private long total;
 	}
 }

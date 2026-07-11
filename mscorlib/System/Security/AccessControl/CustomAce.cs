@@ -5,8 +5,9 @@ namespace System.Security.AccessControl
 	public sealed class CustomAce : GenericAce
 	{
 		public CustomAce(AceType type, AceFlags flags, byte[] opaque)
-			: base(type, flags)
+			: base(type)
 		{
+			base.AceFlags = flags;
 			this.SetOpaque(opaque);
 		}
 
@@ -42,15 +43,9 @@ namespace System.Security.AccessControl
 		{
 			if (opaque == null)
 			{
-				this.opaque = null;
-				return;
+				throw new ArgumentNullException("opaque");
 			}
 			this.opaque = (byte[])opaque.Clone();
-		}
-
-		internal override string GetSddlForm()
-		{
-			throw new NotSupportedException();
 		}
 
 		private byte[] opaque;

@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
-	public class SignedInfo : ICollection, IEnumerable
+	public class SignedInfo : IEnumerable, ICollection
 	{
 		public SignedInfo()
 		{
@@ -174,7 +174,8 @@ namespace System.Security.Cryptography.Xml
 			}
 			foreach (object obj in this.references)
 			{
-				XmlNode xml = ((Reference)obj).GetXml();
+				Reference reference = (Reference)obj;
+				XmlNode xml = reference.GetXml();
 				XmlNode xmlNode = xmlDocument.ImportNode(xml, true);
 				xmlElement.AppendChild(xmlNode);
 			}
@@ -184,11 +185,7 @@ namespace System.Security.Cryptography.Xml
 		private string GetAttribute(XmlElement xel, string attribute)
 		{
 			XmlAttribute xmlAttribute = xel.Attributes[attribute];
-			if (xmlAttribute == null)
-			{
-				return null;
-			}
-			return xmlAttribute.InnerText;
+			return (xmlAttribute == null) ? null : xmlAttribute.InnerText;
 		}
 
 		public void LoadXml(XmlElement value)

@@ -10,19 +10,19 @@ namespace System.Xml
 		{
 		}
 
-		public override string Name
-		{
-			get
-			{
-				return this.OwnerDocument.strCommentName;
-			}
-		}
-
 		public override string LocalName
 		{
 			get
 			{
-				return this.OwnerDocument.strCommentName;
+				return "#comment";
+			}
+		}
+
+		public override string Name
+		{
+			get
+			{
+				return "#comment";
 			}
 		}
 
@@ -34,26 +34,26 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlNode CloneNode(bool deep)
+		internal override XPathNodeType XPathNodeType
 		{
-			return this.OwnerDocument.CreateComment(this.Data);
+			get
+			{
+				return XPathNodeType.Comment;
+			}
 		}
 
-		public override void WriteTo(XmlWriter w)
+		public override XmlNode CloneNode(bool deep)
 		{
-			w.WriteComment(this.Data);
+			return new XmlComment(this.Value, this.OwnerDocument);
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
 		}
 
-		internal override XPathNodeType XPNodeType
+		public override void WriteTo(XmlWriter w)
 		{
-			get
-			{
-				return XPathNodeType.Comment;
-			}
+			w.WriteComment(this.Data);
 		}
 	}
 }

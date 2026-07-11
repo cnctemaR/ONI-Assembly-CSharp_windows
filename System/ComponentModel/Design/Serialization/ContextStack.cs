@@ -1,36 +1,23 @@
 ﻿using System;
 using System.Collections;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design.Serialization
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
 	public sealed class ContextStack
 	{
+		public ContextStack()
+		{
+			this._contextList = new ArrayList();
+		}
+
 		public object Current
 		{
 			get
 			{
-				if (this.contextStack != null && this.contextStack.Count > 0)
+				int count = this._contextList.Count;
+				if (count > 0)
 				{
-					return this.contextStack[this.contextStack.Count - 1];
-				}
-				return null;
-			}
-		}
-
-		public object this[int level]
-		{
-			get
-			{
-				if (level < 0)
-				{
-					throw new ArgumentOutOfRangeException("level");
-				}
-				if (this.contextStack != null && level < this.contextStack.Count)
-				{
-					return this.contextStack[this.contextStack.Count - 1 - level];
+					return this._contextList[count - 1];
 				}
 				return null;
 			}
@@ -44,43 +31,44 @@ namespace System.ComponentModel.Design.Serialization
 				{
 					throw new ArgumentNullException("type");
 				}
-				if (this.contextStack != null)
+				for (int i = this._contextList.Count - 1; i >= 0; i--)
 				{
-					int i = this.contextStack.Count;
-					while (i > 0)
+					object obj = this._contextList[i];
+					if (type.IsInstanceOfType(obj))
 					{
-						object obj = this.contextStack[--i];
-						if (type.IsInstanceOfType(obj))
-						{
-							return obj;
-						}
+						return obj;
 					}
 				}
 				return null;
 			}
 		}
 
-		public void Append(object context)
+		public object this[int level]
 		{
-			if (context == null)
+			get
 			{
-				throw new ArgumentNullException("context");
+				if (level < 0)
+				{
+					throw new ArgumentOutOfRangeException("level");
+				}
+				int count = this._contextList.Count;
+				if (count > 0 && count > level)
+				{
+					return this._contextList[count - 1 - level];
+				}
+				return null;
 			}
-			if (this.contextStack == null)
-			{
-				this.contextStack = new ArrayList();
-			}
-			this.contextStack.Insert(0, context);
 		}
 
 		public object Pop()
 		{
 			object obj = null;
-			if (this.contextStack != null && this.contextStack.Count > 0)
+			int count = this._contextList.Count;
+			if (count > 0)
 			{
-				int num = this.contextStack.Count - 1;
-				obj = this.contextStack[num];
-				this.contextStack.RemoveAt(num);
+				int num = count - 1;
+				obj = this._contextList[num];
+				this._contextList.RemoveAt(num);
 			}
 			return obj;
 		}
@@ -91,13 +79,18 @@ namespace System.ComponentModel.Design.Serialization
 			{
 				throw new ArgumentNullException("context");
 			}
-			if (this.contextStack == null)
-			{
-				this.contextStack = new ArrayList();
-			}
-			this.contextStack.Add(context);
+			this._contextList.Add(context);
 		}
 
-		private ArrayList contextStack;
+		public void Append(object context)
+		{
+			if (context == null)
+			{
+				throw new ArgumentNullException("context");
+			}
+			this._contextList.Insert(0, context);
+		}
+
+		private ArrayList _contextList;
 	}
 }

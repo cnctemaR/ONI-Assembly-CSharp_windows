@@ -11,9 +11,9 @@ namespace System
 		SingleDomain,
 		MultiDomain,
 		MultiDomainHost,
-		[Obsolete("This method has been deprecated. Please use Assembly.Load() instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+		[Obsolete]
 		DomainMask = 3,
-		[Obsolete("This method has been deprecated. Please use Assembly.Load() instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+		[Obsolete]
 		DisallowBindings
 	}
 }

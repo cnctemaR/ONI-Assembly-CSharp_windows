@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class InstanceCreationEditor
 	{
 		public virtual string Text
 		{
 			get
 			{
-				return global::SR.GetString("(New...)");
+				return global::Locale.GetText("(New ...)");
 			}
 		}
 
-		public abstract object CreateInstance(ITypeDescriptorContext context, Type instanceType);
+		public abstract object CreateInstance(ITypeDescriptorContext context, Type type);
 	}
 }

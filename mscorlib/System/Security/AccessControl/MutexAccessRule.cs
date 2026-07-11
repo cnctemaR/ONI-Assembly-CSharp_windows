@@ -6,12 +6,13 @@ namespace System.Security.AccessControl
 	public sealed class MutexAccessRule : AccessRule
 	{
 		public MutexAccessRule(IdentityReference identity, MutexRights eventRights, AccessControlType type)
-			: base(identity, (int)eventRights, false, InheritanceFlags.None, PropagationFlags.None, type)
+			: base(identity, 0, false, InheritanceFlags.None, PropagationFlags.None, type)
 		{
+			this.rights = eventRights;
 		}
 
 		public MutexAccessRule(string identity, MutexRights eventRights, AccessControlType type)
-			: this(new NTAccount(identity), eventRights, type)
+			: this(new SecurityIdentifier(identity), eventRights, type)
 		{
 		}
 
@@ -19,8 +20,10 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return (MutexRights)base.AccessMask;
+				return this.rights;
 			}
 		}
+
+		private MutexRights rights;
 	}
 }

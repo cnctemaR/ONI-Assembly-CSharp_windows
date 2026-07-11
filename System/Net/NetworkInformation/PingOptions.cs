@@ -4,18 +4,30 @@ namespace System.Net.NetworkInformation
 {
 	public class PingOptions
 	{
+		public PingOptions()
+		{
+		}
+
 		public PingOptions(int ttl, bool dontFragment)
 		{
 			if (ttl <= 0)
 			{
-				throw new ArgumentOutOfRangeException("ttl");
+				throw new ArgumentOutOfRangeException("Must be greater than zero.", "ttl");
 			}
 			this.ttl = ttl;
-			this.dontFragment = dontFragment;
+			this.dont_fragment = dontFragment;
 		}
 
-		public PingOptions()
+		public bool DontFragment
 		{
+			get
+			{
+				return this.dont_fragment;
+			}
+			set
+			{
+				this.dont_fragment = value;
+			}
 		}
 
 		public int Ttl
@@ -26,30 +38,12 @@ namespace System.Net.NetworkInformation
 			}
 			set
 			{
-				if (value <= 0)
-				{
-					throw new ArgumentOutOfRangeException("value");
-				}
 				this.ttl = value;
 			}
 		}
 
-		public bool DontFragment
-		{
-			get
-			{
-				return this.dontFragment;
-			}
-			set
-			{
-				this.dontFragment = value;
-			}
-		}
-
-		private const int DontFragmentFlag = 2;
-
 		private int ttl = 128;
 
-		private bool dontFragment;
+		private bool dont_fragment;
 	}
 }

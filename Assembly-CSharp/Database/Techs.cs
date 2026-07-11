@@ -36,8 +36,8 @@ namespace Database
 			foreach (Tech tech3 in this.resources)
 			{
 				tech3.tier = this.GetTier(tech3);
-				List<global::Tuple<string, float>> list = this.TECH_TIERS[tech3.tier];
-				foreach (global::Tuple<string, float> tuple in list)
+				List<Tuple<string, float>> list = this.TECH_TIERS[tech3.tier];
+				foreach (Tuple<string, float> tuple in list)
 				{
 					tech3.costsByResearchTypeID.Add(tuple.first, tuple.second);
 				}
@@ -356,36 +356,36 @@ namespace Database
 			}
 		};
 
-		private readonly List<List<global::Tuple<string, float>>> TECH_TIERS = new List<List<global::Tuple<string, float>>>
+		private readonly List<List<Tuple<string, float>>> TECH_TIERS = new List<List<Tuple<string, float>>>
 		{
-			new List<global::Tuple<string, float>>
+			new List<Tuple<string, float>>
 			{
-				new global::Tuple<string, float>("alpha", 15f)
+				new Tuple<string, float>("alpha", 15f)
 			},
-			new List<global::Tuple<string, float>>
+			new List<Tuple<string, float>>
 			{
-				new global::Tuple<string, float>("alpha", 20f),
-				new global::Tuple<string, float>("beta", 10f)
+				new Tuple<string, float>("alpha", 20f),
+				new Tuple<string, float>("beta", 10f)
 			},
-			new List<global::Tuple<string, float>>
+			new List<Tuple<string, float>>
 			{
-				new global::Tuple<string, float>("alpha", 30f),
-				new global::Tuple<string, float>("beta", 20f)
+				new Tuple<string, float>("alpha", 30f),
+				new Tuple<string, float>("beta", 20f)
 			},
-			new List<global::Tuple<string, float>>
+			new List<Tuple<string, float>>
 			{
-				new global::Tuple<string, float>("alpha", 35f),
-				new global::Tuple<string, float>("beta", 30f)
+				new Tuple<string, float>("alpha", 35f),
+				new Tuple<string, float>("beta", 30f)
 			},
-			new List<global::Tuple<string, float>>
+			new List<Tuple<string, float>>
 			{
-				new global::Tuple<string, float>("alpha", 40f),
-				new global::Tuple<string, float>("beta", 50f)
+				new Tuple<string, float>("alpha", 40f),
+				new Tuple<string, float>("beta", 50f)
 			},
-			new List<global::Tuple<string, float>>
+			new List<Tuple<string, float>>
 			{
-				new global::Tuple<string, float>("alpha", 50f),
-				new global::Tuple<string, float>("beta", 70f)
+				new Tuple<string, float>("alpha", 50f),
+				new Tuple<string, float>("beta", 70f)
 			}
 		};
 	}

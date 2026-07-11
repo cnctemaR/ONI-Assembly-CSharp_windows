@@ -6,17 +6,37 @@ namespace System.Net.Sockets
 {
 	public class SocketAsyncEventArgs : EventArgs, IDisposable
 	{
-		public Exception ConnectByNameError { get; internal set; }
+		public SocketAsyncEventArgs()
+		{
+			this.AcceptSocket = null;
+			this.Buffer = null;
+			this.BufferList = null;
+			this.BytesTransferred = 0;
+			this.Count = 0;
+			this.DisconnectReuseSocket = false;
+			this.LastOperation = SocketAsyncOperation.None;
+			this.Offset = 0;
+			this.RemoteEndPoint = null;
+			this.SendPacketsElements = null;
+			this.SendPacketsFlags = TransmitFileOptions.UseDefaultWorkerThread;
+			this.SendPacketsSendSize = -1;
+			this.SocketError = SocketError.Success;
+			this.SocketFlags = SocketFlags.None;
+			this.UserToken = null;
+		}
+
+		public event EventHandler<SocketAsyncEventArgs> Completed;
 
 		public Socket AcceptSocket { get; set; }
 
 		public byte[] Buffer { get; private set; }
 
+		[global::System.MonoTODO("not supported in all cases")]
 		public IList<ArraySegment<byte>> BufferList
 		{
 			get
 			{
-				return this.m_BufferList;
+				return this._bufferList;
 			}
 			set
 			{
@@ -24,13 +44,13 @@ namespace System.Net.Sockets
 				{
 					throw new ArgumentException("Buffer and BufferList properties cannot both be non-null.");
 				}
-				this.m_BufferList = value;
+				this._bufferList = value;
 			}
 		}
 
-		public int BytesTransferred { get; internal set; }
+		public int BytesTransferred { get; private set; }
 
-		public int Count { get; internal set; }
+		public int Count { get; private set; }
 
 		public bool DisconnectReuseSocket { get; set; }
 
@@ -38,17 +58,7 @@ namespace System.Net.Sockets
 
 		public int Offset { get; private set; }
 
-		public EndPoint RemoteEndPoint
-		{
-			get
-			{
-				return this.remote_ep;
-			}
-			set
-			{
-				this.remote_ep = value;
-			}
-		}
+		public EndPoint RemoteEndPoint { get; set; }
 
 		public IPPacketInformation ReceiveMessageFromPacketInfo { get; private set; }
 
@@ -56,7 +66,7 @@ namespace System.Net.Sockets
 
 		public TransmitFileOptions SendPacketsFlags { get; set; }
 
-		[MonoTODO("unused property")]
+		[global::System.MonoTODO("unused property")]
 		public int SendPacketsSendSize { get; set; }
 
 		public SocketError SocketError { get; set; }
@@ -65,34 +75,6 @@ namespace System.Net.Sockets
 
 		public object UserToken { get; set; }
 
-		public Socket ConnectSocket
-		{
-			get
-			{
-				SocketError socketError = this.SocketError;
-				if (socketError == SocketError.AccessDenied)
-				{
-					return null;
-				}
-				return this.current_socket;
-			}
-		}
-
-		internal bool PolicyRestricted { get; private set; }
-
-		public event EventHandler<SocketAsyncEventArgs> Completed;
-
-		internal SocketAsyncEventArgs(bool policy)
-			: this()
-		{
-			this.PolicyRestricted = policy;
-		}
-
-		public SocketAsyncEventArgs()
-		{
-			this.SendPacketsSendSize = -1;
-		}
-
 		~SocketAsyncEventArgs()
 		{
 			this.Dispose(false);
@@ -100,36 +82,20 @@ namespace System.Net.Sockets
 
 		private void Dispose(bool disposing)
 		{
-			this.disposed = true;
+			Socket acceptSocket = this.AcceptSocket;
+			if (acceptSocket != null)
+			{
+				acceptSocket.Close();
+			}
 			if (disposing)
 			{
-				int num = this.in_progress;
-				return;
+				GC.SuppressFinalize(this);
 			}
 		}
 
 		public void Dispose()
 		{
 			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		internal void SetLastOperation(SocketAsyncOperation op)
-		{
-			if (this.disposed)
-			{
-				throw new ObjectDisposedException("System.Net.Sockets.SocketAsyncEventArgs");
-			}
-			if (Interlocked.Exchange(ref this.in_progress, 1) != 0)
-			{
-				throw new InvalidOperationException("Operation already in progress");
-			}
-			this.LastOperation = op;
-		}
-
-		internal void Complete()
-		{
-			this.OnCompleted(this);
 		}
 
 		protected virtual void OnCompleted(SocketAsyncEventArgs e)
@@ -141,16 +107,21 @@ namespace System.Net.Sockets
 			EventHandler<SocketAsyncEventArgs> completed = e.Completed;
 			if (completed != null)
 			{
-				completed(e.current_socket, e);
+				completed(e.curSocket, e);
 			}
 		}
 
 		public void SetBuffer(int offset, int count)
 		{
-			this.SetBuffer(this.Buffer, offset, count);
+			this.SetBufferInternal(this.Buffer, offset, count);
 		}
 
 		public void SetBuffer(byte[] buffer, int offset, int count)
+		{
+			this.SetBufferInternal(buffer, offset, count);
+		}
+
+		private void SetBufferInternal(byte[] buffer, int offset, int count)
 		{
 			if (buffer != null)
 			{
@@ -173,50 +144,237 @@ namespace System.Net.Sockets
 			this.Buffer = buffer;
 		}
 
-		internal void StartOperationCommon(Socket socket)
+		private void ReceiveCallback()
 		{
-			this.current_socket = socket;
+			this.SocketError = SocketError.Success;
+			this.LastOperation = SocketAsyncOperation.Receive;
+			SocketError socketError = SocketError.Success;
+			if (!this.curSocket.Connected)
+			{
+				this.SocketError = SocketError.NotConnected;
+				return;
+			}
+			try
+			{
+				this.BytesTransferred = this.curSocket.Receive_nochecks(this.Buffer, this.Offset, this.Count, this.SocketFlags, out socketError);
+			}
+			finally
+			{
+				this.SocketError = socketError;
+				this.OnCompleted(this);
+			}
 		}
 
-		internal void StartOperationWrapperConnect(MultipleConnectAsync args)
+		private void ConnectCallback()
 		{
-			this.SetLastOperation(SocketAsyncOperation.Connect);
+			this.LastOperation = SocketAsyncOperation.Connect;
+			SocketError socketError = SocketError.AccessDenied;
+			try
+			{
+				socketError = this.TryConnect(this.RemoteEndPoint);
+			}
+			finally
+			{
+				this.SocketError = socketError;
+				this.OnCompleted(this);
+			}
 		}
 
-		internal void FinishConnectByNameSyncFailure(Exception exception, int bytesTransferred, SocketFlags flags)
+		private SocketError TryConnect(EndPoint endpoint)
 		{
-			throw new NotImplementedException();
+			this.curSocket.Connected = false;
+			SocketError socketError = SocketError.Success;
+			try
+			{
+				if (!this.curSocket.Blocking)
+				{
+					int num;
+					this.curSocket.Poll(-1, SelectMode.SelectWrite, out num);
+					socketError = (SocketError)num;
+					if (num != 0)
+					{
+						return socketError;
+					}
+					this.curSocket.Connected = true;
+				}
+				else
+				{
+					this.curSocket.seed_endpoint = endpoint;
+					this.curSocket.Connect(endpoint);
+					this.curSocket.Connected = true;
+				}
+			}
+			catch (SocketException ex)
+			{
+				socketError = ex.SocketErrorCode;
+			}
+			return socketError;
 		}
 
-		internal void FinishOperationAsyncFailure(Exception exception, int bytesTransferred, SocketFlags flags)
+		private void SendCallback()
 		{
-			throw new NotImplementedException();
+			this.SocketError = SocketError.Success;
+			this.LastOperation = SocketAsyncOperation.Send;
+			SocketError socketError = SocketError.Success;
+			if (!this.curSocket.Connected)
+			{
+				this.SocketError = SocketError.NotConnected;
+				return;
+			}
+			try
+			{
+				if (this.Buffer != null)
+				{
+					this.BytesTransferred = this.curSocket.Send_nochecks(this.Buffer, this.Offset, this.Count, SocketFlags.None, out socketError);
+				}
+				else if (this.BufferList != null)
+				{
+					this.BytesTransferred = 0;
+					foreach (ArraySegment<byte> arraySegment in this.BufferList)
+					{
+						this.BytesTransferred += this.curSocket.Send_nochecks(arraySegment.Array, arraySegment.Offset, arraySegment.Count, SocketFlags.None, out socketError);
+						if (socketError != SocketError.Success)
+						{
+							break;
+						}
+					}
+				}
+			}
+			finally
+			{
+				this.SocketError = socketError;
+				this.OnCompleted(this);
+			}
 		}
 
-		internal void FinishWrapperConnectSuccess(Socket connectSocket, int bytesTransferred, SocketFlags flags)
+		private void AcceptCallback()
 		{
-			this.SetResults(SocketError.Success, bytesTransferred, flags);
-			this.current_socket = connectSocket;
-			this.OnCompleted(this);
+			this.SocketError = SocketError.Success;
+			this.LastOperation = SocketAsyncOperation.Accept;
+			try
+			{
+				this.curSocket.Accept(this.AcceptSocket);
+			}
+			catch (SocketException ex)
+			{
+				this.SocketError = ex.SocketErrorCode;
+				throw;
+			}
+			finally
+			{
+				this.OnCompleted(this);
+			}
 		}
 
-		internal void SetResults(SocketError socketError, int bytesTransferred, SocketFlags flags)
+		private void DisconnectCallback()
 		{
-			this.SocketError = socketError;
-			this.BytesTransferred = bytesTransferred;
-			this.SocketFlags = flags;
+			this.SocketError = SocketError.Success;
+			this.LastOperation = SocketAsyncOperation.Disconnect;
+			try
+			{
+				this.curSocket.Disconnect(this.DisconnectReuseSocket);
+			}
+			catch (SocketException ex)
+			{
+				this.SocketError = ex.SocketErrorCode;
+				throw;
+			}
+			finally
+			{
+				this.OnCompleted(this);
+			}
 		}
 
-		private bool disposed;
+		private void ReceiveFromCallback()
+		{
+			this.SocketError = SocketError.Success;
+			this.LastOperation = SocketAsyncOperation.ReceiveFrom;
+			try
+			{
+				EndPoint remoteEndPoint = this.RemoteEndPoint;
+				if (this.Buffer != null)
+				{
+					this.BytesTransferred = this.curSocket.ReceiveFrom_nochecks(this.Buffer, this.Offset, this.Count, this.SocketFlags, ref remoteEndPoint);
+				}
+				else if (this.BufferList != null)
+				{
+					throw new NotImplementedException();
+				}
+			}
+			catch (SocketException ex)
+			{
+				this.SocketError = ex.SocketErrorCode;
+				throw;
+			}
+			finally
+			{
+				this.OnCompleted(this);
+			}
+		}
 
-		internal volatile int in_progress;
+		private void SendToCallback()
+		{
+			this.SocketError = SocketError.Success;
+			this.LastOperation = SocketAsyncOperation.SendTo;
+			int i = 0;
+			try
+			{
+				int count = this.Count;
+				while (i < count)
+				{
+					i += this.curSocket.SendTo_nochecks(this.Buffer, this.Offset, count, this.SocketFlags, this.RemoteEndPoint);
+				}
+				this.BytesTransferred = i;
+			}
+			catch (SocketException ex)
+			{
+				this.SocketError = ex.SocketErrorCode;
+				throw;
+			}
+			finally
+			{
+				this.OnCompleted(this);
+			}
+		}
 
-		internal EndPoint remote_ep;
+		internal void DoOperation(SocketAsyncOperation operation, Socket socket)
+		{
+			this.curSocket = socket;
+			ThreadStart threadStart;
+			switch (operation)
+			{
+			case SocketAsyncOperation.Accept:
+				threadStart = new ThreadStart(this.AcceptCallback);
+				goto IL_00BE;
+			case SocketAsyncOperation.Connect:
+				threadStart = new ThreadStart(this.ConnectCallback);
+				goto IL_00BE;
+			case SocketAsyncOperation.Disconnect:
+				threadStart = new ThreadStart(this.DisconnectCallback);
+				goto IL_00BE;
+			case SocketAsyncOperation.Receive:
+				threadStart = new ThreadStart(this.ReceiveCallback);
+				goto IL_00BE;
+			case SocketAsyncOperation.ReceiveFrom:
+				threadStart = new ThreadStart(this.ReceiveFromCallback);
+				goto IL_00BE;
+			case SocketAsyncOperation.Send:
+				threadStart = new ThreadStart(this.SendCallback);
+				goto IL_00BE;
+			case SocketAsyncOperation.SendTo:
+				threadStart = new ThreadStart(this.SendToCallback);
+				goto IL_00BE;
+			}
+			throw new NotSupportedException();
+			IL_00BE:
+			new Thread(threadStart)
+			{
+				IsBackground = true
+			}.Start();
+		}
 
-		internal Socket current_socket;
+		private IList<ArraySegment<byte>> _bufferList;
 
-		internal SocketAsyncResult socket_async_result = new SocketAsyncResult();
-
-		internal IList<ArraySegment<byte>> m_BufferList;
+		private Socket curSocket;
 	}
 }

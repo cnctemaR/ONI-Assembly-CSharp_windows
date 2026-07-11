@@ -1,75 +1,70 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Dynamic.Utils;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
-	[DebuggerTypeProxy(typeof(Expression.MemberExpressionProxy))]
-	public class MemberExpression : Expression
+	public sealed class MemberExpression : Expression
 	{
+		internal MemberExpression(Expression expression, MemberInfo member, Type type)
+			: base(ExpressionType.MemberAccess, type)
+		{
+			this.expression = expression;
+			this.member = member;
+		}
+
+		public Expression Expression
+		{
+			get
+			{
+				return this.expression;
+			}
+		}
+
 		public MemberInfo Member
 		{
 			get
 			{
-				return this.GetMember();
+				return this.member;
 			}
 		}
 
-		public Expression Expression { get; }
-
-		internal MemberExpression(Expression expression)
+		internal override void Emit(EmitContext ec)
 		{
-			this.Expression = expression;
-		}
-
-		internal static PropertyExpression Make(Expression expression, PropertyInfo property)
-		{
-			return new PropertyExpression(expression, property);
-		}
-
-		internal static FieldExpression Make(Expression expression, FieldInfo field)
-		{
-			return new FieldExpression(expression, field);
-		}
-
-		internal static MemberExpression Make(Expression expression, MemberInfo member)
-		{
-			FieldInfo fieldInfo = member as FieldInfo;
-			if (!(fieldInfo == null))
+			this.member.OnFieldOrProperty(delegate(FieldInfo field)
 			{
-				return MemberExpression.Make(expression, fieldInfo);
-			}
-			return MemberExpression.Make(expression, (PropertyInfo)member);
-		}
-
-		public sealed override ExpressionType NodeType
-		{
-			get
+				this.EmitFieldAccess(ec, field);
+			}, delegate(PropertyInfo prop)
 			{
-				return ExpressionType.MemberAccess;
-			}
+				this.EmitPropertyAccess(ec, prop);
+			});
 		}
 
-		[ExcludeFromCodeCoverage]
-		internal virtual MemberInfo GetMember()
+		private void EmitPropertyAccess(EmitContext ec, PropertyInfo property)
 		{
-			throw ContractUtils.Unreachable;
-		}
-
-		protected internal override Expression Accept(ExpressionVisitor visitor)
-		{
-			return visitor.VisitMember(this);
-		}
-
-		public MemberExpression Update(Expression expression)
-		{
-			if (expression == this.Expression)
+			MethodInfo getMethod = property.GetGetMethod(true);
+			if (!getMethod.IsStatic)
 			{
-				return this;
+				ec.EmitLoadSubject(this.expression);
 			}
-			return Expression.MakeMemberAccess(expression, this.Member);
+			ec.EmitCall(getMethod);
 		}
+
+		private void EmitFieldAccess(EmitContext ec, FieldInfo field)
+		{
+			if (!field.IsStatic)
+			{
+				ec.EmitLoadSubject(this.expression);
+				ec.ig.Emit(OpCodes.Ldfld, field);
+			}
+			else
+			{
+				ec.ig.Emit(OpCodes.Ldsfld, field);
+			}
+		}
+
+		private Expression expression;
+
+		private MemberInfo member;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -9,24 +10,40 @@ namespace System.Xml.Serialization
 		{
 		}
 
-		public SoapAttributeAttribute(string attributeName)
+		public SoapAttributeAttribute(string attrName)
 		{
-			this.attributeName = attributeName;
+			this.attrName = attrName;
 		}
 
 		public string AttributeName
 		{
 			get
 			{
-				if (this.attributeName != null)
+				if (this.attrName == null)
 				{
-					return this.attributeName;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.attrName;
 			}
 			set
 			{
-				this.attributeName = value;
+				this.attrName = value;
+			}
+		}
+
+		public string DataType
+		{
+			get
+			{
+				if (this.dataType == null)
+				{
+					return string.Empty;
+				}
+				return this.dataType;
+			}
+			set
+			{
+				this.dataType = value;
 			}
 		}
 
@@ -42,26 +59,19 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public string DataType
+		internal void AddKeyHash(StringBuilder sb)
 		{
-			get
-			{
-				if (this.dataType != null)
-				{
-					return this.dataType;
-				}
-				return string.Empty;
-			}
-			set
-			{
-				this.dataType = value;
-			}
+			sb.Append("SAA ");
+			KeyHelper.AddField(sb, 1, this.attrName);
+			KeyHelper.AddField(sb, 2, this.dataType);
+			KeyHelper.AddField(sb, 3, this.ns);
+			sb.Append("|");
 		}
 
-		private string attributeName;
-
-		private string ns;
+		private string attrName;
 
 		private string dataType;
+
+		private string ns;
 	}
 }

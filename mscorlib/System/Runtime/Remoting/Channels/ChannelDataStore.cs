@@ -50,12 +50,14 @@ namespace System.Runtime.Remoting.Channels
 					{
 						new DictionaryEntry(key, value)
 					};
-					return;
 				}
-				DictionaryEntry[] array = new DictionaryEntry[this._extraData.Length + 1];
-				this._extraData.CopyTo(array, 0);
-				array[this._extraData.Length] = new DictionaryEntry(key, value);
-				this._extraData = array;
+				else
+				{
+					DictionaryEntry[] array = new DictionaryEntry[this._extraData.Length + 1];
+					this._extraData.CopyTo(array, 0);
+					array[this._extraData.Length] = new DictionaryEntry(key, value);
+					this._extraData = array;
+				}
 			}
 		}
 

@@ -1,61 +1,49 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Text.RegularExpressions;
 
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class DesignerVerb : MenuCommand
 	{
 		public DesignerVerb(string text, EventHandler handler)
-			: base(handler, StandardCommands.VerbFirst)
+			: this(text, handler, StandardCommands.VerbFirst)
 		{
-			this.Properties["Text"] = ((text == null) ? null : Regex.Replace(text, "\\(\\&.\\)", ""));
 		}
 
 		public DesignerVerb(string text, EventHandler handler, CommandID startCommandID)
 			: base(handler, startCommandID)
 		{
-			this.Properties["Text"] = ((text == null) ? null : Regex.Replace(text, "\\(\\&.\\)", ""));
-		}
-
-		public string Description
-		{
-			get
-			{
-				object obj = this.Properties["Description"];
-				if (obj == null)
-				{
-					return string.Empty;
-				}
-				return (string)obj;
-			}
-			set
-			{
-				this.Properties["Description"] = value;
-			}
+			this.text = text;
 		}
 
 		public string Text
 		{
 			get
 			{
-				object obj = this.Properties["Text"];
-				if (obj == null)
-				{
-					return string.Empty;
-				}
-				return (string)obj;
+				return this.text;
+			}
+		}
+
+		public string Description
+		{
+			get
+			{
+				return this.description;
+			}
+			set
+			{
+				this.description = value;
 			}
 		}
 
 		public override string ToString()
 		{
-			return this.Text + " : " + base.ToString();
+			return this.text + " : " + base.ToString();
 		}
+
+		private string text;
+
+		private string description;
 	}
 }

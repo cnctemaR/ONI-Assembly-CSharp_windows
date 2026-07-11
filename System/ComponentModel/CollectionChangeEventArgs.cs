@@ -1,22 +1,20 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class CollectionChangeEventArgs : EventArgs
 	{
 		public CollectionChangeEventArgs(CollectionChangeAction action, object element)
 		{
-			this.action = action;
-			this.element = element;
+			this.changeAction = action;
+			this.theElement = element;
 		}
 
 		public virtual CollectionChangeAction Action
 		{
 			get
 			{
-				return this.action;
+				return this.changeAction;
 			}
 		}
 
@@ -24,12 +22,12 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.element;
+				return this.theElement;
 			}
 		}
 
-		private CollectionChangeAction action;
+		private CollectionChangeAction changeAction;
 
-		private object element;
+		private object theElement;
 	}
 }

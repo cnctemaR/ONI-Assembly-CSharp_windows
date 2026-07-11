@@ -28,7 +28,11 @@ namespace System.Diagnostics
 				}
 				if (!EventLog.Exists(this._coreEventLog.Log, this._coreEventLog.MachineName))
 				{
-					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The event log '{0}' on  computer '{1}' does not exist.", this._coreEventLog.Log, this._coreEventLog.MachineName));
+					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The event log '{0}' on  computer '{1}' does not exist.", new object[]
+					{
+						this._coreEventLog.Log,
+						this._coreEventLog.MachineName
+					}));
 				}
 				return this.GetEntryCount();
 			}
@@ -44,7 +48,11 @@ namespace System.Diagnostics
 				}
 				if (!EventLog.Exists(this._coreEventLog.Log, this._coreEventLog.MachineName))
 				{
-					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The event log '{0}' on  computer '{1}' does not exist.", this._coreEventLog.Log, this._coreEventLog.MachineName));
+					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The event log '{0}' on  computer '{1}' does not exist.", new object[]
+					{
+						this._coreEventLog.Log,
+						this._coreEventLog.MachineName
+					}));
 				}
 				if (index < 0 || index >= this.EntryCount)
 				{
@@ -70,7 +78,11 @@ namespace System.Diagnostics
 					}
 					if (!EventLog.Exists(this._coreEventLog.Log, this._coreEventLog.MachineName))
 					{
-						throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Cannot find Log {0} on computer {1}.", this._coreEventLog.Log, this._coreEventLog.MachineName));
+						throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Cannot find Log {0} on computer {1}.", new object[]
+						{
+							this._coreEventLog.Log,
+							this._coreEventLog.MachineName
+						}));
 					}
 				}
 				return this.GetLogDisplayName();
@@ -86,7 +98,11 @@ namespace System.Diagnostics
 			}
 			if (!EventLog.Exists(log))
 			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The event log '{0}' on  computer '{1}' does not exist.", log, this._coreEventLog.MachineName));
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "The event log '{0}' on  computer '{1}' does not exist.", new object[]
+				{
+					log,
+					this._coreEventLog.MachineName
+				}));
 			}
 			int entryCount = this.GetEntryCount();
 			EventLogEntry[] array = new EventLogEntry[entryCount];
@@ -154,13 +170,13 @@ namespace System.Diagnostics
 				string text = logName.Substring(0, 8);
 				if (string.Compare(text, "AppEvent", true) == 0 || string.Compare(text, "SysEvent", true) == 0 || string.Compare(text, "SecEvent", true) == 0)
 				{
-					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The log name: '{0}' is invalid for customer log creation.", logName));
+					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The log name: '{0}' is invalid for customer log creation.", new object[] { logName }));
 				}
 				foreach (string text2 in this.GetLogNames(machineName))
 				{
 					if (text2.Length >= 8 && string.Compare(text2, 0, text, 0, 8, true) == 0)
 					{
-						throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Only the first eight characters of a custom log name are significant, and there is already another log on the system using the first eight characters of the name given. Name given: '{0}', name of existing log: '{1}'.", logName, text2));
+						throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Only the first eight characters of a custom log name are significant, and there is already another log on the system using the first eight characters of the name given. Name given: '{0}', name of existing log: '{1}'.", new object[] { logName, text2 }));
 					}
 				}
 			}
@@ -170,9 +186,9 @@ namespace System.Diagnostics
 			}
 			if (machineName == ".")
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Log {0} has already been registered as a source on the local computer.", logName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Log {0} has already been registered as a source on the local computer.", new object[] { logName }));
 			}
-			throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Log {0} has already been registered as a source on the computer {1}.", logName, machineName));
+			throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Log {0} has already been registered as a source on the computer {1}.", new object[] { logName, machineName }));
 		}
 
 		public abstract OverflowAction OverflowAction { get; }

@@ -6,17 +6,15 @@ using System.Security.Principal;
 
 namespace System.IO.Pipes
 {
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
+	[MonoNotSupported("ACL is not supported in Mono")]
+	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 	public class PipeSecurity : NativeObjectSecurity
 	{
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public PipeSecurity()
 			: base(false, ResourceType.FileObject)
 		{
-		}
-
-		internal PipeSecurity(SafeHandle handle, AccessControlSections includeSections)
-			: base(false, ResourceType.FileObject, handle, includeSections)
-		{
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
 		public override Type AccessRightType
@@ -43,92 +41,90 @@ namespace System.IO.Pipes
 			}
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
 		{
-			return new PipeAccessRule(identityReference, (PipeAccessRights)accessMask, type);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void AddAccessRule(PipeAccessRule rule)
 		{
-			base.AddAccessRule(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void AddAuditRule(PipeAuditRule rule)
 		{
-			base.AddAuditRule(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public sealed override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
 		{
-			return new PipeAuditRule(identityReference, (PipeAccessRights)accessMask, flags);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
-		[SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
+		[MonoNotSupported("ACL is not supported in Mono")]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		protected internal void Persist(SafeHandle handle)
 		{
-			base.WriteLock();
-			try
-			{
-				base.Persist(handle, base.AccessControlSectionsModified, null);
-			}
-			finally
-			{
-				base.WriteUnlock();
-			}
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
-		[SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
+		[MonoNotSupported("ACL is not supported in Mono")]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		protected internal void Persist(string name)
 		{
-			base.WriteLock();
-			try
-			{
-				base.Persist(name, base.AccessControlSectionsModified, null);
-			}
-			finally
-			{
-				base.WriteUnlock();
-			}
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public bool RemoveAccessRule(PipeAccessRule rule)
 		{
-			return base.RemoveAccessRule(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void RemoveAccessRuleSpecific(PipeAccessRule rule)
 		{
-			base.RemoveAccessRuleSpecific(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public bool RemoveAuditRule(PipeAuditRule rule)
 		{
-			return base.RemoveAuditRule(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void RemoveAuditRuleAll(PipeAuditRule rule)
 		{
-			base.RemoveAuditRuleAll(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void RemoveAuditRuleSpecific(PipeAuditRule rule)
 		{
-			base.RemoveAuditRuleSpecific(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void ResetAccessRule(PipeAccessRule rule)
 		{
-			base.ResetAccessRule(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void SetAccessRule(PipeAccessRule rule)
 		{
-			base.SetAccessRule(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void SetAuditRule(PipeAuditRule rule)
 		{
-			base.SetAuditRule(rule);
+			throw new NotImplementedException("ACL is not supported in Mono");
 		}
 	}
 }

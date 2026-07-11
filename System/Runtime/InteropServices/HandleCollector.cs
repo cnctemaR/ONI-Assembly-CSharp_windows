@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
@@ -14,35 +13,26 @@ namespace System.Runtime.InteropServices
 		{
 			if (initialThreshold < 0)
 			{
-				throw new ArgumentOutOfRangeException("initialThreshold", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("initialThreshold", "initialThreshold must not be less than zero");
 			}
 			if (maximumThreshold < 0)
 			{
-				throw new ArgumentOutOfRangeException("maximumThreshold", global::SR.GetString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("maximumThreshold", "maximumThreshold must not be less than zero");
 			}
-			if (initialThreshold > maximumThreshold)
+			if (maximumThreshold < initialThreshold)
 			{
-				throw new ArgumentException(global::SR.GetString("maximumThreshold cannot be less than initialThreshold."));
+				throw new ArgumentException("maximumThreshold must not be less than initialThreshold");
 			}
-			if (name != null)
-			{
-				this.name = name;
-			}
-			else
-			{
-				this.name = string.Empty;
-			}
-			this.initialThreshold = initialThreshold;
-			this.maximumThreshold = maximumThreshold;
-			this.threshold = initialThreshold;
-			this.handleCount = 0;
+			this.name = name;
+			this.init = initialThreshold;
+			this.max = maximumThreshold;
 		}
 
 		public int Count
 		{
 			get
 			{
-				return this.handleCount;
+				return this.count;
 			}
 		}
 
@@ -50,7 +40,7 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this.initialThreshold;
+				return this.init;
 			}
 		}
 
@@ -58,7 +48,7 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this.maximumThreshold;
+				return this.max;
 			}
 		}
 
@@ -72,78 +62,34 @@ namespace System.Runtime.InteropServices
 
 		public void Add()
 		{
-			int num = -1;
-			Interlocked.Increment(ref this.handleCount);
-			if (this.handleCount < 0)
+			if (++this.count >= this.max)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Handle collector count overflows or underflows."));
+				GC.Collect(GC.MaxGeneration);
 			}
-			if (this.handleCount > this.threshold)
+			else if (this.count >= this.init && DateTime.Now - this.previous_collection > TimeSpan.FromSeconds(5.0))
 			{
-				lock (this)
-				{
-					this.threshold = this.handleCount + this.handleCount / 10;
-					num = this.gc_gen;
-					if (this.gc_gen < 2)
-					{
-						this.gc_gen++;
-					}
-				}
-			}
-			if (num >= 0 && (num == 0 || this.gc_counts[num] == GC.CollectionCount(num)))
-			{
-				GC.Collect(num);
-				Thread.Sleep(10 * num);
-			}
-			for (int i = 1; i < 3; i++)
-			{
-				this.gc_counts[i] = GC.CollectionCount(i);
+				GC.Collect(GC.MaxGeneration);
+				this.previous_collection = DateTime.Now;
 			}
 		}
 
 		public void Remove()
 		{
-			Interlocked.Decrement(ref this.handleCount);
-			if (this.handleCount < 0)
+			if (this.count == 0)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Handle collector count overflows or underflows."));
+				throw new InvalidOperationException("Cannot call Remove method when Count is 0");
 			}
-			int num = this.handleCount + this.handleCount / 10;
-			if (num < this.threshold - this.threshold / 10)
-			{
-				lock (this)
-				{
-					if (num > this.initialThreshold)
-					{
-						this.threshold = num;
-					}
-					else
-					{
-						this.threshold = this.initialThreshold;
-					}
-					this.gc_gen = 0;
-				}
-			}
-			for (int i = 1; i < 3; i++)
-			{
-				this.gc_counts[i] = GC.CollectionCount(i);
-			}
+			this.count--;
 		}
 
-		private const int deltaPercent = 10;
+		private int count;
 
-		private string name;
+		private readonly int init;
 
-		private int initialThreshold;
+		private readonly int max;
 
-		private int maximumThreshold;
+		private readonly string name;
 
-		private int threshold;
-
-		private int handleCount;
-
-		private int[] gc_counts = new int[3];
-
-		private int gc_gen;
+		private DateTime previous_collection = DateTime.MinValue;
 	}
 }

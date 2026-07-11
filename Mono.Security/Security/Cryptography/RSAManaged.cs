@@ -19,6 +19,8 @@ namespace Mono.Security.Cryptography
 			base.KeySize = keySize;
 		}
 
+		public event RSAManaged.KeyGeneratedEventHandler KeyGenerated;
+
 		~RSAManaged()
 		{
 			this.Dispose(false);
@@ -28,26 +30,27 @@ namespace Mono.Security.Cryptography
 		{
 			int num = this.KeySize + 1 >> 1;
 			int num2 = this.KeySize - num;
-			this.e = 65537U;
+			this.e = 17U;
 			do
 			{
 				this.p = BigInteger.GeneratePseudoPrime(num);
 			}
-			while (this.p % 65537U == 1U);
+			while (this.p % 17U == 1U);
 			for (;;)
 			{
-				this.q = BigInteger.GeneratePseudoPrime(num2);
-				if (this.q % 65537U != 1U && this.p != this.q)
+				do
 				{
-					this.n = this.p * this.q;
-					if (this.n.BitCount() == this.KeySize)
-					{
-						break;
-					}
-					if (this.p < this.q)
-					{
-						this.p = this.q;
-					}
+					this.q = BigInteger.GeneratePseudoPrime(num2);
+				}
+				while (this.q % 17U == 1U || !(this.p != this.q));
+				this.n = this.p * this.q;
+				if (this.n.BitCount() == this.KeySize)
+				{
+					break;
+				}
+				if (this.p < this.q)
+				{
+					this.p = this.q;
 				}
 			}
 			BigInteger bigInteger = this.p - 1;
@@ -69,10 +72,6 @@ namespace Mono.Security.Cryptography
 		{
 			get
 			{
-				if (this.m_disposed)
-				{
-					throw new ObjectDisposedException(Locale.GetText("Keypair was disposed"));
-				}
 				if (this.keypairGenerated)
 				{
 					int num = this.n.BitCount();
@@ -235,7 +234,6 @@ namespace Mono.Security.Cryptography
 			}
 			this.e = new BigInteger(parameters.Exponent);
 			this.n = new BigInteger(parameters.Modulus);
-			this.d = (this.dp = (this.dq = (this.qInv = (this.p = (this.q = null)))));
 			if (parameters.D != null)
 			{
 				this.d = new BigInteger(parameters.D);
@@ -336,8 +334,6 @@ namespace Mono.Security.Cryptography
 			}
 			this.m_disposed = true;
 		}
-
-		public event RSAManaged.KeyGeneratedEventHandler KeyGenerated;
 
 		public override string ToXmlString(bool includePrivateParameters)
 		{

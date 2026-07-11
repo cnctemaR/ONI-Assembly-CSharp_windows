@@ -3,6 +3,7 @@
 namespace System.CodeDom.Compiler
 {
 	[Flags]
+	[Serializable]
 	public enum GeneratorSupport
 	{
 		ArraysOfArrays = 1,

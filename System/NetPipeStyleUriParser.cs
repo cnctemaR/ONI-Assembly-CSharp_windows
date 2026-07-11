@@ -2,11 +2,8 @@
 
 namespace System
 {
-	public class NetPipeStyleUriParser : UriParser
+	[global::System.MonoTODO]
+	public class NetPipeStyleUriParser : global::System.UriParser
 	{
-		public NetPipeStyleUriParser()
-			: base(UriParser.NetPipeUri.Flags)
-		{
-		}
 	}
 }

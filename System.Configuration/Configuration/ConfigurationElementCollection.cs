@@ -17,6 +17,11 @@ namespace System.Configuration
 			this.comparer = comparer;
 		}
 
+		void ICollection.CopyTo(Array arr, int index)
+		{
+			this.list.CopyTo(arr, index);
+		}
+
 		internal override void InitFromProperty(PropertyInformation propertyInfo)
 		{
 			ConfigurationCollectionAttribute configurationCollectionAttribute = propertyInfo.Property.CollectionAttribute;
@@ -172,7 +177,7 @@ namespace System.Configuration
 					}
 					if (throwIfExists)
 					{
-						throw new ConfigurationErrorsException("Duplicate element in collection");
+						throw new ConfigurationException("Duplicate element in collection");
 					}
 					this.list.RemoveAt(num);
 				}
@@ -185,7 +190,7 @@ namespace System.Configuration
 		{
 			if (this.ThrowOnDuplicate && this.BaseIndexOf(element) != -1)
 			{
-				throw new ConfigurationErrorsException("Duplicate element in collection");
+				throw new ConfigurationException("Duplicate element in collection");
 			}
 			if (this.IsReadOnly())
 			{
@@ -311,10 +316,6 @@ namespace System.Configuration
 				throw new ConfigurationErrorsException("Inherited items can't be removed.");
 			}
 			this.list.RemoveAt(index);
-			if (this.IsAlternate && this.inheritedLimitIndex > 0)
-			{
-				this.inheritedLimitIndex--;
-			}
 			this.modified = true;
 		}
 
@@ -391,11 +392,6 @@ namespace System.Configuration
 			return num;
 		}
 
-		void ICollection.CopyTo(Array arr, int index)
-		{
-			this.list.CopyTo(arr, index);
-		}
-
 		public IEnumerator GetEnumerator()
 		{
 			return this.list.GetEnumerator();
@@ -413,18 +409,6 @@ namespace System.Configuration
 
 		protected internal override bool IsModified()
 		{
-			if (this.modified)
-			{
-				return true;
-			}
-			for (int i = 0; i < this.list.Count; i++)
-			{
-				if (((ConfigurationElement)this.list[i]).IsModified())
-				{
-					this.modified = true;
-					break;
-				}
-			}
 			return this.modified;
 		}
 
@@ -434,37 +418,9 @@ namespace System.Configuration
 			return base.IsReadOnly();
 		}
 
-		internal override void PrepareSave(ConfigurationElement parentElement, ConfigurationSaveMode mode)
+		internal override bool HasValues()
 		{
-			ConfigurationElementCollection configurationElementCollection = (ConfigurationElementCollection)parentElement;
-			base.PrepareSave(parentElement, mode);
-			for (int i = 0; i < this.list.Count; i++)
-			{
-				ConfigurationElement configurationElement = (ConfigurationElement)this.list[i];
-				object elementKey = this.GetElementKey(configurationElement);
-				ConfigurationElement configurationElement2 = ((configurationElementCollection != null) ? configurationElementCollection.BaseGet(elementKey) : null);
-				configurationElement.PrepareSave(configurationElement2, mode);
-			}
-		}
-
-		internal override bool HasValues(ConfigurationElement parentElement, ConfigurationSaveMode mode)
-		{
-			ConfigurationElementCollection configurationElementCollection = (ConfigurationElementCollection)parentElement;
-			if (mode == ConfigurationSaveMode.Full)
-			{
-				return this.list.Count > 0;
-			}
-			for (int i = 0; i < this.list.Count; i++)
-			{
-				ConfigurationElement configurationElement = (ConfigurationElement)this.list[i];
-				object elementKey = this.GetElementKey(configurationElement);
-				ConfigurationElement configurationElement2 = ((configurationElementCollection != null) ? configurationElementCollection.BaseGet(elementKey) : null);
-				if (configurationElement.HasValues(configurationElement2, mode))
-				{
-					return true;
-				}
-			}
-			return false;
+			return this.list.Count > 0;
 		}
 
 		protected internal override void Reset(ConfigurationElement parentElement)
@@ -500,10 +456,6 @@ namespace System.Configuration
 		protected internal override void ResetModified()
 		{
 			this.modified = false;
-			for (int i = 0; i < this.list.Count; i++)
-			{
-				((ConfigurationElement)this.list[i]).ResetModified();
-			}
 		}
 
 		[MonoTODO]
@@ -538,7 +490,7 @@ namespace System.Configuration
 			{
 				if (this.emitClear)
 				{
-					writer.WriteElementString(this.clearElementName, "");
+					writer.WriteElementString(this.clearElementName, string.Empty);
 					flag = true;
 				}
 				if (this.removed != null)
@@ -553,7 +505,8 @@ namespace System.Configuration
 				}
 				for (int k = 0; k < this.list.Count; k++)
 				{
-					((ConfigurationElement)this.list[k]).SerializeToXmlElement(writer, this.addElementName);
+					ConfigurationElement configurationElement2 = (ConfigurationElement)this.list[k];
+					configurationElement2.SerializeToXmlElement(writer, this.addElementName);
 				}
 				flag = flag || this.list.Count > 0;
 			}
@@ -599,7 +552,8 @@ namespace System.Configuration
 			{
 				if (elementName == this.removeElementName)
 				{
-					ConfigurationElementCollection.ConfigurationRemoveElement configurationRemoveElement = new ConfigurationElementCollection.ConfigurationRemoveElement(this.CreateNewElementInternal(null), this);
+					ConfigurationElement configurationElement2 = this.CreateNewElementInternal(null);
+					ConfigurationElementCollection.ConfigurationRemoveElement configurationRemoveElement = new ConfigurationElementCollection.ConfigurationRemoveElement(configurationElement2, this);
 					configurationRemoveElement.DeserializeElement(reader, true);
 					this.BaseRemove(configurationRemoveElement.KeyValue);
 					this.modified = false;
@@ -607,9 +561,9 @@ namespace System.Configuration
 				}
 				if (elementName == this.addElementName)
 				{
-					ConfigurationElement configurationElement2 = this.CreateNewElementInternal(null);
-					configurationElement2.DeserializeElement(reader, false);
-					this.BaseAdd(configurationElement2);
+					ConfigurationElement configurationElement3 = this.CreateNewElementInternal(null);
+					configurationElement3.DeserializeElement(reader, false);
+					this.BaseAdd(configurationElement3);
 					this.modified = false;
 					return true;
 				}
@@ -617,7 +571,7 @@ namespace System.Configuration
 			return false;
 		}
 
-		protected internal override void Unmerge(ConfigurationElement sourceElement, ConfigurationElement parentElement, ConfigurationSaveMode saveMode)
+		protected internal override void Unmerge(ConfigurationElement sourceElement, ConfigurationElement parentElement, ConfigurationSaveMode updateMode)
 		{
 			ConfigurationElementCollection configurationElementCollection = (ConfigurationElementCollection)sourceElement;
 			ConfigurationElementCollection configurationElementCollection2 = (ConfigurationElementCollection)parentElement;
@@ -625,40 +579,40 @@ namespace System.Configuration
 			{
 				ConfigurationElement configurationElement = configurationElementCollection.BaseGet(i);
 				object elementKey = configurationElementCollection.GetElementKey(configurationElement);
-				ConfigurationElement configurationElement2 = ((configurationElementCollection2 != null) ? configurationElementCollection2.BaseGet(elementKey) : null);
-				ConfigurationElement configurationElement3 = this.CreateNewElementInternal(null);
-				if (configurationElement2 != null && saveMode != ConfigurationSaveMode.Full)
+				ConfigurationElement configurationElement2 = ((configurationElementCollection2 == null) ? null : configurationElementCollection2.BaseGet(elementKey));
+				if (configurationElement2 != null && updateMode != ConfigurationSaveMode.Full)
 				{
-					configurationElement3.Unmerge(configurationElement, configurationElement2, saveMode);
-					if (configurationElement3.HasValues(configurationElement2, saveMode))
+					ConfigurationElement configurationElement3 = this.CreateNewElementInternal(null);
+					configurationElement3.Unmerge(configurationElement, configurationElement2, ConfigurationSaveMode.Minimal);
+					if (configurationElement3.HasValues())
 					{
 						this.BaseAdd(configurationElement3);
 					}
 				}
 				else
 				{
-					configurationElement3.Unmerge(configurationElement, null, ConfigurationSaveMode.Full);
-					this.BaseAdd(configurationElement3);
+					ConfigurationElement configurationElement4 = this.CreateNewElementInternal(null);
+					configurationElement4.Unmerge(configurationElement, null, ConfigurationSaveMode.Full);
+					this.BaseAdd(configurationElement4);
 				}
 			}
-			if (saveMode == ConfigurationSaveMode.Full)
+			if (updateMode == ConfigurationSaveMode.Full)
 			{
 				this.EmitClear = true;
-				return;
 			}
-			if (configurationElementCollection2 != null)
+			else if (configurationElementCollection2 != null)
 			{
 				for (int j = 0; j < configurationElementCollection2.Count; j++)
 				{
-					ConfigurationElement configurationElement4 = configurationElementCollection2.BaseGet(j);
-					object elementKey2 = configurationElementCollection2.GetElementKey(configurationElement4);
+					ConfigurationElement configurationElement5 = configurationElementCollection2.BaseGet(j);
+					object elementKey2 = configurationElementCollection2.GetElementKey(configurationElement5);
 					if (configurationElementCollection.IndexOfKey(elementKey2) == -1)
 					{
 						if (this.removed == null)
 						{
 							this.removed = new ArrayList();
 						}
-						this.removed.Add(configurationElement4);
+						this.removed.Add(configurationElement5);
 					}
 				}
 			}

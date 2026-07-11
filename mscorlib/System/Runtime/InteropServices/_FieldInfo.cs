@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
+	[Guid("8A7C1442-A9FB-366B-80D8-4939FFA6DBE0")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[CLSCompliant(false)]
 	[ComVisible(true)]
 	[TypeLibImportClass(typeof(FieldInfo))]
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("8A7C1442-A9FB-366B-80D8-4939FFA6DBE0")]
-	[CLSCompliant(false)]
 	public interface _FieldInfo
 	{
 		bool Equals(object other);

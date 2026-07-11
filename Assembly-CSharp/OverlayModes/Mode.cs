@@ -248,39 +248,43 @@ namespace OverlayModes
 				if (!(t == null))
 				{
 					Vector3 position = t.transform.GetPosition();
-					if (Grid.IsVisible(Grid.PosToCell(position)))
+					int num = Grid.PosToCell(position);
+					if (Grid.IsValidCell(num))
 					{
-						if (min <= position && position <= max)
+						if (Grid.IsVisible(num))
 						{
-							KBatchedAnimController component = t.GetComponent<KBatchedAnimController>();
-							if (!(component == null))
+							if (min <= position && position <= max)
 							{
-								int num = 0;
-								Color32 color = Color.clear;
-								if (highlights != null)
+								KBatchedAnimController component = t.GetComponent<KBatchedAnimController>();
+								if (!(component == null))
 								{
-									foreach (ColorHighlightCondition colorHighlightCondition in highlights)
+									int num2 = 0;
+									Color32 color = Color.clear;
+									if (highlights != null)
 									{
-										if (colorHighlightCondition.highlight_condition(t))
+										foreach (ColorHighlightCondition colorHighlightCondition in highlights)
 										{
-											color = colorHighlightCondition.highlight_color(t);
-											num = layer;
-											break;
+											if (colorHighlightCondition.highlight_condition(t))
+											{
+												color = colorHighlightCondition.highlight_color(t);
+												num2 = layer;
+												break;
+											}
 										}
 									}
-								}
-								if (bringToFrontSetting != BringToFrontLayerSetting.Constant)
-								{
-									if (bringToFrontSetting == BringToFrontLayerSetting.Conditional)
+									if (bringToFrontSetting != BringToFrontLayerSetting.Constant)
 									{
-										component.SetLayer(num);
+										if (bringToFrontSetting == BringToFrontLayerSetting.Conditional)
+										{
+											component.SetLayer(num2);
+										}
 									}
+									else
+									{
+										component.SetLayer(layer);
+									}
+									component.HighlightColour = color;
 								}
-								else
-								{
-									component.SetLayer(layer);
-								}
-								component.HighlightColour = color;
 							}
 						}
 					}

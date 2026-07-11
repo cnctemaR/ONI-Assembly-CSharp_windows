@@ -31,17 +31,6 @@ namespace Mono.Security.X509.Extensions
 			this.ski = asn.Value;
 		}
 
-		protected override void Encode()
-		{
-			if (this.ski == null)
-			{
-				throw new InvalidOperationException("Invalid SubjectKeyIdentifier extension");
-			}
-			ASN1 asn = new ASN1(4, this.ski);
-			this.extnValue = new ASN1(4);
-			this.extnValue.Add(asn);
-		}
-
 		public override string Name
 		{
 			get
@@ -59,10 +48,6 @@ namespace Mono.Security.X509.Extensions
 					return null;
 				}
 				return (byte[])this.ski.Clone();
-			}
-			set
-			{
-				this.ski = value;
 			}
 		}
 

@@ -12,6 +12,8 @@ namespace System.Net.NetworkInformation
 
 		public abstract int NumberOfIPAddresses { get; }
 
+		public abstract int NumberOfRoutes { get; }
+
 		public abstract long OutputPacketRequests { get; }
 
 		public abstract long OutputPacketRoutingDiscards { get; }
@@ -45,7 +47,5 @@ namespace System.Net.NetworkInformation
 		public abstract long ReceivedPacketsWithHeadersErrors { get; }
 
 		public abstract long ReceivedPacketsWithUnknownProtocol { get; }
-
-		public abstract int NumberOfRoutes { get; }
 	}
 }

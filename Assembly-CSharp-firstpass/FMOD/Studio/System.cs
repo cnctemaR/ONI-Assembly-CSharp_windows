@@ -198,7 +198,7 @@ namespace FMOD.Studio
 
 		public RESULT loadBankCustom(BANK_INFO info, LOAD_BANK_FLAGS flags, out Bank bank)
 		{
-			info.size = Marshal.SizeOf<BANK_INFO>(info);
+			info.size = Marshal.SizeOf(info);
 			return FMOD.Studio.System.FMOD_Studio_System_LoadBankCustom(this.handle, ref info, flags, out bank.handle);
 		}
 

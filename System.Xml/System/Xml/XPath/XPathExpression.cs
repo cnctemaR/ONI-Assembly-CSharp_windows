@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
-using MS.Internal.Xml.XPath;
+using System.Xml.Xsl;
+using Mono.Xml.XPath;
 
 namespace System.Xml.XPath
 {
@@ -12,6 +13,8 @@ namespace System.Xml.XPath
 
 		public abstract string Expression { get; }
 
+		public abstract XPathResultType ReturnType { get; }
+
 		public abstract void AddSort(object expr, IComparer comparer);
 
 		public abstract void AddSort(object expr, XmlSortOrder order, XmlCaseOrder caseOrder, string lang, XmlDataType dataType);
@@ -20,29 +23,24 @@ namespace System.Xml.XPath
 
 		public abstract void SetContext(XmlNamespaceManager nsManager);
 
-		public abstract void SetContext(IXmlNamespaceResolver nsResolver);
-
-		public abstract XPathResultType ReturnType { get; }
-
 		public static XPathExpression Compile(string xpath)
 		{
-			return XPathExpression.Compile(xpath, null);
+			return XPathExpression.Compile(xpath, null, null);
 		}
 
-		public static XPathExpression Compile(string xpath, IXmlNamespaceResolver nsResolver)
+		public static XPathExpression Compile(string xpath, IXmlNamespaceResolver nsmgr)
 		{
-			bool flag;
-			CompiledXpathExpr compiledXpathExpr = new CompiledXpathExpr(new QueryBuilder().Build(xpath, out flag), xpath, flag);
-			if (nsResolver != null)
-			{
-				compiledXpathExpr.SetContext(nsResolver);
-			}
-			return compiledXpathExpr;
+			return XPathExpression.Compile(xpath, nsmgr, null);
 		}
 
-		private void PrintQuery(XmlWriter w)
+		internal static XPathExpression Compile(string xpath, IXmlNamespaceResolver nsmgr, IStaticXsltContext ctx)
 		{
-			((CompiledXpathExpr)this).QueryTree.PrintQuery(w);
+			XPathParser xpathParser = new XPathParser(ctx);
+			CompiledExpression compiledExpression = new CompiledExpression(xpath, xpathParser.Compile(xpath));
+			compiledExpression.SetContext(nsmgr);
+			return compiledExpression;
 		}
+
+		public abstract void SetContext(IXmlNamespaceResolver nsResolver);
 	}
 }

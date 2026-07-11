@@ -268,11 +268,20 @@ public class CodexScreen : KScreen
 		{
 			list[i].Value.transform.parent.SetSiblingIndex(i);
 		}
-		dictionary["NOTICES"].transform.parent.SetAsFirstSibling();
-		dictionary["RESEARCHNOTES"].transform.parent.SetAsFirstSibling();
-		dictionary["JOURNALS"].transform.parent.SetAsFirstSibling();
-		dictionary["EMAILS"].transform.parent.SetAsFirstSibling();
-		dictionary["Root"].transform.parent.SetAsFirstSibling();
+		CodexScreen.SetupCategory(dictionary, "NOTICES");
+		CodexScreen.SetupCategory(dictionary, "RESEARCHNOTES");
+		CodexScreen.SetupCategory(dictionary, "JOURNALS");
+		CodexScreen.SetupCategory(dictionary, "EMAILS");
+		CodexScreen.SetupCategory(dictionary, "Root");
+	}
+
+	private static void SetupCategory(Dictionary<string, GameObject> categories, string category_name)
+	{
+		if (!categories.ContainsKey(category_name))
+		{
+			return;
+		}
+		categories[category_name].transform.parent.SetAsFirstSibling();
 	}
 
 	public void ChangeArticle(string id, bool playClickSound = false)
@@ -560,7 +569,7 @@ public class CodexScreen : KScreen
 			}
 			else if (content.objectProperties.ContainsKey("coloredSprite"))
 			{
-				global::Tuple<Sprite, Color> tuple = (global::Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
+				Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
 				Image component4 = contentGameObject.GetComponent<Image>();
 				if (tuple != null)
 				{
@@ -626,7 +635,7 @@ public class CodexScreen : KScreen
 		}
 		else if (content.objectProperties.ContainsKey("coloredSprite"))
 		{
-			global::Tuple<Sprite, Color> tuple = (global::Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
+			Tuple<Sprite, Color> tuple = (Tuple<Sprite, Color>)content.objectProperties["coloredSprite"];
 			Image componentInChildren3 = contentGameObject.GetComponentInChildren<Image>();
 			if (tuple != null)
 			{

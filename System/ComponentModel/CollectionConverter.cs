@@ -1,22 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class CollectionConverter : TypeConverter
 	{
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == null)
+			if (destinationType == typeof(string) && value != null && value is ICollection)
 			{
-				throw new ArgumentNullException("destinationType");
-			}
-			if (destinationType == typeof(string) && value is ICollection)
-			{
-				return global::SR.GetString("(Collection)");
+				return "(Collection)";
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}

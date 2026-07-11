@@ -16,6 +16,16 @@ namespace System.Security.Cryptography
 			this._list.Add(asnEncodedData);
 		}
 
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this._list.CopyTo(array, index);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new AsnEncodedDataEnumerator(this);
+		}
+
 		public int Count
 		{
 			get
@@ -58,17 +68,7 @@ namespace System.Security.Cryptography
 			this._list.CopyTo(array, index);
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this._list.CopyTo(array, index);
-		}
-
 		public AsnEncodedDataEnumerator GetEnumerator()
-		{
-			return new AsnEncodedDataEnumerator(this);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new AsnEncodedDataEnumerator(this);
 		}

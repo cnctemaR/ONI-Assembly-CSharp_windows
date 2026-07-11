@@ -48,7 +48,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 			switch (typeCode)
 			{
 			case TypeCode.Empty:
-				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", typeCode));
+				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "TypeCode.{0} is not supported.", new object[] { typeCode }));
 			case TypeCode.Boolean:
 			case TypeCode.Char:
 			case TypeCode.SByte:
@@ -147,7 +147,7 @@ namespace YamlDotNet.Serialization.ObjectGraphTraversalStrategies
 		private void TraverseList<TContext>(IObjectDescriptor value, IObjectGraphVisitor<TContext> visitor, int currentDepth, TContext context)
 		{
 			Type implementedGenericInterface = ReflectionUtility.GetImplementedGenericInterface(value.Type, typeof(IEnumerable<>));
-			Type type = ((!(implementedGenericInterface != null)) ? typeof(object) : implementedGenericInterface.GetGenericArguments()[0]);
+			Type type = ((implementedGenericInterface == null) ? typeof(object) : implementedGenericInterface.GetGenericArguments()[0]);
 			visitor.VisitSequenceStart(value, type, context);
 			IEnumerator enumerator = ((IEnumerable)value.Value).GetEnumerator();
 			try

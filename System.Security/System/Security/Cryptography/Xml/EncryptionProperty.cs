@@ -9,33 +9,16 @@ namespace System.Security.Cryptography.Xml
 		{
 		}
 
-		public EncryptionProperty(XmlElement elementProperty)
+		public EncryptionProperty(XmlElement elemProp)
 		{
-			if (elementProperty == null)
-			{
-				throw new ArgumentNullException("elementProperty");
-			}
-			if (elementProperty.LocalName != "EncryptionProperty" || elementProperty.NamespaceURI != "http://www.w3.org/2001/04/xmlenc#")
-			{
-				throw new CryptographicException("Malformed encryption property element.");
-			}
-			this._elemProp = elementProperty;
-			this._cachedXml = null;
+			this.LoadXml(elemProp);
 		}
 
 		public string Id
 		{
 			get
 			{
-				return this._id;
-			}
-		}
-
-		public string Target
-		{
-			get
-			{
-				return this._target;
+				return this.id;
 			}
 		}
 
@@ -43,46 +26,39 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this._elemProp;
+				return this.elemProp;
 			}
 			set
 			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				if (value.LocalName != "EncryptionProperty" || value.NamespaceURI != "http://www.w3.org/2001/04/xmlenc#")
-				{
-					throw new CryptographicException("Malformed encryption property element.");
-				}
-				this._elemProp = value;
-				this._cachedXml = null;
+				this.LoadXml(value);
 			}
 		}
 
-		private bool CacheValid
+		public string Target
 		{
 			get
 			{
-				return this._cachedXml != null;
+				return this.target;
 			}
 		}
 
 		public XmlElement GetXml()
 		{
-			if (this.CacheValid)
-			{
-				return this._cachedXml;
-			}
-			return this.GetXml(new XmlDocument
-			{
-				PreserveWhitespace = true
-			});
+			return this.GetXml(new XmlDocument());
 		}
 
 		internal XmlElement GetXml(XmlDocument document)
 		{
-			return document.ImportNode(this._elemProp, true) as XmlElement;
+			XmlElement xmlElement = document.CreateElement("EncryptionProperty", "http://www.w3.org/2001/04/xmlenc#");
+			if (this.Id != null)
+			{
+				xmlElement.SetAttribute("Id", this.Id);
+			}
+			if (this.Target != null)
+			{
+				xmlElement.SetAttribute("Target", this.Target);
+			}
+			return xmlElement;
 		}
 
 		public void LoadXml(XmlElement value)
@@ -93,20 +69,22 @@ namespace System.Security.Cryptography.Xml
 			}
 			if (value.LocalName != "EncryptionProperty" || value.NamespaceURI != "http://www.w3.org/2001/04/xmlenc#")
 			{
-				throw new CryptographicException("Malformed encryption property element.");
+				throw new CryptographicException("Malformed EncryptionProperty element.");
 			}
-			this._cachedXml = value;
-			this._id = Utils.GetAttribute(value, "Id", "http://www.w3.org/2001/04/xmlenc#");
-			this._target = Utils.GetAttribute(value, "Target", "http://www.w3.org/2001/04/xmlenc#");
-			this._elemProp = value;
+			if (value.HasAttribute("Id"))
+			{
+				this.id = value.Attributes["Id"].Value;
+			}
+			if (value.HasAttribute("Target"))
+			{
+				this.target = value.Attributes["Target"].Value;
+			}
 		}
 
-		private string _target;
+		private XmlElement elemProp;
 
-		private string _id;
+		private string id;
 
-		private XmlElement _elemProp;
-
-		private XmlElement _cachedXml;
+		private string target;
 	}
 }

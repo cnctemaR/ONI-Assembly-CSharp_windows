@@ -7,11 +7,6 @@ namespace Mono.Unix
 {
 	public class UnixSignal : WaitHandle
 	{
-		static UnixSignal()
-		{
-			Stdlib.VersionCheck();
-		}
-
 		public UnixSignal(Signum signum)
 		{
 			this.signum = NativeConvert.FromSignum(signum);
@@ -78,15 +73,6 @@ namespace Mono.Unix
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Unix_UnixSignal_uninstall")]
 		private static extern int uninstall(IntPtr info);
 
-		private static int RuntimeShuttingDownCallback()
-		{
-			if (!Environment.HasShutdownStarted)
-			{
-				return 0;
-			}
-			return 1;
-		}
-
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Unix_UnixSignal_WaitAny")]
 		private static extern int WaitAny(IntPtr[] infos, int count, int timeout, UnixSignal.Mono_Posix_RuntimeIsShuttingDown shutting_down);
 
@@ -123,7 +109,8 @@ namespace Mono.Unix
 
 		public unsafe bool Reset()
 		{
-			return Interlocked.Exchange(ref this.Info->count, 0) != 0;
+			int num = Interlocked.Exchange(ref this.Info->count, 0);
+			return num != 0;
 		}
 
 		public unsafe int Count
@@ -171,10 +158,6 @@ namespace Mono.Unix
 			{
 				throw new InvalidOperationException("exitContext is not supported");
 			}
-			if (millisecondsTimeout == 0)
-			{
-				return this.IsSet;
-			}
 			return UnixSignal.WaitAny(new UnixSignal[] { this }, millisecondsTimeout) == 0;
 		}
 
@@ -212,17 +195,12 @@ namespace Mono.Unix
 					throw new InvalidOperationException("Disposed UnixSignal");
 				}
 			}
-			return UnixSignal.WaitAny(array, array.Length, millisecondsTimeout, UnixSignal.ShuttingDown);
+			return UnixSignal.WaitAny(array, array.Length, millisecondsTimeout, () => (!Environment.HasShutdownStarted) ? 0 : 1);
 		}
 
 		private int signum;
 
 		private IntPtr signal_info;
-
-		private static UnixSignal.Mono_Posix_RuntimeIsShuttingDown ShuttingDown = new UnixSignal.Mono_Posix_RuntimeIsShuttingDown(UnixSignal.RuntimeShuttingDownCallback);
-
-		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-		private delegate int Mono_Posix_RuntimeIsShuttingDown();
 
 		[Map]
 		private struct SignalInfo
@@ -235,13 +213,14 @@ namespace Mono.Unix
 
 			public int write_fd;
 
-			public int pipecnt;
-
-			public int pipelock;
-
 			public int have_handler;
+
+			public int pipecnt;
 
 			public IntPtr handler;
 		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		private delegate int Mono_Posix_RuntimeIsShuttingDown();
 	}
 }

@@ -5,14 +5,13 @@ using System.Runtime.InteropServices;
 namespace System.Reflection
 {
 	[ComVisible(true)]
-	[StructLayout(LayoutKind.Sequential)]
-	public class MethodBody
+	public sealed class MethodBody
 	{
-		protected MethodBody()
+		internal MethodBody()
 		{
 		}
 
-		public virtual IList<ExceptionHandlingClause> ExceptionHandlingClauses
+		public IList<ExceptionHandlingClause> ExceptionHandlingClauses
 		{
 			get
 			{
@@ -20,7 +19,7 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual IList<LocalVariableInfo> LocalVariables
+		public IList<LocalVariableInfo> LocalVariables
 		{
 			get
 			{
@@ -28,7 +27,7 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual bool InitLocals
+		public bool InitLocals
 		{
 			get
 			{
@@ -36,7 +35,7 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual int LocalSignatureMetadataToken
+		public int LocalSignatureMetadataToken
 		{
 			get
 			{
@@ -44,7 +43,7 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual int MaxStackSize
+		public int MaxStackSize
 		{
 			get
 			{
@@ -52,7 +51,7 @@ namespace System.Reflection
 			}
 		}
 
-		public virtual byte[] GetILAsByteArray()
+		public byte[] GetILAsByteArray()
 		{
 			return this.il;
 		}

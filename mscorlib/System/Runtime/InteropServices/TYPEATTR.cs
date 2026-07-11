@@ -2,7 +2,7 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete("Use System.Runtime.InteropServices.ComTypes.TYPEATTR instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
+	[Obsolete]
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
 	public struct TYPEATTR
 	{

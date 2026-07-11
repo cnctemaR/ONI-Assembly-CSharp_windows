@@ -1,33 +1,41 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Specialized;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class MenuCommand
 	{
 		public MenuCommand(EventHandler handler, CommandID command)
 		{
-			this.execHandler = handler;
-			this.commandID = command;
-			this.status = 3;
+			this.handler = handler;
+			this.command = command;
 		}
+
+		public event EventHandler CommandChanged;
 
 		public virtual bool Checked
 		{
 			get
 			{
-				return (this.status & 4) != 0;
+				return this.ischecked;
 			}
 			set
 			{
-				this.SetStatus(4, value);
+				if (this.ischecked != value)
+				{
+					this.ischecked = value;
+					this.OnCommandChanged(EventArgs.Empty);
+				}
+			}
+		}
+
+		public virtual CommandID CommandID
+		{
+			get
+			{
+				return this.command;
 			}
 		}
 
@@ -35,29 +43,24 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return (this.status & 2) != 0;
+				return this.enabled;
 			}
 			set
 			{
-				this.SetStatus(2, value);
+				if (this.enabled != value)
+				{
+					this.enabled = value;
+					this.OnCommandChanged(EventArgs.Empty);
+				}
 			}
 		}
 
-		private void SetStatus(int mask, bool value)
+		[global::System.MonoTODO]
+		public virtual int OleStatus
 		{
-			int num = this.status;
-			if (value)
+			get
 			{
-				num |= mask;
-			}
-			else
-			{
-				num &= ~mask;
-			}
-			if (num != this.status)
-			{
-				this.status = num;
-				this.OnCommandChanged(EventArgs.Empty);
+				return 3;
 			}
 		}
 
@@ -67,7 +70,7 @@ namespace System.ComponentModel.Design
 			{
 				if (this.properties == null)
 				{
-					this.properties = new HybridDictionary();
+					this.properties = new Hashtable();
 				}
 				return this.properties;
 			}
@@ -77,11 +80,11 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return (this.status & 1) != 0;
+				return this.issupported;
 			}
 			set
 			{
-				this.SetStatus(1, value);
+				this.issupported = value;
 			}
 		}
 
@@ -89,49 +92,19 @@ namespace System.ComponentModel.Design
 		{
 			get
 			{
-				return (this.status & 16) == 0;
+				return this.visible;
 			}
 			set
 			{
-				this.SetStatus(16, !value);
-			}
-		}
-
-		public event EventHandler CommandChanged
-		{
-			add
-			{
-				this.statusHandler = (EventHandler)Delegate.Combine(this.statusHandler, value);
-			}
-			remove
-			{
-				this.statusHandler = (EventHandler)Delegate.Remove(this.statusHandler, value);
-			}
-		}
-
-		public virtual CommandID CommandID
-		{
-			get
-			{
-				return this.commandID;
+				this.visible = value;
 			}
 		}
 
 		public virtual void Invoke()
 		{
-			if (this.execHandler != null)
+			if (this.handler != null)
 			{
-				try
-				{
-					this.execHandler(this, EventArgs.Empty);
-				}
-				catch (CheckoutException ex)
-				{
-					if (ex != CheckoutException.Canceled)
-					{
-						throw;
-					}
-				}
+				this.handler(this, EventArgs.Empty);
 			}
 		}
 
@@ -140,60 +113,53 @@ namespace System.ComponentModel.Design
 			this.Invoke();
 		}
 
-		public virtual int OleStatus
-		{
-			get
-			{
-				return this.status;
-			}
-		}
-
 		protected virtual void OnCommandChanged(EventArgs e)
 		{
-			if (this.statusHandler != null)
+			if (this.CommandChanged != null)
 			{
-				this.statusHandler(this, e);
+				this.CommandChanged(this, e);
 			}
 		}
 
 		public override string ToString()
 		{
-			string text = this.CommandID.ToString() + " : ";
-			if ((this.status & 1) != 0)
+			string text = string.Empty;
+			if (this.command != null)
+			{
+				text = this.command.ToString();
+			}
+			text += " : ";
+			if (this.Supported)
 			{
 				text += "Supported";
 			}
-			if ((this.status & 2) != 0)
+			if (this.Enabled)
 			{
 				text += "|Enabled";
 			}
-			if ((this.status & 16) == 0)
+			if (this.Visible)
 			{
 				text += "|Visible";
 			}
-			if ((this.status & 4) != 0)
+			if (this.Checked)
 			{
 				text += "|Checked";
 			}
 			return text;
 		}
 
-		private EventHandler execHandler;
+		private EventHandler handler;
 
-		private EventHandler statusHandler;
+		private CommandID command;
 
-		private CommandID commandID;
+		private bool ischecked;
 
-		private int status;
+		private bool enabled = true;
 
-		private IDictionary properties;
+		private bool issupported = true;
 
-		private const int ENABLED = 2;
+		private bool visible = true;
 
-		private const int INVISIBLE = 16;
-
-		private const int CHECKED = 4;
-
-		private const int SUPPORTED = 1;
+		private Hashtable properties;
 	}
 }

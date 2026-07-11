@@ -70,7 +70,7 @@ public class FilteredStorage
 		{
 			return;
 		}
-		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, Array.Empty<string>());
+		this.logicMeter = new MeterController(this.root.GetComponent<KBatchedAnimController>(), "logicmeter_target", "logicmeter", Meter.Offset.Infront, new string[0]);
 	}
 
 	public void CleanUp()

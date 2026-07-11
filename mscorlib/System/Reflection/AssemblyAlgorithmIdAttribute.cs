@@ -4,19 +4,19 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class AssemblyAlgorithmIdAttribute : Attribute
 	{
 		public AssemblyAlgorithmIdAttribute(AssemblyHashAlgorithm algorithmId)
 		{
-			this.m_algId = (uint)algorithmId;
+			this.id = (uint)algorithmId;
 		}
 
 		[CLSCompliant(false)]
 		public AssemblyAlgorithmIdAttribute(uint algorithmId)
 		{
-			this.m_algId = algorithmId;
+			this.id = algorithmId;
 		}
 
 		[CLSCompliant(false)]
@@ -24,10 +24,10 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.m_algId;
+				return this.id;
 			}
 		}
 
-		private uint m_algId;
+		private uint id;
 	}
 }

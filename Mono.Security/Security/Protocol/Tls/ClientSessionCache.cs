@@ -82,43 +82,43 @@ namespace Mono.Security.Protocol.Tls
 		public static bool SetContextInCache(Context context)
 		{
 			object obj = ClientSessionCache.locker;
-			bool flag2;
+			bool flag;
 			lock (obj)
 			{
 				ClientSessionInfo clientSessionInfo = ClientSessionCache.FromContext(context, false);
 				if (clientSessionInfo == null)
 				{
-					flag2 = false;
+					flag = false;
 				}
 				else
 				{
 					clientSessionInfo.GetContext(context);
 					clientSessionInfo.KeepAlive();
-					flag2 = true;
+					flag = true;
 				}
 			}
-			return flag2;
+			return flag;
 		}
 
 		public static bool SetContextFromCache(Context context)
 		{
 			object obj = ClientSessionCache.locker;
-			bool flag2;
+			bool flag;
 			lock (obj)
 			{
 				ClientSessionInfo clientSessionInfo = ClientSessionCache.FromContext(context, true);
 				if (clientSessionInfo == null)
 				{
-					flag2 = false;
+					flag = false;
 				}
 				else
 				{
 					clientSessionInfo.SetContext(context);
 					clientSessionInfo.KeepAlive();
-					flag2 = true;
+					flag = true;
 				}
 			}
-			return flag2;
+			return flag;
 		}
 
 		private static Hashtable cache = new Hashtable();

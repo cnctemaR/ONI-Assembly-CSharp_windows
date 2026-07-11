@@ -6,13 +6,13 @@ namespace System.ComponentModel
 	public class DescriptionAttribute : Attribute
 	{
 		public DescriptionAttribute()
-			: this(string.Empty)
 		{
+			this.desc = string.Empty;
 		}
 
-		public DescriptionAttribute(string description)
+		public DescriptionAttribute(string name)
 		{
-			this.description = description;
+			this.desc = name;
 		}
 
 		public virtual string Description
@@ -27,36 +27,31 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.description;
+				return this.desc;
 			}
 			set
 			{
-				this.description = value;
+				this.desc = value;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			DescriptionAttribute descriptionAttribute = obj as DescriptionAttribute;
-			return descriptionAttribute != null && descriptionAttribute.Description == this.Description;
+			return obj is DescriptionAttribute && (obj == this || ((DescriptionAttribute)obj).Description == this.desc);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.Description.GetHashCode();
+			return this.desc.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(DescriptionAttribute.Default);
+			return this == DescriptionAttribute.Default;
 		}
 
-		public static readonly DescriptionAttribute Default = new DescriptionAttribute();
+		private string desc;
 
-		private string description;
+		public static readonly DescriptionAttribute Default = new DescriptionAttribute();
 	}
 }

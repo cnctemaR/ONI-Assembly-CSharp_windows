@@ -6,14 +6,18 @@ namespace System.Threading
 	[ComVisible(true)]
 	public struct NativeOverlapped
 	{
-		public IntPtr InternalLow;
+		public IntPtr EventHandle;
 
 		public IntPtr InternalHigh;
 
-		public int OffsetLow;
+		public IntPtr InternalLow;
 
 		public int OffsetHigh;
 
-		public IntPtr EventHandle;
+		public int OffsetLow;
+
+		internal int Handle1;
+
+		internal int Handle2;
 	}
 }

@@ -2,135 +2,103 @@
 using System.Collections;
 using System.ComponentModel.Design;
 using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ReferenceConverter : TypeConverter
 	{
 		public ReferenceConverter(Type type)
 		{
-			this.type = type;
+			this.reference_type = type;
 		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			return (sourceType == typeof(string) && context != null) || base.CanConvertFrom(context, sourceType);
+			return (context != null && sourceType == typeof(string)) || base.CanConvertFrom(context, sourceType);
 		}
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value is string)
+			if (!(value is string))
 			{
-				string text = ((string)value).Trim();
-				if (!string.Equals(text, ReferenceConverter.none) && context != null)
-				{
-					IReferenceService referenceService = (IReferenceService)context.GetService(typeof(IReferenceService));
-					if (referenceService != null)
-					{
-						object reference = referenceService.GetReference(text);
-						if (reference != null)
-						{
-							return reference;
-						}
-					}
-					IContainer container = context.Container;
-					if (container != null)
-					{
-						object obj = container.Components[text];
-						if (obj != null)
-						{
-							return obj;
-						}
-					}
-				}
-				return null;
+				return base.ConvertFrom(context, culture, value);
 			}
-			return base.ConvertFrom(context, culture, value);
+			if (context != null)
+			{
+				object obj = null;
+				global::System.ComponentModel.Design.IReferenceService referenceService = context.GetService(typeof(global::System.ComponentModel.Design.IReferenceService)) as global::System.ComponentModel.Design.IReferenceService;
+				if (referenceService != null)
+				{
+					obj = referenceService.GetReference((string)value);
+				}
+				if (obj == null && context.Container != null && context.Container.Components != null)
+				{
+					obj = context.Container.Components[(string)value];
+				}
+				return obj;
+			}
+			return null;
 		}
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == null)
-			{
-				throw new ArgumentNullException("destinationType");
-			}
-			if (!(destinationType == typeof(string)))
+			if (destinationType != typeof(string))
 			{
 				return base.ConvertTo(context, culture, value, destinationType);
 			}
-			if (value != null)
+			if (value == null)
 			{
-				if (context != null)
-				{
-					IReferenceService referenceService = (IReferenceService)context.GetService(typeof(IReferenceService));
-					if (referenceService != null)
-					{
-						string name = referenceService.GetName(value);
-						if (name != null)
-						{
-							return name;
-						}
-					}
-				}
-				if (!Marshal.IsComObject(value) && value is IComponent)
-				{
-					ISite site = ((IComponent)value).Site;
-					if (site != null)
-					{
-						string name2 = site.Name;
-						if (name2 != null)
-						{
-							return name2;
-						}
-					}
-				}
-				return string.Empty;
+				return "(none)";
 			}
-			return ReferenceConverter.none;
+			string text = string.Empty;
+			if (context != null)
+			{
+				global::System.ComponentModel.Design.IReferenceService referenceService = context.GetService(typeof(global::System.ComponentModel.Design.IReferenceService)) as global::System.ComponentModel.Design.IReferenceService;
+				if (referenceService != null)
+				{
+					text = referenceService.GetName(value);
+				}
+				if ((text == null || text.Length == 0) && value is IComponent)
+				{
+					IComponent component = (IComponent)value;
+					if (component.Site != null && component.Site.Name != null)
+					{
+						text = component.Site.Name;
+					}
+				}
+			}
+			return text;
 		}
 
 		public override TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			object[] array = null;
+			ArrayList arrayList = new ArrayList();
 			if (context != null)
 			{
-				ArrayList arrayList = new ArrayList();
-				arrayList.Add(null);
-				IReferenceService referenceService = (IReferenceService)context.GetService(typeof(IReferenceService));
+				global::System.ComponentModel.Design.IReferenceService referenceService = context.GetService(typeof(global::System.ComponentModel.Design.IReferenceService)) as global::System.ComponentModel.Design.IReferenceService;
 				if (referenceService != null)
 				{
-					object[] references = referenceService.GetReferences(this.type);
-					int num = references.Length;
-					for (int i = 0; i < num; i++)
+					foreach (object obj in referenceService.GetReferences(this.reference_type))
 					{
-						if (this.IsValueAllowed(context, references[i]))
+						if (this.IsValueAllowed(context, obj))
 						{
-							arrayList.Add(references[i]);
+							arrayList.Add(obj);
 						}
 					}
 				}
-				else
+				else if (context.Container != null && context.Container.Components != null)
 				{
-					IContainer container = context.Container;
-					if (container != null)
+					foreach (object obj2 in context.Container.Components)
 					{
-						foreach (object obj in container.Components)
+						if (obj2 != null && this.IsValueAllowed(context, obj2) && this.reference_type.IsInstanceOfType(obj2))
 						{
-							IComponent component = (IComponent)obj;
-							if (component != null && this.type.IsInstanceOfType(component) && this.IsValueAllowed(context, component))
-							{
-								arrayList.Add(component);
-							}
+							arrayList.Add(obj2);
 						}
 					}
 				}
-				array = arrayList.ToArray();
-				Array.Sort(array, 0, array.Length, new ReferenceConverter.ReferenceComparer(this));
+				arrayList.Add(null);
 			}
-			return new TypeConverter.StandardValuesCollection(array);
+			return new TypeConverter.StandardValuesCollection(arrayList);
 		}
 
 		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
@@ -148,25 +116,6 @@ namespace System.ComponentModel
 			return true;
 		}
 
-		private static readonly string none = global::SR.GetString("(none)");
-
-		private Type type;
-
-		private class ReferenceComparer : IComparer
-		{
-			public ReferenceComparer(ReferenceConverter converter)
-			{
-				this.converter = converter;
-			}
-
-			public int Compare(object item1, object item2)
-			{
-				string text = this.converter.ConvertToString(item1);
-				string text2 = this.converter.ConvertToString(item2);
-				return string.Compare(text, text2, false, CultureInfo.InvariantCulture);
-			}
-
-			private ReferenceConverter converter;
-		}
+		private Type reference_type;
 	}
 }

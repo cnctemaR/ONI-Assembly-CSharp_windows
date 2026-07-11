@@ -1,26 +1,67 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace System.Net.NetworkInformation
 {
-	public class UnicastIPAddressInformationCollection : ICollection<UnicastIPAddressInformation>, IEnumerable<UnicastIPAddressInformation>, IEnumerable
+	public class UnicastIPAddressInformationCollection : IEnumerable, IEnumerable<UnicastIPAddressInformation>, ICollection<UnicastIPAddressInformation>
 	{
 		protected internal UnicastIPAddressInformationCollection()
 		{
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.list.GetEnumerator();
+		}
+
+		public virtual void Add(UnicastIPAddressInformation address)
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			this.list.Add(address);
+		}
+
+		public virtual void Clear()
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			this.list.Clear();
+		}
+
+		public virtual bool Contains(UnicastIPAddressInformation address)
+		{
+			return this.list.Contains(address);
+		}
+
 		public virtual void CopyTo(UnicastIPAddressInformation[] array, int offset)
 		{
-			this.addresses.CopyTo(array, offset);
+			this.list.CopyTo(array, offset);
+		}
+
+		public virtual IEnumerator<UnicastIPAddressInformation> GetEnumerator()
+		{
+			return ((IEnumerable<UnicastIPAddressInformation>)this.list).GetEnumerator();
+		}
+
+		public virtual bool Remove(UnicastIPAddressInformation address)
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			return this.list.Remove(address);
 		}
 
 		public virtual int Count
 		{
 			get
 			{
-				return this.addresses.Count;
+				return this.list.Count;
 			}
 		}
 
@@ -32,49 +73,14 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		public virtual void Add(UnicastIPAddressInformation address)
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		internal void InternalAdd(UnicastIPAddressInformation address)
-		{
-			this.addresses.Add(address);
-		}
-
-		public virtual bool Contains(UnicastIPAddressInformation address)
-		{
-			return this.addresses.Contains(address);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		public virtual IEnumerator<UnicastIPAddressInformation> GetEnumerator()
-		{
-			return this.addresses.GetEnumerator();
-		}
-
 		public virtual UnicastIPAddressInformation this[int index]
 		{
 			get
 			{
-				return this.addresses[index];
+				return this.list[index];
 			}
 		}
 
-		public virtual bool Remove(UnicastIPAddressInformation address)
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		public virtual void Clear()
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		private Collection<UnicastIPAddressInformation> addresses = new Collection<UnicastIPAddressInformation>();
+		private List<UnicastIPAddressInformation> list = new List<UnicastIPAddressInformation>();
 	}
 }

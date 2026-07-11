@@ -3,9 +3,9 @@
 namespace System.Runtime.InteropServices
 {
 	[Flags]
-	[Obsolete("Use System.Runtime.InteropServices.ComTypes.FUNCFLAGS instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
+	[Obsolete]
 	[Serializable]
-	public enum FUNCFLAGS : short
+	public enum FUNCFLAGS
 	{
 		FUNCFLAG_FRESTRICTED = 1,
 		FUNCFLAG_FSOURCE = 2,

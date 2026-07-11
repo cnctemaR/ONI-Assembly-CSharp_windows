@@ -17,22 +17,18 @@ namespace System.Runtime.Remoting.Messaging
 				{
 					if (!parameters[i].ParameterType.IsByRef)
 					{
-						int[] paramMap = this._paramMap;
-						int num = this._inoutArgCount;
-						this._inoutArgCount = num + 1;
-						paramMap[num] = i;
+						this._paramMap[this._inoutArgCount++] = i;
 					}
 				}
-				return;
 			}
-			for (int j = 0; j < parameters.Length; j++)
+			else
 			{
-				if (parameters[j].ParameterType.IsByRef || parameters[j].IsOut)
+				for (int j = 0; j < parameters.Length; j++)
 				{
-					int[] paramMap2 = this._paramMap;
-					int num = this._inoutArgCount;
-					this._inoutArgCount = num + 1;
-					paramMap2[num] = j;
+					if (parameters[j].ParameterType.IsByRef || parameters[j].IsOut)
+					{
+						this._paramMap[this._inoutArgCount++] = j;
+					}
 				}
 			}
 		}

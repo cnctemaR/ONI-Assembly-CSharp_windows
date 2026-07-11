@@ -14,20 +14,19 @@ namespace System
 
 		public Random(int Seed)
 		{
-			int num = ((Seed == int.MinValue) ? int.MaxValue : Math.Abs(Seed));
-			int num2 = 161803398 - num;
-			this.SeedArray[55] = num2;
-			int num3 = 1;
+			int num = 161803398 - Math.Abs(Seed);
+			this.SeedArray[55] = num;
+			int num2 = 1;
 			for (int i = 1; i < 55; i++)
 			{
-				int num4 = 21 * i % 55;
-				this.SeedArray[num4] = num3;
-				num3 = num2 - num3;
-				if (num3 < 0)
+				int num3 = 21 * i % 55;
+				this.SeedArray[num3] = num2;
+				num2 = num - num2;
+				if (num2 < 0)
 				{
-					num3 += int.MaxValue;
+					num2 += int.MaxValue;
 				}
-				num2 = this.SeedArray[num4];
+				num = this.SeedArray[num3];
 			}
 			for (int j = 1; j < 5; j++)
 			{
@@ -41,83 +40,54 @@ namespace System
 				}
 			}
 			this.inext = 0;
-			this.inextp = 21;
-			Seed = 1;
+			this.inextp = 31;
 		}
 
 		protected virtual double Sample()
 		{
-			return (double)this.InternalSample() * 4.656612875245797E-10;
-		}
-
-		private int InternalSample()
-		{
-			int num = this.inext;
-			int num2 = this.inextp;
-			if (++num >= 56)
+			if (++this.inext >= 56)
 			{
-				num = 1;
+				this.inext = 1;
 			}
-			if (++num2 >= 56)
+			if (++this.inextp >= 56)
 			{
-				num2 = 1;
+				this.inextp = 1;
 			}
-			int num3 = this.SeedArray[num] - this.SeedArray[num2];
-			if (num3 == 2147483647)
+			int num = this.SeedArray[this.inext] - this.SeedArray[this.inextp];
+			if (num < 0)
 			{
-				num3--;
+				num += int.MaxValue;
 			}
-			if (num3 < 0)
-			{
-				num3 += int.MaxValue;
-			}
-			this.SeedArray[num] = num3;
-			this.inext = num;
-			this.inextp = num2;
-			return num3;
+			this.SeedArray[this.inext] = num;
+			return (double)num * 4.656612875245797E-10;
 		}
 
 		public virtual int Next()
 		{
-			return this.InternalSample();
-		}
-
-		private double GetSampleForLargeRange()
-		{
-			int num = this.InternalSample();
-			if (this.InternalSample() % 2 == 0)
-			{
-				num = -num;
-			}
-			return ((double)num + 2147483646.0) / 4294967293.0;
-		}
-
-		public virtual int Next(int minValue, int maxValue)
-		{
-			if (minValue > maxValue)
-			{
-				throw new ArgumentOutOfRangeException("minValue", Environment.GetResourceString("'{0}' cannot be greater than {1}.", new object[] { "minValue", "maxValue" }));
-			}
-			long num = (long)maxValue - (long)minValue;
-			if (num <= 2147483647L)
-			{
-				return (int)(this.Sample() * (double)num) + minValue;
-			}
-			return (int)((long)(this.GetSampleForLargeRange() * (double)num) + (long)minValue);
+			return (int)(this.Sample() * 2147483647.0);
 		}
 
 		public virtual int Next(int maxValue)
 		{
 			if (maxValue < 0)
 			{
-				throw new ArgumentOutOfRangeException("maxValue", Environment.GetResourceString("'{0}' must be greater than zero.", new object[] { "maxValue" }));
+				throw new ArgumentOutOfRangeException(Locale.GetText("Max value is less than min value."));
 			}
 			return (int)(this.Sample() * (double)maxValue);
 		}
 
-		public virtual double NextDouble()
+		public virtual int Next(int minValue, int maxValue)
 		{
-			return this.Sample();
+			if (minValue > maxValue)
+			{
+				throw new ArgumentOutOfRangeException(Locale.GetText("Min value is greater than max value."));
+			}
+			uint num = (uint)(maxValue - minValue);
+			if (num <= 1U)
+			{
+				return minValue;
+			}
+			return (int)((ulong)((uint)(this.Sample() * num)) + (ulong)((long)minValue));
 		}
 
 		public virtual void NextBytes(byte[] buffer)
@@ -128,8 +98,13 @@ namespace System
 			}
 			for (int i = 0; i < buffer.Length; i++)
 			{
-				buffer[i] = (byte)(this.InternalSample() % 256);
+				buffer[i] = (byte)(this.Sample() * 256.0);
 			}
+		}
+
+		public virtual double NextDouble()
+		{
+			return this.Sample();
 		}
 
 		private const int MBIG = 2147483647;

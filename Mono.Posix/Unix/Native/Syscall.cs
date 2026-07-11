@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
@@ -324,20 +323,11 @@ namespace Mono.Unix.Native
 		[DllImport("libc", SetLastError = true)]
 		public static extern int dirfd(IntPtr dir);
 
-		[DllImport("libc", SetLastError = true)]
-		public static extern IntPtr fdopendir(int fd);
-
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_fcntl", SetLastError = true)]
 		public static extern int fcntl(int fd, FcntlCommand cmd);
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_fcntl_arg", SetLastError = true)]
 		public static extern int fcntl(int fd, FcntlCommand cmd, long arg);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_fcntl_arg_int", SetLastError = true)]
-		public static extern int fcntl(int fd, FcntlCommand cmd, int arg);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_fcntl_arg_ptr", SetLastError = true)]
-		public static extern int fcntl(int fd, FcntlCommand cmd, IntPtr ptr);
 
 		public static int fcntl(int fd, FcntlCommand cmd, DirectoryNotifyFlags arg)
 		{
@@ -367,28 +357,6 @@ namespace Mono.Unix.Native
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_posix_fallocate", SetLastError = true)]
 		public static extern int posix_fallocate(int fd, long offset, ulong len);
-
-		[DllImport("libc", EntryPoint = "openat", SetLastError = true)]
-		private static extern int sys_openat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, int flags);
-
-		[DllImport("libc", EntryPoint = "openat", SetLastError = true)]
-		private static extern int sys_openat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, int flags, uint mode);
-
-		public static int openat(int dirfd, string pathname, OpenFlags flags)
-		{
-			int num = NativeConvert.FromOpenFlags(flags);
-			return Syscall.sys_openat(dirfd, pathname, num);
-		}
-
-		public static int openat(int dirfd, string pathname, OpenFlags flags, FilePermissions mode)
-		{
-			int num = NativeConvert.FromOpenFlags(flags);
-			uint num2 = NativeConvert.FromFilePermissions(mode);
-			return Syscall.sys_openat(dirfd, pathname, num, num2);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_get_at_fdcwd", SetLastError = true)]
-		private static extern int get_at_fdcwd();
 
 		private static void CopyFstab(Fstab to, ref Syscall._Fstab from)
 		{
@@ -498,54 +466,6 @@ namespace Mono.Unix.Native
 				num = Syscall.sys_setfsent();
 			}
 			return num;
-		}
-
-		[DllImport("libc", EntryPoint = "getgrouplist", SetLastError = true)]
-		private static extern int sys_getgrouplist(string user, uint grp, uint[] groups, ref int ngroups);
-
-		public static Group[] getgrouplist(string username)
-		{
-			if (username == null)
-			{
-				throw new ArgumentNullException("username");
-			}
-			if (username.Trim() == "")
-			{
-				throw new ArgumentException("Username cannot be empty", "username");
-			}
-			Passwd passwd = Syscall.getpwnam(username);
-			if (passwd == null)
-			{
-				throw new ArgumentException(string.Format("User {0} does not exist", username), "username");
-			}
-			return Syscall.getgrouplist(passwd);
-		}
-
-		public static Group[] getgrouplist(Passwd user)
-		{
-			if (user == null)
-			{
-				throw new ArgumentNullException("user");
-			}
-			int num = 8;
-			uint[] array = null;
-			int num2;
-			do
-			{
-				Array.Resize<uint>(ref array, num *= 2);
-				num2 = Syscall.sys_getgrouplist(user.pw_name, user.pw_gid, array, ref num);
-			}
-			while (num2 == -1);
-			List<Group> list = new List<Group>();
-			for (int i = 0; i < num2; i++)
-			{
-				Group group = Syscall.getgrgid(array[i]);
-				if (group != null)
-				{
-					list.Add(group);
-				}
-			}
-			return list.ToArray();
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_setgroups", SetLastError = true)]
@@ -890,7 +810,8 @@ namespace Mono.Unix.Native
 
 		public static int psignal(Signum sig, string s)
 		{
-			return Syscall.psignal(NativeConvert.FromSignum(sig), s);
+			int num = NativeConvert.FromSignum(sig);
+			return Syscall.psignal(num, s);
 		}
 
 		[DllImport("libc", EntryPoint = "kill", SetLastError = true)]
@@ -912,7 +833,8 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Syscall.sys_strsignal(num));
+				IntPtr intPtr = Syscall.sys_strsignal(num);
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
@@ -937,28 +859,14 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Syscall.sys_cuserid(@string));
+				IntPtr intPtr = Syscall.sys_cuserid(@string);
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
 
 		[DllImport("libc", SetLastError = true)]
-		public static extern int renameat(int olddirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string oldpath, int newdirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string newpath);
-
-		[DllImport("libc", SetLastError = true)]
 		public static extern int mkstemp(StringBuilder template);
-
-		[DllImport("libc", EntryPoint = "mkdtemp", SetLastError = true)]
-		private static extern IntPtr sys_mkdtemp(StringBuilder template);
-
-		public static StringBuilder mkdtemp(StringBuilder template)
-		{
-			if (Syscall.sys_mkdtemp(template) == IntPtr.Zero)
-			{
-				return null;
-			}
-			return template;
-		}
 
 		[DllImport("libc", SetLastError = true)]
 		public static extern int ttyslot();
@@ -974,52 +882,14 @@ namespace Mono.Unix.Native
 
 		public static int strerror_r(Errno errnum, StringBuilder buf, ulong n)
 		{
-			return Syscall.sys_strerror_r(NativeConvert.FromErrno(errnum), buf, n);
+			int num = NativeConvert.FromErrno(errnum);
+			return Syscall.sys_strerror_r(num, buf, n);
 		}
 
 		public static int strerror_r(Errno errnum, StringBuilder buf)
 		{
 			return Syscall.strerror_r(errnum, buf, (ulong)((long)buf.Capacity));
 		}
-
-		public static int epoll_create(int size)
-		{
-			return Syscall.sys_epoll_create(size);
-		}
-
-		public static int epoll_create(EpollFlags flags)
-		{
-			return Syscall.sys_epoll_create1(flags);
-		}
-
-		public static int epoll_ctl(int epfd, EpollOp op, int fd, EpollEvents events)
-		{
-			EpollEvent epollEvent = default(EpollEvent);
-			epollEvent.events = events;
-			epollEvent.fd = fd;
-			return Syscall.epoll_ctl(epfd, op, fd, ref epollEvent);
-		}
-
-		public static int epoll_wait(int epfd, EpollEvent[] events, int max_events, int timeout)
-		{
-			if (events.Length < max_events)
-			{
-				throw new ArgumentOutOfRangeException("events", "Must refer to at least 'max_events' elements.");
-			}
-			return Syscall.sys_epoll_wait(epfd, events, max_events, timeout);
-		}
-
-		[DllImport("libc", EntryPoint = "epoll_create", SetLastError = true)]
-		private static extern int sys_epoll_create(int size);
-
-		[DllImport("libc", EntryPoint = "epoll_create1", SetLastError = true)]
-		private static extern int sys_epoll_create1(EpollFlags flags);
-
-		[DllImport("libc", SetLastError = true)]
-		public static extern int epoll_ctl(int epfd, EpollOp op, int fd, ref EpollEvent ee);
-
-		[DllImport("libc", EntryPoint = "epoll_wait", SetLastError = true)]
-		private static extern int sys_epoll_wait(int epfd, EpollEvent[] ee, int maxevents, int timeout);
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_posix_madvise", SetLastError = true)]
 		public static extern int posix_madvise(IntPtr addr, ulong len, PosixMadviseAdvice advice);
@@ -1047,7 +917,8 @@ namespace Mono.Unix.Native
 
 		public static int mlockall(MlockallFlags flags)
 		{
-			return Syscall.sys_mlockall(NativeConvert.FromMlockallFlags(flags));
+			int num = NativeConvert.FromMlockallFlags(flags);
+			return Syscall.sys_mlockall(num);
 		}
 
 		[DllImport("libc", SetLastError = true)]
@@ -1125,7 +996,9 @@ namespace Mono.Unix.Native
 
 		public static FilePermissions umask(FilePermissions mask)
 		{
-			return NativeConvert.ToFilePermissions(Syscall.sys_umask(NativeConvert.FromFilePermissions(mask)));
+			uint num = NativeConvert.FromFilePermissions(mask);
+			uint num2 = Syscall.sys_umask(num);
+			return NativeConvert.ToFilePermissions(num2);
 		}
 
 		[DllImport("libc", EntryPoint = "mkdir", SetLastError = true)]
@@ -1147,73 +1020,6 @@ namespace Mono.Unix.Native
 		{
 			uint num = NativeConvert.FromFilePermissions(mode);
 			return Syscall.sys_mkfifo(pathname, num);
-		}
-
-		[DllImport("libc", EntryPoint = "fchmodat", SetLastError = true)]
-		private static extern int sys_fchmodat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, uint mode, int flags);
-
-		public static int fchmodat(int dirfd, string pathname, FilePermissions mode, AtFlags flags)
-		{
-			uint num = NativeConvert.FromFilePermissions(mode);
-			int num2 = NativeConvert.FromAtFlags(flags);
-			return Syscall.sys_fchmodat(dirfd, pathname, num, num2);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_fstatat", SetLastError = true)]
-		public static extern int fstatat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string file_name, out Stat buf, AtFlags flags);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_get_utime_now", SetLastError = true)]
-		private static extern long get_utime_now();
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_get_utime_omit", SetLastError = true)]
-		private static extern long get_utime_omit();
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_futimens", SetLastError = true)]
-		private static extern int sys_futimens(int fd, Timespec[] times);
-
-		public static int futimens(int fd, Timespec[] times)
-		{
-			if (times != null && times.Length != 2)
-			{
-				Stdlib.SetLastError(Errno.EINVAL);
-				return -1;
-			}
-			return Syscall.sys_futimens(fd, times);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_utimensat", SetLastError = true)]
-		private static extern int sys_utimensat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, Timespec[] times, int flags);
-
-		public static int utimensat(int dirfd, string pathname, Timespec[] times, AtFlags flags)
-		{
-			if (times != null && times.Length != 2)
-			{
-				Stdlib.SetLastError(Errno.EINVAL);
-				return -1;
-			}
-			int num = NativeConvert.FromAtFlags(flags);
-			return Syscall.sys_utimensat(dirfd, pathname, times, num);
-		}
-
-		[DllImport("libc", EntryPoint = "mkdirat", SetLastError = true)]
-		private static extern int sys_mkdirat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string oldpath, uint mode);
-
-		public static int mkdirat(int dirfd, string oldpath, FilePermissions mode)
-		{
-			uint num = NativeConvert.FromFilePermissions(mode);
-			return Syscall.sys_mkdirat(dirfd, oldpath, num);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_mknodat", SetLastError = true)]
-		public static extern int mknodat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, FilePermissions mode, ulong dev);
-
-		[DllImport("libc", EntryPoint = "mkfifoat", SetLastError = true)]
-		private static extern int sys_mkfifoat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, uint mode);
-
-		public static int mkfifoat(int dirfd, string pathname, FilePermissions mode)
-		{
-			uint num = NativeConvert.FromFilePermissions(mode);
-			return Syscall.sys_mkfifoat(dirfd, pathname, num);
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_statvfs", SetLastError = true)]
@@ -1361,7 +1167,8 @@ namespace Mono.Unix.Native
 
 		public static Signum WTERMSIG(int status)
 		{
-			return NativeConvert.ToSignum(Syscall._WTERMSIG(status));
+			int num = Syscall._WTERMSIG(status);
+			return NativeConvert.ToSignum(num);
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_WIFSTOPPED")]
@@ -1377,7 +1184,8 @@ namespace Mono.Unix.Native
 
 		public static Signum WSTOPSIG(int status)
 		{
-			return NativeConvert.ToSignum(Syscall._WSTOPSIG(status));
+			int num = Syscall._WSTOPSIG(status);
+			return NativeConvert.ToSignum(num);
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_openlog", SetLastError = true)]
@@ -1402,7 +1210,8 @@ namespace Mono.Unix.Native
 
 		public static int syslog(SyslogLevel level, string message)
 		{
-			return Syscall.sys_syslog(NativeConvert.FromSyslogLevel(level), Syscall.GetSyslogMessage(message));
+			int num = NativeConvert.FromSyslogLevel(level);
+			return Syscall.sys_syslog(num, Syscall.GetSyslogMessage(message));
 		}
 
 		private static string GetSyslogMessage(string message)
@@ -1441,7 +1250,8 @@ namespace Mono.Unix.Native
 
 		public static int setlogmask(SyslogLevel mask)
 		{
-			return Syscall.sys_setlogmask(NativeConvert.FromSyslogLevel(mask));
+			int num = NativeConvert.FromSyslogLevel(mask);
+			return Syscall.sys_setlogmask(num);
 		}
 
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_nanosleep", SetLastError = true)]
@@ -1694,7 +1504,8 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Syscall.sys_ttyname(fd));
+				IntPtr intPtr = Syscall.sys_ttyname(fd);
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
@@ -1721,46 +1532,12 @@ namespace Mono.Unix.Native
 		[DllImport("libc", SetLastError = true)]
 		public static extern int symlink([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string oldpath, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string newpath);
 
-		private static int ReadlinkIntoStringBuilder(Syscall.DoReadlinkFun doReadlink, [Out] StringBuilder buf, ulong bufsiz)
-		{
-			int num;
-			long num2;
-			checked
-			{
-				num = (int)bufsiz;
-				byte[] array = new byte[num];
-				num2 = doReadlink(array);
-				if (num2 < 0L)
-				{
-					return (int)num2;
-				}
-				buf.Length = 0;
-				char[] chars = UnixEncoding.Instance.GetChars(array, 0, (int)num2);
-				buf.Append(chars, 0, Math.Min(num, chars.Length));
-			}
-			if (num2 == (long)num)
-			{
-				buf.Append(new string('\0', num - buf.Length));
-			}
-			return buf.Length;
-		}
-
-		public static int readlink(string path, [Out] StringBuilder buf, ulong bufsiz)
-		{
-			return Syscall.ReadlinkIntoStringBuilder((byte[] target) => Syscall.readlink(path, target), buf, bufsiz);
-		}
+		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_readlink", SetLastError = true)]
+		public static extern int readlink([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string path, [Out] StringBuilder buf, ulong bufsiz);
 
 		public static int readlink(string path, [Out] StringBuilder buf)
 		{
 			return Syscall.readlink(path, buf, (ulong)((long)buf.Capacity));
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_readlink", SetLastError = true)]
-		private static extern long readlink([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string path, byte[] buf, ulong bufsiz);
-
-		public static long readlink(string path, byte[] buf)
-		{
-			return Syscall.readlink(path, buf, (ulong)((long)buf.Length));
 		}
 
 		[DllImport("libc", SetLastError = true)]
@@ -1784,7 +1561,8 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Syscall.sys_getlogin());
+				IntPtr intPtr = Syscall.sys_getlogin();
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
@@ -1856,7 +1634,8 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Syscall.sys_getusershell());
+				IntPtr intPtr = Syscall.sys_getusershell();
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
@@ -1943,64 +1722,6 @@ namespace Mono.Unix.Native
 			Syscall.swab((IntPtr)from, (IntPtr)to, n);
 		}
 
-		[DllImport("libc", EntryPoint = "faccessat", SetLastError = true)]
-		private static extern int sys_faccessat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, int mode, int flags);
-
-		public static int faccessat(int dirfd, string pathname, AccessModes mode, AtFlags flags)
-		{
-			int num = NativeConvert.FromAccessModes(mode);
-			int num2 = NativeConvert.FromAtFlags(flags);
-			return Syscall.sys_faccessat(dirfd, pathname, num, num2);
-		}
-
-		[DllImport("libc", EntryPoint = "fchownat", SetLastError = true)]
-		private static extern int sys_fchownat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, uint owner, uint group, int flags);
-
-		public static int fchownat(int dirfd, string pathname, uint owner, uint group, AtFlags flags)
-		{
-			int num = NativeConvert.FromAtFlags(flags);
-			return Syscall.sys_fchownat(dirfd, pathname, owner, group, num);
-		}
-
-		[DllImport("libc", EntryPoint = "linkat", SetLastError = true)]
-		private static extern int sys_linkat(int olddirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string oldpath, int newdirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string newpath, int flags);
-
-		public static int linkat(int olddirfd, string oldpath, int newdirfd, string newpath, AtFlags flags)
-		{
-			int num = NativeConvert.FromAtFlags(flags);
-			return Syscall.sys_linkat(olddirfd, oldpath, newdirfd, newpath, num);
-		}
-
-		public static int readlinkat(int dirfd, string pathname, [Out] StringBuilder buf, ulong bufsiz)
-		{
-			return Syscall.ReadlinkIntoStringBuilder((byte[] target) => Syscall.readlinkat(dirfd, pathname, target), buf, bufsiz);
-		}
-
-		public static int readlinkat(int dirfd, string pathname, [Out] StringBuilder buf)
-		{
-			return Syscall.readlinkat(dirfd, pathname, buf, (ulong)((long)buf.Capacity));
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_readlinkat", SetLastError = true)]
-		private static extern long readlinkat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, byte[] buf, ulong bufsiz);
-
-		public static long readlinkat(int dirfd, string pathname, byte[] buf)
-		{
-			return Syscall.readlinkat(dirfd, pathname, buf, (ulong)((long)buf.Length));
-		}
-
-		[DllImport("libc", SetLastError = true)]
-		public static extern int symlinkat([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string oldpath, int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string newpath);
-
-		[DllImport("libc", EntryPoint = "unlinkat", SetLastError = true)]
-		private static extern int sys_unlinkat(int dirfd, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string pathname, int flags);
-
-		public static int unlinkat(int dirfd, string pathname, AtFlags flags)
-		{
-			int num = NativeConvert.FromAtFlags(flags);
-			return Syscall.sys_unlinkat(dirfd, pathname, num);
-		}
-
 		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_utime", SetLastError = true)]
 		private static extern int sys_utime([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string filename, ref Utimbuf buf, int use_buf);
 
@@ -2015,720 +1736,9 @@ namespace Mono.Unix.Native
 			return Syscall.sys_utime(filename, ref utimbuf, 0);
 		}
 
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_readv", SetLastError = true)]
-		private static extern long sys_readv(int fd, Iovec[] iov, int iovcnt);
-
-		public static long readv(int fd, Iovec[] iov)
-		{
-			return Syscall.sys_readv(fd, iov, iov.Length);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_writev", SetLastError = true)]
-		private static extern long sys_writev(int fd, Iovec[] iov, int iovcnt);
-
-		public static long writev(int fd, Iovec[] iov)
-		{
-			return Syscall.sys_writev(fd, iov, iov.Length);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_preadv", SetLastError = true)]
-		private static extern long sys_preadv(int fd, Iovec[] iov, int iovcnt, long offset);
-
-		public static long preadv(int fd, Iovec[] iov, long offset)
-		{
-			return Syscall.sys_preadv(fd, iov, iov.Length, offset);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_pwritev", SetLastError = true)]
-		private static extern long sys_pwritev(int fd, Iovec[] iov, int iovcnt, long offset);
-
-		public static long pwritev(int fd, Iovec[] iov, long offset)
-		{
-			return Syscall.sys_pwritev(fd, iov, iov.Length, offset);
-		}
-
-		[DllImport("libc")]
-		public static extern uint htonl(uint hostlong);
-
-		[DllImport("libc")]
-		public static extern ushort htons(ushort hostshort);
-
-		[DllImport("libc")]
-		public static extern uint ntohl(uint netlong);
-
-		[DllImport("libc")]
-		public static extern ushort ntohs(ushort netshort);
-
-		[DllImport("libc", EntryPoint = "socket", SetLastError = true)]
-		private static extern int sys_socket(int domain, int type, int protocol);
-
-		public static int socket(UnixAddressFamily domain, UnixSocketType type, UnixSocketFlags flags, UnixSocketProtocol protocol)
-		{
-			int num = NativeConvert.FromUnixAddressFamily(domain);
-			int num2 = NativeConvert.FromUnixSocketType(type);
-			int num3 = NativeConvert.FromUnixSocketFlags(flags);
-			int num4 = ((protocol == (UnixSocketProtocol)0) ? 0 : NativeConvert.FromUnixSocketProtocol(protocol));
-			return Syscall.sys_socket(num, num2 | num3, num4);
-		}
-
-		public static int socket(UnixAddressFamily domain, UnixSocketType type, UnixSocketProtocol protocol)
-		{
-			return Syscall.socket(domain, type, (UnixSocketFlags)0, protocol);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_socketpair", SetLastError = true)]
-		private static extern int sys_socketpair(int domain, int type, int protocol, out int socket1, out int socket2);
-
-		public static int socketpair(UnixAddressFamily domain, UnixSocketType type, UnixSocketFlags flags, UnixSocketProtocol protocol, out int socket1, out int socket2)
-		{
-			int num = NativeConvert.FromUnixAddressFamily(domain);
-			int num2 = NativeConvert.FromUnixSocketType(type);
-			int num3 = NativeConvert.FromUnixSocketFlags(flags);
-			int num4 = ((protocol == (UnixSocketProtocol)0) ? 0 : NativeConvert.FromUnixSocketProtocol(protocol));
-			return Syscall.sys_socketpair(num, num2 | num3, num4, out socket1, out socket2);
-		}
-
-		public static int socketpair(UnixAddressFamily domain, UnixSocketType type, UnixSocketProtocol protocol, out int socket1, out int socket2)
-		{
-			return Syscall.socketpair(domain, type, (UnixSocketFlags)0, protocol, out socket1, out socket2);
-		}
-
-		[DllImport("libc", SetLastError = true)]
-		public static extern int sockatmark(int socket);
-
-		[DllImport("libc", SetLastError = true)]
-		public static extern int listen(int socket, int backlog);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_getsockopt", SetLastError = true)]
-		private unsafe static extern int sys_getsockopt(int socket, int level, int option_name, void* option_value, ref long option_len);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_getsockopt_timeval", SetLastError = true)]
-		private static extern int sys_getsockopt_timeval(int socket, int level, int option_name, out Timeval option_value);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_getsockopt_linger", SetLastError = true)]
-		private static extern int sys_getsockopt_linger(int socket, int level, int option_name, out Linger option_value);
-
-		public unsafe static int getsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, void* option_value, ref long option_len)
-		{
-			int num = NativeConvert.FromUnixSocketProtocol(level);
-			int num2 = NativeConvert.FromUnixSocketOptionName(option_name);
-			return Syscall.sys_getsockopt(socket, num, num2, option_value, ref option_len);
-		}
-
-		public unsafe static int getsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, IntPtr option_value, ref long option_len)
-		{
-			return Syscall.getsockopt(socket, level, option_name, (void*)option_value, ref option_len);
-		}
-
-		public unsafe static int getsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, out int option_value)
-		{
-			long num = 4L;
-			int num3;
-			int num2 = Syscall.getsockopt(socket, level, option_name, (void*)(&num3), ref num);
-			if (num2 != -1 && num != 4L)
-			{
-				Stdlib.SetLastError(Errno.EINVAL);
-				num2 = -1;
-			}
-			option_value = num3;
-			return num2;
-		}
-
-		public unsafe static int getsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, byte[] option_value, ref long option_len)
-		{
-			if (option_len > (long)((option_value == null) ? 0 : option_value.Length))
-			{
-				throw new ArgumentOutOfRangeException("option_len", "option_len > (option_value == null ? 0 : option_value.Length)");
-			}
-			byte* ptr;
-			if (option_value == null || option_value.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &option_value[0];
-			}
-			return Syscall.getsockopt(socket, level, option_name, (void*)ptr, ref option_len);
-		}
-
-		public static int getsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, out Timeval option_value)
-		{
-			int num = NativeConvert.FromUnixSocketProtocol(level);
-			int num2 = NativeConvert.FromUnixSocketOptionName(option_name);
-			return Syscall.sys_getsockopt_timeval(socket, num, num2, out option_value);
-		}
-
-		public static int getsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, out Linger option_value)
-		{
-			int num = NativeConvert.FromUnixSocketProtocol(level);
-			int num2 = NativeConvert.FromUnixSocketOptionName(option_name);
-			return Syscall.sys_getsockopt_linger(socket, num, num2, out option_value);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_setsockopt", SetLastError = true)]
-		private unsafe static extern int sys_setsockopt(int socket, int level, int option_name, void* option_value, long option_len);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_setsockopt_timeval", SetLastError = true)]
-		private static extern int sys_setsockopt_timeval(int socket, int level, int option_name, ref Timeval option_value);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_setsockopt_linger", SetLastError = true)]
-		private static extern int sys_setsockopt_linger(int socket, int level, int option_name, ref Linger option_value);
-
-		public unsafe static int setsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, void* option_value, long option_len)
-		{
-			int num = NativeConvert.FromUnixSocketProtocol(level);
-			int num2 = NativeConvert.FromUnixSocketOptionName(option_name);
-			return Syscall.sys_setsockopt(socket, num, num2, option_value, option_len);
-		}
-
-		public unsafe static int setsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, IntPtr option_value, long option_len)
-		{
-			return Syscall.setsockopt(socket, level, option_name, (void*)option_value, option_len);
-		}
-
-		public unsafe static int setsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, int option_value)
-		{
-			return Syscall.setsockopt(socket, level, option_name, (void*)(&option_value), 4L);
-		}
-
-		public unsafe static int setsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, byte[] option_value, long option_len)
-		{
-			if (option_len > (long)((option_value == null) ? 0 : option_value.Length))
-			{
-				throw new ArgumentOutOfRangeException("option_len", "option_len > (option_value == null ? 0 : option_value.Length)");
-			}
-			byte* ptr;
-			if (option_value == null || option_value.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &option_value[0];
-			}
-			return Syscall.setsockopt(socket, level, option_name, (void*)ptr, option_len);
-		}
-
-		public static int setsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, Timeval option_value)
-		{
-			int num = NativeConvert.FromUnixSocketProtocol(level);
-			int num2 = NativeConvert.FromUnixSocketOptionName(option_name);
-			return Syscall.sys_setsockopt_timeval(socket, num, num2, ref option_value);
-		}
-
-		public static int setsockopt(int socket, UnixSocketProtocol level, UnixSocketOptionName option_name, Linger option_value)
-		{
-			int num = NativeConvert.FromUnixSocketProtocol(level);
-			int num2 = NativeConvert.FromUnixSocketOptionName(option_name);
-			return Syscall.sys_setsockopt_linger(socket, num, num2, ref option_value);
-		}
-
-		[DllImport("libc", EntryPoint = "shutdown", SetLastError = true)]
-		private static extern int sys_shutdown(int socket, int how);
-
-		public static int shutdown(int socket, ShutdownOption how)
-		{
-			int num = NativeConvert.FromShutdownOption(how);
-			return Syscall.sys_shutdown(socket, num);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_recv", SetLastError = true)]
-		private unsafe static extern long sys_recv(int socket, void* buffer, ulong length, int flags);
-
-		public unsafe static long recv(int socket, void* buffer, ulong length, MessageFlags flags)
-		{
-			int num = NativeConvert.FromMessageFlags(flags);
-			return Syscall.sys_recv(socket, buffer, length, num);
-		}
-
-		public unsafe static long recv(int socket, IntPtr buffer, ulong length, MessageFlags flags)
-		{
-			return Syscall.recv(socket, (void*)buffer, length, flags);
-		}
-
-		public unsafe static long recv(int socket, byte[] buffer, ulong length, MessageFlags flags)
-		{
-			if (length > (ulong)((buffer == null) ? 0L : ((long)buffer.Length)))
-			{
-				throw new ArgumentOutOfRangeException("length", "length > (buffer == null ? 0 : buffer.LongLength)");
-			}
-			byte* ptr;
-			if (buffer == null || buffer.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &buffer[0];
-			}
-			return Syscall.recv(socket, (void*)ptr, length, flags);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_send", SetLastError = true)]
-		private unsafe static extern long sys_send(int socket, void* message, ulong length, int flags);
-
-		public unsafe static long send(int socket, void* message, ulong length, MessageFlags flags)
-		{
-			int num = NativeConvert.FromMessageFlags(flags);
-			return Syscall.sys_send(socket, message, length, num);
-		}
-
-		public unsafe static long send(int socket, IntPtr message, ulong length, MessageFlags flags)
-		{
-			return Syscall.send(socket, (void*)message, length, flags);
-		}
-
-		public unsafe static long send(int socket, byte[] message, ulong length, MessageFlags flags)
-		{
-			if (length > (ulong)((message == null) ? 0L : ((long)message.Length)))
-			{
-				throw new ArgumentOutOfRangeException("length", "length > (message == null ? 0 : message.LongLength)");
-			}
-			byte* ptr;
-			if (message == null || message.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &message[0];
-			}
-			return Syscall.send(socket, (void*)ptr, length, flags);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_bind", SetLastError = true)]
-		private unsafe static extern int sys_bind(int socket, _SockaddrHeader* address);
-
-		public unsafe static int bind(int socket, Sockaddr address)
-		{
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, false);
-				return Syscall.sys_bind(socket, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_connect", SetLastError = true)]
-		private unsafe static extern int sys_connect(int socket, _SockaddrHeader* address);
-
-		public unsafe static int connect(int socket, Sockaddr address)
-		{
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, false);
-				return Syscall.sys_connect(socket, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_accept", SetLastError = true)]
-		private unsafe static extern int sys_accept(int socket, _SockaddrHeader* address);
-
-		public unsafe static int accept(int socket, Sockaddr address)
-		{
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, true);
-				int num = Syscall.sys_accept(socket, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-				sockaddrDynamic.Update(address);
-				return num;
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_accept4", SetLastError = true)]
-		private unsafe static extern int sys_accept4(int socket, _SockaddrHeader* address, int flags);
-
-		public unsafe static int accept4(int socket, Sockaddr address, UnixSocketFlags flags)
-		{
-			int num = NativeConvert.FromUnixSocketFlags(flags);
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, true);
-				int num2 = Syscall.sys_accept4(socket, Sockaddr.GetNative(&sockaddrDynamic, ptr2), num);
-				sockaddrDynamic.Update(address);
-				return num2;
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_getpeername", SetLastError = true)]
-		private unsafe static extern int sys_getpeername(int socket, _SockaddrHeader* address);
-
-		public unsafe static int getpeername(int socket, Sockaddr address)
-		{
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, true);
-				int num = Syscall.sys_getpeername(socket, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-				sockaddrDynamic.Update(address);
-				return num;
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_getsockname", SetLastError = true)]
-		private unsafe static extern int sys_getsockname(int socket, _SockaddrHeader* address);
-
-		public unsafe static int getsockname(int socket, Sockaddr address)
-		{
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, true);
-				int num = Syscall.sys_getsockname(socket, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-				sockaddrDynamic.Update(address);
-				return num;
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_recvfrom", SetLastError = true)]
-		private unsafe static extern long sys_recvfrom(int socket, void* buffer, ulong length, int flags, _SockaddrHeader* address);
-
-		public unsafe static long recvfrom(int socket, void* buffer, ulong length, MessageFlags flags, Sockaddr address)
-		{
-			int num = NativeConvert.FromMessageFlags(flags);
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, true);
-				long num2 = Syscall.sys_recvfrom(socket, buffer, length, num, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-				sockaddrDynamic.Update(address);
-				return num2;
-			}
-		}
-
-		public unsafe static long recvfrom(int socket, IntPtr buffer, ulong length, MessageFlags flags, Sockaddr address)
-		{
-			return Syscall.recvfrom(socket, (void*)buffer, length, flags, address);
-		}
-
-		public unsafe static long recvfrom(int socket, byte[] buffer, ulong length, MessageFlags flags, Sockaddr address)
-		{
-			if (length > (ulong)((long)buffer.Length))
-			{
-				throw new ArgumentOutOfRangeException("length", "length > buffer.LongLength");
-			}
-			byte* ptr;
-			if (buffer == null || buffer.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &buffer[0];
-			}
-			return Syscall.recvfrom(socket, (void*)ptr, length, flags, address);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_sendto", SetLastError = true)]
-		private unsafe static extern long sys_sendto(int socket, void* message, ulong length, int flags, _SockaddrHeader* address);
-
-		public unsafe static long sendto(int socket, void* message, ulong length, MessageFlags flags, Sockaddr address)
-		{
-			int num = NativeConvert.FromMessageFlags(flags);
-			fixed (SockaddrType* ptr = &Sockaddr.GetAddress(address).type)
-			{
-				SockaddrType* ptr2 = ptr;
-				byte[] dynamicData;
-				byte* ptr3;
-				if ((dynamicData = Sockaddr.GetDynamicData(address)) == null || dynamicData.Length == 0)
-				{
-					ptr3 = null;
-				}
-				else
-				{
-					ptr3 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(address, ptr3, false);
-				return Syscall.sys_sendto(socket, message, length, num, Sockaddr.GetNative(&sockaddrDynamic, ptr2));
-			}
-		}
-
-		public unsafe static long sendto(int socket, IntPtr message, ulong length, MessageFlags flags, Sockaddr address)
-		{
-			return Syscall.sendto(socket, (void*)message, length, flags, address);
-		}
-
-		public unsafe static long sendto(int socket, byte[] message, ulong length, MessageFlags flags, Sockaddr address)
-		{
-			if (length > (ulong)((long)message.Length))
-			{
-				throw new ArgumentOutOfRangeException("length", "length > message.LongLength");
-			}
-			byte* ptr;
-			if (message == null || message.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &message[0];
-			}
-			return Syscall.sendto(socket, (void*)ptr, length, flags, address);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_recvmsg", SetLastError = true)]
-		private unsafe static extern long sys_recvmsg(int socket, ref Syscall._Msghdr message, _SockaddrHeader* msg_name, int flags);
-
-		public unsafe static long recvmsg(int socket, Msghdr message, MessageFlags flags)
-		{
-			int num = NativeConvert.FromMessageFlags(flags);
-			Sockaddr msg_name = message.msg_name;
-			byte[] msg_control;
-			byte* ptr;
-			if ((msg_control = message.msg_control) == null || msg_control.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &msg_control[0];
-			}
-			Iovec[] msg_iov;
-			Iovec* ptr2;
-			if ((msg_iov = message.msg_iov) == null || msg_iov.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &msg_iov[0];
-			}
-			Syscall._Msghdr msghdr = new Syscall._Msghdr(message, ptr2, ptr);
-			long num2;
-			fixed (SockaddrType* ptr3 = &Sockaddr.GetAddress(msg_name).type)
-			{
-				SockaddrType* ptr4 = ptr3;
-				byte[] array;
-				byte* ptr5;
-				if ((array = Sockaddr.GetDynamicData(msg_name)) == null || array.Length == 0)
-				{
-					ptr5 = null;
-				}
-				else
-				{
-					ptr5 = &array[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(msg_name, ptr5, true);
-				num2 = Syscall.sys_recvmsg(socket, ref msghdr, Sockaddr.GetNative(&sockaddrDynamic, ptr4), num);
-				sockaddrDynamic.Update(msg_name);
-				array = null;
-			}
-			msghdr.Update(message);
-			return num2;
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_sendmsg", SetLastError = true)]
-		private unsafe static extern long sys_sendmsg(int socket, ref Syscall._Msghdr message, _SockaddrHeader* msg_name, int flags);
-
-		public unsafe static long sendmsg(int socket, Msghdr message, MessageFlags flags)
-		{
-			int num = NativeConvert.FromMessageFlags(flags);
-			Sockaddr msg_name = message.msg_name;
-			byte[] msg_control;
-			byte* ptr;
-			if ((msg_control = message.msg_control) == null || msg_control.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &msg_control[0];
-			}
-			Iovec[] msg_iov;
-			Iovec* ptr2;
-			if ((msg_iov = message.msg_iov) == null || msg_iov.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &msg_iov[0];
-			}
-			Syscall._Msghdr msghdr = new Syscall._Msghdr(message, ptr2, ptr);
-			fixed (SockaddrType* ptr3 = &Sockaddr.GetAddress(msg_name).type)
-			{
-				SockaddrType* ptr4 = ptr3;
-				byte[] dynamicData;
-				byte* ptr5;
-				if ((dynamicData = Sockaddr.GetDynamicData(msg_name)) == null || dynamicData.Length == 0)
-				{
-					ptr5 = null;
-				}
-				else
-				{
-					ptr5 = &dynamicData[0];
-				}
-				_SockaddrDynamic sockaddrDynamic = new _SockaddrDynamic(msg_name, ptr5, false);
-				return Syscall.sys_sendmsg(socket, ref msghdr, Sockaddr.GetNative(&sockaddrDynamic, ptr4), num);
-			}
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_CMSG_FIRSTHDR", SetLastError = true)]
-		private unsafe static extern long CMSG_FIRSTHDR(byte* msg_control, long msg_controllen);
-
-		public unsafe static long CMSG_FIRSTHDR(Msghdr msgh)
-		{
-			if (msgh.msg_control == null && msgh.msg_controllen != 0L)
-			{
-				throw new ArgumentException("msgh.msg_control == null && msgh.msg_controllen != 0", "msgh");
-			}
-			if (msgh.msg_control != null && msgh.msg_controllen > (long)msgh.msg_control.Length)
-			{
-				throw new ArgumentException("msgh.msg_controllen > msgh.msg_control.Length", "msgh");
-			}
-			byte[] msg_control;
-			byte* ptr;
-			if ((msg_control = msgh.msg_control) == null || msg_control.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &msg_control[0];
-			}
-			return Syscall.CMSG_FIRSTHDR(ptr, msgh.msg_controllen);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_CMSG_NXTHDR", SetLastError = true)]
-		private unsafe static extern long CMSG_NXTHDR(byte* msg_control, long msg_controllen, long cmsg);
-
-		public unsafe static long CMSG_NXTHDR(Msghdr msgh, long cmsg)
-		{
-			if (msgh.msg_control == null || msgh.msg_controllen > (long)msgh.msg_control.Length)
-			{
-				throw new ArgumentException("msgh.msg_control == null || msgh.msg_controllen > msgh.msg_control.Length", "msgh");
-			}
-			if (cmsg < 0L || cmsg + (long)Cmsghdr.Size > msgh.msg_controllen)
-			{
-				throw new ArgumentException("cmsg offset pointing out of buffer", "cmsg");
-			}
-			byte[] msg_control;
-			byte* ptr;
-			if ((msg_control = msgh.msg_control) == null || msg_control.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &msg_control[0];
-			}
-			return Syscall.CMSG_NXTHDR(ptr, msgh.msg_controllen, cmsg);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_CMSG_DATA", SetLastError = true)]
-		private unsafe static extern long CMSG_DATA(byte* msg_control, long msg_controllen, long cmsg);
-
-		public unsafe static long CMSG_DATA(Msghdr msgh, long cmsg)
-		{
-			if (msgh.msg_control == null || msgh.msg_controllen > (long)msgh.msg_control.Length)
-			{
-				throw new ArgumentException("msgh.msg_control == null || msgh.msg_controllen > msgh.msg_control.Length", "msgh");
-			}
-			if (cmsg < 0L || cmsg + (long)Cmsghdr.Size > msgh.msg_controllen)
-			{
-				throw new ArgumentException("cmsg offset pointing out of buffer", "cmsg");
-			}
-			byte[] msg_control;
-			byte* ptr;
-			if ((msg_control = msgh.msg_control) == null || msg_control.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &msg_control[0];
-			}
-			return Syscall.CMSG_DATA(ptr, msgh.msg_controllen, cmsg);
-		}
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_CMSG_ALIGN", SetLastError = true)]
-		public static extern ulong CMSG_ALIGN(ulong length);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_CMSG_SPACE", SetLastError = true)]
-		public static extern ulong CMSG_SPACE(ulong length);
-
-		[DllImport("MonoPosixHelper", EntryPoint = "Mono_Posix_Syscall_CMSG_LEN", SetLastError = true)]
-		public static extern ulong CMSG_LEN(ulong length);
-
 		internal new const string LIBC = "libc";
 
 		internal static object readdir_lock = new object();
-
-		public static readonly int AT_FDCWD = Syscall.get_at_fdcwd();
 
 		internal static object fstab_lock = new object();
 
@@ -2745,10 +1755,6 @@ namespace Mono.Unix.Native
 		internal static object getlogin_lock = new object();
 
 		public static readonly IntPtr MAP_FAILED = (IntPtr)(-1);
-
-		public static readonly long UTIME_NOW = Syscall.get_utime_now();
-
-		public static readonly long UTIME_OMIT = Syscall.get_utime_omit();
 
 		private static object tty_lock = new object();
 
@@ -2853,48 +1859,6 @@ namespace Mono.Unix.Native
 			public IntPtr domainname;
 
 			public IntPtr _buf_;
-		}
-
-		private delegate long DoReadlinkFun(byte[] target);
-
-		private struct _Msghdr
-		{
-			public unsafe _Msghdr(Msghdr message, Iovec* ptr_msg_iov, byte* ptr_msg_control)
-			{
-				if (message.msg_iovlen > message.msg_iov.Length || message.msg_iovlen < 0)
-				{
-					throw new ArgumentException("message.msg_iovlen > message.msg_iov.Length || message.msg_iovlen < 0", "message");
-				}
-				this.msg_iov = ptr_msg_iov;
-				this.msg_iovlen = message.msg_iovlen;
-				if (message.msg_control == null && message.msg_controllen != 0L)
-				{
-					throw new ArgumentException("message.msg_control == null && message.msg_controllen != 0", "message");
-				}
-				if (message.msg_control != null && message.msg_controllen > (long)message.msg_control.Length)
-				{
-					throw new ArgumentException("message.msg_controllen > message.msg_control.Length", "message");
-				}
-				this.msg_control = ptr_msg_control;
-				this.msg_controllen = message.msg_controllen;
-				this.msg_flags = 0;
-			}
-
-			public void Update(Msghdr message)
-			{
-				message.msg_controllen = this.msg_controllen;
-				message.msg_flags = NativeConvert.ToMessageFlags(this.msg_flags);
-			}
-
-			public unsafe Iovec* msg_iov;
-
-			public int msg_iovlen;
-
-			public unsafe byte* msg_control;
-
-			public long msg_controllen;
-
-			public int msg_flags;
 		}
 	}
 }

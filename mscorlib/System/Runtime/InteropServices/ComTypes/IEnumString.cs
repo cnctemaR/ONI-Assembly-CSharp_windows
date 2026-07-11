@@ -2,13 +2,13 @@
 
 namespace System.Runtime.InteropServices.ComTypes
 {
+	[Guid("00000101-0000-0000-c000-000000000046")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	[Guid("00000101-0000-0000-C000-000000000046")]
 	[ComImport]
 	public interface IEnumString
 	{
 		[PreserveSig]
-		int Next(int celt, [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPWStr, SizeParamIndex = 0)] [Out] string[] rgelt, IntPtr pceltFetched);
+		int Next(int celt, [MarshalAs(UnmanagedType.LPArray, SizeConst = 0, SizeParamIndex = 0)] [Out] string[] rgelt, IntPtr pceltFetched);
 
 		[PreserveSig]
 		int Skip(int celt);

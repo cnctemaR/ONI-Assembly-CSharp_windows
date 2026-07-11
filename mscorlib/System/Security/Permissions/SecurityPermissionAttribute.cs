@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class SecurityPermissionAttribute : CodeAccessSecurityAttribute
 	{
@@ -18,16 +18,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.Assertion) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.Assertion) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.Assertion;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.Assertion;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.Assertion;
+				}
 			}
 		}
 
@@ -35,16 +37,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.BindingRedirects) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.BindingRedirects) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.BindingRedirects;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.BindingRedirects;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.BindingRedirects;
+				}
 			}
 		}
 
@@ -52,16 +56,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.ControlAppDomain) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.ControlAppDomain) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.ControlAppDomain;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.ControlAppDomain;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.ControlAppDomain;
+				}
 			}
 		}
 
@@ -69,16 +75,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.ControlDomainPolicy) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.ControlDomainPolicy) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.ControlDomainPolicy;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.ControlDomainPolicy;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.ControlDomainPolicy;
+				}
 			}
 		}
 
@@ -86,16 +94,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.ControlEvidence) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.ControlEvidence) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.ControlEvidence;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.ControlEvidence;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.ControlEvidence;
+				}
 			}
 		}
 
@@ -103,16 +113,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.ControlPolicy) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.ControlPolicy) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.ControlPolicy;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.ControlPolicy;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.ControlPolicy;
+				}
 			}
 		}
 
@@ -120,16 +132,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.ControlPrincipal) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.ControlPrincipal) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.ControlPrincipal;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.ControlPrincipal;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.ControlPrincipal;
+				}
 			}
 		}
 
@@ -137,16 +151,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.ControlThread) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.ControlThread) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.ControlThread;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.ControlThread;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.ControlThread;
+				}
 			}
 		}
 
@@ -154,16 +170,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.Execution) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.Execution) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.Execution;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.Execution;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.Execution;
+				}
 			}
 		}
 
@@ -172,16 +190,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.Infrastructure) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.Infrastructure) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.Infrastructure;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.Infrastructure;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.Infrastructure;
+				}
 			}
 		}
 
@@ -189,16 +209,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.RemotingConfiguration) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.RemotingConfiguration) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.RemotingConfiguration;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.RemotingConfiguration;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.RemotingConfiguration;
+				}
 			}
 		}
 
@@ -206,16 +228,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.SerializationFormatter) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.SerializationFormatter) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.SerializationFormatter;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.SerializationFormatter;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.SerializationFormatter;
+				}
 			}
 		}
 
@@ -223,16 +247,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.SkipVerification) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.SkipVerification) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.SkipVerification;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.SkipVerification;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.SkipVerification;
+				}
 			}
 		}
 
@@ -240,16 +266,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this.m_Flags & SecurityPermissionFlag.UnmanagedCode) > SecurityPermissionFlag.NoFlags;
+				return (this.m_Flags & SecurityPermissionFlag.UnmanagedCode) != SecurityPermissionFlag.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this.m_Flags |= SecurityPermissionFlag.UnmanagedCode;
-					return;
 				}
-				this.m_Flags &= ~SecurityPermissionFlag.UnmanagedCode;
+				else
+				{
+					this.m_Flags &= ~SecurityPermissionFlag.UnmanagedCode;
+				}
 			}
 		}
 

@@ -2,7 +2,6 @@
 
 namespace System
 {
-	[Serializable]
 	public enum GCNotificationStatus
 	{
 		Succeeded,

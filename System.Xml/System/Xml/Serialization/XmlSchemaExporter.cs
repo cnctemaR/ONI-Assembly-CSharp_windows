@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Globalization;
-using System.Reflection;
 using System.Xml.Schema;
 
 namespace System.Xml.Serialization
@@ -13,32 +11,22 @@ namespace System.Xml.Serialization
 			this.schemas = schemas;
 		}
 
-		public void ExportTypeMapping(XmlTypeMapping xmlTypeMapping)
+		internal XmlSchemaExporter(XmlSchemas schemas, bool encodedFormat)
 		{
-			xmlTypeMapping.CheckShallow();
-			this.CheckScope(xmlTypeMapping.Scope);
-			this.ExportElement(xmlTypeMapping.Accessor);
-			this.ExportRootIfNecessary(xmlTypeMapping.Scope);
+			this.encodedFormat = encodedFormat;
+			this.schemas = schemas;
 		}
 
-		public XmlQualifiedName ExportTypeMapping(XmlMembersMapping xmlMembersMapping)
+		[MonoTODO]
+		public string ExportAnyType(string ns)
 		{
-			xmlMembersMapping.CheckShallow();
-			this.CheckScope(xmlMembersMapping.Scope);
-			MembersMapping membersMapping = (MembersMapping)xmlMembersMapping.Accessor.Mapping;
-			if (membersMapping.Members.Length == 1 && membersMapping.Members[0].Elements[0].Mapping is SpecialMapping)
-			{
-				SpecialMapping specialMapping = (SpecialMapping)membersMapping.Members[0].Elements[0].Mapping;
-				XmlSchemaType xmlSchemaType = this.ExportSpecialMapping(specialMapping, xmlMembersMapping.Accessor.Namespace, false, null);
-				if (xmlSchemaType != null && xmlSchemaType.Name != null && xmlSchemaType.Name.Length > 0)
-				{
-					xmlSchemaType.Name = xmlMembersMapping.Accessor.Name;
-					this.AddSchemaItem(xmlSchemaType, xmlMembersMapping.Accessor.Namespace, null);
-				}
-				this.ExportRootIfNecessary(xmlMembersMapping.Scope);
-				return new XmlQualifiedName(xmlMembersMapping.Accessor.Name, xmlMembersMapping.Accessor.Namespace);
-			}
-			return null;
+			throw new NotImplementedException();
+		}
+
+		[MonoNotSupported("")]
+		public string ExportAnyType(XmlMembersMapping members)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void ExportMembersMapping(XmlMembersMapping xmlMembersMapping)
@@ -48,1266 +36,932 @@ namespace System.Xml.Serialization
 
 		public void ExportMembersMapping(XmlMembersMapping xmlMembersMapping, bool exportEnclosingType)
 		{
-			xmlMembersMapping.CheckShallow();
-			MembersMapping membersMapping = (MembersMapping)xmlMembersMapping.Accessor.Mapping;
-			this.CheckScope(xmlMembersMapping.Scope);
-			if (membersMapping.HasWrapperElement && exportEnclosingType)
+			ClassMap classMap = (ClassMap)xmlMembersMapping.ObjectMap;
+			if (xmlMembersMapping.HasWrapperElement && exportEnclosingType)
 			{
-				this.ExportElement(xmlMembersMapping.Accessor);
+				XmlSchema schema = this.GetSchema(xmlMembersMapping.Namespace);
+				XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
+				XmlSchemaSequence xmlSchemaSequence;
+				XmlSchemaAnyAttribute xmlSchemaAnyAttribute;
+				this.ExportMembersMapSchema(schema, classMap, null, xmlSchemaComplexType.Attributes, out xmlSchemaSequence, out xmlSchemaAnyAttribute);
+				xmlSchemaComplexType.Particle = xmlSchemaSequence;
+				xmlSchemaComplexType.AnyAttribute = xmlSchemaAnyAttribute;
+				if (this.encodedFormat)
+				{
+					xmlSchemaComplexType.Name = xmlMembersMapping.ElementName;
+					schema.Items.Add(xmlSchemaComplexType);
+				}
+				else
+				{
+					XmlSchemaElement xmlSchemaElement = new XmlSchemaElement();
+					xmlSchemaElement.Name = xmlMembersMapping.ElementName;
+					xmlSchemaElement.SchemaType = xmlSchemaComplexType;
+					schema.Items.Add(xmlSchemaElement);
+				}
 			}
 			else
 			{
-				foreach (MemberMapping memberMapping in membersMapping.Members)
+				ICollection elementMembers = classMap.ElementMembers;
+				if (elementMembers != null)
 				{
-					if (memberMapping.Attribute != null)
+					foreach (object obj in elementMembers)
 					{
-						throw new InvalidOperationException(Res.GetString("There was an error exporting '{0}': bare members cannot be attributes.", new object[] { memberMapping.Attribute.Name }));
-					}
-					if (memberMapping.Text != null)
-					{
-						throw new InvalidOperationException(Res.GetString("There was an error exporting '{0}': bare members cannot contain text content.", new object[] { memberMapping.Text.Name }));
-					}
-					if (memberMapping.Elements != null && memberMapping.Elements.Length != 0)
-					{
-						if (memberMapping.TypeDesc.IsArrayLike && !(memberMapping.Elements[0].Mapping is ArrayMapping))
+						XmlTypeMapMemberElement xmlTypeMapMemberElement = (XmlTypeMapMemberElement)obj;
+						if (xmlTypeMapMemberElement is XmlTypeMapMemberAnyElement && xmlTypeMapMemberElement.TypeData.IsListType)
 						{
-							throw new InvalidOperationException(Res.GetString("An element declared at the top level of a schema cannot have maxOccurs > 1. Provide a wrapper element for '{0}' by using XmlArray or XmlArrayItem instead of XmlElementAttribute, or by using the Wrapped parameter style.", new object[] { memberMapping.Elements[0].Name }));
+							XmlSchema schema2 = this.GetSchema(xmlMembersMapping.Namespace);
+							XmlSchemaParticle schemaArrayElement = this.GetSchemaArrayElement(schema2, xmlTypeMapMemberElement.ElementInfo);
+							if (schemaArrayElement is XmlSchemaAny)
+							{
+								XmlSchemaComplexType xmlSchemaComplexType2 = this.FindComplexType(schema2.Items, "any");
+								if (xmlSchemaComplexType2 != null)
+								{
+									continue;
+								}
+								xmlSchemaComplexType2 = new XmlSchemaComplexType();
+								xmlSchemaComplexType2.Name = "any";
+								xmlSchemaComplexType2.IsMixed = true;
+								XmlSchemaSequence xmlSchemaSequence2 = new XmlSchemaSequence();
+								xmlSchemaComplexType2.Particle = xmlSchemaSequence2;
+								xmlSchemaSequence2.Items.Add(schemaArrayElement);
+								schema2.Items.Add(xmlSchemaComplexType2);
+								continue;
+							}
 						}
-						if (exportEnclosingType)
+						XmlTypeMapElementInfo xmlTypeMapElementInfo = (XmlTypeMapElementInfo)xmlTypeMapMemberElement.ElementInfo[0];
+						XmlSchema xmlSchema;
+						if (this.encodedFormat)
 						{
-							this.ExportElement(memberMapping.Elements[0]);
+							xmlSchema = this.GetSchema(xmlMembersMapping.Namespace);
+							this.ImportNamespace(xmlSchema, "http://schemas.xmlsoap.org/soap/encoding/");
 						}
 						else
 						{
-							this.ExportMapping(memberMapping.Elements[0].Mapping, memberMapping.Elements[0].Namespace, memberMapping.Elements[0].Any);
+							xmlSchema = this.GetSchema(xmlTypeMapElementInfo.Namespace);
 						}
-					}
-				}
-			}
-			this.ExportRootIfNecessary(xmlMembersMapping.Scope);
-		}
-
-		private static XmlSchemaType FindSchemaType(string name, XmlSchemaObjectCollection items)
-		{
-			foreach (XmlSchemaObject xmlSchemaObject in items)
-			{
-				XmlSchemaType xmlSchemaType = xmlSchemaObject as XmlSchemaType;
-				if (xmlSchemaType != null && xmlSchemaType.Name == name)
-				{
-					return xmlSchemaType;
-				}
-			}
-			return null;
-		}
-
-		private static bool IsAnyType(XmlSchemaType schemaType, bool mixed, bool unbounded)
-		{
-			XmlSchemaComplexType xmlSchemaComplexType = schemaType as XmlSchemaComplexType;
-			if (xmlSchemaComplexType != null)
-			{
-				if (xmlSchemaComplexType.IsMixed != mixed)
-				{
-					return false;
-				}
-				if (xmlSchemaComplexType.Particle is XmlSchemaSequence)
-				{
-					XmlSchemaSequence xmlSchemaSequence = (XmlSchemaSequence)xmlSchemaComplexType.Particle;
-					if (xmlSchemaSequence.Items.Count == 1 && xmlSchemaSequence.Items[0] is XmlSchemaAny)
-					{
-						XmlSchemaAny xmlSchemaAny = (XmlSchemaAny)xmlSchemaSequence.Items[0];
-						return unbounded == xmlSchemaAny.IsMultipleOccurrence;
-					}
-				}
-			}
-			return false;
-		}
-
-		public string ExportAnyType(string ns)
-		{
-			string text = "any";
-			int num = 0;
-			XmlSchema xmlSchema = this.schemas[ns];
-			if (xmlSchema != null)
-			{
-				for (;;)
-				{
-					XmlSchemaType xmlSchemaType = XmlSchemaExporter.FindSchemaType(text, xmlSchema.Items);
-					if (xmlSchemaType == null)
-					{
-						goto IL_0054;
-					}
-					if (XmlSchemaExporter.IsAnyType(xmlSchemaType, true, true))
-					{
-						break;
-					}
-					num++;
-					text = "any" + num.ToString(CultureInfo.InvariantCulture);
-				}
-				return text;
-			}
-			IL_0054:
-			XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
-			xmlSchemaComplexType.Name = text;
-			xmlSchemaComplexType.IsMixed = true;
-			XmlSchemaSequence xmlSchemaSequence = new XmlSchemaSequence();
-			XmlSchemaAny xmlSchemaAny = new XmlSchemaAny();
-			xmlSchemaAny.MinOccurs = 0m;
-			xmlSchemaAny.MaxOccurs = decimal.MaxValue;
-			xmlSchemaSequence.Items.Add(xmlSchemaAny);
-			xmlSchemaComplexType.Particle = xmlSchemaSequence;
-			this.AddSchemaItem(xmlSchemaComplexType, ns, null);
-			return text;
-		}
-
-		public string ExportAnyType(XmlMembersMapping members)
-		{
-			if (members.Count == 1 && members[0].Any && members[0].ElementName.Length == 0)
-			{
-				XmlMemberMapping xmlMemberMapping = members[0];
-				string @namespace = xmlMemberMapping.Namespace;
-				bool flag = xmlMemberMapping.Mapping.TypeDesc.IsArrayLike;
-				bool flag2 = ((flag && xmlMemberMapping.Mapping.TypeDesc.ArrayElementTypeDesc != null) ? xmlMemberMapping.Mapping.TypeDesc.ArrayElementTypeDesc.IsMixed : xmlMemberMapping.Mapping.TypeDesc.IsMixed);
-				if (flag2 && xmlMemberMapping.Mapping.TypeDesc.IsMixed)
-				{
-					flag = true;
-				}
-				string text = (flag2 ? "any" : (flag ? "anyElements" : "anyElement"));
-				string text2 = text;
-				int num = 0;
-				XmlSchema xmlSchema = this.schemas[@namespace];
-				if (xmlSchema != null)
-				{
-					for (;;)
-					{
-						XmlSchemaType xmlSchemaType = XmlSchemaExporter.FindSchemaType(text2, xmlSchema.Items);
-						if (xmlSchemaType == null)
+						XmlSchemaElement xmlSchemaElement2 = this.FindElement(xmlSchema.Items, xmlTypeMapElementInfo.ElementName);
+						XmlSchemaExporter.XmlSchemaObjectContainer xmlSchemaObjectContainer = null;
+						if (!this.encodedFormat)
 						{
-							goto IL_011A;
+							xmlSchemaObjectContainer = new XmlSchemaExporter.XmlSchemaObjectContainer(xmlSchema);
 						}
-						if (XmlSchemaExporter.IsAnyType(xmlSchemaType, flag2, flag))
+						Type type = xmlTypeMapMemberElement.GetType();
+						if (xmlTypeMapMemberElement is XmlTypeMapMemberFlatList)
 						{
-							break;
+							throw new InvalidOperationException("Unwrapped arrays not supported as parameters");
 						}
-						num++;
-						text2 = text + num.ToString(CultureInfo.InvariantCulture);
+						XmlSchemaElement xmlSchemaElement3;
+						if (type == typeof(XmlTypeMapMemberElement))
+						{
+							xmlSchemaElement3 = (XmlSchemaElement)this.GetSchemaElement(xmlSchema, xmlTypeMapElementInfo, xmlTypeMapMemberElement.DefaultValue, false, xmlSchemaObjectContainer);
+						}
+						else
+						{
+							xmlSchemaElement3 = (XmlSchemaElement)this.GetSchemaElement(xmlSchema, xmlTypeMapElementInfo, false, xmlSchemaObjectContainer);
+						}
+						if (xmlSchemaElement2 != null)
+						{
+							if (!xmlSchemaElement2.SchemaTypeName.Equals(xmlSchemaElement3.SchemaTypeName))
+							{
+								string text = "The XML element named '" + xmlTypeMapElementInfo.ElementName + "' ";
+								string text2 = text;
+								text = string.Concat(new string[]
+								{
+									text2,
+									"from namespace '",
+									xmlSchema.TargetNamespace,
+									"' references distinct types ",
+									xmlSchemaElement3.SchemaTypeName.Name,
+									" and ",
+									xmlSchemaElement2.SchemaTypeName.Name,
+									". "
+								});
+								text += "Use XML attributes to specify another XML name or namespace for the element or types.";
+								throw new InvalidOperationException(text);
+							}
+							xmlSchema.Items.Remove(xmlSchemaElement3);
+						}
 					}
-					return text2;
 				}
-				IL_011A:
-				XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
-				xmlSchemaComplexType.Name = text2;
-				xmlSchemaComplexType.IsMixed = flag2;
-				XmlSchemaSequence xmlSchemaSequence = new XmlSchemaSequence();
-				XmlSchemaAny xmlSchemaAny = new XmlSchemaAny();
-				xmlSchemaAny.MinOccurs = 0m;
-				if (flag)
-				{
-					xmlSchemaAny.MaxOccurs = decimal.MaxValue;
-				}
-				xmlSchemaSequence.Items.Add(xmlSchemaAny);
-				xmlSchemaComplexType.Particle = xmlSchemaSequence;
-				this.AddSchemaItem(xmlSchemaComplexType, @namespace, null);
-				return text2;
 			}
-			return null;
+			this.CompileSchemas();
 		}
 
-		private void CheckScope(TypeScope scope)
+		[MonoTODO]
+		public XmlQualifiedName ExportTypeMapping(XmlMembersMapping xmlMembersMapping)
 		{
-			if (this.scope == null)
+			throw new NotImplementedException();
+		}
+
+		public void ExportTypeMapping(XmlTypeMapping xmlTypeMapping)
+		{
+			if (!xmlTypeMapping.IncludeInSchema)
 			{
-				this.scope = scope;
 				return;
 			}
-			if (this.scope != scope)
+			if (this.IsElementExported(xmlTypeMapping))
 			{
-				throw new InvalidOperationException(Res.GetString("Exported mappings must come from the same importer."));
+				return;
+			}
+			if (this.encodedFormat)
+			{
+				this.ExportClassSchema(xmlTypeMapping);
+				XmlSchema schema = this.GetSchema(xmlTypeMapping.XmlTypeNamespace);
+				this.ImportNamespace(schema, "http://schemas.xmlsoap.org/soap/encoding/");
+			}
+			else
+			{
+				XmlSchema schema2 = this.GetSchema(xmlTypeMapping.Namespace);
+				XmlTypeMapElementInfo xmlTypeMapElementInfo = new XmlTypeMapElementInfo(null, xmlTypeMapping.TypeData);
+				xmlTypeMapElementInfo.Namespace = xmlTypeMapping.Namespace;
+				xmlTypeMapElementInfo.ElementName = xmlTypeMapping.ElementName;
+				if (xmlTypeMapping.TypeData.IsComplexType)
+				{
+					xmlTypeMapElementInfo.MappedType = xmlTypeMapping;
+				}
+				xmlTypeMapElementInfo.IsNullable = xmlTypeMapping.IsNullable;
+				this.GetSchemaElement(schema2, xmlTypeMapElementInfo, false, new XmlSchemaExporter.XmlSchemaObjectContainer(schema2));
+				this.SetElementExported(xmlTypeMapping);
+			}
+			this.CompileSchemas();
+		}
+
+		private void ExportXmlSerializableSchema(XmlSchema currentSchema, XmlSerializableMapping map)
+		{
+			if (this.IsMapExported(map))
+			{
+				return;
+			}
+			this.SetMapExported(map);
+			if (map.Schema == null)
+			{
+				return;
+			}
+			string targetNamespace = map.Schema.TargetNamespace;
+			XmlSchema xmlSchema = this.schemas[targetNamespace];
+			if (xmlSchema == null)
+			{
+				this.schemas.Add(map.Schema);
+				this.ImportNamespace(currentSchema, targetNamespace);
+			}
+			else if (xmlSchema != map.Schema && !XmlSchemaExporter.CanBeDuplicated(xmlSchema, map.Schema))
+			{
+				throw new InvalidOperationException(string.Concat(new string[] { "The namespace '", targetNamespace, "' defined by the class '", map.TypeFullName, "' is a duplicate." }));
 			}
 		}
 
-		private XmlSchemaElement ExportElement(ElementAccessor accessor)
+		private static bool CanBeDuplicated(XmlSchema existingSchema, XmlSchema schema)
 		{
-			if (!accessor.Mapping.IncludeInSchema && !accessor.Mapping.TypeDesc.IsRoot)
+			return XmlSchemas.IsDataSet(existingSchema) && XmlSchemas.IsDataSet(schema) && existingSchema.Id == schema.Id;
+		}
+
+		private void ExportClassSchema(XmlTypeMapping map)
+		{
+			if (this.IsMapExported(map))
+			{
+				return;
+			}
+			this.SetMapExported(map);
+			if (map.TypeData.Type == typeof(object))
+			{
+				foreach (object obj in map.DerivedTypes)
+				{
+					XmlTypeMapping xmlTypeMapping = (XmlTypeMapping)obj;
+					if (xmlTypeMapping.TypeData.SchemaType == SchemaTypes.Class)
+					{
+						this.ExportClassSchema(xmlTypeMapping);
+					}
+				}
+				return;
+			}
+			XmlSchema schema = this.GetSchema(map.XmlTypeNamespace);
+			XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
+			xmlSchemaComplexType.Name = map.XmlType;
+			schema.Items.Add(xmlSchemaComplexType);
+			ClassMap classMap = (ClassMap)map.ObjectMap;
+			if (classMap.HasSimpleContent)
+			{
+				XmlSchemaSimpleContent xmlSchemaSimpleContent = new XmlSchemaSimpleContent();
+				xmlSchemaComplexType.ContentModel = xmlSchemaSimpleContent;
+				XmlSchemaSimpleContentExtension xmlSchemaSimpleContentExtension = new XmlSchemaSimpleContentExtension();
+				xmlSchemaSimpleContent.Content = xmlSchemaSimpleContentExtension;
+				XmlSchemaSequence xmlSchemaSequence;
+				XmlSchemaAnyAttribute xmlSchemaAnyAttribute;
+				this.ExportMembersMapSchema(schema, classMap, map.BaseMap, xmlSchemaSimpleContentExtension.Attributes, out xmlSchemaSequence, out xmlSchemaAnyAttribute);
+				xmlSchemaSimpleContentExtension.AnyAttribute = xmlSchemaAnyAttribute;
+				if (map.BaseMap == null)
+				{
+					xmlSchemaSimpleContentExtension.BaseTypeName = classMap.SimpleContentBaseType;
+				}
+				else
+				{
+					xmlSchemaSimpleContentExtension.BaseTypeName = new XmlQualifiedName(map.BaseMap.XmlType, map.BaseMap.XmlTypeNamespace);
+					this.ImportNamespace(schema, map.BaseMap.XmlTypeNamespace);
+					this.ExportClassSchema(map.BaseMap);
+				}
+			}
+			else if (map.BaseMap != null && map.BaseMap.IncludeInSchema)
+			{
+				XmlSchemaComplexContent xmlSchemaComplexContent = new XmlSchemaComplexContent();
+				XmlSchemaComplexContentExtension xmlSchemaComplexContentExtension = new XmlSchemaComplexContentExtension();
+				xmlSchemaComplexContentExtension.BaseTypeName = new XmlQualifiedName(map.BaseMap.XmlType, map.BaseMap.XmlTypeNamespace);
+				xmlSchemaComplexContent.Content = xmlSchemaComplexContentExtension;
+				xmlSchemaComplexType.ContentModel = xmlSchemaComplexContent;
+				XmlSchemaSequence xmlSchemaSequence2;
+				XmlSchemaAnyAttribute xmlSchemaAnyAttribute2;
+				this.ExportMembersMapSchema(schema, classMap, map.BaseMap, xmlSchemaComplexContentExtension.Attributes, out xmlSchemaSequence2, out xmlSchemaAnyAttribute2);
+				xmlSchemaComplexContentExtension.Particle = xmlSchemaSequence2;
+				xmlSchemaComplexContentExtension.AnyAttribute = xmlSchemaAnyAttribute2;
+				xmlSchemaComplexType.IsMixed = this.HasMixedContent(map);
+				xmlSchemaComplexContent.IsMixed = this.BaseHasMixedContent(map);
+				this.ImportNamespace(schema, map.BaseMap.XmlTypeNamespace);
+				this.ExportClassSchema(map.BaseMap);
+			}
+			else
+			{
+				XmlSchemaSequence xmlSchemaSequence3;
+				XmlSchemaAnyAttribute xmlSchemaAnyAttribute3;
+				this.ExportMembersMapSchema(schema, classMap, map.BaseMap, xmlSchemaComplexType.Attributes, out xmlSchemaSequence3, out xmlSchemaAnyAttribute3);
+				xmlSchemaComplexType.Particle = xmlSchemaSequence3;
+				xmlSchemaComplexType.AnyAttribute = xmlSchemaAnyAttribute3;
+				xmlSchemaComplexType.IsMixed = classMap.XmlTextCollector != null;
+			}
+			foreach (object obj2 in map.DerivedTypes)
+			{
+				XmlTypeMapping xmlTypeMapping2 = (XmlTypeMapping)obj2;
+				if (xmlTypeMapping2.TypeData.SchemaType == SchemaTypes.Class)
+				{
+					this.ExportClassSchema(xmlTypeMapping2);
+				}
+			}
+		}
+
+		private bool BaseHasMixedContent(XmlTypeMapping map)
+		{
+			ClassMap classMap = (ClassMap)map.ObjectMap;
+			return classMap.XmlTextCollector != null && map.BaseMap != null && this.DefinedInBaseMap(map.BaseMap, classMap.XmlTextCollector);
+		}
+
+		private bool HasMixedContent(XmlTypeMapping map)
+		{
+			ClassMap classMap = (ClassMap)map.ObjectMap;
+			return classMap.XmlTextCollector != null && (map.BaseMap == null || !this.DefinedInBaseMap(map.BaseMap, classMap.XmlTextCollector));
+		}
+
+		private void ExportMembersMapSchema(XmlSchema schema, ClassMap map, XmlTypeMapping baseMap, XmlSchemaObjectCollection outAttributes, out XmlSchemaSequence particle, out XmlSchemaAnyAttribute anyAttribute)
+		{
+			particle = null;
+			XmlSchemaSequence xmlSchemaSequence = new XmlSchemaSequence();
+			ICollection elementMembers = map.ElementMembers;
+			if (elementMembers != null && !map.HasSimpleContent)
+			{
+				foreach (object obj in elementMembers)
+				{
+					XmlTypeMapMemberElement xmlTypeMapMemberElement = (XmlTypeMapMemberElement)obj;
+					if (baseMap == null || !this.DefinedInBaseMap(baseMap, xmlTypeMapMemberElement))
+					{
+						Type type = xmlTypeMapMemberElement.GetType();
+						if (type == typeof(XmlTypeMapMemberFlatList))
+						{
+							XmlSchemaParticle schemaArrayElement = this.GetSchemaArrayElement(schema, xmlTypeMapMemberElement.ElementInfo);
+							if (schemaArrayElement != null)
+							{
+								xmlSchemaSequence.Items.Add(schemaArrayElement);
+							}
+						}
+						else if (type == typeof(XmlTypeMapMemberAnyElement))
+						{
+							xmlSchemaSequence.Items.Add(this.GetSchemaArrayElement(schema, xmlTypeMapMemberElement.ElementInfo));
+						}
+						else if (type == typeof(XmlTypeMapMemberElement))
+						{
+							this.GetSchemaElement(schema, (XmlTypeMapElementInfo)xmlTypeMapMemberElement.ElementInfo[0], xmlTypeMapMemberElement.DefaultValue, true, new XmlSchemaExporter.XmlSchemaObjectContainer(xmlSchemaSequence));
+						}
+						else
+						{
+							this.GetSchemaElement(schema, (XmlTypeMapElementInfo)xmlTypeMapMemberElement.ElementInfo[0], true, new XmlSchemaExporter.XmlSchemaObjectContainer(xmlSchemaSequence));
+						}
+					}
+				}
+			}
+			if (xmlSchemaSequence.Items.Count > 0)
+			{
+				particle = xmlSchemaSequence;
+			}
+			ICollection attributeMembers = map.AttributeMembers;
+			if (attributeMembers != null)
+			{
+				foreach (object obj2 in attributeMembers)
+				{
+					XmlTypeMapMemberAttribute xmlTypeMapMemberAttribute = (XmlTypeMapMemberAttribute)obj2;
+					if (baseMap == null || !this.DefinedInBaseMap(baseMap, xmlTypeMapMemberAttribute))
+					{
+						outAttributes.Add(this.GetSchemaAttribute(schema, xmlTypeMapMemberAttribute, true));
+					}
+				}
+			}
+			XmlTypeMapMember defaultAnyAttributeMember = map.DefaultAnyAttributeMember;
+			if (defaultAnyAttributeMember != null)
+			{
+				anyAttribute = new XmlSchemaAnyAttribute();
+			}
+			else
+			{
+				anyAttribute = null;
+			}
+		}
+
+		private XmlSchemaElement FindElement(XmlSchemaObjectCollection col, string name)
+		{
+			foreach (XmlSchemaObject xmlSchemaObject in col)
+			{
+				XmlSchemaElement xmlSchemaElement = xmlSchemaObject as XmlSchemaElement;
+				if (xmlSchemaElement != null && xmlSchemaElement.Name == name)
+				{
+					return xmlSchemaElement;
+				}
+			}
+			return null;
+		}
+
+		private XmlSchemaComplexType FindComplexType(XmlSchemaObjectCollection col, string name)
+		{
+			foreach (XmlSchemaObject xmlSchemaObject in col)
+			{
+				XmlSchemaComplexType xmlSchemaComplexType = xmlSchemaObject as XmlSchemaComplexType;
+				if (xmlSchemaComplexType != null && xmlSchemaComplexType.Name == name)
+				{
+					return xmlSchemaComplexType;
+				}
+			}
+			return null;
+		}
+
+		private XmlSchemaAttribute GetSchemaAttribute(XmlSchema currentSchema, XmlTypeMapMemberAttribute attinfo, bool isTypeMember)
+		{
+			XmlSchemaAttribute xmlSchemaAttribute = new XmlSchemaAttribute();
+			if (attinfo.DefaultValue != DBNull.Value)
+			{
+				xmlSchemaAttribute.DefaultValue = this.ExportDefaultValue(attinfo.TypeData, attinfo.MappedType, attinfo.DefaultValue);
+			}
+			else if (!attinfo.IsOptionalValueType && attinfo.TypeData.IsValueType)
+			{
+				xmlSchemaAttribute.Use = XmlSchemaUse.Required;
+			}
+			this.ImportNamespace(currentSchema, attinfo.Namespace);
+			XmlSchema xmlSchema;
+			if (attinfo.Namespace.Length == 0 && attinfo.Form != XmlSchemaForm.Qualified)
+			{
+				xmlSchema = currentSchema;
+			}
+			else
+			{
+				xmlSchema = this.GetSchema(attinfo.Namespace);
+			}
+			if (currentSchema != xmlSchema && !this.encodedFormat)
+			{
+				xmlSchemaAttribute.RefName = new XmlQualifiedName(attinfo.AttributeName, attinfo.Namespace);
+				foreach (XmlSchemaObject xmlSchemaObject in xmlSchema.Items)
+				{
+					if (xmlSchemaObject is XmlSchemaAttribute && ((XmlSchemaAttribute)xmlSchemaObject).Name == attinfo.AttributeName)
+					{
+						return xmlSchemaAttribute;
+					}
+				}
+				xmlSchema.Items.Add(this.GetSchemaAttribute(xmlSchema, attinfo, false));
+				return xmlSchemaAttribute;
+			}
+			xmlSchemaAttribute.Name = attinfo.AttributeName;
+			if (isTypeMember)
+			{
+				xmlSchemaAttribute.Form = attinfo.Form;
+			}
+			if (attinfo.TypeData.SchemaType == SchemaTypes.Enum)
+			{
+				this.ImportNamespace(currentSchema, attinfo.DataTypeNamespace);
+				this.ExportEnumSchema(attinfo.MappedType);
+				xmlSchemaAttribute.SchemaTypeName = new XmlQualifiedName(attinfo.TypeData.XmlType, attinfo.DataTypeNamespace);
+			}
+			else if (attinfo.TypeData.SchemaType == SchemaTypes.Array && TypeTranslator.IsPrimitive(attinfo.TypeData.ListItemType))
+			{
+				xmlSchemaAttribute.SchemaType = this.GetSchemaSimpleListType(attinfo.TypeData);
+			}
+			else
+			{
+				xmlSchemaAttribute.SchemaTypeName = new XmlQualifiedName(attinfo.TypeData.XmlType, attinfo.DataTypeNamespace);
+			}
+			return xmlSchemaAttribute;
+		}
+
+		private XmlSchemaParticle GetSchemaElement(XmlSchema currentSchema, XmlTypeMapElementInfo einfo, bool isTypeMember)
+		{
+			return this.GetSchemaElement(currentSchema, einfo, DBNull.Value, isTypeMember, null);
+		}
+
+		private XmlSchemaParticle GetSchemaElement(XmlSchema currentSchema, XmlTypeMapElementInfo einfo, bool isTypeMember, XmlSchemaExporter.XmlSchemaObjectContainer container)
+		{
+			return this.GetSchemaElement(currentSchema, einfo, DBNull.Value, isTypeMember, container);
+		}
+
+		private XmlSchemaParticle GetSchemaElement(XmlSchema currentSchema, XmlTypeMapElementInfo einfo, object defaultValue, bool isTypeMember, XmlSchemaExporter.XmlSchemaObjectContainer container)
+		{
+			if (einfo.IsTextElement)
 			{
 				return null;
 			}
-			if (accessor.Any && accessor.Name.Length == 0)
+			if (einfo.IsUnnamedAnyElement)
 			{
-				throw new InvalidOperationException(Res.GetString("Cannot use wildcards at the top level of a schema."));
+				XmlSchemaAny xmlSchemaAny = new XmlSchemaAny();
+				xmlSchemaAny.MinOccurs = 0m;
+				xmlSchemaAny.MaxOccurs = 1m;
+				if (container != null)
+				{
+					container.Items.Add(xmlSchemaAny);
+				}
+				return xmlSchemaAny;
 			}
-			XmlSchemaElement xmlSchemaElement = (XmlSchemaElement)this.elements[accessor];
-			if (xmlSchemaElement != null)
+			XmlSchemaElement xmlSchemaElement = new XmlSchemaElement();
+			xmlSchemaElement.IsNillable = einfo.IsNullable;
+			if (container != null)
 			{
+				container.Items.Add(xmlSchemaElement);
+			}
+			if (isTypeMember)
+			{
+				xmlSchemaElement.MaxOccurs = 1m;
+				xmlSchemaElement.MinOccurs = ((!einfo.IsNullable) ? 0 : 1);
+				if ((defaultValue == DBNull.Value && einfo.TypeData.IsValueType && einfo.Member != null && !einfo.Member.IsOptionalValueType) || this.encodedFormat)
+				{
+					xmlSchemaElement.MinOccurs = 1m;
+				}
+			}
+			XmlSchema xmlSchema = null;
+			if (!this.encodedFormat)
+			{
+				xmlSchema = this.GetSchema(einfo.Namespace);
+				this.ImportNamespace(currentSchema, einfo.Namespace);
+			}
+			if (currentSchema != xmlSchema && !this.encodedFormat && isTypeMember)
+			{
+				xmlSchemaElement.RefName = new XmlQualifiedName(einfo.ElementName, einfo.Namespace);
+				foreach (XmlSchemaObject xmlSchemaObject in xmlSchema.Items)
+				{
+					if (xmlSchemaObject is XmlSchemaElement && ((XmlSchemaElement)xmlSchemaObject).Name == einfo.ElementName)
+					{
+						return xmlSchemaElement;
+					}
+				}
+				this.GetSchemaElement(xmlSchema, einfo, defaultValue, false, new XmlSchemaExporter.XmlSchemaObjectContainer(xmlSchema));
 				return xmlSchemaElement;
 			}
-			xmlSchemaElement = new XmlSchemaElement();
-			xmlSchemaElement.Name = accessor.Name;
-			xmlSchemaElement.IsNillable = accessor.IsNullable;
-			this.elements.Add(accessor, xmlSchemaElement);
-			xmlSchemaElement.Form = accessor.Form;
-			this.AddSchemaItem(xmlSchemaElement, accessor.Namespace, null);
-			this.ExportElementMapping(xmlSchemaElement, accessor.Mapping, accessor.Namespace, accessor.Any);
+			if (isTypeMember)
+			{
+				xmlSchemaElement.IsNillable = einfo.IsNullable;
+			}
+			xmlSchemaElement.Name = einfo.ElementName;
+			if (defaultValue != DBNull.Value)
+			{
+				xmlSchemaElement.DefaultValue = this.ExportDefaultValue(einfo.TypeData, einfo.MappedType, defaultValue);
+			}
+			if (einfo.Form != XmlSchemaForm.Qualified)
+			{
+				xmlSchemaElement.Form = einfo.Form;
+			}
+			switch (einfo.TypeData.SchemaType)
+			{
+			case SchemaTypes.Primitive:
+				xmlSchemaElement.SchemaTypeName = new XmlQualifiedName(einfo.TypeData.XmlType, einfo.DataTypeNamespace);
+				if (!einfo.TypeData.IsXsdType)
+				{
+					this.ImportNamespace(currentSchema, einfo.MappedType.XmlTypeNamespace);
+					this.ExportDerivedSchema(einfo.MappedType);
+				}
+				break;
+			case SchemaTypes.Enum:
+				xmlSchemaElement.SchemaTypeName = new XmlQualifiedName(einfo.MappedType.XmlType, einfo.MappedType.XmlTypeNamespace);
+				this.ImportNamespace(currentSchema, einfo.MappedType.XmlTypeNamespace);
+				this.ExportEnumSchema(einfo.MappedType);
+				break;
+			case SchemaTypes.Array:
+			{
+				XmlQualifiedName xmlQualifiedName = this.ExportArraySchema(einfo.MappedType, currentSchema.TargetNamespace);
+				xmlSchemaElement.SchemaTypeName = xmlQualifiedName;
+				this.ImportNamespace(currentSchema, xmlQualifiedName.Namespace);
+				break;
+			}
+			case SchemaTypes.Class:
+				if (einfo.MappedType.TypeData.Type != typeof(object))
+				{
+					xmlSchemaElement.SchemaTypeName = new XmlQualifiedName(einfo.MappedType.XmlType, einfo.MappedType.XmlTypeNamespace);
+					this.ImportNamespace(currentSchema, einfo.MappedType.XmlTypeNamespace);
+				}
+				else if (this.encodedFormat)
+				{
+					xmlSchemaElement.SchemaTypeName = new XmlQualifiedName(einfo.MappedType.XmlType, einfo.MappedType.XmlTypeNamespace);
+				}
+				this.ExportClassSchema(einfo.MappedType);
+				break;
+			case SchemaTypes.XmlSerializable:
+				this.SetSchemaXmlSerializableType(einfo.MappedType as XmlSerializableMapping, xmlSchemaElement);
+				this.ExportXmlSerializableSchema(currentSchema, einfo.MappedType as XmlSerializableMapping);
+				break;
+			case SchemaTypes.XmlNode:
+				xmlSchemaElement.SchemaType = this.GetSchemaXmlNodeType();
+				break;
+			}
 			return xmlSchemaElement;
 		}
 
-		private void CheckForDuplicateType(TypeMapping mapping, string newNamespace)
+		private void ImportNamespace(XmlSchema schema, string ns)
 		{
-			if (mapping.IsAnonymousType)
+			if (ns == null || ns.Length == 0 || ns == schema.TargetNamespace || ns == "http://www.w3.org/2001/XMLSchema")
 			{
 				return;
 			}
-			string typeName = mapping.TypeName;
-			XmlSchema xmlSchema = this.schemas[newNamespace];
-			if (xmlSchema != null)
+			foreach (XmlSchemaObject xmlSchemaObject in schema.Includes)
 			{
-				foreach (XmlSchemaObject xmlSchemaObject in xmlSchema.Items)
+				if (xmlSchemaObject is XmlSchemaImport && ((XmlSchemaImport)xmlSchemaObject).Namespace == ns)
 				{
-					XmlSchemaType xmlSchemaType = xmlSchemaObject as XmlSchemaType;
-					if (xmlSchemaType != null && xmlSchemaType.Name == typeName)
-					{
-						throw new InvalidOperationException(Res.GetString("A type with the name {0} has already been added in namespace {1}.", new object[] { typeName, newNamespace }));
-					}
-				}
-			}
-		}
-
-		private XmlSchema AddSchema(string targetNamespace)
-		{
-			XmlSchema xmlSchema = new XmlSchema();
-			xmlSchema.TargetNamespace = (string.IsNullOrEmpty(targetNamespace) ? null : targetNamespace);
-			xmlSchema.ElementFormDefault = XmlSchemaForm.Qualified;
-			xmlSchema.AttributeFormDefault = XmlSchemaForm.None;
-			this.schemas.Add(xmlSchema);
-			return xmlSchema;
-		}
-
-		private void AddSchemaItem(XmlSchemaObject item, string ns, string referencingNs)
-		{
-			XmlSchema xmlSchema = this.schemas[ns];
-			if (xmlSchema == null)
-			{
-				xmlSchema = this.AddSchema(ns);
-			}
-			if (item is XmlSchemaElement)
-			{
-				XmlSchemaElement xmlSchemaElement = (XmlSchemaElement)item;
-				if (xmlSchemaElement.Form == XmlSchemaForm.Unqualified)
-				{
-					throw new InvalidOperationException(Res.GetString("There was an error exporting '{0}': elements declared at the top level of a schema cannot be unqualified.", new object[] { xmlSchemaElement.Name }));
-				}
-				xmlSchemaElement.Form = XmlSchemaForm.None;
-			}
-			else if (item is XmlSchemaAttribute)
-			{
-				XmlSchemaAttribute xmlSchemaAttribute = (XmlSchemaAttribute)item;
-				if (xmlSchemaAttribute.Form == XmlSchemaForm.Unqualified)
-				{
-					throw new InvalidOperationException(Res.GetString("There was an error exporting '{0}': elements declared at the top level of a schema cannot be unqualified.", new object[] { xmlSchemaAttribute.Name }));
-				}
-				xmlSchemaAttribute.Form = XmlSchemaForm.None;
-			}
-			xmlSchema.Items.Add(item);
-			this.AddSchemaImport(ns, referencingNs);
-		}
-
-		private void AddSchemaImport(string ns, string referencingNs)
-		{
-			if (referencingNs == null)
-			{
-				return;
-			}
-			if (XmlSchemaExporter.NamespacesEqual(ns, referencingNs))
-			{
-				return;
-			}
-			XmlSchema xmlSchema = this.schemas[referencingNs];
-			if (xmlSchema == null)
-			{
-				xmlSchema = this.AddSchema(referencingNs);
-			}
-			if (this.FindImport(xmlSchema, ns) == null)
-			{
-				XmlSchemaImport xmlSchemaImport = new XmlSchemaImport();
-				if (ns != null && ns.Length > 0)
-				{
-					xmlSchemaImport.Namespace = ns;
-				}
-				xmlSchema.Includes.Add(xmlSchemaImport);
-			}
-		}
-
-		private static bool NamespacesEqual(string ns1, string ns2)
-		{
-			if (ns1 == null || ns1.Length == 0)
-			{
-				return ns2 == null || ns2.Length == 0;
-			}
-			return ns1 == ns2;
-		}
-
-		private bool SchemaContainsItem(XmlSchemaObject item, string ns)
-		{
-			XmlSchema xmlSchema = this.schemas[ns];
-			return xmlSchema != null && xmlSchema.Items.Contains(item);
-		}
-
-		private XmlSchemaImport FindImport(XmlSchema schema, string ns)
-		{
-			foreach (object obj in schema.Includes)
-			{
-				if (obj is XmlSchemaImport)
-				{
-					XmlSchemaImport xmlSchemaImport = (XmlSchemaImport)obj;
-					if (XmlSchemaExporter.NamespacesEqual(xmlSchemaImport.Namespace, ns))
-					{
-						return xmlSchemaImport;
-					}
-				}
-			}
-			return null;
-		}
-
-		private void ExportMapping(Mapping mapping, string ns, bool isAny)
-		{
-			if (mapping is ArrayMapping)
-			{
-				this.ExportArrayMapping((ArrayMapping)mapping, ns, null);
-				return;
-			}
-			if (mapping is PrimitiveMapping)
-			{
-				this.ExportPrimitiveMapping((PrimitiveMapping)mapping, ns);
-				return;
-			}
-			if (mapping is StructMapping)
-			{
-				this.ExportStructMapping((StructMapping)mapping, ns, null);
-				return;
-			}
-			if (mapping is MembersMapping)
-			{
-				this.ExportMembersMapping((MembersMapping)mapping, ns);
-				return;
-			}
-			if (mapping is SpecialMapping)
-			{
-				this.ExportSpecialMapping((SpecialMapping)mapping, ns, isAny, null);
-				return;
-			}
-			if (mapping is NullableMapping)
-			{
-				this.ExportMapping(((NullableMapping)mapping).BaseMapping, ns, isAny);
-				return;
-			}
-			throw new ArgumentException(Res.GetString("Internal error."), "mapping");
-		}
-
-		private void ExportElementMapping(XmlSchemaElement element, Mapping mapping, string ns, bool isAny)
-		{
-			if (mapping is ArrayMapping)
-			{
-				this.ExportArrayMapping((ArrayMapping)mapping, ns, element);
-				return;
-			}
-			if (mapping is PrimitiveMapping)
-			{
-				PrimitiveMapping primitiveMapping = (PrimitiveMapping)mapping;
-				if (primitiveMapping.IsAnonymousType)
-				{
-					element.SchemaType = this.ExportAnonymousPrimitiveMapping(primitiveMapping);
 					return;
 				}
-				element.SchemaTypeName = this.ExportPrimitiveMapping(primitiveMapping, ns);
-				return;
 			}
-			else
-			{
-				if (mapping is StructMapping)
-				{
-					this.ExportStructMapping((StructMapping)mapping, ns, element);
-					return;
-				}
-				if (mapping is MembersMapping)
-				{
-					element.SchemaType = this.ExportMembersMapping((MembersMapping)mapping, ns);
-					return;
-				}
-				if (mapping is SpecialMapping)
-				{
-					this.ExportSpecialMapping((SpecialMapping)mapping, ns, isAny, element);
-					return;
-				}
-				if (mapping is NullableMapping)
-				{
-					this.ExportElementMapping(element, ((NullableMapping)mapping).BaseMapping, ns, isAny);
-					return;
-				}
-				throw new ArgumentException(Res.GetString("Internal error."), "mapping");
-			}
+			XmlSchemaImport xmlSchemaImport = new XmlSchemaImport();
+			xmlSchemaImport.Namespace = ns;
+			schema.Includes.Add(xmlSchemaImport);
 		}
 
-		private XmlQualifiedName ExportNonXsdPrimitiveMapping(PrimitiveMapping mapping, string ns)
+		private bool DefinedInBaseMap(XmlTypeMapping map, XmlTypeMapMember member)
 		{
-			XmlSchemaSimpleType xmlSchemaSimpleType = (XmlSchemaSimpleType)mapping.TypeDesc.DataType;
-			if (!this.SchemaContainsItem(xmlSchemaSimpleType, "http://microsoft.com/wsdl/types/"))
-			{
-				this.AddSchemaItem(xmlSchemaSimpleType, "http://microsoft.com/wsdl/types/", ns);
-			}
-			else
-			{
-				this.AddSchemaImport(mapping.Namespace, ns);
-			}
-			return new XmlQualifiedName(mapping.TypeDesc.DataType.Name, "http://microsoft.com/wsdl/types/");
+			return ((ClassMap)map.ObjectMap).FindMember(member.Name) != null || (map.BaseMap != null && this.DefinedInBaseMap(map.BaseMap, member));
 		}
 
-		private XmlSchemaType ExportSpecialMapping(SpecialMapping mapping, string ns, bool isAny, XmlSchemaElement element)
+		private XmlSchemaType GetSchemaXmlNodeType()
 		{
-			TypeKind kind = mapping.TypeDesc.Kind;
-			if (kind == TypeKind.Node)
+			return new XmlSchemaComplexType
 			{
-				XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
-				xmlSchemaComplexType.IsMixed = mapping.TypeDesc.IsMixed;
-				XmlSchemaSequence xmlSchemaSequence = new XmlSchemaSequence();
-				XmlSchemaAny xmlSchemaAny = new XmlSchemaAny();
-				if (isAny)
+				IsMixed = true,
+				Particle = new XmlSchemaSequence
 				{
-					xmlSchemaComplexType.AnyAttribute = new XmlSchemaAnyAttribute();
-					xmlSchemaComplexType.IsMixed = true;
-					xmlSchemaAny.MaxOccurs = decimal.MaxValue;
-				}
-				xmlSchemaSequence.Items.Add(xmlSchemaAny);
-				xmlSchemaComplexType.Particle = xmlSchemaSequence;
-				if (element != null)
-				{
-					element.SchemaType = xmlSchemaComplexType;
-				}
-				return xmlSchemaComplexType;
-			}
-			if (kind != TypeKind.Serializable)
-			{
-				throw new ArgumentException(Res.GetString("Internal error."), "mapping");
-			}
-			SerializableMapping serializableMapping = (SerializableMapping)mapping;
-			if (serializableMapping.IsAny)
-			{
-				XmlSchemaComplexType xmlSchemaComplexType2 = new XmlSchemaComplexType();
-				xmlSchemaComplexType2.IsMixed = mapping.TypeDesc.IsMixed;
-				XmlSchemaSequence xmlSchemaSequence2 = new XmlSchemaSequence();
-				XmlSchemaAny xmlSchemaAny2 = new XmlSchemaAny();
-				if (isAny)
-				{
-					xmlSchemaComplexType2.AnyAttribute = new XmlSchemaAnyAttribute();
-					xmlSchemaComplexType2.IsMixed = true;
-					xmlSchemaAny2.MaxOccurs = decimal.MaxValue;
-				}
-				if (serializableMapping.NamespaceList.Length > 0)
-				{
-					xmlSchemaAny2.Namespace = serializableMapping.NamespaceList;
-				}
-				xmlSchemaAny2.ProcessContents = XmlSchemaContentProcessing.Lax;
-				if (serializableMapping.Schemas != null)
-				{
-					foreach (object obj in serializableMapping.Schemas.Schemas())
+					Items = 
 					{
-						XmlSchema xmlSchema = (XmlSchema)obj;
-						if (xmlSchema.TargetNamespace != "http://www.w3.org/2001/XMLSchema")
-						{
-							this.schemas.Add(xmlSchema, true);
-							this.AddSchemaImport(xmlSchema.TargetNamespace, ns);
-						}
+						new XmlSchemaAny()
 					}
-				}
-				xmlSchemaSequence2.Items.Add(xmlSchemaAny2);
-				xmlSchemaComplexType2.Particle = xmlSchemaSequence2;
-				if (element != null)
-				{
-					element.SchemaType = xmlSchemaComplexType2;
-				}
-				return xmlSchemaComplexType2;
-			}
-			if (serializableMapping.XsiType != null || serializableMapping.XsdType != null)
-			{
-				XmlSchemaType xmlSchemaType = serializableMapping.XsdType;
-				foreach (object obj2 in serializableMapping.Schemas.Schemas())
-				{
-					XmlSchema xmlSchema2 = (XmlSchema)obj2;
-					if (xmlSchema2.TargetNamespace != "http://www.w3.org/2001/XMLSchema")
-					{
-						this.schemas.Add(xmlSchema2, true);
-						this.AddSchemaImport(xmlSchema2.TargetNamespace, ns);
-						if (!serializableMapping.XsiType.IsEmpty && serializableMapping.XsiType.Namespace == xmlSchema2.TargetNamespace)
-						{
-							xmlSchemaType = (XmlSchemaType)xmlSchema2.SchemaTypes[serializableMapping.XsiType];
-						}
-					}
-				}
-				if (element != null)
-				{
-					element.SchemaTypeName = serializableMapping.XsiType;
-					if (element.SchemaTypeName.IsEmpty)
-					{
-						element.SchemaType = xmlSchemaType;
-					}
-				}
-				serializableMapping.CheckDuplicateElement(element, ns);
-				return xmlSchemaType;
-			}
-			if (serializableMapping.Schema != null)
-			{
-				XmlSchemaComplexType xmlSchemaComplexType3 = new XmlSchemaComplexType();
-				XmlSchemaAny xmlSchemaAny3 = new XmlSchemaAny();
-				xmlSchemaComplexType3.Particle = new XmlSchemaSequence
-				{
-					Items = { xmlSchemaAny3 }
-				};
-				string targetNamespace = serializableMapping.Schema.TargetNamespace;
-				xmlSchemaAny3.Namespace = ((targetNamespace == null) ? "" : targetNamespace);
-				XmlSchema xmlSchema3 = this.schemas[targetNamespace];
-				if (xmlSchema3 == null)
-				{
-					this.schemas.Add(serializableMapping.Schema);
-				}
-				else if (xmlSchema3 != serializableMapping.Schema)
-				{
-					throw new InvalidOperationException(Res.GetString("The namespace, {0}, is a duplicate.", new object[] { targetNamespace }));
-				}
-				if (element != null)
-				{
-					element.SchemaType = xmlSchemaComplexType3;
-				}
-				serializableMapping.CheckDuplicateElement(element, ns);
-				return xmlSchemaComplexType3;
-			}
-			XmlSchemaComplexType xmlSchemaComplexType4 = new XmlSchemaComplexType();
-			XmlSchemaElement xmlSchemaElement = new XmlSchemaElement();
-			xmlSchemaElement.RefName = new XmlQualifiedName("schema", "http://www.w3.org/2001/XMLSchema");
-			xmlSchemaComplexType4.Particle = new XmlSchemaSequence
-			{
-				Items = 
-				{
-					xmlSchemaElement,
-					new XmlSchemaAny()
 				}
 			};
-			this.AddSchemaImport("http://www.w3.org/2001/XMLSchema", ns);
-			if (element != null)
-			{
-				element.SchemaType = xmlSchemaComplexType4;
-			}
-			return xmlSchemaComplexType4;
 		}
 
-		private XmlSchemaType ExportMembersMapping(MembersMapping mapping, string ns)
+		private void SetSchemaXmlSerializableType(XmlSerializableMapping map, XmlSchemaElement elem)
 		{
+			if (map.SchemaType != null && map.Schema != null)
+			{
+				elem.SchemaType = map.SchemaType;
+				return;
+			}
+			if (map.SchemaType == null && map.SchemaTypeName != null)
+			{
+				elem.SchemaTypeName = map.SchemaTypeName;
+				elem.Name = map.SchemaTypeName.Name;
+				return;
+			}
 			XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
-			this.ExportTypeMembers(xmlSchemaComplexType, mapping.Members, mapping.TypeName, ns, false, false);
-			if (mapping.XmlnsMember != null)
+			XmlSchemaSequence xmlSchemaSequence = new XmlSchemaSequence();
+			if (map.Schema == null)
 			{
-				this.AddXmlnsAnnotation(xmlSchemaComplexType, mapping.XmlnsMember.Name);
-			}
-			return xmlSchemaComplexType;
-		}
-
-		private XmlSchemaType ExportAnonymousPrimitiveMapping(PrimitiveMapping mapping)
-		{
-			if (mapping is EnumMapping)
-			{
-				return this.ExportEnumMapping((EnumMapping)mapping, null);
-			}
-			throw new InvalidOperationException(Res.GetString("Internal error: {0}.", new object[] { "Unsuported anonymous mapping type: " + mapping.ToString() }));
-		}
-
-		private XmlQualifiedName ExportPrimitiveMapping(PrimitiveMapping mapping, string ns)
-		{
-			XmlQualifiedName xmlQualifiedName;
-			if (mapping is EnumMapping)
-			{
-				xmlQualifiedName = new XmlQualifiedName(this.ExportEnumMapping((EnumMapping)mapping, ns).Name, mapping.Namespace);
-			}
-			else if (mapping.TypeDesc.IsXsdType)
-			{
-				xmlQualifiedName = new XmlQualifiedName(mapping.TypeDesc.DataType.Name, "http://www.w3.org/2001/XMLSchema");
+				XmlSchemaElement xmlSchemaElement = new XmlSchemaElement();
+				xmlSchemaElement.RefName = new XmlQualifiedName("schema", "http://www.w3.org/2001/XMLSchema");
+				xmlSchemaSequence.Items.Add(xmlSchemaElement);
+				xmlSchemaSequence.Items.Add(new XmlSchemaAny());
 			}
 			else
-			{
-				xmlQualifiedName = this.ExportNonXsdPrimitiveMapping(mapping, ns);
-			}
-			return xmlQualifiedName;
-		}
-
-		private void ExportArrayMapping(ArrayMapping mapping, string ns, XmlSchemaElement element)
-		{
-			ArrayMapping arrayMapping = mapping;
-			while (arrayMapping.Next != null)
-			{
-				arrayMapping = arrayMapping.Next;
-			}
-			XmlSchemaComplexType xmlSchemaComplexType = (XmlSchemaComplexType)this.types[arrayMapping];
-			if (xmlSchemaComplexType == null)
-			{
-				this.CheckForDuplicateType(arrayMapping, arrayMapping.Namespace);
-				xmlSchemaComplexType = new XmlSchemaComplexType();
-				if (!mapping.IsAnonymousType)
-				{
-					xmlSchemaComplexType.Name = mapping.TypeName;
-					this.AddSchemaItem(xmlSchemaComplexType, mapping.Namespace, ns);
-				}
-				if (!arrayMapping.IsAnonymousType)
-				{
-					this.types.Add(arrayMapping, xmlSchemaComplexType);
-				}
-				XmlSchemaSequence xmlSchemaSequence = new XmlSchemaSequence();
-				this.ExportElementAccessors(xmlSchemaSequence, mapping.Elements, true, false, mapping.Namespace);
-				if (xmlSchemaSequence.Items.Count > 0)
-				{
-					if (xmlSchemaSequence.Items[0] is XmlSchemaChoice)
-					{
-						xmlSchemaComplexType.Particle = (XmlSchemaChoice)xmlSchemaSequence.Items[0];
-					}
-					else
-					{
-						xmlSchemaComplexType.Particle = xmlSchemaSequence;
-					}
-				}
-			}
-			else
-			{
-				this.AddSchemaImport(mapping.Namespace, ns);
-			}
-			if (element != null)
-			{
-				if (mapping.IsAnonymousType)
-				{
-					element.SchemaType = xmlSchemaComplexType;
-					return;
-				}
-				element.SchemaTypeName = new XmlQualifiedName(xmlSchemaComplexType.Name, mapping.Namespace);
-			}
-		}
-
-		private void ExportElementAccessors(XmlSchemaGroupBase group, ElementAccessor[] accessors, bool repeats, bool valueTypeOptional, string ns)
-		{
-			if (accessors.Length == 0)
-			{
-				return;
-			}
-			if (accessors.Length == 1)
-			{
-				this.ExportElementAccessor(group, accessors[0], repeats, valueTypeOptional, ns);
-				return;
-			}
-			XmlSchemaChoice xmlSchemaChoice = new XmlSchemaChoice();
-			xmlSchemaChoice.MaxOccurs = (repeats ? decimal.MaxValue : 1m);
-			xmlSchemaChoice.MinOccurs = (repeats ? 0 : 1);
-			for (int i = 0; i < accessors.Length; i++)
-			{
-				this.ExportElementAccessor(xmlSchemaChoice, accessors[i], false, valueTypeOptional, ns);
-			}
-			if (xmlSchemaChoice.Items.Count > 0)
-			{
-				group.Items.Add(xmlSchemaChoice);
-			}
-		}
-
-		private void ExportAttributeAccessor(XmlSchemaComplexType type, AttributeAccessor accessor, bool valueTypeOptional, string ns)
-		{
-			if (accessor == null)
-			{
-				return;
-			}
-			XmlSchemaObjectCollection xmlSchemaObjectCollection;
-			if (type.ContentModel != null)
-			{
-				if (type.ContentModel.Content is XmlSchemaComplexContentRestriction)
-				{
-					xmlSchemaObjectCollection = ((XmlSchemaComplexContentRestriction)type.ContentModel.Content).Attributes;
-				}
-				else if (type.ContentModel.Content is XmlSchemaComplexContentExtension)
-				{
-					xmlSchemaObjectCollection = ((XmlSchemaComplexContentExtension)type.ContentModel.Content).Attributes;
-				}
-				else
-				{
-					if (!(type.ContentModel.Content is XmlSchemaSimpleContentExtension))
-					{
-						throw new InvalidOperationException(Res.GetString("Invalid content {0}.", new object[] { type.ContentModel.Content.GetType().Name }));
-					}
-					xmlSchemaObjectCollection = ((XmlSchemaSimpleContentExtension)type.ContentModel.Content).Attributes;
-				}
-			}
-			else
-			{
-				xmlSchemaObjectCollection = type.Attributes;
-			}
-			if (accessor.IsSpecialXmlNamespace)
-			{
-				this.AddSchemaImport("http://www.w3.org/XML/1998/namespace", ns);
-				xmlSchemaObjectCollection.Add(new XmlSchemaAttribute
-				{
-					Use = XmlSchemaUse.Optional,
-					RefName = new XmlQualifiedName(accessor.Name, "http://www.w3.org/XML/1998/namespace")
-				});
-				return;
-			}
-			if (accessor.Any)
-			{
-				if (type.ContentModel == null)
-				{
-					type.AnyAttribute = new XmlSchemaAnyAttribute();
-					return;
-				}
-				XmlSchemaContent content = type.ContentModel.Content;
-				if (content is XmlSchemaComplexContentExtension)
-				{
-					((XmlSchemaComplexContentExtension)content).AnyAttribute = new XmlSchemaAnyAttribute();
-					return;
-				}
-				if (content is XmlSchemaComplexContentRestriction)
-				{
-					((XmlSchemaComplexContentRestriction)content).AnyAttribute = new XmlSchemaAnyAttribute();
-					return;
-				}
-				if (type.ContentModel.Content is XmlSchemaSimpleContentExtension)
-				{
-					((XmlSchemaSimpleContentExtension)content).AnyAttribute = new XmlSchemaAnyAttribute();
-					return;
-				}
-			}
-			else
-			{
-				XmlSchemaAttribute xmlSchemaAttribute = new XmlSchemaAttribute();
-				xmlSchemaAttribute.Use = XmlSchemaUse.None;
-				if (!accessor.HasDefault && !valueTypeOptional && accessor.Mapping.TypeDesc.IsValueType)
-				{
-					xmlSchemaAttribute.Use = XmlSchemaUse.Required;
-				}
-				xmlSchemaAttribute.Name = accessor.Name;
-				if (accessor.Namespace == null || accessor.Namespace == ns)
-				{
-					XmlSchema xmlSchema = this.schemas[ns];
-					if (xmlSchema == null)
-					{
-						xmlSchemaAttribute.Form = ((accessor.Form == XmlSchemaForm.Unqualified) ? XmlSchemaForm.None : accessor.Form);
-					}
-					else
-					{
-						xmlSchemaAttribute.Form = ((accessor.Form == xmlSchema.AttributeFormDefault) ? XmlSchemaForm.None : accessor.Form);
-					}
-					xmlSchemaObjectCollection.Add(xmlSchemaAttribute);
-				}
-				else
-				{
-					if (this.attributes[accessor] == null)
-					{
-						xmlSchemaAttribute.Use = XmlSchemaUse.None;
-						xmlSchemaAttribute.Form = accessor.Form;
-						this.AddSchemaItem(xmlSchemaAttribute, accessor.Namespace, ns);
-						this.attributes.Add(accessor, accessor);
-					}
-					xmlSchemaObjectCollection.Add(new XmlSchemaAttribute
-					{
-						Use = XmlSchemaUse.None,
-						RefName = new XmlQualifiedName(accessor.Name, accessor.Namespace)
-					});
-					this.AddSchemaImport(accessor.Namespace, ns);
-				}
-				if (accessor.Mapping is PrimitiveMapping)
-				{
-					PrimitiveMapping primitiveMapping = (PrimitiveMapping)accessor.Mapping;
-					if (primitiveMapping.IsList)
-					{
-						XmlSchemaSimpleType xmlSchemaSimpleType = new XmlSchemaSimpleType();
-						XmlSchemaSimpleTypeList xmlSchemaSimpleTypeList = new XmlSchemaSimpleTypeList();
-						if (primitiveMapping.IsAnonymousType)
-						{
-							xmlSchemaSimpleTypeList.ItemType = (XmlSchemaSimpleType)this.ExportAnonymousPrimitiveMapping(primitiveMapping);
-						}
-						else
-						{
-							xmlSchemaSimpleTypeList.ItemTypeName = this.ExportPrimitiveMapping(primitiveMapping, (accessor.Namespace == null) ? ns : accessor.Namespace);
-						}
-						xmlSchemaSimpleType.Content = xmlSchemaSimpleTypeList;
-						xmlSchemaAttribute.SchemaType = xmlSchemaSimpleType;
-					}
-					else if (primitiveMapping.IsAnonymousType)
-					{
-						xmlSchemaAttribute.SchemaType = (XmlSchemaSimpleType)this.ExportAnonymousPrimitiveMapping(primitiveMapping);
-					}
-					else
-					{
-						xmlSchemaAttribute.SchemaTypeName = this.ExportPrimitiveMapping(primitiveMapping, (accessor.Namespace == null) ? ns : accessor.Namespace);
-					}
-				}
-				else if (!(accessor.Mapping is SpecialMapping))
-				{
-					throw new InvalidOperationException(Res.GetString("Internal error."));
-				}
-				if (accessor.HasDefault)
-				{
-					xmlSchemaAttribute.DefaultValue = XmlSchemaExporter.ExportDefaultValue(accessor.Mapping, accessor.Default);
-				}
-			}
-		}
-
-		private void ExportElementAccessor(XmlSchemaGroupBase group, ElementAccessor accessor, bool repeats, bool valueTypeOptional, string ns)
-		{
-			if (accessor.Any && accessor.Name.Length == 0)
 			{
 				XmlSchemaAny xmlSchemaAny = new XmlSchemaAny();
-				xmlSchemaAny.MinOccurs = 0m;
-				xmlSchemaAny.MaxOccurs = (repeats ? decimal.MaxValue : 1m);
-				if (accessor.Namespace != null && accessor.Namespace.Length > 0 && accessor.Namespace != ns)
-				{
-					xmlSchemaAny.Namespace = accessor.Namespace;
-				}
-				group.Items.Add(xmlSchemaAny);
-				return;
+				xmlSchemaAny.Namespace = map.Schema.TargetNamespace;
+				xmlSchemaSequence.Items.Add(xmlSchemaAny);
 			}
-			XmlSchemaElement xmlSchemaElement = (XmlSchemaElement)this.elements[accessor];
-			int num = ((repeats || accessor.HasDefault || (!accessor.IsNullable && !accessor.Mapping.TypeDesc.IsValueType) || valueTypeOptional) ? 0 : 1);
-			decimal num2 = ((repeats || accessor.IsUnbounded) ? decimal.MaxValue : 1m);
-			if (xmlSchemaElement == null)
-			{
-				xmlSchemaElement = new XmlSchemaElement();
-				xmlSchemaElement.IsNillable = accessor.IsNullable;
-				xmlSchemaElement.Name = accessor.Name;
-				if (accessor.HasDefault)
-				{
-					xmlSchemaElement.DefaultValue = XmlSchemaExporter.ExportDefaultValue(accessor.Mapping, accessor.Default);
-				}
-				if (accessor.IsTopLevelInSchema)
-				{
-					this.elements.Add(accessor, xmlSchemaElement);
-					xmlSchemaElement.Form = accessor.Form;
-					this.AddSchemaItem(xmlSchemaElement, accessor.Namespace, ns);
-				}
-				else
-				{
-					xmlSchemaElement.MinOccurs = num;
-					xmlSchemaElement.MaxOccurs = num2;
-					XmlSchema xmlSchema = this.schemas[ns];
-					if (xmlSchema == null)
-					{
-						xmlSchemaElement.Form = ((accessor.Form == XmlSchemaForm.Qualified) ? XmlSchemaForm.None : accessor.Form);
-					}
-					else
-					{
-						xmlSchemaElement.Form = ((accessor.Form == xmlSchema.ElementFormDefault) ? XmlSchemaForm.None : accessor.Form);
-					}
-				}
-				this.ExportElementMapping(xmlSchemaElement, accessor.Mapping, accessor.Namespace, accessor.Any);
-			}
-			if (accessor.IsTopLevelInSchema)
-			{
-				XmlSchemaElement xmlSchemaElement2 = new XmlSchemaElement();
-				xmlSchemaElement2.RefName = new XmlQualifiedName(accessor.Name, accessor.Namespace);
-				xmlSchemaElement2.MinOccurs = num;
-				xmlSchemaElement2.MaxOccurs = num2;
-				group.Items.Add(xmlSchemaElement2);
-				this.AddSchemaImport(accessor.Namespace, ns);
-				return;
-			}
-			group.Items.Add(xmlSchemaElement);
+			xmlSchemaComplexType.Particle = xmlSchemaSequence;
+			elem.SchemaType = xmlSchemaComplexType;
 		}
 
-		internal static string ExportDefaultValue(TypeMapping mapping, object value)
+		private XmlSchemaSimpleType GetSchemaSimpleListType(TypeData typeData)
 		{
-			if (!(mapping is PrimitiveMapping))
-			{
-				return null;
-			}
-			if (value == null || value == DBNull.Value)
-			{
-				return null;
-			}
-			if (mapping is EnumMapping)
-			{
-				EnumMapping enumMapping = (EnumMapping)mapping;
-				ConstantMapping[] constants = enumMapping.Constants;
-				if (!enumMapping.IsFlags)
-				{
-					for (int i = 0; i < constants.Length; i++)
-					{
-						if (constants[i].Name == (string)value)
-						{
-							return constants[i].XmlName;
-						}
-					}
-					return null;
-				}
-				string[] array = new string[constants.Length];
-				long[] array2 = new long[constants.Length];
-				Hashtable hashtable = new Hashtable();
-				for (int j = 0; j < constants.Length; j++)
-				{
-					array[j] = constants[j].XmlName;
-					array2[j] = 1L << (j & 31);
-					hashtable.Add(constants[j].Name, array2[j]);
-				}
-				long num = XmlCustomFormatter.ToEnum((string)value, hashtable, enumMapping.TypeName, false);
-				if (num == 0L)
-				{
-					return null;
-				}
-				return XmlCustomFormatter.FromEnum(num, array, array2, mapping.TypeDesc.FullName);
-			}
-			else
-			{
-				PrimitiveMapping primitiveMapping = (PrimitiveMapping)mapping;
-				if (!primitiveMapping.TypeDesc.HasCustomFormatter)
-				{
-					if (primitiveMapping.TypeDesc.FormatterName == "String")
-					{
-						return (string)value;
-					}
-					Type typeFromHandle = typeof(XmlConvert);
-					MethodInfo method = typeFromHandle.GetMethod("ToString", new Type[] { primitiveMapping.TypeDesc.Type });
-					if (method != null)
-					{
-						return (string)method.Invoke(typeFromHandle, new object[] { value });
-					}
-					throw new InvalidOperationException(Res.GetString("Value '{0}' cannot be converted to {1}.", new object[]
-					{
-						value.ToString(),
-						primitiveMapping.TypeDesc.Name
-					}));
-				}
-				else
-				{
-					string text = XmlCustomFormatter.FromDefaultValue(value, primitiveMapping.TypeDesc.FormatterName);
-					if (text == null)
-					{
-						throw new InvalidOperationException(Res.GetString("Value '{0}' cannot be converted to {1}.", new object[]
-						{
-							value.ToString(),
-							primitiveMapping.TypeDesc.Name
-						}));
-					}
-					return text;
-				}
-			}
-		}
-
-		private void ExportRootIfNecessary(TypeScope typeScope)
-		{
-			if (!this.needToExportRoot)
-			{
-				return;
-			}
-			foreach (object obj in typeScope.TypeMappings)
-			{
-				TypeMapping typeMapping = (TypeMapping)obj;
-				if (typeMapping is StructMapping && typeMapping.TypeDesc.IsRoot)
-				{
-					this.ExportDerivedMappings((StructMapping)typeMapping);
-				}
-				else if (typeMapping is ArrayMapping)
-				{
-					this.ExportArrayMapping((ArrayMapping)typeMapping, typeMapping.Namespace, null);
-				}
-				else if (typeMapping is SerializableMapping)
-				{
-					this.ExportSpecialMapping((SerializableMapping)typeMapping, typeMapping.Namespace, false, null);
-				}
-			}
-		}
-
-		private XmlQualifiedName ExportStructMapping(StructMapping mapping, string ns, XmlSchemaElement element)
-		{
-			if (mapping.TypeDesc.IsRoot)
-			{
-				this.needToExportRoot = true;
-				return XmlQualifiedName.Empty;
-			}
-			if (mapping.IsAnonymousType)
-			{
-				if (this.references[mapping] != null)
-				{
-					throw new InvalidOperationException(Res.GetString("A circular type reference was detected in anonymous type '{0}'.  Please change '{0}' to be a named type by setting {1}={2} in the type definition.", new object[]
-					{
-						mapping.TypeDesc.Name,
-						"AnonymousType",
-						"false"
-					}));
-				}
-				this.references[mapping] = mapping;
-			}
-			XmlSchemaComplexType xmlSchemaComplexType = (XmlSchemaComplexType)this.types[mapping];
-			if (xmlSchemaComplexType == null)
-			{
-				if (!mapping.IncludeInSchema)
-				{
-					throw new InvalidOperationException(Res.GetString("The type {0} may not be exported to a schema because the IncludeInSchema property of the XmlType attribute is 'false'.", new object[] { mapping.TypeDesc.Name }));
-				}
-				this.CheckForDuplicateType(mapping, mapping.Namespace);
-				xmlSchemaComplexType = new XmlSchemaComplexType();
-				if (!mapping.IsAnonymousType)
-				{
-					xmlSchemaComplexType.Name = mapping.TypeName;
-					this.AddSchemaItem(xmlSchemaComplexType, mapping.Namespace, ns);
-					this.types.Add(mapping, xmlSchemaComplexType);
-				}
-				xmlSchemaComplexType.IsAbstract = mapping.TypeDesc.IsAbstract;
-				bool flag = mapping.IsOpenModel;
-				if (mapping.BaseMapping != null && mapping.BaseMapping.IncludeInSchema)
-				{
-					if (mapping.BaseMapping.IsAnonymousType)
-					{
-						throw new InvalidOperationException(Res.GetString("Illegal type derivation: Type '{0}' derives from anonymous type '{1}'. Please change '{1}' to be a named type by setting {2}={3} in the type definition.", new object[]
-						{
-							mapping.TypeDesc.Name,
-							mapping.BaseMapping.TypeDesc.Name,
-							"AnonymousType",
-							"false"
-						}));
-					}
-					if (mapping.HasSimpleContent)
-					{
-						xmlSchemaComplexType.ContentModel = new XmlSchemaSimpleContent
-						{
-							Content = new XmlSchemaSimpleContentExtension
-							{
-								BaseTypeName = this.ExportStructMapping(mapping.BaseMapping, mapping.Namespace, null)
-							}
-						};
-					}
-					else
-					{
-						XmlSchemaComplexContentExtension xmlSchemaComplexContentExtension = new XmlSchemaComplexContentExtension();
-						xmlSchemaComplexContentExtension.BaseTypeName = this.ExportStructMapping(mapping.BaseMapping, mapping.Namespace, null);
-						xmlSchemaComplexType.ContentModel = new XmlSchemaComplexContent
-						{
-							Content = xmlSchemaComplexContentExtension,
-							IsMixed = XmlSchemaImporter.IsMixed((XmlSchemaComplexType)this.types[mapping.BaseMapping])
-						};
-					}
-					flag = false;
-				}
-				this.ExportTypeMembers(xmlSchemaComplexType, mapping.Members, mapping.TypeName, mapping.Namespace, mapping.HasSimpleContent, flag);
-				this.ExportDerivedMappings(mapping);
-				if (mapping.XmlnsMember != null)
-				{
-					this.AddXmlnsAnnotation(xmlSchemaComplexType, mapping.XmlnsMember.Name);
-				}
-			}
-			else
-			{
-				this.AddSchemaImport(mapping.Namespace, ns);
-			}
-			if (mapping.IsAnonymousType)
-			{
-				this.references[mapping] = null;
-				if (element != null)
-				{
-					element.SchemaType = xmlSchemaComplexType;
-				}
-				return XmlQualifiedName.Empty;
-			}
-			XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(xmlSchemaComplexType.Name, mapping.Namespace);
-			if (element != null)
-			{
-				element.SchemaTypeName = xmlQualifiedName;
-			}
-			return xmlQualifiedName;
-		}
-
-		private void ExportTypeMembers(XmlSchemaComplexType type, MemberMapping[] members, string name, string ns, bool hasSimpleContent, bool openModel)
-		{
-			XmlSchemaGroupBase xmlSchemaGroupBase = new XmlSchemaSequence();
-			TypeMapping typeMapping = null;
-			foreach (MemberMapping memberMapping in members)
-			{
-				if (!memberMapping.Ignore)
-				{
-					if (memberMapping.Text != null)
-					{
-						if (typeMapping != null)
-						{
-							throw new InvalidOperationException(Res.GetString("Cannot serialize object of type '{0}' because it has multiple XmlText attributes. Consider using an array of strings with XmlTextAttribute for serialization of a mixed complex type.", new object[] { name }));
-						}
-						typeMapping = memberMapping.Text.Mapping;
-					}
-					if (memberMapping.Elements.Length != 0)
-					{
-						bool flag = memberMapping.TypeDesc.IsArrayLike && (memberMapping.Elements.Length != 1 || !(memberMapping.Elements[0].Mapping is ArrayMapping));
-						bool flag2 = memberMapping.CheckSpecified != SpecifiedAccessor.None || memberMapping.CheckShouldPersist;
-						this.ExportElementAccessors(xmlSchemaGroupBase, memberMapping.Elements, flag, flag2, ns);
-					}
-				}
-			}
-			if (xmlSchemaGroupBase.Items.Count > 0)
-			{
-				if (type.ContentModel != null)
-				{
-					if (type.ContentModel.Content is XmlSchemaComplexContentRestriction)
-					{
-						((XmlSchemaComplexContentRestriction)type.ContentModel.Content).Particle = xmlSchemaGroupBase;
-					}
-					else
-					{
-						if (!(type.ContentModel.Content is XmlSchemaComplexContentExtension))
-						{
-							throw new InvalidOperationException(Res.GetString("Invalid content {0}.", new object[] { type.ContentModel.Content.GetType().Name }));
-						}
-						((XmlSchemaComplexContentExtension)type.ContentModel.Content).Particle = xmlSchemaGroupBase;
-					}
-				}
-				else
-				{
-					type.Particle = xmlSchemaGroupBase;
-				}
-			}
-			if (typeMapping != null)
-			{
-				if (hasSimpleContent)
-				{
-					if (typeMapping is PrimitiveMapping && xmlSchemaGroupBase.Items.Count == 0)
-					{
-						PrimitiveMapping primitiveMapping = (PrimitiveMapping)typeMapping;
-						if (primitiveMapping.IsList)
-						{
-							type.IsMixed = true;
-						}
-						else
-						{
-							if (primitiveMapping.IsAnonymousType)
-							{
-								throw new InvalidOperationException(Res.GetString("Illegal type derivation: Type '{0}' derives from anonymous type '{1}'. Please change '{1}' to be a named type by setting {2}={3} in the type definition.", new object[]
-								{
-									typeMapping.TypeDesc.Name,
-									primitiveMapping.TypeDesc.Name,
-									"AnonymousType",
-									"false"
-								}));
-							}
-							XmlSchemaSimpleContent xmlSchemaSimpleContent = new XmlSchemaSimpleContent();
-							XmlSchemaSimpleContentExtension xmlSchemaSimpleContentExtension = new XmlSchemaSimpleContentExtension();
-							xmlSchemaSimpleContent.Content = xmlSchemaSimpleContentExtension;
-							type.ContentModel = xmlSchemaSimpleContent;
-							xmlSchemaSimpleContentExtension.BaseTypeName = this.ExportPrimitiveMapping(primitiveMapping, ns);
-						}
-					}
-				}
-				else
-				{
-					type.IsMixed = true;
-				}
-			}
-			bool flag3 = false;
-			for (int j = 0; j < members.Length; j++)
-			{
-				if (members[j].Attribute != null)
-				{
-					this.ExportAttributeAccessor(type, members[j].Attribute, members[j].CheckSpecified != SpecifiedAccessor.None || members[j].CheckShouldPersist, ns);
-					if (members[j].Attribute.Any)
-					{
-						flag3 = true;
-					}
-				}
-			}
-			if (openModel && !flag3)
-			{
-				this.ExportAttributeAccessor(type, new AttributeAccessor
-				{
-					Any = true
-				}, false, ns);
-			}
-		}
-
-		private void ExportDerivedMappings(StructMapping mapping)
-		{
-			if (mapping.IsAnonymousType)
-			{
-				return;
-			}
-			for (StructMapping structMapping = mapping.DerivedMappings; structMapping != null; structMapping = structMapping.NextDerivedMapping)
-			{
-				if (structMapping.IncludeInSchema)
-				{
-					this.ExportStructMapping(structMapping, structMapping.Namespace, null);
-				}
-			}
-		}
-
-		private XmlSchemaType ExportEnumMapping(EnumMapping mapping, string ns)
-		{
-			if (!mapping.IncludeInSchema)
-			{
-				throw new InvalidOperationException(Res.GetString("The type {0} may not be exported to a schema because the IncludeInSchema property of the XmlType attribute is 'false'.", new object[] { mapping.TypeDesc.Name }));
-			}
-			XmlSchemaSimpleType xmlSchemaSimpleType = (XmlSchemaSimpleType)this.types[mapping];
-			if (xmlSchemaSimpleType == null)
-			{
-				this.CheckForDuplicateType(mapping, mapping.Namespace);
-				xmlSchemaSimpleType = new XmlSchemaSimpleType();
-				xmlSchemaSimpleType.Name = mapping.TypeName;
-				if (!mapping.IsAnonymousType)
-				{
-					this.types.Add(mapping, xmlSchemaSimpleType);
-					this.AddSchemaItem(xmlSchemaSimpleType, mapping.Namespace, ns);
-				}
-				XmlSchemaSimpleTypeRestriction xmlSchemaSimpleTypeRestriction = new XmlSchemaSimpleTypeRestriction();
-				xmlSchemaSimpleTypeRestriction.BaseTypeName = new XmlQualifiedName("string", "http://www.w3.org/2001/XMLSchema");
-				for (int i = 0; i < mapping.Constants.Length; i++)
-				{
-					ConstantMapping constantMapping = mapping.Constants[i];
-					XmlSchemaEnumerationFacet xmlSchemaEnumerationFacet = new XmlSchemaEnumerationFacet();
-					xmlSchemaEnumerationFacet.Value = constantMapping.XmlName;
-					xmlSchemaSimpleTypeRestriction.Facets.Add(xmlSchemaEnumerationFacet);
-				}
-				if (!mapping.IsFlags)
-				{
-					xmlSchemaSimpleType.Content = xmlSchemaSimpleTypeRestriction;
-				}
-				else
-				{
-					xmlSchemaSimpleType.Content = new XmlSchemaSimpleTypeList
-					{
-						ItemType = new XmlSchemaSimpleType
-						{
-							Content = xmlSchemaSimpleTypeRestriction
-						}
-					};
-				}
-			}
-			if (!mapping.IsAnonymousType)
-			{
-				this.AddSchemaImport(mapping.Namespace, ns);
-			}
+			XmlSchemaSimpleType xmlSchemaSimpleType = new XmlSchemaSimpleType();
+			XmlSchemaSimpleTypeList xmlSchemaSimpleTypeList = new XmlSchemaSimpleTypeList();
+			TypeData typeData2 = TypeTranslator.GetTypeData(typeData.ListItemType);
+			xmlSchemaSimpleTypeList.ItemTypeName = new XmlQualifiedName(typeData2.XmlType, "http://www.w3.org/2001/XMLSchema");
+			xmlSchemaSimpleType.Content = xmlSchemaSimpleTypeList;
 			return xmlSchemaSimpleType;
 		}
 
-		private void AddXmlnsAnnotation(XmlSchemaComplexType type, string xmlnsMemberName)
+		private XmlSchemaParticle GetSchemaArrayElement(XmlSchema currentSchema, XmlTypeMapElementInfoList infos)
 		{
-			XmlSchemaAnnotation xmlSchemaAnnotation = new XmlSchemaAnnotation();
-			XmlSchemaAppInfo xmlSchemaAppInfo = new XmlSchemaAppInfo();
-			XmlDocument xmlDocument = new XmlDocument();
-			XmlElement xmlElement = xmlDocument.CreateElement("keepNamespaceDeclarations");
-			if (xmlnsMemberName != null)
+			int num = infos.Count;
+			if (num > 0 && ((XmlTypeMapElementInfo)infos[0]).IsTextElement)
 			{
-				xmlElement.InsertBefore(xmlDocument.CreateTextNode(xmlnsMemberName), null);
+				num--;
 			}
-			xmlSchemaAppInfo.Markup = new XmlNode[] { xmlElement };
-			xmlSchemaAnnotation.Items.Add(xmlSchemaAppInfo);
-			type.Annotation = xmlSchemaAnnotation;
+			if (num == 0)
+			{
+				return null;
+			}
+			if (num == 1)
+			{
+				XmlSchemaParticle schemaElement = this.GetSchemaElement(currentSchema, (XmlTypeMapElementInfo)infos[infos.Count - 1], true);
+				schemaElement.MinOccursString = "0";
+				schemaElement.MaxOccursString = "unbounded";
+				return schemaElement;
+			}
+			XmlSchemaChoice xmlSchemaChoice = new XmlSchemaChoice();
+			xmlSchemaChoice.MinOccursString = "0";
+			xmlSchemaChoice.MaxOccursString = "unbounded";
+			foreach (object obj in infos)
+			{
+				XmlTypeMapElementInfo xmlTypeMapElementInfo = (XmlTypeMapElementInfo)obj;
+				if (!xmlTypeMapElementInfo.IsTextElement)
+				{
+					xmlSchemaChoice.Items.Add(this.GetSchemaElement(currentSchema, xmlTypeMapElementInfo, true));
+				}
+			}
+			return xmlSchemaChoice;
 		}
 
-		internal const XmlSchemaForm elementFormDefault = XmlSchemaForm.Qualified;
+		private string ExportDefaultValue(TypeData typeData, XmlTypeMapping map, object defaultValue)
+		{
+			if (typeData.SchemaType == SchemaTypes.Enum)
+			{
+				EnumMap enumMap = (EnumMap)map.ObjectMap;
+				return enumMap.GetXmlName(map.TypeFullName, defaultValue);
+			}
+			return XmlCustomFormatter.ToXmlString(typeData, defaultValue);
+		}
 
-		internal const XmlSchemaForm attributeFormDefault = XmlSchemaForm.Unqualified;
+		private void ExportDerivedSchema(XmlTypeMapping map)
+		{
+			if (this.IsMapExported(map))
+			{
+				return;
+			}
+			this.SetMapExported(map);
+			XmlSchema schema = this.GetSchema(map.XmlTypeNamespace);
+			for (int i = 0; i < schema.Items.Count; i++)
+			{
+				XmlSchemaSimpleType xmlSchemaSimpleType = schema.Items[i] as XmlSchemaSimpleType;
+				if (xmlSchemaSimpleType != null && xmlSchemaSimpleType.Name == map.ElementName)
+				{
+					return;
+				}
+			}
+			XmlSchemaSimpleType xmlSchemaSimpleType2 = new XmlSchemaSimpleType();
+			xmlSchemaSimpleType2.Name = map.ElementName;
+			schema.Items.Add(xmlSchemaSimpleType2);
+			XmlSchemaSimpleTypeRestriction xmlSchemaSimpleTypeRestriction = new XmlSchemaSimpleTypeRestriction();
+			xmlSchemaSimpleTypeRestriction.BaseTypeName = new XmlQualifiedName(map.TypeData.MappedType.XmlType, "http://www.w3.org/2001/XMLSchema");
+			XmlSchemaPatternFacet xmlSchemaPatternFacet = map.TypeData.XmlSchemaPatternFacet;
+			if (xmlSchemaPatternFacet != null)
+			{
+				xmlSchemaSimpleTypeRestriction.Facets.Add(xmlSchemaPatternFacet);
+			}
+			xmlSchemaSimpleType2.Content = xmlSchemaSimpleTypeRestriction;
+		}
+
+		private void ExportEnumSchema(XmlTypeMapping map)
+		{
+			if (this.IsMapExported(map))
+			{
+				return;
+			}
+			this.SetMapExported(map);
+			XmlSchema schema = this.GetSchema(map.XmlTypeNamespace);
+			XmlSchemaSimpleType xmlSchemaSimpleType = new XmlSchemaSimpleType();
+			xmlSchemaSimpleType.Name = map.ElementName;
+			schema.Items.Add(xmlSchemaSimpleType);
+			XmlSchemaSimpleTypeRestriction xmlSchemaSimpleTypeRestriction = new XmlSchemaSimpleTypeRestriction();
+			xmlSchemaSimpleTypeRestriction.BaseTypeName = new XmlQualifiedName("string", "http://www.w3.org/2001/XMLSchema");
+			EnumMap enumMap = (EnumMap)map.ObjectMap;
+			foreach (EnumMap.EnumMapMember enumMapMember in enumMap.Members)
+			{
+				XmlSchemaEnumerationFacet xmlSchemaEnumerationFacet = new XmlSchemaEnumerationFacet();
+				xmlSchemaEnumerationFacet.Value = enumMapMember.XmlName;
+				xmlSchemaSimpleTypeRestriction.Facets.Add(xmlSchemaEnumerationFacet);
+			}
+			if (enumMap.IsFlags)
+			{
+				xmlSchemaSimpleType.Content = new XmlSchemaSimpleTypeList
+				{
+					ItemType = new XmlSchemaSimpleType
+					{
+						Content = xmlSchemaSimpleTypeRestriction
+					}
+				};
+			}
+			else
+			{
+				xmlSchemaSimpleType.Content = xmlSchemaSimpleTypeRestriction;
+			}
+		}
+
+		private XmlQualifiedName ExportArraySchema(XmlTypeMapping map, string defaultNamespace)
+		{
+			ListMap listMap = (ListMap)map.ObjectMap;
+			if (this.encodedFormat)
+			{
+				string text;
+				string text2;
+				listMap.GetArrayType(-1, out text, out text2);
+				string text3;
+				if (text2 == "http://www.w3.org/2001/XMLSchema")
+				{
+					text3 = defaultNamespace;
+				}
+				else
+				{
+					text3 = text2;
+				}
+				if (this.IsMapExported(map))
+				{
+					return new XmlQualifiedName(listMap.GetSchemaArrayName(), text3);
+				}
+				this.SetMapExported(map);
+				XmlSchema schema = this.GetSchema(text3);
+				XmlSchemaComplexType xmlSchemaComplexType = new XmlSchemaComplexType();
+				xmlSchemaComplexType.Name = listMap.GetSchemaArrayName();
+				schema.Items.Add(xmlSchemaComplexType);
+				XmlSchemaComplexContent xmlSchemaComplexContent = new XmlSchemaComplexContent();
+				xmlSchemaComplexContent.IsMixed = false;
+				xmlSchemaComplexType.ContentModel = xmlSchemaComplexContent;
+				XmlSchemaComplexContentRestriction xmlSchemaComplexContentRestriction = new XmlSchemaComplexContentRestriction();
+				xmlSchemaComplexContent.Content = xmlSchemaComplexContentRestriction;
+				xmlSchemaComplexContentRestriction.BaseTypeName = new XmlQualifiedName("Array", "http://schemas.xmlsoap.org/soap/encoding/");
+				XmlSchemaAttribute xmlSchemaAttribute = new XmlSchemaAttribute();
+				xmlSchemaComplexContentRestriction.Attributes.Add(xmlSchemaAttribute);
+				xmlSchemaAttribute.RefName = new XmlQualifiedName("arrayType", "http://schemas.xmlsoap.org/soap/encoding/");
+				XmlAttribute xmlAttribute = this.Document.CreateAttribute("arrayType", "http://schemas.xmlsoap.org/wsdl/");
+				xmlAttribute.Value = text2 + ((!(text2 != string.Empty)) ? string.Empty : ":") + text;
+				xmlSchemaAttribute.UnhandledAttributes = new XmlAttribute[] { xmlAttribute };
+				this.ImportNamespace(schema, "http://schemas.xmlsoap.org/wsdl/");
+				XmlTypeMapElementInfo xmlTypeMapElementInfo = (XmlTypeMapElementInfo)listMap.ItemInfo[0];
+				if (xmlTypeMapElementInfo.MappedType != null)
+				{
+					switch (xmlTypeMapElementInfo.TypeData.SchemaType)
+					{
+					case SchemaTypes.Enum:
+						this.ExportEnumSchema(xmlTypeMapElementInfo.MappedType);
+						break;
+					case SchemaTypes.Array:
+						this.ExportArraySchema(xmlTypeMapElementInfo.MappedType, text3);
+						break;
+					case SchemaTypes.Class:
+						this.ExportClassSchema(xmlTypeMapElementInfo.MappedType);
+						break;
+					}
+				}
+				return new XmlQualifiedName(listMap.GetSchemaArrayName(), text3);
+			}
+			else
+			{
+				if (this.IsMapExported(map))
+				{
+					return new XmlQualifiedName(map.XmlType, map.XmlTypeNamespace);
+				}
+				this.SetMapExported(map);
+				XmlSchema schema2 = this.GetSchema(map.XmlTypeNamespace);
+				XmlSchemaComplexType xmlSchemaComplexType2 = new XmlSchemaComplexType();
+				xmlSchemaComplexType2.Name = map.ElementName;
+				schema2.Items.Add(xmlSchemaComplexType2);
+				XmlSchemaParticle schemaArrayElement = this.GetSchemaArrayElement(schema2, listMap.ItemInfo);
+				if (schemaArrayElement is XmlSchemaChoice)
+				{
+					xmlSchemaComplexType2.Particle = schemaArrayElement;
+				}
+				else
+				{
+					xmlSchemaComplexType2.Particle = new XmlSchemaSequence
+					{
+						Items = { schemaArrayElement }
+					};
+				}
+				return new XmlQualifiedName(map.XmlType, map.XmlTypeNamespace);
+			}
+		}
+
+		private XmlDocument Document
+		{
+			get
+			{
+				if (this.xmlDoc == null)
+				{
+					this.xmlDoc = new XmlDocument();
+				}
+				return this.xmlDoc;
+			}
+		}
+
+		private bool IsMapExported(XmlTypeMapping map)
+		{
+			return this.exportedMaps.ContainsKey(this.GetMapKey(map));
+		}
+
+		private void SetMapExported(XmlTypeMapping map)
+		{
+			this.exportedMaps[this.GetMapKey(map)] = map;
+		}
+
+		private bool IsElementExported(XmlTypeMapping map)
+		{
+			return this.exportedElements.ContainsKey(this.GetMapKey(map)) || map.TypeData.Type == typeof(object);
+		}
+
+		private void SetElementExported(XmlTypeMapping map)
+		{
+			this.exportedElements[this.GetMapKey(map)] = map;
+		}
+
+		private string GetMapKey(XmlTypeMapping map)
+		{
+			if (map.TypeData.IsListType)
+			{
+				return string.Concat(new string[]
+				{
+					this.GetArrayKeyName(map.TypeData),
+					" ",
+					map.XmlType,
+					" ",
+					map.XmlTypeNamespace
+				});
+			}
+			return string.Concat(new string[]
+			{
+				map.TypeData.FullTypeName,
+				" ",
+				map.XmlType,
+				" ",
+				map.XmlTypeNamespace
+			});
+		}
+
+		private string GetArrayKeyName(TypeData td)
+		{
+			TypeData listItemTypeData = td.ListItemTypeData;
+			return "*arrayof*" + ((!listItemTypeData.IsListType) ? listItemTypeData.FullTypeName : this.GetArrayKeyName(listItemTypeData));
+		}
+
+		private void CompileSchemas()
+		{
+		}
+
+		private XmlSchema GetSchema(string ns)
+		{
+			XmlSchema xmlSchema = this.schemas[ns];
+			if (xmlSchema == null)
+			{
+				xmlSchema = new XmlSchema();
+				if (ns != null && ns.Length > 0)
+				{
+					xmlSchema.TargetNamespace = ns;
+				}
+				if (!this.encodedFormat)
+				{
+					xmlSchema.ElementFormDefault = XmlSchemaForm.Qualified;
+				}
+				this.schemas.Add(xmlSchema);
+			}
+			return xmlSchema;
+		}
 
 		private XmlSchemas schemas;
 
-		private Hashtable elements = new Hashtable();
+		private Hashtable exportedMaps = new Hashtable();
 
-		private Hashtable attributes = new Hashtable();
+		private Hashtable exportedElements = new Hashtable();
 
-		private Hashtable types = new Hashtable();
+		private bool encodedFormat;
 
-		private Hashtable references = new Hashtable();
+		private XmlDocument xmlDoc;
 
-		private bool needToExportRoot;
+		private class XmlSchemaObjectContainer
+		{
+			public XmlSchemaObjectContainer(XmlSchema schema)
+			{
+				this._xmlSchemaObject = schema;
+			}
 
-		private TypeScope scope;
+			public XmlSchemaObjectContainer(XmlSchemaGroupBase group)
+			{
+				this._xmlSchemaObject = group;
+			}
+
+			public XmlSchemaObjectCollection Items
+			{
+				get
+				{
+					if (this._xmlSchemaObject is XmlSchema)
+					{
+						return ((XmlSchema)this._xmlSchemaObject).Items;
+					}
+					return ((XmlSchemaGroupBase)this._xmlSchemaObject).Items;
+				}
+			}
+
+			private readonly XmlSchemaObject _xmlSchemaObject;
+		}
 	}
 }

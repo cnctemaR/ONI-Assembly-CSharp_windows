@@ -5,14 +5,14 @@ using System.Threading;
 
 namespace System.Configuration
 {
-	public abstract class ApplicationSettingsBase : SettingsBase, INotifyPropertyChanged
+	public abstract class ApplicationSettingsBase : SettingsBase, global::System.ComponentModel.INotifyPropertyChanged
 	{
 		protected ApplicationSettingsBase()
 		{
 			base.Initialize(this.Context, this.Properties, this.Providers);
 		}
 
-		protected ApplicationSettingsBase(IComponent owner)
+		protected ApplicationSettingsBase(global::System.ComponentModel.IComponent owner)
 			: this(owner, string.Empty)
 		{
 		}
@@ -23,7 +23,7 @@ namespace System.Configuration
 			base.Initialize(this.Context, this.Properties, this.Providers);
 		}
 
-		protected ApplicationSettingsBase(IComponent owner, string settingsKey)
+		protected ApplicationSettingsBase(global::System.ComponentModel.IComponent owner, string settingsKey)
 		{
 			if (owner == null)
 			{
@@ -34,7 +34,7 @@ namespace System.Configuration
 			base.Initialize(this.Context, this.Properties, this.Providers);
 		}
 
-		public event PropertyChangedEventHandler PropertyChanged;
+		public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
 
 		public event SettingChangingEventHandler SettingChanging;
 
@@ -52,18 +52,17 @@ namespace System.Configuration
 			foreach (object obj in this.Providers)
 			{
 				SettingsProvider settingsProvider = (SettingsProvider)obj;
-				this.CacheValuesByProvider(settingsProvider);
+				IApplicationSettingsProvider applicationSettingsProvider = settingsProvider as IApplicationSettingsProvider;
+				if (applicationSettingsProvider != null)
+				{
+					applicationSettingsProvider.Reset(this.Context);
+				}
 			}
 		}
 
 		public void Reset()
 		{
 			this.Reload();
-			foreach (object obj in this.PropertyValues)
-			{
-				SettingsPropertyValue settingsPropertyValue = (SettingsPropertyValue)obj;
-				settingsPropertyValue.PropertyValue = settingsPropertyValue.Reset();
-			}
 		}
 
 		public override void Save()
@@ -93,7 +92,7 @@ namespace System.Configuration
 		{
 		}
 
-		protected virtual void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+		protected virtual void OnPropertyChanged(object sender, global::System.ComponentModel.PropertyChangedEventArgs e)
 		{
 			if (this.PropertyChanged != null)
 			{
@@ -117,7 +116,7 @@ namespace System.Configuration
 			}
 		}
 
-		protected virtual void OnSettingsSaving(object sender, CancelEventArgs e)
+		protected virtual void OnSettingsSaving(object sender, global::System.ComponentModel.CancelEventArgs e)
 		{
 			if (this.SettingsSaving != null)
 			{
@@ -125,7 +124,7 @@ namespace System.Configuration
 			}
 		}
 
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public override SettingsContext Context
 		{
 			get
@@ -140,7 +139,7 @@ namespace System.Configuration
 					if (this.context == null)
 					{
 						this.context = new SettingsContext();
-						this.context["SettingsKey"] = "";
+						this.context["SettingsKey"] = string.Empty;
 						Type type = base.GetType();
 						this.context["GroupName"] = type.FullName;
 						this.context["SettingsClassType"] = type;
@@ -171,18 +170,8 @@ namespace System.Configuration
 			}
 			if (settingsPropertyCollection.Count > 0)
 			{
-				foreach (object obj2 in provider.GetPropertyValues(this.Context, settingsPropertyCollection))
-				{
-					SettingsPropertyValue settingsPropertyValue = (SettingsPropertyValue)obj2;
-					if (this.PropertyValues[settingsPropertyValue.Name] != null)
-					{
-						this.PropertyValues[settingsPropertyValue.Name].PropertyValue = settingsPropertyValue.PropertyValue;
-					}
-					else
-					{
-						this.PropertyValues.Add(settingsPropertyValue);
-					}
-				}
+				SettingsPropertyValueCollection settingsPropertyValueCollection = provider.GetPropertyValues(this.Context, settingsPropertyCollection);
+				this.PropertyValues.Add(settingsPropertyValueCollection);
 			}
 			this.OnSettingsLoaded(this, new SettingsLoadedEventArgs(provider));
 		}
@@ -209,7 +198,7 @@ namespace System.Configuration
 			return this.PropertyValues[propertyName].PropertyValue;
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override object this[string propertyName]
 		{
 			get
@@ -247,12 +236,12 @@ namespace System.Configuration
 				if (!e.Cancel)
 				{
 					this.PropertyValues[propertyName].PropertyValue = value;
-					this.OnPropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+					this.OnPropertyChanged(this, new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
 				}
 			}
 		}
 
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public override SettingsPropertyCollection Properties
 		{
 			get
@@ -266,26 +255,14 @@ namespace System.Configuration
 				{
 					if (this.properties == null)
 					{
-						SettingsProvider settingsProvider = null;
+						LocalFileSettingsProvider localFileSettingsProvider = null;
 						this.properties = new SettingsPropertyCollection();
-						Type type = base.GetType();
-						SettingsProviderAttribute[] array = (SettingsProviderAttribute[])type.GetCustomAttributes(typeof(SettingsProviderAttribute), false);
-						if (array != null && array.Length != 0)
+						foreach (PropertyInfo propertyInfo in base.GetType().GetProperties())
 						{
-							SettingsProvider settingsProvider2 = (SettingsProvider)Activator.CreateInstance(Type.GetType(array[0].ProviderTypeName));
-							settingsProvider2.Initialize(null, null);
-							if (settingsProvider2 != null && this.Providers[settingsProvider2.Name] == null)
+							SettingAttribute[] array2 = (SettingAttribute[])propertyInfo.GetCustomAttributes(typeof(SettingAttribute), false);
+							if (array2 != null && array2.Length != 0)
 							{
-								this.Providers.Add(settingsProvider2);
-								settingsProvider = settingsProvider2;
-							}
-						}
-						foreach (PropertyInfo propertyInfo in type.GetProperties())
-						{
-							SettingAttribute[] array3 = (SettingAttribute[])propertyInfo.GetCustomAttributes(typeof(SettingAttribute), false);
-							if (array3 != null && array3.Length != 0)
-							{
-								this.CreateSettingsProperty(propertyInfo, this.properties, ref settingsProvider);
+								this.CreateSettingsProperty(propertyInfo, this.properties, ref localFileSettingsProvider);
 							}
 						}
 					}
@@ -302,7 +279,7 @@ namespace System.Configuration
 			}
 		}
 
-		private void CreateSettingsProperty(PropertyInfo prop, SettingsPropertyCollection properties, ref SettingsProvider local_provider)
+		private void CreateSettingsProperty(PropertyInfo prop, SettingsPropertyCollection properties, ref LocalFileSettingsProvider local_provider)
 		{
 			SettingsAttributeDictionary settingsAttributeDictionary = new SettingsAttributeDictionary();
 			SettingsProvider settingsProvider = null;
@@ -313,7 +290,8 @@ namespace System.Configuration
 			{
 				if (attribute is SettingsProviderAttribute)
 				{
-					settingsProvider = (SettingsProvider)Activator.CreateInstance(Type.GetType(((SettingsProviderAttribute)attribute).ProviderTypeName));
+					Type type = Type.GetType(((SettingsProviderAttribute)attribute).ProviderTypeName);
+					settingsProvider = (SettingsProvider)Activator.CreateInstance(type);
 					settingsProvider.Initialize(null, null);
 				}
 				else if (attribute is DefaultSettingValueAttribute)
@@ -336,7 +314,7 @@ namespace System.Configuration
 			}
 			if (!flag)
 			{
-				TypeConverter converter = TypeDescriptor.GetConverter(prop.PropertyType);
+				global::System.ComponentModel.TypeConverter converter = global::System.ComponentModel.TypeDescriptor.GetConverter(prop.PropertyType);
 				if (converter != null && (!converter.CanConvertFrom(typeof(string)) || !converter.CanConvertTo(typeof(string))))
 				{
 					settingsSerializeAs = SettingsSerializeAs.Xml;
@@ -372,7 +350,7 @@ namespace System.Configuration
 			}
 		}
 
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public override SettingsPropertyValueCollection PropertyValues
 		{
 			get
@@ -401,7 +379,7 @@ namespace System.Configuration
 			}
 		}
 
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public override SettingsProviderCollection Providers
 		{
 			get
@@ -430,7 +408,7 @@ namespace System.Configuration
 			}
 		}
 
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public string SettingsKey
 		{
 			get

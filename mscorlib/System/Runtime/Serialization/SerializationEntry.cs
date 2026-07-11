@@ -6,19 +6,18 @@ namespace System.Runtime.Serialization
 	[ComVisible(true)]
 	public struct SerializationEntry
 	{
-		public object Value
+		internal SerializationEntry(string name, Type type, object value)
 		{
-			get
-			{
-				return this.m_value;
-			}
+			this.name = name;
+			this.objectType = type;
+			this.value = value;
 		}
 
 		public string Name
 		{
 			get
 			{
-				return this.m_name;
+				return this.name;
 			}
 		}
 
@@ -26,21 +25,22 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.m_type;
+				return this.objectType;
 			}
 		}
 
-		internal SerializationEntry(string entryName, object entryValue, Type entryType)
+		public object Value
 		{
-			this.m_value = entryValue;
-			this.m_name = entryName;
-			this.m_type = entryType;
+			get
+			{
+				return this.value;
+			}
 		}
 
-		private Type m_type;
+		private string name;
 
-		private object m_value;
+		private Type objectType;
 
-		private string m_name;
+		private object value;
 	}
 }

@@ -1,47 +1,56 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
-	public sealed class ElementInit : IArgumentProvider
+	public sealed class ElementInit
 	{
-		internal ElementInit(MethodInfo addMethod, ReadOnlyCollection<Expression> arguments)
+		internal ElementInit(MethodInfo add_method, ReadOnlyCollection<Expression> arguments)
 		{
-			this.AddMethod = addMethod;
-			this.Arguments = arguments;
+			this.add_method = add_method;
+			this.arguments = arguments;
 		}
 
-		public MethodInfo AddMethod { get; }
-
-		public ReadOnlyCollection<Expression> Arguments { get; }
-
-		public Expression GetArgument(int index)
-		{
-			return this.Arguments[index];
-		}
-
-		public int ArgumentCount
+		public MethodInfo AddMethod
 		{
 			get
 			{
-				return this.Arguments.Count;
+				return this.add_method;
+			}
+		}
+
+		public ReadOnlyCollection<Expression> Arguments
+		{
+			get
+			{
+				return this.arguments;
 			}
 		}
 
 		public override string ToString()
 		{
-			return ExpressionStringBuilder.ElementInitBindingToString(this);
+			return ExpressionPrinter.ToString(this);
 		}
 
-		public ElementInit Update(IEnumerable<Expression> arguments)
+		private void EmitPopIfNeeded(EmitContext ec)
 		{
-			if (arguments == this.Arguments)
+			if (this.add_method.ReturnType == typeof(void))
 			{
-				return this;
+				return;
 			}
-			return Expression.ElementInit(this.AddMethod, arguments);
+			ec.ig.Emit(OpCodes.Pop);
 		}
+
+		internal void Emit(EmitContext ec, LocalBuilder local)
+		{
+			ec.EmitCall(local, this.arguments, this.add_method);
+			this.EmitPopIfNeeded(ec);
+		}
+
+		private MethodInfo add_method;
+
+		private ReadOnlyCollection<Expression> arguments;
 	}
 }

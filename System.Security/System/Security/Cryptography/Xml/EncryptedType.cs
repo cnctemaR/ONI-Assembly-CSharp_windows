@@ -5,50 +5,22 @@ namespace System.Security.Cryptography.Xml
 {
 	public abstract class EncryptedType
 	{
-		internal bool CacheValid
+		protected EncryptedType()
 		{
-			get
-			{
-				return this._cachedXml != null;
-			}
+			this.cipherData = new CipherData();
+			this.encryptionProperties = new EncryptionPropertyCollection();
+			this.keyInfo = new KeyInfo();
 		}
 
-		public virtual string Id
+		public virtual CipherData CipherData
 		{
 			get
 			{
-				return this._id;
+				return this.cipherData;
 			}
 			set
 			{
-				this._id = value;
-				this._cachedXml = null;
-			}
-		}
-
-		public virtual string Type
-		{
-			get
-			{
-				return this._type;
-			}
-			set
-			{
-				this._type = value;
-				this._cachedXml = null;
-			}
-		}
-
-		public virtual string MimeType
-		{
-			get
-			{
-				return this._mimeType;
-			}
-			set
-			{
-				this._mimeType = value;
-				this._cachedXml = null;
+				this.cipherData = value;
 			}
 		}
 
@@ -56,28 +28,11 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this._encoding;
+				return this.encoding;
 			}
 			set
 			{
-				this._encoding = value;
-				this._cachedXml = null;
-			}
-		}
-
-		public KeyInfo KeyInfo
-		{
-			get
-			{
-				if (this._keyInfo == null)
-				{
-					this._keyInfo = new KeyInfo();
-				}
-				return this._keyInfo;
-			}
-			set
-			{
-				this._keyInfo = value;
+				this.encoding = value;
 			}
 		}
 
@@ -85,12 +40,11 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this._encryptionMethod;
+				return this.encryptionMethod;
 			}
 			set
 			{
-				this._encryptionMethod = value;
-				this._cachedXml = null;
+				this.encryptionMethod = value;
 			}
 		}
 
@@ -98,11 +52,55 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				if (this._props == null)
-				{
-					this._props = new EncryptionPropertyCollection();
-				}
-				return this._props;
+				return this.encryptionProperties;
+			}
+		}
+
+		public virtual string Id
+		{
+			get
+			{
+				return this.id;
+			}
+			set
+			{
+				this.id = value;
+			}
+		}
+
+		public KeyInfo KeyInfo
+		{
+			get
+			{
+				return this.keyInfo;
+			}
+			set
+			{
+				this.keyInfo = value;
+			}
+		}
+
+		public virtual string MimeType
+		{
+			get
+			{
+				return this.mimeType;
+			}
+			set
+			{
+				this.mimeType = value;
+			}
+		}
+
+		public virtual string Type
+		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.type = value;
 			}
 		}
 
@@ -111,47 +109,24 @@ namespace System.Security.Cryptography.Xml
 			this.EncryptionProperties.Add(ep);
 		}
 
-		public virtual CipherData CipherData
-		{
-			get
-			{
-				if (this._cipherData == null)
-				{
-					this._cipherData = new CipherData();
-				}
-				return this._cipherData;
-			}
-			set
-			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				this._cipherData = value;
-				this._cachedXml = null;
-			}
-		}
+		public abstract XmlElement GetXml();
 
 		public abstract void LoadXml(XmlElement value);
 
-		public abstract XmlElement GetXml();
+		private CipherData cipherData;
 
-		private string _id;
+		private string encoding;
 
-		private string _type;
+		private EncryptionMethod encryptionMethod;
 
-		private string _mimeType;
+		private EncryptionPropertyCollection encryptionProperties;
 
-		private string _encoding;
+		private string id;
 
-		private EncryptionMethod _encryptionMethod;
+		private KeyInfo keyInfo;
 
-		private CipherData _cipherData;
+		private string mimeType;
 
-		private EncryptionPropertyCollection _props;
-
-		private KeyInfo _keyInfo;
-
-		internal XmlElement _cachedXml;
+		private string type;
 	}
 }

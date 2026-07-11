@@ -14,20 +14,9 @@ namespace System.Runtime.Serialization
 			set
 			{
 				this.value = value;
-				this.isValueSetExplicitly = true;
-			}
-		}
-
-		public bool IsValueSetExplicitly
-		{
-			get
-			{
-				return this.isValueSetExplicitly;
 			}
 		}
 
 		private string value;
-
-		private bool isValueSetExplicitly;
 	}
 }

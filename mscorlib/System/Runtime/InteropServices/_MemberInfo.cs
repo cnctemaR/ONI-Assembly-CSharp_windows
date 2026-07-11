@@ -3,11 +3,11 @@ using System.Reflection;
 
 namespace System.Runtime.InteropServices
 {
+	[ComVisible(true)]
 	[CLSCompliant(false)]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("f7102fa9-cabb-3a74-a6da-b4567ef1b079")]
 	[TypeLibImportClass(typeof(MemberInfo))]
-	[ComVisible(true)]
 	public interface _MemberInfo
 	{
 		bool Equals(object other);

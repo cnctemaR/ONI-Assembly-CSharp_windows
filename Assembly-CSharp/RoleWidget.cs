@@ -144,71 +144,11 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 	{
 		HierarchyReferences component = slot.GetComponent<HierarchyReferences>();
 		component.GetReference<CrewPortrait>("Portrait").GetComponentInChildren<KBatchedAnimController>().enabled = occupier != null;
+		ToolTip reference = component.GetReference<ToolTip>("PortraitTooltip");
+		reference.ClearMultiStringTooltip();
 		if (occupier != null)
 		{
-			component.GetReference<CrewPortrait>("Portrait").SetIdentityObject(occupier.GetComponent<MinionIdentity>(), true);
-			component.GetReference<LocText>("Label").gameObject.SetActive(true);
-			component.GetReference<LayoutElement>("DropDownLayout").minWidth = ((!(this.roleID == "NoRole")) ? 100f : 64f);
-			component.GetReference<LayoutElement>("DropDownLayout").GetComponentInChildren<LocText>().text = ((!(this.roleID == "NoRole")) ? UI.ROLES_SCREEN.SLOTS.UNASSIGNED : UI.ROLES_SCREEN.SLOTS.PICK_JOB);
-			component.GetReference<LocText>("Label").text = occupier.GetProperName();
-			if (occupier.CurrentRole != occupier.TargetRole)
-			{
-				LocText reference = component.GetReference<LocText>("Label");
-				reference.text = reference.text + " " + UI.ROLES_SCREEN.SLOTS.ASSIGNMENT_PENDING;
-			}
-			component.GetReference("BG").GetComponent<KImage>().ColorState = KImage.ColorSelector.Active;
-			string text = string.Empty;
-			foreach (KeyValuePair<HashedString, float> keyValuePair in occupier.AptitudeByRoleGroup)
-			{
-				if (keyValuePair.Value != 0f)
-				{
-					text = text + "\n    • " + Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name;
-				}
-			}
-			if (text != string.Empty)
-			{
-				text = text.Insert(0, "<b>" + UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.APTITUDES + "</b>");
-				text += "\n\n";
-			}
-			text = text + "<b>" + UI.DETAILTABS.STATS.NAME + "</b>";
-			string text3;
-			foreach (AttributeInstance attributeInstance in occupier.GetAttributes())
-			{
-				if (attributeInstance.Attribute.ShowInUI == Klei.AI.Attribute.Display.Skill)
-				{
-					string text2 = UIConstants.ColorPrefixWhite;
-					if (attributeInstance.GetTotalValue() > 0f)
-					{
-						text2 = UIConstants.ColorPrefixGreen;
-					}
-					else if (attributeInstance.GetTotalValue() < 0f)
-					{
-						text2 = UIConstants.ColorPrefixRed;
-					}
-					text3 = text;
-					text = string.Concat(new object[]
-					{
-						text3,
-						"\n    • ",
-						attributeInstance.Name,
-						": ",
-						text2,
-						attributeInstance.GetTotalValue(),
-						UIConstants.ColorSuffix
-					});
-				}
-			}
-			text3 = text;
-			text = string.Concat(new string[]
-			{
-				text3,
-				"\n\n",
-				UI.ROLES_SCREEN.HIGHEST_EXPECTATIONS_TIER,
-				"\n    • ",
-				RolesScreen.tierNames[occupier.GetComponent<MinionResume>().HighestTierRole()]
-			});
-			text = text.Insert(0, "<b>" + occupier.GetProperName() + "</b>\n\n");
-			component.GetReference<ToolTip>("PortraitTooltip").SetSimpleTooltip(text);
+			reference.AddMultiStringTooltip(occupier.GetProperName() + "\n\n", this.TooltipTextStyle_Header);
 			if (this.roleID != "NoRole")
 			{
 				component.GetReference("UnassignButton").gameObject.SetActive(true);
@@ -218,6 +158,32 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 				component.GetReference("ProgressBar").GetComponent<ToolTip>().SetSimpleTooltip(string.Format(UI.ROLES_SCREEN.ROLE_PROGRESS, Mathf.RoundToInt(occupier.ExperienceByRoleID[this.roleID]), Game.Instance.roleManager.GetRole(this.roleID).experienceRequired));
 				component.GetComponent<ToolTip>().enabled = false;
 				component.GetReference<DropDown>("DropDown").gameObject.SetActive(false);
+				AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(occupier);
+				AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(occupier);
+				RoleConfig role = Game.Instance.roleManager.GetRole(this.roleID);
+				if (attributeInstance2.GetTotalValue() > attributeInstance.GetTotalValue())
+				{
+					bool flag = role.tier > occupier.HighestTierRoleMastered();
+					if (flag)
+					{
+						reference.AddMultiStringTooltip(string.Format(UI.ROLES_SCREEN.EXPECTATION_ALERT_JOB, attributeInstance.GetTotalValue(), role.QOLExpectation(), role.name), this.TooltipTextStyle_AbilityNegativeModifier);
+						reference.AddMultiStringTooltip(UI.ROLES_SCREEN.EXPECTATION_ALERT_DESC_JOB, null);
+						component.GetReference<Image>("AlertIcon").color = new Color(0.99215686f, 0.5372549f, 0.29411766f);
+						component.GetReference<Image>("AlertIcon").gameObject.SetActive(true);
+					}
+					else
+					{
+						reference.AddMultiStringTooltip(string.Format(UI.ROLES_SCREEN.EXPECTATION_ALERT_EXPECTATION, attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue()), this.TooltipTextStyle_AbilityNegativeModifier);
+						reference.AddMultiStringTooltip(UI.ROLES_SCREEN.EXPECTATION_ALERT_DESC_EXPECTATION, null);
+						component.GetReference<Image>("AlertIcon").color = new Color(0.7529412f, 0.7529412f, 0.7529412f);
+						component.GetReference<Image>("AlertIcon").gameObject.SetActive(true);
+					}
+				}
+				else
+				{
+					reference.AddMultiStringTooltip(string.Format(UI.ROLES_SCREEN.EXPECTATION_ALERT_EXPECTATION, attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue()), null);
+					component.GetReference<Image>("AlertIcon").gameObject.SetActive(false);
+				}
 			}
 			else
 			{
@@ -231,6 +197,57 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 				reference2.gameObject.SetActive(true);
 				reference2.Initialize(Game.Instance.roleManager.RolesConfigs.Cast<IListableOption>(), new Action<IListableOption, object>(this.OnMinionDropEntryClick), new Func<IListableOption, IListableOption, object, int>(this.minionDropDownSort), new Action<DropDownEntry, object>(this.minionDropEntryRefreshAction), false, occupier);
 			}
+			component.GetReference<CrewPortrait>("Portrait").SetIdentityObject(occupier.GetComponent<MinionIdentity>(), true);
+			component.GetReference<LocText>("Label").gameObject.SetActive(true);
+			component.GetReference<LayoutElement>("DropDownLayout").minWidth = ((!(this.roleID == "NoRole")) ? 100f : 64f);
+			component.GetReference<LayoutElement>("DropDownLayout").GetComponentInChildren<LocText>().text = ((!(this.roleID == "NoRole")) ? UI.ROLES_SCREEN.SLOTS.UNASSIGNED : UI.ROLES_SCREEN.SLOTS.PICK_JOB);
+			component.GetReference<LocText>("Label").text = occupier.GetProperName();
+			if (occupier.CurrentRole != occupier.TargetRole)
+			{
+				LocText reference3 = component.GetReference<LocText>("Label");
+				reference3.text = reference3.text + " " + UI.ROLES_SCREEN.SLOTS.ASSIGNMENT_PENDING;
+			}
+			component.GetReference("BG").GetComponent<KImage>().ColorState = KImage.ColorSelector.Active;
+			bool flag2 = false;
+			foreach (KeyValuePair<HashedString, float> keyValuePair in occupier.AptitudeByRoleGroup)
+			{
+				if (keyValuePair.Value != 0f)
+				{
+					if (!flag2)
+					{
+						flag2 = true;
+						reference.AddMultiStringTooltip("\n" + UI.ROLES_SCREEN.ASSIGNMENT_REQUIREMENTS.APTITUDES + "\n\n", this.TooltipTextStyle_Header);
+					}
+					reference.AddMultiStringTooltip("    • " + Game.Instance.roleManager.RoleGroups[keyValuePair.Key].Name, null);
+				}
+			}
+			reference.AddMultiStringTooltip("\n" + UI.DETAILTABS.STATS.NAME + "\n\n", this.TooltipTextStyle_Header);
+			foreach (AttributeInstance attributeInstance3 in occupier.GetAttributes())
+			{
+				if (attributeInstance3.Attribute.ShowInUI == Klei.AI.Attribute.Display.Skill)
+				{
+					string text = UIConstants.ColorPrefixWhite;
+					if (attributeInstance3.GetTotalValue() > 0f)
+					{
+						text = UIConstants.ColorPrefixGreen;
+					}
+					else if (attributeInstance3.GetTotalValue() < 0f)
+					{
+						text = UIConstants.ColorPrefixRed;
+					}
+					reference.AddMultiStringTooltip(string.Concat(new object[]
+					{
+						"    • ",
+						attributeInstance3.Name,
+						": ",
+						text,
+						attributeInstance3.GetTotalValue(),
+						UIConstants.ColorSuffix
+					}), null);
+				}
+			}
+			reference.AddMultiStringTooltip("\n" + UI.ROLES_SCREEN.HIGHEST_EXPECTATIONS_TIER + "\n\n", this.TooltipTextStyle_Header);
+			reference.AddMultiStringTooltip("    • " + RolesScreen.tierNames[occupier.GetComponent<MinionResume>().HighestTierRole()], null);
 		}
 		else
 		{
@@ -252,9 +269,9 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 				this.rolesScreen.RefreshRoleWidgets();
 				this.rolesScreen.RefreshSideBar();
 			};
-			DropDown reference3 = component.GetReference<DropDown>("DropDown");
-			reference3.gameObject.SetActive(true);
-			reference3.Initialize(list2, action, new Func<IListableOption, IListableOption, object, int>(this.roleSlotDropDownSort), new Action<DropDownEntry, object>(this.roleRefreshAction), false, Game.Instance.roleManager.GetRole(this.roleID));
+			DropDown reference4 = component.GetReference<DropDown>("DropDown");
+			reference4.gameObject.SetActive(true);
+			reference4.Initialize(list2, action, new Func<IListableOption, IListableOption, object, int>(this.roleSlotDropDownSort), new Action<DropDownEntry, object>(this.roleRefreshAction), false, Game.Instance.roleManager.GetRole(this.roleID));
 			component.GetReference<LocText>("Label").gameObject.SetActive(false);
 			component.GetReference<LayoutElement>("DropDownLayout").minWidth = 156f;
 			component.GetReference<LayoutElement>("DropDownLayout").GetComponentInChildren<LocText>().text = ((!(this.roleID == "NoRole")) ? UI.ROLES_SCREEN.SLOTS.UNASSIGNED : UI.ROLES_SCREEN.SLOTS.PICK_DUPLICANT);
@@ -262,6 +279,7 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			component.GetReference("UnassignButton").gameObject.SetActive(false);
 			component.GetReference("ProgressBar").gameObject.SetActive(false);
 			component.GetReference("BG").GetComponent<KImage>().ColorState = KImage.ColorSelector.Active;
+			component.GetReference("AlertIcon").gameObject.SetActive(false);
 		}
 		component.GetReference<KButton>("UnassignButton").ClearOnClick();
 		component.GetReference<KButton>("UnassignButton").onClick += delegate
@@ -289,12 +307,18 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 	{
 		Image reference = entry.GetComponent<HierarchyReferences>().GetReference<Image>("SkillBox");
 		Image reference2 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("AptitudeBox");
+		entry.GetComponent<HierarchyReferences>().GetReference("AlertIcon").gameObject.SetActive(false);
+		entry.GetComponent<HierarchyReferences>().GetReference("MasteryIcon").gameObject.SetActive(false);
+		Image reference3 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("AlertIconCentered");
+		Image reference4 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("MasteryIconCentered");
 		RoleConfig roleConfig = entry.entryData as RoleConfig;
 		MinionResume minionResume = targetData as MinionResume;
 		if (roleConfig == null)
 		{
 			reference.transform.parent.gameObject.SetActive(false);
 			reference2.transform.parent.gameObject.SetActive(false);
+			reference3.gameObject.SetActive(false);
+			reference4.gameObject.SetActive(false);
 		}
 		else
 		{
@@ -318,6 +342,23 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 				reference.SetAlpha(0f);
 			}
 			reference2.gameObject.SetActive(num2 > 0f);
+			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(minionResume);
+			int num3 = roleConfig.QOLExpectation();
+			if (minionResume.HasMasteredRole(roleConfig.id))
+			{
+				reference3.gameObject.SetActive(false);
+				reference4.gameObject.SetActive(true);
+			}
+			else if (roleConfig.tier > minionResume.HighestTierRoleMastered() && (float)num3 > attributeInstance.GetTotalValue())
+			{
+				reference3.gameObject.SetActive(true);
+				reference4.gameObject.SetActive(false);
+			}
+			else
+			{
+				reference3.gameObject.SetActive(false);
+				reference4.gameObject.SetActive(false);
+			}
 		}
 	}
 
@@ -429,34 +470,38 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 		{
 			minionIdentity = entry.entryData as MinionIdentity;
 		}
-		MinionResume minionResume = null;
-		if (minionIdentity != null)
+		Image reference = entry.GetComponent<HierarchyReferences>().GetReference<Image>("AptitudeBox");
+		Image reference2 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("SkillBox");
+		Image reference3 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("AlertIcon");
+		Image reference4 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("MasteryIcon");
+		entry.GetComponent<HierarchyReferences>().GetReference("AlertIconCentered").gameObject.SetActive(false);
+		entry.GetComponent<HierarchyReferences>().GetReference("MasteryIconCentered").gameObject.SetActive(false);
+		if (minionIdentity == null)
 		{
+			reference.transform.parent.gameObject.SetActive(false);
+			reference2.transform.parent.gameObject.SetActive(false);
+			reference3.gameObject.SetActive(false);
+			reference4.gameObject.SetActive(false);
+		}
+		else
+		{
+			MinionResume component = minionIdentity.GetComponent<MinionResume>();
 			entry.button.isInteractable = Game.Instance.roleManager.CanAssignToRole(this.roleID, minionIdentity.GetComponent<MinionResume>());
-			minionResume = minionIdentity.GetComponent<MinionResume>();
-			entry.tooltip.SetSimpleTooltip(Game.Instance.roleManager.RoleCriteriaString(this.roleID, minionResume));
-			if (minionResume.CurrentRole == "NoRole")
+			entry.tooltip.SetSimpleTooltip(Game.Instance.roleManager.RoleCriteriaString(this.roleID, component));
+			if (component.CurrentRole == "NoRole")
 			{
 				entry.label.text = minionIdentity.GetProperName();
 			}
 			else
 			{
-				entry.label.text = string.Format(UI.ROLES_SCREEN.DROPDOWN.NAME_AND_ROLE, minionIdentity.GetProperName(), Game.Instance.roleManager.GetRole(minionResume.CurrentRole).name);
+				entry.label.text = string.Format(UI.ROLES_SCREEN.DROPDOWN.NAME_AND_ROLE, minionIdentity.GetProperName(), Game.Instance.roleManager.GetRole(component.CurrentRole).name);
 			}
 			if (entry.button.isInteractable)
 			{
 				string currentRole = (entry.entryData as MinionIdentity).GetComponent<MinionResume>().CurrentRole;
 			}
-		}
-		Image reference = entry.GetComponent<HierarchyReferences>().GetReference<Image>("AptitudeBox");
-		if (minionIdentity == null)
-		{
-			reference.transform.parent.gameObject.SetActive(false);
-		}
-		else
-		{
 			reference.transform.parent.gameObject.SetActive(true);
-			float num = minionResume.AptitudeByRoleGroup[roleConfig.roleGroup];
+			float num = component.AptitudeByRoleGroup[roleConfig.roleGroup];
 			if (roleConfig.relevantAttributes.Length > 0)
 			{
 				reference.gameObject.SetActive(num > 0f);
@@ -465,14 +510,6 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			{
 				reference.gameObject.SetActive(false);
 			}
-		}
-		Image reference2 = entry.GetComponent<HierarchyReferences>().GetReference<Image>("SkillBox");
-		if (minionIdentity == null)
-		{
-			reference2.transform.parent.gameObject.SetActive(false);
-		}
-		else
-		{
 			reference2.transform.parent.gameObject.SetActive(true);
 			float num2 = 0f;
 			for (int i = 0; i < roleConfig.relevantAttributes.Length; i++)
@@ -487,6 +524,23 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 			else
 			{
 				reference2.SetAlpha(0f);
+			}
+			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component);
+			int num3 = roleConfig.QOLExpectation();
+			if (component.HasMasteredRole(roleConfig.id))
+			{
+				reference3.gameObject.SetActive(false);
+				reference4.gameObject.SetActive(true);
+			}
+			else if (roleConfig.tier > component.HighestTierRoleMastered() && (float)num3 > attributeInstance.GetTotalValue())
+			{
+				reference3.gameObject.SetActive(true);
+				reference4.gameObject.SetActive(false);
+			}
+			else
+			{
+				reference3.gameObject.SetActive(false);
+				reference4.gameObject.SetActive(false);
 			}
 		}
 	}
@@ -572,6 +626,10 @@ public class RoleWidget : KMonoBehaviour, IPointerEnterHandler, IPointerExitHand
 
 	[SerializeField]
 	private ToolTip masteryCount;
+
+	public TextStyleSetting TooltipTextStyle_Header;
+
+	public TextStyleSetting TooltipTextStyle_AbilityNegativeModifier;
 
 	private List<GameObject> Slots = new List<GameObject>();
 

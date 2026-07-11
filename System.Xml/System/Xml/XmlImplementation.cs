@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace System.Xml
 {
@@ -9,14 +11,9 @@ namespace System.Xml
 		{
 		}
 
-		public XmlImplementation(XmlNameTable nt)
+		public XmlImplementation(XmlNameTable nameTable)
 		{
-			this.nameTable = nt;
-		}
-
-		public bool HasFeature(string strFeature, string strVersion)
-		{
-			return string.Compare("XML", strFeature, StringComparison.OrdinalIgnoreCase) == 0 && (strVersion == null || strVersion == "1.0" || strVersion == "2.0");
+			this.InternalNameTable = nameTable;
 		}
 
 		public virtual XmlDocument CreateDocument()
@@ -24,14 +21,35 @@ namespace System.Xml
 			return new XmlDocument(this);
 		}
 
-		internal XmlNameTable NameTable
+		public bool HasFeature(string strFeature, string strVersion)
 		{
-			get
+			if (string.Compare(strFeature, "xml", true, CultureInfo.InvariantCulture) == 0)
 			{
-				return this.nameTable;
+				if (strVersion != null)
+				{
+					if (XmlImplementation.<>f__switch$map32 == null)
+					{
+						XmlImplementation.<>f__switch$map32 = new Dictionary<string, int>(2)
+						{
+							{ "1.0", 0 },
+							{ "2.0", 0 }
+						};
+					}
+					int num;
+					if (!XmlImplementation.<>f__switch$map32.TryGetValue(strVersion, out num))
+					{
+						return false;
+					}
+					if (num != 0)
+					{
+						return false;
+					}
+				}
+				return true;
 			}
+			return false;
 		}
 
-		private XmlNameTable nameTable;
+		internal XmlNameTable InternalNameTable;
 	}
 }

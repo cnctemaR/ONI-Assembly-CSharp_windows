@@ -47,10 +47,10 @@ public class BaseNodeEditor : Node
 
 	protected override void NodeGUI()
 	{
-		GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
 		if (this.Inputs != null)
 		{
-			GUILayout.BeginVertical(Array.Empty<GUILayoutOption>());
+			GUILayout.BeginVertical(new GUILayoutOption[0]);
 			foreach (NodeInput nodeInput in this.Inputs)
 			{
 				nodeInput.DisplayLayout();
@@ -59,7 +59,7 @@ public class BaseNodeEditor : Node
 		}
 		if (this.Outputs != null)
 		{
-			GUILayout.BeginVertical(Array.Empty<GUILayoutOption>());
+			GUILayout.BeginVertical(new GUILayoutOption[0]);
 			foreach (NodeOutput nodeOutput in this.Outputs)
 			{
 				nodeOutput.DisplayLayout();

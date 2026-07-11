@@ -1,24 +1,35 @@
 ﻿using System;
 using System.CodeDom;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.Serialization.Diagnostics;
-using System.Security;
-using System.Security.Permissions;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.Serialization;
 
 namespace System.Runtime.Serialization
 {
 	public class XsdDataContractImporter
 	{
 		public XsdDataContractImporter()
+			: this(null)
 		{
 		}
 
-		public XsdDataContractImporter(CodeCompileUnit codeCompileUnit)
+		public XsdDataContractImporter(CodeCompileUnit ccu)
 		{
-			this.codeCompileUnit = codeCompileUnit;
+			this.ccu = ccu;
+			this.imported_names = new Dictionary<XmlQualifiedName, XmlQualifiedName>();
+		}
+
+		public CodeCompileUnit CodeCompileUnit
+		{
+			get
+			{
+				if (this.ccu == null)
+				{
+					this.ccu = new CodeCompileUnit();
+				}
+				return this.ccu;
+			}
 		}
 
 		public ImportOptions Options
@@ -33,302 +44,291 @@ namespace System.Runtime.Serialization
 			}
 		}
 
-		public CodeCompileUnit CodeCompileUnit
+		[MonoTODO]
+		public ICollection<CodeTypeReference> GetKnownTypeReferences(XmlQualifiedName typeName)
 		{
-			get
-			{
-				return this.GetCodeCompileUnit();
-			}
+			throw new NotImplementedException();
 		}
 
-		private CodeCompileUnit GetCodeCompileUnit()
+		[MonoTODO]
+		public CodeTypeReference GetCodeTypeReference(XmlQualifiedName typeName)
 		{
-			if (this.codeCompileUnit == null)
-			{
-				this.codeCompileUnit = new CodeCompileUnit();
-			}
-			return this.codeCompileUnit;
+			throw new NotImplementedException();
 		}
 
-		private DataContractSet DataContractSet
+		[MonoTODO]
+		public CodeTypeReference GetCodeTypeReference(XmlQualifiedName typeName, XmlSchemaElement element)
 		{
-			get
+			throw new NotImplementedException();
+		}
+
+		public bool CanImport(XmlSchemaSet schemas)
+		{
+			foreach (object obj in schemas.GlobalElements)
 			{
-				if (this.dataContractSet == null)
+				XmlSchemaElement xmlSchemaElement = (XmlSchemaElement)obj;
+				if (!this.CanImport(schemas, xmlSchemaElement))
 				{
-					this.dataContractSet = ((this.Options == null) ? new DataContractSet(null, null, null) : new DataContractSet(this.Options.DataContractSurrogate, this.Options.ReferencedTypes, this.Options.ReferencedCollectionTypes));
+					return false;
 				}
-				return this.dataContractSet;
 			}
+			return true;
 		}
 
+		public bool CanImport(XmlSchemaSet schemas, ICollection<XmlQualifiedName> typeNames)
+		{
+			foreach (XmlQualifiedName xmlQualifiedName in typeNames)
+			{
+				if (!this.CanImport(schemas, xmlQualifiedName))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		public bool CanImport(XmlSchemaSet schemas, XmlQualifiedName name)
+		{
+			return this.CanImport(schemas, (XmlSchemaElement)schemas.GlobalElements[name]);
+		}
+
+		[MonoTODO]
+		public bool CanImport(XmlSchemaSet schemas, XmlSchemaElement element)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
 		public void Import(XmlSchemaSet schemas)
 		{
 			if (schemas == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
+				throw new ArgumentNullException("schemas");
 			}
-			this.InternalImport(schemas, null, null, null);
+			schemas.Compile();
+			foreach (object obj in schemas.GlobalElements.Values)
+			{
+				XmlSchemaElement xmlSchemaElement = (XmlSchemaElement)obj;
+				this.ImportInternal(schemas, xmlSchemaElement.QualifiedName);
+			}
 		}
 
 		public void Import(XmlSchemaSet schemas, ICollection<XmlQualifiedName> typeNames)
 		{
 			if (schemas == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
+				throw new ArgumentNullException("schemas");
 			}
 			if (typeNames == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("typeNames"));
+				throw new ArgumentNullException("typeNames");
 			}
-			this.InternalImport(schemas, typeNames, XsdDataContractImporter.emptyElementArray, XsdDataContractImporter.emptyTypeNameArray);
+			schemas.Compile();
+			foreach (XmlQualifiedName xmlQualifiedName in typeNames)
+			{
+				this.ImportInternal(schemas, xmlQualifiedName);
+			}
 		}
 
-		public void Import(XmlSchemaSet schemas, XmlQualifiedName typeName)
+		public void Import(XmlSchemaSet schemas, XmlQualifiedName name)
 		{
 			if (schemas == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
+				throw new ArgumentNullException("schemas");
 			}
-			if (typeName == null)
+			if (name == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("typeName"));
+				throw new ArgumentNullException("name");
 			}
-			this.SingleTypeNameArray[0] = typeName;
-			this.InternalImport(schemas, this.SingleTypeNameArray, XsdDataContractImporter.emptyElementArray, XsdDataContractImporter.emptyTypeNameArray);
+			schemas.Compile();
+			if (schemas.GlobalTypes[name] == null)
+			{
+				throw new InvalidDataContractException(string.Format("Type with name '{0}' not found in schema with namespace '{1}'", name.Name, name.Namespace));
+			}
+			this.ImportInternal(schemas, name);
 		}
 
+		[MonoTODO]
 		public XmlQualifiedName Import(XmlSchemaSet schemas, XmlSchemaElement element)
 		{
 			if (schemas == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
+				throw new ArgumentNullException("schemas");
 			}
 			if (element == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("element"));
+				throw new ArgumentNullException("element");
 			}
-			this.SingleTypeNameArray[0] = null;
-			this.SingleElementArray[0] = element;
-			this.InternalImport(schemas, XsdDataContractImporter.emptyTypeNameArray, this.SingleElementArray, this.SingleTypeNameArray);
-			return this.SingleTypeNameArray[0];
+			schemas.Compile();
+			XmlQualifiedName xmlQualifiedName = this.ImportInternal(schemas, element.QualifiedName);
+			foreach (object obj in schemas.GlobalTypes.Names)
+			{
+				XmlQualifiedName xmlQualifiedName2 = (XmlQualifiedName)obj;
+				this.ImportInternal(schemas, xmlQualifiedName2);
+			}
+			return xmlQualifiedName;
 		}
 
-		public bool CanImport(XmlSchemaSet schemas)
+		private XmlQualifiedName ImportInternal(XmlSchemaSet schemas, XmlQualifiedName qname)
 		{
-			if (schemas == null)
+			if (qname.Namespace == "http://schemas.microsoft.com/2003/10/Serialization/")
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
+				return qname;
 			}
-			return this.InternalCanImport(schemas, null, null, null);
+			if (this.imported_names.ContainsKey(qname))
+			{
+				return this.imported_names[qname];
+			}
+			XmlSchemas xmlSchemas = new XmlSchemas();
+			foreach (object obj in schemas.Schemas())
+			{
+				XmlSchema xmlSchema = (XmlSchema)obj;
+				xmlSchemas.Add(xmlSchema);
+			}
+			XmlSchemaImporter xmlSchemaImporter = new XmlSchemaImporter(xmlSchemas);
+			XmlTypeMapping xmlTypeMapping = xmlSchemaImporter.ImportTypeMapping(qname);
+			this.ImportFromTypeMapping(xmlTypeMapping);
+			return qname;
 		}
 
-		public bool CanImport(XmlSchemaSet schemas, ICollection<XmlQualifiedName> typeNames)
+		private void ImportFromTypeMapping(XmlTypeMapping mapping)
 		{
-			if (schemas == null)
+			if (mapping == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
+				return;
 			}
-			if (typeNames == null)
+			XmlQualifiedName xmlQualifiedName = new XmlQualifiedName(mapping.TypeName, mapping.Namespace);
+			if (this.imported_names.ContainsKey(xmlQualifiedName))
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("typeNames"));
+				return;
 			}
-			return this.InternalCanImport(schemas, typeNames, XsdDataContractImporter.emptyElementArray, XsdDataContractImporter.emptyTypeNameArray);
-		}
-
-		public bool CanImport(XmlSchemaSet schemas, XmlQualifiedName typeName)
-		{
-			if (schemas == null)
+			CodeNamespace codeNamespace = new CodeNamespace();
+			codeNamespace.Name = this.FromXmlnsToClrName(mapping.Namespace);
+			XmlCodeExporter xmlCodeExporter = new XmlCodeExporter(codeNamespace);
+			xmlCodeExporter.ExportTypeMapping(mapping);
+			List<CodeTypeDeclaration> list = new List<CodeTypeDeclaration>();
+			foreach (object obj in codeNamespace.Types)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
-			}
-			if (typeName == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("typeName"));
-			}
-			return this.InternalCanImport(schemas, new XmlQualifiedName[] { typeName }, XsdDataContractImporter.emptyElementArray, XsdDataContractImporter.emptyTypeNameArray);
-		}
-
-		public bool CanImport(XmlSchemaSet schemas, XmlSchemaElement element)
-		{
-			if (schemas == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("schemas"));
-			}
-			if (element == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("element"));
-			}
-			this.SingleTypeNameArray[0] = null;
-			this.SingleElementArray[0] = element;
-			return this.InternalCanImport(schemas, XsdDataContractImporter.emptyTypeNameArray, this.SingleElementArray, this.SingleTypeNameArray);
-		}
-
-		public CodeTypeReference GetCodeTypeReference(XmlQualifiedName typeName)
-		{
-			DataContract dataContract = this.FindDataContract(typeName);
-			return new CodeExporter(this.DataContractSet, this.Options, this.GetCodeCompileUnit()).GetCodeTypeReference(dataContract);
-		}
-
-		public CodeTypeReference GetCodeTypeReference(XmlQualifiedName typeName, XmlSchemaElement element)
-		{
-			if (element == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("element"));
-			}
-			if (typeName == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("typeName"));
-			}
-			DataContract dataContract = this.FindDataContract(typeName);
-			return new CodeExporter(this.DataContractSet, this.Options, this.GetCodeCompileUnit()).GetElementTypeReference(dataContract, element.IsNillable);
-		}
-
-		internal DataContract FindDataContract(XmlQualifiedName typeName)
-		{
-			if (typeName == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("typeName"));
-			}
-			DataContract dataContract = DataContract.GetBuiltInDataContract(typeName.Name, typeName.Namespace);
-			if (dataContract == null)
-			{
-				dataContract = this.DataContractSet[typeName];
-				if (dataContract == null)
+				CodeTypeDeclaration codeTypeDeclaration = (CodeTypeDeclaration)obj;
+				string @namespace = this.GetNamespace(codeTypeDeclaration);
+				if (@namespace != null)
 				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("Type '{0}' in '{1}' namespace has not been imported.", new object[] { typeName.Name, typeName.Namespace })));
+					XmlQualifiedName xmlQualifiedName2 = new XmlQualifiedName(codeTypeDeclaration.Name, @namespace);
+					if (this.imported_names.ContainsKey(xmlQualifiedName2))
+					{
+						list.Add(codeTypeDeclaration);
+					}
+					else if (xmlQualifiedName2.Namespace == "http://schemas.microsoft.com/2003/10/Serialization/Arrays")
+					{
+						list.Add(codeTypeDeclaration);
+					}
+					else
+					{
+						this.imported_names[xmlQualifiedName2] = xmlQualifiedName2;
+						codeTypeDeclaration.Comments.Clear();
+						codeTypeDeclaration.CustomAttributes.Clear();
+						codeTypeDeclaration.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("System.CodeDom.Compiler.GeneratedCodeAttribute"), new CodeAttributeArgument[]
+						{
+							new CodeAttributeArgument(new CodePrimitiveExpression("System.Runtime.Serialization")),
+							new CodeAttributeArgument(new CodePrimitiveExpression("3.0.0.0"))
+						}));
+						codeTypeDeclaration.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("System.Runtime.Serialization.DataContractAttribute")));
+						if (!codeTypeDeclaration.IsEnum)
+						{
+							codeTypeDeclaration.BaseTypes.Add(new CodeTypeReference(typeof(object)));
+							codeTypeDeclaration.BaseTypes.Add(new CodeTypeReference("System.Runtime.Serialization.IExtensibleDataObject"));
+							foreach (object obj2 in codeTypeDeclaration.Members)
+							{
+								CodeTypeMember codeTypeMember = (CodeTypeMember)obj2;
+								CodeMemberProperty codeMemberProperty = codeTypeMember as CodeMemberProperty;
+								if (codeMemberProperty != null)
+								{
+									if ((codeMemberProperty.Attributes & MemberAttributes.Public) == MemberAttributes.Public)
+									{
+										codeMemberProperty.CustomAttributes.Clear();
+										codeMemberProperty.CustomAttributes.Add(new CodeAttributeDeclaration(new CodeTypeReference("System.Runtime.Serialization.DataMemberAttribute")));
+										codeMemberProperty.Comments.Clear();
+									}
+								}
+							}
+							CodeMemberField codeMemberField = new CodeMemberField(new CodeTypeReference("System.Runtime.Serialization.ExtensionDataObject"), "extensionDataField");
+							codeMemberField.Attributes = (MemberAttributes)20482;
+							codeTypeDeclaration.Members.Add(codeMemberField);
+							CodeMemberProperty codeMemberProperty2 = new CodeMemberProperty();
+							codeMemberProperty2.Type = new CodeTypeReference("System.Runtime.Serialization.ExtensionDataObject");
+							codeMemberProperty2.Name = "ExtensionData";
+							codeMemberProperty2.Attributes = (MemberAttributes)24578;
+							codeMemberProperty2.GetStatements.Add(new CodeMethodReturnStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "extensionDataField")));
+							codeMemberProperty2.SetStatements.Add(new CodeAssignStatement(new CodeFieldReferenceExpression(new CodeThisReferenceExpression(), "extensionDataField"), new CodePropertySetValueReferenceExpression()));
+							codeTypeDeclaration.Members.Add(codeMemberProperty2);
+						}
+					}
 				}
 			}
-			return dataContract;
+			foreach (CodeTypeDeclaration codeTypeDeclaration2 in list)
+			{
+				codeNamespace.Types.Remove(codeTypeDeclaration2);
+			}
+			if (codeNamespace.Types.Count > 0)
+			{
+				this.CodeCompileUnit.Namespaces.Add(codeNamespace);
+			}
 		}
 
-		public ICollection<CodeTypeReference> GetKnownTypeReferences(XmlQualifiedName typeName)
+		private string FromXmlnsToClrName(string xns)
 		{
-			if (typeName == null)
+			Uri uri;
+			string text;
+			if (xns.StartsWith("http://schemas.datacontract.org/2004/07/", StringComparison.Ordinal))
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("typeName"));
+				xns = xns.Substring("http://schemas.datacontract.org/2004/07/".Length);
 			}
-			DataContract dataContract = DataContract.GetBuiltInDataContract(typeName.Name, typeName.Namespace);
-			if (dataContract == null)
+			else if (Uri.TryCreate(xns, UriKind.Absolute, out uri) && (text = this.MakeStringNamespaceComponentsValid(uri.GetComponents(UriComponents.Host | UriComponents.Path, UriFormat.Unescaped))).Length > 0)
 			{
-				dataContract = this.DataContractSet[typeName];
-				if (dataContract == null)
+				xns = text;
+			}
+			return this.MakeStringNamespaceComponentsValid(xns);
+		}
+
+		private string MakeStringNamespaceComponentsValid(string ns)
+		{
+			string[] array = ns.Split(XsdDataContractImporter.split_tokens, StringSplitOptions.RemoveEmptyEntries);
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i] = CodeIdentifier.MakeValid(array[i]);
+			}
+			return string.Join(".", array);
+		}
+
+		private string GetNamespace(CodeTypeDeclaration type)
+		{
+			foreach (object obj in type.CustomAttributes)
+			{
+				CodeAttributeDeclaration codeAttributeDeclaration = (CodeAttributeDeclaration)obj;
+				if (codeAttributeDeclaration.Name == "System.Xml.Serialization.XmlTypeAttribute" || codeAttributeDeclaration.Name == "System.Xml.Serialization.XmlRootAttribute")
 				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidOperationException(global::System.Runtime.Serialization.SR.GetString("Type '{0}' in '{1}' namespace has not been imported.", new object[] { typeName.Name, typeName.Namespace })));
+					foreach (object obj2 in codeAttributeDeclaration.Arguments)
+					{
+						CodeAttributeArgument codeAttributeArgument = (CodeAttributeArgument)obj2;
+						if (codeAttributeArgument.Name == "Namespace")
+						{
+							return ((CodePrimitiveExpression)codeAttributeArgument.Value).Value as string;
+						}
+					}
+					return null;
 				}
 			}
-			return new CodeExporter(this.DataContractSet, this.Options, this.GetCodeCompileUnit()).GetKnownTypeReferences(dataContract);
+			return null;
 		}
 
-		private XmlQualifiedName[] SingleTypeNameArray
-		{
-			get
-			{
-				if (this.singleTypeNameArray == null)
-				{
-					this.singleTypeNameArray = new XmlQualifiedName[1];
-				}
-				return this.singleTypeNameArray;
-			}
-		}
-
-		private XmlSchemaElement[] SingleElementArray
-		{
-			get
-			{
-				if (this.singleElementArray == null)
-				{
-					this.singleElementArray = new XmlSchemaElement[1];
-				}
-				return this.singleElementArray;
-			}
-		}
-
-		[SecuritySafeCritical]
-		[PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
-		private void InternalImport(XmlSchemaSet schemas, ICollection<XmlQualifiedName> typeNames, ICollection<XmlSchemaElement> elements, XmlQualifiedName[] elementTypeNames)
-		{
-			if (DiagnosticUtility.ShouldTraceInformation)
-			{
-				TraceUtility.Trace(TraceEventType.Information, 196618, global::System.Runtime.Serialization.SR.GetString("XSD import begins"));
-			}
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			try
-			{
-				new SchemaImporter(schemas, typeNames, elements, elementTypeNames, this.DataContractSet, this.ImportXmlDataType).Import();
-				new CodeExporter(this.DataContractSet, this.Options, this.GetCodeCompileUnit()).Export();
-			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceImportError(ex);
-				throw;
-			}
-			if (DiagnosticUtility.ShouldTraceInformation)
-			{
-				TraceUtility.Trace(TraceEventType.Information, 196619, global::System.Runtime.Serialization.SR.GetString("XSD import ends"));
-			}
-		}
-
-		private bool ImportXmlDataType
-		{
-			get
-			{
-				return this.Options != null && this.Options.ImportXmlType;
-			}
-		}
-
-		private void TraceImportError(Exception exception)
-		{
-			if (DiagnosticUtility.ShouldTraceError)
-			{
-				TraceUtility.Trace(TraceEventType.Error, 196621, global::System.Runtime.Serialization.SR.GetString("XSD import error"), null, exception);
-			}
-		}
-
-		private bool InternalCanImport(XmlSchemaSet schemas, ICollection<XmlQualifiedName> typeNames, ICollection<XmlSchemaElement> elements, XmlQualifiedName[] elementTypeNames)
-		{
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			bool flag;
-			try
-			{
-				new SchemaImporter(schemas, typeNames, elements, elementTypeNames, this.DataContractSet, this.ImportXmlDataType).Import();
-				flag = true;
-			}
-			catch (InvalidDataContractException)
-			{
-				this.dataContractSet = dataContractSet;
-				flag = false;
-			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceImportError(ex);
-				throw;
-			}
-			return flag;
-		}
+		private const string default_ns_prefix = "http://schemas.datacontract.org/2004/07/";
 
 		private ImportOptions options;
 
-		private CodeCompileUnit codeCompileUnit;
+		private CodeCompileUnit ccu;
 
-		private DataContractSet dataContractSet;
+		private Dictionary<XmlQualifiedName, XmlQualifiedName> imported_names = new Dictionary<XmlQualifiedName, XmlQualifiedName>();
 
-		private static readonly XmlQualifiedName[] emptyTypeNameArray = new XmlQualifiedName[0];
-
-		private static readonly XmlSchemaElement[] emptyElementArray = new XmlSchemaElement[0];
-
-		private XmlQualifiedName[] singleTypeNameArray;
-
-		private XmlSchemaElement[] singleElementArray;
+		private static readonly char[] split_tokens = new char[] { '/', '.' };
 	}
 }

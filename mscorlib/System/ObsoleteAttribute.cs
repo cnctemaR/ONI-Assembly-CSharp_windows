@@ -3,21 +3,18 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Interface | AttributeTargets.Delegate, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Interface | AttributeTargets.Delegate, Inherited = false)]
 	[Serializable]
 	public sealed class ObsoleteAttribute : Attribute
 	{
 		public ObsoleteAttribute()
 		{
-			this._message = null;
-			this._error = false;
 		}
 
 		public ObsoleteAttribute(string message)
 		{
 			this._message = message;
-			this._error = false;
 		}
 
 		public ObsoleteAttribute(string message, bool error)

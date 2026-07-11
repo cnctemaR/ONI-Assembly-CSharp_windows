@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -11,29 +12,28 @@ namespace System.Xml.Serialization
 
 		public XmlAnyElementAttribute(string name)
 		{
-			this.name = name;
+			this.elementName = name;
 		}
 
 		public XmlAnyElementAttribute(string name, string ns)
 		{
-			this.name = name;
+			this.elementName = name;
 			this.ns = ns;
-			this.nsSpecified = true;
 		}
 
 		public string Name
 		{
 			get
 			{
-				if (this.name != null)
+				if (this.elementName == null)
 				{
-					return this.name;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.elementName;
 			}
 			set
 			{
-				this.name = value;
+				this.elementName = value;
 			}
 		}
 
@@ -45,11 +45,20 @@ namespace System.Xml.Serialization
 			}
 			set
 			{
+				this.isNamespaceSpecified = true;
 				this.ns = value;
-				this.nsSpecified = true;
 			}
 		}
 
+		internal bool NamespaceSpecified
+		{
+			get
+			{
+				return this.isNamespaceSpecified;
+			}
+		}
+
+		[MonoTODO]
 		public int Order
 		{
 			get
@@ -58,28 +67,24 @@ namespace System.Xml.Serialization
 			}
 			set
 			{
-				if (value < 0)
-				{
-					throw new ArgumentException(Res.GetString("Negative values are prohibited."), "Order");
-				}
 				this.order = value;
 			}
 		}
 
-		internal bool NamespaceSpecified
+		internal void AddKeyHash(StringBuilder sb)
 		{
-			get
-			{
-				return this.nsSpecified;
-			}
+			sb.Append("XAEA ");
+			KeyHelper.AddField(sb, 1, this.ns);
+			KeyHelper.AddField(sb, 2, this.elementName);
+			sb.Append('|');
 		}
 
-		private string name;
+		private string elementName;
 
 		private string ns;
 
-		private int order = -1;
+		private bool isNamespaceSpecified;
 
-		private bool nsSpecified;
+		private int order = -1;
 	}
 }

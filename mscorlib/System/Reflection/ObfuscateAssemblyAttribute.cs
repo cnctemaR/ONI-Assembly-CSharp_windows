@@ -3,20 +3,21 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
-	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
 	public sealed class ObfuscateAssemblyAttribute : Attribute
 	{
 		public ObfuscateAssemblyAttribute(bool assemblyIsPrivate)
 		{
-			this.m_assemblyIsPrivate = assemblyIsPrivate;
+			this.strip = true;
+			this.is_private = assemblyIsPrivate;
 		}
 
 		public bool AssemblyIsPrivate
 		{
 			get
 			{
-				return this.m_assemblyIsPrivate;
+				return this.is_private;
 			}
 		}
 
@@ -24,16 +25,16 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this.m_strip;
+				return this.strip;
 			}
 			set
 			{
-				this.m_strip = value;
+				this.strip = value;
 			}
 		}
 
-		private bool m_assemblyIsPrivate;
+		private bool is_private;
 
-		private bool m_strip = true;
+		private bool strip;
 	}
 }

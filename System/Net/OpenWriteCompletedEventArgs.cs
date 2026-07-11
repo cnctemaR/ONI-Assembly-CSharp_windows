@@ -4,23 +4,22 @@ using System.IO;
 
 namespace System.Net
 {
-	public class OpenWriteCompletedEventArgs : AsyncCompletedEventArgs
+	public class OpenWriteCompletedEventArgs : global::System.ComponentModel.AsyncCompletedEventArgs
 	{
-		internal OpenWriteCompletedEventArgs(Stream result, Exception exception, bool cancelled, object userToken)
-			: base(exception, cancelled, userToken)
+		internal OpenWriteCompletedEventArgs(Stream result, Exception error, bool cancelled, object userState)
+			: base(error, cancelled, userState)
 		{
-			this.m_Result = result;
+			this.result = result;
 		}
 
 		public Stream Result
 		{
 			get
 			{
-				base.RaiseExceptionIfNecessary();
-				return this.m_Result;
+				return this.result;
 			}
 		}
 
-		private Stream m_Result;
+		private Stream result;
 	}
 }

@@ -4,7 +4,9 @@ namespace System.IO
 {
 	internal struct MonoIOStat
 	{
-		public FileAttributes fileAttributes;
+		public string Name;
+
+		public FileAttributes Attributes;
 
 		public long Length;
 

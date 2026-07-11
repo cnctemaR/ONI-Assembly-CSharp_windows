@@ -86,8 +86,8 @@ public class RefinerySideScreen : SideScreenContent
 			if (flag)
 			{
 				num++;
-				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(complexRecipe.ingredients[0].material, "ui", false);
-				global::Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(complexRecipe.results[0].material, "ui", false);
+				Tuple<Sprite, Color> uisprite = Def.GetUISprite(complexRecipe.ingredients[0].material, "ui", false);
+				Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(complexRecipe.results[0].material, "ui", false);
 				KToggle newToggle;
 				if (target.sideScreenStyle == RefinerySideScreen.StyleSetting.GridInputOutput || target.sideScreenStyle == RefinerySideScreen.StyleSetting.ListInputOutput || target.sideScreenStyle == RefinerySideScreen.StyleSetting.ListInputOutput)
 				{

@@ -1,45 +1,91 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public struct Single : IComparable, IFormattable, IConvertible, IComparable<float>, IEquatable<float>
+	public struct Single : IFormattable, IConvertible, IComparable, IComparable<float>, IEquatable<float>
 	{
-		[SecuritySafeCritical]
-		public unsafe static bool IsInfinity(float f)
+		bool IConvertible.ToBoolean(IFormatProvider provider)
 		{
-			return (*(int*)(&f) & int.MaxValue) == 2139095040;
+			return Convert.ToBoolean(this);
 		}
 
-		[SecuritySafeCritical]
-		public unsafe static bool IsPositiveInfinity(float f)
+		byte IConvertible.ToByte(IFormatProvider provider)
 		{
-			return *(int*)(&f) == 2139095040;
+			return Convert.ToByte(this);
 		}
 
-		[SecuritySafeCritical]
-		public unsafe static bool IsNegativeInfinity(float f)
+		char IConvertible.ToChar(IFormatProvider provider)
 		{
-			return *(int*)(&f) == -8388608;
+			return Convert.ToChar(this);
 		}
 
-		[SecuritySafeCritical]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-		public unsafe static bool IsNaN(float f)
+		DateTime IConvertible.ToDateTime(IFormatProvider provider)
 		{
-			return (*(int*)(&f) & int.MaxValue) > 2139095040;
+			return Convert.ToDateTime(this);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public unsafe static bool IsFinite(float f)
+		decimal IConvertible.ToDecimal(IFormatProvider provider)
 		{
-			return (*(int*)(&f) & int.MaxValue) < 2139095040;
+			return Convert.ToDecimal(this);
+		}
+
+		double IConvertible.ToDouble(IFormatProvider provider)
+		{
+			return Convert.ToDouble(this);
+		}
+
+		short IConvertible.ToInt16(IFormatProvider provider)
+		{
+			return Convert.ToInt16(this);
+		}
+
+		int IConvertible.ToInt32(IFormatProvider provider)
+		{
+			return Convert.ToInt32(this);
+		}
+
+		long IConvertible.ToInt64(IFormatProvider provider)
+		{
+			return Convert.ToInt64(this);
+		}
+
+		sbyte IConvertible.ToSByte(IFormatProvider provider)
+		{
+			return Convert.ToSByte(this);
+		}
+
+		float IConvertible.ToSingle(IFormatProvider provider)
+		{
+			return Convert.ToSingle(this);
+		}
+
+		object IConvertible.ToType(Type targetType, IFormatProvider provider)
+		{
+			if (targetType == null)
+			{
+				throw new ArgumentNullException("targetType");
+			}
+			return Convert.ToType(this, targetType, provider, false);
+		}
+
+		ushort IConvertible.ToUInt16(IFormatProvider provider)
+		{
+			return Convert.ToUInt16(this);
+		}
+
+		uint IConvertible.ToUInt32(IFormatProvider provider)
+		{
+			return Convert.ToUInt32(this);
+		}
+
+		ulong IConvertible.ToUInt64(IFormatProvider provider)
+		{
+			return Convert.ToUInt64(this);
 		}
 
 		public int CompareTo(object value)
@@ -50,85 +96,45 @@ namespace System
 			}
 			if (!(value is float))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Single."));
+				throw new ArgumentException(Locale.GetText("Value is not a System.Single."));
 			}
 			float num = (float)value;
-			if (this < num)
-			{
-				return -1;
-			}
-			if (this > num)
-			{
-				return 1;
-			}
-			if (this == num)
+			if (float.IsPositiveInfinity(this) && float.IsPositiveInfinity(num))
 			{
 				return 0;
 			}
-			if (!float.IsNaN(this))
-			{
-				return 1;
-			}
-			if (!float.IsNaN(num))
-			{
-				return -1;
-			}
-			return 0;
-		}
-
-		public int CompareTo(float value)
-		{
-			if (this < value)
-			{
-				return -1;
-			}
-			if (this > value)
-			{
-				return 1;
-			}
-			if (this == value)
+			if (float.IsNegativeInfinity(this) && float.IsNegativeInfinity(num))
 			{
 				return 0;
 			}
-			if (!float.IsNaN(this))
+			if (float.IsNaN(num))
 			{
+				if (float.IsNaN(this))
+				{
+					return 0;
+				}
 				return 1;
 			}
-			if (!float.IsNaN(value))
+			else if (float.IsNaN(this))
 			{
+				if (float.IsNaN(num))
+				{
+					return 0;
+				}
 				return -1;
 			}
-			return 0;
-		}
-
-		public static bool operator ==(float left, float right)
-		{
-			return left == right;
-		}
-
-		public static bool operator !=(float left, float right)
-		{
-			return left != right;
-		}
-
-		public static bool operator <(float left, float right)
-		{
-			return left < right;
-		}
-
-		public static bool operator >(float left, float right)
-		{
-			return left > right;
-		}
-
-		public static bool operator <=(float left, float right)
-		{
-			return left <= right;
-		}
-
-		public static bool operator >=(float left, float right)
-		{
-			return left >= right;
+			else
+			{
+				if (this == num)
+				{
+					return 0;
+				}
+				if (this > num)
+				{
+					return 1;
+				}
+				return -1;
+			}
 		}
 
 		public override bool Equals(object obj)
@@ -138,115 +144,169 @@ namespace System
 				return false;
 			}
 			float num = (float)obj;
-			return num == this || (float.IsNaN(num) && float.IsNaN(this));
+			if (float.IsNaN(num))
+			{
+				return float.IsNaN(this);
+			}
+			return num == this;
+		}
+
+		public int CompareTo(float value)
+		{
+			if (float.IsPositiveInfinity(this) && float.IsPositiveInfinity(value))
+			{
+				return 0;
+			}
+			if (float.IsNegativeInfinity(this) && float.IsNegativeInfinity(value))
+			{
+				return 0;
+			}
+			if (float.IsNaN(value))
+			{
+				if (float.IsNaN(this))
+				{
+					return 0;
+				}
+				return 1;
+			}
+			else if (float.IsNaN(this))
+			{
+				if (float.IsNaN(value))
+				{
+					return 0;
+				}
+				return -1;
+			}
+			else
+			{
+				if (this == value)
+				{
+					return 0;
+				}
+				if (this > value)
+				{
+					return 1;
+				}
+				return -1;
+			}
 		}
 
 		public bool Equals(float obj)
 		{
-			return obj == this || (float.IsNaN(obj) && float.IsNaN(this));
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int GetHashCode()
-		{
-			float num = this;
-			if (num == 0f)
+			if (float.IsNaN(obj))
 			{
-				return 0;
+				return float.IsNaN(this);
 			}
-			return *(int*)(&num);
+			return obj == this;
 		}
 
-		[SecuritySafeCritical]
-		public override string ToString()
+		public override int GetHashCode()
 		{
-			return Number.FormatSingle(this, null, NumberFormatInfo.CurrentInfo);
+			return (int)this;
 		}
 
-		[SecuritySafeCritical]
-		public string ToString(IFormatProvider provider)
+		public static bool IsInfinity(float f)
 		{
-			return Number.FormatSingle(this, null, NumberFormatInfo.GetInstance(provider));
+			return f == float.PositiveInfinity || f == float.NegativeInfinity;
 		}
 
-		[SecuritySafeCritical]
-		public string ToString(string format)
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+		public static bool IsNaN(float f)
 		{
-			return Number.FormatSingle(this, format, NumberFormatInfo.CurrentInfo);
+			return f != f;
 		}
 
-		[SecuritySafeCritical]
-		public string ToString(string format, IFormatProvider provider)
+		public static bool IsNegativeInfinity(float f)
 		{
-			return Number.FormatSingle(this, format, NumberFormatInfo.GetInstance(provider));
+			return f < 0f && (f == float.NegativeInfinity || f == float.PositiveInfinity);
+		}
+
+		public static bool IsPositiveInfinity(float f)
+		{
+			return f > 0f && (f == float.NegativeInfinity || f == float.PositiveInfinity);
 		}
 
 		public static float Parse(string s)
 		{
-			return float.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo);
-		}
-
-		public static float Parse(string s, NumberStyles style)
-		{
-			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return float.Parse(s, style, NumberFormatInfo.CurrentInfo);
+			double num = double.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, null);
+			if (num - 3.4028234663852886E+38 > 3.6147112457961776E+29 && !double.IsPositiveInfinity(num))
+			{
+				throw new OverflowException();
+			}
+			return (float)num;
 		}
 
 		public static float Parse(string s, IFormatProvider provider)
 		{
-			return float.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.GetInstance(provider));
+			double num = double.Parse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, provider);
+			if (num - 3.4028234663852886E+38 > 3.6147112457961776E+29 && !double.IsPositiveInfinity(num))
+			{
+				throw new OverflowException();
+			}
+			return (float)num;
+		}
+
+		public static float Parse(string s, NumberStyles style)
+		{
+			double num = double.Parse(s, style, null);
+			if (num - 3.4028234663852886E+38 > 3.6147112457961776E+29 && !double.IsPositiveInfinity(num))
+			{
+				throw new OverflowException();
+			}
+			return (float)num;
 		}
 
 		public static float Parse(string s, NumberStyles style, IFormatProvider provider)
 		{
-			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return float.Parse(s, style, NumberFormatInfo.GetInstance(provider));
-		}
-
-		private static float Parse(string s, NumberStyles style, NumberFormatInfo info)
-		{
-			return Number.ParseSingle(s, style, info);
-		}
-
-		public static bool TryParse(string s, out float result)
-		{
-			return float.TryParse(s, NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite | NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowThousands | NumberStyles.AllowExponent, NumberFormatInfo.CurrentInfo, out result);
+			double num = double.Parse(s, style, provider);
+			if (num - 3.4028234663852886E+38 > 3.6147112457961776E+29 && !double.IsPositiveInfinity(num))
+			{
+				throw new OverflowException();
+			}
+			return (float)num;
 		}
 
 		public static bool TryParse(string s, NumberStyles style, IFormatProvider provider, out float result)
 		{
-			NumberFormatInfo.ValidateParseStyleFloatingPoint(style);
-			return float.TryParse(s, style, NumberFormatInfo.GetInstance(provider), out result);
-		}
-
-		private static bool TryParse(string s, NumberStyles style, NumberFormatInfo info, out float result)
-		{
-			if (s == null)
+			double num;
+			Exception ex;
+			if (!double.Parse(s, style, provider, true, out num, out ex))
 			{
 				result = 0f;
 				return false;
 			}
-			if (!Number.TryParseSingle(s, style, info, out result))
+			if (num - 3.4028234663852886E+38 > 3.6147112457961776E+29 && !double.IsPositiveInfinity(num))
 			{
-				string text = s.Trim();
-				if (text.Equals(info.PositiveInfinitySymbol))
-				{
-					result = float.PositiveInfinity;
-				}
-				else if (text.Equals(info.NegativeInfinitySymbol))
-				{
-					result = float.NegativeInfinity;
-				}
-				else
-				{
-					if (!text.Equals(info.NaNSymbol))
-					{
-						return false;
-					}
-					result = float.NaN;
-				}
+				result = 0f;
+				return false;
 			}
+			result = (float)num;
 			return true;
+		}
+
+		public static bool TryParse(string s, out float result)
+		{
+			return float.TryParse(s, NumberStyles.Any, null, out result);
+		}
+
+		public override string ToString()
+		{
+			return NumberFormatter.NumberToString(this, null);
+		}
+
+		public string ToString(IFormatProvider provider)
+		{
+			return NumberFormatter.NumberToString(this, provider);
+		}
+
+		public string ToString(string format)
+		{
+			return this.ToString(format, null);
+		}
+
+		public string ToString(string format, IFormatProvider provider)
+		{
+			return NumberFormatter.NumberToString(format, this, provider);
 		}
 
 		public TypeCode GetTypeCode()
@@ -254,93 +314,20 @@ namespace System
 			return TypeCode.Single;
 		}
 
-		bool IConvertible.ToBoolean(IFormatProvider provider)
-		{
-			return Convert.ToBoolean(this);
-		}
-
-		char IConvertible.ToChar(IFormatProvider provider)
-		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Single", "Char" }));
-		}
-
-		sbyte IConvertible.ToSByte(IFormatProvider provider)
-		{
-			return Convert.ToSByte(this);
-		}
-
-		byte IConvertible.ToByte(IFormatProvider provider)
-		{
-			return Convert.ToByte(this);
-		}
-
-		short IConvertible.ToInt16(IFormatProvider provider)
-		{
-			return Convert.ToInt16(this);
-		}
-
-		ushort IConvertible.ToUInt16(IFormatProvider provider)
-		{
-			return Convert.ToUInt16(this);
-		}
-
-		int IConvertible.ToInt32(IFormatProvider provider)
-		{
-			return Convert.ToInt32(this);
-		}
-
-		uint IConvertible.ToUInt32(IFormatProvider provider)
-		{
-			return Convert.ToUInt32(this);
-		}
-
-		long IConvertible.ToInt64(IFormatProvider provider)
-		{
-			return Convert.ToInt64(this);
-		}
-
-		ulong IConvertible.ToUInt64(IFormatProvider provider)
-		{
-			return Convert.ToUInt64(this);
-		}
-
-		float IConvertible.ToSingle(IFormatProvider provider)
-		{
-			return this;
-		}
-
-		double IConvertible.ToDouble(IFormatProvider provider)
-		{
-			return Convert.ToDouble(this);
-		}
-
-		decimal IConvertible.ToDecimal(IFormatProvider provider)
-		{
-			return Convert.ToDecimal(this);
-		}
-
-		DateTime IConvertible.ToDateTime(IFormatProvider provider)
-		{
-			throw new InvalidCastException(Environment.GetResourceString("Invalid cast from '{0}' to '{1}'.", new object[] { "Single", "DateTime" }));
-		}
-
-		object IConvertible.ToType(Type type, IFormatProvider provider)
-		{
-			return Convert.DefaultToType(this, type, provider);
-		}
-
-		internal float m_value;
-
-		public const float MinValue = -3.4028235E+38f;
-
 		public const float Epsilon = 1E-45f;
 
 		public const float MaxValue = 3.4028235E+38f;
+
+		public const float MinValue = -3.4028235E+38f;
+
+		public const float NaN = float.NaN;
 
 		public const float PositiveInfinity = float.PositiveInfinity;
 
 		public const float NegativeInfinity = float.NegativeInfinity;
 
-		public const float NaN = float.NaN;
+		private const double MaxValueEpsilon = 3.6147112457961776E+29;
+
+		internal float m_value;
 	}
 }

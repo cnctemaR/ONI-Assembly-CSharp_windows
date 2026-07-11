@@ -196,18 +196,18 @@ public static class CSVUtil
 				case TypeCode.Byte:
 				case TypeCode.UInt16:
 				case TypeCode.UInt32:
-					goto IL_0166;
+					goto IL_0160;
 				default:
-					goto IL_0166;
+					goto IL_0160;
 				}
-				IL_0179:
+				IL_0173:
 				num |= num2;
-				goto IL_0180;
-				IL_0166:
+				goto IL_017A;
+				IL_0160:
 				num2 = Convert.ToUInt64(obj, CultureInfo.InvariantCulture);
-				goto IL_0179;
+				goto IL_0173;
 			}
-			IL_0180:;
+			IL_017A:;
 		}
 		value = Enum.ToObject(type, num);
 		return true;

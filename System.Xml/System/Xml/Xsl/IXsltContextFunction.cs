@@ -5,13 +5,13 @@ namespace System.Xml.Xsl
 {
 	public interface IXsltContextFunction
 	{
-		int Minargs { get; }
+		XPathResultType[] ArgTypes { get; }
 
 		int Maxargs { get; }
 
-		XPathResultType ReturnType { get; }
+		int Minargs { get; }
 
-		XPathResultType[] ArgTypes { get; }
+		XPathResultType ReturnType { get; }
 
 		object Invoke(XsltContext xsltContext, object[] args, XPathNavigator docContext);
 	}

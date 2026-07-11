@@ -12,11 +12,6 @@ namespace System.Transactions
 		public void Done()
 		{
 			this.done = true;
-			this.InternalOnDone();
-		}
-
-		internal virtual void InternalOnDone()
-		{
 		}
 
 		internal bool done;

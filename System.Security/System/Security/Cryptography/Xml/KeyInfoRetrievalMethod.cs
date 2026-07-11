@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -11,57 +12,57 @@ namespace System.Security.Cryptography.Xml
 
 		public KeyInfoRetrievalMethod(string strUri)
 		{
-			this._uri = strUri;
+			this.URI = strUri;
 		}
 
-		public KeyInfoRetrievalMethod(string strUri, string typeName)
+		public KeyInfoRetrievalMethod(string strUri, string strType)
+			: this(strUri)
 		{
-			this._uri = strUri;
-			this._type = typeName;
+			this.Type = strType;
+		}
+
+		[ComVisible(false)]
+		public string Type
+		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.element = null;
+				this.type = value;
+			}
 		}
 
 		public string Uri
 		{
 			get
 			{
-				return this._uri;
+				return this.URI;
 			}
 			set
 			{
-				this._uri = value;
-			}
-		}
-
-		public string Type
-		{
-			get
-			{
-				return this._type;
-			}
-			set
-			{
-				this._type = value;
+				this.element = null;
+				this.URI = value;
 			}
 		}
 
 		public override XmlElement GetXml()
 		{
-			return this.GetXml(new XmlDocument
+			if (this.element != null)
 			{
-				PreserveWhitespace = true
-			});
-		}
-
-		internal override XmlElement GetXml(XmlDocument xmlDocument)
-		{
-			XmlElement xmlElement = xmlDocument.CreateElement("RetrievalMethod", "http://www.w3.org/2000/09/xmldsig#");
-			if (!string.IsNullOrEmpty(this._uri))
-			{
-				xmlElement.SetAttribute("URI", this._uri);
+				return this.element;
 			}
-			if (!string.IsNullOrEmpty(this._type))
+			XmlDocument xmlDocument = new XmlDocument();
+			XmlElement xmlElement = xmlDocument.CreateElement("RetrievalMethod", "http://www.w3.org/2000/09/xmldsig#");
+			if (this.URI != null && this.URI.Length > 0)
 			{
-				xmlElement.SetAttribute("Type", this._type);
+				xmlElement.SetAttribute("URI", this.URI);
+			}
+			if (this.Type != null)
+			{
+				xmlElement.SetAttribute("Type", this.Type);
 			}
 			return xmlElement;
 		}
@@ -70,14 +71,27 @@ namespace System.Security.Cryptography.Xml
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException();
 			}
-			this._uri = Utils.GetAttribute(value, "URI", "http://www.w3.org/2000/09/xmldsig#");
-			this._type = Utils.GetAttribute(value, "Type", "http://www.w3.org/2000/09/xmldsig#");
+			if (value.LocalName != "RetrievalMethod" || value.NamespaceURI != "http://www.w3.org/2000/09/xmldsig#")
+			{
+				this.URI = string.Empty;
+			}
+			else
+			{
+				this.URI = value.Attributes["URI"].Value;
+				if (value.HasAttribute("Type"))
+				{
+					this.Type = value.Attributes["Type"].Value;
+				}
+				this.element = value;
+			}
 		}
 
-		private string _uri;
+		private string URI;
 
-		private string _type;
+		private XmlElement element;
+
+		private string type;
 	}
 }

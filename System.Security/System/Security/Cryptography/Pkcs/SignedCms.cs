@@ -15,19 +15,19 @@ namespace System.Security.Cryptography.Pkcs
 			this._info = new SignerInfoCollection();
 		}
 
-		public SignedCms(ContentInfo contentInfo)
-			: this(contentInfo, false)
+		public SignedCms(ContentInfo content)
+			: this(content, false)
 		{
 		}
 
-		public SignedCms(ContentInfo contentInfo, bool detached)
+		public SignedCms(ContentInfo content, bool detached)
 			: this()
 		{
-			if (contentInfo == null)
+			if (content == null)
 			{
-				throw new ArgumentNullException("contentInfo");
+				throw new ArgumentNullException("content");
 			}
-			this._content = contentInfo;
+			this._content = content;
 			this._detached = detached;
 		}
 
@@ -37,14 +37,14 @@ namespace System.Security.Cryptography.Pkcs
 			this._type = signerIdentifierType;
 		}
 
-		public SignedCms(SubjectIdentifierType signerIdentifierType, ContentInfo contentInfo)
-			: this(contentInfo, false)
+		public SignedCms(SubjectIdentifierType signerIdentifierType, ContentInfo content)
+			: this(content, false)
 		{
 			this._type = signerIdentifierType;
 		}
 
-		public SignedCms(SubjectIdentifierType signerIdentifierType, ContentInfo contentInfo, bool detached)
-			: this(contentInfo, detached)
+		public SignedCms(SubjectIdentifierType signerIdentifierType, ContentInfo content, bool detached)
+			: this(content, detached)
 		{
 			this._type = signerIdentifierType;
 		}
@@ -115,13 +115,13 @@ namespace System.Security.Cryptography.Pkcs
 		[MonoTODO]
 		public void CheckHash()
 		{
-			throw new InvalidOperationException("");
+			throw new InvalidOperationException(string.Empty);
 		}
 
 		[MonoTODO]
 		public void ComputeSignature()
 		{
-			throw new CryptographicException("");
+			throw new CryptographicException(string.Empty);
 		}
 
 		[MonoTODO]
@@ -161,17 +161,19 @@ namespace System.Security.Cryptography.Pkcs
 			Mono.Security.X509.X509Extension x509Extension = x509.Extensions["2.5.29.14"];
 			if (x509Extension != null)
 			{
-				return new ASN1(x509Extension.Value.Value).Value;
+				ASN1 asn = new ASN1(x509Extension.Value.Value);
+				return asn.Value;
 			}
-			ASN1 asn = new ASN1(48);
-			ASN1 asn2 = asn.Add(new ASN1(48));
-			asn2.Add(new ASN1(CryptoConfig.EncodeOID(x509.KeyAlgorithm)));
-			asn2.Add(new ASN1(x509.KeyAlgorithmParameters));
+			ASN1 asn2 = new ASN1(48);
+			ASN1 asn3 = asn2.Add(new ASN1(48));
+			asn3.Add(new ASN1(CryptoConfig.EncodeOID(x509.KeyAlgorithm)));
+			asn3.Add(new ASN1(x509.KeyAlgorithmParameters));
 			byte[] publicKey = x509.PublicKey;
 			byte[] array = new byte[publicKey.Length + 1];
 			Array.Copy(publicKey, 0, array, 1, publicKey.Length);
-			asn.Add(new ASN1(3, array));
-			return SHA1.Create().ComputeHash(asn.GetBytes());
+			asn2.Add(new ASN1(3, array));
+			SHA1 sha = SHA1.Create();
+			return sha.ComputeHash(asn2.GetBytes());
 		}
 
 		[MonoTODO("incomplete - missing attributes")]
@@ -180,7 +182,7 @@ namespace System.Security.Cryptography.Pkcs
 			PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(encodedMessage);
 			if (contentInfo.ContentType != "1.2.840.113549.1.7.2")
 			{
-				throw new Exception("");
+				throw new Exception(string.Empty);
 			}
 			PKCS7.SignedData signedData = new PKCS7.SignedData(contentInfo.Content);
 			SubjectIdentifierType subjectIdentifierType = SubjectIdentifierType.Unknown;
@@ -190,61 +192,45 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				x509Certificate = new X509Certificate2(signedData.SignerInfo.Certificate.RawData);
 			}
-			else
+			else if (signedData.SignerInfo.IssuerName != null && signedData.SignerInfo.SerialNumber != null)
 			{
-				if (signedData.SignerInfo.IssuerName != null && signedData.SignerInfo.SerialNumber != null)
+				byte[] serialNumber = signedData.SignerInfo.SerialNumber;
+				Array.Reverse(serialNumber);
+				subjectIdentifierType = SubjectIdentifierType.IssuerAndSerialNumber;
+				X509IssuerSerial x509IssuerSerial = new X509IssuerSerial
 				{
-					byte[] serialNumber = signedData.SignerInfo.SerialNumber;
-					Array.Reverse<byte>(serialNumber);
-					subjectIdentifierType = SubjectIdentifierType.IssuerAndSerialNumber;
-					X509IssuerSerial x509IssuerSerial = new X509IssuerSerial
-					{
-						IssuerName = signedData.SignerInfo.IssuerName,
-						SerialNumber = this.ToString(serialNumber, true)
-					};
-					obj = x509IssuerSerial;
-					using (Mono.Security.X509.X509CertificateCollection.X509CertificateEnumerator x509CertificateEnumerator = signedData.Certificates.GetEnumerator())
-					{
-						while (x509CertificateEnumerator.MoveNext())
-						{
-							Mono.Security.X509.X509Certificate x509Certificate2 = x509CertificateEnumerator.Current;
-							if (x509Certificate2.IssuerName == signedData.SignerInfo.IssuerName && this.ToString(x509Certificate2.SerialNumber, true) == x509IssuerSerial.SerialNumber)
-							{
-								x509Certificate = new X509Certificate2(x509Certificate2.RawData);
-								break;
-							}
-						}
-						goto IL_01CB;
-					}
-				}
-				if (signedData.SignerInfo.SubjectKeyIdentifier != null)
+					IssuerName = signedData.SignerInfo.IssuerName,
+					SerialNumber = this.ToString(serialNumber, true)
+				};
+				obj = x509IssuerSerial;
+				foreach (Mono.Security.X509.X509Certificate x509Certificate2 in signedData.Certificates)
 				{
-					string text = this.ToString(signedData.SignerInfo.SubjectKeyIdentifier, false);
-					subjectIdentifierType = SubjectIdentifierType.SubjectKeyIdentifier;
-					obj = text;
-					foreach (Mono.Security.X509.X509Certificate x509Certificate3 in signedData.Certificates)
+					if (x509Certificate2.IssuerName == signedData.SignerInfo.IssuerName && this.ToString(x509Certificate2.SerialNumber, true) == x509IssuerSerial.SerialNumber)
 					{
-						if (this.ToString(this.GetKeyIdentifier(x509Certificate3), false) == text)
-						{
-							x509Certificate = new X509Certificate2(x509Certificate3.RawData);
-							break;
-						}
+						x509Certificate = new X509Certificate2(x509Certificate2.RawData);
+						break;
 					}
 				}
 			}
-			IL_01CB:
+			else if (signedData.SignerInfo.SubjectKeyIdentifier != null)
+			{
+				string text = this.ToString(signedData.SignerInfo.SubjectKeyIdentifier, false);
+				subjectIdentifierType = SubjectIdentifierType.SubjectKeyIdentifier;
+				obj = text;
+				foreach (Mono.Security.X509.X509Certificate x509Certificate3 in signedData.Certificates)
+				{
+					if (this.ToString(this.GetKeyIdentifier(x509Certificate3), false) == text)
+					{
+						x509Certificate = new X509Certificate2(x509Certificate3.RawData);
+						break;
+					}
+				}
+			}
 			SignerInfo signerInfo = new SignerInfo(signedData.SignerInfo.HashName, x509Certificate, subjectIdentifierType, obj, (int)signedData.SignerInfo.Version);
 			this._info.Add(signerInfo);
 			ASN1 content = signedData.ContentInfo.Content;
 			Oid oid = new Oid(signedData.ContentInfo.ContentType);
-			if (!this._detached || this._content == null)
-			{
-				if (content[0] == null)
-				{
-					throw new ArgumentException("ContentInfo has no content. Detached signature ?");
-				}
-				this._content = new ContentInfo(oid, content[0].Value);
-			}
+			this._content = new ContentInfo(oid, content[0].Value);
 			foreach (Mono.Security.X509.X509Certificate x509Certificate4 in signedData.Certificates)
 			{
 				this._certs.Add(new X509Certificate2(x509Certificate4.RawData));

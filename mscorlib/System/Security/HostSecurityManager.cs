@@ -43,11 +43,13 @@ namespace System.Security
 			}
 			if (activationArguments == null)
 			{
-				throw new ArgumentException(string.Format(Locale.GetText("No {0} found in {1}."), "ActivationArguments", "Evidence"), "applicationEvidence");
+				string text = Locale.GetText("No {0} found in {1}.");
+				throw new ArgumentException(string.Format(text, "ActivationArguments", "Evidence"), "applicationEvidence");
 			}
 			if (activationArguments.ActivationContext == null)
 			{
-				throw new ArgumentException(string.Format(Locale.GetText("No {0} found in {1}."), "ActivationContext", "ActivationArguments"), "applicationEvidence");
+				string text2 = Locale.GetText("No {0} found in {1}.");
+				throw new ArgumentException(string.Format(text2, "ActivationContext", "ActivationArguments"), "applicationEvidence");
 			}
 			if (!ApplicationSecurityManager.DetermineApplicationTrust(activationArguments.ActivationContext, context))
 			{

@@ -119,6 +119,30 @@ public static class RoomConstraints
 		return true;
 	}, 1, ROOMS.CRITERIA.NO_INDUSTRIAL_MACHINERY.NAME, ROOMS.CRITERIA.NO_INDUSTRIAL_MACHINERY.DESCRIPTION, null);
 
+	public static RoomConstraints.Constraint NO_COTS = new RoomConstraints.Constraint(null, delegate(Room room)
+	{
+		foreach (KPrefabID kprefabID2 in room.buildings)
+		{
+			if (kprefabID2.HasPrefabTag(RoomConstraints.ConstraintTags.Bed) && !kprefabID2.HasPrefabTag(RoomConstraints.ConstraintTags.LuxuryBed))
+			{
+				return false;
+			}
+		}
+		return true;
+	}, 1, ROOMS.CRITERIA.NO_COTS.NAME, ROOMS.CRITERIA.NO_COTS.DESCRIPTION, null);
+
+	public static RoomConstraints.Constraint NO_OUTHOUSES = new RoomConstraints.Constraint(null, delegate(Room room)
+	{
+		foreach (KPrefabID kprefabID3 in room.buildings)
+		{
+			if (kprefabID3.HasPrefabTag(RoomConstraints.ConstraintTags.Toilet) && !kprefabID3.HasPrefabTag(RoomConstraints.ConstraintTags.FlushToilet))
+			{
+				return false;
+			}
+		}
+		return true;
+	}, 1, ROOMS.CRITERIA.NO_OUTHOUSES.NAME, ROOMS.CRITERIA.NO_OUTHOUSES.DESCRIPTION, null);
+
 	public static RoomConstraints.Constraint LUXURY_BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.LuxuryBed), null, 1, ROOMS.CRITERIA.LUXURY_BED_SINGLE.NAME, ROOMS.CRITERIA.LUXURY_BED_SINGLE.DESCRIPTION, null);
 
 	public static RoomConstraints.Constraint BED_SINGLE = new RoomConstraints.Constraint((KPrefabID bc) => bc.HasPrefabTag(RoomConstraints.ConstraintTags.Bed), null, 1, ROOMS.CRITERIA.BED_SINGLE.NAME, ROOMS.CRITERIA.BED_SINGLE.DESCRIPTION, new List<RoomConstraints.Constraint> { RoomConstraints.LUXURY_BED_SINGLE });

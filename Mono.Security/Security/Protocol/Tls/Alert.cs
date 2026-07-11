@@ -4,6 +4,18 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal class Alert
 	{
+		public Alert(AlertDescription description)
+		{
+			this.inferAlertLevel();
+			this.description = description;
+		}
+
+		public Alert(AlertLevel level, AlertDescription description)
+		{
+			this.level = level;
+			this.description = description;
+		}
+
 		public AlertLevel Level
 		{
 			get
@@ -44,82 +56,53 @@ namespace Mono.Security.Protocol.Tls
 			}
 		}
 
-		public Alert(AlertDescription description)
+		private void inferAlertLevel()
 		{
-			this.description = description;
-			this.level = Alert.inferAlertLevel(description);
-		}
-
-		public Alert(AlertLevel level, AlertDescription description)
-		{
-			this.level = level;
-			this.description = description;
-		}
-
-		private static AlertLevel inferAlertLevel(AlertDescription description)
-		{
-			if (description <= AlertDescription.DecryptError)
+			AlertDescription alertDescription = this.description;
+			switch (alertDescription)
 			{
-				if (description <= AlertDescription.UnexpectedMessage)
+			case AlertDescription.HandshakeFailiure:
+			case AlertDescription.BadCertificate:
+			case AlertDescription.UnsupportedCertificate:
+			case AlertDescription.CertificateRevoked:
+			case AlertDescription.CertificateExpired:
+			case AlertDescription.CertificateUnknown:
+			case AlertDescription.IlegalParameter:
+			case AlertDescription.UnknownCA:
+			case AlertDescription.AccessDenied:
+			case AlertDescription.DecodeError:
+			case AlertDescription.DecryptError:
+			case AlertDescription.ExportRestriction:
+				break;
+			default:
+				switch (alertDescription)
 				{
-					if (description != AlertDescription.CloseNotify)
+				case AlertDescription.BadRecordMAC:
+				case AlertDescription.DecryptionFailed:
+				case AlertDescription.RecordOverflow:
+					break;
+				default:
+					if (alertDescription != AlertDescription.ProtocolVersion && alertDescription != AlertDescription.InsuficientSecurity)
 					{
-						if (description != AlertDescription.UnexpectedMessage)
+						if (alertDescription != AlertDescription.CloseNotify)
 						{
-							return AlertLevel.Fatal;
+							if (alertDescription == AlertDescription.UnexpectedMessage || alertDescription == AlertDescription.DecompressionFailiure || alertDescription == AlertDescription.InternalError)
+							{
+								break;
+							}
+							if (alertDescription != AlertDescription.UserCancelled && alertDescription != AlertDescription.NoRenegotiation)
+							{
+								break;
+							}
 						}
-						return AlertLevel.Fatal;
+						this.level = AlertLevel.Warning;
+						return;
 					}
+					break;
 				}
-				else
-				{
-					if (description - AlertDescription.BadRecordMAC <= 2)
-					{
-						return AlertLevel.Fatal;
-					}
-					switch (description)
-					{
-					case AlertDescription.DecompressionFailiure:
-					case (AlertDescription)31:
-					case (AlertDescription)32:
-					case (AlertDescription)33:
-					case (AlertDescription)34:
-					case (AlertDescription)35:
-					case (AlertDescription)36:
-					case (AlertDescription)37:
-					case (AlertDescription)38:
-					case (AlertDescription)39:
-					case AlertDescription.HandshakeFailiure:
-					case AlertDescription.NoCertificate:
-					case AlertDescription.BadCertificate:
-					case AlertDescription.UnsupportedCertificate:
-					case AlertDescription.CertificateRevoked:
-					case AlertDescription.CertificateExpired:
-					case AlertDescription.CertificateUnknown:
-					case AlertDescription.IlegalParameter:
-					case AlertDescription.UnknownCA:
-					case AlertDescription.AccessDenied:
-					case AlertDescription.DecodeError:
-					case AlertDescription.DecryptError:
-						return AlertLevel.Fatal;
-					default:
-						return AlertLevel.Fatal;
-					}
-				}
+				break;
 			}
-			else if (description <= AlertDescription.InsuficientSecurity)
-			{
-				if (description != AlertDescription.ExportRestriction && description - AlertDescription.ProtocolVersion > 1)
-				{
-					return AlertLevel.Fatal;
-				}
-				return AlertLevel.Fatal;
-			}
-			else if (description == AlertDescription.InternalError || (description != AlertDescription.UserCancelled && description != AlertDescription.NoRenegotiation))
-			{
-				return AlertLevel.Fatal;
-			}
-			return AlertLevel.Warning;
+			this.level = AlertLevel.Fatal;
 		}
 
 		public static string GetAlertMessage(AlertDescription description)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -8,40 +7,17 @@ namespace System.Reflection
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class CustomAttributeData
+	public sealed class CustomAttributeData
 	{
-		protected CustomAttributeData()
-		{
-		}
-
-		internal CustomAttributeData(ConstructorInfo ctorInfo, Assembly assembly, IntPtr data, uint data_length)
+		internal CustomAttributeData(ConstructorInfo ctorInfo, object[] ctorArgs, object[] namedArgs)
 		{
 			this.ctorInfo = ctorInfo;
-			this.lazyData = new CustomAttributeData.LazyCAttrData();
-			this.lazyData.assembly = assembly;
-			this.lazyData.data = data;
-			this.lazyData.data_length = data_length;
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ResolveArgumentsInternal(ConstructorInfo ctor, Assembly assembly, IntPtr data, uint data_length, out object[] ctorArgs, out object[] namedArgs);
-
-		private void ResolveArguments()
-		{
-			if (this.lazyData == null)
-			{
-				return;
-			}
-			object[] array;
-			object[] array2;
-			CustomAttributeData.ResolveArgumentsInternal(this.ctorInfo, this.lazyData.assembly, this.lazyData.data, this.lazyData.data_length, out array, out array2);
-			this.ctorArgs = Array.AsReadOnly<CustomAttributeTypedArgument>((array != null) ? CustomAttributeData.UnboxValues<CustomAttributeTypedArgument>(array) : EmptyArray<CustomAttributeTypedArgument>.Value);
-			this.namedArgs = Array.AsReadOnly<CustomAttributeNamedArgument>((array2 != null) ? CustomAttributeData.UnboxValues<CustomAttributeNamedArgument>(array2) : EmptyArray<CustomAttributeNamedArgument>.Value);
-			this.lazyData = null;
+			this.ctorArgs = Array.AsReadOnly<CustomAttributeTypedArgument>((ctorArgs == null) ? new CustomAttributeTypedArgument[0] : CustomAttributeData.UnboxValues<CustomAttributeTypedArgument>(ctorArgs));
+			this.namedArgs = Array.AsReadOnly<CustomAttributeNamedArgument>((namedArgs == null) ? new CustomAttributeNamedArgument[0] : CustomAttributeData.UnboxValues<CustomAttributeNamedArgument>(namedArgs));
 		}
 
 		[ComVisible(true)]
-		public virtual ConstructorInfo Constructor
+		public ConstructorInfo Constructor
 		{
 			get
 			{
@@ -50,20 +26,18 @@ namespace System.Reflection
 		}
 
 		[ComVisible(true)]
-		public virtual IList<CustomAttributeTypedArgument> ConstructorArguments
+		public IList<CustomAttributeTypedArgument> ConstructorArguments
 		{
 			get
 			{
-				this.ResolveArguments();
 				return this.ctorArgs;
 			}
 		}
 
-		public virtual IList<CustomAttributeNamedArgument> NamedArguments
+		public IList<CustomAttributeNamedArgument> NamedArguments
 		{
 			get
 			{
-				this.ResolveArguments();
 				return this.namedArgs;
 			}
 		}
@@ -78,11 +52,6 @@ namespace System.Reflection
 			return MonoCustomAttrs.GetCustomAttributesData(target);
 		}
 
-		internal static IList<CustomAttributeData> GetCustomAttributesInternal(RuntimeType target)
-		{
-			return MonoCustomAttrs.GetCustomAttributesData(target);
-		}
-
 		public static IList<CustomAttributeData> GetCustomAttributes(Module target)
 		{
 			return MonoCustomAttrs.GetCustomAttributesData(target);
@@ -93,17 +62,8 @@ namespace System.Reflection
 			return MonoCustomAttrs.GetCustomAttributesData(target);
 		}
 
-		public Type AttributeType
-		{
-			get
-			{
-				return this.ctorInfo.DeclaringType;
-			}
-		}
-
 		public override string ToString()
 		{
-			this.ResolveArguments();
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.Append("[" + this.ctorInfo.DeclaringType.FullName + "(");
 			for (int i = 0; i < this.ctorArgs.Count; i++)
@@ -126,7 +86,7 @@ namespace System.Reflection
 					stringBuilder.Append(", ");
 				}
 			}
-			stringBuilder.AppendFormat(")]", Array.Empty<object>());
+			stringBuilder.AppendFormat(")]", new object[0]);
 			return stringBuilder.ToString();
 		}
 
@@ -175,20 +135,14 @@ namespace System.Reflection
 
 		public override int GetHashCode()
 		{
-			int num = ((this.ctorInfo == null) ? 13 : (this.ctorInfo.GetHashCode() << 16));
-			if (this.ctorArgs != null)
+			int num = this.ctorInfo.GetHashCode() << 16;
+			for (int i = 0; i < this.ctorArgs.Count; i++)
 			{
-				for (int i = 0; i < this.ctorArgs.Count; i++)
-				{
-					num += num ^ (7 + this.ctorArgs[i].GetHashCode() << i * 4);
-				}
+				num += num ^ (7 + this.ctorArgs[i].GetHashCode() << i * 4);
 			}
-			if (this.namedArgs != null)
+			for (int j = 0; j < this.namedArgs.Count; j++)
 			{
-				for (int j = 0; j < this.namedArgs.Count; j++)
-				{
-					num += this.namedArgs[j].GetHashCode() << 5;
-				}
+				num += this.namedArgs[j].GetHashCode() << 5;
 			}
 			return num;
 		}
@@ -198,16 +152,5 @@ namespace System.Reflection
 		private IList<CustomAttributeTypedArgument> ctorArgs;
 
 		private IList<CustomAttributeNamedArgument> namedArgs;
-
-		private CustomAttributeData.LazyCAttrData lazyData;
-
-		private class LazyCAttrData
-		{
-			internal Assembly assembly;
-
-			internal IntPtr data;
-
-			internal uint data_length;
-		}
 	}
 }

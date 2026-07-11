@@ -30,12 +30,16 @@ namespace System
 			{
 				byte[] array = (byte[])obj;
 				int num = 0;
-				while (num < array.Length && num < length && (char)array[num] == buffer[offset + num])
+				while (num < array.Length && num < length)
 				{
+					if ((char)array[num] != buffer[offset + num])
+					{
+						break;
+					}
 					if (array.Length - 1 == num)
 					{
 						used = array.Length;
-						return (TermInfoStrings)this.map[array];
+						return (TermInfoStrings)((int)this.map[array]);
 					}
 					num++;
 				}

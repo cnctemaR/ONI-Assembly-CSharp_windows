@@ -58,8 +58,8 @@ namespace System.Configuration
 			{
 				return this;
 			}
-			ConfigurationSection configurationSection = ((this.sectionInformation != null) ? this.sectionInformation.GetParentSection() : null);
-			object obj = ((configurationSection != null) ? configurationSection.GetRuntimeObject() : null);
+			ConfigurationSection configurationSection = ((this.sectionInformation == null) ? null : this.sectionInformation.GetParentSection());
+			object obj = ((configurationSection == null) ? null : configurationSection.GetRuntimeObject());
 			if (base.RawXml == null)
 			{
 				return obj;
@@ -90,7 +90,7 @@ namespace System.Configuration
 			catch
 			{
 			}
-			XmlDocument xmlDocument = new ConfigurationXmlDocument();
+			XmlDocument xmlDocument = new XmlDocument();
 			xmlDocument.LoadXml(base.RawXml);
 			return this.SectionHandler.Create(obj, this.ConfigContext, xmlDocument.DocumentElement);
 		}
@@ -111,7 +111,6 @@ namespace System.Configuration
 		{
 			ConfigurationElement configurationElement = (ConfigurationElement)Activator.CreateInstance(t);
 			configurationElement.Init();
-			configurationElement.Configuration = base.Configuration;
 			if (this.IsReadOnly())
 			{
 				configurationElement.SetReadOnly();
@@ -139,10 +138,11 @@ namespace System.Configuration
 			if (text != null)
 			{
 				ProtectedConfigurationProvider provider = ProtectedConfiguration.GetProvider(text, true);
-				XmlDocument xmlDocument = new ConfigurationXmlDocument();
+				XmlDocument xmlDocument = new XmlDocument();
 				reader.MoveToElement();
 				xmlDocument.Load(new StringReader(reader.ReadInnerXml()));
-				reader = new XmlNodeReader(provider.Decrypt(xmlDocument));
+				XmlNode xmlNode = provider.Decrypt(xmlDocument);
+				reader = new XmlNodeReader(xmlNode);
 				this.SectionInformation.ProtectSection(text);
 				reader.MoveToContent();
 			}
@@ -151,23 +151,13 @@ namespace System.Configuration
 				this.SectionInformation.ConfigSource = text2;
 			}
 			this.SectionInformation.SetRawXml(base.RawXml);
-			if (this.SectionHandler == null)
-			{
-				this.DeserializeElement(reader, false);
-			}
+			this.DeserializeElement(reader, false);
 		}
 
 		[MonoInternalNote("find the proper location for the decryption stuff")]
 		protected internal virtual void DeserializeSection(XmlReader reader)
 		{
-			try
-			{
-				this.DoDeserializeSection(reader);
-			}
-			catch (ConfigurationErrorsException ex)
-			{
-				throw new ConfigurationErrorsException(string.Format("Error deserializing configuration section {0}: {1}", this.SectionInformation.Name, ex.Message));
-			}
+			this.DoDeserializeSection(reader);
 		}
 
 		internal void DeserializeConfigSource(string basePath)
@@ -179,18 +169,18 @@ namespace System.Configuration
 			}
 			if (Path.IsPathRooted(configSource))
 			{
-				throw new ConfigurationErrorsException("The configSource attribute must be a relative physical path.");
+				throw new ConfigurationException("The configSource attribute must be a relative physical path.");
 			}
 			if (this.HasLocalModifications())
 			{
-				throw new ConfigurationErrorsException("A section using 'configSource' may contain no other attributes or elements.");
+				throw new ConfigurationException("A section using 'configSource' may contain no other attributes or elements.");
 			}
 			string text = Path.Combine(basePath, configSource);
 			if (!File.Exists(text))
 			{
 				base.RawXml = null;
 				this.SectionInformation.SetRawXml(null);
-				throw new ConfigurationErrorsException(string.Format("Unable to open configSource file '{0}'.", text));
+				return;
 			}
 			base.RawXml = File.ReadAllText(text);
 			this.SectionInformation.SetRawXml(base.RawXml);
@@ -210,23 +200,13 @@ namespace System.Configuration
 			{
 				configurationElement = this;
 			}
-			configurationElement.PrepareSave(parentElement, saveMode);
-			bool flag = configurationElement.HasValues(parentElement, saveMode);
 			string text;
 			using (StringWriter stringWriter = new StringWriter())
 			{
 				using (XmlTextWriter xmlTextWriter = new XmlTextWriter(stringWriter))
 				{
 					xmlTextWriter.Formatting = Formatting.Indented;
-					if (flag)
-					{
-						configurationElement.SerializeToXmlElement(xmlTextWriter, name);
-					}
-					else if (saveMode == ConfigurationSaveMode.Modified && configurationElement.IsModified())
-					{
-						xmlTextWriter.WriteStartElement(name);
-						xmlTextWriter.WriteEndElement();
-					}
+					configurationElement.SerializeToXmlElement(xmlTextWriter, name);
 					xmlTextWriter.Close();
 				}
 				text = stringWriter.ToString();
@@ -240,15 +220,15 @@ namespace System.Configuration
 			string text2;
 			using (StringWriter stringWriter2 = new StringWriter())
 			{
-				bool flag2 = !string.IsNullOrEmpty(name);
+				bool flag = !string.IsNullOrEmpty(name);
 				using (XmlTextWriter xmlTextWriter2 = new XmlTextWriter(stringWriter2))
 				{
-					if (flag2)
+					if (flag)
 					{
 						xmlTextWriter2.WriteStartElement(name);
 					}
 					xmlTextWriter2.WriteAttributeString("configSource", configSource);
-					if (flag2)
+					if (flag)
 					{
 						xmlTextWriter2.WriteEndElement();
 					}

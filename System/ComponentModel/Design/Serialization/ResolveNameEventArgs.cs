@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design.Serialization
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class ResolveNameEventArgs : EventArgs
 	{
 		public ResolveNameEventArgs(string name)
 		{
 			this.name = name;
-			this.value = null;
 		}
 
 		public string Name

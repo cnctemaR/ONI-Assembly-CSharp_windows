@@ -39,37 +39,44 @@ namespace Mono.Security.X509.Extensions
 		{
 			this.extnValue = new ASN1(4);
 			ushort num = (ushort)this.kubits;
-			if (num <= 0)
+			if (num > 0)
+			{
+				byte b;
+				for (b = 15; b > 0; b -= 1)
+				{
+					if ((num & 32768) == 32768)
+					{
+						break;
+					}
+					num = (ushort)(num << 1);
+				}
+				if (this.kubits > 255)
+				{
+					b -= 8;
+					this.extnValue.Add(new ASN1(3, new byte[]
+					{
+						b,
+						(byte)this.kubits,
+						(byte)(this.kubits >> 8)
+					}));
+				}
+				else
+				{
+					this.extnValue.Add(new ASN1(3, new byte[]
+					{
+						b,
+						(byte)this.kubits
+					}));
+				}
+			}
+			else
 			{
 				ASN1 extnValue = this.extnValue;
-				byte b = 3;
+				byte b2 = 3;
 				byte[] array = new byte[2];
 				array[0] = 7;
-				extnValue.Add(new ASN1(b, array));
-				return;
+				extnValue.Add(new ASN1(b2, array));
 			}
-			byte b2 = 15;
-			while (b2 > 0 && (num & 32768) != 32768)
-			{
-				num = (ushort)(num << 1);
-				b2 -= 1;
-			}
-			if (this.kubits > 255)
-			{
-				b2 -= 8;
-				this.extnValue.Add(new ASN1(3, new byte[]
-				{
-					b2,
-					(byte)this.kubits,
-					(byte)(this.kubits >> 8)
-				}));
-				return;
-			}
-			this.extnValue.Add(new ASN1(3, new byte[]
-			{
-				b2,
-				(byte)this.kubits
-			}));
 		}
 
 		public KeyUsages KeyUsage

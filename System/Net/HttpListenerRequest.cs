@@ -2,10 +2,8 @@
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
-using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.Net
 {
@@ -15,6 +13,7 @@ namespace System.Net
 		{
 			this.context = context;
 			this.headers = new WebHeaderCollection();
+			this.input_stream = Stream.Null;
 			this.version = HttpVersion.Version10;
 		}
 
@@ -58,63 +57,30 @@ namespace System.Net
 
 		private void CreateQueryString(string query)
 		{
+			this.query_string = new global::System.Collections.Specialized.NameValueCollection();
 			if (query == null || query.Length == 0)
 			{
-				this.query_string = new NameValueCollection(1);
 				return;
 			}
-			this.query_string = new NameValueCollection();
 			if (query[0] == '?')
 			{
 				query = query.Substring(1);
 			}
-			foreach (string text in query.Split(new char[] { '&' }))
+			string[] array = query.Split(new char[] { '&' });
+			foreach (string text in array)
 			{
 				int num = text.IndexOf('=');
 				if (num == -1)
 				{
-					this.query_string.Add(null, WebUtility.UrlDecode(text));
+					this.query_string.Add(null, HttpUtility.UrlDecode(text));
 				}
 				else
 				{
-					string text2 = WebUtility.UrlDecode(text.Substring(0, num));
-					string text3 = WebUtility.UrlDecode(text.Substring(num + 1));
+					string text2 = HttpUtility.UrlDecode(text.Substring(0, num));
+					string text3 = HttpUtility.UrlDecode(text.Substring(num + 1));
 					this.query_string.Add(text2, text3);
 				}
 			}
-		}
-
-		private static bool MaybeUri(string s)
-		{
-			int num = s.IndexOf(':');
-			return num != -1 && num < 10 && HttpListenerRequest.IsPredefinedScheme(s.Substring(0, num));
-		}
-
-		private static bool IsPredefinedScheme(string scheme)
-		{
-			if (scheme == null || scheme.Length < 3)
-			{
-				return false;
-			}
-			char c = scheme[0];
-			if (c == 'h')
-			{
-				return scheme == "http" || scheme == "https";
-			}
-			if (c == 'f')
-			{
-				return scheme == "file" || scheme == "ftp";
-			}
-			if (c != 'n')
-			{
-				return (c == 'g' && scheme == "gopher") || (c == 'm' && scheme == "mailto");
-			}
-			c = scheme[1];
-			if (c == 'e')
-			{
-				return scheme == "news" || scheme == "net.pipe" || scheme == "net.tcp";
-			}
-			return scheme == "nntp";
 		}
 
 		internal void FinishInitialization()
@@ -125,9 +91,9 @@ namespace System.Net
 				this.context.ErrorMessage = "Invalid host name";
 				return;
 			}
-			Uri uri = null;
+			global::System.Uri uri;
 			string pathAndQuery;
-			if (HttpListenerRequest.MaybeUri(this.raw_url.ToLowerInvariant()) && Uri.TryCreate(this.raw_url, UriKind.Absolute, out uri))
+			if (global::System.Uri.MaybeUri(this.raw_url) && global::System.Uri.TryCreate(this.raw_url, global::System.UriKind.Absolute, out uri))
 			{
 				pathAndQuery = uri.PathAndQuery;
 			}
@@ -148,32 +114,44 @@ namespace System.Net
 			{
 				text = text.Substring(0, num);
 			}
-			string text2 = string.Format("{0}://{1}:{2}", this.IsSecureConnection ? "https" : "http", text, this.LocalEndPoint.Port);
-			if (!Uri.TryCreate(text2 + pathAndQuery, UriKind.Absolute, out this.url))
+			string text2 = string.Format("{0}://{1}:{2}", (!this.IsSecureConnection) ? "http" : "https", text, this.LocalEndPoint.Port);
+			if (!global::System.Uri.TryCreate(text2 + pathAndQuery, global::System.UriKind.Absolute, out this.url))
 			{
-				this.context.ErrorMessage = WebUtility.HtmlEncode("Invalid url: " + text2 + pathAndQuery);
+				this.context.ErrorMessage = "Invalid url: " + text2 + pathAndQuery;
 				return;
 			}
 			this.CreateQueryString(this.url.Query);
-			this.url = HttpListenerRequestUriBuilder.GetRequestUri(this.raw_url, this.url.Scheme, this.url.Authority, this.url.LocalPath, this.url.Query);
+			string text3 = null;
 			if (this.version >= HttpVersion.Version11)
 			{
-				string text3 = this.Headers["Transfer-Encoding"];
-				this.is_chunked = text3 != null && string.Compare(text3, "chunked", StringComparison.OrdinalIgnoreCase) == 0;
-				if (text3 != null && !this.is_chunked)
+				text3 = this.Headers["Transfer-Encoding"];
+				if (text3 != null && text3 != "chunked")
 				{
 					this.context.Connection.SendError(null, 501);
 					return;
 				}
 			}
-			if (!this.is_chunked && !this.cl_set && (string.Compare(this.method, "POST", StringComparison.OrdinalIgnoreCase) == 0 || string.Compare(this.method, "PUT", StringComparison.OrdinalIgnoreCase) == 0))
+			this.is_chunked = text3 == "chunked";
+			foreach (string text4 in HttpListenerRequest.no_body_methods)
+			{
+				if (string.Compare(this.method, text4, StringComparison.InvariantCultureIgnoreCase) == 0)
+				{
+					return;
+				}
+			}
+			if (!this.is_chunked && !this.cl_set)
 			{
 				this.context.Connection.SendError(null, 411);
 				return;
 			}
-			if (string.Compare(this.Headers["Expect"], "100-continue", StringComparison.OrdinalIgnoreCase) == 0)
+			if (this.is_chunked || this.content_length > 0L)
 			{
-				this.context.Connection.GetResponseStream().InternalWrite(HttpListenerRequest._100continue, 0, HttpListenerRequest._100continue.Length);
+				this.input_stream = this.context.Connection.GetRequestStream(this.is_chunked, this.content_length);
+			}
+			if (this.Headers["Expect"] == "100-continue")
+			{
+				ResponseStream responseStream = this.context.Connection.GetResponseStream();
+				responseStream.InternalWrite(HttpListenerRequest._100continue, 0, HttpListenerRequest._100continue.Length);
 			}
 		}
 
@@ -201,89 +179,77 @@ namespace System.Net
 			string text2 = header.Substring(num + 1).Trim();
 			string text3 = text.ToLower(CultureInfo.InvariantCulture);
 			this.headers.SetInternal(text, text2);
-			if (text3 == "accept-language")
+			string text4 = text3;
+			switch (text4)
 			{
+			case "accept-language":
 				this.user_languages = text2.Split(new char[] { ',' });
-				return;
-			}
-			if (!(text3 == "accept"))
-			{
-				if (!(text3 == "content-length"))
-				{
-					if (!(text3 == "referer"))
-					{
-						if (!(text3 == "cookie"))
-						{
-							return;
-						}
-						goto IL_0155;
-					}
-				}
-				else
-				{
-					try
-					{
-						this.content_length = long.Parse(text2.Trim());
-						if (this.content_length < 0L)
-						{
-							this.context.ErrorMessage = "Invalid Content-Length.";
-						}
-						this.cl_set = true;
-						return;
-					}
-					catch
-					{
-						this.context.ErrorMessage = "Invalid Content-Length.";
-						return;
-					}
-				}
+				break;
+			case "accept":
+				this.accept_types = text2.Split(new char[] { ',' });
+				break;
+			case "content-length":
 				try
 				{
-					this.referrer = new Uri(text2);
-					return;
+					this.content_length = long.Parse(text2.Trim());
+					if (this.content_length < 0L)
+					{
+						this.context.ErrorMessage = "Invalid Content-Length.";
+					}
+					this.cl_set = true;
 				}
 				catch
 				{
-					this.referrer = new Uri("http://someone.is.screwing.with.the.headers.com/");
-					return;
+					this.context.ErrorMessage = "Invalid Content-Length.";
 				}
-				IL_0155:
+				break;
+			case "referer":
+				try
+				{
+					this.referrer = new global::System.Uri(text2);
+				}
+				catch
+				{
+					this.referrer = new global::System.Uri("http://someone.is.screwing.with.the.headers.com/");
+				}
+				break;
+			case "cookie":
+			{
 				if (this.cookies == null)
 				{
 					this.cookies = new CookieCollection();
 				}
 				string[] array = text2.Split(new char[] { ',', ';' });
 				Cookie cookie = null;
-				int num2 = 0;
-				string[] array2 = array;
-				for (int i = 0; i < array2.Length; i++)
+				int num3 = 0;
+				foreach (string text5 in array)
 				{
-					string text4 = array2[i].Trim();
-					if (text4.Length != 0)
+					string text6 = text5.Trim();
+					if (text6.Length != 0)
 					{
-						if (text4.StartsWith("$Version"))
+						if (text6.StartsWith("$Version"))
 						{
-							num2 = int.Parse(HttpListenerRequest.Unquote(text4.Substring(text4.IndexOf('=') + 1)));
+							num3 = int.Parse(HttpListenerRequest.Unquote(text6.Substring(text6.IndexOf("=") + 1)));
 						}
-						else if (text4.StartsWith("$Path"))
+						else if (text6.StartsWith("$Path"))
 						{
 							if (cookie != null)
 							{
-								cookie.Path = text4.Substring(text4.IndexOf('=') + 1).Trim();
+								cookie.Path = text6.Substring(text6.IndexOf("=") + 1).Trim();
 							}
 						}
-						else if (text4.StartsWith("$Domain"))
+						else if (text6.StartsWith("$Domain"))
 						{
 							if (cookie != null)
 							{
-								cookie.Domain = text4.Substring(text4.IndexOf('=') + 1).Trim();
+								cookie.Domain = text6.Substring(text6.IndexOf("=") + 1).Trim();
 							}
 						}
-						else if (text4.StartsWith("$Port"))
+						else if (text6.StartsWith("$Port"))
 						{
 							if (cookie != null)
 							{
-								cookie.Port = text4.Substring(text4.IndexOf('=') + 1).Trim();
+								cookie.Port = text6.Substring(text6.IndexOf("=") + 1).Trim();
 							}
 						}
 						else
@@ -292,26 +258,19 @@ namespace System.Net
 							{
 								this.cookies.Add(cookie);
 							}
-							try
+							cookie = new Cookie();
+							int num4 = text6.IndexOf("=");
+							if (num4 > 0)
 							{
-								cookie = new Cookie();
-								int num3 = text4.IndexOf('=');
-								if (num3 > 0)
-								{
-									cookie.Name = text4.Substring(0, num3).Trim();
-									cookie.Value = text4.Substring(num3 + 1).Trim();
-								}
-								else
-								{
-									cookie.Name = text4.Trim();
-									cookie.Value = string.Empty;
-								}
-								cookie.Version = num2;
+								cookie.Name = text6.Substring(0, num4).Trim();
+								cookie.Value = text6.Substring(num4 + 1).Trim();
 							}
-							catch (CookieException)
+							else
 							{
-								cookie = null;
+								cookie.Name = text6.Trim();
+								cookie.Value = string.Empty;
 							}
+							cookie.Version = num3;
 						}
 					}
 				}
@@ -319,9 +278,9 @@ namespace System.Net
 				{
 					this.cookies.Add(cookie);
 				}
-				return;
+				break;
 			}
-			this.accept_types = text2.Split(new char[] { ',' });
+			}
 		}
 
 		internal bool FlushInput()
@@ -341,30 +300,17 @@ namespace System.Net
 			{
 				try
 				{
-					IAsyncResult asyncResult = this.InputStream.BeginRead(array, 0, num, null, null);
-					if (!asyncResult.IsCompleted && !asyncResult.AsyncWaitHandle.WaitOne(1000))
+					if (this.InputStream.Read(array, 0, num) <= 0)
 					{
-						flag = false;
-					}
-					else
-					{
-						if (this.InputStream.EndRead(asyncResult) > 0)
-						{
-							continue;
-						}
 						flag = true;
+						break;
 					}
-				}
-				catch (ObjectDisposedException)
-				{
-					this.input_stream = null;
-					flag = true;
 				}
 				catch
 				{
 					flag = false;
+					break;
 				}
-				break;
 			}
 			return flag;
 		}
@@ -377,20 +323,11 @@ namespace System.Net
 			}
 		}
 
+		[global::System.MonoTODO("Always returns 0")]
 		public int ClientCertificateError
 		{
 			get
 			{
-				HttpConnection connection = this.context.Connection;
-				if (connection.ClientCertificate == null)
-				{
-					throw new InvalidOperationException("No client certificate");
-				}
-				int[] clientCertificateErrors = connection.ClientCertificateErrors;
-				if (clientCertificateErrors != null && clientCertificateErrors.Length != 0)
-				{
-					return clientCertificateErrors[0];
-				}
 				return 0;
 			}
 		}
@@ -411,11 +348,7 @@ namespace System.Net
 		{
 			get
 			{
-				if (!this.is_chunked)
-				{
-					return this.content_length;
-				}
-				return -1L;
+				return this.content_length;
 			}
 		}
 
@@ -447,7 +380,7 @@ namespace System.Net
 			}
 		}
 
-		public NameValueCollection Headers
+		public global::System.Collections.Specialized.NameValueCollection Headers
 		{
 			get
 			{
@@ -467,22 +400,11 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.input_stream == null)
-				{
-					if (this.is_chunked || this.content_length > 0L)
-					{
-						this.input_stream = this.context.Connection.GetRequestStream(this.is_chunked, this.content_length);
-					}
-					else
-					{
-						this.input_stream = Stream.Null;
-					}
-				}
 				return this.input_stream;
 			}
 		}
 
-		[MonoTODO("Always returns false")]
+		[global::System.MonoTODO("Always returns false")]
 		public bool IsAuthenticated
 		{
 			get
@@ -495,7 +417,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.LocalEndPoint.Address.Equals(this.RemoteEndPoint.Address);
+				return IPAddress.IsLoopback(this.RemoteEndPoint.Address);
 			}
 		}
 
@@ -511,29 +433,7 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.ka_set)
-				{
-					return this.keep_alive;
-				}
-				this.ka_set = true;
-				string text = this.headers["Connection"];
-				if (!string.IsNullOrEmpty(text))
-				{
-					this.keep_alive = string.Compare(text, "keep-alive", StringComparison.OrdinalIgnoreCase) == 0;
-				}
-				else if (this.version == HttpVersion.Version11)
-				{
-					this.keep_alive = true;
-				}
-				else
-				{
-					text = this.headers["keep-alive"];
-					if (!string.IsNullOrEmpty(text))
-					{
-						this.keep_alive = string.Compare(text, "closed", StringComparison.OrdinalIgnoreCase) != 0;
-					}
-				}
-				return this.keep_alive;
+				return false;
 			}
 		}
 
@@ -553,7 +453,7 @@ namespace System.Net
 			}
 		}
 
-		public NameValueCollection QueryString
+		public global::System.Collections.Specialized.NameValueCollection QueryString
 		{
 			get
 			{
@@ -577,16 +477,15 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO("Always returns Guid.Empty")]
 		public Guid RequestTraceIdentifier
 		{
 			get
 			{
-				return Guid.Empty;
+				return this.identifier;
 			}
 		}
 
-		public Uri Url
+		public global::System.Uri Url
 		{
 			get
 			{
@@ -594,7 +493,7 @@ namespace System.Net
 			}
 		}
 
-		public Uri UrlReferrer
+		public global::System.Uri UrlReferrer
 		{
 			get
 			{
@@ -636,60 +535,17 @@ namespace System.Net
 
 		public IAsyncResult BeginGetClientCertificate(AsyncCallback requestCallback, object state)
 		{
-			if (this.gcc_delegate == null)
-			{
-				this.gcc_delegate = new HttpListenerRequest.GCCDelegate(this.GetClientCertificate);
-			}
-			return this.gcc_delegate.BeginInvoke(requestCallback, state);
+			return null;
 		}
 
-		public X509Certificate2 EndGetClientCertificate(IAsyncResult asyncResult)
+		public global::System.Security.Cryptography.X509Certificates.X509Certificate2 EndGetClientCertificate(IAsyncResult asyncResult)
 		{
-			if (asyncResult == null)
-			{
-				throw new ArgumentNullException("asyncResult");
-			}
-			if (this.gcc_delegate == null)
-			{
-				throw new InvalidOperationException();
-			}
-			return this.gcc_delegate.EndInvoke(asyncResult);
+			return null;
 		}
 
-		public X509Certificate2 GetClientCertificate()
+		public global::System.Security.Cryptography.X509Certificates.X509Certificate2 GetClientCertificate()
 		{
-			return this.context.Connection.ClientCertificate;
-		}
-
-		[MonoTODO]
-		public string ServiceName
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		public TransportContext TransportContext
-		{
-			get
-			{
-				return new HttpListenerRequest.Context();
-			}
-		}
-
-		[MonoTODO]
-		public bool IsWebSocketRequest
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public Task<X509Certificate2> GetClientCertificateAsync()
-		{
-			return Task<X509Certificate2>.Factory.FromAsync(new Func<AsyncCallback, object, IAsyncResult>(this.BeginGetClientCertificate), new Func<IAsyncResult, X509Certificate2>(this.EndGetClientCertificate), null);
+			return null;
 		}
 
 		private string[] accept_types;
@@ -710,13 +566,15 @@ namespace System.Net
 
 		private Version version;
 
-		private NameValueCollection query_string;
+		private global::System.Collections.Specialized.NameValueCollection query_string;
 
 		private string raw_url;
 
-		private Uri url;
+		private Guid identifier;
 
-		private Uri referrer;
+		private global::System.Uri url;
+
+		private global::System.Uri referrer;
 
 		private string[] user_languages;
 
@@ -724,24 +582,10 @@ namespace System.Net
 
 		private bool is_chunked;
 
-		private bool ka_set;
-
-		private bool keep_alive;
-
-		private HttpListenerRequest.GCCDelegate gcc_delegate;
-
 		private static byte[] _100continue = Encoding.ASCII.GetBytes("HTTP/1.1 100 Continue\r\n\r\n");
 
+		private static readonly string[] no_body_methods = new string[] { "GET", "HEAD", "DELETE" };
+
 		private static char[] separators = new char[] { ' ' };
-
-		private class Context : TransportContext
-		{
-			public override ChannelBinding GetChannelBinding(ChannelBindingKind kind)
-			{
-				throw new NotImplementedException();
-			}
-		}
-
-		private delegate X509Certificate2 GCCDelegate();
 	}
 }

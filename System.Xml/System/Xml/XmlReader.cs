@@ -1,60 +1,84 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Schema;
+using Mono.Xml;
+using Mono.Xml.Schema;
 
 namespace System.Xml
 {
-	[DebuggerDisplay("{debuggerDisplayProxy}")]
-	[DebuggerDisplay("{debuggerDisplayProxy}")]
 	public abstract class XmlReader : IDisposable
 	{
-		public virtual XmlReaderSettings Settings
+		void IDisposable.Dispose()
+		{
+			this.Dispose(false);
+		}
+
+		public abstract int AttributeCount { get; }
+
+		public abstract string BaseURI { get; }
+
+		internal XmlReaderBinarySupport Binary
 		{
 			get
 			{
-				return null;
+				return this.binary;
 			}
 		}
 
-		public abstract XmlNodeType NodeType { get; }
-
-		public virtual string Name
+		internal XmlReaderBinarySupport.CharGetter BinaryCharGetter
 		{
 			get
 			{
-				if (this.Prefix.Length == 0)
+				return (this.binary == null) ? null : this.binary.Getter;
+			}
+			set
+			{
+				if (this.binary == null)
 				{
-					return this.LocalName;
+					this.binary = new XmlReaderBinarySupport(this);
 				}
-				return this.NameTable.Add(this.Prefix + ":" + this.LocalName);
+				this.binary.Getter = value;
 			}
 		}
 
-		public abstract string LocalName { get; }
-
-		public abstract string NamespaceURI { get; }
-
-		public abstract string Prefix { get; }
-
-		public virtual bool HasValue
+		public virtual bool CanReadBinaryContent
 		{
 			get
 			{
-				return XmlReader.HasValueInternal(this.NodeType);
+				return false;
 			}
 		}
 
-		public abstract string Value { get; }
+		public virtual bool CanReadValueChunk
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		public virtual bool CanResolveEntity
+		{
+			get
+			{
+				return false;
+			}
+		}
 
 		public abstract int Depth { get; }
 
-		public abstract string BaseURI { get; }
+		public abstract bool EOF { get; }
+
+		public virtual bool HasAttributes
+		{
+			get
+			{
+				return this.AttributeCount > 0;
+			}
+		}
+
+		public abstract bool HasValue { get; }
 
 		public abstract bool IsEmptyElement { get; }
 
@@ -65,417 +89,6 @@ namespace System.Xml
 				return false;
 			}
 		}
-
-		public virtual char QuoteChar
-		{
-			get
-			{
-				return '"';
-			}
-		}
-
-		public virtual XmlSpace XmlSpace
-		{
-			get
-			{
-				return XmlSpace.None;
-			}
-		}
-
-		public virtual string XmlLang
-		{
-			get
-			{
-				return string.Empty;
-			}
-		}
-
-		public virtual IXmlSchemaInfo SchemaInfo
-		{
-			get
-			{
-				return this as IXmlSchemaInfo;
-			}
-		}
-
-		public virtual Type ValueType
-		{
-			get
-			{
-				return typeof(string);
-			}
-		}
-
-		public virtual object ReadContentAsObject()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsObject");
-			}
-			return this.InternalReadContentAsString();
-		}
-
-		public virtual bool ReadContentAsBoolean()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsBoolean");
-			}
-			bool flag;
-			try
-			{
-				flag = XmlConvert.ToBoolean(this.InternalReadContentAsString());
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "Boolean", ex, this as IXmlLineInfo);
-			}
-			return flag;
-		}
-
-		public virtual DateTime ReadContentAsDateTime()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsDateTime");
-			}
-			DateTime dateTime;
-			try
-			{
-				dateTime = XmlConvert.ToDateTime(this.InternalReadContentAsString(), XmlDateTimeSerializationMode.RoundtripKind);
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "DateTime", ex, this as IXmlLineInfo);
-			}
-			return dateTime;
-		}
-
-		public virtual DateTimeOffset ReadContentAsDateTimeOffset()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsDateTimeOffset");
-			}
-			DateTimeOffset dateTimeOffset;
-			try
-			{
-				dateTimeOffset = XmlConvert.ToDateTimeOffset(this.InternalReadContentAsString());
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "DateTimeOffset", ex, this as IXmlLineInfo);
-			}
-			return dateTimeOffset;
-		}
-
-		public virtual double ReadContentAsDouble()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsDouble");
-			}
-			double num;
-			try
-			{
-				num = XmlConvert.ToDouble(this.InternalReadContentAsString());
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "Double", ex, this as IXmlLineInfo);
-			}
-			return num;
-		}
-
-		public virtual float ReadContentAsFloat()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsFloat");
-			}
-			float num;
-			try
-			{
-				num = XmlConvert.ToSingle(this.InternalReadContentAsString());
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "Float", ex, this as IXmlLineInfo);
-			}
-			return num;
-		}
-
-		public virtual decimal ReadContentAsDecimal()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsDecimal");
-			}
-			decimal num;
-			try
-			{
-				num = XmlConvert.ToDecimal(this.InternalReadContentAsString());
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "Decimal", ex, this as IXmlLineInfo);
-			}
-			return num;
-		}
-
-		public virtual int ReadContentAsInt()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsInt");
-			}
-			int num;
-			try
-			{
-				num = XmlConvert.ToInt32(this.InternalReadContentAsString());
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "Int", ex, this as IXmlLineInfo);
-			}
-			return num;
-		}
-
-		public virtual long ReadContentAsLong()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsLong");
-			}
-			long num;
-			try
-			{
-				num = XmlConvert.ToInt64(this.InternalReadContentAsString());
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", "Long", ex, this as IXmlLineInfo);
-			}
-			return num;
-		}
-
-		public virtual string ReadContentAsString()
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAsString");
-			}
-			return this.InternalReadContentAsString();
-		}
-
-		public virtual object ReadContentAs(Type returnType, IXmlNamespaceResolver namespaceResolver)
-		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAs");
-			}
-			string text = this.InternalReadContentAsString();
-			if (returnType == typeof(string))
-			{
-				return text;
-			}
-			object obj;
-			try
-			{
-				obj = XmlUntypedConverter.Untyped.ChangeType(text, returnType, (namespaceResolver == null) ? (this as IXmlNamespaceResolver) : namespaceResolver);
-			}
-			catch (FormatException ex)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", returnType.ToString(), ex, this as IXmlLineInfo);
-			}
-			catch (InvalidCastException ex2)
-			{
-				throw new XmlException("Content cannot be converted to the type {0}.", returnType.ToString(), ex2, this as IXmlLineInfo);
-			}
-			return obj;
-		}
-
-		public virtual object ReadElementContentAsObject()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsObject"))
-			{
-				object obj = this.ReadContentAsObject();
-				this.FinishReadElementContentAsXxx();
-				return obj;
-			}
-			return string.Empty;
-		}
-
-		public virtual object ReadElementContentAsObject(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsObject();
-		}
-
-		public virtual bool ReadElementContentAsBoolean()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsBoolean"))
-			{
-				bool flag = this.ReadContentAsBoolean();
-				this.FinishReadElementContentAsXxx();
-				return flag;
-			}
-			return XmlConvert.ToBoolean(string.Empty);
-		}
-
-		public virtual bool ReadElementContentAsBoolean(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsBoolean();
-		}
-
-		public virtual DateTime ReadElementContentAsDateTime()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsDateTime"))
-			{
-				DateTime dateTime = this.ReadContentAsDateTime();
-				this.FinishReadElementContentAsXxx();
-				return dateTime;
-			}
-			return XmlConvert.ToDateTime(string.Empty, XmlDateTimeSerializationMode.RoundtripKind);
-		}
-
-		public virtual DateTime ReadElementContentAsDateTime(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsDateTime();
-		}
-
-		public virtual double ReadElementContentAsDouble()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsDouble"))
-			{
-				double num = this.ReadContentAsDouble();
-				this.FinishReadElementContentAsXxx();
-				return num;
-			}
-			return XmlConvert.ToDouble(string.Empty);
-		}
-
-		public virtual double ReadElementContentAsDouble(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsDouble();
-		}
-
-		public virtual float ReadElementContentAsFloat()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsFloat"))
-			{
-				float num = this.ReadContentAsFloat();
-				this.FinishReadElementContentAsXxx();
-				return num;
-			}
-			return XmlConvert.ToSingle(string.Empty);
-		}
-
-		public virtual float ReadElementContentAsFloat(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsFloat();
-		}
-
-		public virtual decimal ReadElementContentAsDecimal()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsDecimal"))
-			{
-				decimal num = this.ReadContentAsDecimal();
-				this.FinishReadElementContentAsXxx();
-				return num;
-			}
-			return XmlConvert.ToDecimal(string.Empty);
-		}
-
-		public virtual decimal ReadElementContentAsDecimal(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsDecimal();
-		}
-
-		public virtual int ReadElementContentAsInt()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsInt"))
-			{
-				int num = this.ReadContentAsInt();
-				this.FinishReadElementContentAsXxx();
-				return num;
-			}
-			return XmlConvert.ToInt32(string.Empty);
-		}
-
-		public virtual int ReadElementContentAsInt(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsInt();
-		}
-
-		public virtual long ReadElementContentAsLong()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsLong"))
-			{
-				long num = this.ReadContentAsLong();
-				this.FinishReadElementContentAsXxx();
-				return num;
-			}
-			return XmlConvert.ToInt64(string.Empty);
-		}
-
-		public virtual long ReadElementContentAsLong(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsLong();
-		}
-
-		public virtual string ReadElementContentAsString()
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAsString"))
-			{
-				string text = this.ReadContentAsString();
-				this.FinishReadElementContentAsXxx();
-				return text;
-			}
-			return string.Empty;
-		}
-
-		public virtual string ReadElementContentAsString(string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAsString();
-		}
-
-		public virtual object ReadElementContentAs(Type returnType, IXmlNamespaceResolver namespaceResolver)
-		{
-			if (this.SetupReadElementContentAsXxx("ReadElementContentAs"))
-			{
-				object obj = this.ReadContentAs(returnType, namespaceResolver);
-				this.FinishReadElementContentAsXxx();
-				return obj;
-			}
-			if (!(returnType == typeof(string)))
-			{
-				return XmlUntypedConverter.Untyped.ChangeType(string.Empty, returnType, namespaceResolver);
-			}
-			return string.Empty;
-		}
-
-		public virtual object ReadElementContentAs(Type returnType, IXmlNamespaceResolver namespaceResolver, string localName, string namespaceURI)
-		{
-			this.CheckElement(localName, namespaceURI);
-			return this.ReadElementContentAs(returnType, namespaceResolver);
-		}
-
-		public abstract int AttributeCount { get; }
-
-		public abstract string GetAttribute(string name);
-
-		public abstract string GetAttribute(string name, string namespaceURI);
-
-		public abstract string GetAttribute(int i);
 
 		public virtual string this[int i]
 		{
@@ -501,304 +114,292 @@ namespace System.Xml
 			}
 		}
 
-		public abstract bool MoveToAttribute(string name);
+		public abstract string LocalName { get; }
 
-		public abstract bool MoveToAttribute(string name, string ns);
-
-		public virtual void MoveToAttribute(int i)
+		public virtual string Name
 		{
-			if (i < 0 || i >= this.AttributeCount)
+			get
 			{
-				throw new ArgumentOutOfRangeException("i");
-			}
-			this.MoveToElement();
-			this.MoveToFirstAttribute();
-			for (int j = 0; j < i; j++)
-			{
-				this.MoveToNextAttribute();
+				return (this.Prefix.Length <= 0) ? this.LocalName : (this.Prefix + ":" + this.LocalName);
 			}
 		}
 
-		public abstract bool MoveToFirstAttribute();
+		public abstract string NamespaceURI { get; }
 
-		public abstract bool MoveToNextAttribute();
+		public abstract XmlNameTable NameTable { get; }
 
-		public abstract bool MoveToElement();
+		public abstract XmlNodeType NodeType { get; }
 
-		public abstract bool ReadAttributeValue();
+		public abstract string Prefix { get; }
 
-		public abstract bool Read();
-
-		public abstract bool EOF { get; }
-
-		public virtual void Close()
+		public virtual char QuoteChar
 		{
+			get
+			{
+				return '"';
+			}
 		}
 
 		public abstract ReadState ReadState { get; }
 
-		public virtual void Skip()
-		{
-			if (this.ReadState != ReadState.Interactive)
-			{
-				return;
-			}
-			this.SkipSubtree();
-		}
-
-		public abstract XmlNameTable NameTable { get; }
-
-		public abstract string LookupNamespace(string prefix);
-
-		public virtual bool CanResolveEntity
+		public virtual IXmlSchemaInfo SchemaInfo
 		{
 			get
 			{
-				return false;
+				return null;
 			}
 		}
 
-		public abstract void ResolveEntity();
-
-		public virtual bool CanReadBinaryContent
+		public virtual XmlReaderSettings Settings
 		{
 			get
 			{
-				return false;
+				return this.settings;
 			}
 		}
 
-		public virtual int ReadContentAsBase64(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadContentAsBase64" }));
-		}
+		public abstract string Value { get; }
 
-		public virtual int ReadElementContentAsBase64(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadElementContentAsBase64" }));
-		}
-
-		public virtual int ReadContentAsBinHex(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadContentAsBinHex" }));
-		}
-
-		public virtual int ReadElementContentAsBinHex(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadElementContentAsBinHex" }));
-		}
-
-		public virtual bool CanReadValueChunk
+		public virtual string XmlLang
 		{
 			get
-			{
-				return false;
-			}
-		}
-
-		public virtual int ReadValueChunk(char[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("ReadValueChunk method is not supported on this XmlReader. Use CanReadValueChunk property to find out if an XmlReader implements it."));
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public virtual string ReadString()
-		{
-			if (this.ReadState != ReadState.Interactive)
 			{
 				return string.Empty;
 			}
-			this.MoveToElement();
-			if (this.NodeType == XmlNodeType.Element)
-			{
-				if (this.IsEmptyElement)
-				{
-					return string.Empty;
-				}
-				if (!this.Read())
-				{
-					throw new InvalidOperationException(Res.GetString("Operation is not valid due to the current state of the object."));
-				}
-				if (this.NodeType == XmlNodeType.EndElement)
-				{
-					return string.Empty;
-				}
-			}
-			string text = string.Empty;
-			while (XmlReader.IsTextualNode(this.NodeType))
-			{
-				text += this.Value;
-				if (!this.Read())
-				{
-					break;
-				}
-			}
-			return text;
 		}
 
-		public virtual XmlNodeType MoveToContent()
+		public virtual XmlSpace XmlSpace
 		{
-			for (;;)
+			get
 			{
-				XmlNodeType nodeType = this.NodeType;
-				switch (nodeType)
+				return XmlSpace.None;
+			}
+		}
+
+		public abstract void Close();
+
+		private static XmlNameTable PopulateNameTable(XmlReaderSettings settings)
+		{
+			XmlNameTable xmlNameTable = settings.NameTable;
+			if (xmlNameTable == null)
+			{
+				xmlNameTable = new NameTable();
+			}
+			return xmlNameTable;
+		}
+
+		private static XmlParserContext PopulateParserContext(XmlReaderSettings settings, string baseUri)
+		{
+			XmlNameTable xmlNameTable = XmlReader.PopulateNameTable(settings);
+			return new XmlParserContext(xmlNameTable, new XmlNamespaceManager(xmlNameTable), null, null, null, null, baseUri, null, XmlSpace.None, null);
+		}
+
+		private static XmlNodeType GetNodeType(XmlReaderSettings settings)
+		{
+			ConformanceLevel conformanceLevel = ((settings == null) ? ConformanceLevel.Auto : settings.ConformanceLevel);
+			return (conformanceLevel != ConformanceLevel.Fragment) ? XmlNodeType.Document : XmlNodeType.Element;
+		}
+
+		public static XmlReader Create(Stream stream)
+		{
+			return XmlReader.Create(stream, null);
+		}
+
+		public static XmlReader Create(string url)
+		{
+			return XmlReader.Create(url, null);
+		}
+
+		public static XmlReader Create(TextReader reader)
+		{
+			return XmlReader.Create(reader, null);
+		}
+
+		public static XmlReader Create(string url, XmlReaderSettings settings)
+		{
+			return XmlReader.Create(url, settings, null);
+		}
+
+		public static XmlReader Create(Stream stream, XmlReaderSettings settings)
+		{
+			return XmlReader.Create(stream, settings, string.Empty);
+		}
+
+		public static XmlReader Create(TextReader reader, XmlReaderSettings settings)
+		{
+			return XmlReader.Create(reader, settings, string.Empty);
+		}
+
+		private static XmlReaderSettings PopulateSettings(XmlReaderSettings src)
+		{
+			if (src == null)
+			{
+				return new XmlReaderSettings();
+			}
+			return src.Clone();
+		}
+
+		public static XmlReader Create(Stream stream, XmlReaderSettings settings, string baseUri)
+		{
+			settings = XmlReader.PopulateSettings(settings);
+			return XmlReader.Create(stream, settings, XmlReader.PopulateParserContext(settings, baseUri));
+		}
+
+		public static XmlReader Create(TextReader reader, XmlReaderSettings settings, string baseUri)
+		{
+			settings = XmlReader.PopulateSettings(settings);
+			return XmlReader.Create(reader, settings, XmlReader.PopulateParserContext(settings, baseUri));
+		}
+
+		public static XmlReader Create(XmlReader reader, XmlReaderSettings settings)
+		{
+			settings = XmlReader.PopulateSettings(settings);
+			XmlReader xmlReader = XmlReader.CreateFilteredXmlReader(reader, settings);
+			xmlReader.settings = settings;
+			return xmlReader;
+		}
+
+		public static XmlReader Create(string url, XmlReaderSettings settings, XmlParserContext context)
+		{
+			settings = XmlReader.PopulateSettings(settings);
+			bool closeInput = settings.CloseInput;
+			XmlReader xmlReader2;
+			try
+			{
+				settings.CloseInput = true;
+				if (context == null)
 				{
-				case XmlNodeType.Element:
-				case XmlNodeType.Text:
-				case XmlNodeType.CDATA:
-				case XmlNodeType.EntityReference:
-					goto IL_0033;
-				case XmlNodeType.Attribute:
-					goto IL_002C;
-				default:
-					if (nodeType - XmlNodeType.EndElement <= 1)
-					{
-						goto IL_0033;
-					}
-					if (!this.Read())
-					{
-						goto Block_2;
-					}
-					break;
+					context = XmlReader.PopulateParserContext(settings, url);
 				}
+				XmlTextReader xmlTextReader = new XmlTextReader(false, settings.XmlResolver, url, XmlReader.GetNodeType(settings), context);
+				XmlReader xmlReader = XmlReader.CreateCustomizedTextReader(xmlTextReader, settings);
+				xmlReader2 = xmlReader;
 			}
-			IL_002C:
-			this.MoveToElement();
-			IL_0033:
-			return this.NodeType;
-			Block_2:
-			return this.NodeType;
+			finally
+			{
+				settings.CloseInput = closeInput;
+			}
+			return xmlReader2;
 		}
 
-		public virtual void ReadStartElement()
+		public static XmlReader Create(Stream stream, XmlReaderSettings settings, XmlParserContext context)
 		{
-			if (this.MoveToContent() != XmlNodeType.Element)
+			settings = XmlReader.PopulateSettings(settings);
+			if (context == null)
 			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
+				context = XmlReader.PopulateParserContext(settings, string.Empty);
 			}
-			this.Read();
+			return XmlReader.CreateCustomizedTextReader(new XmlTextReader(stream, XmlReader.GetNodeType(settings), context), settings);
 		}
 
-		public virtual void ReadStartElement(string name)
+		public static XmlReader Create(TextReader reader, XmlReaderSettings settings, XmlParserContext context)
 		{
-			if (this.MoveToContent() != XmlNodeType.Element)
+			settings = XmlReader.PopulateSettings(settings);
+			if (context == null)
 			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
+				context = XmlReader.PopulateParserContext(settings, string.Empty);
 			}
-			if (this.Name == name)
-			{
-				this.Read();
-				return;
-			}
-			throw new XmlException("Element '{0}' was not found.", name, this as IXmlLineInfo);
+			return XmlReader.CreateCustomizedTextReader(new XmlTextReader(context.BaseURI, reader, XmlReader.GetNodeType(settings), context), settings);
 		}
 
-		public virtual void ReadStartElement(string localname, string ns)
+		private static XmlReader CreateCustomizedTextReader(XmlTextReader reader, XmlReaderSettings settings)
 		{
-			if (this.MoveToContent() != XmlNodeType.Element)
+			reader.XmlResolver = settings.XmlResolver;
+			reader.Normalization = true;
+			reader.EntityHandling = EntityHandling.ExpandEntities;
+			if (settings.ProhibitDtd)
 			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
+				reader.ProhibitDtd = true;
 			}
-			if (this.LocalName == localname && this.NamespaceURI == ns)
+			if (!settings.CheckCharacters)
 			{
-				this.Read();
-				return;
+				reader.CharacterChecking = false;
 			}
-			throw new XmlException("Element '{0}' with namespace name '{1}' was not found.", new string[] { localname, ns }, this as IXmlLineInfo);
+			reader.CloseInput = settings.CloseInput;
+			reader.Conformance = settings.ConformanceLevel;
+			reader.AdjustLineInfoOffset(settings.LineNumberOffset, settings.LinePositionOffset);
+			if (settings.NameTable != null)
+			{
+				reader.SetNameTable(settings.NameTable);
+			}
+			XmlReader xmlReader = XmlReader.CreateFilteredXmlReader(reader, settings);
+			xmlReader.settings = settings;
+			return xmlReader;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public virtual string ReadElementString()
+		private static XmlReader CreateFilteredXmlReader(XmlReader reader, XmlReaderSettings settings)
 		{
-			string text = string.Empty;
-			if (this.MoveToContent() != XmlNodeType.Element)
+			ConformanceLevel conformanceLevel;
+			if (reader is XmlTextReader)
 			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
+				conformanceLevel = ((XmlTextReader)reader).Conformance;
 			}
-			if (!this.IsEmptyElement)
+			else if (reader.Settings != null)
 			{
-				this.Read();
-				text = this.ReadString();
-				if (this.NodeType != XmlNodeType.EndElement)
-				{
-					throw new XmlException("Unexpected node type {0}. {1} method can only be called on elements with simple or empty content.", new string[]
-					{
-						this.NodeType.ToString(),
-						"ReadElementString"
-					}, this as IXmlLineInfo);
-				}
-				this.Read();
+				conformanceLevel = reader.Settings.ConformanceLevel;
 			}
 			else
 			{
-				this.Read();
+				conformanceLevel = settings.ConformanceLevel;
 			}
-			return text;
+			if (settings.ConformanceLevel != ConformanceLevel.Auto && conformanceLevel != settings.ConformanceLevel)
+			{
+				throw new InvalidOperationException(string.Format("ConformanceLevel cannot be overwritten by a wrapping XmlReader. The source reader has {0}, while {1} is specified.", conformanceLevel, settings.ConformanceLevel));
+			}
+			settings.ConformanceLevel = conformanceLevel;
+			reader = XmlReader.CreateValidatingXmlReader(reader, settings);
+			if (settings.IgnoreComments || settings.IgnoreProcessingInstructions || settings.IgnoreWhitespace)
+			{
+				return new XmlFilterReader(reader, settings);
+			}
+			reader.settings = settings;
+			return reader;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public virtual string ReadElementString(string name)
+		private static XmlReader CreateValidatingXmlReader(XmlReader reader, XmlReaderSettings settings)
 		{
-			string text = string.Empty;
-			if (this.MoveToContent() != XmlNodeType.Element)
+			switch (settings.ValidationType)
 			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
-			}
-			if (this.Name != name)
+			case ValidationType.DTD:
 			{
-				throw new XmlException("Element '{0}' was not found.", name, this as IXmlLineInfo);
-			}
-			if (!this.IsEmptyElement)
-			{
-				text = this.ReadString();
-				if (this.NodeType != XmlNodeType.EndElement)
+				XmlValidatingReader xmlValidatingReader = new XmlValidatingReader(reader);
+				xmlValidatingReader.XmlResolver = settings.XmlResolver;
+				xmlValidatingReader.ValidationType = ValidationType.DTD;
+				if ((settings.ValidationFlags & XmlSchemaValidationFlags.ProcessIdentityConstraints) == XmlSchemaValidationFlags.None)
 				{
-					throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
+					throw new NotImplementedException();
 				}
-				this.Read();
+				return (xmlValidatingReader == null) ? reader : xmlValidatingReader;
 			}
-			else
-			{
-				this.Read();
+			default:
+				return reader;
+			case ValidationType.Schema:
+				return new XmlSchemaValidatingReader(reader, settings);
 			}
-			return text;
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public virtual string ReadElementString(string localname, string ns)
+		protected virtual void Dispose(bool disposing)
 		{
-			string text = string.Empty;
-			if (this.MoveToContent() != XmlNodeType.Element)
+			if (this.ReadState != ReadState.Closed)
 			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
+				this.Close();
 			}
-			if (this.LocalName != localname || this.NamespaceURI != ns)
-			{
-				throw new XmlException("Element '{0}' with namespace name '{1}' was not found.", new string[] { localname, ns }, this as IXmlLineInfo);
-			}
-			if (!this.IsEmptyElement)
-			{
-				text = this.ReadString();
-				if (this.NodeType != XmlNodeType.EndElement)
-				{
-					throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
-				}
-				this.Read();
-			}
-			else
-			{
-				this.Read();
-			}
-			return text;
 		}
 
-		public virtual void ReadEndElement()
+		public abstract string GetAttribute(int i);
+
+		public abstract string GetAttribute(string name);
+
+		public abstract string GetAttribute(string localName, string namespaceName);
+
+		public static bool IsName(string s)
 		{
-			if (this.MoveToContent() != XmlNodeType.EndElement)
-			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
-			}
-			this.Read();
+			return s != null && XmlChar.IsName(s);
+		}
+
+		public static bool IsNameToken(string s)
+		{
+			return s != null && XmlChar.IsNmToken(s);
 		}
 
 		public virtual bool IsStartElement()
@@ -808,24 +409,380 @@ namespace System.Xml
 
 		public virtual bool IsStartElement(string name)
 		{
-			return this.MoveToContent() == XmlNodeType.Element && this.Name == name;
+			return this.IsStartElement() && this.Name == name;
 		}
 
-		public virtual bool IsStartElement(string localname, string ns)
+		public virtual bool IsStartElement(string localName, string namespaceName)
 		{
-			return this.MoveToContent() == XmlNodeType.Element && this.LocalName == localname && this.NamespaceURI == ns;
+			return this.IsStartElement() && this.LocalName == localName && this.NamespaceURI == namespaceName;
+		}
+
+		public abstract string LookupNamespace(string prefix);
+
+		public virtual void MoveToAttribute(int i)
+		{
+			if (i >= this.AttributeCount)
+			{
+				throw new ArgumentOutOfRangeException();
+			}
+			this.MoveToFirstAttribute();
+			for (int j = 0; j < i; j++)
+			{
+				this.MoveToNextAttribute();
+			}
+		}
+
+		public abstract bool MoveToAttribute(string name);
+
+		public abstract bool MoveToAttribute(string localName, string namespaceName);
+
+		private bool IsContent(XmlNodeType nodeType)
+		{
+			switch (nodeType)
+			{
+			case XmlNodeType.Element:
+				return true;
+			default:
+				return nodeType == XmlNodeType.EndElement || nodeType == XmlNodeType.EndEntity;
+			case XmlNodeType.Text:
+				return true;
+			case XmlNodeType.CDATA:
+				return true;
+			case XmlNodeType.EntityReference:
+				return true;
+			}
+		}
+
+		public virtual XmlNodeType MoveToContent()
+		{
+			ReadState readState = this.ReadState;
+			if (readState != ReadState.Initial && readState != ReadState.Interactive)
+			{
+				return this.NodeType;
+			}
+			if (this.NodeType == XmlNodeType.Attribute)
+			{
+				this.MoveToElement();
+			}
+			while (!this.IsContent(this.NodeType))
+			{
+				this.Read();
+				if (this.EOF)
+				{
+					return XmlNodeType.None;
+				}
+			}
+			return this.NodeType;
+		}
+
+		public abstract bool MoveToElement();
+
+		public abstract bool MoveToFirstAttribute();
+
+		public abstract bool MoveToNextAttribute();
+
+		public abstract bool Read();
+
+		public abstract bool ReadAttributeValue();
+
+		public virtual string ReadElementString()
+		{
+			if (this.MoveToContent() != XmlNodeType.Element)
+			{
+				string text = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+				throw this.XmlError(text);
+			}
+			string text2 = string.Empty;
+			if (!this.IsEmptyElement)
+			{
+				this.Read();
+				text2 = this.ReadString();
+				if (this.NodeType != XmlNodeType.EndElement)
+				{
+					string text3 = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+					throw this.XmlError(text3);
+				}
+			}
+			this.Read();
+			return text2;
+		}
+
+		public virtual string ReadElementString(string name)
+		{
+			if (this.MoveToContent() != XmlNodeType.Element)
+			{
+				string text = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+				throw this.XmlError(text);
+			}
+			if (name != this.Name)
+			{
+				string text2 = string.Format("The {0} tag from namespace {1} is expected.", this.Name, this.NamespaceURI);
+				throw this.XmlError(text2);
+			}
+			string text3 = string.Empty;
+			if (!this.IsEmptyElement)
+			{
+				this.Read();
+				text3 = this.ReadString();
+				if (this.NodeType != XmlNodeType.EndElement)
+				{
+					string text4 = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+					throw this.XmlError(text4);
+				}
+			}
+			this.Read();
+			return text3;
+		}
+
+		public virtual string ReadElementString(string localName, string namespaceName)
+		{
+			if (this.MoveToContent() != XmlNodeType.Element)
+			{
+				string text = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+				throw this.XmlError(text);
+			}
+			if (localName != this.LocalName || this.NamespaceURI != namespaceName)
+			{
+				string text2 = string.Format("The {0} tag from namespace {1} is expected.", this.LocalName, this.NamespaceURI);
+				throw this.XmlError(text2);
+			}
+			string text3 = string.Empty;
+			if (!this.IsEmptyElement)
+			{
+				this.Read();
+				text3 = this.ReadString();
+				if (this.NodeType != XmlNodeType.EndElement)
+				{
+					string text4 = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+					throw this.XmlError(text4);
+				}
+			}
+			this.Read();
+			return text3;
+		}
+
+		public virtual void ReadEndElement()
+		{
+			if (this.MoveToContent() != XmlNodeType.EndElement)
+			{
+				string text = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+				throw this.XmlError(text);
+			}
+			this.Read();
+		}
+
+		public virtual string ReadInnerXml()
+		{
+			if (this.ReadState != ReadState.Interactive || this.NodeType == XmlNodeType.EndElement)
+			{
+				return string.Empty;
+			}
+			if (this.IsEmptyElement)
+			{
+				this.Read();
+				return string.Empty;
+			}
+			StringWriter stringWriter = new StringWriter();
+			XmlTextWriter xmlTextWriter = new XmlTextWriter(stringWriter);
+			if (this.NodeType == XmlNodeType.Element)
+			{
+				int i = this.Depth;
+				this.Read();
+				while (i < this.Depth)
+				{
+					if (this.ReadState != ReadState.Interactive)
+					{
+						throw this.XmlError("Unexpected end of the XML reader.");
+					}
+					xmlTextWriter.WriteNode(this, false);
+				}
+				this.Read();
+			}
+			else
+			{
+				xmlTextWriter.WriteNode(this, false);
+			}
+			return stringWriter.ToString();
+		}
+
+		public virtual string ReadOuterXml()
+		{
+			if (this.ReadState != ReadState.Interactive || this.NodeType == XmlNodeType.EndElement)
+			{
+				return string.Empty;
+			}
+			XmlNodeType nodeType = this.NodeType;
+			if (nodeType != XmlNodeType.Element && nodeType != XmlNodeType.Attribute)
+			{
+				this.Skip();
+				return string.Empty;
+			}
+			StringWriter stringWriter = new StringWriter();
+			XmlTextWriter xmlTextWriter = new XmlTextWriter(stringWriter);
+			xmlTextWriter.WriteNode(this, false);
+			return stringWriter.ToString();
+		}
+
+		public virtual void ReadStartElement()
+		{
+			if (this.MoveToContent() != XmlNodeType.Element)
+			{
+				string text = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+				throw this.XmlError(text);
+			}
+			this.Read();
+		}
+
+		public virtual void ReadStartElement(string name)
+		{
+			if (this.MoveToContent() != XmlNodeType.Element)
+			{
+				string text = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+				throw this.XmlError(text);
+			}
+			if (name != this.Name)
+			{
+				string text2 = string.Format("The {0} tag from namespace {1} is expected.", this.Name, this.NamespaceURI);
+				throw this.XmlError(text2);
+			}
+			this.Read();
+		}
+
+		public virtual void ReadStartElement(string localName, string namespaceName)
+		{
+			if (this.MoveToContent() != XmlNodeType.Element)
+			{
+				string text = string.Format("'{0}' is an invalid node type.", this.NodeType.ToString());
+				throw this.XmlError(text);
+			}
+			if (localName != this.LocalName || this.NamespaceURI != namespaceName)
+			{
+				string text2 = string.Format("Expecting {0} tag from namespace {1}, got {2} and {3} instead", new object[] { localName, namespaceName, this.LocalName, this.NamespaceURI });
+				throw this.XmlError(text2);
+			}
+			this.Read();
+		}
+
+		public virtual string ReadString()
+		{
+			if (this.readStringBuffer == null)
+			{
+				this.readStringBuffer = new StringBuilder();
+			}
+			this.readStringBuffer.Length = 0;
+			this.MoveToElement();
+			XmlNodeType nodeType = this.NodeType;
+			switch (nodeType)
+			{
+			case XmlNodeType.Element:
+				if (this.IsEmptyElement)
+				{
+					return string.Empty;
+				}
+				for (;;)
+				{
+					this.Read();
+					XmlNodeType xmlNodeType = this.NodeType;
+					if (xmlNodeType != XmlNodeType.Text && xmlNodeType != XmlNodeType.CDATA && xmlNodeType != XmlNodeType.Whitespace && xmlNodeType != XmlNodeType.SignificantWhitespace)
+					{
+						break;
+					}
+					this.readStringBuffer.Append(this.Value);
+				}
+				goto IL_0122;
+			default:
+				if (nodeType != XmlNodeType.Whitespace && nodeType != XmlNodeType.SignificantWhitespace)
+				{
+					return string.Empty;
+				}
+				break;
+			case XmlNodeType.Text:
+			case XmlNodeType.CDATA:
+				break;
+			}
+			for (;;)
+			{
+				XmlNodeType xmlNodeType = this.NodeType;
+				if (xmlNodeType != XmlNodeType.Text && xmlNodeType != XmlNodeType.CDATA && xmlNodeType != XmlNodeType.Whitespace && xmlNodeType != XmlNodeType.SignificantWhitespace)
+				{
+					break;
+				}
+				this.readStringBuffer.Append(this.Value);
+				this.Read();
+			}
+			IL_0122:
+			string text = this.readStringBuffer.ToString();
+			this.readStringBuffer.Length = 0;
+			return text;
+		}
+
+		public virtual Type ValueType
+		{
+			get
+			{
+				return typeof(string);
+			}
+		}
+
+		public virtual bool ReadToDescendant(string name)
+		{
+			if (this.ReadState == ReadState.Initial)
+			{
+				this.MoveToContent();
+				if (this.IsStartElement(name))
+				{
+					return true;
+				}
+			}
+			if (this.NodeType != XmlNodeType.Element || this.IsEmptyElement)
+			{
+				return false;
+			}
+			int i = this.Depth;
+			this.Read();
+			while (i < this.Depth)
+			{
+				if (this.NodeType == XmlNodeType.Element && name == this.Name)
+				{
+					return true;
+				}
+				this.Read();
+			}
+			return false;
+		}
+
+		public virtual bool ReadToDescendant(string localName, string namespaceURI)
+		{
+			if (this.ReadState == ReadState.Initial)
+			{
+				this.MoveToContent();
+				if (this.IsStartElement(localName, namespaceURI))
+				{
+					return true;
+				}
+			}
+			if (this.NodeType != XmlNodeType.Element || this.IsEmptyElement)
+			{
+				return false;
+			}
+			int i = this.Depth;
+			this.Read();
+			while (i < this.Depth)
+			{
+				if (this.NodeType == XmlNodeType.Element && localName == this.LocalName && namespaceURI == this.NamespaceURI)
+				{
+					return true;
+				}
+				this.Read();
+			}
+			return false;
 		}
 
 		public virtual bool ReadToFollowing(string name)
 		{
-			if (name == null || name.Length == 0)
-			{
-				throw XmlConvert.CreateInvalidNameArgumentException(name, "name");
-			}
-			name = this.NameTable.Add(name);
 			while (this.Read())
 			{
-				if (this.NodeType == XmlNodeType.Element && Ref.Equal(name, this.Name))
+				if (this.NodeType == XmlNodeType.Element && name == this.Name)
 				{
 					return true;
 				}
@@ -835,84 +792,9 @@ namespace System.Xml
 
 		public virtual bool ReadToFollowing(string localName, string namespaceURI)
 		{
-			if (localName == null || localName.Length == 0)
-			{
-				throw XmlConvert.CreateInvalidNameArgumentException(localName, "localName");
-			}
-			if (namespaceURI == null)
-			{
-				throw new ArgumentNullException("namespaceURI");
-			}
-			localName = this.NameTable.Add(localName);
-			namespaceURI = this.NameTable.Add(namespaceURI);
 			while (this.Read())
 			{
-				if (this.NodeType == XmlNodeType.Element && Ref.Equal(localName, this.LocalName) && Ref.Equal(namespaceURI, this.NamespaceURI))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public virtual bool ReadToDescendant(string name)
-		{
-			if (name == null || name.Length == 0)
-			{
-				throw XmlConvert.CreateInvalidNameArgumentException(name, "name");
-			}
-			int num = this.Depth;
-			if (this.NodeType != XmlNodeType.Element)
-			{
-				if (this.ReadState != ReadState.Initial)
-				{
-					return false;
-				}
-				num--;
-			}
-			else if (this.IsEmptyElement)
-			{
-				return false;
-			}
-			name = this.NameTable.Add(name);
-			while (this.Read() && this.Depth > num)
-			{
-				if (this.NodeType == XmlNodeType.Element && Ref.Equal(name, this.Name))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public virtual bool ReadToDescendant(string localName, string namespaceURI)
-		{
-			if (localName == null || localName.Length == 0)
-			{
-				throw XmlConvert.CreateInvalidNameArgumentException(localName, "localName");
-			}
-			if (namespaceURI == null)
-			{
-				throw new ArgumentNullException("namespaceURI");
-			}
-			int num = this.Depth;
-			if (this.NodeType != XmlNodeType.Element)
-			{
-				if (this.ReadState != ReadState.Initial)
-				{
-					return false;
-				}
-				num--;
-			}
-			else if (this.IsEmptyElement)
-			{
-				return false;
-			}
-			localName = this.NameTable.Add(localName);
-			namespaceURI = this.NameTable.Add(namespaceURI);
-			while (this.Read() && this.Depth > num)
-			{
-				if (this.NodeType == XmlNodeType.Element && Ref.Equal(localName, this.LocalName) && Ref.Equal(namespaceURI, this.NamespaceURI))
+				if (this.NodeType == XmlNodeType.Element && localName == this.LocalName && namespaceURI == this.NamespaceURI)
 				{
 					return true;
 				}
@@ -922,1218 +804,641 @@ namespace System.Xml
 
 		public virtual bool ReadToNextSibling(string name)
 		{
-			if (name == null || name.Length == 0)
+			if (this.ReadState != ReadState.Interactive)
 			{
-				throw XmlConvert.CreateInvalidNameArgumentException(name, "name");
+				return false;
 			}
-			name = this.NameTable.Add(name);
-			while (this.SkipSubtree())
+			int depth = this.Depth;
+			this.Skip();
+			while (!this.EOF && depth <= this.Depth)
 			{
-				XmlNodeType nodeType = this.NodeType;
-				if (nodeType == XmlNodeType.Element && Ref.Equal(name, this.Name))
+				if (this.NodeType == XmlNodeType.Element && name == this.Name)
 				{
 					return true;
 				}
-				if (nodeType == XmlNodeType.EndElement || this.EOF)
-				{
-					break;
-				}
+				this.Skip();
 			}
 			return false;
 		}
 
 		public virtual bool ReadToNextSibling(string localName, string namespaceURI)
 		{
-			if (localName == null || localName.Length == 0)
+			if (this.ReadState != ReadState.Interactive)
 			{
-				throw XmlConvert.CreateInvalidNameArgumentException(localName, "localName");
+				return false;
 			}
-			if (namespaceURI == null)
+			int depth = this.Depth;
+			this.Skip();
+			while (!this.EOF && depth <= this.Depth)
 			{
-				throw new ArgumentNullException("namespaceURI");
-			}
-			localName = this.NameTable.Add(localName);
-			namespaceURI = this.NameTable.Add(namespaceURI);
-			while (this.SkipSubtree())
-			{
-				XmlNodeType nodeType = this.NodeType;
-				if (nodeType == XmlNodeType.Element && Ref.Equal(localName, this.LocalName) && Ref.Equal(namespaceURI, this.NamespaceURI))
+				if (this.NodeType == XmlNodeType.Element && localName == this.LocalName && namespaceURI == this.NamespaceURI)
 				{
 					return true;
 				}
-				if (nodeType == XmlNodeType.EndElement || this.EOF)
-				{
-					break;
-				}
+				this.Skip();
 			}
 			return false;
-		}
-
-		public static bool IsName(string str)
-		{
-			if (str == null)
-			{
-				throw new NullReferenceException();
-			}
-			return ValidateNames.IsNameNoNamespaces(str);
-		}
-
-		public static bool IsNameToken(string str)
-		{
-			if (str == null)
-			{
-				throw new NullReferenceException();
-			}
-			return ValidateNames.IsNmtokenNoNamespaces(str);
-		}
-
-		public virtual string ReadInnerXml()
-		{
-			if (this.ReadState != ReadState.Interactive)
-			{
-				return string.Empty;
-			}
-			if (this.NodeType != XmlNodeType.Attribute && this.NodeType != XmlNodeType.Element)
-			{
-				this.Read();
-				return string.Empty;
-			}
-			StringWriter stringWriter = new StringWriter(CultureInfo.InvariantCulture);
-			XmlWriter xmlWriter = this.CreateWriterForInnerOuterXml(stringWriter);
-			try
-			{
-				if (this.NodeType == XmlNodeType.Attribute)
-				{
-					((XmlTextWriter)xmlWriter).QuoteChar = this.QuoteChar;
-					this.WriteAttributeValue(xmlWriter);
-				}
-				if (this.NodeType == XmlNodeType.Element)
-				{
-					this.WriteNode(xmlWriter, false);
-				}
-			}
-			finally
-			{
-				xmlWriter.Close();
-			}
-			return stringWriter.ToString();
-		}
-
-		private void WriteNode(XmlWriter xtw, bool defattr)
-		{
-			int num = ((this.NodeType == XmlNodeType.None) ? (-1) : this.Depth);
-			while (this.Read() && num < this.Depth)
-			{
-				switch (this.NodeType)
-				{
-				case XmlNodeType.Element:
-					xtw.WriteStartElement(this.Prefix, this.LocalName, this.NamespaceURI);
-					((XmlTextWriter)xtw).QuoteChar = this.QuoteChar;
-					xtw.WriteAttributes(this, defattr);
-					if (this.IsEmptyElement)
-					{
-						xtw.WriteEndElement();
-					}
-					break;
-				case XmlNodeType.Text:
-					xtw.WriteString(this.Value);
-					break;
-				case XmlNodeType.CDATA:
-					xtw.WriteCData(this.Value);
-					break;
-				case XmlNodeType.EntityReference:
-					xtw.WriteEntityRef(this.Name);
-					break;
-				case XmlNodeType.ProcessingInstruction:
-				case XmlNodeType.XmlDeclaration:
-					xtw.WriteProcessingInstruction(this.Name, this.Value);
-					break;
-				case XmlNodeType.Comment:
-					xtw.WriteComment(this.Value);
-					break;
-				case XmlNodeType.DocumentType:
-					xtw.WriteDocType(this.Name, this.GetAttribute("PUBLIC"), this.GetAttribute("SYSTEM"), this.Value);
-					break;
-				case XmlNodeType.Whitespace:
-				case XmlNodeType.SignificantWhitespace:
-					xtw.WriteWhitespace(this.Value);
-					break;
-				case XmlNodeType.EndElement:
-					xtw.WriteFullEndElement();
-					break;
-				}
-			}
-			if (num == this.Depth && this.NodeType == XmlNodeType.EndElement)
-			{
-				this.Read();
-			}
-		}
-
-		private void WriteAttributeValue(XmlWriter xtw)
-		{
-			string name = this.Name;
-			while (this.ReadAttributeValue())
-			{
-				if (this.NodeType == XmlNodeType.EntityReference)
-				{
-					xtw.WriteEntityRef(this.Name);
-				}
-				else
-				{
-					xtw.WriteString(this.Value);
-				}
-			}
-			this.MoveToAttribute(name);
-		}
-
-		public virtual string ReadOuterXml()
-		{
-			if (this.ReadState != ReadState.Interactive)
-			{
-				return string.Empty;
-			}
-			if (this.NodeType != XmlNodeType.Attribute && this.NodeType != XmlNodeType.Element)
-			{
-				this.Read();
-				return string.Empty;
-			}
-			StringWriter stringWriter = new StringWriter(CultureInfo.InvariantCulture);
-			XmlWriter xmlWriter = this.CreateWriterForInnerOuterXml(stringWriter);
-			try
-			{
-				if (this.NodeType == XmlNodeType.Attribute)
-				{
-					xmlWriter.WriteStartAttribute(this.Prefix, this.LocalName, this.NamespaceURI);
-					this.WriteAttributeValue(xmlWriter);
-					xmlWriter.WriteEndAttribute();
-				}
-				else
-				{
-					xmlWriter.WriteNode(this, false);
-				}
-			}
-			finally
-			{
-				xmlWriter.Close();
-			}
-			return stringWriter.ToString();
-		}
-
-		private XmlWriter CreateWriterForInnerOuterXml(StringWriter sw)
-		{
-			XmlTextWriter xmlTextWriter = new XmlTextWriter(sw);
-			this.SetNamespacesFlag(xmlTextWriter);
-			return xmlTextWriter;
-		}
-
-		private void SetNamespacesFlag(XmlTextWriter xtw)
-		{
-			XmlTextReader xmlTextReader = this as XmlTextReader;
-			if (xmlTextReader != null)
-			{
-				xtw.Namespaces = xmlTextReader.Namespaces;
-				return;
-			}
-			XmlValidatingReader xmlValidatingReader = this as XmlValidatingReader;
-			if (xmlValidatingReader != null)
-			{
-				xtw.Namespaces = xmlValidatingReader.Namespaces;
-			}
 		}
 
 		public virtual XmlReader ReadSubtree()
 		{
 			if (this.NodeType != XmlNodeType.Element)
 			{
-				throw new InvalidOperationException(Res.GetString("ReadSubtree() can be called only if the reader is on an element node."));
+				throw new InvalidOperationException(string.Format("ReadSubtree() can be invoked only when the reader is positioned on an element. Current node is {0}. {1}", this.NodeType, this.GetLocation()));
 			}
-			return new XmlSubtreeReader(this);
+			return new SubtreeXmlReader(this);
 		}
 
-		public virtual bool HasAttributes
+		private string ReadContentString()
 		{
-			get
+			if (this.NodeType == XmlNodeType.Attribute || (this.NodeType != XmlNodeType.Element && this.HasAttributes))
 			{
-				return this.AttributeCount > 0;
+				return this.Value;
 			}
+			return this.ReadContentString(true);
 		}
 
-		public void Dispose()
+		private string ReadContentString(bool isText)
 		{
-			this.Dispose(true);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (disposing && this.ReadState != ReadState.Closed)
+			if (isText)
 			{
-				this.Close();
-			}
-		}
-
-		internal virtual XmlNamespaceManager NamespaceManager
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		internal static bool IsTextualNode(XmlNodeType nodeType)
-		{
-			return ((ulong)XmlReader.IsTextualNodeBitmap & (ulong)(1L << (int)(nodeType & (XmlNodeType)31))) > 0UL;
-		}
-
-		internal static bool CanReadContentAs(XmlNodeType nodeType)
-		{
-			return ((ulong)XmlReader.CanReadContentAsBitmap & (ulong)(1L << (int)(nodeType & (XmlNodeType)31))) > 0UL;
-		}
-
-		internal static bool HasValueInternal(XmlNodeType nodeType)
-		{
-			return ((ulong)XmlReader.HasValueBitmap & (ulong)(1L << (int)(nodeType & (XmlNodeType)31))) > 0UL;
-		}
-
-		private bool SkipSubtree()
-		{
-			this.MoveToElement();
-			if (this.NodeType == XmlNodeType.Element && !this.IsEmptyElement)
-			{
-				int depth = this.Depth;
-				while (this.Read() && depth < this.Depth)
+				XmlNodeType xmlNodeType = this.NodeType;
+				switch (xmlNodeType)
 				{
-				}
-				return this.NodeType == XmlNodeType.EndElement && this.Read();
-			}
-			return this.Read();
-		}
-
-		internal void CheckElement(string localName, string namespaceURI)
-		{
-			if (localName == null || localName.Length == 0)
-			{
-				throw XmlConvert.CreateInvalidNameArgumentException(localName, "localName");
-			}
-			if (namespaceURI == null)
-			{
-				throw new ArgumentNullException("namespaceURI");
-			}
-			if (this.NodeType != XmlNodeType.Element)
-			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString(), this as IXmlLineInfo);
-			}
-			if (this.LocalName != localName || this.NamespaceURI != namespaceURI)
-			{
-				throw new XmlException("Element '{0}' with namespace name '{1}' was not found.", new string[] { localName, namespaceURI }, this as IXmlLineInfo);
-			}
-		}
-
-		internal Exception CreateReadContentAsException(string methodName)
-		{
-			return XmlReader.CreateReadContentAsException(methodName, this.NodeType, this as IXmlLineInfo);
-		}
-
-		internal Exception CreateReadElementContentAsException(string methodName)
-		{
-			return XmlReader.CreateReadElementContentAsException(methodName, this.NodeType, this as IXmlLineInfo);
-		}
-
-		internal bool CanReadContentAs()
-		{
-			return XmlReader.CanReadContentAs(this.NodeType);
-		}
-
-		internal static Exception CreateReadContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
-		{
-			return new InvalidOperationException(XmlReader.AddLineInfo(Res.GetString("The {0} method is not supported on node type {1}. If you want to read typed content of an element, use the ReadElementContentAs method.", new string[]
-			{
-				methodName,
-				nodeType.ToString()
-			}), lineInfo));
-		}
-
-		internal static Exception CreateReadElementContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
-		{
-			return new InvalidOperationException(XmlReader.AddLineInfo(Res.GetString("The {0} method is not supported on node type {1}.", new string[]
-			{
-				methodName,
-				nodeType.ToString()
-			}), lineInfo));
-		}
-
-		private static string AddLineInfo(string message, IXmlLineInfo lineInfo)
-		{
-			if (lineInfo != null)
-			{
-				message = message + " " + Res.GetString("Line {0}, position {1}.", new string[]
-				{
-					lineInfo.LineNumber.ToString(CultureInfo.InvariantCulture),
-					lineInfo.LinePosition.ToString(CultureInfo.InvariantCulture)
-				});
-			}
-			return message;
-		}
-
-		internal string InternalReadContentAsString()
-		{
-			string text = string.Empty;
-			StringBuilder stringBuilder = null;
-			do
-			{
-				switch (this.NodeType)
-				{
-				case XmlNodeType.Attribute:
-					goto IL_0055;
-				case XmlNodeType.Text:
-				case XmlNodeType.CDATA:
-				case XmlNodeType.Whitespace:
-				case XmlNodeType.SignificantWhitespace:
-					if (text.Length == 0)
+				case XmlNodeType.Element:
+					throw new InvalidOperationException(string.Format("Node type {0} is not supported in this operation.{1}", this.NodeType, this.GetLocation()));
+				default:
+					if (xmlNodeType != XmlNodeType.Whitespace && xmlNodeType != XmlNodeType.SignificantWhitespace)
 					{
-						text = this.Value;
-						goto IL_009B;
-					}
-					if (stringBuilder == null)
-					{
-						stringBuilder = new StringBuilder();
-						stringBuilder.Append(text);
-					}
-					stringBuilder.Append(this.Value);
-					goto IL_009B;
-				case XmlNodeType.EntityReference:
-					if (this.CanResolveEntity)
-					{
-						this.ResolveEntity();
-						goto IL_009B;
+						return string.Empty;
 					}
 					break;
-				case XmlNodeType.ProcessingInstruction:
-				case XmlNodeType.Comment:
-				case XmlNodeType.EndEntity:
-					goto IL_009B;
+				case XmlNodeType.Text:
+				case XmlNodeType.CDATA:
+					break;
 				}
-				break;
-				IL_009B:;
 			}
-			while ((this.AttributeCount != 0) ? this.ReadAttributeValue() : this.Read());
-			goto IL_00B6;
-			IL_0055:
-			return this.Value;
-			IL_00B6:
-			if (stringBuilder != null)
+			string text = string.Empty;
+			for (;;)
 			{
-				return stringBuilder.ToString();
+				XmlNodeType xmlNodeType = this.NodeType;
+				switch (xmlNodeType)
+				{
+				case XmlNodeType.Element:
+					goto IL_00A5;
+				default:
+					switch (xmlNodeType)
+					{
+					case XmlNodeType.Whitespace:
+					case XmlNodeType.SignificantWhitespace:
+						goto IL_00BB;
+					case XmlNodeType.EndElement:
+						return text;
+					}
+					break;
+				case XmlNodeType.Text:
+				case XmlNodeType.CDATA:
+					goto IL_00BB;
+				}
+				IL_00CD:
+				if (!this.Read())
+				{
+					goto Block_6;
+				}
+				continue;
+				IL_00BB:
+				text += this.Value;
+				goto IL_00CD;
 			}
-			return text;
+			IL_00A5:
+			if (isText)
+			{
+				return text;
+			}
+			throw this.XmlError("Child element is not expected in this operation.");
+			Block_6:
+			throw this.XmlError("Unexpected end of document.");
 		}
 
-		private bool SetupReadElementContentAsXxx(string methodName)
+		private string GetLocation()
 		{
-			if (this.NodeType != XmlNodeType.Element)
-			{
-				throw this.CreateReadElementContentAsException(methodName);
-			}
+			IXmlLineInfo xmlLineInfo = this as IXmlLineInfo;
+			return (xmlLineInfo == null || !xmlLineInfo.HasLineInfo()) ? string.Empty : string.Format(" {0} (line {1}, column {2})", this.BaseURI, xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
+		}
+
+		[MonoTODO]
+		public virtual object ReadElementContentAsObject()
+		{
+			return this.ReadElementContentAs(this.ValueType, null);
+		}
+
+		[MonoTODO]
+		public virtual object ReadElementContentAsObject(string localName, string namespaceURI)
+		{
+			return this.ReadElementContentAs(this.ValueType, null, localName, namespaceURI);
+		}
+
+		[MonoTODO]
+		public virtual object ReadContentAsObject()
+		{
+			return this.ReadContentAs(this.ValueType, null);
+		}
+
+		public virtual object ReadElementContentAs(Type type, IXmlNamespaceResolver resolver)
+		{
 			bool isEmptyElement = this.IsEmptyElement;
-			this.Read();
-			if (isEmptyElement)
+			this.ReadStartElement();
+			object obj = this.ValueAs((!isEmptyElement) ? this.ReadContentString(false) : string.Empty, type, resolver);
+			if (!isEmptyElement)
 			{
-				return false;
+				this.ReadEndElement();
 			}
-			XmlNodeType nodeType = this.NodeType;
-			if (nodeType == XmlNodeType.EndElement)
-			{
-				this.Read();
-				return false;
-			}
-			if (nodeType == XmlNodeType.Element)
-			{
-				throw new XmlException("ReadElementContentAs() methods cannot be called on an element that has child elements.", string.Empty, this as IXmlLineInfo);
-			}
-			return true;
+			return obj;
 		}
 
-		private void FinishReadElementContentAsXxx()
+		public virtual object ReadElementContentAs(Type type, IXmlNamespaceResolver resolver, string localName, string namespaceURI)
 		{
-			if (this.NodeType != XmlNodeType.EndElement)
-			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString());
-			}
-			this.Read();
+			this.ReadStartElement(localName, namespaceURI);
+			object obj = this.ReadContentAs(type, resolver);
+			this.ReadEndElement();
+			return obj;
 		}
 
-		internal bool IsDefaultInternal
+		public virtual object ReadContentAs(Type type, IXmlNamespaceResolver resolver)
 		{
-			get
+			return this.ValueAs(this.ReadContentString(), type, resolver);
+		}
+
+		private object ValueAs(string text, Type type, IXmlNamespaceResolver resolver)
+		{
+			try
 			{
-				if (this.IsDefault)
+				if (type == typeof(object))
 				{
-					return true;
+					return text;
 				}
-				IXmlSchemaInfo schemaInfo = this.SchemaInfo;
-				return schemaInfo != null && schemaInfo.IsDefault;
-			}
-		}
-
-		internal virtual IDtdInfo DtdInfo
-		{
-			get
-			{
-				return null;
-			}
-		}
-
-		internal static Encoding GetEncoding(XmlReader reader)
-		{
-			XmlTextReaderImpl xmlTextReaderImpl = XmlReader.GetXmlTextReaderImpl(reader);
-			if (xmlTextReaderImpl == null)
-			{
-				return null;
-			}
-			return xmlTextReaderImpl.Encoding;
-		}
-
-		internal static ConformanceLevel GetV1ConformanceLevel(XmlReader reader)
-		{
-			XmlTextReaderImpl xmlTextReaderImpl = XmlReader.GetXmlTextReaderImpl(reader);
-			if (xmlTextReaderImpl == null)
-			{
-				return ConformanceLevel.Document;
-			}
-			return xmlTextReaderImpl.V1ComformanceLevel;
-		}
-
-		private static XmlTextReaderImpl GetXmlTextReaderImpl(XmlReader reader)
-		{
-			XmlTextReaderImpl xmlTextReaderImpl = reader as XmlTextReaderImpl;
-			if (xmlTextReaderImpl != null)
-			{
-				return xmlTextReaderImpl;
-			}
-			XmlTextReader xmlTextReader = reader as XmlTextReader;
-			if (xmlTextReader != null)
-			{
-				return xmlTextReader.Impl;
-			}
-			XmlValidatingReaderImpl xmlValidatingReaderImpl = reader as XmlValidatingReaderImpl;
-			if (xmlValidatingReaderImpl != null)
-			{
-				return xmlValidatingReaderImpl.ReaderImpl;
-			}
-			XmlValidatingReader xmlValidatingReader = reader as XmlValidatingReader;
-			if (xmlValidatingReader != null)
-			{
-				return xmlValidatingReader.Impl.ReaderImpl;
-			}
-			return null;
-		}
-
-		public static XmlReader Create(string inputUri)
-		{
-			return XmlReader.Create(inputUri, null, null);
-		}
-
-		public static XmlReader Create(string inputUri, XmlReaderSettings settings)
-		{
-			return XmlReader.Create(inputUri, settings, null);
-		}
-
-		public static XmlReader Create(string inputUri, XmlReaderSettings settings, XmlParserContext inputContext)
-		{
-			if (settings == null)
-			{
-				settings = new XmlReaderSettings();
-			}
-			return settings.CreateReader(inputUri, inputContext);
-		}
-
-		public static XmlReader Create(Stream input)
-		{
-			return XmlReader.Create(input, null, string.Empty);
-		}
-
-		public static XmlReader Create(Stream input, XmlReaderSettings settings)
-		{
-			return XmlReader.Create(input, settings, string.Empty);
-		}
-
-		public static XmlReader Create(Stream input, XmlReaderSettings settings, string baseUri)
-		{
-			if (settings == null)
-			{
-				settings = new XmlReaderSettings();
-			}
-			return settings.CreateReader(input, null, baseUri, null);
-		}
-
-		public static XmlReader Create(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
-		{
-			if (settings == null)
-			{
-				settings = new XmlReaderSettings();
-			}
-			return settings.CreateReader(input, null, string.Empty, inputContext);
-		}
-
-		public static XmlReader Create(TextReader input)
-		{
-			return XmlReader.Create(input, null, string.Empty);
-		}
-
-		public static XmlReader Create(TextReader input, XmlReaderSettings settings)
-		{
-			return XmlReader.Create(input, settings, string.Empty);
-		}
-
-		public static XmlReader Create(TextReader input, XmlReaderSettings settings, string baseUri)
-		{
-			if (settings == null)
-			{
-				settings = new XmlReaderSettings();
-			}
-			return settings.CreateReader(input, baseUri, null);
-		}
-
-		public static XmlReader Create(TextReader input, XmlReaderSettings settings, XmlParserContext inputContext)
-		{
-			if (settings == null)
-			{
-				settings = new XmlReaderSettings();
-			}
-			return settings.CreateReader(input, string.Empty, inputContext);
-		}
-
-		public static XmlReader Create(XmlReader reader, XmlReaderSettings settings)
-		{
-			if (settings == null)
-			{
-				settings = new XmlReaderSettings();
-			}
-			return settings.CreateReader(reader);
-		}
-
-		internal static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			if (settings == null)
-			{
-				settings = new XmlReaderSettings();
-			}
-			byte[] array = new byte[XmlReader.CalcBufferSize(input)];
-			int num = 0;
-			int num2;
-			do
-			{
-				num2 = input.Read(array, num, array.Length - num);
-				num += num2;
-			}
-			while (num2 > 0 && num < 2);
-			XmlReader xmlReader;
-			if (num >= 2 && array[0] == 223 && array[1] == 255)
-			{
-				if (inputContext != null)
+				if (type == typeof(XmlQualifiedName))
 				{
-					throw new ArgumentException(Res.GetString("BinaryXml Parser does not support initialization with XmlParserContext."), "inputContext");
+					if (resolver != null)
+					{
+						return XmlQualifiedName.Parse(text, resolver);
+					}
+					return XmlQualifiedName.Parse(text, this);
 				}
-				xmlReader = new XmlSqlBinaryReader(input, array, num, string.Empty, settings.CloseInput, settings);
+				else
+				{
+					if (type == typeof(DateTimeOffset))
+					{
+						return XmlConvert.ToDateTimeOffset(text);
+					}
+					switch (Type.GetTypeCode(type))
+					{
+					case TypeCode.Boolean:
+						return XQueryConvert.StringToBoolean(text);
+					case TypeCode.Int32:
+						return XQueryConvert.StringToInt(text);
+					case TypeCode.Int64:
+						return XQueryConvert.StringToInteger(text);
+					case TypeCode.Single:
+						return XQueryConvert.StringToFloat(text);
+					case TypeCode.Double:
+						return XQueryConvert.StringToDouble(text);
+					case TypeCode.Decimal:
+						return XQueryConvert.StringToDecimal(text);
+					case TypeCode.DateTime:
+						return XQueryConvert.StringToDateTime(text);
+					case TypeCode.String:
+						return text;
+					}
+				}
 			}
-			else
+			catch (Exception ex)
 			{
-				xmlReader = new XmlTextReaderImpl(input, array, num, settings, null, string.Empty, inputContext, settings.CloseInput);
+				throw this.XmlError(string.Format("Current text value '{0}' is not acceptable for specified type '{1}'. {2}", text, type, (ex == null) ? string.Empty : ex.Message), ex);
 			}
-			if (settings.ValidationType != ValidationType.None)
-			{
-				xmlReader = settings.AddValidation(xmlReader);
-			}
-			if (settings.Async)
-			{
-				xmlReader = XmlAsyncCheckReader.CreateAsyncCheckWrapper(xmlReader);
-			}
-			return xmlReader;
+			throw new ArgumentException(string.Format("Specified type '{0}' is not supported.", type));
 		}
 
-		internal static int CalcBufferSize(Stream input)
+		public virtual bool ReadElementContentAsBoolean()
 		{
-			int num = 4096;
-			if (input.CanSeek)
+			bool flag;
+			try
 			{
-				long length = input.Length;
-				if (length < (long)num)
-				{
-					num = checked((int)length);
-				}
-				else if (length > 65536L)
-				{
-					num = 8192;
-				}
+				flag = XQueryConvert.StringToBoolean(this.ReadElementContentAsString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return flag;
+		}
+
+		public virtual DateTime ReadElementContentAsDateTime()
+		{
+			DateTime dateTime;
+			try
+			{
+				dateTime = XQueryConvert.StringToDateTime(this.ReadElementContentAsString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return dateTime;
+		}
+
+		public virtual decimal ReadElementContentAsDecimal()
+		{
+			decimal num;
+			try
+			{
+				num = XQueryConvert.StringToDecimal(this.ReadElementContentAsString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
 			}
 			return num;
 		}
 
-		private object debuggerDisplayProxy
+		public virtual double ReadElementContentAsDouble()
 		{
-			get
+			double num;
+			try
 			{
-				return new XmlReader.XmlReaderDebuggerDisplayProxy(this);
+				num = XQueryConvert.StringToDouble(this.ReadElementContentAsString());
 			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
 		}
 
-		public virtual Task<string> GetValueAsync()
+		public virtual float ReadElementContentAsFloat()
 		{
-			throw new NotImplementedException();
+			float num;
+			try
+			{
+				num = XQueryConvert.StringToFloat(this.ReadElementContentAsString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
 		}
 
-		public virtual async Task<object> ReadContentAsObjectAsync()
+		public virtual int ReadElementContentAsInt()
 		{
-			if (!this.CanReadContentAs())
+			int num;
+			try
 			{
-				throw this.CreateReadContentAsException("ReadContentAsObject");
+				num = XQueryConvert.StringToInt(this.ReadElementContentAsString());
 			}
-			return await this.InternalReadContentAsStringAsync().ConfigureAwait(false);
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
 		}
 
-		public virtual Task<string> ReadContentAsStringAsync()
+		public virtual long ReadElementContentAsLong()
 		{
-			if (!this.CanReadContentAs())
+			long num;
+			try
 			{
-				throw this.CreateReadContentAsException("ReadContentAsString");
+				num = XQueryConvert.StringToInteger(this.ReadElementContentAsString());
 			}
-			return this.InternalReadContentAsStringAsync();
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
 		}
 
-		public virtual async Task<object> ReadContentAsAsync(Type returnType, IXmlNamespaceResolver namespaceResolver)
+		public virtual string ReadElementContentAsString()
 		{
-			if (!this.CanReadContentAs())
-			{
-				throw this.CreateReadContentAsException("ReadContentAs");
-			}
-			string text = await this.InternalReadContentAsStringAsync().ConfigureAwait(false);
-			object obj;
-			if (returnType == typeof(string))
-			{
-				obj = text;
-			}
-			else
-			{
-				try
-				{
-					obj = XmlUntypedConverter.Untyped.ChangeType(text, returnType, (namespaceResolver == null) ? (this as IXmlNamespaceResolver) : namespaceResolver);
-				}
-				catch (FormatException ex)
-				{
-					throw new XmlException("Content cannot be converted to the type {0}.", returnType.ToString(), ex, this as IXmlLineInfo);
-				}
-				catch (InvalidCastException ex2)
-				{
-					throw new XmlException("Content cannot be converted to the type {0}.", returnType.ToString(), ex2, this as IXmlLineInfo);
-				}
-			}
-			return obj;
-		}
-
-		public virtual async Task<object> ReadElementContentAsObjectAsync()
-		{
-			ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.SetupReadElementContentAsXxxAsync("ReadElementContentAsObject").ConfigureAwait(false).GetAwaiter();
-			if (!configuredTaskAwaiter.IsCompleted)
-			{
-				await configuredTaskAwaiter;
-				ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-				configuredTaskAwaiter = configuredTaskAwaiter2;
-				configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter);
-			}
-			object obj;
-			if (configuredTaskAwaiter.GetResult())
-			{
-				object value = await this.ReadContentAsObjectAsync().ConfigureAwait(false);
-				await this.FinishReadElementContentAsXxxAsync().ConfigureAwait(false);
-				obj = value;
-			}
-			else
-			{
-				obj = string.Empty;
-			}
-			return obj;
-		}
-
-		public virtual async Task<string> ReadElementContentAsStringAsync()
-		{
-			ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.SetupReadElementContentAsXxxAsync("ReadElementContentAsString").ConfigureAwait(false).GetAwaiter();
-			if (!configuredTaskAwaiter.IsCompleted)
-			{
-				await configuredTaskAwaiter;
-				ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-				configuredTaskAwaiter = configuredTaskAwaiter2;
-				configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter);
-			}
-			string text;
-			if (configuredTaskAwaiter.GetResult())
-			{
-				string value = await this.ReadContentAsStringAsync().ConfigureAwait(false);
-				await this.FinishReadElementContentAsXxxAsync().ConfigureAwait(false);
-				text = value;
-			}
-			else
-			{
-				text = string.Empty;
-			}
-			return text;
-		}
-
-		public virtual async Task<object> ReadElementContentAsAsync(Type returnType, IXmlNamespaceResolver namespaceResolver)
-		{
-			ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.SetupReadElementContentAsXxxAsync("ReadElementContentAs").ConfigureAwait(false).GetAwaiter();
-			if (!configuredTaskAwaiter.IsCompleted)
-			{
-				await configuredTaskAwaiter;
-				ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-				configuredTaskAwaiter = configuredTaskAwaiter2;
-				configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter);
-			}
-			object obj;
-			if (configuredTaskAwaiter.GetResult())
-			{
-				object value = await this.ReadContentAsAsync(returnType, namespaceResolver).ConfigureAwait(false);
-				await this.FinishReadElementContentAsXxxAsync().ConfigureAwait(false);
-				obj = value;
-			}
-			else
-			{
-				obj = ((returnType == typeof(string)) ? string.Empty : XmlUntypedConverter.Untyped.ChangeType(string.Empty, returnType, namespaceResolver));
-			}
-			return obj;
-		}
-
-		public virtual Task<bool> ReadAsync()
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual Task SkipAsync()
-		{
-			if (this.ReadState != ReadState.Interactive)
-			{
-				return AsyncHelper.DoneTask;
-			}
-			return this.SkipSubtreeAsync();
-		}
-
-		public virtual Task<int> ReadContentAsBase64Async(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadContentAsBase64" }));
-		}
-
-		public virtual Task<int> ReadElementContentAsBase64Async(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadElementContentAsBase64" }));
-		}
-
-		public virtual Task<int> ReadContentAsBinHexAsync(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadContentAsBinHex" }));
-		}
-
-		public virtual Task<int> ReadElementContentAsBinHexAsync(byte[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("{0} method is not supported on this XmlReader. Use CanReadBinaryContent property to find out if a reader implements it.", new object[] { "ReadElementContentAsBinHex" }));
-		}
-
-		public virtual Task<int> ReadValueChunkAsync(char[] buffer, int index, int count)
-		{
-			throw new NotSupportedException(Res.GetString("ReadValueChunk method is not supported on this XmlReader. Use CanReadValueChunk property to find out if an XmlReader implements it."));
-		}
-
-		public virtual async Task<XmlNodeType> MoveToContentAsync()
-		{
-			for (;;)
-			{
-				XmlNodeType nodeType = this.NodeType;
-				switch (nodeType)
-				{
-				case XmlNodeType.Element:
-				case XmlNodeType.Text:
-				case XmlNodeType.CDATA:
-				case XmlNodeType.EntityReference:
-					goto IL_0047;
-				case XmlNodeType.Attribute:
-					goto IL_0040;
-				default:
-				{
-					if (nodeType - XmlNodeType.EndElement <= 1)
-					{
-						goto IL_0047;
-					}
-					ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadAsync().ConfigureAwait(false).GetAwaiter();
-					if (!configuredTaskAwaiter.IsCompleted)
-					{
-						await configuredTaskAwaiter;
-						ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-						configuredTaskAwaiter = configuredTaskAwaiter2;
-						configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter);
-					}
-					if (!configuredTaskAwaiter.GetResult())
-					{
-						goto Block_3;
-					}
-					break;
-				}
-				}
-			}
-			IL_0040:
-			this.MoveToElement();
-			IL_0047:
-			return this.NodeType;
-			Block_3:
-			return this.NodeType;
-		}
-
-		public virtual async Task<string> ReadInnerXmlAsync()
-		{
-			string text;
-			if (this.ReadState != ReadState.Interactive)
-			{
-				text = string.Empty;
-			}
-			else if (this.NodeType != XmlNodeType.Attribute && this.NodeType != XmlNodeType.Element)
-			{
-				await this.ReadAsync().ConfigureAwait(false);
-				text = string.Empty;
-			}
-			else
-			{
-				StringWriter sw = new StringWriter(CultureInfo.InvariantCulture);
-				XmlWriter xtw = this.CreateWriterForInnerOuterXml(sw);
-				try
-				{
-					if (this.NodeType == XmlNodeType.Attribute)
-					{
-						((XmlTextWriter)xtw).QuoteChar = this.QuoteChar;
-						this.WriteAttributeValue(xtw);
-					}
-					if (this.NodeType == XmlNodeType.Element)
-					{
-						await this.WriteNodeAsync(xtw, false).ConfigureAwait(false);
-					}
-				}
-				finally
-				{
-					xtw.Close();
-				}
-				text = sw.ToString();
-			}
-			return text;
-		}
-
-		private async Task WriteNodeAsync(XmlWriter xtw, bool defattr)
-		{
-			int d = ((this.NodeType == XmlNodeType.None) ? (-1) : this.Depth);
-			for (;;)
-			{
-				ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadAsync().ConfigureAwait(false).GetAwaiter();
-				if (!configuredTaskAwaiter.IsCompleted)
-				{
-					await configuredTaskAwaiter;
-					ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-					configuredTaskAwaiter = configuredTaskAwaiter2;
-					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter);
-				}
-				if (!configuredTaskAwaiter.GetResult() || d >= this.Depth)
-				{
-					break;
-				}
-				switch (this.NodeType)
-				{
-				case XmlNodeType.Element:
-					xtw.WriteStartElement(this.Prefix, this.LocalName, this.NamespaceURI);
-					((XmlTextWriter)xtw).QuoteChar = this.QuoteChar;
-					xtw.WriteAttributes(this, defattr);
-					if (this.IsEmptyElement)
-					{
-						xtw.WriteEndElement();
-					}
-					break;
-				case XmlNodeType.Text:
-				{
-					XmlWriter xmlWriter = xtw;
-					string text = await this.GetValueAsync().ConfigureAwait(false);
-					xmlWriter.WriteString(text);
-					xmlWriter = null;
-					break;
-				}
-				case XmlNodeType.CDATA:
-					xtw.WriteCData(this.Value);
-					break;
-				case XmlNodeType.EntityReference:
-					xtw.WriteEntityRef(this.Name);
-					break;
-				case XmlNodeType.ProcessingInstruction:
-				case XmlNodeType.XmlDeclaration:
-					xtw.WriteProcessingInstruction(this.Name, this.Value);
-					break;
-				case XmlNodeType.Comment:
-					xtw.WriteComment(this.Value);
-					break;
-				case XmlNodeType.DocumentType:
-					xtw.WriteDocType(this.Name, this.GetAttribute("PUBLIC"), this.GetAttribute("SYSTEM"), this.Value);
-					break;
-				case XmlNodeType.Whitespace:
-				case XmlNodeType.SignificantWhitespace:
-				{
-					XmlWriter xmlWriter = xtw;
-					string text = await this.GetValueAsync().ConfigureAwait(false);
-					xmlWriter.WriteWhitespace(text);
-					xmlWriter = null;
-					break;
-				}
-				case XmlNodeType.EndElement:
-					xtw.WriteFullEndElement();
-					break;
-				}
-			}
-			if (d == this.Depth && this.NodeType == XmlNodeType.EndElement)
-			{
-				await this.ReadAsync().ConfigureAwait(false);
-			}
-		}
-
-		public virtual async Task<string> ReadOuterXmlAsync()
-		{
-			string text;
-			if (this.ReadState != ReadState.Interactive)
-			{
-				text = string.Empty;
-			}
-			else if (this.NodeType != XmlNodeType.Attribute && this.NodeType != XmlNodeType.Element)
-			{
-				await this.ReadAsync().ConfigureAwait(false);
-				text = string.Empty;
-			}
-			else
-			{
-				StringWriter stringWriter = new StringWriter(CultureInfo.InvariantCulture);
-				XmlWriter xmlWriter = this.CreateWriterForInnerOuterXml(stringWriter);
-				try
-				{
-					if (this.NodeType == XmlNodeType.Attribute)
-					{
-						xmlWriter.WriteStartAttribute(this.Prefix, this.LocalName, this.NamespaceURI);
-						this.WriteAttributeValue(xmlWriter);
-						xmlWriter.WriteEndAttribute();
-					}
-					else
-					{
-						xmlWriter.WriteNode(this, false);
-					}
-				}
-				finally
-				{
-					xmlWriter.Close();
-				}
-				text = stringWriter.ToString();
-			}
-			return text;
-		}
-
-		private async Task<bool> SkipSubtreeAsync()
-		{
-			this.MoveToElement();
-			bool flag;
-			if (this.NodeType == XmlNodeType.Element && !this.IsEmptyElement)
-			{
-				int depth = this.Depth;
-				ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter;
-				do
-				{
-					configuredTaskAwaiter = this.ReadAsync().ConfigureAwait(false).GetAwaiter();
-					if (!configuredTaskAwaiter.IsCompleted)
-					{
-						await configuredTaskAwaiter;
-						ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-						configuredTaskAwaiter = configuredTaskAwaiter2;
-						configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<bool>.ConfiguredTaskAwaiter);
-					}
-				}
-				while (configuredTaskAwaiter.GetResult() && depth < this.Depth);
-				if (this.NodeType == XmlNodeType.EndElement)
-				{
-					flag = await this.ReadAsync().ConfigureAwait(false);
-				}
-				else
-				{
-					flag = false;
-				}
-			}
-			else
-			{
-				flag = await this.ReadAsync().ConfigureAwait(false);
-			}
-			return flag;
-		}
-
-		internal async Task<string> InternalReadContentAsStringAsync()
-		{
-			string value = string.Empty;
-			StringBuilder sb = null;
-			do
-			{
-				switch (this.NodeType)
-				{
-				case XmlNodeType.Attribute:
-					goto IL_0082;
-				case XmlNodeType.Text:
-				case XmlNodeType.CDATA:
-				case XmlNodeType.Whitespace:
-				case XmlNodeType.SignificantWhitespace:
-				{
-					string text;
-					if (value.Length == 0)
-					{
-						text = await this.GetValueAsync().ConfigureAwait(false);
-						value = text;
-						goto IL_01D5;
-					}
-					if (sb == null)
-					{
-						sb = new StringBuilder();
-						sb.Append(value);
-					}
-					StringBuilder stringBuilder = sb;
-					text = await this.GetValueAsync().ConfigureAwait(false);
-					stringBuilder.Append(text);
-					stringBuilder = null;
-					goto IL_01D5;
-				}
-				case XmlNodeType.EntityReference:
-					if (this.CanResolveEntity)
-					{
-						this.ResolveEntity();
-						goto IL_01D5;
-					}
-					break;
-				case XmlNodeType.ProcessingInstruction:
-				case XmlNodeType.Comment:
-				case XmlNodeType.EndEntity:
-					goto IL_01D5;
-				}
-				break;
-				IL_01D5:;
-			}
-			while ((this.AttributeCount == 0) ? (await this.ReadAsync().ConfigureAwait(false)) : this.ReadAttributeValue());
-			goto IL_0255;
-			IL_0082:
-			return this.Value;
-			IL_0255:
-			return (sb == null) ? value : sb.ToString();
-		}
-
-		private async Task<bool> SetupReadElementContentAsXxxAsync(string methodName)
-		{
+			bool isEmptyElement = this.IsEmptyElement;
 			if (this.NodeType != XmlNodeType.Element)
 			{
-				throw this.CreateReadElementContentAsException(methodName);
+				throw new InvalidOperationException(string.Format("'{0}' is an element node.", this.NodeType));
 			}
-			bool isEmptyElement = this.IsEmptyElement;
-			await this.ReadAsync().ConfigureAwait(false);
-			bool flag;
+			this.ReadStartElement();
 			if (isEmptyElement)
 			{
-				flag = false;
+				return string.Empty;
 			}
-			else
+			string text = this.ReadContentString(false);
+			this.ReadEndElement();
+			return text;
+		}
+
+		public virtual bool ReadElementContentAsBoolean(string localName, string namespaceURI)
+		{
+			bool flag;
+			try
 			{
-				XmlNodeType nodeType = this.NodeType;
-				if (nodeType == XmlNodeType.EndElement)
-				{
-					await this.ReadAsync().ConfigureAwait(false);
-					flag = false;
-				}
-				else
-				{
-					if (nodeType == XmlNodeType.Element)
-					{
-						throw new XmlException("ReadElementContentAs() methods cannot be called on an element that has child elements.", string.Empty, this as IXmlLineInfo);
-					}
-					flag = true;
-				}
+				flag = XQueryConvert.StringToBoolean(this.ReadElementContentAsString(localName, namespaceURI));
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
 			}
 			return flag;
 		}
 
-		private Task FinishReadElementContentAsXxxAsync()
+		public virtual DateTime ReadElementContentAsDateTime(string localName, string namespaceURI)
 		{
-			if (this.NodeType != XmlNodeType.EndElement)
+			DateTime dateTime;
+			try
 			{
-				throw new XmlException("'{0}' is an invalid XmlNodeType.", this.NodeType.ToString());
+				dateTime = XQueryConvert.StringToDateTime(this.ReadElementContentAsString(localName, namespaceURI));
 			}
-			return this.ReadAsync();
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return dateTime;
 		}
 
-		private static uint IsTextualNodeBitmap = 24600U;
-
-		private static uint CanReadContentAsBitmap = 123324U;
-
-		private static uint HasValueBitmap = 157084U;
-
-		internal const int DefaultBufferSize = 4096;
-
-		internal const int BiggerBufferSize = 8192;
-
-		internal const int MaxStreamLengthForDefaultBufferSize = 65536;
-
-		internal const int AsyncBufferSize = 65536;
-
-		[DebuggerDisplay("{ToString()}")]
-		private struct XmlReaderDebuggerDisplayProxy
+		public virtual decimal ReadElementContentAsDecimal(string localName, string namespaceURI)
 		{
-			internal XmlReaderDebuggerDisplayProxy(XmlReader reader)
+			decimal num;
+			try
 			{
-				this.reader = reader;
+				num = XQueryConvert.StringToDecimal(this.ReadElementContentAsString(localName, namespaceURI));
 			}
-
-			public override string ToString()
+			catch (FormatException ex)
 			{
-				XmlNodeType nodeType = this.reader.NodeType;
-				string text = nodeType.ToString();
-				switch (nodeType)
-				{
-				case XmlNodeType.Element:
-				case XmlNodeType.EntityReference:
-				case XmlNodeType.EndElement:
-				case XmlNodeType.EndEntity:
-					text = text + ", Name=\"" + this.reader.Name + "\"";
-					break;
-				case XmlNodeType.Attribute:
-				case XmlNodeType.ProcessingInstruction:
-					text = string.Concat(new string[]
-					{
-						text,
-						", Name=\"",
-						this.reader.Name,
-						"\", Value=\"",
-						XmlConvert.EscapeValueForDebuggerDisplay(this.reader.Value),
-						"\""
-					});
-					break;
-				case XmlNodeType.Text:
-				case XmlNodeType.CDATA:
-				case XmlNodeType.Comment:
-				case XmlNodeType.Whitespace:
-				case XmlNodeType.SignificantWhitespace:
-				case XmlNodeType.XmlDeclaration:
-					text = text + ", Value=\"" + XmlConvert.EscapeValueForDebuggerDisplay(this.reader.Value) + "\"";
-					break;
-				case XmlNodeType.DocumentType:
-					text = text + ", Name=\"" + this.reader.Name + "'";
-					text = text + ", SYSTEM=\"" + this.reader.GetAttribute("SYSTEM") + "\"";
-					text = text + ", PUBLIC=\"" + this.reader.GetAttribute("PUBLIC") + "\"";
-					text = text + ", Value=\"" + XmlConvert.EscapeValueForDebuggerDisplay(this.reader.Value) + "\"";
-					break;
-				}
-				return text;
+				throw this.XmlError("Typed value is invalid.", ex);
 			}
-
-			private XmlReader reader;
+			return num;
 		}
+
+		public virtual double ReadElementContentAsDouble(string localName, string namespaceURI)
+		{
+			double num;
+			try
+			{
+				num = XQueryConvert.StringToDouble(this.ReadElementContentAsString(localName, namespaceURI));
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual float ReadElementContentAsFloat(string localName, string namespaceURI)
+		{
+			float num;
+			try
+			{
+				num = XQueryConvert.StringToFloat(this.ReadElementContentAsString(localName, namespaceURI));
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual int ReadElementContentAsInt(string localName, string namespaceURI)
+		{
+			int num;
+			try
+			{
+				num = XQueryConvert.StringToInt(this.ReadElementContentAsString(localName, namespaceURI));
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual long ReadElementContentAsLong(string localName, string namespaceURI)
+		{
+			long num;
+			try
+			{
+				num = XQueryConvert.StringToInteger(this.ReadElementContentAsString(localName, namespaceURI));
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual string ReadElementContentAsString(string localName, string namespaceURI)
+		{
+			bool isEmptyElement = this.IsEmptyElement;
+			if (this.NodeType != XmlNodeType.Element)
+			{
+				throw new InvalidOperationException(string.Format("'{0}' is an element node.", this.NodeType));
+			}
+			this.ReadStartElement(localName, namespaceURI);
+			if (isEmptyElement)
+			{
+				return string.Empty;
+			}
+			string text = this.ReadContentString(false);
+			this.ReadEndElement();
+			return text;
+		}
+
+		public virtual bool ReadContentAsBoolean()
+		{
+			bool flag;
+			try
+			{
+				flag = XQueryConvert.StringToBoolean(this.ReadContentString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return flag;
+		}
+
+		public virtual DateTime ReadContentAsDateTime()
+		{
+			DateTime dateTime;
+			try
+			{
+				dateTime = XQueryConvert.StringToDateTime(this.ReadContentString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return dateTime;
+		}
+
+		public virtual decimal ReadContentAsDecimal()
+		{
+			decimal num;
+			try
+			{
+				num = XQueryConvert.StringToDecimal(this.ReadContentString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual double ReadContentAsDouble()
+		{
+			double num;
+			try
+			{
+				num = XQueryConvert.StringToDouble(this.ReadContentString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual float ReadContentAsFloat()
+		{
+			float num;
+			try
+			{
+				num = XQueryConvert.StringToFloat(this.ReadContentString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual int ReadContentAsInt()
+		{
+			int num;
+			try
+			{
+				num = XQueryConvert.StringToInt(this.ReadContentString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual long ReadContentAsLong()
+		{
+			long num;
+			try
+			{
+				num = XQueryConvert.StringToInteger(this.ReadContentString());
+			}
+			catch (FormatException ex)
+			{
+				throw this.XmlError("Typed value is invalid.", ex);
+			}
+			return num;
+		}
+
+		public virtual string ReadContentAsString()
+		{
+			return this.ReadContentString();
+		}
+
+		public virtual int ReadContentAsBase64(byte[] buffer, int offset, int length)
+		{
+			this.CheckSupport();
+			return this.binary.ReadContentAsBase64(buffer, offset, length);
+		}
+
+		public virtual int ReadContentAsBinHex(byte[] buffer, int offset, int length)
+		{
+			this.CheckSupport();
+			return this.binary.ReadContentAsBinHex(buffer, offset, length);
+		}
+
+		public virtual int ReadElementContentAsBase64(byte[] buffer, int offset, int length)
+		{
+			this.CheckSupport();
+			return this.binary.ReadElementContentAsBase64(buffer, offset, length);
+		}
+
+		public virtual int ReadElementContentAsBinHex(byte[] buffer, int offset, int length)
+		{
+			this.CheckSupport();
+			return this.binary.ReadElementContentAsBinHex(buffer, offset, length);
+		}
+
+		private void CheckSupport()
+		{
+			if (!this.CanReadBinaryContent || !this.CanReadValueChunk)
+			{
+				throw new NotSupportedException();
+			}
+			if (this.binary == null)
+			{
+				this.binary = new XmlReaderBinarySupport(this);
+			}
+		}
+
+		public virtual int ReadValueChunk(char[] buffer, int offset, int length)
+		{
+			if (!this.CanReadValueChunk)
+			{
+				throw new NotSupportedException();
+			}
+			if (this.binary == null)
+			{
+				this.binary = new XmlReaderBinarySupport(this);
+			}
+			return this.binary.ReadValueChunk(buffer, offset, length);
+		}
+
+		public abstract void ResolveEntity();
+
+		public virtual void Skip()
+		{
+			if (this.ReadState != ReadState.Interactive)
+			{
+				return;
+			}
+			this.MoveToElement();
+			if (this.NodeType != XmlNodeType.Element || this.IsEmptyElement)
+			{
+				this.Read();
+				return;
+			}
+			int depth = this.Depth;
+			while (this.Read() && depth < this.Depth)
+			{
+			}
+			if (this.NodeType == XmlNodeType.EndElement)
+			{
+				this.Read();
+			}
+		}
+
+		private XmlException XmlError(string message)
+		{
+			return new XmlException(this as IXmlLineInfo, this.BaseURI, message);
+		}
+
+		private XmlException XmlError(string message, Exception innerException)
+		{
+			return new XmlException(this as IXmlLineInfo, this.BaseURI, message);
+		}
+
+		private StringBuilder readStringBuffer;
+
+		private XmlReaderBinarySupport binary;
+
+		private XmlReaderSettings settings;
 	}
 }

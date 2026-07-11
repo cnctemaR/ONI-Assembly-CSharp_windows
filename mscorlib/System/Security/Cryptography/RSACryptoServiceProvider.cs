@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Mono.Security.Cryptography;
@@ -8,11 +9,52 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public sealed class RSACryptoServiceProvider : RSA, ICspAsymmetricAlgorithm
 	{
-		public override string SignatureAlgorithm
+		public RSACryptoServiceProvider()
 		{
-			get
+			this.Common(1024, null);
+		}
+
+		public RSACryptoServiceProvider(CspParameters parameters)
+		{
+			this.Common(1024, parameters);
+		}
+
+		public RSACryptoServiceProvider(int dwKeySize)
+		{
+			this.Common(dwKeySize, null);
+		}
+
+		public RSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
+		{
+			this.Common(dwKeySize, parameters);
+		}
+
+		private void Common(int dwKeySize, CspParameters p)
+		{
+			this.LegalKeySizesValue = new KeySizes[1];
+			this.LegalKeySizesValue[0] = new KeySizes(384, 16384, 8);
+			base.KeySize = dwKeySize;
+			this.rsa = new RSAManaged(this.KeySize);
+			this.rsa.KeyGenerated += this.OnKeyGenerated;
+			this.persistKey = p != null;
+			if (p == null)
 			{
-				return "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+				p = new CspParameters(1);
+				if (RSACryptoServiceProvider.useMachineKeyStore)
+				{
+					p.Flags |= CspProviderFlags.UseMachineKeyStore;
+				}
+				this.store = new KeyPairPersistence(p);
+			}
+			else
+			{
+				this.store = new KeyPairPersistence(p);
+				this.store.Load();
+				if (this.store.KeyValue != null)
+				{
+					this.persisted = true;
+					this.FromXmlString(this.store.KeyValue);
+				}
 			}
 		}
 
@@ -20,208 +62,11 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return RSACryptoServiceProvider.s_UseMachineKeyStore == CspProviderFlags.UseMachineKeyStore;
+				return RSACryptoServiceProvider.useMachineKeyStore;
 			}
 			set
 			{
-				RSACryptoServiceProvider.s_UseMachineKeyStore = (value ? CspProviderFlags.UseMachineKeyStore : CspProviderFlags.NoFlags);
-			}
-		}
-
-		[SecuritySafeCritical]
-		protected override byte[] HashData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithm)
-		{
-			return HashAlgorithm.Create(hashAlgorithm.Name).ComputeHash(data, offset, count);
-		}
-
-		[SecuritySafeCritical]
-		protected override byte[] HashData(Stream data, HashAlgorithmName hashAlgorithm)
-		{
-			return HashAlgorithm.Create(hashAlgorithm.Name).ComputeHash(data);
-		}
-
-		private static int GetAlgorithmId(HashAlgorithmName hashAlgorithm)
-		{
-			string name = hashAlgorithm.Name;
-			if (name == "MD5")
-			{
-				return 32771;
-			}
-			if (name == "SHA1")
-			{
-				return 32772;
-			}
-			if (name == "SHA256")
-			{
-				return 32780;
-			}
-			if (name == "SHA384")
-			{
-				return 32781;
-			}
-			if (!(name == "SHA512"))
-			{
-				throw new CryptographicException(Environment.GetResourceString("'{0}' is not a known hash algorithm.", new object[] { hashAlgorithm.Name }));
-			}
-			return 32782;
-		}
-
-		public override byte[] Encrypt(byte[] data, RSAEncryptionPadding padding)
-		{
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
-			if (padding == null)
-			{
-				throw new ArgumentNullException("padding");
-			}
-			if (padding == RSAEncryptionPadding.Pkcs1)
-			{
-				return this.Encrypt(data, false);
-			}
-			if (padding == RSAEncryptionPadding.OaepSHA1)
-			{
-				return this.Encrypt(data, true);
-			}
-			throw RSACryptoServiceProvider.PaddingModeNotSupported();
-		}
-
-		public override byte[] Decrypt(byte[] data, RSAEncryptionPadding padding)
-		{
-			if (data == null)
-			{
-				throw new ArgumentNullException("data");
-			}
-			if (padding == null)
-			{
-				throw new ArgumentNullException("padding");
-			}
-			if (padding == RSAEncryptionPadding.Pkcs1)
-			{
-				return this.Decrypt(data, false);
-			}
-			if (padding == RSAEncryptionPadding.OaepSHA1)
-			{
-				return this.Decrypt(data, true);
-			}
-			throw RSACryptoServiceProvider.PaddingModeNotSupported();
-		}
-
-		public override byte[] SignHash(byte[] hash, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
-		{
-			if (hash == null)
-			{
-				throw new ArgumentNullException("hash");
-			}
-			if (string.IsNullOrEmpty(hashAlgorithm.Name))
-			{
-				throw RSA.HashAlgorithmNameNullOrEmpty();
-			}
-			if (padding == null)
-			{
-				throw new ArgumentNullException("padding");
-			}
-			if (padding != RSASignaturePadding.Pkcs1)
-			{
-				throw RSACryptoServiceProvider.PaddingModeNotSupported();
-			}
-			return this.SignHash(hash, RSACryptoServiceProvider.GetAlgorithmId(hashAlgorithm));
-		}
-
-		public override bool VerifyHash(byte[] hash, byte[] signature, HashAlgorithmName hashAlgorithm, RSASignaturePadding padding)
-		{
-			if (hash == null)
-			{
-				throw new ArgumentNullException("hash");
-			}
-			if (signature == null)
-			{
-				throw new ArgumentNullException("signature");
-			}
-			if (string.IsNullOrEmpty(hashAlgorithm.Name))
-			{
-				throw RSA.HashAlgorithmNameNullOrEmpty();
-			}
-			if (padding == null)
-			{
-				throw new ArgumentNullException("padding");
-			}
-			if (padding != RSASignaturePadding.Pkcs1)
-			{
-				throw RSACryptoServiceProvider.PaddingModeNotSupported();
-			}
-			return this.VerifyHash(hash, RSACryptoServiceProvider.GetAlgorithmId(hashAlgorithm), signature);
-		}
-
-		private static Exception PaddingModeNotSupported()
-		{
-			return new CryptographicException(Environment.GetResourceString("Specified padding mode is not valid for this algorithm."));
-		}
-
-		public RSACryptoServiceProvider()
-			: this(1024)
-		{
-		}
-
-		public RSACryptoServiceProvider(CspParameters parameters)
-			: this(1024, parameters)
-		{
-		}
-
-		public RSACryptoServiceProvider(int dwKeySize)
-		{
-			this.privateKeyExportable = true;
-			base..ctor();
-			this.Common(dwKeySize, false);
-		}
-
-		public RSACryptoServiceProvider(int dwKeySize, CspParameters parameters)
-		{
-			this.privateKeyExportable = true;
-			base..ctor();
-			bool flag = parameters != null;
-			this.Common(dwKeySize, flag);
-			if (flag)
-			{
-				this.Common(parameters);
-			}
-		}
-
-		private void Common(int dwKeySize, bool parameters)
-		{
-			this.LegalKeySizesValue = new KeySizes[1];
-			this.LegalKeySizesValue[0] = new KeySizes(384, 16384, 8);
-			base.KeySize = dwKeySize;
-			this.rsa = new RSAManaged(this.KeySize);
-			this.rsa.KeyGenerated += this.OnKeyGenerated;
-			this.persistKey = parameters;
-			if (parameters)
-			{
-				return;
-			}
-			CspParameters cspParameters = new CspParameters(1);
-			if (RSACryptoServiceProvider.UseMachineKeyStore)
-			{
-				cspParameters.Flags |= CspProviderFlags.UseMachineKeyStore;
-			}
-			this.store = new KeyPairPersistence(cspParameters);
-		}
-
-		private void Common(CspParameters p)
-		{
-			this.store = new KeyPairPersistence(p);
-			bool flag = this.store.Load();
-			bool flag2 = (p.Flags & CspProviderFlags.UseExistingKey) > CspProviderFlags.NoFlags;
-			this.privateKeyExportable = (p.Flags & CspProviderFlags.UseNonExportableKey) == CspProviderFlags.NoFlags;
-			if (flag2 && !flag)
-			{
-				throw new CryptographicException("Keyset does not exist");
-			}
-			if (this.store.KeyValue != null)
-			{
-				this.persisted = true;
-				this.FromXmlString(this.store.KeyValue);
+				RSACryptoServiceProvider.useMachineKeyStore = value;
 			}
 		}
 
@@ -275,16 +120,16 @@ namespace System.Security.Cryptography
 			}
 		}
 
+		public override string SignatureAlgorithm
+		{
+			get
+			{
+				return "http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+			}
+		}
+
 		public byte[] Decrypt(byte[] rgb, bool fOAEP)
 		{
-			if (rgb == null)
-			{
-				throw new ArgumentNullException("rgb");
-			}
-			if (rgb.Length > this.KeySize / 8)
-			{
-				throw new CryptographicException(Environment.GetResourceString("The data to be decrypted exceeds the maximum for this modulus of {0} bytes.", new object[] { this.KeySize / 8 }));
-			}
 			if (this.m_disposed)
 			{
 				throw new ObjectDisposedException("rsa");
@@ -335,19 +180,7 @@ namespace System.Security.Cryptography
 			{
 				throw new CryptographicException("cannot export private key");
 			}
-			RSAParameters rsaparameters = this.rsa.ExportParameters(includePrivateParameters);
-			if (includePrivateParameters)
-			{
-				if (rsaparameters.D == null)
-				{
-					throw new ArgumentNullException("Missing D parameter for the private key.");
-				}
-				if (rsaparameters.P == null || rsaparameters.Q == null || rsaparameters.DP == null || rsaparameters.DQ == null || rsaparameters.InverseQ == null)
-				{
-					throw new CryptographicException("Missing some CRT parameters for the private key.");
-				}
-			}
-			return rsaparameters;
+			return this.rsa.ExportParameters(includePrivateParameters);
 		}
 
 		public override void ImportParameters(RSAParameters parameters)
@@ -364,7 +197,7 @@ namespace System.Security.Cryptography
 			HashAlgorithm hashAlgorithm;
 			if (halg is string)
 			{
-				hashAlgorithm = this.GetHashFromString((string)halg);
+				hashAlgorithm = HashAlgorithm.Create((string)halg);
 			}
 			else if (halg is HashAlgorithm)
 			{
@@ -378,30 +211,7 @@ namespace System.Security.Cryptography
 				}
 				hashAlgorithm = (HashAlgorithm)Activator.CreateInstance((Type)halg);
 			}
-			if (hashAlgorithm == null)
-			{
-				throw new ArgumentException("Could not find provider for halg='" + halg + "'.", "halg");
-			}
 			return hashAlgorithm;
-		}
-
-		private HashAlgorithm GetHashFromString(string name)
-		{
-			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(name);
-			if (hashAlgorithm != null)
-			{
-				return hashAlgorithm;
-			}
-			HashAlgorithm hashAlgorithm2;
-			try
-			{
-				hashAlgorithm2 = HashAlgorithm.Create(this.GetHashNameFromOID(name));
-			}
-			catch (CryptographicException ex)
-			{
-				throw new ArgumentException(ex.Message, "halg", ex);
-			}
-			return hashAlgorithm2;
 		}
 
 		public byte[] SignData(byte[] buffer, object halg)
@@ -429,27 +239,30 @@ namespace System.Security.Cryptography
 
 		private string GetHashNameFromOID(string oid)
 		{
-			if (oid == "1.3.14.3.2.26")
+			if (oid != null)
 			{
-				return "SHA1";
+				if (RSACryptoServiceProvider.<>f__switch$map2D == null)
+				{
+					RSACryptoServiceProvider.<>f__switch$map2D = new Dictionary<string, int>(2)
+					{
+						{ "1.3.14.3.2.26", 0 },
+						{ "1.2.840.113549.2.5", 1 }
+					};
+				}
+				int num;
+				if (RSACryptoServiceProvider.<>f__switch$map2D.TryGetValue(oid, out num))
+				{
+					if (num == 0)
+					{
+						return "SHA1";
+					}
+					if (num == 1)
+					{
+						return "MD5";
+					}
+				}
 			}
-			if (oid == "1.2.840.113549.2.5")
-			{
-				return "MD5";
-			}
-			if (oid == "2.16.840.1.101.3.4.2.1")
-			{
-				return "SHA256";
-			}
-			if (oid == "2.16.840.1.101.3.4.2.2")
-			{
-				return "SHA384";
-			}
-			if (!(oid == "2.16.840.1.101.3.4.2.3"))
-			{
-				throw new CryptographicException(oid + " is an unsupported hash algorithm for RSA signing");
-			}
-			return "SHA512";
+			throw new NotSupportedException(oid + " is an unsupported hash algorithm for RSA signing");
 		}
 
 		public byte[] SignHash(byte[] rgbHash, string str)
@@ -458,36 +271,9 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("rgbHash");
 			}
-			HashAlgorithm hashAlgorithm = HashAlgorithm.Create((str == null) ? "SHA1" : this.GetHashNameFromOID(str));
+			string text = ((str != null) ? this.GetHashNameFromOID(str) : "SHA1");
+			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(text);
 			return PKCS1.Sign_v15(this, hashAlgorithm, rgbHash);
-		}
-
-		private byte[] SignHash(byte[] rgbHash, int calgHash)
-		{
-			return PKCS1.Sign_v15(this, RSACryptoServiceProvider.InternalHashToHashAlgorithm(calgHash), rgbHash);
-		}
-
-		private static HashAlgorithm InternalHashToHashAlgorithm(int calgHash)
-		{
-			if (calgHash == 32771)
-			{
-				return MD5.Create();
-			}
-			if (calgHash == 32772)
-			{
-				return SHA1.Create();
-			}
-			switch (calgHash)
-			{
-			case 32780:
-				return SHA256.Create();
-			case 32781:
-				return SHA384.Create();
-			case 32782:
-				return SHA512.Create();
-			default:
-				throw new NotImplementedException(calgHash.ToString());
-			}
 		}
 
 		public bool VerifyData(byte[] buffer, object halg, byte[] signature)
@@ -515,13 +301,9 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("rgbSignature");
 			}
-			HashAlgorithm hashAlgorithm = HashAlgorithm.Create((str == null) ? "SHA1" : this.GetHashNameFromOID(str));
+			string text = ((str != null) ? this.GetHashNameFromOID(str) : "SHA1");
+			HashAlgorithm hashAlgorithm = HashAlgorithm.Create(text);
 			return PKCS1.Verify_v15(this, hashAlgorithm, rgbHash, rgbSignature);
-		}
-
-		private bool VerifyHash(byte[] rgbHash, int calgHash, byte[] rgbSignature)
-		{
-			return PKCS1.Verify_v15(this, RSACryptoServiceProvider.InternalHashToHashAlgorithm(calgHash), rgbHash, rgbSignature);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -551,11 +333,12 @@ namespace System.Security.Cryptography
 		}
 
 		[ComVisible(false)]
+		[MonoTODO("Always return null")]
 		public CspKeyContainerInfo CspKeyContainerInfo
 		{
 			get
 			{
-				return new CspKeyContainerInfo(this.store.Parameters);
+				return null;
 			}
 		}
 
@@ -571,7 +354,7 @@ namespace System.Security.Cryptography
 			{
 				array = CryptoConvert.ToCapiPublicKeyBlob(this);
 			}
-			array[5] = ((this.store != null && this.store.Parameters.KeyNumber == 2) ? 36 : 164);
+			array[5] = 164;
 			return array;
 		}
 
@@ -601,22 +384,9 @@ namespace System.Security.Cryptography
 					this.ImportParameters(rsaparameters3);
 				}
 			}
-			CspParameters cspParameters = new CspParameters(1);
-			cspParameters.KeyNumber = ((keyBlob[5] == 36) ? 2 : 1);
-			if (RSACryptoServiceProvider.UseMachineKeyStore)
-			{
-				cspParameters.Flags |= CspProviderFlags.UseMachineKeyStore;
-			}
-			this.store = new KeyPairPersistence(cspParameters);
 		}
 
-		private static volatile CspProviderFlags s_UseMachineKeyStore;
-
 		private const int PROV_RSA_FULL = 1;
-
-		private const int AT_KEYEXCHANGE = 1;
-
-		private const int AT_SIGNATURE = 2;
 
 		private KeyPairPersistence store;
 
@@ -624,10 +394,12 @@ namespace System.Security.Cryptography
 
 		private bool persisted;
 
-		private bool privateKeyExportable;
+		private bool privateKeyExportable = true;
 
 		private bool m_disposed;
 
 		private RSAManaged rsa;
+
+		private static bool useMachineKeyStore;
 	}
 }

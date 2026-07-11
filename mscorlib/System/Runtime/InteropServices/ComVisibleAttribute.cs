@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public ComVisibleAttribute(bool visibility)
 		{
-			this._val = visibility;
+			this.Visible = visibility;
 		}
 
 		public bool Value
 		{
 			get
 			{
-				return this._val;
+				return this.Visible;
 			}
 		}
 
-		internal bool _val;
+		private bool Visible;
 	}
 }

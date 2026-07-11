@@ -9,12 +9,12 @@ namespace System.Configuration
 			IdnElement.properties.Add(IdnElement.enabled_prop);
 		}
 
-		[ConfigurationProperty("enabled", DefaultValue = UriIdnScope.None, Options = ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey)]
-		public UriIdnScope Enabled
+		[ConfigurationProperty("enabled", DefaultValue = global::System.UriIdnScope.None, Options = ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey)]
+		public global::System.UriIdnScope Enabled
 		{
 			get
 			{
-				return (UriIdnScope)base[IdnElement.enabled_prop];
+				return (global::System.UriIdnScope)((int)base[IdnElement.enabled_prop]);
 			}
 			set
 			{
@@ -38,13 +38,11 @@ namespace System.Configuration
 
 		public override int GetHashCode()
 		{
-			return (int)(this.Enabled ^ (UriIdnScope)127);
+			return (int)(this.Enabled ^ (global::System.UriIdnScope)127);
 		}
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 
-		private static ConfigurationProperty enabled_prop = new ConfigurationProperty("enabled", typeof(UriIdnScope), UriIdnScope.None, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey);
-
-		internal const UriIdnScope EnabledDefaultValue = UriIdnScope.None;
+		private static ConfigurationProperty enabled_prop = new ConfigurationProperty("enabled", typeof(global::System.UriIdnScope), global::System.UriIdnScope.None, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey);
 	}
 }

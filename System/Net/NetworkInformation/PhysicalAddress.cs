@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace System.Net.NetworkInformation
@@ -7,35 +8,88 @@ namespace System.Net.NetworkInformation
 	{
 		public PhysicalAddress(byte[] address)
 		{
-			this.address = address;
+			this.bytes = address;
 		}
 
-		public override int GetHashCode()
+		internal static PhysicalAddress ParseEthernet(string address)
 		{
-			if (this.changed)
+			if (address == null)
 			{
-				this.changed = false;
-				this.hash = 0;
-				int num = this.address.Length & -4;
-				int i;
-				for (i = 0; i < num; i += 4)
+				return PhysicalAddress.None;
+			}
+			string[] array = address.Split(new char[] { ':' });
+			byte[] array2 = new byte[array.Length];
+			int num = 0;
+			foreach (string text in array)
+			{
+				array2[num++] = byte.Parse(text, NumberStyles.HexNumber);
+			}
+			return new PhysicalAddress(array2);
+		}
+
+		public static PhysicalAddress Parse(string address)
+		{
+			if (address == null)
+			{
+				return PhysicalAddress.None;
+			}
+			if (address == string.Empty)
+			{
+				throw new FormatException("An invalid physical address was specified.");
+			}
+			string[] array = address.Split(new char[] { '-' });
+			if (array.Length == 1)
+			{
+				if (address.Length != 12)
 				{
-					this.hash ^= (int)this.address[i] | ((int)this.address[i + 1] << 8) | ((int)this.address[i + 2] << 16) | ((int)this.address[i + 3] << 24);
+					throw new FormatException("An invalid physical address was specified.");
 				}
-				if ((this.address.Length & 3) != 0)
+				array = new string[6];
+				for (int i = 0; i < array.Length; i++)
 				{
-					int num2 = 0;
-					int num3 = 0;
-					while (i < this.address.Length)
-					{
-						num2 |= (int)this.address[i] << num3;
-						num3 += 8;
-						i++;
-					}
-					this.hash ^= num2;
+					array[i] = address.Substring(i * 2, 2);
 				}
 			}
-			return this.hash;
+			if (array.Length == 6)
+			{
+				foreach (string text in array)
+				{
+					if (text.Length > 2)
+					{
+						throw new FormatException("An invalid physical address was specified.");
+					}
+					if (text.Length < 2)
+					{
+						throw new IndexOutOfRangeException("An invalid physical address was specified.");
+					}
+				}
+				byte[] array3 = new byte[6];
+				for (int k = 0; k < 6; k++)
+				{
+					byte b = (byte)(PhysicalAddress.GetValue(array[k][0]) << 4);
+					b += PhysicalAddress.GetValue(array[k][1]);
+					array3[k] = b;
+				}
+				return new PhysicalAddress(array3);
+			}
+			throw new FormatException("An invalid physical address was specified.");
+		}
+
+		private static byte GetValue(char c)
+		{
+			if (c >= '0' && c <= '9')
+			{
+				return (byte)(c - '0');
+			}
+			if (c >= 'a' && c <= 'f')
+			{
+				return (byte)(c - 'a' + '\n');
+			}
+			if (c >= 'A' && c <= 'F')
+			{
+				return (byte)(c - 'A' + '\n');
+			}
+			throw new FormatException("Invalid physical address.");
 		}
 
 		public override bool Equals(object comparand)
@@ -45,13 +99,13 @@ namespace System.Net.NetworkInformation
 			{
 				return false;
 			}
-			if (this.address.Length != physicalAddress.address.Length)
+			if (this.bytes.Length != physicalAddress.bytes.Length)
 			{
 				return false;
 			}
-			for (int i = 0; i < physicalAddress.address.Length; i++)
+			for (int i = 0; i < this.bytes.Length; i++)
 			{
-				if (this.address[i] != physicalAddress.address[i])
+				if (this.bytes[i] != physicalAddress.bytes[i])
 				{
 					return false;
 				}
@@ -59,115 +113,34 @@ namespace System.Net.NetworkInformation
 			return true;
 		}
 
-		public override string ToString()
+		public override int GetHashCode()
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			foreach (byte b in this.address)
-			{
-				int num = (b >> 4) & 15;
-				for (int j = 0; j < 2; j++)
-				{
-					if (num < 10)
-					{
-						stringBuilder.Append((char)(num + 48));
-					}
-					else
-					{
-						stringBuilder.Append((char)(num + 55));
-					}
-					num = (int)(b & 15);
-				}
-			}
-			return stringBuilder.ToString();
+			return ((int)this.bytes[5] << 8) ^ (int)this.bytes[4] ^ ((int)this.bytes[3] << 24) ^ ((int)this.bytes[2] << 16) ^ ((int)this.bytes[1] << 8) ^ (int)this.bytes[0];
 		}
 
 		public byte[] GetAddressBytes()
 		{
-			byte[] array = new byte[this.address.Length];
-			Buffer.BlockCopy(this.address, 0, array, 0, this.address.Length);
-			return array;
+			return this.bytes;
 		}
 
-		public static PhysicalAddress Parse(string address)
+		public override string ToString()
 		{
-			int num = 0;
-			bool flag = false;
-			if (address == null)
+			if (this.bytes == null)
 			{
-				return PhysicalAddress.None;
+				return string.Empty;
 			}
-			byte[] array;
-			if (address.IndexOf('-') >= 0)
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (byte b in this.bytes)
 			{
-				flag = true;
-				array = new byte[(address.Length + 1) / 3];
+				stringBuilder.AppendFormat("{0:X2}", b);
 			}
-			else
-			{
-				if (address.Length % 2 > 0)
-				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
-				}
-				array = new byte[address.Length / 2];
-			}
-			int num2 = 0;
-			int i = 0;
-			while (i < address.Length)
-			{
-				int num3 = (int)address[i];
-				if (num3 >= 48 && num3 <= 57)
-				{
-					num3 -= 48;
-					goto IL_00C3;
-				}
-				if (num3 >= 65 && num3 <= 70)
-				{
-					num3 -= 55;
-					goto IL_00C3;
-				}
-				if (num3 != 45)
-				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
-				}
-				if (num != 2)
-				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
-				}
-				num = 0;
-				IL_0100:
-				i++;
-				continue;
-				IL_00C3:
-				if (flag && num >= 2)
-				{
-					throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
-				}
-				if (num % 2 == 0)
-				{
-					array[num2] = (byte)(num3 << 4);
-				}
-				else
-				{
-					byte[] array2 = array;
-					int num4 = num2++;
-					array2[num4] |= (byte)num3;
-				}
-				num++;
-				goto IL_0100;
-			}
-			if (num < 2)
-			{
-				throw new FormatException(global::SR.GetString("An invalid physical address was specified."));
-			}
-			return new PhysicalAddress(array);
+			return stringBuilder.ToString();
 		}
 
-		private byte[] address;
-
-		private bool changed = true;
-
-		private int hash;
+		private const int numberOfBytes = 6;
 
 		public static readonly PhysicalAddress None = new PhysicalAddress(new byte[0]);
+
+		private byte[] bytes;
 	}
 }

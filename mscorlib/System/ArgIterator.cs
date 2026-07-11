@@ -7,9 +7,6 @@ namespace System
 	[StructLayout(LayoutKind.Auto)]
 	public struct ArgIterator
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void Setup(IntPtr argsp, IntPtr start);
-
 		public ArgIterator(RuntimeArgumentHandle arglist)
 		{
 			this.sig = IntPtr.Zero;
@@ -26,6 +23,9 @@ namespace System
 			this.next_arg = (this.num_args = 0);
 			this.Setup(arglist.args, (IntPtr)ptr);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void Setup(IntPtr argsp, IntPtr start);
 
 		public void End()
 		{

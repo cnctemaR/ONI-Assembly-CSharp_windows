@@ -162,7 +162,7 @@ public static class Util
 			KMonoBehaviour kmonoBehaviour = t as KMonoBehaviour;
 			if (kmonoBehaviour != null && !KMonoBehaviour.isPoolPreInit && !kmonoBehaviour.IsInitialized())
 			{
-				global::Debug.LogErrorFormat("Could not find component " + typeof(T).ToString() + " on object " + go.ToString(), Array.Empty<object>());
+				global::Debug.LogErrorFormat("Could not find component " + typeof(T).ToString() + " on object " + go.ToString(), new object[0]);
 			}
 		}
 		else
@@ -582,6 +582,11 @@ public static class Util
 	public static float RandomVariance(float center, float plusminus)
 	{
 		return center + global::UnityEngine.Random.Range(-plusminus, plusminus);
+	}
+
+	public static bool IsNullOrWhiteSpace(this string str)
+	{
+		return string.IsNullOrEmpty(str) || str == " ";
 	}
 
 	private static HashSet<char> defaultInvalidUserInputChars = new HashSet<char>(Path.GetInvalidPathChars());

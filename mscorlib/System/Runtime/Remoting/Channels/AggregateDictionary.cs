@@ -5,11 +5,16 @@ using System.Runtime.InteropServices;
 namespace System.Runtime.Remoting.Channels
 {
 	[ComVisible(true)]
-	internal class AggregateDictionary : IDictionary, ICollection, IEnumerable
+	internal class AggregateDictionary : IEnumerable, ICollection, IDictionary
 	{
 		public AggregateDictionary(IDictionary[] dics)
 		{
 			this.dictionaries = dics;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new AggregateEnumerator(this.dictionaries);
 		}
 
 		public bool IsFixedSize
@@ -93,10 +98,9 @@ namespace System.Runtime.Remoting.Channels
 
 		public bool Contains(object ob)
 		{
-			IDictionary[] array = this.dictionaries;
-			for (int i = 0; i < array.Length; i++)
+			foreach (IDictionary dictionary in this.dictionaries)
 			{
-				if (array[i].Contains(ob))
+				if (dictionary.Contains(ob))
 				{
 					return true;
 				}
@@ -105,11 +109,6 @@ namespace System.Runtime.Remoting.Channels
 		}
 
 		public IDictionaryEnumerator GetEnumerator()
-		{
-			return new AggregateEnumerator(this.dictionaries);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new AggregateEnumerator(this.dictionaries);
 		}

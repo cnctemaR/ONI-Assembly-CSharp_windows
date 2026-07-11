@@ -2,8 +2,8 @@
 
 namespace System.ComponentModel
 {
+	[Obsolete("Use SettingsBindableAttribute instead of RecommendedAsConfigurableAttribute")]
 	[AttributeUsage(AttributeTargets.Property)]
-	[Obsolete("Use System.ComponentModel.SettingsBindableAttribute instead to work with the new settings model.")]
 	public class RecommendedAsConfigurableAttribute : Attribute
 	{
 		public RecommendedAsConfigurableAttribute(bool recommendedAsConfigurable)
@@ -21,30 +21,25 @@ namespace System.ComponentModel
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			RecommendedAsConfigurableAttribute recommendedAsConfigurableAttribute = obj as RecommendedAsConfigurableAttribute;
-			return recommendedAsConfigurableAttribute != null && recommendedAsConfigurableAttribute.RecommendedAsConfigurable == this.recommendedAsConfigurable;
+			return obj is RecommendedAsConfigurableAttribute && ((RecommendedAsConfigurableAttribute)obj).RecommendedAsConfigurable == this.recommendedAsConfigurable;
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.recommendedAsConfigurable.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return !this.recommendedAsConfigurable;
+			return this.recommendedAsConfigurable == RecommendedAsConfigurableAttribute.Default.RecommendedAsConfigurable;
 		}
 
 		private bool recommendedAsConfigurable;
 
+		public static readonly RecommendedAsConfigurableAttribute Default = new RecommendedAsConfigurableAttribute(false);
+
 		public static readonly RecommendedAsConfigurableAttribute No = new RecommendedAsConfigurableAttribute(false);
 
 		public static readonly RecommendedAsConfigurableAttribute Yes = new RecommendedAsConfigurableAttribute(true);
-
-		public static readonly RecommendedAsConfigurableAttribute Default = RecommendedAsConfigurableAttribute.No;
 	}
 }

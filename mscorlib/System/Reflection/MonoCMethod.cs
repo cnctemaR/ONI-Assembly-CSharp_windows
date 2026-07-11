@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Security;
 using System.Text;
 
 namespace System.Reflection
 {
-	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	internal class MonoCMethod : RuntimeConstructorInfo
+	internal class MonoCMethod : ConstructorInfo, ISerializable
 	{
 		public override MethodImplAttributes GetMethodImplementationFlags()
 		{
@@ -22,50 +19,41 @@ namespace System.Reflection
 			return MonoMethodInfo.GetParametersInfo(this.mhandle, this);
 		}
 
-		internal override ParameterInfo[] GetParametersInternal()
-		{
-			return MonoMethodInfo.GetParametersInfo(this.mhandle, this);
-		}
-
-		internal override int GetParametersCount()
-		{
-			ParameterInfo[] parametersInfo = MonoMethodInfo.GetParametersInfo(this.mhandle, this);
-			if (parametersInfo != null)
-			{
-				return parametersInfo.Length;
-			}
-			return 0;
-		}
-
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal extern object InternalInvoke(object obj, object[] parameters, out Exception exc);
 
-		[DebuggerStepThrough]
-		[DebuggerHidden]
 		public override object Invoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
-		{
-			if (obj == null)
-			{
-				if (!base.IsStatic)
-				{
-					throw new TargetException("Instance constructor requires a target");
-				}
-			}
-			else if (!this.DeclaringType.IsInstanceOfType(obj))
-			{
-				throw new TargetException("Constructor does not match target type");
-			}
-			return this.DoInvoke(obj, invokeAttr, binder, parameters, culture);
-		}
-
-		private object DoInvoke(object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
 		{
 			if (binder == null)
 			{
-				binder = Type.DefaultBinder;
+				binder = Binder.DefaultBinder;
 			}
-			ParameterInfo[] parametersInfo = MonoMethodInfo.GetParametersInfo(this.mhandle, this);
-			MonoMethod.ConvertValues(binder, parameters, parametersInfo, culture, invokeAttr);
+			ParameterInfo[] parameters2 = this.GetParameters();
+			if ((parameters == null && parameters2.Length != 0) || (parameters != null && parameters.Length != parameters2.Length))
+			{
+				throw new TargetParameterCountException("parameters do not match signature");
+			}
+			if ((invokeAttr & BindingFlags.ExactBinding) == BindingFlags.Default)
+			{
+				if (!Binder.ConvertArgs(binder, parameters, parameters2, culture))
+				{
+					throw new ArgumentException("failed to convert parameters");
+				}
+			}
+			else
+			{
+				for (int i = 0; i < parameters2.Length; i++)
+				{
+					if (parameters[i].GetType() != parameters2[i].ParameterType)
+					{
+						throw new ArgumentException("parameters do not match signature");
+					}
+				}
+			}
+			if (SecurityManager.SecurityEnabled)
+			{
+				SecurityManager.ReflectedLinkDemandInvoke(this);
+			}
 			if (obj == null && this.DeclaringType.ContainsGenericParameters)
 			{
 				throw new MemberAccessException("Cannot create an instance of " + this.DeclaringType + " because Type.ContainsGenericParameters is true.");
@@ -74,13 +62,8 @@ namespace System.Reflection
 			{
 				throw new MemberAccessException(string.Format("Cannot create an instance of {0} because it is an abstract class", this.DeclaringType));
 			}
-			return this.InternalInvoke(obj, parameters);
-		}
-
-		public object InternalInvoke(object obj, object[] parameters)
-		{
+			Exception ex = null;
 			object obj2 = null;
-			Exception ex;
 			try
 			{
 				obj2 = this.InternalInvoke(obj, parameters, out ex);
@@ -93,18 +76,12 @@ namespace System.Reflection
 			{
 				throw ex;
 			}
-			if (obj != null)
-			{
-				return null;
-			}
-			return obj2;
+			return (obj != null) ? null : obj2;
 		}
 
-		[DebuggerStepThrough]
-		[DebuggerHidden]
 		public override object Invoke(BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture)
 		{
-			return this.DoInvoke(null, invokeAttr, binder, parameters, culture);
+			return this.Invoke(null, invokeAttr, binder, parameters, culture);
 		}
 
 		public override RuntimeMethodHandle MethodHandle
@@ -128,14 +105,6 @@ namespace System.Reflection
 			get
 			{
 				return MonoMethodInfo.GetCallingConvention(this.mhandle);
-			}
-		}
-
-		public override bool ContainsGenericParameters
-		{
-			get
-			{
-				return this.DeclaringType.ContainsGenericParameters;
 			}
 		}
 
@@ -210,36 +179,9 @@ namespace System.Reflection
 			return stringBuilder.ToString();
 		}
 
-		public override IList<CustomAttributeData> GetCustomAttributesData()
+		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			return CustomAttributeData.GetCustomAttributes(this);
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int get_core_clr_security_level();
-
-		public override bool IsSecurityTransparent
-		{
-			get
-			{
-				return this.get_core_clr_security_level() == 0;
-			}
-		}
-
-		public override bool IsSecurityCritical
-		{
-			get
-			{
-				return this.get_core_clr_security_level() > 0;
-			}
-		}
-
-		public override bool IsSecuritySafeCritical
-		{
-			get
-			{
-				return this.get_core_clr_security_level() == 1;
-			}
+			MemberInfoSerializationHolder.Serialize(info, this.Name, this.ReflectedType, this.ToString(), MemberTypes.Constructor);
 		}
 
 		internal IntPtr mhandle;

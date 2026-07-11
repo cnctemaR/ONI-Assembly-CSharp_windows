@@ -7,35 +7,30 @@ namespace System.ComponentModel
 	{
 		public EditorAttribute()
 		{
-			this.typeName = string.Empty;
-			this.baseTypeName = string.Empty;
+			this.name = string.Empty;
 		}
 
 		public EditorAttribute(string typeName, string baseTypeName)
 		{
-			typeName.ToUpperInvariant();
-			this.typeName = typeName;
-			this.baseTypeName = baseTypeName;
+			this.name = typeName;
+			this.basename = baseTypeName;
 		}
 
 		public EditorAttribute(string typeName, Type baseType)
+			: this(typeName, baseType.AssemblyQualifiedName)
 		{
-			typeName.ToUpperInvariant();
-			this.typeName = typeName;
-			this.baseTypeName = baseType.AssemblyQualifiedName;
 		}
 
 		public EditorAttribute(Type type, Type baseType)
+			: this(type.AssemblyQualifiedName, baseType.AssemblyQualifiedName)
 		{
-			this.typeName = type.AssemblyQualifiedName;
-			this.baseTypeName = baseType.AssemblyQualifiedName;
 		}
 
 		public string EditorBaseTypeName
 		{
 			get
 			{
-				return this.baseTypeName;
+				return this.basename;
 			}
 		}
 
@@ -43,7 +38,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.typeName;
+				return this.name;
 			}
 		}
 
@@ -51,39 +46,22 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.typeId == null)
-				{
-					string text = this.baseTypeName;
-					int num = text.IndexOf(',');
-					if (num != -1)
-					{
-						text = text.Substring(0, num);
-					}
-					this.typeId = base.GetType().FullName + text;
-				}
-				return this.typeId;
+				return base.GetType();
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			EditorAttribute editorAttribute = obj as EditorAttribute;
-			return editorAttribute != null && editorAttribute.typeName == this.typeName && editorAttribute.baseTypeName == this.baseTypeName;
+			return obj is EditorAttribute && ((EditorAttribute)obj).EditorBaseTypeName.Equals(this.basename) && ((EditorAttribute)obj).EditorTypeName.Equals(this.name);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return (this.name + this.basename).GetHashCode();
 		}
 
-		private string baseTypeName;
+		private string name;
 
-		private string typeName;
-
-		private string typeId;
+		private string basename;
 	}
 }

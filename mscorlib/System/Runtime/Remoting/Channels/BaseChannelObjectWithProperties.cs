@@ -5,11 +5,16 @@ using System.Runtime.InteropServices;
 namespace System.Runtime.Remoting.Channels
 {
 	[ComVisible(true)]
-	public abstract class BaseChannelObjectWithProperties : IDictionary, ICollection, IEnumerable
+	public abstract class BaseChannelObjectWithProperties : IEnumerable, ICollection, IDictionary
 	{
 		protected BaseChannelObjectWithProperties()
 		{
 			this.table = new Hashtable();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.table.GetEnumerator();
 		}
 
 		public virtual int Count
@@ -109,11 +114,6 @@ namespace System.Runtime.Remoting.Channels
 		}
 
 		public virtual IDictionaryEnumerator GetEnumerator()
-		{
-			return this.table.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return this.table.GetEnumerator();
 		}

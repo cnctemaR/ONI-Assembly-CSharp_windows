@@ -32,7 +32,7 @@ namespace Mono.Unix.Native
 
 		public override bool Equals(object obj)
 		{
-			return obj != null && !(obj.GetType() != base.GetType()) && this.Equals((RealTimeSignum)obj);
+			return obj != null && obj.GetType() == base.GetType() && this.Equals((RealTimeSignum)obj);
 		}
 
 		public bool Equals(RealTimeSignum value)

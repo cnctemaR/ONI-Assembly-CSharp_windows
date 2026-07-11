@@ -9,21 +9,21 @@ namespace System
 	public class AccessViolationException : SystemException
 	{
 		public AccessViolationException()
-			: base(Environment.GetResourceString("Attempted to read or write protected memory. This is often an indication that other memory is corrupt."))
+			: base(Locale.GetText("Attempted to read or write protected memory. This is often an indication that other memory has been corrupted."))
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		public AccessViolationException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		public AccessViolationException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		protected AccessViolationException(SerializationInfo info, StreamingContext context)
@@ -31,10 +31,6 @@ namespace System
 		{
 		}
 
-		private IntPtr _ip;
-
-		private IntPtr _target;
-
-		private int _accessType;
+		private const int Result = -2147467261;
 	}
 }

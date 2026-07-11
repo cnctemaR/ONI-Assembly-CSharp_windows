@@ -48,8 +48,8 @@ public class NoiseNodeCanvas : NodeCanvas
 
 	public override void AdditionalSaveMethods(string sceneCanvasName, NodeCanvas.CompleteLoadCallback onComplete)
 	{
-		GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-		if (GUILayout.Button(new GUIContent("Load Yaml", "Loads the Canvas from a Yaml Save File"), Array.Empty<GUILayoutOption>()))
+		GUILayout.BeginHorizontal(new GUILayoutOption[0]);
+		if (GUILayout.Button(new GUIContent("Load Yaml", "Loads the Canvas from a Yaml Save File"), new GUILayoutOption[0]))
 		{
 			this.Load(sceneCanvasName, onComplete);
 		}
@@ -69,7 +69,7 @@ public class NoiseNodeCanvas : NodeCanvas
 		{
 			this.ntf = YamlIO<NoiseTreeFiles>.LoadFile(NoiseTreeFiles.GetPath());
 		}
-		if (this.ntf != null && GUILayout.Button(new GUIContent("Load Tree", "Loads the Canvas from Trees list"), Array.Empty<GUILayoutOption>()))
+		if (this.ntf != null && GUILayout.Button(new GUIContent("Load Tree", "Loads the Canvas from Trees list"), new GUILayoutOption[0]))
 		{
 			GenericMenu genericMenu = new GenericMenu();
 			foreach (string text in this.ntf.tree_files)

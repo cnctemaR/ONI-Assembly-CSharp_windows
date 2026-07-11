@@ -6,13 +6,13 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public interface ICryptoTransform : IDisposable
 	{
-		int InputBlockSize { get; }
-
-		int OutputBlockSize { get; }
+		bool CanReuseTransform { get; }
 
 		bool CanTransformMultipleBlocks { get; }
 
-		bool CanReuseTransform { get; }
+		int InputBlockSize { get; }
+
+		int OutputBlockSize { get; }
 
 		int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset);
 

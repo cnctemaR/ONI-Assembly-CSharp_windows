@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using YamlDotNet.Core.Events;
 
 namespace YamlDotNet.Core
@@ -19,11 +18,13 @@ namespace YamlDotNet.Core
 
 		public ParsingEvent Current
 		{
-			[CompilerGenerated]
 			get
 			{
-				LinkedListNode<ParsingEvent> linkedListNode = this._iterator.Current;
-				return (linkedListNode != null) ? linkedListNode.Value : null;
+				if (this._iterator.Current != null)
+				{
+					return this._iterator.Current.Value;
+				}
+				return null;
 			}
 		}
 

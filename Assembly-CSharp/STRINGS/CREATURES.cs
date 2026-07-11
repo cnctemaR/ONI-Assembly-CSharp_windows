@@ -774,6 +774,10 @@ namespace STRINGS
 				public static LocString DESC = "Bluff Briars exude pheromones causing critters to view them as especially beautiful.";
 
 				public static LocString DOMESTICATEDDESC = "This plant improves " + UI.FormatAsLink("Decor", "DECOR") + ".";
+
+				public static LocString GROWTH_BONUS = "Growth Bonus";
+
+				public static LocString WILT_PENALTY = "Wilt Penalty";
 			}
 
 			public class BASICSINGLEHARVESTPLANT

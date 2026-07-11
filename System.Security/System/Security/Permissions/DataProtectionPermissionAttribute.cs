@@ -21,7 +21,8 @@ namespace System.Security.Permissions
 			{
 				if ((value & DataProtectionPermissionFlags.AllFlags) != value)
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid flags {0}"), value), "DataProtectionPermissionFlags");
+					string text = string.Format(Locale.GetText("Invalid flags {0}"), value);
+					throw new ArgumentException(text, "DataProtectionPermissionFlags");
 				}
 				this._flags = value;
 			}
@@ -31,16 +32,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & DataProtectionPermissionFlags.ProtectData) > DataProtectionPermissionFlags.NoFlags;
+				return (this._flags & DataProtectionPermissionFlags.ProtectData) != DataProtectionPermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= DataProtectionPermissionFlags.ProtectData;
-					return;
 				}
-				this._flags &= ~DataProtectionPermissionFlags.ProtectData;
+				else
+				{
+					this._flags &= ~DataProtectionPermissionFlags.ProtectData;
+				}
 			}
 		}
 
@@ -48,16 +51,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & DataProtectionPermissionFlags.UnprotectData) > DataProtectionPermissionFlags.NoFlags;
+				return (this._flags & DataProtectionPermissionFlags.UnprotectData) != DataProtectionPermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= DataProtectionPermissionFlags.UnprotectData;
-					return;
 				}
-				this._flags &= ~DataProtectionPermissionFlags.UnprotectData;
+				else
+				{
+					this._flags &= ~DataProtectionPermissionFlags.UnprotectData;
+				}
 			}
 		}
 
@@ -65,16 +70,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & DataProtectionPermissionFlags.ProtectMemory) > DataProtectionPermissionFlags.NoFlags;
+				return (this._flags & DataProtectionPermissionFlags.ProtectMemory) != DataProtectionPermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= DataProtectionPermissionFlags.ProtectMemory;
-					return;
 				}
-				this._flags &= ~DataProtectionPermissionFlags.ProtectMemory;
+				else
+				{
+					this._flags &= ~DataProtectionPermissionFlags.ProtectMemory;
+				}
 			}
 		}
 
@@ -82,16 +89,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & DataProtectionPermissionFlags.UnprotectMemory) > DataProtectionPermissionFlags.NoFlags;
+				return (this._flags & DataProtectionPermissionFlags.UnprotectMemory) != DataProtectionPermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= DataProtectionPermissionFlags.UnprotectMemory;
-					return;
 				}
-				this._flags &= ~DataProtectionPermissionFlags.UnprotectMemory;
+				else
+				{
+					this._flags &= ~DataProtectionPermissionFlags.UnprotectMemory;
+				}
 			}
 		}
 

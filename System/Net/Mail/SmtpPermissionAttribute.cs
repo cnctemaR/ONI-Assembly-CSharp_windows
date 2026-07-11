@@ -32,20 +32,17 @@ namespace System.Net.Mail
 				return SmtpAccess.None;
 			}
 			string text = this.access.ToLowerInvariant();
-			if (text == "connecttounrestrictedport")
+			switch (text)
 			{
+			case "connecttounrestrictedport":
 				return SmtpAccess.ConnectToUnrestrictedPort;
-			}
-			if (text == "connect")
-			{
+			case "connect":
 				return SmtpAccess.Connect;
+			case "none":
+				return SmtpAccess.None;
 			}
-			if (!(text == "none"))
-			{
-				string text2 = global::Locale.GetText("Invalid Access='{0}' value.", new object[] { this.access });
-				throw new ArgumentException("Access", text2);
-			}
-			return SmtpAccess.None;
+			string text2 = global::Locale.GetText("Invalid Access='{0}' value.", new object[] { this.access });
+			throw new ArgumentException("Access", text2);
 		}
 
 		public override IPermission CreatePermission()

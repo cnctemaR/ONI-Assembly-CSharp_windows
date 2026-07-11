@@ -1,82 +1,62 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Net.Cache;
-using System.Security.Permissions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Xml
 {
 	public class XmlUrlResolver : XmlResolver
 	{
-		private static XmlDownloadManager DownloadManager
-		{
-			get
-			{
-				if (XmlUrlResolver.s_DownloadManager == null)
-				{
-					object obj = new XmlDownloadManager();
-					Interlocked.CompareExchange<object>(ref XmlUrlResolver.s_DownloadManager, obj, null);
-				}
-				return (XmlDownloadManager)XmlUrlResolver.s_DownloadManager;
-			}
-		}
-
 		public override ICredentials Credentials
 		{
 			set
 			{
-				this._credentials = value;
-			}
-		}
-
-		public IWebProxy Proxy
-		{
-			set
-			{
-				this._proxy = value;
-			}
-		}
-
-		public RequestCachePolicy CachePolicy
-		{
-			set
-			{
-				this._cachePolicy = value;
+				this.credential = value;
 			}
 		}
 
 		public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
 		{
-			if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(object))
+			if (ofObjectToReturn == null)
 			{
-				return XmlUrlResolver.DownloadManager.GetStream(absoluteUri, this._credentials, this._proxy, this._cachePolicy);
+				ofObjectToReturn = typeof(Stream);
 			}
-			throw new XmlException("Object type is not supported.", string.Empty);
+			if (ofObjectToReturn != typeof(Stream))
+			{
+				throw new XmlException("This object type is not supported.");
+			}
+			if (!absoluteUri.IsAbsoluteUri)
+			{
+				throw new ArgumentException("uri must be absolute.", "absoluteUri");
+			}
+			if (!(absoluteUri.Scheme == "file"))
+			{
+				WebRequest webRequest = WebRequest.Create(absoluteUri);
+				if (this.credential != null)
+				{
+					webRequest.Credentials = this.credential;
+				}
+				return webRequest.GetResponse().GetResponseStream();
+			}
+			if (absoluteUri.AbsolutePath == string.Empty)
+			{
+				throw new ArgumentException("uri must be absolute.", "absoluteUri");
+			}
+			return new FileStream(this.UnescapeRelativeUriBody(absoluteUri.LocalPath), FileMode.Open, FileAccess.Read, FileShare.Read);
 		}
 
-		[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 		public override Uri ResolveUri(Uri baseUri, string relativeUri)
 		{
 			return base.ResolveUri(baseUri, relativeUri);
 		}
 
-		public override async Task<object> GetEntityAsync(Uri absoluteUri, string role, Type ofObjectToReturn)
+		private string UnescapeRelativeUriBody(string src)
 		{
-			if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(object))
-			{
-				return await XmlUrlResolver.DownloadManager.GetStreamAsync(absoluteUri, this._credentials, this._proxy, this._cachePolicy).ConfigureAwait(false);
-			}
-			throw new XmlException("Object type is not supported.", string.Empty);
+			return src.Replace("%3C", "<").Replace("%3E", ">").Replace("%23", "#")
+				.Replace("%22", "\"")
+				.Replace("%20", " ")
+				.Replace("%25", "%");
 		}
 
-		private static object s_DownloadManager;
-
-		private ICredentials _credentials;
-
-		private IWebProxy _proxy;
-
-		private RequestCachePolicy _cachePolicy;
+		private ICredentials credential;
 	}
 }

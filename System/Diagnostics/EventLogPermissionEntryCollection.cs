@@ -10,12 +10,13 @@ namespace System.Diagnostics
 		internal EventLogPermissionEntryCollection(EventLogPermission owner)
 		{
 			this.owner = owner;
-			ResourcePermissionBaseEntry[] entries = owner.GetEntries();
-			if (entries.Length != 0)
+			global::System.Security.Permissions.ResourcePermissionBaseEntry[] entries = owner.GetEntries();
+			if (entries.Length > 0)
 			{
-				foreach (ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
+				foreach (global::System.Security.Permissions.ResourcePermissionBaseEntry resourcePermissionBaseEntry in entries)
 				{
-					EventLogPermissionEntry eventLogPermissionEntry = new EventLogPermissionEntry((EventLogPermissionAccess)resourcePermissionBaseEntry.PermissionAccess, resourcePermissionBaseEntry.PermissionAccessPath[0]);
+					EventLogPermissionAccess permissionAccess = (EventLogPermissionAccess)resourcePermissionBaseEntry.PermissionAccess;
+					EventLogPermissionEntry eventLogPermissionEntry = new EventLogPermissionEntry(permissionAccess, resourcePermissionBaseEntry.PermissionAccessPath[0]);
 					base.InnerList.Add(eventLogPermissionEntry);
 				}
 			}

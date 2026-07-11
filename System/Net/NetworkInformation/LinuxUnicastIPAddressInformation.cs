@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Sockets;
 
 namespace System.Net.NetworkInformation
 {
@@ -27,7 +26,7 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		[MonoTODO("Always returns false")]
+		[global::System.MonoTODO("Always returns false")]
 		public override bool IsTransient
 		{
 			get
@@ -72,15 +71,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				if (this.Address.AddressFamily != AddressFamily.InterNetwork)
-				{
-					return IPAddress.Any;
-				}
-				if (this.ipv4Mask == null)
-				{
-					this.ipv4Mask = SystemNetworkInterface.GetNetMask(this.address);
-				}
-				return this.ipv4Mask;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -101,7 +92,5 @@ namespace System.Net.NetworkInformation
 		}
 
 		private IPAddress address;
-
-		private IPAddress ipv4Mask;
 	}
 }

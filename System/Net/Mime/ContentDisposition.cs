@@ -1,48 +1,88 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Collections.Specialized;
 using System.Globalization;
-using System.Net.Mail;
 using System.Text;
 
 namespace System.Net.Mime
 {
 	public class ContentDisposition
 	{
-		static ContentDisposition()
-		{
-			ContentDisposition.validators.Add("creation-date", ContentDisposition.dateParser);
-			ContentDisposition.validators.Add("modification-date", ContentDisposition.dateParser);
-			ContentDisposition.validators.Add("read-date", ContentDisposition.dateParser);
-			ContentDisposition.validators.Add("size", ContentDisposition.longParser);
-		}
-
 		public ContentDisposition()
+			: this("attachment")
 		{
-			this.isChanged = true;
-			this.dispositionType = "attachment";
-			this.disposition = this.dispositionType;
 		}
 
 		public ContentDisposition(string disposition)
 		{
 			if (disposition == null)
 			{
-				throw new ArgumentNullException("disposition");
+				throw new ArgumentNullException();
 			}
-			this.isChanged = true;
-			this.disposition = disposition;
-			this.ParseValue();
+			if (disposition.Length < 1)
+			{
+				throw new FormatException();
+			}
+			this.Size = -1L;
+			try
+			{
+				int num = disposition.IndexOf(';');
+				if (num < 0)
+				{
+					this.dispositionType = disposition.Trim();
+				}
+				else
+				{
+					string[] array = disposition.Split(new char[] { ';' });
+					this.dispositionType = array[0].Trim();
+					for (int i = 1; i < array.Length; i++)
+					{
+						this.Parse(array[i]);
+					}
+				}
+			}
+			catch
+			{
+				throw new FormatException();
+			}
 		}
 
-		internal DateTime GetDateParameter(string parameterName)
+		private void Parse(string pair)
 		{
-			SmtpDateTime smtpDateTime = ((TrackingValidationObjectDictionary)this.Parameters).InternalGet(parameterName) as SmtpDateTime;
-			if (smtpDateTime == null)
+			if (pair == null || pair.Length < 0)
 			{
+				return;
+			}
+			string[] array = pair.Split(new char[] { '=' });
+			if (array.Length == 2)
+			{
+				this.parameters.Add(array[0].Trim(), array[1].Trim());
+				return;
+			}
+			throw new FormatException();
+		}
+
+		public DateTime CreationDate
+		{
+			get
+			{
+				if (this.parameters.ContainsKey("creation-date"))
+				{
+					return DateTime.ParseExact(this.parameters["creation-date"], "dd MMM yyyy HH':'mm':'ss zz00", null);
+				}
 				return DateTime.MinValue;
 			}
-			return smtpDateTime.Date;
+			set
+			{
+				if (value > DateTime.MinValue)
+				{
+					this.parameters["creation-date"] = value.ToString("dd MMM yyyy HH':'mm':'ss zz00");
+				}
+				else
+				{
+					this.parameters.Remove("modification-date");
+				}
+			}
 		}
 
 		public string DispositionType
@@ -55,26 +95,13 @@ namespace System.Net.Mime
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException();
 				}
-				if (value == string.Empty)
+				if (value.Length < 1)
 				{
-					throw new ArgumentException(global::SR.GetString("This property cannot be set to an empty string."), "value");
+					throw new ArgumentException();
 				}
-				this.isChanged = true;
 				this.dispositionType = value;
-			}
-		}
-
-		public StringDictionary Parameters
-		{
-			get
-			{
-				if (this.parameters == null)
-				{
-					this.parameters = new TrackingValidationObjectDictionary(ContentDisposition.validators);
-				}
-				return this.parameters;
 			}
 		}
 
@@ -82,42 +109,11 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.Parameters["filename"];
+				return this.parameters["filename"];
 			}
 			set
 			{
-				if (string.IsNullOrEmpty(value))
-				{
-					this.Parameters.Remove("filename");
-					return;
-				}
-				this.Parameters["filename"] = value;
-			}
-		}
-
-		public DateTime CreationDate
-		{
-			get
-			{
-				return this.GetDateParameter("creation-date");
-			}
-			set
-			{
-				SmtpDateTime smtpDateTime = new SmtpDateTime(value);
-				((TrackingValidationObjectDictionary)this.Parameters).InternalSet("creation-date", smtpDateTime);
-			}
-		}
-
-		public DateTime ModificationDate
-		{
-			get
-			{
-				return this.GetDateParameter("modification-date");
-			}
-			set
-			{
-				SmtpDateTime smtpDateTime = new SmtpDateTime(value);
-				((TrackingValidationObjectDictionary)this.Parameters).InternalSet("modification-date", smtpDateTime);
+				this.parameters["filename"] = value;
 			}
 		}
 
@@ -125,17 +121,49 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.dispositionType == "inline";
+				return string.Compare(this.dispositionType, "inline", true, CultureInfo.InvariantCulture) == 0;
 			}
 			set
 			{
-				this.isChanged = true;
 				if (value)
 				{
 					this.dispositionType = "inline";
-					return;
 				}
-				this.dispositionType = "attachment";
+				else
+				{
+					this.dispositionType = "attachment";
+				}
+			}
+		}
+
+		public DateTime ModificationDate
+		{
+			get
+			{
+				if (this.parameters.ContainsKey("modification-date"))
+				{
+					return DateTime.ParseExact(this.parameters["modification-date"], "dd MMM yyyy HH':'mm':'ss zz00", null);
+				}
+				return DateTime.MinValue;
+			}
+			set
+			{
+				if (value > DateTime.MinValue)
+				{
+					this.parameters["modification-date"] = value.ToString("dd MMM yyyy HH':'mm':'ss zz00");
+				}
+				else
+				{
+					this.parameters.Remove("modification-date");
+				}
+			}
+		}
+
+		public global::System.Collections.Specialized.StringDictionary Parameters
+		{
+			get
+			{
+				return this.parameters;
 			}
 		}
 
@@ -143,12 +171,22 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				return this.GetDateParameter("read-date");
+				if (this.parameters.ContainsKey("read-date"))
+				{
+					return DateTime.ParseExact(this.parameters["read-date"], "dd MMM yyyy HH':'mm':'ss zz00", null);
+				}
+				return DateTime.MinValue;
 			}
 			set
 			{
-				SmtpDateTime smtpDateTime = new SmtpDateTime(value);
-				((TrackingValidationObjectDictionary)this.Parameters).InternalSet("read-date", smtpDateTime);
+				if (value > DateTime.MinValue)
+				{
+					this.parameters["read-date"] = value.ToString("dd MMM yyyy HH':'mm':'ss zz00");
+				}
+				else
+				{
+					this.parameters.Remove("read-date");
+				}
 			}
 		}
 
@@ -156,190 +194,76 @@ namespace System.Net.Mime
 		{
 			get
 			{
-				object obj = ((TrackingValidationObjectDictionary)this.Parameters).InternalGet("size");
-				if (obj == null)
+				if (this.parameters.ContainsKey("size"))
 				{
-					return -1L;
+					return long.Parse(this.parameters["size"]);
 				}
-				return (long)obj;
+				return -1L;
 			}
 			set
 			{
-				((TrackingValidationObjectDictionary)this.Parameters).InternalSet("size", value);
+				if (value > -1L)
+				{
+					this.parameters["size"] = value.ToString();
+				}
+				else
+				{
+					this.parameters.Remove("size");
+				}
 			}
 		}
 
-		internal void Set(string contentDisposition, HeaderCollection headers)
+		public override bool Equals(object obj)
 		{
-			this.disposition = contentDisposition;
-			this.ParseValue();
-			headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentDisposition), this.ToString());
-			this.isPersisted = true;
+			return this.Equals(obj as ContentDisposition);
 		}
 
-		internal void PersistIfNeeded(HeaderCollection headers, bool forcePersist)
+		private bool Equals(ContentDisposition other)
 		{
-			if (this.IsChanged || !this.isPersisted || forcePersist)
-			{
-				headers.InternalSet(MailHeaderInfo.GetString(MailHeaderID.ContentDisposition), this.ToString());
-				this.isPersisted = true;
-			}
-		}
-
-		internal bool IsChanged
-		{
-			get
-			{
-				return this.isChanged || (this.parameters != null && this.parameters.IsChanged);
-			}
-		}
-
-		public override string ToString()
-		{
-			if (this.disposition == null || this.isChanged || (this.parameters != null && this.parameters.IsChanged))
-			{
-				this.disposition = this.Encode(false);
-				this.isChanged = false;
-				this.parameters.IsChanged = false;
-				this.isPersisted = false;
-			}
-			return this.disposition;
-		}
-
-		internal string Encode(bool allowUnicode)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(this.dispositionType);
-			foreach (object obj in this.Parameters.Keys)
-			{
-				string text = (string)obj;
-				stringBuilder.Append("; ");
-				ContentDisposition.EncodeToBuffer(text, stringBuilder, allowUnicode);
-				stringBuilder.Append('=');
-				ContentDisposition.EncodeToBuffer(this.parameters[text], stringBuilder, allowUnicode);
-			}
-			return stringBuilder.ToString();
-		}
-
-		private static void EncodeToBuffer(string value, StringBuilder builder, bool allowUnicode)
-		{
-			Encoding encoding = MimeBasePart.DecodeEncoding(value);
-			if (encoding != null)
-			{
-				builder.Append("\"" + value + "\"");
-				return;
-			}
-			if ((allowUnicode && !MailBnfHelper.HasCROrLF(value)) || MimeBasePart.IsAscii(value, false))
-			{
-				MailBnfHelper.GetTokenOrQuotedString(value, builder, allowUnicode);
-				return;
-			}
-			encoding = Encoding.GetEncoding("utf-8");
-			builder.Append("\"" + MimeBasePart.EncodeHeaderValue(value, encoding, MimeBasePart.ShouldUseBase64Encoding(encoding)) + "\"");
-		}
-
-		public override bool Equals(object rparam)
-		{
-			return rparam != null && string.Compare(this.ToString(), rparam.ToString(), StringComparison.OrdinalIgnoreCase) == 0;
+			return other != null && this.ToString() == other.ToString();
 		}
 
 		public override int GetHashCode()
 		{
-			return this.ToString().ToLowerInvariant().GetHashCode();
+			return this.ToString().GetHashCode();
 		}
 
-		private void ParseValue()
+		public override string ToString()
 		{
-			int num = 0;
-			try
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append(this.DispositionType.ToLower());
+			if (this.Parameters != null && this.Parameters.Count > 0)
 			{
-				this.dispositionType = MailBnfHelper.ReadToken(this.disposition, ref num, null);
-				if (string.IsNullOrEmpty(this.dispositionType))
+				foreach (object obj in this.Parameters)
 				{
-					throw new FormatException(global::SR.GetString("The mail header is malformed."));
-				}
-				if (this.parameters == null)
-				{
-					this.parameters = new TrackingValidationObjectDictionary(ContentDisposition.validators);
-				}
-				else
-				{
-					this.parameters.Clear();
-				}
-				while (MailBnfHelper.SkipCFWS(this.disposition, ref num))
-				{
-					if (this.disposition[num++] != ';')
+					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+					if (dictionaryEntry.Value != null && dictionaryEntry.Value.ToString().Length > 0)
 					{
-						throw new FormatException(global::SR.GetString("An invalid character was found in the mail header: '{0}'.", new object[] { this.disposition[num - 1] }));
+						stringBuilder.Append("; ");
+						stringBuilder.Append(dictionaryEntry.Key);
+						stringBuilder.Append("=");
+						string text = dictionaryEntry.Key.ToString();
+						string text2 = dictionaryEntry.Value.ToString();
+						bool flag = (text == "filename" && text2.IndexOf(' ') != -1) || text.EndsWith("date");
+						if (flag)
+						{
+							stringBuilder.Append("\"");
+						}
+						stringBuilder.Append(text2);
+						if (flag)
+						{
+							stringBuilder.Append("\"");
+						}
 					}
-					if (!MailBnfHelper.SkipCFWS(this.disposition, ref num))
-					{
-						break;
-					}
-					string text = MailBnfHelper.ReadParameterAttribute(this.disposition, ref num, null);
-					if (this.disposition[num++] != '=')
-					{
-						throw new FormatException(global::SR.GetString("The mail header is malformed."));
-					}
-					if (!MailBnfHelper.SkipCFWS(this.disposition, ref num))
-					{
-						throw new FormatException(global::SR.GetString("The specified content disposition is invalid."));
-					}
-					string text2;
-					if (this.disposition[num] == '"')
-					{
-						text2 = MailBnfHelper.ReadQuotedString(this.disposition, ref num, null);
-					}
-					else
-					{
-						text2 = MailBnfHelper.ReadToken(this.disposition, ref num, null);
-					}
-					if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(text2))
-					{
-						throw new FormatException(global::SR.GetString("The specified content disposition is invalid."));
-					}
-					this.Parameters.Add(text, text2);
 				}
 			}
-			catch (FormatException ex)
-			{
-				throw new FormatException(global::SR.GetString("The specified content disposition is invalid."), ex);
-			}
-			this.parameters.IsChanged = false;
+			return stringBuilder.ToString();
 		}
+
+		private const string rfc822 = "dd MMM yyyy HH':'mm':'ss zz00";
 
 		private string dispositionType;
 
-		private TrackingValidationObjectDictionary parameters;
-
-		private bool isChanged;
-
-		private bool isPersisted;
-
-		private string disposition;
-
-		private const string creationDate = "creation-date";
-
-		private const string readDate = "read-date";
-
-		private const string modificationDate = "modification-date";
-
-		private const string size = "size";
-
-		private const string fileName = "filename";
-
-		private static readonly TrackingValidationObjectDictionary.ValidateAndParseValue dateParser = (object value) => new SmtpDateTime(value.ToString());
-
-		private static readonly TrackingValidationObjectDictionary.ValidateAndParseValue longParser = delegate(object value)
-		{
-			long num;
-			if (!long.TryParse(value.ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out num))
-			{
-				throw new FormatException(global::SR.GetString("The specified content disposition is invalid."));
-			}
-			return num;
-		};
-
-		private static readonly IDictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue> validators = new Dictionary<string, TrackingValidationObjectDictionary.ValidateAndParseValue>();
+		private global::System.Collections.Specialized.StringDictionary parameters = new global::System.Collections.Specialized.StringDictionary();
 	}
 }

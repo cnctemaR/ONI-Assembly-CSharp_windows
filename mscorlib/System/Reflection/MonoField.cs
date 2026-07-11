@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace System.Reflection
 {
 	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	internal class MonoField : RtFieldInfo
+	internal class MonoField : FieldInfo, ISerializable
 	{
 		public override FieldAttributes Attributes
 		{
@@ -26,17 +24,10 @@ namespace System.Reflection
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern Type ResolveType();
-
 		public override Type FieldType
 		{
 			get
 			{
-				if (this.type == null)
-				{
-					this.type = this.ResolveType();
-				}
 				return this.type;
 			}
 		}
@@ -91,7 +82,7 @@ namespace System.Reflection
 
 		public override object GetValue(object obj)
 		{
-			if (!base.IsStatic)
+			if (!this.IsStatic)
 			{
 				if (obj == null)
 				{
@@ -102,7 +93,7 @@ namespace System.Reflection
 					throw new ArgumentException(string.Format("Field {0} defined on type {1} is not a field on the target object which is of type {2}.", this.Name, this.DeclaringType, obj.GetType()), "obj");
 				}
 			}
-			if (!base.IsLiteral)
+			if (!this.IsLiteral)
 			{
 				this.CheckGeneric();
 			}
@@ -111,7 +102,7 @@ namespace System.Reflection
 
 		public override string ToString()
 		{
-			return string.Format("{0} {1}", this.FieldType, this.name);
+			return string.Format("{0} {1}", this.type, this.name);
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -119,7 +110,7 @@ namespace System.Reflection
 
 		public override void SetValue(object obj, object val, BindingFlags invokeAttr, Binder binder, CultureInfo culture)
 		{
-			if (!base.IsStatic)
+			if (!this.IsStatic)
 			{
 				if (obj == null)
 				{
@@ -130,18 +121,29 @@ namespace System.Reflection
 					throw new ArgumentException(string.Format("Field {0} defined on type {1} is not a field on the target object which is of type {2}.", this.Name, this.DeclaringType, obj.GetType()), "obj");
 				}
 			}
-			if (base.IsLiteral)
+			if (this.IsLiteral)
 			{
 				throw new FieldAccessException("Cannot set a constant field");
 			}
 			if (binder == null)
 			{
-				binder = Type.DefaultBinder;
+				binder = Binder.DefaultBinder;
 			}
 			this.CheckGeneric();
 			if (val != null)
 			{
-				val = ((RuntimeType)this.FieldType).CheckValue(val, binder, culture, invokeAttr);
+				object obj2 = binder.ChangeType(val, this.type, culture);
+				if (obj2 == null)
+				{
+					throw new ArgumentException(string.Concat(new object[]
+					{
+						"Object type ",
+						val.GetType(),
+						" cannot be converted to target type: ",
+						this.type
+					}), "val");
+				}
+				val = obj2;
 			}
 			MonoField.SetValueInternal(this, obj, val);
 		}
@@ -158,46 +160,19 @@ namespace System.Reflection
 			};
 		}
 
+		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			MemberInfoSerializationHolder.Serialize(info, this.Name, this.ReflectedType, this.ToString(), MemberTypes.Field);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public override extern object GetRawConstantValue();
-
-		public override IList<CustomAttributeData> GetCustomAttributesData()
-		{
-			return CustomAttributeData.GetCustomAttributes(this);
-		}
 
 		private void CheckGeneric()
 		{
 			if (this.DeclaringType.ContainsGenericParameters)
 			{
 				throw new InvalidOperationException("Late bound operations cannot be performed on fields with types for which Type.ContainsGenericParameters is true.");
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern int get_core_clr_security_level();
-
-		public override bool IsSecurityTransparent
-		{
-			get
-			{
-				return this.get_core_clr_security_level() == 0;
-			}
-		}
-
-		public override bool IsSecurityCritical
-		{
-			get
-			{
-				return this.get_core_clr_security_level() > 0;
-			}
-		}
-
-		public override bool IsSecuritySafeCritical
-		{
-			get
-			{
-				return this.get_core_clr_security_level() == 1;
 			}
 		}
 

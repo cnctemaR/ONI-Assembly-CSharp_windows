@@ -9,26 +9,28 @@ namespace System
 	public class NullReferenceException : SystemException
 	{
 		public NullReferenceException()
-			: base(Environment.GetResourceString("Object reference not set to an instance of an object."))
+			: base(Locale.GetText("A null value was found where an object instance was required."))
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		public NullReferenceException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		public NullReferenceException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147467261);
+			base.HResult = -2147467261;
 		}
 
 		protected NullReferenceException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private const int Result = -2147467261;
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
-using TUNING;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -20,8 +19,6 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 			ArcadeMachineWorkable arcadeMachineWorkable = gameObject.AddOrGet<ArcadeMachineWorkable>();
 			arcadeMachineWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Gaming);
 			arcadeMachineWorkable.owner = this;
-			arcadeMachineWorkable.basePriority = RELAXATION.PRIORITY.TIER4;
-			arcadeMachineWorkable.specificEffect = "PlayedArcade";
 			arcadeMachineWorkable.overrideAnims = this.overrideAnims[i];
 			arcadeMachineWorkable.workAnims = this.workAnims[i];
 			this.workables[i] = arcadeMachineWorkable;

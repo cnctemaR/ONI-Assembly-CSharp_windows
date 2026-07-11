@@ -44,7 +44,6 @@ namespace System.Net
 		UnsupportedMediaType,
 		RequestedRangeNotSatisfiable,
 		ExpectationFailed,
-		UpgradeRequired = 426,
 		InternalServerError = 500,
 		NotImplemented,
 		BadGateway,

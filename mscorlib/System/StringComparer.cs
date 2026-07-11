@@ -8,24 +8,8 @@ namespace System
 {
 	[ComVisible(true)]
 	[Serializable]
-	public abstract class StringComparer : IComparer, IEqualityComparer, IComparer<string>, IEqualityComparer<string>
+	public abstract class StringComparer : IComparer<string>, IEqualityComparer<string>, IComparer, IEqualityComparer
 	{
-		public static StringComparer InvariantCulture
-		{
-			get
-			{
-				return StringComparer._invariantCulture;
-			}
-		}
-
-		public static StringComparer InvariantCultureIgnoreCase
-		{
-			get
-			{
-				return StringComparer._invariantCultureIgnoreCase;
-			}
-		}
-
 		public static StringComparer CurrentCulture
 		{
 			get
@@ -42,11 +26,27 @@ namespace System
 			}
 		}
 
+		public static StringComparer InvariantCulture
+		{
+			get
+			{
+				return StringComparer.invariantCulture;
+			}
+		}
+
+		public static StringComparer InvariantCultureIgnoreCase
+		{
+			get
+			{
+				return StringComparer.invariantCultureIgnoreCase;
+			}
+		}
+
 		public static StringComparer Ordinal
 		{
 			get
 			{
-				return StringComparer._ordinal;
+				return StringComparer.ordinal;
 			}
 		}
 
@@ -54,7 +54,7 @@ namespace System
 		{
 			get
 			{
-				return StringComparer._ordinalIgnoreCase;
+				return StringComparer.ordinalIgnoreCase;
 			}
 		}
 
@@ -91,11 +91,11 @@ namespace System
 				}
 			}
 			IComparable comparable = x as IComparable;
-			if (comparable != null)
+			if (comparable == null)
 			{
-				return comparable.CompareTo(y);
+				throw new ArgumentException();
 			}
-			throw new ArgumentException(Environment.GetResourceString("At least one object must implement IComparable."));
+			return comparable.CompareTo(y);
 		}
 
 		public bool Equals(object x, object y)
@@ -127,11 +127,7 @@ namespace System
 				throw new ArgumentNullException("obj");
 			}
 			string text = obj as string;
-			if (text != null)
-			{
-				return this.GetHashCode(text);
-			}
-			return obj.GetHashCode();
+			return (text != null) ? this.GetHashCode(text) : obj.GetHashCode();
 		}
 
 		public abstract int Compare(string x, string y);
@@ -140,12 +136,12 @@ namespace System
 
 		public abstract int GetHashCode(string obj);
 
-		private static readonly StringComparer _invariantCulture = new CultureAwareComparer(CultureInfo.InvariantCulture, false);
+		private static StringComparer invariantCultureIgnoreCase = new CultureAwareComparer(CultureInfo.InvariantCulture, true);
 
-		private static readonly StringComparer _invariantCultureIgnoreCase = new CultureAwareComparer(CultureInfo.InvariantCulture, true);
+		private static StringComparer invariantCulture = new CultureAwareComparer(CultureInfo.InvariantCulture, false);
 
-		private static readonly StringComparer _ordinal = new OrdinalComparer(false);
+		private static StringComparer ordinalIgnoreCase = new OrdinalComparer(true);
 
-		private static readonly StringComparer _ordinalIgnoreCase = new OrdinalComparer(true);
+		private static StringComparer ordinal = new OrdinalComparer(false);
 	}
 }

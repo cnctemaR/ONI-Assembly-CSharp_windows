@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
@@ -9,55 +8,48 @@ namespace System.Security.Cryptography
 	{
 		public DSASignatureFormatter()
 		{
-			this._oid = CryptoConfig.MapNameToOID("SHA1", OidGroup.HashAlgorithm);
 		}
 
 		public DSASignatureFormatter(AsymmetricAlgorithm key)
-			: this()
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			this._dsaKey = (DSA)key;
-		}
-
-		public override void SetKey(AsymmetricAlgorithm key)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			this._dsaKey = (DSA)key;
-		}
-
-		public override void SetHashAlgorithm(string strName)
-		{
-			if (CryptoConfig.MapNameToOID(strName, OidGroup.HashAlgorithm) != this._oid)
-			{
-				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("This operation is not supported for this class."));
-			}
+			this.SetKey(key);
 		}
 
 		public override byte[] CreateSignature(byte[] rgbHash)
 		{
-			if (rgbHash == null)
+			if (this.dsa == null)
 			{
-				throw new ArgumentNullException("rgbHash");
+				throw new CryptographicUnexpectedOperationException(Locale.GetText("missing key"));
 			}
-			if (this._oid == null)
-			{
-				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("Required object identifier (OID) cannot be found."));
-			}
-			if (this._dsaKey == null)
-			{
-				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("No asymmetric key object has been associated with this formatter object."));
-			}
-			return this._dsaKey.CreateSignature(rgbHash);
+			return this.dsa.CreateSignature(rgbHash);
 		}
 
-		private DSA _dsaKey;
+		public override void SetHashAlgorithm(string strName)
+		{
+			if (strName == null)
+			{
+				throw new ArgumentNullException("strName");
+			}
+			try
+			{
+				SHA1.Create(strName);
+			}
+			catch (InvalidCastException)
+			{
+				throw new CryptographicUnexpectedOperationException(Locale.GetText("DSA requires SHA1"));
+			}
+		}
 
-		private string _oid;
+		public override void SetKey(AsymmetricAlgorithm key)
+		{
+			if (key != null)
+			{
+				this.dsa = (DSA)key;
+				return;
+			}
+			throw new ArgumentNullException("key");
+		}
+
+		private DSA dsa;
 	}
 }

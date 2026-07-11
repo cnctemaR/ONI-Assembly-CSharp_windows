@@ -7,12 +7,22 @@ namespace System.ComponentModel
 	{
 		public DefaultBindingPropertyAttribute()
 		{
-			this.name = null;
 		}
 
 		public DefaultBindingPropertyAttribute(string name)
 		{
 			this.name = name;
+		}
+
+		public override bool Equals(object obj)
+		{
+			DefaultBindingPropertyAttribute defaultBindingPropertyAttribute = obj as DefaultBindingPropertyAttribute;
+			return obj != null && this.name == defaultBindingPropertyAttribute.Name;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
 		}
 
 		public string Name
@@ -23,19 +33,8 @@ namespace System.ComponentModel
 			}
 		}
 
-		public override bool Equals(object obj)
-		{
-			DefaultBindingPropertyAttribute defaultBindingPropertyAttribute = obj as DefaultBindingPropertyAttribute;
-			return defaultBindingPropertyAttribute != null && defaultBindingPropertyAttribute.Name == this.name;
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		private readonly string name;
-
 		public static readonly DefaultBindingPropertyAttribute Default = new DefaultBindingPropertyAttribute();
+
+		private string name;
 	}
 }

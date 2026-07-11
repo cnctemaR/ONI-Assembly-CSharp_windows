@@ -7,7 +7,7 @@ namespace System.Reflection
 	public struct InterfaceMapping
 	{
 		[ComVisible(true)]
-		public Type TargetType;
+		public MethodInfo[] InterfaceMethods;
 
 		[ComVisible(true)]
 		public Type InterfaceType;
@@ -16,6 +16,6 @@ namespace System.Reflection
 		public MethodInfo[] TargetMethods;
 
 		[ComVisible(true)]
-		public MethodInfo[] InterfaceMethods;
+		public Type TargetType;
 	}
 }

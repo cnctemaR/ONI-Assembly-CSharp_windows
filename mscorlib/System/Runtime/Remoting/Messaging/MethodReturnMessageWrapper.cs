@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace System.Runtime.Remoting.Messaging
 {
 	[ComVisible(true)]
-	public class MethodReturnMessageWrapper : InternalMessageWrapper, IMethodReturnMessage, IMethodMessage, IMessage
+	public class MethodReturnMessageWrapper : InternalMessageWrapper, IMessage, IMethodMessage, IMethodReturnMessage
 	{
 		public MethodReturnMessageWrapper(IMethodReturnMessage msg)
 			: base(msg)
@@ -15,13 +15,15 @@ namespace System.Runtime.Remoting.Messaging
 			{
 				this._exception = msg.Exception;
 				this._args = new object[0];
-				return;
 			}
-			this._args = msg.Args;
-			this._return = msg.ReturnValue;
-			if (msg.MethodBase != null)
+			else
 			{
-				this._outArgInfo = new ArgInfo(msg.MethodBase, ArgInfoType.Out);
+				this._args = msg.Args;
+				this._return = msg.ReturnValue;
+				if (msg.MethodBase != null)
+				{
+					this._outArgInfo = new ArgInfo(msg.MethodBase, ArgInfoType.Out);
+				}
 			}
 		}
 
@@ -101,11 +103,7 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			get
 			{
-				if (this._outArgInfo == null)
-				{
-					return 0;
-				}
-				return this._outArgInfo.GetInOutArgCount();
+				return (this._outArgInfo == null) ? 0 : this._outArgInfo.GetInOutArgCount();
 			}
 		}
 
@@ -113,11 +111,7 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			get
 			{
-				if (this._outArgInfo == null)
-				{
-					return this._args;
-				}
-				return this._outArgInfo.GetInOutArgs(this._args);
+				return (this._outArgInfo == null) ? this._args : this._outArgInfo.GetInOutArgs(this._args);
 			}
 		}
 
@@ -214,14 +208,15 @@ namespace System.Runtime.Remoting.Messaging
 				if (key == "__Args")
 				{
 					((MethodReturnMessageWrapper)this._message)._args = (object[])value;
-					return;
 				}
-				if (key == "__Return")
+				else if (key == "__Return")
 				{
 					((MethodReturnMessageWrapper)this._message)._return = value;
-					return;
 				}
-				base.SetMethodProperty(key, value);
+				else
+				{
+					base.SetMethodProperty(key, value);
+				}
 			}
 
 			protected override object GetMethodProperty(string key)

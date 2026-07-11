@@ -8,17 +8,17 @@ namespace System.Runtime.InteropServices
 	{
 		public UnknownWrapper(object obj)
 		{
-			this.m_WrappedObject = obj;
+			this.InternalObject = obj;
 		}
 
 		public object WrappedObject
 		{
 			get
 			{
-				return this.m_WrappedObject;
+				return this.InternalObject;
 			}
 		}
 
-		private object m_WrappedObject;
+		private object InternalObject;
 	}
 }

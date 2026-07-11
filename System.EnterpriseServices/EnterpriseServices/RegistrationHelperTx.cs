@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices
 {
-	[Guid("C89AC250-E18A-4FC7-ABD5-B8897B6A78A5")]
 	[Transaction(TransactionOption.RequiresNew)]
+	[Guid("C89AC250-E18A-4FC7-ABD5-B8897B6A78A5")]
 	public sealed class RegistrationHelperTx : ServicedComponent
 	{
 		[MonoTODO]

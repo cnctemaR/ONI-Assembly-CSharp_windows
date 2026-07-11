@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Cache;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using Mono.Net.Security;
-using Mono.Security.Interface;
 
 namespace System.Net
 {
 	public sealed class FtpWebRequest : WebRequest
 	{
-		internal FtpWebRequest(Uri uri)
+		internal FtpWebRequest(global::System.Uri uri)
 		{
 			this.requestUri = uri;
 			this.proxy = GlobalProxySelection.Select;
@@ -25,8 +24,8 @@ namespace System.Net
 			return new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public X509CertificateCollection ClientCertificates
+		[global::System.MonoTODO]
+		public global::System.Security.Cryptography.X509Certificates.X509CertificateCollection ClientCertificates
 		{
 			get
 			{
@@ -38,7 +37,7 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override string ConnectionGroupName
 		{
 			get
@@ -112,8 +111,8 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO]
-		public new static RequestCachePolicy DefaultCachePolicy
+		[global::System.MonoTODO]
+		public new static global::System.Net.Cache.RequestCachePolicy DefaultCachePolicy
 		{
 			get
 			{
@@ -138,7 +137,7 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override WebHeaderCollection Headers
 		{
 			get
@@ -151,7 +150,7 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO("We don't support KeepAlive = true")]
+		[global::System.MonoTODO("We don't support KeepAlive = true")]
 		public bool KeepAlive
 		{
 			get
@@ -206,6 +205,10 @@ namespace System.Net
 			set
 			{
 				this.CheckRequestStarted();
+				if (value == null)
+				{
+					throw new ArgumentNullException();
+				}
 				this.proxy = value;
 			}
 		}
@@ -244,7 +247,7 @@ namespace System.Net
 			}
 		}
 
-		public override Uri RequestUri
+		public override global::System.Uri RequestUri
 		{
 			get
 			{
@@ -273,7 +276,7 @@ namespace System.Net
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool UseDefaultCredentials
 		{
 			get
@@ -320,11 +323,7 @@ namespace System.Net
 		{
 			get
 			{
-				if (!this.binary)
-				{
-					return "A";
-				}
-				return "I";
+				return (!this.binary) ? "A" : "I";
 			}
 		}
 
@@ -359,7 +358,7 @@ namespace System.Net
 			{
 				if (this.State == FtpWebRequest.RequestState.TransferInProgress)
 				{
-					this.SendCommand(false, "ABOR", Array.Empty<string>());
+					this.SendCommand(false, "ABOR", new string[0]);
 				}
 				if (!this.InFinalState())
 				{
@@ -390,10 +389,8 @@ namespace System.Net
 					{
 						this.State = FtpWebRequest.RequestState.Scheduled;
 					}
-					new Thread(new ThreadStart(this.ProcessRequest))
-					{
-						IsBackground = true
-					}.Start();
+					Thread thread = new Thread(new ThreadStart(this.ProcessRequest));
+					thread.Start();
 				}
 			}
 			return this.asyncResult;
@@ -447,10 +444,8 @@ namespace System.Net
 				this.State = FtpWebRequest.RequestState.Scheduled;
 			}
 			this.asyncResult = new FtpAsyncResult(callback, state);
-			new Thread(new ThreadStart(this.ProcessRequest))
-			{
-				IsBackground = true
-			}.Start();
+			Thread thread = new Thread(new ThreadStart(this.ProcessRequest));
+			thread.Start();
 			return this.asyncResult;
 		}
 
@@ -520,28 +515,26 @@ namespace System.Net
 				{
 					this.ProcessMethod();
 					this.asyncResult.SetCompleted(false, this.ftpResponse);
-					return;
 				}
 				catch (Exception ex)
 				{
-					if (!this.GetServicePoint().UsesProxy)
-					{
-						this.State = FtpWebRequest.RequestState.Error;
-					}
+					this.State = FtpWebRequest.RequestState.Error;
 					this.SetCompleteWithError(ex);
-					return;
 				}
 			}
-			if (this.InProgress())
+			else
 			{
-				FtpStatus responseStatus = this.GetResponseStatus();
-				this.ftpResponse.UpdateStatus(responseStatus);
-				if (this.ftpResponse.IsFinal())
+				if (this.InProgress())
 				{
-					this.State = FtpWebRequest.RequestState.Finished;
+					FtpStatus responseStatus = this.GetResponseStatus();
+					this.ftpResponse.UpdateStatus(responseStatus);
+					if (this.ftpResponse.IsFinal())
+					{
+						this.State = FtpWebRequest.RequestState.Finished;
+					}
 				}
+				this.asyncResult.SetCompleted(false, this.ftpResponse);
 			}
-			this.asyncResult.SetCompleted(false, this.ftpResponse);
 		}
 
 		private void SetType()
@@ -556,9 +549,9 @@ namespace System.Net
 			}
 		}
 
-		private string GetRemoteFolderPath(Uri uri)
+		private string GetRemoteFolderPath(global::System.Uri uri)
 		{
-			string text = Uri.UnescapeDataString(uri.LocalPath);
+			string text = global::System.Uri.UnescapeDataString(uri.LocalPath);
 			string text2;
 			if (this.initial_path == null || this.initial_path == "/")
 			{
@@ -570,12 +563,8 @@ namespace System.Net
 				{
 					text = text.Substring(1);
 				}
-				text2 = new Uri(new UriBuilder
-				{
-					Scheme = "ftp",
-					Host = "dummy-host",
-					Path = this.initial_path
-				}.Uri, text).LocalPath;
+				global::System.Uri uri2 = new global::System.Uri("ftp://dummy-host" + this.initial_path);
+				text2 = new global::System.Uri(uri2, text).LocalPath;
 			}
 			int num = text2.LastIndexOf('/');
 			if (num == -1)
@@ -585,7 +574,7 @@ namespace System.Net
 			return text2.Substring(0, num + 1);
 		}
 
-		private void CWDAndSetFileName(Uri uri)
+		private void CWDAndSetFileName(global::System.Uri uri)
 		{
 			string remoteFolderPath = this.GetRemoteFolderPath(uri);
 			if (remoteFolderPath != null)
@@ -598,180 +587,69 @@ namespace System.Net
 				int num = uri.LocalPath.LastIndexOf('/');
 				if (num >= 0)
 				{
-					this.file_name = Uri.UnescapeDataString(uri.LocalPath.Substring(num + 1));
+					this.file_name = global::System.Uri.UnescapeDataString(uri.LocalPath.Substring(num + 1));
 				}
 			}
 		}
 
 		private void ProcessMethod()
 		{
-			if (!this.GetServicePoint().UsesProxy)
+			this.State = FtpWebRequest.RequestState.Connecting;
+			this.ResolveHost();
+			this.OpenControlConnection();
+			this.CWDAndSetFileName(this.requestUri);
+			this.SetType();
+			string text = this.method;
+			if (text != null)
 			{
-				this.State = FtpWebRequest.RequestState.Connecting;
-				this.ResolveHost();
-				this.OpenControlConnection();
-				this.CWDAndSetFileName(this.requestUri);
-				this.SetType();
-				string text = this.method;
-				uint num = global::<PrivateImplementationDetails>.ComputeStringHash(text);
-				if (num <= 1636987420U)
+				if (FtpWebRequest.<>f__switch$mapA == null)
 				{
-					if (num <= 172932033U)
+					FtpWebRequest.<>f__switch$mapA = new Dictionary<string, int>(12)
 					{
-						if (num != 61167622U)
-						{
-							if (num != 111500479U)
-							{
-								if (num != 172932033U)
-								{
-									goto IL_0248;
-								}
-								if (!(text == "LIST"))
-								{
-									goto IL_0248;
-								}
-							}
-							else
-							{
-								if (!(text == "STOR"))
-								{
-									goto IL_0248;
-								}
-								goto IL_0238;
-							}
-						}
-						else
-						{
-							if (!(text == "STOU"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0238;
-						}
-					}
-					else if (num != 540800083U)
-					{
-						if (num != 1414193175U)
-						{
-							if (num != 1636987420U)
-							{
-								goto IL_0248;
-							}
-							if (!(text == "SIZE"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
-						else
-						{
-							if (!(text == "MKD"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
-					}
-					else
-					{
-						if (!(text == "RENAME"))
-						{
-							goto IL_0248;
-						}
-						goto IL_0240;
-					}
+						{ "RETR", 0 },
+						{ "NLST", 0 },
+						{ "LIST", 0 },
+						{ "APPE", 1 },
+						{ "STOR", 1 },
+						{ "STOU", 1 },
+						{ "SIZE", 2 },
+						{ "MDTM", 2 },
+						{ "PWD", 2 },
+						{ "MKD", 2 },
+						{ "RENAME", 2 },
+						{ "DELE", 2 }
+					};
 				}
-				else if (num <= 2586094756U)
+				int num;
+				if (FtpWebRequest.<>f__switch$mapA.TryGetValue(text, out num))
 				{
-					if (num != 2190452587U)
+					switch (num)
 					{
-						if (num != 2192893693U)
-						{
-							if (num != 2586094756U)
-							{
-								goto IL_0248;
-							}
-							if (!(text == "PWD"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
-						else
-						{
-							if (!(text == "DELE"))
-							{
-								goto IL_0248;
-							}
-							goto IL_0240;
-						}
+					case 0:
+						this.DownloadData();
+						break;
+					case 1:
+						this.UploadData();
+						break;
+					case 2:
+						this.ProcessSimpleMethod();
+						break;
+					default:
+						goto IL_0124;
 					}
-					else
-					{
-						if (!(text == "APPE"))
-						{
-							goto IL_0248;
-						}
-						goto IL_0238;
-					}
+					this.CheckIfAborted();
+					return;
 				}
-				else if (num != 3129138359U)
-				{
-					if (num != 3960558266U)
-					{
-						if (num != 4117911256U)
-						{
-							goto IL_0248;
-						}
-						if (!(text == "NLST"))
-						{
-							goto IL_0248;
-						}
-					}
-					else if (!(text == "RETR"))
-					{
-						goto IL_0248;
-					}
-				}
-				else
-				{
-					if (!(text == "MDTM"))
-					{
-						goto IL_0248;
-					}
-					goto IL_0240;
-				}
-				this.DownloadData();
-				goto IL_025E;
-				IL_0238:
-				this.UploadData();
-				goto IL_025E;
-				IL_0240:
-				this.ProcessSimpleMethod();
-				goto IL_025E;
-				IL_0248:
-				throw new Exception(string.Format("Support for command {0} not implemented yet", this.method));
-				IL_025E:
-				this.CheckIfAborted();
-				return;
 			}
-			if (this.method != "RETR")
-			{
-				throw new NotSupportedException("FTP+proxy only supports RETR");
-			}
-			HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(this.proxy.GetProxy(this.requestUri));
-			httpWebRequest.Address = this.requestUri;
-			this.requestState = FtpWebRequest.RequestState.Finished;
-			WebResponse response = httpWebRequest.GetResponse();
-			this.ftpResponse.Stream = new FtpDataStream(this, response.GetResponseStream(), true);
-			this.ftpResponse.StatusCode = FtpStatusCode.CommandOK;
+			IL_0124:
+			throw new Exception(string.Format("Support for command {0} not implemented yet", this.method));
 		}
 
 		private void CloseControlConnection()
 		{
 			if (this.controlStream != null)
 			{
-				this.SendCommand("QUIT", Array.Empty<string>());
+				this.SendCommand("QUIT", new string[0]);
 				this.controlStream.Close();
 				this.controlStream = null;
 			}
@@ -807,89 +685,76 @@ namespace System.Net
 			this.ftpResponse.Stream = Stream.Null;
 			string statusDescription = ftpStatus.StatusDescription;
 			string text = this.method;
-			if (!(text == "SIZE"))
+			switch (text)
 			{
-				if (!(text == "MDTM"))
-				{
-					if (!(text == "MKD"))
-					{
-						if (!(text == "CWD"))
-						{
-							if (!(text == "RNFR"))
-							{
-								if (text == "DELE")
-								{
-									if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
-									{
-										throw this.CreateExceptionFromResponse(ftpStatus);
-									}
-								}
-							}
-							else
-							{
-								this.method = "RENAME";
-								if (ftpStatus.StatusCode != FtpStatusCode.FileCommandPending)
-								{
-									throw this.CreateExceptionFromResponse(ftpStatus);
-								}
-								ftpStatus = this.SendCommand("RNTO", new string[] { (this.renameTo != null) ? this.renameTo : string.Empty });
-								if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
-								{
-									throw this.CreateExceptionFromResponse(ftpStatus);
-								}
-							}
-						}
-						else
-						{
-							this.method = "PWD";
-							if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
-							{
-								throw this.CreateExceptionFromResponse(ftpStatus);
-							}
-							ftpStatus = this.SendCommand(this.method, Array.Empty<string>());
-							if (ftpStatus.StatusCode != FtpStatusCode.PathnameCreated)
-							{
-								throw this.CreateExceptionFromResponse(ftpStatus);
-							}
-						}
-					}
-					else if (ftpStatus.StatusCode != FtpStatusCode.PathnameCreated)
-					{
-						throw this.CreateExceptionFromResponse(ftpStatus);
-					}
-				}
-				else
-				{
-					if (ftpStatus.StatusCode != FtpStatusCode.FileStatus)
-					{
-						throw this.CreateExceptionFromResponse(ftpStatus);
-					}
-					this.ftpResponse.LastModified = DateTime.ParseExact(statusDescription.Substring(4), "yyyyMMddHHmmss", null);
-				}
-			}
-			else
+			case "SIZE":
 			{
 				if (ftpStatus.StatusCode != FtpStatusCode.FileStatus)
 				{
 					throw this.CreateExceptionFromResponse(ftpStatus);
 				}
-				int num = 4;
-				int num2 = 0;
-				while (num < statusDescription.Length && char.IsDigit(statusDescription[num]))
+				int num2 = 4;
+				int num3 = 0;
+				while (num2 < statusDescription.Length && char.IsDigit(statusDescription[num2]))
 				{
-					num++;
 					num2++;
+					num3++;
 				}
-				if (num2 == 0)
+				if (num3 == 0)
 				{
 					throw new WebException("Bad format for server response in " + this.method);
 				}
-				long num3;
-				if (!long.TryParse(statusDescription.Substring(4, num2), out num3))
+				long num4;
+				if (!long.TryParse(statusDescription.Substring(4, num3), out num4))
 				{
 					throw new WebException("Bad format for server response in " + this.method);
 				}
-				this.ftpResponse.contentLength = num3;
+				this.ftpResponse.contentLength = num4;
+				break;
+			}
+			case "MDTM":
+				if (ftpStatus.StatusCode != FtpStatusCode.FileStatus)
+				{
+					throw this.CreateExceptionFromResponse(ftpStatus);
+				}
+				this.ftpResponse.LastModified = DateTime.ParseExact(statusDescription.Substring(4), "yyyyMMddHHmmss", null);
+				break;
+			case "MKD":
+				if (ftpStatus.StatusCode != FtpStatusCode.PathnameCreated)
+				{
+					throw this.CreateExceptionFromResponse(ftpStatus);
+				}
+				break;
+			case "CWD":
+				this.method = "PWD";
+				if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
+				{
+					throw this.CreateExceptionFromResponse(ftpStatus);
+				}
+				ftpStatus = this.SendCommand(this.method, new string[0]);
+				if (ftpStatus.StatusCode != FtpStatusCode.PathnameCreated)
+				{
+					throw this.CreateExceptionFromResponse(ftpStatus);
+				}
+				break;
+			case "RNFR":
+				this.method = "RENAME";
+				if (ftpStatus.StatusCode != FtpStatusCode.FileCommandPending)
+				{
+					throw this.CreateExceptionFromResponse(ftpStatus);
+				}
+				ftpStatus = this.SendCommand("RNTO", new string[] { (this.renameTo == null) ? string.Empty : this.renameTo });
+				if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
+				{
+					throw this.CreateExceptionFromResponse(ftpStatus);
+				}
+				break;
+			case "DELE":
+				if (ftpStatus.StatusCode != FtpStatusCode.FileActionOK)
+				{
+					throw this.CreateExceptionFromResponse(ftpStatus);
+				}
+				break;
 			}
 			this.State = FtpWebRequest.RequestState.Finished;
 		}
@@ -922,12 +787,12 @@ namespace System.Net
 		private void OpenControlConnection()
 		{
 			Exception ex = null;
-			Socket socket = null;
+			global::System.Net.Sockets.Socket socket = null;
 			foreach (IPAddress ipaddress in this.hostEntry.AddressList)
 			{
-				socket = new Socket(ipaddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-				this.remoteEndPoint = new IPEndPoint(ipaddress, this.requestUri.Port);
-				if (!this.ServicePoint.CallEndPointDelegate(socket, this.remoteEndPoint))
+				socket = new global::System.Net.Sockets.Socket(ipaddress.AddressFamily, global::System.Net.Sockets.SocketType.Stream, global::System.Net.Sockets.ProtocolType.Tcp);
+				IPEndPoint ipendPoint = new IPEndPoint(ipaddress, this.requestUri.Port);
+				if (!this.ServicePoint.CallEndPointDelegate(socket, ipendPoint))
 				{
 					socket.Close();
 					socket = null;
@@ -936,12 +801,13 @@ namespace System.Net
 				{
 					try
 					{
-						socket.Connect(this.remoteEndPoint);
+						socket.Connect(ipendPoint);
 						this.localEndPoint = (IPEndPoint)socket.LocalEndPoint;
 						break;
 					}
-					catch (SocketException ex)
+					catch (global::System.Net.Sockets.SocketException ex2)
 					{
+						ex = ex2;
 						socket.Close();
 						socket = null;
 					}
@@ -951,20 +817,12 @@ namespace System.Net
 			{
 				throw new WebException("Unable to connect to remote server", ex, WebExceptionStatus.UnknownError, this.ftpResponse);
 			}
-			this.controlStream = new NetworkStream(socket);
+			this.controlStream = new global::System.Net.Sockets.NetworkStream(socket);
 			this.controlReader = new StreamReader(this.controlStream, Encoding.ASCII);
 			this.State = FtpWebRequest.RequestState.Authenticating;
 			this.Authenticate();
 			FtpStatus ftpStatus = this.SendCommand("OPTS", new string[] { "utf8", "on" });
-			if (ftpStatus.StatusCode < FtpStatusCode.CommandOK || ftpStatus.StatusCode > (FtpStatusCode)300)
-			{
-				this.dataEncoding = Encoding.Default;
-			}
-			else
-			{
-				this.dataEncoding = Encoding.UTF8;
-			}
-			ftpStatus = this.SendCommand("PWD", Array.Empty<string>());
+			ftpStatus = this.SendCommand("PWD", new string[0]);
 			this.initial_path = FtpWebRequest.GetInitialPath(ftpStatus);
 		}
 
@@ -992,87 +850,68 @@ namespace System.Net
 			return text;
 		}
 
-		private Socket SetupPassiveConnection(string statusDescription, bool ipv6)
+		private global::System.Net.Sockets.Socket SetupPassiveConnection(string statusDescription)
 		{
 			if (statusDescription.Length < 4)
 			{
 				throw new WebException("Cannot open passive data connection");
 			}
-			int num = (ipv6 ? this.GetPortV6(statusDescription) : this.GetPortV4(statusDescription));
-			if (num < 0 || num > 65535)
+			int num = 3;
+			while (num < statusDescription.Length && !char.IsDigit(statusDescription[num]))
+			{
+				num++;
+			}
+			if (num >= statusDescription.Length)
 			{
 				throw new WebException("Cannot open passive data connection");
 			}
-			IPEndPoint ipendPoint = new IPEndPoint(this.remoteEndPoint.Address, num);
-			Socket socket = new Socket(ipendPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+			string[] array = statusDescription.Substring(num).Split(new char[] { ',' }, 6);
+			if (array.Length != 6)
+			{
+				throw new WebException("Cannot open passive data connection");
+			}
+			int num2 = array[5].Length - 1;
+			while (num2 >= 0 && !char.IsDigit(array[5][num2]))
+			{
+				num2--;
+			}
+			if (num2 < 0)
+			{
+				throw new WebException("Cannot open passive data connection");
+			}
+			array[5] = array[5].Substring(0, num2 + 1);
+			IPAddress ipaddress;
+			try
+			{
+				ipaddress = IPAddress.Parse(string.Join(".", array, 0, 4));
+			}
+			catch (FormatException)
+			{
+				throw new WebException("Cannot open passive data connection");
+			}
+			int num3;
+			int num4;
+			if (!int.TryParse(array[4], out num3) || !int.TryParse(array[5], out num4))
+			{
+				throw new WebException("Cannot open passive data connection");
+			}
+			int num5 = (num3 << 8) + num4;
+			if (num5 < 0 || num5 > 65535)
+			{
+				throw new WebException("Cannot open passive data connection");
+			}
+			IPEndPoint ipendPoint = new IPEndPoint(ipaddress, num5);
+			global::System.Net.Sockets.Socket socket = new global::System.Net.Sockets.Socket(ipendPoint.AddressFamily, global::System.Net.Sockets.SocketType.Stream, global::System.Net.Sockets.ProtocolType.Tcp);
 			try
 			{
 				socket.Connect(ipendPoint);
 			}
-			catch (SocketException)
+			catch (global::System.Net.Sockets.SocketException)
 			{
 				socket.Close();
 				throw new WebException("Cannot open passive data connection");
 			}
 			return socket;
-		}
-
-		private int GetPortV4(string responseString)
-		{
-			string[] array = responseString.Split(new char[] { ' ', '(', ',', ')' });
-			if (array.Length <= 7)
-			{
-				throw new FormatException(global::SR.GetString("The response string '{0}' has invalid format.", new object[] { responseString }));
-			}
-			int num = array.Length - 1;
-			if (array[num] == "" || !char.IsNumber(array[num], 0))
-			{
-				num--;
-			}
-			return (int)Convert.ToByte(array[num--], NumberFormatInfo.InvariantInfo) | ((int)Convert.ToByte(array[num--], NumberFormatInfo.InvariantInfo) << 8);
-		}
-
-		private int GetPortV6(string responseString)
-		{
-			int num = responseString.LastIndexOf("(");
-			int num2 = responseString.LastIndexOf(")");
-			if (num == -1 || num2 <= num)
-			{
-				throw new FormatException(global::SR.GetString("The response string '{0}' has invalid format.", new object[] { responseString }));
-			}
-			string[] array = responseString.Substring(num + 1, num2 - num - 1).Split(new char[] { '|' });
-			if (array.Length < 4)
-			{
-				throw new FormatException(global::SR.GetString("The response string '{0}' has invalid format.", new object[] { responseString }));
-			}
-			return Convert.ToInt32(array[3], NumberFormatInfo.InvariantInfo);
-		}
-
-		private string FormatAddress(IPAddress address, int Port)
-		{
-			byte[] addressBytes = address.GetAddressBytes();
-			StringBuilder stringBuilder = new StringBuilder(32);
-			foreach (byte b in addressBytes)
-			{
-				stringBuilder.Append(b);
-				stringBuilder.Append(',');
-			}
-			stringBuilder.Append(Port / 256);
-			stringBuilder.Append(',');
-			stringBuilder.Append(Port % 256);
-			return stringBuilder.ToString();
-		}
-
-		private string FormatAddressV6(IPAddress address, int port)
-		{
-			StringBuilder stringBuilder = new StringBuilder(43);
-			string text = address.ToString();
-			stringBuilder.Append("|2|");
-			stringBuilder.Append(text);
-			stringBuilder.Append('|');
-			stringBuilder.Append(port.ToString(NumberFormatInfo.InvariantInfo));
-			stringBuilder.Append('|');
-			return stringBuilder.ToString();
 		}
 
 		private Exception CreateExceptionFromResponse(FtpStatus status)
@@ -1112,34 +951,36 @@ namespace System.Net
 			}
 		}
 
-		private Socket InitDataConnection()
+		private global::System.Net.Sockets.Socket InitDataConnection()
 		{
-			bool flag = this.remoteEndPoint.AddressFamily == AddressFamily.InterNetworkV6;
 			if (this.usePassive)
 			{
-				FtpStatus ftpStatus = this.SendCommand(flag ? "EPSV" : "PASV", Array.Empty<string>());
-				if (ftpStatus.StatusCode != (flag ? ((FtpStatusCode)229) : FtpStatusCode.EnteringPassive))
+				FtpStatus ftpStatus = this.SendCommand("PASV", new string[0]);
+				if (ftpStatus.StatusCode != FtpStatusCode.EnteringPassive)
 				{
 					throw this.CreateExceptionFromResponse(ftpStatus);
 				}
-				return this.SetupPassiveConnection(ftpStatus.StatusDescription, flag);
+				return this.SetupPassiveConnection(ftpStatus.StatusDescription);
 			}
 			else
 			{
-				Socket socket = new Socket(this.remoteEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+				global::System.Net.Sockets.Socket socket = new global::System.Net.Sockets.Socket(global::System.Net.Sockets.AddressFamily.InterNetwork, global::System.Net.Sockets.SocketType.Stream, global::System.Net.Sockets.ProtocolType.Tcp);
 				try
 				{
 					socket.Bind(new IPEndPoint(this.localEndPoint.Address, 0));
 					socket.Listen(1);
 				}
-				catch (SocketException ex)
+				catch (global::System.Net.Sockets.SocketException ex)
 				{
 					socket.Close();
 					throw new WebException("Couldn't open listening socket on client", ex);
 				}
 				IPEndPoint ipendPoint = (IPEndPoint)socket.LocalEndPoint;
-				string text = (flag ? this.FormatAddressV6(ipendPoint.Address, ipendPoint.Port) : this.FormatAddress(ipendPoint.Address, ipendPoint.Port));
-				FtpStatus ftpStatus = this.SendCommand(flag ? "EPRT" : "PORT", new string[] { text });
+				string text = ipendPoint.Address.ToString().Replace('.', ',');
+				int num = ipendPoint.Port >> 8;
+				int num2 = ipendPoint.Port % 256;
+				string text2 = string.Concat(new object[] { text, ",", num, ",", num2 });
+				FtpStatus ftpStatus = this.SendCommand("PORT", new string[] { text2 });
 				if (ftpStatus.StatusCode != FtpStatusCode.CommandOK)
 				{
 					socket.Close();
@@ -1151,7 +992,7 @@ namespace System.Net
 
 		private void OpenDataConnection()
 		{
-			Socket socket = this.InitDataConnection();
+			global::System.Net.Sockets.Socket socket = this.InitDataConnection();
 			FtpStatus ftpStatus;
 			if (this.offset > 0L)
 			{
@@ -1167,7 +1008,7 @@ namespace System.Net
 			}
 			else
 			{
-				ftpStatus = this.SendCommand(this.method, Array.Empty<string>());
+				ftpStatus = this.SendCommand(this.method, new string[0]);
 			}
 			if (ftpStatus.StatusCode != FtpStatusCode.OpeningData && ftpStatus.StatusCode != FtpStatusCode.DataAlreadyOpen)
 			{
@@ -1175,7 +1016,7 @@ namespace System.Net
 			}
 			if (this.usePassive)
 			{
-				this.origDataStream = new NetworkStream(socket, true);
+				this.origDataStream = new global::System.Net.Sockets.NetworkStream(socket, true);
 				this.dataStream = this.origDataStream;
 				if (this.EnableSsl)
 				{
@@ -1184,12 +1025,12 @@ namespace System.Net
 			}
 			else
 			{
-				Socket socket2 = null;
+				global::System.Net.Sockets.Socket socket2 = null;
 				try
 				{
 					socket2 = socket.Accept();
 				}
-				catch (SocketException)
+				catch (global::System.Net.Sockets.SocketException)
 				{
 					socket.Close();
 					if (socket2 != null)
@@ -1199,7 +1040,7 @@ namespace System.Net
 					throw new ProtocolViolationException("Server commited a protocol violation.");
 				}
 				socket.Close();
-				this.origDataStream = new NetworkStream(socket2, true);
+				this.origDataStream = new global::System.Net.Sockets.NetworkStream(socket, true);
 				this.dataStream = this.origDataStream;
 				if (this.EnableSsl)
 				{
@@ -1230,7 +1071,7 @@ namespace System.Net
 			}
 			if (!string.IsNullOrEmpty(text3))
 			{
-				text = text3 + "\\" + text;
+				text = text3 + '\\' + text;
 			}
 			FtpStatus ftpStatus = this.GetResponseStatus();
 			this.ftpResponse.BannerMessage = ftpStatus.StatusDescription;
@@ -1250,7 +1091,7 @@ namespace System.Net
 				{
 					throw this.CreateExceptionFromResponse(ftpStatus);
 				}
-				ftpStatus = new FtpStatus(FtpStatusCode.SendUserCommand, "");
+				ftpStatus = new FtpStatus(FtpStatusCode.SendUserCommand, string.Empty);
 			}
 			if (ftpStatus.StatusCode != FtpStatusCode.SendUserCommand)
 			{
@@ -1282,12 +1123,12 @@ namespace System.Net
 		private FtpStatus SendCommand(bool waitResponse, string command, params string[] parameters)
 		{
 			string text = command;
-			if (parameters.Length != 0)
+			if (parameters.Length > 0)
 			{
 				text = text + " " + string.Join(" ", parameters);
 			}
 			text += "\r\n";
-			byte[] bytes = this.dataEncoding.GetBytes(text);
+			byte[] bytes = Encoding.ASCII.GetBytes(text);
 			try
 			{
 				this.controlStream.Write(bytes, 0, bytes.Length);
@@ -1335,7 +1176,7 @@ namespace System.Net
 			if (text.Length > 3 && text[3] == '-')
 			{
 				string text2 = null;
-				string text3 = num.ToString() + " ";
+				string text3 = num.ToString() + ' ';
 				for (;;)
 				{
 					text2 = null;
@@ -1353,12 +1194,12 @@ namespace System.Net
 					text = text + Environment.NewLine + text2;
 					if (text2.StartsWith(text3, StringComparison.Ordinal))
 					{
-						goto IL_0097;
+						goto Block_8;
 					}
 				}
 				return FtpWebRequest.ServiceNotAvailable();
+				Block_8:;
 			}
-			IL_0097:
 			return new FtpStatus((FtpStatusCode)num, text);
 		}
 
@@ -1374,12 +1215,9 @@ namespace System.Net
 
 		internal bool ChangeToSSLSocket(ref Stream stream)
 		{
-			MonoTlsProvider providerInternal = Mono.Net.Security.MonoTlsProviderFactory.GetProviderInternal();
-			MonoTlsSettings monoTlsSettings = MonoTlsSettings.CopyDefaultSettings();
-			monoTlsSettings.UseServicePointManagerCallback = new bool?(true);
-			IMonoSslStream monoSslStream = providerInternal.CreateSslStream(stream, true, monoTlsSettings);
-			monoSslStream.AuthenticateAsClient(this.requestUri.Host, null, SslProtocols.Default, false);
-			stream = monoSslStream.AuthenticatedStream;
+			global::System.Net.Security.SslStream sslStream = new global::System.Net.Security.SslStream(stream, true, this.callback, null);
+			sslStream.AuthenticateAsClient(this.requestUri.Host, null, global::System.Security.Authentication.SslProtocols.Default, false);
+			stream = sslStream;
 			return true;
 		}
 
@@ -1409,7 +1247,33 @@ namespace System.Net
 			}
 		}
 
-		private Uri requestUri;
+		private const string ChangeDir = "CWD";
+
+		private const string UserCommand = "USER";
+
+		private const string PasswordCommand = "PASS";
+
+		private const string TypeCommand = "TYPE";
+
+		private const string PassiveCommand = "PASV";
+
+		private const string PortCommand = "PORT";
+
+		private const string AbortCommand = "ABOR";
+
+		private const string AuthCommand = "AUTH";
+
+		private const string RestCommand = "REST";
+
+		private const string RenameFromCommand = "RNFR";
+
+		private const string RenameToCommand = "RNTO";
+
+		private const string QuitCommand = "QUIT";
+
+		private const string EOL = "\r\n";
+
+		private global::System.Uri requestUri;
 
 		private string file_name;
 
@@ -1428,8 +1292,6 @@ namespace System.Net
 		private IPHostEntry hostEntry;
 
 		private IPEndPoint localEndPoint;
-
-		private IPEndPoint remoteEndPoint;
 
 		private IWebProxy proxy;
 
@@ -1463,43 +1325,24 @@ namespace System.Net
 
 		private string initial_path;
 
-		private const string ChangeDir = "CWD";
-
-		private const string UserCommand = "USER";
-
-		private const string PasswordCommand = "PASS";
-
-		private const string TypeCommand = "TYPE";
-
-		private const string PassiveCommand = "PASV";
-
-		private const string ExtendedPassiveCommand = "EPSV";
-
-		private const string PortCommand = "PORT";
-
-		private const string ExtendedPortCommand = "EPRT";
-
-		private const string AbortCommand = "ABOR";
-
-		private const string AuthCommand = "AUTH";
-
-		private const string RestCommand = "REST";
-
-		private const string RenameFromCommand = "RNFR";
-
-		private const string RenameToCommand = "RNTO";
-
-		private const string QuitCommand = "QUIT";
-
-		private const string EOL = "\r\n";
-
 		private static readonly string[] supportedCommands = new string[]
 		{
 			"APPE", "DELE", "LIST", "MDTM", "MKD", "NLST", "PWD", "RENAME", "RETR", "RMD",
 			"SIZE", "STOR", "STOU"
 		};
 
-		private Encoding dataEncoding = Encoding.UTF8;
+		private global::System.Net.Security.RemoteCertificateValidationCallback callback = delegate(object sender, X509Certificate certificate, global::System.Security.Cryptography.X509Certificates.X509Chain chain, global::System.Net.Security.SslPolicyErrors sslPolicyErrors)
+		{
+			if (ServicePointManager.ServerCertificateValidationCallback != null)
+			{
+				return ServicePointManager.ServerCertificateValidationCallback(sender, certificate, chain, sslPolicyErrors);
+			}
+			if (sslPolicyErrors != global::System.Net.Security.SslPolicyErrors.None)
+			{
+				throw new InvalidOperationException("SSL authentication error: " + sslPolicyErrors);
+			}
+			return true;
+		};
 
 		private enum RequestState
 		{

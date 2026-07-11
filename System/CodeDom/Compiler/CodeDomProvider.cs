@@ -1,115 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.IO;
-using System.Runtime.Serialization;
-using Microsoft.CSharp;
-using Microsoft.VisualBasic;
+using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace System.CodeDom.Compiler
 {
-	public abstract class CodeDomProvider : Component
+	[ComVisible(true)]
+	[global::System.ComponentModel.ToolboxItem(false)]
+	public abstract class CodeDomProvider : global::System.ComponentModel.Component
 	{
-		static CodeDomProvider()
-		{
-			CodeDomProvider.AddCompilerInfo(new CompilerInfo(new CompilerParameters
-			{
-				WarningLevel = 4
-			}, typeof(CSharpCodeProvider).FullName)
-			{
-				_compilerLanguages = new string[] { "c#", "cs", "csharp" },
-				_compilerExtensions = new string[] { ".cs", "cs" }
-			});
-			CodeDomProvider.AddCompilerInfo(new CompilerInfo(new CompilerParameters
-			{
-				WarningLevel = 4
-			}, typeof(VBCodeProvider).FullName)
-			{
-				_compilerLanguages = new string[] { "vb", "vbs", "visualbasic", "vbscript" },
-				_compilerExtensions = new string[] { ".vb", "vb" }
-			});
-		}
-
-		private static void AddCompilerInfo(CompilerInfo compilerInfo)
-		{
-			foreach (string text in compilerInfo._compilerLanguages)
-			{
-				CodeDomProvider.s_compilerLanguages[text] = compilerInfo;
-			}
-			foreach (string text2 in compilerInfo._compilerExtensions)
-			{
-				CodeDomProvider.s_compilerExtensions[text2] = compilerInfo;
-			}
-			CodeDomProvider.s_allCompilerInfo.Add(compilerInfo);
-		}
-
-		public static CodeDomProvider CreateProvider(string language, IDictionary<string, string> providerOptions)
-		{
-			return CodeDomProvider.GetCompilerInfo(language).CreateProvider(providerOptions);
-		}
-
-		public static CodeDomProvider CreateProvider(string language)
-		{
-			return CodeDomProvider.GetCompilerInfo(language).CreateProvider();
-		}
-
-		public static string GetLanguageFromExtension(string extension)
-		{
-			CompilerInfo compilerInfoForExtensionNoThrow = CodeDomProvider.GetCompilerInfoForExtensionNoThrow(extension);
-			if (compilerInfoForExtensionNoThrow == null)
-			{
-				throw new CodeDomProvider.ConfigurationErrorsException("There is no CodeDom provider defined for the language.");
-			}
-			return compilerInfoForExtensionNoThrow._compilerLanguages[0];
-		}
-
-		public static bool IsDefinedLanguage(string language)
-		{
-			return CodeDomProvider.GetCompilerInfoForLanguageNoThrow(language) != null;
-		}
-
-		public static bool IsDefinedExtension(string extension)
-		{
-			return CodeDomProvider.GetCompilerInfoForExtensionNoThrow(extension) != null;
-		}
-
-		public static CompilerInfo GetCompilerInfo(string language)
-		{
-			CompilerInfo compilerInfoForLanguageNoThrow = CodeDomProvider.GetCompilerInfoForLanguageNoThrow(language);
-			if (compilerInfoForLanguageNoThrow == null)
-			{
-				throw new CodeDomProvider.ConfigurationErrorsException("There is no CodeDom provider defined for the language.");
-			}
-			return compilerInfoForLanguageNoThrow;
-		}
-
-		private static CompilerInfo GetCompilerInfoForLanguageNoThrow(string language)
-		{
-			if (language == null)
-			{
-				throw new ArgumentNullException("language");
-			}
-			CompilerInfo compilerInfo;
-			CodeDomProvider.s_compilerLanguages.TryGetValue(language.Trim(), out compilerInfo);
-			return compilerInfo;
-		}
-
-		private static CompilerInfo GetCompilerInfoForExtensionNoThrow(string extension)
-		{
-			if (extension == null)
-			{
-				throw new ArgumentNullException("extension");
-			}
-			CompilerInfo compilerInfo;
-			CodeDomProvider.s_compilerExtensions.TryGetValue(extension.Trim(), out compilerInfo);
-			return compilerInfo;
-		}
-
-		public static CompilerInfo[] GetAllCompilerInfo()
-		{
-			return CodeDomProvider.s_allCompilerInfo.ToArray();
-		}
-
 		public virtual string FileExtension
 		{
 			get
@@ -126,156 +27,257 @@ namespace System.CodeDom.Compiler
 			}
 		}
 
-		[Obsolete("Callers should not use the ICodeGenerator interface and should instead use the methods directly on the CodeDomProvider class. Those inheriting from CodeDomProvider must still implement this interface, and should exclude this warning or also obsolete this method.")]
-		public abstract ICodeGenerator CreateGenerator();
+		[Obsolete("ICodeCompiler is obsolete")]
+		public abstract ICodeCompiler CreateCompiler();
 
-		public virtual ICodeGenerator CreateGenerator(TextWriter output)
-		{
-			return this.CreateGenerator();
-		}
+		[Obsolete("ICodeGenerator is obsolete")]
+		public abstract ICodeGenerator CreateGenerator();
 
 		public virtual ICodeGenerator CreateGenerator(string fileName)
 		{
 			return this.CreateGenerator();
 		}
 
-		[Obsolete("Callers should not use the ICodeCompiler interface and should instead use the methods directly on the CodeDomProvider class. Those inheriting from CodeDomProvider must still implement this interface, and should exclude this warning or also obsolete this method.")]
-		public abstract ICodeCompiler CreateCompiler();
+		public virtual ICodeGenerator CreateGenerator(TextWriter output)
+		{
+			return this.CreateGenerator();
+		}
 
-		[Obsolete("Callers should not use the ICodeParser interface and should instead use the methods directly on the CodeDomProvider class. Those inheriting from CodeDomProvider must still implement this interface, and should exclude this warning or also obsolete this method.")]
+		[Obsolete("ICodeParser is obsolete")]
 		public virtual ICodeParser CreateParser()
 		{
 			return null;
 		}
 
-		public virtual TypeConverter GetConverter(Type type)
+		public virtual global::System.ComponentModel.TypeConverter GetConverter(Type type)
 		{
-			return TypeDescriptor.GetConverter(type);
+			return global::System.ComponentModel.TypeDescriptor.GetConverter(type);
 		}
 
 		public virtual CompilerResults CompileAssemblyFromDom(CompilerParameters options, params CodeCompileUnit[] compilationUnits)
 		{
-			return this.CreateCompilerHelper().CompileAssemblyFromDomBatch(options, compilationUnits);
+			ICodeCompiler codeCompiler = this.CreateCompiler();
+			if (codeCompiler == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			return codeCompiler.CompileAssemblyFromDomBatch(options, compilationUnits);
 		}
 
 		public virtual CompilerResults CompileAssemblyFromFile(CompilerParameters options, params string[] fileNames)
 		{
-			return this.CreateCompilerHelper().CompileAssemblyFromFileBatch(options, fileNames);
+			ICodeCompiler codeCompiler = this.CreateCompiler();
+			if (codeCompiler == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			return codeCompiler.CompileAssemblyFromFileBatch(options, fileNames);
 		}
 
-		public virtual CompilerResults CompileAssemblyFromSource(CompilerParameters options, params string[] sources)
-		{
-			return this.CreateCompilerHelper().CompileAssemblyFromSourceBatch(options, sources);
-		}
-
-		public virtual bool IsValidIdentifier(string value)
-		{
-			return this.CreateGeneratorHelper().IsValidIdentifier(value);
-		}
-
-		public virtual string CreateEscapedIdentifier(string value)
-		{
-			return this.CreateGeneratorHelper().CreateEscapedIdentifier(value);
-		}
-
-		public virtual string CreateValidIdentifier(string value)
-		{
-			return this.CreateGeneratorHelper().CreateValidIdentifier(value);
-		}
-
-		public virtual string GetTypeOutput(CodeTypeReference type)
-		{
-			return this.CreateGeneratorHelper().GetTypeOutput(type);
-		}
-
-		public virtual bool Supports(GeneratorSupport generatorSupport)
-		{
-			return this.CreateGeneratorHelper().Supports(generatorSupport);
-		}
-
-		public virtual void GenerateCodeFromExpression(CodeExpression expression, TextWriter writer, CodeGeneratorOptions options)
-		{
-			this.CreateGeneratorHelper().GenerateCodeFromExpression(expression, writer, options);
-		}
-
-		public virtual void GenerateCodeFromStatement(CodeStatement statement, TextWriter writer, CodeGeneratorOptions options)
-		{
-			this.CreateGeneratorHelper().GenerateCodeFromStatement(statement, writer, options);
-		}
-
-		public virtual void GenerateCodeFromNamespace(CodeNamespace codeNamespace, TextWriter writer, CodeGeneratorOptions options)
-		{
-			this.CreateGeneratorHelper().GenerateCodeFromNamespace(codeNamespace, writer, options);
-		}
-
-		public virtual void GenerateCodeFromCompileUnit(CodeCompileUnit compileUnit, TextWriter writer, CodeGeneratorOptions options)
-		{
-			this.CreateGeneratorHelper().GenerateCodeFromCompileUnit(compileUnit, writer, options);
-		}
-
-		public virtual void GenerateCodeFromType(CodeTypeDeclaration codeType, TextWriter writer, CodeGeneratorOptions options)
-		{
-			this.CreateGeneratorHelper().GenerateCodeFromType(codeType, writer, options);
-		}
-
-		public virtual void GenerateCodeFromMember(CodeTypeMember member, TextWriter writer, CodeGeneratorOptions options)
-		{
-			throw new NotImplementedException("This CodeDomProvider does not support this method.");
-		}
-
-		public virtual CodeCompileUnit Parse(TextReader codeStream)
-		{
-			return this.CreateParserHelper().Parse(codeStream);
-		}
-
-		private ICodeCompiler CreateCompilerHelper()
+		public virtual CompilerResults CompileAssemblyFromSource(CompilerParameters options, params string[] fileNames)
 		{
 			ICodeCompiler codeCompiler = this.CreateCompiler();
 			if (codeCompiler == null)
 			{
-				throw new NotImplementedException("This CodeDomProvider does not support this method.");
+				throw this.GetNotImplemented();
 			}
-			return codeCompiler;
+			return codeCompiler.CompileAssemblyFromSourceBatch(options, fileNames);
 		}
 
-		private ICodeGenerator CreateGeneratorHelper()
+		public virtual string CreateEscapedIdentifier(string value)
 		{
 			ICodeGenerator codeGenerator = this.CreateGenerator();
 			if (codeGenerator == null)
 			{
-				throw new NotImplementedException("This CodeDomProvider does not support this method.");
+				throw this.GetNotImplemented();
 			}
-			return codeGenerator;
+			return codeGenerator.CreateEscapedIdentifier(value);
 		}
 
-		private ICodeParser CreateParserHelper()
+		[ComVisible(false)]
+		[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public static CodeDomProvider CreateProvider(string language)
+		{
+			CompilerInfo compilerInfo = CodeDomProvider.GetCompilerInfo(language);
+			return (compilerInfo != null) ? compilerInfo.CreateProvider() : null;
+		}
+
+		public virtual string CreateValidIdentifier(string value)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			return codeGenerator.CreateValidIdentifier(value);
+		}
+
+		public virtual void GenerateCodeFromCompileUnit(CodeCompileUnit compileUnit, TextWriter writer, CodeGeneratorOptions options)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			codeGenerator.GenerateCodeFromCompileUnit(compileUnit, writer, options);
+		}
+
+		public virtual void GenerateCodeFromExpression(CodeExpression expression, TextWriter writer, CodeGeneratorOptions options)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			codeGenerator.GenerateCodeFromExpression(expression, writer, options);
+		}
+
+		public virtual void GenerateCodeFromMember(CodeTypeMember member, TextWriter writer, CodeGeneratorOptions options)
+		{
+			throw this.GetNotImplemented();
+		}
+
+		public virtual void GenerateCodeFromNamespace(CodeNamespace codeNamespace, TextWriter writer, CodeGeneratorOptions options)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			codeGenerator.GenerateCodeFromNamespace(codeNamespace, writer, options);
+		}
+
+		public virtual void GenerateCodeFromStatement(CodeStatement statement, TextWriter writer, CodeGeneratorOptions options)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			codeGenerator.GenerateCodeFromStatement(statement, writer, options);
+		}
+
+		public virtual void GenerateCodeFromType(CodeTypeDeclaration codeType, TextWriter writer, CodeGeneratorOptions options)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			codeGenerator.GenerateCodeFromType(codeType, writer, options);
+		}
+
+		[ComVisible(false)]
+		[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public static CompilerInfo[] GetAllCompilerInfo()
+		{
+			return (CodeDomProvider.Config != null) ? CodeDomProvider.Config.CompilerInfos : null;
+		}
+
+		[ComVisible(false)]
+		[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public static CompilerInfo GetCompilerInfo(string language)
+		{
+			if (language == null)
+			{
+				throw new ArgumentNullException("language");
+			}
+			if (CodeDomProvider.Config == null)
+			{
+				return null;
+			}
+			CompilerCollection compilers = CodeDomProvider.Config.Compilers;
+			return compilers[language];
+		}
+
+		[ComVisible(false)]
+		[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public static string GetLanguageFromExtension(string extension)
+		{
+			if (extension == null)
+			{
+				throw new ArgumentNullException("extension");
+			}
+			if (CodeDomProvider.Config != null)
+			{
+				return CodeDomProvider.Config.Compilers.GetLanguageFromExtension(extension);
+			}
+			return null;
+		}
+
+		public virtual string GetTypeOutput(CodeTypeReference type)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			return codeGenerator.GetTypeOutput(type);
+		}
+
+		[ComVisible(false)]
+		[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public static bool IsDefinedExtension(string extension)
+		{
+			if (extension == null)
+			{
+				throw new ArgumentNullException("extension");
+			}
+			return CodeDomProvider.Config != null && CodeDomProvider.Config.Compilers.GetCompilerInfoForExtension(extension) != null;
+		}
+
+		[ComVisible(false)]
+		[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+		public static bool IsDefinedLanguage(string language)
+		{
+			if (language == null)
+			{
+				throw new ArgumentNullException("language");
+			}
+			return CodeDomProvider.Config != null && CodeDomProvider.Config.Compilers.GetCompilerInfoForLanguage(language) != null;
+		}
+
+		public virtual bool IsValidIdentifier(string value)
+		{
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
+			{
+				throw this.GetNotImplemented();
+			}
+			return codeGenerator.IsValidIdentifier(value);
+		}
+
+		public virtual CodeCompileUnit Parse(TextReader codeStream)
 		{
 			ICodeParser codeParser = this.CreateParser();
 			if (codeParser == null)
 			{
-				throw new NotImplementedException("This CodeDomProvider does not support this method.");
+				throw this.GetNotImplemented();
 			}
-			return codeParser;
+			return codeParser.Parse(codeStream);
 		}
 
-		private static readonly Dictionary<string, CompilerInfo> s_compilerLanguages = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
-
-		private static readonly Dictionary<string, CompilerInfo> s_compilerExtensions = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
-
-		private static readonly List<CompilerInfo> s_allCompilerInfo = new List<CompilerInfo>();
-
-		private sealed class ConfigurationErrorsException : SystemException
+		public virtual bool Supports(GeneratorSupport supports)
 		{
-			public ConfigurationErrorsException(string message)
-				: base(message)
+			ICodeGenerator codeGenerator = this.CreateGenerator();
+			if (codeGenerator == null)
 			{
+				throw this.GetNotImplemented();
 			}
+			return codeGenerator.Supports(supports);
+		}
 
-			public ConfigurationErrorsException(SerializationInfo info, StreamingContext context)
-				: base(info, context)
+		private static CodeDomConfigurationHandler Config
+		{
+			get
 			{
-				throw new PlatformNotSupportedException();
+				return ConfigurationManager.GetSection("system.codedom") as CodeDomConfigurationHandler;
 			}
+		}
+
+		private Exception GetNotImplemented()
+		{
+			return new NotImplementedException();
 		}
 	}
 }

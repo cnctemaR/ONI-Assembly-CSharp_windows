@@ -14,7 +14,7 @@ namespace Mono.Unix
 			{
 				throw new ArgumentNullException("path");
 			}
-			if (path == "")
+			if (path == string.Empty)
 			{
 				throw new ArgumentException("Cannot be empty.", "path");
 			}
@@ -48,7 +48,8 @@ namespace Mono.Unix
 			{
 				array[i] = socketAddress[3 + i];
 			}
-			return new AbstractUnixEndPoint(Encoding.Default.GetString(array));
+			string @string = Encoding.Default.GetString(array);
+			return new AbstractUnixEndPoint(@string);
 		}
 
 		public override SocketAddress Serialize()

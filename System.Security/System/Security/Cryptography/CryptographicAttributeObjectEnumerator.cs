@@ -10,19 +10,19 @@ namespace System.Security.Cryptography
 			this.enumerator = enumerable.GetEnumerator();
 		}
 
-		public CryptographicAttributeObject Current
-		{
-			get
-			{
-				return (CryptographicAttributeObject)this.enumerator.Current;
-			}
-		}
-
 		object IEnumerator.Current
 		{
 			get
 			{
 				return this.enumerator.Current;
+			}
+		}
+
+		public CryptographicAttributeObject Current
+		{
+			get
+			{
+				return (CryptographicAttributeObject)this.enumerator.Current;
 			}
 		}
 

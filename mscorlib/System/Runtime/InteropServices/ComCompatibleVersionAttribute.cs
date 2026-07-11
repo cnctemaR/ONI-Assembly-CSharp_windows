@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
+	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
 	[ComVisible(true)]
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class ComCompatibleVersionAttribute : Attribute
 	{
 		public ComCompatibleVersionAttribute(int major, int minor, int build, int revision)
 		{
-			this._major = major;
-			this._minor = minor;
-			this._build = build;
-			this._revision = revision;
+			this.major = major;
+			this.minor = minor;
+			this.build = build;
+			this.revision = revision;
 		}
 
 		public int MajorVersion
 		{
 			get
 			{
-				return this._major;
+				return this.major;
 			}
 		}
 
@@ -26,7 +26,7 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this._minor;
+				return this.minor;
 			}
 		}
 
@@ -34,7 +34,7 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this._build;
+				return this.build;
 			}
 		}
 
@@ -42,16 +42,16 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this._revision;
+				return this.revision;
 			}
 		}
 
-		internal int _major;
+		private int major;
 
-		internal int _minor;
+		private int minor;
 
-		internal int _build;
+		private int build;
 
-		internal int _revision;
+		private int revision;
 	}
 }

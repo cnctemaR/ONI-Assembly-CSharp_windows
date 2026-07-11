@@ -1,55 +1,83 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeTypeMember : CodeObject
 	{
-		public string Name
+		public CodeTypeMember()
+		{
+			this.attributes = (MemberAttributes)20482;
+		}
+
+		public MemberAttributes Attributes
 		{
 			get
 			{
-				return this._name ?? string.Empty;
+				return this.attributes;
 			}
 			set
 			{
-				this._name = value;
+				this.attributes = value;
 			}
 		}
 
-		public MemberAttributes Attributes { get; set; } = (MemberAttributes)20482;
+		public CodeCommentStatementCollection Comments
+		{
+			get
+			{
+				if (this.comments == null)
+				{
+					this.comments = new CodeCommentStatementCollection();
+				}
+				return this.comments;
+			}
+		}
 
 		public CodeAttributeDeclarationCollection CustomAttributes
 		{
 			get
 			{
-				CodeAttributeDeclarationCollection codeAttributeDeclarationCollection;
-				if ((codeAttributeDeclarationCollection = this._customAttributes) == null)
+				if (this.customAttributes == null)
 				{
-					codeAttributeDeclarationCollection = (this._customAttributes = new CodeAttributeDeclarationCollection());
+					this.customAttributes = new CodeAttributeDeclarationCollection();
 				}
-				return codeAttributeDeclarationCollection;
+				return this.customAttributes;
 			}
 			set
 			{
-				this._customAttributes = value;
+				this.customAttributes = value;
 			}
 		}
 
-		public CodeLinePragma LinePragma { get; set; }
-
-		public CodeCommentStatementCollection Comments { get; } = new CodeCommentStatementCollection();
-
-		public CodeDirectiveCollection StartDirectives
+		public CodeLinePragma LinePragma
 		{
 			get
 			{
-				CodeDirectiveCollection codeDirectiveCollection;
-				if ((codeDirectiveCollection = this._startDirectives) == null)
+				return this.linePragma;
+			}
+			set
+			{
+				this.linePragma = value;
+			}
+		}
+
+		public string Name
+		{
+			get
+			{
+				if (this.name == null)
 				{
-					codeDirectiveCollection = (this._startDirectives = new CodeDirectiveCollection());
+					return string.Empty;
 				}
-				return codeDirectiveCollection;
+				return this.name;
+			}
+			set
+			{
+				this.name = value;
 			}
 		}
 
@@ -57,21 +85,38 @@ namespace System.CodeDom
 		{
 			get
 			{
-				CodeDirectiveCollection codeDirectiveCollection;
-				if ((codeDirectiveCollection = this._endDirectives) == null)
+				if (this.endDirectives == null)
 				{
-					codeDirectiveCollection = (this._endDirectives = new CodeDirectiveCollection());
+					this.endDirectives = new CodeDirectiveCollection();
 				}
-				return codeDirectiveCollection;
+				return this.endDirectives;
 			}
 		}
 
-		private string _name;
+		public CodeDirectiveCollection StartDirectives
+		{
+			get
+			{
+				if (this.startDirectives == null)
+				{
+					this.startDirectives = new CodeDirectiveCollection();
+				}
+				return this.startDirectives;
+			}
+		}
 
-		private CodeAttributeDeclarationCollection _customAttributes;
+		private string name;
 
-		private CodeDirectiveCollection _startDirectives;
+		private MemberAttributes attributes;
 
-		private CodeDirectiveCollection _endDirectives;
+		private CodeCommentStatementCollection comments;
+
+		private CodeAttributeDeclarationCollection customAttributes;
+
+		private CodeLinePragma linePragma;
+
+		private CodeDirectiveCollection endDirectives;
+
+		private CodeDirectiveCollection startDirectives;
 	}
 }

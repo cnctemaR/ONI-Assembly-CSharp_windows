@@ -47,7 +47,8 @@ namespace Mono.Security.Cryptography
 			}
 			catch (Exception ex)
 			{
-				throw new CryptographicException(Locale.GetText("Error protecting data."), ex);
+				string text = Locale.GetText("Error protecting data.");
+				throw new CryptographicException(text, ex);
 			}
 			finally
 			{
@@ -90,7 +91,8 @@ namespace Mono.Security.Cryptography
 			}
 			catch (Exception ex)
 			{
-				throw new CryptographicException(Locale.GetText("Error protecting data."), ex);
+				string text = Locale.GetText("Error protecting data.");
+				throw new CryptographicException(text, ex);
 			}
 			finally
 			{

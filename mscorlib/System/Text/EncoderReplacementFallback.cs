@@ -10,52 +10,29 @@ namespace System.Text
 		{
 		}
 
+		[MonoTODO]
 		public EncoderReplacementFallback(string replacement)
 		{
 			if (replacement == null)
 			{
-				throw new ArgumentNullException("replacement");
+				throw new ArgumentNullException();
 			}
-			bool flag = false;
-			for (int i = 0; i < replacement.Length; i++)
-			{
-				if (char.IsSurrogate(replacement, i))
-				{
-					if (char.IsHighSurrogate(replacement, i))
-					{
-						if (flag)
-						{
-							break;
-						}
-						flag = true;
-					}
-					else
-					{
-						if (!flag)
-						{
-							flag = true;
-							break;
-						}
-						flag = false;
-					}
-				}
-				else if (flag)
-				{
-					break;
-				}
-			}
-			if (flag)
-			{
-				throw new ArgumentException(Environment.GetResourceString("String contains invalid Unicode code points.", new object[] { "replacement" }));
-			}
-			this.strDefault = replacement;
+			this.replacement = replacement;
 		}
 
 		public string DefaultString
 		{
 			get
 			{
-				return this.strDefault;
+				return this.replacement;
+			}
+		}
+
+		public override int MaxCharCount
+		{
+			get
+			{
+				return this.replacement.Length;
 			}
 		}
 
@@ -64,25 +41,17 @@ namespace System.Text
 			return new EncoderReplacementFallbackBuffer(this);
 		}
 
-		public override int MaxCharCount
-		{
-			get
-			{
-				return this.strDefault.Length;
-			}
-		}
-
 		public override bool Equals(object value)
 		{
 			EncoderReplacementFallback encoderReplacementFallback = value as EncoderReplacementFallback;
-			return encoderReplacementFallback != null && this.strDefault == encoderReplacementFallback.strDefault;
+			return encoderReplacementFallback != null && this.replacement == encoderReplacementFallback.replacement;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.strDefault.GetHashCode();
+			return this.replacement.GetHashCode();
 		}
 
-		private string strDefault;
+		private string replacement;
 	}
 }

@@ -3,8 +3,18 @@ using System.Collections;
 
 namespace System.Security.AccessControl
 {
-	public abstract class GenericAcl : ICollection, IEnumerable
+	public abstract class GenericAcl : IEnumerable, ICollection
 	{
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this.CopyTo((GenericAce[])array, index);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
 		public abstract int BinaryLength { get; }
 
 		public abstract int Count { get; }
@@ -21,7 +31,7 @@ namespace System.Security.AccessControl
 
 		public abstract byte Revision { get; }
 
-		public virtual object SyncRoot
+		public object SyncRoot
 		{
 			get
 			{
@@ -45,24 +55,12 @@ namespace System.Security.AccessControl
 			}
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this.CopyTo((GenericAce[])array, index);
-		}
-
 		public abstract void GetBinaryForm(byte[] binaryForm, int offset);
 
 		public AceEnumerator GetEnumerator()
 		{
 			return new AceEnumerator(this);
 		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		internal abstract string GetSddlForm(ControlFlags sdFlags, bool isDacl);
 
 		public static readonly byte AclRevision = 2;
 

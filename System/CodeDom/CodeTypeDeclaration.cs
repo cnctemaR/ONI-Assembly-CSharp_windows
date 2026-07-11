@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeTypeDeclaration : CodeTypeMember
 	{
-		public event EventHandler PopulateBaseTypes;
-
-		public event EventHandler PopulateMembers;
-
 		public CodeTypeDeclaration()
 		{
 		}
@@ -19,22 +18,23 @@ namespace System.CodeDom
 			base.Name = name;
 		}
 
-		public TypeAttributes TypeAttributes { get; set; } = TypeAttributes.Public;
+		public event EventHandler PopulateBaseTypes;
+
+		public event EventHandler PopulateMembers;
 
 		public CodeTypeReferenceCollection BaseTypes
 		{
 			get
 			{
-				if ((this._populated & 1) == 0)
+				if (this.baseTypes == null)
 				{
-					this._populated |= 1;
-					EventHandler populateBaseTypes = this.PopulateBaseTypes;
-					if (populateBaseTypes != null)
+					this.baseTypes = new CodeTypeReferenceCollection();
+					if (this.PopulateBaseTypes != null)
 					{
-						populateBaseTypes(this, EventArgs.Empty);
+						this.PopulateBaseTypes(this, EventArgs.Empty);
 					}
 				}
-				return this._baseTypes;
+				return this.baseTypes;
 			}
 		}
 
@@ -42,16 +42,49 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return (this.TypeAttributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.NotPublic && !this._isEnum && !this._isStruct;
+				return (this.attributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.NotPublic && !this.isEnum && !this.isStruct;
 			}
 			set
 			{
 				if (value)
 				{
-					this.TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
-					this.TypeAttributes |= TypeAttributes.NotPublic;
-					this._isStruct = false;
-					this._isEnum = false;
+					this.attributes &= ~TypeAttributes.ClassSemanticsMask;
+					this.isEnum = false;
+					this.isStruct = false;
+				}
+			}
+		}
+
+		public bool IsEnum
+		{
+			get
+			{
+				return this.isEnum;
+			}
+			set
+			{
+				if (value)
+				{
+					this.attributes &= ~TypeAttributes.ClassSemanticsMask;
+					this.isEnum = true;
+					this.isStruct = false;
+				}
+			}
+		}
+
+		public bool IsInterface
+		{
+			get
+			{
+				return (this.attributes & TypeAttributes.ClassSemanticsMask) != TypeAttributes.NotPublic;
+			}
+			set
+			{
+				if (value)
+				{
+					this.attributes |= TypeAttributes.ClassSemanticsMask;
+					this.isEnum = false;
+					this.isStruct = false;
 				}
 			}
 		}
@@ -60,102 +93,86 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return this._isStruct;
+				return this.isStruct;
 			}
 			set
 			{
 				if (value)
 				{
-					this.TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
-					this._isEnum = false;
+					this.attributes &= ~TypeAttributes.ClassSemanticsMask;
+					this.isEnum = false;
+					this.isStruct = true;
 				}
-				this._isStruct = value;
 			}
 		}
-
-		public bool IsEnum
-		{
-			get
-			{
-				return this._isEnum;
-			}
-			set
-			{
-				if (value)
-				{
-					this.TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
-					this._isStruct = false;
-				}
-				this._isEnum = value;
-			}
-		}
-
-		public bool IsInterface
-		{
-			get
-			{
-				return (this.TypeAttributes & TypeAttributes.ClassSemanticsMask) == TypeAttributes.ClassSemanticsMask;
-			}
-			set
-			{
-				if (value)
-				{
-					this.TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
-					this.TypeAttributes |= TypeAttributes.ClassSemanticsMask;
-					this._isStruct = false;
-					this._isEnum = false;
-					return;
-				}
-				this.TypeAttributes &= ~TypeAttributes.ClassSemanticsMask;
-			}
-		}
-
-		public bool IsPartial { get; set; }
 
 		public CodeTypeMemberCollection Members
 		{
 			get
 			{
-				if ((this._populated & 2) == 0)
+				if (this.members == null)
 				{
-					this._populated |= 2;
-					EventHandler populateMembers = this.PopulateMembers;
-					if (populateMembers != null)
+					this.members = new CodeTypeMemberCollection();
+					if (this.PopulateMembers != null)
 					{
-						populateMembers(this, EventArgs.Empty);
+						this.PopulateMembers(this, EventArgs.Empty);
 					}
 				}
-				return this._members;
+				return this.members;
 			}
 		}
 
+		public TypeAttributes TypeAttributes
+		{
+			get
+			{
+				return this.attributes;
+			}
+			set
+			{
+				this.attributes = value;
+			}
+		}
+
+		public bool IsPartial
+		{
+			get
+			{
+				return this.isPartial;
+			}
+			set
+			{
+				this.isPartial = value;
+			}
+		}
+
+		[ComVisible(false)]
 		public CodeTypeParameterCollection TypeParameters
 		{
 			get
 			{
-				CodeTypeParameterCollection codeTypeParameterCollection;
-				if ((codeTypeParameterCollection = this._typeParameters) == null)
+				if (this.typeParameters == null)
 				{
-					codeTypeParameterCollection = (this._typeParameters = new CodeTypeParameterCollection());
+					this.typeParameters = new CodeTypeParameterCollection();
 				}
-				return codeTypeParameterCollection;
+				return this.typeParameters;
 			}
 		}
 
-		private readonly CodeTypeReferenceCollection _baseTypes = new CodeTypeReferenceCollection();
+		private CodeTypeReferenceCollection baseTypes;
 
-		private readonly CodeTypeMemberCollection _members = new CodeTypeMemberCollection();
+		private CodeTypeMemberCollection members;
 
-		private bool _isEnum;
+		private TypeAttributes attributes = TypeAttributes.Public;
 
-		private bool _isStruct;
+		private bool isEnum;
 
-		private int _populated;
+		private bool isStruct;
 
-		private const int BaseTypesCollection = 1;
+		private int populated;
 
-		private const int MembersCollection = 2;
+		private bool isPartial;
 
-		private CodeTypeParameterCollection _typeParameters;
+		private CodeTypeParameterCollection typeParameters;
 	}
 }

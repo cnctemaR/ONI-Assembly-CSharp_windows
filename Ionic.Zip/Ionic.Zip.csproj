@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D2F}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC834}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Ionic</RootNamespace>
     <AssemblyName>Ionic.Zip</AssemblyName>
@@ -115,5 +115,15 @@
     <EmbeddedResource Include="Zip\Forms\ZipContentsDialog.resx" />
     <EmbeddedResource Include="Zip\Resources\ZippedResources.zip" />
     <EmbeddedResource Include="Zip\WinFormsSelfExtractorStub.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83C}</Project>
+      <Name>System</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

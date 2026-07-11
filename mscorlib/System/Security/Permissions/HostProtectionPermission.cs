@@ -3,21 +3,28 @@
 namespace System.Security.Permissions
 {
 	[Serializable]
-	internal sealed class HostProtectionPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
+	internal sealed class HostProtectionPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
 	{
 		public HostProtectionPermission(PermissionState state)
 		{
 			if (CodeAccessPermission.CheckPermissionState(state, true) == PermissionState.Unrestricted)
 			{
 				this._resources = HostProtectionResource.All;
-				return;
 			}
-			this._resources = HostProtectionResource.None;
+			else
+			{
+				this._resources = HostProtectionResource.None;
+			}
 		}
 
 		public HostProtectionPermission(HostProtectionResource resources)
 		{
 			this.Resources = this._resources;
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 9;
 		}
 
 		public HostProtectionResource Resources
@@ -30,7 +37,8 @@ namespace System.Security.Permissions
 			{
 				if (!Enum.IsDefined(typeof(HostProtectionResource), value))
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "HostProtectionResource");
+					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
+					throw new ArgumentException(text, "HostProtectionResource");
 				}
 				this._resources = value;
 			}
@@ -90,7 +98,7 @@ namespace System.Security.Permissions
 		public override void FromXml(SecurityElement e)
 		{
 			CodeAccessPermission.CheckSecurityElement(e, "e", 1, 1);
-			this._resources = (HostProtectionResource)Enum.Parse(typeof(HostProtectionResource), e.Attribute("Resources"));
+			this._resources = (HostProtectionResource)((int)Enum.Parse(typeof(HostProtectionResource), e.Attribute("Resources")));
 		}
 
 		public override SecurityElement ToXml()
@@ -103,11 +111,6 @@ namespace System.Security.Permissions
 		public bool IsUnrestricted()
 		{
 			return this._resources == HostProtectionResource.All;
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 9;
 		}
 
 		private HostProtectionPermission Cast(IPermission target)

@@ -10,15 +10,15 @@ namespace System.Diagnostics
 		Warning = 4,
 		Information = 8,
 		Verbose = 16,
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Advanced)]
 		Start = 256,
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Advanced)]
 		Stop = 512,
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Advanced)]
 		Suspend = 1024,
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Advanced)]
 		Resume = 2048,
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Advanced)]
 		Transfer = 4096
 	}
 }

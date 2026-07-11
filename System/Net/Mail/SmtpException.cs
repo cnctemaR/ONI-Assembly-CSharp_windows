@@ -21,16 +21,16 @@ namespace System.Net.Mail
 		{
 		}
 
-		protected SmtpException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-			: base(serializationInfo, streamingContext)
+		protected SmtpException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 			try
 			{
-				this.statusCode = (SmtpStatusCode)serializationInfo.GetValue("Status", typeof(int));
+				this.statusCode = (SmtpStatusCode)((int)info.GetValue("Status", typeof(int)));
 			}
 			catch (SerializationException)
 			{
-				this.statusCode = (SmtpStatusCode)serializationInfo.GetValue("statusCode", typeof(SmtpStatusCode));
+				this.statusCode = (SmtpStatusCode)((int)info.GetValue("statusCode", typeof(SmtpStatusCode)));
 			}
 		}
 
@@ -46,6 +46,11 @@ namespace System.Net.Mail
 			this.statusCode = SmtpStatusCode.GeneralFailure;
 		}
 
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			this.GetObjectData(info, context);
+		}
+
 		public SmtpStatusCode StatusCode
 		{
 			get
@@ -58,19 +63,14 @@ namespace System.Net.Mail
 			}
 		}
 
-		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			if (serializationInfo == null)
+			if (info == null)
 			{
-				throw new ArgumentNullException("serializationInfo");
+				throw new ArgumentNullException("info");
 			}
-			base.GetObjectData(serializationInfo, streamingContext);
-			serializationInfo.AddValue("Status", this.statusCode, typeof(int));
-		}
-
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			this.GetObjectData(info, context);
+			base.GetObjectData(info, context);
+			info.AddValue("Status", this.statusCode, typeof(int));
 		}
 
 		private SmtpStatusCode statusCode;

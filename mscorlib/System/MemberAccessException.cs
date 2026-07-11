@@ -9,26 +9,28 @@ namespace System
 	public class MemberAccessException : SystemException
 	{
 		public MemberAccessException()
-			: base(Environment.GetResourceString("Cannot access member."))
+			: base(Locale.GetText("Cannot access a class member."))
 		{
-			base.SetErrorCode(-2146233062);
+			base.HResult = -2146233062;
 		}
 
 		public MemberAccessException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233062);
-		}
-
-		public MemberAccessException(string message, Exception inner)
-			: base(message, inner)
-		{
-			base.SetErrorCode(-2146233062);
+			base.HResult = -2146233062;
 		}
 
 		protected MemberAccessException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		public MemberAccessException(string message, Exception inner)
+			: base(message, inner)
+		{
+			base.HResult = -2146233062;
+		}
+
+		private const int Result = -2146233062;
 	}
 }

@@ -30,17 +30,13 @@ namespace Mono.Math
 			this.data = new uint[len];
 			for (uint num = 0U; num < bi.length; num += 1U)
 			{
-				this.data[(int)num] = bi.data[(int)num];
+				this.data[(int)((UIntPtr)num)] = bi.data[(int)((UIntPtr)num)];
 			}
 			this.length = bi.length;
 		}
 
 		public BigInteger(byte[] inData)
 		{
-			if (inData.Length == 0)
-			{
-				inData = new byte[1];
-			}
 			this.length = (uint)inData.Length >> 2;
 			int num = inData.Length & 3;
 			if (num != 0)
@@ -59,13 +55,13 @@ namespace Mono.Math
 			switch (num)
 			{
 			case 1:
-				this.data[(int)(this.length - 1U)] = (uint)inData[0];
+				this.data[(int)((UIntPtr)(this.length - 1U))] = (uint)inData[0];
 				break;
 			case 2:
-				this.data[(int)(this.length - 1U)] = (uint)(((int)inData[0] << 8) | (int)inData[1]);
+				this.data[(int)((UIntPtr)(this.length - 1U))] = (uint)(((int)inData[0] << 8) | (int)inData[1]);
 				break;
 			case 3:
-				this.data[(int)(this.length - 1U)] = (uint)(((int)inData[0] << 16) | ((int)inData[1] << 8) | (int)inData[2]);
+				this.data[(int)((UIntPtr)(this.length - 1U))] = (uint)(((int)inData[0] << 16) | ((int)inData[1] << 8) | (int)inData[2]);
 				break;
 			}
 			this.Normalize();
@@ -73,10 +69,6 @@ namespace Mono.Math
 
 		public BigInteger(uint[] inData)
 		{
-			if (inData.Length == 0)
-			{
-				inData = new uint[1];
-			}
 			this.length = (uint)inData.Length;
 			this.data = new uint[this.length];
 			int i = (int)(this.length - 1U);
@@ -104,25 +96,6 @@ namespace Mono.Math
 			};
 			this.length = 2U;
 			this.Normalize();
-		}
-
-		public static implicit operator BigInteger(uint value)
-		{
-			return new BigInteger(value);
-		}
-
-		public static implicit operator BigInteger(int value)
-		{
-			if (value < 0)
-			{
-				throw new ArgumentOutOfRangeException("value");
-			}
-			return new BigInteger((uint)value);
-		}
-
-		public static implicit operator BigInteger(ulong value)
-		{
-			return new BigInteger(value);
 		}
 
 		public static BigInteger Parse(string number)
@@ -177,122 +150,6 @@ namespace Mono.Math
 				throw new FormatException();
 			}
 			return bigInteger;
-		}
-
-		public static BigInteger operator +(BigInteger bi1, BigInteger bi2)
-		{
-			if (bi1 == 0U)
-			{
-				return new BigInteger(bi2);
-			}
-			if (bi2 == 0U)
-			{
-				return new BigInteger(bi1);
-			}
-			return BigInteger.Kernel.AddSameSign(bi1, bi2);
-		}
-
-		public static BigInteger operator -(BigInteger bi1, BigInteger bi2)
-		{
-			if (bi2 == 0U)
-			{
-				return new BigInteger(bi1);
-			}
-			if (bi1 == 0U)
-			{
-				throw new ArithmeticException("Operation would return a negative value");
-			}
-			switch (BigInteger.Kernel.Compare(bi1, bi2))
-			{
-			case BigInteger.Sign.Negative:
-				throw new ArithmeticException("Operation would return a negative value");
-			case BigInteger.Sign.Zero:
-				return 0;
-			case BigInteger.Sign.Positive:
-				return BigInteger.Kernel.Subtract(bi1, bi2);
-			default:
-				throw new Exception();
-			}
-		}
-
-		public static int operator %(BigInteger bi, int i)
-		{
-			if (i > 0)
-			{
-				return (int)BigInteger.Kernel.DwordMod(bi, (uint)i);
-			}
-			return (int)(-(int)BigInteger.Kernel.DwordMod(bi, (uint)(-(uint)i)));
-		}
-
-		public static uint operator %(BigInteger bi, uint ui)
-		{
-			return BigInteger.Kernel.DwordMod(bi, ui);
-		}
-
-		public static BigInteger operator %(BigInteger bi1, BigInteger bi2)
-		{
-			return BigInteger.Kernel.multiByteDivide(bi1, bi2)[1];
-		}
-
-		public static BigInteger operator /(BigInteger bi, int i)
-		{
-			if (i > 0)
-			{
-				return BigInteger.Kernel.DwordDiv(bi, (uint)i);
-			}
-			throw new ArithmeticException("Operation would return a negative value");
-		}
-
-		public static BigInteger operator /(BigInteger bi1, BigInteger bi2)
-		{
-			return BigInteger.Kernel.multiByteDivide(bi1, bi2)[0];
-		}
-
-		public static BigInteger operator *(BigInteger bi1, BigInteger bi2)
-		{
-			if (bi1 == 0U || bi2 == 0U)
-			{
-				return 0;
-			}
-			if ((long)bi1.data.Length < (long)((ulong)bi1.length))
-			{
-				throw new IndexOutOfRangeException("bi1 out of range");
-			}
-			if ((long)bi2.data.Length < (long)((ulong)bi2.length))
-			{
-				throw new IndexOutOfRangeException("bi2 out of range");
-			}
-			BigInteger bigInteger = new BigInteger(BigInteger.Sign.Positive, bi1.length + bi2.length);
-			BigInteger.Kernel.Multiply(bi1.data, 0U, bi1.length, bi2.data, 0U, bi2.length, bigInteger.data, 0U);
-			bigInteger.Normalize();
-			return bigInteger;
-		}
-
-		public static BigInteger operator *(BigInteger bi, int i)
-		{
-			if (i < 0)
-			{
-				throw new ArithmeticException("Operation would return a negative value");
-			}
-			if (i == 0)
-			{
-				return 0;
-			}
-			if (i == 1)
-			{
-				return new BigInteger(bi);
-			}
-			return BigInteger.Kernel.MultiplyByDword(bi, (uint)i);
-		}
-
-		public static BigInteger operator <<(BigInteger bi1, int shiftVal)
-		{
-			return BigInteger.Kernel.LeftShift(bi1, shiftVal);
-		}
-
-		public static BigInteger operator >>(BigInteger bi1, int shiftVal)
-		{
-			return BigInteger.Kernel.RightShift(bi1, shiftVal);
 		}
 
 		public static BigInteger Add(BigInteger bi1, BigInteger bi2)
@@ -422,7 +279,7 @@ namespace Mono.Math
 		public int BitCount()
 		{
 			this.Normalize();
-			uint num = this.data[(int)(this.length - 1U)];
+			uint num = this.data[(int)((UIntPtr)(this.length - 1U))];
 			uint num2 = 2147483648U;
 			uint num3 = 32U;
 			while (num3 > 0U && (num & num2) == 0U)
@@ -438,7 +295,7 @@ namespace Mono.Math
 			uint num = bitNum >> 5;
 			byte b = (byte)(bitNum & 31U);
 			uint num2 = 1U << (int)b;
-			return (this.data[(int)num] & num2) > 0U;
+			return (this.data[(int)((UIntPtr)num)] & num2) != 0U;
 		}
 
 		public bool TestBit(int bitNum)
@@ -450,7 +307,7 @@ namespace Mono.Math
 			uint num = (uint)bitNum >> 5;
 			byte b = (byte)(bitNum & 31);
 			uint num2 = 1U << (int)b;
-			return (this.data[(int)num] | num2) == this.data[(int)num];
+			return (this.data[(int)((UIntPtr)num)] | num2) == this.data[(int)((UIntPtr)num)];
 		}
 
 		public void SetBit(uint bitNum)
@@ -471,10 +328,12 @@ namespace Mono.Math
 				uint num2 = 1U << (int)bitNum;
 				if (value)
 				{
-					this.data[(int)num] |= num2;
-					return;
+					this.data[(int)((UIntPtr)num)] |= num2;
 				}
-				this.data[(int)num] &= ~num2;
+				else
+				{
+					this.data[(int)((UIntPtr)num)] &= ~num2;
+				}
 			}
 		}
 
@@ -525,54 +384,6 @@ namespace Mono.Math
 			return array;
 		}
 
-		public static bool operator ==(BigInteger bi1, uint ui)
-		{
-			if (bi1.length != 1U)
-			{
-				bi1.Normalize();
-			}
-			return bi1.length == 1U && bi1.data[0] == ui;
-		}
-
-		public static bool operator !=(BigInteger bi1, uint ui)
-		{
-			if (bi1.length != 1U)
-			{
-				bi1.Normalize();
-			}
-			return bi1.length != 1U || bi1.data[0] != ui;
-		}
-
-		public static bool operator ==(BigInteger bi1, BigInteger bi2)
-		{
-			return bi1 == bi2 || (!(null == bi1) && !(null == bi2) && BigInteger.Kernel.Compare(bi1, bi2) == BigInteger.Sign.Zero);
-		}
-
-		public static bool operator !=(BigInteger bi1, BigInteger bi2)
-		{
-			return bi1 != bi2 && (null == bi1 || null == bi2 || BigInteger.Kernel.Compare(bi1, bi2) > BigInteger.Sign.Zero);
-		}
-
-		public static bool operator >(BigInteger bi1, BigInteger bi2)
-		{
-			return BigInteger.Kernel.Compare(bi1, bi2) > BigInteger.Sign.Zero;
-		}
-
-		public static bool operator <(BigInteger bi1, BigInteger bi2)
-		{
-			return BigInteger.Kernel.Compare(bi1, bi2) < BigInteger.Sign.Zero;
-		}
-
-		public static bool operator >=(BigInteger bi1, BigInteger bi2)
-		{
-			return BigInteger.Kernel.Compare(bi1, bi2) >= BigInteger.Sign.Zero;
-		}
-
-		public static bool operator <=(BigInteger bi1, BigInteger bi2)
-		{
-			return BigInteger.Kernel.Compare(bi1, bi2) <= BigInteger.Sign.Zero;
-		}
-
 		public BigInteger.Sign Compare(BigInteger bi)
 		{
 			return BigInteger.Kernel.Compare(this, bi);
@@ -601,19 +412,19 @@ namespace Mono.Math
 			{
 				return "1";
 			}
-			string text = "";
+			string text = string.Empty;
 			BigInteger bigInteger = new BigInteger(this);
 			while (bigInteger != 0U)
 			{
 				uint num = BigInteger.Kernel.SingleByteDivideInPlace(bigInteger, radix);
-				text = characterSet[(int)num].ToString() + text;
+				text = characterSet[(int)num] + text;
 			}
 			return text;
 		}
 
 		private void Normalize()
 		{
-			while (this.length > 0U && this.data[(int)(this.length - 1U)] == 0U)
+			while (this.length > 0U && this.data[(int)((UIntPtr)(this.length - 1U))] == 0U)
 			{
 				this.length -= 1U;
 			}
@@ -638,7 +449,7 @@ namespace Mono.Math
 			uint num = 0U;
 			for (uint num2 = 0U; num2 < this.length; num2 += 1U)
 			{
-				num ^= this.data[(int)num2];
+				num ^= this.data[(int)((UIntPtr)num2)];
 			}
 			return (int)num;
 		}
@@ -674,7 +485,8 @@ namespace Mono.Math
 
 		public BigInteger ModPow(BigInteger exp, BigInteger n)
 		{
-			return new BigInteger.ModulusRing(n).Pow(this, exp);
+			BigInteger.ModulusRing modulusRing = new BigInteger.ModulusRing(n);
+			return modulusRing.Pow(this, exp);
 		}
 
 		public bool IsProbablePrime()
@@ -702,12 +514,14 @@ namespace Mono.Math
 
 		public static BigInteger NextHighestPrime(BigInteger bi)
 		{
-			return new NextPrimeFinder().GenerateNewPrime(0, bi);
+			NextPrimeFinder nextPrimeFinder = new NextPrimeFinder();
+			return nextPrimeFinder.GenerateNewPrime(0, bi);
 		}
 
 		public static BigInteger GeneratePseudoPrime(int bits)
 		{
-			return new SequentialSearchPrimeGeneratorBase().GenerateNewPrime(bits);
+			SequentialSearchPrimeGeneratorBase sequentialSearchPrimeGeneratorBase = new SequentialSearchPrimeGeneratorBase();
+			return sequentialSearchPrimeGeneratorBase.GenerateNewPrime(bits);
 		}
 
 		public void Incr2()
@@ -728,11 +542,197 @@ namespace Mono.Math
 			}
 		}
 
+		public static implicit operator BigInteger(uint value)
+		{
+			return new BigInteger(value);
+		}
+
+		public static implicit operator BigInteger(int value)
+		{
+			if (value < 0)
+			{
+				throw new ArgumentOutOfRangeException("value");
+			}
+			return new BigInteger((uint)value);
+		}
+
+		public static implicit operator BigInteger(ulong value)
+		{
+			return new BigInteger(value);
+		}
+
+		public static BigInteger operator +(BigInteger bi1, BigInteger bi2)
+		{
+			if (bi1 == 0U)
+			{
+				return new BigInteger(bi2);
+			}
+			if (bi2 == 0U)
+			{
+				return new BigInteger(bi1);
+			}
+			return BigInteger.Kernel.AddSameSign(bi1, bi2);
+		}
+
+		public static BigInteger operator -(BigInteger bi1, BigInteger bi2)
+		{
+			if (bi2 == 0U)
+			{
+				return new BigInteger(bi1);
+			}
+			if (bi1 == 0U)
+			{
+				throw new ArithmeticException("Operation would return a negative value");
+			}
+			BigInteger.Sign sign = BigInteger.Kernel.Compare(bi1, bi2);
+			switch (sign + 1)
+			{
+			case BigInteger.Sign.Zero:
+				throw new ArithmeticException("Operation would return a negative value");
+			case BigInteger.Sign.Positive:
+				return 0;
+			case (BigInteger.Sign)2:
+				return BigInteger.Kernel.Subtract(bi1, bi2);
+			default:
+				throw new Exception();
+			}
+		}
+
+		public static int operator %(BigInteger bi, int i)
+		{
+			if (i > 0)
+			{
+				return (int)BigInteger.Kernel.DwordMod(bi, (uint)i);
+			}
+			return (int)(-(int)BigInteger.Kernel.DwordMod(bi, (uint)(-(uint)i)));
+		}
+
+		public static uint operator %(BigInteger bi, uint ui)
+		{
+			return BigInteger.Kernel.DwordMod(bi, ui);
+		}
+
+		public static BigInteger operator %(BigInteger bi1, BigInteger bi2)
+		{
+			return BigInteger.Kernel.multiByteDivide(bi1, bi2)[1];
+		}
+
+		public static BigInteger operator /(BigInteger bi, int i)
+		{
+			if (i > 0)
+			{
+				return BigInteger.Kernel.DwordDiv(bi, (uint)i);
+			}
+			throw new ArithmeticException("Operation would return a negative value");
+		}
+
+		public static BigInteger operator /(BigInteger bi1, BigInteger bi2)
+		{
+			return BigInteger.Kernel.multiByteDivide(bi1, bi2)[0];
+		}
+
+		public static BigInteger operator *(BigInteger bi1, BigInteger bi2)
+		{
+			if (bi1 == 0U || bi2 == 0U)
+			{
+				return 0;
+			}
+			if ((long)bi1.data.Length < (long)((ulong)bi1.length))
+			{
+				throw new IndexOutOfRangeException("bi1 out of range");
+			}
+			if ((long)bi2.data.Length < (long)((ulong)bi2.length))
+			{
+				throw new IndexOutOfRangeException("bi2 out of range");
+			}
+			BigInteger bigInteger = new BigInteger(BigInteger.Sign.Positive, bi1.length + bi2.length);
+			BigInteger.Kernel.Multiply(bi1.data, 0U, bi1.length, bi2.data, 0U, bi2.length, bigInteger.data, 0U);
+			bigInteger.Normalize();
+			return bigInteger;
+		}
+
+		public static BigInteger operator *(BigInteger bi, int i)
+		{
+			if (i < 0)
+			{
+				throw new ArithmeticException("Operation would return a negative value");
+			}
+			if (i == 0)
+			{
+				return 0;
+			}
+			if (i == 1)
+			{
+				return new BigInteger(bi);
+			}
+			return BigInteger.Kernel.MultiplyByDword(bi, (uint)i);
+		}
+
+		public static BigInteger operator <<(BigInteger bi1, int shiftVal)
+		{
+			return BigInteger.Kernel.LeftShift(bi1, shiftVal);
+		}
+
+		public static BigInteger operator >>(BigInteger bi1, int shiftVal)
+		{
+			return BigInteger.Kernel.RightShift(bi1, shiftVal);
+		}
+
+		public static bool operator ==(BigInteger bi1, uint ui)
+		{
+			if (bi1.length != 1U)
+			{
+				bi1.Normalize();
+			}
+			return bi1.length == 1U && bi1.data[0] == ui;
+		}
+
+		public static bool operator !=(BigInteger bi1, uint ui)
+		{
+			if (bi1.length != 1U)
+			{
+				bi1.Normalize();
+			}
+			return bi1.length != 1U || bi1.data[0] != ui;
+		}
+
+		public static bool operator ==(BigInteger bi1, BigInteger bi2)
+		{
+			return bi1 == bi2 || (!(null == bi1) && !(null == bi2) && BigInteger.Kernel.Compare(bi1, bi2) == BigInteger.Sign.Zero);
+		}
+
+		public static bool operator !=(BigInteger bi1, BigInteger bi2)
+		{
+			return bi1 != bi2 && (null == bi1 || null == bi2 || BigInteger.Kernel.Compare(bi1, bi2) != BigInteger.Sign.Zero);
+		}
+
+		public static bool operator >(BigInteger bi1, BigInteger bi2)
+		{
+			return BigInteger.Kernel.Compare(bi1, bi2) > BigInteger.Sign.Zero;
+		}
+
+		public static bool operator <(BigInteger bi1, BigInteger bi2)
+		{
+			return BigInteger.Kernel.Compare(bi1, bi2) < BigInteger.Sign.Zero;
+		}
+
+		public static bool operator >=(BigInteger bi1, BigInteger bi2)
+		{
+			return BigInteger.Kernel.Compare(bi1, bi2) >= BigInteger.Sign.Zero;
+		}
+
+		public static bool operator <=(BigInteger bi1, BigInteger bi2)
+		{
+			return BigInteger.Kernel.Compare(bi1, bi2) <= BigInteger.Sign.Zero;
+		}
+
+		private const uint DEFAULT_LEN = 20U;
+
+		private const string WouldReturnNegVal = "Operation would return a negative value";
+
 		private uint length = 1U;
 
 		private uint[] data;
-
-		private const uint DEFAULT_LEN = 20U;
 
 		internal static readonly uint[] smallPrimes = new uint[]
 		{
@@ -817,8 +817,6 @@ namespace Mono.Math
 			5953U, 5981U, 5987U
 		};
 
-		private const string WouldReturnNegVal = "Operation would return a negative value";
-
 		private static RandomNumberGenerator rng;
 
 		public enum Sign
@@ -835,7 +833,7 @@ namespace Mono.Math
 				this.mod = modulus;
 				uint num = this.mod.length << 1;
 				this.constant = new BigInteger(BigInteger.Sign.Positive, num + 1U);
-				this.constant.data[(int)num] = 1U;
+				this.constant.data[(int)((UIntPtr)num)] = 1U;
 				this.constant /= this.mod;
 			}
 
@@ -855,7 +853,7 @@ namespace Mono.Math
 				}
 				BigInteger bigInteger2 = new BigInteger(BigInteger.Sign.Positive, x.length - num2 + this.constant.length);
 				BigInteger.Kernel.Multiply(x.data, num2, x.length - num2, this.constant.data, 0U, this.constant.length, bigInteger2.data, 0U);
-				uint num3 = ((x.length > num) ? num : x.length);
+				uint num3 = ((x.length <= num) ? x.length : num);
 				x.length = num3;
 				x.Normalize();
 				BigInteger bigInteger3 = new BigInteger(BigInteger.Sign.Positive, num);
@@ -868,7 +866,7 @@ namespace Mono.Math
 				else
 				{
 					BigInteger bigInteger4 = new BigInteger(BigInteger.Sign.Positive, num + 1U);
-					bigInteger4.data[(int)num] = 1U;
+					bigInteger4.data[(int)((UIntPtr)num)] = 1U;
 					BigInteger.Kernel.MinusEq(bigInteger4, bigInteger3);
 					BigInteger.Kernel.PlusEq(x, bigInteger4);
 				}
@@ -900,15 +898,16 @@ namespace Mono.Math
 			public BigInteger Difference(BigInteger a, BigInteger b)
 			{
 				BigInteger.Sign sign = BigInteger.Kernel.Compare(a, b);
+				BigInteger.Sign sign2 = sign;
 				BigInteger bigInteger;
-				switch (sign)
+				switch (sign2 + 1)
 				{
-				case BigInteger.Sign.Negative:
+				case BigInteger.Sign.Zero:
 					bigInteger = b - a;
 					break;
-				case BigInteger.Sign.Zero:
-					return 0;
 				case BigInteger.Sign.Positive:
+					return 0;
+				case (BigInteger.Sign)2:
 					bigInteger = a - b;
 					break;
 				default:
@@ -965,6 +964,83 @@ namespace Mono.Math
 			private BigInteger constant;
 		}
 
+		internal sealed class Montgomery
+		{
+			private Montgomery()
+			{
+			}
+
+			public static uint Inverse(uint n)
+			{
+				uint num = n;
+				uint num2;
+				while ((num2 = n * num) != 1U)
+				{
+					num *= 2U - num2;
+				}
+				return (uint)(-(uint)((ulong)num));
+			}
+
+			public static BigInteger ToMont(BigInteger n, BigInteger m)
+			{
+				n.Normalize();
+				m.Normalize();
+				n <<= (int)(m.length * 32U);
+				n %= m;
+				return n;
+			}
+
+			public unsafe static BigInteger Reduce(BigInteger n, BigInteger m, uint mPrime)
+			{
+				fixed (uint* ptr = (ref n.data != null && n.data.Length != 0 ? ref n.data[0] : ref *null), ptr2 = (ref m.data != null && m.data.Length != 0 ? ref m.data[0] : ref *null))
+				{
+					for (uint num = 0U; num < m.length; num += 1U)
+					{
+						uint num2 = *ptr * mPrime;
+						uint* ptr3 = ptr2;
+						uint* ptr4 = ptr;
+						uint* ptr5 = ptr;
+						ulong num3 = (ulong)num2 * (ulong)(*(ptr3++)) + (ulong)(*(ptr4++));
+						num3 >>= 32;
+						uint num4;
+						for (num4 = 1U; num4 < m.length; num4 += 1U)
+						{
+							num3 += (ulong)num2 * (ulong)(*(ptr3++)) + (ulong)(*(ptr4++));
+							*(ptr5++) = (uint)num3;
+							num3 >>= 32;
+						}
+						while (num4 < n.length)
+						{
+							num3 += (ulong)(*(ptr4++));
+							*(ptr5++) = (uint)num3;
+							num3 >>= 32;
+							if (num3 == 0UL)
+							{
+								num4 += 1U;
+								break;
+							}
+							num4 += 1U;
+						}
+						while (num4 < n.length)
+						{
+							*(ptr5++) = *(ptr4++);
+							num4 += 1U;
+						}
+						*(ptr5++) = (uint)num3;
+					}
+					while (n.length > 1U && ptr[n.length - 1U] == 0U)
+					{
+						n.length -= 1U;
+					}
+				}
+				if (n >= m)
+				{
+					BigInteger.Kernel.MinusEq(n, m);
+				}
+				return n;
+			}
+		}
+
 		private sealed class Kernel
 		{
 			public static BigInteger AddSameSign(BigInteger bi1, BigInteger bi2)
@@ -993,25 +1069,25 @@ namespace Mono.Math
 				ulong num4 = 0UL;
 				do
 				{
-					num4 = (ulong)array[(int)num] + (ulong)array2[(int)num] + num4;
-					data[(int)num] = (uint)num4;
+					num4 = (ulong)array[(int)((UIntPtr)num)] + (ulong)array2[(int)((UIntPtr)num)] + num4;
+					data[(int)((UIntPtr)num)] = (uint)num4;
 					num4 >>= 32;
 				}
 				while ((num += 1U) < num3);
-				bool flag = num4 > 0UL;
+				bool flag = num4 != 0UL;
 				if (flag)
 				{
 					if (num < num2)
 					{
 						do
 						{
-							flag = (data[(int)num] = array[(int)num] + 1U) == 0U;
+							flag = (data[(int)((UIntPtr)num)] = array[(int)((UIntPtr)num)] + 1U) == 0U;
 						}
 						while ((num += 1U) < num2 && flag);
 					}
 					if (flag)
 					{
-						data[(int)num] = 1U;
+						data[(int)((UIntPtr)num)] = 1U;
 						bigInteger.length = num + 1U;
 						return bigInteger;
 					}
@@ -1020,7 +1096,7 @@ namespace Mono.Math
 				{
 					do
 					{
-						data[(int)num] = array[(int)num];
+						data[(int)((UIntPtr)num)] = array[(int)((UIntPtr)num)];
 					}
 					while ((num += 1U) < num2);
 				}
@@ -1038,8 +1114,8 @@ namespace Mono.Math
 				uint num2 = 0U;
 				do
 				{
-					uint num3 = data3[(int)num];
-					if (((num3 += num2) < num2) | ((data[(int)num] = data2[(int)num] - num3) > ~num3))
+					uint num3 = data3[(int)((UIntPtr)num)];
+					if (((num3 += num2) < num2) | ((data[(int)((UIntPtr)num)] = data2[(int)((UIntPtr)num)] - num3) > ~num3))
 					{
 						num2 = 1U;
 					}
@@ -1055,21 +1131,21 @@ namespace Mono.Math
 					{
 						do
 						{
-							data[(int)num] = data2[(int)num] - 1U;
+							data[(int)((UIntPtr)num)] = data2[(int)((UIntPtr)num)] - 1U;
 						}
-						while (data2[(int)num++] == 0U && num < big.length);
+						while (data2[(int)((UIntPtr)(num++))] == 0U && num < big.length);
 						if (num == big.length)
 						{
-							goto IL_00B8;
+							goto IL_00E5;
 						}
 					}
 					do
 					{
-						data[(int)num] = data2[(int)num];
+						data[(int)((UIntPtr)num)] = data2[(int)((UIntPtr)num)];
 					}
 					while ((num += 1U) < big.length);
 				}
-				IL_00B8:
+				IL_00E5:
 				bigInteger.Normalize();
 				return bigInteger;
 			}
@@ -1082,8 +1158,8 @@ namespace Mono.Math
 				uint num2 = 0U;
 				do
 				{
-					uint num3 = data2[(int)num];
-					if (((num3 += num2) < num2) | ((data[(int)num] -= num3) > ~num3))
+					uint num3 = data2[(int)((UIntPtr)num)];
+					if (((num3 += num2) < num2) | ((data[(int)((UIntPtr)num)] -= num3) > ~num3))
 					{
 						num2 = 1U;
 					}
@@ -1093,19 +1169,18 @@ namespace Mono.Math
 					}
 				}
 				while ((num += 1U) < small.length);
-				if (num != big.length && num2 == 1U)
+				if (num != big.length)
 				{
-					do
+					if (num2 == 1U)
 					{
-						data[(int)num] -= 1U;
-						if (data[(int)num++] != 0U)
+						do
 						{
-							break;
+							data[(int)((UIntPtr)num)] -= 1U;
 						}
+						while (data[(int)((UIntPtr)(num++))] == 0U && num < big.length);
 					}
-					while (num < big.length);
 				}
-				while (big.length > 0U && big.data[(int)(big.length - 1U)] == 0U)
+				while (big.length > 0U && big.data[(int)((UIntPtr)(big.length - 1U))] == 0U)
 				{
 					big.length -= 1U;
 				}
@@ -1142,25 +1217,25 @@ namespace Mono.Math
 				ulong num4 = 0UL;
 				do
 				{
-					num4 += (ulong)array[(int)num] + (ulong)array2[(int)num];
-					data[(int)num] = (uint)num4;
+					num4 += (ulong)array[(int)((UIntPtr)num)] + (ulong)array2[(int)((UIntPtr)num)];
+					data[(int)((UIntPtr)num)] = (uint)num4;
 					num4 >>= 32;
 				}
 				while ((num += 1U) < num3);
-				bool flag2 = num4 > 0UL;
+				bool flag2 = num4 != 0UL;
 				if (flag2)
 				{
 					if (num < num2)
 					{
 						do
 						{
-							flag2 = (data[(int)num] = array[(int)num] + 1U) == 0U;
+							flag2 = (data[(int)((UIntPtr)num)] = array[(int)((UIntPtr)num)] + 1U) == 0U;
 						}
 						while ((num += 1U) < num2 && flag2);
 					}
 					if (flag2)
 					{
-						data[(int)num] = 1U;
+						data[(int)((UIntPtr)num)] = 1U;
 						bi1.length = num + 1U;
 						return;
 					}
@@ -1169,7 +1244,7 @@ namespace Mono.Math
 				{
 					do
 					{
-						data[(int)num] = array[(int)num];
+						data[(int)((UIntPtr)num)] = array[(int)((UIntPtr)num)];
 					}
 					while ((num += 1U) < num2);
 				}
@@ -1181,15 +1256,11 @@ namespace Mono.Math
 			{
 				uint num = bi1.length;
 				uint num2 = bi2.length;
-				while (num > 0U)
+				while (num > 0U && bi1.data[(int)((UIntPtr)(num - 1U))] == 0U)
 				{
-					if (bi1.data[(int)(num - 1U)] != 0U)
-					{
-						break;
-					}
 					num -= 1U;
 				}
-				while (num2 > 0U && bi2.data[(int)(num2 - 1U)] == 0U)
+				while (num2 > 0U && bi2.data[(int)((UIntPtr)(num2 - 1U))] == 0U)
 				{
 					num2 -= 1U;
 				}
@@ -1206,15 +1277,15 @@ namespace Mono.Math
 					return BigInteger.Sign.Positive;
 				}
 				uint num3 = num - 1U;
-				while (num3 != 0U && bi1.data[(int)num3] == bi2.data[(int)num3])
+				while (num3 != 0U && bi1.data[(int)((UIntPtr)num3)] == bi2.data[(int)((UIntPtr)num3)])
 				{
 					num3 -= 1U;
 				}
-				if (bi1.data[(int)num3] < bi2.data[(int)num3])
+				if (bi1.data[(int)((UIntPtr)num3)] < bi2.data[(int)((UIntPtr)num3)])
 				{
 					return BigInteger.Sign.Negative;
 				}
-				if (bi1.data[(int)num3] > bi2.data[(int)num3])
+				if (bi1.data[(int)((UIntPtr)num3)] > bi2.data[(int)((UIntPtr)num3)])
 				{
 					return BigInteger.Sign.Positive;
 				}
@@ -1228,8 +1299,8 @@ namespace Mono.Math
 				while (length-- > 0U)
 				{
 					num <<= 32;
-					num |= (ulong)n.data[(int)length];
-					n.data[(int)length] = (uint)(num / (ulong)d);
+					num |= (ulong)n.data[(int)((UIntPtr)length)];
+					n.data[(int)((UIntPtr)length)] = (uint)(num / (ulong)d);
 					num %= (ulong)d;
 				}
 				n.Normalize();
@@ -1243,7 +1314,7 @@ namespace Mono.Math
 				while (length-- > 0U)
 				{
 					num <<= 32;
-					num |= (ulong)n.data[(int)length];
+					num |= (ulong)n.data[(int)((UIntPtr)length)];
 					num %= (ulong)d;
 				}
 				return (uint)num;
@@ -1257,8 +1328,8 @@ namespace Mono.Math
 				while (length-- > 0U)
 				{
 					num <<= 32;
-					num |= (ulong)n.data[(int)length];
-					bigInteger.data[(int)length] = (uint)(num / (ulong)d);
+					num |= (ulong)n.data[(int)((UIntPtr)length)];
+					bigInteger.data[(int)((UIntPtr)length)] = (uint)(num / (ulong)d);
 					num %= (ulong)d;
 				}
 				bigInteger.Normalize();
@@ -1273,8 +1344,8 @@ namespace Mono.Math
 				while (length-- > 0U)
 				{
 					num <<= 32;
-					num |= (ulong)n.data[(int)length];
-					bigInteger.data[(int)length] = (uint)(num / (ulong)d);
+					num |= (ulong)n.data[(int)((UIntPtr)length)];
+					bigInteger.data[(int)((UIntPtr)length)] = (uint)(num / (ulong)d);
 					num %= (ulong)d;
 				}
 				bigInteger.Normalize();
@@ -1301,7 +1372,7 @@ namespace Mono.Math
 				uint num = bi1.length + 1U;
 				int num2 = (int)(bi2.length + 1U);
 				uint num3 = 2147483648U;
-				uint num4 = bi2.data[(int)(bi2.length - 1U)];
+				uint num4 = bi2.data[(int)((UIntPtr)(bi2.length - 1U))];
 				int num5 = 0;
 				int num6 = (int)(bi1.length - bi2.length);
 				while (num3 != 0U && (num4 & num3) == 0U)
@@ -1315,8 +1386,8 @@ namespace Mono.Math
 				bi2 <<= num5;
 				int i = (int)(num - bi2.length);
 				int num7 = (int)(num - 1U);
-				uint num8 = bi2.data[(int)(bi2.length - 1U)];
-				ulong num9 = (ulong)bi2.data[(int)(bi2.length - 2U)];
+				uint num8 = bi2.data[(int)((UIntPtr)(bi2.length - 1U))];
+				ulong num9 = (ulong)bi2.data[(int)((UIntPtr)(bi2.length - 2U))];
 				while (i > 0)
 				{
 					ulong num10 = ((ulong)data[num7] << 32) + (ulong)data[num7 - 1];
@@ -1337,7 +1408,7 @@ namespace Mono.Math
 					uint num16 = (uint)num11;
 					do
 					{
-						num15 += (ulong)bi2.data[(int)num13] * (ulong)num16;
+						num15 += (ulong)bi2.data[(int)((UIntPtr)num13)] * (ulong)num16;
 						uint num17 = data[num14];
 						data[num14] -= (uint)num15;
 						num15 >>= 32;
@@ -1357,7 +1428,7 @@ namespace Mono.Math
 						ulong num18 = 0UL;
 						do
 						{
-							num18 = (ulong)data[num14] + (ulong)bi2.data[(int)num13] + num18;
+							num18 = (ulong)data[num14] + (ulong)bi2.data[(int)((UIntPtr)num13)] + num18;
 							data[num14] = (uint)num18;
 							num18 >>= 32;
 							num13 += 1U;
@@ -1392,37 +1463,34 @@ namespace Mono.Math
 				BigInteger bigInteger = new BigInteger(BigInteger.Sign.Positive, bi.length + 1U + (uint)num);
 				uint num2 = 0U;
 				uint length = bi.length;
-				checked
+				if (n != 0)
 				{
-					if (n != 0)
+					uint num3 = 0U;
+					while (num2 < length)
 					{
-						uint num3 = 0U;
-						while (num2 < length)
+						uint num4 = bi.data[(int)((UIntPtr)num2)];
+						checked
 						{
-							uint num4 = bi.data[(int)num2];
 							bigInteger.data[(int)((IntPtr)(unchecked((ulong)num2 + (ulong)((long)num))))] = (num4 << n) | num3;
-							unchecked
-							{
-								num3 = num4 >> 32 - n;
-								num2 += 1U;
-							}
 						}
+						num3 = num4 >> 32 - n;
+						num2 += 1U;
+					}
+					checked
+					{
 						bigInteger.data[(int)((IntPtr)(unchecked((ulong)num2 + (ulong)((long)num))))] = num3;
 					}
-					else
-					{
-						while (num2 < length)
-						{
-							bigInteger.data[(int)((IntPtr)(unchecked((ulong)num2 + (ulong)((long)num))))] = bi.data[(int)num2];
-							unchecked
-							{
-								num2 += 1U;
-							}
-						}
-					}
-					bigInteger.Normalize();
-					return bigInteger;
 				}
+				else
+				{
+					while (num2 < length)
+					{
+						bigInteger.data[(int)(checked((IntPtr)(unchecked((ulong)num2 + (ulong)((long)num)))))] = bi.data[(int)((UIntPtr)num2)];
+						num2 += 1U;
+					}
+				}
+				bigInteger.Normalize();
+				return bigInteger;
 			}
 
 			public static BigInteger RightShift(BigInteger bi, int n)
@@ -1432,31 +1500,28 @@ namespace Mono.Math
 					return new BigInteger(bi);
 				}
 				int num = n >> 5;
-				bool flag = (n & 31) != 0;
+				int num2 = n & 31;
 				BigInteger bigInteger = new BigInteger(BigInteger.Sign.Positive, bi.length - (uint)num + 1U);
-				uint num2 = (uint)(bigInteger.data.Length - 1);
-				if (flag)
+				uint num3 = (uint)(bigInteger.data.Length - 1);
+				if (num2 != 0)
 				{
-					uint num3 = 0U;
-					while (num2-- > 0U)
+					uint num4 = 0U;
+					while (num3-- > 0U)
 					{
-						uint num4;
+						uint num5;
 						checked
 						{
-							num4 = bi.data[(int)((IntPtr)(unchecked((ulong)num2 + (ulong)((long)num))))];
-							bigInteger.data[(int)num2] = (num4 >> n) | num3;
+							num5 = bi.data[(int)((IntPtr)(unchecked((ulong)num3 + (ulong)((long)num))))];
 						}
-						num3 = num4 << 32 - n;
+						bigInteger.data[(int)((UIntPtr)num3)] = (num5 >> n) | num4;
+						num4 = num5 << 32 - n;
 					}
 				}
 				else
 				{
-					while (num2-- > 0U)
+					while (num3-- > 0U)
 					{
-						checked
-						{
-							bigInteger.data[(int)num2] = bi.data[(int)((IntPtr)(unchecked((ulong)num2 + (ulong)((long)num))))];
-						}
+						bigInteger.data[(int)((UIntPtr)num3)] = bi.data[(int)(checked((IntPtr)(unchecked((ulong)num3 + (ulong)((long)num)))))];
 					}
 				}
 				bigInteger.Normalize();
@@ -1470,153 +1535,83 @@ namespace Mono.Math
 				ulong num2 = 0UL;
 				do
 				{
-					num2 += (ulong)n.data[(int)num] * (ulong)f;
-					bigInteger.data[(int)num] = (uint)num2;
+					num2 += (ulong)n.data[(int)((UIntPtr)num)] * (ulong)f;
+					bigInteger.data[(int)((UIntPtr)num)] = (uint)num2;
 					num2 >>= 32;
 				}
 				while ((num += 1U) < n.length);
-				bigInteger.data[(int)num] = (uint)num2;
+				bigInteger.data[(int)((UIntPtr)num)] = (uint)num2;
 				bigInteger.Normalize();
 				return bigInteger;
 			}
 
 			public unsafe static void Multiply(uint[] x, uint xOffset, uint xLen, uint[] y, uint yOffset, uint yLen, uint[] d, uint dOffset)
 			{
-				fixed (uint[] array = x)
+				fixed (uint* ptr = (ref x != null && x.Length != 0 ? ref x[0] : ref *null), ptr2 = (ref y != null && y.Length != 0 ? ref y[0] : ref *null), ptr3 = (ref d != null && d.Length != 0 ? ref d[0] : ref *null))
 				{
-					uint* ptr;
-					if (x == null || array.Length == 0)
+					uint* ptr4 = ptr + xOffset;
+					uint* ptr5 = ptr4 + xLen;
+					uint* ptr6 = ptr2 + yOffset;
+					uint* ptr7 = ptr6 + yLen;
+					uint* ptr8 = ptr3 + dOffset;
+					while (ptr4 < ptr5)
 					{
-						ptr = null;
-					}
-					else
-					{
-						ptr = &array[0];
-					}
-					fixed (uint[] array2 = y)
-					{
-						uint* ptr2;
-						if (y == null || array2.Length == 0)
+						if (*ptr4 != 0U)
 						{
-							ptr2 = null;
-						}
-						else
-						{
-							ptr2 = &array2[0];
-						}
-						fixed (uint[] array3 = d)
-						{
-							uint* ptr3;
-							if (d == null || array3.Length == 0)
+							ulong num = 0UL;
+							uint* ptr9 = ptr8;
+							uint* ptr10 = ptr6;
+							while (ptr10 < ptr7)
 							{
-								ptr3 = null;
+								num += (ulong)(*ptr4) * (ulong)(*ptr10) + (ulong)(*ptr9);
+								*ptr9 = (uint)num;
+								num >>= 32;
+								ptr10++;
+								ptr9++;
 							}
-							else
+							if (num != 0UL)
 							{
-								ptr3 = &array3[0];
+								*ptr9 = (uint)num;
 							}
-							uint* ptr4 = ptr + (ulong)xOffset * 4UL / 4UL;
-							uint* ptr5 = ptr4 + (ulong)xLen * 4UL / 4UL;
-							uint* ptr6 = ptr2 + (ulong)yOffset * 4UL / 4UL;
-							uint* ptr7 = ptr6 + (ulong)yLen * 4UL / 4UL;
-							uint* ptr8 = ptr3 + (ulong)dOffset * 4UL / 4UL;
-							while (ptr4 < ptr5)
-							{
-								if (*ptr4 != 0U)
-								{
-									ulong num = 0UL;
-									uint* ptr9 = ptr8;
-									uint* ptr10 = ptr6;
-									while (ptr10 < ptr7)
-									{
-										num += (ulong)(*ptr4) * (ulong)(*ptr10) + (ulong)(*ptr9);
-										*ptr9 = (uint)num;
-										num >>= 32;
-										ptr10++;
-										ptr9++;
-									}
-									if (num != 0UL)
-									{
-										*ptr9 = (uint)num;
-									}
-								}
-								ptr4++;
-								ptr8++;
-							}
-							array = null;
-							array2 = null;
 						}
+						ptr4++;
+						ptr8++;
 					}
 				}
 			}
 
 			public unsafe static void MultiplyMod2p32pmod(uint[] x, int xOffset, int xLen, uint[] y, int yOffest, int yLen, uint[] d, int dOffset, int mod)
 			{
-				fixed (uint[] array = x)
+				fixed (uint* ptr = (ref x != null && x.Length != 0 ? ref x[0] : ref *null), ptr2 = (ref y != null && y.Length != 0 ? ref y[0] : ref *null), ptr3 = (ref d != null && d.Length != 0 ? ref d[0] : ref *null))
 				{
-					uint* ptr;
-					if (x == null || array.Length == 0)
+					uint* ptr4 = ptr + xOffset;
+					uint* ptr5 = ptr4 + xLen;
+					uint* ptr6 = ptr2 + yOffest;
+					uint* ptr7 = ptr6 + yLen;
+					uint* ptr8 = ptr3 + dOffset;
+					uint* ptr9 = ptr8 + mod;
+					while (ptr4 < ptr5)
 					{
-						ptr = null;
-					}
-					else
-					{
-						ptr = &array[0];
-					}
-					fixed (uint[] array2 = y)
-					{
-						uint* ptr2;
-						if (y == null || array2.Length == 0)
+						if (*ptr4 != 0U)
 						{
-							ptr2 = null;
-						}
-						else
-						{
-							ptr2 = &array2[0];
-						}
-						fixed (uint[] array3 = d)
-						{
-							uint* ptr3;
-							if (d == null || array3.Length == 0)
+							ulong num = 0UL;
+							uint* ptr10 = ptr8;
+							uint* ptr11 = ptr6;
+							while (ptr11 < ptr7 && ptr10 < ptr9)
 							{
-								ptr3 = null;
+								num += (ulong)(*ptr4) * (ulong)(*ptr11) + (ulong)(*ptr10);
+								*ptr10 = (uint)num;
+								num >>= 32;
+								ptr11++;
+								ptr10++;
 							}
-							else
+							if (num != 0UL && ptr10 < ptr9)
 							{
-								ptr3 = &array3[0];
+								*ptr10 = (uint)num;
 							}
-							uint* ptr4 = ptr + xOffset;
-							uint* ptr5 = ptr4 + xLen;
-							uint* ptr6 = ptr2 + yOffest;
-							uint* ptr7 = ptr6 + yLen;
-							uint* ptr8 = ptr3 + dOffset;
-							uint* ptr9 = ptr8 + mod;
-							while (ptr4 < ptr5)
-							{
-								if (*ptr4 != 0U)
-								{
-									ulong num = 0UL;
-									uint* ptr10 = ptr8;
-									uint* ptr11 = ptr6;
-									while (ptr11 < ptr7 && ptr10 < ptr9)
-									{
-										num += (ulong)(*ptr4) * (ulong)(*ptr11) + (ulong)(*ptr10);
-										*ptr10 = (uint)num;
-										num >>= 32;
-										ptr11++;
-										ptr10++;
-									}
-									if (num != 0UL && ptr10 < ptr9)
-									{
-										*ptr10 = (uint)num;
-									}
-								}
-								ptr4++;
-								ptr8++;
-							}
-							array = null;
-							array2 = null;
 						}
+						ptr4++;
+						ptr8++;
 					}
 				}
 			}
@@ -1628,27 +1623,8 @@ namespace Mono.Math
 				uint[] data = bi.data;
 				uint length = bi.length;
 				bi.data = array;
-				uint[] array3;
-				fixed (uint[] array2 = data)
+				fixed (uint* ptr = (ref data != null && data.Length != 0 ? ref data[0] : ref *null), ptr2 = (ref array != null && array.Length != 0 ? ref array[0] : ref *null))
 				{
-					uint* ptr;
-					if (data == null || array2.Length == 0)
-					{
-						ptr = null;
-					}
-					else
-					{
-						ptr = &array2[0];
-					}
-					uint* ptr2;
-					if ((array3 = array) == null || array3.Length == 0)
-					{
-						ptr2 = null;
-					}
-					else
-					{
-						ptr2 = &array3[0];
-					}
 					uint* ptr3 = ptr2 + array.Length;
 					for (uint* ptr4 = ptr2; ptr4 < ptr3; ptr4++)
 					{
@@ -1664,7 +1640,7 @@ namespace Mono.Math
 							ulong num2 = 0UL;
 							uint num3 = *ptr5;
 							uint* ptr7 = ptr5 + 1;
-							uint* ptr8 = ptr6 + (ulong)(2U * num) * 4UL / 4UL + 1;
+							uint* ptr8 = ptr6 + 2U * num + 1;
 							uint num4 = num + 1U;
 							while (num4 < length)
 							{
@@ -1698,7 +1674,7 @@ namespace Mono.Math
 					}
 					ptr5 = ptr;
 					ptr6 = ptr2;
-					uint* ptr9 = ptr5 + (ulong)length * 4UL / 4UL;
+					uint* ptr9 = ptr5 + length;
 					while (ptr5 < ptr9)
 					{
 						ulong num7 = (ulong)(*ptr5) * (ulong)(*ptr5) + (ulong)(*ptr6);
@@ -1718,12 +1694,11 @@ namespace Mono.Math
 						ptr6++;
 					}
 					bi.length <<= 1;
-					while (ptr2[(ulong)(bi.length - 1U) * 4UL / 4UL] == 0U && bi.length > 1U)
+					while (ptr2[bi.length - 1U] == 0U && bi.length > 1U)
 					{
 						bi.length -= 1U;
 					}
 				}
-				array3 = null;
 			}
 
 			public static BigInteger gcd(BigInteger a, BigInteger b)

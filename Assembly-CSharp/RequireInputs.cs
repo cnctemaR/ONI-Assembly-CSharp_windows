@@ -120,7 +120,7 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 				}
 				if (statusItem != null)
 				{
-					this.selectable.ToggleStatusItem(statusItem, !flag3, this);
+					this.selectable.ToggleStatusItem(statusItem, !flag3, new Tuple<ConduitType, Tag>(this.conduitConsumer.TypeOfConduit, this.conduitConsumer.capacityTag));
 				}
 				this.operational.SetFlag(RequireInputs.inputConnectedFlag, flag3);
 			}

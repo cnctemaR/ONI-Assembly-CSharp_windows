@@ -1,50 +1,30 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
 	[ComVisible(true)]
 	public sealed class RijndaelManaged : Rijndael
 	{
-		public RijndaelManaged()
+		public override void GenerateIV()
 		{
-			if (CryptoConfig.AllowOnlyFipsAlgorithms)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("This implementation is not part of the Windows Platform FIPS validated cryptographic algorithms."));
-			}
-		}
-
-		public override ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV)
-		{
-			return this.NewEncryptor(rgbKey, this.ModeValue, rgbIV, this.FeedbackSizeValue, RijndaelManagedTransformMode.Encrypt);
-		}
-
-		public override ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV)
-		{
-			return this.NewEncryptor(rgbKey, this.ModeValue, rgbIV, this.FeedbackSizeValue, RijndaelManagedTransformMode.Decrypt);
+			this.IVValue = KeyBuilder.IV(this.BlockSizeValue >> 3);
 		}
 
 		public override void GenerateKey()
 		{
-			this.KeyValue = Utils.GenerateRandom(this.KeySizeValue / 8);
+			this.KeyValue = KeyBuilder.Key(this.KeySizeValue >> 3);
 		}
 
-		public override void GenerateIV()
+		public override ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV)
 		{
-			this.IVValue = Utils.GenerateRandom(this.BlockSizeValue / 8);
+			return new RijndaelManagedTransform(this, false, rgbKey, rgbIV);
 		}
 
-		private ICryptoTransform NewEncryptor(byte[] rgbKey, CipherMode mode, byte[] rgbIV, int feedbackSize, RijndaelManagedTransformMode encryptMode)
+		public override ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV)
 		{
-			if (rgbKey == null)
-			{
-				rgbKey = Utils.GenerateRandom(this.KeySizeValue / 8);
-			}
-			if (rgbIV == null)
-			{
-				rgbIV = Utils.GenerateRandom(this.BlockSizeValue / 8);
-			}
-			return new RijndaelManagedTransform(rgbKey, mode, rgbIV, this.BlockSizeValue, feedbackSize, this.PaddingValue, encryptMode);
+			return new RijndaelManagedTransform(this, true, rgbKey, rgbIV);
 		}
 	}
 }

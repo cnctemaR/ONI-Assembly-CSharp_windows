@@ -30,7 +30,7 @@ public class ResourceLoader<T> where T : Resource, new()
 		int length = array.GetLength(1);
 		for (int i = 1; i < length; i++)
 		{
-			if (!string.IsNullOrWhiteSpace(array[0, i]))
+			if (!array[0, i].IsNullOrWhiteSpace())
 			{
 				T t = new T();
 				CSVUtil.ParseData<T>(t, array, i);

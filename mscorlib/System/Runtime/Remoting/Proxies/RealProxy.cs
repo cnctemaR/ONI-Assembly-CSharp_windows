@@ -6,12 +6,10 @@ using System.Runtime.Remoting.Activation;
 using System.Runtime.Remoting.Contexts;
 using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
-using System.Threading;
 
 namespace System.Runtime.Remoting.Proxies
 {
 	[ComVisible(true)]
-	[StructLayout(LayoutKind.Sequential)]
 	public abstract class RealProxy
 	{
 		protected RealProxy()
@@ -65,7 +63,8 @@ namespace System.Runtime.Remoting.Proxies
 
 		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			RemotingServices.GetObjectData(this.GetTransparentProxy(), info, context);
+			object transparentProxy = this.GetTransparentProxy();
+			RemotingServices.GetObjectData(transparentProxy, info, context);
 		}
 
 		internal Identity ObjectIdentity
@@ -113,7 +112,7 @@ namespace System.Runtime.Remoting.Proxies
 		internal static object PrivateInvoke(RealProxy rp, IMessage msg, out Exception exc, out object[] out_args)
 		{
 			MonoMethodMessage monoMethodMessage = (MonoMethodMessage)msg;
-			monoMethodMessage.LogicalCallContext = Thread.CurrentThread.GetMutableExecutionContext().LogicalCallContext;
+			monoMethodMessage.LogicalCallContext = CallContext.CreateLogicalCallContext(true);
 			CallType callType = monoMethodMessage.CallType;
 			bool flag = rp is RemotingProxy;
 			out_args = null;
@@ -156,14 +155,14 @@ namespace System.Runtime.Remoting.Proxies
 				}
 				if (!flag && callType == CallType.BeginInvoke && !flag2)
 				{
-					object obj = monoMethodMessage.AsyncResult.SyncProcessMessage(methodReturnMessage);
+					IMessage message = monoMethodMessage.AsyncResult.SyncProcessMessage(methodReturnMessage);
 					out_args = methodReturnMessage.OutArgs;
-					methodReturnMessage = new ReturnMessage(obj, null, 0, null, methodReturnMessage as IMethodCallMessage);
+					methodReturnMessage = new ReturnMessage(message, null, 0, null, methodReturnMessage as IMethodCallMessage);
 				}
 			}
 			if (methodReturnMessage.LogicalCallContext != null && methodReturnMessage.LogicalCallContext.HasInfo)
 			{
-				Thread.CurrentThread.GetMutableExecutionContext().LogicalCallContext.Merge(methodReturnMessage.LogicalCallContext);
+				CallContext.UpdateCurrentCallContext(methodReturnMessage.LogicalCallContext);
 			}
 			exc = methodReturnMessage.Exception;
 			if (exc != null)
@@ -282,7 +281,7 @@ namespace System.Runtime.Remoting.Proxies
 				{
 					if (parameterInfo.IsOut && !parameterInfo.ParameterType.IsByRef)
 					{
-						object obj = ((parameterInfo.Position < mrm.ArgCount) ? mrm.GetArg(parameterInfo.Position) : null);
+						object obj = ((parameterInfo.Position >= mrm.ArgCount) ? null : mrm.GetArg(parameterInfo.Position));
 						if (obj != null)
 						{
 							object arg = call.GetArg(parameterInfo.Position);
@@ -295,7 +294,7 @@ namespace System.Runtime.Remoting.Proxies
 					}
 					else if (parameterInfo.ParameterType.IsByRef)
 					{
-						object obj2 = ((parameterInfo.Position < mrm.ArgCount) ? mrm.GetArg(parameterInfo.Position) : null);
+						object obj2 = ((parameterInfo.Position >= mrm.ArgCount) ? null : mrm.GetArg(parameterInfo.Position));
 						if (obj2 != null && !parameterInfo.ParameterType.GetElementType().IsInstanceOfType(obj2))
 						{
 							throw new InvalidCastException("Return argument '" + parameterInfo.Name + "' has an invalid type");
@@ -312,7 +311,7 @@ namespace System.Runtime.Remoting.Proxies
 
 		internal Context _targetContext;
 
-		internal MarshalByRefObject _server;
+		private MarshalByRefObject _server;
 
 		private int _targetDomainId = -1;
 

@@ -242,9 +242,12 @@ public class KSelectable : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
-		this.statusItemGroup.Destroy();
-		this.statusItemGroup = null;
-		if (this.selected)
+		if (this.statusItemGroup != null)
+		{
+			this.statusItemGroup.Destroy();
+			this.statusItemGroup = null;
+		}
+		if (this.selected && SelectTool.Instance != null)
 		{
 			if (SelectTool.Instance.selected == this)
 			{

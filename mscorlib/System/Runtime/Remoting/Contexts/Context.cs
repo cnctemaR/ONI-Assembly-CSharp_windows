@@ -1,35 +1,25 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Activation;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting.Messaging;
+using System.Runtime.Remoting.Proxies;
 using System.Threading;
 
 namespace System.Runtime.Remoting.Contexts
 {
 	[ComVisible(true)]
-	[StructLayout(LayoutKind.Sequential)]
 	public class Context
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void RegisterContext(Context ctx);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern void ReleaseContext(Context ctx);
-
 		public Context()
 		{
 			this.domain_id = Thread.GetDomainID();
-			this.context_id = Interlocked.Increment(ref Context.global_count);
-			Context.RegisterContext(this);
+			this.context_id = 1 + Context.global_count++;
 		}
 
 		~Context()
 		{
-			Context.ReleaseContext(this);
 		}
 
 		public static Context DefaultContext
@@ -56,7 +46,7 @@ namespace System.Runtime.Remoting.Contexts
 				{
 					return new IContextProperty[0];
 				}
-				return this.context_properties.ToArray();
+				return (IContextProperty[])this.context_properties.ToArray(typeof(IContextProperty[]));
 			}
 		}
 
@@ -78,12 +68,14 @@ namespace System.Runtime.Remoting.Contexts
 
 		public static bool RegisterDynamicProperty(IDynamicProperty prop, ContextBoundObject obj, Context ctx)
 		{
-			return Context.GetDynamicPropertyCollection(obj, ctx).RegisterDynamicProperty(prop);
+			DynamicPropertyCollection dynamicPropertyCollection = Context.GetDynamicPropertyCollection(obj, ctx);
+			return dynamicPropertyCollection.RegisterDynamicProperty(prop);
 		}
 
 		public static bool UnregisterDynamicProperty(string name, ContextBoundObject obj, Context ctx)
 		{
-			return Context.GetDynamicPropertyCollection(obj, ctx).UnregisterDynamicProperty(name);
+			DynamicPropertyCollection dynamicPropertyCollection = Context.GetDynamicPropertyCollection(obj, ctx);
+			return dynamicPropertyCollection.UnregisterDynamicProperty(name);
 		}
 
 		private static DynamicPropertyCollection GetDynamicPropertyCollection(ContextBoundObject obj, Context ctx)
@@ -92,7 +84,8 @@ namespace System.Runtime.Remoting.Contexts
 			{
 				if (RemotingServices.IsTransparentProxy(obj))
 				{
-					return RemotingServices.GetRealProxy(obj).ObjectIdentity.ClientDynamicProperties;
+					RealProxy realProxy = RemotingServices.GetRealProxy(obj);
+					return realProxy.ObjectIdentity.ClientDynamicProperties;
 				}
 				return obj.ObjectIdentity.ServerDynamicProperties;
 			}
@@ -164,8 +157,9 @@ namespace System.Runtime.Remoting.Contexts
 			{
 				return null;
 			}
-			foreach (IContextProperty contextProperty in this.context_properties)
+			foreach (object obj in this.context_properties)
 			{
+				IContextProperty contextProperty = (IContextProperty)obj;
 				if (contextProperty.Name == name)
 				{
 					return contextProperty;
@@ -184,9 +178,13 @@ namespace System.Runtime.Remoting.Contexts
 			{
 				throw new InvalidOperationException("Can not add properties to default context");
 			}
+			if (this.frozen)
+			{
+				throw new InvalidOperationException("Context is Frozen");
+			}
 			if (this.context_properties == null)
 			{
-				this.context_properties = new List<IContextProperty>();
+				this.context_properties = new ArrayList();
 			}
 			this.context_properties.Add(prop);
 		}
@@ -195,8 +193,9 @@ namespace System.Runtime.Remoting.Contexts
 		{
 			if (this.context_properties != null)
 			{
-				foreach (IContextProperty contextProperty in this.context_properties)
+				foreach (object obj in this.context_properties)
 				{
+					IContextProperty contextProperty = (IContextProperty)obj;
 					contextProperty.Freeze(this);
 				}
 			}
@@ -238,8 +237,9 @@ namespace System.Runtime.Remoting.Contexts
 				this.client_context_sink_chain = new ClientContextTerminatorSink(this);
 				if (this.context_properties != null)
 				{
-					foreach (IContextProperty contextProperty in this.context_properties)
+					foreach (object obj in this.context_properties)
 					{
+						IContextProperty contextProperty = (IContextProperty)obj;
 						IContributeClientContextSink contributeClientContextSink = contextProperty as IContributeClientContextSink;
 						if (contributeClientContextSink != null)
 						{
@@ -260,7 +260,8 @@ namespace System.Runtime.Remoting.Contexts
 			{
 				for (int i = this.context_properties.Count - 1; i >= 0; i--)
 				{
-					IContributeObjectSink contributeObjectSink = this.context_properties[i] as IContributeObjectSink;
+					IContextProperty contextProperty = (IContextProperty)this.context_properties[i];
+					IContributeObjectSink contributeObjectSink = contextProperty as IContributeObjectSink;
 					if (contributeObjectSink != null)
 					{
 						messageSink = contributeObjectSink.GetObjectSink(obj, messageSink);
@@ -275,8 +276,9 @@ namespace System.Runtime.Remoting.Contexts
 			IMessageSink messageSink = EnvoyTerminatorSink.Instance;
 			if (this.context_properties != null)
 			{
-				foreach (IContextProperty contextProperty in this.context_properties)
+				foreach (object obj in this.context_properties)
 				{
+					IContextProperty contextProperty = (IContextProperty)obj;
 					IContributeEnvoySink contributeEnvoySink = contextProperty as IContributeEnvoySink;
 					if (contributeEnvoySink != null)
 					{
@@ -304,14 +306,12 @@ namespace System.Runtime.Remoting.Contexts
 				}
 			}
 			context.Freeze();
-			using (IEnumerator enumerator = msg.ContextProperties.GetEnumerator())
+			foreach (object obj2 in msg.ContextProperties)
 			{
-				while (enumerator.MoveNext())
+				IContextProperty contextProperty2 = (IContextProperty)obj2;
+				if (!contextProperty2.IsNewContextOK(context))
 				{
-					if (!((IContextProperty)enumerator.Current).IsNewContextOK(context))
-					{
-						throw new RemotingException("A context property did not approve the candidate context for activating the object");
-					}
+					throw new RemotingException("A context property did not approve the candidate context for activating the object");
 				}
 			}
 			return context;
@@ -331,53 +331,89 @@ namespace System.Runtime.Remoting.Contexts
 			this.callback_object.DoCallBack(deleg);
 		}
 
-		private LocalDataStore MyLocalStore
-		{
-			get
-			{
-				if (this._localDataStore == null)
-				{
-					LocalDataStoreMgr localDataStoreMgr = Context._localDataStoreMgr;
-					lock (localDataStoreMgr)
-					{
-						if (this._localDataStore == null)
-						{
-							this._localDataStore = Context._localDataStoreMgr.CreateLocalDataStore();
-						}
-					}
-				}
-				return this._localDataStore.Store;
-			}
-		}
-
 		public static LocalDataStoreSlot AllocateDataSlot()
 		{
-			return Context._localDataStoreMgr.AllocateDataSlot();
+			return new LocalDataStoreSlot(false);
 		}
 
 		public static LocalDataStoreSlot AllocateNamedDataSlot(string name)
 		{
-			return Context._localDataStoreMgr.AllocateNamedDataSlot(name);
+			object syncRoot = Context.namedSlots.SyncRoot;
+			LocalDataStoreSlot localDataStoreSlot2;
+			lock (syncRoot)
+			{
+				LocalDataStoreSlot localDataStoreSlot = Context.AllocateDataSlot();
+				Context.namedSlots.Add(name, localDataStoreSlot);
+				localDataStoreSlot2 = localDataStoreSlot;
+			}
+			return localDataStoreSlot2;
 		}
 
 		public static void FreeNamedDataSlot(string name)
 		{
-			Context._localDataStoreMgr.FreeNamedDataSlot(name);
-		}
-
-		public static LocalDataStoreSlot GetNamedDataSlot(string name)
-		{
-			return Context._localDataStoreMgr.GetNamedDataSlot(name);
+			object syncRoot = Context.namedSlots.SyncRoot;
+			lock (syncRoot)
+			{
+				Context.namedSlots.Remove(name);
+			}
 		}
 
 		public static object GetData(LocalDataStoreSlot slot)
 		{
-			return Thread.CurrentContext.MyLocalStore.GetData(slot);
+			Context currentContext = Thread.CurrentContext;
+			Context context = currentContext;
+			object obj;
+			lock (context)
+			{
+				if (currentContext.datastore != null && slot.slot < currentContext.datastore.Length)
+				{
+					obj = currentContext.datastore[slot.slot];
+				}
+				else
+				{
+					obj = null;
+				}
+			}
+			return obj;
+		}
+
+		public static LocalDataStoreSlot GetNamedDataSlot(string name)
+		{
+			object syncRoot = Context.namedSlots.SyncRoot;
+			LocalDataStoreSlot localDataStoreSlot2;
+			lock (syncRoot)
+			{
+				LocalDataStoreSlot localDataStoreSlot = Context.namedSlots[name] as LocalDataStoreSlot;
+				if (localDataStoreSlot == null)
+				{
+					localDataStoreSlot2 = Context.AllocateNamedDataSlot(name);
+				}
+				else
+				{
+					localDataStoreSlot2 = localDataStoreSlot;
+				}
+			}
+			return localDataStoreSlot2;
 		}
 
 		public static void SetData(LocalDataStoreSlot slot, object data)
 		{
-			Thread.CurrentContext.MyLocalStore.SetData(slot, data);
+			Context currentContext = Thread.CurrentContext;
+			Context context = currentContext;
+			lock (context)
+			{
+				if (currentContext.datastore == null)
+				{
+					currentContext.datastore = new object[slot.slot + 2];
+				}
+				else if (slot.slot >= currentContext.datastore.Length)
+				{
+					object[] array = new object[slot.slot + 2];
+					currentContext.datastore.CopyTo(array, 0);
+					currentContext.datastore = array;
+				}
+				currentContext.datastore[slot.slot] = data;
+			}
 		}
 
 		private int domain_id;
@@ -386,24 +422,21 @@ namespace System.Runtime.Remoting.Contexts
 
 		private UIntPtr static_data;
 
-		private UIntPtr data;
-
-		[ContextStatic]
-		private static object[] local_slots;
-
 		private static IMessageSink default_server_context_sink;
 
 		private IMessageSink server_context_sink_chain;
 
 		private IMessageSink client_context_sink_chain;
 
-		private List<IContextProperty> context_properties;
+		private object[] datastore;
+
+		private ArrayList context_properties;
+
+		private bool frozen;
 
 		private static int global_count;
 
-		private volatile LocalDataStoreHolder _localDataStore;
-
-		private static LocalDataStoreMgr _localDataStoreMgr = new LocalDataStoreMgr();
+		private static Hashtable namedSlots = new Hashtable();
 
 		private static DynamicPropertyCollection global_dynamic_properties;
 

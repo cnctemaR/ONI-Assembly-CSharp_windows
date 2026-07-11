@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Win32
 {
@@ -18,17 +17,12 @@ namespace Microsoft.Win32
 
 		private static bool IsWellKnownKey(string parentKeyName, string keyname)
 		{
-			return (parentKeyName == Registry.CurrentUser.Name || parentKeyName == Registry.LocalMachine.Name) && string.Compare("software", keyname, true, CultureInfo.InvariantCulture) == 0;
+			return (parentKeyName == Registry.CurrentUser.Name || parentKeyName == Registry.LocalMachine.Name) && 0 == string.Compare("software", keyname, true, CultureInfo.InvariantCulture);
 		}
 
 		public RegistryKey CreateSubKey(RegistryKey rkey, string keyname)
 		{
 			return this.CreateSubKey(rkey, keyname, true);
-		}
-
-		public RegistryKey CreateSubKey(RegistryKey rkey, string keyname, RegistryOptions options)
-		{
-			return this.CreateSubKey(rkey, keyname, true, options == RegistryOptions.Volatile);
 		}
 
 		public RegistryKey OpenRemoteBaseKey(RegistryHive hKey, string machineName)
@@ -49,11 +43,6 @@ namespace Microsoft.Win32
 				registryKey = this.CreateSubKey(rkey, keyname, writable);
 			}
 			return registryKey;
-		}
-
-		public RegistryKey FromHandle(SafeRegistryHandle handle)
-		{
-			throw new NotImplementedException();
 		}
 
 		public void Flush(RegistryKey rkey)
@@ -112,7 +101,7 @@ namespace Microsoft.Win32
 			{
 				throw RegistryKey.CreateMarkedForDeletionException();
 			}
-			return keyHandler.GetSubKeyCount();
+			return Directory.GetDirectories(keyHandler.Dir).Length;
 		}
 
 		public int ValueCount(RegistryKey rkey)
@@ -142,27 +131,39 @@ namespace Microsoft.Win32
 		public void DeleteKey(RegistryKey rkey, string keyname, bool throw_if_missing)
 		{
 			KeyHandler keyHandler = KeyHandler.Lookup(rkey, true);
-			if (keyHandler == null)
+			if (keyHandler != null)
 			{
-				if (!throw_if_missing)
+				string text = Path.Combine(keyHandler.Dir, UnixRegistryApi.ToUnix(keyname));
+				if (Directory.Exists(text))
 				{
-					return;
+					Directory.Delete(text, true);
+					KeyHandler.Drop(text);
 				}
-				throw new ArgumentException("the given value does not exist");
-			}
-			else
-			{
-				if (!KeyHandler.Delete(Path.Combine(keyHandler.Dir, UnixRegistryApi.ToUnix(keyname))) && throw_if_missing)
+				else if (throw_if_missing)
 				{
 					throw new ArgumentException("the given value does not exist");
 				}
 				return;
 			}
+			if (!throw_if_missing)
+			{
+				return;
+			}
+			throw new ArgumentException("the given value does not exist");
 		}
 
 		public string[] GetSubKeyNames(RegistryKey rkey)
 		{
-			return KeyHandler.Lookup(rkey, true).GetSubKeyNames();
+			KeyHandler keyHandler = KeyHandler.Lookup(rkey, true);
+			DirectoryInfo directoryInfo = new DirectoryInfo(keyHandler.Dir);
+			DirectoryInfo[] directories = directoryInfo.GetDirectories();
+			string[] array = new string[directories.Length];
+			for (int i = 0; i < directories.Length; i++)
+			{
+				DirectoryInfo directoryInfo2 = directories[i];
+				array[i] = directoryInfo2.Name;
+			}
+			return array;
 		}
 
 		public string[] GetValueNames(RegistryKey rkey)
@@ -182,36 +183,12 @@ namespace Microsoft.Win32
 
 		private RegistryKey CreateSubKey(RegistryKey rkey, string keyname, bool writable)
 		{
-			return this.CreateSubKey(rkey, keyname, writable, false);
-		}
-
-		private RegistryKey CreateSubKey(RegistryKey rkey, string keyname, bool writable, bool is_volatile)
-		{
 			KeyHandler keyHandler = KeyHandler.Lookup(rkey, true);
 			if (keyHandler == null)
 			{
 				throw RegistryKey.CreateMarkedForDeletionException();
 			}
-			if (KeyHandler.VolatileKeyExists(keyHandler.Dir) && !is_volatile)
-			{
-				throw new IOException("Cannot create a non volatile subkey under a volatile key.");
-			}
-			return keyHandler.Ensure(rkey, UnixRegistryApi.ToUnix(keyname), writable, is_volatile);
-		}
-
-		public RegistryValueKind GetValueKind(RegistryKey rkey, string name)
-		{
-			KeyHandler keyHandler = KeyHandler.Lookup(rkey, true);
-			if (keyHandler != null)
-			{
-				return keyHandler.GetValueKind(name);
-			}
-			return RegistryValueKind.Unknown;
-		}
-
-		public IntPtr GetHandle(RegistryKey key)
-		{
-			throw new NotImplementedException();
+			return keyHandler.Ensure(rkey, UnixRegistryApi.ToUnix(keyname), writable);
 		}
 	}
 }

@@ -5,13 +5,13 @@ namespace System.ComponentModel.Design.Serialization
 {
 	public interface IDesignerSerializationManager : IServiceProvider
 	{
-		ContextStack Context { get; }
-
-		PropertyDescriptorCollection Properties { get; }
-
 		event ResolveNameEventHandler ResolveName;
 
 		event EventHandler SerializationComplete;
+
+		ContextStack Context { get; }
+
+		PropertyDescriptorCollection Properties { get; }
 
 		void AddSerializationProvider(IDesignerSerializationProvider provider);
 

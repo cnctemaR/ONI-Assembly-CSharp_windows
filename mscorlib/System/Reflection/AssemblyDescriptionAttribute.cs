@@ -3,23 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class AssemblyDescriptionAttribute : Attribute
 	{
 		public AssemblyDescriptionAttribute(string description)
 		{
-			this.m_description = description;
+			this.name = description;
 		}
 
 		public string Description
 		{
 			get
 			{
-				return this.m_description;
+				return this.name;
 			}
 		}
 
-		private string m_description;
+		private string name;
 	}
 }

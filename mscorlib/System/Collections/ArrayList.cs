@@ -1,55 +1,99 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
-using System.Threading;
 
 namespace System.Collections
 {
-	[DebuggerTypeProxy(typeof(ArrayList.ArrayListDebugView))]
 	[ComVisible(true)]
-	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerDisplay("Count={Count}")]
+	[DebuggerTypeProxy(typeof(CollectionDebuggerView))]
 	[Serializable]
-	public class ArrayList : IList, ICollection, IEnumerable, ICloneable
+	public class ArrayList : IEnumerable, ICloneable, ICollection, IList
 	{
-		internal ArrayList(bool trash)
-		{
-		}
-
 		public ArrayList()
 		{
-			this._items = ArrayList.emptyArray;
-		}
-
-		public ArrayList(int capacity)
-		{
-			if (capacity < 0)
-			{
-				throw new ArgumentOutOfRangeException("capacity", Environment.GetResourceString("'{0}' must be non-negative.", new object[] { "capacity" }));
-			}
-			if (capacity == 0)
-			{
-				this._items = ArrayList.emptyArray;
-				return;
-			}
-			this._items = new object[capacity];
+			this._items = ArrayList.EmptyArray;
 		}
 
 		public ArrayList(ICollection c)
 		{
 			if (c == null)
 			{
-				throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
+				throw new ArgumentNullException("c");
 			}
-			int count = c.Count;
-			if (count == 0)
+			Array array = c as Array;
+			if (array != null && array.Rank != 1)
 			{
-				this._items = ArrayList.emptyArray;
+				throw new RankException();
+			}
+			this._items = new object[c.Count];
+			this.AddRange(c);
+		}
+
+		public ArrayList(int capacity)
+		{
+			if (capacity < 0)
+			{
+				ArrayList.ThrowNewArgumentOutOfRangeException("capacity", capacity, "The initial capacity can't be smaller than zero.");
+			}
+			if (capacity == 0)
+			{
+				capacity = 4;
+			}
+			this._items = new object[capacity];
+		}
+
+		private ArrayList(int initialCapacity, bool forceZeroSize)
+		{
+			if (forceZeroSize)
+			{
+				this._items = null;
 				return;
 			}
-			this._items = new object[count];
-			this.AddRange(c);
+			throw new InvalidOperationException("Use ArrayList(int)");
+		}
+
+		private ArrayList(object[] array, int index, int count)
+		{
+			if (count == 0)
+			{
+				this._items = new object[4];
+			}
+			else
+			{
+				this._items = new object[count];
+			}
+			Array.Copy(array, index, this._items, 0, count);
+			this._size = count;
+		}
+
+		public virtual object this[int index]
+		{
+			get
+			{
+				if (index < 0 || index >= this._size)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index is less than 0 or more than or equal to the list count.");
+				}
+				return this._items[index];
+			}
+			set
+			{
+				if (index < 0 || index >= this._size)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index is less than 0 or more than or equal to the list count.");
+				}
+				this._items[index] = value;
+				this._version++;
+			}
+		}
+
+		public virtual int Count
+		{
+			get
+			{
+				return this._size;
+			}
 		}
 
 		public virtual int Capacity
@@ -62,30 +106,11 @@ namespace System.Collections
 			{
 				if (value < this._size)
 				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
+					ArrayList.ThrowNewArgumentOutOfRangeException("Capacity", value, "Must be more than count.");
 				}
-				if (value != this._items.Length)
-				{
-					if (value > 0)
-					{
-						object[] array = new object[value];
-						if (this._size > 0)
-						{
-							Array.Copy(this._items, 0, array, 0, this._size);
-						}
-						this._items = array;
-						return;
-					}
-					this._items = new object[4];
-				}
-			}
-		}
-
-		public virtual int Count
-		{
-			get
-			{
-				return this._size;
+				object[] array = new object[value];
+				Array.Copy(this._items, 0, array, 0, this._size);
+				this._items = array;
 			}
 		}
 
@@ -117,256 +142,135 @@ namespace System.Collections
 		{
 			get
 			{
-				if (this._syncRoot == null)
-				{
-					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
-				}
-				return this._syncRoot;
+				return this;
 			}
 		}
 
-		public virtual object this[int index]
+		private void EnsureCapacity(int count)
 		{
-			get
+			if (count <= this._items.Length)
 			{
-				if (index < 0 || index >= this._size)
-				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				return this._items[index];
+				return;
 			}
-			set
+			int i = this._items.Length << 1;
+			if (i == 0)
 			{
-				if (index < 0 || index >= this._size)
-				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				this._items[index] = value;
-				this._version++;
+				i = 4;
 			}
+			while (i < count)
+			{
+				i <<= 1;
+			}
+			object[] array = new object[i];
+			Array.Copy(this._items, 0, array, 0, this._items.Length);
+			this._items = array;
 		}
 
-		public static ArrayList Adapter(IList list)
+		private void Shift(int index, int count)
 		{
-			if (list == null)
+			if (count > 0)
 			{
-				throw new ArgumentNullException("list");
+				if (this._size + count > this._items.Length)
+				{
+					int i;
+					for (i = ((this._items.Length <= 0) ? 1 : (this._items.Length << 1)); i < this._size + count; i <<= 1)
+					{
+					}
+					object[] array = new object[i];
+					Array.Copy(this._items, 0, array, 0, index);
+					Array.Copy(this._items, index, array, index + count, this._size - index);
+					this._items = array;
+				}
+				else
+				{
+					Array.Copy(this._items, index, this._items, index + count, this._size - index);
+				}
 			}
-			return new ArrayList.IListWrapper(list);
+			else if (count < 0)
+			{
+				int num = index - count;
+				Array.Copy(this._items, num, this._items, index, this._size - num);
+				Array.Clear(this._items, this._size + count, -count);
+			}
 		}
 
 		public virtual int Add(object value)
 		{
-			if (this._size == this._items.Length)
+			if (this._items.Length <= this._size)
 			{
 				this.EnsureCapacity(this._size + 1);
 			}
 			this._items[this._size] = value;
 			this._version++;
-			int size = this._size;
-			this._size = size + 1;
-			return size;
-		}
-
-		public virtual void AddRange(ICollection c)
-		{
-			this.InsertRange(this._size, c);
-		}
-
-		public virtual int BinarySearch(int index, int count, object value, IComparer comparer)
-		{
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (this._size - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			return Array.BinarySearch(this._items, index, count, value, comparer);
-		}
-
-		public virtual int BinarySearch(object value)
-		{
-			return this.BinarySearch(0, this.Count, value, null);
-		}
-
-		public virtual int BinarySearch(object value, IComparer comparer)
-		{
-			return this.BinarySearch(0, this.Count, value, comparer);
+			return this._size++;
 		}
 
 		public virtual void Clear()
 		{
-			if (this._size > 0)
-			{
-				Array.Clear(this._items, 0, this._size);
-				this._size = 0;
-			}
+			Array.Clear(this._items, 0, this._size);
+			this._size = 0;
 			this._version++;
-		}
-
-		public virtual object Clone()
-		{
-			ArrayList arrayList = new ArrayList(this._size);
-			arrayList._size = this._size;
-			arrayList._version = this._version;
-			Array.Copy(this._items, 0, arrayList._items, 0, this._size);
-			return arrayList;
 		}
 
 		public virtual bool Contains(object item)
 		{
-			if (item == null)
-			{
-				for (int i = 0; i < this._size; i++)
-				{
-					if (this._items[i] == null)
-					{
-						return true;
-					}
-				}
-				return false;
-			}
-			for (int j = 0; j < this._size; j++)
-			{
-				if (this._items[j] != null && this._items[j].Equals(item))
-				{
-					return true;
-				}
-			}
-			return false;
+			return this.IndexOf(item, 0, this._size) > -1;
 		}
 
-		public virtual void CopyTo(Array array)
+		internal virtual bool Contains(object value, int startIndex, int count)
 		{
-			this.CopyTo(array, 0);
-		}
-
-		public virtual void CopyTo(Array array, int arrayIndex)
-		{
-			if (array != null && array.Rank != 1)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-			}
-			Array.Copy(this._items, 0, array, arrayIndex, this._size);
-		}
-
-		public virtual void CopyTo(int index, Array array, int arrayIndex, int count)
-		{
-			if (this._size - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (array != null && array.Rank != 1)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-			}
-			Array.Copy(this._items, index, array, arrayIndex, count);
-		}
-
-		private void EnsureCapacity(int min)
-		{
-			if (this._items.Length < min)
-			{
-				int num = ((this._items.Length == 0) ? 4 : (this._items.Length * 2));
-				if (num > 2146435071)
-				{
-					num = 2146435071;
-				}
-				if (num < min)
-				{
-					num = min;
-				}
-				this.Capacity = num;
-			}
-		}
-
-		public static IList FixedSize(IList list)
-		{
-			if (list == null)
-			{
-				throw new ArgumentNullException("list");
-			}
-			return new ArrayList.FixedSizeList(list);
-		}
-
-		public static ArrayList FixedSize(ArrayList list)
-		{
-			if (list == null)
-			{
-				throw new ArgumentNullException("list");
-			}
-			return new ArrayList.FixedSizeArrayList(list);
-		}
-
-		public virtual IEnumerator GetEnumerator()
-		{
-			return new ArrayList.ArrayListEnumeratorSimple(this);
-		}
-
-		public virtual IEnumerator GetEnumerator(int index, int count)
-		{
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (this._size - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			return new ArrayList.ArrayListEnumerator(this, index, count);
+			return this.IndexOf(value, startIndex, count) > -1;
 		}
 
 		public virtual int IndexOf(object value)
 		{
-			return Array.IndexOf(this._items, value, 0, this._size);
+			return this.IndexOf(value, 0);
 		}
 
 		public virtual int IndexOf(object value, int startIndex)
 		{
-			if (startIndex > this._size)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			return Array.IndexOf(this._items, value, startIndex, this._size - startIndex);
+			return this.IndexOf(value, startIndex, this._size - startIndex);
 		}
 
 		public virtual int IndexOf(object value, int startIndex, int count)
 		{
-			if (startIndex > this._size)
+			if (startIndex < 0 || startIndex > this._size)
 			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				ArrayList.ThrowNewArgumentOutOfRangeException("startIndex", startIndex, "Does not specify valid index.");
 			}
-			if (count < 0 || startIndex > this._size - count)
+			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+				ArrayList.ThrowNewArgumentOutOfRangeException("count", count, "Can't be less than 0.");
 			}
-			return Array.IndexOf(this._items, value, startIndex, count);
+			if (startIndex > this._size - count)
+			{
+				throw new ArgumentOutOfRangeException("count", "Start index and count do not specify a valid range.");
+			}
+			return Array.IndexOf<object>(this._items, value, startIndex, count);
+		}
+
+		public virtual int LastIndexOf(object value)
+		{
+			return this.LastIndexOf(value, this._size - 1);
+		}
+
+		public virtual int LastIndexOf(object value, int startIndex)
+		{
+			return this.LastIndexOf(value, startIndex, startIndex + 1);
+		}
+
+		public virtual int LastIndexOf(object value, int startIndex, int count)
+		{
+			return Array.LastIndexOf<object>(this._items, value, startIndex, count);
 		}
 
 		public virtual void Insert(int index, object value)
 		{
 			if (index < 0 || index > this._size)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Insertion index was out of range. Must be non-negative and less than or equal to size."));
+				ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index must be >= 0 and <= Count.");
 			}
-			if (this._size == this._items.Length)
-			{
-				this.EnsureCapacity(this._size + 1);
-			}
-			if (index < this._size)
-			{
-				Array.Copy(this._items, index, this._items, index + 1, this._size - index);
-			}
+			this.Shift(index, 1);
 			this._items[index] = value;
 			this._size++;
 			this._version++;
@@ -376,66 +280,299 @@ namespace System.Collections
 		{
 			if (c == null)
 			{
-				throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
+				throw new ArgumentNullException("c");
 			}
 			if (index < 0 || index > this._size)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index must be >= 0 and <= Count.");
 			}
 			int count = c.Count;
-			if (count > 0)
+			if (this._items.Length < this._size + count)
 			{
 				this.EnsureCapacity(this._size + count);
-				if (index < this._size)
+			}
+			if (index < this._size)
+			{
+				Array.Copy(this._items, index, this._items, index + count, this._size - index);
+			}
+			if (this == c.SyncRoot)
+			{
+				Array.Copy(this._items, 0, this._items, index, index);
+				Array.Copy(this._items, index + count, this._items, index << 1, this._size - index);
+			}
+			else
+			{
+				c.CopyTo(this._items, index);
+			}
+			this._size += c.Count;
+			this._version++;
+		}
+
+		public virtual void Remove(object obj)
+		{
+			int num = this.IndexOf(obj);
+			if (num > -1)
+			{
+				this.RemoveAt(num);
+			}
+			this._version++;
+		}
+
+		public virtual void RemoveAt(int index)
+		{
+			if (index < 0 || index >= this._size)
+			{
+				ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Less than 0 or more than list count.");
+			}
+			this.Shift(index, -1);
+			this._size--;
+			this._version++;
+		}
+
+		public virtual void RemoveRange(int index, int count)
+		{
+			ArrayList.CheckRange(index, count, this._size);
+			this.Shift(index, -count);
+			this._size -= count;
+			this._version++;
+		}
+
+		public virtual void Reverse()
+		{
+			Array.Reverse(this._items, 0, this._size);
+			this._version++;
+		}
+
+		public virtual void Reverse(int index, int count)
+		{
+			ArrayList.CheckRange(index, count, this._size);
+			Array.Reverse(this._items, index, count);
+			this._version++;
+		}
+
+		public virtual void CopyTo(Array array)
+		{
+			Array.Copy(this._items, array, this._size);
+		}
+
+		public virtual void CopyTo(Array array, int arrayIndex)
+		{
+			this.CopyTo(0, array, arrayIndex, this._size);
+		}
+
+		public virtual void CopyTo(int index, Array array, int arrayIndex, int count)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (array.Rank != 1)
+			{
+				throw new ArgumentException("Must have only 1 dimensions.", "array");
+			}
+			Array.Copy(this._items, index, array, arrayIndex, count);
+		}
+
+		public virtual IEnumerator GetEnumerator()
+		{
+			return new ArrayList.SimpleEnumerator(this);
+		}
+
+		public virtual IEnumerator GetEnumerator(int index, int count)
+		{
+			ArrayList.CheckRange(index, count, this._size);
+			return new ArrayList.ArrayListEnumerator(this, index, count);
+		}
+
+		public virtual void AddRange(ICollection c)
+		{
+			this.InsertRange(this._size, c);
+		}
+
+		public virtual int BinarySearch(object value)
+		{
+			int num;
+			try
+			{
+				num = Array.BinarySearch<object>(this._items, 0, this._size, value);
+			}
+			catch (InvalidOperationException ex)
+			{
+				throw new ArgumentException(ex.Message);
+			}
+			return num;
+		}
+
+		public virtual int BinarySearch(object value, IComparer comparer)
+		{
+			int num;
+			try
+			{
+				num = Array.BinarySearch(this._items, 0, this._size, value, comparer);
+			}
+			catch (InvalidOperationException ex)
+			{
+				throw new ArgumentException(ex.Message);
+			}
+			return num;
+		}
+
+		public virtual int BinarySearch(int index, int count, object value, IComparer comparer)
+		{
+			int num;
+			try
+			{
+				num = Array.BinarySearch(this._items, index, count, value, comparer);
+			}
+			catch (InvalidOperationException ex)
+			{
+				throw new ArgumentException(ex.Message);
+			}
+			return num;
+		}
+
+		public virtual ArrayList GetRange(int index, int count)
+		{
+			ArrayList.CheckRange(index, count, this._size);
+			if (this.IsSynchronized)
+			{
+				return ArrayList.Synchronized(new ArrayList.RangedArrayList(this, index, count));
+			}
+			return new ArrayList.RangedArrayList(this, index, count);
+		}
+
+		public virtual void SetRange(int index, ICollection c)
+		{
+			if (c == null)
+			{
+				throw new ArgumentNullException("c");
+			}
+			if (index < 0 || index + c.Count > this._size)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			c.CopyTo(this._items, index);
+			this._version++;
+		}
+
+		public virtual void TrimToSize()
+		{
+			if (this._items.Length > this._size)
+			{
+				object[] array;
+				if (this._size == 0)
 				{
-					Array.Copy(this._items, index, this._items, index + count, this._size - index);
+					array = new object[4];
 				}
-				object[] array = new object[count];
-				c.CopyTo(array, 0);
-				array.CopyTo(this._items, index);
-				this._size += count;
-				this._version++;
+				else
+				{
+					array = new object[this._size];
+				}
+				Array.Copy(this._items, 0, array, 0, this._size);
+				this._items = array;
 			}
 		}
 
-		public virtual int LastIndexOf(object value)
+		public virtual void Sort()
 		{
-			return this.LastIndexOf(value, this._size - 1, this._size);
+			Array.Sort<object>(this._items, 0, this._size);
+			this._version++;
 		}
 
-		public virtual int LastIndexOf(object value, int startIndex)
+		public virtual void Sort(IComparer comparer)
 		{
-			if (startIndex >= this._size)
-			{
-				throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			return this.LastIndexOf(value, startIndex, startIndex + 1);
+			Array.Sort(this._items, 0, this._size, comparer);
 		}
 
-		public virtual int LastIndexOf(object value, int startIndex, int count)
+		public virtual void Sort(int index, int count, IComparer comparer)
 		{
-			if (this.Count != 0 && (startIndex < 0 || count < 0))
-			{
-				throw new ArgumentOutOfRangeException((startIndex < 0) ? "startIndex" : "count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (this._size == 0)
-			{
-				return -1;
-			}
-			if (startIndex >= this._size || count > startIndex + 1)
-			{
-				throw new ArgumentOutOfRangeException((startIndex >= this._size) ? "startIndex" : "count", Environment.GetResourceString("Larger than collection size."));
-			}
-			return Array.LastIndexOf(this._items, value, startIndex, count);
+			ArrayList.CheckRange(index, count, this._size);
+			Array.Sort(this._items, index, count, comparer);
 		}
 
-		public static IList ReadOnly(IList list)
+		public virtual object[] ToArray()
+		{
+			object[] array = new object[this._size];
+			this.CopyTo(array);
+			return array;
+		}
+
+		public virtual Array ToArray(Type type)
+		{
+			Array array = Array.CreateInstance(type, this._size);
+			this.CopyTo(array);
+			return array;
+		}
+
+		public virtual object Clone()
+		{
+			return new ArrayList(this._items, 0, this._size);
+		}
+
+		internal static void CheckRange(int index, int count, int listCount)
+		{
+			if (index < 0)
+			{
+				ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Can't be less than 0.");
+			}
+			if (count < 0)
+			{
+				ArrayList.ThrowNewArgumentOutOfRangeException("count", count, "Can't be less than 0.");
+			}
+			if (index > listCount - count)
+			{
+				throw new ArgumentException("Index and count do not denote a valid range of elements.", "index");
+			}
+		}
+
+		internal static void ThrowNewArgumentOutOfRangeException(string name, object actual, string message)
+		{
+			throw new ArgumentOutOfRangeException(name, actual, message);
+		}
+
+		public static ArrayList Adapter(IList list)
 		{
 			if (list == null)
 			{
 				throw new ArgumentNullException("list");
 			}
-			return new ArrayList.ReadOnlyList(list);
+			ArrayList arrayList = list as ArrayList;
+			if (arrayList != null)
+			{
+				return arrayList;
+			}
+			arrayList = new ArrayList.ArrayListAdapter(list);
+			if (list.IsSynchronized)
+			{
+				return ArrayList.Synchronized(arrayList);
+			}
+			return arrayList;
+		}
+
+		public static ArrayList Synchronized(ArrayList list)
+		{
+			if (list == null)
+			{
+				throw new ArgumentNullException("list");
+			}
+			if (list.IsSynchronized)
+			{
+				return list;
+			}
+			return new ArrayList.SynchronizedArrayListWrapper(list);
+		}
+
+		public static IList Synchronized(IList list)
+		{
+			if (list == null)
+			{
+				throw new ArgumentNullException("list");
+			}
+			if (list.IsSynchronized)
+			{
+				return list;
+			}
+			return new ArrayList.SynchronizedListWrapper(list);
 		}
 
 		public static ArrayList ReadOnly(ArrayList list)
@@ -444,70 +581,55 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("list");
 			}
-			return new ArrayList.ReadOnlyArrayList(list);
+			if (list.IsReadOnly)
+			{
+				return list;
+			}
+			return new ArrayList.ReadOnlyArrayListWrapper(list);
 		}
 
-		public virtual void Remove(object obj)
+		public static IList ReadOnly(IList list)
 		{
-			int num = this.IndexOf(obj);
-			if (num >= 0)
+			if (list == null)
 			{
-				this.RemoveAt(num);
+				throw new ArgumentNullException("list");
 			}
+			if (list.IsReadOnly)
+			{
+				return list;
+			}
+			return new ArrayList.ReadOnlyListWrapper(list);
 		}
 
-		public virtual void RemoveAt(int index)
+		public static ArrayList FixedSize(ArrayList list)
 		{
-			if (index < 0 || index >= this._size)
+			if (list == null)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentNullException("list");
 			}
-			this._size--;
-			if (index < this._size)
+			if (list.IsFixedSize)
 			{
-				Array.Copy(this._items, index + 1, this._items, index, this._size - index);
+				return list;
 			}
-			this._items[this._size] = null;
-			this._version++;
+			return new ArrayList.FixedSizeArrayListWrapper(list);
 		}
 
-		public virtual void RemoveRange(int index, int count)
+		public static IList FixedSize(IList list)
 		{
-			if (index < 0)
+			if (list == null)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentNullException("list");
 			}
-			if (count < 0)
+			if (list.IsFixedSize)
 			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
+				return list;
 			}
-			if (this._size - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (count > 0)
-			{
-				int i = this._size;
-				this._size -= count;
-				if (index < this._size)
-				{
-					Array.Copy(this._items, index + count, this._items, index, this._size - index);
-				}
-				while (i > this._size)
-				{
-					this._items[--i] = null;
-				}
-				this._version++;
-			}
+			return new ArrayList.FixedSizeListWrapper(list);
 		}
 
 		public static ArrayList Repeat(object value, int count)
 		{
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			ArrayList arrayList = new ArrayList((count > 4) ? count : 4);
+			ArrayList arrayList = new ArrayList(count);
 			for (int i = 0; i < count; i++)
 			{
 				arrayList.Add(value);
@@ -515,166 +637,169 @@ namespace System.Collections
 			return arrayList;
 		}
 
-		public virtual void Reverse()
-		{
-			this.Reverse(0, this.Count);
-		}
-
-		public virtual void Reverse(int index, int count)
-		{
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (this._size - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			Array.Reverse<object>(this._items, index, count);
-			this._version++;
-		}
-
-		public virtual void SetRange(int index, ICollection c)
-		{
-			if (c == null)
-			{
-				throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
-			}
-			int count = c.Count;
-			if (index < 0 || index > this._size - count)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (count > 0)
-			{
-				c.CopyTo(this._items, index);
-				this._version++;
-			}
-		}
-
-		public virtual ArrayList GetRange(int index, int count)
-		{
-			if (index < 0 || count < 0)
-			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (this._size - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			return new ArrayList.Range(this, index, count);
-		}
-
-		public virtual void Sort()
-		{
-			this.Sort(0, this.Count, Comparer.Default);
-		}
-
-		public virtual void Sort(IComparer comparer)
-		{
-			this.Sort(0, this.Count, comparer);
-		}
-
-		public virtual void Sort(int index, int count, IComparer comparer)
-		{
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (this._size - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			Array.Sort(this._items, index, count, comparer);
-			this._version++;
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
-		public static IList Synchronized(IList list)
-		{
-			if (list == null)
-			{
-				throw new ArgumentNullException("list");
-			}
-			return new ArrayList.SyncIList(list);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
-		public static ArrayList Synchronized(ArrayList list)
-		{
-			if (list == null)
-			{
-				throw new ArgumentNullException("list");
-			}
-			return new ArrayList.SyncArrayList(list);
-		}
-
-		public virtual object[] ToArray()
-		{
-			object[] array = new object[this._size];
-			Array.Copy(this._items, 0, array, 0, this._size);
-			return array;
-		}
-
-		[SecuritySafeCritical]
-		public virtual Array ToArray(Type type)
-		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			Array array = Array.UnsafeCreateInstance(type, new int[] { this._size });
-			Array.Copy(this._items, 0, array, 0, this._size);
-			return array;
-		}
-
-		public virtual void TrimToSize()
-		{
-			this.Capacity = this._size;
-		}
-
-		private object[] _items;
+		private const int DefaultInitialCapacity = 4;
 
 		private int _size;
 
+		private object[] _items;
+
 		private int _version;
 
-		[NonSerialized]
-		private object _syncRoot;
+		private static readonly object[] EmptyArray = new object[0];
 
-		private const int _defaultCapacity = 4;
-
-		private static readonly object[] emptyArray = EmptyArray<object>.Value;
-
-		[Serializable]
-		private class IListWrapper : ArrayList
+		private sealed class ArrayListEnumerator : IEnumerator, ICloneable
 		{
-			internal IListWrapper(IList list)
+			public ArrayListEnumerator(ArrayList list)
+				: this(list, 0, list.Count)
 			{
-				this._list = list;
-				this._version = 0;
 			}
 
-			public override int Capacity
+			public ArrayListEnumerator(ArrayList list, int index, int count)
+			{
+				this.m_List = list;
+				this.m_Index = index;
+				this.m_Count = count;
+				this.m_Pos = this.m_Index - 1;
+				this.m_Current = null;
+				this.m_ExpectedStateChanges = list._version;
+			}
+
+			public object Clone()
+			{
+				return base.MemberwiseClone();
+			}
+
+			public object Current
 			{
 				get
 				{
-					return this._list.Count;
+					if (this.m_Pos == this.m_Index - 1)
+					{
+						throw new InvalidOperationException("Enumerator unusable (Reset pending, or past end of array.");
+					}
+					return this.m_Current;
+				}
+			}
+
+			public bool MoveNext()
+			{
+				if (this.m_List._version != this.m_ExpectedStateChanges)
+				{
+					throw new InvalidOperationException("List has changed.");
+				}
+				this.m_Pos++;
+				if (this.m_Pos - this.m_Index < this.m_Count)
+				{
+					this.m_Current = this.m_List[this.m_Pos];
+					return true;
+				}
+				return false;
+			}
+
+			public void Reset()
+			{
+				this.m_Current = null;
+				this.m_Pos = this.m_Index - 1;
+			}
+
+			private int m_Pos;
+
+			private int m_Index;
+
+			private int m_Count;
+
+			private object m_Current;
+
+			private ArrayList m_List;
+
+			private int m_ExpectedStateChanges;
+		}
+
+		private sealed class SimpleEnumerator : IEnumerator, ICloneable
+		{
+			public SimpleEnumerator(ArrayList list)
+			{
+				this.list = list;
+				this.index = -1;
+				this.version = list._version;
+				this.currentElement = ArrayList.SimpleEnumerator.endFlag;
+			}
+
+			public object Clone()
+			{
+				return base.MemberwiseClone();
+			}
+
+			public bool MoveNext()
+			{
+				if (this.version != this.list._version)
+				{
+					throw new InvalidOperationException("List has changed.");
+				}
+				if (++this.index < this.list.Count)
+				{
+					this.currentElement = this.list[this.index];
+					return true;
+				}
+				this.currentElement = ArrayList.SimpleEnumerator.endFlag;
+				return false;
+			}
+
+			public object Current
+			{
+				get
+				{
+					if (this.currentElement != ArrayList.SimpleEnumerator.endFlag)
+					{
+						return this.currentElement;
+					}
+					if (this.index == -1)
+					{
+						throw new InvalidOperationException("Enumerator not started");
+					}
+					throw new InvalidOperationException("Enumerator ended");
+				}
+			}
+
+			public void Reset()
+			{
+				if (this.version != this.list._version)
+				{
+					throw new InvalidOperationException("List has changed.");
+				}
+				this.currentElement = ArrayList.SimpleEnumerator.endFlag;
+				this.index = -1;
+			}
+
+			private ArrayList list;
+
+			private int index;
+
+			private int version;
+
+			private object currentElement;
+
+			private static object endFlag = new object();
+		}
+
+		[Serializable]
+		private sealed class ArrayListAdapter : ArrayList
+		{
+			public ArrayListAdapter(IList adaptee)
+				: base(0, true)
+			{
+				this.m_Adaptee = adaptee;
+			}
+
+			public override object this[int index]
+			{
+				get
+				{
+					return this.m_Adaptee[index];
 				}
 				set
 				{
-					if (value < this.Count)
-					{
-						throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
-					}
+					this.m_Adaptee[index] = value;
 				}
 			}
 
@@ -682,15 +807,22 @@ namespace System.Collections
 			{
 				get
 				{
-					return this._list.Count;
+					return this.m_Adaptee.Count;
 				}
 			}
 
-			public override bool IsReadOnly
+			public override int Capacity
 			{
 				get
 				{
-					return this._list.IsReadOnly;
+					return this.m_Adaptee.Count;
+				}
+				set
+				{
+					if (value < this.m_Adaptee.Count)
+					{
+						throw new ArgumentException("capacity");
+					}
 				}
 			}
 
@@ -698,28 +830,15 @@ namespace System.Collections
 			{
 				get
 				{
-					return this._list.IsFixedSize;
+					return this.m_Adaptee.IsFixedSize;
 				}
 			}
 
-			public override bool IsSynchronized
+			public override bool IsReadOnly
 			{
 				get
 				{
-					return this._list.IsSynchronized;
-				}
-			}
-
-			public override object this[int index]
-			{
-				get
-				{
-					return this._list[index];
-				}
-				set
-				{
-					this._list[index] = value;
-					this._version++;
+					return this.m_Adaptee.IsReadOnly;
 				}
 			}
 
@@ -727,32 +846,282 @@ namespace System.Collections
 			{
 				get
 				{
-					return this._list.SyncRoot;
+					return this.m_Adaptee.SyncRoot;
 				}
 			}
 
-			public override int Add(object obj)
+			public override int Add(object value)
 			{
-				int num = this._list.Add(obj);
-				this._version++;
-				return num;
+				return this.m_Adaptee.Add(value);
+			}
+
+			public override void Clear()
+			{
+				this.m_Adaptee.Clear();
+			}
+
+			public override bool Contains(object value)
+			{
+				return this.m_Adaptee.Contains(value);
+			}
+
+			public override int IndexOf(object value)
+			{
+				return this.m_Adaptee.IndexOf(value);
+			}
+
+			public override int IndexOf(object value, int startIndex)
+			{
+				return this.IndexOf(value, startIndex, this.m_Adaptee.Count - startIndex);
+			}
+
+			public override int IndexOf(object value, int startIndex, int count)
+			{
+				if (startIndex < 0 || startIndex > this.m_Adaptee.Count)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("startIndex", startIndex, "Does not specify valid index.");
+				}
+				if (count < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("count", count, "Can't be less than 0.");
+				}
+				if (startIndex > this.m_Adaptee.Count - count)
+				{
+					throw new ArgumentOutOfRangeException("count", "Start index and count do not specify a valid range.");
+				}
+				if (value == null)
+				{
+					for (int i = startIndex; i < startIndex + count; i++)
+					{
+						if (this.m_Adaptee[i] == null)
+						{
+							return i;
+						}
+					}
+				}
+				else
+				{
+					for (int j = startIndex; j < startIndex + count; j++)
+					{
+						if (value.Equals(this.m_Adaptee[j]))
+						{
+							return j;
+						}
+					}
+				}
+				return -1;
+			}
+
+			public override int LastIndexOf(object value)
+			{
+				return this.LastIndexOf(value, this.m_Adaptee.Count - 1);
+			}
+
+			public override int LastIndexOf(object value, int startIndex)
+			{
+				return this.LastIndexOf(value, startIndex, startIndex + 1);
+			}
+
+			public override int LastIndexOf(object value, int startIndex, int count)
+			{
+				if (startIndex < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("startIndex", startIndex, "< 0");
+				}
+				if (count < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("count", count, "count is negative.");
+				}
+				if (startIndex - count + 1 < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("count", count, "count is too large.");
+				}
+				if (value == null)
+				{
+					for (int i = startIndex; i > startIndex - count; i--)
+					{
+						if (this.m_Adaptee[i] == null)
+						{
+							return i;
+						}
+					}
+				}
+				else
+				{
+					for (int j = startIndex; j > startIndex - count; j--)
+					{
+						if (value.Equals(this.m_Adaptee[j]))
+						{
+							return j;
+						}
+					}
+				}
+				return -1;
+			}
+
+			public override void Insert(int index, object value)
+			{
+				this.m_Adaptee.Insert(index, value);
+			}
+
+			public override void InsertRange(int index, ICollection c)
+			{
+				if (c == null)
+				{
+					throw new ArgumentNullException("c");
+				}
+				if (index > this.m_Adaptee.Count)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index must be >= 0 and <= Count.");
+				}
+				foreach (object obj in c)
+				{
+					this.m_Adaptee.Insert(index++, obj);
+				}
+			}
+
+			public override void Remove(object value)
+			{
+				this.m_Adaptee.Remove(value);
+			}
+
+			public override void RemoveAt(int index)
+			{
+				this.m_Adaptee.RemoveAt(index);
+			}
+
+			public override void RemoveRange(int index, int count)
+			{
+				ArrayList.CheckRange(index, count, this.m_Adaptee.Count);
+				for (int i = 0; i < count; i++)
+				{
+					this.m_Adaptee.RemoveAt(index);
+				}
+			}
+
+			public override void Reverse()
+			{
+				this.Reverse(0, this.m_Adaptee.Count);
+			}
+
+			public override void Reverse(int index, int count)
+			{
+				ArrayList.CheckRange(index, count, this.m_Adaptee.Count);
+				for (int i = 0; i < count / 2; i++)
+				{
+					object obj = this.m_Adaptee[i + index];
+					this.m_Adaptee[i + index] = this.m_Adaptee[index + count - i + index - 1];
+					this.m_Adaptee[index + count - i + index - 1] = obj;
+				}
+			}
+
+			public override void SetRange(int index, ICollection c)
+			{
+				if (c == null)
+				{
+					throw new ArgumentNullException("c");
+				}
+				if (index < 0 || index + c.Count > this.m_Adaptee.Count)
+				{
+					throw new ArgumentOutOfRangeException("index");
+				}
+				int num = index;
+				foreach (object obj in c)
+				{
+					this.m_Adaptee[num++] = obj;
+				}
+			}
+
+			public override void CopyTo(Array array)
+			{
+				this.m_Adaptee.CopyTo(array, 0);
+			}
+
+			public override void CopyTo(Array array, int index)
+			{
+				this.m_Adaptee.CopyTo(array, index);
+			}
+
+			public override void CopyTo(int index, Array array, int arrayIndex, int count)
+			{
+				if (index < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Can't be less than zero.");
+				}
+				if (arrayIndex < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("arrayIndex", arrayIndex, "Can't be less than zero.");
+				}
+				if (count < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Can't be less than zero.");
+				}
+				if (index >= this.m_Adaptee.Count)
+				{
+					throw new ArgumentException("Can't be more or equal to list count.", "index");
+				}
+				if (array.Rank > 1)
+				{
+					throw new ArgumentException("Can't copy into multi-dimensional array.");
+				}
+				if (arrayIndex >= array.Length)
+				{
+					throw new ArgumentException("arrayIndex can't be greater than array.Length - 1.");
+				}
+				if (array.Length - arrayIndex + 1 < count)
+				{
+					throw new ArgumentException("Destination array is too small.");
+				}
+				if (index > this.m_Adaptee.Count - count)
+				{
+					throw new ArgumentException("Index and count do not denote a valid range of elements.", "index");
+				}
+				for (int i = 0; i < count; i++)
+				{
+					array.SetValue(this.m_Adaptee[index + i], arrayIndex + i);
+				}
+			}
+
+			public override bool IsSynchronized
+			{
+				get
+				{
+					return this.m_Adaptee.IsSynchronized;
+				}
+			}
+
+			public override IEnumerator GetEnumerator()
+			{
+				return this.m_Adaptee.GetEnumerator();
+			}
+
+			public override IEnumerator GetEnumerator(int index, int count)
+			{
+				ArrayList.CheckRange(index, count, this.m_Adaptee.Count);
+				return new ArrayList.ArrayListAdapter.EnumeratorWithRange(this.m_Adaptee.GetEnumerator(), index, count);
 			}
 
 			public override void AddRange(ICollection c)
 			{
-				this.InsertRange(this.Count, c);
+				foreach (object obj in c)
+				{
+					this.m_Adaptee.Add(obj);
+				}
+			}
+
+			public override int BinarySearch(object value)
+			{
+				return this.BinarySearch(value, null);
+			}
+
+			public override int BinarySearch(object value, IComparer comparer)
+			{
+				return this.BinarySearch(0, this.m_Adaptee.Count, value, comparer);
 			}
 
 			public override int BinarySearch(int index, int count, object value, IComparer comparer)
 			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
+				ArrayList.CheckRange(index, count, this.m_Adaptee.Count);
 				if (comparer == null)
 				{
 					comparer = Comparer.Default;
@@ -761,476 +1130,454 @@ namespace System.Collections
 				int num = index + count - 1;
 				while (i <= num)
 				{
-					int num2 = (i + num) / 2;
-					int num3 = comparer.Compare(value, this._list[num2]);
-					if (num3 == 0)
-					{
-						return num2;
-					}
+					int num2 = i + (num - i) / 2;
+					int num3 = comparer.Compare(value, this.m_Adaptee[num2]);
 					if (num3 < 0)
 					{
 						num = num2 - 1;
 					}
 					else
 					{
+						if (num3 <= 0)
+						{
+							return num2;
+						}
 						i = num2 + 1;
 					}
 				}
 				return ~i;
 			}
 
-			public override void Clear()
-			{
-				if (this._list.IsFixedSize)
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-				}
-				this._list.Clear();
-				this._version++;
-			}
-
 			public override object Clone()
 			{
-				return new ArrayList.IListWrapper(this._list);
-			}
-
-			public override bool Contains(object obj)
-			{
-				return this._list.Contains(obj);
-			}
-
-			public override void CopyTo(Array array, int index)
-			{
-				this._list.CopyTo(array, index);
-			}
-
-			public override void CopyTo(int index, Array array, int arrayIndex, int count)
-			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (index < 0 || arrayIndex < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "arrayIndex", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (count < 0)
-				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (array.Length - arrayIndex < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				if (array.Rank != 1)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-				}
-				if (this._list.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				for (int i = index; i < index + count; i++)
-				{
-					array.SetValue(this._list[i], arrayIndex++);
-				}
-			}
-
-			public override IEnumerator GetEnumerator()
-			{
-				return this._list.GetEnumerator();
-			}
-
-			public override IEnumerator GetEnumerator(int index, int count)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._list.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				return new ArrayList.IListWrapper.IListWrapperEnumWrapper(this, index, count);
-			}
-
-			public override int IndexOf(object value)
-			{
-				return this._list.IndexOf(value);
-			}
-
-			public override int IndexOf(object value, int startIndex)
-			{
-				return this.IndexOf(value, startIndex, this._list.Count - startIndex);
-			}
-
-			public override int IndexOf(object value, int startIndex, int count)
-			{
-				if (startIndex < 0 || startIndex > this.Count)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (count < 0 || startIndex > this.Count - count)
-				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
-				}
-				int num = startIndex + count;
-				if (value == null)
-				{
-					for (int i = startIndex; i < num; i++)
-					{
-						if (this._list[i] == null)
-						{
-							return i;
-						}
-					}
-					return -1;
-				}
-				for (int j = startIndex; j < num; j++)
-				{
-					if (this._list[j] != null && this._list[j].Equals(value))
-					{
-						return j;
-					}
-				}
-				return -1;
-			}
-
-			public override void Insert(int index, object obj)
-			{
-				this._list.Insert(index, obj);
-				this._version++;
-			}
-
-			public override void InsertRange(int index, ICollection c)
-			{
-				if (c == null)
-				{
-					throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
-				}
-				if (index < 0 || index > this.Count)
-				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (c.Count > 0)
-				{
-					ArrayList arrayList = this._list as ArrayList;
-					if (arrayList != null)
-					{
-						arrayList.InsertRange(index, c);
-					}
-					else
-					{
-						foreach (object obj in c)
-						{
-							this._list.Insert(index++, obj);
-						}
-					}
-					this._version++;
-				}
-			}
-
-			public override int LastIndexOf(object value)
-			{
-				return this.LastIndexOf(value, this._list.Count - 1, this._list.Count);
-			}
-
-			public override int LastIndexOf(object value, int startIndex)
-			{
-				return this.LastIndexOf(value, startIndex, startIndex + 1);
-			}
-
-			public override int LastIndexOf(object value, int startIndex, int count)
-			{
-				if (this._list.Count == 0)
-				{
-					return -1;
-				}
-				if (startIndex < 0 || startIndex >= this._list.Count)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (count < 0 || count > startIndex + 1)
-				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
-				}
-				int num = startIndex - count + 1;
-				if (value == null)
-				{
-					for (int i = startIndex; i >= num; i--)
-					{
-						if (this._list[i] == null)
-						{
-							return i;
-						}
-					}
-					return -1;
-				}
-				for (int j = startIndex; j >= num; j--)
-				{
-					if (this._list[j] != null && this._list[j].Equals(value))
-					{
-						return j;
-					}
-				}
-				return -1;
-			}
-
-			public override void Remove(object value)
-			{
-				int num = this.IndexOf(value);
-				if (num >= 0)
-				{
-					this.RemoveAt(num);
-				}
-			}
-
-			public override void RemoveAt(int index)
-			{
-				this._list.RemoveAt(index);
-				this._version++;
-			}
-
-			public override void RemoveRange(int index, int count)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._list.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				if (count > 0)
-				{
-					this._version++;
-				}
-				while (count > 0)
-				{
-					this._list.RemoveAt(index);
-					count--;
-				}
-			}
-
-			public override void Reverse(int index, int count)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._list.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				int i = index;
-				int num = index + count - 1;
-				while (i < num)
-				{
-					object obj = this._list[i];
-					this._list[i++] = this._list[num];
-					this._list[num--] = obj;
-				}
-				this._version++;
-			}
-
-			public override void SetRange(int index, ICollection c)
-			{
-				if (c == null)
-				{
-					throw new ArgumentNullException("c", Environment.GetResourceString("Collection cannot be null."));
-				}
-				if (index < 0 || index > this._list.Count - c.Count)
-				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (c.Count > 0)
-				{
-					foreach (object obj in c)
-					{
-						this._list[index++] = obj;
-					}
-					this._version++;
-				}
+				return new ArrayList.ArrayListAdapter(this.m_Adaptee);
 			}
 
 			public override ArrayList GetRange(int index, int count)
 			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._list.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				return new ArrayList.Range(this, index, count);
-			}
-
-			public override void Sort(int index, int count, IComparer comparer)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._list.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				object[] array = new object[count];
-				this.CopyTo(index, array, 0, count);
-				Array.Sort(array, 0, count, comparer);
-				for (int i = 0; i < count; i++)
-				{
-					this._list[i + index] = array[i];
-				}
-				this._version++;
-			}
-
-			public override object[] ToArray()
-			{
-				object[] array = new object[this.Count];
-				this._list.CopyTo(array, 0);
-				return array;
-			}
-
-			[SecuritySafeCritical]
-			public override Array ToArray(Type type)
-			{
-				if (type == null)
-				{
-					throw new ArgumentNullException("type");
-				}
-				Array array = Array.UnsafeCreateInstance(type, new int[] { this._list.Count });
-				this._list.CopyTo(array, 0);
-				return array;
+				ArrayList.CheckRange(index, count, this.m_Adaptee.Count);
+				return new ArrayList.RangedArrayList(this, index, count);
 			}
 
 			public override void TrimToSize()
 			{
 			}
 
-			private IList _list;
-
-			[Serializable]
-			private sealed class IListWrapperEnumWrapper : IEnumerator, ICloneable
+			public override void Sort()
 			{
-				private IListWrapperEnumWrapper()
-				{
-				}
+				this.Sort(Comparer.Default);
+			}
 
-				internal IListWrapperEnumWrapper(ArrayList.IListWrapper listWrapper, int startIndex, int count)
+			public override void Sort(IComparer comparer)
+			{
+				this.Sort(0, this.m_Adaptee.Count, comparer);
+			}
+
+			public override void Sort(int index, int count, IComparer comparer)
+			{
+				ArrayList.CheckRange(index, count, this.m_Adaptee.Count);
+				if (comparer == null)
 				{
-					this._en = listWrapper.GetEnumerator();
-					this._initialStartIndex = startIndex;
-					this._initialCount = count;
-					while (startIndex-- > 0 && this._en.MoveNext())
+					comparer = Comparer.Default;
+				}
+				ArrayList.ArrayListAdapter.QuickSort(this.m_Adaptee, index, index + count - 1, comparer);
+			}
+
+			private static void Swap(IList list, int x, int y)
+			{
+				object obj = list[x];
+				list[x] = list[y];
+				list[y] = obj;
+			}
+
+			internal static void QuickSort(IList list, int left, int right, IComparer comparer)
+			{
+				if (left >= right)
+				{
+					return;
+				}
+				int num = left + (right - left) / 2;
+				if (comparer.Compare(list[num], list[left]) < 0)
+				{
+					ArrayList.ArrayListAdapter.Swap(list, num, left);
+				}
+				if (comparer.Compare(list[right], list[left]) < 0)
+				{
+					ArrayList.ArrayListAdapter.Swap(list, right, left);
+				}
+				if (comparer.Compare(list[right], list[num]) < 0)
+				{
+					ArrayList.ArrayListAdapter.Swap(list, right, num);
+				}
+				if (right - left + 1 <= 3)
+				{
+					return;
+				}
+				ArrayList.ArrayListAdapter.Swap(list, right - 1, num);
+				object obj = list[right - 1];
+				int num2 = left;
+				int num3 = right - 1;
+				for (;;)
+				{
+					while (comparer.Compare(list[++num2], obj) < 0)
 					{
 					}
-					this._remaining = count;
-					this._firstCall = true;
+					while (comparer.Compare(list[--num3], obj) > 0)
+					{
+					}
+					if (num2 >= num3)
+					{
+						break;
+					}
+					ArrayList.ArrayListAdapter.Swap(list, num2, num3);
+				}
+				ArrayList.ArrayListAdapter.Swap(list, right - 1, num2);
+				ArrayList.ArrayListAdapter.QuickSort(list, left, num2 - 1, comparer);
+				ArrayList.ArrayListAdapter.QuickSort(list, num2 + 1, right, comparer);
+			}
+
+			public override object[] ToArray()
+			{
+				object[] array = new object[this.m_Adaptee.Count];
+				this.m_Adaptee.CopyTo(array, 0);
+				return array;
+			}
+
+			public override Array ToArray(Type elementType)
+			{
+				Array array = Array.CreateInstance(elementType, this.m_Adaptee.Count);
+				this.m_Adaptee.CopyTo(array, 0);
+				return array;
+			}
+
+			private IList m_Adaptee;
+
+			private sealed class EnumeratorWithRange : IEnumerator, ICloneable
+			{
+				public EnumeratorWithRange(IEnumerator enumerator, int index, int count)
+				{
+					this.m_Count = 0;
+					this.m_StartIndex = index;
+					this.m_MaxCount = count;
+					this.m_Enumerator = enumerator;
+					this.Reset();
 				}
 
 				public object Clone()
 				{
-					return new ArrayList.IListWrapper.IListWrapperEnumWrapper
-					{
-						_en = (IEnumerator)((ICloneable)this._en).Clone(),
-						_initialStartIndex = this._initialStartIndex,
-						_initialCount = this._initialCount,
-						_remaining = this._remaining,
-						_firstCall = this._firstCall
-					};
-				}
-
-				public bool MoveNext()
-				{
-					if (this._firstCall)
-					{
-						this._firstCall = false;
-						int num = this._remaining;
-						this._remaining = num - 1;
-						return num > 0 && this._en.MoveNext();
-					}
-					if (this._remaining < 0)
-					{
-						return false;
-					}
-					if (this._en.MoveNext())
-					{
-						int num = this._remaining;
-						this._remaining = num - 1;
-						return num > 0;
-					}
-					return false;
+					return base.MemberwiseClone();
 				}
 
 				public object Current
 				{
 					get
 					{
-						if (this._firstCall)
-						{
-							throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
-						}
-						if (this._remaining < 0)
-						{
-							throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
-						}
-						return this._en.Current;
+						return this.m_Enumerator.Current;
 					}
+				}
+
+				public bool MoveNext()
+				{
+					if (this.m_Count >= this.m_MaxCount)
+					{
+						return false;
+					}
+					this.m_Count++;
+					return this.m_Enumerator.MoveNext();
 				}
 
 				public void Reset()
 				{
-					this._en.Reset();
-					int initialStartIndex = this._initialStartIndex;
-					while (initialStartIndex-- > 0 && this._en.MoveNext())
+					this.m_Count = 0;
+					this.m_Enumerator.Reset();
+					for (int i = 0; i < this.m_StartIndex; i++)
 					{
+						this.m_Enumerator.MoveNext();
 					}
-					this._remaining = this._initialCount;
-					this._firstCall = true;
 				}
 
-				private IEnumerator _en;
+				private int m_StartIndex;
 
-				private int _remaining;
+				private int m_Count;
 
-				private int _initialStartIndex;
+				private int m_MaxCount;
 
-				private int _initialCount;
-
-				private bool _firstCall;
+				private IEnumerator m_Enumerator;
 			}
 		}
 
 		[Serializable]
-		private class SyncArrayList : ArrayList
+		private class ArrayListWrapper : ArrayList
 		{
-			internal SyncArrayList(ArrayList list)
-				: base(false)
+			public ArrayListWrapper(ArrayList innerArrayList)
 			{
-				this._list = list;
-				this._root = list.SyncRoot;
+				this.m_InnerArrayList = innerArrayList;
+			}
+
+			public override object this[int index]
+			{
+				get
+				{
+					return this.m_InnerArrayList[index];
+				}
+				set
+				{
+					this.m_InnerArrayList[index] = value;
+				}
+			}
+
+			public override int Count
+			{
+				get
+				{
+					return this.m_InnerArrayList.Count;
+				}
 			}
 
 			public override int Capacity
 			{
 				get
 				{
-					object root = this._root;
-					int capacity;
-					lock (root)
-					{
-						capacity = this._list.Capacity;
-					}
-					return capacity;
+					return this.m_InnerArrayList.Capacity;
 				}
 				set
 				{
-					object root = this._root;
-					lock (root)
+					this.m_InnerArrayList.Capacity = value;
+				}
+			}
+
+			public override bool IsFixedSize
+			{
+				get
+				{
+					return this.m_InnerArrayList.IsFixedSize;
+				}
+			}
+
+			public override bool IsReadOnly
+			{
+				get
+				{
+					return this.m_InnerArrayList.IsReadOnly;
+				}
+			}
+
+			public override bool IsSynchronized
+			{
+				get
+				{
+					return this.m_InnerArrayList.IsSynchronized;
+				}
+			}
+
+			public override object SyncRoot
+			{
+				get
+				{
+					return this.m_InnerArrayList.SyncRoot;
+				}
+			}
+
+			public override int Add(object value)
+			{
+				return this.m_InnerArrayList.Add(value);
+			}
+
+			public override void Clear()
+			{
+				this.m_InnerArrayList.Clear();
+			}
+
+			public override bool Contains(object value)
+			{
+				return this.m_InnerArrayList.Contains(value);
+			}
+
+			public override int IndexOf(object value)
+			{
+				return this.m_InnerArrayList.IndexOf(value);
+			}
+
+			public override int IndexOf(object value, int startIndex)
+			{
+				return this.m_InnerArrayList.IndexOf(value, startIndex);
+			}
+
+			public override int IndexOf(object value, int startIndex, int count)
+			{
+				return this.m_InnerArrayList.IndexOf(value, startIndex, count);
+			}
+
+			public override int LastIndexOf(object value)
+			{
+				return this.m_InnerArrayList.LastIndexOf(value);
+			}
+
+			public override int LastIndexOf(object value, int startIndex)
+			{
+				return this.m_InnerArrayList.LastIndexOf(value, startIndex);
+			}
+
+			public override int LastIndexOf(object value, int startIndex, int count)
+			{
+				return this.m_InnerArrayList.LastIndexOf(value, startIndex, count);
+			}
+
+			public override void Insert(int index, object value)
+			{
+				this.m_InnerArrayList.Insert(index, value);
+			}
+
+			public override void InsertRange(int index, ICollection c)
+			{
+				this.m_InnerArrayList.InsertRange(index, c);
+			}
+
+			public override void Remove(object value)
+			{
+				this.m_InnerArrayList.Remove(value);
+			}
+
+			public override void RemoveAt(int index)
+			{
+				this.m_InnerArrayList.RemoveAt(index);
+			}
+
+			public override void RemoveRange(int index, int count)
+			{
+				this.m_InnerArrayList.RemoveRange(index, count);
+			}
+
+			public override void Reverse()
+			{
+				this.m_InnerArrayList.Reverse();
+			}
+
+			public override void Reverse(int index, int count)
+			{
+				this.m_InnerArrayList.Reverse(index, count);
+			}
+
+			public override void SetRange(int index, ICollection c)
+			{
+				this.m_InnerArrayList.SetRange(index, c);
+			}
+
+			public override void CopyTo(Array array)
+			{
+				this.m_InnerArrayList.CopyTo(array);
+			}
+
+			public override void CopyTo(Array array, int index)
+			{
+				this.m_InnerArrayList.CopyTo(array, index);
+			}
+
+			public override void CopyTo(int index, Array array, int arrayIndex, int count)
+			{
+				this.m_InnerArrayList.CopyTo(index, array, arrayIndex, count);
+			}
+
+			public override IEnumerator GetEnumerator()
+			{
+				return this.m_InnerArrayList.GetEnumerator();
+			}
+
+			public override IEnumerator GetEnumerator(int index, int count)
+			{
+				return this.m_InnerArrayList.GetEnumerator(index, count);
+			}
+
+			public override void AddRange(ICollection c)
+			{
+				this.m_InnerArrayList.AddRange(c);
+			}
+
+			public override int BinarySearch(object value)
+			{
+				return this.m_InnerArrayList.BinarySearch(value);
+			}
+
+			public override int BinarySearch(object value, IComparer comparer)
+			{
+				return this.m_InnerArrayList.BinarySearch(value, comparer);
+			}
+
+			public override int BinarySearch(int index, int count, object value, IComparer comparer)
+			{
+				return this.m_InnerArrayList.BinarySearch(index, count, value, comparer);
+			}
+
+			public override object Clone()
+			{
+				return this.m_InnerArrayList.Clone();
+			}
+
+			public override ArrayList GetRange(int index, int count)
+			{
+				return this.m_InnerArrayList.GetRange(index, count);
+			}
+
+			public override void TrimToSize()
+			{
+				this.m_InnerArrayList.TrimToSize();
+			}
+
+			public override void Sort()
+			{
+				this.m_InnerArrayList.Sort();
+			}
+
+			public override void Sort(IComparer comparer)
+			{
+				this.m_InnerArrayList.Sort(comparer);
+			}
+
+			public override void Sort(int index, int count, IComparer comparer)
+			{
+				this.m_InnerArrayList.Sort(index, count, comparer);
+			}
+
+			public override object[] ToArray()
+			{
+				return this.m_InnerArrayList.ToArray();
+			}
+
+			public override Array ToArray(Type elementType)
+			{
+				return this.m_InnerArrayList.ToArray(elementType);
+			}
+
+			protected ArrayList m_InnerArrayList;
+		}
+
+		[Serializable]
+		private sealed class SynchronizedArrayListWrapper : ArrayList.ArrayListWrapper
+		{
+			internal SynchronizedArrayListWrapper(ArrayList innerArrayList)
+				: base(innerArrayList)
+			{
+				this.m_SyncRoot = innerArrayList.SyncRoot;
+			}
+
+			public override object this[int index]
+			{
+				get
+				{
+					object syncRoot = this.m_SyncRoot;
+					object obj;
+					lock (syncRoot)
 					{
-						this._list.Capacity = value;
+						obj = this.m_InnerArrayList[index];
+					}
+					return obj;
+				}
+				set
+				{
+					object syncRoot = this.m_SyncRoot;
+					lock (syncRoot)
+					{
+						this.m_InnerArrayList[index] = value;
 					}
 				}
 			}
@@ -1239,21 +1586,35 @@ namespace System.Collections
 			{
 				get
 				{
-					object root = this._root;
+					object syncRoot = this.m_SyncRoot;
 					int count;
-					lock (root)
+					lock (syncRoot)
 					{
-						count = this._list.Count;
+						count = this.m_InnerArrayList.Count;
 					}
 					return count;
 				}
 			}
 
-			public override bool IsReadOnly
+			public override int Capacity
 			{
 				get
 				{
-					return this._list.IsReadOnly;
+					object syncRoot = this.m_SyncRoot;
+					int capacity;
+					lock (syncRoot)
+					{
+						capacity = this.m_InnerArrayList.Capacity;
+					}
+					return capacity;
+				}
+				set
+				{
+					object syncRoot = this.m_SyncRoot;
+					lock (syncRoot)
+					{
+						this.m_InnerArrayList.Capacity = value;
+					}
 				}
 			}
 
@@ -1261,7 +1622,27 @@ namespace System.Collections
 			{
 				get
 				{
-					return this._list.IsFixedSize;
+					object syncRoot = this.m_SyncRoot;
+					bool isFixedSize;
+					lock (syncRoot)
+					{
+						isFixedSize = this.m_InnerArrayList.IsFixedSize;
+					}
+					return isFixedSize;
+				}
+			}
+
+			public override bool IsReadOnly
+			{
+				get
+				{
+					object syncRoot = this.m_SyncRoot;
+					bool isReadOnly;
+					lock (syncRoot)
+					{
+						isReadOnly = this.m_InnerArrayList.IsReadOnly;
+					}
+					return isReadOnly;
 				}
 			}
 
@@ -1273,673 +1654,373 @@ namespace System.Collections
 				}
 			}
 
-			public override object this[int index]
-			{
-				get
-				{
-					object root = this._root;
-					object obj;
-					lock (root)
-					{
-						obj = this._list[index];
-					}
-					return obj;
-				}
-				set
-				{
-					object root = this._root;
-					lock (root)
-					{
-						this._list[index] = value;
-					}
-				}
-			}
-
 			public override object SyncRoot
 			{
 				get
 				{
-					return this._root;
+					return this.m_SyncRoot;
 				}
 			}
 
 			public override int Add(object value)
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				int num;
-				lock (root)
+				lock (syncRoot)
 				{
-					num = this._list.Add(value);
+					num = this.m_InnerArrayList.Add(value);
 				}
 				return num;
 			}
 
+			public override void Clear()
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.Clear();
+				}
+			}
+
+			public override bool Contains(object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				bool flag;
+				lock (syncRoot)
+				{
+					flag = this.m_InnerArrayList.Contains(value);
+				}
+				return flag;
+			}
+
+			public override int IndexOf(object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.m_InnerArrayList.IndexOf(value);
+				}
+				return num;
+			}
+
+			public override int IndexOf(object value, int startIndex)
+			{
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.m_InnerArrayList.IndexOf(value, startIndex);
+				}
+				return num;
+			}
+
+			public override int IndexOf(object value, int startIndex, int count)
+			{
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.m_InnerArrayList.IndexOf(value, startIndex, count);
+				}
+				return num;
+			}
+
+			public override int LastIndexOf(object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.m_InnerArrayList.LastIndexOf(value);
+				}
+				return num;
+			}
+
+			public override int LastIndexOf(object value, int startIndex)
+			{
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.m_InnerArrayList.LastIndexOf(value, startIndex);
+				}
+				return num;
+			}
+
+			public override int LastIndexOf(object value, int startIndex, int count)
+			{
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.m_InnerArrayList.LastIndexOf(value, startIndex, count);
+				}
+				return num;
+			}
+
+			public override void Insert(int index, object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.Insert(index, value);
+				}
+			}
+
+			public override void InsertRange(int index, ICollection c)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.InsertRange(index, c);
+				}
+			}
+
+			public override void Remove(object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.Remove(value);
+				}
+			}
+
+			public override void RemoveAt(int index)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.RemoveAt(index);
+				}
+			}
+
+			public override void RemoveRange(int index, int count)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.RemoveRange(index, count);
+				}
+			}
+
+			public override void Reverse()
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.Reverse();
+				}
+			}
+
+			public override void Reverse(int index, int count)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.Reverse(index, count);
+				}
+			}
+
+			public override void CopyTo(Array array)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.CopyTo(array);
+				}
+			}
+
+			public override void CopyTo(Array array, int index)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.CopyTo(array, index);
+				}
+			}
+
+			public override void CopyTo(int index, Array array, int arrayIndex, int count)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.CopyTo(index, array, arrayIndex, count);
+				}
+			}
+
+			public override IEnumerator GetEnumerator()
+			{
+				object syncRoot = this.m_SyncRoot;
+				IEnumerator enumerator;
+				lock (syncRoot)
+				{
+					enumerator = this.m_InnerArrayList.GetEnumerator();
+				}
+				return enumerator;
+			}
+
+			public override IEnumerator GetEnumerator(int index, int count)
+			{
+				object syncRoot = this.m_SyncRoot;
+				IEnumerator enumerator;
+				lock (syncRoot)
+				{
+					enumerator = this.m_InnerArrayList.GetEnumerator(index, count);
+				}
+				return enumerator;
+			}
+
 			public override void AddRange(ICollection c)
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.AddRange(c);
+					this.m_InnerArrayList.AddRange(c);
 				}
 			}
 
 			public override int BinarySearch(object value)
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				int num;
-				lock (root)
+				lock (syncRoot)
 				{
-					num = this._list.BinarySearch(value);
+					num = this.m_InnerArrayList.BinarySearch(value);
 				}
 				return num;
 			}
 
 			public override int BinarySearch(object value, IComparer comparer)
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				int num;
-				lock (root)
+				lock (syncRoot)
 				{
-					num = this._list.BinarySearch(value, comparer);
+					num = this.m_InnerArrayList.BinarySearch(value, comparer);
 				}
 				return num;
 			}
 
 			public override int BinarySearch(int index, int count, object value, IComparer comparer)
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				int num;
-				lock (root)
+				lock (syncRoot)
 				{
-					num = this._list.BinarySearch(index, count, value, comparer);
+					num = this.m_InnerArrayList.BinarySearch(index, count, value, comparer);
 				}
 				return num;
-			}
-
-			public override void Clear()
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.Clear();
-				}
 			}
 
 			public override object Clone()
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				object obj;
-				lock (root)
+				lock (syncRoot)
 				{
-					obj = new ArrayList.SyncArrayList((ArrayList)this._list.Clone());
+					obj = this.m_InnerArrayList.Clone();
 				}
 				return obj;
 			}
 
-			public override bool Contains(object item)
-			{
-				object root = this._root;
-				bool flag2;
-				lock (root)
-				{
-					flag2 = this._list.Contains(item);
-				}
-				return flag2;
-			}
-
-			public override void CopyTo(Array array)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.CopyTo(array);
-				}
-			}
-
-			public override void CopyTo(Array array, int index)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.CopyTo(array, index);
-				}
-			}
-
-			public override void CopyTo(int index, Array array, int arrayIndex, int count)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.CopyTo(index, array, arrayIndex, count);
-				}
-			}
-
-			public override IEnumerator GetEnumerator()
-			{
-				object root = this._root;
-				IEnumerator enumerator;
-				lock (root)
-				{
-					enumerator = this._list.GetEnumerator();
-				}
-				return enumerator;
-			}
-
-			public override IEnumerator GetEnumerator(int index, int count)
-			{
-				object root = this._root;
-				IEnumerator enumerator;
-				lock (root)
-				{
-					enumerator = this._list.GetEnumerator(index, count);
-				}
-				return enumerator;
-			}
-
-			public override int IndexOf(object value)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.IndexOf(value);
-				}
-				return num;
-			}
-
-			public override int IndexOf(object value, int startIndex)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.IndexOf(value, startIndex);
-				}
-				return num;
-			}
-
-			public override int IndexOf(object value, int startIndex, int count)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.IndexOf(value, startIndex, count);
-				}
-				return num;
-			}
-
-			public override void Insert(int index, object value)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.Insert(index, value);
-				}
-			}
-
-			public override void InsertRange(int index, ICollection c)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.InsertRange(index, c);
-				}
-			}
-
-			public override int LastIndexOf(object value)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.LastIndexOf(value);
-				}
-				return num;
-			}
-
-			public override int LastIndexOf(object value, int startIndex)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.LastIndexOf(value, startIndex);
-				}
-				return num;
-			}
-
-			public override int LastIndexOf(object value, int startIndex, int count)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.LastIndexOf(value, startIndex, count);
-				}
-				return num;
-			}
-
-			public override void Remove(object value)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.Remove(value);
-				}
-			}
-
-			public override void RemoveAt(int index)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.RemoveAt(index);
-				}
-			}
-
-			public override void RemoveRange(int index, int count)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.RemoveRange(index, count);
-				}
-			}
-
-			public override void Reverse(int index, int count)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.Reverse(index, count);
-				}
-			}
-
-			public override void SetRange(int index, ICollection c)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.SetRange(index, c);
-				}
-			}
-
 			public override ArrayList GetRange(int index, int count)
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				ArrayList range;
-				lock (root)
+				lock (syncRoot)
 				{
-					range = this._list.GetRange(index, count);
+					range = this.m_InnerArrayList.GetRange(index, count);
 				}
 				return range;
 			}
 
+			public override void TrimToSize()
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerArrayList.TrimToSize();
+				}
+			}
+
 			public override void Sort()
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.Sort();
+					this.m_InnerArrayList.Sort();
 				}
 			}
 
 			public override void Sort(IComparer comparer)
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.Sort(comparer);
+					this.m_InnerArrayList.Sort(comparer);
 				}
 			}
 
 			public override void Sort(int index, int count, IComparer comparer)
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.Sort(index, count, comparer);
+					this.m_InnerArrayList.Sort(index, count, comparer);
 				}
 			}
 
 			public override object[] ToArray()
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				object[] array;
-				lock (root)
+				lock (syncRoot)
 				{
-					array = this._list.ToArray();
+					array = this.m_InnerArrayList.ToArray();
 				}
 				return array;
 			}
 
-			public override Array ToArray(Type type)
+			public override Array ToArray(Type elementType)
 			{
-				object root = this._root;
+				object syncRoot = this.m_SyncRoot;
 				Array array;
-				lock (root)
+				lock (syncRoot)
 				{
-					array = this._list.ToArray(type);
+					array = this.m_InnerArrayList.ToArray(elementType);
 				}
 				return array;
 			}
 
-			public override void TrimToSize()
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.TrimToSize();
-				}
-			}
-
-			private ArrayList _list;
-
-			private object _root;
+			private object m_SyncRoot;
 		}
 
 		[Serializable]
-		private class SyncIList : IList, ICollection, IEnumerable
+		private class FixedSizeArrayListWrapper : ArrayList.ArrayListWrapper
 		{
-			internal SyncIList(IList list)
+			public FixedSizeArrayListWrapper(ArrayList innerList)
+				: base(innerList)
 			{
-				this._list = list;
-				this._root = list.SyncRoot;
 			}
 
-			public virtual int Count
+			protected virtual string ErrorMessage
 			{
 				get
 				{
-					object root = this._root;
-					int count;
-					lock (root)
-					{
-						count = this._list.Count;
-					}
-					return count;
+					return "Can't add or remove from a fixed-size list.";
 				}
 			}
 
-			public virtual bool IsReadOnly
+			public override int Capacity
 			{
 				get
 				{
-					return this._list.IsReadOnly;
-				}
-			}
-
-			public virtual bool IsFixedSize
-			{
-				get
-				{
-					return this._list.IsFixedSize;
-				}
-			}
-
-			public virtual bool IsSynchronized
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual object this[int index]
-			{
-				get
-				{
-					object root = this._root;
-					object obj;
-					lock (root)
-					{
-						obj = this._list[index];
-					}
-					return obj;
+					return base.Capacity;
 				}
 				set
 				{
-					object root = this._root;
-					lock (root)
-					{
-						this._list[index] = value;
-					}
-				}
-			}
-
-			public virtual object SyncRoot
-			{
-				get
-				{
-					return this._root;
-				}
-			}
-
-			public virtual int Add(object value)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.Add(value);
-				}
-				return num;
-			}
-
-			public virtual void Clear()
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.Clear();
-				}
-			}
-
-			public virtual bool Contains(object item)
-			{
-				object root = this._root;
-				bool flag2;
-				lock (root)
-				{
-					flag2 = this._list.Contains(item);
-				}
-				return flag2;
-			}
-
-			public virtual void CopyTo(Array array, int index)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.CopyTo(array, index);
-				}
-			}
-
-			public virtual IEnumerator GetEnumerator()
-			{
-				object root = this._root;
-				IEnumerator enumerator;
-				lock (root)
-				{
-					enumerator = this._list.GetEnumerator();
-				}
-				return enumerator;
-			}
-
-			public virtual int IndexOf(object value)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.IndexOf(value);
-				}
-				return num;
-			}
-
-			public virtual void Insert(int index, object value)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.Insert(index, value);
-				}
-			}
-
-			public virtual void Remove(object value)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.Remove(value);
-				}
-			}
-
-			public virtual void RemoveAt(int index)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.RemoveAt(index);
-				}
-			}
-
-			private IList _list;
-
-			private object _root;
-		}
-
-		[Serializable]
-		private class FixedSizeList : IList, ICollection, IEnumerable
-		{
-			internal FixedSizeList(IList l)
-			{
-				this._list = l;
-			}
-
-			public virtual int Count
-			{
-				get
-				{
-					return this._list.Count;
-				}
-			}
-
-			public virtual bool IsReadOnly
-			{
-				get
-				{
-					return this._list.IsReadOnly;
-				}
-			}
-
-			public virtual bool IsFixedSize
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual bool IsSynchronized
-			{
-				get
-				{
-					return this._list.IsSynchronized;
-				}
-			}
-
-			public virtual object this[int index]
-			{
-				get
-				{
-					return this._list[index];
-				}
-				set
-				{
-					this._list[index] = value;
-				}
-			}
-
-			public virtual object SyncRoot
-			{
-				get
-				{
-					return this._list.SyncRoot;
-				}
-			}
-
-			public virtual int Add(object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public virtual void Clear()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public virtual bool Contains(object obj)
-			{
-				return this._list.Contains(obj);
-			}
-
-			public virtual void CopyTo(Array array, int index)
-			{
-				this._list.CopyTo(array, index);
-			}
-
-			public virtual IEnumerator GetEnumerator()
-			{
-				return this._list.GetEnumerator();
-			}
-
-			public virtual int IndexOf(object value)
-			{
-				return this._list.IndexOf(value);
-			}
-
-			public virtual void Insert(int index, object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public virtual void Remove(object value)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public virtual void RemoveAt(int index)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			private IList _list;
-		}
-
-		[Serializable]
-		private class FixedSizeArrayList : ArrayList
-		{
-			internal FixedSizeArrayList(ArrayList l)
-			{
-				this._list = l;
-				this._version = this._list._version;
-			}
-
-			public override int Count
-			{
-				get
-				{
-					return this._list.Count;
-				}
-			}
-
-			public override bool IsReadOnly
-			{
-				get
-				{
-					return this._list.IsReadOnly;
+					throw new NotSupportedException(this.ErrorMessage);
 				}
 			}
 
@@ -1949,799 +2030,67 @@ namespace System.Collections
 				{
 					return true;
 				}
-			}
-
-			public override bool IsSynchronized
-			{
-				get
-				{
-					return this._list.IsSynchronized;
-				}
-			}
-
-			public override object this[int index]
-			{
-				get
-				{
-					return this._list[index];
-				}
-				set
-				{
-					this._list[index] = value;
-					this._version = this._list._version;
-				}
-			}
-
-			public override object SyncRoot
-			{
-				get
-				{
-					return this._list.SyncRoot;
-				}
-			}
-
-			public override int Add(object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override void AddRange(ICollection c)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override int BinarySearch(int index, int count, object value, IComparer comparer)
-			{
-				return this._list.BinarySearch(index, count, value, comparer);
-			}
-
-			public override int Capacity
-			{
-				get
-				{
-					return this._list.Capacity;
-				}
-				set
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-				}
-			}
-
-			public override void Clear()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override object Clone()
-			{
-				return new ArrayList.FixedSizeArrayList(this._list)
-				{
-					_list = (ArrayList)this._list.Clone()
-				};
-			}
-
-			public override bool Contains(object obj)
-			{
-				return this._list.Contains(obj);
-			}
-
-			public override void CopyTo(Array array, int index)
-			{
-				this._list.CopyTo(array, index);
-			}
-
-			public override void CopyTo(int index, Array array, int arrayIndex, int count)
-			{
-				this._list.CopyTo(index, array, arrayIndex, count);
-			}
-
-			public override IEnumerator GetEnumerator()
-			{
-				return this._list.GetEnumerator();
-			}
-
-			public override IEnumerator GetEnumerator(int index, int count)
-			{
-				return this._list.GetEnumerator(index, count);
-			}
-
-			public override int IndexOf(object value)
-			{
-				return this._list.IndexOf(value);
-			}
-
-			public override int IndexOf(object value, int startIndex)
-			{
-				return this._list.IndexOf(value, startIndex);
-			}
-
-			public override int IndexOf(object value, int startIndex, int count)
-			{
-				return this._list.IndexOf(value, startIndex, count);
-			}
-
-			public override void Insert(int index, object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override void InsertRange(int index, ICollection c)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override int LastIndexOf(object value)
-			{
-				return this._list.LastIndexOf(value);
-			}
-
-			public override int LastIndexOf(object value, int startIndex)
-			{
-				return this._list.LastIndexOf(value, startIndex);
-			}
-
-			public override int LastIndexOf(object value, int startIndex, int count)
-			{
-				return this._list.LastIndexOf(value, startIndex, count);
-			}
-
-			public override void Remove(object value)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override void RemoveAt(int index)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override void RemoveRange(int index, int count)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			public override void SetRange(int index, ICollection c)
-			{
-				this._list.SetRange(index, c);
-				this._version = this._list._version;
-			}
-
-			public override ArrayList GetRange(int index, int count)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				return new ArrayList.Range(this, index, count);
-			}
-
-			public override void Reverse(int index, int count)
-			{
-				this._list.Reverse(index, count);
-				this._version = this._list._version;
-			}
-
-			public override void Sort(int index, int count, IComparer comparer)
-			{
-				this._list.Sort(index, count, comparer);
-				this._version = this._list._version;
-			}
-
-			public override object[] ToArray()
-			{
-				return this._list.ToArray();
-			}
-
-			public override Array ToArray(Type type)
-			{
-				return this._list.ToArray(type);
-			}
-
-			public override void TrimToSize()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection was of a fixed size."));
-			}
-
-			private ArrayList _list;
-		}
-
-		[Serializable]
-		private class ReadOnlyList : IList, ICollection, IEnumerable
-		{
-			internal ReadOnlyList(IList l)
-			{
-				this._list = l;
-			}
-
-			public virtual int Count
-			{
-				get
-				{
-					return this._list.Count;
-				}
-			}
-
-			public virtual bool IsReadOnly
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual bool IsFixedSize
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual bool IsSynchronized
-			{
-				get
-				{
-					return this._list.IsSynchronized;
-				}
-			}
-
-			public virtual object this[int index]
-			{
-				get
-				{
-					return this._list[index];
-				}
-				set
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-				}
-			}
-
-			public virtual object SyncRoot
-			{
-				get
-				{
-					return this._list.SyncRoot;
-				}
-			}
-
-			public virtual int Add(object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public virtual void Clear()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public virtual bool Contains(object obj)
-			{
-				return this._list.Contains(obj);
-			}
-
-			public virtual void CopyTo(Array array, int index)
-			{
-				this._list.CopyTo(array, index);
-			}
-
-			public virtual IEnumerator GetEnumerator()
-			{
-				return this._list.GetEnumerator();
-			}
-
-			public virtual int IndexOf(object value)
-			{
-				return this._list.IndexOf(value);
-			}
-
-			public virtual void Insert(int index, object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public virtual void Remove(object value)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public virtual void RemoveAt(int index)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			private IList _list;
-		}
-
-		[Serializable]
-		private class ReadOnlyArrayList : ArrayList
-		{
-			internal ReadOnlyArrayList(ArrayList l)
-			{
-				this._list = l;
-			}
-
-			public override int Count
-			{
-				get
-				{
-					return this._list.Count;
-				}
-			}
-
-			public override bool IsReadOnly
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public override bool IsFixedSize
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public override bool IsSynchronized
-			{
-				get
-				{
-					return this._list.IsSynchronized;
-				}
-			}
-
-			public override object this[int index]
-			{
-				get
-				{
-					return this._list[index];
-				}
-				set
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-				}
-			}
-
-			public override object SyncRoot
-			{
-				get
-				{
-					return this._list.SyncRoot;
-				}
-			}
-
-			public override int Add(object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override void AddRange(ICollection c)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override int BinarySearch(int index, int count, object value, IComparer comparer)
-			{
-				return this._list.BinarySearch(index, count, value, comparer);
-			}
-
-			public override int Capacity
-			{
-				get
-				{
-					return this._list.Capacity;
-				}
-				set
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-				}
-			}
-
-			public override void Clear()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override object Clone()
-			{
-				return new ArrayList.ReadOnlyArrayList(this._list)
-				{
-					_list = (ArrayList)this._list.Clone()
-				};
-			}
-
-			public override bool Contains(object obj)
-			{
-				return this._list.Contains(obj);
-			}
-
-			public override void CopyTo(Array array, int index)
-			{
-				this._list.CopyTo(array, index);
-			}
-
-			public override void CopyTo(int index, Array array, int arrayIndex, int count)
-			{
-				this._list.CopyTo(index, array, arrayIndex, count);
-			}
-
-			public override IEnumerator GetEnumerator()
-			{
-				return this._list.GetEnumerator();
-			}
-
-			public override IEnumerator GetEnumerator(int index, int count)
-			{
-				return this._list.GetEnumerator(index, count);
-			}
-
-			public override int IndexOf(object value)
-			{
-				return this._list.IndexOf(value);
-			}
-
-			public override int IndexOf(object value, int startIndex)
-			{
-				return this._list.IndexOf(value, startIndex);
-			}
-
-			public override int IndexOf(object value, int startIndex, int count)
-			{
-				return this._list.IndexOf(value, startIndex, count);
-			}
-
-			public override void Insert(int index, object obj)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override void InsertRange(int index, ICollection c)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override int LastIndexOf(object value)
-			{
-				return this._list.LastIndexOf(value);
-			}
-
-			public override int LastIndexOf(object value, int startIndex)
-			{
-				return this._list.LastIndexOf(value, startIndex);
-			}
-
-			public override int LastIndexOf(object value, int startIndex, int count)
-			{
-				return this._list.LastIndexOf(value, startIndex, count);
-			}
-
-			public override void Remove(object value)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override void RemoveAt(int index)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override void RemoveRange(int index, int count)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override void SetRange(int index, ICollection c)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override ArrayList GetRange(int index, int count)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this.Count - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				return new ArrayList.Range(this, index, count);
-			}
-
-			public override void Reverse(int index, int count)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override void Sort(int index, int count, IComparer comparer)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			public override object[] ToArray()
-			{
-				return this._list.ToArray();
-			}
-
-			public override Array ToArray(Type type)
-			{
-				return this._list.ToArray(type);
-			}
-
-			public override void TrimToSize()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("Collection is read-only."));
-			}
-
-			private ArrayList _list;
-		}
-
-		[Serializable]
-		private sealed class ArrayListEnumerator : IEnumerator, ICloneable
-		{
-			internal ArrayListEnumerator(ArrayList list, int index, int count)
-			{
-				this.list = list;
-				this.startIndex = index;
-				this.index = index - 1;
-				this.endIndex = this.index + count;
-				this.version = list._version;
-				this.currentElement = null;
-			}
-
-			public object Clone()
-			{
-				return base.MemberwiseClone();
-			}
-
-			public bool MoveNext()
-			{
-				if (this.version != this.list._version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-				}
-				if (this.index < this.endIndex)
-				{
-					ArrayList arrayList = this.list;
-					int num = this.index + 1;
-					this.index = num;
-					this.currentElement = arrayList[num];
-					return true;
-				}
-				this.index = this.endIndex + 1;
-				return false;
-			}
-
-			public object Current
-			{
-				get
-				{
-					if (this.index < this.startIndex)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
-					}
-					if (this.index > this.endIndex)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
-					}
-					return this.currentElement;
-				}
-			}
-
-			public void Reset()
-			{
-				if (this.version != this.list._version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-				}
-				this.index = this.startIndex - 1;
-			}
-
-			private ArrayList list;
-
-			private int index;
-
-			private int endIndex;
-
-			private int version;
-
-			private object currentElement;
-
-			private int startIndex;
-		}
-
-		[Serializable]
-		private class Range : ArrayList
-		{
-			internal Range(ArrayList list, int index, int count)
-				: base(false)
-			{
-				this._baseList = list;
-				this._baseIndex = index;
-				this._baseSize = count;
-				this._baseVersion = list._version;
-				this._version = list._version;
-			}
-
-			private void InternalUpdateRange()
-			{
-				if (this._baseVersion != this._baseList._version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("This range in the underlying list is invalid. A possible cause is that elements were removed."));
-				}
-			}
-
-			private void InternalUpdateVersion()
-			{
-				this._baseVersion++;
-				this._version++;
 			}
 
 			public override int Add(object value)
 			{
-				this.InternalUpdateRange();
-				this._baseList.Insert(this._baseIndex + this._baseSize, value);
-				this.InternalUpdateVersion();
-				int baseSize = this._baseSize;
-				this._baseSize = baseSize + 1;
-				return baseSize;
+				throw new NotSupportedException(this.ErrorMessage);
 			}
 
 			public override void AddRange(ICollection c)
 			{
-				if (c == null)
-				{
-					throw new ArgumentNullException("c");
-				}
-				this.InternalUpdateRange();
-				int count = c.Count;
-				if (count > 0)
-				{
-					this._baseList.InsertRange(this._baseIndex + this._baseSize, c);
-					this.InternalUpdateVersion();
-					this._baseSize += count;
-				}
-			}
-
-			public override int BinarySearch(int index, int count, object value, IComparer comparer)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._baseSize - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				this.InternalUpdateRange();
-				int num = this._baseList.BinarySearch(this._baseIndex + index, count, value, comparer);
-				if (num >= 0)
-				{
-					return num - this._baseIndex;
-				}
-				return num + this._baseIndex;
-			}
-
-			public override int Capacity
-			{
-				get
-				{
-					return this._baseList.Capacity;
-				}
-				set
-				{
-					if (value < this.Count)
-					{
-						throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
-					}
-				}
+				throw new NotSupportedException(this.ErrorMessage);
 			}
 
 			public override void Clear()
 			{
-				this.InternalUpdateRange();
-				if (this._baseSize != 0)
-				{
-					this._baseList.RemoveRange(this._baseIndex, this._baseSize);
-					this.InternalUpdateVersion();
-					this._baseSize = 0;
-				}
+				throw new NotSupportedException(this.ErrorMessage);
 			}
 
-			public override object Clone()
+			public override void Insert(int index, object value)
 			{
-				this.InternalUpdateRange();
-				return new ArrayList.Range(this._baseList, this._baseIndex, this._baseSize)
-				{
-					_baseList = (ArrayList)this._baseList.Clone()
-				};
+				throw new NotSupportedException(this.ErrorMessage);
 			}
 
-			public override bool Contains(object item)
+			public override void InsertRange(int index, ICollection c)
 			{
-				this.InternalUpdateRange();
-				if (item == null)
-				{
-					for (int i = 0; i < this._baseSize; i++)
-					{
-						if (this._baseList[this._baseIndex + i] == null)
-						{
-							return true;
-						}
-					}
-					return false;
-				}
-				for (int j = 0; j < this._baseSize; j++)
-				{
-					if (this._baseList[this._baseIndex + j] != null && this._baseList[this._baseIndex + j].Equals(item))
-					{
-						return true;
-					}
-				}
-				return false;
+				throw new NotSupportedException(this.ErrorMessage);
 			}
 
-			public override void CopyTo(Array array, int index)
+			public override void Remove(object value)
 			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (array.Rank != 1)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-				}
-				if (index < 0)
-				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (array.Length - index < this._baseSize)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				this.InternalUpdateRange();
-				this._baseList.CopyTo(this._baseIndex, array, index, this._baseSize);
+				throw new NotSupportedException(this.ErrorMessage);
 			}
 
-			public override void CopyTo(int index, Array array, int arrayIndex, int count)
+			public override void RemoveAt(int index)
 			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (array.Rank != 1)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-				}
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (array.Length - arrayIndex < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				if (this._baseSize - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				this.InternalUpdateRange();
-				this._baseList.CopyTo(this._baseIndex + index, array, arrayIndex, count);
+				throw new NotSupportedException(this.ErrorMessage);
 			}
 
-			public override int Count
+			public override void RemoveRange(int index, int count)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+
+			public override void TrimToSize()
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+		}
+
+		[Serializable]
+		private sealed class ReadOnlyArrayListWrapper : ArrayList.FixedSizeArrayListWrapper
+		{
+			public ReadOnlyArrayListWrapper(ArrayList innerArrayList)
+				: base(innerArrayList)
+			{
+			}
+
+			protected override string ErrorMessage
 			{
 				get
 				{
-					this.InternalUpdateRange();
-					return this._baseSize;
+					return "Can't modify a readonly list.";
 				}
 			}
 
@@ -2749,157 +2098,180 @@ namespace System.Collections
 			{
 				get
 				{
-					return this._baseList.IsReadOnly;
+					return true;
 				}
 			}
 
-			public override bool IsFixedSize
+			public override object this[int index]
 			{
 				get
 				{
-					return this._baseList.IsFixedSize;
+					return this.m_InnerArrayList[index];
 				}
+				set
+				{
+					throw new NotSupportedException(this.ErrorMessage);
+				}
+			}
+
+			public override void Reverse()
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+
+			public override void Reverse(int index, int count)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+
+			public override void SetRange(int index, ICollection c)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+
+			public override void Sort()
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+
+			public override void Sort(IComparer comparer)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+
+			public override void Sort(int index, int count, IComparer comparer)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
+		}
+
+		[Serializable]
+		private sealed class RangedArrayList : ArrayList.ArrayListWrapper
+		{
+			public RangedArrayList(ArrayList innerList, int index, int count)
+				: base(innerList)
+			{
+				this.m_InnerIndex = index;
+				this.m_InnerCount = count;
+				this.m_InnerStateChanges = innerList._version;
 			}
 
 			public override bool IsSynchronized
 			{
 				get
 				{
-					return this._baseList.IsSynchronized;
+					return false;
 				}
 			}
 
-			public override IEnumerator GetEnumerator()
-			{
-				return this.GetEnumerator(0, this._baseSize);
-			}
-
-			public override IEnumerator GetEnumerator(int index, int count)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._baseSize - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				this.InternalUpdateRange();
-				return this._baseList.GetEnumerator(this._baseIndex + index, count);
-			}
-
-			public override ArrayList GetRange(int index, int count)
-			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._baseSize - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				this.InternalUpdateRange();
-				return new ArrayList.Range(this, index, count);
-			}
-
-			public override object SyncRoot
+			public override object this[int index]
 			{
 				get
 				{
-					return this._baseList.SyncRoot;
+					if (index < 0 || index > this.m_InnerCount)
+					{
+						throw new ArgumentOutOfRangeException("index");
+					}
+					return this.m_InnerArrayList[this.m_InnerIndex + index];
 				}
+				set
+				{
+					if (index < 0 || index > this.m_InnerCount)
+					{
+						throw new ArgumentOutOfRangeException("index");
+					}
+					this.m_InnerArrayList[this.m_InnerIndex + index] = value;
+				}
+			}
+
+			public override int Count
+			{
+				get
+				{
+					this.VerifyStateChanges();
+					return this.m_InnerCount;
+				}
+			}
+
+			public override int Capacity
+			{
+				get
+				{
+					return this.m_InnerArrayList.Capacity;
+				}
+				set
+				{
+					if (value < this.m_InnerCount)
+					{
+						throw new ArgumentOutOfRangeException();
+					}
+				}
+			}
+
+			private void VerifyStateChanges()
+			{
+				if (this.m_InnerStateChanges != this.m_InnerArrayList._version)
+				{
+					throw new InvalidOperationException("ArrayList view is invalid because the underlying ArrayList was modified.");
+				}
+			}
+
+			public override int Add(object value)
+			{
+				this.VerifyStateChanges();
+				this.m_InnerArrayList.Insert(this.m_InnerIndex + this.m_InnerCount, value);
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+				return ++this.m_InnerCount;
+			}
+
+			public override void Clear()
+			{
+				this.VerifyStateChanges();
+				this.m_InnerArrayList.RemoveRange(this.m_InnerIndex, this.m_InnerCount);
+				this.m_InnerCount = 0;
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+			}
+
+			public override bool Contains(object value)
+			{
+				return this.m_InnerArrayList.Contains(value, this.m_InnerIndex, this.m_InnerCount);
 			}
 
 			public override int IndexOf(object value)
 			{
-				this.InternalUpdateRange();
-				int num = this._baseList.IndexOf(value, this._baseIndex, this._baseSize);
-				if (num >= 0)
-				{
-					return num - this._baseIndex;
-				}
-				return -1;
+				return this.IndexOf(value, 0);
 			}
 
 			public override int IndexOf(object value, int startIndex)
 			{
-				if (startIndex < 0)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (startIndex > this._baseSize)
-				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				this.InternalUpdateRange();
-				int num = this._baseList.IndexOf(value, this._baseIndex + startIndex, this._baseSize - startIndex);
-				if (num >= 0)
-				{
-					return num - this._baseIndex;
-				}
-				return -1;
+				return this.IndexOf(value, startIndex, this.m_InnerCount - startIndex);
 			}
 
 			public override int IndexOf(object value, int startIndex, int count)
 			{
-				if (startIndex < 0 || startIndex > this._baseSize)
+				if (startIndex < 0 || startIndex > this.m_InnerCount)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					ArrayList.ThrowNewArgumentOutOfRangeException("startIndex", startIndex, "Does not specify valid index.");
 				}
-				if (count < 0 || startIndex > this._baseSize - count)
+				if (count < 0)
 				{
-					throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Count must be positive and count must refer to a location within the string/array/collection."));
+					ArrayList.ThrowNewArgumentOutOfRangeException("count", count, "Can't be less than 0.");
 				}
-				this.InternalUpdateRange();
-				int num = this._baseList.IndexOf(value, this._baseIndex + startIndex, count);
-				if (num >= 0)
+				if (startIndex > this.m_InnerCount - count)
 				{
-					return num - this._baseIndex;
+					throw new ArgumentOutOfRangeException("count", "Start index and count do not specify a valid range.");
 				}
-				return -1;
-			}
-
-			public override void Insert(int index, object value)
-			{
-				if (index < 0 || index > this._baseSize)
+				int num = this.m_InnerArrayList.IndexOf(value, this.m_InnerIndex + startIndex, count);
+				if (num == -1)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					return -1;
 				}
-				this.InternalUpdateRange();
-				this._baseList.Insert(this._baseIndex + index, value);
-				this.InternalUpdateVersion();
-				this._baseSize++;
-			}
-
-			public override void InsertRange(int index, ICollection c)
-			{
-				if (index < 0 || index > this._baseSize)
-				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-				}
-				if (c == null)
-				{
-					throw new ArgumentNullException("c");
-				}
-				this.InternalUpdateRange();
-				int count = c.Count;
-				if (count > 0)
-				{
-					this._baseList.InsertRange(this._baseIndex + index, c);
-					this._baseSize += count;
-					this.InternalUpdateVersion();
-				}
+				return num - this.m_InnerIndex;
 			}
 
 			public override int LastIndexOf(object value)
 			{
-				this.InternalUpdateRange();
-				int num = this._baseList.LastIndexOf(value, this._baseIndex + this._baseSize - 1, this._baseSize);
-				if (num >= 0)
-				{
-					return num - this._baseIndex;
-				}
-				return -1;
+				return this.LastIndexOf(value, this.m_InnerCount - 1);
 			}
 
 			public override int LastIndexOf(object value, int startIndex)
@@ -2909,275 +2281,588 @@ namespace System.Collections
 
 			public override int LastIndexOf(object value, int startIndex, int count)
 			{
-				this.InternalUpdateRange();
-				if (this._baseSize == 0)
+				if (startIndex < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("startIndex", startIndex, "< 0");
+				}
+				if (count < 0)
+				{
+					ArrayList.ThrowNewArgumentOutOfRangeException("count", count, "count is negative.");
+				}
+				int num = this.m_InnerArrayList.LastIndexOf(value, this.m_InnerIndex + startIndex, count);
+				if (num == -1)
 				{
 					return -1;
 				}
-				if (startIndex >= this._baseSize)
+				return num - this.m_InnerIndex;
+			}
+
+			public override void Insert(int index, object value)
+			{
+				this.VerifyStateChanges();
+				if (index < 0 || index > this.m_InnerCount)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index must be >= 0 and <= Count.");
 				}
-				if (startIndex < 0)
+				this.m_InnerArrayList.Insert(this.m_InnerIndex + index, value);
+				this.m_InnerCount++;
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+			}
+
+			public override void InsertRange(int index, ICollection c)
+			{
+				this.VerifyStateChanges();
+				if (index < 0 || index > this.m_InnerCount)
 				{
-					throw new ArgumentOutOfRangeException("startIndex", Environment.GetResourceString("Non-negative number required."));
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index must be >= 0 and <= Count.");
 				}
-				int num = this._baseList.LastIndexOf(value, this._baseIndex + startIndex, count);
-				if (num >= 0)
+				this.m_InnerArrayList.InsertRange(this.m_InnerIndex + index, c);
+				this.m_InnerCount += c.Count;
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+			}
+
+			public override void Remove(object value)
+			{
+				this.VerifyStateChanges();
+				int num = this.IndexOf(value);
+				if (num > -1)
 				{
-					return num - this._baseIndex;
+					this.RemoveAt(num);
 				}
-				return -1;
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
 			}
 
 			public override void RemoveAt(int index)
 			{
-				if (index < 0 || index >= this._baseSize)
+				this.VerifyStateChanges();
+				if (index < 0 || index > this.m_InnerCount)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index must be >= 0 and <= Count.");
 				}
-				this.InternalUpdateRange();
-				this._baseList.RemoveAt(this._baseIndex + index);
-				this.InternalUpdateVersion();
-				this._baseSize--;
+				this.m_InnerArrayList.RemoveAt(this.m_InnerIndex + index);
+				this.m_InnerCount--;
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
 			}
 
 			public override void RemoveRange(int index, int count)
 			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._baseSize - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				this.InternalUpdateRange();
-				if (count > 0)
-				{
-					this._baseList.RemoveRange(this._baseIndex + index, count);
-					this.InternalUpdateVersion();
-					this._baseSize -= count;
-				}
+				this.VerifyStateChanges();
+				ArrayList.CheckRange(index, count, this.m_InnerCount);
+				this.m_InnerArrayList.RemoveRange(this.m_InnerIndex + index, count);
+				this.m_InnerCount -= count;
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+			}
+
+			public override void Reverse()
+			{
+				this.Reverse(0, this.m_InnerCount);
 			}
 
 			public override void Reverse(int index, int count)
 			{
-				if (index < 0 || count < 0)
-				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-				}
-				if (this._baseSize - index < count)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				this.InternalUpdateRange();
-				this._baseList.Reverse(this._baseIndex + index, count);
-				this.InternalUpdateVersion();
+				this.VerifyStateChanges();
+				ArrayList.CheckRange(index, count, this.m_InnerCount);
+				this.m_InnerArrayList.Reverse(this.m_InnerIndex + index, count);
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
 			}
 
 			public override void SetRange(int index, ICollection c)
 			{
-				this.InternalUpdateRange();
-				if (index < 0 || index >= this._baseSize)
+				this.VerifyStateChanges();
+				if (index < 0 || index > this.m_InnerCount)
 				{
-					throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+					ArrayList.ThrowNewArgumentOutOfRangeException("index", index, "Index must be >= 0 and <= Count.");
 				}
-				this._baseList.SetRange(this._baseIndex + index, c);
-				if (c.Count > 0)
-				{
-					this.InternalUpdateVersion();
-				}
+				this.m_InnerArrayList.SetRange(this.m_InnerIndex + index, c);
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+			}
+
+			public override void CopyTo(Array array)
+			{
+				this.CopyTo(array, 0);
+			}
+
+			public override void CopyTo(Array array, int index)
+			{
+				this.CopyTo(0, array, index, this.m_InnerCount);
+			}
+
+			public override void CopyTo(int index, Array array, int arrayIndex, int count)
+			{
+				ArrayList.CheckRange(index, count, this.m_InnerCount);
+				this.m_InnerArrayList.CopyTo(this.m_InnerIndex + index, array, arrayIndex, count);
+			}
+
+			public override IEnumerator GetEnumerator()
+			{
+				return this.GetEnumerator(0, this.m_InnerCount);
+			}
+
+			public override IEnumerator GetEnumerator(int index, int count)
+			{
+				ArrayList.CheckRange(index, count, this.m_InnerCount);
+				return this.m_InnerArrayList.GetEnumerator(this.m_InnerIndex + index, count);
+			}
+
+			public override void AddRange(ICollection c)
+			{
+				this.VerifyStateChanges();
+				this.m_InnerArrayList.InsertRange(this.m_InnerCount, c);
+				this.m_InnerCount += c.Count;
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+			}
+
+			public override int BinarySearch(object value)
+			{
+				return this.BinarySearch(0, this.m_InnerCount, value, Comparer.Default);
+			}
+
+			public override int BinarySearch(object value, IComparer comparer)
+			{
+				return this.BinarySearch(0, this.m_InnerCount, value, comparer);
+			}
+
+			public override int BinarySearch(int index, int count, object value, IComparer comparer)
+			{
+				ArrayList.CheckRange(index, count, this.m_InnerCount);
+				return this.m_InnerArrayList.BinarySearch(this.m_InnerIndex + index, count, value, comparer);
+			}
+
+			public override object Clone()
+			{
+				return new ArrayList.RangedArrayList((ArrayList)this.m_InnerArrayList.Clone(), this.m_InnerIndex, this.m_InnerCount);
+			}
+
+			public override ArrayList GetRange(int index, int count)
+			{
+				ArrayList.CheckRange(index, count, this.m_InnerCount);
+				return new ArrayList.RangedArrayList(this, index, count);
+			}
+
+			public override void TrimToSize()
+			{
+				throw new NotSupportedException();
+			}
+
+			public override void Sort()
+			{
+				this.Sort(Comparer.Default);
+			}
+
+			public override void Sort(IComparer comparer)
+			{
+				this.Sort(0, this.m_InnerCount, comparer);
 			}
 
 			public override void Sort(int index, int count, IComparer comparer)
 			{
-				if (index < 0 || count < 0)
+				this.VerifyStateChanges();
+				ArrayList.CheckRange(index, count, this.m_InnerCount);
+				this.m_InnerArrayList.Sort(this.m_InnerIndex + index, count, comparer);
+				this.m_InnerStateChanges = this.m_InnerArrayList._version;
+			}
+
+			public override object[] ToArray()
+			{
+				object[] array = new object[this.m_InnerCount];
+				this.m_InnerArrayList.CopyTo(this.m_InnerIndex, array, 0, this.m_InnerCount);
+				return array;
+			}
+
+			public override Array ToArray(Type elementType)
+			{
+				Array array = Array.CreateInstance(elementType, this.m_InnerCount);
+				this.m_InnerArrayList.CopyTo(this.m_InnerIndex, array, 0, this.m_InnerCount);
+				return array;
+			}
+
+			private int m_InnerIndex;
+
+			private int m_InnerCount;
+
+			private int m_InnerStateChanges;
+		}
+
+		[Serializable]
+		private sealed class SynchronizedListWrapper : ArrayList.ListWrapper
+		{
+			public SynchronizedListWrapper(IList innerList)
+				: base(innerList)
+			{
+				this.m_SyncRoot = innerList.SyncRoot;
+			}
+
+			public override int Count
+			{
+				get
 				{
-					throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+					object syncRoot = this.m_SyncRoot;
+					int count;
+					lock (syncRoot)
+					{
+						count = this.m_InnerList.Count;
+					}
+					return count;
 				}
-				if (this._baseSize - index < count)
+			}
+
+			public override bool IsSynchronized
+			{
+				get
 				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+					return true;
 				}
-				this.InternalUpdateRange();
-				this._baseList.Sort(this._baseIndex + index, count, comparer);
-				this.InternalUpdateVersion();
+			}
+
+			public override object SyncRoot
+			{
+				get
+				{
+					object syncRoot = this.m_SyncRoot;
+					object syncRoot2;
+					lock (syncRoot)
+					{
+						syncRoot2 = this.m_InnerList.SyncRoot;
+					}
+					return syncRoot2;
+				}
+			}
+
+			public override bool IsFixedSize
+			{
+				get
+				{
+					object syncRoot = this.m_SyncRoot;
+					bool isFixedSize;
+					lock (syncRoot)
+					{
+						isFixedSize = this.m_InnerList.IsFixedSize;
+					}
+					return isFixedSize;
+				}
+			}
+
+			public override bool IsReadOnly
+			{
+				get
+				{
+					object syncRoot = this.m_SyncRoot;
+					bool isReadOnly;
+					lock (syncRoot)
+					{
+						isReadOnly = this.m_InnerList.IsReadOnly;
+					}
+					return isReadOnly;
+				}
 			}
 
 			public override object this[int index]
 			{
 				get
 				{
-					this.InternalUpdateRange();
-					if (index < 0 || index >= this._baseSize)
+					object syncRoot = this.m_SyncRoot;
+					object obj;
+					lock (syncRoot)
 					{
-						throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+						obj = this.m_InnerList[index];
 					}
-					return this._baseList[this._baseIndex + index];
+					return obj;
 				}
 				set
 				{
-					this.InternalUpdateRange();
-					if (index < 0 || index >= this._baseSize)
+					object syncRoot = this.m_SyncRoot;
+					lock (syncRoot)
 					{
-						throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+						this.m_InnerList[index] = value;
 					}
-					this._baseList[this._baseIndex + index] = value;
-					this.InternalUpdateVersion();
 				}
 			}
 
-			public override object[] ToArray()
+			public override int Add(object value)
 			{
-				this.InternalUpdateRange();
-				object[] array = new object[this._baseSize];
-				Array.Copy(this._baseList._items, this._baseIndex, array, 0, this._baseSize);
-				return array;
-			}
-
-			[SecuritySafeCritical]
-			public override Array ToArray(Type type)
-			{
-				if (type == null)
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
 				{
-					throw new ArgumentNullException("type");
+					num = this.m_InnerList.Add(value);
 				}
-				this.InternalUpdateRange();
-				Array array = Array.UnsafeCreateInstance(type, new int[] { this._baseSize });
-				this._baseList.CopyTo(this._baseIndex, array, 0, this._baseSize);
-				return array;
+				return num;
 			}
 
-			public override void TrimToSize()
+			public override void Clear()
 			{
-				throw new NotSupportedException(Environment.GetResourceString("The specified operation is not supported on Ranges."));
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerList.Clear();
+				}
 			}
 
-			private ArrayList _baseList;
+			public override bool Contains(object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				bool flag;
+				lock (syncRoot)
+				{
+					flag = this.m_InnerList.Contains(value);
+				}
+				return flag;
+			}
 
-			private int _baseIndex;
+			public override int IndexOf(object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.m_InnerList.IndexOf(value);
+				}
+				return num;
+			}
 
-			private int _baseSize;
+			public override void Insert(int index, object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerList.Insert(index, value);
+				}
+			}
 
-			private int _baseVersion;
+			public override void Remove(object value)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerList.Remove(value);
+				}
+			}
+
+			public override void RemoveAt(int index)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerList.RemoveAt(index);
+				}
+			}
+
+			public override void CopyTo(Array array, int index)
+			{
+				object syncRoot = this.m_SyncRoot;
+				lock (syncRoot)
+				{
+					this.m_InnerList.CopyTo(array, index);
+				}
+			}
+
+			public override IEnumerator GetEnumerator()
+			{
+				object syncRoot = this.m_SyncRoot;
+				IEnumerator enumerator;
+				lock (syncRoot)
+				{
+					enumerator = this.m_InnerList.GetEnumerator();
+				}
+				return enumerator;
+			}
+
+			private object m_SyncRoot;
 		}
 
 		[Serializable]
-		private sealed class ArrayListEnumeratorSimple : IEnumerator, ICloneable
+		private class FixedSizeListWrapper : ArrayList.ListWrapper
 		{
-			internal ArrayListEnumeratorSimple(ArrayList list)
+			public FixedSizeListWrapper(IList innerList)
+				: base(innerList)
 			{
-				this.list = list;
-				this.index = -1;
-				this.version = list._version;
-				this.isArrayList = list.GetType() == typeof(ArrayList);
-				this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
 			}
 
-			public object Clone()
-			{
-				return base.MemberwiseClone();
-			}
-
-			public bool MoveNext()
-			{
-				if (this.version != this.list._version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-				}
-				if (this.isArrayList)
-				{
-					if (this.index < this.list._size - 1)
-					{
-						object[] items = this.list._items;
-						int num = this.index + 1;
-						this.index = num;
-						this.currentElement = items[num];
-						return true;
-					}
-					this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
-					this.index = this.list._size;
-					return false;
-				}
-				else
-				{
-					if (this.index < this.list.Count - 1)
-					{
-						ArrayList arrayList = this.list;
-						int num = this.index + 1;
-						this.index = num;
-						this.currentElement = arrayList[num];
-						return true;
-					}
-					this.index = this.list.Count;
-					this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
-					return false;
-				}
-			}
-
-			public object Current
+			protected virtual string ErrorMessage
 			{
 				get
 				{
-					object obj = this.currentElement;
-					if (ArrayList.ArrayListEnumeratorSimple.dummyObject != obj)
-					{
-						return obj;
-					}
-					if (this.index == -1)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
-					}
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+					return "List is fixed-size.";
 				}
 			}
 
-			public void Reset()
+			public override bool IsFixedSize
 			{
-				if (this.version != this.list._version)
+				get
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
+					return true;
 				}
-				this.currentElement = ArrayList.ArrayListEnumeratorSimple.dummyObject;
-				this.index = -1;
 			}
 
-			private ArrayList list;
+			public override int Add(object value)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
 
-			private int index;
+			public override void Clear()
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
 
-			private int version;
+			public override void Insert(int index, object value)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
 
-			private object currentElement;
+			public override void Remove(object value)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
 
-			[NonSerialized]
-			private bool isArrayList;
-
-			private static object dummyObject = new object();
+			public override void RemoveAt(int index)
+			{
+				throw new NotSupportedException(this.ErrorMessage);
+			}
 		}
 
-		internal class ArrayListDebugView
+		[Serializable]
+		private sealed class ReadOnlyListWrapper : ArrayList.FixedSizeListWrapper
 		{
-			public ArrayListDebugView(ArrayList arrayList)
+			public ReadOnlyListWrapper(IList innerList)
+				: base(innerList)
 			{
-				if (arrayList == null)
-				{
-					throw new ArgumentNullException("arrayList");
-				}
-				this.arrayList = arrayList;
 			}
 
-			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public object[] Items
+			protected override string ErrorMessage
 			{
 				get
 				{
-					return this.arrayList.ToArray();
+					return "List is read-only.";
 				}
 			}
 
-			private ArrayList arrayList;
+			public override bool IsReadOnly
+			{
+				get
+				{
+					return true;
+				}
+			}
+
+			public override object this[int index]
+			{
+				get
+				{
+					return this.m_InnerList[index];
+				}
+				set
+				{
+					throw new NotSupportedException(this.ErrorMessage);
+				}
+			}
+		}
+
+		[Serializable]
+		private class ListWrapper : IEnumerable, ICollection, IList
+		{
+			public ListWrapper(IList innerList)
+			{
+				this.m_InnerList = innerList;
+			}
+
+			public virtual object this[int index]
+			{
+				get
+				{
+					return this.m_InnerList[index];
+				}
+				set
+				{
+					this.m_InnerList[index] = value;
+				}
+			}
+
+			public virtual int Count
+			{
+				get
+				{
+					return this.m_InnerList.Count;
+				}
+			}
+
+			public virtual bool IsSynchronized
+			{
+				get
+				{
+					return this.m_InnerList.IsSynchronized;
+				}
+			}
+
+			public virtual object SyncRoot
+			{
+				get
+				{
+					return this.m_InnerList.SyncRoot;
+				}
+			}
+
+			public virtual bool IsFixedSize
+			{
+				get
+				{
+					return this.m_InnerList.IsFixedSize;
+				}
+			}
+
+			public virtual bool IsReadOnly
+			{
+				get
+				{
+					return this.m_InnerList.IsReadOnly;
+				}
+			}
+
+			public virtual int Add(object value)
+			{
+				return this.m_InnerList.Add(value);
+			}
+
+			public virtual void Clear()
+			{
+				this.m_InnerList.Clear();
+			}
+
+			public virtual bool Contains(object value)
+			{
+				return this.m_InnerList.Contains(value);
+			}
+
+			public virtual int IndexOf(object value)
+			{
+				return this.m_InnerList.IndexOf(value);
+			}
+
+			public virtual void Insert(int index, object value)
+			{
+				this.m_InnerList.Insert(index, value);
+			}
+
+			public virtual void Remove(object value)
+			{
+				this.m_InnerList.Remove(value);
+			}
+
+			public virtual void RemoveAt(int index)
+			{
+				this.m_InnerList.RemoveAt(index);
+			}
+
+			public virtual void CopyTo(Array array, int index)
+			{
+				this.m_InnerList.CopyTo(array, index);
+			}
+
+			public virtual IEnumerator GetEnumerator()
+			{
+				return this.m_InnerList.GetEnumerator();
+			}
+
+			protected IList m_InnerList;
 		}
 	}
 }

@@ -5,9 +5,9 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event)]
 	public sealed class DesignerSerializationVisibilityAttribute : Attribute
 	{
-		public DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility visibility)
+		public DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility vis)
 		{
-			this.visibility = visibility;
+			this.visibility = vis;
 		}
 
 		public DesignerSerializationVisibility Visibility
@@ -20,32 +20,27 @@ namespace System.ComponentModel
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			DesignerSerializationVisibilityAttribute designerSerializationVisibilityAttribute = obj as DesignerSerializationVisibilityAttribute;
-			return designerSerializationVisibilityAttribute != null && designerSerializationVisibilityAttribute.Visibility == this.visibility;
+			return obj is DesignerSerializationVisibilityAttribute && (obj == this || ((DesignerSerializationVisibilityAttribute)obj).Visibility == this.visibility);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.visibility.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(DesignerSerializationVisibilityAttribute.Default);
+			return this.visibility == DesignerSerializationVisibilityAttribute.Default.Visibility;
 		}
+
+		private DesignerSerializationVisibility visibility;
+
+		public static readonly DesignerSerializationVisibilityAttribute Default = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Visible);
 
 		public static readonly DesignerSerializationVisibilityAttribute Content = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Content);
 
 		public static readonly DesignerSerializationVisibilityAttribute Hidden = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden);
 
 		public static readonly DesignerSerializationVisibilityAttribute Visible = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Visible);
-
-		public static readonly DesignerSerializationVisibilityAttribute Default = DesignerSerializationVisibilityAttribute.Visible;
-
-		private DesignerSerializationVisibility visibility;
 	}
 }

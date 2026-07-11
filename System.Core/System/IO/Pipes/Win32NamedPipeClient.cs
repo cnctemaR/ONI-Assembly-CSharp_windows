@@ -1,9 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	internal class Win32NamedPipeClient : Win32NamedPipe, INamedPipeClient, IPipe
+	internal class Win32NamedPipeClient : Win32NamedPipe, IPipe, INamedPipeClient
 	{
 		public Win32NamedPipeClient(NamedPipeClientStream owner, SafePipeHandle safePipeHandle)
 		{
@@ -13,19 +15,16 @@ namespace System.IO.Pipes
 
 		public Win32NamedPipeClient(NamedPipeClientStream owner, string serverName, string pipeName, PipeAccessRights desiredAccessRights, PipeOptions options, HandleInheritability inheritability)
 		{
-			Win32NamedPipeClient.<>c__DisplayClass2_0 CS$<>8__locals1 = new Win32NamedPipeClient.<>c__DisplayClass2_0();
-			CS$<>8__locals1.desiredAccessRights = desiredAccessRights;
-			base..ctor();
-			CS$<>8__locals1.<>4__this = this;
+			Win32NamedPipeClient <>f__this = this;
 			this.name = string.Format("\\\\{0}\\pipe\\{1}", serverName, pipeName);
-			SecurityAttributes att = new SecurityAttributes(inheritability, IntPtr.Zero);
-			this.is_async = (options & PipeOptions.Asynchronous) > PipeOptions.None;
+			SecurityAttributesHack att = new SecurityAttributesHack(inheritability == HandleInheritability.Inheritable);
+			this.is_async = (options & PipeOptions.Asynchronous) != PipeOptions.None;
 			this.opener = delegate
 			{
-				IntPtr intPtr = Win32Marshal.CreateFile(CS$<>8__locals1.<>4__this.name, CS$<>8__locals1.desiredAccessRights, FileShare.None, ref att, 3, 0, IntPtr.Zero);
+				IntPtr intPtr = Win32Marshal.CreateFile(<>f__this.name, desiredAccessRights, FileShare.None, ref att, 3, 0, IntPtr.Zero);
 				if (intPtr == new IntPtr(-1L))
 				{
-					throw Win32PipeError.GetException();
+					throw new Win32Exception(Marshal.GetLastWin32Error());
 				}
 				return new SafePipeHandle(intPtr, true);
 			};
@@ -65,7 +64,7 @@ namespace System.IO.Pipes
 			}
 			if (!Win32Marshal.WaitNamedPipe(this.name, timeout))
 			{
-				throw Win32PipeError.GetException();
+				throw new Win32Exception(Marshal.GetLastWin32Error());
 			}
 			this.Connect();
 		}
@@ -81,7 +80,7 @@ namespace System.IO.Pipes
 				int num4;
 				if (!Win32Marshal.GetNamedPipeHandleState(this.Handle, out num, out num2, out num3, out num4, array, 0))
 				{
-					throw Win32PipeError.GetException();
+					throw new Win32Exception(Marshal.GetLastWin32Error());
 				}
 				return num2;
 			}

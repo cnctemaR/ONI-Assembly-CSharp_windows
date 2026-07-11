@@ -7,7 +7,7 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class EnvironmentPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
+	public sealed class EnvironmentPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
 	{
 		public EnvironmentPermission(PermissionState state)
 		{
@@ -23,6 +23,11 @@ namespace System.Security.Permissions
 			this.SetPathList(flag, pathList);
 		}
 
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 0;
+		}
+
 		public void AddPathList(EnvironmentPermissionAccess flag, string pathList)
 		{
 			if (pathList == null)
@@ -34,25 +39,33 @@ namespace System.Security.Permissions
 			case EnvironmentPermissionAccess.NoAccess:
 				break;
 			case EnvironmentPermissionAccess.Read:
-				foreach (string text in pathList.Split(new char[] { ';' }))
+			{
+				string[] array = pathList.Split(new char[] { ';' });
+				foreach (string text in array)
 				{
 					if (!this.readList.Contains(text))
 					{
 						this.readList.Add(text);
 					}
 				}
-				return;
+				break;
+			}
 			case EnvironmentPermissionAccess.Write:
-				foreach (string text2 in pathList.Split(new char[] { ';' }))
+			{
+				string[] array = pathList.Split(new char[] { ';' });
+				foreach (string text2 in array)
 				{
 					if (!this.writeList.Contains(text2))
 					{
 						this.writeList.Add(text2);
 					}
 				}
-				return;
+				break;
+			}
 			case EnvironmentPermissionAccess.AllAccess:
-				foreach (string text3 in pathList.Split(new char[] { ';' }))
+			{
+				string[] array = pathList.Split(new char[] { ';' });
+				foreach (string text3 in array)
 				{
 					if (!this.readList.Contains(text3))
 					{
@@ -63,7 +76,8 @@ namespace System.Security.Permissions
 						this.writeList.Add(text3);
 					}
 				}
-				return;
+				break;
+			}
 			default:
 				this.ThrowInvalidFlag(flag, false);
 				break;
@@ -144,7 +158,8 @@ namespace System.Security.Permissions
 			string pathList = environmentPermission.GetPathList(EnvironmentPermissionAccess.Read);
 			if (pathList != null)
 			{
-				foreach (string text in pathList.Split(new char[] { ';' }))
+				string[] array = pathList.Split(new char[] { ';' });
+				foreach (string text in array)
 				{
 					if (this.readList.Contains(text))
 					{
@@ -156,7 +171,8 @@ namespace System.Security.Permissions
 			string pathList2 = environmentPermission.GetPathList(EnvironmentPermissionAccess.Write);
 			if (pathList2 != null)
 			{
-				foreach (string text2 in pathList2.Split(new char[] { ';' }))
+				string[] array3 = pathList2.Split(new char[] { ';' });
+				foreach (string text2 in array3)
 				{
 					if (this.writeList.Contains(text2))
 					{
@@ -165,11 +181,7 @@ namespace System.Security.Permissions
 					}
 				}
 			}
-			if (num <= 0)
-			{
-				return null;
-			}
-			return environmentPermission2;
+			return (num <= 0) ? null : environmentPermission2;
 		}
 
 		public override bool IsSubsetOf(IPermission target)
@@ -222,28 +234,37 @@ namespace System.Security.Permissions
 			case EnvironmentPermissionAccess.NoAccess:
 				break;
 			case EnvironmentPermissionAccess.Read:
+			{
 				this.readList.Clear();
-				foreach (string text in pathList.Split(new char[] { ';' }))
+				string[] array = pathList.Split(new char[] { ';' });
+				foreach (string text in array)
 				{
 					this.readList.Add(text);
 				}
-				return;
+				break;
+			}
 			case EnvironmentPermissionAccess.Write:
+			{
 				this.writeList.Clear();
-				foreach (string text2 in pathList.Split(new char[] { ';' }))
+				string[] array = pathList.Split(new char[] { ';' });
+				foreach (string text2 in array)
 				{
 					this.writeList.Add(text2);
 				}
-				return;
+				break;
+			}
 			case EnvironmentPermissionAccess.AllAccess:
+			{
 				this.readList.Clear();
 				this.writeList.Clear();
-				foreach (string text3 in pathList.Split(new char[] { ';' }))
+				string[] array = pathList.Split(new char[] { ';' });
+				foreach (string text3 in array)
 				{
 					this.readList.Add(text3);
 					this.writeList.Add(text3);
 				}
-				return;
+				break;
+			}
 			default:
 				this.ThrowInvalidFlag(flag, false);
 				break;
@@ -300,11 +321,6 @@ namespace System.Security.Permissions
 				environmentPermission2.AddPathList(EnvironmentPermissionAccess.Write, text);
 			}
 			return environmentPermission2;
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 0;
 		}
 
 		private bool IsEmpty()

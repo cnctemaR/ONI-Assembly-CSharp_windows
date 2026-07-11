@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -122,7 +123,7 @@ namespace Mono.Security
 			{
 				if (relativeUri.Length > 1 && relativeUri[1] == '/')
 				{
-					this.source = this.scheme + ":" + relativeUri;
+					this.source = this.scheme + ':' + relativeUri;
 					this.Parse();
 					return;
 				}
@@ -243,11 +244,7 @@ namespace Mono.Security
 		{
 			get
 			{
-				if (Uri.GetDefaultPort(this.scheme) != this.port)
-				{
-					return this.host + ":" + this.port;
-				}
-				return this.host;
+				return (Uri.GetDefaultPort(this.scheme) != this.port) ? (this.host + ":" + this.port) : this.host;
 			}
 		}
 
@@ -392,7 +389,7 @@ namespace Mono.Security
 				string[] array = this.path.Split(new char[] { '/' });
 				this.segments = array;
 				bool flag = this.path.EndsWith("/");
-				if (array.Length != 0 && flag)
+				if (array.Length > 0 && flag)
 				{
 					string[] array2 = new string[array.Length - 1];
 					Array.Copy(array, 0, array2, 0, array.Length - 1);
@@ -415,7 +412,7 @@ namespace Mono.Security
 					{
 						string[] array4 = array;
 						int num2 = i;
-						array4[num2] += "/";
+						array4[num2] += '/';
 					}
 					i++;
 				}
@@ -631,7 +628,7 @@ namespace Mono.Security
 			{
 				throw new ArgumentOutOfRangeException("character");
 			}
-			return "%" + Uri.hexUpperChars[(int)((character & 'ð') >> 4)].ToString() + Uri.hexUpperChars[(int)(character & '\u000f')].ToString();
+			return "%" + Uri.hexUpperChars[(int)((character & 'ð') >> 4)] + Uri.hexUpperChars[(int)(character & '\u000f')];
 		}
 
 		public static char HexUnescape(string pattern, ref int index)
@@ -649,64 +646,58 @@ namespace Mono.Security
 			while (index + 3 <= pattern.Length && pattern[index] == '%' && Uri.IsHexDigit(pattern[index + 1]) && Uri.IsHexDigit(pattern[index + 2]))
 			{
 				index++;
-				int num3 = index;
-				index = num3 + 1;
-				int num4 = Uri.FromHex(pattern[num3]);
-				num3 = index;
-				index = num3 + 1;
-				int num5 = Uri.FromHex(pattern[num3]);
-				int num6 = (num4 << 4) + num5;
+				int num3 = Uri.FromHex(pattern[index++]);
+				int num4 = Uri.FromHex(pattern[index++]);
+				int num5 = (num3 << 4) + num4;
 				if (num == 0)
 				{
-					if (num6 < 192)
+					if (num5 < 192)
 					{
-						return (char)num6;
+						return (char)num5;
 					}
-					if (num6 < 224)
+					if (num5 < 224)
 					{
-						num2 = num6 - 192;
+						num2 = num5 - 192;
 						num = 2;
 					}
-					else if (num6 < 240)
+					else if (num5 < 240)
 					{
-						num2 = num6 - 224;
+						num2 = num5 - 224;
 						num = 3;
 					}
-					else if (num6 < 248)
+					else if (num5 < 248)
 					{
-						num2 = num6 - 240;
+						num2 = num5 - 240;
 						num = 4;
 					}
-					else if (num6 < 251)
+					else if (num5 < 251)
 					{
-						num2 = num6 - 248;
+						num2 = num5 - 248;
 						num = 5;
 					}
-					else if (num6 < 254)
+					else if (num5 < 254)
 					{
-						num2 = num6 - 252;
+						num2 = num5 - 252;
 						num = 6;
 					}
 					num2 <<= (num - 1) * 6;
 				}
 				else
 				{
-					num2 += num6 - 128 << (num - 1) * 6;
+					num2 += num5 - 128 << (num - 1) * 6;
 				}
 				num--;
 				if (num <= 0)
 				{
-					IL_0154:
+					IL_01A2:
 					return (char)num2;
 				}
 			}
 			if (num == 0)
 			{
-				int num3 = index;
-				index = num3 + 1;
-				return pattern[num3];
+				return pattern[index++];
 			}
-			goto IL_0154;
+			goto IL_01A2;
 		}
 
 		public static bool IsHexDigit(char digit)
@@ -731,20 +722,24 @@ namespace Mono.Security
 			}
 			string[] array = this.Segments;
 			string[] array2 = toUri.Segments;
-			int num = 0;
-			int num2 = Math.Min(array.Length, array2.Length);
-			while (num < num2 && !(array[num] != array2[num]))
+			int i = 0;
+			int num = Math.Min(array.Length, array2.Length);
+			while (i < num)
 			{
-				num++;
+				if (array[i] != array2[i])
+				{
+					break;
+				}
+				i++;
 			}
 			string text = string.Empty;
-			for (int i = num + 1; i < array.Length; i++)
+			for (int j = i + 1; j < array.Length; j++)
 			{
 				text += "../";
 			}
-			for (int j = num; j < array2.Length; j++)
+			for (int k = i; k < array2.Length; k++)
 			{
-				text += array2[j];
+				text += array2[k];
 			}
 			return text;
 		}
@@ -755,7 +750,7 @@ namespace Mono.Security
 			{
 				return this.cachedToString;
 			}
-			string text = (this.query.StartsWith("?") ? ("?" + this.Unescape(this.query.Substring(1))) : this.Unescape(this.query));
+			string text = ((!this.query.StartsWith("?")) ? this.Unescape(this.query) : ('?' + this.Unescape(this.query.Substring(1))));
 			this.cachedToString = this.Unescape(this.GetLeftPart(UriPartial.Path), true) + text + this.fragment;
 			return this.cachedToString;
 		}
@@ -902,7 +897,7 @@ namespace Mono.Security
 			if (uriString.StartsWith("//"))
 			{
 				uriString = uriString.TrimStart(new char[] { '/' });
-				this.path = "/" + uriString;
+				this.path = '/' + uriString;
 			}
 			if (this.path == null)
 			{
@@ -916,7 +911,8 @@ namespace Mono.Security
 			{
 				throw new ArgumentNullException("uriString");
 			}
-			if (uriString.Length <= 1)
+			int length = uriString.Length;
+			if (length <= 1)
 			{
 				throw new FormatException();
 			}
@@ -926,16 +922,18 @@ namespace Mono.Security
 				if (uriString[0] == '/')
 				{
 					this.ParseAsUnixAbsoluteFilePath(uriString);
-					return;
 				}
-				if (uriString.StartsWith("\\\\"))
+				else
 				{
+					if (!uriString.StartsWith("\\\\"))
+					{
+						throw new FormatException("URI scheme was not recognized, nor input string is not recognized as an absolute file path.");
+					}
 					this.ParseAsWindowsUNC(uriString);
-					return;
 				}
-				throw new FormatException("URI scheme was not recognized, nor input string is not recognized as an absolute file path.");
+				return;
 			}
-			else if (num == 1)
+			if (num == 1)
 			{
 				if (!char.IsLetter(uriString[0]))
 				{
@@ -960,11 +958,11 @@ namespace Mono.Security
 						case '+':
 						case '-':
 						case '.':
-							break;
-						default:
-							throw new FormatException("URI scheme must consist of one of alphabet, digits, '+', '-' or '.' character.");
+							goto IL_0132;
 						}
+						throw new FormatException("URI scheme must consist of one of alphabet, digits, '+', '-' or '.' character.");
 					}
+					IL_0132:;
 				}
 				uriString = uriString.Substring(num + 1);
 				num = uriString.IndexOf('#');
@@ -1002,7 +1000,7 @@ namespace Mono.Security
 					this.isOpaquePart = true;
 					return;
 				}
-				num = uriString.IndexOfAny(new char[] { '/', '\\' });
+				num = uriString.IndexOfAny(new char[] { '/' });
 				if (flag)
 				{
 					num = -1;
@@ -1020,10 +1018,6 @@ namespace Mono.Security
 					uriString = uriString.Substring(0, num);
 				}
 				num = uriString.IndexOf("@");
-				if (flag)
-				{
-					num = -1;
-				}
 				if (num != -1)
 				{
 					this.userinfo = uriString.Substring(0, num);
@@ -1032,10 +1026,6 @@ namespace Mono.Security
 				this.port = -1;
 				num = uriString.LastIndexOf(":");
 				if (flag)
-				{
-					num = -1;
-				}
-				if (num == 1 && this.scheme == Uri.UriSchemeFile && char.IsLetter(uriString[0]))
 				{
 					num = -1;
 				}
@@ -1062,7 +1052,7 @@ namespace Mono.Security
 				this.host = uriString;
 				if (flag)
 				{
-					this.path = "/" + uriString;
+					this.path = '/' + uriString;
 					this.host = string.Empty;
 				}
 				else if (this.host.Length == 2 && this.host[1] == ':')
@@ -1098,7 +1088,7 @@ namespace Mono.Security
 		{
 			path = path.Replace('\\', '/');
 			string[] array = path.Split(new char[] { '/' });
-			List<string> list = new List<string>();
+			ArrayList arrayList = new ArrayList();
 			int num = array.Length;
 			for (int i = 0; i < num; i++)
 			{
@@ -1107,7 +1097,7 @@ namespace Mono.Security
 				{
 					if (text == "..")
 					{
-						if (list.Count == 0)
+						if (arrayList.Count == 0)
 						{
 							if (i != 1)
 							{
@@ -1116,24 +1106,24 @@ namespace Mono.Security
 						}
 						else
 						{
-							list.RemoveAt(list.Count - 1);
+							arrayList.RemoveAt(arrayList.Count - 1);
 						}
 					}
 					else
 					{
-						list.Add(text);
+						arrayList.Add(text);
 					}
 				}
 			}
-			if (list.Count == 0)
+			if (arrayList.Count == 0)
 			{
 				return "/";
 			}
-			list.Insert(0, string.Empty);
-			string text2 = string.Join("/", list.ToArray());
+			arrayList.Insert(0, string.Empty);
+			string text2 = string.Join("/", (string[])arrayList.ToArray(typeof(string)));
 			if (path.EndsWith("/"))
 			{
-				text2 += "/";
+				text2 += '/';
 			}
 			return text2;
 		}
@@ -1177,30 +1167,26 @@ namespace Mono.Security
 			{
 				return true;
 			}
-			if (ch <= '*')
+			switch (ch)
 			{
-				if (ch <= '"')
+			case '*':
+			case ',':
+			case '/':
+				break;
+			default:
+				switch (ch)
 				{
-					if (ch != '\0' && ch != '"')
+				case '\\':
+				case '^':
+					break;
+				default:
+					if (ch != '\0' && ch != '"' && ch != '&' && ch != '|')
 					{
 						return false;
 					}
+					break;
 				}
-				else if (ch != '&' && ch != '*')
-				{
-					return false;
-				}
-			}
-			else if (ch <= '/')
-			{
-				if (ch != ',' && ch != '/')
-				{
-					return false;
-				}
-			}
-			else if (ch != '\\' && ch != '^' && ch != '|')
-			{
-				return false;
+				break;
 			}
 			return true;
 		}
@@ -1212,77 +1198,32 @@ namespace Mono.Security
 
 		private static bool IsPredefinedScheme(string scheme)
 		{
-			uint num = <PrivateImplementationDetails>.ComputeStringHash(scheme);
-			if (num <= 2867484483U)
+			if (scheme != null)
 			{
-				if (num <= 1271381062U)
+				if (Uri.<>f__switch$map6 == null)
 				{
-					if (num != 227981521U)
+					Uri.<>f__switch$map6 = new Dictionary<string, int>(8)
 					{
-						if (num != 1271381062U)
-						{
-							return false;
-						}
-						if (!(scheme == "news"))
-						{
-							return false;
-						}
-					}
-					else if (!(scheme == "nntp"))
-					{
-						return false;
-					}
+						{ "http", 0 },
+						{ "https", 0 },
+						{ "file", 0 },
+						{ "ftp", 0 },
+						{ "nntp", 0 },
+						{ "gopher", 0 },
+						{ "mailto", 0 },
+						{ "news", 0 }
+					};
 				}
-				else if (num != 1315902419U)
+				int num;
+				if (Uri.<>f__switch$map6.TryGetValue(scheme, out num))
 				{
-					if (num != 2867484483U)
+					if (num == 0)
 					{
-						return false;
+						return true;
 					}
-					if (!(scheme == "file"))
-					{
-						return false;
-					}
-				}
-				else if (!(scheme == "mailto"))
-				{
-					return false;
 				}
 			}
-			else if (num <= 3378792613U)
-			{
-				if (num != 3101544485U)
-				{
-					if (num != 3378792613U)
-					{
-						return false;
-					}
-					if (!(scheme == "http"))
-					{
-						return false;
-					}
-				}
-				else if (!(scheme == "ftp"))
-				{
-					return false;
-				}
-			}
-			else if (num != 3500961320U)
-			{
-				if (num != 3739134178U)
-				{
-					return false;
-				}
-				if (!(scheme == "https"))
-				{
-					return false;
-				}
-			}
-			else if (!(scheme == "gopher"))
-			{
-				return false;
-			}
-			return true;
+			return false;
 		}
 
 		protected bool IsReservedCharacter(char ch)

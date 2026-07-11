@@ -402,7 +402,7 @@ public class DebugHandler : IInputHandler
 					{
 						if (GenericGameSettings.instance.developerDebugEnable)
 						{
-							GarbageProfiler.DebugDumpGarbageStats();
+							Sim.SIM_DebugCrash();
 						}
 					}
 					else if (e.TryConsume(global::Action.DebugNextCall))

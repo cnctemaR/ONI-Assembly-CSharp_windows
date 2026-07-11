@@ -4,29 +4,31 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal class ClientSessionInfo : IDisposable
 	{
+		public ClientSessionInfo(string hostname, byte[] id)
+		{
+			this.host = hostname;
+			this.sid = id;
+			this.KeepAlive();
+		}
+
 		static ClientSessionInfo()
 		{
 			string environmentVariable = Environment.GetEnvironmentVariable("MONO_TLS_SESSION_CACHE_TIMEOUT");
 			if (environmentVariable == null)
 			{
 				ClientSessionInfo.ValidityInterval = 180;
-				return;
 			}
-			try
+			else
 			{
-				ClientSessionInfo.ValidityInterval = int.Parse(environmentVariable);
+				try
+				{
+					ClientSessionInfo.ValidityInterval = int.Parse(environmentVariable);
+				}
+				catch
+				{
+					ClientSessionInfo.ValidityInterval = 180;
+				}
 			}
-			catch
-			{
-				ClientSessionInfo.ValidityInterval = 180;
-			}
-		}
-
-		public ClientSessionInfo(string hostname, byte[] id)
-		{
-			this.host = hostname;
-			this.sid = id;
-			this.KeepAlive();
 		}
 
 		~ClientSessionInfo()
@@ -108,7 +110,8 @@ namespace Mono.Security.Protocol.Tls
 		{
 			if (this.disposed)
 			{
-				throw new ObjectDisposedException(Locale.GetText("Cache session information were disposed."));
+				string text = Locale.GetText("Cache session information were disposed.");
+				throw new ObjectDisposedException(text);
 			}
 		}
 

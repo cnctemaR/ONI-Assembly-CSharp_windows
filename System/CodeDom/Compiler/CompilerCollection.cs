@@ -9,26 +9,46 @@ namespace System.CodeDom.Compiler
 	{
 		static CompilerCollection()
 		{
-			CompilerInfo compilerInfo = new CompilerInfo(null, "Microsoft.CSharp.CSharpCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", new string[] { ".cs" }, new string[] { "c#", "cs", "csharp" });
-			compilerInfo.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
+			CompilerInfo compilerInfo = new CompilerInfo();
+			compilerInfo.Languages = "c#;cs;csharp";
+			compilerInfo.Extensions = ".cs";
+			compilerInfo.TypeName = "Microsoft.CSharp.CSharpCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+			compilerInfo.ProviderOptions = new Dictionary<string, string>(1);
+			compilerInfo.ProviderOptions["CompilerVersion"] = "2.0";
 			CompilerCollection.AddCompilerInfo(compilerInfo);
-			CompilerInfo compilerInfo2 = new CompilerInfo(null, "Microsoft.VisualBasic.VBCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", new string[] { ".vb" }, new string[] { "vb", "vbs", "visualbasic", "vbscript" });
-			compilerInfo2.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
-			CompilerCollection.AddCompilerInfo(compilerInfo2);
-			CompilerInfo compilerInfo3 = new CompilerInfo(null, "Microsoft.JScript.JScriptCodeProvider, Microsoft.JScript, Version=8.0.1100.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", new string[] { ".js" }, new string[] { "js", "jscript", "javascript" });
-			compilerInfo3.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
-			CompilerCollection.AddCompilerInfo(compilerInfo3);
-			CompilerInfo compilerInfo4 = new CompilerInfo(null, "Microsoft.VJSharp.VJSharpCodeProvider, VJSharpCodeProvider, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", new string[] { ".jsl", ".java" }, new string[] { "vj#", "vjs", "vjsharp" });
-			compilerInfo4.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
-			CompilerCollection.AddCompilerInfo(compilerInfo4);
-			CompilerInfo compilerInfo5 = new CompilerInfo(null, "Microsoft.VisualC.CppCodeProvider, CppCodeProvider, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", new string[] { ".h" }, new string[] { "c++", "mc", "cpp" });
-			compilerInfo5.ProviderOptions["CompilerVersion"] = CompilerCollection.defaultCompilerVersion;
-			CompilerCollection.AddCompilerInfo(compilerInfo5);
+			compilerInfo = new CompilerInfo();
+			compilerInfo.Languages = "vb;vbs;visualbasic;vbscript";
+			compilerInfo.Extensions = ".vb";
+			compilerInfo.TypeName = "Microsoft.VisualBasic.VBCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+			compilerInfo.ProviderOptions = new Dictionary<string, string>(1);
+			compilerInfo.ProviderOptions["CompilerVersion"] = "2.0";
+			CompilerCollection.AddCompilerInfo(compilerInfo);
+			compilerInfo = new CompilerInfo();
+			compilerInfo.Languages = "js;jscript;javascript";
+			compilerInfo.Extensions = ".js";
+			compilerInfo.TypeName = "Microsoft.JScript.JScriptCodeProvider, Microsoft.JScript, Version=8.0.1100.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+			compilerInfo.ProviderOptions = new Dictionary<string, string>(1);
+			compilerInfo.ProviderOptions["CompilerVersion"] = "2.0";
+			CompilerCollection.AddCompilerInfo(compilerInfo);
+			compilerInfo = new CompilerInfo();
+			compilerInfo.Languages = "vj#;vjs;vjsharp";
+			compilerInfo.Extensions = ".jsl;.java";
+			compilerInfo.TypeName = "Microsoft.VJSharp.VJSharpCodeProvider, VJSharpCodeProvider, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+			compilerInfo.ProviderOptions = new Dictionary<string, string>(1);
+			compilerInfo.ProviderOptions["CompilerVersion"] = "2.0";
+			CompilerCollection.AddCompilerInfo(compilerInfo);
+			compilerInfo = new CompilerInfo();
+			compilerInfo.Languages = "c++;mc;cpp";
+			compilerInfo.Extensions = ".h";
+			compilerInfo.TypeName = "Microsoft.VisualC.CppCodeProvider, CppCodeProvider, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+			compilerInfo.ProviderOptions = new Dictionary<string, string>(1);
+			compilerInfo.ProviderOptions["CompilerVersion"] = "2.0";
+			CompilerCollection.AddCompilerInfo(compilerInfo);
 		}
 
 		private static void AddCompilerInfo(CompilerInfo ci)
 		{
-			ci.CreateProvider();
+			ci.Init();
 			CompilerCollection.compiler_infos.Add(ci);
 			string[] languages = ci.GetLanguages();
 			if (languages != null)
@@ -50,13 +70,14 @@ namespace System.CodeDom.Compiler
 
 		private static void AddCompilerInfo(Compiler compiler)
 		{
-			CompilerCollection.AddCompilerInfo(new CompilerInfo(null, compiler.Type, new string[] { compiler.Extension }, new string[] { compiler.Language })
+			CompilerCollection.AddCompilerInfo(new CompilerInfo
 			{
-				CompilerParams = 
-				{
-					CompilerOptions = compiler.CompilerOptions,
-					WarningLevel = compiler.WarningLevel
-				}
+				Languages = compiler.Language,
+				Extensions = compiler.Extension,
+				TypeName = compiler.Type,
+				ProviderOptions = compiler.ProviderOptionsDictionary,
+				CompilerOptions = compiler.CompilerOptions,
+				WarningLevel = compiler.WarningLevel
 			});
 		}
 
@@ -119,7 +140,7 @@ namespace System.CodeDom.Compiler
 				return null;
 			}
 			string[] languages = compilerInfoForExtension.GetLanguages();
-			if (languages != null && languages.Length != 0)
+			if (languages != null && languages.Length > 0)
 			{
 				return languages[0];
 			}
@@ -151,9 +172,9 @@ namespace System.CodeDom.Compiler
 			get
 			{
 				string[] array = new string[CompilerCollection.compiler_infos.Count];
-				for (int i = 0; i < base.Count; i++)
+				for (int i = 0; i < this.Count; i++)
 				{
-					array[i] = string.Join(";", CompilerCollection.compiler_infos[i].GetLanguages());
+					array[i] = CompilerCollection.compiler_infos[i].Languages;
 				}
 				return array;
 			}
@@ -206,8 +227,6 @@ namespace System.CodeDom.Compiler
 				return CompilerCollection.compiler_infos.ToArray();
 			}
 		}
-
-		private static readonly string defaultCompilerVersion = "3.5";
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 

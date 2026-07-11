@@ -6,17 +6,17 @@ namespace System.Collections.Specialized
 	{
 		public static Hashtable CreateCaseInsensitiveHashtable()
 		{
-			return new Hashtable(StringComparer.CurrentCultureIgnoreCase);
-		}
-
-		public static Hashtable CreateCaseInsensitiveHashtable(int capacity)
-		{
-			return new Hashtable(capacity, StringComparer.CurrentCultureIgnoreCase);
+			return new Hashtable(CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
 		}
 
 		public static Hashtable CreateCaseInsensitiveHashtable(IDictionary d)
 		{
-			return new Hashtable(d, StringComparer.CurrentCultureIgnoreCase);
+			return new Hashtable(d, CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
+		}
+
+		public static Hashtable CreateCaseInsensitiveHashtable(int capacity)
+		{
+			return new Hashtable(capacity, CaseInsensitiveHashCodeProvider.Default, CaseInsensitiveComparer.Default);
 		}
 
 		public static SortedList CreateCaseInsensitiveSortedList()

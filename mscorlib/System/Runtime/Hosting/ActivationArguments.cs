@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security.Policy;
 
 namespace System.Runtime.Hosting
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class ActivationArguments : EvidenceBase
+	public sealed class ActivationArguments
 	{
 		public ActivationArguments(ActivationContext activationData)
 		{

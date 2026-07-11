@@ -1,54 +1,18 @@
 ﻿using System;
-using System.Collections;
-using System.Globalization;
+using System.Collections.Generic;
 using System.Text;
+using Mono.Xml.Schema;
 
 namespace System.Xml.Schema
 {
 	public abstract class XmlSchemaDatatype
 	{
-		public abstract Type ValueType { get; }
-
-		public abstract XmlTokenizedType TokenizedType { get; }
-
-		public abstract object ParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr);
-
-		public virtual XmlSchemaDatatypeVariety Variety
+		internal virtual XsdWhitespaceFacet Whitespace
 		{
 			get
 			{
-				return XmlSchemaDatatypeVariety.Atomic;
+				return this.WhitespaceValue;
 			}
-		}
-
-		public virtual object ChangeType(object value, Type targetType)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (targetType == null)
-			{
-				throw new ArgumentNullException("targetType");
-			}
-			return this.ValueConverter.ChangeType(value, targetType);
-		}
-
-		public virtual object ChangeType(object value, Type targetType, IXmlNamespaceResolver namespaceResolver)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (targetType == null)
-			{
-				throw new ArgumentNullException("targetType");
-			}
-			if (namespaceResolver == null)
-			{
-				throw new ArgumentNullException("namespaceResolver");
-			}
-			return this.ValueConverter.ChangeType(value, targetType, namespaceResolver);
 		}
 
 		public virtual XmlTypeCode TypeCode
@@ -59,274 +23,330 @@ namespace System.Xml.Schema
 			}
 		}
 
-		public virtual bool IsDerivedFrom(XmlSchemaDatatype datatype)
-		{
-			return false;
-		}
-
-		internal abstract bool HasLexicalFacets { get; }
-
-		internal abstract bool HasValueFacets { get; }
-
-		internal abstract XmlValueConverter ValueConverter { get; }
-
-		internal abstract RestrictionFacets Restriction { get; set; }
-
-		internal abstract int Compare(object value1, object value2);
-
-		internal abstract object ParseValue(string s, Type typDest, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr);
-
-		internal abstract object ParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr, bool createAtomicValue);
-
-		internal abstract Exception TryParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr, out object typedValue);
-
-		internal abstract Exception TryParseValue(object value, XmlNameTable nameTable, IXmlNamespaceResolver namespaceResolver, out object typedValue);
-
-		internal abstract FacetsChecker FacetsChecker { get; }
-
-		internal abstract XmlSchemaWhiteSpace BuiltInWhitespaceFacet { get; }
-
-		internal abstract XmlSchemaDatatype DeriveByRestriction(XmlSchemaObjectCollection facets, XmlNameTable nameTable, XmlSchemaType schemaType);
-
-		internal abstract XmlSchemaDatatype DeriveByList(XmlSchemaType schemaType);
-
-		internal abstract void VerifySchemaValid(XmlSchemaObjectTable notations, XmlSchemaObject caller);
-
-		internal abstract bool IsEqual(object o1, object o2);
-
-		internal abstract bool IsComparable(XmlSchemaDatatype dtype);
-
-		internal string TypeCodeString
+		public virtual XmlSchemaDatatypeVariety Variety
 		{
 			get
 			{
-				string text = string.Empty;
-				XmlTypeCode typeCode = this.TypeCode;
-				switch (this.Variety)
-				{
-				case XmlSchemaDatatypeVariety.Atomic:
-					if (typeCode == XmlTypeCode.AnyAtomicType)
-					{
-						text = "anySimpleType";
-					}
-					else
-					{
-						text = this.TypeCodeToString(typeCode);
-					}
-					break;
-				case XmlSchemaDatatypeVariety.List:
-					if (typeCode == XmlTypeCode.AnyAtomicType)
-					{
-						text = "List of Union";
-					}
-					else
-					{
-						text = "List of " + this.TypeCodeToString(typeCode);
-					}
-					break;
-				case XmlSchemaDatatypeVariety.Union:
-					text = "Union";
-					break;
-				}
-				return text;
+				return XmlSchemaDatatypeVariety.Atomic;
 			}
 		}
 
-		internal string TypeCodeToString(XmlTypeCode typeCode)
+		public abstract XmlTokenizedType TokenizedType { get; }
+
+		public abstract Type ValueType { get; }
+
+		[MonoTODO]
+		public virtual object ChangeType(object value, Type targetType)
 		{
-			switch (typeCode)
-			{
-			case XmlTypeCode.None:
-				return "None";
-			case XmlTypeCode.Item:
-				return "AnyType";
-			case XmlTypeCode.AnyAtomicType:
-				return "AnyAtomicType";
-			case XmlTypeCode.String:
-				return "String";
-			case XmlTypeCode.Boolean:
-				return "Boolean";
-			case XmlTypeCode.Decimal:
-				return "Decimal";
-			case XmlTypeCode.Float:
-				return "Float";
-			case XmlTypeCode.Double:
-				return "Double";
-			case XmlTypeCode.Duration:
-				return "Duration";
-			case XmlTypeCode.DateTime:
-				return "DateTime";
-			case XmlTypeCode.Time:
-				return "Time";
-			case XmlTypeCode.Date:
-				return "Date";
-			case XmlTypeCode.GYearMonth:
-				return "GYearMonth";
-			case XmlTypeCode.GYear:
-				return "GYear";
-			case XmlTypeCode.GMonthDay:
-				return "GMonthDay";
-			case XmlTypeCode.GDay:
-				return "GDay";
-			case XmlTypeCode.GMonth:
-				return "GMonth";
-			case XmlTypeCode.HexBinary:
-				return "HexBinary";
-			case XmlTypeCode.Base64Binary:
-				return "Base64Binary";
-			case XmlTypeCode.AnyUri:
-				return "AnyUri";
-			case XmlTypeCode.QName:
-				return "QName";
-			case XmlTypeCode.Notation:
-				return "Notation";
-			case XmlTypeCode.NormalizedString:
-				return "NormalizedString";
-			case XmlTypeCode.Token:
-				return "Token";
-			case XmlTypeCode.Language:
-				return "Language";
-			case XmlTypeCode.NmToken:
-				return "NmToken";
-			case XmlTypeCode.Name:
-				return "Name";
-			case XmlTypeCode.NCName:
-				return "NCName";
-			case XmlTypeCode.Id:
-				return "Id";
-			case XmlTypeCode.Idref:
-				return "Idref";
-			case XmlTypeCode.Entity:
-				return "Entity";
-			case XmlTypeCode.Integer:
-				return "Integer";
-			case XmlTypeCode.NonPositiveInteger:
-				return "NonPositiveInteger";
-			case XmlTypeCode.NegativeInteger:
-				return "NegativeInteger";
-			case XmlTypeCode.Long:
-				return "Long";
-			case XmlTypeCode.Int:
-				return "Int";
-			case XmlTypeCode.Short:
-				return "Short";
-			case XmlTypeCode.Byte:
-				return "Byte";
-			case XmlTypeCode.NonNegativeInteger:
-				return "NonNegativeInteger";
-			case XmlTypeCode.UnsignedLong:
-				return "UnsignedLong";
-			case XmlTypeCode.UnsignedInt:
-				return "UnsignedInt";
-			case XmlTypeCode.UnsignedShort:
-				return "UnsignedShort";
-			case XmlTypeCode.UnsignedByte:
-				return "UnsignedByte";
-			case XmlTypeCode.PositiveInteger:
-				return "PositiveInteger";
-			}
-			return typeCode.ToString();
+			return this.ChangeType(value, targetType, null);
 		}
 
-		internal static string ConcatenatedToString(object value)
+		[MonoTODO]
+		public virtual object ChangeType(object value, Type targetType, IXmlNamespaceResolver nsResolver)
 		{
-			Type type = value.GetType();
-			string text = string.Empty;
-			if (type == typeof(IEnumerable) && type != typeof(string))
-			{
-				StringBuilder stringBuilder = new StringBuilder();
-				IEnumerator enumerator = (value as IEnumerable).GetEnumerator();
-				if (enumerator.MoveNext())
-				{
-					stringBuilder.Append("{");
-					object obj = enumerator.Current;
-					if (obj is IFormattable)
-					{
-						stringBuilder.Append(((IFormattable)obj).ToString("", CultureInfo.InvariantCulture));
-					}
-					else
-					{
-						stringBuilder.Append(obj.ToString());
-					}
-					while (enumerator.MoveNext())
-					{
-						stringBuilder.Append(" , ");
-						obj = enumerator.Current;
-						if (obj is IFormattable)
-						{
-							stringBuilder.Append(((IFormattable)obj).ToString("", CultureInfo.InvariantCulture));
-						}
-						else
-						{
-							stringBuilder.Append(obj.ToString());
-						}
-					}
-					stringBuilder.Append("}");
-					text = stringBuilder.ToString();
-				}
-			}
-			else if (value is IFormattable)
-			{
-				text = ((IFormattable)value).ToString("", CultureInfo.InvariantCulture);
-			}
-			else
-			{
-				text = value.ToString();
-			}
-			return text;
+			throw new NotImplementedException();
 		}
 
-		internal static XmlSchemaDatatype FromXmlTokenizedType(XmlTokenizedType token)
+		public virtual bool IsDerivedFrom(XmlSchemaDatatype datatype)
 		{
-			return DatatypeImplementation.FromXmlTokenizedType(token);
+			return this == datatype;
 		}
 
-		internal static XmlSchemaDatatype FromXmlTokenizedTypeXsd(XmlTokenizedType token)
+		public abstract object ParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr);
+
+		internal virtual ValueType ParseValueType(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr)
 		{
-			return DatatypeImplementation.FromXmlTokenizedTypeXsd(token);
+			return null;
 		}
 
-		internal static XmlSchemaDatatype FromXdrName(string name)
+		internal string Normalize(string s)
 		{
-			return DatatypeImplementation.FromXdrName(name);
+			return this.Normalize(s, this.Whitespace);
 		}
 
-		internal static XmlSchemaDatatype DeriveByUnion(XmlSchemaSimpleType[] types, XmlSchemaType schemaType)
+		internal string Normalize(string s, XsdWhitespaceFacet whitespaceFacet)
 		{
-			return DatatypeImplementation.DeriveByUnion(types, schemaType);
-		}
-
-		internal static string XdrCanonizeUri(string uri, XmlNameTable nameTable, SchemaNames schemaNames)
-		{
-			int num = 5;
-			bool flag = false;
-			if (uri.Length > 5 && uri.StartsWith("uuid:", StringComparison.Ordinal))
+			int num = s.IndexOfAny(XmlSchemaDatatype.wsChars);
+			if (num < 0)
 			{
-				flag = true;
-			}
-			else if (uri.Length > 9 && uri.StartsWith("urn:uuid:", StringComparison.Ordinal))
-			{
-				flag = true;
-				num = 9;
+				return s;
 			}
 			string text;
-			if (flag)
+			if (whitespaceFacet == XsdWhitespaceFacet.Replace)
 			{
-				text = nameTable.Add(uri.Substring(0, num) + uri.Substring(num, uri.Length - num).ToUpper(CultureInfo.InvariantCulture));
+				this.sb.Length = 0;
+				this.sb.Append(s);
+				for (int i = 0; i < this.sb.Length; i++)
+				{
+					switch (this.sb[i])
+					{
+					case '\t':
+					case '\n':
+					case '\r':
+						this.sb[i] = ' ';
+						break;
+					}
+				}
+				text = this.sb.ToString();
+				this.sb.Length = 0;
+				return text;
 			}
-			else
+			if (whitespaceFacet != XsdWhitespaceFacet.Collapse)
 			{
-				text = uri;
+				return s;
 			}
-			if (Ref.Equal(schemaNames.NsDataTypeAlias, text) || Ref.Equal(schemaNames.NsDataTypeOld, text))
+			foreach (string text2 in s.Trim().Split(XmlSchemaDatatype.wsChars))
 			{
-				text = schemaNames.NsDataType;
+				if (text2 != string.Empty)
+				{
+					this.sb.Append(text2);
+					this.sb.Append(" ");
+				}
 			}
-			else if (Ref.Equal(schemaNames.NsXdrAlias, text))
-			{
-				text = schemaNames.NsXdr;
-			}
-			return text;
+			text = this.sb.ToString();
+			this.sb.Length = 0;
+			return text.Trim();
 		}
+
+		internal static XmlSchemaDatatype FromName(XmlQualifiedName qname)
+		{
+			return XmlSchemaDatatype.FromName(qname.Name, qname.Namespace);
+		}
+
+		internal static XmlSchemaDatatype FromName(string localName, string ns)
+		{
+			if (ns != null)
+			{
+				if (XmlSchemaDatatype.<>f__switch$map3F == null)
+				{
+					XmlSchemaDatatype.<>f__switch$map3F = new Dictionary<string, int>(2)
+					{
+						{ "http://www.w3.org/2001/XMLSchema", 0 },
+						{ "http://www.w3.org/2003/11/xpath-datatypes", 1 }
+					};
+				}
+				int num;
+				if (XmlSchemaDatatype.<>f__switch$map3F.TryGetValue(ns, out num))
+				{
+					if (num == 0)
+					{
+						switch (localName)
+						{
+						case "anySimpleType":
+							return XmlSchemaDatatype.datatypeAnySimpleType;
+						case "string":
+							return XmlSchemaDatatype.datatypeString;
+						case "normalizedString":
+							return XmlSchemaDatatype.datatypeNormalizedString;
+						case "token":
+							return XmlSchemaDatatype.datatypeToken;
+						case "language":
+							return XmlSchemaDatatype.datatypeLanguage;
+						case "NMTOKEN":
+							return XmlSchemaDatatype.datatypeNMToken;
+						case "NMTOKENS":
+							return XmlSchemaDatatype.datatypeNMTokens;
+						case "Name":
+							return XmlSchemaDatatype.datatypeName;
+						case "NCName":
+							return XmlSchemaDatatype.datatypeNCName;
+						case "ID":
+							return XmlSchemaDatatype.datatypeID;
+						case "IDREF":
+							return XmlSchemaDatatype.datatypeIDRef;
+						case "IDREFS":
+							return XmlSchemaDatatype.datatypeIDRefs;
+						case "ENTITY":
+							return XmlSchemaDatatype.datatypeEntity;
+						case "ENTITIES":
+							return XmlSchemaDatatype.datatypeEntities;
+						case "NOTATION":
+							return XmlSchemaDatatype.datatypeNotation;
+						case "decimal":
+							return XmlSchemaDatatype.datatypeDecimal;
+						case "integer":
+							return XmlSchemaDatatype.datatypeInteger;
+						case "long":
+							return XmlSchemaDatatype.datatypeLong;
+						case "int":
+							return XmlSchemaDatatype.datatypeInt;
+						case "short":
+							return XmlSchemaDatatype.datatypeShort;
+						case "byte":
+							return XmlSchemaDatatype.datatypeByte;
+						case "nonPositiveInteger":
+							return XmlSchemaDatatype.datatypeNonPositiveInteger;
+						case "negativeInteger":
+							return XmlSchemaDatatype.datatypeNegativeInteger;
+						case "nonNegativeInteger":
+							return XmlSchemaDatatype.datatypeNonNegativeInteger;
+						case "unsignedLong":
+							return XmlSchemaDatatype.datatypeUnsignedLong;
+						case "unsignedInt":
+							return XmlSchemaDatatype.datatypeUnsignedInt;
+						case "unsignedShort":
+							return XmlSchemaDatatype.datatypeUnsignedShort;
+						case "unsignedByte":
+							return XmlSchemaDatatype.datatypeUnsignedByte;
+						case "positiveInteger":
+							return XmlSchemaDatatype.datatypePositiveInteger;
+						case "float":
+							return XmlSchemaDatatype.datatypeFloat;
+						case "double":
+							return XmlSchemaDatatype.datatypeDouble;
+						case "base64Binary":
+							return XmlSchemaDatatype.datatypeBase64Binary;
+						case "boolean":
+							return XmlSchemaDatatype.datatypeBoolean;
+						case "anyURI":
+							return XmlSchemaDatatype.datatypeAnyURI;
+						case "duration":
+							return XmlSchemaDatatype.datatypeDuration;
+						case "dateTime":
+							return XmlSchemaDatatype.datatypeDateTime;
+						case "date":
+							return XmlSchemaDatatype.datatypeDate;
+						case "time":
+							return XmlSchemaDatatype.datatypeTime;
+						case "hexBinary":
+							return XmlSchemaDatatype.datatypeHexBinary;
+						case "QName":
+							return XmlSchemaDatatype.datatypeQName;
+						case "gYearMonth":
+							return XmlSchemaDatatype.datatypeGYearMonth;
+						case "gMonthDay":
+							return XmlSchemaDatatype.datatypeGMonthDay;
+						case "gYear":
+							return XmlSchemaDatatype.datatypeGYear;
+						case "gMonth":
+							return XmlSchemaDatatype.datatypeGMonth;
+						case "gDay":
+							return XmlSchemaDatatype.datatypeGDay;
+						}
+						return null;
+					}
+					if (num == 1)
+					{
+						switch (localName)
+						{
+						case "anyAtomicType":
+							return XmlSchemaDatatype.datatypeAnyAtomicType;
+						case "untypedAtomic":
+							return XmlSchemaDatatype.datatypeUntypedAtomic;
+						case "dayTimeDuration":
+							return XmlSchemaDatatype.datatypeDayTimeDuration;
+						case "yearMonthDuration":
+							return XmlSchemaDatatype.datatypeYearMonthDuration;
+						}
+						return null;
+					}
+				}
+			}
+			return null;
+		}
+
+		internal XsdWhitespaceFacet WhitespaceValue;
+
+		private static char[] wsChars = new char[] { ' ', '\t', '\n', '\r' };
+
+		private StringBuilder sb = new StringBuilder();
+
+		private static readonly XsdAnySimpleType datatypeAnySimpleType = XsdAnySimpleType.Instance;
+
+		private static readonly XsdString datatypeString = new XsdString();
+
+		private static readonly XsdNormalizedString datatypeNormalizedString = new XsdNormalizedString();
+
+		private static readonly XsdToken datatypeToken = new XsdToken();
+
+		private static readonly XsdLanguage datatypeLanguage = new XsdLanguage();
+
+		private static readonly XsdNMToken datatypeNMToken = new XsdNMToken();
+
+		private static readonly XsdNMTokens datatypeNMTokens = new XsdNMTokens();
+
+		private static readonly XsdName datatypeName = new XsdName();
+
+		private static readonly XsdNCName datatypeNCName = new XsdNCName();
+
+		private static readonly XsdID datatypeID = new XsdID();
+
+		private static readonly XsdIDRef datatypeIDRef = new XsdIDRef();
+
+		private static readonly XsdIDRefs datatypeIDRefs = new XsdIDRefs();
+
+		private static readonly XsdEntity datatypeEntity = new XsdEntity();
+
+		private static readonly XsdEntities datatypeEntities = new XsdEntities();
+
+		private static readonly XsdNotation datatypeNotation = new XsdNotation();
+
+		private static readonly XsdDecimal datatypeDecimal = new XsdDecimal();
+
+		private static readonly XsdInteger datatypeInteger = new XsdInteger();
+
+		private static readonly XsdLong datatypeLong = new XsdLong();
+
+		private static readonly XsdInt datatypeInt = new XsdInt();
+
+		private static readonly XsdShort datatypeShort = new XsdShort();
+
+		private static readonly XsdByte datatypeByte = new XsdByte();
+
+		private static readonly XsdNonNegativeInteger datatypeNonNegativeInteger = new XsdNonNegativeInteger();
+
+		private static readonly XsdPositiveInteger datatypePositiveInteger = new XsdPositiveInteger();
+
+		private static readonly XsdUnsignedLong datatypeUnsignedLong = new XsdUnsignedLong();
+
+		private static readonly XsdUnsignedInt datatypeUnsignedInt = new XsdUnsignedInt();
+
+		private static readonly XsdUnsignedShort datatypeUnsignedShort = new XsdUnsignedShort();
+
+		private static readonly XsdUnsignedByte datatypeUnsignedByte = new XsdUnsignedByte();
+
+		private static readonly XsdNonPositiveInteger datatypeNonPositiveInteger = new XsdNonPositiveInteger();
+
+		private static readonly XsdNegativeInteger datatypeNegativeInteger = new XsdNegativeInteger();
+
+		private static readonly XsdFloat datatypeFloat = new XsdFloat();
+
+		private static readonly XsdDouble datatypeDouble = new XsdDouble();
+
+		private static readonly XsdBase64Binary datatypeBase64Binary = new XsdBase64Binary();
+
+		private static readonly XsdBoolean datatypeBoolean = new XsdBoolean();
+
+		private static readonly XsdAnyURI datatypeAnyURI = new XsdAnyURI();
+
+		private static readonly XsdDuration datatypeDuration = new XsdDuration();
+
+		private static readonly XsdDateTime datatypeDateTime = new XsdDateTime();
+
+		private static readonly XsdDate datatypeDate = new XsdDate();
+
+		private static readonly XsdTime datatypeTime = new XsdTime();
+
+		private static readonly XsdHexBinary datatypeHexBinary = new XsdHexBinary();
+
+		private static readonly XsdQName datatypeQName = new XsdQName();
+
+		private static readonly XsdGYearMonth datatypeGYearMonth = new XsdGYearMonth();
+
+		private static readonly XsdGMonthDay datatypeGMonthDay = new XsdGMonthDay();
+
+		private static readonly XsdGYear datatypeGYear = new XsdGYear();
+
+		private static readonly XsdGMonth datatypeGMonth = new XsdGMonth();
+
+		private static readonly XsdGDay datatypeGDay = new XsdGDay();
+
+		private static readonly XdtAnyAtomicType datatypeAnyAtomicType = new XdtAnyAtomicType();
+
+		private static readonly XdtUntypedAtomic datatypeUntypedAtomic = new XdtUntypedAtomic();
+
+		private static readonly XdtDayTimeDuration datatypeDayTimeDuration = new XdtDayTimeDuration();
+
+		private static readonly XdtYearMonthDuration datatypeYearMonthDuration = new XdtYearMonthDuration();
 	}
 }

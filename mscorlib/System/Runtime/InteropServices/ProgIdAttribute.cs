@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class ProgIdAttribute : Attribute
 	{
 		public ProgIdAttribute(string progId)
 		{
-			this._val = progId;
+			this.pid = progId;
 		}
 
 		public string Value
 		{
 			get
 			{
-				return this._val;
+				return this.pid;
 			}
 		}
 
-		internal string _val;
+		private string pid;
 	}
 }

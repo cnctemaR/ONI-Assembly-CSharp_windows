@@ -1,93 +1,50 @@
 ﻿using System;
-using System.ComponentModel.Design;
-using System.Globalization;
 using System.IO;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class LicFileLicenseProvider : LicenseProvider
 	{
-		protected virtual bool IsKeyValid(string key, Type type)
+		public override License GetLicense(LicenseContext context, Type type, object instance, bool allowExceptions)
 		{
-			return key != null && key.StartsWith(this.GetKey(type));
+			try
+			{
+				if (context == null || context.UsageMode != LicenseUsageMode.Designtime)
+				{
+					return null;
+				}
+				string text = Path.GetDirectoryName(type.Assembly.Location);
+				text = Path.Combine(text, type.FullName + ".LIC");
+				if (!File.Exists(text))
+				{
+					return null;
+				}
+				StreamReader streamReader = new StreamReader(text);
+				string text2 = streamReader.ReadLine();
+				streamReader.Close();
+				if (this.IsKeyValid(text2, type))
+				{
+					return new LicFileLicense(text2);
+				}
+			}
+			catch
+			{
+				if (allowExceptions)
+				{
+					throw;
+				}
+			}
+			return null;
 		}
 
 		protected virtual string GetKey(Type type)
 		{
-			return string.Format(CultureInfo.InvariantCulture, "{0} is a licensed component.", type.FullName);
+			return type.FullName + " is a licensed component.";
 		}
 
-		public override License GetLicense(LicenseContext context, Type type, object instance, bool allowExceptions)
+		protected virtual bool IsKeyValid(string key, Type type)
 		{
-			LicFileLicenseProvider.LicFileLicense licFileLicense = null;
-			if (context != null)
-			{
-				if (context.UsageMode == LicenseUsageMode.Runtime)
-				{
-					string savedLicenseKey = context.GetSavedLicenseKey(type, null);
-					if (savedLicenseKey != null && this.IsKeyValid(savedLicenseKey, type))
-					{
-						licFileLicense = new LicFileLicenseProvider.LicFileLicense(this, savedLicenseKey);
-					}
-				}
-				if (licFileLicense == null)
-				{
-					string text = null;
-					if (context != null)
-					{
-						ITypeResolutionService typeResolutionService = (ITypeResolutionService)context.GetService(typeof(ITypeResolutionService));
-						if (typeResolutionService != null)
-						{
-							text = typeResolutionService.GetPathOfAssembly(type.Assembly.GetName());
-						}
-					}
-					if (text == null)
-					{
-						text = type.Module.FullyQualifiedName;
-					}
-					string text2 = Path.GetDirectoryName(text) + "\\" + type.FullName + ".lic";
-					if (File.Exists(text2))
-					{
-						StreamReader streamReader = new StreamReader(new FileStream(text2, FileMode.Open, FileAccess.Read, FileShare.Read));
-						string text3 = streamReader.ReadLine();
-						streamReader.Close();
-						if (this.IsKeyValid(text3, type))
-						{
-							licFileLicense = new LicFileLicenseProvider.LicFileLicense(this, this.GetKey(type));
-						}
-					}
-					if (licFileLicense != null)
-					{
-						context.SetSavedLicenseKey(type, licFileLicense.LicenseKey);
-					}
-				}
-			}
-			return licFileLicense;
-		}
-
-		private class LicFileLicense : License
-		{
-			public LicFileLicense(LicFileLicenseProvider owner, string key)
-			{
-				this.key = key;
-			}
-
-			public override string LicenseKey
-			{
-				get
-				{
-					return this.key;
-				}
-			}
-
-			public override void Dispose()
-			{
-				GC.SuppressFinalize(this);
-			}
-
-			private string key;
+			return key != null && key.Equals(this.GetKey(type));
 		}
 	}
 }

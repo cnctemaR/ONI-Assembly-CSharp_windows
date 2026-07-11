@@ -4,18 +4,18 @@ namespace System.Xml.Schema
 {
 	public interface IXmlSchemaInfo
 	{
-		XmlSchemaValidity Validity { get; }
-
 		bool IsDefault { get; }
 
 		bool IsNil { get; }
 
 		XmlSchemaSimpleType MemberType { get; }
 
-		XmlSchemaType SchemaType { get; }
+		XmlSchemaAttribute SchemaAttribute { get; }
 
 		XmlSchemaElement SchemaElement { get; }
 
-		XmlSchemaAttribute SchemaAttribute { get; }
+		XmlSchemaType SchemaType { get; }
+
+		XmlSchemaValidity Validity { get; }
 	}
 }

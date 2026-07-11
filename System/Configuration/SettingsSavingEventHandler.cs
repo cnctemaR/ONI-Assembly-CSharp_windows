@@ -3,5 +3,5 @@ using System.ComponentModel;
 
 namespace System.Configuration
 {
-	public delegate void SettingsSavingEventHandler(object sender, CancelEventArgs e);
+	public delegate void SettingsSavingEventHandler(object sender, global::System.ComponentModel.CancelEventArgs e);
 }

@@ -9,17 +9,17 @@ namespace System.Runtime.Versioning
 	{
 		public ResourceExposureAttribute(ResourceScope exposureLevel)
 		{
-			this._resourceExposureLevel = exposureLevel;
+			this.exposure = exposureLevel;
 		}
 
 		public ResourceScope ResourceExposureLevel
 		{
 			get
 			{
-				return this._resourceExposureLevel;
+				return this.exposure;
 			}
 		}
 
-		private ResourceScope _resourceExposureLevel;
+		private ResourceScope exposure;
 	}
 }

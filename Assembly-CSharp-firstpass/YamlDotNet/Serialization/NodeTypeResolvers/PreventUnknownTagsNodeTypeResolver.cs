@@ -10,7 +10,7 @@ namespace YamlDotNet.Serialization.NodeTypeResolvers
 		{
 			if (!string.IsNullOrEmpty(nodeEvent.Tag))
 			{
-				throw new YamlException(nodeEvent.Start, nodeEvent.End, string.Format("Encountered an unresolved tag '{0}'", nodeEvent.Tag));
+				throw new YamlException(nodeEvent.Start, nodeEvent.End, "Encountered an unresolved tag '{" + nodeEvent.Tag + "}'");
 			}
 			return false;
 		}

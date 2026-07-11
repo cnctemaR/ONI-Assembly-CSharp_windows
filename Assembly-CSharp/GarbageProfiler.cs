@@ -266,7 +266,7 @@ public static class GarbageProfiler
 												Type elementType = fieldType.GetElementType();
 												if (elementType.IsPointer || Helper.IsPOD(elementType) || Array.IndexOf<Type>(array, elementType) >= 0)
 												{
-													goto IL_03C8;
+													goto IL_03BE;
 												}
 											}
 											if (fieldType.IsGenericType)
@@ -296,7 +296,7 @@ public static class GarbageProfiler
 												}
 												if (flag)
 												{
-													goto IL_03C8;
+													goto IL_03BE;
 												}
 											}
 											object value = fieldInfo.GetValue(null);
@@ -318,7 +318,7 @@ public static class GarbageProfiler
 										}
 									}
 								}
-								IL_03C8:;
+								IL_03BE:;
 							}
 						}
 					}

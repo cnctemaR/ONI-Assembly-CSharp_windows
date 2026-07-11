@@ -1,51 +1,14 @@
 ﻿using System;
 using System.Globalization;
-using System.Resources;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Xml.Utils;
+using System.Xml.XPath;
 
 namespace System.Xml.Xsl
 {
 	[Serializable]
 	public class XsltException : SystemException
 	{
-		protected XsltException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
-			this.res = (string)info.GetValue("res", typeof(string));
-			this.args = (string[])info.GetValue("args", typeof(string[]));
-			this.sourceUri = (string)info.GetValue("sourceUri", typeof(string));
-			this.lineNumber = (int)info.GetValue("lineNumber", typeof(int));
-			this.linePosition = (int)info.GetValue("linePosition", typeof(int));
-			string text = null;
-			foreach (SerializationEntry serializationEntry in info)
-			{
-				if (serializationEntry.Name == "version")
-				{
-					text = (string)serializationEntry.Value;
-				}
-			}
-			if (text == null)
-			{
-				this.message = XsltException.CreateMessage(this.res, this.args, this.sourceUri, this.lineNumber, this.linePosition);
-				return;
-			}
-			this.message = null;
-		}
-
-		[SecurityPermission(SecurityAction.LinkDemand, SerializationFormatter = true)]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			base.GetObjectData(info, context);
-			info.AddValue("res", this.res);
-			info.AddValue("args", this.args);
-			info.AddValue("sourceUri", this.sourceUri);
-			info.AddValue("lineNumber", this.lineNumber);
-			info.AddValue("linePosition", this.linePosition);
-			info.AddValue("version", "2.0");
-		}
-
 		public XsltException()
 			: this(string.Empty, null)
 		{
@@ -57,36 +20,57 @@ namespace System.Xml.Xsl
 		}
 
 		public XsltException(string message, Exception innerException)
-			: this("{0}", new string[] { message }, null, 0, 0, innerException)
+			: this("{0}", message, innerException, 0, 0, null)
 		{
 		}
 
-		internal static XsltException Create(string res, params string[] args)
+		protected XsltException(SerializationInfo info, StreamingContext context)
 		{
-			return new XsltException(res, args, null, 0, 0, null);
+			this.lineNumber = info.GetInt32("lineNumber");
+			this.linePosition = info.GetInt32("linePosition");
+			this.sourceUri = info.GetString("sourceUri");
+			this.templateFrames = info.GetString("templateFrames");
 		}
 
-		internal static XsltException Create(string res, string[] args, Exception inner)
+		internal XsltException(string msgFormat, string message, Exception innerException, int lineNumber, int linePosition, string sourceUri)
+			: base(XsltException.CreateMessage(msgFormat, message, lineNumber, linePosition, sourceUri), innerException)
 		{
-			return new XsltException(res, args, null, 0, 0, inner);
-		}
-
-		internal XsltException(string res, string[] args, string sourceUri, int lineNumber, int linePosition, Exception inner)
-			: base(XsltException.CreateMessage(res, args, sourceUri, lineNumber, linePosition), inner)
-		{
-			base.HResult = -2146231998;
-			this.res = res;
-			this.sourceUri = sourceUri;
 			this.lineNumber = lineNumber;
 			this.linePosition = linePosition;
+			this.sourceUri = sourceUri;
 		}
 
-		public virtual string SourceUri
+		internal XsltException(string message, Exception innerException, XPathNavigator nav)
+			: base(XsltException.CreateMessage(message, nav), innerException)
 		{
-			get
+			IXmlLineInfo xmlLineInfo = nav as IXmlLineInfo;
+			this.lineNumber = ((xmlLineInfo == null) ? 0 : xmlLineInfo.LineNumber);
+			this.linePosition = ((xmlLineInfo == null) ? 0 : xmlLineInfo.LinePosition);
+			this.sourceUri = ((nav == null) ? string.Empty : nav.BaseURI);
+		}
+
+		private static string CreateMessage(string message, XPathNavigator nav)
+		{
+			IXmlLineInfo xmlLineInfo = nav as IXmlLineInfo;
+			int num = ((xmlLineInfo == null) ? 0 : xmlLineInfo.LineNumber);
+			int num2 = ((xmlLineInfo == null) ? 0 : xmlLineInfo.LinePosition);
+			string text = ((nav == null) ? string.Empty : nav.BaseURI);
+			if (num != 0)
 			{
-				return this.sourceUri;
+				return XsltException.CreateMessage("{0} at {1}({2},{3}).", message, num, num2, text);
 			}
+			return XsltException.CreateMessage("{0}.", message, num, num2, text);
+		}
+
+		private static string CreateMessage(string msgFormat, string message, int lineNumber, int linePosition, string sourceUri)
+		{
+			return string.Format(CultureInfo.InvariantCulture, msgFormat, new object[]
+			{
+				message,
+				sourceUri,
+				lineNumber.ToString(CultureInfo.InvariantCulture),
+				linePosition.ToString(CultureInfo.InvariantCulture)
+			});
 		}
 
 		public virtual int LineNumber
@@ -109,58 +93,39 @@ namespace System.Xml.Xsl
 		{
 			get
 			{
-				if (this.message != null)
-				{
-					return this.message;
-				}
-				return base.Message;
+				return (this.templateFrames == null) ? base.Message : (base.Message + this.templateFrames);
 			}
 		}
 
-		private static string CreateMessage(string res, string[] args, string sourceUri, int lineNumber, int linePosition)
+		public virtual string SourceUri
 		{
-			string text2;
-			try
+			get
 			{
-				string text = XsltException.FormatMessage(res, args);
-				if (res != "XSLT compile error at {0}({1},{2}). See InnerException for details." && lineNumber != 0)
-				{
-					text = text + " " + XsltException.FormatMessage("An error occurred at {0}({1},{2}).", new string[]
-					{
-						sourceUri,
-						lineNumber.ToString(CultureInfo.InvariantCulture),
-						linePosition.ToString(CultureInfo.InvariantCulture)
-					});
-				}
-				text2 = text;
+				return this.sourceUri;
 			}
-			catch (MissingManifestResourceException)
-			{
-				text2 = "UNKNOWN(" + res + ")";
-			}
-			return text2;
 		}
 
-		private static string FormatMessage(string key, params string[] args)
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			string text = Res.GetString(key);
-			if (text != null && args != null)
-			{
-				text = string.Format(CultureInfo.InvariantCulture, text, args);
-			}
-			return text;
+			base.GetObjectData(info, context);
+			info.AddValue("lineNumber", this.lineNumber);
+			info.AddValue("linePosition", this.linePosition);
+			info.AddValue("sourceUri", this.sourceUri);
+			info.AddValue("templateFrames", this.templateFrames);
 		}
 
-		private string res;
-
-		private string[] args;
-
-		private string sourceUri;
+		internal void AddTemplateFrame(string frame)
+		{
+			this.templateFrames += frame;
+		}
 
 		private int lineNumber;
 
 		private int linePosition;
 
-		private string message;
+		private string sourceUri;
+
+		private string templateFrames;
 	}
 }

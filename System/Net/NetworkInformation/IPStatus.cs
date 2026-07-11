@@ -4,13 +4,14 @@ namespace System.Net.NetworkInformation
 {
 	public enum IPStatus
 	{
+		Unknown = -1,
 		Success,
 		DestinationNetworkUnreachable = 11002,
 		DestinationHostUnreachable,
-		DestinationProtocolUnreachable,
+		DestinationProhibited,
+		DestinationProtocolUnreachable = 11004,
 		DestinationPortUnreachable,
-		DestinationProhibited = 11004,
-		NoResources = 11006,
+		NoResources,
 		BadOption,
 		HardwareError,
 		PacketTooBig,
@@ -26,7 +27,6 @@ namespace System.Net.NetworkInformation
 		BadHeader,
 		UnrecognizedNextHeader,
 		IcmpError,
-		DestinationScopeMismatch,
-		Unknown = -1
+		DestinationScopeMismatch
 	}
 }

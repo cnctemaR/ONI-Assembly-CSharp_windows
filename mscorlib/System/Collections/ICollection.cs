@@ -6,12 +6,12 @@ namespace System.Collections
 	[ComVisible(true)]
 	public interface ICollection : IEnumerable
 	{
-		void CopyTo(Array array, int index);
-
 		int Count { get; }
+
+		bool IsSynchronized { get; }
 
 		object SyncRoot { get; }
 
-		bool IsSynchronized { get; }
+		void CopyTo(Array array, int index);
 	}
 }

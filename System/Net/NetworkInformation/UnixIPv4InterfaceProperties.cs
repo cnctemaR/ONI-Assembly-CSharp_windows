@@ -13,7 +13,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.iface.NameIndex;
+				return UnixNetworkInterface.IfNameToIndex(this.iface.Name);
 			}
 		}
 

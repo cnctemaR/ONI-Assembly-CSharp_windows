@@ -78,7 +78,6 @@ namespace System.Runtime.Remoting
 				if (realProxy.ObjectIdentity == null)
 				{
 					realProxy.ObjectIdentity = this;
-					return;
 				}
 			}
 			else
@@ -119,7 +118,7 @@ namespace System.Runtime.Remoting
 		{
 			if (this._serverObject != null)
 			{
-				object serverObject = this._serverObject;
+				MarshalByRefObject serverObject = this._serverObject;
 				this._serverObject.ObjectIdentity = null;
 				this._serverObject = null;
 				this._serverSink = null;

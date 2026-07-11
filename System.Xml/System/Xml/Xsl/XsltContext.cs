@@ -5,28 +5,34 @@ namespace System.Xml.Xsl
 {
 	public abstract class XsltContext : XmlNamespaceManager
 	{
-		protected XsltContext(NameTable table)
-			: base(table)
-		{
-		}
-
 		protected XsltContext()
 			: base(new NameTable())
 		{
 		}
 
-		internal XsltContext(bool dummy)
+		protected XsltContext(NameTable table)
+			: base(table)
 		{
 		}
 
-		public abstract IXsltContextVariable ResolveVariable(string prefix, string name);
-
-		public abstract IXsltContextFunction ResolveFunction(string prefix, string name, XPathResultType[] ArgTypes);
-
 		public abstract bool Whitespace { get; }
 
-		public abstract bool PreserveWhitespace(XPathNavigator node);
+		public abstract bool PreserveWhitespace(XPathNavigator nav);
 
 		public abstract int CompareDocument(string baseUri, string nextbaseUri);
+
+		public abstract IXsltContextFunction ResolveFunction(string prefix, string name, XPathResultType[] argTypes);
+
+		public abstract IXsltContextVariable ResolveVariable(string prefix, string name);
+
+		internal virtual IXsltContextVariable ResolveVariable(XmlQualifiedName name)
+		{
+			return this.ResolveVariable(this.LookupPrefix(name.Namespace), name.Name);
+		}
+
+		internal virtual IXsltContextFunction ResolveFunction(XmlQualifiedName name, XPathResultType[] argTypes)
+		{
+			return this.ResolveFunction(name.Name, name.Namespace, argTypes);
+		}
 	}
 }

@@ -17,11 +17,18 @@ namespace Mono.Unix
 			if (fstab != null)
 			{
 				this.FromFstab(fstab);
-				return;
 			}
-			this.mount_point = mountPoint;
-			this.block_device = "";
-			this.fstype = "Unknown";
+			else
+			{
+				this.mount_point = mountPoint;
+				this.block_device = string.Empty;
+				this.fstype = "Unknown";
+			}
+		}
+
+		private UnixDriveInfo(Fstab fstab)
+		{
+			this.FromFstab(fstab);
 		}
 
 		private void FromFstab(Fstab fstab)
@@ -43,11 +50,6 @@ namespace Mono.Unix
 				throw new ArgumentException("specialFile isn't valid: " + specialFile);
 			}
 			return new UnixDriveInfo(fstab);
-		}
-
-		private UnixDriveInfo(Fstab fstab)
-		{
-			this.FromFstab(fstab);
 		}
 
 		public long AvailableFreeSpace
@@ -85,7 +87,8 @@ namespace Mono.Unix
 					return flag;
 				}
 				Statvfs statvfs;
-				return Syscall.statvfs(this.RootDirectory.Parent.FullName, out statvfs) == 0 && statvfs.f_fsid != this.stat.f_fsid;
+				int num = Syscall.statvfs(this.RootDirectory.Parent.FullName, out statvfs);
+				return num == 0 && statvfs.f_fsid != this.stat.f_fsid;
 			}
 		}
 
@@ -146,7 +149,8 @@ namespace Mono.Unix
 			object fstab_lock = Syscall.fstab_lock;
 			lock (fstab_lock)
 			{
-				if (Syscall.setfsent() != 1)
+				int num = Syscall.setfsent();
+				if (num != 1)
 				{
 					throw new IOException("Error calling setfsent(3)", new UnixIOException());
 				}
@@ -155,7 +159,7 @@ namespace Mono.Unix
 					Fstab fstab;
 					while ((fstab = Syscall.getfsent()) != null)
 					{
-						if (fstab.fs_file != null && fstab.fs_file.StartsWith("/"))
+						if (fstab.fs_file.StartsWith("/"))
 						{
 							arrayList.Add(new UnixDriveInfo(fstab));
 						}

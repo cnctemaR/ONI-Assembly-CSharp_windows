@@ -190,7 +190,7 @@ public class ConversationManager : KMonoBehaviour, ISim200ms
 		{
 			return null;
 		}
-		global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic.topic, "ui", true);
+		Tuple<Sprite, Color> uisprite = Def.GetUISprite(topic.topic, "ui", true);
 		if (uisprite != null)
 		{
 			ConversationManager.Mode mode = ConversationManager.Topic.Modes[topic.mode];

@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeTypeOfExpression : CodeExpression
 	{
@@ -11,36 +14,40 @@ namespace System.CodeDom
 
 		public CodeTypeOfExpression(CodeTypeReference type)
 		{
-			this.Type = type;
+			this.type = type;
 		}
 
 		public CodeTypeOfExpression(string type)
 		{
-			this.Type = new CodeTypeReference(type);
+			this.type = new CodeTypeReference(type);
 		}
 
 		public CodeTypeOfExpression(Type type)
 		{
-			this.Type = new CodeTypeReference(type);
+			this.type = new CodeTypeReference(type);
 		}
 
 		public CodeTypeReference Type
 		{
 			get
 			{
-				CodeTypeReference codeTypeReference;
-				if ((codeTypeReference = this._type) == null)
+				if (this.type == null)
 				{
-					codeTypeReference = (this._type = new CodeTypeReference(""));
+					this.type = new CodeTypeReference(string.Empty);
 				}
-				return codeTypeReference;
+				return this.type;
 			}
 			set
 			{
-				this._type = value;
+				this.type = value;
 			}
 		}
 
-		private CodeTypeReference _type;
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeTypeReference type;
 	}
 }

@@ -61,11 +61,13 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 
 		private void processProtocol(short protocol)
 		{
-			SecurityProtocolType securityProtocolType = base.Context.DecodeProtocolCode(protocol, false);
+			SecurityProtocolType securityProtocolType = base.Context.DecodeProtocolCode(protocol);
 			if ((securityProtocolType & base.Context.SecurityProtocolFlags) == securityProtocolType || (base.Context.SecurityProtocolFlags & SecurityProtocolType.Default) == SecurityProtocolType.Default)
 			{
 				base.Context.SecurityProtocol = securityProtocolType;
-				base.Context.SupportedCiphers = CipherSuiteFactory.GetSupportedCiphers(false, securityProtocolType);
+				base.Context.SupportedCiphers.Clear();
+				base.Context.SupportedCiphers = null;
+				base.Context.SupportedCiphers = CipherSuiteFactory.GetSupportedCiphers(securityProtocolType);
 				return;
 			}
 			throw new TlsException(AlertDescription.ProtocolVersion, "Incorrect protocol version received from server");

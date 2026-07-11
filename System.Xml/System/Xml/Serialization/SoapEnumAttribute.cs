@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -18,16 +19,23 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				if (this.name != null)
+				if (this.name == null)
 				{
-					return this.name;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.name;
 			}
 			set
 			{
 				this.name = value;
 			}
+		}
+
+		internal void AddKeyHash(StringBuilder sb)
+		{
+			sb.Append("SENA ");
+			KeyHelper.AddField(sb, 1, this.name);
+			sb.Append('|');
 		}
 
 		private string name;

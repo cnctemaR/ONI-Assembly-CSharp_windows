@@ -30,7 +30,7 @@ namespace YamlDotNet.Core
 		{
 			if (bestIndent < 2 || bestIndent > 9)
 			{
-				throw new ArgumentOutOfRangeException("bestIndent", string.Format(CultureInfo.InvariantCulture, "The bestIndent parameter must be between {0} and {1}.", 2, 9));
+				throw new ArgumentOutOfRangeException("bestIndent", string.Format(CultureInfo.InvariantCulture, "The bestIndent parameter must be between {0} and {1}.", new object[] { 2, 9 }));
 			}
 			this.bestIndent = bestIndent;
 			if (bestWidth <= bestIndent * 2)
@@ -495,7 +495,7 @@ namespace YamlDotNet.Core
 					this.AnalyzeVersionDirective(documentStart.Version);
 					flag = false;
 					this.WriteIndicator("%YAML", true, false, false);
-					this.WriteIndicator(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", 1, 1), true, false, false);
+					this.WriteIndicator(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", new object[] { 1, 1 }), true, false, false);
 					this.WriteIndent();
 				}
 				foreach (TagDirective tagDirective in tagDirectiveCollection)
@@ -1427,7 +1427,7 @@ namespace YamlDotNet.Core
 			CharacterAnalyzer<StringLookAheadBuffer> characterAnalyzer = new CharacterAnalyzer<StringLookAheadBuffer>(new StringLookAheadBuffer(value));
 			if (characterAnalyzer.IsSpace(0) || characterAnalyzer.IsBreak(0))
 			{
-				string text = string.Format(CultureInfo.InvariantCulture, "{0}", this.bestIndent);
+				string text = string.Format(CultureInfo.InvariantCulture, "{0}", new object[] { this.bestIndent });
 				this.WriteIndicator(text, false, false, false);
 			}
 			this.isOpenEnded = false;

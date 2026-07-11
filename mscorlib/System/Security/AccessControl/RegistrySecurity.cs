@@ -5,16 +5,6 @@ namespace System.Security.AccessControl
 {
 	public sealed class RegistrySecurity : NativeObjectSecurity
 	{
-		public RegistrySecurity()
-			: base(true, ResourceType.RegistryKey)
-		{
-		}
-
-		internal RegistrySecurity(string name, AccessControlSections includeSections)
-			: base(true, ResourceType.RegistryKey, name, includeSections)
-		{
-		}
-
 		public override Type AccessRightType
 		{
 			get
@@ -41,67 +31,67 @@ namespace System.Security.AccessControl
 
 		public override AccessRule AccessRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
 		{
-			return new RegistryAccessRule(identityReference, (RegistryRights)accessMask, isInherited, inheritanceFlags, propagationFlags, type);
+			return new RegistryAccessRule(identityReference, (RegistryRights)accessMask, inheritanceFlags, propagationFlags, type);
 		}
 
 		public void AddAccessRule(RegistryAccessRule rule)
 		{
-			base.AddAccessRule(rule);
-		}
-
-		public bool RemoveAccessRule(RegistryAccessRule rule)
-		{
-			return base.RemoveAccessRule(rule);
-		}
-
-		public void RemoveAccessRuleAll(RegistryAccessRule rule)
-		{
-			base.RemoveAccessRuleAll(rule);
-		}
-
-		public void RemoveAccessRuleSpecific(RegistryAccessRule rule)
-		{
-			base.RemoveAccessRuleSpecific(rule);
-		}
-
-		public void ResetAccessRule(RegistryAccessRule rule)
-		{
-			base.ResetAccessRule(rule);
-		}
-
-		public void SetAccessRule(RegistryAccessRule rule)
-		{
-			base.SetAccessRule(rule);
-		}
-
-		public override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
-		{
-			return new RegistryAuditRule(identityReference, (RegistryRights)accessMask, isInherited, inheritanceFlags, propagationFlags, flags);
+			throw new NotImplementedException();
 		}
 
 		public void AddAuditRule(RegistryAuditRule rule)
 		{
-			base.AddAuditRule(rule);
+			throw new NotImplementedException();
+		}
+
+		public override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
+		{
+			return new RegistryAuditRule(identityReference, (RegistryRights)accessMask, inheritanceFlags, propagationFlags, flags);
+		}
+
+		public bool RemoveAccessRule(RegistryAccessRule rule)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void RemoveAccessRuleAll(RegistryAccessRule rule)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void RemoveAccessRuleSpecific(RegistryAccessRule rule)
+		{
+			throw new NotImplementedException();
 		}
 
 		public bool RemoveAuditRule(RegistryAuditRule rule)
 		{
-			return base.RemoveAuditRule(rule);
+			throw new NotImplementedException();
 		}
 
 		public void RemoveAuditRuleAll(RegistryAuditRule rule)
 		{
-			base.RemoveAuditRuleAll(rule);
+			throw new NotImplementedException();
 		}
 
 		public void RemoveAuditRuleSpecific(RegistryAuditRule rule)
 		{
-			base.RemoveAuditRuleSpecific(rule);
+			throw new NotImplementedException();
+		}
+
+		public void ResetAccessRule(RegistryAccessRule rule)
+		{
+			throw new NotImplementedException();
+		}
+
+		public void SetAccessRule(RegistryAccessRule rule)
+		{
+			throw new NotImplementedException();
 		}
 
 		public void SetAuditRule(RegistryAuditRule rule)
 		{
-			base.SetAuditRule(rule);
+			throw new NotImplementedException();
 		}
 	}
 }

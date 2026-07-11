@@ -48,7 +48,8 @@ namespace System.Security.Policy
 			}
 			foreach (object obj in base.Children)
 			{
-				PolicyStatement policyStatement = ((CodeGroup)obj).Resolve(evidence);
+				CodeGroup codeGroup = (CodeGroup)obj;
+				PolicyStatement policyStatement = codeGroup.Resolve(evidence);
 				if (policyStatement != null)
 				{
 					return policyStatement;

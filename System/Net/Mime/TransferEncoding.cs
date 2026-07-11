@@ -7,7 +7,6 @@ namespace System.Net.Mime
 		QuotedPrintable,
 		Base64,
 		SevenBit,
-		EightBit,
 		Unknown = -1
 	}
 }

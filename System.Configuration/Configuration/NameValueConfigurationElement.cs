@@ -4,16 +4,16 @@ namespace System.Configuration
 {
 	public sealed class NameValueConfigurationElement : ConfigurationElement
 	{
-		static NameValueConfigurationElement()
-		{
-			NameValueConfigurationElement._properties.Add(NameValueConfigurationElement._propName);
-			NameValueConfigurationElement._properties.Add(NameValueConfigurationElement._propValue);
-		}
-
 		public NameValueConfigurationElement(string name, string value)
 		{
 			base[NameValueConfigurationElement._propName] = name;
 			base[NameValueConfigurationElement._propValue] = value;
+		}
+
+		static NameValueConfigurationElement()
+		{
+			NameValueConfigurationElement._properties.Add(NameValueConfigurationElement._propName);
+			NameValueConfigurationElement._properties.Add(NameValueConfigurationElement._propValue);
 		}
 
 		[ConfigurationProperty("name", DefaultValue = "", Options = ConfigurationPropertyOptions.IsKey)]
@@ -48,8 +48,8 @@ namespace System.Configuration
 
 		private static ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection();
 
-		private static readonly ConfigurationProperty _propName = new ConfigurationProperty("name", typeof(string), "", ConfigurationPropertyOptions.IsKey);
+		private static readonly ConfigurationProperty _propName = new ConfigurationProperty("name", typeof(string), string.Empty, ConfigurationPropertyOptions.IsKey);
 
-		private static readonly ConfigurationProperty _propValue = new ConfigurationProperty("value", typeof(string), "");
+		private static readonly ConfigurationProperty _propValue = new ConfigurationProperty("value", typeof(string), string.Empty);
 	}
 }

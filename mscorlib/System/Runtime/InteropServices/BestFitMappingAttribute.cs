@@ -8,18 +8,18 @@ namespace System.Runtime.InteropServices
 	{
 		public BestFitMappingAttribute(bool BestFitMapping)
 		{
-			this._bestFitMapping = BestFitMapping;
+			this.bfm = BestFitMapping;
 		}
 
 		public bool BestFitMapping
 		{
 			get
 			{
-				return this._bestFitMapping;
+				return this.bfm;
 			}
 		}
 
-		internal bool _bestFitMapping;
+		private bool bfm;
 
 		public bool ThrowOnUnmappableChar;
 	}

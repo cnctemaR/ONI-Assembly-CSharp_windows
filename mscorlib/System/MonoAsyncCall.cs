@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace System
 {
-	[StructLayout(LayoutKind.Sequential)]
 	internal class MonoAsyncCall
 	{
 		private object msg;
@@ -17,5 +15,7 @@ namespace System
 		private object res;
 
 		private object out_args;
+
+		private long wait_event;
 	}
 }

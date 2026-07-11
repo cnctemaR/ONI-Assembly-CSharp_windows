@@ -4,67 +4,23 @@ namespace System.Xml.Serialization
 {
 	public class XmlNodeEventArgs : EventArgs
 	{
-		internal XmlNodeEventArgs(XmlNode xmlNode, int lineNumber, int linePosition, object o)
+		internal XmlNodeEventArgs(int linenumber, int lineposition, string localname, string name, string nsuri, XmlNodeType nodetype, object source, string text)
 		{
-			this.o = o;
-			this.xmlNode = xmlNode;
-			this.lineNumber = lineNumber;
-			this.linePosition = linePosition;
-		}
-
-		public object ObjectBeingDeserialized
-		{
-			get
-			{
-				return this.o;
-			}
-		}
-
-		public XmlNodeType NodeType
-		{
-			get
-			{
-				return this.xmlNode.NodeType;
-			}
-		}
-
-		public string Name
-		{
-			get
-			{
-				return this.xmlNode.Name;
-			}
-		}
-
-		public string LocalName
-		{
-			get
-			{
-				return this.xmlNode.LocalName;
-			}
-		}
-
-		public string NamespaceURI
-		{
-			get
-			{
-				return this.xmlNode.NamespaceURI;
-			}
-		}
-
-		public string Text
-		{
-			get
-			{
-				return this.xmlNode.Value;
-			}
+			this.linenumber = linenumber;
+			this.lineposition = lineposition;
+			this.localname = localname;
+			this.name = name;
+			this.nsuri = nsuri;
+			this.nodetype = nodetype;
+			this.source = source;
+			this.text = text;
 		}
 
 		public int LineNumber
 		{
 			get
 			{
-				return this.lineNumber;
+				return this.linenumber;
 			}
 		}
 
@@ -72,16 +28,72 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this.linePosition;
+				return this.lineposition;
 			}
 		}
 
-		private object o;
+		public string LocalName
+		{
+			get
+			{
+				return this.localname;
+			}
+		}
 
-		private XmlNode xmlNode;
+		public string Name
+		{
+			get
+			{
+				return this.name;
+			}
+		}
 
-		private int lineNumber;
+		public string NamespaceURI
+		{
+			get
+			{
+				return this.nsuri;
+			}
+		}
 
-		private int linePosition;
+		public XmlNodeType NodeType
+		{
+			get
+			{
+				return this.nodetype;
+			}
+		}
+
+		public object ObjectBeingDeserialized
+		{
+			get
+			{
+				return this.source;
+			}
+		}
+
+		public string Text
+		{
+			get
+			{
+				return this.text;
+			}
+		}
+
+		private int linenumber;
+
+		private int lineposition;
+
+		private string localname;
+
+		private string name;
+
+		private string nsuri;
+
+		private XmlNodeType nodetype;
+
+		private object source;
+
+		private string text;
 	}
 }

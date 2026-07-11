@@ -9,9 +9,6 @@ namespace System.Configuration.Assemblies
 	{
 		None,
 		MD5 = 32771,
-		SHA1,
-		SHA256 = 32780,
-		SHA384,
-		SHA512
+		SHA1
 	}
 }

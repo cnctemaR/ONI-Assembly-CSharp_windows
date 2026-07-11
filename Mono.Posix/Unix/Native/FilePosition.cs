@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Mono.Unix.Native
 {
-	public sealed class FilePosition : MarshalByRefObject, IDisposable, IEquatable<FilePosition>
+	public sealed class FilePosition : MarshalByRefObject, IEquatable<FilePosition>, IDisposable
 	{
 		public FilePosition()
 		{
@@ -73,7 +73,7 @@ namespace Mono.Unix.Native
 
 		public bool Equals(FilePosition value)
 		{
-			return this == value || this.ToString().Equals(value.ToString());
+			return object.ReferenceEquals(this, value) || this.ToString().Equals(value.ToString());
 		}
 
 		public override int GetHashCode()

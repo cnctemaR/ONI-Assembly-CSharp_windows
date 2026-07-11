@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Security;
 
 namespace System.Runtime.Serialization
 {
@@ -8,41 +7,39 @@ namespace System.Runtime.Serialization
 	{
 		public SerializationObjectManager(StreamingContext context)
 		{
-			this.m_context = context;
-			this.m_objectSeenTable = new Hashtable();
+			this.context = context;
 		}
 
-		[SecurityCritical]
+		private event SerializationCallbacks.CallbackHandler callbacks;
+
 		public void RegisterObject(object obj)
 		{
-			SerializationEvents serializationEventsForType = SerializationEventsCache.GetSerializationEventsForType(obj.GetType());
-			if (serializationEventsForType.HasOnSerializingEvents && this.m_objectSeenTable[obj] == null)
+			if (this.seen.Contains(obj))
 			{
-				this.m_objectSeenTable[obj] = true;
-				serializationEventsForType.InvokeOnSerializing(obj, this.m_context);
-				this.AddOnSerialized(obj);
+				return;
+			}
+			SerializationCallbacks sc = SerializationCallbacks.GetSerializationCallbacks(obj.GetType());
+			this.seen[obj] = 1;
+			sc.RaiseOnSerializing(obj, this.context);
+			if (sc.HasSerializedCallbacks)
+			{
+				this.callbacks = (SerializationCallbacks.CallbackHandler)Delegate.Combine(this.callbacks, new SerializationCallbacks.CallbackHandler(delegate(StreamingContext ctx)
+				{
+					sc.RaiseOnSerialized(obj, ctx);
+				}));
 			}
 		}
 
 		public void RaiseOnSerializedEvent()
 		{
-			if (this.m_onSerializedHandler != null)
+			if (this.callbacks != null)
 			{
-				this.m_onSerializedHandler(this.m_context);
+				this.callbacks(this.context);
 			}
 		}
 
-		[SecuritySafeCritical]
-		private void AddOnSerialized(object obj)
-		{
-			SerializationEvents serializationEventsForType = SerializationEventsCache.GetSerializationEventsForType(obj.GetType());
-			this.m_onSerializedHandler = serializationEventsForType.AddOnSerialized(obj, this.m_onSerializedHandler);
-		}
+		private readonly StreamingContext context;
 
-		private Hashtable m_objectSeenTable = new Hashtable();
-
-		private SerializationEventHandler m_onSerializedHandler;
-
-		private StreamingContext m_context;
+		private readonly Hashtable seen = new Hashtable();
 	}
 }

@@ -6,6 +6,7 @@ namespace System.Net.NetworkInformation
 	{
 		public MacOsIPv4InterfaceStatistics(MacOsNetworkInterface parent)
 		{
+			this.macos = parent;
 		}
 
 		public override long BytesReceived
@@ -103,5 +104,7 @@ namespace System.Net.NetworkInformation
 				return 0L;
 			}
 		}
+
+		private MacOsNetworkInterface macos;
 	}
 }

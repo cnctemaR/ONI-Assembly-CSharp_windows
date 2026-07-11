@@ -2,43 +2,31 @@
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
-using System.Text;
-using System.Xml.Schema;
+using System.Runtime.Serialization;
 
 namespace System.Xml.Serialization
 {
 	public abstract class XmlSerializationWriter : XmlSerializationGeneratedCode
 	{
-		internal void Init(XmlWriter w, XmlSerializerNamespaces namespaces, string encodingStyle, string idBase, TempAssembly tempAssembly)
+		protected XmlSerializationWriter()
 		{
-			this.w = w;
-			this.namespaces = namespaces;
-			this.soap12 = encodingStyle == "http://www.w3.org/2003/05/soap-encoding";
-			this.idBase = idBase;
-			base.Init(tempAssembly);
+			this.qnameCount = 0;
+			this.serializedObjects = new Hashtable();
 		}
 
-		protected bool EscapeName
+		internal void Initialize(XmlWriter writer, XmlSerializerNamespaces nss)
 		{
-			get
+			this.writer = writer;
+			if (nss != null)
 			{
-				return this.escapeName;
-			}
-			set
-			{
-				this.escapeName = value;
-			}
-		}
-
-		protected XmlWriter Writer
-		{
-			get
-			{
-				return this.w;
-			}
-			set
-			{
-				this.w = value;
+				this.namespaces = new ArrayList();
+				foreach (XmlQualifiedName xmlQualifiedName in nss.ToArray())
+				{
+					if (xmlQualifiedName.Name != string.Empty && xmlQualifiedName.Namespace != string.Empty)
+					{
+						this.namespaces.Add(xmlQualifiedName);
+					}
+				}
 			}
 		}
 
@@ -46,22 +34,73 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				if (this.namespaces != null)
-				{
-					return this.namespaces.NamespaceList;
-				}
-				return null;
+				return this.namespaces;
 			}
 			set
 			{
-				if (value == null)
-				{
-					this.namespaces = null;
-					return;
-				}
-				XmlQualifiedName[] array = (XmlQualifiedName[])value.ToArray(typeof(XmlQualifiedName));
-				this.namespaces = new XmlSerializerNamespaces(array);
+				this.namespaces = value;
 			}
+		}
+
+		protected XmlWriter Writer
+		{
+			get
+			{
+				return this.writer;
+			}
+			set
+			{
+				this.writer = value;
+			}
+		}
+
+		protected void AddWriteCallback(Type type, string typeName, string typeNs, XmlSerializationWriteCallback callback)
+		{
+			XmlSerializationWriter.WriteCallbackInfo writeCallbackInfo = new XmlSerializationWriter.WriteCallbackInfo();
+			writeCallbackInfo.Type = type;
+			writeCallbackInfo.TypeName = typeName;
+			writeCallbackInfo.TypeNs = typeNs;
+			writeCallbackInfo.Callback = callback;
+			if (this.callbacks == null)
+			{
+				this.callbacks = new Hashtable();
+			}
+			this.callbacks.Add(type, writeCallbackInfo);
+		}
+
+		protected Exception CreateChoiceIdentifierValueException(string value, string identifier, string name, string ns)
+		{
+			string text = string.Format("Value '{0}' of the choice identifier '{1}' does not match element '{2}' from namespace '{3}'.", new object[] { value, identifier, name, ns });
+			return new InvalidOperationException(text);
+		}
+
+		protected Exception CreateInvalidChoiceIdentifierValueException(string type, string identifier)
+		{
+			string text = string.Format("Invalid or missing choice identifier '{0}' of type '{1}'.", identifier, type);
+			return new InvalidOperationException(text);
+		}
+
+		protected Exception CreateMismatchChoiceException(string value, string elementName, string enumValue)
+		{
+			string text = string.Format("Value of {0} mismatches the type of {1}, you need to set it to {2}.", elementName, value, enumValue);
+			return new InvalidOperationException(text);
+		}
+
+		protected Exception CreateUnknownAnyElementException(string name, string ns)
+		{
+			string text = string.Format("The XML element named '{0}' from namespace '{1}' was not expected. The XML element name and namespace must match those provided via XmlAnyElementAttribute(s).", name, ns);
+			return new InvalidOperationException(text);
+		}
+
+		protected Exception CreateUnknownTypeException(object o)
+		{
+			return this.CreateUnknownTypeException(o.GetType());
+		}
+
+		protected Exception CreateUnknownTypeException(Type type)
+		{
+			string text = string.Format("The type {0} may not be used in this context.", type);
+			return new InvalidOperationException(text);
 		}
 
 		protected static byte[] FromByteArrayBase64(byte[] value)
@@ -69,29 +108,9 @@ namespace System.Xml.Serialization
 			return value;
 		}
 
-		protected static Assembly ResolveDynamicAssembly(string assemblyFullName)
-		{
-			return DynamicAssemblies.Get(assemblyFullName);
-		}
-
 		protected static string FromByteArrayHex(byte[] value)
 		{
 			return XmlCustomFormatter.FromByteArrayHex(value);
-		}
-
-		protected static string FromDateTime(DateTime value)
-		{
-			return XmlCustomFormatter.FromDateTime(value);
-		}
-
-		protected static string FromDate(DateTime value)
-		{
-			return XmlCustomFormatter.FromDate(value);
-		}
-
-		protected static string FromTime(DateTime value)
-		{
-			return XmlCustomFormatter.FromTime(value);
 		}
 
 		protected static string FromChar(char value)
@@ -99,14 +118,24 @@ namespace System.Xml.Serialization
 			return XmlCustomFormatter.FromChar(value);
 		}
 
-		protected static string FromEnum(long value, string[] values, long[] ids)
+		protected static string FromDate(DateTime value)
 		{
-			return XmlCustomFormatter.FromEnum(value, values, ids, null);
+			return XmlCustomFormatter.FromDate(value);
 		}
 
-		protected static string FromEnum(long value, string[] values, long[] ids, string typeName)
+		protected static string FromDateTime(DateTime value)
 		{
-			return XmlCustomFormatter.FromEnum(value, values, ids, typeName);
+			return XmlCustomFormatter.FromDateTime(value);
+		}
+
+		protected static string FromEnum(long value, string[] values, long[] ids)
+		{
+			return XmlCustomFormatter.FromEnum(value, values, ids);
+		}
+
+		protected static string FromTime(DateTime value)
+		{
+			return XmlCustomFormatter.FromTime(value);
 		}
 
 		protected static string FromXmlName(string name)
@@ -129,878 +158,77 @@ namespace System.Xml.Serialization
 			return XmlCustomFormatter.FromXmlNmTokens(nmTokens);
 		}
 
-		protected void WriteXsiType(string name, string ns)
-		{
-			this.WriteAttribute("type", "http://www.w3.org/2001/XMLSchema-instance", this.GetQualifiedName(name, ns));
-		}
-
-		private XmlQualifiedName GetPrimitiveTypeName(Type type)
-		{
-			return this.GetPrimitiveTypeName(type, true);
-		}
-
-		private XmlQualifiedName GetPrimitiveTypeName(Type type, bool throwIfUnknown)
-		{
-			XmlQualifiedName primitiveTypeNameInternal = XmlSerializationWriter.GetPrimitiveTypeNameInternal(type);
-			if (throwIfUnknown && primitiveTypeNameInternal == null)
-			{
-				throw this.CreateUnknownTypeException(type);
-			}
-			return primitiveTypeNameInternal;
-		}
-
-		internal static XmlQualifiedName GetPrimitiveTypeNameInternal(Type type)
-		{
-			string text = "http://www.w3.org/2001/XMLSchema";
-			string text2;
-			switch (Type.GetTypeCode(type))
-			{
-			case TypeCode.Boolean:
-				text2 = "boolean";
-				goto IL_0196;
-			case TypeCode.Char:
-				text2 = "char";
-				text = "http://microsoft.com/wsdl/types/";
-				goto IL_0196;
-			case TypeCode.SByte:
-				text2 = "byte";
-				goto IL_0196;
-			case TypeCode.Byte:
-				text2 = "unsignedByte";
-				goto IL_0196;
-			case TypeCode.Int16:
-				text2 = "short";
-				goto IL_0196;
-			case TypeCode.UInt16:
-				text2 = "unsignedShort";
-				goto IL_0196;
-			case TypeCode.Int32:
-				text2 = "int";
-				goto IL_0196;
-			case TypeCode.UInt32:
-				text2 = "unsignedInt";
-				goto IL_0196;
-			case TypeCode.Int64:
-				text2 = "long";
-				goto IL_0196;
-			case TypeCode.UInt64:
-				text2 = "unsignedLong";
-				goto IL_0196;
-			case TypeCode.Single:
-				text2 = "float";
-				goto IL_0196;
-			case TypeCode.Double:
-				text2 = "double";
-				goto IL_0196;
-			case TypeCode.Decimal:
-				text2 = "decimal";
-				goto IL_0196;
-			case TypeCode.DateTime:
-				text2 = "dateTime";
-				goto IL_0196;
-			case TypeCode.String:
-				text2 = "string";
-				goto IL_0196;
-			}
-			if (type == typeof(XmlQualifiedName))
-			{
-				text2 = "QName";
-			}
-			else if (type == typeof(byte[]))
-			{
-				text2 = "base64Binary";
-			}
-			else if (type == typeof(TimeSpan) && LocalAppContextSwitches.EnableTimeSpanSerialization)
-			{
-				text2 = "TimeSpan";
-			}
-			else if (type == typeof(Guid))
-			{
-				text2 = "guid";
-				text = "http://microsoft.com/wsdl/types/";
-			}
-			else
-			{
-				if (!(type == typeof(XmlNode[])))
-				{
-					return null;
-				}
-				text2 = "anyType";
-			}
-			IL_0196:
-			return new XmlQualifiedName(text2, text);
-		}
-
-		protected void WriteTypedPrimitive(string name, string ns, object o, bool xsiType)
-		{
-			string text = "http://www.w3.org/2001/XMLSchema";
-			bool flag = true;
-			bool flag2 = false;
-			Type type = o.GetType();
-			bool flag3 = false;
-			string text2;
-			string text3;
-			switch (Type.GetTypeCode(type))
-			{
-			case TypeCode.Boolean:
-				text2 = XmlConvert.ToString((bool)o);
-				text3 = "boolean";
-				goto IL_0322;
-			case TypeCode.Char:
-				text2 = XmlSerializationWriter.FromChar((char)o);
-				text3 = "char";
-				text = "http://microsoft.com/wsdl/types/";
-				goto IL_0322;
-			case TypeCode.SByte:
-				text2 = XmlConvert.ToString((sbyte)o);
-				text3 = "byte";
-				goto IL_0322;
-			case TypeCode.Byte:
-				text2 = XmlConvert.ToString((byte)o);
-				text3 = "unsignedByte";
-				goto IL_0322;
-			case TypeCode.Int16:
-				text2 = XmlConvert.ToString((short)o);
-				text3 = "short";
-				goto IL_0322;
-			case TypeCode.UInt16:
-				text2 = XmlConvert.ToString((ushort)o);
-				text3 = "unsignedShort";
-				goto IL_0322;
-			case TypeCode.Int32:
-				text2 = XmlConvert.ToString((int)o);
-				text3 = "int";
-				goto IL_0322;
-			case TypeCode.UInt32:
-				text2 = XmlConvert.ToString((uint)o);
-				text3 = "unsignedInt";
-				goto IL_0322;
-			case TypeCode.Int64:
-				text2 = XmlConvert.ToString((long)o);
-				text3 = "long";
-				goto IL_0322;
-			case TypeCode.UInt64:
-				text2 = XmlConvert.ToString((ulong)o);
-				text3 = "unsignedLong";
-				goto IL_0322;
-			case TypeCode.Single:
-				text2 = XmlConvert.ToString((float)o);
-				text3 = "float";
-				goto IL_0322;
-			case TypeCode.Double:
-				text2 = XmlConvert.ToString((double)o);
-				text3 = "double";
-				goto IL_0322;
-			case TypeCode.Decimal:
-				text2 = XmlConvert.ToString((decimal)o);
-				text3 = "decimal";
-				goto IL_0322;
-			case TypeCode.DateTime:
-				text2 = XmlSerializationWriter.FromDateTime((DateTime)o);
-				text3 = "dateTime";
-				goto IL_0322;
-			case TypeCode.String:
-				text2 = (string)o;
-				text3 = "string";
-				flag = false;
-				goto IL_0322;
-			}
-			if (type == typeof(XmlQualifiedName))
-			{
-				text3 = "QName";
-				flag3 = true;
-				if (name == null)
-				{
-					this.w.WriteStartElement(text3, text);
-				}
-				else
-				{
-					this.w.WriteStartElement(name, ns);
-				}
-				text2 = this.FromXmlQualifiedName((XmlQualifiedName)o, false);
-			}
-			else if (type == typeof(byte[]))
-			{
-				text2 = string.Empty;
-				flag2 = true;
-				text3 = "base64Binary";
-			}
-			else if (type == typeof(Guid))
-			{
-				text2 = XmlConvert.ToString((Guid)o);
-				text3 = "guid";
-				text = "http://microsoft.com/wsdl/types/";
-			}
-			else if (type == typeof(TimeSpan) && LocalAppContextSwitches.EnableTimeSpanSerialization)
-			{
-				text2 = XmlConvert.ToString((TimeSpan)o);
-				text3 = "TimeSpan";
-			}
-			else
-			{
-				if (typeof(XmlNode[]).IsAssignableFrom(type))
-				{
-					if (name == null)
-					{
-						this.w.WriteStartElement("anyType", "http://www.w3.org/2001/XMLSchema");
-					}
-					else
-					{
-						this.w.WriteStartElement(name, ns);
-					}
-					XmlNode[] array = (XmlNode[])o;
-					for (int i = 0; i < array.Length; i++)
-					{
-						if (array[i] != null)
-						{
-							array[i].WriteTo(this.w);
-						}
-					}
-					this.w.WriteEndElement();
-					return;
-				}
-				throw this.CreateUnknownTypeException(type);
-			}
-			IL_0322:
-			if (!flag3)
-			{
-				if (name == null)
-				{
-					this.w.WriteStartElement(text3, text);
-				}
-				else
-				{
-					this.w.WriteStartElement(name, ns);
-				}
-			}
-			if (xsiType)
-			{
-				this.WriteXsiType(text3, text);
-			}
-			if (text2 == null)
-			{
-				this.w.WriteAttributeString("nil", "http://www.w3.org/2001/XMLSchema-instance", "true");
-			}
-			else if (flag2)
-			{
-				XmlCustomFormatter.WriteArrayBase64(this.w, (byte[])o, 0, ((byte[])o).Length);
-			}
-			else if (flag)
-			{
-				this.w.WriteRaw(text2);
-			}
-			else
-			{
-				this.w.WriteString(text2);
-			}
-			this.w.WriteEndElement();
-		}
-
-		private string GetQualifiedName(string name, string ns)
-		{
-			if (ns == null || ns.Length == 0)
-			{
-				return name;
-			}
-			string text = this.w.LookupPrefix(ns);
-			if (text == null)
-			{
-				if (ns == "http://www.w3.org/XML/1998/namespace")
-				{
-					text = "xml";
-				}
-				else
-				{
-					text = this.NextPrefix();
-					this.WriteAttribute("xmlns", text, null, ns);
-				}
-			}
-			else if (text.Length == 0)
-			{
-				return name;
-			}
-			return text + ":" + name;
-		}
-
 		protected string FromXmlQualifiedName(XmlQualifiedName xmlQualifiedName)
 		{
-			return this.FromXmlQualifiedName(xmlQualifiedName, true);
-		}
-
-		protected string FromXmlQualifiedName(XmlQualifiedName xmlQualifiedName, bool ignoreEmpty)
-		{
-			if (xmlQualifiedName == null)
+			if (xmlQualifiedName == null || xmlQualifiedName == XmlQualifiedName.Empty)
 			{
 				return null;
 			}
-			if (xmlQualifiedName.IsEmpty && ignoreEmpty)
-			{
-				return null;
-			}
-			return this.GetQualifiedName(this.EscapeName ? XmlConvert.EncodeLocalName(xmlQualifiedName.Name) : xmlQualifiedName.Name, xmlQualifiedName.Namespace);
-		}
-
-		protected void WriteStartElement(string name)
-		{
-			this.WriteStartElement(name, null, null, false, null);
-		}
-
-		protected void WriteStartElement(string name, string ns)
-		{
-			this.WriteStartElement(name, ns, null, false, null);
-		}
-
-		protected void WriteStartElement(string name, string ns, bool writePrefixed)
-		{
-			this.WriteStartElement(name, ns, null, writePrefixed, null);
-		}
-
-		protected void WriteStartElement(string name, string ns, object o)
-		{
-			this.WriteStartElement(name, ns, o, false, null);
-		}
-
-		protected void WriteStartElement(string name, string ns, object o, bool writePrefixed)
-		{
-			this.WriteStartElement(name, ns, o, writePrefixed, null);
-		}
-
-		protected void WriteStartElement(string name, string ns, object o, bool writePrefixed, XmlSerializerNamespaces xmlns)
-		{
-			if (o != null && this.objectsInUse != null)
-			{
-				if (this.objectsInUse.ContainsKey(o))
-				{
-					throw new InvalidOperationException(Res.GetString("A circular reference was detected while serializing an object of type {0}.", new object[] { o.GetType().FullName }));
-				}
-				this.objectsInUse.Add(o, o);
-			}
-			string text = null;
-			bool flag = false;
-			if (this.namespaces != null)
-			{
-				foreach (object obj in this.namespaces.Namespaces.Keys)
-				{
-					string text2 = (string)obj;
-					string text3 = (string)this.namespaces.Namespaces[text2];
-					if (text2.Length > 0 && text3 == ns)
-					{
-						text = text2;
-					}
-					if (text2.Length == 0)
-					{
-						if (text3 == null || text3.Length == 0)
-						{
-							flag = true;
-						}
-						if (ns != text3)
-						{
-							writePrefixed = true;
-						}
-					}
-				}
-				this.usedPrefixes = this.ListUsedPrefixes(this.namespaces.Namespaces, this.aliasBase);
-			}
-			if (writePrefixed && text == null && ns != null && ns.Length > 0)
-			{
-				text = this.w.LookupPrefix(ns);
-				if (text == null || text.Length == 0)
-				{
-					text = this.NextPrefix();
-				}
-			}
-			if (text == null && xmlns != null)
-			{
-				text = xmlns.LookupPrefix(ns);
-			}
-			if (flag && text == null && ns != null && ns.Length != 0)
-			{
-				text = this.NextPrefix();
-			}
-			this.w.WriteStartElement(text, name, ns);
-			if (this.namespaces != null)
-			{
-				foreach (object obj2 in this.namespaces.Namespaces.Keys)
-				{
-					string text4 = (string)obj2;
-					string text5 = (string)this.namespaces.Namespaces[text4];
-					if (text4.Length != 0 || (text5 != null && text5.Length != 0))
-					{
-						if (text5 == null || text5.Length == 0)
-						{
-							if (text4.Length > 0)
-							{
-								throw new InvalidOperationException(Res.GetString("Invalid namespace attribute: xmlns:{0}=\"\".", new object[] { text4 }));
-							}
-							this.WriteAttribute("xmlns", text4, null, text5);
-						}
-						else if (this.w.LookupPrefix(text5) == null)
-						{
-							if (text == null && text4.Length == 0)
-							{
-								break;
-							}
-							this.WriteAttribute("xmlns", text4, null, text5);
-						}
-					}
-				}
-			}
-			this.WriteNamespaceDeclarations(xmlns);
-		}
-
-		private Hashtable ListUsedPrefixes(Hashtable nsList, string prefix)
-		{
-			Hashtable hashtable = new Hashtable();
-			int length = prefix.Length;
-			foreach (object obj in this.namespaces.Namespaces.Keys)
-			{
-				string text = (string)obj;
-				if (text.Length > length)
-				{
-					string text2 = text;
-					int length2 = text2.Length;
-					if (text2.Length > length && text2.Length <= length + "2147483647".Length && text2.StartsWith(prefix, StringComparison.Ordinal))
-					{
-						bool flag = true;
-						for (int i = length; i < text2.Length; i++)
-						{
-							if (!char.IsDigit(text2, i))
-							{
-								flag = false;
-								break;
-							}
-						}
-						if (flag)
-						{
-							long num = long.Parse(text2.Substring(length), CultureInfo.InvariantCulture);
-							if (num <= 2147483647L)
-							{
-								int num2 = (int)num;
-								if (!hashtable.ContainsKey(num2))
-								{
-									hashtable.Add(num2, num2);
-								}
-							}
-						}
-					}
-				}
-			}
-			if (hashtable.Count > 0)
-			{
-				return hashtable;
-			}
-			return null;
-		}
-
-		protected void WriteNullTagEncoded(string name)
-		{
-			this.WriteNullTagEncoded(name, null);
-		}
-
-		protected void WriteNullTagEncoded(string name, string ns)
-		{
-			if (name == null || name.Length == 0)
-			{
-				return;
-			}
-			this.WriteStartElement(name, ns, null, true);
-			this.w.WriteAttributeString("nil", "http://www.w3.org/2001/XMLSchema-instance", "true");
-			this.w.WriteEndElement();
-		}
-
-		protected void WriteNullTagLiteral(string name)
-		{
-			this.WriteNullTagLiteral(name, null);
-		}
-
-		protected void WriteNullTagLiteral(string name, string ns)
-		{
-			if (name == null || name.Length == 0)
-			{
-				return;
-			}
-			this.WriteStartElement(name, ns, null, false);
-			this.w.WriteAttributeString("nil", "http://www.w3.org/2001/XMLSchema-instance", "true");
-			this.w.WriteEndElement();
-		}
-
-		protected void WriteEmptyTag(string name)
-		{
-			this.WriteEmptyTag(name, null);
-		}
-
-		protected void WriteEmptyTag(string name, string ns)
-		{
-			if (name == null || name.Length == 0)
-			{
-				return;
-			}
-			this.WriteStartElement(name, ns, null, false);
-			this.w.WriteEndElement();
-		}
-
-		protected void WriteEndElement()
-		{
-			this.w.WriteEndElement();
-		}
-
-		protected void WriteEndElement(object o)
-		{
-			this.w.WriteEndElement();
-			if (o != null && this.objectsInUse != null)
-			{
-				this.objectsInUse.Remove(o);
-			}
-		}
-
-		protected void WriteSerializable(IXmlSerializable serializable, string name, string ns, bool isNullable)
-		{
-			this.WriteSerializable(serializable, name, ns, isNullable, true);
-		}
-
-		protected void WriteSerializable(IXmlSerializable serializable, string name, string ns, bool isNullable, bool wrapped)
-		{
-			if (serializable == null)
-			{
-				if (isNullable)
-				{
-					this.WriteNullTagLiteral(name, ns);
-				}
-				return;
-			}
-			if (wrapped)
-			{
-				this.w.WriteStartElement(name, ns);
-			}
-			serializable.WriteXml(this.w);
-			if (wrapped)
-			{
-				this.w.WriteEndElement();
-			}
-		}
-
-		protected void WriteNullableStringEncoded(string name, string ns, string value, XmlQualifiedName xsiType)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagEncoded(name, ns);
-				return;
-			}
-			this.WriteElementString(name, ns, value, xsiType);
-		}
-
-		protected void WriteNullableStringLiteral(string name, string ns, string value)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagLiteral(name, ns);
-				return;
-			}
-			this.WriteElementString(name, ns, value, null);
-		}
-
-		protected void WriteNullableStringEncodedRaw(string name, string ns, string value, XmlQualifiedName xsiType)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagEncoded(name, ns);
-				return;
-			}
-			this.WriteElementStringRaw(name, ns, value, xsiType);
-		}
-
-		protected void WriteNullableStringEncodedRaw(string name, string ns, byte[] value, XmlQualifiedName xsiType)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagEncoded(name, ns);
-				return;
-			}
-			this.WriteElementStringRaw(name, ns, value, xsiType);
-		}
-
-		protected void WriteNullableStringLiteralRaw(string name, string ns, string value)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagLiteral(name, ns);
-				return;
-			}
-			this.WriteElementStringRaw(name, ns, value, null);
-		}
-
-		protected void WriteNullableStringLiteralRaw(string name, string ns, byte[] value)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagLiteral(name, ns);
-				return;
-			}
-			this.WriteElementStringRaw(name, ns, value, null);
-		}
-
-		protected void WriteNullableQualifiedNameEncoded(string name, string ns, XmlQualifiedName value, XmlQualifiedName xsiType)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagEncoded(name, ns);
-				return;
-			}
-			this.WriteElementQualifiedName(name, ns, value, xsiType);
-		}
-
-		protected void WriteNullableQualifiedNameLiteral(string name, string ns, XmlQualifiedName value)
-		{
-			if (value == null)
-			{
-				this.WriteNullTagLiteral(name, ns);
-				return;
-			}
-			this.WriteElementQualifiedName(name, ns, value, null);
-		}
-
-		protected void WriteElementEncoded(XmlNode node, string name, string ns, bool isNullable, bool any)
-		{
-			if (node == null)
-			{
-				if (isNullable)
-				{
-					this.WriteNullTagEncoded(name, ns);
-				}
-				return;
-			}
-			this.WriteElement(node, name, ns, isNullable, any);
-		}
-
-		protected void WriteElementLiteral(XmlNode node, string name, string ns, bool isNullable, bool any)
-		{
-			if (node == null)
-			{
-				if (isNullable)
-				{
-					this.WriteNullTagLiteral(name, ns);
-				}
-				return;
-			}
-			this.WriteElement(node, name, ns, isNullable, any);
-		}
-
-		private void WriteElement(XmlNode node, string name, string ns, bool isNullable, bool any)
-		{
-			if (typeof(XmlAttribute).IsAssignableFrom(node.GetType()))
-			{
-				throw new InvalidOperationException(Res.GetString("Cannot write a node of type XmlAttribute as an element value. Use XmlAnyAttributeAttribute with an array of XmlNode or XmlAttribute to write the node as an attribute."));
-			}
-			if (node is XmlDocument)
-			{
-				node = ((XmlDocument)node).DocumentElement;
-				if (node == null)
-				{
-					if (isNullable)
-					{
-						this.WriteNullTagEncoded(name, ns);
-					}
-					return;
-				}
-			}
-			if (any)
-			{
-				if (node is XmlElement && name != null && name.Length > 0 && (node.LocalName != name || node.NamespaceURI != ns))
-				{
-					throw new InvalidOperationException(Res.GetString("This element was named '{0}' from namespace '{1}' but should have been named '{2}' from namespace '{3}'.", new object[] { node.LocalName, node.NamespaceURI, name, ns }));
-				}
-			}
-			else
-			{
-				this.w.WriteStartElement(name, ns);
-			}
-			node.WriteTo(this.w);
-			if (!any)
-			{
-				this.w.WriteEndElement();
-			}
-		}
-
-		protected Exception CreateUnknownTypeException(object o)
-		{
-			return this.CreateUnknownTypeException(o.GetType());
-		}
-
-		protected Exception CreateUnknownTypeException(Type type)
-		{
-			if (typeof(IXmlSerializable).IsAssignableFrom(type))
-			{
-				return new InvalidOperationException(Res.GetString("The type {0} may not be used in this context. To use {0} as a parameter, return type, or member of a class or struct, the parameter, return type, or member must be declared as type {0} (it cannot be object). Objects of type {0} may not be used in un-typed collections, such as ArrayLists.", new object[] { type.FullName }));
-			}
-			if (!new TypeScope().GetTypeDesc(type).IsStructLike)
-			{
-				return new InvalidOperationException(Res.GetString("The type {0} may not be used in this context.", new object[] { type.FullName }));
-			}
-			return new InvalidOperationException(Res.GetString("The type {0} was not expected. Use the XmlInclude or SoapInclude attribute to specify types that are not known statically.", new object[] { type.FullName }));
-		}
-
-		protected Exception CreateMismatchChoiceException(string value, string elementName, string enumValue)
-		{
-			return new InvalidOperationException(Res.GetString("Value of {0} mismatches the type of {1}; you need to set it to {2}.", new object[] { elementName, value, enumValue }));
-		}
-
-		protected Exception CreateUnknownAnyElementException(string name, string ns)
-		{
-			return new InvalidOperationException(Res.GetString("The XML element '{0}' from namespace '{1}' was not expected. The XML element name and namespace must match those provided via XmlAnyElementAttribute(s).", new object[] { name, ns }));
-		}
-
-		protected Exception CreateInvalidChoiceIdentifierValueException(string type, string identifier)
-		{
-			return new InvalidOperationException(Res.GetString("Invalid or missing value of the choice identifier '{1}' of type '{0}[]'.", new object[] { type, identifier }));
-		}
-
-		protected Exception CreateChoiceIdentifierValueException(string value, string identifier, string name, string ns)
-		{
-			return new InvalidOperationException(Res.GetString("Value '{0}' of the choice identifier '{1}' does not match element '{2}' from namespace '{3}'.", new object[] { value, identifier, name, ns }));
-		}
-
-		protected Exception CreateInvalidEnumValueException(object value, string typeName)
-		{
-			return new InvalidOperationException(Res.GetString("Instance validation error: '{0}' is not a valid value for {1}.", new object[] { value, typeName }));
-		}
-
-		protected Exception CreateInvalidAnyTypeException(object o)
-		{
-			return this.CreateInvalidAnyTypeException(o.GetType());
-		}
-
-		protected Exception CreateInvalidAnyTypeException(Type type)
-		{
-			return new InvalidOperationException(Res.GetString("Cannot serialize member of type {0}: XmlAnyElement can only be used with classes of type XmlNode or a type deriving from XmlNode.", new object[] { type.FullName }));
-		}
-
-		protected void WriteReferencingElement(string n, string ns, object o)
-		{
-			this.WriteReferencingElement(n, ns, o, false);
-		}
-
-		protected void WriteReferencingElement(string n, string ns, object o, bool isNullable)
-		{
-			if (o == null)
-			{
-				if (isNullable)
-				{
-					this.WriteNullTagEncoded(n, ns);
-				}
-				return;
-			}
-			this.WriteStartElement(n, ns, null, true);
-			if (this.soap12)
-			{
-				this.w.WriteAttributeString("ref", "http://www.w3.org/2003/05/soap-encoding", this.GetId(o, true));
-			}
-			else
-			{
-				this.w.WriteAttributeString("href", "#" + this.GetId(o, true));
-			}
-			this.w.WriteEndElement();
-		}
-
-		private bool IsIdDefined(object o)
-		{
-			return this.references != null && this.references.Contains(o);
+			return this.GetQualifiedName(xmlQualifiedName.Name, xmlQualifiedName.Namespace);
 		}
 
 		private string GetId(object o, bool addToReferencesList)
 		{
-			if (this.references == null)
+			if (this.idGenerator == null)
 			{
-				this.references = new Hashtable();
-				this.referencesToWrite = new ArrayList();
+				this.idGenerator = new ObjectIDGenerator();
 			}
-			string text = (string)this.references[o];
+			bool flag;
+			long id = this.idGenerator.GetId(o, out flag);
+			return string.Format(CultureInfo.InvariantCulture, "id{0}", new object[] { id });
+		}
+
+		private bool AlreadyQueued(object ob)
+		{
+			if (this.idGenerator == null)
+			{
+				return false;
+			}
+			bool flag;
+			this.idGenerator.HasId(ob, out flag);
+			return !flag;
+		}
+
+		private string GetNamespacePrefix(string ns)
+		{
+			string text = this.Writer.LookupPrefix(ns);
 			if (text == null)
 			{
-				string text2 = this.idBase;
-				string text3 = "id";
-				int num = this.nextId + 1;
-				this.nextId = num;
-				text = text2 + text3 + num.ToString(CultureInfo.InvariantCulture);
-				this.references.Add(o, text);
-				if (addToReferencesList)
-				{
-					this.referencesToWrite.Add(o);
-				}
+				text = string.Format(CultureInfo.InvariantCulture, "q{0}", new object[] { ++this.qnameCount });
+				this.WriteAttribute("xmlns", text, null, ns);
 			}
 			return text;
 		}
 
-		protected void WriteId(object o)
+		private string GetQualifiedName(string name, string ns)
 		{
-			this.WriteId(o, true);
+			if (ns == string.Empty)
+			{
+				return name;
+			}
+			string namespacePrefix = this.GetNamespacePrefix(ns);
+			if (namespacePrefix == string.Empty)
+			{
+				return name;
+			}
+			return string.Format("{0}:{1}", namespacePrefix, name);
 		}
 
-		private void WriteId(object o, bool addToReferencesList)
+		protected abstract void InitCallbacks();
+
+		protected void TopLevelElement()
 		{
-			if (this.soap12)
-			{
-				this.w.WriteAttributeString("id", "http://www.w3.org/2003/05/soap-encoding", this.GetId(o, addToReferencesList));
-				return;
-			}
-			this.w.WriteAttributeString("id", this.GetId(o, addToReferencesList));
+			this.topLevelElement = true;
 		}
 
-		protected void WriteXmlAttribute(XmlNode node)
+		protected void WriteAttribute(string localName, byte[] value)
 		{
-			this.WriteXmlAttribute(node, null);
+			this.WriteAttribute(localName, string.Empty, value);
 		}
 
-		protected void WriteXmlAttribute(XmlNode node, object container)
+		protected void WriteAttribute(string localName, string value)
 		{
-			XmlAttribute xmlAttribute = node as XmlAttribute;
-			if (xmlAttribute == null)
-			{
-				throw new InvalidOperationException(Res.GetString("The node must be either type XmlAttribute or a derived type."));
-			}
-			if (xmlAttribute.Value != null)
-			{
-				if (xmlAttribute.NamespaceURI == "http://schemas.xmlsoap.org/wsdl/" && xmlAttribute.LocalName == "arrayType")
-				{
-					string text;
-					XmlQualifiedName xmlQualifiedName = TypeScope.ParseWsdlArrayType(xmlAttribute.Value, out text, (container is XmlSchemaObject) ? ((XmlSchemaObject)container) : null);
-					string text2 = this.FromXmlQualifiedName(xmlQualifiedName, true) + text;
-					this.WriteAttribute("arrayType", "http://schemas.xmlsoap.org/wsdl/", text2);
-					return;
-				}
-				this.WriteAttribute(xmlAttribute.Name, xmlAttribute.NamespaceURI, xmlAttribute.Value);
-			}
-		}
-
-		protected void WriteAttribute(string localName, string ns, string value)
-		{
-			if (value == null)
-			{
-				return;
-			}
-			if (!(localName == "xmlns") && !localName.StartsWith("xmlns:", StringComparison.Ordinal))
-			{
-				int num = localName.IndexOf(':');
-				if (num < 0)
-				{
-					if (ns == "http://www.w3.org/XML/1998/namespace")
-					{
-						string text = this.w.LookupPrefix(ns);
-						if (text == null || text.Length == 0)
-						{
-							text = "xml";
-						}
-						this.w.WriteAttributeString(text, localName, ns, value);
-						return;
-					}
-					this.w.WriteAttributeString(localName, ns, value);
-					return;
-				}
-				else
-				{
-					string text2 = localName.Substring(0, num);
-					this.w.WriteAttributeString(text2, localName.Substring(num + 1), ns, value);
-				}
-			}
+			this.WriteAttribute(string.Empty, localName, string.Empty, value);
 		}
 
 		protected void WriteAttribute(string localName, string ns, byte[] value)
@@ -1009,53 +237,14 @@ namespace System.Xml.Serialization
 			{
 				return;
 			}
-			if (!(localName == "xmlns") && !localName.StartsWith("xmlns:", StringComparison.Ordinal))
-			{
-				int num = localName.IndexOf(':');
-				if (num < 0)
-				{
-					if (ns == "http://www.w3.org/XML/1998/namespace")
-					{
-						string text = this.w.LookupPrefix(ns);
-						if (text == null || text.Length == 0)
-						{
-						}
-						this.w.WriteStartAttribute("xml", localName, ns);
-					}
-					else
-					{
-						this.w.WriteStartAttribute(null, localName, ns);
-					}
-				}
-				else
-				{
-					string text2 = localName.Substring(0, num);
-					text2 = this.w.LookupPrefix(ns);
-					this.w.WriteStartAttribute(text2, localName.Substring(num + 1), ns);
-				}
-				XmlCustomFormatter.WriteArrayBase64(this.w, value, 0, value.Length);
-				this.w.WriteEndAttribute();
-			}
+			this.Writer.WriteStartAttribute(localName, ns);
+			this.WriteValue(value);
+			this.Writer.WriteEndAttribute();
 		}
 
-		protected void WriteAttribute(string localName, string value)
+		protected void WriteAttribute(string localName, string ns, string value)
 		{
-			if (value == null)
-			{
-				return;
-			}
-			this.w.WriteAttributeString(localName, null, value);
-		}
-
-		protected void WriteAttribute(string localName, byte[] value)
-		{
-			if (value == null)
-			{
-				return;
-			}
-			this.w.WriteStartAttribute(null, localName, null);
-			XmlCustomFormatter.WriteArrayBase64(this.w, value, 0, value.Length);
-			this.w.WriteEndAttribute();
+			this.WriteAttribute(null, localName, ns, value);
 		}
 
 		protected void WriteAttribute(string prefix, string localName, string ns, string value)
@@ -1064,38 +253,96 @@ namespace System.Xml.Serialization
 			{
 				return;
 			}
-			this.w.WriteAttributeString(prefix, localName, null, value);
+			this.Writer.WriteAttributeString(prefix, localName, ns, value);
 		}
 
-		protected void WriteValue(string value)
+		private void WriteXmlNode(XmlNode node)
 		{
-			if (value == null)
+			if (node is XmlDocument)
 			{
-				return;
+				node = ((XmlDocument)node).DocumentElement;
 			}
-			this.w.WriteString(value);
+			node.WriteTo(this.Writer);
 		}
 
-		protected void WriteValue(byte[] value)
+		protected void WriteElementEncoded(XmlNode node, string name, string ns, bool isNullable, bool any)
 		{
-			if (value == null)
+			if (name != string.Empty)
 			{
-				return;
+				if (node == null)
+				{
+					if (isNullable)
+					{
+						this.WriteNullTagEncoded(name, ns);
+					}
+				}
+				else
+				{
+					this.Writer.WriteStartElement(name, ns);
+					this.WriteXmlNode(node);
+					this.Writer.WriteEndElement();
+				}
 			}
-			XmlCustomFormatter.WriteArrayBase64(this.w, value, 0, value.Length);
+			else
+			{
+				this.WriteXmlNode(node);
+			}
 		}
 
-		protected void WriteStartDocument()
+		protected void WriteElementLiteral(XmlNode node, string name, string ns, bool isNullable, bool any)
 		{
-			if (this.w.WriteState == WriteState.Start)
+			if (name != string.Empty)
 			{
-				this.w.WriteStartDocument();
+				if (node == null)
+				{
+					if (isNullable)
+					{
+						this.WriteNullTagLiteral(name, ns);
+					}
+				}
+				else
+				{
+					this.Writer.WriteStartElement(name, ns);
+					this.WriteXmlNode(node);
+					this.Writer.WriteEndElement();
+				}
 			}
+			else
+			{
+				this.WriteXmlNode(node);
+			}
+		}
+
+		protected void WriteElementQualifiedName(string localName, XmlQualifiedName value)
+		{
+			this.WriteElementQualifiedName(localName, string.Empty, value, null);
+		}
+
+		protected void WriteElementQualifiedName(string localName, string ns, XmlQualifiedName value)
+		{
+			this.WriteElementQualifiedName(localName, ns, value, null);
+		}
+
+		protected void WriteElementQualifiedName(string localName, XmlQualifiedName value, XmlQualifiedName xsiType)
+		{
+			this.WriteElementQualifiedName(localName, string.Empty, value, xsiType);
+		}
+
+		protected void WriteElementQualifiedName(string localName, string ns, XmlQualifiedName value, XmlQualifiedName xsiType)
+		{
+			localName = XmlCustomFormatter.FromXmlNCName(localName);
+			this.WriteStartElement(localName, ns);
+			if (xsiType != null)
+			{
+				this.WriteXsiType(xsiType.Name, xsiType.Namespace);
+			}
+			this.Writer.WriteString(this.FromXmlQualifiedName(value));
+			this.WriteEndElement();
 		}
 
 		protected void WriteElementString(string localName, string value)
 		{
-			this.WriteElementString(localName, null, value, null);
+			this.WriteElementString(localName, string.Empty, value, null);
 		}
 
 		protected void WriteElementString(string localName, string ns, string value)
@@ -1105,7 +352,7 @@ namespace System.Xml.Serialization
 
 		protected void WriteElementString(string localName, string value, XmlQualifiedName xsiType)
 		{
-			this.WriteElementString(localName, null, value, xsiType);
+			this.WriteElementString(localName, string.Empty, value, xsiType);
 		}
 
 		protected void WriteElementString(string localName, string ns, string value, XmlQualifiedName xsiType)
@@ -1114,30 +361,33 @@ namespace System.Xml.Serialization
 			{
 				return;
 			}
-			if (xsiType == null)
+			if (xsiType != null)
 			{
-				this.w.WriteElementString(localName, ns, value);
-				return;
+				localName = XmlCustomFormatter.FromXmlNCName(localName);
+				this.WriteStartElement(localName, ns);
+				this.WriteXsiType(xsiType.Name, xsiType.Namespace);
+				this.Writer.WriteString(value);
+				this.WriteEndElement();
 			}
-			this.w.WriteStartElement(localName, ns);
-			this.WriteXsiType(xsiType.Name, xsiType.Namespace);
-			this.w.WriteString(value);
-			this.w.WriteEndElement();
-		}
-
-		protected void WriteElementStringRaw(string localName, string value)
-		{
-			this.WriteElementStringRaw(localName, null, value, null);
+			else
+			{
+				this.Writer.WriteElementString(localName, ns, value);
+			}
 		}
 
 		protected void WriteElementStringRaw(string localName, byte[] value)
 		{
-			this.WriteElementStringRaw(localName, null, value, null);
+			this.WriteElementStringRaw(localName, string.Empty, value, null);
 		}
 
-		protected void WriteElementStringRaw(string localName, string ns, string value)
+		protected void WriteElementStringRaw(string localName, string value)
 		{
-			this.WriteElementStringRaw(localName, ns, value, null);
+			this.WriteElementStringRaw(localName, string.Empty, value, null);
+		}
+
+		protected void WriteElementStringRaw(string localName, byte[] value, XmlQualifiedName xsiType)
+		{
+			this.WriteElementStringRaw(localName, string.Empty, value, xsiType);
 		}
 
 		protected void WriteElementStringRaw(string localName, string ns, byte[] value)
@@ -1145,29 +395,14 @@ namespace System.Xml.Serialization
 			this.WriteElementStringRaw(localName, ns, value, null);
 		}
 
+		protected void WriteElementStringRaw(string localName, string ns, string value)
+		{
+			this.WriteElementStringRaw(localName, ns, value, null);
+		}
+
 		protected void WriteElementStringRaw(string localName, string value, XmlQualifiedName xsiType)
 		{
-			this.WriteElementStringRaw(localName, null, value, xsiType);
-		}
-
-		protected void WriteElementStringRaw(string localName, byte[] value, XmlQualifiedName xsiType)
-		{
-			this.WriteElementStringRaw(localName, null, value, xsiType);
-		}
-
-		protected void WriteElementStringRaw(string localName, string ns, string value, XmlQualifiedName xsiType)
-		{
-			if (value == null)
-			{
-				return;
-			}
-			this.w.WriteStartElement(localName, ns);
-			if (xsiType != null)
-			{
-				this.WriteXsiType(xsiType.Name, xsiType.Namespace);
-			}
-			this.w.WriteRaw(value);
-			this.w.WriteEndElement();
+			this.WriteElementStringRaw(localName, string.Empty, value, null);
 		}
 
 		protected void WriteElementStringRaw(string localName, string ns, byte[] value, XmlQualifiedName xsiType)
@@ -1176,196 +411,196 @@ namespace System.Xml.Serialization
 			{
 				return;
 			}
-			this.w.WriteStartElement(localName, ns);
+			this.WriteStartElement(localName, ns);
 			if (xsiType != null)
 			{
 				this.WriteXsiType(xsiType.Name, xsiType.Namespace);
 			}
-			XmlCustomFormatter.WriteArrayBase64(this.w, value, 0, value.Length);
-			this.w.WriteEndElement();
+			if (value.Length > 0)
+			{
+				this.Writer.WriteBase64(value, 0, value.Length);
+			}
+			this.WriteEndElement();
 		}
 
-		protected void WriteRpcResult(string name, string ns)
+		protected void WriteElementStringRaw(string localName, string ns, string value, XmlQualifiedName xsiType)
 		{
-			if (!this.soap12)
+			localName = XmlCustomFormatter.FromXmlNCName(localName);
+			this.WriteStartElement(localName, ns);
+			if (xsiType != null)
+			{
+				this.WriteXsiType(xsiType.Name, xsiType.Namespace);
+			}
+			this.Writer.WriteRaw(value);
+			this.WriteEndElement();
+		}
+
+		protected void WriteEmptyTag(string name)
+		{
+			this.WriteEmptyTag(name, string.Empty);
+		}
+
+		protected void WriteEmptyTag(string name, string ns)
+		{
+			name = XmlCustomFormatter.FromXmlName(name);
+			this.WriteStartElement(name, ns);
+			this.WriteEndElement();
+		}
+
+		protected void WriteEndElement()
+		{
+			this.WriteEndElement(null);
+		}
+
+		protected void WriteEndElement(object o)
+		{
+			if (o != null)
+			{
+				this.serializedObjects.Remove(o);
+			}
+			this.Writer.WriteEndElement();
+		}
+
+		protected void WriteId(object o)
+		{
+			this.WriteAttribute("id", this.GetId(o, true));
+		}
+
+		protected void WriteNamespaceDeclarations(XmlSerializerNamespaces ns)
+		{
+			if (ns == null)
 			{
 				return;
 			}
-			this.WriteElementQualifiedName("result", "http://www.w3.org/2003/05/soap-rpc", new XmlQualifiedName(name, ns), null);
+			ICollection values = ns.Namespaces.Values;
+			foreach (object obj in values)
+			{
+				XmlQualifiedName xmlQualifiedName = (XmlQualifiedName)obj;
+				if (xmlQualifiedName.Namespace != string.Empty && this.Writer.LookupPrefix(xmlQualifiedName.Namespace) != xmlQualifiedName.Name)
+				{
+					this.WriteAttribute("xmlns", xmlQualifiedName.Name, "http://www.w3.org/2000/xmlns/", xmlQualifiedName.Namespace);
+				}
+			}
 		}
 
-		protected void WriteElementQualifiedName(string localName, XmlQualifiedName value)
+		protected void WriteNullableQualifiedNameEncoded(string name, string ns, XmlQualifiedName value, XmlQualifiedName xsiType)
 		{
-			this.WriteElementQualifiedName(localName, null, value, null);
+			if (value != null)
+			{
+				this.WriteElementQualifiedName(name, ns, value, xsiType);
+			}
+			else
+			{
+				this.WriteNullTagEncoded(name, ns);
+			}
 		}
 
-		protected void WriteElementQualifiedName(string localName, XmlQualifiedName value, XmlQualifiedName xsiType)
+		protected void WriteNullableQualifiedNameLiteral(string name, string ns, XmlQualifiedName value)
 		{
-			this.WriteElementQualifiedName(localName, null, value, xsiType);
+			if (value != null)
+			{
+				this.WriteElementQualifiedName(name, ns, value);
+			}
+			else
+			{
+				this.WriteNullTagLiteral(name, ns);
+			}
 		}
 
-		protected void WriteElementQualifiedName(string localName, string ns, XmlQualifiedName value)
+		protected void WriteNullableStringEncoded(string name, string ns, string value, XmlQualifiedName xsiType)
 		{
-			this.WriteElementQualifiedName(localName, ns, value, null);
+			if (value != null)
+			{
+				this.WriteElementString(name, ns, value, xsiType);
+			}
+			else
+			{
+				this.WriteNullTagEncoded(name, ns);
+			}
 		}
 
-		protected void WriteElementQualifiedName(string localName, string ns, XmlQualifiedName value, XmlQualifiedName xsiType)
+		protected void WriteNullableStringEncodedRaw(string name, string ns, byte[] value, XmlQualifiedName xsiType)
 		{
 			if (value == null)
 			{
-				return;
-			}
-			if (value.Namespace == null || value.Namespace.Length == 0)
-			{
-				this.WriteStartElement(localName, ns, null, true);
-				this.WriteAttribute("xmlns", "");
+				this.WriteNullTagEncoded(name, ns);
 			}
 			else
 			{
-				this.w.WriteStartElement(localName, ns);
+				this.WriteElementStringRaw(name, ns, value, xsiType);
 			}
-			if (xsiType != null)
-			{
-				this.WriteXsiType(xsiType.Name, xsiType.Namespace);
-			}
-			this.w.WriteString(this.FromXmlQualifiedName(value, false));
-			this.w.WriteEndElement();
 		}
 
-		protected void AddWriteCallback(Type type, string typeName, string typeNs, XmlSerializationWriteCallback callback)
+		protected void WriteNullableStringEncodedRaw(string name, string ns, string value, XmlQualifiedName xsiType)
 		{
-			XmlSerializationWriter.TypeEntry typeEntry = new XmlSerializationWriter.TypeEntry();
-			typeEntry.typeName = typeName;
-			typeEntry.typeNs = typeNs;
-			typeEntry.type = type;
-			typeEntry.callback = callback;
-			this.typeEntries[type] = typeEntry;
+			if (value == null)
+			{
+				this.WriteNullTagEncoded(name, ns);
+			}
+			else
+			{
+				this.WriteElementStringRaw(name, ns, value, xsiType);
+			}
 		}
 
-		private void WriteArray(string name, string ns, object o, Type type)
+		protected void WriteNullableStringLiteral(string name, string ns, string value)
 		{
-			Type type2 = TypeScope.GetArrayElementType(type, null);
-			StringBuilder stringBuilder = new StringBuilder();
-			if (!this.soap12)
+			if (value != null)
 			{
-				while ((type2.IsArray || typeof(IEnumerable).IsAssignableFrom(type2)) && this.GetPrimitiveTypeName(type2, false) == null)
-				{
-					type2 = TypeScope.GetArrayElementType(type2, null);
-					stringBuilder.Append("[]");
-				}
-			}
-			string text;
-			string text2;
-			if (type2 == typeof(object))
-			{
-				text = "anyType";
-				text2 = "http://www.w3.org/2001/XMLSchema";
+				this.WriteElementString(name, ns, value, null);
 			}
 			else
 			{
-				XmlSerializationWriter.TypeEntry typeEntry = this.GetTypeEntry(type2);
-				if (typeEntry != null)
-				{
-					text = typeEntry.typeName;
-					text2 = typeEntry.typeNs;
-				}
-				else if (this.soap12)
-				{
-					XmlQualifiedName primitiveTypeName = this.GetPrimitiveTypeName(type2, false);
-					if (primitiveTypeName != null)
-					{
-						text = primitiveTypeName.Name;
-						text2 = primitiveTypeName.Namespace;
-					}
-					else
-					{
-						Type type3 = type2.BaseType;
-						while (type3 != null)
-						{
-							typeEntry = this.GetTypeEntry(type3);
-							if (typeEntry != null)
-							{
-								break;
-							}
-							type3 = type3.BaseType;
-						}
-						if (typeEntry != null)
-						{
-							text = typeEntry.typeName;
-							text2 = typeEntry.typeNs;
-						}
-						else
-						{
-							text = "anyType";
-							text2 = "http://www.w3.org/2001/XMLSchema";
-						}
-					}
-				}
-				else
-				{
-					XmlQualifiedName primitiveTypeName2 = this.GetPrimitiveTypeName(type2);
-					text = primitiveTypeName2.Name;
-					text2 = primitiveTypeName2.Namespace;
-				}
+				this.WriteNullTagLiteral(name, ns);
 			}
-			if (stringBuilder.Length > 0)
+		}
+
+		protected void WriteNullableStringLiteralRaw(string name, string ns, byte[] value)
+		{
+			if (value == null)
 			{
-				text += stringBuilder.ToString();
-			}
-			if (this.soap12 && name != null && name.Length > 0)
-			{
-				this.WriteStartElement(name, ns, null, false);
+				this.WriteNullTagLiteral(name, ns);
 			}
 			else
 			{
-				this.WriteStartElement("Array", "http://schemas.xmlsoap.org/soap/encoding/", null, true);
+				this.WriteElementStringRaw(name, ns, value);
 			}
-			this.WriteId(o, false);
-			if (type.IsArray)
+		}
+
+		protected void WriteNullableStringLiteralRaw(string name, string ns, string value)
+		{
+			if (value == null)
 			{
-				Array array = (Array)o;
-				int length = array.Length;
-				if (this.soap12)
-				{
-					this.w.WriteAttributeString("itemType", "http://www.w3.org/2003/05/soap-encoding", this.GetQualifiedName(text, text2));
-					this.w.WriteAttributeString("arraySize", "http://www.w3.org/2003/05/soap-encoding", length.ToString(CultureInfo.InvariantCulture));
-				}
-				else
-				{
-					this.w.WriteAttributeString("arrayType", "http://schemas.xmlsoap.org/soap/encoding/", this.GetQualifiedName(text, text2) + "[" + length.ToString(CultureInfo.InvariantCulture) + "]");
-				}
-				for (int i = 0; i < length; i++)
-				{
-					this.WritePotentiallyReferencingElement("Item", "", array.GetValue(i), type2, false, true);
-				}
+				this.WriteNullTagLiteral(name, ns);
 			}
 			else
 			{
-				int num = (typeof(ICollection).IsAssignableFrom(type) ? ((ICollection)o).Count : (-1));
-				if (this.soap12)
-				{
-					this.w.WriteAttributeString("itemType", "http://www.w3.org/2003/05/soap-encoding", this.GetQualifiedName(text, text2));
-					if (num >= 0)
-					{
-						this.w.WriteAttributeString("arraySize", "http://www.w3.org/2003/05/soap-encoding", num.ToString(CultureInfo.InvariantCulture));
-					}
-				}
-				else
-				{
-					string text3 = ((num >= 0) ? ("[" + num + "]") : "[]");
-					this.w.WriteAttributeString("arrayType", "http://schemas.xmlsoap.org/soap/encoding/", this.GetQualifiedName(text, text2) + text3);
-				}
-				IEnumerator enumerator = ((IEnumerable)o).GetEnumerator();
-				if (enumerator != null)
-				{
-					while (enumerator.MoveNext())
-					{
-						object obj = enumerator.Current;
-						this.WritePotentiallyReferencingElement("Item", "", obj, type2, false, true);
-					}
-				}
+				this.WriteElementStringRaw(name, ns, value);
 			}
-			this.w.WriteEndElement();
+		}
+
+		protected void WriteNullTagEncoded(string name)
+		{
+			this.WriteNullTagEncoded(name, string.Empty);
+		}
+
+		protected void WriteNullTagEncoded(string name, string ns)
+		{
+			this.Writer.WriteStartElement(name, ns);
+			this.Writer.WriteAttributeString("nil", "http://www.w3.org/2001/XMLSchema-instance", "true");
+			this.Writer.WriteEndElement();
+		}
+
+		protected void WriteNullTagLiteral(string name)
+		{
+			this.WriteNullTagLiteral(name, string.Empty);
+		}
+
+		protected void WriteNullTagLiteral(string name, string ns)
+		{
+			this.WriteStartElement(name, ns);
+			this.Writer.WriteAttributeString("nil", "http://www.w3.org/2001/XMLSchema-instance", "true");
+			this.WriteEndElement();
 		}
 
 		protected void WritePotentiallyReferencingElement(string n, string ns, object o)
@@ -1393,194 +628,459 @@ namespace System.Xml.Serialization
 				}
 				return;
 			}
-			Type type = o.GetType();
-			if (Convert.GetTypeCode(o) == TypeCode.Object && !(o is Guid) && type != typeof(XmlQualifiedName) && !(o is XmlNode[]) && type != typeof(byte[]))
+			this.WriteStartElement(n, ns, true);
+			this.CheckReferenceQueue();
+			if (this.callbacks != null && this.callbacks.ContainsKey(o.GetType()))
 			{
-				if ((suppressReference || this.soap12) && !this.IsIdDefined(o))
+				XmlSerializationWriter.WriteCallbackInfo writeCallbackInfo = (XmlSerializationWriter.WriteCallbackInfo)this.callbacks[o.GetType()];
+				if (o.GetType().IsEnum)
 				{
-					this.WriteReferencedElement(n, ns, o, ambientType);
-					return;
+					writeCallbackInfo.Callback(o);
 				}
-				if (n == null)
+				else if (suppressReference)
 				{
-					XmlSerializationWriter.TypeEntry typeEntry = this.GetTypeEntry(type);
-					this.WriteReferencingElement(typeEntry.typeName, typeEntry.typeNs, o, isNullable);
-					return;
+					this.Writer.WriteAttributeString("id", this.GetId(o, false));
+					if (ambientType != o.GetType())
+					{
+						this.WriteXsiType(writeCallbackInfo.TypeName, writeCallbackInfo.TypeNs);
+					}
+					writeCallbackInfo.Callback(o);
 				}
-				this.WriteReferencingElement(n, ns, o, isNullable);
-				return;
+				else
+				{
+					if (!this.AlreadyQueued(o))
+					{
+						this.referencedElements.Enqueue(o);
+					}
+					this.Writer.WriteAttributeString("href", "#" + this.GetId(o, true));
+				}
 			}
 			else
 			{
-				bool flag = type != ambientType && !type.IsEnum;
-				XmlSerializationWriter.TypeEntry typeEntry2 = this.GetTypeEntry(type);
-				if (typeEntry2 != null)
+				TypeData typeData = TypeTranslator.GetTypeData(o.GetType());
+				if (typeData.SchemaType == SchemaTypes.Primitive)
 				{
-					if (n == null)
-					{
-						this.WriteStartElement(typeEntry2.typeName, typeEntry2.typeNs, null, true);
-					}
-					else
-					{
-						this.WriteStartElement(n, ns, null, true);
-					}
-					if (flag)
-					{
-						this.WriteXsiType(typeEntry2.typeName, typeEntry2.typeNs);
-					}
-					typeEntry2.callback(o);
-					this.w.WriteEndElement();
-					return;
+					this.WriteXsiType(typeData.XmlType, "http://www.w3.org/2001/XMLSchema");
+					this.Writer.WriteString(XmlCustomFormatter.ToXmlString(typeData, o));
 				}
-				this.WriteTypedPrimitive(n, ns, o, flag);
-				return;
+				else
+				{
+					if (!this.IsPrimitiveArray(typeData))
+					{
+						throw new InvalidOperationException("Invalid type: " + o.GetType().FullName);
+					}
+					if (!this.AlreadyQueued(o))
+					{
+						this.referencedElements.Enqueue(o);
+					}
+					this.Writer.WriteAttributeString("href", "#" + this.GetId(o, true));
+				}
 			}
+			this.WriteEndElement();
 		}
-
-		private void WriteReferencedElement(object o, Type ambientType)
-		{
-			this.WriteReferencedElement(null, null, o, ambientType);
-		}
-
-		private void WriteReferencedElement(string name, string ns, object o, Type ambientType)
-		{
-			if (name == null)
-			{
-				name = string.Empty;
-			}
-			Type type = o.GetType();
-			if (type.IsArray || typeof(IEnumerable).IsAssignableFrom(type))
-			{
-				this.WriteArray(name, ns, o, type);
-				return;
-			}
-			XmlSerializationWriter.TypeEntry typeEntry = this.GetTypeEntry(type);
-			if (typeEntry == null)
-			{
-				throw this.CreateUnknownTypeException(type);
-			}
-			this.WriteStartElement((name.Length == 0) ? typeEntry.typeName : name, (ns == null) ? typeEntry.typeNs : ns, null, true);
-			this.WriteId(o, false);
-			if (ambientType != type)
-			{
-				this.WriteXsiType(typeEntry.typeName, typeEntry.typeNs);
-			}
-			typeEntry.callback(o);
-			this.w.WriteEndElement();
-		}
-
-		private XmlSerializationWriter.TypeEntry GetTypeEntry(Type t)
-		{
-			if (this.typeEntries == null)
-			{
-				this.typeEntries = new Hashtable();
-				this.InitCallbacks();
-			}
-			return (XmlSerializationWriter.TypeEntry)this.typeEntries[t];
-		}
-
-		protected abstract void InitCallbacks();
 
 		protected void WriteReferencedElements()
 		{
-			if (this.referencesToWrite == null)
+			if (this.referencedElements == null)
 			{
 				return;
 			}
-			for (int i = 0; i < this.referencesToWrite.Count; i++)
+			if (this.callbacks == null)
 			{
-				this.WriteReferencedElement(this.referencesToWrite[i], null);
+				return;
+			}
+			while (this.referencedElements.Count > 0)
+			{
+				object obj = this.referencedElements.Dequeue();
+				TypeData typeData = TypeTranslator.GetTypeData(obj.GetType());
+				XmlSerializationWriter.WriteCallbackInfo writeCallbackInfo = (XmlSerializationWriter.WriteCallbackInfo)this.callbacks[obj.GetType()];
+				if (writeCallbackInfo != null)
+				{
+					this.WriteStartElement(writeCallbackInfo.TypeName, writeCallbackInfo.TypeNs, true);
+					this.Writer.WriteAttributeString("id", this.GetId(obj, false));
+					if (typeData.SchemaType != SchemaTypes.Array)
+					{
+						this.WriteXsiType(writeCallbackInfo.TypeName, writeCallbackInfo.TypeNs);
+					}
+					writeCallbackInfo.Callback(obj);
+					this.WriteEndElement();
+				}
+				else if (this.IsPrimitiveArray(typeData))
+				{
+					this.WriteArray(obj, typeData);
+				}
 			}
 		}
 
-		protected void TopLevelElement()
+		private bool IsPrimitiveArray(TypeData td)
 		{
-			this.objectsInUse = new Hashtable();
+			return td.SchemaType == SchemaTypes.Array && (td.ListItemTypeData.SchemaType == SchemaTypes.Primitive || td.ListItemType == typeof(object) || this.IsPrimitiveArray(td.ListItemTypeData));
 		}
 
-		protected void WriteNamespaceDeclarations(XmlSerializerNamespaces xmlns)
+		private void WriteArray(object o, TypeData td)
 		{
-			if (xmlns != null)
+			TypeData typeData = td;
+			int num = -1;
+			string text;
+			do
 			{
-				foreach (object obj in xmlns.Namespaces)
+				typeData = typeData.ListItemTypeData;
+				text = typeData.XmlType;
+				num++;
+			}
+			while (typeData.SchemaType == SchemaTypes.Array);
+			while (num-- > 0)
+			{
+				text += "[]";
+			}
+			this.WriteStartElement("Array", "http://schemas.xmlsoap.org/soap/encoding/", true);
+			this.Writer.WriteAttributeString("id", this.GetId(o, false));
+			if (td.SchemaType == SchemaTypes.Array)
+			{
+				Array array = (Array)o;
+				int length = array.Length;
+				this.Writer.WriteAttributeString("arrayType", "http://schemas.xmlsoap.org/soap/encoding/", this.GetQualifiedName(text, "http://www.w3.org/2001/XMLSchema") + "[" + length.ToString() + "]");
+				for (int i = 0; i < length; i++)
 				{
-					DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
-					string text = (string)dictionaryEntry.Key;
-					string text2 = (string)dictionaryEntry.Value;
-					if (this.namespaces != null)
+					this.WritePotentiallyReferencingElement("Item", string.Empty, array.GetValue(i), td.ListItemType, false, true);
+				}
+			}
+			this.WriteEndElement();
+		}
+
+		protected void WriteReferencingElement(string n, string ns, object o)
+		{
+			this.WriteReferencingElement(n, ns, o, false);
+		}
+
+		protected void WriteReferencingElement(string n, string ns, object o, bool isNullable)
+		{
+			if (o == null)
+			{
+				if (isNullable)
+				{
+					this.WriteNullTagEncoded(n, ns);
+				}
+				return;
+			}
+			this.CheckReferenceQueue();
+			if (!this.AlreadyQueued(o))
+			{
+				this.referencedElements.Enqueue(o);
+			}
+			this.Writer.WriteStartElement(n, ns);
+			this.Writer.WriteAttributeString("href", "#" + this.GetId(o, true));
+			this.Writer.WriteEndElement();
+		}
+
+		private void CheckReferenceQueue()
+		{
+			if (this.referencedElements == null)
+			{
+				this.referencedElements = new Queue();
+				this.InitCallbacks();
+			}
+		}
+
+		[MonoTODO]
+		protected void WriteRpcResult(string name, string ns)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected void WriteSerializable(IXmlSerializable serializable, string name, string ns, bool isNullable)
+		{
+			this.WriteSerializable(serializable, name, ns, isNullable, true);
+		}
+
+		protected void WriteSerializable(IXmlSerializable serializable, string name, string ns, bool isNullable, bool wrapped)
+		{
+			if (serializable == null)
+			{
+				if (isNullable && wrapped)
+				{
+					this.WriteNullTagLiteral(name, ns);
+				}
+				return;
+			}
+			if (wrapped)
+			{
+				this.Writer.WriteStartElement(name, ns);
+			}
+			serializable.WriteXml(this.Writer);
+			if (wrapped)
+			{
+				this.Writer.WriteEndElement();
+			}
+		}
+
+		protected void WriteStartDocument()
+		{
+			if (this.Writer.WriteState == WriteState.Start)
+			{
+				this.Writer.WriteStartDocument();
+			}
+		}
+
+		protected void WriteStartElement(string name)
+		{
+			this.WriteStartElement(name, string.Empty, null, false);
+		}
+
+		protected void WriteStartElement(string name, string ns)
+		{
+			this.WriteStartElement(name, ns, null, false);
+		}
+
+		protected void WriteStartElement(string name, string ns, bool writePrefixed)
+		{
+			this.WriteStartElement(name, ns, null, writePrefixed);
+		}
+
+		protected void WriteStartElement(string name, string ns, object o)
+		{
+			this.WriteStartElement(name, ns, o, false);
+		}
+
+		protected void WriteStartElement(string name, string ns, object o, bool writePrefixed)
+		{
+			this.WriteStartElement(name, ns, o, writePrefixed, this.namespaces);
+		}
+
+		protected void WriteStartElement(string name, string ns, object o, bool writePrefixed, XmlSerializerNamespaces xmlns)
+		{
+			if (xmlns == null)
+			{
+				throw new ArgumentNullException("xmlns");
+			}
+			this.WriteStartElement(name, ns, o, writePrefixed, xmlns.ToArray());
+		}
+
+		private void WriteStartElement(string name, string ns, object o, bool writePrefixed, ICollection namespaces)
+		{
+			if (o != null)
+			{
+				if (this.serializedObjects.Contains(o))
+				{
+					throw new InvalidOperationException("A circular reference was detected while serializing an object of type " + o.GetType().Name);
+				}
+				this.serializedObjects[o] = o;
+			}
+			string text = null;
+			if (this.topLevelElement && ns != null && ns.Length != 0)
+			{
+				foreach (object obj in namespaces)
+				{
+					XmlQualifiedName xmlQualifiedName = (XmlQualifiedName)obj;
+					if (xmlQualifiedName.Namespace == ns)
 					{
-						string text3 = this.namespaces.Namespaces[text] as string;
-						if (text3 != null && text3 != text2)
-						{
-							throw new InvalidOperationException(Res.GetString("Illegal namespace declaration xmlns:{0}='{1}'. Namespace alias '{0}' already defined in the current scope.", new object[] { text, text2 }));
-						}
-					}
-					string text4 = ((text2 == null || text2.Length == 0) ? null : this.Writer.LookupPrefix(text2));
-					if (text4 == null || text4 != text)
-					{
-						this.WriteAttribute("xmlns", text, null, text2);
+						text = xmlQualifiedName.Name;
+						writePrefixed = true;
+						break;
 					}
 				}
 			}
-			this.namespaces = null;
+			if (writePrefixed && ns != string.Empty)
+			{
+				name = XmlCustomFormatter.FromXmlName(name);
+				if (text == null)
+				{
+					text = this.Writer.LookupPrefix(ns);
+				}
+				if (text == null || text.Length == 0)
+				{
+					text = "q" + ++this.qnameCount;
+				}
+				this.Writer.WriteStartElement(text, name, ns);
+			}
+			else
+			{
+				this.Writer.WriteStartElement(name, ns);
+			}
+			if (this.topLevelElement)
+			{
+				if (namespaces != null)
+				{
+					foreach (object obj2 in namespaces)
+					{
+						XmlQualifiedName xmlQualifiedName2 = (XmlQualifiedName)obj2;
+						string text2 = this.Writer.LookupPrefix(xmlQualifiedName2.Namespace);
+						if (text2 == null || text2.Length == 0)
+						{
+							this.WriteAttribute("xmlns", xmlQualifiedName2.Name, "http://www.w3.org/2000/xmlns/", xmlQualifiedName2.Namespace);
+						}
+					}
+				}
+				this.topLevelElement = false;
+			}
 		}
 
-		private string NextPrefix()
+		protected void WriteTypedPrimitive(string name, string ns, object o, bool xsiType)
 		{
-			int num;
-			if (this.usedPrefixes == null)
+			TypeData typeData = TypeTranslator.GetTypeData(o.GetType());
+			if (typeData.SchemaType != SchemaTypes.Primitive)
 			{
-				object obj = this.aliasBase;
-				num = this.tempNamespacePrefix + 1;
-				this.tempNamespacePrefix = num;
-				return obj + num;
+				throw new InvalidOperationException(string.Format("The type of the argument object '{0}' is not primitive.", typeData.FullTypeName));
 			}
-			Hashtable hashtable;
-			do
+			if (name == null)
 			{
-				hashtable = this.usedPrefixes;
-				num = this.tempNamespacePrefix + 1;
-				this.tempNamespacePrefix = num;
+				ns = ((!typeData.IsXsdType) ? "http://microsoft.com/wsdl/types/" : "http://www.w3.org/2001/XMLSchema");
+				name = typeData.XmlType;
 			}
-			while (hashtable.ContainsKey(num));
-			return this.aliasBase + this.tempNamespacePrefix;
+			else
+			{
+				name = XmlCustomFormatter.FromXmlName(name);
+			}
+			this.Writer.WriteStartElement(name, ns);
+			string text;
+			if (o is XmlQualifiedName)
+			{
+				text = this.FromXmlQualifiedName((XmlQualifiedName)o);
+			}
+			else
+			{
+				text = XmlCustomFormatter.ToXmlString(typeData, o);
+			}
+			if (xsiType)
+			{
+				if (typeData.SchemaType != SchemaTypes.Primitive)
+				{
+					throw new InvalidOperationException(string.Format("The type {0} was not expected. Use the XmlInclude or SoapInclude attribute to specify types that are not known statically.", o.GetType().FullName));
+				}
+				this.WriteXsiType(typeData.XmlType, (!typeData.IsXsdType) ? "http://microsoft.com/wsdl/types/" : "http://www.w3.org/2001/XMLSchema");
+			}
+			this.WriteValue(text);
+			this.Writer.WriteEndElement();
 		}
 
-		private XmlWriter w;
-
-		private XmlSerializerNamespaces namespaces;
-
-		private int tempNamespacePrefix;
-
-		private Hashtable usedPrefixes;
-
-		private Hashtable references;
-
-		private string idBase;
-
-		private int nextId;
-
-		private Hashtable typeEntries;
-
-		private ArrayList referencesToWrite;
-
-		private Hashtable objectsInUse;
-
-		private string aliasBase = "q";
-
-		private bool soap12;
-
-		private bool escapeName = true;
-
-		internal class TypeEntry
+		protected void WriteValue(byte[] value)
 		{
-			internal XmlSerializationWriteCallback callback;
+			this.Writer.WriteBase64(value, 0, value.Length);
+		}
 
-			internal string typeNs;
+		protected void WriteValue(string value)
+		{
+			if (value != null)
+			{
+				this.Writer.WriteString(value);
+			}
+		}
 
-			internal string typeName;
+		protected void WriteXmlAttribute(XmlNode node)
+		{
+			this.WriteXmlAttribute(node, null);
+		}
 
-			internal Type type;
+		protected void WriteXmlAttribute(XmlNode node, object container)
+		{
+			XmlAttribute xmlAttribute = node as XmlAttribute;
+			if (xmlAttribute == null)
+			{
+				throw new InvalidOperationException("The node must be either type XmlAttribute or a derived type.");
+			}
+			if (xmlAttribute.NamespaceURI == "http://schemas.xmlsoap.org/wsdl/" && xmlAttribute.LocalName == "arrayType")
+			{
+				string text;
+				string text2;
+				string text3;
+				TypeTranslator.ParseArrayType(xmlAttribute.Value, out text, out text2, out text3);
+				string qualifiedName = this.GetQualifiedName(text + text3, text2);
+				this.WriteAttribute(xmlAttribute.Prefix, xmlAttribute.LocalName, xmlAttribute.NamespaceURI, qualifiedName);
+				return;
+			}
+			this.WriteAttribute(xmlAttribute.Prefix, xmlAttribute.LocalName, xmlAttribute.NamespaceURI, xmlAttribute.Value);
+		}
+
+		protected void WriteXsiType(string name, string ns)
+		{
+			if (ns != null && ns != string.Empty)
+			{
+				this.WriteAttribute("type", "http://www.w3.org/2001/XMLSchema-instance", this.GetQualifiedName(name, ns));
+			}
+			else
+			{
+				this.WriteAttribute("type", "http://www.w3.org/2001/XMLSchema-instance", name);
+			}
+		}
+
+		protected Exception CreateInvalidAnyTypeException(object o)
+		{
+			if (o == null)
+			{
+				return new InvalidOperationException("null is invalid as anyType in XmlSerializer");
+			}
+			return this.CreateInvalidAnyTypeException(o.GetType());
+		}
+
+		protected Exception CreateInvalidAnyTypeException(Type t)
+		{
+			return new InvalidOperationException(string.Format("An object of type '{0}' is invalid as anyType in XmlSerializer", t));
+		}
+
+		protected Exception CreateInvalidEnumValueException(object value, string typeName)
+		{
+			return new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, "'{0}' is not a valid value for {1}.", new object[] { value, typeName }));
+		}
+
+		protected static string FromEnum(long value, string[] values, long[] ids, string typeName)
+		{
+			return XmlCustomFormatter.FromEnum(value, values, ids, typeName);
+		}
+
+		[MonoTODO]
+		protected string FromXmlQualifiedName(XmlQualifiedName xmlQualifiedName, bool ignoreEmpty)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		protected static Assembly ResolveDynamicAssembly(string assemblyFullName)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		protected bool EscapeName
+		{
+			get
+			{
+				throw new NotImplementedException();
+			}
+			set
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		private const string xmlNamespace = "http://www.w3.org/2000/xmlns/";
+
+		private const string unexpectedTypeError = "The type {0} was not expected. Use the XmlInclude or SoapInclude attribute to specify types that are not known statically.";
+
+		private ObjectIDGenerator idGenerator;
+
+		private int qnameCount;
+
+		private bool topLevelElement;
+
+		private ArrayList namespaces;
+
+		private XmlWriter writer;
+
+		private Queue referencedElements;
+
+		private Hashtable callbacks;
+
+		private Hashtable serializedObjects;
+
+		private class WriteCallbackInfo
+		{
+			public Type Type;
+
+			public string TypeName;
+
+			public string TypeNs;
+
+			public XmlSerializationWriteCallback Callback;
 		}
 	}
 }

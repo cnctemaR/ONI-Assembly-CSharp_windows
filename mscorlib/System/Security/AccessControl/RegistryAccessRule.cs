@@ -11,22 +11,18 @@ namespace System.Security.AccessControl
 		}
 
 		public RegistryAccessRule(string identity, RegistryRights registryRights, AccessControlType type)
-			: this(new NTAccount(identity), registryRights, type)
+			: this(new SecurityIdentifier(identity), registryRights, type)
 		{
 		}
 
 		public RegistryAccessRule(IdentityReference identity, RegistryRights registryRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
-			: this(identity, registryRights, false, inheritanceFlags, propagationFlags, type)
+			: base(identity, 0, false, inheritanceFlags, propagationFlags, type)
 		{
-		}
-
-		internal RegistryAccessRule(IdentityReference identity, RegistryRights registryRights, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
-			: base(identity, (int)registryRights, isInherited, inheritanceFlags, propagationFlags, type)
-		{
+			this.rights = registryRights;
 		}
 
 		public RegistryAccessRule(string identity, RegistryRights registryRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AccessControlType type)
-			: this(new NTAccount(identity), registryRights, inheritanceFlags, propagationFlags, type)
+			: this(new SecurityIdentifier(identity), registryRights, inheritanceFlags, propagationFlags, type)
 		{
 		}
 
@@ -34,8 +30,10 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return (RegistryRights)base.AccessMask;
+				return this.rights;
 			}
 		}
+
+		private RegistryRights rights;
 	}
 }

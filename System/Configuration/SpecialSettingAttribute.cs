@@ -5,9 +5,9 @@ namespace System.Configuration
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Property)]
 	public sealed class SpecialSettingAttribute : Attribute
 	{
-		public SpecialSettingAttribute(SpecialSetting specialSetting)
+		public SpecialSettingAttribute(SpecialSetting setting)
 		{
-			this.setting = specialSetting;
+			this.setting = setting;
 		}
 
 		public SpecialSetting SpecialSetting

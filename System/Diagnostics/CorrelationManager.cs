@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.Remoting.Messaging;
 
 namespace System.Diagnostics
 {
@@ -14,16 +13,11 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				object obj = CallContext.LogicalGetData("E2ETrace.ActivityID");
-				if (obj != null)
-				{
-					return (Guid)obj;
-				}
-				return Guid.Empty;
+				return this.activity;
 			}
 			set
 			{
-				CallContext.LogicalSetData("E2ETrace.ActivityID", value);
+				this.activity = value;
 			}
 		}
 
@@ -31,17 +25,8 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.GetLogicalOperationStack();
+				return this.op_stack;
 			}
-		}
-
-		public void StartLogicalOperation(object operationId)
-		{
-			if (operationId == null)
-			{
-				throw new ArgumentNullException("operationId");
-			}
-			this.GetLogicalOperationStack().Push(operationId);
 		}
 
 		public void StartLogicalOperation()
@@ -49,24 +34,18 @@ namespace System.Diagnostics
 			this.StartLogicalOperation(Guid.NewGuid());
 		}
 
+		public void StartLogicalOperation(object operationId)
+		{
+			this.op_stack.Push(operationId);
+		}
+
 		public void StopLogicalOperation()
 		{
-			this.GetLogicalOperationStack().Pop();
+			this.op_stack.Pop();
 		}
 
-		private Stack GetLogicalOperationStack()
-		{
-			Stack stack = CallContext.LogicalGetData("System.Diagnostics.Trace.CorrelationManagerSlot") as Stack;
-			if (stack == null)
-			{
-				stack = new Stack();
-				CallContext.LogicalSetData("System.Diagnostics.Trace.CorrelationManagerSlot", stack);
-			}
-			return stack;
-		}
+		private Guid activity;
 
-		private const string transactionSlotName = "System.Diagnostics.Trace.CorrelationManagerSlot";
-
-		private const string activityIdSlotName = "E2ETrace.ActivityID";
+		private Stack op_stack = new Stack();
 	}
 }

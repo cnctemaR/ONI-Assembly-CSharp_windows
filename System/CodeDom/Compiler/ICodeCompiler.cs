@@ -6,14 +6,14 @@ namespace System.CodeDom.Compiler
 	{
 		CompilerResults CompileAssemblyFromDom(CompilerParameters options, CodeCompileUnit compilationUnit);
 
+		CompilerResults CompileAssemblyFromDomBatch(CompilerParameters options, CodeCompileUnit[] batch);
+
 		CompilerResults CompileAssemblyFromFile(CompilerParameters options, string fileName);
+
+		CompilerResults CompileAssemblyFromFileBatch(CompilerParameters options, string[] batch);
 
 		CompilerResults CompileAssemblyFromSource(CompilerParameters options, string source);
 
-		CompilerResults CompileAssemblyFromDomBatch(CompilerParameters options, CodeCompileUnit[] compilationUnits);
-
-		CompilerResults CompileAssemblyFromFileBatch(CompilerParameters options, string[] fileNames);
-
-		CompilerResults CompileAssemblyFromSourceBatch(CompilerParameters options, string[] sources);
+		CompilerResults CompileAssemblyFromSourceBatch(CompilerParameters options, string[] batch);
 	}
 }

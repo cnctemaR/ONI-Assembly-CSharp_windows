@@ -112,7 +112,7 @@ public class AssignableSideScreen : SideScreenContent
 	private void Refresh(List<MinionIdentity> identities)
 	{
 		this.ClearContent();
-		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, Array.Empty<object>());
+		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
 		if (this.targetAssignable != null && this.targetAssignable.GetComponent<Equippable>() == null)
 		{
 			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(this.targetAssignable.gameObject);

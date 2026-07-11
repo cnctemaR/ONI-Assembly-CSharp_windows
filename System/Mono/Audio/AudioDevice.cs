@@ -6,16 +6,17 @@ namespace Mono.Audio
 	{
 		private static AudioDevice TryAlsa(string name)
 		{
-			AudioDevice audioDevice;
+			AudioDevice audioDevice2;
 			try
 			{
-				audioDevice = new AlsaDevice(name);
+				AudioDevice audioDevice = new AlsaDevice(name);
+				audioDevice2 = audioDevice;
 			}
 			catch
 			{
-				audioDevice = null;
+				audioDevice2 = null;
 			}
-			return audioDevice;
+			return audioDevice2;
 		}
 
 		public static AudioDevice CreateDevice(string name)
@@ -38,23 +39,8 @@ namespace Mono.Audio
 			return num_frames;
 		}
 
-		public virtual int XRunRecovery(int err)
-		{
-			return err;
-		}
-
 		public virtual void Wait()
 		{
 		}
-
-		public uint ChunkSize
-		{
-			get
-			{
-				return this.chunk_size;
-			}
-		}
-
-		protected uint chunk_size;
 	}
 }

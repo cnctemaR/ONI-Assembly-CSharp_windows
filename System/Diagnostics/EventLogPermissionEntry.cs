@@ -8,7 +8,7 @@ namespace System.Diagnostics
 	{
 		public EventLogPermissionEntry(EventLogPermissionAccess permissionAccess, string machineName)
 		{
-			ResourcePermissionBase.ValidateMachineName(machineName);
+			global::System.Security.Permissions.ResourcePermissionBase.ValidateMachineName(machineName);
 			this.permissionAccess = permissionAccess;
 			this.machineName = machineName;
 		}
@@ -29,9 +29,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		internal ResourcePermissionBaseEntry CreateResourcePermissionBaseEntry()
+		internal global::System.Security.Permissions.ResourcePermissionBaseEntry CreateResourcePermissionBaseEntry()
 		{
-			return new ResourcePermissionBaseEntry((int)this.permissionAccess, new string[] { this.machineName });
+			return new global::System.Security.Permissions.ResourcePermissionBaseEntry((int)this.permissionAccess, new string[] { this.machineName });
 		}
 
 		private EventLogPermissionAccess permissionAccess;

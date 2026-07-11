@@ -1,36 +1,47 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeCompileUnit : CodeObject
 	{
-		public CodeNamespaceCollection Namespaces { get; } = new CodeNamespaceCollection();
-
-		public StringCollection ReferencedAssemblies
-		{
-			get
-			{
-				StringCollection stringCollection;
-				if ((stringCollection = this._assemblies) == null)
-				{
-					stringCollection = (this._assemblies = new StringCollection());
-				}
-				return stringCollection;
-			}
-		}
-
 		public CodeAttributeDeclarationCollection AssemblyCustomAttributes
 		{
 			get
 			{
-				CodeAttributeDeclarationCollection codeAttributeDeclarationCollection;
-				if ((codeAttributeDeclarationCollection = this._attributes) == null)
+				if (this.attributes == null)
 				{
-					codeAttributeDeclarationCollection = (this._attributes = new CodeAttributeDeclarationCollection());
+					this.attributes = new CodeAttributeDeclarationCollection();
 				}
-				return codeAttributeDeclarationCollection;
+				return this.attributes;
+			}
+		}
+
+		public CodeNamespaceCollection Namespaces
+		{
+			get
+			{
+				if (this.namespaces == null)
+				{
+					this.namespaces = new CodeNamespaceCollection();
+				}
+				return this.namespaces;
+			}
+		}
+
+		public global::System.Collections.Specialized.StringCollection ReferencedAssemblies
+		{
+			get
+			{
+				if (this.assemblies == null)
+				{
+					this.assemblies = new global::System.Collections.Specialized.StringCollection();
+				}
+				return this.assemblies;
 			}
 		}
 
@@ -38,12 +49,11 @@ namespace System.CodeDom
 		{
 			get
 			{
-				CodeDirectiveCollection codeDirectiveCollection;
-				if ((codeDirectiveCollection = this._startDirectives) == null)
+				if (this.startDirectives == null)
 				{
-					codeDirectiveCollection = (this._startDirectives = new CodeDirectiveCollection());
+					this.startDirectives = new CodeDirectiveCollection();
 				}
-				return codeDirectiveCollection;
+				return this.startDirectives;
 			}
 		}
 
@@ -51,21 +61,22 @@ namespace System.CodeDom
 		{
 			get
 			{
-				CodeDirectiveCollection codeDirectiveCollection;
-				if ((codeDirectiveCollection = this._endDirectives) == null)
+				if (this.endDirectives == null)
 				{
-					codeDirectiveCollection = (this._endDirectives = new CodeDirectiveCollection());
+					this.endDirectives = new CodeDirectiveCollection();
 				}
-				return codeDirectiveCollection;
+				return this.endDirectives;
 			}
 		}
 
-		private StringCollection _assemblies;
+		private CodeAttributeDeclarationCollection attributes;
 
-		private CodeAttributeDeclarationCollection _attributes;
+		private CodeNamespaceCollection namespaces;
 
-		private CodeDirectiveCollection _startDirectives;
+		private global::System.Collections.Specialized.StringCollection assemblies;
 
-		private CodeDirectiveCollection _endDirectives;
+		private CodeDirectiveCollection startDirectives;
+
+		private CodeDirectiveCollection endDirectives;
 	}
 }

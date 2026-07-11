@@ -1,28 +1,15 @@
 ﻿using System;
 using System.Collections;
+using System.Globalization;
+using System.Text;
 
 namespace System.Xml.Serialization
 {
 	public class XmlAttributeOverrides
 	{
-		public void Add(Type type, XmlAttributes attributes)
+		public XmlAttributeOverrides()
 		{
-			this.Add(type, string.Empty, attributes);
-		}
-
-		public void Add(Type type, string member, XmlAttributes attributes)
-		{
-			Hashtable hashtable = (Hashtable)this.types[type];
-			if (hashtable == null)
-			{
-				hashtable = new Hashtable();
-				this.types.Add(type, hashtable);
-			}
-			else if (hashtable[member] != null)
-			{
-				throw new InvalidOperationException(Res.GetString("'{0}.{1}' already has attributes.", new object[] { type.FullName, member }));
-			}
-			hashtable.Add(member, attributes);
+			this.overrides = new Hashtable();
 		}
 
 		public XmlAttributes this[Type type]
@@ -37,15 +24,43 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				Hashtable hashtable = (Hashtable)this.types[type];
-				if (hashtable == null)
-				{
-					return null;
-				}
-				return (XmlAttributes)hashtable[member];
+				return (XmlAttributes)this.overrides[this.GetKey(type, member)];
 			}
 		}
 
-		private Hashtable types = new Hashtable();
+		public void Add(Type type, XmlAttributes attributes)
+		{
+			this.Add(type, string.Empty, attributes);
+		}
+
+		public void Add(Type type, string member, XmlAttributes attributes)
+		{
+			if (this.overrides[this.GetKey(type, member)] != null)
+			{
+				throw new Exception("The attributes for the given type and Member already exist in the collection");
+			}
+			this.overrides.Add(this.GetKey(type, member), attributes);
+		}
+
+		private TypeMember GetKey(Type type, string member)
+		{
+			return new TypeMember(type, member);
+		}
+
+		internal void AddKeyHash(StringBuilder sb)
+		{
+			sb.Append("XAO ");
+			foreach (object obj in this.overrides)
+			{
+				DictionaryEntry dictionaryEntry = (DictionaryEntry)obj;
+				XmlAttributes xmlAttributes = (XmlAttributes)dictionaryEntry.Value;
+				IFormattable formattable = dictionaryEntry.Key as IFormattable;
+				sb.Append((formattable == null) ? dictionaryEntry.Key.ToString() : formattable.ToString(null, CultureInfo.InvariantCulture)).Append(' ');
+				xmlAttributes.AddKeyHash(sb);
+			}
+			sb.Append("|");
+		}
+
+		private Hashtable overrides;
 	}
 }

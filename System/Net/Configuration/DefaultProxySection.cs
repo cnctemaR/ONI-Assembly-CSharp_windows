@@ -8,10 +8,8 @@ namespace System.Net.Configuration
 		static DefaultProxySection()
 		{
 			DefaultProxySection.properties.Add(DefaultProxySection.bypassListProp);
-			DefaultProxySection.properties.Add(DefaultProxySection.enabledProp);
 			DefaultProxySection.properties.Add(DefaultProxySection.moduleProp);
 			DefaultProxySection.properties.Add(DefaultProxySection.proxyProp);
-			DefaultProxySection.properties.Add(DefaultProxySection.useDefaultCredentialsProp);
 		}
 
 		[ConfigurationProperty("bypasslist")]
@@ -75,12 +73,12 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void PostDeserialize()
 		{
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void Reset(ConfigurationElement parentElement)
 		{
 		}

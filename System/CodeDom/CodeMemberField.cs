@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeMemberField : CodeTypeMember
 	{
@@ -11,41 +14,57 @@ namespace System.CodeDom
 
 		public CodeMemberField(CodeTypeReference type, string name)
 		{
-			this.Type = type;
+			this.type = type;
 			base.Name = name;
 		}
 
 		public CodeMemberField(string type, string name)
 		{
-			this.Type = new CodeTypeReference(type);
+			this.type = new CodeTypeReference(type);
 			base.Name = name;
 		}
 
 		public CodeMemberField(Type type, string name)
 		{
-			this.Type = new CodeTypeReference(type);
+			this.type = new CodeTypeReference(type);
 			base.Name = name;
+		}
+
+		public CodeExpression InitExpression
+		{
+			get
+			{
+				return this.initExpression;
+			}
+			set
+			{
+				this.initExpression = value;
+			}
 		}
 
 		public CodeTypeReference Type
 		{
 			get
 			{
-				CodeTypeReference codeTypeReference;
-				if ((codeTypeReference = this._type) == null)
+				if (this.type == null)
 				{
-					codeTypeReference = (this._type = new CodeTypeReference(""));
+					this.type = new CodeTypeReference(string.Empty);
 				}
-				return codeTypeReference;
+				return this.type;
 			}
 			set
 			{
-				this._type = value;
+				this.type = value;
 			}
 		}
 
-		public CodeExpression InitExpression { get; set; }
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
 
-		private CodeTypeReference _type;
+		private CodeExpression initExpression;
+
+		private CodeTypeReference type;
 	}
 }

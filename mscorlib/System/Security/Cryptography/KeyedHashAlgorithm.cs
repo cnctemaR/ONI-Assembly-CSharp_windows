@@ -6,17 +6,9 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public abstract class KeyedHashAlgorithm : HashAlgorithm
 	{
-		protected override void Dispose(bool disposing)
+		~KeyedHashAlgorithm()
 		{
-			if (disposing)
-			{
-				if (this.KeyValue != null)
-				{
-					Array.Clear(this.KeyValue, 0, this.KeyValue.Length);
-				}
-				this.KeyValue = null;
-			}
-			base.Dispose(disposing);
+			this.Dispose(false);
 		}
 
 		public virtual byte[] Key
@@ -29,9 +21,24 @@ namespace System.Security.Cryptography
 			{
 				if (this.State != 0)
 				{
-					throw new CryptographicException(Environment.GetResourceString("Hash key cannot be changed after the first write to the stream."));
+					throw new CryptographicException(Locale.GetText("Key can't be changed at this state."));
 				}
+				this.ZeroizeKey();
 				this.KeyValue = (byte[])value.Clone();
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			this.ZeroizeKey();
+			base.Dispose(disposing);
+		}
+
+		private void ZeroizeKey()
+		{
+			if (this.KeyValue != null)
+			{
+				Array.Clear(this.KeyValue, 0, this.KeyValue.Length);
 			}
 		}
 

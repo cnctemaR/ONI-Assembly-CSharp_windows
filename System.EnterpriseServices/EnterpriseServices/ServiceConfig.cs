@@ -4,8 +4,8 @@ using System.Transactions;
 
 namespace System.EnterpriseServices
 {
-	[MonoTODO]
 	[ComVisible(false)]
+	[MonoTODO]
 	public sealed class ServiceConfig
 	{
 		[MonoTODO]

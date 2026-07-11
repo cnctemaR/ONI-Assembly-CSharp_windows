@@ -31,7 +31,8 @@ namespace Mono.Security.X509
 				{
 					if (this.attrValue != null && this.attrValue.Length > this.upperBound)
 					{
-						throw new FormatException(string.Format(Locale.GetText("Value length bigger than upperbound ({0})."), this.upperBound));
+						string text = Locale.GetText("Value length bigger than upperbound ({0}).");
+						throw new FormatException(string.Format(text, this.upperBound));
 					}
 					this.attrValue = value;
 				}
@@ -54,23 +55,21 @@ namespace Mono.Security.X509
 				}
 				ASN1 asn = new ASN1(48);
 				asn.Add(ASN1Convert.FromOid(this.oid));
-				if (b != 19)
+				byte b2 = b;
+				switch (b2)
 				{
-					if (b != 22)
-					{
-						if (b == 30)
-						{
-							asn.Add(new ASN1(30, Encoding.BigEndianUnicode.GetBytes(this.attrValue)));
-						}
-					}
-					else
-					{
-						asn.Add(new ASN1(22, Encoding.ASCII.GetBytes(this.attrValue)));
-					}
-				}
-				else
-				{
+				case 19:
 					asn.Add(new ASN1(19, Encoding.ASCII.GetBytes(this.attrValue)));
+					break;
+				default:
+					if (b2 == 30)
+					{
+						asn.Add(new ASN1(30, Encoding.BigEndianUnicode.GetBytes(this.attrValue)));
+					}
+					break;
+				case 22:
+					asn.Add(new ASN1(22, Encoding.ASCII.GetBytes(this.attrValue)));
+					break;
 				}
 				return asn;
 			}
@@ -94,7 +93,8 @@ namespace Mono.Security.X509
 			{
 				foreach (char c in this.attrValue)
 				{
-					if (c == '@' || c == '_')
+					char c2 = c;
+					if (c2 == '@' || c2 == '_')
 					{
 						return 30;
 					}

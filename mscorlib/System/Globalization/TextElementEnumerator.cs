@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 
 namespace System.Globalization
 {
@@ -9,112 +8,74 @@ namespace System.Globalization
 	[Serializable]
 	public class TextElementEnumerator : IEnumerator
 	{
-		internal TextElementEnumerator(string str, int startIndex, int strLen)
+		internal TextElementEnumerator(string str, int startpos)
 		{
-			this.str = str;
-			this.startIndex = startIndex;
-			this.strLen = strLen;
-			this.Reset();
-		}
-
-		[OnDeserializing]
-		private void OnDeserializing(StreamingContext ctx)
-		{
-			this.charLen = -1;
-		}
-
-		[OnDeserialized]
-		private void OnDeserialized(StreamingContext ctx)
-		{
-			this.strLen = this.endIndex + 1;
-			this.currTextElementLen = this.nextTextElementLen;
-			if (this.charLen == -1)
-			{
-				this.uc = CharUnicodeInfo.InternalGetUnicodeCategory(this.str, this.index, out this.charLen);
-			}
-		}
-
-		[OnSerializing]
-		private void OnSerializing(StreamingContext ctx)
-		{
-			this.endIndex = this.strLen - 1;
-			this.nextTextElementLen = this.currTextElementLen;
-		}
-
-		public bool MoveNext()
-		{
-			if (this.index >= this.strLen)
-			{
-				this.index = this.strLen + 1;
-				return false;
-			}
-			this.currTextElementLen = StringInfo.GetCurrentTextElementLen(this.str, this.index, this.strLen, ref this.uc, ref this.charLen);
-			this.index += this.currTextElementLen;
-			return true;
+			this.index = -1;
+			this.startpos = startpos;
+			this.str = str.Substring(startpos);
+			this.element = null;
 		}
 
 		public object Current
 		{
 			get
 			{
-				return this.GetTextElement();
+				if (this.element == null)
+				{
+					throw new InvalidOperationException();
+				}
+				return this.element;
 			}
-		}
-
-		public string GetTextElement()
-		{
-			if (this.index == this.startIndex)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
-			}
-			if (this.index > this.strLen)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
-			}
-			return this.str.Substring(this.index - this.currTextElementLen, this.currTextElementLen);
 		}
 
 		public int ElementIndex
 		{
 			get
 			{
-				if (this.index == this.startIndex)
+				if (this.element == null)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+					throw new InvalidOperationException();
 				}
-				return this.index - this.currTextElementLen;
+				return this.elementindex + this.startpos;
 			}
+		}
+
+		public string GetTextElement()
+		{
+			if (this.element == null)
+			{
+				throw new InvalidOperationException();
+			}
+			return this.element;
+		}
+
+		public bool MoveNext()
+		{
+			this.elementindex = this.index + 1;
+			if (this.elementindex < this.str.Length)
+			{
+				this.element = StringInfo.GetNextTextElement(this.str, this.elementindex);
+				this.index += this.element.Length;
+				return true;
+			}
+			this.element = null;
+			return false;
 		}
 
 		public void Reset()
 		{
-			this.index = this.startIndex;
-			if (this.index < this.strLen)
-			{
-				this.uc = CharUnicodeInfo.InternalGetUnicodeCategory(this.str, this.index, out this.charLen);
-			}
+			this.element = null;
+			this.index = -1;
 		}
-
-		private string str;
 
 		private int index;
 
-		private int startIndex;
+		private int elementindex;
 
-		[NonSerialized]
-		private int strLen;
+		private int startpos;
 
-		[NonSerialized]
-		private int currTextElementLen;
+		private string str;
 
-		[OptionalField(VersionAdded = 2)]
-		private UnicodeCategory uc;
-
-		[OptionalField(VersionAdded = 2)]
-		private int charLen;
-
-		private int endIndex;
-
-		private int nextTextElementLen;
+		private string element;
 	}
 }

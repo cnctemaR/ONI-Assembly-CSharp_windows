@@ -5,10 +5,10 @@ using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using System.Text;
 
 namespace System
 {
+	[MonoTODO("Serialization needs tests")]
 	[ComVisible(true)]
 	[Serializable]
 	public struct RuntimeMethodHandle : ISerializable
@@ -56,7 +56,7 @@ namespace System
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern IntPtr GetFunctionPointer(IntPtr m);
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public IntPtr GetFunctionPointer()
 		{
 			return RuntimeMethodHandle.GetFunctionPointer(this.value);
@@ -65,7 +65,7 @@ namespace System
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		public override bool Equals(object obj)
 		{
-			return obj != null && !(base.GetType() != obj.GetType()) && this.value == ((RuntimeMethodHandle)obj).Value;
+			return obj != null && base.GetType() == obj.GetType() && this.value == ((RuntimeMethodHandle)obj).Value;
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -87,28 +87,6 @@ namespace System
 		public static bool operator !=(RuntimeMethodHandle left, RuntimeMethodHandle right)
 		{
 			return !left.Equals(right);
-		}
-
-		internal static string ConstructInstantiation(RuntimeMethodInfo method, TypeNameFormatFlags format)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			Type[] genericArguments = method.GetGenericArguments();
-			stringBuilder.Append("[");
-			for (int i = 0; i < genericArguments.Length; i++)
-			{
-				if (i > 0)
-				{
-					stringBuilder.Append(",");
-				}
-				stringBuilder.Append(genericArguments[i].Name);
-			}
-			stringBuilder.Append("]");
-			return stringBuilder.ToString();
-		}
-
-		internal bool IsNullHandle()
-		{
-			return this.value == IntPtr.Zero;
 		}
 
 		private IntPtr value;

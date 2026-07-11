@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
+using System.Xml.Xsl;
 
 namespace System.Security.Cryptography.Xml
 {
@@ -17,7 +18,14 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this._inputTypes;
+				if (this.input == null)
+				{
+					this.input = new Type[3];
+					this.input[0] = typeof(Stream);
+					this.input[1] = typeof(XmlDocument);
+					this.input[2] = typeof(XmlNodeList);
+				}
+				return this.input;
 			}
 		}
 
@@ -25,164 +33,265 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this._outputTypes;
+				if (this.output == null)
+				{
+					this.output = new Type[1];
+					this.output[0] = typeof(XmlNodeList);
+				}
+				return this.output;
 			}
+		}
+
+		protected override XmlNodeList GetInnerXml()
+		{
+			if (this.xpath == null)
+			{
+				XmlDocument xmlDocument = new XmlDocument();
+				xmlDocument.LoadXml("<XPath xmlns=\"http://www.w3.org/2000/09/xmldsig#\"></XPath>");
+				this.xpath = xmlDocument.ChildNodes;
+			}
+			return this.xpath;
+		}
+
+		[MonoTODO("Evaluation of extension function here() results in different from MS.NET (is MS.NET really correct??).")]
+		public override object GetOutput()
+		{
+			if (this.xpath == null || this.doc == null)
+			{
+				return new XmlDsigNodeList(new ArrayList());
+			}
+			string text = null;
+			for (int i = 0; i < this.xpath.Count; i++)
+			{
+				switch (this.xpath[i].NodeType)
+				{
+				case XmlNodeType.Element:
+				case XmlNodeType.Text:
+				case XmlNodeType.CDATA:
+					text += this.xpath[i].InnerText;
+					break;
+				}
+			}
+			this.ctx = new XmlDsigXPathTransform.XmlDsigXPathContext(this.doc);
+			foreach (object obj in this.xpath)
+			{
+				XmlNode xmlNode = (XmlNode)obj;
+				XPathNavigator xpathNavigator = xmlNode.CreateNavigator();
+				XPathNodeIterator xpathNodeIterator = xpathNavigator.Select("namespace::*");
+				while (xpathNodeIterator.MoveNext())
+				{
+					if (xpathNodeIterator.Current.LocalName != "xml")
+					{
+						this.ctx.AddNamespace(xpathNodeIterator.Current.LocalName, xpathNodeIterator.Current.Value);
+					}
+				}
+			}
+			return this.EvaluateMatch(this.doc, text);
+		}
+
+		public override object GetOutput(Type type)
+		{
+			if (type != typeof(XmlNodeList))
+			{
+				throw new ArgumentException("type");
+			}
+			return this.GetOutput();
+		}
+
+		private XmlDsigNodeList EvaluateMatch(XmlNode n, string xpath)
+		{
+			ArrayList arrayList = new ArrayList();
+			XPathNavigator xpathNavigator = n.CreateNavigator();
+			XPathExpression xpathExpression = xpathNavigator.Compile(xpath);
+			xpathExpression.SetContext(this.ctx);
+			this.EvaluateMatch(n, xpathExpression, arrayList);
+			return new XmlDsigNodeList(arrayList);
+		}
+
+		private void EvaluateMatch(XmlNode n, XPathExpression exp, ArrayList al)
+		{
+			if (this.NodeMatches(n, exp))
+			{
+				al.Add(n);
+			}
+			if (n.Attributes != null)
+			{
+				for (int i = 0; i < n.Attributes.Count; i++)
+				{
+					if (this.NodeMatches(n.Attributes[i], exp))
+					{
+						al.Add(n.Attributes[i]);
+					}
+				}
+			}
+			for (int j = 0; j < n.ChildNodes.Count; j++)
+			{
+				this.EvaluateMatch(n.ChildNodes[j], exp, al);
+			}
+		}
+
+		private bool NodeMatches(XmlNode n, XPathExpression exp)
+		{
+			object obj = n.CreateNavigator().Evaluate(exp);
+			if (obj is bool)
+			{
+				return (bool)obj;
+			}
+			if (obj is double)
+			{
+				double num = (double)obj;
+				return num != 0.0 && !double.IsNaN(num);
+			}
+			if (obj is string)
+			{
+				return ((string)obj).Length > 0;
+			}
+			if (obj is XPathNodeIterator)
+			{
+				XPathNodeIterator xpathNodeIterator = (XPathNodeIterator)obj;
+				return xpathNodeIterator.Count > 0;
+			}
+			return false;
 		}
 
 		public override void LoadInnerXml(XmlNodeList nodeList)
 		{
 			if (nodeList == null)
 			{
-				throw new CryptographicException("Unknown transform has been encountered.");
+				throw new CryptographicException("nodeList");
 			}
-			foreach (object obj in nodeList)
-			{
-				XmlElement xmlElement = ((XmlNode)obj) as XmlElement;
-				if (xmlElement != null && xmlElement.LocalName == "XPath")
-				{
-					this._xpathexpr = xmlElement.InnerXml.Trim(null);
-					XmlNameTable nameTable = new XmlNodeReader(xmlElement).NameTable;
-					this._nsm = new XmlNamespaceManager(nameTable);
-					using (IEnumerator enumerator2 = xmlElement.Attributes.GetEnumerator())
-					{
-						while (enumerator2.MoveNext())
-						{
-							object obj2 = enumerator2.Current;
-							XmlAttribute xmlAttribute = (XmlAttribute)obj2;
-							if (xmlAttribute.Prefix == "xmlns")
-							{
-								string text = xmlAttribute.LocalName;
-								string text2 = xmlAttribute.Value;
-								if (text == null)
-								{
-									text = xmlElement.Prefix;
-									text2 = xmlElement.NamespaceURI;
-								}
-								this._nsm.AddNamespace(text, text2);
-							}
-						}
-						break;
-					}
-				}
-			}
-			if (this._xpathexpr == null)
-			{
-				throw new CryptographicException("Unknown transform has been encountered.");
-			}
-		}
-
-		protected override XmlNodeList GetInnerXml()
-		{
-			XmlDocument xmlDocument = new XmlDocument();
-			XmlElement xmlElement = xmlDocument.CreateElement(null, "XPath", "http://www.w3.org/2000/09/xmldsig#");
-			if (this._nsm != null)
-			{
-				foreach (object obj in this._nsm)
-				{
-					string text = (string)obj;
-					if (!(text == "xml") && !(text == "xmlns") && text != null && text.Length > 0)
-					{
-						xmlElement.SetAttribute("xmlns:" + text, this._nsm.LookupNamespace(text));
-					}
-				}
-			}
-			xmlElement.InnerXml = this._xpathexpr;
-			xmlDocument.AppendChild(xmlElement);
-			return xmlDocument.ChildNodes;
+			this.xpath = nodeList;
 		}
 
 		public override void LoadInput(object obj)
 		{
 			if (obj is Stream)
 			{
-				this.LoadStreamInput((Stream)obj);
-				return;
+				this.doc = new XmlDocument();
+				this.doc.PreserveWhitespace = true;
+				this.doc.XmlResolver = base.GetResolver();
+				this.doc.Load(new XmlSignatureStreamReader(new StreamReader((Stream)obj)));
 			}
-			if (obj is XmlNodeList)
+			else if (obj is XmlDocument)
 			{
-				this.LoadXmlNodeListInput((XmlNodeList)obj);
-				return;
+				this.doc = obj as XmlDocument;
 			}
-			if (obj is XmlDocument)
+			else if (obj is XmlNodeList)
 			{
-				this.LoadXmlDocumentInput((XmlDocument)obj);
-			}
-		}
-
-		private void LoadStreamInput(Stream stream)
-		{
-			XmlResolver xmlResolver = (base.ResolverSet ? this._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), base.BaseURI));
-			XmlReader xmlReader = Utils.PreProcessStreamInput(stream, xmlResolver, base.BaseURI);
-			this._document = new XmlDocument();
-			this._document.PreserveWhitespace = true;
-			this._document.Load(xmlReader);
-		}
-
-		private void LoadXmlNodeListInput(XmlNodeList nodeList)
-		{
-			XmlResolver xmlResolver = (base.ResolverSet ? this._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), base.BaseURI));
-			using (MemoryStream memoryStream = new MemoryStream(new CanonicalXml(nodeList, xmlResolver, true).GetBytes()))
-			{
-				this.LoadStreamInput(memoryStream);
-			}
-		}
-
-		private void LoadXmlDocumentInput(XmlDocument doc)
-		{
-			this._document = doc;
-		}
-
-		public override object GetOutput()
-		{
-			CanonicalXmlNodeList canonicalXmlNodeList = new CanonicalXmlNodeList();
-			if (!string.IsNullOrEmpty(this._xpathexpr))
-			{
-				XPathNavigator xpathNavigator = this._document.CreateNavigator();
-				XPathNodeIterator xpathNodeIterator = xpathNavigator.Select("//. | //@*");
-				XPathExpression xpathExpression = xpathNavigator.Compile("boolean(" + this._xpathexpr + ")");
-				xpathExpression.SetContext(this._nsm);
-				while (xpathNodeIterator.MoveNext())
+				this.doc = new XmlDocument();
+				this.doc.XmlResolver = base.GetResolver();
+				foreach (object obj2 in (obj as XmlNodeList))
 				{
-					XPathNavigator xpathNavigator2 = xpathNodeIterator.Current;
-					XmlNode node = ((IHasXmlNode)xpathNavigator2).GetNode();
-					if ((bool)xpathNodeIterator.Current.Evaluate(xpathExpression))
-					{
-						canonicalXmlNodeList.Add(node);
-					}
-				}
-				xpathNodeIterator = xpathNavigator.Select("//namespace::*");
-				while (xpathNodeIterator.MoveNext())
-				{
-					XPathNavigator xpathNavigator3 = xpathNodeIterator.Current;
-					XmlNode node2 = ((IHasXmlNode)xpathNavigator3).GetNode();
-					canonicalXmlNodeList.Add(node2);
+					XmlNode xmlNode = (XmlNode)obj2;
+					XmlNode xmlNode2 = this.doc.ImportNode(xmlNode, true);
+					this.doc.AppendChild(xmlNode2);
 				}
 			}
-			return canonicalXmlNodeList;
 		}
 
-		public override object GetOutput(Type type)
+		private Type[] input;
+
+		private Type[] output;
+
+		private XmlNodeList xpath;
+
+		private XmlDocument doc;
+
+		private XsltContext ctx;
+
+		internal class XmlDsigXPathContext : XsltContext
 		{
-			if (type != typeof(XmlNodeList) && !type.IsSubclassOf(typeof(XmlNodeList)))
+			public XmlDsigXPathContext(XmlNode node)
 			{
-				throw new ArgumentException("The input type was invalid for this transform.", "type");
+				this.here = new XmlDsigXPathTransform.XmlDsigXPathFunctionHere(node);
 			}
-			return (XmlNodeList)this.GetOutput();
+
+			public override IXsltContextFunction ResolveFunction(string prefix, string name, XPathResultType[] argType)
+			{
+				if (name == "here" && prefix == string.Empty && argType.Length == 0)
+				{
+					return this.here;
+				}
+				return null;
+			}
+
+			public override bool Whitespace
+			{
+				get
+				{
+					return true;
+				}
+			}
+
+			public override bool PreserveWhitespace(XPathNavigator node)
+			{
+				return true;
+			}
+
+			public override int CompareDocument(string s1, string s2)
+			{
+				return string.Compare(s1, s2);
+			}
+
+			public override IXsltContextVariable ResolveVariable(string prefix, string name)
+			{
+				throw new InvalidOperationException();
+			}
+
+			private XmlDsigXPathTransform.XmlDsigXPathFunctionHere here;
 		}
 
-		private Type[] _inputTypes = new Type[]
+		internal class XmlDsigXPathFunctionHere : IXsltContextFunction
 		{
-			typeof(Stream),
-			typeof(XmlNodeList),
-			typeof(XmlDocument)
-		};
+			public XmlDsigXPathFunctionHere(XmlNode node)
+			{
+				this.xpathNode = node.CreateNavigator().Select(".");
+			}
 
-		private Type[] _outputTypes = new Type[] { typeof(XmlNodeList) };
+			public XPathResultType[] ArgTypes
+			{
+				get
+				{
+					return XmlDsigXPathTransform.XmlDsigXPathFunctionHere.types;
+				}
+			}
 
-		private string _xpathexpr;
+			public int Maxargs
+			{
+				get
+				{
+					return 0;
+				}
+			}
 
-		private XmlDocument _document;
+			public int Minargs
+			{
+				get
+				{
+					return 0;
+				}
+			}
 
-		private XmlNamespaceManager _nsm;
+			public XPathResultType ReturnType
+			{
+				get
+				{
+					return XPathResultType.NodeSet;
+				}
+			}
+
+			public object Invoke(XsltContext ctx, object[] args, XPathNavigator docContext)
+			{
+				if (args.Length != 0)
+				{
+					throw new ArgumentException("Not allowed arguments for function here().", "args");
+				}
+				return this.xpathNode.Clone();
+			}
+
+			private static XPathResultType[] types = new XPathResultType[0];
+
+			private XPathNodeIterator xpathNode;
+		}
 	}
 }

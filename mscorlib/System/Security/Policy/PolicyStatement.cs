@@ -48,12 +48,20 @@ namespace System.Security.Policy
 			}
 			set
 			{
-				if (value <= PolicyStatementAttribute.All)
+				switch (value)
 				{
+				case PolicyStatementAttribute.Nothing:
+				case PolicyStatementAttribute.Exclusive:
+				case PolicyStatementAttribute.LevelFinal:
+				case PolicyStatementAttribute.All:
 					this.attrs = value;
 					return;
+				default:
+				{
+					string text = Locale.GetText("Invalid value for {0}.");
+					throw new ArgumentException(string.Format(text, "PolicyStatementAttribute"));
 				}
-				throw new ArgumentException(string.Format(Locale.GetText("Invalid value for {0}."), "PolicyStatementAttribute"));
+				}
 			}
 		}
 
@@ -98,7 +106,7 @@ namespace System.Security.Policy
 			string text = et.Attribute("Attributes");
 			if (text != null)
 			{
-				this.attrs = (PolicyStatementAttribute)Enum.Parse(typeof(PolicyStatementAttribute), text);
+				this.attrs = (PolicyStatementAttribute)((int)Enum.Parse(typeof(PolicyStatementAttribute), text));
 			}
 			SecurityElement securityElement = et.SearchForChildByTag("PermissionSet");
 			this.PermissionSet.FromXml(securityElement);

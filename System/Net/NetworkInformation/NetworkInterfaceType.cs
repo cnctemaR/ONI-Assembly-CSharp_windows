@@ -28,9 +28,6 @@ namespace System.Net.NetworkInformation
 		GigabitEthernet = 117,
 		Tunnel = 131,
 		MultiRateSymmetricDsl = 143,
-		HighPerformanceSerialBus,
-		Wman = 237,
-		Wwanpp = 243,
-		Wwanpp2
+		HighPerformanceSerialBus
 	}
 }

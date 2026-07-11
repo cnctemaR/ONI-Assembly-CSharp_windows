@@ -1,39 +1,12 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading;
 using Mono.Interop;
 
 namespace System
 {
-	[StructLayout(LayoutKind.Sequential)]
 	internal class __ComObject : MarshalByRefObject
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		internal static extern __ComObject CreateRCW(Type t);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private extern void ReleaseInterfaces();
-
-		~__ComObject()
-		{
-			if (this.hash_table != IntPtr.Zero)
-			{
-				if (this.synchronization_context != null)
-				{
-					this.synchronization_context.Post(delegate(object state)
-					{
-						this.ReleaseInterfaces();
-					}, this);
-				}
-				else
-				{
-					this.ReleaseInterfaces();
-				}
-			}
-			this.proxy = null;
-		}
-
 		public __ComObject()
 		{
 			this.Initialize(base.GetType());
@@ -44,61 +17,43 @@ namespace System
 			this.Initialize(t);
 		}
 
-		internal __ComObject(IntPtr pItf, ComInteropProxy p)
+		internal __ComObject(IntPtr pItf)
 		{
-			this.proxy = p;
-			this.InitializeApartmentDetails();
 			Guid iid_IUnknown = __ComObject.IID_IUnknown;
-			Marshal.ThrowExceptionForHR(Marshal.QueryInterface(pItf, ref iid_IUnknown, out this.iunknown));
+			int num = Marshal.QueryInterface(pItf, ref iid_IUnknown, out this.iunknown);
+			Marshal.ThrowExceptionForHR(num);
 		}
 
-		internal void Initialize(IntPtr pUnk, ComInteropProxy p)
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal static extern __ComObject CreateRCW(Type t);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern void ReleaseInterfaces();
+
+		~__ComObject()
 		{
-			this.proxy = p;
-			this.InitializeApartmentDetails();
-			this.iunknown = pUnk;
+			this.ReleaseInterfaces();
 		}
 
 		internal void Initialize(Type t)
 		{
-			this.InitializeApartmentDetails();
 			if (this.iunknown != IntPtr.Zero)
 			{
 				return;
 			}
-			this.iunknown = __ComObject.CreateIUnknown(t);
-		}
-
-		internal static IntPtr CreateIUnknown(Type t)
-		{
-			RuntimeHelpers.RunClassConstructor(t.TypeHandle);
 			ObjectCreationDelegate objectCreationCallback = ExtensibleClassFactory.GetObjectCreationCallback(t);
-			IntPtr intPtr;
 			if (objectCreationCallback != null)
 			{
-				intPtr = objectCreationCallback(IntPtr.Zero);
-				if (intPtr == IntPtr.Zero)
+				this.iunknown = objectCreationCallback(IntPtr.Zero);
+				if (this.iunknown == IntPtr.Zero)
 				{
 					throw new COMException(string.Format("ObjectCreationDelegate for type {0} failed to return a valid COM object", t));
 				}
 			}
 			else
 			{
-				Marshal.ThrowExceptionForHR(__ComObject.CoCreateInstance(__ComObject.GetCLSID(t), IntPtr.Zero, 21U, __ComObject.IID_IUnknown, out intPtr));
-			}
-			return intPtr;
-		}
-
-		private void InitializeApartmentDetails()
-		{
-			if (Thread.CurrentThread.GetApartmentState() != ApartmentState.STA)
-			{
-				return;
-			}
-			this.synchronization_context = SynchronizationContext.Current;
-			if (this.synchronization_context != null && this.synchronization_context.GetType() == typeof(SynchronizationContext))
-			{
-				this.synchronization_context = null;
+				int num = __ComObject.CoCreateInstance(__ComObject.GetCLSID(t), IntPtr.Zero, 21U, __ComObject.IID_IUnknown, out this.iunknown);
+				Marshal.ThrowExceptionForHR(num);
 			}
 		}
 
@@ -108,14 +63,12 @@ namespace System
 			{
 				return t.GUID;
 			}
-			Type type = t.BaseType;
-			while (type != typeof(object))
+			for (Type type = t.BaseType; type != typeof(object); type = type.BaseType)
 			{
 				if (type.IsImport)
 				{
 					return type.GUID;
 				}
-				type = type.BaseType;
 			}
 			throw new COMException("Could not find base COM type for type " + t.ToString());
 		}
@@ -206,9 +159,5 @@ namespace System
 		private IntPtr iunknown;
 
 		private IntPtr hash_table;
-
-		private SynchronizationContext synchronization_context;
-
-		private ComInteropProxy proxy;
 	}
 }

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -23,22 +23,19 @@ namespace System.Diagnostics
 
 		public override void Clear()
 		{
-			if (Win32EventLog.PInvoke.ClearEventLog(this.ReadHandle, null) != 1)
+			int num = Win32EventLog.PInvoke.ClearEventLog(this.ReadHandle, null);
+			if (num != 1)
 			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
+				throw new global::System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 			}
 		}
 
 		public override void Close()
 		{
-			object eventLock = this._eventLock;
-			lock (eventLock)
+			if (this._readHandle != IntPtr.Zero)
 			{
-				if (this._readHandle != IntPtr.Zero)
-				{
-					this.CloseEventLog(this._readHandle);
-					this._readHandle = IntPtr.Zero;
-				}
+				this.CloseEventLog(this._readHandle);
+				this._readHandle = IntPtr.Zero;
 			}
 		}
 
@@ -124,7 +121,7 @@ namespace System.Diagnostics
 				{
 					if (registryKey == null)
 					{
-						throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' does not exist on computer '{1}'.", logName, machineName));
+						throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' does not exist on computer '{1}'.", new object[] { logName, machineName }));
 					}
 					base.CoreEventLog.Clear();
 					string text = (string)registryKey.GetValue("File");
@@ -149,21 +146,22 @@ namespace System.Diagnostics
 			{
 				if (registryKey == null)
 				{
-					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered on computer '{1}'.", source, machineName));
+					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered on computer '{1}'.", new object[] { source, machineName }));
 				}
 				registryKey.DeleteSubKeyTree(source);
 				string[] array = (string[])registryKey.GetValue("Sources");
 				if (array != null)
 				{
-					List<string> list = new List<string>();
+					ArrayList arrayList = new ArrayList();
 					for (int i = 0; i < array.Length; i++)
 					{
 						if (array[i] != source)
 						{
-							list.Add(array[i]);
+							arrayList.Add(array[i]);
 						}
 					}
-					string[] array2 = list.ToArray();
+					string[] array2 = new string[arrayList.Count];
+					arrayList.CopyTo(array2, 0);
 					registryKey.SetValue("Sources", array2);
 				}
 			}
@@ -188,7 +186,7 @@ namespace System.Diagnostics
 			return flag;
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override string FormatMessage(string source, uint messageID, string[] replacementStrings)
 		{
 			string text = null;
@@ -201,11 +199,7 @@ namespace System.Diagnostics
 					break;
 				}
 			}
-			if (text == null)
-			{
-				return string.Join(", ", replacementStrings);
-			}
-			return text;
+			return (text == null) ? string.Join(", ", replacementStrings) : text;
 		}
 
 		private string FormatCategory(string source, int category)
@@ -220,19 +214,16 @@ namespace System.Diagnostics
 					break;
 				}
 			}
-			if (text == null)
-			{
-				return "(" + category.ToString(CultureInfo.InvariantCulture) + ")";
-			}
-			return text;
+			return (text == null) ? ("(" + category.ToString(CultureInfo.InvariantCulture) + ")") : text;
 		}
 
 		protected override int GetEntryCount()
 		{
 			int num = 0;
-			if (Win32EventLog.PInvoke.GetNumberOfEventLogRecords(this.ReadHandle, ref num) != 1)
+			int numberOfEventLogRecords = Win32EventLog.PInvoke.GetNumberOfEventLogRecords(this.ReadHandle, ref num);
+			if (numberOfEventLogRecords != 1)
 			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
+				throw new global::System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 			}
 			return num;
 		}
@@ -262,8 +253,10 @@ namespace System.Diagnostics
 			int num12 = binaryReader.ReadInt32();
 			int num13 = binaryReader.ReadInt32();
 			int num14 = binaryReader.ReadInt32();
-			DateTime dateTime = new DateTime(1970, 1, 1).AddSeconds((double)num4);
-			DateTime dateTime2 = new DateTime(1970, 1, 1).AddSeconds((double)num5);
+			DateTime dateTime = new DateTime(1970, 1, 1);
+			DateTime dateTime2 = dateTime.AddSeconds((double)num4);
+			DateTime dateTime3 = new DateTime(1970, 1, 1);
+			DateTime dateTime4 = dateTime3.AddSeconds((double)num5);
 			StringBuilder stringBuilder = new StringBuilder();
 			while (binaryReader.PeekChar() != 0)
 			{
@@ -307,10 +300,11 @@ namespace System.Diagnostics
 			memoryStream.Position = (long)num14;
 			binaryReader.Read(array4, 0, num13);
 			string text4 = this.FormatMessage(text, num6, array3);
-			return new EventLogEntry(this.FormatCategory(text, (int)num9), num9, num3, eventID, text, text4, text3, text2, (EventLogEntryType)num7, dateTime, dateTime2, array4, array3, (long)((ulong)num6));
+			string text5 = this.FormatCategory(text, (int)num9);
+			return new EventLogEntry(text5, num9, num3, eventID, text, text4, text3, text2, (EventLogEntryType)num7, dateTime2, dateTime4, array4, array3, (long)((ulong)num6));
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override string GetLogDisplayName()
 		{
 			return base.CoreEventLog.Log;
@@ -366,9 +360,10 @@ namespace System.Diagnostics
 			IntPtr intPtr = this.RegisterEventSource();
 			try
 			{
-				if (Win32EventLog.PInvoke.ReportEvent(intPtr, (ushort)type, (ushort)category, instanceID, IntPtr.Zero, (ushort)replacementStrings.Length, (uint)rawData.Length, replacementStrings, rawData) != 1)
+				int num = Win32EventLog.PInvoke.ReportEvent(intPtr, (ushort)type, (ushort)category, instanceID, IntPtr.Zero, (ushort)replacementStrings.Length, (uint)rawData.Length, replacementStrings, rawData);
+				if (num != 1)
 				{
-					throw new Win32Exception(Marshal.GetLastWin32Error());
+					throw new global::System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 				}
 			}
 			finally
@@ -426,19 +421,20 @@ namespace System.Diagnostics
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				if (Win32EventLog.PInvoke.ReadEventLog(this.ReadHandle, (Win32EventLog.ReadFlags)6, index, buffer, buffer.Length, ref bytesRead, ref minBufferNeeded) != 1)
+				int num = Win32EventLog.PInvoke.ReadEventLog(this.ReadHandle, (Win32EventLog.ReadFlags)6, index, buffer, buffer.Length, ref bytesRead, ref minBufferNeeded);
+				if (num != 1)
 				{
 					int lastWin32Error = Marshal.GetLastWin32Error();
 					if (i >= 2)
 					{
-						throw new Win32Exception(lastWin32Error);
+						throw new global::System.ComponentModel.Win32Exception(lastWin32Error);
 					}
 					base.CoreEventLog.Reset();
 				}
 			}
 		}
 
-		[MonoTODO("Support remote machines")]
+		[global::System.MonoTODO("Support remote machines")]
 		private static RegistryKey GetEventLogKey(string machineName, bool writable)
 		{
 			return Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Services\\EventLog", writable);
@@ -566,9 +562,10 @@ namespace System.Diagnostics
 			get
 			{
 				int num = 0;
-				if (Win32EventLog.PInvoke.GetOldestEventLogRecord(this.ReadHandle, ref num) != 1)
+				int oldestEventLogRecord = Win32EventLog.PInvoke.GetOldestEventLogRecord(this.ReadHandle, ref num);
+				if (oldestEventLogRecord != 1)
 				{
-					throw new Win32Exception(Marshal.GetLastWin32Error());
+					throw new global::System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 				}
 				return num;
 			}
@@ -576,17 +573,19 @@ namespace System.Diagnostics
 
 		private void CloseEventLog(IntPtr hEventLog)
 		{
-			if (Win32EventLog.PInvoke.CloseEventLog(hEventLog) != 1)
+			int num = Win32EventLog.PInvoke.CloseEventLog(hEventLog);
+			if (num != 1)
 			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
+				throw new global::System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 			}
 		}
 
 		private void DeregisterEventSource(IntPtr hEventLog)
 		{
-			if (Win32EventLog.PInvoke.DeregisterEventSource(hEventLog) != 1)
+			int num = Win32EventLog.PInvoke.DeregisterEventSource(hEventLog);
+			if (num != 1)
 			{
-				throw new Win32Exception(Marshal.GetLastWin32Error());
+				throw new global::System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 			}
 		}
 
@@ -602,7 +601,8 @@ namespace System.Diagnostics
 				Win32EventLog.SidNameUse sidNameUse;
 				if (!Win32EventLog.PInvoke.LookupAccountSid(machineName, sid, stringBuilder, ref capacity, stringBuilder2, ref capacity2, out sidNameUse))
 				{
-					if (Marshal.GetLastWin32Error() == 122)
+					int lastWin32Error = Marshal.GetLastWin32Error();
+					if (lastWin32Error == 122)
 					{
 						stringBuilder.EnsureCapacity((int)capacity);
 						stringBuilder2.EnsureCapacity((int)capacity2);
@@ -635,13 +635,17 @@ namespace System.Diagnostics
 				{
 					array[i] = Marshal.StringToHGlobalAuto(replacementStrings[i]);
 				}
-				if (Win32EventLog.PInvoke.FormatMessage(Win32EventLog.FormatMessageFlags.AllocateBuffer | Win32EventLog.FormatMessageFlags.FromHModule | Win32EventLog.FormatMessageFlags.ArgumentArray, intPtr, messageID, 0, ref intPtr2, 0, array) != 0)
+				int num = Win32EventLog.PInvoke.FormatMessage(Win32EventLog.FormatMessageFlags.AllocateBuffer | Win32EventLog.FormatMessageFlags.FromHModule | Win32EventLog.FormatMessageFlags.ArgumentArray, intPtr, messageID, 0, ref intPtr2, 0, array);
+				if (num != 0)
 				{
 					string text = Marshal.PtrToStringAuto(intPtr2);
 					intPtr2 = Win32EventLog.PInvoke.LocalFree(intPtr2);
 					return text.TrimEnd(null);
 				}
-				Marshal.GetLastWin32Error();
+				int lastWin32Error = Marshal.GetLastWin32Error();
+				if (lastWin32Error == 317)
+				{
+				}
 			}
 			finally
 			{
@@ -683,7 +687,11 @@ namespace System.Diagnostics
 				this._readHandle = Win32EventLog.PInvoke.OpenEventLog(base.CoreEventLog.MachineName, logName);
 				if (this._readHandle == IntPtr.Zero)
 				{
-					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' on computer '{1}' cannot be opened.", logName, base.CoreEventLog.MachineName), new Win32Exception());
+					throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' on computer '{1}' cannot be opened.", new object[]
+					{
+						logName,
+						base.CoreEventLog.MachineName
+					}), new global::System.ComponentModel.Win32Exception());
 				}
 				return this._readHandle;
 			}
@@ -694,20 +702,27 @@ namespace System.Diagnostics
 			IntPtr intPtr = Win32EventLog.PInvoke.RegisterEventSource(base.CoreEventLog.MachineName, base.CoreEventLog.Source);
 			if (intPtr == IntPtr.Zero)
 			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event source '{0}' on computer '{1}' cannot be opened.", base.CoreEventLog.Source, base.CoreEventLog.MachineName), new Win32Exception());
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event source '{0}' on computer '{1}' cannot be opened.", new object[]
+				{
+					base.CoreEventLog.Source,
+					base.CoreEventLog.MachineName
+				}), new global::System.ComponentModel.Win32Exception());
 			}
 			return intPtr;
 		}
 
 		public override void DisableNotification()
 		{
-			object eventLock = this._eventLock;
-			lock (eventLock)
+			if (this._notifyResetEvent != null)
 			{
-				if (this._notifyResetEvent != null)
+				this._notifyResetEvent.Close();
+				this._notifyResetEvent = null;
+			}
+			if (this._notifyThread != null)
+			{
+				if (this._notifyThread.ThreadState == ThreadState.Running)
 				{
-					this._notifyResetEvent.Close();
-					this._notifyResetEvent = null;
+					this._notifyThread.Abort();
 				}
 				this._notifyThread = null;
 			}
@@ -715,68 +730,57 @@ namespace System.Diagnostics
 
 		public override void EnableNotification()
 		{
-			object eventLock = this._eventLock;
-			lock (eventLock)
+			this._notifyResetEvent = new ManualResetEvent(false);
+			this._lastEntryWritten = this.OldestEventLogEntry + base.EntryCount;
+			if (Win32EventLog.PInvoke.NotifyChangeEventLog(this.ReadHandle, this._notifyResetEvent.Handle) == 0)
 			{
-				if (this._notifyResetEvent == null)
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unable to receive notifications for log '{0}' on computer '{1}'.", new object[]
 				{
-					this._notifyResetEvent = new ManualResetEvent(false);
-					this._lastEntryWritten = this.OldestEventLogEntry + base.EntryCount;
-					if (Win32EventLog.PInvoke.NotifyChangeEventLog(this.ReadHandle, this._notifyResetEvent.SafeWaitHandle.DangerousGetHandle()) == 0)
-					{
-						throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Unable to receive notifications for log '{0}' on computer '{1}'.", base.CoreEventLog.GetLogName(), base.CoreEventLog.MachineName), new Win32Exception());
-					}
-					this._notifyThread = new Thread(delegate
-					{
-						this.NotifyEventThread(this._notifyResetEvent);
-					});
-					this._notifyThread.IsBackground = true;
-					this._notifyThread.Start();
-				}
+					base.CoreEventLog.GetLogName(),
+					base.CoreEventLog.MachineName
+				}), new global::System.ComponentModel.Win32Exception());
 			}
+			this._notifyThread = new Thread(new ThreadStart(this.NotifyEventThread));
+			this._notifyThread.IsBackground = true;
+			this._notifyThread.Start();
 		}
 
-		private void NotifyEventThread(ManualResetEvent resetEvent)
+		private void NotifyEventThread()
 		{
-			if (resetEvent == null)
-			{
-				return;
-			}
 			for (;;)
 			{
+				this._notifyResetEvent.WaitOne();
+				lock (this)
+				{
+					if (this._notifying)
+					{
+						break;
+					}
+					this._notifying = true;
+				}
 				try
 				{
-					resetEvent.WaitOne();
-				}
-				catch (ObjectDisposedException)
-				{
-					break;
-				}
-				object eventLock = this._eventLock;
-				lock (eventLock)
-				{
-					if (resetEvent == this._notifyResetEvent)
+					int oldestEventLogEntry = this.OldestEventLogEntry;
+					if (this._lastEntryWritten < oldestEventLogEntry)
 					{
-						if (!(this._readHandle == IntPtr.Zero))
-						{
-							int oldestEventLogEntry = this.OldestEventLogEntry;
-							if (this._lastEntryWritten < oldestEventLogEntry)
-							{
-								this._lastEntryWritten = oldestEventLogEntry;
-							}
-							int num = this._lastEntryWritten - oldestEventLogEntry;
-							int num2 = base.EntryCount + oldestEventLogEntry;
-							for (int i = num; i < num2 - 1; i++)
-							{
-								EventLogEntry entry = this.GetEntry(i);
-								base.CoreEventLog.OnEntryWritten(entry);
-							}
-							this._lastEntryWritten = num2;
-							continue;
-						}
+						this._lastEntryWritten = oldestEventLogEntry;
+					}
+					int num = this._lastEntryWritten - oldestEventLogEntry;
+					int num2 = base.EntryCount + oldestEventLogEntry;
+					for (int i = num; i < num2 - 1; i++)
+					{
+						EventLogEntry entry = this.GetEntry(i);
+						base.CoreEventLog.OnEntryWritten(entry);
+					}
+					this._lastEntryWritten = num2;
+				}
+				finally
+				{
+					lock (this)
+					{
+						this._notifying = false;
 					}
 				}
-				break;
 			}
 		}
 
@@ -828,7 +832,7 @@ namespace System.Diagnostics
 
 		private int _lastEntryWritten;
 
-		private object _eventLock = new object();
+		private bool _notifying;
 
 		private class PInvoke
 		{
@@ -841,10 +845,10 @@ namespace System.Diagnostics
 			[DllImport("advapi32.dll", SetLastError = true)]
 			public static extern int DeregisterEventSource(IntPtr hEventLog);
 
-			[DllImport("kernel32", CharSet = CharSet.Auto, SetLastError = true)]
+			[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 			public static extern int FormatMessage(Win32EventLog.FormatMessageFlags dwFlags, IntPtr lpSource, uint dwMessageId, int dwLanguageId, ref IntPtr lpBuffer, int nSize, IntPtr[] arguments);
 
-			[DllImport("kernel32", SetLastError = true)]
+			[DllImport("kernel32.dll", SetLastError = true)]
 			public static extern bool FreeLibrary(IntPtr hModule);
 
 			[DllImport("advapi32.dll", SetLastError = true)]
@@ -853,16 +857,16 @@ namespace System.Diagnostics
 			[DllImport("advapi32.dll", SetLastError = true)]
 			public static extern int GetOldestEventLogRecord(IntPtr hEventLog, ref int OldestRecord);
 
-			[DllImport("kernel32", SetLastError = true)]
+			[DllImport("kernel32.dll", SetLastError = true)]
 			public static extern IntPtr LoadLibraryEx(string lpFileName, IntPtr hFile, Win32EventLog.LoadFlags dwFlags);
 
-			[DllImport("kernel32", SetLastError = true)]
+			[DllImport("kernel32.dll", SetLastError = true)]
 			public static extern IntPtr LocalFree(IntPtr hMem);
 
 			[DllImport("advapi32.dll", SetLastError = true)]
 			public static extern bool LookupAccountSid(string lpSystemName, [MarshalAs(UnmanagedType.LPArray)] byte[] Sid, StringBuilder lpName, ref uint cchName, StringBuilder ReferencedDomainName, ref uint cchReferencedDomainName, out Win32EventLog.SidNameUse peUse);
 
-			[DllImport("advapi32.dll", SetLastError = true)]
+			[DllImport("Advapi32.dll", SetLastError = true)]
 			public static extern int NotifyChangeEventLog(IntPtr hEventLog, IntPtr hEvent);
 
 			[DllImport("advapi32.dll", SetLastError = true)]
@@ -871,7 +875,7 @@ namespace System.Diagnostics
 			[DllImport("advapi32.dll", SetLastError = true)]
 			public static extern IntPtr RegisterEventSource(string machineName, string sourceName);
 
-			[DllImport("advapi32.dll", SetLastError = true)]
+			[DllImport("Advapi32.dll", SetLastError = true)]
 			public static extern int ReportEvent(IntPtr hHandle, ushort wType, ushort wCategory, uint dwEventID, IntPtr sid, ushort wNumStrings, uint dwDataSize, string[] lpStrings, byte[] lpRawData);
 
 			[DllImport("advapi32.dll", SetLastError = true)]

@@ -5,12 +5,6 @@ namespace Mono.Posix
 	[Obsolete("Use Mono.Unix.Native.Stat")]
 	public struct Stat
 	{
-		[Obsolete("Use Mono.Unix.Native.NativeConvert.ToDateTime")]
-		public static DateTime UnixToDateTime(long unix)
-		{
-			return Stat.UnixEpoch.Add(TimeSpan.FromSeconds((double)unix)).ToLocalTime();
-		}
-
 		internal Stat(int device, int inode, int mode, int nlinks, int uid, int gid, int rdev, long size, long blksize, long blocks, long atime, long mtime, long ctime)
 		{
 			this.Device = device;
@@ -42,9 +36,17 @@ namespace Mono.Posix
 			if (ctime != 0L)
 			{
 				this.CTime = Stat.UnixToDateTime(ctime);
-				return;
 			}
-			this.CTime = default(DateTime);
+			else
+			{
+				this.CTime = default(DateTime);
+			}
+		}
+
+		[Obsolete("Use Mono.Unix.Native.NativeConvert.ToDateTime")]
+		public static DateTime UnixToDateTime(long unix)
+		{
+			return Stat.UnixEpoch.Add(TimeSpan.FromSeconds((double)unix)).ToLocalTime();
 		}
 
 		[Obsolete("Use Mono.Unix.Native.Stat.st_dev")]

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Security.Permissions;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace System.IO
 {
@@ -12,139 +8,142 @@ namespace System.IO
 	[Serializable]
 	public class StreamReader : TextReader
 	{
-		internal static int DefaultBufferSize
-		{
-			get
-			{
-				return 1024;
-			}
-		}
-
-		private void CheckAsyncTaskInProgress()
-		{
-			Task asyncReadTask = this._asyncReadTask;
-			if (asyncReadTask != null && !asyncReadTask.IsCompleted)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("The stream is currently in use by a previous operation on the stream."));
-			}
-		}
-
 		internal StreamReader()
 		{
 		}
 
 		public StreamReader(Stream stream)
-			: this(stream, true)
+			: this(stream, Encoding.UTF8Unmarked, true, 1024)
 		{
 		}
 
 		public StreamReader(Stream stream, bool detectEncodingFromByteOrderMarks)
-			: this(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks, StreamReader.DefaultBufferSize, false)
+			: this(stream, Encoding.UTF8Unmarked, detectEncodingFromByteOrderMarks, 1024)
 		{
 		}
 
 		public StreamReader(Stream stream, Encoding encoding)
-			: this(stream, encoding, true, StreamReader.DefaultBufferSize, false)
+			: this(stream, encoding, true, 1024)
 		{
 		}
 
 		public StreamReader(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks)
-			: this(stream, encoding, detectEncodingFromByteOrderMarks, StreamReader.DefaultBufferSize, false)
+			: this(stream, encoding, detectEncodingFromByteOrderMarks, 1024)
 		{
 		}
 
 		public StreamReader(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize)
-			: this(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, false)
 		{
-		}
-
-		public StreamReader(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize, bool leaveOpen)
-		{
-			if (stream == null || encoding == null)
-			{
-				throw new ArgumentNullException((stream == null) ? "stream" : "encoding");
-			}
-			if (!stream.CanRead)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Stream was not readable."));
-			}
-			if (bufferSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
-			}
-			this.Init(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+			this.Initialize(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize);
 		}
 
 		public StreamReader(string path)
-			: this(path, true)
+			: this(path, Encoding.UTF8Unmarked, true, 4096)
 		{
 		}
 
 		public StreamReader(string path, bool detectEncodingFromByteOrderMarks)
-			: this(path, Encoding.UTF8, detectEncodingFromByteOrderMarks, StreamReader.DefaultBufferSize)
+			: this(path, Encoding.UTF8Unmarked, detectEncodingFromByteOrderMarks, 4096)
 		{
 		}
 
 		public StreamReader(string path, Encoding encoding)
-			: this(path, encoding, true, StreamReader.DefaultBufferSize)
+			: this(path, encoding, true, 4096)
 		{
 		}
 
 		public StreamReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks)
-			: this(path, encoding, detectEncodingFromByteOrderMarks, StreamReader.DefaultBufferSize)
+			: this(path, encoding, detectEncodingFromByteOrderMarks, 4096)
 		{
 		}
 
-		[SecuritySafeCritical]
 		public StreamReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize)
-			: this(path, encoding, detectEncodingFromByteOrderMarks, bufferSize, true)
 		{
-		}
-
-		[SecurityCritical]
-		internal StreamReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize, bool checkHost)
-		{
-			if (path == null || encoding == null)
+			if (path == null)
 			{
-				throw new ArgumentNullException((path == null) ? "path" : "encoding");
+				throw new ArgumentNullException("path");
 			}
-			if (path.Length == 0)
+			if (string.Empty == path)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Empty path name is not legal."));
+				throw new ArgumentException("Empty path not allowed");
+			}
+			if (path.IndexOfAny(Path.InvalidPathChars) != -1)
+			{
+				throw new ArgumentException("path contains invalid characters");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
 			}
 			if (bufferSize <= 0)
 			{
-				throw new ArgumentOutOfRangeException("bufferSize", Environment.GetResourceString("Positive number required."));
+				throw new ArgumentOutOfRangeException("bufferSize", "The minimum size of the buffer must be positive");
 			}
-			Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan, Path.GetFileName(path), false, false, checkHost);
-			this.Init(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, false);
+			Stream stream = File.OpenRead(path);
+			this.Initialize(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize);
 		}
 
-		private void Init(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize, bool leaveOpen)
+		internal void Initialize(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize)
 		{
-			this.stream = stream;
-			this.encoding = encoding;
-			this.decoder = encoding.GetDecoder();
+			if (stream == null)
+			{
+				throw new ArgumentNullException("stream");
+			}
+			if (encoding == null)
+			{
+				throw new ArgumentNullException("encoding");
+			}
+			if (!stream.CanRead)
+			{
+				throw new ArgumentException("Cannot read stream");
+			}
+			if (bufferSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException("bufferSize", "The minimum size of the buffer must be positive");
+			}
 			if (bufferSize < 128)
 			{
 				bufferSize = 128;
 			}
-			this.byteBuffer = new byte[bufferSize];
-			this._maxCharsPerBuffer = encoding.GetMaxCharCount(bufferSize);
-			this.charBuffer = new char[this._maxCharsPerBuffer];
-			this.byteLen = 0;
-			this.bytePos = 0;
-			this._detectEncoding = detectEncodingFromByteOrderMarks;
-			this._preamble = encoding.GetPreamble();
-			this._checkPreamble = this._preamble.Length != 0;
-			this._isBlocked = false;
-			this._closable = !leaveOpen;
+			this.base_stream = stream;
+			this.input_buffer = new byte[bufferSize];
+			this.buffer_size = bufferSize;
+			this.encoding = encoding;
+			this.decoder = encoding.GetDecoder();
+			byte[] preamble = encoding.GetPreamble();
+			this.do_checks = ((!detectEncodingFromByteOrderMarks) ? 0 : 1);
+			this.do_checks += ((preamble.Length != 0) ? 2 : 0);
+			this.decoded_buffer = new char[encoding.GetMaxCharCount(bufferSize) + 1];
+			this.decoded_count = 0;
+			this.pos = 0;
 		}
 
-		internal void Init(Stream stream)
+		public virtual Stream BaseStream
 		{
-			this.stream = stream;
-			this._closable = true;
+			get
+			{
+				return this.base_stream;
+			}
+		}
+
+		public virtual Encoding CurrentEncoding
+		{
+			get
+			{
+				if (this.encoding == null)
+				{
+					throw new Exception();
+				}
+				return this.encoding;
+			}
+		}
+
+		public bool EndOfStream
+		{
+			get
+			{
+				return this.Peek() < 0;
+			}
 		}
 
 		public override void Close()
@@ -154,158 +153,207 @@ namespace System.IO
 
 		protected override void Dispose(bool disposing)
 		{
-			try
+			if (disposing && this.base_stream != null)
 			{
-				if (!this.LeaveOpen && disposing && this.stream != null)
+				this.base_stream.Close();
+			}
+			this.input_buffer = null;
+			this.decoded_buffer = null;
+			this.encoding = null;
+			this.decoder = null;
+			this.base_stream = null;
+			base.Dispose(disposing);
+		}
+
+		private int DoChecks(int count)
+		{
+			if ((this.do_checks & 2) == 2)
+			{
+				byte[] preamble = this.encoding.GetPreamble();
+				int num = preamble.Length;
+				if (count >= num)
 				{
-					this.stream.Close();
+					int i;
+					for (i = 0; i < num; i++)
+					{
+						if (this.input_buffer[i] != preamble[i])
+						{
+							break;
+						}
+					}
+					if (i == num)
+					{
+						return i;
+					}
 				}
 			}
-			finally
+			if ((this.do_checks & 1) == 1)
 			{
-				if (!this.LeaveOpen && this.stream != null)
+				if (count < 2)
 				{
-					this.stream = null;
-					this.encoding = null;
-					this.decoder = null;
-					this.byteBuffer = null;
-					this.charBuffer = null;
-					this.charPos = 0;
-					this.charLen = 0;
-					base.Dispose(disposing);
+					return 0;
+				}
+				if (this.input_buffer[0] == 254 && this.input_buffer[1] == 255)
+				{
+					this.encoding = Encoding.BigEndianUnicode;
+					return 2;
+				}
+				if (count < 3)
+				{
+					return 0;
+				}
+				if (this.input_buffer[0] == 239 && this.input_buffer[1] == 187 && this.input_buffer[2] == 191)
+				{
+					this.encoding = Encoding.UTF8Unmarked;
+					return 3;
+				}
+				if (count < 4)
+				{
+					if (this.input_buffer[0] == 255 && this.input_buffer[1] == 254 && this.input_buffer[2] != 0)
+					{
+						this.encoding = Encoding.Unicode;
+						return 2;
+					}
+					return 0;
+				}
+				else
+				{
+					if (this.input_buffer[0] == 0 && this.input_buffer[1] == 0 && this.input_buffer[2] == 254 && this.input_buffer[3] == 255)
+					{
+						this.encoding = Encoding.BigEndianUTF32;
+						return 4;
+					}
+					if (this.input_buffer[0] == 255 && this.input_buffer[1] == 254)
+					{
+						if (this.input_buffer[2] == 0 && this.input_buffer[3] == 0)
+						{
+							this.encoding = Encoding.UTF32;
+							return 4;
+						}
+						this.encoding = Encoding.Unicode;
+						return 2;
+					}
 				}
 			}
-		}
-
-		public virtual Encoding CurrentEncoding
-		{
-			get
-			{
-				return this.encoding;
-			}
-		}
-
-		public virtual Stream BaseStream
-		{
-			get
-			{
-				return this.stream;
-			}
-		}
-
-		internal bool LeaveOpen
-		{
-			get
-			{
-				return !this._closable;
-			}
+			return 0;
 		}
 
 		public void DiscardBufferedData()
 		{
-			this.CheckAsyncTaskInProgress();
-			this.byteLen = 0;
-			this.charLen = 0;
-			this.charPos = 0;
-			if (this.encoding != null)
-			{
-				this.decoder = this.encoding.GetDecoder();
-			}
-			this._isBlocked = false;
+			this.pos = (this.decoded_count = 0);
+			this.mayBlock = false;
+			this.decoder = this.encoding.GetDecoder();
 		}
 
-		public bool EndOfStream
+		private int ReadBuffer()
 		{
-			get
+			this.pos = 0;
+			this.decoded_count = 0;
+			int num = 0;
+			for (;;)
 			{
-				if (this.stream == null)
+				int num2 = this.base_stream.Read(this.input_buffer, 0, this.buffer_size);
+				if (num2 <= 0)
 				{
-					__Error.ReaderClosed();
+					break;
 				}
-				this.CheckAsyncTaskInProgress();
-				return this.charPos >= this.charLen && this.ReadBuffer() == 0;
+				this.mayBlock = num2 < this.buffer_size;
+				if (this.do_checks > 0)
+				{
+					Encoding encoding = this.encoding;
+					num = this.DoChecks(num2);
+					if (encoding != this.encoding)
+					{
+						int num3 = encoding.GetMaxCharCount(this.buffer_size) + 1;
+						int num4 = this.encoding.GetMaxCharCount(this.buffer_size) + 1;
+						if (num3 != num4)
+						{
+							this.decoded_buffer = new char[num4];
+						}
+						this.decoder = this.encoding.GetDecoder();
+					}
+					this.do_checks = 0;
+					num2 -= num;
+				}
+				this.decoded_count += this.decoder.GetChars(this.input_buffer, num, num2, this.decoded_buffer, 0);
+				num = 0;
+				if (this.decoded_count != 0)
+				{
+					goto Block_5;
+				}
 			}
+			return 0;
+			Block_5:
+			return this.decoded_count;
 		}
 
 		public override int Peek()
 		{
-			if (this.stream == null)
+			if (this.base_stream == null)
 			{
-				__Error.ReaderClosed();
+				throw new ObjectDisposedException("StreamReader", "Cannot read from a closed StreamReader");
 			}
-			this.CheckAsyncTaskInProgress();
-			if (this.charPos == this.charLen && (this._isBlocked || this.ReadBuffer() == 0))
+			if (this.pos >= this.decoded_count && this.ReadBuffer() == 0)
 			{
 				return -1;
 			}
-			return (int)this.charBuffer[this.charPos];
+			return (int)this.decoded_buffer[this.pos];
 		}
 
 		internal bool DataAvailable()
 		{
-			return this.charPos < this.charLen;
+			return this.pos < this.decoded_count;
 		}
 
 		public override int Read()
 		{
-			if (this.stream == null)
+			if (this.base_stream == null)
 			{
-				__Error.ReaderClosed();
+				throw new ObjectDisposedException("StreamReader", "Cannot read from a closed StreamReader");
 			}
-			this.CheckAsyncTaskInProgress();
-			if (this.charPos == this.charLen && this.ReadBuffer() == 0)
+			if (this.pos >= this.decoded_count && this.ReadBuffer() == 0)
 			{
 				return -1;
 			}
-			int num = (int)this.charBuffer[this.charPos];
-			this.charPos++;
-			return num;
+			return (int)this.decoded_buffer[this.pos++];
 		}
 
 		public override int Read([In] [Out] char[] buffer, int index, int count)
 		{
+			if (this.base_stream == null)
+			{
+				throw new ObjectDisposedException("StreamReader", "Cannot read from a closed StreamReader");
+			}
 			if (buffer == null)
 			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
+				throw new ArgumentNullException("buffer");
 			}
-			if (index < 0 || count < 0)
+			if (index < 0)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", "< 0");
 			}
-			if (buffer.Length - index < count)
+			if (count < 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
+				throw new ArgumentOutOfRangeException("count", "< 0");
 			}
-			if (this.stream == null)
+			if (index > buffer.Length - count)
 			{
-				__Error.ReaderClosed();
+				throw new ArgumentException("index + count > buffer.Length");
 			}
-			this.CheckAsyncTaskInProgress();
 			int num = 0;
-			bool flag = false;
 			while (count > 0)
 			{
-				int num2 = this.charLen - this.charPos;
-				if (num2 == 0)
+				if (this.pos >= this.decoded_count && this.ReadBuffer() == 0)
 				{
-					num2 = this.ReadBuffer(buffer, index + num, count, out flag);
+					return (num <= 0) ? 0 : num;
 				}
-				if (num2 == 0)
-				{
-					break;
-				}
-				if (num2 > count)
-				{
-					num2 = count;
-				}
-				if (!flag)
-				{
-					Buffer.InternalBlockCopy(this.charBuffer, this.charPos * 2, buffer, (index + num) * 2, num2 * 2);
-					this.charPos += num2;
-				}
-				num += num2;
+				int num2 = Math.Min(this.decoded_count - this.pos, count);
+				Array.Copy(this.decoded_buffer, this.pos, buffer, index, num2);
+				this.pos += num2;
+				index += num2;
 				count -= num2;
-				if (this._isBlocked)
+				num += num2;
+				if (this.mayBlock)
 				{
 					break;
 				}
@@ -313,889 +361,184 @@ namespace System.IO
 			return num;
 		}
 
-		public override string ReadToEnd()
+		private int FindNextEOL()
 		{
-			if (this.stream == null)
+			while (this.pos < this.decoded_count)
 			{
-				__Error.ReaderClosed();
-			}
-			this.CheckAsyncTaskInProgress();
-			StringBuilder stringBuilder = new StringBuilder(this.charLen - this.charPos);
-			do
-			{
-				stringBuilder.Append(this.charBuffer, this.charPos, this.charLen - this.charPos);
-				this.charPos = this.charLen;
-				this.ReadBuffer();
-			}
-			while (this.charLen > 0);
-			return stringBuilder.ToString();
-		}
-
-		public override int ReadBlock([In] [Out] char[] buffer, int index, int count)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
-			}
-			if (index < 0 || count < 0)
-			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.Length - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (this.stream == null)
-			{
-				__Error.ReaderClosed();
-			}
-			this.CheckAsyncTaskInProgress();
-			return base.ReadBlock(buffer, index, count);
-		}
-
-		private void CompressBuffer(int n)
-		{
-			Buffer.InternalBlockCopy(this.byteBuffer, n, this.byteBuffer, 0, this.byteLen - n);
-			this.byteLen -= n;
-		}
-
-		private void DetectEncoding()
-		{
-			if (this.byteLen < 2)
-			{
-				return;
-			}
-			this._detectEncoding = false;
-			bool flag = false;
-			if (this.byteBuffer[0] == 254 && this.byteBuffer[1] == 255)
-			{
-				this.encoding = new UnicodeEncoding(true, true);
-				this.CompressBuffer(2);
-				flag = true;
-			}
-			else if (this.byteBuffer[0] == 255 && this.byteBuffer[1] == 254)
-			{
-				if (this.byteLen < 4 || this.byteBuffer[2] != 0 || this.byteBuffer[3] != 0)
+				char c = this.decoded_buffer[this.pos];
+				if (c == '\n')
 				{
-					this.encoding = new UnicodeEncoding(false, true);
-					this.CompressBuffer(2);
-					flag = true;
+					this.pos++;
+					int num = ((!this.foundCR) ? (this.pos - 1) : (this.pos - 2));
+					if (num < 0)
+					{
+						num = 0;
+					}
+					this.foundCR = false;
+					return num;
+				}
+				if (this.foundCR)
+				{
+					this.foundCR = false;
+					if (this.pos == 0)
+					{
+						return -2;
+					}
+					return this.pos - 1;
 				}
 				else
 				{
-					this.encoding = new UTF32Encoding(false, true);
-					this.CompressBuffer(4);
-					flag = true;
+					this.foundCR = c == '\r';
+					this.pos++;
 				}
 			}
-			else if (this.byteLen >= 3 && this.byteBuffer[0] == 239 && this.byteBuffer[1] == 187 && this.byteBuffer[2] == 191)
-			{
-				this.encoding = Encoding.UTF8;
-				this.CompressBuffer(3);
-				flag = true;
-			}
-			else if (this.byteLen >= 4 && this.byteBuffer[0] == 0 && this.byteBuffer[1] == 0 && this.byteBuffer[2] == 254 && this.byteBuffer[3] == 255)
-			{
-				this.encoding = new UTF32Encoding(true, true);
-				this.CompressBuffer(4);
-				flag = true;
-			}
-			else if (this.byteLen == 2)
-			{
-				this._detectEncoding = true;
-			}
-			if (flag)
-			{
-				this.decoder = this.encoding.GetDecoder();
-				this._maxCharsPerBuffer = this.encoding.GetMaxCharCount(this.byteBuffer.Length);
-				this.charBuffer = new char[this._maxCharsPerBuffer];
-			}
-		}
-
-		private bool IsPreamble()
-		{
-			if (!this._checkPreamble)
-			{
-				return this._checkPreamble;
-			}
-			int num = ((this.byteLen >= this._preamble.Length) ? (this._preamble.Length - this.bytePos) : (this.byteLen - this.bytePos));
-			int i = 0;
-			while (i < num)
-			{
-				if (this.byteBuffer[this.bytePos] != this._preamble[this.bytePos])
-				{
-					this.bytePos = 0;
-					this._checkPreamble = false;
-					break;
-				}
-				i++;
-				this.bytePos++;
-			}
-			if (this._checkPreamble && this.bytePos == this._preamble.Length)
-			{
-				this.CompressBuffer(this._preamble.Length);
-				this.bytePos = 0;
-				this._checkPreamble = false;
-				this._detectEncoding = false;
-			}
-			return this._checkPreamble;
-		}
-
-		internal virtual int ReadBuffer()
-		{
-			this.charLen = 0;
-			this.charPos = 0;
-			if (!this._checkPreamble)
-			{
-				this.byteLen = 0;
-			}
-			for (;;)
-			{
-				if (this._checkPreamble)
-				{
-					int num = this.stream.Read(this.byteBuffer, this.bytePos, this.byteBuffer.Length - this.bytePos);
-					if (num == 0)
-					{
-						break;
-					}
-					this.byteLen += num;
-				}
-				else
-				{
-					this.byteLen = this.stream.Read(this.byteBuffer, 0, this.byteBuffer.Length);
-					if (this.byteLen == 0)
-					{
-						goto Block_5;
-					}
-				}
-				this._isBlocked = this.byteLen < this.byteBuffer.Length;
-				if (!this.IsPreamble())
-				{
-					if (this._detectEncoding && this.byteLen >= 2)
-					{
-						this.DetectEncoding();
-					}
-					this.charLen += this.decoder.GetChars(this.byteBuffer, 0, this.byteLen, this.charBuffer, this.charLen);
-				}
-				if (this.charLen != 0)
-				{
-					goto Block_9;
-				}
-			}
-			if (this.byteLen > 0)
-			{
-				this.charLen += this.decoder.GetChars(this.byteBuffer, 0, this.byteLen, this.charBuffer, this.charLen);
-				this.bytePos = (this.byteLen = 0);
-			}
-			return this.charLen;
-			Block_5:
-			return this.charLen;
-			Block_9:
-			return this.charLen;
-		}
-
-		private int ReadBuffer(char[] userBuffer, int userOffset, int desiredChars, out bool readToUserBuffer)
-		{
-			this.charLen = 0;
-			this.charPos = 0;
-			if (!this._checkPreamble)
-			{
-				this.byteLen = 0;
-			}
-			int num = 0;
-			readToUserBuffer = desiredChars >= this._maxCharsPerBuffer;
-			for (;;)
-			{
-				if (this._checkPreamble)
-				{
-					int num2 = this.stream.Read(this.byteBuffer, this.bytePos, this.byteBuffer.Length - this.bytePos);
-					if (num2 == 0)
-					{
-						break;
-					}
-					this.byteLen += num2;
-				}
-				else
-				{
-					this.byteLen = this.stream.Read(this.byteBuffer, 0, this.byteBuffer.Length);
-					if (this.byteLen == 0)
-					{
-						goto IL_01B1;
-					}
-				}
-				this._isBlocked = this.byteLen < this.byteBuffer.Length;
-				if (!this.IsPreamble())
-				{
-					if (this._detectEncoding && this.byteLen >= 2)
-					{
-						this.DetectEncoding();
-						readToUserBuffer = desiredChars >= this._maxCharsPerBuffer;
-					}
-					this.charPos = 0;
-					if (readToUserBuffer)
-					{
-						num += this.decoder.GetChars(this.byteBuffer, 0, this.byteLen, userBuffer, userOffset + num);
-						this.charLen = 0;
-					}
-					else
-					{
-						num = this.decoder.GetChars(this.byteBuffer, 0, this.byteLen, this.charBuffer, num);
-						this.charLen += num;
-					}
-				}
-				if (num != 0)
-				{
-					goto IL_01B1;
-				}
-			}
-			if (this.byteLen > 0)
-			{
-				if (readToUserBuffer)
-				{
-					num = this.decoder.GetChars(this.byteBuffer, 0, this.byteLen, userBuffer, userOffset + num);
-					this.charLen = 0;
-				}
-				else
-				{
-					num = this.decoder.GetChars(this.byteBuffer, 0, this.byteLen, this.charBuffer, num);
-					this.charLen += num;
-				}
-			}
-			return num;
-			IL_01B1:
-			this._isBlocked &= num < desiredChars;
-			return num;
+			return -1;
 		}
 
 		public override string ReadLine()
 		{
-			if (this.stream == null)
+			if (this.base_stream == null)
 			{
-				__Error.ReaderClosed();
+				throw new ObjectDisposedException("StreamReader", "Cannot read from a closed StreamReader");
 			}
-			this.CheckAsyncTaskInProgress();
-			if (this.charPos == this.charLen && this.ReadBuffer() == 0)
+			if (this.pos >= this.decoded_count && this.ReadBuffer() == 0)
 			{
 				return null;
 			}
-			StringBuilder stringBuilder = null;
-			int num;
-			char c;
-			for (;;)
+			int num = this.pos;
+			int num2 = this.FindNextEOL();
+			if (num2 < this.decoded_count && num2 >= num)
 			{
-				num = this.charPos;
-				do
-				{
-					c = this.charBuffer[num];
-					if (c == '\r' || c == '\n')
-					{
-						goto IL_004A;
-					}
-					num++;
-				}
-				while (num < this.charLen);
-				num = this.charLen - this.charPos;
-				if (stringBuilder == null)
-				{
-					stringBuilder = new StringBuilder(num + 80);
-				}
-				stringBuilder.Append(this.charBuffer, this.charPos, num);
-				if (this.ReadBuffer() <= 0)
-				{
-					goto Block_11;
-				}
+				return new string(this.decoded_buffer, num, num2 - num);
 			}
-			IL_004A:
-			string text;
-			if (stringBuilder != null)
+			if (num2 == -2)
 			{
-				stringBuilder.Append(this.charBuffer, this.charPos, num - this.charPos);
-				text = stringBuilder.ToString();
+				return this.line_builder.ToString(0, this.line_builder.Length);
+			}
+			if (this.line_builder == null)
+			{
+				this.line_builder = new StringBuilder();
 			}
 			else
 			{
-				text = new string(this.charBuffer, this.charPos, num - this.charPos);
+				this.line_builder.Length = 0;
 			}
-			this.charPos = num + 1;
-			if (c == '\r' && (this.charPos < this.charLen || this.ReadBuffer() > 0) && this.charBuffer[this.charPos] == '\n')
+			for (;;)
 			{
-				this.charPos++;
+				if (this.foundCR)
+				{
+					this.decoded_count--;
+				}
+				this.line_builder.Append(this.decoded_buffer, num, this.decoded_count - num);
+				if (this.ReadBuffer() == 0)
+				{
+					break;
+				}
+				num = this.pos;
+				num2 = this.FindNextEOL();
+				if (num2 < this.decoded_count && num2 >= num)
+				{
+					goto Block_12;
+				}
+				if (num2 == -2)
+				{
+					goto Block_14;
+				}
 			}
-			return text;
-			Block_11:
+			if (this.line_builder.Capacity > 32768)
+			{
+				StringBuilder stringBuilder = this.line_builder;
+				this.line_builder = null;
+				return stringBuilder.ToString(0, stringBuilder.Length);
+			}
+			return this.line_builder.ToString(0, this.line_builder.Length);
+			Block_12:
+			this.line_builder.Append(this.decoded_buffer, num, num2 - num);
+			if (this.line_builder.Capacity > 32768)
+			{
+				StringBuilder stringBuilder2 = this.line_builder;
+				this.line_builder = null;
+				return stringBuilder2.ToString(0, stringBuilder2.Length);
+			}
+			return this.line_builder.ToString(0, this.line_builder.Length);
+			Block_14:
+			return this.line_builder.ToString(0, this.line_builder.Length);
+		}
+
+		public override string ReadToEnd()
+		{
+			if (this.base_stream == null)
+			{
+				throw new ObjectDisposedException("StreamReader", "Cannot read from a closed StreamReader");
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			int num = this.decoded_buffer.Length;
+			char[] array = new char[num];
+			int num2;
+			while ((num2 = this.Read(array, 0, num)) > 0)
+			{
+				stringBuilder.Append(array, 0, num2);
+			}
 			return stringBuilder.ToString();
 		}
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override Task<string> ReadLineAsync()
-		{
-			if (base.GetType() != typeof(StreamReader))
-			{
-				return base.ReadLineAsync();
-			}
-			if (this.stream == null)
-			{
-				__Error.ReaderClosed();
-			}
-			this.CheckAsyncTaskInProgress();
-			Task<string> task = this.ReadLineAsyncInternal();
-			this._asyncReadTask = task;
-			return task;
-		}
+		private const int DefaultBufferSize = 1024;
 
-		private async Task<string> ReadLineAsyncInternal()
-		{
-			bool flag = this.CharPos_Prop == this.CharLen_Prop;
-			ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-			if (flag)
-			{
-				ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadBufferAsync().ConfigureAwait(false).GetAwaiter();
-				if (!configuredTaskAwaiter.IsCompleted)
-				{
-					await configuredTaskAwaiter;
-					configuredTaskAwaiter = configuredTaskAwaiter2;
-					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter);
-				}
-				flag = configuredTaskAwaiter.GetResult() == 0;
-			}
-			string text;
-			if (flag)
-			{
-				text = null;
-			}
-			else
-			{
-				StringBuilder sb = null;
-				char[] tmpCharBuffer;
-				int tmpCharLen;
-				int tmpCharPos;
-				int i;
-				char c;
-				for (;;)
-				{
-					tmpCharBuffer = this.CharBuffer_Prop;
-					tmpCharLen = this.CharLen_Prop;
-					tmpCharPos = this.CharPos_Prop;
-					i = tmpCharPos;
-					do
-					{
-						c = tmpCharBuffer[i];
-						if (c == '\r' || c == '\n')
-						{
-							goto IL_00FD;
-						}
-						i++;
-					}
-					while (i < tmpCharLen);
-					i = tmpCharLen - tmpCharPos;
-					if (sb == null)
-					{
-						sb = new StringBuilder(i + 80);
-					}
-					sb.Append(tmpCharBuffer, tmpCharPos, i);
-					tmpCharBuffer = null;
-					ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadBufferAsync().ConfigureAwait(false).GetAwaiter();
-					if (!configuredTaskAwaiter.IsCompleted)
-					{
-						await configuredTaskAwaiter;
-						configuredTaskAwaiter = configuredTaskAwaiter2;
-						configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter);
-					}
-					if (configuredTaskAwaiter.GetResult() <= 0)
-					{
-						goto Block_14;
-					}
-				}
-				IL_00FD:
-				string s;
-				if (sb != null)
-				{
-					sb.Append(tmpCharBuffer, tmpCharPos, i - tmpCharPos);
-					s = sb.ToString();
-				}
-				else
-				{
-					s = new string(tmpCharBuffer, tmpCharPos, i - tmpCharPos);
-				}
-				tmpCharPos = (this.CharPos_Prop = i + 1);
-				flag = c == '\r';
-				if (flag)
-				{
-					bool flag2 = tmpCharPos < tmpCharLen;
-					if (!flag2)
-					{
-						ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadBufferAsync().ConfigureAwait(false).GetAwaiter();
-						if (!configuredTaskAwaiter.IsCompleted)
-						{
-							await configuredTaskAwaiter;
-							configuredTaskAwaiter = configuredTaskAwaiter2;
-							configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter);
-						}
-						flag2 = configuredTaskAwaiter.GetResult() > 0;
-					}
-					flag = flag2;
-				}
-				if (flag)
-				{
-					tmpCharPos = this.CharPos_Prop;
-					if (this.CharBuffer_Prop[tmpCharPos] == '\n')
-					{
-						tmpCharPos = (this.CharPos_Prop = tmpCharPos + 1);
-					}
-				}
-				return s;
-				Block_14:
-				text = sb.ToString();
-			}
-			return text;
-		}
+		private const int DefaultFileBufferSize = 4096;
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override Task<string> ReadToEndAsync()
-		{
-			if (base.GetType() != typeof(StreamReader))
-			{
-				return base.ReadToEndAsync();
-			}
-			if (this.stream == null)
-			{
-				__Error.ReaderClosed();
-			}
-			this.CheckAsyncTaskInProgress();
-			Task<string> task = this.ReadToEndAsyncInternal();
-			this._asyncReadTask = task;
-			return task;
-		}
+		private const int MinimumBufferSize = 128;
 
-		private async Task<string> ReadToEndAsyncInternal()
-		{
-			StringBuilder sb = new StringBuilder(this.CharLen_Prop - this.CharPos_Prop);
-			do
-			{
-				int charPos_Prop = this.CharPos_Prop;
-				sb.Append(this.CharBuffer_Prop, charPos_Prop, this.CharLen_Prop - charPos_Prop);
-				this.CharPos_Prop = this.CharLen_Prop;
-				await this.ReadBufferAsync().ConfigureAwait(false);
-			}
-			while (this.CharLen_Prop > 0);
-			return sb.ToString();
-		}
+		private byte[] input_buffer;
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override Task<int> ReadAsync(char[] buffer, int index, int count)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
-			}
-			if (index < 0 || count < 0)
-			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.Length - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (base.GetType() != typeof(StreamReader))
-			{
-				return base.ReadAsync(buffer, index, count);
-			}
-			if (this.stream == null)
-			{
-				__Error.ReaderClosed();
-			}
-			this.CheckAsyncTaskInProgress();
-			Task<int> task = this.ReadAsyncInternal(buffer, index, count);
-			this._asyncReadTask = task;
-			return task;
-		}
+		private char[] decoded_buffer;
 
-		internal override async Task<int> ReadAsyncInternal(char[] buffer, int index, int count)
-		{
-			bool flag = this.CharPos_Prop == this.CharLen_Prop;
-			if (flag)
-			{
-				ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter = this.ReadBufferAsync().ConfigureAwait(false).GetAwaiter();
-				if (!configuredTaskAwaiter.IsCompleted)
-				{
-					await configuredTaskAwaiter;
-					ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter configuredTaskAwaiter2;
-					configuredTaskAwaiter = configuredTaskAwaiter2;
-					configuredTaskAwaiter2 = default(ConfiguredTaskAwaitable<int>.ConfiguredTaskAwaiter);
-				}
-				flag = configuredTaskAwaiter.GetResult() == 0;
-			}
-			int num;
-			if (flag)
-			{
-				num = 0;
-			}
-			else
-			{
-				int charsRead = 0;
-				bool readToUserBuffer = false;
-				byte[] tmpByteBuffer = this.ByteBuffer_Prop;
-				Stream tmpStream = this.Stream_Prop;
-				while (count > 0)
-				{
-					int i = this.CharLen_Prop - this.CharPos_Prop;
-					if (i == 0)
-					{
-						this.CharLen_Prop = 0;
-						this.CharPos_Prop = 0;
-						if (!this.CheckPreamble_Prop)
-						{
-							this.ByteLen_Prop = 0;
-						}
-						readToUserBuffer = count >= this.MaxCharsPerBuffer_Prop;
-						do
-						{
-							if (this.CheckPreamble_Prop)
-							{
-								int bytePos_Prop = this.BytePos_Prop;
-								int num2 = await tmpStream.ReadAsync(tmpByteBuffer, bytePos_Prop, tmpByteBuffer.Length - bytePos_Prop).ConfigureAwait(false);
-								if (num2 == 0)
-								{
-									goto Block_7;
-								}
-								this.ByteLen_Prop += num2;
-							}
-							else
-							{
-								this.ByteLen_Prop = await tmpStream.ReadAsync(tmpByteBuffer, 0, tmpByteBuffer.Length).ConfigureAwait(false);
-								if (this.ByteLen_Prop == 0)
-								{
-									goto Block_10;
-								}
-							}
-							this.IsBlocked_Prop = this.ByteLen_Prop < tmpByteBuffer.Length;
-							if (!this.IsPreamble())
-							{
-								if (this.DetectEncoding_Prop && this.ByteLen_Prop >= 2)
-								{
-									this.DetectEncoding();
-									readToUserBuffer = count >= this.MaxCharsPerBuffer_Prop;
-								}
-								this.CharPos_Prop = 0;
-								if (readToUserBuffer)
-								{
-									i += this.Decoder_Prop.GetChars(tmpByteBuffer, 0, this.ByteLen_Prop, buffer, index + charsRead);
-									this.CharLen_Prop = 0;
-								}
-								else
-								{
-									i = this.Decoder_Prop.GetChars(tmpByteBuffer, 0, this.ByteLen_Prop, this.CharBuffer_Prop, 0);
-									this.CharLen_Prop += i;
-								}
-							}
-						}
-						while (i == 0);
-						IL_03E0:
-						if (i != 0)
-						{
-							goto IL_03EB;
-						}
-						break;
-						Block_10:
-						this.IsBlocked_Prop = true;
-						goto IL_03E0;
-						Block_7:
-						if (this.ByteLen_Prop > 0)
-						{
-							if (readToUserBuffer)
-							{
-								i = this.Decoder_Prop.GetChars(tmpByteBuffer, 0, this.ByteLen_Prop, buffer, index + charsRead);
-								this.CharLen_Prop = 0;
-							}
-							else
-							{
-								i = this.Decoder_Prop.GetChars(tmpByteBuffer, 0, this.ByteLen_Prop, this.CharBuffer_Prop, 0);
-								this.CharLen_Prop += i;
-							}
-						}
-						this.IsBlocked_Prop = true;
-						goto IL_03E0;
-					}
-					IL_03EB:
-					if (i > count)
-					{
-						i = count;
-					}
-					if (!readToUserBuffer)
-					{
-						Buffer.InternalBlockCopy(this.CharBuffer_Prop, this.CharPos_Prop * 2, buffer, (index + charsRead) * 2, i * 2);
-						this.CharPos_Prop += i;
-					}
-					charsRead += i;
-					count -= i;
-					if (this.IsBlocked_Prop)
-					{
-						break;
-					}
-				}
-				num = charsRead;
-			}
-			return num;
-		}
+		private int decoded_count;
 
-		[ComVisible(false)]
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override Task<int> ReadBlockAsync(char[] buffer, int index, int count)
-		{
-			if (buffer == null)
-			{
-				throw new ArgumentNullException("buffer", Environment.GetResourceString("Buffer cannot be null."));
-			}
-			if (index < 0 || count < 0)
-			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (buffer.Length - index < count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-			}
-			if (base.GetType() != typeof(StreamReader))
-			{
-				return base.ReadBlockAsync(buffer, index, count);
-			}
-			if (this.stream == null)
-			{
-				__Error.ReaderClosed();
-			}
-			this.CheckAsyncTaskInProgress();
-			Task<int> task = base.ReadBlockAsync(buffer, index, count);
-			this._asyncReadTask = task;
-			return task;
-		}
+		private int pos;
 
-		private int CharLen_Prop
-		{
-			get
-			{
-				return this.charLen;
-			}
-			set
-			{
-				this.charLen = value;
-			}
-		}
+		private int buffer_size;
 
-		private int CharPos_Prop
-		{
-			get
-			{
-				return this.charPos;
-			}
-			set
-			{
-				this.charPos = value;
-			}
-		}
-
-		private int ByteLen_Prop
-		{
-			get
-			{
-				return this.byteLen;
-			}
-			set
-			{
-				this.byteLen = value;
-			}
-		}
-
-		private int BytePos_Prop
-		{
-			get
-			{
-				return this.bytePos;
-			}
-			set
-			{
-				this.bytePos = value;
-			}
-		}
-
-		private byte[] Preamble_Prop
-		{
-			get
-			{
-				return this._preamble;
-			}
-		}
-
-		private bool CheckPreamble_Prop
-		{
-			get
-			{
-				return this._checkPreamble;
-			}
-		}
-
-		private Decoder Decoder_Prop
-		{
-			get
-			{
-				return this.decoder;
-			}
-		}
-
-		private bool DetectEncoding_Prop
-		{
-			get
-			{
-				return this._detectEncoding;
-			}
-		}
-
-		private char[] CharBuffer_Prop
-		{
-			get
-			{
-				return this.charBuffer;
-			}
-		}
-
-		private byte[] ByteBuffer_Prop
-		{
-			get
-			{
-				return this.byteBuffer;
-			}
-		}
-
-		private bool IsBlocked_Prop
-		{
-			get
-			{
-				return this._isBlocked;
-			}
-			set
-			{
-				this._isBlocked = value;
-			}
-		}
-
-		private Stream Stream_Prop
-		{
-			get
-			{
-				return this.stream;
-			}
-		}
-
-		private int MaxCharsPerBuffer_Prop
-		{
-			get
-			{
-				return this._maxCharsPerBuffer;
-			}
-		}
-
-		private async Task<int> ReadBufferAsync()
-		{
-			this.CharLen_Prop = 0;
-			this.CharPos_Prop = 0;
-			byte[] tmpByteBuffer = this.ByteBuffer_Prop;
-			Stream tmpStream = this.Stream_Prop;
-			if (!this.CheckPreamble_Prop)
-			{
-				this.ByteLen_Prop = 0;
-			}
-			for (;;)
-			{
-				if (this.CheckPreamble_Prop)
-				{
-					int bytePos_Prop = this.BytePos_Prop;
-					int num = await tmpStream.ReadAsync(tmpByteBuffer, bytePos_Prop, tmpByteBuffer.Length - bytePos_Prop).ConfigureAwait(false);
-					if (num == 0)
-					{
-						break;
-					}
-					this.ByteLen_Prop += num;
-				}
-				else
-				{
-					this.ByteLen_Prop = await tmpStream.ReadAsync(tmpByteBuffer, 0, tmpByteBuffer.Length).ConfigureAwait(false);
-					if (this.ByteLen_Prop == 0)
-					{
-						goto Block_5;
-					}
-				}
-				this.IsBlocked_Prop = this.ByteLen_Prop < tmpByteBuffer.Length;
-				if (!this.IsPreamble())
-				{
-					if (this.DetectEncoding_Prop && this.ByteLen_Prop >= 2)
-					{
-						this.DetectEncoding();
-					}
-					this.CharLen_Prop += this.Decoder_Prop.GetChars(tmpByteBuffer, 0, this.ByteLen_Prop, this.CharBuffer_Prop, this.CharLen_Prop);
-				}
-				if (this.CharLen_Prop != 0)
-				{
-					goto Block_9;
-				}
-			}
-			if (this.ByteLen_Prop > 0)
-			{
-				this.CharLen_Prop += this.Decoder_Prop.GetChars(tmpByteBuffer, 0, this.ByteLen_Prop, this.CharBuffer_Prop, this.CharLen_Prop);
-				this.BytePos_Prop = 0;
-				this.ByteLen_Prop = 0;
-			}
-			return this.CharLen_Prop;
-			Block_5:
-			return this.CharLen_Prop;
-			Block_9:
-			return this.CharLen_Prop;
-		}
-
-		public new static readonly StreamReader Null = new StreamReader.NullStreamReader();
-
-		private const int DefaultFileStreamBufferSize = 4096;
-
-		private const int MinBufferSize = 128;
-
-		private Stream stream;
+		private int do_checks;
 
 		private Encoding encoding;
 
 		private Decoder decoder;
 
-		private byte[] byteBuffer;
+		private Stream base_stream;
 
-		private char[] charBuffer;
+		private bool mayBlock;
 
-		private byte[] _preamble;
+		private StringBuilder line_builder;
 
-		private int charPos;
+		public new static readonly StreamReader Null = new StreamReader.NullStreamReader();
 
-		private int charLen;
-
-		private int byteLen;
-
-		private int bytePos;
-
-		private int _maxCharsPerBuffer;
-
-		private bool _detectEncoding;
-
-		private bool _checkPreamble;
-
-		private bool _isBlocked;
-
-		private bool _closable;
-
-		[NonSerialized]
-		private volatile Task _asyncReadTask;
+		private bool foundCR;
 
 		private class NullStreamReader : StreamReader
 		{
-			internal NullStreamReader()
+			public override int Peek()
 			{
-				base.Init(Stream.Null);
+				return -1;
+			}
+
+			public override int Read()
+			{
+				return -1;
+			}
+
+			public override int Read([In] [Out] char[] buffer, int index, int count)
+			{
+				return 0;
+			}
+
+			public override string ReadLine()
+			{
+				return null;
+			}
+
+			public override string ReadToEnd()
+			{
+				return string.Empty;
 			}
 
 			public override Stream BaseStream
@@ -1212,40 +555,6 @@ namespace System.IO
 				{
 					return Encoding.Unicode;
 				}
-			}
-
-			protected override void Dispose(bool disposing)
-			{
-			}
-
-			public override int Peek()
-			{
-				return -1;
-			}
-
-			public override int Read()
-			{
-				return -1;
-			}
-
-			public override int Read(char[] buffer, int index, int count)
-			{
-				return 0;
-			}
-
-			public override string ReadLine()
-			{
-				return null;
-			}
-
-			public override string ReadToEnd()
-			{
-				return string.Empty;
-			}
-
-			internal override int ReadBuffer()
-			{
-				return 0;
 			}
 		}
 	}

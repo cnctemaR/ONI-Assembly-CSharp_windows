@@ -15,6 +15,7 @@ namespace System.Net.NetworkInformation
 			{
 				this.AddSubsequentlyString(intPtr);
 			}
+			this.is_readonly = true;
 		}
 
 		public Win32IPAddressCollection(params Win32_IP_ADDR_STRING[] al)
@@ -23,10 +24,11 @@ namespace System.Net.NetworkInformation
 			{
 				if (!string.IsNullOrEmpty(win32_IP_ADDR_STRING.IpAddress))
 				{
-					base.InternalAdd(IPAddress.Parse(win32_IP_ADDR_STRING.IpAddress));
+					this.Add(IPAddress.Parse(win32_IP_ADDR_STRING.IpAddress));
 					this.AddSubsequentlyString(win32_IP_ADDR_STRING.Next);
 				}
 			}
+			this.is_readonly = true;
 		}
 
 		public static Win32IPAddressCollection FromAnycast(IntPtr ptr)
@@ -36,9 +38,10 @@ namespace System.Net.NetworkInformation
 			while (intPtr != IntPtr.Zero)
 			{
 				Win32_IP_ADAPTER_ANYCAST_ADDRESS win32_IP_ADAPTER_ANYCAST_ADDRESS = (Win32_IP_ADAPTER_ANYCAST_ADDRESS)Marshal.PtrToStructure(intPtr, typeof(Win32_IP_ADAPTER_ANYCAST_ADDRESS));
-				win32IPAddressCollection.InternalAdd(win32_IP_ADAPTER_ANYCAST_ADDRESS.Address.GetIPAddress());
+				win32IPAddressCollection.Add(win32_IP_ADAPTER_ANYCAST_ADDRESS.Address.GetIPAddress());
 				intPtr = win32_IP_ADAPTER_ANYCAST_ADDRESS.Next;
 			}
+			win32IPAddressCollection.is_readonly = true;
 			return win32IPAddressCollection;
 		}
 
@@ -49,9 +52,10 @@ namespace System.Net.NetworkInformation
 			while (intPtr != IntPtr.Zero)
 			{
 				Win32_IP_ADAPTER_DNS_SERVER_ADDRESS win32_IP_ADAPTER_DNS_SERVER_ADDRESS = (Win32_IP_ADAPTER_DNS_SERVER_ADDRESS)Marshal.PtrToStructure(intPtr, typeof(Win32_IP_ADAPTER_DNS_SERVER_ADDRESS));
-				win32IPAddressCollection.InternalAdd(win32_IP_ADAPTER_DNS_SERVER_ADDRESS.Address.GetIPAddress());
+				win32IPAddressCollection.Add(win32_IP_ADAPTER_DNS_SERVER_ADDRESS.Address.GetIPAddress());
 				intPtr = win32_IP_ADAPTER_DNS_SERVER_ADDRESS.Next;
 			}
+			win32IPAddressCollection.is_readonly = true;
 			return win32IPAddressCollection;
 		}
 
@@ -61,11 +65,21 @@ namespace System.Net.NetworkInformation
 			while (intPtr != IntPtr.Zero)
 			{
 				Win32_IP_ADDR_STRING win32_IP_ADDR_STRING = (Win32_IP_ADDR_STRING)Marshal.PtrToStructure(intPtr, typeof(Win32_IP_ADDR_STRING));
-				base.InternalAdd(IPAddress.Parse(win32_IP_ADDR_STRING.IpAddress));
+				this.Add(IPAddress.Parse(win32_IP_ADDR_STRING.IpAddress));
 				intPtr = win32_IP_ADDR_STRING.Next;
 			}
 		}
 
+		public override bool IsReadOnly
+		{
+			get
+			{
+				return this.is_readonly;
+			}
+		}
+
 		public static readonly Win32IPAddressCollection Empty = new Win32IPAddressCollection(new IntPtr[] { IntPtr.Zero });
+
+		private bool is_readonly;
 	}
 }

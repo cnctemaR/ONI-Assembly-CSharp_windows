@@ -4,11 +4,11 @@ using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
-	[ComVisible(true)]
-	[Guid("82840be1-d273-11d2-b94a-00600893b17a")]
 	[Obsolete("use PerformanceCounter")]
-	[MonoTODO("not implemented")]
-	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
+	[Guid("82840be1-d273-11d2-b94a-00600893b17a")]
+	[global::System.MonoTODO("not implemented")]
+	[ComVisible(true)]
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public sealed class PerformanceCounterManager : ICollectData
 	{
 		[Obsolete("use PerformanceCounter")]

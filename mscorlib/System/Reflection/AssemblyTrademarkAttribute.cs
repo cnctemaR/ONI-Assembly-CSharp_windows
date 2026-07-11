@@ -3,23 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection
 {
-	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class AssemblyTrademarkAttribute : Attribute
 	{
 		public AssemblyTrademarkAttribute(string trademark)
 		{
-			this.m_trademark = trademark;
+			this.name = trademark;
 		}
 
 		public string Trademark
 		{
 			get
 			{
-				return this.m_trademark;
+				return this.name;
 			}
 		}
 
-		private string m_trademark;
+		private string name;
 	}
 }

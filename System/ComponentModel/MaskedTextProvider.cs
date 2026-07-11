@@ -1,250 +1,1528 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Globalization;
-using System.Security.Permissions;
 using System.Text;
+using System.Threading;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class MaskedTextProvider : ICloneable
 	{
 		public MaskedTextProvider(string mask)
-			: this(mask, null, true, '_', '\0', false)
+			: this(mask, null, true, MaskedTextProvider.default_prompt_char, MaskedTextProvider.default_password_char, false)
 		{
 		}
 
 		public MaskedTextProvider(string mask, bool restrictToAscii)
-			: this(mask, null, true, '_', '\0', restrictToAscii)
+			: this(mask, null, true, MaskedTextProvider.default_prompt_char, MaskedTextProvider.default_password_char, restrictToAscii)
 		{
 		}
 
 		public MaskedTextProvider(string mask, CultureInfo culture)
-			: this(mask, culture, true, '_', '\0', false)
-		{
-		}
-
-		public MaskedTextProvider(string mask, CultureInfo culture, bool restrictToAscii)
-			: this(mask, culture, true, '_', '\0', restrictToAscii)
+			: this(mask, culture, true, MaskedTextProvider.default_prompt_char, MaskedTextProvider.default_password_char, false)
 		{
 		}
 
 		public MaskedTextProvider(string mask, char passwordChar, bool allowPromptAsInput)
-			: this(mask, null, allowPromptAsInput, '_', passwordChar, false)
+			: this(mask, null, allowPromptAsInput, MaskedTextProvider.default_prompt_char, passwordChar, false)
+		{
+		}
+
+		public MaskedTextProvider(string mask, CultureInfo culture, bool restrictToAscii)
+			: this(mask, culture, true, MaskedTextProvider.default_prompt_char, MaskedTextProvider.default_password_char, restrictToAscii)
 		{
 		}
 
 		public MaskedTextProvider(string mask, CultureInfo culture, char passwordChar, bool allowPromptAsInput)
-			: this(mask, culture, allowPromptAsInput, '_', passwordChar, false)
+			: this(mask, culture, allowPromptAsInput, MaskedTextProvider.default_prompt_char, passwordChar, false)
 		{
 		}
 
 		public MaskedTextProvider(string mask, CultureInfo culture, bool allowPromptAsInput, char promptChar, char passwordChar, bool restrictToAscii)
 		{
-			if (string.IsNullOrEmpty(mask))
-			{
-				throw new ArgumentException(global::SR.GetString("The Mask value cannot be null or empty."), "mask");
-			}
-			for (int i = 0; i < mask.Length; i++)
-			{
-				if (!MaskedTextProvider.IsPrintableChar(mask[i]))
-				{
-					throw new ArgumentException(global::SR.GetString("The specified mask contains invalid characters."));
-				}
-			}
+			this.SetMask(mask);
 			if (culture == null)
 			{
-				culture = CultureInfo.CurrentCulture;
-			}
-			this.flagState = default(BitVector32);
-			this.mask = mask;
-			this.promptChar = promptChar;
-			this.passwordChar = passwordChar;
-			if (culture.IsNeutralCulture)
-			{
-				foreach (CultureInfo cultureInfo in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
-				{
-					if (culture.Equals(cultureInfo.Parent))
-					{
-						this.culture = cultureInfo;
-						break;
-					}
-				}
-				if (this.culture == null)
-				{
-					this.culture = CultureInfo.InvariantCulture;
-				}
+				this.culture = Thread.CurrentThread.CurrentCulture;
 			}
 			else
 			{
 				this.culture = culture;
 			}
-			if (!this.culture.IsReadOnly)
-			{
-				this.culture = CultureInfo.ReadOnly(this.culture);
-			}
-			this.flagState[MaskedTextProvider.ALLOW_PROMPT_AS_INPUT] = allowPromptAsInput;
-			this.flagState[MaskedTextProvider.ASCII_ONLY] = restrictToAscii;
-			this.flagState[MaskedTextProvider.INCLUDE_PROMPT] = false;
-			this.flagState[MaskedTextProvider.INCLUDE_LITERALS] = true;
-			this.flagState[MaskedTextProvider.RESET_ON_PROMPT] = true;
-			this.flagState[MaskedTextProvider.SKIP_SPACE] = true;
-			this.flagState[MaskedTextProvider.RESET_ON_LITERALS] = true;
-			this.Initialize();
+			this.allow_prompt_as_input = allowPromptAsInput;
+			this.PromptChar = promptChar;
+			this.PasswordChar = passwordChar;
+			this.ascii_only = restrictToAscii;
+			this.include_literals = true;
+			this.reset_on_prompt = true;
+			this.reset_on_space = true;
+			this.skip_literals = true;
 		}
 
-		private void Initialize()
+		private void SetMask(string mask)
 		{
-			this.testString = new StringBuilder();
-			this.stringDescriptor = new List<MaskedTextProvider.CharDescriptor>();
-			MaskedTextProvider.CaseConversion caseConversion = MaskedTextProvider.CaseConversion.None;
-			bool flag = false;
-			int num = 0;
-			MaskedTextProvider.CharType charType = MaskedTextProvider.CharType.Literal;
-			string text = string.Empty;
-			int i = 0;
-			while (i < this.mask.Length)
+			if (mask == null || mask == string.Empty)
 			{
-				char c = this.mask[i];
-				if (!flag)
+				throw new ArgumentException("The Mask value cannot be null or empty.\r\nParameter name: mask");
+			}
+			this.mask = mask;
+			List<MaskedTextProvider.EditPosition> list = new List<MaskedTextProvider.EditPosition>(mask.Length);
+			MaskedTextProvider.EditState editState = MaskedTextProvider.EditState.None;
+			bool flag = false;
+			for (int i = 0; i < mask.Length; i++)
+			{
+				if (flag)
 				{
-					if (c <= 'C')
+					list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.Literal, editState, mask[i]));
+					flag = false;
+				}
+				else
+				{
+					char c = mask[i];
+					switch (c)
 					{
+					case '#':
+						list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.DigitOrSpaceOptional_Blank, editState, mask[i]));
+						break;
+					case '$':
+						list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.CurrencySymbol, editState, mask[i]));
+						break;
+					default:
 						switch (c)
 						{
-						case '#':
-							goto IL_019E;
-						case '$':
-							text = this.culture.NumberFormat.CurrencySymbol;
-							charType = MaskedTextProvider.CharType.Separator;
-							goto IL_01BE;
-						case '%':
-							goto IL_01B8;
-						case '&':
+						case '9':
+							list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.DigitOrSpaceOptional, editState, mask[i]));
+							break;
+						case ':':
+							list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.TimeSeparator, editState, mask[i]));
 							break;
 						default:
-							switch (c)
+							if (c != 'L')
 							{
-							case ',':
-								text = this.culture.NumberFormat.NumberGroupSeparator;
-								charType = MaskedTextProvider.CharType.Separator;
-								goto IL_01BE;
-							case '-':
-								goto IL_01B8;
-							case '.':
-								text = this.culture.NumberFormat.NumberDecimalSeparator;
-								charType = MaskedTextProvider.CharType.Separator;
-								goto IL_01BE;
-							case '/':
-								text = this.culture.DateTimeFormat.DateSeparator;
-								charType = MaskedTextProvider.CharType.Separator;
-								goto IL_01BE;
-							case '0':
-								break;
-							default:
-								switch (c)
+								if (c != '\\')
 								{
-								case '9':
-								case '?':
-								case 'C':
-									goto IL_019E;
-								case ':':
-									text = this.culture.DateTimeFormat.TimeSeparator;
-									charType = MaskedTextProvider.CharType.Separator;
-									goto IL_01BE;
-								case ';':
-								case '=':
-								case '@':
-								case 'B':
-									goto IL_01B8;
-								case '<':
-									caseConversion = MaskedTextProvider.CaseConversion.ToLower;
-									goto IL_022A;
-								case '>':
-									caseConversion = MaskedTextProvider.CaseConversion.ToUpper;
-									goto IL_022A;
-								case 'A':
-									break;
-								default:
-									goto IL_01B8;
+									if (c != 'a')
+									{
+										if (c != '|')
+										{
+											list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.Literal, editState, mask[i]));
+										}
+										else
+										{
+											editState = MaskedTextProvider.EditState.None;
+										}
+									}
+									else
+									{
+										list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.AlphanumericOptional, editState, mask[i]));
+									}
 								}
-								break;
+								else
+								{
+									flag = true;
+								}
+							}
+							else
+							{
+								list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.LetterRequired, editState, mask[i]));
 							}
 							break;
+						case '<':
+							editState = MaskedTextProvider.EditState.LowerCase;
+							break;
+						case '>':
+							editState = MaskedTextProvider.EditState.UpperCase;
+							break;
+						case '?':
+							list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.LetterOptional, editState, mask[i]));
+							break;
+						case 'A':
+							list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.AlphanumericRequired, editState, mask[i]));
+							break;
+						case 'C':
+							list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.CharacterOptional, editState, mask[i]));
+							break;
+						}
+						break;
+					case '&':
+						list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.CharacterRequired, editState, mask[i]));
+						break;
+					case ',':
+						list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.ThousandsPlaceholder, editState, mask[i]));
+						break;
+					case '.':
+						list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.DecimalPlaceholder, editState, mask[i]));
+						break;
+					case '/':
+						list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.DateSeparator, editState, mask[i]));
+						break;
+					case '0':
+						list.Add(new MaskedTextProvider.EditPosition(this, MaskedTextProvider.EditType.DigitRequired, editState, mask[i]));
+						break;
+					}
+				}
+			}
+			this.edit_positions = list.ToArray();
+		}
+
+		private MaskedTextProvider.EditPosition[] ClonePositions()
+		{
+			MaskedTextProvider.EditPosition[] array = new MaskedTextProvider.EditPosition[this.edit_positions.Length];
+			for (int i = 0; i < array.Length; i++)
+			{
+				array[i] = this.edit_positions[i].Clone();
+			}
+			return array;
+		}
+
+		private bool AddInternal(string str_input, out int testPosition, out MaskedTextResultHint resultHint, bool only_test)
+		{
+			MaskedTextProvider.EditPosition[] array;
+			if (only_test)
+			{
+				array = this.ClonePositions();
+			}
+			else
+			{
+				array = this.edit_positions;
+			}
+			if (str_input == null)
+			{
+				throw new ArgumentNullException("input");
+			}
+			if (str_input.Length == 0)
+			{
+				resultHint = MaskedTextResultHint.NoEffect;
+				testPosition = this.LastAssignedPosition + 1;
+				return true;
+			}
+			resultHint = MaskedTextResultHint.Unknown;
+			testPosition = 0;
+			int num = this.LastAssignedPosition;
+			MaskedTextResultHint maskedTextResultHint = MaskedTextResultHint.Unknown;
+			if (num >= array.Length)
+			{
+				testPosition = num;
+				resultHint = MaskedTextResultHint.UnavailableEditPosition;
+				return false;
+			}
+			foreach (char c in str_input)
+			{
+				num++;
+				testPosition = num;
+				if (maskedTextResultHint > resultHint)
+				{
+					resultHint = maskedTextResultHint;
+				}
+				if (this.VerifyEscapeChar(c, num))
+				{
+					maskedTextResultHint = MaskedTextResultHint.CharacterEscaped;
+				}
+				else
+				{
+					num = this.FindEditPositionFrom(num, true);
+					testPosition = num;
+					if (num == MaskedTextProvider.InvalidIndex)
+					{
+						testPosition = array.Length;
+						resultHint = MaskedTextResultHint.UnavailableEditPosition;
+						return false;
+					}
+					if (!MaskedTextProvider.IsValidInputChar(c))
+					{
+						testPosition = num;
+						resultHint = MaskedTextResultHint.InvalidInput;
+						return false;
+					}
+					if (!array[num].Match(c, out maskedTextResultHint, false))
+					{
+						testPosition = num;
+						resultHint = maskedTextResultHint;
+						return false;
+					}
+				}
+			}
+			if (maskedTextResultHint > resultHint)
+			{
+				resultHint = maskedTextResultHint;
+			}
+			return true;
+		}
+
+		private bool AddInternal(char input, out int testPosition, out MaskedTextResultHint resultHint, bool check_available_positions_first, bool check_escape_char_first)
+		{
+			testPosition = 0;
+			int num = this.LastAssignedPosition + 1;
+			if (check_available_positions_first)
+			{
+				int i = num;
+				bool flag = false;
+				while (i < this.edit_positions.Length)
+				{
+					if (this.edit_positions[i].Editable)
+					{
+						flag = true;
+						break;
+					}
+					i++;
+				}
+				if (!flag)
+				{
+					testPosition = i;
+					resultHint = MaskedTextResultHint.UnavailableEditPosition;
+					return MaskedTextProvider.GetOperationResultFromHint(resultHint);
+				}
+			}
+			if (check_escape_char_first && this.VerifyEscapeChar(input, num))
+			{
+				testPosition = num;
+				resultHint = MaskedTextResultHint.CharacterEscaped;
+				return true;
+			}
+			num = this.FindEditPositionFrom(num, true);
+			if (num > this.edit_positions.Length - 1 || num == MaskedTextProvider.InvalidIndex)
+			{
+				testPosition = num;
+				resultHint = MaskedTextResultHint.UnavailableEditPosition;
+				return MaskedTextProvider.GetOperationResultFromHint(resultHint);
+			}
+			if (!MaskedTextProvider.IsValidInputChar(input))
+			{
+				testPosition = num;
+				resultHint = MaskedTextResultHint.InvalidInput;
+				return MaskedTextProvider.GetOperationResultFromHint(resultHint);
+			}
+			if (!this.edit_positions[num].Match(input, out resultHint, false))
+			{
+				testPosition = num;
+				return MaskedTextProvider.GetOperationResultFromHint(resultHint);
+			}
+			testPosition = num;
+			return MaskedTextProvider.GetOperationResultFromHint(resultHint);
+		}
+
+		private bool VerifyStringInternal(string input, out int testPosition, out MaskedTextResultHint resultHint, int startIndex, bool only_test)
+		{
+			int num = startIndex;
+			resultHint = MaskedTextResultHint.Unknown;
+			for (int i = 0; i < input.Length; i++)
+			{
+				int num2 = this.FindEditPositionFrom(num, true);
+				if (num2 == MaskedTextProvider.InvalidIndex)
+				{
+					testPosition = this.edit_positions.Length;
+					resultHint = MaskedTextResultHint.UnavailableEditPosition;
+					return false;
+				}
+				MaskedTextResultHint maskedTextResultHint;
+				if (!this.VerifyCharInternal(input[i], num2, out maskedTextResultHint, only_test))
+				{
+					testPosition = num2;
+					resultHint = maskedTextResultHint;
+					return false;
+				}
+				if (maskedTextResultHint > resultHint)
+				{
+					resultHint = maskedTextResultHint;
+				}
+				num = num2 + 1;
+			}
+			if (!only_test)
+			{
+				for (num = this.FindEditPositionFrom(num, true); num != MaskedTextProvider.InvalidIndex; num = this.FindEditPositionFrom(num + 1, true))
+				{
+					if (this.edit_positions[num].FilledIn)
+					{
+						this.edit_positions[num].Reset();
+						if (resultHint != MaskedTextResultHint.NoEffect)
+						{
+							resultHint = MaskedTextResultHint.Success;
 						}
 					}
-					else if (c <= '\\')
+				}
+			}
+			if (input.Length > 0)
+			{
+				testPosition = startIndex + input.Length - 1;
+			}
+			else
+			{
+				testPosition = startIndex;
+				if (resultHint < MaskedTextResultHint.NoEffect)
+				{
+					resultHint = MaskedTextResultHint.NoEffect;
+				}
+			}
+			return true;
+		}
+
+		private bool VerifyCharInternal(char input, int position, out MaskedTextResultHint hint, bool only_test)
+		{
+			hint = MaskedTextResultHint.Unknown;
+			if (position < 0 || position >= this.edit_positions.Length)
+			{
+				hint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (!MaskedTextProvider.IsValidInputChar(input))
+			{
+				hint = MaskedTextResultHint.InvalidInput;
+				return false;
+			}
+			if (input == ' ' && this.ResetOnSpace && this.edit_positions[position].Editable && this.edit_positions[position].FilledIn)
+			{
+				if (!only_test)
+				{
+					this.edit_positions[position].Reset();
+				}
+				hint = MaskedTextResultHint.SideEffect;
+				return true;
+			}
+			if (this.edit_positions[position].Editable && this.edit_positions[position].FilledIn && this.edit_positions[position].input == input)
+			{
+				hint = MaskedTextResultHint.NoEffect;
+				return true;
+			}
+			if (this.SkipLiterals && !this.edit_positions[position].Editable && this.edit_positions[position].Text == input.ToString())
+			{
+				hint = MaskedTextResultHint.CharacterEscaped;
+				return true;
+			}
+			return this.edit_positions[position].Match(input, out hint, only_test);
+		}
+
+		private bool IsInsertableString(string str_input, int position, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			int num = position;
+			resultHint = MaskedTextResultHint.UnavailableEditPosition;
+			testPosition = MaskedTextProvider.InvalidIndex;
+			foreach (char c in str_input)
+			{
+				int num2 = this.FindEditPositionFrom(num, true);
+				if (num2 != MaskedTextProvider.InvalidIndex && this.VerifyEscapeChar(c, num2))
+				{
+					num = num2 + 1;
+				}
+				else if (this.VerifyEscapeChar(c, num))
+				{
+					num++;
+				}
+				else
+				{
+					if (num2 == MaskedTextProvider.InvalidIndex)
 					{
-						if (c != 'L')
+						resultHint = MaskedTextResultHint.UnavailableEditPosition;
+						testPosition = this.edit_positions.Length;
+						return false;
+					}
+					testPosition = num2;
+					if (!this.edit_positions[num2].Match(c, out resultHint, true))
+					{
+						return false;
+					}
+					num = num2 + 1;
+				}
+			}
+			resultHint = MaskedTextResultHint.Success;
+			return true;
+		}
+
+		private bool ShiftPositionsRight(MaskedTextProvider.EditPosition[] edit_positions, int start, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			int num = this.FindAssignedEditPositionFrom(edit_positions.Length, false);
+			int i = this.FindUnassignedEditPositionFrom(num, true);
+			testPosition = start;
+			resultHint = MaskedTextResultHint.Unknown;
+			if (i == MaskedTextProvider.InvalidIndex)
+			{
+				testPosition = edit_positions.Length;
+				resultHint = MaskedTextResultHint.UnavailableEditPosition;
+				return false;
+			}
+			while (i > start)
+			{
+				int num2 = this.FindEditPositionFrom(i - 1, false);
+				char input = edit_positions[num2].input;
+				if (input == '\0')
+				{
+					edit_positions[i].input = input;
+				}
+				else if (!edit_positions[i].Match(input, out resultHint, false))
+				{
+					testPosition = i;
+					return false;
+				}
+				i = num2;
+			}
+			if (i != MaskedTextProvider.InvalidIndex)
+			{
+				edit_positions[i].Reset();
+			}
+			return true;
+		}
+
+		private bool ReplaceInternal(string input, int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint, bool only_test, bool dont_remove_at_end)
+		{
+			resultHint = MaskedTextResultHint.Unknown;
+			MaskedTextProvider.EditPosition[] array;
+			if (only_test)
+			{
+				array = this.ClonePositions();
+			}
+			else
+			{
+				array = this.edit_positions;
+			}
+			if (input == null)
+			{
+				throw new ArgumentNullException("input");
+			}
+			if (endPosition >= array.Length)
+			{
+				testPosition = endPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition < 0)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition >= array.Length)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition > endPosition)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (input.Length == 0)
+			{
+				return this.RemoveAtInternal(startPosition, endPosition, out testPosition, out resultHint, only_test);
+			}
+			int num = startPosition;
+			int num2 = num;
+			MaskedTextResultHint maskedTextResultHint = MaskedTextResultHint.Unknown;
+			testPosition = MaskedTextProvider.InvalidIndex;
+			foreach (char c in input)
+			{
+				num2 = num;
+				if (this.VerifyEscapeChar(c, num2))
+				{
+					if ((array[num2].FilledIn && array[num2].Editable && c == ' ' && this.ResetOnSpace) || (c == this.PromptChar && this.ResetOnPrompt))
+					{
+						array[num2].Reset();
+						maskedTextResultHint = MaskedTextResultHint.SideEffect;
+					}
+					else
+					{
+						maskedTextResultHint = MaskedTextResultHint.CharacterEscaped;
+					}
+				}
+				else if (num2 < array.Length && !array[num2].Editable && this.FindAssignedEditPositionInRange(num2, endPosition, true) == MaskedTextProvider.InvalidIndex)
+				{
+					num2 = this.FindEditPositionFrom(num2, true);
+					if (num2 == MaskedTextProvider.InvalidIndex)
+					{
+						resultHint = MaskedTextResultHint.UnavailableEditPosition;
+						testPosition = array.Length;
+						return false;
+					}
+					if (!this.InsertAtInternal(c.ToString(), num2, out testPosition, out maskedTextResultHint, only_test))
+					{
+						resultHint = maskedTextResultHint;
+						return false;
+					}
+				}
+				else
+				{
+					num2 = this.FindEditPositionFrom(num2, true);
+					if (num2 == MaskedTextProvider.InvalidIndex)
+					{
+						testPosition = array.Length;
+						resultHint = MaskedTextResultHint.UnavailableEditPosition;
+						return false;
+					}
+					if (!MaskedTextProvider.IsValidInputChar(c))
+					{
+						testPosition = num2;
+						resultHint = MaskedTextResultHint.InvalidInput;
+						return false;
+					}
+					if (!this.ReplaceInternal(array, c, num2, out testPosition, out maskedTextResultHint, false))
+					{
+						resultHint = maskedTextResultHint;
+						return false;
+					}
+				}
+				if (maskedTextResultHint > resultHint)
+				{
+					resultHint = maskedTextResultHint;
+				}
+				num = num2 + 1;
+			}
+			testPosition = num2;
+			int num3;
+			if (!dont_remove_at_end && num <= endPosition && !this.RemoveAtInternal(num, endPosition, out num3, out maskedTextResultHint, only_test))
+			{
+				testPosition = num3;
+				resultHint = maskedTextResultHint;
+				return false;
+			}
+			if (maskedTextResultHint == MaskedTextResultHint.Success && resultHint < MaskedTextResultHint.SideEffect)
+			{
+				resultHint = MaskedTextResultHint.SideEffect;
+			}
+			return true;
+		}
+
+		private bool ReplaceInternal(MaskedTextProvider.EditPosition[] edit_positions, char input, int position, out int testPosition, out MaskedTextResultHint resultHint, bool only_test)
+		{
+			testPosition = position;
+			if (!MaskedTextProvider.IsValidInputChar(input))
+			{
+				resultHint = MaskedTextResultHint.InvalidInput;
+				return false;
+			}
+			if (this.VerifyEscapeChar(input, position))
+			{
+				if ((edit_positions[position].FilledIn && edit_positions[position].Editable && input == ' ' && this.ResetOnSpace) || (input == this.PromptChar && this.ResetOnPrompt))
+				{
+					edit_positions[position].Reset();
+					resultHint = MaskedTextResultHint.SideEffect;
+				}
+				else
+				{
+					resultHint = MaskedTextResultHint.CharacterEscaped;
+				}
+				testPosition = position;
+				return true;
+			}
+			if (!edit_positions[position].Editable)
+			{
+				resultHint = MaskedTextResultHint.NonEditPosition;
+				return false;
+			}
+			bool filledIn = edit_positions[position].FilledIn;
+			if (filledIn && edit_positions[position].input == input)
+			{
+				if (this.VerifyEscapeChar(input, position))
+				{
+					resultHint = MaskedTextResultHint.CharacterEscaped;
+				}
+				else
+				{
+					resultHint = MaskedTextResultHint.NoEffect;
+				}
+			}
+			else
+			{
+				if (input == ' ' && this.ResetOnSpace)
+				{
+					if (filledIn)
+					{
+						resultHint = MaskedTextResultHint.SideEffect;
+						edit_positions[position].Reset();
+					}
+					else
+					{
+						resultHint = MaskedTextResultHint.CharacterEscaped;
+					}
+					return true;
+				}
+				if (this.VerifyEscapeChar(input, position))
+				{
+					resultHint = MaskedTextResultHint.SideEffect;
+				}
+				else
+				{
+					resultHint = MaskedTextResultHint.Success;
+				}
+			}
+			MaskedTextResultHint maskedTextResultHint;
+			if (!edit_positions[position].Match(input, out maskedTextResultHint, false))
+			{
+				resultHint = maskedTextResultHint;
+				return false;
+			}
+			return true;
+		}
+
+		private bool RemoveAtInternal(int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint, bool only_testing)
+		{
+			testPosition = -1;
+			resultHint = MaskedTextResultHint.Unknown;
+			MaskedTextProvider.EditPosition[] array;
+			if (only_testing)
+			{
+				array = this.ClonePositions();
+			}
+			else
+			{
+				array = this.edit_positions;
+			}
+			if (endPosition < 0 || endPosition >= array.Length)
+			{
+				testPosition = endPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition < 0 || startPosition >= array.Length)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition > endPosition)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			int num = 0;
+			for (int i = startPosition; i <= endPosition; i++)
+			{
+				if (array[i].Editable)
+				{
+					num++;
+				}
+			}
+			if (num == 0)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.NoEffect;
+				return true;
+			}
+			for (int num2 = this.FindEditPositionFrom(startPosition, true); num2 != MaskedTextProvider.InvalidIndex; num2 = this.FindEditPositionFrom(num2 + 1, true))
+			{
+				int num3 = this.FindEditPositionFrom(num2 + 1, true);
+				int num4 = 1;
+				while (num4 < num && num3 != MaskedTextProvider.InvalidIndex)
+				{
+					num3 = this.FindEditPositionFrom(num3 + 1, true);
+					num4++;
+				}
+				if (num3 == MaskedTextProvider.InvalidIndex)
+				{
+					if (array[num2].FilledIn)
+					{
+						array[num2].Reset();
+						resultHint = MaskedTextResultHint.Success;
+					}
+					else if (resultHint < MaskedTextResultHint.NoEffect)
+					{
+						resultHint = MaskedTextResultHint.NoEffect;
+					}
+				}
+				else
+				{
+					if (!array[num3].FilledIn)
+					{
+						if (array[num2].FilledIn)
 						{
-							if (c != '\\')
-							{
-								goto IL_01B8;
-							}
-							flag = true;
-							charType = MaskedTextProvider.CharType.Literal;
-							goto IL_022A;
+							array[num2].Reset();
+							resultHint = MaskedTextResultHint.Success;
+						}
+						else if (resultHint < MaskedTextResultHint.NoEffect)
+						{
+							resultHint = MaskedTextResultHint.NoEffect;
 						}
 					}
 					else
 					{
-						if (c == 'a')
+						MaskedTextResultHint maskedTextResultHint = MaskedTextResultHint.Unknown;
+						if (array[num2].FilledIn)
 						{
-							goto IL_019E;
+							resultHint = MaskedTextResultHint.Success;
 						}
-						if (c != '|')
+						else if (resultHint < MaskedTextResultHint.SideEffect)
 						{
-							goto IL_01B8;
+							resultHint = MaskedTextResultHint.SideEffect;
 						}
-						caseConversion = MaskedTextProvider.CaseConversion.None;
-						goto IL_022A;
+						if (!array[num2].Match(array[num3].input, out maskedTextResultHint, false))
+						{
+							resultHint = maskedTextResultHint;
+							testPosition = num2;
+							return false;
+						}
 					}
-					this.requiredEditChars++;
-					c = this.promptChar;
-					charType = MaskedTextProvider.CharType.EditRequired;
-					goto IL_01BE;
-					IL_019E:
-					this.optionalEditChars++;
-					c = this.promptChar;
-					charType = MaskedTextProvider.CharType.EditOptional;
-					goto IL_01BE;
-					IL_01B8:
-					charType = MaskedTextProvider.CharType.Literal;
-					goto IL_01BE;
+					array[num3].Reset();
 				}
-				flag = false;
-				goto IL_01BE;
-				IL_022A:
+			}
+			if (resultHint == MaskedTextResultHint.Unknown)
+			{
+				resultHint = MaskedTextResultHint.NoEffect;
+			}
+			testPosition = startPosition;
+			return true;
+		}
+
+		private bool InsertAtInternal(string str_input, int position, out int testPosition, out MaskedTextResultHint resultHint, bool only_testing)
+		{
+			testPosition = -1;
+			resultHint = MaskedTextResultHint.Unknown;
+			MaskedTextProvider.EditPosition[] array;
+			if (only_testing)
+			{
+				array = this.ClonePositions();
+			}
+			else
+			{
+				array = this.edit_positions;
+			}
+			if (position < 0 || position >= array.Length)
+			{
+				testPosition = 0;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (!this.IsInsertableString(str_input, position, out testPosition, out resultHint))
+			{
+				return false;
+			}
+			resultHint = MaskedTextResultHint.Unknown;
+			int num = position;
+			int i = 0;
+			while (i < str_input.Length)
+			{
+				char c = str_input[i];
+				int num2 = this.FindEditPositionFrom(num, true);
+				int num3 = this.FindUnassignedEditPositionFrom(num, true);
+				bool flag = false;
+				if (!this.VerifyEscapeChar(c, num))
+				{
+					goto IL_00DF;
+				}
+				flag = true;
+				if (!(c.ToString() == array[num].Text))
+				{
+					goto IL_00DF;
+				}
+				if (this.FindAssignedEditPositionInRange(0, num - 1, true) != MaskedTextProvider.InvalidIndex && num3 == MaskedTextProvider.InvalidIndex)
+				{
+					resultHint = MaskedTextResultHint.UnavailableEditPosition;
+					testPosition = array.Length;
+					return false;
+				}
+				resultHint = MaskedTextResultHint.CharacterEscaped;
+				testPosition = num;
+				num++;
+				IL_01FA:
 				i++;
 				continue;
-				IL_01BE:
-				MaskedTextProvider.CharDescriptor charDescriptor = new MaskedTextProvider.CharDescriptor(i, charType);
-				if (MaskedTextProvider.IsEditPosition(charDescriptor))
+				IL_00DF:
+				if (!flag && num2 == MaskedTextProvider.InvalidIndex)
 				{
-					charDescriptor.CaseConversion = caseConversion;
+					testPosition = array.Length;
+					resultHint = MaskedTextResultHint.UnavailableEditPosition;
+					return false;
 				}
-				if (charType != MaskedTextProvider.CharType.Separator)
+				if (num2 == MaskedTextProvider.InvalidIndex)
 				{
-					text = c.ToString();
+					num2 = num;
 				}
-				foreach (char c2 in text)
+				bool filledIn = array[num2].FilledIn;
+				bool flag2 = filledIn;
+				if (flag2 && !this.ShiftPositionsRight(array, num2, out testPosition, out resultHint))
 				{
-					this.testString.Append(c2);
-					this.stringDescriptor.Add(charDescriptor);
-					num++;
+					return false;
 				}
-				goto IL_022A;
+				testPosition = num2;
+				if (flag)
+				{
+					if (filledIn)
+					{
+						resultHint = MaskedTextResultHint.Success;
+					}
+					else if (!array[num2].Editable && c.ToString() == array[num2].Text)
+					{
+						resultHint = MaskedTextResultHint.CharacterEscaped;
+						testPosition = num;
+					}
+					else
+					{
+						int num4 = this.FindEditPositionFrom(num2, true);
+						if (num4 == MaskedTextProvider.InvalidIndex)
+						{
+							resultHint = MaskedTextResultHint.UnavailableEditPosition;
+							testPosition = array.Length;
+							return false;
+						}
+						resultHint = MaskedTextResultHint.CharacterEscaped;
+						if (c.ToString() == array[num].Text)
+						{
+							testPosition = num;
+						}
+					}
+				}
+				else
+				{
+					MaskedTextResultHint maskedTextResultHint;
+					if (!array[num2].Match(c, out maskedTextResultHint, false))
+					{
+						resultHint = maskedTextResultHint;
+						return false;
+					}
+					if (resultHint < maskedTextResultHint)
+					{
+						resultHint = maskedTextResultHint;
+					}
+				}
+				num = num2 + 1;
+				goto IL_01FA;
 			}
-			this.testString.Capacity = this.testString.Length;
+			return true;
+		}
+
+		public bool Add(char input)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.Add(input, out num, out maskedTextResultHint);
+		}
+
+		public bool Add(string input)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.Add(input, out num, out maskedTextResultHint);
+		}
+
+		public bool Add(char input, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			return this.AddInternal(input, out testPosition, out resultHint, true, false);
+		}
+
+		public bool Add(string input, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			bool flag = this.AddInternal(input, out testPosition, out resultHint, true);
+			if (flag)
+			{
+				flag = this.AddInternal(input, out testPosition, out resultHint, false);
+			}
+			return flag;
+		}
+
+		public void Clear()
+		{
+			MaskedTextResultHint maskedTextResultHint;
+			this.Clear(out maskedTextResultHint);
+		}
+
+		public void Clear(out MaskedTextResultHint resultHint)
+		{
+			resultHint = MaskedTextResultHint.NoEffect;
+			for (int i = 0; i < this.edit_positions.Length; i++)
+			{
+				if (this.edit_positions[i].Editable && this.edit_positions[i].FilledIn)
+				{
+					this.edit_positions[i].Reset();
+					resultHint = MaskedTextResultHint.Success;
+				}
+			}
+		}
+
+		public object Clone()
+		{
+			return new MaskedTextProvider(this.mask)
+			{
+				allow_prompt_as_input = this.allow_prompt_as_input,
+				ascii_only = this.ascii_only,
+				culture = this.culture,
+				edit_positions = this.ClonePositions(),
+				include_literals = this.include_literals,
+				include_prompt = this.include_prompt,
+				is_password = this.is_password,
+				mask = this.mask,
+				password_char = this.password_char,
+				prompt_char = this.prompt_char,
+				reset_on_prompt = this.reset_on_prompt,
+				reset_on_space = this.reset_on_space,
+				skip_literals = this.skip_literals
+			};
+		}
+
+		public int FindAssignedEditPositionFrom(int position, bool direction)
+		{
+			if (direction)
+			{
+				return this.FindAssignedEditPositionInRange(position, this.edit_positions.Length - 1, direction);
+			}
+			return this.FindAssignedEditPositionInRange(0, position, direction);
+		}
+
+		public int FindAssignedEditPositionInRange(int startPosition, int endPosition, bool direction)
+		{
+			if (startPosition < 0)
+			{
+				startPosition = 0;
+			}
+			if (endPosition >= this.edit_positions.Length)
+			{
+				endPosition = this.edit_positions.Length - 1;
+			}
+			if (startPosition > endPosition)
+			{
+				return MaskedTextProvider.InvalidIndex;
+			}
+			int num = ((!direction) ? (-1) : 1);
+			int num2 = ((!direction) ? endPosition : startPosition);
+			int num3 = ((!direction) ? startPosition : endPosition) + num;
+			for (int num4 = num2; num4 != num3; num4 += num)
+			{
+				if (this.edit_positions[num4].Editable && this.edit_positions[num4].FilledIn)
+				{
+					return num4;
+				}
+			}
+			return MaskedTextProvider.InvalidIndex;
+		}
+
+		public int FindEditPositionFrom(int position, bool direction)
+		{
+			if (direction)
+			{
+				return this.FindEditPositionInRange(position, this.edit_positions.Length - 1, direction);
+			}
+			return this.FindEditPositionInRange(0, position, direction);
+		}
+
+		public int FindEditPositionInRange(int startPosition, int endPosition, bool direction)
+		{
+			if (startPosition < 0)
+			{
+				startPosition = 0;
+			}
+			if (endPosition >= this.edit_positions.Length)
+			{
+				endPosition = this.edit_positions.Length - 1;
+			}
+			if (startPosition > endPosition)
+			{
+				return MaskedTextProvider.InvalidIndex;
+			}
+			int num = ((!direction) ? (-1) : 1);
+			int num2 = ((!direction) ? endPosition : startPosition);
+			int num3 = ((!direction) ? startPosition : endPosition) + num;
+			for (int num4 = num2; num4 != num3; num4 += num)
+			{
+				if (this.edit_positions[num4].Editable)
+				{
+					return num4;
+				}
+			}
+			return MaskedTextProvider.InvalidIndex;
+		}
+
+		public int FindNonEditPositionFrom(int position, bool direction)
+		{
+			if (direction)
+			{
+				return this.FindNonEditPositionInRange(position, this.edit_positions.Length - 1, direction);
+			}
+			return this.FindNonEditPositionInRange(0, position, direction);
+		}
+
+		public int FindNonEditPositionInRange(int startPosition, int endPosition, bool direction)
+		{
+			if (startPosition < 0)
+			{
+				startPosition = 0;
+			}
+			if (endPosition >= this.edit_positions.Length)
+			{
+				endPosition = this.edit_positions.Length - 1;
+			}
+			if (startPosition > endPosition)
+			{
+				return MaskedTextProvider.InvalidIndex;
+			}
+			int num = ((!direction) ? (-1) : 1);
+			int num2 = ((!direction) ? endPosition : startPosition);
+			int num3 = ((!direction) ? startPosition : endPosition) + num;
+			for (int num4 = num2; num4 != num3; num4 += num)
+			{
+				if (!this.edit_positions[num4].Editable)
+				{
+					return num4;
+				}
+			}
+			return MaskedTextProvider.InvalidIndex;
+		}
+
+		public int FindUnassignedEditPositionFrom(int position, bool direction)
+		{
+			if (direction)
+			{
+				return this.FindUnassignedEditPositionInRange(position, this.edit_positions.Length - 1, direction);
+			}
+			return this.FindUnassignedEditPositionInRange(0, position, direction);
+		}
+
+		public int FindUnassignedEditPositionInRange(int startPosition, int endPosition, bool direction)
+		{
+			if (startPosition < 0)
+			{
+				startPosition = 0;
+			}
+			if (endPosition >= this.edit_positions.Length)
+			{
+				endPosition = this.edit_positions.Length - 1;
+			}
+			if (startPosition > endPosition)
+			{
+				return MaskedTextProvider.InvalidIndex;
+			}
+			int num = ((!direction) ? (-1) : 1);
+			int num2 = ((!direction) ? endPosition : startPosition);
+			int num3 = ((!direction) ? startPosition : endPosition) + num;
+			for (int num4 = num2; num4 != num3; num4 += num)
+			{
+				if (this.edit_positions[num4].Editable && !this.edit_positions[num4].FilledIn)
+				{
+					return num4;
+				}
+			}
+			return MaskedTextProvider.InvalidIndex;
+		}
+
+		public static bool GetOperationResultFromHint(MaskedTextResultHint hint)
+		{
+			return hint == MaskedTextResultHint.CharacterEscaped || hint == MaskedTextResultHint.NoEffect || hint == MaskedTextResultHint.SideEffect || hint == MaskedTextResultHint.Success;
+		}
+
+		public bool InsertAt(char input, int position)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.InsertAt(input, position, out num, out maskedTextResultHint);
+		}
+
+		public bool InsertAt(string input, int position)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.InsertAt(input, position, out num, out maskedTextResultHint);
+		}
+
+		public bool InsertAt(char input, int position, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			return this.InsertAt(input.ToString(), position, out testPosition, out resultHint);
+		}
+
+		public bool InsertAt(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			if (input == null)
+			{
+				throw new ArgumentNullException("input");
+			}
+			if (position >= this.edit_positions.Length)
+			{
+				testPosition = position;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (input == string.Empty)
+			{
+				testPosition = position;
+				resultHint = MaskedTextResultHint.NoEffect;
+				return true;
+			}
+			bool flag = this.InsertAtInternal(input, position, out testPosition, out resultHint, true);
+			if (flag)
+			{
+				flag = this.InsertAtInternal(input, position, out testPosition, out resultHint, false);
+			}
+			return flag;
+		}
+
+		public bool IsAvailablePosition(int position)
+		{
+			return position >= 0 && position < this.edit_positions.Length && this.edit_positions[position].Editable && !this.edit_positions[position].FilledIn;
+		}
+
+		public bool IsEditPosition(int position)
+		{
+			return position >= 0 && position < this.edit_positions.Length && this.edit_positions[position].Editable;
+		}
+
+		public static bool IsValidInputChar(char c)
+		{
+			return char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c) || c == ' ';
+		}
+
+		public static bool IsValidMaskChar(char c)
+		{
+			return char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c) || c == ' ';
+		}
+
+		public static bool IsValidPasswordChar(char c)
+		{
+			return char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c) || c == ' ' || c == '\0';
+		}
+
+		public bool Remove()
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.Remove(out num, out maskedTextResultHint);
+		}
+
+		public bool Remove(out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			if (this.LastAssignedPosition == MaskedTextProvider.InvalidIndex)
+			{
+				resultHint = MaskedTextResultHint.NoEffect;
+				testPosition = 0;
+				return true;
+			}
+			testPosition = this.LastAssignedPosition;
+			resultHint = MaskedTextResultHint.Success;
+			this.edit_positions[this.LastAssignedPosition].input = '\0';
+			return true;
+		}
+
+		public bool RemoveAt(int position)
+		{
+			return this.RemoveAt(position, position);
+		}
+
+		public bool RemoveAt(int startPosition, int endPosition)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.RemoveAt(startPosition, endPosition, out num, out maskedTextResultHint);
+		}
+
+		public bool RemoveAt(int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			bool flag = this.RemoveAtInternal(startPosition, endPosition, out testPosition, out resultHint, true);
+			if (flag)
+			{
+				flag = this.RemoveAtInternal(startPosition, endPosition, out testPosition, out resultHint, false);
+			}
+			return flag;
+		}
+
+		public bool Replace(char input, int position)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.Replace(input, position, out num, out maskedTextResultHint);
+		}
+
+		public bool Replace(string input, int position)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.Replace(input, position, out num, out maskedTextResultHint);
+		}
+
+		public bool Replace(char input, int position, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			if (position < 0 || position >= this.edit_positions.Length)
+			{
+				testPosition = position;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (this.VerifyEscapeChar(input, position))
+			{
+				if ((this.edit_positions[position].FilledIn && this.edit_positions[position].Editable && input == ' ' && this.ResetOnSpace) || (input == this.PromptChar && this.ResetOnPrompt))
+				{
+					this.edit_positions[position].Reset();
+					resultHint = MaskedTextResultHint.SideEffect;
+				}
+				else
+				{
+					resultHint = MaskedTextResultHint.CharacterEscaped;
+				}
+				testPosition = position;
+				return true;
+			}
+			int num = this.FindEditPositionFrom(position, true);
+			if (num == MaskedTextProvider.InvalidIndex)
+			{
+				testPosition = position;
+				resultHint = MaskedTextResultHint.UnavailableEditPosition;
+				return false;
+			}
+			if (!MaskedTextProvider.IsValidInputChar(input))
+			{
+				testPosition = num;
+				resultHint = MaskedTextResultHint.InvalidInput;
+				return false;
+			}
+			return this.ReplaceInternal(this.edit_positions, input, num, out testPosition, out resultHint, false);
+		}
+
+		public bool Replace(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			if (input == null)
+			{
+				throw new ArgumentNullException("input");
+			}
+			if (position < 0 || position >= this.edit_positions.Length)
+			{
+				testPosition = position;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (input.Length == 0)
+			{
+				return this.RemoveAt(position, position, out testPosition, out resultHint);
+			}
+			bool flag = this.ReplaceInternal(input, position, this.edit_positions.Length - 1, out testPosition, out resultHint, true, true);
+			if (flag)
+			{
+				flag = this.ReplaceInternal(input, position, this.edit_positions.Length - 1, out testPosition, out resultHint, false, true);
+			}
+			return flag;
+		}
+
+		public bool Replace(char input, int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			if (endPosition >= this.edit_positions.Length)
+			{
+				testPosition = endPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition < 0)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition > endPosition)
+			{
+				testPosition = startPosition;
+				resultHint = MaskedTextResultHint.PositionOutOfRange;
+				return false;
+			}
+			if (startPosition == endPosition)
+			{
+				return this.ReplaceInternal(this.edit_positions, input, startPosition, out testPosition, out resultHint, false);
+			}
+			return this.Replace(input.ToString(), startPosition, endPosition, out testPosition, out resultHint);
+		}
+
+		public bool Replace(string input, int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			bool flag = this.ReplaceInternal(input, startPosition, endPosition, out testPosition, out resultHint, true, false);
+			if (flag)
+			{
+				flag = this.ReplaceInternal(input, startPosition, endPosition, out testPosition, out resultHint, false, false);
+			}
+			return flag;
+		}
+
+		public bool Set(string input)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.Set(input, out num, out maskedTextResultHint);
+		}
+
+		public bool Set(string input, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			if (input == null)
+			{
+				throw new ArgumentNullException("input");
+			}
+			bool flag = this.VerifyStringInternal(input, out testPosition, out resultHint, 0, true);
+			if (flag)
+			{
+				flag = this.VerifyStringInternal(input, out testPosition, out resultHint, 0, false);
+			}
+			return flag;
+		}
+
+		public string ToDisplayString()
+		{
+			return this.ToString(false, true, true, 0, this.Length);
+		}
+
+		public override string ToString()
+		{
+			return this.ToString(true, this.IncludePrompt, this.IncludeLiterals, 0, this.Length);
+		}
+
+		public string ToString(bool ignorePasswordChar)
+		{
+			return this.ToString(ignorePasswordChar, this.IncludePrompt, this.IncludeLiterals, 0, this.Length);
+		}
+
+		public string ToString(bool includePrompt, bool includeLiterals)
+		{
+			return this.ToString(true, includePrompt, includeLiterals, 0, this.Length);
+		}
+
+		public string ToString(int startPosition, int length)
+		{
+			return this.ToString(true, this.IncludePrompt, this.IncludeLiterals, startPosition, length);
+		}
+
+		public string ToString(bool ignorePasswordChar, int startPosition, int length)
+		{
+			return this.ToString(ignorePasswordChar, this.IncludePrompt, this.IncludeLiterals, startPosition, length);
+		}
+
+		public string ToString(bool includePrompt, bool includeLiterals, int startPosition, int length)
+		{
+			return this.ToString(true, includePrompt, includeLiterals, startPosition, length);
+		}
+
+		public string ToString(bool ignorePasswordChar, bool includePrompt, bool includeLiterals, int startPosition, int length)
+		{
+			if (startPosition < 0)
+			{
+				startPosition = 0;
+			}
+			if (length <= 0)
+			{
+				return string.Empty;
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			int num = startPosition;
+			int num2 = startPosition + length - 1;
+			if (num2 >= this.edit_positions.Length)
+			{
+				num2 = this.edit_positions.Length - 1;
+			}
+			int num3 = this.FindAssignedEditPositionInRange(num, num2, false);
+			if (!includePrompt)
+			{
+				int num4 = this.FindNonEditPositionInRange(num, num2, false);
+				if (includeLiterals)
+				{
+					num2 = ((num3 <= num4) ? num4 : num3);
+				}
+				else
+				{
+					num2 = num3;
+				}
+			}
+			for (int i = num; i <= num2; i++)
+			{
+				MaskedTextProvider.EditPosition editPosition = this.edit_positions[i];
+				if (editPosition.Type == MaskedTextProvider.EditType.Literal)
+				{
+					if (includeLiterals)
+					{
+						stringBuilder.Append(editPosition.Text);
+					}
+				}
+				else if (editPosition.Editable)
+				{
+					if (this.IsPassword)
+					{
+						if (ignorePasswordChar)
+						{
+							if (!editPosition.FilledIn)
+							{
+								if (includePrompt)
+								{
+									stringBuilder.Append(this.PromptChar);
+								}
+								else
+								{
+									stringBuilder.Append(" ");
+								}
+							}
+							else
+							{
+								stringBuilder.Append(editPosition.Input);
+							}
+						}
+						else
+						{
+							stringBuilder.Append(this.PasswordChar);
+						}
+					}
+					else if (!editPosition.FilledIn)
+					{
+						if (includePrompt)
+						{
+							stringBuilder.Append(this.PromptChar);
+						}
+						else if (includeLiterals)
+						{
+							stringBuilder.Append(" ");
+						}
+						else if (num3 != MaskedTextProvider.InvalidIndex && num3 > i)
+						{
+							stringBuilder.Append(" ");
+						}
+					}
+					else
+					{
+						stringBuilder.Append(editPosition.Text);
+					}
+				}
+				else if (includeLiterals)
+				{
+					stringBuilder.Append(editPosition.Text);
+				}
+			}
+			return stringBuilder.ToString();
+		}
+
+		public bool VerifyChar(char input, int position, out MaskedTextResultHint hint)
+		{
+			return this.VerifyCharInternal(input, position, out hint, true);
+		}
+
+		public bool VerifyEscapeChar(char input, int position)
+		{
+			if (position >= this.edit_positions.Length || position < 0)
+			{
+				return false;
+			}
+			if (!this.edit_positions[position].Editable)
+			{
+				return this.SkipLiterals && input.ToString() == this.edit_positions[position].Text;
+			}
+			return (this.ResetOnSpace && input == ' ') || (this.ResetOnPrompt && input == this.PromptChar);
+		}
+
+		public bool VerifyString(string input)
+		{
+			int num;
+			MaskedTextResultHint maskedTextResultHint;
+			return this.VerifyString(input, out num, out maskedTextResultHint);
+		}
+
+		public bool VerifyString(string input, out int testPosition, out MaskedTextResultHint resultHint)
+		{
+			if (input == null || input.Length == 0)
+			{
+				testPosition = 0;
+				resultHint = MaskedTextResultHint.NoEffect;
+				return true;
+			}
+			return this.VerifyStringInternal(input, out testPosition, out resultHint, 0, true);
 		}
 
 		public bool AllowPromptAsInput
 		{
 			get
 			{
-				return this.flagState[MaskedTextProvider.ALLOW_PROMPT_AS_INPUT];
+				return this.allow_prompt_as_input;
+			}
+		}
+
+		public bool AsciiOnly
+		{
+			get
+			{
+				return this.ascii_only;
 			}
 		}
 
@@ -252,7 +1530,15 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.assignedCharCount;
+				int num = 0;
+				for (int i = 0; i < this.edit_positions.Length; i++)
+				{
+					if (this.edit_positions[i].FilledIn)
+					{
+						num++;
+					}
+				}
+				return num;
 			}
 		}
 
@@ -260,40 +1546,16 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.EditPositionCount - this.assignedCharCount;
-			}
-		}
-
-		public object Clone()
-		{
-			Type type = base.GetType();
-			MaskedTextProvider maskedTextProvider;
-			if (type == MaskedTextProvider.maskTextProviderType)
-			{
-				maskedTextProvider = new MaskedTextProvider(this.Mask, this.Culture, this.AllowPromptAsInput, this.PromptChar, this.PasswordChar, this.AsciiOnly);
-			}
-			else
-			{
-				object[] array = new object[] { this.Mask, this.Culture, this.AllowPromptAsInput, this.PromptChar, this.PasswordChar, this.AsciiOnly };
-				maskedTextProvider = SecurityUtils.SecureCreateInstance(type, array) as MaskedTextProvider;
-			}
-			maskedTextProvider.ResetOnPrompt = false;
-			maskedTextProvider.ResetOnSpace = false;
-			maskedTextProvider.SkipLiterals = false;
-			for (int i = 0; i < this.testString.Length; i++)
-			{
-				MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[i];
-				if (MaskedTextProvider.IsEditPosition(charDescriptor) && charDescriptor.IsAssigned)
+				int num = 0;
+				foreach (MaskedTextProvider.EditPosition editPosition in this.edit_positions)
 				{
-					maskedTextProvider.Replace(this.testString[i], i);
+					if (!editPosition.FilledIn && editPosition.Editable)
+					{
+						num++;
+					}
 				}
+				return num;
 			}
-			maskedTextProvider.ResetOnPrompt = this.ResetOnPrompt;
-			maskedTextProvider.ResetOnSpace = this.ResetOnSpace;
-			maskedTextProvider.SkipLiterals = this.SkipLiterals;
-			maskedTextProvider.IncludeLiterals = this.IncludeLiterals;
-			maskedTextProvider.IncludePrompt = this.IncludePrompt;
-			return maskedTextProvider;
 		}
 
 		public CultureInfo Culture
@@ -316,7 +1578,15 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.optionalEditChars + this.requiredEditChars;
+				int num = 0;
+				foreach (MaskedTextProvider.EditPosition editPosition in this.edit_positions)
+				{
+					if (editPosition.Editable)
+					{
+						num++;
+					}
+				}
+				return num;
 			}
 		}
 
@@ -325,19 +1595,14 @@ namespace System.ComponentModel
 			get
 			{
 				List<int> list = new List<int>();
-				int num = 0;
-				using (List<MaskedTextProvider.CharDescriptor>.Enumerator enumerator = this.stringDescriptor.GetEnumerator())
+				for (int i = 0; i < this.edit_positions.Length; i++)
 				{
-					while (enumerator.MoveNext())
+					if (this.edit_positions[i].Editable)
 					{
-						if (MaskedTextProvider.IsEditPosition(enumerator.Current))
-						{
-							list.Add(num);
-						}
-						num++;
+						list.Add(i);
 					}
 				}
-				return ((IEnumerable)list).GetEnumerator();
+				return list.GetEnumerator();
 			}
 		}
 
@@ -345,11 +1610,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.flagState[MaskedTextProvider.INCLUDE_LITERALS];
+				return this.include_literals;
 			}
 			set
 			{
-				this.flagState[MaskedTextProvider.INCLUDE_LITERALS] = value;
+				this.include_literals = value;
 			}
 		}
 
@@ -357,34 +1622,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.flagState[MaskedTextProvider.INCLUDE_PROMPT];
+				return this.include_prompt;
 			}
 			set
 			{
-				this.flagState[MaskedTextProvider.INCLUDE_PROMPT] = value;
-			}
-		}
-
-		public bool AsciiOnly
-		{
-			get
-			{
-				return this.flagState[MaskedTextProvider.ASCII_ONLY];
-			}
-		}
-
-		public bool IsPassword
-		{
-			get
-			{
-				return this.passwordChar > '\0';
-			}
-			set
-			{
-				if (this.IsPassword != value)
-				{
-					this.passwordChar = (value ? MaskedTextProvider.DefaultPasswordChar : '\0');
-				}
+				this.include_prompt = value;
 			}
 		}
 
@@ -396,11 +1638,35 @@ namespace System.ComponentModel
 			}
 		}
 
+		public bool IsPassword
+		{
+			get
+			{
+				return this.password_char != '\0';
+			}
+			set
+			{
+				this.password_char = ((!value) ? '\0' : MaskedTextProvider.DefaultPasswordChar);
+			}
+		}
+
+		public char this[int index]
+		{
+			get
+			{
+				if (index < 0 || index >= this.Length)
+				{
+					throw new IndexOutOfRangeException(index.ToString());
+				}
+				return this.ToString(true, true, true, 0, this.edit_positions.Length)[index];
+			}
+		}
+
 		public int LastAssignedPosition
 		{
 			get
 			{
-				return this.FindAssignedEditPositionFrom(this.testString.Length - 1, false);
+				return this.FindAssignedEditPositionFrom(this.edit_positions.Length - 1, false);
 			}
 		}
 
@@ -408,7 +1674,15 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.testString.Length;
+				int num = 0;
+				for (int i = 0; i < this.edit_positions.Length; i++)
+				{
+					if (this.edit_positions[i].Visible)
+					{
+						num++;
+					}
+				}
+				return num;
 			}
 		}
 
@@ -424,7 +1698,14 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.requiredCharCount == this.requiredEditChars;
+				for (int i = 0; i < this.edit_positions.Length; i++)
+				{
+					if (this.edit_positions[i].Required && !this.edit_positions[i].FilledIn)
+					{
+						return false;
+					}
+				}
+				return true;
 			}
 		}
 
@@ -432,7 +1713,14 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.assignedCharCount == this.EditPositionCount;
+				for (int i = 0; i < this.edit_positions.Length; i++)
+				{
+					if (this.edit_positions[i].Editable && !this.edit_positions[i].FilledIn)
+					{
+						return false;
+					}
+				}
+				return true;
 			}
 		}
 
@@ -440,22 +1728,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.passwordChar;
+				return this.password_char;
 			}
 			set
 			{
-				if (value == this.promptChar)
-				{
-					throw new InvalidOperationException(global::SR.GetString("The PasswordChar and PromptChar values cannot be the same."));
-				}
-				if (!MaskedTextProvider.IsValidPasswordChar(value) && value != '\0')
-				{
-					throw new ArgumentException(global::SR.GetString("The specified character value is not allowed for this property."));
-				}
-				if (value != this.passwordChar)
-				{
-					this.passwordChar = value;
-				}
+				this.password_char = value;
 			}
 		}
 
@@ -463,30 +1740,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.promptChar;
+				return this.prompt_char;
 			}
 			set
 			{
-				if (value == this.passwordChar)
-				{
-					throw new InvalidOperationException(global::SR.GetString("The PasswordChar and PromptChar values cannot be the same."));
-				}
-				if (!MaskedTextProvider.IsPrintableChar(value))
-				{
-					throw new ArgumentException(global::SR.GetString("The specified character value is not allowed for this property."));
-				}
-				if (value != this.promptChar)
-				{
-					this.promptChar = value;
-					for (int i = 0; i < this.testString.Length; i++)
-					{
-						MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[i];
-						if (this.IsEditPosition(i) && !charDescriptor.IsAssigned)
-						{
-							this.testString[i] = this.promptChar;
-						}
-					}
-				}
+				this.prompt_char = value;
 			}
 		}
 
@@ -494,11 +1752,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.flagState[MaskedTextProvider.RESET_ON_PROMPT];
+				return this.reset_on_prompt;
 			}
 			set
 			{
-				this.flagState[MaskedTextProvider.RESET_ON_PROMPT] = value;
+				this.reset_on_prompt = value;
 			}
 		}
 
@@ -506,11 +1764,11 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.flagState[MaskedTextProvider.SKIP_SPACE];
+				return this.reset_on_space;
 			}
 			set
 			{
-				this.flagState[MaskedTextProvider.SKIP_SPACE] = value;
+				this.reset_on_space = value;
 			}
 		}
 
@@ -518,1383 +1776,369 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.flagState[MaskedTextProvider.RESET_ON_LITERALS];
+				return this.skip_literals;
 			}
 			set
 			{
-				this.flagState[MaskedTextProvider.RESET_ON_LITERALS] = value;
+				this.skip_literals = value;
 			}
 		}
 
-		public char this[int index]
+		private bool allow_prompt_as_input;
+
+		private bool ascii_only;
+
+		private CultureInfo culture;
+
+		private bool include_literals;
+
+		private bool include_prompt;
+
+		private bool is_password;
+
+		private string mask;
+
+		private char password_char;
+
+		private char prompt_char;
+
+		private bool reset_on_prompt;
+
+		private bool reset_on_space;
+
+		private bool skip_literals;
+
+		private MaskedTextProvider.EditPosition[] edit_positions;
+
+		private static char default_prompt_char = '_';
+
+		private static char default_password_char;
+
+		private enum EditState
 		{
-			get
+			None,
+			UpperCase,
+			LowerCase
+		}
+
+		private enum EditType
+		{
+			DigitRequired,
+			DigitOrSpaceOptional,
+			DigitOrSpaceOptional_Blank,
+			LetterRequired,
+			LetterOptional,
+			CharacterRequired,
+			CharacterOptional,
+			AlphanumericRequired,
+			AlphanumericOptional,
+			DecimalPlaceholder,
+			ThousandsPlaceholder,
+			TimeSeparator,
+			DateSeparator,
+			CurrencySymbol,
+			Literal
+		}
+
+		private class EditPosition
+		{
+			private EditPosition()
 			{
-				if (index < 0 || index >= this.testString.Length)
+			}
+
+			public EditPosition(MaskedTextProvider Parent, MaskedTextProvider.EditType Type, MaskedTextProvider.EditState State, char MaskCharacter)
+			{
+				this.Type = Type;
+				this.Parent = Parent;
+				this.State = State;
+				this.MaskCharacter = MaskCharacter;
+			}
+
+			public void Reset()
+			{
+				this.input = '\0';
+			}
+
+			internal MaskedTextProvider.EditPosition Clone()
+			{
+				return new MaskedTextProvider.EditPosition
 				{
-					throw new IndexOutOfRangeException(index.ToString(CultureInfo.CurrentCulture));
+					Parent = this.Parent,
+					Type = this.Type,
+					State = this.State,
+					MaskCharacter = this.MaskCharacter,
+					input = this.input
+				};
+			}
+
+			public char Input
+			{
+				get
+				{
+					return this.input;
 				}
-				return this.testString[index];
-			}
-		}
-
-		public bool Add(char input)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.Add(input, out num, out maskedTextResultHint);
-		}
-
-		public bool Add(char input, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			int lastAssignedPosition = this.LastAssignedPosition;
-			if (lastAssignedPosition == this.testString.Length - 1)
-			{
-				testPosition = this.testString.Length;
-				resultHint = MaskedTextResultHint.UnavailableEditPosition;
-				return false;
-			}
-			testPosition = lastAssignedPosition + 1;
-			testPosition = this.FindEditPositionFrom(testPosition, true);
-			if (testPosition == -1)
-			{
-				resultHint = MaskedTextResultHint.UnavailableEditPosition;
-				testPosition = this.testString.Length;
-				return false;
-			}
-			return this.TestSetChar(input, testPosition, out resultHint);
-		}
-
-		public bool Add(string input)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.Add(input, out num, out maskedTextResultHint);
-		}
-
-		public bool Add(string input, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			testPosition = this.LastAssignedPosition + 1;
-			if (input.Length == 0)
-			{
-				resultHint = MaskedTextResultHint.NoEffect;
-				return true;
-			}
-			return this.TestSetString(input, testPosition, out testPosition, out resultHint);
-		}
-
-		public void Clear()
-		{
-			MaskedTextResultHint maskedTextResultHint;
-			this.Clear(out maskedTextResultHint);
-		}
-
-		public void Clear(out MaskedTextResultHint resultHint)
-		{
-			if (this.assignedCharCount == 0)
-			{
-				resultHint = MaskedTextResultHint.NoEffect;
-				return;
-			}
-			resultHint = MaskedTextResultHint.Success;
-			for (int i = 0; i < this.testString.Length; i++)
-			{
-				this.ResetChar(i);
-			}
-		}
-
-		public int FindAssignedEditPositionFrom(int position, bool direction)
-		{
-			if (this.assignedCharCount == 0)
-			{
-				return -1;
-			}
-			int num;
-			int num2;
-			if (direction)
-			{
-				num = position;
-				num2 = this.testString.Length - 1;
-			}
-			else
-			{
-				num = 0;
-				num2 = position;
-			}
-			return this.FindAssignedEditPositionInRange(num, num2, direction);
-		}
-
-		public int FindAssignedEditPositionInRange(int startPosition, int endPosition, bool direction)
-		{
-			if (this.assignedCharCount == 0)
-			{
-				return -1;
-			}
-			return this.FindEditPositionInRange(startPosition, endPosition, direction, 2);
-		}
-
-		public int FindEditPositionFrom(int position, bool direction)
-		{
-			int num;
-			int num2;
-			if (direction)
-			{
-				num = position;
-				num2 = this.testString.Length - 1;
-			}
-			else
-			{
-				num = 0;
-				num2 = position;
-			}
-			return this.FindEditPositionInRange(num, num2, direction);
-		}
-
-		public int FindEditPositionInRange(int startPosition, int endPosition, bool direction)
-		{
-			MaskedTextProvider.CharType charType = MaskedTextProvider.CharType.EditOptional | MaskedTextProvider.CharType.EditRequired;
-			return this.FindPositionInRange(startPosition, endPosition, direction, charType);
-		}
-
-		private int FindEditPositionInRange(int startPosition, int endPosition, bool direction, byte assignedStatus)
-		{
-			int num;
-			for (;;)
-			{
-				num = this.FindEditPositionInRange(startPosition, endPosition, direction);
-				if (num == -1)
+				set
 				{
-					return -1;
-				}
-				MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[num];
-				if (assignedStatus != 1)
-				{
-					if (assignedStatus != 2)
+					MaskedTextProvider.EditState state = this.State;
+					if (state != MaskedTextProvider.EditState.UpperCase)
 					{
-						break;
-					}
-					if (charDescriptor.IsAssigned)
-					{
-						return num;
-					}
-				}
-				else if (!charDescriptor.IsAssigned)
-				{
-					return num;
-				}
-				if (direction)
-				{
-					startPosition++;
-				}
-				else
-				{
-					endPosition--;
-				}
-				if (startPosition > endPosition)
-				{
-					return -1;
-				}
-			}
-			return num;
-		}
-
-		public int FindNonEditPositionFrom(int position, bool direction)
-		{
-			int num;
-			int num2;
-			if (direction)
-			{
-				num = position;
-				num2 = this.testString.Length - 1;
-			}
-			else
-			{
-				num = 0;
-				num2 = position;
-			}
-			return this.FindNonEditPositionInRange(num, num2, direction);
-		}
-
-		public int FindNonEditPositionInRange(int startPosition, int endPosition, bool direction)
-		{
-			MaskedTextProvider.CharType charType = MaskedTextProvider.CharType.Separator | MaskedTextProvider.CharType.Literal;
-			return this.FindPositionInRange(startPosition, endPosition, direction, charType);
-		}
-
-		private int FindPositionInRange(int startPosition, int endPosition, bool direction, MaskedTextProvider.CharType charTypeFlags)
-		{
-			if (startPosition < 0)
-			{
-				startPosition = 0;
-			}
-			if (endPosition >= this.testString.Length)
-			{
-				endPosition = this.testString.Length - 1;
-			}
-			if (startPosition > endPosition)
-			{
-				return -1;
-			}
-			while (startPosition <= endPosition)
-			{
-				int num;
-				if (!direction)
-				{
-					endPosition = (num = endPosition) - 1;
-				}
-				else
-				{
-					startPosition = (num = startPosition) + 1;
-				}
-				int num2 = num;
-				MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[num2];
-				if ((charDescriptor.CharType & charTypeFlags) == charDescriptor.CharType)
-				{
-					return num2;
-				}
-			}
-			return -1;
-		}
-
-		public int FindUnassignedEditPositionFrom(int position, bool direction)
-		{
-			int num;
-			int num2;
-			if (direction)
-			{
-				num = position;
-				num2 = this.testString.Length - 1;
-			}
-			else
-			{
-				num = 0;
-				num2 = position;
-			}
-			return this.FindEditPositionInRange(num, num2, direction, 1);
-		}
-
-		public int FindUnassignedEditPositionInRange(int startPosition, int endPosition, bool direction)
-		{
-			for (;;)
-			{
-				int num = this.FindEditPositionInRange(startPosition, endPosition, direction, 0);
-				if (num == -1)
-				{
-					break;
-				}
-				if (!this.stringDescriptor[num].IsAssigned)
-				{
-					return num;
-				}
-				if (direction)
-				{
-					startPosition++;
-				}
-				else
-				{
-					endPosition--;
-				}
-			}
-			return -1;
-		}
-
-		public static bool GetOperationResultFromHint(MaskedTextResultHint hint)
-		{
-			return hint > MaskedTextResultHint.Unknown;
-		}
-
-		public bool InsertAt(char input, int position)
-		{
-			return position >= 0 && position < this.testString.Length && this.InsertAt(input.ToString(), position);
-		}
-
-		public bool InsertAt(char input, int position, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			return this.InsertAt(input.ToString(), position, out testPosition, out resultHint);
-		}
-
-		public bool InsertAt(string input, int position)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.InsertAt(input, position, out num, out maskedTextResultHint);
-		}
-
-		public bool InsertAt(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			if (position < 0 || position >= this.testString.Length)
-			{
-				testPosition = position;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			return this.InsertAtInt(input, position, out testPosition, out resultHint, false);
-		}
-
-		private bool InsertAtInt(string input, int position, out int testPosition, out MaskedTextResultHint resultHint, bool testOnly)
-		{
-			if (input.Length == 0)
-			{
-				testPosition = position;
-				resultHint = MaskedTextResultHint.NoEffect;
-				return true;
-			}
-			if (!this.TestString(input, position, out testPosition, out resultHint))
-			{
-				return false;
-			}
-			int i = this.FindEditPositionFrom(position, true);
-			bool flag = this.FindAssignedEditPositionInRange(i, testPosition, true) != -1;
-			int lastAssignedPosition = this.LastAssignedPosition;
-			if (flag && testPosition == this.testString.Length - 1)
-			{
-				resultHint = MaskedTextResultHint.UnavailableEditPosition;
-				testPosition = this.testString.Length;
-				return false;
-			}
-			int num = this.FindEditPositionFrom(testPosition + 1, true);
-			if (flag)
-			{
-				MaskedTextResultHint maskedTextResultHint = MaskedTextResultHint.Unknown;
-				while (num != -1)
-				{
-					if (this.stringDescriptor[i].IsAssigned && !this.TestChar(this.testString[i], num, out maskedTextResultHint))
-					{
-						resultHint = maskedTextResultHint;
-						testPosition = num;
-						return false;
-					}
-					if (i != lastAssignedPosition)
-					{
-						i = this.FindEditPositionFrom(i + 1, true);
-						num = this.FindEditPositionFrom(num + 1, true);
-					}
-					else
-					{
-						if (maskedTextResultHint > resultHint)
+						if (state != MaskedTextProvider.EditState.LowerCase)
 						{
-							resultHint = maskedTextResultHint;
-							goto IL_00EF;
-						}
-						goto IL_00EF;
-					}
-				}
-				resultHint = MaskedTextResultHint.UnavailableEditPosition;
-				testPosition = this.testString.Length;
-				return false;
-			}
-			IL_00EF:
-			if (testOnly)
-			{
-				return true;
-			}
-			if (flag)
-			{
-				while (i >= position)
-				{
-					if (this.stringDescriptor[i].IsAssigned)
-					{
-						this.SetChar(this.testString[i], num);
-					}
-					else
-					{
-						this.ResetChar(num);
-					}
-					num = this.FindEditPositionFrom(num - 1, false);
-					i = this.FindEditPositionFrom(i - 1, false);
-				}
-			}
-			this.SetString(input, position);
-			return true;
-		}
-
-		private static bool IsAscii(char c)
-		{
-			return c >= '!' && c <= '~';
-		}
-
-		private static bool IsAciiAlphanumeric(char c)
-		{
-			return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-		}
-
-		private static bool IsAlphanumeric(char c)
-		{
-			return char.IsLetter(c) || char.IsDigit(c);
-		}
-
-		private static bool IsAsciiLetter(char c)
-		{
-			return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-		}
-
-		public bool IsAvailablePosition(int position)
-		{
-			if (position < 0 || position >= this.testString.Length)
-			{
-				return false;
-			}
-			MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[position];
-			return MaskedTextProvider.IsEditPosition(charDescriptor) && !charDescriptor.IsAssigned;
-		}
-
-		public bool IsEditPosition(int position)
-		{
-			return position >= 0 && position < this.testString.Length && MaskedTextProvider.IsEditPosition(this.stringDescriptor[position]);
-		}
-
-		private static bool IsEditPosition(MaskedTextProvider.CharDescriptor charDescriptor)
-		{
-			return charDescriptor.CharType == MaskedTextProvider.CharType.EditRequired || charDescriptor.CharType == MaskedTextProvider.CharType.EditOptional;
-		}
-
-		private static bool IsLiteralPosition(MaskedTextProvider.CharDescriptor charDescriptor)
-		{
-			return charDescriptor.CharType == MaskedTextProvider.CharType.Literal || charDescriptor.CharType == MaskedTextProvider.CharType.Separator;
-		}
-
-		private static bool IsPrintableChar(char c)
-		{
-			return char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c) || c == ' ';
-		}
-
-		public static bool IsValidInputChar(char c)
-		{
-			return MaskedTextProvider.IsPrintableChar(c);
-		}
-
-		public static bool IsValidMaskChar(char c)
-		{
-			return MaskedTextProvider.IsPrintableChar(c);
-		}
-
-		public static bool IsValidPasswordChar(char c)
-		{
-			return MaskedTextProvider.IsPrintableChar(c) || c == '\0';
-		}
-
-		public bool Remove()
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.Remove(out num, out maskedTextResultHint);
-		}
-
-		public bool Remove(out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			int lastAssignedPosition = this.LastAssignedPosition;
-			if (lastAssignedPosition == -1)
-			{
-				testPosition = 0;
-				resultHint = MaskedTextResultHint.NoEffect;
-				return true;
-			}
-			this.ResetChar(lastAssignedPosition);
-			testPosition = lastAssignedPosition;
-			resultHint = MaskedTextResultHint.Success;
-			return true;
-		}
-
-		public bool RemoveAt(int position)
-		{
-			return this.RemoveAt(position, position);
-		}
-
-		public bool RemoveAt(int startPosition, int endPosition)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.RemoveAt(startPosition, endPosition, out num, out maskedTextResultHint);
-		}
-
-		public bool RemoveAt(int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (endPosition >= this.testString.Length)
-			{
-				testPosition = endPosition;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			if (startPosition < 0 || startPosition > endPosition)
-			{
-				testPosition = startPosition;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			return this.RemoveAtInt(startPosition, endPosition, out testPosition, out resultHint, false);
-		}
-
-		private bool RemoveAtInt(int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint, bool testOnly)
-		{
-			int lastAssignedPosition = this.LastAssignedPosition;
-			int num = this.FindEditPositionInRange(startPosition, endPosition, true);
-			resultHint = MaskedTextResultHint.NoEffect;
-			if (num == -1 || num > lastAssignedPosition)
-			{
-				testPosition = startPosition;
-				return true;
-			}
-			testPosition = startPosition;
-			bool flag = endPosition < lastAssignedPosition;
-			if (this.FindAssignedEditPositionInRange(startPosition, endPosition, true) != -1)
-			{
-				resultHint = MaskedTextResultHint.Success;
-			}
-			if (flag)
-			{
-				int num2 = this.FindEditPositionFrom(endPosition + 1, true);
-				int num3 = num2;
-				startPosition = num;
-				MaskedTextResultHint maskedTextResultHint;
-				for (;;)
-				{
-					char c = this.testString[num2];
-					MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[num2];
-					if ((c != this.PromptChar || charDescriptor.IsAssigned) && !this.TestChar(c, num, out maskedTextResultHint))
-					{
-						break;
-					}
-					if (num2 == lastAssignedPosition)
-					{
-						goto IL_00B0;
-					}
-					num2 = this.FindEditPositionFrom(num2 + 1, true);
-					num = this.FindEditPositionFrom(num + 1, true);
-				}
-				resultHint = maskedTextResultHint;
-				testPosition = num;
-				return false;
-				IL_00B0:
-				if (MaskedTextResultHint.SideEffect > resultHint)
-				{
-					resultHint = MaskedTextResultHint.SideEffect;
-				}
-				if (testOnly)
-				{
-					return true;
-				}
-				num2 = num3;
-				num = startPosition;
-				for (;;)
-				{
-					char c2 = this.testString[num2];
-					MaskedTextProvider.CharDescriptor charDescriptor2 = this.stringDescriptor[num2];
-					if (c2 == this.PromptChar && !charDescriptor2.IsAssigned)
-					{
-						this.ResetChar(num);
-					}
-					else
-					{
-						this.SetChar(c2, num);
-						this.ResetChar(num2);
-					}
-					if (num2 == lastAssignedPosition)
-					{
-						break;
-					}
-					num2 = this.FindEditPositionFrom(num2 + 1, true);
-					num = this.FindEditPositionFrom(num + 1, true);
-				}
-				startPosition = num + 1;
-			}
-			if (startPosition <= endPosition)
-			{
-				this.ResetString(startPosition, endPosition);
-			}
-			return true;
-		}
-
-		public bool Replace(char input, int position)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.Replace(input, position, out num, out maskedTextResultHint);
-		}
-
-		public bool Replace(char input, int position, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (position < 0 || position >= this.testString.Length)
-			{
-				testPosition = position;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			testPosition = position;
-			if (!this.TestEscapeChar(input, testPosition))
-			{
-				testPosition = this.FindEditPositionFrom(testPosition, true);
-			}
-			if (testPosition == -1)
-			{
-				resultHint = MaskedTextResultHint.UnavailableEditPosition;
-				testPosition = position;
-				return false;
-			}
-			return this.TestSetChar(input, testPosition, out resultHint);
-		}
-
-		public bool Replace(char input, int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (endPosition >= this.testString.Length)
-			{
-				testPosition = endPosition;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			if (startPosition < 0 || startPosition > endPosition)
-			{
-				testPosition = startPosition;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			if (startPosition == endPosition)
-			{
-				testPosition = startPosition;
-				return this.TestSetChar(input, startPosition, out resultHint);
-			}
-			return this.Replace(input.ToString(), startPosition, endPosition, out testPosition, out resultHint);
-		}
-
-		public bool Replace(string input, int position)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.Replace(input, position, out num, out maskedTextResultHint);
-		}
-
-		public bool Replace(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			if (position < 0 || position >= this.testString.Length)
-			{
-				testPosition = position;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			if (input.Length == 0)
-			{
-				return this.RemoveAt(position, position, out testPosition, out resultHint);
-			}
-			return this.TestSetString(input, position, out testPosition, out resultHint);
-		}
-
-		public bool Replace(string input, int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			if (endPosition >= this.testString.Length)
-			{
-				testPosition = endPosition;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			if (startPosition < 0 || startPosition > endPosition)
-			{
-				testPosition = startPosition;
-				resultHint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			if (input.Length == 0)
-			{
-				return this.RemoveAt(startPosition, endPosition, out testPosition, out resultHint);
-			}
-			if (!this.TestString(input, startPosition, out testPosition, out resultHint))
-			{
-				return false;
-			}
-			if (this.assignedCharCount > 0)
-			{
-				if (testPosition < endPosition)
-				{
-					int num;
-					MaskedTextResultHint maskedTextResultHint;
-					if (!this.RemoveAtInt(testPosition + 1, endPosition, out num, out maskedTextResultHint, false))
-					{
-						testPosition = num;
-						resultHint = maskedTextResultHint;
-						return false;
-					}
-					if (maskedTextResultHint == MaskedTextResultHint.Success && resultHint != maskedTextResultHint)
-					{
-						resultHint = MaskedTextResultHint.SideEffect;
-					}
-				}
-				else if (testPosition > endPosition)
-				{
-					int lastAssignedPosition = this.LastAssignedPosition;
-					int i = testPosition + 1;
-					int num2 = endPosition + 1;
-					MaskedTextResultHint maskedTextResultHint;
-					for (;;)
-					{
-						num2 = this.FindEditPositionFrom(num2, true);
-						i = this.FindEditPositionFrom(i, true);
-						if (i == -1)
-						{
-							goto Block_12;
-						}
-						if (!this.TestChar(this.testString[num2], i, out maskedTextResultHint))
-						{
-							goto Block_13;
-						}
-						if (maskedTextResultHint == MaskedTextResultHint.Success && resultHint != maskedTextResultHint)
-						{
-							resultHint = MaskedTextResultHint.Success;
-						}
-						if (num2 == lastAssignedPosition)
-						{
-							break;
-						}
-						num2++;
-						i++;
-					}
-					while (i > testPosition)
-					{
-						this.SetChar(this.testString[num2], i);
-						num2 = this.FindEditPositionFrom(num2 - 1, false);
-						i = this.FindEditPositionFrom(i - 1, false);
-					}
-					goto IL_0162;
-					Block_12:
-					testPosition = this.testString.Length;
-					resultHint = MaskedTextResultHint.UnavailableEditPosition;
-					return false;
-					Block_13:
-					testPosition = i;
-					resultHint = maskedTextResultHint;
-					return false;
-				}
-			}
-			IL_0162:
-			this.SetString(input, startPosition);
-			return true;
-		}
-
-		private void ResetChar(int testPosition)
-		{
-			MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[testPosition];
-			if (this.IsEditPosition(testPosition) && charDescriptor.IsAssigned)
-			{
-				charDescriptor.IsAssigned = false;
-				this.testString[testPosition] = this.promptChar;
-				this.assignedCharCount--;
-				if (charDescriptor.CharType == MaskedTextProvider.CharType.EditRequired)
-				{
-					this.requiredCharCount--;
-				}
-			}
-		}
-
-		private void ResetString(int startPosition, int endPosition)
-		{
-			startPosition = this.FindAssignedEditPositionFrom(startPosition, true);
-			if (startPosition != -1)
-			{
-				endPosition = this.FindAssignedEditPositionFrom(endPosition, false);
-				while (startPosition <= endPosition)
-				{
-					startPosition = this.FindAssignedEditPositionFrom(startPosition, true);
-					this.ResetChar(startPosition);
-					startPosition++;
-				}
-			}
-		}
-
-		public bool Set(string input)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.Set(input, out num, out maskedTextResultHint);
-		}
-
-		public bool Set(string input, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (input == null)
-			{
-				throw new ArgumentNullException("input");
-			}
-			resultHint = MaskedTextResultHint.Unknown;
-			testPosition = 0;
-			if (input.Length == 0)
-			{
-				this.Clear(out resultHint);
-				return true;
-			}
-			if (!this.TestSetString(input, testPosition, out testPosition, out resultHint))
-			{
-				return false;
-			}
-			int num = this.FindAssignedEditPositionFrom(testPosition + 1, true);
-			if (num != -1)
-			{
-				this.ResetString(num, this.testString.Length - 1);
-			}
-			return true;
-		}
-
-		private void SetChar(char input, int position)
-		{
-			MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[position];
-			this.SetChar(input, position, charDescriptor);
-		}
-
-		private void SetChar(char input, int position, MaskedTextProvider.CharDescriptor charDescriptor)
-		{
-			MaskedTextProvider.CharDescriptor charDescriptor2 = this.stringDescriptor[position];
-			if (this.TestEscapeChar(input, position, charDescriptor))
-			{
-				this.ResetChar(position);
-				return;
-			}
-			if (char.IsLetter(input))
-			{
-				if (char.IsUpper(input))
-				{
-					if (charDescriptor.CaseConversion == MaskedTextProvider.CaseConversion.ToLower)
-					{
-						input = this.culture.TextInfo.ToLower(input);
-					}
-				}
-				else if (charDescriptor.CaseConversion == MaskedTextProvider.CaseConversion.ToUpper)
-				{
-					input = this.culture.TextInfo.ToUpper(input);
-				}
-			}
-			this.testString[position] = input;
-			if (!charDescriptor.IsAssigned)
-			{
-				charDescriptor.IsAssigned = true;
-				this.assignedCharCount++;
-				if (charDescriptor.CharType == MaskedTextProvider.CharType.EditRequired)
-				{
-					this.requiredCharCount++;
-				}
-			}
-		}
-
-		private void SetString(string input, int testPosition)
-		{
-			foreach (char c in input)
-			{
-				if (!this.TestEscapeChar(c, testPosition))
-				{
-					testPosition = this.FindEditPositionFrom(testPosition, true);
-				}
-				this.SetChar(c, testPosition);
-				testPosition++;
-			}
-		}
-
-		private bool TestChar(char input, int position, out MaskedTextResultHint resultHint)
-		{
-			if (!MaskedTextProvider.IsPrintableChar(input))
-			{
-				resultHint = MaskedTextResultHint.InvalidInput;
-				return false;
-			}
-			MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[position];
-			if (MaskedTextProvider.IsLiteralPosition(charDescriptor))
-			{
-				if (this.SkipLiterals && input == this.testString[position])
-				{
-					resultHint = MaskedTextResultHint.CharacterEscaped;
-					return true;
-				}
-				resultHint = MaskedTextResultHint.NonEditPosition;
-				return false;
-			}
-			else
-			{
-				if (input == this.promptChar)
-				{
-					if (this.ResetOnPrompt)
-					{
-						if (MaskedTextProvider.IsEditPosition(charDescriptor) && charDescriptor.IsAssigned)
-						{
-							resultHint = MaskedTextResultHint.SideEffect;
+							this.input = value;
 						}
 						else
 						{
-							resultHint = MaskedTextResultHint.CharacterEscaped;
+							this.input = char.ToLower(value, this.Parent.Culture);
 						}
-						return true;
-					}
-					if (!this.AllowPromptAsInput)
-					{
-						resultHint = MaskedTextResultHint.PromptCharNotAllowed;
-						return false;
-					}
-				}
-				if (input == ' ' && this.ResetOnSpace)
-				{
-					if (MaskedTextProvider.IsEditPosition(charDescriptor) && charDescriptor.IsAssigned)
-					{
-						resultHint = MaskedTextResultHint.SideEffect;
 					}
 					else
 					{
-						resultHint = MaskedTextResultHint.CharacterEscaped;
+						this.input = char.ToUpper(value, this.Parent.Culture);
+					}
+				}
+			}
+
+			public bool IsAscii(char c)
+			{
+				return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+			}
+
+			public bool Match(char c, out MaskedTextResultHint resultHint, bool only_test)
+			{
+				if (!MaskedTextProvider.IsValidInputChar(c))
+				{
+					resultHint = MaskedTextResultHint.InvalidInput;
+					return false;
+				}
+				if (this.Parent.ResetOnSpace && c == ' ' && this.Editable)
+				{
+					resultHint = MaskedTextResultHint.CharacterEscaped;
+					if (this.FilledIn)
+					{
+						resultHint = MaskedTextResultHint.Success;
+						if (!only_test && this.input != ' ')
+						{
+							switch (this.Type)
+							{
+							case MaskedTextProvider.EditType.CharacterRequired:
+							case MaskedTextProvider.EditType.CharacterOptional:
+							case MaskedTextProvider.EditType.AlphanumericRequired:
+							case MaskedTextProvider.EditType.AlphanumericOptional:
+								this.Input = c;
+								break;
+							default:
+								this.Input = '\0';
+								break;
+							}
+						}
 					}
 					return true;
 				}
-				char c = this.mask[charDescriptor.MaskPosition];
-				if (c <= '0')
+				if (this.Type == MaskedTextProvider.EditType.Literal && this.MaskCharacter == c && this.Parent.SkipLiterals)
 				{
-					if (c != '#')
-					{
-						if (c != '&')
-						{
-							if (c == '0')
-							{
-								if (!char.IsDigit(input))
-								{
-									resultHint = MaskedTextResultHint.DigitExpected;
-									return false;
-								}
-							}
-						}
-						else if (!MaskedTextProvider.IsAscii(input) && this.AsciiOnly)
-						{
-							resultHint = MaskedTextResultHint.AsciiCharacterExpected;
-							return false;
-						}
-					}
-					else if (!char.IsDigit(input) && input != '-' && input != '+' && input != ' ')
-					{
-						resultHint = MaskedTextResultHint.DigitExpected;
-						return false;
-					}
+					resultHint = MaskedTextResultHint.Success;
+					return true;
 				}
-				else if (c <= 'C')
+				if (!this.Editable)
 				{
-					if (c != '9')
-					{
-						switch (c)
-						{
-						case '?':
-							if (!char.IsLetter(input) && input != ' ')
-							{
-								resultHint = MaskedTextResultHint.LetterExpected;
-								return false;
-							}
-							if (!MaskedTextProvider.IsAsciiLetter(input) && this.AsciiOnly)
-							{
-								resultHint = MaskedTextResultHint.AsciiCharacterExpected;
-								return false;
-							}
-							break;
-						case 'A':
-							if (!MaskedTextProvider.IsAlphanumeric(input))
-							{
-								resultHint = MaskedTextResultHint.AlphanumericCharacterExpected;
-								return false;
-							}
-							if (!MaskedTextProvider.IsAciiAlphanumeric(input) && this.AsciiOnly)
-							{
-								resultHint = MaskedTextResultHint.AsciiCharacterExpected;
-								return false;
-							}
-							break;
-						case 'C':
-							if (!MaskedTextProvider.IsAscii(input) && this.AsciiOnly && input != ' ')
-							{
-								resultHint = MaskedTextResultHint.AsciiCharacterExpected;
-								return false;
-							}
-							break;
-						}
-					}
-					else if (!char.IsDigit(input) && input != ' ')
-					{
-						resultHint = MaskedTextResultHint.DigitExpected;
-						return false;
-					}
+					resultHint = MaskedTextResultHint.NonEditPosition;
+					return false;
 				}
-				else if (c != 'L')
+				switch (this.Type)
 				{
-					if (c == 'a')
+				case MaskedTextProvider.EditType.DigitRequired:
+					if (char.IsDigit(c))
 					{
-						if (!MaskedTextProvider.IsAlphanumeric(input) && input != ' ')
+						if (!only_test)
 						{
-							resultHint = MaskedTextResultHint.AlphanumericCharacterExpected;
-							return false;
+							this.Input = c;
 						}
-						if (!MaskedTextProvider.IsAciiAlphanumeric(input) && this.AsciiOnly)
-						{
-							resultHint = MaskedTextResultHint.AsciiCharacterExpected;
-							return false;
-						}
+						resultHint = MaskedTextResultHint.Success;
+						return true;
 					}
-				}
-				else
-				{
-					if (!char.IsLetter(input))
+					resultHint = MaskedTextResultHint.DigitExpected;
+					return false;
+				case MaskedTextProvider.EditType.DigitOrSpaceOptional:
+				case MaskedTextProvider.EditType.DigitOrSpaceOptional_Blank:
+					if (char.IsDigit(c) || c == ' ')
+					{
+						if (!only_test)
+						{
+							this.Input = c;
+						}
+						resultHint = MaskedTextResultHint.Success;
+						return true;
+					}
+					resultHint = MaskedTextResultHint.DigitExpected;
+					return false;
+				case MaskedTextProvider.EditType.LetterRequired:
+				case MaskedTextProvider.EditType.LetterOptional:
+					if (!char.IsLetter(c))
 					{
 						resultHint = MaskedTextResultHint.LetterExpected;
 						return false;
 					}
-					if (!MaskedTextProvider.IsAsciiLetter(input) && this.AsciiOnly)
+					if (this.Parent.AsciiOnly && !this.IsAscii(c))
+					{
+						resultHint = MaskedTextResultHint.LetterExpected;
+						return false;
+					}
+					if (!only_test)
+					{
+						this.Input = c;
+					}
+					resultHint = MaskedTextResultHint.Success;
+					return true;
+				case MaskedTextProvider.EditType.CharacterRequired:
+				case MaskedTextProvider.EditType.CharacterOptional:
+					if (this.Parent.AsciiOnly && !this.IsAscii(c))
+					{
+						resultHint = MaskedTextResultHint.LetterExpected;
+						return false;
+					}
+					if (!char.IsControl(c))
+					{
+						if (!only_test)
+						{
+							this.Input = c;
+						}
+						resultHint = MaskedTextResultHint.Success;
+						return true;
+					}
+					resultHint = MaskedTextResultHint.LetterExpected;
+					return false;
+				case MaskedTextProvider.EditType.AlphanumericRequired:
+				case MaskedTextProvider.EditType.AlphanumericOptional:
+					if (!char.IsLetterOrDigit(c))
+					{
+						resultHint = MaskedTextResultHint.AlphanumericCharacterExpected;
+						return false;
+					}
+					if (this.Parent.AsciiOnly && !this.IsAscii(c))
 					{
 						resultHint = MaskedTextResultHint.AsciiCharacterExpected;
 						return false;
 					}
-				}
-				if (input == this.testString[position] && charDescriptor.IsAssigned)
-				{
-					resultHint = MaskedTextResultHint.NoEffect;
-				}
-				else
-				{
+					if (!only_test)
+					{
+						this.Input = c;
+					}
 					resultHint = MaskedTextResultHint.Success;
-				}
-				return true;
-			}
-		}
-
-		private bool TestEscapeChar(char input, int position)
-		{
-			MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[position];
-			return this.TestEscapeChar(input, position, charDescriptor);
-		}
-
-		private bool TestEscapeChar(char input, int position, MaskedTextProvider.CharDescriptor charDex)
-		{
-			if (MaskedTextProvider.IsLiteralPosition(charDex))
-			{
-				return this.SkipLiterals && input == this.testString[position];
-			}
-			return (this.ResetOnPrompt && input == this.promptChar) || (this.ResetOnSpace && input == ' ');
-		}
-
-		private bool TestSetChar(char input, int position, out MaskedTextResultHint resultHint)
-		{
-			if (this.TestChar(input, position, out resultHint))
-			{
-				if (resultHint == MaskedTextResultHint.Success || resultHint == MaskedTextResultHint.SideEffect)
-				{
-					this.SetChar(input, position);
-				}
-				return true;
-			}
-			return false;
-		}
-
-		private bool TestSetString(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			if (this.TestString(input, position, out testPosition, out resultHint))
-			{
-				this.SetString(input, position);
-				return true;
-			}
-			return false;
-		}
-
-		private bool TestString(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			resultHint = MaskedTextResultHint.Unknown;
-			testPosition = position;
-			if (input.Length == 0)
-			{
-				return true;
-			}
-			MaskedTextResultHint maskedTextResultHint = resultHint;
-			foreach (char c in input)
-			{
-				if (testPosition >= this.testString.Length)
-				{
-					resultHint = MaskedTextResultHint.UnavailableEditPosition;
+					return true;
+				default:
+					resultHint = MaskedTextResultHint.Unknown;
 					return false;
 				}
-				if (!this.TestEscapeChar(c, testPosition))
+			}
+
+			public bool FilledIn
+			{
+				get
 				{
-					testPosition = this.FindEditPositionFrom(testPosition, true);
-					if (testPosition == -1)
-					{
-						testPosition = this.testString.Length;
-						resultHint = MaskedTextResultHint.UnavailableEditPosition;
-						return false;
-					}
+					return this.Input != '\0';
 				}
-				if (!this.TestChar(c, testPosition, out maskedTextResultHint))
+			}
+
+			public bool Required
+			{
+				get
 				{
-					resultHint = maskedTextResultHint;
+					char maskCharacter = this.MaskCharacter;
+					return maskCharacter == '&' || maskCharacter == '0' || maskCharacter == 'A' || maskCharacter == 'L';
+				}
+			}
+
+			public bool Editable
+			{
+				get
+				{
+					char maskCharacter = this.MaskCharacter;
+					switch (maskCharacter)
+					{
+					case '?':
+					case 'A':
+					case 'C':
+						break;
+					default:
+						switch (maskCharacter)
+						{
+						case '#':
+						case '&':
+							break;
+						default:
+							if (maskCharacter != '0' && maskCharacter != '9' && maskCharacter != 'L' && maskCharacter != 'a')
+							{
+								return false;
+							}
+							break;
+						}
+						break;
+					}
+					return true;
+				}
+			}
+
+			public bool Visible
+			{
+				get
+				{
+					char maskCharacter = this.MaskCharacter;
+					switch (maskCharacter)
+					{
+					case '<':
+					case '>':
+						break;
+					default:
+						if (maskCharacter != '|')
+						{
+							return true;
+						}
+						break;
+					}
 					return false;
 				}
-				if (maskedTextResultHint > resultHint)
+			}
+
+			public string Text
+			{
+				get
 				{
-					resultHint = maskedTextResultHint;
-				}
-				testPosition++;
-			}
-			testPosition--;
-			return true;
-		}
-
-		public string ToDisplayString()
-		{
-			if (!this.IsPassword || this.assignedCharCount == 0)
-			{
-				return this.testString.ToString();
-			}
-			StringBuilder stringBuilder = new StringBuilder(this.testString.Length);
-			for (int i = 0; i < this.testString.Length; i++)
-			{
-				MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[i];
-				stringBuilder.Append((MaskedTextProvider.IsEditPosition(charDescriptor) && charDescriptor.IsAssigned) ? this.passwordChar : this.testString[i]);
-			}
-			return stringBuilder.ToString();
-		}
-
-		public override string ToString()
-		{
-			return this.ToString(true, this.IncludePrompt, this.IncludeLiterals, 0, this.testString.Length);
-		}
-
-		public string ToString(bool ignorePasswordChar)
-		{
-			return this.ToString(ignorePasswordChar, this.IncludePrompt, this.IncludeLiterals, 0, this.testString.Length);
-		}
-
-		public string ToString(int startPosition, int length)
-		{
-			return this.ToString(true, this.IncludePrompt, this.IncludeLiterals, startPosition, length);
-		}
-
-		public string ToString(bool ignorePasswordChar, int startPosition, int length)
-		{
-			return this.ToString(ignorePasswordChar, this.IncludePrompt, this.IncludeLiterals, startPosition, length);
-		}
-
-		public string ToString(bool includePrompt, bool includeLiterals)
-		{
-			return this.ToString(true, includePrompt, includeLiterals, 0, this.testString.Length);
-		}
-
-		public string ToString(bool includePrompt, bool includeLiterals, int startPosition, int length)
-		{
-			return this.ToString(true, includePrompt, includeLiterals, startPosition, length);
-		}
-
-		public string ToString(bool ignorePasswordChar, bool includePrompt, bool includeLiterals, int startPosition, int length)
-		{
-			if (length <= 0)
-			{
-				return string.Empty;
-			}
-			if (startPosition < 0)
-			{
-				startPosition = 0;
-			}
-			if (startPosition >= this.testString.Length)
-			{
-				return string.Empty;
-			}
-			int num = this.testString.Length - startPosition;
-			if (length > num)
-			{
-				length = num;
-			}
-			if ((!this.IsPassword || ignorePasswordChar) && (includePrompt && includeLiterals))
-			{
-				return this.testString.ToString(startPosition, length);
-			}
-			StringBuilder stringBuilder = new StringBuilder();
-			int num2 = startPosition + length - 1;
-			if (!includePrompt)
-			{
-				int num3 = (includeLiterals ? this.FindNonEditPositionInRange(startPosition, num2, false) : MaskedTextProvider.InvalidIndex);
-				int num4 = this.FindAssignedEditPositionInRange((num3 == MaskedTextProvider.InvalidIndex) ? startPosition : num3, num2, false);
-				num2 = ((num4 != MaskedTextProvider.InvalidIndex) ? num4 : num3);
-				if (num2 == MaskedTextProvider.InvalidIndex)
-				{
-					return string.Empty;
-				}
-			}
-			int i = startPosition;
-			while (i <= num2)
-			{
-				char c = this.testString[i];
-				MaskedTextProvider.CharDescriptor charDescriptor = this.stringDescriptor[i];
-				MaskedTextProvider.CharType charType = charDescriptor.CharType;
-				if (charType - MaskedTextProvider.CharType.EditOptional > 1)
-				{
-					if (charType != MaskedTextProvider.CharType.Separator && charType != MaskedTextProvider.CharType.Literal)
+					if (this.Type == MaskedTextProvider.EditType.Literal)
 					{
-						goto IL_012F;
+						return this.MaskCharacter.ToString();
 					}
-					if (includeLiterals)
+					char maskCharacter = this.MaskCharacter;
+					switch (maskCharacter)
 					{
-						goto IL_012F;
+					case ',':
+						return this.Parent.Culture.NumberFormat.NumberGroupSeparator;
+					default:
+						if (maskCharacter == '$')
+						{
+							return this.Parent.Culture.NumberFormat.CurrencySymbol;
+						}
+						if (maskCharacter != ':')
+						{
+							return (!this.FilledIn) ? this.Parent.PromptChar.ToString() : this.Input.ToString();
+						}
+						return this.Parent.Culture.DateTimeFormat.TimeSeparator;
+					case '.':
+						return this.Parent.Culture.NumberFormat.NumberDecimalSeparator;
+					case '/':
+						return this.Parent.Culture.DateTimeFormat.DateSeparator;
 					}
 				}
-				else if (charDescriptor.IsAssigned)
-				{
-					if (!this.IsPassword || ignorePasswordChar)
-					{
-						goto IL_012F;
-					}
-					stringBuilder.Append(this.passwordChar);
-				}
-				else
-				{
-					if (includePrompt)
-					{
-						goto IL_012F;
-					}
-					stringBuilder.Append(' ');
-				}
-				IL_0138:
-				i++;
-				continue;
-				IL_012F:
-				stringBuilder.Append(c);
-				goto IL_0138;
-			}
-			return stringBuilder.ToString();
-		}
-
-		public bool VerifyChar(char input, int position, out MaskedTextResultHint hint)
-		{
-			hint = MaskedTextResultHint.NoEffect;
-			if (position < 0 || position >= this.testString.Length)
-			{
-				hint = MaskedTextResultHint.PositionOutOfRange;
-				return false;
-			}
-			return this.TestChar(input, position, out hint);
-		}
-
-		public bool VerifyEscapeChar(char input, int position)
-		{
-			return position >= 0 && position < this.testString.Length && this.TestEscapeChar(input, position);
-		}
-
-		public bool VerifyString(string input)
-		{
-			int num;
-			MaskedTextResultHint maskedTextResultHint;
-			return this.VerifyString(input, out num, out maskedTextResultHint);
-		}
-
-		public bool VerifyString(string input, out int testPosition, out MaskedTextResultHint resultHint)
-		{
-			testPosition = 0;
-			if (input == null || input.Length == 0)
-			{
-				resultHint = MaskedTextResultHint.NoEffect;
-				return true;
-			}
-			return this.TestString(input, 0, out testPosition, out resultHint);
-		}
-
-		private const char spaceChar = ' ';
-
-		private const char defaultPromptChar = '_';
-
-		private const char nullPasswordChar = '\0';
-
-		private const bool defaultAllowPrompt = true;
-
-		private const int invalidIndex = -1;
-
-		private const byte editAny = 0;
-
-		private const byte editUnassigned = 1;
-
-		private const byte editAssigned = 2;
-
-		private const bool forward = true;
-
-		private const bool backward = false;
-
-		private static int ASCII_ONLY = BitVector32.CreateMask();
-
-		private static int ALLOW_PROMPT_AS_INPUT = BitVector32.CreateMask(MaskedTextProvider.ASCII_ONLY);
-
-		private static int INCLUDE_PROMPT = BitVector32.CreateMask(MaskedTextProvider.ALLOW_PROMPT_AS_INPUT);
-
-		private static int INCLUDE_LITERALS = BitVector32.CreateMask(MaskedTextProvider.INCLUDE_PROMPT);
-
-		private static int RESET_ON_PROMPT = BitVector32.CreateMask(MaskedTextProvider.INCLUDE_LITERALS);
-
-		private static int RESET_ON_LITERALS = BitVector32.CreateMask(MaskedTextProvider.RESET_ON_PROMPT);
-
-		private static int SKIP_SPACE = BitVector32.CreateMask(MaskedTextProvider.RESET_ON_LITERALS);
-
-		private static Type maskTextProviderType = typeof(MaskedTextProvider);
-
-		private BitVector32 flagState;
-
-		private CultureInfo culture;
-
-		private StringBuilder testString;
-
-		private int assignedCharCount;
-
-		private int requiredCharCount;
-
-		private int requiredEditChars;
-
-		private int optionalEditChars;
-
-		private string mask;
-
-		private char passwordChar;
-
-		private char promptChar;
-
-		private List<MaskedTextProvider.CharDescriptor> stringDescriptor;
-
-		private enum CaseConversion
-		{
-			None,
-			ToLower,
-			ToUpper
-		}
-
-		[Flags]
-		private enum CharType
-		{
-			EditOptional = 1,
-			EditRequired = 2,
-			Separator = 4,
-			Literal = 8,
-			Modifier = 16
-		}
-
-		private class CharDescriptor
-		{
-			public CharDescriptor(int maskPos, MaskedTextProvider.CharType charType)
-			{
-				this.MaskPosition = maskPos;
-				this.CharType = charType;
 			}
 
-			public override string ToString()
-			{
-				return string.Format(CultureInfo.InvariantCulture, "MaskPosition[{0}] <CaseConversion.{1}><CharType.{2}><IsAssigned: {3}", new object[] { this.MaskPosition, this.CaseConversion, this.CharType, this.IsAssigned });
-			}
+			public MaskedTextProvider Parent;
 
-			public int MaskPosition;
+			public MaskedTextProvider.EditType Type;
 
-			public MaskedTextProvider.CaseConversion CaseConversion;
+			public MaskedTextProvider.EditState State;
 
-			public MaskedTextProvider.CharType CharType;
+			public char MaskCharacter;
 
-			public bool IsAssigned;
+			public char input;
 		}
 	}
 }

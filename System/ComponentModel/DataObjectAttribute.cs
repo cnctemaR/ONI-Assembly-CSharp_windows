@@ -25,30 +25,25 @@ namespace System.ComponentModel
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			DataObjectAttribute dataObjectAttribute = obj as DataObjectAttribute;
-			return dataObjectAttribute != null && dataObjectAttribute.IsDataObject == this.IsDataObject;
+			return obj is DataObjectAttribute && ((DataObjectAttribute)obj).IsDataObject == this.IsDataObject;
 		}
 
 		public override int GetHashCode()
 		{
-			return this._isDataObject.GetHashCode();
+			return this.IsDataObject.GetHashCode();
 		}
 
 		public override bool IsDefaultAttribute()
 		{
-			return this.Equals(DataObjectAttribute.Default);
+			return DataObjectAttribute.Default.Equals(this);
 		}
 
 		public static readonly DataObjectAttribute DataObject = new DataObjectAttribute(true);
 
-		public static readonly DataObjectAttribute NonDataObject = new DataObjectAttribute(false);
-
 		public static readonly DataObjectAttribute Default = DataObjectAttribute.NonDataObject;
 
-		private bool _isDataObject;
+		public static readonly DataObjectAttribute NonDataObject = new DataObjectAttribute(false);
+
+		private readonly bool _isDataObject;
 	}
 }

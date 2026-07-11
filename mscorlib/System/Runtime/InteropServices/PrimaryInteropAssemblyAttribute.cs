@@ -8,15 +8,15 @@ namespace System.Runtime.InteropServices
 	{
 		public PrimaryInteropAssemblyAttribute(int major, int minor)
 		{
-			this._major = major;
-			this._minor = minor;
+			this.major = major;
+			this.minor = minor;
 		}
 
 		public int MajorVersion
 		{
 			get
 			{
-				return this._major;
+				return this.major;
 			}
 		}
 
@@ -24,12 +24,12 @@ namespace System.Runtime.InteropServices
 		{
 			get
 			{
-				return this._minor;
+				return this.minor;
 			}
 		}
 
-		internal int _major;
+		private int major;
 
-		internal int _minor;
+		private int minor;
 	}
 }

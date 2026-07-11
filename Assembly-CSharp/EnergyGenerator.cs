@@ -149,7 +149,7 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 			if (this.formula.inputs != null)
 			{
 				bool flag3 = this.IsConvertible(dt);
-				this.selectable.ToggleStatusItem(EnergyGenerator.insufficientConversionMass, !flag3, null);
+				this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NeedResourceMass, !flag3, this.formula);
 				if (flag3)
 				{
 					foreach (EnergyGenerator.InputItem inputItem2 in this.formula.inputs)
@@ -237,10 +237,6 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 		{
 			EnergyGenerator.batteriesSufficientlyFull = new StatusItem("BatteriesSufficientlyFull", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, SimViewMode.None, true, 63486);
 		}
-		if (EnergyGenerator.insufficientConversionMass == null)
-		{
-			EnergyGenerator.insufficientConversionMass = new StatusItem("INSUFFICIENT_CONVERSION_MASS", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, SimViewMode.None, true, 63486);
-		}
 	}
 
 	public static EnergyGenerator.Formula CreateSimpleFormula(SimHashes input_element, float input_mass_rate, float max_stored_input_mass, SimHashes output_element = SimHashes.Void, float output_mass_rate = 0f, bool store_output_mass = true)
@@ -320,8 +316,6 @@ public class EnergyGenerator : Generator, IEffectDescriptor, ISingleSliderContro
 	public bool hasMeter = true;
 
 	private static StatusItem batteriesSufficientlyFull;
-
-	private static StatusItem insufficientConversionMass;
 
 	public Meter.Offset meterOffset;
 

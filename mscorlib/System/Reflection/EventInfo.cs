@@ -1,34 +1,52 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Mono;
 
 namespace System.Reflection
 {
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_EventInfo))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComVisible(true)]
 	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
 	public abstract class EventInfo : MemberInfo, _EventInfo
 	{
+		void _EventInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventInfo.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _EventInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		public abstract EventAttributes Attributes { get; }
 
-		public virtual Type EventHandlerType
+		public Type EventHandlerType
 		{
 			get
 			{
-				ParameterInfo[] parametersInternal = this.GetAddMethod(true).GetParametersInternal();
-				if (parametersInternal.Length != 0)
+				MethodInfo addMethod = this.GetAddMethod(true);
+				ParameterInfo[] parameters = addMethod.GetParameters();
+				if (parameters.Length > 0)
 				{
-					return parametersInternal[0].ParameterType;
+					return parameters[0].ParameterType;
 				}
 				return null;
 			}
 		}
 
-		public virtual bool IsMulticast
+		public bool IsMulticast
 		{
 			get
 			{
@@ -40,7 +58,7 @@ namespace System.Reflection
 		{
 			get
 			{
-				return (this.Attributes & EventAttributes.SpecialName) > EventAttributes.None;
+				return (this.Attributes & EventAttributes.SpecialName) != EventAttributes.None;
 			}
 		}
 
@@ -54,7 +72,7 @@ namespace System.Reflection
 
 		[DebuggerStepThrough]
 		[DebuggerHidden]
-		public virtual void AddEventHandler(object target, Delegate handler)
+		public void AddEventHandler(object target, Delegate handler)
 		{
 			if (this.cached_add_event == null)
 			{
@@ -103,7 +121,7 @@ namespace System.Reflection
 
 		public virtual MethodInfo[] GetOtherMethods(bool nonPublic)
 		{
-			return EmptyArray<MethodInfo>.Value;
+			return new MethodInfo[0];
 		}
 
 		public MethodInfo[] GetOtherMethods()
@@ -111,9 +129,9 @@ namespace System.Reflection
 			return this.GetOtherMethods(false);
 		}
 
-		[DebuggerHidden]
 		[DebuggerStepThrough]
-		public virtual void RemoveEventHandler(object target, Delegate handler)
+		[DebuggerHidden]
+		public void RemoveEventHandler(object target, Delegate handler)
 		{
 			MethodInfo removeMethod = this.GetRemoveMethod();
 			if (removeMethod == null)
@@ -121,51 +139,6 @@ namespace System.Reflection
 				throw new InvalidOperationException("Cannot remove a handler to an event that doesn't have a visible remove method");
 			}
 			removeMethod.Invoke(target, new object[] { handler });
-		}
-
-		public override bool Equals(object obj)
-		{
-			return obj == this;
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		public static bool operator ==(EventInfo left, EventInfo right)
-		{
-			return left == right || (!((left == null) ^ (right == null)) && left.Equals(right));
-		}
-
-		public static bool operator !=(EventInfo left, EventInfo right)
-		{
-			return left != right && (((left == null) ^ (right == null)) || !left.Equals(right));
-		}
-
-		void _EventInfo.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		Type _EventInfo.GetType()
-		{
-			return base.GetType();
-		}
-
-		void _EventInfo.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventInfo.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _EventInfo.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		private static void AddEventFrame<T, D>(EventInfo.AddEvent<T, D> addEvent, object obj, object dele)
@@ -193,7 +166,7 @@ namespace System.Reflection
 			string text;
 			if (method.IsStatic)
 			{
-				array = new Type[] { method.GetParametersInternal()[0].ParameterType };
+				array = new Type[] { method.GetParameters()[0].ParameterType };
 				type = typeof(EventInfo.StaticAddEvent<>);
 				text = "StaticAddEventAdapterFrame";
 			}
@@ -202,65 +175,21 @@ namespace System.Reflection
 				array = new Type[]
 				{
 					method.DeclaringType,
-					method.GetParametersInternal()[0].ParameterType
+					method.GetParameters()[0].ParameterType
 				};
 				type = typeof(EventInfo.AddEvent<, >);
 				text = "AddEventFrame";
 			}
-			object obj = Delegate.CreateDelegate(type.MakeGenericType(array), method);
+			Type type2 = type.MakeGenericType(array);
+			object obj = Delegate.CreateDelegate(type2, method);
 			MethodInfo methodInfo = typeof(EventInfo).GetMethod(text, BindingFlags.Static | BindingFlags.NonPublic);
 			methodInfo = methodInfo.MakeGenericMethod(array);
 			return (EventInfo.AddEventAdapter)Delegate.CreateDelegate(typeof(EventInfo.AddEventAdapter), obj, methodInfo, true);
 		}
 
-		public virtual MethodInfo AddMethod
+		virtual Type System.Runtime.InteropServices._EventInfo.GetType()
 		{
-			get
-			{
-				return this.GetAddMethod(true);
-			}
-		}
-
-		public virtual MethodInfo RaiseMethod
-		{
-			get
-			{
-				return this.GetRaiseMethod(true);
-			}
-		}
-
-		public virtual MethodInfo RemoveMethod
-		{
-			get
-			{
-				return this.GetRemoveMethod(true);
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern EventInfo internal_from_handle_type(IntPtr event_handle, IntPtr type_handle);
-
-		internal static EventInfo GetEventFromHandle(RuntimeEventHandle handle)
-		{
-			if (handle.Value == IntPtr.Zero)
-			{
-				throw new ArgumentException("The handle is invalid.");
-			}
-			return EventInfo.internal_from_handle_type(handle.Value, IntPtr.Zero);
-		}
-
-		internal static EventInfo GetEventFromHandle(RuntimeEventHandle handle, RuntimeTypeHandle reflectedType)
-		{
-			if (handle.Value == IntPtr.Zero)
-			{
-				throw new ArgumentException("The handle is invalid.");
-			}
-			EventInfo eventInfo = EventInfo.internal_from_handle_type(handle.Value, reflectedType.Value);
-			if (eventInfo == null)
-			{
-				throw new ArgumentException("The event handle and the type handle are incompatible.");
-			}
-			return eventInfo;
+			return base.GetType();
 		}
 
 		private EventInfo.AddEventAdapter cached_add_event;

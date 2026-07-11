@@ -1,27 +1,43 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Xml;
+using Mono.Xml;
 
 namespace System.Security.Cryptography.Xml
 {
 	public class XmlDsigC14NTransform : Transform
 	{
 		public XmlDsigC14NTransform()
+			: this(false)
 		{
-			base.Algorithm = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
 		}
 
 		public XmlDsigC14NTransform(bool includeComments)
 		{
-			this._includeComments = includeComments;
-			base.Algorithm = (includeComments ? "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments" : "http://www.w3.org/TR/2001/REC-xml-c14n-20010315");
+			if (includeComments)
+			{
+				base.Algorithm = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments";
+			}
+			else
+			{
+				base.Algorithm = "http://www.w3.org/TR/2001/REC-xml-c14n-20010315";
+			}
+			this.canonicalizer = new XmlCanonicalizer(includeComments, false, base.PropagatedNamespaces);
 		}
 
 		public override Type[] InputTypes
 		{
 			get
 			{
-				return this._inputTypes;
+				if (this.input == null)
+				{
+					this.input = new Type[3];
+					this.input[0] = typeof(Stream);
+					this.input[1] = typeof(XmlDocument);
+					this.input[2] = typeof(XmlNodeList);
+				}
+				return this.input;
 			}
 		}
 
@@ -29,12 +45,13 @@ namespace System.Security.Cryptography.Xml
 		{
 			get
 			{
-				return this._outputTypes;
+				if (this.output == null)
+				{
+					this.output = new Type[1];
+					this.output[0] = typeof(Stream);
+				}
+				return this.output;
 			}
-		}
-
-		public override void LoadInnerXml(XmlNodeList nodeList)
-		{
 		}
 
 		protected override XmlNodeList GetInnerXml()
@@ -42,57 +59,63 @@ namespace System.Security.Cryptography.Xml
 			return null;
 		}
 
-		public override void LoadInput(object obj)
+		[ComVisible(false)]
+		public override byte[] GetDigestedOutput(HashAlgorithm hash)
 		{
-			XmlResolver xmlResolver = (base.ResolverSet ? this._xmlResolver : new XmlSecureResolver(new XmlUrlResolver(), base.BaseURI));
-			if (obj is Stream)
-			{
-				this._cXml = new CanonicalXml((Stream)obj, this._includeComments, xmlResolver, base.BaseURI);
-				return;
-			}
-			if (obj is XmlDocument)
-			{
-				this._cXml = new CanonicalXml((XmlDocument)obj, xmlResolver, this._includeComments);
-				return;
-			}
-			if (obj is XmlNodeList)
-			{
-				this._cXml = new CanonicalXml((XmlNodeList)obj, xmlResolver, this._includeComments);
-				return;
-			}
-			throw new ArgumentException("Type of input object is invalid.", "obj");
+			return hash.ComputeHash((Stream)this.GetOutput());
 		}
 
 		public override object GetOutput()
 		{
-			return new MemoryStream(this._cXml.GetBytes());
+			return this.s;
 		}
 
 		public override object GetOutput(Type type)
 		{
-			if (type != typeof(Stream) && !type.IsSubclassOf(typeof(Stream)))
+			if (type == typeof(Stream))
 			{
-				throw new ArgumentException("The input type was invalid for this transform.", "type");
+				return this.GetOutput();
 			}
-			return new MemoryStream(this._cXml.GetBytes());
+			throw new ArgumentException("type");
 		}
 
-		public override byte[] GetDigestedOutput(HashAlgorithm hash)
+		public override void LoadInnerXml(XmlNodeList nodeList)
 		{
-			return this._cXml.GetDigestedBytes(hash);
 		}
 
-		private Type[] _inputTypes = new Type[]
+		public override void LoadInput(object obj)
 		{
-			typeof(Stream),
-			typeof(XmlDocument),
-			typeof(XmlNodeList)
-		};
+			Stream stream = obj as Stream;
+			if (stream != null)
+			{
+				XmlDocument xmlDocument = new XmlDocument();
+				xmlDocument.PreserveWhitespace = true;
+				xmlDocument.XmlResolver = base.GetResolver();
+				xmlDocument.Load(new XmlSignatureStreamReader(new StreamReader(stream)));
+				this.s = this.canonicalizer.Canonicalize(xmlDocument);
+				return;
+			}
+			XmlDocument xmlDocument2 = obj as XmlDocument;
+			if (xmlDocument2 != null)
+			{
+				this.s = this.canonicalizer.Canonicalize(xmlDocument2);
+				return;
+			}
+			XmlNodeList xmlNodeList = obj as XmlNodeList;
+			if (xmlNodeList != null)
+			{
+				this.s = this.canonicalizer.Canonicalize(xmlNodeList);
+				return;
+			}
+			throw new ArgumentException("obj");
+		}
 
-		private Type[] _outputTypes = new Type[] { typeof(Stream) };
+		private Type[] input;
 
-		private CanonicalXml _cXml;
+		private Type[] output;
 
-		private bool _includeComments;
+		private XmlCanonicalizer canonicalizer;
+
+		private Stream s;
 	}
 }

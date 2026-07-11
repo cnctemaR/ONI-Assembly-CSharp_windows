@@ -44,7 +44,8 @@ namespace System.Runtime.Remoting.Metadata.W3cXsd2001
 
 		public static SoapDay Parse(string value)
 		{
-			return new SoapDay(DateTime.ParseExact(value, SoapDay._datetimeFormats, null, DateTimeStyles.None));
+			DateTime dateTime = DateTime.ParseExact(value, SoapDay._datetimeFormats, null, DateTimeStyles.None);
+			return new SoapDay(dateTime);
 		}
 
 		public override string ToString()

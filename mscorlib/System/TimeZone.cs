@@ -12,17 +12,17 @@ namespace System
 		{
 			get
 			{
-				long ticks = DateTime.UtcNow.Ticks;
-				TimeZone timeZone = TimeZone.currentTimeZone;
+				long now = DateTime.GetNow();
 				object obj = TimeZone.tz_lock;
+				TimeZone timeZone;
 				lock (obj)
 				{
-					if (timeZone == null || Math.Abs(ticks - TimeZone.timezone_check) > 600000000L)
+					if (TimeZone.currentTimeZone == null || now - TimeZone.timezone_check > 600000000L)
 					{
-						timeZone = new CurrentSystemTimeZone();
-						TimeZone.timezone_check = ticks;
-						TimeZone.currentTimeZone = timeZone;
+						TimeZone.currentTimeZone = new CurrentSystemTimeZone(now);
+						TimeZone.timezone_check = now;
 					}
+					timeZone = TimeZone.currentTimeZone;
 				}
 				return timeZone;
 			}
@@ -71,7 +71,7 @@ namespace System
 			{
 				return time;
 			}
-			TimeSpan utcOffset = this.GetUtcOffset(new DateTime(time.Ticks));
+			TimeSpan utcOffset = this.GetUtcOffset(time);
 			if (utcOffset.Ticks > 0L)
 			{
 				if (DateTime.MaxValue - utcOffset < time)
@@ -83,7 +83,18 @@ namespace System
 			{
 				return DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Local);
 			}
-			return DateTime.SpecifyKind(time.Add(utcOffset), DateTimeKind.Local);
+			DateTime dateTime = time.Add(utcOffset);
+			DaylightTime daylightChanges = this.GetDaylightChanges(time.Year);
+			if (daylightChanges.Delta.Ticks == 0L)
+			{
+				return DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+			}
+			if (dateTime < daylightChanges.End && daylightChanges.End.Subtract(daylightChanges.Delta) <= dateTime)
+			{
+				return DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+			}
+			TimeSpan utcOffset2 = this.GetUtcOffset(dateTime);
+			return DateTime.SpecifyKind(time.Add(utcOffset2), DateTimeKind.Local);
 		}
 
 		public virtual DateTime ToUniversalTime(DateTime time)
@@ -107,9 +118,28 @@ namespace System
 			return DateTime.SpecifyKind(new DateTime(time.Ticks - utcOffset.Ticks), DateTimeKind.Utc);
 		}
 
-		internal static void ClearCachedData()
+		internal TimeSpan GetLocalTimeDiff(DateTime time)
 		{
-			TimeZone.currentTimeZone = null;
+			return this.GetLocalTimeDiff(time, this.GetUtcOffset(time));
+		}
+
+		internal TimeSpan GetLocalTimeDiff(DateTime time, TimeSpan utc_offset)
+		{
+			DaylightTime daylightChanges = this.GetDaylightChanges(time.Year);
+			if (daylightChanges.Delta.Ticks == 0L)
+			{
+				return utc_offset;
+			}
+			DateTime dateTime = time.Add(utc_offset);
+			if (dateTime < daylightChanges.End && daylightChanges.End.Subtract(daylightChanges.Delta) <= dateTime)
+			{
+				return utc_offset;
+			}
+			if (dateTime >= daylightChanges.Start && daylightChanges.Start.Add(daylightChanges.Delta) > dateTime)
+			{
+				return utc_offset - daylightChanges.Delta;
+			}
+			return this.GetUtcOffset(dateTime);
 		}
 
 		private static TimeZone currentTimeZone;

@@ -86,7 +86,7 @@ namespace Mono.Unix
 			{
 				return "/";
 			}
-			return "";
+			return string.Empty;
 		}
 
 		public static string GetFileName(string path)
@@ -117,7 +117,7 @@ namespace Mono.Unix
 			}
 			if (!UnixPath.IsPathRooted(path))
 			{
-				path = UnixDirectoryInfo.GetCurrentDirectory() + UnixPath.DirectorySeparatorChar.ToString() + path;
+				path = UnixDirectoryInfo.GetCurrentDirectory() + UnixPath.DirectorySeparatorChar + path;
 			}
 			return path;
 		}
@@ -128,11 +128,7 @@ namespace Mono.Unix
 			int num;
 			UnixPath.GetPathComponents(path, out array, out num);
 			string text = string.Join("/", array, 0, num);
-			if (!UnixPath.IsPathRooted(path))
-			{
-				return text;
-			}
-			return "/" + text;
+			return (!UnixPath.IsPathRooted(path)) ? text : ("/" + text);
 		}
 
 		private static void GetPathComponents(string path, out string[] components, out int lastIndex)
@@ -172,7 +168,7 @@ namespace Mono.Unix
 			}
 			if (!UnixPath.IsPathRooted(path))
 			{
-				return "";
+				return string.Empty;
 			}
 			return "/";
 		}
@@ -187,9 +183,9 @@ namespace Mono.Unix
 			int num;
 			UnixPath.GetPathComponents(path, out array, out num);
 			StringBuilder stringBuilder = new StringBuilder();
-			if (array.Length != 0)
+			if (array.Length > 0)
 			{
-				string text = (UnixPath.IsPathRooted(path) ? "/" : "");
+				string text = ((!UnixPath.IsPathRooted(path)) ? string.Empty : "/");
 				text += array[0];
 				stringBuilder.Append(UnixPath.GetRealPath(text));
 			}
@@ -218,7 +214,7 @@ namespace Mono.Unix
 				}
 				else
 				{
-					path = UnixPath.GetDirectoryName(path) + UnixPath.DirectorySeparatorChar.ToString() + text;
+					path = UnixPath.GetDirectoryName(path) + UnixPath.DirectorySeparatorChar + text;
 					path = UnixPath.GetCanonicalPath(path);
 				}
 			}
@@ -227,86 +223,74 @@ namespace Mono.Unix
 
 		internal static string ReadSymbolicLink(string path)
 		{
-			string text = UnixPath.TryReadLink(path);
-			if (text == null)
+			StringBuilder stringBuilder = new StringBuilder(256);
+			int num;
+			for (;;)
 			{
-				Errno lastError = Stdlib.GetLastError();
-				if (lastError != Errno.EINVAL)
+				num = Syscall.readlink(path, stringBuilder);
+				if (num < 0)
 				{
-					UnixMarshal.ThrowExceptionForError(lastError);
+					Errno lastError;
+					Errno errno = (lastError = Stdlib.GetLastError());
+					if (lastError == Errno.EINVAL)
+					{
+						break;
+					}
+					UnixMarshal.ThrowExceptionForError(errno);
+				}
+				else
+				{
+					if (num != stringBuilder.Capacity)
+					{
+						goto IL_0060;
+					}
+					stringBuilder.Capacity *= 2;
 				}
 			}
-			return text;
+			return null;
+			IL_0060:
+			return stringBuilder.ToString(0, num);
+		}
+
+		private static string ReadSymbolicLink(string path, out Errno errno)
+		{
+			errno = (Errno)0;
+			StringBuilder stringBuilder = new StringBuilder(256);
+			int num;
+			for (;;)
+			{
+				num = Syscall.readlink(path, stringBuilder);
+				if (num < 0)
+				{
+					break;
+				}
+				if (num != stringBuilder.Capacity)
+				{
+					goto IL_0045;
+				}
+				stringBuilder.Capacity *= 2;
+			}
+			errno = Stdlib.GetLastError();
+			return null;
+			IL_0045:
+			return stringBuilder.ToString(0, num);
 		}
 
 		public static string TryReadLink(string path)
 		{
-			byte[] array = new byte[256];
-			long num;
-			for (;;)
-			{
-				num = Syscall.readlink(path, array);
-				if (num < 0L)
-				{
-					break;
-				}
-				if (num != (long)array.Length)
-				{
-					goto IL_0030;
-				}
-				checked
-				{
-					array = new byte[unchecked((long)array.Length) * 2L];
-				}
-			}
-			return null;
-			IL_0030:
-			return UnixEncoding.Instance.GetString(array, 0, checked((int)num));
-		}
-
-		public static string TryReadLinkAt(int dirfd, string path)
-		{
-			byte[] array = new byte[256];
-			long num;
-			for (;;)
-			{
-				num = Syscall.readlinkat(dirfd, path, array);
-				if (num < 0L)
-				{
-					break;
-				}
-				if (num != (long)array.Length)
-				{
-					goto IL_0031;
-				}
-				checked
-				{
-					array = new byte[unchecked((long)array.Length) * 2L];
-				}
-			}
-			return null;
-			IL_0031:
-			return UnixEncoding.Instance.GetString(array, 0, checked((int)num));
+			Errno errno;
+			return UnixPath.ReadSymbolicLink(path, out errno);
 		}
 
 		public static string ReadLink(string path)
 		{
-			string text = UnixPath.TryReadLink(path);
-			if (text == null)
+			Errno errno;
+			path = UnixPath.ReadSymbolicLink(path, out errno);
+			if (errno != (Errno)0)
 			{
-				UnixMarshal.ThrowExceptionForLastError();
+				UnixMarshal.ThrowExceptionForError(errno);
 			}
-			return text;
-		}
-
-		public static string ReadLinkAt(int dirfd, string path)
-		{
-			string text = UnixPath.TryReadLinkAt(dirfd, path);
-			if (text == null)
-			{
-				UnixMarshal.ThrowExceptionForLastError();
-			}
-			return text;
+			return path;
 		}
 
 		public static bool IsPathRooted(string path)

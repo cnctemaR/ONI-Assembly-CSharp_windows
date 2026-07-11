@@ -1,70 +1,61 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class Group : Capture
 	{
-		internal Group(string text, int[] caps, int capcount, string name)
-			: base(text, (capcount == 0) ? 0 : caps[(capcount - 1) * 2], (capcount == 0) ? 0 : caps[capcount * 2 - 1])
+		internal Group(string text, int index, int length, int n_caps)
+			: base(text, index, length)
 		{
-			this._caps = caps;
-			this._capcount = capcount;
-			this._name = name;
+			this.success = true;
+			this.captures = new CaptureCollection(n_caps);
+			this.captures.SetValue(this, n_caps - 1);
 		}
 
-		public bool Success
+		internal Group(string text, int index, int length)
+			: base(text, index, length)
 		{
-			get
-			{
-				return this._capcount != 0;
-			}
+			this.success = true;
 		}
 
-		public string Name
+		internal Group()
+			: base(string.Empty)
 		{
-			get
-			{
-				return this._name;
-			}
+			this.success = false;
+			this.captures = new CaptureCollection(0);
 		}
 
-		public CaptureCollection Captures
-		{
-			get
-			{
-				if (this._capcoll == null)
-				{
-					this._capcoll = new CaptureCollection(this);
-				}
-				return this._capcoll;
-			}
-		}
-
+		[global::System.MonoTODO("not thread-safe")]
 		public static Group Synchronized(Group inner)
 		{
 			if (inner == null)
 			{
 				throw new ArgumentNullException("inner");
 			}
-			CaptureCollection captures = inner.Captures;
-			if (inner._capcount > 0)
-			{
-				Capture capture = captures[0];
-			}
 			return inner;
 		}
 
-		internal static Group _emptygroup = new Group(string.Empty, new int[0], 0, string.Empty);
+		public CaptureCollection Captures
+		{
+			get
+			{
+				return this.captures;
+			}
+		}
 
-		internal int[] _caps;
+		public bool Success
+		{
+			get
+			{
+				return this.success;
+			}
+		}
 
-		internal int _capcount;
+		internal static Group Fail = new Group();
 
-		internal CaptureCollection _capcoll;
+		private bool success;
 
-		[OptionalField]
-		internal string _name;
+		private CaptureCollection captures;
 	}
 }

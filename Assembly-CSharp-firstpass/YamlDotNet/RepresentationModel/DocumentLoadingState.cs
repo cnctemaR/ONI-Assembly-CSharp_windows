@@ -32,7 +32,7 @@ namespace YamlDotNet.RepresentationModel
 			}
 			if (throwException)
 			{
-				throw new AnchorNotFoundException(start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", anchor));
+				throw new AnchorNotFoundException(start, end, string.Format(CultureInfo.InvariantCulture, "The anchor '{0}' does not exists", new object[] { anchor }));
 			}
 			return null;
 		}

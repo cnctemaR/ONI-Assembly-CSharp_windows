@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 
 namespace System.Globalization
 {
@@ -9,7 +9,6 @@ namespace System.Globalization
 	public class StringInfo
 	{
 		public StringInfo()
-			: this("")
 		{
 		}
 
@@ -18,43 +17,34 @@ namespace System.Globalization
 			this.String = value;
 		}
 
-		[OnDeserializing]
-		private void OnDeserializing(StreamingContext ctx)
-		{
-			this.m_str = string.Empty;
-		}
-
-		[OnDeserialized]
-		private void OnDeserialized(StreamingContext ctx)
-		{
-			if (this.m_str.Length == 0)
-			{
-				this.m_indexes = null;
-			}
-		}
-
 		[ComVisible(false)]
 		public override bool Equals(object value)
 		{
 			StringInfo stringInfo = value as StringInfo;
-			return stringInfo != null && this.m_str.Equals(stringInfo.m_str);
+			return stringInfo != null && this.s == stringInfo.s;
 		}
 
 		[ComVisible(false)]
 		public override int GetHashCode()
 		{
-			return this.m_str.GetHashCode();
+			return this.s.GetHashCode();
 		}
 
-		private int[] Indexes
+		public int LengthInTextElements
 		{
 			get
 			{
-				if (this.m_indexes == null && 0 < this.String.Length)
+				if (this.length < 0)
 				{
-					this.m_indexes = StringInfo.ParseCombiningCharacters(this.String);
+					this.length = 0;
+					int i = 0;
+					while (i < this.s.Length)
+					{
+						i += StringInfo.GetNextTextElementLength(this.s, i);
+						this.length++;
+					}
 				}
-				return this.m_indexes;
+				return this.length;
 			}
 		}
 
@@ -62,177 +52,171 @@ namespace System.Globalization
 		{
 			get
 			{
-				return this.m_str;
+				return this.s;
 			}
 			set
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("String", Environment.GetResourceString("String reference not set to an instance of a String."));
+					throw new ArgumentNullException("value");
 				}
-				this.m_str = value;
-				this.m_indexes = null;
-			}
-		}
-
-		public int LengthInTextElements
-		{
-			get
-			{
-				if (this.Indexes == null)
-				{
-					return 0;
-				}
-				return this.Indexes.Length;
+				this.length = -1;
+				this.s = value;
 			}
 		}
 
 		public string SubstringByTextElements(int startingTextElement)
 		{
-			if (this.Indexes != null)
+			if (startingTextElement < 0 || this.s.Length == 0)
 			{
-				return this.SubstringByTextElements(startingTextElement, this.Indexes.Length - startingTextElement);
+				throw new ArgumentOutOfRangeException("startingTextElement");
 			}
-			if (startingTextElement < 0)
+			int num = 0;
+			for (int i = 0; i < startingTextElement; i++)
 			{
-				throw new ArgumentOutOfRangeException("startingTextElement", Environment.GetResourceString("Positive number required."));
+				if (num >= this.s.Length)
+				{
+					throw new ArgumentOutOfRangeException("startingTextElement");
+				}
+				num += StringInfo.GetNextTextElementLength(this.s, num);
 			}
-			throw new ArgumentOutOfRangeException("startingTextElement", Environment.GetResourceString("Specified argument was out of the range of valid values."));
+			return this.s.Substring(num);
 		}
 
 		public string SubstringByTextElements(int startingTextElement, int lengthInTextElements)
 		{
-			if (startingTextElement < 0)
+			if (startingTextElement < 0 || this.s.Length == 0)
 			{
-				throw new ArgumentOutOfRangeException("startingTextElement", Environment.GetResourceString("Positive number required."));
-			}
-			if (this.String.Length == 0 || startingTextElement >= this.Indexes.Length)
-			{
-				throw new ArgumentOutOfRangeException("startingTextElement", Environment.GetResourceString("Specified argument was out of the range of valid values."));
+				throw new ArgumentOutOfRangeException("startingTextElement");
 			}
 			if (lengthInTextElements < 0)
 			{
-				throw new ArgumentOutOfRangeException("lengthInTextElements", Environment.GetResourceString("Positive number required."));
+				throw new ArgumentOutOfRangeException("lengthInTextElements");
 			}
-			if (startingTextElement > this.Indexes.Length - lengthInTextElements)
+			int num = 0;
+			for (int i = 0; i < startingTextElement; i++)
 			{
-				throw new ArgumentOutOfRangeException("lengthInTextElements", Environment.GetResourceString("Specified argument was out of the range of valid values."));
+				if (num >= this.s.Length)
+				{
+					throw new ArgumentOutOfRangeException("startingTextElement");
+				}
+				num += StringInfo.GetNextTextElementLength(this.s, num);
 			}
-			int num = this.Indexes[startingTextElement];
-			if (startingTextElement + lengthInTextElements == this.Indexes.Length)
+			int num2 = num;
+			for (int j = 0; j < lengthInTextElements; j++)
 			{
-				return this.String.Substring(num);
+				if (num >= this.s.Length)
+				{
+					throw new ArgumentOutOfRangeException("lengthInTextElements");
+				}
+				num += StringInfo.GetNextTextElementLength(this.s, num);
 			}
-			return this.String.Substring(num, this.Indexes[lengthInTextElements + startingTextElement] - num);
+			return this.s.Substring(num2, num - num2);
 		}
 
 		public static string GetNextTextElement(string str)
 		{
+			if (str == null || str.Length == 0)
+			{
+				throw new ArgumentNullException("string is null");
+			}
 			return StringInfo.GetNextTextElement(str, 0);
-		}
-
-		internal static int GetCurrentTextElementLen(string str, int index, int len, ref UnicodeCategory ucCurrent, ref int currentCharCount)
-		{
-			if (index + currentCharCount == len)
-			{
-				return currentCharCount;
-			}
-			int num;
-			UnicodeCategory unicodeCategory = CharUnicodeInfo.InternalGetUnicodeCategory(str, index + currentCharCount, out num);
-			if (CharUnicodeInfo.IsCombiningCategory(unicodeCategory) && !CharUnicodeInfo.IsCombiningCategory(ucCurrent) && ucCurrent != UnicodeCategory.Format && ucCurrent != UnicodeCategory.Control && ucCurrent != UnicodeCategory.OtherNotAssigned && ucCurrent != UnicodeCategory.Surrogate)
-			{
-				int num2 = index;
-				for (index += currentCharCount + num; index < len; index += num)
-				{
-					unicodeCategory = CharUnicodeInfo.InternalGetUnicodeCategory(str, index, out num);
-					if (!CharUnicodeInfo.IsCombiningCategory(unicodeCategory))
-					{
-						ucCurrent = unicodeCategory;
-						currentCharCount = num;
-						break;
-					}
-				}
-				return index - num2;
-			}
-			int num3 = currentCharCount;
-			ucCurrent = unicodeCategory;
-			currentCharCount = num;
-			return num3;
 		}
 
 		public static string GetNextTextElement(string str, int index)
 		{
+			int nextTextElementLength = StringInfo.GetNextTextElementLength(str, index);
+			return (nextTextElementLength == 1) ? new string(str[index], 1) : str.Substring(index, nextTextElementLength);
+		}
+
+		private static int GetNextTextElementLength(string str, int index)
+		{
 			if (str == null)
 			{
-				throw new ArgumentNullException("str");
+				throw new ArgumentNullException("string is null");
 			}
-			int length = str.Length;
-			if (index >= 0 && index < length)
+			if (index >= str.Length)
 			{
-				int num;
-				UnicodeCategory unicodeCategory = CharUnicodeInfo.InternalGetUnicodeCategory(str, index, out num);
-				return str.Substring(index, StringInfo.GetCurrentTextElementLen(str, index, length, ref unicodeCategory, ref num));
+				return 0;
 			}
-			if (index == length)
+			if (index < 0)
 			{
-				return string.Empty;
+				throw new ArgumentOutOfRangeException("Index is not valid");
 			}
-			throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+			char c = str[index];
+			UnicodeCategory unicodeCategory = char.GetUnicodeCategory(c);
+			if (unicodeCategory == UnicodeCategory.Surrogate)
+			{
+				if (c < '\ud800' || c > '\udbff')
+				{
+					return 1;
+				}
+				if (index + 1 < str.Length && str[index + 1] >= '\udc00' && str[index + 1] <= '\udfff')
+				{
+					return 2;
+				}
+				return 1;
+			}
+			else
+			{
+				if (unicodeCategory == UnicodeCategory.NonSpacingMark || unicodeCategory == UnicodeCategory.SpacingCombiningMark || unicodeCategory == UnicodeCategory.EnclosingMark)
+				{
+					return 1;
+				}
+				int num = 1;
+				while (index + num < str.Length)
+				{
+					unicodeCategory = char.GetUnicodeCategory(str[index + num]);
+					if (unicodeCategory != UnicodeCategory.NonSpacingMark && unicodeCategory != UnicodeCategory.SpacingCombiningMark && unicodeCategory != UnicodeCategory.EnclosingMark)
+					{
+						break;
+					}
+					num++;
+				}
+				return num;
+			}
 		}
 
 		public static TextElementEnumerator GetTextElementEnumerator(string str)
 		{
-			return StringInfo.GetTextElementEnumerator(str, 0);
+			if (str == null || str.Length == 0)
+			{
+				throw new ArgumentNullException("string is null");
+			}
+			return new TextElementEnumerator(str, 0);
 		}
 
 		public static TextElementEnumerator GetTextElementEnumerator(string str, int index)
 		{
 			if (str == null)
 			{
-				throw new ArgumentNullException("str");
+				throw new ArgumentNullException("string is null");
 			}
-			int length = str.Length;
-			if (index < 0 || index > length)
+			if (index < 0 || index >= str.Length)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentOutOfRangeException("Index is not valid");
 			}
-			return new TextElementEnumerator(str, index, length);
+			return new TextElementEnumerator(str, index);
 		}
 
 		public static int[] ParseCombiningCharacters(string str)
 		{
 			if (str == null)
 			{
-				throw new ArgumentNullException("str");
+				throw new ArgumentNullException("string is null");
 			}
-			int length = str.Length;
-			int[] array = new int[length];
-			if (length == 0)
+			ArrayList arrayList = new ArrayList(str.Length);
+			TextElementEnumerator textElementEnumerator = StringInfo.GetTextElementEnumerator(str);
+			textElementEnumerator.Reset();
+			while (textElementEnumerator.MoveNext())
 			{
-				return array;
+				arrayList.Add(textElementEnumerator.ElementIndex);
 			}
-			int num = 0;
-			int i = 0;
-			int num2;
-			UnicodeCategory unicodeCategory = CharUnicodeInfo.InternalGetUnicodeCategory(str, 0, out num2);
-			while (i < length)
-			{
-				array[num++] = i;
-				i += StringInfo.GetCurrentTextElementLen(str, i, length, ref unicodeCategory, ref num2);
-			}
-			if (num < length)
-			{
-				int[] array2 = new int[num];
-				Array.Copy(array, array2, num);
-				return array2;
-			}
-			return array;
+			return (int[])arrayList.ToArray(typeof(int));
 		}
 
-		[OptionalField(VersionAdded = 2)]
-		private string m_str;
+		private string s;
 
-		[NonSerialized]
-		private int[] m_indexes;
+		private int length;
 	}
 }

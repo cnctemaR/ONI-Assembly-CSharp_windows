@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.Security.Cryptography
 {
-	public sealed class CryptographicAttributeObjectCollection : ICollection, IEnumerable
+	public sealed class CryptographicAttributeObjectCollection : IEnumerable, ICollection
 	{
 		public CryptographicAttributeObjectCollection()
 		{
@@ -14,6 +14,16 @@ namespace System.Security.Cryptography
 			: this()
 		{
 			this._list.Add(attribute);
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			this._list.CopyTo(array, index);
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new CryptographicAttributeObjectEnumerator(this._list);
 		}
 
 		public int Count
@@ -91,17 +101,7 @@ namespace System.Security.Cryptography
 			this._list.CopyTo(array, index);
 		}
 
-		void ICollection.CopyTo(Array array, int index)
-		{
-			this._list.CopyTo(array, index);
-		}
-
 		public CryptographicAttributeObjectEnumerator GetEnumerator()
-		{
-			return new CryptographicAttributeObjectEnumerator(this._list);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return new CryptographicAttributeObjectEnumerator(this._list);
 		}

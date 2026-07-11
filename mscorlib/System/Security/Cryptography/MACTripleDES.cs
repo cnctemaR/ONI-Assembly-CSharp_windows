@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -8,19 +9,16 @@ namespace System.Security.Cryptography
 	{
 		public MACTripleDES()
 		{
-			this.KeyValue = new byte[24];
-			Utils.StaticRandomNumberGenerator.GetBytes(this.KeyValue);
-			this.des = TripleDES.Create();
-			this.HashSizeValue = this.des.BlockSize;
-			this.m_bytesPerBlock = this.des.BlockSize / 8;
-			this.des.IV = new byte[this.m_bytesPerBlock];
-			this.des.Padding = PaddingMode.Zeros;
-			this.m_encryptor = null;
+			this.Setup("TripleDES", null);
 		}
 
 		public MACTripleDES(byte[] rgbKey)
-			: this("System.Security.Cryptography.TripleDES", rgbKey)
 		{
+			if (rgbKey == null)
+			{
+				throw new ArgumentNullException("rgbKey");
+			}
+			this.Setup("TripleDES", rgbKey);
 		}
 
 		public MACTripleDES(string strTripleDES, byte[] rgbKey)
@@ -31,23 +29,31 @@ namespace System.Security.Cryptography
 			}
 			if (strTripleDES == null)
 			{
-				this.des = TripleDES.Create();
+				this.Setup("TripleDES", rgbKey);
 			}
 			else
 			{
-				this.des = TripleDES.Create(strTripleDES);
+				this.Setup(strTripleDES, rgbKey);
 			}
-			this.HashSizeValue = this.des.BlockSize;
-			this.KeyValue = (byte[])rgbKey.Clone();
-			this.m_bytesPerBlock = this.des.BlockSize / 8;
-			this.des.IV = new byte[this.m_bytesPerBlock];
-			this.des.Padding = PaddingMode.Zeros;
-			this.m_encryptor = null;
 		}
 
-		public override void Initialize()
+		private void Setup(string strTripleDES, byte[] rgbKey)
 		{
-			this.m_encryptor = null;
+			this.tdes = TripleDES.Create(strTripleDES);
+			this.tdes.Padding = PaddingMode.Zeros;
+			if (rgbKey != null)
+			{
+				this.tdes.Key = rgbKey;
+			}
+			this.HashSizeValue = this.tdes.BlockSize;
+			this.Key = this.tdes.Key;
+			this.mac = new MACAlgorithm(this.tdes);
+			this.m_disposed = false;
+		}
+
+		~MACTripleDES()
+		{
+			this.Dispose(false);
 		}
 
 		[ComVisible(false)]
@@ -55,77 +61,74 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.des.Padding;
+				return this.tdes.Padding;
 			}
 			set
 			{
-				if (value < PaddingMode.None || PaddingMode.ISO10126 < value)
-				{
-					throw new CryptographicException(Environment.GetResourceString("Specified padding mode is not valid for this algorithm."));
-				}
-				this.des.Padding = value;
+				this.tdes.Padding = value;
 			}
-		}
-
-		protected override void HashCore(byte[] rgbData, int ibStart, int cbSize)
-		{
-			if (this.m_encryptor == null)
-			{
-				this.des.Key = this.Key;
-				this.m_encryptor = this.des.CreateEncryptor();
-				this._ts = new TailStream(this.des.BlockSize / 8);
-				this._cs = new CryptoStream(this._ts, this.m_encryptor, CryptoStreamMode.Write);
-			}
-			this._cs.Write(rgbData, ibStart, cbSize);
-		}
-
-		protected override byte[] HashFinal()
-		{
-			if (this.m_encryptor == null)
-			{
-				this.des.Key = this.Key;
-				this.m_encryptor = this.des.CreateEncryptor();
-				this._ts = new TailStream(this.des.BlockSize / 8);
-				this._cs = new CryptoStream(this._ts, this.m_encryptor, CryptoStreamMode.Write);
-			}
-			this._cs.FlushFinalBlock();
-			return this._ts.Buffer;
 		}
 
 		protected override void Dispose(bool disposing)
 		{
-			if (disposing)
+			if (!this.m_disposed)
 			{
-				if (this.des != null)
+				if (this.KeyValue != null)
 				{
-					this.des.Clear();
+					Array.Clear(this.KeyValue, 0, this.KeyValue.Length);
 				}
-				if (this.m_encryptor != null)
+				if (this.tdes != null)
 				{
-					this.m_encryptor.Dispose();
+					this.tdes.Clear();
 				}
-				if (this._cs != null)
+				if (disposing)
 				{
-					this._cs.Clear();
+					this.KeyValue = null;
+					this.tdes = null;
 				}
-				if (this._ts != null)
-				{
-					this._ts.Clear();
-				}
+				base.Dispose(disposing);
+				this.m_disposed = true;
 			}
-			base.Dispose(disposing);
 		}
 
-		private ICryptoTransform m_encryptor;
+		public override void Initialize()
+		{
+			if (this.m_disposed)
+			{
+				throw new ObjectDisposedException("MACTripleDES");
+			}
+			this.State = 0;
+			this.mac.Initialize(this.KeyValue);
+		}
 
-		private CryptoStream _cs;
+		protected override void HashCore(byte[] rgbData, int ibStart, int cbSize)
+		{
+			if (this.m_disposed)
+			{
+				throw new ObjectDisposedException("MACTripleDES");
+			}
+			if (this.State == 0)
+			{
+				this.Initialize();
+				this.State = 1;
+			}
+			this.mac.Core(rgbData, ibStart, cbSize);
+		}
 
-		private TailStream _ts;
+		protected override byte[] HashFinal()
+		{
+			if (this.m_disposed)
+			{
+				throw new ObjectDisposedException("MACTripleDES");
+			}
+			this.State = 0;
+			return this.mac.Final();
+		}
 
-		private const int m_bitsPerByte = 8;
+		private TripleDES tdes;
 
-		private int m_bytesPerBlock;
+		private MACAlgorithm mac;
 
-		private TripleDES des;
+		private bool m_disposed;
 	}
 }

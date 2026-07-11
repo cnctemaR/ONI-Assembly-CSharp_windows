@@ -5,43 +5,27 @@ namespace System.Net
 	public class Authorization
 	{
 		public Authorization(string token)
-		{
-			this.m_Message = ValidationHelper.MakeStringNull(token);
-			this.m_Complete = true;
-		}
-
-		public Authorization(string token, bool finished)
-		{
-			this.m_Message = ValidationHelper.MakeStringNull(token);
-			this.m_Complete = finished;
-		}
-
-		public Authorization(string token, bool finished, string connectionGroupId)
-			: this(token, finished, connectionGroupId, false)
+			: this(token, true)
 		{
 		}
 
-		internal Authorization(string token, bool finished, string connectionGroupId, bool mutualAuth)
+		public Authorization(string token, bool complete)
+			: this(token, complete, null)
 		{
-			this.m_Message = ValidationHelper.MakeStringNull(token);
-			this.m_ConnectionGroupId = ValidationHelper.MakeStringNull(connectionGroupId);
-			this.m_Complete = finished;
-			this.m_MutualAuth = mutualAuth;
+		}
+
+		public Authorization(string token, bool complete, string connectionGroupId)
+		{
+			this.token = token;
+			this.complete = complete;
+			this.connectionGroupId = connectionGroupId;
 		}
 
 		public string Message
 		{
 			get
 			{
-				return this.m_Message;
-			}
-		}
-
-		public string ConnectionGroupId
-		{
-			get
-			{
-				return this.m_ConnectionGroupId;
+				return this.token;
 			}
 		}
 
@@ -49,50 +33,68 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_Complete;
+				return this.complete;
 			}
 		}
 
-		internal void SetComplete(bool complete)
+		public string ConnectionGroupId
 		{
-			this.m_Complete = complete;
+			get
+			{
+				return this.connectionGroupId;
+			}
 		}
 
 		public string[] ProtectionRealm
 		{
 			get
 			{
-				return this.m_ProtectionRealm;
+				return this.protectionRealm;
 			}
 			set
 			{
-				string[] array = ValidationHelper.MakeEmptyArrayNull(value);
-				this.m_ProtectionRealm = array;
+				this.protectionRealm = value;
 			}
 		}
 
+		internal IAuthenticationModule Module
+		{
+			get
+			{
+				return this.module;
+			}
+			set
+			{
+				this.module = value;
+			}
+		}
+
+		private static Exception GetMustImplement()
+		{
+			return new NotImplementedException();
+		}
+
+		[global::System.MonoTODO]
 		public bool MutuallyAuthenticated
 		{
 			get
 			{
-				return this.Complete && this.m_MutualAuth;
+				throw Authorization.GetMustImplement();
 			}
 			set
 			{
-				this.m_MutualAuth = value;
+				throw Authorization.GetMustImplement();
 			}
 		}
 
-		private string m_Message;
+		private string token;
 
-		private bool m_Complete;
+		private bool complete;
 
-		private string[] m_ProtectionRealm;
+		private string connectionGroupId;
 
-		private string m_ConnectionGroupId;
+		private string[] protectionRealm;
 
-		private bool m_MutualAuth;
-
-		internal string ModuleAuthenticationType;
+		private IAuthenticationModule module;
 	}
 }

@@ -4,6 +4,6 @@ namespace System.Net
 {
 	public interface IWebRequestCreate
 	{
-		WebRequest Create(Uri uri);
+		WebRequest Create(global::System.Uri uri);
 	}
 }

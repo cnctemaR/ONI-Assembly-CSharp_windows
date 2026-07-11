@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security;
 
 namespace System.Reflection
 {
-	[CLSCompliant(false)]
 	[ComVisible(true)]
+	[CLSCompliant(false)]
 	[Serializable]
 	public sealed class Pointer : ISerializable
 	{
@@ -14,14 +13,11 @@ namespace System.Reflection
 		{
 		}
 
-		[SecurityCritical]
-		private Pointer(SerializationInfo info, StreamingContext context)
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			this._ptr = ((IntPtr)info.GetValue("_ptr", typeof(IntPtr))).ToPointer();
-			this._ptrType = (RuntimeType)info.GetValue("_ptrType", typeof(RuntimeType));
+			throw new NotSupportedException("Pointer deserializatioon not supported.");
 		}
 
-		[SecurityCritical]
 		public unsafe static object Box(void* ptr, Type type)
 		{
 			if (type == null)
@@ -30,51 +26,27 @@ namespace System.Reflection
 			}
 			if (!type.IsPointer)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Type must be a Pointer."), "ptr");
-			}
-			RuntimeType runtimeType = type as RuntimeType;
-			if (runtimeType == null)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Type must be a Pointer."), "ptr");
+				throw new ArgumentException("type");
 			}
 			return new Pointer
 			{
-				_ptr = ptr,
-				_ptrType = runtimeType
+				data = ptr,
+				type = type
 			};
 		}
 
-		[SecurityCritical]
 		public unsafe static void* Unbox(object ptr)
 		{
-			if (!(ptr is Pointer))
+			Pointer pointer = ptr as Pointer;
+			if (pointer == null)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Type must be a Pointer."), "ptr");
+				throw new ArgumentException("ptr");
 			}
-			return ((Pointer)ptr)._ptr;
+			return pointer.data;
 		}
 
-		internal RuntimeType GetPointerType()
-		{
-			return this._ptrType;
-		}
+		private unsafe void* data;
 
-		[SecurityCritical]
-		internal object GetPointerValue()
-		{
-			return (IntPtr)this._ptr;
-		}
-
-		[SecurityCritical]
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			info.AddValue("_ptr", new IntPtr(this._ptr));
-			info.AddValue("_ptrType", this._ptrType);
-		}
-
-		[SecurityCritical]
-		private unsafe void* _ptr;
-
-		private RuntimeType _ptrType;
+		private Type type;
 	}
 }

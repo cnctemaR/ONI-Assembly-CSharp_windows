@@ -43,7 +43,7 @@ namespace Satsuma.Drawing
 
 		public string ToString(IFormatProvider provider)
 		{
-			return string.Format(provider, "({0} {1})", this.X, this.Y);
+			return string.Format(provider, "({0} {1})", new object[] { this.X, this.Y });
 		}
 
 		public override string ToString()

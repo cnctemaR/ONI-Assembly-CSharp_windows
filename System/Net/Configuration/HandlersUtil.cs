@@ -37,7 +37,8 @@ namespace System.Net.Configuration
 			string value = xmlNode.Value;
 			if (value == string.Empty)
 			{
-				HandlersUtil.ThrowException((optional ? "Optional" : "Required") + " attribute is empty: " + attKey, node);
+				string text = ((!optional) ? "Required" : "Optional");
+				HandlersUtil.ThrowException(text + " attribute is empty: " + attKey, node);
 			}
 			return value;
 		}
@@ -48,7 +49,7 @@ namespace System.Net.Configuration
 			{
 				msg = msg + " (node name: " + node.Name + ") ";
 			}
-			throw new ConfigurationException(msg, node);
+			throw new global::System.Configuration.ConfigurationException(msg, node);
 		}
 	}
 }

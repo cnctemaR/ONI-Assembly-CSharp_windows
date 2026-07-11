@@ -8,250 +8,170 @@ namespace System.Security.Cryptography
 	{
 		public SHA256Managed()
 		{
-			if (CryptoConfig.AllowOnlyFipsAlgorithms)
-			{
-				throw new InvalidOperationException(Environment.GetResourceString("This implementation is not part of the Windows Platform FIPS validated cryptographic algorithms."));
-			}
-			this._stateSHA256 = new uint[8];
-			this._buffer = new byte[64];
-			this._W = new uint[64];
-			this.InitializeState();
-		}
-
-		public override void Initialize()
-		{
-			this.InitializeState();
-			Array.Clear(this._buffer, 0, this._buffer.Length);
-			Array.Clear(this._W, 0, this._W.Length);
+			this._H = new uint[8];
+			this._ProcessingBuffer = new byte[64];
+			this.buff = new uint[64];
+			this.Initialize();
 		}
 
 		protected override void HashCore(byte[] rgb, int ibStart, int cbSize)
 		{
-			this._HashData(rgb, ibStart, cbSize);
+			this.State = 1;
+			if (this._ProcessingBufferCount != 0)
+			{
+				if (cbSize < 64 - this._ProcessingBufferCount)
+				{
+					Buffer.BlockCopy(rgb, ibStart, this._ProcessingBuffer, this._ProcessingBufferCount, cbSize);
+					this._ProcessingBufferCount += cbSize;
+					return;
+				}
+				int i = 64 - this._ProcessingBufferCount;
+				Buffer.BlockCopy(rgb, ibStart, this._ProcessingBuffer, this._ProcessingBufferCount, i);
+				this.ProcessBlock(this._ProcessingBuffer, 0);
+				this._ProcessingBufferCount = 0;
+				ibStart += i;
+				cbSize -= i;
+			}
+			for (int i = 0; i < cbSize - cbSize % 64; i += 64)
+			{
+				this.ProcessBlock(rgb, ibStart + i);
+			}
+			if (cbSize % 64 != 0)
+			{
+				Buffer.BlockCopy(rgb, cbSize - cbSize % 64 + ibStart, this._ProcessingBuffer, 0, cbSize % 64);
+				this._ProcessingBufferCount = cbSize % 64;
+			}
 		}
 
 		protected override byte[] HashFinal()
 		{
-			return this._EndHash();
-		}
-
-		private void InitializeState()
-		{
-			this._count = 0L;
-			this._stateSHA256[0] = 1779033703U;
-			this._stateSHA256[1] = 3144134277U;
-			this._stateSHA256[2] = 1013904242U;
-			this._stateSHA256[3] = 2773480762U;
-			this._stateSHA256[4] = 1359893119U;
-			this._stateSHA256[5] = 2600822924U;
-			this._stateSHA256[6] = 528734635U;
-			this._stateSHA256[7] = 1541459225U;
-		}
-
-		[SecuritySafeCritical]
-		private unsafe void _HashData(byte[] partIn, int ibStart, int cbSize)
-		{
-			int i = cbSize;
-			int num = ibStart;
-			int num2 = (int)(this._count & 63L);
-			this._count += (long)i;
-			uint[] array;
-			uint* ptr;
-			if ((array = this._stateSHA256) == null || array.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &array[0];
-			}
-			byte[] array2;
-			byte* ptr2;
-			if ((array2 = this._buffer) == null || array2.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &array2[0];
-			}
-			uint[] array3;
-			uint* ptr3;
-			if ((array3 = this._W) == null || array3.Length == 0)
-			{
-				ptr3 = null;
-			}
-			else
-			{
-				ptr3 = &array3[0];
-			}
-			if (num2 > 0 && num2 + i >= 64)
-			{
-				Buffer.InternalBlockCopy(partIn, num, this._buffer, num2, 64 - num2);
-				num += 64 - num2;
-				i -= 64 - num2;
-				SHA256Managed.SHATransform(ptr3, ptr, ptr2);
-				num2 = 0;
-			}
-			while (i >= 64)
-			{
-				Buffer.InternalBlockCopy(partIn, num, this._buffer, 0, 64);
-				num += 64;
-				i -= 64;
-				SHA256Managed.SHATransform(ptr3, ptr, ptr2);
-			}
-			if (i > 0)
-			{
-				Buffer.InternalBlockCopy(partIn, num, this._buffer, num2, i);
-			}
-			array3 = null;
-			array2 = null;
-			array = null;
-		}
-
-		private byte[] _EndHash()
-		{
 			byte[] array = new byte[32];
-			int num = 64 - (int)(this._count & 63L);
-			if (num <= 8)
+			this.ProcessFinalBlock(this._ProcessingBuffer, 0, this._ProcessingBufferCount);
+			for (int i = 0; i < 8; i++)
 			{
-				num += 64;
+				for (int j = 0; j < 4; j++)
+				{
+					array[i * 4 + j] = (byte)(this._H[i] >> 24 - j * 8);
+				}
 			}
-			byte[] array2 = new byte[num];
-			array2[0] = 128;
-			long num2 = this._count * 8L;
-			array2[num - 8] = (byte)((num2 >> 56) & 255L);
-			array2[num - 7] = (byte)((num2 >> 48) & 255L);
-			array2[num - 6] = (byte)((num2 >> 40) & 255L);
-			array2[num - 5] = (byte)((num2 >> 32) & 255L);
-			array2[num - 4] = (byte)((num2 >> 24) & 255L);
-			array2[num - 3] = (byte)((num2 >> 16) & 255L);
-			array2[num - 2] = (byte)((num2 >> 8) & 255L);
-			array2[num - 1] = (byte)(num2 & 255L);
-			this._HashData(array2, 0, array2.Length);
-			Utils.DWORDToBigEndian(array, this._stateSHA256, 8);
-			this.HashValue = array;
+			this.State = 0;
 			return array;
 		}
 
-		[SecurityCritical]
-		private unsafe static void SHATransform(uint* expandedBuffer, uint* state, byte* block)
+		public override void Initialize()
 		{
-			uint num = *state;
-			uint num2 = state[1];
-			uint num3 = state[2];
-			uint num4 = state[3];
-			uint num5 = state[4];
-			uint num6 = state[5];
-			uint num7 = state[6];
-			uint num8 = state[7];
-			Utils.DWORDFromBigEndian(expandedBuffer, 16, block);
-			SHA256Managed.SHA256Expand(expandedBuffer);
-			for (int i = 0; i < 64; i++)
+			this.count = 0UL;
+			this._ProcessingBufferCount = 0;
+			this._H[0] = 1779033703U;
+			this._H[1] = 3144134277U;
+			this._H[2] = 1013904242U;
+			this._H[3] = 2773480762U;
+			this._H[4] = 1359893119U;
+			this._H[5] = 2600822924U;
+			this._H[6] = 528734635U;
+			this._H[7] = 1541459225U;
+		}
+
+		private void ProcessBlock(byte[] inputBuffer, int inputOffset)
+		{
+			uint[] k = SHAConstants.K1;
+			uint[] array = this.buff;
+			this.count += 64UL;
+			for (int i = 0; i < 16; i++)
 			{
-				uint num9 = num8 + SHA256Managed.Sigma_1(num5) + SHA256Managed.Ch(num5, num6, num7) + SHA256Managed._K[i] + expandedBuffer[i];
-				uint num10 = num4 + num9;
-				uint num11 = num9 + SHA256Managed.Sigma_0(num) + SHA256Managed.Maj(num, num2, num3);
-				i++;
-				num9 = num7 + SHA256Managed.Sigma_1(num10) + SHA256Managed.Ch(num10, num5, num6) + SHA256Managed._K[i] + expandedBuffer[i];
-				uint num12 = num3 + num9;
-				uint num13 = num9 + SHA256Managed.Sigma_0(num11) + SHA256Managed.Maj(num11, num, num2);
-				i++;
-				num9 = num6 + SHA256Managed.Sigma_1(num12) + SHA256Managed.Ch(num12, num10, num5) + SHA256Managed._K[i] + expandedBuffer[i];
-				uint num14 = num2 + num9;
-				uint num15 = num9 + SHA256Managed.Sigma_0(num13) + SHA256Managed.Maj(num13, num11, num);
-				i++;
-				num9 = num5 + SHA256Managed.Sigma_1(num14) + SHA256Managed.Ch(num14, num12, num10) + SHA256Managed._K[i] + expandedBuffer[i];
-				uint num16 = num + num9;
-				uint num17 = num9 + SHA256Managed.Sigma_0(num15) + SHA256Managed.Maj(num15, num13, num11);
-				i++;
-				num9 = num10 + SHA256Managed.Sigma_1(num16) + SHA256Managed.Ch(num16, num14, num12) + SHA256Managed._K[i] + expandedBuffer[i];
-				num8 = num11 + num9;
-				num4 = num9 + SHA256Managed.Sigma_0(num17) + SHA256Managed.Maj(num17, num15, num13);
-				i++;
-				num9 = num12 + SHA256Managed.Sigma_1(num8) + SHA256Managed.Ch(num8, num16, num14) + SHA256Managed._K[i] + expandedBuffer[i];
-				num7 = num13 + num9;
-				num3 = num9 + SHA256Managed.Sigma_0(num4) + SHA256Managed.Maj(num4, num17, num15);
-				i++;
-				num9 = num14 + SHA256Managed.Sigma_1(num7) + SHA256Managed.Ch(num7, num8, num16) + SHA256Managed._K[i] + expandedBuffer[i];
-				num6 = num15 + num9;
-				num2 = num9 + SHA256Managed.Sigma_0(num3) + SHA256Managed.Maj(num3, num4, num17);
-				i++;
-				num9 = num16 + SHA256Managed.Sigma_1(num6) + SHA256Managed.Ch(num6, num7, num8) + SHA256Managed._K[i] + expandedBuffer[i];
-				num5 = num17 + num9;
-				num = num9 + SHA256Managed.Sigma_0(num2) + SHA256Managed.Maj(num2, num3, num4);
+				array[i] = (uint)(((int)inputBuffer[inputOffset + 4 * i] << 24) | ((int)inputBuffer[inputOffset + 4 * i + 1] << 16) | ((int)inputBuffer[inputOffset + 4 * i + 2] << 8) | (int)inputBuffer[inputOffset + 4 * i + 3]);
 			}
-			*state += num;
-			state[1] += num2;
-			state[2] += num3;
-			state[3] += num4;
-			state[4] += num5;
-			state[5] += num6;
-			state[6] += num7;
-			state[7] += num8;
-		}
-
-		private static uint RotateRight(uint x, int n)
-		{
-			return (x >> n) | (x << 32 - n);
-		}
-
-		private static uint Ch(uint x, uint y, uint z)
-		{
-			return (x & y) ^ ((x ^ uint.MaxValue) & z);
-		}
-
-		private static uint Maj(uint x, uint y, uint z)
-		{
-			return (x & y) ^ (x & z) ^ (y & z);
-		}
-
-		private static uint sigma_0(uint x)
-		{
-			return SHA256Managed.RotateRight(x, 7) ^ SHA256Managed.RotateRight(x, 18) ^ (x >> 3);
-		}
-
-		private static uint sigma_1(uint x)
-		{
-			return SHA256Managed.RotateRight(x, 17) ^ SHA256Managed.RotateRight(x, 19) ^ (x >> 10);
-		}
-
-		private static uint Sigma_0(uint x)
-		{
-			return SHA256Managed.RotateRight(x, 2) ^ SHA256Managed.RotateRight(x, 13) ^ SHA256Managed.RotateRight(x, 22);
-		}
-
-		private static uint Sigma_1(uint x)
-		{
-			return SHA256Managed.RotateRight(x, 6) ^ SHA256Managed.RotateRight(x, 11) ^ SHA256Managed.RotateRight(x, 25);
-		}
-
-		[SecurityCritical]
-		private unsafe static void SHA256Expand(uint* x)
-		{
 			for (int i = 16; i < 64; i++)
 			{
-				x[i] = SHA256Managed.sigma_1(x[i - 2]) + x[i - 7] + SHA256Managed.sigma_0(x[i - 15]) + x[i - 16];
+				uint num = array[i - 15];
+				num = ((num >> 7) | (num << 25)) ^ ((num >> 18) | (num << 14)) ^ (num >> 3);
+				uint num2 = array[i - 2];
+				num2 = ((num2 >> 17) | (num2 << 15)) ^ ((num2 >> 19) | (num2 << 13)) ^ (num2 >> 10);
+				array[i] = num2 + array[i - 7] + num + array[i - 16];
+			}
+			uint num3 = this._H[0];
+			uint num4 = this._H[1];
+			uint num5 = this._H[2];
+			uint num6 = this._H[3];
+			uint num7 = this._H[4];
+			uint num8 = this._H[5];
+			uint num9 = this._H[6];
+			uint num10 = this._H[7];
+			for (int i = 0; i < 64; i++)
+			{
+				uint num = num10 + (((num7 >> 6) | (num7 << 26)) ^ ((num7 >> 11) | (num7 << 21)) ^ ((num7 >> 25) | (num7 << 7))) + ((num7 & num8) ^ (~num7 & num9)) + k[i] + array[i];
+				uint num2 = ((num3 >> 2) | (num3 << 30)) ^ ((num3 >> 13) | (num3 << 19)) ^ ((num3 >> 22) | (num3 << 10));
+				num2 += (num3 & num4) ^ (num3 & num5) ^ (num4 & num5);
+				num10 = num9;
+				num9 = num8;
+				num8 = num7;
+				num7 = num6 + num;
+				num6 = num5;
+				num5 = num4;
+				num4 = num3;
+				num3 = num + num2;
+			}
+			this._H[0] += num3;
+			this._H[1] += num4;
+			this._H[2] += num5;
+			this._H[3] += num6;
+			this._H[4] += num7;
+			this._H[5] += num8;
+			this._H[6] += num9;
+			this._H[7] += num10;
+		}
+
+		private void ProcessFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
+		{
+			ulong num = this.count + (ulong)((long)inputCount);
+			int num2 = 56 - (int)(num % 64UL);
+			if (num2 < 1)
+			{
+				num2 += 64;
+			}
+			byte[] array = new byte[inputCount + num2 + 8];
+			for (int i = 0; i < inputCount; i++)
+			{
+				array[i] = inputBuffer[i + inputOffset];
+			}
+			array[inputCount] = 128;
+			for (int j = inputCount + 1; j < inputCount + num2; j++)
+			{
+				array[j] = 0;
+			}
+			ulong num3 = num << 3;
+			this.AddLength(num3, array, inputCount + num2);
+			this.ProcessBlock(array, 0);
+			if (inputCount + num2 + 8 == 128)
+			{
+				this.ProcessBlock(array, 64);
 			}
 		}
 
-		private byte[] _buffer;
-
-		private long _count;
-
-		private uint[] _stateSHA256;
-
-		private uint[] _W;
-
-		private static readonly uint[] _K = new uint[]
+		internal void AddLength(ulong length, byte[] buffer, int position)
 		{
-			1116352408U, 1899447441U, 3049323471U, 3921009573U, 961987163U, 1508970993U, 2453635748U, 2870763221U, 3624381080U, 310598401U,
-			607225278U, 1426881987U, 1925078388U, 2162078206U, 2614888103U, 3248222580U, 3835390401U, 4022224774U, 264347078U, 604807628U,
-			770255983U, 1249150122U, 1555081692U, 1996064986U, 2554220882U, 2821834349U, 2952996808U, 3210313671U, 3336571891U, 3584528711U,
-			113926993U, 338241895U, 666307205U, 773529912U, 1294757372U, 1396182291U, 1695183700U, 1986661051U, 2177026350U, 2456956037U,
-			2730485921U, 2820302411U, 3259730800U, 3345764771U, 3516065817U, 3600352804U, 4094571909U, 275423344U, 430227734U, 506948616U,
-			659060556U, 883997877U, 958139571U, 1322822218U, 1537002063U, 1747873779U, 1955562222U, 2024104815U, 2227730452U, 2361852424U,
-			2428436474U, 2756734187U, 3204031479U, 3329325298U
-		};
+			buffer[position++] = (byte)(length >> 56);
+			buffer[position++] = (byte)(length >> 48);
+			buffer[position++] = (byte)(length >> 40);
+			buffer[position++] = (byte)(length >> 32);
+			buffer[position++] = (byte)(length >> 24);
+			buffer[position++] = (byte)(length >> 16);
+			buffer[position++] = (byte)(length >> 8);
+			buffer[position] = (byte)length;
+		}
+
+		private const int BLOCK_SIZE_BYTES = 64;
+
+		private const int HASH_SIZE_BYTES = 32;
+
+		private uint[] _H;
+
+		private ulong count;
+
+		private byte[] _ProcessingBuffer;
+
+		private int _ProcessingBufferCount;
+
+		private uint[] buff;
 	}
 }

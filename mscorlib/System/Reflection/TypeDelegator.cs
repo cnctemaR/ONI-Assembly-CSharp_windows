@@ -6,13 +6,8 @@ namespace System.Reflection
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class TypeDelegator : TypeInfo
+	public class TypeDelegator : Type
 	{
-		public override bool IsAssignableFrom(TypeInfo typeInfo)
-		{
-			return !(typeInfo == null) && this.IsAssignableFrom(typeInfo.AsType());
-		}
-
 		protected TypeDelegator()
 		{
 		}
@@ -21,38 +16,9 @@ namespace System.Reflection
 		{
 			if (delegatingType == null)
 			{
-				throw new ArgumentNullException("delegatingType");
+				throw new ArgumentNullException("delegatingType must be non-null");
 			}
 			this.typeImpl = delegatingType;
-		}
-
-		public override Guid GUID
-		{
-			get
-			{
-				return this.typeImpl.GUID;
-			}
-		}
-
-		public override int MetadataToken
-		{
-			get
-			{
-				return this.typeImpl.MetadataToken;
-			}
-		}
-
-		public override object InvokeMember(string name, BindingFlags invokeAttr, Binder binder, object target, object[] args, ParameterModifier[] modifiers, CultureInfo culture, string[] namedParameters)
-		{
-			return this.typeImpl.InvokeMember(name, invokeAttr, binder, target, args, modifiers, culture, namedParameters);
-		}
-
-		public override Module Module
-		{
-			get
-			{
-				return this.typeImpl.Module;
-			}
 		}
 
 		public override Assembly Assembly
@@ -60,38 +26,6 @@ namespace System.Reflection
 			get
 			{
 				return this.typeImpl.Assembly;
-			}
-		}
-
-		public override RuntimeTypeHandle TypeHandle
-		{
-			get
-			{
-				return this.typeImpl.TypeHandle;
-			}
-		}
-
-		public override string Name
-		{
-			get
-			{
-				return this.typeImpl.Name;
-			}
-		}
-
-		public override string FullName
-		{
-			get
-			{
-				return this.typeImpl.FullName;
-			}
-		}
-
-		public override string Namespace
-		{
-			get
-			{
-				return this.typeImpl.Namespace;
 			}
 		}
 
@@ -111,6 +45,67 @@ namespace System.Reflection
 			}
 		}
 
+		public override string FullName
+		{
+			get
+			{
+				return this.typeImpl.FullName;
+			}
+		}
+
+		public override Guid GUID
+		{
+			get
+			{
+				return this.typeImpl.GUID;
+			}
+		}
+
+		public override Module Module
+		{
+			get
+			{
+				return this.typeImpl.Module;
+			}
+		}
+
+		public override string Name
+		{
+			get
+			{
+				return this.typeImpl.Name;
+			}
+		}
+
+		public override string Namespace
+		{
+			get
+			{
+				return this.typeImpl.Namespace;
+			}
+		}
+
+		public override RuntimeTypeHandle TypeHandle
+		{
+			get
+			{
+				return this.typeImpl.TypeHandle;
+			}
+		}
+
+		public override Type UnderlyingSystemType
+		{
+			get
+			{
+				return this.typeImpl.UnderlyingSystemType;
+			}
+		}
+
+		protected override TypeAttributes GetAttributeFlagsImpl()
+		{
+			return this.typeImpl.Attributes;
+		}
+
 		protected override ConstructorInfo GetConstructorImpl(BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
 		{
 			return this.typeImpl.GetConstructor(bindingAttr, binder, callConvention, types, modifiers);
@@ -122,18 +117,34 @@ namespace System.Reflection
 			return this.typeImpl.GetConstructors(bindingAttr);
 		}
 
-		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
+		public override object[] GetCustomAttributes(bool inherit)
 		{
-			if (types == null)
-			{
-				return this.typeImpl.GetMethod(name, bindingAttr);
-			}
-			return this.typeImpl.GetMethod(name, bindingAttr, binder, callConvention, types, modifiers);
+			return this.typeImpl.GetCustomAttributes(inherit);
 		}
 
-		public override MethodInfo[] GetMethods(BindingFlags bindingAttr)
+		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
 		{
-			return this.typeImpl.GetMethods(bindingAttr);
+			return this.typeImpl.GetCustomAttributes(attributeType, inherit);
+		}
+
+		public override Type GetElementType()
+		{
+			return this.typeImpl.GetElementType();
+		}
+
+		public override EventInfo GetEvent(string name, BindingFlags bindingAttr)
+		{
+			return this.typeImpl.GetEvent(name, bindingAttr);
+		}
+
+		public override EventInfo[] GetEvents()
+		{
+			return this.GetEvents(BindingFlags.Public);
+		}
+
+		public override EventInfo[] GetEvents(BindingFlags bindingAttr)
+		{
+			return this.typeImpl.GetEvents(bindingAttr);
 		}
 
 		public override FieldInfo GetField(string name, BindingFlags bindingAttr)
@@ -151,48 +162,15 @@ namespace System.Reflection
 			return this.typeImpl.GetInterface(name, ignoreCase);
 		}
 
+		[ComVisible(true)]
+		public override InterfaceMapping GetInterfaceMap(Type interfaceType)
+		{
+			return this.typeImpl.GetInterfaceMap(interfaceType);
+		}
+
 		public override Type[] GetInterfaces()
 		{
 			return this.typeImpl.GetInterfaces();
-		}
-
-		public override EventInfo GetEvent(string name, BindingFlags bindingAttr)
-		{
-			return this.typeImpl.GetEvent(name, bindingAttr);
-		}
-
-		public override EventInfo[] GetEvents()
-		{
-			return this.typeImpl.GetEvents();
-		}
-
-		protected override PropertyInfo GetPropertyImpl(string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers)
-		{
-			if (returnType == null && types == null)
-			{
-				return this.typeImpl.GetProperty(name, bindingAttr);
-			}
-			return this.typeImpl.GetProperty(name, bindingAttr, binder, returnType, types, modifiers);
-		}
-
-		public override PropertyInfo[] GetProperties(BindingFlags bindingAttr)
-		{
-			return this.typeImpl.GetProperties(bindingAttr);
-		}
-
-		public override EventInfo[] GetEvents(BindingFlags bindingAttr)
-		{
-			return this.typeImpl.GetEvents(bindingAttr);
-		}
-
-		public override Type[] GetNestedTypes(BindingFlags bindingAttr)
-		{
-			return this.typeImpl.GetNestedTypes(bindingAttr);
-		}
-
-		public override Type GetNestedType(string name, BindingFlags bindingAttr)
-		{
-			return this.typeImpl.GetNestedType(name, bindingAttr);
 		}
 
 		public override MemberInfo[] GetMember(string name, MemberTypes type, BindingFlags bindingAttr)
@@ -205,52 +183,34 @@ namespace System.Reflection
 			return this.typeImpl.GetMembers(bindingAttr);
 		}
 
-		protected override TypeAttributes GetAttributeFlagsImpl()
+		protected override MethodInfo GetMethodImpl(string name, BindingFlags bindingAttr, Binder binder, CallingConventions callConvention, Type[] types, ParameterModifier[] modifiers)
 		{
-			return this.typeImpl.Attributes;
+			return this.typeImpl.GetMethodImplInternal(name, bindingAttr, binder, callConvention, types, modifiers);
 		}
 
-		protected override bool IsArrayImpl()
+		public override MethodInfo[] GetMethods(BindingFlags bindingAttr)
 		{
-			return this.typeImpl.IsArray;
+			return this.typeImpl.GetMethods(bindingAttr);
 		}
 
-		protected override bool IsPrimitiveImpl()
+		public override Type GetNestedType(string name, BindingFlags bindingAttr)
 		{
-			return this.typeImpl.IsPrimitive;
+			return this.typeImpl.GetNestedType(name, bindingAttr);
 		}
 
-		protected override bool IsByRefImpl()
+		public override Type[] GetNestedTypes(BindingFlags bindingAttr)
 		{
-			return this.typeImpl.IsByRef;
+			return this.typeImpl.GetNestedTypes(bindingAttr);
 		}
 
-		protected override bool IsPointerImpl()
+		public override PropertyInfo[] GetProperties(BindingFlags bindingAttr)
 		{
-			return this.typeImpl.IsPointer;
+			return this.typeImpl.GetProperties(bindingAttr);
 		}
 
-		protected override bool IsValueTypeImpl()
+		protected override PropertyInfo GetPropertyImpl(string name, BindingFlags bindingAttr, Binder binder, Type returnType, Type[] types, ParameterModifier[] modifiers)
 		{
-			return this.typeImpl.IsValueType;
-		}
-
-		protected override bool IsCOMObjectImpl()
-		{
-			return this.typeImpl.IsCOMObject;
-		}
-
-		public override bool IsConstructedGenericType
-		{
-			get
-			{
-				return this.typeImpl.IsConstructedGenericType;
-			}
-		}
-
-		public override Type GetElementType()
-		{
-			return this.typeImpl.GetElementType();
+			return this.typeImpl.GetPropertyImplInternal(name, bindingAttr, binder, returnType, types, modifiers);
 		}
 
 		protected override bool HasElementTypeImpl()
@@ -258,22 +218,24 @@ namespace System.Reflection
 			return this.typeImpl.HasElementType;
 		}
 
-		public override Type UnderlyingSystemType
+		public override object InvokeMember(string name, BindingFlags invokeAttr, Binder binder, object target, object[] args, ParameterModifier[] modifiers, CultureInfo culture, string[] namedParameters)
 		{
-			get
-			{
-				return this.typeImpl.UnderlyingSystemType;
-			}
+			return this.typeImpl.InvokeMember(name, invokeAttr, binder, target, args, modifiers, culture, namedParameters);
 		}
 
-		public override object[] GetCustomAttributes(bool inherit)
+		protected override bool IsArrayImpl()
 		{
-			return this.typeImpl.GetCustomAttributes(inherit);
+			return this.typeImpl.IsArray;
 		}
 
-		public override object[] GetCustomAttributes(Type attributeType, bool inherit)
+		protected override bool IsByRefImpl()
 		{
-			return this.typeImpl.GetCustomAttributes(attributeType, inherit);
+			return this.typeImpl.IsByRef;
+		}
+
+		protected override bool IsCOMObjectImpl()
+		{
+			return this.typeImpl.IsCOMObject;
 		}
 
 		public override bool IsDefined(Type attributeType, bool inherit)
@@ -281,17 +243,26 @@ namespace System.Reflection
 			return this.typeImpl.IsDefined(attributeType, inherit);
 		}
 
-		[ComVisible(true)]
-		public override InterfaceMapping GetInterfaceMap(Type interfaceType)
+		protected override bool IsPointerImpl()
 		{
-			return this.typeImpl.GetInterfaceMap(interfaceType);
+			return this.typeImpl.IsPointer;
 		}
 
-		public override bool IsSZArray
+		protected override bool IsPrimitiveImpl()
+		{
+			return this.typeImpl.IsPrimitive;
+		}
+
+		protected override bool IsValueTypeImpl()
+		{
+			return this.typeImpl.IsValueType;
+		}
+
+		public override int MetadataToken
 		{
 			get
 			{
-				return this.typeImpl.IsSZArray;
+				return this.typeImpl.MetadataToken;
 			}
 		}
 

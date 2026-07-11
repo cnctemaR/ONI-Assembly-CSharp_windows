@@ -1,55 +1,46 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Threading;
 
 namespace System.Collections
 {
-	[DebuggerTypeProxy(typeof(SortedList.SortedListDebugView))]
-	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerDisplay("Count={Count}")]
 	[ComVisible(true)]
 	[Serializable]
-	public class SortedList : IDictionary, ICollection, IEnumerable, ICloneable
+	public class SortedList : IEnumerable, ICloneable, ICollection, IDictionary
 	{
 		public SortedList()
+			: this(null, SortedList.INITIAL_SIZE)
 		{
-			this.Init();
-		}
-
-		private void Init()
-		{
-			this.keys = SortedList.emptyArray;
-			this.values = SortedList.emptyArray;
-			this._size = 0;
-			this.comparer = new Comparer(CultureInfo.CurrentCulture);
 		}
 
 		public SortedList(int initialCapacity)
+			: this(null, initialCapacity)
 		{
-			if (initialCapacity < 0)
-			{
-				throw new ArgumentOutOfRangeException("initialCapacity", Environment.GetResourceString("Non-negative number required."));
-			}
-			this.keys = new object[initialCapacity];
-			this.values = new object[initialCapacity];
-			this.comparer = new Comparer(CultureInfo.CurrentCulture);
-		}
-
-		public SortedList(IComparer comparer)
-			: this()
-		{
-			if (comparer != null)
-			{
-				this.comparer = comparer;
-			}
 		}
 
 		public SortedList(IComparer comparer, int capacity)
-			: this(comparer)
 		{
-			this.Capacity = capacity;
+			if (capacity < 0)
+			{
+				throw new ArgumentOutOfRangeException("capacity");
+			}
+			if (capacity == 0)
+			{
+				this.defaultCapacity = 0;
+			}
+			else
+			{
+				this.defaultCapacity = SortedList.INITIAL_SIZE;
+			}
+			this.comparer = comparer;
+			this.InitTable(capacity, true);
+		}
+
+		public SortedList(IComparer comparer)
+		{
+			this.comparer = comparer;
+			this.InitTable(SortedList.INITIAL_SIZE, true);
 		}
 
 		public SortedList(IDictionary d)
@@ -58,106 +49,30 @@ namespace System.Collections
 		}
 
 		public SortedList(IDictionary d, IComparer comparer)
-			: this(comparer, (d != null) ? d.Count : 0)
 		{
 			if (d == null)
 			{
-				throw new ArgumentNullException("d", Environment.GetResourceString("Dictionary cannot be null."));
+				throw new ArgumentNullException("dictionary");
 			}
-			d.Keys.CopyTo(this.keys, 0);
-			d.Values.CopyTo(this.values, 0);
-			Array.Sort(this.keys, this.values, comparer);
-			this._size = d.Count;
+			this.InitTable(d.Count, true);
+			this.comparer = comparer;
+			IDictionaryEnumerator enumerator = d.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				this.Add(enumerator.Key, enumerator.Value);
+			}
 		}
 
-		public virtual void Add(object key, object value)
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
-			}
-			int num = Array.BinarySearch(this.keys, 0, this._size, key, this.comparer);
-			if (num >= 0)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Item has already been added. Key in dictionary: '{0}'  Key being added: '{1}'", new object[]
-				{
-					this.GetKey(num),
-					key
-				}));
-			}
-			this.Insert(~num, key, value);
-		}
-
-		public virtual int Capacity
-		{
-			get
-			{
-				return this.keys.Length;
-			}
-			set
-			{
-				if (value < this.Count)
-				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("capacity was less than the current size."));
-				}
-				if (value != this.keys.Length)
-				{
-					if (value > 0)
-					{
-						object[] array = new object[value];
-						object[] array2 = new object[value];
-						if (this._size > 0)
-						{
-							Array.Copy(this.keys, 0, array, 0, this._size);
-							Array.Copy(this.values, 0, array2, 0, this._size);
-						}
-						this.keys = array;
-						this.values = array2;
-						return;
-					}
-					this.keys = SortedList.emptyArray;
-					this.values = SortedList.emptyArray;
-				}
-			}
+			return new SortedList.Enumerator(this, SortedList.EnumeratorMode.ENTRY_MODE);
 		}
 
 		public virtual int Count
 		{
 			get
 			{
-				return this._size;
-			}
-		}
-
-		public virtual ICollection Keys
-		{
-			get
-			{
-				return this.GetKeyList();
-			}
-		}
-
-		public virtual ICollection Values
-		{
-			get
-			{
-				return this.GetValueList();
-			}
-		}
-
-		public virtual bool IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		public virtual bool IsFixedSize
-		{
-			get
-			{
-				return false;
+				return this.inUse;
 			}
 		}
 
@@ -173,222 +88,138 @@ namespace System.Collections
 		{
 			get
 			{
-				if (this._syncRoot == null)
-				{
-					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
-				}
-				return this._syncRoot;
+				return this;
 			}
 		}
 
-		public virtual void Clear()
+		public virtual bool IsFixedSize
 		{
-			this.version++;
-			Array.Clear(this.keys, 0, this._size);
-			Array.Clear(this.values, 0, this._size);
-			this._size = 0;
-		}
-
-		public virtual object Clone()
-		{
-			SortedList sortedList = new SortedList(this._size);
-			Array.Copy(this.keys, 0, sortedList.keys, 0, this._size);
-			Array.Copy(this.values, 0, sortedList.values, 0, this._size);
-			sortedList._size = this._size;
-			sortedList.version = this.version;
-			sortedList.comparer = this.comparer;
-			return sortedList;
-		}
-
-		public virtual bool Contains(object key)
-		{
-			return this.IndexOfKey(key) >= 0;
-		}
-
-		public virtual bool ContainsKey(object key)
-		{
-			return this.IndexOfKey(key) >= 0;
-		}
-
-		public virtual bool ContainsValue(object value)
-		{
-			return this.IndexOfValue(value) >= 0;
-		}
-
-		public virtual void CopyTo(Array array, int arrayIndex)
-		{
-			if (array == null)
+			get
 			{
-				throw new ArgumentNullException("array", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (array.Rank != 1)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-			}
-			if (arrayIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("arrayIndex", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (array.Length - arrayIndex < this.Count)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Destination array is not long enough to copy all the items in the collection. Check array index and length."));
-			}
-			for (int i = 0; i < this.Count; i++)
-			{
-				DictionaryEntry dictionaryEntry = new DictionaryEntry(this.keys[i], this.values[i]);
-				array.SetValue(dictionaryEntry, i + arrayIndex);
+				return false;
 			}
 		}
 
-		internal virtual KeyValuePairs[] ToKeyValuePairsArray()
+		public virtual bool IsReadOnly
 		{
-			KeyValuePairs[] array = new KeyValuePairs[this.Count];
-			for (int i = 0; i < this.Count; i++)
+			get
 			{
-				array[i] = new KeyValuePairs(this.keys[i], this.values[i]);
+				return false;
 			}
-			return array;
 		}
 
-		private void EnsureCapacity(int min)
+		public virtual ICollection Keys
 		{
-			int num = ((this.keys.Length == 0) ? 16 : (this.keys.Length * 2));
-			if (num > 2146435071)
+			get
 			{
-				num = 2146435071;
+				return new SortedList.ListKeys(this);
 			}
-			if (num < min)
-			{
-				num = min;
-			}
-			this.Capacity = num;
 		}
 
-		public virtual object GetByIndex(int index)
+		public virtual ICollection Values
 		{
-			if (index < 0 || index >= this.Count)
+			get
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				return new SortedList.ListValues(this);
 			}
-			return this.values[index];
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new SortedList.SortedListEnumerator(this, 0, this._size, 3);
-		}
-
-		public virtual IDictionaryEnumerator GetEnumerator()
-		{
-			return new SortedList.SortedListEnumerator(this, 0, this._size, 3);
-		}
-
-		public virtual object GetKey(int index)
-		{
-			if (index < 0 || index >= this.Count)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			return this.keys[index];
-		}
-
-		public virtual IList GetKeyList()
-		{
-			if (this.keyList == null)
-			{
-				this.keyList = new SortedList.KeyList(this);
-			}
-			return this.keyList;
-		}
-
-		public virtual IList GetValueList()
-		{
-			if (this.valueList == null)
-			{
-				this.valueList = new SortedList.ValueList(this);
-			}
-			return this.valueList;
 		}
 
 		public virtual object this[object key]
 		{
 			get
 			{
-				int num = this.IndexOfKey(key);
-				if (num >= 0)
+				if (key == null)
 				{
-					return this.values[num];
+					throw new ArgumentNullException();
 				}
-				return null;
+				return this.GetImpl(key);
 			}
 			set
 			{
 				if (key == null)
 				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+					throw new ArgumentNullException();
 				}
-				int num = Array.BinarySearch(this.keys, 0, this._size, key, this.comparer);
-				if (num >= 0)
+				if (this.IsReadOnly)
 				{
-					this.values[num] = value;
-					this.version++;
-					return;
+					throw new NotSupportedException("SortedList is Read Only.");
 				}
-				this.Insert(~num, key, value);
+				if (this.Find(key) < 0 && this.IsFixedSize)
+				{
+					throw new NotSupportedException("Key not found and SortedList is fixed size.");
+				}
+				this.PutImpl(key, value, true);
 			}
 		}
 
-		public virtual int IndexOfKey(object key)
+		public virtual int Capacity
+		{
+			get
+			{
+				return this.table.Length;
+			}
+			set
+			{
+				int num = this.table.Length;
+				if (this.inUse > value)
+				{
+					throw new ArgumentOutOfRangeException("capacity too small");
+				}
+				if (value == 0)
+				{
+					SortedList.Slot[] array = new SortedList.Slot[this.defaultCapacity];
+					Array.Copy(this.table, array, this.inUse);
+					this.table = array;
+				}
+				else if (value > this.inUse)
+				{
+					SortedList.Slot[] array2 = new SortedList.Slot[value];
+					Array.Copy(this.table, array2, this.inUse);
+					this.table = array2;
+				}
+				else if (value > num)
+				{
+					SortedList.Slot[] array3 = new SortedList.Slot[value];
+					Array.Copy(this.table, array3, num);
+					this.table = array3;
+				}
+			}
+		}
+
+		public virtual void Add(object key, object value)
+		{
+			this.PutImpl(key, value, false);
+		}
+
+		public virtual void Clear()
+		{
+			this.defaultCapacity = SortedList.INITIAL_SIZE;
+			this.table = new SortedList.Slot[this.defaultCapacity];
+			this.inUse = 0;
+			this.modificationCount++;
+		}
+
+		public virtual bool Contains(object key)
 		{
 			if (key == null)
 			{
-				throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
+				throw new ArgumentNullException();
 			}
-			int num = Array.BinarySearch(this.keys, 0, this._size, key, this.comparer);
-			if (num < 0)
+			bool flag;
+			try
 			{
-				return -1;
+				flag = this.Find(key) >= 0;
 			}
-			return num;
+			catch (Exception)
+			{
+				throw new InvalidOperationException();
+			}
+			return flag;
 		}
 
-		public virtual int IndexOfValue(object value)
+		public virtual IDictionaryEnumerator GetEnumerator()
 		{
-			return Array.IndexOf<object>(this.values, value, 0, this._size);
-		}
-
-		private void Insert(int index, object key, object value)
-		{
-			if (this._size == this.keys.Length)
-			{
-				this.EnsureCapacity(this._size + 1);
-			}
-			if (index < this._size)
-			{
-				Array.Copy(this.keys, index, this.keys, index + 1, this._size - index);
-				Array.Copy(this.values, index, this.values, index + 1, this._size - index);
-			}
-			this.keys[index] = key;
-			this.values[index] = value;
-			this._size++;
-			this.version++;
-		}
-
-		public virtual void RemoveAt(int index)
-		{
-			if (index < 0 || index >= this.Count)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			this._size--;
-			if (index < this._size)
-			{
-				Array.Copy(this.keys, index + 1, this.keys, index, this._size - index);
-				Array.Copy(this.values, index + 1, this.values, index, this._size - index);
-			}
-			this.keys[this._size] = null;
-			this.values[this._size] = null;
-			this.version++;
+			return new SortedList.Enumerator(this, SortedList.EnumeratorMode.ENTRY_MODE);
 		}
 
 		public virtual void Remove(object key)
@@ -400,96 +231,779 @@ namespace System.Collections
 			}
 		}
 
-		public virtual void SetByIndex(int index, object value)
+		public virtual void CopyTo(Array array, int arrayIndex)
 		{
-			if (index < 0 || index >= this.Count)
+			if (array == null)
 			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
+				throw new ArgumentNullException();
 			}
-			this.values[index] = value;
-			this.version++;
+			if (arrayIndex < 0)
+			{
+				throw new ArgumentOutOfRangeException();
+			}
+			if (array.Rank > 1)
+			{
+				throw new ArgumentException("array is multi-dimensional");
+			}
+			if (arrayIndex >= array.Length)
+			{
+				throw new ArgumentNullException("arrayIndex is greater than or equal to array.Length");
+			}
+			if (this.Count > array.Length - arrayIndex)
+			{
+				throw new ArgumentNullException("Not enough space in array from arrayIndex to end of array");
+			}
+			IDictionaryEnumerator enumerator = this.GetEnumerator();
+			int num = arrayIndex;
+			while (enumerator.MoveNext())
+			{
+				array.SetValue(enumerator.Entry, num++);
+			}
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, Synchronization = true)]
+		public virtual object Clone()
+		{
+			return new SortedList(this, this.comparer)
+			{
+				modificationCount = this.modificationCount
+			};
+		}
+
+		public virtual IList GetKeyList()
+		{
+			return new SortedList.ListKeys(this);
+		}
+
+		public virtual IList GetValueList()
+		{
+			return new SortedList.ListValues(this);
+		}
+
+		public virtual void RemoveAt(int index)
+		{
+			SortedList.Slot[] array = this.table;
+			int count = this.Count;
+			if (index >= 0 && index < count)
+			{
+				if (index != count - 1)
+				{
+					Array.Copy(array, index + 1, array, index, count - 1 - index);
+				}
+				else
+				{
+					array[index].key = null;
+					array[index].value = null;
+				}
+				this.inUse--;
+				this.modificationCount++;
+				return;
+			}
+			throw new ArgumentOutOfRangeException("index out of range");
+		}
+
+		public virtual int IndexOfKey(object key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException();
+			}
+			int num = 0;
+			try
+			{
+				num = this.Find(key);
+			}
+			catch (Exception)
+			{
+				throw new InvalidOperationException();
+			}
+			return num | (num >> 31);
+		}
+
+		public virtual int IndexOfValue(object value)
+		{
+			if (this.inUse == 0)
+			{
+				return -1;
+			}
+			for (int i = 0; i < this.inUse; i++)
+			{
+				SortedList.Slot slot = this.table[i];
+				if (object.Equals(value, slot.value))
+				{
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		public virtual bool ContainsKey(object key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException();
+			}
+			bool flag;
+			try
+			{
+				flag = this.Contains(key);
+			}
+			catch (Exception)
+			{
+				throw new InvalidOperationException();
+			}
+			return flag;
+		}
+
+		public virtual bool ContainsValue(object value)
+		{
+			return this.IndexOfValue(value) >= 0;
+		}
+
+		public virtual object GetByIndex(int index)
+		{
+			if (index >= 0 && index < this.Count)
+			{
+				return this.table[index].value;
+			}
+			throw new ArgumentOutOfRangeException("index out of range");
+		}
+
+		public virtual void SetByIndex(int index, object value)
+		{
+			if (index >= 0 && index < this.Count)
+			{
+				this.table[index].value = value;
+				return;
+			}
+			throw new ArgumentOutOfRangeException("index out of range");
+		}
+
+		public virtual object GetKey(int index)
+		{
+			if (index >= 0 && index < this.Count)
+			{
+				return this.table[index].key;
+			}
+			throw new ArgumentOutOfRangeException("index out of range");
+		}
+
 		public static SortedList Synchronized(SortedList list)
 		{
 			if (list == null)
 			{
-				throw new ArgumentNullException("list");
+				throw new ArgumentNullException(Locale.GetText("Base list is null."));
 			}
-			return new SortedList.SyncSortedList(list);
+			return new SortedList.SynchedSortedList(list);
 		}
 
 		public virtual void TrimToSize()
 		{
-			this.Capacity = this._size;
+			if (this.Count == 0)
+			{
+				this.Resize(this.defaultCapacity, false);
+			}
+			else
+			{
+				this.Resize(this.Count, true);
+			}
 		}
 
-		private object[] keys;
+		private void Resize(int n, bool copy)
+		{
+			SortedList.Slot[] array = this.table;
+			SortedList.Slot[] array2 = new SortedList.Slot[n];
+			if (copy)
+			{
+				Array.Copy(array, 0, array2, 0, n);
+			}
+			this.table = array2;
+		}
 
-		private object[] values;
+		private void EnsureCapacity(int n, int free)
+		{
+			SortedList.Slot[] array = this.table;
+			SortedList.Slot[] array2 = null;
+			int capacity = this.Capacity;
+			bool flag = free >= 0 && free < this.Count;
+			if (n > capacity)
+			{
+				array2 = new SortedList.Slot[n << 1];
+			}
+			if (array2 != null)
+			{
+				if (flag)
+				{
+					if (free > 0)
+					{
+						Array.Copy(array, 0, array2, 0, free);
+					}
+					int num = this.Count - free;
+					if (num > 0)
+					{
+						Array.Copy(array, free, array2, free + 1, num);
+					}
+				}
+				else
+				{
+					Array.Copy(array, array2, this.Count);
+				}
+				this.table = array2;
+			}
+			else if (flag)
+			{
+				Array.Copy(array, free, array, free + 1, this.Count - free);
+			}
+		}
 
-		private int _size;
+		private void PutImpl(object key, object value, bool overwrite)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("null key");
+			}
+			SortedList.Slot[] array = this.table;
+			int num = -1;
+			try
+			{
+				num = this.Find(key);
+			}
+			catch (Exception)
+			{
+				throw new InvalidOperationException();
+			}
+			if (num >= 0)
+			{
+				if (!overwrite)
+				{
+					string text = Locale.GetText("Key '{0}' already exists in list.", new object[] { key });
+					throw new ArgumentException(text);
+				}
+				array[num].value = value;
+				this.modificationCount++;
+				return;
+			}
+			else
+			{
+				num = ~num;
+				if (num > this.Capacity + 1)
+				{
+					throw new Exception(string.Concat(new object[] { "SortedList::internal error (", key, ", ", value, ") at [", num, "]" }));
+				}
+				this.EnsureCapacity(this.Count + 1, num);
+				array = this.table;
+				array[num].key = key;
+				array[num].value = value;
+				this.inUse++;
+				this.modificationCount++;
+				return;
+			}
+		}
 
-		private int version;
+		private object GetImpl(object key)
+		{
+			int num = this.Find(key);
+			if (num >= 0)
+			{
+				return this.table[num].value;
+			}
+			return null;
+		}
+
+		private void InitTable(int capacity, bool forceSize)
+		{
+			if (!forceSize && capacity < this.defaultCapacity)
+			{
+				capacity = this.defaultCapacity;
+			}
+			this.table = new SortedList.Slot[capacity];
+			this.inUse = 0;
+			this.modificationCount = 0;
+		}
+
+		private void CopyToArray(Array arr, int i, SortedList.EnumeratorMode mode)
+		{
+			if (arr == null)
+			{
+				throw new ArgumentNullException("arr");
+			}
+			if (i < 0 || i + this.Count > arr.Length)
+			{
+				throw new ArgumentOutOfRangeException("i");
+			}
+			IEnumerator enumerator = new SortedList.Enumerator(this, mode);
+			while (enumerator.MoveNext())
+			{
+				object obj = enumerator.Current;
+				arr.SetValue(obj, i++);
+			}
+		}
+
+		private int Find(object key)
+		{
+			SortedList.Slot[] array = this.table;
+			int count = this.Count;
+			if (count == 0)
+			{
+				return -1;
+			}
+			IComparer comparer;
+			if (this.comparer == null)
+			{
+				IComparer @default = Comparer.Default;
+				comparer = @default;
+			}
+			else
+			{
+				comparer = this.comparer;
+			}
+			IComparer comparer2 = comparer;
+			int i = 0;
+			int num = count - 1;
+			while (i <= num)
+			{
+				int num2 = i + num >> 1;
+				int num3 = comparer2.Compare(array[num2].key, key);
+				if (num3 == 0)
+				{
+					return num2;
+				}
+				if (num3 < 0)
+				{
+					i = num2 + 1;
+				}
+				else
+				{
+					num = num2 - 1;
+				}
+			}
+			return ~i;
+		}
+
+		private static readonly int INITIAL_SIZE = 16;
+
+		private int inUse;
+
+		private int modificationCount;
+
+		private SortedList.Slot[] table;
 
 		private IComparer comparer;
 
-		private SortedList.KeyList keyList;
-
-		private SortedList.ValueList valueList;
-
-		[NonSerialized]
-		private object _syncRoot;
-
-		private const int _defaultCapacity = 16;
-
-		private static object[] emptyArray = EmptyArray<object>.Value;
+		private int defaultCapacity;
 
 		[Serializable]
-		private class SyncSortedList : SortedList
+		internal struct Slot
 		{
-			internal SyncSortedList(SortedList list)
+			internal object key;
+
+			internal object value;
+		}
+
+		private enum EnumeratorMode
+		{
+			KEY_MODE,
+			VALUE_MODE,
+			ENTRY_MODE
+		}
+
+		private sealed class Enumerator : IEnumerator, ICloneable, IDictionaryEnumerator
+		{
+			public Enumerator(SortedList host, SortedList.EnumeratorMode mode)
 			{
-				this._list = list;
-				this._root = list.SyncRoot;
+				this.host = host;
+				this.stamp = host.modificationCount;
+				this.size = host.Count;
+				this.mode = mode;
+				this.Reset();
+			}
+
+			public Enumerator(SortedList host)
+				: this(host, SortedList.EnumeratorMode.ENTRY_MODE)
+			{
+			}
+
+			public void Reset()
+			{
+				if (this.host.modificationCount != this.stamp || this.invalid)
+				{
+					throw new InvalidOperationException(SortedList.Enumerator.xstr);
+				}
+				this.pos = -1;
+				this.currentKey = null;
+				this.currentValue = null;
+			}
+
+			public bool MoveNext()
+			{
+				if (this.host.modificationCount != this.stamp || this.invalid)
+				{
+					throw new InvalidOperationException(SortedList.Enumerator.xstr);
+				}
+				SortedList.Slot[] table = this.host.table;
+				if (++this.pos < this.size)
+				{
+					SortedList.Slot slot = table[this.pos];
+					this.currentKey = slot.key;
+					this.currentValue = slot.value;
+					return true;
+				}
+				this.currentKey = null;
+				this.currentValue = null;
+				return false;
+			}
+
+			public DictionaryEntry Entry
+			{
+				get
+				{
+					if (this.invalid || this.pos >= this.size || this.pos == -1)
+					{
+						throw new InvalidOperationException(SortedList.Enumerator.xstr);
+					}
+					return new DictionaryEntry(this.currentKey, this.currentValue);
+				}
+			}
+
+			public object Key
+			{
+				get
+				{
+					if (this.invalid || this.pos >= this.size || this.pos == -1)
+					{
+						throw new InvalidOperationException(SortedList.Enumerator.xstr);
+					}
+					return this.currentKey;
+				}
+			}
+
+			public object Value
+			{
+				get
+				{
+					if (this.invalid || this.pos >= this.size || this.pos == -1)
+					{
+						throw new InvalidOperationException(SortedList.Enumerator.xstr);
+					}
+					return this.currentValue;
+				}
+			}
+
+			public object Current
+			{
+				get
+				{
+					if (this.invalid || this.pos >= this.size || this.pos == -1)
+					{
+						throw new InvalidOperationException(SortedList.Enumerator.xstr);
+					}
+					switch (this.mode)
+					{
+					case SortedList.EnumeratorMode.KEY_MODE:
+						return this.currentKey;
+					case SortedList.EnumeratorMode.VALUE_MODE:
+						return this.currentValue;
+					case SortedList.EnumeratorMode.ENTRY_MODE:
+						return this.Entry;
+					default:
+						throw new NotSupportedException(this.mode + " is not a supported mode.");
+					}
+				}
+			}
+
+			public object Clone()
+			{
+				return new SortedList.Enumerator(this.host, this.mode)
+				{
+					stamp = this.stamp,
+					pos = this.pos,
+					size = this.size,
+					currentKey = this.currentKey,
+					currentValue = this.currentValue,
+					invalid = this.invalid
+				};
+			}
+
+			private SortedList host;
+
+			private int stamp;
+
+			private int pos;
+
+			private int size;
+
+			private SortedList.EnumeratorMode mode;
+
+			private object currentKey;
+
+			private object currentValue;
+
+			private bool invalid;
+
+			private static readonly string xstr = "SortedList.Enumerator: snapshot out of sync.";
+		}
+
+		[Serializable]
+		private class ListKeys : IEnumerable, ICollection, IList
+		{
+			public ListKeys(SortedList host)
+			{
+				if (host == null)
+				{
+					throw new ArgumentNullException();
+				}
+				this.host = host;
+			}
+
+			public virtual int Count
+			{
+				get
+				{
+					return this.host.Count;
+				}
+			}
+
+			public virtual bool IsSynchronized
+			{
+				get
+				{
+					return this.host.IsSynchronized;
+				}
+			}
+
+			public virtual object SyncRoot
+			{
+				get
+				{
+					return this.host.SyncRoot;
+				}
+			}
+
+			public virtual void CopyTo(Array array, int arrayIndex)
+			{
+				this.host.CopyToArray(array, arrayIndex, SortedList.EnumeratorMode.KEY_MODE);
+			}
+
+			public virtual bool IsFixedSize
+			{
+				get
+				{
+					return true;
+				}
+			}
+
+			public virtual bool IsReadOnly
+			{
+				get
+				{
+					return true;
+				}
+			}
+
+			public virtual object this[int index]
+			{
+				get
+				{
+					return this.host.GetKey(index);
+				}
+				set
+				{
+					throw new NotSupportedException("attempt to modify a key");
+				}
+			}
+
+			public virtual int Add(object value)
+			{
+				throw new NotSupportedException("IList::Add not supported");
+			}
+
+			public virtual void Clear()
+			{
+				throw new NotSupportedException("IList::Clear not supported");
+			}
+
+			public virtual bool Contains(object key)
+			{
+				return this.host.Contains(key);
+			}
+
+			public virtual int IndexOf(object key)
+			{
+				return this.host.IndexOfKey(key);
+			}
+
+			public virtual void Insert(int index, object value)
+			{
+				throw new NotSupportedException("IList::Insert not supported");
+			}
+
+			public virtual void Remove(object value)
+			{
+				throw new NotSupportedException("IList::Remove not supported");
+			}
+
+			public virtual void RemoveAt(int index)
+			{
+				throw new NotSupportedException("IList::RemoveAt not supported");
+			}
+
+			public virtual IEnumerator GetEnumerator()
+			{
+				return new SortedList.Enumerator(this.host, SortedList.EnumeratorMode.KEY_MODE);
+			}
+
+			private SortedList host;
+		}
+
+		[Serializable]
+		private class ListValues : IEnumerable, ICollection, IList
+		{
+			public ListValues(SortedList host)
+			{
+				if (host == null)
+				{
+					throw new ArgumentNullException();
+				}
+				this.host = host;
+			}
+
+			public virtual int Count
+			{
+				get
+				{
+					return this.host.Count;
+				}
+			}
+
+			public virtual bool IsSynchronized
+			{
+				get
+				{
+					return this.host.IsSynchronized;
+				}
+			}
+
+			public virtual object SyncRoot
+			{
+				get
+				{
+					return this.host.SyncRoot;
+				}
+			}
+
+			public virtual void CopyTo(Array array, int arrayIndex)
+			{
+				this.host.CopyToArray(array, arrayIndex, SortedList.EnumeratorMode.VALUE_MODE);
+			}
+
+			public virtual bool IsFixedSize
+			{
+				get
+				{
+					return true;
+				}
+			}
+
+			public virtual bool IsReadOnly
+			{
+				get
+				{
+					return true;
+				}
+			}
+
+			public virtual object this[int index]
+			{
+				get
+				{
+					return this.host.GetByIndex(index);
+				}
+				set
+				{
+					throw new NotSupportedException("This operation is not supported on GetValueList return");
+				}
+			}
+
+			public virtual int Add(object value)
+			{
+				throw new NotSupportedException("IList::Add not supported");
+			}
+
+			public virtual void Clear()
+			{
+				throw new NotSupportedException("IList::Clear not supported");
+			}
+
+			public virtual bool Contains(object value)
+			{
+				return this.host.ContainsValue(value);
+			}
+
+			public virtual int IndexOf(object value)
+			{
+				return this.host.IndexOfValue(value);
+			}
+
+			public virtual void Insert(int index, object value)
+			{
+				throw new NotSupportedException("IList::Insert not supported");
+			}
+
+			public virtual void Remove(object value)
+			{
+				throw new NotSupportedException("IList::Remove not supported");
+			}
+
+			public virtual void RemoveAt(int index)
+			{
+				throw new NotSupportedException("IList::RemoveAt not supported");
+			}
+
+			public virtual IEnumerator GetEnumerator()
+			{
+				return new SortedList.Enumerator(this.host, SortedList.EnumeratorMode.VALUE_MODE);
+			}
+
+			private SortedList host;
+		}
+
+		private class SynchedSortedList : SortedList
+		{
+			public SynchedSortedList(SortedList host)
+			{
+				if (host == null)
+				{
+					throw new ArgumentNullException();
+				}
+				this.host = host;
+			}
+
+			public override int Capacity
+			{
+				get
+				{
+					object syncRoot = this.host.SyncRoot;
+					int capacity;
+					lock (syncRoot)
+					{
+						capacity = this.host.Capacity;
+					}
+					return capacity;
+				}
+				set
+				{
+					object syncRoot = this.host.SyncRoot;
+					lock (syncRoot)
+					{
+						this.host.Capacity = value;
+					}
+				}
 			}
 
 			public override int Count
 			{
 				get
 				{
-					object root = this._root;
-					int count;
-					lock (root)
-					{
-						count = this._list.Count;
-					}
-					return count;
-				}
-			}
-
-			public override object SyncRoot
-			{
-				get
-				{
-					return this._root;
-				}
-			}
-
-			public override bool IsReadOnly
-			{
-				get
-				{
-					return this._list.IsReadOnly;
-				}
-			}
-
-			public override bool IsFixedSize
-			{
-				get
-				{
-					return this._list.IsFixedSize;
+					return this.host.Count;
 				}
 			}
 
@@ -501,638 +1015,265 @@ namespace System.Collections
 				}
 			}
 
+			public override object SyncRoot
+			{
+				get
+				{
+					return this.host.SyncRoot;
+				}
+			}
+
+			public override bool IsFixedSize
+			{
+				get
+				{
+					return this.host.IsFixedSize;
+				}
+			}
+
+			public override bool IsReadOnly
+			{
+				get
+				{
+					return this.host.IsReadOnly;
+				}
+			}
+
+			public override ICollection Keys
+			{
+				get
+				{
+					ICollection collection = null;
+					object syncRoot = this.host.SyncRoot;
+					lock (syncRoot)
+					{
+						collection = this.host.Keys;
+					}
+					return collection;
+				}
+			}
+
+			public override ICollection Values
+			{
+				get
+				{
+					ICollection collection = null;
+					object syncRoot = this.host.SyncRoot;
+					lock (syncRoot)
+					{
+						collection = this.host.Values;
+					}
+					return collection;
+				}
+			}
+
 			public override object this[object key]
 			{
 				get
 				{
-					object root = this._root;
-					object obj;
-					lock (root)
+					object syncRoot = this.host.SyncRoot;
+					object impl;
+					lock (syncRoot)
 					{
-						obj = this._list[key];
+						impl = this.host.GetImpl(key);
 					}
-					return obj;
+					return impl;
 				}
 				set
 				{
-					object root = this._root;
-					lock (root)
+					object syncRoot = this.host.SyncRoot;
+					lock (syncRoot)
 					{
-						this._list[key] = value;
+						this.host.PutImpl(key, value, true);
 					}
+				}
+			}
+
+			public override void CopyTo(Array array, int arrayIndex)
+			{
+				object syncRoot = this.host.SyncRoot;
+				lock (syncRoot)
+				{
+					this.host.CopyTo(array, arrayIndex);
 				}
 			}
 
 			public override void Add(object key, object value)
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.Add(key, value);
-				}
-			}
-
-			public override int Capacity
-			{
-				get
-				{
-					object root = this._root;
-					int capacity;
-					lock (root)
-					{
-						capacity = this._list.Capacity;
-					}
-					return capacity;
+					this.host.PutImpl(key, value, false);
 				}
 			}
 
 			public override void Clear()
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.Clear();
+					this.host.Clear();
 				}
-			}
-
-			public override object Clone()
-			{
-				object root = this._root;
-				object obj;
-				lock (root)
-				{
-					obj = this._list.Clone();
-				}
-				return obj;
 			}
 
 			public override bool Contains(object key)
 			{
-				object root = this._root;
-				bool flag2;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				bool flag;
+				lock (syncRoot)
 				{
-					flag2 = this._list.Contains(key);
+					flag = this.host.Find(key) >= 0;
 				}
-				return flag2;
-			}
-
-			public override bool ContainsKey(object key)
-			{
-				object root = this._root;
-				bool flag2;
-				lock (root)
-				{
-					flag2 = this._list.ContainsKey(key);
-				}
-				return flag2;
-			}
-
-			public override bool ContainsValue(object key)
-			{
-				object root = this._root;
-				bool flag2;
-				lock (root)
-				{
-					flag2 = this._list.ContainsValue(key);
-				}
-				return flag2;
-			}
-
-			public override void CopyTo(Array array, int index)
-			{
-				object root = this._root;
-				lock (root)
-				{
-					this._list.CopyTo(array, index);
-				}
-			}
-
-			public override object GetByIndex(int index)
-			{
-				object root = this._root;
-				object byIndex;
-				lock (root)
-				{
-					byIndex = this._list.GetByIndex(index);
-				}
-				return byIndex;
+				return flag;
 			}
 
 			public override IDictionaryEnumerator GetEnumerator()
 			{
-				object root = this._root;
+				object syncRoot = this.host.SyncRoot;
 				IDictionaryEnumerator enumerator;
-				lock (root)
+				lock (syncRoot)
 				{
-					enumerator = this._list.GetEnumerator();
+					enumerator = this.host.GetEnumerator();
 				}
 				return enumerator;
 			}
 
+			public override void Remove(object key)
+			{
+				object syncRoot = this.host.SyncRoot;
+				lock (syncRoot)
+				{
+					this.host.Remove(key);
+				}
+			}
+
+			public override bool ContainsKey(object key)
+			{
+				object syncRoot = this.host.SyncRoot;
+				bool flag;
+				lock (syncRoot)
+				{
+					flag = this.host.Contains(key);
+				}
+				return flag;
+			}
+
+			public override bool ContainsValue(object value)
+			{
+				object syncRoot = this.host.SyncRoot;
+				bool flag;
+				lock (syncRoot)
+				{
+					flag = this.host.ContainsValue(value);
+				}
+				return flag;
+			}
+
+			public override object Clone()
+			{
+				object syncRoot = this.host.SyncRoot;
+				object obj;
+				lock (syncRoot)
+				{
+					obj = this.host.Clone() as SortedList;
+				}
+				return obj;
+			}
+
+			public override object GetByIndex(int index)
+			{
+				object syncRoot = this.host.SyncRoot;
+				object byIndex;
+				lock (syncRoot)
+				{
+					byIndex = this.host.GetByIndex(index);
+				}
+				return byIndex;
+			}
+
 			public override object GetKey(int index)
 			{
-				object root = this._root;
+				object syncRoot = this.host.SyncRoot;
 				object key;
-				lock (root)
+				lock (syncRoot)
 				{
-					key = this._list.GetKey(index);
+					key = this.host.GetKey(index);
 				}
 				return key;
 			}
 
 			public override IList GetKeyList()
 			{
-				object root = this._root;
-				IList keyList;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				IList list;
+				lock (syncRoot)
 				{
-					keyList = this._list.GetKeyList();
+					list = new SortedList.ListKeys(this.host);
 				}
-				return keyList;
+				return list;
 			}
 
 			public override IList GetValueList()
 			{
-				object root = this._root;
-				IList valueList;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				IList list;
+				lock (syncRoot)
 				{
-					valueList = this._list.GetValueList();
+					list = new SortedList.ListValues(this.host);
 				}
-				return valueList;
-			}
-
-			public override int IndexOfKey(object key)
-			{
-				if (key == null)
-				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
-				}
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.IndexOfKey(key);
-				}
-				return num;
-			}
-
-			public override int IndexOfValue(object value)
-			{
-				object root = this._root;
-				int num;
-				lock (root)
-				{
-					num = this._list.IndexOfValue(value);
-				}
-				return num;
+				return list;
 			}
 
 			public override void RemoveAt(int index)
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.RemoveAt(index);
+					this.host.RemoveAt(index);
 				}
 			}
 
-			public override void Remove(object key)
+			public override int IndexOfKey(object key)
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				int num;
+				lock (syncRoot)
 				{
-					this._list.Remove(key);
+					num = this.host.IndexOfKey(key);
 				}
+				return num;
+			}
+
+			public override int IndexOfValue(object val)
+			{
+				object syncRoot = this.host.SyncRoot;
+				int num;
+				lock (syncRoot)
+				{
+					num = this.host.IndexOfValue(val);
+				}
+				return num;
 			}
 
 			public override void SetByIndex(int index, object value)
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.SetByIndex(index, value);
+					this.host.SetByIndex(index, value);
 				}
-			}
-
-			internal override KeyValuePairs[] ToKeyValuePairsArray()
-			{
-				return this._list.ToKeyValuePairsArray();
 			}
 
 			public override void TrimToSize()
 			{
-				object root = this._root;
-				lock (root)
+				object syncRoot = this.host.SyncRoot;
+				lock (syncRoot)
 				{
-					this._list.TrimToSize();
+					this.host.TrimToSize();
 				}
 			}
 
-			private SortedList _list;
-
-			private object _root;
-		}
-
-		[Serializable]
-		private class SortedListEnumerator : IDictionaryEnumerator, IEnumerator, ICloneable
-		{
-			internal SortedListEnumerator(SortedList sortedList, int index, int count, int getObjRetType)
-			{
-				this.sortedList = sortedList;
-				this.index = index;
-				this.startIndex = index;
-				this.endIndex = index + count;
-				this.version = sortedList.version;
-				this.getObjectRetType = getObjRetType;
-				this.current = false;
-			}
-
-			public object Clone()
-			{
-				return base.MemberwiseClone();
-			}
-
-			public virtual object Key
-			{
-				get
-				{
-					if (this.version != this.sortedList.version)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-					}
-					if (!this.current)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-					}
-					return this.key;
-				}
-			}
-
-			public virtual bool MoveNext()
-			{
-				if (this.version != this.sortedList.version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-				}
-				if (this.index < this.endIndex)
-				{
-					this.key = this.sortedList.keys[this.index];
-					this.value = this.sortedList.values[this.index];
-					this.index++;
-					this.current = true;
-					return true;
-				}
-				this.key = null;
-				this.value = null;
-				this.current = false;
-				return false;
-			}
-
-			public virtual DictionaryEntry Entry
-			{
-				get
-				{
-					if (this.version != this.sortedList.version)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-					}
-					if (!this.current)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-					}
-					return new DictionaryEntry(this.key, this.value);
-				}
-			}
-
-			public virtual object Current
-			{
-				get
-				{
-					if (!this.current)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-					}
-					if (this.getObjectRetType == 1)
-					{
-						return this.key;
-					}
-					if (this.getObjectRetType == 2)
-					{
-						return this.value;
-					}
-					return new DictionaryEntry(this.key, this.value);
-				}
-			}
-
-			public virtual object Value
-			{
-				get
-				{
-					if (this.version != this.sortedList.version)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-					}
-					if (!this.current)
-					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-					}
-					return this.value;
-				}
-			}
-
-			public virtual void Reset()
-			{
-				if (this.version != this.sortedList.version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-				}
-				this.index = this.startIndex;
-				this.current = false;
-				this.key = null;
-				this.value = null;
-			}
-
-			private SortedList sortedList;
-
-			private object key;
-
-			private object value;
-
-			private int index;
-
-			private int startIndex;
-
-			private int endIndex;
-
-			private int version;
-
-			private bool current;
-
-			private int getObjectRetType;
-
-			internal const int Keys = 1;
-
-			internal const int Values = 2;
-
-			internal const int DictEntry = 3;
-		}
-
-		[Serializable]
-		private class KeyList : IList, ICollection, IEnumerable
-		{
-			internal KeyList(SortedList sortedList)
-			{
-				this.sortedList = sortedList;
-			}
-
-			public virtual int Count
-			{
-				get
-				{
-					return this.sortedList._size;
-				}
-			}
-
-			public virtual bool IsReadOnly
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual bool IsFixedSize
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual bool IsSynchronized
-			{
-				get
-				{
-					return this.sortedList.IsSynchronized;
-				}
-			}
-
-			public virtual object SyncRoot
-			{
-				get
-				{
-					return this.sortedList.SyncRoot;
-				}
-			}
-
-			public virtual int Add(object key)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual void Clear()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual bool Contains(object key)
-			{
-				return this.sortedList.Contains(key);
-			}
-
-			public virtual void CopyTo(Array array, int arrayIndex)
-			{
-				if (array != null && array.Rank != 1)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-				}
-				Array.Copy(this.sortedList.keys, 0, array, arrayIndex, this.sortedList.Count);
-			}
-
-			public virtual void Insert(int index, object value)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual object this[int index]
-			{
-				get
-				{
-					return this.sortedList.GetKey(index);
-				}
-				set
-				{
-					throw new NotSupportedException(Environment.GetResourceString("Mutating a key collection derived from a dictionary is not allowed."));
-				}
-			}
-
-			public virtual IEnumerator GetEnumerator()
-			{
-				return new SortedList.SortedListEnumerator(this.sortedList, 0, this.sortedList.Count, 1);
-			}
-
-			public virtual int IndexOf(object key)
-			{
-				if (key == null)
-				{
-					throw new ArgumentNullException("key", Environment.GetResourceString("Key cannot be null."));
-				}
-				int num = Array.BinarySearch(this.sortedList.keys, 0, this.sortedList.Count, key, this.sortedList.comparer);
-				if (num >= 0)
-				{
-					return num;
-				}
-				return -1;
-			}
-
-			public virtual void Remove(object key)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual void RemoveAt(int index)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			private SortedList sortedList;
-		}
-
-		[Serializable]
-		private class ValueList : IList, ICollection, IEnumerable
-		{
-			internal ValueList(SortedList sortedList)
-			{
-				this.sortedList = sortedList;
-			}
-
-			public virtual int Count
-			{
-				get
-				{
-					return this.sortedList._size;
-				}
-			}
-
-			public virtual bool IsReadOnly
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual bool IsFixedSize
-			{
-				get
-				{
-					return true;
-				}
-			}
-
-			public virtual bool IsSynchronized
-			{
-				get
-				{
-					return this.sortedList.IsSynchronized;
-				}
-			}
-
-			public virtual object SyncRoot
-			{
-				get
-				{
-					return this.sortedList.SyncRoot;
-				}
-			}
-
-			public virtual int Add(object key)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual void Clear()
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual bool Contains(object value)
-			{
-				return this.sortedList.ContainsValue(value);
-			}
-
-			public virtual void CopyTo(Array array, int arrayIndex)
-			{
-				if (array != null && array.Rank != 1)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-				}
-				Array.Copy(this.sortedList.values, 0, array, arrayIndex, this.sortedList.Count);
-			}
-
-			public virtual void Insert(int index, object value)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual object this[int index]
-			{
-				get
-				{
-					return this.sortedList.GetByIndex(index);
-				}
-				set
-				{
-					throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-				}
-			}
-
-			public virtual IEnumerator GetEnumerator()
-			{
-				return new SortedList.SortedListEnumerator(this.sortedList, 0, this.sortedList.Count, 2);
-			}
-
-			public virtual int IndexOf(object value)
-			{
-				return Array.IndexOf<object>(this.sortedList.values, value, 0, this.sortedList.Count);
-			}
-
-			public virtual void Remove(object value)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			public virtual void RemoveAt(int index)
-			{
-				throw new NotSupportedException(Environment.GetResourceString("This operation is not supported on SortedList nested types because they require modifying the original SortedList."));
-			}
-
-			private SortedList sortedList;
-		}
-
-		internal class SortedListDebugView
-		{
-			public SortedListDebugView(SortedList sortedList)
-			{
-				if (sortedList == null)
-				{
-					throw new ArgumentNullException("sortedList");
-				}
-				this.sortedList = sortedList;
-			}
-
-			[DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-			public KeyValuePairs[] Items
-			{
-				get
-				{
-					return this.sortedList.ToKeyValuePairsArray();
-				}
-			}
-
-			private SortedList sortedList;
+			private SortedList host;
 		}
 	}
 }

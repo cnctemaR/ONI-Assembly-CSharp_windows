@@ -47,7 +47,7 @@ public class TuningSystem
 		foreach (Type type in App.GetCurrentDomainTypes())
 		{
 			Type baseType = type.BaseType;
-			if (!(baseType == null) && baseType.IsGenericType)
+			if (baseType != null && baseType.IsGenericType)
 			{
 				if (baseType.GetGenericTypeDefinition() == typeof(TuningData<>))
 				{

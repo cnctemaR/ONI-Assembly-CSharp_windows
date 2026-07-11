@@ -410,9 +410,11 @@ namespace STRINGS
 
 			public class NEEDGASIN
 			{
-				public static LocString NAME = "No Gas Intake";
+				public static LocString NAME = "No Gas Intake\n{GasRequired}";
 
 				public static LocString TOOLTIP = "This building has nowhere to receive gas from";
+
+				public static LocString LINE_ITEM = "• {0}";
 			}
 
 			public class NEEDGASOUT
@@ -424,9 +426,11 @@ namespace STRINGS
 
 			public class NEEDLIQUIDIN
 			{
-				public static LocString NAME = "No Liquid Intake";
+				public static LocString NAME = "No Liquid Intake\n{LiquidRequired}";
 
 				public static LocString TOOLTIP = "This building has nowhere to receive liquid from";
+
+				public static LocString LINE_ITEM = "• {0}";
 			}
 
 			public class NEEDLIQUIDOUT
@@ -997,11 +1001,13 @@ namespace STRINGS
 				public static LocString TOOLTIP = "All batteries are above the refill threshold";
 			}
 
-			public class INSUFFICIENT_CONVERSION_MASS
+			public class NEEDRESOURCEMASS
 			{
-				public static LocString NAME = "Insufficient Resources";
+				public static LocString NAME = "Insufficient Resources\n{ResourcesRequired}";
 
 				public static LocString TOOLTIP = "The mass of material that was delivered to this building was too low\n\nDeliver more material to run this building";
+
+				public static LocString LINE_ITEM = "• {0}";
 			}
 
 			public class JOULESAVAILABLE

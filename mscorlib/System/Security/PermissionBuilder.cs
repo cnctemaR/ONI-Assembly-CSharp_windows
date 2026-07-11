@@ -58,7 +58,8 @@ namespace System.Security
 			Type type = Type.GetType(fullname);
 			if (type == null)
 			{
-				throw new TypeLoadException(string.Format(Locale.GetText("Can't create an instance of permission class {0}."), fullname));
+				string text = Locale.GetText("Can't create an instance of permission class {0}.");
+				throw new TypeLoadException(string.Format(text, fullname));
 			}
 			IPermission permission = PermissionBuilder.Create(type);
 			permission.FromXml(se);

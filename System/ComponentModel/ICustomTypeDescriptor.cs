@@ -20,11 +20,11 @@ namespace System.ComponentModel
 
 		EventDescriptorCollection GetEvents();
 
-		EventDescriptorCollection GetEvents(Attribute[] attributes);
+		EventDescriptorCollection GetEvents(Attribute[] arr);
 
 		PropertyDescriptorCollection GetProperties();
 
-		PropertyDescriptorCollection GetProperties(Attribute[] attributes);
+		PropertyDescriptorCollection GetProperties(Attribute[] arr);
 
 		object GetPropertyOwner(PropertyDescriptor pd);
 	}

@@ -3,6 +3,7 @@
 namespace System.CodeDom.Compiler
 {
 	[Flags]
+	[Serializable]
 	public enum LanguageOptions
 	{
 		None = 0,

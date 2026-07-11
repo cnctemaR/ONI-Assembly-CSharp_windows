@@ -8,9 +8,9 @@ using Mono.Audio;
 
 namespace System.Media
 {
-	[ToolboxItem(false)]
+	[global::System.ComponentModel.ToolboxItem(false)]
 	[Serializable]
-	public class SoundPlayer : Component, ISerializable
+	public class SoundPlayer : global::System.ComponentModel.Component, ISerializable
 	{
 		public SoundPlayer()
 		{
@@ -39,6 +39,16 @@ namespace System.Media
 			throw new NotImplementedException();
 		}
 
+		public event global::System.ComponentModel.AsyncCompletedEventHandler LoadCompleted;
+
+		public event EventHandler SoundLocationChanged;
+
+		public event EventHandler StreamChanged;
+
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+		}
+
 		private void LoadFromStream(Stream s)
 		{
 			this.mstream = new MemoryStream();
@@ -65,7 +75,8 @@ namespace System.Media
 			}
 			else
 			{
-				stream = WebRequest.Create(location).GetResponse().GetResponseStream();
+				global::System.Net.WebRequest webRequest = global::System.Net.WebRequest.Create(location);
+				stream = webRequest.GetResponse().GetResponseStream();
 			}
 			using (stream)
 			{
@@ -90,7 +101,7 @@ namespace System.Media
 			this.adata = null;
 			this.adev = null;
 			this.load_completed = true;
-			AsyncCompletedEventArgs e = new AsyncCompletedEventArgs(null, false, this);
+			global::System.ComponentModel.AsyncCompletedEventArgs e = new global::System.ComponentModel.AsyncCompletedEventArgs(null, false, this);
 			this.OnLoadCompleted(e);
 			if (this.LoadCompleted != null)
 			{
@@ -100,16 +111,19 @@ namespace System.Media
 			{
 				if (this.win32_player == null)
 				{
-					this.win32_player = new Win32SoundPlayer(this.mstream);
-					return;
+					this.win32_player = new Mono.Audio.Win32SoundPlayer(this.mstream);
 				}
-				this.win32_player.Stream = this.mstream;
+				else
+				{
+					this.win32_player.Stream = this.mstream;
+				}
 			}
 		}
 
 		private void AsyncFinished(IAsyncResult ar)
 		{
-			(ar.AsyncState as ThreadStart).EndInvoke(ar);
+			ThreadStart threadStart = ar.AsyncState as ThreadStart;
+			threadStart.EndInvoke(ar);
 		}
 
 		public void LoadAsync()
@@ -122,7 +136,7 @@ namespace System.Media
 			threadStart.BeginInvoke(new AsyncCallback(this.AsyncFinished), threadStart);
 		}
 
-		protected virtual void OnLoadCompleted(AsyncCompletedEventArgs e)
+		protected virtual void OnLoadCompleted(global::System.ComponentModel.AsyncCompletedEventArgs e)
 		{
 		}
 
@@ -156,15 +170,17 @@ namespace System.Media
 			{
 				ThreadStart threadStart = new ThreadStart(this.PlaySync);
 				threadStart.BeginInvoke(new AsyncCallback(this.AsyncFinished), threadStart);
-				return;
 			}
-			this.Start();
-			if (this.mstream == null)
+			else
 			{
-				SystemSounds.Beep.Play();
-				return;
+				this.Start();
+				if (this.mstream == null)
+				{
+					SystemSounds.Beep.Play();
+					return;
+				}
+				this.win32_player.Play();
 			}
-			this.win32_player.Play();
 		}
 
 		private void PlayLoop()
@@ -187,15 +203,17 @@ namespace System.Media
 			{
 				ThreadStart threadStart = new ThreadStart(this.PlayLoop);
 				threadStart.BeginInvoke(new AsyncCallback(this.AsyncFinished), threadStart);
-				return;
 			}
-			this.Start();
-			if (this.mstream == null)
+			else
 			{
-				SystemSounds.Beep.Play();
-				return;
+				this.Start();
+				if (this.mstream == null)
+				{
+					SystemSounds.Beep.Play();
+					return;
+				}
+				this.win32_player.PlayLooping();
 			}
-			this.win32_player.PlayLooping();
 		}
 
 		public void PlaySync()
@@ -212,25 +230,26 @@ namespace System.Media
 				{
 					if (this.adata == null)
 					{
-						this.adata = new WavData(this.mstream);
+						this.adata = new Mono.Audio.WavData(this.mstream);
 					}
 					if (this.adev == null)
 					{
-						this.adev = AudioDevice.CreateDevice(null);
+						this.adev = Mono.Audio.AudioDevice.CreateDevice(null);
 					}
 					if (this.adata != null)
 					{
 						this.adata.Setup(this.adev);
 						this.adata.Play(this.adev);
 					}
-					return;
 				}
 				catch
 				{
-					return;
 				}
 			}
-			this.win32_player.PlaySync();
+			else
+			{
+				this.win32_player.PlaySync();
+			}
 		}
 
 		public void Stop()
@@ -241,17 +260,12 @@ namespace System.Media
 				if (this.adata != null)
 				{
 					this.adata.IsStopped = true;
-					return;
 				}
 			}
 			else
 			{
 				this.win32_player.Stop();
 			}
-		}
-
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
 		}
 
 		public bool IsLoadCompleted
@@ -333,12 +347,6 @@ namespace System.Media
 			}
 		}
 
-		public event AsyncCompletedEventHandler LoadCompleted;
-
-		public event EventHandler SoundLocationChanged;
-
-		public event EventHandler StreamChanged;
-
 		private string sound_location;
 
 		private Stream audiostream;
@@ -351,13 +359,13 @@ namespace System.Media
 
 		private int load_timeout = 10000;
 
-		private AudioDevice adev;
+		private Mono.Audio.AudioDevice adev;
 
-		private AudioData adata;
+		private Mono.Audio.AudioData adata;
 
 		private bool stopped;
 
-		private Win32SoundPlayer win32_player;
+		private Mono.Audio.Win32SoundPlayer win32_player;
 
 		private static readonly bool use_win32_player = Environment.OSVersion.Platform != PlatformID.Unix;
 	}

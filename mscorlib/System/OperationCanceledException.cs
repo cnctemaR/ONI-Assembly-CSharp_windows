@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Threading;
 
 namespace System
 {
@@ -9,52 +8,22 @@ namespace System
 	[Serializable]
 	public class OperationCanceledException : SystemException
 	{
-		public CancellationToken CancellationToken
-		{
-			get
-			{
-				return this._cancellationToken;
-			}
-			private set
-			{
-				this._cancellationToken = value;
-			}
-		}
-
 		public OperationCanceledException()
-			: base(Environment.GetResourceString("The operation was canceled."))
+			: base(Locale.GetText("The operation was canceled."))
 		{
-			base.SetErrorCode(-2146233029);
+			base.HResult = -2146233029;
 		}
 
 		public OperationCanceledException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233029);
+			base.HResult = -2146233029;
 		}
 
 		public OperationCanceledException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146233029);
-		}
-
-		public OperationCanceledException(CancellationToken token)
-			: this()
-		{
-			this.CancellationToken = token;
-		}
-
-		public OperationCanceledException(string message, CancellationToken token)
-			: this(message)
-		{
-			this.CancellationToken = token;
-		}
-
-		public OperationCanceledException(string message, Exception innerException, CancellationToken token)
-			: this(message, innerException)
-		{
-			this.CancellationToken = token;
+			base.HResult = -2146233029;
 		}
 
 		protected OperationCanceledException(SerializationInfo info, StreamingContext context)
@@ -62,7 +31,6 @@ namespace System
 		{
 		}
 
-		[NonSerialized]
-		private CancellationToken _cancellationToken;
+		private const int Result = -2146233029;
 	}
 }

@@ -385,8 +385,8 @@ public static class CodexEntryGenerator
 				List<ContentContainer> list = new List<ContentContainer>();
 				string text6 = element2.name + " (" + element2.GetStateString() + ")";
 				CodexEntryGenerator.GenerateTitleContainers(text6, list);
-				global::Tuple<Sprite, Color> uisprite = Def.GetUISprite(element2, "ui", false);
-				CodexEntryGenerator.GenerateImageContainers(new global::Tuple<Sprite, Color>[] { Def.GetUISprite(element2, "ui", false) }, list, ContentContainer.ContentLayout.Horizontal);
+				Tuple<Sprite, Color> uisprite = Def.GetUISprite(element2, "ui", false);
+				CodexEntryGenerator.GenerateImageContainers(new Tuple<Sprite, Color>[] { Def.GetUISprite(element2, "ui", false) }, list, ContentContainer.ContentLayout.Horizontal);
 				action(element2, list);
 				text7 = element2.id.ToString();
 				string text8;
@@ -512,7 +512,7 @@ public static class CodexEntryGenerator
 						{ "preferredHeight", "48" },
 						{ "preferredWidth", "48" }
 					});
-					codexWidget.objectProperties.Add("coloredSprite", new global::Tuple<Sprite, Color>(codexEntry2.icon, codexEntry2.iconColor));
+					codexWidget.objectProperties.Add("coloredSprite", new Tuple<Sprite, Color>(codexEntry2.icon, codexEntry2.iconColor));
 					contentContainer.content.Add(codexWidget);
 				}
 				CodexWidget codexWidget2 = new CodexWidget(CodexWidget.ContentType.Text, new Dictionary<string, string>
@@ -1393,10 +1393,10 @@ public static class CodexEntryGenerator
 		containers.Add(new ContentContainer(list, layout));
 	}
 
-	private static void GenerateImageContainers(global::Tuple<Sprite, Color>[] sprites, List<ContentContainer> containers, ContentContainer.ContentLayout layout)
+	private static void GenerateImageContainers(Tuple<Sprite, Color>[] sprites, List<ContentContainer> containers, ContentContainer.ContentLayout layout)
 	{
 		List<CodexWidget> list = new List<CodexWidget>();
-		foreach (global::Tuple<Sprite, Color> tuple in sprites)
+		foreach (Tuple<Sprite, Color> tuple in sprites)
 		{
 			if (tuple != null)
 			{

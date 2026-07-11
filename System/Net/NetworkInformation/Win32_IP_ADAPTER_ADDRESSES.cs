@@ -4,13 +4,13 @@ using System.Runtime.InteropServices;
 namespace System.Net.NetworkInformation
 {
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-	internal struct Win32_IP_ADAPTER_ADDRESSES
+	internal class Win32_IP_ADAPTER_ADDRESSES
 	{
 		public bool DdnsEnabled
 		{
 			get
 			{
-				return (this.Flags & 1U) > 0U;
+				return (this.Flags & 1U) != 0U;
 			}
 		}
 
@@ -18,7 +18,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return (this.Flags & 8U) > 0U;
+				return (this.Flags & 8U) != 0U;
 			}
 		}
 
@@ -26,9 +26,17 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return (this.Flags & 16U) > 0U;
+				return (this.Flags & 16U) != 0U;
 			}
 		}
+
+		private const int MAX_ADAPTER_ADDRESS_LENGTH = 8;
+
+		private const int IP_ADAPTER_DDNS_ENABLED = 1;
+
+		private const int IP_ADAPTER_RECEIVE_ONLY = 8;
+
+		private const int IP_ADAPTER_NO_MULTICAST = 16;
 
 		public AlignmentUnion Alignment;
 
@@ -68,13 +76,5 @@ namespace System.Net.NetworkInformation
 
 		[MarshalAs(UnmanagedType.ByValArray, SizeConst = 64)]
 		public uint[] ZoneIndices;
-
-		private const int MAX_ADAPTER_ADDRESS_LENGTH = 8;
-
-		private const int IP_ADAPTER_DDNS_ENABLED = 1;
-
-		private const int IP_ADAPTER_RECEIVE_ONLY = 8;
-
-		private const int IP_ADAPTER_NO_MULTICAST = 16;
 	}
 }

@@ -5,6 +5,14 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal class ClientContext : Context
 	{
+		public ClientContext(SslClientStream stream, SecurityProtocolType securityProtocolType, string targetHost, X509CertificateCollection clientCertificates)
+			: base(securityProtocolType)
+		{
+			this.sslStream = stream;
+			base.ClientSettings.Certificates = clientCertificates;
+			base.ClientSettings.TargetHost = targetHost;
+		}
+
 		public SslClientStream SslStream
 		{
 			get
@@ -23,14 +31,6 @@ namespace Mono.Security.Protocol.Tls
 			{
 				this.clientHelloProtocol = value;
 			}
-		}
-
-		public ClientContext(SslClientStream stream, SecurityProtocolType securityProtocolType, string targetHost, X509CertificateCollection clientCertificates)
-			: base(securityProtocolType)
-		{
-			this.sslStream = stream;
-			base.ClientSettings.Certificates = clientCertificates;
-			base.ClientSettings.TargetHost = targetHost;
 		}
 
 		public override void Clear()

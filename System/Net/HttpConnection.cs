@@ -1,75 +1,38 @@
 ﻿using System;
 using System.IO;
-using System.Net.Security;
 using System.Net.Sockets;
-using System.Security.Authentication;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading;
+using Mono.Security.Protocol.Tls;
 
 namespace System.Net
 {
 	internal sealed class HttpConnection
 	{
-		public HttpConnection(Socket sock, EndPointListener epl, bool secure, X509Certificate cert)
+		public HttpConnection(global::System.Net.Sockets.Socket sock, EndPointListener epl, bool secure, global::System.Security.Cryptography.X509Certificates.X509Certificate2 cert, AsymmetricAlgorithm key)
 		{
 			this.sock = sock;
 			this.epl = epl;
 			this.secure = secure;
-			this.cert = cert;
+			this.key = key;
 			if (!secure)
 			{
-				this.stream = new NetworkStream(sock, false);
+				this.stream = new global::System.Net.Sockets.NetworkStream(sock, false);
 			}
 			else
 			{
-				this.ssl_stream = epl.Listener.CreateSslStream(new NetworkStream(sock, false), false, delegate(object t, X509Certificate c, X509Chain ch, SslPolicyErrors e)
-				{
-					if (c == null)
-					{
-						return true;
-					}
-					X509Certificate2 x509Certificate = c as X509Certificate2;
-					if (x509Certificate == null)
-					{
-						x509Certificate = new X509Certificate2(c.GetRawCertData());
-					}
-					this.client_cert = x509Certificate;
-					this.client_cert_errors = new int[] { (int)e };
-					return true;
-				});
-				this.stream = this.ssl_stream;
-			}
-			this.timer = new Timer(new TimerCallback(this.OnTimeout), null, -1, -1);
-			if (this.ssl_stream != null)
-			{
-				this.ssl_stream.AuthenticateAsServer(cert, true, (SslProtocols)ServicePointManager.SecurityProtocol, false);
+				SslServerStream sslServerStream = new SslServerStream(new global::System.Net.Sockets.NetworkStream(sock, false), cert, false, false);
+				SslServerStream sslServerStream2 = sslServerStream;
+				sslServerStream2.PrivateKeyCertSelectionDelegate = (PrivateKeySelectionCallback)Delegate.Combine(sslServerStream2.PrivateKeyCertSelectionDelegate, new PrivateKeySelectionCallback(this.OnPVKSelection));
+				this.stream = sslServerStream;
 			}
 			this.Init();
 		}
 
-		internal SslStream SslStream
+		private AsymmetricAlgorithm OnPVKSelection(X509Certificate certificate, string targetHost)
 		{
-			get
-			{
-				return this.ssl_stream;
-			}
-		}
-
-		internal int[] ClientCertificateErrors
-		{
-			get
-			{
-				return this.client_cert_errors;
-			}
-		}
-
-		internal X509Certificate2 ClientCertificate
-		{
-			get
-			{
-				return this.client_cert;
-			}
+			return this.key;
 		}
 
 		private void Init()
@@ -86,19 +49,11 @@ namespace System.Net
 			this.context = new HttpListenerContext(this);
 		}
 
-		public bool IsClosed
+		public int ChunkedUses
 		{
 			get
 			{
-				return this.sock == null;
-			}
-		}
-
-		public int Reuses
-		{
-			get
-			{
-				return this.reuses;
+				return this.chunked_uses;
 			}
 		}
 
@@ -106,12 +61,7 @@ namespace System.Net
 		{
 			get
 			{
-				if (this.local_ep != null)
-				{
-					return this.local_ep;
-				}
-				this.local_ep = (IPEndPoint)this.sock.LocalEndPoint;
-				return this.local_ep;
+				return (IPEndPoint)this.sock.LocalEndPoint;
 			}
 		}
 
@@ -143,12 +93,6 @@ namespace System.Net
 			}
 		}
 
-		private void OnTimeout(object unused)
-		{
-			this.CloseSocket();
-			this.Unbind();
-		}
-
 		public void BeginReadRequest()
 		{
 			if (this.buffer == null)
@@ -157,18 +101,11 @@ namespace System.Net
 			}
 			try
 			{
-				if (this.reuses == 1)
-				{
-					this.s_timeout = 15000;
-				}
-				this.timer.Change(this.s_timeout, -1);
-				this.stream.BeginRead(this.buffer, 0, 8192, HttpConnection.onread_cb, this);
+				this.stream.BeginRead(this.buffer, 0, 8192, new AsyncCallback(this.OnRead), this);
 			}
 			catch
 			{
-				this.timer.Change(-1, -1);
 				this.CloseSocket();
-				this.Unbind();
 			}
 		}
 
@@ -198,23 +135,15 @@ namespace System.Net
 			if (this.o_stream == null)
 			{
 				HttpListener listener = this.context.Listener;
-				if (listener == null)
-				{
-					return new ResponseStream(this.stream, this.context.Response, true);
-				}
-				this.o_stream = new ResponseStream(this.stream, this.context.Response, listener.IgnoreWriteExceptions);
+				bool flag = listener == null || listener.IgnoreWriteExceptions;
+				this.o_stream = new ResponseStream(this.stream, this.context.Response, flag);
 			}
 			return this.o_stream;
 		}
 
-		private static void OnRead(IAsyncResult ares)
+		private void OnRead(IAsyncResult ares)
 		{
-			((HttpConnection)ares.AsyncState).OnReadInternal(ares);
-		}
-
-		private void OnReadInternal(IAsyncResult ares)
-		{
-			this.timer.Change(-1, -1);
+			HttpConnection httpConnection = (HttpConnection)ares.AsyncState;
 			int num = -1;
 			try
 			{
@@ -236,14 +165,12 @@ namespace System.Net
 				if (this.sock != null)
 				{
 					this.CloseSocket();
-					this.Unbind();
 				}
 				return;
 			}
 			if (num == 0)
 			{
 				this.CloseSocket();
-				this.Unbind();
 				return;
 			}
 			if (this.ProcessInput(this.ms))
@@ -262,33 +189,14 @@ namespace System.Net
 				{
 					this.SendError("Invalid host", 400);
 					this.Close(true);
-					return;
-				}
-				HttpListener listener = this.context.Listener;
-				if (this.last_listener != listener)
-				{
-					this.RemoveConnection();
-					listener.AddConnection(this);
-					this.last_listener = listener;
 				}
 				this.context_bound = true;
-				listener.RegisterContext(this.context);
 				return;
 			}
 			else
 			{
-				this.stream.BeginRead(this.buffer, 0, 8192, HttpConnection.onread_cb, this);
+				this.stream.BeginRead(this.buffer, 0, 8192, new AsyncCallback(this.OnRead), httpConnection);
 			}
-		}
-
-		private void RemoveConnection()
-		{
-			if (this.last_listener == null)
-			{
-				this.epl.RemoveConnection(this);
-				return;
-			}
-			this.last_listener.RemoveConnection(this);
 		}
 
 		private bool ProcessInput(MemoryStream ms)
@@ -296,61 +204,74 @@ namespace System.Net
 			byte[] array = ms.GetBuffer();
 			int num = (int)ms.Length;
 			int num2 = 0;
-			while (!this.context.HaveError)
+			string text;
+			try
 			{
-				if (this.position < num)
+				text = this.ReadLine(array, this.position, num - this.position, ref num2);
+				this.position += num2;
+			}
+			catch (Exception ex)
+			{
+				this.context.ErrorMessage = "Bad request";
+				this.context.ErrorStatus = 400;
+				return true;
+			}
+			while (text != null)
+			{
+				if (text == string.Empty)
 				{
-					string text;
+					if (this.input_state != HttpConnection.InputState.RequestLine)
+					{
+						this.current_line = null;
+						ms = null;
+						return true;
+					}
+				}
+				else
+				{
+					if (this.input_state == HttpConnection.InputState.RequestLine)
+					{
+						this.context.Request.SetRequestLine(text);
+						this.input_state = HttpConnection.InputState.Headers;
+					}
+					else
+					{
+						try
+						{
+							this.context.Request.AddHeader(text);
+						}
+						catch (Exception ex2)
+						{
+							this.context.ErrorMessage = ex2.Message;
+							this.context.ErrorStatus = 400;
+							return true;
+						}
+					}
+					if (this.context.HaveError)
+					{
+						return true;
+					}
+					if (this.position >= num)
+					{
+						break;
+					}
 					try
 					{
 						text = this.ReadLine(array, this.position, num - this.position, ref num2);
 						this.position += num2;
 					}
-					catch
+					catch (Exception ex3)
 					{
 						this.context.ErrorMessage = "Bad request";
 						this.context.ErrorStatus = 400;
 						return true;
 					}
-					if (text == null)
-					{
-						goto IL_010D;
-					}
-					if (text == "")
-					{
-						if (this.input_state != HttpConnection.InputState.RequestLine)
-						{
-							this.current_line = null;
-							ms = null;
-							return true;
-						}
-						continue;
-					}
-					else
-					{
-						if (this.input_state == HttpConnection.InputState.RequestLine)
-						{
-							this.context.Request.SetRequestLine(text);
-							this.input_state = HttpConnection.InputState.Headers;
-							continue;
-						}
-						try
-						{
-							this.context.Request.AddHeader(text);
-							continue;
-						}
-						catch (Exception ex)
-						{
-							this.context.ErrorMessage = ex.Message;
-							this.context.ErrorStatus = 400;
-							return true;
-						}
-						goto IL_010D;
-					}
-					bool flag;
-					return flag;
 				}
-				IL_010D:
+				if (text != null)
+				{
+					continue;
+				}
+				IL_0194:
 				if (num2 == num)
 				{
 					ms.SetLength(0L);
@@ -358,14 +279,14 @@ namespace System.Net
 				}
 				return false;
 			}
-			return true;
+			goto IL_0194;
 		}
 
 		private string ReadLine(byte[] buffer, int offset, int len, ref int used)
 		{
 			if (this.current_line == null)
 			{
-				this.current_line = new StringBuilder(128);
+				this.current_line = new StringBuilder();
 			}
 			int num = offset + len;
 			used = 0;
@@ -405,17 +326,17 @@ namespace System.Net
 				HttpListenerResponse response = this.context.Response;
 				response.StatusCode = status;
 				response.ContentType = "text/html";
-				string text = HttpStatusDescription.Get(status);
-				string text2;
+				string statusDescription = HttpListenerResponse.GetStatusDescription(status);
+				string text;
 				if (msg != null)
 				{
-					text2 = string.Format("<h1>{0} ({1})</h1>", text, msg);
+					text = string.Format("<h1>{0} ({1})</h1>", statusDescription, msg);
 				}
 				else
 				{
-					text2 = string.Format("<h1>{0}</h1>", text);
+					text = string.Format("<h1>{0}</h1>", statusDescription);
 				}
-				byte[] bytes = this.context.Response.ContentEncoding.GetBytes(text2);
+				byte[] bytes = this.context.Response.ContentEncoding.GetBytes(text);
 				response.Close(bytes, false);
 			}
 			catch
@@ -459,7 +380,6 @@ namespace System.Net
 			{
 				this.sock = null;
 			}
-			this.RemoveConnection();
 		}
 
 		internal void Close(bool force_close)
@@ -467,30 +387,29 @@ namespace System.Net
 			if (this.sock != null)
 			{
 				Stream responseStream = this.GetResponseStream();
-				if (responseStream != null)
-				{
-					responseStream.Close();
-				}
+				responseStream.Close();
 				this.o_stream = null;
 			}
 			if (this.sock == null)
 			{
 				return;
 			}
-			force_close |= !this.context.Request.KeepAlive;
+			force_close |= this.context.Request.Headers["connection"] == "close";
 			if (!force_close)
 			{
-				force_close = this.context.Response.Headers["connection"] == "close";
+				int statusCode = this.context.Response.StatusCode;
+				bool flag = statusCode == 400 || statusCode == 408 || statusCode == 411 || statusCode == 413 || statusCode == 414 || statusCode == 500 || statusCode == 503;
+				force_close |= this.context.Request.ProtocolVersion <= HttpVersion.Version10;
 			}
 			if (force_close || !this.context.Request.FlushInput())
 			{
-				Socket socket = this.sock;
+				global::System.Net.Sockets.Socket socket = this.sock;
 				this.sock = null;
 				try
 				{
 					if (socket != null)
 					{
-						socket.Shutdown(SocketShutdown.Both);
+						socket.Shutdown(global::System.Net.Sockets.SocketShutdown.Both);
 					}
 				}
 				catch
@@ -504,28 +423,24 @@ namespace System.Net
 					}
 				}
 				this.Unbind();
-				this.RemoveConnection();
 				return;
 			}
 			if (this.chunked && !this.context.Response.ForceCloseChunked)
 			{
-				this.reuses++;
+				this.chunked_uses++;
 				this.Unbind();
 				this.Init();
 				this.BeginReadRequest();
 				return;
 			}
-			this.reuses++;
 			this.Unbind();
 			this.Init();
 			this.BeginReadRequest();
 		}
 
-		private static AsyncCallback onread_cb = new AsyncCallback(HttpConnection.OnRead);
-
 		private const int BufferSize = 8192;
 
-		private Socket sock;
+		private global::System.Net.Sockets.Socket sock;
 
 		private Stream stream;
 
@@ -547,27 +462,13 @@ namespace System.Net
 
 		private bool chunked;
 
-		private int reuses;
+		private int chunked_uses;
 
 		private bool context_bound;
 
 		private bool secure;
 
-		private X509Certificate cert;
-
-		private int s_timeout = 90000;
-
-		private Timer timer;
-
-		private IPEndPoint local_ep;
-
-		private HttpListener last_listener;
-
-		private int[] client_cert_errors;
-
-		private X509Certificate2 client_cert;
-
-		private SslStream ssl_stream;
+		private AsymmetricAlgorithm key;
 
 		private HttpConnection.InputState input_state;
 

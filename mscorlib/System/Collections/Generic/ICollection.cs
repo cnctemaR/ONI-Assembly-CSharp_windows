@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
-	[TypeDependency("System.SZArrayHelper")]
-	public interface ICollection<T> : IEnumerable<T>, IEnumerable
+	public interface ICollection<T> : IEnumerable, IEnumerable<T>
 	{
 		int Count { get; }
 

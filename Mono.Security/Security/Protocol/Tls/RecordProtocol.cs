@@ -7,6 +7,13 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal abstract class RecordProtocol
 	{
+		public RecordProtocol(Stream innerStream, Context context)
+		{
+			this.innerStream = innerStream;
+			this.context = context;
+			this.context.RecordProtocol = this;
+		}
+
 		public Context Context
 		{
 			get
@@ -17,13 +24,6 @@ namespace Mono.Security.Protocol.Tls
 			{
 				this.context = value;
 			}
-		}
-
-		public RecordProtocol(Stream innerStream, Context context)
-		{
-			this.innerStream = innerStream;
-			this.context = context;
-			this.context.RecordProtocol = this;
 		}
 
 		public virtual void SendRecord(HandshakeType type)
@@ -46,7 +46,6 @@ namespace Mono.Security.Protocol.Tls
 			{
 				context.StartSwitchingSecurityParameters(false);
 			}
-			context.ChangeCipherSpecDone = true;
 		}
 
 		public virtual HandshakeMessage GetMessage(HandshakeType type)
@@ -80,6 +79,7 @@ namespace Mono.Security.Protocol.Tls
 				else
 				{
 					int num = (int)receiveRecordAsyncResult.InitialBuffer[0];
+					this.context.LastHandshakeMsg = HandshakeType.ClientHello;
 					ContentType contentType = (ContentType)num;
 					byte[] array = this.ReadRecordBuffer(num, record);
 					if (array == null)
@@ -88,11 +88,15 @@ namespace Mono.Security.Protocol.Tls
 					}
 					else
 					{
-						if ((contentType != ContentType.Alert || array.Length != 2) && this.Context.Read != null && this.Context.Read.Cipher != null)
+						if (contentType != ContentType.Alert || array.Length != 2)
 						{
-							array = this.decryptRecordFragment(contentType, array);
+							if (this.Context.Read != null && this.Context.Read.Cipher != null)
+							{
+								array = this.decryptRecordFragment(contentType, array);
+							}
 						}
-						switch (contentType)
+						ContentType contentType2 = contentType;
+						switch (contentType2)
 						{
 						case ContentType.ChangeCipherSpec:
 							this.ProcessChangeCipherSpec();
@@ -117,7 +121,7 @@ namespace Mono.Security.Protocol.Tls
 						case ContentType.ApplicationData:
 							break;
 						default:
-							if (contentType != (ContentType)128)
+							if (contentType2 != (ContentType)128)
 							{
 								throw new TlsException(AlertDescription.UnexpectedMessage, "Unknown record received from server.");
 							}
@@ -156,69 +160,67 @@ namespace Mono.Security.Protocol.Tls
 
 		public byte[] ReceiveRecord(Stream record)
 		{
-			if (this.context.ReceivedConnectionEnd)
-			{
-				throw new TlsException(AlertDescription.InternalError, "The session is finished and it's no longer valid.");
-			}
-			RecordProtocol.record_processing.Reset();
-			byte[] array = new byte[1];
-			if (record.Read(array, 0, array.Length) == 0)
-			{
-				return null;
-			}
-			int num = (int)array[0];
-			ContentType contentType = (ContentType)num;
-			byte[] array2 = this.ReadRecordBuffer(num, record);
-			if (array2 == null)
-			{
-				return null;
-			}
-			if ((contentType != ContentType.Alert || array2.Length != 2) && this.Context.Read != null && this.Context.Read.Cipher != null)
-			{
-				array2 = this.decryptRecordFragment(contentType, array2);
-			}
-			switch (contentType)
-			{
-			case ContentType.ChangeCipherSpec:
-				this.ProcessChangeCipherSpec();
-				break;
-			case ContentType.Alert:
-				this.ProcessAlert((AlertLevel)array2[0], (AlertDescription)array2[1]);
-				if (record.CanSeek)
-				{
-					record.SetLength(0L);
-				}
-				array2 = null;
-				break;
-			case ContentType.Handshake:
-			{
-				TlsStream tlsStream = new TlsStream(array2);
-				while (!tlsStream.EOF)
-				{
-					this.ProcessHandshakeMessage(tlsStream);
-				}
-				break;
-			}
-			case ContentType.ApplicationData:
-				break;
-			default:
-				if (contentType != (ContentType)128)
-				{
-					throw new TlsException(AlertDescription.UnexpectedMessage, "Unknown record received from server.");
-				}
-				this.context.HandshakeMessages.Write(array2);
-				break;
-			}
-			RecordProtocol.record_processing.Set();
-			return array2;
+			IAsyncResult asyncResult = this.BeginReceiveRecord(record, null, null);
+			return this.EndReceiveRecord(asyncResult);
 		}
 
 		private byte[] ReadRecordBuffer(int contentType, Stream record)
 		{
+			if (contentType == 128)
+			{
+				return this.ReadClientHelloV2(record);
+			}
 			if (!Enum.IsDefined(typeof(ContentType), (ContentType)contentType))
 			{
 				throw new TlsException(AlertDescription.DecodeError);
 			}
+			return this.ReadStandardRecordBuffer(record);
+		}
+
+		private byte[] ReadClientHelloV2(Stream record)
+		{
+			int num = record.ReadByte();
+			if (record.CanSeek && (long)(num + 1) > record.Length)
+			{
+				return null;
+			}
+			byte[] array = new byte[num];
+			record.Read(array, 0, num);
+			int num2 = (int)array[0];
+			if (num2 != 1)
+			{
+				throw new TlsException(AlertDescription.DecodeError);
+			}
+			int num3 = ((int)array[1] << 8) | (int)array[2];
+			int num4 = ((int)array[3] << 8) | (int)array[4];
+			int num5 = ((int)array[5] << 8) | (int)array[6];
+			int num6 = ((int)array[7] << 8) | (int)array[8];
+			int num7 = ((num6 <= 32) ? num6 : 32);
+			byte[] array2 = new byte[num4];
+			Buffer.BlockCopy(array, 9, array2, 0, num4);
+			byte[] array3 = new byte[num5];
+			Buffer.BlockCopy(array, 9 + num4, array3, 0, num5);
+			byte[] array4 = new byte[num6];
+			Buffer.BlockCopy(array, 9 + num4 + num5, array4, 0, num6);
+			if (num6 < 16 || num4 == 0 || num4 % 3 != 0)
+			{
+				throw new TlsException(AlertDescription.DecodeError);
+			}
+			if (array3.Length > 0)
+			{
+				this.context.SessionId = array3;
+			}
+			this.Context.ChangeProtocol((short)num3);
+			this.ProcessCipherSpecV2Buffer(this.Context.SecurityProtocol, array2);
+			this.context.ClientRandom = new byte[32];
+			Buffer.BlockCopy(array4, array4.Length - num7, this.context.ClientRandom, 32 - num7, num7);
+			this.context.LastHandshakeMsg = HandshakeType.ClientHello;
+			this.context.ProtocolNegotiated = true;
+			return array;
+		}
+
+		private byte[] ReadStandardRecordBuffer(Stream record)
+		{
 			byte[] array = new byte[4];
 			if (record.Read(array, 0, 4) != 4)
 			{
@@ -250,27 +252,16 @@ namespace Mono.Security.Protocol.Tls
 
 		private void ProcessAlert(AlertLevel alertLevel, AlertDescription alertDesc)
 		{
-			if (alertLevel != AlertLevel.Warning && alertLevel == AlertLevel.Fatal)
+			if (alertLevel != AlertLevel.Warning)
 			{
-				throw new TlsException(alertLevel, alertDesc);
+				if (alertLevel == AlertLevel.Fatal)
+				{
+					throw new TlsException(alertLevel, alertDesc);
+				}
 			}
 			if (alertDesc == AlertDescription.CloseNotify)
 			{
 				this.context.ReceivedConnectionEnd = true;
-			}
-		}
-
-		internal void SendAlert(ref Exception ex)
-		{
-			TlsException ex2 = ex as TlsException;
-			Alert alert = ((ex2 != null) ? ex2.Alert : new Alert(AlertDescription.InternalError));
-			try
-			{
-				this.SendAlert(alert);
-			}
-			catch (Exception ex3)
-			{
-				ex = new IOException(string.Format("Error while sending TLS Alert ({0}:{1}): {2}", alert.Level, alert.Description, ex), ex3);
 			}
 		}
 
@@ -320,41 +311,11 @@ namespace Mono.Security.Protocol.Tls
 			if (context is ClientContext)
 			{
 				context.StartSwitchingSecurityParameters(true);
-				return;
 			}
-			context.EndSwitchingSecurityParameters(false);
-		}
-
-		public void SendChangeCipherSpec(Stream recordStream)
-		{
-			byte[] array = this.EncodeRecord(ContentType.ChangeCipherSpec, new byte[] { 1 });
-			recordStream.Write(array, 0, array.Length);
-			Context context = this.context;
-			context.WriteSequenceNumber = 0UL;
-			if (context is ClientContext)
+			else
 			{
-				context.StartSwitchingSecurityParameters(true);
-				return;
+				context.EndSwitchingSecurityParameters(false);
 			}
-			context.EndSwitchingSecurityParameters(false);
-		}
-
-		public IAsyncResult BeginSendChangeCipherSpec(AsyncCallback callback, object state)
-		{
-			return this.BeginSendRecord(ContentType.ChangeCipherSpec, new byte[] { 1 }, callback, state);
-		}
-
-		public void EndSendChangeCipherSpec(IAsyncResult asyncResult)
-		{
-			this.EndSendRecord(asyncResult);
-			Context context = this.context;
-			context.WriteSequenceNumber = 0UL;
-			if (context is ClientContext)
-			{
-				context.StartSwitchingSecurityParameters(true);
-				return;
-			}
-			context.EndSwitchingSecurityParameters(false);
 		}
 
 		public IAsyncResult BeginSendRecord(HandshakeType handshakeType, AsyncCallback callback, object state)
@@ -455,16 +416,6 @@ namespace Mono.Security.Protocol.Tls
 			return tlsStream.ToArray();
 		}
 
-		public byte[] EncodeHandshakeRecord(HandshakeType handshakeType)
-		{
-			HandshakeMessage message = this.GetMessage(handshakeType);
-			message.Process();
-			byte[] array = this.EncodeRecord(message.ContentType, message.EncodeMessage());
-			message.Update();
-			message.Reset();
-			return array;
-		}
-
 		private byte[] encryptRecordFragment(ContentType contentType, byte[] fragment)
 		{
 			byte[] array;
@@ -477,9 +428,7 @@ namespace Mono.Security.Protocol.Tls
 				array = this.context.Write.Cipher.ComputeServerRecordMAC(contentType, fragment);
 			}
 			byte[] array2 = this.context.Write.Cipher.EncryptRecord(fragment, array);
-			Context context = this.context;
-			ulong writeSequenceNumber = context.WriteSequenceNumber;
-			context.WriteSequenceNumber = writeSequenceNumber + 1UL;
+			this.context.WriteSequenceNumber += 1UL;
 			return array2;
 		}
 
@@ -512,9 +461,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				throw new TlsException(AlertDescription.BadRecordMAC, "Bad record MAC");
 			}
-			Context context = this.context;
-			ulong readSequenceNumber = context.ReadSequenceNumber;
-			context.ReadSequenceNumber = readSequenceNumber + 1UL;
+			this.context.ReadSequenceNumber += 1UL;
 			return array;
 		}
 
@@ -540,6 +487,105 @@ namespace Mono.Security.Protocol.Tls
 				}
 			}
 			return true;
+		}
+
+		private void ProcessCipherSpecV2Buffer(SecurityProtocolType protocol, byte[] buffer)
+		{
+			TlsStream tlsStream = new TlsStream(buffer);
+			string text = ((protocol != SecurityProtocolType.Ssl3) ? "TLS_" : "SSL_");
+			while (tlsStream.Position < tlsStream.Length)
+			{
+				byte b = tlsStream.ReadByte();
+				if (b == 0)
+				{
+					short num = tlsStream.ReadInt16();
+					int num2 = this.Context.SupportedCiphers.IndexOf(num);
+					if (num2 != -1)
+					{
+						this.Context.Negotiating.Cipher = this.Context.SupportedCiphers[num2];
+						break;
+					}
+				}
+				else
+				{
+					byte[] array = new byte[2];
+					tlsStream.Read(array, 0, array.Length);
+					int num3 = ((int)(b & byte.MaxValue) << 16) | ((int)(array[0] & byte.MaxValue) << 8) | (int)(array[1] & byte.MaxValue);
+					CipherSuite cipherSuite = this.MapV2CipherCode(text, num3);
+					if (cipherSuite != null)
+					{
+						this.Context.Negotiating.Cipher = cipherSuite;
+						break;
+					}
+				}
+			}
+			if (this.Context.Negotiating == null)
+			{
+				throw new TlsException(AlertDescription.InsuficientSecurity, "Insuficient Security");
+			}
+		}
+
+		private CipherSuite MapV2CipherCode(string prefix, int code)
+		{
+			CipherSuite cipherSuite;
+			try
+			{
+				if (code != 65664)
+				{
+					if (code != 131200)
+					{
+						if (code != 196736)
+						{
+							if (code != 262272)
+							{
+								if (code != 327808)
+								{
+									if (code != 393280)
+									{
+										if (code != 458944)
+										{
+											cipherSuite = null;
+										}
+										else
+										{
+											cipherSuite = null;
+										}
+									}
+									else
+									{
+										cipherSuite = null;
+									}
+								}
+								else
+								{
+									cipherSuite = null;
+								}
+							}
+							else
+							{
+								cipherSuite = this.Context.SupportedCiphers[prefix + "RSA_EXPORT_WITH_RC2_CBC_40_MD5"];
+							}
+						}
+						else
+						{
+							cipherSuite = this.Context.SupportedCiphers[prefix + "RSA_EXPORT_WITH_RC2_CBC_40_MD5"];
+						}
+					}
+					else
+					{
+						cipherSuite = this.Context.SupportedCiphers[prefix + "RSA_EXPORT_WITH_RC4_40_MD5"];
+					}
+				}
+				else
+				{
+					cipherSuite = this.Context.SupportedCiphers[prefix + "RSA_WITH_RC4_128_MD5"];
+				}
+			}
+			catch
+			{
+				cipherSuite = null;
+			}
+			return cipherSuite;
 		}
 
 		private static ManualResetEvent record_processing = new ManualResetEvent(true);
@@ -602,7 +648,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				get
 				{
-					return this.IsCompleted && this._asyncException != null;
+					return this.IsCompleted && null != this._asyncException;
 				}
 			}
 
@@ -635,12 +681,12 @@ namespace Mono.Security.Protocol.Tls
 				get
 				{
 					object obj = this.locker;
-					bool flag2;
+					bool flag;
 					lock (obj)
 					{
-						flag2 = this.completed;
+						flag = this.completed;
 					}
-					return flag2;
+					return flag;
 				}
 			}
 
@@ -737,7 +783,7 @@ namespace Mono.Security.Protocol.Tls
 			{
 				get
 				{
-					return this.IsCompleted && this._asyncException != null;
+					return this.IsCompleted && null != this._asyncException;
 				}
 			}
 
@@ -770,12 +816,12 @@ namespace Mono.Security.Protocol.Tls
 				get
 				{
 					object obj = this.locker;
-					bool flag2;
+					bool flag;
 					lock (obj)
 					{
-						flag2 = this.completed;
+						flag = this.completed;
 					}
-					return flag2;
+					return flag;
 				}
 			}
 

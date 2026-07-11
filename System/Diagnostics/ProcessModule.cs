@@ -3,8 +3,8 @@ using System.ComponentModel;
 
 namespace System.Diagnostics
 {
-	[Designer("System.Diagnostics.Design.ProcessModuleDesigner, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-	public class ProcessModule : Component
+	[global::System.ComponentModel.Designer("System.Diagnostics.Design.ProcessModuleDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+	public class ProcessModule : global::System.ComponentModel.Component
 	{
 		internal ProcessModule(IntPtr baseaddr, IntPtr entryaddr, string filename, FileVersionInfo version_info, int memory_size, string modulename)
 		{
@@ -43,7 +43,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public FileVersionInfo FileVersionInfo
 		{
 			get

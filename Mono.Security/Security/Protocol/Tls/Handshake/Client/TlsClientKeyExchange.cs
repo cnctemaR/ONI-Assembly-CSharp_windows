@@ -34,7 +34,8 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			{
 				rsa = base.Context.ServerSettings.CertificateRSA;
 			}
-			byte[] array2 = new RSAPKCS1KeyExchangeFormatter(rsa).CreateKeyExchange(array);
+			RSAPKCS1KeyExchangeFormatter rsapkcs1KeyExchangeFormatter = new RSAPKCS1KeyExchangeFormatter(rsa);
+			byte[] array2 = rsapkcs1KeyExchangeFormatter.CreateKeyExchange(array);
 			if (sendLength)
 			{
 				base.Write((short)array2.Length);

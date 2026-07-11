@@ -8,36 +8,18 @@ namespace System.Runtime.Remoting
 {
 	[ComVisible(true)]
 	[Serializable]
-	public class ObjRef : IObjectReference, ISerializable
+	public class ObjRef : ISerializable, IObjectReference
 	{
 		public ObjRef()
 		{
 			this.UpdateChannelInfo();
 		}
 
-		internal ObjRef(string uri, IChannelInfo cinfo)
+		internal ObjRef(string typeName, string uri, IChannelInfo cinfo)
 		{
 			this.uri = uri;
 			this.channel_info = cinfo;
-		}
-
-		internal ObjRef DeserializeInTheCurrentDomain(int domainId, byte[] tInfo)
-		{
-			string text = string.Copy(this.uri);
-			ChannelInfo channelInfo = new ChannelInfo(new CrossAppDomainData(domainId));
-			ObjRef objRef = new ObjRef(text, channelInfo);
-			IRemotingTypeInfo remotingTypeInfo = (IRemotingTypeInfo)CADSerializer.DeserializeObjectSafe(tInfo);
-			objRef.typeInfo = remotingTypeInfo;
-			return objRef;
-		}
-
-		internal byte[] SerializeType()
-		{
-			if (this.typeInfo == null)
-			{
-				throw new Exception("Attempt to serialize a null TypeInfo.");
-			}
-			return CADSerializer.SerializeObject(this.typeInfo).GetBuffer();
+			this.typeInfo = new TypeInfo(Type.GetType(typeName, true));
 		}
 
 		internal ObjRef(ObjRef o, bool unmarshalAsProxy)
@@ -90,59 +72,43 @@ namespace System.Runtime.Remoting
 			while (enumerator.MoveNext())
 			{
 				string name = enumerator.Name;
-				if (!(name == "uri"))
+				switch (name)
 				{
-					if (!(name == "typeInfo"))
+				case "uri":
+					this.uri = (string)enumerator.Value;
+					continue;
+				case "typeInfo":
+					this.typeInfo = (IRemotingTypeInfo)enumerator.Value;
+					continue;
+				case "channelInfo":
+					this.channel_info = (IChannelInfo)enumerator.Value;
+					continue;
+				case "envoyInfo":
+					this.envoyInfo = (IEnvoyInfo)enumerator.Value;
+					continue;
+				case "fIsMarshalled":
+				{
+					object value = enumerator.Value;
+					int num2;
+					if (value is string)
 					{
-						if (!(name == "channelInfo"))
-						{
-							if (!(name == "envoyInfo"))
-							{
-								if (!(name == "fIsMarshalled"))
-								{
-									if (!(name == "objrefFlags"))
-									{
-										throw new NotSupportedException();
-									}
-									this.flags = Convert.ToInt32(enumerator.Value);
-								}
-								else
-								{
-									object value = enumerator.Value;
-									int num;
-									if (value is string)
-									{
-										num = ((IConvertible)value).ToInt32(null);
-									}
-									else
-									{
-										num = (int)value;
-									}
-									if (num == 0)
-									{
-										flag = false;
-									}
-								}
-							}
-							else
-							{
-								this.envoyInfo = (IEnvoyInfo)enumerator.Value;
-							}
-						}
-						else
-						{
-							this.channel_info = (IChannelInfo)enumerator.Value;
-						}
+						num2 = ((IConvertible)value).ToInt32(null);
 					}
 					else
 					{
-						this.typeInfo = (IRemotingTypeInfo)enumerator.Value;
+						num2 = (int)value;
 					}
+					if (num2 == 0)
+					{
+						flag = false;
+					}
+					continue;
 				}
-				else
-				{
-					this.uri = (string)enumerator.Value;
+				case "objrefFlags":
+					this.flags = Convert.ToInt32(enumerator.Value);
+					continue;
 				}
+				throw new NotSupportedException();
 			}
 			if (flag)
 			{
@@ -244,7 +210,8 @@ namespace System.Runtime.Remoting
 			{
 				if (obj is CrossAppDomainData)
 				{
-					return ((CrossAppDomainData)obj).ProcessID == RemotingConfiguration.ProcessId;
+					string processID = ((CrossAppDomainData)obj).ProcessID;
+					return processID == RemotingConfiguration.ProcessId;
 				}
 			}
 			return true;
@@ -265,10 +232,6 @@ namespace System.Runtime.Remoting
 				}
 				return this._serverType;
 			}
-		}
-
-		internal void SetDomainID(int id)
-		{
 		}
 
 		private IChannelInfo channel_info;

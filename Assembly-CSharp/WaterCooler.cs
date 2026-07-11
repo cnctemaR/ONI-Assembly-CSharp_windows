@@ -8,10 +8,10 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.workables = new SocialGatheringPointWorkable[this.choreOffsets.Length];
+		this.workables = new SocialGatheringPointWorkable[this.socializeOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)
 		{
-			int num = Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]);
+			int num = Grid.OffsetCell(Grid.PosToCell(this), this.socializeOffsets[i]);
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("WaterCoolerWorkable", vector);
 			SocialGatheringPointWorkable socialGatheringPointWorkable = gameObject.AddOrGet<SocialGatheringPointWorkable>();
@@ -19,19 +19,21 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 			socialGatheringPointWorkable.SetWorkTime(this.workTime);
 			this.workables[i] = socialGatheringPointWorkable;
 		}
-		this.tracker = new SocialChoreTracker(base.gameObject, this.choreOffsets);
-		this.tracker.choreCount = this.choreCount;
-		this.tracker.CreateChoreCB = new Func<int, Chore>(this.CreateChore);
+		this.chores = new Chore[this.socializeOffsets.Length];
+		Extents extents = new Extents(Grid.PosToCell(this), this.socializeOffsets);
+		this.validNavCellChangedPartitionerEntry = GameScenePartitioner.Instance.Add("WaterCooler", this, extents, GameScenePartitioner.Instance.validNavCellChangedLayer, new Action<object>(this.OnCellChanged));
+		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		base.smi.StartSM();
 	}
 
 	protected override void OnCleanUp()
 	{
-		if (this.tracker != null)
+		if (this.validNavCellChangedPartitionerEntry != null)
 		{
-			this.tracker.Clear();
-			this.tracker = null;
+			this.validNavCellChangedPartitionerEntry.Release();
+			this.validNavCellChangedPartitionerEntry = null;
 		}
+		this.CancelDrinkChores();
 		for (int i = 0; i < this.workables.Length; i++)
 		{
 			if (this.workables[i])
@@ -43,18 +45,71 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		base.OnCleanUp();
 	}
 
-	private Chore CreateChore(int i)
+	public void UpdateDrinkChores(bool force = true)
 	{
-		Workable workable = this.workables[i];
-		return new WaterCoolerChore(this, workable, null, null, new Action<Chore>(this.OnChoreEnd));
+		if (!force && !this.choresDirty)
+		{
+			return;
+		}
+		float num = this.storage.GetMassAvailable(GameTags.Water);
+		int num2 = 0;
+		for (int i = 0; i < this.socializeOffsets.Length; i++)
+		{
+			CellOffset cellOffset = this.socializeOffsets[i];
+			Chore chore = this.chores[i];
+			bool flag = num2 < this.choreCount && this.IsOffsetValid(cellOffset) && num >= 1f;
+			if (flag)
+			{
+				num2++;
+				num -= 1f;
+				if (chore == null || chore.isComplete)
+				{
+					this.chores[i] = new WaterCoolerChore(this, this.workables[i], null, null, new Action<Chore>(this.OnChoreEnd));
+				}
+			}
+			else if (chore != null)
+			{
+				chore.Cancel("invalid");
+				this.chores[i] = null;
+			}
+		}
+		this.choresDirty = false;
+	}
+
+	public void CancelDrinkChores()
+	{
+		for (int i = 0; i < this.socializeOffsets.Length; i++)
+		{
+			Chore chore = this.chores[i];
+			if (chore != null)
+			{
+				chore.Cancel("cancelled");
+				this.chores[i] = null;
+			}
+		}
+	}
+
+	private bool IsOffsetValid(CellOffset offset)
+	{
+		int num = Grid.PosToCell(this);
+		int num2 = Grid.OffsetCell(num, offset);
+		int num3 = Grid.CellBelow(num2);
+		return GameNavGrids.FloorValidator.IsWalkableCell(num2, num3, Grid.BitFields, false, false);
 	}
 
 	private void OnChoreEnd(Chore chore)
 	{
-		if (base.smi.IsInsideState(base.smi.sm.dispensing))
-		{
-			this.tracker.Update(true);
-		}
+		this.choresDirty = true;
+	}
+
+	private void OnCellChanged(object data)
+	{
+		this.choresDirty = true;
+	}
+
+	private void OnStorageChange(object data)
+	{
+		this.choresDirty = true;
 	}
 
 	public CellOffset[] GetOffsets()
@@ -82,7 +137,9 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		return base.transform;
 	}
 
-	public CellOffset[] choreOffsets = new CellOffset[]
+	public const float DRINK_MASS = 1f;
+
+	public CellOffset[] socializeOffsets = new CellOffset[]
 	{
 		new CellOffset(-1, 0),
 		new CellOffset(2, 0),
@@ -100,38 +157,41 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		new CellOffset(1, 0)
 	};
 
-	private SocialChoreTracker tracker;
+	private Chore[] chores;
+
+	private GameScenePartitionerEntry validNavCellChangedPartitionerEntry;
 
 	private SocialGatheringPointWorkable[] workables;
+
+	[MyCmpGet]
+	private Storage storage;
+
+	public bool choresDirty;
 
 	public class States : GameStateMachine<WaterCooler.States, WaterCooler.StatesInstance, WaterCooler>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.unoperational;
-			this.root.DoNothing();
 			this.unoperational.TagTransition(GameTags.Operational, this.waitingfordelivery, false).PlayAnim("off");
-			this.waitingfordelivery.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.dispensing, (WaterCooler.StatesInstance smi) => !smi.storage.IsEmpty()).Enter("CreateChore", delegate(WaterCooler.StatesInstance smi)
-			{
-				smi.CreateFetchChore();
-			})
-				.Exit("CancelChore", delegate(WaterCooler.StatesInstance smi)
-				{
-					smi.CancelFetchChore();
-				})
+			this.waitingfordelivery.TagTransition(GameTags.Operational, this.unoperational, true).Transition(this.dispensing, (WaterCooler.StatesInstance smi) => smi.HasMinimumMass(), UpdateRate.SIM_200ms).EventTransition(GameHashes.OnStorageChange, this.dispensing, (WaterCooler.StatesInstance smi) => smi.HasMinimumMass())
 				.PlayAnim("off");
-			this.dispensing.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (WaterCooler.StatesInstance smi) => smi.storage.IsEmpty()).Enter("StartMeter", delegate(WaterCooler.StatesInstance smi)
+			this.dispensing.Enter("StartMeter", delegate(WaterCooler.StatesInstance smi)
 			{
 				smi.StartMeter();
-			})
-				.Enter("CreateChore", delegate(WaterCooler.StatesInstance smi)
+			}).Enter("UpdateDrinkChores.force", delegate(WaterCooler.StatesInstance smi)
+			{
+				smi.master.UpdateDrinkChores(true);
+			}).Update("UpdateDrinkChores", delegate(WaterCooler.StatesInstance smi, float dt)
+			{
+				smi.master.UpdateDrinkChores(true);
+			}, UpdateRate.SIM_200ms, false)
+				.Exit("CancelDrinkChores", delegate(WaterCooler.StatesInstance smi)
 				{
-					smi.master.tracker.Update(true);
+					smi.master.CancelDrinkChores();
 				})
-				.Exit("CancelChore", delegate(WaterCooler.StatesInstance smi)
-				{
-					smi.master.tracker.Update(false);
-				})
+				.TagTransition(GameTags.Operational, this.unoperational, true)
+				.EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (WaterCooler.StatesInstance smi) => !smi.HasMinimumMass())
 				.PlayAnim("working");
 		}
 
@@ -152,21 +212,6 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
 		}
 
-		public void CreateFetchChore()
-		{
-			Tag[] array = new Tag[] { GameTags.Water };
-			this.chore = new FetchChore(Db.Get().ChoreTypes.Fetch, this.storage, this.storage.Capacity(), array, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
-		}
-
-		public void CancelFetchChore()
-		{
-			if (this.chore != null)
-			{
-				this.chore.Cancel("Storage Changed");
-				this.chore = null;
-			}
-		}
-
 		private void OnStorageChange(object data)
 		{
 			float num = Mathf.Clamp01(this.storage.MassStored() / this.storage.capacityKg);
@@ -184,9 +229,12 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 			this.OnStorageChange(null);
 		}
 
-		public Storage storage;
+		public bool HasMinimumMass()
+		{
+			return this.storage.GetMassAvailable(GameTags.Water) >= 1f;
+		}
 
-		private FetchChore chore;
+		private Storage storage;
 
 		private MeterController meter;
 	}

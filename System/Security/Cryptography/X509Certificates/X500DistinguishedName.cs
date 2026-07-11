@@ -5,7 +5,7 @@ using Mono.Security.X509;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-	[MonoTODO("Some X500DistinguishedNameFlags options aren't supported, like DoNotUsePlusSign, DoNotUseQuotes and ForceUTF8Encoding")]
+	[global::System.MonoTODO("Some X500DistinguishedNameFlags options aren't supported, like DoNotUsePlusSign, DoNotUseQuotes and ForceUTF8Encoding")]
 	public sealed class X500DistinguishedName : AsnEncodedData
 	{
 		public X500DistinguishedName(AsnEncodedData encodedDistinguishedName)
@@ -15,12 +15,14 @@ namespace System.Security.Cryptography.X509Certificates
 				throw new ArgumentNullException("encodedDistinguishedName");
 			}
 			base.RawData = encodedDistinguishedName.RawData;
-			if (base.RawData.Length != 0)
+			if (base.RawData.Length > 0)
 			{
 				this.DecodeRawData();
-				return;
 			}
-			this.name = string.Empty;
+			else
+			{
+				this.name = string.Empty;
+			}
 		}
 
 		public X500DistinguishedName(byte[] encodedDistinguishedName)
@@ -31,12 +33,14 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			base.Oid = new Oid();
 			base.RawData = encodedDistinguishedName;
-			if (encodedDistinguishedName.Length != 0)
+			if (encodedDistinguishedName.Length > 0)
 			{
 				this.DecodeRawData();
-				return;
 			}
-			this.name = string.Empty;
+			else
+			{
+				this.name = string.Empty;
+			}
 		}
 
 		public X500DistinguishedName(string distinguishedName)
@@ -61,25 +65,29 @@ namespace System.Security.Cryptography.X509Certificates
 				array[0] = 48;
 				base.RawData = array;
 				this.DecodeRawData();
-				return;
 			}
-			Mono.Security.ASN1 asn = Mono.Security.X509.X501.FromString(distinguishedName);
-			if ((flag & X500DistinguishedNameFlags.Reversed) != X500DistinguishedNameFlags.None)
+			else
 			{
-				Mono.Security.ASN1 asn2 = new Mono.Security.ASN1(48);
-				for (int i = asn.Count - 1; i >= 0; i--)
+				ASN1 asn = X501.FromString(distinguishedName);
+				if ((flag & X500DistinguishedNameFlags.Reversed) != X500DistinguishedNameFlags.None)
 				{
-					asn2.Add(asn[i]);
+					ASN1 asn2 = new ASN1(48);
+					for (int i = asn.Count - 1; i >= 0; i--)
+					{
+						asn2.Add(asn[i]);
+					}
+					asn = asn2;
 				}
-				asn = asn2;
+				base.RawData = asn.GetBytes();
+				if (flag == X500DistinguishedNameFlags.None)
+				{
+					this.name = distinguishedName;
+				}
+				else
+				{
+					this.name = this.Decode(flag);
+				}
 			}
-			base.RawData = asn.GetBytes();
-			if (flag == X500DistinguishedNameFlags.None)
-			{
-				this.name = distinguishedName;
-				return;
-			}
-			this.name = this.Decode(flag);
 		}
 
 		public X500DistinguishedName(X500DistinguishedName distinguishedName)
@@ -91,22 +99,6 @@ namespace System.Security.Cryptography.X509Certificates
 			base.Oid = new Oid();
 			base.RawData = distinguishedName.RawData;
 			this.name = distinguishedName.name;
-		}
-
-		internal X500DistinguishedName(byte[] encoded, byte[] canonEncoding, string name)
-		{
-			this.canonEncoding = canonEncoding;
-			this.name = name;
-			base.Oid = new Oid();
-			base.RawData = encoded;
-		}
-
-		internal byte[] CanonicalEncoding
-		{
-			get
-			{
-				return this.canonEncoding;
-			}
 		}
 
 		public string Name
@@ -127,10 +119,11 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				return string.Empty;
 			}
-			bool flag2 = (flag & X500DistinguishedNameFlags.Reversed) > X500DistinguishedNameFlags.None;
+			bool flag2 = (flag & X500DistinguishedNameFlags.Reversed) != X500DistinguishedNameFlags.None;
 			bool flag3 = (flag & X500DistinguishedNameFlags.DoNotUseQuotes) == X500DistinguishedNameFlags.None;
 			string separator = X500DistinguishedName.GetSeparator(flag);
-			return Mono.Security.X509.X501.ToString(new Mono.Security.ASN1(base.RawData), flag2, separator, flag3);
+			ASN1 asn = new ASN1(base.RawData);
+			return X501.ToString(asn, flag2, separator, flag3);
 		}
 
 		public override string Format(bool multiLine)
@@ -171,41 +164,40 @@ namespace System.Security.Cryptography.X509Certificates
 				this.name = string.Empty;
 				return;
 			}
-			Mono.Security.ASN1 asn = new Mono.Security.ASN1(base.RawData);
-			this.name = Mono.Security.X509.X501.ToString(asn, true, ", ", true);
+			ASN1 asn = new ASN1(base.RawData);
+			this.name = X501.ToString(asn, true, ", ", true);
 		}
 
 		private static string Canonize(string s)
 		{
-			int i = s.IndexOf('=') + 1;
-			StringBuilder stringBuilder = new StringBuilder(s.Substring(0, i));
-			while (i < s.Length && char.IsWhiteSpace(s, i))
+			int i = s.IndexOf('=');
+			StringBuilder stringBuilder = new StringBuilder(s.Substring(0, i + 1));
+			while (char.IsWhiteSpace(s, ++i))
 			{
-				i++;
 			}
-			s = s.TrimEnd(Array.Empty<char>());
+			s = s.TrimEnd(new char[0]);
 			bool flag = false;
 			while (i < s.Length)
 			{
 				if (!flag)
 				{
-					goto IL_0050;
+					goto IL_005C;
 				}
 				flag = char.IsWhiteSpace(s, i);
 				if (!flag)
 				{
-					goto IL_0050;
+					goto IL_005C;
 				}
-				IL_006E:
+				IL_007D:
 				i++;
 				continue;
-				IL_0050:
+				IL_005C:
 				if (char.IsWhiteSpace(s, i))
 				{
 					flag = true;
 				}
 				stringBuilder.Append(char.ToUpperInvariant(s[i]));
-				goto IL_006E;
+				goto IL_007D;
 			}
 			return stringBuilder.ToString();
 		}
@@ -220,46 +212,26 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				return false;
 			}
-			if (name1.canonEncoding != null && name2.canonEncoding != null)
+			X500DistinguishedNameFlags x500DistinguishedNameFlags = X500DistinguishedNameFlags.DoNotUseQuotes | X500DistinguishedNameFlags.UseNewLines;
+			string[] array = new string[] { Environment.NewLine };
+			string[] array2 = name1.Decode(x500DistinguishedNameFlags).Split(array, StringSplitOptions.RemoveEmptyEntries);
+			string[] array3 = name2.Decode(x500DistinguishedNameFlags).Split(array, StringSplitOptions.RemoveEmptyEntries);
+			if (array2.Length != array3.Length)
 			{
-				if (name1.canonEncoding.Length != name2.canonEncoding.Length)
+				return false;
+			}
+			for (int i = 0; i < array2.Length; i++)
+			{
+				if (X500DistinguishedName.Canonize(array2[i]) != X500DistinguishedName.Canonize(array3[i]))
 				{
 					return false;
 				}
-				for (int i = 0; i < name1.canonEncoding.Length; i++)
-				{
-					if (name1.canonEncoding[i] != name2.canonEncoding[i])
-					{
-						return false;
-					}
-				}
-				return true;
 			}
-			else
-			{
-				X500DistinguishedNameFlags x500DistinguishedNameFlags = X500DistinguishedNameFlags.DoNotUseQuotes | X500DistinguishedNameFlags.UseNewLines;
-				string[] array = new string[] { Environment.NewLine };
-				string[] array2 = name1.Decode(x500DistinguishedNameFlags).Split(array, StringSplitOptions.RemoveEmptyEntries);
-				string[] array3 = name2.Decode(x500DistinguishedNameFlags).Split(array, StringSplitOptions.RemoveEmptyEntries);
-				if (array2.Length != array3.Length)
-				{
-					return false;
-				}
-				for (int j = 0; j < array2.Length; j++)
-				{
-					if (X500DistinguishedName.Canonize(array2[j]) != X500DistinguishedName.Canonize(array3[j]))
-					{
-						return false;
-					}
-				}
-				return true;
-			}
+			return true;
 		}
 
 		private const X500DistinguishedNameFlags AllFlags = X500DistinguishedNameFlags.Reversed | X500DistinguishedNameFlags.UseSemicolons | X500DistinguishedNameFlags.DoNotUsePlusSign | X500DistinguishedNameFlags.DoNotUseQuotes | X500DistinguishedNameFlags.UseCommas | X500DistinguishedNameFlags.UseNewLines | X500DistinguishedNameFlags.UseUTF8Encoding | X500DistinguishedNameFlags.UseT61Encoding | X500DistinguishedNameFlags.ForceUTF8Encoding;
 
 		private string name;
-
-		private byte[] canonEncoding;
 	}
 }

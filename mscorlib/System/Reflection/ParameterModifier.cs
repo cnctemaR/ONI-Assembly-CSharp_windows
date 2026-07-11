@@ -11,31 +11,23 @@ namespace System.Reflection
 		{
 			if (parameterCount <= 0)
 			{
-				throw new ArgumentException(Environment.GetResourceString("Must specify one or more parameters."));
+				throw new ArgumentException("Must specify one or more parameters.");
 			}
-			this._byRef = new bool[parameterCount];
-		}
-
-		internal bool[] IsByRefArray
-		{
-			get
-			{
-				return this._byRef;
-			}
+			this._byref = new bool[parameterCount];
 		}
 
 		public bool this[int index]
 		{
 			get
 			{
-				return this._byRef[index];
+				return this._byref[index];
 			}
 			set
 			{
-				this._byRef[index] = value;
+				this._byref[index] = value;
 			}
 		}
 
-		private bool[] _byRef;
+		private bool[] _byref;
 	}
 }

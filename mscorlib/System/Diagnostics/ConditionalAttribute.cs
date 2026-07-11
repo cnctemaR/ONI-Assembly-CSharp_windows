@@ -10,17 +10,17 @@ namespace System.Diagnostics
 	{
 		public ConditionalAttribute(string conditionString)
 		{
-			this.m_conditionString = conditionString;
+			this.myCondition = conditionString;
 		}
 
 		public string ConditionString
 		{
 			get
 			{
-				return this.m_conditionString;
+				return this.myCondition;
 			}
 		}
 
-		private string m_conditionString;
+		private string myCondition;
 	}
 }

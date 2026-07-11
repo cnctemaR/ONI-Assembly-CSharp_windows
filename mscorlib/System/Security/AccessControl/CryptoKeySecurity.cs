@@ -5,13 +5,13 @@ namespace System.Security.AccessControl
 {
 	public sealed class CryptoKeySecurity : NativeObjectSecurity
 	{
+		[MonoTODO]
 		public CryptoKeySecurity()
-			: base(false, ResourceType.Unknown)
 		{
 		}
 
+		[MonoTODO]
 		public CryptoKeySecurity(CommonSecurityDescriptor securityDescriptor)
-			: base(securityDescriptor, ResourceType.Unknown)
 		{
 		}
 
@@ -44,34 +44,40 @@ namespace System.Security.AccessControl
 			return new CryptoKeyAccessRule(identityReference, (CryptoKeyRights)accessMask, type);
 		}
 
+		[MonoTODO]
 		public void AddAccessRule(CryptoKeyAccessRule rule)
 		{
-			base.AddAccessRule(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public bool RemoveAccessRule(CryptoKeyAccessRule rule)
 		{
-			return base.RemoveAccessRule(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public void RemoveAccessRuleAll(CryptoKeyAccessRule rule)
 		{
-			base.RemoveAccessRuleAll(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public void RemoveAccessRuleSpecific(CryptoKeyAccessRule rule)
 		{
-			base.RemoveAccessRuleSpecific(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public void ResetAccessRule(CryptoKeyAccessRule rule)
 		{
-			base.ResetAccessRule(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public void SetAccessRule(CryptoKeyAccessRule rule)
 		{
-			base.SetAccessRule(rule);
+			throw new NotImplementedException();
 		}
 
 		public sealed override AuditRule AuditRuleFactory(IdentityReference identityReference, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
@@ -79,29 +85,34 @@ namespace System.Security.AccessControl
 			return new CryptoKeyAuditRule(identityReference, (CryptoKeyRights)accessMask, flags);
 		}
 
+		[MonoTODO]
 		public void AddAuditRule(CryptoKeyAuditRule rule)
 		{
-			base.AddAuditRule(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public bool RemoveAuditRule(CryptoKeyAuditRule rule)
 		{
-			return base.RemoveAuditRule(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public void RemoveAuditRuleAll(CryptoKeyAuditRule rule)
 		{
-			base.RemoveAuditRuleAll(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public void RemoveAuditRuleSpecific(CryptoKeyAuditRule rule)
 		{
-			base.RemoveAuditRuleSpecific(rule);
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO]
 		public void SetAuditRule(CryptoKeyAuditRule rule)
 		{
-			base.SetAuditRule(rule);
+			throw new NotImplementedException();
 		}
 	}
 }

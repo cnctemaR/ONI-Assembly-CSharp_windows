@@ -5,45 +5,40 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.All)]
 	public sealed class DesignOnlyAttribute : Attribute
 	{
-		public DesignOnlyAttribute(bool isDesignOnly)
+		public DesignOnlyAttribute(bool design_only)
 		{
-			this.isDesignOnly = isDesignOnly;
+			this.design_only = design_only;
 		}
 
 		public bool IsDesignOnly
 		{
 			get
 			{
-				return this.isDesignOnly;
+				return this.design_only;
 			}
-		}
-
-		public override bool IsDefaultAttribute()
-		{
-			return this.IsDesignOnly == DesignOnlyAttribute.Default.IsDesignOnly;
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			DesignOnlyAttribute designOnlyAttribute = obj as DesignOnlyAttribute;
-			return designOnlyAttribute != null && designOnlyAttribute.isDesignOnly == this.isDesignOnly;
+			return obj is DesignOnlyAttribute && (obj == this || ((DesignOnlyAttribute)obj).IsDesignOnly == this.design_only);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.isDesignOnly.GetHashCode();
+			return this.design_only.GetHashCode();
 		}
 
-		private bool isDesignOnly;
+		public override bool IsDefaultAttribute()
+		{
+			return this.design_only == DesignOnlyAttribute.Default.IsDesignOnly;
+		}
 
-		public static readonly DesignOnlyAttribute Yes = new DesignOnlyAttribute(true);
+		private bool design_only;
+
+		public static readonly DesignOnlyAttribute Default = new DesignOnlyAttribute(false);
 
 		public static readonly DesignOnlyAttribute No = new DesignOnlyAttribute(false);
 
-		public static readonly DesignOnlyAttribute Default = DesignOnlyAttribute.No;
+		public static readonly DesignOnlyAttribute Yes = new DesignOnlyAttribute(true);
 	}
 }

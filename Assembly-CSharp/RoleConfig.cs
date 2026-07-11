@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using TUNING;
+using UnityEngine;
 
 public class RoleConfig : IListableOption
 {
@@ -60,6 +61,20 @@ public class RoleConfig : IListableOption
 			}
 		}
 		return false;
+	}
+
+	public int QOLExpectation()
+	{
+		Expectation[] array = Expectations.ExpectationsByTier[this.tier];
+		foreach (Expectation expectation in array)
+		{
+			AttributeModifierExpectation attributeModifierExpectation = expectation as AttributeModifierExpectation;
+			if (attributeModifierExpectation != null && attributeModifierExpectation.modifier.AttributeId == Db.Get().Attributes.QualityOfLifeExpectation.Id)
+			{
+				return Mathf.RoundToInt(attributeModifierExpectation.modifier.Value);
+			}
+		}
+		return 0;
 	}
 
 	public virtual void GatherNearbyFetchChores(FetchChore root_chore, Chore.Precondition.Context context, int x, int y, int radius, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts)

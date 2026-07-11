@@ -1,5 +1,7 @@
 ﻿using System;
-using System.Xml.Schema;
+using System.IO;
+using Mono.Xml;
+using Mono.Xml2;
 
 namespace System.Xml
 {
@@ -8,24 +10,67 @@ namespace System.Xml
 		protected internal XmlDocumentType(string name, string publicId, string systemId, string internalSubset, XmlDocument doc)
 			: base(doc)
 		{
-			this.name = name;
-			this.publicId = publicId;
-			this.systemId = systemId;
-			this.namespaces = true;
-			this.internalSubset = internalSubset;
-			if (!doc.IsLoading)
+			XmlTextReader xmlTextReader = new XmlTextReader(this.BaseURI, new StringReader(string.Empty), doc.NameTable);
+			xmlTextReader.XmlResolver = doc.Resolver;
+			xmlTextReader.GenerateDTDObjectModel(name, publicId, systemId, internalSubset);
+			this.dtd = xmlTextReader.DTD;
+			this.ImportFromDTD();
+		}
+
+		internal XmlDocumentType(DTDObjectModel dtd, XmlDocument doc)
+			: base(doc)
+		{
+			this.dtd = dtd;
+			this.ImportFromDTD();
+		}
+
+		private void ImportFromDTD()
+		{
+			this.entities = new XmlNamedNodeMap(this);
+			this.notations = new XmlNamedNodeMap(this);
+			foreach (DTDNode dtdnode in this.DTD.EntityDecls.Values)
 			{
-				doc.IsLoading = true;
-				new XmlLoader().ParseDocumentType(this);
-				doc.IsLoading = false;
+				DTDEntityDeclaration dtdentityDeclaration = (DTDEntityDeclaration)dtdnode;
+				XmlNode xmlNode = new XmlEntity(dtdentityDeclaration.Name, dtdentityDeclaration.NotationName, dtdentityDeclaration.PublicId, dtdentityDeclaration.SystemId, this.OwnerDocument);
+				this.entities.SetNamedItem(xmlNode);
+			}
+			foreach (DTDNode dtdnode2 in this.DTD.NotationDecls.Values)
+			{
+				DTDNotationDeclaration dtdnotationDeclaration = (DTDNotationDeclaration)dtdnode2;
+				XmlNode xmlNode2 = new XmlNotation(dtdnotationDeclaration.LocalName, dtdnotationDeclaration.Prefix, dtdnotationDeclaration.PublicId, dtdnotationDeclaration.SystemId, this.OwnerDocument);
+				this.notations.SetNamedItem(xmlNode2);
 			}
 		}
 
-		public override string Name
+		internal DTDObjectModel DTD
 		{
 			get
 			{
-				return this.name;
+				return this.dtd;
+			}
+		}
+
+		public XmlNamedNodeMap Entities
+		{
+			get
+			{
+				return this.entities;
+			}
+		}
+
+		public string InternalSubset
+		{
+			get
+			{
+				return this.dtd.InternalSubset;
+			}
+		}
+
+		public override bool IsReadOnly
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -33,7 +78,15 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.name;
+				return this.dtd.Name;
+			}
+		}
+
+		public override string Name
+		{
+			get
+			{
+				return this.dtd.Name;
 			}
 		}
 
@@ -45,39 +98,10 @@ namespace System.Xml
 			}
 		}
 
-		public override XmlNode CloneNode(bool deep)
-		{
-			return this.OwnerDocument.CreateDocumentType(this.name, this.publicId, this.systemId, this.internalSubset);
-		}
-
-		public override bool IsReadOnly
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		public XmlNamedNodeMap Entities
-		{
-			get
-			{
-				if (this.entities == null)
-				{
-					this.entities = new XmlNamedNodeMap(this);
-				}
-				return this.entities;
-			}
-		}
-
 		public XmlNamedNodeMap Notations
 		{
 			get
 			{
-				if (this.notations == null)
-				{
-					this.notations = new XmlNamedNodeMap(this);
-				}
 				return this.notations;
 			}
 		}
@@ -86,7 +110,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.publicId;
+				return this.dtd.PublicId;
 			}
 		}
 
@@ -94,65 +118,28 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.systemId;
+				return this.dtd.SystemId;
 			}
 		}
 
-		public string InternalSubset
+		public override XmlNode CloneNode(bool deep)
 		{
-			get
-			{
-				return this.internalSubset;
-			}
-		}
-
-		internal bool ParseWithNamespaces
-		{
-			get
-			{
-				return this.namespaces;
-			}
-			set
-			{
-				this.namespaces = value;
-			}
-		}
-
-		public override void WriteTo(XmlWriter w)
-		{
-			w.WriteDocType(this.name, this.publicId, this.systemId, this.internalSubset);
+			return new XmlDocumentType(this.dtd, this.OwnerDocument);
 		}
 
 		public override void WriteContentTo(XmlWriter w)
 		{
 		}
 
-		internal SchemaInfo DtdSchemaInfo
+		public override void WriteTo(XmlWriter w)
 		{
-			get
-			{
-				return this.schemaInfo;
-			}
-			set
-			{
-				this.schemaInfo = value;
-			}
+			w.WriteDocType(this.Name, this.PublicId, this.SystemId, this.InternalSubset);
 		}
 
-		private string name;
+		internal XmlNamedNodeMap entities;
 
-		private string publicId;
+		internal XmlNamedNodeMap notations;
 
-		private string systemId;
-
-		private string internalSubset;
-
-		private bool namespaces;
-
-		private XmlNamedNodeMap entities;
-
-		private XmlNamedNodeMap notations;
-
-		private SchemaInfo schemaInfo;
+		private DTDObjectModel dtd;
 	}
 }

@@ -7,38 +7,38 @@ namespace System.Runtime.InteropServices
 	{
 		public HandleRef(object wrapper, IntPtr handle)
 		{
-			this.m_wrapper = wrapper;
-			this.m_handle = handle;
-		}
-
-		public object Wrapper
-		{
-			get
-			{
-				return this.m_wrapper;
-			}
+			this.wrapper = wrapper;
+			this.handle = handle;
 		}
 
 		public IntPtr Handle
 		{
 			get
 			{
-				return this.m_handle;
+				return this.handle;
 			}
 		}
 
-		public static explicit operator IntPtr(HandleRef value)
+		public object Wrapper
 		{
-			return value.m_handle;
+			get
+			{
+				return this.wrapper;
+			}
 		}
 
 		public static IntPtr ToIntPtr(HandleRef value)
 		{
-			return value.m_handle;
+			return value.Handle;
 		}
 
-		internal object m_wrapper;
+		public static explicit operator IntPtr(HandleRef value)
+		{
+			return value.Handle;
+		}
 
-		internal IntPtr m_handle;
+		private object wrapper;
+
+		private IntPtr handle;
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.Remoting.Messaging;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Net
@@ -9,69 +9,40 @@ namespace System.Net
 	[Serializable]
 	public class FileWebRequest : WebRequest, ISerializable
 	{
-		internal FileWebRequest(Uri uri)
+		internal FileWebRequest(global::System.Uri uri)
 		{
-			if (uri.Scheme != Uri.UriSchemeFile)
-			{
-				throw new ArgumentOutOfRangeException("uri");
-			}
-			this.m_uri = uri;
-			this.m_fileAccess = FileAccess.Read;
-			this.m_headers = new WebHeaderCollection(WebHeaderCollectionType.FileWebRequest);
+			this.uri = uri;
+			this.webHeaders = new WebHeaderCollection();
 		}
 
-		[Obsolete("Serialization is obsoleted for this type. http://go.microsoft.com/fwlink/?linkid=14202")]
+		[Obsolete("Serialization is obsoleted for this type", false)]
 		protected FileWebRequest(SerializationInfo serializationInfo, StreamingContext streamingContext)
-			: base(serializationInfo, streamingContext)
 		{
-			this.m_headers = (WebHeaderCollection)serializationInfo.GetValue("headers", typeof(WebHeaderCollection));
-			this.m_proxy = (IWebProxy)serializationInfo.GetValue("proxy", typeof(IWebProxy));
-			this.m_uri = (Uri)serializationInfo.GetValue("uri", typeof(Uri));
-			this.m_connectionGroupName = serializationInfo.GetString("connectionGroupName");
-			this.m_method = serializationInfo.GetString("method");
-			this.m_contentLength = serializationInfo.GetInt64("contentLength");
-			this.m_timeout = serializationInfo.GetInt32("timeout");
-			this.m_fileAccess = (FileAccess)serializationInfo.GetInt32("fileAccess");
+			this.webHeaders = (WebHeaderCollection)serializationInfo.GetValue("headers", typeof(WebHeaderCollection));
+			this.proxy = (IWebProxy)serializationInfo.GetValue("proxy", typeof(IWebProxy));
+			this.uri = (global::System.Uri)serializationInfo.GetValue("uri", typeof(global::System.Uri));
+			this.connectionGroup = serializationInfo.GetString("connectionGroupName");
+			this.method = serializationInfo.GetString("method");
+			this.contentLength = serializationInfo.GetInt64("contentLength");
+			this.timeout = serializationInfo.GetInt32("timeout");
+			this.fileAccess = (FileAccess)((int)serializationInfo.GetValue("fileAccess", typeof(FileAccess)));
+			this.preAuthenticate = serializationInfo.GetBoolean("preauthenticate");
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter, SerializationFormatter = true)]
 		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
 			this.GetObjectData(serializationInfo, streamingContext);
-		}
-
-		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-		protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
-		{
-			serializationInfo.AddValue("headers", this.m_headers, typeof(WebHeaderCollection));
-			serializationInfo.AddValue("proxy", this.m_proxy, typeof(IWebProxy));
-			serializationInfo.AddValue("uri", this.m_uri, typeof(Uri));
-			serializationInfo.AddValue("connectionGroupName", this.m_connectionGroupName);
-			serializationInfo.AddValue("method", this.m_method);
-			serializationInfo.AddValue("contentLength", this.m_contentLength);
-			serializationInfo.AddValue("timeout", this.m_timeout);
-			serializationInfo.AddValue("fileAccess", this.m_fileAccess);
-			serializationInfo.AddValue("preauthenticate", false);
-			base.GetObjectData(serializationInfo, streamingContext);
-		}
-
-		internal bool Aborted
-		{
-			get
-			{
-				return this.m_Aborted != 0;
-			}
 		}
 
 		public override string ConnectionGroupName
 		{
 			get
 			{
-				return this.m_connectionGroupName;
+				return this.connectionGroup;
 			}
 			set
 			{
-				this.m_connectionGroupName = value;
+				this.connectionGroup = value;
 			}
 		}
 
@@ -79,15 +50,15 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_contentLength;
+				return this.contentLength;
 			}
 			set
 			{
 				if (value < 0L)
 				{
-					throw new ArgumentException(global::SR.GetString("The Content-Length value must be greater than or equal to zero."), "value");
+					throw new ArgumentException("The Content-Length value must be greater than or equal to zero.", "value");
 				}
-				this.m_contentLength = value;
+				this.contentLength = value;
 			}
 		}
 
@@ -95,11 +66,11 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_headers["Content-Type"];
+				return this.webHeaders["Content-Type"];
 			}
 			set
 			{
-				this.m_headers["Content-Type"] = value;
+				this.webHeaders["Content-Type"] = value;
 			}
 		}
 
@@ -107,11 +78,11 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_credentials;
+				return this.credentials;
 			}
 			set
 			{
-				this.m_credentials = value;
+				this.credentials = value;
 			}
 		}
 
@@ -119,7 +90,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_headers;
+				return this.webHeaders;
 			}
 		}
 
@@ -127,15 +98,15 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_method;
+				return this.method;
 			}
 			set
 			{
-				if (ValidationHelper.IsBlankString(value))
+				if (value == null || value.Length == 0)
 				{
-					throw new ArgumentException(global::SR.GetString("Cannot set null or blank methods on request."), "value");
+					throw new ArgumentException("Cannot set null or blank methods on request.", "value");
 				}
-				this.m_method = value;
+				this.method = value;
 			}
 		}
 
@@ -143,11 +114,11 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_preauthenticate;
+				return this.preAuthenticate;
 			}
 			set
 			{
-				this.m_preauthenticate = true;
+				this.preAuthenticate = value;
 			}
 		}
 
@@ -155,11 +126,19 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_proxy;
+				return this.proxy;
 			}
 			set
 			{
-				this.m_proxy = value;
+				this.proxy = value;
+			}
+		}
+
+		public override global::System.Uri RequestUri
+		{
+			get
+			{
+				return this.uri;
 			}
 		}
 
@@ -167,381 +146,244 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_timeout;
+				return this.timeout;
 			}
 			set
 			{
-				if (value < 0 && value != -1)
+				if (value < -1)
 				{
-					throw new ArgumentOutOfRangeException("value", global::SR.GetString("Timeout can be only be set to 'System.Threading.Timeout.Infinite' or a value >= 0."));
+					throw new ArgumentOutOfRangeException("Timeout can be only set to 'System.Threading.Timeout.Infinite' or a value >= 0.");
 				}
-				this.m_timeout = value;
+				this.timeout = value;
 			}
-		}
-
-		public override Uri RequestUri
-		{
-			get
-			{
-				return this.m_uri;
-			}
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
-		{
-			try
-			{
-				if (this.Aborted)
-				{
-					throw ExceptionHelper.RequestAbortedException;
-				}
-				if (!this.CanGetRequestStream())
-				{
-					throw new ProtocolViolationException(global::SR.GetString("Cannot send a content-body with this verb-type."));
-				}
-				if (this.m_response != null)
-				{
-					throw new InvalidOperationException(global::SR.GetString("This operation cannot be performed after the request has been submitted."));
-				}
-				lock (this)
-				{
-					if (this.m_writePending)
-					{
-						throw new InvalidOperationException(global::SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
-					}
-					this.m_writePending = true;
-				}
-				this.m_ReadAResult = new LazyAsyncResult(this, state, callback);
-				ThreadPool.QueueUserWorkItem(FileWebRequest.s_GetRequestStreamCallback, this.m_ReadAResult);
-			}
-			catch (Exception)
-			{
-				bool on = Logging.On;
-				throw;
-			}
-			finally
-			{
-			}
-			return this.m_ReadAResult;
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
-		{
-			try
-			{
-				if (this.Aborted)
-				{
-					throw ExceptionHelper.RequestAbortedException;
-				}
-				lock (this)
-				{
-					if (this.m_readPending)
-					{
-						throw new InvalidOperationException(global::SR.GetString("Cannot re-call BeginGetRequestStream/BeginGetResponse while a previous call is still in progress."));
-					}
-					this.m_readPending = true;
-				}
-				this.m_WriteAResult = new LazyAsyncResult(this, state, callback);
-				ThreadPool.QueueUserWorkItem(FileWebRequest.s_GetResponseCallback, this.m_WriteAResult);
-			}
-			catch (Exception)
-			{
-				bool on = Logging.On;
-				throw;
-			}
-			finally
-			{
-			}
-			return this.m_WriteAResult;
-		}
-
-		private bool CanGetRequestStream()
-		{
-			return !KnownHttpVerb.Parse(this.m_method).ContentBodyNotAllowed;
-		}
-
-		public override Stream EndGetRequestStream(IAsyncResult asyncResult)
-		{
-			Stream stream;
-			try
-			{
-				LazyAsyncResult lazyAsyncResult = asyncResult as LazyAsyncResult;
-				if (asyncResult == null || lazyAsyncResult == null)
-				{
-					throw (asyncResult == null) ? new ArgumentNullException("asyncResult") : new ArgumentException(global::SR.GetString("The AsyncResult is not valid."), "asyncResult");
-				}
-				object obj = lazyAsyncResult.InternalWaitForCompletion();
-				if (obj is Exception)
-				{
-					throw (Exception)obj;
-				}
-				stream = (Stream)obj;
-				this.m_writePending = false;
-			}
-			catch (Exception)
-			{
-				bool on = Logging.On;
-				throw;
-			}
-			finally
-			{
-			}
-			return stream;
-		}
-
-		public override WebResponse EndGetResponse(IAsyncResult asyncResult)
-		{
-			WebResponse webResponse;
-			try
-			{
-				LazyAsyncResult lazyAsyncResult = asyncResult as LazyAsyncResult;
-				if (asyncResult == null || lazyAsyncResult == null)
-				{
-					throw (asyncResult == null) ? new ArgumentNullException("asyncResult") : new ArgumentException(global::SR.GetString("The AsyncResult is not valid."), "asyncResult");
-				}
-				object obj = lazyAsyncResult.InternalWaitForCompletion();
-				if (obj is Exception)
-				{
-					throw (Exception)obj;
-				}
-				webResponse = (WebResponse)obj;
-				this.m_readPending = false;
-			}
-			catch (Exception)
-			{
-				bool on = Logging.On;
-				throw;
-			}
-			finally
-			{
-			}
-			return webResponse;
-		}
-
-		public override Stream GetRequestStream()
-		{
-			IAsyncResult asyncResult;
-			try
-			{
-				asyncResult = this.BeginGetRequestStream(null, null);
-				if (this.Timeout != -1 && !asyncResult.IsCompleted && (!asyncResult.AsyncWaitHandle.WaitOne(this.Timeout, false) || !asyncResult.IsCompleted))
-				{
-					if (this.m_stream != null)
-					{
-						this.m_stream.Close();
-					}
-					throw new WebException(NetRes.GetWebStatusString(WebExceptionStatus.Timeout), WebExceptionStatus.Timeout);
-				}
-			}
-			catch (Exception)
-			{
-				bool on = Logging.On;
-				throw;
-			}
-			finally
-			{
-			}
-			return this.EndGetRequestStream(asyncResult);
-		}
-
-		public override WebResponse GetResponse()
-		{
-			this.m_syncHint = true;
-			IAsyncResult asyncResult;
-			try
-			{
-				asyncResult = this.BeginGetResponse(null, null);
-				if (this.Timeout != -1 && !asyncResult.IsCompleted && (!asyncResult.AsyncWaitHandle.WaitOne(this.Timeout, false) || !asyncResult.IsCompleted))
-				{
-					if (this.m_response != null)
-					{
-						this.m_response.Close();
-					}
-					throw new WebException(NetRes.GetWebStatusString(WebExceptionStatus.Timeout), WebExceptionStatus.Timeout);
-				}
-			}
-			catch (Exception)
-			{
-				bool on = Logging.On;
-				throw;
-			}
-			finally
-			{
-			}
-			return this.EndGetResponse(asyncResult);
-		}
-
-		private static void GetRequestStreamCallback(object state)
-		{
-			LazyAsyncResult lazyAsyncResult = (LazyAsyncResult)state;
-			FileWebRequest fileWebRequest = (FileWebRequest)lazyAsyncResult.AsyncObject;
-			try
-			{
-				if (fileWebRequest.m_stream == null)
-				{
-					fileWebRequest.m_stream = new FileWebStream(fileWebRequest, fileWebRequest.m_uri.LocalPath, FileMode.Create, FileAccess.Write, FileShare.Read);
-					fileWebRequest.m_fileAccess = FileAccess.Write;
-					fileWebRequest.m_writing = true;
-				}
-			}
-			catch (Exception ex)
-			{
-				Exception ex2 = new WebException(ex.Message, ex);
-				lazyAsyncResult.InvokeCallback(ex2);
-				return;
-			}
-			lazyAsyncResult.InvokeCallback(fileWebRequest.m_stream);
-		}
-
-		private static void GetResponseCallback(object state)
-		{
-			LazyAsyncResult lazyAsyncResult = (LazyAsyncResult)state;
-			FileWebRequest fileWebRequest = (FileWebRequest)lazyAsyncResult.AsyncObject;
-			if (fileWebRequest.m_writePending || fileWebRequest.m_writing)
-			{
-				FileWebRequest fileWebRequest2 = fileWebRequest;
-				lock (fileWebRequest2)
-				{
-					if (fileWebRequest.m_writePending || fileWebRequest.m_writing)
-					{
-						fileWebRequest.m_readerEvent = new ManualResetEvent(false);
-					}
-				}
-			}
-			if (fileWebRequest.m_readerEvent != null)
-			{
-				fileWebRequest.m_readerEvent.WaitOne();
-			}
-			try
-			{
-				if (fileWebRequest.m_response == null)
-				{
-					fileWebRequest.m_response = new FileWebResponse(fileWebRequest, fileWebRequest.m_uri, fileWebRequest.m_fileAccess, !fileWebRequest.m_syncHint);
-				}
-			}
-			catch (Exception ex)
-			{
-				Exception ex2 = new WebException(ex.Message, ex);
-				lazyAsyncResult.InvokeCallback(ex2);
-				return;
-			}
-			lazyAsyncResult.InvokeCallback(fileWebRequest.m_response);
-		}
-
-		internal void UnblockReader()
-		{
-			lock (this)
-			{
-				if (this.m_readerEvent != null)
-				{
-					this.m_readerEvent.Set();
-				}
-			}
-			this.m_writing = false;
 		}
 
 		public override bool UseDefaultCredentials
 		{
 			get
 			{
-				throw ExceptionHelper.PropertyNotSupportedException;
+				throw new NotSupportedException();
 			}
 			set
 			{
-				throw ExceptionHelper.PropertyNotSupportedException;
+				throw new NotSupportedException();
 			}
 		}
 
+		private static Exception GetMustImplement()
+		{
+			return new NotImplementedException();
+		}
+
+		[global::System.MonoTODO]
 		public override void Abort()
 		{
-			bool on = Logging.On;
-			try
+			throw FileWebRequest.GetMustImplement();
+		}
+
+		public override IAsyncResult BeginGetRequestStream(AsyncCallback callback, object state)
+		{
+			if (string.Compare("GET", this.method, true) == 0 || string.Compare("HEAD", this.method, true) == 0 || string.Compare("CONNECT", this.method, true) == 0)
 			{
-				if (Interlocked.Increment(ref this.m_Aborted) == 1)
+				throw new ProtocolViolationException("Cannot send a content-body with this verb-type.");
+			}
+			lock (this)
+			{
+				if (this.asyncResponding || this.webResponse != null)
 				{
-					LazyAsyncResult readAResult = this.m_ReadAResult;
-					LazyAsyncResult writeAResult = this.m_WriteAResult;
-					WebException ex = new WebException(NetRes.GetWebStatusString("net_requestaborted", WebExceptionStatus.RequestCanceled), WebExceptionStatus.RequestCanceled);
-					Stream stream = this.m_stream;
-					if (readAResult != null && !readAResult.IsCompleted)
-					{
-						readAResult.InvokeCallback(ex);
-					}
-					if (writeAResult != null && !writeAResult.IsCompleted)
-					{
-						writeAResult.InvokeCallback(ex);
-					}
-					if (stream != null)
-					{
-						if (stream is ICloseEx)
-						{
-							((ICloseEx)stream).CloseEx(CloseExState.Abort);
-						}
-						else
-						{
-							stream.Close();
-						}
-					}
-					if (this.m_response != null)
-					{
-						((ICloseEx)this.m_response).CloseEx(CloseExState.Abort);
-					}
+					throw new InvalidOperationException("This operation cannot be performed after the request has been submitted.");
+				}
+				if (this.requesting)
+				{
+					throw new InvalidOperationException("Cannot re-call start of asynchronous method while a previous call is still in progress.");
+				}
+				this.requesting = true;
+			}
+			FileWebRequest.GetRequestStreamCallback getRequestStreamCallback = new FileWebRequest.GetRequestStreamCallback(this.GetRequestStreamInternal);
+			return getRequestStreamCallback.BeginInvoke(callback, state);
+		}
+
+		public override Stream EndGetRequestStream(IAsyncResult asyncResult)
+		{
+			if (asyncResult == null)
+			{
+				throw new ArgumentNullException("asyncResult");
+			}
+			if (!asyncResult.IsCompleted)
+			{
+				asyncResult.AsyncWaitHandle.WaitOne();
+			}
+			AsyncResult asyncResult2 = (AsyncResult)asyncResult;
+			FileWebRequest.GetRequestStreamCallback getRequestStreamCallback = (FileWebRequest.GetRequestStreamCallback)asyncResult2.AsyncDelegate;
+			return getRequestStreamCallback.EndInvoke(asyncResult);
+		}
+
+		public override Stream GetRequestStream()
+		{
+			IAsyncResult asyncResult = this.BeginGetRequestStream(null, null);
+			if (!asyncResult.AsyncWaitHandle.WaitOne(this.timeout, false))
+			{
+				throw new WebException("The request timed out", WebExceptionStatus.Timeout);
+			}
+			return this.EndGetRequestStream(asyncResult);
+		}
+
+		internal Stream GetRequestStreamInternal()
+		{
+			this.requestStream = new FileWebRequest.FileWebStream(this, FileMode.Create, FileAccess.Write, FileShare.Read);
+			return this.requestStream;
+		}
+
+		public override IAsyncResult BeginGetResponse(AsyncCallback callback, object state)
+		{
+			lock (this)
+			{
+				if (this.asyncResponding)
+				{
+					throw new InvalidOperationException("Cannot re-call start of asynchronous method while a previous call is still in progress.");
+				}
+				this.asyncResponding = true;
+			}
+			FileWebRequest.GetResponseCallback getResponseCallback = new FileWebRequest.GetResponseCallback(this.GetResponseInternal);
+			return getResponseCallback.BeginInvoke(callback, state);
+		}
+
+		public override WebResponse EndGetResponse(IAsyncResult asyncResult)
+		{
+			if (asyncResult == null)
+			{
+				throw new ArgumentNullException("asyncResult");
+			}
+			if (!asyncResult.IsCompleted)
+			{
+				asyncResult.AsyncWaitHandle.WaitOne();
+			}
+			AsyncResult asyncResult2 = (AsyncResult)asyncResult;
+			FileWebRequest.GetResponseCallback getResponseCallback = (FileWebRequest.GetResponseCallback)asyncResult2.AsyncDelegate;
+			WebResponse webResponse = getResponseCallback.EndInvoke(asyncResult);
+			this.asyncResponding = false;
+			return webResponse;
+		}
+
+		public override WebResponse GetResponse()
+		{
+			IAsyncResult asyncResult = this.BeginGetResponse(null, null);
+			if (!asyncResult.AsyncWaitHandle.WaitOne(this.timeout, false))
+			{
+				throw new WebException("The request timed out", WebExceptionStatus.Timeout);
+			}
+			return this.EndGetResponse(asyncResult);
+		}
+
+		private WebResponse GetResponseInternal()
+		{
+			if (this.webResponse != null)
+			{
+				return this.webResponse;
+			}
+			lock (this)
+			{
+				if (this.requesting)
+				{
+					this.requestEndEvent = new AutoResetEvent(false);
 				}
 			}
-			catch (Exception)
+			if (this.requestEndEvent != null)
 			{
-				bool on2 = Logging.On;
-				throw;
+				this.requestEndEvent.WaitOne();
 			}
-			finally
+			FileStream fileStream = null;
+			try
 			{
+				fileStream = new FileWebRequest.FileWebStream(this, FileMode.Open, FileAccess.Read, FileShare.Read);
+			}
+			catch (Exception ex)
+			{
+				throw new WebException(ex.Message, ex);
+			}
+			this.webResponse = new FileWebResponse(this.uri, fileStream);
+			return this.webResponse;
+		}
+
+		protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			serializationInfo.AddValue("headers", this.webHeaders, typeof(WebHeaderCollection));
+			serializationInfo.AddValue("proxy", this.proxy, typeof(IWebProxy));
+			serializationInfo.AddValue("uri", this.uri, typeof(global::System.Uri));
+			serializationInfo.AddValue("connectionGroupName", this.connectionGroup);
+			serializationInfo.AddValue("method", this.method);
+			serializationInfo.AddValue("contentLength", this.contentLength);
+			serializationInfo.AddValue("timeout", this.timeout);
+			serializationInfo.AddValue("fileAccess", this.fileAccess);
+			serializationInfo.AddValue("preauthenticate", false);
+		}
+
+		internal void Close()
+		{
+			lock (this)
+			{
+				this.requesting = false;
+				if (this.requestEndEvent != null)
+				{
+					this.requestEndEvent.Set();
+				}
 			}
 		}
 
-		private static WaitCallback s_GetRequestStreamCallback = new WaitCallback(FileWebRequest.GetRequestStreamCallback);
+		private global::System.Uri uri;
 
-		private static WaitCallback s_GetResponseCallback = new WaitCallback(FileWebRequest.GetResponseCallback);
+		private WebHeaderCollection webHeaders;
 
-		private string m_connectionGroupName;
+		private ICredentials credentials;
 
-		private long m_contentLength;
+		private string connectionGroup;
 
-		private ICredentials m_credentials;
+		private long contentLength;
 
-		private FileAccess m_fileAccess;
+		private FileAccess fileAccess = FileAccess.Read;
 
-		private WebHeaderCollection m_headers;
+		private string method = "GET";
 
-		private string m_method = "GET";
+		private IWebProxy proxy;
 
-		private bool m_preauthenticate;
+		private bool preAuthenticate;
 
-		private IWebProxy m_proxy;
+		private int timeout = 100000;
 
-		private ManualResetEvent m_readerEvent;
+		private Stream requestStream;
 
-		private bool m_readPending;
+		private FileWebResponse webResponse;
 
-		private WebResponse m_response;
+		private AutoResetEvent requestEndEvent;
 
-		private Stream m_stream;
+		private bool requesting;
 
-		private bool m_syncHint;
+		private bool asyncResponding;
 
-		private int m_timeout = 100000;
+		internal class FileWebStream : FileStream
+		{
+			internal FileWebStream(FileWebRequest webRequest, FileMode mode, FileAccess access, FileShare share)
+				: base(webRequest.RequestUri.LocalPath, mode, access, share)
+			{
+				this.webRequest = webRequest;
+			}
 
-		private Uri m_uri;
+			public override void Close()
+			{
+				base.Close();
+				FileWebRequest fileWebRequest = this.webRequest;
+				this.webRequest = null;
+				if (fileWebRequest != null)
+				{
+					fileWebRequest.Close();
+				}
+			}
 
-		private bool m_writePending;
+			private FileWebRequest webRequest;
+		}
 
-		private bool m_writing;
+		private delegate Stream GetRequestStreamCallback();
 
-		private LazyAsyncResult m_WriteAResult;
-
-		private LazyAsyncResult m_ReadAResult;
-
-		private int m_Aborted;
+		private delegate WebResponse GetResponseCallback();
 	}
 }

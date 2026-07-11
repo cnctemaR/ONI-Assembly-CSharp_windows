@@ -3,30 +3,30 @@
 namespace System.Runtime.InteropServices
 {
 	[ComVisible(true)]
-	[AttributeUsage(AttributeTargets.Delegate, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Delegate, Inherited = false, AllowMultiple = false)]
 	public sealed class UnmanagedFunctionPointerAttribute : Attribute
 	{
 		public UnmanagedFunctionPointerAttribute(CallingConvention callingConvention)
 		{
-			this.m_callingConvention = callingConvention;
+			this.call_conv = callingConvention;
 		}
 
 		public CallingConvention CallingConvention
 		{
 			get
 			{
-				return this.m_callingConvention;
+				return this.call_conv;
 			}
 		}
 
-		private CallingConvention m_callingConvention;
+		private CallingConvention call_conv;
 
 		public CharSet CharSet;
+
+		public bool SetLastError;
 
 		public bool BestFitMapping;
 
 		public bool ThrowOnUnmappableChar;
-
-		public bool SetLastError;
 	}
 }

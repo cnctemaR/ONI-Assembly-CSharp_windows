@@ -53,7 +53,8 @@ namespace Mono.Security.Protocol.Ntlm
 			}
 			if (!this.CheckHeader(message))
 			{
-				throw new ArgumentException(string.Format(Locale.GetText("Invalid Type{0} message."), this._type), "message");
+				string text2 = string.Format(Locale.GetText("Invalid Type{0} message."), this._type);
+				throw new ArgumentException(text2, "message");
 			}
 		}
 

@@ -1,84 +1,68 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
-	[StructLayout(LayoutKind.Sequential)]
 	internal class EventOnTypeBuilderInst : EventInfo
 	{
-		internal EventOnTypeBuilderInst(TypeBuilderInstantiation instantiation, EventBuilder evt)
+		internal EventOnTypeBuilderInst(MonoGenericClass instantiation, EventBuilder evt)
 		{
 			this.instantiation = instantiation;
-			this.event_builder = evt;
-		}
-
-		internal EventOnTypeBuilderInst(TypeBuilderInstantiation instantiation, EventInfo evt)
-		{
-			this.instantiation = instantiation;
-			this.event_info = evt;
+			this.evt = evt;
 		}
 
 		public override EventAttributes Attributes
 		{
 			get
 			{
-				if (this.event_builder == null)
-				{
-					return this.event_info.Attributes;
-				}
-				return this.event_builder.attrs;
+				return this.evt.attrs;
 			}
 		}
 
 		public override MethodInfo GetAddMethod(bool nonPublic)
 		{
-			MethodInfo methodInfo = ((this.event_builder != null) ? this.event_builder.add_method : this.event_info.GetAddMethod(nonPublic));
-			if (methodInfo == null || (!nonPublic && !methodInfo.IsPublic))
+			if (this.evt.add_method == null || (!nonPublic && !this.evt.add_method.IsPublic))
 			{
 				return null;
 			}
-			return TypeBuilder.GetMethod(this.instantiation, methodInfo);
+			return TypeBuilder.GetMethod(this.instantiation, this.evt.add_method);
 		}
 
 		public override MethodInfo GetRaiseMethod(bool nonPublic)
 		{
-			MethodInfo methodInfo = ((this.event_builder != null) ? this.event_builder.raise_method : this.event_info.GetRaiseMethod(nonPublic));
-			if (methodInfo == null || (!nonPublic && !methodInfo.IsPublic))
+			if (this.evt.raise_method == null || (!nonPublic && !this.evt.raise_method.IsPublic))
 			{
 				return null;
 			}
-			return TypeBuilder.GetMethod(this.instantiation, methodInfo);
+			return TypeBuilder.GetMethod(this.instantiation, this.evt.raise_method);
 		}
 
 		public override MethodInfo GetRemoveMethod(bool nonPublic)
 		{
-			MethodInfo methodInfo = ((this.event_builder != null) ? this.event_builder.remove_method : this.event_info.GetRemoveMethod(nonPublic));
-			if (methodInfo == null || (!nonPublic && !methodInfo.IsPublic))
+			if (this.evt.remove_method == null || (!nonPublic && !this.evt.remove_method.IsPublic))
 			{
 				return null;
 			}
-			return TypeBuilder.GetMethod(this.instantiation, methodInfo);
+			return TypeBuilder.GetMethod(this.instantiation, this.evt.remove_method);
 		}
 
 		public override MethodInfo[] GetOtherMethods(bool nonPublic)
 		{
-			MethodInfo[] array = ((this.event_builder != null) ? this.event_builder.other_methods : this.event_info.GetOtherMethods(nonPublic));
-			if (array == null)
+			if (this.evt.other_methods == null)
 			{
 				return new MethodInfo[0];
 			}
 			ArrayList arrayList = new ArrayList();
-			foreach (MethodInfo methodInfo in array)
+			foreach (MethodBuilder methodInfo in this.evt.other_methods)
 			{
 				if (nonPublic || methodInfo.IsPublic)
 				{
 					arrayList.Add(TypeBuilder.GetMethod(this.instantiation, methodInfo));
 				}
 			}
-			MethodInfo[] array3 = new MethodInfo[arrayList.Count];
-			arrayList.CopyTo(array3, 0);
-			return array3;
+			MethodInfo[] array = new MethodInfo[arrayList.Count];
+			arrayList.CopyTo(array, 0);
+			return array;
 		}
 
 		public override Type DeclaringType
@@ -93,11 +77,7 @@ namespace System.Reflection.Emit
 		{
 			get
 			{
-				if (this.event_builder == null)
-				{
-					return this.event_info.Name;
-				}
-				return this.event_builder.name;
+				return this.evt.name;
 			}
 		}
 
@@ -124,10 +104,8 @@ namespace System.Reflection.Emit
 			throw new NotSupportedException();
 		}
 
-		private TypeBuilderInstantiation instantiation;
+		private MonoGenericClass instantiation;
 
-		private EventBuilder event_builder;
-
-		private EventInfo event_info;
+		private EventBuilder evt;
 	}
 }

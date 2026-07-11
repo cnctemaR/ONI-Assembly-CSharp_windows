@@ -15,8 +15,8 @@ namespace System.Security.Cryptography.Xml
 			base.ReferenceType = "KeyReference";
 		}
 
-		public KeyReference(string uri, TransformChain transformChain)
-			: base(uri, transformChain)
+		public KeyReference(string uri, TransformChain tc)
+			: base(uri, tc)
 		{
 			base.ReferenceType = "KeyReference";
 		}

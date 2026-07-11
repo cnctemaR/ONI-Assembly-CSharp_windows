@@ -15,14 +15,14 @@ namespace System.Security.Cryptography.Pkcs
 			this._uattribs = new CryptographicAttributeObjectCollection();
 		}
 
-		public EnvelopedCms(ContentInfo contentInfo)
+		public EnvelopedCms(ContentInfo content)
 			: this()
 		{
-			if (contentInfo == null)
+			if (content == null)
 			{
-				throw new ArgumentNullException("contentInfo");
+				throw new ArgumentNullException("content");
 			}
-			this._content = contentInfo;
+			this._content = content;
 		}
 
 		public EnvelopedCms(ContentInfo contentInfo, AlgorithmIdentifier encryptionAlgorithm)
@@ -135,7 +135,7 @@ namespace System.Security.Cryptography.Pkcs
 			PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(encodedMessage);
 			if (contentInfo.ContentType != "1.2.840.113549.1.7.3")
 			{
-				throw new Exception("");
+				throw new Exception(string.Empty);
 			}
 			PKCS7.EnvelopedData envelopedData = new PKCS7.EnvelopedData(contentInfo.Content);
 			Oid oid = new Oid(envelopedData.ContentInfo.ContentType);
@@ -143,7 +143,8 @@ namespace System.Security.Cryptography.Pkcs
 			foreach (object obj in envelopedData.RecipientInfos)
 			{
 				PKCS7.RecipientInfo recipientInfo = (PKCS7.RecipientInfo)obj;
-				AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(new Oid(recipientInfo.Oid));
+				Oid oid2 = new Oid(recipientInfo.Oid);
+				AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(oid2);
 				SubjectIdentifier subjectIdentifier = null;
 				if (recipientInfo.SubjectKeyIdentifier != null)
 				{

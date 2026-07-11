@@ -11,23 +11,11 @@ namespace System.Security.AccessControl
 
 		protected internal AuthorizationRule(IdentityReference identity, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags)
 		{
-			if (null == identity)
-			{
-				throw new ArgumentNullException("identity");
-			}
-			if (!(identity is SecurityIdentifier) && !(identity is NTAccount))
+			if (!(identity is SecurityIdentifier))
 			{
 				throw new ArgumentException("identity");
 			}
 			if (accessMask == 0)
-			{
-				throw new ArgumentException("accessMask");
-			}
-			if ((inheritanceFlags & ~(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit)) != InheritanceFlags.None)
-			{
-				throw new ArgumentOutOfRangeException();
-			}
-			if ((propagationFlags & ~(PropagationFlags.NoPropagateInherit | PropagationFlags.InheritOnly)) != PropagationFlags.None)
 			{
 				throw new ArgumentOutOfRangeException();
 			}

@@ -9,25 +9,22 @@ namespace System.Threading
 	public class ThreadInterruptedException : SystemException
 	{
 		public ThreadInterruptedException()
-			: base(Exception.GetMessageFromNativeResources(Exception.ExceptionMessageKind.ThreadInterrupted))
+			: base("Thread interrupted")
 		{
-			base.SetErrorCode(-2146233063);
 		}
 
 		public ThreadInterruptedException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233063);
-		}
-
-		public ThreadInterruptedException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-			base.SetErrorCode(-2146233063);
 		}
 
 		protected ThreadInterruptedException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
+		{
+		}
+
+		public ThreadInterruptedException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 	}

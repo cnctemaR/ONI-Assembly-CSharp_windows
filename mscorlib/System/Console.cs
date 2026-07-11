@@ -17,53 +17,68 @@ namespace System
 				{
 					Console.inputEncoding = Encoding.GetEncoding(Console.WindowsConsole.GetInputCodePage());
 					Console.outputEncoding = Encoding.GetEncoding(Console.WindowsConsole.GetOutputCodePage());
-					goto IL_008E;
 				}
 				catch
 				{
 					Console.inputEncoding = (Console.outputEncoding = Encoding.Default);
-					goto IL_008E;
 				}
 			}
-			int num = 0;
-			EncodingHelper.InternalCodePage(ref num);
-			if (num != -1 && ((num & 268435455) == 3 || (num & 268435456) != 0))
-			{
-				Console.inputEncoding = (Console.outputEncoding = EncodingHelper.UTF8Unmarked);
-			}
 			else
 			{
-				Console.inputEncoding = (Console.outputEncoding = Encoding.Default);
+				int num = 0;
+				Encoding.InternalCodePage(ref num);
+				if (num != -1 && ((num & 268435455) == 3 || (num & 268435456) != 0))
+				{
+					Console.inputEncoding = (Console.outputEncoding = Encoding.UTF8Unmarked);
+				}
+				else
+				{
+					Console.inputEncoding = (Console.outputEncoding = Encoding.Default);
+				}
 			}
-			IL_008E:
-			Console.SetupStreams(Console.inputEncoding, Console.outputEncoding);
+			Console.SetEncodings(Console.inputEncoding, Console.outputEncoding);
 		}
 
-		private static void SetupStreams(Encoding inputEncoding, Encoding outputEncoding)
+		public static event ConsoleCancelEventHandler CancelKeyPress
 		{
+			add
+			{
+				if (!ConsoleDriver.Initialized)
+				{
+					ConsoleDriver.Init();
+				}
+				Console.cancel_event = (ConsoleCancelEventHandler)Delegate.Combine(Console.cancel_event, value);
+			}
+			remove
+			{
+				if (!ConsoleDriver.Initialized)
+				{
+					ConsoleDriver.Init();
+				}
+				Console.cancel_event = (ConsoleCancelEventHandler)Delegate.Remove(Console.cancel_event, value);
+			}
+		}
+
+		private static void SetEncodings(Encoding inputEncoding, Encoding outputEncoding)
+		{
+			Console.stderr = new UnexceptionalStreamWriter(Console.OpenStandardError(0), outputEncoding);
+			((StreamWriter)Console.stderr).AutoFlush = true;
+			Console.stderr = TextWriter.Synchronized(Console.stderr, true);
 			if (!Environment.IsRunningOnWindows && ConsoleDriver.IsConsole)
 			{
+				Console.stdout = TextWriter.Synchronized(new CStreamWriter(Console.OpenStandardOutput(0), outputEncoding)
+				{
+					AutoFlush = true
+				}, true);
 				Console.stdin = new CStreamReader(Console.OpenStandardInput(0), inputEncoding);
-				Console.stdout = TextWriter.Synchronized(new CStreamWriter(Console.OpenStandardOutput(0), outputEncoding, true)
-				{
-					AutoFlush = true
-				});
-				Console.stderr = TextWriter.Synchronized(new CStreamWriter(Console.OpenStandardError(0), outputEncoding, true)
-				{
-					AutoFlush = true
-				});
 			}
 			else
 			{
-				Console.stdin = TextReader.Synchronized(new UnexceptionalStreamReader(Console.OpenStandardInput(0), inputEncoding));
-				Console.stdout = TextWriter.Synchronized(new UnexceptionalStreamWriter(Console.OpenStandardOutput(0), outputEncoding)
-				{
-					AutoFlush = true
-				});
-				Console.stderr = TextWriter.Synchronized(new UnexceptionalStreamWriter(Console.OpenStandardError(0), outputEncoding)
-				{
-					AutoFlush = true
-				});
+				Console.stdout = new UnexceptionalStreamWriter(Console.OpenStandardOutput(0), outputEncoding);
+				((StreamWriter)Console.stdout).AutoFlush = true;
+				Console.stdout = TextWriter.Synchronized(Console.stdout, true);
+				Console.stdin = new UnexceptionalStreamReader(Console.OpenStandardInput(0), inputEncoding);
+				Console.stdin = TextReader.Synchronized(Console.stdin);
 			}
 			GC.SuppressFinalize(Console.stdout);
 			GC.SuppressFinalize(Console.stderr);
@@ -94,26 +109,26 @@ namespace System
 			}
 		}
 
-		private static Stream Open(IntPtr handle, FileAccess access, int bufferSize)
-		{
-			Stream stream;
-			try
-			{
-				stream = new FileStream(handle, access, false, bufferSize, false, true);
-			}
-			catch (IOException)
-			{
-				stream = Stream.Null;
-			}
-			return stream;
-		}
-
 		public static Stream OpenStandardError()
 		{
 			return Console.OpenStandardError(0);
 		}
 
-		[SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
+		private static Stream Open(IntPtr handle, FileAccess access, int bufferSize)
+		{
+			Stream stream;
+			try
+			{
+				stream = new FileStream(handle, access, false, bufferSize, false, bufferSize == 0);
+			}
+			catch (IOException)
+			{
+				stream = new NullStream();
+			}
+			return stream;
+		}
+
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static Stream OpenStandardError(int bufferSize)
 		{
 			return Console.Open(MonoIO.ConsoleError, FileAccess.Write, bufferSize);
@@ -124,7 +139,7 @@ namespace System
 			return Console.OpenStandardInput(0);
 		}
 
-		[SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static Stream OpenStandardInput(int bufferSize)
 		{
 			return Console.Open(MonoIO.ConsoleInput, FileAccess.Read, bufferSize);
@@ -135,13 +150,13 @@ namespace System
 			return Console.OpenStandardOutput(0);
 		}
 
-		[SecurityPermission(SecurityAction.Assert, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static Stream OpenStandardOutput(int bufferSize)
 		{
 			return Console.Open(MonoIO.ConsoleOutput, FileAccess.Write, bufferSize);
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static void SetError(TextWriter newError)
 		{
 			if (newError == null)
@@ -151,7 +166,7 @@ namespace System
 			Console.stderr = newError;
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static void SetIn(TextReader newIn)
 		{
 			if (newIn == null)
@@ -161,7 +176,7 @@ namespace System
 			Console.stdin = newIn;
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static void SetOut(TextWriter newOut)
 		{
 			if (newOut == null)
@@ -240,11 +255,6 @@ namespace System
 
 		public static void Write(string format, params object[] arg)
 		{
-			if (arg == null)
-			{
-				Console.stdout.Write(format);
-				return;
-			}
 			Console.stdout.Write(format, arg);
 		}
 
@@ -355,11 +365,6 @@ namespace System
 
 		public static void WriteLine(string format, params object[] arg)
 		{
-			if (arg == null)
-			{
-				Console.stdout.WriteLine(format);
-				return;
-			}
 			Console.stdout.WriteLine(format, arg);
 		}
 
@@ -423,7 +428,7 @@ namespace System
 			set
 			{
 				Console.inputEncoding = value;
-				Console.SetupStreams(Console.inputEncoding, Console.outputEncoding);
+				Console.SetEncodings(Console.inputEncoding, Console.outputEncoding);
 			}
 		}
 
@@ -436,7 +441,7 @@ namespace System
 			set
 			{
 				Console.outputEncoding = value;
-				Console.SetupStreams(Console.inputEncoding, Console.outputEncoding);
+				Console.SetEncodings(Console.inputEncoding, Console.outputEncoding);
 			}
 		}
 
@@ -656,30 +661,6 @@ namespace System
 			}
 		}
 
-		public static bool IsErrorRedirected
-		{
-			get
-			{
-				return ConsoleDriver.IsErrorRedirected;
-			}
-		}
-
-		public static bool IsOutputRedirected
-		{
-			get
-			{
-				return ConsoleDriver.IsOutputRedirected;
-			}
-		}
-
-		public static bool IsInputRedirected
-		{
-			get
-			{
-				return ConsoleDriver.IsInputRedirected;
-			}
-		}
-
 		public static void Beep()
 		{
 			Console.Beep(1000, 500);
@@ -751,41 +732,14 @@ namespace System
 			ConsoleDriver.SetWindowSize(width, height);
 		}
 
-		public static event ConsoleCancelEventHandler CancelKeyPress
-		{
-			add
-			{
-				if (!ConsoleDriver.Initialized)
-				{
-					ConsoleDriver.Init();
-				}
-				Console.cancel_event = (ConsoleCancelEventHandler)Delegate.Combine(Console.cancel_event, value);
-				if (Environment.IsRunningOnWindows && !Console.WindowsConsole.ctrlHandlerAdded)
-				{
-					Console.WindowsConsole.AddCtrlHandler();
-				}
-			}
-			remove
-			{
-				if (!ConsoleDriver.Initialized)
-				{
-					ConsoleDriver.Init();
-				}
-				Console.cancel_event = (ConsoleCancelEventHandler)Delegate.Remove(Console.cancel_event, value);
-				if (Console.cancel_event == null && Environment.IsRunningOnWindows && Console.WindowsConsole.ctrlHandlerAdded)
-				{
-					Console.WindowsConsole.RemoveCtrlHandler();
-				}
-			}
-		}
-
 		internal static void DoConsoleCancelEvent()
 		{
 			bool flag = true;
 			if (Console.cancel_event != null)
 			{
 				ConsoleCancelEventArgs e = new ConsoleCancelEventArgs(ConsoleSpecialKey.ControlC);
-				foreach (ConsoleCancelEventHandler consoleCancelEventHandler in Console.cancel_event.GetInvocationList())
+				Delegate[] invocationList = Console.cancel_event.GetInvocationList();
+				foreach (ConsoleCancelEventHandler consoleCancelEventHandler in invocationList)
 				{
 					try
 					{
@@ -825,18 +779,6 @@ namespace System
 			[DllImport("kernel32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
 			private static extern int GetConsoleOutputCP();
 
-			[DllImport("kernel32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
-			private static extern bool SetConsoleCtrlHandler(Console.WindowsConsole.WindowsCancelHandler handler, bool addHandler);
-
-			private static bool DoWindowsConsoleCancelEvent(int keyCode)
-			{
-				if (keyCode == 0)
-				{
-					Console.DoConsoleCancelEvent();
-				}
-				return keyCode == 0;
-			}
-
 			[MethodImpl(MethodImplOptions.NoInlining)]
 			public static int GetInputCodePage()
 			{
@@ -848,24 +790,6 @@ namespace System
 			{
 				return Console.WindowsConsole.GetConsoleOutputCP();
 			}
-
-			public static void AddCtrlHandler()
-			{
-				Console.WindowsConsole.SetConsoleCtrlHandler(Console.WindowsConsole.cancelHandler, true);
-				Console.WindowsConsole.ctrlHandlerAdded = true;
-			}
-
-			public static void RemoveCtrlHandler()
-			{
-				Console.WindowsConsole.SetConsoleCtrlHandler(Console.WindowsConsole.cancelHandler, false);
-				Console.WindowsConsole.ctrlHandlerAdded = false;
-			}
-
-			public static bool ctrlHandlerAdded = false;
-
-			private static Console.WindowsConsole.WindowsCancelHandler cancelHandler = new Console.WindowsConsole.WindowsCancelHandler(Console.WindowsConsole.DoWindowsConsoleCancelEvent);
-
-			private delegate bool WindowsCancelHandler(int keyCode);
 		}
 
 		private delegate void InternalCancelHandler();

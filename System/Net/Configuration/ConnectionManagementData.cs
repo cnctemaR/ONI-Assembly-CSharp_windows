@@ -21,7 +21,7 @@ namespace System.Net.Configuration
 
 		public void Add(string address, string nconns)
 		{
-			if (nconns == null || nconns == "")
+			if (nconns == null || nconns == string.Empty)
 			{
 				nconns = "2";
 			}
@@ -65,8 +65,8 @@ namespace System.Net.Configuration
 			}
 		}
 
-		private Hashtable data;
-
 		private const int defaultMaxConnections = 2;
+
+		private Hashtable data;
 	}
 }

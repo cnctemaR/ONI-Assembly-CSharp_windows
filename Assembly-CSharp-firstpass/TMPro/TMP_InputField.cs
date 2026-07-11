@@ -32,19 +32,7 @@ namespace TMPro
 			get
 			{
 				RuntimePlatform platform = Application.platform;
-				switch (platform)
-				{
-				case RuntimePlatform.IPhonePlayer:
-				case RuntimePlatform.Android:
-					break;
-				default:
-					if (platform != RuntimePlatform.TizenPlayer && platform != RuntimePlatform.tvOS)
-					{
-						return true;
-					}
-					break;
-				}
-				return this.m_HideMobileInput;
+				return (platform != RuntimePlatform.Android && platform != RuntimePlatform.IPhonePlayer && platform != RuntimePlatform.tvOS) || this.m_HideMobileInput;
 			}
 			set
 			{

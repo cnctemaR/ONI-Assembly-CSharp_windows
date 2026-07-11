@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
 {
-	[ComVisible(true)]
 	[CLSCompliant(false)]
+	[ComVisible(true)]
 	public interface IFormatterConverter
 	{
 		object Convert(object value, Type type);
@@ -13,32 +13,32 @@ namespace System.Runtime.Serialization
 
 		bool ToBoolean(object value);
 
-		char ToChar(object value);
-
-		sbyte ToSByte(object value);
-
 		byte ToByte(object value);
 
-		short ToInt16(object value);
-
-		ushort ToUInt16(object value);
-
-		int ToInt32(object value);
-
-		uint ToUInt32(object value);
-
-		long ToInt64(object value);
-
-		ulong ToUInt64(object value);
-
-		float ToSingle(object value);
-
-		double ToDouble(object value);
-
-		decimal ToDecimal(object value);
+		char ToChar(object value);
 
 		DateTime ToDateTime(object value);
 
+		decimal ToDecimal(object value);
+
+		double ToDouble(object value);
+
+		short ToInt16(object value);
+
+		int ToInt32(object value);
+
+		long ToInt64(object value);
+
+		sbyte ToSByte(object value);
+
+		float ToSingle(object value);
+
 		string ToString(object value);
+
+		ushort ToUInt16(object value);
+
+		uint ToUInt32(object value);
+
+		ulong ToUInt64(object value);
 	}
 }

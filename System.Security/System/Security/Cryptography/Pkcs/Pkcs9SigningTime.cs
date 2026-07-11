@@ -9,14 +9,14 @@ namespace System.Security.Cryptography.Pkcs
 	{
 		public Pkcs9SigningTime()
 		{
-			base.Oid = new Oid("1.2.840.113549.1.9.5", "Signing Time");
+			this.Oid = new Oid("1.2.840.113549.1.9.5", "Signing Time");
 			this._signingTime = DateTime.Now;
 			base.RawData = this.Encode();
 		}
 
 		public Pkcs9SigningTime(DateTime signingTime)
 		{
-			base.Oid = new Oid("1.2.840.113549.1.9.5", "Signing Time");
+			this.Oid = new Oid("1.2.840.113549.1.9.5", "Signing Time");
 			this._signingTime = signingTime;
 			base.RawData = this.Encode();
 		}
@@ -27,7 +27,7 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				throw new ArgumentNullException("encodedSigningTime");
 			}
-			base.Oid = new Oid("1.2.840.113549.1.9.5", "Signing Time");
+			this.Oid = new Oid("1.2.840.113549.1.9.5", "Signing Time");
 			base.RawData = encodedSigningTime;
 			this.Decode(encodedSigningTime);
 		}
@@ -57,7 +57,8 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				throw new CryptographicException(Locale.GetText("Only UTCTIME is supported."));
 			}
-			byte[] value = new ASN1(attribute).Value;
+			ASN1 asn = new ASN1(attribute);
+			byte[] value = asn.Value;
 			string @string = Encoding.ASCII.GetString(value, 0, value.Length - 1);
 			this._signingTime = DateTime.ParseExact(@string, "yyMMddHHmmss", null);
 		}
@@ -73,7 +74,8 @@ namespace System.Security.Cryptography.Pkcs
 				throw new CryptographicException("[1950,2049]");
 			}
 			string text = this._signingTime.ToString("yyMMddHHmmss", CultureInfo.InvariantCulture) + "Z";
-			return new ASN1(23, Encoding.ASCII.GetBytes(text)).GetBytes();
+			ASN1 asn = new ASN1(23, Encoding.ASCII.GetBytes(text));
+			return asn.GetBytes();
 		}
 
 		internal const string oid = "1.2.840.113549.1.9.5";

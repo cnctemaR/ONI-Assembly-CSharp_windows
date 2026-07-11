@@ -11,7 +11,8 @@ namespace System.Configuration
 
 		public override void Validate(object value)
 		{
-			if ((TimeSpan)value <= new TimeSpan(0L))
+			TimeSpan timeSpan = (TimeSpan)value;
+			if (timeSpan <= new TimeSpan(0L))
 			{
 				throw new ArgumentException("The time span value must be positive");
 			}

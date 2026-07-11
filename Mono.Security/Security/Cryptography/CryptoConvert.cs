@@ -71,40 +71,40 @@ namespace Mono.Security.Cryptography
 				int num = CryptoConvert.ToInt32LE(blob, offset + 12);
 				byte[] array = new byte[4];
 				Buffer.BlockCopy(blob, offset + 16, array, 0, 4);
-				Array.Reverse<byte>(array);
+				Array.Reverse(array);
 				rsaparameters.Exponent = CryptoConvert.Trim(array);
 				int num2 = offset + 20;
 				int num3 = num >> 3;
 				rsaparameters.Modulus = new byte[num3];
 				Buffer.BlockCopy(blob, num2, rsaparameters.Modulus, 0, num3);
-				Array.Reverse<byte>(rsaparameters.Modulus);
+				Array.Reverse(rsaparameters.Modulus);
 				num2 += num3;
 				int num4 = num3 >> 1;
 				rsaparameters.P = new byte[num4];
 				Buffer.BlockCopy(blob, num2, rsaparameters.P, 0, num4);
-				Array.Reverse<byte>(rsaparameters.P);
+				Array.Reverse(rsaparameters.P);
 				num2 += num4;
 				rsaparameters.Q = new byte[num4];
 				Buffer.BlockCopy(blob, num2, rsaparameters.Q, 0, num4);
-				Array.Reverse<byte>(rsaparameters.Q);
+				Array.Reverse(rsaparameters.Q);
 				num2 += num4;
 				rsaparameters.DP = new byte[num4];
 				Buffer.BlockCopy(blob, num2, rsaparameters.DP, 0, num4);
-				Array.Reverse<byte>(rsaparameters.DP);
+				Array.Reverse(rsaparameters.DP);
 				num2 += num4;
 				rsaparameters.DQ = new byte[num4];
 				Buffer.BlockCopy(blob, num2, rsaparameters.DQ, 0, num4);
-				Array.Reverse<byte>(rsaparameters.DQ);
+				Array.Reverse(rsaparameters.DQ);
 				num2 += num4;
 				rsaparameters.InverseQ = new byte[num4];
 				Buffer.BlockCopy(blob, num2, rsaparameters.InverseQ, 0, num4);
-				Array.Reverse<byte>(rsaparameters.InverseQ);
+				Array.Reverse(rsaparameters.InverseQ);
 				num2 += num4;
 				rsaparameters.D = new byte[num3];
 				if (num2 + num3 + offset <= blob.Length)
 				{
 					Buffer.BlockCopy(blob, num2, rsaparameters.D, 0, num3);
-					Array.Reverse<byte>(rsaparameters.D);
+					Array.Reverse(rsaparameters.D);
 				}
 			}
 			catch (Exception ex)
@@ -157,30 +157,31 @@ namespace Mono.Security.Cryptography
 				{
 					throw new CryptographicException("Invalid blob header");
 				}
-				int num = CryptoConvert.ToInt32LE(blob, offset + 12) >> 3;
-				int num2 = offset + 16;
-				dsaparameters.P = new byte[num];
-				Buffer.BlockCopy(blob, num2, dsaparameters.P, 0, num);
-				Array.Reverse<byte>(dsaparameters.P);
-				num2 += num;
+				int num = CryptoConvert.ToInt32LE(blob, offset + 12);
+				int num2 = num >> 3;
+				int num3 = offset + 16;
+				dsaparameters.P = new byte[num2];
+				Buffer.BlockCopy(blob, num3, dsaparameters.P, 0, num2);
+				Array.Reverse(dsaparameters.P);
+				num3 += num2;
 				dsaparameters.Q = new byte[20];
-				Buffer.BlockCopy(blob, num2, dsaparameters.Q, 0, 20);
-				Array.Reverse<byte>(dsaparameters.Q);
-				num2 += 20;
-				dsaparameters.G = new byte[num];
-				Buffer.BlockCopy(blob, num2, dsaparameters.G, 0, num);
-				Array.Reverse<byte>(dsaparameters.G);
-				num2 += num;
+				Buffer.BlockCopy(blob, num3, dsaparameters.Q, 0, 20);
+				Array.Reverse(dsaparameters.Q);
+				num3 += 20;
+				dsaparameters.G = new byte[num2];
+				Buffer.BlockCopy(blob, num3, dsaparameters.G, 0, num2);
+				Array.Reverse(dsaparameters.G);
+				num3 += num2;
 				dsaparameters.X = new byte[20];
-				Buffer.BlockCopy(blob, num2, dsaparameters.X, 0, 20);
-				Array.Reverse<byte>(dsaparameters.X);
-				num2 += 20;
-				dsaparameters.Counter = CryptoConvert.ToInt32LE(blob, num2);
-				num2 += 4;
+				Buffer.BlockCopy(blob, num3, dsaparameters.X, 0, 20);
+				Array.Reverse(dsaparameters.X);
+				num3 += 20;
+				dsaparameters.Counter = CryptoConvert.ToInt32LE(blob, num3);
+				num3 += 4;
 				dsaparameters.Seed = new byte[20];
-				Buffer.BlockCopy(blob, num2, dsaparameters.Seed, 0, 20);
-				Array.Reverse<byte>(dsaparameters.Seed);
-				num2 += 20;
+				Buffer.BlockCopy(blob, num3, dsaparameters.Seed, 0, 20);
+				Array.Reverse(dsaparameters.Seed);
+				num3 += 20;
 			}
 			catch (Exception ex)
 			{
@@ -234,40 +235,40 @@ namespace Mono.Security.Cryptography
 				array[num2++] = rsaparameters.Exponent[--i];
 			}
 			num2 = 20;
-			byte[] modulus = rsaparameters.Modulus;
-			int num3 = modulus.Length;
-			Array.Reverse<byte>(modulus, 0, num3);
-			Buffer.BlockCopy(modulus, 0, array, num2, num3);
+			byte[] array2 = rsaparameters.Modulus;
+			int num3 = array2.Length;
+			Array.Reverse(array2, 0, num3);
+			Buffer.BlockCopy(array2, 0, array, num2, num3);
 			num2 += num3;
-			byte[] p = rsaparameters.P;
-			num3 = p.Length;
-			Array.Reverse<byte>(p, 0, num3);
-			Buffer.BlockCopy(p, 0, array, num2, num3);
+			array2 = rsaparameters.P;
+			num3 = array2.Length;
+			Array.Reverse(array2, 0, num3);
+			Buffer.BlockCopy(array2, 0, array, num2, num3);
 			num2 += num3;
-			byte[] q = rsaparameters.Q;
-			num3 = q.Length;
-			Array.Reverse<byte>(q, 0, num3);
-			Buffer.BlockCopy(q, 0, array, num2, num3);
+			array2 = rsaparameters.Q;
+			num3 = array2.Length;
+			Array.Reverse(array2, 0, num3);
+			Buffer.BlockCopy(array2, 0, array, num2, num3);
 			num2 += num3;
-			byte[] dp = rsaparameters.DP;
-			num3 = dp.Length;
-			Array.Reverse<byte>(dp, 0, num3);
-			Buffer.BlockCopy(dp, 0, array, num2, num3);
+			array2 = rsaparameters.DP;
+			num3 = array2.Length;
+			Array.Reverse(array2, 0, num3);
+			Buffer.BlockCopy(array2, 0, array, num2, num3);
 			num2 += num3;
-			byte[] dq = rsaparameters.DQ;
-			num3 = dq.Length;
-			Array.Reverse<byte>(dq, 0, num3);
-			Buffer.BlockCopy(dq, 0, array, num2, num3);
+			array2 = rsaparameters.DQ;
+			num3 = array2.Length;
+			Array.Reverse(array2, 0, num3);
+			Buffer.BlockCopy(array2, 0, array, num2, num3);
 			num2 += num3;
-			byte[] inverseQ = rsaparameters.InverseQ;
-			num3 = inverseQ.Length;
-			Array.Reverse<byte>(inverseQ, 0, num3);
-			Buffer.BlockCopy(inverseQ, 0, array, num2, num3);
+			array2 = rsaparameters.InverseQ;
+			num3 = array2.Length;
+			Array.Reverse(array2, 0, num3);
+			Buffer.BlockCopy(array2, 0, array, num2, num3);
 			num2 += num3;
-			byte[] d = rsaparameters.D;
-			num3 = d.Length;
-			Array.Reverse<byte>(d, 0, num3);
-			Buffer.BlockCopy(d, 0, array, num2, num3);
+			array2 = rsaparameters.D;
+			num3 = array2.Length;
+			Array.Reverse(array2, 0, num3);
+			Buffer.BlockCopy(array2, 0, array, num2, num3);
 			return array;
 		}
 
@@ -289,27 +290,27 @@ namespace Mono.Security.Cryptography
 			array[14] = bytesLE[2];
 			array[15] = bytesLE[3];
 			int num2 = 16;
-			byte[] p = dsaparameters.P;
-			Array.Reverse<byte>(p);
-			Buffer.BlockCopy(p, 0, array, num2, num);
+			byte[] array2 = dsaparameters.P;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, num);
 			num2 += num;
-			byte[] q = dsaparameters.Q;
-			Array.Reverse<byte>(q);
-			Buffer.BlockCopy(q, 0, array, num2, 20);
+			array2 = dsaparameters.Q;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, 20);
 			num2 += 20;
-			byte[] g = dsaparameters.G;
-			Array.Reverse<byte>(g);
-			Buffer.BlockCopy(g, 0, array, num2, num);
+			array2 = dsaparameters.G;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, num);
 			num2 += num;
-			byte[] x = dsaparameters.X;
-			Array.Reverse<byte>(x);
-			Buffer.BlockCopy(x, 0, array, num2, 20);
+			array2 = dsaparameters.X;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, 20);
 			num2 += 20;
 			Buffer.BlockCopy(CryptoConvert.GetBytesLE(dsaparameters.Counter), 0, array, num2, 4);
 			num2 += 4;
-			byte[] seed = dsaparameters.Seed;
-			Array.Reverse<byte>(seed);
-			Buffer.BlockCopy(seed, 0, array, num2, 20);
+			array2 = dsaparameters.Seed;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, 20);
 			return array;
 		}
 
@@ -336,10 +337,8 @@ namespace Mono.Security.Cryptography
 					throw new CryptographicException("Invalid blob header");
 				}
 				int num = CryptoConvert.ToInt32LE(blob, offset + 12);
-				RSAParameters rsaparameters = new RSAParameters
-				{
-					Exponent = new byte[3]
-				};
+				RSAParameters rsaparameters = default(RSAParameters);
+				rsaparameters.Exponent = new byte[3];
 				rsaparameters.Exponent[0] = blob[offset + 18];
 				rsaparameters.Exponent[1] = blob[offset + 17];
 				rsaparameters.Exponent[2] = blob[offset + 16];
@@ -347,7 +346,7 @@ namespace Mono.Security.Cryptography
 				int num3 = num >> 3;
 				rsaparameters.Modulus = new byte[num3];
 				Buffer.BlockCopy(blob, num2, rsaparameters.Modulus, 0, num3);
-				Array.Reverse<byte>(rsaparameters.Modulus);
+				Array.Reverse(rsaparameters.Modulus);
 				RSA rsa = null;
 				try
 				{
@@ -399,25 +398,25 @@ namespace Mono.Security.Cryptography
 				int num3 = offset + 16;
 				dsaparameters.P = new byte[num2];
 				Buffer.BlockCopy(blob, num3, dsaparameters.P, 0, num2);
-				Array.Reverse<byte>(dsaparameters.P);
+				Array.Reverse(dsaparameters.P);
 				num3 += num2;
 				dsaparameters.Q = new byte[20];
 				Buffer.BlockCopy(blob, num3, dsaparameters.Q, 0, 20);
-				Array.Reverse<byte>(dsaparameters.Q);
+				Array.Reverse(dsaparameters.Q);
 				num3 += 20;
 				dsaparameters.G = new byte[num2];
 				Buffer.BlockCopy(blob, num3, dsaparameters.G, 0, num2);
-				Array.Reverse<byte>(dsaparameters.G);
+				Array.Reverse(dsaparameters.G);
 				num3 += num2;
 				dsaparameters.Y = new byte[num2];
 				Buffer.BlockCopy(blob, num3, dsaparameters.Y, 0, num2);
-				Array.Reverse<byte>(dsaparameters.Y);
+				Array.Reverse(dsaparameters.Y);
 				num3 += num2;
 				dsaparameters.Counter = CryptoConvert.ToInt32LE(blob, num3);
 				num3 += 4;
 				dsaparameters.Seed = new byte[20];
 				Buffer.BlockCopy(blob, num3, dsaparameters.Seed, 0, 20);
-				Array.Reverse<byte>(dsaparameters.Seed);
+				Array.Reverse(dsaparameters.Seed);
 				num3 += 20;
 				DSA dsa = DSA.Create();
 				dsa.ImportParameters(dsaparameters);
@@ -456,7 +455,7 @@ namespace Mono.Security.Cryptography
 			num2 = 20;
 			byte[] modulus = rsaparameters.Modulus;
 			int num3 = modulus.Length;
-			Array.Reverse<byte>(modulus, 0, num3);
+			Array.Reverse(modulus, 0, num3);
 			Buffer.BlockCopy(modulus, 0, array, num2, num3);
 			num2 += num3;
 			return array;
@@ -480,27 +479,27 @@ namespace Mono.Security.Cryptography
 			array[14] = bytesLE[2];
 			array[15] = bytesLE[3];
 			int num2 = 16;
-			byte[] p = dsaparameters.P;
-			Array.Reverse<byte>(p);
-			Buffer.BlockCopy(p, 0, array, num2, num);
+			byte[] array2 = dsaparameters.P;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, num);
 			num2 += num;
-			byte[] q = dsaparameters.Q;
-			Array.Reverse<byte>(q);
-			Buffer.BlockCopy(q, 0, array, num2, 20);
+			array2 = dsaparameters.Q;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, 20);
 			num2 += 20;
-			byte[] g = dsaparameters.G;
-			Array.Reverse<byte>(g);
-			Buffer.BlockCopy(g, 0, array, num2, num);
+			array2 = dsaparameters.G;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, num);
 			num2 += num;
-			byte[] y = dsaparameters.Y;
-			Array.Reverse<byte>(y);
-			Buffer.BlockCopy(y, 0, array, num2, num);
+			array2 = dsaparameters.Y;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, num);
 			num2 += num;
 			Buffer.BlockCopy(CryptoConvert.GetBytesLE(dsaparameters.Counter), 0, array, num2, 4);
 			num2 += 4;
-			byte[] seed = dsaparameters.Seed;
-			Array.Reverse<byte>(seed);
-			Buffer.BlockCopy(seed, 0, array, num2, 20);
+			array2 = dsaparameters.Seed;
+			Array.Reverse(array2);
+			Buffer.BlockCopy(array2, 0, array, num2, 20);
 			return array;
 		}
 
@@ -520,22 +519,22 @@ namespace Mono.Security.Cryptography
 				throw new ArgumentException("blob is too small.");
 			}
 			byte b = blob[offset];
-			if (b != 0)
+			if (b == 6)
 			{
-				if (b == 6)
-				{
-					return CryptoConvert.FromCapiPublicKeyBlob(blob, offset);
-				}
-				if (b == 7)
-				{
-					return CryptoConvert.FromCapiPrivateKeyBlob(blob, offset);
-				}
+				return CryptoConvert.FromCapiPublicKeyBlob(blob, offset);
 			}
-			else if (blob[offset + 12] == 6)
+			if (b != 7)
 			{
-				return CryptoConvert.FromCapiPublicKeyBlob(blob, offset + 12);
+				if (b == 0)
+				{
+					if (blob[offset + 12] == 6)
+					{
+						return CryptoConvert.FromCapiPublicKeyBlob(blob, offset + 12);
+					}
+				}
+				throw new CryptographicException("Unknown blob format.");
 			}
-			throw new CryptographicException("Unknown blob format.");
+			return CryptoConvert.FromCapiPrivateKeyBlob(blob, offset);
 		}
 
 		public static DSA FromCapiKeyBlobDSA(byte[] blob)

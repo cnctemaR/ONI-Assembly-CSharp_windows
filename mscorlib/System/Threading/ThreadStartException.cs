@@ -6,20 +6,23 @@ namespace System.Threading
 	[Serializable]
 	public sealed class ThreadStartException : SystemException
 	{
-		private ThreadStartException()
-			: base(Environment.GetResourceString("Thread failed to start."))
+		internal ThreadStartException()
+			: base("Thread Start Error")
 		{
-			base.SetErrorCode(-2146233051);
 		}
 
-		private ThreadStartException(Exception reason)
-			: base(Environment.GetResourceString("Thread failed to start."), reason)
+		internal ThreadStartException(string message)
+			: base(message)
 		{
-			base.SetErrorCode(-2146233051);
 		}
 
 		internal ThreadStartException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
+		{
+		}
+
+		internal ThreadStartException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 	}

@@ -4,18 +4,20 @@ using System.Reflection;
 namespace System.Runtime.InteropServices
 {
 	[ClassInterface(ClassInterfaceType.None)]
-	[Guid("475e398f-8afa-43a7-a3be-f4ef8d6787c9")]
 	[ComVisible(true)]
+	[Guid("475e398f-8afa-43a7-a3be-f4ef8d6787c9")]
 	public class RegistrationServices : IRegistrationServices
 	{
+		[MonoTODO("implement")]
 		public virtual Guid GetManagedCategoryGuid()
 		{
-			return RegistrationServices.guidManagedCategory;
+			throw new NotImplementedException();
 		}
 
+		[MonoTODO("implement")]
 		public virtual string GetProgIdForType(Type type)
 		{
-			return Marshal.GenerateProgIdForType(type);
+			throw new NotImplementedException();
 		}
 
 		[MonoTODO("implement")]
@@ -54,20 +56,18 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("implement")]
+		[ComVisible(false)]
 		public virtual int RegisterTypeForComClients(Type type, RegistrationClassContext classContext, RegistrationConnectionType flags)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO("implement")]
 		[ComVisible(false)]
+		[MonoTODO("implement")]
 		public virtual void UnregisterTypeForComClients(int cookie)
 		{
 			throw new NotImplementedException();
 		}
-
-		private static Guid guidManagedCategory = new Guid("{62C8FE65-4EBB-45e7-B440-6E39B2CDBF29}");
 	}
 }

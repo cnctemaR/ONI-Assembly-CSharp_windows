@@ -12,14 +12,6 @@ namespace Mono.Security.Cryptography
 
 		public BlockProcessor(ICryptoTransform transform, int blockSize)
 		{
-			if (transform == null)
-			{
-				throw new ArgumentNullException("transform");
-			}
-			if (blockSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException("blockSize");
-			}
 			this.transform = transform;
 			this.blockSize = blockSize;
 			this.block = new byte[blockSize];

@@ -21,7 +21,7 @@ namespace System.Security.Cryptography
 			{
 				if (dataProtectionImplementation != ProtectedData.DataProtectionImplementation.ManagedProtection)
 				{
-					goto IL_005E;
+					goto IL_008D;
 				}
 				try
 				{
@@ -29,7 +29,8 @@ namespace System.Security.Cryptography
 				}
 				catch (Exception ex)
 				{
-					throw new CryptographicException(Locale.GetText("Data protection failed."), ex);
+					string text = Locale.GetText("Data protection failed.");
+					throw new CryptographicException(text, ex);
 				}
 			}
 			try
@@ -38,9 +39,10 @@ namespace System.Security.Cryptography
 			}
 			catch (Exception ex2)
 			{
-				throw new CryptographicException(Locale.GetText("Data protection failed."), ex2);
+				string text2 = Locale.GetText("Data protection failed.");
+				throw new CryptographicException(text2, ex2);
 			}
-			IL_005E:
+			IL_008D:
 			throw new PlatformNotSupportedException();
 		}
 
@@ -56,7 +58,7 @@ namespace System.Security.Cryptography
 			{
 				if (dataProtectionImplementation != ProtectedData.DataProtectionImplementation.ManagedProtection)
 				{
-					goto IL_005E;
+					goto IL_008D;
 				}
 				try
 				{
@@ -64,7 +66,8 @@ namespace System.Security.Cryptography
 				}
 				catch (Exception ex)
 				{
-					throw new CryptographicException(Locale.GetText("Data unprotection failed."), ex);
+					string text = Locale.GetText("Data unprotection failed.");
+					throw new CryptographicException(text, ex);
 				}
 			}
 			try
@@ -73,53 +76,56 @@ namespace System.Security.Cryptography
 			}
 			catch (Exception ex2)
 			{
-				throw new CryptographicException(Locale.GetText("Data unprotection failed."), ex2);
+				string text2 = Locale.GetText("Data unprotection failed.");
+				throw new CryptographicException(text2, ex2);
 			}
-			IL_005E:
+			IL_008D:
 			throw new PlatformNotSupportedException();
 		}
 
 		private static void Detect()
 		{
 			OperatingSystem osversion = Environment.OSVersion;
-			PlatformID platform = osversion.Platform;
-			if (platform != PlatformID.Win32NT)
+			switch (osversion.Platform)
 			{
-				if (platform != PlatformID.Unix)
+			case PlatformID.Win32NT:
+			{
+				Version version = osversion.Version;
+				if (version.Major < 5)
 				{
 					ProtectedData.impl = ProtectedData.DataProtectionImplementation.Unsupported;
-					return;
 				}
+				else
+				{
+					ProtectedData.impl = ProtectedData.DataProtectionImplementation.Win32CryptoProtect;
+				}
+				return;
+			}
+			case PlatformID.Unix:
 				ProtectedData.impl = ProtectedData.DataProtectionImplementation.ManagedProtection;
 				return;
 			}
-			else
-			{
-				if (osversion.Version.Major < 5)
-				{
-					ProtectedData.impl = ProtectedData.DataProtectionImplementation.Unsupported;
-					return;
-				}
-				ProtectedData.impl = ProtectedData.DataProtectionImplementation.Win32CryptoProtect;
-				return;
-			}
+			ProtectedData.impl = ProtectedData.DataProtectionImplementation.Unsupported;
 		}
 
 		private static void Check(DataProtectionScope scope)
 		{
 			if (scope < DataProtectionScope.CurrentUser || scope > DataProtectionScope.LocalMachine)
 			{
-				throw new ArgumentException(Locale.GetText("Invalid enum value '{0}' for '{1}'.", new object[] { scope, "DataProtectionScope" }), "scope");
+				string text = Locale.GetText("Invalid enum value '{0}' for '{1}'.", new object[] { scope, "DataProtectionScope" });
+				throw new ArgumentException(text, "scope");
 			}
 			ProtectedData.DataProtectionImplementation dataProtectionImplementation = ProtectedData.impl;
-			if (dataProtectionImplementation == ProtectedData.DataProtectionImplementation.Unsupported)
+			if (dataProtectionImplementation != ProtectedData.DataProtectionImplementation.Unknown)
 			{
-				throw new PlatformNotSupportedException();
+				if (dataProtectionImplementation == ProtectedData.DataProtectionImplementation.Unsupported)
+				{
+					throw new PlatformNotSupportedException();
+				}
 			}
-			if (dataProtectionImplementation == ProtectedData.DataProtectionImplementation.Unknown)
+			else
 			{
 				ProtectedData.Detect();
-				return;
 			}
 		}
 

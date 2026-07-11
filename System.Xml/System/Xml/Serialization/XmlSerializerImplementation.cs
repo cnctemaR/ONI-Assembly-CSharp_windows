@@ -13,7 +13,7 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public virtual XmlSerializationWriter Writer
+		public virtual Hashtable ReadMethods
 		{
 			get
 			{
@@ -21,7 +21,7 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public virtual Hashtable ReadMethods
+		public virtual Hashtable TypedSerializers
 		{
 			get
 			{
@@ -37,7 +37,7 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public virtual Hashtable TypedSerializers
+		public virtual XmlSerializationWriter Writer
 		{
 			get
 			{

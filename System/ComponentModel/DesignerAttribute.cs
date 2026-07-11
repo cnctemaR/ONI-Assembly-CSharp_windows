@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.Design;
-using System.Globalization;
 
 namespace System.ComponentModel
 {
@@ -9,42 +8,44 @@ namespace System.ComponentModel
 	{
 		public DesignerAttribute(string designerTypeName)
 		{
-			designerTypeName.ToUpper(CultureInfo.InvariantCulture);
-			this.designerTypeName = designerTypeName;
-			this.designerBaseTypeName = typeof(IDesigner).FullName;
+			if (designerTypeName == null)
+			{
+				throw new NullReferenceException();
+			}
+			this.name = designerTypeName;
+			this.basetypename = typeof(global::System.ComponentModel.Design.IDesigner).FullName;
 		}
 
 		public DesignerAttribute(Type designerType)
+			: this(designerType.AssemblyQualifiedName)
 		{
-			this.designerTypeName = designerType.AssemblyQualifiedName;
-			this.designerBaseTypeName = typeof(IDesigner).FullName;
+		}
+
+		public DesignerAttribute(string designerTypeName, Type designerBaseType)
+			: this(designerTypeName, designerBaseType.AssemblyQualifiedName)
+		{
+		}
+
+		public DesignerAttribute(Type designerType, Type designerBaseType)
+			: this(designerType.AssemblyQualifiedName, designerBaseType.AssemblyQualifiedName)
+		{
 		}
 
 		public DesignerAttribute(string designerTypeName, string designerBaseTypeName)
 		{
-			designerTypeName.ToUpper(CultureInfo.InvariantCulture);
-			this.designerTypeName = designerTypeName;
-			this.designerBaseTypeName = designerBaseTypeName;
-		}
-
-		public DesignerAttribute(string designerTypeName, Type designerBaseType)
-		{
-			designerTypeName.ToUpper(CultureInfo.InvariantCulture);
-			this.designerTypeName = designerTypeName;
-			this.designerBaseTypeName = designerBaseType.AssemblyQualifiedName;
-		}
-
-		public DesignerAttribute(Type designerType, Type designerBaseType)
-		{
-			this.designerTypeName = designerType.AssemblyQualifiedName;
-			this.designerBaseTypeName = designerBaseType.AssemblyQualifiedName;
+			if (designerTypeName == null)
+			{
+				throw new NullReferenceException();
+			}
+			this.name = designerTypeName;
+			this.basetypename = designerBaseTypeName;
 		}
 
 		public string DesignerBaseTypeName
 		{
 			get
 			{
-				return this.designerBaseTypeName;
+				return this.basetypename;
 			}
 		}
 
@@ -52,7 +53,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.designerTypeName;
+				return this.name;
 			}
 		}
 
@@ -60,39 +61,28 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				if (this.typeId == null)
+				string text = this.basetypename;
+				int num = text.IndexOf(',');
+				if (num != -1)
 				{
-					string text = this.designerBaseTypeName;
-					int num = text.IndexOf(',');
-					if (num != -1)
-					{
-						text = text.Substring(0, num);
-					}
-					this.typeId = base.GetType().FullName + text;
+					text = text.Substring(0, num);
 				}
-				return this.typeId;
+				return base.GetType().ToString() + text;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			DesignerAttribute designerAttribute = obj as DesignerAttribute;
-			return designerAttribute != null && designerAttribute.designerBaseTypeName == this.designerBaseTypeName && designerAttribute.designerTypeName == this.designerTypeName;
+			return obj is DesignerAttribute && ((DesignerAttribute)obj).DesignerBaseTypeName.Equals(this.basetypename) && ((DesignerAttribute)obj).DesignerTypeName.Equals(this.name);
 		}
 
 		public override int GetHashCode()
 		{
-			return this.designerTypeName.GetHashCode() ^ this.designerBaseTypeName.GetHashCode();
+			return (this.name + this.basetypename).GetHashCode();
 		}
 
-		private readonly string designerTypeName;
+		private string name;
 
-		private readonly string designerBaseTypeName;
-
-		private string typeId;
+		private string basetypename;
 	}
 }

@@ -1,12 +1,8 @@
 ﻿using System;
-using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class TypeListConverter : TypeConverter
 	{
 		protected TypeListConverter(Type[] types)
@@ -21,66 +17,26 @@ namespace System.ComponentModel
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
+			return destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
 		}
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value is string)
-			{
-				foreach (Type type in this.types)
-				{
-					if (value.Equals(type.FullName))
-					{
-						return type;
-					}
-				}
-			}
 			return base.ConvertFrom(context, culture, value);
 		}
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == null)
+			if (destinationType == typeof(string) && value != null && value.GetType() == typeof(Type))
 			{
-				throw new ArgumentNullException("destinationType");
+				return ((Type)value).ToString();
 			}
-			if (!(destinationType == typeof(string)))
-			{
-				if (destinationType == typeof(InstanceDescriptor) && value is Type)
-				{
-					MethodInfo method = typeof(Type).GetMethod("GetType", new Type[] { typeof(string) });
-					if (method != null)
-					{
-						return new InstanceDescriptor(method, new object[] { ((Type)value).AssemblyQualifiedName });
-					}
-				}
-				return base.ConvertTo(context, culture, value, destinationType);
-			}
-			if (value == null)
-			{
-				return global::SR.GetString("(none)");
-			}
-			return ((Type)value).FullName;
+			throw new InvalidCastException("Cannot cast to System.Type");
 		}
 
 		public override TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			if (this.values == null)
-			{
-				object[] array;
-				if (this.types != null)
-				{
-					array = new object[this.types.Length];
-					Array.Copy(this.types, array, this.types.Length);
-				}
-				else
-				{
-					array = null;
-				}
-				this.values = new TypeConverter.StandardValuesCollection(array);
-			}
-			return this.values;
+			return new TypeConverter.StandardValuesCollection(this.types);
 		}
 
 		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
@@ -94,7 +50,5 @@ namespace System.ComponentModel
 		}
 
 		private Type[] types;
-
-		private TypeConverter.StandardValuesCollection values;
 	}
 }

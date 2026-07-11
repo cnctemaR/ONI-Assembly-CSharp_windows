@@ -42,7 +42,7 @@ namespace YamlDotNet.Core.Events
 
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "Document end [isImplicit = {0}]", this.isImplicit);
+			return string.Format(CultureInfo.InvariantCulture, "Document end [isImplicit = {0}]", new object[] { this.isImplicit });
 		}
 
 		public override void Accept(IParsingEventVisitor visitor)

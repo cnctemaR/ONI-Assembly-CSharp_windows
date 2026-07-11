@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace System.Security.Permissions
 {
 	[ComVisible(true)]
-	[SecurityPermission(SecurityAction.InheritanceDemand, ControlEvidence = true, ControlPolicy = true)]
+	[PermissionSet(SecurityAction.InheritanceDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
 	[Serializable]
 	public abstract class IsolatedStoragePermission : CodeAccessPermission, IUnrestrictedPermission
 	{
@@ -39,7 +38,8 @@ namespace System.Security.Permissions
 			{
 				if (!Enum.IsDefined(typeof(IsolatedStorageContainment), value))
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "IsolatedStorageContainment");
+					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
+					throw new ArgumentException(text, "IsolatedStorageContainment");
 				}
 				this.m_allowed = value;
 				if (this.m_allowed == IsolatedStorageContainment.UnrestrictedIsolatedStorage)
@@ -86,17 +86,20 @@ namespace System.Security.Permissions
 			if (CodeAccessPermission.IsUnrestricted(esd))
 			{
 				this.UsageAllowed = IsolatedStorageContainment.UnrestrictedIsolatedStorage;
-				return;
 			}
-			string text = esd.Attribute("Allowed");
-			if (text != null)
+			else
 			{
-				this.UsageAllowed = (IsolatedStorageContainment)Enum.Parse(typeof(IsolatedStorageContainment), text);
-			}
-			text = esd.Attribute("UserQuota");
-			if (text != null)
-			{
-				this.m_userQuota = long.Parse(text, CultureInfo.InvariantCulture);
+				string text = esd.Attribute("Allowed");
+				if (text != null)
+				{
+					this.UsageAllowed = (IsolatedStorageContainment)((int)Enum.Parse(typeof(IsolatedStorageContainment), text));
+				}
+				text = esd.Attribute("UserQuota");
+				if (text != null)
+				{
+					Exception ex;
+					long.Parse(text, true, out this.m_userQuota, out ex);
+				}
 			}
 		}
 

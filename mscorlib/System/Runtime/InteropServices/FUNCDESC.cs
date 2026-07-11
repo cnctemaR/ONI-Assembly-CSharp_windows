@@ -2,7 +2,7 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete("Use System.Runtime.InteropServices.ComTypes.FUNCDESC instead. http://go.microsoft.com/fwlink/?linkid=14202", false)]
+	[Obsolete]
 	public struct FUNCDESC
 	{
 		public int memid;

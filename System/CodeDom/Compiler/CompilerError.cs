@@ -13,44 +13,101 @@ namespace System.CodeDom.Compiler
 
 		public CompilerError(string fileName, int line, int column, string errorNumber, string errorText)
 		{
-			this.Line = line;
-			this.Column = column;
-			this.ErrorNumber = errorNumber;
-			this.ErrorText = errorText;
-			this.FileName = fileName;
+			this.fileName = fileName;
+			this.line = line;
+			this.column = column;
+			this.errorNumber = errorNumber;
+			this.errorText = errorText;
 		}
-
-		public int Line { get; set; }
-
-		public int Column { get; set; }
-
-		public string ErrorNumber { get; set; }
-
-		public string ErrorText { get; set; }
-
-		public bool IsWarning { get; set; }
-
-		public string FileName { get; set; }
 
 		public override string ToString()
 		{
-			if (this.FileName.Length <= 0)
-			{
-				return string.Format(CultureInfo.InvariantCulture, "{0} {1}: {2}", this.WarningString, this.ErrorNumber, this.ErrorText);
-			}
-			return string.Format(CultureInfo.InvariantCulture, "{0}({1},{2}) : {3} {4}: {5}", new object[] { this.FileName, this.Line, this.Column, this.WarningString, this.ErrorNumber, this.ErrorText });
+			string text = ((!this.isWarning) ? "error" : "warning");
+			return string.Format(CultureInfo.InvariantCulture, "{0}({1},{2}) : {3} {4}: {5}", new object[] { this.fileName, this.line, this.column, text, this.errorNumber, this.errorText });
 		}
 
-		private string WarningString
+		public int Line
 		{
 			get
 			{
-				if (!this.IsWarning)
-				{
-					return "error";
-				}
-				return "warning";
+				return this.line;
+			}
+			set
+			{
+				this.line = value;
 			}
 		}
+
+		public int Column
+		{
+			get
+			{
+				return this.column;
+			}
+			set
+			{
+				this.column = value;
+			}
+		}
+
+		public string ErrorNumber
+		{
+			get
+			{
+				return this.errorNumber;
+			}
+			set
+			{
+				this.errorNumber = value;
+			}
+		}
+
+		public string ErrorText
+		{
+			get
+			{
+				return this.errorText;
+			}
+			set
+			{
+				this.errorText = value;
+			}
+		}
+
+		public bool IsWarning
+		{
+			get
+			{
+				return this.isWarning;
+			}
+			set
+			{
+				this.isWarning = value;
+			}
+		}
+
+		public string FileName
+		{
+			get
+			{
+				return this.fileName;
+			}
+			set
+			{
+				this.fileName = value;
+			}
+		}
+
+		private string fileName;
+
+		private int line;
+
+		private int column;
+
+		private string errorNumber;
+
+		private string errorText;
+
+		private bool isWarning;
 	}
 }

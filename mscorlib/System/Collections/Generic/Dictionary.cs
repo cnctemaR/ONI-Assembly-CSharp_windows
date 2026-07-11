@@ -1,41 +1,25 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Threading;
+using System.Security.Permissions;
 
 namespace System.Collections.Generic
 {
-	[DebuggerDisplay("Count = {Count}")]
-	[DebuggerTypeProxy(typeof(IDictionaryDebugView<, >))]
+	[DebuggerDisplay("Count={Count}")]
+	[ComVisible(false)]
+	[DebuggerTypeProxy(typeof(CollectionDebuggerView<, >))]
 	[Serializable]
-	public class Dictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDictionary, ICollection, IReadOnlyDictionary<TKey, TValue>, IReadOnlyCollection<KeyValuePair<TKey, TValue>>, ISerializable, IDeserializationCallback
+	public class Dictionary<TKey, TValue> : IEnumerable, ISerializable, ICollection, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IDictionary, IDeserializationCallback
 	{
 		public Dictionary()
-			: this(0, null)
 		{
-		}
-
-		public Dictionary(int capacity)
-			: this(capacity, null)
-		{
+			this.Init(10, null);
 		}
 
 		public Dictionary(IEqualityComparer<TKey> comparer)
-			: this(0, comparer)
 		{
-		}
-
-		public Dictionary(int capacity, IEqualityComparer<TKey> comparer)
-		{
-			if (capacity < 0)
-			{
-				throw new ArgumentOutOfRangeException("capacity", capacity, "Non-negative number required.");
-			}
-			if (capacity > 0)
-			{
-				this.Initialize(capacity);
-			}
-			this.comparer = comparer ?? EqualityComparer<TKey>.Default;
+			this.Init(10, comparer);
 		}
 
 		public Dictionary(IDictionary<TKey, TValue> dictionary)
@@ -43,118 +27,40 @@ namespace System.Collections.Generic
 		{
 		}
 
+		public Dictionary(int capacity)
+		{
+			this.Init(capacity, null);
+		}
+
 		public Dictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
-			: this((dictionary != null) ? dictionary.Count : 0, comparer)
 		{
 			if (dictionary == null)
 			{
 				throw new ArgumentNullException("dictionary");
 			}
-			if (dictionary.GetType() == typeof(Dictionary<TKey, TValue>))
-			{
-				Dictionary<TKey, TValue> dictionary2 = (Dictionary<TKey, TValue>)dictionary;
-				int num = dictionary2.count;
-				Dictionary<TKey, TValue>.Entry[] array = dictionary2.entries;
-				for (int i = 0; i < num; i++)
-				{
-					if (array[i].hashCode >= 0)
-					{
-						this.Add(array[i].key, array[i].value);
-					}
-				}
-				return;
-			}
+			int num = dictionary.Count;
+			this.Init(num, comparer);
 			foreach (KeyValuePair<TKey, TValue> keyValuePair in dictionary)
 			{
 				this.Add(keyValuePair.Key, keyValuePair.Value);
 			}
 		}
 
-		public Dictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection)
-			: this(collection, null)
+		public Dictionary(int capacity, IEqualityComparer<TKey> comparer)
 		{
-		}
-
-		public Dictionary(IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer)
-		{
-			ICollection<KeyValuePair<TKey, TValue>> collection2 = collection as ICollection<KeyValuePair<TKey, TValue>>;
-			this..ctor((collection2 != null) ? collection2.Count : 0, comparer);
-			if (collection == null)
-			{
-				throw new ArgumentNullException("collection");
-			}
-			foreach (KeyValuePair<TKey, TValue> keyValuePair in collection)
-			{
-				this.Add(keyValuePair.Key, keyValuePair.Value);
-			}
+			this.Init(capacity, comparer);
 		}
 
 		protected Dictionary(SerializationInfo info, StreamingContext context)
 		{
-			DictionaryHashHelpers.SerializationInfoTable.Add(this, info);
-		}
-
-		public IEqualityComparer<TKey> Comparer
-		{
-			get
-			{
-				return this.comparer;
-			}
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this.count - this.freeCount;
-			}
-		}
-
-		public Dictionary<TKey, TValue>.KeyCollection Keys
-		{
-			get
-			{
-				if (this.keys == null)
-				{
-					this.keys = new Dictionary<TKey, TValue>.KeyCollection(this);
-				}
-				return this.keys;
-			}
+			this.serialization_info = info;
 		}
 
 		ICollection<TKey> IDictionary<TKey, TValue>.Keys
 		{
 			get
 			{
-				if (this.keys == null)
-				{
-					this.keys = new Dictionary<TKey, TValue>.KeyCollection(this);
-				}
-				return this.keys;
-			}
-		}
-
-		IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys
-		{
-			get
-			{
-				if (this.keys == null)
-				{
-					this.keys = new Dictionary<TKey, TValue>.KeyCollection(this);
-				}
-				return this.keys;
-			}
-		}
-
-		public Dictionary<TKey, TValue>.ValueCollection Values
-		{
-			get
-			{
-				if (this.values == null)
-				{
-					this.values = new Dictionary<TKey, TValue>.ValueCollection(this);
-				}
-				return this.values;
+				return this.Keys;
 			}
 		}
 
@@ -162,557 +68,7 @@ namespace System.Collections.Generic
 		{
 			get
 			{
-				if (this.values == null)
-				{
-					this.values = new Dictionary<TKey, TValue>.ValueCollection(this);
-				}
-				return this.values;
-			}
-		}
-
-		IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values
-		{
-			get
-			{
-				if (this.values == null)
-				{
-					this.values = new Dictionary<TKey, TValue>.ValueCollection(this);
-				}
-				return this.values;
-			}
-		}
-
-		public TValue this[TKey key]
-		{
-			get
-			{
-				int num = this.FindEntry(key);
-				if (num >= 0)
-				{
-					return this.entries[num].value;
-				}
-				throw new KeyNotFoundException();
-			}
-			set
-			{
-				this.TryInsert(key, value, InsertionBehavior.OverwriteExisting);
-			}
-		}
-
-		public void Add(TKey key, TValue value)
-		{
-			this.TryInsert(key, value, InsertionBehavior.ThrowOnExisting);
-		}
-
-		void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> keyValuePair)
-		{
-			this.Add(keyValuePair.Key, keyValuePair.Value);
-		}
-
-		bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> keyValuePair)
-		{
-			int num = this.FindEntry(keyValuePair.Key);
-			return num >= 0 && EqualityComparer<TValue>.Default.Equals(this.entries[num].value, keyValuePair.Value);
-		}
-
-		bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> keyValuePair)
-		{
-			int num = this.FindEntry(keyValuePair.Key);
-			if (num >= 0 && EqualityComparer<TValue>.Default.Equals(this.entries[num].value, keyValuePair.Value))
-			{
-				this.Remove(keyValuePair.Key);
-				return true;
-			}
-			return false;
-		}
-
-		public void Clear()
-		{
-			if (this.count > 0)
-			{
-				for (int i = 0; i < this.buckets.Length; i++)
-				{
-					this.buckets[i] = -1;
-				}
-				Array.Clear(this.entries, 0, this.count);
-				this.freeList = -1;
-				this.count = 0;
-				this.freeCount = 0;
-				this.version++;
-			}
-		}
-
-		public bool ContainsKey(TKey key)
-		{
-			return this.FindEntry(key) >= 0;
-		}
-
-		public bool ContainsValue(TValue value)
-		{
-			if (value == null)
-			{
-				for (int i = 0; i < this.count; i++)
-				{
-					if (this.entries[i].hashCode >= 0 && this.entries[i].value == null)
-					{
-						return true;
-					}
-				}
-			}
-			else
-			{
-				EqualityComparer<TValue> @default = EqualityComparer<TValue>.Default;
-				for (int j = 0; j < this.count; j++)
-				{
-					if (this.entries[j].hashCode >= 0 && @default.Equals(this.entries[j].value, value))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		private void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (index < 0 || index > array.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", index, "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (array.Length - index < this.Count)
-			{
-				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-			}
-			int num = this.count;
-			Dictionary<TKey, TValue>.Entry[] array2 = this.entries;
-			for (int i = 0; i < num; i++)
-			{
-				if (array2[i].hashCode >= 0)
-				{
-					array[index++] = new KeyValuePair<TKey, TValue>(array2[i].key, array2[i].value);
-				}
-			}
-		}
-
-		public Dictionary<TKey, TValue>.Enumerator GetEnumerator()
-		{
-			return new Dictionary<TKey, TValue>.Enumerator(this, 2);
-		}
-
-		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
-		{
-			return new Dictionary<TKey, TValue>.Enumerator(this, 2);
-		}
-
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
-			info.AddValue("Version", this.version);
-			info.AddValue("Comparer", this.comparer, typeof(IEqualityComparer<TKey>));
-			info.AddValue("HashSize", (this.buckets == null) ? 0 : this.buckets.Length);
-			if (this.buckets != null)
-			{
-				KeyValuePair<TKey, TValue>[] array = new KeyValuePair<TKey, TValue>[this.Count];
-				this.CopyTo(array, 0);
-				info.AddValue("KeyValuePairs", array, typeof(KeyValuePair<TKey, TValue>[]));
-			}
-		}
-
-		private int FindEntry(TKey key)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			if (this.buckets != null)
-			{
-				int num = this.comparer.GetHashCode(key) & int.MaxValue;
-				for (int i = this.buckets[num % this.buckets.Length]; i >= 0; i = this.entries[i].next)
-				{
-					if (this.entries[i].hashCode == num && this.comparer.Equals(this.entries[i].key, key))
-					{
-						return i;
-					}
-				}
-			}
-			return -1;
-		}
-
-		private void Initialize(int capacity)
-		{
-			int prime = HashHelpers.GetPrime(capacity);
-			this.buckets = new int[prime];
-			for (int i = 0; i < this.buckets.Length; i++)
-			{
-				this.buckets[i] = -1;
-			}
-			this.entries = new Dictionary<TKey, TValue>.Entry[prime];
-			this.freeList = -1;
-		}
-
-		private bool TryInsert(TKey key, TValue value, InsertionBehavior behavior)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			if (this.buckets == null)
-			{
-				this.Initialize(0);
-			}
-			int num = this.comparer.GetHashCode(key) & int.MaxValue;
-			int num2 = num % this.buckets.Length;
-			int num3 = 0;
-			int i = this.buckets[num2];
-			while (i >= 0)
-			{
-				if (this.entries[i].hashCode == num && this.comparer.Equals(this.entries[i].key, key))
-				{
-					if (behavior == InsertionBehavior.OverwriteExisting)
-					{
-						this.entries[i].value = value;
-						this.version++;
-						return true;
-					}
-					if (behavior == InsertionBehavior.ThrowOnExisting)
-					{
-						throw new ArgumentException(SR.Format("An item with the same key has already been added. Key: {0}", key));
-					}
-					return false;
-				}
-				else
-				{
-					num3++;
-					i = this.entries[i].next;
-				}
-			}
-			int num4;
-			if (this.freeCount > 0)
-			{
-				num4 = this.freeList;
-				this.freeList = this.entries[num4].next;
-				this.freeCount--;
-			}
-			else
-			{
-				if (this.count == this.entries.Length)
-				{
-					this.Resize();
-					num2 = num % this.buckets.Length;
-				}
-				num4 = this.count;
-				this.count++;
-			}
-			this.entries[num4].hashCode = num;
-			this.entries[num4].next = this.buckets[num2];
-			this.entries[num4].key = key;
-			this.entries[num4].value = value;
-			this.buckets[num2] = num4;
-			this.version++;
-			if (num3 > 100 && this.comparer is NonRandomizedStringEqualityComparer)
-			{
-				this.comparer = (IEqualityComparer<TKey>)EqualityComparer<string>.Default;
-				this.Resize(this.entries.Length, true);
-			}
-			return true;
-		}
-
-		public virtual void OnDeserialization(object sender)
-		{
-			SerializationInfo serializationInfo;
-			DictionaryHashHelpers.SerializationInfoTable.TryGetValue(this, out serializationInfo);
-			if (serializationInfo == null)
-			{
-				return;
-			}
-			int @int = serializationInfo.GetInt32("Version");
-			int int2 = serializationInfo.GetInt32("HashSize");
-			this.comparer = (IEqualityComparer<TKey>)serializationInfo.GetValue("Comparer", typeof(IEqualityComparer<TKey>));
-			if (int2 != 0)
-			{
-				this.buckets = new int[int2];
-				for (int i = 0; i < this.buckets.Length; i++)
-				{
-					this.buckets[i] = -1;
-				}
-				this.entries = new Dictionary<TKey, TValue>.Entry[int2];
-				this.freeList = -1;
-				KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])serializationInfo.GetValue("KeyValuePairs", typeof(KeyValuePair<TKey, TValue>[]));
-				if (array == null)
-				{
-					throw new SerializationException("The keys for this dictionary are missing.");
-				}
-				for (int j = 0; j < array.Length; j++)
-				{
-					if (array[j].Key == null)
-					{
-						throw new SerializationException("One of the serialized keys is null.");
-					}
-					this.Add(array[j].Key, array[j].Value);
-				}
-			}
-			else
-			{
-				this.buckets = null;
-			}
-			this.version = @int;
-			DictionaryHashHelpers.SerializationInfoTable.Remove(this);
-		}
-
-		private void Resize()
-		{
-			this.Resize(HashHelpers.ExpandPrime(this.count), false);
-		}
-
-		private void Resize(int newSize, bool forceNewHashCodes)
-		{
-			int[] array = new int[newSize];
-			for (int i = 0; i < array.Length; i++)
-			{
-				array[i] = -1;
-			}
-			Dictionary<TKey, TValue>.Entry[] array2 = new Dictionary<TKey, TValue>.Entry[newSize];
-			Array.Copy(this.entries, 0, array2, 0, this.count);
-			if (forceNewHashCodes)
-			{
-				for (int j = 0; j < this.count; j++)
-				{
-					if (array2[j].hashCode != -1)
-					{
-						array2[j].hashCode = this.comparer.GetHashCode(array2[j].key) & int.MaxValue;
-					}
-				}
-			}
-			for (int k = 0; k < this.count; k++)
-			{
-				if (array2[k].hashCode >= 0)
-				{
-					int num = array2[k].hashCode % newSize;
-					array2[k].next = array[num];
-					array[num] = k;
-				}
-			}
-			this.buckets = array;
-			this.entries = array2;
-		}
-
-		public bool Remove(TKey key)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			if (this.buckets != null)
-			{
-				int num = this.comparer.GetHashCode(key) & int.MaxValue;
-				int num2 = num % this.buckets.Length;
-				int num3 = -1;
-				for (int i = this.buckets[num2]; i >= 0; i = this.entries[i].next)
-				{
-					if (this.entries[i].hashCode == num && this.comparer.Equals(this.entries[i].key, key))
-					{
-						if (num3 < 0)
-						{
-							this.buckets[num2] = this.entries[i].next;
-						}
-						else
-						{
-							this.entries[num3].next = this.entries[i].next;
-						}
-						this.entries[i].hashCode = -1;
-						this.entries[i].next = this.freeList;
-						this.entries[i].key = default(TKey);
-						this.entries[i].value = default(TValue);
-						this.freeList = i;
-						this.freeCount++;
-						this.version++;
-						return true;
-					}
-					num3 = i;
-				}
-			}
-			return false;
-		}
-
-		public bool Remove(TKey key, out TValue value)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			if (this.buckets != null)
-			{
-				int num = this.comparer.GetHashCode(key) & int.MaxValue;
-				int num2 = num % this.buckets.Length;
-				int num3 = -1;
-				for (int i = this.buckets[num2]; i >= 0; i = this.entries[i].next)
-				{
-					if (this.entries[i].hashCode == num && this.comparer.Equals(this.entries[i].key, key))
-					{
-						if (num3 < 0)
-						{
-							this.buckets[num2] = this.entries[i].next;
-						}
-						else
-						{
-							this.entries[num3].next = this.entries[i].next;
-						}
-						value = this.entries[i].value;
-						this.entries[i].hashCode = -1;
-						this.entries[i].next = this.freeList;
-						this.entries[i].key = default(TKey);
-						this.entries[i].value = default(TValue);
-						this.freeList = i;
-						this.freeCount++;
-						this.version++;
-						return true;
-					}
-					num3 = i;
-				}
-			}
-			value = default(TValue);
-			return false;
-		}
-
-		public bool TryGetValue(TKey key, out TValue value)
-		{
-			int num = this.FindEntry(key);
-			if (num >= 0)
-			{
-				value = this.entries[num].value;
-				return true;
-			}
-			value = default(TValue);
-			return false;
-		}
-
-		public bool TryAdd(TKey key, TValue value)
-		{
-			return this.TryInsert(key, value, InsertionBehavior.None);
-		}
-
-		bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
-		{
-			this.CopyTo(array, index);
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank != 1)
-			{
-				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
-			}
-			if (array.GetLowerBound(0) != 0)
-			{
-				throw new ArgumentException("The lower bound of target array must be zero.", "array");
-			}
-			if (index < 0 || index > array.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", index, "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (array.Length - index < this.Count)
-			{
-				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-			}
-			KeyValuePair<TKey, TValue>[] array2 = array as KeyValuePair<TKey, TValue>[];
-			if (array2 != null)
-			{
-				this.CopyTo(array2, index);
-				return;
-			}
-			if (array is DictionaryEntry[])
-			{
-				DictionaryEntry[] array3 = array as DictionaryEntry[];
-				Dictionary<TKey, TValue>.Entry[] array4 = this.entries;
-				for (int i = 0; i < this.count; i++)
-				{
-					if (array4[i].hashCode >= 0)
-					{
-						array3[index++] = new DictionaryEntry(array4[i].key, array4[i].value);
-					}
-				}
-				return;
-			}
-			object[] array5 = array as object[];
-			if (array5 == null)
-			{
-				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
-			}
-			try
-			{
-				int num = this.count;
-				Dictionary<TKey, TValue>.Entry[] array6 = this.entries;
-				for (int j = 0; j < num; j++)
-				{
-					if (array6[j].hashCode >= 0)
-					{
-						array5[index++] = new KeyValuePair<TKey, TValue>(array6[j].key, array6[j].value);
-					}
-				}
-			}
-			catch (ArrayTypeMismatchException)
-			{
-				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
-			}
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return new Dictionary<TKey, TValue>.Enumerator(this, 2);
-		}
-
-		bool ICollection.IsSynchronized
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		object ICollection.SyncRoot
-		{
-			get
-			{
-				if (this._syncRoot == null)
-				{
-					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
-				}
-				return this._syncRoot;
-			}
-		}
-
-		bool IDictionary.IsFixedSize
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		bool IDictionary.IsReadOnly
-		{
-			get
-			{
-				return false;
+				return this.Values;
 			}
 		}
 
@@ -732,19 +88,166 @@ namespace System.Collections.Generic
 			}
 		}
 
+		bool IDictionary.IsFixedSize
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		bool IDictionary.IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
 		object IDictionary.this[object key]
 		{
 			get
 			{
-				if (Dictionary<TKey, TValue>.IsCompatibleKey(key))
+				if (key is TKey && this.ContainsKey((TKey)((object)key)))
 				{
-					int num = this.FindEntry((TKey)((object)key));
-					if (num >= 0)
-					{
-						return this.entries[num].value;
-					}
+					return this[this.ToTKey(key)];
 				}
 				return null;
+			}
+			set
+			{
+				this[this.ToTKey(key)] = this.ToTValue(value);
+			}
+		}
+
+		void IDictionary.Add(object key, object value)
+		{
+			this.Add(this.ToTKey(key), this.ToTValue(value));
+		}
+
+		bool IDictionary.Contains(object key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			return key is TKey && this.ContainsKey((TKey)((object)key));
+		}
+
+		void IDictionary.Remove(object key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			if (key is TKey)
+			{
+				this.Remove((TKey)((object)key));
+			}
+		}
+
+		bool ICollection.IsSynchronized
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		object ICollection.SyncRoot
+		{
+			get
+			{
+				return this;
+			}
+		}
+
+		bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> keyValuePair)
+		{
+			this.Add(keyValuePair.Key, keyValuePair.Value);
+		}
+
+		bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> keyValuePair)
+		{
+			return this.ContainsKeyValuePair(keyValuePair);
+		}
+
+		void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+		{
+			this.CopyTo(array, index);
+		}
+
+		bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> keyValuePair)
+		{
+			return this.ContainsKeyValuePair(keyValuePair) && this.Remove(keyValuePair.Key);
+		}
+
+		void ICollection.CopyTo(Array array, int index)
+		{
+			KeyValuePair<TKey, TValue>[] array2 = array as KeyValuePair<TKey, TValue>[];
+			if (array2 != null)
+			{
+				this.CopyTo(array2, index);
+				return;
+			}
+			this.CopyToCheck(array, index);
+			DictionaryEntry[] array3 = array as DictionaryEntry[];
+			if (array3 != null)
+			{
+				this.Do_CopyTo<DictionaryEntry, DictionaryEntry>(array3, index, (TKey key, TValue value) => new DictionaryEntry(key, value));
+				return;
+			}
+			this.Do_ICollectionCopyTo<KeyValuePair<TKey, TValue>>(array, index, new Dictionary<TKey, TValue>.Transform<KeyValuePair<TKey, TValue>>(Dictionary<TKey, TValue>.make_pair));
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return new Dictionary<TKey, TValue>.Enumerator(this);
+		}
+
+		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+		{
+			return new Dictionary<TKey, TValue>.Enumerator(this);
+		}
+
+		IDictionaryEnumerator IDictionary.GetEnumerator()
+		{
+			return new Dictionary<TKey, TValue>.ShimEnumerator(this);
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this.count;
+			}
+		}
+
+		public TValue this[TKey key]
+		{
+			get
+			{
+				if (key == null)
+				{
+					throw new ArgumentNullException("key");
+				}
+				int num = this.hcp.GetHashCode(key) | int.MinValue;
+				for (int num2 = this.table[(num & int.MaxValue) % this.table.Length] - 1; num2 != -1; num2 = this.linkSlots[num2].Next)
+				{
+					if (this.linkSlots[num2].HashCode == num && this.hcp.Equals(this.keySlots[num2], key))
+					{
+						return this.valueSlots[num2];
+					}
+				}
+				throw new KeyNotFoundException();
 			}
 			set
 			{
@@ -752,153 +255,591 @@ namespace System.Collections.Generic
 				{
 					throw new ArgumentNullException("key");
 				}
-				if (value == null && default(TValue) != null)
+				int num = this.hcp.GetHashCode(key) | int.MinValue;
+				int num2 = (num & int.MaxValue) % this.table.Length;
+				int num3 = this.table[num2] - 1;
+				int num4 = -1;
+				if (num3 != -1)
 				{
-					throw new ArgumentNullException("value");
-				}
-				try
-				{
-					TKey tkey = (TKey)((object)key);
-					try
+					while (this.linkSlots[num3].HashCode != num || !this.hcp.Equals(this.keySlots[num3], key))
 					{
-						this[tkey] = (TValue)((object)value);
-					}
-					catch (InvalidCastException)
-					{
-						throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
+						num4 = num3;
+						num3 = this.linkSlots[num3].Next;
+						if (num3 == -1)
+						{
+							break;
+						}
 					}
 				}
-				catch (InvalidCastException)
+				if (num3 == -1)
 				{
-					throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
+					if (++this.count > this.threshold)
+					{
+						this.Resize();
+						num2 = (num & int.MaxValue) % this.table.Length;
+					}
+					num3 = this.emptySlot;
+					if (num3 == -1)
+					{
+						num3 = this.touchedSlots++;
+					}
+					else
+					{
+						this.emptySlot = this.linkSlots[num3].Next;
+					}
+					this.linkSlots[num3].Next = this.table[num2] - 1;
+					this.table[num2] = num3 + 1;
+					this.linkSlots[num3].HashCode = num;
+					this.keySlots[num3] = key;
+				}
+				else if (num4 != -1)
+				{
+					this.linkSlots[num4].Next = this.linkSlots[num3].Next;
+					this.linkSlots[num3].Next = this.table[num2] - 1;
+					this.table[num2] = num3 + 1;
+				}
+				this.valueSlots[num3] = value;
+				this.generation++;
+			}
+		}
+
+		private void Init(int capacity, IEqualityComparer<TKey> hcp)
+		{
+			if (capacity < 0)
+			{
+				throw new ArgumentOutOfRangeException("capacity");
+			}
+			this.hcp = ((hcp == null) ? EqualityComparer<TKey>.Default : hcp);
+			if (capacity == 0)
+			{
+				capacity = 10;
+			}
+			capacity = (int)((float)capacity / 0.9f) + 1;
+			this.InitArrays(capacity);
+			this.generation = 0;
+		}
+
+		private void InitArrays(int size)
+		{
+			this.table = new int[size];
+			this.linkSlots = new Link[size];
+			this.emptySlot = -1;
+			this.keySlots = new TKey[size];
+			this.valueSlots = new TValue[size];
+			this.touchedSlots = 0;
+			this.threshold = (int)((float)this.table.Length * 0.9f);
+			if (this.threshold == 0 && this.table.Length > 0)
+			{
+				this.threshold = 1;
+			}
+		}
+
+		private void CopyToCheck(Array array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			if (index > array.Length)
+			{
+				throw new ArgumentException("index larger than largest valid index of array");
+			}
+			if (array.Length - index < this.Count)
+			{
+				throw new ArgumentException("Destination array cannot hold the requested elements!");
+			}
+		}
+
+		private void Do_CopyTo<TRet, TElem>(TElem[] array, int index, Dictionary<TKey, TValue>.Transform<TRet> transform) where TRet : TElem
+		{
+			for (int i = 0; i < this.touchedSlots; i++)
+			{
+				if ((this.linkSlots[i].HashCode & -2147483648) != 0)
+				{
+					array[index++] = (TElem)((object)transform(this.keySlots[i], this.valueSlots[i]));
 				}
 			}
 		}
 
-		private static bool IsCompatibleKey(object key)
+		private static KeyValuePair<TKey, TValue> make_pair(TKey key, TValue value)
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			return key is TKey;
+			return new KeyValuePair<TKey, TValue>(key, value);
 		}
 
-		void IDictionary.Add(object key, object value)
+		private static TKey pick_key(TKey key, TValue value)
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			if (value == null && default(TValue) != null)
-			{
-				throw new ArgumentNullException("value");
-			}
+			return key;
+		}
+
+		private static TValue pick_value(TKey key, TValue value)
+		{
+			return value;
+		}
+
+		private void CopyTo(KeyValuePair<TKey, TValue>[] array, int index)
+		{
+			this.CopyToCheck(array, index);
+			this.Do_CopyTo<KeyValuePair<TKey, TValue>, KeyValuePair<TKey, TValue>>(array, index, new Dictionary<TKey, TValue>.Transform<KeyValuePair<TKey, TValue>>(Dictionary<TKey, TValue>.make_pair));
+		}
+
+		private void Do_ICollectionCopyTo<TRet>(Array array, int index, Dictionary<TKey, TValue>.Transform<TRet> transform)
+		{
+			Type typeFromHandle = typeof(TRet);
+			Type elementType = array.GetType().GetElementType();
 			try
 			{
-				TKey tkey = (TKey)((object)key);
-				try
+				if ((typeFromHandle.IsPrimitive || elementType.IsPrimitive) && !elementType.IsAssignableFrom(typeFromHandle))
 				{
-					this.Add(tkey, (TValue)((object)value));
+					throw new Exception();
 				}
-				catch (InvalidCastException)
+				this.Do_CopyTo<TRet, object>((object[])array, index, transform);
+			}
+			catch (Exception ex)
+			{
+				throw new ArgumentException("Cannot copy source collection elements to destination array", "array", ex);
+			}
+		}
+
+		private void Resize()
+		{
+			int num = Hashtable.ToPrime((this.table.Length << 1) | 1);
+			int[] array = new int[num];
+			Link[] array2 = new Link[num];
+			for (int i = 0; i < this.table.Length; i++)
+			{
+				for (int num2 = this.table[i] - 1; num2 != -1; num2 = this.linkSlots[num2].Next)
 				{
-					throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", value, typeof(TValue)), "value");
+					int num3 = (array2[num2].HashCode = this.hcp.GetHashCode(this.keySlots[num2]) | int.MinValue);
+					int num4 = (num3 & int.MaxValue) % num;
+					array2[num2].Next = array[num4] - 1;
+					array[num4] = num2 + 1;
 				}
 			}
-			catch (InvalidCastException)
+			this.table = array;
+			this.linkSlots = array2;
+			TKey[] array3 = new TKey[num];
+			TValue[] array4 = new TValue[num];
+			Array.Copy(this.keySlots, 0, array3, 0, this.touchedSlots);
+			Array.Copy(this.valueSlots, 0, array4, 0, this.touchedSlots);
+			this.keySlots = array3;
+			this.valueSlots = array4;
+			this.threshold = (int)((float)num * 0.9f);
+		}
+
+		public void Add(TKey key, TValue value)
+		{
+			if (key == null)
 			{
-				throw new ArgumentException(SR.Format("The value '{0}' is not of type '{1}' and cannot be used in this generic collection.", key, typeof(TKey)), "key");
+				throw new ArgumentNullException("key");
+			}
+			int num = this.hcp.GetHashCode(key) | int.MinValue;
+			int num2 = (num & int.MaxValue) % this.table.Length;
+			int num3;
+			for (num3 = this.table[num2] - 1; num3 != -1; num3 = this.linkSlots[num3].Next)
+			{
+				if (this.linkSlots[num3].HashCode == num && this.hcp.Equals(this.keySlots[num3], key))
+				{
+					throw new ArgumentException("An element with the same key already exists in the dictionary.");
+				}
+			}
+			if (++this.count > this.threshold)
+			{
+				this.Resize();
+				num2 = (num & int.MaxValue) % this.table.Length;
+			}
+			num3 = this.emptySlot;
+			if (num3 == -1)
+			{
+				num3 = this.touchedSlots++;
+			}
+			else
+			{
+				this.emptySlot = this.linkSlots[num3].Next;
+			}
+			this.linkSlots[num3].HashCode = num;
+			this.linkSlots[num3].Next = this.table[num2] - 1;
+			this.table[num2] = num3 + 1;
+			this.keySlots[num3] = key;
+			this.valueSlots[num3] = value;
+			this.generation++;
+		}
+
+		public IEqualityComparer<TKey> Comparer
+		{
+			get
+			{
+				return this.hcp;
 			}
 		}
 
-		bool IDictionary.Contains(object key)
+		public void Clear()
 		{
-			return Dictionary<TKey, TValue>.IsCompatibleKey(key) && this.ContainsKey((TKey)((object)key));
+			this.count = 0;
+			Array.Clear(this.table, 0, this.table.Length);
+			Array.Clear(this.keySlots, 0, this.keySlots.Length);
+			Array.Clear(this.valueSlots, 0, this.valueSlots.Length);
+			Array.Clear(this.linkSlots, 0, this.linkSlots.Length);
+			this.emptySlot = -1;
+			this.touchedSlots = 0;
+			this.generation++;
 		}
 
-		IDictionaryEnumerator IDictionary.GetEnumerator()
+		public bool ContainsKey(TKey key)
 		{
-			return new Dictionary<TKey, TValue>.Enumerator(this, 1);
-		}
-
-		void IDictionary.Remove(object key)
-		{
-			if (Dictionary<TKey, TValue>.IsCompatibleKey(key))
+			if (key == null)
 			{
-				this.Remove((TKey)((object)key));
+				throw new ArgumentNullException("key");
+			}
+			int num = this.hcp.GetHashCode(key) | int.MinValue;
+			for (int num2 = this.table[(num & int.MaxValue) % this.table.Length] - 1; num2 != -1; num2 = this.linkSlots[num2].Next)
+			{
+				if (this.linkSlots[num2].HashCode == num && this.hcp.Equals(this.keySlots[num2], key))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public bool ContainsValue(TValue value)
+		{
+			IEqualityComparer<TValue> @default = EqualityComparer<TValue>.Default;
+			for (int i = 0; i < this.table.Length; i++)
+			{
+				for (int num = this.table[i] - 1; num != -1; num = this.linkSlots[num].Next)
+				{
+					if (@default.Equals(this.valueSlots[num], value))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
+			info.AddValue("Version", this.generation);
+			info.AddValue("Comparer", this.hcp);
+			KeyValuePair<TKey, TValue>[] array = null;
+			if (this.count > 0)
+			{
+				array = new KeyValuePair<TKey, TValue>[this.count];
+				this.CopyTo(array, 0);
+			}
+			info.AddValue("HashSize", this.table.Length);
+			info.AddValue("KeyValuePairs", array);
+		}
+
+		public virtual void OnDeserialization(object sender)
+		{
+			if (this.serialization_info == null)
+			{
+				return;
+			}
+			this.generation = this.serialization_info.GetInt32("Version");
+			this.hcp = (IEqualityComparer<TKey>)this.serialization_info.GetValue("Comparer", typeof(IEqualityComparer<TKey>));
+			int num = this.serialization_info.GetInt32("HashSize");
+			KeyValuePair<TKey, TValue>[] array = (KeyValuePair<TKey, TValue>[])this.serialization_info.GetValue("KeyValuePairs", typeof(KeyValuePair<TKey, TValue>[]));
+			if (num < 10)
+			{
+				num = 10;
+			}
+			this.InitArrays(num);
+			this.count = 0;
+			if (array != null)
+			{
+				for (int i = 0; i < array.Length; i++)
+				{
+					this.Add(array[i].Key, array[i].Value);
+				}
+			}
+			this.generation++;
+			this.serialization_info = null;
+		}
+
+		public bool Remove(TKey key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			int num = this.hcp.GetHashCode(key) | int.MinValue;
+			int num2 = (num & int.MaxValue) % this.table.Length;
+			int num3 = this.table[num2] - 1;
+			if (num3 == -1)
+			{
+				return false;
+			}
+			int num4 = -1;
+			while (this.linkSlots[num3].HashCode != num || !this.hcp.Equals(this.keySlots[num3], key))
+			{
+				num4 = num3;
+				num3 = this.linkSlots[num3].Next;
+				if (num3 == -1)
+				{
+					IL_00A4:
+					if (num3 == -1)
+					{
+						return false;
+					}
+					this.count--;
+					if (num4 == -1)
+					{
+						this.table[num2] = this.linkSlots[num3].Next + 1;
+					}
+					else
+					{
+						this.linkSlots[num4].Next = this.linkSlots[num3].Next;
+					}
+					this.linkSlots[num3].Next = this.emptySlot;
+					this.emptySlot = num3;
+					this.linkSlots[num3].HashCode = 0;
+					this.keySlots[num3] = default(TKey);
+					this.valueSlots[num3] = default(TValue);
+					this.generation++;
+					return true;
+				}
+			}
+			goto IL_00A4;
+		}
+
+		public bool TryGetValue(TKey key, out TValue value)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			int num = this.hcp.GetHashCode(key) | int.MinValue;
+			for (int num2 = this.table[(num & int.MaxValue) % this.table.Length] - 1; num2 != -1; num2 = this.linkSlots[num2].Next)
+			{
+				if (this.linkSlots[num2].HashCode == num && this.hcp.Equals(this.keySlots[num2], key))
+				{
+					value = this.valueSlots[num2];
+					return true;
+				}
+			}
+			value = default(TValue);
+			return false;
+		}
+
+		public Dictionary<TKey, TValue>.KeyCollection Keys
+		{
+			get
+			{
+				return new Dictionary<TKey, TValue>.KeyCollection(this);
 			}
 		}
 
-		private int[] buckets;
+		public Dictionary<TKey, TValue>.ValueCollection Values
+		{
+			get
+			{
+				return new Dictionary<TKey, TValue>.ValueCollection(this);
+			}
+		}
 
-		private Dictionary<TKey, TValue>.Entry[] entries;
+		private TKey ToTKey(object key)
+		{
+			if (key == null)
+			{
+				throw new ArgumentNullException("key");
+			}
+			if (!(key is TKey))
+			{
+				throw new ArgumentException("not of type: " + typeof(TKey).ToString(), "key");
+			}
+			return (TKey)((object)key);
+		}
+
+		private TValue ToTValue(object value)
+		{
+			if (value == null && !typeof(TValue).IsValueType)
+			{
+				return default(TValue);
+			}
+			if (!(value is TValue))
+			{
+				throw new ArgumentException("not of type: " + typeof(TValue).ToString(), "value");
+			}
+			return (TValue)((object)value);
+		}
+
+		private bool ContainsKeyValuePair(KeyValuePair<TKey, TValue> pair)
+		{
+			TValue tvalue;
+			return this.TryGetValue(pair.Key, out tvalue) && EqualityComparer<TValue>.Default.Equals(pair.Value, tvalue);
+		}
+
+		public Dictionary<TKey, TValue>.Enumerator GetEnumerator()
+		{
+			return new Dictionary<TKey, TValue>.Enumerator(this);
+		}
+
+		private const int INITIAL_SIZE = 10;
+
+		private const float DEFAULT_LOAD_FACTOR = 0.9f;
+
+		private const int NO_SLOT = -1;
+
+		private const int HASH_FLAG = -2147483648;
+
+		private int[] table;
+
+		private Link[] linkSlots;
+
+		private TKey[] keySlots;
+
+		private TValue[] valueSlots;
+
+		private int touchedSlots;
+
+		private int emptySlot;
 
 		private int count;
 
-		private int version;
+		private int threshold;
 
-		private int freeList;
+		private IEqualityComparer<TKey> hcp;
 
-		private int freeCount;
+		private SerializationInfo serialization_info;
 
-		private IEqualityComparer<TKey> comparer;
-
-		private Dictionary<TKey, TValue>.KeyCollection keys;
-
-		private Dictionary<TKey, TValue>.ValueCollection values;
-
-		private object _syncRoot;
-
-		private const string VersionName = "Version";
-
-		private const string HashSizeName = "HashSize";
-
-		private const string KeyValuePairsName = "KeyValuePairs";
-
-		private const string ComparerName = "Comparer";
-
-		private struct Entry
-		{
-			public int hashCode;
-
-			public int next;
-
-			public TKey key;
-
-			public TValue value;
-		}
+		private int generation;
 
 		[Serializable]
-		public struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDisposable, IEnumerator, IDictionaryEnumerator
+		private class ShimEnumerator : IEnumerator, IDictionaryEnumerator
 		{
-			internal Enumerator(Dictionary<TKey, TValue> dictionary, int getEnumeratorRetType)
+			public ShimEnumerator(Dictionary<TKey, TValue> host)
 			{
-				this.dictionary = dictionary;
-				this.version = dictionary.version;
-				this.index = 0;
-				this.getEnumeratorRetType = getEnumeratorRetType;
-				this.current = default(KeyValuePair<TKey, TValue>);
+				this.host_enumerator = host.GetEnumerator();
+			}
+
+			public void Dispose()
+			{
+				this.host_enumerator.Dispose();
 			}
 
 			public bool MoveNext()
 			{
-				if (this.version != this.dictionary.version)
+				return this.host_enumerator.MoveNext();
+			}
+
+			public DictionaryEntry Entry
+			{
+				get
 				{
-					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+					return ((IDictionaryEnumerator)this.host_enumerator).Entry;
 				}
-				while (this.index < this.dictionary.count)
+			}
+
+			public object Key
+			{
+				get
 				{
-					if (this.dictionary.entries[this.index].hashCode >= 0)
+					KeyValuePair<TKey, TValue> keyValuePair = this.host_enumerator.Current;
+					return keyValuePair.Key;
+				}
+			}
+
+			public object Value
+			{
+				get
+				{
+					KeyValuePair<TKey, TValue> keyValuePair = this.host_enumerator.Current;
+					return keyValuePair.Value;
+				}
+			}
+
+			public object Current
+			{
+				get
+				{
+					return this.Entry;
+				}
+			}
+
+			public void Reset()
+			{
+				this.host_enumerator.Reset();
+			}
+
+			private Dictionary<TKey, TValue>.Enumerator host_enumerator;
+		}
+
+		[Serializable]
+		public struct Enumerator : IEnumerator, IDisposable, IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
+		{
+			internal Enumerator(Dictionary<TKey, TValue> dictionary)
+			{
+				this.dictionary = dictionary;
+				this.stamp = dictionary.generation;
+			}
+
+			object IEnumerator.Current
+			{
+				get
+				{
+					this.VerifyCurrent();
+					return this.current;
+				}
+			}
+
+			void IEnumerator.Reset()
+			{
+				this.Reset();
+			}
+
+			DictionaryEntry IDictionaryEnumerator.Entry
+			{
+				get
+				{
+					this.VerifyCurrent();
+					return new DictionaryEntry(this.current.Key, this.current.Value);
+				}
+			}
+
+			object IDictionaryEnumerator.Key
+			{
+				get
+				{
+					return this.CurrentKey;
+				}
+			}
+
+			object IDictionaryEnumerator.Value
+			{
+				get
+				{
+					return this.CurrentValue;
+				}
+			}
+
+			public bool MoveNext()
+			{
+				this.VerifyState();
+				if (this.next < 0)
+				{
+					return false;
+				}
+				while (this.next < this.dictionary.touchedSlots)
+				{
+					int num = this.next++;
+					if ((this.dictionary.linkSlots[num].HashCode & -2147483648) != 0)
 					{
-						this.current = new KeyValuePair<TKey, TValue>(this.dictionary.entries[this.index].key, this.dictionary.entries[this.index].value);
-						this.index++;
+						this.current = new KeyValuePair<TKey, TValue>(this.dictionary.keySlots[num], this.dictionary.valueSlots[num]);
 						return true;
 					}
-					this.index++;
 				}
-				this.index = this.dictionary.count + 1;
-				this.current = default(KeyValuePair<TKey, TValue>);
+				this.next = -1;
 				return false;
 			}
 
@@ -910,91 +851,69 @@ namespace System.Collections.Generic
 				}
 			}
 
-			public void Dispose()
-			{
-			}
-
-			object IEnumerator.Current
+			internal TKey CurrentKey
 			{
 				get
 				{
-					if (this.index == 0 || this.index == this.dictionary.count + 1)
-					{
-						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
-					}
-					if (this.getEnumeratorRetType == 1)
-					{
-						return new DictionaryEntry(this.current.Key, this.current.Value);
-					}
-					return new KeyValuePair<TKey, TValue>(this.current.Key, this.current.Value);
-				}
-			}
-
-			void IEnumerator.Reset()
-			{
-				if (this.version != this.dictionary.version)
-				{
-					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
-				}
-				this.index = 0;
-				this.current = default(KeyValuePair<TKey, TValue>);
-			}
-
-			DictionaryEntry IDictionaryEnumerator.Entry
-			{
-				get
-				{
-					if (this.index == 0 || this.index == this.dictionary.count + 1)
-					{
-						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
-					}
-					return new DictionaryEntry(this.current.Key, this.current.Value);
-				}
-			}
-
-			object IDictionaryEnumerator.Key
-			{
-				get
-				{
-					if (this.index == 0 || this.index == this.dictionary.count + 1)
-					{
-						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
-					}
+					this.VerifyCurrent();
 					return this.current.Key;
 				}
 			}
 
-			object IDictionaryEnumerator.Value
+			internal TValue CurrentValue
 			{
 				get
 				{
-					if (this.index == 0 || this.index == this.dictionary.count + 1)
-					{
-						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
-					}
+					this.VerifyCurrent();
 					return this.current.Value;
 				}
 			}
 
+			internal void Reset()
+			{
+				this.VerifyState();
+				this.next = 0;
+			}
+
+			private void VerifyState()
+			{
+				if (this.dictionary == null)
+				{
+					throw new ObjectDisposedException(null);
+				}
+				if (this.dictionary.generation != this.stamp)
+				{
+					throw new InvalidOperationException("out of sync");
+				}
+			}
+
+			private void VerifyCurrent()
+			{
+				this.VerifyState();
+				if (this.next <= 0)
+				{
+					throw new InvalidOperationException("Current is not valid");
+				}
+			}
+
+			public void Dispose()
+			{
+				this.dictionary = null;
+			}
+
 			private Dictionary<TKey, TValue> dictionary;
 
-			private int version;
+			private int next;
 
-			private int index;
+			private int stamp;
 
-			private KeyValuePair<TKey, TValue> current;
-
-			private int getEnumeratorRetType;
-
-			internal const int DictEntry = 1;
-
-			internal const int KeyValuePair = 2;
+			internal KeyValuePair<TKey, TValue> current;
 		}
 
-		[DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<, >))]
-		[DebuggerDisplay("Count = {Count}")]
+		[DebuggerTypeProxy(typeof(CollectionDebuggerView<, >))]
+		[DebuggerDisplay("Count={Count}")]
 		[Serializable]
-		public sealed class KeyCollection : ICollection<TKey>, IEnumerable<TKey>, IEnumerable, ICollection, IReadOnlyCollection<TKey>
+		public sealed class KeyCollection : IEnumerable, ICollection, ICollection<TKey>, IEnumerable<TKey>
 		{
 			public KeyCollection(Dictionary<TKey, TValue> dictionary)
 			{
@@ -1005,42 +924,46 @@ namespace System.Collections.Generic
 				this.dictionary = dictionary;
 			}
 
-			public Dictionary<TKey, TValue>.KeyCollection.Enumerator GetEnumerator()
+			void ICollection<TKey>.Add(TKey item)
 			{
-				return new Dictionary<TKey, TValue>.KeyCollection.Enumerator(this.dictionary);
+				throw new NotSupportedException("this is a read-only collection");
 			}
 
-			public void CopyTo(TKey[] array, int index)
+			void ICollection<TKey>.Clear()
 			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (index < 0 || index > array.Length)
-				{
-					throw new ArgumentOutOfRangeException("index", index, "Index was out of range. Must be non-negative and less than the size of the collection.");
-				}
-				if (array.Length - index < this.dictionary.Count)
-				{
-					throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-				}
-				int count = this.dictionary.count;
-				Dictionary<TKey, TValue>.Entry[] entries = this.dictionary.entries;
-				for (int i = 0; i < count; i++)
-				{
-					if (entries[i].hashCode >= 0)
-					{
-						array[index++] = entries[i].key;
-					}
-				}
+				throw new NotSupportedException("this is a read-only collection");
 			}
 
-			public int Count
+			bool ICollection<TKey>.Contains(TKey item)
 			{
-				get
+				return this.dictionary.ContainsKey(item);
+			}
+
+			bool ICollection<TKey>.Remove(TKey item)
+			{
+				throw new NotSupportedException("this is a read-only collection");
+			}
+
+			IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+			{
+				return this.GetEnumerator();
+			}
+
+			void ICollection.CopyTo(Array array, int index)
+			{
+				TKey[] array2 = array as TKey[];
+				if (array2 != null)
 				{
-					return this.dictionary.Count;
+					this.CopyTo(array2, index);
+					return;
 				}
+				this.dictionary.CopyToCheck(array, index);
+				this.dictionary.Do_ICollectionCopyTo<TKey>(array, index, new Dictionary<TKey, TValue>.Transform<TKey>(Dictionary<TKey, TValue>.pick_key));
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return this.GetEnumerator();
 			}
 
 			bool ICollection<TKey>.IsReadOnly
@@ -1051,87 +974,6 @@ namespace System.Collections.Generic
 				}
 			}
 
-			void ICollection<TKey>.Add(TKey item)
-			{
-				throw new NotSupportedException("Mutating a key collection derived from a dictionary is not allowed.");
-			}
-
-			void ICollection<TKey>.Clear()
-			{
-				throw new NotSupportedException("Mutating a key collection derived from a dictionary is not allowed.");
-			}
-
-			bool ICollection<TKey>.Contains(TKey item)
-			{
-				return this.dictionary.ContainsKey(item);
-			}
-
-			bool ICollection<TKey>.Remove(TKey item)
-			{
-				throw new NotSupportedException("Mutating a key collection derived from a dictionary is not allowed.");
-			}
-
-			IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
-			{
-				return new Dictionary<TKey, TValue>.KeyCollection.Enumerator(this.dictionary);
-			}
-
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return new Dictionary<TKey, TValue>.KeyCollection.Enumerator(this.dictionary);
-			}
-
-			void ICollection.CopyTo(Array array, int index)
-			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (array.Rank != 1)
-				{
-					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
-				}
-				if (array.GetLowerBound(0) != 0)
-				{
-					throw new ArgumentException("The lower bound of target array must be zero.", "array");
-				}
-				if (index < 0 || index > array.Length)
-				{
-					throw new ArgumentOutOfRangeException("index", index, "Index was out of range. Must be non-negative and less than the size of the collection.");
-				}
-				if (array.Length - index < this.dictionary.Count)
-				{
-					throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-				}
-				TKey[] array2 = array as TKey[];
-				if (array2 != null)
-				{
-					this.CopyTo(array2, index);
-					return;
-				}
-				object[] array3 = array as object[];
-				if (array3 == null)
-				{
-					throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
-				}
-				int count = this.dictionary.count;
-				Dictionary<TKey, TValue>.Entry[] entries = this.dictionary.entries;
-				try
-				{
-					for (int i = 0; i < count; i++)
-					{
-						if (entries[i].hashCode >= 0)
-						{
-							array3[index++] = entries[i].key;
-						}
-					}
-				}
-				catch (ArrayTypeMismatchException)
-				{
-					throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
-				}
-			}
-
 			bool ICollection.IsSynchronized
 			{
 				get
@@ -1148,126 +990,15 @@ namespace System.Collections.Generic
 				}
 			}
 
-			private Dictionary<TKey, TValue> dictionary;
-
-			[Serializable]
-			public struct Enumerator : IEnumerator<TKey>, IDisposable, IEnumerator
+			public void CopyTo(TKey[] array, int index)
 			{
-				internal Enumerator(Dictionary<TKey, TValue> dictionary)
-				{
-					this.dictionary = dictionary;
-					this.version = dictionary.version;
-					this.index = 0;
-					this.currentKey = default(TKey);
-				}
-
-				public void Dispose()
-				{
-				}
-
-				public bool MoveNext()
-				{
-					if (this.version != this.dictionary.version)
-					{
-						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
-					}
-					while (this.index < this.dictionary.count)
-					{
-						if (this.dictionary.entries[this.index].hashCode >= 0)
-						{
-							this.currentKey = this.dictionary.entries[this.index].key;
-							this.index++;
-							return true;
-						}
-						this.index++;
-					}
-					this.index = this.dictionary.count + 1;
-					this.currentKey = default(TKey);
-					return false;
-				}
-
-				public TKey Current
-				{
-					get
-					{
-						return this.currentKey;
-					}
-				}
-
-				object IEnumerator.Current
-				{
-					get
-					{
-						if (this.index == 0 || this.index == this.dictionary.count + 1)
-						{
-							throw new InvalidOperationException("Enumeration has either not started or has already finished.");
-						}
-						return this.currentKey;
-					}
-				}
-
-				void IEnumerator.Reset()
-				{
-					if (this.version != this.dictionary.version)
-					{
-						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
-					}
-					this.index = 0;
-					this.currentKey = default(TKey);
-				}
-
-				private Dictionary<TKey, TValue> dictionary;
-
-				private int index;
-
-				private int version;
-
-				private TKey currentKey;
-			}
-		}
-
-		[DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<, >))]
-		[DebuggerDisplay("Count = {Count}")]
-		[Serializable]
-		public sealed class ValueCollection : ICollection<TValue>, IEnumerable<TValue>, IEnumerable, ICollection, IReadOnlyCollection<TValue>
-		{
-			public ValueCollection(Dictionary<TKey, TValue> dictionary)
-			{
-				if (dictionary == null)
-				{
-					throw new ArgumentNullException("dictionary");
-				}
-				this.dictionary = dictionary;
+				this.dictionary.CopyToCheck(array, index);
+				this.dictionary.Do_CopyTo<TKey, TKey>(array, index, new Dictionary<TKey, TValue>.Transform<TKey>(Dictionary<TKey, TValue>.pick_key));
 			}
 
-			public Dictionary<TKey, TValue>.ValueCollection.Enumerator GetEnumerator()
+			public Dictionary<TKey, TValue>.KeyCollection.Enumerator GetEnumerator()
 			{
-				return new Dictionary<TKey, TValue>.ValueCollection.Enumerator(this.dictionary);
-			}
-
-			public void CopyTo(TValue[] array, int index)
-			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (index < 0 || index > array.Length)
-				{
-					throw new ArgumentOutOfRangeException("index", index, "Index was out of range. Must be non-negative and less than the size of the collection.");
-				}
-				if (array.Length - index < this.dictionary.Count)
-				{
-					throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-				}
-				int count = this.dictionary.count;
-				Dictionary<TKey, TValue>.Entry[] entries = this.dictionary.entries;
-				for (int i = 0; i < count; i++)
-				{
-					if (entries[i].hashCode >= 0)
-					{
-						array[index++] = entries[i].value;
-					}
-				}
+				return new Dictionary<TKey, TValue>.KeyCollection.Enumerator(this.dictionary);
 			}
 
 			public int Count
@@ -1278,27 +1009,73 @@ namespace System.Collections.Generic
 				}
 			}
 
-			bool ICollection<TValue>.IsReadOnly
+			private Dictionary<TKey, TValue> dictionary;
+
+			[Serializable]
+			public struct Enumerator : IEnumerator, IDisposable, IEnumerator<TKey>
 			{
-				get
+				internal Enumerator(Dictionary<TKey, TValue> host)
 				{
-					return true;
+					this.host_enumerator = host.GetEnumerator();
 				}
+
+				object IEnumerator.Current
+				{
+					get
+					{
+						return this.host_enumerator.CurrentKey;
+					}
+				}
+
+				void IEnumerator.Reset()
+				{
+					this.host_enumerator.Reset();
+				}
+
+				public void Dispose()
+				{
+					this.host_enumerator.Dispose();
+				}
+
+				public bool MoveNext()
+				{
+					return this.host_enumerator.MoveNext();
+				}
+
+				public TKey Current
+				{
+					get
+					{
+						return this.host_enumerator.current.Key;
+					}
+				}
+
+				private Dictionary<TKey, TValue>.Enumerator host_enumerator;
+			}
+		}
+
+		[DebuggerDisplay("Count={Count}")]
+		[DebuggerTypeProxy(typeof(CollectionDebuggerView<, >))]
+		[Serializable]
+		public sealed class ValueCollection : IEnumerable, ICollection, ICollection<TValue>, IEnumerable<TValue>
+		{
+			public ValueCollection(Dictionary<TKey, TValue> dictionary)
+			{
+				if (dictionary == null)
+				{
+					throw new ArgumentNullException("dictionary");
+				}
+				this.dictionary = dictionary;
 			}
 
 			void ICollection<TValue>.Add(TValue item)
 			{
-				throw new NotSupportedException("Mutating a value collection derived from a dictionary is not allowed.");
-			}
-
-			bool ICollection<TValue>.Remove(TValue item)
-			{
-				throw new NotSupportedException("Mutating a value collection derived from a dictionary is not allowed.");
+				throw new NotSupportedException("this is a read-only collection");
 			}
 
 			void ICollection<TValue>.Clear()
 			{
-				throw new NotSupportedException("Mutating a value collection derived from a dictionary is not allowed.");
+				throw new NotSupportedException("this is a read-only collection");
 			}
 
 			bool ICollection<TValue>.Contains(TValue item)
@@ -1306,64 +1083,38 @@ namespace System.Collections.Generic
 				return this.dictionary.ContainsValue(item);
 			}
 
-			IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
+			bool ICollection<TValue>.Remove(TValue item)
 			{
-				return new Dictionary<TKey, TValue>.ValueCollection.Enumerator(this.dictionary);
+				throw new NotSupportedException("this is a read-only collection");
 			}
 
-			IEnumerator IEnumerable.GetEnumerator()
+			IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator()
 			{
-				return new Dictionary<TKey, TValue>.ValueCollection.Enumerator(this.dictionary);
+				return this.GetEnumerator();
 			}
 
 			void ICollection.CopyTo(Array array, int index)
 			{
-				if (array == null)
-				{
-					throw new ArgumentNullException("array");
-				}
-				if (array.Rank != 1)
-				{
-					throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
-				}
-				if (array.GetLowerBound(0) != 0)
-				{
-					throw new ArgumentException("The lower bound of target array must be zero.", "array");
-				}
-				if (index < 0 || index > array.Length)
-				{
-					throw new ArgumentOutOfRangeException("index", index, "Index was out of range. Must be non-negative and less than the size of the collection.");
-				}
-				if (array.Length - index < this.dictionary.Count)
-				{
-					throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-				}
 				TValue[] array2 = array as TValue[];
 				if (array2 != null)
 				{
 					this.CopyTo(array2, index);
 					return;
 				}
-				object[] array3 = array as object[];
-				if (array3 == null)
+				this.dictionary.CopyToCheck(array, index);
+				this.dictionary.Do_ICollectionCopyTo<TValue>(array, index, new Dictionary<TKey, TValue>.Transform<TValue>(Dictionary<TKey, TValue>.pick_value));
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return this.GetEnumerator();
+			}
+
+			bool ICollection<TValue>.IsReadOnly
+			{
+				get
 				{
-					throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
-				}
-				int count = this.dictionary.count;
-				Dictionary<TKey, TValue>.Entry[] entries = this.dictionary.entries;
-				try
-				{
-					for (int i = 0; i < count; i++)
-					{
-						if (entries[i].hashCode >= 0)
-						{
-							array3[index++] = entries[i].value;
-						}
-					}
-				}
-				catch (ArrayTypeMismatchException)
-				{
-					throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
+					return true;
 				}
 			}
 
@@ -1383,82 +1134,70 @@ namespace System.Collections.Generic
 				}
 			}
 
+			public void CopyTo(TValue[] array, int index)
+			{
+				this.dictionary.CopyToCheck(array, index);
+				this.dictionary.Do_CopyTo<TValue, TValue>(array, index, new Dictionary<TKey, TValue>.Transform<TValue>(Dictionary<TKey, TValue>.pick_value));
+			}
+
+			public Dictionary<TKey, TValue>.ValueCollection.Enumerator GetEnumerator()
+			{
+				return new Dictionary<TKey, TValue>.ValueCollection.Enumerator(this.dictionary);
+			}
+
+			public int Count
+			{
+				get
+				{
+					return this.dictionary.Count;
+				}
+			}
+
 			private Dictionary<TKey, TValue> dictionary;
 
 			[Serializable]
-			public struct Enumerator : IEnumerator<TValue>, IDisposable, IEnumerator
+			public struct Enumerator : IEnumerator, IDisposable, IEnumerator<TValue>
 			{
-				internal Enumerator(Dictionary<TKey, TValue> dictionary)
+				internal Enumerator(Dictionary<TKey, TValue> host)
 				{
-					this.dictionary = dictionary;
-					this.version = dictionary.version;
-					this.index = 0;
-					this.currentValue = default(TValue);
-				}
-
-				public void Dispose()
-				{
-				}
-
-				public bool MoveNext()
-				{
-					if (this.version != this.dictionary.version)
-					{
-						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
-					}
-					while (this.index < this.dictionary.count)
-					{
-						if (this.dictionary.entries[this.index].hashCode >= 0)
-						{
-							this.currentValue = this.dictionary.entries[this.index].value;
-							this.index++;
-							return true;
-						}
-						this.index++;
-					}
-					this.index = this.dictionary.count + 1;
-					this.currentValue = default(TValue);
-					return false;
-				}
-
-				public TValue Current
-				{
-					get
-					{
-						return this.currentValue;
-					}
+					this.host_enumerator = host.GetEnumerator();
 				}
 
 				object IEnumerator.Current
 				{
 					get
 					{
-						if (this.index == 0 || this.index == this.dictionary.count + 1)
-						{
-							throw new InvalidOperationException("Enumeration has either not started or has already finished.");
-						}
-						return this.currentValue;
+						return this.host_enumerator.CurrentValue;
 					}
 				}
 
 				void IEnumerator.Reset()
 				{
-					if (this.version != this.dictionary.version)
-					{
-						throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
-					}
-					this.index = 0;
-					this.currentValue = default(TValue);
+					this.host_enumerator.Reset();
 				}
 
-				private Dictionary<TKey, TValue> dictionary;
+				public void Dispose()
+				{
+					this.host_enumerator.Dispose();
+				}
 
-				private int index;
+				public bool MoveNext()
+				{
+					return this.host_enumerator.MoveNext();
+				}
 
-				private int version;
+				public TValue Current
+				{
+					get
+					{
+						return this.host_enumerator.current.Value;
+					}
+				}
 
-				private TValue currentValue;
+				private Dictionary<TKey, TValue>.Enumerator host_enumerator;
 			}
 		}
+
+		private delegate TRet Transform<TRet>(TKey key, TValue value);
 	}
 }

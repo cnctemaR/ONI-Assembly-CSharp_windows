@@ -5,7 +5,7 @@ namespace System.Transactions
 	[Serializable]
 	public sealed class SubordinateTransaction : Transaction
 	{
-		public SubordinateTransaction(IsolationLevel isoLevel, ISimpleTransactionSuperior superior)
+		public SubordinateTransaction(IsolationLevel level, ISimpleTransactionSuperior superior)
 		{
 			throw new NotImplementedException();
 		}

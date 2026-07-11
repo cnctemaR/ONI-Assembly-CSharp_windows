@@ -4,10 +4,6 @@ namespace System.Runtime.CompilerServices
 {
 	public class StrongBox<T> : IStrongBox
 	{
-		public StrongBox()
-		{
-		}
-
 		public StrongBox(T value)
 		{
 			this.Value = value;

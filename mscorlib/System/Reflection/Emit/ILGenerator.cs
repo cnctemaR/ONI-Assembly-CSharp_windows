@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics.SymbolStore;
 using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
+	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_ILGenerator))]
 	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
-	[StructLayout(LayoutKind.Sequential)]
 	public class ILGenerator : _ILGenerator
 	{
 		internal ILGenerator(Module m, TokenGenerator token_gen, int size)
@@ -24,6 +22,26 @@ namespace System.Reflection.Emit
 			this.token_gen = token_gen;
 		}
 
+		void _ILGenerator.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ILGenerator.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ILGenerator.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _ILGenerator.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
+		}
+
 		private void add_token_fixup(MemberInfo mi)
 		{
 			if (this.num_token_fixups == this.token_fixups.Length)
@@ -33,10 +51,7 @@ namespace System.Reflection.Emit
 				this.token_fixups = array;
 			}
 			this.token_fixups[this.num_token_fixups].member = mi;
-			ILTokenInfo[] array2 = this.token_fixups;
-			int num = this.num_token_fixups;
-			this.num_token_fixups = num + 1;
-			array2[num].code_pos = this.code_len;
+			this.token_fixups[this.num_token_fixups++].code_pos = this.code_len;
 		}
 
 		private void make_room(int nbytes)
@@ -52,38 +67,19 @@ namespace System.Reflection.Emit
 
 		private void emit_int(int val)
 		{
-			byte[] array = this.code;
-			int num = this.code_len;
-			this.code_len = num + 1;
-			array[num] = (byte)(val & 255);
-			byte[] array2 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array2[num] = (byte)((val >> 8) & 255);
-			byte[] array3 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array3[num] = (byte)((val >> 16) & 255);
-			byte[] array4 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array4[num] = (byte)((val >> 24) & 255);
+			this.code[this.code_len++] = (byte)(val & 255);
+			this.code[this.code_len++] = (byte)((val >> 8) & 255);
+			this.code[this.code_len++] = (byte)((val >> 16) & 255);
+			this.code[this.code_len++] = (byte)((val >> 24) & 255);
 		}
 
 		private void ll_emit(OpCode opcode)
 		{
-			int num;
 			if (opcode.Size == 2)
 			{
-				byte[] array = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array[num] = opcode.op1;
+				this.code[this.code_len++] = opcode.op1;
 			}
-			byte[] array2 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array2[num] = opcode.op2;
+			this.code[this.code_len++] = opcode.op2;
 			switch (opcode.StackBehaviourPush)
 			{
 			case StackBehaviour.Push1:
@@ -109,7 +105,7 @@ namespace System.Reflection.Emit
 			case StackBehaviour.Popi:
 			case StackBehaviour.Popref:
 				this.cur_stack--;
-				return;
+				break;
 			case StackBehaviour.Pop1_pop1:
 			case StackBehaviour.Popi_pop1:
 			case StackBehaviour.Popi_popi:
@@ -119,7 +115,7 @@ namespace System.Reflection.Emit
 			case StackBehaviour.Popref_pop1:
 			case StackBehaviour.Popref_popi:
 				this.cur_stack -= 2;
-				return;
+				break;
 			case StackBehaviour.Popi_popi_popi:
 			case StackBehaviour.Popref_popi_popi:
 			case StackBehaviour.Popref_popi_popi8:
@@ -128,18 +124,6 @@ namespace System.Reflection.Emit
 			case StackBehaviour.Popref_popi_popref:
 				this.cur_stack -= 3;
 				break;
-			case StackBehaviour.Push0:
-			case StackBehaviour.Push1:
-			case StackBehaviour.Push1_push1:
-			case StackBehaviour.Pushi:
-			case StackBehaviour.Pushi8:
-			case StackBehaviour.Pushr4:
-			case StackBehaviour.Pushr8:
-			case StackBehaviour.Pushref:
-			case StackBehaviour.Varpop:
-				break;
-			default:
-				return;
 			}
 		}
 
@@ -154,21 +138,18 @@ namespace System.Reflection.Emit
 
 		private void InternalEndClause()
 		{
-			switch (this.ex_handlers[this.cur_block].LastClauseType())
+			int num = this.ex_handlers[this.cur_block].LastClauseType();
+			switch (num + 1)
 			{
-			case -1:
 			case 0:
 			case 1:
-				this.Emit(OpCodes.Leave, this.ex_handlers[this.cur_block].end);
-				return;
 			case 2:
-			case 4:
-				this.Emit(OpCodes.Endfinally);
+				this.Emit(OpCodes.Leave, this.ex_handlers[this.cur_block].end);
 				break;
 			case 3:
+			case 5:
+				this.Emit(OpCodes.Endfinally);
 				break;
-			default:
-				return;
 			}
 		}
 
@@ -332,9 +313,7 @@ namespace System.Reflection.Emit
 				this.labels = array;
 			}
 			this.labels[this.num_labels] = new ILGenerator.LabelData(-1, 0);
-			int num = this.num_labels;
-			this.num_labels = num + 1;
-			return new Label(num);
+			return new Label(this.num_labels++);
 		}
 
 		public virtual void Emit(OpCode opcode)
@@ -347,26 +326,23 @@ namespace System.Reflection.Emit
 		{
 			this.make_room(3);
 			this.ll_emit(opcode);
-			byte[] array = this.code;
-			int num = this.code_len;
-			this.code_len = num + 1;
-			array[num] = arg;
+			this.code[this.code_len++] = arg;
 		}
 
 		[ComVisible(true)]
 		public virtual void Emit(OpCode opcode, ConstructorInfo con)
 		{
-			int token = this.token_gen.GetToken(con, true);
+			int token = this.token_gen.GetToken(con);
 			this.make_room(6);
 			this.ll_emit(opcode);
-			if (con.DeclaringType.Module == this.module || con is ConstructorOnTypeBuilderInst || con is ConstructorBuilder)
+			if (con.DeclaringType.Module == this.module)
 			{
 				this.add_token_fixup(con);
 			}
 			this.emit_int(token);
 			if (opcode.StackBehaviourPop == StackBehaviour.Varpop)
 			{
-				this.cur_stack -= con.GetParametersCount();
+				this.cur_stack -= con.GetParameterCount();
 			}
 		}
 
@@ -379,48 +355,26 @@ namespace System.Reflection.Emit
 			{
 				Array.Copy(bytes, 0, this.code, this.code_len, 8);
 				this.code_len += 8;
-				return;
 			}
-			byte[] array = this.code;
-			int num = this.code_len;
-			this.code_len = num + 1;
-			array[num] = bytes[7];
-			byte[] array2 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array2[num] = bytes[6];
-			byte[] array3 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array3[num] = bytes[5];
-			byte[] array4 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array4[num] = bytes[4];
-			byte[] array5 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array5[num] = bytes[3];
-			byte[] array6 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array6[num] = bytes[2];
-			byte[] array7 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array7[num] = bytes[1];
-			byte[] array8 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array8[num] = bytes[0];
+			else
+			{
+				this.code[this.code_len++] = bytes[7];
+				this.code[this.code_len++] = bytes[6];
+				this.code[this.code_len++] = bytes[5];
+				this.code[this.code_len++] = bytes[4];
+				this.code[this.code_len++] = bytes[3];
+				this.code[this.code_len++] = bytes[2];
+				this.code[this.code_len++] = bytes[1];
+				this.code[this.code_len++] = bytes[0];
+			}
 		}
 
 		public virtual void Emit(OpCode opcode, FieldInfo field)
 		{
-			int token = this.token_gen.GetToken(field, true);
+			int token = this.token_gen.GetToken(field);
 			this.make_room(6);
 			this.ll_emit(opcode);
-			if (field.DeclaringType.Module == this.module || field is FieldOnTypeBuilderInst || field is FieldBuilder)
+			if (field.DeclaringType.Module == this.module)
 			{
 				this.add_token_fixup(field);
 			}
@@ -431,14 +385,8 @@ namespace System.Reflection.Emit
 		{
 			this.make_room(4);
 			this.ll_emit(opcode);
-			byte[] array = this.code;
-			int num = this.code_len;
-			this.code_len = num + 1;
-			array[num] = (byte)(arg & 255);
-			byte[] array2 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array2[num] = (byte)((arg >> 8) & 255);
+			this.code[this.code_len++] = (byte)(arg & 255);
+			this.code[this.code_len++] = (byte)((arg >> 8) & 255);
 		}
 
 		public virtual void Emit(OpCode opcode, int arg)
@@ -452,38 +400,14 @@ namespace System.Reflection.Emit
 		{
 			this.make_room(10);
 			this.ll_emit(opcode);
-			byte[] array = this.code;
-			int num = this.code_len;
-			this.code_len = num + 1;
-			array[num] = (byte)(arg & 255L);
-			byte[] array2 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array2[num] = (byte)((arg >> 8) & 255L);
-			byte[] array3 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array3[num] = (byte)((arg >> 16) & 255L);
-			byte[] array4 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array4[num] = (byte)((arg >> 24) & 255L);
-			byte[] array5 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array5[num] = (byte)((arg >> 32) & 255L);
-			byte[] array6 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array6[num] = (byte)((arg >> 40) & 255L);
-			byte[] array7 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array7[num] = (byte)((arg >> 48) & 255L);
-			byte[] array8 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array8[num] = (byte)((arg >> 56) & 255L);
+			this.code[this.code_len++] = (byte)(arg & 255L);
+			this.code[this.code_len++] = (byte)((arg >> 8) & 255L);
+			this.code[this.code_len++] = (byte)((arg >> 16) & 255L);
+			this.code[this.code_len++] = (byte)((arg >> 24) & 255L);
+			this.code[this.code_len++] = (byte)((arg >> 32) & 255L);
+			this.code[this.code_len++] = (byte)((arg >> 40) & 255L);
+			this.code[this.code_len++] = (byte)((arg >> 48) & 255L);
+			this.code[this.code_len++] = (byte)((arg >> 56) & 255L);
 		}
 
 		public virtual void Emit(OpCode opcode, Label label)
@@ -559,24 +483,22 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentNullException("local");
 			}
+			uint position = (uint)local.position;
+			bool flag = false;
+			bool flag2 = false;
+			this.make_room(6);
 			if (local.ilgen != this)
 			{
 				throw new ArgumentException("Trying to emit a local from a different ILGenerator.");
 			}
-			uint position = (uint)local.position;
-			bool flag = false;
-			bool flag2 = false;
-			bool flag3 = false;
-			this.make_room(6);
 			if (opcode.StackBehaviourPop == StackBehaviour.Pop1)
 			{
 				this.cur_stack--;
 				flag2 = true;
 			}
-			else if (opcode.StackBehaviourPush == StackBehaviour.Push1 || opcode.StackBehaviourPush == StackBehaviour.Pushi)
+			else
 			{
 				this.cur_stack++;
-				flag3 = true;
 				if (this.cur_stack > this.max_stack)
 				{
 					this.max_stack = this.cur_stack;
@@ -585,123 +507,53 @@ namespace System.Reflection.Emit
 			}
 			if (flag)
 			{
-				int num;
 				if (position < 256U)
 				{
-					byte[] array = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array[num] = 18;
-					byte[] array2 = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array2[num] = (byte)position;
-					return;
+					this.code[this.code_len++] = 18;
+					this.code[this.code_len++] = (byte)position;
 				}
-				byte[] array3 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array3[num] = 254;
-				byte[] array4 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array4[num] = 13;
-				byte[] array5 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array5[num] = (byte)(position & 255U);
-				byte[] array6 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array6[num] = (byte)((position >> 8) & 255U);
-				return;
+				else
+				{
+					this.code[this.code_len++] = 254;
+					this.code[this.code_len++] = 13;
+					this.code[this.code_len++] = (byte)(position & 255U);
+					this.code[this.code_len++] = (byte)((position >> 8) & 255U);
+				}
 			}
 			else if (flag2)
 			{
-				int num;
 				if (position < 4U)
 				{
-					byte[] array7 = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array7[num] = (byte)(10U + position);
-					return;
+					this.code[this.code_len++] = (byte)(10U + position);
 				}
-				if (position < 256U)
+				else if (position < 256U)
 				{
-					byte[] array8 = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array8[num] = 19;
-					byte[] array9 = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array9[num] = (byte)position;
-					return;
+					this.code[this.code_len++] = 19;
+					this.code[this.code_len++] = (byte)position;
 				}
-				byte[] array10 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array10[num] = 254;
-				byte[] array11 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array11[num] = 14;
-				byte[] array12 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array12[num] = (byte)(position & 255U);
-				byte[] array13 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array13[num] = (byte)((position >> 8) & 255U);
-				return;
+				else
+				{
+					this.code[this.code_len++] = 254;
+					this.code[this.code_len++] = 14;
+					this.code[this.code_len++] = (byte)(position & 255U);
+					this.code[this.code_len++] = (byte)((position >> 8) & 255U);
+				}
+			}
+			else if (position < 4U)
+			{
+				this.code[this.code_len++] = (byte)(6U + position);
+			}
+			else if (position < 256U)
+			{
+				this.code[this.code_len++] = 17;
+				this.code[this.code_len++] = (byte)position;
 			}
 			else
 			{
-				if (!flag3)
-				{
-					this.ll_emit(opcode);
-					return;
-				}
-				int num;
-				if (position < 4U)
-				{
-					byte[] array14 = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array14[num] = (byte)(6U + position);
-					return;
-				}
-				if (position < 256U)
-				{
-					byte[] array15 = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array15[num] = 17;
-					byte[] array16 = this.code;
-					num = this.code_len;
-					this.code_len = num + 1;
-					array16[num] = (byte)position;
-					return;
-				}
-				byte[] array17 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array17[num] = 254;
-				byte[] array18 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array18[num] = 12;
-				byte[] array19 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array19[num] = (byte)(position & 255U);
-				byte[] array20 = this.code;
-				num = this.code_len;
-				this.code_len = num + 1;
-				array20[num] = (byte)((position >> 8) & 255U);
-				return;
+				this.code[this.code_len++] = 254;
+				this.code[this.code_len++] = 12;
+				this.code[this.code_len++] = (byte)(position & 255U);
+				this.code[this.code_len++] = (byte)((position >> 8) & 255U);
 			}
 		}
 
@@ -715,22 +567,22 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentException("Ldtoken, Ldftn and Ldvirtftn OpCodes cannot target DynamicMethods.");
 			}
-			int token = this.token_gen.GetToken(meth, true);
+			int token = this.token_gen.GetToken(meth);
 			this.make_room(6);
 			this.ll_emit(opcode);
 			Type declaringType = meth.DeclaringType;
-			if (declaringType != null && (declaringType.Module == this.module || meth is MethodOnTypeBuilderInst || meth is MethodBuilder))
+			if (declaringType != null && declaringType.Module == this.module)
 			{
 				this.add_token_fixup(meth);
 			}
 			this.emit_int(token);
-			if (meth.ReturnType != typeof(void))
+			if (meth.ReturnType != ILGenerator.void_type)
 			{
 				this.cur_stack++;
 			}
 			if (opcode.StackBehaviourPop == StackBehaviour.Varpop)
 			{
-				this.cur_stack -= meth.GetParametersCount();
+				this.cur_stack -= meth.GetParameterCount();
 			}
 		}
 
@@ -739,18 +591,18 @@ namespace System.Reflection.Emit
 			this.make_room(6);
 			this.ll_emit(opcode);
 			Type declaringType = method.DeclaringType;
-			if (declaringType != null && (declaringType.Module == this.module || method is MethodBuilder))
+			if (declaringType != null && declaringType.Module == this.module)
 			{
 				this.add_token_fixup(method);
 			}
 			this.emit_int(token);
-			if (method.ReturnType != typeof(void))
+			if (method.ReturnType != ILGenerator.void_type)
 			{
 				this.cur_stack++;
 			}
 			if (opcode.StackBehaviourPop == StackBehaviour.Varpop)
 			{
-				this.cur_stack -= method.GetParametersCount();
+				this.cur_stack -= method.GetParameterCount();
 			}
 		}
 
@@ -759,10 +611,7 @@ namespace System.Reflection.Emit
 		{
 			this.make_room(3);
 			this.ll_emit(opcode);
-			byte[] array = this.code;
-			int num = this.code_len;
-			this.code_len = num + 1;
-			array[num] = (byte)arg;
+			this.code[this.code_len++] = (byte)arg;
 		}
 
 		public virtual void Emit(OpCode opcode, SignatureHelper signature)
@@ -782,24 +631,14 @@ namespace System.Reflection.Emit
 			{
 				Array.Copy(bytes, 0, this.code, this.code_len, 4);
 				this.code_len += 4;
-				return;
 			}
-			byte[] array = this.code;
-			int num = this.code_len;
-			this.code_len = num + 1;
-			array[num] = bytes[3];
-			byte[] array2 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array2[num] = bytes[2];
-			byte[] array3 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array3[num] = bytes[1];
-			byte[] array4 = this.code;
-			num = this.code_len;
-			this.code_len = num + 1;
-			array4[num] = bytes[0];
+			else
+			{
+				this.code[this.code_len++] = bytes[3];
+				this.code[this.code_len++] = bytes[2];
+				this.code[this.code_len++] = bytes[1];
+				this.code[this.code_len++] = bytes[0];
+			}
 		}
 
 		public virtual void Emit(OpCode opcode, string str)
@@ -812,18 +651,9 @@ namespace System.Reflection.Emit
 
 		public virtual void Emit(OpCode opcode, Type cls)
 		{
-			if (cls != null && cls.IsByRef)
-			{
-				throw new ArgumentException("Cannot get TypeToken for a ByRef type.");
-			}
 			this.make_room(6);
 			this.ll_emit(opcode);
-			int token = this.token_gen.GetToken(cls, opcode != OpCodes.Ldtoken);
-			if (cls is TypeBuilderInstantiation || cls is SymbolType || cls is TypeBuilder || cls is GenericTypeParameterBuilder || cls is EnumBuilder)
-			{
-				this.add_token_fixup(cls);
-			}
-			this.emit_int(token);
+			this.emit_int(this.token_gen.GetToken(cls));
 		}
 
 		[MonoLimitation("vararg methods are not supported")]
@@ -857,7 +687,7 @@ namespace System.Reflection.Emit
 
 		public virtual void EmitCalli(OpCode opcode, CallingConvention unmanagedCallConv, Type returnType, Type[] parameterTypes)
 		{
-			SignatureHelper methodSigHelper = SignatureHelper.GetMethodSigHelper(this.module as ModuleBuilder, (CallingConventions)0, unmanagedCallConv, returnType, parameterTypes);
+			SignatureHelper methodSigHelper = SignatureHelper.GetMethodSigHelper(this.module, (CallingConventions)0, unmanagedCallConv, returnType, parameterTypes);
 			this.Emit(opcode, methodSigHelper);
 		}
 
@@ -867,7 +697,7 @@ namespace System.Reflection.Emit
 			{
 				throw new NotImplementedException();
 			}
-			SignatureHelper methodSigHelper = SignatureHelper.GetMethodSigHelper(this.module as ModuleBuilder, callingConvention, (CallingConvention)0, returnType, parameterTypes);
+			SignatureHelper methodSigHelper = SignatureHelper.GetMethodSigHelper(this.module, callingConvention, (CallingConvention)0, returnType, parameterTypes);
 			this.Emit(opcode, methodSigHelper);
 		}
 
@@ -987,7 +817,7 @@ namespace System.Reflection.Emit
 					{
 						if (localBuilder.Name != null && localBuilder.Name.Length > 0)
 						{
-							SignatureHelper localVarSigHelper = SignatureHelper.GetLocalVarSigHelper(this.module as ModuleBuilder);
+							SignatureHelper localVarSigHelper = SignatureHelper.GetLocalVarSigHelper(this.module);
 							localVarSigHelper.AddArgument(localBuilder.LocalType);
 							byte[] signature = localVarSigHelper.GetSignature();
 							symbolWriter.DefineLocalVariable(localBuilder.Name, FieldAttributes.Public, signature, SymAddressKind.ILOffset, (int)localBuilder.position, 0, 0, localBuilder.StartOffset, localBuilder.EndOffset);
@@ -1012,7 +842,7 @@ namespace System.Reflection.Emit
 			{
 				throw new ArgumentNullException("excType");
 			}
-			if (!(excType == typeof(Exception)) && !excType.IsSubclassOf(typeof(Exception)))
+			if (excType != typeof(Exception) && !excType.IsSubclassOf(typeof(Exception)))
 			{
 				throw new ArgumentException("Type should be an exception type", "excType");
 			}
@@ -1031,13 +861,13 @@ namespace System.Reflection.Emit
 			throw new NotImplementedException();
 		}
 
-		internal void label_fixup(MethodBase mb)
+		internal void label_fixup()
 		{
 			for (int i = 0; i < this.num_fixups; i++)
 			{
 				if (this.labels[this.fixups[i].label_idx].addr < 0)
 				{
-					throw new ArgumentException(string.Format("Label #{0} is not marked in method `{1}'", this.fixups[i].label_idx + 1, mb.Name));
+					throw new ArgumentException("Label not marked");
 				}
 				int num = this.labels[this.fixups[i].label_idx].addr - (this.fixups[i].pos + this.fixups[i].offset);
 				if (this.fixups[i].offset == 1)
@@ -1054,154 +884,19 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal void FixupTokens(Dictionary<int, int> token_map, Dictionary<int, MemberInfo> member_map)
-		{
-			for (int i = 0; i < this.num_token_fixups; i++)
-			{
-				int code_pos = this.token_fixups[i].code_pos;
-				int num = (int)this.code[code_pos] | ((int)this.code[code_pos + 1] << 8) | ((int)this.code[code_pos + 2] << 16) | ((int)this.code[code_pos + 3] << 24);
-				int num2;
-				if (token_map.TryGetValue(num, out num2))
-				{
-					this.token_fixups[i].member = member_map[num];
-					int num3 = this.code_len;
-					this.code_len = code_pos;
-					this.emit_int(num2);
-					this.code_len = num3;
-				}
-			}
-		}
-
-		internal void SetExceptionHandlers(ILExceptionInfo[] exHandlers)
-		{
-			this.ex_handlers = exHandlers;
-		}
-
-		internal void SetTokenFixups(ILTokenInfo[] tokenFixups)
-		{
-			this.token_fixups = tokenFixups;
-		}
-
-		internal void SetCode(byte[] code, int max_stack)
-		{
-			this.code = (byte[])code.Clone();
-			this.code_len = code.Length;
-			this.max_stack = max_stack;
-			this.cur_stack = 0;
-		}
-
-		internal unsafe void SetCode(byte* code, int code_size, int max_stack)
-		{
-			this.code = new byte[code_size];
-			for (int i = 0; i < code_size; i++)
-			{
-				this.code[i] = code[i];
-			}
-			this.code_len = code_size;
-			this.max_stack = max_stack;
-			this.cur_stack = 0;
-		}
-
-		internal void Init(byte[] il, int maxStack, byte[] localSignature, IEnumerable<ExceptionHandler> exceptionHandlers, IEnumerable<int> tokenFixups)
-		{
-			this.SetCode(il, maxStack);
-			if (exceptionHandlers != null)
-			{
-				Dictionary<Tuple<int, int>, List<ExceptionHandler>> dictionary = new Dictionary<Tuple<int, int>, List<ExceptionHandler>>();
-				foreach (ExceptionHandler exceptionHandler in exceptionHandlers)
-				{
-					Tuple<int, int> tuple = new Tuple<int, int>(exceptionHandler.TryOffset, exceptionHandler.TryLength);
-					List<ExceptionHandler> list;
-					if (!dictionary.TryGetValue(tuple, out list))
-					{
-						list = new List<ExceptionHandler>();
-						dictionary.Add(tuple, list);
-					}
-					list.Add(exceptionHandler);
-				}
-				List<ILExceptionInfo> list2 = new List<ILExceptionInfo>();
-				foreach (KeyValuePair<Tuple<int, int>, List<ExceptionHandler>> keyValuePair in dictionary)
-				{
-					ILExceptionInfo ilexceptionInfo = new ILExceptionInfo
-					{
-						start = keyValuePair.Key.Item1,
-						len = keyValuePair.Key.Item2,
-						handlers = new ILExceptionBlock[keyValuePair.Value.Count]
-					};
-					list2.Add(ilexceptionInfo);
-					int num = 0;
-					foreach (ExceptionHandler exceptionHandler2 in keyValuePair.Value)
-					{
-						ilexceptionInfo.handlers[num++] = new ILExceptionBlock
-						{
-							start = exceptionHandler2.HandlerOffset,
-							len = exceptionHandler2.HandlerLength,
-							filter_offset = exceptionHandler2.FilterOffset,
-							type = (int)exceptionHandler2.Kind,
-							extype = this.module.ResolveType(exceptionHandler2.ExceptionTypeToken)
-						};
-					}
-				}
-				this.SetExceptionHandlers(list2.ToArray());
-			}
-			if (tokenFixups != null)
-			{
-				List<ILTokenInfo> list3 = new List<ILTokenInfo>();
-				foreach (int num2 in tokenFixups)
-				{
-					int num3 = (int)BitConverter.ToUInt32(il, num2);
-					ILTokenInfo iltokenInfo = new ILTokenInfo
-					{
-						code_pos = num2,
-						member = ((ModuleBuilder)this.module).ResolveOrGetRegisteredToken(num3, null, null)
-					};
-					list3.Add(iltokenInfo);
-				}
-				this.SetTokenFixups(list3.ToArray());
-			}
-		}
-
-		internal TokenGenerator TokenGenerator
-		{
-			get
-			{
-				return this.token_gen;
-			}
-		}
-
-		[Obsolete("Use ILOffset", true)]
+		[Obsolete("Use ILOffset")]
 		internal static int Mono_GetCurrentOffset(ILGenerator ig)
 		{
 			return ig.code_len;
 		}
 
-		public virtual int ILOffset
-		{
-			get
-			{
-				return this.code_len;
-			}
-		}
+		private const int defaultFixupSize = 4;
 
-		void _ILGenerator.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
+		private const int defaultLabelsSize = 4;
 
-		void _ILGenerator.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
+		private const int defaultExceptionStackSize = 2;
 
-		void _ILGenerator.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _ILGenerator.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
-		}
+		private static readonly Type void_type = typeof(void);
 
 		private byte[] code;
 
@@ -1234,12 +929,6 @@ namespace System.Reflection.Emit
 		private Stack open_blocks;
 
 		private TokenGenerator token_gen;
-
-		private const int defaultFixupSize = 4;
-
-		private const int defaultLabelsSize = 4;
-
-		private const int defaultExceptionStackSize = 2;
 
 		private ArrayList sequencePointLists;
 

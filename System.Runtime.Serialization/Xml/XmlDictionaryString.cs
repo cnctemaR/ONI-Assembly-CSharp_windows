@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
-using System.Text;
 
 namespace System.Xml
 {
@@ -10,35 +8,26 @@ namespace System.Xml
 		{
 			if (dictionary == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("dictionary"));
+				throw new ArgumentNullException("dictionary");
 			}
 			if (value == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("value"));
+				throw new ArgumentNullException("value");
 			}
 			if (key < 0 || key > 536870911)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentOutOfRangeException("key", global::System.Runtime.Serialization.SR.GetString("The value of this argument must fall within the range {0} to {1}.", new object[] { 0, 536870911 })));
+				throw new ArgumentOutOfRangeException("key");
 			}
-			this.dictionary = dictionary;
+			this.dict = dictionary;
 			this.value = value;
 			this.key = key;
-		}
-
-		internal static string GetString(XmlDictionaryString s)
-		{
-			if (s == null)
-			{
-				return null;
-			}
-			return s.Value;
 		}
 
 		public static XmlDictionaryString Empty
 		{
 			get
 			{
-				return XmlDictionaryString.emptyStringDictionary.EmptyString;
+				return XmlDictionaryString.empty;
 			}
 		}
 
@@ -46,7 +35,7 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.dictionary;
+				return this.dict;
 			}
 		}
 
@@ -66,91 +55,17 @@ namespace System.Xml
 			}
 		}
 
-		internal byte[] ToUTF8()
-		{
-			if (this.buffer == null)
-			{
-				this.buffer = Encoding.UTF8.GetBytes(this.value);
-			}
-			return this.buffer;
-		}
-
 		public override string ToString()
 		{
 			return this.value;
 		}
 
-		internal const int MinKey = 0;
+		private static XmlDictionaryString empty = new XmlDictionaryString(XmlDictionary.EmptyDictionary.Instance, string.Empty, 0);
 
-		internal const int MaxKey = 536870911;
+		private readonly IXmlDictionary dict;
 
-		private IXmlDictionary dictionary;
+		private readonly string value;
 
-		private string value;
-
-		private int key;
-
-		private byte[] buffer;
-
-		private static XmlDictionaryString.EmptyStringDictionary emptyStringDictionary = new XmlDictionaryString.EmptyStringDictionary();
-
-		private class EmptyStringDictionary : IXmlDictionary
-		{
-			public EmptyStringDictionary()
-			{
-				this.empty = new XmlDictionaryString(this, string.Empty, 0);
-			}
-
-			public XmlDictionaryString EmptyString
-			{
-				get
-				{
-					return this.empty;
-				}
-			}
-
-			public bool TryLookup(string value, out XmlDictionaryString result)
-			{
-				if (value == null)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperArgumentNull("value");
-				}
-				if (value.Length == 0)
-				{
-					result = this.empty;
-					return true;
-				}
-				result = null;
-				return false;
-			}
-
-			public bool TryLookup(int key, out XmlDictionaryString result)
-			{
-				if (key == 0)
-				{
-					result = this.empty;
-					return true;
-				}
-				result = null;
-				return false;
-			}
-
-			public bool TryLookup(XmlDictionaryString value, out XmlDictionaryString result)
-			{
-				if (value == null)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("value"));
-				}
-				if (value.Dictionary != this)
-				{
-					result = null;
-					return false;
-				}
-				result = value;
-				return true;
-			}
-
-			private XmlDictionaryString empty;
-		}
+		private readonly int key;
 	}
 }

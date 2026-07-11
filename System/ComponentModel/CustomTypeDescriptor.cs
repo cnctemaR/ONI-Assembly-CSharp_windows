@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class CustomTypeDescriptor : ICustomTypeDescriptor
 	{
 		protected CustomTypeDescriptor()

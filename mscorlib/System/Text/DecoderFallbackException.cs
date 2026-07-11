@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace System.Text
 {
@@ -7,43 +6,40 @@ namespace System.Text
 	public sealed class DecoderFallbackException : ArgumentException
 	{
 		public DecoderFallbackException()
-			: base(Environment.GetResourceString("Value does not fall within the expected range."))
+			: this(null)
 		{
-			base.SetErrorCode(-2147024809);
 		}
 
 		public DecoderFallbackException(string message)
-			: base(message)
 		{
-			base.SetErrorCode(-2147024809);
+			this.index = -1;
+			base..ctor(message);
 		}
 
 		public DecoderFallbackException(string message, Exception innerException)
-			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147024809);
-		}
-
-		internal DecoderFallbackException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
-		{
+			this.index = -1;
+			base..ctor(message, innerException);
 		}
 
 		public DecoderFallbackException(string message, byte[] bytesUnknown, int index)
-			: base(message)
 		{
-			this.bytesUnknown = bytesUnknown;
+			this.index = -1;
+			base..ctor(message);
+			this.bytes_unknown = bytesUnknown;
 			this.index = index;
 		}
 
+		[MonoTODO]
 		public byte[] BytesUnknown
 		{
 			get
 			{
-				return this.bytesUnknown;
+				return this.bytes_unknown;
 			}
 		}
 
+		[MonoTODO]
 		public int Index
 		{
 			get
@@ -52,7 +48,9 @@ namespace System.Text
 			}
 		}
 
-		private byte[] bytesUnknown;
+		private const string defaultMessage = "Failed to decode the input byte sequence to Unicode characters.";
+
+		private byte[] bytes_unknown;
 
 		private int index;
 	}

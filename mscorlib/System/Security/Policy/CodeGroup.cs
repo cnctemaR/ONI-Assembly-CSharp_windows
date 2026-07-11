@@ -218,7 +218,8 @@ namespace System.Security.Policy
 				SecurityElement securityElement = e.SearchForChildByTag("PermissionSet");
 				if (securityElement != null)
 				{
-					permissionSet = (PermissionSet)Activator.CreateInstance(Type.GetType(securityElement.Attribute("class")), true);
+					Type type = Type.GetType(securityElement.Attribute("class"));
+					permissionSet = (PermissionSet)Activator.CreateInstance(type, true);
 					permissionSet.FromXml(securityElement);
 				}
 				else
@@ -244,12 +245,12 @@ namespace System.Security.Policy
 			if (securityElement3 != null)
 			{
 				string text2 = securityElement3.Attribute("class");
-				Type type = Type.GetType(text2);
-				if (type == null)
+				Type type2 = Type.GetType(text2);
+				if (type2 == null)
 				{
-					type = Type.GetType("System.Security.Policy." + text2);
+					type2 = Type.GetType("System.Security.Policy." + text2);
 				}
-				this.m_membershipCondition = (IMembershipCondition)Activator.CreateInstance(type, true);
+				this.m_membershipCondition = (IMembershipCondition)Activator.CreateInstance(type2, true);
 				this.m_membershipCondition.FromXml(securityElement3, level);
 			}
 			this.m_name = e.Attribute("Name");
@@ -314,25 +315,22 @@ namespace System.Security.Policy
 			{
 				text2 = text2.Substring(num + 1);
 			}
-			if (text2 == "FileCodeGroup")
+			string text3 = text2;
+			switch (text3)
 			{
+			case "FileCodeGroup":
 				return new FileCodeGroup(se, level);
-			}
-			if (text2 == "FirstMatchCodeGroup")
-			{
+			case "FirstMatchCodeGroup":
 				return new FirstMatchCodeGroup(se, level);
-			}
-			if (text2 == "NetCodeGroup")
-			{
+			case "NetCodeGroup":
 				return new NetCodeGroup(se, level);
+			case "UnionCodeGroup":
+				return new UnionCodeGroup(se, level);
 			}
-			if (!(text2 == "UnionCodeGroup"))
-			{
-				CodeGroup codeGroup = (CodeGroup)Activator.CreateInstance(Type.GetType(text), true);
-				codeGroup.FromXml(se, level);
-				return codeGroup;
-			}
-			return new UnionCodeGroup(se, level);
+			Type type = Type.GetType(text);
+			CodeGroup codeGroup = (CodeGroup)Activator.CreateInstance(type, true);
+			codeGroup.FromXml(se, level);
+			return codeGroup;
 		}
 
 		private PolicyStatement m_policy;

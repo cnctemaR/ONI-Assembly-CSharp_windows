@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
@@ -6,9 +7,9 @@ using System.Runtime.Serialization;
 namespace System.Net
 {
 	[Serializable]
-	public class HttpWebResponse : WebResponse, ISerializable, IDisposable
+	public class HttpWebResponse : WebResponse, IDisposable, ISerializable
 	{
-		internal HttpWebResponse(Uri uri, string method, WebConnectionData data, CookieContainer container)
+		internal HttpWebResponse(global::System.Uri uri, string method, WebConnectionData data, CookieContainer container)
 		{
 			this.uri = uri;
 			this.method = method;
@@ -38,28 +39,36 @@ namespace System.Net
 			string text2 = this.webHeaders["Content-Encoding"];
 			if (text2 == "gzip" && (data.request.AutomaticDecompression & DecompressionMethods.GZip) != DecompressionMethods.None)
 			{
-				this.stream = new GZipStream(this.stream, CompressionMode.Decompress);
-				this.webHeaders.Remove(HttpRequestHeader.ContentEncoding);
-				return;
+				this.stream = new global::System.IO.Compression.GZipStream(this.stream, global::System.IO.Compression.CompressionMode.Decompress);
 			}
-			if (text2 == "deflate" && (data.request.AutomaticDecompression & DecompressionMethods.Deflate) != DecompressionMethods.None)
+			else if (text2 == "deflate" && (data.request.AutomaticDecompression & DecompressionMethods.Deflate) != DecompressionMethods.None)
 			{
-				this.stream = new DeflateStream(this.stream, CompressionMode.Decompress);
-				this.webHeaders.Remove(HttpRequestHeader.ContentEncoding);
+				this.stream = new global::System.IO.Compression.DeflateStream(this.stream, global::System.IO.Compression.CompressionMode.Decompress);
 			}
 		}
 
 		[Obsolete("Serialization is obsoleted for this type", false)]
 		protected HttpWebResponse(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
-			this.uri = (Uri)serializationInfo.GetValue("uri", typeof(Uri));
+			this.uri = (global::System.Uri)serializationInfo.GetValue("uri", typeof(global::System.Uri));
 			this.contentLength = serializationInfo.GetInt64("contentLength");
 			this.contentType = serializationInfo.GetString("contentType");
 			this.method = serializationInfo.GetString("method");
 			this.statusDescription = serializationInfo.GetString("statusDescription");
 			this.cookieCollection = (CookieCollection)serializationInfo.GetValue("cookieCollection", typeof(CookieCollection));
 			this.version = (Version)serializationInfo.GetValue("version", typeof(Version));
-			this.statusCode = (HttpStatusCode)serializationInfo.GetValue("statusCode", typeof(HttpStatusCode));
+			this.statusCode = (HttpStatusCode)((int)serializationInfo.GetValue("statusCode", typeof(HttpStatusCode)));
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			this.GetObjectData(serializationInfo, streamingContext);
+		}
+
+		void IDisposable.Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		public string CharacterSet
@@ -72,18 +81,14 @@ namespace System.Net
 					return "ISO-8859-1";
 				}
 				string text2 = text.ToLower();
-				int num = text2.IndexOf("charset=", StringComparison.Ordinal);
+				int num = text2.IndexOf("charset=");
 				if (num == -1)
 				{
 					return "ISO-8859-1";
 				}
 				num += 8;
 				int num2 = text2.IndexOf(';', num);
-				if (num2 != -1)
-				{
-					return text.Substring(num, num2 - num);
-				}
-				return text.Substring(num);
+				return (num2 != -1) ? text.Substring(num, num2 - num) : text.Substring(num);
 			}
 		}
 
@@ -93,11 +98,7 @@ namespace System.Net
 			{
 				this.CheckDisposed();
 				string text = this.webHeaders["Content-Encoding"];
-				if (text == null)
-				{
-					return "";
-				}
-				return text;
+				return (text == null) ? string.Empty : text;
 			}
 		}
 
@@ -122,7 +123,7 @@ namespace System.Net
 			}
 		}
 
-		public virtual CookieCollection Cookies
+		public CookieCollection Cookies
 		{
 			get
 			{
@@ -153,7 +154,7 @@ namespace System.Net
 			return new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool IsMutuallyAuthenticated
 		{
 			get
@@ -170,7 +171,8 @@ namespace System.Net
 				DateTime dateTime;
 				try
 				{
-					dateTime = MonoHttpDate.Parse(this.webHeaders["Last-Modified"]);
+					string text = this.webHeaders["Last-Modified"];
+					dateTime = MonoHttpDate.Parse(text);
 				}
 				catch (Exception)
 				{
@@ -180,7 +182,7 @@ namespace System.Net
 			}
 		}
 
-		public virtual string Method
+		public string Method
 		{
 			get
 			{
@@ -198,7 +200,7 @@ namespace System.Net
 			}
 		}
 
-		public override Uri ResponseUri
+		public override global::System.Uri ResponseUri
 		{
 			get
 			{
@@ -212,11 +214,11 @@ namespace System.Net
 			get
 			{
 				this.CheckDisposed();
-				return this.webHeaders["Server"] ?? "";
+				return this.webHeaders["Server"];
 			}
 		}
 
-		public virtual HttpStatusCode StatusCode
+		public HttpStatusCode StatusCode
 		{
 			get
 			{
@@ -224,7 +226,7 @@ namespace System.Net
 			}
 		}
 
-		public virtual string StatusDescription
+		public string StatusDescription
 		{
 			get
 			{
@@ -233,23 +235,11 @@ namespace System.Net
 			}
 		}
 
-		public override bool SupportsHeaders
-		{
-			get
-			{
-				return true;
-			}
-		}
-
 		public string GetResponseHeader(string headerName)
 		{
 			this.CheckDisposed();
 			string text = this.webHeaders[headerName];
-			if (text == null)
-			{
-				return "";
-			}
-			return text;
+			return (text == null) ? string.Empty : text;
 		}
 
 		internal void ReadAll()
@@ -275,16 +265,11 @@ namespace System.Net
 			{
 				return Stream.Null;
 			}
-			if (string.Equals(this.method, "HEAD", StringComparison.OrdinalIgnoreCase))
+			if (string.Compare(this.method, "HEAD", true) == 0)
 			{
 				return Stream.Null;
 			}
 			return this.stream;
-		}
-
-		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
-		{
-			this.GetObjectData(serializationInfo, streamingContext);
 		}
 
 		protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
@@ -301,26 +286,30 @@ namespace System.Net
 
 		public override void Close()
 		{
-			if (this.stream != null)
+			((IDisposable)this).Dispose();
+		}
+
+		private void Dispose(bool disposing)
+		{
+			if (this.disposed)
 			{
-				Stream stream = this.stream;
-				this.stream = null;
-				if (stream != null)
-				{
-					stream.Close();
-				}
+				return;
 			}
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		protected override void Dispose(bool disposing)
-		{
 			this.disposed = true;
-			base.Dispose(true);
+			if (disposing)
+			{
+				this.uri = null;
+				this.cookieCollection = null;
+				this.method = null;
+				this.version = null;
+				this.statusDescription = null;
+			}
+			Stream stream = this.stream;
+			this.stream = null;
+			if (stream != null)
+			{
+				stream.Close();
+			}
 		}
 
 		private void CheckDisposed()
@@ -337,41 +326,161 @@ namespace System.Net
 			{
 				return;
 			}
-			CookieCollection cookieCollection = null;
-			try
+			string[] array = this.webHeaders.GetValues("Set-Cookie");
+			if (array != null)
 			{
-				string text = this.webHeaders.Get("Set-Cookie");
-				if (text != null)
+				foreach (string text in array)
 				{
-					cookieCollection = this.cookie_container.CookieCutter(this.uri, "Set-Cookie", text, false);
+					this.SetCookie(text);
 				}
 			}
-			catch
+			array = this.webHeaders.GetValues("Set-Cookie2");
+			if (array != null)
 			{
-			}
-			try
-			{
-				string text = this.webHeaders.Get("Set-Cookie2");
-				if (text != null)
+				foreach (string text2 in array)
 				{
-					CookieCollection cookieCollection2 = this.cookie_container.CookieCutter(this.uri, "Set-Cookie2", text, false);
-					if (cookieCollection != null && cookieCollection.Count != 0)
+					this.SetCookie2(text2);
+				}
+			}
+		}
+
+		private void SetCookie(string header)
+		{
+			Cookie cookie = null;
+			CookieParser cookieParser = new CookieParser(header);
+			string text;
+			string text2;
+			while (cookieParser.GetNextNameValue(out text, out text2))
+			{
+				if ((text != null && !(text == string.Empty)) || cookie != null)
+				{
+					if (cookie == null)
 					{
-						cookieCollection.Add(cookieCollection2);
+						cookie = new Cookie(text, text2);
 					}
 					else
 					{
-						cookieCollection = cookieCollection2;
+						text = text.ToUpper();
+						string text3 = text;
+						switch (text3)
+						{
+						case "COMMENT":
+							if (cookie.Comment == null)
+							{
+								cookie.Comment = text2;
+							}
+							break;
+						case "COMMENTURL":
+							if (cookie.CommentUri == null)
+							{
+								cookie.CommentUri = new global::System.Uri(text2);
+							}
+							break;
+						case "DISCARD":
+							cookie.Discard = true;
+							break;
+						case "DOMAIN":
+							if (cookie.Domain == string.Empty)
+							{
+								cookie.Domain = text2;
+							}
+							break;
+						case "HTTPONLY":
+							cookie.HttpOnly = true;
+							break;
+						case "MAX-AGE":
+							if (cookie.Expires == DateTime.MinValue)
+							{
+								try
+								{
+									cookie.Expires = cookie.TimeStamp.AddSeconds(uint.Parse(text2));
+								}
+								catch
+								{
+								}
+							}
+							break;
+						case "EXPIRES":
+							if (!(cookie.Expires != DateTime.MinValue))
+							{
+								cookie.Expires = this.TryParseCookieExpires(text2);
+							}
+							break;
+						case "PATH":
+							cookie.Path = text2;
+							break;
+						case "PORT":
+							if (cookie.Port == null)
+							{
+								cookie.Port = text2;
+							}
+							break;
+						case "SECURE":
+							cookie.Secure = true;
+							break;
+						case "VERSION":
+							try
+							{
+								cookie.Version = (int)uint.Parse(text2);
+							}
+							catch
+							{
+							}
+							break;
+						}
 					}
 				}
 			}
-			catch
+			if (cookie == null)
 			{
+				return;
 			}
-			this.cookieCollection = cookieCollection;
+			if (this.cookieCollection == null)
+			{
+				this.cookieCollection = new CookieCollection();
+			}
+			if (cookie.Domain == string.Empty)
+			{
+				cookie.Domain = this.uri.Host;
+			}
+			this.cookieCollection.Add(cookie);
+			if (this.cookie_container != null)
+			{
+				this.cookie_container.Add(this.uri, cookie);
+			}
 		}
 
-		private Uri uri;
+		private void SetCookie2(string cookies_str)
+		{
+			string[] array = cookies_str.Split(new char[] { ',' });
+			foreach (string text in array)
+			{
+				this.SetCookie(text);
+			}
+		}
+
+		private DateTime TryParseCookieExpires(string value)
+		{
+			if (value == null || value.Length == 0)
+			{
+				return DateTime.MinValue;
+			}
+			for (int i = 0; i < this.cookieExpiresFormats.Length; i++)
+			{
+				try
+				{
+					DateTime dateTime = DateTime.ParseExact(value, this.cookieExpiresFormats[i], CultureInfo.InvariantCulture);
+					dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+					return TimeZone.CurrentTimeZone.ToLocalTime(dateTime);
+				}
+				catch
+				{
+				}
+			}
+			return DateTime.MinValue;
+		}
+
+		private global::System.Uri uri;
 
 		private WebHeaderCollection webHeaders;
 
@@ -394,5 +503,7 @@ namespace System.Net
 		private bool disposed;
 
 		private Stream stream;
+
+		private string[] cookieExpiresFormats = new string[] { "r", "ddd, dd'-'MMM'-'yyyy HH':'mm':'ss 'GMT'", "ddd, dd'-'MMM'-'yy HH':'mm':'ss 'GMT'" };
 	}
 }

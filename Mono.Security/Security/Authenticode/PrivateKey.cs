@@ -107,7 +107,9 @@ namespace Mono.Security.Authenticode
 				byte[] array2 = new byte[num];
 				Buffer.BlockCopy(pvk, 24, array2, 0, num);
 				byte[] array3 = this.DeriveKey(array2, password);
-				RC4.Create().CreateDecryptor(array3, null).TransformBlock(array, 8, array.Length - 8, array, 8);
+				RC4 rc = RC4.Create();
+				ICryptoTransform cryptoTransform = rc.CreateDecryptor(array3, null);
+				cryptoTransform.TransformBlock(array, 8, array.Length - 8, array, 8);
 				try
 				{
 					this.rsa = CryptoConvert.FromCapiPrivateKeyBlob(array);
@@ -118,7 +120,9 @@ namespace Mono.Security.Authenticode
 					this.weak = true;
 					Buffer.BlockCopy(pvk, 24 + num, array, 0, num2);
 					Array.Clear(array3, 5, 11);
-					RC4.Create().CreateDecryptor(array3, null).TransformBlock(array, 8, array.Length - 8, array, 8);
+					RC4 rc2 = RC4.Create();
+					cryptoTransform = rc2.CreateDecryptor(array3, null);
+					cryptoTransform.TransformBlock(array, 8, array.Length - 8, array, 8);
 					this.rsa = CryptoConvert.FromCapiPrivateKeyBlob(array);
 				}
 				Array.Clear(array3, 0, array3.Length);
@@ -169,15 +173,16 @@ namespace Mono.Security.Authenticode
 					byte[] array5 = null;
 					try
 					{
-						RandomNumberGenerator.Create().GetBytes(array4);
+						RandomNumberGenerator randomNumberGenerator = RandomNumberGenerator.Create();
+						randomNumberGenerator.GetBytes(array4);
 						fileStream.Write(array4, 0, array4.Length);
 						array5 = this.DeriveKey(array4, password);
 						if (this.Weak)
 						{
 							Array.Clear(array5, 5, 11);
 						}
-						rc.CreateEncryptor(array5, null).TransformBlock(array, 8, array.Length - 8, array, 8);
-						goto IL_014E;
+						ICryptoTransform cryptoTransform = rc.CreateEncryptor(array5, null);
+						cryptoTransform.TransformBlock(array, 8, array.Length - 8, array, 8);
 					}
 					finally
 					{
@@ -186,11 +191,13 @@ namespace Mono.Security.Authenticode
 						rc.Clear();
 					}
 				}
-				fileStream.Write(array2, 0, 4);
-				fileStream.Write(array2, 0, 4);
-				array3 = BitConverterLE.GetBytes(array.Length);
-				fileStream.Write(array3, 0, 4);
-				IL_014E:
+				else
+				{
+					fileStream.Write(array2, 0, 4);
+					fileStream.Write(array2, 0, 4);
+					array3 = BitConverterLE.GetBytes(array.Length);
+					fileStream.Write(array3, 0, 4);
+				}
 				fileStream.Write(array, 0, array.Length);
 			}
 			finally

@@ -2,8 +2,8 @@
 
 namespace Mono.Unix.Native
 {
-	[Map]
 	[CLSCompliant(false)]
+	[Map]
 	public enum SyslogLevel
 	{
 		LOG_EMERG,

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.ComponentModel.Design.Serialization
 {
-	public interface IDesignerLoaderHost : IDesignerHost, IServiceContainer, IServiceProvider
+	public interface IDesignerLoaderHost : IServiceProvider, IDesignerHost, IServiceContainer
 	{
 		void EndLoad(string baseClassName, bool successful, ICollection errorCollection);
 

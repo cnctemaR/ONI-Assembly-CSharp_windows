@@ -5,20 +5,20 @@ namespace System.Runtime.Serialization
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Module, Inherited = false, AllowMultiple = true)]
 	public sealed class ContractNamespaceAttribute : Attribute
 	{
-		public ContractNamespaceAttribute(string contractNamespace)
+		public ContractNamespaceAttribute(string ns)
 		{
-			this.contractNamespace = contractNamespace;
+			this.contract_ns = ns;
 		}
 
 		public string ClrNamespace
 		{
 			get
 			{
-				return this.clrNamespace;
+				return this.clr_ns;
 			}
 			set
 			{
-				this.clrNamespace = value;
+				this.clr_ns = value;
 			}
 		}
 
@@ -26,12 +26,12 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.contractNamespace;
+				return this.contract_ns;
 			}
 		}
 
-		private string clrNamespace;
+		private string clr_ns;
 
-		private string contractNamespace;
+		private string contract_ns;
 	}
 }

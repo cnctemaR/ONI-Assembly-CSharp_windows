@@ -2,28 +2,28 @@
 
 namespace System.Runtime.InteropServices
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Method, Inherited = false)]
+	[ComVisible(true)]
 	public sealed class TypeLibFuncAttribute : Attribute
 	{
-		public TypeLibFuncAttribute(TypeLibFuncFlags flags)
-		{
-			this._val = flags;
-		}
-
 		public TypeLibFuncAttribute(short flags)
 		{
-			this._val = (TypeLibFuncFlags)flags;
+			this.flags = (TypeLibFuncFlags)flags;
+		}
+
+		public TypeLibFuncAttribute(TypeLibFuncFlags flags)
+		{
+			this.flags = flags;
 		}
 
 		public TypeLibFuncFlags Value
 		{
 			get
 			{
-				return this._val;
+				return this.flags;
 			}
 		}
 
-		internal TypeLibFuncFlags _val;
+		private TypeLibFuncFlags flags;
 	}
 }

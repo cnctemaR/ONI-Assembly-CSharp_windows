@@ -5,12 +5,12 @@ using System.Runtime.ConstrainedExecution;
 
 namespace System.Diagnostics
 {
-	[InstallerType(typeof(PerformanceCounterInstaller))]
-	public sealed class PerformanceCounter : Component, ISupportInitialize
+	[global::System.ComponentModel.InstallerType(typeof(PerformanceCounterInstaller))]
+	public sealed class PerformanceCounter : global::System.ComponentModel.Component, global::System.ComponentModel.ISupportInitialize
 	{
 		public PerformanceCounter()
 		{
-			this.categoryName = (this.counterName = (this.instanceName = ""));
+			this.categoryName = (this.counterName = (this.instanceName = string.Empty));
 			this.machineName = ".";
 		}
 
@@ -20,7 +20,7 @@ namespace System.Diagnostics
 		}
 
 		public PerformanceCounter(string categoryName, string counterName, bool readOnly)
-			: this(categoryName, counterName, "", readOnly)
+			: this(categoryName, counterName, string.Empty, readOnly)
 		{
 		}
 
@@ -45,7 +45,7 @@ namespace System.Diagnostics
 			}
 			this.CategoryName = categoryName;
 			this.CounterName = counterName;
-			if (categoryName == "" || counterName == "")
+			if (categoryName == string.Empty || counterName == string.Empty)
 			{
 				throw new InvalidOperationException();
 			}
@@ -88,11 +88,11 @@ namespace System.Diagnostics
 			this.changed = false;
 		}
 
-		[DefaultValue("")]
-		[ReadOnly(true)]
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[SRDescription("The category name for this performance counter.")]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.CategoryValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.SRDescription("The category name for this performance counter.")]
+		[global::System.ComponentModel.DefaultValue("")]
+		[global::System.ComponentModel.ReadOnly(true)]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
 		public string CategoryName
 		{
 			get
@@ -110,23 +110,23 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
-		[ReadOnly(true)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.ReadOnly(true)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("A description describing the counter.")]
+		[global::System.MonoTODO]
 		public string CounterHelp
 		{
 			get
 			{
-				return "";
+				return string.Empty;
 			}
 		}
 
-		[DefaultValue("")]
-		[ReadOnly(true)]
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.CounterNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[SRDescription("The name of this performance counter.")]
+		[global::System.SRDescription("The name of this performance counter.")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.CounterNameConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.ReadOnly(true)]
+		[global::System.ComponentModel.DefaultValue("")]
 		public string CounterName
 		{
 			get
@@ -144,8 +144,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The type of the counter.")]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public PerformanceCounterType CounterType
 		{
 			get
@@ -158,8 +158,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
-		[DefaultValue(PerformanceCounterInstanceLifetime.Global)]
+		[global::System.ComponentModel.DefaultValue(PerformanceCounterInstanceLifetime.Global)]
+		[global::System.MonoTODO]
 		public PerformanceCounterInstanceLifetime InstanceLifetime
 		{
 			get
@@ -172,11 +172,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[DefaultValue("")]
-		[ReadOnly(true)]
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.InstanceNameConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[SRDescription("The instance name for this performance counter.")]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.InstanceNameConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.SRDescription("The instance name for this performance counter.")]
+		[global::System.ComponentModel.ReadOnly(true)]
+		[global::System.ComponentModel.DefaultValue("")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
 		public string InstanceName
 		{
 			get
@@ -194,11 +194,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO("What's the machine name format?")]
-		[DefaultValue(".")]
-		[Browsable(false)]
-		[SettingsBindable(true)]
-		[SRDescription("The machine where this performance counter resides.")]
+		[global::System.MonoTODO("What's the machine name format?")]
+		[global::System.ComponentModel.DefaultValue(".")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.SRDescription("The machine where this performance counter resides.")]
 		public string MachineName
 		{
 			get
@@ -211,7 +211,7 @@ namespace System.Diagnostics
 				{
 					throw new ArgumentNullException("value");
 				}
-				if (value == "" || value == ".")
+				if (value == string.Empty || value == ".")
 				{
 					this.machineName = ".";
 					this.changed = true;
@@ -221,9 +221,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		[MonitoringDescription("The raw value of the counter.")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public long RawValue
 		{
 			get
@@ -250,9 +250,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
-		[DefaultValue(true)]
 		[MonitoringDescription("The accessability level of the counter.")]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DefaultValue(true)]
 		public bool ReadOnly
 		{
 			get
@@ -351,8 +351,8 @@ namespace System.Diagnostics
 			return num;
 		}
 
-		[MonoTODO]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[global::System.MonoTODO]
 		public void RemoveInstance()
 		{
 			throw new NotImplementedException();

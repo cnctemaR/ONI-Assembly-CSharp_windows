@@ -5,17 +5,17 @@ namespace System.Diagnostics
 {
 	public class InstanceDataCollectionCollection : DictionaryBase
 	{
+		[Obsolete("Use PerformanceCounterCategory.ReadCategory()")]
+		public InstanceDataCollectionCollection()
+		{
+		}
+
 		private static void CheckNull(object value, string name)
 		{
 			if (value == null)
 			{
 				throw new ArgumentNullException(name);
 			}
-		}
-
-		[Obsolete("Use PerformanceCounterCategory.ReadCategory()")]
-		public InstanceDataCollectionCollection()
-		{
 		}
 
 		public InstanceDataCollection this[string counterName]

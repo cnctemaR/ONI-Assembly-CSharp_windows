@@ -7,9 +7,9 @@ namespace System.Linq
 	{
 		IQueryable CreateQuery(Expression expression);
 
-		IQueryable<TElement> CreateQuery<TElement>(Expression expression);
-
 		object Execute(Expression expression);
+
+		IQueryable<TElement> CreateQuery<TElement>(Expression expression);
 
 		TResult Execute<TResult>(Expression expression);
 	}

@@ -18,7 +18,7 @@ public class Def : ScriptableObject
 		}
 	}
 
-	public static global::Tuple<Sprite, Color> GetUISprite(object item, string animName = "ui", bool centered = false)
+	public static Tuple<Sprite, Color> GetUISprite(object item, string animName = "ui", bool centered = false)
 	{
 		if (item is Substance)
 		{
@@ -28,17 +28,17 @@ public class Def : ScriptableObject
 		{
 			if ((item as Element).IsSolid)
 			{
-				return new global::Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName, centered), Color.white);
+				return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName, centered), Color.white);
 			}
 			if ((item as Element).IsLiquid)
 			{
-				return new global::Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.debugColour);
+				return new Tuple<Sprite, Color>(Assets.GetSprite("element_liquid"), (item as Element).substance.debugColour);
 			}
 			if ((item as Element).IsGas)
 			{
-				return new global::Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.debugColour);
+				return new Tuple<Sprite, Color>(Assets.GetSprite("element_gas"), (item as Element).substance.debugColour);
 			}
-			return new global::Tuple<Sprite, Color>(null, Color.clear);
+			return new Tuple<Sprite, Color>(null, Color.clear);
 		}
 		else if (item is GameObject)
 		{
@@ -56,12 +56,12 @@ public class Def : ScriptableObject
 			if (component2)
 			{
 				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered);
-				return new global::Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (!(uispriteFromMultiObjectAnim != null)) ? Color.clear : Color.white);
+				return new Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (!(uispriteFromMultiObjectAnim != null)) ? Color.clear : Color.white);
 			}
 			if (gameObject.GetComponent<Building>() != null)
 			{
 				Sprite uisprite = gameObject.GetComponent<Building>().Def.GetUISprite(animName, centered);
-				return new global::Tuple<Sprite, Color>(uisprite, (!(uisprite != null)) ? Color.clear : Color.white);
+				return new Tuple<Sprite, Color>(uisprite, (!(uisprite != null)) ? Color.clear : Color.white);
 			}
 			global::Debug.LogWarningFormat("Can't get sprite for type {0} (no KBatchedAnimController)", new object[] { item.ToString() });
 			return null;
@@ -90,7 +90,7 @@ public class Def : ScriptableObject
 
 	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile animFile, string animName = "ui", bool centered = false)
 	{
-		global::Tuple<KAnimFile, string, bool> tuple = new global::Tuple<KAnimFile, string, bool>(animFile, animName, centered);
+		Tuple<KAnimFile, string, bool> tuple = new Tuple<KAnimFile, string, bool>(animFile, animName, centered);
 		if (Def.knownUISprites.ContainsKey(tuple))
 		{
 			return Def.knownUISprites[tuple];
@@ -177,5 +177,5 @@ public class Def : ScriptableObject
 
 	public Tag Tag;
 
-	private static Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite> knownUISprites = new Dictionary<global::Tuple<KAnimFile, string, bool>, Sprite>();
+	private static Dictionary<Tuple<KAnimFile, string, bool>, Sprite> knownUISprites = new Dictionary<Tuple<KAnimFile, string, bool>, Sprite>();
 }

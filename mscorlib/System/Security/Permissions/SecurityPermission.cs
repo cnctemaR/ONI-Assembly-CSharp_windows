@@ -5,21 +5,28 @@ namespace System.Security.Permissions
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class SecurityPermission : CodeAccessPermission, IUnrestrictedPermission, IBuiltInPermission
+	public sealed class SecurityPermission : CodeAccessPermission, IBuiltInPermission, IUnrestrictedPermission
 	{
 		public SecurityPermission(PermissionState state)
 		{
 			if (CodeAccessPermission.CheckPermissionState(state, true) == PermissionState.Unrestricted)
 			{
 				this.flags = SecurityPermissionFlag.AllFlags;
-				return;
 			}
-			this.flags = SecurityPermissionFlag.NoFlags;
+			else
+			{
+				this.flags = SecurityPermissionFlag.NoFlags;
+			}
 		}
 
 		public SecurityPermission(SecurityPermissionFlag flag)
 		{
 			this.Flags = flag;
+		}
+
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 6;
 		}
 
 		public SecurityPermissionFlag Flags
@@ -32,7 +39,8 @@ namespace System.Security.Permissions
 			{
 				if ((value & SecurityPermissionFlag.AllFlags) != value)
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid flags {0}"), value), "SecurityPermissionFlag");
+					string text = string.Format(Locale.GetText("Invalid flags {0}"), value);
+					throw new ArgumentException(text, "SecurityPermissionFlag");
 				}
 				this.flags = value;
 			}
@@ -109,15 +117,19 @@ namespace System.Security.Permissions
 			if (CodeAccessPermission.IsUnrestricted(esd))
 			{
 				this.flags = SecurityPermissionFlag.AllFlags;
-				return;
 			}
-			string text = esd.Attribute("Flags");
-			if (text == null)
+			else
 			{
-				this.flags = SecurityPermissionFlag.NoFlags;
-				return;
+				string text = esd.Attribute("Flags");
+				if (text == null)
+				{
+					this.flags = SecurityPermissionFlag.NoFlags;
+				}
+				else
+				{
+					this.flags = (SecurityPermissionFlag)((int)Enum.Parse(typeof(SecurityPermissionFlag), text));
+				}
 			}
-			this.flags = (SecurityPermissionFlag)Enum.Parse(typeof(SecurityPermissionFlag), text);
 		}
 
 		public override SecurityElement ToXml()
@@ -132,11 +144,6 @@ namespace System.Security.Permissions
 				securityElement.AddAttribute("Flags", this.flags.ToString());
 			}
 			return securityElement;
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 6;
 		}
 
 		private bool IsEmpty()

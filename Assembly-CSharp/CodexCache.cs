@@ -333,9 +333,17 @@ public static class CodexCache
 	{
 		List<CodexEntry> list = new List<CodexEntry>();
 		string text = ((!(folder == string.Empty)) ? Path.Combine(CodexCache.baseEntryPath, folder) : CodexCache.baseEntryPath);
-		string[] files = Directory.GetFiles(text, "*.yaml");
+		string[] array = new string[0];
+		try
+		{
+			array = Directory.GetFiles(text, "*.yaml");
+		}
+		catch (UnauthorizedAccessException ex)
+		{
+			global::Debug.LogWarning(ex, null);
+		}
 		WorkItemCollection<CodexCache.CollectEntryWorkItem, object> workItemCollection = new WorkItemCollection<CodexCache.CollectEntryWorkItem, object>();
-		foreach (string text2 in files)
+		foreach (string text2 in array)
 		{
 			workItemCollection.Add(new CodexCache.CollectEntryWorkItem
 			{
@@ -361,9 +369,17 @@ public static class CodexCache
 	{
 		List<SubEntry> list = new List<SubEntry>();
 		string text = ((!(folder == string.Empty)) ? Path.Combine(CodexCache.baseEntryPath, folder) : CodexCache.baseEntryPath);
-		string[] files = Directory.GetFiles(text, "*.yaml", SearchOption.AllDirectories);
+		string[] array = new string[0];
+		try
+		{
+			array = Directory.GetFiles(text, "*.yaml", SearchOption.AllDirectories);
+		}
+		catch (UnauthorizedAccessException ex)
+		{
+			global::Debug.LogWarning(ex, null);
+		}
 		WorkItemCollection<CodexCache.CollectSubEntryWorkItem, object> workItemCollection = new WorkItemCollection<CodexCache.CollectSubEntryWorkItem, object>();
-		foreach (string text2 in files)
+		foreach (string text2 in array)
 		{
 			workItemCollection.Add(new CodexCache.CollectSubEntryWorkItem
 			{

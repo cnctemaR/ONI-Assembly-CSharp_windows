@@ -7,7 +7,7 @@ namespace System.Security.Cryptography.Pkcs
 	{
 		public Pkcs9MessageDigest()
 		{
-			base.Oid = new Oid("1.2.840.113549.1.9.4", "Message Digest");
+			this.Oid = new Oid("1.2.840.113549.1.9.4", "Message Digest");
 			this._encoded = null;
 		}
 
@@ -19,14 +19,16 @@ namespace System.Security.Cryptography.Pkcs
 			}
 			if (encoded)
 			{
-				base.Oid = new Oid("1.2.840.113549.1.9.4", "Message Digest");
+				this.Oid = new Oid("1.2.840.113549.1.9.4", "Message Digest");
 				base.RawData = messageDigest;
 				this.Decode(messageDigest);
-				return;
 			}
-			base.Oid = new Oid("1.2.840.113549.1.9.4", "Message Digest");
-			this._messageDigest = (byte[])this._messageDigest.Clone();
-			base.RawData = this.Encode();
+			else
+			{
+				this.Oid = new Oid("1.2.840.113549.1.9.4", "Message Digest");
+				this._messageDigest = (byte[])this._messageDigest.Clone();
+				base.RawData = this.Encode();
+			}
 		}
 
 		public byte[] MessageDigest
@@ -60,7 +62,8 @@ namespace System.Security.Cryptography.Pkcs
 
 		internal byte[] Encode()
 		{
-			return new ASN1(4, this._messageDigest).GetBytes();
+			ASN1 asn = new ASN1(4, this._messageDigest);
+			return asn.GetBytes();
 		}
 
 		internal const string oid = "1.2.840.113549.1.9.4";

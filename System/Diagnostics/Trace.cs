@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Security.Permissions;
+using System.Reflection;
 
 namespace System.Diagnostics
 {
@@ -9,53 +9,21 @@ namespace System.Diagnostics
 		{
 		}
 
-		public static TraceListenerCollection Listeners
+		[global::System.MonoNotSupported("")]
+		public static void Refresh()
 		{
-			[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-			get
-			{
-				return TraceInternal.Listeners;
-			}
+			throw new NotImplementedException();
 		}
 
 		public static bool AutoFlush
 		{
-			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			get
 			{
-				return TraceInternal.AutoFlush;
+				return TraceImpl.AutoFlush;
 			}
-			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
-				TraceInternal.AutoFlush = value;
-			}
-		}
-
-		public static bool UseGlobalLock
-		{
-			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-			get
-			{
-				return TraceInternal.UseGlobalLock;
-			}
-			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-			set
-			{
-				TraceInternal.UseGlobalLock = value;
-			}
-		}
-
-		public static CorrelationManager CorrelationManager
-		{
-			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-			get
-			{
-				if (Trace.correlationManager == null)
-				{
-					Trace.correlationManager = new CorrelationManager();
-				}
-				return Trace.correlationManager;
+				TraceImpl.AutoFlush = value;
 			}
 		}
 
@@ -63,11 +31,11 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return TraceInternal.IndentLevel;
+				return TraceImpl.IndentLevel;
 			}
 			set
 			{
-				TraceInternal.IndentLevel = value;
+				TraceImpl.IndentLevel = value;
 			}
 		}
 
@@ -75,208 +43,239 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return TraceInternal.IndentSize;
+				return TraceImpl.IndentSize;
 			}
 			set
 			{
-				TraceInternal.IndentSize = value;
+				TraceImpl.IndentSize = value;
 			}
 		}
 
-		[Conditional("TRACE")]
-		public static void Flush()
+		public static TraceListenerCollection Listeners
 		{
-			TraceInternal.Flush();
+			get
+			{
+				return TraceImpl.Listeners;
+			}
 		}
 
-		[Conditional("TRACE")]
-		public static void Close()
+		public static CorrelationManager CorrelationManager
 		{
-			TraceInternal.Close();
+			get
+			{
+				return TraceImpl.CorrelationManager;
+			}
+		}
+
+		public static bool UseGlobalLock
+		{
+			get
+			{
+				return TraceImpl.UseGlobalLock;
+			}
+			set
+			{
+				TraceImpl.UseGlobalLock = value;
+			}
 		}
 
 		[Conditional("TRACE")]
 		public static void Assert(bool condition)
 		{
-			TraceInternal.Assert(condition);
+			TraceImpl.Assert(condition);
 		}
 
 		[Conditional("TRACE")]
 		public static void Assert(bool condition, string message)
 		{
-			TraceInternal.Assert(condition, message);
+			TraceImpl.Assert(condition, message);
 		}
 
 		[Conditional("TRACE")]
 		public static void Assert(bool condition, string message, string detailMessage)
 		{
-			TraceInternal.Assert(condition, message, detailMessage);
+			TraceImpl.Assert(condition, message, detailMessage);
+		}
+
+		[Conditional("TRACE")]
+		public static void Close()
+		{
+			TraceImpl.Close();
 		}
 
 		[Conditional("TRACE")]
 		public static void Fail(string message)
 		{
-			TraceInternal.Fail(message);
+			TraceImpl.Fail(message);
 		}
 
 		[Conditional("TRACE")]
 		public static void Fail(string message, string detailMessage)
 		{
-			TraceInternal.Fail(message, detailMessage);
-		}
-
-		public static void Refresh()
-		{
-			DiagnosticsConfiguration.Refresh();
-			Switch.RefreshAll();
-			TraceSource.RefreshAll();
-			TraceInternal.Refresh();
+			TraceImpl.Fail(message, detailMessage);
 		}
 
 		[Conditional("TRACE")]
-		public static void TraceInformation(string message)
+		public static void Flush()
 		{
-			TraceInternal.TraceEvent(TraceEventType.Information, 0, message, null);
-		}
-
-		[Conditional("TRACE")]
-		public static void TraceInformation(string format, params object[] args)
-		{
-			TraceInternal.TraceEvent(TraceEventType.Information, 0, format, args);
-		}
-
-		[Conditional("TRACE")]
-		public static void TraceWarning(string message)
-		{
-			TraceInternal.TraceEvent(TraceEventType.Warning, 0, message, null);
-		}
-
-		[Conditional("TRACE")]
-		public static void TraceWarning(string format, params object[] args)
-		{
-			TraceInternal.TraceEvent(TraceEventType.Warning, 0, format, args);
-		}
-
-		[Conditional("TRACE")]
-		public static void TraceError(string message)
-		{
-			TraceInternal.TraceEvent(TraceEventType.Error, 0, message, null);
-		}
-
-		[Conditional("TRACE")]
-		public static void TraceError(string format, params object[] args)
-		{
-			TraceInternal.TraceEvent(TraceEventType.Error, 0, format, args);
-		}
-
-		[Conditional("TRACE")]
-		public static void Write(string message)
-		{
-			TraceInternal.Write(message);
-		}
-
-		[Conditional("TRACE")]
-		public static void Write(object value)
-		{
-			TraceInternal.Write(value);
-		}
-
-		[Conditional("TRACE")]
-		public static void Write(string message, string category)
-		{
-			TraceInternal.Write(message, category);
-		}
-
-		[Conditional("TRACE")]
-		public static void Write(object value, string category)
-		{
-			TraceInternal.Write(value, category);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLine(string message)
-		{
-			TraceInternal.WriteLine(message);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLine(object value)
-		{
-			TraceInternal.WriteLine(value);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLine(string message, string category)
-		{
-			TraceInternal.WriteLine(message, category);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLine(object value, string category)
-		{
-			TraceInternal.WriteLine(value, category);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteIf(bool condition, string message)
-		{
-			TraceInternal.WriteIf(condition, message);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteIf(bool condition, object value)
-		{
-			TraceInternal.WriteIf(condition, value);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteIf(bool condition, string message, string category)
-		{
-			TraceInternal.WriteIf(condition, message, category);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteIf(bool condition, object value, string category)
-		{
-			TraceInternal.WriteIf(condition, value, category);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLineIf(bool condition, string message)
-		{
-			TraceInternal.WriteLineIf(condition, message);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLineIf(bool condition, object value)
-		{
-			TraceInternal.WriteLineIf(condition, value);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLineIf(bool condition, string message, string category)
-		{
-			TraceInternal.WriteLineIf(condition, message, category);
-		}
-
-		[Conditional("TRACE")]
-		public static void WriteLineIf(bool condition, object value, string category)
-		{
-			TraceInternal.WriteLineIf(condition, value, category);
+			TraceImpl.Flush();
 		}
 
 		[Conditional("TRACE")]
 		public static void Indent()
 		{
-			TraceInternal.Indent();
+			TraceImpl.Indent();
 		}
 
 		[Conditional("TRACE")]
 		public static void Unindent()
 		{
-			TraceInternal.Unindent();
+			TraceImpl.Unindent();
 		}
 
-		private static volatile CorrelationManager correlationManager;
+		[Conditional("TRACE")]
+		public static void Write(object value)
+		{
+			TraceImpl.Write(value);
+		}
+
+		[Conditional("TRACE")]
+		public static void Write(string message)
+		{
+			TraceImpl.Write(message);
+		}
+
+		[Conditional("TRACE")]
+		public static void Write(object value, string category)
+		{
+			TraceImpl.Write(value, category);
+		}
+
+		[Conditional("TRACE")]
+		public static void Write(string message, string category)
+		{
+			TraceImpl.Write(message, category);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteIf(bool condition, object value)
+		{
+			TraceImpl.WriteIf(condition, value);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteIf(bool condition, string message)
+		{
+			TraceImpl.WriteIf(condition, message);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteIf(bool condition, object value, string category)
+		{
+			TraceImpl.WriteIf(condition, value, category);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteIf(bool condition, string message, string category)
+		{
+			TraceImpl.WriteIf(condition, message, category);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLine(object value)
+		{
+			TraceImpl.WriteLine(value);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLine(string message)
+		{
+			TraceImpl.WriteLine(message);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLine(object value, string category)
+		{
+			TraceImpl.WriteLine(value, category);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLine(string message, string category)
+		{
+			TraceImpl.WriteLine(message, category);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLineIf(bool condition, object value)
+		{
+			TraceImpl.WriteLineIf(condition, value);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLineIf(bool condition, string message)
+		{
+			TraceImpl.WriteLineIf(condition, message);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLineIf(bool condition, object value, string category)
+		{
+			TraceImpl.WriteLineIf(condition, value, category);
+		}
+
+		[Conditional("TRACE")]
+		public static void WriteLineIf(bool condition, string message, string category)
+		{
+			TraceImpl.WriteLineIf(condition, message, category);
+		}
+
+		private static void DoTrace(string kind, Assembly report, string message)
+		{
+			string text = string.Empty;
+			try
+			{
+				text = report.Location;
+			}
+			catch (MethodAccessException)
+			{
+			}
+			TraceImpl.WriteLine(string.Format("{0} {1} : 0 : {2}", text, kind, message));
+		}
+
+		[Conditional("TRACE")]
+		public static void TraceError(string message)
+		{
+			Trace.DoTrace("Error", Assembly.GetCallingAssembly(), message);
+		}
+
+		[Conditional("TRACE")]
+		public static void TraceError(string message, params object[] args)
+		{
+			Trace.DoTrace("Error", Assembly.GetCallingAssembly(), string.Format(message, args));
+		}
+
+		[Conditional("TRACE")]
+		public static void TraceInformation(string message)
+		{
+			Trace.DoTrace("Information", Assembly.GetCallingAssembly(), message);
+		}
+
+		[Conditional("TRACE")]
+		public static void TraceInformation(string message, params object[] args)
+		{
+			Trace.DoTrace("Information", Assembly.GetCallingAssembly(), string.Format(message, args));
+		}
+
+		[Conditional("TRACE")]
+		public static void TraceWarning(string message)
+		{
+			Trace.DoTrace("Warning", Assembly.GetCallingAssembly(), message);
+		}
+
+		[Conditional("TRACE")]
+		public static void TraceWarning(string message, params object[] args)
+		{
+			Trace.DoTrace("Warning", Assembly.GetCallingAssembly(), string.Format(message, args));
+		}
 	}
 }

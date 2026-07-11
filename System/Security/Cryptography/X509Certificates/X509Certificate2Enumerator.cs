@@ -10,24 +10,6 @@ namespace System.Security.Cryptography.X509Certificates
 			this.enumerator = ((IEnumerable)collection).GetEnumerator();
 		}
 
-		public X509Certificate2 Current
-		{
-			get
-			{
-				return (X509Certificate2)this.enumerator.Current;
-			}
-		}
-
-		public bool MoveNext()
-		{
-			return this.enumerator.MoveNext();
-		}
-
-		public void Reset()
-		{
-			this.enumerator.Reset();
-		}
-
 		object IEnumerator.Current
 		{
 			get
@@ -42,6 +24,24 @@ namespace System.Security.Cryptography.X509Certificates
 		}
 
 		void IEnumerator.Reset()
+		{
+			this.enumerator.Reset();
+		}
+
+		public X509Certificate2 Current
+		{
+			get
+			{
+				return (X509Certificate2)this.enumerator.Current;
+			}
+		}
+
+		public bool MoveNext()
+		{
+			return this.enumerator.MoveNext();
+		}
+
+		public void Reset()
 		{
 			this.enumerator.Reset();
 		}

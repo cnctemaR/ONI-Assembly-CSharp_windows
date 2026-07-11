@@ -73,7 +73,7 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void PostDeserialize()
 		{
 			base.PostDeserialize();

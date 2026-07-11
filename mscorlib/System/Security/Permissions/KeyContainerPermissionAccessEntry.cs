@@ -47,7 +47,8 @@ namespace System.Security.Permissions
 			{
 				if ((value & KeyContainerPermissionFlags.AllFlags) != KeyContainerPermissionFlags.NoFlags)
 				{
-					throw new ArgumentException(string.Format(Locale.GetText("Invalid enum {0}"), value), "KeyContainerPermissionFlags");
+					string text = string.Format(Locale.GetText("Invalid enum {0}"), value);
+					throw new ArgumentException(text, "KeyContainerPermissionFlags");
 				}
 				this._flags = value;
 			}

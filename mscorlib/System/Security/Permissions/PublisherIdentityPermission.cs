@@ -19,6 +19,11 @@ namespace System.Security.Permissions
 			this.Certificate = certificate;
 		}
 
+		int IBuiltInPermission.GetTokenIndex()
+		{
+			return 10;
+		}
+
 		public X509Certificate Certificate
 		{
 			get
@@ -112,11 +117,6 @@ namespace System.Security.Permissions
 				}
 			}
 			return null;
-		}
-
-		int IBuiltInPermission.GetTokenIndex()
-		{
-			return 10;
 		}
 
 		private PublisherIdentityPermission Cast(IPermission target)

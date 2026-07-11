@@ -2,7 +2,7 @@
 
 namespace System.Collections.Generic
 {
-	public interface IComparer<in T>
+	public interface IComparer<T>
 	{
 		int Compare(T x, T y);
 	}

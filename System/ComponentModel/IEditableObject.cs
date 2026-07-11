@@ -6,8 +6,8 @@ namespace System.ComponentModel
 	{
 		void BeginEdit();
 
-		void EndEdit();
-
 		void CancelEdit();
+
+		void EndEdit();
 	}
 }

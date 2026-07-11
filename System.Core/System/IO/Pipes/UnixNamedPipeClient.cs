@@ -6,7 +6,7 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	internal class UnixNamedPipeClient : UnixNamedPipe, INamedPipeClient, IPipe
+	internal class UnixNamedPipeClient : UnixNamedPipe, IPipe, INamedPipeClient
 	{
 		public UnixNamedPipeClient(NamedPipeClientStream owner, SafePipeHandle safePipeHandle)
 		{
@@ -16,25 +16,21 @@ namespace System.IO.Pipes
 
 		public UnixNamedPipeClient(NamedPipeClientStream owner, string serverName, string pipeName, PipeAccessRights desiredAccessRights, PipeOptions options, HandleInheritability inheritability)
 		{
-			UnixNamedPipeClient.<>c__DisplayClass1_0 CS$<>8__locals1 = new UnixNamedPipeClient.<>c__DisplayClass1_0();
-			CS$<>8__locals1.desiredAccessRights = desiredAccessRights;
-			CS$<>8__locals1.owner = owner;
-			base..ctor();
-			CS$<>8__locals1.<>4__this = this;
-			this.owner = CS$<>8__locals1.owner;
+			UnixNamedPipeClient <>f__this = this;
+			this.owner = owner;
 			if (serverName != "." && !Dns.GetHostEntry(serverName).AddressList.Contains(IPAddress.Loopback))
 			{
 				throw new NotImplementedException("Unix fifo does not support remote server connection");
 			}
 			string name = Path.Combine("/var/tmp/", pipeName);
 			base.EnsureTargetFile(name);
-			base.RightsToAccess(CS$<>8__locals1.desiredAccessRights);
-			base.ValidateOptions(options, CS$<>8__locals1.owner.TransmissionMode);
+			string text = base.RightsToAccess(desiredAccessRights);
+			base.ValidateOptions(options, owner.TransmissionMode);
 			this.opener = delegate
 			{
-				FileStream fileStream = new FileStream(name, FileMode.Open, CS$<>8__locals1.<>4__this.RightsToFileAccess(CS$<>8__locals1.desiredAccessRights), FileShare.ReadWrite);
-				CS$<>8__locals1.owner.Stream = fileStream;
-				CS$<>8__locals1.<>4__this.handle = new SafePipeHandle(fileStream.SafeFileHandle.DangerousGetHandle(), false);
+				FileStream fileStream = new FileStream(name, FileMode.Open, <>f__this.RightsToFileAccess(desiredAccessRights), FileShare.ReadWrite);
+				owner.Stream = fileStream;
+				<>f__this.handle = new SafePipeHandle(fileStream.Handle, false);
 			};
 		}
 
@@ -73,7 +69,7 @@ namespace System.IO.Pipes
 		{
 			get
 			{
-				return false;
+				return this.is_async;
 			}
 		}
 
@@ -86,6 +82,8 @@ namespace System.IO.Pipes
 		}
 
 		private NamedPipeClientStream owner;
+
+		private bool is_async;
 
 		private SafePipeHandle handle;
 

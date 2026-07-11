@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -14,31 +15,15 @@ namespace System.Xml.Serialization
 			this.elementName = elementName;
 		}
 
-		public string ElementName
-		{
-			get
-			{
-				if (this.elementName != null)
-				{
-					return this.elementName;
-				}
-				return string.Empty;
-			}
-			set
-			{
-				this.elementName = value;
-			}
-		}
-
 		public string DataType
 		{
 			get
 			{
-				if (this.dataType != null)
+				if (this.dataType == null)
 				{
-					return this.dataType;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.dataType;
 			}
 			set
 			{
@@ -46,22 +31,47 @@ namespace System.Xml.Serialization
 			}
 		}
 
+		public string ElementName
+		{
+			get
+			{
+				if (this.elementName == null)
+				{
+					return string.Empty;
+				}
+				return this.elementName;
+			}
+			set
+			{
+				this.elementName = value;
+			}
+		}
+
 		public bool IsNullable
 		{
 			get
 			{
-				return this.nullable;
+				return this.isNullable;
 			}
 			set
 			{
-				this.nullable = value;
+				this.isNullable = value;
 			}
 		}
 
-		private string elementName;
+		internal void AddKeyHash(StringBuilder sb)
+		{
+			sb.Append("SEA ");
+			KeyHelper.AddField(sb, 1, this.elementName);
+			KeyHelper.AddField(sb, 2, this.dataType);
+			KeyHelper.AddField(sb, 3, this.isNullable);
+			sb.Append('|');
+		}
 
 		private string dataType;
 
-		private bool nullable;
+		private string elementName;
+
+		private bool isNullable;
 	}
 }

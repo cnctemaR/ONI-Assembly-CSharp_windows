@@ -4,7 +4,7 @@ using Mono.Unix.Native;
 
 namespace System.IO.Pipes
 {
-	internal class UnixNamedPipeServer : UnixNamedPipe, INamedPipeServer, IPipe
+	internal class UnixNamedPipeServer : UnixNamedPipe, IPipe, INamedPipeServer
 	{
 		public UnixNamedPipeServer(NamedPipeServerStream owner, SafePipeHandle safePipeHandle)
 		{
@@ -15,10 +15,10 @@ namespace System.IO.Pipes
 		{
 			string text = Path.Combine("/var/tmp/", pipeName);
 			base.EnsureTargetFile(text);
-			base.RightsToAccess(rights);
+			string text2 = base.RightsToAccess(rights);
 			base.ValidateOptions(options, owner.TransmissionMode);
 			FileStream fileStream = new FileStream(text, FileMode.Open, base.RightsToFileAccess(rights), FileShare.ReadWrite);
-			this.handle = new SafePipeHandle(fileStream.SafeFileHandle.DangerousGetHandle(), false);
+			this.handle = new SafePipeHandle(fileStream.Handle, false);
 			owner.Stream = fileStream;
 			this.should_close_handle = true;
 		}

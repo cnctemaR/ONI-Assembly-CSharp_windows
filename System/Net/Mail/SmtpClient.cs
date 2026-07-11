@@ -6,19 +6,16 @@ using System.Globalization;
 using System.IO;
 using System.Net.Configuration;
 using System.Net.Mime;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using Mono.Net.Security;
-using Mono.Security.Interface;
 
 namespace System.Net.Mail
 {
-	[Obsolete("SmtpClient and its network of types are poorly designed, we strongly recommend you use https://github.com/jstedfast/MailKit and https://github.com/jstedfast/MimeKit instead")]
-	public class SmtpClient : IDisposable
+	public class SmtpClient
 	{
 		public SmtpClient()
 			: this(null, 0)
@@ -32,17 +29,11 @@ namespace System.Net.Mail
 
 		public SmtpClient(string host, int port)
 		{
-			SmtpSection smtpSection = (SmtpSection)ConfigurationManager.GetSection("system.net/mailSettings/smtp");
+			global::System.Net.Configuration.SmtpSection smtpSection = (global::System.Net.Configuration.SmtpSection)ConfigurationManager.GetSection("system.net/mailSettings/smtp");
 			if (smtpSection != null)
 			{
 				this.host = smtpSection.Network.Host;
 				this.port = smtpSection.Network.Port;
-				this.enableSsl = smtpSection.Network.EnableSsl;
-				this.TargetName = smtpSection.Network.TargetName;
-				if (this.TargetName == null)
-				{
-					this.TargetName = "SMTPSVC/" + ((host != null) ? host : "");
-				}
 				if (smtpSection.Network.UserName != null)
 				{
 					string text = string.Empty;
@@ -52,7 +43,7 @@ namespace System.Net.Mail
 					}
 					this.Credentials = new CCredentialsByHost(smtpSection.Network.UserName, text);
 				}
-				if (!string.IsNullOrEmpty(smtpSection.From))
+				if (smtpSection.From != null)
 				{
 					this.defaultFrom = new MailAddress(smtpSection.From);
 				}
@@ -64,28 +55,25 @@ namespace System.Net.Mail
 			if (port != 0)
 			{
 				this.port = port;
-				return;
-			}
-			if (this.port == 0)
-			{
-				this.port = 25;
 			}
 		}
 
-		[MonoTODO("Client certificates not used")]
-		public X509CertificateCollection ClientCertificates
+		public event SendCompletedEventHandler SendCompleted;
+
+		[global::System.MonoTODO("Client certificates not used")]
+		public global::System.Security.Cryptography.X509Certificates.X509CertificateCollection ClientCertificates
 		{
 			get
 			{
 				if (this.clientCertificates == null)
 				{
-					this.clientCertificates = new X509CertificateCollection();
+					this.clientCertificates = new global::System.Security.Cryptography.X509Certificates.X509CertificateCollection();
 				}
 				return this.clientCertificates;
 			}
 		}
 
-		public string TargetName { get; set; }
+		private string TargetName { get; set; }
 
 		public ICredentialsByHost Credentials
 		{
@@ -176,20 +164,7 @@ namespace System.Net.Mail
 			}
 		}
 
-		public SmtpDeliveryFormat DeliveryFormat
-		{
-			get
-			{
-				return this.deliveryFormat;
-			}
-			set
-			{
-				this.CheckState();
-				this.deliveryFormat = value;
-			}
-		}
-
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public ServicePoint ServicePoint
 		{
 			get
@@ -221,7 +196,7 @@ namespace System.Net.Mail
 			{
 				return false;
 			}
-			[MonoNotSupported("no DefaultCredential support in Mono")]
+			[global::System.MonoNotSupported("no DefaultCredential support in Mono")]
 			set
 			{
 				if (value)
@@ -230,18 +205,6 @@ namespace System.Net.Mail
 				}
 				this.CheckState();
 			}
-		}
-
-		public event SendCompletedEventHandler SendCompleted;
-
-		public void Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		[MonoTODO("Does nothing at the moment.")]
-		protected virtual void Dispose(bool disposing)
-		{
 		}
 
 		private void CheckState()
@@ -254,12 +217,8 @@ namespace System.Net.Mail
 
 		private static string EncodeAddress(MailAddress address)
 		{
-			if (!string.IsNullOrEmpty(address.DisplayName))
-			{
-				string text = MailMessage.EncodeSubjectRFC2047(address.DisplayName, Encoding.UTF8);
-				return string.Concat(new string[] { "\"", text, "\" <", address.Address, ">" });
-			}
-			return address.ToString();
+			string text = global::System.Net.Mime.ContentType.EncodeSubjectRFC2047(address.DisplayName, Encoding.UTF8);
+			return string.Concat(new string[] { "\"", text, "\" <", address.Address, ">" });
 		}
 
 		private static string EncodeAddresses(MailAddressCollection addresses)
@@ -280,39 +239,39 @@ namespace System.Net.Mail
 
 		private string EncodeSubjectRFC2047(MailMessage message)
 		{
-			return MailMessage.EncodeSubjectRFC2047(message.Subject, message.SubjectEncoding);
+			return global::System.Net.Mime.ContentType.EncodeSubjectRFC2047(message.Subject, message.SubjectEncoding);
 		}
 
 		private string EncodeBody(MailMessage message)
 		{
 			string body = message.Body;
 			Encoding bodyEncoding = message.BodyEncoding;
-			TransferEncoding contentTransferEncoding = message.ContentTransferEncoding;
-			if (contentTransferEncoding == TransferEncoding.Base64)
+			global::System.Net.Mime.TransferEncoding contentTransferEncoding = message.ContentTransferEncoding;
+			if (contentTransferEncoding == global::System.Net.Mime.TransferEncoding.Base64)
 			{
 				return Convert.ToBase64String(bodyEncoding.GetBytes(body), Base64FormattingOptions.InsertLineBreaks);
 			}
-			if (contentTransferEncoding == TransferEncoding.SevenBit)
+			if (contentTransferEncoding != global::System.Net.Mime.TransferEncoding.SevenBit)
 			{
-				return body;
+				return this.ToQuotedPrintable(body, bodyEncoding);
 			}
-			return this.ToQuotedPrintable(body, bodyEncoding);
+			return body;
 		}
 
 		private string EncodeBody(AlternateView av)
 		{
 			byte[] array = new byte[av.ContentStream.Length];
 			av.ContentStream.Read(array, 0, array.Length);
-			TransferEncoding transferEncoding = av.TransferEncoding;
-			if (transferEncoding == TransferEncoding.Base64)
+			global::System.Net.Mime.TransferEncoding transferEncoding = av.TransferEncoding;
+			if (transferEncoding == global::System.Net.Mime.TransferEncoding.Base64)
 			{
 				return Convert.ToBase64String(array, Base64FormattingOptions.InsertLineBreaks);
 			}
-			if (transferEncoding == TransferEncoding.SevenBit)
+			if (transferEncoding != global::System.Net.Mime.TransferEncoding.SevenBit)
 			{
-				return Encoding.ASCII.GetString(array);
+				return this.ToQuotedPrintable(array);
 			}
-			return this.ToQuotedPrintable(array);
+			return Encoding.ASCII.GetString(array);
 		}
 
 		private void EndSection(string section)
@@ -338,7 +297,7 @@ namespace System.Net.Mail
 			return status.StatusCode >= (SmtpStatusCode)400;
 		}
 
-		protected void OnSendCompleted(AsyncCompletedEventArgs e)
+		protected void OnSendCompleted(global::System.ComponentModel.AsyncCompletedEventArgs e)
 		{
 			try
 			{
@@ -396,7 +355,9 @@ namespace System.Net.Mail
 			while (!flag);
 			if (num > 0)
 			{
-				return SmtpClient.SmtpResponse.Parse(new ASCIIEncoding().GetString(array, 0, num - 1));
+				Encoding encoding = new ASCIIEncoding();
+				string @string = encoding.GetString(array, 0, num - 1);
+				return SmtpClient.SmtpResponse.Parse(@string);
 			}
 			throw new IOException("Connection closed");
 		}
@@ -408,27 +369,40 @@ namespace System.Net.Mail
 
 		private void ParseExtensions(string extens)
 		{
-			foreach (string text in extens.Split(new char[] { '\n' }))
+			char[] array = new char[] { ' ' };
+			string[] array2 = extens.Split(new char[] { '\n' });
+			foreach (string text in array2)
 			{
 				if (text.Length >= 4)
 				{
 					string text2 = text.Substring(4);
 					if (text2.StartsWith("AUTH ", StringComparison.Ordinal))
 					{
-						string[] array2 = text2.Split(new char[] { ' ' });
-						for (int j = 1; j < array2.Length; j++)
+						string[] array4 = text2.Split(array);
+						for (int j = 1; j < array4.Length; j++)
 						{
-							string text3 = array2[j].Trim();
-							if (!(text3 == "LOGIN"))
+							string text3 = array4[j].Trim();
+							string text4 = text3;
+							switch (text4)
 							{
-								if (text3 == "PLAIN")
-								{
-									this.authMechs |= SmtpClient.AuthMechs.Plain;
-								}
-							}
-							else
-							{
+							case "CRAM-MD5":
+								this.authMechs |= SmtpClient.AuthMechs.CramMD5;
+								break;
+							case "DIGEST-MD5":
+								this.authMechs |= SmtpClient.AuthMechs.DigestMD5;
+								break;
+							case "GSSAPI":
+								this.authMechs |= SmtpClient.AuthMechs.GssAPI;
+								break;
+							case "KERBEROS_V4":
+								this.authMechs |= SmtpClient.AuthMechs.Kerberos4;
+								break;
+							case "LOGIN":
 								this.authMechs |= SmtpClient.AuthMechs.Login;
+								break;
+							case "PLAIN":
+								this.authMechs |= SmtpClient.AuthMechs.Plain;
+								break;
 							}
 						}
 					}
@@ -490,7 +464,7 @@ namespace System.Net.Mail
 			this.CheckCancellation();
 			try
 			{
-				this.client = new TcpClient(this.host, this.port);
+				this.client = new global::System.Net.Sockets.TcpClient(this.host, this.port);
 				this.stream = this.client.GetStream();
 				this.writer = new StreamWriter(this.stream);
 				this.reader = new StreamReader(this.stream);
@@ -532,19 +506,17 @@ namespace System.Net.Mail
 				{
 					from = this.defaultFrom;
 				}
-				string text2 = DateTime.Now.ToString("ddd, dd MMM yyyy HH':'mm':'ss zzz", DateTimeFormatInfo.InvariantInfo);
-				text2 = text2.Remove(text2.Length - 3, 1);
-				this.SendHeader("Date", text2);
-				this.SendHeader("From", SmtpClient.EncodeAddress(from));
-				this.SendHeader("To", SmtpClient.EncodeAddresses(message.To));
+				this.SendHeader("Date", DateTime.Now.ToString("ddd, dd MMM yyyy HH':'mm':'ss zzz", DateTimeFormatInfo.InvariantInfo));
+				this.SendHeader("From", from.ToString());
+				this.SendHeader("To", message.To.ToString());
 				if (message.CC.Count > 0)
 				{
-					this.SendHeader("Cc", SmtpClient.EncodeAddresses(message.CC));
+					this.SendHeader("Cc", message.CC.ToString());
 				}
 				this.SendHeader("Subject", this.EncodeSubjectRFC2047(message));
-				foreach (string text3 in message.Headers.AllKeys)
+				foreach (string text2 in message.Headers.AllKeys)
 				{
-					this.SendHeader(text3, message.Headers[text3]);
+					this.SendHeader(text2, message.Headers[text2]);
 				}
 				this.AddPriorityHeader(message);
 				this.boundaryIndex = 0;
@@ -574,18 +546,10 @@ namespace System.Net.Mail
 			{
 				throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
 			}
-			string text = Dns.GetHostName();
-			try
-			{
-				text = Dns.GetHostEntry(text).HostName;
-			}
-			catch (SocketException)
-			{
-			}
-			smtpResponse = this.SendCommand("EHLO " + text);
+			smtpResponse = this.SendCommand("EHLO " + Dns.GetHostName());
 			if (this.IsError(smtpResponse))
 			{
-				smtpResponse = this.SendCommand("HELO " + text);
+				smtpResponse = this.SendCommand("HELO " + Dns.GetHostName());
 				if (this.IsError(smtpResponse))
 				{
 					throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
@@ -605,10 +569,10 @@ namespace System.Net.Mail
 				this.ResetExtensions();
 				this.writer = new StreamWriter(this.stream);
 				this.reader = new StreamReader(this.stream);
-				smtpResponse = this.SendCommand("EHLO " + text);
+				smtpResponse = this.SendCommand("EHLO " + Dns.GetHostName());
 				if (this.IsError(smtpResponse))
 				{
-					smtpResponse = this.SendCommand("HELO " + text);
+					smtpResponse = this.SendCommand("HELO " + Dns.GetHostName());
 					if (this.IsError(smtpResponse))
 					{
 						throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
@@ -627,16 +591,12 @@ namespace System.Net.Mail
 			{
 				this.Authenticate();
 			}
-			MailAddress mailAddress = message.Sender;
-			if (mailAddress == null)
+			MailAddress from = message.From;
+			if (from == null)
 			{
-				mailAddress = message.From;
+				from = this.defaultFrom;
 			}
-			if (mailAddress == null)
-			{
-				mailAddress = this.defaultFrom;
-			}
-			smtpResponse = this.SendCommand("MAIL FROM:<" + mailAddress.Address + ">");
+			smtpResponse = this.SendCommand("MAIL FROM:<" + from.Address + '>');
 			if (this.IsError(smtpResponse))
 			{
 				throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
@@ -644,7 +604,7 @@ namespace System.Net.Mail
 			List<SmtpFailedRecipientException> list = new List<SmtpFailedRecipientException>();
 			for (int i = 0; i < message.To.Count; i++)
 			{
-				smtpResponse = this.SendCommand("RCPT TO:<" + message.To[i].Address + ">");
+				smtpResponse = this.SendCommand("RCPT TO:<" + message.To[i].Address + '>');
 				if (this.IsError(smtpResponse))
 				{
 					list.Add(new SmtpFailedRecipientException(smtpResponse.StatusCode, message.To[i].Address));
@@ -652,7 +612,7 @@ namespace System.Net.Mail
 			}
 			for (int j = 0; j < message.CC.Count; j++)
 			{
-				smtpResponse = this.SendCommand("RCPT TO:<" + message.CC[j].Address + ">");
+				smtpResponse = this.SendCommand("RCPT TO:<" + message.CC[j].Address + '>');
 				if (this.IsError(smtpResponse))
 				{
 					list.Add(new SmtpFailedRecipientException(smtpResponse.StatusCode, message.CC[j].Address));
@@ -660,7 +620,7 @@ namespace System.Net.Mail
 			}
 			for (int k = 0; k < message.Bcc.Count; k++)
 			{
-				smtpResponse = this.SendCommand("RCPT TO:<" + message.Bcc[k].Address + ">");
+				smtpResponse = this.SendCommand("RCPT TO:<" + message.Bcc[k].Address + '>');
 				if (this.IsError(smtpResponse))
 				{
 					list.Add(new SmtpFailedRecipientException(smtpResponse.StatusCode, message.Bcc[k].Address));
@@ -675,14 +635,9 @@ namespace System.Net.Mail
 			{
 				throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
 			}
-			string text2 = DateTime.Now.ToString("ddd, dd MMM yyyy HH':'mm':'ss zzz", DateTimeFormatInfo.InvariantInfo);
-			text2 = text2.Remove(text2.Length - 3, 1);
-			this.SendHeader("Date", text2);
-			MailAddress from = message.From;
-			if (from == null)
-			{
-				from = this.defaultFrom;
-			}
+			string text = DateTime.Now.ToString("ddd, dd MMM yyyy HH':'mm':'ss zzz", DateTimeFormatInfo.InvariantInfo);
+			text = text.Remove(text.Length - 3, 1);
+			this.SendHeader("Date", text);
 			this.SendHeader("From", SmtpClient.EncodeAddress(from));
 			this.SendHeader("To", SmtpClient.EncodeAddresses(message.To));
 			if (message.CC.Count > 0)
@@ -690,20 +645,20 @@ namespace System.Net.Mail
 				this.SendHeader("Cc", SmtpClient.EncodeAddresses(message.CC));
 			}
 			this.SendHeader("Subject", this.EncodeSubjectRFC2047(message));
-			string text3 = "normal";
+			string text2 = "normal";
 			switch (message.Priority)
 			{
 			case MailPriority.Normal:
-				text3 = "normal";
+				text2 = "normal";
 				break;
 			case MailPriority.Low:
-				text3 = "non-urgent";
+				text2 = "non-urgent";
 				break;
 			case MailPriority.High:
-				text3 = "urgent";
+				text2 = "urgent";
 				break;
 			}
-			this.SendHeader("Priority", text3);
+			this.SendHeader("Priority", text2);
 			if (message.Sender != null)
 			{
 				this.SendHeader("Sender", SmtpClient.EncodeAddress(message.Sender));
@@ -712,9 +667,9 @@ namespace System.Net.Mail
 			{
 				this.SendHeader("Reply-To", SmtpClient.EncodeAddresses(message.ReplyToList));
 			}
-			foreach (string text4 in message.Headers.AllKeys)
+			foreach (string text3 in message.Headers.AllKeys)
 			{
-				this.SendHeader(text4, MailMessage.EncodeSubjectRFC2047(message.Headers[text4], message.HeadersEncoding));
+				this.SendHeader(text3, message.Headers[text3]);
 			}
 			this.AddPriorityHeader(message);
 			this.boundaryIndex = 0;
@@ -741,47 +696,9 @@ namespace System.Net.Mail
 			}
 		}
 
-		public void Send(string from, string recipients, string subject, string body)
+		public void Send(string from, string to, string subject, string body)
 		{
-			this.Send(new MailMessage(from, recipients, subject, body));
-		}
-
-		public Task SendMailAsync(MailMessage message)
-		{
-			TaskCompletionSource<object> tcs = new TaskCompletionSource<object>();
-			SendCompletedEventHandler handler = null;
-			handler = delegate(object s, AsyncCompletedEventArgs e)
-			{
-				SmtpClient.SendMailAsyncCompletedHandler(tcs, e, handler, this);
-			};
-			this.SendCompleted += handler;
-			this.SendAsync(message, tcs);
-			return tcs.Task;
-		}
-
-		public Task SendMailAsync(string from, string recipients, string subject, string body)
-		{
-			return this.SendMailAsync(new MailMessage(from, recipients, subject, body));
-		}
-
-		private static void SendMailAsyncCompletedHandler(TaskCompletionSource<object> source, AsyncCompletedEventArgs e, SendCompletedEventHandler handler, SmtpClient client)
-		{
-			if (source != e.UserState)
-			{
-				return;
-			}
-			client.SendCompleted -= handler;
-			if (e.Error != null)
-			{
-				source.SetException(e.Error);
-				return;
-			}
-			if (e.Cancelled)
-			{
-				source.SetCanceled();
-				return;
-			}
-			source.SetResult(null);
+			this.Send(new MailMessage(from, to, subject, body));
 		}
 
 		private void SendDot()
@@ -804,9 +721,20 @@ namespace System.Net.Mail
 			while ((text = stringReader.ReadLine()) != null)
 			{
 				this.CheckCancellation();
-				if (flag && text.Length > 0 && text[0] == '.')
+				if (flag)
 				{
-					text = "." + text;
+					int i;
+					for (i = 0; i < text.Length; i++)
+					{
+						if (text[i] != '.')
+						{
+							break;
+						}
+					}
+					if (i > 0 && i == text.Length)
+					{
+						text += ".";
+					}
 				}
 				this.writer.Write(text);
 				this.writer.Write("\r\n");
@@ -820,8 +748,8 @@ namespace System.Net.Mail
 			{
 				throw new InvalidOperationException("Another SendAsync operation is in progress");
 			}
-			this.worker = new BackgroundWorker();
-			this.worker.DoWork += delegate(object o, DoWorkEventArgs ea)
+			this.worker = new global::System.ComponentModel.BackgroundWorker();
+			this.worker.DoWork += delegate(object o, global::System.ComponentModel.DoWorkEventArgs ea)
 			{
 				try
 				{
@@ -835,16 +763,16 @@ namespace System.Net.Mail
 				}
 			};
 			this.worker.WorkerSupportsCancellation = true;
-			this.worker.RunWorkerCompleted += delegate(object o, RunWorkerCompletedEventArgs ea)
+			this.worker.RunWorkerCompleted += delegate(object o, global::System.ComponentModel.RunWorkerCompletedEventArgs ea)
 			{
-				this.OnSendCompleted(new AsyncCompletedEventArgs(ea.Error, ea.Cancelled, this.user_async_state));
+				this.OnSendCompleted(new global::System.ComponentModel.AsyncCompletedEventArgs(ea.Error, ea.Cancelled, this.user_async_state));
 			};
 			this.worker.RunWorkerAsync(userToken);
 		}
 
-		public void SendAsync(string from, string recipients, string subject, string body, object userToken)
+		public void SendAsync(string from, string to, string subject, string body, object userToken)
 		{
-			this.SendAsync(new MailMessage(from, recipients, subject, body), userToken);
+			this.SendAsync(new MailMessage(from, to, subject, body), userToken);
 		}
 
 		public void SendAsyncCancel()
@@ -866,7 +794,6 @@ namespace System.Net.Mail
 					this.SendHeader("Priority", "Urgent");
 					this.SendHeader("Importance", "high");
 					this.SendHeader("X-Priority", "1");
-					return;
 				}
 			}
 			else
@@ -880,7 +807,7 @@ namespace System.Net.Mail
 		private void SendSimpleBody(MailMessage message)
 		{
 			this.SendHeader("Content-Type", message.BodyContentType.ToString());
-			if (message.ContentTransferEncoding != TransferEncoding.SevenBit)
+			if (message.ContentTransferEncoding != global::System.Net.Mime.TransferEncoding.SevenBit)
 			{
 				this.SendHeader("Content-Transfer-Encoding", SmtpClient.GetTransferEncodingName(message.ContentTransferEncoding));
 			}
@@ -891,7 +818,7 @@ namespace System.Net.Mail
 		private void SendBodylessSingleAlternate(AlternateView av)
 		{
 			this.SendHeader("Content-Type", av.ContentType.ToString());
-			if (av.TransferEncoding != TransferEncoding.SevenBit)
+			if (av.TransferEncoding != global::System.Net.Mime.TransferEncoding.SevenBit)
 			{
 				this.SendHeader("Content-Transfer-Encoding", SmtpClient.GetTransferEncodingName(av.TransferEncoding));
 			}
@@ -904,20 +831,21 @@ namespace System.Net.Mail
 			if (message.Body == null && message.AlternateViews.Count == 1)
 			{
 				this.SendBodylessSingleAlternate(message.AlternateViews[0]);
-				return;
 			}
-			if (message.AlternateViews.Count > 0)
+			else if (message.AlternateViews.Count > 0)
 			{
 				this.SendBodyWithAlternateViews(message, boundary, attachmentExists);
-				return;
 			}
-			this.SendSimpleBody(message);
+			else
+			{
+				this.SendSimpleBody(message);
+			}
 		}
 
 		private void SendWithAttachments(MailMessage message)
 		{
 			string text = this.GenerateBoundary();
-			this.SendHeader("Content-Type", new ContentType
+			this.SendHeader("Content-Type", new global::System.Net.Mime.ContentType
 			{
 				Boundary = text,
 				MediaType = "multipart/mixed",
@@ -931,7 +859,7 @@ namespace System.Net.Mail
 			}
 			else
 			{
-				attachment = Attachment.CreateAttachmentFromString(message.Body, null, message.BodyEncoding, message.IsBodyHtml ? "text/html" : "text/plain");
+				attachment = Attachment.CreateAttachmentFromString(message.Body, null, message.BodyEncoding, (!message.IsBodyHtml) ? "text/plain" : "text/html");
 				message.Attachments.Insert(0, attachment);
 			}
 			try
@@ -952,7 +880,7 @@ namespace System.Net.Mail
 		{
 			AlternateViewCollection alternateViews = message.AlternateViews;
 			string text = this.GenerateBoundary();
-			ContentType contentType = new ContentType();
+			global::System.Net.Mime.ContentType contentType = new global::System.Net.Mime.ContentType();
 			contentType.Boundary = text;
 			contentType.MediaType = "multipart/alternative";
 			if (!attachmentExists)
@@ -963,7 +891,7 @@ namespace System.Net.Mail
 			AlternateView alternateView = null;
 			if (message.Body != null)
 			{
-				alternateView = AlternateView.CreateAlternateViewFromString(message.Body, message.BodyEncoding, message.IsBodyHtml ? "text/html" : "text/plain");
+				alternateView = AlternateView.CreateAlternateViewFromString(message.Body, message.BodyEncoding, (!message.IsBodyHtml) ? "text/plain" : "text/html");
 				alternateViews.Insert(0, alternateView);
 				this.StartSection(boundary, contentType);
 			}
@@ -975,35 +903,36 @@ namespace System.Net.Mail
 					if (alternateView2.LinkedResources.Count > 0)
 					{
 						text2 = this.GenerateBoundary();
-						ContentType contentType2 = new ContentType("multipart/related");
+						global::System.Net.Mime.ContentType contentType2 = new global::System.Net.Mime.ContentType("multipart/related");
 						contentType2.Boundary = text2;
 						contentType2.Parameters["type"] = alternateView2.ContentType.ToString();
 						this.StartSection(text, contentType2);
-						this.StartSection(text2, alternateView2.ContentType, alternateView2);
+						this.StartSection(text2, alternateView2.ContentType, alternateView2.TransferEncoding);
 					}
 					else
 					{
-						ContentType contentType2 = new ContentType(alternateView2.ContentType.ToString());
-						this.StartSection(text, contentType2, alternateView2);
+						global::System.Net.Mime.ContentType contentType2 = new global::System.Net.Mime.ContentType(alternateView2.ContentType.ToString());
+						this.StartSection(text, contentType2, alternateView2.TransferEncoding);
 					}
-					switch (alternateView2.TransferEncoding)
+					global::System.Net.Mime.TransferEncoding transferEncoding = alternateView2.TransferEncoding;
+					switch (transferEncoding + 1)
 					{
-					case TransferEncoding.Unknown:
-					case TransferEncoding.SevenBit:
+					case global::System.Net.Mime.TransferEncoding.QuotedPrintable:
+					case (global::System.Net.Mime.TransferEncoding)3:
 					{
 						byte[] array = new byte[alternateView2.ContentStream.Length];
 						alternateView2.ContentStream.Read(array, 0, array.Length);
 						this.SendData(Encoding.ASCII.GetString(array));
 						break;
 					}
-					case TransferEncoding.QuotedPrintable:
+					case global::System.Net.Mime.TransferEncoding.Base64:
 					{
 						byte[] array2 = new byte[alternateView2.ContentStream.Length];
 						alternateView2.ContentStream.Read(array2, 0, array2.Length);
 						this.SendData(this.ToQuotedPrintable(array2));
 						break;
 					}
-					case TransferEncoding.Base64:
+					case global::System.Net.Mime.TransferEncoding.SevenBit:
 					{
 						byte[] array = new byte[alternateView2.ContentStream.Length];
 						alternateView2.ContentStream.Read(array, 0, array.Length);
@@ -1036,25 +965,26 @@ namespace System.Net.Mail
 		{
 			foreach (LinkedResource linkedResource in resources)
 			{
-				this.StartSection(boundary, linkedResource.ContentType, linkedResource);
-				switch (linkedResource.TransferEncoding)
+				this.StartSection(boundary, linkedResource.ContentType, linkedResource.TransferEncoding, linkedResource);
+				global::System.Net.Mime.TransferEncoding transferEncoding = linkedResource.TransferEncoding;
+				switch (transferEncoding + 1)
 				{
-				case TransferEncoding.Unknown:
-				case TransferEncoding.SevenBit:
+				case global::System.Net.Mime.TransferEncoding.QuotedPrintable:
+				case (global::System.Net.Mime.TransferEncoding)3:
 				{
 					byte[] array = new byte[linkedResource.ContentStream.Length];
 					linkedResource.ContentStream.Read(array, 0, array.Length);
 					this.SendData(Encoding.ASCII.GetString(array));
 					break;
 				}
-				case TransferEncoding.QuotedPrintable:
+				case global::System.Net.Mime.TransferEncoding.Base64:
 				{
 					byte[] array2 = new byte[linkedResource.ContentStream.Length];
 					linkedResource.ContentStream.Read(array2, 0, array2.Length);
 					this.SendData(this.ToQuotedPrintable(array2));
 					break;
 				}
-				case TransferEncoding.Base64:
+				case global::System.Net.Mime.TransferEncoding.SevenBit:
 				{
 					byte[] array = new byte[linkedResource.ContentStream.Length];
 					linkedResource.ContentStream.Read(array, 0, array.Length);
@@ -1069,7 +999,7 @@ namespace System.Net.Mail
 		{
 			foreach (Attachment attachment in message.Attachments)
 			{
-				ContentType contentType = new ContentType(attachment.ContentType.ToString());
+				global::System.Net.Mime.ContentType contentType = new global::System.Net.Mime.ContentType(attachment.ContentType.ToString());
 				if (attachment.Name != null)
 				{
 					contentType.Name = attachment.Name;
@@ -1079,19 +1009,20 @@ namespace System.Net.Mail
 					}
 					attachment.ContentDisposition.FileName = attachment.Name;
 				}
-				this.StartSection(boundary, contentType, attachment, attachment != body);
+				this.StartSection(boundary, contentType, attachment.TransferEncoding, (attachment != body) ? attachment.ContentDisposition : null);
 				byte[] array = new byte[attachment.ContentStream.Length];
 				attachment.ContentStream.Read(array, 0, array.Length);
-				switch (attachment.TransferEncoding)
+				global::System.Net.Mime.TransferEncoding transferEncoding = attachment.TransferEncoding;
+				switch (transferEncoding + 1)
 				{
-				case TransferEncoding.Unknown:
-				case TransferEncoding.SevenBit:
+				case global::System.Net.Mime.TransferEncoding.QuotedPrintable:
+				case (global::System.Net.Mime.TransferEncoding)3:
 					this.SendData(Encoding.ASCII.GetString(array));
 					break;
-				case TransferEncoding.QuotedPrintable:
+				case global::System.Net.Mime.TransferEncoding.Base64:
 					this.SendData(this.ToQuotedPrintable(array));
 					break;
-				case TransferEncoding.Base64:
+				case global::System.Net.Mime.TransferEncoding.SevenBit:
 					this.SendData(Convert.ToBase64String(array, Base64FormattingOptions.InsertLineBreaks));
 					break;
 				}
@@ -1112,37 +1043,41 @@ namespace System.Net.Mail
 			this.SendData(string.Format("{0}: {1}", name, value));
 		}
 
-		private void StartSection(string section, ContentType sectionContentType)
+		private void StartSection(string section, global::System.Net.Mime.ContentType sectionContentType)
 		{
 			this.SendData(string.Format("--{0}", section));
 			this.SendHeader("content-type", sectionContentType.ToString());
 			this.SendData(string.Empty);
 		}
 
-		private void StartSection(string section, ContentType sectionContentType, AttachmentBase att)
+		private void StartSection(string section, global::System.Net.Mime.ContentType sectionContentType, global::System.Net.Mime.TransferEncoding transferEncoding)
 		{
 			this.SendData(string.Format("--{0}", section));
 			this.SendHeader("content-type", sectionContentType.ToString());
-			this.SendHeader("content-transfer-encoding", SmtpClient.GetTransferEncodingName(att.TransferEncoding));
-			if (!string.IsNullOrEmpty(att.ContentId))
+			this.SendHeader("content-transfer-encoding", SmtpClient.GetTransferEncodingName(transferEncoding));
+			this.SendData(string.Empty);
+		}
+
+		private void StartSection(string section, global::System.Net.Mime.ContentType sectionContentType, global::System.Net.Mime.TransferEncoding transferEncoding, LinkedResource lr)
+		{
+			this.SendData(string.Format("--{0}", section));
+			this.SendHeader("content-type", sectionContentType.ToString());
+			this.SendHeader("content-transfer-encoding", SmtpClient.GetTransferEncodingName(transferEncoding));
+			if (lr.ContentId != null && lr.ContentId.Length > 0)
 			{
-				this.SendHeader("content-ID", "<" + att.ContentId + ">");
+				this.SendHeader("content-ID", "<" + lr.ContentId + ">");
 			}
 			this.SendData(string.Empty);
 		}
 
-		private void StartSection(string section, ContentType sectionContentType, Attachment att, bool sendDisposition)
+		private void StartSection(string section, global::System.Net.Mime.ContentType sectionContentType, global::System.Net.Mime.TransferEncoding transferEncoding, global::System.Net.Mime.ContentDisposition contentDisposition)
 		{
 			this.SendData(string.Format("--{0}", section));
-			if (!string.IsNullOrEmpty(att.ContentId))
-			{
-				this.SendHeader("content-ID", "<" + att.ContentId + ">");
-			}
 			this.SendHeader("content-type", sectionContentType.ToString());
-			this.SendHeader("content-transfer-encoding", SmtpClient.GetTransferEncodingName(att.TransferEncoding));
-			if (sendDisposition)
+			this.SendHeader("content-transfer-encoding", SmtpClient.GetTransferEncodingName(transferEncoding));
+			if (contentDisposition != null)
 			{
-				this.SendHeader("content-disposition", att.ContentDisposition.ToString());
+				this.SendHeader("content-disposition", contentDisposition.ToString());
 			}
 			this.SendData(string.Empty);
 		}
@@ -1170,20 +1105,20 @@ namespace System.Net.Mail
 					stringBuilder.Length = 1;
 					stringBuilder.Append(Convert.ToString(b2, 16).ToUpperInvariant());
 					num2 = 3;
-					goto IL_007C;
+					goto IL_008E;
 				}
 				c = Convert.ToChar(b2);
 				if (c != '\r' && c != '\n')
 				{
 					num2 = 1;
-					goto IL_007C;
+					goto IL_008E;
 				}
 				stringWriter.Write(c);
 				num = 0;
-				IL_00AC:
+				IL_00C7:
 				i++;
 				continue;
-				IL_007C:
+				IL_008E:
 				num += num2;
 				if (num > 75)
 				{
@@ -1193,23 +1128,23 @@ namespace System.Net.Mail
 				if (num2 == 1)
 				{
 					stringWriter.Write(c);
-					goto IL_00AC;
+					goto IL_00C7;
 				}
 				stringWriter.Write(stringBuilder.ToString());
-				goto IL_00AC;
+				goto IL_00C7;
 			}
 			return stringWriter.ToString();
 		}
 
-		private static string GetTransferEncodingName(TransferEncoding encoding)
+		private static string GetTransferEncodingName(global::System.Net.Mime.TransferEncoding encoding)
 		{
 			switch (encoding)
 			{
-			case TransferEncoding.QuotedPrintable:
+			case global::System.Net.Mime.TransferEncoding.QuotedPrintable:
 				return "quoted-printable";
-			case TransferEncoding.Base64:
+			case global::System.Net.Mime.TransferEncoding.Base64:
 				return "base64";
-			case TransferEncoding.SevenBit:
+			case global::System.Net.Mime.TransferEncoding.SevenBit:
 				return "7bit";
 			default:
 				return "unknown";
@@ -1223,13 +1158,10 @@ namespace System.Net.Mail
 			{
 				throw new SmtpException(SmtpStatusCode.GeneralFailure, "Server does not support secure connections.");
 			}
-			MonoTlsProvider providerInternal = Mono.Net.Security.MonoTlsProviderFactory.GetProviderInternal();
-			MonoTlsSettings monoTlsSettings = MonoTlsSettings.CopyDefaultSettings();
-			monoTlsSettings.UseServicePointManagerCallback = new bool?(true);
-			IMonoSslStream monoSslStream = providerInternal.CreateSslStream(this.stream, false, monoTlsSettings);
+			global::System.Net.Security.SslStream sslStream = new global::System.Net.Security.SslStream(this.stream, false, this.callback, null);
 			this.CheckCancellation();
-			monoSslStream.AuthenticateAsClient(this.Host, this.ClientCertificates, SslProtocols.Default, false);
-			this.stream = monoSslStream.AuthenticatedStream;
+			sslStream.AuthenticateAsClient(this.Host, this.ClientCertificates, global::System.Security.Authentication.SslProtocols.Default, false);
+			this.stream = sslStream;
 		}
 
 		private void Authenticate()
@@ -1238,8 +1170,8 @@ namespace System.Net.Mail
 			string text2;
 			if (this.UseDefaultCredentials)
 			{
-				text = CredentialCache.DefaultCredentials.GetCredential(new Uri("smtp://" + this.host), "basic").UserName;
-				text2 = CredentialCache.DefaultCredentials.GetCredential(new Uri("smtp://" + this.host), "basic").Password;
+				text = CredentialCache.DefaultCredentials.GetCredential(new global::System.Uri("smtp://" + this.host), "basic").UserName;
+				text2 = CredentialCache.DefaultCredentials.GetCredential(new global::System.Uri("smtp://" + this.host), "basic").Password;
 			}
 			else
 			{
@@ -1253,47 +1185,23 @@ namespace System.Net.Mail
 			this.Authenticate(text, text2);
 		}
 
-		private void CheckStatus(SmtpClient.SmtpResponse status, int i)
+		private void Authenticate(string Username, string Password)
 		{
-			if (status.StatusCode != (SmtpStatusCode)i)
+			SmtpClient.SmtpResponse smtpResponse = this.SendCommand("AUTH LOGIN");
+			if (smtpResponse.StatusCode != (SmtpStatusCode)334)
 			{
-				throw new SmtpException(status.StatusCode, status.Description);
+				throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
 			}
-		}
-
-		private void ThrowIfError(SmtpClient.SmtpResponse status)
-		{
-			if (this.IsError(status))
+			smtpResponse = this.SendCommand(Convert.ToBase64String(Encoding.ASCII.GetBytes(Username)));
+			if (smtpResponse.StatusCode != (SmtpStatusCode)334)
 			{
-				throw new SmtpException(status.StatusCode, status.Description);
+				throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
 			}
-		}
-
-		private void Authenticate(string user, string password)
-		{
-			if (this.authMechs == SmtpClient.AuthMechs.None)
+			smtpResponse = this.SendCommand(Convert.ToBase64String(Encoding.ASCII.GetBytes(Password)));
+			if (this.IsError(smtpResponse))
 			{
-				return;
+				throw new SmtpException(smtpResponse.StatusCode, smtpResponse.Description);
 			}
-			if ((this.authMechs & SmtpClient.AuthMechs.Login) != SmtpClient.AuthMechs.None)
-			{
-				SmtpClient.SmtpResponse smtpResponse = this.SendCommand("AUTH LOGIN");
-				this.CheckStatus(smtpResponse, 334);
-				smtpResponse = this.SendCommand(Convert.ToBase64String(Encoding.UTF8.GetBytes(user)));
-				this.CheckStatus(smtpResponse, 334);
-				smtpResponse = this.SendCommand(Convert.ToBase64String(Encoding.UTF8.GetBytes(password)));
-				this.CheckStatus(smtpResponse, 235);
-				return;
-			}
-			if ((this.authMechs & SmtpClient.AuthMechs.Plain) != SmtpClient.AuthMechs.None)
-			{
-				string text = string.Format("\0{0}\0{1}", user, password);
-				text = Convert.ToBase64String(Encoding.UTF8.GetBytes(text));
-				SmtpClient.SmtpResponse smtpResponse = this.SendCommand("AUTH PLAIN " + text);
-				this.CheckStatus(smtpResponse, 235);
-				return;
-			}
-			throw new SmtpException("AUTH types PLAIN, LOGIN not supported by the server");
 		}
 
 		private string host;
@@ -1308,13 +1216,11 @@ namespace System.Net.Mail
 
 		private SmtpDeliveryMethod deliveryMethod;
 
-		private SmtpDeliveryFormat deliveryFormat;
-
 		private bool enableSsl;
 
-		private X509CertificateCollection clientCertificates;
+		private global::System.Security.Cryptography.X509Certificates.X509CertificateCollection clientCertificates;
 
-		private TcpClient client;
+		private global::System.Net.Sockets.TcpClient client;
 
 		private Stream stream;
 
@@ -1328,7 +1234,7 @@ namespace System.Net.Mail
 
 		private MailMessage messageInProcess;
 
-		private BackgroundWorker worker;
+		private global::System.ComponentModel.BackgroundWorker worker;
 
 		private object user_async_state;
 
@@ -1336,12 +1242,29 @@ namespace System.Net.Mail
 
 		private Mutex mutex = new Mutex();
 
+		private global::System.Net.Security.RemoteCertificateValidationCallback callback = delegate(object sender, X509Certificate certificate, global::System.Security.Cryptography.X509Certificates.X509Chain chain, global::System.Net.Security.SslPolicyErrors sslPolicyErrors)
+		{
+			if (ServicePointManager.ServerCertificateValidationCallback != null)
+			{
+				return ServicePointManager.ServerCertificateValidationCallback(sender, certificate, chain, sslPolicyErrors);
+			}
+			if (sslPolicyErrors != global::System.Net.Security.SslPolicyErrors.None)
+			{
+				throw new InvalidOperationException("SSL authentication error: " + sslPolicyErrors);
+			}
+			return true;
+		};
+
 		[Flags]
 		private enum AuthMechs
 		{
 			None = 0,
-			Login = 1,
-			Plain = 2
+			CramMD5 = 1,
+			DigestMD5 = 2,
+			GssAPI = 4,
+			Kerberos4 = 8,
+			Login = 16,
+			Plain = 32
 		}
 
 		private class CancellationException : Exception

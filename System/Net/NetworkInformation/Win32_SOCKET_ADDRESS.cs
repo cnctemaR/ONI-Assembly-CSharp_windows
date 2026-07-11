@@ -22,10 +22,10 @@ namespace System.Net.NetworkInformation
 			return new IPAddress(array);
 		}
 
+		private const int AF_INET6 = 23;
+
 		public IntPtr Sockaddr;
 
 		public int SockaddrLength;
-
-		private const int AF_INET6 = 23;
 	}
 }

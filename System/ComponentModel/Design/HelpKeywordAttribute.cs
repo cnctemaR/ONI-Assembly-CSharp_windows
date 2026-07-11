@@ -12,10 +12,6 @@ namespace System.ComponentModel.Design
 
 		public HelpKeywordAttribute(string keyword)
 		{
-			if (keyword == null)
-			{
-				throw new ArgumentNullException("keyword");
-			}
 			this.contextKeyword = keyword;
 		}
 
@@ -28,6 +24,26 @@ namespace System.ComponentModel.Design
 			this.contextKeyword = t.FullName;
 		}
 
+		public override bool Equals(object other)
+		{
+			if (other == null)
+			{
+				return false;
+			}
+			HelpKeywordAttribute helpKeywordAttribute = other as HelpKeywordAttribute;
+			return helpKeywordAttribute != null && helpKeywordAttribute.contextKeyword == this.contextKeyword;
+		}
+
+		public override int GetHashCode()
+		{
+			return (this.contextKeyword == null) ? 0 : this.contextKeyword.GetHashCode();
+		}
+
+		public override bool IsDefaultAttribute()
+		{
+			return this.contextKeyword == null;
+		}
+
 		public string HelpKeyword
 		{
 			get
@@ -36,22 +52,7 @@ namespace System.ComponentModel.Design
 			}
 		}
 
-		public override bool Equals(object obj)
-		{
-			return obj == this || (obj != null && obj is HelpKeywordAttribute && ((HelpKeywordAttribute)obj).HelpKeyword == this.HelpKeyword);
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		public override bool IsDefaultAttribute()
-		{
-			return this.Equals(HelpKeywordAttribute.Default);
-		}
-
-		public static readonly HelpKeywordAttribute Default = new HelpKeywordAttribute();
+		public static readonly HelpKeywordAttribute Default;
 
 		private string contextKeyword;
 	}

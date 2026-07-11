@@ -2,11 +2,9 @@
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class DateTimeConverter : TypeConverter
 	{
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
@@ -16,38 +14,30 @@ namespace System.ComponentModel
 
 		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
 		{
-			return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
+			return destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor) || base.CanConvertTo(context, destinationType);
 		}
 
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
 			if (value is string)
 			{
-				string text = ((string)value).Trim();
-				if (text.Length == 0)
-				{
-					return DateTime.MinValue;
-				}
+				string text = (string)value;
 				try
 				{
-					DateTimeFormatInfo dateTimeFormatInfo = null;
-					if (culture != null)
+					if (text != null && text.Trim().Length == 0)
 					{
-						dateTimeFormatInfo = (DateTimeFormatInfo)culture.GetFormat(typeof(DateTimeFormatInfo));
+						return DateTime.MinValue;
 					}
-					if (dateTimeFormatInfo != null)
+					if (culture == null)
 					{
-						return DateTime.Parse(text, dateTimeFormatInfo);
+						return DateTime.Parse(text);
 					}
-					return DateTime.Parse(text, culture);
+					DateTimeFormatInfo dateTimeFormatInfo = (DateTimeFormatInfo)culture.GetFormat(typeof(DateTimeFormatInfo));
+					return DateTime.Parse(text, dateTimeFormatInfo);
 				}
-				catch (FormatException ex)
+				catch
 				{
-					throw new FormatException(global::SR.GetString("{0} is not a valid value for {1}.", new object[]
-					{
-						(string)value,
-						"DateTime"
-					}), ex);
+					throw new FormatException(text + " is not a valid DateTime value.");
 				}
 			}
 			return base.ConvertFrom(context, culture, value);
@@ -55,64 +45,44 @@ namespace System.ComponentModel
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (!(destinationType == typeof(string)) || !(value is DateTime))
+			if (value is DateTime)
 			{
-				if (destinationType == typeof(InstanceDescriptor) && value is DateTime)
+				DateTime dateTime = (DateTime)value;
+				if (destinationType == typeof(string))
 				{
-					DateTime dateTime = (DateTime)value;
-					if (dateTime.Ticks == 0L)
+					if (culture == null)
 					{
-						ConstructorInfo constructor = typeof(DateTime).GetConstructor(new Type[] { typeof(long) });
-						if (constructor != null)
+						culture = CultureInfo.CurrentCulture;
+					}
+					if (dateTime == DateTime.MinValue)
+					{
+						return string.Empty;
+					}
+					DateTimeFormatInfo dateTimeFormatInfo = (DateTimeFormatInfo)culture.GetFormat(typeof(DateTimeFormatInfo));
+					if (culture == CultureInfo.InvariantCulture)
+					{
+						if (dateTime.Equals(dateTime.Date))
 						{
-							return new InstanceDescriptor(constructor, new object[] { dateTime.Ticks });
+							return dateTime.ToString("yyyy-MM-dd", culture);
 						}
+						return dateTime.ToString(culture);
 					}
-					ConstructorInfo constructor2 = typeof(DateTime).GetConstructor(new Type[]
+					else
 					{
-						typeof(int),
-						typeof(int),
-						typeof(int),
-						typeof(int),
-						typeof(int),
-						typeof(int),
-						typeof(int)
-					});
-					if (constructor2 != null)
-					{
-						return new InstanceDescriptor(constructor2, new object[] { dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond });
+						if (dateTime == dateTime.Date)
+						{
+							return dateTime.ToString(dateTimeFormatInfo.ShortDatePattern, culture);
+						}
+						return dateTime.ToString(dateTimeFormatInfo.ShortDatePattern + " " + dateTimeFormatInfo.ShortTimePattern, culture);
 					}
 				}
-				return base.ConvertTo(context, culture, value, destinationType);
-			}
-			DateTime dateTime2 = (DateTime)value;
-			if (dateTime2 == DateTime.MinValue)
-			{
-				return string.Empty;
-			}
-			if (culture == null)
-			{
-				culture = CultureInfo.CurrentCulture;
-			}
-			DateTimeFormatInfo dateTimeFormatInfo = (DateTimeFormatInfo)culture.GetFormat(typeof(DateTimeFormatInfo));
-			if (culture != CultureInfo.InvariantCulture)
-			{
-				string text;
-				if (dateTime2.TimeOfDay.TotalSeconds == 0.0)
+				else if (destinationType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor))
 				{
-					text = dateTimeFormatInfo.ShortDatePattern;
+					ConstructorInfo constructor = typeof(DateTime).GetConstructor(new Type[] { typeof(long) });
+					return new global::System.ComponentModel.Design.Serialization.InstanceDescriptor(constructor, new object[] { dateTime.Ticks });
 				}
-				else
-				{
-					text = dateTimeFormatInfo.ShortDatePattern + " " + dateTimeFormatInfo.ShortTimePattern;
-				}
-				return dateTime2.ToString(text, CultureInfo.CurrentCulture);
 			}
-			if (dateTime2.TimeOfDay.TotalSeconds == 0.0)
-			{
-				return dateTime2.ToString("yyyy-MM-dd", culture);
-			}
-			return dateTime2.ToString(culture);
+			return base.ConvertTo(context, culture, value, destinationType);
 		}
 	}
 }

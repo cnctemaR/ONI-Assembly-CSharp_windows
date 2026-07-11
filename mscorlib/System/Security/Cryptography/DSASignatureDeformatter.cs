@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
@@ -9,55 +8,48 @@ namespace System.Security.Cryptography
 	{
 		public DSASignatureDeformatter()
 		{
-			this._oid = CryptoConfig.MapNameToOID("SHA1", OidGroup.HashAlgorithm);
 		}
 
 		public DSASignatureDeformatter(AsymmetricAlgorithm key)
-			: this()
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			this._dsaKey = (DSA)key;
-		}
-
-		public override void SetKey(AsymmetricAlgorithm key)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			this._dsaKey = (DSA)key;
+			this.SetKey(key);
 		}
 
 		public override void SetHashAlgorithm(string strName)
 		{
-			if (CryptoConfig.MapNameToOID(strName, OidGroup.HashAlgorithm) != this._oid)
+			if (strName == null)
 			{
-				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("This operation is not supported for this class."));
+				throw new ArgumentNullException("strName");
 			}
+			try
+			{
+				SHA1.Create(strName);
+			}
+			catch (InvalidCastException)
+			{
+				throw new CryptographicUnexpectedOperationException(Locale.GetText("DSA requires SHA1"));
+			}
+		}
+
+		public override void SetKey(AsymmetricAlgorithm key)
+		{
+			if (key != null)
+			{
+				this.dsa = (DSA)key;
+				return;
+			}
+			throw new ArgumentNullException("key");
 		}
 
 		public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature)
 		{
-			if (rgbHash == null)
+			if (this.dsa == null)
 			{
-				throw new ArgumentNullException("rgbHash");
+				throw new CryptographicUnexpectedOperationException(Locale.GetText("missing key"));
 			}
-			if (rgbSignature == null)
-			{
-				throw new ArgumentNullException("rgbSignature");
-			}
-			if (this._dsaKey == null)
-			{
-				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("No asymmetric key object has been associated with this formatter object."));
-			}
-			return this._dsaKey.VerifySignature(rgbHash, rgbSignature);
+			return this.dsa.VerifySignature(rgbHash, rgbSignature);
 		}
 
-		private DSA _dsaKey;
-
-		private string _oid;
+		private DSA dsa;
 	}
 }

@@ -3,27 +3,23 @@ using System.Runtime.InteropServices;
 
 namespace System.Resources
 {
-	[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly)]
 	public sealed class SatelliteContractVersionAttribute : Attribute
 	{
 		public SatelliteContractVersionAttribute(string version)
 		{
-			if (version == null)
-			{
-				throw new ArgumentNullException("version");
-			}
-			this._version = version;
+			this.ver = new Version(version);
 		}
 
 		public string Version
 		{
 			get
 			{
-				return this._version;
+				return this.ver.ToString();
 			}
 		}
 
-		private string _version;
+		private Version ver;
 	}
 }

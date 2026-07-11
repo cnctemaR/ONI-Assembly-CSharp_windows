@@ -5,14 +5,14 @@ namespace System.Net
 {
 	public class FtpWebResponse : WebResponse
 	{
-		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, bool keepAlive)
+		internal FtpWebResponse(FtpWebRequest request, global::System.Uri uri, string method, bool keepAlive)
 		{
 			this.request = request;
 			this.uri = uri;
 			this.method = method;
 		}
 
-		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, FtpStatusCode statusCode, string statusDescription)
+		internal FtpWebResponse(FtpWebRequest request, global::System.Uri uri, string method, FtpStatusCode statusCode, string statusDescription)
 		{
 			this.request = request;
 			this.uri = uri;
@@ -21,7 +21,7 @@ namespace System.Net
 			this.statusDescription = statusDescription;
 		}
 
-		internal FtpWebResponse(FtpWebRequest request, Uri uri, string method, FtpStatus status)
+		internal FtpWebResponse(FtpWebRequest request, global::System.Uri uri, string method, FtpStatus status)
 			: this(request, uri, method, status.StatusCode, status.StatusDescription)
 		{
 		}
@@ -42,7 +42,7 @@ namespace System.Net
 			}
 		}
 
-		public override Uri ResponseUri
+		public override global::System.Uri ResponseUri
 		{
 			get
 			{
@@ -104,17 +104,9 @@ namespace System.Net
 			{
 				return this.statusCode;
 			}
-			internal set
+			private set
 			{
 				this.statusCode = value;
-			}
-		}
-
-		public override bool SupportsHeaders
-		{
-			get
-			{
-				return true;
 			}
 		}
 
@@ -124,7 +116,7 @@ namespace System.Net
 			{
 				return this.statusDescription;
 			}
-			internal set
+			private set
 			{
 				this.statusDescription = value;
 			}
@@ -194,7 +186,7 @@ namespace System.Net
 
 		private Stream stream;
 
-		private Uri uri;
+		private global::System.Uri uri;
 
 		private FtpStatusCode statusCode;
 

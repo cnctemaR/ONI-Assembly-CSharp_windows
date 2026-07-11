@@ -102,7 +102,7 @@ namespace KSerialization
 					}
 					else
 					{
-						if (!(deserializationInfo.property != null))
+						if (deserializationInfo.property == null)
 						{
 							throw new Exception("????");
 						}

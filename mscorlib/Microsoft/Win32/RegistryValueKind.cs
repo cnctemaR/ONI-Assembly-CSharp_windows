@@ -12,7 +12,6 @@ namespace Microsoft.Win32
 		Binary,
 		DWord,
 		MultiString = 7,
-		QWord = 11,
-		None = -1
+		QWord = 11
 	}
 }

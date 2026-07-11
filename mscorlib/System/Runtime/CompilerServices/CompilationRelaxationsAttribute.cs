@@ -10,22 +10,22 @@ namespace System.Runtime.CompilerServices
 	{
 		public CompilationRelaxationsAttribute(int relaxations)
 		{
-			this.m_relaxations = relaxations;
+			this.relax = relaxations;
 		}
 
 		public CompilationRelaxationsAttribute(CompilationRelaxations relaxations)
 		{
-			this.m_relaxations = (int)relaxations;
+			this.relax = (int)relaxations;
 		}
 
 		public int CompilationRelaxations
 		{
 			get
 			{
-				return this.m_relaxations;
+				return this.relax;
 			}
 		}
 
-		private int m_relaxations;
+		private int relax;
 	}
 }

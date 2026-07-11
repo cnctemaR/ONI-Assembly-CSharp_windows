@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Xml.Schema;
 
 namespace System.Xml.Serialization
@@ -26,55 +27,15 @@ namespace System.Xml.Serialization
 			this.type = type;
 		}
 
-		public Type Type
-		{
-			get
-			{
-				return this.type;
-			}
-			set
-			{
-				this.type = value;
-			}
-		}
-
-		public string ElementName
-		{
-			get
-			{
-				if (this.elementName != null)
-				{
-					return this.elementName;
-				}
-				return string.Empty;
-			}
-			set
-			{
-				this.elementName = value;
-			}
-		}
-
-		public string Namespace
-		{
-			get
-			{
-				return this.ns;
-			}
-			set
-			{
-				this.ns = value;
-			}
-		}
-
 		public string DataType
 		{
 			get
 			{
-				if (this.dataType != null)
+				if (this.dataType == null)
 				{
-					return this.dataType;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.dataType;
 			}
 			set
 			{
@@ -82,24 +43,19 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public bool IsNullable
+		public string ElementName
 		{
 			get
 			{
-				return this.nullable;
+				if (this.elementName == null)
+				{
+					return string.Empty;
+				}
+				return this.elementName;
 			}
 			set
 			{
-				this.nullable = value;
-				this.nullableSpecified = true;
-			}
-		}
-
-		internal bool IsNullableSpecified
-		{
-			get
-			{
-				return this.nullableSpecified;
+				this.elementName = value;
 			}
 		}
 
@@ -115,6 +71,40 @@ namespace System.Xml.Serialization
 			}
 		}
 
+		public string Namespace
+		{
+			get
+			{
+				return this.ns;
+			}
+			set
+			{
+				this.ns = value;
+			}
+		}
+
+		public bool IsNullable
+		{
+			get
+			{
+				return this.isNullable;
+			}
+			set
+			{
+				this.isNullableSpecified = true;
+				this.isNullable = value;
+			}
+		}
+
+		internal bool IsNullableSpecified
+		{
+			get
+			{
+				return this.isNullableSpecified;
+			}
+		}
+
+		[MonoTODO]
 		public int Order
 		{
 			get
@@ -123,27 +113,47 @@ namespace System.Xml.Serialization
 			}
 			set
 			{
-				if (value < 0)
-				{
-					throw new ArgumentException(Res.GetString("Negative values are prohibited."), "Order");
-				}
 				this.order = value;
 			}
 		}
 
-		private string elementName;
+		public Type Type
+		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.type = value;
+			}
+		}
 
-		private Type type;
-
-		private string ns;
+		internal void AddKeyHash(StringBuilder sb)
+		{
+			sb.Append("XEA ");
+			KeyHelper.AddField(sb, 1, this.ns);
+			KeyHelper.AddField(sb, 2, this.elementName);
+			KeyHelper.AddField(sb, 3, this.form.ToString(), XmlSchemaForm.None.ToString());
+			KeyHelper.AddField(sb, 4, this.dataType);
+			KeyHelper.AddField(sb, 5, this.type);
+			KeyHelper.AddField(sb, 6, this.isNullable);
+			sb.Append('|');
+		}
 
 		private string dataType;
 
-		private bool nullable;
-
-		private bool nullableSpecified;
+		private string elementName;
 
 		private XmlSchemaForm form;
+
+		private string ns;
+
+		private bool isNullable;
+
+		private bool isNullableSpecified;
+
+		private Type type;
 
 		private int order = -1;
 	}

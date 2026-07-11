@@ -8,9 +8,13 @@ using System.Threading;
 
 namespace System.CodeDom.Compiler
 {
-	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
-	public static class Executor
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	public sealed class Executor
 	{
+		private Executor()
+		{
+		}
+
 		public static void ExecWait(string cmd, TempFileCollection tempFiles)
 		{
 			string text = null;
@@ -18,8 +22,8 @@ namespace System.CodeDom.Compiler
 			Executor.ExecWaitWithCapture(cmd, Environment.CurrentDirectory, tempFiles, ref text, ref text2);
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
-		[SecurityPermission(SecurityAction.Assert, ControlPrincipal = true)]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"ControlPrincipal\"/>\n</PermissionSet>\n")]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static int ExecWaitWithCapture(IntPtr userToken, string cmd, string currentDir, TempFileCollection tempFiles, ref string outputName, ref string errorName)
 		{
 			int num;
@@ -35,13 +39,13 @@ namespace System.CodeDom.Compiler
 			return Executor.ExecWaitWithCapture(userToken, cmd, Environment.CurrentDirectory, tempFiles, ref outputName, ref errorName);
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static int ExecWaitWithCapture(string cmd, string currentDir, TempFileCollection tempFiles, ref string outputName, ref string errorName)
 		{
 			return Executor.InternalExecWaitWithCapture(cmd, currentDir, tempFiles, ref outputName, ref errorName);
 		}
 
-		[SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public static int ExecWaitWithCapture(string cmd, TempFileCollection tempFiles, ref string outputName, ref string errorName)
 		{
 			return Executor.InternalExecWaitWithCapture(cmd, Environment.CurrentDirectory, tempFiles, ref outputName, ref errorName);
@@ -62,7 +66,7 @@ namespace System.CodeDom.Compiler
 				errorName = tempFiles.AddExtension("err");
 			}
 			int num = -1;
-			Process process = new Process();
+			global::System.Diagnostics.Process process = new global::System.Diagnostics.Process();
 			process.StartInfo.FileName = cmd;
 			process.StartInfo.CreateNoWindow = true;
 			process.StartInfo.UseShellExecute = false;
@@ -73,7 +77,8 @@ namespace System.CodeDom.Compiler
 			{
 				process.Start();
 				Executor.ProcessResultReader processResultReader = new Executor.ProcessResultReader(process.StandardOutput, outputName);
-				Thread thread = new Thread(new ThreadStart(new Executor.ProcessResultReader(process.StandardError, errorName).Read));
+				Executor.ProcessResultReader processResultReader2 = new Executor.ProcessResultReader(process.StandardError, errorName);
+				Thread thread = new Thread(new ThreadStart(processResultReader2.Read));
 				thread.Start();
 				processResultReader.Read();
 				thread.Join();

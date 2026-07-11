@@ -1093,6 +1093,8 @@ namespace STRINGS
 				public static LocString BLADDER_FULL = "Bladder isn't full";
 
 				public static LocString BLADDER_NOT_FULL = "Bladder too full";
+
+				public static LocString CURRENTLY_PEEING = "Currently Peeing";
 			}
 		}
 

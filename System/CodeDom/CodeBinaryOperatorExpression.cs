@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeBinaryOperatorExpression : CodeExpression
 	{
@@ -11,15 +14,56 @@ namespace System.CodeDom
 
 		public CodeBinaryOperatorExpression(CodeExpression left, CodeBinaryOperatorType op, CodeExpression right)
 		{
-			this.Right = right;
-			this.Operator = op;
-			this.Left = left;
+			this.left = left;
+			this.op = op;
+			this.right = right;
 		}
 
-		public CodeExpression Right { get; set; }
+		public CodeExpression Left
+		{
+			get
+			{
+				return this.left;
+			}
+			set
+			{
+				this.left = value;
+			}
+		}
 
-		public CodeExpression Left { get; set; }
+		public CodeBinaryOperatorType Operator
+		{
+			get
+			{
+				return this.op;
+			}
+			set
+			{
+				this.op = value;
+			}
+		}
 
-		public CodeBinaryOperatorType Operator { get; set; }
+		public CodeExpression Right
+		{
+			get
+			{
+				return this.right;
+			}
+			set
+			{
+				this.right = value;
+			}
+		}
+
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeExpression left;
+
+		private CodeExpression right;
+
+		private CodeBinaryOperatorType op;
 	}
 }

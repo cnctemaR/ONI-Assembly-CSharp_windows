@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeCatchClauseCollection : CollectionBase
 	{
@@ -10,12 +13,12 @@ namespace System.CodeDom
 		{
 		}
 
-		public CodeCatchClauseCollection(CodeCatchClauseCollection value)
+		public CodeCatchClauseCollection(CodeCatchClause[] value)
 		{
 			this.AddRange(value);
 		}
 
-		public CodeCatchClauseCollection(CodeCatchClause[] value)
+		public CodeCatchClauseCollection(CodeCatchClauseCollection value)
 		{
 			this.AddRange(value);
 		}

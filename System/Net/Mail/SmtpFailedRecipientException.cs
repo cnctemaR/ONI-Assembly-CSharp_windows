@@ -15,14 +15,14 @@ namespace System.Net.Mail
 		{
 		}
 
-		protected SmtpFailedRecipientException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		protected SmtpFailedRecipientException(SerializationInfo serializationInfo, StreamingContext streamingContext)
+			: base(serializationInfo, streamingContext)
 		{
-			if (info == null)
+			if (serializationInfo == null)
 			{
-				throw new ArgumentNullException("info");
+				throw new ArgumentNullException("serializationInfo");
 			}
-			this.failedRecipient = info.GetString("failedRecipient");
+			this.failedRecipient = serializationInfo.GetString("failedRecipient");
 		}
 
 		public SmtpFailedRecipientException(SmtpStatusCode statusCode, string failedRecipient)
@@ -48,6 +48,11 @@ namespace System.Net.Mail
 			this.failedRecipient = failedRecipient;
 		}
 
+		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			this.GetObjectData(serializationInfo, streamingContext);
+		}
+
 		public string FailedRecipient
 		{
 			get
@@ -64,11 +69,6 @@ namespace System.Net.Mail
 			}
 			base.GetObjectData(serializationInfo, streamingContext);
 			serializationInfo.AddValue("failedRecipient", this.failedRecipient);
-		}
-
-		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
-		{
-			this.GetObjectData(serializationInfo, streamingContext);
 		}
 
 		private string failedRecipient;

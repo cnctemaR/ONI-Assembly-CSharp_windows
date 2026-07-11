@@ -19,13 +19,14 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 
 		protected override void ProcessAsSsl3()
 		{
-			SslHandshakeHash sslHandshakeHash = new SslHandshakeHash(base.Context.MasterSecret);
+			HashAlgorithm hashAlgorithm = new SslHandshakeHash(base.Context.MasterSecret);
 			byte[] array = base.Context.HandshakeMessages.ToArray();
-			sslHandshakeHash.TransformBlock(array, 0, array.Length, array, 0);
-			sslHandshakeHash.TransformBlock(TlsServerFinished.Ssl3Marker, 0, TlsServerFinished.Ssl3Marker.Length, TlsServerFinished.Ssl3Marker, 0);
-			sslHandshakeHash.TransformFinalBlock(CipherSuite.EmptyArray, 0, 0);
+			hashAlgorithm.TransformBlock(array, 0, array.Length, array, 0);
+			hashAlgorithm.TransformBlock(TlsServerFinished.Ssl3Marker, 0, TlsServerFinished.Ssl3Marker.Length, TlsServerFinished.Ssl3Marker, 0);
+			hashAlgorithm.TransformFinalBlock(CipherSuite.EmptyArray, 0, 0);
 			byte[] array2 = base.ReadBytes((int)this.Length);
-			if (!HandshakeMessage.Compare(sslHandshakeHash.Hash, array2))
+			byte[] hash = hashAlgorithm.Hash;
+			if (!HandshakeMessage.Compare(hash, array2))
 			{
 				throw new TlsException(AlertDescription.InsuficientSecurity, "Invalid ServerFinished message received.");
 			}
@@ -37,7 +38,8 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			HashAlgorithm hashAlgorithm = new MD5SHA1();
 			byte[] array2 = base.Context.HandshakeMessages.ToArray();
 			byte[] array3 = hashAlgorithm.ComputeHash(array2, 0, array2.Length);
-			if (!HandshakeMessage.Compare(base.Context.Current.Cipher.PRF(base.Context.MasterSecret, "server finished", array3, 12), array))
+			byte[] array4 = base.Context.Current.Cipher.PRF(base.Context.MasterSecret, "server finished", array3, 12);
+			if (!HandshakeMessage.Compare(array4, array))
 			{
 				throw new TlsException("Invalid ServerFinished message received.");
 			}

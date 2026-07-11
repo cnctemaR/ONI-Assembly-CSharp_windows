@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class DesignerEventArgs : EventArgs
 	{
 		public DesignerEventArgs(IDesignerHost host)
@@ -21,6 +17,6 @@ namespace System.ComponentModel.Design
 			}
 		}
 
-		private readonly IDesignerHost host;
+		private IDesignerHost host;
 	}
 }

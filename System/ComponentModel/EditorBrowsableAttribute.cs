@@ -5,39 +5,34 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Interface | AttributeTargets.Delegate)]
 	public sealed class EditorBrowsableAttribute : Attribute
 	{
-		public EditorBrowsableAttribute(EditorBrowsableState state)
+		public EditorBrowsableAttribute()
 		{
-			this.browsableState = state;
+			this.state = EditorBrowsableState.Always;
 		}
 
-		public EditorBrowsableAttribute()
-			: this(EditorBrowsableState.Always)
+		public EditorBrowsableAttribute(EditorBrowsableState state)
 		{
+			this.state = state;
 		}
 
 		public EditorBrowsableState State
 		{
 			get
 			{
-				return this.browsableState;
+				return this.state;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			EditorBrowsableAttribute editorBrowsableAttribute = obj as EditorBrowsableAttribute;
-			return editorBrowsableAttribute != null && editorBrowsableAttribute.browsableState == this.browsableState;
+			return obj is EditorBrowsableAttribute && (obj == this || ((EditorBrowsableAttribute)obj).State == this.state);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.state.GetHashCode();
 		}
 
-		private EditorBrowsableState browsableState;
+		private EditorBrowsableState state;
 	}
 }

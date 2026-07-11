@@ -2,28 +2,28 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false)]
 	public sealed class ClassInterfaceAttribute : Attribute
 	{
-		public ClassInterfaceAttribute(ClassInterfaceType classInterfaceType)
-		{
-			this._val = classInterfaceType;
-		}
-
 		public ClassInterfaceAttribute(short classInterfaceType)
 		{
-			this._val = (ClassInterfaceType)classInterfaceType;
+			this.ciType = (ClassInterfaceType)classInterfaceType;
+		}
+
+		public ClassInterfaceAttribute(ClassInterfaceType classInterfaceType)
+		{
+			this.ciType = classInterfaceType;
 		}
 
 		public ClassInterfaceType Value
 		{
 			get
 			{
-				return this._val;
+				return this.ciType;
 			}
 		}
 
-		internal ClassInterfaceType _val;
+		private ClassInterfaceType ciType;
 	}
 }

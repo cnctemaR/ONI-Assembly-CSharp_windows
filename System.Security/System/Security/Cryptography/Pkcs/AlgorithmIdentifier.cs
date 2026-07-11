@@ -10,15 +10,15 @@ namespace System.Security.Cryptography.Pkcs
 			this._params = new byte[0];
 		}
 
-		public AlgorithmIdentifier(Oid oid)
+		public AlgorithmIdentifier(Oid algorithm)
 		{
-			this._oid = oid;
+			this._oid = algorithm;
 			this._params = new byte[0];
 		}
 
-		public AlgorithmIdentifier(Oid oid, int keyLength)
+		public AlgorithmIdentifier(Oid algorithm, int keyLength)
 		{
-			this._oid = oid;
+			this._oid = algorithm;
 			this._length = keyLength;
 			this._params = new byte[0];
 		}

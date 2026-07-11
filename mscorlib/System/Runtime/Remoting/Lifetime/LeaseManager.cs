@@ -50,10 +50,7 @@ namespace System.Runtime.Remoting.Lifetime
 		{
 			Timer timer = this._timer;
 			this._timer = null;
-			if (timer != null)
-			{
-				timer.Dispose();
-			}
+			timer.Dispose();
 		}
 
 		public void ManageLeases(object state)

@@ -1,115 +1,72 @@
 ﻿using System;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.ComponentModel
 {
-	[SRDescription("Executes an operation on a separate thread.")]
 	[DefaultEvent("DoWork")]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class BackgroundWorker : Component
 	{
-		public BackgroundWorker()
-		{
-			this.threadStart = new BackgroundWorker.WorkerThreadStartDelegate(this.WorkerThreadStart);
-			this.operationCompleted = new SendOrPostCallback(this.AsyncOperationCompleted);
-			this.progressReporter = new SendOrPostCallback(this.ProgressReporter);
-		}
+		public event DoWorkEventHandler DoWork;
 
-		private void AsyncOperationCompleted(object arg)
-		{
-			this.isRunning = false;
-			this.cancellationPending = false;
-			this.OnRunWorkerCompleted((RunWorkerCompletedEventArgs)arg);
-		}
+		public event ProgressChangedEventHandler ProgressChanged;
+
+		public event RunWorkerCompletedEventHandler RunWorkerCompleted;
 
 		[Browsable(false)]
-		[SRDescription("Has the user attempted to cancel the operation? To be accessed from DoWork event handler.")]
 		public bool CancellationPending
 		{
 			get
 			{
-				return this.cancellationPending;
+				return this.cancel_pending;
+			}
+		}
+
+		[Browsable(false)]
+		public bool IsBusy
+		{
+			get
+			{
+				return this.async != null;
+			}
+		}
+
+		[DefaultValue(false)]
+		public bool WorkerReportsProgress
+		{
+			get
+			{
+				return this.report_progress;
+			}
+			set
+			{
+				this.report_progress = value;
+			}
+		}
+
+		[DefaultValue(false)]
+		public bool WorkerSupportsCancellation
+		{
+			get
+			{
+				return this.support_cancel;
+			}
+			set
+			{
+				this.support_cancel = value;
 			}
 		}
 
 		public void CancelAsync()
 		{
-			if (!this.WorkerSupportsCancellation)
+			if (!this.support_cancel)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This BackgroundWorker states that it doesn't support cancellation. Modify WorkerSupportsCancellation to state that it does support cancellation."));
+				throw new InvalidOperationException("This background worker does not support cancellation.");
 			}
-			this.cancellationPending = true;
-		}
-
-		[SRCategory("Asynchronous")]
-		[SRDescription("Event handler to be run on a different thread when the operation begins.")]
-		public event DoWorkEventHandler DoWork
-		{
-			add
+			if (!this.IsBusy)
 			{
-				base.Events.AddHandler(BackgroundWorker.doWorkKey, value);
+				return;
 			}
-			remove
-			{
-				base.Events.RemoveHandler(BackgroundWorker.doWorkKey, value);
-			}
-		}
-
-		[Browsable(false)]
-		[SRDescription("Is the worker still currently working on a background operation?")]
-		public bool IsBusy
-		{
-			get
-			{
-				return this.isRunning;
-			}
-		}
-
-		protected virtual void OnDoWork(DoWorkEventArgs e)
-		{
-			DoWorkEventHandler doWorkEventHandler = (DoWorkEventHandler)base.Events[BackgroundWorker.doWorkKey];
-			if (doWorkEventHandler != null)
-			{
-				doWorkEventHandler(this, e);
-			}
-		}
-
-		protected virtual void OnRunWorkerCompleted(RunWorkerCompletedEventArgs e)
-		{
-			RunWorkerCompletedEventHandler runWorkerCompletedEventHandler = (RunWorkerCompletedEventHandler)base.Events[BackgroundWorker.runWorkerCompletedKey];
-			if (runWorkerCompletedEventHandler != null)
-			{
-				runWorkerCompletedEventHandler(this, e);
-			}
-		}
-
-		protected virtual void OnProgressChanged(ProgressChangedEventArgs e)
-		{
-			ProgressChangedEventHandler progressChangedEventHandler = (ProgressChangedEventHandler)base.Events[BackgroundWorker.progressChangedKey];
-			if (progressChangedEventHandler != null)
-			{
-				progressChangedEventHandler(this, e);
-			}
-		}
-
-		[SRCategory("Asynchronous")]
-		[SRDescription("Raised when the worker thread indicates that some progress has been made.")]
-		public event ProgressChangedEventHandler ProgressChanged
-		{
-			add
-			{
-				base.Events.AddHandler(BackgroundWorker.progressChangedKey, value);
-			}
-			remove
-			{
-				base.Events.RemoveHandler(BackgroundWorker.progressChangedKey, value);
-			}
-		}
-
-		private void ProgressReporter(object arg)
-		{
-			this.OnProgressChanged((ProgressChangedEventArgs)arg);
+			this.cancel_pending = true;
 		}
 
 		public void ReportProgress(int percentProgress)
@@ -121,15 +78,17 @@ namespace System.ComponentModel
 		{
 			if (!this.WorkerReportsProgress)
 			{
-				throw new InvalidOperationException(global::SR.GetString("This BackgroundWorker states that it doesn't report progress. Modify WorkerReportsProgress to state that it does report progress."));
+				throw new InvalidOperationException("This background worker does not report progress.");
 			}
-			ProgressChangedEventArgs e = new ProgressChangedEventArgs(percentProgress, userState);
-			if (this.asyncOperation != null)
+			if (!this.IsBusy)
 			{
-				this.asyncOperation.Post(this.progressReporter, e);
 				return;
 			}
-			this.progressReporter(e);
+			this.async.Post(delegate(object o)
+			{
+				ProgressChangedEventArgs e = o as ProgressChangedEventArgs;
+				this.OnProgressChanged(e);
+			}, new ProgressChangedEventArgs(percentProgress, userState));
 		}
 
 		public void RunWorkerAsync()
@@ -137,109 +96,83 @@ namespace System.ComponentModel
 			this.RunWorkerAsync(null);
 		}
 
-		public void RunWorkerAsync(object argument)
+		private void ProcessWorker(object argument, AsyncOperation async, SendOrPostCallback callback)
 		{
-			if (this.isRunning)
-			{
-				throw new InvalidOperationException(global::SR.GetString("This BackgroundWorker is currently busy and cannot run multiple tasks concurrently."));
-			}
-			this.isRunning = true;
-			this.cancellationPending = false;
-			this.asyncOperation = AsyncOperationManager.CreateOperation(null);
-			this.threadStart.BeginInvoke(argument, null, null);
-		}
-
-		[SRCategory("Asynchronous")]
-		[SRDescription("Raised when the worker has completed (either through success, failure, or cancellation).")]
-		public event RunWorkerCompletedEventHandler RunWorkerCompleted
-		{
-			add
-			{
-				base.Events.AddHandler(BackgroundWorker.runWorkerCompletedKey, value);
-			}
-			remove
-			{
-				base.Events.RemoveHandler(BackgroundWorker.runWorkerCompletedKey, value);
-			}
-		}
-
-		[SRCategory("Asynchronous")]
-		[SRDescription("Whether the worker will report progress.")]
-		[DefaultValue(false)]
-		public bool WorkerReportsProgress
-		{
-			get
-			{
-				return this.workerReportsProgress;
-			}
-			set
-			{
-				this.workerReportsProgress = value;
-			}
-		}
-
-		[SRCategory("Asynchronous")]
-		[SRDescription("Whether the worker supports cancellation.")]
-		[DefaultValue(false)]
-		public bool WorkerSupportsCancellation
-		{
-			get
-			{
-				return this.canCancelWorker;
-			}
-			set
-			{
-				this.canCancelWorker = value;
-			}
-		}
-
-		private void WorkerThreadStart(object argument)
-		{
-			object obj = null;
 			Exception ex = null;
-			bool flag = false;
+			DoWorkEventArgs e = new DoWorkEventArgs(argument);
 			try
 			{
-				DoWorkEventArgs e = new DoWorkEventArgs(argument);
 				this.OnDoWork(e);
-				if (e.Cancel)
-				{
-					flag = true;
-				}
-				else
-				{
-					obj = e.Result;
-				}
 			}
-			catch (Exception ex)
+			catch (Exception ex2)
 			{
+				ex = ex2;
+				e.Cancel = false;
 			}
-			RunWorkerCompletedEventArgs e2 = new RunWorkerCompletedEventArgs(obj, ex, flag);
-			this.asyncOperation.PostOperationCompleted(this.operationCompleted, e2);
+			callback(new object[]
+			{
+				new RunWorkerCompletedEventArgs(e.Result, ex, e.Cancel),
+				async
+			});
 		}
 
-		private static readonly object doWorkKey = new object();
+		private void CompleteWorker(object state)
+		{
+			object[] array = (object[])state;
+			RunWorkerCompletedEventArgs e = array[0] as RunWorkerCompletedEventArgs;
+			AsyncOperation asyncOperation = array[1] as AsyncOperation;
+			SendOrPostCallback sendOrPostCallback = delegate(object darg)
+			{
+				this.async = null;
+				this.OnRunWorkerCompleted(darg as RunWorkerCompletedEventArgs);
+			};
+			asyncOperation.PostOperationCompleted(sendOrPostCallback, e);
+			this.cancel_pending = false;
+		}
 
-		private static readonly object runWorkerCompletedKey = new object();
+		public void RunWorkerAsync(object argument)
+		{
+			if (this.IsBusy)
+			{
+				throw new InvalidOperationException("The background worker is busy.");
+			}
+			this.async = AsyncOperationManager.CreateOperation(this);
+			BackgroundWorker.ProcessWorkerEventHandler processWorkerEventHandler = new BackgroundWorker.ProcessWorkerEventHandler(this.ProcessWorker);
+			processWorkerEventHandler.BeginInvoke(argument, this.async, new SendOrPostCallback(this.CompleteWorker), null, null);
+		}
 
-		private static readonly object progressChangedKey = new object();
+		protected virtual void OnDoWork(DoWorkEventArgs e)
+		{
+			if (this.DoWork != null)
+			{
+				this.DoWork(this, e);
+			}
+		}
 
-		private bool canCancelWorker;
+		protected virtual void OnProgressChanged(ProgressChangedEventArgs e)
+		{
+			if (this.ProgressChanged != null)
+			{
+				this.ProgressChanged(this, e);
+			}
+		}
 
-		private bool workerReportsProgress;
+		protected virtual void OnRunWorkerCompleted(RunWorkerCompletedEventArgs e)
+		{
+			if (this.RunWorkerCompleted != null)
+			{
+				this.RunWorkerCompleted(this, e);
+			}
+		}
 
-		private bool cancellationPending;
+		private AsyncOperation async;
 
-		private bool isRunning;
+		private bool cancel_pending;
 
-		private AsyncOperation asyncOperation;
+		private bool report_progress;
 
-		private readonly BackgroundWorker.WorkerThreadStartDelegate threadStart;
+		private bool support_cancel;
 
-		private readonly SendOrPostCallback operationCompleted;
-
-		private readonly SendOrPostCallback progressReporter;
-
-		private delegate void WorkerThreadStartDelegate(object argument);
+		private delegate void ProcessWorkerEventHandler(object argument, AsyncOperation async, SendOrPostCallback callback);
 	}
 }

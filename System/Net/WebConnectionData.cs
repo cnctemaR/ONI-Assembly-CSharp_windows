@@ -5,48 +5,16 @@ namespace System.Net
 {
 	internal class WebConnectionData
 	{
-		public WebConnectionData()
+		public void Init()
 		{
-			this._readState = ReadState.None;
+			this.request = null;
+			this.StatusCode = 0;
+			this.StatusDescription = null;
+			this.Headers = null;
+			this.stream = null;
 		}
 
-		public WebConnectionData(HttpWebRequest request)
-		{
-			this._request = request;
-		}
-
-		public HttpWebRequest request
-		{
-			get
-			{
-				return this._request;
-			}
-			set
-			{
-				this._request = value;
-			}
-		}
-
-		public ReadState ReadState
-		{
-			get
-			{
-				return this._readState;
-			}
-			set
-			{
-				lock (this)
-				{
-					if (this._readState == ReadState.Aborted && value != ReadState.Aborted)
-					{
-						throw new WebException("Aborted", WebExceptionStatus.RequestCanceled);
-					}
-					this._readState = value;
-				}
-			}
-		}
-
-		private HttpWebRequest _request;
+		public HttpWebRequest request;
 
 		public int StatusCode;
 
@@ -56,12 +24,8 @@ namespace System.Net
 
 		public Version Version;
 
-		public Version ProxyVersion;
-
 		public Stream stream;
 
-		public string[] Challenge;
-
-		private ReadState _readState;
+		public string Challenge;
 	}
 }

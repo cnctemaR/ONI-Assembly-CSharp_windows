@@ -5,7 +5,7 @@ using System.Security;
 namespace Mono.Xml
 {
 	[CLSCompliant(false)]
-	public class SecurityParser : MiniParser, MiniParser.IHandler, MiniParser.IReader
+	public class SecurityParser : MiniParser, MiniParser.IReader, MiniParser.IHandler
 	{
 		public SecurityParser()
 		{
@@ -32,10 +32,7 @@ namespace Mono.Xml
 			{
 				return -1;
 			}
-			string text = this.xmldoc;
-			int num = this.pos;
-			this.pos = num + 1;
-			return (int)text[num];
+			return (int)this.xmldoc[this.pos++];
 		}
 
 		public void OnStartParsing(MiniParser parser)
@@ -52,7 +49,8 @@ namespace Mono.Xml
 			}
 			else
 			{
-				((SecurityElement)this.stack.Peek()).AddChild(securityElement);
+				SecurityElement securityElement2 = (SecurityElement)this.stack.Peek();
+				securityElement2.AddChild(securityElement);
 			}
 			this.stack.Push(securityElement);
 			this.current = securityElement;

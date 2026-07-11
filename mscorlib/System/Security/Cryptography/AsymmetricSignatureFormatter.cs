@@ -6,9 +6,11 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public abstract class AsymmetricSignatureFormatter
 	{
+		public abstract void SetHashAlgorithm(string strName);
+
 		public abstract void SetKey(AsymmetricAlgorithm key);
 
-		public abstract void SetHashAlgorithm(string strName);
+		public abstract byte[] CreateSignature(byte[] rgbHash);
 
 		public virtual byte[] CreateSignature(HashAlgorithm hash)
 		{
@@ -19,7 +21,5 @@ namespace System.Security.Cryptography
 			this.SetHashAlgorithm(hash.ToString());
 			return this.CreateSignature(hash.Hash);
 		}
-
-		public abstract byte[] CreateSignature(byte[] rgbHash);
 	}
 }

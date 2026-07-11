@@ -2,9 +2,9 @@
 
 namespace Mono.Posix
 {
-	[Flags]
-	[CLSCompliant(false)]
 	[Obsolete("Use Mono.Unix.Native.FilePermissions")]
+	[CLSCompliant(false)]
+	[Flags]
 	public enum FileMode
 	{
 		S_ISUID = 2048,

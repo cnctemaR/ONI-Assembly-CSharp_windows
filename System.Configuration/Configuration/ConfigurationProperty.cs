@@ -10,59 +10,59 @@ namespace System.Configuration
 		{
 		}
 
-		public ConfigurationProperty(string name, Type type, object defaultValue)
-			: this(name, type, defaultValue, TypeDescriptor.GetConverter(type), new DefaultValidator(), ConfigurationPropertyOptions.None, null)
+		public ConfigurationProperty(string name, Type type, object default_value)
+			: this(name, type, default_value, TypeDescriptor.GetConverter(type), new DefaultValidator(), ConfigurationPropertyOptions.None, null)
 		{
 		}
 
-		public ConfigurationProperty(string name, Type type, object defaultValue, ConfigurationPropertyOptions options)
-			: this(name, type, defaultValue, TypeDescriptor.GetConverter(type), new DefaultValidator(), options, null)
+		public ConfigurationProperty(string name, Type type, object default_value, ConfigurationPropertyOptions flags)
+			: this(name, type, default_value, TypeDescriptor.GetConverter(type), new DefaultValidator(), flags, null)
 		{
 		}
 
-		public ConfigurationProperty(string name, Type type, object defaultValue, TypeConverter typeConverter, ConfigurationValidatorBase validator, ConfigurationPropertyOptions options)
-			: this(name, type, defaultValue, typeConverter, validator, options, null)
+		public ConfigurationProperty(string name, Type type, object default_value, TypeConverter converter, ConfigurationValidatorBase validation, ConfigurationPropertyOptions flags)
+			: this(name, type, default_value, converter, validation, flags, null)
 		{
 		}
 
-		public ConfigurationProperty(string name, Type type, object defaultValue, TypeConverter typeConverter, ConfigurationValidatorBase validator, ConfigurationPropertyOptions options, string description)
+		public ConfigurationProperty(string name, Type type, object default_value, TypeConverter converter, ConfigurationValidatorBase validation, ConfigurationPropertyOptions flags, string description)
 		{
 			this.name = name;
-			this.converter = ((typeConverter != null) ? typeConverter : TypeDescriptor.GetConverter(type));
-			if (defaultValue != null)
+			this.converter = ((converter == null) ? TypeDescriptor.GetConverter(type) : converter);
+			if (default_value != null)
 			{
-				if (defaultValue == ConfigurationProperty.NoDefaultValue)
+				if (default_value == ConfigurationProperty.NoDefaultValue)
 				{
 					TypeCode typeCode = Type.GetTypeCode(type);
 					if (typeCode != TypeCode.Object)
 					{
 						if (typeCode != TypeCode.String)
 						{
-							defaultValue = Activator.CreateInstance(type);
+							default_value = Activator.CreateInstance(type);
 						}
 						else
 						{
-							defaultValue = string.Empty;
+							default_value = string.Empty;
 						}
 					}
 					else
 					{
-						defaultValue = null;
+						default_value = null;
 					}
 				}
-				else if (!type.IsAssignableFrom(defaultValue.GetType()))
+				else if (!type.IsAssignableFrom(default_value.GetType()))
 				{
-					if (!this.converter.CanConvertFrom(defaultValue.GetType()))
+					if (!this.converter.CanConvertFrom(default_value.GetType()))
 					{
-						throw new ConfigurationErrorsException(string.Format("The default value for property '{0}' has a different type than the one of the property itself: expected {1} but was {2}", name, type, defaultValue.GetType()));
+						throw new ConfigurationErrorsException(string.Format("The default value for property '{0}' has a different type than the one of the property itself: expected {1} but was {2}", name, type, default_value.GetType()));
 					}
-					defaultValue = this.converter.ConvertFrom(defaultValue);
+					default_value = this.converter.ConvertFrom(default_value);
 				}
 			}
-			this.default_value = defaultValue;
-			this.flags = options;
+			this.default_value = default_value;
+			this.flags = flags;
 			this.type = type;
-			this.validation = ((validator != null) ? validator : new DefaultValidator());
+			this.validation = ((validation == null) ? new DefaultValidator() : validation);
 			this.description = description;
 		}
 
@@ -86,7 +86,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				return (this.flags & ConfigurationPropertyOptions.IsKey) > ConfigurationPropertyOptions.None;
+				return (this.flags & ConfigurationPropertyOptions.IsKey) != ConfigurationPropertyOptions.None;
 			}
 		}
 
@@ -94,7 +94,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				return (this.flags & ConfigurationPropertyOptions.IsRequired) > ConfigurationPropertyOptions.None;
+				return (this.flags & ConfigurationPropertyOptions.IsRequired) != ConfigurationPropertyOptions.None;
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				return (this.flags & ConfigurationPropertyOptions.IsDefaultCollection) > ConfigurationPropertyOptions.None;
+				return (this.flags & ConfigurationPropertyOptions.IsDefaultCollection) != ConfigurationPropertyOptions.None;
 			}
 		}
 

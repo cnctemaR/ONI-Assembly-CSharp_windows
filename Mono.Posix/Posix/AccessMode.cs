@@ -2,9 +2,9 @@
 
 namespace Mono.Posix
 {
-	[Flags]
 	[CLSCompliant(false)]
 	[Obsolete("Use Mono.Unix.Native.AccessModes")]
+	[Flags]
 	public enum AccessMode
 	{
 		R_OK = 1,

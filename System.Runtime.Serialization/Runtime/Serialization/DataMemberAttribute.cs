@@ -5,6 +5,30 @@ namespace System.Runtime.Serialization
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
 	public sealed class DataMemberAttribute : Attribute
 	{
+		public bool EmitDefaultValue
+		{
+			get
+			{
+				return this.emit_default;
+			}
+			set
+			{
+				this.emit_default = value;
+			}
+		}
+
+		public bool IsRequired
+		{
+			get
+			{
+				return this.is_required;
+			}
+			set
+			{
+				this.is_required = value;
+			}
+		}
+
 		public string Name
 		{
 			get
@@ -14,15 +38,6 @@ namespace System.Runtime.Serialization
 			set
 			{
 				this.name = value;
-				this.isNameSetExplicitly = true;
-			}
-		}
-
-		public bool IsNameSetExplicitly
-		{
-			get
-			{
-				return this.isNameSetExplicitly;
 			}
 		}
 
@@ -34,46 +49,16 @@ namespace System.Runtime.Serialization
 			}
 			set
 			{
-				if (value < 0)
-				{
-					throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new InvalidDataContractException(global::System.Runtime.Serialization.SR.GetString("Property 'Order' in DataMemberAttribute attribute cannot be a negative number.")));
-				}
 				this.order = value;
 			}
 		}
 
-		public bool IsRequired
-		{
-			get
-			{
-				return this.isRequired;
-			}
-			set
-			{
-				this.isRequired = value;
-			}
-		}
+		private bool is_required;
 
-		public bool EmitDefaultValue
-		{
-			get
-			{
-				return this.emitDefaultValue;
-			}
-			set
-			{
-				this.emitDefaultValue = value;
-			}
-		}
+		private bool emit_default = true;
 
 		private string name;
 
-		private bool isNameSetExplicitly;
-
 		private int order = -1;
-
-		private bool isRequired;
-
-		private bool emitDefaultValue = true;
 	}
 }

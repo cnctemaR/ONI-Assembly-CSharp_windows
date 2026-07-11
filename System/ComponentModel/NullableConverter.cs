@@ -1,70 +1,63 @@
 ﻿using System;
 using System.Collections;
-using System.ComponentModel.Design.Serialization;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class NullableConverter : TypeConverter
 	{
-		public NullableConverter(Type type)
+		public NullableConverter(Type nullableType)
 		{
-			this.nullableType = type;
-			this.simpleType = Nullable.GetUnderlyingType(type);
-			if (this.simpleType == null)
+			if (nullableType == null)
 			{
-				throw new ArgumentException(global::SR.GetString("The specified type is not a nullable type."), "type");
+				throw new ArgumentNullException("nullableType");
 			}
-			this.simpleTypeConverter = TypeDescriptor.GetConverter(this.simpleType);
+			this.nullableType = nullableType;
+			this.underlyingType = Nullable.GetUnderlyingType(nullableType);
+			this.underlyingTypeConverter = TypeDescriptor.GetConverter(this.underlyingType);
 		}
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			if (sourceType == this.simpleType)
+			if (sourceType == this.underlyingType)
 			{
 				return true;
 			}
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.CanConvertFrom(context, sourceType);
+				return this.underlyingTypeConverter.CanConvertFrom(context, sourceType);
 			}
 			return base.CanConvertFrom(context, sourceType);
 		}
 
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+		{
+			if (destinationType == this.underlyingType)
+			{
+				return true;
+			}
+			if (this.underlyingTypeConverter != null)
+			{
+				return this.underlyingTypeConverter.CanConvertTo(context, destinationType);
+			}
+			return base.CanConvertFrom(context, destinationType);
+		}
+
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value == null || value.GetType() == this.simpleType)
+			if (value == null || value.GetType() == this.underlyingType)
 			{
 				return value;
 			}
-			if (value is string && string.IsNullOrEmpty(value as string))
+			if (value is string && string.IsNullOrEmpty((string)value))
 			{
 				return null;
 			}
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.ConvertFrom(context, culture, value);
+				return this.underlyingTypeConverter.ConvertFrom(context, culture, value);
 			}
 			return base.ConvertFrom(context, culture, value);
-		}
-
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-		{
-			if (destinationType == this.simpleType)
-			{
-				return true;
-			}
-			if (destinationType == typeof(InstanceDescriptor))
-			{
-				return true;
-			}
-			if (this.simpleTypeConverter != null)
-			{
-				return this.simpleTypeConverter.CanConvertTo(context, destinationType);
-			}
-			return base.CanConvertTo(context, destinationType);
 		}
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
@@ -73,79 +66,61 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("destinationType");
 			}
-			if (destinationType == this.simpleType && this.nullableType.IsInstanceOfType(value))
+			if (destinationType == this.underlyingType && value.GetType() == this.nullableType)
 			{
 				return value;
 			}
-			if (destinationType == typeof(InstanceDescriptor))
+			if (this.underlyingTypeConverter != null && value != null)
 			{
-				return new InstanceDescriptor(this.nullableType.GetConstructor(new Type[] { this.simpleType }), new object[] { value }, true);
-			}
-			if (value == null)
-			{
-				if (destinationType == typeof(string))
-				{
-					return string.Empty;
-				}
-			}
-			else if (this.simpleTypeConverter != null)
-			{
-				return this.simpleTypeConverter.ConvertTo(context, culture, value, destinationType);
+				return this.underlyingTypeConverter.ConvertTo(context, culture, value, destinationType);
 			}
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
 		public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.CreateInstance(context, propertyValues);
+				return this.underlyingTypeConverter.CreateInstance(context, propertyValues);
 			}
 			return base.CreateInstance(context, propertyValues);
 		}
 
 		public override bool GetCreateInstanceSupported(ITypeDescriptorContext context)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.GetCreateInstanceSupported(context);
+				return this.underlyingTypeConverter.GetCreateInstanceSupported(context);
 			}
 			return base.GetCreateInstanceSupported(context);
 		}
 
 		public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.GetProperties(context, value, attributes);
+				return this.underlyingTypeConverter.GetProperties(context, value, attributes);
 			}
 			return base.GetProperties(context, value, attributes);
 		}
 
 		public override bool GetPropertiesSupported(ITypeDescriptorContext context)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.GetPropertiesSupported(context);
+				return this.underlyingTypeConverter.GetCreateInstanceSupported(context);
 			}
-			return base.GetPropertiesSupported(context);
+			return base.GetCreateInstanceSupported(context);
 		}
 
 		public override TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null && this.underlyingTypeConverter.GetStandardValuesSupported(context))
 			{
-				TypeConverter.StandardValuesCollection standardValues = this.simpleTypeConverter.GetStandardValues(context);
-				if (this.GetStandardValuesSupported(context) && standardValues != null)
+				TypeConverter.StandardValuesCollection standardValues = this.underlyingTypeConverter.GetStandardValues(context);
+				if (standardValues != null)
 				{
-					object[] array = new object[standardValues.Count + 1];
-					int num = 0;
-					array[num++] = null;
-					foreach (object obj in standardValues)
-					{
-						array[num++] = obj;
-					}
-					return new TypeConverter.StandardValuesCollection(array);
+					return new TypeConverter.StandardValuesCollection(new ArrayList(standardValues) { null });
 				}
 			}
 			return base.GetStandardValues(context);
@@ -153,27 +128,27 @@ namespace System.ComponentModel
 
 		public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.GetStandardValuesExclusive(context);
+				return this.underlyingTypeConverter.GetStandardValuesExclusive(context);
 			}
 			return base.GetStandardValuesExclusive(context);
 		}
 
 		public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return this.simpleTypeConverter.GetStandardValuesSupported(context);
+				return this.underlyingTypeConverter.GetStandardValuesSupported(context);
 			}
 			return base.GetStandardValuesSupported(context);
 		}
 
 		public override bool IsValid(ITypeDescriptorContext context, object value)
 		{
-			if (this.simpleTypeConverter != null)
+			if (this.underlyingTypeConverter != null)
 			{
-				return value == null || this.simpleTypeConverter.IsValid(context, value);
+				return this.underlyingTypeConverter.IsValid(context, value);
 			}
 			return base.IsValid(context, value);
 		}
@@ -190,7 +165,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.simpleType;
+				return this.underlyingType;
 			}
 		}
 
@@ -198,14 +173,14 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.simpleTypeConverter;
+				return this.underlyingTypeConverter;
 			}
 		}
 
 		private Type nullableType;
 
-		private Type simpleType;
+		private Type underlyingType;
 
-		private TypeConverter simpleTypeConverter;
+		private TypeConverter underlyingTypeConverter;
 	}
 }

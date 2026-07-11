@@ -7,17 +7,17 @@ namespace System.Runtime.CompilerServices
 	{
 		public TypeForwardedToAttribute(Type destination)
 		{
-			this._destination = destination;
+			this.destination = destination;
 		}
 
 		public Type Destination
 		{
 			get
 			{
-				return this._destination;
+				return this.destination;
 			}
 		}
 
-		private Type _destination;
+		private Type destination;
 	}
 }

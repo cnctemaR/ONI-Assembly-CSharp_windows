@@ -6,14 +6,14 @@ namespace System.EnterpriseServices.CompensatingResourceManager
 	public sealed class ClerkMonitor : IEnumerable
 	{
 		[MonoTODO]
-		~ClerkMonitor()
-		{
-		}
-
-		[MonoTODO]
 		public ClerkMonitor()
 		{
 			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		~ClerkMonitor()
+		{
 		}
 
 		[MonoTODO]

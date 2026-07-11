@@ -1,71 +1,29 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Remoting.Messaging
 {
 	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
-	internal class MonoMethodMessage : IMethodCallMessage, IMethodMessage, IMessage, IMethodReturnMessage, IInternalMessage
+	internal class MonoMethodMessage : IInternalMessage, IMessage, IMethodCallMessage, IMethodMessage, IMethodReturnMessage
 	{
-		internal void InitMessage(MonoMethod method, object[] out_args)
-		{
-			this.method = method;
-			ParameterInfo[] parametersInternal = method.GetParametersInternal();
-			int num = parametersInternal.Length;
-			this.args = new object[num];
-			this.arg_types = new byte[num];
-			this.asyncResult = null;
-			this.call_type = CallType.Sync;
-			this.names = new string[num];
-			for (int i = 0; i < num; i++)
-			{
-				this.names[i] = parametersInternal[i].Name;
-			}
-			bool flag = out_args != null;
-			int num2 = 0;
-			for (int j = 0; j < num; j++)
-			{
-				bool isOut = parametersInternal[j].IsOut;
-				byte b;
-				if (parametersInternal[j].ParameterType.IsByRef)
-				{
-					if (flag)
-					{
-						this.args[j] = out_args[num2++];
-					}
-					b = 2;
-					if (!isOut)
-					{
-						b |= 1;
-					}
-				}
-				else
-				{
-					b = 1;
-					if (isOut)
-					{
-						b |= 4;
-					}
-				}
-				this.arg_types[j] = b;
-			}
-		}
-
 		public MonoMethodMessage(MethodBase method, object[] out_args)
 		{
 			if (method != null)
 			{
 				this.InitMessage((MonoMethod)method, out_args);
-				return;
 			}
-			this.args = null;
+			else
+			{
+				this.args = null;
+			}
 		}
 
-		internal MonoMethodMessage(MethodInfo minfo, object[] in_args, object[] out_args)
+		public MonoMethodMessage(Type type, string method_name, object[] in_args)
 		{
-			this.InitMessage((MonoMethod)minfo, out_args);
+			MethodInfo methodInfo = type.GetMethod(method_name);
+			this.InitMessage((MonoMethod)methodInfo, null);
 			int num = in_args.Length;
 			for (int i = 0; i < num; i++)
 			{
@@ -73,20 +31,20 @@ namespace System.Runtime.Remoting.Messaging
 			}
 		}
 
-		private static MethodInfo GetMethodInfo(Type type, string methodName)
+		Identity IInternalMessage.TargetIdentity
 		{
-			MethodInfo methodInfo = type.GetMethod(methodName);
-			if (methodInfo == null)
+			get
 			{
-				throw new ArgumentException(string.Format("Could not find '{0}' in {1}", methodName, type), "methodName");
+				return this.identity;
 			}
-			return methodInfo;
+			set
+			{
+				this.identity = value;
+			}
 		}
 
-		public MonoMethodMessage(Type type, string methodName, object[] in_args)
-			: this(MonoMethodMessage.GetMethodInfo(type, methodName), in_args, null)
-		{
-		}
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern void InitMessage(MonoMethod method, object[] out_args);
 
 		public IDictionary Properties
 		{
@@ -94,7 +52,7 @@ namespace System.Runtime.Remoting.Messaging
 			{
 				if (this.properties == null)
 				{
-					this.properties = new MCMDictionary(this);
+					this.properties = new MethodCallDictionary(this);
 				}
 				return this.properties;
 			}
@@ -156,7 +114,7 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			get
 			{
-				if (null == this.method)
+				if (this.method == null)
 				{
 					return string.Empty;
 				}
@@ -185,7 +143,7 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			get
 			{
-				if (null == this.method)
+				if (this.method == null)
 				{
 					return string.Empty;
 				}
@@ -236,10 +194,9 @@ namespace System.Runtime.Remoting.Messaging
 					return 0;
 				}
 				int num = 0;
-				byte[] array = this.arg_types;
-				for (int i = 0; i < array.Length; i++)
+				foreach (byte b in this.arg_types)
 				{
-					if ((array[i] & 1) != 0)
+					if ((b & 1) != 0)
 					{
 						num++;
 					}
@@ -252,13 +209,13 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			get
 			{
-				object[] array = new object[this.InArgCount];
+				int inArgCount = this.InArgCount;
+				object[] array = new object[inArgCount];
 				int num2;
 				int num = (num2 = 0);
-				byte[] array2 = this.arg_types;
-				for (int i = 0; i < array2.Length; i++)
+				foreach (byte b in this.arg_types)
 				{
-					if ((array2[i] & 1) != 0)
+					if ((b & 1) != 0)
 					{
 						array[num++] = this.args[num2];
 					}
@@ -272,10 +229,9 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			int num = 0;
 			int num2 = 0;
-			byte[] array = this.arg_types;
-			for (int i = 0; i < array.Length; i++)
+			foreach (byte b in this.arg_types)
 			{
-				if ((array[i] & 1) != 0 && num2++ == arg_num)
+				if ((b & 1) != 0 && num2++ == arg_num)
 				{
 					return this.args[num];
 				}
@@ -288,10 +244,9 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			int num = 0;
 			int num2 = 0;
-			byte[] array = this.arg_types;
-			for (int i = 0; i < array.Length; i++)
+			foreach (byte b in this.arg_types)
 			{
-				if ((array[i] & 1) != 0 && num2++ == arg_num)
+				if ((b & 1) != 0 && num2++ == arg_num)
 				{
 					return this.names[num];
 				}
@@ -317,10 +272,9 @@ namespace System.Runtime.Remoting.Messaging
 					return 0;
 				}
 				int num = 0;
-				byte[] array = this.arg_types;
-				for (int i = 0; i < array.Length; i++)
+				foreach (byte b in this.arg_types)
 				{
-					if ((array[i] & 2) != 0)
+					if ((b & 2) != 0)
 					{
 						num++;
 					}
@@ -337,13 +291,13 @@ namespace System.Runtime.Remoting.Messaging
 				{
 					return null;
 				}
-				object[] array = new object[this.OutArgCount];
+				int outArgCount = this.OutArgCount;
+				object[] array = new object[outArgCount];
 				int num2;
 				int num = (num2 = 0);
-				byte[] array2 = this.arg_types;
-				for (int i = 0; i < array2.Length; i++)
+				foreach (byte b in this.arg_types)
 				{
-					if ((array2[i] & 2) != 0)
+					if ((b & 2) != 0)
 					{
 						array[num++] = this.args[num2];
 					}
@@ -365,10 +319,9 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			int num = 0;
 			int num2 = 0;
-			byte[] array = this.arg_types;
-			for (int i = 0; i < array.Length; i++)
+			foreach (byte b in this.arg_types)
 			{
-				if ((array[i] & 2) != 0 && num2++ == arg_num)
+				if ((b & 2) != 0 && num2++ == arg_num)
 				{
 					return this.args[num];
 				}
@@ -381,33 +334,15 @@ namespace System.Runtime.Remoting.Messaging
 		{
 			int num = 0;
 			int num2 = 0;
-			byte[] array = this.arg_types;
-			for (int i = 0; i < array.Length; i++)
+			foreach (byte b in this.arg_types)
 			{
-				if ((array[i] & 2) != 0 && num2++ == arg_num)
+				if ((b & 2) != 0 && num2++ == arg_num)
 				{
 					return this.names[num];
 				}
 				num++;
 			}
 			return null;
-		}
-
-		Identity IInternalMessage.TargetIdentity
-		{
-			get
-			{
-				return this.identity;
-			}
-			set
-			{
-				this.identity = value;
-			}
-		}
-
-		bool IInternalMessage.HasProperties()
-		{
-			return this.properties != null;
 		}
 
 		public bool IsAsync
@@ -476,14 +411,10 @@ namespace System.Runtime.Remoting.Messaging
 
 		private string uri;
 
-		private MCMDictionary properties;
+		private MethodCallDictionary properties;
 
 		private Type[] methodSignature;
 
 		private Identity identity;
-
-		internal static string CallContextKey = "__CallContext";
-
-		internal static string UriKey = "__Uri";
 	}
 }

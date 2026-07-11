@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices
 {
-	[Guid("FE6777FB-A674-4177-8F32-6D707E113484")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("FE6777FB-A674-4177-8F32-6D707E113484")]
 	[ComImport]
 	public interface IAsyncErrorNotify
 	{

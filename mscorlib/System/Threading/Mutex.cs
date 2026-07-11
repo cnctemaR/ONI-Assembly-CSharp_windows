@@ -11,15 +11,6 @@ namespace System.Threading
 	[ComVisible(true)]
 	public sealed class Mutex : WaitHandle
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern bool ReleaseMutex_internal(IntPtr handle);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr CreateMutex_internal(bool initiallyOwned, string name, out bool created);
-
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern IntPtr OpenMutex_internal(string name, MutexRights rights, out MonoIOError error);
-
 		private Mutex(IntPtr handle)
 		{
 			this.Handle = handle;
@@ -40,7 +31,7 @@ namespace System.Threading
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public Mutex(bool initiallyOwned, string name)
 		{
 			bool flag;
@@ -48,22 +39,31 @@ namespace System.Threading
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public Mutex(bool initiallyOwned, string name, out bool createdNew)
 		{
 			this.Handle = Mutex.CreateMutex_internal(initiallyOwned, name, out createdNew);
 		}
 
-		[MonoTODO("Use MutexSecurity in CreateMutex_internal")]
+		[MonoTODO("Implement MutexSecurity")]
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public Mutex(bool initiallyOwned, string name, out bool createdNew, MutexSecurity mutexSecurity)
 		{
 			this.Handle = Mutex.CreateMutex_internal(initiallyOwned, name, out createdNew);
 		}
 
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr CreateMutex_internal(bool initiallyOwned, string name, out bool created);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern bool ReleaseMutex_internal(IntPtr handle);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private static extern IntPtr OpenMutex_internal(string name, MutexRights rights, out MonoIOError error);
+
 		public MutexSecurity GetAccessControl()
 		{
-			return new MutexSecurity(base.SafeWaitHandle, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
+			throw new NotImplementedException();
 		}
 
 		public static Mutex OpenExisting(string name)
@@ -98,32 +98,6 @@ namespace System.Threading
 			throw new IOException(Locale.GetText("Win32 IO error: ") + monoIOError.ToString());
 		}
 
-		public static bool TryOpenExisting(string name, out Mutex result)
-		{
-			return Mutex.TryOpenExisting(name, MutexRights.Modify | MutexRights.Synchronize, out result);
-		}
-
-		public static bool TryOpenExisting(string name, MutexRights rights, out Mutex result)
-		{
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-			if (name.Length == 0 || name.Length > 260)
-			{
-				throw new ArgumentException("name", Locale.GetText("Invalid length [1-260]."));
-			}
-			MonoIOError monoIOError;
-			IntPtr intPtr = Mutex.OpenMutex_internal(name, rights, out monoIOError);
-			if (intPtr == (IntPtr)null)
-			{
-				result = null;
-				return false;
-			}
-			result = new Mutex(intPtr);
-			return true;
-		}
-
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		public void ReleaseMutex()
 		{
@@ -135,11 +109,7 @@ namespace System.Threading
 
 		public void SetAccessControl(MutexSecurity mutexSecurity)
 		{
-			if (mutexSecurity == null)
-			{
-				throw new ArgumentNullException("mutexSecurity");
-			}
-			mutexSecurity.PersistModifications(base.SafeWaitHandle);
+			throw new NotImplementedException();
 		}
 	}
 }

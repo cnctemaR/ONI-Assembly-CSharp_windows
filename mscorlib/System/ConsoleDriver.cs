@@ -4,28 +4,31 @@ using System.Runtime.CompilerServices;
 
 namespace System
 {
-	internal static class ConsoleDriver
+	internal class ConsoleDriver
 	{
 		static ConsoleDriver()
 		{
 			if (!ConsoleDriver.IsConsole)
 			{
 				ConsoleDriver.driver = ConsoleDriver.CreateNullConsoleDriver();
-				return;
 			}
-			if (Environment.IsRunningOnWindows)
+			else if (Environment.IsRunningOnWindows)
 			{
 				ConsoleDriver.driver = ConsoleDriver.CreateWindowsConsoleDriver();
-				return;
 			}
-			string environmentVariable = Environment.GetEnvironmentVariable("TERM");
-			if (environmentVariable == "dumb")
+			else
 			{
-				ConsoleDriver.is_console = false;
-				ConsoleDriver.driver = ConsoleDriver.CreateNullConsoleDriver();
-				return;
+				string environmentVariable = Environment.GetEnvironmentVariable("TERM");
+				if (environmentVariable == "dumb")
+				{
+					ConsoleDriver.is_console = false;
+					ConsoleDriver.driver = ConsoleDriver.CreateNullConsoleDriver();
+				}
+				else
+				{
+					ConsoleDriver.driver = ConsoleDriver.CreateTermInfoDriver(environmentVariable);
+				}
 			}
-			ConsoleDriver.driver = ConsoleDriver.CreateTermInfoDriver(environmentVariable);
 		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
@@ -267,30 +270,6 @@ namespace System
 			set
 			{
 				ConsoleDriver.driver.WindowWidth = value;
-			}
-		}
-
-		public static bool IsErrorRedirected
-		{
-			get
-			{
-				return !ConsoleDriver.Isatty(MonoIO.ConsoleError);
-			}
-		}
-
-		public static bool IsOutputRedirected
-		{
-			get
-			{
-				return !ConsoleDriver.Isatty(MonoIO.ConsoleOutput);
-			}
-		}
-
-		public static bool IsInputRedirected
-		{
-			get
-			{
-				return !ConsoleDriver.Isatty(MonoIO.ConsoleInput);
 			}
 		}
 

@@ -28,9 +28,12 @@ namespace System.Configuration
 				if (this.config == null)
 				{
 					ConfigurationData configurationData = new ConfigurationData();
-					if (!configurationData.LoadString(DefaultConfig.GetBundledMachineConfig()) && !configurationData.Load(DefaultConfig.GetMachineConfigPath()))
+					if (!configurationData.LoadString(DefaultConfig.GetBundledMachineConfig()))
 					{
-						throw new ConfigurationException("Cannot find " + DefaultConfig.GetMachineConfigPath());
+						if (!configurationData.Load(DefaultConfig.GetMachineConfigPath()))
+						{
+							throw new ConfigurationException("Cannot find " + DefaultConfig.GetMachineConfigPath());
+						}
 					}
 					string appConfigPath = DefaultConfig.GetAppConfigPath();
 					if (appConfigPath == null)
@@ -71,7 +74,8 @@ namespace System.Configuration
 
 		private static string GetAppConfigPath()
 		{
-			string configurationFile = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+			AppDomainSetup setupInformation = AppDomain.CurrentDomain.SetupInformation;
+			string configurationFile = setupInformation.ConfigurationFile;
 			if (configurationFile == null || configurationFile.Length == 0)
 			{
 				return null;

@@ -1,25 +1,13 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class ActiveDesignerEventArgs : EventArgs
 	{
 		public ActiveDesignerEventArgs(IDesignerHost oldDesigner, IDesignerHost newDesigner)
 		{
 			this.oldDesigner = oldDesigner;
 			this.newDesigner = newDesigner;
-		}
-
-		public IDesignerHost OldDesigner
-		{
-			get
-			{
-				return this.oldDesigner;
-			}
 		}
 
 		public IDesignerHost NewDesigner
@@ -30,8 +18,16 @@ namespace System.ComponentModel.Design
 			}
 		}
 
-		private readonly IDesignerHost oldDesigner;
+		public IDesignerHost OldDesigner
+		{
+			get
+			{
+				return this.oldDesigner;
+			}
+		}
 
-		private readonly IDesignerHost newDesigner;
+		private IDesignerHost oldDesigner;
+
+		private IDesignerHost newDesigner;
 	}
 }

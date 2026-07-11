@@ -137,7 +137,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 			}
 			if (complexRecipe != null)
 			{
-				Refinery.UserOrder userOrder = new Refinery.UserOrder(complexRecipe, orderSaveData.infinite, this);
+				Refinery.UserOrder userOrder = new Refinery.UserOrder(complexRecipe, orderSaveData.infinite);
 				if (this.OnCreateOrder != null)
 				{
 					this.OnCreateOrder(userOrder);
@@ -297,10 +297,10 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 					component3.AddSymbolOverride("output_tracker", symbol, 0);
 				}
 			}
-			if (!completed_order.infinite && this.OnOrderCancelledOrComplete != null)
-			{
-				this.OnOrderCancelledOrComplete(completed_order);
-			}
+		}
+		if (!completed_order.infinite && this.OnOrderCancelledOrComplete != null)
+		{
+			this.OnOrderCancelledOrComplete(completed_order);
 		}
 		return list;
 	}
@@ -309,7 +309,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 	{
 		if (DebugHandler.InstantBuildMode)
 		{
-			Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, false, this);
+			Refinery.UserOrder userOrder = new Refinery.UserOrder(recipe, false);
 			if (this.OnCreateOrder != null)
 			{
 				this.OnCreateOrder(userOrder);
@@ -319,7 +319,7 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		else if (this.userOrders.Count < 6)
 		{
 			KFMOD.PlayOneShot(soundPath);
-			Refinery.UserOrder userOrder2 = new Refinery.UserOrder(recipe, isInfinite, this);
+			Refinery.UserOrder userOrder2 = new Refinery.UserOrder(recipe, isInfinite);
 			if (this.OnCreateOrder != null)
 			{
 				this.OnCreateOrder(userOrder2);
@@ -742,11 +742,10 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 	[Serializable]
 	public class UserOrder : IBuildQueueOrder
 	{
-		public UserOrder(ComplexRecipe recipe, bool infinite = false, Refinery refinery = null)
+		public UserOrder(ComplexRecipe recipe, bool infinite = false)
 		{
 			this.recipe = recipe;
 			this.infinite = infinite;
-			this.refinery = refinery;
 		}
 
 		public Tag Result
@@ -805,8 +804,6 @@ public class Refinery : KMonoBehaviour, IEffectDescriptor, IHasBuildQueue, ISim2
 		public ComplexRecipe recipe;
 
 		public bool infinite;
-
-		private Refinery refinery;
 
 		private Dictionary<Tag, float> materialRequirements = new Dictionary<Tag, float>();
 	}

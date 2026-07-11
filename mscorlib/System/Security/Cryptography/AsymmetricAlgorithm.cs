@@ -6,20 +6,13 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public abstract class AsymmetricAlgorithm : IDisposable
 	{
-		public void Dispose()
-		{
-			this.Clear();
-		}
-
-		public void Clear()
+		void IDisposable.Dispose()
 		{
 			this.Dispose(true);
 			GC.SuppressFinalize(this);
 		}
 
-		protected virtual void Dispose(bool disposing)
-		{
-		}
+		public abstract string KeyExchangeAlgorithm { get; }
 
 		public virtual int KeySize
 		{
@@ -29,29 +22,11 @@ namespace System.Security.Cryptography
 			}
 			set
 			{
-				for (int i = 0; i < this.LegalKeySizesValue.Length; i++)
+				if (!KeySizes.IsLegalKeySize(this.LegalKeySizesValue, value))
 				{
-					if (this.LegalKeySizesValue[i].SkipSize == 0)
-					{
-						if (this.LegalKeySizesValue[i].MinSize == value)
-						{
-							this.KeySizeValue = value;
-							return;
-						}
-					}
-					else
-					{
-						for (int j = this.LegalKeySizesValue[i].MinSize; j <= this.LegalKeySizesValue[i].MaxSize; j += this.LegalKeySizesValue[i].SkipSize)
-						{
-							if (j == value)
-							{
-								this.KeySizeValue = value;
-								return;
-							}
-						}
-					}
+					throw new CryptographicException(Locale.GetText("Key size not supported by algorithm."));
 				}
-				throw new CryptographicException(Environment.GetResourceString("Specified key is not a valid size for this algorithm."));
+				this.KeySizeValue = value;
 			}
 		}
 
@@ -59,25 +34,22 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return (KeySizes[])this.LegalKeySizesValue.Clone();
+				return this.LegalKeySizesValue;
 			}
 		}
 
-		public virtual string SignatureAlgorithm
+		public abstract string SignatureAlgorithm { get; }
+
+		public void Clear()
 		{
-			get
-			{
-				throw new NotImplementedException();
-			}
+			this.Dispose(false);
 		}
 
-		public virtual string KeyExchangeAlgorithm
-		{
-			get
-			{
-				throw new NotImplementedException();
-			}
-		}
+		protected abstract void Dispose(bool disposing);
+
+		public abstract void FromXmlString(string xmlString);
+
+		public abstract string ToXmlString(bool includePrivateParameters);
 
 		public static AsymmetricAlgorithm Create()
 		{
@@ -89,14 +61,23 @@ namespace System.Security.Cryptography
 			return (AsymmetricAlgorithm)CryptoConfig.CreateFromName(algName);
 		}
 
-		public virtual void FromXmlString(string xmlString)
+		internal static byte[] GetNamedParam(string xml, string param)
 		{
-			throw new NotImplementedException();
-		}
-
-		public virtual string ToXmlString(bool includePrivateParameters)
-		{
-			throw new NotImplementedException();
+			string text = "<" + param + ">";
+			int num = xml.IndexOf(text);
+			if (num == -1)
+			{
+				return null;
+			}
+			string text2 = "</" + param + ">";
+			int num2 = xml.IndexOf(text2);
+			if (num2 == -1 || num2 <= num)
+			{
+				return null;
+			}
+			num += text.Length;
+			string text3 = xml.Substring(num, num2 - num);
+			return Convert.FromBase64String(text3);
 		}
 
 		protected int KeySizeValue;

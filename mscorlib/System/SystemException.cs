@@ -9,26 +9,28 @@ namespace System
 	public class SystemException : Exception
 	{
 		public SystemException()
-			: base(Environment.GetResourceString("System error."))
+			: base(Locale.GetText("A system exception has occurred."))
 		{
-			base.SetErrorCode(-2146233087);
+			base.HResult = -2146233087;
 		}
 
 		public SystemException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233087);
-		}
-
-		public SystemException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-			base.SetErrorCode(-2146233087);
+			base.HResult = -2146233087;
 		}
 
 		protected SystemException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		public SystemException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+			base.HResult = -2146233087;
+		}
+
+		private const int Result = -2146233087;
 	}
 }

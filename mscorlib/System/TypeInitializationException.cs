@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security;
 
 namespace System
 {
@@ -9,50 +8,32 @@ namespace System
 	[Serializable]
 	public sealed class TypeInitializationException : SystemException
 	{
-		private TypeInitializationException()
-			: base(Environment.GetResourceString("Type constructor threw an exception."))
-		{
-			base.SetErrorCode(-2146233036);
-		}
-
-		private TypeInitializationException(string message)
-			: base(message)
-		{
-			base.SetErrorCode(-2146233036);
-		}
-
 		public TypeInitializationException(string fullTypeName, Exception innerException)
-			: base(Environment.GetResourceString("The type initializer for '{0}' threw an exception.", new object[] { fullTypeName }), innerException)
+			: base(Locale.GetText("An exception was thrown by the type initializer for ") + fullTypeName, innerException)
 		{
-			this._typeName = fullTypeName;
-			base.SetErrorCode(-2146233036);
+			this.type_name = fullTypeName;
 		}
 
 		internal TypeInitializationException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this._typeName = info.GetString("TypeName");
+			this.type_name = info.GetString("TypeName");
 		}
 
 		public string TypeName
 		{
 			get
 			{
-				if (this._typeName == null)
-				{
-					return string.Empty;
-				}
-				return this._typeName;
+				return this.type_name;
 			}
 		}
 
-		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
-			info.AddValue("TypeName", this.TypeName, typeof(string));
+			info.AddValue("TypeName", this.type_name);
 		}
 
-		private string _typeName;
+		private string type_name;
 	}
 }

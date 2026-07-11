@@ -2,11 +2,7 @@
 
 namespace System
 {
-	public class FtpStyleUriParser : UriParser
+	public class FtpStyleUriParser : global::System.UriParser
 	{
-		public FtpStyleUriParser()
-			: base(UriParser.FtpUri.Flags)
-		{
-		}
 	}
 }

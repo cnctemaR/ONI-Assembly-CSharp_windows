@@ -9,26 +9,28 @@ namespace System
 	public class NotSupportedException : SystemException
 	{
 		public NotSupportedException()
-			: base(Environment.GetResourceString("Specified method is not supported."))
+			: base(Locale.GetText("Operation is not supported."))
 		{
-			base.SetErrorCode(-2146233067);
+			base.HResult = -2146233067;
 		}
 
 		public NotSupportedException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233067);
+			base.HResult = -2146233067;
 		}
 
 		public NotSupportedException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146233067);
+			base.HResult = -2146233067;
 		}
 
 		protected NotSupportedException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private const int Result = -2146233067;
 	}
 }

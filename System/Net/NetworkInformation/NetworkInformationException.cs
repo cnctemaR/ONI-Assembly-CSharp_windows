@@ -1,16 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
 namespace System.Net.NetworkInformation
 {
 	[Serializable]
-	public class NetworkInformationException : Win32Exception
+	public class NetworkInformationException : global::System.ComponentModel.Win32Exception
 	{
 		public NetworkInformationException()
-			: base(Marshal.GetLastWin32Error())
 		{
 		}
 
@@ -19,22 +16,20 @@ namespace System.Net.NetworkInformation
 		{
 		}
 
-		internal NetworkInformationException(SocketError socketError)
-			: base((int)socketError)
+		protected NetworkInformationException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
-		}
-
-		protected NetworkInformationException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-			: base(serializationInfo, streamingContext)
-		{
+			this.error_code = info.GetInt32("ErrorCode");
 		}
 
 		public override int ErrorCode
 		{
 			get
 			{
-				return base.NativeErrorCode;
+				return this.error_code;
 			}
 		}
+
+		private int error_code;
 	}
 }

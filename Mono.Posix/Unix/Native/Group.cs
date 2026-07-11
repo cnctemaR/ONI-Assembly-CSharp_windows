@@ -73,7 +73,7 @@ namespace Mono.Unix.Native
 
 		private static void GetMembers(StringBuilder sb, string[] members)
 		{
-			if (members.Length != 0)
+			if (members.Length > 0)
 			{
 				sb.Append(members[0]);
 			}

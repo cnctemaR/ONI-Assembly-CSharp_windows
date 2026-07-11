@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Net;
-using System.Text;
 
 namespace Mono.Security.Protocol.Tls.Handshake.Client
 {
@@ -22,6 +20,11 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 
 		protected override void ProcessAsSsl3()
 		{
+			this.ProcessAsTls1();
+		}
+
+		protected override void ProcessAsTls1()
+		{
 			base.Write(base.Context.Protocol);
 			TlsStream tlsStream = new TlsStream();
 			tlsStream.Write(base.Context.GetUnixTime());
@@ -33,7 +36,7 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			if (base.Context.SessionId != null)
 			{
 				base.Write((byte)base.Context.SessionId.Length);
-				if (base.Context.SessionId.Length != 0)
+				if (base.Context.SessionId.Length > 0)
 				{
 					base.Write(base.Context.SessionId);
 				}
@@ -49,27 +52,6 @@ namespace Mono.Security.Protocol.Tls.Handshake.Client
 			}
 			base.Write(1);
 			base.Write((byte)base.Context.CompressionMethod);
-		}
-
-		protected override void ProcessAsTls1()
-		{
-			this.ProcessAsSsl3();
-			string targetHost = base.Context.ClientSettings.TargetHost;
-			IPAddress ipaddress;
-			if (IPAddress.TryParse(targetHost, out ipaddress))
-			{
-				return;
-			}
-			TlsStream tlsStream = new TlsStream();
-			byte[] bytes = Encoding.UTF8.GetBytes(targetHost);
-			tlsStream.Write(0);
-			tlsStream.Write((short)(bytes.Length + 5));
-			tlsStream.Write((short)(bytes.Length + 3));
-			tlsStream.Write(0);
-			tlsStream.Write((short)bytes.Length);
-			tlsStream.Write(bytes);
-			base.Write((short)tlsStream.Length);
-			base.Write(tlsStream.ToArray());
 		}
 
 		private byte[] random;

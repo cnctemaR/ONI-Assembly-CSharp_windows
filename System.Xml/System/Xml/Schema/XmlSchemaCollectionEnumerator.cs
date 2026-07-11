@@ -5,31 +5,26 @@ namespace System.Xml.Schema
 {
 	public sealed class XmlSchemaCollectionEnumerator : IEnumerator
 	{
-		internal XmlSchemaCollectionEnumerator(Hashtable collection)
+		internal XmlSchemaCollectionEnumerator(ICollection col)
 		{
-			this.enumerator = collection.GetEnumerator();
-		}
-
-		void IEnumerator.Reset()
-		{
-			this.enumerator.Reset();
+			this.xenum = col.GetEnumerator();
 		}
 
 		bool IEnumerator.MoveNext()
 		{
-			return this.enumerator.MoveNext();
+			return this.xenum.MoveNext();
 		}
 
-		public bool MoveNext()
+		void IEnumerator.Reset()
 		{
-			return this.enumerator.MoveNext();
+			this.xenum.Reset();
 		}
 
 		object IEnumerator.Current
 		{
 			get
 			{
-				return this.Current;
+				return this.xenum.Current;
 			}
 		}
 
@@ -37,23 +32,15 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				XmlSchemaCollectionNode xmlSchemaCollectionNode = (XmlSchemaCollectionNode)this.enumerator.Value;
-				if (xmlSchemaCollectionNode != null)
-				{
-					return xmlSchemaCollectionNode.Schema;
-				}
-				return null;
+				return (XmlSchema)this.xenum.Current;
 			}
 		}
 
-		internal XmlSchemaCollectionNode CurrentNode
+		public bool MoveNext()
 		{
-			get
-			{
-				return (XmlSchemaCollectionNode)this.enumerator.Value;
-			}
+			return this.xenum.MoveNext();
 		}
 
-		private IDictionaryEnumerator enumerator;
+		private IEnumerator xenum;
 	}
 }

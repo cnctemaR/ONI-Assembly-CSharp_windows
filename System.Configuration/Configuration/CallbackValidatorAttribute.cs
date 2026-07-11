@@ -39,7 +39,7 @@ namespace System.Configuration
 			}
 		}
 
-		private string callbackMethodName = "";
+		private string callbackMethodName = string.Empty;
 
 		private Type type;
 

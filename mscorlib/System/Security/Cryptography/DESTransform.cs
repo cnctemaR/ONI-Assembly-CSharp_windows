@@ -16,7 +16,8 @@ namespace System.Security.Cryptography
 			}
 			if (DES.IsWeakKey(key) || DES.IsSemiWeakKey(key))
 			{
-				throw new CryptographicException(Locale.GetText("This is a known weak, or semi-weak, key."));
+				string text = Locale.GetText("This is a known weak, or semi-weak, key.");
+				throw new CryptographicException(text);
 			}
 			if (array == null)
 			{
@@ -34,9 +35,15 @@ namespace System.Security.Cryptography
 			byte[] array = this.keySchedule;
 			int num2 = n << 3;
 			uint num3 = (r >> 1) | (r << 31);
-			uint num4 = num | DESTransform.spBoxes[(int)(((num3 >> 26) ^ (uint)array[num2++]) & 63U)] | DESTransform.spBoxes[(int)(64U + (((num3 >> 22) ^ (uint)array[num2++]) & 63U))] | DESTransform.spBoxes[(int)(128U + (((num3 >> 18) ^ (uint)array[num2++]) & 63U))] | DESTransform.spBoxes[(int)(192U + (((num3 >> 14) ^ (uint)array[num2++]) & 63U))] | DESTransform.spBoxes[(int)(256U + (((num3 >> 10) ^ (uint)array[num2++]) & 63U))] | DESTransform.spBoxes[(int)(320U + (((num3 >> 6) ^ (uint)array[num2++]) & 63U))] | DESTransform.spBoxes[(int)(384U + (((num3 >> 2) ^ (uint)array[num2++]) & 63U))];
+			num |= DESTransform.spBoxes[(int)((UIntPtr)(0U + (((num3 >> 26) ^ (uint)array[num2++]) & 63U)))];
+			num |= DESTransform.spBoxes[(int)((UIntPtr)(64U + (((num3 >> 22) ^ (uint)array[num2++]) & 63U)))];
+			num |= DESTransform.spBoxes[(int)((UIntPtr)(128U + (((num3 >> 18) ^ (uint)array[num2++]) & 63U)))];
+			num |= DESTransform.spBoxes[(int)((UIntPtr)(192U + (((num3 >> 14) ^ (uint)array[num2++]) & 63U)))];
+			num |= DESTransform.spBoxes[(int)((UIntPtr)(256U + (((num3 >> 10) ^ (uint)array[num2++]) & 63U)))];
+			num |= DESTransform.spBoxes[(int)((UIntPtr)(320U + (((num3 >> 6) ^ (uint)array[num2++]) & 63U)))];
+			num |= DESTransform.spBoxes[(int)((UIntPtr)(384U + (((num3 >> 2) ^ (uint)array[num2++]) & 63U)))];
 			num3 = (r << 1) | (r >> 31);
-			return num4 | DESTransform.spBoxes[(int)(448U + ((num3 ^ (uint)array[num2]) & 63U))];
+			return num | DESTransform.spBoxes[(int)((UIntPtr)(448U + ((num3 ^ (uint)array[num2]) & 63U)))];
 		}
 
 		internal static void Permutation(byte[] input, byte[] output, uint[] permTab, bool preSwap)
@@ -72,16 +79,18 @@ namespace System.Security.Cryptography
 				output[5] = (byte)(num4 >> 8);
 				output[6] = (byte)(num4 >> 16);
 				output[7] = (byte)(num4 >> 24);
-				return;
 			}
-			output[0] = (byte)(num3 >> 24);
-			output[1] = (byte)(num3 >> 16);
-			output[2] = (byte)(num3 >> 8);
-			output[3] = (byte)num3;
-			output[4] = (byte)(num4 >> 24);
-			output[5] = (byte)(num4 >> 16);
-			output[6] = (byte)(num4 >> 8);
-			output[7] = (byte)num4;
+			else
+			{
+				output[0] = (byte)(num3 >> 24);
+				output[1] = (byte)(num3 >> 16);
+				output[2] = (byte)(num3 >> 8);
+				output[3] = (byte)num3;
+				output[4] = (byte)(num4 >> 24);
+				output[5] = (byte)(num4 >> 16);
+				output[6] = (byte)(num4 >> 8);
+				output[7] = (byte)num4;
+			}
 		}
 
 		private static void BSwap(byte[] byteBuff)
@@ -118,12 +127,12 @@ namespace System.Security.Cryptography
 				for (k = 0; k < num3; k++)
 				{
 					int num4 = k + (int)DESTransform.leftRotTotal[j];
-					array2[k] = array[(num4 < num3) ? num4 : (num4 - num3)];
+					array2[k] = array[(num4 >= num3) ? (num4 - num3) : num4];
 				}
 				for (k = num3; k < num; k++)
 				{
 					int num5 = k + (int)DESTransform.leftRotTotal[j];
-					array2[k] = array[(num5 < num) ? num5 : (num5 - num3)];
+					array2[k] = array[(num5 >= num) ? (num5 - num3) : num5];
 				}
 				int num6 = j * DESTransform.KEY_BYTE_SIZE;
 				k = 0;
@@ -131,9 +140,9 @@ namespace System.Security.Cryptography
 				{
 					if (array2[(int)b2] != 0)
 					{
-						byte[] array4 = this.keySchedule;
+						byte[] array3 = this.keySchedule;
 						int num7 = num6 + k / 6;
-						array4[num7] |= (byte)(128 >> k % 6 + 2);
+						array3[num7] |= (byte)(128 >> k % 6 + 2);
 					}
 					k++;
 				}

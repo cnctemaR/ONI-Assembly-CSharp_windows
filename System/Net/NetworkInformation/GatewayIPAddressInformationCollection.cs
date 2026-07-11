@@ -1,26 +1,67 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace System.Net.NetworkInformation
 {
-	public class GatewayIPAddressInformationCollection : ICollection<GatewayIPAddressInformation>, IEnumerable<GatewayIPAddressInformation>, IEnumerable
+	public class GatewayIPAddressInformationCollection : IEnumerable, IEnumerable<GatewayIPAddressInformation>, ICollection<GatewayIPAddressInformation>
 	{
-		protected internal GatewayIPAddressInformationCollection()
+		protected GatewayIPAddressInformationCollection()
 		{
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.list.GetEnumerator();
+		}
+
+		public virtual void Add(GatewayIPAddressInformation address)
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			this.list.Add(address);
+		}
+
+		public virtual void Clear()
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			this.list.Clear();
+		}
+
+		public virtual bool Contains(GatewayIPAddressInformation address)
+		{
+			return this.list.Contains(address);
 		}
 
 		public virtual void CopyTo(GatewayIPAddressInformation[] array, int offset)
 		{
-			this.addresses.CopyTo(array, offset);
+			this.list.CopyTo(array, offset);
+		}
+
+		public virtual IEnumerator<GatewayIPAddressInformation> GetEnumerator()
+		{
+			return ((IEnumerable<GatewayIPAddressInformation>)this.list).GetEnumerator();
+		}
+
+		public virtual bool Remove(GatewayIPAddressInformation address)
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			return this.list.Remove(address);
 		}
 
 		public virtual int Count
 		{
 			get
 			{
-				return this.addresses.Count;
+				return this.list.Count;
 			}
 		}
 
@@ -36,45 +77,10 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.addresses[index];
+				return this.list[index];
 			}
 		}
 
-		public virtual void Add(GatewayIPAddressInformation address)
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		internal void InternalAdd(GatewayIPAddressInformation address)
-		{
-			this.addresses.Add(address);
-		}
-
-		public virtual bool Contains(GatewayIPAddressInformation address)
-		{
-			return this.addresses.Contains(address);
-		}
-
-		public virtual IEnumerator<GatewayIPAddressInformation> GetEnumerator()
-		{
-			return this.addresses.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		public virtual bool Remove(GatewayIPAddressInformation address)
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		public virtual void Clear()
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		private Collection<GatewayIPAddressInformation> addresses = new Collection<GatewayIPAddressInformation>();
+		private List<GatewayIPAddressInformation> list = new List<GatewayIPAddressInformation>();
 	}
 }

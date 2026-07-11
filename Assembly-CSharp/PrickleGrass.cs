@@ -13,8 +13,8 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 		{
 			this.replanted = true;
 		});
-		this.growth_bonus.Description = "Growth Bonus";
-		this.wilt_penalty.Description = "Wilt Penalty";
+		this.growth_bonus.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.GROWTH_BONUS;
+		this.wilt_penalty.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.WILT_PENALTY;
 	}
 
 	protected override void OnSpawn()
@@ -84,14 +84,14 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 			state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, statusItemCategory);
 			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (PrickleGrass.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
-				smi.master.growth_bonus.Description = "Growth Bonus";
+				smi.master.growth_bonus.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.GROWTH_BONUS;
 				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.wilt_penalty);
 				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add(smi.master.growth_bonus);
 				smi.master.GetComponent<DecorProvider>().Refresh();
 			});
 			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.alive.idle, null).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
-				smi.master.growth_bonus.Description = "Wilt Penalty";
+				smi.master.growth_bonus.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.WILT_PENALTY;
 				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.growth_bonus);
 				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add(smi.master.wilt_penalty);
 				smi.master.GetComponent<DecorProvider>().SetValues(DECOR.PENALTY.TIER1);

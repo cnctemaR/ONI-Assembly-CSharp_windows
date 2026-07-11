@@ -5,7 +5,7 @@ using System.Runtime.Remoting.Messaging;
 
 namespace Mono.Remoting.Channels.Unix
 {
-	public class UnixChannel : IChannelReceiver, IChannel, IChannelSender
+	public class UnixChannel : IChannelSender, IChannel, IChannelReceiver
 	{
 		public UnixChannel()
 			: this(null)
@@ -20,6 +20,14 @@ namespace Mono.Remoting.Channels.Unix
 			Hashtable hashtable = new Hashtable();
 			hashtable["path"] = path;
 			this.Init(hashtable, null, null);
+		}
+
+		public UnixChannel(IDictionary properties, IClientChannelSinkProvider clientSinkProvider, IServerChannelSinkProvider serverSinkProvider)
+		{
+			this._name = "unix";
+			this._priority = 1;
+			base..ctor();
+			this.Init(properties, clientSinkProvider, serverSinkProvider);
 		}
 
 		private void Init(IDictionary properties, IClientChannelSinkProvider clientSink, IServerChannelSinkProvider serverSink)
@@ -39,14 +47,6 @@ namespace Mono.Remoting.Channels.Unix
 			{
 				this._priority = Convert.ToInt32(obj);
 			}
-		}
-
-		public UnixChannel(IDictionary properties, IClientChannelSinkProvider clientSinkProvider, IServerChannelSinkProvider serverSinkProvider)
-		{
-			this._name = "unix";
-			this._priority = 1;
-			base..ctor();
-			this.Init(properties, clientSinkProvider, serverSinkProvider);
 		}
 
 		public IMessageSink CreateMessageSink(string url, object remoteChannelData, out string objectURI)

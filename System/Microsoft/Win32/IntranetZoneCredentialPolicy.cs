@@ -6,16 +6,17 @@ using System.Security.Policy;
 
 namespace Microsoft.Win32
 {
-	public class IntranetZoneCredentialPolicy : ICredentialPolicy
+	public class IntranetZoneCredentialPolicy : global::System.Net.ICredentialPolicy
 	{
-		[SecurityPermission(SecurityAction.Demand, ControlPolicy = true)]
+		[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"ControlPolicy\"/>\n</PermissionSet>\n")]
 		public IntranetZoneCredentialPolicy()
 		{
 		}
 
-		public virtual bool ShouldSendCredential(Uri challengeUri, WebRequest request, NetworkCredential credential, IAuthenticationModule authModule)
+		public virtual bool ShouldSendCredential(global::System.Uri challengeUri, global::System.Net.WebRequest request, global::System.Net.NetworkCredential credential, global::System.Net.IAuthenticationModule authenticationModule)
 		{
-			return Zone.CreateFromUrl(challengeUri.AbsoluteUri).SecurityZone == SecurityZone.Intranet;
+			Zone zone = Zone.CreateFromUrl(challengeUri.AbsoluteUri);
+			return zone.SecurityZone == SecurityZone.Intranet;
 		}
 	}
 }

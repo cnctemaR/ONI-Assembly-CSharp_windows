@@ -2,117 +2,25 @@
 
 namespace System.Xml.Schema
 {
+	[MonoTODO]
 	public class XmlSchemaInfo : IXmlSchemaInfo
 	{
 		public XmlSchemaInfo()
 		{
-			this.Clear();
 		}
 
-		internal XmlSchemaInfo(XmlSchemaValidity validity)
-			: this()
+		internal XmlSchemaInfo(IXmlSchemaInfo info)
 		{
-			this.validity = validity;
+			this.isDefault = info.IsDefault;
+			this.isNil = info.IsNil;
+			this.memberType = info.MemberType;
+			this.attr = info.SchemaAttribute;
+			this.elem = info.SchemaElement;
+			this.type = info.SchemaType;
+			this.validity = info.Validity;
 		}
 
-		public XmlSchemaValidity Validity
-		{
-			get
-			{
-				return this.validity;
-			}
-			set
-			{
-				this.validity = value;
-			}
-		}
-
-		public bool IsDefault
-		{
-			get
-			{
-				return this.isDefault;
-			}
-			set
-			{
-				this.isDefault = value;
-			}
-		}
-
-		public bool IsNil
-		{
-			get
-			{
-				return this.isNil;
-			}
-			set
-			{
-				this.isNil = value;
-			}
-		}
-
-		public XmlSchemaSimpleType MemberType
-		{
-			get
-			{
-				return this.memberType;
-			}
-			set
-			{
-				this.memberType = value;
-			}
-		}
-
-		public XmlSchemaType SchemaType
-		{
-			get
-			{
-				return this.schemaType;
-			}
-			set
-			{
-				this.schemaType = value;
-				if (this.schemaType != null)
-				{
-					this.contentType = this.schemaType.SchemaContentType;
-					return;
-				}
-				this.contentType = XmlSchemaContentType.Empty;
-			}
-		}
-
-		public XmlSchemaElement SchemaElement
-		{
-			get
-			{
-				return this.schemaElement;
-			}
-			set
-			{
-				this.schemaElement = value;
-				if (value != null)
-				{
-					this.schemaAttribute = null;
-				}
-			}
-		}
-
-		public XmlSchemaAttribute SchemaAttribute
-		{
-			get
-			{
-				return this.schemaAttribute;
-			}
-			set
-			{
-				this.schemaAttribute = value;
-				if (value != null)
-				{
-					this.schemaElement = null;
-				}
-			}
-		}
-
+		[MonoTODO]
 		public XmlSchemaContentType ContentType
 		{
 			get
@@ -125,57 +33,108 @@ namespace System.Xml.Schema
 			}
 		}
 
-		internal XmlSchemaType XmlType
+		[MonoTODO]
+		public bool IsDefault
 		{
 			get
 			{
-				if (this.memberType != null)
-				{
-					return this.memberType;
-				}
-				return this.schemaType;
+				return this.isDefault;
+			}
+			set
+			{
+				this.isDefault = value;
 			}
 		}
 
-		internal bool HasDefaultValue
+		[MonoTODO]
+		public bool IsNil
 		{
 			get
 			{
-				return this.schemaElement != null && this.schemaElement.ElementDecl.DefaultValueTyped != null;
+				return this.isNil;
+			}
+			set
+			{
+				this.isNil = value;
 			}
 		}
 
-		internal bool IsUnionType
+		[MonoTODO]
+		public XmlSchemaSimpleType MemberType
 		{
 			get
 			{
-				return this.schemaType != null && this.schemaType.Datatype != null && this.schemaType.Datatype.Variety == XmlSchemaDatatypeVariety.Union;
+				return this.memberType;
+			}
+			set
+			{
+				this.memberType = value;
 			}
 		}
 
-		internal void Clear()
+		[MonoTODO]
+		public XmlSchemaAttribute SchemaAttribute
 		{
-			this.isNil = false;
-			this.isDefault = false;
-			this.schemaType = null;
-			this.schemaElement = null;
-			this.schemaAttribute = null;
-			this.memberType = null;
-			this.validity = XmlSchemaValidity.NotKnown;
-			this.contentType = XmlSchemaContentType.Empty;
+			get
+			{
+				return this.attr;
+			}
+			set
+			{
+				this.attr = value;
+			}
+		}
+
+		[MonoTODO]
+		public XmlSchemaElement SchemaElement
+		{
+			get
+			{
+				return this.elem;
+			}
+			set
+			{
+				this.elem = value;
+			}
+		}
+
+		[MonoTODO]
+		public XmlSchemaType SchemaType
+		{
+			get
+			{
+				return this.type;
+			}
+			set
+			{
+				this.type = value;
+			}
+		}
+
+		[MonoTODO]
+		public XmlSchemaValidity Validity
+		{
+			get
+			{
+				return this.validity;
+			}
+			set
+			{
+				this.validity = value;
+			}
 		}
 
 		private bool isDefault;
 
 		private bool isNil;
 
-		private XmlSchemaElement schemaElement;
-
-		private XmlSchemaAttribute schemaAttribute;
-
-		private XmlSchemaType schemaType;
-
 		private XmlSchemaSimpleType memberType;
+
+		private XmlSchemaAttribute attr;
+
+		private XmlSchemaElement elem;
+
+		private XmlSchemaType type;
 
 		private XmlSchemaValidity validity;
 

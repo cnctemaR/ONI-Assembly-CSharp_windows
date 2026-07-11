@@ -6,52 +6,29 @@ namespace Mono.Unix.Native
 {
 	public class Stdlib
 	{
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Unix_VersionString")]
-		private static extern IntPtr VersionStringPtr();
-
-		internal static void VersionCheck()
-		{
-			if (Stdlib.versionCheckPerformed)
-			{
-				return;
-			}
-			string text = "MonoProject-2015-12-1";
-			string text2 = Marshal.PtrToStringAnsi(Stdlib.VersionStringPtr());
-			if (text != text2)
-			{
-				throw new Exception(string.Concat(new string[] { "Mono.Posix assembly loaded with a different version (\"", text, "\") than MonoPosixHelper (\"", text2, "\"). You may need to reinstall Mono.Posix." }));
-			}
-			Stdlib.versionCheckPerformed = true;
-		}
-
-		static Stdlib()
-		{
-			Stdlib.VersionCheck();
-		}
-
 		internal Stdlib()
 		{
 		}
 
-		public static Errno GetLastError()
+		static Stdlib()
 		{
-			int num = Marshal.GetLastWin32Error();
-			if (Environment.OSVersion.Platform != PlatformID.Unix)
-			{
-				num = Stdlib._GetLastError();
-			}
-			return NativeConvert.ToErrno(num);
+			Array values = Enum.GetValues(typeof(Signum));
+			Stdlib.registered_signals = new SignalHandler[(int)values.GetValue(values.Length - 1)];
 		}
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_GetLastError")]
-		private static extern int _GetLastError();
+		public static Errno GetLastError()
+		{
+			int lastWin32Error = Marshal.GetLastWin32Error();
+			return NativeConvert.ToErrno(lastWin32Error);
+		}
 
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_SetLastError")]
 		private static extern void SetLastError(int error);
 
 		protected static void SetLastError(Errno error)
 		{
-			Stdlib.SetLastError(NativeConvert.FromErrno(error));
+			int num = NativeConvert.FromErrno(error);
+			Stdlib.SetLastError(num);
 		}
 
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_InvokeSignalHandler")]
@@ -96,6 +73,11 @@ namespace Mono.Unix.Native
 			for (int i = 0; i < invocationList.Length; i++)
 			{
 				Marshal.Prelink(invocationList[i].Method);
+			}
+			SignalHandler[] array = Stdlib.registered_signals;
+			lock (array)
+			{
+				Stdlib.registered_signals[(int)signum] = handler;
 			}
 			IntPtr intPtr;
 			if (handler == Stdlib.SIG_DFL)
@@ -161,7 +143,8 @@ namespace Mono.Unix.Native
 			default:
 				throw new ArgumentException("Invalid action value.", "action");
 			}
-			if (Stdlib.sys_signal(signum, intPtr) == Stdlib._SIG_ERR)
+			IntPtr intPtr2 = Stdlib.sys_signal(signum, intPtr);
+			if (intPtr2 == Stdlib._SIG_ERR)
 			{
 				return -1;
 			}
@@ -230,7 +213,7 @@ namespace Mono.Unix.Native
 		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int rename([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string oldpath, [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string newpath);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_tmpfile", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern IntPtr tmpfile();
 
 		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, EntryPoint = "tmpnam", SetLastError = true)]
@@ -247,7 +230,8 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Stdlib.sys_tmpnam(s));
+				IntPtr intPtr = Stdlib.sys_tmpnam(s);
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
@@ -259,21 +243,22 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Stdlib.sys_tmpnam(null));
+				IntPtr intPtr = Stdlib.sys_tmpnam(null);
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fclose", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int fclose(IntPtr stream);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fflush", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int fflush(IntPtr stream);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fopen", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern IntPtr fopen([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string path, string mode);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_freopen", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern IntPtr freopen([MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = Mono.Unix.Native.FileNameMarshaler)] string path, string mode, IntPtr stream);
 
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_setbuf", SetLastError = true)]
@@ -295,7 +280,7 @@ namespace Mono.Unix.Native
 			return Stdlib.setvbuf(stream, (IntPtr)((void*)buf), mode, size);
 		}
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fprintf")]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, EntryPoint = "fprintf")]
 		private static extern int sys_fprintf(IntPtr stream, string format, string message);
 
 		public static int fprintf(IntPtr stream, string message)
@@ -376,15 +361,16 @@ namespace Mono.Unix.Native
 			return (int)XPrintfFunctions.snprintf(array);
 		}
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fgetc", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int fgetc(IntPtr stream);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fgets", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, EntryPoint = "fgets", SetLastError = true)]
 		private static extern IntPtr sys_fgets(StringBuilder sb, int size, IntPtr stream);
 
 		public static StringBuilder fgets(StringBuilder sb, int size, IntPtr stream)
 		{
-			if (Stdlib.sys_fgets(sb, size, stream) == IntPtr.Zero)
+			IntPtr intPtr = Stdlib.sys_fgets(sb, size, stream);
+			if (intPtr == IntPtr.Zero)
 			{
 				return null;
 			}
@@ -396,24 +382,20 @@ namespace Mono.Unix.Native
 			return Stdlib.fgets(sb, sb.Capacity, stream);
 		}
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fputc", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int fputc(int c, IntPtr stream);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_fputs", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int fputs(string s, IntPtr stream);
 
-		public static int getc(IntPtr stream)
-		{
-			return Stdlib.fgetc(stream);
-		}
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
+		public static extern int getc(IntPtr stream);
 
 		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int getchar();
 
-		public static int putc(int c, IntPtr stream)
-		{
-			return Stdlib.fputc(c, stream);
-		}
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
+		public static extern int putc(int c, IntPtr stream);
 
 		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int putchar(int c);
@@ -421,7 +403,7 @@ namespace Mono.Unix.Native
 		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int puts(string s);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_ungetc", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl, SetLastError = true)]
 		public static extern int ungetc(int c, IntPtr stream);
 
 		[CLSCompliant(false)]
@@ -517,10 +499,10 @@ namespace Mono.Unix.Native
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_clearerr", SetLastError = true)]
 		public static extern int clearerr(IntPtr stream);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_feof", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int feof(IntPtr stream);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_ferror", SetLastError = true)]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl)]
 		public static extern int ferror(IntPtr stream);
 
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_perror", SetLastError = true)]
@@ -554,7 +536,7 @@ namespace Mono.Unix.Native
 		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_calloc", SetLastError = true)]
 		public static extern IntPtr calloc(ulong nmemb, ulong size);
 
-		[DllImport("MonoPosixHelper", CallingConvention = CallingConvention.Cdecl, EntryPoint = "Mono_Posix_Stdlib_free")]
+		[DllImport("msvcrt", CallingConvention = CallingConvention.Cdecl)]
 		public static extern void free(IntPtr ptr);
 
 		[CLSCompliant(false)]
@@ -580,7 +562,8 @@ namespace Mono.Unix.Native
 
 		public static string getenv(string name)
 		{
-			return UnixMarshal.PtrToString(Stdlib.sys_getenv(name));
+			IntPtr intPtr = Stdlib.sys_getenv(name);
+			return UnixMarshal.PtrToString(intPtr);
 		}
 
 		[CLSCompliant(false)]
@@ -598,7 +581,8 @@ namespace Mono.Unix.Native
 			string text;
 			lock (obj)
 			{
-				text = UnixMarshal.PtrToString(Stdlib.sys_strerror(num));
+				IntPtr intPtr = Stdlib.sys_strerror(num);
+				text = UnixMarshal.PtrToString(intPtr);
 			}
 			return text;
 		}
@@ -610,8 +594,6 @@ namespace Mono.Unix.Native
 		internal const string LIBC = "msvcrt";
 
 		internal const string MPH = "MonoPosixHelper";
-
-		private static bool versionCheckPerformed = false;
 
 		private static readonly IntPtr _SIG_DFL = Stdlib.GetDefaultSignal();
 
@@ -627,6 +609,8 @@ namespace Mono.Unix.Native
 
 		[CLSCompliant(false)]
 		public static readonly SignalHandler SIG_IGN = new SignalHandler(Stdlib._IgnoreHandler);
+
+		private static readonly SignalHandler[] registered_signals;
 
 		[CLSCompliant(false)]
 		public static readonly int _IOFBF = Stdlib.GetFullyBuffered();

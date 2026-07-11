@@ -1,84 +1,18 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.Serialization;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace System.Net
 {
 	[Serializable]
 	public class CookieCollection : ICollection, IEnumerable
 	{
-		public CookieCollection()
-		{
-			this.m_IsReadOnly = true;
-		}
-
-		internal CookieCollection(bool IsReadOnly)
-		{
-			this.m_IsReadOnly = IsReadOnly;
-		}
-
-		public bool IsReadOnly
+		internal IList<Cookie> List
 		{
 			get
 			{
-				return this.m_IsReadOnly;
-			}
-		}
-
-		public Cookie this[int index]
-		{
-			get
-			{
-				if (index < 0 || index >= this.m_list.Count)
-				{
-					throw new ArgumentOutOfRangeException("index");
-				}
-				return (Cookie)this.m_list[index];
-			}
-		}
-
-		public Cookie this[string name]
-		{
-			get
-			{
-				foreach (object obj in this.m_list)
-				{
-					Cookie cookie = (Cookie)obj;
-					if (string.Compare(cookie.Name, name, StringComparison.OrdinalIgnoreCase) == 0)
-					{
-						return cookie;
-					}
-				}
-				return null;
-			}
-		}
-
-		public void Add(Cookie cookie)
-		{
-			if (cookie == null)
-			{
-				throw new ArgumentNullException("cookie");
-			}
-			this.m_version++;
-			int num = this.IndexOf(cookie);
-			if (num == -1)
-			{
-				this.m_list.Add(cookie);
-				return;
-			}
-			this.m_list[num] = cookie;
-		}
-
-		public void Add(CookieCollection cookies)
-		{
-			if (cookies == null)
-			{
-				throw new ArgumentNullException("cookies");
-			}
-			foreach (object obj in cookies)
-			{
-				Cookie cookie = (Cookie)obj;
-				this.Add(cookie);
+				return this.list;
 			}
 		}
 
@@ -86,7 +20,7 @@ namespace System.Net
 		{
 			get
 			{
-				return this.m_list.Count;
+				return this.list.Count;
 			}
 		}
 
@@ -108,178 +42,133 @@ namespace System.Net
 
 		public void CopyTo(Array array, int index)
 		{
-			this.m_list.CopyTo(array, index);
+			((ICollection)this.list).CopyTo(array, index);
 		}
 
 		public void CopyTo(Cookie[] array, int index)
 		{
-			this.m_list.CopyTo(array, index);
-		}
-
-		internal DateTime TimeStamp(CookieCollection.Stamp how)
-		{
-			switch (how)
-			{
-			case CookieCollection.Stamp.Set:
-				this.m_TimeStamp = DateTime.Now;
-				break;
-			case CookieCollection.Stamp.SetToUnused:
-				this.m_TimeStamp = DateTime.MinValue;
-				break;
-			case CookieCollection.Stamp.SetToMaxUsed:
-				this.m_TimeStamp = DateTime.MaxValue;
-				break;
-			}
-			return this.m_TimeStamp;
-		}
-
-		internal bool IsOtherVersionSeen
-		{
-			get
-			{
-				return this.m_has_other_versions;
-			}
-		}
-
-		internal int InternalAdd(Cookie cookie, bool isStrict)
-		{
-			int num = 1;
-			if (isStrict)
-			{
-				IComparer comparer = Cookie.GetComparer();
-				int num2 = 0;
-				foreach (object obj in this.m_list)
-				{
-					Cookie cookie2 = (Cookie)obj;
-					if (comparer.Compare(cookie, cookie2) == 0)
-					{
-						num = 0;
-						if (cookie2.Variant <= cookie.Variant)
-						{
-							this.m_list[num2] = cookie;
-							break;
-						}
-						break;
-					}
-					else
-					{
-						num2++;
-					}
-				}
-				if (num2 == this.m_list.Count)
-				{
-					this.m_list.Add(cookie);
-				}
-			}
-			else
-			{
-				this.m_list.Add(cookie);
-			}
-			if (cookie.Version != 1)
-			{
-				this.m_has_other_versions = true;
-			}
-			return num;
-		}
-
-		internal int IndexOf(Cookie cookie)
-		{
-			IComparer comparer = Cookie.GetComparer();
-			int num = 0;
-			foreach (object obj in this.m_list)
-			{
-				Cookie cookie2 = (Cookie)obj;
-				if (comparer.Compare(cookie, cookie2) == 0)
-				{
-					return num;
-				}
-				num++;
-			}
-			return -1;
-		}
-
-		internal void RemoveAt(int idx)
-		{
-			this.m_list.RemoveAt(idx);
+			this.list.CopyTo(array, index);
 		}
 
 		public IEnumerator GetEnumerator()
 		{
-			return new CookieCollection.CookieCollectionEnumerator(this);
+			return this.list.GetEnumerator();
 		}
 
-		internal int m_version;
-
-		private ArrayList m_list = new ArrayList();
-
-		private DateTime m_TimeStamp = DateTime.MinValue;
-
-		private bool m_has_other_versions;
-
-		[OptionalField]
-		private bool m_IsReadOnly;
-
-		internal enum Stamp
+		public bool IsReadOnly
 		{
-			Check,
-			Set,
-			SetToUnused,
-			SetToMaxUsed
+			get
+			{
+				return true;
+			}
 		}
 
-		private class CookieCollectionEnumerator : IEnumerator
+		public void Add(Cookie cookie)
 		{
-			internal CookieCollectionEnumerator(CookieCollection cookies)
+			if (cookie == null)
 			{
-				this.m_cookies = cookies;
-				this.m_count = cookies.Count;
-				this.m_version = cookies.m_version;
+				throw new ArgumentNullException("cookie");
 			}
-
-			object IEnumerator.Current
+			int num = this.SearchCookie(cookie);
+			if (num == -1)
 			{
-				get
+				this.list.Add(cookie);
+			}
+			else
+			{
+				this.list[num] = cookie;
+			}
+		}
+
+		internal void Sort()
+		{
+			if (this.list.Count > 0)
+			{
+				this.list.Sort(CookieCollection.Comparer);
+			}
+		}
+
+		private int SearchCookie(Cookie cookie)
+		{
+			string name = cookie.Name;
+			string domain = cookie.Domain;
+			string path = cookie.Path;
+			for (int i = this.list.Count - 1; i >= 0; i--)
+			{
+				Cookie cookie2 = this.list[i];
+				if (cookie2.Version == cookie.Version)
 				{
-					if (this.m_index < 0 || this.m_index >= this.m_count)
+					if (string.Compare(domain, cookie2.Domain, true, CultureInfo.InvariantCulture) == 0)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Enumeration has either not started or has already finished."));
+						if (string.Compare(name, cookie2.Name, true, CultureInfo.InvariantCulture) == 0)
+						{
+							if (string.Compare(path, cookie2.Path, true, CultureInfo.InvariantCulture) == 0)
+							{
+								return i;
+							}
+						}
 					}
-					if (this.m_version != this.m_cookies.m_version)
+				}
+			}
+			return -1;
+		}
+
+		public void Add(CookieCollection cookies)
+		{
+			if (cookies == null)
+			{
+				throw new ArgumentNullException("cookies");
+			}
+			foreach (object obj in cookies)
+			{
+				Cookie cookie = (Cookie)obj;
+				this.Add(cookie);
+			}
+		}
+
+		public Cookie this[int index]
+		{
+			get
+			{
+				if (index < 0 || index >= this.list.Count)
+				{
+					throw new ArgumentOutOfRangeException("index");
+				}
+				return this.list[index];
+			}
+		}
+
+		public Cookie this[string name]
+		{
+			get
+			{
+				foreach (Cookie cookie in this.list)
+				{
+					if (string.Compare(cookie.Name, name, true, CultureInfo.InvariantCulture) == 0)
 					{
-						throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+						return cookie;
 					}
-					return this.m_cookies[this.m_index];
 				}
+				return null;
 			}
+		}
 
-			bool IEnumerator.MoveNext()
+		private List<Cookie> list = new List<Cookie>();
+
+		private static CookieCollection.CookieCollectionComparer Comparer = new CookieCollection.CookieCollectionComparer();
+
+		private sealed class CookieCollectionComparer : IComparer<Cookie>
+		{
+			public int Compare(Cookie x, Cookie y)
 			{
-				if (this.m_version != this.m_cookies.m_version)
+				if (x == null || y == null)
 				{
-					throw new InvalidOperationException(global::SR.GetString("Collection was modified; enumeration operation may not execute."));
+					return 0;
 				}
-				int num = this.m_index + 1;
-				this.m_index = num;
-				if (num < this.m_count)
-				{
-					return true;
-				}
-				this.m_index = this.m_count;
-				return false;
+				int num = x.Name.Length + x.Value.Length;
+				int num2 = y.Name.Length + y.Value.Length;
+				return num - num2;
 			}
-
-			void IEnumerator.Reset()
-			{
-				this.m_index = -1;
-			}
-
-			private CookieCollection m_cookies;
-
-			private int m_count;
-
-			private int m_index = -1;
-
-			private int m_version;
 		}
 	}
 }

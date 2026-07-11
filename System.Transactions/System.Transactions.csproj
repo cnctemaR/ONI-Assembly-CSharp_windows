@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D3C}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC840}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Transactions</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>net20</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultItems>False</EnableDefaultItems>
@@ -23,9 +23,6 @@
     <Compile Include="MonoTODOAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transactions\CommittableTransaction.cs" />
-    <Compile Include="Transactions\Configuration\DefaultSettingsSection.cs" />
-    <Compile Include="Transactions\Configuration\MachineSettingsSection.cs" />
-    <Compile Include="Transactions\Configuration\TransactionsSectionGroup.cs" />
     <Compile Include="Transactions\DependentCloneOption.cs" />
     <Compile Include="Transactions\DependentTransaction.cs" />
     <Compile Include="Transactions\Enlistment.cs" />
@@ -55,20 +52,14 @@
     <Compile Include="Transactions\TransactionOptions.cs" />
     <Compile Include="Transactions\TransactionPromotionException.cs" />
     <Compile Include="Transactions\TransactionScope.cs" />
-    <Compile Include="Transactions\TransactionScopeAsyncFlowOption.cs" />
     <Compile Include="Transactions\TransactionScopeOption.cs" />
     <Compile Include="Transactions\TransactionStartedEventHandler.cs" />
     <Compile Include="Transactions\TransactionStatus.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D32}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D34}</Project>
-      <Name>System.Configuration</Name>
-    </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
 </Project>

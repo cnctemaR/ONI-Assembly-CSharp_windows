@@ -6,26 +6,30 @@ namespace System.Reflection
 	[ComVisible(true)]
 	public class ManifestResourceInfo
 	{
-		public ManifestResourceInfo(Assembly containingAssembly, string containingFileName, ResourceLocation resourceLocation)
+		internal ManifestResourceInfo()
 		{
-			this._containingAssembly = containingAssembly;
-			this._containingFileName = containingFileName;
-			this._resourceLocation = resourceLocation;
 		}
 
-		public virtual Assembly ReferencedAssembly
+		internal ManifestResourceInfo(Assembly assembly, string filename, ResourceLocation location)
 		{
-			get
-			{
-				return this._containingAssembly;
-			}
+			this._assembly = assembly;
+			this._filename = filename;
+			this._location = location;
 		}
 
 		public virtual string FileName
 		{
 			get
 			{
-				return this._containingFileName;
+				return this._filename;
+			}
+		}
+
+		public virtual Assembly ReferencedAssembly
+		{
+			get
+			{
+				return this._assembly;
 			}
 		}
 
@@ -33,14 +37,14 @@ namespace System.Reflection
 		{
 			get
 			{
-				return this._resourceLocation;
+				return this._location;
 			}
 		}
 
-		private Assembly _containingAssembly;
+		private Assembly _assembly;
 
-		private string _containingFileName;
+		private string _filename;
 
-		private ResourceLocation _resourceLocation;
+		private ResourceLocation _location;
 	}
 }

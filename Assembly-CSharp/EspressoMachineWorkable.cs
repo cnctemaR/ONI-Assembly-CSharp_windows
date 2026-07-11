@@ -41,6 +41,10 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 		{
 			component2.Add(this.specificEffect, true);
 		}
+		if (!string.IsNullOrEmpty(this.trackingEffect))
+		{
+			component2.Add(this.trackingEffect, true);
+		}
 	}
 
 	protected override void OnStopWork(Worker worker)
@@ -51,13 +55,15 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 	public bool GetWorkerPriority(Worker worker, out int priority)
 	{
 		priority = this.basePriority;
-		if (!string.IsNullOrEmpty(this.specificEffect))
+		Effects component = worker.GetComponent<Effects>();
+		if (!string.IsNullOrEmpty(this.trackingEffect) && component.HasEffect(this.trackingEffect))
 		{
-			Effects component = worker.GetComponent<Effects>();
-			if (component.HasEffect(this.specificEffect))
-			{
-				priority = RELAXATION.PRIORITY.RECENTLY_USED;
-			}
+			priority = 0;
+			return false;
+		}
+		if (!string.IsNullOrEmpty(this.specificEffect) && component.HasEffect(this.specificEffect))
+		{
+			priority = RELAXATION.PRIORITY.RECENTLY_USED;
 		}
 		return true;
 	}
@@ -65,7 +71,9 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 	[MyCmpReq]
 	private Operational operational;
 
-	public int basePriority;
+	public int basePriority = RELAXATION.PRIORITY.TIER5;
 
-	public string specificEffect;
+	public string specificEffect = "Espresso";
+
+	public string trackingEffect = "RecentlyEspresso";
 }

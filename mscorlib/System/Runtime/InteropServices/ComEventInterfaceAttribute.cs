@@ -2,34 +2,34 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Interface, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Interface, Inherited = false)]
 	public sealed class ComEventInterfaceAttribute : Attribute
 	{
 		public ComEventInterfaceAttribute(Type SourceInterface, Type EventProvider)
 		{
-			this._SourceInterface = SourceInterface;
-			this._EventProvider = EventProvider;
-		}
-
-		public Type SourceInterface
-		{
-			get
-			{
-				return this._SourceInterface;
-			}
+			this.si = SourceInterface;
+			this.ep = EventProvider;
 		}
 
 		public Type EventProvider
 		{
 			get
 			{
-				return this._EventProvider;
+				return this.ep;
 			}
 		}
 
-		internal Type _SourceInterface;
+		public Type SourceInterface
+		{
+			get
+			{
+				return this.si;
+			}
+		}
 
-		internal Type _EventProvider;
+		private Type si;
+
+		private Type ep;
 	}
 }

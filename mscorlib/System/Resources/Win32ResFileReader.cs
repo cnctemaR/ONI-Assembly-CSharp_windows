@@ -42,51 +42,50 @@ namespace System.Resources
 			return num | (num2 << 16);
 		}
 
-		private bool read_padding()
+		private void read_padding()
 		{
 			while (this.res_file.Position % 4L != 0L)
 			{
-				if (this.read_int16() == -1)
-				{
-					return false;
-				}
+				this.read_int16();
 			}
-			return true;
 		}
 
 		private NameOrId read_ordinal()
 		{
-			if ((this.read_int16() & 65535) != 0)
-			{
-				return new NameOrId(this.read_int16());
-			}
-			byte[] array = new byte[16];
-			int num = 0;
-			for (;;)
+			int num = this.read_int16();
+			if ((num & 65535) != 0)
 			{
 				int num2 = this.read_int16();
-				if (num2 == 0)
+				return new NameOrId(num2);
+			}
+			byte[] array = new byte[16];
+			int num3 = 0;
+			for (;;)
+			{
+				int num4 = this.read_int16();
+				if (num4 == 0)
 				{
 					break;
 				}
-				if (num == array.Length)
+				if (num3 == array.Length)
 				{
 					byte[] array2 = new byte[array.Length * 2];
 					Array.Copy(array, array2, array.Length);
 					array = array2;
 				}
-				array[num] = (byte)(num2 >> 8);
-				array[num + 1] = (byte)(num2 & 255);
-				num += 2;
+				array[num3] = (byte)(num4 >> 8);
+				array[num3 + 1] = (byte)(num4 & 255);
+				num3 += 2;
 			}
-			return new NameOrId(new string(Encoding.Unicode.GetChars(array, 0, num)));
+			return new NameOrId(new string(Encoding.Unicode.GetChars(array, 0, num3)));
 		}
 
 		public ICollection ReadResources()
 		{
 			ArrayList arrayList = new ArrayList();
-			while (this.read_padding())
+			for (;;)
 			{
+				this.read_padding();
 				int num = this.read_int32();
 				if (num == -1)
 				{
@@ -95,10 +94,7 @@ namespace System.Resources
 				this.read_int32();
 				NameOrId nameOrId = this.read_ordinal();
 				NameOrId nameOrId2 = this.read_ordinal();
-				if (!this.read_padding())
-				{
-					break;
-				}
+				this.read_padding();
 				this.read_int32();
 				this.read_int16();
 				int num2 = this.read_int16();
@@ -107,10 +103,7 @@ namespace System.Resources
 				if (num != 0)
 				{
 					byte[] array = new byte[num];
-					if (this.res_file.Read(array, 0, num) != num)
-					{
-						break;
-					}
+					this.res_file.Read(array, 0, num);
 					arrayList.Add(new Win32EncodedResource(nameOrId, nameOrId2, num2, array));
 				}
 			}

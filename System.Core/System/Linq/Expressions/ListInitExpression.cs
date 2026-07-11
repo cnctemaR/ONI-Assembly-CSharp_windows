@@ -1,65 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Dynamic.Utils;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
-	[DebuggerTypeProxy(typeof(Expression.ListInitExpressionProxy))]
 	public sealed class ListInitExpression : Expression
 	{
-		internal ListInitExpression(NewExpression newExpression, ReadOnlyCollection<ElementInit> initializers)
+		internal ListInitExpression(NewExpression new_expression, ReadOnlyCollection<ElementInit> initializers)
+			: base(ExpressionType.ListInit, new_expression.Type)
 		{
-			this.NewExpression = newExpression;
-			this.Initializers = initializers;
+			this.new_expression = new_expression;
+			this.initializers = initializers;
 		}
 
-		public sealed override ExpressionType NodeType
-		{
-			get
-			{
-				return ExpressionType.ListInit;
-			}
-		}
-
-		public sealed override Type Type
+		public NewExpression NewExpression
 		{
 			get
 			{
-				return this.NewExpression.Type;
+				return this.new_expression;
 			}
 		}
 
-		public override bool CanReduce
+		public ReadOnlyCollection<ElementInit> Initializers
 		{
 			get
 			{
-				return true;
+				return this.initializers;
 			}
 		}
 
-		public NewExpression NewExpression { get; }
-
-		public ReadOnlyCollection<ElementInit> Initializers { get; }
-
-		protected internal override Expression Accept(ExpressionVisitor visitor)
+		internal override void Emit(EmitContext ec)
 		{
-			return visitor.VisitListInit(this);
+			LocalBuilder localBuilder = ec.EmitStored(this.new_expression);
+			ec.EmitCollection(this.initializers, localBuilder);
+			ec.EmitLoad(localBuilder);
 		}
 
-		public override Expression Reduce()
-		{
-			return MemberInitExpression.ReduceListInit(this.NewExpression, this.Initializers, true);
-		}
+		private NewExpression new_expression;
 
-		public ListInitExpression Update(NewExpression newExpression, IEnumerable<ElementInit> initializers)
-		{
-			if (((newExpression == this.NewExpression) & (initializers != null)) && ExpressionUtils.SameElements<ElementInit>(ref initializers, this.Initializers))
-			{
-				return this;
-			}
-			return Expression.ListInit(newExpression, initializers);
-		}
+		private ReadOnlyCollection<ElementInit> initializers;
 	}
 }

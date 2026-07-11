@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Net;
-using System.Runtime.CompilerServices;
 
 namespace Mono.Http
 {
-	internal class NtlmClient : IAuthenticationModule
+	internal class NtlmClient : global::System.Net.IAuthenticationModule
 	{
-		public Authorization Authenticate(string challenge, WebRequest webRequest, ICredentials credentials)
+		public global::System.Net.Authorization Authenticate(string challenge, global::System.Net.WebRequest webRequest, global::System.Net.ICredentials credentials)
 		{
 			if (credentials == null || challenge == null)
 			{
@@ -27,21 +27,27 @@ namespace Mono.Http
 			{
 				text = null;
 			}
-			HttpWebRequest httpWebRequest = webRequest as HttpWebRequest;
+			global::System.Net.HttpWebRequest httpWebRequest = webRequest as global::System.Net.HttpWebRequest;
 			if (httpWebRequest == null)
 			{
 				return null;
 			}
-			ConditionalWeakTable<HttpWebRequest, NtlmSession> conditionalWeakTable = NtlmClient.cache;
-			Authorization authorization;
-			lock (conditionalWeakTable)
+			Hashtable hashtable = Mono.Http.NtlmClient.cache;
+			global::System.Net.Authorization authorization;
+			lock (hashtable)
 			{
-				authorization = NtlmClient.cache.GetValue(httpWebRequest, (HttpWebRequest x) => new NtlmSession()).Authenticate(text, webRequest, credentials);
+				NtlmSession ntlmSession = (NtlmSession)Mono.Http.NtlmClient.cache[httpWebRequest.RequestUri];
+				if (ntlmSession == null)
+				{
+					ntlmSession = new NtlmSession();
+					Mono.Http.NtlmClient.cache.Add(httpWebRequest.RequestUri, ntlmSession);
+				}
+				authorization = ntlmSession.Authenticate(text, webRequest, credentials);
 			}
 			return authorization;
 		}
 
-		public Authorization PreAuthenticate(WebRequest webRequest, ICredentials credentials)
+		public global::System.Net.Authorization PreAuthenticate(global::System.Net.WebRequest webRequest, global::System.Net.ICredentials credentials)
 		{
 			return null;
 		}
@@ -62,6 +68,6 @@ namespace Mono.Http
 			}
 		}
 
-		private static readonly ConditionalWeakTable<HttpWebRequest, NtlmSession> cache = new ConditionalWeakTable<HttpWebRequest, NtlmSession>();
+		private static Hashtable cache = new Hashtable();
 	}
 }

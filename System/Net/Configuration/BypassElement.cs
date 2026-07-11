@@ -5,11 +5,6 @@ namespace System.Net.Configuration
 {
 	public sealed class BypassElement : ConfigurationElement
 	{
-		static BypassElement()
-		{
-			BypassElement.properties.Add(BypassElement.addressProp);
-		}
-
 		public BypassElement()
 		{
 		}
@@ -17,6 +12,11 @@ namespace System.Net.Configuration
 		public BypassElement(string address)
 		{
 			this.Address = address;
+		}
+
+		static BypassElement()
+		{
+			BypassElement.properties.Add(BypassElement.addressProp);
 		}
 
 		[ConfigurationProperty("address", Options = ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey)]
@@ -42,6 +42,6 @@ namespace System.Net.Configuration
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 
-		private static ConfigurationProperty addressProp = new ConfigurationProperty("address", typeof(string), null, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey);
+		private static ConfigurationProperty addressProp = new ConfigurationProperty("Address", typeof(string), null, ConfigurationPropertyOptions.IsRequired | ConfigurationPropertyOptions.IsKey);
 	}
 }

@@ -86,16 +86,17 @@ namespace Mono.Security.Authenticode
 
 		private static byte[] PEM(byte[] data)
 		{
-			string text = ((data[1] == 0) ? Encoding.Unicode.GetString(data) : Encoding.ASCII.GetString(data));
+			string text = ((data[1] != 0) ? Encoding.ASCII.GetString(data) : Encoding.Unicode.GetString(data));
 			int num = text.IndexOf("-----BEGIN PKCS7-----") + "-----BEGIN PKCS7-----".Length;
 			int num2 = text.IndexOf("-----END PKCS7-----", num);
-			return Convert.FromBase64String((num == -1 || num2 == -1) ? text : text.Substring(num, num2 - num));
+			string text2 = ((num != -1 && num2 != -1) ? text.Substring(num, num2 - num) : text);
+			return Convert.FromBase64String(text2);
 		}
-
-		private PKCS7.SignedData pkcs7;
 
 		private const string header = "-----BEGIN PKCS7-----";
 
 		private const string footer = "-----END PKCS7-----";
+
+		private PKCS7.SignedData pkcs7;
 	}
 }

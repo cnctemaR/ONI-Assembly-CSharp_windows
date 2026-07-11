@@ -6,14 +6,6 @@ namespace Mono.Security.Protocol.Tls
 	[Serializable]
 	internal sealed class TlsException : Exception
 	{
-		public Alert Alert
-		{
-			get
-			{
-				return this.alert;
-			}
-		}
-
 		internal TlsException(string message)
 			: base(message)
 		{
@@ -49,6 +41,14 @@ namespace Mono.Security.Protocol.Tls
 			: base(message)
 		{
 			this.alert = new Alert(description);
+		}
+
+		public Alert Alert
+		{
+			get
+			{
+				return this.alert;
+			}
 		}
 
 		private Alert alert;

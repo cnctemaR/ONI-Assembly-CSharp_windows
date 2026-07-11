@@ -4,10 +4,10 @@ namespace System.Net.Sockets
 {
 	public class LingerOption
 	{
-		public LingerOption(bool enable, int seconds)
+		public LingerOption(bool enable, int secs)
 		{
-			this.Enabled = enable;
-			this.LingerTime = seconds;
+			this.enabled = enable;
+			this.seconds = secs;
 		}
 
 		public bool Enabled
@@ -26,16 +26,16 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.lingerTime;
+				return this.seconds;
 			}
 			set
 			{
-				this.lingerTime = value;
+				this.seconds = value;
 			}
 		}
 
 		private bool enabled;
 
-		private int lingerTime;
+		private int seconds;
 	}
 }

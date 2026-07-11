@@ -21,23 +21,30 @@ namespace System.Security.Cryptography
 
 		protected override void Dispose(bool disposing)
 		{
-			if (this._ProcessingBuffer != null)
+			if (disposing)
 			{
-				Array.Clear(this._ProcessingBuffer, 0, this._ProcessingBuffer.Length);
-			}
-			if (this._H != null)
-			{
-				Array.Clear(this._H, 0, this._H.Length);
-			}
-			if (this.buff != null)
-			{
-				Array.Clear(this.buff, 0, this.buff.Length);
+				if (this._ProcessingBuffer != null)
+				{
+					Array.Clear(this._ProcessingBuffer, 0, this._ProcessingBuffer.Length);
+					this._ProcessingBuffer = null;
+				}
+				if (this._H != null)
+				{
+					Array.Clear(this._H, 0, this._H.Length);
+					this._H = null;
+				}
+				if (this.buff != null)
+				{
+					Array.Clear(this.buff, 0, this.buff.Length);
+					this.buff = null;
+				}
 			}
 			base.Dispose(disposing);
 		}
 
 		protected override void HashCore(byte[] rgb, int ibStart, int cbSize)
 		{
+			this.State = 1;
 			if (this._ProcessingBufferCount != 0)
 			{
 				if (cbSize < 64 - this._ProcessingBufferCount)
@@ -337,6 +344,8 @@ namespace System.Security.Cryptography
 		}
 
 		private const int BLOCK_SIZE_BYTES = 64;
+
+		private const int HASH_SIZE_BYTES = 16;
 
 		private uint[] _H;
 

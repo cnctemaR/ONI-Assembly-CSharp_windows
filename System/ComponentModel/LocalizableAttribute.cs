@@ -5,41 +5,40 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.All)]
 	public sealed class LocalizableAttribute : Attribute
 	{
-		public LocalizableAttribute(bool isLocalizable)
+		public LocalizableAttribute(bool localizable)
 		{
-			this.isLocalizable = isLocalizable;
+			this.localizable = localizable;
 		}
 
 		public bool IsLocalizable
 		{
 			get
 			{
-				return this.isLocalizable;
+				return this.localizable;
 			}
-		}
-
-		public override bool IsDefaultAttribute()
-		{
-			return this.IsLocalizable == LocalizableAttribute.Default.IsLocalizable;
 		}
 
 		public override bool Equals(object obj)
 		{
-			LocalizableAttribute localizableAttribute = obj as LocalizableAttribute;
-			return localizableAttribute != null && localizableAttribute.IsLocalizable == this.isLocalizable;
+			return obj is LocalizableAttribute && (obj == this || ((LocalizableAttribute)obj).IsLocalizable == this.localizable);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.localizable.GetHashCode();
 		}
 
-		private bool isLocalizable;
+		public override bool IsDefaultAttribute()
+		{
+			return this.localizable == LocalizableAttribute.Default.IsLocalizable;
+		}
 
-		public static readonly LocalizableAttribute Yes = new LocalizableAttribute(true);
+		private bool localizable;
+
+		public static readonly LocalizableAttribute Default = new LocalizableAttribute(false);
 
 		public static readonly LocalizableAttribute No = new LocalizableAttribute(false);
 
-		public static readonly LocalizableAttribute Default = LocalizableAttribute.No;
+		public static readonly LocalizableAttribute Yes = new LocalizableAttribute(true);
 	}
 }

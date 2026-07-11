@@ -6,6 +6,12 @@ namespace System.Collections.Specialized
 	public class HybridDictionary : IDictionary, ICollection, IEnumerable
 	{
 		public HybridDictionary()
+			: this(0, false)
+		{
+		}
+
+		public HybridDictionary(bool caseInsensitive)
+			: this(0, caseInsensitive)
 		{
 		}
 
@@ -14,129 +20,53 @@ namespace System.Collections.Specialized
 		{
 		}
 
-		public HybridDictionary(bool caseInsensitive)
-		{
-			this.caseInsensitive = caseInsensitive;
-		}
-
 		public HybridDictionary(int initialSize, bool caseInsensitive)
 		{
 			this.caseInsensitive = caseInsensitive;
-			if (initialSize >= 6)
+			IComparer comparer = ((!caseInsensitive) ? null : CaseInsensitiveComparer.DefaultInvariant);
+			IHashCodeProvider hashCodeProvider = ((!caseInsensitive) ? null : CaseInsensitiveHashCodeProvider.DefaultInvariant);
+			if (initialSize <= 10)
 			{
-				if (caseInsensitive)
-				{
-					this.hashtable = new Hashtable(initialSize, StringComparer.OrdinalIgnoreCase);
-					return;
-				}
-				this.hashtable = new Hashtable(initialSize);
-			}
-		}
-
-		public object this[object key]
-		{
-			get
-			{
-				ListDictionary listDictionary = this.list;
-				if (this.hashtable != null)
-				{
-					return this.hashtable[key];
-				}
-				if (listDictionary != null)
-				{
-					return listDictionary[key];
-				}
-				if (key == null)
-				{
-					throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
-				}
-				return null;
-			}
-			set
-			{
-				if (this.hashtable != null)
-				{
-					this.hashtable[key] = value;
-					return;
-				}
-				if (this.list == null)
-				{
-					this.list = new ListDictionary(this.caseInsensitive ? StringComparer.OrdinalIgnoreCase : null);
-					this.list[key] = value;
-					return;
-				}
-				if (this.list.Count >= 8)
-				{
-					this.ChangeOver();
-					this.hashtable[key] = value;
-					return;
-				}
-				this.list[key] = value;
-			}
-		}
-
-		private ListDictionary List
-		{
-			get
-			{
-				if (this.list == null)
-				{
-					this.list = new ListDictionary(this.caseInsensitive ? StringComparer.OrdinalIgnoreCase : null);
-				}
-				return this.list;
-			}
-		}
-
-		private void ChangeOver()
-		{
-			IDictionaryEnumerator enumerator = this.list.GetEnumerator();
-			Hashtable hashtable;
-			if (this.caseInsensitive)
-			{
-				hashtable = new Hashtable(13, StringComparer.OrdinalIgnoreCase);
+				this.list = new ListDictionary(comparer);
 			}
 			else
 			{
-				hashtable = new Hashtable(13);
+				this.hashtable = new Hashtable(initialSize, hashCodeProvider, comparer);
 			}
-			while (enumerator.MoveNext())
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.GetEnumerator();
+		}
+
+		private IDictionary inner
+		{
+			get
 			{
-				hashtable.Add(enumerator.Key, enumerator.Value);
+				IDictionary dictionary2;
+				if (this.list == null)
+				{
+					IDictionary dictionary = this.hashtable;
+					dictionary2 = dictionary;
+				}
+				else
+				{
+					dictionary2 = this.list;
+				}
+				return dictionary2;
 			}
-			this.hashtable = hashtable;
-			this.list = null;
 		}
 
 		public int Count
 		{
 			get
 			{
-				ListDictionary listDictionary = this.list;
-				if (this.hashtable != null)
-				{
-					return this.hashtable.Count;
-				}
-				if (listDictionary != null)
-				{
-					return listDictionary.Count;
-				}
-				return 0;
+				return this.inner.Count;
 			}
 		}
 
-		public ICollection Keys
-		{
-			get
-			{
-				if (this.hashtable != null)
-				{
-					return this.hashtable.Keys;
-				}
-				return this.List.Keys;
-			}
-		}
-
-		public bool IsReadOnly
+		public bool IsFixedSize
 		{
 			get
 			{
@@ -144,7 +74,7 @@ namespace System.Collections.Specialized
 			}
 		}
 
-		public bool IsFixedSize
+		public bool IsReadOnly
 		{
 			get
 			{
@@ -160,6 +90,30 @@ namespace System.Collections.Specialized
 			}
 		}
 
+		public object this[object key]
+		{
+			get
+			{
+				return this.inner[key];
+			}
+			set
+			{
+				this.inner[key] = value;
+				if (this.list != null && this.Count > 10)
+				{
+					this.Switch();
+				}
+			}
+		}
+
+		public ICollection Keys
+		{
+			get
+			{
+				return this.inner.Keys;
+			}
+		}
+
 		public object SyncRoot
 		{
 			get
@@ -172,134 +126,59 @@ namespace System.Collections.Specialized
 		{
 			get
 			{
-				if (this.hashtable != null)
-				{
-					return this.hashtable.Values;
-				}
-				return this.List.Values;
+				return this.inner.Values;
 			}
 		}
 
 		public void Add(object key, object value)
 		{
-			if (this.hashtable != null)
+			this.inner.Add(key, value);
+			if (this.list != null && this.Count > 10)
 			{
-				this.hashtable.Add(key, value);
-				return;
+				this.Switch();
 			}
-			if (this.list == null)
-			{
-				this.list = new ListDictionary(this.caseInsensitive ? StringComparer.OrdinalIgnoreCase : null);
-				this.list.Add(key, value);
-				return;
-			}
-			if (this.list.Count + 1 >= 9)
-			{
-				this.ChangeOver();
-				this.hashtable.Add(key, value);
-				return;
-			}
-			this.list.Add(key, value);
 		}
 
 		public void Clear()
 		{
-			if (this.hashtable != null)
-			{
-				Hashtable hashtable = this.hashtable;
-				this.hashtable = null;
-				hashtable.Clear();
-			}
-			if (this.list != null)
-			{
-				ListDictionary listDictionary = this.list;
-				this.list = null;
-				listDictionary.Clear();
-			}
+			this.inner.Clear();
 		}
 
 		public bool Contains(object key)
 		{
-			ListDictionary listDictionary = this.list;
-			if (this.hashtable != null)
-			{
-				return this.hashtable.Contains(key);
-			}
-			if (listDictionary != null)
-			{
-				return listDictionary.Contains(key);
-			}
-			if (key == null)
-			{
-				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
-			}
-			return false;
+			return this.inner.Contains(key);
 		}
 
 		public void CopyTo(Array array, int index)
 		{
-			if (this.hashtable != null)
-			{
-				this.hashtable.CopyTo(array, index);
-				return;
-			}
-			this.List.CopyTo(array, index);
+			this.inner.CopyTo(array, index);
 		}
 
 		public IDictionaryEnumerator GetEnumerator()
 		{
-			if (this.hashtable != null)
-			{
-				return this.hashtable.GetEnumerator();
-			}
-			if (this.list == null)
-			{
-				this.list = new ListDictionary(this.caseInsensitive ? StringComparer.OrdinalIgnoreCase : null);
-			}
-			return this.list.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			if (this.hashtable != null)
-			{
-				return this.hashtable.GetEnumerator();
-			}
-			if (this.list == null)
-			{
-				this.list = new ListDictionary(this.caseInsensitive ? StringComparer.OrdinalIgnoreCase : null);
-			}
-			return this.list.GetEnumerator();
+			return this.inner.GetEnumerator();
 		}
 
 		public void Remove(object key)
 		{
-			if (this.hashtable != null)
-			{
-				this.hashtable.Remove(key);
-				return;
-			}
-			if (this.list != null)
-			{
-				this.list.Remove(key);
-				return;
-			}
-			if (key == null)
-			{
-				throw new ArgumentNullException("key", global::SR.GetString("Key cannot be null."));
-			}
+			this.inner.Remove(key);
 		}
 
-		private const int CutoverPoint = 9;
+		private void Switch()
+		{
+			IComparer comparer = ((!this.caseInsensitive) ? null : CaseInsensitiveComparer.DefaultInvariant);
+			IHashCodeProvider hashCodeProvider = ((!this.caseInsensitive) ? null : CaseInsensitiveHashCodeProvider.DefaultInvariant);
+			this.hashtable = new Hashtable(this.list, hashCodeProvider, comparer);
+			this.list.Clear();
+			this.list = null;
+		}
 
-		private const int InitialHashtableSize = 13;
+		private const int switchAfter = 10;
 
-		private const int FixedSizeCutoverPoint = 6;
-
-		private ListDictionary list;
+		private bool caseInsensitive;
 
 		private Hashtable hashtable;
 
-		private bool caseInsensitive;
+		private ListDictionary list;
 	}
 }

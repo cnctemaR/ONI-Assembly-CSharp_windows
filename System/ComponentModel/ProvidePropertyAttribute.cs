@@ -2,26 +2,26 @@
 
 namespace System.ComponentModel
 {
-	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+	[AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
 	public sealed class ProvidePropertyAttribute : Attribute
 	{
-		public ProvidePropertyAttribute(string propertyName, Type receiverType)
-		{
-			this.propertyName = propertyName;
-			this.receiverTypeName = receiverType.AssemblyQualifiedName;
-		}
-
 		public ProvidePropertyAttribute(string propertyName, string receiverTypeName)
 		{
-			this.propertyName = propertyName;
-			this.receiverTypeName = receiverTypeName;
+			this.Property = propertyName;
+			this.Receiver = receiverTypeName;
+		}
+
+		public ProvidePropertyAttribute(string propertyName, Type receiverType)
+		{
+			this.Property = propertyName;
+			this.Receiver = receiverType.AssemblyQualifiedName;
 		}
 
 		public string PropertyName
 		{
 			get
 			{
-				return this.propertyName;
+				return this.Property;
 			}
 		}
 
@@ -29,7 +29,7 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.receiverTypeName;
+				return this.Receiver;
 			}
 		}
 
@@ -37,27 +37,22 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return base.GetType().FullName + this.propertyName;
+				return base.TypeId + this.Property;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			ProvidePropertyAttribute providePropertyAttribute = obj as ProvidePropertyAttribute;
-			return providePropertyAttribute != null && providePropertyAttribute.propertyName == this.propertyName && providePropertyAttribute.receiverTypeName == this.receiverTypeName;
+			return obj is ProvidePropertyAttribute && (obj == this || (((ProvidePropertyAttribute)obj).PropertyName == this.Property && ((ProvidePropertyAttribute)obj).ReceiverTypeName == this.Receiver));
 		}
 
 		public override int GetHashCode()
 		{
-			return this.propertyName.GetHashCode() ^ this.receiverTypeName.GetHashCode();
+			return (this.Property + this.Receiver).GetHashCode();
 		}
 
-		private readonly string propertyName;
+		private string Property;
 
-		private readonly string receiverTypeName;
+		private string Receiver;
 	}
 }

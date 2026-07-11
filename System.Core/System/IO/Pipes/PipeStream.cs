@@ -1,15 +1,30 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Security.AccessControl;
 using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
+	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"/>\n")]
+	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 	public abstract class PipeStream : Stream
 	{
+		protected PipeStream(PipeDirection direction, int bufferSize)
+			: this(direction, PipeTransmissionMode.Byte, bufferSize)
+		{
+		}
+
+		protected PipeStream(PipeDirection direction, PipeTransmissionMode transmissionMode, int outBufferSize)
+		{
+			this.direction = direction;
+			this.transmission_mode = transmissionMode;
+			this.read_trans_mode = transmissionMode;
+			if (outBufferSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException("bufferSize must be greater than 0");
+			}
+			this.buffer_size = outBufferSize;
+		}
+
 		internal static bool IsWindows
 		{
 			get
@@ -40,8 +55,8 @@ namespace System.IO.Pipes
 
 		internal static PipeDirection ToDirection(PipeAccessRights rights)
 		{
-			bool flag = (rights & PipeAccessRights.ReadData) > (PipeAccessRights)0;
-			bool flag2 = (rights & PipeAccessRights.WriteData) > (PipeAccessRights)0;
+			bool flag = (rights & PipeAccessRights.ReadData) != (PipeAccessRights)0;
+			bool flag2 = (rights & PipeAccessRights.WriteData) != (PipeAccessRights)0;
 			if (flag)
 			{
 				if (flag2)
@@ -60,28 +75,11 @@ namespace System.IO.Pipes
 			}
 		}
 
-		protected PipeStream(PipeDirection direction, int bufferSize)
-			: this(direction, PipeTransmissionMode.Byte, bufferSize)
-		{
-		}
-
-		protected PipeStream(PipeDirection direction, PipeTransmissionMode transmissionMode, int outBufferSize)
-		{
-			this.direction = direction;
-			this.transmission_mode = transmissionMode;
-			this.read_trans_mode = transmissionMode;
-			if (outBufferSize <= 0)
-			{
-				throw new ArgumentOutOfRangeException("bufferSize must be greater than 0");
-			}
-			this.buffer_size = outBufferSize;
-		}
-
 		public override bool CanRead
 		{
 			get
 			{
-				return (this.direction & PipeDirection.In) > (PipeDirection)0;
+				return (this.direction & PipeDirection.In) != (PipeDirection)0;
 			}
 		}
 
@@ -97,7 +95,7 @@ namespace System.IO.Pipes
 		{
 			get
 			{
-				return (this.direction & PipeDirection.Out) > (PipeDirection)0;
+				return (this.direction & PipeDirection.Out) != (PipeDirection)0;
 			}
 		}
 
@@ -123,7 +121,7 @@ namespace System.IO.Pipes
 				}
 				if (this.stream == null)
 				{
-					this.stream = new FileStream(this.handle.DangerousGetHandle(), this.CanRead ? (this.CanWrite ? FileAccess.ReadWrite : FileAccess.Read) : FileAccess.Write, false, this.buffer_size, this.IsAsync);
+					this.stream = new FileStream(this.handle.DangerousGetHandle(), (!this.CanRead) ? FileAccess.Write : ((!this.CanWrite) ? FileAccess.Read : FileAccess.ReadWrite), false, this.buffer_size, this.IsAsync);
 				}
 				return this.stream;
 			}
@@ -135,10 +133,10 @@ namespace System.IO.Pipes
 
 		private protected bool IsHandleExposed { protected get; private set; }
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public bool IsMessageComplete { get; private set; }
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public virtual int OutBufferSize
 		{
 			get
@@ -179,12 +177,12 @@ namespace System.IO.Pipes
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		protected internal virtual void CheckPipePropertyOperations()
 		{
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		protected internal void CheckReadOperations()
 		{
 			if (!this.IsConnected)
@@ -197,12 +195,12 @@ namespace System.IO.Pipes
 			}
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		protected internal void CheckWriteOperations()
 		{
 			if (!this.IsConnected)
 			{
-				throw new InvalidOperationException("Pipe is not connected");
+				throw new InvalidOperationException("Pipe us not connected");
 			}
 			if (!this.CanWrite)
 			{
@@ -255,60 +253,58 @@ namespace System.IO.Pipes
 			throw new NotSupportedException();
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public PipeSecurity GetAccessControl()
 		{
-			return new PipeSecurity(this.SafePipeHandle, AccessControlSections.Access | AccessControlSections.Owner | AccessControlSections.Group);
+			throw this.ThrowACLException();
 		}
 
+		[MonoNotSupported("ACL is not supported in Mono")]
 		public void SetAccessControl(PipeSecurity pipeSecurity)
 		{
-			if (pipeSecurity == null)
-			{
-				throw new ArgumentNullException("pipeSecurity");
-			}
-			pipeSecurity.Persist(this.SafePipeHandle);
+			throw this.ThrowACLException();
 		}
 
 		public void WaitForPipeDrain()
 		{
 		}
 
-		[global::System.MonoTODO]
-		public override int Read([In] byte[] buffer, int offset, int count)
+		[MonoTODO]
+		public override int Read(byte[] buffer, int offset, int count)
 		{
 			this.CheckReadOperations();
 			return this.Stream.Read(buffer, offset, count);
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public override int ReadByte()
 		{
 			this.CheckReadOperations();
 			return this.Stream.ReadByte();
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public override void Write(byte[] buffer, int offset, int count)
 		{
 			this.CheckWriteOperations();
 			this.Stream.Write(buffer, offset, count);
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public override void WriteByte(byte value)
 		{
 			this.CheckWriteOperations();
 			this.Stream.WriteByte(value);
 		}
 
-		[global::System.MonoTODO]
+		[MonoTODO]
 		public override void Flush()
 		{
 			this.CheckWriteOperations();
 			this.Stream.Flush();
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
 			if (this.read_delegate == null)
@@ -318,7 +314,7 @@ namespace System.IO.Pipes
 			return this.read_delegate.BeginInvoke(buffer, offset, count, callback, state);
 		}
 
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
 		{
 			if (this.write_delegate == null)

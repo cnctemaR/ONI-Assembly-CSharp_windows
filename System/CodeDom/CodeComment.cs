@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeComment : CodeObject
 	{
@@ -11,29 +14,45 @@ namespace System.CodeDom
 
 		public CodeComment(string text)
 		{
-			this.Text = text;
+			this.text = text;
 		}
 
 		public CodeComment(string text, bool docComment)
 		{
-			this.Text = text;
-			this.DocComment = docComment;
+			this.text = text;
+			this.docComment = docComment;
 		}
 
-		public bool DocComment { get; set; }
+		public bool DocComment
+		{
+			get
+			{
+				return this.docComment;
+			}
+			set
+			{
+				this.docComment = value;
+			}
+		}
 
 		public string Text
 		{
 			get
 			{
-				return this._text ?? string.Empty;
+				if (this.text == null)
+				{
+					return string.Empty;
+				}
+				return this.text;
 			}
 			set
 			{
-				this._text = value;
+				this.text = value;
 			}
 		}
 
-		private string _text;
+		private bool docComment;
+
+		private string text;
 	}
 }

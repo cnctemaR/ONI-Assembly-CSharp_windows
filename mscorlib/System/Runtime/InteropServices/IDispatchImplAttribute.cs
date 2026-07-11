@@ -2,29 +2,29 @@
 
 namespace System.Runtime.InteropServices
 {
+	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	[ComVisible(true)]
-	[Obsolete("This attribute is deprecated and will be removed in a future version.", false)]
-	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class, Inherited = false)]
+	[Obsolete]
 	public sealed class IDispatchImplAttribute : Attribute
 	{
 		public IDispatchImplAttribute(IDispatchImplType implType)
 		{
-			this._val = implType;
+			this.Impl = implType;
 		}
 
 		public IDispatchImplAttribute(short implType)
 		{
-			this._val = (IDispatchImplType)implType;
+			this.Impl = (IDispatchImplType)implType;
 		}
 
 		public IDispatchImplType Value
 		{
 			get
 			{
-				return this._val;
+				return this.Impl;
 			}
 		}
 
-		internal IDispatchImplType _val;
+		private IDispatchImplType Impl;
 	}
 }

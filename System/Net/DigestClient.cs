@@ -25,13 +25,13 @@ namespace System.Net
 				return;
 			}
 			DateTime dateTime = DateTime.MaxValue;
-			DateTime utcNow = DateTime.UtcNow;
+			DateTime now = DateTime.Now;
 			ArrayList arrayList = null;
 			foreach (object obj in DigestClient.cache.Keys)
 			{
 				int num = (int)obj;
 				DigestSession digestSession = (DigestSession)DigestClient.cache[num];
-				if (digestSession.LastUse < dateTime && (digestSession.LastUse - utcNow).Ticks > 6000000000L)
+				if (digestSession.LastUse < dateTime && (digestSession.LastUse - now).Ticks > 6000000000L)
 				{
 					dateTime = digestSession.LastUse;
 					if (arrayList == null)
@@ -57,7 +57,8 @@ namespace System.Net
 			{
 				return null;
 			}
-			if (challenge.Trim().ToLower().IndexOf("digest") == -1)
+			string text = challenge.Trim();
+			if (text.ToLower().IndexOf("digest") == -1)
 			{
 				return null;
 			}
@@ -66,27 +67,22 @@ namespace System.Net
 			{
 				return null;
 			}
-			DigestSession digestSession = new DigestSession();
+			int num = httpWebRequest.Address.GetHashCode() ^ credentials.GetHashCode();
+			DigestSession digestSession = (DigestSession)DigestClient.Cache[num];
+			bool flag = digestSession == null;
+			if (flag)
+			{
+				digestSession = new DigestSession();
+			}
 			if (!digestSession.Parse(challenge))
 			{
 				return null;
 			}
-			int num = httpWebRequest.Address.GetHashCode() ^ credentials.GetHashCode() ^ digestSession.Nonce.GetHashCode();
-			DigestSession digestSession2 = (DigestSession)DigestClient.Cache[num];
-			bool flag = digestSession2 == null;
 			if (flag)
 			{
-				digestSession2 = digestSession;
+				DigestClient.Cache.Add(num, digestSession);
 			}
-			else if (!digestSession2.Parse(challenge))
-			{
-				return null;
-			}
-			if (flag)
-			{
-				DigestClient.Cache.Add(num, digestSession2);
-			}
-			return digestSession2.Authenticate(webRequest, credentials);
+			return digestSession.Authenticate(webRequest, credentials);
 		}
 
 		public Authorization PreAuthenticate(WebRequest webRequest, ICredentials credentials)

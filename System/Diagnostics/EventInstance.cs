@@ -43,7 +43,7 @@ namespace System.Diagnostics
 			{
 				if (!Enum.IsDefined(typeof(EventLogEntryType), value))
 				{
-					throw new InvalidEnumArgumentException("value", (int)value, typeof(EventLogEntryType));
+					throw new global::System.ComponentModel.InvalidEnumArgumentException("value", (int)value, typeof(EventLogEntryType));
 				}
 				this._entryType = value;
 			}

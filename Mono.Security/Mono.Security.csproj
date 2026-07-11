@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D31}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC836}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Mono</RootNamespace>
     <AssemblyName>Mono.Security</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>net20</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -14,7 +14,6 @@
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="AssemblyRef.cs" />
     <Compile Include="Consts.cs" />
     <Compile Include="Locale.cs" />
     <Compile Include="Math\BigInteger.cs" />
@@ -57,36 +56,10 @@
     <Compile Include="Security\Cryptography\SHA224Managed.cs" />
     <Compile Include="Security\Cryptography\SHAConstants.cs" />
     <Compile Include="Security\Cryptography\SymmetricTransform.cs" />
-    <Compile Include="Security\Interface\Alert.cs" />
-    <Compile Include="Security\Interface\AlertDescription.cs" />
-    <Compile Include="Security\Interface\AlertLevel.cs" />
-    <Compile Include="Security\Interface\CertificateValidationHelper.cs" />
-    <Compile Include="Security\Interface\CipherAlgorithmType.cs" />
-    <Compile Include="Security\Interface\CipherSuiteCode.cs" />
-    <Compile Include="Security\Interface\ExchangeAlgorithmType.cs" />
-    <Compile Include="Security\Interface\HashAlgorithmType.cs" />
-    <Compile Include="Security\Interface\ICertificateValidator.cs" />
-    <Compile Include="Security\Interface\ICertificateValidator2.cs" />
-    <Compile Include="Security\Interface\IMonoSslStream.cs" />
-    <Compile Include="Security\Interface\MonoEncryptionPolicy.cs" />
-    <Compile Include="Security\Interface\MonoLocalCertificateSelectionCallback.cs" />
-    <Compile Include="Security\Interface\MonoRemoteCertificateValidationCallback.cs" />
-    <Compile Include="Security\Interface\MonoSslPolicyErrors.cs" />
-    <Compile Include="Security\Interface\MonoTlsConnectionInfo.cs" />
-    <Compile Include="Security\Interface\MonoTlsProvider.cs" />
-    <Compile Include="Security\Interface\MonoTlsProviderFactory.cs" />
-    <Compile Include="Security\Interface\MonoTlsSettings.cs" />
-    <Compile Include="Security\Interface\TlsException.cs" />
-    <Compile Include="Security\Interface\TlsProtocolCode.cs" />
-    <Compile Include="Security\Interface\TlsProtocols.cs" />
-    <Compile Include="Security\Interface\ValidationResult.cs" />
     <Compile Include="Security\PKCS7.cs" />
     <Compile Include="Security\Protocol\Ntlm\ChallengeResponse.cs" />
-    <Compile Include="Security\Protocol\Ntlm\ChallengeResponse2.cs" />
     <Compile Include="Security\Protocol\Ntlm\MessageBase.cs" />
-    <Compile Include="Security\Protocol\Ntlm\NtlmAuthLevel.cs" />
     <Compile Include="Security\Protocol\Ntlm\NtlmFlags.cs" />
-    <Compile Include="Security\Protocol\Ntlm\NtlmSettings.cs" />
     <Compile Include="Security\Protocol\Ntlm\Type1Message.cs" />
     <Compile Include="Security\Protocol\Ntlm\Type2Message.cs" />
     <Compile Include="Security\Protocol\Ntlm\Type3Message.cs" />
@@ -155,6 +128,7 @@
     <Compile Include="Security\Protocol\Tls\TlsException.cs" />
     <Compile Include="Security\Protocol\Tls\TlsServerSettings.cs" />
     <Compile Include="Security\Protocol\Tls\TlsStream.cs" />
+    <Compile Include="Security\Protocol\Tls\ValidationResult.cs" />
     <Compile Include="Security\StrongName.cs" />
     <Compile Include="Security\X509\Extensions\AuthorityKeyIdentifierExtension.cs" />
     <Compile Include="Security\X509\Extensions\BasicConstraintsExtension.cs" />
@@ -192,11 +166,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D32}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D37}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83C}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

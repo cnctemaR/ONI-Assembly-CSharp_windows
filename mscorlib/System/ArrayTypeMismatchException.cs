@@ -9,26 +9,28 @@ namespace System
 	public class ArrayTypeMismatchException : SystemException
 	{
 		public ArrayTypeMismatchException()
-			: base(Environment.GetResourceString("Attempted to access an element as a type incompatible with the array."))
+			: base(Locale.GetText("Source array type cannot be assigned to destination array type."))
 		{
-			base.SetErrorCode(-2146233085);
+			base.HResult = -2146233085;
 		}
 
 		public ArrayTypeMismatchException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233085);
+			base.HResult = -2146233085;
 		}
 
 		public ArrayTypeMismatchException(string message, Exception innerException)
 			: base(message, innerException)
 		{
-			base.SetErrorCode(-2146233085);
+			base.HResult = -2146233085;
 		}
 
 		protected ArrayTypeMismatchException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private const int Result = -2146233085;
 	}
 }

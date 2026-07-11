@@ -5,18 +5,25 @@ namespace System.Text
 	[Serializable]
 	public sealed class EncodingInfo
 	{
-		internal EncodingInfo(int codePage, string name, string displayName)
+		internal EncodingInfo(int cp)
 		{
-			this.iCodePage = codePage;
-			this.strEncodingName = name;
-			this.strDisplayName = displayName;
+			this.codepage = cp;
 		}
 
 		public int CodePage
 		{
 			get
 			{
-				return this.iCodePage;
+				return this.codepage;
+			}
+		}
+
+		[MonoTODO]
+		public string DisplayName
+		{
+			get
+			{
+				return this.Name;
 			}
 		}
 
@@ -24,38 +31,32 @@ namespace System.Text
 		{
 			get
 			{
-				return this.strEncodingName;
+				if (this.encoding == null)
+				{
+					this.encoding = this.GetEncoding();
+				}
+				return this.encoding.WebName;
 			}
-		}
-
-		public string DisplayName
-		{
-			get
-			{
-				return this.strDisplayName;
-			}
-		}
-
-		public Encoding GetEncoding()
-		{
-			return Encoding.GetEncoding(this.iCodePage);
 		}
 
 		public override bool Equals(object value)
 		{
 			EncodingInfo encodingInfo = value as EncodingInfo;
-			return encodingInfo != null && this.CodePage == encodingInfo.CodePage;
+			return encodingInfo != null && encodingInfo.codepage == this.codepage;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.CodePage;
+			return this.codepage;
 		}
 
-		private int iCodePage;
+		public Encoding GetEncoding()
+		{
+			return Encoding.GetEncoding(this.codepage);
+		}
 
-		private string strEncodingName;
+		private readonly int codepage;
 
-		private string strDisplayName;
+		private Encoding encoding;
 	}
 }

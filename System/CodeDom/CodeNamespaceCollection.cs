@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeNamespaceCollection : CollectionBase
 	{
@@ -10,12 +13,12 @@ namespace System.CodeDom
 		{
 		}
 
-		public CodeNamespaceCollection(CodeNamespaceCollection value)
+		public CodeNamespaceCollection(CodeNamespace[] value)
 		{
 			this.AddRange(value);
 		}
 
-		public CodeNamespaceCollection(CodeNamespace[] value)
+		public CodeNamespaceCollection(CodeNamespaceCollection value)
 		{
 			this.AddRange(value);
 		}

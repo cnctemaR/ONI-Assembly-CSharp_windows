@@ -1,69 +1,50 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class BaseNumberConverter : TypeConverter
 	{
-		internal virtual bool AllowHex
-		{
-			get
-			{
-				return true;
-			}
-		}
-
-		internal abstract Type TargetType { get; }
-
-		internal abstract object FromString(string value, int radix);
-
-		internal abstract object FromString(string value, NumberFormatInfo formatInfo);
-
-		internal abstract object FromString(string value, CultureInfo culture);
-
-		internal virtual Exception FromStringError(string failedText, Exception innerException)
-		{
-			return new Exception(global::SR.GetString("{0} is not a valid value for {1}.", new object[]
-			{
-				failedText,
-				this.TargetType.Name
-			}), innerException);
-		}
-
-		internal abstract string ToString(object value, NumberFormatInfo formatInfo);
+		internal abstract bool SupportHex { get; }
 
 		public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
 			return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 		}
 
+		public override bool CanConvertTo(ITypeDescriptorContext context, Type t)
+		{
+			return t.IsPrimitive || base.CanConvertTo(context, t);
+		}
+
 		public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			if (value is string)
+			if (culture == null)
 			{
-				string text = ((string)value).Trim();
+				culture = CultureInfo.CurrentCulture;
+			}
+			string text = value as string;
+			if (text != null)
+			{
 				try
 				{
-					if (this.AllowHex && text[0] == '#')
+					if (this.SupportHex)
 					{
-						return this.FromString(text.Substring(1), 16);
-					}
-					if ((this.AllowHex && text.StartsWith("0x")) || text.StartsWith("0X") || text.StartsWith("&h") || text.StartsWith("&H"))
-					{
-						return this.FromString(text.Substring(2), 16);
-					}
-					if (culture == null)
-					{
-						culture = CultureInfo.CurrentCulture;
+						if (text.Length >= 1 && text[0] == '#')
+						{
+							return this.ConvertFromString(text.Substring(1), 16);
+						}
+						if (text.StartsWith("0x") || text.StartsWith("0X"))
+						{
+							return this.ConvertFromString(text, 16);
+						}
 					}
 					NumberFormatInfo numberFormatInfo = (NumberFormatInfo)culture.GetFormat(typeof(NumberFormatInfo));
-					return this.FromString(text, numberFormatInfo);
+					return this.ConvertFromString(text, numberFormatInfo);
 				}
 				catch (Exception ex)
 				{
-					throw this.FromStringError(text, ex);
+					throw new Exception(value.ToString() + " is not a valid value for " + this.InnerType.Name + ".", ex);
 				}
 			}
 			return base.ConvertFrom(context, culture, value);
@@ -71,18 +52,17 @@ namespace System.ComponentModel
 
 		public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
 		{
-			if (destinationType == null)
+			if (value == null)
 			{
-				throw new ArgumentNullException("destinationType");
+				throw new ArgumentNullException("value");
 			}
-			if (destinationType == typeof(string) && value != null && this.TargetType.IsInstanceOfType(value))
+			if (culture == null)
 			{
-				if (culture == null)
-				{
-					culture = CultureInfo.CurrentCulture;
-				}
-				NumberFormatInfo numberFormatInfo = (NumberFormatInfo)culture.GetFormat(typeof(NumberFormatInfo));
-				return this.ToString(value, numberFormatInfo);
+				culture = CultureInfo.CurrentCulture;
+			}
+			if (destinationType == typeof(string) && value is IConvertible)
+			{
+				return ((IConvertible)value).ToType(destinationType, culture);
 			}
 			if (destinationType.IsPrimitive)
 			{
@@ -91,9 +71,19 @@ namespace System.ComponentModel
 			return base.ConvertTo(context, culture, value, destinationType);
 		}
 
-		public override bool CanConvertTo(ITypeDescriptorContext context, Type t)
+		internal abstract string ConvertToString(object value, NumberFormatInfo format);
+
+		internal abstract object ConvertFromString(string value, NumberFormatInfo format);
+
+		internal virtual object ConvertFromString(string value, int fromBase)
 		{
-			return base.CanConvertTo(context, t) || t.IsPrimitive;
+			if (this.SupportHex)
+			{
+				throw new NotImplementedException();
+			}
+			throw new InvalidOperationException();
 		}
+
+		internal Type InnerType;
 	}
 }

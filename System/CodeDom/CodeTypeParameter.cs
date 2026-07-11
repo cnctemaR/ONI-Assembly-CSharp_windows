@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeTypeParameter : CodeObject
 	{
@@ -11,31 +14,18 @@ namespace System.CodeDom
 
 		public CodeTypeParameter(string name)
 		{
-			this._name = name;
-		}
-
-		public string Name
-		{
-			get
-			{
-				return this._name ?? string.Empty;
-			}
-			set
-			{
-				this._name = value;
-			}
+			this.name = name;
 		}
 
 		public CodeTypeReferenceCollection Constraints
 		{
 			get
 			{
-				CodeTypeReferenceCollection codeTypeReferenceCollection;
-				if ((codeTypeReferenceCollection = this._constraints) == null)
+				if (this.constraints == null)
 				{
-					codeTypeReferenceCollection = (this._constraints = new CodeTypeReferenceCollection());
+					this.constraints = new CodeTypeReferenceCollection();
 				}
-				return codeTypeReferenceCollection;
+				return this.constraints;
 			}
 		}
 
@@ -43,21 +33,48 @@ namespace System.CodeDom
 		{
 			get
 			{
-				CodeAttributeDeclarationCollection codeAttributeDeclarationCollection;
-				if ((codeAttributeDeclarationCollection = this._customAttributes) == null)
+				if (this.customAttributes == null)
 				{
-					codeAttributeDeclarationCollection = (this._customAttributes = new CodeAttributeDeclarationCollection());
+					this.customAttributes = new CodeAttributeDeclarationCollection();
 				}
-				return codeAttributeDeclarationCollection;
+				return this.customAttributes;
 			}
 		}
 
-		public bool HasConstructorConstraint { get; set; }
+		public bool HasConstructorConstraint
+		{
+			get
+			{
+				return this.hasConstructorConstraint;
+			}
+			set
+			{
+				this.hasConstructorConstraint = value;
+			}
+		}
 
-		private string _name;
+		public string Name
+		{
+			get
+			{
+				if (this.name == null)
+				{
+					return string.Empty;
+				}
+				return this.name;
+			}
+			set
+			{
+				this.name = value;
+			}
+		}
 
-		private CodeAttributeDeclarationCollection _customAttributes;
+		private CodeTypeReferenceCollection constraints;
 
-		private CodeTypeReferenceCollection _constraints;
+		private CodeAttributeDeclarationCollection customAttributes;
+
+		private bool hasConstructorConstraint;
+
+		private string name;
 	}
 }

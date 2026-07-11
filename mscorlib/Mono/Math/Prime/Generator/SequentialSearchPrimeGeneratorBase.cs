@@ -24,23 +24,50 @@ namespace Mono.Math.Prime.Generator
 			uint[] smallPrimes = BigInteger.smallPrimes;
 			for (;;)
 			{
-				if (num % 3U != 0U && num % 5U != 0U && num % 7U != 0U && num % 11U != 0U && num % 13U != 0U && num % 17U != 0U && num % 19U != 0U && num % 23U != 0U && num % 29U != 0U)
+				if (num % 3U != 0U)
 				{
-					int num2 = 10;
-					while (num2 < smallPrimes.Length && (ulong)smallPrimes[num2] <= (ulong)((long)trialDivisionBounds))
+					if (num % 5U != 0U)
 					{
-						if (bigInteger % smallPrimes[num2] == 0U)
+						if (num % 7U != 0U)
 						{
-							goto IL_009D;
+							if (num % 11U != 0U)
+							{
+								if (num % 13U != 0U)
+								{
+									if (num % 17U != 0U)
+									{
+										if (num % 19U != 0U)
+										{
+											if (num % 23U != 0U)
+											{
+												if (num % 29U != 0U)
+												{
+													int num2 = 10;
+													while (num2 < smallPrimes.Length && (ulong)smallPrimes[num2] <= (ulong)((long)trialDivisionBounds))
+													{
+														if (bigInteger % smallPrimes[num2] == 0U)
+														{
+															goto IL_0105;
+														}
+														num2++;
+													}
+													if (this.IsPrimeAcceptable(bigInteger, context))
+													{
+														if (this.PrimalityTest(bigInteger, this.Confidence))
+														{
+															break;
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 						}
-						num2++;
-					}
-					if (this.IsPrimeAcceptable(bigInteger, context) && this.PrimalityTest(bigInteger, this.Confidence))
-					{
-						break;
 					}
 				}
-				IL_009D:
+				IL_0105:
 				num += 2U;
 				if (num >= 3234846615U)
 				{

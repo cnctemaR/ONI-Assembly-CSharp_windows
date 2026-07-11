@@ -9,6 +9,8 @@ namespace System.ComponentModel.Design
 
 		Assembly GetAssembly(AssemblyName name, bool throwOnError);
 
+		string GetPathOfAssembly(AssemblyName name);
+
 		Type GetType(string name);
 
 		Type GetType(string name, bool throwOnError);
@@ -16,7 +18,5 @@ namespace System.ComponentModel.Design
 		Type GetType(string name, bool throwOnError, bool ignoreCase);
 
 		void ReferenceAssembly(AssemblyName name);
-
-		string GetPathOfAssembly(AssemblyName name);
 	}
 }

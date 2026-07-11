@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeExpressionCollection : CollectionBase
 	{
@@ -10,12 +13,12 @@ namespace System.CodeDom
 		{
 		}
 
-		public CodeExpressionCollection(CodeExpressionCollection value)
+		public CodeExpressionCollection(CodeExpression[] value)
 		{
 			this.AddRange(value);
 		}
 
-		public CodeExpressionCollection(CodeExpression[] value)
+		public CodeExpressionCollection(CodeExpressionCollection value)
 		{
 			this.AddRange(value);
 		}

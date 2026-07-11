@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Mono.Security;
 
 namespace System.Security.Cryptography.Pkcs
@@ -10,17 +11,17 @@ namespace System.Security.Cryptography.Pkcs
 		{
 		}
 
-		public ContentInfo(Oid contentType, byte[] content)
+		public ContentInfo(Oid oid, byte[] content)
 		{
-			if (contentType == null)
+			if (oid == null)
 			{
-				throw new ArgumentNullException("contentType");
+				throw new ArgumentNullException("oid");
 			}
 			if (content == null)
 			{
 				throw new ArgumentNullException("content");
 			}
-			this._oid = contentType;
+			this._oid = oid;
 			this._content = content;
 		}
 
@@ -51,21 +52,40 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				throw new ArgumentNullException("algorithm");
 			}
-			Oid oid;
 			try
 			{
 				PKCS7.ContentInfo contentInfo = new PKCS7.ContentInfo(encodedMessage);
 				string contentType = contentInfo.ContentType;
-				if (!(contentType == "1.2.840.113549.1.7.1") && !(contentType == "1.2.840.113549.1.7.2") && !(contentType == "1.2.840.113549.1.7.3") && !(contentType == "1.2.840.113549.1.7.5") && !(contentType == "1.2.840.113549.1.7.6"))
+				if (contentType != null)
 				{
-					throw new CryptographicException(string.Format(Locale.GetText("Bad ASN1 - invalid OID '{0}'"), contentInfo.ContentType));
+					if (ContentInfo.<>f__switch$map0 == null)
+					{
+						ContentInfo.<>f__switch$map0 = new Dictionary<string, int>(5)
+						{
+							{ "1.2.840.113549.1.7.1", 0 },
+							{ "1.2.840.113549.1.7.2", 0 },
+							{ "1.2.840.113549.1.7.3", 0 },
+							{ "1.2.840.113549.1.7.5", 0 },
+							{ "1.2.840.113549.1.7.6", 0 }
+						};
+					}
+					int num;
+					if (ContentInfo.<>f__switch$map0.TryGetValue(contentType, out num))
+					{
+						if (num == 0)
+						{
+							return new Oid(contentInfo.ContentType);
+						}
+					}
 				}
-				oid = new Oid(contentInfo.ContentType);
+				string text = Locale.GetText("Bad ASN1 - invalid OID '{0}'");
+				throw new CryptographicException(string.Format(text, contentInfo.ContentType));
 			}
 			catch (Exception ex)
 			{
 				throw new CryptographicException(Locale.GetText("Bad ASN1 - invalid structure"), ex);
 			}
+			Oid oid;
 			return oid;
 		}
 

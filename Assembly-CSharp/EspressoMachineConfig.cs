@@ -49,9 +49,7 @@ public class EspressoMachineConfig : IBuildingConfig
 		manualDeliveryKG.minimumMass = 1f;
 		manualDeliveryKG.choreTags = new Tag[] { GameTags.ChoreTypes.Cooking };
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
-		EspressoMachineWorkable espressoMachineWorkable = go.AddOrGet<EspressoMachineWorkable>();
-		espressoMachineWorkable.basePriority = RELAXATION.PRIORITY.TIER5;
-		espressoMachineWorkable.specificEffect = "Espresso";
+		go.AddOrGet<EspressoMachineWorkable>();
 		go.AddOrGet<EspressoMachine>();
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;

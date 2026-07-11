@@ -22,11 +22,6 @@ namespace System.Diagnostics
 			}
 		}
 
-		public int IndexOf(ProcessModule module)
-		{
-			return base.InnerList.IndexOf(module);
-		}
-
 		public bool Contains(ProcessModule module)
 		{
 			return base.InnerList.Contains(module);
@@ -35,6 +30,11 @@ namespace System.Diagnostics
 		public void CopyTo(ProcessModule[] array, int index)
 		{
 			base.InnerList.CopyTo(array, index);
+		}
+
+		public int IndexOf(ProcessModule module)
+		{
+			return base.InnerList.IndexOf(module);
 		}
 	}
 }

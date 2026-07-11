@@ -2,7 +2,7 @@
 
 namespace System.ComponentModel
 {
-	[Obsolete("This interface has been deprecated. Add a TypeDescriptionProvider to handle type TypeDescriptor.ComObjectType instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+	[Obsolete("Use TypeDescriptionProvider and TypeDescriptor.ComObjectType instead")]
 	public interface IComNativeDescriptorHandler
 	{
 		AttributeCollection GetAttributes(object component);
@@ -17,16 +17,16 @@ namespace System.ComponentModel
 
 		object GetEditor(object component, Type baseEditorType);
 
-		string GetName(object component);
-
 		EventDescriptorCollection GetEvents(object component);
 
 		EventDescriptorCollection GetEvents(object component, Attribute[] attributes);
 
+		string GetName(object component);
+
 		PropertyDescriptorCollection GetProperties(object component, Attribute[] attributes);
 
-		object GetPropertyValue(object component, string propertyName, ref bool success);
-
 		object GetPropertyValue(object component, int dispid, ref bool success);
+
+		object GetPropertyValue(object component, string propertyName, ref bool success);
 	}
 }

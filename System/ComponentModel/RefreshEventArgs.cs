@@ -1,27 +1,29 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class RefreshEventArgs : EventArgs
 	{
 		public RefreshEventArgs(object componentChanged)
 		{
-			this.componentChanged = componentChanged;
-			this.typeChanged = componentChanged.GetType();
+			if (componentChanged == null)
+			{
+				throw new ArgumentNullException("componentChanged");
+			}
+			this.component = componentChanged;
+			this.type = this.component.GetType();
 		}
 
 		public RefreshEventArgs(Type typeChanged)
 		{
-			this.typeChanged = typeChanged;
+			this.type = typeChanged;
 		}
 
 		public object ComponentChanged
 		{
 			get
 			{
-				return this.componentChanged;
+				return this.component;
 			}
 		}
 
@@ -29,12 +31,12 @@ namespace System.ComponentModel
 		{
 			get
 			{
-				return this.typeChanged;
+				return this.type;
 			}
 		}
 
-		private object componentChanged;
+		private object component;
 
-		private Type typeChanged;
+		private Type type;
 	}
 }

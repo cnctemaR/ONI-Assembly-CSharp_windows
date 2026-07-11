@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -12,11 +13,7 @@ namespace System.Security.Cryptography
 
 		public RSAOAEPKeyExchangeDeformatter(AsymmetricAlgorithm key)
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			this._rsaKey = (RSA)key;
+			this.SetKey(key);
 		}
 
 		public override string Parameters
@@ -30,48 +27,27 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		[SecuritySafeCritical]
 		public override byte[] DecryptKeyExchange(byte[] rgbData)
 		{
-			if (this._rsaKey == null)
+			if (this.rsa == null)
 			{
-				throw new CryptographicUnexpectedOperationException(Environment.GetResourceString("No asymmetric key object has been associated with this formatter object."));
+				string text = Locale.GetText("No RSA key specified");
+				throw new CryptographicUnexpectedOperationException(text);
 			}
-			if (this.OverridesDecrypt)
+			SHA1 sha = SHA1.Create();
+			byte[] array = PKCS1.Decrypt_OAEP(this.rsa, sha, rgbData);
+			if (array != null)
 			{
-				return this._rsaKey.Decrypt(rgbData, RSAEncryptionPadding.OaepSHA1);
+				return array;
 			}
-			return Utils.RsaOaepDecrypt(this._rsaKey, SHA1.Create(), new PKCS1MaskGenerationMethod(), rgbData);
+			throw new CryptographicException(Locale.GetText("OAEP decoding error."));
 		}
 
 		public override void SetKey(AsymmetricAlgorithm key)
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			this._rsaKey = (RSA)key;
-			this._rsaOverridesDecrypt = null;
+			this.rsa = (RSA)key;
 		}
 
-		private bool OverridesDecrypt
-		{
-			get
-			{
-				if (this._rsaOverridesDecrypt == null)
-				{
-					this._rsaOverridesDecrypt = new bool?(Utils.DoesRsaKeyOverride(this._rsaKey, "Decrypt", new Type[]
-					{
-						typeof(byte[]),
-						typeof(RSAEncryptionPadding)
-					}));
-				}
-				return this._rsaOverridesDecrypt.Value;
-			}
-		}
-
-		private RSA _rsaKey;
-
-		private bool? _rsaOverridesDecrypt;
+		private RSA rsa;
 	}
 }

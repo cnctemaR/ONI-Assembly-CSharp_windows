@@ -67,11 +67,9 @@ public class LegacyModMain
 			{
 				if (!(component == null))
 				{
-					Type type = component.GetType();
-					while (type != typeof(Component))
+					for (Type type = component.GetType(); type != typeof(Component); type = type.BaseType)
 					{
 						hashSet.Add(type);
-						type = type.BaseType;
 					}
 				}
 			}

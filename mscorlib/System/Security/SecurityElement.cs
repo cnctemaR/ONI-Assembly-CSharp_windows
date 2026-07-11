@@ -192,11 +192,7 @@ namespace System.Security
 				throw new ArgumentNullException("name");
 			}
 			SecurityElement.SecurityAttribute attribute = this.GetAttribute(name);
-			if (attribute != null)
-			{
-				return attribute.Value;
-			}
-			return null;
+			return (attribute != null) ? attribute.Value : null;
 		}
 
 		[ComVisible(false)]
@@ -284,50 +280,35 @@ namespace System.Security
 			}
 			StringBuilder stringBuilder = new StringBuilder();
 			int length = str.Length;
-			int i = 0;
-			while (i < length)
+			for (int i = 0; i < length; i++)
 			{
 				char c = str[i];
-				if (c <= '&')
+				char c2 = c;
+				switch (c2)
 				{
-					if (c != '"')
+				case '"':
+					stringBuilder.Append("&quot;");
+					break;
+				default:
+					switch (c2)
 					{
-						if (c != '&')
-						{
-							goto IL_0096;
-						}
-						stringBuilder.Append("&amp;");
-					}
-					else
-					{
-						stringBuilder.Append("&quot;");
-					}
-				}
-				else if (c != '\'')
-				{
-					if (c != '<')
-					{
-						if (c != '>')
-						{
-							goto IL_0096;
-						}
-						stringBuilder.Append("&gt;");
-					}
-					else
-					{
+					case '<':
 						stringBuilder.Append("&lt;");
+						goto IL_00D9;
+					case '>':
+						stringBuilder.Append("&gt;");
+						goto IL_00D9;
 					}
-				}
-				else
-				{
+					stringBuilder.Append(c);
+					break;
+				case '&':
+					stringBuilder.Append("&amp;");
+					break;
+				case '\'':
 					stringBuilder.Append("&apos;");
+					break;
 				}
-				IL_009E:
-				i++;
-				continue;
-				IL_0096:
-				stringBuilder.Append(c);
-				goto IL_009E;
+				IL_00D9:;
 			}
 			return stringBuilder.ToString();
 		}
@@ -366,7 +347,8 @@ namespace System.Security
 			}
 			catch (Exception ex)
 			{
-				throw new XmlSyntaxException(Locale.GetText("Invalid XML."), ex);
+				string text = Locale.GetText("Invalid XML.");
+				throw new XmlSyntaxException(text, ex);
 			}
 			return securityElement;
 		}
@@ -465,19 +447,22 @@ namespace System.Security
 			if ((this.text == null || this.text == string.Empty) && (this.children == null || this.children.Count == 0))
 			{
 				s.Append("/>").Append(Environment.NewLine);
-				return;
 			}
-			s.Append(">").Append(SecurityElement.Escape(this.text));
-			if (this.children != null)
+			else
 			{
-				s.Append(Environment.NewLine);
-				foreach (object obj in this.children)
+				s.Append(">").Append(SecurityElement.Escape(this.text));
+				if (this.children != null)
 				{
-					((SecurityElement)obj).ToXml(ref s, level + 1);
+					s.Append(Environment.NewLine);
+					foreach (object obj in this.children)
+					{
+						SecurityElement securityElement = (SecurityElement)obj;
+						securityElement.ToXml(ref s, level + 1);
+					}
 				}
+				s.Append("</").Append(this.tag).Append(">")
+					.Append(Environment.NewLine);
 			}
-			s.Append("</").Append(this.tag).Append(">")
-				.Append(Environment.NewLine);
 		}
 
 		internal SecurityElement.SecurityAttribute GetAttribute(string name)
@@ -491,71 +476,6 @@ namespace System.Security
 					{
 						return securityAttribute;
 					}
-				}
-			}
-			return null;
-		}
-
-		internal string m_strTag
-		{
-			get
-			{
-				return this.tag;
-			}
-		}
-
-		internal string m_strText
-		{
-			get
-			{
-				return this.text;
-			}
-			set
-			{
-				this.text = value;
-			}
-		}
-
-		internal ArrayList m_lAttributes
-		{
-			get
-			{
-				return this.attributes;
-			}
-		}
-
-		internal ArrayList InternalChildren
-		{
-			get
-			{
-				return this.children;
-			}
-		}
-
-		internal string SearchForTextOfLocalName(string strLocalName)
-		{
-			if (strLocalName == null)
-			{
-				throw new ArgumentNullException("strLocalName");
-			}
-			if (this.tag == null)
-			{
-				return null;
-			}
-			if (this.tag.Equals(strLocalName) || this.tag.EndsWith(":" + strLocalName, StringComparison.Ordinal))
-			{
-				return SecurityElement.Unescape(this.text);
-			}
-			if (this.children == null)
-			{
-				return null;
-			}
-			foreach (object obj in this.children)
-			{
-				string text = ((SecurityElement)obj).SearchForTextOfLocalName(strLocalName);
-				if (text != null)
-				{
-					return text;
 				}
 			}
 			return null;

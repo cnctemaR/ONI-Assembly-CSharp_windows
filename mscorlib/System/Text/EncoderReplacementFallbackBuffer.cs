@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace System.Text
 {
@@ -7,95 +6,75 @@ namespace System.Text
 	{
 		public EncoderReplacementFallbackBuffer(EncoderReplacementFallback fallback)
 		{
-			this.strDefault = fallback.DefaultString + fallback.DefaultString;
-		}
-
-		public override bool Fallback(char charUnknown, int index)
-		{
-			if (this.fallbackCount >= 1)
+			if (fallback == null)
 			{
-				if (char.IsHighSurrogate(charUnknown) && this.fallbackCount >= 0 && char.IsLowSurrogate(this.strDefault[this.fallbackIndex + 1]))
-				{
-					base.ThrowLastCharRecursive(char.ConvertToUtf32(charUnknown, this.strDefault[this.fallbackIndex + 1]));
-				}
-				base.ThrowLastCharRecursive((int)charUnknown);
+				throw new ArgumentNullException("fallback");
 			}
-			this.fallbackCount = this.strDefault.Length / 2;
-			this.fallbackIndex = -1;
-			return this.fallbackCount != 0;
-		}
-
-		public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
-		{
-			if (!char.IsHighSurrogate(charUnknownHigh))
-			{
-				throw new ArgumentOutOfRangeException("charUnknownHigh", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 55296, 56319 }));
-			}
-			if (!char.IsLowSurrogate(charUnknownLow))
-			{
-				throw new ArgumentOutOfRangeException("charUnknownLow", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 56320, 57343 }));
-			}
-			if (this.fallbackCount >= 1)
-			{
-				base.ThrowLastCharRecursive(char.ConvertToUtf32(charUnknownHigh, charUnknownLow));
-			}
-			this.fallbackCount = this.strDefault.Length;
-			this.fallbackIndex = -1;
-			return this.fallbackCount != 0;
-		}
-
-		public override char GetNextChar()
-		{
-			this.fallbackCount--;
-			this.fallbackIndex++;
-			if (this.fallbackCount < 0)
-			{
-				return '\0';
-			}
-			if (this.fallbackCount == 2147483647)
-			{
-				this.fallbackCount = -1;
-				return '\0';
-			}
-			return this.strDefault[this.fallbackIndex];
-		}
-
-		public override bool MovePrevious()
-		{
-			if (this.fallbackCount >= -1 && this.fallbackIndex >= 0)
-			{
-				this.fallbackIndex--;
-				this.fallbackCount++;
-				return true;
-			}
-			return false;
+			this.replacement = fallback.DefaultString;
+			this.current = 0;
 		}
 
 		public override int Remaining
 		{
 			get
 			{
-				if (this.fallbackCount >= 0)
-				{
-					return this.fallbackCount;
-				}
-				return 0;
+				return this.replacement.Length - this.current;
 			}
 		}
 
-		[SecuritySafeCritical]
-		public override void Reset()
+		public override bool Fallback(char charUnknown, int index)
 		{
-			this.fallbackCount = -1;
-			this.fallbackIndex = 0;
-			this.charStart = null;
-			this.bFallingBack = false;
+			return this.Fallback(index);
 		}
 
-		private string strDefault;
+		public override bool Fallback(char charUnknownHigh, char charUnknownLow, int index)
+		{
+			return this.Fallback(index);
+		}
 
-		private int fallbackCount = -1;
+		private bool Fallback(int index)
+		{
+			if (this.fallback_assigned && this.Remaining != 0)
+			{
+				throw new ArgumentException("Reentrant Fallback method invocation occured. It might be because either this FallbackBuffer is incorrectly shared by multiple threads, invoked inside Encoding recursively, or Reset invocation is forgotten.");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			this.fallback_assigned = true;
+			this.current = 0;
+			return this.replacement.Length > 0;
+		}
 
-		private int fallbackIndex = -1;
+		public override char GetNextChar()
+		{
+			if (this.current >= this.replacement.Length)
+			{
+				return '\0';
+			}
+			return this.replacement[this.current++];
+		}
+
+		public override bool MovePrevious()
+		{
+			if (this.current == 0)
+			{
+				return false;
+			}
+			this.current--;
+			return true;
+		}
+
+		public override void Reset()
+		{
+			this.current = 0;
+		}
+
+		private string replacement;
+
+		private int current;
+
+		private bool fallback_assigned;
 	}
 }

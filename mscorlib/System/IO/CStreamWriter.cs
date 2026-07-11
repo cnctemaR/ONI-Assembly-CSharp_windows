@@ -5,8 +5,8 @@ namespace System.IO
 {
 	internal class CStreamWriter : StreamWriter
 	{
-		public CStreamWriter(Stream stream, Encoding encoding, bool leaveOpen)
-			: base(stream, encoding, 1024, leaveOpen)
+		public CStreamWriter(Stream stream, Encoding encoding)
+			: base(stream, encoding)
 		{
 			this.driver = (TermInfoDriver)ConsoleDriver.driver;
 		}
@@ -92,6 +92,22 @@ namespace System.IO
 			}
 		}
 
+		public void WriteKey(ConsoleKeyInfo key)
+		{
+			lock (this)
+			{
+				ConsoleKeyInfo consoleKeyInfo = new ConsoleKeyInfo(key);
+				if (this.driver.IsSpecialKey(consoleKeyInfo))
+				{
+					this.driver.WriteSpecialKey(consoleKeyInfo);
+				}
+				else
+				{
+					this.InternalWriteChar(consoleKeyInfo.KeyChar);
+				}
+			}
+		}
+
 		public void InternalWriteString(string val)
 		{
 			try
@@ -139,14 +155,16 @@ namespace System.IO
 			if (this.driver.Initialized)
 			{
 				this.Write(val.ToCharArray());
-				return;
 			}
-			try
+			else
 			{
-				base.Write(val);
-			}
-			catch (IOException)
-			{
+				try
+				{
+					base.Write(val);
+				}
+				catch (IOException)
+				{
+				}
 			}
 		}
 

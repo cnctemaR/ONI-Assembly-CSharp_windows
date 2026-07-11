@@ -21,8 +21,6 @@ namespace System.IO
 		ReparsePoint = 1024,
 		SparseFile = 512,
 		System = 4,
-		Temporary = 256,
-		IntegrityStream = 32768,
-		NoScrubData = 131072
+		Temporary = 256
 	}
 }

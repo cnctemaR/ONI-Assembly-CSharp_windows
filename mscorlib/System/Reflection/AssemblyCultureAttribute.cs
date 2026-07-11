@@ -9,17 +9,17 @@ namespace System.Reflection
 	{
 		public AssemblyCultureAttribute(string culture)
 		{
-			this.m_culture = culture;
+			this.name = culture;
 		}
 
 		public string Culture
 		{
 			get
 			{
-				return this.m_culture;
+				return this.name;
 			}
 		}
 
-		private string m_culture;
+		private string name;
 	}
 }

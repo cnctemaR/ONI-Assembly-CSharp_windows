@@ -3,35 +3,50 @@ using System.Linq.Expressions;
 
 namespace System.Runtime.CompilerServices
 {
-	[Obsolete("do not use this type", true)]
 	public class ExecutionScope
 	{
-		internal ExecutionScope()
+		private ExecutionScope(CompilationContext context, int compilation_unit)
 		{
-			this.Parent = null;
-			this.Globals = null;
-			this.Locals = null;
+			this.context = context;
+			this.compilation_unit = compilation_unit;
+			this.Globals = context.GetGlobals();
 		}
 
-		public object[] CreateHoistedLocals()
+		internal ExecutionScope(CompilationContext context)
+			: this(context, 0)
 		{
-			throw new NotSupportedException();
+		}
+
+		internal ExecutionScope(CompilationContext context, int compilation_unit, ExecutionScope parent, object[] locals)
+			: this(context, compilation_unit)
+		{
+			this.Parent = parent;
+			this.Locals = locals;
 		}
 
 		public Delegate CreateDelegate(int indexLambda, object[] locals)
 		{
-			throw new NotSupportedException();
+			return this.context.CreateDelegate(indexLambda, new ExecutionScope(this.context, indexLambda, this, locals));
+		}
+
+		public object[] CreateHoistedLocals()
+		{
+			return this.context.CreateHoistedLocals(this.compilation_unit);
 		}
 
 		public Expression IsolateExpression(Expression expression, object[] locals)
 		{
-			throw new NotSupportedException();
+			return this.context.IsolateExpression(this, locals, expression);
 		}
-
-		public ExecutionScope Parent;
 
 		public object[] Globals;
 
 		public object[] Locals;
+
+		public ExecutionScope Parent;
+
+		internal CompilationContext context;
+
+		internal int compilation_unit;
 	}
 }

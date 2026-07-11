@@ -5,14 +5,15 @@ using System.Threading;
 namespace System.Runtime.Remoting.Channels
 {
 	[Serializable]
-	internal class CrossAppDomainChannel : IChannel, IChannelSender, IChannelReceiver
+	internal class CrossAppDomainChannel : IChannel, IChannelReceiver, IChannelSender
 	{
 		internal static void RegisterCrossAppDomainChannel()
 		{
 			object obj = CrossAppDomainChannel.s_lock;
 			lock (obj)
 			{
-				ChannelServices.RegisterChannel(new CrossAppDomainChannel());
+				CrossAppDomainChannel crossAppDomainChannel = new CrossAppDomainChannel();
+				ChannelServices.RegisterChannel(crossAppDomainChannel);
 			}
 		}
 
@@ -78,6 +79,8 @@ namespace System.Runtime.Remoting.Channels
 		}
 
 		private const string _strName = "MONOCAD";
+
+		private const string _strBaseURI = "MONOCADURI";
 
 		private static object s_lock = new object();
 	}

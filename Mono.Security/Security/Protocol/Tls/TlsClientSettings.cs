@@ -7,6 +7,12 @@ namespace Mono.Security.Protocol.Tls
 {
 	internal sealed class TlsClientSettings
 	{
+		public TlsClientSettings()
+		{
+			this.certificates = new global::System.Security.Cryptography.X509Certificates.X509CertificateCollection();
+			this.targetHost = string.Empty;
+		}
+
 		public string TargetHost
 		{
 			get
@@ -52,22 +58,18 @@ namespace Mono.Security.Protocol.Tls
 			}
 		}
 
-		public TlsClientSettings()
-		{
-			this.certificates = new global::System.Security.Cryptography.X509Certificates.X509CertificateCollection();
-			this.targetHost = string.Empty;
-		}
-
 		public void UpdateCertificateRSA()
 		{
 			if (this.clientCertificate == null)
 			{
 				this.certificateRSA = null;
-				return;
 			}
-			Mono.Security.X509.X509Certificate x509Certificate = new Mono.Security.X509.X509Certificate(this.clientCertificate.GetRawCertData());
-			this.certificateRSA = new RSAManaged(x509Certificate.RSA.KeySize);
-			this.certificateRSA.ImportParameters(x509Certificate.RSA.ExportParameters(false));
+			else
+			{
+				Mono.Security.X509.X509Certificate x509Certificate = new Mono.Security.X509.X509Certificate(this.clientCertificate.GetRawCertData());
+				this.certificateRSA = new RSAManaged(x509Certificate.RSA.KeySize);
+				this.certificateRSA.ImportParameters(x509Certificate.RSA.ExportParameters(false));
+			}
 		}
 
 		private string targetHost;

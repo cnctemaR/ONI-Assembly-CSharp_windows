@@ -8,60 +8,13 @@ namespace System.Xml.Serialization
 	{
 		public ImportContext(CodeIdentifiers identifiers, bool shareTypes)
 		{
-			this.typeIdentifiers = identifiers;
-			this.shareTypes = shareTypes;
-		}
-
-		internal ImportContext()
-			: this(null, false)
-		{
-		}
-
-		internal SchemaObjectCache Cache
-		{
-			get
+			this._typeIdentifiers = identifiers;
+			this._shareTypes = shareTypes;
+			if (shareTypes)
 			{
-				if (this.cache == null)
-				{
-					this.cache = new SchemaObjectCache();
-				}
-				return this.cache;
-			}
-		}
-
-		internal Hashtable Elements
-		{
-			get
-			{
-				if (this.elements == null)
-				{
-					this.elements = new Hashtable();
-				}
-				return this.elements;
-			}
-		}
-
-		internal Hashtable Mappings
-		{
-			get
-			{
-				if (this.mappings == null)
-				{
-					this.mappings = new Hashtable();
-				}
-				return this.mappings;
-			}
-		}
-
-		public CodeIdentifiers TypeIdentifiers
-		{
-			get
-			{
-				if (this.typeIdentifiers == null)
-				{
-					this.typeIdentifiers = new CodeIdentifiers();
-				}
-				return this.typeIdentifiers;
+				this.MappedTypes = new Hashtable();
+				this.DataMappedTypes = new Hashtable();
+				this.SharedAnonymousTypes = new Hashtable();
 			}
 		}
 
@@ -69,7 +22,15 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this.shareTypes;
+				return this._shareTypes;
+			}
+		}
+
+		public CodeIdentifiers TypeIdentifiers
+		{
+			get
+			{
+				return this._typeIdentifiers;
 			}
 		}
 
@@ -77,18 +38,20 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this.Cache.Warnings;
+				return this._warnings;
 			}
 		}
 
-		private bool shareTypes;
+		private bool _shareTypes;
 
-		private SchemaObjectCache cache;
+		private CodeIdentifiers _typeIdentifiers;
 
-		private Hashtable mappings;
+		private StringCollection _warnings = new StringCollection();
 
-		private Hashtable elements;
+		internal Hashtable MappedTypes;
 
-		private CodeIdentifiers typeIdentifiers;
+		internal Hashtable DataMappedTypes;
+
+		internal Hashtable SharedAnonymousTypes;
 	}
 }

@@ -31,7 +31,7 @@ namespace System.Configuration
 			return base.GetRuntimeObject();
 		}
 
-		private static readonly ConfigurationProperty _propConnectionStrings = new ConfigurationProperty("", typeof(ConnectionStringSettingsCollection), null, ConfigurationPropertyOptions.IsDefaultCollection);
+		private static readonly ConfigurationProperty _propConnectionStrings = new ConfigurationProperty(string.Empty, typeof(ConnectionStringSettingsCollection), null, ConfigurationPropertyOptions.IsDefaultCollection);
 
 		private static ConfigurationPropertyCollection _properties = new ConfigurationPropertyCollection();
 	}

@@ -8,7 +8,7 @@ namespace System.Configuration
 	{
 		public object Create(object parent, object context, XmlNode section)
 		{
-			return ConfigHelper.GetNameValueCollection(parent as NameValueCollection, section, this.KeyAttributeName, this.ValueAttributeName);
+			return ConfigHelper.GetNameValueCollection(parent as global::System.Collections.Specialized.NameValueCollection, section, this.KeyAttributeName, this.ValueAttributeName);
 		}
 
 		protected virtual string KeyAttributeName

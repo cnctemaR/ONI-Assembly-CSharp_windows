@@ -1,208 +1,56 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace System.Collections.Generic
 {
-	[DebuggerTypeProxy(typeof(ICollectionDebugView<>))]
-	[DebuggerDisplay("Count = {Count}")]
+	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 	[Serializable]
-	public class HashSet<T> : ICollection<T>, IEnumerable<T>, IEnumerable, ISet<T>, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback
+	public class HashSet<T> : IEnumerable, ISerializable, IDeserializationCallback, ICollection<T>, IEnumerable<T>
 	{
 		public HashSet()
-			: this(EqualityComparer<T>.Default)
 		{
+			this.Init(10, null);
 		}
 
 		public HashSet(IEqualityComparer<T> comparer)
 		{
-			if (comparer == null)
-			{
-				comparer = EqualityComparer<T>.Default;
-			}
-			this._comparer = comparer;
-			this._lastIndex = 0;
-			this._count = 0;
-			this._freeList = -1;
-			this._version = 0;
-		}
-
-		public HashSet(int capacity)
-			: this(capacity, EqualityComparer<T>.Default)
-		{
+			this.Init(10, comparer);
 		}
 
 		public HashSet(IEnumerable<T> collection)
-			: this(collection, EqualityComparer<T>.Default)
+			: this(collection, null)
 		{
 		}
 
 		public HashSet(IEnumerable<T> collection, IEqualityComparer<T> comparer)
-			: this(comparer)
 		{
 			if (collection == null)
 			{
 				throw new ArgumentNullException("collection");
 			}
-			HashSet<T> hashSet = collection as HashSet<T>;
-			if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet))
-			{
-				this.CopyFrom(hashSet);
-				return;
-			}
+			int num = 0;
 			ICollection<T> collection2 = collection as ICollection<T>;
-			int num = ((collection2 == null) ? 0 : collection2.Count);
-			this.Initialize(num);
-			this.UnionWith(collection);
-			if (this._count > 0 && this._slots.Length / this._count > 3)
+			if (collection2 != null)
 			{
-				this.TrimExcess();
+				num = collection2.Count;
+			}
+			this.Init(num, comparer);
+			foreach (T t in collection)
+			{
+				this.Add(t);
 			}
 		}
 
 		protected HashSet(SerializationInfo info, StreamingContext context)
 		{
-			this._siInfo = info;
+			this.si = info;
 		}
 
-		private void CopyFrom(HashSet<T> source)
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			int count = source._count;
-			if (count == 0)
-			{
-				return;
-			}
-			int num = source._buckets.Length;
-			if (HashHelpers.ExpandPrime(count + 1) >= num)
-			{
-				this._buckets = (int[])source._buckets.Clone();
-				this._slots = (HashSet<T>.Slot[])source._slots.Clone();
-				this._lastIndex = source._lastIndex;
-				this._freeList = source._freeList;
-			}
-			else
-			{
-				int lastIndex = source._lastIndex;
-				HashSet<T>.Slot[] slots = source._slots;
-				this.Initialize(count);
-				int num2 = 0;
-				for (int i = 0; i < lastIndex; i++)
-				{
-					int hashCode = slots[i].hashCode;
-					if (hashCode >= 0)
-					{
-						this.AddValue(num2, hashCode, slots[i].value);
-						num2++;
-					}
-				}
-				this._lastIndex = num2;
-			}
-			this._count = count;
-		}
-
-		public HashSet(int capacity, IEqualityComparer<T> comparer)
-			: this(comparer)
-		{
-			if (capacity < 0)
-			{
-				throw new ArgumentOutOfRangeException("capacity");
-			}
-			if (capacity > 0)
-			{
-				this.Initialize(capacity);
-			}
-		}
-
-		void ICollection<T>.Add(T item)
-		{
-			this.AddIfNotPresent(item);
-		}
-
-		public void Clear()
-		{
-			if (this._lastIndex > 0)
-			{
-				Array.Clear(this._slots, 0, this._lastIndex);
-				Array.Clear(this._buckets, 0, this._buckets.Length);
-				this._lastIndex = 0;
-				this._count = 0;
-				this._freeList = -1;
-			}
-			this._version++;
-		}
-
-		public bool Contains(T item)
-		{
-			if (this._buckets != null)
-			{
-				int num = this.InternalGetHashCode(item);
-				for (int i = this._buckets[num % this._buckets.Length] - 1; i >= 0; i = this._slots[i].next)
-				{
-					if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, item))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			this.CopyTo(array, arrayIndex, this._count);
-		}
-
-		public bool Remove(T item)
-		{
-			if (this._buckets != null)
-			{
-				int num = this.InternalGetHashCode(item);
-				int num2 = num % this._buckets.Length;
-				int num3 = -1;
-				for (int i = this._buckets[num2] - 1; i >= 0; i = this._slots[i].next)
-				{
-					if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, item))
-					{
-						if (num3 < 0)
-						{
-							this._buckets[num2] = this._slots[i].next + 1;
-						}
-						else
-						{
-							this._slots[num3].next = this._slots[i].next;
-						}
-						this._slots[i].hashCode = -1;
-						if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-						{
-							this._slots[i].value = default(T);
-						}
-						this._slots[i].next = this._freeList;
-						this._count--;
-						this._version++;
-						if (this._count == 0)
-						{
-							this._lastIndex = 0;
-							this._freeList = -1;
-						}
-						else
-						{
-							this._freeList = i;
-						}
-						return true;
-					}
-					num3 = i;
-				}
-			}
-			return false;
-		}
-
-		public int Count
-		{
-			get
-			{
-				return this._count;
-			}
+			return new HashSet<T>.Enumerator(this);
 		}
 
 		bool ICollection<T>.IsReadOnly
@@ -213,14 +61,14 @@ namespace System.Collections.Generic
 			}
 		}
 
-		public HashSet<T>.Enumerator GetEnumerator()
+		void ICollection<T>.CopyTo(T[] array, int index)
 		{
-			return new HashSet<T>.Enumerator(this);
+			this.CopyTo(array, index);
 		}
 
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		void ICollection<T>.Add(T item)
 		{
-			return new HashSet<T>.Enumerator(this);
+			this.Add(item);
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
@@ -228,84 +76,256 @@ namespace System.Collections.Generic
 			return new HashSet<T>.Enumerator(this);
 		}
 
-		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		public int Count
 		{
-			if (info == null)
+			get
 			{
-				throw new ArgumentNullException("info");
-			}
-			info.AddValue("Version", this._version);
-			info.AddValue("Comparer", this._comparer, typeof(IComparer<T>));
-			info.AddValue("Capacity", (this._buckets == null) ? 0 : this._buckets.Length);
-			if (this._buckets != null)
-			{
-				T[] array = new T[this._count];
-				this.CopyTo(array);
-				info.AddValue("Elements", array, typeof(T[]));
+				return this.count;
 			}
 		}
 
-		public virtual void OnDeserialization(object sender)
+		private void Init(int capacity, IEqualityComparer<T> comparer)
 		{
-			if (this._siInfo == null)
+			if (capacity < 0)
 			{
-				return;
+				throw new ArgumentOutOfRangeException("capacity");
 			}
-			int @int = this._siInfo.GetInt32("Capacity");
-			this._comparer = (IEqualityComparer<T>)this._siInfo.GetValue("Comparer", typeof(IEqualityComparer<T>));
-			this._freeList = -1;
-			if (@int != 0)
+			this.comparer = comparer ?? EqualityComparer<T>.Default;
+			if (capacity == 0)
 			{
-				this._buckets = new int[@int];
-				this._slots = new HashSet<T>.Slot[@int];
-				T[] array = (T[])this._siInfo.GetValue("Elements", typeof(T[]));
-				if (array == null)
+				capacity = 10;
+			}
+			capacity = (int)((float)capacity / 0.9f) + 1;
+			this.InitArrays(capacity);
+			this.generation = 0;
+		}
+
+		private void InitArrays(int size)
+		{
+			this.table = new int[size];
+			this.links = new HashSet<T>.Link[size];
+			this.empty_slot = -1;
+			this.slots = new T[size];
+			this.touched = 0;
+			this.threshold = (int)((float)this.table.Length * 0.9f);
+			if (this.threshold == 0 && this.table.Length > 0)
+			{
+				this.threshold = 1;
+			}
+		}
+
+		private bool SlotsContainsAt(int index, int hash, T item)
+		{
+			HashSet<T>.Link link;
+			for (int num = this.table[index] - 1; num != -1; num = link.Next)
+			{
+				link = this.links[num];
+				if (link.HashCode == hash && ((hash != -2147483648 || (item != null && this.slots[num] != null)) ? this.comparer.Equals(item, this.slots[num]) : (item == null && null == this.slots[num])))
 				{
-					throw new SerializationException("The Keys for this dictionary are missing.");
-				}
-				for (int i = 0; i < array.Length; i++)
-				{
-					this.AddIfNotPresent(array[i]);
+					return true;
 				}
 			}
-			else
+			return false;
+		}
+
+		public void CopyTo(T[] array)
+		{
+			this.CopyTo(array, 0, this.count);
+		}
+
+		public void CopyTo(T[] array, int index)
+		{
+			this.CopyTo(array, index, this.count);
+		}
+
+		public void CopyTo(T[] array, int index, int count)
+		{
+			if (array == null)
 			{
-				this._buckets = null;
+				throw new ArgumentNullException("array");
 			}
-			this._version = this._siInfo.GetInt32("Version");
-			this._siInfo = null;
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			if (index > array.Length)
+			{
+				throw new ArgumentException("index larger than largest valid index of array");
+			}
+			if (array.Length - index < count)
+			{
+				throw new ArgumentException("Destination array cannot hold the requested elements!");
+			}
+			int num = 0;
+			int num2 = 0;
+			while (num < this.touched && num2 < count)
+			{
+				if (this.GetLinkHashCode(num) != 0)
+				{
+					array[index++] = this.slots[num];
+				}
+				num++;
+			}
+		}
+
+		private void Resize(int size)
+		{
+			int num = HashSet<T>.PrimeHelper.ToPrime(size);
+			int[] array = new int[num];
+			HashSet<T>.Link[] array2 = new HashSet<T>.Link[num];
+			for (int i = 0; i < this.table.Length; i++)
+			{
+				for (int num2 = this.table[i] - 1; num2 != -1; num2 = this.links[num2].Next)
+				{
+					int num3 = (array2[num2].HashCode = this.GetItemHashCode(this.slots[num2]));
+					int num4 = (num3 & int.MaxValue) % num;
+					array2[num2].Next = array[num4] - 1;
+					array[num4] = num2 + 1;
+				}
+			}
+			this.table = array;
+			this.links = array2;
+			T[] array3 = new T[num];
+			Array.Copy(this.slots, 0, array3, 0, this.touched);
+			this.slots = array3;
+			this.threshold = (int)((float)num * 0.9f);
+		}
+
+		private int GetLinkHashCode(int index)
+		{
+			return this.links[index].HashCode & int.MinValue;
+		}
+
+		private int GetItemHashCode(T item)
+		{
+			if (item == null)
+			{
+				return int.MinValue;
+			}
+			return this.comparer.GetHashCode(item) | int.MinValue;
 		}
 
 		public bool Add(T item)
 		{
-			return this.AddIfNotPresent(item);
+			int itemHashCode = this.GetItemHashCode(item);
+			int num = (itemHashCode & int.MaxValue) % this.table.Length;
+			if (this.SlotsContainsAt(num, itemHashCode, item))
+			{
+				return false;
+			}
+			if (++this.count > this.threshold)
+			{
+				this.Resize((this.table.Length << 1) | 1);
+				num = (itemHashCode & int.MaxValue) % this.table.Length;
+			}
+			int num2 = this.empty_slot;
+			if (num2 == -1)
+			{
+				num2 = this.touched++;
+			}
+			else
+			{
+				this.empty_slot = this.links[num2].Next;
+			}
+			this.links[num2].HashCode = itemHashCode;
+			this.links[num2].Next = this.table[num] - 1;
+			this.table[num] = num2 + 1;
+			this.slots[num2] = item;
+			this.generation++;
+			return true;
 		}
 
-		public bool TryGetValue(T equalValue, out T actualValue)
+		public IEqualityComparer<T> Comparer
 		{
-			if (this._buckets != null)
+			get
 			{
-				int num = this.InternalIndexOf(equalValue);
-				if (num >= 0)
+				return this.comparer;
+			}
+		}
+
+		public void Clear()
+		{
+			this.count = 0;
+			Array.Clear(this.table, 0, this.table.Length);
+			Array.Clear(this.slots, 0, this.slots.Length);
+			Array.Clear(this.links, 0, this.links.Length);
+			this.empty_slot = -1;
+			this.touched = 0;
+			this.generation++;
+		}
+
+		public bool Contains(T item)
+		{
+			int itemHashCode = this.GetItemHashCode(item);
+			int num = (itemHashCode & int.MaxValue) % this.table.Length;
+			return this.SlotsContainsAt(num, itemHashCode, item);
+		}
+
+		public bool Remove(T item)
+		{
+			int itemHashCode = this.GetItemHashCode(item);
+			int num = (itemHashCode & int.MaxValue) % this.table.Length;
+			int num2 = this.table[num] - 1;
+			if (num2 == -1)
+			{
+				return false;
+			}
+			int num3 = -1;
+			do
+			{
+				HashSet<T>.Link link = this.links[num2];
+				if (link.HashCode == itemHashCode && ((itemHashCode != -2147483648 || (item != null && this.slots[num2] != null)) ? this.comparer.Equals(this.slots[num2], item) : (item == null && null == this.slots[num2])))
 				{
-					actualValue = this._slots[num].value;
-					return true;
+					break;
+				}
+				num3 = num2;
+				num2 = link.Next;
+			}
+			while (num2 != -1);
+			if (num2 == -1)
+			{
+				return false;
+			}
+			this.count--;
+			if (num3 == -1)
+			{
+				this.table[num] = this.links[num2].Next + 1;
+			}
+			else
+			{
+				this.links[num3].Next = this.links[num2].Next;
+			}
+			this.links[num2].Next = this.empty_slot;
+			this.empty_slot = num2;
+			this.links[num2].HashCode = 0;
+			this.slots[num2] = default(T);
+			this.generation++;
+			return true;
+		}
+
+		public int RemoveWhere(Predicate<T> predicate)
+		{
+			if (predicate == null)
+			{
+				throw new ArgumentNullException("predicate");
+			}
+			int num = 0;
+			T[] array = new T[this.count];
+			this.CopyTo(array, 0);
+			foreach (T t in array)
+			{
+				if (predicate(t))
+				{
+					this.Remove(t);
+					num++;
 				}
 			}
-			actualValue = default(T);
-			return false;
+			return num;
 		}
 
-		public void UnionWith(IEnumerable<T> other)
+		public void TrimExcess()
 		{
-			if (other == null)
-			{
-				throw new ArgumentNullException("other");
-			}
-			foreach (T t in other)
-			{
-				this.AddIfNotPresent(t);
-			}
+			this.Resize(this.count);
 		}
 
 		public void IntersectWith(IEnumerable<T> other)
@@ -314,30 +334,22 @@ namespace System.Collections.Generic
 			{
 				throw new ArgumentNullException("other");
 			}
-			if (this._count == 0)
+			T[] array = new T[this.count];
+			this.CopyTo(array, 0);
+			foreach (T t in array)
 			{
-				return;
-			}
-			if (other == this)
-			{
-				return;
-			}
-			ICollection<T> collection = other as ICollection<T>;
-			if (collection != null)
-			{
-				if (collection.Count == 0)
+				if (!other.Contains(t))
 				{
-					this.Clear();
-					return;
-				}
-				HashSet<T> hashSet = other as HashSet<T>;
-				if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet))
-				{
-					this.IntersectWithHashSetWithSameEC(hashSet);
-					return;
+					this.Remove(t);
 				}
 			}
-			this.IntersectWithEnumerable(other);
+			foreach (T t2 in other)
+			{
+				if (!this.Contains(t2))
+				{
+					this.Remove(t2);
+				}
+			}
 		}
 
 		public void ExceptWith(IEnumerable<T> other)
@@ -346,155 +358,10 @@ namespace System.Collections.Generic
 			{
 				throw new ArgumentNullException("other");
 			}
-			if (this._count == 0)
-			{
-				return;
-			}
-			if (other == this)
-			{
-				this.Clear();
-				return;
-			}
 			foreach (T t in other)
 			{
 				this.Remove(t);
 			}
-		}
-
-		public void SymmetricExceptWith(IEnumerable<T> other)
-		{
-			if (other == null)
-			{
-				throw new ArgumentNullException("other");
-			}
-			if (this._count == 0)
-			{
-				this.UnionWith(other);
-				return;
-			}
-			if (other == this)
-			{
-				this.Clear();
-				return;
-			}
-			HashSet<T> hashSet = other as HashSet<T>;
-			if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet))
-			{
-				this.SymmetricExceptWithUniqueHashSet(hashSet);
-				return;
-			}
-			this.SymmetricExceptWithEnumerable(other);
-		}
-
-		public bool IsSubsetOf(IEnumerable<T> other)
-		{
-			if (other == null)
-			{
-				throw new ArgumentNullException("other");
-			}
-			if (this._count == 0)
-			{
-				return true;
-			}
-			if (other == this)
-			{
-				return true;
-			}
-			HashSet<T> hashSet = other as HashSet<T>;
-			if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet))
-			{
-				return this._count <= hashSet.Count && this.IsSubsetOfHashSetWithSameEC(hashSet);
-			}
-			HashSet<T>.ElementCount elementCount = this.CheckUniqueAndUnfoundElements(other, false);
-			return elementCount.uniqueCount == this._count && elementCount.unfoundCount >= 0;
-		}
-
-		public bool IsProperSubsetOf(IEnumerable<T> other)
-		{
-			if (other == null)
-			{
-				throw new ArgumentNullException("other");
-			}
-			if (other == this)
-			{
-				return false;
-			}
-			ICollection<T> collection = other as ICollection<T>;
-			if (collection != null)
-			{
-				if (collection.Count == 0)
-				{
-					return false;
-				}
-				if (this._count == 0)
-				{
-					return collection.Count > 0;
-				}
-				HashSet<T> hashSet = other as HashSet<T>;
-				if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet))
-				{
-					return this._count < hashSet.Count && this.IsSubsetOfHashSetWithSameEC(hashSet);
-				}
-			}
-			HashSet<T>.ElementCount elementCount = this.CheckUniqueAndUnfoundElements(other, false);
-			return elementCount.uniqueCount == this._count && elementCount.unfoundCount > 0;
-		}
-
-		public bool IsSupersetOf(IEnumerable<T> other)
-		{
-			if (other == null)
-			{
-				throw new ArgumentNullException("other");
-			}
-			if (other == this)
-			{
-				return true;
-			}
-			ICollection<T> collection = other as ICollection<T>;
-			if (collection != null)
-			{
-				if (collection.Count == 0)
-				{
-					return true;
-				}
-				HashSet<T> hashSet = other as HashSet<T>;
-				if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet) && hashSet.Count > this._count)
-				{
-					return false;
-				}
-			}
-			return this.ContainsAllElements(other);
-		}
-
-		public bool IsProperSupersetOf(IEnumerable<T> other)
-		{
-			if (other == null)
-			{
-				throw new ArgumentNullException("other");
-			}
-			if (this._count == 0)
-			{
-				return false;
-			}
-			if (other == this)
-			{
-				return false;
-			}
-			ICollection<T> collection = other as ICollection<T>;
-			if (collection != null)
-			{
-				if (collection.Count == 0)
-				{
-					return true;
-				}
-				HashSet<T> hashSet = other as HashSet<T>;
-				if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet))
-				{
-					return hashSet.Count < this._count && this.ContainsAllElements(hashSet);
-				}
-			}
-			HashSet<T>.ElementCount elementCount = this.CheckUniqueAndUnfoundElements(other, true);
-			return elementCount.uniqueCount < this._count && elementCount.unfoundCount == 0;
 		}
 
 		public bool Overlaps(IEnumerable<T> other)
@@ -502,14 +369,6 @@ namespace System.Collections.Generic
 			if (other == null)
 			{
 				throw new ArgumentNullException("other");
-			}
-			if (this._count == 0)
-			{
-				return false;
-			}
-			if (other == this)
-			{
-				return true;
 			}
 			foreach (T t in other)
 			{
@@ -527,222 +386,10 @@ namespace System.Collections.Generic
 			{
 				throw new ArgumentNullException("other");
 			}
-			if (other == this)
-			{
-				return true;
-			}
-			HashSet<T> hashSet = other as HashSet<T>;
-			if (hashSet != null && HashSet<T>.AreEqualityComparersEqual(this, hashSet))
-			{
-				return this._count == hashSet.Count && this.ContainsAllElements(hashSet);
-			}
-			ICollection<T> collection = other as ICollection<T>;
-			if (collection != null && this._count == 0 && collection.Count > 0)
+			if (this.count != other.Count<T>())
 			{
 				return false;
 			}
-			HashSet<T>.ElementCount elementCount = this.CheckUniqueAndUnfoundElements(other, true);
-			return elementCount.uniqueCount == this._count && elementCount.unfoundCount == 0;
-		}
-
-		public void CopyTo(T[] array)
-		{
-			this.CopyTo(array, 0, this._count);
-		}
-
-		public void CopyTo(T[] array, int arrayIndex, int count)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (arrayIndex < 0)
-			{
-				throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, "Non negative number is required.");
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", count, "Non negative number is required.");
-			}
-			if (arrayIndex > array.Length || count > array.Length - arrayIndex)
-			{
-				throw new ArgumentException("Destination array is not long enough to copy all the items in the collection. Check array index and length.");
-			}
-			int num = 0;
-			int num2 = 0;
-			while (num2 < this._lastIndex && num < count)
-			{
-				if (this._slots[num2].hashCode >= 0)
-				{
-					array[arrayIndex + num] = this._slots[num2].value;
-					num++;
-				}
-				num2++;
-			}
-		}
-
-		public int RemoveWhere(Predicate<T> match)
-		{
-			if (match == null)
-			{
-				throw new ArgumentNullException("match");
-			}
-			int num = 0;
-			for (int i = 0; i < this._lastIndex; i++)
-			{
-				if (this._slots[i].hashCode >= 0)
-				{
-					T value = this._slots[i].value;
-					if (match(value) && this.Remove(value))
-					{
-						num++;
-					}
-				}
-			}
-			return num;
-		}
-
-		public IEqualityComparer<T> Comparer
-		{
-			get
-			{
-				return this._comparer;
-			}
-		}
-
-		public void TrimExcess()
-		{
-			if (this._count == 0)
-			{
-				this._buckets = null;
-				this._slots = null;
-				this._version++;
-				return;
-			}
-			int prime = HashHelpers.GetPrime(this._count);
-			HashSet<T>.Slot[] array = new HashSet<T>.Slot[prime];
-			int[] array2 = new int[prime];
-			int num = 0;
-			for (int i = 0; i < this._lastIndex; i++)
-			{
-				if (this._slots[i].hashCode >= 0)
-				{
-					array[num] = this._slots[i];
-					int num2 = array[num].hashCode % prime;
-					array[num].next = array2[num2] - 1;
-					array2[num2] = num + 1;
-					num++;
-				}
-			}
-			this._lastIndex = num;
-			this._slots = array;
-			this._buckets = array2;
-			this._freeList = -1;
-		}
-
-		public static IEqualityComparer<HashSet<T>> CreateSetComparer()
-		{
-			return new HashSetEqualityComparer<T>();
-		}
-
-		private void Initialize(int capacity)
-		{
-			int prime = HashHelpers.GetPrime(capacity);
-			this._buckets = new int[prime];
-			this._slots = new HashSet<T>.Slot[prime];
-		}
-
-		private void IncreaseCapacity()
-		{
-			int num = HashHelpers.ExpandPrime(this._count);
-			if (num <= this._count)
-			{
-				throw new ArgumentException("HashSet capacity is too big.");
-			}
-			this.SetCapacity(num);
-		}
-
-		private void SetCapacity(int newSize)
-		{
-			HashSet<T>.Slot[] array = new HashSet<T>.Slot[newSize];
-			if (this._slots != null)
-			{
-				Array.Copy(this._slots, 0, array, 0, this._lastIndex);
-			}
-			int[] array2 = new int[newSize];
-			for (int i = 0; i < this._lastIndex; i++)
-			{
-				int num = array[i].hashCode % newSize;
-				array[i].next = array2[num] - 1;
-				array2[num] = i + 1;
-			}
-			this._slots = array;
-			this._buckets = array2;
-		}
-
-		private bool AddIfNotPresent(T value)
-		{
-			if (this._buckets == null)
-			{
-				this.Initialize(0);
-			}
-			int num = this.InternalGetHashCode(value);
-			int num2 = num % this._buckets.Length;
-			for (int i = this._buckets[num2] - 1; i >= 0; i = this._slots[i].next)
-			{
-				if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, value))
-				{
-					return false;
-				}
-			}
-			int num3;
-			if (this._freeList >= 0)
-			{
-				num3 = this._freeList;
-				this._freeList = this._slots[num3].next;
-			}
-			else
-			{
-				if (this._lastIndex == this._slots.Length)
-				{
-					this.IncreaseCapacity();
-					num2 = num % this._buckets.Length;
-				}
-				num3 = this._lastIndex;
-				this._lastIndex++;
-			}
-			this._slots[num3].hashCode = num;
-			this._slots[num3].value = value;
-			this._slots[num3].next = this._buckets[num2] - 1;
-			this._buckets[num2] = num3 + 1;
-			this._count++;
-			this._version++;
-			return true;
-		}
-
-		private void AddValue(int index, int hashCode, T value)
-		{
-			int num = hashCode % this._buckets.Length;
-			this._slots[index].hashCode = hashCode;
-			this._slots[index].value = value;
-			this._slots[index].next = this._buckets[num] - 1;
-			this._buckets[num] = index + 1;
-		}
-
-		private bool ContainsAllElements(IEnumerable<T> other)
-		{
-			foreach (T t in other)
-			{
-				if (!this.Contains(t))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		private bool IsSubsetOfHashSetWithSameEC(HashSet<T> other)
-		{
 			foreach (T t in this)
 			{
 				if (!other.Contains(t))
@@ -753,253 +400,46 @@ namespace System.Collections.Generic
 			return true;
 		}
 
-		private void IntersectWithHashSetWithSameEC(HashSet<T> other)
+		public void SymmetricExceptWith(IEnumerable<T> other)
 		{
-			for (int i = 0; i < this._lastIndex; i++)
+			if (other == null)
 			{
-				if (this._slots[i].hashCode >= 0)
-				{
-					T value = this._slots[i].value;
-					if (!other.Contains(value))
-					{
-						this.Remove(value);
-					}
-				}
+				throw new ArgumentNullException("other");
 			}
-		}
-
-		private unsafe void IntersectWithEnumerable(IEnumerable<T> other)
-		{
-			int lastIndex = this._lastIndex;
-			int num = BitHelper.ToIntArrayLength(lastIndex);
-			BitHelper bitHelper;
-			checked
-			{
-				if (num <= 100)
-				{
-					bitHelper = new BitHelper(stackalloc int[unchecked((UIntPtr)num) * 4], num);
-				}
-				else
-				{
-					bitHelper = new BitHelper(new int[num], num);
-				}
-				foreach (T t in other)
-				{
-					int num2 = this.InternalIndexOf(t);
-					if (num2 >= 0)
-					{
-						bitHelper.MarkBit(num2);
-					}
-				}
-			}
-			for (int i = 0; i < lastIndex; i++)
-			{
-				if (this._slots[i].hashCode >= 0 && !bitHelper.IsMarked(i))
-				{
-					this.Remove(this._slots[i].value);
-				}
-			}
-		}
-
-		private int InternalIndexOf(T item)
-		{
-			int num = this.InternalGetHashCode(item);
-			for (int i = this._buckets[num % this._buckets.Length] - 1; i >= 0; i = this._slots[i].next)
-			{
-				if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, item))
-				{
-					return i;
-				}
-			}
-			return -1;
-		}
-
-		private void SymmetricExceptWithUniqueHashSet(HashSet<T> other)
-		{
 			foreach (T t in other)
 			{
-				if (!this.Remove(t))
+				if (this.Contains(t))
 				{
-					this.AddIfNotPresent(t);
-				}
-			}
-		}
-
-		private unsafe void SymmetricExceptWithEnumerable(IEnumerable<T> other)
-		{
-			int lastIndex = this._lastIndex;
-			int num = BitHelper.ToIntArrayLength(lastIndex);
-			BitHelper bitHelper;
-			checked
-			{
-				BitHelper bitHelper2;
-				if (num <= 50)
-				{
-					bitHelper = new BitHelper(stackalloc int[unchecked((UIntPtr)num) * 4], num);
-					bitHelper2 = new BitHelper(stackalloc int[unchecked((UIntPtr)num) * 4], num);
+					this.Remove(t);
 				}
 				else
 				{
-					bitHelper = new BitHelper(new int[num], num);
-					bitHelper2 = new BitHelper(new int[num], num);
-				}
-				foreach (T t in other)
-				{
-					int num2 = 0;
-					if (this.AddOrGetLocation(t, out num2))
-					{
-						bitHelper2.MarkBit(num2);
-					}
-					else if (num2 < lastIndex && !bitHelper2.IsMarked(num2))
-					{
-						bitHelper.MarkBit(num2);
-					}
-				}
-			}
-			for (int i = 0; i < lastIndex; i++)
-			{
-				if (bitHelper.IsMarked(i))
-				{
-					this.Remove(this._slots[i].value);
+					this.Add(t);
 				}
 			}
 		}
 
-		private bool AddOrGetLocation(T value, out int location)
+		public void UnionWith(IEnumerable<T> other)
 		{
-			int num = this.InternalGetHashCode(value);
-			int num2 = num % this._buckets.Length;
-			for (int i = this._buckets[num2] - 1; i >= 0; i = this._slots[i].next)
+			if (other == null)
 			{
-				if (this._slots[i].hashCode == num && this._comparer.Equals(this._slots[i].value, value))
-				{
-					location = i;
-					return false;
-				}
+				throw new ArgumentNullException("other");
 			}
-			int num3;
-			if (this._freeList >= 0)
+			foreach (T t in other)
 			{
-				num3 = this._freeList;
-				this._freeList = this._slots[num3].next;
+				this.Add(t);
 			}
-			else
-			{
-				if (this._lastIndex == this._slots.Length)
-				{
-					this.IncreaseCapacity();
-					num2 = num % this._buckets.Length;
-				}
-				num3 = this._lastIndex;
-				this._lastIndex++;
-			}
-			this._slots[num3].hashCode = num;
-			this._slots[num3].value = value;
-			this._slots[num3].next = this._buckets[num2] - 1;
-			this._buckets[num2] = num3 + 1;
-			this._count++;
-			this._version++;
-			location = num3;
-			return true;
 		}
 
-		private unsafe HashSet<T>.ElementCount CheckUniqueAndUnfoundElements(IEnumerable<T> other, bool returnIfUnfound)
+		private bool CheckIsSubsetOf(IEnumerable<T> other)
 		{
-			HashSet<T>.ElementCount elementCount;
-			if (this._count == 0)
+			if (other == null)
 			{
-				int num = 0;
-				using (IEnumerator<T> enumerator = other.GetEnumerator())
-				{
-					if (enumerator.MoveNext())
-					{
-						T t = enumerator.Current;
-						num++;
-					}
-				}
-				elementCount.uniqueCount = 0;
-				elementCount.unfoundCount = num;
-				return elementCount;
+				throw new ArgumentNullException("other");
 			}
-			int num2 = BitHelper.ToIntArrayLength(this._lastIndex);
-			BitHelper bitHelper;
-			int num3;
-			int num4;
-			checked
+			foreach (T t in this)
 			{
-				if (num2 <= 100)
-				{
-					bitHelper = new BitHelper(stackalloc int[unchecked((UIntPtr)num2) * 4], num2);
-				}
-				else
-				{
-					bitHelper = new BitHelper(new int[num2], num2);
-				}
-				num3 = 0;
-				num4 = 0;
-			}
-			foreach (T t2 in other)
-			{
-				int num5 = this.InternalIndexOf(t2);
-				if (num5 >= 0)
-				{
-					if (!bitHelper.IsMarked(num5))
-					{
-						bitHelper.MarkBit(num5);
-						num4++;
-					}
-				}
-				else
-				{
-					num3++;
-					if (returnIfUnfound)
-					{
-						break;
-					}
-				}
-			}
-			elementCount.uniqueCount = num4;
-			elementCount.unfoundCount = num3;
-			return elementCount;
-		}
-
-		internal static bool HashSetEquals(HashSet<T> set1, HashSet<T> set2, IEqualityComparer<T> comparer)
-		{
-			if (set1 == null)
-			{
-				return set2 == null;
-			}
-			if (set2 == null)
-			{
-				return false;
-			}
-			if (!HashSet<T>.AreEqualityComparersEqual(set1, set2))
-			{
-				foreach (T t in set2)
-				{
-					bool flag = false;
-					foreach (T t2 in set1)
-					{
-						if (comparer.Equals(t, t2))
-						{
-							flag = true;
-							break;
-						}
-					}
-					if (!flag)
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-			if (set1.Count != set2.Count)
-			{
-				return false;
-			}
-			foreach (T t3 in set2)
-			{
-				if (!set1.Contains(t3))
+				if (!other.Contains(t))
 				{
 					return false;
 				}
@@ -1007,99 +447,166 @@ namespace System.Collections.Generic
 			return true;
 		}
 
-		private static bool AreEqualityComparersEqual(HashSet<T> set1, HashSet<T> set2)
+		public bool IsSubsetOf(IEnumerable<T> other)
 		{
-			return set1.Comparer.Equals(set2.Comparer);
-		}
-
-		private int InternalGetHashCode(T item)
-		{
-			if (item == null)
+			if (other == null)
 			{
-				return 0;
+				throw new ArgumentNullException("other");
 			}
-			return this._comparer.GetHashCode(item) & int.MaxValue;
+			return this.count == 0 || (this.count <= other.Count<T>() && this.CheckIsSubsetOf(other));
 		}
 
-		private const int Lower31BitMask = 2147483647;
-
-		private const int StackAllocThreshold = 100;
-
-		private const int ShrinkThreshold = 3;
-
-		private const string CapacityName = "Capacity";
-
-		private const string ElementsName = "Elements";
-
-		private const string ComparerName = "Comparer";
-
-		private const string VersionName = "Version";
-
-		private int[] _buckets;
-
-		private HashSet<T>.Slot[] _slots;
-
-		private int _count;
-
-		private int _lastIndex;
-
-		private int _freeList;
-
-		private IEqualityComparer<T> _comparer;
-
-		private int _version;
-
-		private SerializationInfo _siInfo;
-
-		internal struct ElementCount
+		public bool IsProperSubsetOf(IEnumerable<T> other)
 		{
-			internal int uniqueCount;
-
-			internal int unfoundCount;
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+			return this.count == 0 || (this.count < other.Count<T>() && this.CheckIsSubsetOf(other));
 		}
 
-		internal struct Slot
+		private bool CheckIsSupersetOf(IEnumerable<T> other)
 		{
-			internal int hashCode;
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+			foreach (T t in other)
+			{
+				if (!this.Contains(t))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
 
-			internal int next;
+		public bool IsSupersetOf(IEnumerable<T> other)
+		{
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+			return this.count >= other.Count<T>() && this.CheckIsSupersetOf(other);
+		}
 
-			internal T value;
+		public bool IsProperSupersetOf(IEnumerable<T> other)
+		{
+			if (other == null)
+			{
+				throw new ArgumentNullException("other");
+			}
+			return this.count > other.Count<T>() && this.CheckIsSupersetOf(other);
+		}
+
+		[MonoTODO]
+		public static IEqualityComparer<HashSet<T>> CreateSetComparer()
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
+		public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		public virtual void OnDeserialization(object sender)
+		{
+			if (this.si == null)
+			{
+				return;
+			}
+			throw new NotImplementedException();
+		}
+
+		public HashSet<T>.Enumerator GetEnumerator()
+		{
+			return new HashSet<T>.Enumerator(this);
+		}
+
+		private const int INITIAL_SIZE = 10;
+
+		private const float DEFAULT_LOAD_FACTOR = 0.9f;
+
+		private const int NO_SLOT = -1;
+
+		private const int HASH_FLAG = -2147483648;
+
+		private int[] table;
+
+		private HashSet<T>.Link[] links;
+
+		private T[] slots;
+
+		private int touched;
+
+		private int empty_slot;
+
+		private int count;
+
+		private int threshold;
+
+		private IEqualityComparer<T> comparer;
+
+		private SerializationInfo si;
+
+		private int generation;
+
+		private struct Link
+		{
+			public int HashCode;
+
+			public int Next;
 		}
 
 		[Serializable]
-		public struct Enumerator : IEnumerator<T>, IDisposable, IEnumerator
+		public struct Enumerator : IEnumerator, IDisposable, IEnumerator<T>
 		{
-			internal Enumerator(HashSet<T> set)
+			internal Enumerator(HashSet<T> hashset)
 			{
-				this._set = set;
-				this._index = 0;
-				this._version = set._version;
-				this._current = default(T);
+				this.hashset = hashset;
+				this.stamp = hashset.generation;
 			}
 
-			public void Dispose()
+			object IEnumerator.Current
 			{
+				get
+				{
+					this.CheckState();
+					if (this.next <= 0)
+					{
+						throw new InvalidOperationException("Current is not valid");
+					}
+					return this.current;
+				}
+			}
+
+			void IEnumerator.Reset()
+			{
+				this.CheckState();
+				this.next = 0;
 			}
 
 			public bool MoveNext()
 			{
-				if (this._version != this._set._version)
+				this.CheckState();
+				if (this.next < 0)
 				{
-					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+					return false;
 				}
-				while (this._index < this._set._lastIndex)
+				while (this.next < this.hashset.touched)
 				{
-					if (this._set._slots[this._index].hashCode >= 0)
+					int num = this.next++;
+					if (this.hashset.GetLinkHashCode(num) != 0)
 					{
-						this._current = this._set._slots[this._index].value;
-						this._index++;
+						this.current = this.hashset.slots[num];
 						return true;
 					}
-					this._index++;
 				}
-				this._index = this._set._lastIndex + 1;
-				this._current = default(T);
+				this.next = -1;
 				return false;
 			}
 
@@ -1107,39 +614,86 @@ namespace System.Collections.Generic
 			{
 				get
 				{
-					return this._current;
+					return this.current;
 				}
 			}
 
-			object IEnumerator.Current
+			public void Dispose()
 			{
-				get
+				this.hashset = null;
+			}
+
+			private void CheckState()
+			{
+				if (this.hashset == null)
 				{
-					if (this._index == 0 || this._index == this._set._lastIndex + 1)
+					throw new ObjectDisposedException(null);
+				}
+				if (this.hashset.generation != this.stamp)
+				{
+					throw new InvalidOperationException("HashSet have been modified while it was iterated over");
+				}
+			}
+
+			private HashSet<T> hashset;
+
+			private int next;
+
+			private int stamp;
+
+			private T current;
+		}
+
+		private static class PrimeHelper
+		{
+			private static bool TestPrime(int x)
+			{
+				if ((x & 1) != 0)
+				{
+					int num = (int)Math.Sqrt((double)x);
+					for (int i = 3; i < num; i += 2)
 					{
-						throw new InvalidOperationException("Enumeration has either not started or has already finished.");
+						if (x % i == 0)
+						{
+							return false;
+						}
 					}
-					return this.Current;
+					return true;
 				}
+				return x == 2;
 			}
 
-			void IEnumerator.Reset()
+			private static int CalcPrime(int x)
 			{
-				if (this._version != this._set._version)
+				for (int i = (x & -2) - 1; i < 2147483647; i += 2)
 				{
-					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+					if (HashSet<T>.PrimeHelper.TestPrime(i))
+					{
+						return i;
+					}
 				}
-				this._index = 0;
-				this._current = default(T);
+				return x;
 			}
 
-			private HashSet<T> _set;
+			public static int ToPrime(int x)
+			{
+				for (int i = 0; i < HashSet<T>.PrimeHelper.primes_table.Length; i++)
+				{
+					if (x <= HashSet<T>.PrimeHelper.primes_table[i])
+					{
+						return HashSet<T>.PrimeHelper.primes_table[i];
+					}
+				}
+				return HashSet<T>.PrimeHelper.CalcPrime(x);
+			}
 
-			private int _index;
-
-			private int _version;
-
-			private T _current;
+			private static readonly int[] primes_table = new int[]
+			{
+				11, 19, 37, 73, 109, 163, 251, 367, 557, 823,
+				1237, 1861, 2777, 4177, 6247, 9371, 14057, 21089, 31627, 47431,
+				71143, 106721, 160073, 240101, 360163, 540217, 810343, 1215497, 1823231, 2734867,
+				4102283, 6153409, 9230113, 13845163
+			};
 		}
 	}
 }

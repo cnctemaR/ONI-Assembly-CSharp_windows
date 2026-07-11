@@ -8,471 +8,9 @@ namespace System.CodeDom.Compiler
 {
 	public abstract class CodeGenerator : ICodeGenerator
 	{
-		protected CodeTypeDeclaration CurrentClass
+		protected CodeGenerator()
 		{
-			get
-			{
-				return this._currentClass;
-			}
-		}
-
-		protected string CurrentTypeName
-		{
-			get
-			{
-				if (this._currentClass == null)
-				{
-					return "<% unknown %>";
-				}
-				return this._currentClass.Name;
-			}
-		}
-
-		protected CodeTypeMember CurrentMember
-		{
-			get
-			{
-				return this._currentMember;
-			}
-		}
-
-		protected string CurrentMemberName
-		{
-			get
-			{
-				if (this._currentMember == null)
-				{
-					return "<% unknown %>";
-				}
-				return this._currentMember.Name;
-			}
-		}
-
-		protected bool IsCurrentInterface
-		{
-			get
-			{
-				return this._currentClass != null && !(this._currentClass is CodeTypeDelegate) && this._currentClass.IsInterface;
-			}
-		}
-
-		protected bool IsCurrentClass
-		{
-			get
-			{
-				return this._currentClass != null && !(this._currentClass is CodeTypeDelegate) && this._currentClass.IsClass;
-			}
-		}
-
-		protected bool IsCurrentStruct
-		{
-			get
-			{
-				return this._currentClass != null && !(this._currentClass is CodeTypeDelegate) && this._currentClass.IsStruct;
-			}
-		}
-
-		protected bool IsCurrentEnum
-		{
-			get
-			{
-				return this._currentClass != null && !(this._currentClass is CodeTypeDelegate) && this._currentClass.IsEnum;
-			}
-		}
-
-		protected bool IsCurrentDelegate
-		{
-			get
-			{
-				return this._currentClass != null && this._currentClass is CodeTypeDelegate;
-			}
-		}
-
-		protected int Indent
-		{
-			get
-			{
-				return this._output.Indent;
-			}
-			set
-			{
-				this._output.Indent = value;
-			}
-		}
-
-		protected abstract string NullToken { get; }
-
-		protected TextWriter Output
-		{
-			get
-			{
-				return this._output;
-			}
-		}
-
-		protected CodeGeneratorOptions Options
-		{
-			get
-			{
-				return this._options;
-			}
-		}
-
-		private void GenerateType(CodeTypeDeclaration e)
-		{
-			this._currentClass = e;
-			if (e.StartDirectives.Count > 0)
-			{
-				this.GenerateDirectives(e.StartDirectives);
-			}
-			this.GenerateCommentStatements(e.Comments);
-			if (e.LinePragma != null)
-			{
-				this.GenerateLinePragmaStart(e.LinePragma);
-			}
-			this.GenerateTypeStart(e);
-			if (this.Options.VerbatimOrder)
-			{
-				using (IEnumerator enumerator = e.Members.GetEnumerator())
-				{
-					while (enumerator.MoveNext())
-					{
-						object obj = enumerator.Current;
-						CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-						this.GenerateTypeMember(codeTypeMember, e);
-					}
-					goto IL_00CA;
-				}
-			}
-			this.GenerateFields(e);
-			this.GenerateSnippetMembers(e);
-			this.GenerateTypeConstructors(e);
-			this.GenerateConstructors(e);
-			this.GenerateProperties(e);
-			this.GenerateEvents(e);
-			this.GenerateMethods(e);
-			this.GenerateNestedTypes(e);
-			IL_00CA:
-			this._currentClass = e;
-			this.GenerateTypeEnd(e);
-			if (e.LinePragma != null)
-			{
-				this.GenerateLinePragmaEnd(e.LinePragma);
-			}
-			if (e.EndDirectives.Count > 0)
-			{
-				this.GenerateDirectives(e.EndDirectives);
-			}
-		}
-
-		protected virtual void GenerateDirectives(CodeDirectiveCollection directives)
-		{
-		}
-
-		private void GenerateTypeMember(CodeTypeMember member, CodeTypeDeclaration declaredType)
-		{
-			if (this._options.BlankLinesBetweenMembers)
-			{
-				this.Output.WriteLine();
-			}
-			if (member is CodeTypeDeclaration)
-			{
-				((ICodeGenerator)this).GenerateCodeFromType((CodeTypeDeclaration)member, this._output.InnerWriter, this._options);
-				this._currentClass = declaredType;
-				return;
-			}
-			if (member.StartDirectives.Count > 0)
-			{
-				this.GenerateDirectives(member.StartDirectives);
-			}
-			this.GenerateCommentStatements(member.Comments);
-			if (member.LinePragma != null)
-			{
-				this.GenerateLinePragmaStart(member.LinePragma);
-			}
-			if (member is CodeMemberField)
-			{
-				this.GenerateField((CodeMemberField)member);
-			}
-			else if (member is CodeMemberProperty)
-			{
-				this.GenerateProperty((CodeMemberProperty)member, declaredType);
-			}
-			else if (member is CodeMemberMethod)
-			{
-				if (member is CodeConstructor)
-				{
-					this.GenerateConstructor((CodeConstructor)member, declaredType);
-				}
-				else if (member is CodeTypeConstructor)
-				{
-					this.GenerateTypeConstructor((CodeTypeConstructor)member);
-				}
-				else if (member is CodeEntryPointMethod)
-				{
-					this.GenerateEntryPointMethod((CodeEntryPointMethod)member, declaredType);
-				}
-				else
-				{
-					this.GenerateMethod((CodeMemberMethod)member, declaredType);
-				}
-			}
-			else if (member is CodeMemberEvent)
-			{
-				this.GenerateEvent((CodeMemberEvent)member, declaredType);
-			}
-			else if (member is CodeSnippetTypeMember)
-			{
-				int indent = this.Indent;
-				this.Indent = 0;
-				this.GenerateSnippetMember((CodeSnippetTypeMember)member);
-				this.Indent = indent;
-				this.Output.WriteLine();
-			}
-			if (member.LinePragma != null)
-			{
-				this.GenerateLinePragmaEnd(member.LinePragma);
-			}
-			if (member.EndDirectives.Count > 0)
-			{
-				this.GenerateDirectives(member.EndDirectives);
-			}
-		}
-
-		private void GenerateTypeConstructors(CodeTypeDeclaration e)
-		{
-			foreach (object obj in e.Members)
-			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeTypeConstructor)
-				{
-					this._currentMember = codeTypeMember;
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					if (this._currentMember.StartDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.StartDirectives);
-					}
-					this.GenerateCommentStatements(this._currentMember.Comments);
-					CodeTypeConstructor codeTypeConstructor = (CodeTypeConstructor)codeTypeMember;
-					if (codeTypeConstructor.LinePragma != null)
-					{
-						this.GenerateLinePragmaStart(codeTypeConstructor.LinePragma);
-					}
-					this.GenerateTypeConstructor(codeTypeConstructor);
-					if (codeTypeConstructor.LinePragma != null)
-					{
-						this.GenerateLinePragmaEnd(codeTypeConstructor.LinePragma);
-					}
-					if (this._currentMember.EndDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.EndDirectives);
-					}
-				}
-			}
-		}
-
-		protected void GenerateNamespaces(CodeCompileUnit e)
-		{
-			foreach (object obj in e.Namespaces)
-			{
-				CodeNamespace codeNamespace = (CodeNamespace)obj;
-				((ICodeGenerator)this).GenerateCodeFromNamespace(codeNamespace, this._output.InnerWriter, this._options);
-			}
-		}
-
-		protected void GenerateTypes(CodeNamespace e)
-		{
-			foreach (object obj in e.Types)
-			{
-				CodeTypeDeclaration codeTypeDeclaration = (CodeTypeDeclaration)obj;
-				if (this._options.BlankLinesBetweenMembers)
-				{
-					this.Output.WriteLine();
-				}
-				((ICodeGenerator)this).GenerateCodeFromType(codeTypeDeclaration, this._output.InnerWriter, this._options);
-			}
-		}
-
-		bool ICodeGenerator.Supports(GeneratorSupport support)
-		{
-			return this.Supports(support);
-		}
-
-		void ICodeGenerator.GenerateCodeFromType(CodeTypeDeclaration e, TextWriter w, CodeGeneratorOptions o)
-		{
-			bool flag = false;
-			if (this._output != null && w != this._output.InnerWriter)
-			{
-				throw new InvalidOperationException("The output writer for code generation and the writer supplied don't match and cannot be used. This is generally caused by a bad implementation of a CodeGenerator derived class.");
-			}
-			if (this._output == null)
-			{
-				flag = true;
-				this._options = o ?? new CodeGeneratorOptions();
-				this._output = new ExposedTabStringIndentedTextWriter(w, this._options.IndentString);
-			}
-			try
-			{
-				this.GenerateType(e);
-			}
-			finally
-			{
-				if (flag)
-				{
-					this._output = null;
-					this._options = null;
-				}
-			}
-		}
-
-		void ICodeGenerator.GenerateCodeFromExpression(CodeExpression e, TextWriter w, CodeGeneratorOptions o)
-		{
-			bool flag = false;
-			if (this._output != null && w != this._output.InnerWriter)
-			{
-				throw new InvalidOperationException("The output writer for code generation and the writer supplied don't match and cannot be used. This is generally caused by a bad implementation of a CodeGenerator derived class.");
-			}
-			if (this._output == null)
-			{
-				flag = true;
-				this._options = o ?? new CodeGeneratorOptions();
-				this._output = new ExposedTabStringIndentedTextWriter(w, this._options.IndentString);
-			}
-			try
-			{
-				this.GenerateExpression(e);
-			}
-			finally
-			{
-				if (flag)
-				{
-					this._output = null;
-					this._options = null;
-				}
-			}
-		}
-
-		void ICodeGenerator.GenerateCodeFromCompileUnit(CodeCompileUnit e, TextWriter w, CodeGeneratorOptions o)
-		{
-			bool flag = false;
-			if (this._output != null && w != this._output.InnerWriter)
-			{
-				throw new InvalidOperationException("The output writer for code generation and the writer supplied don't match and cannot be used. This is generally caused by a bad implementation of a CodeGenerator derived class.");
-			}
-			if (this._output == null)
-			{
-				flag = true;
-				this._options = o ?? new CodeGeneratorOptions();
-				this._output = new ExposedTabStringIndentedTextWriter(w, this._options.IndentString);
-			}
-			try
-			{
-				if (e is CodeSnippetCompileUnit)
-				{
-					this.GenerateSnippetCompileUnit((CodeSnippetCompileUnit)e);
-				}
-				else
-				{
-					this.GenerateCompileUnit(e);
-				}
-			}
-			finally
-			{
-				if (flag)
-				{
-					this._output = null;
-					this._options = null;
-				}
-			}
-		}
-
-		void ICodeGenerator.GenerateCodeFromNamespace(CodeNamespace e, TextWriter w, CodeGeneratorOptions o)
-		{
-			bool flag = false;
-			if (this._output != null && w != this._output.InnerWriter)
-			{
-				throw new InvalidOperationException("The output writer for code generation and the writer supplied don't match and cannot be used. This is generally caused by a bad implementation of a CodeGenerator derived class.");
-			}
-			if (this._output == null)
-			{
-				flag = true;
-				this._options = o ?? new CodeGeneratorOptions();
-				this._output = new ExposedTabStringIndentedTextWriter(w, this._options.IndentString);
-			}
-			try
-			{
-				this.GenerateNamespace(e);
-			}
-			finally
-			{
-				if (flag)
-				{
-					this._output = null;
-					this._options = null;
-				}
-			}
-		}
-
-		void ICodeGenerator.GenerateCodeFromStatement(CodeStatement e, TextWriter w, CodeGeneratorOptions o)
-		{
-			bool flag = false;
-			if (this._output != null && w != this._output.InnerWriter)
-			{
-				throw new InvalidOperationException("The output writer for code generation and the writer supplied don't match and cannot be used. This is generally caused by a bad implementation of a CodeGenerator derived class.");
-			}
-			if (this._output == null)
-			{
-				flag = true;
-				this._options = o ?? new CodeGeneratorOptions();
-				this._output = new ExposedTabStringIndentedTextWriter(w, this._options.IndentString);
-			}
-			try
-			{
-				this.GenerateStatement(e);
-			}
-			finally
-			{
-				if (flag)
-				{
-					this._output = null;
-					this._options = null;
-				}
-			}
-		}
-
-		public virtual void GenerateCodeFromMember(CodeTypeMember member, TextWriter writer, CodeGeneratorOptions options)
-		{
-			if (this._output != null)
-			{
-				throw new InvalidOperationException("This code generation API cannot be called while the generator is being used to generate something else.");
-			}
-			this._options = options ?? new CodeGeneratorOptions();
-			this._output = new ExposedTabStringIndentedTextWriter(writer, this._options.IndentString);
-			try
-			{
-				CodeTypeDeclaration codeTypeDeclaration = new CodeTypeDeclaration();
-				this._currentClass = codeTypeDeclaration;
-				this.GenerateTypeMember(member, codeTypeDeclaration);
-			}
-			finally
-			{
-				this._currentClass = null;
-				this._output = null;
-				this._options = null;
-			}
-		}
-
-		bool ICodeGenerator.IsValidIdentifier(string value)
-		{
-			return this.IsValidIdentifier(value);
-		}
-
-		void ICodeGenerator.ValidateIdentifier(string value)
-		{
-			this.ValidateIdentifier(value);
+			this.visitor = new CodeGenerator.Visitor(this);
 		}
 
 		string ICodeGenerator.CreateEscapedIdentifier(string value)
@@ -485,387 +23,380 @@ namespace System.CodeDom.Compiler
 			return this.CreateValidIdentifier(value);
 		}
 
+		void ICodeGenerator.GenerateCodeFromCompileUnit(CodeCompileUnit compileUnit, TextWriter output, CodeGeneratorOptions options)
+		{
+			this.InitOutput(output, options);
+			if (compileUnit is CodeSnippetCompileUnit)
+			{
+				this.GenerateSnippetCompileUnit((CodeSnippetCompileUnit)compileUnit);
+			}
+			else
+			{
+				this.GenerateCompileUnit(compileUnit);
+			}
+		}
+
+		void ICodeGenerator.GenerateCodeFromExpression(CodeExpression expression, TextWriter output, CodeGeneratorOptions options)
+		{
+			this.InitOutput(output, options);
+			this.GenerateExpression(expression);
+		}
+
+		void ICodeGenerator.GenerateCodeFromNamespace(CodeNamespace ns, TextWriter output, CodeGeneratorOptions options)
+		{
+			this.InitOutput(output, options);
+			this.GenerateNamespace(ns);
+		}
+
+		void ICodeGenerator.GenerateCodeFromStatement(CodeStatement statement, TextWriter output, CodeGeneratorOptions options)
+		{
+			this.InitOutput(output, options);
+			this.GenerateStatement(statement);
+		}
+
+		void ICodeGenerator.GenerateCodeFromType(CodeTypeDeclaration type, TextWriter output, CodeGeneratorOptions options)
+		{
+			this.InitOutput(output, options);
+			this.GenerateType(type);
+		}
+
 		string ICodeGenerator.GetTypeOutput(CodeTypeReference type)
 		{
 			return this.GetTypeOutput(type);
 		}
 
-		private void GenerateConstructors(CodeTypeDeclaration e)
+		bool ICodeGenerator.IsValidIdentifier(string value)
 		{
-			foreach (object obj in e.Members)
+			return this.IsValidIdentifier(value);
+		}
+
+		bool ICodeGenerator.Supports(GeneratorSupport value)
+		{
+			return this.Supports(value);
+		}
+
+		void ICodeGenerator.ValidateIdentifier(string value)
+		{
+			this.ValidateIdentifier(value);
+		}
+
+		protected CodeTypeDeclaration CurrentClass
+		{
+			get
 			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeConstructor)
-				{
-					this._currentMember = codeTypeMember;
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					if (this._currentMember.StartDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.StartDirectives);
-					}
-					this.GenerateCommentStatements(this._currentMember.Comments);
-					CodeConstructor codeConstructor = (CodeConstructor)codeTypeMember;
-					if (codeConstructor.LinePragma != null)
-					{
-						this.GenerateLinePragmaStart(codeConstructor.LinePragma);
-					}
-					this.GenerateConstructor(codeConstructor, e);
-					if (codeConstructor.LinePragma != null)
-					{
-						this.GenerateLinePragmaEnd(codeConstructor.LinePragma);
-					}
-					if (this._currentMember.EndDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.EndDirectives);
-					}
-				}
+				return this.currentType;
 			}
 		}
 
-		private void GenerateEvents(CodeTypeDeclaration e)
+		protected CodeTypeMember CurrentMember
 		{
-			foreach (object obj in e.Members)
+			get
 			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeMemberEvent)
-				{
-					this._currentMember = codeTypeMember;
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					if (this._currentMember.StartDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.StartDirectives);
-					}
-					this.GenerateCommentStatements(this._currentMember.Comments);
-					CodeMemberEvent codeMemberEvent = (CodeMemberEvent)codeTypeMember;
-					if (codeMemberEvent.LinePragma != null)
-					{
-						this.GenerateLinePragmaStart(codeMemberEvent.LinePragma);
-					}
-					this.GenerateEvent(codeMemberEvent, e);
-					if (codeMemberEvent.LinePragma != null)
-					{
-						this.GenerateLinePragmaEnd(codeMemberEvent.LinePragma);
-					}
-					if (this._currentMember.EndDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.EndDirectives);
-					}
-				}
+				return this.currentMember;
 			}
 		}
 
-		protected void GenerateExpression(CodeExpression e)
+		protected string CurrentMemberName
 		{
-			if (e is CodeArrayCreateExpression)
+			get
 			{
-				this.GenerateArrayCreateExpression((CodeArrayCreateExpression)e);
-				return;
-			}
-			if (e is CodeBaseReferenceExpression)
-			{
-				this.GenerateBaseReferenceExpression((CodeBaseReferenceExpression)e);
-				return;
-			}
-			if (e is CodeBinaryOperatorExpression)
-			{
-				this.GenerateBinaryOperatorExpression((CodeBinaryOperatorExpression)e);
-				return;
-			}
-			if (e is CodeCastExpression)
-			{
-				this.GenerateCastExpression((CodeCastExpression)e);
-				return;
-			}
-			if (e is CodeDelegateCreateExpression)
-			{
-				this.GenerateDelegateCreateExpression((CodeDelegateCreateExpression)e);
-				return;
-			}
-			if (e is CodeFieldReferenceExpression)
-			{
-				this.GenerateFieldReferenceExpression((CodeFieldReferenceExpression)e);
-				return;
-			}
-			if (e is CodeArgumentReferenceExpression)
-			{
-				this.GenerateArgumentReferenceExpression((CodeArgumentReferenceExpression)e);
-				return;
-			}
-			if (e is CodeVariableReferenceExpression)
-			{
-				this.GenerateVariableReferenceExpression((CodeVariableReferenceExpression)e);
-				return;
-			}
-			if (e is CodeIndexerExpression)
-			{
-				this.GenerateIndexerExpression((CodeIndexerExpression)e);
-				return;
-			}
-			if (e is CodeArrayIndexerExpression)
-			{
-				this.GenerateArrayIndexerExpression((CodeArrayIndexerExpression)e);
-				return;
-			}
-			if (e is CodeSnippetExpression)
-			{
-				this.GenerateSnippetExpression((CodeSnippetExpression)e);
-				return;
-			}
-			if (e is CodeMethodInvokeExpression)
-			{
-				this.GenerateMethodInvokeExpression((CodeMethodInvokeExpression)e);
-				return;
-			}
-			if (e is CodeMethodReferenceExpression)
-			{
-				this.GenerateMethodReferenceExpression((CodeMethodReferenceExpression)e);
-				return;
-			}
-			if (e is CodeEventReferenceExpression)
-			{
-				this.GenerateEventReferenceExpression((CodeEventReferenceExpression)e);
-				return;
-			}
-			if (e is CodeDelegateInvokeExpression)
-			{
-				this.GenerateDelegateInvokeExpression((CodeDelegateInvokeExpression)e);
-				return;
-			}
-			if (e is CodeObjectCreateExpression)
-			{
-				this.GenerateObjectCreateExpression((CodeObjectCreateExpression)e);
-				return;
-			}
-			if (e is CodeParameterDeclarationExpression)
-			{
-				this.GenerateParameterDeclarationExpression((CodeParameterDeclarationExpression)e);
-				return;
-			}
-			if (e is CodeDirectionExpression)
-			{
-				this.GenerateDirectionExpression((CodeDirectionExpression)e);
-				return;
-			}
-			if (e is CodePrimitiveExpression)
-			{
-				this.GeneratePrimitiveExpression((CodePrimitiveExpression)e);
-				return;
-			}
-			if (e is CodePropertyReferenceExpression)
-			{
-				this.GeneratePropertyReferenceExpression((CodePropertyReferenceExpression)e);
-				return;
-			}
-			if (e is CodePropertySetValueReferenceExpression)
-			{
-				this.GeneratePropertySetValueReferenceExpression((CodePropertySetValueReferenceExpression)e);
-				return;
-			}
-			if (e is CodeThisReferenceExpression)
-			{
-				this.GenerateThisReferenceExpression((CodeThisReferenceExpression)e);
-				return;
-			}
-			if (e is CodeTypeReferenceExpression)
-			{
-				this.GenerateTypeReferenceExpression((CodeTypeReferenceExpression)e);
-				return;
-			}
-			if (e is CodeTypeOfExpression)
-			{
-				this.GenerateTypeOfExpression((CodeTypeOfExpression)e);
-				return;
-			}
-			if (e is CodeDefaultValueExpression)
-			{
-				this.GenerateDefaultValueExpression((CodeDefaultValueExpression)e);
-				return;
-			}
-			if (e == null)
-			{
-				throw new ArgumentNullException("e");
-			}
-			throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
-		}
-
-		private void GenerateFields(CodeTypeDeclaration e)
-		{
-			foreach (object obj in e.Members)
-			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeMemberField)
+				if (this.currentMember == null)
 				{
-					this._currentMember = codeTypeMember;
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					if (this._currentMember.StartDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.StartDirectives);
-					}
-					this.GenerateCommentStatements(this._currentMember.Comments);
-					CodeMemberField codeMemberField = (CodeMemberField)codeTypeMember;
-					if (codeMemberField.LinePragma != null)
-					{
-						this.GenerateLinePragmaStart(codeMemberField.LinePragma);
-					}
-					this.GenerateField(codeMemberField);
-					if (codeMemberField.LinePragma != null)
-					{
-						this.GenerateLinePragmaEnd(codeMemberField.LinePragma);
-					}
-					if (this._currentMember.EndDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.EndDirectives);
-					}
+					return "<% unknown %>";
 				}
+				return this.currentMember.Name;
 			}
 		}
 
-		private void GenerateSnippetMembers(CodeTypeDeclaration e)
+		protected string CurrentTypeName
 		{
-			bool flag = false;
-			foreach (object obj in e.Members)
+			get
 			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeSnippetTypeMember)
+				if (this.currentType == null)
 				{
-					flag = true;
-					this._currentMember = codeTypeMember;
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					if (this._currentMember.StartDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.StartDirectives);
-					}
-					this.GenerateCommentStatements(this._currentMember.Comments);
-					CodeSnippetTypeMember codeSnippetTypeMember = (CodeSnippetTypeMember)codeTypeMember;
-					if (codeSnippetTypeMember.LinePragma != null)
-					{
-						this.GenerateLinePragmaStart(codeSnippetTypeMember.LinePragma);
-					}
-					int indent = this.Indent;
-					this.Indent = 0;
-					this.GenerateSnippetMember(codeSnippetTypeMember);
-					this.Indent = indent;
-					if (codeSnippetTypeMember.LinePragma != null)
-					{
-						this.GenerateLinePragmaEnd(codeSnippetTypeMember.LinePragma);
-					}
-					if (this._currentMember.EndDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.EndDirectives);
-					}
+					return "<% unknown %>";
 				}
+				return this.currentType.Name;
 			}
-			if (flag)
+		}
+
+		protected int Indent
+		{
+			get
 			{
+				return this.output.Indent;
+			}
+			set
+			{
+				this.output.Indent = value;
+			}
+		}
+
+		protected bool IsCurrentClass
+		{
+			get
+			{
+				return this.currentType != null && this.currentType.IsClass && !(this.currentType is CodeTypeDelegate);
+			}
+		}
+
+		protected bool IsCurrentDelegate
+		{
+			get
+			{
+				return this.currentType is CodeTypeDelegate;
+			}
+		}
+
+		protected bool IsCurrentEnum
+		{
+			get
+			{
+				return this.currentType != null && this.currentType.IsEnum;
+			}
+		}
+
+		protected bool IsCurrentInterface
+		{
+			get
+			{
+				return this.currentType != null && this.currentType.IsInterface;
+			}
+		}
+
+		protected bool IsCurrentStruct
+		{
+			get
+			{
+				return this.currentType != null && this.currentType.IsStruct;
+			}
+		}
+
+		protected abstract string NullToken { get; }
+
+		protected CodeGeneratorOptions Options
+		{
+			get
+			{
+				return this.options;
+			}
+		}
+
+		protected TextWriter Output
+		{
+			get
+			{
+				return this.output;
+			}
+		}
+
+		protected virtual void ContinueOnNewLine(string st)
+		{
+			this.output.WriteLine(st);
+		}
+
+		protected abstract void GenerateArgumentReferenceExpression(CodeArgumentReferenceExpression e);
+
+		protected abstract void GenerateArrayCreateExpression(CodeArrayCreateExpression e);
+
+		protected abstract void GenerateArrayIndexerExpression(CodeArrayIndexerExpression e);
+
+		protected abstract void GenerateAssignStatement(CodeAssignStatement s);
+
+		protected abstract void GenerateAttachEventStatement(CodeAttachEventStatement s);
+
+		protected abstract void GenerateAttributeDeclarationsStart(CodeAttributeDeclarationCollection attributes);
+
+		protected abstract void GenerateAttributeDeclarationsEnd(CodeAttributeDeclarationCollection attributes);
+
+		protected abstract void GenerateBaseReferenceExpression(CodeBaseReferenceExpression e);
+
+		protected virtual void GenerateBinaryOperatorExpression(CodeBinaryOperatorExpression e)
+		{
+			this.output.Write('(');
+			this.GenerateExpression(e.Left);
+			this.output.Write(' ');
+			this.OutputOperator(e.Operator);
+			this.output.Write(' ');
+			this.GenerateExpression(e.Right);
+			this.output.Write(')');
+		}
+
+		protected abstract void GenerateCastExpression(CodeCastExpression e);
+
+		[global::System.MonoTODO]
+		public virtual void GenerateCodeFromMember(CodeTypeMember member, TextWriter writer, CodeGeneratorOptions options)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected abstract void GenerateComment(CodeComment comment);
+
+		protected virtual void GenerateCommentStatement(CodeCommentStatement statement)
+		{
+			this.GenerateComment(statement.Comment);
+		}
+
+		protected virtual void GenerateCommentStatements(CodeCommentStatementCollection statements)
+		{
+			foreach (object obj in statements)
+			{
+				CodeCommentStatement codeCommentStatement = (CodeCommentStatement)obj;
+				this.GenerateCommentStatement(codeCommentStatement);
+			}
+		}
+
+		protected virtual void GenerateCompileUnit(CodeCompileUnit compileUnit)
+		{
+			this.GenerateCompileUnitStart(compileUnit);
+			CodeAttributeDeclarationCollection assemblyCustomAttributes = compileUnit.AssemblyCustomAttributes;
+			if (assemblyCustomAttributes.Count != 0)
+			{
+				foreach (object obj in assemblyCustomAttributes)
+				{
+					CodeAttributeDeclaration codeAttributeDeclaration = (CodeAttributeDeclaration)obj;
+					this.GenerateAttributeDeclarationsStart(assemblyCustomAttributes);
+					this.output.Write("assembly: ");
+					this.OutputAttributeDeclaration(codeAttributeDeclaration);
+					this.GenerateAttributeDeclarationsEnd(assemblyCustomAttributes);
+				}
+				this.output.WriteLine();
+			}
+			foreach (object obj2 in compileUnit.Namespaces)
+			{
+				CodeNamespace codeNamespace = (CodeNamespace)obj2;
+				this.GenerateNamespace(codeNamespace);
+			}
+			this.GenerateCompileUnitEnd(compileUnit);
+		}
+
+		protected virtual void GenerateCompileUnitEnd(CodeCompileUnit compileUnit)
+		{
+			if (compileUnit.EndDirectives.Count > 0)
+			{
+				this.GenerateDirectives(compileUnit.EndDirectives);
+			}
+		}
+
+		protected virtual void GenerateCompileUnitStart(CodeCompileUnit compileUnit)
+		{
+			if (compileUnit.StartDirectives.Count > 0)
+			{
+				this.GenerateDirectives(compileUnit.StartDirectives);
 				this.Output.WriteLine();
 			}
 		}
 
-		protected virtual void GenerateSnippetCompileUnit(CodeSnippetCompileUnit e)
+		protected abstract void GenerateConditionStatement(CodeConditionStatement s);
+
+		protected abstract void GenerateConstructor(CodeConstructor x, CodeTypeDeclaration d);
+
+		protected virtual void GenerateDecimalValue(decimal d)
 		{
-			this.GenerateDirectives(e.StartDirectives);
-			if (e.LinePragma != null)
+			this.Output.Write(d.ToString(CultureInfo.InvariantCulture));
+		}
+
+		[global::System.MonoTODO]
+		protected virtual void GenerateDefaultValueExpression(CodeDefaultValueExpression e)
+		{
+			throw new NotImplementedException();
+		}
+
+		protected abstract void GenerateDelegateCreateExpression(CodeDelegateCreateExpression e);
+
+		protected abstract void GenerateDelegateInvokeExpression(CodeDelegateInvokeExpression e);
+
+		protected virtual void GenerateDirectionExpression(CodeDirectionExpression e)
+		{
+			this.OutputDirection(e.Direction);
+			this.output.Write(' ');
+			this.GenerateExpression(e.Expression);
+		}
+
+		protected virtual void GenerateDoubleValue(double d)
+		{
+			this.Output.Write(d.ToString(CultureInfo.InvariantCulture));
+		}
+
+		protected abstract void GenerateEntryPointMethod(CodeEntryPointMethod m, CodeTypeDeclaration d);
+
+		protected abstract void GenerateEvent(CodeMemberEvent ev, CodeTypeDeclaration d);
+
+		protected abstract void GenerateEventReferenceExpression(CodeEventReferenceExpression e);
+
+		protected void GenerateExpression(CodeExpression e)
+		{
+			if (e == null)
 			{
-				this.GenerateLinePragmaStart(e.LinePragma);
+				throw new ArgumentNullException("e");
 			}
-			this.Output.WriteLine(e.Value);
-			if (e.LinePragma != null)
+			try
 			{
-				this.GenerateLinePragmaEnd(e.LinePragma);
+				e.Accept(this.visitor);
 			}
-			if (e.EndDirectives.Count > 0)
+			catch (NotImplementedException)
 			{
-				this.GenerateDirectives(e.EndDirectives);
+				throw new ArgumentException("Element type " + e.GetType() + " is not supported.", "e");
 			}
 		}
 
-		private void GenerateMethods(CodeTypeDeclaration e)
+		protected abstract void GenerateExpressionStatement(CodeExpressionStatement statement);
+
+		protected abstract void GenerateField(CodeMemberField f);
+
+		protected abstract void GenerateFieldReferenceExpression(CodeFieldReferenceExpression e);
+
+		protected abstract void GenerateGotoStatement(CodeGotoStatement statement);
+
+		protected abstract void GenerateIndexerExpression(CodeIndexerExpression e);
+
+		protected abstract void GenerateIterationStatement(CodeIterationStatement s);
+
+		protected abstract void GenerateLabeledStatement(CodeLabeledStatement statement);
+
+		protected abstract void GenerateLinePragmaStart(CodeLinePragma p);
+
+		protected abstract void GenerateLinePragmaEnd(CodeLinePragma p);
+
+		protected abstract void GenerateMethod(CodeMemberMethod m, CodeTypeDeclaration d);
+
+		protected abstract void GenerateMethodInvokeExpression(CodeMethodInvokeExpression e);
+
+		protected abstract void GenerateMethodReferenceExpression(CodeMethodReferenceExpression e);
+
+		protected abstract void GenerateMethodReturnStatement(CodeMethodReturnStatement e);
+
+		protected virtual void GenerateNamespace(CodeNamespace ns)
 		{
-			foreach (object obj in e.Members)
+			foreach (object obj in ns.Comments)
 			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeMemberMethod && !(codeTypeMember is CodeTypeConstructor) && !(codeTypeMember is CodeConstructor))
+				CodeCommentStatement codeCommentStatement = (CodeCommentStatement)obj;
+				this.GenerateCommentStatement(codeCommentStatement);
+			}
+			this.GenerateNamespaceStart(ns);
+			foreach (object obj2 in ns.Imports)
+			{
+				CodeNamespaceImport codeNamespaceImport = (CodeNamespaceImport)obj2;
+				if (codeNamespaceImport.LinePragma != null)
 				{
-					this._currentMember = codeTypeMember;
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					if (this._currentMember.StartDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.StartDirectives);
-					}
-					this.GenerateCommentStatements(this._currentMember.Comments);
-					CodeMemberMethod codeMemberMethod = (CodeMemberMethod)codeTypeMember;
-					if (codeMemberMethod.LinePragma != null)
-					{
-						this.GenerateLinePragmaStart(codeMemberMethod.LinePragma);
-					}
-					if (codeTypeMember is CodeEntryPointMethod)
-					{
-						this.GenerateEntryPointMethod((CodeEntryPointMethod)codeTypeMember, e);
-					}
-					else
-					{
-						this.GenerateMethod(codeMemberMethod, e);
-					}
-					if (codeMemberMethod.LinePragma != null)
-					{
-						this.GenerateLinePragmaEnd(codeMemberMethod.LinePragma);
-					}
-					if (this._currentMember.EndDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.EndDirectives);
-					}
+					this.GenerateLinePragmaStart(codeNamespaceImport.LinePragma);
+				}
+				this.GenerateNamespaceImport(codeNamespaceImport);
+				if (codeNamespaceImport.LinePragma != null)
+				{
+					this.GenerateLinePragmaEnd(codeNamespaceImport.LinePragma);
 				}
 			}
+			this.output.WriteLine();
+			this.GenerateTypes(ns);
+			this.GenerateNamespaceEnd(ns);
 		}
 
-		private void GenerateNestedTypes(CodeTypeDeclaration e)
-		{
-			foreach (object obj in e.Members)
-			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeTypeDeclaration)
-				{
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					CodeTypeDeclaration codeTypeDeclaration = (CodeTypeDeclaration)codeTypeMember;
-					((ICodeGenerator)this).GenerateCodeFromType(codeTypeDeclaration, this._output.InnerWriter, this._options);
-				}
-			}
-		}
+		protected abstract void GenerateNamespaceStart(CodeNamespace ns);
 
-		protected virtual void GenerateCompileUnit(CodeCompileUnit e)
-		{
-			this.GenerateCompileUnitStart(e);
-			this.GenerateNamespaces(e);
-			this.GenerateCompileUnitEnd(e);
-		}
+		protected abstract void GenerateNamespaceEnd(CodeNamespace ns);
 
-		protected virtual void GenerateNamespace(CodeNamespace e)
-		{
-			this.GenerateCommentStatements(e.Comments);
-			this.GenerateNamespaceStart(e);
-			this.GenerateNamespaceImports(e);
-			this.Output.WriteLine();
-			this.GenerateTypes(e);
-			this.GenerateNamespaceEnd(e);
-		}
+		protected abstract void GenerateNamespaceImport(CodeNamespaceImport i);
 
 		protected void GenerateNamespaceImports(CodeNamespace e)
 		{
@@ -884,354 +415,258 @@ namespace System.CodeDom.Compiler
 			}
 		}
 
-		private void GenerateProperties(CodeTypeDeclaration e)
+		protected void GenerateNamespaces(CodeCompileUnit e)
 		{
-			foreach (object obj in e.Members)
+			foreach (object obj in e.Namespaces)
 			{
-				CodeTypeMember codeTypeMember = (CodeTypeMember)obj;
-				if (codeTypeMember is CodeMemberProperty)
-				{
-					this._currentMember = codeTypeMember;
-					if (this._options.BlankLinesBetweenMembers)
-					{
-						this.Output.WriteLine();
-					}
-					if (this._currentMember.StartDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.StartDirectives);
-					}
-					this.GenerateCommentStatements(this._currentMember.Comments);
-					CodeMemberProperty codeMemberProperty = (CodeMemberProperty)codeTypeMember;
-					if (codeMemberProperty.LinePragma != null)
-					{
-						this.GenerateLinePragmaStart(codeMemberProperty.LinePragma);
-					}
-					this.GenerateProperty(codeMemberProperty, e);
-					if (codeMemberProperty.LinePragma != null)
-					{
-						this.GenerateLinePragmaEnd(codeMemberProperty.LinePragma);
-					}
-					if (this._currentMember.EndDirectives.Count > 0)
-					{
-						this.GenerateDirectives(this._currentMember.EndDirectives);
-					}
-				}
+				CodeNamespace codeNamespace = (CodeNamespace)obj;
+				this.GenerateNamespace(codeNamespace);
 			}
 		}
 
-		protected void GenerateStatement(CodeStatement e)
+		protected abstract void GenerateObjectCreateExpression(CodeObjectCreateExpression e);
+
+		protected virtual void GenerateParameterDeclarationExpression(CodeParameterDeclarationExpression e)
 		{
-			if (e.StartDirectives.Count > 0)
+			if (e.CustomAttributes != null && e.CustomAttributes.Count > 0)
 			{
-				this.GenerateDirectives(e.StartDirectives);
+				this.OutputAttributeDeclarations(e.CustomAttributes);
 			}
+			this.OutputDirection(e.Direction);
+			this.OutputType(e.Type);
+			this.output.Write(' ');
+			this.output.Write(e.Name);
+		}
+
+		protected virtual void GeneratePrimitiveExpression(CodePrimitiveExpression e)
+		{
+			object value = e.Value;
+			if (value == null)
+			{
+				this.output.Write(this.NullToken);
+				return;
+			}
+			Type type = value.GetType();
+			switch (Type.GetTypeCode(type))
+			{
+			case TypeCode.Boolean:
+				this.output.Write(value.ToString().ToLower(CultureInfo.InvariantCulture));
+				return;
+			case TypeCode.Char:
+				this.output.Write("'" + value.ToString() + "'");
+				return;
+			case TypeCode.Byte:
+			case TypeCode.Int16:
+			case TypeCode.Int32:
+			case TypeCode.Int64:
+				this.output.Write(((IFormattable)value).ToString(null, CultureInfo.InvariantCulture));
+				return;
+			case TypeCode.Single:
+				this.GenerateSingleFloatValue((float)value);
+				return;
+			case TypeCode.Double:
+				this.GenerateDoubleValue((double)value);
+				return;
+			case TypeCode.Decimal:
+				this.GenerateDecimalValue((decimal)value);
+				return;
+			case TypeCode.String:
+				this.output.Write(this.QuoteSnippetString((string)value));
+				return;
+			}
+			throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid Primitive Type: {0}. Only CLS compliant primitive types can be used. Consider using CodeObjectCreateExpression.", new object[] { type.FullName }));
+		}
+
+		protected abstract void GenerateProperty(CodeMemberProperty p, CodeTypeDeclaration d);
+
+		protected abstract void GeneratePropertyReferenceExpression(CodePropertyReferenceExpression e);
+
+		protected abstract void GeneratePropertySetValueReferenceExpression(CodePropertySetValueReferenceExpression e);
+
+		protected abstract void GenerateRemoveEventStatement(CodeRemoveEventStatement statement);
+
+		protected virtual void GenerateSingleFloatValue(float s)
+		{
+			this.output.Write(s.ToString(CultureInfo.InvariantCulture));
+		}
+
+		protected virtual void GenerateSnippetCompileUnit(CodeSnippetCompileUnit e)
+		{
 			if (e.LinePragma != null)
 			{
 				this.GenerateLinePragmaStart(e.LinePragma);
 			}
-			if (e is CodeCommentStatement)
-			{
-				this.GenerateCommentStatement((CodeCommentStatement)e);
-			}
-			else if (e is CodeMethodReturnStatement)
-			{
-				this.GenerateMethodReturnStatement((CodeMethodReturnStatement)e);
-			}
-			else if (e is CodeConditionStatement)
-			{
-				this.GenerateConditionStatement((CodeConditionStatement)e);
-			}
-			else if (e is CodeTryCatchFinallyStatement)
-			{
-				this.GenerateTryCatchFinallyStatement((CodeTryCatchFinallyStatement)e);
-			}
-			else if (e is CodeAssignStatement)
-			{
-				this.GenerateAssignStatement((CodeAssignStatement)e);
-			}
-			else if (e is CodeExpressionStatement)
-			{
-				this.GenerateExpressionStatement((CodeExpressionStatement)e);
-			}
-			else if (e is CodeIterationStatement)
-			{
-				this.GenerateIterationStatement((CodeIterationStatement)e);
-			}
-			else if (e is CodeThrowExceptionStatement)
-			{
-				this.GenerateThrowExceptionStatement((CodeThrowExceptionStatement)e);
-			}
-			else if (e is CodeSnippetStatement)
-			{
-				int indent = this.Indent;
-				this.Indent = 0;
-				this.GenerateSnippetStatement((CodeSnippetStatement)e);
-				this.Indent = indent;
-			}
-			else if (e is CodeVariableDeclarationStatement)
-			{
-				this.GenerateVariableDeclarationStatement((CodeVariableDeclarationStatement)e);
-			}
-			else if (e is CodeAttachEventStatement)
-			{
-				this.GenerateAttachEventStatement((CodeAttachEventStatement)e);
-			}
-			else if (e is CodeRemoveEventStatement)
-			{
-				this.GenerateRemoveEventStatement((CodeRemoveEventStatement)e);
-			}
-			else if (e is CodeGotoStatement)
-			{
-				this.GenerateGotoStatement((CodeGotoStatement)e);
-			}
-			else
-			{
-				if (!(e is CodeLabeledStatement))
-				{
-					throw new ArgumentException(global::SR.Format("Element type {0} is not supported.", e.GetType().FullName), "e");
-				}
-				this.GenerateLabeledStatement((CodeLabeledStatement)e);
-			}
+			this.output.WriteLine(e.Value);
 			if (e.LinePragma != null)
 			{
 				this.GenerateLinePragmaEnd(e.LinePragma);
 			}
-			if (e.EndDirectives.Count > 0)
+		}
+
+		protected abstract void GenerateSnippetExpression(CodeSnippetExpression e);
+
+		protected abstract void GenerateSnippetMember(CodeSnippetTypeMember m);
+
+		protected virtual void GenerateSnippetStatement(CodeSnippetStatement s)
+		{
+			this.output.WriteLine(s.Value);
+		}
+
+		protected void GenerateStatement(CodeStatement s)
+		{
+			if (s.StartDirectives.Count > 0)
 			{
-				this.GenerateDirectives(e.EndDirectives);
+				this.GenerateDirectives(s.StartDirectives);
+			}
+			if (s.LinePragma != null)
+			{
+				this.GenerateLinePragmaStart(s.LinePragma);
+			}
+			CodeSnippetStatement codeSnippetStatement = s as CodeSnippetStatement;
+			if (codeSnippetStatement != null)
+			{
+				int indent = this.Indent;
+				try
+				{
+					this.Indent = 0;
+					this.GenerateSnippetStatement(codeSnippetStatement);
+				}
+				finally
+				{
+					this.Indent = indent;
+				}
+			}
+			else
+			{
+				try
+				{
+					s.Accept(this.visitor);
+				}
+				catch (NotImplementedException)
+				{
+					throw new ArgumentException("Element type " + s.GetType() + " is not supported.", "s");
+				}
+			}
+			if (s.LinePragma != null)
+			{
+				this.GenerateLinePragmaEnd(s.LinePragma);
+			}
+			if (s.EndDirectives.Count > 0)
+			{
+				this.GenerateDirectives(s.EndDirectives);
 			}
 		}
 
-		protected void GenerateStatements(CodeStatementCollection stmts)
+		protected void GenerateStatements(CodeStatementCollection c)
 		{
-			foreach (object obj in stmts)
+			foreach (object obj in c)
 			{
 				CodeStatement codeStatement = (CodeStatement)obj;
-				((ICodeGenerator)this).GenerateCodeFromStatement(codeStatement, this._output.InnerWriter, this._options);
+				this.GenerateStatement(codeStatement);
 			}
+		}
+
+		protected abstract void GenerateThisReferenceExpression(CodeThisReferenceExpression e);
+
+		protected abstract void GenerateThrowExceptionStatement(CodeThrowExceptionStatement s);
+
+		protected abstract void GenerateTryCatchFinallyStatement(CodeTryCatchFinallyStatement s);
+
+		protected abstract void GenerateTypeEnd(CodeTypeDeclaration declaration);
+
+		protected abstract void GenerateTypeConstructor(CodeTypeConstructor constructor);
+
+		protected virtual void GenerateTypeOfExpression(CodeTypeOfExpression e)
+		{
+			this.output.Write("typeof(");
+			this.OutputType(e.Type);
+			this.output.Write(")");
+		}
+
+		protected virtual void GenerateTypeReferenceExpression(CodeTypeReferenceExpression e)
+		{
+			this.OutputType(e.Type);
+		}
+
+		protected void GenerateTypes(CodeNamespace e)
+		{
+			foreach (object obj in e.Types)
+			{
+				CodeTypeDeclaration codeTypeDeclaration = (CodeTypeDeclaration)obj;
+				if (this.options.BlankLinesBetweenMembers)
+				{
+					this.output.WriteLine();
+				}
+				this.GenerateType(codeTypeDeclaration);
+			}
+		}
+
+		protected abstract void GenerateTypeStart(CodeTypeDeclaration declaration);
+
+		protected abstract void GenerateVariableDeclarationStatement(CodeVariableDeclarationStatement e);
+
+		protected abstract void GenerateVariableReferenceExpression(CodeVariableReferenceExpression e);
+
+		protected virtual void OutputAttributeArgument(CodeAttributeArgument argument)
+		{
+			string name = argument.Name;
+			if (name != null && name.Length > 0)
+			{
+				this.output.Write(name);
+				this.output.Write('=');
+			}
+			this.GenerateExpression(argument.Value);
+		}
+
+		private void OutputAttributeDeclaration(CodeAttributeDeclaration attribute)
+		{
+			this.output.Write(attribute.Name.Replace('+', '.'));
+			this.output.Write('(');
+			IEnumerator enumerator = attribute.Arguments.GetEnumerator();
+			if (enumerator.MoveNext())
+			{
+				CodeAttributeArgument codeAttributeArgument = (CodeAttributeArgument)enumerator.Current;
+				this.OutputAttributeArgument(codeAttributeArgument);
+				while (enumerator.MoveNext())
+				{
+					this.output.Write(',');
+					codeAttributeArgument = (CodeAttributeArgument)enumerator.Current;
+					this.OutputAttributeArgument(codeAttributeArgument);
+				}
+			}
+			this.output.Write(')');
 		}
 
 		protected virtual void OutputAttributeDeclarations(CodeAttributeDeclarationCollection attributes)
 		{
-			if (attributes.Count == 0)
-			{
-				return;
-			}
 			this.GenerateAttributeDeclarationsStart(attributes);
-			bool flag = true;
-			foreach (object obj in attributes)
+			IEnumerator enumerator = attributes.GetEnumerator();
+			if (enumerator.MoveNext())
 			{
-				CodeAttributeDeclaration codeAttributeDeclaration = (CodeAttributeDeclaration)obj;
-				if (flag)
+				CodeAttributeDeclaration codeAttributeDeclaration = (CodeAttributeDeclaration)enumerator.Current;
+				this.OutputAttributeDeclaration(codeAttributeDeclaration);
+				while (enumerator.MoveNext())
 				{
-					flag = false;
+					object obj = enumerator.Current;
+					codeAttributeDeclaration = (CodeAttributeDeclaration)obj;
+					this.output.WriteLine(',');
+					this.OutputAttributeDeclaration(codeAttributeDeclaration);
 				}
-				else
-				{
-					this.ContinueOnNewLine(", ");
-				}
-				this.Output.Write(codeAttributeDeclaration.Name);
-				this.Output.Write('(');
-				bool flag2 = true;
-				foreach (object obj2 in codeAttributeDeclaration.Arguments)
-				{
-					CodeAttributeArgument codeAttributeArgument = (CodeAttributeArgument)obj2;
-					if (flag2)
-					{
-						flag2 = false;
-					}
-					else
-					{
-						this.Output.Write(", ");
-					}
-					this.OutputAttributeArgument(codeAttributeArgument);
-				}
-				this.Output.Write(')');
 			}
 			this.GenerateAttributeDeclarationsEnd(attributes);
 		}
 
-		protected virtual void OutputAttributeArgument(CodeAttributeArgument arg)
+		protected virtual void OutputDirection(FieldDirection direction)
 		{
-			if (!string.IsNullOrEmpty(arg.Name))
+			switch (direction)
 			{
-				this.OutputIdentifier(arg.Name);
-				this.Output.Write('=');
-			}
-			((ICodeGenerator)this).GenerateCodeFromExpression(arg.Value, this._output.InnerWriter, this._options);
-		}
-
-		protected virtual void OutputDirection(FieldDirection dir)
-		{
-			switch (dir)
-			{
-			case FieldDirection.In:
-				break;
 			case FieldDirection.Out:
-				this.Output.Write("out ");
-				return;
+				this.output.Write("out ");
+				break;
 			case FieldDirection.Ref:
-				this.Output.Write("ref ");
+				this.output.Write("ref ");
 				break;
-			default:
-				return;
 			}
-		}
-
-		protected virtual void OutputFieldScopeModifier(MemberAttributes attributes)
-		{
-			MemberAttributes memberAttributes = attributes & MemberAttributes.VTableMask;
-			if (memberAttributes == MemberAttributes.New)
-			{
-				this.Output.Write("new ");
-			}
-			switch (attributes & MemberAttributes.ScopeMask)
-			{
-			case MemberAttributes.Final:
-			case MemberAttributes.Override:
-				break;
-			case MemberAttributes.Static:
-				this.Output.Write("static ");
-				return;
-			case MemberAttributes.Const:
-				this.Output.Write("const ");
-				break;
-			default:
-				return;
-			}
-		}
-
-		protected virtual void OutputMemberAccessModifier(MemberAttributes attributes)
-		{
-			MemberAttributes memberAttributes = attributes & MemberAttributes.AccessMask;
-			if (memberAttributes <= MemberAttributes.Family)
-			{
-				if (memberAttributes == MemberAttributes.Assembly)
-				{
-					this.Output.Write("internal ");
-					return;
-				}
-				if (memberAttributes == MemberAttributes.FamilyAndAssembly)
-				{
-					this.Output.Write("internal ");
-					return;
-				}
-				if (memberAttributes != MemberAttributes.Family)
-				{
-					return;
-				}
-				this.Output.Write("protected ");
-				return;
-			}
-			else
-			{
-				if (memberAttributes == MemberAttributes.FamilyOrAssembly)
-				{
-					this.Output.Write("protected internal ");
-					return;
-				}
-				if (memberAttributes == MemberAttributes.Private)
-				{
-					this.Output.Write("private ");
-					return;
-				}
-				if (memberAttributes != MemberAttributes.Public)
-				{
-					return;
-				}
-				this.Output.Write("public ");
-				return;
-			}
-		}
-
-		protected virtual void OutputMemberScopeModifier(MemberAttributes attributes)
-		{
-			MemberAttributes memberAttributes = attributes & MemberAttributes.VTableMask;
-			if (memberAttributes == MemberAttributes.New)
-			{
-				this.Output.Write("new ");
-			}
-			switch (attributes & MemberAttributes.ScopeMask)
-			{
-			case MemberAttributes.Abstract:
-				this.Output.Write("abstract ");
-				return;
-			case MemberAttributes.Final:
-				this.Output.Write("");
-				return;
-			case MemberAttributes.Static:
-				this.Output.Write("static ");
-				return;
-			case MemberAttributes.Override:
-				this.Output.Write("override ");
-				return;
-			default:
-				memberAttributes = attributes & MemberAttributes.AccessMask;
-				if (memberAttributes == MemberAttributes.Family || memberAttributes == MemberAttributes.Public)
-				{
-					this.Output.Write("virtual ");
-				}
-				return;
-			}
-		}
-
-		protected abstract void OutputType(CodeTypeReference typeRef);
-
-		protected virtual void OutputTypeAttributes(TypeAttributes attributes, bool isStruct, bool isEnum)
-		{
-			TypeAttributes typeAttributes = attributes & TypeAttributes.VisibilityMask;
-			if (typeAttributes - TypeAttributes.Public > 1)
-			{
-				if (typeAttributes == TypeAttributes.NestedPrivate)
-				{
-					this.Output.Write("private ");
-				}
-			}
-			else
-			{
-				this.Output.Write("public ");
-			}
-			if (isStruct)
-			{
-				this.Output.Write("struct ");
-				return;
-			}
-			if (isEnum)
-			{
-				this.Output.Write("enum ");
-				return;
-			}
-			typeAttributes = attributes & TypeAttributes.ClassSemanticsMask;
-			if (typeAttributes == TypeAttributes.NotPublic)
-			{
-				if ((attributes & TypeAttributes.Sealed) == TypeAttributes.Sealed)
-				{
-					this.Output.Write("sealed ");
-				}
-				if ((attributes & TypeAttributes.Abstract) == TypeAttributes.Abstract)
-				{
-					this.Output.Write("abstract ");
-				}
-				this.Output.Write("class ");
-				return;
-			}
-			if (typeAttributes != TypeAttributes.ClassSemanticsMask)
-			{
-				return;
-			}
-			this.Output.Write("interface ");
-		}
-
-		protected virtual void OutputTypeNamePair(CodeTypeReference typeRef, string name)
-		{
-			this.OutputType(typeRef);
-			this.Output.Write(' ');
-			this.OutputIdentifier(name);
-		}
-
-		protected virtual void OutputIdentifier(string ident)
-		{
-			this.Output.Write(ident);
 		}
 
 		protected virtual void OutputExpressionList(CodeExpressionCollection expressions)
@@ -1239,30 +674,128 @@ namespace System.CodeDom.Compiler
 			this.OutputExpressionList(expressions, false);
 		}
 
-		protected virtual void OutputExpressionList(CodeExpressionCollection expressions, bool newlineBetweenItems)
+		protected virtual void OutputExpressionList(CodeExpressionCollection expressions, bool newLineBetweenItems)
 		{
-			bool flag = true;
-			int num = this.Indent;
-			this.Indent = num + 1;
-			foreach (object obj in expressions)
+			this.Indent++;
+			IEnumerator enumerator = expressions.GetEnumerator();
+			if (enumerator.MoveNext())
 			{
-				CodeExpression codeExpression = (CodeExpression)obj;
-				if (flag)
+				CodeExpression codeExpression = (CodeExpression)enumerator.Current;
+				this.GenerateExpression(codeExpression);
+				while (enumerator.MoveNext())
 				{
-					flag = false;
+					object obj = enumerator.Current;
+					codeExpression = (CodeExpression)obj;
+					this.output.Write(',');
+					if (newLineBetweenItems)
+					{
+						this.output.WriteLine();
+					}
+					else
+					{
+						this.output.Write(' ');
+					}
+					this.GenerateExpression(codeExpression);
 				}
-				else if (newlineBetweenItems)
+			}
+			this.Indent--;
+		}
+
+		protected virtual void OutputFieldScopeModifier(MemberAttributes attributes)
+		{
+			if ((attributes & MemberAttributes.VTableMask) == MemberAttributes.New)
+			{
+				this.output.Write("new ");
+			}
+			switch (attributes & MemberAttributes.ScopeMask)
+			{
+			case MemberAttributes.Static:
+				this.output.Write("static ");
+				break;
+			case MemberAttributes.Const:
+				this.output.Write("const ");
+				break;
+			}
+		}
+
+		protected virtual void OutputIdentifier(string ident)
+		{
+			this.output.Write(ident);
+		}
+
+		protected virtual void OutputMemberAccessModifier(MemberAttributes attributes)
+		{
+			MemberAttributes memberAttributes = attributes & MemberAttributes.AccessMask;
+			if (memberAttributes != MemberAttributes.Assembly)
+			{
+				if (memberAttributes != MemberAttributes.FamilyAndAssembly)
 				{
-					this.ContinueOnNewLine(",");
+					if (memberAttributes != MemberAttributes.Family)
+					{
+						if (memberAttributes != MemberAttributes.FamilyOrAssembly)
+						{
+							if (memberAttributes != MemberAttributes.Private)
+							{
+								if (memberAttributes == MemberAttributes.Public)
+								{
+									this.output.Write("public ");
+								}
+							}
+							else
+							{
+								this.output.Write("private ");
+							}
+						}
+						else
+						{
+							this.output.Write("protected internal ");
+						}
+					}
+					else
+					{
+						this.output.Write("protected ");
+					}
 				}
 				else
 				{
-					this.Output.Write(", ");
+					this.output.Write("internal ");
 				}
-				((ICodeGenerator)this).GenerateCodeFromExpression(codeExpression, this._output.InnerWriter, this._options);
 			}
-			num = this.Indent;
-			this.Indent = num - 1;
+			else
+			{
+				this.output.Write("internal ");
+			}
+		}
+
+		protected virtual void OutputMemberScopeModifier(MemberAttributes attributes)
+		{
+			if ((attributes & MemberAttributes.VTableMask) == MemberAttributes.New)
+			{
+				this.output.Write("new ");
+			}
+			switch (attributes & MemberAttributes.ScopeMask)
+			{
+			case MemberAttributes.Abstract:
+				this.output.Write("abstract ");
+				break;
+			case MemberAttributes.Final:
+				break;
+			case MemberAttributes.Static:
+				this.output.Write("static ");
+				break;
+			case MemberAttributes.Override:
+				this.output.Write("override ");
+				break;
+			default:
+			{
+				MemberAttributes memberAttributes = attributes & MemberAttributes.AccessMask;
+				if (memberAttributes == MemberAttributes.Public || memberAttributes == MemberAttributes.Family)
+				{
+					this.output.Write("virtual ");
+				}
+				break;
+			}
+			}
 		}
 
 		protected virtual void OutputOperator(CodeBinaryOperatorType op)
@@ -1270,69 +803,62 @@ namespace System.CodeDom.Compiler
 			switch (op)
 			{
 			case CodeBinaryOperatorType.Add:
-				this.Output.Write('+');
-				return;
+				this.output.Write("+");
+				break;
 			case CodeBinaryOperatorType.Subtract:
-				this.Output.Write('-');
-				return;
+				this.output.Write("-");
+				break;
 			case CodeBinaryOperatorType.Multiply:
-				this.Output.Write('*');
-				return;
+				this.output.Write("*");
+				break;
 			case CodeBinaryOperatorType.Divide:
-				this.Output.Write('/');
-				return;
+				this.output.Write("/");
+				break;
 			case CodeBinaryOperatorType.Modulus:
-				this.Output.Write('%');
-				return;
+				this.output.Write("%");
+				break;
 			case CodeBinaryOperatorType.Assign:
-				this.Output.Write('=');
-				return;
+				this.output.Write("=");
+				break;
 			case CodeBinaryOperatorType.IdentityInequality:
-				this.Output.Write("!=");
-				return;
+				this.output.Write("!=");
+				break;
 			case CodeBinaryOperatorType.IdentityEquality:
-				this.Output.Write("==");
-				return;
+				this.output.Write("==");
+				break;
 			case CodeBinaryOperatorType.ValueEquality:
-				this.Output.Write("==");
-				return;
+				this.output.Write("==");
+				break;
 			case CodeBinaryOperatorType.BitwiseOr:
-				this.Output.Write('|');
-				return;
+				this.output.Write("|");
+				break;
 			case CodeBinaryOperatorType.BitwiseAnd:
-				this.Output.Write('&');
-				return;
+				this.output.Write("&");
+				break;
 			case CodeBinaryOperatorType.BooleanOr:
-				this.Output.Write("||");
-				return;
+				this.output.Write("||");
+				break;
 			case CodeBinaryOperatorType.BooleanAnd:
-				this.Output.Write("&&");
-				return;
+				this.output.Write("&&");
+				break;
 			case CodeBinaryOperatorType.LessThan:
-				this.Output.Write('<');
-				return;
+				this.output.Write("<");
+				break;
 			case CodeBinaryOperatorType.LessThanOrEqual:
-				this.Output.Write("<=");
-				return;
+				this.output.Write("<=");
+				break;
 			case CodeBinaryOperatorType.GreaterThan:
-				this.Output.Write('>');
-				return;
+				this.output.Write(">");
+				break;
 			case CodeBinaryOperatorType.GreaterThanOrEqual:
-				this.Output.Write(">=");
-				return;
-			default:
-				return;
+				this.output.Write(">=");
+				break;
 			}
 		}
 
 		protected virtual void OutputParameters(CodeParameterDeclarationExpressionCollection parameters)
 		{
 			bool flag = true;
-			bool flag2 = parameters.Count > 15;
-			if (flag2)
-			{
-				this.Indent += 3;
-			}
 			foreach (object obj in parameters)
 			{
 				CodeParameterDeclarationExpression codeParameterDeclarationExpression = (CodeParameterDeclarationExpression)obj;
@@ -1342,344 +868,518 @@ namespace System.CodeDom.Compiler
 				}
 				else
 				{
-					this.Output.Write(", ");
-				}
-				if (flag2)
-				{
-					this.ContinueOnNewLine("");
+					this.output.Write(", ");
 				}
 				this.GenerateExpression(codeParameterDeclarationExpression);
 			}
-			if (flag2)
-			{
-				this.Indent -= 3;
-			}
 		}
 
-		protected abstract void GenerateArrayCreateExpression(CodeArrayCreateExpression e);
+		protected abstract void OutputType(CodeTypeReference t);
 
-		protected abstract void GenerateBaseReferenceExpression(CodeBaseReferenceExpression e);
-
-		protected virtual void GenerateBinaryOperatorExpression(CodeBinaryOperatorExpression e)
+		protected virtual void OutputTypeAttributes(TypeAttributes attributes, bool isStruct, bool isEnum)
 		{
-			bool flag = false;
-			this.Output.Write('(');
-			this.GenerateExpression(e.Left);
-			this.Output.Write(' ');
-			if (e.Left is CodeBinaryOperatorExpression || e.Right is CodeBinaryOperatorExpression)
+			switch (attributes & TypeAttributes.VisibilityMask)
 			{
-				if (!this._inNestedBinary)
+			case TypeAttributes.Public:
+			case TypeAttributes.NestedPublic:
+				this.output.Write("public ");
+				break;
+			case TypeAttributes.NestedPrivate:
+				this.output.Write("private ");
+				break;
+			}
+			if (isStruct)
+			{
+				this.output.Write("struct ");
+			}
+			else if (isEnum)
+			{
+				this.output.Write("enum ");
+			}
+			else if ((attributes & TypeAttributes.ClassSemanticsMask) != TypeAttributes.NotPublic)
+			{
+				this.output.Write("interface ");
+			}
+			else if (this.currentType is CodeTypeDelegate)
+			{
+				this.output.Write("delegate ");
+			}
+			else
+			{
+				if ((attributes & TypeAttributes.Sealed) != TypeAttributes.NotPublic)
 				{
-					flag = true;
-					this._inNestedBinary = true;
-					this.Indent += 3;
+					this.output.Write("sealed ");
 				}
-				this.ContinueOnNewLine("");
-			}
-			this.OutputOperator(e.Operator);
-			this.Output.Write(' ');
-			this.GenerateExpression(e.Right);
-			this.Output.Write(')');
-			if (flag)
-			{
-				this.Indent -= 3;
-				this._inNestedBinary = false;
+				if ((attributes & TypeAttributes.Abstract) != TypeAttributes.NotPublic)
+				{
+					this.output.Write("abstract ");
+				}
+				this.output.Write("class ");
 			}
 		}
 
-		protected virtual void ContinueOnNewLine(string st)
+		protected virtual void OutputTypeNamePair(CodeTypeReference type, string name)
 		{
-			this.Output.WriteLine(st);
+			this.OutputType(type);
+			this.output.Write(' ');
+			this.output.Write(name);
 		}
 
-		protected abstract void GenerateCastExpression(CodeCastExpression e);
-
-		protected abstract void GenerateDelegateCreateExpression(CodeDelegateCreateExpression e);
-
-		protected abstract void GenerateFieldReferenceExpression(CodeFieldReferenceExpression e);
-
-		protected abstract void GenerateArgumentReferenceExpression(CodeArgumentReferenceExpression e);
-
-		protected abstract void GenerateVariableReferenceExpression(CodeVariableReferenceExpression e);
-
-		protected abstract void GenerateIndexerExpression(CodeIndexerExpression e);
-
-		protected abstract void GenerateArrayIndexerExpression(CodeArrayIndexerExpression e);
-
-		protected abstract void GenerateSnippetExpression(CodeSnippetExpression e);
-
-		protected abstract void GenerateMethodInvokeExpression(CodeMethodInvokeExpression e);
-
-		protected abstract void GenerateMethodReferenceExpression(CodeMethodReferenceExpression e);
-
-		protected abstract void GenerateEventReferenceExpression(CodeEventReferenceExpression e);
-
-		protected abstract void GenerateDelegateInvokeExpression(CodeDelegateInvokeExpression e);
-
-		protected abstract void GenerateObjectCreateExpression(CodeObjectCreateExpression e);
-
-		protected virtual void GenerateParameterDeclarationExpression(CodeParameterDeclarationExpression e)
-		{
-			if (e.CustomAttributes.Count > 0)
-			{
-				this.OutputAttributeDeclarations(e.CustomAttributes);
-				this.Output.Write(' ');
-			}
-			this.OutputDirection(e.Direction);
-			this.OutputTypeNamePair(e.Type, e.Name);
-		}
-
-		protected virtual void GenerateDirectionExpression(CodeDirectionExpression e)
-		{
-			this.OutputDirection(e.Direction);
-			this.GenerateExpression(e.Expression);
-		}
-
-		protected virtual void GeneratePrimitiveExpression(CodePrimitiveExpression e)
-		{
-			if (e.Value == null)
-			{
-				this.Output.Write(this.NullToken);
-				return;
-			}
-			if (e.Value is string)
-			{
-				this.Output.Write(this.QuoteSnippetString((string)e.Value));
-				return;
-			}
-			if (e.Value is char)
-			{
-				this.Output.Write("'" + e.Value.ToString() + "'");
-				return;
-			}
-			if (e.Value is byte)
-			{
-				this.Output.Write(((byte)e.Value).ToString(CultureInfo.InvariantCulture));
-				return;
-			}
-			if (e.Value is short)
-			{
-				this.Output.Write(((short)e.Value).ToString(CultureInfo.InvariantCulture));
-				return;
-			}
-			if (e.Value is int)
-			{
-				this.Output.Write(((int)e.Value).ToString(CultureInfo.InvariantCulture));
-				return;
-			}
-			if (e.Value is long)
-			{
-				this.Output.Write(((long)e.Value).ToString(CultureInfo.InvariantCulture));
-				return;
-			}
-			if (e.Value is float)
-			{
-				this.GenerateSingleFloatValue((float)e.Value);
-				return;
-			}
-			if (e.Value is double)
-			{
-				this.GenerateDoubleValue((double)e.Value);
-				return;
-			}
-			if (e.Value is decimal)
-			{
-				this.GenerateDecimalValue((decimal)e.Value);
-				return;
-			}
-			if (!(e.Value is bool))
-			{
-				throw new ArgumentException(global::SR.Format("Invalid Primitive Type: {0}. Consider using CodeObjectCreateExpression.", e.Value.GetType().ToString()));
-			}
-			if ((bool)e.Value)
-			{
-				this.Output.Write("true");
-				return;
-			}
-			this.Output.Write("false");
-		}
-
-		protected virtual void GenerateSingleFloatValue(float s)
-		{
-			this.Output.Write(s.ToString("R", CultureInfo.InvariantCulture));
-		}
-
-		protected virtual void GenerateDoubleValue(double d)
-		{
-			this.Output.Write(d.ToString("R", CultureInfo.InvariantCulture));
-		}
-
-		protected virtual void GenerateDecimalValue(decimal d)
-		{
-			this.Output.Write(d.ToString(CultureInfo.InvariantCulture));
-		}
-
-		protected virtual void GenerateDefaultValueExpression(CodeDefaultValueExpression e)
-		{
-		}
-
-		protected abstract void GeneratePropertyReferenceExpression(CodePropertyReferenceExpression e);
-
-		protected abstract void GeneratePropertySetValueReferenceExpression(CodePropertySetValueReferenceExpression e);
-
-		protected abstract void GenerateThisReferenceExpression(CodeThisReferenceExpression e);
-
-		protected virtual void GenerateTypeReferenceExpression(CodeTypeReferenceExpression e)
-		{
-			this.OutputType(e.Type);
-		}
-
-		protected virtual void GenerateTypeOfExpression(CodeTypeOfExpression e)
-		{
-			this.Output.Write("typeof(");
-			this.OutputType(e.Type);
-			this.Output.Write(')');
-		}
-
-		protected abstract void GenerateExpressionStatement(CodeExpressionStatement e);
-
-		protected abstract void GenerateIterationStatement(CodeIterationStatement e);
-
-		protected abstract void GenerateThrowExceptionStatement(CodeThrowExceptionStatement e);
-
-		protected virtual void GenerateCommentStatement(CodeCommentStatement e)
-		{
-			if (e.Comment == null)
-			{
-				throw new ArgumentException(global::SR.Format("The 'Comment' property of the CodeCommentStatement '{0}' cannot be null.", "e"), "e");
-			}
-			this.GenerateComment(e.Comment);
-		}
-
-		protected virtual void GenerateCommentStatements(CodeCommentStatementCollection e)
-		{
-			foreach (object obj in e)
-			{
-				CodeCommentStatement codeCommentStatement = (CodeCommentStatement)obj;
-				this.GenerateCommentStatement(codeCommentStatement);
-			}
-		}
-
-		protected abstract void GenerateComment(CodeComment e);
-
-		protected abstract void GenerateMethodReturnStatement(CodeMethodReturnStatement e);
-
-		protected abstract void GenerateConditionStatement(CodeConditionStatement e);
-
-		protected abstract void GenerateTryCatchFinallyStatement(CodeTryCatchFinallyStatement e);
-
-		protected abstract void GenerateAssignStatement(CodeAssignStatement e);
-
-		protected abstract void GenerateAttachEventStatement(CodeAttachEventStatement e);
-
-		protected abstract void GenerateRemoveEventStatement(CodeRemoveEventStatement e);
-
-		protected abstract void GenerateGotoStatement(CodeGotoStatement e);
-
-		protected abstract void GenerateLabeledStatement(CodeLabeledStatement e);
-
-		protected virtual void GenerateSnippetStatement(CodeSnippetStatement e)
-		{
-			this.Output.WriteLine(e.Value);
-		}
-
-		protected abstract void GenerateVariableDeclarationStatement(CodeVariableDeclarationStatement e);
-
-		protected abstract void GenerateLinePragmaStart(CodeLinePragma e);
-
-		protected abstract void GenerateLinePragmaEnd(CodeLinePragma e);
-
-		protected abstract void GenerateEvent(CodeMemberEvent e, CodeTypeDeclaration c);
-
-		protected abstract void GenerateField(CodeMemberField e);
-
-		protected abstract void GenerateSnippetMember(CodeSnippetTypeMember e);
-
-		protected abstract void GenerateEntryPointMethod(CodeEntryPointMethod e, CodeTypeDeclaration c);
-
-		protected abstract void GenerateMethod(CodeMemberMethod e, CodeTypeDeclaration c);
-
-		protected abstract void GenerateProperty(CodeMemberProperty e, CodeTypeDeclaration c);
-
-		protected abstract void GenerateConstructor(CodeConstructor e, CodeTypeDeclaration c);
-
-		protected abstract void GenerateTypeConstructor(CodeTypeConstructor e);
-
-		protected abstract void GenerateTypeStart(CodeTypeDeclaration e);
-
-		protected abstract void GenerateTypeEnd(CodeTypeDeclaration e);
-
-		protected virtual void GenerateCompileUnitStart(CodeCompileUnit e)
-		{
-			if (e.StartDirectives.Count > 0)
-			{
-				this.GenerateDirectives(e.StartDirectives);
-			}
-		}
-
-		protected virtual void GenerateCompileUnitEnd(CodeCompileUnit e)
-		{
-			if (e.EndDirectives.Count > 0)
-			{
-				this.GenerateDirectives(e.EndDirectives);
-			}
-		}
-
-		protected abstract void GenerateNamespaceStart(CodeNamespace e);
-
-		protected abstract void GenerateNamespaceEnd(CodeNamespace e);
-
-		protected abstract void GenerateNamespaceImport(CodeNamespaceImport e);
-
-		protected abstract void GenerateAttributeDeclarationsStart(CodeAttributeDeclarationCollection attributes);
-
-		protected abstract void GenerateAttributeDeclarationsEnd(CodeAttributeDeclarationCollection attributes);
-
-		protected abstract bool Supports(GeneratorSupport support);
-
-		protected abstract bool IsValidIdentifier(string value);
-
-		protected virtual void ValidateIdentifier(string value)
-		{
-			if (!this.IsValidIdentifier(value))
-			{
-				throw new ArgumentException(global::SR.Format("Identifier '{0}' is not valid.", value));
-			}
-		}
+		protected abstract string QuoteSnippetString(string value);
 
 		protected abstract string CreateEscapedIdentifier(string value);
 
 		protected abstract string CreateValidIdentifier(string value);
 
-		protected abstract string GetTypeOutput(CodeTypeReference value);
+		private void InitOutput(TextWriter output, CodeGeneratorOptions options)
+		{
+			if (options == null)
+			{
+				options = new CodeGeneratorOptions();
+			}
+			this.output = new IndentedTextWriter(output, options.IndentString);
+			this.options = options;
+		}
 
-		protected abstract string QuoteSnippetString(string value);
+		private void GenerateType(CodeTypeDeclaration type)
+		{
+			this.currentType = type;
+			this.currentMember = null;
+			if (type.StartDirectives.Count > 0)
+			{
+				this.GenerateDirectives(type.StartDirectives);
+			}
+			foreach (object obj in type.Comments)
+			{
+				CodeCommentStatement codeCommentStatement = (CodeCommentStatement)obj;
+				this.GenerateCommentStatement(codeCommentStatement);
+			}
+			if (type.LinePragma != null)
+			{
+				this.GenerateLinePragmaStart(type.LinePragma);
+			}
+			this.GenerateTypeStart(type);
+			CodeTypeMember[] array = new CodeTypeMember[type.Members.Count];
+			type.Members.CopyTo(array, 0);
+			if (!this.Options.VerbatimOrder)
+			{
+				int[] array2 = new int[array.Length];
+				for (int i = 0; i < array.Length; i++)
+				{
+					array2[i] = Array.IndexOf<Type>(CodeGenerator.memberTypes, array[i].GetType()) * array.Length + i;
+				}
+				Array.Sort<int, CodeTypeMember>(array2, array);
+			}
+			CodeTypeDeclaration codeTypeDeclaration = null;
+			foreach (CodeTypeMember codeTypeMember in array)
+			{
+				CodeTypeMember codeTypeMember2 = this.currentMember;
+				this.currentMember = codeTypeMember;
+				if (codeTypeMember2 != null && codeTypeDeclaration == null)
+				{
+					if (codeTypeMember2.LinePragma != null)
+					{
+						this.GenerateLinePragmaEnd(codeTypeMember2.LinePragma);
+					}
+					if (codeTypeMember2.EndDirectives.Count > 0)
+					{
+						this.GenerateDirectives(codeTypeMember2.EndDirectives);
+					}
+				}
+				if (this.options.BlankLinesBetweenMembers)
+				{
+					this.output.WriteLine();
+				}
+				codeTypeDeclaration = codeTypeMember as CodeTypeDeclaration;
+				if (codeTypeDeclaration != null)
+				{
+					this.GenerateType(codeTypeDeclaration);
+					this.currentType = type;
+				}
+				else
+				{
+					if (this.currentMember.StartDirectives.Count > 0)
+					{
+						this.GenerateDirectives(this.currentMember.StartDirectives);
+					}
+					foreach (object obj2 in codeTypeMember.Comments)
+					{
+						CodeCommentStatement codeCommentStatement2 = (CodeCommentStatement)obj2;
+						this.GenerateCommentStatement(codeCommentStatement2);
+					}
+					if (codeTypeMember.LinePragma != null)
+					{
+						this.GenerateLinePragmaStart(codeTypeMember.LinePragma);
+					}
+					try
+					{
+						codeTypeMember.Accept(this.visitor);
+					}
+					catch (NotImplementedException)
+					{
+						throw new ArgumentException("Element type " + codeTypeMember.GetType() + " is not supported.");
+					}
+				}
+			}
+			if (this.currentMember != null && !(this.currentMember is CodeTypeDeclaration))
+			{
+				if (this.currentMember.LinePragma != null)
+				{
+					this.GenerateLinePragmaEnd(this.currentMember.LinePragma);
+				}
+				if (this.currentMember.EndDirectives.Count > 0)
+				{
+					this.GenerateDirectives(this.currentMember.EndDirectives);
+				}
+			}
+			this.currentType = type;
+			this.GenerateTypeEnd(type);
+			if (type.LinePragma != null)
+			{
+				this.GenerateLinePragmaEnd(type.LinePragma);
+			}
+			if (type.EndDirectives.Count > 0)
+			{
+				this.GenerateDirectives(type.EndDirectives);
+			}
+		}
+
+		protected abstract string GetTypeOutput(CodeTypeReference type);
+
+		protected abstract bool IsValidIdentifier(string value);
 
 		public static bool IsValidLanguageIndependentIdentifier(string value)
 		{
-			return CSharpHelpers.IsValidTypeNameOrIdentifier(value, false);
+			if (value == null)
+			{
+				return false;
+			}
+			if (value.Equals(string.Empty))
+			{
+				return false;
+			}
+			UnicodeCategory unicodeCategory = char.GetUnicodeCategory(value[0]);
+			switch (unicodeCategory)
+			{
+			case UnicodeCategory.UppercaseLetter:
+			case UnicodeCategory.LowercaseLetter:
+			case UnicodeCategory.TitlecaseLetter:
+			case UnicodeCategory.ModifierLetter:
+			case UnicodeCategory.OtherLetter:
+			case UnicodeCategory.LetterNumber:
+				break;
+			default:
+				if (unicodeCategory != UnicodeCategory.ConnectorPunctuation)
+				{
+					return false;
+				}
+				break;
+			}
+			int i = 1;
+			while (i < value.Length)
+			{
+				switch (char.GetUnicodeCategory(value[i]))
+				{
+				case UnicodeCategory.UppercaseLetter:
+				case UnicodeCategory.LowercaseLetter:
+				case UnicodeCategory.TitlecaseLetter:
+				case UnicodeCategory.ModifierLetter:
+				case UnicodeCategory.OtherLetter:
+				case UnicodeCategory.NonSpacingMark:
+				case UnicodeCategory.SpacingCombiningMark:
+				case UnicodeCategory.DecimalDigitNumber:
+				case UnicodeCategory.LetterNumber:
+				case UnicodeCategory.Format:
+				case UnicodeCategory.ConnectorPunctuation:
+					i++;
+					continue;
+				}
+				return false;
+			}
+			return true;
 		}
 
-		internal static bool IsValidLanguageIndependentTypeName(string value)
+		protected abstract bool Supports(GeneratorSupport supports);
+
+		protected virtual void ValidateIdentifier(string value)
 		{
-			return CSharpHelpers.IsValidTypeNameOrIdentifier(value, true);
+			if (!this.IsValidIdentifier(value))
+			{
+				throw new ArgumentException("Identifier is invalid", "value");
+			}
 		}
 
+		[global::System.MonoTODO]
 		public static void ValidateIdentifiers(CodeObject e)
 		{
-			new CodeValidator().ValidateIdentifiers(e);
+			throw new NotImplementedException();
 		}
 
-		private const int ParameterMultilineThreshold = 15;
+		protected virtual void GenerateDirectives(CodeDirectiveCollection directives)
+		{
+		}
 
-		private ExposedTabStringIndentedTextWriter _output;
+		private IndentedTextWriter output;
 
-		private CodeGeneratorOptions _options;
+		private CodeGeneratorOptions options;
 
-		private CodeTypeDeclaration _currentClass;
+		private CodeTypeMember currentMember;
 
-		private CodeTypeMember _currentMember;
+		private CodeTypeDeclaration currentType;
 
-		private bool _inNestedBinary;
+		private CodeGenerator.Visitor visitor;
+
+		private static Type[] memberTypes = new Type[]
+		{
+			typeof(CodeMemberField),
+			typeof(CodeSnippetTypeMember),
+			typeof(CodeTypeConstructor),
+			typeof(CodeConstructor),
+			typeof(CodeMemberProperty),
+			typeof(CodeMemberEvent),
+			typeof(CodeMemberMethod),
+			typeof(CodeTypeDeclaration),
+			typeof(CodeEntryPointMethod)
+		};
+
+		internal class Visitor : ICodeDomVisitor
+		{
+			public Visitor(CodeGenerator generator)
+			{
+				this.g = generator;
+			}
+
+			public void Visit(CodeArgumentReferenceExpression o)
+			{
+				this.g.GenerateArgumentReferenceExpression(o);
+			}
+
+			public void Visit(CodeArrayCreateExpression o)
+			{
+				this.g.GenerateArrayCreateExpression(o);
+			}
+
+			public void Visit(CodeArrayIndexerExpression o)
+			{
+				this.g.GenerateArrayIndexerExpression(o);
+			}
+
+			public void Visit(CodeBaseReferenceExpression o)
+			{
+				this.g.GenerateBaseReferenceExpression(o);
+			}
+
+			public void Visit(CodeBinaryOperatorExpression o)
+			{
+				this.g.GenerateBinaryOperatorExpression(o);
+			}
+
+			public void Visit(CodeCastExpression o)
+			{
+				this.g.GenerateCastExpression(o);
+			}
+
+			public void Visit(CodeDefaultValueExpression o)
+			{
+				this.g.GenerateDefaultValueExpression(o);
+			}
+
+			public void Visit(CodeDelegateCreateExpression o)
+			{
+				this.g.GenerateDelegateCreateExpression(o);
+			}
+
+			public void Visit(CodeDelegateInvokeExpression o)
+			{
+				this.g.GenerateDelegateInvokeExpression(o);
+			}
+
+			public void Visit(CodeDirectionExpression o)
+			{
+				this.g.GenerateDirectionExpression(o);
+			}
+
+			public void Visit(CodeEventReferenceExpression o)
+			{
+				this.g.GenerateEventReferenceExpression(o);
+			}
+
+			public void Visit(CodeFieldReferenceExpression o)
+			{
+				this.g.GenerateFieldReferenceExpression(o);
+			}
+
+			public void Visit(CodeIndexerExpression o)
+			{
+				this.g.GenerateIndexerExpression(o);
+			}
+
+			public void Visit(CodeMethodInvokeExpression o)
+			{
+				this.g.GenerateMethodInvokeExpression(o);
+			}
+
+			public void Visit(CodeMethodReferenceExpression o)
+			{
+				this.g.GenerateMethodReferenceExpression(o);
+			}
+
+			public void Visit(CodeObjectCreateExpression o)
+			{
+				this.g.GenerateObjectCreateExpression(o);
+			}
+
+			public void Visit(CodeParameterDeclarationExpression o)
+			{
+				this.g.GenerateParameterDeclarationExpression(o);
+			}
+
+			public void Visit(CodePrimitiveExpression o)
+			{
+				this.g.GeneratePrimitiveExpression(o);
+			}
+
+			public void Visit(CodePropertyReferenceExpression o)
+			{
+				this.g.GeneratePropertyReferenceExpression(o);
+			}
+
+			public void Visit(CodePropertySetValueReferenceExpression o)
+			{
+				this.g.GeneratePropertySetValueReferenceExpression(o);
+			}
+
+			public void Visit(CodeSnippetExpression o)
+			{
+				this.g.GenerateSnippetExpression(o);
+			}
+
+			public void Visit(CodeThisReferenceExpression o)
+			{
+				this.g.GenerateThisReferenceExpression(o);
+			}
+
+			public void Visit(CodeTypeOfExpression o)
+			{
+				this.g.GenerateTypeOfExpression(o);
+			}
+
+			public void Visit(CodeTypeReferenceExpression o)
+			{
+				this.g.GenerateTypeReferenceExpression(o);
+			}
+
+			public void Visit(CodeVariableReferenceExpression o)
+			{
+				this.g.GenerateVariableReferenceExpression(o);
+			}
+
+			public void Visit(CodeAssignStatement o)
+			{
+				this.g.GenerateAssignStatement(o);
+			}
+
+			public void Visit(CodeAttachEventStatement o)
+			{
+				this.g.GenerateAttachEventStatement(o);
+			}
+
+			public void Visit(CodeCommentStatement o)
+			{
+				this.g.GenerateCommentStatement(o);
+			}
+
+			public void Visit(CodeConditionStatement o)
+			{
+				this.g.GenerateConditionStatement(o);
+			}
+
+			public void Visit(CodeExpressionStatement o)
+			{
+				this.g.GenerateExpressionStatement(o);
+			}
+
+			public void Visit(CodeGotoStatement o)
+			{
+				this.g.GenerateGotoStatement(o);
+			}
+
+			public void Visit(CodeIterationStatement o)
+			{
+				this.g.GenerateIterationStatement(o);
+			}
+
+			public void Visit(CodeLabeledStatement o)
+			{
+				this.g.GenerateLabeledStatement(o);
+			}
+
+			public void Visit(CodeMethodReturnStatement o)
+			{
+				this.g.GenerateMethodReturnStatement(o);
+			}
+
+			public void Visit(CodeRemoveEventStatement o)
+			{
+				this.g.GenerateRemoveEventStatement(o);
+			}
+
+			public void Visit(CodeThrowExceptionStatement o)
+			{
+				this.g.GenerateThrowExceptionStatement(o);
+			}
+
+			public void Visit(CodeTryCatchFinallyStatement o)
+			{
+				this.g.GenerateTryCatchFinallyStatement(o);
+			}
+
+			public void Visit(CodeVariableDeclarationStatement o)
+			{
+				this.g.GenerateVariableDeclarationStatement(o);
+			}
+
+			public void Visit(CodeConstructor o)
+			{
+				this.g.GenerateConstructor(o, this.g.CurrentClass);
+			}
+
+			public void Visit(CodeEntryPointMethod o)
+			{
+				this.g.GenerateEntryPointMethod(o, this.g.CurrentClass);
+			}
+
+			public void Visit(CodeMemberEvent o)
+			{
+				this.g.GenerateEvent(o, this.g.CurrentClass);
+			}
+
+			public void Visit(CodeMemberField o)
+			{
+				this.g.GenerateField(o);
+			}
+
+			public void Visit(CodeMemberMethod o)
+			{
+				this.g.GenerateMethod(o, this.g.CurrentClass);
+			}
+
+			public void Visit(CodeMemberProperty o)
+			{
+				this.g.GenerateProperty(o, this.g.CurrentClass);
+			}
+
+			public void Visit(CodeSnippetTypeMember o)
+			{
+				this.g.GenerateSnippetMember(o);
+			}
+
+			public void Visit(CodeTypeConstructor o)
+			{
+				this.g.GenerateTypeConstructor(o);
+			}
+
+			private CodeGenerator g;
+		}
 	}
 }

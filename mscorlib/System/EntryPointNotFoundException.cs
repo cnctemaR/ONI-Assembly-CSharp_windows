@@ -9,26 +9,28 @@ namespace System
 	public class EntryPointNotFoundException : TypeLoadException
 	{
 		public EntryPointNotFoundException()
-			: base(Environment.GetResourceString("Entry point was not found."))
+			: base(Locale.GetText("Cannot load class because of missing entry method."))
 		{
-			base.SetErrorCode(-2146233053);
+			base.HResult = -2146233053;
 		}
 
 		public EntryPointNotFoundException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233053);
-		}
-
-		public EntryPointNotFoundException(string message, Exception inner)
-			: base(message, inner)
-		{
-			base.SetErrorCode(-2146233053);
+			base.HResult = -2146233053;
 		}
 
 		protected EntryPointNotFoundException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		public EntryPointNotFoundException(string message, Exception inner)
+			: base(message, inner)
+		{
+			base.HResult = -2146233053;
+		}
+
+		private const int Result = -2146233053;
 	}
 }

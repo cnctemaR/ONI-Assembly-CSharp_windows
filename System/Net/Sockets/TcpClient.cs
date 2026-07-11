@@ -1,103 +1,80 @@
 ﻿using System;
-using System.Security.Permissions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace System.Net.Sockets
 {
 	public class TcpClient : IDisposable
 	{
-		public TcpClient(IPEndPoint localEP)
-		{
-			bool on = Logging.On;
-			if (localEP == null)
-			{
-				throw new ArgumentNullException("localEP");
-			}
-			this.m_Family = localEP.AddressFamily;
-			this.initialize();
-			this.Client.Bind(localEP);
-			bool on2 = Logging.On;
-		}
-
 		public TcpClient()
-			: this(AddressFamily.InterNetwork)
 		{
-			bool on = Logging.On;
-			bool on2 = Logging.On;
+			this.Init(AddressFamily.InterNetwork);
+			this.client.Bind(new IPEndPoint(IPAddress.Any, 0));
 		}
 
 		public TcpClient(AddressFamily family)
 		{
-			bool on = Logging.On;
 			if (family != AddressFamily.InterNetwork && family != AddressFamily.InterNetworkV6)
 			{
-				throw new ArgumentException(global::SR.GetString("'{0}' Client can only accept InterNetwork or InterNetworkV6 addresses.", new object[] { "TCP" }), "family");
+				throw new ArgumentException("Family must be InterNetwork or InterNetworkV6", "family");
 			}
-			this.m_Family = family;
-			this.initialize();
-			bool on2 = Logging.On;
+			this.Init(family);
+			IPAddress ipaddress = IPAddress.Any;
+			if (family == AddressFamily.InterNetworkV6)
+			{
+				ipaddress = IPAddress.IPv6Any;
+			}
+			this.client.Bind(new IPEndPoint(ipaddress, 0));
+		}
+
+		public TcpClient(IPEndPoint local_end_point)
+		{
+			this.Init(local_end_point.AddressFamily);
+			this.client.Bind(local_end_point);
 		}
 
 		public TcpClient(string hostname, int port)
 		{
-			bool on = Logging.On;
-			if (hostname == null)
-			{
-				throw new ArgumentNullException("hostname");
-			}
-			if (!ValidationHelper.ValidateTcpPort(port))
-			{
-				throw new ArgumentOutOfRangeException("port");
-			}
-			try
-			{
-				this.Connect(hostname, port);
-			}
-			catch (Exception ex)
-			{
-				if (ex is ThreadAbortException || ex is StackOverflowException || ex is OutOfMemoryException)
-				{
-					throw;
-				}
-				if (this.m_ClientSocket != null)
-				{
-					this.m_ClientSocket.Close();
-				}
-				throw ex;
-			}
-			bool on2 = Logging.On;
+			this.Connect(hostname, port);
 		}
 
-		internal TcpClient(Socket acceptedSocket)
+		void IDisposable.Dispose()
 		{
-			bool on = Logging.On;
-			this.Client = acceptedSocket;
-			this.m_Active = true;
-			bool on2 = Logging.On;
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
-		public Socket Client
+		private void Init(AddressFamily family)
 		{
-			get
+			this.active = false;
+			if (this.client != null)
 			{
-				return this.m_ClientSocket;
+				this.client.Close();
+				this.client = null;
 			}
-			set
-			{
-				this.m_ClientSocket = value;
-			}
+			this.client = new Socket(family, SocketType.Stream, ProtocolType.Tcp);
 		}
 
 		protected bool Active
 		{
 			get
 			{
-				return this.m_Active;
+				return this.active;
 			}
 			set
 			{
-				this.m_Active = value;
+				this.active = value;
+			}
+		}
+
+		public Socket Client
+		{
+			get
+			{
+				return this.client;
+			}
+			set
+			{
+				this.client = value;
+				this.stream = null;
 			}
 		}
 
@@ -105,7 +82,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.m_ClientSocket.Available;
+				return this.client.Available;
 			}
 		}
 
@@ -113,7 +90,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.m_ClientSocket.Connected;
+				return this.client.Connected;
 			}
 		}
 
@@ -121,352 +98,38 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.m_ClientSocket.ExclusiveAddressUse;
+				return this.client.ExclusiveAddressUse;
 			}
 			set
 			{
-				this.m_ClientSocket.ExclusiveAddressUse = value;
+				this.client.ExclusiveAddressUse = value;
 			}
 		}
 
-		public void Connect(string hostname, int port)
+		internal void SetTcpClient(Socket s)
 		{
-			bool on = Logging.On;
-			if (this.m_CleanedUp)
-			{
-				throw new ObjectDisposedException(base.GetType().FullName);
-			}
-			if (hostname == null)
-			{
-				throw new ArgumentNullException("hostname");
-			}
-			if (!ValidationHelper.ValidateTcpPort(port))
-			{
-				throw new ArgumentOutOfRangeException("port");
-			}
-			if (this.m_Active)
-			{
-				throw new SocketException(SocketError.IsConnected);
-			}
-			IPAddress[] hostAddresses = Dns.GetHostAddresses(hostname);
-			Exception ex = null;
-			Socket socket = null;
-			Socket socket2 = null;
-			try
-			{
-				if (this.m_ClientSocket == null)
-				{
-					if (Socket.OSSupportsIPv4)
-					{
-						socket2 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-					}
-					if (Socket.OSSupportsIPv6)
-					{
-						socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
-					}
-				}
-				foreach (IPAddress ipaddress in hostAddresses)
-				{
-					try
-					{
-						if (this.m_ClientSocket == null)
-						{
-							if (ipaddress.AddressFamily == AddressFamily.InterNetwork && socket2 != null)
-							{
-								socket2.Connect(ipaddress, port);
-								this.m_ClientSocket = socket2;
-								if (socket != null)
-								{
-									socket.Close();
-								}
-							}
-							else if (socket != null)
-							{
-								socket.Connect(ipaddress, port);
-								this.m_ClientSocket = socket;
-								if (socket2 != null)
-								{
-									socket2.Close();
-								}
-							}
-							this.m_Family = ipaddress.AddressFamily;
-							this.m_Active = true;
-							break;
-						}
-						if (ipaddress.AddressFamily == this.m_Family)
-						{
-							this.Connect(new IPEndPoint(ipaddress, port));
-							this.m_Active = true;
-							break;
-						}
-					}
-					catch (Exception ex2)
-					{
-						if (ex2 is ThreadAbortException || ex2 is StackOverflowException || ex2 is OutOfMemoryException)
-						{
-							throw;
-						}
-						ex = ex2;
-					}
-				}
-			}
-			catch (Exception ex3)
-			{
-				if (ex3 is ThreadAbortException || ex3 is StackOverflowException || ex3 is OutOfMemoryException)
-				{
-					throw;
-				}
-				ex = ex3;
-			}
-			finally
-			{
-				if (!this.m_Active)
-				{
-					if (socket != null)
-					{
-						socket.Close();
-					}
-					if (socket2 != null)
-					{
-						socket2.Close();
-					}
-					if (ex != null)
-					{
-						throw ex;
-					}
-					throw new SocketException(SocketError.NotConnected);
-				}
-			}
-			bool on2 = Logging.On;
-		}
-
-		public void Connect(IPAddress address, int port)
-		{
-			bool on = Logging.On;
-			if (this.m_CleanedUp)
-			{
-				throw new ObjectDisposedException(base.GetType().FullName);
-			}
-			if (address == null)
-			{
-				throw new ArgumentNullException("address");
-			}
-			if (!ValidationHelper.ValidateTcpPort(port))
-			{
-				throw new ArgumentOutOfRangeException("port");
-			}
-			IPEndPoint ipendPoint = new IPEndPoint(address, port);
-			this.Connect(ipendPoint);
-			bool on2 = Logging.On;
-		}
-
-		public void Connect(IPEndPoint remoteEP)
-		{
-			bool on = Logging.On;
-			if (this.m_CleanedUp)
-			{
-				throw new ObjectDisposedException(base.GetType().FullName);
-			}
-			if (remoteEP == null)
-			{
-				throw new ArgumentNullException("remoteEP");
-			}
-			this.Client.Connect(remoteEP);
-			this.m_Active = true;
-			bool on2 = Logging.On;
-		}
-
-		public void Connect(IPAddress[] ipAddresses, int port)
-		{
-			bool on = Logging.On;
-			this.Client.Connect(ipAddresses, port);
-			this.m_Active = true;
-			bool on2 = Logging.On;
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public IAsyncResult BeginConnect(string host, int port, AsyncCallback requestCallback, object state)
-		{
-			bool on = Logging.On;
-			IAsyncResult asyncResult = this.Client.BeginConnect(host, port, requestCallback, state);
-			bool on2 = Logging.On;
-			return asyncResult;
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback requestCallback, object state)
-		{
-			bool on = Logging.On;
-			IAsyncResult asyncResult = this.Client.BeginConnect(address, port, requestCallback, state);
-			bool on2 = Logging.On;
-			return asyncResult;
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback requestCallback, object state)
-		{
-			bool on = Logging.On;
-			IAsyncResult asyncResult = this.Client.BeginConnect(addresses, port, requestCallback, state);
-			bool on2 = Logging.On;
-			return asyncResult;
-		}
-
-		public void EndConnect(IAsyncResult asyncResult)
-		{
-			bool on = Logging.On;
-			this.Client.EndConnect(asyncResult);
-			this.m_Active = true;
-			bool on2 = Logging.On;
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public Task ConnectAsync(IPAddress address, int port)
-		{
-			return Task.Factory.FromAsync<IPAddress, int>(new Func<IPAddress, int, AsyncCallback, object, IAsyncResult>(this.BeginConnect), new Action<IAsyncResult>(this.EndConnect), address, port, null);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public Task ConnectAsync(string host, int port)
-		{
-			return Task.Factory.FromAsync<string, int>(new Func<string, int, AsyncCallback, object, IAsyncResult>(this.BeginConnect), new Action<IAsyncResult>(this.EndConnect), host, port, null);
-		}
-
-		[HostProtection(SecurityAction.LinkDemand, ExternalThreading = true)]
-		public Task ConnectAsync(IPAddress[] addresses, int port)
-		{
-			return Task.Factory.FromAsync<IPAddress[], int>(new Func<IPAddress[], int, AsyncCallback, object, IAsyncResult>(this.BeginConnect), new Action<IAsyncResult>(this.EndConnect), addresses, port, null);
-		}
-
-		public NetworkStream GetStream()
-		{
-			bool on = Logging.On;
-			if (this.m_CleanedUp)
-			{
-				throw new ObjectDisposedException(base.GetType().FullName);
-			}
-			if (!this.Client.Connected)
-			{
-				throw new InvalidOperationException(global::SR.GetString("The operation is not allowed on non-connected sockets."));
-			}
-			if (this.m_DataStream == null)
-			{
-				this.m_DataStream = new NetworkStream(this.Client, true);
-			}
-			bool on2 = Logging.On;
-			return this.m_DataStream;
-		}
-
-		public void Close()
-		{
-			bool on = Logging.On;
-			((IDisposable)this).Dispose();
-			bool on2 = Logging.On;
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			bool on = Logging.On;
-			if (this.m_CleanedUp)
-			{
-				bool on2 = Logging.On;
-				return;
-			}
-			if (disposing)
-			{
-				IDisposable dataStream = this.m_DataStream;
-				if (dataStream != null)
-				{
-					dataStream.Dispose();
-				}
-				else
-				{
-					Socket client = this.Client;
-					if (client != null)
-					{
-						try
-						{
-							client.InternalShutdown(SocketShutdown.Both);
-						}
-						finally
-						{
-							client.Close();
-							this.Client = null;
-						}
-					}
-				}
-				GC.SuppressFinalize(this);
-			}
-			this.m_CleanedUp = true;
-			bool on3 = Logging.On;
-		}
-
-		public void Dispose()
-		{
-			this.Dispose(true);
-		}
-
-		~TcpClient()
-		{
-			this.Dispose(false);
-		}
-
-		public int ReceiveBufferSize
-		{
-			get
-			{
-				return this.numericOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer);
-			}
-			set
-			{
-				this.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, value);
-			}
-		}
-
-		public int SendBufferSize
-		{
-			get
-			{
-				return this.numericOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer);
-			}
-			set
-			{
-				this.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer, value);
-			}
-		}
-
-		public int ReceiveTimeout
-		{
-			get
-			{
-				return this.numericOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout);
-			}
-			set
-			{
-				this.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, value);
-			}
-		}
-
-		public int SendTimeout
-		{
-			get
-			{
-				return this.numericOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout);
-			}
-			set
-			{
-				this.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, value);
-			}
+			this.Client = s;
 		}
 
 		public LingerOption LingerState
 		{
 			get
 			{
-				return (LingerOption)this.Client.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger);
+				if ((this.values & TcpClient.Properties.LingerState) != (TcpClient.Properties)0U)
+				{
+					return this.linger_state;
+				}
+				return (LingerOption)this.client.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger);
 			}
 			set
 			{
-				this.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, value);
+				if (!this.client.Connected)
+				{
+					this.linger_state = value;
+					this.values |= TcpClient.Properties.LingerState;
+					return;
+				}
+				this.client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, value);
 			}
 		}
 
@@ -474,33 +137,323 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.numericOption(SocketOptionLevel.Tcp, SocketOptionName.Debug) != 0;
+				if ((this.values & TcpClient.Properties.NoDelay) != (TcpClient.Properties)0U)
+				{
+					return this.no_delay;
+				}
+				return (bool)this.client.GetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug);
 			}
 			set
 			{
-				this.Client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, value ? 1 : 0);
+				if (!this.client.Connected)
+				{
+					this.no_delay = value;
+					this.values |= TcpClient.Properties.NoDelay;
+					return;
+				}
+				this.client.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.Debug, (!value) ? 0 : 1);
 			}
 		}
 
-		private void initialize()
+		public int ReceiveBufferSize
 		{
-			this.Client = new Socket(this.m_Family, SocketType.Stream, ProtocolType.Tcp);
-			this.m_Active = false;
+			get
+			{
+				if ((this.values & TcpClient.Properties.ReceiveBufferSize) != (TcpClient.Properties)0U)
+				{
+					return this.recv_buffer_size;
+				}
+				return (int)this.client.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer);
+			}
+			set
+			{
+				if (!this.client.Connected)
+				{
+					this.recv_buffer_size = value;
+					this.values |= TcpClient.Properties.ReceiveBufferSize;
+					return;
+				}
+				this.client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, value);
+			}
 		}
 
-		private int numericOption(SocketOptionLevel optionLevel, SocketOptionName optionName)
+		public int ReceiveTimeout
 		{
-			return (int)this.Client.GetSocketOption(optionLevel, optionName);
+			get
+			{
+				if ((this.values & TcpClient.Properties.ReceiveTimeout) != (TcpClient.Properties)0U)
+				{
+					return this.recv_timeout;
+				}
+				return (int)this.client.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout);
+			}
+			set
+			{
+				if (!this.client.Connected)
+				{
+					this.recv_timeout = value;
+					this.values |= TcpClient.Properties.ReceiveTimeout;
+					return;
+				}
+				this.client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, value);
+			}
 		}
 
-		private Socket m_ClientSocket;
+		public int SendBufferSize
+		{
+			get
+			{
+				if ((this.values & TcpClient.Properties.SendBufferSize) != (TcpClient.Properties)0U)
+				{
+					return this.send_buffer_size;
+				}
+				return (int)this.client.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer);
+			}
+			set
+			{
+				if (!this.client.Connected)
+				{
+					this.send_buffer_size = value;
+					this.values |= TcpClient.Properties.SendBufferSize;
+					return;
+				}
+				this.client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendBuffer, value);
+			}
+		}
 
-		private bool m_Active;
+		public int SendTimeout
+		{
+			get
+			{
+				if ((this.values & TcpClient.Properties.SendTimeout) != (TcpClient.Properties)0U)
+				{
+					return this.send_timeout;
+				}
+				return (int)this.client.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout);
+			}
+			set
+			{
+				if (!this.client.Connected)
+				{
+					this.send_timeout = value;
+					this.values |= TcpClient.Properties.SendTimeout;
+					return;
+				}
+				this.client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, value);
+			}
+		}
 
-		private NetworkStream m_DataStream;
+		public void Close()
+		{
+			((IDisposable)this).Dispose();
+		}
 
-		private AddressFamily m_Family = AddressFamily.InterNetwork;
+		public void Connect(IPEndPoint remote_end_point)
+		{
+			try
+			{
+				this.client.Connect(remote_end_point);
+				this.active = true;
+			}
+			finally
+			{
+				this.CheckDisposed();
+			}
+		}
 
-		private bool m_CleanedUp;
+		public void Connect(IPAddress address, int port)
+		{
+			this.Connect(new IPEndPoint(address, port));
+		}
+
+		private void SetOptions()
+		{
+			TcpClient.Properties properties = this.values;
+			this.values = (TcpClient.Properties)0U;
+			if ((properties & TcpClient.Properties.LingerState) != (TcpClient.Properties)0U)
+			{
+				this.LingerState = this.linger_state;
+			}
+			if ((properties & TcpClient.Properties.NoDelay) != (TcpClient.Properties)0U)
+			{
+				this.NoDelay = this.no_delay;
+			}
+			if ((properties & TcpClient.Properties.ReceiveBufferSize) != (TcpClient.Properties)0U)
+			{
+				this.ReceiveBufferSize = this.recv_buffer_size;
+			}
+			if ((properties & TcpClient.Properties.ReceiveTimeout) != (TcpClient.Properties)0U)
+			{
+				this.ReceiveTimeout = this.recv_timeout;
+			}
+			if ((properties & TcpClient.Properties.SendBufferSize) != (TcpClient.Properties)0U)
+			{
+				this.SendBufferSize = this.send_buffer_size;
+			}
+			if ((properties & TcpClient.Properties.SendTimeout) != (TcpClient.Properties)0U)
+			{
+				this.SendTimeout = this.send_timeout;
+			}
+		}
+
+		public void Connect(string hostname, int port)
+		{
+			IPAddress[] hostAddresses = Dns.GetHostAddresses(hostname);
+			this.Connect(hostAddresses, port);
+		}
+
+		public void Connect(IPAddress[] ipAddresses, int port)
+		{
+			this.CheckDisposed();
+			if (ipAddresses == null)
+			{
+				throw new ArgumentNullException("ipAddresses");
+			}
+			for (int i = 0; i < ipAddresses.Length; i++)
+			{
+				try
+				{
+					IPAddress ipaddress = ipAddresses[i];
+					if (ipaddress.Equals(IPAddress.Any) || ipaddress.Equals(IPAddress.IPv6Any))
+					{
+						throw new SocketException(10049);
+					}
+					this.Init(ipaddress.AddressFamily);
+					if (ipaddress.AddressFamily == AddressFamily.InterNetwork)
+					{
+						this.client.Bind(new IPEndPoint(IPAddress.Any, 0));
+					}
+					else
+					{
+						if (ipaddress.AddressFamily != AddressFamily.InterNetworkV6)
+						{
+							throw new NotSupportedException("This method is only valid for sockets in the InterNetwork and InterNetworkV6 families");
+						}
+						this.client.Bind(new IPEndPoint(IPAddress.IPv6Any, 0));
+					}
+					this.Connect(new IPEndPoint(ipaddress, port));
+					if (this.values != (TcpClient.Properties)0U)
+					{
+						this.SetOptions();
+					}
+					break;
+				}
+				catch (Exception ex)
+				{
+					this.Init(AddressFamily.InterNetwork);
+					if (i == ipAddresses.Length - 1)
+					{
+						throw ex;
+					}
+				}
+			}
+		}
+
+		public void EndConnect(IAsyncResult asyncResult)
+		{
+			this.client.EndConnect(asyncResult);
+		}
+
+		public IAsyncResult BeginConnect(IPAddress address, int port, AsyncCallback callback, object state)
+		{
+			return this.client.BeginConnect(address, port, callback, state);
+		}
+
+		public IAsyncResult BeginConnect(IPAddress[] addresses, int port, AsyncCallback callback, object state)
+		{
+			return this.client.BeginConnect(addresses, port, callback, state);
+		}
+
+		public IAsyncResult BeginConnect(string host, int port, AsyncCallback callback, object state)
+		{
+			return this.client.BeginConnect(host, port, callback, state);
+		}
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (this.disposed)
+			{
+				return;
+			}
+			this.disposed = true;
+			if (disposing)
+			{
+				NetworkStream networkStream = this.stream;
+				this.stream = null;
+				if (networkStream != null)
+				{
+					networkStream.Close();
+					this.active = false;
+				}
+				else if (this.client != null)
+				{
+					this.client.Close();
+					this.client = null;
+				}
+			}
+		}
+
+		~TcpClient()
+		{
+			this.Dispose(false);
+		}
+
+		public NetworkStream GetStream()
+		{
+			NetworkStream networkStream;
+			try
+			{
+				if (this.stream == null)
+				{
+					this.stream = new NetworkStream(this.client, true);
+				}
+				networkStream = this.stream;
+			}
+			finally
+			{
+				this.CheckDisposed();
+			}
+			return networkStream;
+		}
+
+		private void CheckDisposed()
+		{
+			if (this.disposed)
+			{
+				throw new ObjectDisposedException(base.GetType().FullName);
+			}
+		}
+
+		private NetworkStream stream;
+
+		private bool active;
+
+		private Socket client;
+
+		private bool disposed;
+
+		private TcpClient.Properties values;
+
+		private int recv_timeout;
+
+		private int send_timeout;
+
+		private int recv_buffer_size;
+
+		private int send_buffer_size;
+
+		private LingerOption linger_state;
+
+		private bool no_delay;
+
+		private enum Properties : uint
+		{
+			LingerState = 1U,
+			NoDelay,
+			ReceiveBufferSize = 4U,
+			ReceiveTimeout = 8U,
+			SendBufferSize = 16U,
+			SendTimeout = 32U
+		}
 	}
 }

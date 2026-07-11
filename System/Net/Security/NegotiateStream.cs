@@ -1,22 +1,20 @@
 ﻿using System;
 using System.IO;
-using System.Security.Authentication.ExtendedProtection;
 using System.Security.Principal;
-using System.Threading.Tasks;
 
 namespace System.Net.Security
 {
 	public class NegotiateStream : AuthenticatedStream
 	{
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public NegotiateStream(Stream innerStream)
 			: base(innerStream, false)
 		{
 		}
 
-		[MonoTODO]
-		public NegotiateStream(Stream innerStream, bool leaveInnerStreamOpen)
-			: base(innerStream, leaveInnerStreamOpen)
+		[global::System.MonoTODO]
+		public NegotiateStream(Stream innerStream, bool leaveStreamOpen)
+			: base(innerStream, leaveStreamOpen)
 		{
 		}
 
@@ -36,7 +34,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool CanTimeout
 		{
 			get
@@ -53,7 +51,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual TokenImpersonationLevel ImpersonationLevel
 		{
 			get
@@ -62,7 +60,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool IsAuthenticated
 		{
 			get
@@ -71,7 +69,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool IsEncrypted
 		{
 			get
@@ -80,7 +78,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool IsMutuallyAuthenticated
 		{
 			get
@@ -89,7 +87,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool IsServer
 		{
 			get
@@ -98,7 +96,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override bool IsSigned
 		{
 			get
@@ -139,7 +137,7 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual IIdentity RemoteIdentity
 		{
 			get
@@ -160,226 +158,136 @@ namespace System.Net.Security
 			}
 		}
 
-		[MonoTODO]
-		public virtual IAsyncResult BeginAuthenticateAsClient(AsyncCallback asyncCallback, object asyncState)
+		[global::System.MonoTODO]
+		public virtual IAsyncResult BeginAuthenticateAsClient(AsyncCallback callback, object asyncState)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual IAsyncResult BeginAuthenticateAsClient(NetworkCredential credential, ChannelBinding binding, string targetName, AsyncCallback asyncCallback, object asyncState)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual IAsyncResult BeginAuthenticateAsClient(NetworkCredential credential, string targetName, AsyncCallback asyncCallback, object asyncState)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual IAsyncResult BeginAuthenticateAsClient(NetworkCredential credential, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel allowedImpersonationLevel, AsyncCallback asyncCallback, object asyncState)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual IAsyncResult BeginAuthenticateAsClient(NetworkCredential credential, ChannelBinding binding, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel allowedImpersonationLevel, AsyncCallback asyncCallback, object asyncState)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual IAsyncResult BeginAuthenticateAsServer(AsyncCallback asyncCallback, object asyncState)
+		[global::System.MonoTODO]
+		public virtual IAsyncResult BeginAuthenticateAsServer(AsyncCallback callback, object asyncState)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual IAsyncResult BeginAuthenticateAsServer(NetworkCredential credential, ExtendedProtectionPolicy policy, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel requiredImpersonationLevel, AsyncCallback asyncCallback, object asyncState)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual IAsyncResult BeginAuthenticateAsServer(NetworkCredential credential, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel requiredImpersonationLevel, AsyncCallback asyncCallback, object asyncState)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual IAsyncResult BeginAuthenticateAsServer(ExtendedProtectionPolicy policy, AsyncCallback asyncCallback, object asyncState)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual void AuthenticateAsClient()
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual void AuthenticateAsClient(NetworkCredential credential, string targetName)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual void AuthenticateAsClient(NetworkCredential credential, ChannelBinding binding, string targetName)
+		[global::System.MonoTODO]
+		public virtual void AuthenticateAsClient(NetworkCredential credential, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel requiredImpersonationLevel)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual void AuthenticateAsClient(NetworkCredential credential, ChannelBinding binding, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel allowedImpersonationLevel)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		public virtual void AuthenticateAsClient(NetworkCredential credential, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel allowedImpersonationLevel)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual void AuthenticateAsServer()
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
-		public virtual void AuthenticateAsServer(ExtendedProtectionPolicy policy)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
-		public virtual void AuthenticateAsServer(NetworkCredential credential, ExtendedProtectionPolicy policy, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel requiredImpersonationLevel)
-		{
-			throw new NotImplementedException();
-		}
-
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual void AuthenticateAsServer(NetworkCredential credential, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel requiredImpersonationLevel)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void Dispose(bool disposing)
 		{
+			if (disposing)
+			{
+			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual void EndAuthenticateAsClient(IAsyncResult asyncResult)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override int EndRead(IAsyncResult asyncResult)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public virtual void EndAuthenticateAsServer(IAsyncResult asyncResult)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override void EndWrite(IAsyncResult asyncResult)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override void Flush()
 		{
 			base.InnerStream.Flush();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override int Read(byte[] buffer, int offset, int count)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override long Seek(long offset, SeekOrigin origin)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override void SetLength(long value)
 		{
 			throw new NotImplementedException();
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public override void Write(byte[] buffer, int offset, int count)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual Task AuthenticateAsClientAsync()
-		{
-			return Task.Factory.FromAsync(new Func<AsyncCallback, object, IAsyncResult>(this.BeginAuthenticateAsClient), new Action<IAsyncResult>(this.EndAuthenticateAsClient), null);
-		}
-
-		public virtual Task AuthenticateAsClientAsync(NetworkCredential credential, string targetName)
-		{
-			return Task.Factory.FromAsync<NetworkCredential, string>(new Func<NetworkCredential, string, AsyncCallback, object, IAsyncResult>(this.BeginAuthenticateAsClient), new Action<IAsyncResult>(this.EndAuthenticateAsClient), credential, targetName, null);
-		}
-
-		public virtual Task AuthenticateAsClientAsync(NetworkCredential credential, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel allowedImpersonationLevel)
-		{
-			return Task.Factory.FromAsync((AsyncCallback callback, object state) => this.BeginAuthenticateAsClient(credential, targetName, requiredProtectionLevel, allowedImpersonationLevel, callback, state), new Action<IAsyncResult>(this.EndAuthenticateAsClient), null);
-		}
-
-		public virtual Task AuthenticateAsClientAsync(NetworkCredential credential, ChannelBinding binding, string targetName)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual Task AuthenticateAsClientAsync(NetworkCredential credential, ChannelBinding binding, string targetName, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel allowedImpersonationLevel)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual Task AuthenticateAsServerAsync()
-		{
-			return Task.Factory.FromAsync(new Func<AsyncCallback, object, IAsyncResult>(this.BeginAuthenticateAsServer), new Action<IAsyncResult>(this.EndAuthenticateAsServer), null);
-		}
-
-		public virtual Task AuthenticateAsServerAsync(ExtendedProtectionPolicy policy)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual Task AuthenticateAsServerAsync(NetworkCredential credential, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel requiredImpersonationLevel)
-		{
-			throw new NotImplementedException();
-		}
-
-		public virtual Task AuthenticateAsServerAsync(NetworkCredential credential, ExtendedProtectionPolicy policy, ProtectionLevel requiredProtectionLevel, TokenImpersonationLevel requiredImpersonationLevel)
 		{
 			throw new NotImplementedException();
 		}

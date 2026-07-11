@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeLinePragma
 	{
@@ -11,24 +14,40 @@ namespace System.CodeDom
 
 		public CodeLinePragma(string fileName, int lineNumber)
 		{
-			this.FileName = fileName;
-			this.LineNumber = lineNumber;
+			this.fileName = fileName;
+			this.lineNumber = lineNumber;
 		}
 
 		public string FileName
 		{
 			get
 			{
-				return this._fileName ?? string.Empty;
+				if (this.fileName == null)
+				{
+					return string.Empty;
+				}
+				return this.fileName;
 			}
 			set
 			{
-				this._fileName = value;
+				this.fileName = value;
 			}
 		}
 
-		public int LineNumber { get; set; }
+		public int LineNumber
+		{
+			get
+			{
+				return this.lineNumber;
+			}
+			set
+			{
+				this.lineNumber = value;
+			}
+		}
 
-		private string _fileName;
+		private string fileName;
+
+		private int lineNumber;
 	}
 }

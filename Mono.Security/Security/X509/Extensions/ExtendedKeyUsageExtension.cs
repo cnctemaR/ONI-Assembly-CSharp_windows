@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Mono.Security.X509.Extensions
@@ -70,50 +71,57 @@ namespace Mono.Security.X509.Extensions
 			foreach (object obj in this.keyPurpose)
 			{
 				string text = (string)obj;
-				if (!(text == "1.3.6.1.5.5.7.3.1"))
+				string text2 = text;
+				if (text2 == null)
 				{
-					if (!(text == "1.3.6.1.5.5.7.3.2"))
-					{
-						if (!(text == "1.3.6.1.5.5.7.3.3"))
-						{
-							if (!(text == "1.3.6.1.5.5.7.3.4"))
-							{
-								if (!(text == "1.3.6.1.5.5.7.3.8"))
-								{
-									if (!(text == "1.3.6.1.5.5.7.3.9"))
-									{
-										stringBuilder.Append("unknown");
-									}
-									else
-									{
-										stringBuilder.Append("OCSP Signing");
-									}
-								}
-								else
-								{
-									stringBuilder.Append("Time Stamping");
-								}
-							}
-							else
-							{
-								stringBuilder.Append("Email Protection");
-							}
-						}
-						else
-						{
-							stringBuilder.Append("Code Signing");
-						}
-					}
-					else
-					{
-						stringBuilder.Append("Client Authentication");
-					}
+					goto IL_012E;
 				}
-				else
+				if (ExtendedKeyUsageExtension.<>f__switch$map14 == null)
 				{
+					ExtendedKeyUsageExtension.<>f__switch$map14 = new Dictionary<string, int>(6)
+					{
+						{ "1.3.6.1.5.5.7.3.1", 0 },
+						{ "1.3.6.1.5.5.7.3.2", 1 },
+						{ "1.3.6.1.5.5.7.3.3", 2 },
+						{ "1.3.6.1.5.5.7.3.4", 3 },
+						{ "1.3.6.1.5.5.7.3.8", 4 },
+						{ "1.3.6.1.5.5.7.3.9", 5 }
+					};
+				}
+				int num;
+				if (!ExtendedKeyUsageExtension.<>f__switch$map14.TryGetValue(text2, out num))
+				{
+					goto IL_012E;
+				}
+				switch (num)
+				{
+				case 0:
 					stringBuilder.Append("Server Authentication");
+					break;
+				case 1:
+					stringBuilder.Append("Client Authentication");
+					break;
+				case 2:
+					stringBuilder.Append("Code Signing");
+					break;
+				case 3:
+					stringBuilder.Append("Email Protection");
+					break;
+				case 4:
+					stringBuilder.Append("Time Stamping");
+					break;
+				case 5:
+					stringBuilder.Append("OCSP Signing");
+					break;
+				default:
+					goto IL_012E;
 				}
+				IL_013F:
 				stringBuilder.AppendFormat(" ({0}){1}", text, Environment.NewLine);
+				continue;
+				IL_012E:
+				stringBuilder.Append("unknown");
+				goto IL_013F;
 			}
 			return stringBuilder.ToString();
 		}

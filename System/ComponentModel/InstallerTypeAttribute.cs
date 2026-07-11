@@ -5,39 +5,34 @@ namespace System.ComponentModel
 	[AttributeUsage(AttributeTargets.Class)]
 	public class InstallerTypeAttribute : Attribute
 	{
-		public InstallerTypeAttribute(Type installerType)
-		{
-			this._typeName = installerType.AssemblyQualifiedName;
-		}
-
 		public InstallerTypeAttribute(string typeName)
 		{
-			this._typeName = typeName;
+			this.installer = Type.GetType(typeName, false);
+		}
+
+		public InstallerTypeAttribute(Type installerType)
+		{
+			this.installer = installerType;
 		}
 
 		public virtual Type InstallerType
 		{
 			get
 			{
-				return Type.GetType(this._typeName);
+				return this.installer;
 			}
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (obj == this)
-			{
-				return true;
-			}
-			InstallerTypeAttribute installerTypeAttribute = obj as InstallerTypeAttribute;
-			return installerTypeAttribute != null && installerTypeAttribute._typeName == this._typeName;
+			return obj is InstallerTypeAttribute && (obj == this || ((InstallerTypeAttribute)obj).InstallerType == this.installer);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.GetHashCode();
+			return this.installer.GetHashCode();
 		}
 
-		private string _typeName;
+		private Type installer;
 	}
 }

@@ -6,19 +6,26 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public sealed class KeySizes
 	{
-		public int MinSize
+		public KeySizes(int minSize, int maxSize, int skipSize)
 		{
-			get
-			{
-				return this.m_minSize;
-			}
+			this._maxSize = maxSize;
+			this._minSize = minSize;
+			this._skipSize = skipSize;
 		}
 
 		public int MaxSize
 		{
 			get
 			{
-				return this.m_maxSize;
+				return this._maxSize;
+			}
+		}
+
+		public int MinSize
+		{
+			get
+			{
+				return this._minSize;
 			}
 		}
 
@@ -26,33 +33,22 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_skipSize;
+				return this._skipSize;
 			}
-		}
-
-		public KeySizes(int minSize, int maxSize, int skipSize)
-		{
-			this.m_minSize = minSize;
-			this.m_maxSize = maxSize;
-			this.m_skipSize = skipSize;
 		}
 
 		internal bool IsLegal(int keySize)
 		{
 			int num = keySize - this.MinSize;
 			bool flag = num >= 0 && keySize <= this.MaxSize;
-			if (this.SkipSize != 0)
-			{
-				return flag && num % this.SkipSize == 0;
-			}
-			return flag;
+			return (this.SkipSize != 0) ? (flag && num % this.SkipSize == 0) : flag;
 		}
 
 		internal static bool IsLegalKeySize(KeySizes[] legalKeys, int size)
 		{
-			for (int i = 0; i < legalKeys.Length; i++)
+			foreach (KeySizes keySizes in legalKeys)
 			{
-				if (legalKeys[i].IsLegal(size))
+				if (keySizes.IsLegal(size))
 				{
 					return true;
 				}
@@ -60,10 +56,10 @@ namespace System.Security.Cryptography
 			return false;
 		}
 
-		private int m_minSize;
+		private int _maxSize;
 
-		private int m_maxSize;
+		private int _minSize;
 
-		private int m_skipSize;
+		private int _skipSize;
 	}
 }

@@ -2,11 +2,7 @@
 
 namespace System
 {
-	public class FileStyleUriParser : UriParser
+	public class FileStyleUriParser : global::System.UriParser
 	{
-		public FileStyleUriParser()
-			: base(UriParser.FileUri.Flags)
-		{
-		}
 	}
 }

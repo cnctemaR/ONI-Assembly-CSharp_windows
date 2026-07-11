@@ -54,7 +54,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 		this.TubeConnectionsChanged(connections);
 		this.tubeChangedEntry = GameScenePartitioner.Instance.Add("TravelTubeEntrance.TubeListener", base.gameObject, extents, GameScenePartitioner.Instance.objectLayers[32], new Action<object>(this.TubeChanged));
 		base.Subscribe(-592767678, new Action<object>(this.OnOperationalChanged));
-		this.meter = new MeterController(this, Meter.Offset.Infront, Array.Empty<string>());
+		this.meter = new MeterController(this, Meter.Offset.Infront, new string[0]);
 		this.CreateNewWaitReactable();
 		Grid.HasTubeEntrance[Grid.PosToCell(this)] = true;
 		base.smi.StartSM();

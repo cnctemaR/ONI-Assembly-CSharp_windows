@@ -7,7 +7,7 @@ namespace System.Net
 	{
 		public bool CheckValidationResult(ServicePoint point, X509Certificate certificate, WebRequest request, int certificateProblem)
 		{
-			return ServicePointManager.ServerCertificateValidationCallback != null || (certificateProblem == -2146762495 || certificateProblem == 0);
+			return ServicePointManager.ServerCertificateValidationCallback != null || certificateProblem == -2146762495 || certificateProblem == 0;
 		}
 	}
 }

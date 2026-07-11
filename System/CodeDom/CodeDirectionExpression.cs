@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeDirectionExpression : CodeExpression
 	{
@@ -11,12 +14,41 @@ namespace System.CodeDom
 
 		public CodeDirectionExpression(FieldDirection direction, CodeExpression expression)
 		{
-			this.Expression = expression;
-			this.Direction = direction;
+			this.direction = direction;
+			this.expression = expression;
 		}
 
-		public CodeExpression Expression { get; set; }
+		public FieldDirection Direction
+		{
+			get
+			{
+				return this.direction;
+			}
+			set
+			{
+				this.direction = value;
+			}
+		}
 
-		public FieldDirection Direction { get; set; }
+		public CodeExpression Expression
+		{
+			get
+			{
+				return this.expression;
+			}
+			set
+			{
+				this.expression = value;
+			}
+		}
+
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private FieldDirection direction;
+
+		private CodeExpression expression;
 	}
 }

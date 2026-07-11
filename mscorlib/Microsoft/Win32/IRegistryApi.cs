@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.Win32
 {
@@ -16,8 +15,6 @@ namespace Microsoft.Win32
 		void Close(RegistryKey rkey);
 
 		object GetValue(RegistryKey rkey, string name, object default_value, RegistryValueOptions options);
-
-		RegistryValueKind GetValueKind(RegistryKey rkey, string name);
 
 		void SetValue(RegistryKey rkey, string name, object value);
 
@@ -36,11 +33,5 @@ namespace Microsoft.Win32
 		string ToString(RegistryKey rkey);
 
 		void SetValue(RegistryKey rkey, string name, object value, RegistryValueKind valueKind);
-
-		RegistryKey CreateSubKey(RegistryKey rkey, string keyname, RegistryOptions options);
-
-		RegistryKey FromHandle(SafeRegistryHandle handle);
-
-		IntPtr GetHandle(RegistryKey key);
 	}
 }

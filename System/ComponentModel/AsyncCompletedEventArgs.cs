@@ -1,68 +1,57 @@
 ﻿using System;
 using System.Reflection;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class AsyncCompletedEventArgs : EventArgs
 	{
-		[Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-		[EditorBrowsable(EditorBrowsableState.Never)]
-		public AsyncCompletedEventArgs()
-		{
-		}
-
 		public AsyncCompletedEventArgs(Exception error, bool cancelled, object userState)
 		{
-			this.error = error;
-			this.cancelled = cancelled;
-			this.userState = userState;
-		}
-
-		[SRDescription("True if operation was cancelled.")]
-		public bool Cancelled
-		{
-			get
-			{
-				return this.cancelled;
-			}
-		}
-
-		[SRDescription("Exception that occurred during operation.  Null if no error.")]
-		public Exception Error
-		{
-			get
-			{
-				return this.error;
-			}
-		}
-
-		[SRDescription("User-supplied state to identify operation.")]
-		public object UserState
-		{
-			get
-			{
-				return this.userState;
-			}
+			this._error = error;
+			this._cancelled = cancelled;
+			this._userState = userState;
 		}
 
 		protected void RaiseExceptionIfNecessary()
 		{
-			if (this.Error != null)
+			if (this._error != null)
 			{
-				throw new TargetInvocationException(global::SR.GetString("An exception occurred during the operation, making the result invalid.  Check InnerException for exception details."), this.Error);
+				throw new TargetInvocationException(this._error);
 			}
-			if (this.Cancelled)
+			if (this._cancelled)
 			{
-				throw new InvalidOperationException(global::SR.GetString("Operation has been cancelled."));
+				throw new InvalidOperationException("The operation was cancelled");
 			}
 		}
 
-		private readonly Exception error;
+		public bool Cancelled
+		{
+			get
+			{
+				return this._cancelled;
+			}
+		}
 
-		private readonly bool cancelled;
+		public Exception Error
+		{
+			get
+			{
+				return this._error;
+			}
+		}
 
-		private readonly object userState;
+		public object UserState
+		{
+			get
+			{
+				return this._userState;
+			}
+		}
+
+		private Exception _error;
+
+		private bool _cancelled;
+
+		private object _userState;
 	}
 }

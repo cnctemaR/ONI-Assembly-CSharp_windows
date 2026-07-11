@@ -7,28 +7,28 @@ namespace System.Runtime.ConstrainedExecution
 	{
 		public ReliabilityContractAttribute(Consistency consistencyGuarantee, Cer cer)
 		{
-			this._consistency = consistencyGuarantee;
-			this._cer = cer;
-		}
-
-		public Consistency ConsistencyGuarantee
-		{
-			get
-			{
-				return this._consistency;
-			}
+			this.consistency = consistencyGuarantee;
+			this.cer = cer;
 		}
 
 		public Cer Cer
 		{
 			get
 			{
-				return this._cer;
+				return this.cer;
 			}
 		}
 
-		private Consistency _consistency;
+		public Consistency ConsistencyGuarantee
+		{
+			get
+			{
+				return this.consistency;
+			}
+		}
 
-		private Cer _cer;
+		private Consistency consistency;
+
+		private Cer cer;
 	}
 }

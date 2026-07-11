@@ -4,16 +4,31 @@ namespace System.Xml.Schema
 {
 	public class ValidationEventArgs : EventArgs
 	{
-		internal ValidationEventArgs(XmlSchemaException ex)
+		private ValidationEventArgs()
 		{
-			this.ex = ex;
-			this.severity = XmlSeverityType.Error;
 		}
 
-		internal ValidationEventArgs(XmlSchemaException ex, XmlSeverityType severity)
+		internal ValidationEventArgs(XmlSchemaException ex, string message, XmlSeverityType severity)
 		{
-			this.ex = ex;
+			this.exception = ex;
+			this.message = message;
 			this.severity = severity;
+		}
+
+		public XmlSchemaException Exception
+		{
+			get
+			{
+				return this.exception;
+			}
+		}
+
+		public string Message
+		{
+			get
+			{
+				return this.message;
+			}
 		}
 
 		public XmlSeverityType Severity
@@ -24,23 +39,9 @@ namespace System.Xml.Schema
 			}
 		}
 
-		public XmlSchemaException Exception
-		{
-			get
-			{
-				return this.ex;
-			}
-		}
+		private XmlSchemaException exception;
 
-		public string Message
-		{
-			get
-			{
-				return this.ex.Message;
-			}
-		}
-
-		private XmlSchemaException ex;
+		private string message;
 
 		private XmlSeverityType severity;
 	}

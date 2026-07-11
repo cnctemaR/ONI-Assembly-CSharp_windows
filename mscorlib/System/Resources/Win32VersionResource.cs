@@ -18,10 +18,10 @@ namespace System.Resources
 			this.file_type = 2;
 			this.file_subtype = 0;
 			this.file_date = 0L;
-			this.file_lang = (compilercontext ? 0 : 127);
+			this.file_lang = ((!compilercontext) ? 127 : 0);
 			this.file_codepage = 1200;
 			this.properties = new Hashtable();
-			string text = (compilercontext ? string.Empty : " ");
+			string text = ((!compilercontext) ? " " : string.Empty);
 			foreach (string text2 in this.WellKnownProperties)
 			{
 				this.properties[text2] = text;
@@ -36,6 +36,7 @@ namespace System.Resources
 			{
 				return string.Concat(new object[]
 				{
+					string.Empty,
 					this.file_version >> 48,
 					".",
 					(this.file_version >> 32) & 65535L,
@@ -86,7 +87,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["Comments"] = ((value == string.Empty) ? " " : value);
+				this.properties["Comments"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -98,7 +99,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["CompanyName"] = ((value == string.Empty) ? " " : value);
+				this.properties["CompanyName"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -110,7 +111,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["LegalCopyright"] = ((value == string.Empty) ? " " : value);
+				this.properties["LegalCopyright"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -122,7 +123,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["LegalTrademarks"] = ((value == string.Empty) ? " " : value);
+				this.properties["LegalTrademarks"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -134,7 +135,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["OriginalFilename"] = ((value == string.Empty) ? " " : value);
+				this.properties["OriginalFilename"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -146,7 +147,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["ProductName"] = ((value == string.Empty) ? " " : value);
+				this.properties["ProductName"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -190,7 +191,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["InternalName"] = ((value == string.Empty) ? " " : value);
+				this.properties["InternalName"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -202,7 +203,7 @@ namespace System.Resources
 			}
 			set
 			{
-				this.properties["FileDescription"] = ((value == string.Empty) ? " " : value);
+				this.properties["FileDescription"] = ((!(value == string.Empty)) ? value : " ");
 			}
 		}
 
@@ -252,7 +253,8 @@ namespace System.Resources
 
 		private void emit_padding(BinaryWriter w)
 		{
-			if (w.BaseStream.Position % 4L != 0L)
+			Stream baseStream = w.BaseStream;
+			if (baseStream.Position % 4L != 0L)
 			{
 				w.Write(0);
 			}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 namespace System.Transactions
 {
@@ -9,7 +8,6 @@ namespace System.Transactions
 		{
 			this.tx = tx;
 			this.enlisted = enlisted;
-			this.waitHandle = new ManualResetEvent(false);
 		}
 
 		public void ForceRollback()
@@ -17,23 +15,16 @@ namespace System.Transactions
 			this.ForceRollback(null);
 		}
 
-		internal override void InternalOnDone()
-		{
-			this.Prepared();
-		}
-
 		[MonoTODO]
-		public void ForceRollback(Exception e)
+		public void ForceRollback(Exception ex)
 		{
-			this.tx.Rollback(e, this.enlisted);
-			((ManualResetEvent)this.waitHandle).Set();
+			this.tx.Rollback(ex, this.enlisted);
 		}
 
 		[MonoTODO]
 		public void Prepared()
 		{
 			this.prepared = true;
-			((ManualResetEvent)this.waitHandle).Set();
 		}
 
 		[MonoTODO]
@@ -50,42 +41,10 @@ namespace System.Transactions
 			}
 		}
 
-		internal WaitHandle WaitHandle
-		{
-			get
-			{
-				return this.waitHandle;
-			}
-		}
-
-		internal IEnlistmentNotification EnlistmentNotification
-		{
-			get
-			{
-				return this.enlisted;
-			}
-		}
-
-		internal Exception Exception
-		{
-			get
-			{
-				return this.ex;
-			}
-			set
-			{
-				this.ex = value;
-			}
-		}
-
 		private bool prepared;
 
 		private Transaction tx;
 
 		private IEnlistmentNotification enlisted;
-
-		private WaitHandle waitHandle;
-
-		private Exception ex;
 	}
 }

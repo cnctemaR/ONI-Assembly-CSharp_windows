@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.IO.IsolatedStorage
 {
-	[Flags]
 	[ComVisible(true)]
+	[Flags]
 	[Serializable]
 	public enum IsolatedStorageScope
 	{

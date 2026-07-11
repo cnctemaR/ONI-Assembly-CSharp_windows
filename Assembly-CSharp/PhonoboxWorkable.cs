@@ -19,6 +19,10 @@ public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 	{
 		Effects component = worker.GetComponent<Effects>();
 		component.Add("TookABreak", true);
+		if (!string.IsNullOrEmpty(this.trackingEffect))
+		{
+			component.Add(this.trackingEffect, true);
+		}
 		if (!string.IsNullOrEmpty(this.specificEffect))
 		{
 			component.Add(this.specificEffect, true);
@@ -28,13 +32,15 @@ public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 	public bool GetWorkerPriority(Worker worker, out int priority)
 	{
 		priority = this.basePriority;
-		if (!string.IsNullOrEmpty(this.specificEffect))
+		Effects component = worker.GetComponent<Effects>();
+		if (!string.IsNullOrEmpty(this.trackingEffect) && component.HasEffect(this.trackingEffect))
 		{
-			Effects component = worker.GetComponent<Effects>();
-			if (component.HasEffect(this.specificEffect))
-			{
-				priority = RELAXATION.PRIORITY.RECENTLY_USED;
-			}
+			priority = 0;
+			return false;
+		}
+		if (!string.IsNullOrEmpty(this.specificEffect) && component.HasEffect(this.specificEffect))
+		{
+			priority = RELAXATION.PRIORITY.RECENTLY_USED;
 		}
 		return true;
 	}
@@ -58,9 +64,11 @@ public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 
 	public ISharedWorkable owner;
 
-	public int basePriority;
+	public int basePriority = RELAXATION.PRIORITY.TIER3;
 
-	public string specificEffect;
+	public string specificEffect = "Danced";
+
+	public string trackingEffect = "RecentlyDanced";
 
 	public KAnimFile[][] workerOverrideAnims = new KAnimFile[][]
 	{

@@ -11,6 +11,11 @@ namespace System.Transactions
 		{
 		}
 
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			this.completed = info.GetBoolean("completed");
+		}
+
 		internal bool Completed
 		{
 			get
@@ -23,11 +28,6 @@ namespace System.Transactions
 		public void Complete()
 		{
 			throw new NotImplementedException();
-		}
-
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			this.completed = info.GetBoolean("completed");
 		}
 
 		private bool completed;

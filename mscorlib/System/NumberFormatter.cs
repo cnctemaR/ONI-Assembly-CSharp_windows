@@ -8,13 +8,24 @@ namespace System
 {
 	internal sealed class NumberFormatter
 	{
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private unsafe static extern void GetFormatterTables(out ulong* MantissaBitsTable, out int* TensExponentTable, out char* DigitLowerTable, out char* DigitUpperTable, out long* TenPowersList, out int* DecHexDigits);
+		public NumberFormatter(Thread current)
+		{
+			this._cbuf = new char[0];
+			if (current == null)
+			{
+				return;
+			}
+			this._thread = current;
+			this.CurrentCulture = this._thread.CurrentCulture;
+		}
 
 		static NumberFormatter()
 		{
 			NumberFormatter.GetFormatterTables(out NumberFormatter.MantissaBitsTable, out NumberFormatter.TensExponentTable, out NumberFormatter.DigitLowerTable, out NumberFormatter.DigitUpperTable, out NumberFormatter.TenPowersList, out NumberFormatter.DecHexDigits);
 		}
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private unsafe static extern void GetFormatterTables(out ulong* MantissaBitsTable, out int* TensExponentTable, out char* DigitLowerTable, out char* DigitUpperTable, out long* TenPowersList, out int* DecHexDigits);
 
 		private unsafe static long GetTenPowerOf(int i)
 		{
@@ -213,16 +224,6 @@ namespace System
 			return num;
 		}
 
-		private NumberFormatter(Thread current)
-		{
-			this._cbuf = EmptyArray<char>.Value;
-			if (current == null)
-			{
-				return;
-			}
-			this.CurrentCulture = current.CurrentCulture;
-		}
-
 		private void Init(string format)
 		{
 			this._val1 = (this._val2 = (this._val3 = (this._val4 = 0U)));
@@ -264,9 +265,20 @@ namespace System
 		private void InitHex(ulong value)
 		{
 			int defPrecision = this._defPrecision;
-			if (defPrecision == 10)
+			switch (defPrecision)
 			{
-				value = (ulong)((uint)value);
+			case 3:
+				value = (ulong)((byte)value);
+				break;
+			default:
+				if (defPrecision == 10)
+				{
+					value = (ulong)((uint)value);
+				}
+				break;
+			case 5:
+				value = (ulong)((ushort)value);
+				break;
 			}
 			this._val1 = (uint)value;
 			this._val2 = (uint)(value >> 32);
@@ -450,7 +462,9 @@ namespace System
 
 		private void Resize(int len)
 		{
-			Array.Resize<char>(ref this._cbuf, len);
+			char[] array = new char[len];
+			Array.Copy(this._cbuf, array, this._ind);
+			this._cbuf = array;
 		}
 
 		private void Append(char c)
@@ -459,10 +473,7 @@ namespace System
 			{
 				this.Resize(this._ind + 10);
 			}
-			char[] cbuf = this._cbuf;
-			int ind = this._ind;
-			this._ind = ind + 1;
-			cbuf[ind] = c;
+			this._cbuf[this._ind++] = c;
 		}
 
 		private void Append(char c, int cnt)
@@ -473,10 +484,7 @@ namespace System
 			}
 			while (cnt-- > 0)
 			{
-				char[] cbuf = this._cbuf;
-				int ind = this._ind;
-				this._ind = ind + 1;
-				cbuf[ind] = c;
+				this._cbuf[this._ind++] = c;
 			}
 		}
 
@@ -489,10 +497,7 @@ namespace System
 			}
 			for (int i = 0; i < length; i++)
 			{
-				char[] cbuf = this._cbuf;
-				int ind = this._ind;
-				this._ind = ind + 1;
-				cbuf[ind] = s[i];
+				this._cbuf[this._ind++] = s[i];
 			}
 		}
 
@@ -505,16 +510,18 @@ namespace System
 			return NumberFormatInfo.GetInstance(fp);
 		}
 
-		private CultureInfo CurrentCulture
+		public CultureInfo CurrentCulture
 		{
 			set
 			{
 				if (value != null && value.IsReadOnly)
 				{
 					this._nfi = value.NumberFormat;
-					return;
 				}
-				this._nfi = null;
+				else
+				{
+					this._nfi = null;
+				}
 			}
 		}
 
@@ -522,11 +529,7 @@ namespace System
 		{
 			get
 			{
-				if (this._decPointPos <= 0)
-				{
-					return 1;
-				}
-				return this._decPointPos;
+				return (this._decPointPos <= 0) ? 1 : this._decPointPos;
 			}
 		}
 
@@ -534,11 +537,7 @@ namespace System
 		{
 			get
 			{
-				if (this._digitsLen <= this._decPointPos)
-				{
-					return 0;
-				}
-				return this._digitsLen - this._decPointPos;
+				return (this._digitsLen <= this._decPointPos) ? 0 : (this._digitsLen - this._decPointPos);
 			}
 		}
 
@@ -633,25 +632,31 @@ namespace System
 
 		private void AddOneToDecHex()
 		{
-			if (this._val1 != 2576980377U)
+			if (this._val1 == 2576980377U)
+			{
+				this._val1 = 0U;
+				if (this._val2 == 2576980377U)
+				{
+					this._val2 = 0U;
+					if (this._val3 == 2576980377U)
+					{
+						this._val3 = 0U;
+						this._val4 = NumberFormatter.AddOneToDecHex(this._val4);
+					}
+					else
+					{
+						this._val3 = NumberFormatter.AddOneToDecHex(this._val3);
+					}
+				}
+				else
+				{
+					this._val2 = NumberFormatter.AddOneToDecHex(this._val2);
+				}
+			}
+			else
 			{
 				this._val1 = NumberFormatter.AddOneToDecHex(this._val1);
-				return;
 			}
-			this._val1 = 0U;
-			if (this._val2 != 2576980377U)
-			{
-				this._val2 = NumberFormatter.AddOneToDecHex(this._val2);
-				return;
-			}
-			this._val2 = 0U;
-			if (this._val3 == 2576980377U)
-			{
-				this._val3 = 0U;
-				this._val4 = NumberFormatter.AddOneToDecHex(this._val4);
-				return;
-			}
-			this._val3 = NumberFormatter.AddOneToDecHex(this._val3);
 		}
 
 		private static uint AddOneToDecHex(uint val)
@@ -753,37 +758,69 @@ namespace System
 			}
 		}
 
-		private static NumberFormatter GetInstance(IFormatProvider fp)
+		private static NumberFormatter GetInstance()
 		{
-			if (fp != null)
-			{
-				if (NumberFormatter.userFormatProvider == null)
-				{
-					Interlocked.CompareExchange<NumberFormatter>(ref NumberFormatter.userFormatProvider, new NumberFormatter(null), null);
-				}
-				return NumberFormatter.userFormatProvider;
-			}
 			NumberFormatter numberFormatter = NumberFormatter.threadNumberFormatter;
 			NumberFormatter.threadNumberFormatter = null;
 			if (numberFormatter == null)
 			{
 				return new NumberFormatter(Thread.CurrentThread);
 			}
-			numberFormatter.CurrentCulture = Thread.CurrentThread.CurrentCulture;
 			return numberFormatter;
 		}
 
 		private void Release()
 		{
-			if (this != NumberFormatter.userFormatProvider)
+			NumberFormatter.threadNumberFormatter = this;
+		}
+
+		internal static void SetThreadCurrentCulture(CultureInfo culture)
+		{
+			if (NumberFormatter.threadNumberFormatter != null)
 			{
-				NumberFormatter.threadNumberFormatter = this;
+				NumberFormatter.threadNumberFormatter.CurrentCulture = culture;
 			}
+		}
+
+		public static string NumberToString(string format, sbyte value, IFormatProvider fp)
+		{
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			instance.Init(format, (int)value, 3);
+			string text = instance.IntegerToString(format, fp);
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(string format, byte value, IFormatProvider fp)
+		{
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			instance.Init(format, (int)value, 3);
+			string text = instance.IntegerToString(format, fp);
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(string format, ushort value, IFormatProvider fp)
+		{
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			instance.Init(format, (int)value, 5);
+			string text = instance.IntegerToString(format, fp);
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(string format, short value, IFormatProvider fp)
+		{
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			instance.Init(format, (int)value, 5);
+			string text = instance.IntegerToString(format, fp);
+			instance.Release();
+			return text;
 		}
 
 		public static string NumberToString(string format, uint value, IFormatProvider fp)
 		{
-			NumberFormatter instance = NumberFormatter.GetInstance(fp);
+			NumberFormatter instance = NumberFormatter.GetInstance();
 			instance.Init(format, value, 10);
 			string text = instance.IntegerToString(format, fp);
 			instance.Release();
@@ -792,7 +829,7 @@ namespace System
 
 		public static string NumberToString(string format, int value, IFormatProvider fp)
 		{
-			NumberFormatter instance = NumberFormatter.GetInstance(fp);
+			NumberFormatter instance = NumberFormatter.GetInstance();
 			instance.Init(format, value, 10);
 			string text = instance.IntegerToString(format, fp);
 			instance.Release();
@@ -801,7 +838,7 @@ namespace System
 
 		public static string NumberToString(string format, ulong value, IFormatProvider fp)
 		{
-			NumberFormatter instance = NumberFormatter.GetInstance(fp);
+			NumberFormatter instance = NumberFormatter.GetInstance();
 			instance.Init(format, value);
 			string text = instance.IntegerToString(format, fp);
 			instance.Release();
@@ -810,7 +847,7 @@ namespace System
 
 		public static string NumberToString(string format, long value, IFormatProvider fp)
 		{
-			NumberFormatter instance = NumberFormatter.GetInstance(fp);
+			NumberFormatter instance = NumberFormatter.GetInstance();
 			instance.Init(format, value);
 			string text = instance.IntegerToString(format, fp);
 			instance.Release();
@@ -819,7 +856,7 @@ namespace System
 
 		public static string NumberToString(string format, float value, IFormatProvider fp)
 		{
-			NumberFormatter instance = NumberFormatter.GetInstance(fp);
+			NumberFormatter instance = NumberFormatter.GetInstance();
 			instance.Init(format, (double)value, 7);
 			NumberFormatInfo numberFormatInstance = instance.GetNumberFormatInstance(fp);
 			string text;
@@ -852,7 +889,7 @@ namespace System
 
 		public static string NumberToString(string format, double value, IFormatProvider fp)
 		{
-			NumberFormatter instance = NumberFormatter.GetInstance(fp);
+			NumberFormatter instance = NumberFormatter.GetInstance();
 			instance.Init(format, value, 15);
 			NumberFormatInfo numberFormatInstance = instance.GetNumberFormatInstance(fp);
 			string text;
@@ -885,122 +922,232 @@ namespace System
 
 		public static string NumberToString(string format, decimal value, IFormatProvider fp)
 		{
-			NumberFormatter instance = NumberFormatter.GetInstance(fp);
+			NumberFormatter instance = NumberFormatter.GetInstance();
 			instance.Init(format, value);
 			string text = instance.NumberToString(format, instance.GetNumberFormatInstance(fp));
 			instance.Release();
 			return text;
 		}
 
-		private string IntegerToString(string format, IFormatProvider fp)
+		public static string NumberToString(uint value, IFormatProvider fp)
 		{
-			NumberFormatInfo numberFormatInstance = this.GetNumberFormatInstance(fp);
-			char specifier = this._specifier;
-			if (specifier <= 'N')
+			if (value >= 100000000U)
 			{
-				switch (specifier)
+				return NumberFormatter.NumberToString(null, value, fp);
+			}
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			string text = instance.FastIntegerToString((int)value, fp);
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(int value, IFormatProvider fp)
+		{
+			if (value >= 100000000 || value <= -100000000)
+			{
+				return NumberFormatter.NumberToString(null, value, fp);
+			}
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			string text = instance.FastIntegerToString(value, fp);
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(ulong value, IFormatProvider fp)
+		{
+			if (value >= 100000000UL)
+			{
+				return NumberFormatter.NumberToString(null, value, fp);
+			}
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			string text = instance.FastIntegerToString((int)value, fp);
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(long value, IFormatProvider fp)
+		{
+			if (value >= 100000000L || value <= -100000000L)
+			{
+				return NumberFormatter.NumberToString(null, value, fp);
+			}
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			string text = instance.FastIntegerToString((int)value, fp);
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(float value, IFormatProvider fp)
+		{
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			instance.Init(null, (double)value, 7);
+			NumberFormatInfo numberFormatInstance = instance.GetNumberFormatInstance(fp);
+			string text;
+			if (instance._NaN)
+			{
+				text = numberFormatInstance.NaNSymbol;
+			}
+			else if (instance._infinity)
+			{
+				if (instance._positive)
 				{
-				case 'C':
-					return this.FormatCurrency(this._precision, numberFormatInstance);
-				case 'D':
-					return this.FormatDecimal(this._precision, numberFormatInstance);
-				case 'E':
-					return this.FormatExponential(this._precision, numberFormatInstance);
-				case 'F':
-					return this.FormatFixedPoint(this._precision, numberFormatInstance);
-				case 'G':
-					if (this._precision <= 0)
-					{
-						return this.FormatDecimal(-1, numberFormatInstance);
-					}
-					return this.FormatGeneral(this._precision, numberFormatInstance);
-				default:
-					if (specifier == 'N')
-					{
-						return this.FormatNumber(this._precision, numberFormatInstance);
-					}
-					break;
+					text = numberFormatInstance.PositiveInfinitySymbol;
+				}
+				else
+				{
+					text = numberFormatInstance.NegativeInfinitySymbol;
 				}
 			}
 			else
 			{
-				if (specifier == 'P')
+				text = instance.FormatGeneral(-1, numberFormatInstance);
+			}
+			instance.Release();
+			return text;
+		}
+
+		public static string NumberToString(double value, IFormatProvider fp)
+		{
+			NumberFormatter instance = NumberFormatter.GetInstance();
+			NumberFormatInfo numberFormatInstance = instance.GetNumberFormatInstance(fp);
+			instance.Init(null, value, 15);
+			string text;
+			if (instance._NaN)
+			{
+				text = numberFormatInstance.NaNSymbol;
+			}
+			else if (instance._infinity)
+			{
+				if (instance._positive)
 				{
-					return this.FormatPercent(this._precision, numberFormatInstance);
+					text = numberFormatInstance.PositiveInfinitySymbol;
 				}
+				else
+				{
+					text = numberFormatInstance.NegativeInfinitySymbol;
+				}
+			}
+			else
+			{
+				text = instance.FormatGeneral(-1, numberFormatInstance);
+			}
+			instance.Release();
+			return text;
+		}
+
+		private string FastIntegerToString(int value, IFormatProvider fp)
+		{
+			if (value < 0)
+			{
+				string negativeSign = this.GetNumberFormatInstance(fp).NegativeSign;
+				this.ResetCharBuf(8 + negativeSign.Length);
+				value = -value;
+				this.Append(negativeSign);
+			}
+			else
+			{
+				this.ResetCharBuf(8);
+			}
+			if (value >= 10000)
+			{
+				int num = value / 10000;
+				this.FastAppendDigits(num, false);
+				this.FastAppendDigits(value - num * 10000, true);
+			}
+			else
+			{
+				this.FastAppendDigits(value, false);
+			}
+			return new string(this._cbuf, 0, this._ind);
+		}
+
+		private string IntegerToString(string format, IFormatProvider fp)
+		{
+			NumberFormatInfo numberFormatInstance = this.GetNumberFormatInstance(fp);
+			char specifier = this._specifier;
+			switch (specifier)
+			{
+			case 'C':
+				return this.FormatCurrency(this._precision, numberFormatInstance);
+			case 'D':
+				return this.FormatDecimal(this._precision, numberFormatInstance);
+			case 'E':
+				return this.FormatExponential(this._precision, numberFormatInstance);
+			case 'F':
+				return this.FormatFixedPoint(this._precision, numberFormatInstance);
+			case 'G':
+				if (this._precision <= 0)
+				{
+					return this.FormatDecimal(-1, numberFormatInstance);
+				}
+				return this.FormatGeneral(this._precision, numberFormatInstance);
+			default:
 				if (specifier == 'X')
 				{
 					return this.FormatHexadecimal(this._precision);
 				}
+				if (this._isCustomFormat)
+				{
+					return this.FormatCustom(format, numberFormatInstance);
+				}
+				throw new FormatException("The specified format '" + format + "' is invalid");
+			case 'N':
+				return this.FormatNumber(this._precision, numberFormatInstance);
+			case 'P':
+				return this.FormatPercent(this._precision, numberFormatInstance);
 			}
-			if (this._isCustomFormat)
-			{
-				return this.FormatCustom(format, numberFormatInstance);
-			}
-			throw new FormatException("The specified format '" + format + "' is invalid");
 		}
 
 		private string NumberToString(string format, NumberFormatInfo nfi)
 		{
 			char specifier = this._specifier;
-			if (specifier <= 'N')
+			switch (specifier)
 			{
+			case 'C':
+				return this.FormatCurrency(this._precision, nfi);
+			default:
 				switch (specifier)
 				{
-				case 'C':
-					return this.FormatCurrency(this._precision, nfi);
-				case 'D':
-					break;
-				case 'E':
-					return this.FormatExponential(this._precision, nfi);
-				case 'F':
-					return this.FormatFixedPoint(this._precision, nfi);
-				case 'G':
-					return this.FormatGeneral(this._precision, nfi);
+				case 'N':
+					return this.FormatNumber(this._precision, nfi);
 				default:
-					if (specifier == 'N')
+					if (specifier != 'X')
 					{
-						return this.FormatNumber(this._precision, nfi);
 					}
-					break;
-				}
-			}
-			else
-			{
-				if (specifier == 'P')
-				{
+					if (this._isCustomFormat)
+					{
+						return this.FormatCustom(format, nfi);
+					}
+					throw new FormatException("The specified format '" + format + "' is invalid");
+				case 'P':
 					return this.FormatPercent(this._precision, nfi);
 				}
-				if (specifier != 'X')
-				{
-				}
+				break;
+			case 'E':
+				return this.FormatExponential(this._precision, nfi);
+			case 'F':
+				return this.FormatFixedPoint(this._precision, nfi);
+			case 'G':
+				return this.FormatGeneral(this._precision, nfi);
 			}
-			if (this._isCustomFormat)
-			{
-				return this.FormatCustom(format, nfi);
-			}
-			throw new FormatException("The specified format '" + format + "' is invalid");
 		}
 
-		private string FormatCurrency(int precision, NumberFormatInfo nfi)
+		public string FormatCurrency(int precision, NumberFormatInfo nfi)
 		{
-			precision = ((precision >= 0) ? precision : nfi.CurrencyDecimalDigits);
+			precision = ((precision < 0) ? nfi.CurrencyDecimalDigits : precision);
 			this.RoundDecimal(precision);
 			this.ResetCharBuf(this.IntegerDigits * 2 + precision * 2 + 16);
 			if (this._positive)
 			{
-				int num = nfi.CurrencyPositivePattern;
-				if (num != 0)
+				switch (nfi.CurrencyPositivePattern)
 				{
-					if (num == 2)
-					{
-						this.Append(nfi.CurrencySymbol);
-						this.Append(' ');
-					}
-				}
-				else
-				{
+				case 0:
 					this.Append(nfi.CurrencySymbol);
+					break;
+				case 2:
+					this.Append(nfi.CurrencySymbol);
+					this.Append(' ');
+					break;
 				}
 			}
 			else
@@ -1055,7 +1202,7 @@ namespace System
 					break;
 				}
 			}
-			this.AppendIntegerStringWithGroupSeparator(nfi.CurrencyGroupSizes, nfi.CurrencyGroupSeparator);
+			this.AppendIntegerStringWithGroupSeparator(nfi.RawCurrencyGroupSizes, nfi.CurrencyGroupSeparator);
 			if (precision > 0)
 			{
 				this.Append(nfi.CurrencyDecimalSeparator);
@@ -1063,18 +1210,15 @@ namespace System
 			}
 			if (this._positive)
 			{
-				int num = nfi.CurrencyPositivePattern;
-				if (num != 1)
+				switch (nfi.CurrencyPositivePattern)
 				{
-					if (num == 3)
-					{
-						this.Append(' ');
-						this.Append(nfi.CurrencySymbol);
-					}
-				}
-				else
-				{
+				case 1:
 					this.Append(nfi.CurrencySymbol);
+					break;
+				case 3:
+					this.Append(' ');
+					this.Append(nfi.CurrencySymbol);
+					break;
 				}
 			}
 			else
@@ -1154,7 +1298,7 @@ namespace System
 		private unsafe string FormatHexadecimal(int precision)
 		{
 			int i = Math.Max(precision, this._decPointPos);
-			char* ptr = (this._specifierIsUpper ? NumberFormatter.DigitUpperTable : NumberFormatter.DigitLowerTable);
+			char* ptr = ((!this._specifierIsUpper) ? NumberFormatter.DigitLowerTable : NumberFormatter.DigitUpperTable);
 			this.ResetCharBuf(i);
 			this._ind = i;
 			ulong num = (ulong)this._val1 | ((ulong)this._val2 << 32);
@@ -1166,7 +1310,7 @@ namespace System
 			return new string(this._cbuf, 0, this._ind);
 		}
 
-		private string FormatFixedPoint(int precision, NumberFormatInfo nfi)
+		public string FormatFixedPoint(int precision, NumberFormatInfo nfi)
 		{
 			if (precision == -1)
 			{
@@ -1265,9 +1409,9 @@ namespace System
 			return new string(this._cbuf, 0, this._ind);
 		}
 
-		private string FormatNumber(int precision, NumberFormatInfo nfi)
+		public string FormatNumber(int precision, NumberFormatInfo nfi)
 		{
-			precision = ((precision >= 0) ? precision : nfi.NumberDecimalDigits);
+			precision = ((precision < 0) ? nfi.NumberDecimalDigits : precision);
 			this.ResetCharBuf(this.IntegerDigits * 3 + precision);
 			this.RoundDecimal(precision);
 			if (!this._positive)
@@ -1286,7 +1430,7 @@ namespace System
 					break;
 				}
 			}
-			this.AppendIntegerStringWithGroupSeparator(nfi.NumberGroupSizes, nfi.NumberGroupSeparator);
+			this.AppendIntegerStringWithGroupSeparator(nfi.RawNumberGroupSizes, nfi.NumberGroupSeparator);
 			if (precision > 0)
 			{
 				this.Append(nfi.NumberDecimalSeparator);
@@ -1311,9 +1455,9 @@ namespace System
 			return new string(this._cbuf, 0, this._ind);
 		}
 
-		private string FormatPercent(int precision, NumberFormatInfo nfi)
+		public string FormatPercent(int precision, NumberFormatInfo nfi)
 		{
-			precision = ((precision >= 0) ? precision : nfi.PercentDecimalDigits);
+			precision = ((precision < 0) ? nfi.PercentDecimalDigits : precision);
 			this.Multiply10(2);
 			this.RoundDecimal(precision);
 			this.ResetCharBuf(this.IntegerDigits * 2 + precision + 16);
@@ -1340,7 +1484,7 @@ namespace System
 					break;
 				}
 			}
-			this.AppendIntegerStringWithGroupSeparator(nfi.PercentGroupSizes, nfi.PercentGroupSeparator);
+			this.AppendIntegerStringWithGroupSeparator(nfi.RawPercentGroupSizes, nfi.PercentGroupSeparator);
 			if (precision > 0)
 			{
 				this.Append(nfi.PercentDecimalSeparator);
@@ -1381,7 +1525,7 @@ namespace System
 			return new string(this._cbuf, 0, this._ind);
 		}
 
-		private string FormatExponential(int precision, NumberFormatInfo nfi)
+		public string FormatExponential(int precision, NumberFormatInfo nfi)
 		{
 			if (precision == -1)
 			{
@@ -1396,7 +1540,7 @@ namespace System
 			int decPointPos = this._decPointPos;
 			int digitsLen = this._digitsLen;
 			int num = decPointPos - 1;
-			this._decPointPos = 1;
+			int num2 = (this._decPointPos = 1);
 			this.ResetCharBuf(precision + 8);
 			if (!this._positive)
 			{
@@ -1412,111 +1556,111 @@ namespace System
 			return new string(this._cbuf, 0, this._ind);
 		}
 
-		private string FormatCustom(string format, NumberFormatInfo nfi)
+		public string FormatCustom(string format, NumberFormatInfo nfi)
 		{
 			bool positive = this._positive;
 			int num = 0;
 			int num2 = 0;
 			NumberFormatter.CustomInfo.GetActiveSection(format, ref positive, this.IsZero, ref num, ref num2);
-			if (num2 != 0)
+			if (num2 == 0)
 			{
-				this._positive = positive;
-				NumberFormatter.CustomInfo customInfo = NumberFormatter.CustomInfo.Parse(format, num, num2, nfi);
-				StringBuilder stringBuilder = new StringBuilder(customInfo.IntegerDigits * 2);
-				StringBuilder stringBuilder2 = new StringBuilder(customInfo.DecimalDigits * 2);
-				StringBuilder stringBuilder3 = (customInfo.UseExponent ? new StringBuilder(customInfo.ExponentDigits * 2) : null);
-				int num3 = 0;
-				if (customInfo.Percents > 0)
-				{
-					this.Multiply10(2 * customInfo.Percents);
-				}
-				if (customInfo.Permilles > 0)
-				{
-					this.Multiply10(3 * customInfo.Permilles);
-				}
-				if (customInfo.DividePlaces > 0)
-				{
-					this.Divide10(customInfo.DividePlaces);
-				}
-				bool flag = true;
-				if (customInfo.UseExponent && (customInfo.DecimalDigits > 0 || customInfo.IntegerDigits > 0))
-				{
-					if (!this.IsZero)
-					{
-						this.RoundPos(customInfo.DecimalDigits + customInfo.IntegerDigits);
-						num3 -= this._decPointPos - customInfo.IntegerDigits;
-						this._decPointPos = customInfo.IntegerDigits;
-					}
-					flag = num3 <= 0;
-					NumberFormatter.AppendNonNegativeNumber(stringBuilder3, (num3 < 0) ? (-num3) : num3);
-				}
-				else
-				{
-					this.RoundDecimal(customInfo.DecimalDigits);
-				}
-				if (customInfo.IntegerDigits != 0 || !this.IsZeroInteger)
-				{
-					this.AppendIntegerString(this.IntegerDigits, stringBuilder);
-				}
-				this.AppendDecimalString(this.DecimalDigits, stringBuilder2);
-				if (customInfo.UseExponent)
-				{
-					if (customInfo.DecimalDigits <= 0 && customInfo.IntegerDigits <= 0)
-					{
-						this._positive = true;
-					}
-					if (stringBuilder.Length < customInfo.IntegerDigits)
-					{
-						stringBuilder.Insert(0, "0", customInfo.IntegerDigits - stringBuilder.Length);
-					}
-					while (stringBuilder3.Length < customInfo.ExponentDigits - customInfo.ExponentTailSharpDigits)
-					{
-						stringBuilder3.Insert(0, '0');
-					}
-					if (flag && !customInfo.ExponentNegativeSignOnly)
-					{
-						stringBuilder3.Insert(0, nfi.PositiveSign);
-					}
-					else if (!flag)
-					{
-						stringBuilder3.Insert(0, nfi.NegativeSign);
-					}
-				}
-				else
-				{
-					if (stringBuilder.Length < customInfo.IntegerDigits - customInfo.IntegerHeadSharpDigits)
-					{
-						stringBuilder.Insert(0, "0", customInfo.IntegerDigits - customInfo.IntegerHeadSharpDigits - stringBuilder.Length);
-					}
-					if (customInfo.IntegerDigits == customInfo.IntegerHeadSharpDigits && NumberFormatter.IsZeroOnly(stringBuilder))
-					{
-						stringBuilder.Remove(0, stringBuilder.Length);
-					}
-				}
-				NumberFormatter.ZeroTrimEnd(stringBuilder2, true);
-				while (stringBuilder2.Length < customInfo.DecimalDigits - customInfo.DecimalTailSharpDigits)
-				{
-					stringBuilder2.Append('0');
-				}
-				if (stringBuilder2.Length > customInfo.DecimalDigits)
-				{
-					stringBuilder2.Remove(customInfo.DecimalDigits, stringBuilder2.Length - customInfo.DecimalDigits);
-				}
-				return customInfo.Format(format, num, num2, nfi, this._positive, stringBuilder, stringBuilder2, stringBuilder3);
+				return (!this._positive) ? nfi.NegativeSign : string.Empty;
 			}
-			if (!this._positive)
+			this._positive = positive;
+			NumberFormatter.CustomInfo customInfo = NumberFormatter.CustomInfo.Parse(format, num, num2, nfi);
+			StringBuilder stringBuilder = new StringBuilder(customInfo.IntegerDigits * 2);
+			StringBuilder stringBuilder2 = new StringBuilder(customInfo.DecimalDigits * 2);
+			StringBuilder stringBuilder3 = ((!customInfo.UseExponent) ? null : new StringBuilder(customInfo.ExponentDigits * 2));
+			int num3 = 0;
+			if (customInfo.Percents > 0)
 			{
-				return nfi.NegativeSign;
+				this.Multiply10(2 * customInfo.Percents);
 			}
-			return string.Empty;
+			if (customInfo.Permilles > 0)
+			{
+				this.Multiply10(3 * customInfo.Permilles);
+			}
+			if (customInfo.DividePlaces > 0)
+			{
+				this.Divide10(customInfo.DividePlaces);
+			}
+			bool flag = true;
+			if (customInfo.UseExponent && (customInfo.DecimalDigits > 0 || customInfo.IntegerDigits > 0))
+			{
+				if (!this.IsZero)
+				{
+					this.RoundPos(customInfo.DecimalDigits + customInfo.IntegerDigits);
+					num3 -= this._decPointPos - customInfo.IntegerDigits;
+					this._decPointPos = customInfo.IntegerDigits;
+				}
+				flag = num3 <= 0;
+				NumberFormatter.AppendNonNegativeNumber(stringBuilder3, (num3 >= 0) ? num3 : (-num3));
+			}
+			else
+			{
+				this.RoundDecimal(customInfo.DecimalDigits);
+			}
+			if (customInfo.IntegerDigits != 0 || !this.IsZeroInteger)
+			{
+				this.AppendIntegerString(this.IntegerDigits, stringBuilder);
+			}
+			this.AppendDecimalString(this.DecimalDigits, stringBuilder2);
+			if (customInfo.UseExponent)
+			{
+				if (customInfo.DecimalDigits <= 0 && customInfo.IntegerDigits <= 0)
+				{
+					this._positive = true;
+				}
+				if (stringBuilder.Length < customInfo.IntegerDigits)
+				{
+					stringBuilder.Insert(0, "0", customInfo.IntegerDigits - stringBuilder.Length);
+				}
+				while (stringBuilder3.Length < customInfo.ExponentDigits - customInfo.ExponentTailSharpDigits)
+				{
+					stringBuilder3.Insert(0, '0');
+				}
+				if (flag && !customInfo.ExponentNegativeSignOnly)
+				{
+					stringBuilder3.Insert(0, nfi.PositiveSign);
+				}
+				else if (!flag)
+				{
+					stringBuilder3.Insert(0, nfi.NegativeSign);
+				}
+			}
+			else
+			{
+				if (stringBuilder.Length < customInfo.IntegerDigits - customInfo.IntegerHeadSharpDigits)
+				{
+					stringBuilder.Insert(0, "0", customInfo.IntegerDigits - customInfo.IntegerHeadSharpDigits - stringBuilder.Length);
+				}
+				if (customInfo.IntegerDigits == customInfo.IntegerHeadSharpDigits && NumberFormatter.IsZeroOnly(stringBuilder))
+				{
+					stringBuilder.Remove(0, stringBuilder.Length);
+				}
+			}
+			NumberFormatter.ZeroTrimEnd(stringBuilder2, true);
+			while (stringBuilder2.Length < customInfo.DecimalDigits - customInfo.DecimalTailSharpDigits)
+			{
+				stringBuilder2.Append('0');
+			}
+			if (stringBuilder2.Length > customInfo.DecimalDigits)
+			{
+				stringBuilder2.Remove(customInfo.DecimalDigits, stringBuilder2.Length - customInfo.DecimalDigits);
+			}
+			return customInfo.Format(format, num, num2, nfi, this._positive, stringBuilder, stringBuilder2, stringBuilder3);
 		}
 
 		private static void ZeroTrimEnd(StringBuilder sb, bool canEmpty)
 		{
 			int num = 0;
 			int num2 = sb.Length - 1;
-			while ((canEmpty ? (num2 >= 0) : (num2 > 0)) && sb[num2] == '0')
+			while ((!canEmpty) ? (num2 > 0) : (num2 >= 0))
 			{
+				if (sb[num2] != '0')
+				{
+					break;
+				}
 				num++;
 				num2--;
 			}
@@ -1610,17 +1754,17 @@ namespace System
 				}
 				num2 = i;
 			}
-			if (groups.Length != 0 && num > 0)
+			if (groups.Length > 0 && num > 0)
 			{
 				int num3 = groups[num2];
-				int num4 = ((this._decPointPos > num) ? (this._decPointPos - num) : 0);
+				int num4 = ((this._decPointPos <= num) ? 0 : (this._decPointPos - num));
 				if (num3 == 0)
 				{
 					while (num2 >= 0 && groups[num2] == 0)
 					{
 						num2--;
 					}
-					num3 = ((num4 > 0) ? num4 : groups[num2]);
+					num3 = ((num4 <= 0) ? groups[num2] : num4);
 				}
 				int num5;
 				if (num4 == 0)
@@ -1640,28 +1784,11 @@ namespace System
 						num2++;
 					}
 				}
-				if (num >= this._decPointPos)
+				int num6 = 0;
+				while (this._decPointPos - num6 > num5 && num5 != 0)
 				{
-					int num6 = groups[0];
-					if (num > num6)
-					{
-						int num7 = -(num6 - this._decPointPos);
-						int num8;
-						if (num7 < num6)
-						{
-							num5 = num7;
-						}
-						else if (num6 > 0 && (num8 = this._decPointPos % num6) > 0)
-						{
-							num5 = num8;
-						}
-					}
-				}
-				int num9 = 0;
-				while (this._decPointPos - num9 > num5 && num5 != 0)
-				{
-					this.AppendDigits(this._digitsLen - num9 - num5, this._digitsLen - num9);
-					num9 += num5;
+					this.AppendDigits(this._digitsLen - num6 - num5, this._digitsLen - num6);
+					num6 += num5;
 					this.Append(groupSeparator);
 					if (--num2 < groups.Length && num2 >= 0)
 					{
@@ -1669,10 +1796,12 @@ namespace System
 					}
 					num5 = num3;
 				}
-				this.AppendDigits(this._digitsLen - this._decPointPos, this._digitsLen - num9);
-				return;
+				this.AppendDigits(this._digitsLen - this._decPointPos, this._digitsLen - num6);
 			}
-			this.AppendDigits(this._digitsLen - this._decPointPos, this._digitsLen);
+			else
+			{
+				this.AppendDigits(this._digitsLen - this._decPointPos, this._digitsLen);
+			}
 		}
 
 		private void AppendExponent(NumberFormatInfo nfi, int exponent, int minDigits)
@@ -1697,21 +1826,22 @@ namespace System
 			if (exponent == 0)
 			{
 				this.Append('0', minDigits);
-				return;
 			}
-			if (exponent < 10)
+			else if (exponent < 10)
 			{
 				this.Append('0', minDigits - 1);
 				this.Append((char)(48 | exponent));
-				return;
 			}
-			uint num = NumberFormatter.FastToDecHex(exponent);
-			if (exponent >= 100 || minDigits == 3)
+			else
 			{
-				this.Append((char)(48U | (num >> 8)));
+				uint num = NumberFormatter.FastToDecHex(exponent);
+				if (exponent >= 100 || minDigits == 3)
+				{
+					this.Append((char)(48U | (num >> 8)));
+				}
+				this.Append((char)(48U | ((num >> 4) & 15U)));
+				this.Append((char)(48U | (num & 15U)));
 			}
-			this.Append((char)(48U | ((num >> 4) & 15U)));
-			this.Append((char)(48U | (num & 15U)));
 		}
 
 		private void AppendOneDigit(int start)
@@ -1747,10 +1877,34 @@ namespace System
 				num = 0U;
 			}
 			num >>= (start & 7) << 2;
-			char[] cbuf = this._cbuf;
+			this._cbuf[this._ind++] = (char)(48U | (num & 15U));
+		}
+
+		private unsafe void FastAppendDigits(int val, bool force)
+		{
 			int ind = this._ind;
-			this._ind = ind + 1;
-			cbuf[ind] = (ushort)(48U | (num & 15U));
+			int num2;
+			if (force || val >= 100)
+			{
+				int num = val * 5243 >> 19;
+				num2 = NumberFormatter.DecHexDigits[num];
+				if (force || val >= 1000)
+				{
+					this._cbuf[ind++] = (char)(48 | (num2 >> 4));
+				}
+				this._cbuf[ind++] = (char)(48 | (num2 & 15));
+				num2 = NumberFormatter.DecHexDigits[val - num * 100];
+			}
+			else
+			{
+				num2 = NumberFormatter.DecHexDigits[val];
+			}
+			if (force || val >= 10)
+			{
+				this._cbuf[ind++] = (char)(48 | (num2 >> 4));
+			}
+			this._cbuf[ind++] = (char)(48 | (num2 & 15));
+			this._ind = ind;
 		}
 
 		private void AppendDigits(int start, int end)
@@ -1800,51 +1954,51 @@ namespace System
 				switch (num2 - start)
 				{
 				case 1:
-					goto IL_017F;
+					goto IL_01C8;
 				case 2:
-					goto IL_0167;
+					goto IL_01AB;
 				case 3:
-					goto IL_014F;
+					goto IL_018E;
 				case 4:
-					goto IL_0137;
+					goto IL_0171;
 				case 5:
-					goto IL_011F;
+					goto IL_0154;
 				case 6:
-					goto IL_0107;
+					goto IL_0137;
 				case 7:
-					goto IL_00EF;
+					goto IL_011A;
 				case 8:
 					this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-					goto IL_00EF;
+					goto IL_011A;
 				}
-				IL_0184:
+				IL_01D5:
 				start = num2;
 				num2 += 8;
 				continue;
-				IL_017F:
+				IL_01C8:
 				if (num2 == end)
 				{
 					break;
 				}
-				goto IL_0184;
-				IL_0167:
+				goto IL_01D5;
+				IL_01AB:
 				this._cbuf[--num] = (char)(48U | ((num3 >> 4) & 15U));
-				goto IL_017F;
-				IL_014F:
+				goto IL_01C8;
+				IL_018E:
 				this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_0167;
+				goto IL_01AB;
+				IL_0171:
+				this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
+				goto IL_018E;
+				IL_0154:
+				this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
+				goto IL_0171;
 				IL_0137:
 				this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_014F;
-				IL_011F:
+				goto IL_0154;
+				IL_011A:
 				this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
 				goto IL_0137;
-				IL_0107:
-				this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_011F;
-				IL_00EF:
-				this._cbuf[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_0107;
 			}
 		}
 
@@ -1891,51 +2045,51 @@ namespace System
 				switch (num2 - start)
 				{
 				case 1:
-					goto IL_0162;
+					goto IL_01A8;
 				case 2:
-					goto IL_014B;
+					goto IL_018C;
 				case 3:
-					goto IL_0134;
+					goto IL_0170;
 				case 4:
-					goto IL_011D;
+					goto IL_0154;
 				case 5:
-					goto IL_0106;
+					goto IL_0138;
 				case 6:
-					goto IL_00EF;
+					goto IL_011C;
 				case 7:
-					goto IL_00D8;
+					goto IL_0100;
 				case 8:
 					sb[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-					goto IL_00D8;
+					goto IL_0100;
 				}
-				IL_0167:
+				IL_01B5:
 				start = num2;
 				num2 += 8;
 				continue;
-				IL_0162:
+				IL_01A8:
 				if (num2 == end)
 				{
 					break;
 				}
-				goto IL_0167;
-				IL_014B:
+				goto IL_01B5;
+				IL_018C:
 				sb[--num] = (char)(48U | ((num3 >> 4) & 15U));
-				goto IL_0162;
-				IL_0134:
+				goto IL_01A8;
+				IL_0170:
 				sb[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_014B;
-				IL_011D:
+				goto IL_018C;
+				IL_0154:
 				sb[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_0134;
-				IL_0106:
+				goto IL_0170;
+				IL_0138:
 				sb[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_011D;
-				IL_00EF:
+				goto IL_0154;
+				IL_011C:
 				sb[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_0106;
-				IL_00D8:
+				goto IL_0138;
+				IL_0100:
 				sb[--num] = (char)(48U | ((num3 >>= 4) & 15U));
-				goto IL_00EF;
+				goto IL_011C;
 			}
 		}
 
@@ -1984,6 +2138,14 @@ namespace System
 
 		private const int DoubleDefPrecision = 15;
 
+		private const int Int8DefPrecision = 3;
+
+		private const int UInt8DefPrecision = 3;
+
+		private const int Int16DefPrecision = 5;
+
+		private const int UInt16DefPrecision = 5;
+
 		private const int Int32DefPrecision = 10;
 
 		private const int UInt32DefPrecision = 10;
@@ -2012,9 +2174,9 @@ namespace System
 
 		private unsafe static readonly int* DecHexDigits;
 
-		private NumberFormatInfo _nfi;
+		private Thread _thread;
 
-		private char[] _cbuf;
+		private NumberFormatInfo _nfi;
 
 		private bool _NaN;
 
@@ -2046,13 +2208,12 @@ namespace System
 
 		private uint _val4;
 
+		private char[] _cbuf;
+
 		private int _ind;
 
 		[ThreadStatic]
 		private static NumberFormatter threadNumberFormatter;
-
-		[ThreadStatic]
-		private static NumberFormatter userFormatProvider;
 
 		private class CustomInfo
 		{
@@ -2061,18 +2222,22 @@ namespace System
 				int[] array = new int[3];
 				int num = 0;
 				int num2 = 0;
-				bool flag = false;
+				char c = '\0';
 				for (int i = 0; i < format.Length; i++)
 				{
-					char c = format[i];
-					if (c == '"' || c == '\'')
+					char c2 = format[i];
+					if (c2 == c || (c == '\0' && (c2 == '"' || c2 == '\'')))
 					{
-						if (i == 0 || format[i - 1] != '\\')
+						if (c == '\0')
 						{
-							flag = !flag;
+							c = c2;
+						}
+						else
+						{
+							c = '\0';
 						}
 					}
-					else if (c == ';' && !flag && (i == 0 || format[i - 1] != '\\'))
+					else if (c == '\0' && format[i] == ';' && (i == 0 || format[i - 1] != '\\'))
 					{
 						array[num++] = i - num2;
 						num2 = i + 1;
@@ -2107,35 +2272,43 @@ namespace System
 					length = array[0];
 					return;
 				}
-				else if (zero)
+				else if (num == 2)
 				{
-					if (num == 2)
+					if (zero)
 					{
-						if (format.Length - num2 == 0)
-						{
-							offset = 0;
-							length = array[0];
-							return;
-						}
 						offset = array[0] + array[1] + 2;
 						length = format.Length - offset;
 						return;
 					}
-					else
+					if (positive)
 					{
-						if (array[2] == 0)
-						{
-							offset = 0;
-							length = array[0];
-							return;
-						}
+						offset = 0;
+						length = array[0];
+						return;
+					}
+					if (array[1] > 0)
+					{
+						positive = true;
+						offset = array[0] + 1;
+						length = array[1];
+						return;
+					}
+					offset = 0;
+					length = array[0];
+					return;
+				}
+				else
+				{
+					if (num != 3)
+					{
+						throw new ArgumentException();
+					}
+					if (zero)
+					{
 						offset = array[0] + array[1] + 2;
 						length = array[2];
 						return;
 					}
-				}
-				else
-				{
 					if (positive)
 					{
 						offset = 0;
@@ -2183,158 +2356,139 @@ namespace System
 						}
 						else
 						{
-							if (c2 <= 'E')
+							char c3 = c2;
+							switch (c3)
 							{
-								switch (c2)
+							case '"':
+							case '\'':
+								if (c2 == '"' || c2 == '\'')
 								{
-								case '"':
-								case '\'':
-									if (c2 == '"' || c2 == '\'')
+									c = c2;
+								}
+								goto IL_0311;
+							case '#':
+								if (flag4 && flag)
+								{
+									customInfo.IntegerHeadSharpDigits++;
+								}
+								else if (flag2)
+								{
+									customInfo.DecimalTailSharpDigits++;
+								}
+								else if (flag3)
+								{
+									customInfo.ExponentTailSharpDigits++;
+								}
+								break;
+							default:
+								switch (c3)
+								{
+								case ',':
+									if (flag && customInfo.IntegerDigits > 0)
 									{
-										c = c2;
-										goto IL_0292;
+										num++;
 									}
-									goto IL_0292;
-								case '#':
-									if (flag4 && flag)
-									{
-										customInfo.IntegerHeadSharpDigits++;
-									}
-									else if (flag2)
-									{
-										customInfo.DecimalTailSharpDigits++;
-									}
-									else if (flag3)
-									{
-										customInfo.ExponentTailSharpDigits++;
-									}
-									break;
-								case '$':
-								case '&':
-									goto IL_0292;
-								case '%':
-									customInfo.Percents++;
-									goto IL_0292;
+									goto IL_0311;
 								default:
-									switch (c2)
+									if (c3 != 'E')
 									{
-									case ',':
-										if (flag && customInfo.IntegerDigits > 0)
+										if (c3 == '\\')
 										{
-											num++;
-											goto IL_0292;
+											num2++;
+											goto IL_0311;
 										}
-										goto IL_0292;
-									case '-':
-									case '/':
-										goto IL_0292;
-									case '.':
-										flag = false;
-										flag2 = true;
-										flag3 = false;
-										if (customInfo.DecimalPointPos == -1)
+										if (c3 != 'e')
 										{
-											customInfo.DecimalPointPos = num2;
-											goto IL_0292;
+											if (c3 != '‰')
+											{
+												goto IL_0311;
+											}
+											customInfo.Permilles++;
+											goto IL_0311;
 										}
-										goto IL_0292;
-									case '0':
-										break;
-									default:
-										if (c2 != 'E')
-										{
-											goto IL_0292;
-										}
-										goto IL_01CC;
 									}
+									if (customInfo.UseExponent)
+									{
+										goto IL_0311;
+									}
+									customInfo.UseExponent = true;
+									flag = false;
+									flag2 = false;
+									flag3 = true;
+									if (num2 + 1 - offset < length)
+									{
+										char c4 = format[num2 + 1];
+										if (c4 == '+')
+										{
+											customInfo.ExponentNegativeSignOnly = false;
+										}
+										if (c4 == '+' || c4 == '-')
+										{
+											num2++;
+										}
+										else if (c4 != '0' && c4 != '#')
+										{
+											customInfo.UseExponent = false;
+											if (customInfo.DecimalPointPos < 0)
+											{
+												flag = true;
+											}
+										}
+									}
+									goto IL_0311;
+								case '.':
+									flag = false;
+									flag2 = true;
+									flag3 = false;
+									if (customInfo.DecimalPointPos == -1)
+									{
+										customInfo.DecimalPointPos = num2;
+									}
+									goto IL_0311;
+								case '0':
 									break;
 								}
-								if (c2 != '#')
-								{
-									flag4 = false;
-									if (flag2)
-									{
-										customInfo.DecimalTailSharpDigits = 0;
-									}
-									else if (flag3)
-									{
-										customInfo.ExponentTailSharpDigits = 0;
-									}
-								}
-								if (customInfo.IntegerHeadPos == -1)
-								{
-									customInfo.IntegerHeadPos = num2;
-								}
-								if (flag)
-								{
-									customInfo.IntegerDigits++;
-									if (num > 0)
-									{
-										customInfo.UseGroup = true;
-									}
-									num = 0;
-									goto IL_0292;
-								}
+								break;
+							case '%':
+								customInfo.Percents++;
+								goto IL_0311;
+							}
+							if (c2 != '#')
+							{
+								flag4 = false;
 								if (flag2)
 								{
-									customInfo.DecimalDigits++;
-									goto IL_0292;
+									customInfo.DecimalTailSharpDigits = 0;
 								}
-								if (flag3)
+								else if (flag3)
 								{
-									customInfo.ExponentDigits++;
-									goto IL_0292;
-								}
-								goto IL_0292;
-							}
-							else
-							{
-								if (c2 == '\\')
-								{
-									num2++;
-									goto IL_0292;
-								}
-								if (c2 != 'e')
-								{
-									if (c2 != '‰')
-									{
-										goto IL_0292;
-									}
-									customInfo.Permilles++;
-									goto IL_0292;
+									customInfo.ExponentTailSharpDigits = 0;
 								}
 							}
-							IL_01CC:
-							if (!customInfo.UseExponent)
+							if (customInfo.IntegerHeadPos == -1)
 							{
-								customInfo.UseExponent = true;
-								flag = false;
-								flag2 = false;
-								flag3 = true;
-								if (num2 + 1 - offset < length)
+								customInfo.IntegerHeadPos = num2;
+							}
+							if (flag)
+							{
+								customInfo.IntegerDigits++;
+								if (num > 0)
 								{
-									char c3 = format[num2 + 1];
-									if (c3 == '+')
-									{
-										customInfo.ExponentNegativeSignOnly = false;
-									}
-									if (c3 == '+' || c3 == '-')
-									{
-										num2++;
-									}
-									else if (c3 != '0' && c3 != '#')
-									{
-										customInfo.UseExponent = false;
-										if (customInfo.DecimalPointPos < 0)
-										{
-											flag = true;
-										}
-									}
+									customInfo.UseGroup = true;
 								}
+								num = 0;
+							}
+							else if (flag2)
+							{
+								customInfo.DecimalDigits++;
+							}
+							else if (flag3)
+							{
+								customInfo.ExponentDigits++;
 							}
 						}
 					}
-					IL_0292:
+					IL_0311:
 					num2++;
 				}
 				if (customInfo.ExponentDigits == 0)
@@ -2362,33 +2516,33 @@ namespace System
 				int num = 0;
 				int i = 0;
 				int num2 = 0;
-				int[] numberGroupSizes = nfi.NumberGroupSizes;
+				int[] rawNumberGroupSizes = nfi.RawNumberGroupSizes;
 				string numberGroupSeparator = nfi.NumberGroupSeparator;
 				int num3 = 0;
 				int num4 = 0;
 				int num5 = 0;
 				int num6 = 0;
 				int num7 = 0;
-				if (this.UseGroup && numberGroupSizes.Length != 0)
+				if (this.UseGroup && rawNumberGroupSizes.Length > 0)
 				{
 					num3 = sb_int.Length;
-					for (int j = 0; j < numberGroupSizes.Length; j++)
+					for (int j = 0; j < rawNumberGroupSizes.Length; j++)
 					{
-						num4 += numberGroupSizes[j];
+						num4 += rawNumberGroupSizes[j];
 						if (num4 <= num3)
 						{
 							num5 = j;
 						}
 					}
-					num7 = numberGroupSizes[num5];
-					int num8 = ((num3 > num4) ? (num3 - num4) : 0);
+					num7 = rawNumberGroupSizes[num5];
+					int num8 = ((num3 <= num4) ? 0 : (num3 - num4));
 					if (num7 == 0)
 					{
-						while (num5 >= 0 && numberGroupSizes[num5] == 0)
+						while (num5 >= 0 && rawNumberGroupSizes[num5] == 0)
 						{
 							num5--;
 						}
-						num7 = ((num8 > 0) ? num8 : numberGroupSizes[num5]);
+						num7 = ((num8 <= 0) ? rawNumberGroupSizes[num5] : num8);
 					}
 					if (num8 == 0)
 					{
@@ -2426,164 +2580,145 @@ namespace System
 					}
 					else
 					{
-						if (c2 <= 'E')
+						char c3 = c2;
+						switch (c3)
 						{
-							switch (c2)
+						case '"':
+						case '\'':
+							if (c2 == '"' || c2 == '\'')
 							{
-							case '"':
-							case '\'':
-								if (c2 == '"' || c2 == '\'')
-								{
-									c = c2;
-									goto IL_03CC;
-								}
-								goto IL_03CC;
-							case '#':
-								break;
-							case '$':
-							case '&':
-								goto IL_03C3;
-							case '%':
-								stringBuilder.Append(nfi.PercentSymbol);
-								goto IL_03CC;
+								c = c2;
+							}
+							goto IL_0474;
+						case '#':
+							break;
+						default:
+							switch (c3)
+							{
+							case ',':
+								goto IL_0474;
 							default:
-								switch (c2)
+							{
+								if (c3 != 'E')
 								{
-								case ',':
-									goto IL_03CC;
-								case '-':
-								case '/':
-									goto IL_03C3;
-								case '.':
-									if (this.DecimalPointPos == num9)
+									if (c3 == '\\')
 									{
-										if (this.DecimalDigits > 0)
+										num9++;
+										if (num9 - offset < length)
 										{
-											while (i < sb_int.Length)
-											{
-												stringBuilder.Append(sb_int[i++]);
-											}
+											stringBuilder.Append(format[num9]);
 										}
-										if (sb_dec.Length > 0)
-										{
-											stringBuilder.Append(nfi.NumberDecimalSeparator);
-										}
+										goto IL_0474;
 									}
-									flag = false;
-									flag2 = true;
-									goto IL_03CC;
-								case '0':
-									break;
-								default:
-									if (c2 != 'E')
+									if (c3 != 'e')
 									{
-										goto IL_03C3;
+										if (c3 != '‰')
+										{
+											stringBuilder.Append(c2);
+											goto IL_0474;
+										}
+										stringBuilder.Append(nfi.PerMilleSymbol);
+										goto IL_0474;
 									}
-									goto IL_02A3;
 								}
+								if (sb_exp == null || !this.UseExponent)
+								{
+									stringBuilder.Append(c2);
+									goto IL_0474;
+								}
+								bool flag3 = true;
+								bool flag4 = false;
+								int num10 = num9 + 1;
+								while (num10 - offset < length)
+								{
+									if (format[num10] == '0')
+									{
+										flag4 = true;
+									}
+									else if (num10 != num9 + 1 || (format[num10] != '+' && format[num10] != '-'))
+									{
+										if (!flag4)
+										{
+											flag3 = false;
+										}
+										break;
+									}
+									num10++;
+								}
+								if (flag3)
+								{
+									num9 = num10 - 1;
+									flag = this.DecimalPointPos < 0;
+									flag2 = !flag;
+									stringBuilder.Append(c2);
+									stringBuilder.Append(sb_exp);
+									sb_exp = null;
+								}
+								else
+								{
+									stringBuilder.Append(c2);
+								}
+								goto IL_0474;
+							}
+							case '.':
+								if (this.DecimalPointPos == num9)
+								{
+									if (this.DecimalDigits > 0)
+									{
+										while (i < sb_int.Length)
+										{
+											stringBuilder.Append(sb_int[i++]);
+										}
+									}
+									if (sb_dec.Length > 0)
+									{
+										stringBuilder.Append(nfi.NumberDecimalSeparator);
+									}
+								}
+								flag = false;
+								flag2 = true;
+								goto IL_0474;
+							case '0':
 								break;
 							}
-							if (flag)
+							break;
+						case '%':
+							stringBuilder.Append(nfi.PercentSymbol);
+							goto IL_0474;
+						}
+						if (flag)
+						{
+							num++;
+							if (this.IntegerDigits - num < sb_int.Length + i || c2 == '0')
 							{
-								num++;
-								if (this.IntegerDigits - num >= sb_int.Length + i)
-								{
-									if (c2 != '0')
-									{
-										goto IL_03CC;
-									}
-								}
 								while (this.IntegerDigits - num + i < sb_int.Length)
 								{
 									stringBuilder.Append(sb_int[i++]);
 									if (this.UseGroup && --num3 > 0 && --num6 == 0)
 									{
 										stringBuilder.Append(numberGroupSeparator);
-										if (--num5 < numberGroupSizes.Length && num5 >= 0)
+										if (--num5 < rawNumberGroupSizes.Length && num5 >= 0)
 										{
-											num7 = numberGroupSizes[num5];
+											num7 = rawNumberGroupSizes[num5];
 										}
 										num6 = num7;
 									}
 								}
-								goto IL_03CC;
 							}
-							if (!flag2)
-							{
-								stringBuilder.Append(c2);
-								goto IL_03CC;
-							}
+						}
+						else if (flag2)
+						{
 							if (num2 < sb_dec.Length)
 							{
 								stringBuilder.Append(sb_dec[num2++]);
-								goto IL_03CC;
-							}
-							goto IL_03CC;
-						}
-						else if (c2 != '\\')
-						{
-							if (c2 != 'e')
-							{
-								if (c2 != '‰')
-								{
-									goto IL_03C3;
-								}
-								stringBuilder.Append(nfi.PerMilleSymbol);
-								goto IL_03CC;
 							}
 						}
 						else
 						{
-							num9++;
-							if (num9 - offset < length)
-							{
-								stringBuilder.Append(format[num9]);
-								goto IL_03CC;
-							}
-							goto IL_03CC;
-						}
-						IL_02A3:
-						if (sb_exp == null || !this.UseExponent)
-						{
 							stringBuilder.Append(c2);
-							goto IL_03CC;
 						}
-						bool flag3 = true;
-						bool flag4 = false;
-						int num10 = num9 + 1;
-						while (num10 - offset < length)
-						{
-							if (format[num10] == '0')
-							{
-								flag4 = true;
-							}
-							else if (num10 != num9 + 1 || (format[num10] != '+' && format[num10] != '-'))
-							{
-								if (!flag4)
-								{
-									flag3 = false;
-									break;
-								}
-								break;
-							}
-							num10++;
-						}
-						if (flag3)
-						{
-							num9 = num10 - 1;
-							flag = this.DecimalPointPos < 0;
-							flag2 = !flag;
-							stringBuilder.Append(c2);
-							stringBuilder.Append(sb_exp);
-							sb_exp = null;
-							goto IL_03CC;
-						}
-						stringBuilder.Append(c2);
-						goto IL_03CC;
-						IL_03C3:
-						stringBuilder.Append(c2);
 					}
-					IL_03CC:
+					IL_0474:
 					num9++;
 				}
 				if (!positive)

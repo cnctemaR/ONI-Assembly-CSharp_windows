@@ -2,7 +2,7 @@
 
 namespace System.Collections.Generic
 {
-	public interface IEqualityComparer<in T>
+	public interface IEqualityComparer<T>
 	{
 		bool Equals(T x, T y);
 

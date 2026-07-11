@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeVariableReferenceExpression : CodeExpression
 	{
@@ -11,21 +14,30 @@ namespace System.CodeDom
 
 		public CodeVariableReferenceExpression(string variableName)
 		{
-			this._variableName = variableName;
+			this.variableName = variableName;
 		}
 
 		public string VariableName
 		{
 			get
 			{
-				return this._variableName ?? string.Empty;
+				if (this.variableName == null)
+				{
+					return string.Empty;
+				}
+				return this.variableName;
 			}
 			set
 			{
-				this._variableName = value;
+				this.variableName = value;
 			}
 		}
 
-		private string _variableName;
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private string variableName;
 	}
 }

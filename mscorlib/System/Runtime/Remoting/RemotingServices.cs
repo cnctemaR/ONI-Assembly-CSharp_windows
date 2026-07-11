@@ -23,17 +23,22 @@ using Mono.Interop;
 namespace System.Runtime.Remoting
 {
 	[ComVisible(true)]
-	public static class RemotingServices
+	public sealed class RemotingServices
 	{
+		private RemotingServices()
+		{
+		}
+
 		static RemotingServices()
 		{
-			ISurrogateSelector surrogateSelector = new RemotingSurrogateSelector();
+			RemotingSurrogateSelector remotingSurrogateSelector = new RemotingSurrogateSelector();
 			StreamingContext streamingContext = new StreamingContext(StreamingContextStates.Remoting, null);
-			RemotingServices._serializationFormatter = new BinaryFormatter(surrogateSelector, streamingContext);
+			RemotingServices._serializationFormatter = new BinaryFormatter(remotingSurrogateSelector, streamingContext);
 			RemotingServices._deserializationFormatter = new BinaryFormatter(null, streamingContext);
 			RemotingServices._serializationFormatter.AssemblyFormat = FormatterAssemblyStyle.Full;
 			RemotingServices._deserializationFormatter.AssemblyFormat = FormatterAssemblyStyle.Full;
 			RemotingServices.RegisterInternalChannels();
+			RemotingServices.app_id = Guid.NewGuid().ToString().Replace('-', '_') + "/";
 			RemotingServices.CreateWellKnownServerIdentity(typeof(RemoteActivator), "RemoteActivationService.rem", WellKnownObjectMode.Singleton);
 			RemotingServices.FieldSetterMethod = typeof(object).GetMethod("FieldSetter", BindingFlags.Instance | BindingFlags.NonPublic);
 			RemotingServices.FieldGetterMethod = typeof(object).GetMethod("FieldGetter", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -48,11 +53,6 @@ namespace System.Runtime.Remoting
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsTransparentProxy(object proxy);
-
-		internal static bool ProxyCheckCast(RealProxy rp, RuntimeType castType)
-		{
-			return true;
-		}
 
 		internal static IMethodReturnMessage InternalExecuteMessage(MarshalByRefObject target, IMethodCallMessage reqMsg)
 		{
@@ -73,14 +73,14 @@ namespace System.Runtime.Remoting
 			if (reqMsg.MethodBase.IsGenericMethod)
 			{
 				Type[] genericArguments = reqMsg.MethodBase.GetGenericArguments();
-				methodBase = ((MethodInfo)methodBase).GetGenericMethodDefinition().MakeGenericMethod(genericArguments);
+				methodBase = ((MethodInfo)methodBase).MakeGenericMethod(genericArguments);
 			}
-			LogicalCallContext logicalCallContext = CallContext.SetLogicalCallContext(reqMsg.LogicalCallContext);
+			object obj = CallContext.SetCurrentCallContext(reqMsg.LogicalCallContext);
 			ReturnMessage returnMessage;
 			try
 			{
 				object[] array;
-				object obj = RemotingServices.InternalExecute(methodBase, target, reqMsg.Args, out array);
+				object obj2 = RemotingServices.InternalExecute(methodBase, target, reqMsg.Args, out array);
 				ParameterInfo[] parameters = methodBase.GetParameters();
 				object[] array2 = new object[parameters.Length];
 				int num = 0;
@@ -100,14 +100,13 @@ namespace System.Runtime.Remoting
 						array2[num++] = null;
 					}
 				}
-				LogicalCallContext logicalCallContext2 = Thread.CurrentThread.GetMutableExecutionContext().LogicalCallContext;
-				returnMessage = new ReturnMessage(obj, array2, num, logicalCallContext2, reqMsg);
+				returnMessage = new ReturnMessage(obj2, array2, num, CallContext.CreateLogicalCallContext(true), reqMsg);
 			}
 			catch (Exception ex)
 			{
 				returnMessage = new ReturnMessage(ex, reqMsg);
 			}
-			CallContext.SetLogicalCallContext(logicalCallContext);
+			CallContext.RestoreCallContext(obj);
 			return returnMessage;
 		}
 
@@ -115,7 +114,8 @@ namespace System.Runtime.Remoting
 		{
 			if (RemotingServices.IsTransparentProxy(target))
 			{
-				return (IMethodReturnMessage)RemotingServices.GetRealProxy(target).Invoke(reqMsg);
+				RealProxy realProxy = RemotingServices.GetRealProxy(target);
+				return (IMethodReturnMessage)realProxy.Invoke(reqMsg);
 			}
 			return RemotingServices.InternalExecuteMessage(target, reqMsg);
 		}
@@ -123,13 +123,15 @@ namespace System.Runtime.Remoting
 		[ComVisible(true)]
 		public static object Connect(Type classToProxy, string url)
 		{
-			return RemotingServices.GetRemoteObject(new ObjRef(classToProxy, url, null), classToProxy);
+			ObjRef objRef = new ObjRef(classToProxy, url, null);
+			return RemotingServices.GetRemoteObject(objRef, classToProxy);
 		}
 
 		[ComVisible(true)]
 		public static object Connect(Type classToProxy, string url, object data)
 		{
-			return RemotingServices.GetRemoteObject(new ObjRef(classToProxy, url, data), classToProxy);
+			ObjRef objRef = new ObjRef(classToProxy, url, data);
+			return RemotingServices.GetRemoteObject(objRef, classToProxy);
 		}
 
 		public static bool Disconnect(MarshalByRefObject obj)
@@ -194,7 +196,7 @@ namespace System.Runtime.Remoting
 
 		public static object Unmarshal(ObjRef objectRef, bool fRefine)
 		{
-			Type type = (fRefine ? objectRef.ServerType : typeof(MarshalByRefObject));
+			Type type = ((!fRefine) ? typeof(MarshalByRefObject) : objectRef.ServerType);
 			if (type == null)
 			{
 				type = typeof(MarshalByRefObject);
@@ -205,19 +207,20 @@ namespace System.Runtime.Remoting
 				TrackingServices.NotifyUnmarshaledObject(remoteObject, objectRef);
 				return remoteObject;
 			}
+			object obj;
 			if (type.IsContextful)
 			{
 				ProxyAttribute proxyAttribute = (ProxyAttribute)Attribute.GetCustomAttribute(type, typeof(ProxyAttribute), true);
 				if (proxyAttribute != null)
 				{
-					object transparentProxy = proxyAttribute.CreateProxy(objectRef, type, null, null).GetTransparentProxy();
-					TrackingServices.NotifyUnmarshaledObject(transparentProxy, objectRef);
-					return transparentProxy;
+					obj = proxyAttribute.CreateProxy(objectRef, type, null, null).GetTransparentProxy();
+					TrackingServices.NotifyUnmarshaledObject(obj, objectRef);
+					return obj;
 				}
 			}
-			object proxyForRemoteObject = RemotingServices.GetProxyForRemoteObject(objectRef, type);
-			TrackingServices.NotifyUnmarshaledObject(proxyForRemoteObject, objectRef);
-			return proxyForRemoteObject;
+			obj = RemotingServices.GetProxyForRemoteObject(objectRef, type);
+			TrackingServices.NotifyUnmarshaledObject(obj, objectRef);
+			return obj;
 		}
 
 		public static ObjRef Marshal(MarshalByRefObject Obj)
@@ -294,17 +297,6 @@ namespace System.Runtime.Remoting
 
 		private static string NewUri()
 		{
-			if (RemotingServices.app_id == null)
-			{
-				object obj = RemotingServices.app_id_lock;
-				lock (obj)
-				{
-					if (RemotingServices.app_id == null)
-					{
-						RemotingServices.app_id = Guid.NewGuid().ToString().Replace('-', '_') + "/";
-					}
-				}
-			}
 			int num = Interlocked.Increment(ref RemotingServices.next_id);
 			return string.Concat(new object[]
 			{
@@ -345,11 +337,11 @@ namespace System.Runtime.Remoting
 			MethodBase methodBase;
 			if (signature == null)
 			{
-				methodBase = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				methodBase = type.GetMethod(methodName, RemotingServices.methodBindings);
 			}
 			else
 			{
-				methodBase = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, signature, null);
+				methodBase = type.GetMethod(methodName, RemotingServices.methodBindings, null, signature, null);
 			}
 			if (methodBase != null)
 			{
@@ -365,9 +357,9 @@ namespace System.Runtime.Remoting
 			}
 			if (signature == null)
 			{
-				return type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+				return type.GetConstructor(RemotingServices.methodBindings, null, Type.EmptyTypes, null);
 			}
-			return type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, signature, null);
+			return type.GetConstructor(RemotingServices.methodBindings, null, signature, null);
 		}
 
 		private static MethodBase FindInterfaceMethod(Type type, string methodName, Type[] signature)
@@ -375,20 +367,19 @@ namespace System.Runtime.Remoting
 			MethodBase methodBase;
 			if (signature == null)
 			{
-				methodBase = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+				methodBase = type.GetMethod(methodName, RemotingServices.methodBindings);
 			}
 			else
 			{
-				methodBase = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, signature, null);
+				methodBase = type.GetMethod(methodName, RemotingServices.methodBindings, null, signature, null);
 			}
 			if (methodBase != null)
 			{
 				return methodBase;
 			}
-			Type[] interfaces = type.GetInterfaces();
-			for (int i = 0; i < interfaces.Length; i++)
+			foreach (Type type2 in type.GetInterfaces())
 			{
-				methodBase = RemotingServices.FindInterfaceMethod(interfaces[i], methodName, signature);
+				methodBase = RemotingServices.FindInterfaceMethod(type2, methodName, signature);
 				if (methodBase != null)
 				{
 					return methodBase;
@@ -403,7 +394,8 @@ namespace System.Runtime.Remoting
 			{
 				throw new ArgumentNullException("obj");
 			}
-			RemotingServices.Marshal((MarshalByRefObject)obj).GetObjectData(info, context);
+			ObjRef objRef = RemotingServices.Marshal((MarshalByRefObject)obj);
+			objRef.GetObjectData(info, context);
 		}
 
 		public static ObjRef GetObjRefForProxy(MarshalByRefObject obj)
@@ -434,9 +426,9 @@ namespace System.Runtime.Remoting
 			throw new ArgumentException("obj must be a proxy.", "obj");
 		}
 
-		[MonoTODO]
-		[Conditional("REMOTING_PERF")]
 		[Obsolete("It existed for only internal use in .NET and unimplemented in mono")]
+		[Conditional("REMOTING_PERF")]
+		[MonoTODO]
 		public static void LogRemotingStage(int stage)
 		{
 			throw new NotImplementedException();
@@ -449,14 +441,19 @@ namespace System.Runtime.Remoting
 
 		public static bool IsMethodOverloaded(IMethodMessage msg)
 		{
-			RuntimeType runtimeType = (RuntimeType)msg.MethodBase.DeclaringType;
-			return runtimeType.GetMethodsByName(msg.MethodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, false, runtimeType).Length > 1;
+			MonoType monoType = (MonoType)msg.MethodBase.DeclaringType;
+			return monoType.GetMethodsByName(msg.MethodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, false, monoType).Length > 1;
 		}
 
 		public static bool IsObjectOutOfAppDomain(object tp)
 		{
 			MarshalByRefObject marshalByRefObject = tp as MarshalByRefObject;
-			return marshalByRefObject != null && RemotingServices.GetObjectIdentity(marshalByRefObject) is ClientIdentity;
+			if (marshalByRefObject == null)
+			{
+				return false;
+			}
+			Identity objectIdentity = RemotingServices.GetObjectIdentity(marshalByRefObject);
+			return objectIdentity is ClientIdentity;
 		}
 
 		public static bool IsObjectOutOfContext(object tp)
@@ -527,7 +524,8 @@ namespace System.Runtime.Remoting
 			text += "RemoteActivationService.rem";
 			string text2;
 			RemotingServices.GetClientChannelSinkChain(text, null, out text2);
-			return new RemotingProxy(objectType, text, activationAttributes).GetTransparentProxy();
+			RemotingProxy remotingProxy = new RemotingProxy(objectType, text, activationAttributes);
+			return remotingProxy.GetTransparentProxy();
 		}
 
 		internal static object CreateClientProxy(WellKnownClientTypeEntry entry)
@@ -545,12 +543,14 @@ namespace System.Runtime.Remoting
 					return proxyAttribute.CreateInstance(type);
 				}
 			}
-			return new RemotingProxy(type, ChannelServices.CrossContextUrl, activationAttributes).GetTransparentProxy();
+			RemotingProxy remotingProxy = new RemotingProxy(type, ChannelServices.CrossContextUrl, activationAttributes);
+			return remotingProxy.GetTransparentProxy();
 		}
 
 		internal static object CreateClientProxyForComInterop(Type type)
 		{
-			return ComInteropProxy.CreateProxy(type).GetTransparentProxy();
+			ComInteropProxy comInteropProxy = ComInteropProxy.CreateProxy(type);
+			return comInteropProxy.GetTransparentProxy();
 		}
 
 		internal static Identity GetIdentityForUri(string uri)
@@ -600,7 +600,7 @@ namespace System.Runtime.Remoting
 
 		internal static ClientIdentity GetOrCreateClientIdentity(ObjRef objRef, Type proxyType, out object clientProxy)
 		{
-			object obj = ((objRef.ChannelInfo != null) ? objRef.ChannelInfo.ChannelData : null);
+			object obj = ((objRef.ChannelInfo == null) ? null : objRef.ChannelInfo.ChannelData);
 			string uri;
 			IMessageSink clientChannelSinkChain = RemotingServices.GetClientChannelSinkChain(objRef.URI, obj, out uri);
 			if (uri == null)
@@ -651,9 +651,11 @@ namespace System.Runtime.Remoting
 			}
 			if (url != null)
 			{
-				throw new RemotingException(string.Format("Cannot create channel sink to connect to URL {0}. An appropriate channel has probably not been registered.", url));
+				string text = string.Format("Cannot create channel sink to connect to URL {0}. An appropriate channel has probably not been registered.", url);
+				throw new RemotingException(text);
 			}
-			throw new RemotingException(string.Format("Cannot create channel sink to connect to the remote object. An appropriate channel has probably not been registered.", url));
+			string text2 = string.Format("Cannot create channel sink to connect to the remote object. An appropriate channel has probably not been registered.", url);
+			throw new RemotingException(text2);
 		}
 
 		internal static ClientActivatedIdentity CreateContextBoundObjectIdentity(Type objectType)
@@ -728,16 +730,16 @@ namespace System.Runtime.Remoting
 			return clientActivatedIdentity.GetServerObject();
 		}
 
-		[SecurityPermission(SecurityAction.Assert, SerializationFormatter = true)]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
 		internal static byte[] SerializeCallData(object obj)
 		{
-			LogicalCallContext.Reader logicalCallContext = Thread.CurrentThread.GetExecutionContextReader().LogicalCallContext;
-			if (!logicalCallContext.IsNull)
+			LogicalCallContext logicalCallContext = CallContext.CreateLogicalCallContext(false);
+			if (logicalCallContext != null)
 			{
 				obj = new RemotingServices.CACD
 				{
 					d = obj,
-					c = logicalCallContext.Clone()
+					c = logicalCallContext
 				};
 			}
 			if (obj == null)
@@ -749,7 +751,7 @@ namespace System.Runtime.Remoting
 			return memoryStream.ToArray();
 		}
 
-		[SecurityPermission(SecurityAction.Assert, SerializationFormatter = true)]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
 		internal static object DeserializeCallData(byte[] array)
 		{
 			if (array == null)
@@ -762,27 +764,55 @@ namespace System.Runtime.Remoting
 			{
 				RemotingServices.CACD cacd = (RemotingServices.CACD)obj;
 				obj = cacd.d;
-				LogicalCallContext logicalCallContext = (LogicalCallContext)cacd.c;
-				if (logicalCallContext.HasInfo)
-				{
-					Thread.CurrentThread.GetMutableExecutionContext().LogicalCallContext.Merge(logicalCallContext);
-				}
+				CallContext.UpdateCurrentCallContext((LogicalCallContext)cacd.c);
 			}
 			return obj;
 		}
 
-		[SecurityPermission(SecurityAction.Assert, SerializationFormatter = true)]
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"SerializationFormatter\"/>\n</PermissionSet>\n")]
 		internal static byte[] SerializeExceptionData(Exception ex)
 		{
-			byte[] array = null;
+			byte[] array;
 			try
 			{
+				int num = 4;
+				do
+				{
+					try
+					{
+						MemoryStream memoryStream = new MemoryStream();
+						RemotingServices._serializationFormatter.Serialize(memoryStream, ex);
+						return memoryStream.ToArray();
+					}
+					catch (Exception ex2)
+					{
+						if (ex2 is ThreadAbortException)
+						{
+							Thread.ResetAbort();
+							num = 5;
+							ex = ex2;
+						}
+						else if (num == 2)
+						{
+							ex = new Exception();
+							ex.SetMessage(ex2.Message);
+							ex.SetStackTrace(ex2.StackTrace);
+						}
+						else
+						{
+							ex = ex2;
+						}
+					}
+					num--;
+				}
+				while (num > 0);
+				array = null;
 			}
-			finally
+			catch (Exception ex3)
 			{
-				MemoryStream memoryStream = new MemoryStream();
-				RemotingServices._serializationFormatter.Serialize(memoryStream, ex);
-				array = memoryStream.ToArray();
+				byte[] array2 = RemotingServices.SerializeExceptionData(ex3);
+				Thread.ResetAbort();
+				array = array2;
 			}
 			return array;
 		}
@@ -801,7 +831,9 @@ namespace System.Runtime.Remoting
 			}
 			byte[] array2 = new byte[array.Length];
 			array.CopyTo(array2, 0);
-			return (AppDomain)RemotingServices.Unmarshal((ObjRef)CADSerializer.DeserializeObject(new MemoryStream(array2)));
+			MemoryStream memoryStream = new MemoryStream(array2);
+			ObjRef objRef = (ObjRef)CADSerializer.DeserializeObject(memoryStream);
+			return (AppDomain)RemotingServices.Unmarshal(objRef);
 		}
 
 		private static void RegisterInternalChannels()
@@ -883,13 +915,11 @@ namespace System.Runtime.Remoting
 
 		private static BinaryFormatter _deserializationFormatter;
 
-		private static string app_id;
-
-		private static readonly object app_id_lock = new object();
+		internal static string app_id;
 
 		private static int next_id = 1;
 
-		private const BindingFlags methodBindings = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+		private static readonly BindingFlags methodBindings = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
 		private static readonly MethodInfo FieldSetterMethod;
 

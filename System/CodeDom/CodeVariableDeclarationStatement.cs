@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeVariableDeclarationStatement : CodeStatement
 	{
@@ -11,54 +14,68 @@ namespace System.CodeDom
 
 		public CodeVariableDeclarationStatement(CodeTypeReference type, string name)
 		{
-			this.Type = type;
-			this.Name = name;
+			this.type = type;
+			this.name = name;
 		}
 
 		public CodeVariableDeclarationStatement(string type, string name)
 		{
-			this.Type = new CodeTypeReference(type);
-			this.Name = name;
+			this.type = new CodeTypeReference(type);
+			this.name = name;
 		}
 
 		public CodeVariableDeclarationStatement(Type type, string name)
 		{
-			this.Type = new CodeTypeReference(type);
-			this.Name = name;
+			this.type = new CodeTypeReference(type);
+			this.name = name;
 		}
 
 		public CodeVariableDeclarationStatement(CodeTypeReference type, string name, CodeExpression initExpression)
 		{
-			this.Type = type;
-			this.Name = name;
-			this.InitExpression = initExpression;
+			this.type = type;
+			this.name = name;
+			this.initExpression = initExpression;
 		}
 
 		public CodeVariableDeclarationStatement(string type, string name, CodeExpression initExpression)
 		{
-			this.Type = new CodeTypeReference(type);
-			this.Name = name;
-			this.InitExpression = initExpression;
+			this.type = new CodeTypeReference(type);
+			this.name = name;
+			this.initExpression = initExpression;
 		}
 
 		public CodeVariableDeclarationStatement(Type type, string name, CodeExpression initExpression)
 		{
-			this.Type = new CodeTypeReference(type);
-			this.Name = name;
-			this.InitExpression = initExpression;
+			this.type = new CodeTypeReference(type);
+			this.name = name;
+			this.initExpression = initExpression;
 		}
 
-		public CodeExpression InitExpression { get; set; }
+		public CodeExpression InitExpression
+		{
+			get
+			{
+				return this.initExpression;
+			}
+			set
+			{
+				this.initExpression = value;
+			}
+		}
 
 		public string Name
 		{
 			get
 			{
-				return this._name ?? string.Empty;
+				if (this.name == null)
+				{
+					return string.Empty;
+				}
+				return this.name;
 			}
 			set
 			{
-				this._name = value;
+				this.name = value;
 			}
 		}
 
@@ -66,21 +83,27 @@ namespace System.CodeDom
 		{
 			get
 			{
-				CodeTypeReference codeTypeReference;
-				if ((codeTypeReference = this._type) == null)
+				if (this.type == null)
 				{
-					codeTypeReference = (this._type = new CodeTypeReference(""));
+					this.type = new CodeTypeReference(string.Empty);
 				}
-				return codeTypeReference;
+				return this.type;
 			}
 			set
 			{
-				this._type = value;
+				this.type = value;
 			}
 		}
 
-		private CodeTypeReference _type;
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
 
-		private string _name;
+		private CodeExpression initExpression;
+
+		private CodeTypeReference type;
+
+		private string name;
 	}
 }

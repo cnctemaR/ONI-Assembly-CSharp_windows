@@ -24,12 +24,12 @@ namespace System.Net.NetworkInformation
 
 		public abstract long ResetConnections { get; }
 
+		public abstract long ResetsSent { get; }
+
 		public abstract long SegmentsReceived { get; }
 
 		public abstract long SegmentsResent { get; }
 
 		public abstract long SegmentsSent { get; }
-
-		public abstract long ResetsSent { get; }
 	}
 }

@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security.Permissions;
 using Mono.Security.X509;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-	public sealed class X509Store : IDisposable
+	public sealed class X509Store
 	{
 		public X509Store()
 			: this("MY", StoreLocation.CurrentUser)
@@ -36,19 +37,19 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				throw new ArgumentException("storeLocation");
 			}
-			if (storeName == StoreName.CertificateAuthority)
+			if (storeName != StoreName.CertificateAuthority)
 			{
-				this._name = "CA";
+				this._name = storeName.ToString();
 			}
 			else
 			{
-				this._name = storeName.ToString();
+				this._name = "CA";
 			}
 			this._location = storeLocation;
 		}
 
-		[MonoTODO("Mono's stores are fully managed. All handles are invalid.")]
-		[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+		[global::System.MonoTODO("Mono's stores are fully managed. All handles are invalid.")]
+		[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"UnmanagedCode\"/>\n</PermissionSet>\n")]
 		public X509Store(IntPtr storeHandle)
 		{
 			if (storeHandle == IntPtr.Zero)
@@ -100,15 +101,15 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		private Mono.Security.X509.X509Stores Factory
+		private X509Stores Factory
 		{
 			get
 			{
 				if (this._location == StoreLocation.CurrentUser)
 				{
-					return Mono.Security.X509.X509StoreManager.CurrentUser;
+					return X509StoreManager.CurrentUser;
 				}
-				return Mono.Security.X509.X509StoreManager.LocalMachine;
+				return X509StoreManager.LocalMachine;
 			}
 		}
 
@@ -124,11 +125,11 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			get
 			{
-				return (this._flags & OpenFlags.ReadWrite) == OpenFlags.ReadOnly;
+				return Environment.UnityWebSecurityEnabled || (this._flags & OpenFlags.ReadWrite) == OpenFlags.ReadOnly;
 			}
 		}
 
-		internal Mono.Security.X509.X509Store Store
+		internal X509Store Store
 		{
 			get
 			{
@@ -136,7 +137,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		[MonoTODO("Mono's stores are fully managed. Always returns IntPtr.Zero.")]
+		[global::System.MonoTODO("Mono's stores are fully managed. Always returns IntPtr.Zero.")]
 		public IntPtr StoreHandle
 		{
 			get
@@ -163,7 +164,7 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				try
 				{
-					this.store.Import(new Mono.Security.X509.X509Certificate(certificate.RawData));
+					this.store.Import(new X509Certificate(certificate.RawData));
 				}
 				finally
 				{
@@ -172,7 +173,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		[MonoTODO("Method isn't transactional (like documented)")]
+		[global::System.MonoTODO("Method isn't transactional (like documented)")]
 		public void AddRange(X509Certificate2Collection certificates)
 		{
 			if (certificates == null)
@@ -197,7 +198,7 @@ namespace System.Security.Cryptography.X509Certificates
 				{
 					try
 					{
-						this.store.Import(new Mono.Security.X509.X509Certificate(x509Certificate.RawData));
+						this.store.Import(new X509Certificate(x509Certificate.RawData));
 					}
 					finally
 					{
@@ -216,11 +217,6 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		public void Dispose()
-		{
-			this.Close();
-		}
-
 		public void Open(OpenFlags flags)
 		{
 			if (string.IsNullOrEmpty(this._name))
@@ -229,14 +225,24 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			string name = this._name;
 			string text;
-			if (name == "Root")
+			if (name != null)
 			{
-				text = "Trust";
+				if (X509Store.<>f__switch$map1B == null)
+				{
+					X509Store.<>f__switch$map1B = new Dictionary<string, int>(1) { { "Root", 0 } };
+				}
+				int num;
+				if (X509Store.<>f__switch$map1B.TryGetValue(name, out num))
+				{
+					if (num == 0)
+					{
+						text = "Trust";
+						goto IL_008B;
+					}
+				}
 			}
-			else
-			{
-				text = this._name;
-			}
+			text = this._name;
+			IL_008B:
 			bool flag = (flags & OpenFlags.OpenExistingOnly) != OpenFlags.OpenExistingOnly;
 			this.store = this.Factory.Open(text, flag);
 			if (this.store == null)
@@ -244,11 +250,9 @@ namespace System.Security.Cryptography.X509Certificates
 				throw new CryptographicException(global::Locale.GetText("Store {0} doesn't exists.", new object[] { this._name }));
 			}
 			this._flags = flags;
-			foreach (Mono.Security.X509.X509Certificate x509Certificate in this.store.Certificates)
+			foreach (X509Certificate x509Certificate in this.store.Certificates)
 			{
-				X509Certificate2 x509Certificate2 = new X509Certificate2(x509Certificate.RawData);
-				x509Certificate2.PrivateKey = x509Certificate.RSA;
-				this.Certificates.Add(x509Certificate2);
+				this.Certificates.Add(new X509Certificate2(x509Certificate.RawData));
 			}
 		}
 
@@ -272,7 +276,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			try
 			{
-				this.store.Remove(new Mono.Security.X509.X509Certificate(certificate.RawData));
+				this.store.Remove(new X509Certificate(certificate.RawData));
 			}
 			finally
 			{
@@ -280,7 +284,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 		}
 
-		[MonoTODO("Method isn't transactional (like documented)")]
+		[global::System.MonoTODO("Method isn't transactional (like documented)")]
 		public void RemoveRange(X509Certificate2Collection certificates)
 		{
 			if (certificates == null)
@@ -315,7 +319,7 @@ namespace System.Security.Cryptography.X509Certificates
 			{
 				foreach (X509Certificate2 x509Certificate2 in certificates)
 				{
-					this.store.Remove(new Mono.Security.X509.X509Certificate(x509Certificate2.RawData));
+					this.store.Remove(new X509Certificate(x509Certificate2.RawData));
 				}
 			}
 			finally
@@ -348,6 +352,6 @@ namespace System.Security.Cryptography.X509Certificates
 
 		private OpenFlags _flags;
 
-		private Mono.Security.X509.X509Store store;
+		private X509Store store;
 	}
 }

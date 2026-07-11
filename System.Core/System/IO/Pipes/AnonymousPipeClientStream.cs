@@ -5,19 +5,10 @@ using Microsoft.Win32.SafeHandles;
 
 namespace System.IO.Pipes
 {
-	[global::System.MonoTODO("Anonymous pipes are not working even on win32, due to some access authorization issue")]
-	[HostProtection(SecurityAction.LinkDemand, MayLeakOnAbort = true)]
+	[MonoTODO("Anonymous pipes are not working even on win32, due to some access authorization issue")]
+	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 	public sealed class AnonymousPipeClientStream : PipeStream
 	{
-		private static SafePipeHandle ToSafePipeHandle(string pipeHandleAsString)
-		{
-			if (pipeHandleAsString == null)
-			{
-				throw new ArgumentNullException("pipeHandleAsString");
-			}
-			return new SafePipeHandle(new IntPtr(long.Parse(pipeHandleAsString, NumberFormatInfo.InvariantInfo)), false);
-		}
-
 		public AnonymousPipeClientStream(string pipeHandleAsString)
 			: this(PipeDirection.In, pipeHandleAsString)
 		{
@@ -35,8 +26,13 @@ namespace System.IO.Pipes
 			base.IsConnected = true;
 		}
 
-		~AnonymousPipeClientStream()
+		private static SafePipeHandle ToSafePipeHandle(string pipeHandleAsString)
 		{
+			if (pipeHandleAsString == null)
+			{
+				throw new ArgumentNullException("pipeHandleAsString");
+			}
+			return new SafePipeHandle(new IntPtr(long.Parse(pipeHandleAsString, NumberFormatInfo.InvariantInfo)), false);
 		}
 
 		public override PipeTransmissionMode ReadMode

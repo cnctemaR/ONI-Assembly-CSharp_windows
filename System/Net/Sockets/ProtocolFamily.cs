@@ -11,10 +11,8 @@ namespace System.Net.Sockets
 		ImpLink,
 		Pup,
 		Chaos,
-		NS,
-		Ipx = 6,
+		Ipx,
 		Iso,
-		Osi = 7,
 		Ecma,
 		DataKit,
 		Ccitt,
@@ -34,6 +32,8 @@ namespace System.Net.Sockets
 		Ieee12844,
 		Irda,
 		NetworkDesigners = 28,
-		Max
+		Max,
+		NS = 6,
+		Osi
 	}
 }

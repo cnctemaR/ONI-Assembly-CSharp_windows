@@ -7,7 +7,7 @@ namespace System.Configuration
 	public sealed class DpapiProtectedConfigurationProvider : ProtectedConfigurationProvider
 	{
 		[MonoNotSupported("DpapiProtectedConfigurationProvider depends on the Microsoft Data\nProtection API, and is unimplemented in Mono.  For portability's sake,\nit is suggested that you use the RsaProtectedConfigurationProvider.")]
-		public override XmlNode Decrypt(XmlNode encryptedNode)
+		public override XmlNode Decrypt(XmlNode encrypted_node)
 		{
 			throw new NotSupportedException("DpapiProtectedConfigurationProvider depends on the Microsoft Data\nProtection API, and is unimplemented in Mono.  For portability's sake,\nit is suggested that you use the RsaProtectedConfigurationProvider.");
 		}
@@ -37,8 +37,8 @@ namespace System.Configuration
 			}
 		}
 
-		private bool useMachineProtection;
-
 		private const string NotSupportedReason = "DpapiProtectedConfigurationProvider depends on the Microsoft Data\nProtection API, and is unimplemented in Mono.  For portability's sake,\nit is suggested that you use the RsaProtectedConfigurationProvider.";
+
+		private bool useMachineProtection;
 	}
 }

@@ -1,47 +1,16 @@
 ﻿using System;
 using System.Collections;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class DesignerOptionService : IDesignerOptionService
 	{
-		public DesignerOptionService.DesignerOptionCollection Options
+		protected internal DesignerOptionService()
 		{
-			get
-			{
-				if (this._options == null)
-				{
-					this._options = new DesignerOptionService.DesignerOptionCollection(this, null, string.Empty, null);
-				}
-				return this._options;
-			}
 		}
 
-		protected DesignerOptionService.DesignerOptionCollection CreateOptionCollection(DesignerOptionService.DesignerOptionCollection parent, string name, object value)
-		{
-			if (parent == null)
-			{
-				throw new ArgumentNullException("parent");
-			}
-			if (name == null)
-			{
-				throw new ArgumentNullException("name");
-			}
-			if (name.Length == 0)
-			{
-				throw new ArgumentException(global::SR.GetString("'{1}' is not a valid value for '{0}'.", new object[]
-				{
-					name.Length.ToString(CultureInfo.CurrentCulture),
-					0.ToString(CultureInfo.CurrentCulture)
-				}), "name.Length");
-			}
-			return new DesignerOptionService.DesignerOptionCollection(this, parent, name, value);
-		}
-
-		private PropertyDescriptor GetOptionProperty(string pageName, string valueName)
+		object IDesignerOptionService.GetOptionValue(string pageName, string valueName)
 		{
 			if (pageName == null)
 			{
@@ -51,6 +20,71 @@ namespace System.ComponentModel.Design
 			{
 				throw new ArgumentNullException("valueName");
 			}
+			PropertyDescriptor optionProperty = this.GetOptionProperty(pageName, valueName);
+			if (optionProperty != null)
+			{
+				return optionProperty.GetValue(null);
+			}
+			return null;
+		}
+
+		void IDesignerOptionService.SetOptionValue(string pageName, string valueName, object value)
+		{
+			if (pageName == null)
+			{
+				throw new ArgumentNullException("pageName");
+			}
+			if (valueName == null)
+			{
+				throw new ArgumentNullException("valueName");
+			}
+			PropertyDescriptor optionProperty = this.GetOptionProperty(pageName, valueName);
+			if (optionProperty != null)
+			{
+				optionProperty.SetValue(null, value);
+			}
+		}
+
+		protected DesignerOptionService.DesignerOptionCollection CreateOptionCollection(DesignerOptionService.DesignerOptionCollection parent, string name, object value)
+		{
+			if (name == null)
+			{
+				throw new ArgumentNullException("name");
+			}
+			if (parent == null)
+			{
+				throw new ArgumentNullException("parent");
+			}
+			if (name == string.Empty)
+			{
+				throw new ArgumentException("name.Length == 0");
+			}
+			return new DesignerOptionService.DesignerOptionCollection(parent, name, value, this);
+		}
+
+		protected virtual bool ShowDialog(DesignerOptionService.DesignerOptionCollection options, object optionObject)
+		{
+			return false;
+		}
+
+		protected virtual void PopulateOptionCollection(DesignerOptionService.DesignerOptionCollection options)
+		{
+		}
+
+		public DesignerOptionService.DesignerOptionCollection Options
+		{
+			get
+			{
+				if (this._options == null)
+				{
+					this._options = new DesignerOptionService.DesignerOptionCollection(null, string.Empty, null, this);
+				}
+				return this._options;
+			}
+		}
+
+		private PropertyDescriptor GetOptionProperty(string pageName, string valueName)
+		{
 			string[] array = pageName.Split(new char[] { '\\' });
 			DesignerOptionService.DesignerOptionCollection designerOptionCollection = this.Options;
 			foreach (string text in array)
@@ -64,215 +98,29 @@ namespace System.ComponentModel.Design
 			return designerOptionCollection.Properties[valueName];
 		}
 
-		protected virtual void PopulateOptionCollection(DesignerOptionService.DesignerOptionCollection options)
-		{
-		}
-
-		protected virtual bool ShowDialog(DesignerOptionService.DesignerOptionCollection options, object optionObject)
-		{
-			return false;
-		}
-
-		object IDesignerOptionService.GetOptionValue(string pageName, string valueName)
-		{
-			PropertyDescriptor optionProperty = this.GetOptionProperty(pageName, valueName);
-			if (optionProperty != null)
-			{
-				return optionProperty.GetValue(null);
-			}
-			return null;
-		}
-
-		void IDesignerOptionService.SetOptionValue(string pageName, string valueName, object value)
-		{
-			PropertyDescriptor optionProperty = this.GetOptionProperty(pageName, valueName);
-			if (optionProperty != null)
-			{
-				optionProperty.SetValue(null, value);
-			}
-		}
-
 		private DesignerOptionService.DesignerOptionCollection _options;
 
-		[TypeConverter(typeof(DesignerOptionService.DesignerOptionConverter))]
-		[Editor("", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[TypeConverter(typeof(TypeConverter))]
+		[Editor("", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.MonoTODO("implement own TypeConverter")]
 		public sealed class DesignerOptionCollection : IList, ICollection, IEnumerable
 		{
-			internal DesignerOptionCollection(DesignerOptionService service, DesignerOptionService.DesignerOptionCollection parent, string name, object value)
+			internal DesignerOptionCollection(DesignerOptionService.DesignerOptionCollection parent, string name, object propertiesProvider, DesignerOptionService service)
 			{
-				this._service = service;
-				this._parent = parent;
 				this._name = name;
-				this._value = value;
-				if (this._parent != null)
+				this._propertiesProvider = propertiesProvider;
+				this._parent = parent;
+				if (parent != null)
 				{
-					if (this._parent._children == null)
+					if (parent._children == null)
 					{
-						this._parent._children = new ArrayList(1);
+						parent._children = new ArrayList();
 					}
-					this._parent._children.Add(this);
+					parent._children.Add(this);
 				}
-			}
-
-			public int Count
-			{
-				get
-				{
-					this.EnsurePopulated();
-					return this._children.Count;
-				}
-			}
-
-			public string Name
-			{
-				get
-				{
-					return this._name;
-				}
-			}
-
-			public DesignerOptionService.DesignerOptionCollection Parent
-			{
-				get
-				{
-					return this._parent;
-				}
-			}
-
-			public PropertyDescriptorCollection Properties
-			{
-				get
-				{
-					if (this._properties == null)
-					{
-						ArrayList arrayList;
-						if (this._value != null)
-						{
-							PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(this._value);
-							arrayList = new ArrayList(properties.Count);
-							using (IEnumerator enumerator = properties.GetEnumerator())
-							{
-								while (enumerator.MoveNext())
-								{
-									object obj = enumerator.Current;
-									PropertyDescriptor propertyDescriptor = (PropertyDescriptor)obj;
-									arrayList.Add(new DesignerOptionService.DesignerOptionCollection.WrappedPropertyDescriptor(propertyDescriptor, this._value));
-								}
-								goto IL_0076;
-							}
-						}
-						arrayList = new ArrayList(1);
-						IL_0076:
-						this.EnsurePopulated();
-						foreach (object obj2 in this._children)
-						{
-							DesignerOptionService.DesignerOptionCollection designerOptionCollection = (DesignerOptionService.DesignerOptionCollection)obj2;
-							arrayList.AddRange(designerOptionCollection.Properties);
-						}
-						PropertyDescriptor[] array = (PropertyDescriptor[])arrayList.ToArray(typeof(PropertyDescriptor));
-						this._properties = new PropertyDescriptorCollection(array, true);
-					}
-					return this._properties;
-				}
-			}
-
-			public DesignerOptionService.DesignerOptionCollection this[int index]
-			{
-				get
-				{
-					this.EnsurePopulated();
-					if (index < 0 || index >= this._children.Count)
-					{
-						throw new IndexOutOfRangeException("index");
-					}
-					return (DesignerOptionService.DesignerOptionCollection)this._children[index];
-				}
-			}
-
-			public DesignerOptionService.DesignerOptionCollection this[string name]
-			{
-				get
-				{
-					this.EnsurePopulated();
-					foreach (object obj in this._children)
-					{
-						DesignerOptionService.DesignerOptionCollection designerOptionCollection = (DesignerOptionService.DesignerOptionCollection)obj;
-						if (string.Compare(designerOptionCollection.Name, name, true, CultureInfo.InvariantCulture) == 0)
-						{
-							return designerOptionCollection;
-						}
-					}
-					return null;
-				}
-			}
-
-			public void CopyTo(Array array, int index)
-			{
-				this.EnsurePopulated();
-				this._children.CopyTo(array, index);
-			}
-
-			private void EnsurePopulated()
-			{
-				if (this._children == null)
-				{
-					this._service.PopulateOptionCollection(this);
-					if (this._children == null)
-					{
-						this._children = new ArrayList(1);
-					}
-				}
-			}
-
-			public IEnumerator GetEnumerator()
-			{
-				this.EnsurePopulated();
-				return this._children.GetEnumerator();
-			}
-
-			public int IndexOf(DesignerOptionService.DesignerOptionCollection value)
-			{
-				this.EnsurePopulated();
-				return this._children.IndexOf(value);
-			}
-
-			private static object RecurseFindValue(DesignerOptionService.DesignerOptionCollection options)
-			{
-				if (options._value != null)
-				{
-					return options._value;
-				}
-				foreach (object obj in options)
-				{
-					object obj2 = DesignerOptionService.DesignerOptionCollection.RecurseFindValue((DesignerOptionService.DesignerOptionCollection)obj);
-					if (obj2 != null)
-					{
-						return obj2;
-					}
-				}
-				return null;
-			}
-
-			public bool ShowDialog()
-			{
-				object obj = DesignerOptionService.DesignerOptionCollection.RecurseFindValue(this);
-				return obj != null && this._service.ShowDialog(this, obj);
-			}
-
-			bool ICollection.IsSynchronized
-			{
-				get
-				{
-					return false;
-				}
-			}
-
-			object ICollection.SyncRoot
-			{
-				get
-				{
-					return this;
-				}
+				this._children = new ArrayList();
+				this._optionService = service;
+				service.PopulateOptionCollection(this);
 			}
 
 			bool IList.IsFixedSize
@@ -303,34 +151,38 @@ namespace System.ComponentModel.Design
 				}
 			}
 
-			int IList.Add(object value)
+			bool ICollection.IsSynchronized
+			{
+				get
+				{
+					return false;
+				}
+			}
+
+			object ICollection.SyncRoot
+			{
+				get
+				{
+					return this;
+				}
+			}
+
+			bool IList.Contains(object item)
+			{
+				return this._children.Contains(item);
+			}
+
+			int IList.IndexOf(object item)
+			{
+				return this._children.IndexOf(item);
+			}
+
+			int IList.Add(object item)
 			{
 				throw new NotSupportedException();
 			}
 
-			void IList.Clear()
-			{
-				throw new NotSupportedException();
-			}
-
-			bool IList.Contains(object value)
-			{
-				this.EnsurePopulated();
-				return this._children.Contains(value);
-			}
-
-			int IList.IndexOf(object value)
-			{
-				this.EnsurePopulated();
-				return this._children.IndexOf(value);
-			}
-
-			void IList.Insert(int index, object value)
-			{
-				throw new NotSupportedException();
-			}
-
-			void IList.Remove(object value)
+			void IList.Remove(object item)
 			{
 				throw new NotSupportedException();
 			}
@@ -340,40 +192,153 @@ namespace System.ComponentModel.Design
 				throw new NotSupportedException();
 			}
 
-			private DesignerOptionService _service;
+			void IList.Insert(int index, object item)
+			{
+				throw new NotSupportedException();
+			}
 
-			private DesignerOptionService.DesignerOptionCollection _parent;
+			void IList.Clear()
+			{
+				throw new NotSupportedException();
+			}
+
+			public bool ShowDialog()
+			{
+				return this._optionService.ShowDialog(this, this._propertiesProvider);
+			}
+
+			public DesignerOptionService.DesignerOptionCollection this[int index]
+			{
+				get
+				{
+					return (DesignerOptionService.DesignerOptionCollection)this._children[index];
+				}
+			}
+
+			public DesignerOptionService.DesignerOptionCollection this[string index]
+			{
+				get
+				{
+					foreach (object obj in this._children)
+					{
+						DesignerOptionService.DesignerOptionCollection designerOptionCollection = (DesignerOptionService.DesignerOptionCollection)obj;
+						if (string.Compare(designerOptionCollection.Name, index, true, CultureInfo.InvariantCulture) == 0)
+						{
+							return designerOptionCollection;
+						}
+					}
+					return null;
+				}
+			}
+
+			public string Name
+			{
+				get
+				{
+					return this._name;
+				}
+			}
+
+			public int Count
+			{
+				get
+				{
+					if (this._children != null)
+					{
+						return this._children.Count;
+					}
+					return 0;
+				}
+			}
+
+			public DesignerOptionService.DesignerOptionCollection Parent
+			{
+				get
+				{
+					return this._parent;
+				}
+			}
+
+			public PropertyDescriptorCollection Properties
+			{
+				get
+				{
+					PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(this._propertiesProvider);
+					ArrayList arrayList = new ArrayList(properties.Count);
+					foreach (object obj in properties)
+					{
+						PropertyDescriptor propertyDescriptor = (PropertyDescriptor)obj;
+						arrayList.Add(new DesignerOptionService.DesignerOptionCollection.WrappedPropertyDescriptor(propertyDescriptor, this._propertiesProvider));
+					}
+					PropertyDescriptor[] array = (PropertyDescriptor[])arrayList.ToArray(typeof(PropertyDescriptor));
+					return new PropertyDescriptorCollection(array);
+				}
+			}
+
+			public IEnumerator GetEnumerator()
+			{
+				return this._children.GetEnumerator();
+			}
+
+			public int IndexOf(DesignerOptionService.DesignerOptionCollection item)
+			{
+				return this._children.IndexOf(item);
+			}
+
+			public void CopyTo(Array array, int index)
+			{
+				this._children.CopyTo(array, index);
+			}
 
 			private string _name;
 
-			private object _value;
+			private object _propertiesProvider;
+
+			private DesignerOptionService.DesignerOptionCollection _parent;
 
 			private ArrayList _children;
 
-			private PropertyDescriptorCollection _properties;
+			private DesignerOptionService _optionService;
 
-			private sealed class WrappedPropertyDescriptor : PropertyDescriptor
+			public sealed class WrappedPropertyDescriptor : PropertyDescriptor
 			{
-				internal WrappedPropertyDescriptor(PropertyDescriptor property, object target)
-					: base(property.Name, null)
+				public WrappedPropertyDescriptor(PropertyDescriptor property, object component)
+					: base(property.Name, new Attribute[0])
 				{
-					this.property = property;
-					this.target = target;
+					this._property = property;
+					this._component = component;
+				}
+
+				public override object GetValue(object ignored)
+				{
+					return this._property.GetValue(this._component);
+				}
+
+				public override void SetValue(object ignored, object value)
+				{
+					this._property.SetValue(this._component, value);
+				}
+
+				public override bool CanResetValue(object ignored)
+				{
+					return this._property.CanResetValue(this._component);
+				}
+
+				public override void ResetValue(object ignored)
+				{
+					this._property.ResetValue(this._component);
+				}
+
+				public override bool ShouldSerializeValue(object ignored)
+				{
+					return this._property.ShouldSerializeValue(this._component);
 				}
 
 				public override AttributeCollection Attributes
 				{
 					get
 					{
-						return this.property.Attributes;
-					}
-				}
-
-				public override Type ComponentType
-				{
-					get
-					{
-						return this.property.ComponentType;
+						return this._property.Attributes;
 					}
 				}
 
@@ -381,107 +346,15 @@ namespace System.ComponentModel.Design
 				{
 					get
 					{
-						return this.property.IsReadOnly;
+						return this._property.IsReadOnly;
 					}
-				}
-
-				public override Type PropertyType
-				{
-					get
-					{
-						return this.property.PropertyType;
-					}
-				}
-
-				public override bool CanResetValue(object component)
-				{
-					return this.property.CanResetValue(this.target);
-				}
-
-				public override object GetValue(object component)
-				{
-					return this.property.GetValue(this.target);
-				}
-
-				public override void ResetValue(object component)
-				{
-					this.property.ResetValue(this.target);
-				}
-
-				public override void SetValue(object component, object value)
-				{
-					this.property.SetValue(this.target, value);
-				}
-
-				public override bool ShouldSerializeValue(object component)
-				{
-					return this.property.ShouldSerializeValue(this.target);
-				}
-
-				private object target;
-
-				private PropertyDescriptor property;
-			}
-		}
-
-		internal sealed class DesignerOptionConverter : TypeConverter
-		{
-			public override bool GetPropertiesSupported(ITypeDescriptorContext cxt)
-			{
-				return true;
-			}
-
-			public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext cxt, object value, Attribute[] attributes)
-			{
-				PropertyDescriptorCollection propertyDescriptorCollection = new PropertyDescriptorCollection(null);
-				DesignerOptionService.DesignerOptionCollection designerOptionCollection = value as DesignerOptionService.DesignerOptionCollection;
-				if (designerOptionCollection == null)
-				{
-					return propertyDescriptorCollection;
-				}
-				foreach (object obj in designerOptionCollection)
-				{
-					DesignerOptionService.DesignerOptionCollection designerOptionCollection2 = (DesignerOptionService.DesignerOptionCollection)obj;
-					propertyDescriptorCollection.Add(new DesignerOptionService.DesignerOptionConverter.OptionPropertyDescriptor(designerOptionCollection2));
-				}
-				foreach (object obj2 in designerOptionCollection.Properties)
-				{
-					PropertyDescriptor propertyDescriptor = (PropertyDescriptor)obj2;
-					propertyDescriptorCollection.Add(propertyDescriptor);
-				}
-				return propertyDescriptorCollection;
-			}
-
-			public override object ConvertTo(ITypeDescriptorContext cxt, CultureInfo culture, object value, Type destinationType)
-			{
-				if (destinationType == typeof(string))
-				{
-					return global::SR.GetString("(Collection)");
-				}
-				return base.ConvertTo(cxt, culture, value, destinationType);
-			}
-
-			private class OptionPropertyDescriptor : PropertyDescriptor
-			{
-				internal OptionPropertyDescriptor(DesignerOptionService.DesignerOptionCollection option)
-					: base(option.Name, null)
-				{
-					this._option = option;
 				}
 
 				public override Type ComponentType
 				{
 					get
 					{
-						return this._option.GetType();
-					}
-				}
-
-				public override bool IsReadOnly
-				{
-					get
-					{
-						return true;
+						return this._property.ComponentType;
 					}
 				}
 
@@ -489,34 +362,13 @@ namespace System.ComponentModel.Design
 				{
 					get
 					{
-						return this._option.GetType();
+						return this._property.PropertyType;
 					}
 				}
 
-				public override bool CanResetValue(object component)
-				{
-					return false;
-				}
+				private PropertyDescriptor _property;
 
-				public override object GetValue(object component)
-				{
-					return this._option;
-				}
-
-				public override void ResetValue(object component)
-				{
-				}
-
-				public override void SetValue(object component, object value)
-				{
-				}
-
-				public override bool ShouldSerializeValue(object component)
-				{
-					return false;
-				}
-
-				private DesignerOptionService.DesignerOptionCollection _option;
+				private object _component;
 			}
 		}
 	}

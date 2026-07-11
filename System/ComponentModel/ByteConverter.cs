@@ -1,38 +1,36 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ByteConverter : BaseNumberConverter
 	{
-		internal override Type TargetType
+		public ByteConverter()
+		{
+			this.InnerType = typeof(byte);
+		}
+
+		internal override bool SupportHex
 		{
 			get
 			{
-				return typeof(byte);
+				return true;
 			}
 		}
 
-		internal override object FromString(string value, int radix)
+		internal override string ConvertToString(object value, NumberFormatInfo format)
 		{
-			return Convert.ToByte(value, radix);
+			return ((byte)value).ToString("G", format);
 		}
 
-		internal override object FromString(string value, NumberFormatInfo formatInfo)
+		internal override object ConvertFromString(string value, NumberFormatInfo format)
 		{
-			return byte.Parse(value, NumberStyles.Integer, formatInfo);
+			return byte.Parse(value, NumberStyles.Integer, format);
 		}
 
-		internal override object FromString(string value, CultureInfo culture)
+		internal override object ConvertFromString(string value, int fromBase)
 		{
-			return byte.Parse(value, culture);
-		}
-
-		internal override string ToString(object value, NumberFormatInfo formatInfo)
-		{
-			return ((byte)value).ToString("G", formatInfo);
+			return Convert.ToByte(value, fromBase);
 		}
 	}
 }

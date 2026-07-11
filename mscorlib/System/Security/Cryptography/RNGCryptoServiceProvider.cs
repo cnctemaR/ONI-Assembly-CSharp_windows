@@ -8,14 +8,6 @@ namespace System.Security.Cryptography
 	[ComVisible(true)]
 	public sealed class RNGCryptoServiceProvider : RandomNumberGenerator
 	{
-		static RNGCryptoServiceProvider()
-		{
-			if (RNGCryptoServiceProvider.RngOpen())
-			{
-				RNGCryptoServiceProvider._lock = new object();
-			}
-		}
-
 		public RNGCryptoServiceProvider()
 		{
 			this._handle = RNGCryptoServiceProvider.RngInitialize(null);
@@ -45,6 +37,14 @@ namespace System.Security.Cryptography
 				this._handle = RNGCryptoServiceProvider.RngInitialize(Encoding.UTF8.GetBytes(str));
 			}
 			this.Check();
+		}
+
+		static RNGCryptoServiceProvider()
+		{
+			if (RNGCryptoServiceProvider.RngOpen())
+			{
+				RNGCryptoServiceProvider._lock = new object();
+			}
 		}
 
 		private void Check()
@@ -100,14 +100,16 @@ namespace System.Security.Cryptography
 			{
 				this._handle = RNGCryptoServiceProvider.RngGetBytes(this._handle, array);
 				this.Check();
-				int num = 0;
-				while (num < array.Length && i != data.Length)
+				for (int j = 0; j < array.Length; j++)
 				{
-					if (array[num] != 0)
+					if (i == data.Length)
 					{
-						data[i++] = array[num];
+						break;
 					}
-					num++;
+					if (array[j] != 0)
+					{
+						data[i++] = array[j];
+					}
 				}
 			}
 		}
@@ -119,11 +121,6 @@ namespace System.Security.Cryptography
 				RNGCryptoServiceProvider.RngClose(this._handle);
 				this._handle = IntPtr.Zero;
 			}
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			base.Dispose(disposing);
 		}
 
 		private static object _lock;

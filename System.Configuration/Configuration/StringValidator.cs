@@ -46,9 +46,13 @@ namespace System.Configuration
 			{
 				throw new ArgumentException("The string must be no more than " + this.maxLength + " characters long.");
 			}
-			if (this.invalidCharacters != null && text.IndexOfAny(this.invalidCharacters) != -1)
+			if (this.invalidCharacters != null)
 			{
-				throw new ArgumentException(string.Format("The string cannot contain any of the following characters: '{0}'.", this.invalidCharacters));
+				int num = text.IndexOfAny(this.invalidCharacters);
+				if (num != -1)
+				{
+					throw new ArgumentException(string.Format("The string cannot contain any of the following characters: '{0}'.", this.invalidCharacters));
+				}
 			}
 		}
 

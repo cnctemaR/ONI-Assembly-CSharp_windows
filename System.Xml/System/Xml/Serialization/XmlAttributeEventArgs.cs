@@ -4,21 +4,12 @@ namespace System.Xml.Serialization
 {
 	public class XmlAttributeEventArgs : EventArgs
 	{
-		internal XmlAttributeEventArgs(XmlAttribute attr, int lineNumber, int linePosition, object o, string qnames)
+		internal XmlAttributeEventArgs(XmlAttribute attr, int lineNum, int linePos, object source)
 		{
 			this.attr = attr;
-			this.o = o;
-			this.qnames = qnames;
-			this.lineNumber = lineNumber;
-			this.linePosition = linePosition;
-		}
-
-		public object ObjectBeingDeserialized
-		{
-			get
-			{
-				return this.o;
-			}
+			this.lineNumber = lineNum;
+			this.linePosition = linePos;
+			this.obj = source;
 		}
 
 		public XmlAttribute Attr
@@ -45,26 +36,34 @@ namespace System.Xml.Serialization
 			}
 		}
 
+		public object ObjectBeingDeserialized
+		{
+			get
+			{
+				return this.obj;
+			}
+		}
+
 		public string ExpectedAttributes
 		{
 			get
 			{
-				if (this.qnames != null)
-				{
-					return this.qnames;
-				}
-				return string.Empty;
+				return this.expectedAttributes;
+			}
+			internal set
+			{
+				this.expectedAttributes = value;
 			}
 		}
 
-		private object o;
-
 		private XmlAttribute attr;
-
-		private string qnames;
 
 		private int lineNumber;
 
 		private int linePosition;
+
+		private object obj;
+
+		private string expectedAttributes;
 	}
 }

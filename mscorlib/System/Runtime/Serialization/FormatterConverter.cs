@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace System.Runtime.Serialization
@@ -9,38 +8,111 @@ namespace System.Runtime.Serialization
 	{
 		public object Convert(object value, Type type)
 		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
+			return global::System.Convert.ChangeType(value, type);
 		}
 
 		public object Convert(object value, TypeCode typeCode)
 		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ChangeType(value, typeCode, CultureInfo.InvariantCulture);
+			return global::System.Convert.ChangeType(value, typeCode);
 		}
 
 		public bool ToBoolean(object value)
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException("value is null.");
 			}
-			return global::System.Convert.ToBoolean(value, CultureInfo.InvariantCulture);
+			return global::System.Convert.ToBoolean(value);
+		}
+
+		public byte ToByte(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToByte(value);
 		}
 
 		public char ToChar(object value)
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException("value is null.");
 			}
-			return global::System.Convert.ToChar(value, CultureInfo.InvariantCulture);
+			return global::System.Convert.ToChar(value);
+		}
+
+		public DateTime ToDateTime(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToDateTime(value);
+		}
+
+		public decimal ToDecimal(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToDecimal(value);
+		}
+
+		public double ToDouble(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToDouble(value);
+		}
+
+		public short ToInt16(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToInt16(value);
+		}
+
+		public int ToInt32(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToInt32(value);
+		}
+
+		public long ToInt64(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToInt64(value);
+		}
+
+		public float ToSingle(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToSingle(value);
+		}
+
+		public string ToString(object value)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException("value is null.");
+			}
+			return global::System.Convert.ToString(value);
 		}
 
 		[CLSCompliant(false)]
@@ -48,27 +120,9 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException("value is null.");
 			}
-			return global::System.Convert.ToSByte(value, CultureInfo.InvariantCulture);
-		}
-
-		public byte ToByte(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToByte(value, CultureInfo.InvariantCulture);
-		}
-
-		public short ToInt16(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToInt16(value, CultureInfo.InvariantCulture);
+			return global::System.Convert.ToSByte(value);
 		}
 
 		[CLSCompliant(false)]
@@ -76,18 +130,9 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException("value is null.");
 			}
-			return global::System.Convert.ToUInt16(value, CultureInfo.InvariantCulture);
-		}
-
-		public int ToInt32(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToInt32(value, CultureInfo.InvariantCulture);
+			return global::System.Convert.ToUInt16(value);
 		}
 
 		[CLSCompliant(false)]
@@ -95,18 +140,9 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException("value is null.");
 			}
-			return global::System.Convert.ToUInt32(value, CultureInfo.InvariantCulture);
-		}
-
-		public long ToInt64(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToInt64(value, CultureInfo.InvariantCulture);
+			return global::System.Convert.ToUInt32(value);
 		}
 
 		[CLSCompliant(false)]
@@ -114,54 +150,9 @@ namespace System.Runtime.Serialization
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException("value");
+				throw new ArgumentNullException("value is null.");
 			}
-			return global::System.Convert.ToUInt64(value, CultureInfo.InvariantCulture);
-		}
-
-		public float ToSingle(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToSingle(value, CultureInfo.InvariantCulture);
-		}
-
-		public double ToDouble(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToDouble(value, CultureInfo.InvariantCulture);
-		}
-
-		public decimal ToDecimal(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToDecimal(value, CultureInfo.InvariantCulture);
-		}
-
-		public DateTime ToDateTime(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToDateTime(value, CultureInfo.InvariantCulture);
-		}
-
-		public string ToString(object value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			return global::System.Convert.ToString(value, CultureInfo.InvariantCulture);
+			return global::System.Convert.ToUInt64(value);
 		}
 	}
 }

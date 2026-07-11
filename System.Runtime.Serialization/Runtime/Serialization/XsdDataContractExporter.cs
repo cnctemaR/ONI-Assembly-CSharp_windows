@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.IO;
 using System.Reflection;
-using System.Runtime.Serialization.Diagnostics;
 using System.Xml;
 using System.Xml.Schema;
 
@@ -20,6 +18,19 @@ namespace System.Runtime.Serialization
 			this.schemas = schemas;
 		}
 
+		public XmlSchemaSet Schemas
+		{
+			get
+			{
+				if (this.schemas == null)
+				{
+					this.schemas = new XmlSchemaSet();
+					this.schemas.Add(XsdDataContractExporter.MSTypesSchema);
+				}
+				return this.schemas;
+			}
+		}
+
 		public ExportOptions Options
 		{
 			get
@@ -32,376 +43,149 @@ namespace System.Runtime.Serialization
 			}
 		}
 
-		public XmlSchemaSet Schemas
+		public bool CanExport(ICollection<Type> types)
 		{
-			get
+			foreach (Type type in types)
 			{
-				XmlSchemaSet schemaSet = this.GetSchemaSet();
-				SchemaImporter.CompileSchemaSet(schemaSet);
-				return schemaSet;
-			}
-		}
-
-		private XmlSchemaSet GetSchemaSet()
-		{
-			if (this.schemas == null)
-			{
-				this.schemas = new XmlSchemaSet();
-				this.schemas.XmlResolver = null;
-			}
-			return this.schemas;
-		}
-
-		private DataContractSet DataContractSet
-		{
-			get
-			{
-				if (this.dataContractSet == null)
+				if (!this.CanExport(type))
 				{
-					this.dataContractSet = new DataContractSet((this.Options == null) ? null : this.Options.GetSurrogate());
+					return false;
 				}
-				return this.dataContractSet;
 			}
+			return true;
 		}
 
-		private void TraceExportBegin()
+		public bool CanExport(ICollection<Assembly> assemblies)
 		{
-			if (DiagnosticUtility.ShouldTraceInformation)
+			foreach (Assembly assembly in assemblies)
 			{
-				TraceUtility.Trace(TraceEventType.Information, 196616, global::System.Runtime.Serialization.SR.GetString("XSD export begins"));
+				foreach (Module module in assembly.GetModules())
+				{
+					foreach (Type type in module.GetTypes())
+					{
+						if (!this.CanExport(type))
+						{
+							return false;
+						}
+					}
+				}
 			}
+			return true;
 		}
 
-		private void TraceExportEnd()
+		public bool CanExport(Type type)
 		{
-			if (DiagnosticUtility.ShouldTraceInformation)
-			{
-				TraceUtility.Trace(TraceEventType.Information, 196617, global::System.Runtime.Serialization.SR.GetString("XSD export ends"));
-			}
+			return !this.KnownTypes.GetQName(type).IsEmpty;
 		}
 
-		private void TraceExportError(Exception exception)
+		public void Export(ICollection<Type> types)
 		{
-			if (DiagnosticUtility.ShouldTraceError)
+			foreach (Type type in types)
 			{
-				TraceUtility.Trace(TraceEventType.Error, 196620, global::System.Runtime.Serialization.SR.GetString("XSD export error"), null, exception);
+				this.Export(type);
 			}
 		}
 
 		public void Export(ICollection<Assembly> assemblies)
 		{
-			if (assemblies == null)
+			foreach (Assembly assembly in assemblies)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("assemblies"));
-			}
-			this.TraceExportBegin();
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			try
-			{
-				foreach (Assembly assembly in assemblies)
+				foreach (Module module in assembly.GetModules())
 				{
-					if (assembly == null)
+					foreach (Type type in module.GetTypes())
 					{
-						throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Cannot export null assembly.", new object[] { "assemblies" })));
-					}
-					Type[] types = assembly.GetTypes();
-					for (int i = 0; i < types.Length; i++)
-					{
-						this.CheckAndAddType(types[i]);
+						this.Export(type);
 					}
 				}
-				this.Export();
 			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceExportError(ex);
-				throw;
-			}
-			this.TraceExportEnd();
 		}
 
-		public void Export(ICollection<Type> types)
-		{
-			if (types == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("types"));
-			}
-			this.TraceExportBegin();
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			try
-			{
-				foreach (Type type in types)
-				{
-					if (type == null)
-					{
-						throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Cannot export null type.", new object[] { "types" })));
-					}
-					this.AddType(type);
-				}
-				this.Export();
-			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceExportError(ex);
-				throw;
-			}
-			this.TraceExportEnd();
-		}
-
+		[MonoTODO]
 		public void Export(Type type)
 		{
-			if (type == null)
+			this.KnownTypes.Add(type);
+			SerializationMap serializationMap = this.KnownTypes.FindUserMap(type);
+			if (serializationMap == null)
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("type"));
+				return;
 			}
-			this.TraceExportBegin();
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			try
+			serializationMap.GetSchemaType(this.Schemas, this.GeneratedTypes);
+			this.Schemas.Compile();
+		}
+
+		[MonoTODO]
+		public XmlQualifiedName GetRootElementName(Type type)
+		{
+			throw new NotImplementedException();
+		}
+
+		[MonoTODO]
+		public XmlSchemaType GetSchemaType(Type type)
+		{
+			SerializationMap serializationMap = this.KnownTypes.FindUserMap(type);
+			if (serializationMap == null)
 			{
-				this.AddType(type);
-				this.Export();
+				return null;
 			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceExportError(ex);
-				throw;
-			}
-			this.TraceExportEnd();
+			return serializationMap.GetSchemaType(this.Schemas, this.GeneratedTypes);
 		}
 
 		public XmlQualifiedName GetSchemaTypeName(Type type)
 		{
-			if (type == null)
+			XmlQualifiedName qname = this.KnownTypes.GetQName(type);
+			if (qname.Namespace == "http://schemas.microsoft.com/2003/10/Serialization/")
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("type"));
+				return new XmlQualifiedName(qname.Name, "http://www.w3.org/2001/XMLSchema");
 			}
-			type = this.GetSurrogatedType(type);
-			DataContract dataContract = DataContract.GetDataContract(type);
-			DataContractSet.EnsureTypeNotGeneric(dataContract.UnderlyingType);
-			XmlDataContract xmlDataContract = dataContract as XmlDataContract;
-			if (xmlDataContract != null && xmlDataContract.IsAnonymous)
-			{
-				return XmlQualifiedName.Empty;
-			}
-			return dataContract.StableName;
+			return qname;
 		}
 
-		public XmlSchemaType GetSchemaType(Type type)
+		private KnownTypeCollection KnownTypes
 		{
-			if (type == null)
+			get
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("type"));
-			}
-			type = this.GetSurrogatedType(type);
-			DataContract dataContract = DataContract.GetDataContract(type);
-			DataContractSet.EnsureTypeNotGeneric(dataContract.UnderlyingType);
-			XmlDataContract xmlDataContract = dataContract as XmlDataContract;
-			if (xmlDataContract != null && xmlDataContract.IsAnonymous)
-			{
-				return xmlDataContract.XsdType;
-			}
-			return null;
-		}
-
-		public XmlQualifiedName GetRootElementName(Type type)
-		{
-			if (type == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("type"));
-			}
-			type = this.GetSurrogatedType(type);
-			DataContract dataContract = DataContract.GetDataContract(type);
-			DataContractSet.EnsureTypeNotGeneric(dataContract.UnderlyingType);
-			if (dataContract.HasRoot)
-			{
-				return new XmlQualifiedName(dataContract.TopLevelElementName.Value, dataContract.TopLevelElementNamespace.Value);
-			}
-			return null;
-		}
-
-		private Type GetSurrogatedType(Type type)
-		{
-			IDataContractSurrogate surrogate;
-			if (this.options != null && (surrogate = this.Options.GetSurrogate()) != null)
-			{
-				type = DataContractSurrogateCaller.GetDataContractType(surrogate, type);
-			}
-			return type;
-		}
-
-		private void CheckAndAddType(Type type)
-		{
-			type = this.GetSurrogatedType(type);
-			if (!type.ContainsGenericParameters && DataContract.IsTypeSerializable(type))
-			{
-				this.AddType(type);
-			}
-		}
-
-		private void AddType(Type type)
-		{
-			this.DataContractSet.Add(type);
-		}
-
-		private void Export()
-		{
-			this.AddKnownTypes();
-			new SchemaExporter(this.GetSchemaSet(), this.DataContractSet).Export();
-		}
-
-		private void AddKnownTypes()
-		{
-			if (this.Options != null)
-			{
-				Collection<Type> knownTypes = this.Options.KnownTypes;
-				if (knownTypes != null)
+				if (this.known_types == null)
 				{
-					for (int i = 0; i < knownTypes.Count; i++)
-					{
-						Type type = knownTypes[i];
-						if (type == null)
-						{
-							throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Cannot export null known type.")));
-						}
-						this.AddType(type);
-					}
+					this.known_types = new KnownTypeCollection();
 				}
+				return this.known_types;
 			}
 		}
 
-		public bool CanExport(ICollection<Assembly> assemblies)
+		private Dictionary<XmlQualifiedName, XmlSchemaType> GeneratedTypes
 		{
-			if (assemblies == null)
+			get
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("assemblies"));
-			}
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			bool flag;
-			try
-			{
-				foreach (Assembly assembly in assemblies)
+				if (this.generated_schema_types == null)
 				{
-					if (assembly == null)
-					{
-						throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Cannot export null assembly.", new object[] { "assemblies" })));
-					}
-					Type[] types = assembly.GetTypes();
-					for (int i = 0; i < types.Length; i++)
-					{
-						this.CheckAndAddType(types[i]);
-					}
+					this.generated_schema_types = new Dictionary<XmlQualifiedName, XmlSchemaType>();
 				}
-				this.AddKnownTypes();
-				flag = true;
+				return this.generated_schema_types;
 			}
-			catch (InvalidDataContractException)
-			{
-				this.dataContractSet = dataContractSet;
-				flag = false;
-			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceExportError(ex);
-				throw;
-			}
-			return flag;
 		}
 
-		public bool CanExport(ICollection<Type> types)
+		private static XmlSchema MSTypesSchema
 		{
-			if (types == null)
+			get
 			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("types"));
-			}
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			bool flag;
-			try
-			{
-				foreach (Type type in types)
+				if (XsdDataContractExporter.mstypes_schema == null)
 				{
-					if (type == null)
-					{
-						throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentException(global::System.Runtime.Serialization.SR.GetString("Cannot export null type.", new object[] { "types" })));
-					}
-					this.AddType(type);
+					Assembly callingAssembly = Assembly.GetCallingAssembly();
+					Stream manifestResourceStream = callingAssembly.GetManifestResourceStream("mstypes.schema");
+					XsdDataContractExporter.mstypes_schema = XmlSchema.Read(manifestResourceStream, null);
 				}
-				this.AddKnownTypes();
-				flag = true;
+				return XsdDataContractExporter.mstypes_schema;
 			}
-			catch (InvalidDataContractException)
-			{
-				this.dataContractSet = dataContractSet;
-				flag = false;
-			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceExportError(ex);
-				throw;
-			}
-			return flag;
-		}
-
-		public bool CanExport(Type type)
-		{
-			if (type == null)
-			{
-				throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(new ArgumentNullException("type"));
-			}
-			DataContractSet dataContractSet = ((this.dataContractSet == null) ? null : new DataContractSet(this.dataContractSet));
-			bool flag;
-			try
-			{
-				this.AddType(type);
-				this.AddKnownTypes();
-				flag = true;
-			}
-			catch (InvalidDataContractException)
-			{
-				this.dataContractSet = dataContractSet;
-				flag = false;
-			}
-			catch (Exception ex)
-			{
-				if (Fx.IsFatal(ex))
-				{
-					throw;
-				}
-				this.dataContractSet = dataContractSet;
-				this.TraceExportError(ex);
-				throw;
-			}
-			return flag;
 		}
 
 		private ExportOptions options;
 
+		private KnownTypeCollection known_types;
+
 		private XmlSchemaSet schemas;
 
-		private DataContractSet dataContractSet;
+		private Dictionary<XmlQualifiedName, XmlSchemaType> generated_schema_types;
+
+		private static XmlSchema mstypes_schema;
 	}
 }

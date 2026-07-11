@@ -6,6 +6,10 @@ namespace System.Configuration.Internal
 	[ComVisible(false)]
 	public interface IInternalConfigRoot
 	{
+		event InternalConfigEventHandler ConfigChanged;
+
+		event InternalConfigEventHandler ConfigRemoved;
+
 		IInternalConfigRecord GetConfigRecord(string configPath);
 
 		object GetSection(string section, string configPath);
@@ -19,9 +23,5 @@ namespace System.Configuration.Internal
 		bool IsDesignTime { get; }
 
 		void RemoveConfig(string configPath);
-
-		event InternalConfigEventHandler ConfigChanged;
-
-		event InternalConfigEventHandler ConfigRemoved;
 	}
 }

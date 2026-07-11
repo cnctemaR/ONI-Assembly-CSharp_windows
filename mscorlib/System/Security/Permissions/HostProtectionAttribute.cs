@@ -18,7 +18,8 @@ namespace System.Security.Permissions
 		{
 			if (action != SecurityAction.LinkDemand)
 			{
-				throw new ArgumentException(string.Format(Locale.GetText("Only {0} is accepted."), SecurityAction.LinkDemand), "action");
+				string text = string.Format(Locale.GetText("Only {0} is accepted."), SecurityAction.LinkDemand);
+				throw new ArgumentException(text, "action");
 			}
 		}
 
@@ -26,16 +27,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.ExternalProcessMgmt) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.ExternalProcessMgmt) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.ExternalProcessMgmt;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.ExternalProcessMgmt;
+				else
+				{
+					this._resources &= ~HostProtectionResource.ExternalProcessMgmt;
+				}
 			}
 		}
 
@@ -43,16 +46,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.ExternalThreading) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.ExternalThreading) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.ExternalThreading;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.ExternalThreading;
+				else
+				{
+					this._resources &= ~HostProtectionResource.ExternalThreading;
+				}
 			}
 		}
 
@@ -60,16 +65,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.MayLeakOnAbort) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.MayLeakOnAbort) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.MayLeakOnAbort;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.MayLeakOnAbort;
+				else
+				{
+					this._resources &= ~HostProtectionResource.MayLeakOnAbort;
+				}
 			}
 		}
 
@@ -78,16 +85,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.SecurityInfrastructure) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.SecurityInfrastructure) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.SecurityInfrastructure;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.SecurityInfrastructure;
+				else
+				{
+					this._resources &= ~HostProtectionResource.SecurityInfrastructure;
+				}
 			}
 		}
 
@@ -95,16 +104,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.SelfAffectingProcessMgmt) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.SelfAffectingProcessMgmt) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.SelfAffectingProcessMgmt;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.SelfAffectingProcessMgmt;
+				else
+				{
+					this._resources &= ~HostProtectionResource.SelfAffectingProcessMgmt;
+				}
 			}
 		}
 
@@ -112,16 +123,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.SelfAffectingThreading) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.SelfAffectingThreading) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.SelfAffectingThreading;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.SelfAffectingThreading;
+				else
+				{
+					this._resources &= ~HostProtectionResource.SelfAffectingThreading;
+				}
 			}
 		}
 
@@ -129,16 +142,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.SharedState) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.SharedState) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.SharedState;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.SharedState;
+				else
+				{
+					this._resources &= ~HostProtectionResource.SharedState;
+				}
 			}
 		}
 
@@ -146,16 +161,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.Synchronization) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.Synchronization) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.Synchronization;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.Synchronization;
+				else
+				{
+					this._resources &= ~HostProtectionResource.Synchronization;
+				}
 			}
 		}
 
@@ -163,16 +180,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._resources & HostProtectionResource.UI) > HostProtectionResource.None;
+				return (this._resources & HostProtectionResource.UI) != HostProtectionResource.None;
 			}
 			set
 			{
 				if (value)
 				{
 					this._resources |= HostProtectionResource.UI;
-					return;
 				}
-				this._resources &= ~HostProtectionResource.UI;
+				else
+				{
+					this._resources &= ~HostProtectionResource.UI;
+				}
 			}
 		}
 

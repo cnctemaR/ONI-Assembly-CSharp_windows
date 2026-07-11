@@ -22,6 +22,7 @@ namespace System.Net.NetworkInformation
 
 		public abstract long OutgoingPacketsWithErrors { get; }
 
+		[global::System.MonoTODO("Not implemented for Linux")]
 		public abstract long OutputQueueLength { get; }
 
 		public abstract long UnicastPacketsReceived { get; }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -30,10 +29,14 @@ public class WaterCoolerConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddPrefabTag(RoomConstraints.ConstraintTags.RecBuilding);
 		Prioritizable.AddRef(go);
 		Storage storage = go.AddOrGet<Storage>();
-		storage.storageFilters = new List<Tag> { GameTags.Water };
-		storage.showInUI = true;
-		storage.showDescriptor = true;
 		storage.capacityKg = 10f;
+		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
+		manualDeliveryKG.SetStorage(storage);
+		manualDeliveryKG.requestedItemTag = GameTags.Water;
+		manualDeliveryKG.capacity = 10f;
+		manualDeliveryKG.refillMass = 10f;
+		manualDeliveryKG.minimumMass = 1f;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
 		go.AddOrGet<WaterCooler>();
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;

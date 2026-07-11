@@ -12,19 +12,19 @@ namespace System.Security.Policy
 			this.e = collection.GetEnumerator();
 		}
 
-		public ApplicationTrust Current
-		{
-			get
-			{
-				return (ApplicationTrust)this.e.Current;
-			}
-		}
-
 		object IEnumerator.Current
 		{
 			get
 			{
 				return this.e.Current;
+			}
+		}
+
+		public ApplicationTrust Current
+		{
+			get
+			{
+				return (ApplicationTrust)this.e.Current;
 			}
 		}
 

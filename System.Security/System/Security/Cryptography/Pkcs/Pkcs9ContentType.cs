@@ -7,13 +7,13 @@ namespace System.Security.Cryptography.Pkcs
 	{
 		public Pkcs9ContentType()
 		{
-			base.Oid = new Oid("1.2.840.113549.1.9.3", "Content Type");
+			this.Oid = new Oid("1.2.840.113549.1.9.3", "Content Type");
 			this._encoded = null;
 		}
 
 		internal Pkcs9ContentType(string contentType)
 		{
-			base.Oid = new Oid("1.2.840.113549.1.9.3", "Content Type");
+			this.Oid = new Oid("1.2.840.113549.1.9.3", "Content Type");
 			this._contentType = new Oid(contentType);
 			base.RawData = this.Encode();
 			this._encoded = null;
@@ -25,7 +25,7 @@ namespace System.Security.Cryptography.Pkcs
 			{
 				throw new ArgumentNullException("encodedContentType");
 			}
-			base.Oid = new Oid("1.2.840.113549.1.9.3", "Content Type");
+			this.Oid = new Oid("1.2.840.113549.1.9.3", "Content Type");
 			base.RawData = encodedContentType;
 			this.Decode(encodedContentType);
 		}

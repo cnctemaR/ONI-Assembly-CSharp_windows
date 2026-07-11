@@ -1,36 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace System.Globalization
 {
 	[ComVisible(true)]
 	[Serializable]
-	[StructLayout(LayoutKind.Sequential)]
 	public class RegionInfo
 	{
-		public static RegionInfo CurrentRegion
-		{
-			get
-			{
-				RegionInfo regionInfo = RegionInfo.currentRegion;
-				if (regionInfo == null)
-				{
-					CultureInfo currentCulture = CultureInfo.CurrentCulture;
-					if (currentCulture != null)
-					{
-						regionInfo = new RegionInfo(currentCulture);
-					}
-					if (Interlocked.CompareExchange<RegionInfo>(ref RegionInfo.currentRegion, regionInfo, null) != null)
-					{
-						regionInfo = RegionInfo.currentRegion;
-					}
-				}
-				return regionInfo;
-			}
-		}
-
 		public RegionInfo(int culture)
 		{
 			if (!this.GetByTerritory(CultureInfo.GetCultureInfo(culture)))
@@ -47,6 +25,7 @@ namespace System.Globalization
 			}
 			if (this.construct_internal_region_from_name(name.ToUpperInvariant()))
 			{
+				this.lcid = name.GetHashCode();
 				return;
 			}
 			if (!this.GetByTerritory(CultureInfo.GetCultureInfo(name)))
@@ -55,25 +34,21 @@ namespace System.Globalization
 			}
 		}
 
-		private RegionInfo(CultureInfo ci)
+		public static RegionInfo CurrentRegion
 		{
-			if (ci.LCID == 127)
+			get
 			{
-				this.regionId = 244;
-				this.iso2Name = "IV";
-				this.iso3Name = "ivc";
-				this.win3Name = "IVC";
-				this.nativeName = (this.englishName = "Invariant Country");
-				this.currencySymbol = "¤";
-				this.isoCurrencySymbol = "XDR";
-				this.currencyEnglishName = (this.currencyNativeName = "International Monetary Fund");
-				return;
+				if (RegionInfo.currentRegion == null)
+				{
+					CultureInfo currentCulture = CultureInfo.CurrentCulture;
+					if (currentCulture == null || CultureInfo.BootstrapCultureID == 127)
+					{
+						return null;
+					}
+					RegionInfo.currentRegion = new RegionInfo(CultureInfo.BootstrapCultureID);
+				}
+				return RegionInfo.currentRegion;
 			}
-			if (ci.Territory == null)
-			{
-				throw new NotImplementedException("Neutral region info");
-			}
-			this.construct_internal_region_from_name(ci.Territory.ToUpperInvariant());
 		}
 
 		private bool GetByTerritory(CultureInfo ci)
@@ -82,7 +57,12 @@ namespace System.Globalization
 			{
 				throw new Exception("INTERNAL ERROR: should not happen.");
 			}
-			return !ci.IsNeutralCulture && ci.Territory != null && this.construct_internal_region_from_name(ci.Territory.ToUpperInvariant());
+			if (ci.IsNeutralCulture || ci.Territory == null)
+			{
+				return false;
+			}
+			this.lcid = ci.LCID;
+			return this.construct_internal_region_from_name(ci.Territory.ToUpperInvariant());
 		}
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -136,7 +116,26 @@ namespace System.Globalization
 			get
 			{
 				string text = this.iso2Name;
-				return !(text == "US") && !(text == "UK");
+				if (text != null)
+				{
+					if (RegionInfo.<>f__switch$map1D == null)
+					{
+						RegionInfo.<>f__switch$map1D = new Dictionary<string, int>(2)
+						{
+							{ "US", 0 },
+							{ "UK", 0 }
+						};
+					}
+					int num;
+					if (RegionInfo.<>f__switch$map1D.TryGetValue(text, out num))
+					{
+						if (num == 0)
+						{
+							return false;
+						}
+					}
+				}
+				return true;
 			}
 		}
 
@@ -153,16 +152,17 @@ namespace System.Globalization
 		{
 			get
 			{
-				return this.nativeName;
+				return this.DisplayName;
 			}
 		}
 
+		[MonoTODO("Not implemented")]
 		[ComVisible(false)]
 		public virtual string CurrencyNativeName
 		{
 			get
 			{
-				return this.currencyNativeName;
+				throw new NotImplementedException();
 			}
 		}
 
@@ -201,12 +201,12 @@ namespace System.Globalization
 		public override bool Equals(object value)
 		{
 			RegionInfo regionInfo = value as RegionInfo;
-			return regionInfo != null && this.Name == regionInfo.Name;
+			return regionInfo != null && this.lcid == regionInfo.lcid;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.Name.GetHashCode();
+			return (int)((ulong)int.MinValue + (ulong)((long)((long)this.regionId << 3)) + (ulong)((long)this.regionId));
 		}
 
 		public override string ToString()
@@ -214,12 +214,9 @@ namespace System.Globalization
 			return this.Name;
 		}
 
-		internal static void ClearCachedData()
-		{
-			RegionInfo.currentRegion = null;
-		}
-
 		private static RegionInfo currentRegion;
+
+		private int lcid;
 
 		private int regionId;
 
@@ -231,14 +228,10 @@ namespace System.Globalization
 
 		private string englishName;
 
-		private string nativeName;
-
 		private string currencySymbol;
 
 		private string isoCurrencySymbol;
 
 		private string currencyEnglishName;
-
-		private string currencyNativeName;
 	}
 }

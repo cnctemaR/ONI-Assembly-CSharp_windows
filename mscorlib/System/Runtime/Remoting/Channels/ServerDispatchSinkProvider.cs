@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace System.Runtime.Remoting.Channels
 {
-	internal class ServerDispatchSinkProvider : IServerFormatterSinkProvider, IServerChannelSinkProvider
+	internal class ServerDispatchSinkProvider : IServerChannelSinkProvider, IServerFormatterSinkProvider
 	{
 		public ServerDispatchSinkProvider()
 		{

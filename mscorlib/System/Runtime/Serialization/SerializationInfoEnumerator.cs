@@ -7,39 +7,16 @@ namespace System.Runtime.Serialization
 	[ComVisible(true)]
 	public sealed class SerializationInfoEnumerator : IEnumerator
 	{
-		internal SerializationInfoEnumerator(string[] members, object[] info, Type[] types, int numItems)
+		internal SerializationInfoEnumerator(ArrayList list)
 		{
-			this.m_members = members;
-			this.m_data = info;
-			this.m_types = types;
-			this.m_numItems = numItems - 1;
-			this.m_currItem = -1;
-			this.m_current = false;
-		}
-
-		public bool MoveNext()
-		{
-			if (this.m_currItem < this.m_numItems)
-			{
-				this.m_currItem++;
-				this.m_current = true;
-			}
-			else
-			{
-				this.m_current = false;
-			}
-			return this.m_current;
+			this.enumerator = list.GetEnumerator();
 		}
 
 		object IEnumerator.Current
 		{
 			get
 			{
-				if (!this.m_current)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-				}
-				return new SerializationEntry(this.m_members[this.m_currItem], this.m_data[this.m_currItem], this.m_types[this.m_currItem]);
+				return this.enumerator.Current;
 			}
 		}
 
@@ -47,41 +24,16 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				if (!this.m_current)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-				}
-				return new SerializationEntry(this.m_members[this.m_currItem], this.m_data[this.m_currItem], this.m_types[this.m_currItem]);
+				return (SerializationEntry)this.enumerator.Current;
 			}
-		}
-
-		public void Reset()
-		{
-			this.m_currItem = -1;
-			this.m_current = false;
 		}
 
 		public string Name
 		{
 			get
 			{
-				if (!this.m_current)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-				}
-				return this.m_members[this.m_currItem];
-			}
-		}
-
-		public object Value
-		{
-			get
-			{
-				if (!this.m_current)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-				}
-				return this.m_data[this.m_currItem];
+				SerializationEntry serializationEntry = this.Current;
+				return serializationEntry.Name;
 			}
 		}
 
@@ -89,24 +41,30 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				if (!this.m_current)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Enumeration has either not started or has already finished."));
-				}
-				return this.m_types[this.m_currItem];
+				SerializationEntry serializationEntry = this.Current;
+				return serializationEntry.ObjectType;
 			}
 		}
 
-		private string[] m_members;
+		public object Value
+		{
+			get
+			{
+				SerializationEntry serializationEntry = this.Current;
+				return serializationEntry.Value;
+			}
+		}
 
-		private object[] m_data;
+		public bool MoveNext()
+		{
+			return this.enumerator.MoveNext();
+		}
 
-		private Type[] m_types;
+		public void Reset()
+		{
+			this.enumerator.Reset();
+		}
 
-		private int m_numItems;
-
-		private int m_currItem;
-
-		private bool m_current;
+		private IEnumerator enumerator;
 	}
 }

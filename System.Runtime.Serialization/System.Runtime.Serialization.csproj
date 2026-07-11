@@ -1,252 +1,72 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{1E5D8D43-4B95-4088-B569-06A3F1844D39}</ProjectGuid>
+    <ProjectGuid>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Runtime.Serialization</AssemblyName>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <FileAlignment>512</FileAlignment>
-    <TargetFramework>net40</TargetFramework>
+    <TargetFramework>net35</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <EnableDefaultItems>False</EnableDefaultItems>
   </PropertyGroup>
   <PropertyGroup />
   <ItemGroup>
-    <Compile Include="LocalAppContextSwitches.cs" />
+    <Compile Include="Consts.cs" />
+    <Compile Include="Locale.cs" />
+    <Compile Include="MonoDocumentationNoteAttribute.cs" />
+    <Compile Include="MonoExtensionAttribute.cs" />
+    <Compile Include="MonoInternalNoteAttribute.cs" />
+    <Compile Include="MonoLimitationAttribute.cs" />
+    <Compile Include="MonoNotSupportedAttribute.cs" />
+    <Compile Include="MonoTODOAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Runtime\CompilerServices\FriendAccessAllowedAttribute.cs" />
-    <Compile Include="Runtime\Serialization\AppSettings.cs" />
-    <Compile Include="Runtime\Serialization\AsmxCharDataContract.cs" />
-    <Compile Include="Runtime\Serialization\AsmxGuidDataContract.cs" />
-    <Compile Include="Runtime\Serialization\AttributeData.cs" />
-    <Compile Include="Runtime\Serialization\Attributes.cs" />
-    <Compile Include="Runtime\Serialization\BitFlagsGenerator.cs" />
-    <Compile Include="Runtime\Serialization\BooleanDataContract.cs" />
-    <Compile Include="Runtime\Serialization\ByteArrayDataContract.cs" />
-    <Compile Include="Runtime\Serialization\CharDataContract.cs" />
-    <Compile Include="Runtime\Serialization\ClassDataContract.cs" />
-    <Compile Include="Runtime\Serialization\ClassDataNode.cs" />
-    <Compile Include="Runtime\Serialization\CodeExporter.cs" />
-    <Compile Include="Runtime\Serialization\CodeInterpreter.cs" />
-    <Compile Include="Runtime\Serialization\CollectionDataContract.cs" />
+    <Compile Include="Runtime\Serialization\CollectionContractTypeMap.cs" />
     <Compile Include="Runtime\Serialization\CollectionDataContractAttribute.cs" />
-    <Compile Include="Runtime\Serialization\CollectionDataNode.cs" />
-    <Compile Include="Runtime\Serialization\CollectionKind.cs" />
-    <Compile Include="Runtime\Serialization\Configuration\ConfigurationStrings.cs" />
-    <Compile Include="Runtime\Serialization\Configuration\DataContractSerializerSection.cs" />
+    <Compile Include="Runtime\Serialization\CollectionTypeMap.cs" />
     <Compile Include="Runtime\Serialization\Configuration\DeclaredTypeElement.cs" />
     <Compile Include="Runtime\Serialization\Configuration\DeclaredTypeElementCollection.cs" />
-    <Compile Include="Runtime\Serialization\Configuration\DeclaredTypeValidator.cs" />
-    <Compile Include="Runtime\Serialization\Configuration\DeclaredTypeValidatorAttribute.cs" />
-    <Compile Include="Runtime\Serialization\Configuration\NetDataContractSerializerSection.cs" />
     <Compile Include="Runtime\Serialization\Configuration\ParameterElement.cs" />
     <Compile Include="Runtime\Serialization\Configuration\ParameterElementCollection.cs" />
     <Compile Include="Runtime\Serialization\Configuration\SerializationSectionGroup.cs" />
     <Compile Include="Runtime\Serialization\Configuration\TypeElement.cs" />
     <Compile Include="Runtime\Serialization\Configuration\TypeElementCollection.cs" />
-    <Compile Include="Runtime\Serialization\ContractCodeDomInfo.cs" />
+    <Compile Include="Runtime\Serialization\Configuration\XmlFormatterSection.cs" />
     <Compile Include="Runtime\Serialization\ContractNamespaceAttribute.cs" />
-    <Compile Include="Runtime\Serialization\CreateXmlSerializableDelegate.cs" />
-    <Compile Include="Runtime\Serialization\DataContract.cs" />
     <Compile Include="Runtime\Serialization\DataContractAttribute.cs" />
-    <Compile Include="Runtime\Serialization\DataContractPairKey.cs" />
-    <Compile Include="Runtime\Serialization\DataContractResolver.cs" />
     <Compile Include="Runtime\Serialization\DataContractSerializer.cs" />
-    <Compile Include="Runtime\Serialization\DataContractSerializerSettings.cs" />
-    <Compile Include="Runtime\Serialization\DataContractSet.cs" />
-    <Compile Include="Runtime\Serialization\DataContractSurrogateCaller.cs" />
-    <Compile Include="Runtime\Serialization\DataMember.cs" />
     <Compile Include="Runtime\Serialization\DataMemberAttribute.cs" />
-    <Compile Include="Runtime\Serialization\DataNode.cs" />
-    <Compile Include="Runtime\Serialization\DateDataContract.cs" />
-    <Compile Include="Runtime\Serialization\DateTimeDataContract.cs" />
-    <Compile Include="Runtime\Serialization\DateTimeFormat.cs" />
-    <Compile Include="Runtime\Serialization\DateTimeOffsetAdapter.cs" />
-    <Compile Include="Runtime\Serialization\DecimalDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Diagnostics\Application\TD.cs" />
-    <Compile Include="Runtime\Serialization\Diagnostics\TraceCode.cs" />
-    <Compile Include="Runtime\Serialization\Diagnostics\TraceUtility.cs" />
-    <Compile Include="Runtime\Serialization\DiagnosticUtility.cs" />
-    <Compile Include="Runtime\Serialization\DictionaryGlobals.cs" />
-    <Compile Include="Runtime\Serialization\DoubleDataContract.cs" />
-    <Compile Include="Runtime\Serialization\ElementData.cs" />
-    <Compile Include="Runtime\Serialization\EmitTypeInformation.cs" />
-    <Compile Include="Runtime\Serialization\ENTITIESDataContract.cs" />
-    <Compile Include="Runtime\Serialization\ENTITYDataContract.cs" />
-    <Compile Include="Runtime\Serialization\EnumDataContract.cs" />
+    <Compile Include="Runtime\Serialization\DataMemberInfo.cs" />
+    <Compile Include="Runtime\Serialization\DefaultTypeMap.cs" />
+    <Compile Include="Runtime\Serialization\DictionaryTypeMap.cs" />
+    <Compile Include="Runtime\Serialization\EnumMap.cs" />
     <Compile Include="Runtime\Serialization\EnumMemberAttribute.cs" />
+    <Compile Include="Runtime\Serialization\EnumMemberInfo.cs" />
     <Compile Include="Runtime\Serialization\ExportOptions.cs" />
-    <Compile Include="Runtime\Serialization\ExtensionDataMember.cs" />
     <Compile Include="Runtime\Serialization\ExtensionDataObject.cs" />
-    <Compile Include="Runtime\Serialization\ExtensionDataReader.cs" />
-    <Compile Include="Runtime\Serialization\FloatDataContract.cs" />
-    <Compile Include="Runtime\Serialization\FxTrace.cs" />
-    <Compile Include="Runtime\Serialization\GDayDataContract.cs" />
-    <Compile Include="Runtime\Serialization\GenericInfo.cs" />
-    <Compile Include="Runtime\Serialization\GenericNameProvider.cs" />
-    <Compile Include="Runtime\Serialization\GenericParameterDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Globals.cs" />
-    <Compile Include="Runtime\Serialization\GMonthDataContract.cs" />
-    <Compile Include="Runtime\Serialization\GMonthDayDataContract.cs" />
-    <Compile Include="Runtime\Serialization\GuidDataContract.cs" />
-    <Compile Include="Runtime\Serialization\GYearDataContract.cs" />
-    <Compile Include="Runtime\Serialization\GYearMonthDataContract.cs" />
-    <Compile Include="Runtime\Serialization\HexBinaryDataContract.cs" />
-    <Compile Include="Runtime\Serialization\HybridObjectCache.cs" />
+    <Compile Include="Runtime\Serialization\ICollectionTypeMap.cs" />
     <Compile Include="Runtime\Serialization\IDataContractSurrogate.cs" />
-    <Compile Include="Runtime\Serialization\IDataNode.cs" />
-    <Compile Include="Runtime\Serialization\IDDataContract.cs" />
-    <Compile Include="Runtime\Serialization\IDREFDataContract.cs" />
-    <Compile Include="Runtime\Serialization\IDREFSDataContract.cs" />
     <Compile Include="Runtime\Serialization\IExtensibleDataObject.cs" />
-    <Compile Include="Runtime\Serialization\IGenericNameProvider.cs" />
     <Compile Include="Runtime\Serialization\IgnoreDataMemberAttribute.cs" />
     <Compile Include="Runtime\Serialization\ImportOptions.cs" />
-    <Compile Include="Runtime\Serialization\IntDataContract.cs" />
-    <Compile Include="Runtime\Serialization\IntegerDataContract.cs" />
-    <Compile Include="Runtime\Serialization\IntRef.cs" />
     <Compile Include="Runtime\Serialization\InvalidDataContractException.cs" />
-    <Compile Include="Runtime\Serialization\ISerializableDataMember.cs" />
-    <Compile Include="Runtime\Serialization\ISerializableDataNode.cs" />
-    <Compile Include="Runtime\Serialization\JsonFormatGeneratorStatics.cs" />
-    <Compile Include="Runtime\Serialization\Json\ByteArrayHelperWithString.cs" />
-    <Compile Include="Runtime\Serialization\Json\DataContractJsonSerializer.cs" />
-    <Compile Include="Runtime\Serialization\Json\DataContractJsonSerializerSettings.cs" />
-    <Compile Include="Runtime\Serialization\Json\IXmlJsonReaderInitializer.cs" />
-    <Compile Include="Runtime\Serialization\Json\IXmlJsonWriterInitializer.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonByteArrayDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonClassDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonCollectionDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonEncodingStreamWrapper.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonEnumDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatClassReaderDelegate.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatClassWriterDelegate.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatCollectionReaderDelegate.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatCollectionWriterDelegate.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatGetOnlyCollectionReaderDelegate.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatReaderGenerator.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatReaderInterpreter.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatWriterGenerator.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonFormatWriterInterpreter.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonGlobals.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonNodeType.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonObjectDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonQNameDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonReaderDelegator.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonReaderWriterFactory.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonStringDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonUriDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonWriterDelegator.cs" />
-    <Compile Include="Runtime\Serialization\Json\JsonXmlDataContract.cs" />
-    <Compile Include="Runtime\Serialization\Json\XmlJsonReader.cs" />
-    <Compile Include="Runtime\Serialization\Json\XmlJsonWriter.cs" />
-    <Compile Include="Runtime\Serialization\Json\XmlObjectSerializerReadContextComplexJson.cs" />
-    <Compile Include="Runtime\Serialization\Json\XmlObjectSerializerWriteContextComplexJson.cs" />
-    <Compile Include="Runtime\Serialization\KeyValue.cs" />
     <Compile Include="Runtime\Serialization\KnownTypeAttribute.cs" />
-    <Compile Include="Runtime\Serialization\KnownTypeDataContractResolver.cs" />
-    <Compile Include="Runtime\Serialization\LanguageDataContract.cs" />
-    <Compile Include="Runtime\Serialization\LongDataContract.cs" />
-    <Compile Include="Runtime\Serialization\NameDataContract.cs" />
-    <Compile Include="Runtime\Serialization\NCNameDataContract.cs" />
-    <Compile Include="Runtime\Serialization\NegativeIntegerDataContract.cs" />
+    <Compile Include="Runtime\Serialization\KnownTypeCollection.cs" />
     <Compile Include="Runtime\Serialization\NetDataContractSerializer.cs" />
-    <Compile Include="Runtime\Serialization\NMTOKENDataContract.cs" />
-    <Compile Include="Runtime\Serialization\NMTOKENSDataContract.cs" />
-    <Compile Include="Runtime\Serialization\NonNegativeIntegerDataContract.cs" />
-    <Compile Include="Runtime\Serialization\NonPositiveIntegerDataContract.cs" />
-    <Compile Include="Runtime\Serialization\NormalizedStringDataContract.cs" />
-    <Compile Include="Runtime\Serialization\ObjectDataContract.cs" />
-    <Compile Include="Runtime\Serialization\ObjectReferenceStack.cs" />
-    <Compile Include="Runtime\Serialization\ObjectToIdCache.cs" />
-    <Compile Include="Runtime\Serialization\PositiveIntegerDataContract.cs" />
-    <Compile Include="Runtime\Serialization\PrimitiveDataContract.cs" />
-    <Compile Include="Runtime\Serialization\QNameDataContract.cs" />
-    <Compile Include="Runtime\Serialization\SchemaExporter.cs" />
-    <Compile Include="Runtime\Serialization\SchemaHelper.cs" />
-    <Compile Include="Runtime\Serialization\SchemaImporter.cs" />
-    <Compile Include="Runtime\Serialization\SchemaObjectInfo.cs" />
-    <Compile Include="Runtime\Serialization\ScopedKnownTypes.cs" />
-    <Compile Include="Runtime\Serialization\SerializationMode.cs" />
-    <Compile Include="Runtime\Serialization\SerializationTrace.cs" />
-    <Compile Include="Runtime\Serialization\ShortDataContract.cs" />
-    <Compile Include="Runtime\Serialization\SignedByteDataContract.cs" />
-    <Compile Include="Runtime\Serialization\SpecialTypeDataContract.cs" />
-    <Compile Include="Runtime\Serialization\SR.cs" />
-    <Compile Include="Runtime\Serialization\StringDataContract.cs" />
-    <Compile Include="Runtime\Serialization\SurrogateDataContract.cs" />
-    <Compile Include="Runtime\Serialization\TimeDataContract.cs" />
-    <Compile Include="Runtime\Serialization\TimeSpanDataContract.cs" />
-    <Compile Include="Runtime\Serialization\TokenDataContract.cs" />
-    <Compile Include="Runtime\Serialization\TypeHandleRef.cs" />
-    <Compile Include="Runtime\Serialization\TypeHandleRefEqualityComparer.cs" />
-    <Compile Include="Runtime\Serialization\TypeInformation.cs" />
-    <Compile Include="Runtime\Serialization\UnsignedByteDataContract.cs" />
-    <Compile Include="Runtime\Serialization\UnsignedIntDataContract.cs" />
-    <Compile Include="Runtime\Serialization\UnsignedLongDataContract.cs" />
-    <Compile Include="Runtime\Serialization\UnsignedShortDataContract.cs" />
-    <Compile Include="Runtime\Serialization\UriDataContract.cs" />
-    <Compile Include="Runtime\Serialization\XmlDataContract.cs" />
-    <Compile Include="Runtime\Serialization\XmlDataContractInterpreter.cs" />
-    <Compile Include="Runtime\Serialization\XmlDataNode.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatClassReaderDelegate.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatClassWriterDelegate.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatCollectionReaderDelegate.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatCollectionWriterDelegate.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatGeneratorStatics.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatGetOnlyCollectionReaderDelegate.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatReaderGenerator.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatReaderInterpreter.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatWriterGenerator.cs" />
-    <Compile Include="Runtime\Serialization\XmlFormatWriterInterpreter.cs" />
+    <Compile Include="Runtime\Serialization\SerializationMap.cs" />
+    <Compile Include="Runtime\Serialization\SharedContractMap.cs" />
+    <Compile Include="Runtime\Serialization\SharedTypeMap.cs" />
+    <Compile Include="Runtime\Serialization\TypeExtensions.cs" />
+    <Compile Include="Runtime\Serialization\XmlFormatterDeserializer.cs" />
+    <Compile Include="Runtime\Serialization\XmlFormatterSerializer.cs" />
     <Compile Include="Runtime\Serialization\XmlObjectSerializer.cs" />
-    <Compile Include="Runtime\Serialization\XmlObjectSerializerContext.cs" />
-    <Compile Include="Runtime\Serialization\XmlObjectSerializerReadContext.cs" />
-    <Compile Include="Runtime\Serialization\XmlObjectSerializerReadContextComplex.cs" />
-    <Compile Include="Runtime\Serialization\XmlObjectSerializerWriteContext.cs" />
-    <Compile Include="Runtime\Serialization\XmlObjectSerializerWriteContextComplex.cs" />
-    <Compile Include="Runtime\Serialization\XmlReaderDelegator.cs" />
-    <Compile Include="Runtime\Serialization\XmlSerializableReader.cs" />
+    <Compile Include="Runtime\Serialization\XmlSerializableMap.cs" />
     <Compile Include="Runtime\Serialization\XmlSerializableServices.cs" />
-    <Compile Include="Runtime\Serialization\XmlSerializableWriter.cs" />
-    <Compile Include="Runtime\Serialization\XmlWriterDelegator.cs" />
-    <Compile Include="Runtime\Serialization\XPathQueryGenerator.cs" />
     <Compile Include="Runtime\Serialization\XsdDataContractExporter.cs" />
     <Compile Include="Runtime\Serialization\XsdDataContractImporter.cs" />
-    <Compile Include="Runtime\Serialization\XsDurationDataContract.cs" />
-    <Compile Include="SR.cs" />
-    <Compile Include="Text\Base64Encoding.cs" />
-    <Compile Include="Text\BinHexEncoding.cs" />
-    <Compile Include="Text\SurrogateChar.cs" />
-    <Compile Include="Xml\ArrayHelper.cs" />
-    <Compile Include="Xml\BooleanArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\BooleanArrayHelperWithString.cs" />
-    <Compile Include="Xml\BufferedReadStream.cs" />
-    <Compile Include="Xml\BufferedWrite.cs" />
-    <Compile Include="Xml\ContentIDHeader.cs" />
-    <Compile Include="Xml\ContentTransferEncoding.cs" />
-    <Compile Include="Xml\ContentTransferEncodingHeader.cs" />
-    <Compile Include="Xml\ContentTypeHeader.cs" />
-    <Compile Include="Xml\DateTimeArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\DateTimeArrayHelperWithString.cs" />
-    <Compile Include="Xml\DecimalArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\DecimalArrayHelperWithString.cs" />
-    <Compile Include="Xml\DelimittedStreamReader.cs" />
-    <Compile Include="Xml\DoubleArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\DoubleArrayHelperWithString.cs" />
-    <Compile Include="Xml\EncodingStreamWrapper.cs" />
-    <Compile Include="Xml\GuidArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\GuidArrayHelperWithString.cs" />
+    <Compile Include="Xml\DummyStateXmlReader.cs" />
     <Compile Include="Xml\IFragmentCapableXmlDictionaryWriter.cs" />
-    <Compile Include="Xml\Int16ArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\Int16ArrayHelperWithString.cs" />
-    <Compile Include="Xml\Int32ArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\Int32ArrayHelperWithString.cs" />
-    <Compile Include="Xml\Int64ArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\Int64ArrayHelperWithString.cs" />
     <Compile Include="Xml\IStreamProvider.cs" />
     <Compile Include="Xml\IXmlBinaryReaderInitializer.cs" />
     <Compile Include="Xml\IXmlBinaryWriterInitializer.cs" />
@@ -255,85 +75,48 @@
     <Compile Include="Xml\IXmlMtomWriterInitializer.cs" />
     <Compile Include="Xml\IXmlTextReaderInitializer.cs" />
     <Compile Include="Xml\IXmlTextWriterInitializer.cs" />
-    <Compile Include="Xml\MailBnfHelper.cs" />
-    <Compile Include="Xml\MimeGlobals.cs" />
-    <Compile Include="Xml\MimeHeader.cs" />
-    <Compile Include="Xml\MimeHeaderReader.cs" />
-    <Compile Include="Xml\MimeHeaders.cs" />
-    <Compile Include="Xml\MimeMessageReader.cs" />
-    <Compile Include="Xml\MimeReader.cs" />
-    <Compile Include="Xml\MimeVersionHeader.cs" />
-    <Compile Include="Xml\MimeWriter.cs" />
-    <Compile Include="Xml\MimeWriterState.cs" />
-    <Compile Include="Xml\MtomBinaryData.cs" />
-    <Compile Include="Xml\MtomBinaryDataType.cs" />
-    <Compile Include="Xml\MtomGlobals.cs" />
+    <Compile Include="Xml\MimeEncodedStream.cs" />
+    <Compile Include="Xml\MultiPartedXmlReader.cs" />
+    <Compile Include="Xml\NonInteractiveStateXmlReader.cs" />
     <Compile Include="Xml\OnXmlDictionaryReaderClose.cs" />
-    <Compile Include="Xml\PrefixHandle.cs" />
-    <Compile Include="Xml\PrefixHandleType.cs" />
-    <Compile Include="Xml\SingleArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\SingleArrayHelperWithString.cs" />
-    <Compile Include="Xml\StringHandle.cs" />
-    <Compile Include="Xml\StringHandleConstStringType.cs" />
-    <Compile Include="Xml\TimeSpanArrayHelperWithDictionaryString.cs" />
-    <Compile Include="Xml\TimeSpanArrayHelperWithString.cs" />
     <Compile Include="Xml\UniqueId.cs" />
-    <Compile Include="Xml\ValueHandle.cs" />
-    <Compile Include="Xml\ValueHandleConstStringType.cs" />
-    <Compile Include="Xml\ValueHandleLength.cs" />
-    <Compile Include="Xml\ValueHandleType.cs" />
-    <Compile Include="Xml\XmlBaseReader.cs" />
-    <Compile Include="Xml\XmlBaseWriter.cs" />
-    <Compile Include="Xml\XmlBinaryNodeType.cs" />
-    <Compile Include="Xml\XmlBinaryNodeWriter.cs" />
-    <Compile Include="Xml\XmlBinaryReader.cs" />
+    <Compile Include="Xml\XmlBinaryDictionaryReader.cs" />
+    <Compile Include="Xml\XmlBinaryDictionaryWriter.cs" />
+    <Compile Include="Xml\XmlBinaryFormat.cs" />
     <Compile Include="Xml\XmlBinaryReaderSession.cs" />
-    <Compile Include="Xml\XmlBinaryWriter.cs" />
     <Compile Include="Xml\XmlBinaryWriterSession.cs" />
-    <Compile Include="Xml\XmlBufferReader.cs" />
-    <Compile Include="Xml\XmlCanonicalWriter.cs" />
-    <Compile Include="Xml\XmlConverter.cs" />
     <Compile Include="Xml\XmlDictionary.cs" />
     <Compile Include="Xml\XmlDictionaryReader.cs" />
     <Compile Include="Xml\XmlDictionaryReaderQuotas.cs" />
-    <Compile Include="Xml\XmlDictionaryReaderQuotaTypes.cs" />
     <Compile Include="Xml\XmlDictionaryString.cs" />
     <Compile Include="Xml\XmlDictionaryWriter.cs" />
-    <Compile Include="Xml\XmlExceptionHelper.cs" />
-    <Compile Include="Xml\XmlMtomReader.cs" />
-    <Compile Include="Xml\XmlMtomWriter.cs" />
-    <Compile Include="Xml\XmlNodeWriter.cs" />
-    <Compile Include="Xml\XmlNodeWriterWriteBase64TextArgs.cs" />
-    <Compile Include="Xml\XmlSigningNodeWriter.cs" />
-    <Compile Include="Xml\XmlStreamNodeWriter.cs" />
-    <Compile Include="Xml\XmlUTF8NodeWriter.cs" />
-    <Compile Include="Xml\XmlUTF8TextReader.cs" />
-    <Compile Include="Xml\XmlUTF8TextWriter.cs" />
-    <Compile Include="Xml\XmlWriteBase64AsyncArguments.cs" />
+    <Compile Include="Xml\XmlMtomDictionaryReader.cs" />
+    <Compile Include="Xml\XmlMtomDictionaryWriter.cs" />
+    <Compile Include="Xml\XmlSimpleDictionaryReader.cs" />
+    <Compile Include="Xml\XmlSimpleDictionaryWriter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="mstypes.schema" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D32}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC837}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Configuration\System.Configuration.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D34}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC839}</Project>
       <Name>System.Configuration</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D35}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83A}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\System.ServiceModel.Internals\System.ServiceModel.Internals.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D3B}</Project>
-      <Name>System.ServiceModel.Internals</Name>
-    </ProjectReference>
     <ProjectReference Include="..\System.Xml\System.Xml.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D3D}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC841}</Project>
       <Name>System.Xml</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{1E5D8D43-4B95-4088-B569-06A3F1844D37}</Project>
+      <Project>{A3252AAE-5DD4-4E96-BF6F-3119D06CC83C}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

@@ -1,27 +1,24 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace System.Collections.Generic
 {
-	[DebuggerTypeProxy(typeof(QueueDebugView<>))]
-	[DebuggerDisplay("Count = {Count}")]
+	[ComVisible(false)]
 	[Serializable]
-	public class Queue<T> : IEnumerable<T>, IEnumerable, ICollection, IReadOnlyCollection<T>
+	public class Queue<T> : IEnumerable<T>, ICollection, IEnumerable
 	{
 		public Queue()
 		{
-			this._array = Array.Empty<T>();
+			this._array = new T[0];
 		}
 
-		public Queue(int capacity)
+		public Queue(int count)
 		{
-			if (capacity < 0)
+			if (count < 0)
 			{
-				throw new ArgumentOutOfRangeException("capacity", capacity, "Non-negative number required.");
+				throw new ArgumentOutOfRangeException("count");
 			}
-			this._array = new T[capacity];
+			this._array = new T[count];
 		}
 
 		public Queue(IEnumerable<T> collection)
@@ -30,18 +27,46 @@ namespace System.Collections.Generic
 			{
 				throw new ArgumentNullException("collection");
 			}
-			this._array = EnumerableHelpers.ToArray<T>(collection, out this._size);
-			if (this._size != this._array.Length)
+			ICollection<T> collection2 = collection as ICollection<T>;
+			int num = ((collection2 == null) ? 0 : collection2.Count);
+			this._array = new T[num];
+			foreach (T t in collection)
 			{
-				this._tail = this._size;
+				this.Enqueue(t);
 			}
 		}
 
-		public int Count
+		void ICollection.CopyTo(Array array, int idx)
 		{
-			get
+			if (array == null)
 			{
-				return this._size;
+				throw new ArgumentNullException();
+			}
+			if (idx > array.Length)
+			{
+				throw new ArgumentOutOfRangeException();
+			}
+			if (array.Length - idx < this._size)
+			{
+				throw new ArgumentOutOfRangeException();
+			}
+			if (this._size == 0)
+			{
+				return;
+			}
+			try
+			{
+				int num = this._array.Length;
+				int num2 = num - this._head;
+				Array.Copy(this._array, this._head, array, idx, Math.Min(this._size, num2));
+				if (this._size > num2)
+				{
+					Array.Copy(this._array, 0, array, idx + num2, this._size - num2);
+				}
+			}
+			catch (ArrayTypeMismatchException)
+			{
+				throw new ArgumentException();
 			}
 		}
 
@@ -57,267 +82,145 @@ namespace System.Collections.Generic
 		{
 			get
 			{
-				if (this._syncRoot == null)
-				{
-					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
-				}
-				return this._syncRoot;
+				return this;
 			}
-		}
-
-		public void Clear()
-		{
-			if (this._size != 0)
-			{
-				if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-				{
-					if (this._head < this._tail)
-					{
-						Array.Clear(this._array, this._head, this._size);
-					}
-					else
-					{
-						Array.Clear(this._array, this._head, this._array.Length - this._head);
-						Array.Clear(this._array, 0, this._tail);
-					}
-				}
-				this._size = 0;
-			}
-			this._head = 0;
-			this._tail = 0;
-			this._version++;
-		}
-
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (arrayIndex < 0 || arrayIndex > array.Length)
-			{
-				throw new ArgumentOutOfRangeException("arrayIndex", arrayIndex, "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (array.Length - arrayIndex < this._size)
-			{
-				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
-			}
-			int num = this._size;
-			if (num == 0)
-			{
-				return;
-			}
-			int num2 = Math.Min(this._array.Length - this._head, num);
-			Array.Copy(this._array, this._head, array, arrayIndex, num2);
-			num -= num2;
-			if (num > 0)
-			{
-				Array.Copy(this._array, 0, array, arrayIndex + this._array.Length - this._head, num);
-			}
-		}
-
-		void ICollection.CopyTo(Array array, int index)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (array.Rank != 1)
-			{
-				throw new ArgumentException("Only single dimensional arrays are supported for the requested action.", "array");
-			}
-			if (array.GetLowerBound(0) != 0)
-			{
-				throw new ArgumentException("The lower bound of target array must be zero.", "array");
-			}
-			int length = array.Length;
-			if (index < 0 || index > length)
-			{
-				throw new ArgumentOutOfRangeException("index", index, "Index was out of range. Must be non-negative and less than the size of the collection.");
-			}
-			if (length - index < this._size)
-			{
-				throw new ArgumentException("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.");
-			}
-			int num = this._size;
-			if (num == 0)
-			{
-				return;
-			}
-			try
-			{
-				int num2 = ((this._array.Length - this._head < num) ? (this._array.Length - this._head) : num);
-				Array.Copy(this._array, this._head, array, index, num2);
-				num -= num2;
-				if (num > 0)
-				{
-					Array.Copy(this._array, 0, array, index + this._array.Length - this._head, num);
-				}
-			}
-			catch (ArrayTypeMismatchException)
-			{
-				throw new ArgumentException("Target array type is not compatible with the type of items in the collection.", "array");
-			}
-		}
-
-		public void Enqueue(T item)
-		{
-			if (this._size == this._array.Length)
-			{
-				int num = (int)((long)this._array.Length * 200L / 100L);
-				if (num < this._array.Length + 4)
-				{
-					num = this._array.Length + 4;
-				}
-				this.SetCapacity(num);
-			}
-			this._array[this._tail] = item;
-			this.MoveNext(ref this._tail);
-			this._size++;
-			this._version++;
-		}
-
-		public Queue<T>.Enumerator GetEnumerator()
-		{
-			return new Queue<T>.Enumerator(this);
 		}
 
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
-			return new Queue<T>.Enumerator(this);
+			return this.GetEnumerator();
 		}
 
 		IEnumerator IEnumerable.GetEnumerator()
 		{
-			return new Queue<T>.Enumerator(this);
+			return this.GetEnumerator();
+		}
+
+		public void Clear()
+		{
+			Array.Clear(this._array, 0, this._array.Length);
+			this._head = (this._tail = (this._size = 0));
+			this._version++;
+		}
+
+		public bool Contains(T item)
+		{
+			if (item == null)
+			{
+				foreach (T t in this)
+				{
+					if (t == null)
+					{
+						return true;
+					}
+				}
+			}
+			else
+			{
+				foreach (T t2 in this)
+				{
+					if (item.Equals(t2))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		public void CopyTo(T[] array, int idx)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException();
+			}
+			((ICollection)this).CopyTo(array, idx);
 		}
 
 		public T Dequeue()
 		{
-			if (this._size == 0)
+			T t = this.Peek();
+			this._array[this._head] = default(T);
+			if (++this._head == this._array.Length)
 			{
-				this.ThrowForEmptyQueue();
+				this._head = 0;
 			}
-			T t = this._array[this._head];
-			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-			{
-				this._array[this._head] = default(T);
-			}
-			this.MoveNext(ref this._head);
 			this._size--;
 			this._version++;
 			return t;
-		}
-
-		public bool TryDequeue(out T result)
-		{
-			if (this._size == 0)
-			{
-				result = default(T);
-				return false;
-			}
-			result = this._array[this._head];
-			if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-			{
-				this._array[this._head] = default(T);
-			}
-			this.MoveNext(ref this._head);
-			this._size--;
-			this._version++;
-			return true;
 		}
 
 		public T Peek()
 		{
 			if (this._size == 0)
 			{
-				this.ThrowForEmptyQueue();
+				throw new InvalidOperationException();
 			}
 			return this._array[this._head];
 		}
 
-		public bool TryPeek(out T result)
+		public void Enqueue(T item)
 		{
-			if (this._size == 0)
+			if (this._size == this._array.Length || this._tail == this._array.Length)
 			{
-				result = default(T);
-				return false;
+				this.SetCapacity(Math.Max(Math.Max(this._size, this._tail) * 2, 4));
 			}
-			result = this._array[this._head];
-			return true;
-		}
-
-		public bool Contains(T item)
-		{
-			if (this._size == 0)
+			this._array[this._tail] = item;
+			if (++this._tail == this._array.Length)
 			{
-				return false;
+				this._tail = 0;
 			}
-			if (this._head < this._tail)
-			{
-				return Array.IndexOf<T>(this._array, item, this._head, this._size) >= 0;
-			}
-			return Array.IndexOf<T>(this._array, item, this._head, this._array.Length - this._head) >= 0 || Array.IndexOf<T>(this._array, item, 0, this._tail) >= 0;
+			this._size++;
+			this._version++;
 		}
 
 		public T[] ToArray()
 		{
-			if (this._size == 0)
-			{
-				return Array.Empty<T>();
-			}
 			T[] array = new T[this._size];
-			if (this._head < this._tail)
-			{
-				Array.Copy(this._array, this._head, array, 0, this._size);
-			}
-			else
-			{
-				Array.Copy(this._array, this._head, array, 0, this._array.Length - this._head);
-				Array.Copy(this._array, 0, array, this._array.Length - this._head, this._tail);
-			}
+			this.CopyTo(array, 0);
 			return array;
-		}
-
-		private void SetCapacity(int capacity)
-		{
-			T[] array = new T[capacity];
-			if (this._size > 0)
-			{
-				if (this._head < this._tail)
-				{
-					Array.Copy(this._array, this._head, array, 0, this._size);
-				}
-				else
-				{
-					Array.Copy(this._array, this._head, array, 0, this._array.Length - this._head);
-					Array.Copy(this._array, 0, array, this._array.Length - this._head, this._tail);
-				}
-			}
-			this._array = array;
-			this._head = 0;
-			this._tail = ((this._size == capacity) ? 0 : this._size);
-			this._version++;
-		}
-
-		private void MoveNext(ref int index)
-		{
-			int num = index + 1;
-			index = ((num == this._array.Length) ? 0 : num);
-		}
-
-		private void ThrowForEmptyQueue()
-		{
-			throw new InvalidOperationException("Queue empty.");
 		}
 
 		public void TrimExcess()
 		{
-			int num = (int)((double)this._array.Length * 0.9);
-			if (this._size < num)
+			if ((double)this._size < (double)this._array.Length * 0.9)
 			{
 				this.SetCapacity(this._size);
 			}
+		}
+
+		private void SetCapacity(int new_size)
+		{
+			if (new_size == this._array.Length)
+			{
+				return;
+			}
+			if (new_size < this._size)
+			{
+				throw new InvalidOperationException("shouldnt happen");
+			}
+			T[] array = new T[new_size];
+			if (this._size > 0)
+			{
+				this.CopyTo(array, 0);
+			}
+			this._array = array;
+			this._tail = this._size;
+			this._head = 0;
+			this._version++;
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this._size;
+			}
+		}
+
+		public Queue<T>.Enumerator GetEnumerator()
+		{
+			return new Queue<T>.Enumerator(this);
 		}
 
 		private T[] _array;
@@ -330,73 +233,23 @@ namespace System.Collections.Generic
 
 		private int _version;
 
-		[NonSerialized]
-		private object _syncRoot;
-
-		private const int MinimumGrow = 4;
-
-		private const int GrowFactor = 200;
-
 		[Serializable]
-		public struct Enumerator : IEnumerator<T>, IDisposable, IEnumerator
+		public struct Enumerator : IEnumerator, IDisposable, IEnumerator<T>
 		{
 			internal Enumerator(Queue<T> q)
 			{
-				this._q = q;
-				this._version = q._version;
-				this._index = -1;
-				this._currentElement = default(T);
+				this.q = q;
+				this.idx = -2;
+				this.ver = q._version;
 			}
 
-			public void Dispose()
+			void IEnumerator.Reset()
 			{
-				this._index = -2;
-				this._currentElement = default(T);
-			}
-
-			public bool MoveNext()
-			{
-				if (this._version != this._q._version)
+				if (this.ver != this.q._version)
 				{
-					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+					throw new InvalidOperationException();
 				}
-				if (this._index == -2)
-				{
-					return false;
-				}
-				this._index++;
-				if (this._index == this._q._size)
-				{
-					this._index = -2;
-					this._currentElement = default(T);
-					return false;
-				}
-				T[] array = this._q._array;
-				int num = array.Length;
-				int num2 = this._q._head + this._index;
-				if (num2 >= num)
-				{
-					num2 -= num;
-				}
-				this._currentElement = array[num2];
-				return true;
-			}
-
-			public T Current
-			{
-				get
-				{
-					if (this._index < 0)
-					{
-						this.ThrowEnumerationNotStartedOrEnded();
-					}
-					return this._currentElement;
-				}
-			}
-
-			private void ThrowEnumerationNotStartedOrEnded()
-			{
-				throw new InvalidOperationException((this._index == -1) ? "Enumeration has not started. Call MoveNext." : "Enumeration already finished.");
+				this.idx = -2;
 			}
 
 			object IEnumerator.Current
@@ -407,23 +260,45 @@ namespace System.Collections.Generic
 				}
 			}
 
-			void IEnumerator.Reset()
+			public void Dispose()
 			{
-				if (this._version != this._q._version)
-				{
-					throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
-				}
-				this._index = -1;
-				this._currentElement = default(T);
+				this.idx = -2;
 			}
 
-			private readonly Queue<T> _q;
+			public bool MoveNext()
+			{
+				if (this.ver != this.q._version)
+				{
+					throw new InvalidOperationException();
+				}
+				if (this.idx == -2)
+				{
+					this.idx = this.q._size;
+				}
+				return this.idx != -1 && --this.idx != -1;
+			}
 
-			private readonly int _version;
+			public T Current
+			{
+				get
+				{
+					if (this.idx < 0)
+					{
+						throw new InvalidOperationException();
+					}
+					return this.q._array[(this.q._size - 1 - this.idx + this.q._head) % this.q._array.Length];
+				}
+			}
 
-			private int _index;
+			private const int NOT_STARTED = -2;
 
-			private T _currentElement;
+			private const int FINISHED = -1;
+
+			private Queue<T> q;
+
+			private int idx;
+
+			private int ver;
 		}
 	}
 }

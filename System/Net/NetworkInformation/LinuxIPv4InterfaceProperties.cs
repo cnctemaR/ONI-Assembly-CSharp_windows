@@ -15,7 +15,12 @@ namespace System.Net.NetworkInformation
 			get
 			{
 				string text = "/proc/sys/net/ipv4/conf/" + this.iface.Name + "/forwarding";
-				return File.Exists(text) && LinuxNetworkInterface.ReadLine(text) != "0";
+				if (File.Exists(text))
+				{
+					string text2 = NetworkInterface.ReadLine(text);
+					return text2 != "0";
+				}
+				return false;
 			}
 		}
 
@@ -27,7 +32,7 @@ namespace System.Net.NetworkInformation
 				int num = 0;
 				if (File.Exists(text))
 				{
-					string text2 = LinuxNetworkInterface.ReadLine(text);
+					string text2 = NetworkInterface.ReadLine(text);
 					try
 					{
 						num = int.Parse(text2);

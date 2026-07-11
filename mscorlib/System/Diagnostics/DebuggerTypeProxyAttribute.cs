@@ -7,25 +7,21 @@ namespace System.Diagnostics
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
 	public sealed class DebuggerTypeProxyAttribute : Attribute
 	{
-		public DebuggerTypeProxyAttribute(Type type)
-		{
-			if (type == null)
-			{
-				throw new ArgumentNullException("type");
-			}
-			this.typeName = type.AssemblyQualifiedName;
-		}
-
 		public DebuggerTypeProxyAttribute(string typeName)
 		{
-			this.typeName = typeName;
+			this.proxy_type_name = typeName;
+		}
+
+		public DebuggerTypeProxyAttribute(Type type)
+		{
+			this.proxy_type_name = type.Name;
 		}
 
 		public string ProxyTypeName
 		{
 			get
 			{
-				return this.typeName;
+				return this.proxy_type_name;
 			}
 		}
 
@@ -33,16 +29,12 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.target;
+				return this.target_type;
 			}
 			set
 			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				this.targetName = value.AssemblyQualifiedName;
-				this.target = value;
+				this.target_type = value;
+				this.target_type_name = this.target_type.Name;
 			}
 		}
 
@@ -50,18 +42,18 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.targetName;
+				return this.target_type_name;
 			}
 			set
 			{
-				this.targetName = value;
+				this.target_type_name = value;
 			}
 		}
 
-		private string typeName;
+		private string proxy_type_name;
 
-		private string targetName;
+		private string target_type_name;
 
-		private Type target;
+		private Type target_type;
 	}
 }

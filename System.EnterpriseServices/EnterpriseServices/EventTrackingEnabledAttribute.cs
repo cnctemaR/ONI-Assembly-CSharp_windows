@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices
 {
-	[AttributeUsage(AttributeTargets.Class)]
 	[ComVisible(false)]
+	[AttributeUsage(AttributeTargets.Class)]
 	public sealed class EventTrackingEnabledAttribute : Attribute
 	{
 		public EventTrackingEnabledAttribute()

@@ -2,11 +2,7 @@
 
 namespace System
 {
-	public class LdapStyleUriParser : UriParser
+	public class LdapStyleUriParser : global::System.UriParser
 	{
-		public LdapStyleUriParser()
-			: base(UriParser.LdapUri.Flags)
-		{
-		}
 	}
 }

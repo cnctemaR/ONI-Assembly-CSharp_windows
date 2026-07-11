@@ -1,64 +1,34 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Reflection;
+using System.Security.Permissions;
 using System.Security.Policy;
 
 namespace System.CodeDom.Compiler
 {
+	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	[Serializable]
 	public class CompilerResults
 	{
-		[Obsolete("CAS policy is obsolete and will be removed in a future release of the .NET Framework. Please see http://go2.microsoft.com/fwlink/?LinkId=131738 for more information.")]
-		public Evidence Evidence
-		{
-			get
-			{
-				Evidence evidence = this._evidence;
-				if (evidence == null)
-				{
-					return null;
-				}
-				return evidence.Clone();
-			}
-			set
-			{
-				this._evidence = ((value != null) ? value.Clone() : null);
-			}
-		}
-
 		public CompilerResults(TempFileCollection tempFiles)
 		{
-			this._tempFiles = tempFiles;
-		}
-
-		public TempFileCollection TempFiles
-		{
-			get
-			{
-				return this._tempFiles;
-			}
-			set
-			{
-				this._tempFiles = value;
-			}
+			this.tempFiles = tempFiles;
 		}
 
 		public Assembly CompiledAssembly
 		{
 			get
 			{
-				if (this._compiledAssembly == null && this.PathToAssembly != null)
+				if (this.compiledAssembly == null && this.pathToAssembly != null)
 				{
-					this._compiledAssembly = Assembly.Load(new AssemblyName
-					{
-						CodeBase = this.PathToAssembly
-					});
+					this.compiledAssembly = Assembly.LoadFrom(this.pathToAssembly);
 				}
-				return this._compiledAssembly;
+				return this.compiledAssembly;
 			}
 			set
 			{
-				this._compiledAssembly = value;
+				this.compiledAssembly = value;
 			}
 		}
 
@@ -66,30 +36,91 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				return this._errors;
+				if (this.errors == null)
+				{
+					this.errors = new CompilerErrorCollection();
+				}
+				return this.errors;
 			}
 		}
 
-		public StringCollection Output
+		public Evidence Evidence
 		{
 			get
 			{
-				return this._output;
+				return this.evidence;
+			}
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nFlags=\"ControlEvidence\"/>\n</PermissionSet>\n")]
+			set
+			{
+				this.evidence = value;
 			}
 		}
 
-		public string PathToAssembly { get; set; }
+		public int NativeCompilerReturnValue
+		{
+			get
+			{
+				return this.nativeCompilerReturnValue;
+			}
+			set
+			{
+				this.nativeCompilerReturnValue = value;
+			}
+		}
 
-		public int NativeCompilerReturnValue { get; set; }
+		public global::System.Collections.Specialized.StringCollection Output
+		{
+			get
+			{
+				if (this.output == null)
+				{
+					this.output = new global::System.Collections.Specialized.StringCollection();
+				}
+				return this.output;
+			}
+			internal set
+			{
+				this.output = value;
+			}
+		}
 
-		private Evidence _evidence;
+		public string PathToAssembly
+		{
+			get
+			{
+				return this.pathToAssembly;
+			}
+			set
+			{
+				this.pathToAssembly = value;
+			}
+		}
 
-		private readonly CompilerErrorCollection _errors = new CompilerErrorCollection();
+		public TempFileCollection TempFiles
+		{
+			get
+			{
+				return this.tempFiles;
+			}
+			set
+			{
+				this.tempFiles = value;
+			}
+		}
 
-		private readonly StringCollection _output = new StringCollection();
+		private Assembly compiledAssembly;
 
-		private Assembly _compiledAssembly;
+		private CompilerErrorCollection errors = new CompilerErrorCollection();
 
-		private TempFileCollection _tempFiles;
+		private Evidence evidence;
+
+		private int nativeCompilerReturnValue;
+
+		private global::System.Collections.Specialized.StringCollection output = new global::System.Collections.Specialized.StringCollection();
+
+		private string pathToAssembly;
+
+		private TempFileCollection tempFiles;
 	}
 }

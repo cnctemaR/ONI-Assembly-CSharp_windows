@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[Guid("27FFF232-A7A8-40dd-8D4A-734AD59FCD41")]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	[Guid("27FFF232-A7A8-40DD-8D4A-734AD59fCD41")]
 	[ComVisible(true)]
 	public interface IAppDomainSetup
 	{

@@ -11,12 +11,14 @@ namespace System.Runtime.Remoting.Messaging
 			{
 				return ActivationServices.CreateInstanceFromMessage((IConstructionCallMessage)msg);
 			}
-			return ((ServerIdentity)RemotingServices.GetMessageTargetIdentity(msg)).SyncObjectProcessMessage(msg);
+			ServerIdentity serverIdentity = (ServerIdentity)RemotingServices.GetMessageTargetIdentity(msg);
+			return serverIdentity.SyncObjectProcessMessage(msg);
 		}
 
 		public IMessageCtrl AsyncProcessMessage(IMessage msg, IMessageSink replySink)
 		{
-			return ((ServerIdentity)RemotingServices.GetMessageTargetIdentity(msg)).AsyncObjectProcessMessage(msg, replySink);
+			ServerIdentity serverIdentity = (ServerIdentity)RemotingServices.GetMessageTargetIdentity(msg);
+			return serverIdentity.AsyncObjectProcessMessage(msg, replySink);
 		}
 
 		public IMessageSink NextSink

@@ -8,19 +8,45 @@ namespace System
 {
 	internal class TermInfoDriver : IConsoleDriver
 	{
-		private static string TryTermInfoDir(string dir, string term)
+		public TermInfoDriver()
+			: this(Environment.GetEnvironmentVariable("TERM"))
 		{
-			string text = string.Format("{0}/{1:x}/{2}", dir, (int)term[0], term);
-			if (File.Exists(text))
+		}
+
+		public TermInfoDriver(string term)
+		{
+			this.term = term;
+			if (term == "xterm")
 			{
-				return text;
+				this.reader = new TermInfoReader(term, KnownTerminals.xterm);
+				this.color16 = true;
 			}
-			text = Path.Combine(dir, term.Substring(0, 1), term);
-			if (File.Exists(text))
+			else if (term == "linux")
 			{
-				return text;
+				this.reader = new TermInfoReader(term, KnownTerminals.linux);
+				this.color16 = true;
 			}
-			return null;
+			else
+			{
+				string text = TermInfoDriver.SearchTerminfo(term);
+				if (text != null)
+				{
+					this.reader = new TermInfoReader(term, text);
+				}
+			}
+			if (this.reader == null)
+			{
+				this.reader = new TermInfoReader(term, KnownTerminals.ansi);
+			}
+			if (!(Console.stdout is CStreamWriter))
+			{
+				this.stdout = new CStreamWriter(Console.OpenStandardOutput(0), Console.OutputEncoding);
+				this.stdout.AutoFlush = true;
+			}
+			else
+			{
+				this.stdout = (CStreamWriter)Console.stdout;
+			}
 		}
 
 		private static string SearchTerminfo(string term)
@@ -29,23 +55,18 @@ namespace System
 			{
 				return null;
 			}
-			string environmentVariable = Environment.GetEnvironmentVariable("TERMINFO");
-			if (environmentVariable != null && Directory.Exists(environmentVariable))
+			foreach (string text in TermInfoDriver.locations)
 			{
-				string text = TermInfoDriver.TryTermInfoDir(environmentVariable, term);
-				if (text != null)
+				if (Directory.Exists(text))
 				{
-					return text;
-				}
-			}
-			foreach (string text2 in TermInfoDriver.locations)
-			{
-				if (Directory.Exists(text2))
-				{
-					string text = TermInfoDriver.TryTermInfoDir(text2, term);
-					if (text != null)
+					string text2 = Path.Combine(text, term.Substring(0, 1));
+					if (Directory.Exists(text))
 					{
-						return text;
+						text2 = Path.Combine(text2, term);
+						if (File.Exists(text2))
+						{
+							return text2;
+						}
 					}
 				}
 			}
@@ -59,40 +80,6 @@ namespace System
 				return;
 			}
 			this.stdout.InternalWriteString(str);
-		}
-
-		public TermInfoDriver()
-			: this(Environment.GetEnvironmentVariable("TERM"))
-		{
-		}
-
-		public TermInfoDriver(string term)
-		{
-			this.term = term;
-			string text = TermInfoDriver.SearchTerminfo(term);
-			if (text != null)
-			{
-				this.reader = new TermInfoReader(term, text);
-			}
-			else if (term == "xterm")
-			{
-				this.reader = new TermInfoReader(term, KnownTerminals.xterm);
-			}
-			else if (term == "linux")
-			{
-				this.reader = new TermInfoReader(term, KnownTerminals.linux);
-			}
-			if (this.reader == null)
-			{
-				this.reader = new TermInfoReader(term, KnownTerminals.ansi);
-			}
-			if (!(Console.stdout is CStreamWriter))
-			{
-				this.stdout = new CStreamWriter(Console.OpenStandardOutput(0), Console.OutputEncoding, false);
-				this.stdout.AutoFlush = true;
-				return;
-			}
-			this.stdout = (CStreamWriter)Console.stdout;
 		}
 
 		public bool Initialized
@@ -133,19 +120,18 @@ namespace System
 					}
 					this.origPair = this.reader.Get(TermInfoStrings.OrigPair);
 					this.origColors = this.reader.Get(TermInfoStrings.OrigColors);
-					this.setfgcolor = this.reader.Get(TermInfoStrings.SetAForeground);
-					this.setbgcolor = this.reader.Get(TermInfoStrings.SetABackground);
-					this.maxColors = this.reader.Get(TermInfoNumbers.MaxColors);
-					this.maxColors = Math.Max(Math.Min(this.maxColors, 16), 1);
-					string text2 = ((this.origColors == null) ? this.origPair : this.origColors);
+					this.setfgcolor = TermInfoDriver.MangleParameters(this.reader.Get(TermInfoStrings.SetAForeground));
+					this.setbgcolor = TermInfoDriver.MangleParameters(this.reader.Get(TermInfoStrings.SetABackground));
+					this.setlfgcolor = ((!this.color16) ? this.setfgcolor : this.setfgcolor.Replace("[3", "[9"));
+					this.setlbgcolor = ((!this.color16) ? this.setbgcolor : this.setbgcolor.Replace("[4", "[10"));
+					string text2 = ((this.origColors != null) ? this.origColors : this.origPair);
 					if (text2 != null)
 					{
 						text += text2;
 					}
 					if (!ConsoleDriver.TtySetup(this.keypadXmit, text, out this.control_characters, out TermInfoDriver.native_terminal_size))
 					{
-						this.control_characters = new byte[17];
-						TermInfoDriver.native_terminal_size = null;
+						throw new IOException("Error initializing terminal.");
 					}
 					this.stdin = new StreamReader(Console.OpenStandardInput(0), Console.InputEncoding);
 					this.clear = this.reader.Get(TermInfoStrings.ClearScreen);
@@ -174,6 +160,12 @@ namespace System
 						this.titleFormat = "\u001b]l{0}\u001b\\";
 					}
 					this.cursorAddress = this.reader.Get(TermInfoStrings.CursorAddress);
+					if (this.cursorAddress != null)
+					{
+						string text3 = this.cursorAddress.Replace("%i", string.Empty);
+						this.home_1_1 = this.cursorAddress != text3;
+						this.cursorAddress = TermInfoDriver.MangleParameters(text3);
+					}
 					this.GetCursorPosition();
 					if (this.noGetPosition)
 					{
@@ -182,6 +174,76 @@ namespace System
 						this.cursorTop = 0;
 					}
 				}
+			}
+		}
+
+		private static string MangleParameters(string str)
+		{
+			if (str == null)
+			{
+				return null;
+			}
+			str = str.Replace("{", "{{");
+			str = str.Replace("}", "}}");
+			str = str.Replace("%p1%d", "{0}");
+			return str.Replace("%p2%d", "{1}");
+		}
+
+		private static int TranslateColor(ConsoleColor desired, out bool light)
+		{
+			switch (desired)
+			{
+			case ConsoleColor.Black:
+				light = false;
+				return 0;
+			case ConsoleColor.DarkBlue:
+				light = false;
+				return 4;
+			case ConsoleColor.DarkGreen:
+				light = false;
+				return 2;
+			case ConsoleColor.DarkCyan:
+				light = false;
+				return 6;
+			case ConsoleColor.DarkRed:
+				light = false;
+				return 1;
+			case ConsoleColor.DarkMagenta:
+				light = false;
+				return 5;
+			case ConsoleColor.DarkYellow:
+				light = false;
+				return 3;
+			case ConsoleColor.Gray:
+				light = false;
+				return 7;
+			case ConsoleColor.DarkGray:
+				light = true;
+				return 0;
+			case ConsoleColor.Blue:
+				light = true;
+				return 4;
+			case ConsoleColor.Green:
+				light = true;
+				return 2;
+			case ConsoleColor.Cyan:
+				light = true;
+				return 6;
+			case ConsoleColor.Red:
+				light = true;
+				return 1;
+			case ConsoleColor.Magenta:
+				light = true;
+				return 5;
+			case ConsoleColor.Yellow:
+				light = true;
+				return 3;
+			case ConsoleColor.White:
+				light = true;
+				return 7;
+			default:
+				light = false;
+				return 0;
 			}
 		}
 
@@ -208,13 +270,15 @@ namespace System
 			switch (key.Key)
 			{
 			case ConsoleKey.Backspace:
-				if (this.cursorLeft > 0 && (this.cursorLeft > this.rl_startx || this.cursorTop != this.rl_starty))
+				if (this.cursorLeft > 0)
 				{
-					this.cursorLeft--;
-					this.SetCursorPosition(this.cursorLeft, this.cursorTop);
-					this.WriteConsole(" ");
-					this.SetCursorPosition(this.cursorLeft, this.cursorTop);
-					return;
+					if (this.cursorLeft > this.rl_startx || this.cursorTop != this.rl_starty)
+					{
+						this.cursorLeft--;
+						this.SetCursorPosition(this.cursorLeft, this.cursorTop);
+						this.WriteConsole(" ");
+						this.SetCursorPosition(this.cursorLeft, this.cursorTop);
+					}
 				}
 				break;
 			case ConsoleKey.Tab:
@@ -225,19 +289,13 @@ namespace System
 					this.IncrementX();
 				}
 				this.WriteConsole("\t");
-				return;
-			}
-			case (ConsoleKey)10:
-			case (ConsoleKey)11:
-			case ConsoleKey.Enter:
 				break;
+			}
 			case ConsoleKey.Clear:
 				this.WriteConsole(this.clear);
 				this.cursorLeft = 0;
 				this.cursorTop = 0;
 				break;
-			default:
-				return;
 			}
 		}
 
@@ -278,16 +336,6 @@ namespace System
 			return this.IsSpecialKey(this.CreateKeyInfoFromInt((int)c, false));
 		}
 
-		private void ChangeColor(string format, ConsoleColor color)
-		{
-			if ((color & (ConsoleColor)(-16)) != ConsoleColor.Black)
-			{
-				throw new ArgumentException("Invalid Console Color");
-			}
-			int num = TermInfoDriver._consoleColorToAnsiCode[(int)color] % this.maxColors;
-			this.WriteConsole(ParameterizedStrings.Evaluate(format, new ParameterizedStrings.FormatParam[] { num }));
-		}
-
 		public ConsoleColor BackgroundColor
 		{
 			get
@@ -304,8 +352,17 @@ namespace System
 				{
 					this.Init();
 				}
-				this.ChangeColor(this.setbgcolor, value);
 				this.bgcolor = value;
+				bool flag;
+				int num = TermInfoDriver.TranslateColor(value, out flag);
+				if (flag)
+				{
+					this.WriteConsole(string.Format(this.setlbgcolor, num));
+				}
+				else
+				{
+					this.WriteConsole(string.Format(this.setbgcolor, num));
+				}
 			}
 		}
 
@@ -325,8 +382,17 @@ namespace System
 				{
 					this.Init();
 				}
-				this.ChangeColor(this.setfgcolor, value);
 				this.fgcolor = value;
+				bool flag;
+				int num = TermInfoDriver.TranslateColor(value, out flag);
+				if (flag)
+				{
+					this.WriteConsole(string.Format(this.setlfgcolor, num));
+				}
+				else
+				{
+					this.WriteConsole(string.Format(this.setfgcolor, num));
+				}
 			}
 		}
 
@@ -334,7 +400,7 @@ namespace System
 		{
 			int num = 0;
 			int num2 = 0;
-			int num3 = ConsoleDriver.InternalKeyAvailable(0);
+			int num3 = ConsoleDriver.InternalKeyAvailable(1000);
 			int num4;
 			while (num3-- > 0)
 			{
@@ -398,7 +464,6 @@ namespace System
 				{
 					this.Init();
 				}
-				this.CheckWindowDimensions();
 				return this.bufferHeight;
 			}
 			set
@@ -419,7 +484,6 @@ namespace System
 				{
 					this.Init();
 				}
-				this.CheckWindowDimensions();
 				return this.bufferWidth;
 			}
 			set
@@ -440,7 +504,7 @@ namespace System
 				{
 					this.Init();
 				}
-				return false;
+				throw new NotSupportedException();
 			}
 		}
 
@@ -501,7 +565,7 @@ namespace System
 					this.Init();
 				}
 				this.cursorVisible = value;
-				this.WriteConsole(value ? this.csrVisible : this.csrInvisible);
+				this.WriteConsole((!value) ? this.csrInvisible : this.csrVisible);
 			}
 		}
 
@@ -561,7 +625,7 @@ namespace System
 				{
 					this.Init();
 				}
-				return false;
+				throw new NotSupportedException();
 			}
 		}
 
@@ -763,10 +827,7 @@ namespace System
 				Buffer.BlockCopy(this.buffer, 0, array, 0, this.buffer.Length);
 				this.buffer = array;
 			}
-			char[] array2 = this.buffer;
-			int num = this.writepos;
-			this.writepos = num + 1;
-			array2[num] = (ushort)b;
+			this.buffer[this.writepos++] = (char)b;
 		}
 
 		private void AdjustBuffer()
@@ -783,74 +844,68 @@ namespace System
 			ConsoleKey consoleKey = (ConsoleKey)n;
 			bool flag = false;
 			bool flag2 = false;
-			if (n <= 19)
+			switch (n)
 			{
-				switch (n)
-				{
-				case 8:
-				case 9:
-				case 12:
-				case 13:
-					goto IL_00C7;
-				case 10:
-					consoleKey = ConsoleKey.Enter;
-					goto IL_00C7;
-				case 11:
-					break;
-				default:
-					if (n == 19)
-					{
-						goto IL_00C7;
-					}
-					break;
-				}
-			}
-			else
-			{
-				if (n == 27)
-				{
-					consoleKey = ConsoleKey.Escape;
-					goto IL_00C7;
-				}
-				if (n == 32)
-				{
-					consoleKey = ConsoleKey.Spacebar;
-					goto IL_00C7;
-				}
+			case 8:
+			case 9:
+			case 12:
+			case 13:
+			case 19:
+				break;
+			case 10:
+				consoleKey = ConsoleKey.Enter;
+				break;
+			default:
 				switch (n)
 				{
 				case 42:
 					consoleKey = ConsoleKey.Multiply;
-					goto IL_00C7;
+					break;
 				case 43:
 					consoleKey = ConsoleKey.Add;
-					goto IL_00C7;
+					break;
+				default:
+					if (n != 27)
+					{
+						if (n != 32)
+						{
+							if (n >= 1 && n <= 26)
+							{
+								flag2 = true;
+								consoleKey = ConsoleKey.A + n - 1;
+							}
+							else if (n >= 97 && n <= 122)
+							{
+								consoleKey = (ConsoleKey)(-32) + n;
+							}
+							else if (n >= 65 && n <= 90)
+							{
+								flag = true;
+							}
+							else if (n < 48 || n > 57)
+							{
+								consoleKey = (ConsoleKey)0;
+							}
+						}
+						else
+						{
+							consoleKey = ConsoleKey.Spacebar;
+						}
+					}
+					else
+					{
+						consoleKey = ConsoleKey.Escape;
+					}
+					break;
 				case 45:
 					consoleKey = ConsoleKey.Subtract;
-					goto IL_00C7;
+					break;
 				case 47:
 					consoleKey = ConsoleKey.Divide;
-					goto IL_00C7;
+					break;
 				}
+				break;
 			}
-			if (n >= 1 && n <= 26)
-			{
-				flag2 = true;
-				consoleKey = ConsoleKey.A + n - 1;
-			}
-			else if (n >= 97 && n <= 122)
-			{
-				consoleKey = (ConsoleKey)(-32) + n;
-			}
-			else if (n >= 65 && n <= 90)
-			{
-				flag = true;
-			}
-			else if (n < 48 || n > 57)
-			{
-				consoleKey = (ConsoleKey)0;
-			}
-			IL_00C7:
 			return new ConsoleKeyInfo(c, consoleKey, flag, alt, flag2);
 		}
 
@@ -957,10 +1012,7 @@ namespace System
 			{
 				this.echobuf = new char[1024];
 			}
-			char[] array = this.echobuf;
-			int num = this.echon;
-			this.echon = num + 1;
-			array[num] = c;
+			this.echobuf[this.echon++] = c;
 			if (this.echon == this.echobuf.Length || !this.InputPending())
 			{
 				this.stdout.InternalWriteChars(this.echobuf, this.echon);
@@ -1009,9 +1061,7 @@ namespace System
 				}
 				else if (stringBuilder.Length > num)
 				{
-					StringBuilder stringBuilder2 = stringBuilder;
-					int num2 = stringBuilder2.Length;
-					stringBuilder2.Length = num2 - 1;
+					stringBuilder.Length--;
 				}
 			}
 			this.rl_startx = this.cursorLeft;
@@ -1029,44 +1079,42 @@ namespace System
 						num = stringBuilder.Length;
 					}
 					stringBuilder.Append(c);
-					goto IL_00E0;
+					goto IL_010C;
 				}
 				if (stringBuilder.Length > num)
 				{
-					StringBuilder stringBuilder3 = stringBuilder;
-					int num2 = stringBuilder3.Length;
-					stringBuilder3.Length = num2 - 1;
-					goto IL_00E0;
+					stringBuilder.Length--;
+					goto IL_010C;
 				}
-				IL_00EA:
+				IL_0119:
 				if (consoleKeyInfo.Key == ConsoleKey.Enter)
 				{
 					break;
 				}
 				continue;
-				IL_00E0:
+				IL_010C:
 				if (flag)
 				{
 					this.Echo(consoleKeyInfo);
-					goto IL_00EA;
+					goto IL_0119;
 				}
-				goto IL_00EA;
+				goto IL_0119;
 			}
 			this.EchoFlush();
 			this.rl_startx = -1;
 			this.rl_starty = -1;
-			int num3 = 0;
-			while (count > 0 && num3 < stringBuilder.Length)
+			int num2 = 0;
+			while (count > 0 && num2 < stringBuilder.Length)
 			{
-				dest[index + num3] = stringBuilder[num3];
-				num3++;
+				dest[index + num2] = stringBuilder[num2];
+				num2++;
 				count--;
 			}
-			for (int i = num3; i < stringBuilder.Length; i++)
+			for (int i = num2; i < stringBuilder.Length; i++)
 			{
 				this.AddToBuffer((int)stringBuilder[i]);
 			}
-			return num3;
+			return num2;
 		}
 
 		public ConsoleKeyInfo ReadKey(bool intercept)
@@ -1082,16 +1130,6 @@ namespace System
 		}
 
 		public string ReadLine()
-		{
-			return this.ReadUntilConditionInternal(true);
-		}
-
-		public string ReadToEnd()
-		{
-			return this.ReadUntilConditionInternal(false);
-		}
-
-		private string ReadUntilConditionInternal(bool haltOnNewLine)
 		{
 			if (!this.inited)
 			{
@@ -1113,36 +1151,33 @@ namespace System
 				{
 					break;
 				}
-				bool flag3 = haltOnNewLine && consoleKeyInfo.Key == ConsoleKey.Enter;
-				if (flag3)
+				if (consoleKeyInfo.Key == ConsoleKey.Enter)
 				{
-					goto IL_00AC;
+					goto IL_00C9;
 				}
 				if (consoleKeyInfo.Key != ConsoleKey.Backspace)
 				{
 					stringBuilder.Append(keyChar);
-					goto IL_00AC;
+					goto IL_00C9;
 				}
 				if (stringBuilder.Length > 0)
 				{
-					StringBuilder stringBuilder2 = stringBuilder;
-					int length = stringBuilder2.Length;
-					stringBuilder2.Length = length - 1;
-					goto IL_00AC;
+					stringBuilder.Length--;
+					goto IL_00C9;
 				}
-				IL_00B6:
-				if (flag3)
+				IL_00D6:
+				if (consoleKeyInfo.Key == ConsoleKey.Enter)
 				{
 					goto Block_10;
 				}
 				continue;
-				IL_00AC:
+				IL_00C9:
 				if (flag)
 				{
 					this.Echo(consoleKeyInfo);
-					goto IL_00B6;
+					goto IL_00D6;
 				}
-				goto IL_00B6;
+				goto IL_00D6;
 			}
 			return null;
 			Block_10:
@@ -1158,7 +1193,7 @@ namespace System
 			{
 				this.Init();
 			}
-			string text = ((this.origPair != null) ? this.origPair : this.origColors);
+			string text = ((this.origPair == null) ? this.origColors : this.origPair);
 			this.WriteConsole(text);
 		}
 
@@ -1190,7 +1225,8 @@ namespace System
 			{
 				throw new NotSupportedException("This terminal does not suport setting the cursor position.");
 			}
-			this.WriteConsole(ParameterizedStrings.Evaluate(this.cursorAddress, new ParameterizedStrings.FormatParam[] { top, left }));
+			int num = ((!this.home_1_1) ? 0 : 1);
+			this.WriteConsole(string.Format(this.cursorAddress, top + num, left + num));
 			this.cursorLeft = left;
 			this.cursorTop = top;
 		}
@@ -1284,69 +1320,7 @@ namespace System
 			}
 			this.CreateKeyMap();
 			this.rootmap = new ByteMatcher();
-			foreach (TermInfoStrings termInfoStrings in new TermInfoStrings[]
-			{
-				TermInfoStrings.KeyBackspace,
-				TermInfoStrings.KeyClear,
-				TermInfoStrings.KeyDown,
-				TermInfoStrings.KeyF1,
-				TermInfoStrings.KeyF10,
-				TermInfoStrings.KeyF2,
-				TermInfoStrings.KeyF3,
-				TermInfoStrings.KeyF4,
-				TermInfoStrings.KeyF5,
-				TermInfoStrings.KeyF6,
-				TermInfoStrings.KeyF7,
-				TermInfoStrings.KeyF8,
-				TermInfoStrings.KeyF9,
-				TermInfoStrings.KeyHome,
-				TermInfoStrings.KeyLeft,
-				TermInfoStrings.KeyLl,
-				TermInfoStrings.KeyNpage,
-				TermInfoStrings.KeyPpage,
-				TermInfoStrings.KeyRight,
-				TermInfoStrings.KeySf,
-				TermInfoStrings.KeySr,
-				TermInfoStrings.KeyUp,
-				TermInfoStrings.KeyA1,
-				TermInfoStrings.KeyA3,
-				TermInfoStrings.KeyB2,
-				TermInfoStrings.KeyC1,
-				TermInfoStrings.KeyC3,
-				TermInfoStrings.KeyBtab,
-				TermInfoStrings.KeyBeg,
-				TermInfoStrings.KeyCopy,
-				TermInfoStrings.KeyEnd,
-				TermInfoStrings.KeyEnter,
-				TermInfoStrings.KeyHelp,
-				TermInfoStrings.KeyPrint,
-				TermInfoStrings.KeyUndo,
-				TermInfoStrings.KeySbeg,
-				TermInfoStrings.KeyScopy,
-				TermInfoStrings.KeySdc,
-				TermInfoStrings.KeyShelp,
-				TermInfoStrings.KeyShome,
-				TermInfoStrings.KeySleft,
-				TermInfoStrings.KeySprint,
-				TermInfoStrings.KeySright,
-				TermInfoStrings.KeySundo,
-				TermInfoStrings.KeyF11,
-				TermInfoStrings.KeyF12,
-				TermInfoStrings.KeyF13,
-				TermInfoStrings.KeyF14,
-				TermInfoStrings.KeyF15,
-				TermInfoStrings.KeyF16,
-				TermInfoStrings.KeyF17,
-				TermInfoStrings.KeyF18,
-				TermInfoStrings.KeyF19,
-				TermInfoStrings.KeyF20,
-				TermInfoStrings.KeyF21,
-				TermInfoStrings.KeyF22,
-				TermInfoStrings.KeyF23,
-				TermInfoStrings.KeyF24,
-				TermInfoStrings.KeyDc,
-				TermInfoStrings.KeyIc
-			})
+			foreach (TermInfoStrings termInfoStrings in TermInfoDriver.UsedKeys)
 			{
 				this.AddStringMapping(termInfoStrings);
 			}
@@ -1369,7 +1343,7 @@ namespace System
 
 		private static int terminal_size;
 
-		private static readonly string[] locations = new string[] { "/usr/share/terminfo", "/etc/terminfo", "/usr/lib/terminfo", "/lib/terminfo" };
+		private static string[] locations = new string[] { "/etc/terminfo", "/usr/share/terminfo", "/usr/lib/terminfo" };
 
 		private TermInfoReader reader;
 
@@ -1433,11 +1407,15 @@ namespace System
 
 		private ConsoleColor bgcolor;
 
+		private bool color16;
+
+		private string setlfgcolor;
+
+		private string setlbgcolor;
+
 		private string setfgcolor;
 
 		private string setbgcolor;
-
-		private int maxColors;
 
 		private bool noGetPosition;
 
@@ -1445,20 +1423,80 @@ namespace System
 
 		private ByteMatcher rootmap;
 
+		private bool home_1_1;
+
 		private int rl_startx = -1;
 
 		private int rl_starty = -1;
 
 		private byte[] control_characters;
 
-		private static readonly int[] _consoleColorToAnsiCode = new int[]
-		{
-			0, 4, 2, 6, 1, 5, 3, 7, 8, 12,
-			10, 14, 9, 13, 11, 15
-		};
-
 		private char[] echobuf;
 
 		private int echon;
+
+		private static TermInfoStrings[] UsedKeys = new TermInfoStrings[]
+		{
+			TermInfoStrings.KeyBackspace,
+			TermInfoStrings.KeyClear,
+			TermInfoStrings.KeyDown,
+			TermInfoStrings.KeyF1,
+			TermInfoStrings.KeyF10,
+			TermInfoStrings.KeyF2,
+			TermInfoStrings.KeyF3,
+			TermInfoStrings.KeyF4,
+			TermInfoStrings.KeyF5,
+			TermInfoStrings.KeyF6,
+			TermInfoStrings.KeyF7,
+			TermInfoStrings.KeyF8,
+			TermInfoStrings.KeyF9,
+			TermInfoStrings.KeyHome,
+			TermInfoStrings.KeyLeft,
+			TermInfoStrings.KeyLl,
+			TermInfoStrings.KeyNpage,
+			TermInfoStrings.KeyPpage,
+			TermInfoStrings.KeyRight,
+			TermInfoStrings.KeySf,
+			TermInfoStrings.KeySr,
+			TermInfoStrings.KeyUp,
+			TermInfoStrings.KeyA1,
+			TermInfoStrings.KeyA3,
+			TermInfoStrings.KeyB2,
+			TermInfoStrings.KeyC1,
+			TermInfoStrings.KeyC3,
+			TermInfoStrings.KeyBtab,
+			TermInfoStrings.KeyBeg,
+			TermInfoStrings.KeyCopy,
+			TermInfoStrings.KeyEnd,
+			TermInfoStrings.KeyEnter,
+			TermInfoStrings.KeyHelp,
+			TermInfoStrings.KeyPrint,
+			TermInfoStrings.KeyUndo,
+			TermInfoStrings.KeySbeg,
+			TermInfoStrings.KeyScopy,
+			TermInfoStrings.KeySdc,
+			TermInfoStrings.KeyShelp,
+			TermInfoStrings.KeyShome,
+			TermInfoStrings.KeySleft,
+			TermInfoStrings.KeySprint,
+			TermInfoStrings.KeySright,
+			TermInfoStrings.KeySundo,
+			TermInfoStrings.KeyF11,
+			TermInfoStrings.KeyF12,
+			TermInfoStrings.KeyF13,
+			TermInfoStrings.KeyF14,
+			TermInfoStrings.KeyF15,
+			TermInfoStrings.KeyF16,
+			TermInfoStrings.KeyF17,
+			TermInfoStrings.KeyF18,
+			TermInfoStrings.KeyF19,
+			TermInfoStrings.KeyF20,
+			TermInfoStrings.KeyF21,
+			TermInfoStrings.KeyF22,
+			TermInfoStrings.KeyF23,
+			TermInfoStrings.KeyF24,
+			TermInfoStrings.KeyDc,
+			TermInfoStrings.KeyIc
+		};
 	}
 }

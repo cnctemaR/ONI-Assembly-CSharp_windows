@@ -2,56 +2,55 @@
 
 namespace System.ComponentModel
 {
-	[AttributeUsage(AttributeTargets.All)]
+	[AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
 	public sealed class ListBindableAttribute : Attribute
 	{
 		public ListBindableAttribute(bool listBindable)
 		{
-			this.listBindable = listBindable;
+			this.bindable = listBindable;
 		}
 
 		public ListBindableAttribute(BindableSupport flags)
 		{
-			this.listBindable = flags > BindableSupport.No;
-			this.isDefault = flags == BindableSupport.Default;
+			if (flags == BindableSupport.No)
+			{
+				this.bindable = false;
+			}
+			else
+			{
+				this.bindable = true;
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is ListBindableAttribute && ((ListBindableAttribute)obj).ListBindable.Equals(this.bindable);
+		}
+
+		public override int GetHashCode()
+		{
+			return this.bindable.GetHashCode();
+		}
+
+		public override bool IsDefaultAttribute()
+		{
+			return this.Equals(ListBindableAttribute.Default);
 		}
 
 		public bool ListBindable
 		{
 			get
 			{
-				return this.listBindable;
+				return this.bindable;
 			}
 		}
 
-		public override bool Equals(object obj)
-		{
-			if (obj == this)
-			{
-				return true;
-			}
-			ListBindableAttribute listBindableAttribute = obj as ListBindableAttribute;
-			return listBindableAttribute != null && listBindableAttribute.ListBindable == this.listBindable;
-		}
-
-		public override int GetHashCode()
-		{
-			return base.GetHashCode();
-		}
-
-		public override bool IsDefaultAttribute()
-		{
-			return this.Equals(ListBindableAttribute.Default) || this.isDefault;
-		}
-
-		public static readonly ListBindableAttribute Yes = new ListBindableAttribute(true);
+		public static readonly ListBindableAttribute Default = new ListBindableAttribute(true);
 
 		public static readonly ListBindableAttribute No = new ListBindableAttribute(false);
 
-		public static readonly ListBindableAttribute Default = ListBindableAttribute.Yes;
+		public static readonly ListBindableAttribute Yes = new ListBindableAttribute(true);
 
-		private bool listBindable;
-
-		private bool isDefault;
+		private bool bindable;
 	}
 }

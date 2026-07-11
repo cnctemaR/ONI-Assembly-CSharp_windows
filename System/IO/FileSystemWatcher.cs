@@ -7,9 +7,9 @@ using System.Threading;
 
 namespace System.IO
 {
-	[DefaultEvent("Changed")]
+	[global::System.ComponentModel.DefaultEvent("Changed")]
 	[IODescription("")]
-	public class FileSystemWatcher : Component, ISupportInitialize
+	public class FileSystemWatcher : global::System.ComponentModel.Component, global::System.ComponentModel.ISupportInitialize
 	{
 		public FileSystemWatcher()
 		{
@@ -18,7 +18,7 @@ namespace System.IO
 			this.filter = "*.*";
 			this.includeSubdirectories = false;
 			this.internalBufferSize = 8192;
-			this.path = "";
+			this.path = string.Empty;
 			this.InitWatcher();
 		}
 
@@ -43,7 +43,7 @@ namespace System.IO
 			}
 			if (!Directory.Exists(path))
 			{
-				throw new ArgumentException("Directory does not exist", "path");
+				throw new ArgumentException("Directory does not exists", "path");
 			}
 			this.enableRaisingEvents = false;
 			this.filter = filter;
@@ -55,7 +55,22 @@ namespace System.IO
 			this.InitWatcher();
 		}
 
-		[EnvironmentPermission(SecurityAction.Assert, Read = "MONO_MANAGED_WATCHER")]
+		[IODescription("Occurs when a file/directory change matches the filter")]
+		public event FileSystemEventHandler Changed;
+
+		[IODescription("Occurs when a file/directory creation matches the filter")]
+		public event FileSystemEventHandler Created;
+
+		[IODescription("Occurs when a file/directory deletion matches the filter")]
+		public event FileSystemEventHandler Deleted;
+
+		[global::System.ComponentModel.Browsable(false)]
+		public event ErrorEventHandler Error;
+
+		[IODescription("Occurs when a file/directory rename matches the filter")]
+		public event RenamedEventHandler Renamed;
+
+		[PermissionSet(SecurityAction.Assert, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.EnvironmentPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nRead=\"MONO_MANAGED_WATCHER\"\nWrite=\"\"/>\n</PermissionSet>\n")]
 		private void InitWatcher()
 		{
 			object obj = FileSystemWatcher.lockobj;
@@ -69,26 +84,26 @@ namespace System.IO
 					{
 						num = FileSystemWatcher.InternalSupportsFSW();
 					}
-					bool flag2 = false;
+					bool flag = false;
 					switch (num)
 					{
 					case 1:
-						flag2 = DefaultWatcher.GetInstance(out FileSystemWatcher.watcher);
+						flag = DefaultWatcher.GetInstance(out FileSystemWatcher.watcher);
 						break;
 					case 2:
-						flag2 = FAMWatcher.GetInstance(out FileSystemWatcher.watcher, false);
+						flag = FAMWatcher.GetInstance(out FileSystemWatcher.watcher, false);
 						break;
 					case 3:
-						flag2 = KeventWatcher.GetInstance(out FileSystemWatcher.watcher);
+						flag = KeventWatcher.GetInstance(out FileSystemWatcher.watcher);
 						break;
 					case 4:
-						flag2 = FAMWatcher.GetInstance(out FileSystemWatcher.watcher, true);
+						flag = FAMWatcher.GetInstance(out FileSystemWatcher.watcher, true);
 						break;
 					case 5:
-						flag2 = InotifyWatcher.GetInstance(out FileSystemWatcher.watcher, true);
+						flag = InotifyWatcher.GetInstance(out FileSystemWatcher.watcher, true);
 						break;
 					}
-					if (num == 0 || !flag2)
+					if (num == 0 || !flag)
 					{
 						if (string.Compare(environmentVariable, "disabled", true) == 0)
 						{
@@ -107,7 +122,7 @@ namespace System.IO
 		[Conditional("TRACE")]
 		private void ShowWatcherInfo()
 		{
-			Console.WriteLine("Watcher implementation: {0}", (FileSystemWatcher.watcher != null) ? FileSystemWatcher.watcher.GetType().ToString() : "<none>");
+			Console.WriteLine("Watcher implementation: {0}", (FileSystemWatcher.watcher == null) ? "<none>" : FileSystemWatcher.watcher.GetType().ToString());
 		}
 
 		internal bool Waiting
@@ -135,7 +150,7 @@ namespace System.IO
 					return this.mangledFilter;
 				}
 				string text = "*.*";
-				if (!(FileSystemWatcher.watcher.GetType() == typeof(WindowsWatcher)))
+				if (FileSystemWatcher.watcher.GetType() != typeof(WindowsWatcher))
 				{
 					text = "*";
 				}
@@ -149,14 +164,7 @@ namespace System.IO
 			{
 				if (this.pattern == null)
 				{
-					if (FileSystemWatcher.watcher.GetType() == typeof(KeventWatcher))
-					{
-						this.pattern = new SearchPattern2(this.MangledFilter, true);
-					}
-					else
-					{
-						this.pattern = new SearchPattern2(this.MangledFilter);
-					}
+					this.pattern = new SearchPattern2(this.MangledFilter);
 				}
 				return this.pattern;
 			}
@@ -168,7 +176,7 @@ namespace System.IO
 			{
 				if (this.fullpath == null)
 				{
-					if (this.path == null || this.path == "")
+					if (this.path == null || this.path == string.Empty)
 					{
 						this.fullpath = Environment.CurrentDirectory;
 					}
@@ -181,8 +189,8 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue(false)]
 		[IODescription("Flag to indicate if this instance is active")]
+		[global::System.ComponentModel.DefaultValue(false)]
 		public bool EnableRaisingEvents
 		{
 			get
@@ -199,16 +207,18 @@ namespace System.IO
 				if (value)
 				{
 					this.Start();
-					return;
 				}
-				this.Stop();
+				else
+				{
+					this.Stop();
+				}
 			}
 		}
 
-		[DefaultValue("*.*")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.DefaultValue("*.*")]
 		[IODescription("File name filter pattern")]
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string Filter
 		{
 			get
@@ -217,7 +227,7 @@ namespace System.IO
 			}
 			set
 			{
-				if (value == null || value == "")
+				if (value == null || value == string.Empty)
 				{
 					value = "*.*";
 				}
@@ -230,7 +240,7 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue(false)]
+		[global::System.ComponentModel.DefaultValue(false)]
 		[IODescription("Flag to indicate we want to watch subdirectories")]
 		public bool IncludeSubdirectories
 		{
@@ -253,8 +263,8 @@ namespace System.IO
 			}
 		}
 
-		[Browsable(false)]
-		[DefaultValue(8192)]
+		[global::System.ComponentModel.DefaultValue(8192)]
+		[global::System.ComponentModel.Browsable(false)]
 		public int InternalBufferSize
 		{
 			get
@@ -280,7 +290,7 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue(NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite)]
+		[global::System.ComponentModel.DefaultValue(NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite)]
 		[IODescription("Flag to indicate which change event we want to monitor")]
 		public NotifyFilters NotifyFilter
 		{
@@ -303,11 +313,11 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue("")]
+		[global::System.ComponentModel.DefaultValue("")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.Editor("System.Diagnostics.Design.FSWPathEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[IODescription("The directory to monitor")]
-		[SettingsBindable(true)]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[Editor("System.Diagnostics.Design.FSWPathEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string Path
 		{
 			get
@@ -326,8 +336,9 @@ namespace System.IO
 				{
 					flag = Directory.Exists(value);
 				}
-				catch (Exception ex)
+				catch (Exception ex2)
 				{
+					ex = ex2;
 				}
 				if (ex != null)
 				{
@@ -335,7 +346,7 @@ namespace System.IO
 				}
 				if (!flag)
 				{
-					throw new ArgumentException("Directory does not exist", "value");
+					throw new ArgumentException("Directory does not exists", "value");
 				}
 				this.path = value;
 				this.fullpath = null;
@@ -347,8 +358,8 @@ namespace System.IO
 			}
 		}
 
-		[Browsable(false)]
-		public override ISite Site
+		[global::System.ComponentModel.Browsable(false)]
+		public override global::System.ComponentModel.ISite Site
 		{
 			get
 			{
@@ -360,10 +371,10 @@ namespace System.IO
 			}
 		}
 
-		[DefaultValue(null)]
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DefaultValue(null)]
 		[IODescription("The object used to marshal the event handler calls resulting from a directory change")]
-		[Browsable(false)]
-		public ISynchronizeInvoke SynchronizingObject
+		public global::System.ComponentModel.ISynchronizeInvoke SynchronizingObject
 		{
 			get
 			{
@@ -407,20 +418,17 @@ namespace System.IO
 			}
 			if (this.synchronizingObject == null)
 			{
-				foreach (Delegate @delegate in ev.GetInvocationList())
+				switch (evtype)
 				{
-					switch (evtype)
-					{
-					case FileSystemWatcher.EventType.FileSystemEvent:
-						((FileSystemEventHandler)@delegate).BeginInvoke(this, (FileSystemEventArgs)arg, null, null);
-						break;
-					case FileSystemWatcher.EventType.ErrorEvent:
-						((ErrorEventHandler)@delegate).BeginInvoke(this, (ErrorEventArgs)arg, null, null);
-						break;
-					case FileSystemWatcher.EventType.RenameEvent:
-						((RenamedEventHandler)@delegate).BeginInvoke(this, (RenamedEventArgs)arg, null, null);
-						break;
-					}
+				case FileSystemWatcher.EventType.FileSystemEvent:
+					((FileSystemEventHandler)ev).BeginInvoke(this, (FileSystemEventArgs)arg, null, null);
+					break;
+				case FileSystemWatcher.EventType.ErrorEvent:
+					((ErrorEventHandler)ev).BeginInvoke(this, (ErrorEventArgs)arg, null, null);
+					break;
+				case FileSystemWatcher.EventType.RenameEvent:
+					((RenamedEventHandler)ev).BeginInvoke(this, (RenamedEventArgs)arg, null, null);
+					break;
 				}
 				return;
 			}
@@ -465,27 +473,22 @@ namespace System.IO
 			{
 				this.EnableRaisingEvents = true;
 			}
-			bool flag3;
+			bool flag2;
 			lock (this)
 			{
 				this.waiting = true;
-				flag3 = Monitor.Wait(this, timeout);
-				if (flag3)
+				flag2 = Monitor.Wait(this, timeout);
+				if (flag2)
 				{
 					waitForChangedResult = this.lastData;
 				}
 			}
 			this.EnableRaisingEvents = flag;
-			if (!flag3)
+			if (!flag2)
 			{
 				waitForChangedResult.TimedOut = true;
 			}
 			return waitForChangedResult;
-		}
-
-		internal void DispatchErrorEvents(ErrorEventArgs args)
-		{
-			this.OnError(args);
 		}
 
 		internal void DispatchEvents(FileAction act, string filename, ref RenamedEventArgs renamed)
@@ -500,17 +503,17 @@ namespace System.IO
 				this.lastData.Name = filename;
 				this.lastData.ChangeType = WatcherChangeTypes.Created;
 				this.OnCreated(new FileSystemEventArgs(WatcherChangeTypes.Created, this.path, filename));
-				return;
+				break;
 			case FileAction.Removed:
 				this.lastData.Name = filename;
 				this.lastData.ChangeType = WatcherChangeTypes.Deleted;
 				this.OnDeleted(new FileSystemEventArgs(WatcherChangeTypes.Deleted, this.path, filename));
-				return;
+				break;
 			case FileAction.Modified:
 				this.lastData.Name = filename;
 				this.lastData.ChangeType = WatcherChangeTypes.Changed;
 				this.OnChanged(new FileSystemEventArgs(WatcherChangeTypes.Changed, this.path, filename));
-				return;
+				break;
 			case FileAction.RenamedOldName:
 				if (renamed != null)
 				{
@@ -518,20 +521,18 @@ namespace System.IO
 				}
 				this.lastData.OldName = filename;
 				this.lastData.ChangeType = WatcherChangeTypes.Renamed;
-				renamed = new RenamedEventArgs(WatcherChangeTypes.Renamed, this.path, filename, "");
-				return;
+				renamed = new RenamedEventArgs(WatcherChangeTypes.Renamed, this.path, filename, string.Empty);
+				break;
 			case FileAction.RenamedNewName:
 				this.lastData.Name = filename;
 				this.lastData.ChangeType = WatcherChangeTypes.Renamed;
 				if (renamed == null)
 				{
-					renamed = new RenamedEventArgs(WatcherChangeTypes.Renamed, this.path, "", filename);
+					renamed = new RenamedEventArgs(WatcherChangeTypes.Renamed, this.path, string.Empty, filename);
 				}
 				this.OnRenamed(renamed);
 				renamed = null;
-				return;
-			default:
-				return;
+				break;
 			}
 		}
 
@@ -544,21 +545,6 @@ namespace System.IO
 		{
 			FileSystemWatcher.watcher.StopDispatching(this);
 		}
-
-		[IODescription("Occurs when a file/directory change matches the filter")]
-		public event FileSystemEventHandler Changed;
-
-		[IODescription("Occurs when a file/directory creation matches the filter")]
-		public event FileSystemEventHandler Created;
-
-		[IODescription("Occurs when a file/directory deletion matches the filter")]
-		public event FileSystemEventHandler Deleted;
-
-		[Browsable(false)]
-		public event ErrorEventHandler Error;
-
-		[IODescription("Occurs when a file/directory rename matches the filter")]
-		public event RenamedEventHandler Renamed;
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern int InternalSupportsFSW();
@@ -577,7 +563,7 @@ namespace System.IO
 
 		private string fullpath;
 
-		private ISynchronizeInvoke synchronizingObject;
+		private global::System.ComponentModel.ISynchronizeInvoke synchronizingObject;
 
 		private WaitForChangedResult lastData;
 

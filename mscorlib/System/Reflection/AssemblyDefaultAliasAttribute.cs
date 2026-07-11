@@ -9,17 +9,17 @@ namespace System.Reflection
 	{
 		public AssemblyDefaultAliasAttribute(string defaultAlias)
 		{
-			this.m_defaultAlias = defaultAlias;
+			this.name = defaultAlias;
 		}
 
 		public string DefaultAlias
 		{
 			get
 			{
-				return this.m_defaultAlias;
+				return this.name;
 			}
 		}
 
-		private string m_defaultAlias;
+		private string name;
 	}
 }

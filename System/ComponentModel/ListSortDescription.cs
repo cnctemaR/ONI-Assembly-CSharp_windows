@@ -1,26 +1,24 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class ListSortDescription
 	{
-		public ListSortDescription(PropertyDescriptor property, ListSortDirection direction)
+		public ListSortDescription(PropertyDescriptor propertyDescriptor, ListSortDirection sortDirection)
 		{
-			this.property = property;
-			this.sortDirection = direction;
+			this.propertyDescriptor = propertyDescriptor;
+			this.sortDirection = sortDirection;
 		}
 
 		public PropertyDescriptor PropertyDescriptor
 		{
 			get
 			{
-				return this.property;
+				return this.propertyDescriptor;
 			}
 			set
 			{
-				this.property = value;
+				this.propertyDescriptor = value;
 			}
 		}
 
@@ -36,7 +34,7 @@ namespace System.ComponentModel
 			}
 		}
 
-		private PropertyDescriptor property;
+		private PropertyDescriptor propertyDescriptor;
 
 		private ListSortDirection sortDirection;
 	}

@@ -1,74 +1,28 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace System.Collections
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class BitArray : ICollection, IEnumerable, ICloneable
+	public sealed class BitArray : IEnumerable, ICloneable, ICollection
 	{
-		private BitArray()
+		public BitArray(BitArray bits)
 		{
-		}
-
-		public BitArray(int length)
-			: this(length, false)
-		{
-		}
-
-		public BitArray(int length, bool defaultValue)
-		{
-			if (length < 0)
+			if (bits == null)
 			{
-				throw new ArgumentOutOfRangeException("length", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentNullException("bits");
 			}
-			this.m_array = new int[BitArray.GetArrayLength(length, 32)];
-			this.m_length = length;
-			int num = (defaultValue ? (-1) : 0);
-			for (int i = 0; i < this.m_array.Length; i++)
+			this.m_length = bits.m_length;
+			this.m_array = new int[(this.m_length + 31) / 32];
+			if (this.m_array.Length == 1)
 			{
-				this.m_array[i] = num;
+				this.m_array[0] = bits.m_array[0];
 			}
-			this._version = 0;
-		}
-
-		public BitArray(byte[] bytes)
-		{
-			if (bytes == null)
+			else
 			{
-				throw new ArgumentNullException("bytes");
+				Array.Copy(bits.m_array, this.m_array, this.m_array.Length);
 			}
-			if (bytes.Length > 268435455)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The input array length must not exceed Int32.MaxValue / {0}. Otherwise BitArray.Length would exceed Int32.MaxValue.", new object[] { 8 }), "bytes");
-			}
-			this.m_array = new int[BitArray.GetArrayLength(bytes.Length, 4)];
-			this.m_length = bytes.Length * 8;
-			int num = 0;
-			int num2 = 0;
-			while (bytes.Length - num2 >= 4)
-			{
-				this.m_array[num++] = (int)(bytes[num2] & byte.MaxValue) | ((int)(bytes[num2 + 1] & byte.MaxValue) << 8) | ((int)(bytes[num2 + 2] & byte.MaxValue) << 16) | ((int)(bytes[num2 + 3] & byte.MaxValue) << 24);
-				num2 += 4;
-			}
-			switch (bytes.Length - num2)
-			{
-			case 1:
-				goto IL_0103;
-			case 2:
-				break;
-			case 3:
-				this.m_array[num] = (int)(bytes[num2 + 2] & byte.MaxValue) << 16;
-				break;
-			default:
-				goto IL_011C;
-			}
-			this.m_array[num] |= (int)(bytes[num2 + 1] & byte.MaxValue) << 8;
-			IL_0103:
-			this.m_array[num] |= (int)(bytes[num2] & byte.MaxValue);
-			IL_011C:
-			this._version = 0;
 		}
 
 		public BitArray(bool[] values)
@@ -77,16 +31,26 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("values");
 			}
-			this.m_array = new int[BitArray.GetArrayLength(values.Length, 32)];
 			this.m_length = values.Length;
+			this.m_array = new int[(this.m_length + 31) / 32];
 			for (int i = 0; i < values.Length; i++)
 			{
-				if (values[i])
-				{
-					this.m_array[i / 32] |= 1 << i % 32;
-				}
+				this[i] = values[i];
 			}
-			this._version = 0;
+		}
+
+		public BitArray(byte[] bytes)
+		{
+			if (bytes == null)
+			{
+				throw new ArgumentNullException("bytes");
+			}
+			this.m_length = bytes.Length * 8;
+			this.m_array = new int[(this.m_length + 31) / 32];
+			for (int i = 0; i < bytes.Length; i++)
+			{
+				this.setByte(i, bytes[i]);
+			}
 		}
 
 		public BitArray(int[] values)
@@ -95,229 +59,66 @@ namespace System.Collections
 			{
 				throw new ArgumentNullException("values");
 			}
-			if (values.Length > 67108863)
-			{
-				throw new ArgumentException(Environment.GetResourceString("The input array length must not exceed Int32.MaxValue / {0}. Otherwise BitArray.Length would exceed Int32.MaxValue.", new object[] { 32 }), "values");
-			}
-			this.m_array = new int[values.Length];
-			this.m_length = values.Length * 32;
-			Array.Copy(values, this.m_array, values.Length);
-			this._version = 0;
+			int num = values.Length;
+			this.m_length = num * 32;
+			this.m_array = new int[num];
+			Array.Copy(values, this.m_array, num);
 		}
 
-		public BitArray(BitArray bits)
+		public BitArray(int length)
 		{
-			if (bits == null)
+			if (length < 0)
 			{
-				throw new ArgumentNullException("bits");
+				throw new ArgumentOutOfRangeException("length");
 			}
-			int arrayLength = BitArray.GetArrayLength(bits.m_length, 32);
-			this.m_array = new int[arrayLength];
-			this.m_length = bits.m_length;
-			Array.Copy(bits.m_array, this.m_array, arrayLength);
-			this._version = bits._version;
+			this.m_length = length;
+			this.m_array = new int[(this.m_length + 31) / 32];
 		}
 
-		public bool this[int index]
+		public BitArray(int length, bool defaultValue)
+			: this(length)
 		{
-			get
+			if (defaultValue)
 			{
-				return this.Get(index);
-			}
-			set
-			{
-				this.Set(index, value);
+				for (int i = 0; i < this.m_array.Length; i++)
+				{
+					this.m_array[i] = -1;
+				}
 			}
 		}
 
-		public bool Get(int index)
+		private BitArray(int[] array, int length)
 		{
-			if (index < 0 || index >= this.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			return (this.m_array[index / 32] & (1 << index % 32)) != 0;
+			this.m_array = array;
+			this.m_length = length;
 		}
 
-		public void Set(int index, bool value)
+		private byte getByte(int byteIndex)
 		{
-			if (index < 0 || index >= this.Length)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (value)
-			{
-				this.m_array[index / 32] |= 1 << index % 32;
-			}
-			else
-			{
-				this.m_array[index / 32] &= ~(1 << index % 32);
-			}
+			int num = byteIndex / 4;
+			int num2 = byteIndex % 4 * 8;
+			int num3 = this.m_array[num] & (255 << num2);
+			return (byte)((num3 >> num2) & 255);
+		}
+
+		private void setByte(int byteIndex, byte value)
+		{
+			int num = byteIndex / 4;
+			int num2 = byteIndex % 4 * 8;
+			this.m_array[num] &= ~(255 << num2);
+			this.m_array[num] |= (int)value << num2;
 			this._version++;
 		}
 
-		public void SetAll(bool value)
+		private void checkOperand(BitArray operand)
 		{
-			int num = (value ? (-1) : 0);
-			int arrayLength = BitArray.GetArrayLength(this.m_length, 32);
-			for (int i = 0; i < arrayLength; i++)
+			if (operand == null)
 			{
-				this.m_array[i] = num;
+				throw new ArgumentNullException();
 			}
-			this._version++;
-		}
-
-		public BitArray And(BitArray value)
-		{
-			if (value == null)
+			if (operand.m_length != this.m_length)
 			{
-				throw new ArgumentNullException("value");
-			}
-			if (this.Length != value.Length)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Array lengths must be the same."));
-			}
-			int arrayLength = BitArray.GetArrayLength(this.m_length, 32);
-			for (int i = 0; i < arrayLength; i++)
-			{
-				this.m_array[i] &= value.m_array[i];
-			}
-			this._version++;
-			return this;
-		}
-
-		public BitArray Or(BitArray value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (this.Length != value.Length)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Array lengths must be the same."));
-			}
-			int arrayLength = BitArray.GetArrayLength(this.m_length, 32);
-			for (int i = 0; i < arrayLength; i++)
-			{
-				this.m_array[i] |= value.m_array[i];
-			}
-			this._version++;
-			return this;
-		}
-
-		public BitArray Xor(BitArray value)
-		{
-			if (value == null)
-			{
-				throw new ArgumentNullException("value");
-			}
-			if (this.Length != value.Length)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Array lengths must be the same."));
-			}
-			int arrayLength = BitArray.GetArrayLength(this.m_length, 32);
-			for (int i = 0; i < arrayLength; i++)
-			{
-				this.m_array[i] ^= value.m_array[i];
-			}
-			this._version++;
-			return this;
-		}
-
-		public BitArray Not()
-		{
-			int arrayLength = BitArray.GetArrayLength(this.m_length, 32);
-			for (int i = 0; i < arrayLength; i++)
-			{
-				this.m_array[i] = ~this.m_array[i];
-			}
-			this._version++;
-			return this;
-		}
-
-		public int Length
-		{
-			get
-			{
-				return this.m_length;
-			}
-			set
-			{
-				if (value < 0)
-				{
-					throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Non-negative number required."));
-				}
-				int arrayLength = BitArray.GetArrayLength(value, 32);
-				if (arrayLength > this.m_array.Length || arrayLength + 256 < this.m_array.Length)
-				{
-					int[] array = new int[arrayLength];
-					Array.Copy(this.m_array, array, (arrayLength > this.m_array.Length) ? this.m_array.Length : arrayLength);
-					this.m_array = array;
-				}
-				if (value > this.m_length)
-				{
-					int num = BitArray.GetArrayLength(this.m_length, 32) - 1;
-					int num2 = this.m_length % 32;
-					if (num2 > 0)
-					{
-						this.m_array[num] &= (1 << num2) - 1;
-					}
-					Array.Clear(this.m_array, num + 1, arrayLength - num - 1);
-				}
-				this.m_length = value;
-				this._version++;
-			}
-		}
-
-		public void CopyTo(Array array, int index)
-		{
-			if (array == null)
-			{
-				throw new ArgumentNullException("array");
-			}
-			if (index < 0)
-			{
-				throw new ArgumentOutOfRangeException("index", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (array.Rank != 1)
-			{
-				throw new ArgumentException(Environment.GetResourceString("Only single dimensional arrays are supported for the requested action."));
-			}
-			if (array is int[])
-			{
-				Array.Copy(this.m_array, 0, array, index, BitArray.GetArrayLength(this.m_length, 32));
-				return;
-			}
-			if (array is byte[])
-			{
-				int arrayLength = BitArray.GetArrayLength(this.m_length, 8);
-				if (array.Length - index < arrayLength)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				byte[] array2 = (byte[])array;
-				for (int i = 0; i < arrayLength; i++)
-				{
-					array2[index + i] = (byte)((this.m_array[i / 4] >> i % 4 * 8) & 255);
-				}
-				return;
-			}
-			else
-			{
-				if (!(array is bool[]))
-				{
-					throw new ArgumentException(Environment.GetResourceString("Only supported array types for CopyTo on BitArrays are Boolean[], Int32[] and Byte[]."));
-				}
-				if (array.Length - index < this.m_length)
-				{
-					throw new ArgumentException(Environment.GetResourceString("Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection."));
-				}
-				bool[] array3 = (bool[])array;
-				for (int j = 0; j < this.m_length; j++)
-				{
-					array3[index + j] = ((this.m_array[j / 32] >> j % 32) & 1) != 0;
-				}
-				return;
+				throw new ArgumentException();
 			}
 		}
 
@@ -326,27 +127,6 @@ namespace System.Collections
 			get
 			{
 				return this.m_length;
-			}
-		}
-
-		public object Clone()
-		{
-			return new BitArray(this.m_array)
-			{
-				_version = this._version,
-				m_length = this.m_length
-			};
-		}
-
-		public object SyncRoot
-		{
-			get
-			{
-				if (this._syncRoot == null)
-				{
-					Interlocked.CompareExchange<object>(ref this._syncRoot, new object(), null);
-				}
-				return this._syncRoot;
 			}
 		}
 
@@ -366,25 +146,218 @@ namespace System.Collections
 			}
 		}
 
+		public bool this[int index]
+		{
+			get
+			{
+				return this.Get(index);
+			}
+			set
+			{
+				this.Set(index, value);
+			}
+		}
+
+		public int Length
+		{
+			get
+			{
+				return this.m_length;
+			}
+			set
+			{
+				if (this.m_length == value)
+				{
+					return;
+				}
+				if (value < 0)
+				{
+					throw new ArgumentOutOfRangeException();
+				}
+				if (value > this.m_length)
+				{
+					int num = (value + 31) / 32;
+					int num2 = (this.m_length + 31) / 32;
+					if (num > this.m_array.Length)
+					{
+						int[] array = new int[num];
+						Array.Copy(this.m_array, array, this.m_array.Length);
+						this.m_array = array;
+					}
+					else
+					{
+						Array.Clear(this.m_array, num2, num - num2);
+					}
+					int num3 = this.m_length % 32;
+					if (num3 > 0)
+					{
+						this.m_array[num2 - 1] &= (1 << num3) - 1;
+					}
+				}
+				this.m_length = value;
+				this._version++;
+			}
+		}
+
+		public object SyncRoot
+		{
+			get
+			{
+				return this;
+			}
+		}
+
+		public object Clone()
+		{
+			return new BitArray(this);
+		}
+
+		public void CopyTo(Array array, int index)
+		{
+			if (array == null)
+			{
+				throw new ArgumentNullException("array");
+			}
+			if (index < 0)
+			{
+				throw new ArgumentOutOfRangeException("index");
+			}
+			if (array.Rank != 1)
+			{
+				throw new ArgumentException("array", "Array rank must be 1");
+			}
+			if (index >= array.Length && this.m_length > 0)
+			{
+				throw new ArgumentException("index", "index is greater than array.Length");
+			}
+			if (array is bool[])
+			{
+				if (array.Length - index < this.m_length)
+				{
+					throw new ArgumentException();
+				}
+				bool[] array2 = (bool[])array;
+				for (int i = 0; i < this.m_length; i++)
+				{
+					array2[index + i] = this[i];
+				}
+			}
+			else if (array is byte[])
+			{
+				int num = (this.m_length + 7) / 8;
+				if (array.Length - index < num)
+				{
+					throw new ArgumentException();
+				}
+				byte[] array3 = (byte[])array;
+				for (int j = 0; j < num; j++)
+				{
+					array3[index + j] = this.getByte(j);
+				}
+			}
+			else
+			{
+				if (!(array is int[]))
+				{
+					throw new ArgumentException("array", "Unsupported type");
+				}
+				Array.Copy(this.m_array, 0, array, index, (this.m_length + 31) / 32);
+			}
+		}
+
+		public BitArray Not()
+		{
+			int num = (this.m_length + 31) / 32;
+			for (int i = 0; i < num; i++)
+			{
+				this.m_array[i] = ~this.m_array[i];
+			}
+			this._version++;
+			return this;
+		}
+
+		public BitArray And(BitArray value)
+		{
+			this.checkOperand(value);
+			int num = (this.m_length + 31) / 32;
+			for (int i = 0; i < num; i++)
+			{
+				this.m_array[i] &= value.m_array[i];
+			}
+			this._version++;
+			return this;
+		}
+
+		public BitArray Or(BitArray value)
+		{
+			this.checkOperand(value);
+			int num = (this.m_length + 31) / 32;
+			for (int i = 0; i < num; i++)
+			{
+				this.m_array[i] |= value.m_array[i];
+			}
+			this._version++;
+			return this;
+		}
+
+		public BitArray Xor(BitArray value)
+		{
+			this.checkOperand(value);
+			int num = (this.m_length + 31) / 32;
+			for (int i = 0; i < num; i++)
+			{
+				this.m_array[i] ^= value.m_array[i];
+			}
+			this._version++;
+			return this;
+		}
+
+		public bool Get(int index)
+		{
+			if (index < 0 || index >= this.m_length)
+			{
+				throw new ArgumentOutOfRangeException();
+			}
+			return (this.m_array[index >> 5] & (1 << index)) != 0;
+		}
+
+		public void Set(int index, bool value)
+		{
+			if (index < 0 || index >= this.m_length)
+			{
+				throw new ArgumentOutOfRangeException();
+			}
+			if (value)
+			{
+				this.m_array[index >> 5] |= 1 << index;
+			}
+			else
+			{
+				this.m_array[index >> 5] &= ~(1 << index);
+			}
+			this._version++;
+		}
+
+		public void SetAll(bool value)
+		{
+			if (value)
+			{
+				for (int i = 0; i < this.m_array.Length; i++)
+				{
+					this.m_array[i] = -1;
+				}
+			}
+			else
+			{
+				Array.Clear(this.m_array, 0, this.m_array.Length);
+			}
+			this._version++;
+		}
+
 		public IEnumerator GetEnumerator()
 		{
-			return new BitArray.BitArrayEnumeratorSimple(this);
+			return new BitArray.BitArrayEnumerator(this);
 		}
-
-		private static int GetArrayLength(int n, int div)
-		{
-			if (n <= 0)
-			{
-				return 0;
-			}
-			return (n - 1) / div + 1;
-		}
-
-		private const int BitsPerInt32 = 32;
-
-		private const int BytesPerInt32 = 4;
-
-		private const int BitsPerByte = 8;
 
 		private int[] m_array;
 
@@ -392,19 +365,14 @@ namespace System.Collections
 
 		private int _version;
 
-		[NonSerialized]
-		private object _syncRoot;
-
-		private const int _ShrinkThreshold = 256;
-
 		[Serializable]
-		private class BitArrayEnumeratorSimple : IEnumerator, ICloneable
+		private class BitArrayEnumerator : IEnumerator, ICloneable
 		{
-			internal BitArrayEnumeratorSimple(BitArray bitarray)
+			public BitArrayEnumerator(BitArray ba)
 			{
-				this.bitarray = bitarray;
-				this.index = -1;
-				this.version = bitarray._version;
+				this._index = -1;
+				this._bitArray = ba;
+				this._version = ba._version;
 			}
 
 			public object Clone()
@@ -412,54 +380,55 @@ namespace System.Collections
 				return base.MemberwiseClone();
 			}
 
-			public virtual bool MoveNext()
-			{
-				if (this.version != this.bitarray._version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-				}
-				if (this.index < this.bitarray.Count - 1)
-				{
-					this.index++;
-					this.currentElement = this.bitarray.Get(this.index);
-					return true;
-				}
-				this.index = this.bitarray.Count;
-				return false;
-			}
-
-			public virtual object Current
+			public object Current
 			{
 				get
 				{
-					if (this.index == -1)
+					if (this._index == -1)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration has not started. Call MoveNext."));
+						throw new InvalidOperationException("Enum not started");
 					}
-					if (this.index >= this.bitarray.Count)
+					if (this._index >= this._bitArray.Count)
 					{
-						throw new InvalidOperationException(Environment.GetResourceString("Enumeration already finished."));
+						throw new InvalidOperationException("Enum Ended");
 					}
-					return this.currentElement;
+					return this._current;
 				}
+			}
+
+			public bool MoveNext()
+			{
+				this.checkVersion();
+				if (this._index < this._bitArray.Count - 1)
+				{
+					this._current = this._bitArray[++this._index];
+					return true;
+				}
+				this._index = this._bitArray.Count;
+				return false;
 			}
 
 			public void Reset()
 			{
-				if (this.version != this.bitarray._version)
-				{
-					throw new InvalidOperationException(Environment.GetResourceString("Collection was modified; enumeration operation may not execute."));
-				}
-				this.index = -1;
+				this.checkVersion();
+				this._index = -1;
 			}
 
-			private BitArray bitarray;
+			private void checkVersion()
+			{
+				if (this._version != this._bitArray._version)
+				{
+					throw new InvalidOperationException();
+				}
+			}
 
-			private int index;
+			private BitArray _bitArray;
 
-			private int version;
+			private bool _current;
 
-			private bool currentElement;
+			private int _index;
+
+			private int _version;
 		}
 	}
 }

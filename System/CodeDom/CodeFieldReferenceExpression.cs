@@ -1,34 +1,55 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
 	[Serializable]
 	public class CodeFieldReferenceExpression : CodeExpression
 	{
 		public CodeFieldReferenceExpression()
 		{
+			this.fieldName = string.Empty;
 		}
 
 		public CodeFieldReferenceExpression(CodeExpression targetObject, string fieldName)
 		{
-			this.TargetObject = targetObject;
-			this.FieldName = fieldName;
+			this.targetObject = targetObject;
+			this.fieldName = fieldName;
 		}
-
-		public CodeExpression TargetObject { get; set; }
 
 		public string FieldName
 		{
 			get
 			{
-				return this._fieldName ?? string.Empty;
+				return this.fieldName;
 			}
 			set
 			{
-				this._fieldName = value;
+				this.fieldName = value;
 			}
 		}
 
-		private string _fieldName;
+		public CodeExpression TargetObject
+		{
+			get
+			{
+				return this.targetObject;
+			}
+			set
+			{
+				this.targetObject = value;
+			}
+		}
+
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeExpression targetObject;
+
+		private string fieldName;
 	}
 }

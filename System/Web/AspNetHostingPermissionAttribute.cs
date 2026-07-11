@@ -33,7 +33,8 @@ namespace System.Web
 			{
 				if (value < AspNetHostingPermissionLevel.None || value > AspNetHostingPermissionLevel.Unrestricted)
 				{
-					throw new ArgumentException(string.Format(global::Locale.GetText("Invalid enum {0}."), value), "Level");
+					string text = global::Locale.GetText("Invalid enum {0}.");
+					throw new ArgumentException(string.Format(text, value), "Level");
 				}
 				this._level = value;
 			}

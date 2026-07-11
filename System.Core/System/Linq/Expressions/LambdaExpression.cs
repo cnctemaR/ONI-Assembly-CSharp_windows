@@ -1,39 +1,23 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Dynamic.Utils;
-using System.Linq.Expressions.Compiler;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 
 namespace System.Linq.Expressions
 {
-	[DebuggerTypeProxy(typeof(Expression.LambdaExpressionProxy))]
-	public abstract class LambdaExpression : Expression, IParameterProvider
+	public class LambdaExpression : Expression
 	{
-		internal LambdaExpression(Expression body)
+		internal LambdaExpression(Type delegateType, Expression body, ReadOnlyCollection<ParameterExpression> parameters)
+			: base(ExpressionType.Lambda, delegateType)
 		{
-			this._body = body;
+			this.body = body;
+			this.parameters = parameters;
 		}
 
-		public sealed override Type Type
+		public Expression Body
 		{
 			get
 			{
-				return this.TypeCore;
-			}
-		}
-
-		internal abstract Type TypeCore { get; }
-
-		internal abstract Type PublicType { get; }
-
-		public sealed override ExpressionType NodeType
-		{
-			get
-			{
-				return ExpressionType.Lambda;
+				return this.body;
 			}
 		}
 
@@ -41,127 +25,44 @@ namespace System.Linq.Expressions
 		{
 			get
 			{
-				return this.GetOrMakeParameters();
+				return this.parameters;
 			}
 		}
 
-		public string Name
+		private void EmitPopIfNeeded(EmitContext ec)
 		{
-			get
+			if (this.GetReturnType() == typeof(void) && this.body.Type != typeof(void))
 			{
-				return this.NameCore;
+				ec.ig.Emit(OpCodes.Pop);
 			}
 		}
 
-		internal virtual string NameCore
+		internal override void Emit(EmitContext ec)
 		{
-			get
-			{
-				return null;
-			}
+			ec.EmitCreateDelegate(this);
 		}
 
-		public Expression Body
+		internal void EmitBody(EmitContext ec)
 		{
-			get
-			{
-				return this._body;
-			}
+			this.body.Emit(ec);
+			this.EmitPopIfNeeded(ec);
+			ec.ig.Emit(OpCodes.Ret);
 		}
 
-		public Type ReturnType
+		internal Type GetReturnType()
 		{
-			get
-			{
-				return this.Type.GetInvokeMethod().ReturnType;
-			}
-		}
-
-		public bool TailCall
-		{
-			get
-			{
-				return this.TailCallCore;
-			}
-		}
-
-		internal virtual bool TailCallCore
-		{
-			get
-			{
-				return false;
-			}
-		}
-
-		[ExcludeFromCodeCoverage]
-		internal virtual ReadOnlyCollection<ParameterExpression> GetOrMakeParameters()
-		{
-			throw ContractUtils.Unreachable;
-		}
-
-		[ExcludeFromCodeCoverage]
-		ParameterExpression IParameterProvider.GetParameter(int index)
-		{
-			return this.GetParameter(index);
-		}
-
-		[ExcludeFromCodeCoverage]
-		internal virtual ParameterExpression GetParameter(int index)
-		{
-			throw ContractUtils.Unreachable;
-		}
-
-		[ExcludeFromCodeCoverage]
-		int IParameterProvider.ParameterCount
-		{
-			get
-			{
-				return this.ParameterCount;
-			}
-		}
-
-		[ExcludeFromCodeCoverage]
-		internal virtual int ParameterCount
-		{
-			get
-			{
-				throw ContractUtils.Unreachable;
-			}
+			return base.Type.GetInvokeMethod().ReturnType;
 		}
 
 		public Delegate Compile()
 		{
-			return this.Compile(false);
+			CompilationContext compilationContext = new CompilationContext();
+			compilationContext.AddCompilationUnit(this);
+			return compilationContext.CreateDelegate();
 		}
 
-		public Delegate Compile(bool preferInterpretation)
-		{
-			return LambdaCompiler.Compile(this);
-		}
+		private Expression body;
 
-		public void CompileToMethod(MethodBuilder method)
-		{
-			ContractUtils.RequiresNotNull(method, "method");
-			ContractUtils.Requires(method.IsStatic, "method");
-			if (method.DeclaringType as TypeBuilder == null)
-			{
-				throw Error.MethodBuilderDoesNotHaveTypeBuilder();
-			}
-			LambdaCompiler.Compile(this, method);
-		}
-
-		internal abstract LambdaExpression Accept(StackSpiller spiller);
-
-		public Delegate Compile(DebugInfoGenerator debugInfoGenerator)
-		{
-			return this.Compile();
-		}
-
-		public void CompileToMethod(MethodBuilder method, DebugInfoGenerator debugInfoGenerator)
-		{
-			this.CompileToMethod(method);
-		}
-
-		private readonly Expression _body;
+		private ReadOnlyCollection<ParameterExpression> parameters;
 	}
 }

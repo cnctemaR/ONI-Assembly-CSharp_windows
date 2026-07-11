@@ -3,22 +3,12 @@ using System.Collections;
 using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
 	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class TypeConverter
 	{
-		private static bool UseCompatibleTypeConversion
-		{
-			get
-			{
-				return TypeConverter.useCompatibleTypeConversion;
-			}
-		}
-
 		public bool CanConvertFrom(Type sourceType)
 		{
 			return this.CanConvertFrom(null, sourceType);
@@ -26,7 +16,7 @@ namespace System.ComponentModel
 
 		public virtual bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
 		{
-			return sourceType == typeof(InstanceDescriptor);
+			return sourceType == typeof(global::System.ComponentModel.Design.Serialization.InstanceDescriptor);
 		}
 
 		public bool CanConvertTo(Type destinationType)
@@ -39,24 +29,23 @@ namespace System.ComponentModel
 			return destinationType == typeof(string);
 		}
 
-		public object ConvertFrom(object value)
+		public object ConvertFrom(object o)
 		{
-			return this.ConvertFrom(null, CultureInfo.CurrentCulture, value);
+			return this.ConvertFrom(null, CultureInfo.CurrentCulture, o);
 		}
 
 		public virtual object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
 		{
-			InstanceDescriptor instanceDescriptor = value as InstanceDescriptor;
-			if (instanceDescriptor != null)
+			if (value is global::System.ComponentModel.Design.Serialization.InstanceDescriptor)
 			{
-				return instanceDescriptor.Invoke();
+				return ((global::System.ComponentModel.Design.Serialization.InstanceDescriptor)value).Invoke();
 			}
-			throw this.GetConvertFromException(value);
+			return this.GetConvertFromException(value);
 		}
 
 		public object ConvertFromInvariantString(string text)
 		{
-			return this.ConvertFromString(null, CultureInfo.InvariantCulture, text);
+			return this.ConvertFromInvariantString(null, text);
 		}
 
 		public object ConvertFromInvariantString(ITypeDescriptorContext context, string text)
@@ -66,12 +55,12 @@ namespace System.ComponentModel
 
 		public object ConvertFromString(string text)
 		{
-			return this.ConvertFrom(null, null, text);
+			return this.ConvertFrom(text);
 		}
 
 		public object ConvertFromString(ITypeDescriptorContext context, string text)
 		{
-			return this.ConvertFrom(context, CultureInfo.CurrentCulture, text);
+			return this.ConvertFromString(context, CultureInfo.CurrentCulture, text);
 		}
 
 		public object ConvertFromString(ITypeDescriptorContext context, CultureInfo culture, string text)
@@ -90,33 +79,25 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("destinationType");
 			}
-			if (!(destinationType == typeof(string)))
+			if (destinationType != typeof(string))
 			{
-				throw this.GetConvertToException(value, destinationType);
+				return this.GetConvertToException(value, destinationType);
 			}
-			if (value == null)
+			if (value != null)
 			{
-				return string.Empty;
+				return value.ToString();
 			}
-			if (culture != null && culture != CultureInfo.CurrentCulture)
-			{
-				IFormattable formattable = value as IFormattable;
-				if (formattable != null)
-				{
-					return formattable.ToString(null, culture);
-				}
-			}
-			return value.ToString();
+			return string.Empty;
 		}
 
 		public string ConvertToInvariantString(object value)
 		{
-			return this.ConvertToString(null, CultureInfo.InvariantCulture, value);
+			return this.ConvertToInvariantString(null, value);
 		}
 
 		public string ConvertToInvariantString(ITypeDescriptorContext context, object value)
 		{
-			return this.ConvertToString(context, CultureInfo.InvariantCulture, value);
+			return (string)this.ConvertTo(context, CultureInfo.InvariantCulture, value, typeof(string));
 		}
 
 		public string ConvertToString(object value)
@@ -134,28 +115,18 @@ namespace System.ComponentModel
 			return (string)this.ConvertTo(context, culture, value, typeof(string));
 		}
 
-		public object CreateInstance(IDictionary propertyValues)
-		{
-			return this.CreateInstance(null, propertyValues);
-		}
-
-		public virtual object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
-		{
-			return null;
-		}
-
 		protected Exception GetConvertFromException(object value)
 		{
 			string text;
 			if (value == null)
 			{
-				text = global::SR.GetString("(null)");
+				text = "(null)";
 			}
 			else
 			{
 				text = value.GetType().FullName;
 			}
-			throw new NotSupportedException(global::SR.GetString("{0} cannot convert from {1}.", new object[]
+			throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "{0} cannot convert from {1}.", new object[]
 			{
 				base.GetType().Name,
 				text
@@ -167,18 +138,28 @@ namespace System.ComponentModel
 			string text;
 			if (value == null)
 			{
-				text = global::SR.GetString("(null)");
+				text = "(null)";
 			}
 			else
 			{
 				text = value.GetType().FullName;
 			}
-			throw new NotSupportedException(global::SR.GetString("'{0}' is unable to convert '{1}' to '{2}'.", new object[]
+			throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "'{0}' is unable to convert '{1}' to '{2}'.", new object[]
 			{
 				base.GetType().Name,
 				text,
 				destinationType.FullName
 			}));
+		}
+
+		public object CreateInstance(IDictionary propertyValues)
+		{
+			return this.CreateInstance(null, propertyValues);
+		}
+
+		public virtual object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
+		{
+			return null;
 		}
 
 		public bool GetCreateInstanceSupported()
@@ -253,27 +234,7 @@ namespace System.ComponentModel
 
 		public virtual bool IsValid(ITypeDescriptorContext context, object value)
 		{
-			if (TypeConverter.UseCompatibleTypeConversion)
-			{
-				return true;
-			}
-			bool flag = true;
-			try
-			{
-				if (value == null || this.CanConvertFrom(context, value.GetType()))
-				{
-					this.ConvertFrom(context, CultureInfo.InvariantCulture, value);
-				}
-				else
-				{
-					flag = false;
-				}
-			}
-			catch
-			{
-				flag = false;
-			}
-			return flag;
+			return true;
 		}
 
 		protected PropertyDescriptorCollection SortProperties(PropertyDescriptorCollection props, string[] names)
@@ -282,136 +243,21 @@ namespace System.ComponentModel
 			return props;
 		}
 
-		private const string s_UseCompatibleTypeConverterBehavior = "UseCompatibleTypeConverterBehavior";
-
-		private static volatile bool useCompatibleTypeConversion;
-
-		protected abstract class SimplePropertyDescriptor : PropertyDescriptor
-		{
-			protected SimplePropertyDescriptor(Type componentType, string name, Type propertyType)
-				: this(componentType, name, propertyType, new Attribute[0])
-			{
-			}
-
-			protected SimplePropertyDescriptor(Type componentType, string name, Type propertyType, Attribute[] attributes)
-				: base(name, attributes)
-			{
-				this.componentType = componentType;
-				this.propertyType = propertyType;
-			}
-
-			public override Type ComponentType
-			{
-				get
-				{
-					return this.componentType;
-				}
-			}
-
-			public override bool IsReadOnly
-			{
-				get
-				{
-					return this.Attributes.Contains(ReadOnlyAttribute.Yes);
-				}
-			}
-
-			public override Type PropertyType
-			{
-				get
-				{
-					return this.propertyType;
-				}
-			}
-
-			public override bool CanResetValue(object component)
-			{
-				DefaultValueAttribute defaultValueAttribute = (DefaultValueAttribute)this.Attributes[typeof(DefaultValueAttribute)];
-				return defaultValueAttribute != null && defaultValueAttribute.Value.Equals(this.GetValue(component));
-			}
-
-			public override void ResetValue(object component)
-			{
-				DefaultValueAttribute defaultValueAttribute = (DefaultValueAttribute)this.Attributes[typeof(DefaultValueAttribute)];
-				if (defaultValueAttribute != null)
-				{
-					this.SetValue(component, defaultValueAttribute.Value);
-				}
-			}
-
-			public override bool ShouldSerializeValue(object component)
-			{
-				return false;
-			}
-
-			private Type componentType;
-
-			private Type propertyType;
-		}
-
 		public class StandardValuesCollection : ICollection, IEnumerable
 		{
 			public StandardValuesCollection(ICollection values)
 			{
-				if (values == null)
-				{
-					values = new object[0];
-				}
-				Array array = values as Array;
-				if (array != null)
-				{
-					this.valueArray = array;
-				}
 				this.values = values;
 			}
 
-			public int Count
+			void ICollection.CopyTo(Array array, int index)
 			{
-				get
-				{
-					if (this.valueArray != null)
-					{
-						return this.valueArray.Length;
-					}
-					return this.values.Count;
-				}
+				this.CopyTo(array, index);
 			}
 
-			public object this[int index]
+			IEnumerator IEnumerable.GetEnumerator()
 			{
-				get
-				{
-					if (this.valueArray != null)
-					{
-						return this.valueArray.GetValue(index);
-					}
-					IList list = this.values as IList;
-					if (list != null)
-					{
-						return list[index];
-					}
-					this.valueArray = new object[this.values.Count];
-					this.values.CopyTo(this.valueArray, 0);
-					return this.valueArray.GetValue(index);
-				}
-			}
-
-			public void CopyTo(Array array, int index)
-			{
-				this.values.CopyTo(array, index);
-			}
-
-			public IEnumerator GetEnumerator()
-			{
-				return this.values.GetEnumerator();
-			}
-
-			int ICollection.Count
-			{
-				get
-				{
-					return this.Count;
-				}
+				return this.GetEnumerator();
 			}
 
 			bool ICollection.IsSynchronized
@@ -430,19 +276,104 @@ namespace System.ComponentModel
 				}
 			}
 
-			void ICollection.CopyTo(Array array, int index)
+			int ICollection.Count
 			{
-				this.CopyTo(array, index);
+				get
+				{
+					return this.Count;
+				}
 			}
 
-			IEnumerator IEnumerable.GetEnumerator()
+			public void CopyTo(Array array, int index)
 			{
-				return this.GetEnumerator();
+				this.values.CopyTo(array, index);
+			}
+
+			public IEnumerator GetEnumerator()
+			{
+				return this.values.GetEnumerator();
+			}
+
+			public int Count
+			{
+				get
+				{
+					return this.values.Count;
+				}
+			}
+
+			public object this[int index]
+			{
+				get
+				{
+					return ((IList)this.values)[index];
+				}
 			}
 
 			private ICollection values;
+		}
 
-			private Array valueArray;
+		protected abstract class SimplePropertyDescriptor : PropertyDescriptor
+		{
+			public SimplePropertyDescriptor(Type componentType, string name, Type propertyType)
+				: this(componentType, name, propertyType, null)
+			{
+			}
+
+			public SimplePropertyDescriptor(Type componentType, string name, Type propertyType, Attribute[] attributes)
+				: base(name, attributes)
+			{
+				this.componentType = componentType;
+				this.propertyType = propertyType;
+			}
+
+			public override Type ComponentType
+			{
+				get
+				{
+					return this.componentType;
+				}
+			}
+
+			public override Type PropertyType
+			{
+				get
+				{
+					return this.propertyType;
+				}
+			}
+
+			public override bool IsReadOnly
+			{
+				get
+				{
+					return this.Attributes.Contains(ReadOnlyAttribute.Yes);
+				}
+			}
+
+			public override bool ShouldSerializeValue(object component)
+			{
+				return false;
+			}
+
+			public override bool CanResetValue(object component)
+			{
+				DefaultValueAttribute defaultValueAttribute = (DefaultValueAttribute)this.Attributes[typeof(DefaultValueAttribute)];
+				return defaultValueAttribute != null && defaultValueAttribute.Value == this.GetValue(component);
+			}
+
+			public override void ResetValue(object component)
+			{
+				DefaultValueAttribute defaultValueAttribute = (DefaultValueAttribute)this.Attributes[typeof(DefaultValueAttribute)];
+				if (defaultValueAttribute != null)
+				{
+					this.SetValue(component, defaultValueAttribute.Value);
+				}
+			}
+
+			private Type componentType;
+
+			private Type propertyType;
 		}
 	}
 }

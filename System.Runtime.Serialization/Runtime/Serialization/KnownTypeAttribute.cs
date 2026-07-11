@@ -5,8 +5,9 @@ namespace System.Runtime.Serialization
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = true, AllowMultiple = true)]
 	public sealed class KnownTypeAttribute : Attribute
 	{
-		private KnownTypeAttribute()
+		public KnownTypeAttribute(string methodName)
 		{
+			this.method_name = methodName;
 		}
 
 		public KnownTypeAttribute(Type type)
@@ -14,16 +15,11 @@ namespace System.Runtime.Serialization
 			this.type = type;
 		}
 
-		public KnownTypeAttribute(string methodName)
-		{
-			this.methodName = methodName;
-		}
-
 		public string MethodName
 		{
 			get
 			{
-				return this.methodName;
+				return this.method_name;
 			}
 		}
 
@@ -35,7 +31,7 @@ namespace System.Runtime.Serialization
 			}
 		}
 
-		private string methodName;
+		private string method_name;
 
 		private Type type;
 	}

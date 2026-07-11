@@ -1,45 +1,46 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Dynamic.Utils;
 using System.Reflection;
-using System.Runtime.CompilerServices;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
-	[DebuggerTypeProxy(typeof(Expression.UnaryExpressionProxy))]
 	public sealed class UnaryExpression : Expression
 	{
-		internal UnaryExpression(ExpressionType nodeType, Expression expression, Type type, MethodInfo method)
+		internal UnaryExpression(ExpressionType node_type, Expression operand, Type type)
+			: base(node_type, type)
 		{
-			this.Operand = expression;
-			this.Method = method;
-			this.NodeType = nodeType;
-			this.Type = type;
+			this.operand = operand;
 		}
 
-		public sealed override Type Type { get; }
+		internal UnaryExpression(ExpressionType node_type, Expression operand, Type type, MethodInfo method, bool is_lifted)
+			: base(node_type, type)
+		{
+			this.operand = operand;
+			this.method = method;
+			this.is_lifted = is_lifted;
+		}
 
-		public sealed override ExpressionType NodeType { get; }
+		public Expression Operand
+		{
+			get
+			{
+				return this.operand;
+			}
+		}
 
-		public Expression Operand { get; }
-
-		public MethodInfo Method { get; }
+		public MethodInfo Method
+		{
+			get
+			{
+				return this.method;
+			}
+		}
 
 		public bool IsLifted
 		{
 			get
 			{
-				if (this.NodeType == ExpressionType.TypeAs || this.NodeType == ExpressionType.Quote || this.NodeType == ExpressionType.Throw)
-				{
-					return false;
-				}
-				bool flag = this.Operand.Type.IsNullableType();
-				bool flag2 = this.Type.IsNullableType();
-				if (this.Method != null)
-				{
-					return (flag && !TypeUtils.AreEquivalent(this.Method.GetParametersCached()[0].ParameterType, this.Operand.Type)) || (flag2 && !TypeUtils.AreEquivalent(this.Method.ReturnType, this.Type));
-				}
-				return flag || flag2;
+				return this.is_lifted;
 			}
 		}
 
@@ -47,147 +48,368 @@ namespace System.Linq.Expressions
 		{
 			get
 			{
-				return this.IsLifted && this.Type.IsNullableType();
+				return this.is_lifted && base.Type.IsNullable();
 			}
 		}
 
-		protected internal override Expression Accept(ExpressionVisitor visitor)
+		private void EmitArrayLength(EmitContext ec)
 		{
-			return visitor.VisitUnary(this);
+			this.operand.Emit(ec);
+			ec.ig.Emit(OpCodes.Ldlen);
 		}
 
-		public override bool CanReduce
+		private void EmitTypeAs(EmitContext ec)
 		{
-			get
+			Type type = base.Type;
+			ec.EmitIsInst(this.operand, type);
+			if (type.IsNullable())
 			{
-				ExpressionType nodeType = this.NodeType;
-				return nodeType - ExpressionType.PreIncrementAssign <= 3;
-			}
-		}
-
-		public override Expression Reduce()
-		{
-			if (!this.CanReduce)
-			{
-				return this;
-			}
-			ExpressionType nodeType = this.Operand.NodeType;
-			if (nodeType == ExpressionType.MemberAccess)
-			{
-				return this.ReduceMember();
-			}
-			if (nodeType == ExpressionType.Index)
-			{
-				return this.ReduceIndex();
-			}
-			return this.ReduceVariable();
-		}
-
-		private bool IsPrefix
-		{
-			get
-			{
-				return this.NodeType == ExpressionType.PreIncrementAssign || this.NodeType == ExpressionType.PreDecrementAssign;
+				ec.ig.Emit(OpCodes.Unbox_Any, type);
 			}
 		}
 
-		private UnaryExpression FunctionalOp(Expression operand)
+		private void EmitLiftedUnary(EmitContext ec)
 		{
-			ExpressionType expressionType;
-			if (this.NodeType == ExpressionType.PreIncrementAssign || this.NodeType == ExpressionType.PostIncrementAssign)
-			{
-				expressionType = ExpressionType.Increment;
-			}
-			else
-			{
-				expressionType = ExpressionType.Decrement;
-			}
-			return new UnaryExpression(expressionType, operand, operand.Type, this.Method);
+			ILGenerator ig = ec.ig;
+			LocalBuilder localBuilder = ec.EmitStored(this.operand);
+			LocalBuilder localBuilder2 = ig.DeclareLocal(base.Type);
+			Label label = ig.DefineLabel();
+			Label label2 = ig.DefineLabel();
+			ec.EmitNullableHasValue(localBuilder);
+			ig.Emit(OpCodes.Brtrue, label);
+			ec.EmitNullableInitialize(localBuilder2);
+			ig.Emit(OpCodes.Br, label2);
+			ig.MarkLabel(label);
+			ec.EmitNullableGetValueOrDefault(localBuilder);
+			this.EmitUnaryOperator(ec);
+			ec.EmitNullableNew(base.Type);
+			ig.MarkLabel(label2);
 		}
 
-		private Expression ReduceVariable()
+		private void EmitUnaryOperator(EmitContext ec)
 		{
-			if (this.IsPrefix)
+			ILGenerator ig = ec.ig;
+			ExpressionType nodeType = base.NodeType;
+			switch (nodeType)
 			{
-				return Expression.Assign(this.Operand, this.FunctionalOp(this.Operand));
-			}
-			ParameterExpression parameterExpression = Expression.Parameter(this.Operand.Type, null);
-			return Expression.Block(new TrueReadOnlyCollection<ParameterExpression>(new ParameterExpression[] { parameterExpression }), new TrueReadOnlyCollection<Expression>(new Expression[]
-			{
-				Expression.Assign(parameterExpression, this.Operand),
-				Expression.Assign(this.Operand, this.FunctionalOp(parameterExpression)),
-				parameterExpression
-			}));
-		}
-
-		private Expression ReduceMember()
-		{
-			MemberExpression memberExpression = (MemberExpression)this.Operand;
-			if (memberExpression.Expression == null)
-			{
-				return this.ReduceVariable();
-			}
-			ParameterExpression parameterExpression = Expression.Parameter(memberExpression.Expression.Type, null);
-			BinaryExpression binaryExpression = Expression.Assign(parameterExpression, memberExpression.Expression);
-			memberExpression = Expression.MakeMemberAccess(parameterExpression, memberExpression.Member);
-			if (this.IsPrefix)
-			{
-				return Expression.Block(new TrueReadOnlyCollection<ParameterExpression>(new ParameterExpression[] { parameterExpression }), new TrueReadOnlyCollection<Expression>(new Expression[]
+			case ExpressionType.Negate:
+				ig.Emit(OpCodes.Neg);
+				break;
+			default:
+				if (nodeType != ExpressionType.Convert && nodeType != ExpressionType.ConvertChecked)
 				{
-					binaryExpression,
-					Expression.Assign(memberExpression, this.FunctionalOp(memberExpression))
-				}));
+					if (nodeType == ExpressionType.Not)
+					{
+						if (this.operand.Type.GetNotNullableType() == typeof(bool))
+						{
+							ig.Emit(OpCodes.Ldc_I4_0);
+							ig.Emit(OpCodes.Ceq);
+						}
+						else
+						{
+							ig.Emit(OpCodes.Not);
+						}
+					}
+				}
+				else
+				{
+					this.EmitPrimitiveConversion(ec, this.operand.Type.GetNotNullableType(), base.Type.GetNotNullableType());
+				}
+				break;
+			case ExpressionType.NegateChecked:
+				ig.Emit(OpCodes.Ldc_I4_M1);
+				ig.Emit((!Expression.IsUnsigned(this.operand.Type)) ? OpCodes.Mul_Ovf : OpCodes.Mul_Ovf_Un);
+				break;
 			}
-			ParameterExpression parameterExpression2 = Expression.Parameter(memberExpression.Type, null);
-			return Expression.Block(new TrueReadOnlyCollection<ParameterExpression>(new ParameterExpression[] { parameterExpression, parameterExpression2 }), new TrueReadOnlyCollection<Expression>(new Expression[]
-			{
-				binaryExpression,
-				Expression.Assign(parameterExpression2, memberExpression),
-				Expression.Assign(memberExpression, this.FunctionalOp(parameterExpression2)),
-				parameterExpression2
-			}));
 		}
 
-		private Expression ReduceIndex()
+		private void EmitConvert(EmitContext ec)
 		{
-			bool isPrefix = this.IsPrefix;
-			IndexExpression indexExpression = (IndexExpression)this.Operand;
-			int argumentCount = indexExpression.ArgumentCount;
-			Expression[] array = new Expression[argumentCount + (isPrefix ? 2 : 4)];
-			ParameterExpression[] array2 = new ParameterExpression[argumentCount + (isPrefix ? 1 : 2)];
-			ParameterExpression[] array3 = new ParameterExpression[argumentCount];
-			int i = 0;
-			array2[i] = Expression.Parameter(indexExpression.Object.Type, null);
-			array[i] = Expression.Assign(array2[i], indexExpression.Object);
-			for (i++; i <= argumentCount; i++)
+			Type type = this.operand.Type;
+			Type type2 = base.Type;
+			if (type == type2)
 			{
-				Expression argument = indexExpression.GetArgument(i - 1);
-				array3[i - 1] = (array2[i] = Expression.Parameter(argument.Type, null));
-				array[i] = Expression.Assign(array2[i], argument);
+				this.operand.Emit(ec);
 			}
-			indexExpression = Expression.MakeIndex(array2[0], indexExpression.Indexer, new TrueReadOnlyCollection<Expression>(array3));
-			if (!isPrefix)
+			else if (type.IsNullable() && !type2.IsNullable())
 			{
-				ParameterExpression parameterExpression = (array2[i] = Expression.Parameter(indexExpression.Type, null));
-				array[i] = Expression.Assign(array2[i], indexExpression);
-				i++;
-				array[i++] = Expression.Assign(indexExpression, this.FunctionalOp(parameterExpression));
-				array[i++] = parameterExpression;
+				this.EmitConvertFromNullable(ec);
+			}
+			else if (!type.IsNullable() && type2.IsNullable())
+			{
+				this.EmitConvertToNullable(ec);
+			}
+			else if (type.IsNullable() && type2.IsNullable())
+			{
+				this.EmitConvertFromNullableToNullable(ec);
+			}
+			else if (Expression.IsReferenceConversion(type, type2))
+			{
+				this.EmitCast(ec);
 			}
 			else
 			{
-				array[i++] = Expression.Assign(indexExpression, this.FunctionalOp(indexExpression));
+				if (!Expression.IsPrimitiveConversion(type, type2))
+				{
+					throw new NotImplementedException();
+				}
+				this.EmitPrimitiveConversion(ec);
 			}
-			return Expression.Block(new TrueReadOnlyCollection<ParameterExpression>(array2), new TrueReadOnlyCollection<Expression>(array));
 		}
 
-		public UnaryExpression Update(Expression operand)
+		private void EmitConvertFromNullableToNullable(EmitContext ec)
 		{
-			if (operand == this.Operand)
-			{
-				return this;
-			}
-			return Expression.MakeUnary(this.NodeType, operand, this.Type, this.Method);
+			this.EmitLiftedUnary(ec);
 		}
+
+		private void EmitConvertToNullable(EmitContext ec)
+		{
+			ec.Emit(this.operand);
+			if (this.IsUnBoxing())
+			{
+				this.EmitUnbox(ec);
+				return;
+			}
+			if (this.operand.Type != base.Type.GetNotNullableType())
+			{
+				this.EmitPrimitiveConversion(ec, this.operand.Type, base.Type.GetNotNullableType());
+			}
+			ec.EmitNullableNew(base.Type);
+		}
+
+		private void EmitConvertFromNullable(EmitContext ec)
+		{
+			if (this.IsBoxing())
+			{
+				ec.Emit(this.operand);
+				this.EmitBox(ec);
+				return;
+			}
+			ec.EmitCall(this.operand, this.operand.Type.GetMethod("get_Value"));
+			if (this.operand.Type.GetNotNullableType() != base.Type)
+			{
+				this.EmitPrimitiveConversion(ec, this.operand.Type.GetNotNullableType(), base.Type);
+			}
+		}
+
+		private bool IsBoxing()
+		{
+			return this.operand.Type.IsValueType && !base.Type.IsValueType;
+		}
+
+		private void EmitBox(EmitContext ec)
+		{
+			ec.ig.Emit(OpCodes.Box, this.operand.Type);
+		}
+
+		private bool IsUnBoxing()
+		{
+			return !this.operand.Type.IsValueType && base.Type.IsValueType;
+		}
+
+		private void EmitUnbox(EmitContext ec)
+		{
+			ec.ig.Emit(OpCodes.Unbox_Any, base.Type);
+		}
+
+		private void EmitCast(EmitContext ec)
+		{
+			this.operand.Emit(ec);
+			if (this.IsBoxing())
+			{
+				this.EmitBox(ec);
+			}
+			else if (this.IsUnBoxing())
+			{
+				this.EmitUnbox(ec);
+			}
+			else
+			{
+				ec.ig.Emit(OpCodes.Castclass, base.Type);
+			}
+		}
+
+		private void EmitPrimitiveConversion(EmitContext ec, bool is_unsigned, OpCode signed, OpCode unsigned, OpCode signed_checked, OpCode unsigned_checked)
+		{
+			if (base.NodeType != ExpressionType.ConvertChecked)
+			{
+				ec.ig.Emit((!is_unsigned) ? signed : unsigned);
+			}
+			else
+			{
+				ec.ig.Emit((!is_unsigned) ? signed_checked : unsigned_checked);
+			}
+		}
+
+		private void EmitPrimitiveConversion(EmitContext ec)
+		{
+			this.operand.Emit(ec);
+			this.EmitPrimitiveConversion(ec, this.operand.Type, base.Type);
+		}
+
+		private void EmitPrimitiveConversion(EmitContext ec, Type from, Type to)
+		{
+			bool flag = Expression.IsUnsigned(from);
+			switch (Type.GetTypeCode(to))
+			{
+			case TypeCode.SByte:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I1, OpCodes.Conv_U1, OpCodes.Conv_Ovf_I1, OpCodes.Conv_Ovf_I1_Un);
+				return;
+			case TypeCode.Byte:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I1, OpCodes.Conv_U1, OpCodes.Conv_Ovf_U1, OpCodes.Conv_Ovf_U1_Un);
+				return;
+			case TypeCode.Int16:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I2, OpCodes.Conv_U2, OpCodes.Conv_Ovf_I2, OpCodes.Conv_Ovf_I2_Un);
+				return;
+			case TypeCode.UInt16:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I2, OpCodes.Conv_U2, OpCodes.Conv_Ovf_U2, OpCodes.Conv_Ovf_U2_Un);
+				return;
+			case TypeCode.Int32:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I4, OpCodes.Conv_U4, OpCodes.Conv_Ovf_I4, OpCodes.Conv_Ovf_I4_Un);
+				return;
+			case TypeCode.UInt32:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I4, OpCodes.Conv_U4, OpCodes.Conv_Ovf_U4, OpCodes.Conv_Ovf_U4_Un);
+				return;
+			case TypeCode.Int64:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I8, OpCodes.Conv_U8, OpCodes.Conv_Ovf_I8, OpCodes.Conv_Ovf_I8_Un);
+				return;
+			case TypeCode.UInt64:
+				this.EmitPrimitiveConversion(ec, flag, OpCodes.Conv_I8, OpCodes.Conv_U8, OpCodes.Conv_Ovf_U8, OpCodes.Conv_Ovf_U8_Un);
+				return;
+			case TypeCode.Single:
+				if (flag)
+				{
+					ec.ig.Emit(OpCodes.Conv_R_Un);
+				}
+				ec.ig.Emit(OpCodes.Conv_R4);
+				return;
+			case TypeCode.Double:
+				if (flag)
+				{
+					ec.ig.Emit(OpCodes.Conv_R_Un);
+				}
+				ec.ig.Emit(OpCodes.Conv_R8);
+				return;
+			default:
+				throw new NotImplementedException(base.Type.ToString());
+			}
+		}
+
+		private void EmitArithmeticUnary(EmitContext ec)
+		{
+			if (!this.IsLifted)
+			{
+				this.operand.Emit(ec);
+				this.EmitUnaryOperator(ec);
+			}
+			else
+			{
+				this.EmitLiftedUnary(ec);
+			}
+		}
+
+		private void EmitUserDefinedLiftedToNullOperator(EmitContext ec)
+		{
+			ILGenerator ig = ec.ig;
+			LocalBuilder localBuilder = ec.EmitStored(this.operand);
+			Label label = ig.DefineLabel();
+			Label label2 = ig.DefineLabel();
+			ec.EmitNullableHasValue(localBuilder);
+			ig.Emit(OpCodes.Brfalse, label);
+			ec.EmitNullableGetValueOrDefault(localBuilder);
+			ec.EmitCall(this.method);
+			ec.EmitNullableNew(base.Type);
+			ig.Emit(OpCodes.Br, label2);
+			ig.MarkLabel(label);
+			LocalBuilder localBuilder2 = ig.DeclareLocal(base.Type);
+			ec.EmitNullableInitialize(localBuilder2);
+			ig.MarkLabel(label2);
+		}
+
+		private void EmitUserDefinedLiftedOperator(EmitContext ec)
+		{
+			LocalBuilder localBuilder = ec.EmitStored(this.operand);
+			ec.EmitNullableGetValue(localBuilder);
+			ec.EmitCall(this.method);
+		}
+
+		private void EmitUserDefinedOperator(EmitContext ec)
+		{
+			if (!this.IsLifted)
+			{
+				ec.Emit(this.operand);
+				ec.EmitCall(this.method);
+			}
+			else if (this.IsLiftedToNull)
+			{
+				this.EmitUserDefinedLiftedToNullOperator(ec);
+			}
+			else
+			{
+				this.EmitUserDefinedLiftedOperator(ec);
+			}
+		}
+
+		private void EmitQuote(EmitContext ec)
+		{
+			ec.EmitScope();
+			ec.EmitReadGlobal(this.operand, typeof(Expression));
+			if (ec.HasHoistedLocals)
+			{
+				ec.EmitLoadHoistedLocalsStore();
+			}
+			else
+			{
+				ec.ig.Emit(OpCodes.Ldnull);
+			}
+			ec.EmitIsolateExpression();
+		}
+
+		internal override void Emit(EmitContext ec)
+		{
+			if (this.method != null)
+			{
+				this.EmitUserDefinedOperator(ec);
+				return;
+			}
+			ExpressionType nodeType = base.NodeType;
+			switch (nodeType)
+			{
+			case ExpressionType.Negate:
+			case ExpressionType.UnaryPlus:
+			case ExpressionType.NegateChecked:
+			case ExpressionType.Not:
+				this.EmitArithmeticUnary(ec);
+				return;
+			default:
+				if (nodeType == ExpressionType.Convert || nodeType == ExpressionType.ConvertChecked)
+				{
+					this.EmitConvert(ec);
+					return;
+				}
+				if (nodeType == ExpressionType.ArrayLength)
+				{
+					this.EmitArrayLength(ec);
+					return;
+				}
+				if (nodeType == ExpressionType.Quote)
+				{
+					this.EmitQuote(ec);
+					return;
+				}
+				if (nodeType != ExpressionType.TypeAs)
+				{
+					throw new NotImplementedException(base.NodeType.ToString());
+				}
+				this.EmitTypeAs(ec);
+				return;
+			}
+		}
+
+		private Expression operand;
+
+		private MethodInfo method;
+
+		private bool is_lifted;
 	}
 }

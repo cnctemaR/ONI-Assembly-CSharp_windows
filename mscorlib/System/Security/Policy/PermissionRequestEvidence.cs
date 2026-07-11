@@ -5,7 +5,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class PermissionRequestEvidence : EvidenceBase, IBuiltInEvidence
+	public sealed class PermissionRequestEvidence : IBuiltInEvidence
 	{
 		public PermissionRequestEvidence(PermissionSet request, PermissionSet optional, PermissionSet denied)
 		{
@@ -21,6 +21,39 @@ namespace System.Security.Policy
 			{
 				this.denied = new PermissionSet(denied);
 			}
+		}
+
+		int IBuiltInEvidence.GetRequiredSize(bool verbose)
+		{
+			int num = ((!verbose) ? 1 : 3);
+			if (this.requested != null)
+			{
+				int num2 = this.requested.ToXml().ToString().Length + ((!verbose) ? 0 : 5);
+				num += num2;
+			}
+			if (this.optional != null)
+			{
+				int num3 = this.optional.ToXml().ToString().Length + ((!verbose) ? 0 : 5);
+				num += num3;
+			}
+			if (this.denied != null)
+			{
+				int num4 = this.denied.ToXml().ToString().Length + ((!verbose) ? 0 : 5);
+				num += num4;
+			}
+			return num;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
+		{
+			return 0;
+		}
+
+		[MonoTODO("IBuiltInEvidence")]
+		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
+		{
+			return 0;
 		}
 
 		public PermissionSet DeniedPermissions
@@ -75,39 +108,6 @@ namespace System.Security.Policy
 				securityElement.AddChild(securityElement4);
 			}
 			return securityElement.ToString();
-		}
-
-		int IBuiltInEvidence.GetRequiredSize(bool verbose)
-		{
-			int num = (verbose ? 3 : 1);
-			if (this.requested != null)
-			{
-				int num2 = this.requested.ToXml().ToString().Length + (verbose ? 5 : 0);
-				num += num2;
-			}
-			if (this.optional != null)
-			{
-				int num3 = this.optional.ToXml().ToString().Length + (verbose ? 5 : 0);
-				num += num3;
-			}
-			if (this.denied != null)
-			{
-				int num4 = this.denied.ToXml().ToString().Length + (verbose ? 5 : 0);
-				num += num4;
-			}
-			return num;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.InitFromBuffer(char[] buffer, int position)
-		{
-			return 0;
-		}
-
-		[MonoTODO("IBuiltInEvidence")]
-		int IBuiltInEvidence.OutputToBuffer(char[] buffer, int position, bool verbose)
-		{
-			return 0;
 		}
 
 		private PermissionSet requested;

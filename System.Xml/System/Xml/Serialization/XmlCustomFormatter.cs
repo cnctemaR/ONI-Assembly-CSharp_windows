@@ -1,80 +1,35 @@
 ﻿using System;
 using System.Collections;
-using System.Configuration;
 using System.Globalization;
 using System.Text;
-using System.Xml.Serialization.Configuration;
 
 namespace System.Xml.Serialization
 {
 	internal class XmlCustomFormatter
 	{
-		private static DateTimeSerializationSection.DateTimeSerializationMode Mode
+		internal static string FromByteArrayBase64(byte[] value)
 		{
-			get
-			{
-				if (XmlCustomFormatter.mode == DateTimeSerializationSection.DateTimeSerializationMode.Default)
-				{
-					DateTimeSerializationSection dateTimeSerializationSection = PrivilegedConfigurationManager.GetSection(ConfigurationStrings.DateTimeSerializationSectionPath) as DateTimeSerializationSection;
-					if (dateTimeSerializationSection != null)
-					{
-						XmlCustomFormatter.mode = dateTimeSerializationSection.Mode;
-					}
-					else
-					{
-						XmlCustomFormatter.mode = DateTimeSerializationSection.DateTimeSerializationMode.Roundtrip;
-					}
-				}
-				return XmlCustomFormatter.mode;
-			}
+			return (value != null) ? Convert.ToBase64String(value) : string.Empty;
 		}
 
-		private XmlCustomFormatter()
-		{
-		}
-
-		internal static string FromDefaultValue(object value, string formatter)
+		internal static string FromByteArrayHex(byte[] value)
 		{
 			if (value == null)
 			{
 				return null;
 			}
-			Type type = value.GetType();
-			if (type == typeof(DateTime))
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (byte b in value)
 			{
-				if (formatter == "DateTime")
-				{
-					return XmlCustomFormatter.FromDateTime((DateTime)value);
-				}
-				if (formatter == "Date")
-				{
-					return XmlCustomFormatter.FromDate((DateTime)value);
-				}
-				if (formatter == "Time")
-				{
-					return XmlCustomFormatter.FromTime((DateTime)value);
-				}
+				stringBuilder.Append(b.ToString("X2", CultureInfo.InvariantCulture));
 			}
-			else if (type == typeof(string))
-			{
-				if (formatter == "XmlName")
-				{
-					return XmlCustomFormatter.FromXmlName((string)value);
-				}
-				if (formatter == "XmlNCName")
-				{
-					return XmlCustomFormatter.FromXmlNCName((string)value);
-				}
-				if (formatter == "XmlNmToken")
-				{
-					return XmlCustomFormatter.FromXmlNmToken((string)value);
-				}
-				if (formatter == "XmlNmTokens")
-				{
-					return XmlCustomFormatter.FromXmlNmTokens((string)value);
-				}
-			}
-			throw new Exception(Res.GetString("The default value type, {0}, is unsupported.", new object[] { type.FullName }));
+			return stringBuilder.ToString();
+		}
+
+		internal static string FromChar(char value)
+		{
+			int num = (int)value;
+			return num.ToString(CultureInfo.InvariantCulture);
 		}
 
 		internal static string FromDate(DateTime value)
@@ -82,27 +37,63 @@ namespace System.Xml.Serialization
 			return XmlConvert.ToString(value, "yyyy-MM-dd");
 		}
 
-		internal static string FromTime(DateTime value)
-		{
-			if (!LocalAppContextSwitches.IgnoreKindInUtcTimeSerialization && value.Kind == DateTimeKind.Utc)
-			{
-				return XmlConvert.ToString(DateTime.MinValue + value.TimeOfDay, "HH:mm:ss.fffffffZ");
-			}
-			return XmlConvert.ToString(DateTime.MinValue + value.TimeOfDay, "HH:mm:ss.fffffffzzzzzz");
-		}
-
 		internal static string FromDateTime(DateTime value)
 		{
-			if (XmlCustomFormatter.Mode == DateTimeSerializationSection.DateTimeSerializationMode.Local)
-			{
-				return XmlConvert.ToString(value, "yyyy-MM-ddTHH:mm:ss.fffffffzzzzzz");
-			}
 			return XmlConvert.ToString(value, XmlDateTimeSerializationMode.RoundtripKind);
 		}
 
-		internal static string FromChar(char value)
+		internal static string FromTime(DateTime value)
 		{
-			return XmlConvert.ToString((ushort)value);
+			return XmlConvert.ToString(value, "HH:mm:ss.fffffffzzz");
+		}
+
+		internal static string FromEnum(long value, string[] values, long[] ids)
+		{
+			return XmlCustomFormatter.FromEnum(value, values, ids, null);
+		}
+
+		internal static string FromEnum(long value, string[] values, long[] ids, string typeName)
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			int num = ids.Length;
+			long num2 = value;
+			int num3 = -1;
+			for (int i = 0; i < num; i++)
+			{
+				if (ids[i] == 0L)
+				{
+					num3 = i;
+				}
+				else
+				{
+					if (num2 == 0L)
+					{
+						break;
+					}
+					if ((ids[i] & value) == ids[i])
+					{
+						if (stringBuilder.Length != 0)
+						{
+							stringBuilder.Append(' ');
+						}
+						stringBuilder.Append(values[i]);
+						num2 &= ~ids[i];
+					}
+				}
+			}
+			if (num2 == 0L)
+			{
+				if (stringBuilder.Length == 0 && num3 != -1)
+				{
+					stringBuilder.Append(values[num3]);
+				}
+				return stringBuilder.ToString();
+			}
+			if (typeName != null)
+			{
+				throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, "'{0}' is not a valid value for {1}.", new object[] { value, typeName }));
+			}
+			throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, "'{0}' is not a valid value.", new object[] { value }));
 		}
 
 		internal static string FromXmlName(string name)
@@ -122,151 +113,17 @@ namespace System.Xml.Serialization
 
 		internal static string FromXmlNmTokens(string nmTokens)
 		{
-			if (nmTokens == null)
-			{
-				return null;
-			}
-			if (nmTokens.IndexOf(' ') < 0)
-			{
-				return XmlCustomFormatter.FromXmlNmToken(nmTokens);
-			}
 			string[] array = nmTokens.Split(new char[] { ' ' });
-			StringBuilder stringBuilder = new StringBuilder();
 			for (int i = 0; i < array.Length; i++)
 			{
-				if (i > 0)
-				{
-					stringBuilder.Append(' ');
-				}
-				stringBuilder.Append(XmlCustomFormatter.FromXmlNmToken(array[i]));
+				array[i] = XmlCustomFormatter.FromXmlNmToken(array[i]);
 			}
-			return stringBuilder.ToString();
+			return string.Join(" ", array);
 		}
 
-		internal static void WriteArrayBase64(XmlWriter writer, byte[] inData, int start, int count)
+		internal static byte[] ToByteArrayBase64(string value)
 		{
-			if (inData == null || count == 0)
-			{
-				return;
-			}
-			writer.WriteBase64(inData, start, count);
-		}
-
-		internal static string FromByteArrayHex(byte[] value)
-		{
-			if (value == null)
-			{
-				return null;
-			}
-			if (value.Length == 0)
-			{
-				return "";
-			}
-			return XmlConvert.ToBinHexString(value);
-		}
-
-		internal static string FromEnum(long val, string[] vals, long[] ids, string typeName)
-		{
-			long num = val;
-			StringBuilder stringBuilder = new StringBuilder();
-			int num2 = -1;
-			for (int i = 0; i < ids.Length; i++)
-			{
-				if (ids[i] == 0L)
-				{
-					num2 = i;
-				}
-				else
-				{
-					if (val == 0L)
-					{
-						break;
-					}
-					if ((ids[i] & num) == ids[i])
-					{
-						if (stringBuilder.Length != 0)
-						{
-							stringBuilder.Append(" ");
-						}
-						stringBuilder.Append(vals[i]);
-						val &= ~ids[i];
-					}
-				}
-			}
-			if (val != 0L)
-			{
-				throw new InvalidOperationException(Res.GetString("Instance validation error: '{0}' is not a valid value for {1}.", new object[]
-				{
-					num,
-					(typeName == null) ? "enum" : typeName
-				}));
-			}
-			if (stringBuilder.Length == 0 && num2 >= 0)
-			{
-				stringBuilder.Append(vals[num2]);
-			}
-			return stringBuilder.ToString();
-		}
-
-		internal static object ToDefaultValue(string value, string formatter)
-		{
-			if (formatter == "DateTime")
-			{
-				return XmlCustomFormatter.ToDateTime(value);
-			}
-			if (formatter == "Date")
-			{
-				return XmlCustomFormatter.ToDate(value);
-			}
-			if (formatter == "Time")
-			{
-				return XmlCustomFormatter.ToTime(value);
-			}
-			if (formatter == "XmlName")
-			{
-				return XmlCustomFormatter.ToXmlName(value);
-			}
-			if (formatter == "XmlNCName")
-			{
-				return XmlCustomFormatter.ToXmlNCName(value);
-			}
-			if (formatter == "XmlNmToken")
-			{
-				return XmlCustomFormatter.ToXmlNmToken(value);
-			}
-			if (formatter == "XmlNmTokens")
-			{
-				return XmlCustomFormatter.ToXmlNmTokens(value);
-			}
-			throw new Exception(Res.GetString("The formatter {0} cannot be used for default values.", new object[] { formatter }));
-		}
-
-		internal static DateTime ToDateTime(string value)
-		{
-			if (XmlCustomFormatter.Mode == DateTimeSerializationSection.DateTimeSerializationMode.Local)
-			{
-				return XmlCustomFormatter.ToDateTime(value, XmlCustomFormatter.allDateTimeFormats);
-			}
-			return XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.RoundtripKind);
-		}
-
-		internal static DateTime ToDateTime(string value, string[] formats)
-		{
-			return XmlConvert.ToDateTime(value, formats);
-		}
-
-		internal static DateTime ToDate(string value)
-		{
-			return XmlCustomFormatter.ToDateTime(value, XmlCustomFormatter.allDateFormats);
-		}
-
-		internal static DateTime ToTime(string value)
-		{
-			if (!LocalAppContextSwitches.IgnoreKindInUtcTimeSerialization)
-			{
-				return DateTime.ParseExact(value, XmlCustomFormatter.allTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite | DateTimeStyles.NoCurrentDateDefault | DateTimeStyles.RoundtripKind);
-			}
-			return DateTime.ParseExact(value, XmlCustomFormatter.allTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AllowLeadingWhite | DateTimeStyles.AllowTrailingWhite | DateTimeStyles.NoCurrentDateDefault);
+			return Convert.FromBase64String(value);
 		}
 
 		internal static char ToChar(string value)
@@ -274,106 +131,320 @@ namespace System.Xml.Serialization
 			return (char)XmlConvert.ToUInt16(value);
 		}
 
-		internal static string ToXmlName(string value)
+		internal static DateTime ToDate(string value)
 		{
-			return XmlConvert.DecodeName(XmlCustomFormatter.CollapseWhitespace(value));
+			return XmlCustomFormatter.ToDateTime(value);
 		}
 
-		internal static string ToXmlNCName(string value)
+		internal static DateTime ToDateTime(string value)
 		{
-			return XmlConvert.DecodeName(XmlCustomFormatter.CollapseWhitespace(value));
+			return XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.RoundtripKind);
 		}
 
-		internal static string ToXmlNmToken(string value)
+		internal static DateTime ToTime(string value)
 		{
-			return XmlConvert.DecodeName(XmlCustomFormatter.CollapseWhitespace(value));
+			return XmlCustomFormatter.ToDateTime(value);
 		}
 
-		internal static string ToXmlNmTokens(string value)
-		{
-			return XmlConvert.DecodeName(XmlCustomFormatter.CollapseWhitespace(value));
-		}
-
-		internal static byte[] ToByteArrayBase64(string value)
-		{
-			if (value == null)
-			{
-				return null;
-			}
-			value = value.Trim();
-			if (value.Length == 0)
-			{
-				return new byte[0];
-			}
-			return Convert.FromBase64String(value);
-		}
-
-		internal static byte[] ToByteArrayHex(string value)
-		{
-			if (value == null)
-			{
-				return null;
-			}
-			value = value.Trim();
-			return XmlConvert.FromBinHexString(value);
-		}
-
-		internal static long ToEnum(string val, Hashtable vals, string typeName, bool validate)
+		internal static long ToEnum(string value, Hashtable values, string typeName, bool validate)
 		{
 			long num = 0L;
-			string[] array = val.Split(null);
-			for (int i = 0; i < array.Length; i++)
+			string[] array = value.Split(new char[] { ' ' });
+			foreach (string text in array)
 			{
-				object obj = vals[array[i]];
+				object obj = values[text];
 				if (obj != null)
 				{
 					num |= (long)obj;
 				}
-				else if (validate && array[i].Length > 0)
+				else if (validate && text.Length != 0)
 				{
-					throw new InvalidOperationException(Res.GetString("Instance validation error: '{0}' is not a valid value for {1}.", new object[]
-					{
-						array[i],
-						typeName
-					}));
+					throw new InvalidOperationException(string.Format("'{0}' is not a valid member of type {1}.", text, typeName));
 				}
 			}
 			return num;
 		}
 
-		private static string CollapseWhitespace(string value)
+		internal static string ToXmlName(string value)
+		{
+			return XmlConvert.DecodeName(value);
+		}
+
+		internal static string ToXmlNCName(string value)
+		{
+			return XmlCustomFormatter.ToXmlName(value);
+		}
+
+		internal static string ToXmlNmToken(string value)
+		{
+			return XmlCustomFormatter.ToXmlName(value);
+		}
+
+		internal static string ToXmlNmTokens(string value)
+		{
+			return XmlCustomFormatter.ToXmlName(value);
+		}
+
+		internal static string ToXmlString(TypeData type, object value)
 		{
 			if (value == null)
 			{
 				return null;
 			}
-			return value.Trim();
+			string xmlType = type.XmlType;
+			switch (xmlType)
+			{
+			case "boolean":
+				return XmlConvert.ToString((bool)value);
+			case "unsignedByte":
+				return XmlConvert.ToString((byte)value);
+			case "char":
+				return XmlConvert.ToString((int)((char)value));
+			case "dateTime":
+				return XmlConvert.ToString((DateTime)value, XmlDateTimeSerializationMode.RoundtripKind);
+			case "date":
+				return ((DateTime)value).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+			case "time":
+				return ((DateTime)value).ToString("HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture);
+			case "decimal":
+				return XmlConvert.ToString((decimal)value);
+			case "double":
+				return XmlConvert.ToString((double)value);
+			case "short":
+				return XmlConvert.ToString((short)value);
+			case "int":
+				return XmlConvert.ToString((int)value);
+			case "long":
+				return XmlConvert.ToString((long)value);
+			case "byte":
+				return XmlConvert.ToString((sbyte)value);
+			case "float":
+				return XmlConvert.ToString((float)value);
+			case "unsignedShort":
+				return XmlConvert.ToString((ushort)value);
+			case "unsignedInt":
+				return XmlConvert.ToString((uint)value);
+			case "unsignedLong":
+				return XmlConvert.ToString((ulong)value);
+			case "guid":
+				return XmlConvert.ToString((Guid)value);
+			case "base64":
+			case "base64Binary":
+				return (value != null) ? Convert.ToBase64String((byte[])value) : string.Empty;
+			case "hexBinary":
+				return (value != null) ? XmlConvert.ToBinHexString((byte[])value) : string.Empty;
+			case "duration":
+				return (string)value;
+			}
+			return (!(value is IFormattable)) ? value.ToString() : ((IFormattable)value).ToString(null, CultureInfo.InvariantCulture);
 		}
 
-		private static DateTimeSerializationSection.DateTimeSerializationMode mode;
-
-		private static string[] allDateTimeFormats = new string[]
+		internal static object FromXmlString(TypeData type, string value)
 		{
-			"yyyy-MM-ddTHH:mm:ss.fffffffzzzzzz", "yyyy", "---dd", "---ddZ", "---ddzzzzzz", "--MM-dd", "--MM-ddZ", "--MM-ddzzzzzz", "--MM--", "--MM--Z",
-			"--MM--zzzzzz", "yyyy-MM", "yyyy-MMZ", "yyyy-MMzzzzzz", "yyyyzzzzzz", "yyyy-MM-dd", "yyyy-MM-ddZ", "yyyy-MM-ddzzzzzz", "HH:mm:ss", "HH:mm:ss.f",
-			"HH:mm:ss.ff", "HH:mm:ss.fff", "HH:mm:ss.ffff", "HH:mm:ss.fffff", "HH:mm:ss.ffffff", "HH:mm:ss.fffffff", "HH:mm:ssZ", "HH:mm:ss.fZ", "HH:mm:ss.ffZ", "HH:mm:ss.fffZ",
-			"HH:mm:ss.ffffZ", "HH:mm:ss.fffffZ", "HH:mm:ss.ffffffZ", "HH:mm:ss.fffffffZ", "HH:mm:sszzzzzz", "HH:mm:ss.fzzzzzz", "HH:mm:ss.ffzzzzzz", "HH:mm:ss.fffzzzzzz", "HH:mm:ss.ffffzzzzzz", "HH:mm:ss.fffffzzzzzz",
-			"HH:mm:ss.ffffffzzzzzz", "HH:mm:ss.fffffffzzzzzz", "yyyy-MM-ddTHH:mm:ss", "yyyy-MM-ddTHH:mm:ss.f", "yyyy-MM-ddTHH:mm:ss.ff", "yyyy-MM-ddTHH:mm:ss.fff", "yyyy-MM-ddTHH:mm:ss.ffff", "yyyy-MM-ddTHH:mm:ss.fffff", "yyyy-MM-ddTHH:mm:ss.ffffff", "yyyy-MM-ddTHH:mm:ss.fffffff",
-			"yyyy-MM-ddTHH:mm:ssZ", "yyyy-MM-ddTHH:mm:ss.fZ", "yyyy-MM-ddTHH:mm:ss.ffZ", "yyyy-MM-ddTHH:mm:ss.fffZ", "yyyy-MM-ddTHH:mm:ss.ffffZ", "yyyy-MM-ddTHH:mm:ss.fffffZ", "yyyy-MM-ddTHH:mm:ss.ffffffZ", "yyyy-MM-ddTHH:mm:ss.fffffffZ", "yyyy-MM-ddTHH:mm:sszzzzzz", "yyyy-MM-ddTHH:mm:ss.fzzzzzz",
-			"yyyy-MM-ddTHH:mm:ss.ffzzzzzz", "yyyy-MM-ddTHH:mm:ss.fffzzzzzz", "yyyy-MM-ddTHH:mm:ss.ffffzzzzzz", "yyyy-MM-ddTHH:mm:ss.fffffzzzzzz", "yyyy-MM-ddTHH:mm:ss.ffffffzzzzzz"
-		};
+			if (value == null)
+			{
+				return null;
+			}
+			string xmlType = type.XmlType;
+			switch (xmlType)
+			{
+			case "boolean":
+				return XmlConvert.ToBoolean(value);
+			case "unsignedByte":
+				return XmlConvert.ToByte(value);
+			case "char":
+				return (char)XmlConvert.ToInt32(value);
+			case "dateTime":
+				return XmlConvert.ToDateTime(value, XmlDateTimeSerializationMode.RoundtripKind);
+			case "date":
+				return DateTime.ParseExact(value, "yyyy-MM-dd", null);
+			case "time":
+				return DateTime.ParseExact(value, "HH:mm:ss.FFFFFFF", null);
+			case "decimal":
+				return XmlConvert.ToDecimal(value);
+			case "double":
+				return XmlConvert.ToDouble(value);
+			case "short":
+				return XmlConvert.ToInt16(value);
+			case "int":
+				return XmlConvert.ToInt32(value);
+			case "long":
+				return XmlConvert.ToInt64(value);
+			case "byte":
+				return XmlConvert.ToSByte(value);
+			case "float":
+				return XmlConvert.ToSingle(value);
+			case "unsignedShort":
+				return XmlConvert.ToUInt16(value);
+			case "unsignedInt":
+				return XmlConvert.ToUInt32(value);
+			case "unsignedLong":
+				return XmlConvert.ToUInt64(value);
+			case "guid":
+				return XmlConvert.ToGuid(value);
+			case "base64":
+			case "base64Binary":
+				return Convert.FromBase64String(value);
+			case "hexBinary":
+				return XmlConvert.FromBinHexString(value);
+			case "duration":
+				return value;
+			}
+			if (type.Type != null)
+			{
+				return Convert.ChangeType(value, type.Type);
+			}
+			return value;
+		}
 
-		private static string[] allDateFormats = new string[]
+		internal static string GenerateToXmlString(TypeData type, string value)
 		{
-			"yyyy-MM-ddzzzzzz", "yyyy-MM-dd", "yyyy-MM-ddZ", "yyyy", "---dd", "---ddZ", "---ddzzzzzz", "--MM-dd", "--MM-ddZ", "--MM-ddzzzzzz",
-			"--MM--", "--MM--Z", "--MM--zzzzzz", "yyyy-MM", "yyyy-MMZ", "yyyy-MMzzzzzz", "yyyyzzzzzz"
-		};
+			if (type.NullableOverride)
+			{
+				return string.Concat(new string[]
+				{
+					"(",
+					value,
+					" != null ? ",
+					XmlCustomFormatter.GenerateToXmlStringCore(type, value),
+					" : null)"
+				});
+			}
+			return XmlCustomFormatter.GenerateToXmlStringCore(type, value);
+		}
 
-		private static string[] allTimeFormats = new string[]
+		private static string GenerateToXmlStringCore(TypeData type, string value)
 		{
-			"HH:mm:ss.fffffffzzzzzz", "HH:mm:ss", "HH:mm:ss.f", "HH:mm:ss.ff", "HH:mm:ss.fff", "HH:mm:ss.ffff", "HH:mm:ss.fffff", "HH:mm:ss.ffffff", "HH:mm:ss.fffffff", "HH:mm:ssZ",
-			"HH:mm:ss.fZ", "HH:mm:ss.ffZ", "HH:mm:ss.fffZ", "HH:mm:ss.ffffZ", "HH:mm:ss.fffffZ", "HH:mm:ss.ffffffZ", "HH:mm:ss.fffffffZ", "HH:mm:sszzzzzz", "HH:mm:ss.fzzzzzz", "HH:mm:ss.ffzzzzzz",
-			"HH:mm:ss.fffzzzzzz", "HH:mm:ss.ffffzzzzzz", "HH:mm:ss.fffffzzzzzz", "HH:mm:ss.ffffffzzzzzz"
-		};
+			if (type.NullableOverride)
+			{
+				value += ".Value";
+			}
+			string xmlType = type.XmlType;
+			switch (xmlType)
+			{
+			case "boolean":
+				return "(" + value + "?\"true\":\"false\")";
+			case "unsignedByte":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "char":
+				return "((int)(" + value + ")).ToString(CultureInfo.InvariantCulture)";
+			case "dateTime":
+				return "XmlConvert.ToString (" + value + ", XmlDateTimeSerializationMode.RoundtripKind)";
+			case "date":
+				return value + ".ToString(\"yyyy-MM-dd\", CultureInfo.InvariantCulture)";
+			case "time":
+				return value + ".ToString(\"HH:mm:ss.FFFFFFF\", CultureInfo.InvariantCulture)";
+			case "decimal":
+				return "XmlConvert.ToString (" + value + ")";
+			case "double":
+				return "XmlConvert.ToString (" + value + ")";
+			case "short":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "int":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "long":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "byte":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "float":
+				return "XmlConvert.ToString (" + value + ")";
+			case "unsignedShort":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "unsignedInt":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "unsignedLong":
+				return value + ".ToString(CultureInfo.InvariantCulture)";
+			case "guid":
+				return "XmlConvert.ToString (" + value + ")";
+			case "base64":
+			case "base64Binary":
+				return value + " == null ? String.Empty : Convert.ToBase64String (" + value + ")";
+			case "hexBinary":
+				return value + " == null ? String.Empty : ToBinHexString (" + value + ")";
+			case "duration":
+				return value;
+			case "NMTOKEN":
+			case "Name":
+			case "NCName":
+			case "language":
+			case "ENTITY":
+			case "ID":
+			case "IDREF":
+			case "NOTATION":
+			case "token":
+			case "normalizedString":
+			case "string":
+				return value;
+			}
+			return string.Concat(new string[] { "((", value, " != null) ? (", value, ").ToString() : null)" });
+		}
+
+		internal static string GenerateFromXmlString(TypeData type, string value)
+		{
+			if (type.NullableOverride)
+			{
+				return string.Concat(new string[]
+				{
+					"(",
+					value,
+					" != null ? (",
+					type.CSharpName,
+					"?)",
+					XmlCustomFormatter.GenerateFromXmlStringCore(type, value),
+					" : null)"
+				});
+			}
+			return XmlCustomFormatter.GenerateFromXmlStringCore(type, value);
+		}
+
+		private static string GenerateFromXmlStringCore(TypeData type, string value)
+		{
+			string xmlType = type.XmlType;
+			switch (xmlType)
+			{
+			case "boolean":
+				return "XmlConvert.ToBoolean (" + value + ")";
+			case "unsignedByte":
+				return "byte.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "char":
+				return "(char)Int32.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "dateTime":
+				return "XmlConvert.ToDateTime (" + value + ", XmlDateTimeSerializationMode.RoundtripKind)";
+			case "date":
+				return "DateTime.ParseExact (" + value + ", \"yyyy-MM-dd\", CultureInfo.InvariantCulture)";
+			case "time":
+				return "DateTime.ParseExact (" + value + ", \"HH:mm:ss.FFFFFFF\", CultureInfo.InvariantCulture)";
+			case "decimal":
+				return "Decimal.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "double":
+				return "XmlConvert.ToDouble (" + value + ")";
+			case "short":
+				return "Int16.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "int":
+				return "Int32.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "long":
+				return "Int64.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "byte":
+				return "SByte.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "float":
+				return "XmlConvert.ToSingle (" + value + ")";
+			case "unsignedShort":
+				return "UInt16.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "unsignedInt":
+				return "UInt32.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "unsignedLong":
+				return "UInt64.Parse (" + value + ", CultureInfo.InvariantCulture)";
+			case "guid":
+				return "XmlConvert.ToGuid (" + value + ")";
+			case "base64:":
+			case "base64Binary":
+				return "Convert.FromBase64String (" + value + ")";
+			case "hexBinary":
+				return "FromBinHexString (" + value + ")";
+			case "duration":
+				return value;
+			}
+			return value;
+		}
 	}
 }

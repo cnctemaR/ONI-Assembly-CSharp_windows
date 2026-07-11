@@ -71,7 +71,7 @@ namespace System.Security.Cryptography.X509Certificates
 				break;
 			case X509SubjectKeyIdentifierHashAlgorithm.ShortSha1:
 			{
-				Array array = SHA1.Create().ComputeHash(rawData);
+				byte[] array = SHA1.Create().ComputeHash(rawData);
 				this._subjectKeyIdentifier = new byte[8];
 				Buffer.BlockCopy(array, 12, this._subjectKeyIdentifier, 0, 8);
 				this._subjectKeyIdentifier[0] = 64 | (this._subjectKeyIdentifier[0] & 15);
@@ -79,13 +79,13 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			case X509SubjectKeyIdentifierHashAlgorithm.CapiSha1:
 			{
-				Mono.Security.ASN1 asn = new Mono.Security.ASN1(48);
-				Mono.Security.ASN1 asn2 = asn.Add(new Mono.Security.ASN1(48));
-				asn2.Add(new Mono.Security.ASN1(CryptoConfig.EncodeOID(key.Oid.Value)));
-				asn2.Add(new Mono.Security.ASN1(key.EncodedParameters.RawData));
+				ASN1 asn = new ASN1(48);
+				ASN1 asn2 = asn.Add(new ASN1(48));
+				asn2.Add(new ASN1(CryptoConfig.EncodeOID(key.Oid.Value)));
+				asn2.Add(new ASN1(key.EncodedParameters.RawData));
 				byte[] array2 = new byte[rawData.Length + 1];
 				Buffer.BlockCopy(rawData, 0, array2, 1, rawData.Length);
-				asn.Add(new Mono.Security.ASN1(3, array2));
+				asn.Add(new ASN1(3, array2));
 				this._subjectKeyIdentifier = SHA1.Create().ComputeHash(asn.GetBytes());
 				break;
 			}
@@ -102,28 +102,28 @@ namespace System.Security.Cryptography.X509Certificates
 			get
 			{
 				AsnDecodeStatus status = this._status;
-				if (status == AsnDecodeStatus.Ok || status == AsnDecodeStatus.InformationNotAvailable)
+				if (status != AsnDecodeStatus.Ok && status != AsnDecodeStatus.InformationNotAvailable)
 				{
-					if (this._subjectKeyIdentifier != null)
-					{
-						this._ski = Mono.Security.Cryptography.CryptoConvert.ToHex(this._subjectKeyIdentifier);
-					}
-					return this._ski;
+					throw new CryptographicException("Badly encoded extension.");
 				}
-				throw new CryptographicException("Badly encoded extension.");
+				if (this._subjectKeyIdentifier != null)
+				{
+					this._ski = CryptoConvert.ToHex(this._subjectKeyIdentifier);
+				}
+				return this._ski;
 			}
 		}
 
-		public override void CopyFrom(AsnEncodedData asnEncodedData)
+		public override void CopyFrom(AsnEncodedData encodedData)
 		{
-			if (asnEncodedData == null)
+			if (encodedData == null)
 			{
-				throw new ArgumentNullException("asnEncodedData");
+				throw new ArgumentNullException("encodedData");
 			}
-			X509Extension x509Extension = asnEncodedData as X509Extension;
+			X509Extension x509Extension = encodedData as X509Extension;
 			if (x509Extension == null)
 			{
-				throw new ArgumentException(global::Locale.GetText("Wrong type."), "asnEncodedData");
+				throw new ArgumentException(global::Locale.GetText("Wrong type."), "encodedData");
 			}
 			if (x509Extension._oid == null)
 			{
@@ -203,7 +203,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			try
 			{
-				Mono.Security.ASN1 asn = new Mono.Security.ASN1(extension);
+				ASN1 asn = new ASN1(extension);
 				this._subjectKeyIdentifier = asn.Value;
 			}
 			catch
@@ -215,7 +215,8 @@ namespace System.Security.Cryptography.X509Certificates
 
 		internal byte[] Encode()
 		{
-			return new Mono.Security.ASN1(4, this._subjectKeyIdentifier).GetBytes();
+			ASN1 asn = new ASN1(4, this._subjectKeyIdentifier);
+			return asn.GetBytes();
 		}
 
 		internal override string ToString(bool multiLine)

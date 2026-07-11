@@ -4,6 +4,11 @@ namespace System.Net.Sockets
 {
 	public class IPv6MulticastOption
 	{
+		public IPv6MulticastOption(IPAddress group)
+			: this(group, 0L)
+		{
+		}
+
 		public IPv6MulticastOption(IPAddress group, long ifindex)
 		{
 			if (group == null)
@@ -14,25 +19,15 @@ namespace System.Net.Sockets
 			{
 				throw new ArgumentOutOfRangeException("ifindex");
 			}
-			this.Group = group;
-			this.InterfaceIndex = ifindex;
-		}
-
-		public IPv6MulticastOption(IPAddress group)
-		{
-			if (group == null)
-			{
-				throw new ArgumentNullException("group");
-			}
-			this.Group = group;
-			this.InterfaceIndex = 0L;
+			this.group = group;
+			this.ifIndex = ifindex;
 		}
 
 		public IPAddress Group
 		{
 			get
 			{
-				return this.m_Group;
+				return this.group;
 			}
 			set
 			{
@@ -40,7 +35,7 @@ namespace System.Net.Sockets
 				{
 					throw new ArgumentNullException("value");
 				}
-				this.m_Group = value;
+				this.group = value;
 			}
 		}
 
@@ -48,7 +43,7 @@ namespace System.Net.Sockets
 		{
 			get
 			{
-				return this.m_Interface;
+				return this.ifIndex;
 			}
 			set
 			{
@@ -56,12 +51,12 @@ namespace System.Net.Sockets
 				{
 					throw new ArgumentOutOfRangeException("value");
 				}
-				this.m_Interface = value;
+				this.ifIndex = value;
 			}
 		}
 
-		private IPAddress m_Group;
+		private IPAddress group;
 
-		private long m_Interface;
+		private long ifIndex;
 	}
 }

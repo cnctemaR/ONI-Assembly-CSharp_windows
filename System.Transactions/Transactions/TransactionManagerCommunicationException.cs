@@ -6,7 +6,7 @@ namespace System.Transactions
 	[Serializable]
 	public class TransactionManagerCommunicationException : TransactionException
 	{
-		public TransactionManagerCommunicationException()
+		protected TransactionManagerCommunicationException()
 		{
 		}
 

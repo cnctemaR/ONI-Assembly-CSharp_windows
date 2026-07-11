@@ -15,10 +15,12 @@ namespace System.IO.Ports
 		{
 			this.ReadIntervalTimeout = uint.MaxValue;
 			this.ReadTotalTimeoutMultiplier = uint.MaxValue;
-			this.ReadTotalTimeoutConstant = (uint)((read_timeout == -1) ? (-2) : read_timeout);
+			this.ReadTotalTimeoutConstant = (uint)((read_timeout != -1) ? read_timeout : (-2));
 			this.WriteTotalTimeoutMultiplier = 0U;
-			this.WriteTotalTimeoutConstant = (uint)((write_timeout == -1) ? (-1) : write_timeout);
+			this.WriteTotalTimeoutConstant = (uint)((write_timeout != -1) ? write_timeout : (-1));
 		}
+
+		public const uint MaxDWord = 4294967295U;
 
 		public uint ReadIntervalTimeout;
 
@@ -29,7 +31,5 @@ namespace System.IO.Ports
 		public uint WriteTotalTimeoutMultiplier;
 
 		public uint WriteTotalTimeoutConstant;
-
-		public const uint MaxDWord = 4294967295U;
 	}
 }

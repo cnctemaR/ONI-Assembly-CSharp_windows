@@ -49,16 +49,7 @@ namespace Mono.Remoting.Channels.Unix
 				if (!flag)
 				{
 					sinkStack.Push(this, unixConnection);
-					ThreadPool.QueueUserWorkItem(delegate(object data)
-					{
-						try
-						{
-							this.ReadAsyncUnixMessage(data);
-						}
-						catch
-						{
-						}
-					}, sinkStack);
+					ThreadPool.QueueUserWorkItem(new WaitCallback(this.ReadAsyncUnixMessage), sinkStack);
 				}
 				else
 				{
@@ -84,7 +75,8 @@ namespace Mono.Remoting.Channels.Unix
 			UnixConnection unixConnection = (UnixConnection)clientChannelSinkStack.Pop(this);
 			try
 			{
-				if (UnixMessageIO.ReceiveMessageStatus(unixConnection.Stream, unixConnection.Buffer) != MessageStatus.MethodMessage)
+				MessageStatus messageStatus = UnixMessageIO.ReceiveMessageStatus(unixConnection.Stream, unixConnection.Buffer);
+				if (messageStatus != MessageStatus.MethodMessage)
 				{
 					throw new RemotingException("Unknown response message from server");
 				}
@@ -127,7 +119,8 @@ namespace Mono.Remoting.Channels.Unix
 				unixConnection = UnixConnectionPool.GetConnection(this._path);
 				UnixMessageIO.SendMessageStream(unixConnection.Stream, requestStream, requestHeaders, unixConnection.Buffer);
 				unixConnection.Stream.Flush();
-				if (UnixMessageIO.ReceiveMessageStatus(unixConnection.Stream, unixConnection.Buffer) != MessageStatus.MethodMessage)
+				MessageStatus messageStatus = UnixMessageIO.ReceiveMessageStatus(unixConnection.Stream, unixConnection.Buffer);
+				if (messageStatus != MessageStatus.MethodMessage)
 				{
 					throw new RemotingException("Unknown response message from server");
 				}

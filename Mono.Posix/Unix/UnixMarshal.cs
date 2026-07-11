@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using Mono.Unix.Native;
@@ -97,10 +96,6 @@ namespace Mono.Unix
 			{
 				num = UnixMarshal.GetInt16BufferLength(p);
 			}
-			else if (typeof(UTF32Encoding).IsAssignableFrom(type))
-			{
-				num = UnixMarshal.GetInt32BufferLength(p);
-			}
 			else
 			{
 				num = UnixMarshal.GetRandomBufferLength(p, encoding.GetMaxByteCount(1));
@@ -177,7 +172,8 @@ namespace Mono.Unix
 			{
 				return new string[0];
 			}
-			return UnixMarshal.PtrToStringArray(UnixMarshal.CountStrings(stringArray), stringArray, encoding);
+			int num = UnixMarshal.CountStrings(stringArray);
+			return UnixMarshal.PtrToStringArray(num, stringArray, encoding);
 		}
 
 		private static int CountStrings(IntPtr stringArray)
@@ -225,10 +221,6 @@ namespace Mono.Unix
 
 		public static IntPtr StringToHeap(string s, Encoding encoding)
 		{
-			if (s == null)
-			{
-				return IntPtr.Zero;
-			}
 			return UnixMarshal.StringToHeap(s, 0, s.Length, encoding);
 		}
 
@@ -237,7 +229,7 @@ namespace Mono.Unix
 			return UnixMarshal.StringToHeap(s, index, count, UnixEncoding.Instance);
 		}
 
-		public unsafe static IntPtr StringToHeap(string s, int index, int count, Encoding encoding)
+		public static IntPtr StringToHeap(string s, int index, int count, Encoding encoding)
 		{
 			if (s == null)
 			{
@@ -247,49 +239,30 @@ namespace Mono.Unix
 			{
 				throw new ArgumentNullException("encoding");
 			}
-			if (index < 0 || count < 0)
-			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", "Non - negative number required.");
-			}
-			if (s.Length - index < count)
-			{
-				throw new ArgumentOutOfRangeException("s", "Index and count must refer to a location within the string.");
-			}
 			int maxByteCount = encoding.GetMaxByteCount(1);
-			int byteCount = encoding.GetByteCount(s);
-			int num = checked(byteCount + maxByteCount);
-			IntPtr intPtr = UnixMarshal.AllocHeap((long)num);
+			char[] array = s.ToCharArray(index, count);
+			byte[] array2 = new byte[encoding.GetByteCount(array) + maxByteCount];
+			int bytes = encoding.GetBytes(array, 0, array.Length, array2, 0);
+			if (bytes != array2.Length - maxByteCount)
+			{
+				throw new NotSupportedException("encoding.GetBytes() doesn't equal encoding.GetByteCount()!");
+			}
+			IntPtr intPtr = UnixMarshal.AllocHeap((long)array2.Length);
 			if (intPtr == IntPtr.Zero)
 			{
 				throw new UnixIOException(Errno.ENOMEM);
 			}
-			fixed (string text = s)
+			bool flag = false;
+			try
 			{
-				char* ptr = text;
-				if (ptr != null)
-				{
-					ptr += RuntimeHelpers.OffsetToStringData / 2;
-				}
-				byte* ptr2 = (byte*)(void*)intPtr;
-				int bytes;
-				try
-				{
-					bytes = encoding.GetBytes(ptr + index, count, ptr2, num);
-				}
-				catch
+				Marshal.Copy(array2, 0, intPtr, array2.Length);
+				flag = true;
+			}
+			finally
+			{
+				if (!flag)
 				{
 					UnixMarshal.FreeHeap(intPtr);
-					throw;
-				}
-				if (bytes != byteCount)
-				{
-					UnixMarshal.FreeHeap(intPtr);
-					throw new NotSupportedException("encoding.GetBytes() doesn't equal encoding.GetByteCount()!");
-				}
-				ptr2 += byteCount;
-				for (int i = 0; i < maxByteCount; i++)
-				{
-					ptr2[i] = 0;
 				}
 			}
 			return intPtr;
@@ -311,7 +284,7 @@ namespace Mono.Unix
 		{
 			if (message == null)
 			{
-				return "";
+				return string.Empty;
 			}
 			StringBuilder stringBuilder = new StringBuilder(message.Length);
 			for (int i = 0; i < message.Length; i++)
@@ -359,90 +332,54 @@ namespace Mono.Unix
 		{
 			string errorDescription = UnixMarshal.GetErrorDescription(errno);
 			UnixIOException ex = new UnixIOException(errno);
-			if (errno <= Errno.ERANGE)
+			switch (errno)
 			{
+			case Errno.EPERM:
+				break;
+			case Errno.ENOENT:
+				return new FileNotFoundException(errorDescription, ex);
+			default:
 				switch (errno)
 				{
-				case Errno.EPERM:
-					goto IL_00CB;
-				case Errno.ENOENT:
-					return new FileNotFoundException(errorDescription, ex);
-				case Errno.ESRCH:
-				case Errno.EINTR:
-				case Errno.E2BIG:
-				case Errno.ECHILD:
-				case Errno.EAGAIN:
-				case Errno.ENOMEM:
-					return ex;
-				case Errno.EIO:
-				case Errno.ENXIO:
-					goto IL_00DB;
-				case Errno.ENOEXEC:
-					return new InvalidProgramException(errorDescription, ex);
-				case Errno.EBADF:
-					break;
-				case Errno.EACCES:
-					goto IL_00FB;
-				case Errno.EFAULT:
-					return new NullReferenceException(errorDescription, ex);
+				case Errno.ENOSPC:
+				case Errno.ESPIPE:
+				case Errno.EROFS:
+				case Errno.ENOTEMPTY:
+					goto IL_00ED;
 				default:
-					switch (errno)
+					if (errno == Errno.EOVERFLOW)
 					{
-					case Errno.ENOTDIR:
-						return new DirectoryNotFoundException(errorDescription, ex);
-					case Errno.EISDIR:
-						goto IL_00FB;
-					case Errno.EINVAL:
-						break;
-					case Errno.ENFILE:
-					case Errno.EMFILE:
-					case Errno.ENOTTY:
-					case Errno.ETXTBSY:
-					case Errno.EFBIG:
+						return new OverflowException(errorDescription, ex);
+					}
+					if (errno != Errno.EOPNOTSUPP)
+					{
 						return ex;
-					case Errno.ENOSPC:
-					case Errno.ESPIPE:
-					case Errno.EROFS:
-						goto IL_00DB;
-					default:
-						if (errno != Errno.ERANGE)
-						{
-							return ex;
-						}
-						return new ArgumentOutOfRangeException(errorDescription);
 					}
 					break;
-				}
-				return new ArgumentException(errorDescription, ex);
-				IL_00FB:
-				return new UnauthorizedAccessException(errorDescription, ex);
-			}
-			if (errno <= Errno.ENOTEMPTY)
-			{
-				if (errno == Errno.ENAMETOOLONG)
-				{
+				case Errno.ERANGE:
+					return new ArgumentOutOfRangeException(errorDescription);
+				case Errno.ENAMETOOLONG:
 					return new PathTooLongException(errorDescription, ex);
 				}
-				if (errno != Errno.ENOTEMPTY)
-				{
-					return ex;
-				}
-				goto IL_00DB;
+				break;
+			case Errno.EIO:
+			case Errno.ENXIO:
+				goto IL_00ED;
+			case Errno.ENOEXEC:
+				return new InvalidProgramException(errorDescription, ex);
+			case Errno.EBADF:
+			case Errno.EINVAL:
+				return new ArgumentException(errorDescription, ex);
+			case Errno.EACCES:
+			case Errno.EISDIR:
+				return new UnauthorizedAccessException(errorDescription, ex);
+			case Errno.EFAULT:
+				return new NullReferenceException(errorDescription, ex);
+			case Errno.ENOTDIR:
+				return new DirectoryNotFoundException(errorDescription, ex);
 			}
-			else
-			{
-				if (errno == Errno.EOVERFLOW)
-				{
-					return new OverflowException(errorDescription, ex);
-				}
-				if (errno != Errno.EOPNOTSUPP)
-				{
-					return ex;
-				}
-			}
-			IL_00CB:
 			return new InvalidOperationException(errorDescription, ex);
-			IL_00DB:
+			IL_00ED:
 			return new IOException(errorDescription, ex);
 		}
 

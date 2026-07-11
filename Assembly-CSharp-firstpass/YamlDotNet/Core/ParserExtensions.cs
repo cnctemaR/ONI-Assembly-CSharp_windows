@@ -13,7 +13,12 @@ namespace YamlDotNet.Core
 			if (t == null)
 			{
 				ParsingEvent parsingEvent = parser.Current;
-				throw new YamlException(parsingEvent.Start, parsingEvent.End, string.Format(CultureInfo.InvariantCulture, "Expected '{0}', got '{1}' (at {2}).", typeof(T).Name, parsingEvent.GetType().Name, parsingEvent.Start));
+				throw new YamlException(parsingEvent.Start, parsingEvent.End, string.Format(CultureInfo.InvariantCulture, "Expected '{0}', got '{1}' (at {2}).", new object[]
+				{
+					typeof(T).Name,
+					parsingEvent.GetType().Name,
+					parsingEvent.Start
+				}));
 			}
 			return t;
 		}

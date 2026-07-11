@@ -1,39 +1,41 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeNamespace : CodeObject
 	{
-		public event EventHandler PopulateComments;
-
-		public event EventHandler PopulateImports;
-
-		public event EventHandler PopulateTypes;
-
 		public CodeNamespace()
 		{
 		}
 
 		public CodeNamespace(string name)
 		{
-			this.Name = name;
+			this.name = name;
 		}
 
-		public CodeTypeDeclarationCollection Types
+		public event EventHandler PopulateComments;
+
+		public event EventHandler PopulateImports;
+
+		public event EventHandler PopulateTypes;
+
+		public CodeCommentStatementCollection Comments
 		{
 			get
 			{
-				if ((this._populated & 4) == 0)
+				if (this.comments == null)
 				{
-					this._populated |= 4;
-					EventHandler populateTypes = this.PopulateTypes;
-					if (populateTypes != null)
+					this.comments = new CodeCommentStatementCollection();
+					if (this.PopulateComments != null)
 					{
-						populateTypes(this, EventArgs.Empty);
+						this.PopulateComments(this, EventArgs.Empty);
 					}
 				}
-				return this._classes;
+				return this.comments;
 			}
 		}
 
@@ -41,16 +43,15 @@ namespace System.CodeDom
 		{
 			get
 			{
-				if ((this._populated & 1) == 0)
+				if (this.imports == null)
 				{
-					this._populated |= 1;
-					EventHandler populateImports = this.PopulateImports;
-					if (populateImports != null)
+					this.imports = new CodeNamespaceImportCollection();
+					if (this.PopulateImports != null)
 					{
-						populateImports(this, EventArgs.Empty);
+						this.PopulateImports(this, EventArgs.Empty);
 					}
 				}
-				return this._imports;
+				return this.imports;
 			}
 		}
 
@@ -58,45 +59,44 @@ namespace System.CodeDom
 		{
 			get
 			{
-				return this._name ?? string.Empty;
+				if (this.name == null)
+				{
+					return string.Empty;
+				}
+				return this.name;
 			}
 			set
 			{
-				this._name = value;
+				this.name = value;
 			}
 		}
 
-		public CodeCommentStatementCollection Comments
+		public CodeTypeDeclarationCollection Types
 		{
 			get
 			{
-				if ((this._populated & 2) == 0)
+				if (this.classes == null)
 				{
-					this._populated |= 2;
-					EventHandler populateComments = this.PopulateComments;
-					if (populateComments != null)
+					this.classes = new CodeTypeDeclarationCollection();
+					if (this.PopulateTypes != null)
 					{
-						populateComments(this, EventArgs.Empty);
+						this.PopulateTypes(this, EventArgs.Empty);
 					}
 				}
-				return this._comments;
+				return this.classes;
 			}
 		}
 
-		private string _name;
+		private CodeCommentStatementCollection comments;
 
-		private readonly CodeNamespaceImportCollection _imports = new CodeNamespaceImportCollection();
+		private CodeNamespaceImportCollection imports;
 
-		private readonly CodeCommentStatementCollection _comments = new CodeCommentStatementCollection();
+		private CodeNamespaceCollection namespaces;
 
-		private readonly CodeTypeDeclarationCollection _classes = new CodeTypeDeclarationCollection();
+		private CodeTypeDeclarationCollection classes;
 
-		private int _populated;
+		private string name;
 
-		private const int ImportsCollection = 1;
-
-		private const int CommentsCollection = 2;
-
-		private const int TypesCollection = 4;
+		private int populated;
 	}
 }

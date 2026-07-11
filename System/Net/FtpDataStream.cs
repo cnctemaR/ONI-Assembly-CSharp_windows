@@ -17,6 +17,12 @@ namespace System.Net
 			this.isRead = isRead;
 		}
 
+		void IDisposable.Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
 		public override bool CanRead
 		{
 			get
@@ -130,7 +136,8 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset+size");
 			}
-			return new FtpDataStream.ReadDelegate(this.ReadInternal).BeginInvoke(buffer, offset, size, cb, state);
+			FtpDataStream.ReadDelegate readDelegate = new FtpDataStream.ReadDelegate(this.ReadInternal);
+			return readDelegate.BeginInvoke(buffer, offset, size, cb, state);
 		}
 
 		public override int EndRead(IAsyncResult asyncResult)
@@ -195,7 +202,8 @@ namespace System.Net
 			{
 				throw new ArgumentOutOfRangeException("offset+size");
 			}
-			return new FtpDataStream.WriteDelegate(this.WriteInternal).BeginInvoke(buffer, offset, size, cb, state);
+			FtpDataStream.WriteDelegate writeDelegate = new FtpDataStream.WriteDelegate(this.WriteInternal);
+			return writeDelegate.BeginInvoke(buffer, offset, size, cb, state);
 		}
 
 		public override void EndWrite(IAsyncResult asyncResult)
@@ -231,12 +239,6 @@ namespace System.Net
 		~FtpDataStream()
 		{
 			this.Dispose(false);
-		}
-
-		void IDisposable.Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
 		}
 
 		protected override void Dispose(bool disposing)

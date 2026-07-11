@@ -298,7 +298,7 @@ namespace YamlDotNet.Serialization
 
 			public void SerializeValue(IEmitter emitter, object value, Type type)
 			{
-				Type type2 = ((!(type != null)) ? ((value == null) ? typeof(object) : value.GetType()) : type);
+				Type type2 = ((type == null) ? ((value == null) ? typeof(object) : value.GetType()) : type);
 				Type type3 = type ?? typeof(object);
 				ObjectDescriptor objectDescriptor = new ObjectDescriptor(value, type2, type3);
 				List<IObjectGraphVisitor<Nothing>> preProcessingPhaseObjectGraphVisitors = this.preProcessingPhaseObjectGraphVisitorFactories.BuildComponentList(this.typeConverters);

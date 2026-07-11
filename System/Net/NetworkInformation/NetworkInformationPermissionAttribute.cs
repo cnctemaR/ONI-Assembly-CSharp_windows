@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Security;
 using System.Security.Permissions;
 
@@ -13,6 +14,40 @@ namespace System.Net.NetworkInformation
 		{
 		}
 
+		[global::System.MonoTODO("verify implementation")]
+		public override IPermission CreatePermission()
+		{
+			NetworkInformationAccess networkInformationAccess = NetworkInformationAccess.None;
+			string text = this.Access;
+			if (text != null)
+			{
+				if (NetworkInformationPermissionAttribute.<>f__switch$map11 == null)
+				{
+					NetworkInformationPermissionAttribute.<>f__switch$map11 = new Dictionary<string, int>(2)
+					{
+						{ "Read", 0 },
+						{ "Full", 1 }
+					};
+				}
+				int num;
+				if (NetworkInformationPermissionAttribute.<>f__switch$map11.TryGetValue(text, out num))
+				{
+					if (num != 0)
+					{
+						if (num == 1)
+						{
+							networkInformationAccess = NetworkInformationAccess.Read | NetworkInformationAccess.Ping;
+						}
+					}
+					else
+					{
+						networkInformationAccess = NetworkInformationAccess.Read;
+					}
+				}
+			}
+			return new NetworkInformationPermission(networkInformationAccess);
+		}
+
 		public string Access
 		{
 			get
@@ -21,44 +56,31 @@ namespace System.Net.NetworkInformation
 			}
 			set
 			{
-				this.access = value;
-			}
-		}
-
-		public override IPermission CreatePermission()
-		{
-			NetworkInformationPermission networkInformationPermission;
-			if (base.Unrestricted)
-			{
-				networkInformationPermission = new NetworkInformationPermission(PermissionState.Unrestricted);
-			}
-			else
-			{
-				networkInformationPermission = new NetworkInformationPermission(PermissionState.None);
-				if (this.access != null)
+				string text = this.access;
+				if (text != null)
 				{
-					if (string.Compare(this.access, "Read", StringComparison.OrdinalIgnoreCase) == 0)
+					if (NetworkInformationPermissionAttribute.<>f__switch$map10 == null)
 					{
-						networkInformationPermission.AddPermission(NetworkInformationAccess.Read);
-					}
-					else if (string.Compare(this.access, "Ping", StringComparison.OrdinalIgnoreCase) == 0)
-					{
-						networkInformationPermission.AddPermission(NetworkInformationAccess.Ping);
-					}
-					else
-					{
-						if (string.Compare(this.access, "None", StringComparison.OrdinalIgnoreCase) != 0)
+						NetworkInformationPermissionAttribute.<>f__switch$map10 = new Dictionary<string, int>(3)
 						{
-							throw new ArgumentException(global::SR.GetString("The parameter value '{0}={1}' is invalid.", new object[] { "Access", this.access }));
+							{ "Read", 0 },
+							{ "Full", 0 },
+							{ "None", 0 }
+						};
+					}
+					int num;
+					if (NetworkInformationPermissionAttribute.<>f__switch$map10.TryGetValue(text, out num))
+					{
+						if (num == 0)
+						{
+							this.access = value;
+							return;
 						}
-						networkInformationPermission.AddPermission(NetworkInformationAccess.None);
 					}
 				}
+				throw new ArgumentException("Only 'Read', 'Full' and 'None' are allowed");
 			}
-			return networkInformationPermission;
 		}
-
-		private const string strAccess = "Access";
 
 		private string access;
 	}

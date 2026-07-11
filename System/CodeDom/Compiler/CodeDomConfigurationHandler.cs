@@ -15,7 +15,7 @@ namespace System.CodeDom.Compiler
 			CodeDomConfigurationHandler.compilersProp = new ConfigurationProperty("compilers", typeof(CompilerCollection), CodeDomConfigurationHandler.default_compilers);
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void PostDeserialize()
 		{
 			base.PostDeserialize();

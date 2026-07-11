@@ -6,7 +6,7 @@ namespace System.Net.Configuration
 	[ConfigurationCollection(typeof(WebRequestModuleElement), CollectionType = ConfigurationElementCollectionType.AddRemoveClearMap)]
 	public sealed class WebRequestModuleElementCollection : ConfigurationElementCollection
 	{
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public WebRequestModuleElement this[int index]
 		{
 			get
@@ -19,7 +19,7 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		public WebRequestModuleElement this[string name]
 		{
 			get

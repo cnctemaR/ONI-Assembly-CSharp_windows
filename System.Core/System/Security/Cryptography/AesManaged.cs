@@ -1,41 +1,41 @@
 ﻿using System;
+using System.Security.Permissions;
+using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
+	[PermissionSet(SecurityAction.LinkDemand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\">\n<IPermission class=\"System.Security.Permissions.HostProtectionPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\nversion=\"1\"\nResources=\"None\"/>\n</PermissionSet>\n")]
 	public sealed class AesManaged : Aes
 	{
-		public AesManaged()
+		public override void GenerateIV()
 		{
-			if (CryptoConfig.AllowOnlyFipsAlgorithms)
-			{
-				throw new InvalidOperationException(global::SR.GetString("This implementation is not part of the Windows Platform FIPS validated cryptographic algorithms."));
-			}
-			this.m_rijndael = new RijndaelManaged();
-			this.m_rijndael.BlockSize = this.BlockSize;
-			this.m_rijndael.KeySize = this.KeySize;
+			this.IVValue = KeyBuilder.IV(this.BlockSizeValue >> 3);
 		}
 
-		public override int FeedbackSize
+		public override void GenerateKey()
 		{
-			get
-			{
-				return this.m_rijndael.FeedbackSize;
-			}
-			set
-			{
-				this.m_rijndael.FeedbackSize = value;
-			}
+			this.KeyValue = KeyBuilder.Key(this.KeySizeValue >> 3);
+		}
+
+		public override ICryptoTransform CreateDecryptor(byte[] rgbKey, byte[] rgbIV)
+		{
+			return new AesTransform(this, false, rgbKey, rgbIV);
+		}
+
+		public override ICryptoTransform CreateEncryptor(byte[] rgbKey, byte[] rgbIV)
+		{
+			return new AesTransform(this, true, rgbKey, rgbIV);
 		}
 
 		public override byte[] IV
 		{
 			get
 			{
-				return this.m_rijndael.IV;
+				return base.IV;
 			}
 			set
 			{
-				this.m_rijndael.IV = value;
+				base.IV = value;
 			}
 		}
 
@@ -43,11 +43,11 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_rijndael.Key;
+				return base.Key;
 			}
 			set
 			{
-				this.m_rijndael.Key = value;
+				base.Key = value;
 			}
 		}
 
@@ -55,111 +55,27 @@ namespace System.Security.Cryptography
 		{
 			get
 			{
-				return this.m_rijndael.KeySize;
+				return base.KeySize;
 			}
 			set
 			{
-				this.m_rijndael.KeySize = value;
-			}
-		}
-
-		public override CipherMode Mode
-		{
-			get
-			{
-				return this.m_rijndael.Mode;
-			}
-			set
-			{
-				if (value == CipherMode.CFB || value == CipherMode.OFB)
-				{
-					throw new CryptographicException(global::SR.GetString("The specified cipher mode is not valid for this algorithm."));
-				}
-				this.m_rijndael.Mode = value;
-			}
-		}
-
-		public override PaddingMode Padding
-		{
-			get
-			{
-				return this.m_rijndael.Padding;
-			}
-			set
-			{
-				this.m_rijndael.Padding = value;
+				base.KeySize = value;
 			}
 		}
 
 		public override ICryptoTransform CreateDecryptor()
 		{
-			return this.m_rijndael.CreateDecryptor();
-		}
-
-		public override ICryptoTransform CreateDecryptor(byte[] key, byte[] iv)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			if (!base.ValidKeySize(key.Length * 8))
-			{
-				throw new ArgumentException(global::SR.GetString("The specified key is not a valid size for this algorithm."), "key");
-			}
-			if (iv != null && iv.Length * 8 != this.BlockSizeValue)
-			{
-				throw new ArgumentException(global::SR.GetString("The specified initialization vector (IV) does not match the block size for this algorithm."), "iv");
-			}
-			return this.m_rijndael.CreateDecryptor(key, iv);
+			return this.CreateDecryptor(this.Key, this.IV);
 		}
 
 		public override ICryptoTransform CreateEncryptor()
 		{
-			return this.m_rijndael.CreateEncryptor();
-		}
-
-		public override ICryptoTransform CreateEncryptor(byte[] key, byte[] iv)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException("key");
-			}
-			if (!base.ValidKeySize(key.Length * 8))
-			{
-				throw new ArgumentException(global::SR.GetString("The specified key is not a valid size for this algorithm."), "key");
-			}
-			if (iv != null && iv.Length * 8 != this.BlockSizeValue)
-			{
-				throw new ArgumentException(global::SR.GetString("The specified initialization vector (IV) does not match the block size for this algorithm."), "iv");
-			}
-			return this.m_rijndael.CreateEncryptor(key, iv);
+			return this.CreateEncryptor(this.Key, this.IV);
 		}
 
 		protected override void Dispose(bool disposing)
 		{
-			try
-			{
-				if (disposing)
-				{
-					((IDisposable)this.m_rijndael).Dispose();
-				}
-			}
-			finally
-			{
-				base.Dispose(disposing);
-			}
+			base.Dispose(disposing);
 		}
-
-		public override void GenerateIV()
-		{
-			this.m_rijndael.GenerateIV();
-		}
-
-		public override void GenerateKey()
-		{
-			this.m_rijndael.GenerateKey();
-		}
-
-		private RijndaelManaged m_rijndael;
 	}
 }

@@ -22,7 +22,8 @@ namespace Mono.Security.Cryptography
 				ASN1 asn = new ASN1(data);
 				if (asn.Tag == 48 && asn.Count > 0)
 				{
-					byte tag = asn[0].Tag;
+					ASN1 asn2 = asn[0];
+					byte tag = asn2.Tag;
 					if (tag != 2)
 					{
 						if (tag == 48)
@@ -214,7 +215,8 @@ namespace Mono.Security.Cryptography
 				{
 					throw new CryptographicException("invalid private key format");
 				}
-				if (asn[0].Tag != 2)
+				ASN1 asn2 = asn[0];
+				if (asn2.Tag != 2)
 				{
 					throw new CryptographicException("missing version");
 				}
@@ -222,10 +224,8 @@ namespace Mono.Security.Cryptography
 				{
 					throw new CryptographicException("not enough key parameters");
 				}
-				RSAParameters rsaparameters = new RSAParameters
-				{
-					Modulus = PKCS8.PrivateKeyInfo.RemoveLeadingZero(asn[1].Value)
-				};
+				RSAParameters rsaparameters = default(RSAParameters);
+				rsaparameters.Modulus = PKCS8.PrivateKeyInfo.RemoveLeadingZero(asn[1].Value);
 				int num = rsaparameters.Modulus.Length;
 				int num2 = num >> 1;
 				rsaparameters.D = PKCS8.PrivateKeyInfo.Normalize(asn[3].Value, num);
@@ -336,15 +336,11 @@ namespace Mono.Security.Cryptography
 			{
 				get
 				{
-					if (this._data != null)
-					{
-						return (byte[])this._data.Clone();
-					}
-					return null;
+					return (this._data != null) ? ((byte[])this._data.Clone()) : null;
 				}
 				set
 				{
-					this._data = ((value == null) ? null : ((byte[])value.Clone()));
+					this._data = ((value != null) ? ((byte[])value.Clone()) : null);
 				}
 			}
 

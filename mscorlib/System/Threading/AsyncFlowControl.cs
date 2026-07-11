@@ -5,60 +5,56 @@ namespace System.Threading
 {
 	public struct AsyncFlowControl : IDisposable
 	{
-		[SecurityCritical]
-		internal void Setup()
+		internal AsyncFlowControl(Thread t, AsyncFlowControlType type)
 		{
-			this.useEC = true;
-			Thread currentThread = Thread.CurrentThread;
-			this._ec = currentThread.GetMutableExecutionContext();
-			this._ec.isFlowSuppressed = true;
-			this._thread = currentThread;
+			this._t = t;
+			this._type = type;
 		}
 
-		public void Dispose()
+		void IDisposable.Dispose()
 		{
-			this.Undo();
+			if (this._t != null)
+			{
+				this.Undo();
+				this._t = null;
+				this._type = AsyncFlowControlType.None;
+			}
 		}
 
-		[SecuritySafeCritical]
 		public void Undo()
 		{
-			if (this._thread == null)
+			if (this._t == null)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("AsyncFlowControl object can be used only once to call Undo()."));
+				throw new InvalidOperationException(Locale.GetText("Can only be called once."));
 			}
-			if (this._thread != Thread.CurrentThread)
+			AsyncFlowControlType type = this._type;
+			if (type != AsyncFlowControlType.Execution)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("AsyncFlowControl object must be used on the thread where it was created."));
-			}
-			if (this.useEC)
-			{
-				if (Thread.CurrentThread.GetMutableExecutionContext() != this._ec)
+				if (type == AsyncFlowControlType.Security)
 				{
-					throw new InvalidOperationException(Environment.GetResourceString("AsyncFlowControl objects can be used to restore flow only on the Context that had its flow suppressed."));
+					SecurityContext.RestoreFlow();
 				}
+			}
+			else
+			{
 				ExecutionContext.RestoreFlow();
 			}
-			this._thread = null;
+			this._t = null;
 		}
 
 		public override int GetHashCode()
 		{
-			if (this._thread != null)
-			{
-				return this._thread.GetHashCode();
-			}
-			return this.ToString().GetHashCode();
+			return base.GetHashCode();
 		}
 
 		public override bool Equals(object obj)
 		{
-			return obj is AsyncFlowControl && this.Equals((AsyncFlowControl)obj);
+			return obj is AsyncFlowControl && obj.Equals(this);
 		}
 
 		public bool Equals(AsyncFlowControl obj)
 		{
-			return obj.useEC == this.useEC && obj._ec == this._ec && obj._thread == this._thread;
+			return this._t == obj._t && this._type == obj._type;
 		}
 
 		public static bool operator ==(AsyncFlowControl a, AsyncFlowControl b)
@@ -68,13 +64,11 @@ namespace System.Threading
 
 		public static bool operator !=(AsyncFlowControl a, AsyncFlowControl b)
 		{
-			return !(a == b);
+			return !a.Equals(b);
 		}
 
-		private bool useEC;
+		private Thread _t;
 
-		private ExecutionContext _ec;
-
-		private Thread _thread;
+		private AsyncFlowControlType _type;
 	}
 }

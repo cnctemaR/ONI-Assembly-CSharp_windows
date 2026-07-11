@@ -17,7 +17,7 @@ public class EggIncubator : SingleEntityReceptacle, ISaveLoadable, ISim1000ms
 		this.synchronizeAnims = false;
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		component.SetSymbolVisiblity("egg_target", false);
-		this.meter = new MeterController(this, Meter.Offset.Infront, Array.Empty<string>());
+		this.meter = new MeterController(this, Meter.Offset.Infront, new string[0]);
 	}
 
 	protected override void OnSpawn()

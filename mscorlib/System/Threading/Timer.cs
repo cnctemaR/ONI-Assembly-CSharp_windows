@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace System.Threading
@@ -27,8 +25,8 @@ namespace System.Threading
 		[CLSCompliant(false)]
 		public Timer(TimerCallback callback, object state, uint dueTime, uint period)
 		{
-			long num = (long)((dueTime == uint.MaxValue) ? ulong.MaxValue : ((ulong)dueTime));
-			long num2 = (long)((period == uint.MaxValue) ? ulong.MaxValue : ((ulong)period));
+			long num = (long)((dueTime != uint.MaxValue) ? ((ulong)dueTime) : ulong.MaxValue);
+			long num2 = (long)((period != uint.MaxValue) ? ((ulong)period) : ulong.MaxValue);
 			this.Init(callback, state, num, num2);
 		}
 
@@ -61,8 +59,8 @@ namespace System.Threading
 		[CLSCompliant(false)]
 		public bool Change(uint dueTime, uint period)
 		{
-			long num = (long)((dueTime == uint.MaxValue) ? ulong.MaxValue : ((ulong)dueTime));
-			long num2 = (long)((period == uint.MaxValue) ? ulong.MaxValue : ((ulong)period));
+			long num = (long)((dueTime != uint.MaxValue) ? ((ulong)dueTime) : ulong.MaxValue);
+			long num2 = (long)((period != uint.MaxValue) ? ((ulong)period) : ulong.MaxValue);
 			return this.Change(num, num2, false);
 		}
 
@@ -85,11 +83,11 @@ namespace System.Threading
 		{
 			if (dueTime > (long)((ulong)(-2)))
 			{
-				throw new ArgumentOutOfRangeException("dueTime", "Due time too large");
+				throw new ArgumentOutOfRangeException("Due time too large");
 			}
 			if (period > (long)((ulong)(-2)))
 			{
-				throw new ArgumentOutOfRangeException("period", "Period too large");
+				throw new ArgumentOutOfRangeException("Period too large");
 			}
 			if (dueTime < -1L)
 			{
@@ -101,7 +99,7 @@ namespace System.Threading
 			}
 			if (this.disposed)
 			{
-				throw new ObjectDisposedException(null, Environment.GetResourceString("Cannot access a disposed object."));
+				return false;
 			}
 			this.due_time_ms = dueTime;
 			this.period_ms = period;
@@ -121,7 +119,7 @@ namespace System.Threading
 			}
 			else
 			{
-				num = dueTime * 10000L + Timer.GetTimeMonotonic();
+				num = dueTime * 10000L + DateTime.GetTimeMonotonic();
 			}
 			Timer.scheduler.Change(this, num);
 			return true;
@@ -134,18 +132,13 @@ namespace System.Threading
 				throw new ArgumentNullException("notifyObject");
 			}
 			this.Dispose();
-			NativeEventCalls.SetEvent(notifyObject.SafeWaitHandle);
+			NativeEventCalls.SetEvent_internal(notifyObject.Handle);
 			return true;
 		}
 
-		internal void KeepRootedWhileScheduled()
-		{
-		}
+		private const long MaxValue = 4294967294L;
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern long GetTimeMonotonic();
-
-		private static readonly Timer.Scheduler scheduler = Timer.Scheduler.Instance;
+		private static Timer.Scheduler scheduler = Timer.Scheduler.Instance;
 
 		private TimerCallback callback;
 
@@ -158,8 +151,6 @@ namespace System.Threading
 		private long next_run;
 
 		private bool disposed;
-
-		private const long MaxValue = 4294967294L;
 
 		private sealed class TimerComparer : IComparer
 		{
@@ -178,41 +169,29 @@ namespace System.Threading
 				long num = timer.next_run - timer2.next_run;
 				if (num == 0L)
 				{
-					if (x != y)
-					{
-						return -1;
-					}
 					return 0;
 				}
-				else
-				{
-					if (num <= 0L)
-					{
-						return -1;
-					}
-					return 1;
-				}
+				return (num <= 0L) ? (-1) : 1;
 			}
 		}
 
 		private sealed class Scheduler
 		{
+			private Scheduler()
+			{
+				this.list = new SortedList(new Timer.TimerComparer(), 1024);
+				new Thread(new ThreadStart(this.SchedulerThread))
+				{
+					IsBackground = true
+				}.Start();
+			}
+
 			public static Timer.Scheduler Instance
 			{
 				get
 				{
 					return Timer.Scheduler.instance;
 				}
-			}
-
-			private Scheduler()
-			{
-				this.changed = new ManualResetEvent(false);
-				this.list = new SortedList(new Timer.TimerComparer(), 1024);
-				new Thread(new ThreadStart(this.SchedulerThread))
-				{
-					IsBackground = true
-				}.Start();
 			}
 
 			public void Remove(Timer timer)
@@ -229,79 +208,32 @@ namespace System.Threading
 
 			public void Change(Timer timer, long new_next_run)
 			{
-				bool flag = false;
 				lock (this)
 				{
 					this.InternalRemove(timer);
 					if (new_next_run == 9223372036854775807L)
 					{
 						timer.next_run = new_next_run;
-						return;
 					}
-					if (!timer.disposed)
+					else if (!timer.disposed)
 					{
 						timer.next_run = new_next_run;
 						this.Add(timer);
-						flag = this.list.GetByIndex(0) == timer;
-					}
-				}
-				if (flag)
-				{
-					this.changed.Set();
-				}
-			}
-
-			private int FindByDueTime(long nr)
-			{
-				int i = 0;
-				int num = this.list.Count - 1;
-				if (num < 0)
-				{
-					return -1;
-				}
-				if (num < 20)
-				{
-					while (i <= num)
-					{
-						Timer timer = (Timer)this.list.GetByIndex(i);
-						if (timer.next_run == nr)
+						if (this.list.GetByIndex(0) == timer)
 						{
-							return i;
+							Monitor.Pulse(this);
 						}
-						if (timer.next_run > nr)
-						{
-							return -1;
-						}
-						i++;
-					}
-					return -1;
-				}
-				while (i <= num)
-				{
-					int num2 = i + (num - i >> 1);
-					Timer timer2 = (Timer)this.list.GetByIndex(num2);
-					if (nr == timer2.next_run)
-					{
-						return num2;
-					}
-					if (nr > timer2.next_run)
-					{
-						i = num2 + 1;
-					}
-					else
-					{
-						num = num2 - 1;
 					}
 				}
-				return -1;
 			}
 
 			private void Add(Timer timer)
 			{
-				int num = this.FindByDueTime(timer.next_run);
+				int num = this.list.IndexOfKey(timer);
 				if (num != -1)
 				{
 					bool flag = long.MaxValue - timer.next_run > 20000L;
+					Timer timer2;
 					do
 					{
 						num++;
@@ -313,8 +245,13 @@ namespace System.Threading
 						{
 							timer.next_run -= 1L;
 						}
+						if (num >= this.list.Count)
+						{
+							break;
+						}
+						timer2 = (Timer)this.list.GetByIndex(num);
 					}
-					while (num < this.list.Count && ((Timer)this.list.GetByIndex(num)).next_run == timer.next_run);
+					while (timer2.next_run == timer.next_run);
 				}
 				this.list.Add(timer, timer);
 			}
@@ -329,25 +266,17 @@ namespace System.Threading
 				return num;
 			}
 
-			private static void TimerCB(object o)
-			{
-				Timer timer = (Timer)o;
-				timer.callback(timer.state);
-			}
-
 			private void SchedulerThread()
 			{
 				Thread.CurrentThread.Name = "Timer-Scheduler";
-				List<Timer> list = new List<Timer>(512);
+				ArrayList arrayList = new ArrayList(512);
 				for (;;)
 				{
-					int num = -1;
-					long timeMonotonic = Timer.GetTimeMonotonic();
+					long timeMonotonic = DateTime.GetTimeMonotonic();
 					lock (this)
 					{
-						this.changed.Reset();
-						int num2 = this.list.Count;
-						for (int i = 0; i < num2; i++)
+						int num = this.list.Count;
+						for (int i = 0; i < num; i++)
 						{
 							Timer timer = (Timer)this.list.GetByIndex(i);
 							if (timer.next_run > timeMonotonic)
@@ -355,63 +284,57 @@ namespace System.Threading
 								break;
 							}
 							this.list.RemoveAt(i);
-							num2--;
+							num--;
 							i--;
-							ThreadPool.UnsafeQueueUserWorkItem(new WaitCallback(Timer.Scheduler.TimerCB), timer);
+							ThreadPool.QueueUserWorkItem(new WaitCallback(timer.callback.Invoke), timer.state);
 							long period_ms = timer.period_ms;
 							long due_time_ms = timer.due_time_ms;
-							if (period_ms == -1L || ((period_ms == 0L || period_ms == -1L) && due_time_ms != -1L))
+							bool flag = period_ms == -1L || ((period_ms == 0L || period_ms == -1L) && due_time_ms != -1L);
+							if (flag)
 							{
 								timer.next_run = long.MaxValue;
 							}
 							else
 							{
-								timer.next_run = Timer.GetTimeMonotonic() + 10000L * timer.period_ms;
-								list.Add(timer);
+								timer.next_run = DateTime.GetTimeMonotonic() + 10000L * timer.period_ms;
+								arrayList.Add(timer);
 							}
 						}
-						num2 = list.Count;
-						for (int i = 0; i < num2; i++)
+						num = arrayList.Count;
+						for (int i = 0; i < num; i++)
 						{
-							Timer timer2 = list[i];
+							Timer timer2 = (Timer)arrayList[i];
 							this.Add(timer2);
 						}
-						list.Clear();
-						this.ShrinkIfNeeded(list, 512);
+						arrayList.Clear();
+						this.ShrinkIfNeeded(arrayList, 512);
 						int capacity = this.list.Capacity;
-						num2 = this.list.Count;
-						if (capacity > 1024 && num2 > 0 && capacity / num2 > 3)
+						num = this.list.Count;
+						if (capacity > 1024 && num > 0 && capacity / num > 3)
 						{
-							this.list.Capacity = num2 * 2;
+							this.list.Capacity = num * 2;
 						}
-						long num3 = long.MaxValue;
+						long num2 = long.MaxValue;
 						if (this.list.Count > 0)
 						{
-							num3 = ((Timer)this.list.GetByIndex(0)).next_run;
+							num2 = ((Timer)this.list.GetByIndex(0)).next_run;
 						}
-						num = -1;
-						if (num3 != 9223372036854775807L)
+						int num3 = -1;
+						if (num2 != 9223372036854775807L)
 						{
-							long num4 = (num3 - Timer.GetTimeMonotonic()) / 10000L;
-							if (num4 > 2147483647L)
+							long num4 = num2 - DateTime.GetTimeMonotonic();
+							num3 = (int)(num4 / 10000L);
+							if (num3 < 0)
 							{
-								num = 2147483646;
-							}
-							else
-							{
-								num = (int)num4;
-								if (num < 0)
-								{
-									num = 0;
-								}
+								num3 = 0;
 							}
 						}
+						Monitor.Wait(this, num3);
 					}
-					this.changed.WaitOne(num);
 				}
 			}
 
-			private void ShrinkIfNeeded(List<Timer> list, int initial)
+			private void ShrinkIfNeeded(ArrayList list, int initial)
 			{
 				int capacity = list.Capacity;
 				int count = list.Count;
@@ -424,8 +347,6 @@ namespace System.Threading
 			private static Timer.Scheduler instance = new Timer.Scheduler();
 
 			private SortedList list;
-
-			private ManualResetEvent changed;
 		}
 	}
 }

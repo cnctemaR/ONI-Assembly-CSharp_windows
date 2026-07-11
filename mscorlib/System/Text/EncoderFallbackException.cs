@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace System.Text
 {
@@ -7,48 +6,36 @@ namespace System.Text
 	public sealed class EncoderFallbackException : ArgumentException
 	{
 		public EncoderFallbackException()
-			: base(Environment.GetResourceString("Value does not fall within the expected range."))
+			: this(null)
 		{
-			base.SetErrorCode(-2147024809);
 		}
 
 		public EncoderFallbackException(string message)
-			: base(message)
 		{
-			base.SetErrorCode(-2147024809);
+			this.index = -1;
+			base..ctor(message);
 		}
 
 		public EncoderFallbackException(string message, Exception innerException)
-			: base(message, innerException)
 		{
-			base.SetErrorCode(-2147024809);
+			this.index = -1;
+			base..ctor(message, innerException);
 		}
 
-		internal EncoderFallbackException(SerializationInfo info, StreamingContext context)
-			: base(info, context)
+		internal EncoderFallbackException(char charUnknown, int index)
 		{
-		}
-
-		internal EncoderFallbackException(string message, char charUnknown, int index)
-			: base(message)
-		{
-			this.charUnknown = charUnknown;
+			this.index = -1;
+			base..ctor(null);
+			this.char_unknown = charUnknown;
 			this.index = index;
 		}
 
-		internal EncoderFallbackException(string message, char charUnknownHigh, char charUnknownLow, int index)
-			: base(message)
+		internal EncoderFallbackException(char charUnknownHigh, char charUnknownLow, int index)
 		{
-			if (!char.IsHighSurrogate(charUnknownHigh))
-			{
-				throw new ArgumentOutOfRangeException("charUnknownHigh", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 55296, 56319 }));
-			}
-			if (!char.IsLowSurrogate(charUnknownLow))
-			{
-				throw new ArgumentOutOfRangeException("charUnknownLow", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[] { 56320, 57343 }));
-			}
-			this.charUnknownHigh = charUnknownHigh;
-			this.charUnknownLow = charUnknownLow;
+			this.index = -1;
+			base..ctor(null);
+			this.char_unknown_high = charUnknownHigh;
+			this.char_unknown_low = charUnknownLow;
 			this.index = index;
 		}
 
@@ -56,7 +43,7 @@ namespace System.Text
 		{
 			get
 			{
-				return this.charUnknown;
+				return this.char_unknown;
 			}
 		}
 
@@ -64,7 +51,7 @@ namespace System.Text
 		{
 			get
 			{
-				return this.charUnknownHigh;
+				return this.char_unknown_high;
 			}
 		}
 
@@ -72,10 +59,11 @@ namespace System.Text
 		{
 			get
 			{
-				return this.charUnknownLow;
+				return this.char_unknown_low;
 			}
 		}
 
+		[MonoTODO]
 		public int Index
 		{
 			get
@@ -84,16 +72,19 @@ namespace System.Text
 			}
 		}
 
+		[MonoTODO]
 		public bool IsUnknownSurrogate()
 		{
-			return this.charUnknownHigh > '\0';
+			throw new NotImplementedException();
 		}
 
-		private char charUnknown;
+		private const string defaultMessage = "Failed to decode the input byte sequence to Unicode characters.";
 
-		private char charUnknownHigh;
+		private char char_unknown;
 
-		private char charUnknownLow;
+		private char char_unknown_high;
+
+		private char char_unknown_low;
 
 		private int index;
 	}

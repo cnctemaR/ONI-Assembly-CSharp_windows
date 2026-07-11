@@ -22,7 +22,8 @@ namespace System.Security.Permissions
 			{
 				if ((value & StorePermissionFlags.AllFlags) != value)
 				{
-					throw new ArgumentException(string.Format(global::Locale.GetText("Invalid flags {0}"), value), "StorePermissionFlags");
+					string text = string.Format(global::Locale.GetText("Invalid flags {0}"), value);
+					throw new ArgumentException(text, "StorePermissionFlags");
 				}
 				this._flags = value;
 			}
@@ -32,16 +33,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & StorePermissionFlags.AddToStore) > StorePermissionFlags.NoFlags;
+				return (this._flags & StorePermissionFlags.AddToStore) != StorePermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= StorePermissionFlags.AddToStore;
-					return;
 				}
-				this._flags &= ~StorePermissionFlags.AddToStore;
+				else
+				{
+					this._flags &= ~StorePermissionFlags.AddToStore;
+				}
 			}
 		}
 
@@ -49,16 +52,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & StorePermissionFlags.CreateStore) > StorePermissionFlags.NoFlags;
+				return (this._flags & StorePermissionFlags.CreateStore) != StorePermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= StorePermissionFlags.CreateStore;
-					return;
 				}
-				this._flags &= ~StorePermissionFlags.CreateStore;
+				else
+				{
+					this._flags &= ~StorePermissionFlags.CreateStore;
+				}
 			}
 		}
 
@@ -66,16 +71,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & StorePermissionFlags.DeleteStore) > StorePermissionFlags.NoFlags;
+				return (this._flags & StorePermissionFlags.DeleteStore) != StorePermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= StorePermissionFlags.DeleteStore;
-					return;
 				}
-				this._flags &= ~StorePermissionFlags.DeleteStore;
+				else
+				{
+					this._flags &= ~StorePermissionFlags.DeleteStore;
+				}
 			}
 		}
 
@@ -83,16 +90,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & StorePermissionFlags.EnumerateCertificates) > StorePermissionFlags.NoFlags;
+				return (this._flags & StorePermissionFlags.EnumerateCertificates) != StorePermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= StorePermissionFlags.EnumerateCertificates;
-					return;
 				}
-				this._flags &= ~StorePermissionFlags.EnumerateCertificates;
+				else
+				{
+					this._flags &= ~StorePermissionFlags.EnumerateCertificates;
+				}
 			}
 		}
 
@@ -100,16 +109,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & StorePermissionFlags.EnumerateStores) > StorePermissionFlags.NoFlags;
+				return (this._flags & StorePermissionFlags.EnumerateStores) != StorePermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= StorePermissionFlags.EnumerateStores;
-					return;
 				}
-				this._flags &= ~StorePermissionFlags.EnumerateStores;
+				else
+				{
+					this._flags &= ~StorePermissionFlags.EnumerateStores;
+				}
 			}
 		}
 
@@ -117,16 +128,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & StorePermissionFlags.OpenStore) > StorePermissionFlags.NoFlags;
+				return (this._flags & StorePermissionFlags.OpenStore) != StorePermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= StorePermissionFlags.OpenStore;
-					return;
 				}
-				this._flags &= ~StorePermissionFlags.OpenStore;
+				else
+				{
+					this._flags &= ~StorePermissionFlags.OpenStore;
+				}
 			}
 		}
 
@@ -134,16 +147,18 @@ namespace System.Security.Permissions
 		{
 			get
 			{
-				return (this._flags & StorePermissionFlags.RemoveFromStore) > StorePermissionFlags.NoFlags;
+				return (this._flags & StorePermissionFlags.RemoveFromStore) != StorePermissionFlags.NoFlags;
 			}
 			set
 			{
 				if (value)
 				{
 					this._flags |= StorePermissionFlags.RemoveFromStore;
-					return;
 				}
-				this._flags &= ~StorePermissionFlags.RemoveFromStore;
+				else
+				{
+					this._flags &= ~StorePermissionFlags.RemoveFromStore;
+				}
 			}
 		}
 

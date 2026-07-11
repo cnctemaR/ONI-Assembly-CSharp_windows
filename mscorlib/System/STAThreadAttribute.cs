@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Method)]
+	[ComVisible(true)]
 	public sealed class STAThreadAttribute : Attribute
 	{
 	}

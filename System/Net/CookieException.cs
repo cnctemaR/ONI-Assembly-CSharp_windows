@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace System.Net
 {
@@ -11,28 +10,26 @@ namespace System.Net
 		{
 		}
 
-		internal CookieException(string message)
-			: base(message)
+		internal CookieException(string msg)
+			: base(msg)
 		{
 		}
 
-		internal CookieException(string message, Exception inner)
-			: base(message, inner)
+		internal CookieException(string msg, Exception e)
+			: base(msg, e)
 		{
 		}
 
-		protected CookieException(SerializationInfo serializationInfo, StreamingContext streamingContext)
-			: base(serializationInfo, streamingContext)
+		protected CookieException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter, SerializationFormatter = true)]
-		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			base.GetObjectData(serializationInfo, streamingContext);
+			base.GetObjectData(info, context);
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
 		public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
 			base.GetObjectData(serializationInfo, streamingContext);

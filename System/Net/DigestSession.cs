@@ -9,7 +9,7 @@ namespace System.Net
 		public DigestSession()
 		{
 			this._nc = 1;
-			this.lastUse = DateTime.UtcNow;
+			this.lastUse = DateTime.Now;
 		}
 
 		public string Algorithm
@@ -76,7 +76,7 @@ namespace System.Net
 			}
 			if (this.parser.Algorithm == null || this.parser.Algorithm.ToUpper().StartsWith("MD5"))
 			{
-				this.hash = MD5.Create();
+				this.hash = HashAlgorithm.Create("MD5");
 			}
 			return true;
 		}
@@ -110,7 +110,9 @@ namespace System.Net
 		private string HA2(HttpWebRequest webRequest)
 		{
 			string text = string.Format("{0}:{1}", webRequest.Method, webRequest.RequestUri.PathAndQuery);
-			this.QOP == "auth-int";
+			if (this.QOP == "auth-int")
+			{
+			}
 			return this.HashToHexString(text);
 		}
 
@@ -136,14 +138,14 @@ namespace System.Net
 			{
 				return null;
 			}
-			this.lastUse = DateTime.UtcNow;
+			this.lastUse = DateTime.Now;
 			NetworkCredential credential = credentials.GetCredential(httpWebRequest.RequestUri, "digest");
 			if (credential == null)
 			{
 				return null;
 			}
 			string userName = credential.UserName;
-			if (userName == null || userName == "")
+			if (userName == null || userName == string.Empty)
 			{
 				return null;
 			}

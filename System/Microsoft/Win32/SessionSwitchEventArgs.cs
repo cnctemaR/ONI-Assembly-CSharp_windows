@@ -3,8 +3,8 @@ using System.Security.Permissions;
 
 namespace Microsoft.Win32
 {
-	[PermissionSet(SecurityAction.LinkDemand, Unrestricted = true)]
-	[PermissionSet(SecurityAction.InheritanceDemand, Unrestricted = true)]
+	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public class SessionSwitchEventArgs : EventArgs
 	{
 		public SessionSwitchEventArgs(SessionSwitchReason reason)

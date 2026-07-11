@@ -144,7 +144,7 @@ namespace System
 		{
 			get
 			{
-				return "";
+				return string.Empty;
 			}
 			set
 			{
@@ -229,7 +229,7 @@ namespace System
 
 		public ConsoleKeyInfo ReadKey(bool intercept)
 		{
-			return NullConsoleDriver.EmptyConsoleKeyInfo;
+			return ConsoleKeyInfo.Empty;
 		}
 
 		public void ResetColor()
@@ -251,7 +251,5 @@ namespace System
 		public void SetWindowSize(int width, int height)
 		{
 		}
-
-		private static readonly ConsoleKeyInfo EmptyConsoleKeyInfo = new ConsoleKeyInfo('\0', (ConsoleKey)0, false, false, false);
 	}
 }

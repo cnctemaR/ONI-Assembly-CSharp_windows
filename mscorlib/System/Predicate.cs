@@ -2,5 +2,5 @@
 
 namespace System
 {
-	public delegate bool Predicate<in T>(T obj);
+	public delegate bool Predicate<T>(T obj);
 }

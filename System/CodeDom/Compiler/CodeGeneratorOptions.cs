@@ -1,37 +1,29 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace System.CodeDom.Compiler
 {
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public class CodeGeneratorOptions
 	{
-		public object this[string index]
+		public CodeGeneratorOptions()
 		{
-			get
-			{
-				return this._options[index];
-			}
-			set
-			{
-				this._options[index] = value;
-			}
+			this.properties = new global::System.Collections.Specialized.ListDictionary();
 		}
 
-		public string IndentString
+		public bool BlankLinesBetweenMembers
 		{
 			get
 			{
-				object obj = this._options["IndentString"];
-				if (obj == null)
-				{
-					return "    ";
-				}
-				return (string)obj;
+				object obj = this.properties["BlankLinesBetweenMembers"];
+				return obj == null || (bool)obj;
 			}
 			set
 			{
-				this._options["IndentString"] = value;
+				this.properties["BlankLinesBetweenMembers"] = value;
 			}
 		}
 
@@ -39,16 +31,12 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				object obj = this._options["BracingStyle"];
-				if (obj == null)
-				{
-					return "Block";
-				}
-				return (string)obj;
+				object obj = this.properties["BracingStyle"];
+				return (obj != null) ? ((string)obj) : "Block";
 			}
 			set
 			{
-				this._options["BracingStyle"] = value;
+				this.properties["BracingStyle"] = value;
 			}
 		}
 
@@ -56,41 +44,54 @@ namespace System.CodeDom.Compiler
 		{
 			get
 			{
-				object obj = this._options["ElseOnClosing"];
+				object obj = this.properties["ElseOnClosing"];
 				return obj != null && (bool)obj;
 			}
 			set
 			{
-				this._options["ElseOnClosing"] = value;
+				this.properties["ElseOnClosing"] = value;
 			}
 		}
 
-		public bool BlankLinesBetweenMembers
+		public string IndentString
 		{
 			get
 			{
-				object obj = this._options["BlankLinesBetweenMembers"];
-				return obj == null || (bool)obj;
+				object obj = this.properties["IndentString"];
+				return (obj != null) ? ((string)obj) : "    ";
 			}
 			set
 			{
-				this._options["BlankLinesBetweenMembers"] = value;
+				this.properties["IndentString"] = value;
 			}
 		}
 
+		public object this[string index]
+		{
+			get
+			{
+				return this.properties[index];
+			}
+			set
+			{
+				this.properties[index] = value;
+			}
+		}
+
+		[ComVisible(false)]
 		public bool VerbatimOrder
 		{
 			get
 			{
-				object obj = this._options["VerbatimOrder"];
+				object obj = this.properties["VerbatimOrder"];
 				return obj != null && (bool)obj;
 			}
 			set
 			{
-				this._options["VerbatimOrder"] = value;
+				this.properties["VerbatimOrder"] = value;
 			}
 		}
 
-		private readonly IDictionary _options = new ListDictionary();
+		private IDictionary properties;
 	}
 }

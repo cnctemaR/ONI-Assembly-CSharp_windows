@@ -8,26 +8,26 @@ namespace System.Runtime.InteropServices
 	{
 		public CurrencyWrapper(decimal obj)
 		{
-			this.m_WrappedObject = obj;
+			this.currency = obj;
 		}
 
 		public CurrencyWrapper(object obj)
 		{
-			if (!(obj is decimal))
+			if (obj.GetType() != typeof(decimal))
 			{
-				throw new ArgumentException(Environment.GetResourceString("Object must be of type Decimal."), "obj");
+				throw new ArgumentException("obj has to be a Decimal type");
 			}
-			this.m_WrappedObject = (decimal)obj;
+			this.currency = (decimal)obj;
 		}
 
 		public decimal WrappedObject
 		{
 			get
 			{
-				return this.m_WrappedObject;
+				return this.currency;
 			}
 		}
 
-		private decimal m_WrappedObject;
+		private decimal currency;
 	}
 }

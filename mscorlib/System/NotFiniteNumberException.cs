@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Security;
 
 namespace System
 {
@@ -10,70 +9,65 @@ namespace System
 	public class NotFiniteNumberException : ArithmeticException
 	{
 		public NotFiniteNumberException()
-			: base(Environment.GetResourceString("Number encountered was not a finite quantity."))
+			: base(Locale.GetText("The number encountered was not a finite quantity."))
 		{
-			this._offendingNumber = 0.0;
-			base.SetErrorCode(-2146233048);
+			base.HResult = -2146233048;
 		}
 
 		public NotFiniteNumberException(double offendingNumber)
 		{
-			this._offendingNumber = offendingNumber;
-			base.SetErrorCode(-2146233048);
+			this.offending_number = offendingNumber;
+			base.HResult = -2146233048;
 		}
 
 		public NotFiniteNumberException(string message)
 			: base(message)
 		{
-			this._offendingNumber = 0.0;
-			base.SetErrorCode(-2146233048);
+			base.HResult = -2146233048;
 		}
 
 		public NotFiniteNumberException(string message, double offendingNumber)
 			: base(message)
 		{
-			this._offendingNumber = offendingNumber;
-			base.SetErrorCode(-2146233048);
-		}
-
-		public NotFiniteNumberException(string message, Exception innerException)
-			: base(message, innerException)
-		{
-			base.SetErrorCode(-2146233048);
+			this.offending_number = offendingNumber;
+			base.HResult = -2146233048;
 		}
 
 		public NotFiniteNumberException(string message, double offendingNumber, Exception innerException)
 			: base(message, innerException)
 		{
-			this._offendingNumber = offendingNumber;
-			base.SetErrorCode(-2146233048);
+			this.offending_number = offendingNumber;
+			base.HResult = -2146233048;
 		}
 
 		protected NotFiniteNumberException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
-			this._offendingNumber = (double)info.GetInt32("OffendingNumber");
+			this.offending_number = info.GetDouble("OffendingNumber");
+		}
+
+		public NotFiniteNumberException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+			base.HResult = -2146233048;
 		}
 
 		public double OffendingNumber
 		{
 			get
 			{
-				return this._offendingNumber;
+				return this.offending_number;
 			}
 		}
 
-		[SecurityCritical]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
 			base.GetObjectData(info, context);
-			info.AddValue("OffendingNumber", this._offendingNumber, typeof(int));
+			info.AddValue("OffendingNumber", this.offending_number);
 		}
 
-		private double _offendingNumber;
+		private const int Result = -2146233048;
+
+		private double offending_number;
 	}
 }

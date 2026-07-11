@@ -1,82 +1,73 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Security;
 
 namespace System.Collections.Generic
 {
-	[TypeDependency("System.Collections.Generic.ObjectComparer`1")]
 	[Serializable]
-	public abstract class Comparer<T> : IComparer, IComparer<T>
+	public abstract class Comparer<T> : IComparer<T>, IComparer
 	{
-		public static Comparer<T> Default
+		static Comparer()
 		{
-			get
+			if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
 			{
-				Comparer<T> comparer = Comparer<T>.defaultComparer;
-				if (comparer == null)
-				{
-					comparer = Comparer<T>.CreateComparer();
-					Comparer<T>.defaultComparer = comparer;
-				}
-				return comparer;
+				Comparer<T>._default = (Comparer<T>)Activator.CreateInstance(typeof(GenericComparer<>).MakeGenericType(new Type[] { typeof(T) }));
+			}
+			else
+			{
+				Comparer<T>._default = new Comparer<T>.DefaultComparer();
 			}
 		}
-
-		public static Comparer<T> Create(Comparison<T> comparison)
-		{
-			if (comparison == null)
-			{
-				throw new ArgumentNullException("comparison");
-			}
-			return new ComparisonComparer<T>(comparison);
-		}
-
-		[SecuritySafeCritical]
-		private static Comparer<T> CreateComparer()
-		{
-			RuntimeType runtimeType = (RuntimeType)typeof(T);
-			if (typeof(IComparable<T>).IsAssignableFrom(runtimeType))
-			{
-				return (Comparer<T>)RuntimeType.CreateInstanceForAnotherGenericParameter(typeof(GenericComparer<>), runtimeType);
-			}
-			if (runtimeType.IsGenericType && runtimeType.GetGenericTypeDefinition() == typeof(Nullable<>))
-			{
-				RuntimeType runtimeType2 = (RuntimeType)runtimeType.GetGenericArguments()[0];
-				if (typeof(IComparable<>).MakeGenericType(new Type[] { runtimeType2 }).IsAssignableFrom(runtimeType2))
-				{
-					return (Comparer<T>)RuntimeType.CreateInstanceForAnotherGenericParameter(typeof(NullableComparer<>), runtimeType2);
-				}
-			}
-			return new ObjectComparer<T>();
-		}
-
-		public abstract int Compare(T x, T y);
 
 		int IComparer.Compare(object x, object y)
 		{
 			if (x == null)
 			{
-				if (y != null)
-				{
-					return -1;
-				}
-				return 0;
+				return (y != null) ? (-1) : 0;
 			}
-			else
+			if (y == null)
 			{
+				return 1;
+			}
+			if (x is T && y is T)
+			{
+				return this.Compare((T)((object)x), (T)((object)y));
+			}
+			throw new ArgumentException();
+		}
+
+		public abstract int Compare(T x, T y);
+
+		public static Comparer<T> Default
+		{
+			get
+			{
+				return Comparer<T>._default;
+			}
+		}
+
+		private static readonly Comparer<T> _default;
+
+		private sealed class DefaultComparer : Comparer<T>
+		{
+			public override int Compare(T x, T y)
+			{
+				if (x == null)
+				{
+					return (y != null) ? (-1) : 0;
+				}
 				if (y == null)
 				{
 					return 1;
 				}
-				if (x is T && y is T)
+				if (x is IComparable<T>)
 				{
-					return this.Compare((T)((object)x), (T)((object)y));
+					return ((IComparable<T>)((object)x)).CompareTo(y);
 				}
-				ThrowHelper.ThrowArgumentException(ExceptionResource.Argument_InvalidArgumentForComparison);
-				return 0;
+				if (x is IComparable)
+				{
+					return ((IComparable)((object)x)).CompareTo(y);
+				}
+				throw new ArgumentException("does not implement right interface");
 			}
 		}
-
-		private static volatile Comparer<T> defaultComparer;
 	}
 }

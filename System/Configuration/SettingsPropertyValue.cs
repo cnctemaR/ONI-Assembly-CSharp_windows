@@ -96,7 +96,7 @@ namespace System.Configuration
 					switch (this.property.SerializeAs)
 					{
 					case SettingsSerializeAs.String:
-						this.serializedValue = TypeDescriptor.GetConverter(this.property.PropertyType).ConvertToInvariantString(this.propertyValue);
+						this.serializedValue = global::System.ComponentModel.TypeDescriptor.GetConverter(this.property.PropertyType).ConvertToInvariantString(this.propertyValue);
 						break;
 					case SettingsSerializeAs.Xml:
 						if (this.propertyValue != null)
@@ -159,7 +159,7 @@ namespace System.Configuration
 		{
 			if (this.property.DefaultValue == null)
 			{
-				if (this.property.PropertyType != null && this.property.PropertyType.IsValueType)
+				if (this.property.PropertyType.IsValueType)
 				{
 					return Activator.CreateInstance(this.property.PropertyType);
 				}
@@ -181,7 +181,8 @@ namespace System.Configuration
 				}
 				if (!this.property.PropertyType.IsAssignableFrom(this.property.DefaultValue.GetType()))
 				{
-					return TypeDescriptor.GetConverter(this.property.PropertyType).ConvertFrom(null, CultureInfo.InvariantCulture, this.property.DefaultValue);
+					global::System.ComponentModel.TypeConverter converter = global::System.ComponentModel.TypeDescriptor.GetConverter(this.property.PropertyType);
+					return converter.ConvertFrom(null, CultureInfo.InvariantCulture, this.property.DefaultValue);
 				}
 				return this.property.DefaultValue;
 			}
@@ -201,7 +202,7 @@ namespace System.Configuration
 				case SettingsSerializeAs.String:
 					if (serializedValue is string)
 					{
-						obj = TypeDescriptor.GetConverter(this.property.PropertyType).ConvertFromInvariantString((string)serializedValue);
+						obj = global::System.ComponentModel.TypeDescriptor.GetConverter(this.property.PropertyType).ConvertFromInvariantString((string)serializedValue);
 					}
 					break;
 				case SettingsSerializeAs.Xml:

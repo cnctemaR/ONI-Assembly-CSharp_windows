@@ -60,7 +60,7 @@ namespace YamlDotNet.Core.Tokens
 
 		public override string ToString()
 		{
-			return string.Format(CultureInfo.InvariantCulture, "{0} => {1}", this.handle, this.prefix);
+			return string.Format(CultureInfo.InvariantCulture, "{0} => {1}", new object[] { this.handle, this.prefix });
 		}
 
 		private readonly string handle;

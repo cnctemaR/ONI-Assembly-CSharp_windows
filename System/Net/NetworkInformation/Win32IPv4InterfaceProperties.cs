@@ -5,9 +5,6 @@ namespace System.Net.NetworkInformation
 {
 	internal sealed class Win32IPv4InterfaceProperties : IPv4InterfaceProperties
 	{
-		[DllImport("iphlpapi.dll")]
-		private static extern int GetPerAdapterInfo(int IfIndex, Win32_IP_PER_ADAPTER_INFO pPerAdapterInfo, ref int pOutBufLen);
-
 		public Win32IPv4InterfaceProperties(Win32_IP_ADAPTER_INFO ainfo, Win32_MIB_IFROW mib)
 		{
 			this.ainfo = ainfo;
@@ -22,6 +19,9 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
+		[DllImport("iphlpapi.dll")]
+		private static extern int GetPerAdapterInfo(int IfIndex, Win32_IP_PER_ADAPTER_INFO pPerAdapterInfo, ref int pOutBufLen);
+
 		public override int Index
 		{
 			get
@@ -34,7 +34,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.painfo.AutoconfigActive > 0U;
+				return this.painfo.AutoconfigActive != 0U;
 			}
 		}
 
@@ -42,7 +42,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.painfo.AutoconfigEnabled > 0U;
+				return this.painfo.AutoconfigEnabled != 0U;
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return this.ainfo.DhcpEnabled > 0U;
+				return this.ainfo.DhcpEnabled != 0U;
 			}
 		}
 
@@ -58,7 +58,7 @@ namespace System.Net.NetworkInformation
 		{
 			get
 			{
-				return Win32NetworkInterface.FixedInfo.EnableRouting > 0U;
+				return Win32_FIXED_INFO.Instance.EnableRouting != 0U;
 			}
 		}
 

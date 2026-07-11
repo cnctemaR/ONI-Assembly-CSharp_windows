@@ -33,9 +33,9 @@ namespace System.Configuration
 		}
 
 		[MonoTODO]
-		public void ForceDeclaration(bool force)
+		public void ForceDeclaration(bool require)
 		{
-			this.require_declaration = force;
+			this.require_declaration = require;
 		}
 
 		public void ForceDeclaration()
@@ -43,12 +43,11 @@ namespace System.Configuration
 			this.ForceDeclaration(true);
 		}
 
-		[MonoTODO]
 		public bool IsDeclared
 		{
 			get
 			{
-				return false;
+				return this.declared;
 			}
 		}
 
@@ -115,6 +114,8 @@ namespace System.Configuration
 		}
 
 		private bool require_declaration;
+
+		private bool declared;
 
 		private string name;
 

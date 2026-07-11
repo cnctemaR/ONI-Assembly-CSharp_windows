@@ -1,83 +1,46 @@
 ﻿using System;
-using System.Globalization;
 
 namespace System
 {
 	[Serializable]
 	internal sealed class OrdinalComparer : StringComparer
 	{
-		internal OrdinalComparer(bool ignoreCase)
+		public OrdinalComparer(bool ignoreCase)
 		{
 			this._ignoreCase = ignoreCase;
 		}
 
 		public override int Compare(string x, string y)
 		{
-			if (x == y)
-			{
-				return 0;
-			}
-			if (x == null)
-			{
-				return -1;
-			}
-			if (y == null)
-			{
-				return 1;
-			}
 			if (this._ignoreCase)
 			{
-				return string.Compare(x, y, StringComparison.OrdinalIgnoreCase);
+				return string.CompareOrdinalCaseInsensitiveUnchecked(x, 0, int.MaxValue, y, 0, int.MaxValue);
 			}
-			return string.CompareOrdinal(x, y);
+			return string.CompareOrdinalUnchecked(x, 0, int.MaxValue, y, 0, int.MaxValue);
 		}
 
 		public override bool Equals(string x, string y)
 		{
-			if (x == y)
+			if (this._ignoreCase)
 			{
-				return true;
+				return this.Compare(x, y) == 0;
 			}
-			if (x == null || y == null)
+			return x == y;
+		}
+
+		public override int GetHashCode(string s)
+		{
+			if (s == null)
 			{
-				return false;
+				throw new ArgumentNullException("s");
 			}
 			if (this._ignoreCase)
 			{
-				return x.Length == y.Length && string.Compare(x, y, StringComparison.OrdinalIgnoreCase) == 0;
+				return s.GetCaseInsensitiveHashCode();
 			}
-			return x.Equals(y);
+			return s.GetHashCode();
 		}
 
-		public override int GetHashCode(string obj)
-		{
-			if (obj == null)
-			{
-				throw new ArgumentNullException("obj");
-			}
-			if (this._ignoreCase)
-			{
-				return TextInfo.GetHashCodeOrdinalIgnoreCase(obj);
-			}
-			return obj.GetHashCode();
-		}
-
-		public override bool Equals(object obj)
-		{
-			OrdinalComparer ordinalComparer = obj as OrdinalComparer;
-			return ordinalComparer != null && this._ignoreCase == ordinalComparer._ignoreCase;
-		}
-
-		public override int GetHashCode()
-		{
-			int hashCode = "OrdinalComparer".GetHashCode();
-			if (!this._ignoreCase)
-			{
-				return hashCode;
-			}
-			return ~hashCode;
-		}
-
-		private bool _ignoreCase;
+		private readonly bool _ignoreCase;
 	}
 }

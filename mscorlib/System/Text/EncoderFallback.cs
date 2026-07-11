@@ -1,72 +1,42 @@
 ﻿using System;
-using System.Threading;
 
 namespace System.Text
 {
 	[Serializable]
 	public abstract class EncoderFallback
 	{
-		private static object InternalSyncObject
+		public static EncoderFallback ExceptionFallback
 		{
 			get
 			{
-				if (EncoderFallback.s_InternalSyncObject == null)
-				{
-					object obj = new object();
-					Interlocked.CompareExchange<object>(ref EncoderFallback.s_InternalSyncObject, obj, null);
-				}
-				return EncoderFallback.s_InternalSyncObject;
+				return EncoderFallback.exception_fallback;
 			}
 		}
+
+		public abstract int MaxCharCount { get; }
 
 		public static EncoderFallback ReplacementFallback
 		{
 			get
 			{
-				if (EncoderFallback.replacementFallback == null)
-				{
-					object internalSyncObject = EncoderFallback.InternalSyncObject;
-					lock (internalSyncObject)
-					{
-						if (EncoderFallback.replacementFallback == null)
-						{
-							EncoderFallback.replacementFallback = new EncoderReplacementFallback();
-						}
-					}
-				}
-				return EncoderFallback.replacementFallback;
+				return EncoderFallback.replacement_fallback;
 			}
 		}
 
-		public static EncoderFallback ExceptionFallback
+		internal static EncoderFallback StandardSafeFallback
 		{
 			get
 			{
-				if (EncoderFallback.exceptionFallback == null)
-				{
-					object internalSyncObject = EncoderFallback.InternalSyncObject;
-					lock (internalSyncObject)
-					{
-						if (EncoderFallback.exceptionFallback == null)
-						{
-							EncoderFallback.exceptionFallback = new EncoderExceptionFallback();
-						}
-					}
-				}
-				return EncoderFallback.exceptionFallback;
+				return EncoderFallback.standard_safe_fallback;
 			}
 		}
 
 		public abstract EncoderFallbackBuffer CreateFallbackBuffer();
 
-		public abstract int MaxCharCount { get; }
+		private static EncoderFallback exception_fallback = new EncoderExceptionFallback();
 
-		internal bool bIsMicrosoftBestFitFallback;
+		private static EncoderFallback replacement_fallback = new EncoderReplacementFallback();
 
-		private static volatile EncoderFallback replacementFallback;
-
-		private static volatile EncoderFallback exceptionFallback;
-
-		private static object s_InternalSyncObject;
+		private static EncoderFallback standard_safe_fallback = new EncoderReplacementFallback("\ufffd");
 	}
 }

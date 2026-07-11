@@ -17,9 +17,20 @@ namespace System
 			if (applicationIdentityFullName.IndexOf(", Culture=") == -1)
 			{
 				this._fullName = applicationIdentityFullName + ", Culture=neutral";
-				return;
 			}
-			this._fullName = applicationIdentityFullName;
+			else
+			{
+				this._fullName = applicationIdentityFullName;
+			}
+		}
+
+		[MonoTODO("Missing serialization")]
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			if (info == null)
+			{
+				throw new ArgumentNullException("info");
+			}
 		}
 
 		public string CodeBase
@@ -41,15 +52,6 @@ namespace System
 		public override string ToString()
 		{
 			return this._fullName;
-		}
-
-		[MonoTODO("Missing serialization")]
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-			{
-				throw new ArgumentNullException("info");
-			}
 		}
 
 		private string _fullName;

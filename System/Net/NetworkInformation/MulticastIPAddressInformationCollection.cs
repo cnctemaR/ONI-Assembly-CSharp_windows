@@ -1,26 +1,67 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace System.Net.NetworkInformation
 {
-	public class MulticastIPAddressInformationCollection : ICollection<MulticastIPAddressInformation>, IEnumerable<MulticastIPAddressInformation>, IEnumerable
+	public class MulticastIPAddressInformationCollection : IEnumerable, IEnumerable<MulticastIPAddressInformation>, ICollection<MulticastIPAddressInformation>
 	{
 		protected internal MulticastIPAddressInformationCollection()
 		{
 		}
 
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return this.list.GetEnumerator();
+		}
+
+		public virtual void Add(MulticastIPAddressInformation address)
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			this.list.Add(address);
+		}
+
+		public virtual void Clear()
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			this.list.Clear();
+		}
+
+		public virtual bool Contains(MulticastIPAddressInformation address)
+		{
+			return this.list.Contains(address);
+		}
+
 		public virtual void CopyTo(MulticastIPAddressInformation[] array, int offset)
 		{
-			this.addresses.CopyTo(array, offset);
+			this.list.CopyTo(array, offset);
+		}
+
+		public virtual IEnumerator<MulticastIPAddressInformation> GetEnumerator()
+		{
+			return ((IEnumerable<MulticastIPAddressInformation>)this.list).GetEnumerator();
+		}
+
+		public virtual bool Remove(MulticastIPAddressInformation address)
+		{
+			if (this.IsReadOnly)
+			{
+				throw new NotSupportedException("The collection is read-only.");
+			}
+			return this.list.Remove(address);
 		}
 
 		public virtual int Count
 		{
 			get
 			{
-				return this.addresses.Count;
+				return this.list.Count;
 			}
 		}
 
@@ -32,49 +73,14 @@ namespace System.Net.NetworkInformation
 			}
 		}
 
-		public virtual void Add(MulticastIPAddressInformation address)
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		internal void InternalAdd(MulticastIPAddressInformation address)
-		{
-			this.addresses.Add(address);
-		}
-
-		public virtual bool Contains(MulticastIPAddressInformation address)
-		{
-			return this.addresses.Contains(address);
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return this.GetEnumerator();
-		}
-
-		public virtual IEnumerator<MulticastIPAddressInformation> GetEnumerator()
-		{
-			return this.addresses.GetEnumerator();
-		}
-
 		public virtual MulticastIPAddressInformation this[int index]
 		{
 			get
 			{
-				return this.addresses[index];
+				return this.list[index];
 			}
 		}
 
-		public virtual bool Remove(MulticastIPAddressInformation address)
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		public virtual void Clear()
-		{
-			throw new NotSupportedException(global::SR.GetString("The collection is read-only."));
-		}
-
-		private Collection<MulticastIPAddressInformation> addresses = new Collection<MulticastIPAddressInformation>();
+		private List<MulticastIPAddressInformation> list = new List<MulticastIPAddressInformation>();
 	}
 }

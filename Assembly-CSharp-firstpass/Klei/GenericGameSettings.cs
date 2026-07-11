@@ -66,6 +66,8 @@ namespace Klei
 
 		public bool takeSaveScreenshots { get; private set; }
 
+		public bool disableAutosave { get; private set; }
+
 		private static string Path
 		{
 			get

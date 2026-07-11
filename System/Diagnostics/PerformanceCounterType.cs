@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace System.Diagnostics
 {
-	[TypeConverter(typeof(AlphabeticalEnumConverter))]
+	[global::System.ComponentModel.TypeConverter(typeof(AlphabeticalEnumConverter))]
 	public enum PerformanceCounterType
 	{
 		NumberOfItemsHEX32,

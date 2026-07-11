@@ -11,22 +11,18 @@ namespace System.Security.AccessControl
 		}
 
 		public FileSystemAuditRule(string identity, FileSystemRights fileSystemRights, AuditFlags flags)
-			: this(new NTAccount(identity), fileSystemRights, flags)
+			: this(new SecurityIdentifier(identity), fileSystemRights, flags)
 		{
 		}
 
 		public FileSystemAuditRule(IdentityReference identity, FileSystemRights fileSystemRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
-			: this(identity, fileSystemRights, false, inheritanceFlags, propagationFlags, flags)
+			: base(identity, 0, false, inheritanceFlags, propagationFlags, flags)
 		{
-		}
-
-		internal FileSystemAuditRule(IdentityReference identity, FileSystemRights fileSystemRights, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
-			: base(identity, (int)fileSystemRights, isInherited, inheritanceFlags, propagationFlags, flags)
-		{
+			this.rights = fileSystemRights;
 		}
 
 		public FileSystemAuditRule(string identity, FileSystemRights fileSystemRights, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
-			: this(new NTAccount(identity), fileSystemRights, inheritanceFlags, propagationFlags, flags)
+			: this(new SecurityIdentifier(identity), fileSystemRights, inheritanceFlags, propagationFlags, flags)
 		{
 		}
 
@@ -34,8 +30,10 @@ namespace System.Security.AccessControl
 		{
 			get
 			{
-				return (FileSystemRights)base.AccessMask;
+				return this.rights;
 			}
 		}
+
+		private FileSystemRights rights;
 	}
 }

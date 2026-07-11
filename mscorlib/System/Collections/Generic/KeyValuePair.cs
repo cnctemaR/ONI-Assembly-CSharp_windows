@@ -1,30 +1,77 @@
 ﻿using System;
-using System.Text;
+using System.Diagnostics;
 
 namespace System.Collections.Generic
 {
-	public static class KeyValuePair
+	[DebuggerDisplay("{value}", Name = "[{key}]")]
+	[Serializable]
+	public struct KeyValuePair<TKey, TValue>
 	{
-		public static KeyValuePair<TKey, TValue> Create<TKey, TValue>(TKey key, TValue value)
+		public KeyValuePair(TKey key, TValue value)
 		{
-			return new KeyValuePair<TKey, TValue>(key, value);
+			this.Key = key;
+			this.Value = value;
 		}
 
-		internal static string PairToString(object key, object value)
+		public TKey Key
 		{
-			StringBuilder stringBuilder = StringBuilderCache.Acquire(16);
-			stringBuilder.Append('[');
-			if (key != null)
+			get
 			{
-				stringBuilder.Append(key);
+				return this.key;
 			}
-			stringBuilder.Append(", ");
-			if (value != null)
+			private set
 			{
-				stringBuilder.Append(value);
+				this.key = value;
 			}
-			stringBuilder.Append(']');
-			return StringBuilderCache.GetStringAndRelease(stringBuilder);
 		}
+
+		public TValue Value
+		{
+			get
+			{
+				return this.value;
+			}
+			private set
+			{
+				this.value = value;
+			}
+		}
+
+		public override string ToString()
+		{
+			string[] array = new string[5];
+			array[0] = "[";
+			int num = 1;
+			string text;
+			if (this.Key != null)
+			{
+				TKey tkey = this.Key;
+				text = tkey.ToString();
+			}
+			else
+			{
+				text = string.Empty;
+			}
+			array[num] = text;
+			array[2] = ", ";
+			int num2 = 3;
+			string text2;
+			if (this.Value != null)
+			{
+				TValue tvalue = this.Value;
+				text2 = tvalue.ToString();
+			}
+			else
+			{
+				text2 = string.Empty;
+			}
+			array[num2] = text2;
+			array[4] = "]";
+			return string.Concat(array);
+		}
+
+		private TKey key;
+
+		private TValue value;
 	}
 }

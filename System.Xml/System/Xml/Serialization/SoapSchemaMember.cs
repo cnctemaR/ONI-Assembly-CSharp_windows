@@ -4,27 +4,15 @@ namespace System.Xml.Serialization
 {
 	public class SoapSchemaMember
 	{
-		public XmlQualifiedName MemberType
-		{
-			get
-			{
-				return this.type;
-			}
-			set
-			{
-				this.type = value;
-			}
-		}
-
 		public string MemberName
 		{
 			get
 			{
-				if (this.memberName != null)
+				if (this.memberName == null)
 				{
-					return this.memberName;
+					return string.Empty;
 				}
-				return string.Empty;
+				return this.memberName;
 			}
 			set
 			{
@@ -32,8 +20,20 @@ namespace System.Xml.Serialization
 			}
 		}
 
+		public XmlQualifiedName MemberType
+		{
+			get
+			{
+				return this.memberType;
+			}
+			set
+			{
+				this.memberType = value;
+			}
+		}
+
 		private string memberName;
 
-		private XmlQualifiedName type = XmlQualifiedName.Empty;
+		private XmlQualifiedName memberType = XmlQualifiedName.Empty;
 	}
 }

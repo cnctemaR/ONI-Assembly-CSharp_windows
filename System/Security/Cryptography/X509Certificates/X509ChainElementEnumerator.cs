@@ -10,19 +10,19 @@ namespace System.Security.Cryptography.X509Certificates
 			this.enumerator = enumerable.GetEnumerator();
 		}
 
-		public X509ChainElement Current
-		{
-			get
-			{
-				return (X509ChainElement)this.enumerator.Current;
-			}
-		}
-
 		object IEnumerator.Current
 		{
 			get
 			{
 				return this.enumerator.Current;
+			}
+		}
+
+		public X509ChainElement Current
+		{
+			get
+			{
+				return (X509ChainElement)this.enumerator.Current;
 			}
 		}
 

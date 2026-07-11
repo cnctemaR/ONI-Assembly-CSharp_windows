@@ -10,7 +10,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class ApplicationTrust : EvidenceBase, ISecurityEncodable
+	public sealed class ApplicationTrust : ISecurityEncodable
 	{
 		public ApplicationTrust()
 		{
@@ -27,7 +27,7 @@ namespace System.Security.Policy
 			this._appid = applicationIdentity;
 		}
 
-		public ApplicationTrust(PermissionSet defaultGrantSet, IEnumerable<StrongName> fullTrustAssemblies)
+		internal ApplicationTrust(PermissionSet defaultGrantSet, IEnumerable<StrongName> fullTrustAssemblies)
 		{
 			if (defaultGrantSet == null)
 			{
@@ -165,7 +165,8 @@ namespace System.Security.Policy
 				text = securityElement3.Attribute("Data");
 				if (text != null)
 				{
-					using (MemoryStream memoryStream = new MemoryStream(CryptoConvert.FromHex(text)))
+					byte[] array = CryptoConvert.FromHex(text);
+					using (MemoryStream memoryStream = new MemoryStream(array))
 					{
 						BinaryFormatter binaryFormatter = new BinaryFormatter();
 						this._xtranfo = binaryFormatter.Deserialize(memoryStream);
@@ -198,7 +199,8 @@ namespace System.Security.Policy
 				byte[] array = null;
 				using (MemoryStream memoryStream = new MemoryStream())
 				{
-					new BinaryFormatter().Serialize(memoryStream, this._xtranfo);
+					BinaryFormatter binaryFormatter = new BinaryFormatter();
+					binaryFormatter.Serialize(memoryStream, this._xtranfo);
 					array = memoryStream.ToArray();
 				}
 				SecurityElement securityElement3 = new SecurityElement("ExtraInfo");
@@ -208,17 +210,10 @@ namespace System.Security.Policy
 			return securityElement;
 		}
 
-		public IList<StrongName> FullTrustAssemblies
-		{
-			get
-			{
-				return this.fullTrustAssemblies;
-			}
-		}
-
 		private PolicyStatement GetDefaultGrantSet()
 		{
-			return new PolicyStatement(new PermissionSet(PermissionState.None));
+			PermissionSet permissionSet = new PermissionSet(PermissionState.None);
+			return new PolicyStatement(permissionSet);
 		}
 
 		private ApplicationIdentity _appid;

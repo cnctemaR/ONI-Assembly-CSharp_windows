@@ -34,15 +34,13 @@ namespace System.Security.Cryptography.Xml
 			case X509IncludeOption.None:
 			case X509IncludeOption.EndCertOnly:
 				this.AddCertificate(cert);
-				return;
+				break;
 			case X509IncludeOption.ExcludeRoot:
 				this.AddCertificatesChainFrom(cert, false);
-				return;
+				break;
 			case X509IncludeOption.WholeChain:
 				this.AddCertificatesChainFrom(cert, true);
-				return;
-			default:
-				return;
+				break;
 			}
 		}
 
@@ -53,9 +51,13 @@ namespace System.Security.Cryptography.Xml
 			foreach (X509ChainElement x509ChainElement in x509Chain.ChainElements)
 			{
 				byte[] array = x509ChainElement.Certificate.RawData;
-				if (!root && new Mono.Security.X509.X509Certificate(array).IsSelfSigned)
+				if (!root)
 				{
-					array = null;
+					Mono.Security.X509.X509Certificate x509Certificate = new Mono.Security.X509.X509Certificate(array);
+					if (x509Certificate.IsSelfSigned)
+					{
+						array = null;
+					}
 				}
 				if (array != null)
 				{

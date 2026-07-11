@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Security;
@@ -26,10 +26,9 @@ namespace System.Diagnostics
 			{
 				return;
 			}
-			string[] files = Directory.GetFiles(text, "*.log");
-			for (int i = 0; i < files.Length; i++)
+			foreach (string text2 in Directory.GetFiles(text, "*.log"))
 			{
-				File.Delete(files[i]);
+				File.Delete(text2);
 			}
 		}
 
@@ -56,7 +55,8 @@ namespace System.Diagnostics
 					LocalFileEventLog.ModifyAccessPermissions(text, "+t");
 				}
 			}
-			Directory.CreateDirectory(Path.Combine(text, sourceData.Source));
+			string text2 = Path.Combine(text, sourceData.Source);
+			Directory.CreateDirectory(text2);
 		}
 
 		public override void Delete(string logName, string machineName)
@@ -64,7 +64,7 @@ namespace System.Diagnostics
 			string text = this.FindLogStore(logName);
 			if (!Directory.Exists(text))
 			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' does not exist on computer '{1}'.", logName, machineName));
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' does not exist on computer '{1}'.", new object[] { logName, machineName }));
 			}
 			Directory.Delete(text, true);
 		}
@@ -73,12 +73,12 @@ namespace System.Diagnostics
 		{
 			if (!Directory.Exists(this.EventLogStore))
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered on computer '{1}'.", source, machineName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered on computer '{1}'.", new object[] { source, machineName }));
 			}
 			string text = this.FindSourceDirectory(source);
 			if (text == null)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered on computer '{1}'.", source, machineName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered on computer '{1}'.", new object[] { source, machineName }));
 			}
 			Directory.Delete(text);
 		}
@@ -106,12 +106,11 @@ namespace System.Diagnostics
 				{
 					Directory.CreateDirectory(text);
 				}
-				this.file_watcher = new FileSystemWatcher();
+				this.file_watcher = new global::System.IO.FileSystemWatcher();
 				this.file_watcher.Path = text;
-				this.file_watcher.Created += delegate(object o, FileSystemEventArgs e)
+				this.file_watcher.Created += delegate(object o, global::System.IO.FileSystemEventArgs e)
 				{
-					LocalFileEventLog localFileEventLog = this;
-					lock (localFileEventLog)
+					lock (this)
 					{
 						if (this._notifying)
 						{
@@ -126,20 +125,16 @@ namespace System.Diagnostics
 						{
 							try
 							{
-								EventLog coreEventLog = base.CoreEventLog;
-								int num = this.last_notification_index;
-								this.last_notification_index = num + 1;
-								coreEventLog.OnEntryWritten(this.GetEntry(num));
+								base.CoreEventLog.OnEntryWritten(this.GetEntry(this.last_notification_index++));
 							}
-							catch (Exception)
+							catch (Exception ex)
 							{
 							}
 						}
 					}
 					finally
 					{
-						localFileEventLog = this;
-						lock (localFileEventLog)
+						lock (this)
 						{
 							this._notifying = false;
 						}
@@ -156,10 +151,11 @@ namespace System.Diagnostics
 
 		public override bool Exists(string logName, string machineName)
 		{
-			return Directory.Exists(this.FindLogStore(logName));
+			string text = this.FindLogStore(logName);
+			return Directory.Exists(text);
 		}
 
-		[MonoTODO("Use MessageTable from PE for lookup")]
+		[global::System.MonoTODO("Use MessageTable from PE for lookup")]
 		protected override string FormatMessage(string source, uint eventID, string[] replacementStrings)
 		{
 			return string.Join(", ", replacementStrings);
@@ -172,33 +168,35 @@ namespace System.Diagnostics
 			{
 				return 0;
 			}
-			return Directory.GetFiles(text, "*.log").Length;
+			string[] files = Directory.GetFiles(text, "*.log");
+			return files.Length;
 		}
 
 		protected override EventLogEntry GetEntry(int index)
 		{
-			string text = Path.Combine(this.FindLogStore(base.CoreEventLog.Log), (index + 1).ToString(CultureInfo.InvariantCulture) + ".log");
+			string text = this.FindLogStore(base.CoreEventLog.Log);
+			string text2 = Path.Combine(text, (index + 1).ToString(CultureInfo.InvariantCulture) + ".log");
 			EventLogEntry eventLogEntry;
-			using (TextReader textReader = File.OpenText(text))
+			using (TextReader textReader = File.OpenText(text2))
 			{
-				int num = int.Parse(Path.GetFileNameWithoutExtension(text), CultureInfo.InvariantCulture);
+				int num = int.Parse(Path.GetFileNameWithoutExtension(text2), CultureInfo.InvariantCulture);
 				uint num2 = uint.Parse(textReader.ReadLine().Substring(12), CultureInfo.InvariantCulture);
-				EventLogEntryType eventLogEntryType = (EventLogEntryType)Enum.Parse(typeof(EventLogEntryType), textReader.ReadLine().Substring(11));
-				string text2 = textReader.ReadLine().Substring(8);
-				string text3 = textReader.ReadLine().Substring(10);
-				short num3 = short.Parse(text3, CultureInfo.InvariantCulture);
-				string text4 = "(" + text3 + ")";
+				EventLogEntryType eventLogEntryType = (EventLogEntryType)((int)Enum.Parse(typeof(EventLogEntryType), textReader.ReadLine().Substring(11)));
+				string text3 = textReader.ReadLine().Substring(8);
+				string text4 = textReader.ReadLine().Substring(10);
+				short num3 = short.Parse(text4, CultureInfo.InvariantCulture);
+				string text5 = "(" + text4 + ")";
 				DateTime dateTime = DateTime.ParseExact(textReader.ReadLine().Substring(15), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture);
-				DateTime lastWriteTime = File.GetLastWriteTime(text);
+				DateTime lastWriteTime = File.GetLastWriteTime(text2);
 				int num4 = int.Parse(textReader.ReadLine().Substring(20));
-				List<string> list = new List<string>();
+				ArrayList arrayList = new ArrayList();
 				StringBuilder stringBuilder = new StringBuilder();
-				while (list.Count < num4)
+				while (arrayList.Count < num4)
 				{
 					char c = (char)textReader.Read();
 					if (c == '\0')
 					{
-						list.Add(stringBuilder.ToString());
+						arrayList.Add(stringBuilder.ToString());
 						stringBuilder.Length = 0;
 					}
 					else
@@ -206,16 +204,17 @@ namespace System.Diagnostics
 						stringBuilder.Append(c);
 					}
 				}
-				string[] array = list.ToArray();
-				string text5 = this.FormatMessage(text2, num2, array);
+				string[] array = new string[arrayList.Count];
+				arrayList.CopyTo(array, 0);
+				string text6 = this.FormatMessage(text3, num2, array);
 				int eventID = EventLog.GetEventID((long)((ulong)num2));
 				byte[] array2 = Convert.FromBase64String(textReader.ReadToEnd());
-				eventLogEntry = new EventLogEntry(text4, num3, num, eventID, text2, text5, null, Environment.MachineName, eventLogEntryType, dateTime, lastWriteTime, array2, array, (long)((ulong)num2));
+				eventLogEntry = new EventLogEntry(text5, num3, num, eventID, text3, text6, null, Environment.MachineName, eventLogEntryType, dateTime, lastWriteTime, array2, array, (long)((ulong)num2));
 			}
 			return eventLogEntry;
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override string GetLogDisplayName()
 		{
 			return base.CoreEventLog.Log;
@@ -247,12 +246,18 @@ namespace System.Diagnostics
 			{
 				return string.Empty;
 			}
-			return new DirectoryInfo(text).Parent.Name;
+			DirectoryInfo directoryInfo = new DirectoryInfo(text);
+			return directoryInfo.Parent.Name;
 		}
 
 		public override bool SourceExists(string source, string machineName)
 		{
-			return Directory.Exists(this.EventLogStore) && this.FindSourceDirectory(source) != null;
+			if (!Directory.Exists(this.EventLogStore))
+			{
+				return false;
+			}
+			string text = this.FindSourceDirectory(source);
+			return text != null;
 		}
 
 		public override void WriteEntry(string[] replacementStrings, EventLogEntryType type, uint instanceID, short category, byte[] rawData)
@@ -260,10 +265,11 @@ namespace System.Diagnostics
 			object obj = LocalFileEventLog.lockObject;
 			lock (obj)
 			{
-				string text = Path.Combine(this.FindLogStore(base.CoreEventLog.Log), (this.GetLatestIndex() + 1).ToString(CultureInfo.InvariantCulture) + ".log");
+				string text = this.FindLogStore(base.CoreEventLog.Log);
+				string text2 = Path.Combine(text, (this.GetLatestIndex() + 1).ToString(CultureInfo.InvariantCulture) + ".log");
 				try
 				{
-					using (TextWriter textWriter = File.CreateText(text))
+					using (TextWriter textWriter = File.CreateText(text2))
 					{
 						textWriter.WriteLine("InstanceID: {0}", instanceID.ToString(CultureInfo.InvariantCulture));
 						textWriter.WriteLine("EntryType: {0}", (int)type);
@@ -272,9 +278,9 @@ namespace System.Diagnostics
 						textWriter.WriteLine("TimeGenerated: {0}", DateTime.Now.ToString("yyyyMMddHHmmssfff", CultureInfo.InvariantCulture));
 						textWriter.WriteLine("ReplacementStrings: {0}", replacementStrings.Length.ToString(CultureInfo.InvariantCulture));
 						StringBuilder stringBuilder = new StringBuilder();
-						foreach (string text2 in replacementStrings)
+						foreach (string text3 in replacementStrings)
 						{
-							stringBuilder.Append(text2);
+							stringBuilder.Append(text3);
 							stringBuilder.Append('\0');
 						}
 						textWriter.Write(stringBuilder.ToString());
@@ -283,7 +289,7 @@ namespace System.Diagnostics
 				}
 				catch (IOException)
 				{
-					File.Delete(text);
+					File.Delete(text2);
 				}
 			}
 		}
@@ -297,7 +303,8 @@ namespace System.Diagnostics
 				string[] directories2 = Directory.GetDirectories(directories[i], "*");
 				for (int j = 0; j < directories2.Length; j++)
 				{
-					if (string.Compare(Path.GetFileName(directories2[j]), source, true, CultureInfo.InvariantCulture) == 0)
+					string fileName = Path.GetFileName(directories2[j]);
+					if (string.Compare(fileName, source, true, CultureInfo.InvariantCulture) == 0)
 					{
 						text = directories2[j];
 						break;
@@ -325,7 +332,8 @@ namespace System.Diagnostics
 			string[] directories = Directory.GetDirectories(this.EventLogStore, "*");
 			for (int i = 0; i < directories.Length; i++)
 			{
-				if (string.Compare(Path.GetFileName(directories[i]), logName, true, CultureInfo.InvariantCulture) == 0)
+				string fileName = Path.GetFileName(directories[i]);
+				if (string.Compare(fileName, logName, true, CultureInfo.InvariantCulture) == 0)
 				{
 					return directories[i];
 				}
@@ -358,7 +366,8 @@ namespace System.Diagnostics
 			{
 				try
 				{
-					int num2 = int.Parse(Path.GetFileNameWithoutExtension(files[i]), CultureInfo.InvariantCulture);
+					string text = files[i];
+					int num2 = int.Parse(Path.GetFileNameWithoutExtension(text), CultureInfo.InvariantCulture);
 					if (num2 > num)
 					{
 						num = num2;
@@ -439,7 +448,7 @@ namespace System.Diagnostics
 
 		private static readonly object lockObject = new object();
 
-		private FileSystemWatcher file_watcher;
+		private global::System.IO.FileSystemWatcher file_watcher;
 
 		private int last_notification_index;
 

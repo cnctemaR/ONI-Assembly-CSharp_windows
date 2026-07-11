@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography.X509Certificates;
 
 namespace System.Security.Cryptography
 {
@@ -10,32 +9,19 @@ namespace System.Security.Cryptography
 		}
 
 		public Oid(string oid)
-			: this(oid, OidGroup.All, true)
 		{
-		}
-
-		internal Oid(string oid, OidGroup group, bool lookupFriendlyName)
-		{
-			if (lookupFriendlyName)
+			if (oid == null)
 			{
-				string text = X509Utils.FindOidInfoWithFallback(2U, oid, group);
-				if (text == null)
-				{
-					text = oid;
-				}
-				this.Value = text;
+				throw new ArgumentNullException("oid");
 			}
-			else
-			{
-				this.Value = oid;
-			}
-			this.m_group = group;
+			this._value = oid;
+			this._name = this.GetName(oid);
 		}
 
 		public Oid(string value, string friendlyName)
 		{
-			this.m_value = value;
-			this.m_friendlyName = friendlyName;
+			this._value = value;
+			this._name = friendlyName;
 		}
 
 		public Oid(Oid oid)
@@ -44,86 +30,150 @@ namespace System.Security.Cryptography
 			{
 				throw new ArgumentNullException("oid");
 			}
-			this.m_value = oid.m_value;
-			this.m_friendlyName = oid.m_friendlyName;
-			this.m_group = oid.m_group;
-		}
-
-		private Oid(string value, string friendlyName, OidGroup group)
-		{
-			this.m_value = value;
-			this.m_friendlyName = friendlyName;
-			this.m_group = group;
-		}
-
-		public static Oid FromFriendlyName(string friendlyName, OidGroup group)
-		{
-			if (friendlyName == null)
-			{
-				throw new ArgumentNullException("friendlyName");
-			}
-			string text = X509Utils.FindOidInfo(2U, friendlyName, group);
-			if (text == null)
-			{
-				throw new CryptographicException(global::SR.GetString("The OID value is invalid."));
-			}
-			return new Oid(text, friendlyName, group);
-		}
-
-		public static Oid FromOidValue(string oidValue, OidGroup group)
-		{
-			if (oidValue == null)
-			{
-				throw new ArgumentNullException("oidValue");
-			}
-			string text = X509Utils.FindOidInfo(1U, oidValue, group);
-			if (text == null)
-			{
-				throw new CryptographicException(global::SR.GetString("The OID value is invalid."));
-			}
-			return new Oid(oidValue, text, group);
-		}
-
-		public string Value
-		{
-			get
-			{
-				return this.m_value;
-			}
-			set
-			{
-				this.m_value = value;
-			}
+			this._value = oid.Value;
+			this._name = oid.FriendlyName;
 		}
 
 		public string FriendlyName
 		{
 			get
 			{
-				if (this.m_friendlyName == null && this.m_value != null)
-				{
-					this.m_friendlyName = X509Utils.FindOidInfoWithFallback(1U, this.m_value, this.m_group);
-				}
-				return this.m_friendlyName;
+				return this._name;
 			}
 			set
 			{
-				this.m_friendlyName = value;
-				if (this.m_friendlyName != null)
-				{
-					string text = X509Utils.FindOidInfoWithFallback(2U, this.m_friendlyName, this.m_group);
-					if (text != null)
-					{
-						this.m_value = text;
-					}
-				}
+				this._name = value;
+				this._value = this.GetValue(this._name);
 			}
 		}
 
-		private string m_value;
+		public string Value
+		{
+			get
+			{
+				return this._value;
+			}
+			set
+			{
+				this._value = value;
+				this._name = this.GetName(this._value);
+			}
+		}
 
-		private string m_friendlyName;
+		private string GetName(string oid)
+		{
+			switch (oid)
+			{
+			case "1.2.840.113549.1.1.1":
+				return "RSA";
+			case "1.2.840.113549.1.7.1":
+				return "PKCS 7 Data";
+			case "1.2.840.113549.1.9.3":
+				return "Content Type";
+			case "1.2.840.113549.1.9.4":
+				return "Message Digest";
+			case "1.2.840.113549.1.9.5":
+				return "Signing Time";
+			case "1.2.840.113549.3.7":
+				return "3des";
+			case "2.5.29.19":
+				return "Basic Constraints";
+			case "2.5.29.15":
+				return "Key Usage";
+			case "2.5.29.37":
+				return "Enhanced Key Usage";
+			case "2.5.29.14":
+				return "Subject Key Identifier";
+			case "2.5.29.17":
+				return "Subject Alternative Name";
+			case "2.16.840.1.113730.1.1":
+				return "Netscape Cert Type";
+			case "1.2.840.113549.2.5":
+				return "md5";
+			case "1.3.14.3.2.26":
+				return "sha1";
+			}
+			return this._name;
+		}
 
-		private OidGroup m_group;
+		private string GetValue(string name)
+		{
+			switch (name)
+			{
+			case "RSA":
+				return "1.2.840.113549.1.1.1";
+			case "PKCS 7 Data":
+				return "1.2.840.113549.1.7.1";
+			case "Content Type":
+				return "1.2.840.113549.1.9.3";
+			case "Message Digest":
+				return "1.2.840.113549.1.9.4";
+			case "Signing Time":
+				return "1.2.840.113549.1.9.5";
+			case "3des":
+				return "1.2.840.113549.3.7";
+			case "Basic Constraints":
+				return "2.5.29.19";
+			case "Key Usage":
+				return "2.5.29.15";
+			case "Enhanced Key Usage":
+				return "2.5.29.37";
+			case "Subject Key Identifier":
+				return "2.5.29.14";
+			case "Subject Alternative Name":
+				return "2.5.29.17";
+			case "Netscape Cert Type":
+				return "2.16.840.1.113730.1.1";
+			case "md5":
+				return "1.2.840.113549.2.5";
+			case "sha1":
+				return "1.3.14.3.2.26";
+			}
+			return this._value;
+		}
+
+		internal const string oidRSA = "1.2.840.113549.1.1.1";
+
+		internal const string nameRSA = "RSA";
+
+		internal const string oidPkcs7Data = "1.2.840.113549.1.7.1";
+
+		internal const string namePkcs7Data = "PKCS 7 Data";
+
+		internal const string oidPkcs9ContentType = "1.2.840.113549.1.9.3";
+
+		internal const string namePkcs9ContentType = "Content Type";
+
+		internal const string oidPkcs9MessageDigest = "1.2.840.113549.1.9.4";
+
+		internal const string namePkcs9MessageDigest = "Message Digest";
+
+		internal const string oidPkcs9SigningTime = "1.2.840.113549.1.9.5";
+
+		internal const string namePkcs9SigningTime = "Signing Time";
+
+		internal const string oidMd5 = "1.2.840.113549.2.5";
+
+		internal const string nameMd5 = "md5";
+
+		internal const string oid3Des = "1.2.840.113549.3.7";
+
+		internal const string name3Des = "3des";
+
+		internal const string oidSha1 = "1.3.14.3.2.26";
+
+		internal const string nameSha1 = "sha1";
+
+		internal const string oidSubjectAltName = "2.5.29.17";
+
+		internal const string nameSubjectAltName = "Subject Alternative Name";
+
+		internal const string oidNetscapeCertType = "2.16.840.1.113730.1.1";
+
+		internal const string nameNetscapeCertType = "Netscape Cert Type";
+
+		private string _value;
+
+		private string _name;
 	}
 }

@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 
 namespace System.Diagnostics
 {
-	[DefaultEvent("EntryWritten")]
-	[InstallerType(typeof(EventLogInstaller))]
+	[global::System.ComponentModel.InstallerType(typeof(EventLogInstaller))]
 	[MonitoringDescription("Represents an event log")]
-	public class EventLog : Component, ISupportInitialize
+	[global::System.ComponentModel.DefaultEvent("EntryWritten")]
+	public class EventLog : global::System.ComponentModel.Component, global::System.ComponentModel.ISupportInitialize
 	{
 		public EventLog()
 			: this(string.Empty)
@@ -33,7 +33,7 @@ namespace System.Diagnostics
 			}
 			if (machineName == null || machineName.Trim().Length == 0)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'machineName'.", machineName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'machineName'.", new object[] { machineName }));
 			}
 			this.source = source;
 			this.machineName = machineName;
@@ -41,9 +41,12 @@ namespace System.Diagnostics
 			this.Impl = EventLog.CreateEventLogImpl(this);
 		}
 
-		[Browsable(false)]
-		[DefaultValue(false)]
+		[MonitoringDescription("Raised for each EventLog entry written.")]
+		public event EntryWrittenEventHandler EntryWritten;
+
+		[global::System.ComponentModel.DefaultValue(false)]
 		[MonitoringDescription("If enabled raises event when a log is written.")]
+		[global::System.ComponentModel.Browsable(false)]
 		public bool EnableRaisingEvents
 		{
 			get
@@ -68,8 +71,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.Browsable(false)]
 		[MonitoringDescription("The entries in the log.")]
 		public EventLogEntryCollection Entries
 		{
@@ -79,11 +82,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ReadOnly(true)]
-		[DefaultValue("")]
-		[RecommendedAsConfigurable(true)]
-		[TypeConverter("System.Diagnostics.Design.LogConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.DefaultValue("")]
 		[MonitoringDescription("Name of the log that is read and written.")]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.LogConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.ReadOnly(true)]
 		public string Log
 		{
 			get
@@ -108,7 +111,7 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public string LogDisplayName
 		{
 			get
@@ -117,10 +120,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ReadOnly(true)]
-		[DefaultValue(".")]
-		[RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.ReadOnly(true)]
 		[MonitoringDescription("Name of the machine that this log get written to.")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.DefaultValue(".")]
 		public string MachineName
 		{
 			get
@@ -131,7 +134,7 @@ namespace System.Diagnostics
 			{
 				if (value == null || value.Trim().Length == 0)
 				{
-					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value {0} for property MachineName.", value));
+					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value {0} for property MachineName.", new object[] { value }));
 				}
 				if (string.Compare(this.machineName, value, true) != 0)
 				{
@@ -141,11 +144,11 @@ namespace System.Diagnostics
 			}
 		}
 
-		[ReadOnly(true)]
-		[DefaultValue("")]
-		[RecommendedAsConfigurable(true)]
-		[TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.ReadOnly(true)]
 		[MonitoringDescription("The application name that writes the log.")]
+		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.DefaultValue("")]
 		public string Source
 		{
 			get
@@ -161,9 +164,8 @@ namespace System.Diagnostics
 				if (this.source == null || (this.source.Length == 0 && (this.logName == null || this.logName.Length == 0)))
 				{
 					this.source = value;
-					return;
 				}
-				if (string.Compare(this.source, value, true) != 0)
+				else if (string.Compare(this.source, value, true) != 0)
 				{
 					this.source = value;
 					this.Reset();
@@ -171,10 +173,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Browsable(false)]
-		[DefaultValue(null)]
 		[MonitoringDescription("An object that synchronizes event handler calls.")]
-		public ISynchronizeInvoke SynchronizingObject
+		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DefaultValue(null)]
+		public global::System.ComponentModel.ISynchronizeInvoke SynchronizingObject
 		{
 			get
 			{
@@ -186,9 +188,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		[ComVisible(false)]
-		[Browsable(false)]
+		[global::System.ComponentModel.Browsable(false)]
 		public OverflowAction OverflowAction
 		{
 			get
@@ -197,9 +199,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.Browsable(false)]
 		[ComVisible(false)]
-		[Browsable(false)]
 		public int MinimumRetentionDays
 		{
 			get
@@ -208,10 +210,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[global::System.ComponentModel.Browsable(false)]
 		[ComVisible(false)]
-		[Browsable(false)]
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public long MaximumKilobytes
 		{
 			get
@@ -224,14 +226,14 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonoTODO]
 		[ComVisible(false)]
+		[global::System.MonoTODO]
 		public void ModifyOverflowPolicy(OverflowAction action, int retentionDays)
 		{
 			this.Impl.ModifyOverflowPolicy(action, retentionDays);
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		[ComVisible(false)]
 		public void RegisterDisplayName(string resourceFile, long resourceId)
 		{
@@ -252,7 +254,7 @@ namespace System.Diagnostics
 			}
 			if (!EventLog.Exists(log, this.MachineName))
 			{
-				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' does not exist on computer '{1}'.", log, this.machineName));
+				throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Event Log '{0}' does not exist on computer '{1}'.", new object[] { log, this.machineName }));
 			}
 			this.Impl.Clear();
 			this.Reset();
@@ -282,7 +284,7 @@ namespace System.Diagnostics
 			EventLog.CreateEventSource(new EventSourceCreationData(source, logName, machineName));
 		}
 
-		[MonoNotSupported("remote machine is not supported")]
+		[global::System.MonoNotSupported("remote machine is not supported")]
 		public static void CreateEventSource(EventSourceCreationData sourceData)
 		{
 			if (sourceData.Source == null || sourceData.Source.Length == 0)
@@ -295,9 +297,10 @@ namespace System.Diagnostics
 			}
 			if (EventLog.SourceExists(sourceData.Source, sourceData.MachineName))
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Source '{0}' already exists on '{1}'.", sourceData.Source, sourceData.MachineName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Source '{0}' already exists on '{1}'.", new object[] { sourceData.Source, sourceData.MachineName }));
 			}
-			EventLog.CreateEventLogImpl(sourceData.LogName, sourceData.MachineName, sourceData.Source).CreateEventSource(sourceData);
+			EventLogImpl eventLogImpl = EventLog.CreateEventLogImpl(sourceData.LogName, sourceData.MachineName, sourceData.Source);
+			eventLogImpl.CreateEventSource(sourceData);
 		}
 
 		public static void Delete(string logName)
@@ -305,7 +308,7 @@ namespace System.Diagnostics
 			EventLog.Delete(logName, ".");
 		}
 
-		[MonoNotSupported("remote machine is not supported")]
+		[global::System.MonoNotSupported("remote machine is not supported")]
 		public static void Delete(string logName, string machineName)
 		{
 			if (machineName == null || machineName.Trim().Length == 0)
@@ -316,7 +319,8 @@ namespace System.Diagnostics
 			{
 				throw new ArgumentException("Log to delete was not specified.");
 			}
-			EventLog.CreateEventLogImpl(logName, machineName, string.Empty).Delete(logName, machineName);
+			EventLogImpl eventLogImpl = EventLog.CreateEventLogImpl(logName, machineName, string.Empty);
+			eventLogImpl.Delete(logName, machineName);
 		}
 
 		public static void DeleteEventSource(string source)
@@ -324,14 +328,15 @@ namespace System.Diagnostics
 			EventLog.DeleteEventSource(source, ".");
 		}
 
-		[MonoNotSupported("remote machine is not supported")]
+		[global::System.MonoNotSupported("remote machine is not supported")]
 		public static void DeleteEventSource(string source, string machineName)
 		{
 			if (machineName == null || machineName.Trim().Length == 0)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'machineName'.", machineName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'machineName'.", new object[] { machineName }));
 			}
-			EventLog.CreateEventLogImpl(string.Empty, machineName, source).DeleteEventSource(source, machineName);
+			EventLogImpl eventLogImpl = EventLog.CreateEventLogImpl(string.Empty, machineName, source);
+			eventLogImpl.DeleteEventSource(source, machineName);
 		}
 
 		protected override void Dispose(bool disposing)
@@ -352,14 +357,19 @@ namespace System.Diagnostics
 			return EventLog.Exists(logName, ".");
 		}
 
-		[MonoNotSupported("remote machine is not supported")]
+		[global::System.MonoNotSupported("remote machine is not supported")]
 		public static bool Exists(string logName, string machineName)
 		{
 			if (machineName == null || machineName.Trim().Length == 0)
 			{
 				throw new ArgumentException("Invalid format for argument machineName.");
 			}
-			return logName != null && logName.Length != 0 && EventLog.CreateEventLogImpl(logName, machineName, string.Empty).Exists(logName, machineName);
+			if (logName == null || logName.Length == 0)
+			{
+				return false;
+			}
+			EventLogImpl eventLogImpl = EventLog.CreateEventLogImpl(logName, machineName, string.Empty);
+			return eventLogImpl.Exists(logName, machineName);
 		}
 
 		public static EventLog[] GetEventLogs()
@@ -367,20 +377,22 @@ namespace System.Diagnostics
 			return EventLog.GetEventLogs(".");
 		}
 
-		[MonoNotSupported("remote machine is not supported")]
+		[global::System.MonoNotSupported("remote machine is not supported")]
 		public static EventLog[] GetEventLogs(string machineName)
 		{
-			return EventLog.CreateEventLogImpl(new EventLog()).GetEventLogs(machineName);
+			EventLogImpl eventLogImpl = EventLog.CreateEventLogImpl(new EventLog());
+			return eventLogImpl.GetEventLogs(machineName);
 		}
 
-		[MonoNotSupported("remote machine is not supported")]
+		[global::System.MonoNotSupported("remote machine is not supported")]
 		public static string LogNameFromSourceName(string source, string machineName)
 		{
 			if (machineName == null || machineName.Trim().Length == 0)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'MachineName'.", machineName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'MachineName'.", new object[] { machineName }));
 			}
-			return EventLog.CreateEventLogImpl(string.Empty, machineName, source).LogNameFromSourceName(source, machineName);
+			EventLogImpl eventLogImpl = EventLog.CreateEventLogImpl(string.Empty, machineName, source);
+			return eventLogImpl.LogNameFromSourceName(source, machineName);
 		}
 
 		public static bool SourceExists(string source)
@@ -388,14 +400,15 @@ namespace System.Diagnostics
 			return EventLog.SourceExists(source, ".");
 		}
 
-		[MonoNotSupported("remote machine is not supported")]
+		[global::System.MonoNotSupported("remote machine is not supported")]
 		public static bool SourceExists(string source, string machineName)
 		{
 			if (machineName == null || machineName.Trim().Length == 0)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'machineName'.", machineName));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid value '{0}' for parameter 'machineName'.", new object[] { machineName }));
 			}
-			return EventLog.CreateEventLogImpl(string.Empty, machineName, source).SourceExists(source, machineName);
+			EventLogImpl eventLogImpl = EventLog.CreateEventLogImpl(string.Empty, machineName, source);
+			return eventLogImpl.SourceExists(source, machineName);
 		}
 
 		public void WriteEntry(string message)
@@ -510,9 +523,6 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Raised for each EventLog entry written.")]
-		public event EntryWrittenEventHandler EntryWritten;
-
 		internal string GetLogName()
 		{
 			if (this.logName != null && this.logName.Length > 0)
@@ -525,25 +535,23 @@ namespace System.Diagnostics
 
 		private static EventLogImpl CreateEventLogImpl(string logName, string machineName, string source)
 		{
-			return EventLog.CreateEventLogImpl(new EventLog(logName, machineName, source));
+			EventLog eventLog = new EventLog(logName, machineName, source);
+			return EventLog.CreateEventLogImpl(eventLog);
 		}
 
 		private static EventLogImpl CreateEventLogImpl(EventLog eventLog)
 		{
 			string eventLogImplType = EventLog.EventLogImplType;
-			if (eventLogImplType == "local")
+			switch (eventLogImplType)
 			{
+			case "local":
 				return new LocalFileEventLog(eventLog);
-			}
-			if (eventLogImplType == "win32")
-			{
+			case "win32":
 				return new Win32EventLog(eventLog);
+			case "null":
+				return new NullEventLog(eventLog);
 			}
-			if (!(eventLogImplType == "null"))
-			{
-				throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Eventlog implementation '{0}' is not supported.", EventLog.EventLogImplType));
-			}
-			return new NullEventLog(eventLog);
+			throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Eventlog implementation '{0}' is not supported.", new object[] { EventLog.EventLogImplType }));
 		}
 
 		private static bool Win32EventLogEnabled
@@ -579,7 +587,7 @@ namespace System.Diagnostics
 				{
 					if (string.Compare(text, 0, "local", 0, "local".Length, true) != 0)
 					{
-						throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Eventlog implementation '{0}' is not supported.", text));
+						throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Eventlog implementation '{0}' is not supported.", new object[] { text }));
 					}
 					text = "local";
 				}
@@ -595,7 +603,7 @@ namespace System.Diagnostics
 			}
 			if (!Enum.IsDefined(typeof(EventLogEntryType), type))
 			{
-				throw new InvalidEnumArgumentException("type", (int)type, typeof(EventLogEntryType));
+				throw new global::System.ComponentModel.InvalidEnumArgumentException("type", (int)type, typeof(EventLogEntryType));
 			}
 			this.ValidateEventID(instanceID);
 			if (!EventLog.SourceExists(this.Source, this.MachineName))
@@ -611,7 +619,7 @@ namespace System.Diagnostics
 				string text = EventLog.LogNameFromSourceName(this.Source, this.MachineName);
 				if (string.Compare(this.logName, text, true, CultureInfo.InvariantCulture) != 0)
 				{
-					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered in log '{1}' (it is registered in log '{2}'). The Source and Log properties must be matched, or you may set Log to the empty string, and it will automatically be matched to the Source property.", this.Source, this.logName, text));
+					throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "The source '{0}' is not registered in log '{1}' (it is registered in log '{2}'). The Source and Log properties must be matched, or you may set Log to the empty string, and it will automatically be matched to the Source property.", new object[] { this.Source, this.logName, text }));
 				}
 			}
 			if (rawData == null)
@@ -626,19 +634,24 @@ namespace System.Diagnostics
 			int eventID = EventLog.GetEventID(instanceID);
 			if (eventID < 0 || eventID > 65535)
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid eventID value '{0}'. It must be in the range between '{1}' and '{2}'.", instanceID, 0, ushort.MaxValue));
+				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid eventID value '{0}'. It must be in the range between '{1}' and '{2}'.", new object[] { instanceID, 0, ushort.MaxValue }));
 			}
 		}
 
 		internal static int GetEventID(long instanceID)
 		{
-			int num = (int)(((instanceID < 0L) ? (-instanceID) : instanceID) & 1073741823L);
-			if (instanceID >= 0L)
-			{
-				return num;
-			}
-			return -num;
+			long num = ((instanceID >= 0L) ? instanceID : (-instanceID));
+			int num2 = (int)(num & 1073741823L);
+			return (instanceID >= 0L) ? num2 : (-num2);
 		}
+
+		internal const string LOCAL_FILE_IMPL = "local";
+
+		private const string WIN32_IMPL = "win32";
+
+		private const string NULL_IMPL = "null";
+
+		internal const string EVENTLOG_TYPE_VAR = "MONO_EVENTLOG_TYPE";
 
 		private string source;
 
@@ -648,15 +661,7 @@ namespace System.Diagnostics
 
 		private bool doRaiseEvents;
 
-		private ISynchronizeInvoke synchronizingObject;
-
-		internal const string LOCAL_FILE_IMPL = "local";
-
-		private const string WIN32_IMPL = "win32";
-
-		private const string NULL_IMPL = "null";
-
-		internal const string EVENTLOG_TYPE_VAR = "MONO_EVENTLOG_TYPE";
+		private global::System.ComponentModel.ISynchronizeInvoke synchronizingObject;
 
 		private EventLogImpl Impl;
 	}

@@ -5,5 +5,5 @@ using UnityEngine;
 public class FMOD_Listener : MonoBehaviour
 {
 	[Header("This component is obsolete. Use FMODUnity.StudioListener instead")]
-	public string[] pluginPaths = Array.Empty<string>();
+	public string[] pluginPaths = new string[0];
 }

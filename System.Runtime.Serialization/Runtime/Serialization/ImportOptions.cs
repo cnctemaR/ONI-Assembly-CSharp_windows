@@ -6,99 +6,15 @@ namespace System.Runtime.Serialization
 {
 	public class ImportOptions
 	{
-		public bool GenerateSerializable
-		{
-			get
-			{
-				return this.generateSerializable;
-			}
-			set
-			{
-				this.generateSerializable = value;
-			}
-		}
-
-		public bool GenerateInternal
-		{
-			get
-			{
-				return this.generateInternal;
-			}
-			set
-			{
-				this.generateInternal = value;
-			}
-		}
-
-		public bool EnableDataBinding
-		{
-			get
-			{
-				return this.enableDataBinding;
-			}
-			set
-			{
-				this.enableDataBinding = value;
-			}
-		}
-
 		public CodeDomProvider CodeProvider
 		{
 			get
 			{
-				return this.codeProvider;
+				return this.code_provider;
 			}
 			set
 			{
-				this.codeProvider = value;
-			}
-		}
-
-		public ICollection<Type> ReferencedTypes
-		{
-			get
-			{
-				if (this.referencedTypes == null)
-				{
-					this.referencedTypes = new List<Type>();
-				}
-				return this.referencedTypes;
-			}
-		}
-
-		public ICollection<Type> ReferencedCollectionTypes
-		{
-			get
-			{
-				if (this.referencedCollectionTypes == null)
-				{
-					this.referencedCollectionTypes = new List<Type>();
-				}
-				return this.referencedCollectionTypes;
-			}
-		}
-
-		public IDictionary<string, string> Namespaces
-		{
-			get
-			{
-				if (this.namespaces == null)
-				{
-					this.namespaces = new Dictionary<string, string>();
-				}
-				return this.namespaces;
-			}
-		}
-
-		public bool ImportXmlType
-		{
-			get
-			{
-				return this.importXmlType;
-			}
-			set
-			{
-				this.importXmlType = value;
+				this.code_provider = value;
 			}
 		}
 
@@ -106,30 +22,102 @@ namespace System.Runtime.Serialization
 		{
 			get
 			{
-				return this.dataContractSurrogate;
+				return this.surrogate;
 			}
 			set
 			{
-				this.dataContractSurrogate = value;
+				this.surrogate = value;
 			}
 		}
 
-		private bool generateSerializable;
+		public bool EnableDataBinding
+		{
+			get
+			{
+				return this.enable_data_binding;
+			}
+			set
+			{
+				this.enable_data_binding = value;
+			}
+		}
 
-		private bool generateInternal;
+		public bool GenerateInternal
+		{
+			get
+			{
+				return this.generate_internal;
+			}
+			set
+			{
+				this.generate_internal = value;
+			}
+		}
 
-		private bool enableDataBinding;
+		public bool GenerateSerializable
+		{
+			get
+			{
+				return this.generate_serializable;
+			}
+			set
+			{
+				this.generate_serializable = value;
+			}
+		}
 
-		private CodeDomProvider codeProvider;
+		public bool ImportXmlType
+		{
+			get
+			{
+				return this.import_xml_type;
+			}
+			set
+			{
+				this.import_xml_type = value;
+			}
+		}
 
-		private ICollection<Type> referencedTypes;
+		public IDictionary<string, string> Namespaces
+		{
+			get
+			{
+				return this.namespaces;
+			}
+		}
 
-		private ICollection<Type> referencedCollectionTypes;
+		public ICollection<Type> ReferencedCollectionTypes
+		{
+			get
+			{
+				return this.referenced_collection_types;
+			}
+		}
 
-		private IDictionary<string, string> namespaces;
+		public ICollection<Type> ReferencedTypes
+		{
+			get
+			{
+				return this.referenced_types;
+			}
+		}
 
-		private bool importXmlType;
+		private IDataContractSurrogate surrogate;
 
-		private IDataContractSurrogate dataContractSurrogate;
+		private ICollection<Type> referenced_collection_types = new List<Type>();
+
+		private ICollection<Type> referenced_types = new List<Type>();
+
+		private bool enable_data_binding;
+
+		private bool generate_internal;
+
+		private bool generate_serializable;
+
+		private bool import_xml_type;
+
+		private IDictionary<string, string> namespaces = new Dictionary<string, string>();
+
+		private CodeDomProvider code_provider;
 	}
 }

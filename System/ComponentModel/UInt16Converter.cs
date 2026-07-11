@@ -1,38 +1,36 @@
 ﻿using System;
 using System.Globalization;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public class UInt16Converter : BaseNumberConverter
 	{
-		internal override Type TargetType
+		public UInt16Converter()
+		{
+			this.InnerType = typeof(ushort);
+		}
+
+		internal override bool SupportHex
 		{
 			get
 			{
-				return typeof(ushort);
+				return true;
 			}
 		}
 
-		internal override object FromString(string value, int radix)
+		internal override string ConvertToString(object value, NumberFormatInfo format)
 		{
-			return Convert.ToUInt16(value, radix);
+			return ((ushort)value).ToString("G", format);
 		}
 
-		internal override object FromString(string value, NumberFormatInfo formatInfo)
+		internal override object ConvertFromString(string value, NumberFormatInfo format)
 		{
-			return ushort.Parse(value, NumberStyles.Integer, formatInfo);
+			return ushort.Parse(value, NumberStyles.Integer, format);
 		}
 
-		internal override object FromString(string value, CultureInfo culture)
+		internal override object ConvertFromString(string value, int fromBase)
 		{
-			return ushort.Parse(value, culture);
-		}
-
-		internal override string ToString(object value, NumberFormatInfo formatInfo)
-		{
-			return ((ushort)value).ToString("G", formatInfo);
+			return Convert.ToUInt16(value, fromBase);
 		}
 	}
 }

@@ -42,12 +42,12 @@ namespace System.Configuration
 			}
 		}
 
-		[MonoTODO("Support multiple levels of inheritance")]
+		[MonoTODO]
 		public bool IsPresent
 		{
 			get
 			{
-				return this.owner.IsElementPresent;
+				return this.propertyInfo != null;
 			}
 		}
 
@@ -55,11 +55,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				if (this.propertyInfo == null)
-				{
-					return 0;
-				}
-				return this.propertyInfo.LineNumber;
+				return (this.propertyInfo == null) ? 0 : this.propertyInfo.LineNumber;
 			}
 		}
 
@@ -67,11 +63,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				if (this.propertyInfo == null)
-				{
-					return null;
-				}
-				return this.propertyInfo.Source;
+				return (this.propertyInfo == null) ? null : this.propertyInfo.Source;
 			}
 		}
 
@@ -79,11 +71,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				if (this.propertyInfo == null)
-				{
-					return this.owner.GetType();
-				}
-				return this.propertyInfo.Type;
+				return (this.propertyInfo == null) ? this.owner.GetType() : this.propertyInfo.Type;
 			}
 		}
 
@@ -91,11 +79,7 @@ namespace System.Configuration
 		{
 			get
 			{
-				if (this.propertyInfo == null)
-				{
-					return new DefaultValidator();
-				}
-				return this.propertyInfo.Validator;
+				return (this.propertyInfo == null) ? new DefaultValidator() : this.propertyInfo.Validator;
 			}
 		}
 

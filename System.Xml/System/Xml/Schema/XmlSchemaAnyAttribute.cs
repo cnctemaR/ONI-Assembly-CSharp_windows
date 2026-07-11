@@ -1,21 +1,28 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Xml.Serialization;
+using Mono.Xml.Schema;
 
 namespace System.Xml.Schema
 {
 	public class XmlSchemaAnyAttribute : XmlSchemaAnnotated
 	{
+		public XmlSchemaAnyAttribute()
+		{
+			this.wildcard = new XsdWildcard(this);
+		}
+
 		[XmlAttribute("namespace")]
 		public string Namespace
 		{
 			get
 			{
-				return this.ns;
+				return this.nameSpace;
 			}
 			set
 			{
-				this.ns = value;
+				this.nameSpace = value;
 			}
 		}
 
@@ -25,100 +32,191 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.processContents;
+				return this.processing;
 			}
 			set
 			{
-				this.processContents = value;
+				this.processing = value;
 			}
 		}
 
-		[XmlIgnore]
-		internal NamespaceList NamespaceList
+		internal bool HasValueAny
 		{
 			get
 			{
-				return this.namespaceList;
+				return this.wildcard.HasValueAny;
 			}
 		}
 
-		[XmlIgnore]
-		internal XmlSchemaContentProcessing ProcessContentsCorrect
+		internal bool HasValueLocal
 		{
 			get
 			{
-				if (this.processContents != XmlSchemaContentProcessing.None)
+				return this.wildcard.HasValueLocal;
+			}
+		}
+
+		internal bool HasValueOther
+		{
+			get
+			{
+				return this.wildcard.HasValueOther;
+			}
+		}
+
+		internal bool HasValueTargetNamespace
+		{
+			get
+			{
+				return this.wildcard.HasValueTargetNamespace;
+			}
+		}
+
+		internal StringCollection ResolvedNamespaces
+		{
+			get
+			{
+				return this.wildcard.ResolvedNamespaces;
+			}
+		}
+
+		internal XmlSchemaContentProcessing ResolvedProcessContents
+		{
+			get
+			{
+				return this.wildcard.ResolvedProcessing;
+			}
+		}
+
+		internal string TargetNamespace
+		{
+			get
+			{
+				return this.wildcard.TargetNamespace;
+			}
+		}
+
+		internal override int Compile(ValidationEventHandler h, XmlSchema schema)
+		{
+			if (this.CompilationId == schema.CompilationId)
+			{
+				return 0;
+			}
+			this.errorCount = 0;
+			this.wildcard.TargetNamespace = base.AncestorSchema.TargetNamespace;
+			if (this.wildcard.TargetNamespace == null)
+			{
+				this.wildcard.TargetNamespace = string.Empty;
+			}
+			XmlSchemaUtil.CompileID(base.Id, this, schema.IDCollection, h);
+			this.wildcard.Compile(this.Namespace, h, schema);
+			if (this.processing == XmlSchemaContentProcessing.None)
+			{
+				this.wildcard.ResolvedProcessing = XmlSchemaContentProcessing.Strict;
+			}
+			else
+			{
+				this.wildcard.ResolvedProcessing = this.processing;
+			}
+			this.CompilationId = schema.CompilationId;
+			return this.errorCount;
+		}
+
+		internal override int Validate(ValidationEventHandler h, XmlSchema schema)
+		{
+			return this.errorCount;
+		}
+
+		internal void ValidateWildcardSubset(XmlSchemaAnyAttribute other, ValidationEventHandler h, XmlSchema schema)
+		{
+			this.wildcard.ValidateWildcardSubset(other.wildcard, h, schema);
+		}
+
+		internal bool ValidateWildcardAllowsNamespaceName(string ns, XmlSchema schema)
+		{
+			return this.wildcard.ValidateWildcardAllowsNamespaceName(ns, null, schema, false);
+		}
+
+		internal static XmlSchemaAnyAttribute Read(XmlSchemaReader reader, ValidationEventHandler h)
+		{
+			XmlSchemaAnyAttribute xmlSchemaAnyAttribute = new XmlSchemaAnyAttribute();
+			reader.MoveToElement();
+			if (reader.NamespaceURI != "http://www.w3.org/2001/XMLSchema" || reader.LocalName != "anyAttribute")
+			{
+				XmlSchemaObject.error(h, "Should not happen :1: XmlSchemaAnyAttribute.Read, name=" + reader.Name, null);
+				reader.SkipToEnd();
+				return null;
+			}
+			xmlSchemaAnyAttribute.LineNumber = reader.LineNumber;
+			xmlSchemaAnyAttribute.LinePosition = reader.LinePosition;
+			xmlSchemaAnyAttribute.SourceUri = reader.BaseURI;
+			while (reader.MoveToNextAttribute())
+			{
+				if (reader.Name == "id")
 				{
-					return this.processContents;
+					xmlSchemaAnyAttribute.Id = reader.Value;
 				}
-				return XmlSchemaContentProcessing.Strict;
-			}
-		}
-
-		internal void BuildNamespaceList(string targetNamespace)
-		{
-			if (this.ns != null)
-			{
-				this.namespaceList = new NamespaceList(this.ns, targetNamespace);
-				return;
-			}
-			this.namespaceList = new NamespaceList();
-		}
-
-		internal void BuildNamespaceListV1Compat(string targetNamespace)
-		{
-			if (this.ns != null)
-			{
-				this.namespaceList = new NamespaceListV1Compat(this.ns, targetNamespace);
-				return;
-			}
-			this.namespaceList = new NamespaceList();
-		}
-
-		internal bool Allows(XmlQualifiedName qname)
-		{
-			return this.namespaceList.Allows(qname.Namespace);
-		}
-
-		internal static bool IsSubset(XmlSchemaAnyAttribute sub, XmlSchemaAnyAttribute super)
-		{
-			return NamespaceList.IsSubset(sub.NamespaceList, super.NamespaceList);
-		}
-
-		internal static XmlSchemaAnyAttribute Intersection(XmlSchemaAnyAttribute o1, XmlSchemaAnyAttribute o2, bool v1Compat)
-		{
-			NamespaceList namespaceList = NamespaceList.Intersection(o1.NamespaceList, o2.NamespaceList, v1Compat);
-			if (namespaceList != null)
-			{
-				return new XmlSchemaAnyAttribute
+				else if (reader.Name == "namespace")
 				{
-					namespaceList = namespaceList,
-					ProcessContents = o1.ProcessContents,
-					Annotation = o1.Annotation
-				};
-			}
-			return null;
-		}
-
-		internal static XmlSchemaAnyAttribute Union(XmlSchemaAnyAttribute o1, XmlSchemaAnyAttribute o2, bool v1Compat)
-		{
-			NamespaceList namespaceList = NamespaceList.Union(o1.NamespaceList, o2.NamespaceList, v1Compat);
-			if (namespaceList != null)
-			{
-				return new XmlSchemaAnyAttribute
+					xmlSchemaAnyAttribute.nameSpace = reader.Value;
+				}
+				else if (reader.Name == "processContents")
 				{
-					namespaceList = namespaceList,
-					processContents = o1.processContents,
-					Annotation = o1.Annotation
-				};
+					Exception ex;
+					xmlSchemaAnyAttribute.processing = XmlSchemaUtil.ReadProcessingAttribute(reader, out ex);
+					if (ex != null)
+					{
+						XmlSchemaObject.error(h, reader.Value + " is not a valid value for processContents", ex);
+					}
+				}
+				else if ((reader.NamespaceURI == string.Empty && reader.Name != "xmlns") || reader.NamespaceURI == "http://www.w3.org/2001/XMLSchema")
+				{
+					XmlSchemaObject.error(h, reader.Name + " is not a valid attribute for anyAttribute", null);
+				}
+				else
+				{
+					XmlSchemaUtil.ReadUnhandledAttribute(reader, xmlSchemaAnyAttribute);
+				}
 			}
-			return null;
+			reader.MoveToElement();
+			if (reader.IsEmptyElement)
+			{
+				return xmlSchemaAnyAttribute;
+			}
+			int num = 1;
+			while (reader.ReadNextElement())
+			{
+				if (reader.NodeType == XmlNodeType.EndElement)
+				{
+					if (reader.LocalName != "anyAttribute")
+					{
+						XmlSchemaObject.error(h, "Should not happen :2: XmlSchemaAnyAttribute.Read, name=" + reader.Name, null);
+					}
+					break;
+				}
+				if (num <= 1 && reader.LocalName == "annotation")
+				{
+					num = 2;
+					XmlSchemaAnnotation xmlSchemaAnnotation = XmlSchemaAnnotation.Read(reader, h);
+					if (xmlSchemaAnnotation != null)
+					{
+						xmlSchemaAnyAttribute.Annotation = xmlSchemaAnnotation;
+					}
+				}
+				else
+				{
+					reader.RaiseInvalidElementError();
+				}
+			}
+			return xmlSchemaAnyAttribute;
 		}
 
-		private string ns;
+		private const string xmlname = "anyAttribute";
 
-		private XmlSchemaContentProcessing processContents;
+		private string nameSpace;
 
-		private NamespaceList namespaceList;
+		private XmlSchemaContentProcessing processing;
+
+		private XsdWildcard wildcard;
 	}
 }

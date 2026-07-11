@@ -2,23 +2,23 @@
 
 namespace System.Runtime.InteropServices
 {
-	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	[ComVisible(true)]
+	[AttributeUsage(AttributeTargets.Class, Inherited = false)]
 	public sealed class ComDefaultInterfaceAttribute : Attribute
 	{
 		public ComDefaultInterfaceAttribute(Type defaultInterface)
 		{
-			this._val = defaultInterface;
+			this._type = defaultInterface;
 		}
 
 		public Type Value
 		{
 			get
 			{
-				return this._val;
+				return this._type;
 			}
 		}
 
-		internal Type _val;
+		private Type _type;
 	}
 }

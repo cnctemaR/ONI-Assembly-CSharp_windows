@@ -60,10 +60,6 @@ namespace System.Configuration
 
 		internal abstract void Merge(ConfigInfo data);
 
-		internal abstract bool HasValues(Configuration config, ConfigurationSaveMode mode);
-
-		internal abstract void ResetModified(Configuration config);
-
 		public string Name;
 
 		public string TypeName;

@@ -5,10 +5,10 @@ namespace System.Xml
 	public enum ValidationType
 	{
 		None,
-		[Obsolete("Validation type should be specified as DTD or Schema.")]
+		[Obsolete]
 		Auto,
 		DTD,
-		[Obsolete("XDR Validation through XmlValidatingReader is obsoleted")]
+		[Obsolete]
 		XDR,
 		Schema
 	}

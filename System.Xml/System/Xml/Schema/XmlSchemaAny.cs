@@ -1,22 +1,52 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Text;
 using System.Xml.Serialization;
+using Mono.Xml.Schema;
 
 namespace System.Xml.Schema
 {
 	public class XmlSchemaAny : XmlSchemaParticle
 	{
+		public XmlSchemaAny()
+		{
+			this.wildcard = new XsdWildcard(this);
+		}
+
+		internal static XmlSchemaAny AnyTypeContent
+		{
+			get
+			{
+				if (XmlSchemaAny.anyTypeContent == null)
+				{
+					XmlSchemaAny.anyTypeContent = new XmlSchemaAny();
+					XmlSchemaAny.anyTypeContent.MaxOccursString = "unbounded";
+					XmlSchemaAny.anyTypeContent.MinOccurs = 0m;
+					XmlSchemaAny.anyTypeContent.CompileOccurence(null, null);
+					XmlSchemaAny.anyTypeContent.Namespace = "##any";
+					XmlSchemaAny.anyTypeContent.wildcard.HasValueAny = true;
+					XmlSchemaAny.anyTypeContent.wildcard.ResolvedNamespaces = new StringCollection();
+					XsdWildcard xsdWildcard = XmlSchemaAny.anyTypeContent.wildcard;
+					XmlSchemaContentProcessing xmlSchemaContentProcessing = XmlSchemaContentProcessing.Lax;
+					XmlSchemaAny.anyTypeContent.ProcessContents = xmlSchemaContentProcessing;
+					xsdWildcard.ResolvedProcessing = xmlSchemaContentProcessing;
+					XmlSchemaAny.anyTypeContent.wildcard.SkipCompile = true;
+				}
+				return XmlSchemaAny.anyTypeContent;
+			}
+		}
+
 		[XmlAttribute("namespace")]
 		public string Namespace
 		{
 			get
 			{
-				return this.ns;
+				return this.nameSpace;
 			}
 			set
 			{
-				this.ns = value;
+				this.nameSpace = value;
 			}
 		}
 
@@ -26,110 +56,290 @@ namespace System.Xml.Schema
 		{
 			get
 			{
-				return this.processContents;
+				return this.processing;
 			}
 			set
 			{
-				this.processContents = value;
+				this.processing = value;
 			}
 		}
 
-		[XmlIgnore]
-		internal NamespaceList NamespaceList
+		internal bool HasValueAny
 		{
 			get
 			{
-				return this.namespaceList;
+				return this.wildcard.HasValueAny;
 			}
 		}
 
-		[XmlIgnore]
-		internal string ResolvedNamespace
+		internal bool HasValueLocal
 		{
 			get
 			{
-				if (this.ns == null || this.ns.Length == 0)
+				return this.wildcard.HasValueLocal;
+			}
+		}
+
+		internal bool HasValueOther
+		{
+			get
+			{
+				return this.wildcard.HasValueOther;
+			}
+		}
+
+		internal bool HasValueTargetNamespace
+		{
+			get
+			{
+				return this.wildcard.HasValueTargetNamespace;
+			}
+		}
+
+		internal StringCollection ResolvedNamespaces
+		{
+			get
+			{
+				return this.wildcard.ResolvedNamespaces;
+			}
+		}
+
+		internal XmlSchemaContentProcessing ResolvedProcessContents
+		{
+			get
+			{
+				return this.wildcard.ResolvedProcessing;
+			}
+		}
+
+		internal string TargetNamespace
+		{
+			get
+			{
+				return this.wildcard.TargetNamespace;
+			}
+		}
+
+		internal override int Compile(ValidationEventHandler h, XmlSchema schema)
+		{
+			if (this.CompilationId == schema.CompilationId)
+			{
+				return 0;
+			}
+			this.errorCount = 0;
+			XmlSchemaUtil.CompileID(base.Id, this, schema.IDCollection, h);
+			this.wildcard.TargetNamespace = base.AncestorSchema.TargetNamespace;
+			if (this.wildcard.TargetNamespace == null)
+			{
+				this.wildcard.TargetNamespace = string.Empty;
+			}
+			base.CompileOccurence(h, schema);
+			this.wildcard.Compile(this.Namespace, h, schema);
+			if (this.processing == XmlSchemaContentProcessing.None)
+			{
+				this.wildcard.ResolvedProcessing = XmlSchemaContentProcessing.Strict;
+			}
+			else
+			{
+				this.wildcard.ResolvedProcessing = this.processing;
+			}
+			this.CompilationId = schema.CompilationId;
+			return this.errorCount;
+		}
+
+		internal override XmlSchemaParticle GetOptimizedParticle(bool isTop)
+		{
+			if (this.OptimizedParticle != null)
+			{
+				return this.OptimizedParticle;
+			}
+			XmlSchemaAny xmlSchemaAny = new XmlSchemaAny();
+			this.CopyInfo(xmlSchemaAny);
+			xmlSchemaAny.CompileOccurence(null, null);
+			xmlSchemaAny.wildcard = this.wildcard;
+			this.OptimizedParticle = xmlSchemaAny;
+			xmlSchemaAny.Namespace = this.Namespace;
+			xmlSchemaAny.ProcessContents = this.ProcessContents;
+			xmlSchemaAny.Annotation = base.Annotation;
+			xmlSchemaAny.UnhandledAttributes = base.UnhandledAttributes;
+			return this.OptimizedParticle;
+		}
+
+		internal override int Validate(ValidationEventHandler h, XmlSchema schema)
+		{
+			return this.errorCount;
+		}
+
+		internal override bool ParticleEquals(XmlSchemaParticle other)
+		{
+			XmlSchemaAny xmlSchemaAny = other as XmlSchemaAny;
+			if (xmlSchemaAny == null)
+			{
+				return false;
+			}
+			if (this.HasValueAny != xmlSchemaAny.HasValueAny || this.HasValueLocal != xmlSchemaAny.HasValueLocal || this.HasValueOther != xmlSchemaAny.HasValueOther || this.HasValueTargetNamespace != xmlSchemaAny.HasValueTargetNamespace || this.ResolvedProcessContents != xmlSchemaAny.ResolvedProcessContents || base.ValidatedMaxOccurs != xmlSchemaAny.ValidatedMaxOccurs || base.ValidatedMinOccurs != xmlSchemaAny.ValidatedMinOccurs || this.ResolvedNamespaces.Count != xmlSchemaAny.ResolvedNamespaces.Count)
+			{
+				return false;
+			}
+			for (int i = 0; i < this.ResolvedNamespaces.Count; i++)
+			{
+				if (this.ResolvedNamespaces[i] != xmlSchemaAny.ResolvedNamespaces[i])
 				{
-					return "##any";
+					return false;
 				}
-				return this.ns;
 			}
+			return true;
 		}
 
-		[XmlIgnore]
-		internal XmlSchemaContentProcessing ProcessContentsCorrect
+		internal bool ExamineAttributeWildcardIntersection(XmlSchemaAny other, ValidationEventHandler h, XmlSchema schema)
 		{
-			get
+			return this.wildcard.ExamineAttributeWildcardIntersection(other, h, schema);
+		}
+
+		internal override bool ValidateDerivationByRestriction(XmlSchemaParticle baseParticle, ValidationEventHandler h, XmlSchema schema, bool raiseError)
+		{
+			XmlSchemaAny xmlSchemaAny = baseParticle as XmlSchemaAny;
+			if (xmlSchemaAny == null)
 			{
-				if (this.processContents != XmlSchemaContentProcessing.None)
+				if (raiseError)
 				{
-					return this.processContents;
+					base.error(h, "Invalid particle derivation by restriction was found.");
 				}
-				return XmlSchemaContentProcessing.Strict;
+				return false;
 			}
+			return this.ValidateOccurenceRangeOK(baseParticle, h, schema, raiseError) && this.wildcard.ValidateWildcardSubset(xmlSchemaAny.wildcard, h, schema, raiseError);
 		}
 
-		internal override string NameString
+		internal override void CheckRecursion(int depth, ValidationEventHandler h, XmlSchema schema)
 		{
-			get
+		}
+
+		internal override void ValidateUniqueParticleAttribution(XmlSchemaObjectTable qnames, ArrayList nsNames, ValidationEventHandler h, XmlSchema schema)
+		{
+			foreach (object obj in nsNames)
 			{
-				switch (this.namespaceList.Type)
+				XmlSchemaAny xmlSchemaAny = (XmlSchemaAny)obj;
+				if (!this.ExamineAttributeWildcardIntersection(xmlSchemaAny, h, schema))
 				{
-				case NamespaceList.ListType.Any:
-					return "##any:*";
-				case NamespaceList.ListType.Other:
-					return "##other:*";
-				case NamespaceList.ListType.Set:
+					base.error(h, "Ambiguous -any- particle was found.");
+				}
+			}
+			nsNames.Add(this);
+		}
+
+		internal override void ValidateUniqueTypeAttribution(XmlSchemaObjectTable labels, ValidationEventHandler h, XmlSchema schema)
+		{
+		}
+
+		internal bool ValidateWildcardAllowsNamespaceName(string ns, ValidationEventHandler h, XmlSchema schema, bool raiseError)
+		{
+			return this.wildcard.ValidateWildcardAllowsNamespaceName(ns, h, schema, raiseError);
+		}
+
+		internal static XmlSchemaAny Read(XmlSchemaReader reader, ValidationEventHandler h)
+		{
+			XmlSchemaAny xmlSchemaAny = new XmlSchemaAny();
+			reader.MoveToElement();
+			if (reader.NamespaceURI != "http://www.w3.org/2001/XMLSchema" || reader.LocalName != "any")
+			{
+				XmlSchemaObject.error(h, "Should not happen :1: XmlSchemaAny.Read, name=" + reader.Name, null);
+				reader.SkipToEnd();
+				return null;
+			}
+			xmlSchemaAny.LineNumber = reader.LineNumber;
+			xmlSchemaAny.LinePosition = reader.LinePosition;
+			xmlSchemaAny.SourceUri = reader.BaseURI;
+			while (reader.MoveToNextAttribute())
+			{
+				if (reader.Name == "id")
 				{
-					StringBuilder stringBuilder = new StringBuilder();
-					int num = 1;
-					foreach (object obj in this.namespaceList.Enumerate)
+					xmlSchemaAny.Id = reader.Value;
+				}
+				else if (reader.Name == "maxOccurs")
+				{
+					try
 					{
-						string text = (string)obj;
-						stringBuilder.Append(text + ":*");
-						if (num < this.namespaceList.Enumerate.Count)
-						{
-							stringBuilder.Append(" ");
-						}
-						num++;
+						xmlSchemaAny.MaxOccursString = reader.Value;
 					}
-					return stringBuilder.ToString();
+					catch (Exception ex)
+					{
+						XmlSchemaObject.error(h, reader.Value + " is an invalid value for maxOccurs", ex);
+					}
 				}
-				default:
-					return string.Empty;
+				else if (reader.Name == "minOccurs")
+				{
+					try
+					{
+						xmlSchemaAny.MinOccursString = reader.Value;
+					}
+					catch (Exception ex2)
+					{
+						XmlSchemaObject.error(h, reader.Value + " is an invalid value for minOccurs", ex2);
+					}
+				}
+				else if (reader.Name == "namespace")
+				{
+					xmlSchemaAny.nameSpace = reader.Value;
+				}
+				else if (reader.Name == "processContents")
+				{
+					Exception ex3;
+					xmlSchemaAny.processing = XmlSchemaUtil.ReadProcessingAttribute(reader, out ex3);
+					if (ex3 != null)
+					{
+						XmlSchemaObject.error(h, reader.Value + " is not a valid value for processContents", ex3);
+					}
+				}
+				else if ((reader.NamespaceURI == string.Empty && reader.Name != "xmlns") || reader.NamespaceURI == "http://www.w3.org/2001/XMLSchema")
+				{
+					XmlSchemaObject.error(h, reader.Name + " is not a valid attribute for any", null);
+				}
+				else
+				{
+					XmlSchemaUtil.ReadUnhandledAttribute(reader, xmlSchemaAny);
 				}
 			}
-		}
-
-		internal void BuildNamespaceList(string targetNamespace)
-		{
-			if (this.ns != null)
+			reader.MoveToElement();
+			if (reader.IsEmptyElement)
 			{
-				this.namespaceList = new NamespaceList(this.ns, targetNamespace);
-				return;
+				return xmlSchemaAny;
 			}
-			this.namespaceList = new NamespaceList();
-		}
-
-		internal void BuildNamespaceListV1Compat(string targetNamespace)
-		{
-			if (this.ns != null)
+			int num = 1;
+			while (reader.ReadNextElement())
 			{
-				this.namespaceList = new NamespaceListV1Compat(this.ns, targetNamespace);
-				return;
+				if (reader.NodeType == XmlNodeType.EndElement)
+				{
+					if (reader.LocalName != "any")
+					{
+						XmlSchemaObject.error(h, "Should not happen :2: XmlSchemaAny.Read, name=" + reader.Name, null);
+					}
+					break;
+				}
+				if (num <= 1 && reader.LocalName == "annotation")
+				{
+					num = 2;
+					XmlSchemaAnnotation xmlSchemaAnnotation = XmlSchemaAnnotation.Read(reader, h);
+					if (xmlSchemaAnnotation != null)
+					{
+						xmlSchemaAny.Annotation = xmlSchemaAnnotation;
+					}
+				}
+				else
+				{
+					reader.RaiseInvalidElementError();
+				}
 			}
-			this.namespaceList = new NamespaceList();
+			return xmlSchemaAny;
 		}
 
-		internal bool Allows(XmlQualifiedName qname)
-		{
-			return this.namespaceList.Allows(qname.Namespace);
-		}
+		private const string xmlname = "any";
 
-		private string ns;
+		private static XmlSchemaAny anyTypeContent;
 
-		private XmlSchemaContentProcessing processContents;
+		private string nameSpace;
 
-		private NamespaceList namespaceList;
+		private XmlSchemaContentProcessing processing;
+
+		private XsdWildcard wildcard;
 	}
 }

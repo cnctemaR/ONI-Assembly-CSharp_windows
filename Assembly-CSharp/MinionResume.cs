@@ -370,6 +370,20 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		return num;
 	}
 
+	public int HighestTierRoleMastered()
+	{
+		int num = 0;
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryByRoleID)
+		{
+			if (keyValuePair.Value)
+			{
+				RoleConfig role = Game.Instance.roleManager.GetRole(keyValuePair.Key);
+				num = Math.Max(role.tier, num);
+			}
+		}
+		return num;
+	}
+
 	private void OnRoleMastered()
 	{
 		RoleMasteredMessage roleMasteredMessage = new RoleMasteredMessage(this);

@@ -3,19 +3,18 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography
 {
-	[ComVisible(true)]
 	[Flags]
+	[ComVisible(true)]
 	[Serializable]
 	public enum CspProviderFlags
 	{
-		NoFlags = 0,
 		UseMachineKeyStore = 1,
 		UseDefaultKeyContainer = 2,
-		UseNonExportableKey = 4,
 		UseExistingKey = 8,
-		UseArchivableKey = 16,
-		UseUserProtectedKey = 32,
+		NoFlags = 0,
 		NoPrompt = 64,
-		CreateEphemeralKey = 128
+		UseArchivableKey = 16,
+		UseNonExportableKey = 4,
+		UseUserProtectedKey = 32
 	}
 }

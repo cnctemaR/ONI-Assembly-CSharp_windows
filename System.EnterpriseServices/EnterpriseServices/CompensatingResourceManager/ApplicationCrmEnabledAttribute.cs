@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices.CompensatingResourceManager
 {
+	[ProgId("System.EnterpriseServices.Crm.ApplicationCrmEnabledAttribute")]
 	[AttributeUsage(AttributeTargets.Assembly)]
 	[ComVisible(false)]
-	[ProgId("System.EnterpriseServices.Crm.ApplicationCrmEnabledAttribute")]
 	public sealed class ApplicationCrmEnabledAttribute : Attribute
 	{
 		public ApplicationCrmEnabledAttribute()

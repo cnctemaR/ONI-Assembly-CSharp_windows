@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace System.Net
 {
 	[Serializable]
-	public abstract class WebResponse : MarshalByRefObject, ISerializable, IDisposable
+	public abstract class WebResponse : MarshalByRefObject, IDisposable, ISerializable
 	{
 		protected WebResponse()
 		{
@@ -14,93 +13,28 @@ namespace System.Net
 
 		protected WebResponse(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
+			throw new NotSupportedException();
 		}
 
-		[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter, SerializationFormatter = true)]
+		void IDisposable.Dispose()
+		{
+			this.Close();
+		}
+
 		void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
 		{
-			this.GetObjectData(serializationInfo, streamingContext);
-		}
-
-		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-		protected virtual void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
-		{
-		}
-
-		public virtual void Close()
-		{
-		}
-
-		public void Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!disposing)
-			{
-				return;
-			}
-			try
-			{
-				this.Close();
-			}
-			catch
-			{
-			}
-		}
-
-		public virtual bool IsFromCache
-		{
-			get
-			{
-				return this.m_IsFromCache;
-			}
-		}
-
-		internal bool InternalSetFromCache
-		{
-			set
-			{
-				this.m_IsFromCache = value;
-			}
-		}
-
-		internal virtual bool IsCacheFresh
-		{
-			get
-			{
-				return this.m_IsCacheFresh;
-			}
-		}
-
-		internal bool InternalSetIsCacheFresh
-		{
-			set
-			{
-				this.m_IsCacheFresh = value;
-			}
-		}
-
-		public virtual bool IsMutuallyAuthenticated
-		{
-			get
-			{
-				return false;
-			}
+			throw new NotSupportedException();
 		}
 
 		public virtual long ContentLength
 		{
 			get
 			{
-				throw ExceptionHelper.PropertyNotImplementedException;
+				throw new NotSupportedException();
 			}
 			set
 			{
-				throw ExceptionHelper.PropertyNotImplementedException;
+				throw new NotSupportedException();
 			}
 		}
 
@@ -108,24 +42,11 @@ namespace System.Net
 		{
 			get
 			{
-				throw ExceptionHelper.PropertyNotImplementedException;
+				throw new NotSupportedException();
 			}
 			set
 			{
-				throw ExceptionHelper.PropertyNotImplementedException;
-			}
-		}
-
-		public virtual Stream GetResponseStream()
-		{
-			throw ExceptionHelper.MethodNotImplementedException;
-		}
-
-		public virtual Uri ResponseUri
-		{
-			get
-			{
-				throw ExceptionHelper.PropertyNotImplementedException;
+				throw new NotSupportedException();
 			}
 		}
 
@@ -133,20 +54,55 @@ namespace System.Net
 		{
 			get
 			{
-				throw ExceptionHelper.PropertyNotImplementedException;
+				throw new NotSupportedException();
 			}
 		}
 
-		public virtual bool SupportsHeaders
+		private static Exception GetMustImplement()
+		{
+			return new NotImplementedException();
+		}
+
+		[global::System.MonoTODO]
+		public virtual bool IsFromCache
 		{
 			get
 			{
-				return false;
+				throw WebResponse.GetMustImplement();
 			}
 		}
 
-		private bool m_IsCacheFresh;
+		[global::System.MonoTODO]
+		public virtual bool IsMutuallyAuthenticated
+		{
+			get
+			{
+				throw WebResponse.GetMustImplement();
+			}
+		}
 
-		private bool m_IsFromCache;
+		public virtual global::System.Uri ResponseUri
+		{
+			get
+			{
+				throw new NotSupportedException();
+			}
+		}
+
+		public virtual void Close()
+		{
+			throw new NotSupportedException();
+		}
+
+		public virtual Stream GetResponseStream()
+		{
+			throw new NotSupportedException();
+		}
+
+		[global::System.MonoTODO]
+		protected virtual void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
+		{
+			throw WebResponse.GetMustImplement();
+		}
 	}
 }

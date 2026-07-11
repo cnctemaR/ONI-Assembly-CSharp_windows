@@ -7,8 +7,8 @@ namespace System.Net.Cache
 		None,
 		MinFresh,
 		MaxAge,
-		MaxStale = 4,
-		MaxAgeAndMinFresh = 3,
+		MaxAgeAndMinFresh,
+		MaxStale,
 		MaxAgeAndMaxStale = 6
 	}
 }

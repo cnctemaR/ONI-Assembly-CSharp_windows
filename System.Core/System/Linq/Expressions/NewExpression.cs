@@ -1,81 +1,87 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Dynamic.Utils;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace System.Linq.Expressions
 {
-	[DebuggerTypeProxy(typeof(Expression.NewExpressionProxy))]
-	public class NewExpression : Expression, IArgumentProvider
+	public sealed class NewExpression : Expression
 	{
-		internal NewExpression(ConstructorInfo constructor, IReadOnlyList<Expression> arguments, ReadOnlyCollection<MemberInfo> members)
+		internal NewExpression(Type type, ReadOnlyCollection<Expression> arguments)
+			: base(ExpressionType.New, type)
 		{
-			this.Constructor = constructor;
-			this._arguments = arguments;
-			this.Members = members;
+			this.arguments = arguments;
 		}
 
-		public override Type Type
+		internal NewExpression(ConstructorInfo constructor, ReadOnlyCollection<Expression> arguments, ReadOnlyCollection<MemberInfo> members)
+			: base(ExpressionType.New, constructor.DeclaringType)
+		{
+			this.constructor = constructor;
+			this.arguments = arguments;
+			this.members = members;
+		}
+
+		public ConstructorInfo Constructor
 		{
 			get
 			{
-				return this.Constructor.DeclaringType;
+				return this.constructor;
 			}
 		}
-
-		public sealed override ExpressionType NodeType
-		{
-			get
-			{
-				return ExpressionType.New;
-			}
-		}
-
-		public ConstructorInfo Constructor { get; }
 
 		public ReadOnlyCollection<Expression> Arguments
 		{
 			get
 			{
-				return ExpressionUtils.ReturnReadOnly<Expression>(ref this._arguments);
+				return this.arguments;
 			}
 		}
 
-		public Expression GetArgument(int index)
-		{
-			return this._arguments[index];
-		}
-
-		public int ArgumentCount
+		public ReadOnlyCollection<MemberInfo> Members
 		{
 			get
 			{
-				return this._arguments.Count;
+				return this.members;
 			}
 		}
 
-		public ReadOnlyCollection<MemberInfo> Members { get; }
-
-		protected internal override Expression Accept(ExpressionVisitor visitor)
+		internal override void Emit(EmitContext ec)
 		{
-			return visitor.VisitNew(this);
+			ILGenerator ig = ec.ig;
+			Type type = base.Type;
+			LocalBuilder localBuilder = null;
+			if (type.IsValueType)
+			{
+				localBuilder = ig.DeclareLocal(type);
+				ig.Emit(OpCodes.Ldloca, localBuilder);
+				if (this.constructor == null)
+				{
+					ig.Emit(OpCodes.Initobj, type);
+					ig.Emit(OpCodes.Ldloc, localBuilder);
+					return;
+				}
+			}
+			ec.EmitCollection<Expression>(this.arguments);
+			if (type.IsValueType)
+			{
+				ig.Emit(OpCodes.Call, this.constructor);
+				ig.Emit(OpCodes.Ldloc, localBuilder);
+			}
+			else
+			{
+				ig.Emit(OpCodes.Newobj, this.constructor ?? NewExpression.GetDefaultConstructor(type));
+			}
 		}
 
-		public NewExpression Update(IEnumerable<Expression> arguments)
+		private static ConstructorInfo GetDefaultConstructor(Type type)
 		{
-			if (ExpressionUtils.SameElements<Expression>(ref arguments, this.Arguments))
-			{
-				return this;
-			}
-			if (this.Members == null)
-			{
-				return Expression.New(this.Constructor, arguments);
-			}
-			return Expression.New(this.Constructor, arguments, this.Members);
+			return type.GetConstructor(Type.EmptyTypes);
 		}
 
-		private IReadOnlyList<Expression> _arguments;
+		private ConstructorInfo constructor;
+
+		private ReadOnlyCollection<Expression> arguments;
+
+		private ReadOnlyCollection<MemberInfo> members;
 	}
 }

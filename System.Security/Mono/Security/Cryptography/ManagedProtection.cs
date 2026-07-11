@@ -36,7 +36,7 @@ namespace Mono.Security.Cryptography
 				array3 = rijndael.IV;
 				array4 = new byte[68];
 				byte[] array6 = sha.ComputeHash(userData);
-				if (optionalEntropy != null && optionalEntropy.Length != 0)
+				if (optionalEntropy != null && optionalEntropy.Length > 0)
 				{
 					byte[] array7 = sha.ComputeHash(optionalEntropy);
 					for (int i = 0; i < 16; i++)
@@ -60,7 +60,8 @@ namespace Mono.Security.Cryptography
 				Buffer.BlockCopy(array3, 0, array4, 19, 16);
 				array4[35] = 32;
 				Buffer.BlockCopy(array6, 0, array4, 36, 32);
-				array5 = new RSAOAEPKeyExchangeFormatter(ManagedProtection.GetKey(scope)).CreateKeyExchange(array4);
+				RSAOAEPKeyExchangeFormatter rsaoaepkeyExchangeFormatter = new RSAOAEPKeyExchangeFormatter(ManagedProtection.GetKey(scope));
+				array5 = rsaoaepkeyExchangeFormatter.CreateKeyExchange(array4);
 			}
 			finally
 			{
@@ -116,7 +117,8 @@ namespace Mono.Security.Cryptography
 			{
 				try
 				{
-					array3 = new RSAOAEPKeyExchangeDeformatter(key).DecryptKeyExchange(array2);
+					RSAOAEPKeyExchangeDeformatter rsaoaepkeyExchangeDeformatter = new RSAOAEPKeyExchangeDeformatter(key);
+					array3 = rsaoaepkeyExchangeDeformatter.DecryptKeyExchange(array2);
 					flag2 = array3.Length == 68;
 				}
 				catch
@@ -132,7 +134,7 @@ namespace Mono.Security.Cryptography
 				Buffer.BlockCopy(array3, 2, array4, 0, 16);
 				array5 = new byte[16];
 				Buffer.BlockCopy(array3, 19, array5, 0, 16);
-				if (optionalEntropy != null && optionalEntropy.Length != 0)
+				if (optionalEntropy != null && optionalEntropy.Length > 0)
 				{
 					byte[] array6 = sha.ComputeHash(optionalEntropy);
 					for (int i = 0; i < 16; i++)
@@ -214,14 +216,10 @@ namespace Mono.Security.Cryptography
 			{
 				if (ManagedProtection.user == null)
 				{
-					object obj = ManagedProtection.user_lock;
-					lock (obj)
+					ManagedProtection.user = new RSACryptoServiceProvider(1536, new CspParameters
 					{
-						ManagedProtection.user = new RSACryptoServiceProvider(1536, new CspParameters
-						{
-							KeyContainerName = "DAPI"
-						});
-					}
+						KeyContainerName = "DAPI"
+					});
 				}
 				return ManagedProtection.user;
 			}
@@ -231,15 +229,11 @@ namespace Mono.Security.Cryptography
 			}
 			if (ManagedProtection.machine == null)
 			{
-				object obj = ManagedProtection.machine_lock;
-				lock (obj)
+				ManagedProtection.machine = new RSACryptoServiceProvider(1536, new CspParameters
 				{
-					ManagedProtection.machine = new RSACryptoServiceProvider(1536, new CspParameters
-					{
-						KeyContainerName = "DAPI",
-						Flags = CspProviderFlags.UseMachineKeyStore
-					});
-				}
+					KeyContainerName = "DAPI",
+					Flags = CspProviderFlags.UseMachineKeyStore
+				});
 			}
 			return ManagedProtection.machine;
 		}
@@ -247,9 +241,5 @@ namespace Mono.Security.Cryptography
 		private static RSA user;
 
 		private static RSA machine;
-
-		private static readonly object user_lock = new object();
-
-		private static readonly object machine_lock = new object();
 	}
 }

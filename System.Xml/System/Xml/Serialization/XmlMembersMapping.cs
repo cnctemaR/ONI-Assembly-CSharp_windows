@@ -1,42 +1,42 @@
 ﻿using System;
-using System.Text;
 
 namespace System.Xml.Serialization
 {
 	public class XmlMembersMapping : XmlMapping
 	{
-		internal XmlMembersMapping(TypeScope scope, ElementAccessor accessor, XmlMappingAccess access)
-			: base(scope, accessor, access)
+		internal XmlMembersMapping()
 		{
-			MembersMapping membersMapping = (MembersMapping)accessor.Mapping;
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(":");
-			this.mappings = new XmlMemberMapping[membersMapping.Members.Length];
-			for (int i = 0; i < this.mappings.Length; i++)
-			{
-				if (membersMapping.Members[i].TypeDesc.Type != null)
-				{
-					stringBuilder.Append(XmlMapping.GenerateKey(membersMapping.Members[i].TypeDesc.Type, null, null));
-					stringBuilder.Append(":");
-				}
-				this.mappings[i] = new XmlMemberMapping(membersMapping.Members[i]);
-			}
-			base.SetKeyInternal(stringBuilder.ToString());
 		}
 
-		public string TypeName
+		internal XmlMembersMapping(XmlMemberMapping[] mapping)
+			: this(string.Empty, null, false, false, mapping)
+		{
+		}
+
+		internal XmlMembersMapping(string elementName, string ns, XmlMemberMapping[] mapping)
+			: this(elementName, ns, true, false, mapping)
+		{
+		}
+
+		internal XmlMembersMapping(string elementName, string ns, bool hasWrapperElement, bool writeAccessors, XmlMemberMapping[] mapping)
+			: base(elementName, ns)
+		{
+			this._hasWrapperElement = hasWrapperElement;
+			this._mapping = mapping;
+			ClassMap classMap = new ClassMap();
+			classMap.IgnoreMemberNamespace = writeAccessors;
+			foreach (XmlMemberMapping xmlMemberMapping in mapping)
+			{
+				classMap.AddMember(xmlMemberMapping.TypeMapMember);
+			}
+			base.ObjectMap = classMap;
+		}
+
+		public int Count
 		{
 			get
 			{
-				return base.Accessor.Mapping.TypeName;
-			}
-		}
-
-		public string TypeNamespace
-		{
-			get
-			{
-				return base.Accessor.Mapping.Namespace;
+				return this._mapping.Length;
 			}
 		}
 
@@ -44,18 +44,38 @@ namespace System.Xml.Serialization
 		{
 			get
 			{
-				return this.mappings[index];
+				return this._mapping[index];
 			}
 		}
 
-		public int Count
+		public string TypeName
+		{
+			[MonoTODO]
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		public string TypeNamespace
+		{
+			[MonoTODO]
+			get
+			{
+				throw new NotImplementedException();
+			}
+		}
+
+		internal bool HasWrapperElement
 		{
 			get
 			{
-				return this.mappings.Length;
+				return this._hasWrapperElement;
 			}
 		}
 
-		private XmlMemberMapping[] mappings;
+		private bool _hasWrapperElement;
+
+		private XmlMemberMapping[] _mapping;
 	}
 }

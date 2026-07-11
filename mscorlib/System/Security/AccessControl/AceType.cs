@@ -2,7 +2,7 @@
 
 namespace System.Security.AccessControl
 {
-	public enum AceType : byte
+	public enum AceType
 	{
 		AccessAllowed,
 		AccessDenied,

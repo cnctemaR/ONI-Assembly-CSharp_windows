@@ -1,208 +1,77 @@
 ﻿using System;
 using System.Collections;
+using System.ComponentModel.Design;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Threading;
 
 namespace System.ComponentModel
 {
 	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
 	public abstract class MemberDescriptor
 	{
+		protected MemberDescriptor(string name, Attribute[] attrs)
+		{
+			this.name = name;
+			this.attrs = attrs;
+		}
+
+		protected MemberDescriptor(MemberDescriptor reference, Attribute[] attrs)
+		{
+			this.name = reference.name;
+			this.attrs = attrs;
+		}
+
 		protected MemberDescriptor(string name)
-			: this(name, null)
 		{
+			this.name = name;
 		}
 
-		protected MemberDescriptor(string name, Attribute[] attributes)
+		protected MemberDescriptor(MemberDescriptor reference)
 		{
-			this.lockCookie = new object();
-			base..ctor();
-			try
-			{
-				if (name == null || name.Length == 0)
-				{
-					throw new ArgumentException(global::SR.GetString("Invalid member name."));
-				}
-				this.name = name;
-				this.displayName = name;
-				this.nameHash = name.GetHashCode();
-				if (attributes != null)
-				{
-					this.attributes = attributes;
-					this.attributesFiltered = false;
-				}
-				this.originalAttributes = this.attributes;
-			}
-			catch (Exception ex)
-			{
-				throw ex;
-			}
-		}
-
-		protected MemberDescriptor(MemberDescriptor descr)
-		{
-			this.lockCookie = new object();
-			base..ctor();
-			this.name = descr.Name;
-			this.displayName = this.name;
-			this.nameHash = this.name.GetHashCode();
-			this.attributes = new Attribute[descr.Attributes.Count];
-			descr.Attributes.CopyTo(this.attributes, 0);
-			this.attributesFiltered = true;
-			this.originalAttributes = this.attributes;
-		}
-
-		protected MemberDescriptor(MemberDescriptor oldMemberDescriptor, Attribute[] newAttributes)
-		{
-			this.lockCookie = new object();
-			base..ctor();
-			this.name = oldMemberDescriptor.Name;
-			this.displayName = oldMemberDescriptor.DisplayName;
-			this.nameHash = this.name.GetHashCode();
-			ArrayList arrayList = new ArrayList();
-			if (oldMemberDescriptor.Attributes.Count != 0)
-			{
-				foreach (object obj in oldMemberDescriptor.Attributes)
-				{
-					arrayList.Add(obj);
-				}
-			}
-			if (newAttributes != null)
-			{
-				foreach (Attribute obj2 in newAttributes)
-				{
-					arrayList.Add(obj2);
-				}
-			}
-			this.attributes = new Attribute[arrayList.Count];
-			arrayList.CopyTo(this.attributes, 0);
-			this.attributesFiltered = false;
-			this.originalAttributes = this.attributes;
+			this.name = reference.name;
+			this.attrs = reference.AttributeArray;
 		}
 
 		protected virtual Attribute[] AttributeArray
 		{
 			get
 			{
-				this.CheckAttributesValid();
-				this.FilterAttributesIfNeeded();
-				return this.attributes;
+				ArrayList arrayList = new ArrayList();
+				if (this.attrs != null)
+				{
+					arrayList.AddRange(this.attrs);
+				}
+				this.FillAttributes(arrayList);
+				Hashtable hashtable = new Hashtable();
+				foreach (object obj in arrayList)
+				{
+					Attribute attribute = (Attribute)obj;
+					hashtable[attribute.TypeId] = attribute;
+				}
+				Attribute[] array = new Attribute[hashtable.Values.Count];
+				hashtable.Values.CopyTo(array, 0);
+				return array;
 			}
 			set
 			{
-				object obj = this.lockCookie;
-				lock (obj)
-				{
-					this.attributes = value;
-					this.originalAttributes = value;
-					this.attributesFiltered = false;
-					this.attributeCollection = null;
-				}
+				this.attrs = value;
 			}
+		}
+
+		protected virtual void FillAttributes(IList attributeList)
+		{
 		}
 
 		public virtual AttributeCollection Attributes
 		{
 			get
 			{
-				this.CheckAttributesValid();
-				AttributeCollection attributeCollection = this.attributeCollection;
-				if (attributeCollection == null)
+				if (this.attrCollection == null)
 				{
-					object obj = this.lockCookie;
-					lock (obj)
-					{
-						attributeCollection = this.CreateAttributeCollection();
-						this.attributeCollection = attributeCollection;
-					}
+					this.attrCollection = this.CreateAttributeCollection();
 				}
-				return attributeCollection;
-			}
-		}
-
-		public virtual string Category
-		{
-			get
-			{
-				if (this.category == null)
-				{
-					this.category = ((CategoryAttribute)this.Attributes[typeof(CategoryAttribute)]).Category;
-				}
-				return this.category;
-			}
-		}
-
-		public virtual string Description
-		{
-			get
-			{
-				if (this.description == null)
-				{
-					this.description = ((DescriptionAttribute)this.Attributes[typeof(DescriptionAttribute)]).Description;
-				}
-				return this.description;
-			}
-		}
-
-		public virtual bool IsBrowsable
-		{
-			get
-			{
-				return ((BrowsableAttribute)this.Attributes[typeof(BrowsableAttribute)]).Browsable;
-			}
-		}
-
-		public virtual string Name
-		{
-			get
-			{
-				if (this.name == null)
-				{
-					return "";
-				}
-				return this.name;
-			}
-		}
-
-		protected virtual int NameHashCode
-		{
-			get
-			{
-				return this.nameHash;
-			}
-		}
-
-		public virtual bool DesignTimeOnly
-		{
-			get
-			{
-				return DesignOnlyAttribute.Yes.Equals(this.Attributes[typeof(DesignOnlyAttribute)]);
-			}
-		}
-
-		public virtual string DisplayName
-		{
-			get
-			{
-				DisplayNameAttribute displayNameAttribute = this.Attributes[typeof(DisplayNameAttribute)] as DisplayNameAttribute;
-				if (displayNameAttribute == null || displayNameAttribute.IsDefaultAttribute())
-				{
-					return this.displayName;
-				}
-				return displayNameAttribute.DisplayName;
-			}
-		}
-
-		private void CheckAttributesValid()
-		{
-			if (this.attributesFiltered && this.metadataVersion != TypeDescriptor.MetadataVersion)
-			{
-				this.attributesFilled = false;
-				this.attributesFiltered = false;
-				this.attributeCollection = null;
+				return this.attrCollection;
 			}
 		}
 
@@ -211,145 +80,130 @@ namespace System.ComponentModel
 			return new AttributeCollection(this.AttributeArray);
 		}
 
-		public override bool Equals(object obj)
+		public virtual string Category
 		{
-			if (this == obj)
+			get
 			{
+				return ((CategoryAttribute)this.Attributes[typeof(CategoryAttribute)]).Category;
+			}
+		}
+
+		public virtual string Description
+		{
+			get
+			{
+				foreach (Attribute attribute in this.AttributeArray)
+				{
+					if (attribute is DescriptionAttribute)
+					{
+						return ((DescriptionAttribute)attribute).Description;
+					}
+				}
+				return string.Empty;
+			}
+		}
+
+		public virtual bool DesignTimeOnly
+		{
+			get
+			{
+				foreach (Attribute attribute in this.AttributeArray)
+				{
+					if (attribute is DesignOnlyAttribute)
+					{
+						return ((DesignOnlyAttribute)attribute).IsDesignOnly;
+					}
+				}
+				return false;
+			}
+		}
+
+		public virtual string DisplayName
+		{
+			get
+			{
+				foreach (Attribute attribute in this.AttributeArray)
+				{
+					if (attribute is DisplayNameAttribute)
+					{
+						return ((DisplayNameAttribute)attribute).DisplayName;
+					}
+				}
+				return this.name;
+			}
+		}
+
+		public virtual string Name
+		{
+			get
+			{
+				return this.name;
+			}
+		}
+
+		public virtual bool IsBrowsable
+		{
+			get
+			{
+				foreach (Attribute attribute in this.AttributeArray)
+				{
+					if (attribute is BrowsableAttribute)
+					{
+						return ((BrowsableAttribute)attribute).Browsable;
+					}
+				}
 				return true;
 			}
-			if (obj == null)
-			{
-				return false;
-			}
-			if (obj.GetType() != base.GetType())
-			{
-				return false;
-			}
-			MemberDescriptor memberDescriptor = (MemberDescriptor)obj;
-			this.FilterAttributesIfNeeded();
-			memberDescriptor.FilterAttributesIfNeeded();
-			if (memberDescriptor.nameHash != this.nameHash)
-			{
-				return false;
-			}
-			if (memberDescriptor.category == null != (this.category == null) || (this.category != null && !memberDescriptor.category.Equals(this.category)))
-			{
-				return false;
-			}
-			if (!LocalAppContextSwitches.MemberDescriptorEqualsReturnsFalseIfEquivalent)
-			{
-				if (memberDescriptor.description == null != (this.description == null) || (this.description != null && !memberDescriptor.description.Equals(this.description)))
-				{
-					return false;
-				}
-			}
-			else if (memberDescriptor.description == null != (this.description == null) || (this.description != null && !memberDescriptor.category.Equals(this.description)))
-			{
-				return false;
-			}
-			if (memberDescriptor.attributes == null != (this.attributes == null))
-			{
-				return false;
-			}
-			bool flag = true;
-			if (this.attributes != null)
-			{
-				if (this.attributes.Length != memberDescriptor.attributes.Length)
-				{
-					return false;
-				}
-				for (int i = 0; i < this.attributes.Length; i++)
-				{
-					if (!this.attributes[i].Equals(memberDescriptor.attributes[i]))
-					{
-						flag = false;
-						break;
-					}
-				}
-			}
-			return flag;
 		}
 
-		protected virtual void FillAttributes(IList attributeList)
+		protected virtual int NameHashCode
 		{
-			if (this.originalAttributes != null)
+			get
 			{
-				foreach (Attribute attribute in this.originalAttributes)
-				{
-					attributeList.Add(attribute);
-				}
+				return this.name.GetHashCode();
 			}
-		}
-
-		private void FilterAttributesIfNeeded()
-		{
-			if (!this.attributesFiltered)
-			{
-				IList list;
-				if (!this.attributesFilled)
-				{
-					list = new ArrayList();
-					try
-					{
-						this.FillAttributes(list);
-						goto IL_0034;
-					}
-					catch (ThreadAbortException)
-					{
-						throw;
-					}
-					catch (Exception)
-					{
-						goto IL_0034;
-					}
-				}
-				list = new ArrayList(this.attributes);
-				IL_0034:
-				Hashtable hashtable = new Hashtable(list.Count);
-				foreach (object obj in list)
-				{
-					Attribute attribute = (Attribute)obj;
-					hashtable[attribute.TypeId] = attribute;
-				}
-				Attribute[] array = new Attribute[hashtable.Values.Count];
-				hashtable.Values.CopyTo(array, 0);
-				object obj2 = this.lockCookie;
-				lock (obj2)
-				{
-					this.attributes = array;
-					this.attributesFiltered = true;
-					this.attributesFilled = true;
-					this.metadataVersion = TypeDescriptor.MetadataVersion;
-				}
-			}
-		}
-
-		protected static MethodInfo FindMethod(Type componentClass, string name, Type[] args, Type returnType)
-		{
-			return MemberDescriptor.FindMethod(componentClass, name, args, returnType, true);
-		}
-
-		protected static MethodInfo FindMethod(Type componentClass, string name, Type[] args, Type returnType, bool publicOnly)
-		{
-			MethodInfo methodInfo;
-			if (publicOnly)
-			{
-				methodInfo = componentClass.GetMethod(name, args);
-			}
-			else
-			{
-				methodInfo = componentClass.GetMethod(name, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, args, null);
-			}
-			if (methodInfo != null && !methodInfo.ReturnType.IsEquivalentTo(returnType))
-			{
-				methodInfo = null;
-			}
-			return methodInfo;
 		}
 
 		public override int GetHashCode()
 		{
-			return this.nameHash;
+			return base.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			MemberDescriptor memberDescriptor = obj as MemberDescriptor;
+			return memberDescriptor != null && memberDescriptor.name == this.name;
+		}
+
+		protected static ISite GetSite(object component)
+		{
+			if (component is Component)
+			{
+				return ((Component)component).Site;
+			}
+			return null;
+		}
+
+		[Obsolete("Use GetInvocationTarget")]
+		protected static object GetInvokee(Type componentClass, object component)
+		{
+			if (component is IComponent)
+			{
+				ISite site = ((IComponent)component).Site;
+				if (site != null && site.DesignMode)
+				{
+					global::System.ComponentModel.Design.IDesignerHost designerHost = site.GetService(typeof(global::System.ComponentModel.Design.IDesignerHost)) as global::System.ComponentModel.Design.IDesignerHost;
+					if (designerHost != null)
+					{
+						global::System.ComponentModel.Design.IDesigner designer = designerHost.GetDesigner((IComponent)component);
+						if (designer != null && componentClass.IsInstanceOfType(designer))
+						{
+							component = designer;
+						}
+					}
+				}
+			}
+			return component;
 		}
 
 		protected virtual object GetInvocationTarget(Type type, object instance)
@@ -362,54 +216,54 @@ namespace System.ComponentModel
 			{
 				throw new ArgumentNullException("instance");
 			}
-			return TypeDescriptor.GetAssociation(type, instance);
+			return MemberDescriptor.GetInvokee(type, instance);
 		}
 
-		protected static ISite GetSite(object component)
+		protected static MethodInfo FindMethod(Type componentClass, string name, Type[] args, Type returnType)
 		{
-			if (!(component is IComponent))
-			{
-				return null;
-			}
-			return ((IComponent)component).Site;
+			return MemberDescriptor.FindMethod(componentClass, name, args, returnType, true);
 		}
 
-		[Obsolete("This method has been deprecated. Use GetInvocationTarget instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
-		protected static object GetInvokee(Type componentClass, object component)
+		protected static MethodInfo FindMethod(Type componentClass, string name, Type[] args, Type returnType, bool publicOnly)
 		{
-			if (componentClass == null)
+			BindingFlags bindingFlags;
+			if (publicOnly)
 			{
-				throw new ArgumentNullException("componentClass");
+				bindingFlags = BindingFlags.Public;
 			}
-			if (component == null)
+			else
 			{
-				throw new ArgumentNullException("component");
+				bindingFlags = BindingFlags.Public | BindingFlags.NonPublic;
 			}
-			return TypeDescriptor.GetAssociation(componentClass, component);
+			return componentClass.GetMethod(name, bindingFlags, null, CallingConventions.Any, args, null);
+		}
+
+		internal static IComparer DefaultComparer
+		{
+			get
+			{
+				if (MemberDescriptor.default_comparer == null)
+				{
+					MemberDescriptor.default_comparer = new MemberDescriptor.MemberDescriptorComparer();
+				}
+				return MemberDescriptor.default_comparer;
+			}
 		}
 
 		private string name;
 
-		private string displayName;
+		private Attribute[] attrs;
 
-		private int nameHash;
+		private AttributeCollection attrCollection;
 
-		private AttributeCollection attributeCollection;
+		private static IComparer default_comparer;
 
-		private Attribute[] attributes;
-
-		private Attribute[] originalAttributes;
-
-		private bool attributesFiltered;
-
-		private bool attributesFilled;
-
-		private int metadataVersion;
-
-		private string category;
-
-		private string description;
-
-		private object lockCookie;
+		private class MemberDescriptorComparer : IComparer
+		{
+			public int Compare(object x, object y)
+			{
+				return string.Compare(((MemberDescriptor)x).Name, ((MemberDescriptor)y).Name, false, CultureInfo.InvariantCulture);
+			}
+		}
 	}
 }

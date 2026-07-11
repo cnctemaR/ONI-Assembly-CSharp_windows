@@ -5,11 +5,16 @@ using System.Runtime.InteropServices;
 
 namespace System
 {
-	[ClassInterface(ClassInterfaceType.AutoDual)]
 	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.AutoDual)]
 	[Serializable]
 	public class Object
 	{
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		public Object()
+		{
+		}
+
 		public virtual bool Equals(object obj)
 		{
 			return this == obj;
@@ -18,11 +23,6 @@ namespace System
 		public static bool Equals(object objA, object objB)
 		{
 			return objA == objB || (objA != null && objB != null && objA.Equals(objB));
-		}
-
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-		public Object()
-		{
 		}
 
 		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
@@ -54,6 +54,9 @@ namespace System
 
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern int InternalGetHashCode(object o);
+
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		internal extern IntPtr obj_address();
 
 		private void FieldGetter(string typeName, string fieldName, ref object val)
 		{

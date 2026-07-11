@@ -35,7 +35,6 @@ namespace Mono.Security
 				if (num == 4)
 				{
 					this.publicKey = (byte[])data.Clone();
-					return;
 				}
 			}
 			else
@@ -146,10 +145,11 @@ namespace Mono.Security
 					{
 						return null;
 					}
-					byte[] array2 = HashAlgorithm.Create(this.TokenAlgorithm).ComputeHash(array);
+					HashAlgorithm hashAlgorithm = HashAlgorithm.Create(this.TokenAlgorithm);
+					byte[] array2 = hashAlgorithm.ComputeHash(array);
 					this.keyToken = new byte[8];
 					Buffer.BlockCopy(array2, array2.Length - 8, this.keyToken, 0, 8);
-					Array.Reverse<byte>(this.keyToken, 0, 8);
+					Array.Reverse(this.keyToken, 0, 8);
 				}
 				return (byte[])this.keyToken.Clone();
 			}
@@ -274,7 +274,7 @@ namespace Mono.Security
 					}
 					strongNameSignature.Signature = new byte[strongNameSignature.SignatureLength];
 					Buffer.BlockCopy(array8, num11, strongNameSignature.Signature, 0, (int)strongNameSignature.SignatureLength);
-					Array.Reverse<byte>(strongNameSignature.Signature);
+					Array.Reverse(strongNameSignature.Signature);
 					int num12 = (int)((long)num11 + (long)((ulong)strongNameSignature.SignatureLength));
 					int num13 = num10 - num12;
 					if (num13 > 0)
@@ -319,7 +319,7 @@ namespace Mono.Security
 				RSAPKCS1SignatureFormatter rsapkcs1SignatureFormatter = new RSAPKCS1SignatureFormatter(this.rsa);
 				rsapkcs1SignatureFormatter.SetHashAlgorithm(this.TokenAlgorithm);
 				array = rsapkcs1SignatureFormatter.CreateSignature(strongNameSignature.Hash);
-				Array.Reverse<byte>(array);
+				Array.Reverse(array);
 			}
 			catch (CryptographicException)
 			{
@@ -373,19 +373,17 @@ namespace Mono.Security
 		private static bool Verify(RSA rsa, AssemblyHashAlgorithm algorithm, byte[] hash, byte[] signature)
 		{
 			RSAPKCS1SignatureDeformatter rsapkcs1SignatureDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-			if (algorithm != AssemblyHashAlgorithm.None)
+			if (algorithm != AssemblyHashAlgorithm.MD5)
 			{
-				if (algorithm == AssemblyHashAlgorithm.MD5)
-				{
-					rsapkcs1SignatureDeformatter.SetHashAlgorithm("MD5");
-					goto IL_0034;
-				}
-				if (algorithm != AssemblyHashAlgorithm.SHA1)
+				if (algorithm != AssemblyHashAlgorithm.SHA1 && algorithm != AssemblyHashAlgorithm.None)
 				{
 				}
+				rsapkcs1SignatureDeformatter.SetHashAlgorithm("SHA1");
 			}
-			rsapkcs1SignatureDeformatter.SetHashAlgorithm("SHA1");
-			IL_0034:
+			else
+			{
+				rsapkcs1SignatureDeformatter.SetHashAlgorithm("MD5");
+			}
 			return rsapkcs1SignatureDeformatter.VerifySignature(hash, signature);
 		}
 

@@ -14,6 +14,11 @@ namespace System.Diagnostics
 			base.InnerList.AddRange(processThreads);
 		}
 
+		internal static ProcessThreadCollection GetEmpty()
+		{
+			return new ProcessThreadCollection();
+		}
+
 		public ProcessThread this[int index]
 		{
 			get
@@ -27,9 +32,14 @@ namespace System.Diagnostics
 			return base.InnerList.Add(thread);
 		}
 
-		public void Insert(int index, ProcessThread thread)
+		public bool Contains(ProcessThread thread)
 		{
-			base.InnerList.Insert(index, thread);
+			return base.InnerList.Contains(thread);
+		}
+
+		public void CopyTo(ProcessThread[] array, int index)
+		{
+			base.InnerList.CopyTo(array, index);
 		}
 
 		public int IndexOf(ProcessThread thread)
@@ -37,19 +47,14 @@ namespace System.Diagnostics
 			return base.InnerList.IndexOf(thread);
 		}
 
-		public bool Contains(ProcessThread thread)
+		public void Insert(int index, ProcessThread thread)
 		{
-			return base.InnerList.Contains(thread);
+			base.InnerList.Insert(index, thread);
 		}
 
 		public void Remove(ProcessThread thread)
 		{
 			base.InnerList.Remove(thread);
-		}
-
-		public void CopyTo(ProcessThread[] array, int index)
-		{
-			base.InnerList.CopyTo(array, index);
 		}
 	}
 }

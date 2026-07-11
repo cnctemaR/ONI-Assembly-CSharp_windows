@@ -1,87 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Collections.Specialized;
 using System.Configuration;
-using System.Globalization;
-using System.Threading;
 using System.Xml.Serialization;
 
 namespace System.Diagnostics
 {
 	public abstract class Switch
 	{
-		private object IntializedLock
-		{
-			get
-			{
-				if (this.m_intializedLock == null)
-				{
-					object obj = new object();
-					Interlocked.CompareExchange<object>(ref this.m_intializedLock, obj, null);
-				}
-				return this.m_intializedLock;
-			}
-		}
-
 		protected Switch(string displayName, string description)
-			: this(displayName, description, "0")
 		{
+			this.name = displayName;
+			this.description = description;
 		}
 
 		protected Switch(string displayName, string description, string defaultSwitchValue)
+			: this(displayName, description)
 		{
-			if (displayName == null)
-			{
-				displayName = string.Empty;
-			}
-			this.displayName = displayName;
-			this.description = description;
-			List<WeakReference> list = Switch.switches;
-			lock (list)
-			{
-				Switch._pruneCachedSwitches();
-				Switch.switches.Add(new WeakReference(this));
-			}
-			this.defaultValue = defaultSwitchValue;
+			this.defaultSwitchValue = defaultSwitchValue;
 		}
 
-		private static void _pruneCachedSwitches()
-		{
-			List<WeakReference> list = Switch.switches;
-			lock (list)
-			{
-				if (Switch.s_LastCollectionCount != GC.CollectionCount(2))
-				{
-					List<WeakReference> list2 = new List<WeakReference>(Switch.switches.Count);
-					for (int i = 0; i < Switch.switches.Count; i++)
-					{
-						if ((Switch)Switch.switches[i].Target != null)
-						{
-							list2.Add(Switch.switches[i]);
-						}
-					}
-					if (list2.Count < Switch.switches.Count)
-					{
-						Switch.switches.Clear();
-						Switch.switches.AddRange(list2);
-						Switch.switches.TrimExcess();
-					}
-					Switch.s_LastCollectionCount = GC.CollectionCount(2);
-				}
-			}
-		}
-
-		[XmlIgnore]
-		public StringDictionary Attributes
+		public string Description
 		{
 			get
 			{
-				this.Initialize();
-				if (this.attributes == null)
-				{
-					this.attributes = new StringDictionary();
-				}
-				return this.attributes;
+				return this.description;
 			}
 		}
 
@@ -89,19 +32,7 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				return this.displayName;
-			}
-		}
-
-		public string Description
-		{
-			get
-			{
-				if (this.description != null)
-				{
-					return this.description;
-				}
-				return string.Empty;
+				return this.name;
 			}
 		}
 
@@ -109,29 +40,31 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				if (!this.initialized && this.InitializeWithStatus())
+				if (!this.initialized)
 				{
+					this.initialized = true;
+					this.GetConfigFileSetting();
 					this.OnSwitchSettingChanged();
 				}
 				return this.switchSetting;
 			}
 			set
 			{
-				bool flag = false;
-				object intializedLock = this.IntializedLock;
-				lock (intializedLock)
+				if (this.switchSetting != value)
 				{
-					this.initialized = true;
-					if (this.switchSetting != value)
-					{
-						this.switchSetting = value;
-						flag = true;
-					}
-				}
-				if (flag)
-				{
+					this.switchSetting = value;
 					this.OnSwitchSettingChanged();
 				}
+				this.initialized = true;
+			}
+		}
+
+		[XmlIgnore]
+		public global::System.Collections.Specialized.StringDictionary Attributes
+		{
+			get
+			{
+				return this.attributes;
 			}
 		}
 
@@ -139,113 +72,21 @@ namespace System.Diagnostics
 		{
 			get
 			{
-				this.Initialize();
-				return this.switchValueString;
+				return this.value;
 			}
 			set
 			{
-				this.Initialize();
-				this.switchValueString = value;
+				this.value = value;
 				try
 				{
 					this.OnValueChanged();
 				}
-				catch (ArgumentException ex)
+				catch (Exception ex)
 				{
-					throw new ConfigurationErrorsException(global::SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex);
-				}
-				catch (FormatException ex2)
-				{
-					throw new ConfigurationErrorsException(global::SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex2);
-				}
-				catch (OverflowException ex3)
-				{
-					throw new ConfigurationErrorsException(global::SR.GetString("The config value for Switch '{0}' was invalid.", new object[] { this.DisplayName }), ex3);
+					string text = string.Format("The config value for Switch '{0}' was invalid.", this.DisplayName);
+					throw new ConfigurationErrorsException(text, ex);
 				}
 			}
-		}
-
-		private void Initialize()
-		{
-			this.InitializeWithStatus();
-		}
-
-		private bool InitializeWithStatus()
-		{
-			if (!this.initialized)
-			{
-				object intializedLock = this.IntializedLock;
-				lock (intializedLock)
-				{
-					if (this.initialized || this.initializing)
-					{
-						return false;
-					}
-					this.initializing = true;
-					if (this.switchSettings == null && !this.InitializeConfigSettings())
-					{
-						this.initialized = true;
-						this.initializing = false;
-						return false;
-					}
-					if (this.switchSettings != null)
-					{
-						SwitchElement switchElement = this.switchSettings[this.displayName];
-						if (switchElement != null)
-						{
-							string value = switchElement.Value;
-							if (value != null)
-							{
-								this.Value = value;
-							}
-							else
-							{
-								this.Value = this.defaultValue;
-							}
-							try
-							{
-								TraceUtils.VerifyAttributes(switchElement.Attributes, this.GetSupportedAttributes(), this);
-							}
-							catch (ConfigurationException)
-							{
-								this.initialized = false;
-								this.initializing = false;
-								throw;
-							}
-							this.attributes = new StringDictionary();
-							this.attributes.ReplaceHashtable(switchElement.Attributes);
-						}
-						else
-						{
-							this.switchValueString = this.defaultValue;
-							this.OnValueChanged();
-						}
-					}
-					else
-					{
-						this.switchValueString = this.defaultValue;
-						this.OnValueChanged();
-					}
-					this.initialized = true;
-					this.initializing = false;
-				}
-				return true;
-			}
-			return true;
-		}
-
-		private bool InitializeConfigSettings()
-		{
-			if (this.switchSettings != null)
-			{
-				return true;
-			}
-			if (!DiagnosticsConfiguration.CanInitialize())
-			{
-				return false;
-			}
-			this.switchSettings = DiagnosticsConfiguration.SwitchSettings;
-			return true;
 		}
 
 		protected internal virtual string[] GetSupportedAttributes()
@@ -253,65 +94,41 @@ namespace System.Diagnostics
 			return null;
 		}
 
+		protected virtual void OnValueChanged()
+		{
+		}
+
+		private void GetConfigFileSetting()
+		{
+			IDictionary dictionary = (IDictionary)DiagnosticsConfiguration.Settings["switches"];
+			if (dictionary != null && dictionary.Contains(this.name))
+			{
+				this.Value = dictionary[this.name] as string;
+				return;
+			}
+			if (this.defaultSwitchValue != null)
+			{
+				this.value = this.defaultSwitchValue;
+				this.OnValueChanged();
+			}
+		}
+
 		protected virtual void OnSwitchSettingChanged()
 		{
 		}
 
-		protected virtual void OnValueChanged()
-		{
-			this.SwitchSetting = int.Parse(this.Value, CultureInfo.InvariantCulture);
-		}
+		private string name;
 
-		internal static void RefreshAll()
-		{
-			List<WeakReference> list = Switch.switches;
-			lock (list)
-			{
-				Switch._pruneCachedSwitches();
-				for (int i = 0; i < Switch.switches.Count; i++)
-				{
-					Switch @switch = (Switch)Switch.switches[i].Target;
-					if (@switch != null)
-					{
-						@switch.Refresh();
-					}
-				}
-			}
-		}
-
-		internal void Refresh()
-		{
-			object intializedLock = this.IntializedLock;
-			lock (intializedLock)
-			{
-				this.initialized = false;
-				this.switchSettings = null;
-				this.Initialize();
-			}
-		}
-
-		private SwitchElementsCollection switchSettings;
-
-		private readonly string description;
-
-		private readonly string displayName;
+		private string description;
 
 		private int switchSetting;
 
-		private volatile bool initialized;
+		private string value;
 
-		private bool initializing;
+		private string defaultSwitchValue;
 
-		private volatile string switchValueString = string.Empty;
+		private bool initialized;
 
-		private StringDictionary attributes;
-
-		private string defaultValue;
-
-		private object m_intializedLock;
-
-		private static List<WeakReference> switches = new List<WeakReference>();
-
-		private static int s_LastCollectionCount;
+		private global::System.Collections.Specialized.StringDictionary attributes = new global::System.Collections.Specialized.StringDictionary();
 	}
 }

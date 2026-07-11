@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Security;
 
 namespace System.Text
 {
@@ -18,919 +16,475 @@ namespace System.Text
 		}
 
 		public UTF32Encoding(bool bigEndian, bool byteOrderMark, bool throwOnInvalidCharacters)
-			: base(bigEndian ? 12001 : 12000)
+			: base((!bigEndian) ? 12000 : 12001)
 		{
 			this.bigEndian = bigEndian;
-			this.emitUTF32ByteOrderMark = byteOrderMark;
-			this.isThrowException = throwOnInvalidCharacters;
-			if (this.isThrowException)
+			this.byteOrderMark = byteOrderMark;
+			if (throwOnInvalidCharacters)
 			{
-				this.SetDefaultFallbacks();
+				base.SetFallbackInternal(EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
 			}
+			else
+			{
+				base.SetFallbackInternal(new EncoderReplacementFallback("\ufffd"), new DecoderReplacementFallback("\ufffd"));
+			}
+			if (bigEndian)
+			{
+				this.body_name = "utf-32BE";
+				this.encoding_name = "UTF-32 (Big-Endian)";
+				this.header_name = "utf-32BE";
+				this.web_name = "utf-32BE";
+			}
+			else
+			{
+				this.body_name = "utf-32";
+				this.encoding_name = "UTF-32";
+				this.header_name = "utf-32";
+				this.web_name = "utf-32";
+			}
+			this.windows_code_page = 12000;
 		}
 
-		internal override void SetDefaultFallbacks()
-		{
-			if (this.isThrowException)
-			{
-				this.encoderFallback = EncoderFallback.ExceptionFallback;
-				this.decoderFallback = DecoderFallback.ExceptionFallback;
-				return;
-			}
-			this.encoderFallback = new EncoderReplacementFallback("\ufffd");
-			this.decoderFallback = new DecoderReplacementFallback("\ufffd");
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int GetByteCount(char[] chars, int index, int count)
+		[MonoTODO("handle fallback")]
+		public override int GetByteCount(char[] chars, int index, int count)
 		{
 			if (chars == null)
 			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
+				throw new ArgumentNullException("chars");
 			}
-			if (index < 0 || count < 0)
+			if (index < 0 || index > chars.Length)
 			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("index", Encoding._("ArgRange_Array"));
 			}
-			if (chars.Length - index < count)
+			if (count < 0 || count > chars.Length - index)
 			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
+				throw new ArgumentOutOfRangeException("count", Encoding._("ArgRange_Array"));
 			}
-			if (chars.Length == 0)
-			{
-				return 0;
-			}
-			char* ptr;
-			if (chars == null || chars.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &chars[0];
-			}
-			return this.GetByteCount(ptr + index, count, null);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int GetByteCount(string s)
-		{
-			if (s == null)
-			{
-				throw new ArgumentNullException("s");
-			}
-			char* ptr = s;
-			if (ptr != null)
-			{
-				ptr += RuntimeHelpers.OffsetToStringData / 2;
-			}
-			return this.GetByteCount(ptr, s.Length, null);
-		}
-
-		[SecurityCritical]
-		[CLSCompliant(false)]
-		public unsafe override int GetByteCount(char* chars, int count)
-		{
-			if (chars == null)
-			{
-				throw new ArgumentNullException("chars", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			return this.GetByteCount(chars, count, null);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
-		{
-			if (s == null || bytes == null)
-			{
-				throw new ArgumentNullException((s == null) ? "s" : "bytes", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (charIndex < 0 || charCount < 0)
-			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (s.Length - charIndex < charCount)
-			{
-				throw new ArgumentOutOfRangeException("s", Environment.GetResourceString("Index and count must refer to a location within the string."));
-			}
-			if (byteIndex < 0 || byteIndex > bytes.Length)
-			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
-			char* ptr = s;
-			if (ptr != null)
-			{
-				ptr += RuntimeHelpers.OffsetToStringData / 2;
-			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
-		{
-			if (chars == null || bytes == null)
-			{
-				throw new ArgumentNullException((chars == null) ? "chars" : "bytes", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (charIndex < 0 || charCount < 0)
-			{
-				throw new ArgumentOutOfRangeException((charIndex < 0) ? "charIndex" : "charCount", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (chars.Length - charIndex < charCount)
-			{
-				throw new ArgumentOutOfRangeException("chars", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
-			}
-			if (byteIndex < 0 || byteIndex > bytes.Length)
-			{
-				throw new ArgumentOutOfRangeException("byteIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (chars.Length == 0)
-			{
-				return 0;
-			}
-			int num = bytes.Length - byteIndex;
-			if (bytes.Length == 0)
-			{
-				bytes = new byte[1];
-			}
-			char* ptr;
-			if (chars == null || chars.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &chars[0];
-			}
-			byte[] array;
-			byte* ptr2;
-			if ((array = bytes) == null || array.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetBytes(ptr + charIndex, charCount, ptr2 + byteIndex, num, null);
-		}
-
-		[SecurityCritical]
-		[CLSCompliant(false)]
-		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
-		{
-			if (bytes == null || chars == null)
-			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (charCount < 0 || byteCount < 0)
-			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
-			}
-			return this.GetBytes(chars, charCount, bytes, byteCount, null);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int GetCharCount(byte[] bytes, int index, int count)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (index < 0 || count < 0)
-			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (bytes.Length - index < count)
-			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
-			}
-			if (bytes.Length == 0)
-			{
-				return 0;
-			}
-			byte* ptr;
-			if (bytes == null || bytes.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &bytes[0];
-			}
-			return this.GetCharCount(ptr + index, count, null);
-		}
-
-		[SecurityCritical]
-		[CLSCompliant(false)]
-		public unsafe override int GetCharCount(byte* bytes, int count)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (count < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Non-negative number required."));
-			}
-			return this.GetCharCount(bytes, count, null);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
-		{
-			if (bytes == null || chars == null)
-			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (byteIndex < 0 || byteCount < 0)
-			{
-				throw new ArgumentOutOfRangeException((byteIndex < 0) ? "byteIndex" : "byteCount", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (bytes.Length - byteIndex < byteCount)
-			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
-			}
-			if (charIndex < 0 || charIndex > chars.Length)
-			{
-				throw new ArgumentOutOfRangeException("charIndex", Environment.GetResourceString("Index was out of range. Must be non-negative and less than the size of the collection."));
-			}
-			if (bytes.Length == 0)
-			{
-				return 0;
-			}
-			int num = chars.Length - charIndex;
-			if (chars.Length == 0)
-			{
-				chars = new char[1];
-			}
-			byte* ptr;
-			if (bytes == null || bytes.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &bytes[0];
-			}
-			char[] array;
-			char* ptr2;
-			if ((array = chars) == null || array.Length == 0)
-			{
-				ptr2 = null;
-			}
-			else
-			{
-				ptr2 = &array[0];
-			}
-			return this.GetChars(ptr + byteIndex, byteCount, ptr2 + charIndex, num, null);
-		}
-
-		[CLSCompliant(false)]
-		[SecurityCritical]
-		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
-		{
-			if (bytes == null || chars == null)
-			{
-				throw new ArgumentNullException((bytes == null) ? "bytes" : "chars", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (charCount < 0 || byteCount < 0)
-			{
-				throw new ArgumentOutOfRangeException((charCount < 0) ? "charCount" : "byteCount", Environment.GetResourceString("Non-negative number required."));
-			}
-			return this.GetChars(bytes, byteCount, chars, charCount, null);
-		}
-
-		[SecuritySafeCritical]
-		public unsafe override string GetString(byte[] bytes, int index, int count)
-		{
-			if (bytes == null)
-			{
-				throw new ArgumentNullException("bytes", Environment.GetResourceString("Array cannot be null."));
-			}
-			if (index < 0 || count < 0)
-			{
-				throw new ArgumentOutOfRangeException((index < 0) ? "index" : "count", Environment.GetResourceString("Non-negative number required."));
-			}
-			if (bytes.Length - index < count)
-			{
-				throw new ArgumentOutOfRangeException("bytes", Environment.GetResourceString("Index and count must refer to a location within the buffer."));
-			}
-			if (bytes.Length == 0)
-			{
-				return string.Empty;
-			}
-			byte* ptr;
-			if (bytes == null || bytes.Length == 0)
-			{
-				ptr = null;
-			}
-			else
-			{
-				ptr = &bytes[0];
-			}
-			return string.CreateStringFromEncoding(ptr + index, count, this);
-		}
-
-		[SecurityCritical]
-		internal unsafe override int GetByteCount(char* chars, int count, EncoderNLS encoder)
-		{
-			char* ptr = chars + count;
-			char* ptr2 = chars;
 			int num = 0;
-			char c = '\0';
-			EncoderFallbackBuffer encoderFallbackBuffer;
-			if (encoder != null)
+			for (int i = index; i < index + count; i++)
 			{
-				c = encoder.charLeftOver;
-				encoderFallbackBuffer = encoder.FallbackBuffer;
-				if (encoderFallbackBuffer.Remaining > 0)
+				if (char.IsSurrogate(chars[i]))
 				{
-					throw new ArgumentException(Environment.GetResourceString("Must complete Convert() operation or call Encoder.Reset() before calling GetBytes() or GetByteCount(). Encoder '{0}' fallback '{1}'.", new object[]
+					if (i + 1 < chars.Length && char.IsSurrogate(chars[i + 1]))
 					{
-						this.EncodingName,
-						encoder.Fallback.GetType()
-					}));
-				}
-			}
-			else
-			{
-				encoderFallbackBuffer = this.encoderFallback.CreateFallbackBuffer();
-			}
-			encoderFallbackBuffer.InternalInitialize(ptr2, ptr, encoder, false);
-			for (;;)
-			{
-				char c2;
-				if ((c2 = encoderFallbackBuffer.InternalGetNextChar()) == '\0' && chars >= ptr)
-				{
-					if ((encoder != null && !encoder.MustFlush) || c <= '\0')
-					{
-						break;
-					}
-					encoderFallbackBuffer.InternalFallback(c, ref chars);
-					c = '\0';
-				}
-				else
-				{
-					if (c2 == '\0')
-					{
-						c2 = *chars;
-						chars++;
-					}
-					if (c != '\0')
-					{
-						if (char.IsLowSurrogate(c2))
-						{
-							c = '\0';
-							num += 4;
-						}
-						else
-						{
-							chars--;
-							encoderFallbackBuffer.InternalFallback(c, ref chars);
-							c = '\0';
-						}
-					}
-					else if (char.IsHighSurrogate(c2))
-					{
-						c = c2;
-					}
-					else if (char.IsLowSurrogate(c2))
-					{
-						encoderFallbackBuffer.InternalFallback(c2, ref chars);
+						num += 4;
 					}
 					else
 					{
 						num += 4;
 					}
 				}
-			}
-			if (num < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
+				else
+				{
+					num += 4;
+				}
 			}
 			return num;
 		}
 
-		[SecurityCritical]
-		internal unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount, EncoderNLS encoder)
+		[MonoTODO("handle fallback")]
+		public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
 		{
-			char* ptr = chars;
-			char* ptr2 = chars + charCount;
-			byte* ptr3 = bytes;
-			byte* ptr4 = bytes + byteCount;
-			char c = '\0';
-			EncoderFallbackBuffer encoderFallbackBuffer;
-			if (encoder != null)
+			if (chars == null)
 			{
-				c = encoder.charLeftOver;
-				encoderFallbackBuffer = encoder.FallbackBuffer;
-				if (encoder.m_throwOnOverflow && encoderFallbackBuffer.Remaining > 0)
+				throw new ArgumentNullException("chars");
+			}
+			if (bytes == null)
+			{
+				throw new ArgumentNullException("bytes");
+			}
+			if (charIndex < 0 || charIndex > chars.Length)
+			{
+				throw new ArgumentOutOfRangeException("charIndex", Encoding._("ArgRange_Array"));
+			}
+			if (charCount < 0 || charCount > chars.Length - charIndex)
+			{
+				throw new ArgumentOutOfRangeException("charCount", Encoding._("ArgRange_Array"));
+			}
+			if (byteIndex < 0 || byteIndex > bytes.Length)
+			{
+				throw new ArgumentOutOfRangeException("byteIndex", Encoding._("ArgRange_Array"));
+			}
+			if (bytes.Length - byteIndex < charCount * 4)
+			{
+				throw new ArgumentException(Encoding._("Arg_InsufficientSpace"));
+			}
+			int num = byteIndex;
+			while (charCount-- > 0)
+			{
+				char c = chars[charIndex++];
+				if (char.IsSurrogate(c))
 				{
-					throw new ArgumentException(Environment.GetResourceString("Must complete Convert() operation or call Encoder.Reset() before calling GetBytes() or GetByteCount(). Encoder '{0}' fallback '{1}'.", new object[]
+					if (charCount-- > 0)
 					{
-						this.EncodingName,
-						encoder.Fallback.GetType()
-					}));
-				}
-			}
-			else
-			{
-				encoderFallbackBuffer = this.encoderFallback.CreateFallbackBuffer();
-			}
-			encoderFallbackBuffer.InternalInitialize(ptr, ptr2, encoder, true);
-			for (;;)
-			{
-				char c2;
-				if ((c2 = encoderFallbackBuffer.InternalGetNextChar()) != '\0' || chars < ptr2)
-				{
-					if (c2 == '\0')
-					{
-						c2 = *chars;
-						chars++;
-					}
-					if (c != '\0')
-					{
-						if (!char.IsLowSurrogate(c2))
-						{
-							chars--;
-							encoderFallbackBuffer.InternalFallback(c, ref chars);
-							c = '\0';
-							continue;
-						}
-						uint surrogate = this.GetSurrogate(c, c2);
-						c = '\0';
-						if (bytes + 3 >= ptr4)
-						{
-							if (encoderFallbackBuffer.bFallingBack)
-							{
-								encoderFallbackBuffer.MovePrevious();
-								encoderFallbackBuffer.MovePrevious();
-							}
-							else
-							{
-								chars -= 2;
-							}
-							base.ThrowBytesOverflow(encoder, bytes == ptr3);
-							c = '\0';
-						}
-						else
-						{
-							if (this.bigEndian)
-							{
-								*(bytes++) = 0;
-								*(bytes++) = (byte)(surrogate >> 16);
-								*(bytes++) = (byte)(surrogate >> 8);
-								*(bytes++) = (byte)surrogate;
-								continue;
-							}
-							*(bytes++) = (byte)surrogate;
-							*(bytes++) = (byte)(surrogate >> 8);
-							*(bytes++) = (byte)(surrogate >> 16);
-							*(bytes++) = 0;
-							continue;
-						}
-					}
-					else
-					{
-						if (char.IsHighSurrogate(c2))
-						{
-							c = c2;
-							continue;
-						}
-						if (char.IsLowSurrogate(c2))
-						{
-							encoderFallbackBuffer.InternalFallback(c2, ref chars);
-							continue;
-						}
-						if (bytes + 3 >= ptr4)
-						{
-							if (encoderFallbackBuffer.bFallingBack)
-							{
-								encoderFallbackBuffer.MovePrevious();
-							}
-							else
-							{
-								chars--;
-							}
-							base.ThrowBytesOverflow(encoder, bytes == ptr3);
-						}
-						else
-						{
-							if (this.bigEndian)
-							{
-								*(bytes++) = 0;
-								*(bytes++) = 0;
-								*(bytes++) = (byte)(c2 >> 8);
-								*(bytes++) = (byte)c2;
-								continue;
-							}
-							*(bytes++) = (byte)c2;
-							*(bytes++) = (byte)(c2 >> 8);
-							*(bytes++) = 0;
-							*(bytes++) = 0;
-							continue;
-						}
-					}
-				}
-				if ((encoder != null && !encoder.MustFlush) || c <= '\0')
-				{
-					break;
-				}
-				encoderFallbackBuffer.InternalFallback(c, ref chars);
-				c = '\0';
-			}
-			if (encoder != null)
-			{
-				encoder.charLeftOver = c;
-				encoder.m_charsUsed = (int)((long)(chars - ptr));
-			}
-			return (int)((long)(bytes - ptr3));
-		}
-
-		[SecurityCritical]
-		internal unsafe override int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
-		{
-			UTF32Encoding.UTF32Decoder utf32Decoder = (UTF32Encoding.UTF32Decoder)baseDecoder;
-			int num = 0;
-			byte* ptr = bytes + count;
-			byte* ptr2 = bytes;
-			int i = 0;
-			uint num2 = 0U;
-			DecoderFallbackBuffer decoderFallbackBuffer;
-			if (utf32Decoder != null)
-			{
-				i = utf32Decoder.readByteCount;
-				num2 = (uint)utf32Decoder.iChar;
-				decoderFallbackBuffer = utf32Decoder.FallbackBuffer;
-			}
-			else
-			{
-				decoderFallbackBuffer = this.decoderFallback.CreateFallbackBuffer();
-			}
-			decoderFallbackBuffer.InternalInitialize(ptr2, null);
-			while (bytes < ptr && num >= 0)
-			{
-				if (this.bigEndian)
-				{
-					num2 <<= 8;
-					num2 += (uint)(*(bytes++));
-				}
-				else
-				{
-					num2 >>= 8;
-					num2 += (uint)((uint)(*(bytes++)) << 24);
-				}
-				i++;
-				if (i >= 4)
-				{
-					i = 0;
-					if (num2 > 1114111U || (num2 >= 55296U && num2 <= 57343U))
-					{
-						byte[] array;
+						int num2 = (int)('Ѐ' * (c - '\ud800')) + 65536 + (int)chars[charIndex++] - 56320;
 						if (this.bigEndian)
 						{
-							array = new byte[]
+							for (int i = 0; i < 4; i++)
 							{
-								(byte)(num2 >> 24),
-								(byte)(num2 >> 16),
-								(byte)(num2 >> 8),
-								(byte)num2
-							};
+								bytes[num + 3 - i] = (byte)(num2 % 256);
+								num2 >>= 8;
+							}
+							num += 4;
 						}
 						else
 						{
-							array = new byte[]
+							for (int j = 0; j < 4; j++)
 							{
-								(byte)num2,
-								(byte)(num2 >> 8),
-								(byte)(num2 >> 16),
-								(byte)(num2 >> 24)
-							};
+								bytes[num++] = (byte)(num2 % 256);
+								num2 >>= 8;
+							}
 						}
-						num += decoderFallbackBuffer.InternalFallback(array, bytes);
-						num2 = 0U;
+					}
+					else if (this.bigEndian)
+					{
+						bytes[num++] = 0;
+						bytes[num++] = 0;
+						bytes[num++] = 0;
+						bytes[num++] = 63;
 					}
 					else
 					{
-						if (num2 >= 65536U)
-						{
-							num++;
-						}
-						num++;
-						num2 = 0U;
+						bytes[num++] = 63;
+						bytes[num++] = 0;
+						bytes[num++] = 0;
+						bytes[num++] = 0;
 					}
 				}
-			}
-			if (i > 0 && (utf32Decoder == null || utf32Decoder.MustFlush))
-			{
-				byte[] array2 = new byte[i];
-				if (this.bigEndian)
+				else if (this.bigEndian)
 				{
-					while (i > 0)
-					{
-						array2[--i] = (byte)num2;
-						num2 >>= 8;
-					}
+					bytes[num++] = 0;
+					bytes[num++] = 0;
+					bytes[num++] = (byte)(c >> 8);
+					bytes[num++] = (byte)c;
 				}
 				else
 				{
-					while (i > 0)
-					{
-						array2[--i] = (byte)(num2 >> 24);
-						num2 <<= 8;
-					}
+					bytes[num++] = (byte)c;
+					bytes[num++] = (byte)(c >> 8);
+					bytes[num++] = 0;
+					bytes[num++] = 0;
 				}
-				num += decoderFallbackBuffer.InternalFallback(array2, bytes);
 			}
-			if (num < 0)
-			{
-				throw new ArgumentOutOfRangeException("count", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
-			}
-			return num;
+			return num - byteIndex;
 		}
 
-		[SecurityCritical]
-		internal unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount, DecoderNLS baseDecoder)
+		public override int GetCharCount(byte[] bytes, int index, int count)
 		{
-			UTF32Encoding.UTF32Decoder utf32Decoder = (UTF32Encoding.UTF32Decoder)baseDecoder;
-			char* ptr = chars;
-			char* ptr2 = chars + charCount;
-			byte* ptr3 = bytes;
-			byte* ptr4 = bytes + byteCount;
-			int num = 0;
-			uint num2 = 0U;
-			DecoderFallbackBuffer decoderFallbackBuffer;
-			if (utf32Decoder != null)
+			if (bytes == null)
 			{
-				num = utf32Decoder.readByteCount;
-				num2 = (uint)utf32Decoder.iChar;
-				decoderFallbackBuffer = baseDecoder.FallbackBuffer;
+				throw new ArgumentNullException("bytes");
+			}
+			if (index < 0 || index > bytes.Length)
+			{
+				throw new ArgumentOutOfRangeException("index", Encoding._("ArgRange_Array"));
+			}
+			if (count < 0 || count > bytes.Length - index)
+			{
+				throw new ArgumentOutOfRangeException("count", Encoding._("ArgRange_Array"));
+			}
+			return count / 4;
+		}
+
+		public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
+		{
+			if (bytes == null)
+			{
+				throw new ArgumentNullException("bytes");
+			}
+			if (chars == null)
+			{
+				throw new ArgumentNullException("chars");
+			}
+			if (byteIndex < 0 || byteIndex > bytes.Length)
+			{
+				throw new ArgumentOutOfRangeException("byteIndex", Encoding._("ArgRange_Array"));
+			}
+			if (byteCount < 0 || byteCount > bytes.Length - byteIndex)
+			{
+				throw new ArgumentOutOfRangeException("byteCount", Encoding._("ArgRange_Array"));
+			}
+			if (charIndex < 0 || charIndex > chars.Length)
+			{
+				throw new ArgumentOutOfRangeException("charIndex", Encoding._("ArgRange_Array"));
+			}
+			if (chars.Length - charIndex < byteCount / 4)
+			{
+				throw new ArgumentException(Encoding._("Arg_InsufficientSpace"));
+			}
+			int num = charIndex;
+			if (this.bigEndian)
+			{
+				while (byteCount >= 4)
+				{
+					chars[num++] = (char)(((int)bytes[byteIndex] << 24) | ((int)bytes[byteIndex + 1] << 16) | ((int)bytes[byteIndex + 2] << 8) | (int)bytes[byteIndex + 3]);
+					byteIndex += 4;
+					byteCount -= 4;
+				}
 			}
 			else
 			{
-				decoderFallbackBuffer = this.decoderFallback.CreateFallbackBuffer();
-			}
-			decoderFallbackBuffer.InternalInitialize(bytes, chars + charCount);
-			while (bytes < ptr4)
-			{
-				if (this.bigEndian)
+				while (byteCount >= 4)
 				{
-					num2 <<= 8;
-					num2 += (uint)(*(bytes++));
-				}
-				else
-				{
-					num2 >>= 8;
-					num2 += (uint)((uint)(*(bytes++)) << 24);
-				}
-				num++;
-				if (num >= 4)
-				{
-					num = 0;
-					if (num2 > 1114111U || (num2 >= 55296U && num2 <= 57343U))
-					{
-						byte[] array;
-						if (this.bigEndian)
-						{
-							array = new byte[]
-							{
-								(byte)(num2 >> 24),
-								(byte)(num2 >> 16),
-								(byte)(num2 >> 8),
-								(byte)num2
-							};
-						}
-						else
-						{
-							array = new byte[]
-							{
-								(byte)num2,
-								(byte)(num2 >> 8),
-								(byte)(num2 >> 16),
-								(byte)(num2 >> 24)
-							};
-						}
-						if (!decoderFallbackBuffer.InternalFallback(array, bytes, ref chars))
-						{
-							bytes -= 4;
-							num2 = 0U;
-							decoderFallbackBuffer.InternalReset();
-							base.ThrowCharsOverflow(utf32Decoder, chars == ptr);
-							break;
-						}
-						num2 = 0U;
-					}
-					else
-					{
-						if (num2 >= 65536U)
-						{
-							if (chars >= ptr2 - 1)
-							{
-								bytes -= 4;
-								num2 = 0U;
-								base.ThrowCharsOverflow(utf32Decoder, chars == ptr);
-								break;
-							}
-							*(chars++) = this.GetHighSurrogate(num2);
-							num2 = (uint)this.GetLowSurrogate(num2);
-						}
-						else if (chars >= ptr2)
-						{
-							bytes -= 4;
-							num2 = 0U;
-							base.ThrowCharsOverflow(utf32Decoder, chars == ptr);
-							break;
-						}
-						*(chars++) = (char)num2;
-						num2 = 0U;
-					}
+					chars[num++] = (char)((int)bytes[byteIndex] | ((int)bytes[byteIndex + 1] << 8) | ((int)bytes[byteIndex + 2] << 16) | ((int)bytes[byteIndex + 3] << 24));
+					byteIndex += 4;
+					byteCount -= 4;
 				}
 			}
-			if (num > 0 && (utf32Decoder == null || utf32Decoder.MustFlush))
-			{
-				byte[] array2 = new byte[num];
-				int i = num;
-				if (this.bigEndian)
-				{
-					while (i > 0)
-					{
-						array2[--i] = (byte)num2;
-						num2 >>= 8;
-					}
-				}
-				else
-				{
-					while (i > 0)
-					{
-						array2[--i] = (byte)(num2 >> 24);
-						num2 <<= 8;
-					}
-				}
-				if (!decoderFallbackBuffer.InternalFallback(array2, bytes, ref chars))
-				{
-					decoderFallbackBuffer.InternalReset();
-					base.ThrowCharsOverflow(utf32Decoder, chars == ptr);
-				}
-				else
-				{
-					num = 0;
-					num2 = 0U;
-				}
-			}
-			if (utf32Decoder != null)
-			{
-				utf32Decoder.iChar = (int)num2;
-				utf32Decoder.readByteCount = num;
-				utf32Decoder.m_bytesUsed = (int)((long)(bytes - ptr3));
-			}
-			return (int)((long)(chars - ptr));
-		}
-
-		private uint GetSurrogate(char cHigh, char cLow)
-		{
-			return (uint)((cHigh - '\ud800') * 'Ѐ' + (cLow - '\udc00')) + 65536U;
-		}
-
-		private char GetHighSurrogate(uint iChar)
-		{
-			return (char)((iChar - 65536U) / 1024U + 55296U);
-		}
-
-		private char GetLowSurrogate(uint iChar)
-		{
-			return (char)((iChar - 65536U) % 1024U + 56320U);
-		}
-
-		public override Decoder GetDecoder()
-		{
-			return new UTF32Encoding.UTF32Decoder(this);
-		}
-
-		public override Encoder GetEncoder()
-		{
-			return new EncoderNLS(this);
+			return num - charIndex;
 		}
 
 		public override int GetMaxByteCount(int charCount)
 		{
 			if (charCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("charCount", Encoding._("ArgRange_NonNegative"));
 			}
-			long num = (long)charCount + 1L;
-			if (base.EncoderFallback.MaxCharCount > 1)
-			{
-				num *= (long)base.EncoderFallback.MaxCharCount;
-			}
-			num *= 4L;
-			if (num > 2147483647L)
-			{
-				throw new ArgumentOutOfRangeException("charCount", Environment.GetResourceString("Too many characters. The resulting number of bytes is larger than what can be returned as an int."));
-			}
-			return (int)num;
+			return charCount * 4;
 		}
 
 		public override int GetMaxCharCount(int byteCount)
 		{
 			if (byteCount < 0)
 			{
-				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("byteCount", Encoding._("ArgRange_NonNegative"));
 			}
-			int num = byteCount / 2 + 2;
-			if (base.DecoderFallback.MaxCharCount > 2)
-			{
-				num *= base.DecoderFallback.MaxCharCount;
-				num /= 2;
-			}
-			if (num > 2147483647)
-			{
-				throw new ArgumentOutOfRangeException("byteCount", Environment.GetResourceString("Too many bytes. The resulting number of chars is larger than what can be returned as an int."));
-			}
-			return num;
+			return byteCount / 4;
+		}
+
+		public override Decoder GetDecoder()
+		{
+			return new UTF32Encoding.UTF32Decoder(this.bigEndian);
 		}
 
 		public override byte[] GetPreamble()
 		{
-			if (!this.emitUTF32ByteOrderMark)
+			if (this.byteOrderMark)
 			{
-				return EmptyArray<byte>.Value;
+				byte[] array = new byte[4];
+				if (this.bigEndian)
+				{
+					array[2] = 254;
+					array[3] = byte.MaxValue;
+				}
+				else
+				{
+					array[0] = byte.MaxValue;
+					array[1] = 254;
+				}
+				return array;
 			}
-			if (this.bigEndian)
-			{
-				return new byte[] { 0, 0, 254, byte.MaxValue };
-			}
-			byte[] array = new byte[4];
-			array[0] = byte.MaxValue;
-			array[1] = 254;
-			return array;
+			return new byte[0];
 		}
 
 		public override bool Equals(object value)
 		{
 			UTF32Encoding utf32Encoding = value as UTF32Encoding;
-			return utf32Encoding != null && (this.emitUTF32ByteOrderMark == utf32Encoding.emitUTF32ByteOrderMark && this.bigEndian == utf32Encoding.bigEndian && base.EncoderFallback.Equals(utf32Encoding.EncoderFallback)) && base.DecoderFallback.Equals(utf32Encoding.DecoderFallback);
+			return utf32Encoding != null && (this.codePage == utf32Encoding.codePage && this.bigEndian == utf32Encoding.bigEndian && this.byteOrderMark == utf32Encoding.byteOrderMark) && base.Equals(value);
 		}
 
 		public override int GetHashCode()
 		{
-			return base.EncoderFallback.GetHashCode() + base.DecoderFallback.GetHashCode() + this.CodePage + (this.emitUTF32ByteOrderMark ? 4 : 0) + (this.bigEndian ? 8 : 0);
+			int num = base.GetHashCode();
+			if (this.bigEndian)
+			{
+				num ^= 31;
+			}
+			if (this.byteOrderMark)
+			{
+				num ^= 63;
+			}
+			return num;
 		}
 
-		private bool emitUTF32ByteOrderMark;
+		[CLSCompliant(false)]
+		public unsafe override int GetByteCount(char* chars, int count)
+		{
+			if (chars == null)
+			{
+				throw new ArgumentNullException("chars");
+			}
+			return count * 4;
+		}
 
-		private bool isThrowException;
+		public override int GetByteCount(string s)
+		{
+			return base.GetByteCount(s);
+		}
+
+		[CLSCompliant(false)]
+		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
+		{
+			return base.GetBytes(chars, charCount, bytes, byteCount);
+		}
+
+		public override int GetBytes(string s, int charIndex, int charCount, byte[] bytes, int byteIndex)
+		{
+			return base.GetBytes(s, charIndex, charCount, bytes, byteIndex);
+		}
+
+		[CLSCompliant(false)]
+		public unsafe override int GetCharCount(byte* bytes, int count)
+		{
+			return base.GetCharCount(bytes, count);
+		}
+
+		[CLSCompliant(false)]
+		public unsafe override int GetChars(byte* bytes, int byteCount, char* chars, int charCount)
+		{
+			return base.GetChars(bytes, byteCount, chars, charCount);
+		}
+
+		public override string GetString(byte[] bytes, int index, int count)
+		{
+			return base.GetString(bytes, index, count);
+		}
+
+		public override Encoder GetEncoder()
+		{
+			return base.GetEncoder();
+		}
+
+		internal const int UTF32_CODE_PAGE = 12000;
+
+		internal const int BIG_UTF32_CODE_PAGE = 12001;
 
 		private bool bigEndian;
 
-		[Serializable]
-		internal class UTF32Decoder : DecoderNLS
+		private bool byteOrderMark;
+
+		private sealed class UTF32Decoder : Decoder
 		{
-			public UTF32Decoder(UTF32Encoding encoding)
-				: base(encoding)
+			public UTF32Decoder(bool bigEndian)
 			{
+				this.bigEndian = bigEndian;
+				this.leftOverByte = -1;
 			}
 
-			public override void Reset()
+			public override int GetCharCount(byte[] bytes, int index, int count)
 			{
-				this.iChar = 0;
-				this.readByteCount = 0;
-				if (this.m_fallbackBuffer != null)
+				if (bytes == null)
 				{
-					this.m_fallbackBuffer.Reset();
+					throw new ArgumentNullException("bytes");
 				}
-			}
-
-			internal override bool HasState
-			{
-				get
+				if (index < 0 || index > bytes.Length)
 				{
-					return this.readByteCount != 0;
+					throw new ArgumentOutOfRangeException("index", Encoding._("ArgRange_Array"));
 				}
+				if (count < 0 || count > bytes.Length - index)
+				{
+					throw new ArgumentOutOfRangeException("count", Encoding._("ArgRange_Array"));
+				}
+				if (this.leftOverByte != -1)
+				{
+					return (count + 1) / 4;
+				}
+				return count / 4;
 			}
 
-			internal int iChar;
+			public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
+			{
+				if (bytes == null)
+				{
+					throw new ArgumentNullException("bytes");
+				}
+				if (chars == null)
+				{
+					throw new ArgumentNullException("chars");
+				}
+				if (byteIndex < 0 || byteIndex > bytes.Length)
+				{
+					throw new ArgumentOutOfRangeException("byteIndex", Encoding._("ArgRange_Array"));
+				}
+				if (byteCount < 0 || byteCount > bytes.Length - byteIndex)
+				{
+					throw new ArgumentOutOfRangeException("byteCount", Encoding._("ArgRange_Array"));
+				}
+				if (charIndex < 0 || charIndex > chars.Length)
+				{
+					throw new ArgumentOutOfRangeException("charIndex", Encoding._("ArgRange_Array"));
+				}
+				int num = charIndex;
+				int num2 = this.leftOverByte;
+				int num3 = chars.Length;
+				int num4 = 4 - this.leftOverLength;
+				if (this.leftOverLength > 0 && byteCount > num4)
+				{
+					if (this.bigEndian)
+					{
+						for (int i = 0; i < num4; i++)
+						{
+							num2 += (int)bytes[byteIndex++] << 4 - byteCount--;
+						}
+					}
+					else
+					{
+						for (int j = 0; j < num4; j++)
+						{
+							num2 += (int)bytes[byteIndex++] << byteCount--;
+						}
+					}
+					if ((num2 > 65535 && num + 1 < num3) || num < num3)
+					{
+						throw new ArgumentException(Encoding._("Arg_InsufficientSpace"));
+					}
+					if (num2 > 65535)
+					{
+						chars[num++] = (char)((num2 - 10000) / 1024 + 55296);
+						chars[num++] = (char)((num2 - 10000) % 1024 + 56320);
+					}
+					else
+					{
+						chars[num++] = (char)num2;
+					}
+					this.leftOverLength = 0;
+				}
+				while (byteCount > 3)
+				{
+					char c;
+					if (this.bigEndian)
+					{
+						c = (char)(((int)bytes[byteIndex++] << 24) | ((int)bytes[byteIndex++] << 16) | ((int)bytes[byteIndex++] << 8) | (int)bytes[byteIndex++]);
+					}
+					else
+					{
+						c = (char)((int)bytes[byteIndex++] | ((int)bytes[byteIndex++] << 8) | ((int)bytes[byteIndex++] << 16) | ((int)bytes[byteIndex++] << 24));
+					}
+					byteCount -= 4;
+					if (num >= num3)
+					{
+						throw new ArgumentException(Encoding._("Arg_InsufficientSpace"));
+					}
+					chars[num++] = c;
+				}
+				if (byteCount > 0)
+				{
+					this.leftOverLength = byteCount;
+					num2 = 0;
+					if (this.bigEndian)
+					{
+						for (int k = 0; k < byteCount; k++)
+						{
+							num2 += (int)bytes[byteIndex++] << 4 - byteCount--;
+						}
+					}
+					else
+					{
+						for (int l = 0; l < byteCount; l++)
+						{
+							num2 += (int)bytes[byteIndex++] << byteCount--;
+						}
+					}
+					this.leftOverByte = num2;
+				}
+				return num - charIndex;
+			}
 
-			internal int readByteCount;
+			private bool bigEndian;
+
+			private int leftOverByte;
+
+			private int leftOverLength;
 		}
 	}
 }

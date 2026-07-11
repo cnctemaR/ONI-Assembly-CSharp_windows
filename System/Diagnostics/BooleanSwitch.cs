@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
@@ -22,22 +21,23 @@ namespace System.Diagnostics
 			{
 				return base.SwitchSetting != 0;
 			}
-			[SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
 			set
 			{
-				base.SwitchSetting = (value ? 1 : 0);
+				base.SwitchSetting = Convert.ToInt32(value);
 			}
 		}
 
 		protected override void OnValueChanged()
 		{
-			bool flag;
-			if (bool.TryParse(base.Value, out flag))
+			int num;
+			if (int.TryParse(base.Value, out num))
 			{
-				base.SwitchSetting = (flag ? 1 : 0);
-				return;
+				this.Enabled = num != 0;
 			}
-			base.OnValueChanged();
+			else
+			{
+				this.Enabled = Convert.ToBoolean(base.Value);
+			}
 		}
 	}
 }

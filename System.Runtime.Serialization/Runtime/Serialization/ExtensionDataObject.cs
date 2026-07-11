@@ -1,26 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace System.Runtime.Serialization
 {
 	public sealed class ExtensionDataObject
 	{
-		internal ExtensionDataObject()
+		internal ExtensionDataObject(object target)
 		{
+			this.target = target;
 		}
 
-		internal IList<ExtensionDataMember> Members
-		{
-			get
-			{
-				return this.members;
-			}
-			set
-			{
-				this.members = value;
-			}
-		}
-
-		private IList<ExtensionDataMember> members;
+		private object target;
 	}
 }

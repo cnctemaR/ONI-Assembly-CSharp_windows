@@ -14,7 +14,7 @@ namespace System.Net
 
 		public override IPermission Copy()
 		{
-			return new DnsPermission(this.m_noRestriction ? PermissionState.Unrestricted : PermissionState.None);
+			return new DnsPermission((!this.m_noRestriction) ? PermissionState.None : PermissionState.Unrestricted);
 		}
 
 		public override IPermission Intersect(IPermission target)
@@ -48,7 +48,7 @@ namespace System.Net
 
 		public override SecurityElement ToXml()
 		{
-			SecurityElement securityElement = PermissionHelper.Element(typeof(DnsPermission), 1);
+			SecurityElement securityElement = global::System.Security.Permissions.PermissionHelper.Element(typeof(DnsPermission), 1);
 			if (this.m_noRestriction)
 			{
 				securityElement.AddAttribute("Unrestricted", "true");
@@ -58,12 +58,12 @@ namespace System.Net
 
 		public override void FromXml(SecurityElement securityElement)
 		{
-			PermissionHelper.CheckSecurityElement(securityElement, "securityElement", 1, 1);
+			global::System.Security.Permissions.PermissionHelper.CheckSecurityElement(securityElement, "securityElement", 1, 1);
 			if (securityElement.Tag != "IPermission")
 			{
 				throw new ArgumentException("securityElement");
 			}
-			this.m_noRestriction = PermissionHelper.IsUnrestricted(securityElement);
+			this.m_noRestriction = global::System.Security.Permissions.PermissionHelper.IsUnrestricted(securityElement);
 		}
 
 		public override IPermission Union(IPermission target)
@@ -94,7 +94,7 @@ namespace System.Net
 			DnsPermission dnsPermission = target as DnsPermission;
 			if (dnsPermission == null)
 			{
-				PermissionHelper.ThrowInvalidPermission(target, typeof(DnsPermission));
+				global::System.Security.Permissions.PermissionHelper.ThrowInvalidPermission(target, typeof(DnsPermission));
 			}
 			return dnsPermission;
 		}

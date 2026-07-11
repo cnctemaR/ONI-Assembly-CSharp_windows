@@ -10,12 +10,10 @@ namespace System.Runtime.CompilerServices
 	{
 		Unmanaged = 4,
 		ForwardRef = 16,
-		PreserveSig = 128,
 		InternalCall = 4096,
 		Synchronized = 32,
 		NoInlining = 8,
-		[ComVisible(false)]
-		AggressiveInlining = 256,
+		PreserveSig = 128,
 		NoOptimization = 64
 	}
 }

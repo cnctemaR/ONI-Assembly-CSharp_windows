@@ -1,7 +1,6 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security;
 
 namespace System.Globalization
 {
@@ -9,12 +8,51 @@ namespace System.Globalization
 	[Serializable]
 	public abstract class Calendar : ICloneable
 	{
-		[ComVisible(false)]
-		public virtual DateTime MinSupportedDateTime
+		protected Calendar()
+		{
+			this.twoDigitYearMax = 99;
+		}
+
+		internal virtual int M_DaysInWeek
 		{
 			get
 			{
-				return DateTime.MinValue;
+				return 7;
+			}
+		}
+
+		internal string M_ValidValues(object a, object b)
+		{
+			StringWriter stringWriter = new StringWriter();
+			stringWriter.Write("Valid values are between {0} and {1}, inclusive.", a, b);
+			return stringWriter.ToString();
+		}
+
+		internal void M_ArgumentInRange(string param, int arg, int a, int b)
+		{
+			if (a <= arg && arg <= b)
+			{
+				return;
+			}
+			throw new ArgumentOutOfRangeException(param, this.M_ValidValues(a, b));
+		}
+
+		internal void M_CheckHMSM(int hour, int minute, int second, int milliseconds)
+		{
+			this.M_ArgumentInRange("hour", hour, 0, 23);
+			this.M_ArgumentInRange("minute", minute, 0, 59);
+			this.M_ArgumentInRange("second", second, 0, 59);
+			this.M_ArgumentInRange("milliseconds", milliseconds, 0, 999999);
+		}
+
+		public abstract int[] Eras { get; }
+
+		[ComVisible(false)]
+		public virtual CalendarAlgorithmType AlgorithmType
+		{
+			get
+			{
+				return CalendarAlgorithmType.Unknown;
 			}
 		}
 
@@ -27,29 +65,41 @@ namespace System.Globalization
 			}
 		}
 
-		internal virtual int ID
+		[ComVisible(false)]
+		public virtual DateTime MinSupportedDateTime
 		{
 			get
 			{
-				return -1;
-			}
-		}
-
-		internal virtual int BaseCalendarID
-		{
-			get
-			{
-				return this.ID;
+				return DateTime.MinValue;
 			}
 		}
 
 		[ComVisible(false)]
-		public virtual CalendarAlgorithmType AlgorithmType
+		public virtual object Clone()
 		{
-			get
+			Calendar calendar = (Calendar)base.MemberwiseClone();
+			calendar.m_isReadOnly = false;
+			return calendar;
+		}
+
+		[ComVisible(false)]
+		public virtual int GetLeapMonth(int year)
+		{
+			return this.GetLeapMonth(year, this.GetEra(this.ToDateTime(year, 1, 1, 0, 0, 0, 0)));
+		}
+
+		[ComVisible(false)]
+		public virtual int GetLeapMonth(int year, int era)
+		{
+			int monthsInYear = this.GetMonthsInYear(year, era);
+			for (int i = 1; i <= monthsInYear; i++)
 			{
-				return CalendarAlgorithmType.Unknown;
+				if (this.IsLeapMonth(year, i, era))
+				{
+					return i;
+				}
 			}
+			return 0;
 		}
 
 		[ComVisible(false)]
@@ -62,105 +112,87 @@ namespace System.Globalization
 		}
 
 		[ComVisible(false)]
-		public virtual object Clone()
-		{
-			object obj = base.MemberwiseClone();
-			((Calendar)obj).SetReadOnlyState(false);
-			return obj;
-		}
-
-		[ComVisible(false)]
 		public static Calendar ReadOnly(Calendar calendar)
 		{
-			if (calendar == null)
-			{
-				throw new ArgumentNullException("calendar");
-			}
-			if (calendar.IsReadOnly)
+			if (calendar.m_isReadOnly)
 			{
 				return calendar;
 			}
-			Calendar calendar2 = (Calendar)calendar.MemberwiseClone();
-			calendar2.SetReadOnlyState(true);
+			Calendar calendar2 = (Calendar)calendar.Clone();
+			calendar2.m_isReadOnly = true;
 			return calendar2;
 		}
 
-		internal void VerifyWritable()
+		internal void CheckReadOnly()
 		{
 			if (this.m_isReadOnly)
 			{
-				throw new InvalidOperationException(Environment.GetResourceString("Instance is read-only."));
+				throw new InvalidOperationException("This Calendar is read-only.");
 			}
 		}
 
-		internal void SetReadOnlyState(bool readOnly)
-		{
-			this.m_isReadOnly = readOnly;
-		}
-
-		internal virtual int CurrentEraValue
+		internal virtual int M_MaxYear
 		{
 			get
 			{
-				if (this.m_currentEraValue == -1)
+				if (this.M_MaxYearValue == 0)
 				{
-					this.m_currentEraValue = CalendarData.GetCalendarData(this.BaseCalendarID).iCurrentEra;
+					this.M_MaxYearValue = this.GetYear(DateTime.MaxValue);
 				}
-				return this.m_currentEraValue;
+				return this.M_MaxYearValue;
 			}
 		}
 
-		internal static void CheckAddResult(long ticks, DateTime minValue, DateTime maxValue)
+		internal virtual void M_CheckYE(int year, ref int era)
 		{
-			if (ticks < minValue.Ticks || ticks > maxValue.Ticks)
+		}
+
+		public virtual int TwoDigitYearMax
+		{
+			get
 			{
-				throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Environment.GetResourceString("The result is out of the supported range for this calendar. The result should be between {0} (Gregorian date) and {1} (Gregorian date), inclusive."), minValue, maxValue));
+				return this.twoDigitYearMax;
 			}
-		}
-
-		internal DateTime Add(DateTime time, double value, int scale)
-		{
-			double num = value * (double)scale + ((value >= 0.0) ? 0.5 : (-0.5));
-			if (num <= -315537897600000.0 || num >= 315537897600000.0)
+			set
 			{
-				throw new ArgumentOutOfRangeException("value", Environment.GetResourceString("Value to add was out of range."));
+				this.CheckReadOnly();
+				this.M_ArgumentInRange("year", value, 100, this.M_MaxYear);
+				int num = 0;
+				this.M_CheckYE(value, ref num);
+				this.twoDigitYearMax = value;
 			}
-			long num2 = (long)num;
-			long num3 = time.Ticks + num2 * 10000L;
-			Calendar.CheckAddResult(num3, this.MinSupportedDateTime, this.MaxSupportedDateTime);
-			return new DateTime(num3);
-		}
-
-		public virtual DateTime AddMilliseconds(DateTime time, double milliseconds)
-		{
-			return this.Add(time, milliseconds, 1);
 		}
 
 		public virtual DateTime AddDays(DateTime time, int days)
 		{
-			return this.Add(time, (double)days, 86400000);
+			return time.Add(TimeSpan.FromDays((double)days));
 		}
 
 		public virtual DateTime AddHours(DateTime time, int hours)
 		{
-			return this.Add(time, (double)hours, 3600000);
+			return time.Add(TimeSpan.FromHours((double)hours));
+		}
+
+		public virtual DateTime AddMilliseconds(DateTime time, double milliseconds)
+		{
+			return time.Add(TimeSpan.FromMilliseconds(milliseconds));
 		}
 
 		public virtual DateTime AddMinutes(DateTime time, int minutes)
 		{
-			return this.Add(time, (double)minutes, 60000);
+			return time.Add(TimeSpan.FromMinutes((double)minutes));
 		}
 
 		public abstract DateTime AddMonths(DateTime time, int months);
 
 		public virtual DateTime AddSeconds(DateTime time, int seconds)
 		{
-			return this.Add(time, (double)seconds, 1000);
+			return time.Add(TimeSpan.FromSeconds((double)seconds));
 		}
 
 		public virtual DateTime AddWeeks(DateTime time, int weeks)
 		{
-			return this.AddDays(time, weeks * 7);
+			return time.AddDays((double)(weeks * this.M_DaysInWeek));
 		}
 
 		public abstract DateTime AddYears(DateTime time, int years);
@@ -187,21 +219,19 @@ namespace System.Globalization
 
 		public abstract int GetEra(DateTime time);
 
-		public abstract int[] Eras { get; }
-
 		public virtual int GetHour(DateTime time)
 		{
-			return (int)(time.Ticks / 36000000000L % 24L);
+			return time.TimeOfDay.Hours;
 		}
 
 		public virtual double GetMilliseconds(DateTime time)
 		{
-			return (double)(time.Ticks / 10000L % 1000L);
+			return (double)time.TimeOfDay.Milliseconds;
 		}
 
 		public virtual int GetMinute(DateTime time)
 		{
-			return (int)(time.Ticks / 600000000L % 60L);
+			return time.TimeOfDay.Minutes;
 		}
 
 		public abstract int GetMonth(DateTime time);
@@ -215,90 +245,85 @@ namespace System.Globalization
 
 		public virtual int GetSecond(DateTime time)
 		{
-			return (int)(time.Ticks / 10000000L % 60L);
+			return time.TimeOfDay.Seconds;
 		}
 
-		internal int GetFirstDayWeekOfYear(DateTime time, int firstDayOfWeek)
+		internal int M_DiffDays(DateTime timeA, DateTime timeB)
 		{
-			int num = this.GetDayOfYear(time) - 1;
-			int num2 = (this.GetDayOfWeek(time) - (DayOfWeek)(num % 7) - firstDayOfWeek + 14) % 7;
-			return (num + num2) / 7 + 1;
+			long num = timeA.Ticks - timeB.Ticks;
+			if (num >= 0L)
+			{
+				return (int)(num / 864000000000L);
+			}
+			num += 1L;
+			return -1 + (int)(num / 864000000000L);
 		}
 
-		private int GetWeekOfYearFullDays(DateTime time, int firstDayOfWeek, int fullDays)
+		internal DateTime M_GetFirstDayOfSecondWeekOfYear(int year, CalendarWeekRule rule, DayOfWeek firstDayOfWeek)
 		{
-			int num = this.GetDayOfYear(time) - 1;
-			int num2 = this.GetDayOfWeek(time) - (DayOfWeek)(num % 7);
-			int num3 = (firstDayOfWeek - num2 + 14) % 7;
-			if (num3 != 0 && num3 >= fullDays)
+			DateTime dateTime = this.ToDateTime(year, 1, 1, 0, 0, 0, 0);
+			int dayOfWeek = (int)this.GetDayOfWeek(dateTime);
+			int num = 0;
+			switch (rule)
 			{
-				num3 -= 7;
-			}
-			int num4 = num - num3;
-			if (num4 >= 0)
+			case CalendarWeekRule.FirstDay:
+				if (firstDayOfWeek > (DayOfWeek)dayOfWeek)
+				{
+					num += firstDayOfWeek - (DayOfWeek)dayOfWeek;
+				}
+				else
+				{
+					num += firstDayOfWeek + this.M_DaysInWeek - (DayOfWeek)dayOfWeek;
+				}
+				break;
+			case CalendarWeekRule.FirstFullWeek:
+				num = this.M_DaysInWeek;
+				if (firstDayOfWeek >= (DayOfWeek)dayOfWeek)
+				{
+					num += firstDayOfWeek - (DayOfWeek)dayOfWeek;
+				}
+				else
+				{
+					num += firstDayOfWeek + this.M_DaysInWeek - (DayOfWeek)dayOfWeek;
+				}
+				break;
+			case CalendarWeekRule.FirstFourDayWeek:
 			{
-				return num4 / 7 + 1;
+				int num2 = (dayOfWeek + 3) % this.M_DaysInWeek;
+				num = 3;
+				if (firstDayOfWeek > (DayOfWeek)num2)
+				{
+					num += firstDayOfWeek - (DayOfWeek)num2;
+				}
+				else
+				{
+					num += firstDayOfWeek + this.M_DaysInWeek - (DayOfWeek)num2;
+				}
+				break;
 			}
-			if (time <= this.MinSupportedDateTime.AddDays((double)num))
-			{
-				return this.GetWeekOfYearOfMinSupportedDateTime(firstDayOfWeek, fullDays);
 			}
-			return this.GetWeekOfYearFullDays(time.AddDays((double)(-(double)(num + 1))), firstDayOfWeek, fullDays);
-		}
-
-		private int GetWeekOfYearOfMinSupportedDateTime(int firstDayOfWeek, int minimumDaysInFirstWeek)
-		{
-			int num = this.GetDayOfYear(this.MinSupportedDateTime) - 1;
-			int num2 = this.GetDayOfWeek(this.MinSupportedDateTime) - (DayOfWeek)(num % 7);
-			int num3 = (firstDayOfWeek + 7 - num2) % 7;
-			if (num3 == 0 || num3 >= minimumDaysInFirstWeek)
-			{
-				return 1;
-			}
-			int num4 = this.DaysInYearBeforeMinSupportedYear - 1;
-			int num5 = num2 - 1 - num4 % 7;
-			int num6 = (firstDayOfWeek - num5 + 14) % 7;
-			int num7 = num4 - num6;
-			if (num6 >= minimumDaysInFirstWeek)
-			{
-				num7 += 7;
-			}
-			return num7 / 7 + 1;
-		}
-
-		protected virtual int DaysInYearBeforeMinSupportedYear
-		{
-			get
-			{
-				return 365;
-			}
+			return this.AddDays(dateTime, num);
 		}
 
 		public virtual int GetWeekOfYear(DateTime time, CalendarWeekRule rule, DayOfWeek firstDayOfWeek)
 		{
-			if (firstDayOfWeek < DayOfWeek.Sunday || firstDayOfWeek > DayOfWeek.Saturday)
+			if (firstDayOfWeek < DayOfWeek.Sunday || DayOfWeek.Saturday < firstDayOfWeek)
 			{
-				throw new ArgumentOutOfRangeException("firstDayOfWeek", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[]
-				{
-					DayOfWeek.Sunday,
-					DayOfWeek.Saturday
-				}));
+				throw new ArgumentOutOfRangeException("firstDayOfWeek", "Value is not a valid day of week.");
 			}
-			switch (rule)
+			int num = this.GetYear(time);
+			int num2;
+			for (;;)
 			{
-			case CalendarWeekRule.FirstDay:
-				return this.GetFirstDayWeekOfYear(time, (int)firstDayOfWeek);
-			case CalendarWeekRule.FirstFullWeek:
-				return this.GetWeekOfYearFullDays(time, (int)firstDayOfWeek, 7);
-			case CalendarWeekRule.FirstFourDayWeek:
-				return this.GetWeekOfYearFullDays(time, (int)firstDayOfWeek, 4);
-			default:
-				throw new ArgumentOutOfRangeException("rule", Environment.GetResourceString("Valid values are between {0} and {1}, inclusive.", new object[]
+				DateTime dateTime = this.M_GetFirstDayOfSecondWeekOfYear(num, rule, firstDayOfWeek);
+				num2 = this.M_DiffDays(time, dateTime) + this.M_DaysInWeek;
+				if (num2 >= 0)
 				{
-					CalendarWeekRule.FirstDay,
-					CalendarWeekRule.FirstFourDayWeek
-				}));
+					break;
+				}
+				num--;
 			}
+			return 1 + num2 / this.M_DaysInWeek;
 		}
 
 		public abstract int GetYear(DateTime time);
@@ -317,30 +342,6 @@ namespace System.Globalization
 
 		public abstract bool IsLeapMonth(int year, int month, int era);
 
-		[ComVisible(false)]
-		public virtual int GetLeapMonth(int year)
-		{
-			return this.GetLeapMonth(year, 0);
-		}
-
-		[ComVisible(false)]
-		public virtual int GetLeapMonth(int year, int era)
-		{
-			if (!this.IsLeapYear(year, era))
-			{
-				return 0;
-			}
-			int monthsInYear = this.GetMonthsInYear(year, era);
-			for (int i = 1; i <= monthsInYear; i++)
-			{
-				if (this.IsLeapMonth(year, i, era))
-				{
-					return i;
-				}
-			}
-			return 0;
-		}
-
 		public virtual bool IsLeapYear(int year)
 		{
 			return this.IsLeapYear(year, 0);
@@ -355,170 +356,86 @@ namespace System.Globalization
 
 		public abstract DateTime ToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era);
 
-		internal virtual bool TryToDateTime(int year, int month, int day, int hour, int minute, int second, int millisecond, int era, out DateTime result)
-		{
-			result = DateTime.MinValue;
-			bool flag;
-			try
-			{
-				result = this.ToDateTime(year, month, day, hour, minute, second, millisecond, era);
-				flag = true;
-			}
-			catch (ArgumentException)
-			{
-				flag = false;
-			}
-			return flag;
-		}
-
-		internal virtual bool IsValidYear(int year, int era)
-		{
-			return year >= this.GetYear(this.MinSupportedDateTime) && year <= this.GetYear(this.MaxSupportedDateTime);
-		}
-
-		internal virtual bool IsValidMonth(int year, int month, int era)
-		{
-			return this.IsValidYear(year, era) && month >= 1 && month <= this.GetMonthsInYear(year, era);
-		}
-
-		internal virtual bool IsValidDay(int year, int month, int day, int era)
-		{
-			return this.IsValidMonth(year, month, era) && day >= 1 && day <= this.GetDaysInMonth(year, month, era);
-		}
-
-		public virtual int TwoDigitYearMax
-		{
-			get
-			{
-				return this.twoDigitYearMax;
-			}
-			set
-			{
-				this.VerifyWritable();
-				this.twoDigitYearMax = value;
-			}
-		}
-
 		public virtual int ToFourDigitYear(int year)
 		{
 			if (year < 0)
 			{
-				throw new ArgumentOutOfRangeException("year", Environment.GetResourceString("Non-negative number required."));
+				throw new ArgumentOutOfRangeException("year", "Non-negative number required.");
 			}
-			if (year < 100)
+			if (year <= 99)
 			{
-				return (this.TwoDigitYearMax / 100 - ((year > this.TwoDigitYearMax % 100) ? 1 : 0)) * 100 + year;
+				int num = this.TwoDigitYearMax % 100;
+				int num2 = year - num;
+				year = this.TwoDigitYearMax + num2 + ((num2 > 0) ? (-100) : 0);
 			}
+			int num3 = 0;
+			this.M_CheckYE(year, ref num3);
 			return year;
 		}
 
-		internal static long TimeToTicks(int hour, int minute, int second, int millisecond)
+		internal string[] AbbreviatedEraNames
 		{
-			if (hour < 0 || hour >= 24 || minute < 0 || minute >= 60 || second < 0 || second >= 60)
+			get
 			{
-				throw new ArgumentOutOfRangeException(null, Environment.GetResourceString("Hour, Minute, and Second parameters describe an un-representable DateTime."));
+				if (this.M_AbbrEraNames == null || this.M_AbbrEraNames.Length != this.Eras.Length)
+				{
+					throw new Exception("Internal: M_AbbrEraNames wrong initialized!");
+				}
+				return (string[])this.M_AbbrEraNames.Clone();
 			}
-			if (millisecond < 0 || millisecond >= 1000)
+			set
 			{
-				throw new ArgumentOutOfRangeException("millisecond", string.Format(CultureInfo.InvariantCulture, Environment.GetResourceString("Valid values are between {0} and {1}, inclusive."), 0, 999));
+				this.CheckReadOnly();
+				if (value.Length != this.Eras.Length)
+				{
+					StringWriter stringWriter = new StringWriter();
+					stringWriter.Write("Array length must be equal Eras length {0}.", this.Eras.Length);
+					throw new ArgumentException(stringWriter.ToString());
+				}
+				this.M_AbbrEraNames = (string[])value.Clone();
 			}
-			return TimeSpan.TimeToTicks(hour, minute, second) + (long)millisecond * 10000L;
 		}
 
-		[SecuritySafeCritical]
-		internal static int GetSystemTwoDigitYearSetting(int CalID, int defaultYearValue)
+		internal string[] EraNames
 		{
-			int num = CalendarData.nativeGetTwoDigitYearMax(CalID);
-			if (num < 0)
+			get
 			{
-				num = defaultYearValue;
+				if (this.M_EraNames == null || this.M_EraNames.Length != this.Eras.Length)
+				{
+					throw new Exception("Internal: M_EraNames not initialized!");
+				}
+				return (string[])this.M_EraNames.Clone();
 			}
-			return num;
+			set
+			{
+				this.CheckReadOnly();
+				if (value.Length != this.Eras.Length)
+				{
+					StringWriter stringWriter = new StringWriter();
+					stringWriter.Write("Array length must be equal Eras length {0}.", this.Eras.Length);
+					throw new ArgumentException(stringWriter.ToString());
+				}
+				this.M_EraNames = (string[])value.Clone();
+			}
 		}
-
-		internal const long TicksPerMillisecond = 10000L;
-
-		internal const long TicksPerSecond = 10000000L;
-
-		internal const long TicksPerMinute = 600000000L;
-
-		internal const long TicksPerHour = 36000000000L;
-
-		internal const long TicksPerDay = 864000000000L;
-
-		internal const int MillisPerSecond = 1000;
-
-		internal const int MillisPerMinute = 60000;
-
-		internal const int MillisPerHour = 3600000;
-
-		internal const int MillisPerDay = 86400000;
-
-		internal const int DaysPerYear = 365;
-
-		internal const int DaysPer4Years = 1461;
-
-		internal const int DaysPer100Years = 36524;
-
-		internal const int DaysPer400Years = 146097;
-
-		internal const int DaysTo10000 = 3652059;
-
-		internal const long MaxMillis = 315537897600000L;
-
-		internal const int CAL_GREGORIAN = 1;
-
-		internal const int CAL_GREGORIAN_US = 2;
-
-		internal const int CAL_JAPAN = 3;
-
-		internal const int CAL_TAIWAN = 4;
-
-		internal const int CAL_KOREA = 5;
-
-		internal const int CAL_HIJRI = 6;
-
-		internal const int CAL_THAI = 7;
-
-		internal const int CAL_HEBREW = 8;
-
-		internal const int CAL_GREGORIAN_ME_FRENCH = 9;
-
-		internal const int CAL_GREGORIAN_ARABIC = 10;
-
-		internal const int CAL_GREGORIAN_XLIT_ENGLISH = 11;
-
-		internal const int CAL_GREGORIAN_XLIT_FRENCH = 12;
-
-		internal const int CAL_JULIAN = 13;
-
-		internal const int CAL_JAPANESELUNISOLAR = 14;
-
-		internal const int CAL_CHINESELUNISOLAR = 15;
-
-		internal const int CAL_SAKA = 16;
-
-		internal const int CAL_LUNAR_ETO_CHN = 17;
-
-		internal const int CAL_LUNAR_ETO_KOR = 18;
-
-		internal const int CAL_LUNAR_ETO_ROKUYOU = 19;
-
-		internal const int CAL_KOREANLUNISOLAR = 20;
-
-		internal const int CAL_TAIWANLUNISOLAR = 21;
-
-		internal const int CAL_PERSIAN = 22;
-
-		internal const int CAL_UMALQURA = 23;
-
-		internal int m_currentEraValue = -1;
-
-		[OptionalField(VersionAdded = 2)]
-		private bool m_isReadOnly;
 
 		public const int CurrentEra = 0;
 
-		internal int twoDigitYearMax = -1;
+		[NonSerialized]
+		private bool m_isReadOnly;
+
+		[NonSerialized]
+		internal int twoDigitYearMax;
+
+		[NonSerialized]
+		private int M_MaxYearValue;
+
+		[NonSerialized]
+		internal string[] M_AbbrEraNames;
+
+		[NonSerialized]
+		internal string[] M_EraNames;
+
+		internal int m_currentEraValue;
 	}
 }

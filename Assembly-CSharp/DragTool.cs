@@ -54,7 +54,8 @@ public class DragTool : InterfaceTool
 		{
 			this.areaVisualizer = global::Util.KInstantiate(this.areaVisualizer, null, null);
 			this.areaVisualizer.SetActive(false);
-			this.areaVisualizer.transform.parent = base.transform;
+			this.areaVisualizerSpriteRenderer = this.areaVisualizer.GetComponent<SpriteRenderer>();
+			this.areaVisualizer.transform.SetParent(base.transform);
 			Renderer component = this.areaVisualizer.GetComponent<Renderer>();
 			component.material.color = this.areaColour;
 		}
@@ -102,7 +103,7 @@ public class DragTool : InterfaceTool
 			{
 				this.areaVisualizer.SetActive(true);
 				this.areaVisualizer.transform.SetPosition(cursor_pos);
-				this.areaVisualizer.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+				this.areaVisualizerSpriteRenderer.size = new Vector2(0.01f, 0.01f);
 			}
 		}
 	}
@@ -220,15 +221,14 @@ public class DragTool : InterfaceTool
 		{
 			if (mode == DragTool.Mode.Box)
 			{
-				Vector3 vector2 = Vector3.Max(this.downPos, cursorPos);
-				Vector3 vector3 = Vector3.Min(this.downPos, cursorPos);
-				float z = vector2.z;
+				Vector2 vector2 = Vector3.Max(this.downPos, cursorPos);
+				Vector2 vector3 = Vector3.Min(this.downPos, cursorPos);
 				vector2 = base.GetRegularizedPos(vector2, false);
 				vector3 = base.GetRegularizedPos(vector3, true);
-				Vector3 vector4 = vector2 - vector3;
+				Vector2 vector4 = vector2 - vector3;
 				Vector2 vector5 = (vector2 + vector3) * 0.5f;
-				this.areaVisualizer.transform.SetPosition(new Vector3(vector5.x, vector5.y, z));
-				if (this.areaVisualizer.transform.localScale != vector4)
+				this.areaVisualizer.transform.SetPosition(new Vector2(vector5.x, vector5.y));
+				if (this.areaVisualizerSpriteRenderer.size != vector4)
 				{
 					string sound = GlobalAssets.GetSound(this.GetDragSound(), false);
 					if (sound != null)
@@ -239,7 +239,7 @@ public class DragTool : InterfaceTool
 						SoundEvent.EndOneShot(eventInstance);
 					}
 				}
-				this.areaVisualizer.transform.localScale = vector4;
+				this.areaVisualizerSpriteRenderer.size = vector4;
 			}
 		}
 		else
@@ -409,6 +409,8 @@ public class DragTool : InterfaceTool
 
 	[SerializeField]
 	private Color32 areaColour = new Color(1f, 1f, 1f, 0.5f);
+
+	protected SpriteRenderer areaVisualizerSpriteRenderer;
 
 	protected Vector3 placementPivot;
 

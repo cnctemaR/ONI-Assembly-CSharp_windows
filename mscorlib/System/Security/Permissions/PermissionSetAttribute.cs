@@ -8,8 +8,8 @@ using Mono.Xml;
 
 namespace System.Security.Permissions
 {
-	[ComVisible(true)]
 	[AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
+	[ComVisible(true)]
 	[Serializable]
 	public sealed class PermissionSetAttribute : CodeAccessSecurityAttribute
 	{
@@ -136,13 +136,13 @@ namespace System.Security.Permissions
 				}
 				if (this.file != null)
 				{
-					Encoding encoding = (this.isUnicodeEncoded ? Encoding.Unicode : Encoding.ASCII);
+					Encoding encoding = ((!this.isUnicodeEncoded) ? Encoding.ASCII : Encoding.Unicode);
 					using (StreamReader streamReader = new StreamReader(this.file, encoding))
 					{
-						return this.CreateFromXml(streamReader.ReadToEnd());
+						permissionSet = this.CreateFromXml(streamReader.ReadToEnd());
 					}
 				}
-				if (this.xml != null)
+				else if (this.xml != null)
 				{
 					permissionSet = this.CreateFromXml(this.xml);
 				}

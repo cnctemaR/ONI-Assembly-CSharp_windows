@@ -1,57 +1,28 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace System.Text.RegularExpressions
 {
 	[Serializable]
 	public class RegexCompilationInfo
 	{
-		[OnDeserializing]
-		private void InitMatchTimeoutDefaultForOldVersionDeserialization(StreamingContext unusedContext)
-		{
-			this.matchTimeout = Regex.DefaultMatchTimeout;
-		}
-
 		public RegexCompilationInfo(string pattern, RegexOptions options, string name, string fullnamespace, bool ispublic)
-			: this(pattern, options, name, fullnamespace, ispublic, Regex.DefaultMatchTimeout)
-		{
-		}
-
-		public RegexCompilationInfo(string pattern, RegexOptions options, string name, string fullnamespace, bool ispublic, TimeSpan matchTimeout)
 		{
 			this.Pattern = pattern;
+			this.Options = options;
 			this.Name = name;
 			this.Namespace = fullnamespace;
-			this.options = options;
-			this.isPublic = ispublic;
-			this.MatchTimeout = matchTimeout;
+			this.IsPublic = ispublic;
 		}
 
-		public string Pattern
+		public bool IsPublic
 		{
 			get
 			{
-				return this.pattern;
+				return this.isPublic;
 			}
 			set
 			{
-				if (value == null)
-				{
-					throw new ArgumentNullException("value");
-				}
-				this.pattern = value;
-			}
-		}
-
-		public RegexOptions Options
-		{
-			get
-			{
-				return this.options;
-			}
-			set
-			{
-				this.options = value;
+				this.isPublic = value;
 			}
 		}
 
@@ -65,11 +36,11 @@ namespace System.Text.RegularExpressions
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException("Name");
 				}
 				if (value.Length == 0)
 				{
-					throw new ArgumentException(global::SR.GetString("Argument {0} cannot be null or zero-length.", new object[] { "value" }), "value");
+					throw new ArgumentException("Name");
 				}
 				this.name = value;
 			}
@@ -85,48 +56,48 @@ namespace System.Text.RegularExpressions
 			{
 				if (value == null)
 				{
-					throw new ArgumentNullException("value");
+					throw new ArgumentNullException("Namespace");
 				}
 				this.nspace = value;
 			}
 		}
 
-		public bool IsPublic
+		public RegexOptions Options
 		{
 			get
 			{
-				return this.isPublic;
+				return this.options;
 			}
 			set
 			{
-				this.isPublic = value;
+				this.options = value;
 			}
 		}
 
-		public TimeSpan MatchTimeout
+		public string Pattern
 		{
 			get
 			{
-				return this.matchTimeout;
+				return this.pattern;
 			}
 			set
 			{
-				Regex.ValidateMatchTimeout(value);
-				this.matchTimeout = value;
+				if (value == null)
+				{
+					throw new ArgumentNullException("pattern");
+				}
+				this.pattern = value;
 			}
 		}
 
 		private string pattern;
 
-		private RegexOptions options;
-
 		private string name;
 
 		private string nspace;
 
-		private bool isPublic;
+		private RegexOptions options;
 
-		[OptionalField(VersionAdded = 2)]
-		private TimeSpan matchTimeout;
+		private bool isPublic;
 	}
 }

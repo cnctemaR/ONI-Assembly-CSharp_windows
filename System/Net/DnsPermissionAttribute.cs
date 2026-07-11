@@ -15,7 +15,7 @@ namespace System.Net
 
 		public override IPermission CreatePermission()
 		{
-			return new DnsPermission(base.Unrestricted ? PermissionState.Unrestricted : PermissionState.None);
+			return new DnsPermission((!base.Unrestricted) ? PermissionState.None : PermissionState.Unrestricted);
 		}
 	}
 }

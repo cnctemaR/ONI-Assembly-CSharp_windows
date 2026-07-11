@@ -6,9 +6,10 @@ namespace System.Security.AccessControl
 	public sealed class CompoundAce : KnownAce
 	{
 		public CompoundAce(AceFlags flags, int accessMask, CompoundAceType compoundAceType, SecurityIdentifier sid)
-			: base(AceType.AccessAllowedCompound, flags)
+			: base(InheritanceFlags.None, PropagationFlags.None)
 		{
 			this.compound_ace_type = compoundAceType;
+			base.AceFlags = flags;
 			base.AccessMask = accessMask;
 			base.SecurityIdentifier = sid;
 		}
@@ -36,11 +37,6 @@ namespace System.Security.AccessControl
 
 		[MonoTODO]
 		public override void GetBinaryForm(byte[] binaryForm, int offset)
-		{
-			throw new NotImplementedException();
-		}
-
-		internal override string GetSddlForm()
 		{
 			throw new NotImplementedException();
 		}

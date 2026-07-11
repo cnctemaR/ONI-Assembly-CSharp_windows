@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace System.Security.Cryptography.Xml
@@ -8,43 +9,64 @@ namespace System.Security.Cryptography.Xml
 	{
 		public KeyInfo()
 		{
-			this._keyInfoClauses = new ArrayList();
+			this.Info = new ArrayList();
+		}
+
+		public int Count
+		{
+			get
+			{
+				return this.Info.Count;
+			}
 		}
 
 		public string Id
 		{
 			get
 			{
-				return this._id;
+				return this.id;
 			}
 			set
 			{
-				this._id = value;
+				this.id = value;
 			}
+		}
+
+		public void AddClause(KeyInfoClause clause)
+		{
+			this.Info.Add(clause);
+		}
+
+		public IEnumerator GetEnumerator()
+		{
+			return this.Info.GetEnumerator();
+		}
+
+		public IEnumerator GetEnumerator(Type requestedObjectType)
+		{
+			ArrayList arrayList = new ArrayList();
+			IEnumerator enumerator = this.Info.GetEnumerator();
+			do
+			{
+				if (enumerator.Current.GetType().Equals(requestedObjectType))
+				{
+					arrayList.Add(enumerator.Current);
+				}
+			}
+			while (enumerator.MoveNext());
+			return arrayList.GetEnumerator();
 		}
 
 		public XmlElement GetXml()
 		{
-			return this.GetXml(new XmlDocument
-			{
-				PreserveWhitespace = true
-			});
-		}
-
-		internal XmlElement GetXml(XmlDocument xmlDocument)
-		{
+			XmlDocument xmlDocument = new XmlDocument();
 			XmlElement xmlElement = xmlDocument.CreateElement("KeyInfo", "http://www.w3.org/2000/09/xmldsig#");
-			if (!string.IsNullOrEmpty(this._id))
+			foreach (object obj in this.Info)
 			{
-				xmlElement.SetAttribute("Id", this._id);
-			}
-			for (int i = 0; i < this._keyInfoClauses.Count; i++)
-			{
-				XmlElement xml = ((KeyInfoClause)this._keyInfoClauses[i]).GetXml(xmlDocument);
-				if (xml != null)
-				{
-					xmlElement.AppendChild(xml);
-				}
+				KeyInfoClause keyInfoClause = (KeyInfoClause)obj;
+				XmlNode xml = keyInfoClause.GetXml();
+				XmlNode xmlNode = xmlDocument.ImportNode(xml, true);
+				xmlElement.AppendChild(xmlNode);
 			}
 			return xmlElement;
 		}
@@ -55,69 +77,114 @@ namespace System.Security.Cryptography.Xml
 			{
 				throw new ArgumentNullException("value");
 			}
-			this._id = Utils.GetAttribute(value, "Id", "http://www.w3.org/2000/09/xmldsig#");
-			for (XmlNode xmlNode = value.FirstChild; xmlNode != null; xmlNode = xmlNode.NextSibling)
+			this.Id = ((value.Attributes["Id"] == null) ? null : value.GetAttribute("Id"));
+			if (value.LocalName == "KeyInfo" && value.NamespaceURI == "http://www.w3.org/2000/09/xmldsig#")
 			{
-				XmlElement xmlElement = xmlNode as XmlElement;
-				if (xmlElement != null)
+				foreach (object obj in value.ChildNodes)
 				{
-					string text = xmlElement.NamespaceURI + " " + xmlElement.LocalName;
-					if (text == "http://www.w3.org/2000/09/xmldsig# KeyValue")
+					XmlNode xmlNode = (XmlNode)obj;
+					if (xmlNode.NodeType == XmlNodeType.Element)
 					{
-						foreach (object obj in xmlElement.ChildNodes)
+						KeyInfoClause keyInfoClause = null;
+						string localName = xmlNode.LocalName;
+						if (localName == null)
 						{
-							XmlElement xmlElement2 = ((XmlNode)obj) as XmlElement;
-							if (xmlElement2 != null)
-							{
-								text = text + "/" + xmlElement2.LocalName;
-								break;
-							}
+							goto IL_0255;
 						}
-					}
-					KeyInfoClause keyInfoClause = (KeyInfoClause)CryptoHelpers.CreateFromName(text);
-					if (keyInfoClause == null)
-					{
+						if (KeyInfo.<>f__switch$mapC == null)
+						{
+							KeyInfo.<>f__switch$mapC = new Dictionary<string, int>(6)
+							{
+								{ "KeyValue", 0 },
+								{ "KeyName", 1 },
+								{ "RetrievalMethod", 2 },
+								{ "X509Data", 3 },
+								{ "RSAKeyValue", 4 },
+								{ "EncryptedKey", 5 }
+							};
+						}
+						int num;
+						if (!KeyInfo.<>f__switch$mapC.TryGetValue(localName, out num))
+						{
+							goto IL_0255;
+						}
+						switch (num)
+						{
+						case 0:
+						{
+							XmlNodeList childNodes = xmlNode.ChildNodes;
+							if (childNodes.Count > 0)
+							{
+								foreach (object obj2 in childNodes)
+								{
+									XmlNode xmlNode2 = (XmlNode)obj2;
+									string localName2 = xmlNode2.LocalName;
+									if (localName2 != null)
+									{
+										if (KeyInfo.<>f__switch$mapB == null)
+										{
+											KeyInfo.<>f__switch$mapB = new Dictionary<string, int>(2)
+											{
+												{ "DSAKeyValue", 0 },
+												{ "RSAKeyValue", 1 }
+											};
+										}
+										int num2;
+										if (KeyInfo.<>f__switch$mapB.TryGetValue(localName2, out num2))
+										{
+											if (num2 != 0)
+											{
+												if (num2 == 1)
+												{
+													keyInfoClause = new RSAKeyValue();
+												}
+											}
+											else
+											{
+												keyInfoClause = new DSAKeyValue();
+											}
+										}
+									}
+								}
+							}
+							break;
+						}
+						case 1:
+							keyInfoClause = new KeyInfoName();
+							break;
+						case 2:
+							keyInfoClause = new KeyInfoRetrievalMethod();
+							break;
+						case 3:
+							keyInfoClause = new KeyInfoX509Data();
+							break;
+						case 4:
+							keyInfoClause = new RSAKeyValue();
+							break;
+						case 5:
+							keyInfoClause = new KeyInfoEncryptedKey();
+							break;
+						default:
+							goto IL_0255;
+						}
+						IL_0260:
+						if (keyInfoClause != null)
+						{
+							keyInfoClause.LoadXml((XmlElement)xmlNode);
+							this.AddClause(keyInfoClause);
+							continue;
+						}
+						continue;
+						IL_0255:
 						keyInfoClause = new KeyInfoNode();
+						goto IL_0260;
 					}
-					keyInfoClause.LoadXml(xmlElement);
-					this.AddClause(keyInfoClause);
 				}
 			}
 		}
 
-		public int Count
-		{
-			get
-			{
-				return this._keyInfoClauses.Count;
-			}
-		}
+		private ArrayList Info;
 
-		public void AddClause(KeyInfoClause clause)
-		{
-			this._keyInfoClauses.Add(clause);
-		}
-
-		public IEnumerator GetEnumerator()
-		{
-			return this._keyInfoClauses.GetEnumerator();
-		}
-
-		public IEnumerator GetEnumerator(Type requestedObjectType)
-		{
-			ArrayList arrayList = new ArrayList();
-			foreach (object obj in this._keyInfoClauses)
-			{
-				if (requestedObjectType.Equals(obj.GetType()))
-				{
-					arrayList.Add(obj);
-				}
-			}
-			return arrayList.GetEnumerator();
-		}
-
-		private string _id;
-
-		private ArrayList _keyInfoClauses;
+		private string id;
 	}
 }

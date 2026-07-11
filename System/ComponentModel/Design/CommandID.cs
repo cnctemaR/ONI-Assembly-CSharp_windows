@@ -1,60 +1,50 @@
 ﻿using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 
 namespace System.ComponentModel.Design
 {
 	[ComVisible(true)]
-	[HostProtection(SecurityAction.LinkDemand, SharedState = true)]
-	[PermissionSet(SecurityAction.LinkDemand, Name = "FullTrust")]
-	[PermissionSet(SecurityAction.InheritanceDemand, Name = "FullTrust")]
 	public class CommandID
 	{
 		public CommandID(Guid menuGroup, int commandID)
 		{
-			this.menuGroup = menuGroup;
-			this.commandID = commandID;
-		}
-
-		public virtual int ID
-		{
-			get
-			{
-				return this.commandID;
-			}
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (!(obj is CommandID))
-			{
-				return false;
-			}
-			CommandID commandID = (CommandID)obj;
-			return commandID.menuGroup.Equals(this.menuGroup) && commandID.commandID == this.commandID;
-		}
-
-		public override int GetHashCode()
-		{
-			return (this.menuGroup.GetHashCode() << 2) | this.commandID;
+			this.cID = commandID;
+			this.guid = menuGroup;
 		}
 
 		public virtual Guid Guid
 		{
 			get
 			{
-				return this.menuGroup;
+				return this.guid;
 			}
+		}
+
+		public virtual int ID
+		{
+			get
+			{
+				return this.cID;
+			}
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is CommandID && (obj == this || (((CommandID)obj).Guid.Equals(this.guid) && ((CommandID)obj).ID.Equals(this.cID)));
+		}
+
+		public override int GetHashCode()
+		{
+			return this.guid.GetHashCode() ^ this.cID.GetHashCode();
 		}
 
 		public override string ToString()
 		{
-			return this.menuGroup.ToString() + " : " + this.commandID.ToString(CultureInfo.CurrentCulture);
+			return this.guid.ToString() + " : " + this.cID.ToString();
 		}
 
-		private readonly Guid menuGroup;
+		private int cID;
 
-		private readonly int commandID;
+		private Guid guid;
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Mono.Security.Cryptography;
 
 namespace System.Security.Cryptography
 {
@@ -7,30 +8,22 @@ namespace System.Security.Cryptography
 	public class HMACSHA1 : HMAC
 	{
 		public HMACSHA1()
-			: this(Utils.GenerateRandom(64))
+			: this(KeyBuilder.Key(8))
 		{
 		}
 
 		public HMACSHA1(byte[] key)
-			: this(key, false)
 		{
+			base.HashName = "SHA1";
+			this.HashSizeValue = 160;
+			this.Key = key;
 		}
 
 		public HMACSHA1(byte[] key, bool useManagedSha1)
 		{
-			this.m_hashName = "SHA1";
-			if (useManagedSha1)
-			{
-				this.m_hash1 = new SHA1Managed();
-				this.m_hash2 = new SHA1Managed();
-			}
-			else
-			{
-				this.m_hash1 = new SHA1CryptoServiceProvider();
-				this.m_hash2 = new SHA1CryptoServiceProvider();
-			}
+			base.HashName = "System.Security.Cryptography.SHA1" + ((!useManagedSha1) ? "CryptoServiceProvider" : "Managed");
 			this.HashSizeValue = 160;
-			base.InitializeKey(key);
+			this.Key = key;
 		}
 	}
 }

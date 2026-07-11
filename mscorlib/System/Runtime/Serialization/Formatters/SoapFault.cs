@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Metadata;
-using System.Security;
 
 namespace System.Runtime.Serialization.Formatters
 {
+	[SoapType]
 	[ComVisible(true)]
-	[SoapType(Embedded = true)]
 	[Serializable]
 	public sealed class SoapFault : ISerializable
 	{
@@ -15,69 +13,54 @@ namespace System.Runtime.Serialization.Formatters
 		{
 		}
 
+		private SoapFault(SerializationInfo info, StreamingContext context)
+		{
+			this.code = info.GetString("faultcode");
+			this.faultString = info.GetString("faultstring");
+			this.detail = info.GetValue("detail", typeof(object));
+		}
+
 		public SoapFault(string faultCode, string faultString, string faultActor, ServerFault serverFault)
 		{
-			this.faultCode = faultCode;
+			this.code = faultCode;
+			this.actor = faultActor;
 			this.faultString = faultString;
-			this.faultActor = faultActor;
 			this.detail = serverFault;
 		}
 
-		internal SoapFault(SerializationInfo info, StreamingContext context)
+		public object Detail
 		{
-			SerializationInfoEnumerator enumerator = info.GetEnumerator();
-			while (enumerator.MoveNext())
+			get
 			{
-				string name = enumerator.Name;
-				object value = enumerator.Value;
-				if (string.Compare(name, "faultCode", true, CultureInfo.InvariantCulture) == 0)
-				{
-					int num = ((string)value).IndexOf(':');
-					if (num > -1)
-					{
-						this.faultCode = ((string)value).Substring(num + 1);
-					}
-					else
-					{
-						this.faultCode = (string)value;
-					}
-				}
-				else if (string.Compare(name, "faultString", true, CultureInfo.InvariantCulture) == 0)
-				{
-					this.faultString = (string)value;
-				}
-				else if (string.Compare(name, "faultActor", true, CultureInfo.InvariantCulture) == 0)
-				{
-					this.faultActor = (string)value;
-				}
-				else if (string.Compare(name, "detail", true, CultureInfo.InvariantCulture) == 0)
-				{
-					this.detail = value;
-				}
+				return this.detail;
+			}
+			set
+			{
+				this.detail = value;
 			}
 		}
 
-		[SecurityCritical]
-		public void GetObjectData(SerializationInfo info, StreamingContext context)
+		public string FaultActor
 		{
-			info.AddValue("faultcode", "SOAP-ENV:" + this.faultCode);
-			info.AddValue("faultstring", this.faultString);
-			if (this.faultActor != null)
+			get
 			{
-				info.AddValue("faultactor", this.faultActor);
+				return this.actor;
 			}
-			info.AddValue("detail", this.detail, typeof(object));
+			set
+			{
+				this.actor = value;
+			}
 		}
 
 		public string FaultCode
 		{
 			get
 			{
-				return this.faultCode;
+				return this.code;
 			}
 			set
 			{
-				this.faultCode = value;
+				this.code = value;
 			}
 		}
 
@@ -93,37 +76,19 @@ namespace System.Runtime.Serialization.Formatters
 			}
 		}
 
-		public string FaultActor
+		public void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			get
-			{
-				return this.faultActor;
-			}
-			set
-			{
-				this.faultActor = value;
-			}
+			info.AddValue("faultcode", this.code, typeof(string));
+			info.AddValue("faultstring", this.faultString, typeof(string));
+			info.AddValue("detail", this.detail, typeof(object));
 		}
 
-		public object Detail
-		{
-			get
-			{
-				return this.detail;
-			}
-			set
-			{
-				this.detail = value;
-			}
-		}
+		private string code;
 
-		private string faultCode;
+		private string actor;
 
 		private string faultString;
 
-		private string faultActor;
-
-		[SoapField(Embedded = true)]
 		private object detail;
 	}
 }

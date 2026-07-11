@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace System.IO
 {
@@ -9,27 +11,17 @@ namespace System.IO
 	[Serializable]
 	public sealed class DriveInfo : ISerializable
 	{
-		private DriveInfo(string path, string fstype)
+		private DriveInfo(DriveInfo._DriveType _drive_type, string path, string fstype)
 		{
+			this._drive_type = _drive_type;
 			this.drive_format = fstype;
 			this.path = path;
 		}
 
 		public DriveInfo(string driveName)
 		{
-			if (!Environment.IsUnix)
-			{
-				if (driveName == null || driveName.Length == 0)
-				{
-					throw new ArgumentException("The drive name is null or empty", "driveName");
-				}
-				if (driveName.Length >= 2 && driveName[1] != ':')
-				{
-					throw new ArgumentException("Invalid drive name", "driveName");
-				}
-				driveName = char.ToUpperInvariant(driveName[0]).ToString() + ":\\";
-			}
-			foreach (DriveInfo driveInfo in DriveInfo.GetDrives())
+			DriveInfo[] drives = DriveInfo.GetDrives();
+			foreach (DriveInfo driveInfo in drives)
 			{
 				if (driveInfo.path == driveName)
 				{
@@ -40,6 +32,11 @@ namespace System.IO
 				}
 			}
 			throw new ArgumentException("The drive name does not exist", "driveName");
+		}
+
+		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		{
+			throw new NotImplementedException();
 		}
 
 		private static void GetDiskFreeSpace(string path, out ulong availableFreeSpace, out ulong totalSize, out ulong totalFreeSpace)
@@ -59,11 +56,7 @@ namespace System.IO
 				ulong num2;
 				ulong num3;
 				DriveInfo.GetDiskFreeSpace(this.path, out num, out num2, out num3);
-				if (num <= 9223372036854775807UL)
-				{
-					return (long)num;
-				}
-				return long.MaxValue;
+				return (long)((num <= 9223372036854775807UL) ? num : 9223372036854775807UL);
 			}
 		}
 
@@ -75,11 +68,7 @@ namespace System.IO
 				ulong num2;
 				ulong num3;
 				DriveInfo.GetDiskFreeSpace(this.path, out num, out num2, out num3);
-				if (num3 <= 9223372036854775807UL)
-				{
-					return (long)num3;
-				}
-				return long.MaxValue;
+				return (long)((num3 <= 9223372036854775807UL) ? num3 : 9223372036854775807UL);
 			}
 		}
 
@@ -91,11 +80,7 @@ namespace System.IO
 				ulong num2;
 				ulong num3;
 				DriveInfo.GetDiskFreeSpace(this.path, out num, out num2, out num3);
-				if (num2 <= 9223372036854775807UL)
-				{
-					return (long)num2;
-				}
-				return long.MaxValue;
+				return (long)((num2 <= 9223372036854775807UL) ? num2 : 9223372036854775807UL);
 			}
 		}
 
@@ -104,6 +89,10 @@ namespace System.IO
 		{
 			get
 			{
+				if (this._drive_type != DriveInfo._DriveType.Windows)
+				{
+					return this.path;
+				}
 				return this.path;
 			}
 			set
@@ -149,26 +138,98 @@ namespace System.IO
 		{
 			get
 			{
-				return true;
+				return this._drive_type == DriveInfo._DriveType.Windows || true;
 			}
 		}
 
-		[MonoTODO("In windows, alldrives are 'Fixed'")]
-		public static DriveInfo[] GetDrives()
+		private static StreamReader TryOpen(string name)
 		{
-			string[] logicalDrives = Environment.GetLogicalDrives();
-			DriveInfo[] array = new DriveInfo[logicalDrives.Length];
-			int num = 0;
-			foreach (string text in logicalDrives)
+			if (File.Exists(name))
 			{
-				array[num++] = new DriveInfo(text, DriveInfo.GetDriveFormat(text));
+				return new StreamReader(name, Encoding.ASCII);
+			}
+			return null;
+		}
+
+		private static DriveInfo[] LinuxGetDrives()
+		{
+			DriveInfo[] array;
+			using (StreamReader streamReader = DriveInfo.TryOpen("/proc/mounts"))
+			{
+				ArrayList arrayList = new ArrayList();
+				string text;
+				while ((text = streamReader.ReadLine()) != null)
+				{
+					if (!text.StartsWith("rootfs"))
+					{
+						int num = text.IndexOf(' ');
+						if (num != -1)
+						{
+							string text2 = text.Substring(num + 1);
+							num = text2.IndexOf(' ');
+							if (num != -1)
+							{
+								string text3 = text2.Substring(0, num);
+								text2 = text2.Substring(num + 1);
+								num = text2.IndexOf(' ');
+								if (num != -1)
+								{
+									string text4 = text2.Substring(0, num);
+									arrayList.Add(new DriveInfo(DriveInfo._DriveType.Linux, text3, text4));
+								}
+							}
+						}
+					}
+				}
+				array = (DriveInfo[])arrayList.ToArray(typeof(DriveInfo));
 			}
 			return array;
 		}
 
-		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
+		private static DriveInfo[] UnixGetDrives()
+		{
+			DriveInfo[] array = null;
+			try
+			{
+				using (StreamReader streamReader = DriveInfo.TryOpen("/proc/sys/kernel/ostype"))
+				{
+					if (streamReader != null)
+					{
+						string text = streamReader.ReadLine();
+						if (text == "Linux")
+						{
+							array = DriveInfo.LinuxGetDrives();
+						}
+					}
+				}
+				if (array != null)
+				{
+					return array;
+				}
+			}
+			catch (Exception)
+			{
+			}
+			return new DriveInfo[]
+			{
+				new DriveInfo(DriveInfo._DriveType.GenericUnix, "/", "unixfs")
+			};
+		}
+
+		private static DriveInfo[] WindowsGetDrives()
 		{
 			throw new NotImplementedException();
+		}
+
+		[MonoTODO("Currently only implemented on Mono/Linux")]
+		public static DriveInfo[] GetDrives()
+		{
+			int platform = (int)Environment.Platform;
+			if (platform == 4 || platform == 128 || platform == 6)
+			{
+				return DriveInfo.UnixGetDrives();
+			}
+			return DriveInfo.WindowsGetDrives();
 		}
 
 		public override string ToString()
@@ -182,11 +243,17 @@ namespace System.IO
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern uint GetDriveTypeInternal(string rootPathName);
 
-		[MethodImpl(MethodImplOptions.InternalCall)]
-		private static extern string GetDriveFormat(string rootPathName);
+		private DriveInfo._DriveType _drive_type;
 
 		private string drive_format;
 
 		private string path;
+
+		private enum _DriveType
+		{
+			GenericUnix,
+			Linux,
+			Windows
+		}
 	}
 }

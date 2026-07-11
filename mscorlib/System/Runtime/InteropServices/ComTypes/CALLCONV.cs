@@ -6,8 +6,8 @@ namespace System.Runtime.InteropServices.ComTypes
 	public enum CALLCONV
 	{
 		CC_CDECL = 1,
-		CC_MSCPASCAL,
-		CC_PASCAL = 2,
+		CC_PASCAL,
+		CC_MSCPASCAL = 2,
 		CC_MACPASCAL,
 		CC_STDCALL,
 		CC_RESERVED,

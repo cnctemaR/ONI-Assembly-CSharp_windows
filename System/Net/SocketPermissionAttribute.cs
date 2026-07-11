@@ -116,7 +116,8 @@ namespace System.Net
 			{
 				if (string.Compare(this.m_access, "Accept", true) != 0)
 				{
-					throw new ArgumentException(string.Format(global::Locale.GetText("The parameter value for 'Access', '{1}, is invalid."), this.m_access));
+					string text3 = global::Locale.GetText("The parameter value for 'Access', '{1}, is invalid.");
+					throw new ArgumentException(string.Format(text3, this.m_access));
 				}
 				networkAccess = NetworkAccess.Accept;
 			}
@@ -128,18 +129,20 @@ namespace System.Net
 				}
 				catch
 				{
-					throw new ArgumentException(string.Format(global::Locale.GetText("The parameter value for 'Port', '{1}, is invalid."), this.m_port));
+					string text4 = global::Locale.GetText("The parameter value for 'Port', '{1}, is invalid.");
+					throw new ArgumentException(string.Format(text4, this.m_port));
 				}
 				new IPEndPoint(1L, num);
 			}
 			TransportType transportType;
 			try
 			{
-				transportType = (TransportType)Enum.Parse(typeof(TransportType), this.m_transport, true);
+				transportType = (TransportType)((int)Enum.Parse(typeof(TransportType), this.m_transport, true));
 			}
 			catch
 			{
-				throw new ArgumentException(string.Format(global::Locale.GetText("The parameter value for 'Transport', '{1}, is invalid."), this.m_transport));
+				string text5 = global::Locale.GetText("The parameter value for 'Transport', '{1}, is invalid.");
+				throw new ArgumentException(string.Format(text5, this.m_transport));
 			}
 			SocketPermission socketPermission = new SocketPermission(PermissionState.None);
 			socketPermission.AddPermission(networkAccess, transportType, this.m_host, num);
@@ -148,7 +151,8 @@ namespace System.Net
 
 		internal void AlreadySet(string property)
 		{
-			throw new ArgumentException(string.Format(global::Locale.GetText("The parameter '{0}' can be set only once."), property), property);
+			string text = global::Locale.GetText("The parameter '{0}' can be set only once.");
+			throw new ArgumentException(string.Format(text, property), property);
 		}
 
 		private string m_access;

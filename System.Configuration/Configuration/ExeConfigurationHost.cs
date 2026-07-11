@@ -8,52 +8,20 @@ namespace System.Configuration
 		public override void Init(IInternalConfigRoot root, params object[] hostInitParams)
 		{
 			this.map = (ExeConfigurationFileMap)hostInitParams[0];
-			this.level = (ConfigurationUserLevel)hostInitParams[1];
-			ExeConfigurationHost.CheckFileMap(this.level, this.map);
-		}
-
-		private static void CheckFileMap(ConfigurationUserLevel level, ExeConfigurationFileMap map)
-		{
-			if (level != ConfigurationUserLevel.None)
-			{
-				if (level != ConfigurationUserLevel.PerUserRoaming)
-				{
-					if (level != ConfigurationUserLevel.PerUserRoamingAndLocal)
-					{
-						return;
-					}
-					if (string.IsNullOrEmpty(map.LocalUserConfigFilename))
-					{
-						throw new ArgumentException("The 'LocalUserConfigFilename' argument cannot be null.");
-					}
-				}
-				if (string.IsNullOrEmpty(map.RoamingUserConfigFilename))
-				{
-					throw new ArgumentException("The 'RoamingUserConfigFilename' argument cannot be null.");
-				}
-			}
-			if (string.IsNullOrEmpty(map.ExeConfigFilename))
-			{
-				throw new ArgumentException("The 'ExeConfigFilename' argument cannot be null.");
-			}
+			this.level = (ConfigurationUserLevel)((int)hostInitParams[1]);
 		}
 
 		public override string GetStreamName(string configPath)
 		{
-			if (configPath == "exe")
+			switch (configPath)
 			{
+			case "exe":
 				return this.map.ExeConfigFilename;
-			}
-			if (configPath == "local")
-			{
+			case "local":
 				return this.map.LocalUserConfigFilename;
-			}
-			if (configPath == "roaming")
-			{
+			case "roaming":
 				return this.map.RoamingUserConfigFilename;
-			}
-			if (configPath == "machine")
-			{
+			case "machine":
 				return this.map.MachineConfigFilename;
 			}
 			ConfigurationUserLevel configurationUserLevel = this.level;
@@ -77,9 +45,8 @@ namespace System.Configuration
 			this.map = (ExeConfigurationFileMap)hostInitConfigurationParams[0];
 			if (hostInitConfigurationParams.Length > 1 && hostInitConfigurationParams[1] is ConfigurationUserLevel)
 			{
-				this.level = (ConfigurationUserLevel)hostInitConfigurationParams[1];
+				this.level = (ConfigurationUserLevel)((int)hostInitConfigurationParams[1]);
 			}
-			ExeConfigurationHost.CheckFileMap(this.level, this.map);
 			if (locationSubPath == null)
 			{
 				ConfigurationUserLevel configurationUserLevel = this.level;
@@ -103,35 +70,33 @@ namespace System.Configuration
 					locationSubPath = "roaming";
 				}
 			}
+			configPath = null;
+			string text = null;
+			locationConfigPath = null;
 			if (locationSubPath == "exe" || (locationSubPath == null && this.map.ExeConfigFilename != null))
 			{
 				configPath = "exe";
-				locationSubPath = "machine";
+				text = "local";
 				locationConfigPath = this.map.ExeConfigFilename;
-				return;
 			}
 			if (locationSubPath == "local" && this.map.LocalUserConfigFilename != null)
 			{
 				configPath = "local";
-				locationSubPath = "roaming";
+				text = "roaming";
 				locationConfigPath = this.map.LocalUserConfigFilename;
-				return;
 			}
 			if (locationSubPath == "roaming" && this.map.RoamingUserConfigFilename != null)
 			{
 				configPath = "roaming";
-				locationSubPath = "exe";
+				text = "machine";
 				locationConfigPath = this.map.RoamingUserConfigFilename;
-				return;
 			}
-			if (locationSubPath == "machine" && this.map.MachineConfigFilename != null)
+			if ((locationSubPath == "machine" || configPath == null) && this.map.MachineConfigFilename != null)
 			{
 				configPath = "machine";
-				locationSubPath = null;
-				locationConfigPath = null;
-				return;
+				text = null;
 			}
-			throw new NotImplementedException();
+			locationSubPath = text;
 		}
 
 		private ExeConfigurationFileMap map;

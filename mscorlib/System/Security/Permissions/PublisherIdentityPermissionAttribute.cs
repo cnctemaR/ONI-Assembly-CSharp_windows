@@ -59,15 +59,19 @@ namespace System.Security.Permissions
 			}
 			if (this.x509data != null)
 			{
-				return new PublisherIdentityPermission(new X509Certificate(CryptoConvert.FromHex(this.x509data)));
+				byte[] array = CryptoConvert.FromHex(this.x509data);
+				X509Certificate x509Certificate = new X509Certificate(array);
+				return new PublisherIdentityPermission(x509Certificate);
 			}
 			if (this.certFile != null)
 			{
-				return new PublisherIdentityPermission(global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromCertFile(this.certFile));
+				X509Certificate x509Certificate = global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromCertFile(this.certFile);
+				return new PublisherIdentityPermission(x509Certificate);
 			}
 			if (this.signedFile != null)
 			{
-				return new PublisherIdentityPermission(global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromSignedFile(this.signedFile));
+				X509Certificate x509Certificate = global::System.Security.Cryptography.X509Certificates.X509Certificate.CreateFromSignedFile(this.signedFile);
+				return new PublisherIdentityPermission(x509Certificate);
 			}
 			return new PublisherIdentityPermission(PermissionState.None);
 		}

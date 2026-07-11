@@ -28,6 +28,11 @@ namespace System.Reflection.Emit
 			return this.label == obj.label;
 		}
 
+		public override int GetHashCode()
+		{
+			return this.label.GetHashCode();
+		}
+
 		public static bool operator ==(Label a, Label b)
 		{
 			return a.Equals(b);
@@ -36,11 +41,6 @@ namespace System.Reflection.Emit
 		public static bool operator !=(Label a, Label b)
 		{
 			return !(a == b);
-		}
-
-		public override int GetHashCode()
-		{
-			return this.label.GetHashCode();
 		}
 
 		internal int label;

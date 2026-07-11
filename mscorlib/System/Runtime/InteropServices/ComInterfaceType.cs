@@ -8,8 +8,6 @@ namespace System.Runtime.InteropServices
 	{
 		InterfaceIsDual,
 		InterfaceIsIUnknown,
-		InterfaceIsIDispatch,
-		[ComVisible(false)]
-		InterfaceIsIInspectable
+		InterfaceIsIDispatch
 	}
 }

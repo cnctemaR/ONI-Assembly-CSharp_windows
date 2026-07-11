@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace System.CodeDom
 {
+	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
 	[Serializable]
 	public class CodeRemoveEventStatement : CodeStatement
 	{
@@ -11,35 +14,51 @@ namespace System.CodeDom
 
 		public CodeRemoveEventStatement(CodeEventReferenceExpression eventRef, CodeExpression listener)
 		{
-			this._eventRef = eventRef;
-			this.Listener = listener;
+			this.eventRef = eventRef;
+			this.listener = listener;
 		}
 
 		public CodeRemoveEventStatement(CodeExpression targetObject, string eventName, CodeExpression listener)
 		{
-			this._eventRef = new CodeEventReferenceExpression(targetObject, eventName);
-			this.Listener = listener;
+			this.eventRef = new CodeEventReferenceExpression(targetObject, eventName);
+			this.listener = listener;
 		}
 
 		public CodeEventReferenceExpression Event
 		{
 			get
 			{
-				CodeEventReferenceExpression codeEventReferenceExpression;
-				if ((codeEventReferenceExpression = this._eventRef) == null)
+				if (this.eventRef == null)
 				{
-					codeEventReferenceExpression = (this._eventRef = new CodeEventReferenceExpression());
+					this.eventRef = new CodeEventReferenceExpression();
 				}
-				return codeEventReferenceExpression;
+				return this.eventRef;
 			}
 			set
 			{
-				this._eventRef = value;
+				this.eventRef = value;
 			}
 		}
 
-		public CodeExpression Listener { get; set; }
+		public CodeExpression Listener
+		{
+			get
+			{
+				return this.listener;
+			}
+			set
+			{
+				this.listener = value;
+			}
+		}
 
-		private CodeEventReferenceExpression _eventRef;
+		internal override void Accept(ICodeDomVisitor visitor)
+		{
+			visitor.Visit(this);
+		}
+
+		private CodeEventReferenceExpression eventRef;
+
+		private CodeExpression listener;
 	}
 }

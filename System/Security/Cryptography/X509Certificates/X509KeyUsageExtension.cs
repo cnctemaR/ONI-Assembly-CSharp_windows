@@ -32,24 +32,24 @@ namespace System.Security.Cryptography.X509Certificates
 			get
 			{
 				AsnDecodeStatus status = this._status;
-				if (status == AsnDecodeStatus.Ok || status == AsnDecodeStatus.InformationNotAvailable)
+				if (status != AsnDecodeStatus.Ok && status != AsnDecodeStatus.InformationNotAvailable)
 				{
-					return this._keyUsages;
+					throw new CryptographicException("Badly encoded extension.");
 				}
-				throw new CryptographicException("Badly encoded extension.");
+				return this._keyUsages;
 			}
 		}
 
-		public override void CopyFrom(AsnEncodedData asnEncodedData)
+		public override void CopyFrom(AsnEncodedData encodedData)
 		{
-			if (asnEncodedData == null)
+			if (encodedData == null)
 			{
-				throw new ArgumentNullException("asnEncodedData");
+				throw new ArgumentNullException("encodedData");
 			}
-			X509Extension x509Extension = asnEncodedData as X509Extension;
+			X509Extension x509Extension = encodedData as X509Extension;
 			if (x509Extension == null)
 			{
-				throw new ArgumentException(global::Locale.GetText("Wrong type."), "asnEncodedData");
+				throw new ArgumentException(global::Locale.GetText("Wrong type."), "encodedData");
 			}
 			if (x509Extension._oid == null)
 			{
@@ -93,7 +93,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			try
 			{
-				Mono.Security.ASN1 asn = new Mono.Security.ASN1(extension);
+				ASN1 asn = new ASN1(extension);
 				int num = 0;
 				int i = 1;
 				while (i < asn.Value.Length)
@@ -113,14 +113,14 @@ namespace System.Security.Cryptography.X509Certificates
 		{
 			int keyUsages = (int)this._keyUsages;
 			byte b = 0;
-			Mono.Security.ASN1 asn;
+			ASN1 asn;
 			if (keyUsages == 0)
 			{
-				asn = new Mono.Security.ASN1(3, new byte[] { b });
+				asn = new ASN1(3, new byte[] { b });
 			}
 			else
 			{
-				int num = ((keyUsages < 255) ? keyUsages : (keyUsages >> 8));
+				int num = ((keyUsages >= 255) ? (keyUsages >> 8) : keyUsages);
 				while ((num & 1) == 0 && b < 8)
 				{
 					b += 1;
@@ -128,7 +128,7 @@ namespace System.Security.Cryptography.X509Certificates
 				}
 				if (keyUsages <= 255)
 				{
-					asn = new Mono.Security.ASN1(3, new byte[]
+					asn = new ASN1(3, new byte[]
 					{
 						b,
 						(byte)keyUsages
@@ -136,7 +136,7 @@ namespace System.Security.Cryptography.X509Certificates
 				}
 				else
 				{
-					asn = new Mono.Security.ASN1(3, new byte[]
+					asn = new ASN1(3, new byte[]
 					{
 						b,
 						(byte)keyUsages,

@@ -27,18 +27,18 @@ namespace System.Net.Configuration
 			}
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void PostDeserialize()
 		{
 		}
 
-		[MonoTODO]
+		[global::System.MonoTODO]
 		protected override void InitializeDefault()
 		{
 		}
 
 		private static ConfigurationPropertyCollection properties = new ConfigurationPropertyCollection();
 
-		private static ConfigurationProperty authenticationModulesProp = new ConfigurationProperty("", typeof(AuthenticationModuleElementCollection), null, ConfigurationPropertyOptions.IsDefaultCollection);
+		private static ConfigurationProperty authenticationModulesProp = new ConfigurationProperty(string.Empty, typeof(AuthenticationModuleElementCollection), null, ConfigurationPropertyOptions.IsDefaultCollection);
 	}
 }

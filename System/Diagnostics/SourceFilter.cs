@@ -6,34 +6,34 @@ namespace System.Diagnostics
 	{
 		public SourceFilter(string source)
 		{
-			this.Source = source;
-		}
-
-		public override bool ShouldTrace(TraceEventCache cache, string source, TraceEventType eventType, int id, string formatOrMessage, object[] args, object data1, object[] data)
-		{
 			if (source == null)
 			{
 				throw new ArgumentNullException("source");
 			}
-			return string.Equals(this.src, source);
+			this.source = source;
 		}
 
 		public string Source
 		{
 			get
 			{
-				return this.src;
+				return this.source;
 			}
 			set
 			{
-				if (value == null)
+				if (this.source == null)
 				{
-					throw new ArgumentNullException("source");
+					throw new ArgumentNullException("value");
 				}
-				this.src = value;
+				this.source = value;
 			}
 		}
 
-		private string src;
+		public override bool ShouldTrace(TraceEventCache cache, string source, TraceEventType eventType, int id, string formatOrMessage, object[] args, object data1, object[] data)
+		{
+			return source == this.source;
+		}
+
+		private string source;
 	}
 }

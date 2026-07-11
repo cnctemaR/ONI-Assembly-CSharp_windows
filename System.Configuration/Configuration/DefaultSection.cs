@@ -10,9 +10,11 @@ namespace System.Configuration
 			if (base.RawXml == null)
 			{
 				base.RawXml = xmlReader.ReadOuterXml();
-				return;
 			}
-			xmlReader.Skip();
+			else
+			{
+				xmlReader.Skip();
+			}
 		}
 
 		[MonoTODO]

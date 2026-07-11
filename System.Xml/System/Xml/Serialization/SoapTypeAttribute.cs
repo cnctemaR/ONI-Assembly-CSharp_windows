@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace System.Xml.Serialization
 {
@@ -32,22 +33,6 @@ namespace System.Xml.Serialization
 			}
 		}
 
-		public string TypeName
-		{
-			get
-			{
-				if (this.typeName != null)
-				{
-					return this.typeName;
-				}
-				return string.Empty;
-			}
-			set
-			{
-				this.typeName = value;
-			}
-		}
-
 		public string Namespace
 		{
 			get
@@ -58,6 +43,31 @@ namespace System.Xml.Serialization
 			{
 				this.ns = value;
 			}
+		}
+
+		public string TypeName
+		{
+			get
+			{
+				if (this.typeName == null)
+				{
+					return string.Empty;
+				}
+				return this.typeName;
+			}
+			set
+			{
+				this.typeName = value;
+			}
+		}
+
+		internal void AddKeyHash(StringBuilder sb)
+		{
+			sb.Append("STA ");
+			KeyHelper.AddField(sb, 1, this.ns);
+			KeyHelper.AddField(sb, 2, this.typeName);
+			KeyHelper.AddField(sb, 3, this.includeInSchema);
+			sb.Append('|');
 		}
 
 		private string ns;

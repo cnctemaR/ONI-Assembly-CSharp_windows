@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Mono.Security;
 
@@ -27,11 +28,7 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			this._oid = new Oid("2.5.29.37", "Enhanced Key Usage");
 			base.Critical = critical;
-			this._enhKeyUsage = new OidCollection();
-			foreach (Oid oid in enhancedKeyUsages)
-			{
-				this._enhKeyUsage.Add(oid);
-			}
+			this._enhKeyUsage = enhancedKeyUsages.ReadOnlyCopy();
 			base.RawData = this.Encode();
 		}
 
@@ -40,19 +37,16 @@ namespace System.Security.Cryptography.X509Certificates
 			get
 			{
 				AsnDecodeStatus status = this._status;
-				if (status == AsnDecodeStatus.Ok || status == AsnDecodeStatus.InformationNotAvailable)
+				if (status != AsnDecodeStatus.Ok && status != AsnDecodeStatus.InformationNotAvailable)
 				{
-					OidCollection oidCollection = new OidCollection();
-					if (this._enhKeyUsage != null)
-					{
-						foreach (Oid oid in this._enhKeyUsage)
-						{
-							oidCollection.Add(oid);
-						}
-					}
-					return oidCollection;
+					throw new CryptographicException("Badly encoded extension.");
 				}
-				throw new CryptographicException("Badly encoded extension.");
+				if (this._enhKeyUsage == null)
+				{
+					this._enhKeyUsage = new OidCollection();
+				}
+				this._enhKeyUsage.ReadOnly = true;
+				return this._enhKeyUsage;
 			}
 		}
 
@@ -96,14 +90,14 @@ namespace System.Security.Cryptography.X509Certificates
 			}
 			try
 			{
-				Mono.Security.ASN1 asn = new Mono.Security.ASN1(extension);
+				ASN1 asn = new ASN1(extension);
 				if (asn.Tag != 48)
 				{
 					throw new CryptographicException(global::Locale.GetText("Invalid ASN.1 Tag"));
 				}
 				for (int i = 0; i < asn.Count; i++)
 				{
-					this._enhKeyUsage.Add(new Oid(Mono.Security.ASN1Convert.ToOid(asn[i])));
+					this._enhKeyUsage.Add(new Oid(ASN1Convert.ToOid(asn[i])));
 				}
 			}
 			catch
@@ -115,10 +109,10 @@ namespace System.Security.Cryptography.X509Certificates
 
 		internal byte[] Encode()
 		{
-			Mono.Security.ASN1 asn = new Mono.Security.ASN1(48);
+			ASN1 asn = new ASN1(48);
 			foreach (Oid oid in this._enhKeyUsage)
 			{
-				asn.Add(Mono.Security.ASN1Convert.FromOid(oid.Value));
+				asn.Add(ASN1Convert.FromOid(oid.Value));
 			}
 			return asn.GetBytes();
 		}
@@ -145,18 +139,30 @@ namespace System.Security.Cryptography.X509Certificates
 					return "Information Not Available";
 				}
 				StringBuilder stringBuilder = new StringBuilder();
-				for (int i = 0; i < this._enhKeyUsage.Count; i++)
+				int i = 0;
+				while (i < this._enhKeyUsage.Count)
 				{
 					Oid oid = this._enhKeyUsage[i];
 					string value = oid.Value;
-					if (value == "1.3.6.1.5.5.7.3.1")
+					if (value == null)
 					{
-						stringBuilder.Append("Server Authentication (");
+						goto IL_0102;
 					}
-					else
+					if (X509EnhancedKeyUsageExtension.<>f__switch$map1A == null)
 					{
-						stringBuilder.Append("Unknown Key Usage (");
+						X509EnhancedKeyUsageExtension.<>f__switch$map1A = new Dictionary<string, int>(1) { { "1.3.6.1.5.5.7.3.1", 0 } };
 					}
+					int num;
+					if (!X509EnhancedKeyUsageExtension.<>f__switch$map1A.TryGetValue(value, out num))
+					{
+						goto IL_0102;
+					}
+					if (num != 0)
+					{
+						goto IL_0102;
+					}
+					stringBuilder.Append("Server Authentication (");
+					IL_0113:
 					stringBuilder.Append(oid.Value);
 					stringBuilder.Append(")");
 					if (multiLine)
@@ -167,6 +173,11 @@ namespace System.Security.Cryptography.X509Certificates
 					{
 						stringBuilder.Append(", ");
 					}
+					i++;
+					continue;
+					IL_0102:
+					stringBuilder.Append("Unknown Key Usage (");
+					goto IL_0113;
 				}
 				return stringBuilder.ToString();
 			}

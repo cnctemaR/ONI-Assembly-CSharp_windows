@@ -12,181 +12,10 @@ namespace System.Security
 	[Serializable]
 	public class SecurityException : SystemException
 	{
-		[ComVisible(false)]
-		public SecurityAction Action
-		{
-			get
-			{
-				return this._action;
-			}
-			set
-			{
-				this._action = value;
-			}
-		}
-
-		[ComVisible(false)]
-		public object DenySetInstance
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._denyset;
-			}
-			set
-			{
-				this._denyset = value;
-			}
-		}
-
-		[ComVisible(false)]
-		public AssemblyName FailedAssemblyInfo
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._assembly;
-			}
-			set
-			{
-				this._assembly = value;
-			}
-		}
-
-		[ComVisible(false)]
-		public MethodInfo Method
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._method;
-			}
-			set
-			{
-				this._method = value;
-			}
-		}
-
-		[ComVisible(false)]
-		public object PermitOnlySetInstance
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._permitset;
-			}
-			set
-			{
-				this._permitset = value;
-			}
-		}
-
-		public string Url
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._url;
-			}
-			set
-			{
-				this._url = value;
-			}
-		}
-
-		public SecurityZone Zone
-		{
-			get
-			{
-				return this._zone;
-			}
-			set
-			{
-				this._zone = value;
-			}
-		}
-
-		[ComVisible(false)]
-		public object Demanded
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._demanded;
-			}
-			set
-			{
-				this._demanded = value;
-			}
-		}
-
-		public IPermission FirstPermissionThatFailed
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._firstperm;
-			}
-			set
-			{
-				this._firstperm = value;
-			}
-		}
-
-		public string PermissionState
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this.permissionState;
-			}
-			set
-			{
-				this.permissionState = value;
-			}
-		}
-
-		public Type PermissionType
-		{
-			get
-			{
-				return this.permissionType;
-			}
-			set
-			{
-				this.permissionType = value;
-			}
-		}
-
-		public string GrantedSet
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._granted;
-			}
-			set
-			{
-				this._granted = value;
-			}
-		}
-
-		public string RefusedSet
-		{
-			[SecurityPermission(SecurityAction.Demand, ControlEvidence = true, ControlPolicy = true)]
-			get
-			{
-				return this._refused;
-			}
-			set
-			{
-				this._refused = value;
-			}
-		}
-
 		public SecurityException()
-			: this(Locale.GetText("A security error has been detected."))
+			: base(Locale.GetText("A security error has been detected."))
 		{
+			base.HResult = -2146233078;
 		}
 
 		public SecurityException(string message)
@@ -205,7 +34,7 @@ namespace System.Security
 				if (enumerator.Name == "PermissionState")
 				{
 					this.permissionState = (string)enumerator.Value;
-					return;
+					break;
 				}
 			}
 		}
@@ -255,8 +84,8 @@ namespace System.Security
 		{
 			base.HResult = -2146233078;
 			this._assembly = assemblyName;
-			this._granted = ((grant == null) ? string.Empty : grant.ToString());
-			this._refused = ((refused == null) ? string.Empty : refused.ToString());
+			this._granted = ((grant != null) ? grant.ToString() : string.Empty);
+			this._refused = ((refused != null) ? refused.ToString() : string.Empty);
 			this._method = method;
 			this._action = action;
 			this._demanded = demanded;
@@ -268,12 +97,184 @@ namespace System.Security
 			this._evidence = evidence;
 		}
 
+		[ComVisible(false)]
+		public SecurityAction Action
+		{
+			get
+			{
+				return this._action;
+			}
+			set
+			{
+				this._action = value;
+			}
+		}
+
+		[ComVisible(false)]
+		public object DenySetInstance
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._denyset;
+			}
+			set
+			{
+				this._denyset = value;
+			}
+		}
+
+		[ComVisible(false)]
+		public AssemblyName FailedAssemblyInfo
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._assembly;
+			}
+			set
+			{
+				this._assembly = value;
+			}
+		}
+
+		[ComVisible(false)]
+		public MethodInfo Method
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._method;
+			}
+			set
+			{
+				this._method = value;
+			}
+		}
+
+		[ComVisible(false)]
+		public object PermitOnlySetInstance
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._permitset;
+			}
+			set
+			{
+				this._permitset = value;
+			}
+		}
+
+		public string Url
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._url;
+			}
+			set
+			{
+				this._url = value;
+			}
+		}
+
+		public SecurityZone Zone
+		{
+			get
+			{
+				return this._zone;
+			}
+			set
+			{
+				this._zone = value;
+			}
+		}
+
+		[ComVisible(false)]
+		public object Demanded
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._demanded;
+			}
+			set
+			{
+				this._demanded = value;
+			}
+		}
+
+		public IPermission FirstPermissionThatFailed
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._firstperm;
+			}
+			set
+			{
+				this._firstperm = value;
+			}
+		}
+
+		public string PermissionState
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this.permissionState;
+			}
+			set
+			{
+				this.permissionState = value;
+			}
+		}
+
+		public Type PermissionType
+		{
+			get
+			{
+				return this.permissionType;
+			}
+			set
+			{
+				this.permissionType = value;
+			}
+		}
+
+		public string GrantedSet
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._granted;
+			}
+			set
+			{
+				this._granted = value;
+			}
+		}
+
+		public string RefusedSet
+		{
+			[PermissionSet(SecurityAction.Demand, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\">\n   <IPermission class=\"System.Security.Permissions.SecurityPermission, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089\"\n                version=\"1\"\n                Flags=\"ControlEvidence, ControlPolicy\"/>\n</PermissionSet>\n")]
+			get
+			{
+				return this._refused;
+			}
+			set
+			{
+				this._refused = value;
+			}
+		}
+
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
 			try
 			{
-				info.AddValue("PermissionState", this.permissionState);
+				info.AddValue("PermissionState", this.PermissionState);
 			}
 			catch (SecurityException)
 			{

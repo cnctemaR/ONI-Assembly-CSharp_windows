@@ -8,26 +8,28 @@ namespace System.Runtime.InteropServices
 	public class InvalidComObjectException : SystemException
 	{
 		public InvalidComObjectException()
-			: base(Environment.GetResourceString("Attempt has been made to use a COM object that does not have a backing class factory."))
+			: base(Locale.GetText("Invalid COM object is used"))
 		{
-			base.SetErrorCode(-2146233049);
+			base.HResult = -2146233049;
 		}
 
 		public InvalidComObjectException(string message)
 			: base(message)
 		{
-			base.SetErrorCode(-2146233049);
+			base.HResult = -2146233049;
 		}
 
 		public InvalidComObjectException(string message, Exception inner)
 			: base(message, inner)
 		{
-			base.SetErrorCode(-2146233049);
+			base.HResult = -2146233049;
 		}
 
 		protected InvalidComObjectException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 		}
+
+		private const int ErrorCode = -2146233049;
 	}
 }

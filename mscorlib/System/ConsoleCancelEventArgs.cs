@@ -5,21 +5,20 @@ namespace System
 	[Serializable]
 	public sealed class ConsoleCancelEventArgs : EventArgs
 	{
-		internal ConsoleCancelEventArgs(ConsoleSpecialKey type)
+		internal ConsoleCancelEventArgs(ConsoleSpecialKey key)
 		{
-			this._type = type;
-			this._cancel = false;
+			this.specialKey = key;
 		}
 
 		public bool Cancel
 		{
 			get
 			{
-				return this._cancel;
+				return this.cancel;
 			}
 			set
 			{
-				this._cancel = value;
+				this.cancel = value;
 			}
 		}
 
@@ -27,12 +26,12 @@ namespace System
 		{
 			get
 			{
-				return this._type;
+				return this.specialKey;
 			}
 		}
 
-		private ConsoleSpecialKey _type;
+		private bool cancel;
 
-		private bool _cancel;
+		private ConsoleSpecialKey specialKey;
 	}
 }

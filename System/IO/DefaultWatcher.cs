@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace System.IO
@@ -82,7 +81,7 @@ namespace System.IO
 				if (defaultWatcherData != null)
 				{
 					defaultWatcherData.Enabled = false;
-					defaultWatcherData.DisabledTime = DateTime.UtcNow;
+					defaultWatcherData.DisabledTime = DateTime.Now;
 				}
 			}
 		}
@@ -113,24 +112,19 @@ namespace System.IO
 				if (hashtable2.Count != 0)
 				{
 					num = 0;
-					using (IEnumerator enumerator = hashtable2.Values.GetEnumerator())
+					foreach (object obj in hashtable2.Values)
 					{
-						while (enumerator.MoveNext())
+						DefaultWatcherData defaultWatcherData = (DefaultWatcherData)obj;
+						bool flag = this.UpdateDataAndDispatch(defaultWatcherData, true);
+						if (flag)
 						{
-							object obj = enumerator.Current;
-							DefaultWatcherData defaultWatcherData = (DefaultWatcherData)obj;
-							if (this.UpdateDataAndDispatch(defaultWatcherData, true))
+							Hashtable hashtable3 = DefaultWatcher.watches;
+							lock (hashtable3)
 							{
-								hashtable = DefaultWatcher.watches;
-								lock (hashtable)
-								{
-									DefaultWatcher.watches.Remove(defaultWatcherData.FSW);
-								}
+								DefaultWatcher.watches.Remove(defaultWatcherData.FSW);
 							}
 						}
-						continue;
 					}
-					break;
 				}
 			}
 			lock (this)
@@ -143,7 +137,7 @@ namespace System.IO
 		{
 			if (!data.Enabled)
 			{
-				return data.DisabledTime != DateTime.MaxValue && (DateTime.UtcNow - data.DisabledTime).TotalSeconds > 5.0;
+				return data.DisabledTime != DateTime.MaxValue && (DateTime.Now - data.DisabledTime).TotalSeconds > 5.0;
 			}
 			this.DoFiles(data, data.Directory, dispatch);
 			return false;
@@ -173,7 +167,7 @@ namespace System.IO
 					this.DoFiles(data, text, dispatch);
 				}
 			}
-			string[] array;
+			string[] array = null;
 			if (!flag)
 			{
 				array = DefaultWatcher.NoStringsArray;
@@ -190,108 +184,102 @@ namespace System.IO
 			{
 				array = DefaultWatcher.NoStringsArray;
 			}
-			object filesLock = data.FilesLock;
-			lock (filesLock)
-			{
-				this.IterateAndModifyFilesData(data, directory, dispatch, array);
-			}
-		}
-
-		private void IterateAndModifyFilesData(DefaultWatcherData data, string directory, bool dispatch, string[] files)
-		{
 			foreach (object obj in data.Files.Keys)
 			{
-				string text = (string)obj;
-				FileData fileData = (FileData)data.Files[text];
+				string text2 = (string)obj;
+				FileData fileData = (FileData)data.Files[text2];
 				if (fileData.Directory == directory)
 				{
 					fileData.NotExists = true;
 				}
 			}
-			foreach (string text2 in files)
+			foreach (string text3 in array)
 			{
-				FileData fileData2 = (FileData)data.Files[text2];
+				FileData fileData2 = (FileData)data.Files[text3];
 				if (fileData2 == null)
 				{
 					try
 					{
-						data.Files.Add(text2, DefaultWatcher.CreateFileData(directory, text2));
+						data.Files.Add(text3, DefaultWatcher.CreateFileData(directory, text3));
 					}
 					catch
 					{
-						data.Files.Remove(text2);
-						goto IL_00DD;
+						data.Files.Remove(text3);
+						goto IL_01BD;
 					}
 					if (dispatch)
 					{
-						DefaultWatcher.DispatchEvents(data.FSW, FileAction.Added, text2);
+						DefaultWatcher.DispatchEvents(data.FSW, FileAction.Added, text3);
 					}
 				}
 				else if (fileData2.Directory == directory)
 				{
 					fileData2.NotExists = false;
 				}
-				IL_00DD:;
+				IL_01BD:;
 			}
 			if (!dispatch)
 			{
 				return;
 			}
-			List<string> list = null;
+			ArrayList arrayList = null;
 			foreach (object obj2 in data.Files.Keys)
 			{
-				string text3 = (string)obj2;
-				if (((FileData)data.Files[text3]).NotExists)
+				string text4 = (string)obj2;
+				FileData fileData3 = (FileData)data.Files[text4];
+				if (fileData3.NotExists)
 				{
-					if (list == null)
+					if (arrayList == null)
 					{
-						list = new List<string>();
+						arrayList = new ArrayList();
 					}
-					list.Add(text3);
-					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, text3);
+					arrayList.Add(text4);
+					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, text4);
 				}
 			}
-			if (list != null)
+			if (arrayList != null)
 			{
-				foreach (string text4 in list)
+				foreach (object obj3 in arrayList)
 				{
-					data.Files.Remove(text4);
+					string text5 = (string)obj3;
+					data.Files.Remove(text5);
 				}
-				list = null;
+				arrayList = null;
 			}
-			foreach (object obj3 in data.Files.Keys)
+			foreach (object obj4 in data.Files.Keys)
 			{
-				string text5 = (string)obj3;
-				FileData fileData3 = (FileData)data.Files[text5];
+				string text6 = (string)obj4;
+				FileData fileData4 = (FileData)data.Files[text6];
 				DateTime creationTime;
 				DateTime lastWriteTime;
 				try
 				{
-					creationTime = File.GetCreationTime(text5);
-					lastWriteTime = File.GetLastWriteTime(text5);
+					creationTime = File.GetCreationTime(text6);
+					lastWriteTime = File.GetLastWriteTime(text6);
 				}
 				catch
 				{
-					if (list == null)
+					if (arrayList == null)
 					{
-						list = new List<string>();
+						arrayList = new ArrayList();
 					}
-					list.Add(text5);
-					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, text5);
+					arrayList.Add(text6);
+					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Removed, text6);
 					continue;
 				}
-				if (creationTime != fileData3.CreationTime || lastWriteTime != fileData3.LastWriteTime)
+				if (creationTime != fileData4.CreationTime || lastWriteTime != fileData4.LastWriteTime)
 				{
-					fileData3.CreationTime = creationTime;
-					fileData3.LastWriteTime = lastWriteTime;
-					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Modified, text5);
+					fileData4.CreationTime = creationTime;
+					fileData4.LastWriteTime = lastWriteTime;
+					DefaultWatcher.DispatchEvents(data.FSW, FileAction.Modified, text6);
 				}
 			}
-			if (list != null)
+			if (arrayList != null)
 			{
-				foreach (string text6 in list)
+				foreach (object obj5 in arrayList)
 				{
-					data.Files.Remove(text6);
+					string text7 = (string)obj5;
+					data.Files.Remove(text7);
 				}
 			}
 		}

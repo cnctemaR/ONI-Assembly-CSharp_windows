@@ -2,8 +2,8 @@
 
 namespace System.Diagnostics.CodeAnalysis
 {
-	[Conditional("CODE_ANALYSIS")]
 	[AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+	[Conditional("CODE_ANALYSIS")]
 	public sealed class SuppressMessageAttribute : Attribute
 	{
 		public SuppressMessageAttribute(string category, string checkId)
@@ -25,6 +25,30 @@ namespace System.Diagnostics.CodeAnalysis
 			get
 			{
 				return this.checkId;
+			}
+		}
+
+		public string Justification
+		{
+			get
+			{
+				return this.justification;
+			}
+			set
+			{
+				this.justification = value;
+			}
+		}
+
+		public string MessageId
+		{
+			get
+			{
+				return this.messageId;
+			}
+			set
+			{
+				this.messageId = value;
 			}
 		}
 
@@ -52,40 +76,16 @@ namespace System.Diagnostics.CodeAnalysis
 			}
 		}
 
-		public string MessageId
-		{
-			get
-			{
-				return this.messageId;
-			}
-			set
-			{
-				this.messageId = value;
-			}
-		}
-
-		public string Justification
-		{
-			get
-			{
-				return this.justification;
-			}
-			set
-			{
-				this.justification = value;
-			}
-		}
-
 		private string category;
+
+		private string checkId;
 
 		private string justification;
 
-		private string checkId;
+		private string messageId;
 
 		private string scope;
 
 		private string target;
-
-		private string messageId;
 	}
 }

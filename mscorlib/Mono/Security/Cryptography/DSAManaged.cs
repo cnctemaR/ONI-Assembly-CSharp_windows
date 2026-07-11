@@ -18,6 +18,8 @@ namespace Mono.Security.Cryptography
 			this.LegalKeySizesValue[0] = new KeySizes(512, 1024, 64);
 		}
 
+		public event DSAManaged.KeyGeneratedEventHandler KeyGenerated;
+
 		~DSAManaged()
 		{
 			this.Dispose(false);
@@ -377,7 +379,8 @@ namespace Mono.Security.Cryptography
 					BigInteger bigInteger6 = bigInteger2 * bigInteger4 % this.q;
 					bigInteger5 = this.g.ModPow(bigInteger5, this.p);
 					bigInteger6 = this.y.ModPow(bigInteger6, this.p);
-					flag = bigInteger5 * bigInteger6 % this.p % this.q == bigInteger2;
+					BigInteger bigInteger7 = bigInteger5 * bigInteger6 % this.p % this.q;
+					flag = bigInteger7 == bigInteger2;
 				}
 			}
 			catch
@@ -432,8 +435,6 @@ namespace Mono.Security.Cryptography
 			}
 			this.m_disposed = true;
 		}
-
-		public event DSAManaged.KeyGeneratedEventHandler KeyGenerated;
 
 		private const int defaultKeySize = 1024;
 

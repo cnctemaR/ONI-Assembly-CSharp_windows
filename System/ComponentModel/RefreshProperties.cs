@@ -4,8 +4,8 @@ namespace System.ComponentModel
 {
 	public enum RefreshProperties
 	{
-		None,
-		All,
-		Repaint
+		All = 1,
+		None = 0,
+		Repaint = 2
 	}
 }

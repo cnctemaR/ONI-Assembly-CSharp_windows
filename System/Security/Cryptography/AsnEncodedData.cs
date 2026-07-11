@@ -53,9 +53,11 @@ namespace System.Security.Cryptography
 				if (value == null)
 				{
 					this._oid = null;
-					return;
 				}
-				this._oid = new Oid(value);
+				else
+				{
+					this._oid = new Oid(value);
+				}
 			}
 		}
 
@@ -108,31 +110,22 @@ namespace System.Security.Cryptography
 		internal virtual string ToString(bool multiLine)
 		{
 			string value = this._oid.Value;
-			if (value == "2.5.29.19")
+			switch (value)
 			{
+			case "2.5.29.19":
 				return this.BasicConstraintsExtension(multiLine);
-			}
-			if (value == "2.5.29.37")
-			{
+			case "2.5.29.37":
 				return this.EnhancedKeyUsageExtension(multiLine);
-			}
-			if (value == "2.5.29.15")
-			{
+			case "2.5.29.15":
 				return this.KeyUsageExtension(multiLine);
-			}
-			if (value == "2.5.29.14")
-			{
+			case "2.5.29.14":
 				return this.SubjectKeyIdentifierExtension(multiLine);
-			}
-			if (value == "2.5.29.17")
-			{
+			case "2.5.29.17":
 				return this.SubjectAltName(multiLine);
+			case "2.16.840.1.113730.1.1":
+				return this.NetscapeCertType(multiLine);
 			}
-			if (!(value == "2.16.840.1.113730.1.1"))
-			{
-				return this.Default(multiLine);
-			}
-			return this.NetscapeCertType(multiLine);
+			return this.Default(multiLine);
 		}
 
 		internal string Default(bool multiLine)
@@ -154,7 +147,8 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				text = new X509BasicConstraintsExtension(this, false).ToString(multiLine);
+				global::System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension x509BasicConstraintsExtension = new global::System.Security.Cryptography.X509Certificates.X509BasicConstraintsExtension(this, false);
+				text = x509BasicConstraintsExtension.ToString(multiLine);
 			}
 			catch
 			{
@@ -168,7 +162,8 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				text = new X509EnhancedKeyUsageExtension(this, false).ToString(multiLine);
+				global::System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension x509EnhancedKeyUsageExtension = new global::System.Security.Cryptography.X509Certificates.X509EnhancedKeyUsageExtension(this, false);
+				text = x509EnhancedKeyUsageExtension.ToString(multiLine);
 			}
 			catch
 			{
@@ -182,7 +177,8 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				text = new X509KeyUsageExtension(this, false).ToString(multiLine);
+				global::System.Security.Cryptography.X509Certificates.X509KeyUsageExtension x509KeyUsageExtension = new global::System.Security.Cryptography.X509Certificates.X509KeyUsageExtension(this, false);
+				text = x509KeyUsageExtension.ToString(multiLine);
 			}
 			catch
 			{
@@ -196,7 +192,8 @@ namespace System.Security.Cryptography
 			string text;
 			try
 			{
-				text = new X509SubjectKeyIdentifierExtension(this, false).ToString(multiLine);
+				global::System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension x509SubjectKeyIdentifierExtension = new global::System.Security.Cryptography.X509Certificates.X509SubjectKeyIdentifierExtension(this, false);
+				text = x509SubjectKeyIdentifierExtension.ToString(multiLine);
 			}
 			catch
 			{
@@ -214,11 +211,11 @@ namespace System.Security.Cryptography
 			string text3;
 			try
 			{
-				Mono.Security.ASN1 asn = new Mono.Security.ASN1(this._raw);
+				ASN1 asn = new ASN1(this._raw);
 				StringBuilder stringBuilder = new StringBuilder();
 				for (int i = 0; i < asn.Count; i++)
 				{
-					Mono.Security.ASN1 asn2 = asn[i];
+					ASN1 asn2 = asn[i];
 					byte tag = asn2.Tag;
 					string text;
 					string text2;
@@ -227,7 +224,7 @@ namespace System.Security.Cryptography
 						if (tag != 130)
 						{
 							text = string.Format("Unknown ({0})=", asn2.Tag);
-							text2 = Mono.Security.Cryptography.CryptoConvert.ToHex(asn2.Value);
+							text2 = CryptoConvert.ToHex(asn2.Value);
 						}
 						else
 						{

@@ -4,7 +4,7 @@ namespace System.Runtime.InteropServices.ComTypes
 {
 	[Flags]
 	[Serializable]
-	public enum TYPEFLAGS : short
+	public enum TYPEFLAGS
 	{
 		TYPEFLAG_FAPPOBJECT = 1,
 		TYPEFLAG_FCANCREATE = 2,

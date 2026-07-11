@@ -6,7 +6,7 @@ namespace System.Security.Policy
 {
 	[ComVisible(true)]
 	[Serializable]
-	public sealed class ZoneMembershipCondition : IMembershipCondition, ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition
+	public sealed class ZoneMembershipCondition : ISecurityEncodable, ISecurityPolicyEncodable, IConstantMembershipCondition, IMembershipCondition
 	{
 		internal ZoneMembershipCondition()
 		{
@@ -78,7 +78,7 @@ namespace System.Security.Policy
 			string text = e.Attribute("Zone");
 			if (text != null)
 			{
-				this.zone = (SecurityZone)Enum.Parse(typeof(SecurityZone), text);
+				this.zone = (SecurityZone)((int)Enum.Parse(typeof(SecurityZone), text));
 			}
 		}
 

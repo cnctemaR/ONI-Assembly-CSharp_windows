@@ -4,10 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
-	[ClassInterface(ClassInterfaceType.None)]
-	[ComVisible(true)]
 	[ComDefaultInterface(typeof(_FieldBuilder))]
-	[StructLayout(LayoutKind.Sequential)]
+	[ComVisible(true)]
+	[ClassInterface(ClassInterfaceType.None)]
 	public sealed class FieldBuilder : FieldInfo, _FieldBuilder
 	{
 		internal FieldBuilder(TypeBuilder tb, string fieldName, Type type, FieldAttributes attributes, Type[] modReq, Type[] modOpt)
@@ -24,7 +23,26 @@ namespace System.Reflection.Emit
 			this.offset = -1;
 			this.typeb = tb;
 			this.table_idx = tb.get_next_table_index(this, 4, true);
-			((ModuleBuilder)tb.Module).RegisterToken(this, this.GetToken().Token);
+		}
+
+		void _FieldBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldBuilder.GetTypeInfoCount(out uint pcTInfo)
+		{
+			throw new NotImplementedException();
+		}
+
+		void _FieldBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
+		{
+			throw new NotImplementedException();
 		}
 
 		public override FieldAttributes Attributes
@@ -127,10 +145,6 @@ namespace System.Reflection.Emit
 		public void SetCustomAttribute(CustomAttributeBuilder customBuilder)
 		{
 			this.RejectIfCreated();
-			if (customBuilder == null)
-			{
-				throw new ArgumentNullException("customBuilder");
-			}
 			string fullName = customBuilder.Ctor.ReflectedType.FullName;
 			if (fullName == "System.Runtime.InteropServices.FieldOffsetAttribute")
 			{
@@ -163,10 +177,12 @@ namespace System.Reflection.Emit
 				this.cattrs.CopyTo(array, 0);
 				array[this.cattrs.Length] = customBuilder;
 				this.cattrs = array;
-				return;
 			}
-			this.cattrs = new CustomAttributeBuilder[1];
-			this.cattrs[0] = customBuilder;
+			else
+			{
+				this.cattrs = new CustomAttributeBuilder[1];
+				this.cattrs[0] = customBuilder;
+			}
 		}
 
 		[ComVisible(true)]
@@ -187,16 +203,20 @@ namespace System.Reflection.Emit
 		public void SetOffset(int iOffset)
 		{
 			this.RejectIfCreated();
-			if (iOffset < 0)
-			{
-				throw new ArgumentException("Negative field offset is not allowed");
-			}
 			this.offset = iOffset;
 		}
 
 		public override void SetValue(object obj, object val, BindingFlags invokeAttr, Binder binder, CultureInfo culture)
 		{
 			throw this.CreateNotSupportedException();
+		}
+
+		internal override UnmanagedMarshal UMarshal
+		{
+			get
+			{
+				return this.marshal_info;
+			}
 		}
 
 		private Exception CreateNotSupportedException()
@@ -212,49 +232,12 @@ namespace System.Reflection.Emit
 			}
 		}
 
-		internal void ResolveUserTypes()
-		{
-			this.type = TypeBuilder.ResolveUserType(this.type);
-			TypeBuilder.ResolveUserTypes(this.modReq);
-			TypeBuilder.ResolveUserTypes(this.modOpt);
-			if (this.marshal_info != null)
-			{
-				this.marshal_info.marshaltyperef = TypeBuilder.ResolveUserType(this.marshal_info.marshaltyperef);
-			}
-		}
-
-		internal FieldInfo RuntimeResolve()
-		{
-			RuntimeTypeHandle runtimeTypeHandle = new RuntimeTypeHandle(this.typeb.CreateType() as RuntimeType);
-			return FieldInfo.GetFieldFromHandle(this.handle, runtimeTypeHandle);
-		}
-
 		public override Module Module
 		{
 			get
 			{
 				return base.Module;
 			}
-		}
-
-		void _FieldBuilder.GetIDsOfNames([In] ref Guid riid, IntPtr rgszNames, uint cNames, uint lcid, IntPtr rgDispId)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldBuilder.GetTypeInfo(uint iTInfo, uint lcid, IntPtr ppTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldBuilder.GetTypeInfoCount(out uint pcTInfo)
-		{
-			throw new NotImplementedException();
-		}
-
-		void _FieldBuilder.Invoke(uint dispIdMember, [In] ref Guid riid, uint lcid, short wFlags, IntPtr pDispParams, IntPtr pVarResult, IntPtr pExcepInfo, IntPtr puArgErr)
-		{
-			throw new NotImplementedException();
 		}
 
 		private FieldAttributes attrs;

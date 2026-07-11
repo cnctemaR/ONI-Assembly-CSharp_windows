@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Mono
@@ -108,11 +107,7 @@ namespace Mono
 		{
 			get
 			{
-				if (!BitConverter.IsLittleEndian)
-				{
-					return DataConverter.SwapConv;
-				}
-				return DataConverter.CopyConv;
+				return (!BitConverter.IsLittleEndian) ? DataConverter.SwapConv : DataConverter.CopyConv;
 			}
 		}
 
@@ -120,11 +115,7 @@ namespace Mono
 		{
 			get
 			{
-				if (!BitConverter.IsLittleEndian)
-				{
-					return DataConverter.CopyConv;
-				}
-				return DataConverter.SwapConv;
+				return (!BitConverter.IsLittleEndian) ? DataConverter.CopyConv : DataConverter.SwapConv;
 			}
 		}
 
@@ -169,10 +160,7 @@ namespace Mono
 					num++;
 					if (packContext.repeat > 0)
 					{
-						DataConverter.PackContext packContext2 = packContext;
-						int num2 = packContext2.repeat - 1;
-						packContext2.repeat = num2;
-						if (num2 > 0)
+						if (--packContext.repeat > 0)
 						{
 							packContext.i = i;
 						}
@@ -223,10 +211,7 @@ namespace Mono
 					flag = enumerator.MoveNext();
 					if (packContext.repeat > 0)
 					{
-						DataConverter.PackContext packContext2 = packContext;
-						int num = packContext2.repeat - 1;
-						packContext2.repeat = num;
-						if (num > 0)
+						if (--packContext.repeat > 0)
 						{
 							packContext.i = i;
 						}
@@ -251,116 +236,156 @@ namespace Mono
 		private static bool PackOne(DataConverter.PackContext b, object oarg)
 		{
 			char c = b.description[b.i];
-			if (c <= 'S')
+			switch (c)
 			{
-				if (c <= 'C')
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				b.repeat = (int)((short)b.description[b.i] - 48);
+				return false;
+			default:
+				switch (c)
+				{
+				case '[':
+				{
+					int num = -1;
+					int i;
+					for (i = b.i + 1; i < b.description.Length; i++)
+					{
+						if (b.description[i] == ']')
+						{
+							break;
+						}
+						int num2 = (int)((short)b.description[i] - 48);
+						if (num2 >= 0 && num2 <= 9)
+						{
+							if (num == -1)
+							{
+								num = num2;
+							}
+							else
+							{
+								num = num * 10 + num2;
+							}
+						}
+					}
+					if (num == -1)
+					{
+						throw new ArgumentException("invalid size specification");
+					}
+					b.i = i;
+					b.repeat = num;
+					return false;
+				}
+				default:
 				{
 					switch (c)
 					{
 					case '!':
 						b.align = -1;
 						return false;
-					case '"':
-					case '#':
-					case '&':
-					case '\'':
-					case '(':
-					case ')':
-					case '+':
-					case ',':
-					case '-':
-					case '.':
-					case '/':
-					case '0':
-						goto IL_044B;
+					default:
+						switch (c)
+						{
+						case 'I':
+							b.Add(b.conv.GetBytes(Convert.ToUInt32(oarg)));
+							return true;
+						default:
+							switch (c)
+							{
+							case 'x':
+								b.Add(new byte[1]);
+								return false;
+							default:
+								if (c == '*')
+								{
+									b.repeat = int.MaxValue;
+									return false;
+								}
+								if (c == 'S')
+								{
+									b.Add(b.conv.GetBytes(Convert.ToUInt16(oarg)));
+									return true;
+								}
+								if (c != 's')
+								{
+									throw new ArgumentException(string.Format("invalid format specified `{0}'", b.description[b.i]));
+								}
+								b.Add(b.conv.GetBytes(Convert.ToInt16(oarg)));
+								return true;
+							case 'z':
+								break;
+							}
+							break;
+						case 'L':
+							b.Add(b.conv.GetBytes(Convert.ToUInt64(oarg)));
+							return true;
+						}
+						break;
 					case '$':
 						break;
 					case '%':
 						b.conv = DataConverter.Native;
 						return false;
-					case '*':
-						b.repeat = int.MaxValue;
-						return false;
-					case '1':
-					case '2':
+					}
+					bool flag = b.description[b.i] == 'z';
+					b.i++;
+					if (b.i >= b.description.Length)
+					{
+						throw new ArgumentException("$ description needs a type specified", "description");
+					}
+					char c2 = b.description[b.i];
+					char c3 = c2;
+					int num2;
+					Encoding encoding;
+					switch (c3)
+					{
 					case '3':
+						encoding = Encoding.GetEncoding(12000);
+						num2 = 4;
+						break;
 					case '4':
-					case '5':
-					case '6':
-					case '7':
-					case '8':
-					case '9':
-						b.repeat = (int)((short)b.description[b.i] - 48);
-						return false;
+						encoding = Encoding.GetEncoding(12001);
+						num2 = 4;
+						break;
 					default:
-						if (c != 'C')
+						if (c3 != 'b')
 						{
-							goto IL_044B;
+							throw new ArgumentException("Invalid format for $ specifier", "description");
 						}
-						b.Add(new byte[] { Convert.ToByte(oarg) });
-						return true;
+						encoding = Encoding.BigEndianUnicode;
+						num2 = 2;
+						break;
+					case '6':
+						encoding = Encoding.Unicode;
+						num2 = 2;
+						break;
+					case '7':
+						encoding = Encoding.UTF7;
+						num2 = 1;
+						break;
+					case '8':
+						encoding = Encoding.UTF8;
+						num2 = 1;
+						break;
 					}
+					if (b.align == -1)
+					{
+						b.align = 4;
+					}
+					b.Add(encoding.GetBytes(Convert.ToString(oarg)));
+					if (flag)
+					{
+						b.Add(new byte[num2]);
+					}
+					break;
 				}
-				else
-				{
-					if (c == 'I')
-					{
-						b.Add(b.conv.GetBytes(Convert.ToUInt32(oarg)));
-						return true;
-					}
-					if (c == 'L')
-					{
-						b.Add(b.conv.GetBytes(Convert.ToUInt64(oarg)));
-						return true;
-					}
-					if (c != 'S')
-					{
-						goto IL_044B;
-					}
-					b.Add(b.conv.GetBytes(Convert.ToUInt16(oarg)));
-					return true;
-				}
-			}
-			else if (c <= 'l')
-			{
-				switch (c)
-				{
-				case '[':
-				{
-					int num = -1;
-					int num2 = b.i + 1;
-					while (num2 < b.description.Length && b.description[num2] != ']')
-					{
-						int num3 = (int)((short)b.description[num2] - 48);
-						if (num3 >= 0 && num3 <= 9)
-						{
-							if (num == -1)
-							{
-								num = num3;
-							}
-							else
-							{
-								num = num * 10 + num3;
-							}
-						}
-						num2++;
-					}
-					if (num == -1)
-					{
-						throw new ArgumentException("invalid size specification");
-					}
-					b.i = num2;
-					b.repeat = num;
-					return false;
-				}
-				case '\\':
-				case ']':
-				case '`':
-				case 'a':
-				case 'e':
-				case 'g':
-				case 'h':
-					goto IL_044B;
 				case '^':
 					b.conv = DataConverter.BigEndian;
 					return false;
@@ -369,112 +394,29 @@ namespace Mono
 					return false;
 				case 'b':
 					b.Add(new byte[] { Convert.ToByte(oarg) });
-					return true;
+					break;
 				case 'c':
 					b.Add(new byte[] { (byte)Convert.ToSByte(oarg) });
-					return true;
+					break;
 				case 'd':
 					b.Add(b.conv.GetBytes(Convert.ToDouble(oarg)));
-					return true;
+					break;
 				case 'f':
 					b.Add(b.conv.GetBytes(Convert.ToSingle(oarg)));
-					return true;
+					break;
 				case 'i':
 					b.Add(b.conv.GetBytes(Convert.ToInt32(oarg)));
-					return true;
-				default:
-					if (c != 'l')
-					{
-						goto IL_044B;
-					}
+					break;
+				case 'l':
 					b.Add(b.conv.GetBytes(Convert.ToInt64(oarg)));
-					return true;
-				}
-			}
-			else
-			{
-				if (c == 's')
-				{
-					b.Add(b.conv.GetBytes(Convert.ToInt16(oarg)));
-					return true;
-				}
-				if (c == 'x')
-				{
-					b.Add(new byte[1]);
-					return false;
-				}
-				if (c != 'z')
-				{
-					goto IL_044B;
-				}
-			}
-			bool flag = b.description[b.i] == 'z';
-			b.i++;
-			if (b.i >= b.description.Length)
-			{
-				throw new ArgumentException("$ description needs a type specified", "description");
-			}
-			char c2 = b.description[b.i];
-			Encoding encoding;
-			switch (c2)
-			{
-			case '3':
-			{
-				encoding = Encoding.GetEncoding(12000);
-				int num3 = 4;
-				goto IL_0416;
-			}
-			case '4':
-			{
-				encoding = Encoding.GetEncoding(12001);
-				int num3 = 4;
-				goto IL_0416;
-			}
-			case '5':
-				break;
-			case '6':
-			{
-				encoding = Encoding.Unicode;
-				int num3 = 2;
-				goto IL_0416;
-			}
-			case '7':
-			{
-				encoding = Encoding.UTF7;
-				int num3 = 1;
-				goto IL_0416;
-			}
-			case '8':
-			{
-				encoding = Encoding.UTF8;
-				int num3 = 1;
-				goto IL_0416;
-			}
-			default:
-				if (c2 == 'b')
-				{
-					encoding = Encoding.BigEndianUnicode;
-					int num3 = 2;
-					goto IL_0416;
+					break;
 				}
 				break;
-			}
-			throw new ArgumentException("Invalid format for $ specifier", "description");
-			IL_0416:
-			if (b.align == -1)
-			{
-				b.align = 4;
-			}
-			b.Add(encoding.GetBytes(Convert.ToString(oarg)));
-			if (flag)
-			{
-				int num3;
-				b.Add(new byte[num3]);
-				return true;
+			case 'C':
+				b.Add(new byte[] { Convert.ToByte(oarg) });
+				break;
 			}
 			return true;
-			IL_044B:
-			throw new ArgumentException(string.Format("invalid format specified `{0}'", b.description[b.i]));
 		}
 
 		private static bool Prepare(byte[] buffer, ref int idx, int size, ref bool align)
@@ -495,7 +437,7 @@ namespace Mono
 		public static IList Unpack(string description, byte[] buffer, int startIndex)
 		{
 			DataConverter dataConverter = DataConverter.CopyConv;
-			List<object> list = new List<object>();
+			ArrayList arrayList = new ArrayList();
 			int num = startIndex;
 			bool flag = false;
 			int num2 = 0;
@@ -504,123 +446,238 @@ namespace Mono
 			{
 				int num4 = num3;
 				char c = description[num3];
-				if (c <= 'S')
+				switch (c)
 				{
-					if (c <= 'C')
-					{
-						switch (c)
-						{
-						case '!':
-							flag = true;
-							break;
-						case '"':
-						case '#':
-						case '&':
-						case '\'':
-						case '(':
-						case ')':
-						case '+':
-						case ',':
-						case '-':
-						case '.':
-						case '/':
-						case '0':
-							goto IL_05C2;
-						case '$':
-							goto IL_03E0;
-						case '%':
-							dataConverter = DataConverter.Native;
-							break;
-						case '*':
-							num2 = int.MaxValue;
-							break;
-						case '1':
-						case '2':
-						case '3':
-						case '4':
-						case '5':
-						case '6':
-						case '7':
-						case '8':
-						case '9':
-							num2 = (int)((short)description[num3] - 48);
-							num4 = num3 + 1;
-							break;
-						default:
-							if (c != 'C')
-							{
-								goto IL_05C2;
-							}
-							goto IL_0303;
-						}
-					}
-					else if (c != 'I')
-					{
-						if (c != 'L')
-						{
-							if (c != 'S')
-							{
-								goto IL_05C2;
-							}
-							if (DataConverter.Prepare(buffer, ref num, 2, ref flag))
-							{
-								list.Add(dataConverter.GetUInt16(buffer, num));
-								num += 2;
-							}
-						}
-						else if (DataConverter.Prepare(buffer, ref num, 8, ref flag))
-						{
-							list.Add(dataConverter.GetUInt64(buffer, num));
-							num += 8;
-						}
-					}
-					else if (DataConverter.Prepare(buffer, ref num, 4, ref flag))
-					{
-						list.Add(dataConverter.GetUInt32(buffer, num));
-						num += 4;
-					}
-				}
-				else if (c <= 'l')
-				{
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					num2 = (int)((short)description[num3] - 48);
+					num4 = num3 + 1;
+					break;
+				default:
 					switch (c)
 					{
 					case '[':
 					{
 						int num5 = -1;
-						int num6 = num3 + 1;
-						while (num6 < description.Length && description[num6] != ']')
+						int i;
+						for (i = num3 + 1; i < description.Length; i++)
 						{
-							int num7 = (int)((short)description[num6] - 48);
-							if (num7 >= 0 && num7 <= 9)
+							if (description[i] == ']')
+							{
+								break;
+							}
+							int num6 = (int)((short)description[i] - 48);
+							if (num6 >= 0 && num6 <= 9)
 							{
 								if (num5 == -1)
 								{
-									num5 = num7;
+									num5 = num6;
 								}
 								else
 								{
-									num5 = num5 * 10 + num7;
+									num5 = num5 * 10 + num6;
 								}
 							}
-							num6++;
 						}
 						if (num5 == -1)
 						{
 							throw new ArgumentException("invalid size specification");
 						}
-						num3 = num6;
-						num4 = num3 + 1;
+						num3 = i;
 						num2 = num5;
 						break;
 					}
-					case '\\':
-					case ']':
-					case '`':
-					case 'a':
-					case 'e':
-					case 'g':
-					case 'h':
-						goto IL_05C2;
+					default:
+					{
+						switch (c)
+						{
+						case '!':
+							flag = true;
+							goto IL_0683;
+						default:
+							switch (c)
+							{
+							case 'I':
+								if (DataConverter.Prepare(buffer, ref num, 4, ref flag))
+								{
+									arrayList.Add(dataConverter.GetUInt32(buffer, num));
+									num += 4;
+								}
+								goto IL_0683;
+							default:
+								switch (c)
+								{
+								case 'x':
+									num++;
+									goto IL_0683;
+								default:
+									if (c == '*')
+									{
+										num2 = int.MaxValue;
+										goto IL_0683;
+									}
+									if (c == 'S')
+									{
+										if (DataConverter.Prepare(buffer, ref num, 2, ref flag))
+										{
+											arrayList.Add(dataConverter.GetUInt16(buffer, num));
+											num += 2;
+										}
+										goto IL_0683;
+									}
+									if (c != 's')
+									{
+										throw new ArgumentException(string.Format("invalid format specified `{0}'", description[num3]));
+									}
+									if (DataConverter.Prepare(buffer, ref num, 2, ref flag))
+									{
+										arrayList.Add(dataConverter.GetInt16(buffer, num));
+										num += 2;
+									}
+									goto IL_0683;
+								case 'z':
+									break;
+								}
+								break;
+							case 'L':
+								if (DataConverter.Prepare(buffer, ref num, 8, ref flag))
+								{
+									arrayList.Add(dataConverter.GetUInt64(buffer, num));
+									num += 8;
+								}
+								goto IL_0683;
+							}
+							break;
+						case '$':
+							break;
+						case '%':
+							dataConverter = DataConverter.Native;
+							goto IL_0683;
+						}
+						num3++;
+						if (num3 >= description.Length)
+						{
+							throw new ArgumentException("$ description needs a type specified", "description");
+						}
+						char c2 = description[num3];
+						if (flag)
+						{
+							num = DataConverter.Align(num, 4);
+							flag = false;
+						}
+						if (num < buffer.Length)
+						{
+							char c3 = c2;
+							int num6;
+							Encoding encoding;
+							switch (c3)
+							{
+							case '3':
+								encoding = Encoding.GetEncoding(12000);
+								num6 = 4;
+								break;
+							case '4':
+								encoding = Encoding.GetEncoding(12001);
+								num6 = 4;
+								break;
+							default:
+								if (c3 != 'b')
+								{
+									throw new ArgumentException("Invalid format for $ specifier", "description");
+								}
+								encoding = Encoding.BigEndianUnicode;
+								num6 = 2;
+								break;
+							case '6':
+								encoding = Encoding.Unicode;
+								num6 = 2;
+								break;
+							case '7':
+								encoding = Encoding.UTF7;
+								num6 = 1;
+								break;
+							case '8':
+								encoding = Encoding.UTF8;
+								num6 = 1;
+								break;
+							}
+							int j = num;
+							switch (num6)
+							{
+							case 1:
+								while (j < buffer.Length && buffer[j] != 0)
+								{
+									j++;
+								}
+								arrayList.Add(encoding.GetChars(buffer, num, j - num));
+								if (j == buffer.Length)
+								{
+									num = j;
+								}
+								else
+								{
+									num = j + 1;
+								}
+								break;
+							case 2:
+								while (j < buffer.Length)
+								{
+									if (j + 1 == buffer.Length)
+									{
+										j++;
+										break;
+									}
+									if (buffer[j] == 0 && buffer[j + 1] == 0)
+									{
+										break;
+									}
+									j++;
+								}
+								arrayList.Add(encoding.GetChars(buffer, num, j - num));
+								if (j == buffer.Length)
+								{
+									num = j;
+								}
+								else
+								{
+									num = j + 2;
+								}
+								break;
+							case 4:
+								while (j < buffer.Length)
+								{
+									if (j + 3 >= buffer.Length)
+									{
+										j = buffer.Length;
+										break;
+									}
+									if (buffer[j] == 0 && buffer[j + 1] == 0 && buffer[j + 2] == 0 && buffer[j + 3] == 0)
+									{
+										break;
+									}
+									j++;
+								}
+								arrayList.Add(encoding.GetChars(buffer, num, j - num));
+								if (j == buffer.Length)
+								{
+									num = j;
+								}
+								else
+								{
+									num = j + 4;
+								}
+								break;
+							}
+						}
+						break;
+					}
 					case '^':
 						dataConverter = DataConverter.BigEndian;
 						break;
@@ -630,217 +687,74 @@ namespace Mono
 					case 'b':
 						if (DataConverter.Prepare(buffer, ref num, 1, ref flag))
 						{
-							list.Add(buffer[num]);
+							arrayList.Add(buffer[num]);
 							num++;
 						}
 						break;
 					case 'c':
-						goto IL_0303;
+						goto IL_0300;
 					case 'd':
 						if (DataConverter.Prepare(buffer, ref num, 8, ref flag))
 						{
-							list.Add(dataConverter.GetDouble(buffer, num));
+							arrayList.Add(dataConverter.GetDouble(buffer, num));
 							num += 8;
 						}
 						break;
 					case 'f':
 						if (DataConverter.Prepare(buffer, ref num, 4, ref flag))
 						{
-							list.Add(dataConverter.GetFloat(buffer, num));
+							arrayList.Add(dataConverter.GetDouble(buffer, num));
 							num += 4;
 						}
 						break;
 					case 'i':
 						if (DataConverter.Prepare(buffer, ref num, 4, ref flag))
 						{
-							list.Add(dataConverter.GetInt32(buffer, num));
+							arrayList.Add(dataConverter.GetInt32(buffer, num));
 							num += 4;
 						}
 						break;
-					default:
-						if (c != 'l')
-						{
-							goto IL_05C2;
-						}
+					case 'l':
 						if (DataConverter.Prepare(buffer, ref num, 8, ref flag))
 						{
-							list.Add(dataConverter.GetInt64(buffer, num));
+							arrayList.Add(dataConverter.GetInt64(buffer, num));
 							num += 8;
 						}
 						break;
 					}
+					break;
+				case 'C':
+					goto IL_0300;
 				}
-				else if (c != 's')
+				IL_0683:
+				if (num2 > 0)
 				{
-					if (c != 'x')
+					if (--num2 > 0)
 					{
-						if (c != 'z')
-						{
-							goto IL_05C2;
-						}
-						goto IL_03E0;
+						num3 = num4;
 					}
-					else
-					{
-						num++;
-					}
-				}
-				else if (DataConverter.Prepare(buffer, ref num, 2, ref flag))
-				{
-					list.Add(dataConverter.GetInt16(buffer, num));
-					num += 2;
-				}
-				IL_05DF:
-				if (num2 <= 0)
-				{
-					num3++;
 					continue;
 				}
-				if (--num2 > 0)
-				{
-					num3 = num4;
-					continue;
-				}
+				num3++;
 				continue;
-				IL_0303:
+				IL_0300:
 				if (DataConverter.Prepare(buffer, ref num, 1, ref flag))
 				{
-					char c2;
+					char c4;
 					if (description[num3] == 'c')
 					{
-						c2 = (char)((sbyte)buffer[num]);
+						c4 = (char)((sbyte)buffer[num]);
 					}
 					else
 					{
-						c2 = (char)buffer[num];
+						c4 = (char)buffer[num];
 					}
-					list.Add(c2);
+					arrayList.Add(c4);
 					num++;
-					goto IL_05DF;
 				}
-				goto IL_05DF;
-				IL_03E0:
-				num3++;
-				if (num3 >= description.Length)
-				{
-					throw new ArgumentException("$ description needs a type specified", "description");
-				}
-				char c3 = description[num3];
-				if (flag)
-				{
-					num = DataConverter.Align(num, 4);
-					flag = false;
-				}
-				if (num < buffer.Length)
-				{
-					int num7;
-					Encoding encoding;
-					switch (c3)
-					{
-					case '3':
-						encoding = Encoding.GetEncoding(12000);
-						num7 = 4;
-						break;
-					case '4':
-						encoding = Encoding.GetEncoding(12001);
-						num7 = 4;
-						break;
-					case '5':
-						goto IL_049C;
-					case '6':
-						encoding = Encoding.Unicode;
-						num7 = 2;
-						break;
-					case '7':
-						encoding = Encoding.UTF7;
-						num7 = 1;
-						break;
-					case '8':
-						encoding = Encoding.UTF8;
-						num7 = 1;
-						break;
-					default:
-						if (c3 != 'b')
-						{
-							goto IL_049C;
-						}
-						encoding = Encoding.BigEndianUnicode;
-						num7 = 2;
-						break;
-					}
-					int i = num;
-					switch (num7)
-					{
-					case 1:
-						while (i < buffer.Length && buffer[i] != 0)
-						{
-							i++;
-						}
-						list.Add(encoding.GetChars(buffer, num, i - num));
-						if (i == buffer.Length)
-						{
-							num = i;
-							goto IL_05DF;
-						}
-						num = i + 1;
-						goto IL_05DF;
-					case 2:
-						while (i < buffer.Length)
-						{
-							if (i + 1 == buffer.Length)
-							{
-								i++;
-								break;
-							}
-							if (buffer[i] == 0 && buffer[i + 1] == 0)
-							{
-								break;
-							}
-							i++;
-						}
-						list.Add(encoding.GetChars(buffer, num, i - num));
-						if (i == buffer.Length)
-						{
-							num = i;
-							goto IL_05DF;
-						}
-						num = i + 2;
-						goto IL_05DF;
-					case 3:
-						goto IL_05DF;
-					case 4:
-						while (i < buffer.Length)
-						{
-							if (i + 3 >= buffer.Length)
-							{
-								i = buffer.Length;
-								break;
-							}
-							if (buffer[i] == 0 && buffer[i + 1] == 0 && buffer[i + 2] == 0 && buffer[i + 3] == 0)
-							{
-								break;
-							}
-							i++;
-						}
-						list.Add(encoding.GetChars(buffer, num, i - num));
-						if (i == buffer.Length)
-						{
-							num = i;
-							goto IL_05DF;
-						}
-						num = i + 4;
-						goto IL_05DF;
-					default:
-						goto IL_05DF;
-					}
-					IL_049C:
-					throw new ArgumentException("Invalid format for $ specifier", "description");
-				}
-				goto IL_05DF;
-				IL_05C2:
-				throw new ArgumentException(string.Format("invalid format specified `{0}'", description[num3]));
+				goto IL_0683;
 			}
-			return list;
+			return arrayList;
 		}
 
 		internal void Check(byte[] dest, int destIdx, int size)
@@ -855,9 +769,9 @@ namespace Mono
 			}
 		}
 
-		private static readonly DataConverter SwapConv = new DataConverter.SwapConverter();
+		private static DataConverter SwapConv = new DataConverter.SwapConverter();
 
-		private static readonly DataConverter CopyConv = new DataConverter.CopyConverter();
+		private static DataConverter CopyConv = new DataConverter.CopyConverter();
 
 		public static readonly bool IsLittleEndian = BitConverter.IsLittleEndian;
 
@@ -890,10 +804,12 @@ namespace Mono
 					Array.Copy(group, 0, array, this.next, group.Length);
 					this.next += group.Length;
 					this.buffer = array;
-					return;
 				}
-				Array.Copy(group, 0, this.buffer, this.next, group.Length);
-				this.next += group.Length;
+				else
+				{
+					Array.Copy(group, 0, this.buffer, this.next, group.Length);
+					this.next += group.Length;
+				}
 			}
 
 			public byte[] Get()
@@ -943,10 +859,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				double num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 8; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -966,10 +881,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				ulong num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 8; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -989,10 +903,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				long num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 8; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -1012,10 +925,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				float num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 4; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -1035,10 +947,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				int num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 4; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -1058,10 +969,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				uint num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 4; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -1081,10 +991,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				short num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 2; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -1104,10 +1013,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				ushort num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 2; i++)
 				{
-					ptr[i] = data[index + i];
+					*((ref num) + i) = data[index + i];
 				}
 				return num;
 			}
@@ -1117,9 +1025,7 @@ namespace Mono
 				base.Check(dest, destIdx, 8);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref long ptr2 = ref *(long*)ptr;
-					long* ptr3 = (long*)(&value);
-					ptr2 = *ptr3;
+					*(long*)ptr = (long)value;
 				}
 			}
 
@@ -1128,9 +1034,7 @@ namespace Mono
 				base.Check(dest, destIdx, 4);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref int ptr2 = ref *(int*)ptr;
-					uint* ptr3 = (uint*)(&value);
-					ptr2 = (int)(*ptr3);
+					*(int*)ptr = (int)value;
 				}
 			}
 
@@ -1139,9 +1043,7 @@ namespace Mono
 				base.Check(dest, destIdx, 4);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref int ptr2 = ref *(int*)ptr;
-					uint* ptr3 = (uint*)(&value);
-					ptr2 = (int)(*ptr3);
+					*(int*)ptr = value;
 				}
 			}
 
@@ -1150,9 +1052,7 @@ namespace Mono
 				base.Check(dest, destIdx, 4);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref int ptr2 = ref *(int*)ptr;
-					uint* ptr3 = &value;
-					ptr2 = (int)(*ptr3);
+					*(int*)ptr = (int)value;
 				}
 			}
 
@@ -1161,9 +1061,7 @@ namespace Mono
 				base.Check(dest, destIdx, 8);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref long ptr2 = ref *(long*)ptr;
-					long* ptr3 = &value;
-					ptr2 = *ptr3;
+					*(long*)ptr = value;
 				}
 			}
 
@@ -1172,9 +1070,7 @@ namespace Mono
 				base.Check(dest, destIdx, 8);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref long ptr2 = ref *(long*)ptr;
-					ulong* ptr3 = &value;
-					ptr2 = (long)(*ptr3);
+					*(long*)ptr = (long)value;
 				}
 			}
 
@@ -1183,9 +1079,7 @@ namespace Mono
 				base.Check(dest, destIdx, 2);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref short ptr2 = ref *(short*)ptr;
-					ushort* ptr3 = (ushort*)(&value);
-					ptr2 = (short)(*ptr3);
+					*(short*)ptr = value;
 				}
 			}
 
@@ -1194,9 +1088,7 @@ namespace Mono
 				base.Check(dest, destIdx, 2);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					ref short ptr2 = ref *(short*)ptr;
-					ushort* ptr3 = &value;
-					ptr2 = (short)(*ptr3);
+					*(short*)ptr = (short)value;
 				}
 			}
 		}
@@ -1218,10 +1110,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				double num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 8; i++)
 				{
-					ptr[7 - i] = data[index + i];
+					*((ref num) + (7 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1241,10 +1132,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				ulong num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 8; i++)
 				{
-					ptr[7 - i] = data[index + i];
+					*((ref num) + (7 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1264,10 +1154,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				long num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 8; i++)
 				{
-					ptr[7 - i] = data[index + i];
+					*((ref num) + (7 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1287,10 +1176,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				float num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 4; i++)
 				{
-					ptr[3 - i] = data[index + i];
+					*((ref num) + (3 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1310,10 +1198,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				int num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 4; i++)
 				{
-					ptr[3 - i] = data[index + i];
+					*((ref num) + (3 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1333,10 +1220,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				uint num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 4; i++)
 				{
-					ptr[3 - i] = data[index + i];
+					*((ref num) + (3 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1356,10 +1242,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				short num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 2; i++)
 				{
-					ptr[1 - i] = data[index + i];
+					*((ref num) + (1 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1379,10 +1264,9 @@ namespace Mono
 					throw new ArgumentException("index");
 				}
 				ushort num;
-				byte* ptr = (byte*)(&num);
 				for (int i = 0; i < 2; i++)
 				{
-					ptr[1 - i] = data[index + i];
+					*((ref num) + (1 - i)) = data[index + i];
 				}
 				return num;
 			}
@@ -1392,11 +1276,9 @@ namespace Mono
 				base.Check(dest, destIdx, 8);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
 					for (int i = 0; i < 8; i++)
 					{
-						ptr2[i] = ptr3[7 - i];
+						ptr[i] = *((ref value) + (7 - i));
 					}
 				}
 			}
@@ -1406,11 +1288,9 @@ namespace Mono
 				base.Check(dest, destIdx, 4);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
 					for (int i = 0; i < 4; i++)
 					{
-						ptr2[i] = ptr3[3 - i];
+						ptr[i] = *((ref value) + (3 - i));
 					}
 				}
 			}
@@ -1420,11 +1300,9 @@ namespace Mono
 				base.Check(dest, destIdx, 4);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
 					for (int i = 0; i < 4; i++)
 					{
-						ptr2[i] = ptr3[3 - i];
+						ptr[i] = *((ref value) + (3 - i));
 					}
 				}
 			}
@@ -1434,11 +1312,9 @@ namespace Mono
 				base.Check(dest, destIdx, 4);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
 					for (int i = 0; i < 4; i++)
 					{
-						ptr2[i] = ptr3[3 - i];
+						ptr[i] = *((ref value) + (3 - i));
 					}
 				}
 			}
@@ -1448,11 +1324,9 @@ namespace Mono
 				base.Check(dest, destIdx, 8);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
 					for (int i = 0; i < 8; i++)
 					{
-						ptr2[i] = ptr3[7 - i];
+						ptr[i] = *((ref value) + (7 - i));
 					}
 				}
 			}
@@ -1462,11 +1336,9 @@ namespace Mono
 				base.Check(dest, destIdx, 8);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
-					for (int i = 0; i < 8; i++)
+					for (int i = 0; i < 4; i++)
 					{
-						ptr2[i] = ptr3[7 - i];
+						ptr[i] = *((ref value) + (7 - i));
 					}
 				}
 			}
@@ -1476,11 +1348,9 @@ namespace Mono
 				base.Check(dest, destIdx, 2);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
 					for (int i = 0; i < 2; i++)
 					{
-						ptr2[i] = ptr3[1 - i];
+						ptr[i] = *((ref value) + (1 - i));
 					}
 				}
 			}
@@ -1490,11 +1360,9 @@ namespace Mono
 				base.Check(dest, destIdx, 2);
 				fixed (byte* ptr = &dest[destIdx])
 				{
-					byte* ptr2 = ptr;
-					byte* ptr3 = (byte*)(&value);
 					for (int i = 0; i < 2; i++)
 					{
-						ptr2[i] = ptr3[1 - i];
+						ptr[i] = *((ref value) + (1 - i));
 					}
 				}
 			}

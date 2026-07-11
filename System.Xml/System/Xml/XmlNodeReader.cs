@@ -1,116 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Schema;
+using Mono.Xml;
 
 namespace System.Xml
 {
-	public class XmlNodeReader : XmlReader, IXmlNamespaceResolver
+	public class XmlNodeReader : XmlReader, IHasXmlParserContext, IXmlNamespaceResolver
 	{
 		public XmlNodeReader(XmlNode node)
 		{
-			if (node == null)
-			{
-				throw new ArgumentNullException("node");
-			}
-			this.readerNav = new XmlNodeReaderNavigator(node);
-			this.curDepth = 0;
-			this.readState = ReadState.Initial;
-			this.fEOF = false;
-			this.nodeType = XmlNodeType.None;
-			this.bResolveEntity = false;
-			this.bStartFromDocument = false;
+			this.source = new XmlNodeReaderImpl(node);
 		}
 
-		internal bool IsInReadingStates()
+		private XmlNodeReader(XmlNodeReaderImpl entityContainer, bool insideAttribute)
 		{
-			return this.readState == ReadState.Interactive;
+			this.source = new XmlNodeReaderImpl(entityContainer);
+			this.entityInsideAttribute = insideAttribute;
 		}
 
-		public override XmlNodeType NodeType
+		XmlParserContext IHasXmlParserContext.ParserContext
 		{
 			get
 			{
-				if (!this.IsInReadingStates())
-				{
-					return XmlNodeType.None;
-				}
-				return this.nodeType;
+				return ((IHasXmlParserContext)this.Current).ParserContext;
 			}
 		}
 
-		public override string Name
+		IDictionary<string, string> IXmlNamespaceResolver.GetNamespacesInScope(XmlNamespaceScope scope)
+		{
+			return ((IXmlNamespaceResolver)this.Current).GetNamespacesInScope(scope);
+		}
+
+		string IXmlNamespaceResolver.LookupPrefix(string ns)
+		{
+			return ((IXmlNamespaceResolver)this.Current).LookupPrefix(ns);
+		}
+
+		private XmlReader Current
 		{
 			get
 			{
-				if (!this.IsInReadingStates())
-				{
-					return string.Empty;
-				}
-				return this.readerNav.Name;
+				return (this.entity == null || this.entity.ReadState == ReadState.Initial) ? this.source : this.entity;
 			}
 		}
 
-		public override string LocalName
+		public override int AttributeCount
 		{
 			get
 			{
-				if (!this.IsInReadingStates())
-				{
-					return string.Empty;
-				}
-				return this.readerNav.LocalName;
-			}
-		}
-
-		public override string NamespaceURI
-		{
-			get
-			{
-				if (!this.IsInReadingStates())
-				{
-					return string.Empty;
-				}
-				return this.readerNav.NamespaceURI;
-			}
-		}
-
-		public override string Prefix
-		{
-			get
-			{
-				if (!this.IsInReadingStates())
-				{
-					return string.Empty;
-				}
-				return this.readerNav.Prefix;
-			}
-		}
-
-		public override bool HasValue
-		{
-			get
-			{
-				return this.IsInReadingStates() && this.readerNav.HasValue;
-			}
-		}
-
-		public override string Value
-		{
-			get
-			{
-				if (!this.IsInReadingStates())
-				{
-					return string.Empty;
-				}
-				return this.readerNav.Value;
-			}
-		}
-
-		public override int Depth
-		{
-			get
-			{
-				return this.curDepth;
+				return this.Current.AttributeCount;
 			}
 		}
 
@@ -118,7 +56,15 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.readerNav.BaseURI;
+				return this.Current.BaseURI;
+			}
+		}
+
+		public override bool CanReadBinaryContent
+		{
+			get
+			{
+				return true;
 			}
 		}
 
@@ -130,11 +76,39 @@ namespace System.Xml
 			}
 		}
 
-		public override bool IsEmptyElement
+		public override int Depth
 		{
 			get
 			{
-				return this.IsInReadingStates() && this.readerNav.IsEmptyElement;
+				if (this.entity != null && this.entity.ReadState == ReadState.Interactive)
+				{
+					return this.source.Depth + this.entity.Depth + 1;
+				}
+				return this.source.Depth;
+			}
+		}
+
+		public override bool EOF
+		{
+			get
+			{
+				return this.source.EOF;
+			}
+		}
+
+		public override bool HasAttributes
+		{
+			get
+			{
+				return this.Current.HasAttributes;
+			}
+		}
+
+		public override bool HasValue
+		{
+			get
+			{
+				return this.Current.HasValue;
 			}
 		}
 
@@ -142,429 +116,39 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.IsInReadingStates() && this.readerNav.IsDefault;
+				return this.Current.IsDefault;
 			}
 		}
 
-		public override XmlSpace XmlSpace
+		public override bool IsEmptyElement
 		{
 			get
 			{
-				if (!this.IsInReadingStates())
-				{
-					return XmlSpace.None;
-				}
-				return this.readerNav.XmlSpace;
+				return this.Current.IsEmptyElement;
 			}
 		}
 
-		public override string XmlLang
+		public override string LocalName
 		{
 			get
 			{
-				if (!this.IsInReadingStates())
-				{
-					return string.Empty;
-				}
-				return this.readerNav.XmlLang;
+				return this.Current.LocalName;
 			}
 		}
 
-		public override IXmlSchemaInfo SchemaInfo
+		public override string Name
 		{
 			get
 			{
-				if (!this.IsInReadingStates())
-				{
-					return null;
-				}
-				return this.readerNav.SchemaInfo;
+				return this.Current.Name;
 			}
 		}
 
-		public override int AttributeCount
+		public override string NamespaceURI
 		{
 			get
 			{
-				if (!this.IsInReadingStates() || this.nodeType == XmlNodeType.EndElement)
-				{
-					return 0;
-				}
-				return this.readerNav.AttributeCount;
-			}
-		}
-
-		public override string GetAttribute(string name)
-		{
-			if (!this.IsInReadingStates())
-			{
-				return null;
-			}
-			return this.readerNav.GetAttribute(name);
-		}
-
-		public override string GetAttribute(string name, string namespaceURI)
-		{
-			if (!this.IsInReadingStates())
-			{
-				return null;
-			}
-			string text = ((namespaceURI == null) ? string.Empty : namespaceURI);
-			return this.readerNav.GetAttribute(name, text);
-		}
-
-		public override string GetAttribute(int attributeIndex)
-		{
-			if (!this.IsInReadingStates())
-			{
-				throw new ArgumentOutOfRangeException("attributeIndex");
-			}
-			return this.readerNav.GetAttribute(attributeIndex);
-		}
-
-		public override bool MoveToAttribute(string name)
-		{
-			if (!this.IsInReadingStates())
-			{
-				return false;
-			}
-			this.readerNav.ResetMove(ref this.curDepth, ref this.nodeType);
-			if (this.readerNav.MoveToAttribute(name))
-			{
-				this.curDepth++;
-				this.nodeType = this.readerNav.NodeType;
-				if (this.bInReadBinary)
-				{
-					this.FinishReadBinary();
-				}
-				return true;
-			}
-			this.readerNav.RollBackMove(ref this.curDepth);
-			return false;
-		}
-
-		public override bool MoveToAttribute(string name, string namespaceURI)
-		{
-			if (!this.IsInReadingStates())
-			{
-				return false;
-			}
-			this.readerNav.ResetMove(ref this.curDepth, ref this.nodeType);
-			string text = ((namespaceURI == null) ? string.Empty : namespaceURI);
-			if (this.readerNav.MoveToAttribute(name, text))
-			{
-				this.curDepth++;
-				this.nodeType = this.readerNav.NodeType;
-				if (this.bInReadBinary)
-				{
-					this.FinishReadBinary();
-				}
-				return true;
-			}
-			this.readerNav.RollBackMove(ref this.curDepth);
-			return false;
-		}
-
-		public override void MoveToAttribute(int attributeIndex)
-		{
-			if (!this.IsInReadingStates())
-			{
-				throw new ArgumentOutOfRangeException("attributeIndex");
-			}
-			this.readerNav.ResetMove(ref this.curDepth, ref this.nodeType);
-			try
-			{
-				if (this.AttributeCount <= 0)
-				{
-					throw new ArgumentOutOfRangeException("attributeIndex");
-				}
-				this.readerNav.MoveToAttribute(attributeIndex);
-				if (this.bInReadBinary)
-				{
-					this.FinishReadBinary();
-				}
-			}
-			catch
-			{
-				this.readerNav.RollBackMove(ref this.curDepth);
-				throw;
-			}
-			this.curDepth++;
-			this.nodeType = this.readerNav.NodeType;
-		}
-
-		public override bool MoveToFirstAttribute()
-		{
-			if (!this.IsInReadingStates())
-			{
-				return false;
-			}
-			this.readerNav.ResetMove(ref this.curDepth, ref this.nodeType);
-			if (this.AttributeCount > 0)
-			{
-				this.readerNav.MoveToAttribute(0);
-				this.curDepth++;
-				this.nodeType = this.readerNav.NodeType;
-				if (this.bInReadBinary)
-				{
-					this.FinishReadBinary();
-				}
-				return true;
-			}
-			this.readerNav.RollBackMove(ref this.curDepth);
-			return false;
-		}
-
-		public override bool MoveToNextAttribute()
-		{
-			if (!this.IsInReadingStates() || this.nodeType == XmlNodeType.EndElement)
-			{
-				return false;
-			}
-			this.readerNav.LogMove(this.curDepth);
-			this.readerNav.ResetToAttribute(ref this.curDepth);
-			if (this.readerNav.MoveToNextAttribute(ref this.curDepth))
-			{
-				this.nodeType = this.readerNav.NodeType;
-				if (this.bInReadBinary)
-				{
-					this.FinishReadBinary();
-				}
-				return true;
-			}
-			this.readerNav.RollBackMove(ref this.curDepth);
-			return false;
-		}
-
-		public override bool MoveToElement()
-		{
-			if (!this.IsInReadingStates())
-			{
-				return false;
-			}
-			this.readerNav.LogMove(this.curDepth);
-			this.readerNav.ResetToAttribute(ref this.curDepth);
-			if (this.readerNav.MoveToElement())
-			{
-				this.curDepth--;
-				this.nodeType = this.readerNav.NodeType;
-				if (this.bInReadBinary)
-				{
-					this.FinishReadBinary();
-				}
-				return true;
-			}
-			this.readerNav.RollBackMove(ref this.curDepth);
-			return false;
-		}
-
-		public override bool Read()
-		{
-			return this.Read(false);
-		}
-
-		private bool Read(bool fSkipChildren)
-		{
-			if (this.fEOF)
-			{
-				return false;
-			}
-			if (this.readState == ReadState.Initial)
-			{
-				if (this.readerNav.NodeType == XmlNodeType.Document || this.readerNav.NodeType == XmlNodeType.DocumentFragment)
-				{
-					this.bStartFromDocument = true;
-					if (!this.ReadNextNode(fSkipChildren))
-					{
-						this.readState = ReadState.Error;
-						return false;
-					}
-				}
-				this.ReSetReadingMarks();
-				this.readState = ReadState.Interactive;
-				this.nodeType = this.readerNav.NodeType;
-				this.curDepth = 0;
-				return true;
-			}
-			if (this.bInReadBinary)
-			{
-				this.FinishReadBinary();
-			}
-			if (this.readerNav.CreatedOnAttribute)
-			{
-				return false;
-			}
-			this.ReSetReadingMarks();
-			if (this.ReadNextNode(fSkipChildren))
-			{
-				return true;
-			}
-			if (this.readState == ReadState.Initial || this.readState == ReadState.Interactive)
-			{
-				this.readState = ReadState.Error;
-			}
-			if (this.readState == ReadState.EndOfFile)
-			{
-				this.nodeType = XmlNodeType.None;
-			}
-			return false;
-		}
-
-		private bool ReadNextNode(bool fSkipChildren)
-		{
-			if (this.readState != ReadState.Interactive && this.readState != ReadState.Initial)
-			{
-				this.nodeType = XmlNodeType.None;
-				return false;
-			}
-			bool flag = !fSkipChildren;
-			XmlNodeType xmlNodeType = this.readerNav.NodeType;
-			if (flag && this.nodeType != XmlNodeType.EndElement && this.nodeType != XmlNodeType.EndEntity && (xmlNodeType == XmlNodeType.Element || (xmlNodeType == XmlNodeType.EntityReference && this.bResolveEntity) || ((this.readerNav.NodeType == XmlNodeType.Document || this.readerNav.NodeType == XmlNodeType.DocumentFragment) && this.readState == ReadState.Initial)))
-			{
-				if (this.readerNav.MoveToFirstChild())
-				{
-					this.nodeType = this.readerNav.NodeType;
-					this.curDepth++;
-					if (this.bResolveEntity)
-					{
-						this.bResolveEntity = false;
-					}
-					return true;
-				}
-				if (this.readerNav.NodeType == XmlNodeType.Element && !this.readerNav.IsEmptyElement)
-				{
-					this.nodeType = XmlNodeType.EndElement;
-					return true;
-				}
-				if (this.readerNav.NodeType == XmlNodeType.EntityReference && this.bResolveEntity)
-				{
-					this.bResolveEntity = false;
-					this.nodeType = XmlNodeType.EndEntity;
-					return true;
-				}
-				return this.ReadForward(fSkipChildren);
-			}
-			else
-			{
-				if (this.readerNav.NodeType == XmlNodeType.EntityReference && this.bResolveEntity)
-				{
-					if (this.readerNav.MoveToFirstChild())
-					{
-						this.nodeType = this.readerNav.NodeType;
-						this.curDepth++;
-					}
-					else
-					{
-						this.nodeType = XmlNodeType.EndEntity;
-					}
-					this.bResolveEntity = false;
-					return true;
-				}
-				return this.ReadForward(fSkipChildren);
-			}
-		}
-
-		private void SetEndOfFile()
-		{
-			this.fEOF = true;
-			this.readState = ReadState.EndOfFile;
-			this.nodeType = XmlNodeType.None;
-		}
-
-		private bool ReadAtZeroLevel(bool fSkipChildren)
-		{
-			if (!fSkipChildren && this.nodeType != XmlNodeType.EndElement && this.readerNav.NodeType == XmlNodeType.Element && !this.readerNav.IsEmptyElement)
-			{
-				this.nodeType = XmlNodeType.EndElement;
-				return true;
-			}
-			this.SetEndOfFile();
-			return false;
-		}
-
-		private bool ReadForward(bool fSkipChildren)
-		{
-			if (this.readState == ReadState.Error)
-			{
-				return false;
-			}
-			if (!this.bStartFromDocument && this.curDepth == 0)
-			{
-				return this.ReadAtZeroLevel(fSkipChildren);
-			}
-			if (this.readerNav.MoveToNext())
-			{
-				this.nodeType = this.readerNav.NodeType;
-				return true;
-			}
-			if (this.curDepth == 0)
-			{
-				return this.ReadAtZeroLevel(fSkipChildren);
-			}
-			if (!this.readerNav.MoveToParent())
-			{
-				return false;
-			}
-			if (this.readerNav.NodeType == XmlNodeType.Element)
-			{
-				this.curDepth--;
-				this.nodeType = XmlNodeType.EndElement;
-				return true;
-			}
-			if (this.readerNav.NodeType == XmlNodeType.EntityReference)
-			{
-				this.curDepth--;
-				this.nodeType = XmlNodeType.EndEntity;
-				return true;
-			}
-			return true;
-		}
-
-		private void ReSetReadingMarks()
-		{
-			this.readerNav.ResetMove(ref this.curDepth, ref this.nodeType);
-		}
-
-		public override bool EOF
-		{
-			get
-			{
-				return this.readState != ReadState.Closed && this.fEOF;
-			}
-		}
-
-		public override void Close()
-		{
-			this.readState = ReadState.Closed;
-		}
-
-		public override ReadState ReadState
-		{
-			get
-			{
-				return this.readState;
-			}
-		}
-
-		public override void Skip()
-		{
-			this.Read(true);
-		}
-
-		public override string ReadString()
-		{
-			if (this.NodeType == XmlNodeType.EntityReference && this.bResolveEntity && !this.Read())
-			{
-				throw new InvalidOperationException(Res.GetString("Operation is not valid due to the current state of the object."));
-			}
-			return base.ReadString();
-		}
-
-		public override bool HasAttributes
-		{
-			get
-			{
-				return this.AttributeCount > 0;
+				return this.Current.NamespaceURI;
 			}
 		}
 
@@ -572,173 +156,311 @@ namespace System.Xml
 		{
 			get
 			{
-				return this.readerNav.NameTable;
+				return this.Current.NameTable;
 			}
+		}
+
+		public override XmlNodeType NodeType
+		{
+			get
+			{
+				if (this.entity != null)
+				{
+					return (this.entity.ReadState != ReadState.Initial) ? ((!this.entity.EOF) ? this.entity.NodeType : XmlNodeType.EndEntity) : this.source.NodeType;
+				}
+				return this.source.NodeType;
+			}
+		}
+
+		public override string Prefix
+		{
+			get
+			{
+				return this.Current.Prefix;
+			}
+		}
+
+		public override ReadState ReadState
+		{
+			get
+			{
+				return (this.entity == null) ? this.source.ReadState : ReadState.Interactive;
+			}
+		}
+
+		public override IXmlSchemaInfo SchemaInfo
+		{
+			get
+			{
+				IXmlSchemaInfo xmlSchemaInfo;
+				if (this.entity != null)
+				{
+					IXmlSchemaInfo schemaInfo = this.entity.SchemaInfo;
+					xmlSchemaInfo = schemaInfo;
+				}
+				else
+				{
+					xmlSchemaInfo = this.source.SchemaInfo;
+				}
+				return xmlSchemaInfo;
+			}
+		}
+
+		public override string Value
+		{
+			get
+			{
+				return this.Current.Value;
+			}
+		}
+
+		public override string XmlLang
+		{
+			get
+			{
+				return this.Current.XmlLang;
+			}
+		}
+
+		public override XmlSpace XmlSpace
+		{
+			get
+			{
+				return this.Current.XmlSpace;
+			}
+		}
+
+		public override void Close()
+		{
+			if (this.entity != null)
+			{
+				this.entity.Close();
+			}
+			this.source.Close();
+		}
+
+		public override string GetAttribute(int attributeIndex)
+		{
+			return this.Current.GetAttribute(attributeIndex);
+		}
+
+		public override string GetAttribute(string name)
+		{
+			return this.Current.GetAttribute(name);
+		}
+
+		public override string GetAttribute(string name, string namespaceURI)
+		{
+			return this.Current.GetAttribute(name, namespaceURI);
 		}
 
 		public override string LookupNamespace(string prefix)
 		{
-			if (!this.IsInReadingStates())
-			{
-				return null;
-			}
-			string text = this.readerNav.LookupNamespace(prefix);
-			if (text != null && text.Length == 0)
-			{
-				return null;
-			}
-			return text;
+			return this.Current.LookupNamespace(prefix);
 		}
 
-		public override void ResolveEntity()
+		public override void MoveToAttribute(int i)
 		{
-			if (!this.IsInReadingStates() || this.nodeType != XmlNodeType.EntityReference)
+			if (this.entity != null && this.entityInsideAttribute)
 			{
-				throw new InvalidOperationException(Res.GetString("The node is not an expandable 'EntityReference' node."));
+				this.entity.Close();
+				this.entity = null;
 			}
-			this.bResolveEntity = true;
+			this.Current.MoveToAttribute(i);
+			this.insideAttribute = true;
+		}
+
+		public override bool MoveToAttribute(string name)
+		{
+			if (this.entity != null && !this.entityInsideAttribute)
+			{
+				return this.entity.MoveToAttribute(name);
+			}
+			if (!this.source.MoveToAttribute(name))
+			{
+				return false;
+			}
+			if (this.entity != null && this.entityInsideAttribute)
+			{
+				this.entity.Close();
+				this.entity = null;
+			}
+			this.insideAttribute = true;
+			return true;
+		}
+
+		public override bool MoveToAttribute(string localName, string namespaceURI)
+		{
+			if (this.entity != null && !this.entityInsideAttribute)
+			{
+				return this.entity.MoveToAttribute(localName, namespaceURI);
+			}
+			if (!this.source.MoveToAttribute(localName, namespaceURI))
+			{
+				return false;
+			}
+			if (this.entity != null && this.entityInsideAttribute)
+			{
+				this.entity.Close();
+				this.entity = null;
+			}
+			this.insideAttribute = true;
+			return true;
+		}
+
+		public override bool MoveToElement()
+		{
+			if (this.entity != null && this.entityInsideAttribute)
+			{
+				this.entity = null;
+			}
+			if (!this.Current.MoveToElement())
+			{
+				return false;
+			}
+			this.insideAttribute = false;
+			return true;
+		}
+
+		public override bool MoveToFirstAttribute()
+		{
+			if (this.entity != null && !this.entityInsideAttribute)
+			{
+				return this.entity.MoveToFirstAttribute();
+			}
+			if (!this.source.MoveToFirstAttribute())
+			{
+				return false;
+			}
+			if (this.entity != null && this.entityInsideAttribute)
+			{
+				this.entity.Close();
+				this.entity = null;
+			}
+			this.insideAttribute = true;
+			return true;
+		}
+
+		public override bool MoveToNextAttribute()
+		{
+			if (this.entity != null && !this.entityInsideAttribute)
+			{
+				return this.entity.MoveToNextAttribute();
+			}
+			if (!this.source.MoveToNextAttribute())
+			{
+				return false;
+			}
+			if (this.entity != null && this.entityInsideAttribute)
+			{
+				this.entity.Close();
+				this.entity = null;
+			}
+			this.insideAttribute = true;
+			return true;
+		}
+
+		public override bool Read()
+		{
+			this.insideAttribute = false;
+			if (this.entity != null && (this.entityInsideAttribute || this.entity.EOF))
+			{
+				this.entity = null;
+			}
+			if (this.entity != null)
+			{
+				this.entity.Read();
+				return true;
+			}
+			return this.source.Read();
 		}
 
 		public override bool ReadAttributeValue()
 		{
-			if (!this.IsInReadingStates())
+			if (this.entity != null && this.entityInsideAttribute)
 			{
-				return false;
+				if (!this.entity.EOF)
+				{
+					this.entity.Read();
+					return true;
+				}
+				this.entity = null;
 			}
-			if (this.readerNav.ReadAttributeValue(ref this.curDepth, ref this.bResolveEntity, ref this.nodeType))
-			{
-				this.bInReadBinary = false;
-				return true;
-			}
-			return false;
+			return this.Current.ReadAttributeValue();
 		}
 
-		public override bool CanReadBinaryContent
+		public override int ReadContentAsBase64(byte[] buffer, int offset, int length)
 		{
-			get
+			if (this.entity != null)
 			{
-				return true;
+				return this.entity.ReadContentAsBase64(buffer, offset, length);
 			}
+			return this.source.ReadContentAsBase64(buffer, offset, length);
 		}
 
-		public override int ReadContentAsBase64(byte[] buffer, int index, int count)
+		public override int ReadContentAsBinHex(byte[] buffer, int offset, int length)
 		{
-			if (this.readState != ReadState.Interactive)
+			if (this.entity != null)
 			{
-				return 0;
+				return this.entity.ReadContentAsBinHex(buffer, offset, length);
 			}
-			if (!this.bInReadBinary)
-			{
-				this.readBinaryHelper = ReadContentAsBinaryHelper.CreateOrReset(this.readBinaryHelper, this);
-			}
-			this.bInReadBinary = false;
-			int num = this.readBinaryHelper.ReadContentAsBase64(buffer, index, count);
-			this.bInReadBinary = true;
-			return num;
+			return this.source.ReadContentAsBinHex(buffer, offset, length);
 		}
 
-		public override int ReadContentAsBinHex(byte[] buffer, int index, int count)
+		public override int ReadElementContentAsBase64(byte[] buffer, int offset, int length)
 		{
-			if (this.readState != ReadState.Interactive)
+			if (this.entity != null)
 			{
-				return 0;
+				return this.entity.ReadElementContentAsBase64(buffer, offset, length);
 			}
-			if (!this.bInReadBinary)
-			{
-				this.readBinaryHelper = ReadContentAsBinaryHelper.CreateOrReset(this.readBinaryHelper, this);
-			}
-			this.bInReadBinary = false;
-			int num = this.readBinaryHelper.ReadContentAsBinHex(buffer, index, count);
-			this.bInReadBinary = true;
-			return num;
+			return this.source.ReadElementContentAsBase64(buffer, offset, length);
 		}
 
-		public override int ReadElementContentAsBase64(byte[] buffer, int index, int count)
+		public override int ReadElementContentAsBinHex(byte[] buffer, int offset, int length)
 		{
-			if (this.readState != ReadState.Interactive)
+			if (this.entity != null)
 			{
-				return 0;
+				return this.entity.ReadElementContentAsBinHex(buffer, offset, length);
 			}
-			if (!this.bInReadBinary)
-			{
-				this.readBinaryHelper = ReadContentAsBinaryHelper.CreateOrReset(this.readBinaryHelper, this);
-			}
-			this.bInReadBinary = false;
-			int num = this.readBinaryHelper.ReadElementContentAsBase64(buffer, index, count);
-			this.bInReadBinary = true;
-			return num;
+			return this.source.ReadElementContentAsBinHex(buffer, offset, length);
 		}
 
-		public override int ReadElementContentAsBinHex(byte[] buffer, int index, int count)
+		public override string ReadString()
 		{
-			if (this.readState != ReadState.Interactive)
+			return base.ReadString();
+		}
+
+		public override void ResolveEntity()
+		{
+			if (this.entity != null)
 			{
-				return 0;
+				this.entity.ResolveEntity();
 			}
-			if (!this.bInReadBinary)
+			else
 			{
-				this.readBinaryHelper = ReadContentAsBinaryHelper.CreateOrReset(this.readBinaryHelper, this);
-			}
-			this.bInReadBinary = false;
-			int num = this.readBinaryHelper.ReadElementContentAsBinHex(buffer, index, count);
-			this.bInReadBinary = true;
-			return num;
-		}
-
-		private void FinishReadBinary()
-		{
-			this.bInReadBinary = false;
-			this.readBinaryHelper.Finish();
-		}
-
-		IDictionary<string, string> IXmlNamespaceResolver.GetNamespacesInScope(XmlNamespaceScope scope)
-		{
-			return this.readerNav.GetNamespacesInScope(scope);
-		}
-
-		string IXmlNamespaceResolver.LookupPrefix(string namespaceName)
-		{
-			return this.readerNav.LookupPrefix(namespaceName);
-		}
-
-		string IXmlNamespaceResolver.LookupNamespace(string prefix)
-		{
-			if (!this.IsInReadingStates())
-			{
-				return this.readerNav.DefaultLookupNamespace(prefix);
-			}
-			string text = this.readerNav.LookupNamespace(prefix);
-			if (text != null)
-			{
-				text = this.readerNav.NameTable.Add(text);
-			}
-			return text;
-		}
-
-		internal override IDtdInfo DtdInfo
-		{
-			get
-			{
-				return this.readerNav.Document.DtdSchemaInfo;
+				if (this.source.NodeType != XmlNodeType.EntityReference)
+				{
+					throw new InvalidOperationException("The current node is not an Entity Reference");
+				}
+				this.entity = new XmlNodeReader(this.source, this.insideAttribute);
 			}
 		}
 
-		private XmlNodeReaderNavigator readerNav;
+		public override void Skip()
+		{
+			if (this.entity != null && this.entityInsideAttribute)
+			{
+				this.entity = null;
+			}
+			this.Current.Skip();
+		}
 
-		private XmlNodeType nodeType;
+		private XmlReader entity;
 
-		private int curDepth;
+		private XmlNodeReaderImpl source;
 
-		private ReadState readState;
+		private bool entityInsideAttribute;
 
-		private bool fEOF;
-
-		private bool bResolveEntity;
-
-		private bool bStartFromDocument;
-
-		private bool bInReadBinary;
-
-		private ReadContentAsBinaryHelper readBinaryHelper;
+		private bool insideAttribute;
 	}
 }

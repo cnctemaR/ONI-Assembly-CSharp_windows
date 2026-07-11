@@ -3,10 +3,11 @@
 namespace System.IO.Pipes
 {
 	[Flags]
+	[Serializable]
 	public enum PipeOptions
 	{
 		None = 0,
-		WriteThrough = -2147483648,
-		Asynchronous = 1073741824
+		WriteThrough = 1,
+		Asynchronous = 2
 	}
 }

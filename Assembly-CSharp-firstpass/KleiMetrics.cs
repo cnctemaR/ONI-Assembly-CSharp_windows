@@ -331,7 +331,6 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 		{
 			dictionary.Add(this.PlatformUserIDFieldName, text);
 		}
-		dictionary.Add("UserName", Environment.UserName);
 		if (this.shouldStartSession)
 		{
 			dictionary.Add("HeartBeatTimeOut", false);

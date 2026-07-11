@@ -6,8 +6,12 @@ public class KModalButtonMenu : KButtonMenu
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
-		this.activateOnSpawn = true;
+		this.modalBackground = KModalScreen.MakeScreenModal(this);
+	}
+
+	protected override void OnCmpEnable()
+	{
+		KModalScreen.ResizeBackground(this.modalBackground);
 	}
 
 	protected override void OnCmpDisable()
@@ -93,4 +97,6 @@ public class KModalButtonMenu : KButtonMenu
 	private GameObject panelRoot;
 
 	private GameObject childDialog;
+
+	private RectTransform modalBackground;
 }

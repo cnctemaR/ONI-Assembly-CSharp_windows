@@ -353,7 +353,7 @@ public class Global : MonoBehaviour
 				}, delegate
 				{
 					App.Quit();
-				}, null, null, null, null, null, null, true);
+				}, null, null, null, null, null, null);
 			}
 		}
 		if (flag)
@@ -363,7 +363,7 @@ public class Global : MonoBehaviour
 			component2.GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(UI.FRONTEND.RAILFORCEQUIT.WARN_EXIT, delegate
 			{
 				App.Quit();
-			}, null, null, null, null, null, null, null, true);
+			}, null, null, null, null, null, null, null);
 		}
 	}
 
@@ -560,7 +560,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 419840U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 420700U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

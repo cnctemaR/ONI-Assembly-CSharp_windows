@@ -231,7 +231,7 @@ public class InputBindingsScreen : KModalScreen
 		}, delegate
 		{
 			this.confirmDialog.Deactivate();
-		}, null, null, null, null, null, null, true);
+		}, null, null, null, null, null, null);
 		this.confirmDialog.gameObject.SetActive(true);
 	}
 
@@ -315,7 +315,7 @@ public class InputBindingsScreen : KModalScreen
 					string bindingText = this.GetBindingText(duplicatedBinding);
 					string text2 = string.Format(UI.FRONTEND.INPUT_BINDINGS_SCREEN.DUPLICATE, text, bindingText);
 					this.Unbind(duplicatedBinding.mAction);
-					this.confirmDialog.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null, true);
+					this.confirmDialog.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null);
 					this.confirmDialog.gameObject.SetActive(true);
 				}
 				Global.Instance.GetInputManager().RebindControls();

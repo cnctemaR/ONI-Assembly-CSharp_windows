@@ -12,7 +12,7 @@ public class TableScreen : KScreen
 	{
 		base.OnActivate();
 		this.title_bar.text = this.title;
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		this.CloseButton.onClick += delegate
 		{
 			ManagementMenu.Instance.CloseAll();

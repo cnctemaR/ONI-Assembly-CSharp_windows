@@ -1528,7 +1528,7 @@ namespace STRINGS
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "<b>New Bugfix Patch for July 2020</b>\n\n • Fixed multiple simulation heat creation/destruction bugs\n • Fixed Duplicants getting stuck digging forever\n • Continued work on alternate color modes\n • Dozens of other fixes and improvements\n\nPlease check out the full patch notes for more details!";
+				public static LocString PATCH_NOTES_SUMMARY = "<b>New Bugfix Patch for July 2020</b>\n\n • Fixed multiple simulation heat creation/destruction bugs\n • Fixed Duplicants getting stuck digging forever\n • Continued work on alternate color sets\n • Dozens of other fixes and improvements\n\nPlease check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 			}
@@ -1589,9 +1589,9 @@ namespace STRINGS
 
 			public class RAILFORCEQUIT
 			{
-				public static LocString SAVE_EXIT = "Play time has expired, the game is exiting would you like to overwrite {0}?";
+				public static LocString SAVE_EXIT = "Play time has expired and the game is exiting. Would you like to overwrite {0}?";
 
-				public static LocString WARN_EXIT = "Play time has expired, the game will now exit.";
+				public static LocString WARN_EXIT = "Play time has expired and the game will now exit.";
 			}
 
 			public class MOD_ERRORS
@@ -3908,6 +3908,14 @@ namespace STRINGS
 			public static LocString WATERMARK = "BUILD: {0}";
 
 			public static LocString TESTING_WATERMARK = "TESTING BUILD: {0}";
+
+			public static LocString TESTING_TOOLTIP = "The game is currently running a Test version\n\nClick for more info.";
+
+			public static LocString TESTING_MESSAGE_TITLE = "TESTING BUILD";
+
+			public static LocString TESTING_MESSAGE = "This game is running a Test version of Oxygen Not Included. This means that some features may be in development or buggier than normal, and not quite ready to go to the Release version of the game.\n\nIf you encounter any bugs or strange behavior, we'd appreciate if you took the time to add a report to the bug forums.";
+
+			public static LocString TESTING_MORE_INFO = "BUG FORUMS";
 
 			public static LocString FULL_PATCH_NOTES = "Full Patch Notes";
 

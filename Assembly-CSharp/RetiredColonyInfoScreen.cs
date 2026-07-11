@@ -17,7 +17,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 		this.ConfigButtons();
 		this.LoadExplorer();
 		this.PopulateAchievements();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		this.explorerSearch.text = "";
 		this.explorerSearch.onValueChanged.AddListener(delegate(string value)
 		{
@@ -108,7 +108,7 @@ public class RetiredColonyInfoScreen : KModalScreen
 	private void ConfirmDecision(string text, global::System.Action onConfirm)
 	{
 		base.gameObject.SetActive(false);
-		((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
+		((ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay)).PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null);
 	}
 
 	private void OnCancelPopup()

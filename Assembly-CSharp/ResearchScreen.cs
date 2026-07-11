@@ -18,7 +18,7 @@ public class ResearchScreen : KModalScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		Transform transform = base.transform;
 		while (this.m_Raycaster == null)
 		{

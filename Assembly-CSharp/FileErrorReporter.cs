@@ -56,7 +56,7 @@ public class FileErrorReporter : KMonoBehaviour
 			KCrashReporter.ReportError(FileUtil.exceptionMessage, FileUtil.exceptionStackTrace, null, null, null, "");
 		}
 		ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
-		component.PopupConfirmDialog(text, null, null, null, null, null, null, null, null, true);
+		component.PopupConfirmDialog(text, null, null, null, null, null, null, null, null);
 		global::UnityEngine.Object.DontDestroyOnLoad(component.gameObject);
 	}
 

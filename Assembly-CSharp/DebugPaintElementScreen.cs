@@ -27,7 +27,7 @@ public class DebugPaintElementScreen : KScreen
 		this.inputFields.Add(this.filterInput);
 		base.gameObject.SetActive(false);
 		this.activateOnSpawn = true;
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	private void SetupLocText()

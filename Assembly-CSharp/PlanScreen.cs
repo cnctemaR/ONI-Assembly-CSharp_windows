@@ -818,7 +818,7 @@ public class PlanScreen : KIconToggleMenu
 		{
 			return;
 		}
-		if (this.mouseOver && this.ConsumeMouseScroll && !e.TryConsume(global::Action.ZoomIn))
+		if (this.mouseOver && base.ConsumeMouseScroll && !e.TryConsume(global::Action.ZoomIn))
 		{
 			e.TryConsume(global::Action.ZoomOut);
 		}

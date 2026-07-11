@@ -265,7 +265,7 @@ public class KCrashReporter : MonoBehaviour
 				DistributionPlatform.Inst.LocalUser.Id
 			});
 		}
-		return Environment.UserName;
+		return "LocalUser";
 	}
 
 	private static string GetLogContents()
@@ -363,7 +363,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				string text3 = "AP-" + 419840U.ToString();
+				string text3 = "AP-" + 420700U.ToString();
 				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
@@ -412,7 +412,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 419840;
+			error.build = 420700;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -438,7 +438,7 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (confirm_prefab != null && confirm_parent != null)
 			{
-				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR, null, null, null, null, null, null, null, null, true);
+				((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, confirm_parent)).PopupConfirmDialog(UI.CRASHSCREEN.REPORTEDERROR, null, null, null, null, null, null, null, null);
 			}
 			text8 = text7;
 		}

@@ -9,6 +9,7 @@ public class ColonyDestinationSelectScreen : NewGameFlowScreen
 {
 	protected override void OnPrefabInit()
 	{
+		base.OnPrefabInit();
 		this.backButton.onClick += this.BackClicked;
 		this.customizeButton.onClick += this.CustomizeClicked;
 		this.launchButton.onClick += this.LaunchClicked;

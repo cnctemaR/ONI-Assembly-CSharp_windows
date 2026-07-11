@@ -7,8 +7,35 @@ public class KModalScreen : KScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
-		this.activateOnSpawn = true;
+		KModalScreen.MakeScreenModal(this);
+	}
+
+	public static RectTransform MakeScreenModal(KScreen screen)
+	{
+		screen.ConsumeMouseScroll = true;
+		screen.activateOnSpawn = true;
+		GameObject gameObject = new GameObject("background");
+		gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+		gameObject.AddComponent<CanvasRenderer>();
+		Image image = gameObject.AddComponent<Image>();
+		image.color = new Color32(0, 0, 0, 160);
+		image.raycastTarget = true;
+		RectTransform component = gameObject.GetComponent<RectTransform>();
+		component.SetParent(screen.transform);
+		KModalScreen.ResizeBackground(component);
+		return component;
+	}
+
+	public static void ResizeBackground(RectTransform rectTransform)
+	{
+		rectTransform.SetAsFirstSibling();
+		rectTransform.SetLocalPosition(Vector3.zero);
+		rectTransform.localScale = Vector3.one;
+		Vector3 lossyScale = rectTransform.lossyScale;
+		rectTransform.localScale = new Vector3(1f / lossyScale.x, 1f / lossyScale.y, 1f / lossyScale.z);
+		rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+		rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+		rectTransform.sizeDelta = new Vector2((float)Screen.width, (float)Screen.height);
 	}
 
 	protected override void OnCmpEnable()
@@ -99,12 +126,6 @@ public class KModalScreen : KScreen
 			}
 		}
 		e.Consumed = true;
-	}
-
-	public void SetBackgroundActive(bool active)
-	{
-		int num = (active ? 190 : 0);
-		base.GetComponent<Image>().color = new Color32(0, 0, 0, (byte)num);
 	}
 
 	private bool shown;

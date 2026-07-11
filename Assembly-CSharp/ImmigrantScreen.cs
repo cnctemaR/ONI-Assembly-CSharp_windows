@@ -18,7 +18,7 @@ public class ImmigrantScreen : CharacterSelectionController
 	protected override void OnSpawn()
 	{
 		this.activateOnSpawn = false;
-		this.ConsumeMouseScroll = false;
+		base.ConsumeMouseScroll = false;
 		base.OnSpawn();
 		base.IsStarterMinion = false;
 		this.rejectButton.onClick += this.OnRejectAll;

@@ -29,7 +29,7 @@ public class ReportScreen : KScreen
 			RetiredColonyData currentColonyRetiredColonyData = RetireColonyUtility.GetCurrentColonyRetiredColonyData();
 			MainMenu.ActivateRetiredColoniesScreenFromData(PauseScreen.Instance.transform.parent.gameObject, currentColonyRetiredColonyData);
 		};
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	protected override void OnSpawn()

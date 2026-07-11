@@ -349,7 +349,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 					this.feedbackDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.COLORBLIND_FEEDBACK.text, null, null, UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.COLORBLIND_FEEDBACK_BUTTON.text, delegate
 					{
 						Application.OpenURL("https://forums.kleientertainment.com/forums/topic/117325-color-blindness-feedback/");
-					}, null, null, null, null, true);
+					}, null, null, null, null);
 					this.feedbackDialog.gameObject.SetActive(true);
 				}
 				this.colorModeChanged = false;
@@ -441,7 +441,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.StopCoroutine(timer);
 		};
-		this.confirmDialog.PopupConfirmDialog(this.colorModeChanged ? UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES_STRING_COLOR.text : UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null, true);
+		this.confirmDialog.PopupConfirmDialog(this.colorModeChanged ? UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES_STRING_COLOR.text : UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null);
 		this.confirmDialog.gameObject.SetActive(true);
 	}
 

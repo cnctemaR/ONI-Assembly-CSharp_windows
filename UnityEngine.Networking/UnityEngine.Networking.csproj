@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{E70A1338-F4A6-444D-B2FC-247520AC914A}</ProjectGuid>
+    <ProjectGuid>{FDEFE812-C689-4EDB-B9F2-D100FD020EE7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.Networking</RootNamespace>
     <AssemblyName>UnityEngine.Networking</AssemblyName>
@@ -114,7 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{E70A1338-F4A6-444D-B2FC-247520AC9140}</Project>
+      <Project>{FDEFE812-C689-4EDB-B9F2-D100FD020EDD}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

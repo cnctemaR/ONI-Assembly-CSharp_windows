@@ -569,9 +569,9 @@ namespace KMod
 			return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), "mods.json"));
 		}
 
-		public static void Dialog(GameObject parent = null, string title = null, string text = null, string confirm_text = null, global::System.Action on_confirm = null, string cancel_text = null, global::System.Action on_cancel = null, string configurable_text = null, global::System.Action on_configurable_clicked = null, Sprite image_sprite = null, bool activateBlackBackground = true)
+		public static void Dialog(GameObject parent = null, string title = null, string text = null, string confirm_text = null, global::System.Action on_confirm = null, string cancel_text = null, global::System.Action on_cancel = null, string configurable_text = null, global::System.Action on_configurable_clicked = null, Sprite image_sprite = null)
 		{
-			((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent ?? Global.Instance.globalCanvas)).PopupConfirmDialog(text, on_confirm, on_cancel, configurable_text, on_configurable_clicked, title, confirm_text, cancel_text, image_sprite, activateBlackBackground);
+			((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent ?? Global.Instance.globalCanvas)).PopupConfirmDialog(text, on_confirm, on_cancel, configurable_text, on_configurable_clicked, title, confirm_text, cancel_text, image_sprite);
 		}
 
 		private static string MakeModList(List<Event> events, EventType event_type)
@@ -668,7 +668,7 @@ namespace KMod
 			string text4 = UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
 			Manager.Dialog(parent, text, text2, text3, new global::System.Action(App.instance.Restart), text4, delegate
 			{
-			}, null, null, null, true);
+			}, null, null, null);
 			this.events.Clear();
 		}
 
@@ -691,7 +691,7 @@ namespace KMod
 					App.instance.Restart();
 				}, UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL, delegate
 				{
-				}, null, null, null, true);
+				}, null, null, null);
 			}
 			else
 			{
@@ -700,7 +700,7 @@ namespace KMod
 					App.instance.Restart();
 				}, UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL, delegate
 				{
-				}, null, null, null, true);
+				}, null, null, null);
 			}
 			this.events.Clear();
 		}
@@ -714,7 +714,7 @@ namespace KMod
 			string text = string.Format(message_format, with_details ? Manager.MakeEventList(this.events) : Manager.MakeModList(this.events));
 			string text2 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
 			string text3 = cancel_text ?? UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
-			Manager.Dialog(parent, title, text, text2, new global::System.Action(App.instance.Restart), text3, on_cancel, null, null, null, true);
+			Manager.Dialog(parent, title, text, text2, new global::System.Action(App.instance.Restart), text3, on_cancel, null, null, null);
 			this.events.Clear();
 		}
 
@@ -724,7 +724,7 @@ namespace KMod
 			{
 				return;
 			}
-			Manager.Dialog(parent, title, string.Format(message_format, Manager.MakeEventList(this.events)), null, null, null, null, null, null, null, true);
+			Manager.Dialog(parent, title, string.Format(message_format, Manager.MakeEventList(this.events)), null, null, null, null, null, null, null);
 			this.events.Clear();
 		}
 

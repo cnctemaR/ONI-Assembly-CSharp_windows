@@ -20,7 +20,7 @@ public class StarmapScreen : KModalScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		this.rocketDetailsStatus = global::UnityEngine.Object.Instantiate<BreakdownList>(this.breakdownListPrefab, this.rocketDetailsContainer);
 		this.rocketDetailsStatus.SetTitle(UI.STARMAP.LISTTITLES.MISSIONSTATUS);
 		this.rocketDetailsStatus.SetIcon(this.rocketDetailsStatusIcon);

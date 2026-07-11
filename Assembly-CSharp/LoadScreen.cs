@@ -291,7 +291,7 @@ public class LoadScreen : KModalScreen
 
 	private static bool IsSaveFileFromUnsupportedFutureBuild(SaveGame.Header header)
 	{
-		return header.buildVersion > 419840U;
+		return header.buildVersion > 420700U;
 	}
 
 	private void SetSelectedGame(string filename, string savename)
@@ -335,7 +335,7 @@ public class LoadScreen : KModalScreen
 			this.InfoText.text = "";
 			if (LoadScreen.IsSaveFileFromUnsupportedFutureBuild(header))
 			{
-				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 419840U);
+				this.InfoText.text = string.Format(UI.FRONTEND.LOADSCREEN.SAVE_TOO_NEW, filename, header.buildVersion, 420700U);
 				this.loadButton.isInteractable = false;
 				this.loadButton.GetComponent<ImageToggleState>().SetState(ImageToggleState.State.Disabled);
 			}
@@ -398,10 +398,10 @@ public class LoadScreen : KModalScreen
 		SaveGame.GameInfo gameInfo = SaveLoader.LoadHeader(filename, out header);
 		string text = null;
 		string text2 = null;
-		if (header.buildVersion > 419840U)
+		if (header.buildVersion > 420700U)
 		{
 			text = header.buildVersion.ToString();
-			text2 = 419840U.ToString();
+			text2 = 420700U.ToString();
 		}
 		else if (gameInfo.saveMajorVersion < 7)
 		{
@@ -411,7 +411,7 @@ public class LoadScreen : KModalScreen
 		if (!flag)
 		{
 			GameObject gameObject = ((FrontEndManager.Instance == null) ? GameScreenManager.Instance.ssOverlayCanvas : FrontEndManager.Instance.gameObject);
-			global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(string.Format(UI.CRASHSCREEN.LOADFAILED, "Version Mismatch", text, text2), null, null, null, null, null, null, null, null, true);
+			global::Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(string.Format(UI.CRASHSCREEN.LOADFAILED, "Version Mismatch", text, text2), null, null, null, null, null, null, null, null);
 			return;
 		}
 		if (Game.Instance != null)
@@ -452,7 +452,7 @@ public class LoadScreen : KModalScreen
 			this.confirmScreen = global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, false);
 			this.confirmScreen.PopupConfirmDialog(message, action, delegate
 			{
-			}, null, null, null, null, null, null, true);
+			}, null, null, null, null, null, null);
 			this.confirmScreen.gameObject.SetActive(true);
 		}
 	}

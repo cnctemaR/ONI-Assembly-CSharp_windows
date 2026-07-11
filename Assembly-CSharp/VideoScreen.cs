@@ -11,7 +11,7 @@ public class VideoScreen : KModalScreen
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		this.closeButton.onClick += delegate
 		{
 			this.Stop();

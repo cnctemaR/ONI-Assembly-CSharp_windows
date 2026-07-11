@@ -7,7 +7,7 @@ public class DebugElementMenu : KButtonMenu
 	{
 		DebugElementMenu.Instance = this;
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	public void Turnoff()

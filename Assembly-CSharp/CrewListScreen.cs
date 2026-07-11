@@ -16,7 +16,7 @@ public class CrewListScreen<EntryType> : KScreen where EntryType : CrewListEntry
 		{
 			this.UpdateColumnTitles();
 		}
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	protected override void OnCmpEnable()

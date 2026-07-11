@@ -3111,14 +3111,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Balloon Artist";
 
-				public static LocString TOOLTIP = "This Duplicant is planning hand out balloons in their downtime.";
+				public static LocString TOOLTIP = "This Duplicant is planning to hand out balloons in their downtime";
 			}
 
 			public class BALLOONARTISTHANDINGOUT
 			{
 				public static LocString NAME = "Balloon Artist";
 
-				public static LocString TOOLTIP = "This Duplicant is handing out balloons to other Duplicants.";
+				public static LocString TOOLTIP = "This Duplicant is handing out balloons to other Duplicants";
 			}
 		}
 

@@ -33,7 +33,7 @@ public class SkillsScreen : KModalScreen
 
 	protected override void OnActivate()
 	{
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		base.OnActivate();
 		this.BuildMinions();
 		this.RefreshAll();

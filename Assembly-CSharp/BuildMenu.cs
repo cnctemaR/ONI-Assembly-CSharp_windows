@@ -39,7 +39,7 @@ public class BuildMenu : KScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		this.initTime = KTime.Instance.UnscaledGameTime;
 		bool flag = BuildMenu.UseHotkeyBuildMenu();
 		if (flag)
@@ -221,7 +221,7 @@ public class BuildMenu : KScreen
 		{
 			return;
 		}
-		if (this.mouseOver && this.ConsumeMouseScroll && !e.TryConsume(global::Action.ZoomIn))
+		if (this.mouseOver && base.ConsumeMouseScroll && !e.TryConsume(global::Action.ZoomIn))
 		{
 			e.TryConsume(global::Action.ZoomOut);
 		}

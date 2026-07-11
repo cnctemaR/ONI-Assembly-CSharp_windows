@@ -22,7 +22,7 @@ public class CodexScreen : KScreen
 
 	protected override void OnActivate()
 	{
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		base.OnActivate();
 		this.closeButton.onClick += delegate
 		{

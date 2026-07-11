@@ -126,7 +126,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		}, delegate
 		{
 			Localization.SetFont<ConfirmDialogScreen>(screen, Localization.FontAsset, Localization.IsRightToLeft, excluded_members);
-		}, null, null, text, func(UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART), UI.FRONTEND.TRANSLATIONS_SCREEN.CANCEL, null, true);
+		}, null, null, text, func(UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART), UI.FRONTEND.TRANSLATIONS_SCREEN.CANCEL, null);
 	}
 
 	private void ConfirmLanguageChoiceDialog(string selected_preinstalled_translation)
@@ -226,7 +226,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 	private void InstallLanguage(PublishedFileId_t item)
 	{
 		this.SetCurrentLanguage(item);
-		this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null, true);
+		this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null);
 	}
 
 	private void Uninstall()
@@ -234,10 +234,10 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 		this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.ARE_YOU_SURE, delegate
 		{
 			Localization.ClearLanguage();
-			this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null, true);
+			this.GetConfirmDialog().PopupConfirmDialog(UI.FRONTEND.TRANSLATIONS_SCREEN.PLEASE_REBOOT, new global::System.Action(App.instance.Restart), new global::System.Action(this.Deactivate), null, null, null, null, null, null);
 		}, delegate
 		{
-		}, null, null, null, null, null, null, true);
+		}, null, null, null, null, null, null);
 	}
 
 	private void OnClickUninstall()
@@ -261,7 +261,7 @@ public class LanguageOptionsScreen : KModalScreen, SteamUGCService.IClient
 				Localization.ClearLanguage();
 				this.currentLanguage = PublishedFileId_t.Invalid;
 				App.instance.Restart();
-			}, null, null, null, null, UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART, null, null, true);
+			}, null, null, null, null, UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART, null, null);
 		}
 		if (updated.Contains(publishedFileId_t))
 		{

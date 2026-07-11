@@ -39,7 +39,7 @@ public class InitializeCheck : MonoBehaviour
 	private void ShowErrorDialog(string msg)
 	{
 		GameObject gameObject = this.CreateUIRoot();
-		Util.KInstantiateUI<ConfirmDialogScreen>(this.confirmDialogScreen.gameObject, gameObject, true).PopupConfirmDialog(msg, new global::System.Action(this.Quit), null, null, null, null, null, null, this.sadDupe, true);
+		Util.KInstantiateUI<ConfirmDialogScreen>(this.confirmDialogScreen.gameObject, gameObject, true).PopupConfirmDialog(msg, new global::System.Action(this.Quit), null, null, null, null, null, null, this.sadDupe);
 	}
 
 	private void ShowFileErrorDialogs()

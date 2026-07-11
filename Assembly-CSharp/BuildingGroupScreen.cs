@@ -6,13 +6,13 @@ public class BuildingGroupScreen : KScreen
 	{
 		BuildingGroupScreen.Instance = this;
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	public static BuildingGroupScreen Instance;

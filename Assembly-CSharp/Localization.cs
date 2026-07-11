@@ -225,7 +225,7 @@ public static class Localization
 		string text2 = UI.CONFIRMDIALOG.DIALOG_HEADER;
 		string text3 = string.Format(UI.FRONTEND.TRANSLATIONS_SCREEN.MISSING_LANGUAGE_PACK, text);
 		string text4 = UI.FRONTEND.TRANSLATIONS_SCREEN.RESTART;
-		component2.PopupConfirmDialog(text3, new global::System.Action(App.instance.Restart), null, null, null, text2, text4, null, null, true);
+		component2.PopupConfirmDialog(text3, new global::System.Action(App.instance.Restart), null, null, null, text2, text4, null, null);
 	}
 
 	public static void LoadPreinstalledTranslation(string code)

@@ -9,7 +9,7 @@ public class PasteBaseTemplateScreen : KScreen
 		base.OnPrefabInit();
 		PasteBaseTemplateScreen.Instance = this;
 		TemplateCache.Init();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		this.RefreshStampButtons();
 	}
 

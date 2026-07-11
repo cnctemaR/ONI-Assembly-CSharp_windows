@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class FileNameDialog : KScreen
+public class FileNameDialog : KModalScreen
 {
 	public override float GetSortKey()
 	{

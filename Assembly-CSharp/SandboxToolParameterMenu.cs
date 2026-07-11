@@ -24,7 +24,7 @@ public class SandboxToolParameterMenu : KScreen
 		base.OnPrefabInit();
 		this.ConfigureSettings();
 		this.activateOnSpawn = true;
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	private void ConfigureSettings()

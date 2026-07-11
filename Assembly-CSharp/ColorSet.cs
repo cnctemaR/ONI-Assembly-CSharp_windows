@@ -26,6 +26,12 @@ public class ColorSet : ScriptableObject
 		return this.namedLookup[name];
 	}
 
+	public void RefreshLookup()
+	{
+		this.namedLookup = null;
+		this.Init();
+	}
+
 	public string settingName;
 
 	[Header("Logic")]

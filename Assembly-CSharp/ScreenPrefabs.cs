@@ -15,7 +15,7 @@ public class ScreenPrefabs : KMonoBehaviour
 	{
 		((ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent.gameObject)).PopupConfirmDialog(message, action, delegate
 		{
-		}, null, null, null, null, null, null, true);
+		}, null, null, null, null, null, null);
 	}
 
 	public ControlsScreen ControlsScreen;
@@ -29,8 +29,6 @@ public class ScreenPrefabs : KMonoBehaviour
 	public TileScreen TileScreen;
 
 	public SpeedControlScreen SpeedControlScreen;
-
-	public OverviewScreen ManagementScreen;
 
 	public ManagementMenu ManagementMenu;
 

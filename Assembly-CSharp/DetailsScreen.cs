@@ -26,7 +26,7 @@ public class DetailsScreen : KTabMenu
 	{
 		base.OnPrefabInit();
 		this.SortScreenOrder();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		global::Debug.Assert(DetailsScreen.Instance == null);
 		DetailsScreen.Instance = this;
 		UIRegistry.detailsScreen = this;

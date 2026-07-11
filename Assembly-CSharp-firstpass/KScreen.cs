@@ -46,6 +46,8 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 		}
 	}
 
+	public bool ConsumeMouseScroll { get; set; }
+
 	public virtual void SetHasFocus(bool has_focus)
 	{
 		this.hasFocus = has_focus;
@@ -223,8 +225,6 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IEve
 	private bool isActive;
 
 	protected bool mouseOver;
-
-	protected bool ConsumeMouseScroll;
 
 	public WidgetTransition.TransitionType transitionType;
 

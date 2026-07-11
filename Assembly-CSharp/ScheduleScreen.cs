@@ -12,7 +12,7 @@ public class ScheduleScreen : KScreen
 
 	protected override void OnPrefabInit()
 	{
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		this.entries = new List<ScheduleScreenEntry>();
 		this.paintStyles = new Dictionary<string, ColorStyleSetting>();
 		this.paintStyles["Hygene"] = this.hygene_color;

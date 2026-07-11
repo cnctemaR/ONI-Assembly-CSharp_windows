@@ -48,7 +48,7 @@ public class MaterialSelectionPanel : KScreen
 	{
 		MaterialSelectionPanel.elementsWithTag.Clear();
 		base.OnPrefabInit();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		for (int i = 0; i < 3; i++)
 		{
 			MaterialSelector materialSelector = Util.KInstantiateUI<MaterialSelector>(this.MaterialSelectorTemplate, base.gameObject, false);

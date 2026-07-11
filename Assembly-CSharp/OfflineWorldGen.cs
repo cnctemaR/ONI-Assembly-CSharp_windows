@@ -310,7 +310,7 @@ public class OfflineWorldGen : KMonoBehaviour
 		{
 			foreach (OfflineWorldGen.ErrorInfo errorInfo in this.errors)
 			{
-				global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true).PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null, true);
+				global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true).PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null);
 			}
 		}
 		this.errorMutex.ReleaseMutex();

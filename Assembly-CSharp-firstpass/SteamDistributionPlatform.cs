@@ -64,6 +64,17 @@ internal class SteamDistributionPlatform : MonoBehaviour, DistributionPlatform.I
 		}
 	}
 
+	public bool IsArchiveBranch
+	{
+		get
+		{
+			string text;
+			SteamApps.GetCurrentBetaName(out text, 100);
+			global::Debug.Log("Checking which steam branch we're on. Got: [" + text + "]");
+			return !(text == "default") && !(text == "release");
+		}
+	}
+
 	public string ApplyWordFilter(string text)
 	{
 		return text;

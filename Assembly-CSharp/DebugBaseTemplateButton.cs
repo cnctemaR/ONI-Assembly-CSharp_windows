@@ -20,7 +20,7 @@ public class DebugBaseTemplateButton : KScreen
 		DebugBaseTemplateButton.Instance = this;
 		base.gameObject.SetActive(false);
 		this.SetupLocText();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		TMP_InputField tmp_InputField = this.nameField;
 		tmp_InputField.onFocus = (global::System.Action)Delegate.Combine(tmp_InputField.onFocus, new global::System.Action(delegate
 		{
@@ -39,7 +39,7 @@ public class DebugBaseTemplateButton : KScreen
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 	}
 
 	public override float GetSortKey()

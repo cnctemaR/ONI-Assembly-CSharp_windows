@@ -8,7 +8,7 @@ public class KButtonMenu : KScreen
 {
 	protected override void OnActivate()
 	{
-		this.ConsumeMouseScroll = this.ShouldConsumeMouseScroll;
+		base.ConsumeMouseScroll = this.ShouldConsumeMouseScroll;
 		this.RefreshButtons();
 	}
 

@@ -14,7 +14,7 @@ public class ResourceCategoryScreen : KScreen
 	{
 		base.OnActivate();
 		ResourceCategoryScreen.Instance = this;
-		this.ConsumeMouseScroll = true;
+		base.ConsumeMouseScroll = true;
 		MultiToggle hiderButton = this.HiderButton;
 		hiderButton.onClick = (global::System.Action)Delegate.Combine(hiderButton.onClick, new global::System.Action(this.OnHiderClick));
 		this.OnHiderClick();

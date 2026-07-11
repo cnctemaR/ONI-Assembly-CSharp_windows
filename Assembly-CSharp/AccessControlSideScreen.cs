@@ -91,8 +91,8 @@ public class AccessControlSideScreen : SideScreenContent
 			{
 				accessControlSideScreenRow = this.identityRowMap[minionAssignablesProxy];
 			}
-			AccessControl.Permission setPermission = this.target.GetSetPermission(minionAssignablesProxy.gameObject);
-			bool flag2 = this.target.IsDefaultPermission(minionAssignablesProxy.gameObject);
+			AccessControl.Permission setPermission = this.target.GetSetPermission(minionAssignablesProxy);
+			bool flag2 = this.target.IsDefaultPermission(minionAssignablesProxy);
 			accessControlSideScreenRow.SetRotated(flag);
 			accessControlSideScreenRow.SetMinionContent(minionAssignablesProxy, setPermission, flag2, new Action<MinionAssignablesProxy, AccessControl.Permission>(this.OnPermissionChanged), new Action<MinionAssignablesProxy, bool>(this.OnPermissionDefault));
 		}
@@ -109,7 +109,7 @@ public class AccessControlSideScreen : SideScreenContent
 
 	private void SortByPermission(bool state)
 	{
-		this.ExecuteSort<int>(this.sortByPermissionToggle, state, (MinionAssignablesProxy identity) => (int)((!this.target.IsDefaultPermission(identity.gameObject)) ? this.target.GetSetPermission(identity.gameObject) : ((AccessControl.Permission)(-1))), false);
+		this.ExecuteSort<int>(this.sortByPermissionToggle, state, (MinionAssignablesProxy identity) => (int)((!this.target.IsDefaultPermission(identity)) ? this.target.GetSetPermission(identity) : ((AccessControl.Permission)(-1))), false);
 	}
 
 	private void ExecuteSort<T>(Toggle toggle, bool state, Func<MinionAssignablesProxy, T> sortFunction, bool refresh = false)
@@ -169,18 +169,18 @@ public class AccessControlSideScreen : SideScreenContent
 
 	private void OnPermissionChanged(MinionAssignablesProxy identity, AccessControl.Permission permission)
 	{
-		this.target.SetPermission(identity.gameObject, permission);
+		this.target.SetPermission(identity, permission);
 	}
 
 	private void OnPermissionDefault(MinionAssignablesProxy identity, bool isDefault)
 	{
 		if (isDefault)
 		{
-			this.target.ClearPermission(identity.gameObject);
+			this.target.ClearPermission(identity);
 		}
 		else
 		{
-			this.target.SetPermission(identity.gameObject, this.target.DefaultPermission);
+			this.target.SetPermission(identity, this.target.DefaultPermission);
 		}
 		this.Refresh(this.identityList, false);
 	}

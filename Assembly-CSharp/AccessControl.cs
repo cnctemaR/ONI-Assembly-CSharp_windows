@@ -58,7 +58,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		}
 		foreach (Tuple<MinionAssignablesProxy, AccessControl.Permission> tuple in list)
 		{
-			this.SetPermission(tuple.first.gameObject, tuple.second);
+			this.SetPermission(tuple.first, tuple.second);
 		}
 		this.SetStatusItem();
 	}
@@ -79,14 +79,14 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 			{
 				if (keyValuePair.Key.Get() != null)
 				{
-					this.SetPermission(keyValuePair.Key.Get().gameObject, keyValuePair.Value);
+					this.SetPermission(keyValuePair.Key.Get().GetComponent<MinionAssignablesProxy>(), keyValuePair.Value);
 				}
 			}
 			this._defaultPermission = component._defaultPermission;
 		}
 	}
 
-	public void SetPermission(GameObject key, AccessControl.Permission permission)
+	public void SetPermission(MinionAssignablesProxy key, AccessControl.Permission permission)
 	{
 		KPrefabID component = key.GetComponent<KPrefabID>();
 		if (component == null)
@@ -111,7 +111,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		this.SetStatusItem();
 	}
 
-	public AccessControl.Permission GetPermission(GameObject key)
+	public AccessControl.Permission GetPermission(Navigator minion)
 	{
 		Door.ControlState controlState = this.overrideAccess;
 		if (controlState == Door.ControlState.Closed)
@@ -120,20 +120,30 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		}
 		if (controlState != Door.ControlState.Opened)
 		{
-			return this.GetSetPermission(key);
+			return this.GetSetPermission(this.GetKeyForNavigator(minion));
 		}
 		return AccessControl.Permission.Both;
 	}
 
-	public AccessControl.Permission GetSetPermission(GameObject key)
+	private MinionAssignablesProxy GetKeyForNavigator(Navigator minion)
+	{
+		MinionIdentity component = minion.GetComponent<MinionIdentity>();
+		return component.assignableProxy.Get();
+	}
+
+	public AccessControl.Permission GetSetPermission(MinionAssignablesProxy key)
+	{
+		return this.GetSetPermission(key.GetComponent<KPrefabID>());
+	}
+
+	private AccessControl.Permission GetSetPermission(KPrefabID kpid)
 	{
 		AccessControl.Permission permission = this.DefaultPermission;
-		KPrefabID component = key.GetComponent<KPrefabID>();
-		if (component != null)
+		if (kpid != null)
 		{
 			for (int i = 0; i < this.savedPermissions.Count; i++)
 			{
-				if (this.savedPermissions[i].Key.GetId() == component.InstanceID)
+				if (this.savedPermissions[i].Key.GetId() == kpid.InstanceID)
 				{
 					permission = this.savedPermissions[i].Value;
 					break;
@@ -143,7 +153,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		return permission;
 	}
 
-	public void ClearPermission(GameObject key)
+	public void ClearPermission(MinionAssignablesProxy key)
 	{
 		AccessControl.Permission defaultPermission = this.DefaultPermission;
 		KPrefabID component = key.GetComponent<KPrefabID>();
@@ -161,7 +171,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		this.SetStatusItem();
 	}
 
-	public bool IsDefaultPermission(GameObject key)
+	public bool IsDefaultPermission(MinionAssignablesProxy key)
 	{
 		bool flag = false;
 		KPrefabID component = key.GetComponent<KPrefabID>();

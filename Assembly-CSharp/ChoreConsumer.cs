@@ -121,11 +121,29 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 			GameScenePartitioner.Instance.GatherEntries(extents, GameScenePartitioner.Instance.fetchChoreLayer, pooledList);
 			foreach (ScenePartitionerEntry scenePartitionerEntry in pooledList)
 			{
-				FetchChore fetchChore = scenePartitionerEntry.obj as FetchChore;
-				int num2 = Grid.PosToCell(fetchChore.gameObject);
-				if (this.consumerState.solidTransferArm.IsCellReachable(num2))
+				if (scenePartitionerEntry.obj == null)
 				{
-					fetchChore.CollectChoresFromGlobalChoreProvider(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
+					DebugUtil.Assert(false, "FindNextChore found an entry that was null");
+				}
+				else
+				{
+					FetchChore fetchChore = scenePartitionerEntry.obj as FetchChore;
+					if (fetchChore == null)
+					{
+						DebugUtil.Assert(false, "FindNextChore found an entry that wasn't a FetchChore");
+					}
+					else if (fetchChore.target == null)
+					{
+						DebugUtil.Assert(false, "FindNextChore found an entry with a null target");
+					}
+					else
+					{
+						int num2 = Grid.PosToCell(fetchChore.gameObject);
+						if (this.consumerState.solidTransferArm.IsCellReachable(num2))
+						{
+							fetchChore.CollectChoresFromGlobalChoreProvider(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts, false);
+						}
+					}
 				}
 			}
 			pooledList.Recycle();

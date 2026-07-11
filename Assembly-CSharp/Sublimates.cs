@@ -149,7 +149,7 @@ public class Sublimates : KMonoBehaviour, ISim200ms
 
 	private void Emit(int cell, float mass, float temperature, byte disease_idx, int disease_count)
 	{
-		SimMessages.AddRemoveSubstance(cell, this.info.sublimatedElement, CellEventLogger.Instance.SublimatesEmit, mass, temperature, disease_idx, disease_count, -1);
+		SimMessages.AddRemoveSubstance(cell, this.info.sublimatedElement, CellEventLogger.Instance.SublimatesEmit, mass, temperature, disease_idx, disease_count, true, -1);
 		Game.Instance.accumulators.Accumulate(this.flowAccumulator, mass);
 		if (this.spawnFXHash != SpawnFXHashes.None)
 		{

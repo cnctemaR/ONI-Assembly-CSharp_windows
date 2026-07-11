@@ -67,7 +67,7 @@ public class ElementEmitter : SimComponent
 		if (element.IsGas || element.IsLiquid)
 		{
 			int num2 = Grid.PosToCell(base.transform.GetPosition());
-			SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, -1);
+			SimMessages.AddRemoveSubstance(num2, this.outputElement.elementHash, CellEventLogger.Instance.ElementConsumerSimUpdate, mass, num, disease_idx, disease_count, true, -1);
 		}
 		else if (element.IsSolid)
 		{

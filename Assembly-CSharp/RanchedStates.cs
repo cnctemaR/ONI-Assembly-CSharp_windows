@@ -88,7 +88,7 @@ internal class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Ins
 	private static int GetTargetRanchCell(RanchedStates.Instance smi)
 	{
 		RanchStation.Instance ranchStation = RanchedStates.GetRanchStation(smi);
-		return ranchStation.def.getTargetRanchCell(ranchStation);
+		return ranchStation.GetTargetRanchCell();
 	}
 
 	private static int GetRunawayCell(RanchedStates.Instance smi)

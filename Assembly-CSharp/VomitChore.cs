@@ -60,7 +60,7 @@ public class VomitChore : Chore<VomitChore.StatesInstance>
 				{
 					num3 = num2;
 				}
-				SimMessages.AddRemoveSubstance(num3, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, -1);
+				SimMessages.AddRemoveSubstance(num3, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, STRESS.VOMIT_AMOUNT * num, this.bodyTemperature.value, invalid.idx, invalid.count, true, -1);
 			}
 		}
 

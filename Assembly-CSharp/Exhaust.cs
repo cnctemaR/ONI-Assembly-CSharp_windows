@@ -65,7 +65,7 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 								component.AddDisease(this.exhaustPE.DiseaseIdx, num3, "Exhaust transfer");
 								this.exhaustPE.ModifyDiseaseCount(-num3, "Exhaust transfer");
 								this.exhaustPE.AddDisease(component.DiseaseIdx, num2, "Exhaust transfer");
-								SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+								SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, -1);
 								component.KeepZeroMassObject = true;
 								component.Mass = 0f;
 								component.ModifyDiseaseCount(int.MinValue, "Exhaust.SimUpdate");
@@ -98,7 +98,7 @@ public class Exhaust : KMonoBehaviour, ISim200ms
 							}
 							else
 							{
-								SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, -1);
+								SimMessages.AddRemoveSubstance(num, component2.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component2.Mass, component2.Temperature, component2.DiseaseIdx, component2.DiseaseCount, true, -1);
 							}
 							component2.KeepZeroMassObject = true;
 							component2.Mass = 0f;

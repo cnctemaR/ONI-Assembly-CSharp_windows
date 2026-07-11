@@ -259,7 +259,7 @@ public class StructureTemperatureComponents : KGameObjectComponentManager<Struct
 		if (element.highTempTransitionTarget != SimHashes.Unobtanium)
 		{
 			int num = Grid.PosToCell(primary_element.transform.GetPosition());
-			SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, primary_element.Mass, primary_element.Element.highTemp, primary_element.DiseaseIdx, primary_element.DiseaseCount, -1);
+			SimMessages.AddRemoveSubstance(num, element.highTempTransitionTarget, CellEventLogger.Instance.OreMelted, primary_element.Mass, primary_element.Element.highTemp, primary_element.DiseaseIdx, primary_element.DiseaseCount, true, -1);
 			Util.KDestroyGameObject(primary_element.gameObject);
 		}
 	}

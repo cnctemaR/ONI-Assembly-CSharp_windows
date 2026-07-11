@@ -200,7 +200,7 @@ public class ConduitConsumer : KMonoBehaviour
 					{
 						int num6 = (int)((float)contents.diseaseCount * (num4 / contents.mass));
 						int num7 = Grid.PosToCell(base.transform.GetPosition());
-						SimMessages.AddRemoveSubstance(num7, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num4, contents.temperature, contents.diseaseIdx, num6, -1);
+						SimMessages.AddRemoveSubstance(num7, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num4, contents.temperature, contents.diseaseIdx, num6, true, -1);
 					}
 				}
 			}

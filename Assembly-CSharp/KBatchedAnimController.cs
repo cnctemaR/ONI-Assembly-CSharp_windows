@@ -35,7 +35,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	public bool IsActive()
 	{
-		return base.isActiveAndEnabled;
+		return base.isActiveAndEnabled && this._enabled;
 	}
 
 	public bool IsVisible()
@@ -195,7 +195,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			}
 			this.SetDirty();
 		}
-		if (this.batchGroupID == KAnimBatchManager.NO_BATCH || !base.isActiveAndEnabled || (!this.isVisible && !this.forceRebuild))
+		if (this.batchGroupID == KAnimBatchManager.NO_BATCH || !this.IsActive() || (!this.isVisible && !this.forceRebuild))
 		{
 			return;
 		}
@@ -496,6 +496,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		}
 		this.symbolOverrideController = base.GetComponent<SymbolOverrideController>();
 		this.UpdateHidden();
+		this.hasEnableRun = false;
 	}
 
 	protected override void OnStart()
@@ -521,6 +522,19 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void OnEnable()
 	{
+		if (this._enabled)
+		{
+			this.Enable();
+		}
+	}
+
+	protected override void Enable()
+	{
+		if (this.hasEnableRun)
+		{
+			return;
+		}
+		this.hasEnableRun = true;
 		if (this.batch == null)
 		{
 			this.Initialize();
@@ -536,10 +550,20 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void OnDisable()
 	{
+		this.Disable();
+	}
+
+	protected override void Disable()
+	{
 		if (App.IsExiting || KMonoBehaviour.isLoadingScene)
 		{
 			return;
 		}
+		if (!this.hasEnableRun)
+		{
+			return;
+		}
+		this.hasEnableRun = false;
 		this.SuspendUpdates(true);
 		if (this.batch != null)
 		{
@@ -595,7 +619,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void Register()
 	{
-		if (!base.isActiveAndEnabled)
+		if (!this.IsActive())
 		{
 			return;
 		}
@@ -622,7 +646,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void ConfigureUpdateListener()
 	{
-		bool flag = (base.isActiveAndEnabled && !this.suspendUpdates && this.isVisible) || this.moving || this.visibilityType == KAnimControllerBase.VisibilityType.Always;
+		bool flag = (this.IsActive() && !this.suspendUpdates && this.isVisible) || this.moving || this.visibilityType == KAnimControllerBase.VisibilityType.Always;
 		if (flag)
 		{
 			KBatchedAnimUpdater.instance.UpdateRegister(this);

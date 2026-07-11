@@ -715,7 +715,7 @@ public class ConduitFlow : IConduitFlow
 	{
 		if (contents.element != SimHashes.Vacuum && contents.mass > 0f)
 		{
-			SimMessages.AddRemoveSubstance(cell, contents.element, CellEventLogger.Instance.ConduitFlowEmptyConduit, contents.mass, contents.temperature, contents.diseaseIdx, contents.diseaseCount, -1);
+			SimMessages.AddRemoveSubstance(cell, contents.element, CellEventLogger.Instance.ConduitFlowEmptyConduit, contents.mass, contents.temperature, contents.diseaseIdx, contents.diseaseCount, true, -1);
 			contents.mass = 0f;
 			contents.temperature = 0f;
 			contents.element = SimHashes.Vacuum;

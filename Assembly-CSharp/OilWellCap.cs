@@ -115,7 +115,7 @@ public class OilWellCap : Workable, ISingleSliderControl, IElementEmitter, ISlid
 			SimUtil.DiseaseInfo percentOfDisease = SimUtil.GetPercentOfDisease(primaryElement, num / primaryElement.Mass);
 			primaryElement.Mass -= num;
 			Game.Instance.accumulators.Accumulate(this.accumulator, num);
-			SimMessages.AddRemoveSubstance(Grid.PosToCell(this), ElementLoader.GetElementIndex(this.gasElement), null, num, primaryElement.Temperature, percentOfDisease.idx, percentOfDisease.count, -1);
+			SimMessages.AddRemoveSubstance(Grid.PosToCell(this), ElementLoader.GetElementIndex(this.gasElement), null, num, primaryElement.Temperature, percentOfDisease.idx, percentOfDisease.count, true, -1);
 		}
 		this.UpdatePressurePercent();
 	}

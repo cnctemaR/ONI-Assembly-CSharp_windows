@@ -58,13 +58,18 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 			return new RancherChore(base.GetComponent<KPrefabID>());
 		}
 
+		public int GetTargetRanchCell()
+		{
+			return base.def.getTargetRanchCell(this);
+		}
+
 		public bool IsCreatureAvailableForRanching()
 		{
 			if (this.targetRanchable != null)
 			{
-				int num = Grid.PosToCell(base.transform.GetPosition());
-				CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
-				return RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(this.targetRanchable, this, cavityForCell, num);
+				int targetRanchCell = this.GetTargetRanchCell();
+				CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(targetRanchCell);
+				return RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(this.targetRanchable, this, cavityForCell, targetRanchCell);
 			}
 			return false;
 		}
@@ -109,20 +114,20 @@ public class RanchStation : GameStateMachine<RanchStation, RanchStation.Instance
 
 		public void FindRanchable()
 		{
-			int num = Grid.PosToCell(base.transform.GetPosition());
-			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
+			int targetRanchCell = this.GetTargetRanchCell();
+			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(targetRanchCell);
 			if (cavityForCell == null)
 			{
 				this.TriggerRanchStationNoLongerAvailable();
 				return;
 			}
-			if (this.targetRanchable != null && !RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(this.targetRanchable, this, cavityForCell, num))
+			if (this.targetRanchable != null && !RanchStation.Instance.CanRanchableBeRanchedAtRanchStation(this.targetRanchable, this, cavityForCell, targetRanchCell))
 			{
 				this.TriggerRanchStationNoLongerAvailable();
 			}
 			if (this.targetRanchable.IsNullOrStopped())
 			{
-				RanchStation.Instance.RanchableIterator ranchableIterator = new RanchStation.Instance.RanchableIterator(this, cavityForCell, num);
+				RanchStation.Instance.RanchableIterator ranchableIterator = new RanchStation.Instance.RanchableIterator(this, cavityForCell, targetRanchCell);
 				GameScenePartitioner.Instance.Iterate<RanchStation.Instance.RanchableIterator>(cavityForCell.minX, cavityForCell.minY, cavityForCell.maxX - cavityForCell.minX + 1, cavityForCell.maxY - cavityForCell.minY + 1, GameScenePartitioner.Instance.collisionLayer, ref ranchableIterator);
 				ranchableIterator.Cleanup();
 				this.targetRanchable = ranchableIterator.result;

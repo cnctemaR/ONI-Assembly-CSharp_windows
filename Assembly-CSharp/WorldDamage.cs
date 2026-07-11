@@ -105,7 +105,7 @@ public class WorldDamage : KMonoBehaviour
 		KBatchedAnimController kanim = fx.GetComponent<KBatchedAnimController>();
 		kanim.TintColour = elem.substance.colour;
 		kanim.onDestroySelf = new Action<GameObject>(this.ReleaseGO);
-		SimMessages.AddRemoveSubstance(src_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, -1f, temperature, byte.MaxValue, 0, -1);
+		SimMessages.AddRemoveSubstance(src_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, -1f, temperature, byte.MaxValue, 0, true, -1);
 		if (offset == -1)
 		{
 			kanim.Play("side", KAnim.PlayMode.Once, 1f, 0f);
@@ -121,7 +121,7 @@ public class WorldDamage : KMonoBehaviour
 			kanim.Play("floor", KAnim.PlayMode.Once, 1f, 0f);
 			kanim.enabled = false;
 			kanim.enabled = true;
-			SimMessages.AddRemoveSubstance(dest_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, 1f, temperature, byte.MaxValue, 0, -1);
+			SimMessages.AddRemoveSubstance(dest_cell, idx, CellEventLogger.Instance.WorldDamageDelayedSpawnFX, 1f, temperature, byte.MaxValue, 0, true, -1);
 		}
 		else if (offset == -Grid.WidthInCells)
 		{

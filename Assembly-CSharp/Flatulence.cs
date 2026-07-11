@@ -38,7 +38,7 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 		}
 		int num2 = Grid.PosToCell(gameObject.transform.GetPosition());
 		float value = Db.Get().Amounts.Temperature.Lookup(this).value;
-		SimMessages.AddRemoveSubstance(num2, SimHashes.Methane, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.1f, value, byte.MaxValue, 0, -1);
+		SimMessages.AddRemoveSubstance(num2, SimHashes.Methane, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.1f, value, byte.MaxValue, 0, true, -1);
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), base.transform.GetPosition());
 		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", gameObject.transform.GetPosition(), gameObject.transform, true, Grid.SceneLayer.Front, false);
 		kbatchedAnimController.Play(Flatulence.WorkLoopAnims, KAnim.PlayMode.Once);

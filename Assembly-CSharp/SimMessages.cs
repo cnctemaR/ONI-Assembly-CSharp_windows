@@ -456,7 +456,7 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-469311643, sizeof(SimMessages.CellPropertiesMessage), (byte*)ptr);
 	}
 
-	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, byte disease_idx, int disease_count, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, int callbackIdx = -1)
+	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, byte disease_idx, int disease_count, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, bool do_vertical_solid_displacement = false, int callbackIdx = -1)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -481,6 +481,7 @@ public static class SimMessages
 		ptr->replaceType = (byte)replace_type;
 		ptr->diseaseIdx = disease_idx;
 		ptr->diseaseCount = disease_count;
+		ptr->addSubType = ((!do_vertical_solid_displacement) ? 1 : 0);
 		Sim.SIM_HandleMessage(-1252920804, sizeof(SimMessages.ModifyCellMessage), (byte*)ptr);
 	}
 
@@ -555,19 +556,19 @@ public static class SimMessages
 		Sim.SIM_HandleMessage(-1019841536, sizeof(SimMessages.ConsumeDiseaseMessage), (byte*)ptr);
 	}
 
-	public static void AddRemoveSubstance(int gameCell, SimHashes new_element, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
+	public static void AddRemoveSubstance(int gameCell, SimHashes new_element, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, bool do_vertical_solid_displacement = true, int callbackIdx = -1)
 	{
 		int elementIndex = SimMessages.GetElementIndex(new_element);
-		SimMessages.AddRemoveSubstance(gameCell, elementIndex, ev, mass, temperature, disease_idx, disease_count, callbackIdx);
+		SimMessages.AddRemoveSubstance(gameCell, elementIndex, ev, mass, temperature, disease_idx, disease_count, do_vertical_solid_displacement, callbackIdx);
 	}
 
-	public static void AddRemoveSubstance(int gameCell, int elementIdx, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
+	public static void AddRemoveSubstance(int gameCell, int elementIdx, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, bool do_vertical_solid_displacement = true, int callbackIdx = -1)
 	{
 		if (elementIdx != -1)
 		{
 			Element element = ElementLoader.elements[elementIdx];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, callbackIdx);
+			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, do_vertical_solid_displacement, callbackIdx);
 			if (ev != null)
 			{
 			}
@@ -581,7 +582,10 @@ public static class SimMessages
 		{
 			Element element = ElementLoader.elements[elementIndex];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, diseaseIdx, diseaseCount, SimMessages.ReplaceType.Replace, callbackIdx);
+			int num2 = elementIndex;
+			float num3 = num;
+			SimMessages.ReplaceType replaceType = SimMessages.ReplaceType.Replace;
+			SimMessages.ModifyCell(gameCell, num2, num3, mass, diseaseIdx, diseaseCount, replaceType, false, callbackIdx);
 		}
 	}
 
@@ -592,7 +596,10 @@ public static class SimMessages
 		{
 			Element element = ElementLoader.elements[elementIndex];
 			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIndex, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.ReplaceAndDisplace, callbackIdx);
+			int num2 = elementIndex;
+			float num3 = num;
+			SimMessages.ReplaceType replaceType = SimMessages.ReplaceType.ReplaceAndDisplace;
+			SimMessages.ModifyCell(gameCell, num2, num3, mass, disease_idx, disease_count, replaceType, false, callbackIdx);
 		}
 	}
 
@@ -626,12 +633,12 @@ public static class SimMessages
 				{
 					temperature = ElementLoader.elements[elementIndex].defaultValues.temperature;
 				}
-				SimMessages.ModifyCell(gameCell, elementIndex, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, -1);
+				SimMessages.ModifyCell(gameCell, elementIndex, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, false, -1);
 			}
 		}
 		else
 		{
-			SimMessages.ModifyCell(gameCell, 0, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, -1);
+			SimMessages.ModifyCell(gameCell, 0, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, false, -1);
 		}
 	}
 
@@ -1004,7 +1011,7 @@ public static class SimMessages
 
 		public byte diseaseIdx;
 
-		private byte pad0;
+		public byte addSubType;
 	}
 
 	public enum ReplaceType
@@ -1012,6 +1019,12 @@ public static class SimMessages
 		None,
 		Replace,
 		ReplaceAndDisplace
+	}
+
+	private enum AddSolidMassSubType
+	{
+		DoVerticalDisplacement,
+		OnlyIfSameElement
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

@@ -24,6 +24,30 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
 	public event Action<Color32> OnOverlayColourChanged;
 
+	public new bool enabled
+	{
+		get
+		{
+			return this._enabled;
+		}
+		set
+		{
+			this._enabled = value;
+			if (!this.hasAwakeRun)
+			{
+				return;
+			}
+			if (this._enabled)
+			{
+				this.Enable();
+			}
+			else
+			{
+				this.Disable();
+			}
+		}
+	}
+
 	public bool HasBatchInstanceData
 	{
 		get
@@ -345,6 +369,10 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected abstract void OnStop();
 
+	protected abstract void Enable();
+
+	protected abstract void Disable();
+
 	protected abstract void UpdateFrame(float t);
 
 	public abstract Matrix2x3 GetTransformMatrix();
@@ -395,6 +423,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 			this.SetDirty();
 			this.Play(this.initialAnim, this.initialMode, 1f, 0f);
 		}
+		this.hasAwakeRun = true;
 	}
 
 	private void Start()
@@ -869,6 +898,13 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	private KAnimSynchronizer synchronizer;
 
 	protected KAnimLayering layering;
+
+	[SerializeField]
+	protected bool _enabled = true;
+
+	protected bool hasEnableRun;
+
+	protected bool hasAwakeRun;
 
 	protected KBatchedAnimInstanceData batchInstanceData;
 

@@ -172,7 +172,7 @@ public class UnstableGroundManager : KMonoBehaviour
 				{
 					this.RemoveFromPending(cell);
 				}, false));
-				SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, handle.index);
+				SimMessages.AddRemoveSubstance(cell, component.ElementID, CellEventLogger.Instance.UnstableGround, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, handle.index);
 				if (component.Element.substance != null && component.Element.substance.fallingStopSound != null && CameraController.Instance.IsAudibleSound(position, component.Element.substance.fallingStopSound))
 				{
 					SoundEvent.PlayOneShot(component.Element.substance.fallingStopSound, position);

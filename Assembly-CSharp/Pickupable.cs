@@ -749,7 +749,11 @@ public class Pickupable : Workable
 		{
 			if (this.entombedCell == -1)
 			{
-				int num = Grid.PosToCell(base.transform.GetPosition());
+				int num = Grid.PosToCell(this);
+				if (PickupableWorldEntomber.CanEntomb(this))
+				{
+					Game.Instance.pickupableWorldEntomber.Add(this);
+				}
 				if (Grid.Objects[num, 1] == null)
 				{
 					KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();

@@ -103,7 +103,7 @@ public class StandardCropPlant : StateMachineComponent<StandardCropPlant.StatesI
 			StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, SimViewMode.None, 0, null, null, main).Enter(delegate(StandardCropPlant.StatesInstance smi)
 			{
-				if (smi.master.growing.Replanted)
+				if (smi.master.growing.Replanted && !UprootedMonitor.IsObjectUprooted(this.masterTarget.Get(smi)))
 				{
 					Notifier notifier = smi.master.gameObject.AddOrGet<Notifier>();
 					Notification notification = smi.master.CreateDeathNotification();

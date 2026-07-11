@@ -382,7 +382,7 @@ public class FallingWater : KMonoBehaviour, ISim200ms
 		return;
 		Block_3:
 		FallingWater.ParticleProperties particleProperties = this.properties[particleIdx];
-		SimMessages.AddRemoveSubstance(cell, (int)particleProperties.elementIdx, CellEventLogger.Instance.FallingWaterAddToSim, particleProperties.mass, particleProperties.temperature, particleProperties.diseaseIdx, particleProperties.diseaseCount, -1);
+		SimMessages.AddRemoveSubstance(cell, (int)particleProperties.elementIdx, CellEventLogger.Instance.FallingWaterAddToSim, particleProperties.mass, particleProperties.temperature, particleProperties.diseaseIdx, particleProperties.diseaseCount, true, -1);
 		this.RemoveParticle(particleIdx, ref num_particles);
 		float time = this.GetTime();
 		float num = this.lastSpawnTime[cell];

@@ -219,7 +219,7 @@ public class Fabricator : Workable, IEffectDescriptor, IHasBuildQueue
 				{
 					int outputCell = this.outputPoint.GetOutputCell();
 					PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
-					SimMessages.AddRemoveSubstance(outputCell, component.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component2.Mass, component.Element.highTempTransition.defaultValues.temperature + 10f, byte.MaxValue, 0, -1);
+					SimMessages.AddRemoveSubstance(outputCell, component.Element.highTempTransition.id, CellEventLogger.Instance.FabricatorProduceMelted, component2.Mass, component.Element.highTempTransition.defaultValues.temperature + 10f, byte.MaxValue, 0, true, -1);
 					component.gameObject.DeleteObject();
 				}
 			}

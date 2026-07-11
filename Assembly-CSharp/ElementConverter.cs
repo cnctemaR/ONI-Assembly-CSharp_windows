@@ -260,7 +260,7 @@ public class ElementConverter : StateMachineComponent<ElementConverter.StatesIns
 					}
 					else
 					{
-						SimMessages.AddRemoveSubstance(num15, outputElement.elementHash, CellEventLogger.Instance.OxygenModifierSimUpdate, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, -1);
+						SimMessages.AddRemoveSubstance(num15, outputElement.elementHash, CellEventLogger.Instance.OxygenModifierSimUpdate, num13, num14, diseaseInfo2.idx, diseaseInfo2.count, true, -1);
 					}
 				}
 				if (outputElement.elementHash == SimHashes.Oxygen)

@@ -52,7 +52,7 @@ namespace Klei.AI
 					}
 					int num = Grid.PosToCell(this.go.transform.GetPosition());
 					float value = Db.Get().Amounts.Temperature.Lookup(this.go).value;
-					SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.05f, value, byte.MaxValue, 0, -1);
+					SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.ElementConsumerSimUpdate, 0.05f, value, byte.MaxValue, 0, true, -1);
 					KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("spore_fx_kanim", this.go.transform.GetPosition(), this.go.transform, true, Grid.SceneLayer.Front, false);
 					kbatchedAnimController.Play(Spores.SporesComponent.WorkLoopAnims, KAnim.PlayMode.Once);
 					kbatchedAnimController.destroyOnAnimComplete = true;

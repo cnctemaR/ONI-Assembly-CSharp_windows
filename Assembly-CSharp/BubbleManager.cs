@@ -44,7 +44,7 @@ public class BubbleManager : KMonoBehaviour, ISim33ms, IRenderEveryTick
 		foreach (BubbleManager.Bubble bubble3 in pooledList2)
 		{
 			int num2 = Grid.PosToCell(bubble3.position);
-			SimMessages.AddRemoveSubstance(num2, bubble3.element, CellEventLogger.Instance.FallingWaterAddToSim, bubble3.mass, bubble3.temperature, byte.MaxValue, 0, -1);
+			SimMessages.AddRemoveSubstance(num2, bubble3.element, CellEventLogger.Instance.FallingWaterAddToSim, bubble3.mass, bubble3.temperature, byte.MaxValue, 0, true, -1);
 		}
 		this.bubbles.Clear();
 		this.bubbles.AddRange(pooledList);

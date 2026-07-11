@@ -92,7 +92,7 @@ namespace ProcGenGame
 			for (int m = 0; m < Grid.CellCount; m++)
 			{
 				int num3 = ((m != Grid.CellCount - 1) ? (-1) : 2147481337);
-				SimMessages.ModifyCell(m, (int)cells[m].elementIdx, cells[m].temperature, cells[m].mass, dcs[m].diseaseIdx, dcs[m].elementCount, SimMessages.ReplaceType.Replace, num3);
+				SimMessages.ModifyCell(m, (int)cells[m].elementIdx, cells[m].temperature, cells[m].mass, dcs[m].diseaseIdx, dcs[m].elementCount, SimMessages.ReplaceType.Replace, false, num3);
 			}
 			bool flag = false;
 			while (!flag)

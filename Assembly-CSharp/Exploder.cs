@@ -9,7 +9,7 @@ public class Exploder : KMonoBehaviour
 		Vector3 vector = Grid.CellToPosCCC(num, Grid.SceneLayer.Building);
 		vector.z = -Grid.CellSizeInMeters * 0.5f;
 		this.PlayExplosion(vector);
-		SimMessages.AddRemoveSubstance(num, this.result, CellEventLogger.Instance.ExploderOnSpawn, this.mass, this.temperature, byte.MaxValue, 0, -1);
+		SimMessages.AddRemoveSubstance(num, this.result, CellEventLogger.Instance.ExploderOnSpawn, this.mass, this.temperature, byte.MaxValue, 0, true, -1);
 		base.gameObject.DeleteObject();
 	}
 

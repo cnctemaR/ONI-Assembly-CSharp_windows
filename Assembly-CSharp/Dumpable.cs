@@ -53,7 +53,7 @@ public class Dumpable : Workable
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		if (component.Mass > 0f)
 		{
-			SimMessages.AddRemoveSubstance(Grid.PosToCell(this), component.ElementID, CellEventLogger.Instance.Dumpable, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+			SimMessages.AddRemoveSubstance(Grid.PosToCell(this), component.ElementID, CellEventLogger.Instance.Dumpable, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, -1);
 		}
 		Util.KDestroyGameObject(base.gameObject);
 	}

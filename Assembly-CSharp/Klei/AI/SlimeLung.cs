@@ -184,7 +184,7 @@ namespace Klei.AI
 				{
 					AmountInstance amountInstance = Db.Get().Amounts.Temperature.Lookup(cougher);
 					int num = Grid.PosToCell(cougher);
-					SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.Cough, 0.1f, amountInstance.value, Db.Get().Diseases.GetIndex("SlimeLung"), 1000, -1);
+					SimMessages.AddRemoveSubstance(num, SimHashes.ContaminatedOxygen, CellEventLogger.Instance.Cough, 0.1f, amountInstance.value, Db.Get().Diseases.GetIndex("SlimeLung"), 1000, true, -1);
 					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, base.master.modifier.Name, 1000), cougher.transform, 1.5f, false);
 				}
 

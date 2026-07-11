@@ -34,7 +34,7 @@ public class PeeChore : Chore<PeeChore.StatesInstance>
 			float num2 = dt * -this.bladder.GetDelta() / this.bladder.GetMax();
 			if (num2 > 0f)
 			{
-				SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, 2f * num2, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), -1);
+				SimMessages.AddRemoveSubstance(num, SimHashes.DirtyWater, CellEventLogger.Instance.Vomit, 2f * num2, this.bodyTemperature.value, index, Mathf.CeilToInt(100000f * num2), true, -1);
 			}
 		}
 

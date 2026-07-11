@@ -23,7 +23,7 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 		{
 			int num = Grid.PosToCell(base.transform.GetPosition() + this.emitOffset);
 			PrimaryElement component = base.GetComponent<PrimaryElement>();
-			SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementEmitted, this.emittedMass, component.Temperature, byte.MaxValue, 0, -1);
+			SimMessages.AddRemoveSubstance(num, SimHashes.CarbonDioxide, CellEventLogger.Instance.ElementEmitted, this.emittedMass, component.Temperature, byte.MaxValue, 0, true, -1);
 			this.emittedMass = 0f;
 		}
 	}

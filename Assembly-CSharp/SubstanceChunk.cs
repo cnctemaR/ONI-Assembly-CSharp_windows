@@ -32,7 +32,7 @@ public class SubstanceChunk : KMonoBehaviour, ISaveLoadable
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		if (component.Mass > 0f)
 		{
-			SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, -1);
+			SimMessages.AddRemoveSubstance(num, component.ElementID, CellEventLogger.Instance.ExhaustSimUpdate, component.Mass, component.Temperature, component.DiseaseIdx, component.DiseaseCount, true, -1);
 		}
 		base.gameObject.DeleteObject();
 	}

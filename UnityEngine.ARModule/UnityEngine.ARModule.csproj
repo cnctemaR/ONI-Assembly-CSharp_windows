@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CB398776-6635-4EB0-91FF-143F020E0EA6}</ProjectGuid>
+    <ProjectGuid>{9077E494-4D7F-4F5D-8DA8-EDDC6EF9F80B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.XR</RootNamespace>
     <AssemblyName>UnityEngine.ARModule</AssemblyName>
@@ -39,15 +39,15 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{CB398776-6635-4EB0-91FF-143F020E0EAE}</Project>
+      <Project>{9077E494-4D7F-4F5D-8DA8-EDDC6EF9F813}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
-      <Project>{CB398776-6635-4EB0-91FF-143F020E0EC1}</Project>
+      <Project>{9077E494-4D7F-4F5D-8DA8-EDDC6EF9F826}</Project>
       <Name>UnityEngine.PhysicsModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{CB398776-6635-4EB0-91FF-143F020E0EC4}</Project>
+      <Project>{9077E494-4D7F-4F5D-8DA8-EDDC6EF9F829}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

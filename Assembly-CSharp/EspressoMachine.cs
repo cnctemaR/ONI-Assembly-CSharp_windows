@@ -13,6 +13,8 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 		base.OnCleanUp();
 	}
 
+	public static Tag INGREDIENT_TAG = new Tag("SpiceNut");
+
 	public class States : GameStateMachine<EspressoMachine.States, EspressoMachine.StatesInstance, EspressoMachine>
 	{
 		public override void InitializeStates(out StateMachine.BaseState default_state)
@@ -50,7 +52,7 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 			{
 				return false;
 			}
-			float amountAvailable = smi.GetComponent<Storage>().GetAmountAvailable(new Tag("SpiceNut"));
+			float amountAvailable = smi.GetComponent<Storage>().GetAmountAvailable(EspressoMachine.INGREDIENT_TAG);
 			return amountAvailable >= 1f;
 		}
 

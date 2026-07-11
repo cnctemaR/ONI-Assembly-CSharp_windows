@@ -81,7 +81,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		{
 			component5.carryAnimOverride = Assets.GetAnim("anim_incapacitated_carrier_kanim");
 		}
-		SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem");
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting("ImmuneSystem");
 		if (currentQualitySetting.id == "Compromised")
 		{
 			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, -0.025f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.COMPROMISED.ATTRIBUTE_MODIFIER_NAME, false, false, true));
@@ -98,7 +98,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		{
 			Db.Get().Amounts.ImmuneLevel.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.ImmuneLevel.deltaAttribute.Id, float.PositiveInfinity, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.IMMUNESYSTEM.LEVELS.INVINCIBLE.ATTRIBUTE_MODIFIER_NAME, false, false, true));
 		}
-		SettingLevel currentQualitySetting2 = Game.Instance.customSettings.GetCurrentQualitySetting("Stress");
+		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting("Stress");
 		if (currentQualitySetting2.id == "Doomed")
 		{
 			Db.Get().Amounts.Stress.deltaAttribute.Lookup(this).Add(new AttributeModifier(Db.Get().Amounts.Stress.deltaAttribute.Id, 0.033333335f, UI.FRONTEND.CUSTOMGAMESETTINGSSCREEN.SETTINGS.STRESS.LEVELS.DOOMED.ATTRIBUTE_MODIFIER_NAME, false, false, true));

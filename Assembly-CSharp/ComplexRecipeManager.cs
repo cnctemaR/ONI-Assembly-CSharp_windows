@@ -54,6 +54,10 @@ public class ComplexRecipeManager
 
 	public ComplexRecipe GetRecipe(string id)
 	{
+		if (string.IsNullOrEmpty(id))
+		{
+			return null;
+		}
 		return this.recipes.Find((ComplexRecipe r) => r.id == id);
 	}
 
@@ -64,6 +68,10 @@ public class ComplexRecipeManager
 
 	public ComplexRecipe GetObsoleteRecipe(string id)
 	{
+		if (string.IsNullOrEmpty(id))
+		{
+			return null;
+		}
 		ComplexRecipe complexRecipe = null;
 		string text = null;
 		if (this.obsoleteIDMapping.TryGetValue(id, out text))

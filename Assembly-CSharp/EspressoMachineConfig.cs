@@ -7,7 +7,7 @@ public class EspressoMachineConfig : IBuildingConfig
 	public override BuildingDef CreateBuildingDef()
 	{
 		string text = "EspressoMachine";
-		int num = 4;
+		int num = 3;
 		int num2 = 3;
 		string text2 = "espresso_machine_kanim";
 		int num3 = 30;

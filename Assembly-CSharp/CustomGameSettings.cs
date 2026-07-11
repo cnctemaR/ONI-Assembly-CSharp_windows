@@ -5,23 +5,58 @@ using KSerialization;
 using ProcGen;
 using ProcGenGame;
 using STRINGS;
-using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
 public class CustomGameSettings : KMonoBehaviour
 {
-	public static CustomGameSettings Get()
+	public static CustomGameSettings Instance
 	{
-		return CustomGameSettings.instance;
+		get
+		{
+			return CustomGameSettings.instance;
+		}
+	}
+
+	protected override void OnPrefabInit()
+	{
+		CustomGameSettings.instance = this;
+		this.AddSettingConfig(CustomGameSettingConfigs.ImmuneSystem);
+		this.AddSettingConfig(CustomGameSettingConfigs.Stress);
+		this.AddSettingConfig(CustomGameSettingConfigs.StressBreaks);
+		this.AddSettingConfig(CustomGameSettingConfigs.Morale);
+		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
+		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
+		if (DebugHandler.enabled)
+		{
+			this.InitWorldGenOptions();
+		}
+		this.Reset();
+	}
+
+	public SettingLevel CycleSettingLevel(ListSettingConfig config, int direction)
+	{
+		this.CurrentQualityLevelsBySetting[config.id] = config.CycleSettingLevelID(this.CurrentQualityLevelsBySetting[config.id], direction);
+		return config.GetLevel(this.CurrentQualityLevelsBySetting[config.id]);
+	}
+
+	public SettingLevel ToggleSettingLevel(ToggleSettingConfig config)
+	{
+		this.CurrentQualityLevelsBySetting[config.id] = config.ToggleSettingLevelID(this.CurrentQualityLevelsBySetting[config.id]);
+		return config.GetLevel(this.CurrentQualityLevelsBySetting[config.id]);
+	}
+
+	public void SetQualitySetting(SettingConfig config, string value)
+	{
+		this.CurrentQualityLevelsBySetting[config.id] = value;
 	}
 
 	public SettingLevel GetCurrentQualitySetting(string setting_id)
 	{
 		if (this.is_custom_game)
 		{
-			string empty = string.Empty;
-			this.CurrentQualityLevelsBySetting.TryGetValue(setting_id, out empty);
-			return this.QualitySettings[setting_id].GetLevel(empty);
+			string text = null;
+			this.CurrentQualityLevelsBySetting.TryGetValue(setting_id, out text);
+			return this.QualitySettings[setting_id].GetLevel(text);
 		}
 		return this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].default_level_id);
 	}
@@ -37,7 +72,7 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.label;
 			}
 		}
-		global::Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id, null);
+		Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id, null);
 		return string.Empty;
 	}
 
@@ -52,28 +87,8 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.tooltip;
 			}
 		}
-		global::Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id, null);
+		Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id, null);
 		return string.Empty;
-	}
-
-	protected override void OnPrefabInit()
-	{
-		if (CustomGameSettings.instance != null)
-		{
-			global::UnityEngine.Object.DestroyImmediate(CustomGameSettings.instance.gameObject);
-		}
-		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
-		CustomGameSettings.instance = this;
-		this.AddSettingConfig(CustomGameSettingConfigs.ImmuneSystem);
-		this.AddSettingConfig(CustomGameSettingConfigs.Stress);
-		this.AddSettingConfig(CustomGameSettingConfigs.StressBreaks);
-		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
-		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
-		if (DebugHandler.enabled)
-		{
-			CustomGameSettings.Get().InitWorldGenOptions();
-		}
-		this.Reset();
 	}
 
 	public void AddSettingConfig(SettingConfig config)
@@ -120,7 +135,7 @@ public class CustomGameSettings : KMonoBehaviour
 			string text2 = text;
 			text = string.Concat(new string[] { text2, keyValuePair.Key, "=", keyValuePair.Value, "," });
 		}
-		global::Debug.Log(text, null);
+		Debug.Log(text, null);
 	}
 
 	public List<CustomGameSettings.MetricSettingsData> GetSettingsForMetrics()
@@ -143,7 +158,7 @@ public class CustomGameSettings : KMonoBehaviour
 	public bool is_custom_game;
 
 	[Serialize]
-	public Dictionary<string, string> CurrentQualityLevelsBySetting = new Dictionary<string, string>();
+	private Dictionary<string, string> CurrentQualityLevelsBySetting = new Dictionary<string, string>();
 
 	public Dictionary<string, SettingConfig> QualitySettings = new Dictionary<string, SettingConfig>();
 

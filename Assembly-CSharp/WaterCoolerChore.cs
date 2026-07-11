@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using Klei.AI;
 using TUNING;
 
@@ -41,33 +42,49 @@ public class WaterCoolerChore : Chore<WaterCoolerChore.StatesInstance>, IWorkerP
 			default_state = this.drink_move;
 			base.Target(this.drinker);
 			this.drink_move.InitializeStates(this.drinker, this.masterTarget, this.drink, null, null, null);
-			this.drink.Face(this.masterTarget, 0.5f).Enter("Drink", delegate(WaterCoolerChore.StatesInstance smi)
-			{
-				Storage storage = this.masterTarget.Get<Storage>(smi);
-				storage.ConsumeIgnoringDisease(GameTags.Water, 1f);
-			}).ToggleAnims("anim_interacts_watercooler_kanim", 0f)
-				.PlayAnim("working_pre")
-				.QueueAnim("working_loop", false, null)
-				.QueueAnim("working_pst", false, null)
-				.OnAnimQueueComplete(this.chat_move);
+			this.drink.ToggleAnims("anim_interacts_watercooler_kanim", 0f).DefaultState(this.drink.drink);
+			this.drink.drink.Face(this.masterTarget, 0.5f).PlayAnim("working_pre").QueueAnim("working_loop", false, null)
+				.OnAnimQueueComplete(this.drink.post);
+			this.drink.post.Enter("Drink", new StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State.Callback(this.Drink)).PlayAnim("working_pst").OnAnimQueueComplete(this.chat_move);
 			this.chat_move.InitializeStates(this.drinker, this.chitchatlocator, this.chat, null, null, null);
 			this.chat.ToggleWork<SocialGatheringPointWorkable>(this.chitchatlocator, this.success, null, null);
 			this.success.ReturnSuccess();
+		}
+
+		private void Drink(WaterCoolerChore.StatesInstance smi)
+		{
+			Storage storage = this.masterTarget.Get<Storage>(smi);
+			Worker worker = this.stateTarget.Get<Worker>(smi);
+			SimUtil.DiseaseInfo diseaseInfo;
+			float num;
+			storage.ConsumeAndGetDisease(GameTags.Water, 1f, out diseaseInfo, out num);
+			ImmuneSystemMonitor.Instance smi2 = worker.GetSMI<ImmuneSystemMonitor.Instance>();
+			if (smi2 != null)
+			{
+				smi2.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Disease.InfectionVector.Digestion);
+			}
 		}
 
 		public StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.TargetParameter drinker;
 
 		public StateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.TargetParameter chitchatlocator;
 
-		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.ApproachSubState<WaterCooler> drink_move;
+		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.ApproachSubState<IApproachable> drink_move;
 
-		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State drink;
+		public WaterCoolerChore.States.DrinkStates drink;
 
 		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.ApproachSubState<IApproachable> chat_move;
 
 		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State chat;
 
 		public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State success;
+
+		public class DrinkStates : GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State
+		{
+			public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State drink;
+
+			public GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.State post;
+		}
 	}
 
 	public class StatesInstance : GameStateMachine<WaterCoolerChore.States, WaterCoolerChore.StatesInstance, WaterCoolerChore, object>.GameInstance

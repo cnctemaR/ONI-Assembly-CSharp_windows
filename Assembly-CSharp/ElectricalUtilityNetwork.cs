@@ -90,12 +90,15 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 						this.targetOverloadedWire = list[num2].gameObject;
 					}
 				}
-				this.targetOverloadedWire.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+				if (this.targetOverloadedWire != null)
 				{
-					damage = 1,
-					source = BUILDINGS.DAMAGESOURCES.CIRCUIT_OVERLOADED,
-					popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CIRCUIT_OVERLOADED
-				});
+					this.targetOverloadedWire.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+					{
+						damage = 1,
+						source = BUILDINGS.DAMAGESOURCES.CIRCUIT_OVERLOADED,
+						popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CIRCUIT_OVERLOADED
+					});
+				}
 				if (this.overloadedNotification == null)
 				{
 					this.timeOverloadNotificationDisplayed = 0f;

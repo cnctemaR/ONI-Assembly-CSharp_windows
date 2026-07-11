@@ -493,6 +493,57 @@ namespace STRINGS
 						}
 					}
 
+					public class MORALE
+					{
+						public static LocString NAME = "Morale Stress";
+
+						public static LocString TOOLTIP = "Affects how stressed Duplicants get from Low Morale";
+
+						public static class LEVELS
+						{
+							public static class VERYHARD
+							{
+								public static LocString NAME = "Very Hard";
+
+								public static LocString TOOLTIP = "Duplicants have very high expectations";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Low Morale (Very Hard)";
+							}
+
+							public static class HARD
+							{
+								public static LocString NAME = "Hard";
+
+								public static LocString TOOLTIP = "Duplicants have increased expectations.";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Low Morale (Hard)";
+							}
+
+							public static class DEFAULT
+							{
+								public static LocString NAME = "Regular";
+
+								public static LocString TOOLTIP = "Duplicants regain immunity normally";
+							}
+
+							public static class EASY
+							{
+								public static LocString NAME = "Easy";
+
+								public static LocString TOOLTIP = "Duplicants have low expectations";
+
+								public static LocString ATTRIBUTE_MODIFIER_NAME = "Low Morale (Easy)";
+							}
+
+							public static class DISABLED
+							{
+								public static LocString NAME = "None";
+
+								public static LocString TOOLTIP = "Duplicants aren't stressed by their expectations at all";
+							}
+						}
+					}
+
 					public class WORLD_CHOICE
 					{
 						public static LocString NAME = "World(DEBUG)";
@@ -939,6 +990,17 @@ namespace STRINGS
 				public static LocString SAVE_DIRECTORY_INSUFFICIENT_SPACE = "There is insufficient disk space to write to your save directory.\n\nPlease free at least 15 MB to give your saves some room to breathe.\n{0}";
 
 				public static LocString WORLD_GEN_FILES = "A problem occurred while accessing certain game files that will prevent starting new games.\n\nPlease ensure you can modify these files and re-launch the game:\n\n{0}";
+			}
+
+			public class SAVEUPGRADEWARNINGS
+			{
+				public static LocString SUDDENMORALEHELPER = "Welcome to the Expressive Upgrade! This update introduces a new Morale system that replaces Food and Decor Expectations that were found in previous versions of the game.\n\nThe game you are trying to load was created before this system was introduced, and will need to be updated. You may either:\n\n\n1) Enable the new Morale system in this save, removing Food and Decor Expectations. It's possible that when you load your save your old colony won't meet your Duplicants' new Morale needs, so they'll receive a 5 cycle Morale boost to give you time to adjust.\n\n2) Disable Morale in this save. The new Morale mechanics will still be visible, but won't affect your Duplicants' stress. Food and Decor expectations will no longer exist in this save.";
+
+				public static LocString SUDDENMORALEHELPER_TITLE = "MORALE CHANGES";
+
+				public static LocString SUDDENMORALEHELPER_BUFF = "1) Bring on Morale!";
+
+				public static LocString SUDDENMORALEHELPER_DISABLE = "2) Disable Morale";
 			}
 		}
 
@@ -3108,7 +3170,9 @@ namespace STRINGS
 			{
 				public static LocString TITLE = "Filter Outputs";
 
-				public static LocString SELECTELEMENTHEADER = "Select Element";
+				public static LocString OUTPUTELEMENTHEADER = "Output 1";
+
+				public static LocString SELECTELEMENTHEADER = "Output 2";
 
 				public static LocString NOELEMENTSELECTED = "No element selected";
 
@@ -5716,7 +5780,7 @@ namespace STRINGS
 
 			public static LocString TIME_PLAYED = "Time Played: {0} hours";
 
-			public static LocString SCHEDULE_BUTTON_TOOLTIP = "Manage Schedule\n\nNOT IMPLEMENTED";
+			public static LocString SCHEDULE_BUTTON_TOOLTIP = "Manage Schedule";
 		}
 
 		public class ENDOFDAYREPORT

@@ -14,6 +14,11 @@ public class SocialChoreTracker
 
 	public void Update(bool update = true)
 	{
+		if (this.updating)
+		{
+			return;
+		}
+		this.updating = true;
 		int num = 0;
 		for (int i = 0; i < this.choreOffsets.Length; i++)
 		{
@@ -34,6 +39,7 @@ public class SocialChoreTracker
 				this.chores[i] = null;
 			}
 		}
+		this.updating = false;
 	}
 
 	private void OnCellChanged(object data)
@@ -73,4 +79,6 @@ public class SocialChoreTracker
 	private Chore[] chores;
 
 	private GameScenePartitionerEntry validNavCellChangedPartitionerEntry;
+
+	private bool updating;
 }

@@ -34,6 +34,7 @@ public class FilterSideScreen : SideScreenContent
 		{
 			return;
 		}
+		this.outputElementHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.OUTPUTELEMENTHEADER;
 		this.selectElementHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.SELECTELEMENTHEADER;
 		this.everythingElseHeaderLabel.text = ((component.filterElementState != Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS);
 		Element element = ((!component.SelectedTag.IsValid) ? null : ElementLoader.GetElement(component.SelectedTag));
@@ -99,6 +100,8 @@ public class FilterSideScreen : SideScreenContent
 	public Image outputIcon;
 
 	public Image everythingElseIcon;
+
+	public LocText outputElementHeaderLabel;
 
 	public LocText everythingElseHeaderLabel;
 

@@ -51,7 +51,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 
 	private void OnChoreEnd(Chore chore)
 	{
-		if (base.gameObject.HasTag(GameTags.Operational))
+		if (base.smi.IsInsideState(base.smi.sm.dispensing))
 		{
 			this.tracker.Update(true);
 		}
@@ -119,7 +119,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 				{
 					smi.CancelFetchChore();
 				})
-				.PlayAnim("on");
+				.PlayAnim("off");
 			this.dispensing.TagTransition(GameTags.Operational, this.unoperational, true).EventTransition(GameHashes.OnStorageChange, this.waitingfordelivery, (WaterCooler.StatesInstance smi) => smi.storage.IsEmpty()).Enter("StartMeter", delegate(WaterCooler.StatesInstance smi)
 			{
 				smi.StartMeter();
@@ -132,7 +132,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 				{
 					smi.master.tracker.Update(false);
 				})
-				.PlayAnim("on");
+				.PlayAnim("working");
 		}
 
 		public GameStateMachine<WaterCooler.States, WaterCooler.StatesInstance, WaterCooler, object>.State unoperational;

@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei;
 using Klei.AI;
 using TUNING;
 
@@ -23,8 +24,17 @@ public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IW
 	protected override void OnCompleteWork(Worker worker)
 	{
 		Storage component = base.GetComponent<Storage>();
-		component.ConsumeIgnoringDisease(GameTags.Water, 1f);
-		component.ConsumeIgnoringDisease(new Tag("SpiceNut"), 1f);
+		SimUtil.DiseaseInfo diseaseInfo;
+		float num;
+		component.ConsumeAndGetDisease(GameTags.Water, 1f, out diseaseInfo, out num);
+		SimUtil.DiseaseInfo diseaseInfo2;
+		component.ConsumeAndGetDisease(EspressoMachine.INGREDIENT_TAG, 1f, out diseaseInfo2, out num);
+		ImmuneSystemMonitor.Instance smi = worker.GetSMI<ImmuneSystemMonitor.Instance>();
+		if (smi != null)
+		{
+			smi.TryInjectDisease(diseaseInfo.idx, diseaseInfo.count, GameTags.Water, Disease.InfectionVector.Digestion);
+			smi.TryInjectDisease(diseaseInfo2.idx, diseaseInfo2.count, EspressoMachine.INGREDIENT_TAG, Disease.InfectionVector.Digestion);
+		}
 		Effects component2 = worker.GetComponent<Effects>();
 		component2.Add("TookABreak", true);
 		if (!string.IsNullOrEmpty(this.specificEffect))

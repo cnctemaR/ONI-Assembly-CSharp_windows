@@ -59,7 +59,7 @@ public class SocialGatheringPoint : StateMachineComponent<SocialGatheringPoint.S
 
 	private void OnSocialChoreEnd(Chore chore)
 	{
-		if (base.gameObject.HasTag(GameTags.Operational))
+		if (base.smi.IsInsideState(base.smi.sm.on))
 		{
 			this.tracker.Update(true);
 		}

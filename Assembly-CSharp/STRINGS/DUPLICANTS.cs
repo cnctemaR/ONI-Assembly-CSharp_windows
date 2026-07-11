@@ -2792,7 +2792,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Recieving Clinic Massage";
 
-				public static LocString TOOLTIP = "Proper facilities futher improve this massage's effectiveness";
+				public static LocString TOOLTIP = "Proper facilities further improve this massage's effectiveness";
 			}
 
 			public class UGLY_CRYING
@@ -3503,6 +3503,13 @@ namespace STRINGS
 				public static LocString NAME = "Engie's Jerry Rig";
 
 				public static LocString TOOLTIP = "A skilled Engineer has jerry rigged this generator to temporarily run faster";
+			}
+
+			public class SUDDENMORALEHELPER
+			{
+				public static LocString NAME = "Morale Upgrade Helper";
+
+				public static LocString TOOLTIP = "This Duplicant will receive a temporary Morale bonus to buffer the new system introduction";
 			}
 		}
 

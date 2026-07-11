@@ -3,7 +3,6 @@ using System.IO;
 using ProcGenGame;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class InitializeCheck : MonoBehaviour
 {
@@ -65,8 +64,12 @@ public class InitializeCheck : MonoBehaviour
 		{
 			GameObject gameObject = this.CreateUIRoot();
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(this.confirmDialogScreen.gameObject, gameObject, true);
-			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = this.sadDupe;
-			confirmDialogScreen.PopupConfirmDialog(text, new global::System.Action(this.Quit), null, null, null, null, null, null);
+			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
+			string text2 = text;
+			global::System.Action action = new global::System.Action(this.Quit);
+			global::System.Action action2 = null;
+			Sprite sprite = this.sadDupe;
+			confirmDialogScreen2.PopupConfirmDialog(text2, action, action2, null, null, null, null, null, sprite);
 		}
 	}
 

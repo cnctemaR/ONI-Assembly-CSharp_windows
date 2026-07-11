@@ -607,8 +607,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Mercury", "MERCURY");
 
 			public static LocString DESC = "(Hg) Mercury is a toxic, metallic" + UI.FormatAsLink("Liquid", "ELEMENTS_LIQUID") + ".";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class MERCURYGAS
@@ -728,8 +726,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Obsidian", "OBSIDIAN");
 
 			public static LocString DESC = "Obsidian is a brittle composite of volcanic " + ELEMENTS.GLASS.NAME + ".";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class OXYGEN
@@ -744,8 +740,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Oxylite", "OXYROCK");
 
 			public static LocString DESC = "(Ir<sub>3</sub>O<sub>2</sub>) Oxylite is a chemical compound that slowly emits breathable " + ELEMENTS.OXYGEN.NAME + ".\n\nExcavating Oxylite increases its emission rate, but depletes the ore more rapidly.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHATENODULES
@@ -753,8 +747,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Phosphate Nodules", "PHOSPHATENODULES");
 
 			public static LocString DESC = "(PO<sup>3-</sup><sub>4</sub>) Nodules of sedimentary rock containing high concentrations of phosphate.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORITE
@@ -762,8 +754,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Phosphorite", "PHOSPHORITE");
 
 			public static LocString DESC = "Phosphorite is a composite of sedimentary rock, saturated with phosphate.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORUS
@@ -771,8 +761,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Phosphorus", "PHOSPHORUS");
 
 			public static LocString DESC = "(P) Phosphorus is a chemical element in its " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class PHOSPHORUSGAS
@@ -808,8 +796,6 @@ namespace STRINGS
 				UI.FormatAsLink("Power", "POWER"),
 				" source."
 			});
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class ROCKGAS
@@ -831,8 +817,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Sand", "SAND");
 
 			public static LocString DESC = "Sand is a composite of granular rock.\n\nIt is useful as a Filtration Medium.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SANDCEMENT
@@ -840,8 +824,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Sand Cement", "SANDCEMENT");
 
 			public static LocString DESC = string.Empty;
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SANDSTONE
@@ -849,8 +831,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Sandstone", "SANDSTONE");
 
 			public static LocString DESC = "Sandstone is a composite of relatively soft sedimentary rock.\n\nIt is useful as a Construction Material.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SEDIMENTARYROCK
@@ -858,8 +838,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Sedimentary Rock", "SEDIMENTARYROCK");
 
 			public static LocString DESC = "Sedimentary Rock is a hardened composite of sediment layers.\n\nIt is useful as a Construction Material.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SLIMEMOLD
@@ -874,8 +852,6 @@ namespace STRINGS
 				ELEMENTS.OXYGEN.NAME,
 				" production processes."
 			});
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SNOW
@@ -883,8 +859,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Snow", "SNOW");
 
 			public static LocString DESC = "(H<sub>2</sub>0) Snow is a mass of loose, crystalline ice particles.\n\nIt becomes " + ELEMENTS.WATER.NAME + " when melted.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDCARBONDIOXIDE
@@ -899,8 +873,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Chlorine", "SOLIDCHLORINE");
 
 			public static LocString DESC = "(Cl) Chlorine is a toxic chemical element in a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDHYDROGEN
@@ -908,8 +880,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Hydrogen", "SOLIDHYDROGEN");
 
 			public static LocString DESC = "(H) Hydrogen is the universe's most common element in a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDMERCURY
@@ -924,8 +894,6 @@ namespace STRINGS
 				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
 				" state."
 			});
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDOXYGEN
@@ -933,8 +901,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Oxygen", "SOLIDOXYGEN");
 
 			public static LocString DESC = "(O<sub>2</sub>) Oxygen is a breathable element in a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDMETHANE
@@ -942,8 +908,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Methane", "SOLIDMETHANE");
 
 			public static LocString DESC = "(CH<sub>4</sub>) Methane is an alkane in a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDPROPANE
@@ -951,8 +915,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Propane", "SOLIDPROPANE");
 
 			public static LocString DESC = "(C<sub>3</sub>H<sub>8</sub>) Propane is a natural gas in a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDCRUDEOIL
@@ -960,8 +922,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Crude Oil", "SOLIDCRUDEOIL");
 
 			public static LocString DESC = string.Empty;
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDNAPHTHA
@@ -969,8 +929,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Naphtha", "SOLIDNAPHTHA");
 
 			public static LocString DESC = "Naphtha is a distilled hydrocarbon mixture in a " + UI.FormatAsLink("Solid", "ELEMENTS_SOLID") + " state.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class SOLIDPETROLEUM
@@ -985,8 +943,6 @@ namespace STRINGS
 				UI.FormatAsLink("Solid", "ELEMENTS_SOLID"),
 				" state."
 			});
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class STEAM
@@ -1001,8 +957,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Steel", "STEEL");
 
 			public static LocString DESC = "Steel is a " + UI.FormatAsLink("Metal Alloy", "REFINEDMETAL") + " composed of iron and carbon.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class STEELGAS
@@ -1031,8 +985,6 @@ namespace STRINGS
 				UI.FormatAsLink("Power", "POWER"),
 				" systems."
 			});
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class TUNGSTENGAS
@@ -1061,8 +1013,6 @@ namespace STRINGS
 				UI.FormatAsLink("Power", "POWER"),
 				" systems."
 			});
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class TUNGSTENDISELENIDEGAS
@@ -1084,8 +1034,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Polluted Dirt", "TOXICSAND");
 
 			public static LocString DESC = "Polluted Dirt is toxic biological waste.\n\nIt emits " + UI.FormatAsLink("disease", "Polluted Oxygen") + " over time.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class UNOBTANIUM
@@ -1093,8 +1041,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Neutronium", "UNOBTANIUM");
 
 			public static LocString DESC = "(Nt) Neutronium is a mysterious and extremely resilient Metallic element.\n\nIt cannot be excavated by any Duplicant mining tool.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class VACUUM
@@ -1132,8 +1078,6 @@ namespace STRINGS
 				UI.FormatAsLink("Power", "POWER"),
 				" systems."
 			});
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 
 		public class POLYPROPYLENE
@@ -1157,8 +1101,6 @@ namespace STRINGS
 			public static LocString NAME = UI.FormatAsLink("Building Slab", "SLABS");
 
 			public static LocString DESC = "Slabs are a refined mineral building block used for assembling advanced buildings.";
-
-			public static LocString BUILD_DESC = string.Empty;
 		}
 	}
 }

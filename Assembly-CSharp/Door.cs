@@ -27,11 +27,11 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		}
 	}
 
-	public bool IsRotated
+	public bool ShouldBlockFallingSand
 	{
 		get
 		{
-			return this.rotatable.IsRotated;
+			return this.rotatable.GetOrientation() != this.verticalOrientation;
 		}
 	}
 
@@ -301,7 +301,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				if (is_door_open)
 				{
 					SimMessages.Dig(num2, Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false)).index);
-					if (this.IsRotated)
+					if (this.ShouldBlockFallingSand)
 					{
 						SimMessages.ClearCellProperties(num2, 4);
 					}
@@ -584,6 +584,8 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 	[MyCmpAdd]
 	private LoopingSounds loopingSounds;
+
+	public Orientation verticalOrientation;
 
 	[SerializeField]
 	public bool hasComplexUserControls;

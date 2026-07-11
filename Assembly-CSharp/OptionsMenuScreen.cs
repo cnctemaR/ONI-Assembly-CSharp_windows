@@ -95,7 +95,7 @@ public class OptionsMenuScreen : KModalButtonMenu
 			Tutorial.ResetHiddenTutorialMessages();
 		}, delegate
 		{
-		}, null, null, null, null, null);
+		}, null, null, null, null, null, null);
 		component.Activate();
 	}
 
@@ -132,7 +132,7 @@ public class OptionsMenuScreen : KModalButtonMenu
 		{
 		};
 		string text3 = UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CONFIRM_SAVE_BACKUP;
-		confirmDialogScreen.PopupConfirmDialog(text, action, action2, text2, action3, null, UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CONFIRM, text3);
+		confirmDialogScreen.PopupConfirmDialog(text, action, action2, text2, action3, null, UI.FRONTEND.OPTIONS_SCREEN.TOGGLE_SANDBOX_SCREEN.CONFIRM, text3, null);
 		component.Activate();
 	}
 

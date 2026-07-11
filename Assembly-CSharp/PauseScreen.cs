@@ -97,7 +97,7 @@ public class PauseScreen : KModalButtonMenu
 			{
 				this.DoSave(filename);
 				this.gameObject.SetActive(true);
-			}, new global::System.Action(this.OnCancelPopup), null, null, null, null, null);
+			}, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null);
 		}
 		else
 		{
@@ -124,7 +124,7 @@ public class PauseScreen : KModalButtonMenu
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
 				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, string.Empty);
-			}, null, null, null);
+			}, null, null, null, null);
 		}
 	}
 
@@ -132,7 +132,7 @@ public class PauseScreen : KModalButtonMenu
 	{
 		base.gameObject.SetActive(false);
 		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-		confirmDialogScreen.PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null);
+		confirmDialogScreen.PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null);
 	}
 
 	private void OnLoad()

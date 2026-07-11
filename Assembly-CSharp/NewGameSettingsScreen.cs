@@ -40,7 +40,8 @@ public class NewGameSettingsScreen : KModalScreen
 		{
 			this.Deactivate();
 		};
-		this.settings = global::UnityEngine.Object.FindObjectOfType<CustomGameSettings>();
+		this.settings = CustomGameSettings.Instance;
+		this.settings.Reset();
 		this.SetGameTypeToggle(false);
 		Color color = new Color(0.95f, 0.95f, 1f, 1f);
 		bool flag = true;
@@ -55,16 +56,15 @@ public class NewGameSettingsScreen : KModalScreen
 				refs2.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
 				refs2.GetReference<LocText>("Label").text = keyValuePair.Value.label;
 				refs2.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
-				string key2 = keyValuePair.Key;
 				refs2.GetReference<KButton>("CycleLeft").onClick += delegate
 				{
-					this.CycleSetting(list_setting, refs2, key2, -1);
+					this.CycleSetting(list_setting, refs2, -1);
 				};
 				refs2.GetReference<KButton>("CycleRight").onClick += delegate
 				{
-					this.CycleSetting(list_setting, refs2, key2, 1);
+					this.CycleSetting(list_setting, refs2, 1);
 				};
-				this.CycleSetting(list_setting, refs2, key2, 0);
+				this.CycleSetting(list_setting, refs2, 0);
 			}
 			else
 			{
@@ -76,13 +76,12 @@ public class NewGameSettingsScreen : KModalScreen
 					refs3.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
 					refs3.GetReference<LocText>("Label").text = keyValuePair.Value.label;
 					refs3.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
-					string key3 = keyValuePair.Key;
 					MultiToggle reference = refs3.GetReference<MultiToggle>("Toggle");
 					reference.onClick = (global::System.Action)Delegate.Combine(reference.onClick, new global::System.Action(delegate
 					{
-						this.ToggleSetting(toggle_setting, refs3, key3, false);
+						this.ToggleSetting(toggle_setting, refs3, false);
 					}));
-					this.ToggleSetting(toggle_setting, refs3, key3, true);
+					this.ToggleSetting(toggle_setting, refs3, true);
 				}
 				else
 				{
@@ -134,49 +133,40 @@ public class NewGameSettingsScreen : KModalScreen
 						refs.GetReference<Image>("BG").color = ((!flag) ? Color.white : color);
 						refs.GetReference<LocText>("Label").text = keyValuePair.Value.label;
 						refs.GetReference<LocText>("Label").GetComponent<ToolTip>().toolTip = keyValuePair.Value.tooltip;
-						string key = keyValuePair.Key;
 						refs.GetReference<TMP_InputField>("Input").onEndEdit.AddListener(delegate(string s)
 						{
-							this.SetSeedSetting(seed_setting, refs, key, s);
+							this.SetSeedSetting(seed_setting, refs, s);
 						});
 						refs.GetReference<KButton>("Randomize").onClick += delegate
 						{
-							this.GetNewRandomSeed(seed_setting, refs, key);
+							this.GetNewRandomSeed(seed_setting, refs);
 						};
-						this.GetNewRandomSeed(seed_setting, refs, key);
+						this.GetNewRandomSeed(seed_setting, refs);
 					}
 				}
 			}
 		}
 	}
 
-	private void CycleSetting(ListSettingConfig setting, HierarchyReferences refs, string key, int direction)
+	private void CycleSetting(ListSettingConfig setting, HierarchyReferences refs, int direction)
 	{
-		string text = setting.CycleSettingLevelID(this.settings.CurrentQualityLevelsBySetting[key], direction);
-		this.settings.CurrentQualityLevelsBySetting[key] = text;
-		SettingLevel level = setting.GetLevel(text);
-		refs.GetReference<LocText>("ValueLabel").text = level.label;
-		refs.GetReference<LocText>("ValueLabel").GetComponent<ToolTip>().toolTip = level.tooltip;
-		refs.GetReference<KButton>("CycleLeft").isInteractable = !setting.IsFirstLevel(text);
-		refs.GetReference<KButton>("CycleRight").isInteractable = !setting.IsLastLevel(text);
+		SettingLevel settingLevel = this.settings.CycleSettingLevel(setting, direction);
+		refs.GetReference<LocText>("ValueLabel").text = settingLevel.label;
+		refs.GetReference<LocText>("ValueLabel").GetComponent<ToolTip>().toolTip = settingLevel.tooltip;
+		refs.GetReference<KButton>("CycleLeft").isInteractable = !setting.IsFirstLevel(settingLevel.id);
+		refs.GetReference<KButton>("CycleRight").isInteractable = !setting.IsLastLevel(settingLevel.id);
 	}
 
-	private void ToggleSetting(ToggleSettingConfig setting, HierarchyReferences refs, string key, bool just_update_widgets = false)
+	private void ToggleSetting(ToggleSettingConfig setting, HierarchyReferences refs, bool just_update_widgets = false)
 	{
-		string text = this.settings.CurrentQualityLevelsBySetting[key];
-		if (!just_update_widgets)
-		{
-			text = setting.ToggleSettingLevelID(text);
-			this.settings.CurrentQualityLevelsBySetting[key] = text;
-		}
-		SettingLevel level = setting.GetLevel(text);
-		refs.GetReference<MultiToggle>("Toggle").ChangeState((!setting.IsOnLevel(text)) ? 0 : 1);
-		refs.GetReference<MultiToggle>("Toggle").GetComponent<ToolTip>().toolTip = level.tooltip;
+		SettingLevel settingLevel = ((!just_update_widgets) ? this.settings.ToggleSettingLevel(setting) : this.settings.GetCurrentQualitySetting(setting.id));
+		refs.GetReference<MultiToggle>("Toggle").ChangeState((!setting.IsOnLevel(settingLevel.id)) ? 0 : 1);
+		refs.GetReference<MultiToggle>("Toggle").GetComponent<ToolTip>().toolTip = settingLevel.tooltip;
 	}
 
-	private void SetSeedSetting(SeedSettingConfig setting, HierarchyReferences refs, string key, string input)
+	private void SetSeedSetting(SeedSettingConfig setting, HierarchyReferences refs, string input)
 	{
-		this.settings.CurrentQualityLevelsBySetting[key] = input;
+		this.settings.SetQualitySetting(setting, input);
 		int num;
 		try
 		{
@@ -190,11 +180,11 @@ public class NewGameSettingsScreen : KModalScreen
 		Output.Log(new object[] { "Set worldgen seed to", input });
 	}
 
-	private void GetNewRandomSeed(SeedSettingConfig setting, HierarchyReferences refs, string key)
+	private void GetNewRandomSeed(SeedSettingConfig setting, HierarchyReferences refs)
 	{
 		int num = global::UnityEngine.Random.Range(0, int.MaxValue);
 		refs.GetReference<TMP_InputField>("Input").text = num.ToString();
-		this.SetSeedSetting(setting, refs, key, num.ToString());
+		this.SetSeedSetting(setting, refs, num.ToString());
 	}
 
 	private void SetGameTypeToggle(bool custom_game)

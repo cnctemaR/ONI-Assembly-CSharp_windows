@@ -47,9 +47,9 @@ public class SaveLoader : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		WorldGen.LoadSettings();
-		if (DebugHandler.enabled && CustomGameSettings.Get().is_custom_game)
+		if (DebugHandler.enabled && CustomGameSettings.Instance.is_custom_game)
 		{
-			WorldGen.Settings.SetWorld(CustomGameSettings.Get().GetCurrentQualitySetting("World").id, WorldGen.GetPath());
+			WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting("World").id, WorldGen.GetPath());
 		}
 		else
 		{
@@ -341,7 +341,7 @@ public class SaveLoader : KMonoBehaviour
 			}
 			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
 			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(text2, null, null, null, null, null, null, null);
+			component.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null);
 		}
 		return list;
 	}
@@ -379,7 +379,7 @@ public class SaveLoader : KMonoBehaviour
 	{
 		Manager.Clear();
 		this.ReportSaveMetrics(isAutoSave);
-		if (isAutoSave)
+		if (isAutoSave && !GenericGameSettings.instance.keepAllAutosaves)
 		{
 			List<string> saveFiles = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
 			while (saveFiles.Count >= 10)
@@ -427,14 +427,14 @@ public class SaveLoader : KMonoBehaviour
 			{
 				Output.Log(new object[] { "UnauthorizedAccessException for " + filename });
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
 			if (ex is IOException)
 			{
 				Output.Log(new object[] { "IOException (probably out of disk space) for " + filename });
 				ConfirmDialogScreen confirmDialogScreen2 = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null);
+				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
 			throw ex;
@@ -605,9 +605,9 @@ public class SaveLoader : KMonoBehaviour
 		{
 			dictionary["DailyReport"] = this.GetDailyReportMetrics();
 		}
-		if (Game.Instance.customSettings != null && Game.Instance.customSettings.is_custom_game)
+		if (CustomGameSettings.Instance != null && CustomGameSettings.Instance.is_custom_game)
 		{
-			dictionary["CustomGameSettings"] = Game.Instance.customSettings.GetSettingsForMetrics();
+			dictionary["CustomGameSettings"] = CustomGameSettings.Instance.GetSettingsForMetrics();
 		}
 		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary);
 	}

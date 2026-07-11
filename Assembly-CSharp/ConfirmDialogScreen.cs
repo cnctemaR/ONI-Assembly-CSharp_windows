@@ -28,7 +28,7 @@ public class ConfirmDialogScreen : KModalScreen
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string title_text = null, string confirm_text = null, string cancel_text = null)
+	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string title_text = null, string confirm_text = null, string cancel_text = null, Sprite image_sprite = null)
 	{
 		this.confirmAction = on_confirm;
 		this.cancelAction = on_cancel;
@@ -61,10 +61,10 @@ public class ConfirmDialogScreen : KModalScreen
 				componentInChildren.text = configurable_text;
 			}
 		}
-		Image component = this.imageGO.GetComponent<Image>();
-		if (component != null && component.sprite != null)
+		if (image_sprite != null)
 		{
-			this.imageGO.SetActive(true);
+			this.image.sprite = image_sprite;
+			this.image.gameObject.SetActive(true);
 		}
 		if (title_text != null)
 		{
@@ -115,10 +115,6 @@ public class ConfirmDialogScreen : KModalScreen
 
 	private global::System.Action configurableAction;
 
-	public LocText popupMessage;
-
-	public GameObject imageGO;
-
 	public global::System.Action onDeactivateCB;
 
 	[SerializeField]
@@ -132,4 +128,10 @@ public class ConfirmDialogScreen : KModalScreen
 
 	[SerializeField]
 	private LocText titleText;
+
+	[SerializeField]
+	private LocText popupMessage;
+
+	[SerializeField]
+	private Image image;
 }

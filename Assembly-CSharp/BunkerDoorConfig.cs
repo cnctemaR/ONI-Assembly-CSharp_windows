@@ -52,6 +52,7 @@ public class BunkerDoorConfig : IBuildingConfig
 		door.allowAutoControl = false;
 		door.doorOpeningSoundEventName = "BunkerDoor_opening";
 		door.doorClosingSoundEventName = "BunkerDoor_closing";
+		door.verticalOrientation = Orientation.R90;
 		AccessControl accessControl = go.AddOrGet<AccessControl>();
 		accessControl.controlEnabled = true;
 		Workable workable = go.AddOrGet<Workable>();

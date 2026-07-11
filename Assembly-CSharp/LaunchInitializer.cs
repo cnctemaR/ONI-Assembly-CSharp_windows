@@ -14,7 +14,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		LaunchInitializer.ApplyCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: EU-" + 279497U.ToString(), null);
+		global::Debug.Log("Development Build: EU-" + 279674U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();

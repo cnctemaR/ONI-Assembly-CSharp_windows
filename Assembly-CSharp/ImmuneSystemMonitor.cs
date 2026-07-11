@@ -143,6 +143,18 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 			this.lastDiseaseSources[disease.id] = new ImmuneSystemMonitor.Instance.DiseaseSourceInfo(source, vector);
 		}
 
+		public void TryInjectDisease(byte disease_idx, int count, Tag source, Disease.InfectionVector vector)
+		{
+			if (disease_idx != 255)
+			{
+				Disease disease = Db.Get().Diseases[(int)disease_idx];
+				if (disease.infectionVectors.Contains(vector))
+				{
+					this.InjectDisease(disease, count, source, vector);
+				}
+			}
+		}
+
 		public void UpdateImmuneSystem()
 		{
 			Klei.AI.Amounts amounts = this.modifiers.GetAmounts();
@@ -211,7 +223,7 @@ public class ImmuneSystemMonitor : GameStateMachine<ImmuneSystemMonitor, ImmuneS
 
 		private void OnImmuneDelta(float delta)
 		{
-			if (Game.Instance.customSettings.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible")
+			if (CustomGameSettings.Instance.GetCurrentQualitySetting("ImmuneSystem").id == "Invincible")
 			{
 				return;
 			}

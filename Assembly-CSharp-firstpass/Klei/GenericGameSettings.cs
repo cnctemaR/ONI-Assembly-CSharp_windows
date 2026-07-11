@@ -62,6 +62,10 @@ namespace Klei
 
 		public bool allowInsufficientMaterialBuild { get; private set; }
 
+		public bool keepAllAutosaves { get; private set; }
+
+		public bool takeSaveScreenshots { get; private set; }
+
 		private static string Path
 		{
 			get

@@ -40,8 +40,8 @@ public class StressMonitor : GameStateMachine<StressMonitor, StressMonitor.Insta
 			: base(master)
 		{
 			this.stress = Db.Get().Amounts.Stress.Lookup(base.gameObject);
-			SettingConfig settingConfig = Game.Instance.customSettings.QualitySettings["StressBreaks"];
-			SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("StressBreaks");
+			SettingConfig settingConfig = CustomGameSettings.Instance.QualitySettings["StressBreaks"];
+			SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting("StressBreaks");
 			this.allowStressBreak = settingConfig.IsDefaultLevel(currentQualitySetting.id);
 		}
 

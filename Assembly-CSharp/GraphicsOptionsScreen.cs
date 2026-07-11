@@ -240,7 +240,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.StopCoroutine(timer);
 		};
-		this.confirmDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null);
+		this.confirmDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null);
 		this.confirmDialog.gameObject.SetActive(true);
 	}
 

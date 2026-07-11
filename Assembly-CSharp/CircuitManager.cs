@@ -561,7 +561,10 @@ public class CircuitManager
 		if (networkByID != null)
 		{
 			ElectricalUtilityNetwork electricalUtilityNetwork = (ElectricalUtilityNetwork)networkByID;
-			electricalUtilityNetwork.UpdateOverloadTime(dt, watts_used, this.circuitInfo[id].bridgeGroups);
+			if (electricalUtilityNetwork != null)
+			{
+				electricalUtilityNetwork.UpdateOverloadTime(dt, watts_used, this.circuitInfo[id].bridgeGroups);
+			}
 		}
 	}
 

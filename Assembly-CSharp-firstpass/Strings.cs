@@ -18,26 +18,6 @@ public static class Strings
 		return new StringEntry(text);
 	}
 
-	public static StringEntry Get(StringKey key0, StringKey key1, StringKey key2)
-	{
-		StringEntry stringEntry = Strings.RootTable.Get(key0, key1, key2);
-		if (stringEntry == null)
-		{
-			stringEntry = Strings.GetInvalidString(new StringKey[] { key0, key1, key2 });
-		}
-		return stringEntry;
-	}
-
-	public static StringEntry Get(StringKey key0, StringKey key1)
-	{
-		StringEntry stringEntry = Strings.RootTable.Get(key0, key1);
-		if (stringEntry == null)
-		{
-			stringEntry = Strings.GetInvalidString(new StringKey[] { key0, key1 });
-		}
-		return stringEntry;
-	}
-
 	public static StringEntry Get(StringKey key0)
 	{
 		StringEntry stringEntry = Strings.RootTable.Get(key0);
@@ -68,34 +48,6 @@ public static class Strings
 	public static bool TryGet(string key, out StringEntry result)
 	{
 		return Strings.TryGet(new StringKey(key), out result);
-	}
-
-	public static StringTable GetTable(StringKey key0)
-	{
-		return Strings.RootTable.GetTable(key0);
-	}
-
-	public static StringEntry Get(StringKey key, StringKey[] keys)
-	{
-		StringEntry stringEntry = Strings.RootTable.Get(0, key, keys);
-		if (stringEntry == null)
-		{
-			List<StringKey> list = new List<StringKey>();
-			list.Add(key);
-			list.AddRange(keys);
-			stringEntry = Strings.GetInvalidString(list.ToArray());
-		}
-		return stringEntry;
-	}
-
-	public static StringEntry Get(StringKey[] keys)
-	{
-		StringEntry stringEntry = Strings.RootTable.Get(0, keys);
-		if (stringEntry == null)
-		{
-			stringEntry = Strings.GetInvalidString(keys);
-		}
-		return stringEntry;
 	}
 
 	public static void Add(params string[] value)

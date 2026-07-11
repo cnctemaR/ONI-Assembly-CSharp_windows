@@ -287,14 +287,16 @@ public class MaterialSelector : KScreen
 
 	private void SetDescription(Element element)
 	{
-		string text = Strings.Get(new StringKey("STRINGS.ELEMENTS." + element.tag.ToString().ToUpper() + ".BUILD_DESC"));
-		if (text == string.Empty)
+		StringEntry stringEntry = null;
+		if (Strings.TryGet(new StringKey("STRINGS.ELEMENTS." + element.tag.ToString().ToUpper() + ".BUILD_DESC"), out stringEntry))
+		{
+			this.MaterialDescriptionText.text = stringEntry.ToString();
+			this.MaterialDescriptionPane.SetActive(true);
+		}
+		else
 		{
 			this.MaterialDescriptionPane.SetActive(false);
-			return;
 		}
-		this.MaterialDescriptionPane.SetActive(true);
-		this.MaterialDescriptionText.text = text;
 	}
 
 	private void SetEffects(Element element)

@@ -117,7 +117,7 @@ public class LanguageOptionsScreen : KModalScreen
 		}, delegate
 		{
 			App.LoadScene("frontend");
-		}, null, null, null, null, null);
+		}, null, null, null, null, null, null);
 	}
 
 	private void InstallLanguage(PublishedFileId_t item)
@@ -130,7 +130,7 @@ public class LanguageOptionsScreen : KModalScreen
 		}, delegate
 		{
 			App.LoadScene("frontend");
-		}, null, null, null, null, null);
+		}, null, null, null, null, null, null);
 	}
 
 	private void Uninstall()
@@ -146,10 +146,10 @@ public class LanguageOptionsScreen : KModalScreen
 			}, delegate
 			{
 				App.LoadScene("frontend");
-			}, null, null, null, null, null);
+			}, null, null, null, null, null, null);
 		}, delegate
 		{
-		}, null, null, null, null, null);
+		}, null, null, null, null, null, null);
 	}
 
 	private ConfirmDialogScreen GetConfirmDialog()

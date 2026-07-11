@@ -181,7 +181,6 @@ public class Game : KMonoBehaviour
 		}
 		TagManager.FillMissingProperNames();
 		CameraController.Instance.SetOrthographicsSize(20f);
-		this.customSettings = global::UnityEngine.Object.FindObjectOfType<CustomGameSettings>();
 		if (SaveLoader.Instance.loadedFromSave)
 		{
 			this.baseAlreadyCreated = true;
@@ -204,8 +203,8 @@ public class Game : KMonoBehaviour
 		SimAndRenderScheduler.instance.Add(KComponentSpawn.instance, false);
 		if (!SaveLoader.Instance.loadedFromSave)
 		{
-			SettingConfig settingConfig = Game.Instance.customSettings.QualitySettings["SandboxMode"];
-			SettingLevel currentQualitySetting = Game.Instance.customSettings.GetCurrentQualitySetting("SandboxMode");
+			SettingConfig settingConfig = CustomGameSettings.Instance.QualitySettings["SandboxMode"];
+			SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting("SandboxMode");
 			SaveGame.Instance.sandboxEnabled = !settingConfig.IsDefaultLevel(currentQualitySetting.id);
 		}
 		this.mingleCellTracker = base.gameObject.AddComponent<MingleCellTracker>();
@@ -913,7 +912,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = SaveLoader.Instance.worldDetailSave;
 		gameSaveData.debugWasUsed = this.debugWasUsed;
-		gameSaveData.customGameSettings = this.customSettings;
+		gameSaveData.customGameSettings = CustomGameSettings.Instance;
 		gameSaveData.autoPrioritizeRoles = this.autoPrioritizeRoles;
 		gameSaveData.advancedPersonalPriorities = this.advancedPersonalPriorities;
 		gameSaveData.savedInfo = this.savedInfo;
@@ -934,7 +933,7 @@ public class Game : KMonoBehaviour
 		gameSaveData.fallingWater = this.world.GetComponent<FallingWater>();
 		gameSaveData.unstableGround = this.world.GetComponent<UnstableGroundManager>();
 		gameSaveData.worldDetail = new WorldDetailSave();
-		gameSaveData.customGameSettings = global::UnityEngine.Object.FindObjectOfType<CustomGameSettings>();
+		gameSaveData.customGameSettings = CustomGameSettings.Instance;
 		gameSaveData.customGameSettings.Reset();
 		deserializer.Deserialize(gameSaveData);
 		this.gasConduitFlow = gameSaveData.gasConduitFlow;
@@ -942,14 +941,10 @@ public class Game : KMonoBehaviour
 		this.simActiveRegionMin = gameSaveData.simActiveRegionMin;
 		this.simActiveRegionMax = gameSaveData.simActiveRegionMax;
 		this.debugWasUsed = gameSaveData.debugWasUsed;
-		this.customSettings = gameSaveData.customGameSettings;
 		this.autoPrioritizeRoles = gameSaveData.autoPrioritizeRoles;
 		this.advancedPersonalPriorities = gameSaveData.advancedPersonalPriorities;
 		this.savedInfo = gameSaveData.savedInfo;
-		if (this.customSettings != null)
-		{
-			this.customSettings.Print();
-		}
+		CustomGameSettings.Instance.Print();
 		KCrashReporter.debugWasUsed = this.debugWasUsed;
 		SaveLoader.Instance.SetWorldDetail(gameSaveData.worldDetail);
 		if (this.OnLoad != null)
@@ -1383,8 +1378,6 @@ public class Game : KMonoBehaviour
 	public RoomProber roomProber;
 
 	public RoleManager roleManager;
-
-	public CustomGameSettings customSettings;
 
 	public UserMenu userMenu;
 

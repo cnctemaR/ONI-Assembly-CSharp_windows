@@ -5,7 +5,6 @@ using Klei;
 using Steamworks;
 using STRINGS;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MainMenu : KMonoBehaviour
 {
@@ -85,7 +84,7 @@ public class MainMenu : KMonoBehaviour
 			}
 			string text3 = string.Format(text2, savePrefix);
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null);
+			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
 		}
 		if (GenericGameSettings.instance.autoResumeGame)
 		{
@@ -184,7 +183,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 279497U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 279674U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -254,11 +253,17 @@ public class MainMenu : KMonoBehaviour
 		if (!KFMOD.didFmodInitializeSuccessfully)
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupeAudio;
-			confirmDialogScreen.PopupConfirmDialog(UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS, null, null, UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO, delegate
+			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
+			string text = UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS;
+			global::System.Action action = null;
+			global::System.Action action2 = null;
+			string text2 = UI.FRONTEND.SUPPORTWARNINGS.AUDIO_DRIVERS_MORE_INFO;
+			global::System.Action action3 = delegate
 			{
 				Application.OpenURL("http://support.kleientertainment.com/customer/en/portal/articles/2947881-no-audio-when-playing-oxygen-not-included");
-			}, null, null, null);
+			};
+			Sprite sadDupeAudio = GlobalResources.Instance().sadDupeAudio;
+			confirmDialogScreen2.PopupConfirmDialog(text, action, action2, text2, action3, null, null, null, sadDupeAudio);
 		}
 	}
 
@@ -311,8 +316,12 @@ public class MainMenu : KMonoBehaviour
 		if (text != string.Empty)
 		{
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.imageGO.GetComponent<Image>().sprite = GlobalResources.Instance().sadDupe;
-			confirmDialogScreen.PopupConfirmDialog(string.Format(UI.FRONTEND.SUPPORTWARNINGS.DUPLICATE_KEY_BINDINGS, text), null, null, null, null, null, null, null);
+			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
+			string text2 = string.Format(UI.FRONTEND.SUPPORTWARNINGS.DUPLICATE_KEY_BINDINGS, text);
+			global::System.Action action = null;
+			global::System.Action action2 = null;
+			Sprite sadDupe = GlobalResources.Instance().sadDupe;
+			confirmDialogScreen2.PopupConfirmDialog(text2, action, action2, null, null, null, null, null, sadDupe);
 		}
 	}
 

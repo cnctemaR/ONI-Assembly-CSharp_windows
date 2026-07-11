@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CB398776-6635-4EB0-91FF-143F020E0ED2}</ProjectGuid>
+    <ProjectGuid>{9077E494-4D7F-4F5D-8DA8-EDDC6EF9F837}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.UI</AssemblyName>
@@ -130,7 +130,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{CB398776-6635-4EB0-91FF-143F020E0EB1}</Project>
+      <Project>{9077E494-4D7F-4F5D-8DA8-EDDC6EF9F816}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

@@ -11,21 +11,19 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedW
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
-		this.workables = new ArcadeMachineWorkable[this.choreOffsets.Length];
+		this.workables = new PhonoboxWorkable[this.choreOffsets.Length];
 		this.chores = new Chore[this.choreOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)
 		{
 			int num = Grid.OffsetCell(Grid.PosToCell(this), this.choreOffsets[i]);
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.Move);
 			GameObject gameObject = ChoreHelpers.CreateLocator("PhonoboxWorkable", vector);
-			ArcadeMachineWorkable arcadeMachineWorkable = gameObject.AddOrGet<ArcadeMachineWorkable>();
-			arcadeMachineWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Dancing);
-			arcadeMachineWorkable.owner = this;
-			arcadeMachineWorkable.basePriority = RELAXATION.PRIORITY.TIER3;
-			arcadeMachineWorkable.specificEffect = "Danced";
-			int num2 = global::UnityEngine.Random.Range(0, this.workerOverrideAnims.Length);
-			arcadeMachineWorkable.overrideAnims = this.workerOverrideAnims[num2];
-			this.workables[i] = arcadeMachineWorkable;
+			PhonoboxWorkable phonoboxWorkable = gameObject.AddOrGet<PhonoboxWorkable>();
+			phonoboxWorkable.SetWorkerStatusItem(Db.Get().DuplicantStatusItems.Dancing);
+			phonoboxWorkable.owner = this;
+			phonoboxWorkable.basePriority = RELAXATION.PRIORITY.TIER3;
+			phonoboxWorkable.specificEffect = "Danced";
+			this.workables[i] = phonoboxWorkable;
 		}
 	}
 
@@ -49,7 +47,7 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedW
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
 		Workable workable2 = workable;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<ArcadeMachineWorkable>(relax, workable2, null, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 0, false);
+		Chore chore = new WorkChore<PhonoboxWorkable>(relax, workable2, null, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 0, false);
 		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
 		return chore;
 	}
@@ -103,20 +101,13 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, ISharedW
 		new CellOffset(2, 0)
 	};
 
-	private ArcadeMachineWorkable[] workables;
+	private PhonoboxWorkable[] workables;
 
 	private Chore[] chores;
 
 	private HashSet<Worker> players = new HashSet<Worker>();
 
 	private static string[] building_anims = new string[] { "working_loop", "working_loop2", "working_loop3" };
-
-	public KAnimFile[][] workerOverrideAnims = new KAnimFile[][]
-	{
-		new KAnimFile[] { Assets.GetAnim("anim_interacts_phonobox_danceone_kanim") },
-		new KAnimFile[] { Assets.GetAnim("anim_interacts_phonobox_dancetwo_kanim") },
-		new KAnimFile[] { Assets.GetAnim("anim_interacts_phonobox_dancethree_kanim") }
-	};
 
 	public class States : GameStateMachine<Phonobox.States, Phonobox.StatesInstance, Phonobox>
 	{

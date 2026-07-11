@@ -341,7 +341,7 @@ public class KCrashReporter : MonoBehaviour
 				msg = "Debug tools were used in this game.\n\n" + msg;
 			}
 			error.fullstack = msg;
-			error.build = 279497;
+			error.build = 279674;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = msg;
 			error.user_message = userMessage;
@@ -368,7 +368,7 @@ public class KCrashReporter : MonoBehaviour
 			if (confirm_prefab != null)
 			{
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
-				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null, null);
 			}
 			text7 = empty;
 		}

@@ -6,6 +6,7 @@ using KSerialization;
 using ProcGenGame;
 using Steamworks;
 using UnityEngine;
+using UnityEngine.U2D;
 
 public class Global : MonoBehaviour
 {
@@ -224,6 +225,25 @@ public class Global : MonoBehaviour
 	{
 		this.OutputSystemInfo();
 		Global.Instance = this;
+		if (this.forcedAtlasInitializationList != null)
+		{
+			foreach (SpriteAtlas spriteAtlas in this.forcedAtlasInitializationList)
+			{
+				int spriteCount = spriteAtlas.spriteCount;
+				Sprite[] array2 = new Sprite[spriteCount];
+				spriteAtlas.GetSprites(array2);
+				foreach (Sprite sprite in array2)
+				{
+					Texture2D texture = sprite.texture;
+					if (texture != null)
+					{
+						texture.filterMode = FilterMode.Bilinear;
+						texture.anisoLevel = 4;
+						texture.mipMapBias = 0f;
+					}
+				}
+			}
+		}
 		Manager.Initialize(new Type[]
 		{
 			typeof(WorldGen),
@@ -321,7 +341,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 279497U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 279674U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -396,6 +416,8 @@ public class Global : MonoBehaviour
 		{
 		}
 	}
+
+	public SpriteAtlas[] forcedAtlasInitializationList;
 
 	private GameInputManager mInputManager;
 

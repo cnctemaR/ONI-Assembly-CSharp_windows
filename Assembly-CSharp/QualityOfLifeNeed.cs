@@ -1,5 +1,6 @@
 ﻿using System;
 using Klei.AI;
+using Klei.CustomSettings;
 using STRINGS;
 using UnityEngine;
 
@@ -32,17 +33,36 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		{
 			return;
 		}
+		float num = 1f;
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting("Morale");
+		if (currentQualitySetting.id == "Disabled")
+		{
+			base.SetModifier(this.stressNeutral);
+			return;
+		}
+		if (currentQualitySetting.id == "Easy")
+		{
+			num = 0.5f;
+		}
+		else if (currentQualitySetting.id == "Hard")
+		{
+			num = 1.5f;
+		}
+		else if (currentQualitySetting.id == "VeryHard")
+		{
+			num = 2f;
+		}
 		float totalValue = this.qolAttribute.GetTotalValue();
 		float totalValue2 = this.expectationAttribute.GetTotalValue();
-		float num = totalValue2 - totalValue;
+		float num2 = totalValue2 - totalValue;
 		if (totalValue < totalValue2)
 		{
-			this.stressPenalty.modifier.SetValue(Mathf.Min(num * 0.008333334f, 0.041666668f));
+			this.stressPenalty.modifier.SetValue(Mathf.Min(num2 * 0.008333334f, 0.041666668f) * num);
 			base.SetModifier(this.stressPenalty);
 		}
 		else if (totalValue > totalValue2)
 		{
-			this.stressBonus.modifier.SetValue(Mathf.Max(-num * -0.016666668f, -0.041666668f));
+			this.stressBonus.modifier.SetValue(Mathf.Max(-num2 * -0.016666668f, -0.041666668f) * num);
 			base.SetModifier(this.stressBonus);
 		}
 		else

@@ -307,7 +307,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			foreach (OfflineWorldGen.ErrorInfo errorInfo in this.errors)
 			{
 				ConfirmDialogScreen confirmDialogScreen = global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true);
-				confirmDialogScreen.PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null);
 			}
 		}
 		this.errorMutex.ReleaseMutex();
@@ -374,9 +374,9 @@ public class OfflineWorldGen : KMonoBehaviour
 	private void DoWordGenInitialise()
 	{
 		WorldGen.LoadSettings();
-		if (DebugHandler.enabled && CustomGameSettings.Get().is_custom_game)
+		if (DebugHandler.enabled && CustomGameSettings.Instance.is_custom_game)
 		{
-			WorldGen.Settings.SetWorld(CustomGameSettings.Get().GetCurrentQualitySetting("World").id, WorldGen.GetPath());
+			WorldGen.Settings.SetWorld(CustomGameSettings.Instance.GetCurrentQualitySetting("World").id, WorldGen.GetPath());
 		}
 		else
 		{

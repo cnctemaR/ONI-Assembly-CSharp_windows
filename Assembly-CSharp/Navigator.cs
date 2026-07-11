@@ -22,19 +22,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		byte b = reader.ReadByte();
 		NavType navType = (NavType)b;
-		bool flag = false;
-		foreach (NavType navType2 in this.NavGrid.ValidNavTypes)
-		{
-			if (navType2 == navType)
-			{
-				flag = true;
-				break;
-			}
-		}
-		if (flag)
-		{
-			this.CurrentNavType = navType;
-		}
+		this.CurrentNavType = navType;
 	}
 
 	protected override void OnPrefabInit()

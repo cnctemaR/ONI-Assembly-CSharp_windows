@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{53FE2271-2A1A-432B-B531-13AF0E15FDF4}</ProjectGuid>
+    <ProjectGuid>{970726B0-8432-45EE-8D3C-C28A3158B877}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.AnimationModule</AssemblyName>
@@ -106,19 +106,19 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{53FE2271-2A1A-432B-B531-13AF0E15FDE6}</Project>
+      <Project>{970726B0-8432-45EE-8D3C-C28A3158B869}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System.Core\System.Core.csproj">
-      <Project>{53FE2271-2A1A-432B-B531-13AF0E15FDE9}</Project>
+      <Project>{970726B0-8432-45EE-8D3C-C28A3158B86C}</Project>
       <Name>System.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
-      <Project>{53FE2271-2A1A-432B-B531-13AF0E15FDFD}</Project>
+      <Project>{970726B0-8432-45EE-8D3C-C28A3158B880}</Project>
       <Name>UnityEngine.CoreModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{53FE2271-2A1A-432B-B531-13AF0E15FE13}</Project>
+      <Project>{970726B0-8432-45EE-8D3C-C28A3158B896}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

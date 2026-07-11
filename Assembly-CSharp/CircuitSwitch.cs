@@ -8,7 +8,6 @@ public class CircuitSwitch : Switch
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.OnWireStateChangedDelegate = new Action<object>(this.OnWireStateChanged);
 		base.OnToggle += this.CircuitOnToggle;
 		int num = Grid.PosToCell(base.transform.GetPosition());
 		GameObject gameObject = Grid.Objects[num, (int)this.objectLayer];
@@ -87,15 +86,15 @@ public class CircuitSwitch : Switch
 	private void SubscribeToWire(Wire wire)
 	{
 		wire.Subscribe(1969584890, new Action<object>(this.OnWireDestroyed));
-		wire.Subscribe(-1735440190, this.OnWireStateChangedDelegate);
-		wire.Subscribe(774203113, this.OnWireStateChangedDelegate);
+		wire.Subscribe(-1735440190, new Action<object>(this.OnWireStateChanged));
+		wire.Subscribe(774203113, new Action<object>(this.OnWireStateChanged));
 	}
 
 	private void UnsubscribeFromWire(Wire wire)
 	{
 		wire.Unsubscribe(1969584890, new Action<object>(this.OnWireDestroyed));
-		wire.Unsubscribe(-1735440190, this.OnWireStateChangedDelegate);
-		wire.Unsubscribe(774203113, this.OnWireStateChangedDelegate);
+		wire.Unsubscribe(-1735440190, new Action<object>(this.OnWireStateChanged));
+		wire.Unsubscribe(774203113, new Action<object>(this.OnWireStateChanged));
 	}
 
 	private void UpdateCircuit(bool should_update_anim = true)
@@ -129,6 +128,4 @@ public class CircuitSwitch : Switch
 	private Guid wireConnectedGUID;
 
 	private bool wasOn;
-
-	private Action<object> OnWireStateChangedDelegate;
 }

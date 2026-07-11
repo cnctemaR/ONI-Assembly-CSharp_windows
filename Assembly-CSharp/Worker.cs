@@ -24,7 +24,7 @@ public class Worker : KMonoBehaviour
 	{
 		base.OnPrefabInit();
 		this.state = Worker.State.Idle;
-		base.Subscribe<Worker>(1485595942, Worker.OnChoreInterruptDelegate);
+		base.Subscribe(1485595942, new Action<object>(this.OnChoreInterrupt));
 	}
 
 	private string GetWorkableDebugString()
@@ -459,11 +459,6 @@ public class Worker : KMonoBehaviour
 	private Vector3 workAnimOffset = Vector3.zero;
 
 	public bool usesMultiTool = true;
-
-	private static readonly EventSystem.IntraObjectHandler<Worker> OnChoreInterruptDelegate = new EventSystem.IntraObjectHandler<Worker>(delegate(Worker worker, object data)
-	{
-		worker.OnChoreInterrupt(data);
-	});
 
 	private Reactable passerbyReactable;
 

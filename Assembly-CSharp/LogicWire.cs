@@ -25,8 +25,8 @@ public class LogicWire : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetwor
 		{
 			Game.Instance.logicCircuitSystem.RemoveFromNetworks(num, this, false);
 		}
-		base.Unsubscribe<LogicWire>(774203113, LogicWire.OnBuildingBrokenDelegate);
-		base.Unsubscribe<LogicWire>(-1735440190, LogicWire.OnBuildingFullyRepairedDelegate);
+		base.Unsubscribe<LogicWire>(774203113, LogicWire.OnBuildingBrokenDelegate, false);
+		base.Unsubscribe<LogicWire>(-1735440190, LogicWire.OnBuildingFullyRepairedDelegate, false);
 		base.OnCleanUp();
 	}
 

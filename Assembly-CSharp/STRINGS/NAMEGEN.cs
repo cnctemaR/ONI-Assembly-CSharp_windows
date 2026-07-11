@@ -600,10 +600,18 @@ namespace STRINGS
 					public static LocString GRUNKTILDA = "Grunktilda";
 
 					public static LocString MAHA = "Maha";
+
+					public static LocString MOZZARELLA = "Mozzarella";
 				}
 
 				public class NB
 				{
+					public static LocString BRUMBLE = "Brumble";
+
+					public static LocString SKIDOOSH = "Skidoosh";
+
+					public static LocString FRIMBLE = "Frimble";
+
 					public static LocString KRIS = "Kris";
 
 					public static LocString DUMPLING = "Dumpling";

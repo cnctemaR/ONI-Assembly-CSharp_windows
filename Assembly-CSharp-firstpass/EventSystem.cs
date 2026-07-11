@@ -180,12 +180,15 @@ public class EventSystem
 		orCreateObject.GetEventSystem().Unsubscribe(eventName, handler);
 	}
 
-	public void Unsubscribe(int eventName, int subscribeHandle)
+	public void Unsubscribe(int eventName, int subscribeHandle, bool suppressWarnings = false)
 	{
 		int num = this.intraObjectRoutes.FindIndex((EventSystem.IntraObjectRoute route) => route.eventHash == eventName && route.handlerIndex == subscribeHandle);
 		if (num == -1)
 		{
-			global::Debug.LogWarning("Failed to Unsubscribe event handler: " + EventSystem.intraObjectDispatcher[eventName][subscribeHandle].ToString() + "\nNot subscribed to event", null);
+			if (!suppressWarnings)
+			{
+				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + EventSystem.intraObjectDispatcher[eventName][subscribeHandle].ToString() + "\nNot subscribed to event", null);
+			}
 			return;
 		}
 		if (this.currentlyTriggering == 0)
@@ -199,21 +202,27 @@ public class EventSystem
 		}
 	}
 
-	public void Unsubscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler)
+	public void Unsubscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings)
 	{
 		List<EventSystem.IntraObjectHandlerBase> list;
 		if (!EventSystem.intraObjectDispatcher.TryGetValue(eventName, out list))
 		{
-			global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNo subscriptions have been made to event", null);
+			if (!suppressWarnings)
+			{
+				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNo subscriptions have been made to event", null);
+			}
 			return;
 		}
 		int num = list.IndexOf(handler);
 		if (num == -1)
 		{
-			global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNot subscribed to event", null);
+			if (!suppressWarnings)
+			{
+				global::Debug.LogWarning("Failed to Unsubscribe event handler: " + handler.ToString() + "\nNot subscribed to event", null);
+			}
 			return;
 		}
-		this.Unsubscribe(eventName, num);
+		this.Unsubscribe(eventName, num, suppressWarnings);
 	}
 
 	public void Unsubscribe(string[] eventNames, Action<object> handler)

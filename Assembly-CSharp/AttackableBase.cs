@@ -52,9 +52,9 @@ public class AttackableBase : Workable, IApproachable
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe<AttackableBase>(-1506500077, AttackableBase.OnDefeatedDelegate);
-		base.Unsubscribe<AttackableBase>(1623392196, AttackableBase.OnDefeatedDelegate);
-		base.Unsubscribe<AttackableBase>(-1256572400, AttackableBase.SetupScenePartitionerDelegate);
+		base.Unsubscribe<AttackableBase>(-1506500077, AttackableBase.OnDefeatedDelegate, false);
+		base.Unsubscribe<AttackableBase>(1623392196, AttackableBase.OnDefeatedDelegate, false);
+		base.Unsubscribe<AttackableBase>(-1256572400, AttackableBase.SetupScenePartitionerDelegate, false);
 		GameScenePartitioner.Instance.Free(ref this.scenePartitionerEntry);
 		base.OnCleanUp();
 	}

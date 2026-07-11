@@ -57,8 +57,8 @@ public class Conduit : KMonoBehaviour, IFirstFrameCallback, IHaveUtilityNetworkM
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe<Conduit>(774203113, Conduit.OnBuildingBrokenDelegate);
-		base.Unsubscribe<Conduit>(-1735440190, Conduit.OnBuildingFullyRepairedDelegate);
+		base.Unsubscribe<Conduit>(774203113, Conduit.OnBuildingBrokenDelegate, false);
+		base.Unsubscribe<Conduit>(-1735440190, Conduit.OnBuildingFullyRepairedDelegate, false);
 		BuildingDef def = base.GetComponent<Building>().Def;
 		if (def != null && def.ThermalConductivity != 1f)
 		{

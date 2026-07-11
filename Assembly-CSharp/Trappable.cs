@@ -53,7 +53,7 @@ public class Trappable : KMonoBehaviour, IGameObjectEffectDescriptor
 		{
 			return;
 		}
-		base.Unsubscribe<Trappable>(856640610, Trappable.OnStoreDelegate);
+		base.Unsubscribe<Trappable>(856640610, Trappable.OnStoreDelegate, false);
 		Singleton<CellChangeMonitor>.Instance.UnregisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange));
 		this.registered = false;
 	}

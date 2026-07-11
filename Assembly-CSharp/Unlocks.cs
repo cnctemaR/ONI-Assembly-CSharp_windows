@@ -26,10 +26,10 @@ public class Unlocks : KMonoBehaviour, ISim4000ms
 	{
 		base.OnSpawn();
 		GameClock.Instance.Subscribe(631075836, new Action<object>(this.OnNewDay));
-		Game.Instance.Subscribe(-1056989049, new Action<object>(this.OnLaunchRocket));
-		Game.Instance.Subscribe(282337316, new Action<object>(this.OnDuplicantDied));
-		Game.Instance.Subscribe(-107300940, new Action<object>(this.OnResearchComplete));
-		Game.Instance.Subscribe(-818188514, new Action<object>(this.OnDiscoveredSpace));
+		base.Subscribe<Unlocks>(-1056989049, Unlocks.OnLaunchRocketDelegate);
+		base.Subscribe<Unlocks>(282337316, Unlocks.OnDuplicantDiedDelegate);
+		base.Subscribe<Unlocks>(-107300940, Unlocks.OnResearchCompleteDelegate);
+		base.Subscribe<Unlocks>(-818188514, Unlocks.OnDiscoveredSpaceDelegate);
 		this.UnlockCycleCodexes();
 		Components.LiveMinionIdentities.OnAdd += this.OnNewDupe;
 	}
@@ -345,4 +345,24 @@ public class Unlocks : KMonoBehaviour, ISim4000ms
 		{ 30, "log6" },
 		{ 35, "log7" }
 	};
+
+	private static readonly EventSystem.IntraObjectHandler<Unlocks> OnLaunchRocketDelegate = new EventSystem.IntraObjectHandler<Unlocks>(delegate(Unlocks unlocks, object data)
+	{
+		unlocks.OnLaunchRocket(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Unlocks> OnDuplicantDiedDelegate = new EventSystem.IntraObjectHandler<Unlocks>(delegate(Unlocks unlocks, object data)
+	{
+		unlocks.OnDuplicantDied(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Unlocks> OnResearchCompleteDelegate = new EventSystem.IntraObjectHandler<Unlocks>(delegate(Unlocks unlocks, object data)
+	{
+		unlocks.OnResearchComplete(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Unlocks> OnDiscoveredSpaceDelegate = new EventSystem.IntraObjectHandler<Unlocks>(delegate(Unlocks unlocks, object data)
+	{
+		unlocks.OnDiscoveredSpace(data);
+	});
 }

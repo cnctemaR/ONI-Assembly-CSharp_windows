@@ -2974,11 +2974,11 @@ namespace STRINGS
 
 			public class ITEMPEDESTAL
 			{
-				public static LocString NAME = UI.FormatAsLink("Display Pedestal", "ITEMPEDESTAL");
+				public static LocString NAME = UI.FormatAsLink("Pedestal", "ITEMPEDESTAL");
 
-				public static LocString DESC = "Show off your favourite things!";
+				public static LocString DESC = "Perception can be drastically changed by a bit of thoughtful presentation.";
 
-				public static LocString EFFECT = "Doubles the " + UI.FormatAsLink("Decor", "DECOR") + " of any item placed on it. Ugly items can be made somewhat attractive by placing them on the pedestal.";
+				public static LocString EFFECT = "Displays any single object, doubling its " + UI.FormatAsLink("Decor", "DECOR") + " value.\n\nObjects with negative decor will gain some positive decor when displayed.";
 
 				public static LocString DISPLAYED_ITEM_FMT = "Displayed {0}";
 			}

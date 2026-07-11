@@ -1034,7 +1034,7 @@ public class StarmapScreen : KModalScreen
 		this.destinationDetailsResources.ClearRows();
 		if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
 		{
-			foreach (KeyValuePair<string, int> keyValuePair3 in this.selectedDestination.recoverableEntities)
+			foreach (KeyValuePair<Tag, int> keyValuePair3 in this.selectedDestination.GetRecoverableEntities())
 			{
 				BreakdownListRow breakdownListRow4 = this.destinationDetailsResources.AddRow();
 				GameObject prefab = Assets.GetPrefab(keyValuePair3.Key);

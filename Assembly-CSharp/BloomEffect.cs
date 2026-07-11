@@ -69,8 +69,8 @@ public class BloomEffect : MonoBehaviour
 		RenderTexture temporary = RenderTexture.GetTemporary(source.width, source.height, 0);
 		temporary.name = "bloom_source";
 		Graphics.Blit(source, temporary, this.BloomMaskMaterial);
-		int num = source.width / 4;
-		int num2 = source.height / 4;
+		int num = Math.Max(source.width / 4, 4);
+		int num2 = Math.Max(source.height / 4, 4);
 		RenderTexture renderTexture = RenderTexture.GetTemporary(num, num2, 0);
 		renderTexture.name = "bloom_downsampled";
 		this.DownSample4x(temporary, renderTexture);

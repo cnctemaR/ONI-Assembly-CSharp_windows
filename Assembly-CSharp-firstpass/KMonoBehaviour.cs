@@ -234,11 +234,11 @@ public class KMonoBehaviour : MonoBehaviour, IStateMachineTarget, ISaveLoadable,
 		this.obj.GetEventSystem().Unsubscribe(target, hash, handler);
 	}
 
-	public void Unsubscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler)
+	public void Unsubscribe<ComponentType>(int hash, EventSystem.IntraObjectHandler<ComponentType> handler, bool suppressWarnings = false)
 	{
 		if (this.obj != null)
 		{
-			this.obj.GetEventSystem().Unsubscribe<ComponentType>(hash, handler);
+			this.obj.GetEventSystem().Unsubscribe<ComponentType>(hash, handler, suppressWarnings);
 		}
 	}
 

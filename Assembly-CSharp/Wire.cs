@@ -66,8 +66,8 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 		{
 			Game.Instance.electricalConduitSystem.RemoveFromNetworks(num, this, false);
 		}
-		base.Unsubscribe<Wire>(774203113, Wire.OnBuildingBrokenDelegate);
-		base.Unsubscribe<Wire>(-1735440190, Wire.OnBuildingFullyRepairedDelegate);
+		base.Unsubscribe<Wire>(774203113, Wire.OnBuildingBrokenDelegate, false);
+		base.Unsubscribe<Wire>(-1735440190, Wire.OnBuildingFullyRepairedDelegate, false);
 		base.OnCleanUp();
 	}
 

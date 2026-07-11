@@ -24,8 +24,8 @@ public class LogicGate : LogicGateBase, ILogicEventSender, ILogicNetworkConnecti
 	{
 		this.cleaningUp = true;
 		this.Disconnect();
-		base.Unsubscribe<LogicGate>(774203113, LogicGate.OnBuildingBrokenDelegate);
-		base.Unsubscribe<LogicGate>(-1735440190, LogicGate.OnBuildingFullyRepairedDelegate);
+		base.Unsubscribe<LogicGate>(774203113, LogicGate.OnBuildingBrokenDelegate, false);
+		base.Unsubscribe<LogicGate>(-1735440190, LogicGate.OnBuildingFullyRepairedDelegate, false);
 		base.OnCleanUp();
 	}
 

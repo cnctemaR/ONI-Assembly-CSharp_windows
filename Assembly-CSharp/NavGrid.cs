@@ -57,6 +57,7 @@ public class NavGrid
 			NavTableValidator navTableValidator2 = navTableValidator;
 			navTableValidator2.onDirty = (Action<int>)Delegate.Combine(navTableValidator2.onDirty, new Action<int>(this.AddDirtyCell));
 		}
+		this.potentialScratchPad = new PathFinder.PotentialScratchPad(this.maxLinksPerCell);
 		this.InitializeGraph();
 		this.NavGraph = new NavGraph(Grid.CellCount, this);
 	}
@@ -294,6 +295,8 @@ public class NavGrid
 	public string id;
 
 	public bool updateEveryFrame;
+
+	public PathFinder.PotentialScratchPad potentialScratchPad;
 
 	public Action<HashSet<int>> OnNavGridUpdateComplete;
 

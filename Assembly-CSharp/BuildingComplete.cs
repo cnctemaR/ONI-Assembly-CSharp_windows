@@ -147,9 +147,8 @@ public class BuildingComplete : Building
 			}
 			if (this.Def.IsFoundation)
 			{
-				foreach (CellOffset cellOffset in this.Def.PlacementOffsets)
+				foreach (int num2 in base.PlacementCells)
 				{
-					int num2 = Grid.OffsetCell(num, cellOffset);
 					Grid.Foundation[num2] = false;
 					Game.Instance.roomProber.SolidChangedEvent(num2, false);
 				}

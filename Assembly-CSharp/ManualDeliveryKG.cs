@@ -60,18 +60,14 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 	{
 		if (this.storage != null)
 		{
-			this.storage.Unsubscribe(this.onStorageChangeSubscription);
-			this.onStorageChangeSubscription = -1;
+			this.storage.Unsubscribe<Storage>(-1697596308, ManualDeliveryKG.OnStorageChangedDelegate, true);
 		}
 		this.AbortDelivery("storage pointer changed");
 		this.filteredStoredItems.Clear();
 		this.storage = storage;
 		if (this.storage != null && base.isSpawned)
 		{
-			this.onStorageChangeSubscription = this.storage.Subscribe(-1697596308, delegate(object eventData)
-			{
-				this.OnStorageChanged(this.storage);
-			});
+			this.storage.Subscribe<Storage>(-1697596308, ManualDeliveryKG.OnStorageChangedDelegate);
 		}
 	}
 
@@ -259,10 +255,19 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 
 	private List<PrimaryElement> filteredStoredItems = new List<PrimaryElement>();
 
-	private int onStorageChangeSubscription = -1;
-
 	private static readonly EventSystem.IntraObjectHandler<ManualDeliveryKG> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<ManualDeliveryKG>(delegate(ManualDeliveryKG component, object data)
 	{
 		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<Storage> OnStorageChangedDelegate = new EventSystem.IntraObjectHandler<Storage>(delegate(Storage storage, object data)
+	{
+		ListPool<ManualDeliveryKG, ManualDeliveryKG>.PooledList pooledList = ListPool<ManualDeliveryKG, ManualDeliveryKG>.Allocate();
+		storage.gameObject.GetComponents<ManualDeliveryKG>(pooledList);
+		foreach (ManualDeliveryKG manualDeliveryKG in pooledList)
+		{
+			manualDeliveryKG.OnStorageChanged(storage);
+		}
+		pooledList.Recycle();
 	});
 }

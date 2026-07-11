@@ -64,7 +64,7 @@ public class PathProber : KMonoBehaviour
 		PathFinder.Cell cell = this.PathGrid.GetCell(potential, query_id);
 		if (cell.cost == potential_cost)
 		{
-			PathFinder.AddPotentials(potential, cell.cost, (int)cell.underwaterCost, ref abilities, null, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, query_id, this.PathGrid, cell.parent, cell.parentNavType);
+			PathFinder.AddPotentials(nav_grid.potentialScratchPad, potential, cell.cost, (int)cell.underwaterCost, ref abilities, null, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, query_id, this.PathGrid, cell.parent, cell.parentNavType);
 		}
 	}
 

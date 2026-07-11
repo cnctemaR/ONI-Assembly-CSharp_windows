@@ -26,7 +26,7 @@ public class SeasonManager : KMonoBehaviour, ISim200ms
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
-		base.Unsubscribe<SeasonManager>(631075836, SeasonManager.OnNewDayDelegate);
+		base.Unsubscribe<SeasonManager>(631075836, SeasonManager.OnNewDayDelegate, false);
 	}
 
 	private void OnNewDay(object data)

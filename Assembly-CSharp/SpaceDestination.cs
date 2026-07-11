@@ -166,14 +166,23 @@ public class SpaceDestination
 		return dictionary;
 	}
 
-	public Dictionary<Tag, int> GetMissionEntityResult()
+	public Dictionary<Tag, int> GetRecoverableEntities()
 	{
 		Dictionary<Tag, int> dictionary = new Dictionary<Tag, int>();
-		foreach (KeyValuePair<string, int> keyValuePair in this.recoverableEntities)
+		Dictionary<string, int> recoverableEntities = this.GetDestinationType().recoverableEntities;
+		if (recoverableEntities != null)
 		{
-			dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+			foreach (KeyValuePair<string, int> keyValuePair in recoverableEntities)
+			{
+				dictionary.Add(keyValuePair.Key, keyValuePair.Value);
+			}
 		}
 		return dictionary;
+	}
+
+	public Dictionary<Tag, int> GetMissionEntityResult()
+	{
+		return this.GetRecoverableEntities();
 	}
 
 	private static List<Tuple<float, int>> RARE_ELEMENT_CHANCES = new List<Tuple<float, int>>
@@ -220,9 +229,6 @@ public class SpaceDestination
 
 	[Serialize]
 	public Dictionary<SimHashes, float> recoverableElements = new Dictionary<SimHashes, float>();
-
-	[Serialize]
-	public Dictionary<string, int> recoverableEntities = new Dictionary<string, int>();
 
 	[Serialize]
 	public List<SpaceDestination.ResearchOpportunity> researchOpportunities = new List<SpaceDestination.ResearchOpportunity>();

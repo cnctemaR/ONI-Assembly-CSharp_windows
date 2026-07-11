@@ -23,8 +23,8 @@ public class TravelTubeBridge : KMonoBehaviour, ITravelTubePiece
 
 	protected override void OnCleanUp()
 	{
-		base.Unsubscribe<TravelTubeBridge>(774203113, TravelTubeBridge.OnBuildingBrokenDelegate);
-		base.Unsubscribe<TravelTubeBridge>(-1735440190, TravelTubeBridge.OnBuildingFullyRepairedDelegate);
+		base.Unsubscribe<TravelTubeBridge>(774203113, TravelTubeBridge.OnBuildingBrokenDelegate, false);
+		base.Unsubscribe<TravelTubeBridge>(-1735440190, TravelTubeBridge.OnBuildingFullyRepairedDelegate, false);
 		Grid.HasTube[Grid.PosToCell(this)] = false;
 		Components.ITravelTubePieces.Remove(this);
 		base.OnCleanUp();

@@ -3938,7 +3938,7 @@ namespace STRINGS
 
 				public static LocString CONSUMED = "There are no charges left in this Vacillator.";
 
-				public static LocString CONSUMED_WAITING = "Recharge requested, awaiting Duplicant delivery.";
+				public static LocString CONSUMED_WAITING = "Recharge requested, awaiting delivery by Duplicant.";
 
 				public static LocString BUTTON = "Complete Neural Process";
 
@@ -4054,17 +4054,17 @@ namespace STRINGS
 
 			public class BASICRECEPTACLE
 			{
-				public static LocString TITLE = "Held Object";
+				public static LocString TITLE = "Displayed Object";
 
-				public static LocString AWAITINGREQUEST = "FETCH: {0}";
+				public static LocString AWAITINGREQUEST = "SELECT: {0}";
 
 				public static LocString AWAITINGDELIVERY = "AWAITING DELIVERY: {0}";
 
 				public static LocString AWAITINGREMOVAL = "AWAITING REMOVAL: {0}";
 
-				public static LocString ENTITYDEPOSITED = "HOLDING: {0}";
+				public static LocString ENTITYDEPOSITED = "DISPLAYING: {0}";
 
-				public static LocString DEPOSIT = "Fetch";
+				public static LocString DEPOSIT = "Select";
 
 				public static LocString CANCELDEPOSIT = "Cancel";
 
@@ -4072,9 +4072,9 @@ namespace STRINGS
 
 				public static LocString CANCELREMOVAL = "Cancel";
 
-				public static LocString SELECT_TITLE = "SELECT";
+				public static LocString SELECT_TITLE = "SELECT OBJECT";
 
-				public static LocString SELECT_DESC = "Select an object to store here.";
+				public static LocString SELECT_DESC = "Select an object to display here.";
 			}
 
 			public class LURE

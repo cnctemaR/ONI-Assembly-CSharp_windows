@@ -1571,9 +1571,18 @@ public class GameNavGrids
 		{
 			if (Grid.IsValidCell(cell) && NavTableValidator.IsCellSolid(grid_bit_fields, cell, allow_forcefield_traversal))
 			{
-				byte b = Grid.ElementIdx[cell];
-				Element element = ElementLoader.elements[(int)b];
-				return element.id != SimHashes.Katairite && !element.HasTag(GameTags.RefinedMetal);
+				if (!Grid.HasDoor[cell] && !Grid.Foundation[cell])
+				{
+					byte b = Grid.ElementIdx[cell];
+					Element element = ElementLoader.elements[(int)b];
+					return element.id != SimHashes.Katairite && !element.HasTag(GameTags.RefinedMetal);
+				}
+				GameObject gameObject = Grid.Objects[cell, 1];
+				if (gameObject != null)
+				{
+					PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+					return component.ElementID != SimHashes.Katairite && !component.Element.HasTag(GameTags.RefinedMetal);
+				}
 			}
 			return false;
 		}

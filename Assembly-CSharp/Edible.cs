@@ -8,6 +8,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 {
 	private Edible()
 	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
 		this.showProgressBar = false;
 		base.SetOffsetTable(OffsetGroups.InvertedStandardTable);
 		this.shouldTransferDiseaseWithWorker = false;
@@ -50,6 +51,8 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		}
 	}
 
+	public bool isBeingConsumed { get; private set; }
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -88,7 +91,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	public override HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
 	{
 		MinionResume component = worker.GetComponent<MinionResume>();
-		if (base.GetComponent<Building>() != null && component != null && component.CurrentRole != "NoRole")
+		if (component != null && component.CurrentRole != "NoRole")
 		{
 			return Edible.hatWorkPstAnim;
 		}
@@ -137,15 +140,16 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private void StartConsuming()
 	{
-		this.started = true;
+		DebugUtil.DevAssert(!this.isBeingConsumed, new object[] { "Can't StartConsuming()...we've already started" });
+		this.isBeingConsumed = true;
 		this.consumptionStartTime = Time.time;
 		base.worker.Trigger(1406130139, this);
 	}
 
 	private void StopConsuming(Worker worker)
 	{
-		DebugUtil.DevAssert(this.started, new object[] { "StopConsuming() called without StartConsuming()" });
-		this.started = false;
+		DebugUtil.DevAssert(this.isBeingConsumed, new object[] { "StopConsuming() called without StartConsuming()" });
+		this.isBeingConsumed = false;
 		if (float.IsNaN(this.consumptionStartTime))
 		{
 			DebugUtil.DevAssert(false, new object[] { "consumptionStartTime NaN in StopConsuming()" });
@@ -159,6 +163,10 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		float num = Time.time - this.consumptionStartTime;
 		float num2 = Mathf.Clamp01(num / this.GetFeedingTime(worker));
 		this.unitsConsumed = this.Units * num2;
+		if (this.Units < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT && this.unitsConsumed < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+		{
+			this.unitsConsumed = this.Units;
+		}
 		if (float.IsNaN(this.unitsConsumed))
 		{
 			KCrashReporter.Assert(false, "Why is unitsConsumed NaN?");
@@ -226,8 +234,6 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 	public string FoodID;
 
 	private EdiblesManager.FoodInfo foodInfo;
-
-	private bool started;
 
 	private float consumptionStartTime = float.NaN;
 

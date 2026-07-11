@@ -4,11 +4,17 @@ using UnityEngine;
 
 public class FetchOrder2
 {
-	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None, int priorityMod = 0, Tag[] chore_tags = null)
+	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None, int priorityMod = 0, Tag[] chore_tags = null)
 	{
-		if (amount <= 0f)
+		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 		{
-			Output.LogError("Requesting an invalid FetchOrder2 amount");
+			Output.LogWarning(new object[] { string.Format("FetchOrder2 {0} is requesting {1} {2} to {3}", new object[]
+			{
+				chore_type.Id,
+				tags[0],
+				amount,
+				(!(destination != null)) ? "to nowhere" : destination.name
+			}) });
 		}
 		this.choreType = chore_type;
 		this.Tags = tags;
@@ -19,7 +25,7 @@ public class FetchOrder2
 		this.UnfetchedAmount = amount;
 		this.PriorityMod = priorityMod;
 		this.ChoreTags = chore_tags;
-		this.operationalRequirement = operationalRequirement;
+		this.operationalRequirement = operationalRequirementDEPRECATED;
 	}
 
 	public float TotalAmount { get; set; }

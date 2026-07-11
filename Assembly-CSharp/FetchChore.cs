@@ -6,20 +6,26 @@ using UnityEngine;
 public class FetchChore : Chore<FetchChore.StatesInstance>
 {
 	public FetchChore(ChoreType choreType, Storage destination, float amount, Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, ChoreProvider chore_provider = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, FetchOrder2.OperationalRequirement operational_requirement = FetchOrder2.OperationalRequirement.Operational, int priority_mod = 0, Tag[] chore_tags = null)
-		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 5, false, true, priority_mod, chore_tags)
+		: base(choreType, destination, chore_provider, run_until_complete, on_complete, on_begin, on_end, PriorityScreen.PriorityClass.basic, 5, false, true, priority_mod, chore_tags, false, ReportManager.ReportType.WorkTime)
 	{
 		if (choreType == null)
 		{
 			Output.LogError("You must specify a chore type for fetching!");
 		}
-		if (amount <= 0f)
+		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 		{
-			Output.LogError("Requesting an invalid FetchChore amount");
+			Output.LogWarning(new object[] { string.Format("Chore {0} is requesting {1} {2} to {3}", new object[]
+			{
+				choreType.Id,
+				tags[0],
+				amount,
+				(!(destination != null)) ? "to nowhere" : destination.name
+			}) });
 		}
 		base.SetPrioritizable((!(destination.prioritizable != null)) ? destination.GetComponent<Prioritizable>() : destination.prioritizable);
-		this.smi = new FetchChore.StatesInstance(this);
-		this.smi.sm.requestedamount.Set(amount, this.smi);
-		this.smi.sm.destination.Set(destination, this.smi);
+		base.smi = new FetchChore.StatesInstance(this);
+		base.smi.sm.requestedamount.Set(amount, base.smi);
+		base.smi.sm.destination.Set(destination, base.smi);
 		this.tags = tags;
 		this.tagBits = new TagBits(tags);
 		this.requiredTagBits = new TagBits(required_tags);
@@ -75,7 +81,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		get
 		{
-			return this.smi.sm.requestedamount.Get(this.smi);
+			return base.smi.sm.requestedamount.Get(base.smi);
 		}
 	}
 
@@ -83,11 +89,11 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		get
 		{
-			return this.smi.sm.actualamount.Get(this.smi);
+			return base.smi.sm.actualamount.Get(base.smi);
 		}
 		set
 		{
-			this.smi.sm.actualamount.Set(value, this.smi);
+			base.smi.sm.actualamount.Set(value, base.smi);
 		}
 	}
 
@@ -95,11 +101,11 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		get
 		{
-			return this.smi.sm.chunk.Get<Pickupable>(this.smi);
+			return base.smi.sm.chunk.Get<Pickupable>(base.smi);
 		}
 		set
 		{
-			this.smi.sm.chunk.Set(value, this.smi);
+			base.smi.sm.chunk.Set(value, base.smi);
 		}
 	}
 
@@ -107,11 +113,11 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		get
 		{
-			return this.smi.sm.fetcher.Get(this.smi);
+			return base.smi.sm.fetcher.Get(base.smi);
 		}
 		set
 		{
-			this.smi.sm.fetcher.Set(value, this.smi);
+			base.smi.sm.fetcher.Set(value, base.smi);
 		}
 	}
 
@@ -119,14 +125,15 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		get
 		{
-			return this.smi.sm.destination.Get<Storage>(this.smi);
+			return base.smi.sm.destination.Get<Storage>(base.smi);
 		}
 	}
 
 	public void FetchAreaBegin(Chore.Precondition.Context context, float amount_to_be_fetched)
 	{
 		this.amount = amount_to_be_fetched;
-		this.smi.sm.fetcher.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.fetcher.Set(context.consumerState.gameObject, base.smi);
+		ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, 1f, context.chore.choreType.Name, GameUtil.GetChoreName(this, context.data));
 		base.Begin(context);
 	}
 
@@ -134,6 +141,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		if (is_success)
 		{
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, base.choreType.Name, GameUtil.GetChoreName(this, pickupable));
 			this.fetchTarget = pickupable;
 			base.driver = driver;
 			this.fetcher = driver.gameObject;
@@ -171,14 +179,14 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 		{
 			pickupable = this.FindFetchTarget(context.consumerState);
 		}
-		this.smi.sm.source.Set(pickupable.gameObject, this.smi);
+		base.smi.sm.source.Set(pickupable.gameObject, base.smi);
 		pickupable.Subscribe(-1582839653, new Action<object>(this.OnTagsChanged));
 		base.Begin(context);
 	}
 
 	protected override void End(string reason)
 	{
-		Pickupable pickupable = this.smi.sm.source.Get<Pickupable>(this.smi);
+		Pickupable pickupable = base.smi.sm.source.Get<Pickupable>(base.smi);
 		if (pickupable != null)
 		{
 			pickupable.Unsubscribe(-1582839653, new Action<object>(this.OnTagsChanged));
@@ -188,7 +196,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	private void OnTagsChanged(object data)
 	{
-		if (this.smi.sm.chunk.Get(this.smi) != null)
+		if (base.smi.sm.chunk.Get(base.smi) != null)
 		{
 			this.Fail("Tags changed");
 		}
@@ -210,7 +218,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 
 	private void OnOnlyFetchMarkedItemsSettingChanged(object data)
 	{
-		if (this.smi.sm.destination.Get<Storage>(this.smi).GetOnlyFetchMarkedItems())
+		if (base.smi.sm.destination.Get<Storage>(base.smi).GetOnlyFetchMarkedItems())
 		{
 			this.requiredTagBits.SetTag(GameTags.Garbage);
 		}
@@ -239,7 +247,7 @@ public class FetchChore : Chore<FetchChore.StatesInstance>
 	{
 		base.Cleanup();
 		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
-		Storage storage = this.smi.sm.destination.Get<Storage>(this.smi);
+		Storage storage = base.smi.sm.destination.Get<Storage>(base.smi);
 		if (storage != null)
 		{
 			storage.Unsubscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));

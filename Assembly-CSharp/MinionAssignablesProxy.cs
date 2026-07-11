@@ -30,9 +30,9 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 		{
 			this.RestoreTargetFromInstanceID();
 		}
-		if (this.target != null)
+		KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)this.target;
+		if (kmonoBehaviour != null)
 		{
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)this.target;
 			return kmonoBehaviour.gameObject;
 		}
 		return null;

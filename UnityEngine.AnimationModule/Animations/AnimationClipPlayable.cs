@@ -9,10 +9,10 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>A Playable that controls an AnimationClip.</para>
 	/// </summary>
-	[RequiredByNativeCode]
+	[StaticAccessor("AnimationClipPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationClipPlayable.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationClipPlayable.h")]
-	[StaticAccessor("AnimationClipPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	public struct AnimationClipPlayable : IPlayable, IEquatable<AnimationClipPlayable>
 	{
 		internal AnimationClipPlayable(PlayableHandle handle)

@@ -5,11 +5,11 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Animations
 {
+	[StaticAccessor("AnimationPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPlayableGraphExtensions.bindings.h")]
 	[NativeHeader("Runtime/Animation/Animator.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[StaticAccessor("AnimationPlayableGraphExtensionsBindings", StaticAccessorType.DoubleColon)]
 	internal static class AnimationPlayableGraphExtensions
 	{
 		internal static void SyncUpdateAndTimeMode(this PlayableGraph graph, Animator animator)

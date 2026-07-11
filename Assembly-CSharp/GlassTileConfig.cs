@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -28,7 +29,7 @@ public class GlassTileConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Glass";
 		buildingDef.AudioSize = "small";
 		buildingDef.BaseTimeUntilRepair = -1f;
-		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
+		buildingDef.SceneLayer = Grid.SceneLayer.GlassTile;
 		buildingDef.isKAnimTile = true;
 		buildingDef.isSolidTile = true;
 		buildingDef.BlockTileIsTransparent = true;
@@ -38,6 +39,8 @@ public class GlassTileConfig : IBuildingConfig
 		buildingDef.DecorBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_glass_tops_decor_info");
 		buildingDef.DecorPlaceBlockTileInfo = Assets.GetBlockTileDecorInfo("tiles_glass_tops_decor_place_info");
 		buildingDef.ConstructionOffsetFilter = BuildingDef.ConstructionOffsetFilter_OneDown;
+		buildingDef.ReplacementTags = new List<Tag>();
+		buildingDef.ReplacementTags.Add(GameTags.FloorTiles);
 		return buildingDef;
 	}
 
@@ -60,6 +63,7 @@ public class GlassTileConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RemoveLoopingSounds(go);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.FloorTiles);
 	}
 
 	public override void DoPostConfigureUnderConstruction(GameObject go)

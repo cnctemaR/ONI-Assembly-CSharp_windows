@@ -6,59 +6,95 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	public MinionPathFinderAbilities(Navigator navigator)
 		: base(navigator)
 	{
-		this.accessControlNavMask = new AccessControlNavMask(navigator);
-		this.travelTubeNavMask = new TravelTubeNavMask(navigator);
-		this.jetPackNavMask = new JetPackNavMask(navigator);
-		this.navigationFeatureMask = new NavigationFeatureMask(navigator);
-		this.idleNavMask = default(IdleNavMask);
+		this.transitionVoidOffsets = new CellOffset[navigator.NavGrid.transitions.Length][];
+		for (int i = 0; i < this.transitionVoidOffsets.Length; i++)
+		{
+			this.transitionVoidOffsets[i] = navigator.NavGrid.transitions[i].voidOffsets;
+		}
 	}
 
-	public override void Refresh()
+	protected override void Refresh(Navigator navigator)
 	{
-		int num = Grid.PosToCell(base.navigator);
-		if (PathFinder.IsSubmerged(num))
-		{
-			this.maxUnderwaterCost = int.MaxValue;
-		}
-		else
-		{
-			this.maxUnderwaterCost = (int)Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(base.navigator).GetTotalValue();
-		}
+		this.proxyID = navigator.GetComponent<MinionIdentity>().assignableProxy.Get().GetComponent<KPrefabID>().InstanceID;
+		this.maxUnderwaterCost = ((!PathFinder.IsSubmerged(Grid.PosToCell(navigator))) ? ((int)Db.Get().Attributes.MaxUnderwaterTravelCost.Lookup(navigator).GetTotalValue()) : int.MaxValue);
+		this.out_of_fuel = navigator.HasTag(GameTags.JetSuitOutOfFuel);
 	}
 
 	public void SetIdleNavMaskEnabled(bool enabled)
 	{
-		this.idleNavMask.enabled = enabled;
+		this.idleNavMaskEnabled = enabled;
+	}
+
+	private static bool IsAccessPermitted(int proxyID, int cell, int from_cell)
+	{
+		return !Grid.HasAccessDoor[cell] || Grid.HasPermission(cell, proxyID, from_cell);
 	}
 
 	public override bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, int underwater_cost)
 	{
-		if (!this.accessControlNavMask.IsTraversable(base.navigator, path, from_cell, cost, transition_id))
+		if (!MinionPathFinderAbilities.IsAccessPermitted(this.proxyID, path.cell, from_cell))
 		{
 			return false;
 		}
-		if (!this.travelTubeNavMask.IsTraversable(base.navigator, path, from_cell, from_nav_type, cost, transition_id))
+		foreach (CellOffset cellOffset in this.transitionVoidOffsets[transition_id])
+		{
+			int num = Grid.OffsetCell(from_cell, cellOffset);
+			if (!MinionPathFinderAbilities.IsAccessPermitted(this.proxyID, num, from_cell))
+			{
+				return false;
+			}
+		}
+		if (path.navType == NavType.Tube && from_nav_type == NavType.Floor && !Grid.HasUsableTubeEntrance(from_cell, this.prefabInstanceID))
 		{
 			return false;
 		}
-		if (!this.jetPackNavMask.IsTraversable(base.navigator, path, from_cell, from_nav_type, cost, transition_id))
+		if (path.navType == NavType.Hover && (this.out_of_fuel || !path.HasFlag(PathFinder.PotentialPath.Flags.HasJetPack)))
 		{
 			return false;
 		}
-		if (!this.navigationFeatureMask.IsTraversable(base.navigator, path, from_cell, cost, transition_id, this))
+		Grid.SuitMarker.Flags flags = (Grid.SuitMarker.Flags)0;
+		PathFinder.PotentialPath.Flags flags2 = PathFinder.PotentialPath.Flags.None;
+		bool flag = path.HasFlag(PathFinder.PotentialPath.Flags.PerformSuitChecks) && Grid.TryGetSuitMarkerFlags(from_cell, out flags, out flags2) && (byte)(flags & Grid.SuitMarker.Flags.Operational) != 0;
+		bool flag2 = SuitMarker.DoesTraversalDirectionRequireSuit(from_cell, path.cell, flags);
+		bool flag3 = path.HasAnyFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit | PathFinder.PotentialPath.Flags.HasJetPack);
+		if (flag)
+		{
+			bool flag4 = path.HasFlag(flags2);
+			if (flag2)
+			{
+				if (!flag3 && !Grid.HasSuit(from_cell, this.prefabInstanceID))
+				{
+					return false;
+				}
+			}
+			else if (flag3 && (byte)(flags & Grid.SuitMarker.Flags.OnlyTraverseIfUnequipAvailable) != 0 && (!flag4 || !Grid.HasEmptyLocker(from_cell, this.prefabInstanceID)))
+			{
+				return false;
+			}
+		}
+		if (this.idleNavMaskEnabled && (Grid.PreventIdleTraversal[path.cell] || Grid.PreventIdleTraversal[from_cell]))
 		{
 			return false;
 		}
-		if (!this.idleNavMask.IsTraversable(base.navigator, path, from_cell, cost, transition_id))
+		if (!path.HasFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit) && !path.HasFlag(PathFinder.PotentialPath.Flags.HasJetPack) && path.navType != NavType.Tube && underwater_cost > this.maxUnderwaterCost)
 		{
 			return false;
 		}
-		if (path.HasFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit) || path.HasFlag(PathFinder.PotentialPath.Flags.HasJetPack) || path.navType == NavType.Tube || underwater_cost <= this.maxUnderwaterCost)
+		if (flag)
 		{
-			this.navigationFeatureMask.ApplyTraversalToPath(base.navigator, ref path, from_cell);
-			return true;
+			if (flag2)
+			{
+				if (!flag3)
+				{
+					path.SetFlags(flags2);
+				}
+			}
+			else
+			{
+				path.ClearFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit | PathFinder.PotentialPath.Flags.HasJetPack);
+			}
 		}
-		return false;
+		return true;
 	}
 
 	[Conditional("ENABLE_NAVIGATION_MASK_PROFILING")]
@@ -71,15 +107,13 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	{
 	}
 
+	private CellOffset[][] transitionVoidOffsets;
+
 	public int maxUnderwaterCost;
 
-	private AccessControlNavMask accessControlNavMask;
+	private int proxyID;
 
-	private TravelTubeNavMask travelTubeNavMask;
+	private bool out_of_fuel;
 
-	private JetPackNavMask jetPackNavMask;
-
-	private NavigationFeatureMask navigationFeatureMask;
-
-	private IdleNavMask idleNavMask;
+	private bool idleNavMaskEnabled;
 }

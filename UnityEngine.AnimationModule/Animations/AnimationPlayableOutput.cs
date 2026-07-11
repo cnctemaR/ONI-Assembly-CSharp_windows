@@ -9,13 +9,13 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>A IPlayableOutput implementation that connects the PlayableGraph to an Animator in the scene.</para>
 	/// </summary>
-	[StaticAccessor("AnimationPlayableOutputBindings", StaticAccessorType.DoubleColon)]
-	[NativeHeader("Runtime/Animation/Director/AnimationPlayableOutput.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationPlayableOutput.bindings.h")]
+	[NativeHeader("Runtime/Animation/Director/AnimationPlayableOutput.h")]
 	[NativeHeader("Runtime/Animation/Animator.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayableOutput.h")]
+	[StaticAccessor("AnimationPlayableOutputBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	public struct AnimationPlayableOutput : IPlayableOutput
 	{
 		internal AnimationPlayableOutput(PlayableOutputHandle handle)

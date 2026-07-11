@@ -4,9 +4,9 @@ using UnityEngine;
 public class SighChore : Chore<SighChore.StatesInstance>
 {
 	public SighChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Sigh, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Sigh, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new SighChore.StatesInstance(this, target.gameObject);
+		base.smi = new SighChore.StatesInstance(this, target.gameObject);
 	}
 
 	public class StatesInstance : GameStateMachine<SighChore.States, SighChore.StatesInstance, SighChore, object>.GameInstance

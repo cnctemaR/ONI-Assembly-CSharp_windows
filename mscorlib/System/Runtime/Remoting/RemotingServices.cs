@@ -427,8 +427,8 @@ namespace System.Runtime.Remoting
 		}
 
 		[Obsolete("It existed for only internal use in .NET and unimplemented in mono")]
-		[Conditional("REMOTING_PERF")]
 		[MonoTODO]
+		[Conditional("REMOTING_PERF")]
 		public static void LogRemotingStage(int stage)
 		{
 			throw new NotImplementedException();

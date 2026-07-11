@@ -8,8 +8,8 @@ namespace UnityEngine.Experimental.Animations
 	/// <summary>
 	///   <para>Handle for a muscle in the AnimationHumanStream.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/Animator.h")]
 	[NativeHeader("Runtime/Animation/MuscleHandle.h")]
+	[NativeHeader("Runtime/Animation/Animator.h")]
 	public struct MuscleHandle
 	{
 		/// <summary>

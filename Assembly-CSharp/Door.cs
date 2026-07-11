@@ -99,33 +99,33 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		base.Subscribe<Door>(-801688580, Door.OnLogicValueChangedDelegate);
 		this.requestedState = this.CurrentState;
 		this.ApplyRequestedControlState(true);
-		if (this.rotatable.IsRotated)
+		int num = ((this.rotatable.GetOrientation() != Orientation.Neutral) ? 0 : (this.building.Def.WidthInCells * (this.building.Def.HeightInCells - 1)));
+		int num2 = ((this.rotatable.GetOrientation() != Orientation.Neutral) ? this.building.Def.HeightInCells : this.building.Def.WidthInCells);
+		for (int num3 = 0; num3 != num2; num3++)
 		{
-			foreach (int num in this.building.PlacementCells)
-			{
-				Grid.FakeFloor[num] = true;
-				Pathfinding.Instance.AddDirtyNavGridCell(num);
-			}
+			int num4 = this.building.PlacementCells[num + num3];
+			Grid.FakeFloor[num4] = true;
+			Pathfinding.Instance.AddDirtyNavGridCell(num4);
 		}
 		List<int> list = new List<int>();
-		foreach (int num2 in this.building.PlacementCells)
+		foreach (int num5 in this.building.PlacementCells)
 		{
-			Grid.HasDoor[num2] = true;
-			Grid.HasAccessDoor[num2] = base.GetComponent<AccessControl>() != null;
+			Grid.HasDoor[num5] = true;
+			Grid.HasAccessDoor[num5] = base.GetComponent<AccessControl>() != null;
 			if (this.rotatable.IsRotated)
 			{
-				list.Add(Grid.CellAbove(num2));
-				list.Add(Grid.CellBelow(num2));
+				list.Add(Grid.CellAbove(num5));
+				list.Add(Grid.CellBelow(num5));
 			}
 			else
 			{
-				list.Add(Grid.CellLeft(num2));
-				list.Add(Grid.CellRight(num2));
+				list.Add(Grid.CellLeft(num5));
+				list.Add(Grid.CellRight(num5));
 			}
-			SimMessages.SetCellProperties(num2, 8);
+			SimMessages.SetCellProperties(num5, 8);
 			if (Door.DisplacesGas(this.doorType))
 			{
-				Grid.RenderedByWorld[num2] = false;
+				Grid.RenderedByWorld[num5] = false;
 			}
 		}
 	}
@@ -386,7 +386,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				this.changeStateChore.Cancel("Change state");
 			}
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
 	}
 
@@ -795,7 +795,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)
 		{
-			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State open;

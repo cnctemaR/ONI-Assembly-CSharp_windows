@@ -69,10 +69,10 @@ namespace System.Threading
 			return SynchronizationContext.WaitHelper(waitHandles, waitAll, millisecondsTimeout);
 		}
 
-		[CLSCompliant(false)]
-		[PrePrepareMethod]
-		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
 		[MonoTODO]
+		[CLSCompliant(false)]
+		[ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+		[PrePrepareMethod]
 		protected static int WaitHelper(IntPtr[] waitHandles, bool waitAll, int millisecondsTimeout)
 		{
 			throw new NotImplementedException();

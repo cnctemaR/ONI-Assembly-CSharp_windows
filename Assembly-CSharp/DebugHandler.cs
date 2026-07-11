@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Klei;
 using STRINGS;
@@ -14,6 +15,14 @@ public class DebugHandler : IInputHandler
 	}
 
 	public static bool enabled { get; private set; }
+
+	public string handlerName
+	{
+		get
+		{
+			return "DebugHandler";
+		}
+	}
 
 	public KInputHandler inputHandler { get; set; }
 
@@ -373,6 +382,8 @@ public class DebugHandler : IInputHandler
 						if (GenericGameSettings.instance.developerDebugEnable)
 						{
 							string text6 = Guid.NewGuid().ToString();
+							StackTrace stackTrace = new StackTrace(1, true);
+							text6 = text6 + "\n" + stackTrace.ToString();
 							KCrashReporter.ReportError("Debug crash with random stack", text6, null, ScreenPrefabs.Instance.ConfirmDialogScreen, string.Empty);
 						}
 					}
@@ -439,6 +450,10 @@ public class DebugHandler : IInputHandler
 		if (CameraController.Instance != null)
 		{
 			CameraController.Instance.FreeCameraEnabled = !CameraController.Instance.FreeCameraEnabled;
+		}
+		if (KScreenManager.Instance != null)
+		{
+			KScreenManager.Instance.DisableInput(DebugHandler.HideUI);
 		}
 	}
 

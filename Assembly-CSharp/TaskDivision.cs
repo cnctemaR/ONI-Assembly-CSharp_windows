@@ -3,15 +3,18 @@ using UnityEngine;
 
 internal class TaskDivision<Task, SharedData> where Task : DivisibleTask<SharedData>, new()
 {
-	public TaskDivision()
+	public TaskDivision(int taskCount)
 	{
-		this.tasks = new Task[Math.Max(1, SystemInfo.processorCount - 1)];
+		this.tasks = new Task[taskCount];
 		for (int num = 0; num != this.tasks.Length; num++)
 		{
 			this.tasks[num] = new Task();
-			Task task = this.tasks[num];
-			task.name += string.Format("{0}", num);
 		}
+	}
+
+	public TaskDivision()
+		: this(SystemInfo.processorCount - 1)
+	{
 	}
 
 	public void Initialize(int count)

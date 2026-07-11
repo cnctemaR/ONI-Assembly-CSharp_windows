@@ -10,10 +10,10 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>AvatarMask is used to mask out humanoid body parts and transforms.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/AvatarMask.h")]
-	[UsedByNativeCode]
-	[MovedFrom("UnityEditor.Animations", true)]
 	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[NativeHeader("Runtime/Animation/AvatarMask.h")]
+	[MovedFrom("UnityEditor.Animations", true)]
+	[UsedByNativeCode]
 	public sealed class AvatarMask : Object
 	{
 		/// <summary>

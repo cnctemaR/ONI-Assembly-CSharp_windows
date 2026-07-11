@@ -8,15 +8,15 @@ namespace UnityEngine
 	public enum AudioVelocityUpdateMode
 	{
 		/// <summary>
-		///   <para>Updates the source or listener in the fixed update loop if it is attached to a Rigidbody, dynamic otherwise.</para>
+		///   <para>Updates the source or listener in the MonoBehaviour.FixedUpdate loop if it is attached to a Rigidbody, dynamic MonoBehaviour.Update otherwise.</para>
 		/// </summary>
 		Auto,
 		/// <summary>
-		///   <para>Updates the source or listener in the fixed update loop.</para>
+		///   <para>Updates the source or listener in the MonoBehaviour.FixedUpdate loop.</para>
 		/// </summary>
 		Fixed,
 		/// <summary>
-		///   <para>Updates the source or listener in the dynamic update loop.</para>
+		///   <para>Updates the source or listener in the dynamic MonoBehaviour.Update loop.</para>
 		/// </summary>
 		Dynamic
 	}

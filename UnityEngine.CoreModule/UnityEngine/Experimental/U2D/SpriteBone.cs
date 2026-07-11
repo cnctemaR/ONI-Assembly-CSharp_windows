@@ -7,9 +7,9 @@ namespace UnityEngine.Experimental.U2D
 	/// <summary>
 	///   <para>A struct that holds a rich set of information that describes the bind pose of this Sprite.</para>
 	/// </summary>
+	[NativeType(CodegenOptions.Custom, "ScriptingSpriteBone")]
 	[NativeHeader("Runtime/2D/Common/SpriteDataAccess.h")]
 	[RequiredByNativeCode]
-	[NativeType(CodegenOptions.Custom, "ScriptingSpriteBone")]
 	[Serializable]
 	public struct SpriteBone
 	{

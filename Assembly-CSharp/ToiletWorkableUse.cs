@@ -4,6 +4,11 @@ using KSerialization;
 
 public class ToiletWorkableUse : Workable, IGameObjectEffectDescriptor
 {
+	private ToiletWorkableUse()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

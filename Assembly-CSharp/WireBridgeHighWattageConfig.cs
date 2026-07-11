@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -38,8 +39,10 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 		buildingDef.ReplacementLayer = ObjectLayer.ReplacementTile;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		buildingDef.SceneLayer = Grid.SceneLayer.WireBridgesFront;
-		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.TileMain;
 		GeneratedBuildings.RegisterWithOverlay(OverlayScreen.WireIDs, "WireBridgeHighWattage");
+		buildingDef.ReplacementTags = new List<Tag>();
+		buildingDef.ReplacementTags.Add(GameTags.FloorTiles);
 		return buildingDef;
 	}
 
@@ -77,6 +80,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 	{
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = false;
+		go.GetComponent<KPrefabID>().AddTag(GameTags.WireBridges);
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 

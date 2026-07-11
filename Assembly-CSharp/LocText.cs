@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class LocText : TextMeshProUGUI
 {
+	protected override void OnEnable()
+	{
+		base.OnEnable();
+	}
+
 	public bool AllowLinks
 	{
 		get

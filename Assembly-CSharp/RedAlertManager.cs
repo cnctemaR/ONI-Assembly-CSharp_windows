@@ -24,13 +24,24 @@ public class RedAlertManager : GameStateMachine<RedAlertManager, RedAlertManager
 			{
 				Vignette.Instance.Reset();
 			})
+			.Enter("Sounds", delegate(RedAlertManager.Instance smi)
+			{
+				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_ON", false));
+			})
+			.ToggleLoopingSound(GlobalAssets.GetSound("RedAlert_LP", false), null)
 			.ToggleNotification((RedAlertManager.Instance smi) => smi.notification)
 			.ParamTransition<bool>(this.isOn, this.off, GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.IsFalse);
+		this.on_pst.Enter("Sounds", delegate(RedAlertManager.Instance smi)
+		{
+			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_OFF", false));
+		});
 	}
 
 	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.State off;
 
 	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.State on;
+
+	public GameStateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.State on_pst;
 
 	public StateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.BoolParameter isOn = new StateMachine<RedAlertManager, RedAlertManager.Instance, IStateMachineTarget, object>.BoolParameter();
 
@@ -57,13 +68,34 @@ public class RedAlertManager : GameStateMachine<RedAlertManager, RedAlertManager
 			return base.sm.isOn.Get(base.smi);
 		}
 
+		public bool IsToggledOn()
+		{
+			return this.isToggled;
+		}
+
 		public void Toggle(bool on)
 		{
-			base.sm.isOn.Set(on, base.smi);
+			this.isToggled = on;
+			this.Refresh();
+		}
+
+		public void HasEmergencyChore(bool on)
+		{
+			this.hasEmergencyChore = on;
+			this.Refresh();
+		}
+
+		private void Refresh()
+		{
+			base.sm.isOn.Set(this.isToggled || this.hasEmergencyChore, base.smi);
 		}
 
 		private static RedAlertManager.Instance instance;
 
-		public Notification notification = new Notification(MISC.NOTIFICATIONS.REDALERT.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REDALERT.TOOLTIP, null, false, 0f, null, null);
+		private bool isToggled;
+
+		private bool hasEmergencyChore;
+
+		public Notification notification = new Notification(MISC.NOTIFICATIONS.REDALERT.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.REDALERT.TOOLTIP, null, false, 0f, null, null, null);
 	}
 }

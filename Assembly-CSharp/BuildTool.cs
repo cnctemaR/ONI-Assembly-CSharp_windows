@@ -190,7 +190,7 @@ public class BuildTool : DragTool
 						GameObject gameObject2 = null;
 						if (this.def.ReplacementLayer != ObjectLayer.NumLayers)
 						{
-							gameObject2 = Grid.Objects[num2, 11];
+							gameObject2 = Grid.Objects[num2, (int)this.def.ReplacementLayer];
 						}
 						if (gameObject == null || (gameObject.GetComponent<Constructable>() == null && gameObject2 == null))
 						{
@@ -286,7 +286,7 @@ public class BuildTool : DragTool
 				if (gameObject2 != null && Grid.Objects[cell, (int)this.def.ReplacementLayer] == null)
 				{
 					BuildingComplete component = gameObject2.GetComponent<BuildingComplete>();
-					if (component != null && component.Def.Replaceable && component.Def.IsFoundation && component.Def.isKAnimTile && (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element.tag))
+					if (component != null && component.Def.Replaceable && this.def.CanReplace(gameObject2) && (component.Def != this.def || this.selectedElements[0] != gameObject2.GetComponent<PrimaryElement>().Element.tag))
 					{
 						gameObject = this.def.TryReplaceTile(this.visualizer, vector, this.buildingOrientation, this.selectedElements, 0);
 						Grid.Objects[cell, (int)this.def.ReplacementLayer] = gameObject;

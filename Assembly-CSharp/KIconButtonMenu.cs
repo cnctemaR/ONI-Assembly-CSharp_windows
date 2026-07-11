@@ -288,9 +288,6 @@ public class KIconButtonMenu : KScreen
 	[SerializeField]
 	public TextStyleSetting ToggleToolTipTextStyleSetting;
 
-	[SerializeField]
-	public string tooltipHotKeyColor = "#ff2222ff";
-
 	protected GameObject go;
 
 	protected IList<KIconButtonMenu.ButtonInfo> buttons;
@@ -320,7 +317,7 @@ public class KIconButtonMenu : KScreen
 			string text = ((!(this.tooltipText == string.Empty)) ? this.tooltipText : this.text);
 			if (this.shortcutKey != global::Action.NumActions)
 			{
-				text = text + " " + GameUtil.GetHotkeyString(this.shortcutKey);
+				text = GameUtil.ReplaceHotkeyString(text, this.shortcutKey);
 			}
 			return text;
 		}

@@ -73,6 +73,10 @@ public class StarmapScreen : KModalScreen
 		this.destinationDetailsResources.SetTitle(UI.STARMAP.LISTTITLES.RESOURCES);
 		this.destinationDetailsResources.SetIcon(this.destinationDetailsResourcesIcon);
 		this.destinationDetailsResources.gameObject.name = "destinationDetailsResources";
+		this.destinationDetailsArtifacts = global::UnityEngine.Object.Instantiate<BreakdownList>(this.breakdownListPrefab, this.destinationDetailsContainer);
+		this.destinationDetailsArtifacts.SetTitle(UI.STARMAP.LISTTITLES.ARTIFACTS);
+		this.destinationDetailsArtifacts.SetIcon(this.destinationDetailsArtifactsIcon);
+		this.destinationDetailsArtifacts.gameObject.name = "destinationDetailsArtifacts";
 		this.LoadPlanets();
 		this.selectionUpdateHandle = Game.Instance.Subscribe(-1503271301, new Action<object>(this.OnSelectableChanged));
 		this.titleBarLabel.text = UI.STARMAP.TITLE;
@@ -1020,6 +1024,16 @@ public class StarmapScreen : KModalScreen
 				}
 			}
 		}
+		this.destinationDetailsArtifacts.ClearRows();
+		if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+		{
+			ArtifactDropRate artifactDropTable = this.selectedDestination.GetDestinationType().artifactDropTable;
+			foreach (Tuple<ArtifactTier, float> tuple in artifactDropTable.rates)
+			{
+				BreakdownListRow breakdownListRow5 = this.destinationDetailsArtifacts.AddRow();
+				breakdownListRow5.ShowData(tuple.first.name_key.String, GameUtil.GetFormattedPercent(tuple.second / artifactDropTable.totalWeight * 100f, GameUtil.TimeSlice.None));
+			}
+		}
 		this.destinationDetailsContainer.gameObject.SetActive(true);
 		LayoutRebuilder.ForceRebuildLayoutImmediate(this.destinationDetailsContainer);
 	}
@@ -1244,6 +1258,10 @@ public class StarmapScreen : KModalScreen
 	private BreakdownList destinationDetailsResources;
 
 	public Sprite destinationDetailsResourcesIcon;
+
+	private BreakdownList destinationDetailsArtifacts;
+
+	public Sprite destinationDetailsArtifactsIcon;
 
 	public RectTransform destinationDetailsContainer;
 

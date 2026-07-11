@@ -26,7 +26,7 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 		this.behaviourcomplete.Enter(delegate(NestingPoopState.Instance smi)
 		{
 			smi.SetLastPoopCell();
-		}).BehaviourComplete(GameTags.Creatures.Poop, false);
+		}).PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.Poop, false);
 	}
 
 	public GameStateMachine<NestingPoopState, NestingPoopState.Instance, IStateMachineTarget, NestingPoopState.Def>.State goingtopoop;

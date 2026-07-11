@@ -14,7 +14,7 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 			return instance.IsCreatureAvailableForFixedCapture();
 		};
 		this.IsCreatureAvailableForFixedCapture = precondition;
-		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null);
+		base..ctor(Db.Get().ChoreTypes.Ranch, capture_point, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime);
 		base.AddPrecondition(this.IsCreatureAvailableForFixedCapture, capture_point.GetSMI<FixedCapturePoint.Instance>());
 		base.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanWrangleCreatures.id);
 		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
@@ -25,14 +25,14 @@ public class FixedCaptureChore : Chore<FixedCaptureChore.FixedCaptureChoreStates
 		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
 		BuildingEnabledButton component3 = capture_point.GetComponent<BuildingEnabledButton>();
 		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
-		this.smi = new FixedCaptureChore.FixedCaptureChoreStates.Instance(capture_point);
+		base.smi = new FixedCaptureChore.FixedCaptureChoreStates.Instance(capture_point);
 		base.SetPrioritizable(capture_point.GetComponent<Prioritizable>());
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.rancher.Set(context.consumerState.gameObject, this.smi);
-		this.smi.sm.creature.Set(this.smi.fixedCapturePoint.targetCapturable.gameObject, this.smi);
+		base.smi.sm.rancher.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.creature.Set(base.smi.fixedCapturePoint.targetCapturable.gameObject, base.smi);
 		base.Begin(context);
 	}
 

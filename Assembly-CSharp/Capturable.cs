@@ -134,7 +134,7 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 		{
 			ChoreType capture = Db.Get().ChoreTypes.Capture;
 			Tag[] array = new Tag[] { GameTags.ChoreTypes.Ranching };
-			this.chore = new WorkChore<Capturable>(capture, this, null, array, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+			this.chore = new WorkChore<Capturable>(capture, this, null, array, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
 		else if (!this.markedForCapture && this.chore != null)
 		{

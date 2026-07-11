@@ -9,10 +9,10 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>Constrains the orientation of an object relative to the position of one or more source objects, such that the object is facing the average position of the sources.</para>
 	/// </summary>
+	[NativeHeader("Runtime/Animation/Constraints/AimConstraint.h")]
 	[RequireComponent(typeof(Transform))]
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
-	[NativeHeader("Runtime/Animation/Constraints/AimConstraint.h")]
 	public sealed class AimConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private AimConstraint()

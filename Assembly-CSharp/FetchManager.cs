@@ -57,6 +57,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 
 	public void UpdatePickups(PathProber path_prober, Worker worker)
 	{
+		Navigator component = worker.GetComponent<Navigator>();
 		this.updatePickupsWorkItems.Reset(null);
 		foreach (KeyValuePair<Tag, FetchManager.FetchablesByPrefabId> keyValuePair in this.prefabIdToFetchables)
 		{
@@ -66,7 +67,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 			{
 				fetchablesByPrefabId = value,
 				pathProber = path_prober,
-				navigator = worker.GetComponent<Navigator>(),
+				navigator = component,
 				worker = worker.gameObject
 			});
 		}

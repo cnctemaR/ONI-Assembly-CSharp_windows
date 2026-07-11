@@ -7,7 +7,7 @@ namespace Database
 	[DebuggerDisplay("{Id}")]
 	public class SpaceDestinationType : Resource
 	{
-		public SpaceDestinationType(string id, ResourceSet parent, string name, string description, int iconSize, string spriteName, Dictionary<SimHashes, MathUtil.MinMax> elementTable, Dictionary<string, int> recoverableEntities = null)
+		public SpaceDestinationType(string id, ResourceSet parent, string name, string description, int iconSize, string spriteName, Dictionary<SimHashes, MathUtil.MinMax> elementTable, Dictionary<string, int> recoverableEntities = null, ArtifactDropRate artifactDropRate = null)
 			: base(id, parent, name)
 		{
 			this.typeName = name;
@@ -16,6 +16,7 @@ namespace Database
 			this.spriteName = spriteName;
 			this.elementTable = elementTable;
 			this.recoverableEntities = recoverableEntities;
+			this.artifactDropTable = artifactDropRate;
 		}
 
 		public string typeName;
@@ -29,5 +30,7 @@ namespace Database
 		public Dictionary<SimHashes, MathUtil.MinMax> elementTable;
 
 		public Dictionary<string, int> recoverableEntities;
+
+		public ArtifactDropRate artifactDropTable;
 	}
 }

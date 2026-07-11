@@ -4,10 +4,10 @@ using UnityEngine;
 public class IdleChore : Chore<IdleChore.StatesInstance>
 {
 	public IdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
 		this.showAvailabilityInHoverText = false;
-		this.smi = new IdleChore.StatesInstance(this, target.gameObject);
+		base.smi = new IdleChore.StatesInstance(this, target.gameObject);
 	}
 
 	public class StatesInstance : GameStateMachine<IdleChore.States, IdleChore.StatesInstance, IdleChore, object>.GameInstance

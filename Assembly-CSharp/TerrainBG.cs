@@ -158,7 +158,10 @@ public class TerrainBG : KMonoBehaviour
 			}
 		}
 		this.gasMaterial.renderQueue = RenderQueues.Gas;
-		Graphics.DrawMesh(this.gasPlane, Vector3.zero, Quaternion.identity, this.gasMaterial, this.layer, null, 0, null);
+		Vector3 vector3 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.Gas));
+		Graphics.DrawMesh(this.gasPlane, vector3, Quaternion.identity, this.gasMaterial, this.layer);
+		Vector3 vector4 = new Vector3(0f, 0f, Grid.GetLayerZ(Grid.SceneLayer.GasFront));
+		Graphics.DrawMesh(this.gasPlane, vector4, Quaternion.identity, this.gasMaterial, this.layer);
 	}
 
 	public Material starsMaterial;

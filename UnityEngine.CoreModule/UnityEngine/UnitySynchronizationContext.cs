@@ -7,6 +7,18 @@ namespace UnityEngine
 {
 	internal sealed class UnitySynchronizationContext : SynchronizationContext
 	{
+		private UnitySynchronizationContext(int mainThreadID)
+		{
+			this.m_AsyncWorkQueue = new Queue<UnitySynchronizationContext.WorkRequest>(20);
+			this.m_MainThreadID = mainThreadID;
+		}
+
+		private UnitySynchronizationContext(Queue<UnitySynchronizationContext.WorkRequest> queue, int mainThreadID)
+		{
+			this.m_AsyncWorkQueue = queue;
+			this.m_MainThreadID = mainThreadID;
+		}
+
 		public override void Send(SendOrPostCallback callback, object state)
 		{
 			if (this.m_MainThreadID == Thread.CurrentThread.ManagedThreadId)
@@ -36,6 +48,11 @@ namespace UnityEngine
 			}
 		}
 
+		public override SynchronizationContext CreateCopy()
+		{
+			return new UnitySynchronizationContext(this.m_AsyncWorkQueue, this.m_MainThreadID);
+		}
+
 		private void Exec()
 		{
 			object asyncWorkQueue = this.m_AsyncWorkQueue;
@@ -54,7 +71,7 @@ namespace UnityEngine
 		{
 			if (SynchronizationContext.Current == null)
 			{
-				SynchronizationContext.SetSynchronizationContext(new UnitySynchronizationContext());
+				SynchronizationContext.SetSynchronizationContext(new UnitySynchronizationContext(Thread.CurrentThread.ManagedThreadId));
 			}
 		}
 
@@ -70,9 +87,9 @@ namespace UnityEngine
 
 		private const int kAwqInitialCapacity = 20;
 
-		private readonly Queue<UnitySynchronizationContext.WorkRequest> m_AsyncWorkQueue = new Queue<UnitySynchronizationContext.WorkRequest>(20);
+		private readonly Queue<UnitySynchronizationContext.WorkRequest> m_AsyncWorkQueue;
 
-		private readonly int m_MainThreadID = Thread.CurrentThread.ManagedThreadId;
+		private readonly int m_MainThreadID;
 
 		private struct WorkRequest
 		{

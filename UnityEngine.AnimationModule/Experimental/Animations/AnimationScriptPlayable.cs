@@ -10,11 +10,11 @@ namespace UnityEngine.Experimental.Animations
 	/// <summary>
 	///   <para>A Playable that can run a custom, multi-threaded animation job.</para>
 	/// </summary>
-	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
+	[StaticAccessor("AnimationScriptPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationScriptPlayable.bindings.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayableGraph.h")]
-	[StaticAccessor("AnimationScriptPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	public struct AnimationScriptPlayable : IAnimationJobPlayable, IEquatable<AnimationScriptPlayable>, IPlayable
 	{
 		internal AnimationScriptPlayable(PlayableHandle handle)

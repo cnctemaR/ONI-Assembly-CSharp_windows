@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using UnityEngine;
@@ -61,8 +62,17 @@ public static class KProfiler
 	{
 	}
 
+	public static void AddCounter(string event_name, List<KeyValuePair<string, int>> series_name_counts)
+	{
+	}
+
+	public static void AddCounter(string event_name, string series_name, int count)
+	{
+	}
+
 	public static void AddCounter(string event_name, int count)
 	{
+		KProfiler.AddCounter(event_name, event_name, count);
 	}
 
 	public static int counter;

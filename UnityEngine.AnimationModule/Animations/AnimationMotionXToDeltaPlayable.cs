@@ -6,8 +6,8 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/Director/AnimationMotionXToDeltaPlayable.h")]
+	[RequiredByNativeCode]
 	internal struct AnimationMotionXToDeltaPlayable : IPlayable, IEquatable<AnimationMotionXToDeltaPlayable>
 	{
 		private AnimationMotionXToDeltaPlayable(PlayableHandle handle)

@@ -40,6 +40,7 @@ public class Db : EntityModifierSet
 		this.ScheduleGroups = new ScheduleGroups(this.Root);
 		this.RoomTypeCategories = new RoomTypeCategories(this.Root);
 		this.RoomTypes = new RoomTypes(this.Root);
+		this.ArtifactDropRates = new ArtifactDropRates(this.Root);
 		this.SpaceDestinationTypes = new SpaceDestinationTypes(this.Root);
 		this.Diseases = new global::Database.Diseases(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
@@ -142,6 +143,8 @@ public class Db : EntityModifierSet
 	public RoomTypeCategories RoomTypeCategories;
 
 	public RoomTypes RoomTypes;
+
+	public ArtifactDropRates ArtifactDropRates;
 
 	public SpaceDestinationTypes SpaceDestinationTypes;
 

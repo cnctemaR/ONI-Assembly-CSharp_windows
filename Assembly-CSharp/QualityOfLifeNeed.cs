@@ -31,7 +31,6 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 			statusItem = Db.Get().DuplicantStatusItems.PoorQualityOfLife
 		};
 		this.qolAttribute = Db.Get().Attributes.QualityOfLife.Lookup(base.gameObject);
-		base.Subscribe<QualityOfLifeNeed>(1714332666, QualityOfLifeNeed.OnScheduleBlocksTickDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -45,6 +44,7 @@ public class QualityOfLifeNeed : Need, ISim4000ms
 		{
 			this.breakBlocks.RemoveAt(this.breakBlocks.Count - 1);
 		}
+		base.Subscribe<QualityOfLifeNeed>(1714332666, QualityOfLifeNeed.OnScheduleBlocksTickDelegate);
 	}
 
 	public void Sim4000ms(float dt)

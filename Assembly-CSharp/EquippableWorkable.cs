@@ -9,6 +9,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Equipping;
 		this.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_equip_clothing_kanim") };
+		this.synchronizeAnims = false;
 	}
 
 	public QualityLevel GetQuality()
@@ -29,7 +30,7 @@ public class EquippableWorkable : Workable, ISaveLoadable
 
 	private void CreateChore()
 	{
-		this.chore = new WorkChore<EquippableWorkable>(Db.Get().ChoreTypes.Equip, this, this.equippable.assignee.GetSoleOwner().GetComponent<ChoreProvider>(), null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+		this.chore = new EquipChore(this);
 	}
 
 	public void CancelChore()
@@ -48,9 +49,14 @@ public class EquippableWorkable : Workable, ISaveLoadable
 			this.chore.Cancel("Equipment Reassigned");
 			this.chore = null;
 		}
-		if (target != null && !target.GetSoleOwner().GetComponent<Equipment>().IsEquipped(this.equippable))
+		if (target != null)
 		{
-			this.CreateChore();
+			Ownables soleOwner = target.GetSoleOwner();
+			Equipment component = soleOwner.GetComponent<Equipment>();
+			if (!component.IsEquipped(this.equippable))
+			{
+				this.CreateChore();
+			}
 		}
 	}
 
@@ -58,7 +64,11 @@ public class EquippableWorkable : Workable, ISaveLoadable
 	{
 		if (this.equippable.assignee != null)
 		{
-			this.equippable.assignee.GetSoleOwner().GetComponent<Equipment>().Equip(this.equippable);
+			Ownables soleOwner = this.equippable.assignee.GetSoleOwner();
+			if (soleOwner)
+			{
+				soleOwner.GetComponent<Equipment>().Equip(this.equippable);
+			}
 		}
 	}
 

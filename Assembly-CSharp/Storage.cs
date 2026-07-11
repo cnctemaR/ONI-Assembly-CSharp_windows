@@ -322,7 +322,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			this.items.RemoveAt(0);
 			if (gameObject != null)
 			{
-				gameObject.Trigger(1228788923, this);
 				bool flag = false;
 				if (empty_containers)
 				{
@@ -372,7 +371,6 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 					this.items[i] = this.items[count - 1];
 					this.items.RemoveAt(count - 1);
 					this.TransferDiseaseWithObject(go);
-					go.Trigger(1228788923, this);
 					this.MakeWorldActive(go);
 					break;
 				}
@@ -787,6 +785,21 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		this.TransferDiseaseWithObject(go);
 		base.Trigger(-1697596308, go);
 		this.ApplyStoredItemModifiers(go, false, false);
+	}
+
+	public bool ForceStore(Tag tag, float amount)
+	{
+		for (int i = 0; i < this.items.Count; i++)
+		{
+			GameObject gameObject = this.items[i];
+			if (gameObject != null && gameObject.HasTag(tag))
+			{
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				component.Mass += amount;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public float GetAmountAvailable(Tag tag)

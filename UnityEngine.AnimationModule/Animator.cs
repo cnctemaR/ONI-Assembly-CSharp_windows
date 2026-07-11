@@ -11,9 +11,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Interface to control the Mecanim animation system.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
 	[UsedByNativeCode]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
 	[NativeHeader("Runtime/Animation/Animator.h")]
 	public class Animator : Behaviour
 	{
@@ -1111,7 +1111,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Blends pivot point between body center of mass and feet pivot. At 0%, the blending point is body center of mass. At 100%, the blending point is feet pivot.</para>
+		///   <para>Blends pivot point between body center of mass and feet pivot.</para>
 		/// </summary>
 		public extern float feetPivotActive
 		{
@@ -1154,7 +1154,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Automatically adjust the gameobject position and rotation so that the AvatarTarget reaches the matchPosition when the current state is at the specified progress.</para>
+		///   <para>Automatically adjust the GameObject position and rotation.</para>
 		/// </summary>
 		/// <param name="matchPosition">The position we want the body part to reach.</param>
 		/// <param name="matchRotation">The rotation in which we want the body part to be.</param>

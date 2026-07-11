@@ -825,15 +825,15 @@ namespace System.ComponentModel
 			return type;
 		}
 
-		[global::System.MonoNotSupported("Associations not supported")]
 		[EditorBrowsable(EditorBrowsableState.Advanced)]
+		[global::System.MonoNotSupported("Associations not supported")]
 		public static void CreateAssociation(object primary, object secondary)
 		{
 			throw new NotImplementedException();
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		[global::System.MonoNotSupported("Associations not supported")]
+		[EditorBrowsable(EditorBrowsableState.Advanced)]
 		public static object GetAssociation(Type type, object primary)
 		{
 			throw new NotImplementedException();

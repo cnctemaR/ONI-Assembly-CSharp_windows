@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class SymbolOverrideController : KMonoBehaviour
 {
+	public SymbolOverrideController.SymbolEntry[] GetSymbolOverrides
+	{
+		get
+		{
+			return this.symbolOverrides.ToArray();
+		}
+	}
+
 	public int version { get; private set; }
 
 	protected override void OnPrefabInit()
@@ -183,7 +191,7 @@ public class SymbolOverrideController : KMonoBehaviour
 	private bool requiresSorting;
 
 	[Serializable]
-	private struct SymbolEntry
+	public struct SymbolEntry
 	{
 		public HashedString targetSymbol;
 

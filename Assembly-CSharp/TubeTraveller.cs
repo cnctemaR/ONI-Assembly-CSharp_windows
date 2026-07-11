@@ -55,6 +55,14 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 		{
 		}
 
+		public int prefabInstanceID
+		{
+			get
+			{
+				return base.GetComponent<Navigator>().gameObject.GetComponent<KPrefabID>().InstanceID;
+			}
+		}
+
 		public void OnPathAdvanced(object data)
 		{
 			this.UnreserveEntrances();
@@ -73,7 +81,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 				if (path.nodes[i].navType == NavType.Floor && path.nodes[i + 1].navType == NavType.Tube)
 				{
 					int cell = path.nodes[i].cell;
-					if (Grid.HasTubeEntrance[cell])
+					if (Grid.HasUsableTubeEntrance(cell, this.prefabInstanceID))
 					{
 						GameObject gameObject = Grid.Objects[cell, 1];
 						if (gameObject)
@@ -81,7 +89,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 							TravelTubeEntrance component = gameObject.GetComponent<TravelTubeEntrance>();
 							if (component)
 							{
-								component.Reserve(this);
+								component.Reserve(this, this.prefabInstanceID);
 								this.reservations.Add(component);
 							}
 						}
@@ -96,7 +104,7 @@ public class TubeTraveller : GameStateMachine<TubeTraveller, TubeTraveller.Insta
 			{
 				if (!(travelTubeEntrance == null))
 				{
-					travelTubeEntrance.Unreserve(this);
+					travelTubeEntrance.Unreserve(this, this.prefabInstanceID);
 				}
 			}
 			this.reservations.Clear();

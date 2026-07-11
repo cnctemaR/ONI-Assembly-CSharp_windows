@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.IO
 {
-	[Flags]
 	[ComVisible(true)]
+	[Flags]
 	[Serializable]
 	public enum FileAccess
 	{

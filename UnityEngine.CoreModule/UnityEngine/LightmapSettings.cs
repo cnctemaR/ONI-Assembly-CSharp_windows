@@ -29,7 +29,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Non-directional, Directional or Directional Specular lightmaps rendering mode.</para>
+		///   <para>NonDirectional or CombinedDirectional Specular lightmaps rendering mode.</para>
 		/// </summary>
 		public static extern LightmapsMode lightmapsMode
 		{

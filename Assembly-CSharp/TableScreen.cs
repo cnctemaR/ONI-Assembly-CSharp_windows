@@ -412,6 +412,7 @@ public class TableScreen : KScreen
 			if (locText != null)
 			{
 				locText.text = minion.gameObject.GetComponent<MinionResume>().GetCurrentRoleString();
+				locText.enableWordWrapping = false;
 			}
 		}
 		else

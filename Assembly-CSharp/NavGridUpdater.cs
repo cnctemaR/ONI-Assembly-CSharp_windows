@@ -4,19 +4,19 @@ using UnityEngine;
 
 public class NavGridUpdater
 {
-	public static void InitializeNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type, ushort[] gridBitFields)
+	public static void InitializeNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
 	{
-		NavGridUpdater.MarkValidCells(gridBitFields, nav_table, valid_nav_types, validators, bounding_offsets);
-		NavGridUpdater.CreateLinks(nav_table, gridBitFields, max_links_per_cell, links, transitions_by_nav_type);
+		NavGridUpdater.MarkValidCells(nav_table, valid_nav_types, validators, bounding_offsets);
+		NavGridUpdater.CreateLinks(nav_table, max_links_per_cell, links, transitions_by_nav_type);
 	}
 
-	public static void UpdateNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type, ushort[] gridBitFields, HashSet<int> dirty_nav_cells)
+	public static void UpdateNavGrid(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type, HashSet<int> dirty_nav_cells)
 	{
-		NavGridUpdater.UpdateValidCells(dirty_nav_cells, gridBitFields, nav_table, valid_nav_types, validators, bounding_offsets);
-		NavGridUpdater.UpdateLinks(dirty_nav_cells, nav_table, gridBitFields, max_links_per_cell, links, transitions_by_nav_type);
+		NavGridUpdater.UpdateValidCells(dirty_nav_cells, nav_table, valid_nav_types, validators, bounding_offsets);
+		NavGridUpdater.UpdateLinks(dirty_nav_cells, nav_table, max_links_per_cell, links, transitions_by_nav_type);
 	}
 
-	private static void UpdateValidCells(HashSet<int> dirty_solid_cells, ushort[] gridBitFields, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
+	private static void UpdateValidCells(HashSet<int> dirty_solid_cells, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
 	{
 		foreach (int num in dirty_solid_cells)
 		{
@@ -27,31 +27,31 @@ public class NavGridUpdater
 		}
 	}
 
-	private static void CreateLinksForCell(int cell, NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
+	private static void CreateLinksForCell(int cell, NavTable nav_table, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
 	{
-		NavGridUpdater.CreateLinks(cell, nav_table, gridBitFields, max_links_per_cell, links, transitions_by_nav_type);
+		NavGridUpdater.CreateLinks(cell, nav_table, max_links_per_cell, links, transitions_by_nav_type);
 	}
 
-	private static void UpdateLinks(HashSet<int> dirty_nav_cells, NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
+	private static void UpdateLinks(HashSet<int> dirty_nav_cells, NavTable nav_table, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
 	{
 		foreach (int num in dirty_nav_cells)
 		{
-			NavGridUpdater.CreateLinksForCell(num, nav_table, gridBitFields, max_links_per_cell, links, transitions_by_nav_type);
+			NavGridUpdater.CreateLinksForCell(num, nav_table, max_links_per_cell, links, transitions_by_nav_type);
 		}
 	}
 
-	private static void CreateLinks(NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
+	private static void CreateLinks(NavTable nav_table, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
 	{
 		WorkItemCollection<NavGridUpdater.CreateLinkWorkItem, object> workItemCollection = new WorkItemCollection<NavGridUpdater.CreateLinkWorkItem, object>();
 		workItemCollection.Reset(null);
 		for (int i = 0; i < Grid.HeightInCells; i++)
 		{
-			workItemCollection.Add(new NavGridUpdater.CreateLinkWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, gridBitFields, max_links_per_cell, links, transitions_by_nav_type));
+			workItemCollection.Add(new NavGridUpdater.CreateLinkWorkItem(Grid.OffsetCell(0, new CellOffset(0, i)), nav_table, max_links_per_cell, links, transitions_by_nav_type));
 		}
 		GlobalJobManager.Run(workItemCollection);
 	}
 
-	private static void CreateLinks(int cell, NavTable nav_table, ushort[] gridBitFields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
+	private static void CreateLinks(int cell, NavTable nav_table, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
 	{
 		int num = cell * max_links_per_cell;
 		int num2 = 0;
@@ -65,7 +65,7 @@ public class NavGridUpdater
 				{
 					foreach (NavGrid.Transition transition in array)
 					{
-						int num3 = transition.IsValid(cell, nav_table, gridBitFields);
+						int num3 = transition.IsValid(cell, nav_table);
 						if (num3 != Grid.InvalidCell)
 						{
 							links[num] = new NavGrid.Link(num3, transition.start, transition.end, transition.id, transition.cost);
@@ -83,7 +83,7 @@ public class NavGridUpdater
 		links[num].link = Grid.InvalidCell;
 	}
 
-	private static void MarkValidCells(ushort[] gridBitFields, NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
+	private static void MarkValidCells(NavTable nav_table, NavType[] valid_nav_types, NavTableValidator[] validators, CellOffset[] bounding_offsets)
 	{
 		WorkItemCollection<NavGridUpdater.MarkValidCellWorkItem, object> workItemCollection = new WorkItemCollection<NavGridUpdater.MarkValidCellWorkItem, object>();
 		workItemCollection.Reset(null);
@@ -119,11 +119,10 @@ public class NavGridUpdater
 
 	private struct CreateLinkWorkItem : IWorkItem<object>
 	{
-		public CreateLinkWorkItem(int start_cell, NavTable nav_table, ushort[] grid_bit_fields, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
+		public CreateLinkWorkItem(int start_cell, NavTable nav_table, int max_links_per_cell, NavGrid.Link[] links, NavGrid.Transition[][] transitions_by_nav_type)
 		{
 			this.startCell = start_cell;
 			this.navTable = nav_table;
-			this.gridBitFields = grid_bit_fields;
 			this.maxLinksPerCell = max_links_per_cell;
 			this.links = links;
 			this.transitionsByNavType = transitions_by_nav_type;
@@ -134,15 +133,13 @@ public class NavGridUpdater
 			for (int i = 0; i < Grid.WidthInCells; i++)
 			{
 				int num = this.startCell + i;
-				NavGridUpdater.CreateLinksForCell(num, this.navTable, this.gridBitFields, this.maxLinksPerCell, this.links, this.transitionsByNavType);
+				NavGridUpdater.CreateLinksForCell(num, this.navTable, this.maxLinksPerCell, this.links, this.transitionsByNavType);
 			}
 		}
 
 		private int startCell;
 
 		private NavTable navTable;
-
-		private ushort[] gridBitFields;
 
 		private int maxLinksPerCell;
 

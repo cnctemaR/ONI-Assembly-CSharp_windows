@@ -9,6 +9,26 @@ using UnityEngine;
 
 public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 {
+	public List<ChoreProvider> GetProviders()
+	{
+		return this.providers;
+	}
+
+	public ChoreConsumer.PreconditionSnapshot GetLastPreconditionSnapshot()
+	{
+		return this.preconditionSnapshot;
+	}
+
+	public List<Chore.Precondition.Context> GetSuceededPreconditionContexts()
+	{
+		return this.lastSuccessfulPreconditionSnapshot.succeededContexts;
+	}
+
+	public List<Chore.Precondition.Context> GetFailedPreconditionContexts()
+	{
+		return this.lastSuccessfulPreconditionSnapshot.failedContexts;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -136,6 +156,10 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 					{
 						DebugUtil.Assert(false, "FindNextChore found an entry with a null target");
 					}
+					else if (fetchChore.isNull)
+					{
+						global::Debug.LogWarning("FindNextChore found an entry that isNull", null);
+					}
 					else
 					{
 						int num2 = Grid.PosToCell(fetchChore.gameObject);
@@ -156,8 +180,8 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 				choreProvider.CollectChores(this.consumerState, this.preconditionSnapshot.succeededContexts, this.preconditionSnapshot.failedContexts);
 			}
 		}
+		this.preconditionSnapshot.succeededContexts.Sort();
 		List<Chore.Precondition.Context> succeededContexts = this.preconditionSnapshot.succeededContexts;
-		succeededContexts.Sort();
 		bool flag = false;
 		if (succeededContexts.Count > 0)
 		{
@@ -188,6 +212,10 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 					}
 				}
 			}
+		}
+		if (flag)
+		{
+			this.preconditionSnapshot.CopyTo(this.lastSuccessfulPreconditionSnapshot);
 		}
 		return flag;
 	}
@@ -568,6 +596,8 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 
 	private ChoreConsumer.PreconditionSnapshot preconditionSnapshot = new ChoreConsumer.PreconditionSnapshot();
 
+	private ChoreConsumer.PreconditionSnapshot lastSuccessfulPreconditionSnapshot = new ChoreConsumer.PreconditionSnapshot();
+
 	[Serialize]
 	private Dictionary<HashedString, ChoreConsumer.PriorityInfo> choreGroupPriorities = new Dictionary<HashedString, ChoreConsumer.PriorityInfo>();
 
@@ -588,7 +618,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		public object arg;
 	}
 
-	private class PreconditionSnapshot
+	public class PreconditionSnapshot
 	{
 		public void CopyTo(ChoreConsumer.PreconditionSnapshot snapshot)
 		{

@@ -352,7 +352,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Returns the current UILineInfo.</para>
+		///   <para>Returns the current UIVertex array.</para>
 		/// </summary>
 		/// <returns>
 		///   <para>Vertices.</para>

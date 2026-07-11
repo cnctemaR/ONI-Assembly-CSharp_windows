@@ -44,6 +44,7 @@ public class Uprootable : Workable
 
 	protected override void OnSpawn()
 	{
+		base.OnSpawn();
 		base.Subscribe<Uprootable>(2127324410, Uprootable.ForceCancelUprootDelegate);
 		base.SetWorkTime(12.5f);
 		base.Subscribe<Uprootable>(2127324410, Uprootable.OnCancelDelegate);
@@ -118,7 +119,7 @@ public class Uprootable : Workable
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
 		}
 		this.isMarkedForUproot = true;

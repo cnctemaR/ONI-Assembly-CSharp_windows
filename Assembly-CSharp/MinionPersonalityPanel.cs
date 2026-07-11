@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class MinionPersonalityPanel : TargetScreen
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<MinionIdentity>() != null;
+	}
+
 	public override void ScreenUpdate(bool topLevel)
 	{
 		base.ScreenUpdate(topLevel);

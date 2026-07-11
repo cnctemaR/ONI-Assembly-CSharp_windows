@@ -42,26 +42,15 @@ public class MeterScreen : KScreen, IRender1000ms
 
 	private void OnRedAlertClick()
 	{
-		bool flag = !RedAlertManager.Instance.Get().IsOn();
+		bool flag = !RedAlertManager.Instance.Get().IsToggledOn();
 		RedAlertManager.Instance.Get().Toggle(flag);
 		if (flag)
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Open", false));
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_ON", false));
-			if (!this.loopInstance.IsValid())
-			{
-				this.loopInstance = LoopingSoundManager.StartSound(GlobalAssets.GetSound("RedAlert_LP", false), Vector3.zero, true, false);
-			}
 		}
 		else
 		{
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Click_Close", false));
-			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("RedAlert_OFF", false));
-			if (this.loopInstance.IsValid())
-			{
-				LoopingSoundManager.StopSound(this.loopInstance);
-				this.loopInstance.Clear();
-			}
 		}
 	}
 
@@ -300,8 +289,6 @@ public class MeterScreen : KScreen, IRender1000ms
 	private KToggle RedAlertButton;
 
 	public ToolTip RedAlertTooltip;
-
-	private HandleVector<int>.Handle loopInstance = HandleVector<int>.InvalidHandle;
 
 	private MeterScreen.DisplayInfo stressDisplayInfo = new MeterScreen.DisplayInfo
 	{

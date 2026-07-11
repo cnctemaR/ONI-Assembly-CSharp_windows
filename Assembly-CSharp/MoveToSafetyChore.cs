@@ -4,9 +4,9 @@ using UnityEngine;
 public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 {
 	public MoveToSafetyChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, -1, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new MoveToSafetyChore.StatesInstance(this, target.gameObject);
+		base.smi = new MoveToSafetyChore.StatesInstance(this, target.gameObject);
 	}
 
 	public class StatesInstance : GameStateMachine<MoveToSafetyChore.States, MoveToSafetyChore.StatesInstance, MoveToSafetyChore, object>.GameInstance

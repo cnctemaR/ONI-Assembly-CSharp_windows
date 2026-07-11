@@ -8,6 +8,14 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 {
 	public static KScreenManager Instance { get; private set; }
 
+	public string handlerName
+	{
+		get
+		{
+			return base.gameObject.name;
+		}
+	}
+
 	public KInputHandler inputHandler { get; set; }
 
 	private void OnApplicationQuit()
@@ -149,6 +157,8 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 				kscreen.OnKeyDown(e);
 				if (e.Consumed || kscreen.IsModal())
 				{
+					this.lastConsumedEvent = e;
+					this.lastConsumedEventScreen = kscreen;
 					break;
 				}
 			}
@@ -169,6 +179,8 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 				kscreen.OnKeyUp(e);
 				if (e.Consumed || kscreen.IsModal())
 				{
+					this.lastConsumedEvent = e;
+					this.lastConsumedEventScreen = kscreen;
 					break;
 				}
 			}
@@ -223,4 +235,8 @@ public class KScreenManager : KMonoBehaviour, IInputHandler
 	private List<KScreen> screenStack = new List<KScreen>();
 
 	private global::UnityEngine.EventSystems.EventSystem evSys;
+
+	private KButtonEvent lastConsumedEvent;
+
+	private KScreen lastConsumedEventScreen;
 }

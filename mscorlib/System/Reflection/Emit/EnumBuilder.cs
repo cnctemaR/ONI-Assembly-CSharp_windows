@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 
 namespace System.Reflection.Emit
 {
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.None)]
 	[ComDefaultInterface(typeof(_EnumBuilder))]
+	[ComVisible(true)]
 	public sealed class EnumBuilder : Type, _EnumBuilder
 	{
 		internal EnumBuilder(ModuleBuilder mb, string name, TypeAttributes visibility, Type underlyingType)

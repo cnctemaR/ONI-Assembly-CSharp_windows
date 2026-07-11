@@ -24,7 +24,6 @@ namespace Database
 			this.AccessControl = new StatusItemCategory("AccessControl", this, "AccessControl");
 			this.RequiredRoom = new StatusItemCategory("RequiredRoom", this, "RequiredRoom");
 			this.Yield = new StatusItemCategory("Yield", this, "Yield");
-			this.Sleep = new StatusItemCategory("Sleep", this, "Sleep");
 			this.Heat = new StatusItemCategory("Heat", this, "Heat");
 		}
 
@@ -61,8 +60,6 @@ namespace Database
 		public StatusItemCategory RequiredRoom;
 
 		public StatusItemCategory Yield;
-
-		public StatusItemCategory Sleep;
 
 		public StatusItemCategory Heat;
 	}

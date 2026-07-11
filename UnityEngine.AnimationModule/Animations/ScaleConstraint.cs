@@ -9,10 +9,10 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>Constrains the scale of an object relative to the scale of one or more source objects.</para>
 	/// </summary>
+	[NativeHeader("Runtime/Animation/Constraints/ScaleConstraint.h")]
+	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
 	[RequireComponent(typeof(Transform))]
 	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
-	[NativeHeader("Runtime/Animation/Constraints/ScaleConstraint.h")]
 	public sealed class ScaleConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private ScaleConstraint()

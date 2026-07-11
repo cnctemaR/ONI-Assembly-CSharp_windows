@@ -219,6 +219,11 @@ public class Rotatable : KMonoBehaviour, ISaveLoadable
 		}
 	}
 
+	public static CellOffset GetRotatedCellOffset(int x, int y, Orientation orientation)
+	{
+		return Rotatable.GetRotatedCellOffset(new CellOffset(x, y), orientation);
+	}
+
 	public Vector3 GetRotatedOffset(Vector3 offset)
 	{
 		return Rotatable.GetRotatedOffset(offset, this.orientation);

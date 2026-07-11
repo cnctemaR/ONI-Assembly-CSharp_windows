@@ -47,7 +47,7 @@ public class AcousticDisturbance
 
 	private static void SpawnEffect(object data)
 	{
-		Grid.SceneLayer sceneLayer = Grid.SceneLayer.Paintings;
+		Grid.SceneLayer sceneLayer = Grid.SceneLayer.InteriorWall;
 		int num = (int)data;
 		KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("radialgrid_kanim", Grid.CellToPosCCC(num, sceneLayer), null, false, sceneLayer, false);
 		kbatchedAnimController.destroyOnAnimComplete = false;

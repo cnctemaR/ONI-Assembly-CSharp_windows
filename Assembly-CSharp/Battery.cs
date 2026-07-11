@@ -75,7 +75,7 @@ public class Battery : KMonoBehaviour, IEnergyConsumer, IEffectDescriptor, IEner
 	{
 		get
 		{
-			GameObject gameObject = Grid.Objects[this.PowerCell, 24];
+			GameObject gameObject = Grid.Objects[this.PowerCell, 26];
 			return gameObject != null;
 		}
 	}

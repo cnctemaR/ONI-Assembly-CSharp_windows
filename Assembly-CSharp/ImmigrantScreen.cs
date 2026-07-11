@@ -83,20 +83,24 @@ public class ImmigrantScreen : CharacterSelectionController
 	private void Initialize(Telepad telepad)
 	{
 		this.InitializeContainers();
-		this.containers.ForEach(delegate(CharacterContainer c)
+		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in this.containers)
 		{
-			c.SetReshufflingState(false);
-		});
+			CharacterContainer characterContainer = telepadDeliverableContainer as CharacterContainer;
+			if (characterContainer != null)
+			{
+				characterContainer.SetReshufflingState(false);
+			}
+		}
 		this.telepad = telepad;
 	}
 
 	protected override void OnProceed()
 	{
-		this.telepad.OnClickImmigrant(this.startingStats[0]);
+		this.telepad.OnAcceptDelivery(this.selectedDeliverables[0]);
 		base.Show(false);
-		this.containers.ForEach(delegate(CharacterContainer cc)
+		this.containers.ForEach(delegate(ITelepadDeliverableContainer cc)
 		{
-			global::UnityEngine.Object.Destroy(cc.gameObject);
+			global::UnityEngine.Object.Destroy(cc.GetGameObject());
 		});
 		this.containers.Clear();
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().MENUNewDuplicantSnapshot, STOP_MODE.ALLOWFADEOUT);
@@ -119,9 +123,9 @@ public class ImmigrantScreen : CharacterSelectionController
 	private void OnRejectionConfirmed()
 	{
 		this.telepad.RejectAll();
-		this.containers.ForEach(delegate(CharacterContainer cc)
+		this.containers.ForEach(delegate(ITelepadDeliverableContainer cc)
 		{
-			global::UnityEngine.Object.Destroy(cc.gameObject);
+			global::UnityEngine.Object.Destroy(cc.GetGameObject());
 		});
 		this.containers.Clear();
 		this.rejectConfirmationScreen.SetActive(false);

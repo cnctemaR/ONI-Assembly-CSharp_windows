@@ -106,8 +106,8 @@ namespace System.Security.Principal
 			return this.IsInRole(text);
 		}
 
-		[MonoTODO("not implemented")]
 		[ComVisible(false)]
+		[MonoTODO("not implemented")]
 		public virtual bool IsInRole(SecurityIdentifier sid)
 		{
 			throw new NotImplementedException();

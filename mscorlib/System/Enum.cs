@@ -519,8 +519,8 @@ namespace System
 			return Enum.ToObject(enumType, value);
 		}
 
-		[ComVisible(true)]
 		[CLSCompliant(false)]
+		[ComVisible(true)]
 		public static object ToObject(Type enumType, ulong value)
 		{
 			return Enum.ToObject(enumType, value);

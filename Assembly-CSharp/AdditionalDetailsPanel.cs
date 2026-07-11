@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class AdditionalDetailsPanel : TargetScreen
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return true;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

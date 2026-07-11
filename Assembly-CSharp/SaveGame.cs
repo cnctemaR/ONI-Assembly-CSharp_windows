@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using KSerialization;
 using Newtonsoft.Json;
+using ProcGenGame;
 using UnityEngine;
 
 [SerializationConfig(global::KSerialization.MemberSerialization.OptIn)]
@@ -31,6 +32,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		RedAlertManager.Instance instance2 = new RedAlertManager.Instance(this);
 		instance2.StartSM();
 		this.entombedItemManager = base.gameObject.AddComponent<EntombedItemManager>();
+		this.worldGen = SaveLoader.Instance.worldGen;
 		this.worldGenSpawner = base.gameObject.AddComponent<WorldGenSpawner>();
 	}
 
@@ -64,7 +66,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 303707U;
+		header.buildVersion = 309851U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -144,6 +146,8 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 
 	[MyCmpReq]
 	public MaterialSelectorSerializer materialSelectorSerializer;
+
+	public WorldGen worldGen;
 
 	public struct Header
 	{

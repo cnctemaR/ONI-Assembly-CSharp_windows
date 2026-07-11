@@ -37,7 +37,8 @@ public class CommandModuleConfig : IBuildingConfig
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
-		go.AddOrGet<RocketModule>();
+		RocketModule rocketModule = go.AddOrGet<RocketModule>();
+		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_command_module_bg_kanim"));
 		LaunchConditionManager launchConditionManager = go.AddOrGet<LaunchConditionManager>();
 		launchConditionManager.triggerPort = "TriggerLaunch";
 		launchConditionManager.statusPort = "LaunchReady";
@@ -51,6 +52,7 @@ public class CommandModuleConfig : IBuildingConfig
 		go.AddOrGet<CommandModule>();
 		go.AddOrGet<CommandModuleWorkable>();
 		go.AddOrGet<MinionStorage>();
+		go.AddOrGet<ArtifactFinder>();
 		go.AddOrGet<LaunchableRocket>();
 	}
 

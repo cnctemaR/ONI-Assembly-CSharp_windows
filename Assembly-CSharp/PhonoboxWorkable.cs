@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class PhonoboxWorkable : Workable, IWorkerPrioritizable
 {
+	private PhonoboxWorkable()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

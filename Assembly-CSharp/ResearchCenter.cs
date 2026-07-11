@@ -77,7 +77,18 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	{
 		ChoreType research = Db.Get().ChoreTypes.Research;
 		Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-		return new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+		WorkChore<ResearchCenter> workChore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		workChore.preemption_cb = new Func<Chore.Precondition.Context, bool>(ResearchCenter.CanPreemptCB);
+		return workChore;
+	}
+
+	private static bool CanPreemptCB(Chore.Precondition.Context context)
+	{
+		Worker component = context.chore.driver.GetComponent<Worker>();
+		float num = Db.Get().AttributeConverters.ResearchSpeed.Lookup(component).Evaluate();
+		Worker worker = context.consumerState.worker;
+		float num2 = Db.Get().AttributeConverters.ResearchSpeed.Lookup(worker).Evaluate();
+		return num2 > num;
 	}
 
 	public override float GetPercentComplete()

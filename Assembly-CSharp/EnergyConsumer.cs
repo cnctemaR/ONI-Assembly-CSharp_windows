@@ -23,7 +23,7 @@ public class EnergyConsumer : KMonoBehaviour, ISaveLoadable, IEnergyConsumer, IE
 	{
 		get
 		{
-			return Grid.Objects[this.PowerCell, 24] != null;
+			return Grid.Objects[this.PowerCell, 26] != null;
 		}
 	}
 

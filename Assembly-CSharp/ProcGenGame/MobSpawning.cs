@@ -8,7 +8,7 @@ namespace ProcGenGame
 {
 	public static class MobSpawning
 	{
-		public static Dictionary<int, string> PlaceAmbientMobs(TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells)
+		public static Dictionary<int, string> PlaceAmbientMobs(WorldGenSettings worldGenSettings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug)
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
 			Node node = tc.node;
@@ -23,7 +23,7 @@ namespace ProcGenGame
 			}
 			foreach (Tag tag in node.biomeSpecificTags)
 			{
-				if (WorldGen.Settings.mobs.HasMob(tag.Name) && WorldGen.Settings.mobs.GetMob(tag.Name) != null)
+				if (SettingsCache.mobs.HasMob(tag.Name) && SettingsCache.mobs.GetMob(tag.Name) != null)
 				{
 					list.Add(tag);
 					num++;
@@ -48,7 +48,7 @@ namespace ProcGenGame
 			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)availableSpawnCells.Count);
 			if (availableSpawnCells.Count == 0)
 			{
-				if (WorldGen.isRunningDebugGen)
+				if (isDebug)
 				{
 					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.node.Id + "]", null);
 				}
@@ -60,17 +60,17 @@ namespace ProcGenGame
 				list.ShuffleSeeded<Tag>(rnd.RandomSource());
 				for (int j = 0; j < list.Count; j++)
 				{
-					if (!WorldGen.Settings.mobs.GetMobTags().Contains(list[j]))
+					if (!SettingsCache.mobs.GetMobTags().Contains(list[j]))
 					{
 						global::Debug.LogError("Missing sample description for tag [" + list[j].Name + "]", null);
 					}
 					else
 					{
-						Mob mob = WorldGen.Settings.mobs.MobLookupTable[list[j].Name];
+						Mob mob = SettingsCache.mobs.MobLookupTable[list[j].Name];
 						List<int> list2 = availableSpawnCells.FindAll((int cell) => MobSpawning.isSuitableMobSpawnPoint(cell, mob, cells, bgTemp, dc, ref alreadyOccupiedCells));
 						if (list2.Count == 0)
 						{
-							if (WorldGen.isRunningDebugGen)
+							if (isDebug)
 							{
 								global::Debug.LogWarning(string.Concat(new object[]
 								{
@@ -95,7 +95,7 @@ namespace ProcGenGame
 							float num4 = mob.density.GetRandomValueWithinRange(rnd);
 							if (num4 > 1f)
 							{
-								if (WorldGen.isRunningDebugGen)
+								if (isDebug)
 								{
 									global::Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!", null);
 								}
@@ -190,14 +190,14 @@ namespace ProcGenGame
 			return MobSpawning.NaturalCavities != null && MobSpawning.allNaturalCavityCells.Contains(cell);
 		}
 
-		public static void DetectNaturalCavities(WorldGen.OfflineCallbackFunction updateProgressFn)
+		public static void DetectNaturalCavities(List<TerrainCell> terrainCells, WorldGen.OfflineCallbackFunction updateProgressFn)
 		{
 			updateProgressFn(UI.WORLDGEN.ANALYZINGWORLD.key, 0.8f, WorldGenProgressStages.Stages.DetectNaturalCavities);
 			HashSet<int> invalidCells = new HashSet<int>();
-			for (int i = 0; i < WorldGen.TerrainCells.Count; i++)
+			for (int i = 0; i < terrainCells.Count; i++)
 			{
-				TerrainCell terrainCell = WorldGen.TerrainCells[i];
-				float num = (float)i / (float)WorldGen.TerrainCells.Count * 100f;
+				TerrainCell terrainCell = terrainCells[i];
+				float num = (float)i / (float)terrainCells.Count * 100f;
 				updateProgressFn(UI.WORLDGEN.ANALYZINGWORLDCOMPLETE.key, num, WorldGenProgressStages.Stages.DetectNaturalCavities);
 				MobSpawning.NaturalCavities.Add(terrainCell, new List<HashSet<int>>());
 				invalidCells.Clear();

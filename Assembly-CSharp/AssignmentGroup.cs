@@ -57,7 +57,12 @@ public class AssignmentGroup : IAssignableIdentity
 
 	public Ownables GetSoleOwner()
 	{
-		return this.members[0] as Ownables;
+		if (this.members.Count == 1)
+		{
+			return this.members[0] as Ownables;
+		}
+		Debug.LogWarningFormat("GetSoleOwner called on AssignmentGroup with {0} members", new object[] { this.members.Count });
+		return null;
 	}
 
 	private List<IAssignableIdentity> members = new List<IAssignableIdentity>();

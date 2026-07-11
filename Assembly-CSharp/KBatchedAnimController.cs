@@ -198,13 +198,21 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 			}
 			this.SetDirty();
 		}
-		if (this.batchGroupID == KAnimBatchManager.NO_BATCH || !this.IsActive() || (!this.isVisible && !this.forceRebuild))
+		if (this.batchGroupID == KAnimBatchManager.NO_BATCH || !this.IsActive())
 		{
 			return;
 		}
 		if (!this.forceRebuild && (this.mode == KAnim.PlayMode.Paused || this.stopped || this.curAnim == null || (this.mode == KAnim.PlayMode.Once && this.curAnim != null && (this.elapsedTime > this.curAnim.totalTime || this.curAnim.totalTime <= 0f) && this.animQueue.Count == 0)))
 		{
 			this.SuspendUpdates(true);
+		}
+		if (!this.isVisible && !this.forceRebuild)
+		{
+			if (this.visibilityType == KAnimControllerBase.VisibilityType.OffscreenUpdate && !this.stopped && this.mode != KAnim.PlayMode.Paused)
+			{
+				base.SetElapsedTime(this.elapsedTime + dt * this.playSpeed);
+			}
+			return;
 		}
 		this.curAnimFrameIdx = base.GetFrameIdx(this.elapsedTime, true);
 		if (this.eventManagerHandle.IsValid() && this.aem != null)
@@ -499,7 +507,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 		{
 			this.Initialize();
 		}
-		if (this.visibilityType == KAnimControllerBase.VisibilityType.Always)
+		if (this.visibilityType == KAnimControllerBase.VisibilityType.Always || this.visibilityType == KAnimControllerBase.VisibilityType.OffscreenUpdate)
 		{
 			this.ConfigureUpdateListener();
 		}
@@ -652,7 +660,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void ConfigureUpdateListener()
 	{
-		bool flag = (this.IsActive() && !this.suspendUpdates && this.isVisible) || this.moving || this.visibilityType == KAnimControllerBase.VisibilityType.Always;
+		bool flag = (this.IsActive() && !this.suspendUpdates && this.isVisible) || this.moving || this.visibilityType == KAnimControllerBase.VisibilityType.OffscreenUpdate || this.visibilityType == KAnimControllerBase.VisibilityType.Always;
 		if (flag)
 		{
 			Singleton<KBatchedAnimUpdater>.Instance.UpdateRegister(this);
@@ -690,7 +698,7 @@ public class KBatchedAnimController : KAnimControllerBase, KAnimConverter.IAnimC
 
 	private void ConfigureVisibilityListener(bool enabled)
 	{
-		if (this.visibilityType == KAnimControllerBase.VisibilityType.Always)
+		if (this.visibilityType == KAnimControllerBase.VisibilityType.Always || this.visibilityType == KAnimControllerBase.VisibilityType.OffscreenUpdate)
 		{
 			return;
 		}

@@ -108,19 +108,19 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDTOILET.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 5f, delegate(object d)
 		{
 			PlanScreen.Instance.OpenCategoryByName("Plumbing");
-		}, null);
+		}, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.ToiletExists);
 		list2.Add(item);
 		this.itemTree.Add(list);
 		List<Tutorial.Item> list3 = new List<Tutorial.Item>();
 		List<Tutorial.Item> list4 = list3;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDFOOD.TOOLTIP.text, null, true, 20f, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.NEEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDFOOD.TOOLTIP.text, null, true, 20f, null, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodSourceExists);
 		list4.Add(item);
 		List<Tutorial.Item> list5 = list3;
 		item = new Tutorial.Item();
-		item.notification = new Notification(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP.text, null, true, 0f, null, null);
+		item.notification = new Notification(MISC.NOTIFICATIONS.THERMALCOMFORT.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.THERMALCOMFORT.TOOLTIP.text, null, true, 0f, null, null, null);
 		list5.Add(item);
 		this.itemTree.Add(list3);
 		List<Tutorial.Item> list6 = new List<Tutorial.Item>();
@@ -129,7 +129,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item.notification = new Notification(MISC.NOTIFICATIONS.HYGENE_NEEDED.NAME, NotificationType.Tutorial, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.HYGENE_NEEDED.TOOLTIP, null, true, 20f, delegate(object d)
 		{
 			PlanScreen.Instance.OpenCategoryByName("Medicine");
-		}, null);
+		}, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.HygeneExists);
 		list7.Add(item);
 		this.itemTree.Add(list6);
@@ -141,7 +141,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item2.notification = new Notification(text, NotificationType.Tutorial, hashedString, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NO_OXYGEN_GENERATOR.TOOLTIP, null, false, 0f, delegate(object d)
 		{
 			PlanScreen.Instance.OpenCategoryByName("Oxygen");
-		}, null);
+		}, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.OxygenGeneratorBuilt);
 		item.minTimeToNotify = 80f;
 		item.lastNotifyTime = 0f;
@@ -154,7 +154,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item3.notification = new Notification(text, NotificationType.Tutorial, hashedString, new Func<List<Notification>, object, string>(this.OnOxygenTooltip), null, false, 0f, delegate(object d)
 		{
 			this.ZoomToNextOxygenGenerator();
-		}, null);
+		}, null, null);
 		item.hideCondition = new Tutorial.HideConditionDelegate(this.OxygenGeneratorNotBuilt);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.SufficientOxygenLastCycleAndThisCycle);
 		item.minTimeToNotify = 80f;
@@ -165,7 +165,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item.notification = new Notification(MISC.NOTIFICATIONS.UNREFRIGERATEDFOOD.NAME, NotificationType.Tutorial, HashedString.Invalid, new Func<List<Notification>, object, string>(this.UnrefrigeratedFoodTooltip), null, false, 0f, delegate(object d)
 		{
 			PlanScreen.Instance.OpenCategoryByName("Food");
-		}, null);
+		}, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.FoodIsRefrigerated);
 		item.minTimeToNotify = 6f;
 		item.lastNotifyTime = 0f;
@@ -175,7 +175,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item.notification = new Notification(MISC.NOTIFICATIONS.FOODLOW.NAME, NotificationType.Bad, HashedString.Invalid, new Func<List<Notification>, object, string>(this.OnLowFoodTooltip), null, false, 0f, delegate(object d)
 		{
 			PlanScreen.Instance.OpenCategoryByName("Food");
-		}, null);
+		}, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughFood);
 		item.minTimeToNotify = 10f;
 		item.lastNotifyTime = 0f;
@@ -185,11 +185,21 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		item.notification = new Notification(MISC.NOTIFICATIONS.NO_MEDICAL_COTS.NAME, NotificationType.Bad, HashedString.Invalid, (List<Notification> n, object o) => MISC.NOTIFICATIONS.NO_MEDICAL_COTS.TOOLTIP, null, false, 0f, delegate(object d)
 		{
 			PlanScreen.Instance.OpenCategoryByName("Medicine");
-		}, null);
+		}, null, null);
 		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.EnoughMedicalCots);
 		item.minTimeToNotify = 10f;
 		item.lastNotifyTime = 0f;
 		list12.Add(item);
+		List<Tutorial.Item> list13 = this.warningItems;
+		item = new Tutorial.Item();
+		item.notification = new Notification(string.Format(UI.ENDOFDAYREPORT.TRAVELTIMEWARNING.WARNING_TITLE, new object[0]), NotificationType.BadMinor, HashedString.Invalid, (List<Notification> n, object d) => string.Format(UI.ENDOFDAYREPORT.TRAVELTIMEWARNING.WARNING_MESSAGE, GameUtil.GetFormattedPercent(40f, GameUtil.TimeSlice.None)), null, true, 0f, delegate(object d)
+		{
+			ManagementMenu.Instance.OpenReports(GameClock.Instance.GetCycle());
+		}, null, null);
+		item.requirementSatisfied = new Tutorial.RequirementSatisfiedDelegate(this.LongTravelTimes);
+		item.minTimeToNotify = 1f;
+		item.lastNotifyTime = 0f;
+		list13.Add(item);
 	}
 
 	public void TutorialMessage(Tutorial.TutorialMessages tm)
@@ -304,7 +314,7 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 			notificationType = NotificationType.Bad;
 			text = "Urgent important message. Uses Bad Color BG";
 		}
-		Notification notification = new Notification(string.Format("{0} ({1})", text, this.debugMessageCount++.ToString()), notificationType, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 0f, null, null);
+		Notification notification = new Notification(string.Format("{0} ({1})", text, this.debugMessageCount++.ToString()), notificationType, HashedString.Invalid, (List<Notification> n, object d) => MISC.NOTIFICATIONS.NEEDTOILET.TOOLTIP.text, null, true, 0f, null, null, null);
 		this.notifier.Add(notification, string.Empty);
 	}
 
@@ -469,6 +479,25 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 		return count >= num;
 	}
 
+	private bool LongTravelTimes()
+	{
+		int num = 3;
+		if (ReportManager.Instance.reports.Count < num)
+		{
+			return true;
+		}
+		float num2 = 0f;
+		float num3 = 0f;
+		for (int i = ReportManager.Instance.reports.Count - 1; i >= ReportManager.Instance.reports.Count - num; i--)
+		{
+			ReportManager.ReportEntry entry = ReportManager.Instance.reports[i].GetEntry(ReportManager.ReportType.TravelTime);
+			num2 += entry.Net;
+			num3 += 600f * (float)entry.contextEntries.Count;
+		}
+		float num4 = num2 / num3;
+		return num4 <= 0.4f;
+	}
+
 	private bool FoodSourceExists()
 	{
 		foreach (ComplexFabricator complexFabricator in Components.ComplexFabricators.Items)
@@ -493,10 +522,14 @@ public class Tutorial : KMonoBehaviour, IRender1000ms
 
 	private void ZoomToNextOxygenGenerator()
 	{
+		if (this.oxygenGenerators.Count == 0)
+		{
+			return;
+		}
+		this.focusedOxygenGenerator %= this.oxygenGenerators.Count;
 		Vector3 position = this.oxygenGenerators[this.focusedOxygenGenerator].transform.position;
-		position.z = -40f;
 		CameraController.Instance.SetTargetPos(position, 8f, true);
-		this.focusedOxygenGenerator = (this.focusedOxygenGenerator + 1) % this.oxygenGenerators.Count;
+		this.focusedOxygenGenerator++;
 	}
 
 	[MyCmpAdd]

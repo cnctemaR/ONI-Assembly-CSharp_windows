@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using KSerialization;
 using ProcGen;
-using ProcGenGame;
 using TemplateClasses;
 using UnityEngine;
 
@@ -88,35 +87,35 @@ public class WorldGenSpawner : KMonoBehaviour
 	private void PlaceTemplates()
 	{
 		this.spawnables = new List<WorldGenSpawner.Spawnable>();
-		foreach (Prefab prefab in WorldGen.SpawnData.buildings)
+		foreach (Prefab prefab in SaveGame.Instance.worldGen.SpawnData.buildings)
 		{
 			prefab.type = Prefab.Type.Building;
 			this.AddSpawnable(prefab);
 		}
-		foreach (Prefab prefab2 in WorldGen.SpawnData.elementalOres)
+		foreach (Prefab prefab2 in SaveGame.Instance.worldGen.SpawnData.elementalOres)
 		{
 			prefab2.type = Prefab.Type.Ore;
 			this.AddSpawnable(prefab2);
 		}
-		foreach (Prefab prefab3 in WorldGen.SpawnData.otherEntities)
+		foreach (Prefab prefab3 in SaveGame.Instance.worldGen.SpawnData.otherEntities)
 		{
 			prefab3.type = Prefab.Type.Other;
 			this.AddSpawnable(prefab3);
 		}
-		foreach (Prefab prefab4 in WorldGen.SpawnData.pickupables)
+		foreach (Prefab prefab4 in SaveGame.Instance.worldGen.SpawnData.pickupables)
 		{
 			prefab4.type = Prefab.Type.Pickupable;
 			this.AddSpawnable(prefab4);
 		}
-		WorldGen.SpawnData.buildings.Clear();
-		WorldGen.SpawnData.elementalOres.Clear();
-		WorldGen.SpawnData.otherEntities.Clear();
-		WorldGen.SpawnData.pickupables.Clear();
+		SaveGame.Instance.worldGen.SpawnData.buildings.Clear();
+		SaveGame.Instance.worldGen.SpawnData.elementalOres.Clear();
+		SaveGame.Instance.worldGen.SpawnData.otherEntities.Clear();
+		SaveGame.Instance.worldGen.SpawnData.pickupables.Clear();
 	}
 
 	private void DoReveal()
 	{
-		Game.Instance.Reset(WorldGen.SpawnData);
+		Game.Instance.Reset(SaveGame.Instance.worldGen.SpawnData);
 		for (int i = 0; i < Grid.CellCount; i++)
 		{
 			Grid.Revealed[i] = false;
@@ -124,7 +123,7 @@ public class WorldGenSpawner : KMonoBehaviour
 		}
 		float num = 16.5f;
 		float num2 = 18f;
-		Vector2I baseStartPos = WorldGen.SpawnData.baseStartPos;
+		Vector2I baseStartPos = SaveGame.Instance.worldGen.SpawnData.baseStartPos;
 		GridVisibility.Reveal(baseStartPos.x, baseStartPos.y, num2, num);
 	}
 
@@ -241,7 +240,7 @@ public class WorldGenSpawner : KMonoBehaviour
 
 		private Tag GetPrefabTag()
 		{
-			Mob mob = WorldGen.Settings.mobs.GetMob(this.spawnInfo.id);
+			Mob mob = SettingsCache.mobs.GetMob(this.spawnInfo.id);
 			if (mob != null && mob.prefabName != null)
 			{
 				return new Tag(mob.prefabName);

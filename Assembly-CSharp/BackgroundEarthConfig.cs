@@ -11,7 +11,7 @@ public class BackgroundEarthConfig : IEntityConfig
 		kbatchedAnimController.isMovable = true;
 		kbatchedAnimController.initialAnim = "idle";
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
-		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
+		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
 		gameObject.AddOrGet<LoopingSounds>();
 		return gameObject;
 	}

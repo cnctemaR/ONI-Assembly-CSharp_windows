@@ -1113,7 +1113,7 @@ namespace STRINGS
 
 				public static LocString DESC = "New Duplicants will come out here, but thank goodness, they'll never go back in.";
 
-				public static LocString EFFECT = "An exceptionally advanced bioprinter of unknown origin.\n\nIt periodically produces new Duplicants.";
+				public static LocString EFFECT = "An exceptionally advanced bioprinter of unknown origin.\n\nIt periodically produces new Duplicants or care packages containing resources.";
 			}
 
 			public class HYDROGENGENERATOR
@@ -1856,14 +1856,7 @@ namespace STRINGS
 
 				public static LocString DESC = "Telescopes are necessary for learning starmaps and conducting rocket missions.";
 
-				public static LocString EFFECT = string.Concat(new string[]
-				{
-					"Maps Starmap destinations and produces ",
-					UI.FormatAsLink("Databanks", "RESEARCH_DATABANK"),
-					".\n\nAssigned Duplicants must possess the ",
-					UI.FormatAsLink("Geographical Analysis", UI.StripLinkFormatting(Researcher.ID)),
-					" trait.\n\nBuilding must be exposed to space to function."
-				});
+				public static LocString EFFECT = "Maps Starmap destinations.\n\nAssigned Duplicants must possess the " + UI.FormatAsLink("Geographical Analysis", UI.StripLinkFormatting(Researcher.ID)) + " trait.\n\nBuilding must be exposed to space to function.";
 
 				public static LocString REQUIREMENT_TOOLTIP = "A steady {0} supply is required to sustain working Duplicants.";
 			}

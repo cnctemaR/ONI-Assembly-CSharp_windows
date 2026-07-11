@@ -44,11 +44,11 @@ public class AssignableSideScreenRow : KMonoBehaviour
 						flag = true;
 					}
 				}
-				if (!flag)
-				{
-					this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
-					this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;
-				}
+			}
+			if (!flag)
+			{
+				this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
+				this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;
 			}
 		}
 		this.toggle.ChangeState((int)this.currentState);

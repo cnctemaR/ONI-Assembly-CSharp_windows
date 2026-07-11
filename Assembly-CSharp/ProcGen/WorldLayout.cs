@@ -15,15 +15,16 @@ namespace ProcGen
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class WorldLayout
 	{
-		public WorldLayout(int seed)
+		public WorldLayout(WorldGen worldGen, int seed)
 		{
+			this.worldGen = worldGen;
 			this.localGraph = new MapGraph(seed);
 			this.overworldGraph = new MapGraph(seed);
 			this.SetSeed(seed);
 		}
 
-		public WorldLayout(int width, int height, int seed)
-			: this(seed)
+		public WorldLayout(WorldGen worldGen, int width, int height, int seed)
+			: this(worldGen, seed)
 		{
 			this.mapWidth = width;
 			this.mapHeight = height;
@@ -83,18 +84,18 @@ namespace ProcGen
 			site.poly = new Polygon(new Rect(0f, 0f, (float)this.mapWidth, (float)this.mapHeight));
 			this.voronoiTree = new Tree(site, null, this.myRandom.seed);
 			global::VoronoiTree.Node.maxIndex = 0U;
-			float floatSetting = WorldGen.Settings.GetFloatSetting("OverworldDensityMin");
-			float floatSetting2 = WorldGen.Settings.GetFloatSetting("OverworldDensityMax");
+			float floatSetting = this.worldGen.Settings.GetFloatSetting("OverworldDensityMin");
+			float floatSetting2 = this.worldGen.Settings.GetFloatSetting("OverworldDensityMax");
 			float num = this.myRandom.RandomRange(floatSetting, floatSetting2);
-			float floatSetting3 = WorldGen.Settings.GetFloatSetting("OverworldAvoidRadius");
-			PointGenerator.SampleBehaviour enumSetting = WorldGen.Settings.GetEnumSetting<PointGenerator.SampleBehaviour>("OverworldSampleBehaviour");
+			float floatSetting3 = this.worldGen.Settings.GetFloatSetting("OverworldAvoidRadius");
+			PointGenerator.SampleBehaviour enumSetting = this.worldGen.Settings.GetEnumSetting<PointGenerator.SampleBehaviour>("OverworldSampleBehaviour");
 			ProcGen.Node node = this.overworldGraph.AddNode(WorldGenTags.StartWorld.Name);
 			node.SetPosition(new Vector2((float)(this.mapWidth / 2), (float)(this.mapHeight / 2)));
 			List<Vector2> list = new List<Vector2>();
 			list.Add(node.position);
 			global::VoronoiTree.Node node2 = this.voronoiTree.AddSite(new Diagram.Site((uint)node.node.Id, node.position, 1f), global::VoronoiTree.Node.NodeType.Internal);
 			List<Vector2> randomPoints = PointGenerator.GetRandomPoints(site.poly, num, floatSetting3, list, enumSetting, false, this.myRandom, false, true);
-			int intSetting = WorldGen.Settings.GetIntSetting("OverworldMaxNodes");
+			int intSetting = this.worldGen.Settings.GetIntSetting("OverworldMaxNodes");
 			if (randomPoints.Count > intSetting)
 			{
 				randomPoints.ShuffleSeeded<Vector2>(this.myRandom.RandomSource());
@@ -156,8 +157,8 @@ namespace ProcGen
 					node7.AddTag(WorldGenTags.StartFar);
 				}
 			}
-			int intSetting2 = WorldGen.Settings.GetIntSetting("OverworldRelaxIterations");
-			float floatSetting4 = WorldGen.Settings.GetFloatSetting("OverworldRelaxEnergyMin");
+			int intSetting2 = this.worldGen.Settings.GetIntSetting("OverworldRelaxIterations");
+			float floatSetting4 = this.worldGen.Settings.GetFloatSetting("OverworldRelaxEnergyMin");
 			this.voronoiTree.RelaxRecursive(0, intSetting2, floatSetting4, usePD);
 			this.TagTopAndBottomSites(WorldGenTags.NearSurface, WorldGenTags.NearDepths);
 			this.TagEdgeSites(WorldGenTags.NearEdge, WorldGenTags.NearEdge);
@@ -176,9 +177,9 @@ namespace ProcGen
 			}
 			this.PropegateOverworldTags(this.voronoiTree, WorldGenTags.DistanceTags);
 			this.ConvertUnknownCells();
-			if (WorldGen.Settings.GetOverworldAddTags() != null)
+			if (this.worldGen.Settings.GetOverworldAddTags() != null)
 			{
-				foreach (string text in WorldGen.Settings.GetOverworldAddTags())
+				foreach (string text in this.worldGen.Settings.GetOverworldAddTags())
 				{
 					int num3 = this.myRandom.RandomSource().Next(this.voronoiTree.ChildCount());
 					global::VoronoiTree.Node child2 = this.voronoiTree.GetChild(num3);
@@ -415,7 +416,7 @@ namespace ProcGen
 		private HashSet<SubWorld> Filter(global::VoronoiTree.Node vn, Dictionary<string, TagSet> tagsets, List<SubWorld> allSubWorlds, Dictionary<string, List<SubWorld>> subworldsByTemperature, Dictionary<string, List<SubWorld>> subworldsByZoneType)
 		{
 			HashSet<SubWorld> hashSet = new HashSet<SubWorld>();
-			World world = WorldGen.Settings.GetWorld();
+			World world = this.worldGen.Settings.world;
 			foreach (World.AllowedCellsFilter allowedCellsFilter in world.UnknownCellsAllowedSubworlds)
 			{
 				HashSet<SubWorld> hashSet2 = new HashSet<SubWorld>();
@@ -468,8 +469,8 @@ namespace ProcGen
 		{
 			List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
 			this.voronoiTree.GetNodesWithTag(WorldGenTags.UnassignedNode, list);
-			List<SubWorld> subWorldList = WorldGen.Settings.GetSubWorldList();
-			subWorldList.Remove(WorldGen.Settings.GetSubWorld(WorldGenTags.StartWorld.Name));
+			List<SubWorld> subWorldList = this.worldGen.Settings.GetSubWorldList();
+			subWorldList.Remove(this.worldGen.Settings.GetSubWorld(WorldGenTags.StartWorld.Name));
 			Dictionary<string, List<SubWorld>> dictionary = new Dictionary<string, List<SubWorld>>();
 			IEnumerator enumerator = Enum.GetValues(typeof(Temperature.Range)).GetEnumerator();
 			try
@@ -507,7 +508,7 @@ namespace ProcGen
 				}
 			}
 			Dictionary<string, TagSet> dictionary3 = new Dictionary<string, TagSet>();
-			World world = WorldGen.Settings.GetWorld();
+			World world = this.worldGen.Settings.world;
 			foreach (KeyValuePair<string, List<string>> keyValuePair in world.DefineTagSet)
 			{
 				dictionary3.Add(keyValuePair.Key, new TagSet(keyValuePair.Value));
@@ -528,7 +529,7 @@ namespace ProcGen
 				List<SubWorld> list2 = new List<SubWorld>(hashSet);
 				list2.ShuffleSeeded<SubWorld>(this.myRandom.RandomSource());
 				string text = "NONE";
-				foreach (KeyValuePair<string, SubWorld> keyValuePair2 in WorldGen.Settings.GetSubWorlds())
+				foreach (KeyValuePair<string, SubWorld> keyValuePair2 in this.worldGen.Settings.GetSubWorlds())
 				{
 					if (list2.Count > 0)
 					{
@@ -636,8 +637,8 @@ namespace ProcGen
 								ProcGen.Node node3 = this.overworldGraph.FindNodeByID(key.site.id);
 								Cell cell3 = this.overworldGraph.GetCell(node3.node);
 								edge = this.overworldGraph.GetEdge(corner, corner2, cell2, cell3, true);
-								SubWorld subWorld = WorldGen.Settings.GetSubWorld(node2.type);
-								SubWorld subWorld2 = WorldGen.Settings.GetSubWorld(node3.type);
+								SubWorld subWorld = this.worldGen.Settings.GetSubWorld(node2.type);
+								SubWorld subWorld2 = this.worldGen.Settings.GetSubWorld(node3.type);
 								if (node2.type == node3.type || subWorld.zoneType == subWorld2.zoneType || (subWorld.zoneType == SubWorld.ZoneType.Space && subWorld2.zoneType == SubWorld.ZoneType.Space) || (cell2.tags.ContainsOne(tagSet) && cell3.tags.ContainsOne(tagSet)))
 								{
 									edge.tags.Add(WorldGenTags.EdgeOpen);
@@ -681,7 +682,7 @@ namespace ProcGen
 		{
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.Overworld);
-			TagSet tagSet2 = new TagSet(WorldGen.Settings.GetDefaultMoveTags());
+			TagSet tagSet2 = new TagSet(this.worldGen.Settings.GetDefaultMoveTags());
 			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
 			splitCommand.dontCopyTags = tagSet;
 			splitCommand.moveTags = tagSet2;
@@ -693,7 +694,7 @@ namespace ProcGen
 				{
 					Tree tree = child as Tree;
 					ProcGen.Node node = this.overworldGraph.FindNodeByID(tree.site.id);
-					SubWorld subWorld = WorldGen.Settings.GetSubWorld(node.type);
+					SubWorld subWorld = this.worldGen.Settings.GetSubWorld(node.type);
 					tree.AddTag(new Tag(node.type));
 					tree.AddTag(new Tag(subWorld.temperatureRange.ToString()));
 					this.GenerateChildren(subWorld, tree, this.localGraph, (float)this.mapHeight, i + this.myRandom.seed);
@@ -724,7 +725,7 @@ namespace ProcGen
 							}
 						}
 					}
-					tree.RelaxRecursive(0, 10, 1f, WorldGen.Settings.GetWorld().layoutMethod == World.LayoutMethod.PowerTree);
+					tree.RelaxRecursive(0, 10, 1f, this.worldGen.Settings.world.layoutMethod == World.LayoutMethod.PowerTree);
 					List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
 					tree.GetNodesWithTag(WorldGenTags.Feature, list);
 					splitCommand.dontCopyTags = new TagSet
@@ -770,7 +771,7 @@ namespace ProcGen
 				if (randomPoints.Count < minPointCount)
 				{
 					density *= 0.8f;
-					if (WorldGen.isRunningDebugGen)
+					if (this.worldGen.isRunningDebugGen)
 					{
 						global::Debug.LogWarning(string.Concat(new object[] { "Recaluclating points for ", name, " iter: ", num, " density:", density }), null);
 					}
@@ -784,7 +785,7 @@ namespace ProcGen
 		public void GenerateChildren(SubWorld sw, Tree node, Graph graph, float worldHeight, int seed)
 		{
 			SeededRandom seededRandom = new SeededRandom(seed);
-			TagSet tagSet = new TagSet(WorldGen.Settings.GetDefaultMoveTags());
+			TagSet tagSet = new TagSet(this.worldGen.Settings.GetDefaultMoveTags());
 			TagSet tagSet2 = new TagSet();
 			if (tagSet != null)
 			{
@@ -841,7 +842,7 @@ namespace ProcGen
 				{
 					text = text + node.site.poly.Vertices[l] + ", ";
 				}
-				if (WorldGen.isRunningDebugGen)
+				if (this.worldGen.isRunningDebugGen)
 				{
 				}
 				return;
@@ -852,9 +853,9 @@ namespace ProcGen
 				Feature feature = sw.features[n];
 				TerrainFeature terrainFeature = null;
 				TagSet tagSet5 = new TagSet(feature.tags.ToArray());
-				if (WorldGen.Settings.features.TerrainFeatures.ContainsKey(feature.type) && WorldGen.Settings.features.TerrainFeatures[feature.type] != null)
+				if (SettingsCache.features.TerrainFeatures.ContainsKey(feature.type) && SettingsCache.features.TerrainFeatures[feature.type] != null)
 				{
-					terrainFeature = WorldGen.Settings.features.TerrainFeatures[feature.type];
+					terrainFeature = SettingsCache.features.TerrainFeatures[feature.type];
 					if (terrainFeature.tags != null)
 					{
 						tagSet5.Union(new TagSet(terrainFeature.tags.ToArray()));
@@ -960,10 +961,10 @@ namespace ProcGen
 
 		private void SplitTopAndBottomSites()
 		{
-			float floatSetting = WorldGen.Settings.GetFloatSetting("SplitTopAndBottomSitesMaxArea");
+			float floatSetting = this.worldGen.Settings.GetFloatSetting("SplitTopAndBottomSitesMaxArea");
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.Overworld);
-			TagSet tagSet2 = new TagSet(WorldGen.Settings.GetDefaultMoveTags());
+			TagSet tagSet2 = new TagSet(this.worldGen.Settings.GetDefaultMoveTags());
 			List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
 			this.voronoiTree.GetNodesWithTag(WorldGenTags.NearSurface, list);
 			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
@@ -1005,11 +1006,11 @@ namespace ProcGen
 			ProcGen.Node node;
 			if (tree.tags.Contains(WorldGenTags.Overworld))
 			{
-				node = WorldGen.WorldLayout.overworldGraph.FindNodeByID(tree.site.id);
+				node = this.worldGen.WorldLayout.overworldGraph.FindNodeByID(tree.site.id);
 			}
 			else
 			{
-				node = WorldGen.WorldLayout.localGraph.FindNodeByID(tree.site.id);
+				node = this.worldGen.WorldLayout.localGraph.FindNodeByID(tree.site.id);
 			}
 			TagSet tagSet = new TagSet(tree.tags);
 			if (cmd.dontCopyTags != null)
@@ -1036,7 +1037,7 @@ namespace ProcGen
 			List<Vector2> list = new List<Vector2>();
 			if (tagSet.Contains(WorldGenTags.Feature))
 			{
-				ProcGen.Node node2 = WorldGen.WorldLayout.localGraph.AddNode(node.type);
+				ProcGen.Node node2 = this.worldGen.WorldLayout.localGraph.AddNode(node.type);
 				node2.SetPosition((!tagSet.Contains(WorldGenTags.StartLocation)) ? tree.site.position : tree.site.poly.Centroid());
 				global::VoronoiTree.Node node3 = tree.AddSite(new Diagram.Site((uint)node2.node.Id, node2.position, 1f), global::VoronoiTree.Node.NodeType.Leaf);
 				if (tagSet != null && tagSet.Count != 0)
@@ -1047,33 +1048,33 @@ namespace ProcGen
 				tagSet.Remove(new Tag(node.type));
 				list.Add(node2.position);
 			}
-			float num = WorldGen.Settings.GetFloatSetting("SplitDensityMin");
-			float num2 = WorldGen.Settings.GetFloatSetting("SplitDensityMax");
+			float num = this.worldGen.Settings.GetFloatSetting("SplitDensityMin");
+			float num2 = this.worldGen.Settings.GetFloatSetting("SplitDensityMax");
 			if (tree.tags.Contains(WorldGenTags.UltraHighDensitySplit))
 			{
-				num = WorldGen.Settings.GetFloatSetting("UltraHighSplitDensityMin");
-				num2 = WorldGen.Settings.GetFloatSetting("UltraHighSplitDensityMax");
+				num = this.worldGen.Settings.GetFloatSetting("UltraHighSplitDensityMin");
+				num2 = this.worldGen.Settings.GetFloatSetting("UltraHighSplitDensityMax");
 			}
 			else if (tree.tags.Contains(WorldGenTags.VeryHighDensitySplit))
 			{
-				num = WorldGen.Settings.GetFloatSetting("VeryHighSplitDensityMin");
-				num2 = WorldGen.Settings.GetFloatSetting("VeryHighSplitDensityMax");
+				num = this.worldGen.Settings.GetFloatSetting("VeryHighSplitDensityMin");
+				num2 = this.worldGen.Settings.GetFloatSetting("VeryHighSplitDensityMax");
 			}
 			else if (tree.tags.Contains(WorldGenTags.HighDensitySplit))
 			{
-				num = WorldGen.Settings.GetFloatSetting("HighSplitDensityMin");
-				num2 = WorldGen.Settings.GetFloatSetting("HighSplitDensityMax");
+				num = this.worldGen.Settings.GetFloatSetting("HighSplitDensityMin");
+				num2 = this.worldGen.Settings.GetFloatSetting("HighSplitDensityMax");
 			}
 			else if (tree.tags.Contains(WorldGenTags.MediumDensitySplit))
 			{
-				num = WorldGen.Settings.GetFloatSetting("MediumSplitDensityMin");
-				num2 = WorldGen.Settings.GetFloatSetting("MediumSplitDensityMax");
+				num = this.worldGen.Settings.GetFloatSetting("MediumSplitDensityMin");
+				num2 = this.worldGen.Settings.GetFloatSetting("MediumSplitDensityMax");
 			}
 			float num3 = tree.myRandom.RandomRange(num, num2);
 			List<Vector2> points = this.GetPoints(tree.site.id.ToString(), tree.log, cmd.minChildCount, tree.site.poly, num3, 1f, list, PointGenerator.SampleBehaviour.PoissonDisk, true, tree.myRandom, true, true);
 			if (points.Count < cmd.minChildCount)
 			{
-				if (WorldGen.isRunningDebugGen)
+				if (this.worldGen.isRunningDebugGen)
 				{
 				}
 				if (points.Count == 0)
@@ -1083,7 +1084,7 @@ namespace ProcGen
 			}
 			for (int j = 0; j < points.Count; j++)
 			{
-				ProcGen.Node node4 = WorldGen.WorldLayout.localGraph.AddNode((cmd.typeOverride != null) ? cmd.typeOverride(points[j]) : node.type);
+				ProcGen.Node node4 = this.worldGen.WorldLayout.localGraph.AddNode((cmd.typeOverride != null) ? cmd.typeOverride(points[j]) : node.type);
 				node4.SetPosition(points[j]);
 				global::VoronoiTree.Node node5 = tree.AddSite(new Diagram.Site((uint)node4.node.Id, node4.position, 1f), global::VoronoiTree.Node.NodeType.Leaf);
 				if (tagSet != null && tagSet.Count != 0)
@@ -1214,7 +1215,7 @@ namespace ProcGen
 		{
 			TagSet tagSet = new TagSet();
 			tagSet.Add(WorldGenTags.Overworld);
-			TagSet tagSet2 = new TagSet(WorldGen.Settings.GetDefaultMoveTags());
+			TagSet tagSet2 = new TagSet(this.worldGen.Settings.GetDefaultMoveTags());
 			List<global::VoronoiTree.Node> list = new List<global::VoronoiTree.Node>();
 			this.voronoiTree.GetLeafNodes(list, new Tree.LeafNodeTest(this.StartAreaTooLarge));
 			global::VoronoiTree.Node.SplitCommand splitCommand = new global::VoronoiTree.Node.SplitCommand();
@@ -1316,9 +1317,9 @@ namespace ProcGen
 					if (list.Find((River r) => r.SinkPosition() == tn0.position && r.SourcePosition() == tn1.position) == null)
 					{
 						River river;
-						if (WorldGen.Settings.rivers.rivers.ContainsKey(tn0.type))
+						if (SettingsCache.rivers.rivers.ContainsKey(tn0.type))
 						{
-							river = new River(WorldGen.Settings.rivers.rivers[tn0.type], false);
+							river = new River(SettingsCache.rivers.rivers[tn0.type], false);
 							river.AddSection(tn0, tn1);
 						}
 						else
@@ -1514,6 +1515,8 @@ namespace ProcGen
 		private LineSegment rightEdge;
 
 		private SeededRandom myRandom;
+
+		private WorldGen worldGen;
 
 		[Serialize]
 		private WorldLayout.ExtraIO extra;

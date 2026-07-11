@@ -486,6 +486,8 @@ namespace STRINGS
 
 					public static LocString LOU = "Lou";
 
+					public static LocString BRYCE = "Bryce";
+
 					public static LocString TRAVALDO = "Travaldo";
 
 					public static LocString WILSON = "Wilson";

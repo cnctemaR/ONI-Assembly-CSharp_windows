@@ -45,14 +45,14 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = new Tag("Algae");
 		manualDeliveryKG.capacity = 90f;
 		manualDeliveryKG.refillMass = 18f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
 		manualDeliveryKG2.requestedItemTag = new Tag("Water");
 		manualDeliveryKG2.capacity = 360f;
 		manualDeliveryKG2.refillMass = 72f;
 		manualDeliveryKG2.allowPause = true;
-		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.OperateFetch.IdHash;
+		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		KAnimFile[] array = new KAnimFile[] { Assets.GetAnim("anim_interacts_algae_terarrium_kanim") };
 		AlgaeHabitatEmpty algaeHabitatEmpty = go.AddOrGet<AlgaeHabitatEmpty>();
 		algaeHabitatEmpty.workTime = 5f;

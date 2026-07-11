@@ -11,12 +11,12 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>An implementation of IPlayable that controls an animation RuntimeAnimatorController.</para>
 	/// </summary>
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerPlayable.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
 	[StaticAccessor("AnimatorControllerPlayableBindings", StaticAccessorType.DoubleColon)]
 	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
 	[NativeHeader("Runtime/Animation/RuntimeAnimatorController.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerPlayable.bindings.h")]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animator.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimatorControllerPlayable.h")]
 	public struct AnimatorControllerPlayable : IPlayable, IEquatable<AnimatorControllerPlayable>
 	{

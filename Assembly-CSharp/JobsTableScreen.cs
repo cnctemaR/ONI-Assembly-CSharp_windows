@@ -15,24 +15,35 @@ public class JobsTableScreen : TableScreen
 		return 102f;
 	}
 
+	public static List<JobsTableScreen.PriorityInfo> priorityInfo
+	{
+		get
+		{
+			if (JobsTableScreen._priorityInfo == null)
+			{
+				JobsTableScreen._priorityInfo = new List<JobsTableScreen.PriorityInfo>
+				{
+					new JobsTableScreen.PriorityInfo(0, Assets.GetSprite("icon_priority_disabled"), UI.JOBSSCREEN.PRIORITY.DISABLED),
+					new JobsTableScreen.PriorityInfo(1, Assets.GetSprite("icon_priority_down_2"), UI.JOBSSCREEN.PRIORITY.VERYLOW),
+					new JobsTableScreen.PriorityInfo(2, Assets.GetSprite("icon_priority_down"), UI.JOBSSCREEN.PRIORITY.LOW),
+					new JobsTableScreen.PriorityInfo(3, Assets.GetSprite("icon_priority_flat"), UI.JOBSSCREEN.PRIORITY.STANDARD),
+					new JobsTableScreen.PriorityInfo(4, Assets.GetSprite("icon_priority_up"), UI.JOBSSCREEN.PRIORITY.HIGH),
+					new JobsTableScreen.PriorityInfo(5, Assets.GetSprite("icon_priority_up_2"), UI.JOBSSCREEN.PRIORITY.VERYHIGH),
+					new JobsTableScreen.PriorityInfo(5, Assets.GetSprite("icon_priority_automatic"), UI.JOBSSCREEN.PRIORITY.VERYHIGH)
+				};
+			}
+			return JobsTableScreen._priorityInfo;
+		}
+	}
+
 	protected override void OnActivate()
 	{
 		JobsTableScreen.Instance = this;
 		this.title = UI.JOBSSCREEN.TITLE;
 		base.OnActivate();
 		this.resetSettingsButton.onClick += this.OnResetSettingsClicked;
-		this.priorityInfo = new List<JobsTableScreen.PriorityInfo>
-		{
-			new JobsTableScreen.PriorityInfo(0, Assets.GetSprite("icon_priority_disabled"), UI.JOBSSCREEN.PRIORITY.DISABLED),
-			new JobsTableScreen.PriorityInfo(1, Assets.GetSprite("icon_priority_down_2"), UI.JOBSSCREEN.PRIORITY.VERYLOW),
-			new JobsTableScreen.PriorityInfo(2, Assets.GetSprite("icon_priority_down"), UI.JOBSSCREEN.PRIORITY.LOW),
-			new JobsTableScreen.PriorityInfo(3, Assets.GetSprite("icon_priority_flat"), UI.JOBSSCREEN.PRIORITY.STANDARD),
-			new JobsTableScreen.PriorityInfo(4, Assets.GetSprite("icon_priority_up"), UI.JOBSSCREEN.PRIORITY.HIGH),
-			new JobsTableScreen.PriorityInfo(5, Assets.GetSprite("icon_priority_up_2"), UI.JOBSSCREEN.PRIORITY.VERYHIGH),
-			new JobsTableScreen.PriorityInfo(5, Assets.GetSprite("icon_priority_automatic"), UI.JOBSSCREEN.PRIORITY.VERYHIGH)
-		};
 		this.prioritySprites = new List<Sprite>();
-		foreach (JobsTableScreen.PriorityInfo priorityInfo in this.priorityInfo)
+		foreach (JobsTableScreen.PriorityInfo priorityInfo in JobsTableScreen.priorityInfo)
 		{
 			this.prioritySprites.Add(priorityInfo.sprite);
 		}
@@ -89,6 +100,7 @@ public class JobsTableScreen : TableScreen
 			bool flag;
 			int personalPriority = priorityManager.GetPersonalPriority(choreGroup, out flag);
 			string text2 = this.GetPriorityStr(personalPriority);
+			string priorityValue = this.GetPriorityValue(personalPriority);
 			MinionIdentity minionIdentity = widgetRow.GetMinionIdentity();
 			if (minionIdentity != null && flag)
 			{
@@ -129,6 +141,7 @@ public class JobsTableScreen : TableScreen
 			{
 				text = text.Replace("{Job}", choreGroup.Name);
 				text = text.Replace("{Priority}", text2);
+				text = text.Replace("{PriorityValue}", priorityValue);
 				componentInChildren.ClearMultiStringTooltip();
 				componentInChildren.AddMultiStringTooltip(text, null);
 				if (minionIdentity != null)
@@ -191,7 +204,7 @@ public class JobsTableScreen : TableScreen
 
 	private string GetUsageString()
 	{
-		return UI.JOBSSCREEN.INCREASE_PRIORITY_TUTORIAL.ToString().Replace("{Key}", GameUtil.GetHotkeyString(global::Action.MouseLeft)) + "\n" + UI.JOBSSCREEN.DECREASE_PRIORITY_TUTORIAL.ToString().Replace("{Key}", GameUtil.GetHotkeyString(global::Action.MouseRight));
+		return GameUtil.ReplaceHotkeyString(UI.JOBSSCREEN.INCREASE_PRIORITY_TUTORIAL, global::Action.MouseLeft) + "\n" + GameUtil.ReplaceHotkeyString(UI.JOBSSCREEN.DECREASE_PRIORITY_TUTORIAL, global::Action.MouseRight);
 	}
 
 	private string HoverChangeRowPriorityButton(object widget_go_obj, int delta)
@@ -281,7 +294,7 @@ public class JobsTableScreen : TableScreen
 	{
 		priority = Mathf.Clamp(priority, 0, 5);
 		LocString locString = null;
-		foreach (JobsTableScreen.PriorityInfo priorityInfo in this.priorityInfo)
+		foreach (JobsTableScreen.PriorityInfo priorityInfo in JobsTableScreen.priorityInfo)
 		{
 			if (priorityInfo.priority == priority)
 			{
@@ -289,6 +302,11 @@ public class JobsTableScreen : TableScreen
 			}
 		}
 		return locString;
+	}
+
+	private string GetPriorityValue(int priority)
+	{
+		return (priority * 10).ToString();
 	}
 
 	private void LoadValue(MinionIdentity minion, GameObject widget_go)
@@ -328,11 +346,11 @@ public class JobsTableScreen : TableScreen
 	private JobsTableScreen.PriorityInfo GetPriorityInfo(int priority)
 	{
 		JobsTableScreen.PriorityInfo priorityInfo = default(JobsTableScreen.PriorityInfo);
-		for (int i = 0; i < this.priorityInfo.Count; i++)
+		for (int i = 0; i < JobsTableScreen.priorityInfo.Count; i++)
 		{
-			if (this.priorityInfo[i].priority == priority)
+			if (JobsTableScreen.priorityInfo[i].priority == priority)
 			{
-				priorityInfo = this.priorityInfo[i];
+				priorityInfo = JobsTableScreen.priorityInfo[i];
 				break;
 			}
 		}
@@ -472,9 +490,9 @@ public class JobsTableScreen : TableScreen
 		num2 = Mathf.Clamp(num2, 0, 5);
 		if (!flag)
 		{
-			for (int i = 0; i < this.priorityInfo.Count - 1; i++)
+			for (int i = 0; i < JobsTableScreen.priorityInfo.Count - 1; i++)
 			{
-				if (this.priorityInfo[i].priority == num2)
+				if (JobsTableScreen.priorityInfo[i].priority == num2)
 				{
 					num = i;
 					break;
@@ -483,7 +501,7 @@ public class JobsTableScreen : TableScreen
 		}
 		else
 		{
-			num = this.priorityInfo.Count - 1;
+			num = JobsTableScreen.priorityInfo.Count - 1;
 		}
 		OptionSelector component = widget_go.GetComponent<OptionSelector>();
 		int associatedSkillLevel = priority_mgr.GetAssociatedSkillLevel(chore_group);
@@ -721,6 +739,7 @@ public class JobsTableScreen : TableScreen
 		{
 			is_hovering_button = false;
 			is_hovering_screen = false;
+			return;
 		}
 		List<RaycastResult> list = new List<RaycastResult>();
 		current.RaycastAll(new PointerEventData(current)
@@ -983,13 +1002,13 @@ public class JobsTableScreen : TableScreen
 
 	private HashSet<MinionIdentity> dirty_single_minion_rows = new HashSet<MinionIdentity>();
 
-	private List<JobsTableScreen.PriorityInfo> priorityInfo;
+	private static List<JobsTableScreen.PriorityInfo> _priorityInfo;
 
 	private List<Sprite> prioritySprites;
 
 	private List<KeyValuePair<GameObject, JobsTableScreen.SkillEventHandlerID>> EffectListeners = new List<KeyValuePair<GameObject, JobsTableScreen.SkillEventHandlerID>>();
 
-	private struct PriorityInfo
+	public struct PriorityInfo
 	{
 		public PriorityInfo(int priority, Sprite sprite, LocString name)
 		{

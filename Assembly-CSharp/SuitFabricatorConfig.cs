@@ -60,7 +60,8 @@ public class SuitFabricatorConfig : IBuildingConfig
 			time = (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.RECIPE_DESC,
 			useResultAsDescription = true,
-			fabricators = new List<Tag> { "SuitFabricator" }
+			fabricators = new List<Tag> { "SuitFabricator" },
+			requiredTech = Db.Get().TechItems.suitsOverlay.parentTech.Id
 		};
 		ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[]
 		{

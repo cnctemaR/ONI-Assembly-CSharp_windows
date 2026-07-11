@@ -9,11 +9,11 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>A collection of common math functions.</para>
 	/// </summary>
-	[ThreadAndSerializationSafe]
 	[NativeHeader("Runtime/Utilities/BitUtility.h")]
+	[ThreadAndSerializationSafe]
 	[NativeHeader("Runtime/Math/ColorSpaceConversion.h")]
-	[NativeHeader("Runtime/Math/FloatConversion.h")]
 	[NativeHeader("Runtime/Math/PerlinNoise.h")]
+	[NativeHeader("Runtime/Math/FloatConversion.h")]
 	public struct Mathf
 	{
 		/// <summary>
@@ -85,7 +85,7 @@ namespace UnityEngine
 		/// <param name="x">X-coordinate of sample point.</param>
 		/// <param name="y">Y-coordinate of sample point.</param>
 		/// <returns>
-		///   <para>Value between 0.0 and 1.0.</para>
+		///   <para>Value between 0.0 and 1.0. (Return value might be slightly beyond 1.0.)</para>
 		/// </returns>
 		[FreeFunction("PerlinNoise::NoiseNormalized", IsThreadSafe = true)]
 		[MethodImpl(MethodImplOptions.InternalCall)]
@@ -730,9 +730,12 @@ namespace UnityEngine
 		/// <summary>
 		///   <para>Calculates the linear parameter t that produces the interpolant value within the range [a, b].</para>
 		/// </summary>
-		/// <param name="a"></param>
-		/// <param name="b"></param>
-		/// <param name="value"></param>
+		/// <param name="a">Start value.</param>
+		/// <param name="b">End value.</param>
+		/// <param name="value">Value between start and end.</param>
+		/// <returns>
+		///   <para>Percentage of value between start and end.</para>
+		/// </returns>
 		public static float InverseLerp(float a, float b, float value)
 		{
 			float num;
@@ -834,7 +837,7 @@ namespace UnityEngine
 		private static extern void CorrelatedColorTemperatureToRGB_Injected(float kelvin, out Color ret);
 
 		/// <summary>
-		///   <para>The infamous 3.14159265358979... value (Read Only).</para>
+		///   <para>The well-known 3.14159265358979... value (Read Only).</para>
 		/// </summary>
 		public const float PI = 3.1415927f;
 

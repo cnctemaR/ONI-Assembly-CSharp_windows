@@ -72,6 +72,20 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		}
 	}
 
+	public float GetTimeSinceStartOfReport()
+	{
+		if (this.IsNighttime())
+		{
+			return 525f - this.GetTimeSinceStartOfCycle();
+		}
+		return this.GetTimeSinceStartOfCycle() + 75f;
+	}
+
+	public float GetTimeSinceStartOfCycle()
+	{
+		return this.timeSinceStartOfCycle;
+	}
+
 	public float GetCurrentCycleAsPercentage()
 	{
 		return this.timeSinceStartOfCycle / 600f;

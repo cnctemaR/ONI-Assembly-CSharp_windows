@@ -13,6 +13,14 @@ public class KScreen : KMonoBehaviour, IInputHandler, IPointerEnterHandler, IPoi
 		}
 	}
 
+	public string handlerName
+	{
+		get
+		{
+			return base.gameObject.name;
+		}
+	}
+
 	public KInputHandler inputHandler { get; set; }
 
 	public virtual bool HasFocus

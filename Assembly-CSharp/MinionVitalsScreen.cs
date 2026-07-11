@@ -3,6 +3,11 @@ using UnityEngine;
 
 public class MinionVitalsScreen : TargetScreen
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<MinionIdentity>();
+	}
+
 	public override void ScreenUpdate(bool topLevel)
 	{
 		base.ScreenUpdate(topLevel);

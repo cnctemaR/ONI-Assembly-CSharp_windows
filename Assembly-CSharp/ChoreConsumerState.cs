@@ -36,6 +36,7 @@ public class ChoreConsumerState
 		this.storage = consumer.GetComponent<Storage>();
 		this.consumableConsumer = consumer.GetComponent<ConsumableConsumer>();
 		this.worker = consumer.GetComponent<Worker>();
+		this.selectable = consumer.GetComponent<KSelectable>();
 		if (this.schedulable != null)
 		{
 			int blockIdx = Schedule.GetBlockIdx();
@@ -79,6 +80,8 @@ public class ChoreConsumerState
 	public Storage storage;
 
 	public ConsumableConsumer consumableConsumer;
+
+	public KSelectable selectable;
 
 	public Worker worker;
 

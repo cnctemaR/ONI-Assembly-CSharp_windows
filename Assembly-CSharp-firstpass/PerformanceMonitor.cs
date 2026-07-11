@@ -6,8 +6,12 @@ public class PerformanceMonitor : MonoBehaviour
 {
 	private void Update()
 	{
-		float deltaTime = Time.deltaTime;
-		if (deltaTime <= 0.033333335f)
+		if (Time.timeScale == 0f)
+		{
+			return;
+		}
+		float unscaledDeltaTime = Time.unscaledDeltaTime;
+		if (unscaledDeltaTime <= 0.033333335f)
 		{
 			this.numFramesAbove30 += 1UL;
 		}
@@ -20,14 +24,14 @@ public class PerformanceMonitor : MonoBehaviour
 			LinkedListNode<float> first = this.frameTimes.First;
 			this.frameTimeTotal -= first.Value;
 			this.frameTimes.RemoveFirst();
-			first.Value = deltaTime;
+			first.Value = unscaledDeltaTime;
 			this.frameTimes.AddLast(first);
 		}
 		else
 		{
-			this.frameTimes.AddLast(deltaTime);
+			this.frameTimes.AddLast(unscaledDeltaTime);
 		}
-		this.frameTimeTotal += deltaTime;
+		this.frameTimeTotal += unscaledDeltaTime;
 	}
 
 	public void Reset()

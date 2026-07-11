@@ -5,6 +5,11 @@ using TUNING;
 
 public class EspressoMachineWorkable : Workable, IGameObjectEffectDescriptor, IWorkerPrioritizable
 {
+	private EspressoMachineWorkable()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

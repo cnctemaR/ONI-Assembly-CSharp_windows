@@ -429,7 +429,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Returns a nicely formatted string for this vector.</para>
+		///   <para>Return the Vector4 formatted as a string.</para>
 		/// </summary>
 		/// <param name="format"></param>
 		public override string ToString()
@@ -438,7 +438,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Returns a nicely formatted string for this vector.</para>
+		///   <para>Return the Vector4 formatted as a string.</para>
 		/// </summary>
 		/// <param name="format"></param>
 		public string ToString(string format)

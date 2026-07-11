@@ -282,7 +282,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Invalid Port Overlap";
 
-				public static LocString TOOLTIP = "Ports on this building overlap those on another building. This building must be rebuilt in a valid location.";
+				public static LocString TOOLTIP = "Ports on this building overlap those on another building" + UI.HORIZONTAL_BR_RULE + "This building must be rebuilt in a valid location";
 
 				public static LocString NOTIFICATION_NAME = "Building has overlapping ports";
 
@@ -575,13 +575,13 @@ namespace STRINGS
 
 			public class NEWDUPLICANTSAVAILABLE
 			{
-				public static LocString NAME = "New Duplicants Available";
+				public static LocString NAME = "Printables Available";
 
-				public static LocString TOOLTIP = "I am ready to print a new colony member";
+				public static LocString TOOLTIP = "I am ready to print a new colony member or care package";
 
-				public static LocString NOTIFICATION_NAME = "New Duplicants are available";
+				public static LocString NOTIFICATION_NAME = "New Printables are available";
 
-				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod <color=#F44A47><b>[H]</b></color> is ready to print a new Duplicant.\nI'll need to select a DNA blueprint:";
+				public static LocString NOTIFICATION_TOOLTIP = "The Printing Pod <color=#F44A47><b>[H]</b></color> is ready to print a new Duplicant or care package.\nI'll need to select a blueprint:";
 			}
 
 			public class NOAPPLICABLERESEARCHSELECTED
@@ -597,13 +597,13 @@ namespace STRINGS
 
 			public class NOAPPLICABLEANALYSISSELECTED
 			{
-				public static LocString NAME = "No studyable starmap destination selected";
+				public static LocString NAME = "No Anaylsis Focus Selected";
 
-				public static LocString TOOLTIP = "Select an unknown destination in the starmap to study";
+				public static LocString TOOLTIP = "Select an unknown destination from the Starmap <color=#F44A47><b>[R]</b></color> to begin analysis";
 
 				public static LocString NOTIFICATION_NAME = UI.FormatAsLink("Telescope", "TELESCOPE") + " idle";
 
-				public static LocString NOTIFICATION_TOOLTIP = "These buildings need a space destination to study";
+				public static LocString NOTIFICATION_TOOLTIP = "These buildings require an analysis focus:";
 			}
 
 			public class NOAVAILABLESEED
@@ -1152,9 +1152,9 @@ namespace STRINGS
 
 			public class WATTSON
 			{
-				public static LocString NAME = "Next Duplicant: {TimeRemaining}";
+				public static LocString NAME = "Next Print: {TimeRemaining}";
 
-				public static LocString TOOLTIP = "The Printing Pod can print out new Duplicants over time.\nThe next one will be ready in {TimeRemaining}";
+				public static LocString TOOLTIP = "The Printing Pod can print out new Duplicants and useful resources over time.\nThe next print be ready in {TimeRemaining}";
 
 				public static LocString UNAVAILABLE = "UNAVAILABLE";
 			}

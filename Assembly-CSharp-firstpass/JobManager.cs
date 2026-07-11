@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using UnityEngine;
 
 public class JobManager
 {
@@ -10,9 +9,8 @@ public class JobManager
 
 	private void Initialize()
 	{
-		int num = Math.Max(SystemInfo.processorCount, 1);
-		this.semaphore = new Semaphore(0, num);
-		for (int i = 0; i < num; i++)
+		this.semaphore = new Semaphore(0, CPUBudget.coreCount);
+		for (int i = 0; i < CPUBudget.coreCount; i++)
 		{
 			this.threads.Add(new JobManager.WorkerThread(this.semaphore, this, string.Format("KWorker{0}", i)));
 		}
@@ -103,7 +101,7 @@ public class JobManager
 			this.semaphore = semaphore;
 			this.thread = new Thread(new ParameterizedThreadStart(JobManager.WorkerThread.ThreadMain), 131072);
 			Util.ApplyInvariantCultureToThread(this.thread);
-			this.thread.Priority = global::System.Threading.ThreadPriority.AboveNormal;
+			this.thread.Priority = ThreadPriority.AboveNormal;
 			this.thread.Name = name;
 			this.jobManager = job_manager;
 			this.exceptions = new List<Exception>();

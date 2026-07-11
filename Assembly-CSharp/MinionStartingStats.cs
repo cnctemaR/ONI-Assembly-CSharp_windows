@@ -4,7 +4,7 @@ using Klei.AI;
 using TUNING;
 using UnityEngine;
 
-public class MinionStartingStats
+public class MinionStartingStats : ITelepadDeliverable
 {
 	public MinionStartingStats(bool is_starter_minion)
 	{
@@ -365,6 +365,18 @@ public class MinionStartingStats
 		}
 		go.GetComponent<MinionIdentity>().SetName(this.Name);
 		go.GetComponent<MinionIdentity>().SetGender(this.GenderStringKey);
+	}
+
+	public GameObject Deliver(Vector3 location)
+	{
+		GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
+		gameObject.SetActive(true);
+		gameObject.transform.SetLocalPosition(location);
+		this.Apply(gameObject);
+		Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
+		ChoreProvider component = gameObject.GetComponent<ChoreProvider>();
+		new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
+		return gameObject;
 	}
 
 	public string Name;

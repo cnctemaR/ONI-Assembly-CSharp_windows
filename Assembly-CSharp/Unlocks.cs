@@ -166,7 +166,8 @@ public class Unlocks : KMonoBehaviour
 			new string[]
 			{
 				"email_preliminarycalculations", "email_researchgiant", "email_thermodynamiclaws", "email_frankiesblog", "email_atomiconrecruitment", "email_thejanitor", "email_security2", "email_newemployee", "email_security3", "email_hollandsdog",
-				"email_temporalbowupdate", "email_retemporalbowupdate", "email_pens", "email_pens2", "email_memorychip", "email_arthistoryrequest", "email_AIcontrol", "email_AIcontrol2", "email_AIcontrol3", "email_AIcontrol4"
+				"email_temporalbowupdate", "email_retemporalbowupdate", "email_pens", "email_pens2", "email_memorychip", "email_arthistoryrequest", "email_AIcontrol", "email_AIcontrol2", "email_friendlyemail", "email_AIcontrol3",
+				"email_AIcontrol4"
 			}
 		},
 		{
@@ -174,9 +175,9 @@ public class Unlocks : KMonoBehaviour
 			new string[]
 			{
 				"journal_sunflowerseeds", "journal_debrief", "journal_employeeprocessing", "journal_B835_1", "journal_B835_2", "journal_B835_3", "journal_B835_4", "journal_B835_5", "journal_B835_6", "journal_cleanup",
-				"journal_pipedream", "journal_A046_1", "journal_A046_2", "journal_A046_3", "journal_A046_4", "journal_movedrats", "journal_spittingimage", "journal_B327_1", "journal_B327_2", "journal_B327_3",
-				"journal_B327_4", "journal_revisitednumbers", "journal_ants", "journal_B556_1", "journal_B556_2", "journal_B556_3", "journal_B556_4", "journal_timemusings", "journal_timesarrowthoughts", "journal_magazine",
-				"journal_notetojodi"
+				"journal_pipedream", "journal_A046_1", "journal_A046_2", "journal_A046_3", "journal_A046_4", "journal_spittingimage", "journal_elliesbirthday1", "journal_movedrats", "journal_B327_1", "journal_B327_2",
+				"journal_B327_3", "journal_B327_4", "journal_elliesbirthday2", "journal_revisitednumbers", "journal_ants", "journal_B556_1", "journal_B556_2", "journal_B556_3", "journal_B556_4", "journal_timemusings",
+				"journal_timesarrowthoughts", "journal_magazine", "journal_planetaryechoes1", "journal_planetaryechoes2", "journal_planetaryechoes3", "journal_planetaryechoes4", "journal_planetaryechoes5", "journal_notetojodi"
 			}
 		},
 		{

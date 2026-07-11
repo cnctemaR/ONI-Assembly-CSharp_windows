@@ -293,6 +293,11 @@ public static class GameUtil
 		return GameUtil.AddTimeSliceText(text2, timeSlice);
 	}
 
+	public static string ApplyBoldString(string source)
+	{
+		return "<b>" + source + "</b>";
+	}
+
 	public static float GetRoundedTemperatureInKelvin(float kelvin)
 	{
 		float num = 0f;
@@ -1221,17 +1226,46 @@ public static class GameUtil
 		return string.Format(ELEMENTS.BREATHABLEDESC, color4.ToHexString(), locString);
 	}
 
-	public static string GetHotkeyString(global::Action action)
+	public static string AppendHotkeyString(string template, global::Action action)
 	{
 		Color color = new Color(0.95686275f, 0.2901961f, 0.2784314f);
 		return string.Concat(new string[]
+		{
+			template,
+			"<color=#",
+			color.ToHexString(),
+			">(",
+			GameUtil.GetActionString(action),
+			")</color>"
+		});
+	}
+
+	public static string ReplaceHotkeyString(string template, global::Action action)
+	{
+		Color color = new Color(0.95686275f, 0.2901961f, 0.2784314f);
+		return template.Replace("{Hotkey}", string.Concat(new string[]
 		{
 			"<color=#",
 			color.ToHexString(),
 			">(",
 			GameUtil.GetActionString(action),
-			") </color>"
-		});
+			")</color>"
+		}));
+	}
+
+	public static string ReplaceHotkeyString(string template, global::Action action1, global::Action action2)
+	{
+		Color color = new Color(0.95686275f, 0.2901961f, 0.2784314f);
+		return template.Replace("{Hotkey}", string.Concat(new string[]
+		{
+			"<color=#",
+			color.ToHexString(),
+			">(",
+			GameUtil.GetActionString(action2),
+			") + (",
+			GameUtil.GetActionString(action2),
+			")</color>"
+		}));
 	}
 
 	public static string GetKeycodeLocalized(KKeyCode key_code)
@@ -2406,6 +2440,88 @@ public static class GameUtil
 					}
 				}
 			}
+		}
+		return text;
+	}
+
+	public static bool AreChoresUIMergeable(Chore.Precondition.Context choreA, Chore.Precondition.Context choreB)
+	{
+		if (choreA.chore.target.isNull || choreB.chore.target.isNull)
+		{
+			return false;
+		}
+		ChoreType choreType = choreB.chore.choreType;
+		ChoreType choreType2 = choreA.chore.choreType;
+		return (choreA.chore.choreType == choreB.chore.choreType && choreA.chore.target.GetComponent<KPrefabID>().PrefabTag == choreB.chore.target.GetComponent<KPrefabID>().PrefabTag) || (choreA.chore.choreType == Db.Get().ChoreTypes.Dig && choreB.chore.choreType == Db.Get().ChoreTypes.Dig) || (choreA.chore.choreType == Db.Get().ChoreTypes.Relax && choreB.chore.choreType == Db.Get().ChoreTypes.Relax) || ((choreType2 == Db.Get().ChoreTypes.ReturnSuitIdle || choreType2 == Db.Get().ChoreTypes.ReturnSuitUrgent) && (choreType == Db.Get().ChoreTypes.ReturnSuitIdle || choreType == Db.Get().ChoreTypes.ReturnSuitUrgent)) || (choreA.chore.target.gameObject == choreB.chore.target.gameObject && choreA.chore.choreType == choreB.chore.choreType);
+	}
+
+	public static string GetChoreName(Chore chore, object choreData)
+	{
+		string text = string.Empty;
+		if (chore.choreType == Db.Get().ChoreTypes.Fetch || chore.choreType == Db.Get().ChoreTypes.MachineFetch || chore.choreType == Db.Get().ChoreTypes.FabricateFetch || chore.choreType == Db.Get().ChoreTypes.FetchCritical || chore.choreType == Db.Get().ChoreTypes.PowerFetch)
+		{
+			text = chore.GetReportName(chore.gameObject.GetProperName());
+		}
+		else if (chore.choreType == Db.Get().ChoreTypes.StorageFetch || chore.choreType == Db.Get().ChoreTypes.FoodFetch)
+		{
+			FetchChore fetchChore = chore as FetchChore;
+			FetchAreaChore fetchAreaChore = chore as FetchAreaChore;
+			if (fetchAreaChore != null)
+			{
+				GameObject getFetchTarget = fetchAreaChore.GetFetchTarget;
+				KMonoBehaviour kmonoBehaviour = choreData as KMonoBehaviour;
+				if (getFetchTarget != null)
+				{
+					text = chore.GetReportName(getFetchTarget.GetProperName());
+				}
+				else if (kmonoBehaviour != null)
+				{
+					text = chore.GetReportName(kmonoBehaviour.GetProperName());
+				}
+				else
+				{
+					text = chore.GetReportName(null);
+				}
+			}
+			else if (fetchChore != null)
+			{
+				Pickupable fetchTarget = fetchChore.fetchTarget;
+				KMonoBehaviour kmonoBehaviour2 = choreData as KMonoBehaviour;
+				if (fetchTarget != null)
+				{
+					text = chore.GetReportName(fetchTarget.GetProperName());
+				}
+				else if (kmonoBehaviour2 != null)
+				{
+					text = chore.GetReportName(kmonoBehaviour2.GetProperName());
+				}
+				else
+				{
+					text = chore.GetReportName(null);
+				}
+			}
+		}
+		else
+		{
+			text = chore.GetReportName(null);
+		}
+		return text;
+	}
+
+	public static string ChoreGroupsForChoreType(ChoreType choreType)
+	{
+		if (choreType.groups == null || choreType.groups.Length == 0)
+		{
+			return null;
+		}
+		string text = string.Empty;
+		for (int i = 0; i < choreType.groups.Length; i++)
+		{
+			if (i != 0)
+			{
+				text += UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CHORE_GROUP_SEPARATOR;
+			}
+			text += choreType.groups[i].Name;
 		}
 		return text;
 	}

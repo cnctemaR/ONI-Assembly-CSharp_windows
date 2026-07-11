@@ -90,7 +90,7 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 		Quaternion quaternion = Quaternion.Euler(data.angle, 0f, 0f);
 		Vector3 vector3 = quaternion * (vector2 * num4);
 		Vector3 vector4 = vector + vector3;
-		vector4.z = 100f;
+		vector4.z = data.renderZ;
 		return vector4;
 	}
 
@@ -127,5 +127,7 @@ public class OrbitalMechanics : KMonoBehaviour, IRenderEveryTick
 		public Vector3 scale;
 
 		public float distance;
+
+		public float renderZ;
 	}
 }

@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class DiseaseInfoScreen : TargetScreen
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<CellSelectionObject>() != null || target.GetComponent<PrimaryElement>() != null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

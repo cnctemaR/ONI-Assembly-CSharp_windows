@@ -936,7 +936,6 @@ public abstract class KAnimControllerBase : MonoBehaviour
 
 	protected KBatchedAnimInstanceData batchInstanceData;
 
-	[NonSerialized]
 	public KAnimControllerBase.VisibilityType visibilityType;
 
 	public Action<GameObject> onDestroySelf;
@@ -984,6 +983,7 @@ public abstract class KAnimControllerBase : MonoBehaviour
 	public enum VisibilityType
 	{
 		Default,
+		OffscreenUpdate,
 		Always
 	}
 

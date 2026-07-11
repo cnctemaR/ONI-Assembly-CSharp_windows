@@ -272,7 +272,7 @@ namespace UnityEngine.Timeline
 					{
 						if (this.updateParticle)
 						{
-							foreach (ParticleSystem particleSystem in this.GetParticleSystemRoots(gameObject))
+							foreach (ParticleSystem particleSystem in gameObject.GetComponentsInChildren<ParticleSystem>(true))
 							{
 								driver.AddFromName<ParticleSystem>(particleSystem.gameObject, "randomSeed");
 								driver.AddFromName<ParticleSystem>(particleSystem.gameObject, "autoRandomSeed");

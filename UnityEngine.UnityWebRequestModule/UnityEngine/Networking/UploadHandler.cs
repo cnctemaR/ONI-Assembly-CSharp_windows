@@ -26,7 +26,7 @@ namespace UnityEngine.Networking
 		}
 
 		/// <summary>
-		///   <para>Signals that this [UploadHandler] is no longer being used, and should clean up any resources it is using.</para>
+		///   <para>Signals that this UploadHandler is no longer being used, and should clean up any resources it is using.</para>
 		/// </summary>
 		public void Dispose()
 		{

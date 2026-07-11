@@ -561,7 +561,7 @@ namespace UnityEngine.Networking
 			return ClientScene.s_NetworkScene.FindLocalObject(netId);
 		}
 
-		private static void ApplySpawnPayload(NetworkIdentity uv, Vector3 position, byte[] payload, NetworkInstanceId netId, GameObject newGameObject)
+		private static void ApplySpawnPayload(NetworkIdentity uv, Vector3 position, byte[] payload, NetworkInstanceId netId, GameObject newGameObject, NetworkMessage netMsg)
 		{
 			if (!uv.gameObject.activeSelf)
 			{
@@ -571,7 +571,7 @@ namespace UnityEngine.Networking
 			if (payload != null && payload.Length > 0)
 			{
 				NetworkReader networkReader = new NetworkReader(payload);
-				uv.OnUpdateVars(networkReader, true);
+				uv.OnUpdateVars(networkReader, true, netMsg);
 			}
 			if (!(newGameObject == null))
 			{
@@ -616,7 +616,7 @@ namespace UnityEngine.Networking
 				SpawnDelegate spawnDelegate;
 				if (ClientScene.s_NetworkScene.GetNetworkIdentity(ClientScene.s_ObjectSpawnMessage.netId, out networkIdentity))
 				{
-					ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, null);
+					ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, null, netMsg);
 				}
 				else if (NetworkScene.GetPrefab(ClientScene.s_ObjectSpawnMessage.assetId, out gameObject))
 				{
@@ -647,7 +647,7 @@ namespace UnityEngine.Networking
 					else
 					{
 						networkIdentity.Reset();
-						ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject2);
+						ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject2, netMsg);
 					}
 				}
 				else if (NetworkScene.GetSpawnHandler(ClientScene.s_ObjectSpawnMessage.assetId, out spawnDelegate))
@@ -674,7 +674,7 @@ namespace UnityEngine.Networking
 						{
 							networkIdentity.Reset();
 							networkIdentity.SetDynamicAssetId(ClientScene.s_ObjectSpawnMessage.assetId);
-							ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject3);
+							ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnMessage.position, ClientScene.s_ObjectSpawnMessage.payload, ClientScene.s_ObjectSpawnMessage.netId, gameObject3, netMsg);
 						}
 					}
 				}
@@ -709,7 +709,7 @@ namespace UnityEngine.Networking
 			NetworkIdentity networkIdentity;
 			if (ClientScene.s_NetworkScene.GetNetworkIdentity(ClientScene.s_ObjectSpawnSceneMessage.netId, out networkIdentity))
 			{
-				ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnSceneMessage.position, ClientScene.s_ObjectSpawnSceneMessage.payload, ClientScene.s_ObjectSpawnSceneMessage.netId, networkIdentity.gameObject);
+				ClientScene.ApplySpawnPayload(networkIdentity, ClientScene.s_ObjectSpawnSceneMessage.position, ClientScene.s_ObjectSpawnSceneMessage.payload, ClientScene.s_ObjectSpawnSceneMessage.netId, networkIdentity.gameObject, netMsg);
 			}
 			else
 			{
@@ -735,7 +735,7 @@ namespace UnityEngine.Networking
 							networkIdentity2.gameObject.name
 						}));
 					}
-					ClientScene.ApplySpawnPayload(networkIdentity2, ClientScene.s_ObjectSpawnSceneMessage.position, ClientScene.s_ObjectSpawnSceneMessage.payload, ClientScene.s_ObjectSpawnSceneMessage.netId, networkIdentity2.gameObject);
+					ClientScene.ApplySpawnPayload(networkIdentity2, ClientScene.s_ObjectSpawnSceneMessage.position, ClientScene.s_ObjectSpawnSceneMessage.payload, ClientScene.s_ObjectSpawnSceneMessage.netId, networkIdentity2.gameObject, netMsg);
 				}
 			}
 		}
@@ -852,7 +852,7 @@ namespace UnityEngine.Networking
 			NetworkIdentity networkIdentity;
 			if (ClientScene.s_NetworkScene.GetNetworkIdentity(networkInstanceId, out networkIdentity))
 			{
-				networkIdentity.OnUpdateVars(netMsg.reader, false);
+				networkIdentity.OnUpdateVars(netMsg.reader, false, netMsg);
 			}
 			else if (LogFilter.logWarn)
 			{

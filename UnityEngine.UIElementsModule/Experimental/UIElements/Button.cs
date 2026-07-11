@@ -25,7 +25,7 @@ namespace UnityEngine.Experimental.UIElements
 		}
 
 		/// <summary>
-		///   <para>UxmlTraits for the Button.</para>
+		///   <para>UxmlTraits for the UI.Button.</para>
 		/// </summary>
 		public class ButtonUxmlTraits : BaseTextElement.BaseTextElementUxmlTraits
 		{

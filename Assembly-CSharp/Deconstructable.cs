@@ -17,6 +17,8 @@ public class Deconstructable : Workable
 		this.minimumAttributeMultiplier = 0.75f;
 		this.multitoolContext = "build";
 		this.multitoolHitEffectTag = EffectConfigs.BuildSplashId;
+		this.workingPstComplete = HashedString.Invalid;
+		this.workingPstFailed = HashedString.Invalid;
 		Building component = base.GetComponent<Building>();
 		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
 		if (component.Def.IsTilePiece)
@@ -150,7 +152,7 @@ public class Deconstructable : Workable
 			else
 			{
 				Prioritizable.AddRef(base.gameObject);
-				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, null, true, null, null, null, true, null, false, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, true);
+				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, null, true, null, null, null, true, null, false, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 				this.isMarkedForDeconstruction = true;
 				base.Trigger(2108245096, "Deconstruct");

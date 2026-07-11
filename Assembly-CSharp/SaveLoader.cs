@@ -234,13 +234,7 @@ public class SaveLoader : KMonoBehaviour
 			}
 		}
 		Game.worldID = text2;
-		WorldGen.LoadSettings();
-		string path = WorldGen.GetPath();
-		if (!WorldGen.Settings.SetWorld(text2, path))
-		{
-			Output.LogWarning(new object[] { string.Format("Failed to get worldGen data for {0}. Using worlds/Default instead", text2) });
-			WorldGen.Settings.SetDefaultWorld(path);
-		}
+		this.worldGen = new WorldGen(text2);
 		Game.LoadSettings(deserializer);
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
@@ -581,7 +575,18 @@ public class SaveLoader : KMonoBehaviour
 	public bool LoadFromWorldGen()
 	{
 		Output.Log(new object[] { "Attempting to start a new game with current world gen" });
-		SimSaveFileStructure simSaveFileStructure = WorldGen.LoadWorldGenSim();
+		WorldGen.LoadSettings();
+		string text;
+		try
+		{
+			text = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id;
+		}
+		catch
+		{
+			text = "worlds/Default";
+		}
+		this.worldGen = new WorldGen(text);
+		SimSaveFileStructure simSaveFileStructure = this.worldGen.LoadWorldGenSim();
 		if (simSaveFileStructure == null)
 		{
 			global::Debug.LogError("Attempt failed", null);
@@ -615,7 +620,7 @@ public class SaveLoader : KMonoBehaviour
 		global::Debug.Log("Attempt success", null);
 		SceneInitializer.Instance.PostLoadPrefabs();
 		SceneInitializer.Instance.NewSaveGamePrefab();
-		WorldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));
+		this.worldGen.ReplayGenerate(new WorldGen.ResetFunction(this.Reset));
 		this.OnWorldGenComplete.Signal();
 		ThreadedHttps<KleiMetrics>.Instance.StartNewGame();
 		return true;
@@ -652,6 +657,7 @@ public class SaveLoader : KMonoBehaviour
 		{
 			dictionary["DailyReport"] = this.GetDailyReportMetrics();
 			dictionary["PerformanceMeasurements"] = this.GetPerformanceMeasurements();
+			dictionary["AverageFrameTime"] = this.GetFrameTime();
 		}
 		dictionary["CustomGameSettings"] = CustomGameSettings.Instance.GetSettingsForMetrics();
 		ThreadedHttps<KleiMetrics>.Instance.SendEvent(dictionary);
@@ -805,6 +811,17 @@ public class SaveLoader : KMonoBehaviour
 		return list;
 	}
 
+	private float GetFrameTime()
+	{
+		PerformanceMonitor component = Global.Instance.GetComponent<PerformanceMonitor>();
+		Output.Log(new object[]
+		{
+			"Average frame time:",
+			1f / component.FPS
+		});
+		return 1f / component.FPS;
+	}
+
 	[MyCmpGet]
 	private GridSettings gridSettings;
 
@@ -833,6 +850,8 @@ public class SaveLoader : KMonoBehaviour
 
 	private bool mustRestartOnFail;
 
+	public WorldGen worldGen;
+
 	public const string METRIC_SAVED_PREFAB_KEY = "SavedPrefabs";
 
 	public const string METRIC_IS_AUTO_SAVE_KEY = "IsAutoSave";
@@ -848,6 +867,8 @@ public class SaveLoader : KMonoBehaviour
 	public const string METRIC_CUSTOM_GAME_SETTINGS = "CustomGameSettings";
 
 	public const string METRIC_PERFORMANCE_MEASUREMENTS = "PerformanceMeasurements";
+
+	public const string METRIC_FRAME_TIME = "AverageFrameTime";
 
 	private static bool force_infinity;
 

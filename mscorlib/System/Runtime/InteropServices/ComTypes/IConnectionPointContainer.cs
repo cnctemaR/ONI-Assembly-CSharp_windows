@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices.ComTypes
 {
-	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("b196b284-bab4-101a-b69c-00aa00341d07")]
+	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[ComImport]
 	public interface IConnectionPointContainer
 	{

@@ -46,41 +46,33 @@ namespace ProcGen
 		{
 			foreach (WeightedName weightedName in this.ZoneFiles)
 			{
-				SubWorld subWorld = null;
 				string text = WorldGenSettings.GetSimpleName(weightedName.name);
 				if (weightedName.overrideName != null && weightedName.overrideName.Length > 0)
 				{
 					text = weightedName.overrideName;
 				}
-				if (!this.ZoneLookupTable.ContainsKey(text))
+				if (!this.Zones.ContainsKey(text))
 				{
 					SubWorldFile subWorldFile = YamlIO<SubWorldFile>.LoadFile(path + weightedName.name + ".yaml", null);
 					if (subWorldFile != null)
 					{
-						subWorld = subWorldFile.zone;
-						subWorld.name = text;
-						subWorld.pdWeight = weightedName.weight;
-						this.ZoneLookupTable[text] = subWorld;
-						noise.LoadTree(subWorld.biomeNoise, path);
-						noise.LoadTree(subWorld.densityNoise, path);
-						noise.LoadTree(subWorld.overrideNoise, path);
+						SubWorld zone = subWorldFile.zone;
+						zone.name = text;
+						zone.pdWeight = weightedName.weight;
+						this.Zones[text] = zone;
+						noise.LoadTree(zone.biomeNoise, path);
+						noise.LoadTree(zone.densityNoise, path);
+						noise.LoadTree(zone.overrideNoise, path);
 					}
 					else
 					{
 						Debug.LogWarning("WorldGen: Attempting to load zone: " + weightedName.name + " failed", null);
 					}
 				}
-				else
-				{
-					subWorld = this.ZoneLookupTable[text];
-				}
-				this.Zones[text] = subWorld;
 			}
 		}
 
 		public Dictionary<string, SubWorld> Zones;
-
-		private Dictionary<string, SubWorld> ZoneLookupTable = new Dictionary<string, SubWorld>();
 
 		public enum LayoutMethod
 		{

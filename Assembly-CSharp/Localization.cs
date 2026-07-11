@@ -33,15 +33,15 @@ public static class Localization
 	public static void Initialize(bool dontCheckSteam = false)
 	{
 		Output.Log(new object[] { "Localization.Initialize!" });
-		Localization.SelectedLanguageType selectedLanguageType = (Localization.SelectedLanguageType)Enum.Parse(typeof(Localization.SelectedLanguageType), KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.None.ToString()), true);
-		if (selectedLanguageType == Localization.SelectedLanguageType.Preinstalled)
+		Localization.SelectedLanguageType selectedPreinstalledLanguageType = Localization.GetSelectedPreinstalledLanguageType();
+		string selectedPreinstalledLanguageCode = Localization.GetSelectedPreinstalledLanguageCode();
+		if (!string.IsNullOrEmpty(selectedPreinstalledLanguageCode))
 		{
 			Output.Log(new object[] { "Localization Initialize... Preinstalled localization" });
-			string @string = KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_CODE_KEY, string.Empty);
-			Output.Log(new object[] { " -> ", @string });
-			Localization.LoadPreinstalledTranslation(@string);
+			Output.Log(new object[] { " -> ", selectedPreinstalledLanguageCode });
+			Localization.LoadPreinstalledTranslation(selectedPreinstalledLanguageCode);
 		}
-		else if (selectedLanguageType == Localization.SelectedLanguageType.UGC && !dontCheckSteam && SteamManager.Initialized && LanguageOptionsScreen.HasInstalledLanguage())
+		else if (selectedPreinstalledLanguageType == Localization.SelectedLanguageType.UGC && !dontCheckSteam && SteamManager.Initialized && LanguageOptionsScreen.HasInstalledLanguage())
 		{
 			Output.Log(new object[] { "Localization Initialize... SteamUGCService" });
 			PublishedFileId_t invalid = PublishedFileId_t.Invalid;
@@ -361,6 +361,21 @@ public static class Localization
 		return text;
 	}
 
+	public static string GetSelectedPreinstalledLanguageCode()
+	{
+		Localization.SelectedLanguageType selectedPreinstalledLanguageType = Localization.GetSelectedPreinstalledLanguageType();
+		if (selectedPreinstalledLanguageType == Localization.SelectedLanguageType.Preinstalled)
+		{
+			return KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_CODE_KEY, string.Empty);
+		}
+		return string.Empty;
+	}
+
+	public static Localization.SelectedLanguageType GetSelectedPreinstalledLanguageType()
+	{
+		return (Localization.SelectedLanguageType)Enum.Parse(typeof(Localization.SelectedLanguageType), KPlayerPrefs.GetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.None.ToString()), true);
+	}
+
 	private static string GetLanguageCode(string line)
 	{
 		string text = null;
@@ -418,16 +433,6 @@ public static class Localization
 			locale.SetCode(text);
 		}
 		return locale;
-	}
-
-	public static TMP_FontAsset GetFontForLocale(string code)
-	{
-		Localization.Locale locale = Localization.GetLocaleForCode(code);
-		if (locale == null)
-		{
-			locale = Localization.GetDefaultLocale();
-		}
-		return Resources.Load<TMP_FontAsset>(locale.FontName);
 	}
 
 	private static string GetFontName(string filename)
@@ -517,31 +522,35 @@ public static class Localization
 	{
 		if (!string.IsNullOrEmpty(fontname))
 		{
-			TMP_FontAsset tmp_FontAsset = Resources.Load<TMP_FontAsset>(fontname);
-			if (tmp_FontAsset != null)
+			Localization.sFontAsset = Localization.GetFont(fontname);
+			foreach (TextStyleSetting textStyleSetting in Resources.FindObjectsOfTypeAll<TextStyleSetting>())
 			{
-				Localization.sFontAsset = tmp_FontAsset;
-				foreach (TextStyleSetting textStyleSetting in Resources.FindObjectsOfTypeAll<TextStyleSetting>())
+				if (textStyleSetting != null)
 				{
-					if (textStyleSetting != null)
-					{
-						textStyleSetting.sdfFont = tmp_FontAsset;
-					}
-				}
-				bool isRightToLeft = Localization.IsRightToLeft;
-				foreach (LocText locText in Resources.FindObjectsOfTypeAll<LocText>())
-				{
-					if (locText != null)
-					{
-						locText.SwapFont(tmp_FontAsset, isRightToLeft);
-					}
+					textStyleSetting.sdfFont = Localization.sFontAsset;
 				}
 			}
-			else
+			bool isRightToLeft = Localization.IsRightToLeft;
+			foreach (LocText locText in Resources.FindObjectsOfTypeAll<LocText>())
 			{
-				Console.WriteLine("LOCALIZATION ERROR! Font [" + fontname + "] not found");
+				if (locText != null)
+				{
+					locText.SwapFont(Localization.sFontAsset, isRightToLeft);
+				}
 			}
 		}
+	}
+
+	public static TMP_FontAsset GetFont(string fontname)
+	{
+		foreach (TMP_FontAsset tmp_FontAsset in Resources.FindObjectsOfTypeAll<TMP_FontAsset>())
+		{
+			if (tmp_FontAsset.name == fontname)
+			{
+				return tmp_FontAsset;
+			}
+		}
+		return null;
 	}
 
 	private static bool HasSameOrLessTokenCount(string english_string, string translated_string, string token)

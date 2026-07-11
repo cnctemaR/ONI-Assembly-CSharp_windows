@@ -11,9 +11,9 @@ namespace UnityEngine.Experimental.Playables
 	/// </summary>
 	[NativeHeader("Runtime/Export/Director/CameraPlayable.bindings.h")]
 	[NativeHeader("Runtime/Camera//Director/CameraPlayable.h")]
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("CameraPlayableBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	public struct CameraPlayable : IPlayable, IEquatable<CameraPlayable>
 	{
 		internal CameraPlayable(PlayableHandle handle)

@@ -17,6 +17,11 @@ public class CargoBay : KMonoBehaviour
 		base.Subscribe<CargoBay>(-1056989049, CargoBay.OnLaunchDelegate);
 		base.Subscribe<CargoBay>(238242047, CargoBay.OnLandDelegate);
 		base.Subscribe<CargoBay>(493375141, CargoBay.OnRefreshUserMenuDelegate);
+		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_fill", "meter_frame", "meter_OL" });
+		base.Subscribe(-1697596308, delegate(object data)
+		{
+			this.meter.SetPositionPercent(this.storage.MassStored() / this.storage.Capacity());
+		});
 	}
 
 	private void OnRefreshUserMenu(object data)
@@ -123,6 +128,8 @@ public class CargoBay : KMonoBehaviour
 	}
 
 	public Storage storage;
+
+	private MeterController meter;
 
 	public CargoBay.CargoType storageType;
 

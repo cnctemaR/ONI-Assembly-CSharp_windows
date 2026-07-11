@@ -158,20 +158,19 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		this.assignee = new_assignee;
 		if (this.slot != null && (new_assignee is MinionIdentity || new_assignee is StoredMinionIdentity || new_assignee is MinionAssignablesProxy))
 		{
-			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)new_assignee;
-			Ownables component = kmonoBehaviour.GetComponent<Ownables>();
-			if (component != null)
+			Ownables soleOwner = new_assignee.GetSoleOwner();
+			if (soleOwner != null)
 			{
-				AssignableSlotInstance slot = component.GetSlot(this.slot);
+				AssignableSlotInstance slot = soleOwner.GetSlot(this.slot);
 				if (slot != null)
 				{
 					slot.Assign(this);
 				}
 			}
-			Equipment component2 = kmonoBehaviour.GetComponent<Equipment>();
-			if (component2 != null)
+			Equipment component = soleOwner.GetComponent<Equipment>();
+			if (component != null)
 			{
-				AssignableSlotInstance slot2 = component2.GetSlot(this.slot);
+				AssignableSlotInstance slot2 = component.GetSlot(this.slot);
 				if (slot2 != null)
 				{
 					slot2.Assign(this);
@@ -194,13 +193,22 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 		base.GetComponent<KPrefabID>().RemoveTag(GameTags.Assigned);
 		if (this.slot != null)
 		{
-			Assignables soleOwner = this.assignee.GetSoleOwner();
+			Ownables soleOwner = this.assignee.GetSoleOwner();
 			if (soleOwner)
 			{
-				AssignableSlotInstance slot = soleOwner.GetSlot(this.slot);
-				if (slot != null)
+				AssignableSlotInstance assignableSlotInstance = soleOwner.GetSlot(this.slot);
+				if (assignableSlotInstance != null)
 				{
-					slot.Unassign(true);
+					assignableSlotInstance.Unassign(true);
+				}
+				Equipment component = soleOwner.GetComponent<Equipment>();
+				if (component != null)
+				{
+					assignableSlotInstance = component.GetSlot(this.slot);
+					if (assignableSlotInstance != null)
+					{
+						assignableSlotInstance.Unassign(true);
+					}
 				}
 			}
 		}

@@ -323,9 +323,9 @@ namespace UnityEngine
 		/// <returns>
 		///   <para>A reference to the Cache at the index specified.</para>
 		/// </returns>
-		[NativeThrows]
 		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_GetCacheHandleAt")]
+		[NativeThrows]
 		public static Cache GetCacheAt(int cacheIndex)
 		{
 			Cache cache;
@@ -392,9 +392,9 @@ namespace UnityEngine
 		/// </summary>
 		/// <param name="src">The Cache to move.</param>
 		/// <param name="dst">The Cache which should come before the source Cache in the cache list.</param>
-		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		[NativeName("Caching_MoveCacheAfterByHandle")]
 		[NativeThrows]
+		[StaticAccessor("CachingManagerWrapper", StaticAccessorType.DoubleColon)]
 		public static void MoveCacheAfter(Cache src, Cache dst)
 		{
 			Caching.MoveCacheAfter_Injected(ref src, ref dst);

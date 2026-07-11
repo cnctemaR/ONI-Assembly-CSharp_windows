@@ -9,10 +9,10 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>Constrains the orientation and translation of an object to one or more source objects. The constrained object behaves as if it is in the hierarchy of the sources.</para>
 	/// </summary>
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/Constraints/ParentConstraint.h")]
-	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
 	[RequireComponent(typeof(Transform))]
+	[NativeHeader("Runtime/Animation/Constraints/ParentConstraint.h")]
+	[UsedByNativeCode]
+	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
 	public sealed class ParentConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private ParentConstraint()

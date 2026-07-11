@@ -9,10 +9,10 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>Constrains the rotation of an object relative to the rotation of one or more source objects.</para>
 	/// </summary>
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
 	[NativeHeader("Runtime/Animation/Constraints/RotationConstraint.h")]
 	[RequireComponent(typeof(Transform))]
+	[UsedByNativeCode]
 	public sealed class RotationConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private RotationConstraint()

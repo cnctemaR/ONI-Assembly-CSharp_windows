@@ -24,7 +24,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Mix level of dry signal in output in mB. Ranges from -10000.0 to 0.0. Default is 0.</para>
+		///   <para>Mix level of dry signal in output in millibels (mB). Ranges from -10000.0 to 0.0. Default is 0.</para>
 		/// </summary>
 		public extern float dryLevel
 		{
@@ -37,7 +37,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Room effect level at low frequencies in mB. Ranges from -10000.0 to 0.0. Default is 0.0.</para>
+		///   <para>Room effect level at low frequencies in millibels (mB). Ranges from -10000.0 to 0.0. Default is 0.0.</para>
 		/// </summary>
 		public extern float room
 		{
@@ -50,7 +50,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Room effect high-frequency level re. low frequency level in mB. Ranges from -10000.0 to 0.0. Default is 0.0.</para>
+		///   <para>Room effect high-frequency level re. low frequency level in millibels (mB). Ranges from -10000.0 to 0.0. Default is 0.0.</para>
 		/// </summary>
 		public extern float roomHF
 		{
@@ -101,7 +101,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Early reflections level relative to room effect in mB. Ranges from -10000.0 to 1000.0. Default is -10000.0.</para>
+		///   <para>Early reflections level relative to room effect in millibels (mB). Ranges from -10000.0 to 1000.0. Default is -10000.0.</para>
 		/// </summary>
 		public extern float reflectionsLevel
 		{
@@ -114,7 +114,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Late reverberation level relative to room effect in mB. Ranges from -10000.0 to 2000.0. Default is 0.0.</para>
+		///   <para>Late reverberation level relative to room effect in millibels (mB). Ranges from -10000.0 to 2000.0. Default is 0.0.</para>
 		/// </summary>
 		public extern float reflectionsDelay
 		{
@@ -127,7 +127,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Late reverberation level relative to room effect in mB. Ranges from -10000.0 to 2000.0. Default is 0.0.</para>
+		///   <para>Late reverberation level relative to room effect in millibels (mB). Ranges from -10000.0 to 2000.0. Default is 0.0.</para>
 		/// </summary>
 		public extern float reverbLevel
 		{
@@ -179,7 +179,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Reference high frequency in Hz. Ranges from 20.0 to 20000.0. Default is 5000.0.</para>
+		///   <para>Reference high frequency in hertz (Hz). Ranges from 1000.0 to 20000.0. Default is 5000.0.</para>
 		/// </summary>
 		public extern float hfReference
 		{
@@ -192,7 +192,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Room effect low-frequency level in mB. Ranges from -10000.0 to 0.0. Default is 0.0.</para>
+		///   <para>Room effect low-frequency level in millibels (mB). Ranges from -10000.0 to 0.0. Default is 0.0.</para>
 		/// </summary>
 		public extern float roomLF
 		{
@@ -205,7 +205,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Reference low-frequency in Hz. Ranges from 20.0 to 1000.0. Default is 250.0.</para>
+		///   <para>Reference low-frequency in hertz (Hz). Ranges from 20.0 to 1000.0. Default is 250.0.</para>
 		/// </summary>
 		public extern float lfReference
 		{

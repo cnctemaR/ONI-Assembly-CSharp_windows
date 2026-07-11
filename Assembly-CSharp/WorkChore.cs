@@ -3,10 +3,10 @@ using UnityEngine;
 
 public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInstance> where WorkableType : Workable
 {
-	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, Tag[] chore_tags = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool ignore_schedule_block = false, bool only_when_operational = true, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 5, bool ignore_building_assignment = false)
-		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, priority_class, priority_class_value, is_preemptable, allow_in_context_menu, 0, chore_tags)
+	public WorkChore(ChoreType chore_type, IStateMachineTarget target, ChoreProvider chore_provider = null, Tag[] chore_tags = null, bool run_until_complete = true, Action<Chore> on_complete = null, Action<Chore> on_begin = null, Action<Chore> on_end = null, bool allow_in_red_alert = true, ScheduleBlockType schedule_block = null, bool ignore_schedule_block = false, bool only_when_operational = true, KAnimFile override_anims = null, bool is_preemptable = false, bool allow_in_context_menu = true, bool allow_prioritization = true, PriorityScreen.PriorityClass priority_class = PriorityScreen.PriorityClass.basic, int priority_class_value = 5, bool ignore_building_assignment = false, bool add_to_daily_report = true)
+		: base(chore_type, target, chore_provider, run_until_complete, on_complete, on_begin, on_end, priority_class, priority_class_value, is_preemptable, allow_in_context_menu, 0, chore_tags, add_to_daily_report, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new WorkChore<WorkableType>.StatesInstance(this, target.gameObject, override_anims);
+		base.smi = new WorkChore<WorkableType>.StatesInstance(this, target.gameObject, override_anims);
 		this.onlyWhenOperational = only_when_operational;
 		if (allow_prioritization)
 		{
@@ -25,7 +25,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
 		}
-		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, this.smi.sm.workable.Get<WorkableType>(this.smi));
+		base.AddPrecondition(ChorePreconditions.instance.CanMoveTo, base.smi.sm.workable.Get<WorkableType>(base.smi));
 		Operational component = target.GetComponent<Operational>();
 		if (only_when_operational && component != null)
 		{
@@ -44,9 +44,9 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 				base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
 			}
 		}
-		if (!ignore_building_assignment && this.smi.sm.workable.Get(this.smi).GetComponent<Assignable>() != null)
+		if (!ignore_building_assignment && base.smi.sm.workable.Get(base.smi).GetComponent<Assignable>() != null)
 		{
-			base.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.smi.sm.workable.Get<Assignable>(this.smi));
+			base.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, base.smi.sm.workable.Get<Assignable>(base.smi));
 		}
 		WorkableType workableType = target as WorkableType;
 		if (workableType != null && workableType.requiredRolePerk.IsValid)
@@ -64,7 +64,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.worker.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.worker.Set(context.consumerState.gameObject, base.smi);
 		base.Begin(context);
 	}
 
@@ -72,7 +72,7 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 	{
 		if (this.onlyWhenOperational)
 		{
-			Operational component = this.smi.master.GetComponent<Operational>();
+			Operational component = base.smi.master.GetComponent<Operational>();
 			if (component != null && !component.IsOperational)
 			{
 				return false;
@@ -95,20 +95,36 @@ public class WorkChore<WorkableType> : Chore<WorkChore<WorkableType>.StatesInsta
 		{
 			return false;
 		}
-		Workable workable = this.smi.sm.workable.Get<WorkableType>(this.smi);
+		Workable workable = base.smi.sm.workable.Get<WorkableType>(base.smi);
 		if (workable == null)
 		{
 			return false;
 		}
-		int navigationCost = context.chore.driver.GetComponent<Navigator>().GetNavigationCost(workable);
-		int num = 4;
-		if (navigationCost == -1 || navigationCost < num)
+		if (this.preemption_cb != null)
 		{
-			return false;
+			if (!this.preemption_cb(context))
+			{
+				return false;
+			}
 		}
-		int navigationCost2 = context.consumerState.navigator.GetNavigationCost(workable);
-		return navigationCost2 * 2 <= navigationCost;
+		else
+		{
+			int num = 4;
+			int navigationCost = context.chore.driver.GetComponent<Navigator>().GetNavigationCost(workable);
+			if (navigationCost == -1 || navigationCost < num)
+			{
+				return false;
+			}
+			int navigationCost2 = context.consumerState.navigator.GetNavigationCost(workable);
+			if (navigationCost2 * 2 > navigationCost)
+			{
+				return false;
+			}
+		}
+		return true;
 	}
+
+	public Func<Chore.Precondition.Context, bool> preemption_cb;
 
 	public class StatesInstance : GameStateMachine<WorkChore<WorkableType>.States, WorkChore<WorkableType>.StatesInstance, WorkChore<WorkableType>, object>.GameInstance
 	{

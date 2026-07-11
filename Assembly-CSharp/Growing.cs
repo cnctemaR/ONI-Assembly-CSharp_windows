@@ -217,7 +217,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 
 		public bool CanExitStalled()
 		{
-			return !this.IsWilting() && !this.IsSleeping() && !this.IsGrown();
+			return !this.IsWilting() && !this.IsSleeping();
 		}
 
 		public AttributeModifier baseGrowingRate;
@@ -235,15 +235,16 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 		{
 			default_state = this.growing;
 			base.serializable = true;
-			this.root.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).EventTransition(GameHashes.CropSleep, this.stalled, (Growing.StatesInstance smi) => smi.IsSleeping()).Enter(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.AddToScenePartitioner))
-				.Exit(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.RemoveFromScenePartitioner));
-			this.growing.TriggerOnEnter(GameHashes.Grow, null).Update("CheckGrown", delegate(Growing.StatesInstance smi, float dt)
-			{
-				if (smi.ReachedNextHarvest())
+			this.root.Enter(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.AddToScenePartitioner)).Exit(new StateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State.Callback(Growing.RemoveFromScenePartitioner));
+			this.growing.EventTransition(GameHashes.Wilt, this.stalled, (Growing.StatesInstance smi) => smi.IsWilting()).EventTransition(GameHashes.CropSleep, this.stalled, (Growing.StatesInstance smi) => smi.IsSleeping()).TriggerOnEnter(GameHashes.Grow, null)
+				.Update("CheckGrown", delegate(Growing.StatesInstance smi, float dt)
 				{
-					smi.GoTo(this.grown);
-				}
-			}, UpdateRate.SIM_4000ms, false).ToggleStatusItem(Db.Get().CreatureStatusItems.Growing, (Growing.StatesInstance smi) => smi.master.GetComponent<Growing>())
+					if (smi.ReachedNextHarvest())
+					{
+						smi.GoTo(this.grown);
+					}
+				}, UpdateRate.SIM_4000ms, false)
+				.ToggleStatusItem(Db.Get().CreatureStatusItems.Growing, (Growing.StatesInstance smi) => smi.master.GetComponent<Growing>())
 				.Enter(delegate(Growing.StatesInstance smi)
 				{
 					GameStateMachine<Growing.States, Growing.StatesInstance, Growing, object>.State state = ((!smi.master.replanted) ? this.growing.wild : this.growing.planted);
@@ -251,6 +252,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				});
 			this.growing.wild.ToggleAttributeModifier("GrowingWild", (Growing.StatesInstance smi) => smi.wildGrowingRate, null);
 			this.growing.planted.ToggleAttributeModifier("Growing", (Growing.StatesInstance smi) => smi.baseGrowingRate, null);
+			this.stalled.EventTransition(GameHashes.WiltRecover, this.growing, (Growing.StatesInstance smi) => smi.CanExitStalled()).EventTransition(GameHashes.CropWakeUp, this.growing, (Growing.StatesInstance smi) => smi.CanExitStalled());
 			this.grown.DefaultState(this.grown.idle).TriggerOnEnter(GameHashes.Grow, null).Update("CheckNotGrown", delegate(Growing.StatesInstance smi, float dt)
 			{
 				if (!smi.ReachedNextHarvest())
@@ -290,13 +292,6 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 				smi.master.maturity.SetValue(0f);
 				smi.master.oldAge.SetValue(0f);
 			}).GoTo(this.grown.idle);
-			this.stalled.EventTransition(GameHashes.WiltRecover, this.growing, (Growing.StatesInstance smi) => smi.CanExitStalled()).EventTransition(GameHashes.CropWakeUp, this.growing, (Growing.StatesInstance smi) => smi.CanExitStalled()).Update("Growing.stalled", delegate(Growing.StatesInstance smi, float dt)
-			{
-				if (smi.master.oldAge.value >= smi.master.oldAge.GetMax())
-				{
-					smi.GoTo(this.grown.try_self_harvest);
-				}
-			}, UpdateRate.SIM_4000ms, false);
 		}
 
 		public Growing.States.GrowingStates growing;

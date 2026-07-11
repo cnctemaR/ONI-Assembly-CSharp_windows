@@ -11,7 +11,7 @@ using UnityEngineInternal;
 namespace UnityEngine
 {
 	/// <summary>
-	///   <para>Base class for all entities in Unity scenes.</para>
+	///   <para>Base class for all entities in Unity Scenes.</para>
 	/// </summary>
 	[ExcludeFromPreset]
 	[UsedByNativeCode]
@@ -323,7 +323,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The layer the game object is in. A layer is in the range [0...31].</para>
+		///   <para>The layer the game object is in.</para>
 		/// </summary>
 		public extern int layer
 		{
@@ -347,7 +347,7 @@ namespace UnityEngine
 		/// <summary>
 		///   <para>Activates/Deactivates the GameObject.</para>
 		/// </summary>
-		/// <param name="value">Activate or deactivation the  object.</param>
+		/// <param name="value">Activate or deactivate the  object.</param>
 		[NativeMethod(Name = "SetSelfActive")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void SetActive(bool value);

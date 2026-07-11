@@ -12,10 +12,10 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Base class for all objects Unity can reference.</para>
 	/// </summary>
-	[RequiredByNativeCode(GenerateProxy = true)]
-	[NativeHeader("Runtime/Export/UnityEngineObject.bindings.h")]
 	[NativeHeader("Runtime/GameCode/CloneObject.h")]
 	[NativeHeader("Runtime/SceneManager/SceneManager.h")]
+	[RequiredByNativeCode(GenerateProxy = true)]
+	[NativeHeader("Runtime/Export/UnityEngineObject.bindings.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class Object
 	{
@@ -331,15 +331,15 @@ namespace UnityEngine
 		public static extern Object[] FindObjectsOfType(Type type);
 
 		/// <summary>
-		///   <para>Makes the object target not be destroyed automatically when loading a new scene.</para>
+		///   <para>Do not destroy the target Object when loading a new Scene.</para>
 		/// </summary>
-		/// <param name="target">The object which is not destroyed on scene change.</param>
+		/// <param name="target">An Object not destroyed on Scene change.</param>
 		[FreeFunction("GetSceneManager().DontDestroyOnLoad")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void DontDestroyOnLoad(Object target);
 
 		/// <summary>
-		///   <para>Should the object be hidden, saved with the scene or modifiable by the user?</para>
+		///   <para>Should the object be hidden, saved with the Scene or modifiable by the user?</para>
 		/// </summary>
 		public extern HideFlags hideFlags
 		{

@@ -117,7 +117,7 @@ namespace UnityEngine
 		public static extern bool GetButtonUp(string buttonName);
 
 		/// <summary>
-		///   <para>Returns true while the user holds down the key identified by name. Think auto fire.</para>
+		///   <para>Returns true while the user holds down the key identified by name.</para>
 		/// </summary>
 		/// <param name="name"></param>
 		public static bool GetKey(string name)

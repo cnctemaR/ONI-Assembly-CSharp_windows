@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Text
 {
-	[MonoTODO("Serialization format not compatible with .NET")]
 	[ComVisible(true)]
+	[MonoTODO("Serialization format not compatible with .NET")]
 	[Serializable]
 	public class UTF7Encoding : Encoding
 	{

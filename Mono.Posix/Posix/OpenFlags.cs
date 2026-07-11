@@ -2,9 +2,9 @@
 
 namespace Mono.Posix
 {
-	[CLSCompliant(false)]
 	[Flags]
 	[Obsolete("Use Mono.Unix.Native.OpenFlags")]
+	[CLSCompliant(false)]
 	public enum OpenFlags
 	{
 		O_RDONLY = 0,

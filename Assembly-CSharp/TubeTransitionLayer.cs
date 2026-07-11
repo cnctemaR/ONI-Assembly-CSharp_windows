@@ -37,7 +37,7 @@ public class TubeTransitionLayer : TransitionDriver.OverrideLayer
 
 	private TravelTubeEntrance GetEntrance(int cell)
 	{
-		if (!Grid.HasTubeEntrance[cell])
+		if (!Grid.HasUsableTubeEntrance(cell, this.tube_traveller.prefabInstanceID))
 		{
 			return null;
 		}

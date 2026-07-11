@@ -47,17 +47,10 @@ public class BladderMonitor : GameStateMachine<BladderMonitor, BladderMonitor.In
 
 		public bool NeedsToPee()
 		{
-			if (base.smi == null)
-			{
-				Debug.LogWarning("How can my state machine instance be null?", null);
-				return false;
-			}
-			if (base.smi.master.gameObject == null)
-			{
-				Debug.LogWarning("How is my gameObject null?", null);
-				return false;
-			}
+			DebugUtil.DevAssert(base.master != null, new object[] { "master ref null" });
+			DebugUtil.DevAssert(!base.master.isNull, new object[] { "master isNull" });
 			KPrefabID component = base.master.GetComponent<KPrefabID>();
+			DebugUtil.DevAssert(component, new object[] { "kpid was null" });
 			return !component.HasTag(GameTags.Asleep) && this.bladder.value >= 100f;
 		}
 

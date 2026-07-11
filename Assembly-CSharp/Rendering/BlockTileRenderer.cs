@@ -320,13 +320,14 @@ namespace Rendering
 				this.rootPosition = new Vector3(0f, 0f, Grid.GetLayerZ(def.SceneLayer));
 				this.element = element;
 				this.material = new Material(def.BlockTileMaterial);
-				if (def.SceneLayer == Grid.SceneLayer.TileMain)
+				if (def.BlockTileIsTransparent)
+				{
+					this.material.renderQueue = RenderQueues.Liquid;
+					this.decorZOffset = Grid.GetLayerZ(Grid.SceneLayer.TileFront) - Grid.GetLayerZ(Grid.SceneLayer.Liquid) - 1f;
+				}
+				else if (def.SceneLayer == Grid.SceneLayer.TileMain)
 				{
 					this.material.renderQueue = RenderQueues.BlockTiles;
-					if (def.BlockTileIsTransparent)
-					{
-						this.material.renderQueue = RenderQueues.Liquid - 1;
-					}
 				}
 				this.material.DisableKeyword("ENABLE_SHINE");
 				if (element != SimHashes.Void)
@@ -506,7 +507,7 @@ namespace Rendering
 				}
 				if (this.decorRenderInfo != null)
 				{
-					this.decorRenderInfo.Rebuild(renderer, this.occupiedCells, chunk_x, chunk_y, 16, vertices, uvs, colours, indices, this.element);
+					this.decorRenderInfo.Rebuild(renderer, this.occupiedCells, chunk_x, chunk_y, this.decorZOffset, 16, vertices, uvs, colours, indices, this.element);
 				}
 			}
 
@@ -591,6 +592,8 @@ namespace Rendering
 
 			private SimHashes element;
 
+			private float decorZOffset = -1f;
+
 			private const float scale = 0.5f;
 
 			private const float core_size = 256f;
@@ -620,7 +623,11 @@ namespace Rendering
 				this.decorInfo = decorInfo;
 				this.queryLayer = query_layer;
 				this.material = new Material(def.BlockTileMaterial);
-				if (def.SceneLayer == Grid.SceneLayer.TileMain)
+				if (def.BlockTileIsTransparent)
+				{
+					this.material.renderQueue = RenderQueues.Liquid;
+				}
+				else if (def.SceneLayer == Grid.SceneLayer.TileMain)
 				{
 					this.material.renderQueue = RenderQueues.BlockTiles;
 				}
@@ -665,7 +672,7 @@ namespace Rendering
 				}
 			}
 
-			public void Rebuild(BlockTileRenderer renderer, Dictionary<int, int> occupiedCells, int chunk_x, int chunk_y, int chunkEdgeSize, List<Vector3> vertices, List<Vector2> uvs, List<Color> colours, List<int> indices, SimHashes element)
+			public void Rebuild(BlockTileRenderer renderer, Dictionary<int, int> occupiedCells, int chunk_x, int chunk_y, float z_offset, int chunkEdgeSize, List<Vector3> vertices, List<Vector2> uvs, List<Color> colours, List<int> indices, SimHashes element)
 			{
 				vertices.Clear();
 				uvs.Clear();
@@ -681,7 +688,7 @@ namespace Rendering
 						{
 							Color cellColour = renderer.GetCellColour(num, element);
 							BlockTileRenderer.Bits decorConnectionBits = renderer.GetDecorConnectionBits(j, i, this.queryLayer);
-							this.AddDecor(j, i, decorConnectionBits, cellColour, vertices, uvs, this.triangles, colours);
+							this.AddDecor(j, i, z_offset, decorConnectionBits, cellColour, vertices, uvs, this.triangles, colours);
 						}
 					}
 				}
@@ -713,7 +720,7 @@ namespace Rendering
 				}
 			}
 
-			private void AddDecor(int x, int y, BlockTileRenderer.Bits connection_bits, Color colour, List<Vector3> vertices, List<Vector2> uvs, List<BlockTileRenderer.DecorRenderInfo.TriangleInfo> triangles, List<Color> colours)
+			private void AddDecor(int x, int y, float z_offset, BlockTileRenderer.Bits connection_bits, Color colour, List<Vector3> vertices, List<Vector2> uvs, List<BlockTileRenderer.DecorRenderInfo.TriangleInfo> triangles, List<Color> colours)
 			{
 				for (int i = 0; i < this.decorInfo.decor.Length; i++)
 				{
@@ -729,7 +736,7 @@ namespace Rendering
 							{
 								int num2 = (int)((float)(decor.variants.Length - 1) * num);
 								int count = vertices.Count;
-								Vector3 vector = new Vector3((float)x, (float)y, -1f) + decor.variants[num2].offset;
+								Vector3 vector = new Vector3((float)x, (float)y, z_offset) + decor.variants[num2].offset;
 								foreach (Vector3 vector2 in decor.variants[num2].atlasItem.vertices)
 								{
 									vertices.Add(vector2 + vector);

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Notification
 {
-	public Notification(string title, NotificationType type, HashedString group, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null)
+	public Notification(string title, NotificationType type, HashedString group, Func<List<Notification>, object, string> tooltip = null, object tooltip_data = null, bool expires = true, float delay = 0f, Notification.ClickCallback custom_click_callback = null, object custom_click_data = null, Transform click_focus = null)
 	{
 		this.titleText = title;
 		this.Group = group;
@@ -16,11 +16,14 @@ public class Notification
 		this.Delay = delay;
 		this.customClickCallback = custom_click_callback;
 		this.customClickData = custom_click_data;
+		this.clickFocus = click_focus;
 	}
 
 	public NotificationType Type { get; set; }
 
 	public Notifier Notifier { get; set; }
+
+	public Transform clickFocus { get; set; }
 
 	public float Time { get; set; }
 
@@ -106,11 +109,7 @@ public class Notification
 
 	public HashedString Group;
 
-	public Vector3 Position;
-
 	public object tooltipData;
-
-	public bool hasLocation = true;
 
 	public bool expires = true;
 

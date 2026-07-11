@@ -2,9 +2,9 @@
 
 namespace System.Runtime.InteropServices
 {
+	[Obsolete]
 	[InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 	[Guid("0000000c-0000-0000-c000-000000000046")]
-	[Obsolete]
 	[ComImport]
 	public interface UCOMIStream
 	{

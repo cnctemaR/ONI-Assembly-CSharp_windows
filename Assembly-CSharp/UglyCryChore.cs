@@ -7,9 +7,9 @@ using UnityEngine;
 public class UglyCryChore : Chore<UglyCryChore.StatesInstance>
 {
 	public UglyCryChore(ChoreType chore_type, IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.UglyCry, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new UglyCryChore.StatesInstance(this, target.gameObject);
+		base.smi = new UglyCryChore.StatesInstance(this, target.gameObject);
 	}
 
 	public class StatesInstance : GameStateMachine<UglyCryChore.States, UglyCryChore.StatesInstance, UglyCryChore, object>.GameInstance

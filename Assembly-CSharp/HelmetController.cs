@@ -12,27 +12,48 @@ public class HelmetController : KMonoBehaviour
 
 	private KBatchedAnimController GetAssigneeController()
 	{
-		KBatchedAnimController kbatchedAnimController = null;
 		Equippable component = base.GetComponent<Equippable>();
 		if (component.assignee != null)
 		{
-			Transform transform = ((!(component.assignee is MinionIdentity)) ? (component.assignee as MinionAssignablesProxy).GetTargetGameObject().transform : (component.assignee as MinionIdentity).transform);
-			kbatchedAnimController = transform.GetComponent<KBatchedAnimController>();
+			GameObject assigneeGameObject = this.GetAssigneeGameObject(component.assignee);
+			if (assigneeGameObject)
+			{
+				return assigneeGameObject.GetComponent<KBatchedAnimController>();
+			}
 		}
-		return kbatchedAnimController;
+		return null;
+	}
+
+	private GameObject GetAssigneeGameObject(IAssignableIdentity ass_id)
+	{
+		GameObject gameObject = null;
+		MinionAssignablesProxy minionAssignablesProxy = ass_id as MinionAssignablesProxy;
+		if (minionAssignablesProxy)
+		{
+			gameObject = minionAssignablesProxy.GetTargetGameObject();
+		}
+		else
+		{
+			MinionIdentity minionIdentity = ass_id as MinionIdentity;
+			if (minionIdentity)
+			{
+				gameObject = minionIdentity.gameObject;
+			}
+		}
+		return gameObject;
 	}
 
 	private void OnEquipped(object data)
 	{
 		Equippable component = base.GetComponent<Equippable>();
 		this.ShowHelmet();
-		GameObject gameObject = ((!(component.assignee is MinionIdentity)) ? (component.assignee as MinionAssignablesProxy).GetTargetGameObject() : (component.assignee as MinionIdentity).gameObject);
-		gameObject.Subscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
-		gameObject.Subscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
-		gameObject.Subscribe(1347184327, new Action<object>(this.OnPathAdvanced));
+		GameObject assigneeGameObject = this.GetAssigneeGameObject(component.assignee);
+		assigneeGameObject.Subscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
+		assigneeGameObject.Subscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
+		assigneeGameObject.Subscribe(1347184327, new Action<object>(this.OnPathAdvanced));
 		this.in_tube = false;
 		this.is_flying = false;
-		this.owner_navigator = gameObject.GetComponent<Navigator>();
+		this.owner_navigator = assigneeGameObject.GetComponent<Navigator>();
 	}
 
 	private void OnUnequipped(object data)
@@ -42,13 +63,15 @@ public class HelmetController : KMonoBehaviour
 		if (component != null)
 		{
 			this.HideHelmet();
-			IAssignableIdentity assignee = component.assignee;
-			if (assignee != null)
+			if (component.assignee != null)
 			{
-				GameObject gameObject = ((!(component.assignee is MinionIdentity)) ? (component.assignee as MinionAssignablesProxy).GetTargetGameObject() : (component.assignee as MinionIdentity).gameObject);
-				gameObject.Unsubscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
-				gameObject.Unsubscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
-				gameObject.Unsubscribe(1347184327, new Action<object>(this.OnPathAdvanced));
+				GameObject assigneeGameObject = this.GetAssigneeGameObject(component.assignee);
+				if (assigneeGameObject)
+				{
+					assigneeGameObject.Unsubscribe(961737054, new Action<object>(this.OnBeginRecoverBreath));
+					assigneeGameObject.Unsubscribe(-2037519664, new Action<object>(this.OnEndRecoverBreath));
+					assigneeGameObject.Unsubscribe(1347184327, new Action<object>(this.OnPathAdvanced));
+				}
 			}
 		}
 	}
@@ -60,9 +83,12 @@ public class HelmetController : KMonoBehaviour
 		{
 			return;
 		}
-		KAnimFile anim = Assets.GetAnim(this.anim_file);
 		KAnimHashedString kanimHashedString = new KAnimHashedString("snapTo_neck");
-		assigneeController.GetComponent<SymbolOverrideController>().AddSymbolOverride(kanimHashedString, anim.GetData().build.GetSymbol(kanimHashedString), 6);
+		if (!string.IsNullOrEmpty(this.anim_file))
+		{
+			KAnimFile anim = Assets.GetAnim(this.anim_file);
+			assigneeController.GetComponent<SymbolOverrideController>().AddSymbolOverride(kanimHashedString, anim.GetData().build.GetSymbol(kanimHashedString), 6);
+		}
 		assigneeController.SetSymbolVisiblity(kanimHashedString, true);
 		this.is_shown = true;
 		this.UpdateJets();
@@ -77,12 +103,15 @@ public class HelmetController : KMonoBehaviour
 			return;
 		}
 		KAnimHashedString kanimHashedString = "snapTo_neck";
-		SymbolOverrideController component = assigneeController.GetComponent<SymbolOverrideController>();
-		if (component == null)
+		if (!string.IsNullOrEmpty(this.anim_file))
 		{
-			return;
+			SymbolOverrideController component = assigneeController.GetComponent<SymbolOverrideController>();
+			if (component == null)
+			{
+				return;
+			}
+			component.RemoveSymbolOverride(kanimHashedString, 6);
 		}
-		component.RemoveSymbolOverride(kanimHashedString, 6);
 		assigneeController.SetSymbolVisiblity(kanimHashedString, false);
 		this.UpdateJets();
 	}
@@ -125,7 +154,7 @@ public class HelmetController : KMonoBehaviour
 		this.glow_go = null;
 	}
 
-	private GameObject AddTrackedAnim(string name, KAnimFile anim_file, string anim_clip, Grid.SceneLayer layer, string symbol_name)
+	private GameObject AddTrackedAnim(string name, KAnimFile tracked_anim_file, string anim_clip, Grid.SceneLayer layer, string symbol_name)
 	{
 		KBatchedAnimController assigneeController = this.GetAssigneeController();
 		if (assigneeController == null)
@@ -139,7 +168,7 @@ public class HelmetController : KMonoBehaviour
 		KPrefabID kprefabID = gameObject.AddComponent<KPrefabID>();
 		kprefabID.PrefabTag = new Tag(text);
 		KBatchedAnimController kbatchedAnimController = gameObject.AddComponent<KBatchedAnimController>();
-		kbatchedAnimController.AnimFiles = new KAnimFile[] { anim_file };
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { tracked_anim_file };
 		kbatchedAnimController.initialAnim = anim_clip;
 		kbatchedAnimController.isMovable = true;
 		kbatchedAnimController.sceneLayer = layer;
@@ -192,7 +221,7 @@ public class HelmetController : KMonoBehaviour
 		}
 	}
 
-	public string anim_file = "helm_oxygen_kanim";
+	public string anim_file;
 
 	public bool has_jets;
 

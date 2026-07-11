@@ -4,9 +4,9 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine
 {
+	[RequiredByNativeCode]
 	[NativeClass(null)]
 	[ExcludeFromObjectFactory]
-	[RequiredByNativeCode]
 	[StructLayout(LayoutKind.Sequential)]
 	internal class FailedToLoadScriptObject : Object
 	{

@@ -35,10 +35,15 @@ namespace UnityEngine.Timeline
 		{
 			this.particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
 			ParticleSystem[] componentsInChildren = this.particleSystem.gameObject.GetComponentsInChildren<ParticleSystem>();
+			uint num = this.m_RandomSeed;
 			foreach (ParticleSystem particleSystem in componentsInChildren)
 			{
-				particleSystem.useAutoRandomSeed = false;
-				particleSystem.randomSeed = this.m_RandomSeed;
+				if (particleSystem.useAutoRandomSeed)
+				{
+					particleSystem.useAutoRandomSeed = false;
+					particleSystem.randomSeed = num;
+					num += 1U;
+				}
 			}
 		}
 
@@ -46,10 +51,6 @@ namespace UnityEngine.Timeline
 		{
 			if (!(this.particleSystem == null) && this.particleSystem.gameObject.activeInHierarchy)
 			{
-				if (this.particleSystem.randomSeed != this.m_RandomSeed)
-				{
-					this.SetRandomSeed();
-				}
 				float num = (float)playable.GetTime<Playable>();
 				bool flag = Mathf.Approximately(this.m_LastTime, -1f) || !Mathf.Approximately(this.m_LastTime, num);
 				if (flag)

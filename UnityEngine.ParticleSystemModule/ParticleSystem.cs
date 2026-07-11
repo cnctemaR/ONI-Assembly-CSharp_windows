@@ -8892,6 +8892,9 @@ namespace UnityEngine
 				}
 			}
 
+			/// <summary>
+			///   <para>Mesh particles will rotate around this axis.</para>
+			/// </summary>
 			public Vector3 axisOfRotation
 			{
 				get

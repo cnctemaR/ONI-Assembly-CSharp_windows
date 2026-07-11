@@ -308,12 +308,12 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.ComponentModel.NotifyParentProperty(true)]
+		[global::System.ComponentModel.Editor("System.Diagnostics.Design.WorkingDirectoryEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		[MonitoringDescription("The initial directory for this process.")]
-		[global::System.ComponentModel.Editor("System.Diagnostics.Design.WorkingDirectoryEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", "System.Drawing.Design.UITypeEditor, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
+		[global::System.ComponentModel.NotifyParentProperty(true)]
 		[global::System.ComponentModel.DefaultValue("")]
+		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
 		public string WorkingDirectory
 		{
 			get

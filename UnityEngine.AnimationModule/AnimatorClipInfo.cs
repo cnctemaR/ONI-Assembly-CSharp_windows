@@ -8,9 +8,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Information about clip being played and blended by the Animator.</para>
 	/// </summary>
-	[UsedByNativeCode]
-	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
 	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[UsedByNativeCode]
 	public struct AnimatorClipInfo
 	{
 		/// <summary>

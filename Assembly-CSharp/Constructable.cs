@@ -106,7 +106,10 @@ public class Constructable : Workable, ISaveLoadable
 					{
 						component5.Subscribe(-21016276, delegate(object data)
 						{
-							this.FinishConstruction(connections);
+							GameScheduler.Instance.Schedule("finishConstruction", 0.001f, delegate(object data2)
+							{
+								this.FinishConstruction(connections);
+							}, null, null);
 						});
 					}
 					else
@@ -181,7 +184,7 @@ public class Constructable : Workable, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null);
+		this.invalidLocation = new Notification(MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.INVALIDCONSTRUCTIONLOCATION.TOOLTIP + notificationList.ReduceMessages(false), null, true, 0f, null, null, null);
 		CellOffset[][] array = OffsetGroups.InvertedStandardTable;
 		if (this.building.Def.IsTilePiece)
 		{
@@ -532,6 +535,7 @@ public class Constructable : Workable, ISaveLoadable
 						diggable.gameObject.SetActive(true);
 						diggable.transform.SetPosition(Grid.CellToPosCBC(offset_cell, Grid.SceneLayer.Move));
 						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
+						Grid.Objects[offset_cell, 7] = diggable.gameObject;
 					}
 					else
 					{
@@ -566,7 +570,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			ChoreType build = Db.Get().ChoreTypes.Build;
 			Tag[] array = this.choreTags;
-			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)

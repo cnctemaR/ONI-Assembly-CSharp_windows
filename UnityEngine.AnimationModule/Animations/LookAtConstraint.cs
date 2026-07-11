@@ -12,10 +12,10 @@ namespace UnityEngine.Animations
 	///           The LookAtConstraint is a simplified Animations.AimConstraint typically used with a Camera.
 	///       </para>
 	/// </summary>
-	[UsedByNativeCode]
-	[RequireComponent(typeof(Transform))]
 	[NativeHeader("Runtime/Animation/Constraints/LookAtConstraint.h")]
 	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
+	[RequireComponent(typeof(Transform))]
+	[UsedByNativeCode]
 	public sealed class LookAtConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private LookAtConstraint()

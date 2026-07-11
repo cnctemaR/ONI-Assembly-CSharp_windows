@@ -26,7 +26,7 @@ public class AstronautTrainingCenter : Workable
 
 	private Chore CreateChore()
 	{
-		WorkChore<AstronautTrainingCenter> workChore = new WorkChore<AstronautTrainingCenter>(Db.Get().ChoreTypes.Train, this, null, null, true, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+		WorkChore<AstronautTrainingCenter> workChore = new WorkChore<AstronautTrainingCenter>(Db.Get().ChoreTypes.Train, this, null, null, true, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsRole, AstronautTrainee.ID);
 		workChore.AddPrecondition(ChorePreconditions.instance.HasNotMasteredRole, AstronautTrainee.ID);
 		return workChore;

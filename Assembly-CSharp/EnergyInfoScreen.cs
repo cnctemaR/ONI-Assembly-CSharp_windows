@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class EnergyInfoScreen : TargetScreen
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<Generator>() != null || target.GetComponent<Wire>() != null || target.GetComponent<Battery>() != null || target.GetComponent<EnergyConsumer>() != null;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

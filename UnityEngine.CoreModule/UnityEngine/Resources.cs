@@ -49,9 +49,12 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Loads an asset stored at path in a Resources folder.</para>
+		///   <para>Loads an asset stored at path in a folder called Resources.</para>
 		/// </summary>
-		/// <param name="path">Pathname of the target folder. When using the empty string (i.e., ""), the function will load the entire contents of the Resources folder.</param>
+		/// <param name="path">Pathname of the target folder.</param>
+		/// <returns>
+		///   <para>The requested asset returned as a Type.</para>
+		/// </returns>
 		public static Object Load(string path)
 		{
 			return Resources.Load(path, typeof(Object));
@@ -67,6 +70,9 @@ namespace UnityEngine
 		/// </summary>
 		/// <param name="path">Pathname of the target folder. When using the empty string (i.e., ""), the function will load the entire contents of the Resources folder.</param>
 		/// <param name="systemTypeInstance">Type filter for objects returned.</param>
+		/// <returns>
+		///   <para>The requested asset returned as an Object.</para>
+		/// </returns>
 		[TypeInferenceRule(TypeInferenceRules.TypeReferencedBySecondArgument)]
 		[NativeThrows]
 		[FreeFunction("Resources_Bindings::Load")]
@@ -77,8 +83,6 @@ namespace UnityEngine
 		///   <para>Asynchronously loads an asset stored at path in a Resources folder.</para>
 		/// </summary>
 		/// <param name="path">Pathname of the target folder. When using the empty string (i.e., ""), the function will load the entire contents of the Resources folder.</param>
-		/// <param name="systemTypeInstance">Type filter for objects returned.</param>
-		/// <param name="type"></param>
 		public static ResourceRequest LoadAsync(string path)
 		{
 			return Resources.LoadAsync(path, typeof(Object));
@@ -121,7 +125,6 @@ namespace UnityEngine
 		///   <para>Loads all assets in a folder or file at path in a Resources folder.</para>
 		/// </summary>
 		/// <param name="path">Pathname of the target folder. When using the empty string (i.e., ""), the function will load the entire contents of the Resources folder.</param>
-		/// <param name="systemTypeInstance">Type filter for objects returned.</param>
 		public static Object[] LoadAll(string path)
 		{
 			return Resources.LoadAll(path, typeof(Object));

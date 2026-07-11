@@ -6,7 +6,7 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	/// <summary>
-	///   <para>LayerMask allow you to display the LayerMask popup menu in the inspector.</para>
+	///   <para>Specifies Layers to use in a Physics.Raycast.</para>
 	/// </summary>
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/BaseClasses/TagManager.h")]

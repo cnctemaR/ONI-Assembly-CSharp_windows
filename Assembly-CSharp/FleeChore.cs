@@ -5,12 +5,12 @@ using UnityEngine;
 public class FleeChore : Chore<FleeChore.StatesInstance>
 {
 	public FleeChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new FleeChore.StatesInstance(this);
-		this.smi.sm.self.Set(this.gameObject, this.smi);
+		base.smi = new FleeChore.StatesInstance(this);
+		base.smi.sm.self.Set(this.gameObject, base.smi);
 		this.nav = this.gameObject.GetComponent<Navigator>();
-		this.smi.sm.fleeFromTarget.Set(enemy, this.smi);
+		base.smi.sm.fleeFromTarget.Set(enemy, base.smi);
 	}
 
 	private bool isInFavoredDirection(int cell, int fleeFromCell)
@@ -32,9 +32,9 @@ public class FleeChore : Chore<FleeChore.StatesInstance>
 
 	protected override void OnStateMachineStop(string reason, StateMachine.Status status)
 	{
-		if (this.smi.sm.fleeToTarget.Get(this.smi) != null)
+		if (base.smi.sm.fleeToTarget.Get(base.smi) != null)
 		{
-			ChoreHelpers.DestroyLocator(this.smi.sm.fleeToTarget.Get(this.smi));
+			ChoreHelpers.DestroyLocator(base.smi.sm.fleeToTarget.Get(base.smi));
 		}
 		base.OnStateMachineStop(reason, status);
 	}

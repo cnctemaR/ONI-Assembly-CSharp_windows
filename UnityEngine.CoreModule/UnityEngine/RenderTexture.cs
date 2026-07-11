@@ -12,9 +12,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Render textures are textures that can be rendered to.</para>
 	/// </summary>
+	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
-	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
 	[NativeHeader("Runtime/Camera/Camera.h")]
 	public class RenderTexture : Texture
 	{
@@ -203,7 +203,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Does this render texture use sRGB read/write conversions (Read Only).</para>
+		///   <para>Does this render texture use sRGB read/write conversions? (Read Only).</para>
 		/// </summary>
 		[NativeProperty("SRGBReadWrite")]
 		public extern bool sRGB

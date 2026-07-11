@@ -473,8 +473,8 @@ namespace System.Security.Cryptography.X509Certificates
 			return this.Export(contentType, null);
 		}
 
-		[MonoTODO("X509ContentType.Pfx/Pkcs12 and SerializedCert are not supported")]
 		[ComVisible(false)]
+		[MonoTODO("X509ContentType.Pfx/Pkcs12 and SerializedCert are not supported")]
 		public virtual byte[] Export(X509ContentType contentType, string password)
 		{
 			byte[] array = ((password != null) ? Encoding.UTF8.GetBytes(password) : null);

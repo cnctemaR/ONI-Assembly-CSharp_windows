@@ -86,6 +86,15 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		base.OnShow(show);
 	}
 
+	private int CompareRecipe(ComplexRecipe a, ComplexRecipe b)
+	{
+		if (a.sortOrder != b.sortOrder)
+		{
+			return a.sortOrder - b.sortOrder;
+		}
+		return StringComparer.InvariantCulture.Compare(a.id, b.id);
+	}
+
 	public void Initialize(ComplexFabricator target)
 	{
 		if (target == null)
@@ -96,7 +105,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		this.targetFab = target;
 		base.gameObject.SetActive(true);
 		ComplexRecipe[] recipes = this.targetFab.GetRecipes();
-		Array.Sort<ComplexRecipe>(recipes, (ComplexRecipe a, ComplexRecipe b) => a.sortOrder - b.sortOrder);
+		Array.Sort<ComplexRecipe>(recipes, new Comparison<ComplexRecipe>(this.CompareRecipe));
 		this.recipeMap = new Dictionary<GameObject, ComplexRecipe>();
 		this.recipeToggles.ForEach(delegate(GameObject rbi)
 		{
@@ -111,21 +120,21 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		case ComplexFabricatorSideScreen.StyleSetting.ListInputOutput:
 			component.constraintCount = 1;
 			component.cellSize = new Vector2(262f, component.cellSize.y);
-			goto IL_01B3;
+			goto IL_01A2;
 		case ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator:
 			component.constraintCount = 128;
 			component.cellSize = new Vector2(78f, 96f);
 			this.buttonScrollContainer.minHeight = 100f;
-			goto IL_01B3;
+			goto IL_01A2;
 		case ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid:
 			component.constraintCount = 1;
 			component.cellSize = new Vector2(264f, 64f);
 			this.buttonScrollContainer.minHeight = 66f;
-			goto IL_01B3;
+			goto IL_01A2;
 		}
 		component.constraintCount = 3;
 		component.cellSize = new Vector2(116f, component.cellSize.y);
-		IL_01B3:
+		IL_01A2:
 		int num = 0;
 		ComplexRecipe[] array = recipes;
 		for (int i = 0; i < array.Length; i++)
@@ -138,6 +147,14 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				flag = true;
 			}
 			else if (<Initialize>c__AnonStorey2.recipe.RequiresTechUnlock() && <Initialize>c__AnonStorey2.recipe.IsRequiredTechUnlocked())
+			{
+				flag = true;
+			}
+			else if (target.GetRecipeQueueCount(<Initialize>c__AnonStorey2.recipe) != 0)
+			{
+				flag = true;
+			}
+			else if (this.AnyRecipeRequirementsDiscovered(<Initialize>c__AnonStorey2.recipe))
 			{
 				flag = true;
 			}
@@ -177,7 +194,7 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				case ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator:
-					goto IL_0608;
+					goto IL_0630;
 				case ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid:
 				{
 					newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButtonQueueHybrid, this.recipeGrid, false);
@@ -212,9 +229,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				default:
-					goto IL_0608;
+					goto IL_0630;
 				}
-				IL_06AB:
+				IL_06D3:
 				if (this.targetFab.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator)
 				{
 					newToggle.GetComponentInChildren<LocText>().text = <Initialize>c__AnonStorey2.recipe.results[0].material.ProperName();
@@ -237,8 +254,8 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				};
 				entryGO.SetActive(true);
 				this.recipeToggles.Add(entryGO);
-				goto IL_0814;
-				IL_0608:
+				goto IL_083C;
+				IL_0630:
 				newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 				entryGO = newToggle.gameObject;
 				Image componentInChildrenOnly = newToggle.gameObject.GetComponentInChildrenOnly<Image>();
@@ -252,9 +269,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					componentInChildrenOnly.sprite = uisprite2.first;
 					componentInChildrenOnly.color = uisprite2.second;
 				}
-				goto IL_06AB;
+				goto IL_06D3;
 			}
-			IL_0814:;
+			IL_083C:;
 		}
 		if (this.recipeToggles.Count > 0)
 		{
@@ -344,6 +361,18 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 			}
 		}
 		return flag;
+	}
+
+	private bool AnyRecipeRequirementsDiscovered(ComplexRecipe recipe)
+	{
+		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
+		{
+			if (WorldInventory.Instance.IsDiscovered(recipeElement.material))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void Update()

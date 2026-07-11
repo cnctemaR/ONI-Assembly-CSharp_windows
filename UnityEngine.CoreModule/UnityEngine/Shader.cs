@@ -11,11 +11,11 @@ namespace UnityEngine
 	///   <para>Shader scripts used for all rendering.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Graphics/ShaderScriptBindings.h")]
-	[NativeHeader("Runtime/Shaders/Shader.h")]
-	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Shaders/ShaderNameRegistry.h")]
-	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
+	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
 	[NativeHeader("Runtime/Misc/ResourceManager.h")]
+	[NativeHeader("Runtime/Shaders/GpuPrograms/ShaderVariantCollection.h")]
+	[NativeHeader("Runtime/Shaders/Shader.h")]
 	public sealed class Shader : Object
 	{
 		private Shader()

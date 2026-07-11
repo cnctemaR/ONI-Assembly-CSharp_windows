@@ -436,7 +436,7 @@ namespace STRINGS
 			}
 		}
 
-		public class AICONTROL
+		public class B6_AICONTROL
 		{
 			public static LocString TITLE = "Re: Objectionable Request";
 
@@ -468,7 +468,7 @@ namespace STRINGS
 			}
 		}
 
-		public class ARTHISTORYREQUEST
+		public class B51_ARTHISTORYREQUEST
 		{
 			public static LocString TITLE = "Re: Implant Database Request";
 
@@ -492,7 +492,7 @@ namespace STRINGS
 			}
 		}
 
-		public class ATOMICONRECRUITMENT
+		public class A4_ATOMICONRECRUITMENT
 		{
 			public static LocString TITLE = "Results from Atomicon";
 
@@ -508,7 +508,7 @@ namespace STRINGS
 			}
 		}
 
-		public class FRANKIESBLOG
+		public class A3_FRANKIESBLOG
 		{
 			public static LocString TITLE = "Re: frankie's bloggg";
 
@@ -532,7 +532,23 @@ namespace STRINGS
 			}
 		}
 
-		public class HOLLANDSDOG
+		public class B7_FRIENDLYEMAIL
+		{
+			public static LocString TITLE = "Hiiiii!";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+			public class BODY
+			{
+				public static LocString EMAILHEADER1 = "<smallcaps>To: <b>Dr. Techna</b><alpha=#AA><size=12> <ntechna@gravitas.nova></size></color>\nFrom: <b>Dr. Jones</b><alpha=#AA><size=12> <ejones@gravitas.nova></size></color></smallcaps>\n------------------\n";
+
+				public static LocString CONTAINER1 = "<indent=5%>Omg, <i>hi</i> Nikola!\n\nHave you heard about the super weird thing that's been happening in the kitchen lately? Joshua's lunch has disappeared from the fridge like, every day for the past week!\n\nThere's a <i>ton</i> of cameras in that room too but all anyone can see is this like, spiky blond hair behind the fridge door.\n\nSo weird right? ;)\n\nAnyway, totally unrelated, but Gravitas' computer system has been having this inexplicable glitch where datasets going back six months get <i>totally</i> wiped for any employee with the initials \"N.T.\"\n\nDon't worry though! I'm sure I'll have it fixed before it affects any of <i>your</i> work.\n\nByeee!</indent>";
+
+				public static LocString SIGNATURE1 = "\nXOXO,\nDr. Jones\n<size=11>Information and Statistics Department\nThe Gravitas Facility</size>\n------------------\n";
+			}
+		}
+
+		public class B1_HOLLANDSDOG
 		{
 			public static LocString TITLE = "Re: dr. holland's dog";
 
@@ -558,7 +574,7 @@ namespace STRINGS
 			}
 		}
 
-		public class MEMORYCHIP
+		public class B50_MEMORYCHIP
 		{
 			public static LocString TITLE = "Duplicant Memory Solution";
 
@@ -574,7 +590,7 @@ namespace STRINGS
 			}
 		}
 
-		public class MYPENS
+		public class B4_MYPENS
 		{
 			public static LocString TITLE = "SUBJECT: MY PENS";
 
@@ -590,7 +606,7 @@ namespace STRINGS
 			}
 		}
 
-		public class NEWEMPLOYEE
+		public class A7_NEWEMPLOYEE
 		{
 			public static LocString TITLE = "Welcome, New Employee";
 
@@ -606,7 +622,7 @@ namespace STRINGS
 			}
 		}
 
-		public class NEWSECURITY2
+		public class A6_NEWSECURITY2
 		{
 			public static LocString TITLE = "New Security System?";
 
@@ -622,7 +638,7 @@ namespace STRINGS
 			}
 		}
 
-		public class NEWSECURITY3
+		public class A8_NEWSECURITY3
 		{
 			public static LocString TITLE = "They Stole Our DNA";
 
@@ -638,7 +654,7 @@ namespace STRINGS
 			}
 		}
 
-		public class POLITEREQUEST
+		public class B8_POLITEREQUEST
 		{
 			public static LocString TITLE = "Polite Request";
 
@@ -654,7 +670,7 @@ namespace STRINGS
 			}
 		}
 
-		public class PRELIMINARYCALCULATIONS
+		public class A0_PRELIMINARYCALCULATIONS
 		{
 			public static LocString TITLE = "Preliminary Calculations";
 
@@ -670,7 +686,7 @@ namespace STRINGS
 			}
 		}
 
-		public class REMYPENS
+		public class B4_REMYPENS
 		{
 			public static LocString TITLE = "Re: MY PENS";
 
@@ -686,7 +702,7 @@ namespace STRINGS
 			}
 		}
 
-		public class RESEARCHGIANTARTICLE
+		public class A1_RESEARCHGIANTARTICLE
 		{
 			public static LocString TITLE = "Re: Have you seen this?";
 
@@ -712,7 +728,7 @@ namespace STRINGS
 			}
 		}
 
-		public class RETEMPORALBOWUPDATE
+		public class B3_RETEMPORALBOWUPDATE
 		{
 			public static LocString TITLE = "RE: To Otto (Spec Changes)";
 
@@ -732,7 +748,7 @@ namespace STRINGS
 			}
 		}
 
-		public class TEMPORALBOWUPDATE
+		public class B2_TEMPORALBOWUPDATE
 		{
 			public static LocString TITLE = "Spec Changes";
 
@@ -746,7 +762,7 @@ namespace STRINGS
 			}
 		}
 
-		public class THEJANITOR
+		public class A5_THEJANITOR
 		{
 			public static LocString TITLE = "Re: omg the janitor";
 
@@ -774,7 +790,7 @@ namespace STRINGS
 			}
 		}
 
-		public class THERMODYNAMICLAWS
+		public class A2_THERMODYNAMICLAWS
 		{
 			public static LocString TITLE = "The Laws of Thermodynamics";
 
@@ -800,7 +816,7 @@ namespace STRINGS
 			}
 		}
 
-		public class ANTS
+		public class B5_ANTS
 		{
 			public static LocString TITLE = "Ants";
 
@@ -812,7 +828,7 @@ namespace STRINGS
 			}
 		}
 
-		public class CLEANUPTHEMESS
+		public class A8_CLEANUPTHEMESS
 		{
 			public static LocString TITLE = "Cleaning Up The Mess";
 
@@ -824,7 +840,7 @@ namespace STRINGS
 			}
 		}
 
-		public class DEBRIEF
+		public class A6_DEBRIEF
 		{
 			public static LocString TITLE = "Debrief";
 
@@ -836,7 +852,21 @@ namespace STRINGS
 			}
 		}
 
-		public class EMPLOYEEPROCESSING
+		public class B2_ELLIESBIRTHDAY
+		{
+			public static LocString TITLE = "Office Cake";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: NONE";
+
+			public class BODY
+			{
+				public static LocString CONTAINER1 = "Joshua: Hey Max, I'm passing around the collection pan. Wanna pitch in a couple bucks to get a cake for Ellie?\n\nMax: Uh... I think I'll pass.\n\nJoshua: C'mon Max, it's her birthday.\n\nMax: Alright, fine. But this is all I got.\n\nMax: I don't get why you hang out with her at all. Isn't she kind of... you know, mean?\n\nJoshua: Even the meanest people have a little niceness in them somewhere.\n\nMax: Huh. Well, good luck finding it.\n\nJoshua: Thanks for the cake money, Max.\n------------------\n";
+
+				public static LocString CONTAINER2 = "Ellie: Nice cake. I bet it wasn't easy to like, strong arm everyone into buying it.\n\nJoshua: You know, if you were a little nicer to people they might want to spend more time with you.\n\nEllie: Pfft, please. Friends are about <i>quality</i>, not quantity, Josh.\n\nJoshua: Wow! Was that a roundabout compliment I just heard?\n\nEllie: What? Gross, ew. Stop that.\n\nJoshua: Oh, don't worry, I won't tell anyone. I'm not really much of a gossip.";
+			}
+		}
+
+		public class A7_EMPLOYEEPROCESSING
 		{
 			public static LocString TITLE = "Employee Processing";
 
@@ -848,7 +878,7 @@ namespace STRINGS
 			}
 		}
 
-		public class MAGAZINEARTICLE
+		public class B8_MAGAZINEARTICLE
 		{
 			public static LocString TITLE = "Article Excerpt";
 
@@ -862,7 +892,7 @@ namespace STRINGS
 			}
 		}
 
-		public class MOVEDRATS
+		public class B3_MOVEDRATS
 		{
 			public static LocString TITLE = "Moved Rats";
 
@@ -874,7 +904,7 @@ namespace STRINGS
 			}
 		}
 
-		public class A046
+		public class A1_A046
 		{
 			public static LocString TITLE = "Personal Journal: A046";
 
@@ -892,7 +922,7 @@ namespace STRINGS
 			}
 		}
 
-		public class B327
+		public class A2_B327
 		{
 			public static LocString TITLE = "Personal Journal: B327";
 
@@ -910,7 +940,7 @@ namespace STRINGS
 			}
 		}
 
-		public class B556
+		public class A3_B556
 		{
 			public static LocString TITLE = "Personal Journal: B556";
 
@@ -928,7 +958,7 @@ namespace STRINGS
 			}
 		}
 
-		public class B835
+		public class A4_B835
 		{
 			public static LocString TITLE = "Personal Journal: B835";
 
@@ -950,7 +980,7 @@ namespace STRINGS
 			}
 		}
 
-		public class PIPEDREAM
+		public class A9_PIPEDREAM
 		{
 			public static LocString TITLE = "Pipedream";
 
@@ -962,7 +992,7 @@ namespace STRINGS
 			}
 		}
 
-		public class REVISITEDNUMBERS
+		public class B4_REVISITEDNUMBERS
 		{
 			public static LocString TITLE = "Revisited Numbers";
 
@@ -974,7 +1004,7 @@ namespace STRINGS
 			}
 		}
 
-		public class SPITTINGIMAGE
+		public class B1_SPITTINGIMAGE
 		{
 			public static LocString TITLE = "Spittin' Image";
 
@@ -986,7 +1016,7 @@ namespace STRINGS
 			}
 		}
 
-		public class SUNFLOWERSEEDS
+		public class A5_SUNFLOWERSEEDS
 		{
 			public static LocString TITLE = "Sunflower Seeds";
 
@@ -998,7 +1028,7 @@ namespace STRINGS
 			}
 		}
 
-		public class TIMEMUSINGS
+		public class B6_TIMEMUSINGS
 		{
 			public static LocString TITLE = "Director's Notes";
 
@@ -1010,7 +1040,7 @@ namespace STRINGS
 			}
 		}
 
-		public class TIMESARROWTHOUGHTS
+		public class B7_TIMESARROWTHOUGHTS
 		{
 			public static LocString TITLE = "Time's Arrow Thoughts";
 
@@ -1068,6 +1098,44 @@ namespace STRINGS
 			}
 		}
 
+		public class PLANETARYECHOES
+		{
+			public static LocString TITLE = "Planetary Echoes";
+
+			public static LocString SUBTITLE = "ENCRYPTION LEVEL: THREE";
+
+			public class BODY
+			{
+				public static LocString TITLE1 = "Echo One";
+
+				public static LocString TITLE2 = "Echo Two";
+
+				public static LocString TITLE3 = "Echo Three";
+
+				public static LocString TITLE4 = "Echo Four";
+
+				public static LocString TITLE5 = "Echo Five";
+
+				public static LocString TITLE6 = "Echo Six";
+
+				public static LocString TITLE7 = "Echo Seven";
+
+				public static LocString CONTAINER1 = "Jackie: So, Charles rejected my thesis proposal.\n\nJodi: He can do that? I thought he had to mentor you no matter what topic you chose.\n\nJackie: Well apparently he has veto power. He thought I should choose something more realistic.\n\nJodi: Pfft. Imagine if the Theory of Relativity had been vetoed for being \"unrealistic\".\n\nJackie: Heh heh. \"<i>Special</i> Relativity\"? I don't see what's so special about it.\n\nJodi: Haha! Right?\n------------------\n";
+
+				public static LocString CONTAINER2 = "Jodi: We should start our own company after I graduate.\n\nJackie: That would be incredible.\n\nJodi: Wouldn't it!\n\nJackie: Okay, wait, you're being serious right?\n\nJodi: Yeah! Of course!\n------------------\n";
+
+				public static LocString CONTAINER3 = "Jackie: Hey, Jodi, c'mere, I got a present for you.\n\nJodi: What's thi--\n\nJodi: Is this a business card? With my name on it?!\n\nJackie: Heh! Hot off the presses! Look, I have one too.\n\nJodi: You got a logo done and everything. Wow, it feels so real all of the sudden!\n\nJackie: We're really doing it!\n------------------\n";
+
+				public static LocString CONTAINER4 = "Jackie: I think we should use your name when we apply for the research grant.\n\nJodi: But we're submitting your proposal.\n\nJackie: We won't get funding if we use my name. It'll be hard enough for you competing against tenured scientists, but without my PhD I don't stand a chance.\n\nJodi: Yeah...\n\nJodi: Okay, but the second we get famous I'm setting the record straight.\n------------------\n";
+
+				public static LocString CONTAINER5 = "Jodi: The grant office called again.\n\nJackie: ...\n\nJodi: We can't just keep ignoring them.\n------------------\n";
+
+				public static LocString CONTAINER6 = "Jodi: Jackie, do you have a second to chat?\n\nJackie: I'm a little busy right now.\n\nJodi: It's important.\n\nJodi: I got an offer at Atomicon.\n\nJackie: I'm sorry?\n\nJodi: Yeah, they're looking into some exciting new methods of gene splicing. It'd make better use of my bio degree, I think...\n\nJackie: You can't really be thinking about leaving.\n\nJodi: It's just, we're running out of money, and...\n\nJackie: We're a startup! Startups always run out of money in the beginning!\n\nJodi: I'm sorry, Jackie.\n------------------\n";
+
+				public static LocString CONTAINER7 = "Jodi: Hey, Jackie, it's been awhile since we had a chance to talk.\n\nJodi: I heard EUoST's presenting you with an honorary PhD. I just wanted to leave you a message and say \"congratulations\".\n\nJodi: So... Congratulations!\n\nJodi: Hope you're doing well. Err, this is Jodi, by the way.\n------------------\n";
+			}
+		}
+
 		public class SCHOOLNEWSPAPER
 		{
 			public static LocString TITLE = "Newspaper Article";
@@ -1082,7 +1150,7 @@ namespace STRINGS
 			}
 		}
 
-		public class BACTERIALCULTURES
+		public class A2_BACTERIALCULTURES
 		{
 			public static LocString TITLE = "Unattended Cultures";
 
@@ -1094,7 +1162,7 @@ namespace STRINGS
 			}
 		}
 
-		public class BRINGYOURKIDTOWORK
+		public class A5_BRINGYOURKIDTOWORK
 		{
 			public static LocString TITLE = "Bring Your Child To Work";
 
@@ -1106,7 +1174,7 @@ namespace STRINGS
 			}
 		}
 
-		public class CASUALFRIDAY
+		public class A4_CASUALFRIDAY
 		{
 			public static LocString TITLE = "Casual Friday!";
 
@@ -1118,7 +1186,7 @@ namespace STRINGS
 			}
 		}
 
-		public class DISHBOT
+		public class A6_DISHBOT
 		{
 			public static LocString TITLE = "Dishbot";
 
@@ -1130,7 +1198,7 @@ namespace STRINGS
 			}
 		}
 
-		public class MAILROOMETIQUETTE
+		public class A1_MAILROOMETIQUETTE
 		{
 			public static LocString TITLE = "Reminder: Mailroom Etiquette";
 
@@ -1142,7 +1210,7 @@ namespace STRINGS
 			}
 		}
 
-		public class NEWSECURITY
+		public class A3_NEWSECURITY
 		{
 			public static LocString TITLE = "NEW SECURITY PROTOCOL";
 
@@ -1154,7 +1222,7 @@ namespace STRINGS
 			}
 		}
 
-		public class PROPFACILITYDISPLAY1
+		public class A0_PROPFACILITYDISPLAY1
 		{
 			public static LocString TITLE = "Printing Pod Promo";
 
@@ -1168,7 +1236,7 @@ namespace STRINGS
 			}
 		}
 
-		public class PROPFACILITYDISPLAY2
+		public class A0_PROPFACILITYDISPLAY2
 		{
 			public static LocString TITLE = "Mining Gun Promo";
 
@@ -1182,7 +1250,7 @@ namespace STRINGS
 			}
 		}
 
-		public class PROPFACILITYDISPLAY3
+		public class A0_PROPFACILITYDISPLAY3
 		{
 			public static LocString TITLE = "Thermo-Nullifier Promo";
 
@@ -1376,7 +1444,7 @@ namespace STRINGS
 			}
 		}
 
-		public class AGRICULTURALNOTES
+		public class A2_AGRICULTURALNOTES
 		{
 			public static LocString TITLE = "Agricultural Notes";
 
@@ -1400,7 +1468,7 @@ namespace STRINGS
 			}
 		}
 
-		public class CLONEDRATS
+		public class A1_CLONEDRATS
 		{
 			public static LocString TITLE = "Initial Success";
 
@@ -1412,7 +1480,7 @@ namespace STRINGS
 			}
 		}
 
-		public class FIRSTSUCCESS
+		public class A8_FIRSTSUCCESS
 		{
 			public static LocString TITLE = "Encouraging Results";
 
@@ -1424,7 +1492,7 @@ namespace STRINGS
 			}
 		}
 
-		public class GENETICOOZE
+		public class A5_GENETICOOZE
 		{
 			public static LocString TITLE = "Biofluid";
 
@@ -1436,7 +1504,7 @@ namespace STRINGS
 			}
 		}
 
-		public class HIBISCUS3
+		public class A4_HIBISCUS3
 		{
 			public static LocString TITLE = "Experiment 7D";
 
@@ -1450,7 +1518,7 @@ namespace STRINGS
 			}
 		}
 
-		public class HUSBANDRYNOTES
+		public class A3_HUSBANDRYNOTES
 		{
 			public static LocString TITLE = "Husbandry Notes";
 
@@ -1474,7 +1542,7 @@ namespace STRINGS
 			}
 		}
 
-		public class MEMORYIMPLANTATION
+		public class A6_MEMORYIMPLANTATION
 		{
 			public static LocString TITLE = "Memory Dysfunction Log";
 
@@ -1488,7 +1556,7 @@ namespace STRINGS
 			}
 		}
 
-		public class NEUTRONIUM
+		public class A7_NEUTRONIUM
 		{
 			public static LocString TITLE = "Byproduct Notes";
 
@@ -1500,7 +1568,7 @@ namespace STRINGS
 			}
 		}
 
-		public class NEUTRONIUMAPPLICATIONS
+		public class A9_NEUTRONIUMAPPLICATIONS
 		{
 			public static LocString TITLE = "Possible Applications";
 

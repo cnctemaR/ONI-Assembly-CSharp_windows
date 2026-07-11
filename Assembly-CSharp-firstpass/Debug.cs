@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using UnityEngine;
 
 public static class Debug
 {
 	private static string TimeStamp()
 	{
-		return string.Empty;
+		return DateTime.UtcNow.ToString("[HH:mm:ss.fff] [") + Thread.CurrentThread.ManagedThreadId + "] ";
 	}
 
 	public static bool isDebugBuild
@@ -73,19 +74,26 @@ public static class Debug
 
 	public static void LogError(object obj, global::UnityEngine.Object context = null)
 	{
+		Console.Out.Write(string.Concat(new object[]
+		{
+			global::Debug.TimeStamp(),
+			"[ERROR] ",
+			obj,
+			"\n"
+		}));
 		if (context == null)
 		{
-			global::UnityEngine.Debug.LogError(global::Debug.TimeStamp() + obj);
+			global::UnityEngine.Debug.LogError(obj);
 		}
 		else
 		{
-			global::UnityEngine.Debug.LogError(global::Debug.TimeStamp() + obj, context);
+			global::UnityEngine.Debug.LogError(obj, context);
 		}
 	}
 
 	public static void LogErrorFormat(string format, params object[] args)
 	{
-		global::UnityEngine.Debug.LogErrorFormat(global::Debug.TimeStamp() + format, args);
+		Console.Out.Write(global::Debug.TimeStamp() + "[ERROR] " + string.Format(format, args) + "\n");
 	}
 
 	[Conditional("UNITY_EDITOR")]

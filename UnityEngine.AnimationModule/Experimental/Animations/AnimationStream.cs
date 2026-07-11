@@ -8,9 +8,9 @@ namespace UnityEngine.Experimental.Animations
 	/// <summary>
 	///   <para>The stream of animation data passed from one Playable to another.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationStream.bindings.h")]
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/Director/AnimationStream.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationStream.bindings.h")]
 	public struct AnimationStream
 	{
 		internal uint animatorBindingsVersion

@@ -31,6 +31,7 @@ public class NavGrid
 		}
 		this.ValidNavTypes = list.ToArray();
 		this.DebugViewLinkType = new bool[this.ValidNavTypes.Length];
+		this.DebugViewValidCellsType = new bool[this.ValidNavTypes.Length];
 		foreach (NavType navType in this.ValidNavTypes)
 		{
 			this.GetNavTypeData(navType);
@@ -120,7 +121,7 @@ public class NavGrid
 
 	public void InitializeGraph()
 	{
-		NavGridUpdater.InitializeNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, Grid.BitFields);
+		NavGridUpdater.InitializeNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType);
 	}
 
 	public void UpdateGraph()
@@ -146,7 +147,7 @@ public class NavGrid
 
 	public void UpdateGraph(HashSet<int> dirty_nav_cells)
 	{
-		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, Grid.BitFields, dirty_nav_cells);
+		NavGridUpdater.UpdateNavGrid(this.NavTable, this.ValidNavTypes, this.Validators, this.boundingOffsets, this.maxLinksPerCell, this.Links, this.transitionsByNavType, dirty_nav_cells);
 		if (this.OnNavGridUpdateComplete != null)
 		{
 			this.OnNavGridUpdateComplete(dirty_nav_cells);
@@ -172,15 +173,16 @@ public class NavGrid
 
 	private void DebugDrawValidCells()
 	{
+		Color white = Color.white;
 		int cellCount = Grid.CellCount;
 		for (int i = 0; i < cellCount; i++)
 		{
 			for (int j = 0; j < 10; j++)
 			{
 				NavType navType = (NavType)j;
-				if (this.NavTable.IsValid(i, navType))
+				if (this.NavTable.IsValid(i, navType) && this.DrawNavTypeCell(navType, ref white))
 				{
-					DebugExtension.DebugPoint(NavTypeHelper.GetNavPos(i, navType), this.NavTypeColor(navType), 1f, 0f, false);
+					DebugExtension.DebugPoint(NavTypeHelper.GetNavPos(i, navType), white, 1f, 0f, false);
 				}
 			}
 		}
@@ -216,6 +218,23 @@ public class NavGrid
 			if (this.ValidNavTypes[i] == nav_type)
 			{
 				return this.DebugViewLinkType[i];
+			}
+		}
+		return false;
+	}
+
+	private bool DrawNavTypeCell(NavType nav_type, ref Color color)
+	{
+		color = this.NavTypeColor(nav_type);
+		if (this.DebugViewValidCellsAll)
+		{
+			return true;
+		}
+		for (int i = 0; i < this.ValidNavTypes.Length; i++)
+		{
+			if (this.ValidNavTypes[i] == nav_type)
+			{
+				return this.DebugViewValidCellsType[i];
 			}
 		}
 		return false;
@@ -269,6 +288,10 @@ public class NavGrid
 	public bool DebugViewAllPaths;
 
 	public bool DebugViewValidCells;
+
+	public bool[] DebugViewValidCellsType;
+
+	public bool DebugViewValidCellsAll;
 
 	public bool DebugViewLinks;
 
@@ -419,7 +442,7 @@ public class NavGrid
 			this.impassableNotVoid = impassable_not_void;
 		}
 
-		public int IsValid(int cell, NavTable nav_table, ushort[] gridBitFields)
+		public int IsValid(int cell, NavTable nav_table)
 		{
 			if (!Grid.IsCellOffsetValid(cell, (int)this.x, (int)this.y))
 			{
@@ -430,25 +453,23 @@ public class NavGrid
 			{
 				return Grid.InvalidCell;
 			}
+			Grid.BuildFlags buildFlags = Grid.BuildFlags.FakeFloor | Grid.BuildFlags.Solid;
+			if (this.impassableNotVoid)
+			{
+				buildFlags |= Grid.BuildFlags.Impassable;
+			}
 			foreach (CellOffset cellOffset in this.voidOffsets)
 			{
 				int num2 = Grid.OffsetCell(cell, cellOffset.x, cellOffset.y);
-				if (Grid.IsValidCell(num2))
+				if (Grid.IsValidCell(num2) && (byte)(Grid.BuildMasks[num2] & buildFlags) != 0)
 				{
-					if ((gridBitFields[num2] & 32) != 0)
-					{
-						return Grid.InvalidCell;
-					}
-					if (this.impassableNotVoid && (gridBitFields[num2] & 256) != 0)
-					{
-						return Grid.InvalidCell;
-					}
+					return Grid.InvalidCell;
 				}
 			}
 			foreach (CellOffset cellOffset2 in this.solidOffsets)
 			{
 				int num3 = Grid.OffsetCell(cell, cellOffset2.x, cellOffset2.y);
-				if (Grid.IsValidCell(num3) && (gridBitFields[num3] & 32) == 0)
+				if (Grid.IsValidCell(num3) && !Grid.Solid[num3])
 				{
 					return Grid.InvalidCell;
 				}

@@ -95,11 +95,11 @@ public class ManagementMenu : KIconToggleMenu
 		Components.Telescopes.OnAdd += new Action<Telescope>(this.CheckStarmap);
 		Components.Telescopes.OnRemove += new Action<Telescope>(this.CheckStarmap);
 		this.rolesTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_ROLES_STATION;
-		this.rolesTooltip = UI.TOOLTIPS.MANAGEMENTMENU_ROLES + " " + GameUtil.GetHotkeyString(global::Action.ManageRoles);
+		this.rolesTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_ROLES, global::Action.ManageRoles);
 		this.researchTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH;
-		this.researchTooltip = UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH + " " + GameUtil.GetHotkeyString(global::Action.ManageResearch);
+		this.researchTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, global::Action.ManageResearch);
 		this.starmapTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_TELESCOPE;
-		this.starmapTooltip = UI.TOOLTIPS.MANAGEMENTMENU_STARMAP + " " + GameUtil.GetHotkeyString(global::Action.ManageResearch);
+		this.starmapTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, global::Action.ManageResearch);
 		this.CheckResearch(null);
 		this.CheckRoles(null);
 		this.CheckStarmap(null);

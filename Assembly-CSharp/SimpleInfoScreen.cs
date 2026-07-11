@@ -13,6 +13,11 @@ public class SimpleInfoScreen : TargetScreen
 		this.onStorageChangeDelegate = new Action<object>(this.OnStorageChange);
 	}
 
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return true;
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

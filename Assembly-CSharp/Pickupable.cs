@@ -116,7 +116,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			DebugUtil.Assert(this.primaryElement != null);
 			this.primaryElement.Units = value;
-			if (value <= 0.001f)
+			if (value < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 			{
 				PrimaryElement component = base.GetComponent<PrimaryElement>();
 				if (!component.KeepZeroMassObject)

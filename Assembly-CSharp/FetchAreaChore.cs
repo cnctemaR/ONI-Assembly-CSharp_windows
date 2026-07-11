@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using STRINGS;
 using UnityEngine;
 
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
@@ -13,16 +12,16 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		bool flag = false;
 		PriorityScreen.PriorityClass priority_class = context.masterPriority.priority_class;
 		int priority_value = context.masterPriority.priority_value;
-		base..ctor(choreType, consumer, choreProvider, flag, null, null, null, priority_class, priority_value, false, true, 0, null);
+		base..ctor(choreType, consumer, choreProvider, flag, null, null, null, priority_class, priority_value, false, true, 0, null, false, ReportManager.ReportType.WorkTime);
 		this.showAvailabilityInHoverText = false;
-		this.smi = new FetchAreaChore.StatesInstance(this, context);
+		base.smi = new FetchAreaChore.StatesInstance(this, context);
 	}
 
 	public bool IsFetching
 	{
 		get
 		{
-			return this.smi.pickingup;
+			return base.smi.pickingup;
 		}
 	}
 
@@ -30,7 +29,15 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 	{
 		get
 		{
-			return this.smi.delivering;
+			return base.smi.delivering;
+		}
+	}
+
+	public GameObject GetFetchTarget
+	{
+		get
+		{
+			return base.smi.sm.fetchTarget.Get(base.smi);
 		}
 	}
 
@@ -41,32 +48,22 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.Begin(context);
+		base.smi.Begin(context);
 		base.Begin(context);
 	}
 
 	protected override void End(string reason)
 	{
-		this.smi.End();
+		base.smi.End();
 		base.End(reason);
 	}
 
 	private void OnTagsChanged(object data)
 	{
-		if (this.smi.sm.fetchTarget.Get(this.smi) != null)
+		if (base.smi.sm.fetchTarget.Get(base.smi) != null)
 		{
 			this.Fail("Tags changed");
 		}
-	}
-
-	public override string GetReportName()
-	{
-		if (this.smi.deliveries.Count > 0 && this.smi.deliveries[0].destination != null)
-		{
-			string text = DUPLICANTS.CHORES.FETCH.REPORT_NAME;
-			return StringFormatter.Replace(DUPLICANTS.CHORES.FETCH.REPORT_NAME, "{0}", this.smi.deliveries[0].destination.GetProperName());
-		}
-		return base.GetReportName();
 	}
 
 	public static void GatherNearbyFetchChores(FetchChore root_chore, Chore.Precondition.Context context, int x, int y, int radius, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts)
@@ -328,17 +325,32 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			Pickupable pickupable = base.sm.deliveryObject.Get<Pickupable>(base.smi);
 			if (pickupable == null || pickupable.TotalAmount <= 0f)
 			{
-				base.smi.GoTo(base.sm.delivering.deliverfail);
-			}
-			else
-			{
-				if (this.deliveries.Count > 0)
+				if (this.deliveries.Count > 0 && this.deliveries[0].chore.amount < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 				{
 					FetchAreaChore.StatesInstance.Delivery delivery = this.deliveries[0];
 					Chore chore = delivery.chore;
 					delivery.Complete(this.deliverables);
 					delivery.Cleanup();
 					if (this.deliveries.Count > 0 && this.deliveries[0].chore == chore)
+					{
+						this.deliveries.RemoveAt(0);
+					}
+					this.GoTo(base.sm.delivering.next);
+				}
+				else
+				{
+					base.smi.GoTo(base.sm.delivering.deliverfail);
+				}
+			}
+			else
+			{
+				if (this.deliveries.Count > 0)
+				{
+					FetchAreaChore.StatesInstance.Delivery delivery2 = this.deliveries[0];
+					Chore chore2 = delivery2.chore;
+					delivery2.Complete(this.deliverables);
+					delivery2.Cleanup();
+					if (this.deliveries.Count > 0 && this.deliveries[0].chore == chore2)
 					{
 						this.deliveries.RemoveAt(0);
 					}
@@ -434,6 +446,18 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			this.reservations.Clear();
 		}
 
+		public bool SameDestination(FetchChore fetch)
+		{
+			foreach (FetchChore fetchChore in this.chores)
+			{
+				if (fetchChore.destination == fetch.destination)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		private List<FetchChore> chores = new List<FetchChore>();
 
 		private List<Pickupable> fetchables = new List<Pickupable>();
@@ -492,7 +516,14 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 							{
 								break;
 							}
-							if (!(deliverables[i] == null))
+							if (deliverables[i] == null)
+							{
+								if (num < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
+								{
+									this.destination.ForceStore(this.chore.tags[0], num);
+								}
+							}
+							else
 							{
 								Pickupable pickupable2 = deliverables[i].Take(num);
 								if (pickupable2 != null && pickupable2.TotalAmount > 0f)

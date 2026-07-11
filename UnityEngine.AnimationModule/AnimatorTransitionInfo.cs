@@ -7,8 +7,8 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Information about the current transition.</para>
 	/// </summary>
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
+	[RequiredByNativeCode]
 	public struct AnimatorTransitionInfo
 	{
 		/// <summary>

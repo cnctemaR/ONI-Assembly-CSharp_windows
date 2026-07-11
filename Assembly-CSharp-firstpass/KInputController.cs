@@ -18,6 +18,14 @@ public class KInputController : IInputHandler
 		this.inputHandler = new KInputHandler(this, this);
 	}
 
+	public string handlerName
+	{
+		get
+		{
+			return "KInputController";
+		}
+	}
+
 	public KInputHandler inputHandler { get; set; }
 
 	public bool IsGamepad { get; private set; }

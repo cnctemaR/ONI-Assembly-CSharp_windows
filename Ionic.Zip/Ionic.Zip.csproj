@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{6188D4E0-E98D-4759-9291-AA4BCF2EBFE6}</ProjectGuid>
+    <ProjectGuid>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19272}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Ionic</RootNamespace>
     <AssemblyName>Ionic.Zip</AssemblyName>
@@ -118,11 +118,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EBFE9}</Project>
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19275}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\System\System.csproj">
-      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EBFEE}</Project>
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD1927A}</Project>
       <Name>System</Name>
     </ProjectReference>
   </ItemGroup>

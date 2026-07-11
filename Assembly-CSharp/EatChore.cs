@@ -7,9 +7,9 @@ using UnityEngine;
 public class EatChore : Chore<EatChore.StatesInstance>
 {
 	public EatChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, null, false, ReportManager.ReportType.PersonalTime)
 	{
-		this.smi = new EatChore.StatesInstance(this);
+		base.smi = new EatChore.StatesInstance(this);
 		this.showAvailabilityInHoverText = false;
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		base.AddPrecondition(EatChore.EdibleIsNotNull, null);
@@ -34,28 +34,28 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			global::Debug.LogError("EATCHORE null edible.gameObject", null);
 			return;
 		}
-		if (this.smi == null)
+		if (base.smi == null)
 		{
 			global::Debug.LogError("EATCHORE null smi", null);
 			return;
 		}
-		if (this.smi.sm == null)
+		if (base.smi.sm == null)
 		{
 			global::Debug.LogError("EATCHORE null smi.sm", null);
 			return;
 		}
-		if (this.smi.sm.ediblesource == null)
+		if (base.smi.sm.ediblesource == null)
 		{
 			global::Debug.LogError("EATCHORE null smi.sm.ediblesource", null);
 			return;
 		}
-		this.smi.sm.ediblesource.Set(edible.gameObject, this.smi);
+		base.smi.sm.ediblesource.Set(edible.gameObject, base.smi);
 		KCrashReporter.Assert(edible.FoodInfo.CaloriesPerUnit > 0f, edible.GetProperName() + " has invalid calories per unit. Will result in NaNs");
 		AmountInstance amountInstance = Db.Get().Amounts.Calories.Lookup(this.gameObject);
 		float num = (amountInstance.GetMax() - amountInstance.value) / edible.FoodInfo.CaloriesPerUnit;
 		KCrashReporter.Assert(num > 0f, "EatChore is requesting an invalid amount of food");
-		this.smi.sm.requestedfoodunits.Set(num, this.smi);
-		this.smi.sm.eater.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.requestedfoodunits.Set(num, base.smi);
+		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi);
 		base.Begin(context);
 	}
 
@@ -164,7 +164,6 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			});
 			this.eatonfloorstate.moveto.InitializeStates(this.eater, this.locator, this.eatonfloorstate.eat, this.eatonfloorstate.eat, null, null);
 			this.eatonfloorstate.eat.ToggleAnims("anim_eat_floor_kanim", 0f).DoEat(this.ediblechunk, this.actualfoodunits, null, null);
-			this.interruptedbyschedule.GoTo(null);
 		}
 
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.TargetParameter eater;
@@ -180,8 +179,6 @@ public class EatChore : Chore<EatChore.StatesInstance>
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.FloatParameter actualfoodunits;
 
 		public StateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.TargetParameter locator;
-
-		public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.State interruptedbyschedule;
 
 		public GameStateMachine<EatChore.States, EatChore.StatesInstance, EatChore, object>.FetchSubState fetch;
 

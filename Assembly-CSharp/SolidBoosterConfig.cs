@@ -66,14 +66,15 @@ public class SolidBoosterConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = solidBooster.fuelTag;
 		manualDeliveryKG.refillMass = storage.capacityKg / 2f;
 		manualDeliveryKG.capacity = storage.capacityKg / 2f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
 		manualDeliveryKG2.requestedItemTag = ElementLoader.FindElementByHash(SimHashes.OxyRock).tag;
 		manualDeliveryKG2.refillMass = storage.capacityKg / 2f;
 		manualDeliveryKG2.capacity = storage.capacityKg / 2f;
-		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
-		go.AddOrGet<RocketModule>();
+		manualDeliveryKG2.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+		RocketModule rocketModule = go.AddOrGet<RocketModule>();
+		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_solid_booster_bg_kanim"));
 		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 

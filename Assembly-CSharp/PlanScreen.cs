@@ -36,9 +36,10 @@ public class PlanScreen : KIconToggleMenu
 
 	public PlanScreen.RequirementsState BuildableState(BuildingDef def)
 	{
-		PlanScreen.RequirementsState requirementsState = PlanScreen.RequirementsState.Materials;
-		if (!this.buildableDefs.TryGetValue(def, out requirementsState))
+		PlanScreen.RequirementsState requirementsState;
+		if (def == null || !this.buildableDefs.TryGetValue(def, out requirementsState))
 		{
+			requirementsState = PlanScreen.RequirementsState.Materials;
 		}
 		return requirementsState;
 	}
@@ -88,7 +89,7 @@ public class PlanScreen : KIconToggleMenu
 		};
 		this.RefreshCopyBuildingButton(null);
 		Game.Instance.Subscribe(-1503271301, new Action<object>(this.RefreshCopyBuildingButton));
-		this.copyBuildingButton.GetComponent<ToolTip>().SetSimpleTooltip(UI.COPY_BUILDING_TOOLTIP + " " + GameUtil.GetHotkeyString(global::Action.CopyBuilding));
+		this.copyBuildingButton.GetComponent<ToolTip>().SetSimpleTooltip(GameUtil.ReplaceHotkeyString(UI.COPY_BUILDING_TOOLTIP, global::Action.CopyBuilding));
 	}
 
 	private void OnClickCopyBuilding()

@@ -71,6 +71,8 @@ public class GameTags
 
 	public static readonly Tag PreciousRock = TagManager.Create("PreciousRock");
 
+	public static readonly Tag Artifact = TagManager.Create("Artifact");
+
 	public static readonly Tag Incapacitated = TagManager.Create("Incapacitated");
 
 	public static readonly Tag CaloriesDepleted = TagManager.Create("CaloriesDepleted");
@@ -201,6 +203,22 @@ public class GameTags
 
 	public static readonly Tag StorageLocker = TagManager.Create("StorageLocker");
 
+	public static readonly Tag FloorTiles = TagManager.Create("FloorTiles");
+
+	public static readonly Tag FarmTiles = TagManager.Create("FarmTiles");
+
+	public static readonly Tag Ladders = TagManager.Create("Ladders");
+
+	public static readonly Tag Wires = TagManager.Create("Wires");
+
+	public static readonly Tag Vents = TagManager.Create("Vents");
+
+	public static readonly Tag Pipes = TagManager.Create("Pipes");
+
+	public static readonly Tag WireBridges = TagManager.Create("WireBridges");
+
+	public static readonly Tag TravelTubeBridges = TagManager.Create("TravelTubeBridges");
+
 	public static readonly Tag MISSING_TAG = TagManager.Create("MISSING_TAG");
 
 	public static readonly Tag PlantRenderer = TagManager.Create("PlantRenderer");
@@ -208,6 +226,8 @@ public class GameTags
 	public static readonly Tag Usable = TagManager.Create("Usable");
 
 	public static readonly Tag PedestalDisplayable = TagManager.Create("PedestalDisplayable");
+
+	public static readonly Tag HasChores = TagManager.Create("HasChores");
 
 	public static readonly Tag Suit = TagManager.Create("Suit");
 
@@ -304,6 +324,8 @@ public class GameTags
 	public static readonly Tag JetSuitBlocker = TagManager.Create("JetSuitBlocker");
 
 	public static readonly Tag HasInvalidPorts = TagManager.Create("HasInvalidPorts");
+
+	public static readonly Tag NotRoomAssignable = TagManager.Create("NotRoomAssignable");
 
 	public static readonly Tag Rocket = TagManager.Create("Rocket");
 

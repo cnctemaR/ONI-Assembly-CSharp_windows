@@ -98,7 +98,7 @@ public class MainMenu : KMonoBehaviour
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
 			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
 		}
-		if (GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce)
+		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce) || !string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame))
 		{
 			MainMenu.HasAutoresumedOnce = true;
 			this.ResumeGame();
@@ -125,11 +125,11 @@ public class MainMenu : KMonoBehaviour
 
 	private void ResumeGame()
 	{
-		string latestSaveFile = SaveLoader.GetLatestSaveFile();
-		if (!string.IsNullOrEmpty(latestSaveFile))
+		string text = ((!string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame)) ? GenericGameSettings.instance.performanceCapture.saveGame : SaveLoader.GetLatestSaveFile());
+		if (!string.IsNullOrEmpty(text))
 		{
-			KCrashReporter.MOST_RECENT_SAVEFILE = latestSaveFile;
-			SaveLoader.SetActiveSaveFilePath(latestSaveFile);
+			KCrashReporter.MOST_RECENT_SAVEFILE = text;
+			SaveLoader.SetActiveSaveFilePath(text);
 			LoadingOverlay.Load(delegate
 			{
 				App.LoadScene("backend");
@@ -196,7 +196,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 303707U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 309851U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}

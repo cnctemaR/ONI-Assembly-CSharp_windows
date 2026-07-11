@@ -271,8 +271,8 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 	protected virtual Sprite GetEntityIcon(Tag prefabTag)
 	{
 		GameObject prefab = Assets.GetPrefab(prefabTag);
-		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
-		return Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false);
+		Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
+		return uisprite.first;
 	}
 
 	public override bool IsValidForTarget(GameObject target)

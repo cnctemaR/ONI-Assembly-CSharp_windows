@@ -21,7 +21,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The position of the transform in world space.</para>
+		///   <para>The world space position of the Transform.</para>
 		/// </summary>
 		public Vector3 position
 		{
@@ -165,7 +165,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The rotation of the transform relative to the parent transform's rotation.</para>
+		///   <para>The rotation of the transform relative to the transform rotation of the parent.</para>
 		/// </summary>
 		public Quaternion localRotation
 		{
@@ -681,7 +681,7 @@ namespace UnityEngine
 		private extern Transform GetRoot();
 
 		/// <summary>
-		///   <para>The number of children the Transform has.</para>
+		///   <para>The number of children the parent Transform has.</para>
 		/// </summary>
 		public extern int childCount
 		{
@@ -851,7 +851,17 @@ namespace UnityEngine
 		/// <summary>
 		///   <para>The number of transforms in the transform's hierarchy data structure.</para>
 		/// </summary>
-		public int hierarchyCount { get; }
+		public int hierarchyCount
+		{
+			get
+			{
+				return this.internal_getHierarchyCount();
+			}
+		}
+
+		[FreeFunction("GetHierarchyCount", HasExplicitThis = true)]
+		[MethodImpl(MethodImplOptions.InternalCall)]
+		private extern int internal_getHierarchyCount();
 
 		[NativeConditional("UNITY_EDITOR")]
 		[FreeFunction("IsNonUniformScaleTransform", HasExplicitThis = true)]

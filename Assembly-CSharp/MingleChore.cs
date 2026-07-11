@@ -16,9 +16,9 @@ public class MingleChore : Chore<MingleChore.StatesInstance>, IWorkerPrioritizab
 			return mingleChore.smi.HasMingleCell();
 		};
 		this.HasMingleCell = precondition;
-		base..ctor(Db.Get().ChoreTypes.Relax, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, null);
+		base..ctor(Db.Get().ChoreTypes.Relax, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, null, false, ReportManager.ReportType.PersonalTime);
 		this.showAvailabilityInHoverText = false;
-		this.smi = new MingleChore.StatesInstance(this, target.gameObject);
+		base.smi = new MingleChore.StatesInstance(this, target.gameObject);
 		base.AddPrecondition(this.HasMingleCell, this);
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Recreation);

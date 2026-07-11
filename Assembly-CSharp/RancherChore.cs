@@ -15,7 +15,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			return instance.IsCreatureAvailableForRanching();
 		};
 		this.IsCreatureAvailableForRanching = precondition;
-		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null);
+		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime);
 		base.AddPrecondition(this.IsCreatureAvailableForRanching, rancher_station.GetSMI<RanchStation.Instance>());
 		base.AddPrecondition(ChorePreconditions.instance.HasRolePerk, RoleManager.rolePerks.CanUseRanchStation.id);
 		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
@@ -26,13 +26,13 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDeconstruction, component2);
 		BuildingEnabledButton component3 = rancher_station.GetComponent<BuildingEnabledButton>();
 		base.AddPrecondition(ChorePreconditions.instance.IsNotMarkedForDisable, component3);
-		this.smi = new RancherChore.RancherChoreStates.Instance(rancher_station);
+		base.smi = new RancherChore.RancherChoreStates.Instance(rancher_station);
 		base.SetPrioritizable(rancher_station.GetComponent<Prioritizable>());
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.rancher.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.rancher.Set(context.consumerState.gameObject, base.smi);
 		base.Begin(context);
 	}
 
@@ -50,7 +50,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			});
 			this.movetoranch.MoveTo((RancherChore.RancherChoreStates.Instance smi) => Grid.PosToCell(smi.transform.GetPosition()), this.waitforcreature_pre, null, false).Transition(this.checkformoreranchables, new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RancherChore.RancherChoreStates.HasCreatureLeft), UpdateRate.SIM_1000ms);
 			this.waitforcreature_pre.EnterTransition(null, (RancherChore.RancherChoreStates.Instance smi) => smi.ranchStation.IsNullOrStopped()).Transition(this.checkformoreranchables, new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RancherChore.RancherChoreStates.HasCreatureLeft), UpdateRate.SIM_1000ms).EnterTransition(this.waitforcreature, (RancherChore.RancherChoreStates.Instance smi) => true);
-			this.waitforcreature.Transition(this.checkformoreranchables, new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RancherChore.RancherChoreStates.HasCreatureLeft), UpdateRate.SIM_1000ms).ToggleAnims(new Func<RancherChore.RancherChoreStates.Instance, HashedString>(RancherChore.RancherChoreStates.GetRancherInteractAnim)).PlayAnim("calling_loop", KAnim.PlayMode.Loop)
+			this.waitforcreature.Transition(this.checkformoreranchables, new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.Transition.ConditionCallback(RancherChore.RancherChoreStates.HasCreatureLeft), UpdateRate.SIM_1000ms).ToggleAnims("anim_interacts_rancherstation_kanim", 0f).PlayAnim("calling_loop", KAnim.PlayMode.Loop)
 				.Enter(new StateMachine<RancherChore.RancherChoreStates, RancherChore.RancherChoreStates.Instance, IStateMachineTarget, object>.State.Callback(RancherChore.RancherChoreStates.FaceCreature))
 				.Enter("TellCreatureToGoGetRanched", delegate(RancherChore.RancherChoreStates.Instance smi)
 				{

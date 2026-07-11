@@ -16,6 +16,7 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 		{
 			Grid.HasLadder[Grid.PosToCell(this)] = true;
 		}
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Ladders);
 		Components.Ladders.Add(this);
 	}
 

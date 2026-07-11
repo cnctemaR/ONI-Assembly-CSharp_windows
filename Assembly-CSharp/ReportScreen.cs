@@ -93,15 +93,19 @@ public class ReportScreen : KScreen
 		foreach (KeyValuePair<ReportManager.ReportType, ReportManager.ReportGroup> keyValuePair in ReportManager.Instance.ReportGroups)
 		{
 			ReportManager.ReportEntry entry = this.currentReport.GetEntry(keyValuePair.Key);
-			bool flag2 = entry.accumulate != 0f || keyValuePair.Value.reportIfZero;
-			this.CreateOrUpdateLine(entry, keyValuePair.Value, flag2);
-			if (flag2)
+			if (num != keyValuePair.Value.group)
 			{
-				if (num != keyValuePair.Value.group)
-				{
-					num = keyValuePair.Value.group;
-					this.AddSpacer(num);
-				}
+				num = keyValuePair.Value.group;
+				this.AddSpacer(num);
+			}
+			bool flag2 = entry.accumulate != 0f || keyValuePair.Value.reportIfZero;
+			if (keyValuePair.Value.isHeader)
+			{
+				this.CreateHeader(keyValuePair.Value);
+			}
+			else if (flag2)
+			{
+				this.CreateOrUpdateLine(entry, keyValuePair.Value, flag2);
 			}
 		}
 	}
@@ -126,6 +130,22 @@ public class ReportScreen : KScreen
 			this.lineItems[group.ToString()] = gameObject;
 		}
 		gameObject.SetActive(true);
+		return gameObject;
+	}
+
+	private GameObject CreateHeader(ReportManager.ReportGroup reportGroup)
+	{
+		GameObject gameObject = null;
+		this.lineItems.TryGetValue(reportGroup.stringKey, out gameObject);
+		if (gameObject == null)
+		{
+			gameObject = Util.KInstantiateUI(this.lineItemHeader, this.contentFolder, true);
+			gameObject.name = "LineItemHeader" + this.lineItems.Count;
+			this.lineItems[reportGroup.stringKey] = gameObject;
+		}
+		gameObject.SetActive(true);
+		ReportScreenHeader component = gameObject.GetComponent<ReportScreenHeader>();
+		component.SetMainEntry(reportGroup);
 		return gameObject;
 	}
 
@@ -175,6 +195,9 @@ public class ReportScreen : KScreen
 
 	[SerializeField]
 	private GameObject lineItemSpacer;
+
+	[SerializeField]
+	private GameObject lineItemHeader;
 
 	[SerializeField]
 	private GameObject contentFolder;

@@ -8,9 +8,9 @@ namespace UnityEngine.Experimental.Animations
 	/// <summary>
 	///   <para>The humanoid stream of animation data passed from one Playable to another.</para>
 	/// </summary>
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationHumanStream.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationHumanStream.h")]
+	[RequiredByNativeCode]
 	public struct AnimationHumanStream
 	{
 		/// <summary>

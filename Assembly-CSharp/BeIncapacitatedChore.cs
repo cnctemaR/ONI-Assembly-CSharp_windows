@@ -4,9 +4,9 @@ using UnityEngine;
 public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 {
 	public BeIncapacitatedChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.BeIncapacitated, master, master.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new BeIncapacitatedChore.StatesInstance(this);
+		base.smi = new BeIncapacitatedChore.StatesInstance(this);
 	}
 
 	public void FindAvailableMedicalBed(Navigator navigator)
@@ -29,14 +29,14 @@ public class BeIncapacitatedChore : Chore<BeIncapacitatedChore.StatesInstance>
 		}
 		if (clinic != null && navigator.CanReach(clinic))
 		{
-			this.smi.sm.clinic.Set(clinic.gameObject, this.smi);
-			this.smi.GoTo(this.smi.sm.incapacitation_root.rescue.waitingForPickup);
+			base.smi.sm.clinic.Set(clinic.gameObject, base.smi);
+			base.smi.GoTo(base.smi.sm.incapacitation_root.rescue.waitingForPickup);
 		}
 	}
 
 	public GameObject GetChosenClinic()
 	{
-		return this.smi.sm.clinic.Get(this.smi);
+		return base.smi.sm.clinic.Get(base.smi);
 	}
 
 	private static string IncapacitatedDuplicantAnim_pre = "incapacitate_pre";

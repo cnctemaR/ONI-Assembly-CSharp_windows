@@ -9,9 +9,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Access to display information.</para>
 	/// </summary>
-	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/ScreenManager.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsScriptBindings.h")]
+	[StaticAccessor("GetScreenManager()", StaticAccessorType.Dot)]
 	public sealed class Screen
 	{
 		/// <summary>
@@ -164,7 +164,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Is the game running fullscreen?</para>
+		///   <para>Is the game running full-screen?</para>
 		/// </summary>
 		public static extern bool fullScreen
 		{
@@ -246,7 +246,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>All fullscreen resolutions supported by the monitor (Read Only).</para>
+		///   <para>All full-screen resolutions supported by the monitor (Read Only).</para>
 		/// </summary>
 		public static extern Resolution[] resolutions
 		{

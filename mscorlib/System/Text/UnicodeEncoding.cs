@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Text
 {
-	[ComVisible(true)]
 	[MonoTODO("Serialization format not compatible with .NET")]
+	[ComVisible(true)]
 	[Serializable]
 	public class UnicodeEncoding : Encoding
 	{

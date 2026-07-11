@@ -112,11 +112,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		this.buildStorage.Transfer(this.inStorage, true, true);
 		this.UpdateMachineOrders(true);
 		base.Subscribe<ComplexFabricator>(-905833192, ComplexFabricator.OnCopySettingsDelegate);
-		base.Subscribe(-1697596308, new Action<object>(this.OnStorageChanged));
-	}
-
-	private void OnStorageChanged(object data = null)
-	{
 	}
 
 	private void OnCopySettings(object data)
@@ -131,28 +126,25 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		{
 			return;
 		}
-		foreach (string text in this.recipeQueueCounts.Keys.ToArray<string>())
+		foreach (ComplexRecipe complexRecipe in this.possible_recipes_cache)
 		{
-			if (component.recipeQueueCounts.ContainsKey(text))
+			int num;
+			if (!component.recipeQueueCounts.TryGetValue(complexRecipe.id, out num))
 			{
-				this.recipeQueueCounts[text] = component.recipeQueueCounts[text];
+				num = 0;
 			}
-			else
-			{
-				this.recipeQueueCounts[text] = 0;
-			}
+			this.SetRecipeQueueCountInternal(complexRecipe, num);
 		}
+		this.SetOperationalInactive();
+		this.buildStorage.Transfer(this.inStorage, true, true);
 		this.RefreshUserOrdersFromQueueCounts();
 		this.UpdateMachineOrders(false);
 	}
 
 	protected override void OnCleanUp()
 	{
-		this.ingredientSearchHandle.ClearScheduler();
-		foreach (ComplexFabricator.UserOrder userOrder in this.userOrders)
-		{
-			this.CancelMachineOrdersByUserOrder(userOrder);
-		}
+		this.StopCheckWorldInventory();
+		this.CancelAllMachineOrders(false);
 		Components.ComplexFabricators.Remove(this);
 		base.OnCleanUp();
 	}
@@ -246,57 +238,44 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 
 	public void SetRecipeQueueCount(ComplexRecipe recipe, int count)
 	{
-		bool flag = true;
-		if (this.machineOrders.Count == 0)
-		{
-			flag = true;
-		}
+		this.SetRecipeQueueCountInternal(recipe, count);
+		this.RefreshUserOrdersFromQueueCounts();
+		this.UpdateMachineOrders(false);
+	}
+
+	private void SetRecipeQueueCountInternal(ComplexRecipe recipe, int count)
+	{
 		ComplexFabricator.UserOrder userOrder = this.userOrders.Find((ComplexFabricator.UserOrder match) => match.recipe == recipe);
 		if (userOrder != null && this.GetUserOrderIndex(userOrder) == this.currentOrderIdx && this.GetRecipeQueueCount(recipe) == ComplexFabricator.QUEUE_INFINITE)
 		{
 			this.CancelMachineOrdersByUserOrder(userOrder);
 		}
 		this.recipeQueueCounts[recipe.id] = count;
-		this.RefreshUserOrdersFromQueueCounts();
-		if (flag)
-		{
-			this.UpdateMachineOrders(false);
-		}
 	}
 
 	public void IncrementRecipeQueueCount(ComplexRecipe recipe)
 	{
-		if (this.machineOrders.Count == 0)
-		{
-		}
 		ComplexFabricator.UserOrder userOrder = this.userOrders.Find((ComplexFabricator.UserOrder match) => match.recipe == recipe);
 		if (userOrder != null && this.GetUserOrderIndex(userOrder) == this.currentOrderIdx && this.GetRecipeQueueCount(recipe) == ComplexFabricator.QUEUE_INFINITE)
 		{
 			this.CancelMachineOrdersByUserOrder(userOrder);
 		}
-		bool flag;
 		if (this.recipeQueueCounts[recipe.id] == ComplexFabricator.QUEUE_INFINITE)
 		{
 			this.recipeQueueCounts[recipe.id] = 0;
-			flag = true;
 		}
 		else if (this.recipeQueueCounts[recipe.id] >= ComplexFabricator.MAX_QUEUE_SIZE)
 		{
 			this.recipeQueueCounts[recipe.id] = ComplexFabricator.QUEUE_INFINITE;
-			flag = true;
 		}
 		else
 		{
 			Dictionary<string, int> dictionary;
 			string id;
 			(dictionary = this.recipeQueueCounts)[id = recipe.id] = dictionary[id] + 1;
-			flag = true;
 		}
 		this.RefreshUserOrdersFromQueueCounts();
-		if (flag)
-		{
-			this.UpdateMachineOrders(false);
-		}
+		this.UpdateMachineOrders(false);
 	}
 
 	public void DecrementRecipeQueueCount(ComplexRecipe recipe, bool respectInfinite = true)
@@ -669,9 +648,12 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		this.isCancellingOrder = false;
 	}
 
-	private void CancelAllMachineOrders()
+	private void CancelAllMachineOrders(bool clear_storage)
 	{
-		this.buildStorage.Transfer(this.inStorage, true, true);
+		if (clear_storage)
+		{
+			this.buildStorage.Transfer(this.inStorage, true, true);
+		}
 		DebugUtil.DevAssertWithStack(this.machineOrders.Count == 0 || !this.willBeSadIfMachineOrdersChanges, new object[] { "machineOrders changed when it wasn't expected. sad." });
 		while (this.machineOrders.Count > 0)
 		{
@@ -971,7 +953,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 
 	private void OnDroppedAll(object data)
 	{
-		this.CancelAllMachineOrders();
+		this.CancelAllMachineOrders(true);
 		this.UpdateMachineOrders(false);
 	}
 
@@ -1011,7 +993,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 	public Action<ComplexFabricator.MachineOrder> OnMachineOrderCancelledOrComplete;
 
 	[SerializeField]
-	public HashedString fetchChoreTypeIdHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+	public HashedString fetchChoreTypeIdHash = Db.Get().ChoreTypes.FabricateFetch.IdHash;
 
 	[SerializeField]
 	public ComplexFabricator.ResultState resultState;
@@ -1147,7 +1129,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 
 		public bool CheckMaterialRequirements(WorldInventory worldInventory, Storage storage)
 		{
-			Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
 			foreach (ComplexRecipe.RecipeElement recipeElement in this.recipe.ingredients)
 			{
 				if (worldInventory.GetAmount(recipeElement.material) + storage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)

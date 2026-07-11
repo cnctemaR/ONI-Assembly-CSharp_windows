@@ -1,20 +1,23 @@
 ﻿using System;
 
-public class PathFinderAbilities
+public abstract class PathFinderAbilities
 {
 	public PathFinderAbilities(Navigator navigator)
 	{
 		this.navigator = navigator;
 	}
 
-	public Navigator navigator { get; private set; }
-
-	public virtual void Refresh()
+	public void Refresh()
 	{
+		this.prefabInstanceID = this.navigator.gameObject.GetComponent<KPrefabID>().InstanceID;
+		this.Refresh(this.navigator);
 	}
 
-	public virtual bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, int underwater_cost)
-	{
-		return true;
-	}
+	protected abstract void Refresh(Navigator navigator);
+
+	public abstract bool TraversePath(ref PathFinder.PotentialPath path, int from_cell, NavType from_nav_type, int cost, int transition_id, int underwater_cost);
+
+	private Navigator navigator;
+
+	protected int prefabInstanceID;
 }

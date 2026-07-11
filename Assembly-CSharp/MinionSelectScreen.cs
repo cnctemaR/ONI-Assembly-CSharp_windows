@@ -1,6 +1,5 @@
 ﻿using System;
 using FMOD.Studio;
-using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 
@@ -22,7 +21,7 @@ public class MinionSelectScreen : CharacterSelectionController
 		this.backButton.onClick += delegate
 		{
 			LoadScreen.ForceStopGame();
-			WorldGen.Reset();
+			SaveGame.Instance.worldGen.Reset();
 			App.LoadScene("frontend");
 		};
 		this.InitializeContainers();
@@ -30,12 +29,16 @@ public class MinionSelectScreen : CharacterSelectionController
 
 	protected override void OnSpawn()
 	{
-		this.OnCharacterAdded();
+		this.OnDeliverableAdded();
 		base.EnableProceedButton();
 		this.proceedButton.GetComponentInChildren<LocText>().text = UI.IMMIGRANTSCREEN.EMBARK;
-		this.containers.ForEach(delegate(CharacterContainer container)
+		this.containers.ForEach(delegate(ITelepadDeliverableContainer container)
 		{
-			container.DisableSelectButton();
+			CharacterContainer characterContainer = container as CharacterContainer;
+			if (characterContainer != null)
+			{
+				characterContainer.DisableSelectButton();
+			}
 		});
 	}
 
@@ -45,12 +48,13 @@ public class MinionSelectScreen : CharacterSelectionController
 		MusicManager.instance.StopSong("Music_FrontEnd", true, STOP_MODE.ALLOWFADEOUT);
 		AudioMixer.instance.Start(AudioMixerSnapshots.Get().NewBaseSetupSnapshot);
 		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().FrontEndWorldGenerationSnapshot, STOP_MODE.ALLOWFADEOUT);
-		this.startingStats.Clear();
-		foreach (CharacterContainer characterContainer in this.containers)
+		this.selectedDeliverables.Clear();
+		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in this.containers)
 		{
-			this.startingStats.Add(characterContainer.Stats);
+			CharacterContainer characterContainer = (CharacterContainer)telepadDeliverableContainer;
+			this.selectedDeliverables.Add(characterContainer.Stats);
 		}
-		NewBaseScreen.Instance.SetStartingMinionStats(this.startingStats.ToArray());
+		NewBaseScreen.Instance.SetStartingMinionStats(this.selectedDeliverables.ToArray());
 		if (this.OnProceedEvent != null)
 		{
 			this.OnProceedEvent();
@@ -78,9 +82,13 @@ public class MinionSelectScreen : CharacterSelectionController
 
 	public override void OnPressBack()
 	{
-		foreach (CharacterContainer characterContainer in this.containers)
+		foreach (ITelepadDeliverableContainer telepadDeliverableContainer in this.containers)
 		{
-			characterContainer.ForceStopEditingTitle();
+			CharacterContainer characterContainer = telepadDeliverableContainer as CharacterContainer;
+			if (characterContainer != null)
+			{
+				characterContainer.ForceStopEditingTitle();
+			}
 		}
 	}
 

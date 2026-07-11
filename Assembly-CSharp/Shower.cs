@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 {
+	private Shower()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -140,7 +145,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			ChoreType shower = Db.Get().ChoreTypes.Shower;
 			Shower master = smi.master;
 			ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
-			return new WorkChore<Shower>(shower, master, null, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.emergency, 5, false);
+			return new WorkChore<Shower>(shower, master, null, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
 		}
 
 		private void UpdateStatusItems(Shower.ShowerSM.Instance smi, float dt)

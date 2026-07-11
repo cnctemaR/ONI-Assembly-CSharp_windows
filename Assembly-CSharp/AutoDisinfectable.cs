@@ -53,7 +53,7 @@ public class AutoDisinfectable : Workable
 			int diseaseCount = this.primaryElement.DiseaseCount;
 			if (this.chore == null && diseaseCount > SaveGame.Instance.minGermCountForDisinfect)
 			{
-				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true);
+				this.chore = new WorkChore<AutoDisinfectable>(Db.Get().ChoreTypes.Disinfect, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
 			}
 			else if (diseaseCount < SaveGame.Instance.minGermCountForDisinfect && this.chore != null)
 			{

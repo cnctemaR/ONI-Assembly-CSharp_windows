@@ -349,8 +349,8 @@ namespace Mono.Unix.Native
 			return (int)XPrintfFunctions.snprintf(array);
 		}
 
-		[CLSCompliant(false)]
 		[Obsolete("Not necessarily portable due to cdecl restrictions.\nUse snprintf (StringBuilder, string) instead.")]
+		[CLSCompliant(false)]
 		public static int snprintf(StringBuilder s, string format, params object[] parameters)
 		{
 			object[] array = new object[checked(parameters.Length + 3)];

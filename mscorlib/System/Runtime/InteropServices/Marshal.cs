@@ -468,8 +468,8 @@ namespace System.Runtime.InteropServices
 			throw new NotImplementedException();
 		}
 
-		[Obsolete]
 		[MonoTODO]
+		[Obsolete]
 		public static string GetTypeInfoName(UCOMITypeInfo pTI)
 		{
 			throw new NotImplementedException();

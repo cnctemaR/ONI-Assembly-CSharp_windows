@@ -322,8 +322,8 @@ namespace System.Text
 			}
 		}
 
-		[CLSCompliant(false)]
 		[ComVisible(false)]
+		[CLSCompliant(false)]
 		public unsafe override int GetBytes(char* chars, int charCount, byte* bytes, int byteCount)
 		{
 			if (chars == null)

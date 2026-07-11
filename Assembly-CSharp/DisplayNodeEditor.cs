@@ -2,6 +2,7 @@
 using LibNoiseDotNet.Graphics.Tools.Noise;
 using LibNoiseDotNet.Graphics.Tools.Noise.Builder;
 using NodeEditorFramework;
+using ProcGen;
 using ProcGen.Noise;
 using ProcGenGame;
 using UnityEngine;
@@ -30,7 +31,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 		return null;
 	}
 
-	public override Node Create(Vector2 pos)
+	public override global::NodeEditorFramework.Node Create(Vector2 pos)
 	{
 		DisplayNodeEditor displayNodeEditor = ScriptableObject.CreateInstance<DisplayNodeEditor>();
 		displayNodeEditor.rect = new Rect(pos.x, pos.y, 266f, 301f);
@@ -118,9 +119,9 @@ public class DisplayNodeEditor : BaseNodeEditor
 
 	private void InitSettings()
 	{
-		if (WorldGen.Settings == null)
+		if (this.worldGenSettings == null)
 		{
-			WorldGen.LoadSettings();
+			this.worldGenSettings = SaveGame.Instance.worldGen.Settings;
 		}
 	}
 
@@ -129,7 +130,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 		if (this.biomeOptions == null)
 		{
 			this.InitSettings();
-			this.biomeOptions = WorldGen.Settings.biomes.GetNames();
+			this.biomeOptions = SettingsCache.biomes.GetNames();
 		}
 	}
 
@@ -138,7 +139,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 		if (this.featureOptions == null)
 		{
 			this.InitSettings();
-			this.featureOptions = WorldGen.Settings.features.GetNames();
+			this.featureOptions = SettingsCache.features.GetNames();
 		}
 	}
 
@@ -146,6 +147,8 @@ public class DisplayNodeEditor : BaseNodeEditor
 	{
 		base.NodeGUI();
 	}
+
+	private WorldGenSettings worldGenSettings;
 
 	private const string Id = "displayNodeEditor";
 

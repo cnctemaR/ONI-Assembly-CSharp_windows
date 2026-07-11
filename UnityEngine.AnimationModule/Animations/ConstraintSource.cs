@@ -7,9 +7,9 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>Represents a source for the constraint.</para>
 	/// </summary>
-	[NativeType(CodegenOptions = CodegenOptions.Custom, Header = "Runtime/Animation/Constraints/ConstraintSource.h", IntermediateScriptingStructName = "MonoConstraintSource")]
 	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
 	[UsedByNativeCode]
+	[NativeType(CodegenOptions = CodegenOptions.Custom, Header = "Runtime/Animation/Constraints/ConstraintSource.h", IntermediateScriptingStructName = "MonoConstraintSource")]
 	[Serializable]
 	public struct ConstraintSource
 	{

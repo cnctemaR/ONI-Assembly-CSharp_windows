@@ -7,11 +7,11 @@ namespace UnityEngine.Experimental.Animations
 	/// <summary>
 	///   <para>Static class providing extension methods for Animator and the animation C# jobs.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/Animator.h")]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorJobExtensions.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationStreamHandles.h")]
-	[NativeHeader("Runtime/Animation/Director/AnimationSceneHandles.h")]
+	[NativeHeader("Runtime/Animation/Animator.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationStream.h")]
+	[NativeHeader("Runtime/Animation/Director/AnimationSceneHandles.h")]
 	[StaticAccessor("AnimatorJobExtensionsBindings", StaticAccessorType.DoubleColon)]
 	public static class AnimatorJobExtensions
 	{

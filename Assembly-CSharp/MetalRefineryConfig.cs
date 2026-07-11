@@ -136,6 +136,7 @@ public class MetalRefineryConfig : IBuildingConfig
 	{
 		Storage.StoredItemModifier.Hide,
 		Storage.StoredItemModifier.Preserve,
-		Storage.StoredItemModifier.Insulate
+		Storage.StoredItemModifier.Insulate,
+		Storage.StoredItemModifier.Seal
 	};
 }

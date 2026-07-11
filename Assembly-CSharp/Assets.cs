@@ -157,7 +157,10 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public static Sprite GetSprite(HashedString name)
 	{
 		Sprite sprite = null;
-		Assets.Sprites.TryGetValue(name, out sprite);
+		if (Assets.Sprites != null)
+		{
+			Assets.Sprites.TryGetValue(name, out sprite);
+		}
 		return sprite;
 	}
 

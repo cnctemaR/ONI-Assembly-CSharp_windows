@@ -102,11 +102,13 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 				if (this.overloadedNotification == null)
 				{
 					this.timeOverloadNotificationDisplayed = 0f;
-					this.overloadedNotification = new Notification(MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME, NotificationType.BadMinor, HashedString.Invalid, null, null, true, 0f, null, null);
+					string text = MISC.NOTIFICATIONS.CIRCUIT_OVERLOADED.NAME;
+					NotificationType notificationType = NotificationType.BadMinor;
+					HashedString invalid = HashedString.Invalid;
+					Transform transform = this.targetOverloadedWire.transform;
+					this.overloadedNotification = new Notification(text, notificationType, invalid, null, null, true, 0f, null, null, transform);
 					Notifier notifier = Game.Instance.FindOrAdd<Notifier>();
 					notifier.Add(this.overloadedNotification, string.Empty);
-					this.overloadedNotification.Position = this.targetOverloadedWire.transform.GetPosition();
-					this.overloadedNotification.Notifier = null;
 				}
 			}
 		}

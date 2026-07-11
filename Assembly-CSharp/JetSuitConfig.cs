@@ -59,21 +59,27 @@ public class JetSuitConfig : IEquipmentConfig
 			if (eq.assignee != null)
 			{
 				Ownables soleOwner2 = eq.assignee.GetSoleOwner();
-				GameObject targetGameObject2 = soleOwner2.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
-				Attributes attributes = targetGameObject2.GetAttributes();
-				if (attributes != null)
+				if (soleOwner2)
 				{
-					attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
-					KAnimControllerBase component4 = targetGameObject2.GetComponent<KAnimControllerBase>();
-					if (component4)
+					GameObject targetGameObject2 = soleOwner2.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
+					if (targetGameObject2)
 					{
-						component4.RemoveAnimOverrides(Assets.GetAnim("anim_loco_hover_kanim"));
+						Attributes attributes = targetGameObject2.GetAttributes();
+						if (attributes != null)
+						{
+							attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
+						}
+						Navigator component4 = targetGameObject2.GetComponent<Navigator>();
+						if (component4 != null)
+						{
+							component4.ClearFlags(PathFinder.PotentialPath.Flags.HasJetPack);
+						}
+						KAnimControllerBase component5 = targetGameObject2.GetComponent<KAnimControllerBase>();
+						if (component5)
+						{
+							component5.RemoveAnimOverrides(Assets.GetAnim("anim_loco_hover_kanim"));
+						}
 					}
-				}
-				Navigator component5 = targetGameObject2.GetComponent<Navigator>();
-				if (component5 != null)
-				{
-					component5.ClearFlags(PathFinder.PotentialPath.Flags.HasJetPack);
 				}
 			}
 		};
@@ -89,7 +95,6 @@ public class JetSuitConfig : IEquipmentConfig
 		suitTank.capacity = 75f;
 		go.AddComponent<JetSuitTank>();
 		HelmetController helmetController = go.AddComponent<HelmetController>();
-		helmetController.anim_file = "helm_jetpack_kanim";
 		helmetController.has_jets = true;
 		KPrefabID component = go.GetComponent<KPrefabID>();
 		component.AddTag(GameTags.Clothes);

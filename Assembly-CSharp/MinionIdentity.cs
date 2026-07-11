@@ -243,7 +243,7 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 			Chore currentChore = this.choreDriver.GetCurrentChore();
 			if (currentChore != null)
 			{
-				ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, GameUtil.GetChoreName(currentChore, null), currentChore.driver.GetProperName());
 				if (currentChore is FetchAreaChore)
 				{
 					MinionResume component = base.GetComponent<MinionResume>();

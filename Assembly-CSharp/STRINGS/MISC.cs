@@ -120,6 +120,8 @@ namespace STRINGS
 
 			public static LocString MARKEDFORCOMPOST = "Marked For Compost";
 
+			public static LocString MARKEDFORCOMPOSTINSTORAGE = "In Compost Storage";
+
 			public static LocString COMPOSTMEAT = "Compost Meat";
 
 			public static LocString PICKLED = "Pickled";
@@ -368,6 +370,13 @@ namespace STRINGS
 				public static LocString NAME = "{Temp}";
 
 				public static LocString TOOLTIP = "The selected object is currently {Temp}";
+			}
+
+			public class MARKEDFORCOMPOSTINSTORAGE
+			{
+				public static LocString NAME = "Composted";
+
+				public static LocString TOOLTIP = "The selected object is currently in the compost";
 			}
 
 			public class BURIEDITEM
@@ -891,11 +900,11 @@ namespace STRINGS
 
 			public class DUPLICANTABSORBED
 			{
-				public static LocString NAME = "New Duplicants have been reabsorbed";
+				public static LocString NAME = "Printables have been reabsorbed";
 
-				public static LocString MESSAGEBODY = "New Duplicants are no longer available for printing.\nCountdown to the next production was rebooted.";
+				public static LocString MESSAGEBODY = "The Printing Pod is no longer available for printing.\nCountdown to the next production was rebooted.";
 
-				public static LocString TOOLTIP = "The printable Duplicants have been reabsorbed";
+				public static LocString TOOLTIP = "Printables have been reabsorbed";
 			}
 
 			public class DUPLICANTDIED
@@ -1228,9 +1237,9 @@ namespace STRINGS
 
 			public class IMMIGRANTSLEFT
 			{
-				public static LocString NAME = "New Duplicants have been reabsorbed";
+				public static LocString NAME = "Printables have been reabsorbed";
 
-				public static LocString TOOLTIP = "The printable Duplicants have been Oozed";
+				public static LocString TOOLTIP = "The care packages have been disintegrated and printable Duplicants have been Oozed";
 			}
 
 			public class LEVELUP
@@ -1405,6 +1414,13 @@ namespace STRINGS
 				public static LocString NAME = "ALERT - Surface Breach";
 
 				public static LocString TOOLTIP = "Amazing!\n\nMy Duplicants have managed to breach the surface of our rocky prison.\n\nI should be careful; the region is extremely inhospitable and I could easily lose resources to the vacuum of space.";
+			}
+
+			public class EMERGENCY_CHORES
+			{
+				public static LocString NAME = "Emergency Errands";
+
+				public static LocString TOOLTIP = "The colony is in Red Alert mode because Emergency Priority has been set.";
 			}
 		}
 

@@ -14,7 +14,7 @@ public class ProfilerBase
 		this.sw = new Stopwatch();
 	}
 
-	public static void WriteLine(StringBuilder sb, string category, string region_name, int tid, Stopwatch sw, string ph, string suffix)
+	public static void StartLine(StringBuilder sb, string category, string region_name, int tid, Stopwatch sw, string ph)
 	{
 		sb.Append("{\"cat\":\"").Append(category).Append("\"");
 		sb.Append(",\"name\":\"").Append(region_name).Append("\"");
@@ -25,6 +25,11 @@ public class ProfilerBase
 		long num = elapsedTicks * 1000000L / frequency;
 		sb.Append(",\"ts\":").Append(num);
 		sb.Append(",\"ph\":\"").Append(ph).Append("\"");
+	}
+
+	public static void WriteLine(StringBuilder sb, string category, string region_name, int tid, Stopwatch sw, string ph, string suffix)
+	{
+		ProfilerBase.StartLine(sb, category, region_name, tid, sw, ph);
 		sb.Append(suffix).Append("\n");
 	}
 
@@ -222,6 +227,11 @@ public class ProfilerBase
 		public void WriteLine(string category, string region_name, Stopwatch sw, string ph, string suffix)
 		{
 			ProfilerBase.WriteLine(this.sb, category, region_name, this.id, sw, ph, suffix);
+		}
+
+		public void StartLine(string category, string region_name, Stopwatch sw, string ph)
+		{
+			ProfilerBase.StartLine(this.sb, category, region_name, this.id, sw, ph);
 		}
 
 		public Stack<string> regionStack;

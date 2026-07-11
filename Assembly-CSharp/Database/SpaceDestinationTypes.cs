@@ -9,7 +9,12 @@ namespace Database
 		public SpaceDestinationTypes(ResourceSet parent)
 			: base("SpaceDestinations", parent)
 		{
-			this.Satellite = base.Add(new SpaceDestinationType("Satellite", parent, UI.SPACEDESTINATIONS.DEBRIS.SATELLITE.NAME, UI.SPACEDESTINATIONS.DEBRIS.SATELLITE.DESCRIPTION, 16, "asteroid", new Dictionary<SimHashes, MathUtil.MinMax>
+			string text = "Satellite";
+			string text2 = UI.SPACEDESTINATIONS.DEBRIS.SATELLITE.NAME;
+			string text3 = UI.SPACEDESTINATIONS.DEBRIS.SATELLITE.DESCRIPTION;
+			int num = 16;
+			string text4 = "asteroid";
+			Dictionary<SimHashes, MathUtil.MinMax> dictionary = new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
 					SimHashes.Steel,
@@ -23,7 +28,9 @@ namespace Database
 					SimHashes.Glass,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, null));
+			};
+			ArtifactDropRate artifactDropRate = Db.Get().ArtifactDropRates.Bad;
+			this.Satellite = base.Add(new SpaceDestinationType(text, parent, text2, text3, num, text4, dictionary, null, artifactDropRate));
 			this.MetallicAsteroid = base.Add(new SpaceDestinationType("MetallicAsteroid", parent, UI.SPACEDESTINATIONS.ASTEROIDS.METALLICASTEROID.NAME, UI.SPACEDESTINATIONS.ASTEROIDS.METALLICASTEROID.DESCRIPTION, 32, "nebula", new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
@@ -38,7 +45,7 @@ namespace Database
 					SimHashes.Obsidian,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, new Dictionary<string, int> { { "HatchMetal", 3 } }));
+			}, new Dictionary<string, int> { { "HatchMetal", 3 } }, Db.Get().ArtifactDropRates.Mediocre));
 			this.RockyAsteroid = base.Add(new SpaceDestinationType("RockyAsteroid", parent, UI.SPACEDESTINATIONS.ASTEROIDS.ROCKYASTEROID.NAME, UI.SPACEDESTINATIONS.ASTEROIDS.ROCKYASTEROID.DESCRIPTION, 32, "asteroid", new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
@@ -57,8 +64,13 @@ namespace Database
 					SimHashes.IgneousRock,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, new Dictionary<string, int> { { "HatchHard", 3 } }));
-			this.CarbonaceousAsteroid = base.Add(new SpaceDestinationType("CarbonaceousAsteroid", parent, UI.SPACEDESTINATIONS.ASTEROIDS.CARBONACEOUSASTEROID.NAME, UI.SPACEDESTINATIONS.ASTEROIDS.CARBONACEOUSASTEROID.DESCRIPTION, 32, "asteroid", new Dictionary<SimHashes, MathUtil.MinMax>
+			}, new Dictionary<string, int> { { "HatchHard", 3 } }, Db.Get().ArtifactDropRates.Good));
+			text4 = "CarbonaceousAsteroid";
+			text3 = UI.SPACEDESTINATIONS.ASTEROIDS.CARBONACEOUSASTEROID.NAME;
+			text2 = UI.SPACEDESTINATIONS.ASTEROIDS.CARBONACEOUSASTEROID.DESCRIPTION;
+			num = 32;
+			text = "asteroid";
+			dictionary = new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
 					SimHashes.RefinedCarbon,
@@ -72,7 +84,9 @@ namespace Database
 					SimHashes.Diamond,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, null));
+			};
+			artifactDropRate = Db.Get().ArtifactDropRates.Mediocre;
+			this.CarbonaceousAsteroid = base.Add(new SpaceDestinationType(text4, parent, text3, text2, num, text, dictionary, null, artifactDropRate));
 			this.IcyDwarf = base.Add(new SpaceDestinationType("IcyDwarf", parent, UI.SPACEDESTINATIONS.DWARFPLANETS.ICYDWARF.NAME, UI.SPACEDESTINATIONS.DWARFPLANETS.ICYDWARF.DESCRIPTION, 64, "icyMoon", new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
@@ -95,7 +109,7 @@ namespace Database
 			{
 				{ "ColdBreatherSeed", 3 },
 				{ "ColdWheatSeed", 4 }
-			}));
+			}, Db.Get().ArtifactDropRates.Great));
 			this.OrganicDwarf = base.Add(new SpaceDestinationType("OrganicDwarf", parent, UI.SPACEDESTINATIONS.DWARFPLANETS.ORGANICDWARF.NAME, UI.SPACEDESTINATIONS.DWARFPLANETS.ORGANICDWARF.DESCRIPTION, 64, "organicAsteroid", new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
@@ -122,8 +136,13 @@ namespace Database
 			{
 				{ "Moo", 1 },
 				{ "GasGrassSeed", 4 }
-			}));
-			this.DustyMoon = base.Add(new SpaceDestinationType("DustyMoon", parent, UI.SPACEDESTINATIONS.DWARFPLANETS.DUSTYDWARF.NAME, UI.SPACEDESTINATIONS.DWARFPLANETS.DUSTYDWARF.DESCRIPTION, 64, "asteroid", new Dictionary<SimHashes, MathUtil.MinMax>
+			}, Db.Get().ArtifactDropRates.Great));
+			text = "DustyMoon";
+			text2 = UI.SPACEDESTINATIONS.DWARFPLANETS.DUSTYDWARF.NAME;
+			text3 = UI.SPACEDESTINATIONS.DWARFPLANETS.DUSTYDWARF.DESCRIPTION;
+			num = 64;
+			text4 = "asteroid";
+			dictionary = new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
 					SimHashes.Regolith,
@@ -137,7 +156,9 @@ namespace Database
 					SimHashes.SedimentaryRock,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, null));
+			};
+			artifactDropRate = Db.Get().ArtifactDropRates.Amazing;
+			this.DustyMoon = base.Add(new SpaceDestinationType(text, parent, text2, text3, num, text4, dictionary, null, artifactDropRate));
 			this.TerraPlanet = base.Add(new SpaceDestinationType("TerraPlanet", parent, UI.SPACEDESTINATIONS.PLANETS.TERRAPLANET.NAME, UI.SPACEDESTINATIONS.PLANETS.TERRAPLANET.DESCRIPTION, 96, "terra", new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
@@ -160,8 +181,13 @@ namespace Database
 			{
 				{ "PrickleFlowerSeed", 4 },
 				{ "PacuEgg", 4 }
-			}));
-			this.VolcanoPlanet = base.Add(new SpaceDestinationType("VolcanoPlanet", parent, UI.SPACEDESTINATIONS.PLANETS.VOLCANOPLANET.NAME, UI.SPACEDESTINATIONS.PLANETS.VOLCANOPLANET.DESCRIPTION, 96, "planet", new Dictionary<SimHashes, MathUtil.MinMax>
+			}, Db.Get().ArtifactDropRates.Amazing));
+			text4 = "VolcanoPlanet";
+			text3 = UI.SPACEDESTINATIONS.PLANETS.VOLCANOPLANET.NAME;
+			text2 = UI.SPACEDESTINATIONS.PLANETS.VOLCANOPLANET.DESCRIPTION;
+			num = 96;
+			text = "planet";
+			dictionary = new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
 					SimHashes.Magma,
@@ -179,8 +205,15 @@ namespace Database
 					SimHashes.Katairite,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, null));
-			this.GasGiant = base.Add(new SpaceDestinationType("GasGiant", parent, UI.SPACEDESTINATIONS.GIANTS.GASGIANT.NAME, UI.SPACEDESTINATIONS.GIANTS.GASGIANT.DESCRIPTION, 96, "gasGiant", new Dictionary<SimHashes, MathUtil.MinMax>
+			};
+			artifactDropRate = Db.Get().ArtifactDropRates.Amazing;
+			this.VolcanoPlanet = base.Add(new SpaceDestinationType(text4, parent, text3, text2, num, text, dictionary, null, artifactDropRate));
+			text = "GasGiant";
+			text2 = UI.SPACEDESTINATIONS.GIANTS.GASGIANT.NAME;
+			text3 = UI.SPACEDESTINATIONS.GIANTS.GASGIANT.DESCRIPTION;
+			num = 96;
+			text4 = "gasGiant";
+			dictionary = new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
 					SimHashes.Methane,
@@ -190,8 +223,15 @@ namespace Database
 					SimHashes.Hydrogen,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, null));
-			this.IceGiant = base.Add(new SpaceDestinationType("IceGiant", parent, UI.SPACEDESTINATIONS.GIANTS.ICEGIANT.NAME, UI.SPACEDESTINATIONS.GIANTS.ICEGIANT.DESCRIPTION, 96, "icyMoon", new Dictionary<SimHashes, MathUtil.MinMax>
+			};
+			artifactDropRate = Db.Get().ArtifactDropRates.Perfect;
+			this.GasGiant = base.Add(new SpaceDestinationType(text, parent, text2, text3, num, text4, dictionary, null, artifactDropRate));
+			text4 = "IceGiant";
+			text3 = UI.SPACEDESTINATIONS.GIANTS.ICEGIANT.NAME;
+			text2 = UI.SPACEDESTINATIONS.GIANTS.ICEGIANT.DESCRIPTION;
+			num = 96;
+			text = "icyMoon";
+			dictionary = new Dictionary<SimHashes, MathUtil.MinMax>
 			{
 				{
 					SimHashes.Ice,
@@ -209,7 +249,9 @@ namespace Database
 					SimHashes.SolidMethane,
 					new MathUtil.MinMax(100f, 200f)
 				}
-			}, null));
+			};
+			artifactDropRate = Db.Get().ArtifactDropRates.Perfect;
+			this.IceGiant = base.Add(new SpaceDestinationType(text4, parent, text3, text2, num, text, dictionary, null, artifactDropRate));
 		}
 
 		public SpaceDestinationType Satellite;

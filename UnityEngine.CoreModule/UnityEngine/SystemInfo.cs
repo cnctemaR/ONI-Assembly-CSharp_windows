@@ -9,11 +9,11 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Access system and hardware information.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
+	[NativeHeader("Runtime/Shaders/GraphicsCapsScriptBindings.h")]
 	[NativeHeader("Runtime/Graphics/GraphicsFormatUtility.bindings.h")]
-	[NativeHeader("Runtime/Input/GetInput.h")]
 	[NativeHeader("Runtime/Camera/RenderLoops/MotionVectorRenderLoop.h")]
+	[NativeHeader("Runtime/Input/GetInput.h")]
 	public sealed class SystemInfo
 	{
 		/// <summary>
@@ -962,15 +962,6 @@ namespace UnityEngine
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		private static extern bool SupportsMipStreaming();
 
-		/// <summary>
-		///   <para>Verifies that the specified graphics format is supported for the specified usage.</para>
-		/// </summary>
-		/// <param name="format">The GraphicsFormat format to look up.</param>
-		/// <param name="format">The FormatUsage usage to look up.</param>
-		/// <param name="usage"></param>
-		/// <returns>
-		///   <para>Returns true if the format is supported for the specific usage. Returns false otherwise.</para>
-		/// </returns>
 		[FreeFunction("ScriptingGraphicsCaps::IsFormatSupported")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern bool IsFormatSupported(GraphicsFormat format, FormatUsage usage);

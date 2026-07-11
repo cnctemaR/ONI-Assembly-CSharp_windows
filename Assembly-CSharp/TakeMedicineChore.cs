@@ -4,11 +4,11 @@ using STRINGS;
 public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 {
 	public TakeMedicineChore(MedicinalPill master)
-		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.TakeMedicine, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
 		this.medicine = master;
 		this.pickupable = this.medicine.GetComponent<Pickupable>();
-		this.smi = new TakeMedicineChore.StatesInstance(this);
+		base.smi = new TakeMedicineChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.instance.CanPickup, this.pickupable);
 		base.AddPrecondition(TakeMedicineChore.CanCure, this);
 		base.AddPrecondition(TakeMedicineChore.IsConsumptionPermitted, this);
@@ -16,9 +16,9 @@ public class TakeMedicineChore : Chore<TakeMedicineChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.source.Set(this.pickupable.gameObject, this.smi);
-		this.smi.sm.requestedpillcount.Set(1f, this.smi);
-		this.smi.sm.eater.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.source.Set(this.pickupable.gameObject, base.smi);
+		base.smi.sm.requestedpillcount.Set(1f, base.smi);
+		base.smi.sm.eater.Set(context.consumerState.gameObject, base.smi);
 		base.Begin(context);
 		new TakeMedicineChore(this.medicine);
 	}

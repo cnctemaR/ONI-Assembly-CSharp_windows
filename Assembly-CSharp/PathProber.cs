@@ -4,6 +4,15 @@ using System.Collections.Generic;
 [SkipSaveFileSerialization]
 public class PathProber : KMonoBehaviour
 {
+	protected override void OnCleanUp()
+	{
+		if (this.PathGrid != null)
+		{
+			this.PathGrid.OnCleanUp();
+		}
+		base.OnCleanUp();
+	}
+
 	public void SetGroupProber(IGroupProber group_prober)
 	{
 		this.PathGrid.SetGroupProber(group_prober);
@@ -23,12 +32,12 @@ public class PathProber : KMonoBehaviour
 
 	public int GetCost(int cell)
 	{
-		return this.PathGrid.GetCost(cell, this.QueryId);
+		return this.PathGrid.GetCost(cell);
 	}
 
 	public int GetNavigationCostIgnoreProberOffset(int cell, CellOffset[] offsets)
 	{
-		return this.PathGrid.GetCostIgnoreProberOffset(cell, offsets, this.QueryId);
+		return this.PathGrid.GetCostIgnoreProberOffset(cell, offsets);
 	}
 
 	public PathGrid GetPathGrid()
@@ -36,37 +45,41 @@ public class PathProber : KMonoBehaviour
 		return this.PathGrid;
 	}
 
-	public void UpdateProbe(NavGrid nav_grid, int cell, NavType nav_type, PathFinderAbilities abilities, PathFinder.PotentialPath.Flags flags, bool new_query = true)
+	public void UpdateProbe(NavGrid nav_grid, int cell, NavType nav_type, PathFinderAbilities abilities, PathFinder.PotentialPath.Flags flags)
 	{
-		this.Potentials.Clear();
-		if (new_query)
+		if (this.scratchPad == null)
 		{
-			this.QueryId++;
+			this.scratchPad = new PathFinder.PotentialScratchPad(nav_grid.maxLinksPerCell);
 		}
-		this.PathGrid.SetRootCell(cell);
-		bool flag = false;
-		PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type, this.QueryId, out flag);
-		PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(cell, nav_type, flags);
-		PathFinder.AddPotential(potentialPath, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, this.Potentials, this.QueryId, this.PathGrid, ref cell2);
-		this.UpdateProbe(nav_grid, ref abilities, this.Potentials, this.QueryId);
-	}
-
-	private void UpdateProbe(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialList potentials, int query_id)
-	{
-		while (potentials.Count > 0)
+		bool flag = this.updateCount == -1;
+		bool flag2 = this.Potentials.Count == 0 || flag;
+		this.PathGrid.BeginUpdate(cell, !flag2);
+		if (flag2)
 		{
-			KeyValuePair<int, PathFinder.PotentialPath> keyValuePair = potentials.Next();
-			this.UpdateProbe(nav_grid, ref abilities, keyValuePair.Value, keyValuePair.Key, potentials, query_id);
+			this.updateCount = 0;
+			bool flag3;
+			PathFinder.Cell cell2 = this.PathGrid.GetCell(cell, nav_type, out flag3);
+			PathFinder.PotentialPath potentialPath = new PathFinder.PotentialPath(cell, nav_type, flags);
+			PathFinder.AddPotential(potentialPath, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, this.Potentials, this.PathGrid, ref cell2);
 		}
-	}
-
-	private void UpdateProbe(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialPath potential, int potential_cost, PathFinder.PotentialList potentials, int query_id)
-	{
-		bool flag;
-		PathFinder.Cell cell = this.PathGrid.GetCell(potential, query_id, out flag);
-		if (cell.cost == potential_cost)
+		int num = ((this.potentialCellsPerUpdate > 0 && !flag) ? this.potentialCellsPerUpdate : int.MaxValue);
+		this.updateCount++;
+		while (this.Potentials.Count > 0 && num > 0)
 		{
-			PathFinder.AddPotentials(nav_grid.potentialScratchPad, potential, cell.cost, (int)cell.underwaterCost, ref abilities, null, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, query_id, this.PathGrid, cell.parent, cell.parentNavType);
+			KeyValuePair<int, PathFinder.PotentialPath> keyValuePair = this.Potentials.Next();
+			num--;
+			bool flag3;
+			PathFinder.Cell cell3 = this.PathGrid.GetCell(keyValuePair.Value, out flag3);
+			if (cell3.cost == keyValuePair.Key)
+			{
+				PathFinder.AddPotentials(this.scratchPad, keyValuePair.Value, cell3.cost, (int)cell3.underwaterCost, ref abilities, null, nav_grid.maxLinksPerCell, nav_grid.Links, this.Potentials, this.PathGrid, cell3.parent, cell3.parentNavType);
+			}
+		}
+		bool flag4 = this.Potentials.Count == 0;
+		this.PathGrid.EndUpdate(flag4);
+		if (flag4 && this.updateCount > 25)
+		{
+			KProfiler.AddEvent("PathProberUpdateCountExceeded");
 		}
 	}
 
@@ -78,9 +91,15 @@ public class PathProber : KMonoBehaviour
 
 	public const int InvalidCost = -1;
 
-	public int QueryId = 1;
-
 	private PathGrid PathGrid;
 
 	private PathFinder.PotentialList Potentials = new PathFinder.PotentialList();
+
+	public int updateCount = -1;
+
+	private const int updateCountThreshold = 25;
+
+	private PathFinder.PotentialScratchPad scratchPad;
+
+	public int potentialCellsPerUpdate = -1;
 }

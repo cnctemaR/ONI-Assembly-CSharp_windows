@@ -188,8 +188,13 @@ namespace UnityEngine
 		/// <returns>
 		///   <para>Whether or not the font has the character specified.</para>
 		/// </returns>
+		public bool HasCharacter(char c)
+		{
+			return this.HasCharacter((int)c);
+		}
+
 		[MethodImpl(MethodImplOptions.InternalCall)]
-		public extern bool HasCharacter(char c);
+		private extern bool HasCharacter(int c);
 
 		/// <summary>
 		///   <para>Get names of fonts installed on the machine.</para>

@@ -427,5 +427,12 @@ namespace STRINGS
 				public static LocString DESC = "Replenishes one charge to a depleted Neural Vacillator.";
 			}
 		}
+
+		public class CARGO_CAPSULE
+		{
+			public static LocString NAME = "Cargo Capsule";
+
+			public static LocString DESC = "Temporary container";
+		}
 	}
 }

@@ -5,14 +5,15 @@ using UnityEngine;
 
 public class KInputHandler
 {
-	public KInputHandler(object obj, KInputController controller)
+	public KInputHandler(IInputHandler obj, KInputController controller)
 		: this(obj)
 	{
 		this.mController = controller;
 	}
 
-	public KInputHandler(object obj)
+	public KInputHandler(IInputHandler obj)
 	{
+		this.name = obj.handlerName;
 		MethodInfo method = obj.GetType().GetMethod("OnKeyDown");
 		if (method != null)
 		{
@@ -105,9 +106,14 @@ public class KInputHandler
 
 	public void HandleKeyDown(KButtonEvent e)
 	{
+		this.lastConsumedEvent = null;
 		foreach (Action<KButtonEvent> action in this.mOnKeyDownDelegates)
 		{
 			action(e);
+			if (e.Consumed)
+			{
+				this.lastConsumedEvent = e;
+			}
 		}
 		if (!e.Consumed && this.mChildren != null)
 		{
@@ -124,9 +130,14 @@ public class KInputHandler
 
 	public void HandleKeyUp(KButtonEvent e)
 	{
+		this.lastConsumedEvent = null;
 		foreach (Action<KButtonEvent> action in this.mOnKeyUpDelegates)
 		{
 			action(e);
+			if (e.Consumed)
+			{
+				this.lastConsumedEvent = e;
+			}
 		}
 		if (!e.Consumed && this.mChildren != null)
 		{
@@ -209,6 +220,10 @@ public class KInputHandler
 	private List<KInputHandler.HandlerInfo> mChildren;
 
 	private KInputController mController;
+
+	private string name;
+
+	private KButtonEvent lastConsumedEvent;
 
 	public delegate void KButtonEventHandler(KButtonEvent e);
 

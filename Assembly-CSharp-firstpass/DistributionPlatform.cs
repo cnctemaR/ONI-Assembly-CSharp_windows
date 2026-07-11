@@ -28,6 +28,7 @@ public class DistributionPlatform : MonoBehaviour
 			{
 				global::Debug.LogError("Steam not initialized in time.", null);
 			}
+			Output.Log(new object[] { "Distribution platform: " + DistributionPlatform.sImpl.Platform });
 		}
 	}
 

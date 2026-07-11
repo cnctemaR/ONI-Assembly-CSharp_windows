@@ -106,11 +106,16 @@ namespace Klei.AI
 
 		public void Sim200ms(float dt)
 		{
-			float delta = this.GetDelta();
-			if (delta != 0f)
+			if (dt == 0f)
 			{
-				this.ApplyDelta(delta * dt);
+				return;
 			}
+			float delta = this.GetDelta();
+			if (delta == 0f)
+			{
+				return;
+			}
+			this.ApplyDelta(delta * dt);
 		}
 
 		public void Deactivate()

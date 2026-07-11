@@ -6,9 +6,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>This class stores the rotation limits that define the muscle for a single human bone.</para>
 	/// </summary>
-	[NativeType(CodegenOptions.Custom, "MonoHumanLimit")]
-	[NativeHeader("Runtime/Animation/HumanDescription.h")]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
+	[NativeHeader("Runtime/Animation/HumanDescription.h")]
+	[NativeType(CodegenOptions.Custom, "MonoHumanLimit")]
 	public struct HumanLimit
 	{
 		/// <summary>

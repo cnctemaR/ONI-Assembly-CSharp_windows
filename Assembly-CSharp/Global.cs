@@ -116,7 +116,6 @@ public class Global : MonoBehaviour
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F3, Modifier.Alt, global::Action.DebugCollectGarbage, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F7, Modifier.Alt, global::Action.DebugInvincible, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F10, Modifier.Alt, global::Action.DebugForceLightEverywhere, true, false),
-			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F6, Modifier.Shift, global::Action.DebugVisualTest, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F10, Modifier.Shift, global::Action.DebugElementTest, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F11, Modifier.Shift, global::Action.DebugRiverTest, true, false),
 			new BindingEntry("Debug", GamepadButton.NumButtons, KKeyCode.F12, Modifier.Shift, global::Action.DebugTileTest, true, false),
@@ -268,6 +267,7 @@ public class Global : MonoBehaviour
 		Singleton<KBatchedAnimUpdater>.CreateInstance();
 		DistributionPlatform.Initialize();
 		Localization.Initialize(false);
+		this.mainThread = Thread.CurrentThread;
 		KProfiler.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
 		if (DistributionPlatform.Initialized)
@@ -356,7 +356,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 303707U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 309851U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -456,7 +456,7 @@ public class Global : MonoBehaviour
 
 	private bool gotKleiUserID;
 
-	private Thread mainThread;
+	public Thread mainThread;
 
 	public static readonly string LanguagePackKey = "LanguagePack";
 

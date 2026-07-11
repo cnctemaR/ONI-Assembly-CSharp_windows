@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{6188D4E0-E98D-4759-9291-AA4BCF2EBFFF}</ProjectGuid>
+    <ProjectGuid>{505B7BE8-91D0-4DB8-89B0-CEAD8FD1928C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.ClusterRendererModule</AssemblyName>
@@ -19,11 +19,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EBFE9}</Project>
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19275}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{6188D4E0-E98D-4759-9291-AA4BCF2EC016}</Project>
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192A3}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

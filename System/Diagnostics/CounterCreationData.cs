@@ -36,8 +36,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("Name of this counter.")]
 		[global::System.ComponentModel.DefaultValue("")]
+		[MonitoringDescription("Name of this counter.")]
 		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.StringValueConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 		public string CounterName
 		{

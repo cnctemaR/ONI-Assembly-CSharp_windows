@@ -9,11 +9,11 @@ namespace UnityEngine.Experimental.Playables
 	/// <summary>
 	///   <para>An implementation of IPlayable that allows application of a Material shader to one or many texture inputs to produce a texture output.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Export/Director/MaterialEffectPlayable.bindings.h")]
-	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
-	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
+	[NativeHeader("Runtime/Export/Director/MaterialEffectPlayable.bindings.h")]
 	[RequiredByNativeCode]
+	[NativeHeader("Runtime/Shaders/Director/MaterialEffectPlayable.h")]
+	[StaticAccessor("MaterialEffectPlayableBindings", StaticAccessorType.DoubleColon)]
 	public struct MaterialEffectPlayable : IPlayable, IEquatable<MaterialEffectPlayable>
 	{
 		internal MaterialEffectPlayable(PlayableHandle handle)

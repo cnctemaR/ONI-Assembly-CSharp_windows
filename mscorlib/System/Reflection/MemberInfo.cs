@@ -5,8 +5,8 @@ using System.Security.Permissions;
 
 namespace System.Reflection
 {
-	[ComDefaultInterface(typeof(_MemberInfo))]
 	[ComVisible(true)]
+	[ComDefaultInterface(typeof(_MemberInfo))]
 	[ClassInterface(ClassInterfaceType.None)]
 	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\n               version=\"1\"\n               Unrestricted=\"true\"/>\n")]
 	[Serializable]

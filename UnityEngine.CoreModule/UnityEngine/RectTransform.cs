@@ -167,9 +167,21 @@ namespace UnityEngine
 			}
 		}
 
-		internal Object drivenByObject { get; set; }
+		internal extern Object drivenByObject
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 
-		internal DrivenTransformProperties drivenProperties { get; set; }
+		internal extern DrivenTransformProperties drivenProperties
+		{
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			get;
+			[MethodImpl(MethodImplOptions.InternalCall)]
+			set;
+		}
 
 		/// <summary>
 		///   <para>Force the recalculation of RectTransforms internal data.</para>
@@ -205,7 +217,7 @@ namespace UnityEngine
 		/// <summary>
 		///   <para>Get the corners of the calculated rectangle in world space.</para>
 		/// </summary>
-		/// <param name="fourCornersArray">The ray that corners are filled into.</param>
+		/// <param name="fourCornersArray">The array that corners are filled into.</param>
 		public void GetWorldCorners(Vector3[] fourCornersArray)
 		{
 			if (fourCornersArray == null || fourCornersArray.Length < 4)

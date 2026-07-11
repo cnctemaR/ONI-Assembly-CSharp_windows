@@ -9,9 +9,9 @@ namespace UnityEngine.U2D
 	/// <summary>
 	///   <para>Manages SpriteAtlas during runtime.</para>
 	/// </summary>
+	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
 	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlas.h")]
 	[StaticAccessor("GetSpriteAtlasManager()", StaticAccessorType.Dot)]
-	[NativeHeader("Runtime/2D/SpriteAtlas/SpriteAtlasManager.h")]
 	public class SpriteAtlasManager
 	{
 		[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]

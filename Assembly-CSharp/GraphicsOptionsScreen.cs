@@ -12,10 +12,6 @@ internal class GraphicsOptionsScreen : KModalScreen
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (Application.platform == RuntimePlatform.LinuxPlayer || Application.platform == RuntimePlatform.LinuxEditor)
-		{
-			this.resDropdownAlwaysActive = true;
-		}
 		this.title.SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.TITLE);
 		this.originalSettings = this.CaptureSettings();
 		this.applyButton.isInteractable = false;
@@ -34,7 +30,6 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.fullscreenToggle.isOn = Screen.fullScreen;
 		this.fullscreenToggle.onValueChanged.AddListener(new UnityAction<bool>(this.OnFullscreenToggle));
 		this.fullscreenToggle.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.FULLSCREEN);
-		this.resolutionDropdown.interactable = this.resDropdownAlwaysActive || this.fullscreenToggle.isOn;
 		this.resolutionDropdown.transform.parent.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.RESOLUTION);
 		if (this.fullscreenToggle.isOn)
 		{
@@ -56,9 +51,9 @@ internal class GraphicsOptionsScreen : KModalScreen
 		int num3 = Screen.currentResolution.refreshRate;
 		bool flag = Screen.fullScreen;
 		Output.Log(new object[] { string.Format("Starting up with a resolution of {0}x{1} @{2}hz (fullscreen: {3})", new object[] { num, num2, num3, flag }) });
-		if ((Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionWidthKey) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionHeightKey))
+		if (KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionWidthKey) && KPlayerPrefs.HasKey(GraphicsOptionsScreen.ResolutionHeightKey))
 		{
-			Output.Log(new object[] { "Found OSX player prefs resolution, overriding with that" });
+			Output.Log(new object[] { "Found player prefs resolution, overriding with that" });
 			num = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionWidthKey);
 			num2 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.ResolutionHeightKey);
 			num3 = KPlayerPrefs.GetInt(GraphicsOptionsScreen.RefreshRateKey, Screen.currentResolution.refreshRate);
@@ -114,15 +109,29 @@ internal class GraphicsOptionsScreen : KModalScreen
 		Screen.SetResolution(num, num2, flag, num3);
 	}
 
-	private void SaveResolutionToPrefs(GraphicsOptionsScreen.Settings settings)
+	public static void OnResize()
 	{
-		if (Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXEditor)
+		GraphicsOptionsScreen.Settings settings = default(GraphicsOptionsScreen.Settings);
+		settings.resolution = Screen.currentResolution;
+		settings.resolution.width = Screen.width;
+		settings.resolution.height = Screen.height;
+		settings.fullscreen = Screen.fullScreen;
+		GraphicsOptionsScreen.SaveResolutionToPrefs(settings);
+	}
+
+	private static void SaveResolutionToPrefs(GraphicsOptionsScreen.Settings settings)
+	{
+		Output.Log(new object[] { string.Format("Screen resolution updated, saving values to prefs: {0}x{1} @ {2}, fullscreen: {3}", new object[]
 		{
-			KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionWidthKey, settings.resolution.width);
-			KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionHeightKey, settings.resolution.height);
-			KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKey, settings.resolution.refreshRate);
-			KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, (!settings.fullscreen) ? 0 : 1);
-		}
+			settings.resolution.width,
+			settings.resolution.height,
+			settings.resolution.refreshRate,
+			settings.fullscreen
+		}) });
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionWidthKey, settings.resolution.width);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.ResolutionHeightKey, settings.resolution.height);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.RefreshRateKey, settings.resolution.refreshRate);
+		KPlayerPrefs.SetInt(GraphicsOptionsScreen.FullScreenKey, (!settings.fullscreen) ? 0 : 1);
 	}
 
 	private void UpdateUIScale(float value)
@@ -217,7 +226,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 			{
 				this.applyButton.isInteractable = false;
 				this.revertButton.isInteractable = true;
-				this.SaveResolutionToPrefs(new_settings);
+				GraphicsOptionsScreen.SaveResolutionToPrefs(new_settings);
 			});
 		}
 		catch (Exception ex)
@@ -241,7 +250,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.applyButton.isInteractable = false;
 			this.revertButton.isInteractable = false;
-			this.SaveResolutionToPrefs(this.originalSettings);
+			GraphicsOptionsScreen.SaveResolutionToPrefs(this.originalSettings);
 		});
 	}
 
@@ -257,20 +266,15 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.applyButton.isInteractable = true;
 		}
-		else if (this.resDropdownAlwaysActive || this.fullscreenToggle.isOn)
+		else
 		{
 			int resolutionIndex = this.GetResolutionIndex(settings.resolution);
 			this.applyButton.isInteractable = this.resolutionDropdown.value != resolutionIndex;
-		}
-		else
-		{
-			this.applyButton.isInteractable = false;
 		}
 	}
 
 	private void OnFullscreenToggle(bool enabled)
 	{
-		this.resolutionDropdown.interactable = this.resDropdownAlwaysActive || this.fullscreenToggle.isOn;
 		this.RefreshApplyButton();
 	}
 
@@ -372,8 +376,6 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private List<Dropdown.OptionData> options = new List<Dropdown.OptionData>();
 
 	private GraphicsOptionsScreen.Settings originalSettings;
-
-	private bool resDropdownAlwaysActive;
 
 	private struct Settings
 	{

@@ -24,6 +24,11 @@ public class RocketModule : KMonoBehaviour
 		return condition;
 	}
 
+	public void SetBGKAnim(KAnimFile anim_file)
+	{
+		this.bgAnimFile = anim_file;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -46,6 +51,30 @@ public class RocketModule : KMonoBehaviour
 		base.Subscribe<RocketModule>(-1056989049, RocketModule.OnLaunchDelegate);
 		base.Subscribe<RocketModule>(238242047, RocketModule.OnLandDelegate);
 		base.Subscribe<RocketModule>(1502190696, RocketModule.DEBUG_OnDestroyDelegate);
+		if (this.bgAnimFile != null)
+		{
+			this.AddBGGantry();
+		}
+	}
+
+	private void AddBGGantry()
+	{
+		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
+		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(Assets.GetPrefab(this.rocket_gantry_bg_prefab));
+		gameObject.name = string.Format(this.rocket_module_bg_base_string, base.name, this.rocket_module_bg_affix);
+		gameObject.SetActive(false);
+		Vector3 position = component.transform.GetPosition();
+		position.z = Grid.GetLayerZ(Grid.SceneLayer.InteriorWall);
+		gameObject.transform.SetPosition(position);
+		gameObject.transform.parent = base.transform;
+		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+		component2.AnimFiles = new KAnimFile[] { this.bgAnimFile };
+		component2.initialAnim = this.rocket_module_bg_anim;
+		component2.fgLayer = Grid.SceneLayer.NoLayer;
+		component2.initialMode = KAnim.PlayMode.Paused;
+		component2.FlipX = component.FlipX;
+		component2.FlipY = component.FlipY;
+		gameObject.SetActive(true);
 	}
 
 	private void DEBUG_OnDestroy(object data)
@@ -210,6 +239,17 @@ public class RocketModule : KMonoBehaviour
 	public List<RocketLaunchCondition> launchConditions = new List<RocketLaunchCondition>();
 
 	public List<RocketFlightCondition> flightConditions = new List<RocketFlightCondition>();
+
+	private string rocket_module_bg_base_string = "{0}{1}";
+
+	private string rocket_module_bg_affix = "BG";
+
+	private string rocket_module_bg_anim = "on";
+
+	private string rocket_gantry_bg_prefab = "RocketGantryBG";
+
+	[SerializeField]
+	private KAnimFile bgAnimFile;
 
 	protected string parentRocketName = UI.STARMAP.DEFAULT_NAME;
 

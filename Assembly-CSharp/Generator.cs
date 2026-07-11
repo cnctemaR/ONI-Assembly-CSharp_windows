@@ -81,7 +81,7 @@ public class Generator : KMonoBehaviour, ISaveLoadable, IEnergyProducer
 		get
 		{
 			bool flag = false;
-			GameObject gameObject = Grid.Objects[this.PowerCell, 24];
+			GameObject gameObject = Grid.Objects[this.PowerCell, 26];
 			if (gameObject != null && gameObject.GetComponent<BuildingComplete>() != null)
 			{
 				flag = true;

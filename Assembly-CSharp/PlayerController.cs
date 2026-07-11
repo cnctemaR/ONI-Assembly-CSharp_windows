@@ -5,6 +5,14 @@ using UnityEngine.EventSystems;
 
 public class PlayerController : KMonoBehaviour, IInputHandler
 {
+	public string handlerName
+	{
+		get
+		{
+			return "PlayerController";
+		}
+	}
+
 	public KInputHandler inputHandler { get; set; }
 
 	public InterfaceTool ActiveTool
@@ -191,6 +199,11 @@ public class PlayerController : KMonoBehaviour, IInputHandler
 	public void OnKeyDown(KButtonEvent e)
 	{
 		if (e.TryConsume(global::Action.ToggleScreenshotMode))
+		{
+			DebugHandler.ToggleScreenshotMode();
+			return;
+		}
+		if (DebugHandler.HideUI && e.TryConsume(global::Action.Escape))
 		{
 			DebugHandler.ToggleScreenshotMode();
 			return;

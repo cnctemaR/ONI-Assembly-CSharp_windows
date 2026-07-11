@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei.AI;
+using STRINGS;
 using UnityEngine;
 
 public class Telepad : StateMachineComponent<Telepad.StatesInstance>
@@ -59,33 +60,28 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		if (this.GetTimeRemaining() < -120f)
 		{
 			Messenger.Instance.QueueMessage(new DuplicantsLeftMessage());
-			Immigration.Instance.SpawnMinions();
+			Immigration.Instance.EndImmigration();
 		}
 	}
 
 	public void RejectAll()
 	{
-		Immigration.Instance.SpawnMinions();
+		Immigration.Instance.EndImmigration();
 		base.smi.sm.closePortal.Trigger(base.smi);
 	}
 
-	public void OnClickImmigrant(MinionStartingStats starting_stats)
+	public void OnAcceptDelivery(ITelepadDeliverable delivery)
 	{
 		int num = Grid.PosToCell(this);
-		int num2 = Immigration.Instance.SpawnMinions();
-		foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+		Immigration.Instance.EndImmigration();
+		GameObject gameObject = delivery.Deliver(Grid.CellToPosCBC(num, Grid.SceneLayer.Move));
+		if (gameObject.GetComponent<MinionIdentity>() != null)
 		{
-			minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", true);
-		}
-		for (int i = 0; i < num2; i++)
-		{
-			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(MinionConfig.ID), null, null);
-			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num, Grid.SceneLayer.Move));
-			gameObject.SetActive(true);
-			starting_stats.Apply(gameObject);
-			Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
-			ChoreProvider component = gameObject.GetComponent<ChoreProvider>();
-			new EmoteChore(component, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", Telepad.PortalBirthAnim, null);
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.PersonalTime, GameClock.Instance.GetTimeSinceStartOfReport(), string.Format(UI.ENDOFDAYREPORT.NOTES.PERSONAL_TIME, DUPLICANTS.CHORES.NOT_EXISTING_TASK), gameObject.GetProperName());
+			foreach (MinionIdentity minionIdentity in Components.LiveMinionIdentities.Items)
+			{
+				minionIdentity.GetComponent<Effects>().Add("NewCrewArrival", true);
+			}
 		}
 		base.smi.sm.closePortal.Trigger(base.smi);
 	}
@@ -106,7 +102,7 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 
 	private List<MinionStartingStats> minionStats;
 
-	private static readonly HashedString[] PortalBirthAnim = new HashedString[] { "portalbirth" };
+	public static readonly HashedString[] PortalBirthAnim = new HashedString[] { "portalbirth" };
 
 	public class StatesInstance : GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.GameInstance
 	{

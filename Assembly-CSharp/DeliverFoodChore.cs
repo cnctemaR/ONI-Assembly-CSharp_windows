@@ -3,18 +3,18 @@
 public class DeliverFoodChore : Chore<DeliverFoodChore.StatesInstance>
 {
 	public DeliverFoodChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.DeliverFood, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.DeliverFood, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new DeliverFoodChore.StatesInstance(this);
+		base.smi = new DeliverFoodChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.instance.IsChattable, target);
 	}
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.requestedrationcount.Set(this.smi.GetComponent<StateMachineController>().GetSMI<RationMonitor.Instance>().GetRationsRemaining(), this.smi);
-		this.smi.sm.ediblesource.Set(context.consumerState.gameObject.GetComponent<Sensors>().GetSensor<ClosestEdibleSensor>().GetEdible(), this.smi);
-		this.smi.sm.deliverypoint.Set(this.gameObject, this.smi);
-		this.smi.sm.deliverer.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.requestedrationcount.Set(base.smi.GetComponent<StateMachineController>().GetSMI<RationMonitor.Instance>().GetRationsRemaining(), base.smi);
+		base.smi.sm.ediblesource.Set(context.consumerState.gameObject.GetComponent<Sensors>().GetSensor<ClosestEdibleSensor>().GetEdible(), base.smi);
+		base.smi.sm.deliverypoint.Set(this.gameObject, base.smi);
+		base.smi.sm.deliverer.Set(context.consumerState.gameObject, base.smi);
 		base.Begin(context);
 	}
 

@@ -9,9 +9,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>A class you can derive from if you want to create objects that don't need to be attached to game objects.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[RequiredByNativeCode]
 	[NativeClass(null)]
+	[NativeHeader("Runtime/Mono/MonoBehaviour.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class ScriptableObject : Object
 	{

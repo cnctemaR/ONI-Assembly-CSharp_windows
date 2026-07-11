@@ -8,6 +8,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 {
 	public RelaxationPoint()
 	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
 		this.showProgressBar = false;
 	}
 
@@ -86,7 +87,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)

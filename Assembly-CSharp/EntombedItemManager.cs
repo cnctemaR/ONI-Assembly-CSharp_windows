@@ -157,7 +157,10 @@ public class EntombedItemManager : KMonoBehaviour, ISim33ms
 		{
 			EntombedItemManager.Item item = this.GetItem(num2);
 			this.RemoveItem(num2);
-			SimMessages.AddRemoveSubstance(item.cell, (int)ElementLoader.FindElementByHash((SimHashes)item.elementId).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, true, -1);
+			if (item.mass > 1E-45f)
+			{
+				SimMessages.AddRemoveSubstance(item.cell, (int)ElementLoader.FindElementByHash((SimHashes)item.elementId).idx, CellEventLogger.Instance.ElementConsumerSimUpdate, item.mass, item.temperature, item.diseaseIdx, item.diseaseCount, true, -1);
+			}
 		}
 		pooledList.Recycle();
 	}

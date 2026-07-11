@@ -194,25 +194,11 @@ public class DetailsScreen : KTabMenu
 		int num2 = 0;
 		for (int j = 0; j < this.screens.Length; j++)
 		{
-			string requiredComponentType = this.screens[j].requiredComponentType;
-			bool flag = requiredComponentType == null || requiredComponentType == string.Empty || DetailsScreen.GetComponent(go, requiredComponentType) != null;
-			if (flag && requiredComponentType == "Storage")
-			{
-				flag = go.GetComponent<Storage>().showInUI;
-			}
-			bool flag2 = false;
-			for (int k = 0; k < this.screens[j].excludeComponentType.Length; k++)
-			{
-				string text = this.screens[j].excludeComponentType[k];
-				if (text != null && DetailsScreen.GetComponent(go, text) != null)
-				{
-					flag2 = true;
-					break;
-				}
-			}
-			bool flag3 = this.screens[j].hideWhenDead && base.gameObject.HasTag(GameTags.Dead);
-			base.SetTabEnabled(this.screens[j].tabIdx, flag && !flag2 && !flag3);
-			if (flag)
+			bool flag = this.screens[j].screen.IsValidForTarget(go);
+			bool flag2 = this.screens[j].hideWhenDead && base.gameObject.HasTag(GameTags.Dead);
+			bool flag3 = flag && !flag2;
+			base.SetTabEnabled(this.screens[j].tabIdx, flag3);
+			if (flag3)
 			{
 				num2++;
 				if (num == -1)
@@ -554,12 +540,6 @@ public class DetailsScreen : KTabMenu
 		public Sprite icon;
 
 		public TargetScreen screen;
-
-		public string requiredComponentType;
-
-		public string[] excludeComponentType;
-
-		public Tag[] excludedPrefabTags;
 
 		public int displayOrderPriority;
 

@@ -41,7 +41,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The height of the capsule meased in the object's local space.</para>
+		///   <para>The height of the capsule measured in the object's local space.</para>
 		/// </summary>
 		public extern float height
 		{

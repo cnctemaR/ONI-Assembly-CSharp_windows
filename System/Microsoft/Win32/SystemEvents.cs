@@ -58,9 +58,9 @@ namespace Microsoft.Win32
 		}
 
 		[global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-		[global::System.ComponentModel.Browsable(false)]
-		[Obsolete("")]
 		[global::System.MonoTODO("Currently does nothing on Mono")]
+		[Obsolete("")]
+		[global::System.ComponentModel.Browsable(false)]
 		public static event EventHandler LowMemory
 		{
 			add

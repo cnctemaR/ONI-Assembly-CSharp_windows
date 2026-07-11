@@ -137,10 +137,10 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Get raw data from a texture for reading or writing.</para>
+		///   <para>Get raw data from a texture.</para>
 		/// </summary>
 		/// <returns>
-		///   <para>Raw texture data view.</para>
+		///   <para>Raw texture data as a byte array.</para>
 		/// </returns>
 		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]

@@ -14,7 +14,7 @@ namespace UnityEngine.Experimental.UIElements
 		}
 
 		/// <summary>
-		///   <para>Must return true if the UXML element attributes are not restricted to the values enumerated by uxmlAttributesDescription.</para>
+		///   <para>Must return true if the UXML element attributes are not restricted to the values enumerated by UxmlTraits.uxmlAttributesDescription.</para>
 		/// </summary>
 		public bool canHaveAnyAttribute { get; protected set; }
 

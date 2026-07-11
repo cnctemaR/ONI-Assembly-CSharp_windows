@@ -7,8 +7,8 @@ public class NextUpdateTimer : KMonoBehaviour
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.currentReleaseDate = new global::System.DateTime(2018, 12, 13, 17, 0, 0, DateTimeKind.Utc);
-		this.nextReleaseDate = new global::System.DateTime(2019, 2, 19, 17, 0, 0, DateTimeKind.Utc);
+		this.currentReleaseDate = new global::System.DateTime(2019, 2, 19, 17, 0, 0, DateTimeKind.Utc);
+		this.nextReleaseDate = new global::System.DateTime(2019, 4, 18, 17, 0, 0, DateTimeKind.Utc);
 		this.initialAnimScale = this.UpdateAnimController.animScale;
 		ScreenResize instance = ScreenResize.Instance;
 		instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.RefreshScale));

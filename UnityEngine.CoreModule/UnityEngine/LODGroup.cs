@@ -7,10 +7,10 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>LODGroup lets you group multiple Renderers into LOD levels.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Graphics/LOD/LODUtility.h")]
-	[StaticAccessor("GetLODGroupManager()", StaticAccessorType.Dot)]
 	[NativeHeader("Runtime/Graphics/LOD/LODGroup.h")]
 	[NativeHeader("Runtime/Graphics/LOD/LODGroupManager.h")]
+	[NativeHeader("Runtime/Graphics/LOD/LODUtility.h")]
+	[StaticAccessor("GetLODGroupManager()", StaticAccessorType.Dot)]
 	public class LODGroup : Component
 	{
 		/// <summary>

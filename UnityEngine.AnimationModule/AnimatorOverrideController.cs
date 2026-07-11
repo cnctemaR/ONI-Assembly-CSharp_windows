@@ -10,8 +10,8 @@ namespace UnityEngine
 	///   <para>Interface to control Animator Override Controller.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Animation/AnimatorOverrideController.h")]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[UsedByNativeCode]
 	public class AnimatorOverrideController : RuntimeAnimatorController
 	{
 		/// <summary>

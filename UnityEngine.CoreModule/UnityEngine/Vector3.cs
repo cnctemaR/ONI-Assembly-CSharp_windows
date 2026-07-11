@@ -10,10 +10,10 @@ namespace UnityEngine
 	///   <para>Representation of 3D vectors and points.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[NativeClass("Vector3f")]
 	[ThreadAndSerializationSafe]
 	[NativeHeader("Runtime/Math/Vector3.h")]
 	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
+	[NativeClass("Vector3f")]
 	[NativeType(Header = "Runtime/Math/Vector3.h")]
 	public struct Vector3 : IEquatable<Vector3>
 	{

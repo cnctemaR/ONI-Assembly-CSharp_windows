@@ -6,9 +6,9 @@ using UnityEngine;
 public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 {
 	public BingeEatChore(IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.BingeEat, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.BingeEat, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new BingeEatChore.StatesInstance(this, target.gameObject);
+		base.smi = new BingeEatChore.StatesInstance(this, target.gameObject);
 		base.Subscribe(1121894420, new Action<object>(this.OnEat));
 	}
 
@@ -17,7 +17,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 		Edible edible = (Edible)data;
 		if (edible != null)
 		{
-			this.smi.sm.bingeremaining.Set(Mathf.Max(0f, this.smi.sm.bingeremaining.Get(this.smi) - edible.unitsConsumed), this.smi);
+			base.smi.sm.bingeremaining.Set(Mathf.Max(0f, base.smi.sm.bingeremaining.Get(base.smi) - edible.unitsConsumed), base.smi);
 		}
 	}
 
@@ -41,7 +41,7 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 			Navigator component = base.GetComponent<Navigator>();
 			int num = int.MaxValue;
 			Edible edible = null;
-			if (base.sm.bingeremaining.Get(base.smi) <= 0f)
+			if (base.sm.bingeremaining.Get(base.smi) <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 			{
 				this.GoTo(base.sm.eat_pst);
 				return;
@@ -52,17 +52,20 @@ public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 				{
 					if (!(edible2 == base.sm.ediblesource.Get<Edible>(base.smi)))
 					{
-						if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
+						if (!edible2.isBeingConsumed)
 						{
-							if (edible2.GetComponent<Pickupable>().CouldBePickedUpByMinion(base.gameObject))
+							if (edible2.GetComponent<Pickupable>().UnreservedAmount > 0f)
 							{
-								int navigationCost = component.GetNavigationCost(edible2);
-								if (navigationCost != -1)
+								if (edible2.GetComponent<Pickupable>().CouldBePickedUpByMinion(base.gameObject))
 								{
-									if (navigationCost < num)
+									int navigationCost = component.GetNavigationCost(edible2);
+									if (navigationCost != -1)
 									{
-										num = navigationCost;
-										edible = edible2;
+										if (navigationCost < num)
+										{
+											num = navigationCost;
+											edible = edible2;
+										}
 									}
 								}
 							}

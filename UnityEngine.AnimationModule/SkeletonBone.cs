@@ -5,10 +5,11 @@ using UnityEngine.Scripting;
 namespace UnityEngine
 {
 	/// <summary>
-	///   <para>Details of the Transform name mapped to a model's skeleton bone and its default position and rotation in the T-pose.</para>
+	///   <para>Details of the Transform name mapped to the skeleton bone of a model and its default position and rotation in the T-pose.</para>
 	/// </summary>
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/HumanDescription.h")]
+	[RequiredByNativeCode]
+	[NativeType(CodegenOptions.Custom, "MonoSkeletonBone")]
 	public struct SkeletonBone
 	{
 		[Obsolete("transformModified is no longer used and has been deprecated.", true)]

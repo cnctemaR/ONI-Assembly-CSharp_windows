@@ -243,7 +243,7 @@ namespace UnityEngine
 		private extern void GetBindposesNonAllocImpl([Out] Matrix4x4[] values);
 
 		/// <summary>
-		///   <para>Returns state of the Read/Write Enabled checkbox when model was imported.</para>
+		///   <para>Returns true if the Mesh is read/write enabled, or false if it is not.</para>
 		/// </summary>
 		public extern bool isReadable
 		{

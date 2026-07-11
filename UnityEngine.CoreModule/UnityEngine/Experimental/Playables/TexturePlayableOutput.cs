@@ -10,10 +10,10 @@ namespace UnityEngine.Experimental.Playables
 	///   <para>An IPlayableOutput implementation that will be used to manipulate textures.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Export/Director/TexturePlayableOutput.bindings.h")]
-	[StaticAccessor("TexturePlayableOutputBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Graphics/Director/TexturePlayableOutput.h")]
 	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[StaticAccessor("TexturePlayableOutputBindings", StaticAccessorType.DoubleColon)]
+	[RequiredByNativeCode]
 	public struct TexturePlayableOutput : IPlayableOutput
 	{
 		internal TexturePlayableOutput(PlayableOutputHandle handle)

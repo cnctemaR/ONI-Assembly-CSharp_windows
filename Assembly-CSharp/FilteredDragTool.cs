@@ -126,28 +126,30 @@ public class FilteredDragTool : DragTool
 			{
 				return "Buildings";
 			}
-			if (gamer_layer != ObjectLayer.Backwall)
+			if (gamer_layer == ObjectLayer.Backwall)
 			{
-				switch (gamer_layer)
-				{
-				case ObjectLayer.FoundationTile:
-					return "Tiles";
-				case ObjectLayer.GasConduit:
-					goto IL_0083;
-				}
-				return "Default";
+				return "BackWall";
 			}
-			return "BackWall";
+			switch (gamer_layer)
+			{
+			case ObjectLayer.FoundationTile:
+				return "Tiles";
+			default:
+				if (gamer_layer != ObjectLayer.LogicGates && gamer_layer != ObjectLayer.LogicWires)
+				{
+					return "Default";
+				}
+				return "Logic";
+			case ObjectLayer.GasConduit:
+				break;
+			}
+			break;
 		case ObjectLayer.SolidConduit:
 		case ObjectLayer.SolidConduitConnection:
 			return "SolidConduits";
 		case ObjectLayer.Wire:
 			return "Wires";
-		case ObjectLayer.LogicGates:
-		case ObjectLayer.LogicWires:
-			return "Logic";
 		}
-		IL_0083:
 		return "GasPipes";
 	}
 

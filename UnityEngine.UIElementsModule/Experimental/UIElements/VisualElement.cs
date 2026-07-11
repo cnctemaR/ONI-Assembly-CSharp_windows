@@ -616,7 +616,7 @@ namespace UnityEngine.Experimental.UIElements
 		}
 
 		/// <summary>
-		///   <para>Changes the VisualElement enabled state. A disabled VisualElement does not receive most events.</para>
+		///   <para>Changes whether the current VisualElement is enabled or not. When disabled, a VisualElement does not receive most events.</para>
 		/// </summary>
 		/// <param name="value">New enabled state</param>
 		public void SetEnabled(bool value)

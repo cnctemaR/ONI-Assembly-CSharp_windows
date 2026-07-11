@@ -2,9 +2,9 @@
 
 namespace Mono.Unix.Native
 {
-	[CLSCompliant(false)]
 	[Map]
 	[Flags]
+	[CLSCompliant(false)]
 	public enum OpenFlags
 	{
 		O_RDONLY = 0,

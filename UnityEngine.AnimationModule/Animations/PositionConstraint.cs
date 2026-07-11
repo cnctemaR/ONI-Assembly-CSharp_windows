@@ -9,10 +9,10 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>Constrains the position of an object relative to the position of one or more source objects.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
 	[RequireComponent(typeof(Transform))]
-	[UsedByNativeCode]
 	[NativeHeader("Runtime/Animation/Constraints/PositionConstraint.h")]
+	[NativeHeader("Runtime/Animation/Constraints/Constraint.bindings.h")]
+	[UsedByNativeCode]
 	public sealed class PositionConstraint : Behaviour, IConstraint, IConstraintInternal
 	{
 		private PositionConstraint()

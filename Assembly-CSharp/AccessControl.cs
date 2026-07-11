@@ -17,6 +17,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		{
 			this._defaultPermission = value;
 			this.SetStatusItem();
+			this.SetGridRestrictions(null, this._defaultPermission);
 		}
 	}
 
@@ -42,7 +43,13 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		List<Tuple<MinionAssignablesProxy, AccessControl.Permission>> list = new List<Tuple<MinionAssignablesProxy, AccessControl.Permission>>();
+		this.RegisterInGrid(true);
+		this.SetGridRestrictions(null, this.DefaultPermission);
+		foreach (KeyValuePair<Ref<KPrefabID>, AccessControl.Permission> keyValuePair in this.savedPermissions)
+		{
+			this.SetGridRestrictions(keyValuePair.Key.Get(), keyValuePair.Value);
+		}
+		ListPool<Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.PooledList pooledList = ListPool<Tuple<MinionAssignablesProxy, AccessControl.Permission>, AccessControl>.Allocate();
 		for (int i = this.savedPermissions.Count - 1; i >= 0; i--)
 		{
 			KPrefabID kprefabID = this.savedPermissions[i].Key.Get();
@@ -51,16 +58,24 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 				MinionIdentity component = kprefabID.GetComponent<MinionIdentity>();
 				if (component != null)
 				{
-					list.Add(new Tuple<MinionAssignablesProxy, AccessControl.Permission>(component.assignableProxy.Get(), this.savedPermissions[i].Value));
+					pooledList.Add(new Tuple<MinionAssignablesProxy, AccessControl.Permission>(component.assignableProxy.Get(), this.savedPermissions[i].Value));
 					this.savedPermissions.RemoveAt(i);
+					this.ClearGridRestrictions(kprefabID);
 				}
 			}
 		}
-		foreach (Tuple<MinionAssignablesProxy, AccessControl.Permission> tuple in list)
+		foreach (Tuple<MinionAssignablesProxy, AccessControl.Permission> tuple in pooledList)
 		{
 			this.SetPermission(tuple.first, tuple.second);
 		}
+		pooledList.Recycle();
 		this.SetStatusItem();
+	}
+
+	protected override void OnCleanUp()
+	{
+		this.RegisterInGrid(false);
+		base.OnCleanUp();
 	}
 
 	private void OnControlStateChanged(object data)
@@ -83,6 +98,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 				}
 			}
 			this._defaultPermission = component._defaultPermission;
+			this.SetGridRestrictions(null, this.DefaultPermission);
 		}
 	}
 
@@ -109,6 +125,76 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 			this.savedPermissions.Add(new KeyValuePair<Ref<KPrefabID>, AccessControl.Permission>(new Ref<KPrefabID>(component), permission));
 		}
 		this.SetStatusItem();
+		this.SetGridRestrictions(component, permission);
+	}
+
+	private void RegisterInGrid(bool register)
+	{
+		Building component = base.GetComponent<Building>();
+		if (component == null)
+		{
+			return;
+		}
+		if (register)
+		{
+			Rotatable component2 = base.GetComponent<Rotatable>();
+			Grid.Restriction.Orientation orientation = ((!(component2 == null) && component2.GetOrientation() != Orientation.Neutral) ? Grid.Restriction.Orientation.Horizontal : Grid.Restriction.Orientation.Vertical);
+			foreach (int num in component.PlacementCells)
+			{
+				Grid.RegisterRestriction(num, orientation);
+			}
+		}
+		else
+		{
+			foreach (int num2 in component.PlacementCells)
+			{
+				Grid.UnregisterRestriction(num2);
+			}
+		}
+	}
+
+	private void SetGridRestrictions(KPrefabID kpid, AccessControl.Permission permission)
+	{
+		Building component = base.GetComponent<Building>();
+		if (component == null)
+		{
+			return;
+		}
+		int num = ((!(kpid != null)) ? (-1) : kpid.InstanceID);
+		Grid.Restriction.Directions directions = (Grid.Restriction.Directions)0;
+		switch (permission)
+		{
+		case AccessControl.Permission.Both:
+			directions = (Grid.Restriction.Directions)0;
+			break;
+		case AccessControl.Permission.GoLeft:
+			directions = Grid.Restriction.Directions.Right;
+			break;
+		case AccessControl.Permission.GoRight:
+			directions = Grid.Restriction.Directions.Left;
+			break;
+		case AccessControl.Permission.Neither:
+			directions = Grid.Restriction.Directions.Left | Grid.Restriction.Directions.Right;
+			break;
+		}
+		foreach (int num2 in component.PlacementCells)
+		{
+			Grid.SetRestriction(num2, num, directions);
+		}
+	}
+
+	private void ClearGridRestrictions(KPrefabID kpid)
+	{
+		Building component = base.GetComponent<Building>();
+		if (component == null)
+		{
+			return;
+		}
+		int num = ((!(kpid != null)) ? (-1) : kpid.InstanceID);
+		foreach (int num2 in component.PlacementCells)
+		{
+			Grid.ClearRestriction(num2, num);
+		}
 	}
 
 	public AccessControl.Permission GetPermission(Navigator minion)
@@ -155,7 +241,6 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 
 	public void ClearPermission(MinionAssignablesProxy key)
 	{
-		AccessControl.Permission defaultPermission = this.DefaultPermission;
 		KPrefabID component = key.GetComponent<KPrefabID>();
 		if (component != null)
 		{
@@ -169,6 +254,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 			}
 		}
 		this.SetStatusItem();
+		this.ClearGridRestrictions(component);
 	}
 
 	public bool IsDefaultPermission(MinionAssignablesProxy key)

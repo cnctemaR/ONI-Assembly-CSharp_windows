@@ -30,10 +30,15 @@ public class MinimumOperatingTemperature : KMonoBehaviour, ISim200ms, IGameObjec
 			for (int i = 0; i < this.building.PlacementCells.Length; i++)
 			{
 				int num = this.building.PlacementCells[i];
-				if (Grid.Temperature[num] < this.minimumTemperature)
+				float num2 = Grid.Temperature[num];
+				float num3 = Grid.Mass[num];
+				if (num2 != 0f || num3 != 0f)
 				{
-					flag = false;
-					break;
+					if (num2 < this.minimumTemperature)
+					{
+						flag = false;
+						break;
+					}
 				}
 			}
 		}

@@ -83,6 +83,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 			return;
 		}
 		this.RefreshReachableCells();
+		this.pickupablesDirty = true;
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
 		if (this.choreConsumer.FindNextChore(ref context))
 		{
@@ -120,18 +121,22 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private void RefreshReachableCells()
 	{
-		this.reachableCells.Clear();
-		int num;
-		int num2;
-		Grid.CellToXY(Grid.PosToCell(this), out num, out num2);
-		for (int i = num2 - this.pickupRange; i < num2 + this.pickupRange + 1; i++)
+		foreach (int num in this.reachableCells)
 		{
-			for (int j = num - this.pickupRange; j < num + this.pickupRange + 1; j++)
+			MinionGroupProber.Get().ProxyProberCell(num, false);
+		}
+		this.reachableCells.Clear();
+		int num2;
+		int num3;
+		Grid.CellToXY(Grid.PosToCell(this), out num2, out num3);
+		for (int i = num3 - this.pickupRange; i < num3 + this.pickupRange + 1; i++)
+		{
+			for (int j = num2 - this.pickupRange; j < num2 + this.pickupRange + 1; j++)
 			{
-				int num3 = Grid.XYToCell(j, i);
-				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, j, i, true))
+				int num4 = Grid.XYToCell(j, i);
+				if (Grid.IsValidCell(num4) && Grid.IsPhysicallyAccessible(num2, num3, j, i, true))
 				{
-					this.reachableCells.Add(num3);
+					this.reachableCells.Add(num4);
 				}
 			}
 		}
@@ -141,7 +146,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	{
 		foreach (int num in this.reachableCells)
 		{
-			MinionGroupProber.Get().SetProberCell(num);
+			MinionGroupProber.Get().ProxyProberCell(num, true);
 		}
 	}
 
@@ -165,15 +170,9 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 				Pickupable pickupable = fetchable.pickupable;
 				int pickupableCell = this.GetPickupableCell(pickupable);
 				int cellRange = Grid.GetCellRange(num, pickupableCell);
-				if (cellRange <= this.pickupRange)
+				if (cellRange <= this.pickupRange && this.IsPickupableRelevantToMyInterests(pickupable) && pickupable.CouldBePickedUpByTransferArm(base.gameObject))
 				{
-					if (this.IsPickupableRelevantToMyInterests(pickupable))
-					{
-						if (pickupable.CouldBePickedUpByTransferArm(base.gameObject))
-						{
-							this.pickupables.Add(pickupable);
-						}
-					}
+					this.pickupables.Add(pickupable);
 				}
 			}
 		}
@@ -202,8 +201,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	public void FindFetchTarget(Storage destination, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, float required_amount, ref Pickupable target)
 	{
-		target = null;
-		this.pickupablesDirty = true;
 		this.RefreshPickupables();
 		target = FetchManager.FindFetchTarget(this.pickupables, destination, ref tag_bits, ref required_tags, ref forbid_tags, required_amount);
 	}

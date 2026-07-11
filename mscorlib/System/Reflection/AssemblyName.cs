@@ -15,8 +15,8 @@ using Mono.Security.Cryptography;
 namespace System.Reflection
 {
 	[ComVisible(true)]
-	[ComDefaultInterface(typeof(_AssemblyName))]
 	[ClassInterface(ClassInterfaceType.None)]
+	[ComDefaultInterface(typeof(_AssemblyName))]
 	[Serializable]
 	public sealed class AssemblyName : ICloneable, ISerializable, _AssemblyName, IDeserializationCallback
 	{

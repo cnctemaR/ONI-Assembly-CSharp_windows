@@ -53,6 +53,11 @@ public class Def : ScriptableObject
 			{
 				animName = creatureBrain.symbolPrefix + "ui";
 			}
+			SpaceArtifact component = gameObject.GetComponent<SpaceArtifact>();
+			if (component != null)
+			{
+				animName = component.GetUIAnim();
+			}
 			if (gameObject.HasTag(GameTags.Egg))
 			{
 				IncubationMonitor.Def def = gameObject.GetDef<IncubationMonitor.Def>();
@@ -69,10 +74,10 @@ public class Def : ScriptableObject
 					}
 				}
 			}
-			KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
-			if (component)
+			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
+			if (component2)
 			{
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], animName, centered);
+				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered);
 				return new Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (!(uispriteFromMultiObjectAnim != null)) ? Color.clear : Color.white);
 			}
 			if (gameObject.GetComponent<Building>() != null)

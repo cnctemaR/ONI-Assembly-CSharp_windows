@@ -799,6 +799,21 @@ namespace UnityEngine
 			Graphics.Internal_DrawMesh(mesh, submeshIndex, matrix, material, layer, camera, properties, castShadows, receiveShadows, probeAnchor, lightProbeUsage, lightProbeProxyVolume);
 		}
 
+		/// <summary>
+		///   <para>Draw the same mesh multiple times using GPU instancing.</para>
+		/// </summary>
+		/// <param name="mesh">The Mesh to draw.</param>
+		/// <param name="submeshIndex">Which subset of the mesh to draw. This applies only to meshes that are composed of several materials.</param>
+		/// <param name="material">Material to use.</param>
+		/// <param name="matrices">The array of object transformation matrices.</param>
+		/// <param name="count">The number of instances to be drawn.</param>
+		/// <param name="properties">Additional material properties to apply. See MaterialPropertyBlock.</param>
+		/// <param name="castShadows">Should the meshes cast shadows?</param>
+		/// <param name="receiveShadows">Should the meshes receive shadows?</param>
+		/// <param name="layer"> to use.</param>
+		/// <param name="camera">If null (default), the mesh will be drawn in all cameras. Otherwise it will be drawn in the given camera only.</param>
+		/// <param name="lightProbeUsage">LightProbeUsage for the instances.</param>
+		/// <param name="lightProbeProxyVolume"></param>
 		public static void DrawMeshInstanced(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, [DefaultValue("matrices.Length")] int count, [DefaultValue("null")] MaterialPropertyBlock properties, [DefaultValue("ShadowCastingMode.On")] ShadowCastingMode castShadows, [DefaultValue("true")] bool receiveShadows, [DefaultValue("0")] int layer, [DefaultValue("null")] Camera camera, [DefaultValue("LightProbeUsage.BlendProbes")] LightProbeUsage lightProbeUsage, [DefaultValue("null")] LightProbeProxyVolume lightProbeProxyVolume)
 		{
 			if (!SystemInfo.supportsInstancing)
@@ -848,6 +863,22 @@ namespace UnityEngine
 			Graphics.DrawMeshInstanced(mesh, submeshIndex, material, NoAllocHelpers.ExtractArrayFromListT<Matrix4x4>(matrices), matrices.Count, properties, castShadows, receiveShadows, layer, camera, lightProbeUsage, lightProbeProxyVolume);
 		}
 
+		/// <summary>
+		///   <para>Draw the same mesh multiple times using GPU instancing.</para>
+		/// </summary>
+		/// <param name="mesh">The Mesh to draw.</param>
+		/// <param name="submeshIndex">Which subset of the mesh to draw. This applies only to meshes that are composed of several materials.</param>
+		/// <param name="material">Material to use.</param>
+		/// <param name="bounds">The bounding volume surrounding the instances you intend to draw.</param>
+		/// <param name="bufferWithArgs">The GPU buffer containing the arguments for how many instances of this mesh to draw.</param>
+		/// <param name="argsOffset">The byte offset into the buffer, where the draw arguments start.</param>
+		/// <param name="properties">Additional material properties to apply. See MaterialPropertyBlock.</param>
+		/// <param name="castShadows">Should the mesh cast shadows?</param>
+		/// <param name="receiveShadows">Should the mesh receive shadows?</param>
+		/// <param name="layer"> to use.</param>
+		/// <param name="camera">If null (default), the mesh will be drawn in all cameras. Otherwise it will be drawn in the given camera only.</param>
+		/// <param name="lightProbeUsage">LightProbeUsage for the instances.</param>
+		/// <param name="lightProbeProxyVolume"></param>
 		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, [DefaultValue("0")] int argsOffset, [DefaultValue("null")] MaterialPropertyBlock properties, [DefaultValue("ShadowCastingMode.On")] ShadowCastingMode castShadows, [DefaultValue("true")] bool receiveShadows, [DefaultValue("0")] int layer, [DefaultValue("null")] Camera camera, [DefaultValue("LightProbeUsage.BlendProbes")] LightProbeUsage lightProbeUsage, [DefaultValue("null")] LightProbeProxyVolume lightProbeProxyVolume)
 		{
 			if (!SystemInfo.supportsInstancing)
@@ -1182,21 +1213,6 @@ namespace UnityEngine
 			Graphics.DrawMeshInstanced(mesh, submeshIndex, material, matrices, count, properties, castShadows, receiveShadows, layer, camera, LightProbeUsage.BlendProbes, null);
 		}
 
-		/// <summary>
-		///   <para>Draw the same mesh multiple times using GPU instancing.</para>
-		/// </summary>
-		/// <param name="mesh">The Mesh to draw.</param>
-		/// <param name="submeshIndex">Which subset of the mesh to draw. This applies only to meshes that are composed of several materials.</param>
-		/// <param name="material">Material to use.</param>
-		/// <param name="matrices">The array of object transformation matrices.</param>
-		/// <param name="count">The number of instances to be drawn.</param>
-		/// <param name="properties">Additional material properties to apply. See MaterialPropertyBlock.</param>
-		/// <param name="castShadows">Should the meshes cast shadows?</param>
-		/// <param name="receiveShadows">Should the meshes receive shadows?</param>
-		/// <param name="layer"> to use.</param>
-		/// <param name="camera">If null (default), the mesh will be drawn in all cameras. Otherwise it will be drawn in the given camera only.</param>
-		/// <param name="lightProbeUsage">LightProbeUsage for the instances.</param>
-		/// <param name="lightProbeProxyVolume"></param>
 		[ExcludeFromDocs]
 		public static void DrawMeshInstanced(Mesh mesh, int submeshIndex, Material material, Matrix4x4[] matrices, int count, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage)
 		{
@@ -1287,22 +1303,6 @@ namespace UnityEngine
 			Graphics.DrawMeshInstancedIndirect(mesh, submeshIndex, material, bounds, bufferWithArgs, argsOffset, properties, castShadows, receiveShadows, layer, camera, LightProbeUsage.BlendProbes, null);
 		}
 
-		/// <summary>
-		///   <para>Draw the same mesh multiple times using GPU instancing.</para>
-		/// </summary>
-		/// <param name="mesh">The Mesh to draw.</param>
-		/// <param name="submeshIndex">Which subset of the mesh to draw. This applies only to meshes that are composed of several materials.</param>
-		/// <param name="material">Material to use.</param>
-		/// <param name="bounds">The bounding volume surrounding the instances you intend to draw.</param>
-		/// <param name="bufferWithArgs">The GPU buffer containing the arguments for how many instances of this mesh to draw.</param>
-		/// <param name="argsOffset">The byte offset into the buffer, where the draw arguments start.</param>
-		/// <param name="properties">Additional material properties to apply. See MaterialPropertyBlock.</param>
-		/// <param name="castShadows">Should the mesh cast shadows?</param>
-		/// <param name="receiveShadows">Should the mesh receive shadows?</param>
-		/// <param name="layer"> to use.</param>
-		/// <param name="camera">If null (default), the mesh will be drawn in all cameras. Otherwise it will be drawn in the given camera only.</param>
-		/// <param name="lightProbeUsage">LightProbeUsage for the instances.</param>
-		/// <param name="lightProbeProxyVolume"></param>
 		[ExcludeFromDocs]
 		public static void DrawMeshInstancedIndirect(Mesh mesh, int submeshIndex, Material material, Bounds bounds, ComputeBuffer bufferWithArgs, int argsOffset, MaterialPropertyBlock properties, ShadowCastingMode castShadows, bool receiveShadows, int layer, Camera camera, LightProbeUsage lightProbeUsage)
 		{

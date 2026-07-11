@@ -65,12 +65,8 @@ public class FetchList2 : IFetchList
 		}
 	}
 
-	public void Add(Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
+	public void Add(Tag[] tags, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None)
 	{
-		if (amount <= 0f)
-		{
-			Output.LogError("Requesting an invalid FetchList2 amount");
-		}
 		foreach (Tag tag in tags)
 		{
 			if (!this.MinimumAmount.ContainsKey(tag))
@@ -78,13 +74,13 @@ public class FetchList2 : IFetchList
 				this.MinimumAmount[tag] = amount;
 			}
 		}
-		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, required_tags, forbidden_tags, this.Destination, amount, operationalRequirement, this.PriorityMod, this.choreTags);
+		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, required_tags, forbidden_tags, this.Destination, amount, operationalRequirementDEPRECATED, this.PriorityMod, this.choreTags);
 		this.FetchOrders.Add(fetchOrder);
 	}
 
-	public void Add(Tag tag, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirement = FetchOrder2.OperationalRequirement.None)
+	public void Add(Tag tag, Tag[] required_tags = null, Tag[] forbidden_tags = null, float amount = 1f, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None)
 	{
-		this.Add(new Tag[] { tag }, required_tags, forbidden_tags, amount, operationalRequirement);
+		this.Add(new Tag[] { tag }, required_tags, forbidden_tags, amount, operationalRequirementDEPRECATED);
 	}
 
 	public float GetMinimumAmount(Tag tag)

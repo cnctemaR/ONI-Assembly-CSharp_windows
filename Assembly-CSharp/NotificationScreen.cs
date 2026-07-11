@@ -341,10 +341,6 @@ public class NotificationScreen : KScreen
 			{
 				num++;
 			}
-			if (notification.Notifier != null)
-			{
-				notification.Position = notification.Notifier.transform.GetPosition();
-			}
 			if (notification.expires && KTime.Instance.UnscaledGameTime - notification.Time > this.lifetime)
 			{
 				this.dirty = true;
@@ -363,7 +359,6 @@ public class NotificationScreen : KScreen
 	private void OnClick(NotificationScreen.Entry entry)
 	{
 		Notification nextClickedNotification = entry.NextClickedNotification;
-		Notifier notifier = nextClickedNotification.Notifier;
 		base.PlaySound3D(GlobalAssets.GetSound("HUD_Click_Open", false));
 		if (nextClickedNotification.customClickCallback != null)
 		{
@@ -371,19 +366,23 @@ public class NotificationScreen : KScreen
 		}
 		else
 		{
-			if (notifier != null)
+			if (nextClickedNotification.clickFocus != null)
 			{
-				SelectTool.Instance.Select(notifier.GetComponent<KSelectable>(), false);
+				Vector3 position = nextClickedNotification.clickFocus.GetPosition();
+				position.z = -40f;
+				CameraController.Instance.SetTargetPos(position, 8f, true);
+				if (nextClickedNotification.clickFocus.GetComponent<KSelectable>() != null)
+				{
+					SelectTool.Instance.Select(nextClickedNotification.clickFocus.GetComponent<KSelectable>(), false);
+				}
+			}
+			else if (nextClickedNotification.Notifier != null)
+			{
+				SelectTool.Instance.Select(nextClickedNotification.Notifier.GetComponent<KSelectable>(), false);
 			}
 			if (nextClickedNotification.Type == NotificationType.Messages)
 			{
 				this.ShowMessage((MessageNotification)nextClickedNotification);
-			}
-			if (nextClickedNotification.hasLocation)
-			{
-				Vector3 position = nextClickedNotification.Position;
-				position.z = -40f;
-				CameraController.Instance.SetTargetPos(position, 8f, true);
 			}
 		}
 	}

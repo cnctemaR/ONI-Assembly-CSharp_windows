@@ -10,9 +10,9 @@ namespace UnityEngine.Rendering
 	/// <summary>
 	///   <para>List of graphics commands to execute.</para>
 	/// </summary>
+	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 	[UsedByNativeCode]
 	[NativeHeader("Runtime/Shaders/ComputeShader.h")]
-	[NativeType("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
 	public sealed class CommandBuffer : IDisposable
 	{
 		/// <summary>

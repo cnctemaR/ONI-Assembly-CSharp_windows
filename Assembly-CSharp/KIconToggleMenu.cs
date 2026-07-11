@@ -80,7 +80,6 @@ public class KIconToggleMenu : KScreen
 			ToolTip component2 = ktoggle2.GetComponent<ToolTip>();
 			if (component2)
 			{
-				string hotkeyString = GameUtil.GetHotkeyString(toggleInfo.hotKey);
 				if (toggleInfo.tooltipHeader != string.Empty)
 				{
 					component2.AddMultiStringTooltip(toggleInfo.tooltipHeader, (!(this.ToggleToolTipHeaderTextStyleSetting != null)) ? this.ToggleToolTipTextStyleSetting : this.ToggleToolTipHeaderTextStyleSetting);
@@ -89,7 +88,7 @@ public class KIconToggleMenu : KScreen
 						global::Debug.Log("!", null);
 					}
 				}
-				component2.AddMultiStringTooltip(toggleInfo.tooltip + " " + hotkeyString, this.ToggleToolTipTextStyleSetting);
+				component2.AddMultiStringTooltip(GameUtil.ReplaceHotkeyString(toggleInfo.tooltip, toggleInfo.hotKey), this.ToggleToolTipTextStyleSetting);
 			}
 			if (toggleInfo.getSpriteCB != null)
 			{

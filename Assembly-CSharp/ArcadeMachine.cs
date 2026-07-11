@@ -33,6 +33,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 			arcadeMachineWorkable.overrideAnims = this.overrideAnims[i];
 			arcadeMachineWorkable.workAnims = this.workAnims[i];
 			this.workables[i] = arcadeMachineWorkable;
+			this.workables[i].owner = this;
 		}
 		base.smi.StartSM();
 	}
@@ -57,7 +58,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
 		Workable workable2 = workable;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<ArcadeMachineWorkable>(relax, workable2, null, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false);
+		Chore chore = new WorkChore<ArcadeMachineWorkable>(relax, workable2, null, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
 		return chore;
 	}

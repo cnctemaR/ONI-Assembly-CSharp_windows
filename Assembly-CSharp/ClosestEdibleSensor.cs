@@ -5,7 +5,6 @@ public class ClosestEdibleSensor : Sensor
 	public ClosestEdibleSensor(Sensors sensors)
 		: base(sensors)
 	{
-		this.worker = base.GetComponent<Worker>();
 	}
 
 	public override void Update()
@@ -43,8 +42,6 @@ public class ClosestEdibleSensor : Sensor
 	private static TagBits edibleTagBits = new TagBits(GameTags.Edible);
 
 	private Edible edible;
-
-	private Worker worker;
 
 	private bool hasEdible;
 

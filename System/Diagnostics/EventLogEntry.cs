@@ -6,8 +6,8 @@ using System.Security.Permissions;
 
 namespace System.Diagnostics
 {
-	[global::System.ComponentModel.ToolboxItem(false)]
 	[global::System.ComponentModel.DesignTimeVisible(false)]
+	[global::System.ComponentModel.ToolboxItem(false)]
 	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	[Serializable]
 	public sealed class EventLogEntry : global::System.ComponentModel.Component, ISerializable
@@ -77,8 +77,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[Obsolete("Use InstanceId")]
 		[MonitoringDescription("An ID number for this event entry.")]
+		[Obsolete("Use InstanceId")]
 		public int EventID
 		{
 			get

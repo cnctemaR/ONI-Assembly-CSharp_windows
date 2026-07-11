@@ -113,7 +113,7 @@ namespace UnityEngine
 		private static extern void INTERNAL_CALL_Sample(Animation self);
 
 		/// <summary>
-		///   <para>Are we playing any animations?</para>
+		///   <para>Is an animation currently being played?</para>
 		/// </summary>
 		public extern bool isPlaying
 		{
@@ -146,7 +146,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Plays an animation without any blending.</para>
+		///   <para>Plays an animation without blending.</para>
 		/// </summary>
 		/// <param name="mode"></param>
 		/// <param name="animation"></param>
@@ -156,7 +156,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Plays an animation without any blending.</para>
+		///   <para>Plays an animation without blending.</para>
 		/// </summary>
 		/// <param name="mode"></param>
 		/// <param name="animation"></param>
@@ -165,7 +165,7 @@ namespace UnityEngine
 		public extern bool Play(string animation, [DefaultValue("PlayMode.StopSameLayer")] PlayMode mode);
 
 		/// <summary>
-		///   <para>Plays an animation without any blending.</para>
+		///   <para>Plays an animation without blending.</para>
 		/// </summary>
 		/// <param name="mode"></param>
 		/// <param name="animation"></param>

@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Security.AccessControl
 {
-	[ComVisible(false)]
 	[Flags]
+	[ComVisible(false)]
 	public enum SemaphoreRights
 	{
 		Modify = 2,

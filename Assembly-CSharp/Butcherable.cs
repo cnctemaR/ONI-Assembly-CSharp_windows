@@ -35,7 +35,7 @@ public class Butcherable : Workable, ISaveLoadable
 		{
 			return;
 		}
-		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false);
+		this.chore = new WorkChore<Butcherable>(Db.Get().ChoreTypes.Harvest, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		this.OnRefreshUserMenu(null);
 	}
 

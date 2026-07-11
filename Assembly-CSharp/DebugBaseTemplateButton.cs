@@ -329,7 +329,7 @@ public class DebugBaseTemplateButton : KScreen
 			string id = prefab2.id;
 			if (id == null)
 			{
-				goto IL_07AF;
+				goto IL_07B3;
 			}
 			if (DebugBaseTemplateButton.<>f__switch$map2 == null)
 			{
@@ -348,12 +348,12 @@ public class DebugBaseTemplateButton : KScreen
 			int num28;
 			if (!DebugBaseTemplateButton.<>f__switch$map2.TryGetValue(id, out num28))
 			{
-				goto IL_07AF;
+				goto IL_07B3;
 			}
 			switch (num28)
 			{
 			default:
-				goto IL_07AF;
+				goto IL_07B3;
 			case 1:
 				prefab2.connections = (int)Game.Instance.electricalConduitSystem.GetConnections(num27, true);
 				break;
@@ -367,12 +367,12 @@ public class DebugBaseTemplateButton : KScreen
 				prefab2.connections = (int)Game.Instance.logicCircuitSystem.GetConnections(num27, true);
 				break;
 			}
-			IL_0834:
+			IL_0838:
 			l++;
 			continue;
-			IL_07AF:
+			IL_07B3:
 			prefab2.connections = 0;
-			goto IL_0834;
+			goto IL_0838;
 		}
 		for (int m = 0; m < Components.Pickupables.Count; m++)
 		{

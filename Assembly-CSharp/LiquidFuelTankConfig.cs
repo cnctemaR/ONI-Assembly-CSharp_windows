@@ -69,7 +69,7 @@ public class LiquidFuelTankConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = fuelTank.capacityKg;
 		manualDeliveryKG.capacity = fuelTank.capacityKg;
 		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = ConduitType.Liquid;
 		conduitConsumer.consumptionRate = 10f;
@@ -77,7 +77,8 @@ public class LiquidFuelTankConfig : IBuildingConfig
 		conduitConsumer.capacityKG = fuelTank.capacityKg;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Store;
-		go.AddOrGet<RocketModule>();
+		RocketModule rocketModule = go.AddOrGet<RocketModule>();
+		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_liquid_fuel_tank_bg_kanim"));
 		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 

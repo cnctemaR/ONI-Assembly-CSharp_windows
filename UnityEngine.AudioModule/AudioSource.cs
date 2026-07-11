@@ -93,9 +93,9 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Plays the clip with an optional certain delay.</para>
+		///   <para>Plays the clip.</para>
 		/// </summary>
-		/// <param name="delay">Delay in number of samples, assuming a 44100Hz sample rate (meaning that Play(44100) will delay the playing by exactly 1 sec).</param>
+		/// <param name="delay">Deprecated. Delay in number of samples, assuming a 44100Hz sample rate (meaning that Play(44100) will delay the playing by exactly 1 sec).</param>
 		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void Play([DefaultValue("0")] ulong delay);

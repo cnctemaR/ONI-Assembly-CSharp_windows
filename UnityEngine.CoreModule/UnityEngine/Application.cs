@@ -16,23 +16,23 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Access to application run-time data.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Input/InputManager.h")]
+	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
 	[NativeHeader("Runtime/Application/ApplicationInfo.h")]
-	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
-	[NativeHeader("Runtime/Misc/Player.h")]
+	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
+	[NativeHeader("Runtime/Export/Application.bindings.h")]
 	[NativeHeader("Runtime/File/ApplicationSpecificPersistentDataPath.h")]
 	[NativeHeader("Runtime/Input/GetInput.h")]
-	[NativeHeader("Runtime/Application/AdsIdHandler.h")]
+	[NativeHeader("Runtime/Utilities/URLUtility.h")]
 	[NativeHeader("Runtime/Logging/LogSystem.h")]
 	[NativeHeader("Runtime/Misc/BuildSettings.h")]
-	[NativeHeader("Runtime/Export/Application.bindings.h")]
-	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
-	[NativeHeader("Runtime/Network/NetworkUtility.h")]
-	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
+	[NativeHeader("Runtime/Misc/Player.h")]
+	[NativeHeader("Runtime/Input/InputManager.h")]
 	[NativeHeader("Runtime/Misc/SystemInfo.h")]
-	[NativeHeader("Runtime/PreloadManager/PreloadManager.h")]
+	[NativeHeader("Runtime/Network/NetworkUtility.h")]
+	[NativeHeader("Runtime/BaseClasses/IsPlaying.h")]
+	[NativeHeader("Runtime/PreloadManager/LoadSceneOperation.h")]
+	[NativeHeader("Runtime/Misc/PlayerSettings.h")]
 	[NativeHeader("Runtime/Utilities/Argv.h")]
-	[NativeHeader("Runtime/Utilities/URLUtility.h")]
 	public class Application
 	{
 		/// <summary>
@@ -491,7 +491,7 @@ namespace UnityEngine
 		private static extern void SetLogCallbackDefined(bool defined);
 
 		/// <summary>
-		///   <para>Stack trace logging options. The default value is StackTraceLogType.ScriptOnly.</para>
+		///   <para>Obsolete. Use Application.SetStackTraceLogType.</para>
 		/// </summary>
 		[Obsolete("Use SetStackTraceLogType/GetStackTraceLogType instead")]
 		public static extern StackTraceLogType stackTraceLogType
@@ -565,7 +565,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Request authorization to use the webcam or microphone in the Web Player.</para>
+		///   <para>Request authorization to use the webcam or microphone on iOS.</para>
 		/// </summary>
 		/// <param name="mode"></param>
 		[FreeFunction("Application_Bindings::RequestUserAuthorization")]
@@ -914,7 +914,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The level index that was last loaded (Read Only).</para>
+		///   <para>Note: This is now obsolete. Use SceneManager.GetActiveScene instead. (Read Only).</para>
 		/// </summary>
 		[Obsolete("Use SceneManager to determine what scenes have been loaded")]
 		public static int loadedLevel

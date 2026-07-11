@@ -8,8 +8,8 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Stores keyframe based animations.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationClip.bindings.h")]
 	[NativeType("Runtime/Animation/AnimationClip.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationClip.bindings.h")]
 	public sealed class AnimationClip : Motion
 	{
 		/// <summary>
@@ -74,8 +74,8 @@ namespace UnityEngine
 			AnimationClip.SampleAnimation(go, this, time, this.wrapMode);
 		}
 
-		[NativeHeader("Runtime/Animation/AnimationUtility.h")]
 		[FreeFunction]
+		[NativeHeader("Runtime/Animation/AnimationUtility.h")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		internal static extern void SampleAnimation([NotNull] GameObject go, [NotNull] AnimationClip clip, float inTime, WrapMode wrapMode);
 

@@ -43,8 +43,8 @@ namespace System.Security.Cryptography
 			this.KeyValue = KeyBuilder.Key(this.KeySizeValue >> 3);
 		}
 
-		[MonoTODO("Use salt in algorithm")]
 		[ComVisible(false)]
+		[MonoTODO("Use salt in algorithm")]
 		public bool UseSalt
 		{
 			get

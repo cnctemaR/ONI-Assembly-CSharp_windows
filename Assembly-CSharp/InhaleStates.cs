@@ -35,8 +35,8 @@ internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instan
 			})
 			.ScheduleGoTo((InhaleStates.Instance smi) => smi.def.inhaleTime, this.inhaling.pst);
 		this.inhaling.pst.Transition(this.inhaling.full, new StateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Transition.ConditionCallback(InhaleStates.IsFull), UpdateRate.SIM_200ms).Transition(this.behaviourcomplete, GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Not(new StateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>.Transition.ConditionCallback(InhaleStates.IsFull)), UpdateRate.SIM_200ms);
-		this.inhaling.full.QueueAnim("inhale_pst", false, null).QueueAnim("idle_loop", false, null).OnAnimQueueComplete(this.behaviourcomplete);
-		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.WantsToEat, false);
+		this.inhaling.full.QueueAnim("inhale_pst", false, null).OnAnimQueueComplete(this.behaviourcomplete);
+		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.WantsToEat, false);
 	}
 
 	private static bool IsFull(InhaleStates.Instance smi)

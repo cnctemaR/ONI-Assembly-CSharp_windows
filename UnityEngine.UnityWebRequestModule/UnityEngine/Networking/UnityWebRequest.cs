@@ -130,7 +130,7 @@ namespace UnityEngine.Networking
 		}
 
 		/// <summary>
-		///   <para>Signals that this [UnityWebRequest] is no longer being used, and should clean up any resources it is using.</para>
+		///   <para>Signals that this UnityWebRequest is no longer being used, and should clean up any resources it is using.</para>
 		/// </summary>
 		public void Dispose()
 		{
@@ -184,13 +184,7 @@ namespace UnityEngine.Networking
 		}
 
 		/// <summary>
-		///   <para>Begin communicating with the remote server.
-		///
-		/// After calling this method, the UnityWebRequest will perform DNS resolution (if necessary), transmit an HTTP request to the remote server at the target URL and process the server’s response.
-		///
-		/// This method can only be called once on any given UnityWebRequest object. Once this method is called, you cannot change any of the UnityWebRequest’s properties.
-		///
-		/// This method returns a WebRequestAsyncOperation object. Yielding the WebRequestAsyncOperation inside a coroutine will cause the coroutine to pause until the UnityWebRequest encounters a system error or finishes communicating.</para>
+		///   <para>Begin communicating with the remote server.</para>
 		/// </summary>
 		public UnityWebRequestAsyncOperation SendWebRequest()
 		{

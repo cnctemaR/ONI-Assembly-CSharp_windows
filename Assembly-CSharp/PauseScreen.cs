@@ -2,7 +2,6 @@
 using System.IO;
 using FMOD.Studio;
 using Klei;
-using ProcGenGame;
 using STRINGS;
 using UnityEngine;
 using UnityEngine.Events;
@@ -199,7 +198,7 @@ public class PauseScreen : KModalButtonMenu
 
 	public static void TriggerQuitGame()
 	{
-		WorldGen.Reset();
+		SaveGame.Instance.worldGen.Reset();
 		ThreadedHttps<KleiMetrics>.Instance.EndGame();
 		LoadScreen.ForceStopGame();
 		App.LoadScene("frontend");

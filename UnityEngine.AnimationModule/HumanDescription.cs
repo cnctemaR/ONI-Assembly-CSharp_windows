@@ -6,8 +6,8 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Class that holds humanoid avatar parameters to pass to the AvatarBuilder.BuildHumanAvatar function.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
 	[NativeHeader("Runtime/Animation/HumanDescription.h")]
+	[NativeHeader("Runtime/Animation/ScriptBindings/AvatarBuilder.bindings.h")]
 	public struct HumanDescription
 	{
 		/// <summary>
@@ -157,8 +157,6 @@ namespace UnityEngine
 		internal float m_FeetSpacing;
 
 		internal string m_RootMotionBoneName;
-
-		internal Quaternion m_RootMotionBoneRotation;
 
 		internal bool m_HasTranslationDoF;
 

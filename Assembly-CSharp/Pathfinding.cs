@@ -100,23 +100,6 @@ public class Pathfinding : KMonoBehaviour
 		}
 	}
 
-	public void AddNavigationFeature(int cell, Pathfinding.INavigationFeature feature)
-	{
-		this.NavigationFeatures[cell] = feature;
-	}
-
-	public void RemoveNavigationFeature(int cell, Pathfinding.INavigationFeature feature)
-	{
-		this.NavigationFeatures.Remove(cell);
-	}
-
-	public Pathfinding.INavigationFeature GetNavigationFeature(int cell)
-	{
-		Pathfinding.INavigationFeature navigationFeature = null;
-		this.NavigationFeatures.TryGetValue(cell, out navigationFeature);
-		return navigationFeature;
-	}
-
 	protected override void OnCleanUp()
 	{
 		this.NavGrids.Clear();
@@ -125,18 +108,9 @@ public class Pathfinding : KMonoBehaviour
 
 	private List<NavGrid> NavGrids = new List<NavGrid>();
 
-	private Dictionary<int, Pathfinding.INavigationFeature> NavigationFeatures = new Dictionary<int, Pathfinding.INavigationFeature>();
-
 	private int UpdateIdx;
 
 	private bool navGridsHaveBeenFlushedOnLoad;
 
 	public static Pathfinding Instance;
-
-	public interface INavigationFeature
-	{
-		bool IsTraversable(Navigator agent, PathFinder.PotentialPath path, int from_cell, int cost, PathFinderAbilities abilities);
-
-		void ApplyTraversalToPath(Navigator agent, ref PathFinder.PotentialPath path, int from_cell);
-	}
 }

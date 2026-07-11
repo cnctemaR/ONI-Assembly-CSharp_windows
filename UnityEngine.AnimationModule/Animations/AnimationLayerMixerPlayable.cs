@@ -9,11 +9,11 @@ namespace UnityEngine.Animations
 	/// <summary>
 	///   <para>An implementation of IPlayable that controls an animation layer mixer.</para>
 	/// </summary>
+	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationLayerMixerPlayable.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationLayerMixerPlayable.h")]
 	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AnimationLayerMixerPlayableBindings", StaticAccessorType.DoubleColon)]
-	[RequiredByNativeCode]
 	public struct AnimationLayerMixerPlayable : IPlayable, IEquatable<AnimationLayerMixerPlayable>
 	{
 		internal AnimationLayerMixerPlayable(PlayableHandle handle)

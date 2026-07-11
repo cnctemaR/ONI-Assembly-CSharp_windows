@@ -62,12 +62,12 @@ public class MeterController
 			}
 			else
 			{
-				position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront);
+				position.z = building_controller.transform.GetPosition().z - 0.1f;
 			}
 		}
 		else
 		{
-			position.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingBack);
+			position.z = building_controller.transform.GetPosition().z + 0.1f;
 		}
 		gameObject.transform.SetPosition(position);
 		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();

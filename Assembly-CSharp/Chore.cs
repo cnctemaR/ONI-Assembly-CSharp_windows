@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using STRINGS;
 using UnityEngine;
 
 public abstract class Chore
 {
-	public Chore(ChoreType chore_type, ChoreProvider chore_provider, Tag[] chore_tags, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod)
+	public Chore(ChoreType chore_type, ChoreProvider chore_provider, Tag[] chore_tags, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod, bool add_to_daily_report, ReportManager.ReportType report_type)
 	{
 		if (priority_value == 2147483647)
 		{
@@ -31,7 +32,8 @@ public abstract class Chore
 		this.AddPrecondition(ChorePreconditions.instance.IsPermitted, null);
 		this.AddPrecondition(ChorePreconditions.instance.IsPreemptable, null);
 		this.AddPrecondition(ChorePreconditions.instance.HasUrge, null);
-		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfying, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingEarly, null);
+		this.AddPrecondition(ChorePreconditions.instance.IsMoreSatisfyingLate, null);
 		this.AddPrecondition(ChorePreconditions.instance.IsOverrideTargetNullOrMe, null);
 		chore_provider.AddChore(this);
 	}
@@ -103,6 +105,7 @@ public abstract class Chore
 			this.prioritizable = prioritizable;
 			this.masterPriority = prioritizable.GetMasterPriority();
 			prioritizable.onPriorityChanged = (Action<PrioritySetting>)Delegate.Combine(prioritizable.onPriorityChanged, new Action<PrioritySetting>(this.OnMasterPriorityChanged));
+			this.RefreshHighPriorityNotification(this.masterPriority.priority_class);
 		}
 	}
 
@@ -118,6 +121,32 @@ public abstract class Chore
 	private void OnMasterPriorityChanged(PrioritySetting priority)
 	{
 		this.masterPriority = priority;
+		this.RefreshHighPriorityNotification(this.masterPriority.priority_class);
+	}
+
+	private void RefreshHighPriorityNotification(PriorityScreen.PriorityClass priority_class)
+	{
+		if (priority_class == PriorityScreen.PriorityClass.emergency && this.highPriorityNotification == null)
+		{
+			this.highPriorityNotification = new Notification(MISC.NOTIFICATIONS.EMERGENCY_CHORES.NAME, NotificationType.Bad, Chore.highPriorityGroup, new Func<List<Notification>, object, string>(Chore.EmergencyChoreTooltip), null, false, 0f, null, null, null);
+			Notifier notifier = this.gameObject.AddOrGet<Notifier>();
+			notifier.Add(this.highPriorityNotification, string.Empty);
+		}
+		else if (priority_class != PriorityScreen.PriorityClass.emergency && this.highPriorityNotification != null)
+		{
+			Notifier component = this.gameObject.GetComponent<Notifier>();
+			component.Remove(this.highPriorityNotification);
+			this.highPriorityNotification = null;
+		}
+		if (GlobalChoreProvider.Instance != null)
+		{
+			GlobalChoreProvider.Instance.RefreshEmergencyChoreStatus();
+		}
+	}
+
+	private static string EmergencyChoreTooltip(List<Notification> notifications, object data)
+	{
+		return MISC.NOTIFICATIONS.EMERGENCY_CHORES.TOOLTIP + notifications.ReduceMessages(true);
 	}
 
 	public void SetOverrideTarget(ChoreConsumer chore_consumer)
@@ -160,6 +189,11 @@ public abstract class Chore
 	public bool SatisfiesUrge(Urge urge)
 	{
 		return urge == this.choreType.urge;
+	}
+
+	public ReportManager.ReportType GetReportType()
+	{
+		return this.reportType;
 	}
 
 	public virtual void PrepareChore(ref Chore.Precondition.Context context)
@@ -242,6 +276,10 @@ public abstract class Chore
 		{
 			this.onComplete(this);
 		}
+		if (this.addToDailyReport)
+		{
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, this.choreType.Name, GameUtil.GetChoreName(this, null));
+		}
 		this.End(reason);
 		this.Cleanup();
 	}
@@ -274,6 +312,10 @@ public abstract class Chore
 		if (!this.RemoveFromProvider())
 		{
 			return;
+		}
+		if (this.addToDailyReport)
+		{
+			ReportManager.Instance.ReportValue(ReportManager.ReportType.ChoreStatus, -1f, this.choreType.Name, GameUtil.GetChoreName(this, null));
 		}
 		this.End(reason);
 		this.Cleanup();
@@ -311,9 +353,13 @@ public abstract class Chore
 	{
 	}
 
-	public virtual string GetReportName()
+	public virtual string GetReportName(string context = null)
 	{
-		return this.choreType.Name;
+		if (context == null || this.choreType.reportName == null)
+		{
+			return this.choreType.Name;
+		}
+		return string.Format(this.choreType.reportName, context);
 	}
 
 	private static int nextId;
@@ -340,15 +386,19 @@ public abstract class Chore
 
 	private bool arePreconditionsDirty;
 
+	public bool addToDailyReport;
+
+	public ReportManager.ReportType reportType;
+
 	private Prioritizable prioritizable;
 
 	public const int MAX_PLAYER_BASIC_PRIORITY = 9;
 
 	public const int MIN_PLAYER_BASIC_PRIORITY = 1;
 
-	public const int MAX_PLAYER_HIGH_PRIORITY = 9;
+	public const int MAX_PLAYER_HIGH_PRIORITY = 0;
 
-	public const int MIN_PLAYER_HIGH_PRIORITY = 1;
+	public const int MIN_PLAYER_HIGH_PRIORITY = 0;
 
 	public const int MAX_PLAYER_EMERGENCY_PRIORITY = 1;
 
@@ -361,6 +411,10 @@ public abstract class Chore
 	public const int MIN_BASIC_PRIORITY = 0;
 
 	public static bool ENABLE_PERSONAL_PRIORITIES = true;
+
+	private static HashedString highPriorityGroup = "HighPriorityGroup";
+
+	private Notification highPriorityNotification;
 
 	public delegate bool PreconditionFn(ref Chore.Precondition.Context context, object data);
 
@@ -437,6 +491,11 @@ public abstract class Chore
 				return this.failedPreconditionId == -1;
 			}
 
+			public bool IsPotentialSuccess()
+			{
+				return this.IsSuccess() || this.chore.driver == this.consumerState.choreDriver || (this.failedPreconditionId != -1 && this.chore.preconditions[this.failedPreconditionId].id == ChorePreconditions.instance.IsMoreSatisfyingLate.id);
+			}
+
 			public void RunPreconditions()
 			{
 				if (this.chore.debug)
@@ -448,6 +507,11 @@ public abstract class Chore
 						num++;
 						Debugger.Break();
 					}
+				}
+				if (this.chore.arePreconditionsDirty)
+				{
+					this.chore.preconditions.Sort((Chore.PreconditionInstance x, Chore.PreconditionInstance y) => x.sortOrder.CompareTo(y.sortOrder));
+					this.chore.arePreconditionsDirty = false;
 				}
 				for (int i = 0; i < this.chore.preconditions.Count; i++)
 				{
@@ -498,7 +562,24 @@ public abstract class Chore
 				{
 					return num6;
 				}
-				return obj.cost - this.cost;
+				int num7 = obj.cost - this.cost;
+				if (num7 != 0)
+				{
+					return num7;
+				}
+				if (this.chore == null && obj.chore == null)
+				{
+					return 0;
+				}
+				if (this.chore == null)
+				{
+					return -1;
+				}
+				if (obj.chore == null)
+				{
+					return 1;
+				}
+				return this.chore.id - obj.chore.id;
 			}
 
 			public override bool Equals(object obj)

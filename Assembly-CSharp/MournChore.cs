@@ -7,9 +7,9 @@ using UnityEngine;
 public class MournChore : Chore<MournChore.StatesInstance>
 {
 	public MournChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new MournChore.StatesInstance(this);
+		base.smi = new MournChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);
 		base.AddPrecondition(ChorePreconditions.instance.NoDeadBodies, null);
 		base.AddPrecondition(MournChore.HasValidMournLocation, master);
@@ -73,12 +73,12 @@ public class MournChore : Chore<MournChore.StatesInstance>
 			global::Debug.LogError("MournChore null context.consumer", null);
 			return;
 		}
-		if (this.smi == null)
+		if (base.smi == null)
 		{
 			global::Debug.LogError("MournChore null smi", null);
 			return;
 		}
-		if (this.smi.sm == null)
+		if (base.smi.sm == null)
 		{
 			global::Debug.LogError("MournChore null smi.sm", null);
 			return;
@@ -89,7 +89,7 @@ public class MournChore : Chore<MournChore.StatesInstance>
 			global::Debug.LogError("MournChore no grave", null);
 			return;
 		}
-		this.smi.sm.mourner.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.mourner.Set(context.consumerState.gameObject, base.smi);
 		base.Begin(context);
 	}
 

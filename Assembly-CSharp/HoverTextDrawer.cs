@@ -78,10 +78,9 @@ public class HoverTextDrawer
 			widget.text = text;
 			widget.KForceUpdateDirty();
 		}
-		Vector2 vector = widget.bounds.extents;
-		this.currentPos.x = this.currentPos.x + vector.x * 2f;
+		this.currentPos.x = this.currentPos.x + widget.renderedWidth;
 		this.maxShadowX = Mathf.Max(this.currentPos.x, this.maxShadowX);
-		this.minLineHeight = (int)Mathf.Max((float)this.minLineHeight, vector.y * 2f);
+		this.minLineHeight = (int)Mathf.Max((float)this.minLineHeight, widget.renderedHeight);
 		this.EndSample();
 	}
 

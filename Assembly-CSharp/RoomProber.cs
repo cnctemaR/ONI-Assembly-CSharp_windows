@@ -213,10 +213,13 @@ public class RoomProber : ISim1000ms
 		}
 		foreach (KPrefabID kprefabID in room.buildings)
 		{
-			Assignable component = kprefabID.GetComponent<Assignable>();
-			if (component != null && (roomType.primary_constraint == null || !roomType.primary_constraint.building_criteria(kprefabID.GetComponent<KPrefabID>())))
+			if (!kprefabID.HasTag(GameTags.NotRoomAssignable))
 			{
-				component.Assign(room);
+				Assignable component = kprefabID.GetComponent<Assignable>();
+				if (component != null && (roomType.primary_constraint == null || !roomType.primary_constraint.building_criteria(kprefabID.GetComponent<KPrefabID>())))
+				{
+					component.Assign(room);
+				}
 			}
 		}
 	}
@@ -329,7 +332,7 @@ public class RoomProber : ISim1000ms
 
 		private static bool IsWall(int cell)
 		{
-			return Grid.Solid[cell] || Grid.HasDoor[cell] || Grid.Foundation[cell];
+			return (byte)(Grid.BuildMasks[cell] & (Grid.BuildFlags.Foundation | Grid.BuildFlags.Solid)) != 0 || Grid.HasDoor[cell];
 		}
 
 		public bool ShouldContinue(int flood_cell)

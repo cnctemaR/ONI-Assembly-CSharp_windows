@@ -648,23 +648,13 @@ public class SimDebugView : KMonoBehaviour
 
 	private static Color GetMinionGroupProberColour(SimDebugView instance, int cell)
 	{
-		bool flag = MinionGroupProber.Get().IsReachable(cell, instance.currentFrame);
+		bool flag = MinionGroupProber.Get().IsReachable(cell);
 		return (!flag) ? Color.black : Color.white;
 	}
 
 	private static Color GetPathProberColour(SimDebugView instance, int cell)
 	{
-		Color color = Color.black;
-		PathProber pathProber = instance.selectedPathProber;
-		if (pathProber != null && pathProber != null)
-		{
-			int cost = pathProber.GetCost(cell);
-			if (cost != -1)
-			{
-				color = Color.white;
-			}
-		}
-		return color;
+		return (!(instance.selectedPathProber != null) || instance.selectedPathProber.GetCost(cell) == -1) ? Color.black : Color.white;
 	}
 
 	private static Color GetReservedColour(SimDebugView instance, int cell)

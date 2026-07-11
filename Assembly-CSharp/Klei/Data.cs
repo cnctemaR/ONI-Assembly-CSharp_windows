@@ -10,7 +10,7 @@ namespace Klei
 	{
 		public Data()
 		{
-			this.worldLayout = new WorldLayout(0);
+			this.worldLayout = new WorldLayout(null, 0);
 			this.terrainCells = new List<TerrainCell>();
 			this.overworldCells = new List<TerrainCell>();
 			this.rivers = new List<global::ProcGen.River>();

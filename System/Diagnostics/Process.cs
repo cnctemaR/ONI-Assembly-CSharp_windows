@@ -15,8 +15,8 @@ namespace System.Diagnostics
 	[MonitoringDescription("Represents a system process")]
 	[global::System.ComponentModel.Designer("System.Diagnostics.Design.ProcessDesigner, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
 	[global::System.ComponentModel.DefaultProperty("StartInfo")]
-	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	[PermissionSet((SecurityAction)15, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
+	[PermissionSet((SecurityAction)14, XML = "<PermissionSet class=\"System.Security.PermissionSet\"\nversion=\"1\"\nUnrestricted=\"true\"/>\n")]
 	public class Process : global::System.ComponentModel.Component
 	{
 		private Process(IntPtr handle, int id)
@@ -236,9 +236,9 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The title of the main window of the process.")]
 		[global::System.MonoTODO]
 		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The title of the main window of the process.")]
 		public string MainWindowTitle
 		{
 			get
@@ -397,8 +397,8 @@ namespace System.Diagnostics
 		}
 
 		[MonitoringDescription("The maximum amount of system memory used by this process.")]
-		[Obsolete("Use PeakWorkingSet64")]
 		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[Obsolete("Use PeakWorkingSet64")]
 		public int PeakWorkingSet
 		{
 			get

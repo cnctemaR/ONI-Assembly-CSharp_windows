@@ -98,7 +98,7 @@ public class GeneShuffler : Workable
 	protected override void OnStartWork(Worker worker)
 	{
 		base.OnStartWork(worker);
-		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null);
+		this.notification = new Notification(MISC.NOTIFICATIONS.GENESHUFFLER.NAME, NotificationType.Good, HashedString.Invalid, (List<Notification> notificationList, object data) => MISC.NOTIFICATIONS.GENESHUFFLER.TOOLTIP + notificationList.ReduceMessages(false), null, false, 0f, null, null, null);
 		this.notifier.Add(this.notification, string.Empty);
 		this.DeSelectBuilding();
 	}
@@ -183,7 +183,7 @@ public class GeneShuffler : Workable
 		this.chore = new WorkChore<Workable>(geneShuffle, this, null, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, false, true, anim, false, true, true, PriorityScreen.PriorityClass.emergency, 5, false);
+		}, null, null, true, null, false, true, anim, false, true, true, PriorityScreen.PriorityClass.compulsory, 5, false, true);
 	}
 
 	private void CancelChore()

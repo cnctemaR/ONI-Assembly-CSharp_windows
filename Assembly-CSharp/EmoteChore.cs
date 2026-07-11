@@ -4,22 +4,22 @@ using UnityEngine;
 public class EmoteChore : Chore<EmoteChore.StatesInstance>
 {
 	public EmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString[] emote_anims, Func<StatusItem> get_status_item = null)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, null, emote_anims, KAnim.PlayMode.Once, false);
+		base.smi = new EmoteChore.StatesInstance(this, target.gameObject, null, emote_anims, KAnim.PlayMode.Once, false);
 		this.getStatusItem = get_status_item;
 	}
 
 	public EmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, bool flip_x = false)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, play_mode, flip_x);
+		base.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, play_mode, flip_x);
 	}
 
 	public EmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString emote_kanim, HashedString[] emote_anims, Func<StatusItem> get_status_item)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, KAnim.PlayMode.Once, false);
+		base.smi = new EmoteChore.StatesInstance(this, target.gameObject, emote_kanim, emote_anims, KAnim.PlayMode.Once, false);
 		this.getStatusItem = get_status_item;
 	}
 
@@ -30,11 +30,11 @@ public class EmoteChore : Chore<EmoteChore.StatesInstance>
 
 	public override string ToString()
 	{
-		if (this.smi.emoteKAnim.IsValid)
+		if (base.smi.emoteKAnim.IsValid)
 		{
-			return "EmoteChore<" + this.smi.emoteKAnim + ">";
+			return "EmoteChore<" + base.smi.emoteKAnim + ">";
 		}
-		return "EmoteChore<" + this.smi.emoteAnims[0] + ">";
+		return "EmoteChore<" + base.smi.emoteAnims[0] + ">";
 	}
 
 	public void PairReactable(SelfEmoteReactable reactable)

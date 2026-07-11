@@ -8,8 +8,8 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>A handler that lets you read or write a HumanPose from or to a humanoid avatar skeleton hierarchy.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Animation/HumanPoseHandler.h")]
 	[NativeHeader("Runtime/Animation/ScriptBindings/Animation.bindings.h")]
+	[NativeHeader("Runtime/Animation/HumanPoseHandler.h")]
 	public class HumanPoseHandler : IDisposable
 	{
 		/// <summary>

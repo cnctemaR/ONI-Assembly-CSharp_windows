@@ -67,4 +67,6 @@ public class SplashMessageScreen : KMonoBehaviour
 	public KButton confirmButton;
 
 	public LayoutElement bodyText;
+
+	public bool previewInEditor;
 }

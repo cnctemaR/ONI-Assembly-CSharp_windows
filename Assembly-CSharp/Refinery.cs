@@ -7,7 +7,6 @@ public class Refinery : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		ComplexFabricator component = base.GetComponent<ComplexFabricator>();
 	}
 
 	[Serializable]

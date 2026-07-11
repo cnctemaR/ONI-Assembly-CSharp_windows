@@ -404,6 +404,7 @@ namespace UnityEngine
 				if (GUISkin.ms_Error == null)
 				{
 					GUISkin.ms_Error = new GUIStyle();
+					GUISkin.ms_Error.name = "StyleNotFoundError";
 				}
 				return GUISkin.ms_Error;
 			}
@@ -569,14 +570,14 @@ namespace UnityEngine
 			}
 			else
 			{
-				Debug.LogWarning(string.Concat(new object[]
+				Debug.LogWarning(string.Concat(new string[]
 				{
 					"Unable to find style '",
 					styleName,
 					"' in skin '",
 					base.name,
 					"' ",
-					Event.current.type
+					(Event.current == null) ? "<called outside OnGUI>" : Event.current.type.ToString()
 				}));
 				guistyle2 = GUISkin.error;
 			}

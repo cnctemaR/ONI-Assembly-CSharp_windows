@@ -27,6 +27,7 @@ public class BunkerDoorConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.InteriorWall;
 		buildingDef.TileLayer = ObjectLayer.FoundationTile;
 		SoundEventVolumeCache.instance.AddVolume("door_internal_kanim", "Open_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_internal_kanim", "Close_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
@@ -57,6 +58,8 @@ public class BunkerDoorConfig : IBuildingConfig
 		workable.workTime = 3f;
 		KBatchedAnimController component = go.GetComponent<KBatchedAnimController>();
 		component.initialAnim = "closed";
+		component.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
+		go.AddOrGet<ZoneTile>();
 		go.AddOrGet<KBoxCollider2D>();
 		Prioritizable.AddRef(go);
 		GeneratedBuildings.RegisterLogicPorts(go, BunkerDoorConfig.INPUT_PORTS);

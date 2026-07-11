@@ -98,12 +98,12 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 				array = new Tag[0];
 			}
 			Storage component2 = base.GetComponent<Storage>();
-			ChoreType fetch = Db.Get().ChoreTypes.Fetch;
+			ChoreType storageFetch = Db.Get().ChoreTypes.StorageFetch;
 			Storage storage = component2;
 			float num = component2.Capacity();
 			Tag[] tags2 = base.GetComponent<TreeFilterable>().GetTags();
 			Tag[] array2 = array;
-			this.chore = new FetchChore(fetch, storage, num, tags2, null, array2, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
+			this.chore = new FetchChore(storageFetch, storage, num, tags2, null, array2, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
 		}
 
 		public void CancelChore()

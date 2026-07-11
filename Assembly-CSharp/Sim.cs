@@ -138,6 +138,8 @@ public static class Sim
 
 	public const byte SpaceZoneID = 255;
 
+	public const byte SolidZoneID = 0;
+
 	public const int ChunkEdgeSize = 32;
 
 	public const float StateTransitionEnergy = 3f;

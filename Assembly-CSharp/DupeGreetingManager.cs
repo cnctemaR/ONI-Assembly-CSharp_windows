@@ -58,12 +58,24 @@ public class DupeGreetingManager : KMonoBehaviour, ISim200ms
 
 	private bool ValidNavigatingMinion(MinionIdentity minion)
 	{
+		if (minion == null)
+		{
+			return false;
+		}
 		Navigator component = minion.GetComponent<Navigator>();
 		return component != null && component.IsMoving() && component.CurrentNavType == NavType.Floor;
 	}
 
 	private bool ValidOppositionalMinion(MinionIdentity reference_minion, MinionIdentity minion)
 	{
+		if (reference_minion == null)
+		{
+			return false;
+		}
+		if (minion == null)
+		{
+			return false;
+		}
 		Facing component = minion.GetComponent<Facing>();
 		Facing component2 = reference_minion.GetComponent<Facing>();
 		return this.ValidNavigatingMinion(minion) && component != null && component2 != null && component.GetFacing() != component2.GetFacing();

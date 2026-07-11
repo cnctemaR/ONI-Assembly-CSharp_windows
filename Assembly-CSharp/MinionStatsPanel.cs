@@ -6,6 +6,11 @@ using UnityEngine;
 
 public class MinionStatsPanel : TargetScreen
 {
+	public override bool IsValidForTarget(GameObject target)
+	{
+		return target.GetComponent<MinionIdentity>();
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

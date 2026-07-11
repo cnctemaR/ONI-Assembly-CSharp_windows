@@ -67,9 +67,12 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 					amountInstance2.value = num * amountInstance2.GetMax();
 				}
 			}
+			Navigator component = base.smi.GetComponent<Navigator>();
+			Navigator component2 = gameObject.GetComponent<Navigator>();
+			component2.SetCurrentNavType(component.CurrentNavType);
 			gameObject.Trigger(-2027483228, base.gameObject);
-			KSelectable component = base.gameObject.GetComponent<KSelectable>();
-			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component)
+			KSelectable component3 = base.gameObject.GetComponent<KSelectable>();
+			if (SelectTool.Instance != null && SelectTool.Instance.selected != null && SelectTool.Instance.selected == component3)
 			{
 				SelectTool.Instance.Select(gameObject.GetComponent<KSelectable>(), false);
 			}

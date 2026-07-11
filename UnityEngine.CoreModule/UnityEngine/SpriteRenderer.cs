@@ -41,7 +41,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Property to set/get the size to render when the SpriteRenderer.drawMode is set to SpriteDrawMode.NineSlice.</para>
+		///   <para>Property to set/get the size to render when the SpriteRenderer.drawMode is set to SpriteDrawMode.Sliced.</para>
 		/// </summary>
 		public Vector2 size
 		{

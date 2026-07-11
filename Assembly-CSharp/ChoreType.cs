@@ -52,4 +52,6 @@ public class ChoreType : Resource
 	public List<Tag> tags = new List<Tag>();
 
 	public List<Tag> interruptExclusion;
+
+	public string reportName;
 }

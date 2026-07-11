@@ -4,10 +4,10 @@ using UnityEngine;
 public class AttackChore : Chore<AttackChore.StatesInstance>
 {
 	public AttackChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.Attack, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new AttackChore.StatesInstance(this);
-		this.smi.sm.attackTarget.Set(enemy, this.smi);
+		base.smi = new AttackChore.StatesInstance(this);
+		base.smi.sm.attackTarget.Set(enemy, base.smi);
 	}
 
 	protected override void OnStateMachineStop(string reason, StateMachine.Status status)
@@ -18,7 +18,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 
 	public string GetHitAnim()
 	{
-		Workable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<Workable>();
+		Workable component = base.smi.sm.attackTarget.Get(base.smi).gameObject.GetComponent<Workable>();
 		if (component)
 		{
 			string text = MultitoolController.GetAnimationStrings(component, this.gameObject.GetComponent<Worker>(), "hit")[1];
@@ -29,16 +29,16 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 
 	public void OnTargetMoved(object data)
 	{
-		int num = Grid.PosToCell(this.smi.master.gameObject);
-		if (this.smi.sm.attackTarget.Get(this.smi) == null)
+		int num = Grid.PosToCell(base.smi.master.gameObject);
+		if (base.smi.sm.attackTarget.Get(base.smi) == null)
 		{
 			this.CleanUpMultitool();
 			return;
 		}
-		if (this.smi.GetCurrentState() == this.smi.sm.attack)
+		if (base.smi.GetCurrentState() == base.smi.sm.attack)
 		{
-			int num2 = Grid.PosToCell(this.smi.sm.attackTarget.Get(this.smi).gameObject);
-			IApproachable component = this.smi.sm.attackTarget.Get(this.smi).gameObject.GetComponent<IApproachable>();
+			int num2 = Grid.PosToCell(base.smi.sm.attackTarget.Get(base.smi).gameObject);
+			IApproachable component = base.smi.sm.attackTarget.Get(base.smi).gameObject.GetComponent<IApproachable>();
 			if (component != null)
 			{
 				CellOffset[] offsets = component.GetOffsets();
@@ -48,7 +48,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 					{
 						this.CleanUpMultitool();
 					}
-					this.smi.GoTo(this.smi.sm.approachtarget);
+					base.smi.GoTo(base.smi.sm.approachtarget);
 				}
 			}
 			else
@@ -64,7 +64,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.attacker.Set(context.consumerState.gameObject, this.smi);
+		base.smi.sm.attacker.Set(context.consumerState.gameObject, base.smi);
 		base.Begin(context);
 	}
 
@@ -81,7 +81,7 @@ public class AttackChore : Chore<AttackChore.StatesInstance>
 
 	private void CleanUpMultitool()
 	{
-		if (this.smi.master.multiTool != null)
+		if (base.smi.master.multiTool != null)
 		{
 			this.multiTool.DestroyHitEffect();
 			this.multiTool.StopSM("attack complete");

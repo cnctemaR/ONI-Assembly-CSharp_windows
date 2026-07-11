@@ -69,12 +69,12 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 
 	private void CreateFetchChore()
 	{
-		ChoreType fetch = Db.Get().ChoreTypes.Fetch;
+		ChoreType storageFetch = Db.Get().ChoreTypes.StorageFetch;
 		Storage component = base.GetComponent<Storage>();
 		float num = 1f;
 		Tag[] outfitTags = this.OutfitTags;
 		Tag[] array = new Tag[] { GameTags.Assigned };
-		this.fetchChore = new FetchChore(fetch, component, num, outfitTags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
+		this.fetchChore = new FetchChore(storageFetch, component, num, outfitTags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
 		this.fetchChore.allowMultifetch = false;
 	}
 
@@ -447,11 +447,11 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			if (this.urgentChore == null)
 			{
 				SuitLocker component = base.GetComponent<SuitLocker>();
-				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.emergency, 5, false);
+				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
 				this.urgentChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingUrgent, null);
 				this.urgentChore.AddPrecondition(this.HasSuitMarker, component);
 				this.urgentChore.AddPrecondition(this.SuitTypeMatchesLocker, component);
-				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.idle, 5, false);
+				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.idle, 5, false, false);
 				this.idleChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingIdle, null);
 				this.idleChore.AddPrecondition(this.HasSuitMarker, component);
 				this.idleChore.AddPrecondition(this.SuitTypeMatchesLocker, component);

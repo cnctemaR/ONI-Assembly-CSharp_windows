@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using Klei;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -85,36 +86,43 @@ public class TuningSystem
 		string[] array = new string[]
 		{
 			TuningSystem._TuningPath,
-			Path.Combine(Application.dataPath, "Tuning.json")
+			string.Empty
 		};
+		if (Thread.CurrentThread == KProfiler.main_thread)
+		{
+			array[1] = Path.Combine(Application.dataPath, "Tuning.json");
+		}
 		foreach (string text in array)
 		{
-			bool flag = ((LayeredFileSystem.instance != null) ? LayeredFileSystem.instance.Exists(text) : File.Exists(text));
-			if (flag)
+			if (!string.IsNullOrEmpty(text))
 			{
-				string text2 = ((LayeredFileSystem.instance != null) ? LayeredFileSystem.instance.ReadText(text) : File.ReadAllText(text));
-				Dictionary<string, object> dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(text2);
-				foreach (KeyValuePair<string, object> keyValuePair in dictionary)
+				bool flag = ((LayeredFileSystem.instance != null) ? LayeredFileSystem.instance.Exists(text) : File.Exists(text));
+				if (flag)
 				{
-					Type type = null;
-					foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+					string text2 = ((LayeredFileSystem.instance != null) ? LayeredFileSystem.instance.ReadText(text) : File.ReadAllText(text));
+					Dictionary<string, object> dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(text2);
+					foreach (KeyValuePair<string, object> keyValuePair in dictionary)
 					{
-						type = assembly.GetType(keyValuePair.Key);
+						Type type = null;
+						foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+						{
+							type = assembly.GetType(keyValuePair.Key);
+							if (type != null)
+							{
+								break;
+							}
+						}
 						if (type != null)
 						{
-							break;
-						}
-					}
-					if (type != null)
-					{
-						if (TuningSystem._TuningValues.ContainsKey(type))
-						{
-							JsonConvert.PopulateObject(keyValuePair.Value.ToString(), TuningSystem._TuningValues[type]);
-						}
-						else
-						{
-							object obj = JsonConvert.DeserializeObject(keyValuePair.Value.ToString(), type);
-							TuningSystem._TuningValues[type] = obj;
+							if (TuningSystem._TuningValues.ContainsKey(type))
+							{
+								JsonConvert.PopulateObject(keyValuePair.Value.ToString(), TuningSystem._TuningValues[type]);
+							}
+							else
+							{
+								object obj = JsonConvert.DeserializeObject(keyValuePair.Value.ToString(), type);
+								TuningSystem._TuningValues[type] = obj;
+							}
 						}
 					}
 				}

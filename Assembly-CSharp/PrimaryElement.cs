@@ -143,12 +143,12 @@ public class PrimaryElement : KMonoBehaviour, ISaveLoadable
 	{
 		if (this._Temperature <= 0f)
 		{
-			KCrashReporter.Assert(false, base.gameObject.name + " is attempting to serialize a temperature of <= 0K. Resetting to default.");
+			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is attempting to serialize a temperature of <= 0K. Resetting to default.", base.gameObject.name));
 			this._Temperature = this.Element.defaultValues.temperature;
 		}
 		if (this.Mass > 100000f)
 		{
-			KCrashReporter.Assert(false, base.gameObject.name + string.Format(" is attempting to serialize a mass of {0}. Resetting to default.", this.Mass));
+			DebugUtil.DevLogErrorWithObj(base.gameObject, string.Format("{0} is attempting to serialize very large mass {1}. Resetting to default.", base.gameObject.name, this.Mass));
 			this.Mass = this.Element.defaultValues.mass;
 		}
 	}

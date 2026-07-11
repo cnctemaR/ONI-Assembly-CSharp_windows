@@ -107,7 +107,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The render order in which the canvas is being emitted to the scene.</para>
+		///   <para>The render order in which the canvas is being emitted to the scene. (Read Only)</para>
 		/// </summary>
 		public extern int renderOrder
 		{

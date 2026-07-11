@@ -3,8 +3,8 @@ using System.Runtime.InteropServices;
 
 namespace System.EnterpriseServices
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	[ComVisible(false)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public sealed class SecureMethodAttribute : Attribute
 	{
 	}

@@ -100,6 +100,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			}
 			this.roleUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 		}
+		KPrefabID component = base.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.HasChores);
 		this.UpdateStatusItem(null);
 	}
 
@@ -272,6 +274,16 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 		}
 		this.workTimeRemaining = this.GetWorkTime();
 		this.ShowProgressBar(false);
+	}
+
+	public void SetReportType(ReportManager.ReportType report_type)
+	{
+		this.reportType = report_type;
+	}
+
+	public ReportManager.ReportType GetReportType()
+	{
+		return this.reportType;
 	}
 
 	protected virtual void OnStartWork(Worker worker)
@@ -487,6 +499,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected float attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
 
 	public bool triggerWorkReactions = true;
+
+	public ReportManager.ReportType reportType = ReportManager.ReportType.WorkTime;
 
 	[SerializeField]
 	[Tooltip("What layer does the dupe switch to when interacting with the building")]

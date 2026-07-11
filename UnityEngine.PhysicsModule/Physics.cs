@@ -223,8 +223,8 @@ namespace UnityEngine
 		/// <summary>
 		///   <para>Makes the collision detection system ignore all collisions between collider1 and collider2.</para>
 		/// </summary>
-		/// <param name="start">Start point.</param>
-		/// <param name="end">End point.</param>
+		/// <param name="start">Starting point of the collider.</param>
+		/// <param name="end">End point of the collider.</param>
 		/// <param name="ignore">Ignore collision.</param>
 		/// <param name="collider1"></param>
 		/// <param name="collider2"></param>

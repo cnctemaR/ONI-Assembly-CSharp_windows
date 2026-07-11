@@ -223,8 +223,7 @@ namespace UnityEngine.SceneManagement
 		/// </summary>
 		/// <param name="sceneName">Name or path of the Scene to load.</param>
 		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to load.</param>
-		/// <param name="mode">Allows you to specify whether or not to load the Scene additively.
-		///   See SceneManagement.LoadSceneMode for more information about the options.</param>
+		/// <param name="mode">Allows you to specify whether or not to load the Scene additively. See SceneManagement.LoadSceneMode for more information about the options.</param>
 		public static void LoadScene(string sceneName, [DefaultValue("LoadSceneMode.Single")] LoadSceneMode mode)
 		{
 			SceneManager.LoadSceneAsyncNameIndexInternal(sceneName, -1, mode == LoadSceneMode.Additive, true);
@@ -242,8 +241,7 @@ namespace UnityEngine.SceneManagement
 		/// </summary>
 		/// <param name="sceneName">Name or path of the Scene to load.</param>
 		/// <param name="sceneBuildIndex">Index of the Scene in the Build Settings to load.</param>
-		/// <param name="mode">Allows you to specify whether or not to load the Scene additively.
-		///   See SceneManagement.LoadSceneMode for more information about the options.</param>
+		/// <param name="mode">Allows you to specify whether or not to load the Scene additively. See SceneManagement.LoadSceneMode for more information about the options.</param>
 		public static void LoadScene(int sceneBuildIndex, [DefaultValue("LoadSceneMode.Single")] LoadSceneMode mode)
 		{
 			SceneManager.LoadSceneAsyncNameIndexInternal(null, sceneBuildIndex, mode == LoadSceneMode.Additive, true);

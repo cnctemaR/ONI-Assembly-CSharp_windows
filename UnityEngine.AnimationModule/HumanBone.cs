@@ -9,6 +9,7 @@ namespace UnityEngine
 	/// </summary>
 	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/HumanDescription.h")]
+	[NativeType(CodegenOptions.Custom, "MonoHumanBone")]
 	public struct HumanBone
 	{
 		/// <summary>

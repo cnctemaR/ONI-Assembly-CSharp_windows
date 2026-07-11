@@ -7,6 +7,7 @@ public class Sleepable : Workable
 {
 	private Sleepable()
 	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
 		this.showProgressBar = false;
 	}
 

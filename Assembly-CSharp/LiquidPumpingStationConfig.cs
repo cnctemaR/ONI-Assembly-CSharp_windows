@@ -51,7 +51,7 @@ public class LiquidPumpingStationConfig : IBuildingConfig
 		kbatchedAnimController.Offset = go.GetComponent<Building>().Def.GetVisualizerOffset();
 		kbatchedAnimController.AnimFiles = new KAnimFile[] { Assets.GetAnim(new HashedString("waterpump_kanim")) };
 		kbatchedAnimController.initialAnim = "place_guide";
-		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
+		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
 		kbatchedAnimController.isMovable = true;
 		PumpingStationGuide pumpingStationGuide = gameObject.AddComponent<PumpingStationGuide>();
 		pumpingStationGuide.parent = go;

@@ -80,8 +80,8 @@ namespace System.Text
 			}
 		}
 
-		[ComVisible(false)]
 		[CLSCompliant(false)]
+		[ComVisible(false)]
 		public unsafe virtual void Convert(char* chars, int charCount, byte* bytes, int byteCount, bool flush, out int charsUsed, out int bytesUsed, out bool completed)
 		{
 			this.CheckArguments(chars, charCount, bytes, byteCount);

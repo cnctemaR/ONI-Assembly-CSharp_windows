@@ -27,6 +27,7 @@ public class POIDoorInternalConfig : IBuildingConfig
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.PermittedRotations = PermittedRotations.R90;
 		buildingDef.SceneLayer = Grid.SceneLayer.TileMain;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.InteriorWall;
 		SoundEventVolumeCache.instance.AddVolume("door_poi_internal_kanim", "Open_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		SoundEventVolumeCache.instance.AddVolume("door_poi_internal_kanim", "Close_DoorInternal", NOISE_POLLUTION.NOISY.TIER2);
 		return buildingDef;
@@ -37,6 +38,7 @@ public class POIDoorInternalConfig : IBuildingConfig
 		Door door = go.AddOrGet<Door>();
 		door.unpoweredAnimSpeed = 1f;
 		door.doorType = Door.DoorType.Internal;
+		go.AddOrGet<ZoneTile>();
 		go.AddOrGet<AccessControl>();
 		Workable workable = go.AddOrGet<Workable>();
 		workable.workTime = 3f;

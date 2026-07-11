@@ -144,7 +144,7 @@ public class ProductInfoScreen : KScreen
 	private void SetTitle(BuildingDef def)
 	{
 		this.titleBar.SetTitle(def.Name);
-		bool flag = (PlanScreen.Instance != null && PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.BuildableState(this.currentDef) == PlanScreen.RequirementsState.Complete) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.BuildableState(this.currentDef) == PlanScreen.RequirementsState.Complete);
+		bool flag = (PlanScreen.Instance != null && PlanScreen.Instance.isActiveAndEnabled && PlanScreen.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete) || (BuildMenu.Instance != null && BuildMenu.Instance.isActiveAndEnabled && BuildMenu.Instance.BuildableState(def) == PlanScreen.RequirementsState.Complete);
 		this.titleBar.GetComponentInChildren<KImage>().ColorState = ((!flag) ? KImage.ColorSelector.Disabled : KImage.ColorSelector.Active);
 	}
 
@@ -330,11 +330,11 @@ public class ProductInfoScreen : KScreen
 			}
 			if (PlanScreen.Instance != null)
 			{
-				PrebuildTool.Instance.Activate(this.currentDef, PlanScreen.Instance.BuildableState(this.currentDef));
+				PrebuildTool.Instance.Activate(def, PlanScreen.Instance.BuildableState(def));
 			}
 			if (BuildMenu.Instance != null)
 			{
-				PrebuildTool.Instance.Activate(this.currentDef, BuildMenu.Instance.BuildableState(this.currentDef));
+				PrebuildTool.Instance.Activate(def, BuildMenu.Instance.BuildableState(def));
 			}
 		}
 	}

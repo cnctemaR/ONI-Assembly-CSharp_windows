@@ -80,10 +80,10 @@ public class Game : KMonoBehaviour
 		this.energySim = new EnergySim();
 		this.gasConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 13);
 		this.liquidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, Vent>(Grid.WidthInCells, Grid.HeightInCells, 17);
-		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 25);
-		this.logicCircuitSystem = new UtilityNetworkManager<LogicCircuitNetwork, LogicWire>(Grid.WidthInCells, Grid.HeightInCells, 30);
+		this.electricalConduitSystem = new UtilityNetworkManager<ElectricalUtilityNetwork, Wire>(Grid.WidthInCells, Grid.HeightInCells, 27);
+		this.logicCircuitSystem = new UtilityNetworkManager<LogicCircuitNetwork, LogicWire>(Grid.WidthInCells, Grid.HeightInCells, 32);
 		this.logicCircuitManager = new LogicCircuitManager(this.logicCircuitSystem);
-		this.travelTubeSystem = new UtilityNetworkTubesManager(Grid.WidthInCells, Grid.HeightInCells, 32);
+		this.travelTubeSystem = new UtilityNetworkTubesManager(Grid.WidthInCells, Grid.HeightInCells, 34);
 		this.solidConduitSystem = new UtilityNetworkManager<FlowUtilityNetwork, SolidConduit>(Grid.WidthInCells, Grid.HeightInCells, 21);
 		this.conduitTemperatureManager = new ConduitTemperatureManager();
 		this.conduitDiseaseManager = new ConduitDiseaseManager(this.conduitTemperatureManager);
@@ -764,62 +764,77 @@ public class Game : KMonoBehaviour
 			}
 		}
 		KFMOD.RenderEveryTick(Time.deltaTime);
-		if (GenericGameSettings.instance.developerDebugEnable)
+		if (GenericGameSettings.instance.performanceCapture.waitTime != 0f)
 		{
-			this.UpdateGCProfileCapture();
+			this.UpdatePerformanceCapture();
 		}
 	}
 
-	private void UpdateGCProfileCapture()
+	private void UpdatePerformanceCapture()
 	{
-		if (GenericGameSettings.instance.developerCaptureGCStatsTime == 0f)
-		{
-			return;
-		}
 		if (this.IsPaused && SpeedControlScreen.Instance != null)
 		{
 			SpeedControlScreen.Instance.Unpause(true);
 		}
-		if (Time.timeSinceLevelLoad < GenericGameSettings.instance.developerCaptureGCStatsTime)
+		if (Time.timeSinceLevelLoad < GenericGameSettings.instance.performanceCapture.waitTime)
 		{
 			return;
 		}
-		float fps = Global.Instance.GetComponent<PerformanceMonitor>().FPS;
-		global::Debug.Log("Begin GC profiling...", null);
-		float realtimeSinceStartup = Time.realtimeSinceStartup;
-		GC.Collect();
-		float num = Time.realtimeSinceStartup - realtimeSinceStartup;
-		global::Debug.Log("\tGC.Collect() took " + num.ToString() + " seconds", null);
-		uint num2 = 303707U;
+		uint num = 309851U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
-		string fileName = Path.GetFileName(SaveLoader.GetLatestSaveFile());
+		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
 		string text3 = "Version,Date,Time,SaveGame";
-		string text4 = string.Format("{0},{1},{2},{3}", new object[] { num2, text, text2, fileName });
-		using (StreamWriter streamWriter = new StreamWriter("./memory/GeneralMetrics.csv"))
+		string text4 = string.Format("{0},{1},{2},{3}", new object[] { num, text, text2, fileName });
+		float num2 = 0.1f;
+		if (GenericGameSettings.instance.performanceCapture.gcStats)
 		{
-			string text5 = "{0},{1},{2}";
-			streamWriter.WriteLine(string.Format(text5, text3, "GCDuration", "FPS"));
-			streamWriter.WriteLine(string.Format(text5, text4, num, fps));
-		}
-		MemorySnapshot memorySnapshot = new MemorySnapshot();
-		using (StreamWriter streamWriter2 = new StreamWriter("./memory/GCTypeMetrics.csv"))
-		{
-			string text6 = "{0},{1},{2},{3}";
-			streamWriter2.WriteLine(string.Format(text6, new object[] { text3, "Type", "Instances", "References" }));
-			foreach (MemorySnapshot.TypeData typeData in memorySnapshot.types.Values)
+			global::Debug.Log("Begin GC profiling...", null);
+			float realtimeSinceStartup = Time.realtimeSinceStartup;
+			GC.Collect();
+			num2 = Time.realtimeSinceStartup - realtimeSinceStartup;
+			global::Debug.Log("\tGC.Collect() took " + num2.ToString() + " seconds", null);
+			MemorySnapshot memorySnapshot = new MemorySnapshot();
+			string text5 = "{0},{1},{2},{3}";
+			string text6 = "./memory/GCTypeMetrics.csv";
+			if (!File.Exists(text6))
 			{
-				streamWriter2.WriteLine(string.Format(text6, new object[]
+				using (StreamWriter streamWriter = new StreamWriter(text6))
 				{
-					text4,
-					"\"" + typeData.type.ToString() + "\"",
-					typeData.instanceCount,
-					typeData.refCount
-				}));
+					streamWriter.WriteLine(string.Format(text5, new object[] { text3, "Type", "Instances", "References" }));
+				}
+			}
+			using (StreamWriter streamWriter2 = new StreamWriter(text6, true))
+			{
+				foreach (MemorySnapshot.TypeData typeData in memorySnapshot.types.Values)
+				{
+					streamWriter2.WriteLine(string.Format(text5, new object[]
+					{
+						text4,
+						"\"" + typeData.type.ToString() + "\"",
+						typeData.instanceCount,
+						typeData.refCount
+					}));
+				}
+			}
+			global::Debug.Log("...end GC profiling", null);
+		}
+		float fps = Global.Instance.GetComponent<PerformanceMonitor>().FPS;
+		Directory.CreateDirectory("./memory");
+		string text7 = "{0},{1},{2}";
+		string text8 = "./memory/GeneralMetrics.csv";
+		if (!File.Exists(text8))
+		{
+			using (StreamWriter streamWriter3 = new StreamWriter(text8))
+			{
+				streamWriter3.WriteLine(string.Format(text7, text3, "GCDuration", "FPS"));
 			}
 		}
-		GenericGameSettings.instance.developerCaptureGCStatsTime = 0f;
-		global::Debug.Log("...end GC profiling", null);
+		using (StreamWriter streamWriter4 = new StreamWriter(text8, true))
+		{
+			streamWriter4.WriteLine(string.Format(text7, text4, num2, fps));
+		}
+		GenericGameSettings.instance.performanceCapture.waitTime = 0f;
 		Application.Quit();
 	}
 
@@ -1296,6 +1311,7 @@ public class Game : KMonoBehaviour
 		MinionGroupProber.DestroyInstance();
 		NavPathDrawer.DestroyInstance();
 		MinionIdentity.DestroyStatics();
+		PathFinder.PathGrid.OnCleanUp();
 		PathFinder.PathGrid = null;
 		Pathfinding.DestroyInstance();
 		PrebuildTool.DestroyInstance();

@@ -13,9 +13,9 @@ namespace System.Xml.Schema
 
 		[XmlElement("any", typeof(XmlSchemaAny))]
 		[XmlElement("sequence", typeof(XmlSchemaSequence))]
-		[XmlElement("element", typeof(XmlSchemaElement))]
 		[XmlElement("choice", typeof(XmlSchemaChoice))]
 		[XmlElement("group", typeof(XmlSchemaGroupRef))]
+		[XmlElement("element", typeof(XmlSchemaElement))]
 		public override XmlSchemaObjectCollection Items
 		{
 			get

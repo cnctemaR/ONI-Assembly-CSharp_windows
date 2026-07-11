@@ -6,7 +6,7 @@ using UnityEngine.Internal;
 namespace UnityEngine
 {
 	/// <summary>
-	///   <para>Gizmos are used to give visual debugging or setup aids in the scene view.</para>
+	///   <para>Gizmos are used to give visual debugging or setup aids in the Scene view.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Export/Gizmos.bindings.h")]
 	[StaticAccessor("GizmoBindings", StaticAccessorType.DoubleColon)]
@@ -96,7 +96,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Draw an icon at a position in the scene view.</para>
+		///   <para>Draw an icon at a position in the Scene view.</para>
 		/// </summary>
 		/// <param name="center"></param>
 		/// <param name="name"></param>
@@ -108,7 +108,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Draw a texture in the scene.</para>
+		///   <para>Draw a texture in the Scene.</para>
 		/// </summary>
 		/// <param name="screenRect">The size and position of the texture on the "screen" defined by the XY plane.</param>
 		/// <param name="texture">The texture to be displayed.</param>
@@ -315,7 +315,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Draw an icon at a position in the scene view.</para>
+		///   <para>Draw an icon at a position in the Scene view.</para>
 		/// </summary>
 		/// <param name="center"></param>
 		/// <param name="name"></param>
@@ -328,7 +328,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Draw a texture in the scene.</para>
+		///   <para>Draw a texture in the Scene.</para>
 		/// </summary>
 		/// <param name="screenRect">The size and position of the texture on the "screen" defined by the XY plane.</param>
 		/// <param name="texture">The texture to be displayed.</param>
@@ -345,7 +345,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Draw a texture in the scene.</para>
+		///   <para>Draw a texture in the Scene.</para>
 		/// </summary>
 		/// <param name="screenRect">The size and position of the texture on the "screen" defined by the XY plane.</param>
 		/// <param name="texture">The texture to be displayed.</param>
@@ -360,7 +360,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Draw a texture in the scene.</para>
+		///   <para>Draw a texture in the Scene.</para>
 		/// </summary>
 		/// <param name="screenRect">The size and position of the texture on the "screen" defined by the XY plane.</param>
 		/// <param name="texture">The texture to be displayed.</param>

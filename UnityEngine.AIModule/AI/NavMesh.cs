@@ -490,7 +490,7 @@ namespace UnityEngine.AI
 		/// <summary>
 		///   <para>Removes all NavMesh surfaces and links from the game.</para>
 		/// </summary>
-		[NativeName("Cleanup")]
+		[NativeName("CleanupAfterCarving")]
 		[StaticAccessor("GetNavMeshManager()")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void RemoveAllNavMeshData();

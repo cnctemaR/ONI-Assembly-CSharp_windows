@@ -1,4 +1,5 @@
 ﻿using System;
+using STRINGS;
 
 public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance, IStateMachineTarget, DeathMonitor.Def>
 {
@@ -106,6 +107,8 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 			if (this.isDuplicant)
 			{
 				base.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, Db.Get().DuplicantStatusItems.Dead, base.smi.sm.death.Get(base.smi));
+				float num = 600f - GameClock.Instance.GetTimeSinceStartOfReport();
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.PersonalTime, num, string.Format(UI.ENDOFDAYREPORT.NOTES.PERSONAL_TIME, DUPLICANTS.CHORES.IS_DEAD_TASK), base.smi.master.gameObject.GetProperName());
 				Pickupable component = base.GetComponent<Pickupable>();
 				if (component != null)
 				{

@@ -72,8 +72,9 @@ public class OxidizerTankConfig : IBuildingConfig
 		manualDeliveryKG.refillMass = storage.capacityKg;
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.None;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
-		go.AddOrGet<RocketModule>();
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+		RocketModule rocketModule = go.AddOrGet<RocketModule>();
+		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_oxidizer_tank_bg_kanim"));
 		EntityTemplates.ExtendBuildingToRocketModule(go);
 	}
 

@@ -55,16 +55,22 @@ public class AtmoSuitConfig : IEquipmentConfig
 			if (eq.assignee != null)
 			{
 				Ownables soleOwner2 = eq.assignee.GetSoleOwner();
-				GameObject targetGameObject2 = soleOwner2.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
-				Attributes attributes = targetGameObject2.GetAttributes();
-				if (attributes != null)
+				if (soleOwner2 != null)
 				{
-					attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
-				}
-				Navigator component3 = targetGameObject2.GetComponent<Navigator>();
-				if (component3 != null)
-				{
-					component3.ClearFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
+					GameObject targetGameObject2 = soleOwner2.GetComponent<MinionAssignablesProxy>().GetTargetGameObject();
+					if (targetGameObject2)
+					{
+						Attributes attributes = targetGameObject2.GetAttributes();
+						if (attributes != null)
+						{
+							attributes.Get(Db.Get().Attributes.Athletics).Remove(SuitExpert.AthleticsModifier);
+						}
+						Navigator component3 = targetGameObject2.GetComponent<Navigator>();
+						if (component3 != null)
+						{
+							component3.ClearFlags(PathFinder.PotentialPath.Flags.HasAtmoSuit);
+						}
+					}
 				}
 			}
 		};

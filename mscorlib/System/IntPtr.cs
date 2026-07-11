@@ -21,8 +21,8 @@ namespace System
 			this.m_value = value;
 		}
 
-		[CLSCompliant(false)]
 		[ReliabilityContract(Consistency.MayCorruptInstance, Cer.MayFail)]
+		[CLSCompliant(false)]
 		public unsafe IntPtr(void* value)
 		{
 			this.m_value = value;

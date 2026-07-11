@@ -97,7 +97,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The maximum time a frame can take. Physics and other fixed frame rate updates (like MonoBehaviour's MonoBehaviour.FixedUpdate).</para>
+		///   <para>The maximum time a frame can take. Physics and other fixed frame rate updates (like MonoBehaviour's MonoBehaviour.FixedUpdate) will be performed only for this duration of time per frame.</para>
 		/// </summary>
 		public static extern float maximumDeltaTime
 		{

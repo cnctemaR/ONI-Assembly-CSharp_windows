@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
+public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 {
 	public float Capacity
 	{
@@ -31,17 +30,14 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (!this.choreTypeIDHash.IsValid)
-		{
-			this.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
-		}
+		DebugUtil.Assert(this.choreTypeIDHash.IsValid, "ManualDeliveryKG Must have a valid chore type specified!", base.name);
 		base.Subscribe<ManualDeliveryKG>(493375141, ManualDeliveryKG.OnRefreshUserMenuDelegate);
 		base.Subscribe<ManualDeliveryKG>(-111137758, ManualDeliveryKG.OnRefreshUserMenuDelegate);
+		base.Subscribe<ManualDeliveryKG>(-592767678, ManualDeliveryKG.OnOperationalChangedDelegate);
 		if (this.storage != null)
 		{
 			this.SetStorage(this.storage);
 		}
-		this.UpdateFilteredItems();
 		Prioritizable.AddRef(base.gameObject);
 		if (this.userPaused && this.allowPause)
 		{
@@ -64,7 +60,6 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 			this.onStorageChangeSubscription = -1;
 		}
 		this.AbortDelivery("storage pointer changed");
-		this.filteredStoredItems.Clear();
 		this.storage = storage;
 		if (this.storage != null && base.isSpawned)
 		{
@@ -87,7 +82,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	public void Sim200ms(float dt)
+	public void Sim1000ms(float dt)
 	{
 		this.UpdateDeliveryState();
 	}
@@ -103,55 +98,61 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		{
 			return;
 		}
-		if (!this.paused)
-		{
-			this.RequestDelivery();
-		}
+		this.UpdateFetchList();
 	}
 
-	private void RequestDelivery()
+	private void UpdateFetchList()
 	{
-		float fetchAmount = this.GetFetchAmount();
-		if (fetchAmount > 0f)
+		if (this.paused)
 		{
-			if (this.fetchList == null || this.fetchList.IsComplete)
+			return;
+		}
+		if (this.fetchList != null && this.fetchList.IsComplete)
+		{
+			this.fetchList = null;
+		}
+		if (!this.OperationalRequirementsMet())
+		{
+			if (this.fetchList != null)
 			{
-				if (this.fetchList != null)
-				{
-					this.fetchList.Cancel("Request Delivery");
-				}
+				this.fetchList.Cancel("Operational requirements");
+				this.fetchList = null;
+			}
+		}
+		else if (this.fetchList == null)
+		{
+			float massAvailable = this.storage.GetMassAvailable(this.requestedItemTag);
+			if (massAvailable < this.refillMass)
+			{
+				float num = this.capacity - massAvailable;
+				num = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, num);
 				ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
 				this.fetchList = new FetchList2(this.storage, byHash, this.choreTags);
 				this.fetchList.ShowStatusItem = this.ShowStatusItem;
-				this.fetchList.MinimumAmount[this.requestedItemTag] = this.minimumMass;
+				this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.minimumMass);
 				FetchList2 fetchList = this.fetchList;
 				Tag[] array = new Tag[] { this.requestedItemTag };
-				float num = fetchAmount;
-				FetchOrder2.OperationalRequirement operationalRequirement = this.operationalRequirement;
-				fetchList.Add(array, null, null, num, operationalRequirement);
+				float num2 = num;
+				fetchList.Add(array, null, null, num2, FetchOrder2.OperationalRequirement.None);
 				this.fetchList.Submit(null, false);
 			}
 		}
-		else if (this.fetchList != null)
-		{
-			this.fetchList.Cancel("Storage is full");
-			this.fetchList = null;
-		}
 	}
 
-	private float GetFetchAmount()
+	private bool OperationalRequirementsMet()
 	{
-		float num = 0f;
-		float num2 = 0f;
-		for (int i = 0; i < this.filteredStoredItems.Count; i++)
+		if (this.operational)
 		{
-			num2 += this.filteredStoredItems[i].Mass;
+			if (this.operationalRequirement == FetchOrder2.OperationalRequirement.Operational)
+			{
+				return this.operational.IsOperational;
+			}
+			if (this.operationalRequirement == FetchOrder2.OperationalRequirement.Functional)
+			{
+				return this.operational.IsFunctional;
+			}
 		}
-		if (num2 < this.refillMass)
-		{
-			num = Mathf.Max(0f, this.capacity - num2);
-		}
-		return num;
+		return true;
 	}
 
 	public void AbortDelivery(string reason)
@@ -168,24 +169,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 	{
 		if (storage == this.storage)
 		{
-			this.UpdateFilteredItems();
 			this.UpdateDeliveryState();
-		}
-	}
-
-	private void UpdateFilteredItems()
-	{
-		this.filteredStoredItems.Clear();
-		int num = 0;
-		while (this.storage != null && num < this.storage.items.Count)
-		{
-			GameObject gameObject = this.storage.items[num];
-			if (gameObject.HasTag(this.requestedItemTag))
-			{
-				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-				this.filteredStoredItems.Add(component);
-			}
-			num++;
 		}
 	}
 
@@ -228,6 +212,14 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
+	private void OnOperationalChanged(object data)
+	{
+		this.UpdateDeliveryState();
+	}
+
+	[MyCmpGet]
+	private Operational operational;
+
 	[SerializeField]
 	private Storage storage;
 
@@ -266,12 +258,15 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim200ms
 
 	private FetchList2 fetchList;
 
-	private List<PrimaryElement> filteredStoredItems = new List<PrimaryElement>();
-
 	private int onStorageChangeSubscription = -1;
 
 	private static readonly EventSystem.IntraObjectHandler<ManualDeliveryKG> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<ManualDeliveryKG>(delegate(ManualDeliveryKG component, object data)
 	{
 		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<ManualDeliveryKG> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<ManualDeliveryKG>(delegate(ManualDeliveryKG component, object data)
+	{
+		component.OnOperationalChanged(data);
 	});
 }

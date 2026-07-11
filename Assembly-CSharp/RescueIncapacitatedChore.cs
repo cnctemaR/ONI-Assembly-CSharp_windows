@@ -5,9 +5,9 @@ using UnityEngine;
 public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesInstance>
 {
 	public RescueIncapacitatedChore(IStateMachineTarget master, GameObject incapacitatedDuplicant)
-		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.emergency, 5, false, true, 0, null)
+		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
 	{
-		this.smi = new RescueIncapacitatedChore.StatesInstance(this);
+		base.smi = new RescueIncapacitatedChore.StatesInstance(this);
 		base.runUntilComplete = true;
 		base.AddPrecondition(ChorePreconditions.instance.NotChoreCreator, incapacitatedDuplicant.gameObject);
 		base.AddPrecondition(RescueIncapacitatedChore.CanReachIncapacitated, incapacitatedDuplicant);
@@ -15,9 +15,9 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 
 	public override void Begin(Chore.Precondition.Context context)
 	{
-		this.smi.sm.rescuer.Set(context.consumerState.gameObject, this.smi);
-		this.smi.sm.rescueTarget.Set(this.gameObject, this.smi);
-		this.smi.sm.deliverTarget.Set(this.gameObject.GetSMI<BeIncapacitatedChore.StatesInstance>().master.GetChosenClinic(), this.smi);
+		base.smi.sm.rescuer.Set(context.consumerState.gameObject, base.smi);
+		base.smi.sm.rescueTarget.Set(this.gameObject, base.smi);
+		base.smi.sm.deliverTarget.Set(this.gameObject.GetSMI<BeIncapacitatedChore.StatesInstance>().master.GetChosenClinic(), base.smi);
 		base.Begin(context);
 	}
 
@@ -29,9 +29,9 @@ public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesIns
 
 	private void DropIncapacitatedDuplicant()
 	{
-		if (this.smi.sm.rescuer.Get(this.smi) != null && this.smi.sm.rescueTarget.Get(this.smi) != null)
+		if (base.smi.sm.rescuer.Get(base.smi) != null && base.smi.sm.rescueTarget.Get(base.smi) != null)
 		{
-			this.smi.sm.rescuer.Get(this.smi).GetComponent<Storage>().Drop(this.smi.sm.rescueTarget.Get(this.smi));
+			base.smi.sm.rescuer.Get(base.smi).GetComponent<Storage>().Drop(base.smi.sm.rescueTarget.Get(base.smi));
 		}
 	}
 

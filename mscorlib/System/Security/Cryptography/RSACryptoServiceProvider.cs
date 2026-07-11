@@ -332,8 +332,8 @@ namespace System.Security.Cryptography
 			}
 		}
 
-		[ComVisible(false)]
 		[MonoTODO("Always return null")]
+		[ComVisible(false)]
 		public CspKeyContainerInfo CspKeyContainerInfo
 		{
 			get

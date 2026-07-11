@@ -6,11 +6,11 @@ using UnityEngine.Scripting;
 
 namespace UnityEngine.Animations
 {
+	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationOffsetPlayable.bindings.h")]
 	[NativeHeader("Runtime/Animation/Director/AnimationOffsetPlayable.h")]
-	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	[StaticAccessor("AnimationOffsetPlayableBindings", StaticAccessorType.DoubleColon)]
 	[RequiredByNativeCode]
-	[NativeHeader("Runtime/Animation/ScriptBindings/AnimationOffsetPlayable.bindings.h")]
+	[NativeHeader("Runtime/Director/Core/HPlayable.h")]
 	internal struct AnimationOffsetPlayable : IPlayable, IEquatable<AnimationOffsetPlayable>
 	{
 		internal AnimationOffsetPlayable(PlayableHandle handle)

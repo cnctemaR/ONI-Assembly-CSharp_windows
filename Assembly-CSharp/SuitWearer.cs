@@ -25,6 +25,7 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 		{
 			this.navigator = master.GetComponent<Navigator>();
 			this.navigator.SetFlags(PathFinder.PotentialPath.Flags.PerformSuitChecks);
+			this.prefabInstanceID = this.navigator.GetComponent<KPrefabID>().InstanceID;
 			KBatchedAnimController component = master.GetComponent<KBatchedAnimController>();
 			component.SetSymbolVisiblity("snapto_neck", false);
 		}
@@ -51,52 +52,39 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 			for (int i = 0; i < path.nodes.Count - 1; i++)
 			{
 				int cell = path.nodes[i].cell;
-				Pathfinding.INavigationFeature navigationFeature = Pathfinding.Instance.GetNavigationFeature(cell);
-				if (navigationFeature != null)
+				Grid.SuitMarker.Flags flags = (Grid.SuitMarker.Flags)0;
+				PathFinder.PotentialPath.Flags flags2 = PathFinder.PotentialPath.Flags.None;
+				if (Grid.TryGetSuitMarkerFlags(cell, out flags, out flags2))
 				{
-					SuitMarker suitMarker = navigationFeature as SuitMarker;
-					if (!(suitMarker == null))
+					bool flag3 = (byte)(flags2 & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
+					bool flag4 = (byte)(flags2 & PathFinder.PotentialPath.Flags.HasJetPack) != 0;
+					bool flag5 = flag2 || flag;
+					bool flag6 = flag3 == flag && flag4 == flag2;
+					bool flag7 = SuitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell, flags);
+					if (flag7 && !flag5)
 					{
-						bool flag3 = (byte)(suitMarker.PathFlag & PathFinder.PotentialPath.Flags.HasAtmoSuit) != 0;
-						bool flag4 = (byte)(suitMarker.PathFlag & PathFinder.PotentialPath.Flags.HasJetPack) != 0;
-						bool flag5 = flag2 || flag;
-						bool flag6 = flag3 == flag && flag4 == flag2;
-						bool flag7 = suitMarker.DoesTraversalDirectionRequireSuit(cell, path.nodes[i + 1].cell);
-						if (flag7 && !flag5)
+						Grid.ReserveSuit(cell, this.prefabInstanceID, true);
+						this.suitReservations.Add(cell);
+						if (flag3)
 						{
-							SuitWearer.Instance.Reservation reservation = new SuitWearer.Instance.Reservation
-							{
-								suitMarker = suitMarker,
-								isForEquipping = flag7
-							};
-							suitMarker.Reserve(this, flag7);
-							this.reservations.Add(reservation);
-							if (flag3)
-							{
-								flag = true;
-							}
-							if (flag4)
-							{
-								flag2 = true;
-							}
+							flag = true;
 						}
-						else if (!flag7 && flag6 && suitMarker.IsUnequipAvailableForSuitWearer(this))
+						if (flag4)
 						{
-							SuitWearer.Instance.Reservation reservation2 = new SuitWearer.Instance.Reservation
-							{
-								suitMarker = suitMarker,
-								isForEquipping = flag7
-							};
-							suitMarker.Reserve(this, flag7);
-							this.reservations.Add(reservation2);
-							if (flag3)
-							{
-								flag = false;
-							}
-							if (flag4)
-							{
-								flag2 = false;
-							}
+							flag2 = true;
+						}
+					}
+					else if (!flag7 && flag6 && Grid.HasEmptyLocker(cell, this.prefabInstanceID))
+					{
+						Grid.ReserveEmptyLocker(cell, this.prefabInstanceID, true);
+						this.emptyLockerReservations.Add(cell);
+						if (flag3)
+						{
+							flag = false;
+						}
+						if (flag4)
+						{
+							flag2 = false;
 						}
 					}
 				}
@@ -105,25 +93,30 @@ public class SuitWearer : GameStateMachine<SuitWearer, SuitWearer.Instance>
 
 		public void UnreserveSuits()
 		{
-			foreach (SuitWearer.Instance.Reservation reservation in this.reservations)
+			foreach (int num in this.suitReservations)
 			{
-				if (!(reservation.suitMarker == null))
+				if (Grid.HasSuitMarker[num])
 				{
-					reservation.suitMarker.Unreserve(this, reservation.isForEquipping);
+					Grid.ReserveSuit(num, this.prefabInstanceID, false);
 				}
 			}
-			this.reservations.Clear();
+			this.suitReservations.Clear();
+			foreach (int num2 in this.emptyLockerReservations)
+			{
+				if (Grid.HasSuitMarker[num2])
+				{
+					Grid.ReserveEmptyLocker(num2, this.prefabInstanceID, false);
+				}
+			}
+			this.emptyLockerReservations.Clear();
 		}
 
-		private List<SuitWearer.Instance.Reservation> reservations = new List<SuitWearer.Instance.Reservation>();
+		private List<int> suitReservations = new List<int>();
+
+		private List<int> emptyLockerReservations = new List<int>();
 
 		private Navigator navigator;
 
-		private struct Reservation
-		{
-			public SuitMarker suitMarker;
-
-			public bool isForEquipping;
-		}
+		private int prefabInstanceID;
 	}
 }

@@ -7,7 +7,6 @@ using Klei;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGen;
-using ProcGenGame;
 using Steamworks;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -140,10 +139,28 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 	}
 
+	private static void AddModLevels(IFileSystem fs, object user_data, List<SettingLevel> levels)
+	{
+		string text = FSUtil.Normalize(global::System.IO.Path.Combine(SettingsCache.GetPath(), "worlds"));
+		ListPool<string, CustomGameSettings>.PooledList pooledList = ListPool<string, CustomGameSettings>.Allocate();
+		FSUtil.GetFiles(fs, text, "*.yaml", pooledList);
+		foreach (string text2 in pooledList)
+		{
+			global::ProcGen.World world = YamlIO<global::ProcGen.World>.LoadFile(text2, null);
+			string worldName = Worlds.GetWorldName(text2);
+			levels.Add(new SettingLevel(worldName, world.name, world.description, user_data));
+		}
+		pooledList.Recycle();
+	}
+
 	public void LoadWorlds()
 	{
-		List<SettingLevel> list = new List<SettingLevel>();
-		this.AddLevels(Global.Instance.standardFS, null, list);
+		Dictionary<string, Worlds.Data> worldCache = SettingsCache.worlds.worldCache;
+		List<SettingLevel> list = new List<SettingLevel>(worldCache.Count);
+		foreach (KeyValuePair<string, Worlds.Data> keyValuePair in worldCache)
+		{
+			list.Add(new SettingLevel(keyValuePair.Key, keyValuePair.Value.world.name, keyValuePair.Value.world.description, null));
+		}
 		if (DistributionPlatform.Initialized)
 		{
 			List<SteamUGCService.Subscribed> subscribed = SteamUGCService.Instance.GetSubscribed("worldgen");
@@ -153,30 +170,17 @@ public class CustomGameSettings : KMonoBehaviour
 				string text;
 				uint num2;
 				SteamUGC.GetItemInstallInfo(subscribed2.fileId, out num, out text, 1024U, out num2);
-				string path = WorldGen.GetPath();
+				string path = SettingsCache.GetPath();
 				string text2 = subscribed2.fileId.m_PublishedFileId.ToString();
 				ModInfo modInfo = new ModInfo(ModInfo.Source.Steam, ModInfo.ModType.WorldGen, text2, subscribed2.description, path, 0UL);
 				FileStream fileStream = File.OpenRead(text);
 				ZipFileSystem zipFileSystem = new ZipFileSystem(text2, fileStream, path);
 				Global.Instance.layeredFileSystem.AddFileSystem(zipFileSystem);
-				this.AddLevels(zipFileSystem, modInfo, list);
+				CustomGameSettings.AddModLevels(zipFileSystem, modInfo, list);
 				Global.Instance.layeredFileSystem.RemoveFileSystem(zipFileSystem);
 			}
 		}
 		CustomGameSettingConfigs.World.StompLevels(list, "worlds/Default", "worlds/Default");
-	}
-
-	private void AddLevels(IFileSystem fs, object user_data, List<SettingLevel> levels)
-	{
-		string text = FSUtil.Normalize(global::System.IO.Path.Combine(WorldGen.GetPath(), "worlds"));
-		List<string> list = new List<string>();
-		FSUtil.GetFiles(fs, text, "*.yaml", list);
-		foreach (string text2 in list)
-		{
-			global::ProcGen.World world = YamlIO<global::ProcGen.World>.LoadFile(text2, null);
-			string worldName = Worlds.GetWorldName(text2);
-			levels.Add(new SettingLevel(worldName, world.name, world.description, user_data));
-		}
 	}
 
 	public void Print()

@@ -5,6 +5,331 @@ using UnityEngine;
 
 public class Grid
 {
+	private static void UpdateBuildMask(int i, Grid.BuildFlags flag, bool state)
+	{
+		if (state)
+		{
+			Grid.BuildFlags[] array;
+			(array = Grid.BuildMasks)[i] = array[i] | flag;
+		}
+		else
+		{
+			Grid.BuildFlags[] array;
+			(array = Grid.BuildMasks)[i] = array[i] & ~flag;
+		}
+	}
+
+	public static void SetSolid(int cell, bool solid, CellSolidEvent ev)
+	{
+		Grid.UpdateBuildMask(cell, Grid.BuildFlags.Solid, solid);
+	}
+
+	private static void UpdateVisMask(int i, Grid.VisFlags flag, bool state)
+	{
+		if (state)
+		{
+			Grid.VisFlags[] array;
+			(array = Grid.VisMasks)[i] = array[i] | flag;
+		}
+		else
+		{
+			Grid.VisFlags[] array;
+			(array = Grid.VisMasks)[i] = array[i] & ~flag;
+		}
+	}
+
+	private static void UpdateNavValidatorMask(int i, Grid.NavValidatorFlags flag, bool state)
+	{
+		if (state)
+		{
+			Grid.NavValidatorFlags[] array;
+			(array = Grid.NavValidatorMasks)[i] = array[i] | flag;
+		}
+		else
+		{
+			Grid.NavValidatorFlags[] array;
+			(array = Grid.NavValidatorMasks)[i] = array[i] & ~flag;
+		}
+	}
+
+	private static void UpdateNavMask(int i, Grid.NavFlags flag, bool state)
+	{
+		if (state)
+		{
+			Grid.NavFlags[] array;
+			(array = Grid.NavMasks)[i] = array[i] | flag;
+		}
+		else
+		{
+			Grid.NavFlags[] array;
+			(array = Grid.NavMasks)[i] = array[i] & ~flag;
+		}
+	}
+
+	public static void ResetNavMasksAndDetails()
+	{
+		Grid.NavMasks = null;
+		Grid.tubeEntrances.Clear();
+		Grid.restrictions.Clear();
+		Grid.suitMarkers.Clear();
+	}
+
+	public static void RegisterRestriction(int cell, Grid.Restriction.Orientation orientation)
+	{
+		Grid.restrictions.Add(cell, new Grid.Restriction
+		{
+			directionMasks = new Dictionary<int, Grid.Restriction.Directions>(),
+			orientation = orientation
+		});
+	}
+
+	public static void UnregisterRestriction(int cell)
+	{
+		Grid.restrictions.Remove(cell);
+	}
+
+	public static void SetRestriction(int cell, int minion, Grid.Restriction.Directions directions)
+	{
+		Grid.restrictions[cell].directionMasks[minion] = directions;
+	}
+
+	public static void ClearRestriction(int cell, int minion)
+	{
+		Grid.restrictions[cell].directionMasks.Remove(minion);
+	}
+
+	public static bool HasPermission(int cell, int minion, int fromCell)
+	{
+		DebugUtil.Assert(Grid.HasAccessDoor[cell]);
+		Grid.Restriction restriction = Grid.restrictions[cell];
+		Vector2I vector2I = Grid.CellToXY(cell);
+		Vector2I vector2I2 = Grid.CellToXY(fromCell);
+		Grid.Restriction.Directions directions = (Grid.Restriction.Directions)0;
+		Grid.Restriction.Orientation orientation = restriction.orientation;
+		if (orientation != Grid.Restriction.Orientation.Vertical)
+		{
+			if (orientation == Grid.Restriction.Orientation.Horizontal)
+			{
+				int num = vector2I.y - vector2I2.y;
+				if (num > 0)
+				{
+					directions |= Grid.Restriction.Directions.Left;
+				}
+				if (num < 0)
+				{
+					directions |= Grid.Restriction.Directions.Right;
+				}
+			}
+		}
+		else
+		{
+			int num2 = vector2I.x - vector2I2.x;
+			if (num2 < 0)
+			{
+				directions |= Grid.Restriction.Directions.Left;
+			}
+			if (num2 > 0)
+			{
+				directions |= Grid.Restriction.Directions.Right;
+			}
+		}
+		Grid.Restriction.Directions directions2 = (Grid.Restriction.Directions)0;
+		return (!restriction.directionMasks.TryGetValue(minion, out directions2) && !restriction.directionMasks.TryGetValue(-1, out directions2)) || (byte)(directions2 & directions) == 0;
+	}
+
+	public static void RegisterTubeEntrance(int cell, int reservationCapacity)
+	{
+		DebugUtil.Assert(!Grid.tubeEntrances.ContainsKey(cell));
+		Grid.HasTubeEntrance[cell] = true;
+		Grid.tubeEntrances.Add(cell, new Grid.TubeEntrance
+		{
+			reservationCapacity = reservationCapacity,
+			reservations = new HashSet<int>()
+		});
+	}
+
+	public static void UnregisterTubeEntrance(int cell)
+	{
+		DebugUtil.Assert(Grid.tubeEntrances.ContainsKey(cell));
+		Grid.HasTubeEntrance[cell] = false;
+		Grid.tubeEntrances.Remove(cell);
+	}
+
+	public static bool ReserveTubeEntrance(int cell, int minion, bool reserve)
+	{
+		Grid.TubeEntrance tubeEntrance = Grid.tubeEntrances[cell];
+		HashSet<int> reservations = tubeEntrance.reservations;
+		if (!reserve)
+		{
+			return reservations.Remove(minion);
+		}
+		DebugUtil.Assert(Grid.HasTubeEntrance[cell]);
+		if (reservations.Count == tubeEntrance.reservationCapacity)
+		{
+			return false;
+		}
+		bool flag = reservations.Add(minion);
+		DebugUtil.Assert(flag);
+		return true;
+	}
+
+	public static void SetTubeEntranceReservationCapacity(int cell, int newReservationCapacity)
+	{
+		DebugUtil.Assert(Grid.HasTubeEntrance[cell]);
+		Grid.TubeEntrance tubeEntrance = Grid.tubeEntrances[cell];
+		tubeEntrance.reservationCapacity = newReservationCapacity;
+		Grid.tubeEntrances[cell] = tubeEntrance;
+	}
+
+	public static bool HasUsableTubeEntrance(int cell, int minion)
+	{
+		if (!Grid.HasTubeEntrance[cell])
+		{
+			return false;
+		}
+		Grid.TubeEntrance tubeEntrance = Grid.tubeEntrances[cell];
+		HashSet<int> reservations = tubeEntrance.reservations;
+		return reservations.Count < tubeEntrance.reservationCapacity || reservations.Contains(minion);
+	}
+
+	public static bool HasReservedTubeEntrance(int cell, int minion)
+	{
+		DebugUtil.Assert(Grid.HasTubeEntrance[cell]);
+		return Grid.tubeEntrances[cell].reservations.Contains(minion);
+	}
+
+	public static void ActivateTubeEntrance(int cell, bool activate)
+	{
+		DebugUtil.Assert(Grid.tubeEntrances.ContainsKey(cell));
+		Grid.HasTubeEntrance[cell] = activate;
+	}
+
+	public static void RegisterSuitMarker(int cell)
+	{
+		DebugUtil.Assert(!Grid.HasSuitMarker[cell]);
+		Grid.HasSuitMarker[cell] = true;
+		Grid.suitMarkers.Add(cell, new Grid.SuitMarker
+		{
+			suitCount = 0,
+			lockerCount = 0,
+			flags = Grid.SuitMarker.Flags.Operational,
+			suitReservations = new HashSet<int>(),
+			emptyLockerReservations = new HashSet<int>()
+		});
+	}
+
+	public static void UnregisterSuitMarker(int cell)
+	{
+		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
+		Grid.HasSuitMarker[cell] = false;
+		Grid.suitMarkers.Remove(cell);
+	}
+
+	public static bool ReserveSuit(int cell, int minion, bool reserve)
+	{
+		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
+		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
+		HashSet<int> suitReservations = suitMarker.suitReservations;
+		if (!reserve)
+		{
+			return suitReservations.Remove(minion);
+		}
+		if (suitReservations.Count == suitMarker.suitCount)
+		{
+			return false;
+		}
+		bool flag = suitReservations.Add(minion);
+		DebugUtil.Assert(flag);
+		return true;
+	}
+
+	public static bool ReserveEmptyLocker(int cell, int minion, bool reserve)
+	{
+		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
+		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
+		HashSet<int> emptyLockerReservations = suitMarker.emptyLockerReservations;
+		if (!reserve)
+		{
+			return emptyLockerReservations.Remove(minion);
+		}
+		if (emptyLockerReservations.Count == suitMarker.emptyLockerCount)
+		{
+			return false;
+		}
+		bool flag = emptyLockerReservations.Add(minion);
+		DebugUtil.Assert(flag);
+		return true;
+	}
+
+	public static void UpdateSuitMarker(int cell, int fullLockerCount, int emptyLockerCount, Grid.SuitMarker.Flags flags, PathFinder.PotentialPath.Flags pathFlags)
+	{
+		DebugUtil.Assert(Grid.HasSuitMarker[cell]);
+		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
+		suitMarker.suitCount = fullLockerCount;
+		suitMarker.lockerCount = fullLockerCount + emptyLockerCount;
+		suitMarker.flags = flags;
+		suitMarker.pathFlags = pathFlags;
+		Grid.suitMarkers[cell] = suitMarker;
+	}
+
+	public static bool TryGetSuitMarkerFlags(int cell, out Grid.SuitMarker.Flags flags, out PathFinder.PotentialPath.Flags pathFlags)
+	{
+		if (Grid.HasSuitMarker[cell])
+		{
+			flags = Grid.suitMarkers[cell].flags;
+			pathFlags = Grid.suitMarkers[cell].pathFlags;
+			return true;
+		}
+		flags = (Grid.SuitMarker.Flags)0;
+		pathFlags = PathFinder.PotentialPath.Flags.None;
+		return false;
+	}
+
+	public static bool HasSuit(int cell, int minion)
+	{
+		if (!Grid.HasSuitMarker[cell])
+		{
+			return false;
+		}
+		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
+		HashSet<int> suitReservations = suitMarker.suitReservations;
+		return suitReservations.Count < suitMarker.suitCount || suitReservations.Contains(minion);
+	}
+
+	public static bool HasEmptyLocker(int cell, int minion)
+	{
+		if (!Grid.HasSuitMarker[cell])
+		{
+			return false;
+		}
+		Grid.SuitMarker suitMarker = Grid.suitMarkers[cell];
+		HashSet<int> emptyLockerReservations = suitMarker.emptyLockerReservations;
+		return emptyLockerReservations.Count < suitMarker.emptyLockerCount || emptyLockerReservations.Contains(minion);
+	}
+
+	public unsafe static void InitializeCells()
+	{
+		for (int num = 0; num != Grid.WidthInCells * Grid.HeightInCells; num++)
+		{
+			byte b = Grid.elementIdx[num];
+			Element element = ElementLoader.elements[(int)b];
+			Grid.Element[num] = element;
+			if (element.IsSolid)
+			{
+				Grid.BuildFlags[] array;
+				int num2;
+				(array = Grid.BuildMasks)[num2 = num] = array[num2] | (Grid.BuildFlags.Solid | Grid.BuildFlags.PreviousSolid);
+			}
+			else
+			{
+				Grid.BuildFlags[] array;
+				int num3;
+				(array = Grid.BuildMasks)[num3 = num] = array[num3] & ~(Grid.BuildFlags.Solid | Grid.BuildFlags.PreviousSolid);
+			}
+			Grid.RenderedByWorld[num] = element.substance != null && element.substance.renderedByWorld && Grid.Objects[num, 9] == null;
+		}
+	}
+
 	public static bool IsInitialized()
 	{
 		return Grid.mass != null;
@@ -381,13 +706,6 @@ public class Grid
 		return Grid.CellToPos(cell, Grid.HalfCellSizeInMeters, Grid.CellSizeInMeters - 0.01f, Grid.GetLayerZ(layer));
 	}
 
-	public static void SetSolid(int cell, bool solid, CellSolidEvent ev)
-	{
-		Grid.BitFields[cell] = Grid.BitFields[cell] & 65503;
-		ushort[] bitFields = Grid.BitFields;
-		bitFields[cell] |= ((!solid) ? 0 : 32);
-	}
-
 	public static bool IsSolidCell(int cell)
 	{
 		return Grid.IsValidCell(cell) && Grid.Solid[cell];
@@ -455,28 +773,6 @@ public class Grid
 	public static void GetVisibleExtents(out Vector2I min, out Vector2I max)
 	{
 		Grid.GetVisibleExtents(out min.x, out min.y, out max.x, out max.y);
-	}
-
-	public unsafe static void InitializeCells()
-	{
-		int widthInCells = Grid.WidthInCells;
-		int heightInCells = Grid.HeightInCells;
-		List<Element> elements = ElementLoader.elements;
-		for (int i = 0; i < heightInCells; i++)
-		{
-			for (int j = 0; j < widthInCells; j++)
-			{
-				int num = i * widthInCells + j;
-				byte b = Grid.elementIdx[num];
-				Element element = elements[(int)b];
-				Grid.Element[num] = element;
-				int num2 = (int)Grid.BitFields[num];
-				num2 &= 65303;
-				num2 |= ((!element.IsSolid) ? 0 : 96);
-				num2 |= ((element.substance == null || !element.substance.renderedByWorld || !(Grid.Objects[num, 9] == null)) ? 0 : 128);
-				Grid.BitFields[num] = (ushort)num2;
-			}
-		}
 	}
 
 	public static bool IsVisible(int cell)
@@ -623,6 +919,66 @@ public class Grid
 
 	public static int TopBorderHeight = 2;
 
+	public static Dictionary<int, GameObject>[] ObjectLayers;
+
+	public static Action<int> OnReveal;
+
+	public static Grid.BuildFlags[] BuildMasks;
+
+	public static Grid.BuildFlagsFoundationIndexer Foundation;
+
+	public static Grid.BuildFlagsSolidIndexer Solid;
+
+	public static Grid.BuildFlagsPreviousSolidIndexer PreviousSolid;
+
+	public static Grid.BuildFlagsFakeFloorIndexer FakeFloor;
+
+	public static Grid.BuildFlagsLiquidPumpFloorIndexer LiquidPumpFloor;
+
+	public static Grid.BuildFlagsForceFieldIndexer ForceField;
+
+	public static Grid.BuildFlagsImpassableIndexer Impassable;
+
+	public static Grid.BuildFlagsDoorIndexer HasDoor;
+
+	public static Grid.VisFlags[] VisMasks;
+
+	public static Grid.VisFlagsRevealedIndexer Revealed;
+
+	public static Grid.VisFlagsPreventFogOfWarRevealIndexer PreventFogOfWarReveal;
+
+	public static Grid.VisFlagsRenderedByWorldIndexer RenderedByWorld;
+
+	public static Grid.VisFlagsAllowPathfindingIndexer AllowPathfinding;
+
+	public static Grid.NavValidatorFlags[] NavValidatorMasks;
+
+	public static Grid.NavValidatorFlagsLadderIndexer HasLadder;
+
+	public static Grid.NavValidatorFlagsPoleIndexer HasPole;
+
+	public static Grid.NavValidatorFlagsTubeIndexer HasTube;
+
+	public static Grid.NavValidatorFlagsUnderConstructionIndexer IsTileUnderConstruction;
+
+	public static Grid.NavFlags[] NavMasks;
+
+	public static Grid.NavFlagsAccessDoorIndexer HasAccessDoor;
+
+	public static Grid.NavFlagsTubeEntranceIndexer HasTubeEntrance;
+
+	public static Grid.NavFlagsPreventIdleTraversalIndexer PreventIdleTraversal;
+
+	public static Grid.NavFlagsReservedIndexer Reserved;
+
+	public static Grid.NavFlagsSuitMarkerIndexer HasSuitMarker;
+
+	private static Dictionary<int, Grid.Restriction> restrictions = new Dictionary<int, Grid.Restriction>();
+
+	private static Dictionary<int, Grid.TubeEntrance> tubeEntrances = new Dictionary<int, Grid.TubeEntrance>();
+
+	private static Dictionary<int, Grid.SuitMarker> suitMarkers = new Dictionary<int, Grid.SuitMarker>();
+
 	public unsafe static byte* elementIdx;
 
 	public unsafe static float* temperature;
@@ -643,41 +999,21 @@ public class Grid
 
 	public unsafe static float* AccumulatedFlowValues = null;
 
-	public static bool[] Revealed;
-
-	public static bool[] Reserved;
-
 	public static byte[] Visible;
 
 	public static byte[] Spawnable;
 
 	public static float[] Damage;
 
-	public static bool[] HasDoor;
-
-	public static bool[] HasAccessDoor;
-
-	public static bool[] HasLadder;
-
-	public static bool[] HasPole;
-
-	public static bool[] HasTube;
-
-	public static bool[] AllowPathfinding;
-
-	public static bool[] HasTubeEntrance;
-
-	public static bool[] IsTileUnderConstruction;
-
-	public static bool[] PreventFogOfWarReveal;
-
-	public static bool[] PreventIdleTraversal;
-
 	public static float[] Decor;
 
 	public static bool[] GravitasFacility;
 
 	public static float[] Loudness;
+
+	public static Element[] Element;
+
+	public static int[] LightCount;
 
 	public static Grid.PressureIndexer Pressure;
 
@@ -705,86 +1041,420 @@ public class Grid
 
 	public static Grid.AccumulatedFlowIndexer AccumulatedFlow;
 
-	public static Grid.FoundationIndexer Foundation;
-
-	public static Grid.SolidIndexer Solid;
-
-	public static Grid.PreviousSolidIndexer PreviousSolid;
-
-	public static Grid.RenderedByWorldIndexer RenderedByWorld;
-
-	public static Grid.FakeFloorIndexer FakeFloor;
-
-	public static Grid.LiquidPumpFloorIndexer LiquidPumpFloor;
-
-	public static Grid.ForceFieldIndexer ForceField;
-
-	public static Grid.ImpassableIndexer Impassable;
-
-	public static ushort[] BitFields;
-
-	public static Element[] Element;
-
-	public static int[] LightCount;
-
 	public static Grid.ObjectLayerIndexer Objects;
-
-	public static Dictionary<int, GameObject>[] ObjectLayers;
-
-	public static Action<int> OnReveal;
 
 	public static float LayerMultiplier = 1f;
 
 	[Flags]
-	public enum BitField : ushort
+	public enum BuildFlags : byte
 	{
-		Unused = 1,
-		FakeFloor = 2,
-		ForceField = 4,
-		SuitRequired = 8,
-		Foundation = 16,
-		Solid = 32,
-		PreviousSolid = 64,
-		RenderedByWorld = 128,
-		Impassable = 256,
-		LiquidPumpFloor = 512
+		FakeFloor = 1,
+		ForceField = 2,
+		Foundation = 4,
+		Solid = 8,
+		PreviousSolid = 16,
+		Impassable = 32,
+		LiquidPumpFloor = 64,
+		Door = 128
 	}
 
-	public enum SceneLayer
+	public struct BuildFlagsFoundationIndexer
 	{
-		NoLayer = -2,
-		Background,
-		TempShiftPlate = 1,
-		GasConduits,
-		GasConduitBridges,
-		LiquidConduits,
-		LiquidConduitBridges,
-		SolidConduits,
-		SolidConduitContents,
-		SolidConduitBridges,
-		Wires,
-		WireBridges,
-		WireBridgesFront,
-		LogicWires,
-		LogicWireBridges,
-		LogicWireBridgesFront,
-		Paintings,
-		BuildingBack,
-		Building,
-		BuildingUse,
-		BuildingFront,
-		TransferArm,
-		Ore,
-		Creatures,
-		Move,
-		Front,
-		Liquid,
-		Ground,
-		TileMain,
-		TileFront,
-		FXFront,
-		FXFront2,
-		SceneMAX
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.Foundation) != 0;
+			}
+			set
+			{
+				Grid.UpdateBuildMask(i, Grid.BuildFlags.Foundation, value);
+			}
+		}
+	}
+
+	public struct BuildFlagsSolidIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.Solid) != 0;
+			}
+		}
+	}
+
+	public struct BuildFlagsPreviousSolidIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.PreviousSolid) != 0;
+			}
+			set
+			{
+				Grid.UpdateBuildMask(i, Grid.BuildFlags.PreviousSolid, value);
+			}
+		}
+	}
+
+	public struct BuildFlagsFakeFloorIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.FakeFloor) != 0;
+			}
+			set
+			{
+				Grid.UpdateBuildMask(i, Grid.BuildFlags.FakeFloor, value);
+			}
+		}
+	}
+
+	public struct BuildFlagsLiquidPumpFloorIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.LiquidPumpFloor) != 0;
+			}
+			set
+			{
+				Grid.UpdateBuildMask(i, Grid.BuildFlags.LiquidPumpFloor, value);
+			}
+		}
+	}
+
+	public struct BuildFlagsForceFieldIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.ForceField) != 0;
+			}
+			set
+			{
+				Grid.UpdateBuildMask(i, Grid.BuildFlags.ForceField, value);
+			}
+		}
+	}
+
+	public struct BuildFlagsImpassableIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.Impassable) != 0;
+			}
+			set
+			{
+				Grid.UpdateBuildMask(i, Grid.BuildFlags.Impassable, value);
+			}
+		}
+	}
+
+	public struct BuildFlagsDoorIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.BuildMasks[i] & Grid.BuildFlags.Door) != 0;
+			}
+			set
+			{
+				Grid.UpdateBuildMask(i, Grid.BuildFlags.Door, value);
+			}
+		}
+	}
+
+	[Flags]
+	public enum VisFlags : byte
+	{
+		Revealed = 1,
+		PreventFogOfWarReveal = 2,
+		RenderedByWorld = 4,
+		AllowPathfinding = 8
+	}
+
+	public struct VisFlagsRevealedIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.Revealed) != 0;
+			}
+			set
+			{
+				Grid.UpdateVisMask(i, Grid.VisFlags.Revealed, value);
+			}
+		}
+	}
+
+	public struct VisFlagsPreventFogOfWarRevealIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.PreventFogOfWarReveal) != 0;
+			}
+			set
+			{
+				Grid.UpdateVisMask(i, Grid.VisFlags.PreventFogOfWarReveal, value);
+			}
+		}
+	}
+
+	public struct VisFlagsRenderedByWorldIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.RenderedByWorld) != 0;
+			}
+			set
+			{
+				Grid.UpdateVisMask(i, Grid.VisFlags.RenderedByWorld, value);
+			}
+		}
+	}
+
+	public struct VisFlagsAllowPathfindingIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.VisMasks[i] & Grid.VisFlags.AllowPathfinding) != 0;
+			}
+			set
+			{
+				Grid.UpdateVisMask(i, Grid.VisFlags.AllowPathfinding, value);
+			}
+		}
+	}
+
+	[Flags]
+	public enum NavValidatorFlags : byte
+	{
+		Ladder = 1,
+		Pole = 2,
+		Tube = 4,
+		UnderConstruction = 8
+	}
+
+	public struct NavValidatorFlagsLadderIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Ladder) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavValidatorMask(i, Grid.NavValidatorFlags.Ladder, value);
+			}
+		}
+	}
+
+	public struct NavValidatorFlagsPoleIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Pole) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavValidatorMask(i, Grid.NavValidatorFlags.Pole, value);
+			}
+		}
+	}
+
+	public struct NavValidatorFlagsTubeIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.Tube) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavValidatorMask(i, Grid.NavValidatorFlags.Tube, value);
+			}
+		}
+	}
+
+	public struct NavValidatorFlagsUnderConstructionIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavValidatorMasks[i] & Grid.NavValidatorFlags.UnderConstruction) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavValidatorMask(i, Grid.NavValidatorFlags.UnderConstruction, value);
+			}
+		}
+	}
+
+	[Flags]
+	public enum NavFlags : byte
+	{
+		AccessDoor = 1,
+		TubeEntrance = 2,
+		PreventIdleTraversal = 4,
+		Reserved = 8,
+		SuitMarker = 16
+	}
+
+	public struct NavFlagsAccessDoorIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.AccessDoor) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavMask(i, Grid.NavFlags.AccessDoor, value);
+			}
+		}
+	}
+
+	public struct NavFlagsTubeEntranceIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.TubeEntrance) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavMask(i, Grid.NavFlags.TubeEntrance, value);
+			}
+		}
+	}
+
+	public struct NavFlagsPreventIdleTraversalIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.PreventIdleTraversal) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavMask(i, Grid.NavFlags.PreventIdleTraversal, value);
+			}
+		}
+	}
+
+	public struct NavFlagsReservedIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.Reserved) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavMask(i, Grid.NavFlags.Reserved, value);
+			}
+		}
+	}
+
+	public struct NavFlagsSuitMarkerIndexer
+	{
+		public bool this[int i]
+		{
+			get
+			{
+				return (byte)(Grid.NavMasks[i] & Grid.NavFlags.SuitMarker) != 0;
+			}
+			set
+			{
+				Grid.UpdateNavMask(i, Grid.NavFlags.SuitMarker, value);
+			}
+		}
+	}
+
+	public struct Restriction
+	{
+		public const int DefaultID = -1;
+
+		public Dictionary<int, Grid.Restriction.Directions> directionMasks;
+
+		public Grid.Restriction.Orientation orientation;
+
+		[Flags]
+		public enum Directions : byte
+		{
+			Left = 1,
+			Right = 2
+		}
+
+		public enum Orientation : byte
+		{
+			Vertical,
+			Horizontal
+		}
+	}
+
+	private struct TubeEntrance
+	{
+		public int reservationCapacity;
+
+		public HashSet<int> reservations;
+	}
+
+	public struct SuitMarker
+	{
+		public int emptyLockerCount
+		{
+			get
+			{
+				return this.lockerCount - this.suitCount;
+			}
+		}
+
+		public int suitCount;
+
+		public int lockerCount;
+
+		public Grid.SuitMarker.Flags flags;
+
+		public PathFinder.PotentialPath.Flags pathFlags;
+
+		public HashSet<int> suitReservations;
+
+		public HashSet<int> emptyLockerReservations;
+
+		[Flags]
+		public enum Flags : byte
+		{
+			OnlyTraverseIfUnequipAvailable = 1,
+			Operational = 2,
+			Rotated = 4
+		}
 	}
 
 	public struct ObjectLayerIndexer
@@ -957,133 +1627,43 @@ public class Grid
 		}
 	}
 
-	public struct FoundationIndexer
+	public enum SceneLayer
 	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 16) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = Grid.BitFields[i] & 65519;
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 16);
-			}
-		}
-	}
-
-	public struct SolidIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 32) != 0;
-			}
-		}
-	}
-
-	public struct PreviousSolidIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 64) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = Grid.BitFields[i] & 65471;
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 64);
-			}
-		}
-	}
-
-	public struct RenderedByWorldIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 128) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = Grid.BitFields[i] & 65407;
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 128);
-			}
-		}
-	}
-
-	public struct FakeFloorIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 2) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = Grid.BitFields[i] & 65533;
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 2);
-			}
-		}
-	}
-
-	public struct LiquidPumpFloorIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 512) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = Grid.BitFields[i] & 65023;
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 512);
-			}
-		}
-	}
-
-	public struct ForceFieldIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 4) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = Grid.BitFields[i] & 65531;
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 4);
-			}
-		}
-	}
-
-	public struct ImpassableIndexer
-	{
-		public bool this[int i]
-		{
-			get
-			{
-				return (Grid.BitFields[i] & 256) != 0;
-			}
-			set
-			{
-				Grid.BitFields[i] = Grid.BitFields[i] & 65279;
-				ushort[] bitFields = Grid.BitFields;
-				bitFields[i] |= ((!value) ? 0 : 256);
-			}
-		}
+		NoLayer = -2,
+		Background,
+		Backwall = 1,
+		Gas,
+		GasConduits,
+		GasConduitBridges,
+		LiquidConduits,
+		LiquidConduitBridges,
+		SolidConduits,
+		SolidConduitContents,
+		SolidConduitBridges,
+		Wires,
+		WireBridges,
+		WireBridgesFront,
+		LogicWires,
+		LogicWireBridges,
+		LogicWireBridgesFront,
+		InteriorWall,
+		GasFront,
+		BuildingBack,
+		Building,
+		BuildingUse,
+		BuildingFront,
+		TransferArm,
+		Ore,
+		Creatures,
+		Move,
+		Front,
+		GlassTile,
+		Liquid,
+		Ground,
+		TileMain,
+		TileFront,
+		FXFront,
+		FXFront2,
+		SceneMAX
 	}
 }

@@ -9,10 +9,10 @@ namespace UnityEngine
 	///   <para>Used to communicate between scripting and the controller. Some parameters can be set in scripting and used by the controller, while other parameters are based on Custom Curves in Animation Clips and can be sampled using the scripting API.</para>
 	/// </summary>
 	[NativeHeader("Runtime/Animation/ScriptBindings/AnimatorControllerParameter.bindings.h")]
-	[NativeHeader("Runtime/Animation/AnimatorControllerParameter.h")]
 	[NativeAsStruct]
 	[UsedByNativeCode]
 	[NativeType(CodegenOptions.Custom, "MonoAnimatorControllerParameter")]
+	[NativeHeader("Runtime/Animation/AnimatorControllerParameter.h")]
 	[StructLayout(LayoutKind.Sequential)]
 	public class AnimatorControllerParameter
 	{

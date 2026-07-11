@@ -9,9 +9,9 @@ namespace UnityEngine
 	///   <para>A standard 4x4 transformation matrix.</para>
 	/// </summary>
 	[NativeType(Header = "Runtime/Math/Matrix4x4.h")]
-	[NativeHeader("Runtime/Math/MathScripting.h")]
-	[ThreadAndSerializationSafe]
 	[UsedByNativeCode]
+	[ThreadAndSerializationSafe]
+	[NativeHeader("Runtime/Math/MathScripting.h")]
 	public struct Matrix4x4 : IEquatable<Matrix4x4>
 	{
 		public Matrix4x4(Vector4 column0, Vector4 column1, Vector4 column2, Vector4 column3)

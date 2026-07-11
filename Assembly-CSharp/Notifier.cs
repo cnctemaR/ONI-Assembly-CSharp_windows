@@ -12,6 +12,7 @@ public class Notifier : KMonoBehaviour
 
 	protected override void OnCleanUp()
 	{
+		this.ClearNotifications();
 		Components.Notifiers.Remove(this);
 	}
 
@@ -36,7 +37,10 @@ public class Notifier : KMonoBehaviour
 				notification.NotifierName = "• " + base.name + suffix;
 			}
 			notification.Notifier = this;
-			notification.Position = base.transform.GetPosition();
+			if (this.AutoClickFocus && notification.clickFocus == null)
+			{
+				notification.clickFocus = base.transform;
+			}
 			if (notification.Group.IsValid && notification.Group != string.Empty)
 			{
 				if (this.NotificationGroups == null)
@@ -82,9 +86,13 @@ public class Notifier : KMonoBehaviour
 
 	public void ClearNotifications()
 	{
-		foreach (KeyValuePair<HashedString, Notification> keyValuePair in this.NotificationGroups)
+		if (this.NotificationGroups != null)
 		{
-			this.Remove(keyValuePair.Value);
+			List<HashedString> list = new List<HashedString>(this.NotificationGroups.Keys);
+			foreach (HashedString hashedString in list)
+			{
+				this.Remove(this.NotificationGroups[hashedString]);
+			}
 		}
 	}
 
@@ -96,6 +104,8 @@ public class Notifier : KMonoBehaviour
 	public Action<Notification> OnRemove;
 
 	public bool DisableNotifications;
+
+	public bool AutoClickFocus = true;
 
 	private Dictionary<HashedString, Notification> NotificationGroups;
 }

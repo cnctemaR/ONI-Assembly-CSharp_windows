@@ -1,0 +1,151 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19281}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TMPro</RootNamespace>
+    <AssemblyName>Unity.TextMeshPro</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <FileAlignment>512</FileAlignment>
+    <TargetFramework>net35</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableDefaultItems>False</EnableDefaultItems>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Include="CaretInfo.cs" />
+    <Compile Include="CaretPosition.cs" />
+    <Compile Include="ColorTween.cs" />
+    <Compile Include="Compute_DistanceTransform_EventTypes.cs" />
+    <Compile Include="Compute_DT_EventArgs.cs" />
+    <Compile Include="Extents.cs" />
+    <Compile Include="FaceInfo.cs" />
+    <Compile Include="FastAction.2.cs" />
+    <Compile Include="FastAction.3.cs" />
+    <Compile Include="FastAction.4.cs" />
+    <Compile Include="FastAction.cs" />
+    <Compile Include="FloatTween.cs" />
+    <Compile Include="FontAssetCreationSettings.cs" />
+    <Compile Include="FontStyles.cs" />
+    <Compile Include="FontWeights.cs" />
+    <Compile Include="GlyphValueRecord.cs" />
+    <Compile Include="ITextElement.cs" />
+    <Compile Include="ITweenValue.cs" />
+    <Compile Include="KerningPair.cs" />
+    <Compile Include="KerningPairKey.cs" />
+    <Compile Include="KerningTable.cs" />
+    <Compile Include="MaskingOffsetMode.cs" />
+    <Compile Include="MaskingTypes.cs" />
+    <Compile Include="MaterialReference.cs" />
+    <Compile Include="MaterialReferenceManager.cs" />
+    <Compile Include="Mesh_Extents.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SetPropertyUtility.cs" />
+    <Compile Include="ShaderUtilities.cs" />
+    <Compile Include="SpriteAssetUtilities\SpriteAssetImportFormats.cs" />
+    <Compile Include="SpriteAssetUtilities\TexturePacker.cs" />
+    <Compile Include="TagAttribute.cs" />
+    <Compile Include="TagType.cs" />
+    <Compile Include="TagUnits.cs" />
+    <Compile Include="TextAlignmentOptions.cs" />
+    <Compile Include="TextContainer.cs" />
+    <Compile Include="TextContainerAnchors.cs" />
+    <Compile Include="TextMeshPro.cs" />
+    <Compile Include="TextMeshProUGUI.cs" />
+    <Compile Include="TextOverflowModes.cs" />
+    <Compile Include="TextRenderFlags.cs" />
+    <Compile Include="TextureMappingOptions.cs" />
+    <Compile Include="TMPro_EventManager.cs" />
+    <Compile Include="TMPro_ExtensionMethods.cs" />
+    <Compile Include="TMP_Asset.cs" />
+    <Compile Include="TMP_BasicXmlTagStack.cs" />
+    <Compile Include="TMP_CharacterInfo.cs" />
+    <Compile Include="TMP_ColorGradient.cs" />
+    <Compile Include="TMP_Compatibility.cs" />
+    <Compile Include="TMP_DefaultControls.cs" />
+    <Compile Include="TMP_Dropdown.cs" />
+    <Compile Include="TMP_FontAsset.cs" />
+    <Compile Include="TMP_FontUtilities.cs" />
+    <Compile Include="TMP_FontWeights.cs" />
+    <Compile Include="TMP_Glyph.cs" />
+    <Compile Include="TMP_InputField.cs" />
+    <Compile Include="TMP_InputValidator.cs" />
+    <Compile Include="TMP_LineInfo.cs" />
+    <Compile Include="TMP_LinkInfo.cs" />
+    <Compile Include="TMP_ListPool.cs" />
+    <Compile Include="TMP_MaterialManager.cs" />
+    <Compile Include="TMP_Math.cs" />
+    <Compile Include="TMP_MeshInfo.cs" />
+    <Compile Include="TMP_ObjectPool.cs" />
+    <Compile Include="TMP_PageInfo.cs" />
+    <Compile Include="TMP_ScrollbarEventHandler.cs" />
+    <Compile Include="TMP_SelectionCaret.cs" />
+    <Compile Include="TMP_Settings.cs" />
+    <Compile Include="TMP_Sprite.cs" />
+    <Compile Include="TMP_SpriteAnimator.cs" />
+    <Compile Include="TMP_SpriteAsset.cs" />
+    <Compile Include="TMP_SpriteInfo.cs" />
+    <Compile Include="TMP_Style.cs" />
+    <Compile Include="TMP_StyleSheet.cs" />
+    <Compile Include="TMP_SubMesh.cs" />
+    <Compile Include="TMP_SubMeshUI.cs" />
+    <Compile Include="TMP_Text.cs" />
+    <Compile Include="TMP_TextElement.cs" />
+    <Compile Include="TMP_TextElementType.cs" />
+    <Compile Include="TMP_TextInfo.cs" />
+    <Compile Include="TMP_TextUtilities.cs" />
+    <Compile Include="TMP_UpdateManager.cs" />
+    <Compile Include="TMP_UpdateRegistry.cs" />
+    <Compile Include="TMP_Vertex.cs" />
+    <Compile Include="TMP_VertexDataUpdateFlags.cs" />
+    <Compile Include="TMP_WordInfo.cs" />
+    <Compile Include="TMP_XmlTagStack.cs" />
+    <Compile Include="TweenRunner.cs" />
+    <Compile Include="VertexGradient.cs" />
+    <Compile Include="VertexSortingOrder.cs" />
+    <Compile Include="WordWrapState.cs" />
+    <Compile Include="XML_TagAttribute.cs" />
+    <Compile Include="_HorizontalAlignmentOptions.cs" />
+    <Compile Include="_VerticalAlignmentOptions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mscorlib\mscorlib.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19275}</Project>
+      <Name>mscorlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Core\System.Core.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19278}</Project>
+      <Name>System.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System\System.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD1927A}</Project>
+      <Name>System</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.CoreModule\UnityEngine.CoreModule.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD1928D}</Project>
+      <Name>UnityEngine.CoreModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.IMGUIModule\UnityEngine.IMGUIModule.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD19297}</Project>
+      <Name>UnityEngine.IMGUIModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.PhysicsModule\UnityEngine.PhysicsModule.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192A0}</Project>
+      <Name>UnityEngine.PhysicsModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.TextRenderingModule\UnityEngine.TextRenderingModule.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192AC}</Project>
+      <Name>UnityEngine.TextRenderingModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.UIModule\UnityEngine.UIModule.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192B3}</Project>
+      <Name>UnityEngine.UIModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UnityEngine.UI\UnityEngine.UI.csproj">
+      <Project>{505B7BE8-91D0-4DB8-89B0-CEAD8FD192B1}</Project>
+      <Name>UnityEngine.UI</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+</Project>

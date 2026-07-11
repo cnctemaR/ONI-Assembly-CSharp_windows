@@ -34,9 +34,9 @@ public class WaterCoolerConfig : IBuildingConfig
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = GameTags.Water;
 		manualDeliveryKG.capacity = 10f;
-		manualDeliveryKG.refillMass = 10f;
+		manualDeliveryKG.refillMass = 9f;
 		manualDeliveryKG.minimumMass = 1f;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.Fetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		go.AddOrGet<WaterCooler>();
 		RoomTracker roomTracker = go.AddOrGet<RoomTracker>();
 		roomTracker.requiredRoomType = Db.Get().RoomTypes.RecRoom.Id;

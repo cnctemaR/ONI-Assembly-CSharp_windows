@@ -27,7 +27,7 @@ public class IronCometConfig : IEntityConfig
 		kbatchedAnimController.isMovable = true;
 		kbatchedAnimController.initialAnim = "fall_loop";
 		kbatchedAnimController.initialMode = KAnim.PlayMode.Loop;
-		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.Always;
+		kbatchedAnimController.visibilityType = KAnimControllerBase.VisibilityType.OffscreenUpdate;
 		KCircleCollider2D kcircleCollider2D = gameObject.AddOrGet<KCircleCollider2D>();
 		kcircleCollider2D.radius = 0.5f;
 		gameObject.transform.localScale = new Vector3(0.6f, 0.6f, 1f);

@@ -12,12 +12,12 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>A Camera is a device through which the player views the world.</para>
 	/// </summary>
-	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
-	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
 	[NativeHeader("Runtime/Camera/Camera.h")]
 	[NativeHeader("Runtime/Camera/RenderManager.h")]
 	[NativeHeader("Runtime/GfxDevice/GfxDeviceTypes.h")]
 	[NativeHeader("Runtime/Graphics/RenderTexture.h")]
+	[NativeHeader("Runtime/Graphics/CommandBuffer/RenderingCommandBuffer.h")]
+	[NativeHeader("Runtime/Misc/GameObjectUtility.h")]
 	[NativeHeader("Runtime/Shaders/Shader.h")]
 	[UsedByNativeCode]
 	[RequireComponent(typeof(Transform))]
@@ -259,7 +259,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>This is used to render parts of the scene selectively.</para>
+		///   <para>This is used to render parts of the Scene selectively.</para>
 		/// </summary>
 		public extern int cullingMask
 		{
@@ -736,7 +736,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Make the rendering position reflect the camera's position in the scene.</para>
+		///   <para>Make the rendering position reflect the camera's position in the Scene.</para>
 		/// </summary>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void ResetWorldToCameraMatrix();
@@ -939,17 +939,17 @@ namespace UnityEngine
 		///   <para>Converts focal length to field of view.</para>
 		/// </summary>
 		/// <param name="focalLength">Focal length in millimeters.</param>
-		/// <param name="sensorSize">Sensor size in millimeters. Use sensor height to get vertical field of view. Use sensor width to get horizontal field of view.</param>
+		/// <param name="sensorSize">Sensor size in millimeters. Use the sensor height to get the vertical field of view. Use the sensor width to get the horizontal field of view.</param>
 		/// <returns>
-		///   <para>Field of view in degrees.</para>
+		///   <para>field of view in degrees.</para>
 		/// </returns>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern float FocalLengthToFOV(float focalLength, float sensorSize);
 
 		/// <summary>
-		///   <para>Converts field of view to focal length. Use either sensor height and vertical field of view, or sensor width and horizontal field of view.</para>
+		///   <para>Converts field of view to focal length. Use either sensor height and vertical field of view or sensor width and horizontal field of view.</para>
 		/// </summary>
-		/// <param name="fov">Field of view in degrees.</param>
+		/// <param name="fov">field of view in degrees.</param>
 		/// <param name="sensorSize">Sensor size in millimeters.</param>
 		/// <returns>
 		///   <para>Focal length in millimeters.</para>
@@ -978,7 +978,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>If not null, the camera will only render the contents of the specified scene.</para>
+		///   <para>If not null, the camera will only render the contents of the specified Scene.</para>
 		/// </summary>
 		public Scene scene
 		{
@@ -1118,7 +1118,7 @@ namespace UnityEngine
 		private static extern int GetAllCamerasImpl([NotNull] [Out] Camera[] cam);
 
 		/// <summary>
-		///   <para>The number of cameras in the current scene.</para>
+		///   <para>The number of cameras in the current Scene.</para>
 		/// </summary>
 		public static int allCamerasCount
 		{
@@ -1129,7 +1129,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Returns all enabled cameras in the scene.</para>
+		///   <para>Returns all enabled cameras in the Scene.</para>
 		/// </summary>
 		public static Camera[] allCameras
 		{
@@ -1142,9 +1142,9 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Fills an array of Camera with the current cameras in the scene, without allocating a new array.</para>
+		///   <para>Fills an array of Camera with the current cameras in the Scene, without allocating a new array.</para>
 		/// </summary>
-		/// <param name="cameras">An array to be filled up with cameras currently in the scene.</param>
+		/// <param name="cameras">An array to be filled up with cameras currently in the Scene.</param>
 		public static int GetAllCameras(Camera[] cameras)
 		{
 			if (cameras.Length < Camera.allCamerasCount)

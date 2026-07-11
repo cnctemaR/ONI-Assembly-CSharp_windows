@@ -26,7 +26,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		}
 		foreach (Tuple<string, string, string> tuple in this.DEBUG_ModuleDestructions)
 		{
-			Output.Log(new object[] { "\n\nBEGIN MODULE DUMP\n", tuple.first, ">", tuple.second, "\n", tuple.third, "\nEND MODULE DUMP\n\n" });
+			Output.Log(new object[] { tuple.first, ">", tuple.second, "\n", tuple.third, "\nEND MODULE DUMP\n\n" });
 		}
 	}
 
@@ -132,7 +132,7 @@ public class LaunchConditionManager : KMonoBehaviour, ISim4000ms, ISim1000ms
 		{
 			return;
 		}
-		if (this.CheckReadyToLaunch() && this.CheckAbleToFly())
+		if (DebugHandler.InstantBuildMode || (this.CheckReadyToLaunch() && this.CheckAbleToFly()))
 		{
 			this.launchable.Trigger(-1056989049, null);
 			SpacecraftManager.instance.SetSpacecraftDestination(this, destination);

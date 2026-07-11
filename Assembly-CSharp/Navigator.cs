@@ -45,12 +45,13 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.simRenderLoadBalance = true;
 		this.autoRegisterSimRender = false;
 		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
+		PathProber component = base.GetComponent<PathProber>();
+		component.SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.GetComponent<PathProber>().SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
 		base.Subscribe<Navigator>(1623392196, Navigator.OnDefeatedDelegate);
 		base.Subscribe<Navigator>(-1506500077, Navigator.OnDefeatedDelegate);
 		base.Subscribe<Navigator>(493375141, Navigator.OnRefreshUserMenuDelegate);
@@ -60,6 +61,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		{
 			SimAndRenderScheduler.instance.Add(this, false);
 		}
+		this.pathProbeTask = new Navigator.PathProbeTask(this);
 		this.SetCurrentNavType(this.CurrentNavType);
 	}
 
@@ -241,17 +243,16 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	public void Sim4000ms(float dt)
 	{
-		this.UpdateProbe();
+		this.UpdateProbe(true);
 	}
 
-	public void UpdateProbe()
+	public void UpdateProbe(bool forceUpdate = false)
 	{
-		int num = Grid.PosToCell(this);
-		if (!Grid.IsValidCell(num))
+		if (forceUpdate || !this.executePathProbeTaskAsync)
 		{
-			return;
+			this.pathProbeTask.Update();
+			this.pathProbeTask.Run(null);
 		}
-		this.PathProber.UpdateProbe(this.NavGrid, num, this.CurrentNavType, this.GetCurrentAbilities(), this.flags, true);
 	}
 
 	public void DrawPath()
@@ -524,6 +525,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 
 	private NavTactic tactic;
 
+	public Navigator.PathProbeTask pathProbeTask;
+
 	private static readonly EventSystem.IntraObjectHandler<Navigator> OnDefeatedDelegate = new EventSystem.IntraObjectHandler<Navigator>(delegate(Navigator component, object data)
 	{
 		component.OnDefeated(data);
@@ -543,6 +546,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		component.OnStore(data);
 	});
+
+	public bool executePathProbeTaskAsync;
 
 	public class ActiveTransition
 	{
@@ -620,5 +625,29 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State failed;
 
 		public GameStateMachine<Navigator.States, Navigator.StatesInstance, Navigator, object>.State stopped;
+	}
+
+	public struct PathProbeTask : IWorkItem<object>
+	{
+		public PathProbeTask(Navigator navigator)
+		{
+			this.navigator = navigator;
+			this.cell = -1;
+		}
+
+		public void Update()
+		{
+			this.cell = Grid.PosToCell(this.navigator);
+			this.navigator.abilities.Refresh();
+		}
+
+		public void Run(object sharedData)
+		{
+			this.navigator.PathProber.UpdateProbe(this.navigator.NavGrid, this.cell, this.navigator.CurrentNavType, this.navigator.abilities, this.navigator.flags);
+		}
+
+		private int cell;
+
+		private Navigator navigator;
 	}
 }

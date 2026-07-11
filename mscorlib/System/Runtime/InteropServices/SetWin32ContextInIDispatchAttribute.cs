@@ -2,8 +2,8 @@
 
 namespace System.Runtime.InteropServices
 {
-	[Obsolete]
 	[ComVisible(true)]
+	[Obsolete]
 	[AttributeUsage(AttributeTargets.Assembly, Inherited = false)]
 	public sealed class SetWin32ContextInIDispatchAttribute : Attribute
 	{

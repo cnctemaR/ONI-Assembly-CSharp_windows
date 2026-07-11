@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 {
+	private SocialGatheringPointWorkable()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();

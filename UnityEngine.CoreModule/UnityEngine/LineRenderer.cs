@@ -174,7 +174,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Set the number of line segments.</para>
+		///   <para>Set/get the number of vertices.</para>
 		/// </summary>
 		[NativeProperty("PositionsCount")]
 		public extern int positionCount
@@ -253,7 +253,7 @@ namespace UnityEngine
 		///   <para>Creates a snapshot of LineRenderer and stores it in mesh.</para>
 		/// </summary>
 		/// <param name="mesh">A static mesh that will receive the snapshot of the line.</param>
-		/// <param name="camera">The camera used for determining which way view space lines will face.</param>
+		/// <param name="camera">The camera used for determining which way camera-space lines will face.</param>
 		/// <param name="useTransform">Include the rotation and scale of the Transform in the baked mesh.</param>
 		public void BakeMesh(Mesh mesh, bool useTransform = false)
 		{
@@ -264,7 +264,7 @@ namespace UnityEngine
 		///   <para>Creates a snapshot of LineRenderer and stores it in mesh.</para>
 		/// </summary>
 		/// <param name="mesh">A static mesh that will receive the snapshot of the line.</param>
-		/// <param name="camera">The camera used for determining which way view space lines will face.</param>
+		/// <param name="camera">The camera used for determining which way camera-space lines will face.</param>
 		/// <param name="useTransform">Include the rotation and scale of the Transform in the baked mesh.</param>
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void BakeMesh([NotNull] Mesh mesh, [NotNull] Camera camera, bool useTransform = false);
@@ -314,7 +314,7 @@ namespace UnityEngine
 		/// <summary>
 		///   <para>Get the positions of all vertices in the line.</para>
 		/// </summary>
-		/// <param name="positions">The array of positions to retrieve. The array passed should be of at least numPositions in size.</param>
+		/// <param name="positions">The array of positions to retrieve. The array passed should be of at least positionCount in size.</param>
 		/// <returns>
 		///   <para>How many positions were actually stored in the output array.</para>
 		/// </returns>

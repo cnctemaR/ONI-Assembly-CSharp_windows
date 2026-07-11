@@ -61,9 +61,9 @@ namespace UnityEngine.Profiling
 		/// <summary>
 		///   <para>End profiling a piece of code with a custom label.</para>
 		/// </summary>
-		[GeneratedByOldBindingsGenerator]
 		[Conditional("ENABLE_PROFILER")]
 		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public extern void End();
 

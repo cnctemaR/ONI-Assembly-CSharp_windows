@@ -7,8 +7,8 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Information about the current or next state.</para>
 	/// </summary>
-	[RequiredByNativeCode]
 	[NativeHeader("Runtime/Animation/AnimatorInfo.h")]
+	[RequiredByNativeCode]
 	public struct AnimatorStateInfo
 	{
 		/// <summary>

@@ -122,10 +122,10 @@ namespace System.Diagnostics
 			}
 		}
 
-		[global::System.SRDescription("The name of this performance counter.")]
+		[global::System.ComponentModel.ReadOnly(true)]
 		[global::System.ComponentModel.RecommendedAsConfigurable(true)]
 		[global::System.ComponentModel.TypeConverter("System.Diagnostics.Design.CounterNameConverter, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-		[global::System.ComponentModel.ReadOnly(true)]
+		[global::System.SRDescription("The name of this performance counter.")]
 		[global::System.ComponentModel.DefaultValue("")]
 		public string CounterName
 		{
@@ -144,8 +144,8 @@ namespace System.Diagnostics
 			}
 		}
 
-		[MonitoringDescription("The type of the counter.")]
 		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+		[MonitoringDescription("The type of the counter.")]
 		public PerformanceCounterType CounterType
 		{
 			get

@@ -28,7 +28,7 @@ namespace UnityEngine
 		/// </summary>
 		Plane,
 		/// <summary>
-		///   <para>A Quad primitive.</para>
+		///   <para>A quad primitive.</para>
 		/// </summary>
 		Quad
 	}

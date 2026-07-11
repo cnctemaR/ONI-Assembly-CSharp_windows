@@ -75,22 +75,9 @@ public static class TemplateCache
 		List<TemplateContainer> list = new List<TemplateContainer>();
 		string text = Path.Combine(TemplateCache.baseTemplatePath, folder);
 		string[] files = Directory.GetFiles(text, "*.yaml");
-		WorkItemCollection<TemplateCache.ParseTemplateWorkItem, object> workItemCollection = new WorkItemCollection<TemplateCache.ParseTemplateWorkItem, object>();
-		workItemCollection.Reset(null);
 		foreach (string text2 in files)
 		{
-			workItemCollection.Add(new TemplateCache.ParseTemplateWorkItem
-			{
-				path = text2
-			});
-		}
-		GlobalJobManager.Run(workItemCollection);
-		for (int j = 0; j < workItemCollection.Count; j++)
-		{
-			if (workItemCollection.GetWorkItem(j).template != null)
-			{
-				list.Add(workItemCollection.GetWorkItem(j).template);
-			}
+			list.Add(YamlIO<TemplateContainer>.LoadFile(text2, null));
 		}
 		list.Sort(delegate(TemplateContainer x, TemplateContainer y)
 		{
@@ -107,15 +94,5 @@ public static class TemplateCache
 
 	private static Dictionary<string, TemplateContainer> templates;
 
-	private struct ParseTemplateWorkItem : IWorkItem<object>
-	{
-		public void Run(object shared_data)
-		{
-			this.template = YamlIO<TemplateContainer>.LoadFile(this.path, null);
-		}
-
-		public string path;
-
-		public TemplateContainer template;
-	}
+	private const string defaultAssetFolder = "bases/";
 }

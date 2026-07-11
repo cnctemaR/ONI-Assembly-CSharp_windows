@@ -7,9 +7,9 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Representation of RGBA colors.</para>
 	/// </summary>
+	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	[NativeHeader("Runtime/Math/Color.h")]
 	[NativeClass("ColorRGBAf")]
-	[RequiredByNativeCode(Optional = true, GenerateProxy = true)]
 	public struct Color : IEquatable<Color>
 	{
 		/// <summary>
@@ -123,9 +123,9 @@ namespace UnityEngine
 		/// <summary>
 		///   <para>Linearly interpolates between colors a and b by t.</para>
 		/// </summary>
-		/// <param name="a">Color a</param>
-		/// <param name="b">Color b</param>
-		/// <param name="t">Float for combining a and b</param>
+		/// <param name="a">Color a.</param>
+		/// <param name="b">Color b.</param>
+		/// <param name="t">Float for combining a and b.</param>
 		public static Color Lerp(Color a, Color b, float t)
 		{
 			t = Mathf.Clamp01(t);

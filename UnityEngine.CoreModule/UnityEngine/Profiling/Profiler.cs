@@ -108,9 +108,9 @@ namespace UnityEngine.Profiling
 		/// </summary>
 		/// <param name="name">A string to identify the sample in the Profiler window.</param>
 		/// <param name="targetObject">An object that provides context to the sample,.</param>
-		[Conditional("ENABLE_PROFILER")]
 		[ThreadAndSerializationSafe]
 		[GeneratedByOldBindingsGenerator]
+		[Conditional("ENABLE_PROFILER")]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void BeginSample(string name, Object targetObject);
 
@@ -122,9 +122,9 @@ namespace UnityEngine.Profiling
 		/// <summary>
 		///   <para>Ends the current profiling sample.</para>
 		/// </summary>
-		[GeneratedByOldBindingsGenerator]
 		[Conditional("ENABLE_PROFILER")]
 		[ThreadAndSerializationSafe]
+		[GeneratedByOldBindingsGenerator]
 		[MethodImpl(MethodImplOptions.InternalCall)]
 		public static extern void EndSample();
 

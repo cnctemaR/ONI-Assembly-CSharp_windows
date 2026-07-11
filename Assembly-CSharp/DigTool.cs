@@ -57,7 +57,7 @@ public class DigTool : DragTool
 	{
 		if (Grid.Solid[cell] && !Grid.Foundation[cell] && Grid.Objects[cell, 7] == null)
 		{
-			for (int i = 0; i < 37; i++)
+			for (int i = 0; i < 39; i++)
 			{
 				if (Grid.Objects[cell, i] != null && Grid.Objects[cell, i].GetComponent<Constructable>() != null)
 				{

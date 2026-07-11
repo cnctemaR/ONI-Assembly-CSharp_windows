@@ -1,7 +1,6 @@
 ﻿using System;
 using FMODUnity;
 using Klei.AI;
-using ProcGenGame;
 using UnityEngine;
 
 public class NewBaseScreen : KScreen
@@ -51,7 +50,7 @@ public class NewBaseScreen : KScreen
 		this.Final();
 	}
 
-	public void SetStartingMinionStats(MinionStartingStats[] stats)
+	public void SetStartingMinionStats(ITelepadDeliverable[] stats)
 	{
 		this.minionStartingStats = stats;
 	}
@@ -119,8 +118,8 @@ public class NewBaseScreen : KScreen
 		{
 			return;
 		}
-		int baseLeft = WorldGen.BaseLeft;
-		int baseRight = WorldGen.BaseRight;
+		int baseLeft = SaveGame.Instance.worldGen.BaseLeft;
+		int baseRight = SaveGame.Instance.worldGen.BaseRight;
 		Effect a_new_hope = Db.Get().effects.Get("AnewHope");
 		for (int i = 0; i < this.minionStartingStats.Length; i++)
 		{
@@ -131,7 +130,7 @@ public class NewBaseScreen : KScreen
 			Immigration.Instance.ApplyDefaultPersonalPriorities(gameObject);
 			gameObject.transform.SetLocalPosition(Grid.CellToPosCBC(num5, Grid.SceneLayer.Move));
 			gameObject.SetActive(true);
-			this.minionStartingStats[i].Apply(gameObject);
+			((MinionStartingStats)this.minionStartingStats[i]).Apply(gameObject);
 			GameScheduler.Instance.Schedule("ANewHope", 3f + 0.5f * (float)i, delegate(object m)
 			{
 				GameObject gameObject2 = m as GameObject;
@@ -155,5 +154,5 @@ public class NewBaseScreen : KScreen
 	[EventRef]
 	public string BuildBaseSoundMigrated;
 
-	private MinionStartingStats[] minionStartingStats;
+	private ITelepadDeliverable[] minionStartingStats;
 }

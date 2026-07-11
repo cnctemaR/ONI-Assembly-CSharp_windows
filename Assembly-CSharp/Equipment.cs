@@ -68,11 +68,20 @@ public class Equipment : Assignables
 		{
 			component2.GetComponent<SymbolOverrideController>().AddBuildOverride(equippable.def.BuildOverride.GetData(), equippable.def.BuildOverridePriority);
 		}
-		equippable.GetComponent<KBatchedAnimController>().enabled = false;
+		if (equippable.transform.parent)
+		{
+			Storage component3 = equippable.transform.parent.GetComponent<Storage>();
+			if (component3)
+			{
+				component3.Drop(equippable.gameObject);
+			}
+		}
+		equippable.transform.parent = slot.gameObject.transform;
+		equippable.transform.SetLocalPosition(Vector3.zero);
 		equippable.OnEquip(slot);
 		if (this.refreshHandle.TimeRemaining > 0f)
 		{
-			global::Debug.LogWarning(targetGameObject.GetProperName() + " is already in the process of changing equipment", null);
+			global::Debug.LogWarning(targetGameObject.GetProperName() + " is already in the process of changing equipment (equip)", null);
 			this.refreshHandle.ClearScheduler();
 		}
 		CreatureSimTemperatureTransfer transferer = targetGameObject.GetComponent<CreatureSimTemperatureTransfer>();
@@ -91,14 +100,12 @@ public class Equipment : Assignables
 
 	public void Unequip(Equippable equippable)
 	{
-		equippable.GetComponent<KBatchedAnimController>().enabled = true;
 		AssignableSlotInstance slot = base.GetSlot(equippable.slot);
 		slot.Unassign(true);
 		equippable.Trigger(-170173755, this);
 		GameObject targetGameObject = this.GetTargetGameObject();
 		if (!targetGameObject)
 		{
-			DebugUtil.DevAssert(false, new object[] { "GetTargetGameObject returned null in Unequip" });
 			return;
 		}
 		targetGameObject.Trigger(-1285462312, equippable.GetComponent<KPrefabID>());
@@ -126,17 +133,37 @@ public class Equipment : Assignables
 					component2.DetachSnapOnByName(equippable.def.SnapOn1);
 				}
 			}
+			if (equippable.transform.parent)
+			{
+				Storage component3 = equippable.transform.parent.GetComponent<Storage>();
+				if (component3)
+				{
+					component3.Drop(equippable.gameObject);
+				}
+			}
+			equippable.transform.parent = null;
+			equippable.transform.SetPosition(targetGameObject.transform.GetPosition() + Vector3.up / 2f);
+			KBatchedAnimController component4 = equippable.GetComponent<KBatchedAnimController>();
+			if (component4)
+			{
+				component4.SetSceneLayer(Grid.SceneLayer.Ore);
+			}
 			if (!(component == null))
 			{
+				if (this.refreshHandle.TimeRemaining > 0f)
+				{
+					this.refreshHandle.ClearScheduler();
+				}
+				Equipment instance = this;
 				this.refreshHandle = GameScheduler.Instance.Schedule("ChangeEquipment", 1f, delegate(object obj)
 				{
-					GameObject gameObject = ((!(this != null)) ? null : this.GetTargetGameObject());
+					GameObject gameObject = ((!(instance != null)) ? null : instance.GetTargetGameObject());
 					if (gameObject)
 					{
-						CreatureSimTemperatureTransfer component3 = gameObject.GetComponent<CreatureSimTemperatureTransfer>();
-						if (component3 != null)
+						CreatureSimTemperatureTransfer component5 = gameObject.GetComponent<CreatureSimTemperatureTransfer>();
+						if (component5 != null)
 						{
-							component3.RefreshRegistration();
+							component5.RefreshRegistration();
 						}
 					}
 				}, null, null);

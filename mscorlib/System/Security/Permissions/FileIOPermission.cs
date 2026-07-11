@@ -370,15 +370,15 @@ namespace System.Security.Permissions
 			return fileIOPermission2;
 		}
 
-		[MonoTODO("(2.0)")]
 		[ComVisible(false)]
+		[MonoTODO("(2.0)")]
 		public override bool Equals(object obj)
 		{
 			return false;
 		}
 
-		[MonoTODO("(2.0)")]
 		[ComVisible(false)]
+		[MonoTODO("(2.0)")]
 		public override int GetHashCode()
 		{
 			return base.GetHashCode();

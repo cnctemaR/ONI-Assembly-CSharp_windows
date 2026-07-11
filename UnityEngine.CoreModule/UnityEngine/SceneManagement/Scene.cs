@@ -81,11 +81,11 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>Whether this is a valid scene.
-		/// A scene may be invalid if, for example, you tried to open a scene that does not exist. In this case, the scene returned from EditorSceneManager.OpenScene would return False for IsValid.</para>
+		///   <para>Whether this is a valid Scene.
+		/// A Scene may be invalid if, for example, you tried to open a Scene that does not exist. In this case, the Scene returned from EditorSceneManager.OpenScene would return False for IsValid.</para>
 		/// </summary>
 		/// <returns>
-		///   <para>Whether this is a valid scene.</para>
+		///   <para>Whether this is a valid Scene.</para>
 		/// </returns>
 		public bool IsValid()
 		{
@@ -93,7 +93,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>Returns the relative path of the scene. Like: "AssetsMyScenesMyScene.unity".</para>
+		///   <para>Returns the relative path of the Scene. Like: "AssetsMyScenesMyScene.unity".</para>
 		/// </summary>
 		public string path
 		{
@@ -104,7 +104,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>Returns the name of the scene.</para>
+		///   <para>Returns the name of the Scene.</para>
 		/// </summary>
 		public string name
 		{
@@ -119,7 +119,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>Returns true if the scene is loaded.</para>
+		///   <para>Returns true if the Scene is loaded.</para>
 		/// </summary>
 		public bool isLoaded
 		{
@@ -130,7 +130,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>Returns the index of the scene in the Build Settings. Always returns -1 if the scene was loaded through an AssetBundle.</para>
+		///   <para>Return the index of the Scene in the Build Settings.</para>
 		/// </summary>
 		public int buildIndex
 		{
@@ -141,7 +141,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>Returns true if the scene is modifed.</para>
+		///   <para>Returns true if the Scene is modifed.</para>
 		/// </summary>
 		public bool isDirty
 		{
@@ -152,7 +152,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>The number of root transforms of this scene.</para>
+		///   <para>The number of root transforms of this Scene.</para>
 		/// </summary>
 		public int rootCount
 		{
@@ -163,7 +163,7 @@ namespace UnityEngine.SceneManagement
 		}
 
 		/// <summary>
-		///   <para>Returns all the root game objects in the scene.</para>
+		///   <para>Returns all the root game objects in the Scene.</para>
 		/// </summary>
 		/// <returns>
 		///   <para>An array of game objects.</para>

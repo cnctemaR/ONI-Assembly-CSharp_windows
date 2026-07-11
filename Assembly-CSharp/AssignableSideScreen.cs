@@ -104,7 +104,7 @@ public class AssignableSideScreen : SideScreenContent
 	{
 		this.ClearContent();
 		this.currentOwnerText.text = string.Format(UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED, new object[0]);
-		if (this.targetAssignable != null && this.targetAssignable.GetComponent<Equippable>() == null)
+		if (this.targetAssignable != null && this.targetAssignable.GetComponent<Equippable>() == null && !this.targetAssignable.HasTag(GameTags.NotRoomAssignable))
 		{
 			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(this.targetAssignable.gameObject);
 			if (roomOfGameObject != null)

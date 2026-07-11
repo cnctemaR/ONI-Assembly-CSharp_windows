@@ -45,7 +45,7 @@ namespace UnityEngine.Jobs
 		}
 
 		/// <summary>
-		///   <para>The scale of the transform relative to the parent.</para>
+		///   <para>The position of the transform relative to the parent.</para>
 		/// </summary>
 		public Vector3 localPosition
 		{

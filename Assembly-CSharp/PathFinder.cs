@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public class PathFinder
 {
@@ -80,11 +81,11 @@ public class PathFinder
 		{
 			return;
 		}
-		PathFinder.FindPaths(nav_grid, ref abilities, potential_path, PathFinder.PathGrid, query, ref PathFinder.QueryId, PathFinder.Temp.Potentials, ref invalidCell, ref navType);
+		PathFinder.FindPaths(nav_grid, ref abilities, potential_path, query, PathFinder.Temp.Potentials, ref invalidCell, ref navType);
 		if (invalidCell != PathFinder.InvalidCell)
 		{
 			bool flag = false;
-			PathFinder.Cell cell = PathFinder.PathGrid.GetCell(invalidCell, navType, PathFinder.QueryId, out flag);
+			PathFinder.Cell cell = PathFinder.PathGrid.GetCell(invalidCell, navType, out flag);
 			query.SetResult(invalidCell, cell.cost, navType);
 		}
 	}
@@ -94,7 +95,7 @@ public class PathFinder
 		PathFinder.Run(nav_grid, abilities, potential_path, query);
 		if (query.GetResultCell() != PathFinder.InvalidCell)
 		{
-			PathFinder.BuildResultPath(query.GetResultCell(), query.GetResultNavType(), PathFinder.PathGrid, PathFinder.QueryId, ref path);
+			PathFinder.BuildResultPath(query.GetResultCell(), query.GetResultNavType(), ref path);
 		}
 		else
 		{
@@ -102,12 +103,12 @@ public class PathFinder
 		}
 	}
 
-	private static void BuildResultPath(int path_cell, NavType path_nav_type, PathGrid path_grid, int query_id, ref PathFinder.Path path)
+	private static void BuildResultPath(int path_cell, NavType path_nav_type, ref PathFinder.Path path)
 	{
 		if (path_cell != PathFinder.InvalidCell)
 		{
 			bool flag = false;
-			PathFinder.Cell cell = path_grid.GetCell(path_cell, path_nav_type, query_id, out flag);
+			PathFinder.Cell cell = PathFinder.PathGrid.GetCell(path_cell, path_nav_type, out flag);
 			path.Clear();
 			path.cost = cell.cost;
 			while (path_cell != PathFinder.InvalidCell)
@@ -121,7 +122,7 @@ public class PathFinder
 				path_cell = cell.parent;
 				if (path_cell != PathFinder.InvalidCell)
 				{
-					cell = path_grid.GetCell(path_cell, cell.parentNavType, query_id, out flag);
+					cell = PathFinder.PathGrid.GetCell(path_cell, cell.parentNavType, out flag);
 				}
 			}
 			if (path.nodes != null)
@@ -136,56 +137,37 @@ public class PathFinder
 		}
 	}
 
-	private static void FindPaths(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialPath potential_path, PathGrid path_grid, PathFinderQuery query, ref int query_id, PathFinder.PotentialList potentials, ref int result_cell, ref NavType result_nav_type)
+	private static void FindPaths(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialPath potential_path, PathFinderQuery query, PathFinder.PotentialList potentials, ref int result_cell, ref NavType result_nav_type)
 	{
 		potentials.Clear();
-		query_id++;
-		bool flag = false;
-		PathFinder.Cell cell = path_grid.GetCell(potential_path, query_id, out flag);
-		PathFinder.AddPotential(potential_path, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, potentials, query_id, path_grid, ref cell);
-		PathFinder.FindPaths(nav_grid, ref abilities, potentials, query_id, path_grid, query, ref result_cell, ref result_nav_type);
-	}
-
-	private static void FindPaths(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, PathFinderQuery query, ref int result_cell, ref NavType result_nav_type)
-	{
-		int maxValue = int.MaxValue;
+		PathFinder.PathGrid.ResetUpdate();
+		PathFinder.PathGrid.BeginUpdate(potential_path.cell, false);
+		bool flag;
+		PathFinder.Cell cell = PathFinder.PathGrid.GetCell(potential_path, out flag);
+		PathFinder.AddPotential(potential_path, Grid.InvalidCell, NavType.NumNavTypes, 0, 0, -1, potentials, PathFinder.PathGrid, ref cell);
+		int num = int.MaxValue;
 		while (potentials.Count > 0)
 		{
 			KeyValuePair<int, PathFinder.PotentialPath> keyValuePair = potentials.Next();
-			if (PathFinder.FindPaths(nav_grid, ref abilities, keyValuePair.Value, keyValuePair.Key, potentials, query_id, path_grid, query, ref result_cell, ref result_nav_type, ref maxValue))
+			cell = PathFinder.PathGrid.GetCell(keyValuePair.Value, out flag);
+			if (cell.cost == keyValuePair.Key)
 			{
-				break;
+				bool flag2 = cell.navType != NavType.Tube && query.IsMatch(keyValuePair.Value.cell, cell.parent, cell.cost) && cell.cost < num;
+				if (flag2)
+				{
+					result_cell = keyValuePair.Value.cell;
+					num = cell.cost;
+					result_nav_type = cell.navType;
+					break;
+				}
+				PathFinder.AddPotentials(nav_grid.potentialScratchPad, keyValuePair.Value, cell.cost, (int)cell.underwaterCost, ref abilities, query, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, PathFinder.PathGrid, cell.parent, cell.parentNavType);
 			}
 		}
+		PathFinder.PathGrid.EndUpdate(true);
 	}
 
-	private static bool FindPaths(NavGrid nav_grid, ref PathFinderAbilities abilities, PathFinder.PotentialPath potential, int potential_cost, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, PathFinderQuery query, ref int result_cell, ref NavType result_nav_type, ref int result_cost)
+	public static void AddPotential(PathFinder.PotentialPath potential_path, int parent_cell, NavType parent_nav_type, int cost, int underwater_cost, int transition_id, PathFinder.PotentialList potentials, PathGrid path_grid, ref PathFinder.Cell cell_data)
 	{
-		bool flag = false;
-		PathFinder.Cell cell = path_grid.GetCell(potential, query_id, out flag);
-		if (cell.cost != potential_cost)
-		{
-			return false;
-		}
-		int cost = cell.cost;
-		NavType navType = cell.navType;
-		bool flag2 = navType != NavType.Tube && query.IsMatch(potential.cell, cell.parent, cost) && cost < result_cost;
-		if (flag2)
-		{
-			result_cell = potential.cell;
-			result_cost = cost;
-			result_nav_type = navType;
-		}
-		if (!flag2)
-		{
-			PathFinder.AddPotentials(nav_grid.potentialScratchPad, potential, cell.cost, (int)cell.underwaterCost, ref abilities, query, nav_grid.maxLinksPerCell, nav_grid.Links, potentials, query_id, path_grid, cell.parent, cell.parentNavType);
-		}
-		return flag2;
-	}
-
-	public static void AddPotential(PathFinder.PotentialPath potential_path, int parent_cell, NavType parent_nav_type, int cost, int underwater_cost, int transition_id, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, ref PathFinder.Cell cell_data)
-	{
-		cell_data.queryId = query_id;
 		cell_data.cost = cost;
 		cell_data.underwaterCost = (byte)Math.Min(underwater_cost, 255);
 		cell_data.parent = parent_cell;
@@ -194,6 +176,16 @@ public class PathFinder
 		cell_data.transitionId = transition_id;
 		potentials.Add(cost, potential_path);
 		path_grid.SetCell(potential_path, ref cell_data);
+	}
+
+	[Conditional("ENABLE_PATH_DETAILS")]
+	private static void BeginDetailSample(string region_name)
+	{
+	}
+
+	[Conditional("ENABLE_PATH_DETAILS")]
+	private static void EndDetailSample()
+	{
 	}
 
 	public static bool IsSubmerged(int cell)
@@ -206,7 +198,7 @@ public class PathFinder
 		return (Grid.IsValidCell(num) && Grid.Element[num].IsLiquid) || (Grid.Element[cell].IsLiquid && Grid.IsValidCell(num) && Grid.Element[num].IsSolid);
 	}
 
-	public static void AddPotentials(PathFinder.PotentialScratchPad potential_scratch_pad, PathFinder.PotentialPath potential, int cost, int underwater_cost, ref PathFinderAbilities abilities, PathFinderQuery query, int max_links_per_cell, NavGrid.Link[] links, PathFinder.PotentialList potentials, int query_id, PathGrid path_grid, int parent_cell, NavType parent_nav_type)
+	public static void AddPotentials(PathFinder.PotentialScratchPad potential_scratch_pad, PathFinder.PotentialPath potential, int cost, int underwater_cost, ref PathFinderAbilities abilities, PathFinderQuery query, int max_links_per_cell, NavGrid.Link[] links, PathFinder.PotentialList potentials, PathGrid path_grid, int parent_cell, NavType parent_nav_type)
 	{
 		int num = 0;
 		NavGrid.Link[] linksWithCorrectNavType = potential_scratch_pad.linksWithCorrectNavType;
@@ -228,11 +220,11 @@ public class PathFinder
 			NavGrid.Link link2 = linksWithCorrectNavType[i];
 			int link3 = link2.link;
 			bool flag = false;
-			PathFinder.Cell cell = path_grid.GetCell(link3, link2.endNavType, query_id, out flag);
+			PathFinder.Cell cell = path_grid.GetCell(link3, link2.endNavType, out flag);
 			if (flag)
 			{
 				int num5 = cost + (int)link2.cost;
-				bool flag2 = query_id != cell.queryId;
+				bool flag2 = cell.cost == -1;
 				bool flag3 = num5 < cell.cost;
 				if (flag2 || flag3)
 				{
@@ -271,9 +263,15 @@ public class PathFinder
 			{
 				num7 = 0;
 			}
-			if (abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link6.transitionId, num7))
+			PathFinder.PotentialPath.Flags flags = potentialPath.flags;
+			bool flag4 = abilities.TraversePath(ref potentialPath, potential.cell, potential.navType, num6, (int)link6.transitionId, num7);
+			if (potentialPath.flags != flags)
 			{
-				PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, num7, (int)link6.transitionId, potentials, query_id, path_grid, ref pathGridCell);
+				KProfiler.AddEvent("NavChange");
+			}
+			if (flag4)
+			{
+				PathFinder.AddPotential(potentialPath, potential.cell, potential.navType, num6, num7, (int)link6.transitionId, potentials, path_grid, ref pathGridCell);
 			}
 		}
 	}
@@ -283,8 +281,6 @@ public class PathFinder
 	public static int InvalidIdx = -1;
 
 	public static int InvalidCell = -1;
-
-	public static int QueryId;
 
 	public static PathGrid PathGrid;
 
@@ -340,14 +336,19 @@ public class PathFinder
 
 		public bool HasFlag(PathFinder.PotentialPath.Flags flag)
 		{
-			return (byte)(this.flags & flag) != 0;
+			return this.HasAnyFlag(flag);
 		}
+
+		public bool HasAnyFlag(PathFinder.PotentialPath.Flags mask)
+		{
+			return (byte)(this.flags & mask) != 0;
+		}
+
+		public PathFinder.PotentialPath.Flags flags { get; private set; }
 
 		public int cell;
 
 		public NavType navType;
-
-		private PathFinder.PotentialPath.Flags flags;
 
 		[Flags]
 		public enum Flags : byte

@@ -7,6 +7,7 @@ public class ConditionHasAtmoSuit : RocketLaunchCondition
 	{
 		this.module = module;
 		ManualDeliveryKG manualDeliveryKG = this.module.FindOrAdd<ManualDeliveryKG>();
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
 		manualDeliveryKG.SetStorage(module.storage);
 		manualDeliveryKG.requestedItemTag = GameTags.AtmoSuit;
 		manualDeliveryKG.minimumMass = 1f;

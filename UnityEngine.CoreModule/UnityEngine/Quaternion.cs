@@ -9,10 +9,10 @@ namespace UnityEngine
 	/// <summary>
 	///   <para>Quaternions are used to represent rotations.</para>
 	/// </summary>
-	[ThreadAndSerializationSafe]
-	[UsedByNativeCode]
 	[NativeType(Header = "Runtime/Math/Quaternion.h")]
 	[NativeHeader("Runtime/Math/MathScripting.h")]
+	[ThreadAndSerializationSafe]
+	[UsedByNativeCode]
 	public struct Quaternion : IEquatable<Quaternion>
 	{
 		/// <summary>
@@ -358,7 +358,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>Returns the euler angle representation of the rotation.</para>
+		///   <para>Returns or sets the euler angle representation of the rotation.</para>
 		/// </summary>
 		public Vector3 eulerAngles
 		{
@@ -636,7 +636,7 @@ namespace UnityEngine
 		public float z;
 
 		/// <summary>
-		///   <para>W component of the Quaternion. Don't modify this directly unless you know quaternions inside out.</para>
+		///   <para>W component of the Quaternion. Do not directly modify quaternions.</para>
 		/// </summary>
 		public float w;
 

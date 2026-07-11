@@ -14,6 +14,7 @@ namespace Klei
 			this.sleepWhenOutOfFocus = true;
 			this.debugEnable = false;
 			this.developerDebugEnable = false;
+			this.performanceCapture = new GenericGameSettings.PerformanceCapture();
 			GenericGameSettings._instance = this;
 		}
 
@@ -48,8 +49,6 @@ namespace Klei
 
 		public bool developerDebugEnable { get; private set; }
 
-		public float developerCaptureGCStatsTime { get; set; }
-
 		public bool disableGameOver { get; private set; }
 
 		public bool disablePopFx { get; private set; }
@@ -69,6 +68,8 @@ namespace Klei
 		public bool takeSaveScreenshots { get; private set; }
 
 		public bool disableAutosave { get; private set; }
+
+		public GenericGameSettings.PerformanceCapture performanceCapture { get; set; }
 
 		private static string Path
 		{
@@ -91,5 +92,14 @@ namespace Klei
 		}
 
 		private static GenericGameSettings _instance;
+
+		public class PerformanceCapture : YamlIO<GenericGameSettings.PerformanceCapture>
+		{
+			public string saveGame { get; set; }
+
+			public float waitTime { get; set; }
+
+			public bool gcStats { get; set; }
+		}
 	}
 }

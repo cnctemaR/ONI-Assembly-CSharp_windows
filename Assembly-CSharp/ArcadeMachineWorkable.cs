@@ -4,6 +4,11 @@ using TUNING;
 
 public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 {
+	private ArcadeMachineWorkable()
+	{
+		base.SetReportType(ReportManager.ReportType.PersonalTime);
+	}
+
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
@@ -41,6 +46,8 @@ public class ArcadeMachineWorkable : Workable, IWorkerPrioritizable
 		}
 		return true;
 	}
+
+	public ArcadeMachine owner;
 
 	public int basePriority = RELAXATION.PRIORITY.TIER4;
 

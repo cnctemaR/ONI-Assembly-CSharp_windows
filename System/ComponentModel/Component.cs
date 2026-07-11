@@ -3,9 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace System.ComponentModel
 {
-	[DesignerCategory("Component")]
-	[ComVisible(true)]
 	[ClassInterface(ClassInterfaceType.AutoDispatch)]
+	[ComVisible(true)]
+	[DesignerCategory("Component")]
 	public class Component : MarshalByRefObject, IDisposable, IComponent
 	{
 		public Component()

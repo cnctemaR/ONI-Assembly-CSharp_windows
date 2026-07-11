@@ -224,9 +224,9 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.Browsable(true)]
 		[global::System.MonoTODO("Not implemented")]
+		[global::System.ComponentModel.Browsable(true)]
+		[global::System.Diagnostics.MonitoringDescription("")]
 		[global::System.ComponentModel.DefaultValue(false)]
 		public bool DiscardNull
 		{
@@ -242,8 +242,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		[global::System.ComponentModel.Browsable(false)]
+		[global::System.ComponentModel.DesignerSerializationVisibility(global::System.ComponentModel.DesignerSerializationVisibility.Hidden)]
 		public bool DsrHolding
 		{
 			get
@@ -466,10 +466,10 @@ namespace System.IO.Ports
 			}
 		}
 
+		[global::System.ComponentModel.Browsable(true)]
+		[global::System.ComponentModel.DefaultValue(1)]
 		[global::System.MonoTODO("Not implemented")]
 		[global::System.Diagnostics.MonitoringDescription("")]
-		[global::System.ComponentModel.DefaultValue(1)]
-		[global::System.ComponentModel.Browsable(true)]
 		public int ReceivedBytesThreshold
 		{
 			get
@@ -486,8 +486,8 @@ namespace System.IO.Ports
 			}
 		}
 
-		[global::System.ComponentModel.Browsable(true)]
 		[global::System.ComponentModel.DefaultValue(false)]
+		[global::System.ComponentModel.Browsable(true)]
 		[global::System.Diagnostics.MonitoringDescription("")]
 		public bool RtsEnable
 		{

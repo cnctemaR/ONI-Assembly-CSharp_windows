@@ -9,6 +9,14 @@ using UnityStandardAssets.ImageEffects;
 
 public class CameraController : KMonoBehaviour, IInputHandler
 {
+	public string handlerName
+	{
+		get
+		{
+			return base.gameObject.name;
+		}
+	}
+
 	public KInputHandler inputHandler { get; set; }
 
 	private float zoomScaledKeyPanningSpeed
@@ -184,6 +192,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			return;
 		}
+		if (SaveGame.Instance != null && SaveGame.Instance.GetComponent<UserNavigation>().Handle(e))
+		{
+			return;
+		}
 		if (e.TryConsume(global::Action.ZoomIn))
 		{
 			float num = this.targetOrthographicSize - this.zoomFactor * this.targetOrthographicSize;
@@ -326,15 +338,15 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		return ray.origin + vector;
 	}
 
-	private void Update()
+	private void NormalCamUpdate()
 	{
-		float num = ((this.overrideZoomSpeed <= 0f) ? this.zoomSpeed : this.overrideZoomSpeed);
 		float unscaledDeltaTime = Time.unscaledDeltaTime;
 		Camera main = Camera.main;
-		Vector3 vector = ((this.overrideZoomSpeed <= 0f) ? KInputManager.GetMousePos() : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
+		float num = ((this.overrideZoomSpeed == 0f) ? this.zoomSpeed : this.overrideZoomSpeed);
+		Vector3 localPosition = base.transform.GetLocalPosition();
+		Vector3 vector = ((this.overrideZoomSpeed == 0f) ? KInputManager.GetMousePos() : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
 		Vector3 vector2 = this.PointUnderCursor(vector, main);
 		Vector3 vector3 = main.ScreenToViewportPoint(vector);
-		Vector3 localPosition = base.transform.GetLocalPosition();
 		float num2 = Mathf.Min(num * unscaledDeltaTime, 0.1f);
 		this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num2));
 		base.transform.SetLocalPosition(localPosition);
@@ -414,9 +426,15 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			base.transform.SetLocalPosition(vector7);
 		}
+	}
+
+	private void Update()
+	{
+		this.NormalCamUpdate();
 		this.ConstrainToWorld();
-		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(base.transform.GetPosition().x, base.transform.GetPosition().y, base.transform.GetPosition().z, main.orthographicSize));
-		Shader.SetGlobalVector("_WorldCursorPos", new Vector4(vector2.x, vector2.y, 0f, 0f));
+		Vector3 vector = this.PointUnderCursor(KInputManager.GetMousePos(), Camera.main);
+		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(base.transform.GetPosition().x, base.transform.GetPosition().y, base.transform.GetPosition().z, Camera.main.orthographicSize));
+		Shader.SetGlobalVector("_WorldCursorPos", new Vector4(vector.x, vector.y, 0f, 0f));
 		this.VisibleArea.Update();
 		this.soundCuller = SoundCuller.CreateCuller();
 	}

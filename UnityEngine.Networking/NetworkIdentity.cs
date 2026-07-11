@@ -668,7 +668,7 @@ namespace UnityEngine.Networking
 			}
 		}
 
-		internal void OnUpdateVars(NetworkReader reader, bool initialState)
+		internal void OnUpdateVars(NetworkReader reader, bool initialState, NetworkMessage netMsg)
 		{
 			if (initialState && this.m_NetworkBehaviours == null)
 			{
@@ -677,7 +677,10 @@ namespace UnityEngine.Networking
 			for (int i = 0; i < this.m_NetworkBehaviours.Length; i++)
 			{
 				NetworkBehaviour networkBehaviour = this.m_NetworkBehaviours[i];
-				networkBehaviour.OnDeserialize(reader, initialState);
+				if (netMsg.channelId.Equals(networkBehaviour.GetNetworkChannel()))
+				{
+					networkBehaviour.OnDeserialize(reader, initialState);
+				}
 			}
 		}
 

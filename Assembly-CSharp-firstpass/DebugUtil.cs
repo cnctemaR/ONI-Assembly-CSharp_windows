@@ -96,6 +96,18 @@ public static class DebugUtil
 		}
 	}
 
+	public static void DevLogErrorWithObj(GameObject gameObject, string msg)
+	{
+		if (global::Debug.isDebugBuild)
+		{
+			Output.LogErrorWithObj(gameObject, new object[] { msg });
+		}
+		else
+		{
+			Output.LogWarningWithObj(gameObject, new object[] { msg });
+		}
+	}
+
 	public static void SoftAssert(bool test, params object[] objs)
 	{
 		if (!test)

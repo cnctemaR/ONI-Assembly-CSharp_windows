@@ -71,7 +71,7 @@ namespace UnityEngine
 		}
 
 		/// <summary>
-		///   <para>The world space bounding volume of the collider.</para>
+		///   <para>The world space bounding volume of the collider (Read Only).</para>
 		/// </summary>
 		public Bounds bounds
 		{

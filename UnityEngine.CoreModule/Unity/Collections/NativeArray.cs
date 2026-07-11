@@ -11,11 +11,11 @@ namespace Unity.Collections
 	/// <summary>
 	///   <para>A NativeArray exposes a buffer of native memory to managed code, making it possible to share data between managed and native.</para>
 	/// </summary>
+	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
 	[NativeContainer]
 	[NativeContainerSupportsMinMaxWriteRestriction]
 	[NativeContainerSupportsDeallocateOnJobCompletion]
 	[NativeContainerSupportsDeferredConvertListToArray]
-	[DebuggerTypeProxy(typeof(NativeArrayDebugView<>))]
 	[DebuggerDisplay("Length = {Length}")]
 	public struct NativeArray<T> : IDisposable, IEnumerable<T>, IEnumerable where T : struct
 	{

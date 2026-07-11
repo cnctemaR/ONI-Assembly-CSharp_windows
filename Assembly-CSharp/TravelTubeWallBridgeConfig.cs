@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TUNING;
 using UnityEngine;
 
@@ -32,7 +33,9 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		buildingDef.UtilityOutputOffset = new CellOffset(0, 2);
 		buildingDef.IsFoundation = true;
 		buildingDef.SceneLayer = Grid.SceneLayer.BuildingFront;
-		buildingDef.ForegroundLayer = Grid.SceneLayer.TileFront;
+		buildingDef.ForegroundLayer = Grid.SceneLayer.TileMain;
+		buildingDef.ReplacementTags = new List<Tag>();
+		buildingDef.ReplacementTags.Add(GameTags.FloorTiles);
 		return buildingDef;
 	}
 
@@ -69,6 +72,7 @@ public class TravelTubeWallBridgeConfig : IBuildingConfig
 		TravelTubeUtilityNetworkLink travelTubeUtilityNetworkLink = this.AddNetworkLink(go);
 		travelTubeUtilityNetworkLink.visualizeOnly = false;
 		go.AddOrGet<BuildingCellVisualizer>();
+		go.AddOrGet<KPrefabID>().AddTag(GameTags.TravelTubeBridges);
 	}
 
 	protected virtual TravelTubeUtilityNetworkLink AddNetworkLink(GameObject go)

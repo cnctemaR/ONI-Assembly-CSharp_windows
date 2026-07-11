@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class GlobalChoreProvider : ChoreProvider
+public class GlobalChoreProvider : ChoreProvider, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -12,22 +12,31 @@ public class GlobalChoreProvider : ChoreProvider
 
 	public override Chore AddChore(Chore chore)
 	{
+		chore = base.AddChore(chore);
 		FetchChore fetchChore = chore as FetchChore;
 		if (fetchChore != null)
 		{
 			this.fetchChores.Add(fetchChore);
 		}
-		return base.AddChore(chore);
+		this.RefreshEmergencyChoreStatus();
+		return chore;
 	}
 
 	public override Chore RemoveChore(Chore chore)
 	{
+		chore = base.RemoveChore(chore);
 		FetchChore fetchChore = chore as FetchChore;
 		if (fetchChore != null)
 		{
 			this.fetchChores.Remove(fetchChore);
 		}
-		return base.RemoveChore(chore);
+		this.RefreshEmergencyChoreStatus();
+		return chore;
+	}
+
+	public void Sim200ms(float dt)
+	{
+		this.RefreshEmergencyChoreStatus();
 	}
 
 	public void UpdateFetches(PathProber path_prober)
@@ -102,6 +111,20 @@ public class GlobalChoreProvider : ChoreProvider
 	{
 		base.OnLoadLevel();
 		GlobalChoreProvider.Instance = null;
+	}
+
+	public void RefreshEmergencyChoreStatus()
+	{
+		bool flag = false;
+		foreach (Chore chore in this.chores)
+		{
+			if (chore.masterPriority.priority_class == PriorityScreen.PriorityClass.emergency)
+			{
+				flag = true;
+				break;
+			}
+		}
+		RedAlertManager.Instance.Get().HasEmergencyChore(flag);
 	}
 
 	public static GlobalChoreProvider Instance;

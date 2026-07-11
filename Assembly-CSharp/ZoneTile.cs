@@ -5,35 +5,22 @@ internal class ZoneTile : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{
-		base.OnSpawn();
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < this.width; i++)
+		foreach (int num in this.building.PlacementCells)
 		{
-			for (int j = 0; j < this.height; j++)
-			{
-				int num2 = Grid.OffsetCell(num, i, j);
-				SimMessages.ModifyCellWorldZone(num2, 0);
-			}
+			SimMessages.ModifyCellWorldZone(num, 0);
 		}
 	}
 
 	protected override void OnCleanUp()
 	{
-		base.OnCleanUp();
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < this.width; i++)
+		foreach (int num in this.building.PlacementCells)
 		{
-			for (int j = 0; j < this.height; j++)
-			{
-				int num2 = Grid.OffsetCell(num, i, j);
-				SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num2);
-				byte b = ((subWorldZoneType != SubWorld.ZoneType.Space) ? ((byte)subWorldZoneType) : byte.MaxValue);
-				SimMessages.ModifyCellWorldZone(num2, b);
-			}
+			SubWorld.ZoneType subWorldZoneType = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num);
+			byte b = ((subWorldZoneType != SubWorld.ZoneType.Space) ? ((byte)subWorldZoneType) : byte.MaxValue);
+			SimMessages.ModifyCellWorldZone(num, b);
 		}
 	}
 
-	public int width = 1;
-
-	public int height = 1;
+	[MyCmpReq]
+	public Building building;
 }

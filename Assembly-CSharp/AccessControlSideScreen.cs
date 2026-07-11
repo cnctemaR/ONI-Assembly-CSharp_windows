@@ -165,6 +165,13 @@ public class AccessControlSideScreen : SideScreenContent
 	{
 		this.target.DefaultPermission = permission;
 		this.Refresh(this.identityList, false);
+		foreach (MinionAssignablesProxy minionAssignablesProxy in this.identityList)
+		{
+			if (this.target.IsDefaultPermission(minionAssignablesProxy))
+			{
+				this.target.ClearPermission(minionAssignablesProxy);
+			}
+		}
 	}
 
 	private void OnPermissionChanged(MinionAssignablesProxy identity, AccessControl.Permission permission)

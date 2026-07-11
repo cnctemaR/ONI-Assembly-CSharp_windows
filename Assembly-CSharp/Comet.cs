@@ -129,11 +129,13 @@ public class Comet : KMonoBehaviour, ISim33ms
 			HashSetPool<int, Comet>.PooledHashSet pooledHashSet = HashSetPool<int, Comet>.Allocate();
 			HashSetPool<int, Comet>.PooledHashSet pooledHashSet2 = HashSetPool<int, Comet>.Allocate();
 			QueuePool<GameUtil.FloodFillInfo, Comet>.PooledQueue pooledQueue = QueuePool<GameUtil.FloodFillInfo, Comet>.Allocate();
-			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
+			int num9 = -1;
+			int num10 = 1;
+			if (this.velocity.x < 0f)
 			{
-				cell = cell,
-				depth = 0
-			});
+				num9 *= -1;
+				num10 *= -1;
+			}
 			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 			{
 				cell = prev_cell,
@@ -141,24 +143,24 @@ public class Comet : KMonoBehaviour, ISim33ms
 			});
 			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 			{
-				cell = Grid.OffsetCell(cell, new CellOffset(-1, 0)),
+				cell = Grid.OffsetCell(prev_cell, new CellOffset(num9, 0)),
 				depth = 0
 			});
 			pooledQueue.Enqueue(new GameUtil.FloodFillInfo
 			{
-				cell = Grid.OffsetCell(cell, new CellOffset(1, 0)),
+				cell = Grid.OffsetCell(prev_cell, new CellOffset(num10, 0)),
 				depth = 0
 			});
 			GameUtil.FloodFillConditional(pooledQueue, new Func<int, bool>(this.SpawnTilesCellTest), pooledHashSet2, pooledHashSet, 10);
-			float num9 = ((num8 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
+			float num11 = ((num8 > 0) ? (this.addTileMass / (float)this.addTiles) : 1f);
 			UnstableGroundManager component = World.Instance.GetComponent<UnstableGroundManager>();
-			foreach (int num10 in pooledHashSet)
+			foreach (int num12 in pooledHashSet)
 			{
 				if (num8 <= 0)
 				{
 					break;
 				}
-				component.Spawn(num10, element, num9, num6, byte.MaxValue, 0);
+				component.Spawn(num12, element, num11, num6, byte.MaxValue, 0);
 				num8--;
 			}
 			pooledHashSet.Recycle();
@@ -245,7 +247,7 @@ public class Comet : KMonoBehaviour, ISim33ms
 		}
 		else
 		{
-			num5 = WorldDamage.Instance.ApplyDamage(cell, num2, prev_cell, -1, BUILDINGS.DAMAGESOURCES.COMET, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.COMET);
+			num5 = WorldDamage.Instance.ApplyDamage(cell, num2, prev_cell, BUILDINGS.DAMAGESOURCES.COMET, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.COMET);
 		}
 		this.destroyedCells.Add(cell);
 		float num6 = num5 / num2;

@@ -6,12 +6,6 @@ using TUNING;
 [SkipSaveFileSerialization]
 public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.Subscribe<EarlyBird>(1623392196, EarlyBird.OnDeathDelegate);
-		base.Subscribe<EarlyBird>(-1117766961, EarlyBird.OnRevivedDelegate);
-	}
-
 	protected override void OnSpawn()
 	{
 		this.attributeModifiers = new AttributeModifier[]
@@ -51,30 +45,10 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 		}
 	}
 
-	private void OnDeath(object data)
-	{
-		base.enabled = false;
-	}
-
-	private void OnRevived(object data)
-	{
-		base.enabled = true;
-	}
-
 	[MyCmpReq]
 	private KPrefabID kPrefabID;
 
 	private AttributeModifier[] attributeModifiers;
-
-	private static readonly EventSystem.IntraObjectHandler<EarlyBird> OnDeathDelegate = new EventSystem.IntraObjectHandler<EarlyBird>(delegate(EarlyBird component, object data)
-	{
-		component.OnDeath(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<EarlyBird> OnRevivedDelegate = new EventSystem.IntraObjectHandler<EarlyBird>(delegate(EarlyBird component, object data)
-	{
-		component.OnRevived(data);
-	});
 
 	public class StatesInstance : GameStateMachine<EarlyBird.States, EarlyBird.StatesInstance, EarlyBird, object>.GameInstance
 	{
@@ -94,6 +68,7 @@ public class EarlyBird : StateMachineComponent<EarlyBird.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
+			this.root.TagTransition(GameTags.Dead, null, false);
 			this.idle.Transition(this.early, (EarlyBird.StatesInstance smi) => smi.IsMorning(), UpdateRate.SIM_200ms);
 			this.early.Enter("Morning", delegate(EarlyBird.StatesInstance smi)
 			{

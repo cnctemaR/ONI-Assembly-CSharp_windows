@@ -33,6 +33,7 @@ public class OuthouseConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Toilet, false);
 		Toilet toilet = go.AddOrGet<Toilet>();
 		toilet.maxFlushes = 15;
+		toilet.dirtUsedPerFlush = 13f;
 		toilet.solidWastePerUse = new Toilet.SpawnInfo(SimHashes.ToxicSand, 6.7f, 0f);
 		toilet.solidWasteTemperature = 310.15f;
 		toilet.gasWasteWhenFull = new Toilet.SpawnInfo(SimHashes.ContaminatedOxygen, 0.1f, 15f);
@@ -56,6 +57,7 @@ public class OuthouseConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = new Tag("Dirt");
 		manualDeliveryKG.capacity = 200f;
 		manualDeliveryKG.refillMass = 0.01f;
+		manualDeliveryKG.minimumMass = 200f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		Ownable ownable = go.AddOrGet<Ownable>();
 		ownable.slotID = Db.Get().AssignableSlots.Toilet.Id;
@@ -71,4 +73,6 @@ public class OuthouseConfig : IBuildingConfig
 	private const int USES_PER_REFILL = 15;
 
 	private const float DIRT_PER_REFILL = 200f;
+
+	private const float DIRT_PER_USE = 13f;
 }

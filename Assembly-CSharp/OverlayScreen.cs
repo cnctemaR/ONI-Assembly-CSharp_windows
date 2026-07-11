@@ -49,7 +49,7 @@ public class OverlayScreen : KMonoBehaviour
 		OverlayModes.None none = new OverlayModes.None();
 		this.RegisterMode(none);
 		this.RegisterMode(new OverlayModes.Oxygen());
-		this.RegisterMode(new OverlayModes.Power(this.powerLabelParent, this.powerLabelPrefab, this.batUIPrefab, this.powerLabelOffset, this.batteryUIOffset, this.batteryUITransformerOffset, this.batteryUISmallTransformerOffset, this.consumerColour, this.generatorColour, this.buildingDisabledColour, this.circuitUnpoweredColour, this.circuitSafeColour, this.circuitStrainingColour, this.circuitOverloadingColour));
+		this.RegisterMode(new OverlayModes.Power(this.powerLabelParent, this.powerLabelPrefab, this.batUIPrefab, this.powerLabelOffset, this.batteryUIOffset, this.batteryUITransformerOffset, this.batteryUISmallTransformerOffset));
 		this.RegisterMode(new OverlayModes.Temperature());
 		this.RegisterMode(new OverlayModes.ThermalConductivity());
 		this.RegisterMode(new OverlayModes.Light());

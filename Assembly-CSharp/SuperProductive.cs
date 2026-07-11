@@ -8,7 +8,7 @@ public class SuperProductive : GameStateMachine<SuperProductive, SuperProductive
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.neutral;
-		this.root.EventTransition(GameHashes.Died, null, null);
+		this.root.TagTransition(GameTags.Dead, null, false);
 		this.neutral.TagTransition(GameTags.Overjoyed, this.overjoyed, false);
 		this.overjoyed.TagTransition(GameTags.Overjoyed, this.neutral, true).ToggleStatusItem(Db.Get().DuplicantStatusItems.BeingProductive, null).Enter(delegate(SuperProductive.Instance smi)
 		{

@@ -835,7 +835,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 410209U;
+		uint num = 419840U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1868,11 +1868,11 @@ public class Game : KMonoBehaviour
 		public Color32 radiantTint;
 
 		[Header("Overlay")]
-		public Color32 overlayTint;
+		public string overlayTintName;
 
-		public Color32 overlayInsulatedTint;
+		public string overlayInsulatedTintName;
 
-		public Color32 overlayRadiantTint;
+		public string overlayRadiantTintName;
 
 		public Vector2 overlayMassScaleRange = new Vector2f(1f, 1000f);
 

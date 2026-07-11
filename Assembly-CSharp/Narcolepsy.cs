@@ -1,5 +1,4 @@
 ﻿using System;
-using Klei.AI;
 using STRINGS;
 using TUNING;
 using UnityEngine;
@@ -7,34 +6,14 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.Subscribe<Narcolepsy>(1623392196, Narcolepsy.OnDeathDelegate);
-		base.Subscribe<Narcolepsy>(-1117766961, Narcolepsy.OnRevivedDelegate);
-	}
-
 	protected override void OnSpawn()
 	{
 		base.smi.StartSM();
 	}
 
-	private void OnDeath(object data)
-	{
-		base.enabled = false;
-	}
-
-	private void OnRevived(object data)
-	{
-		base.enabled = true;
-	}
-
 	public bool IsNarcolepsing()
 	{
 		return base.smi.IsNarcolepsing();
-	}
-
-	public void ModifyTrait(Trait t)
-	{
 	}
 
 	public static readonly Chore.Precondition IsNarcolepsingPrecondition = new Chore.Precondition
@@ -43,20 +22,10 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 		description = DUPLICANTS.CHORES.PRECONDITIONS.IS_NARCOLEPSING,
 		fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			Narcolepsy component2 = context.consumerState.consumer.GetComponent<Narcolepsy>();
-			return component2 != null && component2.IsNarcolepsing();
+			Narcolepsy component = context.consumerState.consumer.GetComponent<Narcolepsy>();
+			return component != null && component.IsNarcolepsing();
 		}
 	};
-
-	private static readonly EventSystem.IntraObjectHandler<Narcolepsy> OnDeathDelegate = new EventSystem.IntraObjectHandler<Narcolepsy>(delegate(Narcolepsy component, object data)
-	{
-		component.OnDeath(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<Narcolepsy> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Narcolepsy>(delegate(Narcolepsy component, object data)
-	{
-		component.OnRevived(data);
-	});
 
 	public class StatesInstance : GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.GameInstance
 	{
@@ -90,7 +59,7 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.root.TagTransition(GameTags.Dead, this.dead, false);
+			this.root.TagTransition(GameTags.Dead, null, false);
 			this.idle.Enter("ScheduleNextSleep", delegate(Narcolepsy.StatesInstance smi)
 			{
 				smi.ScheduleGoTo(this.GetNewInterval(TRAITS.NARCOLEPSY_INTERVAL_MIN, TRAITS.NARCOLEPSY_INTERVAL_MAX), this.sleepy);
@@ -104,7 +73,6 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 				}
 				smi.ScheduleGoTo(this.GetNewInterval(TRAITS.NARCOLEPSY_SLEEPDURATION_MIN, TRAITS.NARCOLEPSY_SLEEPDURATION_MAX), this.idle);
 			}).ToggleUrge(Db.Get().Urges.Narcolepsy).ToggleChore(new Func<Narcolepsy.StatesInstance, Chore>(this.CreateNarcolepsyChore), this.idle);
-			this.dead.DoNothing();
 		}
 
 		private Chore CreateNarcolepsyChore(Narcolepsy.StatesInstance smi)
@@ -124,7 +92,5 @@ public class Narcolepsy : StateMachineComponent<Narcolepsy.StatesInstance>
 		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.State idle;
 
 		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.State sleepy;
-
-		public GameStateMachine<Narcolepsy.States, Narcolepsy.StatesInstance, Narcolepsy, object>.State dead;
 	}
 }

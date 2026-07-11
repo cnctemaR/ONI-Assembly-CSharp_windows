@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{46994E65-5B14-4593-820E-2BCEBDAA34EE}</ProjectGuid>
+    <ProjectGuid>{E70A1338-F4A6-444D-B2FC-247520AC9141}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.FileSystemHttpModule</RootNamespace>
     <AssemblyName>UnityEngine.FileSystemHttpModule</AssemblyName>
@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{46994E65-5B14-4593-820E-2BCEBDAA34FE}</Project>
+      <Project>{E70A1338-F4A6-444D-B2FC-247520AC9151}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

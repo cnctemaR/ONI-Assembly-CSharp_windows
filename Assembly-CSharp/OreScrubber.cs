@@ -151,6 +151,15 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 			return flag;
 		}
 
+		public Dictionary<Tag, float> GetNeededMass()
+		{
+			return new Dictionary<Tag, float> { 
+			{
+				base.master.consumedElement.CreateTag(),
+				base.master.massConsumedPerUse
+			} };
+		}
+
 		public void OnCompleteWork(Worker worker)
 		{
 		}
@@ -172,7 +181,8 @@ public class OreScrubber : StateMachineComponent<OreScrubber.SMInstance>, IGameO
 			default_state = this.notready;
 			base.serializable = true;
 			this.notoperational.PlayAnim("off").TagTransition(GameTags.Operational, this.notready, false);
-			this.notready.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.ready, (OreScrubber.SMInstance smi) => smi.HasSufficientMass()).TagTransition(GameTags.Operational, this.notoperational, true);
+			this.notready.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.ready, (OreScrubber.SMInstance smi) => smi.HasSufficientMass()).ToggleStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, (OreScrubber.SMInstance smi) => smi.GetNeededMass())
+				.TagTransition(GameTags.Operational, this.notoperational, true);
 			this.ready.DefaultState(this.ready.free).ToggleReactable((OreScrubber.SMInstance smi) => smi.master.reactable = new OreScrubber.ScrubOreReactable(smi.master.GetComponent<OreScrubber.Work>(), Db.Get().ChoreTypes.ScrubOre, smi.master.GetComponent<DirectionControl>().allowedDirection)).EventTransition(GameHashes.OnStorageChange, this.notready, (OreScrubber.SMInstance smi) => !smi.HasSufficientMass())
 				.TagTransition(GameTags.Operational, this.notoperational, true);
 			this.ready.free.PlayAnim("on").WorkableStartTransition((OreScrubber.SMInstance smi) => smi.GetComponent<OreScrubber.Work>(), this.ready.occupied);

@@ -37,7 +37,7 @@ public class CreatureFeederConfig : IBuildingConfig
 		storage.showDescriptor = true;
 		storage.allowItemRemoval = false;
 		storage.allowSettingOnlyFetchMarkedItems = false;
-		go.AddOrGet<StorageLocker>();
+		go.AddOrGet<StorageLocker>().choreTypeID = Db.Get().ChoreTypes.RanchingFetch.Id;
 		go.AddOrGet<UserNameable>();
 		go.AddOrGet<TreeFilterable>();
 		go.AddOrGet<CreatureFeeder>();

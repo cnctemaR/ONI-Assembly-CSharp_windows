@@ -39,7 +39,7 @@ public class Valve : Workable, ISaveLoadable
 		Valve component = ((GameObject)data).GetComponent<Valve>();
 		if (component != null)
 		{
-			this.desiredFlow = component.desiredFlow;
+			this.ChangeFlow(component.desiredFlow);
 		}
 	}
 

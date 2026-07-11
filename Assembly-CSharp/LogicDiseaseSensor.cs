@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -215,7 +216,8 @@ public class LogicDiseaseSensor : Switch, ISaveLoadable, IThresholdSwitch, ISim2
 				Color32 color = Color.white;
 				if (b != 255)
 				{
-					color = Db.Get().Diseases[(int)b].overlayColour;
+					Disease disease = Db.Get().Diseases[(int)b];
+					color = GlobalAssets.Instance.colorSet.GetColorByName(disease.overlayColourName);
 				}
 				this.animController.SetSymbolTint(LogicDiseaseSensor.TINT_SYMBOL, color);
 				return;

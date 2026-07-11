@@ -395,7 +395,7 @@ public class NavGrid
 
 	public struct Transition
 	{
-		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool critter = false)
+		public Transition(NavType start, NavType end, int x, int y, NavAxis start_axis, bool is_looping, bool loop_has_pre, bool is_escape, int cost, string anim, CellOffset[] void_offsets, CellOffset[] solid_offsets, NavOffset[] valid_nav_offsets, NavOffset[] invalid_nav_offsets, bool critter = false, float animSpeed = 1f)
 		{
 			DebugUtil.Assert(x <= 127 && x >= -128);
 			DebugUtil.Assert(y <= 127 && y >= -128);
@@ -441,6 +441,7 @@ public class NavGrid
 			this.validNavOffsets = valid_nav_offsets;
 			this.invalidNavOffsets = invalid_nav_offsets;
 			this.isCritter = critter;
+			this.animSpeed = animSpeed;
 		}
 
 		public int IsValid(int cell, NavTable nav_table)
@@ -656,6 +657,8 @@ public class NavGrid
 		public string preAnim;
 
 		public string anim;
+
+		public float animSpeed;
 
 		public CellOffset[] voidOffsets;
 

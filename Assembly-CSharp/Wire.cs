@@ -135,7 +135,8 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 					wattageFormatterUnit = GameUtil.WattageFormatterUnit.Kilowatts;
 				}
 				float maxWattageAsFloat = Wire.GetMaxWattageAsFloat(wire.MaxWattageRating);
-				string wireLoadColor = GameUtil.GetWireLoadColor(wattsUsedByCircuit, maxWattageAsFloat);
+				float wattsNeededWhenActive = circuitManager.GetWattsNeededWhenActive(circuitID);
+				string wireLoadColor = GameUtil.GetWireLoadColor(wattsUsedByCircuit, maxWattageAsFloat, wattsNeededWhenActive);
 				str = str.Replace("{CurrentLoadAndColor}", (wireLoadColor == Color.white.ToHexString()) ? GameUtil.GetFormattedWattage(wattsUsedByCircuit, wattageFormatterUnit, true) : string.Concat(new string[]
 				{
 					"<color=#",
@@ -162,16 +163,16 @@ public class Wire : KMonoBehaviour, IDisconnectable, IFirstFrameCallback, IWatta
 				int num2 = Grid.PosToCell(wire2.transform.GetPosition());
 				CircuitManager circuitManager2 = Game.Instance.circuitManager;
 				ushort circuitID2 = circuitManager2.GetCircuitID(num2);
-				float wattsNeededWhenActive = circuitManager2.GetWattsNeededWhenActive(circuitID2);
+				float wattsNeededWhenActive2 = circuitManager2.GetWattsNeededWhenActive(circuitID2);
 				float maxWattageAsFloat2 = Wire.GetMaxWattageAsFloat(wire2.MaxWattageRating);
-				str = str.Replace("{TotalPotentialLoadAndColor}", (wattsNeededWhenActive > maxWattageAsFloat2) ? string.Concat(new string[]
+				str = str.Replace("{TotalPotentialLoadAndColor}", (wattsNeededWhenActive2 > maxWattageAsFloat2) ? string.Concat(new string[]
 				{
 					"<color=#",
 					new Color(0.9843137f, 0.6901961f, 0.23137255f).ToHexString(),
 					">",
-					GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2, true),
+					GameUtil.GetFormattedWattage(wattsNeededWhenActive2, wattageFormatterUnit2, true),
 					"</color>"
-				}) : GameUtil.GetFormattedWattage(wattsNeededWhenActive, wattageFormatterUnit2, true));
+				}) : GameUtil.GetFormattedWattage(wattsNeededWhenActive2, wattageFormatterUnit2, true));
 				str = str.Replace("{MaxLoad}", GameUtil.GetFormattedWattage(maxWattageAsFloat2, wattageFormatterUnit2, true));
 				return str;
 			});

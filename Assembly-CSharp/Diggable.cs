@@ -249,7 +249,7 @@ public class Diggable : Workable
 	{
 		float approximateDigTime = Diggable.GetApproximateDigTime(cell);
 		float num = dt / approximateDigTime;
-		WorldDamage.Instance.ApplyDamage(cell, num, -1, -1, null, null);
+		WorldDamage.Instance.ApplyDamage(cell, num, -1, null, null);
 	}
 
 	public static float GetApproximateDigTime(int cell)

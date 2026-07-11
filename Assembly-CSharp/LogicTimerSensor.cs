@@ -18,6 +18,8 @@ public class LogicTimerSensor : Switch, ISaveLoadable, ISim33ms
 		{
 			this.onDuration = component.onDuration;
 			this.offDuration = component.offDuration;
+			this.timeElapsedInCurrentState = component.timeElapsedInCurrentState;
+			this.displayCyclesMode = component.displayCyclesMode;
 		}
 	}
 
@@ -94,12 +96,6 @@ public class LogicTimerSensor : Switch, ISaveLoadable, ISim33ms
 
 	[Serialize]
 	public float offDuration = 10f;
-
-	[Serialize]
-	public float onStartTime;
-
-	[Serialize]
-	public float offStartTime;
 
 	[Serialize]
 	public bool displayCyclesMode;

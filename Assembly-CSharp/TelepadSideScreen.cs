@@ -63,7 +63,7 @@ public class TelepadSideScreen : SideScreenContent
 			{
 				if (this.targetTelepad.GetComponent<Operational>().IsOperational)
 				{
-					this.timeLabel.text = string.Format(UI.UISIDESCREENS.TELEPADSIDESCREEN.NEXTPRODUCTION, GameUtil.GetFormattedCycles(this.targetTelepad.GetTimeRemaining(), "F1"));
+					this.timeLabel.text = string.Format(UI.UISIDESCREENS.TELEPADSIDESCREEN.NEXTPRODUCTION, GameUtil.GetFormattedCycles(this.targetTelepad.GetTimeRemaining(), "F1", false));
 				}
 				else
 				{

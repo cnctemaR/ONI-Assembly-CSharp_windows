@@ -60,6 +60,7 @@ public class SaunaConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<RequireInputs>().requireConduitHasMass = false;
 	}
 
 	public const string ID = "Sauna";

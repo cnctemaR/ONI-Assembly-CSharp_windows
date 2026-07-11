@@ -379,7 +379,7 @@ namespace STRINGS
 				{
 					public static LocString NAME = UI.FormatAsLink("Puft Prince", "PUFTALPHA");
 
-					public static LocString DESC = "The Puft Prince is a lazy critter that excretes little lumps of " + UI.FormatAsLink("Slime", "SLIMEMOLD") + " with each breath.";
+					public static LocString DESC = "The Puft Prince is a lazy critter that excretes little " + UI.FormatAsLink("Solid", "SOLID") + " lumps of whatever it has been breathing.";
 
 					public static LocString EGG_NAME = UI.FormatAsLink("Puftlet Prince Egg", "PUFTALPHA");
 

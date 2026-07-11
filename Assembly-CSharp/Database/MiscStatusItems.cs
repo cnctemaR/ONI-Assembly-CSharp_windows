@@ -136,7 +136,7 @@ namespace Database
 				Studyable component = statesInstance.GetComponent<Studyable>();
 				if (statesInstance != null && component != null && component.Studied)
 				{
-					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTOVERPRESSURE.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance.master.RemainingEruptTime(), "F1")));
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTOVERPRESSURE.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance.master.RemainingEruptTime(), "F1", false)));
 				}
 				else
 				{
@@ -151,7 +151,7 @@ namespace Database
 				Studyable component2 = statesInstance2.GetComponent<Studyable>();
 				if (statesInstance2 != null && component2 != null && component2.Studied)
 				{
-					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTEMITTING.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance2.master.RemainingEruptTime(), "F1")));
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTEMITTING.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance2.master.RemainingEruptTime(), "F1", false)));
 				}
 				else
 				{
@@ -166,7 +166,7 @@ namespace Database
 				Studyable component3 = statesInstance3.GetComponent<Studyable>();
 				if (statesInstance3 != null && component3 != null && component3.Studied)
 				{
-					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTPRESSUREBUILDING.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance3.master.RemainingNonEruptTime(), "F1")));
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTPRESSUREBUILDING.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance3.master.RemainingNonEruptTime(), "F1", false)));
 				}
 				else
 				{
@@ -181,7 +181,7 @@ namespace Database
 				Studyable component4 = statesInstance4.GetComponent<Studyable>();
 				if (statesInstance4 != null && component4 != null && component4.Studied)
 				{
-					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTIDLE.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance4.master.RemainingNonEruptTime(), "F1")));
+					str = str.Replace("{StudiedDetails}", MISC.STATUSITEMS.SPOUTIDLE.STUDIED.text.Replace("{Time}", GameUtil.GetFormattedCycles(statesInstance4.master.RemainingNonEruptTime(), "F1", false)));
 				}
 				else
 				{

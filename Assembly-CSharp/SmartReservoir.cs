@@ -34,7 +34,7 @@ public class SmartReservoir : KMonoBehaviour, IActivationRangeTarget, ISim200ms
 
 	private void UpdateLogicCircuit(object data)
 	{
-		float num = (float)Mathf.RoundToInt(this.PercentFull * 100f);
+		float num = this.PercentFull * 100f;
 		if (this.activated)
 		{
 			if (num >= (float)this.deactivateValue)

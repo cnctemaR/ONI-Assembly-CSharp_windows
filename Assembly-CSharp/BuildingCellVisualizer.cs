@@ -165,7 +165,7 @@ public class BuildingCellVisualizer : KMonoBehaviour
 		if (info.name != null)
 		{
 			this.diseaseSourceSprite = Assets.instance.DiseaseVisualization.overlaySprite;
-			this.diseaseSourceColour = info.overlayColour;
+			this.diseaseSourceColour = GlobalAssets.Instance.colorSet.GetColorByName(info.overlayColourName);
 		}
 		ISecondaryInput component = def.BuildingComplete.GetComponent<ISecondaryInput>();
 		if (component != null)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Klei;
+using Klei.AI;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
@@ -22,17 +23,17 @@ public class SimDebugView : KMonoBehaviour
 
 	protected override void OnSpawn()
 	{
-		SimDebugViewCompositor.Instance.material.SetColor("_Color0", this.temperatureThresholds[0].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color1", this.temperatureThresholds[1].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color2", this.temperatureThresholds[2].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color3", this.temperatureThresholds[3].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color4", this.temperatureThresholds[4].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color5", this.temperatureThresholds[5].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color6", this.temperatureThresholds[6].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color7", this.temperatureThresholds[7].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color0", this.heatFlowThresholds[0].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color1", this.heatFlowThresholds[1].color);
-		SimDebugViewCompositor.Instance.material.SetColor("_Color2", this.heatFlowThresholds[2].color);
+		SimDebugViewCompositor.Instance.material.SetColor("_Color0", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[0].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color1", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[1].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color2", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[2].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color3", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[3].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color4", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[4].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color5", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[5].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color6", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[6].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color7", GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[7].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color0", GlobalAssets.Instance.colorSet.GetColorByName(this.heatFlowThresholds[0].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color1", GlobalAssets.Instance.colorSet.GetColorByName(this.heatFlowThresholds[1].colorName));
+		SimDebugViewCompositor.Instance.material.SetColor("_Color2", GlobalAssets.Instance.colorSet.GetColorByName(this.heatFlowThresholds[2].colorName));
 		this.SetMode(global::OverlayModes.None.ID);
 	}
 
@@ -246,7 +247,7 @@ public class SimDebugView : KMonoBehaviour
 		}
 		num3 = Mathf.Max(num3, 0f);
 		num3 = Mathf.Min(num3, 1f);
-		return Color.Lerp(this.temperatureThresholds[num].color, this.temperatureThresholds[num2].color, num3);
+		return Color.Lerp(GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[num].colorName), GlobalAssets.Instance.colorSet.GetColorByName(this.temperatureThresholds[num2].colorName), num3);
 	}
 
 	public Color NormalizedHeatFlow(int cell)
@@ -271,7 +272,7 @@ public class SimDebugView : KMonoBehaviour
 		}
 		num3 = Mathf.Max(num3, 0f);
 		num3 = Mathf.Min(num3, 1f);
-		Color color = Color.Lerp(this.heatFlowThresholds[num].color, this.heatFlowThresholds[num2].color, num3);
+		Color color = Color.Lerp(GlobalAssets.Instance.colorSet.GetColorByName(this.heatFlowThresholds[num].colorName), GlobalAssets.Instance.colorSet.GetColorByName(this.heatFlowThresholds[num2].colorName), num3);
 		if (Grid.Solid[cell])
 		{
 			color = Color.black;
@@ -289,7 +290,8 @@ public class SimDebugView : KMonoBehaviour
 		Color color = Color.black;
 		if (Grid.DiseaseIdx[cell] != 255)
 		{
-			color = Db.Get().Diseases[(int)Grid.DiseaseIdx[cell]].overlayColour;
+			Disease disease = Db.Get().Diseases[(int)Grid.DiseaseIdx[cell]];
+			color = GlobalAssets.Instance.colorSet.GetColorByName(disease.overlayColourName);
 			color.a = SimUtil.DiseaseCountToAlpha(Grid.DiseaseCount[cell]);
 		}
 		else
@@ -311,7 +313,8 @@ public class SimDebugView : KMonoBehaviour
 
 	public static Color GetLightColour(SimDebugView instance, int cell)
 	{
-		Color color = new Color(0.8f, 0.7f, 0.3f, Mathf.Clamp(Mathf.Sqrt((float)(Grid.LightIntensity[cell] + LightGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f));
+		Color color = GlobalAssets.Instance.colorSet.lightOverlay;
+		color.a = Mathf.Clamp(Mathf.Sqrt((float)(Grid.LightIntensity[cell] + LightGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f);
 		if (Grid.LightIntensity[cell] > 72000)
 		{
 			float num = ((float)Grid.LightIntensity[cell] + (float)LightGridManager.previewLux[cell] - 72000f) / 8000f;
@@ -341,7 +344,8 @@ public class SimDebugView : KMonoBehaviour
 			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(cell);
 			if (cavityForCell != null && cavityForCell.room != null)
 			{
-				color = cavityForCell.room.roomType.category.color;
+				Room room = cavityForCell.room;
+				color = GlobalAssets.Instance.colorSet.GetColorByName(room.roomType.category.colorName);
 				color.a = 0.45f;
 				if (Game.Instance.roomProber.GetCavityForCell(instance.selectedCell) == cavityForCell)
 				{
@@ -1089,7 +1093,7 @@ public class SimDebugView : KMonoBehaviour
 	[Serializable]
 	public struct ColorThreshold
 	{
-		public Color color;
+		public string colorName;
 
 		public float value;
 	}

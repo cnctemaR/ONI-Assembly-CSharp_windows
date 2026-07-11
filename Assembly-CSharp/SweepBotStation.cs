@@ -15,7 +15,7 @@ public class SweepBotStation : KMonoBehaviour
 	protected void Initialize(bool use_logic_meter)
 	{
 		base.OnPrefabInit();
-		base.GetComponent<Operational>().SetFlag(this.hasRobot, false);
+		base.GetComponent<Operational>().SetFlag(this.dockedRobot, false);
 	}
 
 	protected override void OnSpawn()
@@ -117,16 +117,19 @@ public class SweepBotStation : KMonoBehaviour
 		NameDisplayScreen.Instance.UpdateName(base.gameObject);
 	}
 
+	public void DockRobot(bool docked)
+	{
+		base.GetComponent<Operational>().SetFlag(this.dockedRobot, docked);
+	}
+
 	public void StartCharging()
 	{
-		base.GetComponent<Operational>().SetFlag(this.hasRobot, true);
 		base.GetComponent<KBatchedAnimController>().Queue("sleep_pre", KAnim.PlayMode.Once, 1f, 0f);
 		base.GetComponent<KBatchedAnimController>().Queue("sleep_idle", KAnim.PlayMode.Loop, 1f, 0f);
 	}
 
 	public void StopCharging()
 	{
-		base.GetComponent<Operational>().SetFlag(this.hasRobot, false);
 		base.GetComponent<KBatchedAnimController>().Play("sleep_pst", KAnim.PlayMode.Once, 1f, 0f);
 		this.UpdateNameDisplay();
 	}
@@ -204,7 +207,7 @@ public class SweepBotStation : KMonoBehaviour
 	[Serialize]
 	public string storedName;
 
-	private Operational.Flag hasRobot = new Operational.Flag("hasRobot", Operational.Flag.Type.Functional);
+	private Operational.Flag dockedRobot = new Operational.Flag("dockedRobot", Operational.Flag.Type.Functional);
 
 	private MeterController meter;
 

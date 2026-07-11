@@ -1,17 +1,10 @@
 ﻿using System;
-using Klei.AI;
 using TUNING;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.Subscribe<Flatulence>(1623392196, Flatulence.OnDeathDelegate);
-		base.Subscribe<Flatulence>(-1117766961, Flatulence.OnRevivedDelegate);
-	}
-
 	protected override void OnSpawn()
 	{
 		base.smi.StartSM();
@@ -65,20 +58,6 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), vector3, num);
 	}
 
-	private void OnDeath(object data)
-	{
-		base.enabled = false;
-	}
-
-	private void OnRevived(object data)
-	{
-		base.enabled = true;
-	}
-
-	public void ModifyTrait(Trait t)
-	{
-	}
-
 	private const float EmitMass = 0.1f;
 
 	private const SimHashes EmitElement = SimHashes.Methane;
@@ -86,16 +65,6 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 	private const float EmissionRadius = 1.5f;
 
 	private const float MaxDistanceSq = 2.25f;
-
-	private static readonly EventSystem.IntraObjectHandler<Flatulence> OnDeathDelegate = new EventSystem.IntraObjectHandler<Flatulence>(delegate(Flatulence component, object data)
-	{
-		component.OnDeath(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<Flatulence> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Flatulence>(delegate(Flatulence component, object data)
-	{
-		component.OnRevived(data);
-	});
 
 	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop", "working_pst" };
 
@@ -112,6 +81,7 @@ public class Flatulence : StateMachineComponent<Flatulence.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
+			this.root.TagTransition(GameTags.Dead, null, false);
 			this.idle.Enter("ScheduleNextFart", delegate(Flatulence.StatesInstance smi)
 			{
 				smi.ScheduleGoTo(this.GetNewInterval(), this.emit);

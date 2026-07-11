@@ -527,7 +527,7 @@ public static class SimMessages
 		Sim.HandleMessage(SimMessageHashes.SimData_InitializeFromCells, buffer.Length, buffer);
 	}
 
-	public unsafe static void Dig(int gameCell, int callbackIdx = -1)
+	public unsafe static void Dig(int gameCell, int callbackIdx = -1, bool skipEvent = false)
 	{
 		if (!Grid.IsValidCell(gameCell))
 		{
@@ -538,6 +538,7 @@ public static class SimMessages
 			SimMessages.DigMessage* ptr = stackalloc SimMessages.DigMessage[unchecked((UIntPtr)1) * (UIntPtr)sizeof(SimMessages.DigMessage)];
 			ptr->cellIdx = gameCell;
 			ptr->callbackIdx = callbackIdx;
+			ptr->skipEvent = skipEvent;
 			Sim.SIM_HandleMessage(833038498, sizeof(SimMessages.DigMessage), (byte*)ptr);
 		}
 	}
@@ -1182,6 +1183,8 @@ public static class SimMessages
 		public int cellIdx;
 
 		public int callbackIdx;
+
+		public bool skipEvent;
 	}
 
 	[StructLayout(LayoutKind.Sequential, Pack = 4)]

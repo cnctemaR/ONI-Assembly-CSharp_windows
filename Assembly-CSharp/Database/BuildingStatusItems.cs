@@ -384,8 +384,7 @@ namespace Database
 						float mass = component.Mass;
 						if (mass > 0f)
 						{
-							Element element2 = ElementLoader.FindElementByHash(component.ElementID);
-							text12 = string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), element2.name, GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
+							text12 = string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS, GameUtil.GetFormattedMass(mass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), pickupable.GetProperName(), GameUtil.GetFormattedTemperature(component.Temperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false));
 							if (OverlayScreen.Instance != null && OverlayScreen.Instance.mode == OverlayModes.Disease.ID && component.DiseaseIdx != 255)
 							{
 								text12 += string.Format(BUILDING.STATUSITEMS.CONVEYOR_CONTENTS.CONTENTS_WITH_DISEASE, GameUtil.GetFormattedDisease(component.DiseaseIdx, component.DiseaseCount, true));
@@ -587,7 +586,7 @@ namespace Database
 				}
 				else if (telepad.GetComponent<Operational>().IsOperational)
 				{
-					str = str.Replace("{TimeRemaining}", GameUtil.GetFormattedCycles(telepad.GetTimeRemaining(), "F1"));
+					str = str.Replace("{TimeRemaining}", GameUtil.GetFormattedCycles(telepad.GetTimeRemaining(), "F1", false));
 				}
 				else
 				{
@@ -720,14 +719,14 @@ namespace Database
 			this.Baited = this.CreateStatusItem("Baited", "BUILDING", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, false, 129022);
 			this.Baited.resolveStringCallback = delegate(string str, object data)
 			{
-				Element element3 = ElementLoader.FindElementByName(((CreatureBait.StatesInstance)data).master.baitElement.ToString());
-				str = str.Replace("{0}", element3.name);
+				Element element2 = ElementLoader.FindElementByName(((CreatureBait.StatesInstance)data).master.baitElement.ToString());
+				str = str.Replace("{0}", element2.name);
 				return str;
 			};
 			this.Baited.resolveTooltipCallback = delegate(string str, object data)
 			{
-				Element element4 = ElementLoader.FindElementByName(((CreatureBait.StatesInstance)data).master.baitElement.ToString());
-				str = str.Replace("{0}", element4.name);
+				Element element3 = ElementLoader.FindElementByName(((CreatureBait.StatesInstance)data).master.baitElement.ToString());
+				str = str.Replace("{0}", element3.name);
 				return str;
 			};
 			this.TanningLightSufficient = this.CreateStatusItem("TanningLightSufficient", BUILDING.STATUSITEMS.TANNINGLIGHTSUFFICIENT.NAME, BUILDING.STATUSITEMS.TANNINGLIGHTSUFFICIENT.TOOLTIP, "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
@@ -753,6 +752,7 @@ namespace Database
 				str = str.Replace("{fullness}", GameUtil.GetFormattedPercent(hotTub3.PercentFull, GameUtil.TimeSlice.None));
 				return str;
 			};
+			this.WindTunnelIntake = this.CreateStatusItem("WindTunnelIntake", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 		}
 
 		private static bool ShowInUtilityOverlay(HashedString mode, object data)
@@ -1140,5 +1140,7 @@ namespace Database
 		public StatusItem HotTubTooHot;
 
 		public StatusItem HotTubFilling;
+
+		public StatusItem WindTunnelIntake;
 	}
 }

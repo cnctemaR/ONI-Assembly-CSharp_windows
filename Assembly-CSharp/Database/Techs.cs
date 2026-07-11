@@ -408,7 +408,6 @@ namespace Database
 					"FloorSwitch",
 					LogicElementSensorGasConfig.ID,
 					LogicElementSensorLiquidConfig.ID,
-					"BatterySmart",
 					"LogicGateNOT"
 				}
 			},

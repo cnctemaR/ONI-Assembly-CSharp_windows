@@ -118,7 +118,7 @@ public class Growing : StateMachineComponent<Growing.StatesInstance>, IGameObjec
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "")), Descriptor.DescriptorType.Requirement, false)
+			new Descriptor(string.Format(UI.GAMEOBJECTEFFECTS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "", false)), string.Format(UI.GAMEOBJECTEFFECTS.TOOLTIPS.GROWTHTIME_SIMPLE, GameUtil.GetFormattedCycles(this.growthTime, "", false)), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
 

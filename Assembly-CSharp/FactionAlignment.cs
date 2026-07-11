@@ -23,8 +23,12 @@ public class FactionAlignment : KMonoBehaviour
 		{
 			FactionManager.Instance.GetFaction(this.Alignment).Members.Add(this);
 		}
-		base.Subscribe<FactionAlignment>(1623392196, FactionAlignment.OnDeathDelegate);
+		GameUtil.SubscribeToTags<FactionAlignment>(this, FactionAlignment.OnDeadTagChangedDelegate);
 		this.UpdateStatusItem();
+	}
+
+	protected override void OnPrefabInit()
+	{
 	}
 
 	private void OnDeath(object data)
@@ -119,14 +123,14 @@ public class FactionAlignment : KMonoBehaviour
 	[Serialize]
 	public bool targetable = true;
 
+	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnDeadTagChangedDelegate = GameUtil.CreateHasTagHandler<FactionAlignment>(GameTags.Dead, delegate(FactionAlignment component, object data)
+	{
+		component.OnDeath(data);
+	});
+
 	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)
 	{
 		component.OnRefreshUserMenu(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> OnDeathDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)
-	{
-		component.OnDeath(data);
 	});
 
 	private static readonly EventSystem.IntraObjectHandler<FactionAlignment> SetPlayerTargetedFalseDelegate = new EventSystem.IntraObjectHandler<FactionAlignment>(delegate(FactionAlignment component, object data)

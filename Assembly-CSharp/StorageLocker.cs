@@ -14,7 +14,8 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 	{
 		base.OnPrefabInit();
 		this.log = new LoggerFS("StorageLocker", 35);
-		this.filteredStorage = new FilteredStorage(this, null, null, this, use_logic_meter, Db.Get().ChoreTypes.StorageFetch);
+		ChoreType choreType = Db.Get().ChoreTypes.Get(this.choreTypeID);
+		this.filteredStorage = new FilteredStorage(this, null, null, this, use_logic_meter, choreType);
 		base.Subscribe<StorageLocker>(-905833192, StorageLocker.OnCopySettingsDelegate);
 	}
 
@@ -112,6 +113,8 @@ public class StorageLocker : KMonoBehaviour, IUserControlledCapacity
 
 	[MyCmpGet]
 	private UserNameable nameable;
+
+	public string choreTypeID = Db.Get().ChoreTypes.StorageFetch.Id;
 
 	private static readonly EventSystem.IntraObjectHandler<StorageLocker> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<StorageLocker>(delegate(StorageLocker component, object data)
 	{

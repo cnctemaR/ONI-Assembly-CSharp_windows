@@ -108,7 +108,7 @@ public class Pickupable : Workable, IHasSortOrder
 		{
 			DebugUtil.Assert(this.primaryElement != null);
 			this.primaryElement.Units = value;
-			if (value < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT && !base.GetComponent<PrimaryElement>().KeepZeroMassObject)
+			if (value < PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT && !this.primaryElement.KeepZeroMassObject)
 			{
 				base.gameObject.DeleteObject();
 			}
@@ -494,7 +494,7 @@ public class Pickupable : Workable, IHasSortOrder
 			}
 			return this;
 		}
-		if (amount >= this.TotalAmount && this.storage != null)
+		if (amount >= this.TotalAmount && this.storage != null && !this.primaryElement.KeepZeroMassObject)
 		{
 			this.storage.Remove(base.gameObject, true);
 		}

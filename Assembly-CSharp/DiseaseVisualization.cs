@@ -26,11 +26,11 @@ public class DiseaseVisualization : ScriptableObject
 		public Info(string name)
 		{
 			this.name = name;
-			this.overlayColour = Color.red;
+			this.overlayColourName = "germFoodPoisoning";
 		}
 
 		public string name;
 
-		public Color32 overlayColour;
+		public string overlayColourName;
 	}
 }

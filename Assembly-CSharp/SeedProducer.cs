@@ -61,12 +61,12 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 		if (this.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
 		{
 			Worker completed_by = base.GetComponent<Harvestable>().completed_by;
-			float num = 10f;
+			float num = 0.1f;
 			if (completed_by != null)
 			{
-				num += completed_by.GetAttributes().Get(Db.Get().Attributes.Botanist).GetTotalValue() * Db.Get().AttributeConverters.SeedHarvestChance.multiplier;
+				num += completed_by.GetComponent<AttributeConverters>().Get(Db.Get().AttributeConverters.SeedHarvestChance).Evaluate();
 			}
-			int num2 = (((float)global::UnityEngine.Random.Range(0, 100) <= num) ? 1 : 0);
+			int num2 = ((global::UnityEngine.Random.Range(0f, 1f) <= num) ? 1 : 0);
 			this.ProduceSeed(this.seedInfo.seedId, num2);
 		}
 	}
@@ -83,6 +83,7 @@ public class SeedProducer : KMonoBehaviour, IGameObjectEffectDescriptor
 			return null;
 		case SeedProducer.ProductionType.Harvest:
 			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_HARVEST, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_HARVEST, Descriptor.DescriptorType.Lifecycle, true));
+			list.Add(new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false));
 			break;
 		case SeedProducer.ProductionType.Fruit:
 			list.Add(new Descriptor(UI.GAMEOBJECTEFFECTS.SEED_PRODUCTION_FRUIT, UI.GAMEOBJECTEFFECTS.TOOLTIPS.SEED_PRODUCTION_DIG_ONLY, Descriptor.DescriptorType.Lifecycle, true));

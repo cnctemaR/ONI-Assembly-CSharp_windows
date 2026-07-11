@@ -1,13 +1,12 @@
 ﻿using System;
-using UnityEngine;
 
 public class RoomTypeCategory : Resource
 {
-	public Color color { get; private set; }
+	public string colorName { get; private set; }
 
-	public RoomTypeCategory(string id, string name, Color color)
+	public RoomTypeCategory(string id, string name, string colorName)
 		: base(id, name)
 	{
-		this.color = color;
+		this.colorName = colorName;
 	}
 }

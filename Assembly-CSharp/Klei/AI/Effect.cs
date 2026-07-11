@@ -62,7 +62,7 @@ namespace Klei.AI
 			}
 			if (showDuration && effect.duration > 0f)
 			{
-				text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1"));
+				text = text + linePrefix + string.Format(DUPLICANTS.MODIFIERS.TIME_TOTAL, GameUtil.GetFormattedCycles(effect.duration, "F1", false));
 			}
 			return text;
 		}

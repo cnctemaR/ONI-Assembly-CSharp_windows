@@ -25,7 +25,7 @@ namespace Klei.AI
 			this.name = new StringKey("STRINGS.DUPLICANTS.DISEASES." + id.ToUpper() + ".NAME");
 			this.id = id;
 			DiseaseVisualization.Info info = Assets.instance.DiseaseVisualization.GetInfo(id);
-			this.overlayColour = info.overlayColour;
+			this.overlayColourName = info.overlayColourName;
 			this.temperatureRange = temperature_range;
 			this.temperatureHalfLives = temperature_half_lives;
 			this.pressureRange = pressure_range;
@@ -373,7 +373,7 @@ namespace Klei.AI
 				list.Add(new Descriptor(section_text, section_tooltip, Descriptor.DescriptorType.Information, false));
 				for (int i = 0; i < rules.Count; i++)
 				{
-					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.GROWTH_FORMAT, rules[i].Name()), string.Format(item_tooltip, GameUtil.GetFormattedCycles(Mathf.Abs(rules[i].populationHalfLife.Value), "F1")), Descriptor.DescriptorType.Information, false));
+					list.Add(new Descriptor(string.Format(DUPLICANTS.DISEASES.DESCRIPTORS.INFO.GROWTH_FORMAT, rules[i].Name()), string.Format(item_tooltip, GameUtil.GetFormattedCycles(Mathf.Abs(rules[i].populationHalfLife.Value), "F1", false)), Descriptor.DescriptorType.Information, false));
 				}
 			}
 			return list;
@@ -401,7 +401,7 @@ namespace Klei.AI
 
 		public ElemExposureInfo[] elemExposureInfo;
 
-		public Color32 overlayColour = new Color32(byte.MaxValue, 0, 0, byte.MaxValue);
+		public string overlayColourName;
 
 		public string overlayLegendHovertext;
 

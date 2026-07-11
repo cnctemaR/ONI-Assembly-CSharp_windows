@@ -48,7 +48,7 @@ public class DiseaseOverlayWidget : KMonoBehaviour
 					image = Util.KInstantiateUI(this.germsImage.gameObject, this.germsImage.transform.parent.gameObject, true).GetComponent<Image>();
 					this.displayedDiseases.Add(image);
 				}
-				image.color = disease.overlayColour;
+				image.color = GlobalAssets.Instance.colorSet.GetColorByName(disease.overlayColourName);
 				image.GetComponent<ToolTip>().toolTip = disease.Name + " " + GameUtil.GetFormattedDiseaseAmount((int)value);
 				num2++;
 			}

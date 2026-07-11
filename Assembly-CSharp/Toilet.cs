@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Klei;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
@@ -47,14 +48,19 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 	public void Flush(Worker worker)
 	{
-		Element element = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID);
+		this.FlushesUsed++;
+		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
+		float num = 0f;
+		Tag tag = ElementLoader.FindElementByHash(SimHashes.Dirt).tag;
+		SimUtil.DiseaseInfo diseaseInfo;
+		this.storage.ConsumeAndGetDisease(tag, base.smi.DirtUsedPerFlush(), out diseaseInfo, out num);
 		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
-		GameObject gameObject = element.substance.SpawnResource(base.transform.GetPosition(), base.smi.MassPerFlush(), this.solidWasteTemperature, index, this.diseasePerFlush, true, false, false);
+		float num2 = base.smi.MassPerFlush() + base.smi.DirtUsedPerFlush();
+		GameObject gameObject = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID).substance.SpawnResource(base.transform.GetPosition(), num2, this.solidWasteTemperature, index, this.diseasePerFlush, true, false, false);
+		gameObject.GetComponent<PrimaryElement>().AddDisease(diseaseInfo.idx, diseaseInfo.count, "Toilet.Flush");
 		this.storage.Store(gameObject, false, false, true, false);
 		worker.GetComponent<PrimaryElement>().AddDisease(index, this.diseaseOnDupePerFlush, "Toilet.Flush");
 		PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, this.diseasePerFlush + this.diseaseOnDupePerFlush), base.transform, Vector3.up, 1.5f, false, false);
-		this.FlushesUsed++;
-		this.meter.SetPositionPercent((float)this.FlushesUsed / (float)this.maxFlushes);
 		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms, true);
 	}
 
@@ -79,8 +85,9 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string text = base.GetComponent<ManualDeliveryKG>().requestedItemTag.ProperName();
+		float num = base.smi.DirtUsedPerFlush();
 		Descriptor descriptor = default(Descriptor);
-		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
+		descriptor.SetupDescriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Requirement);
 		list.Add(descriptor);
 		return list;
 	}
@@ -89,10 +96,11 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	{
 		List<Descriptor> list = new List<Descriptor>();
 		string text = ElementLoader.FindElementByHash(this.solidWastePerUse.elementID).tag.ProperName();
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(base.smi.MassPerFlush(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), Descriptor.DescriptorType.Effect, false));
+		float num = base.smi.MassPerFlush() + base.smi.DirtUsedPerFlush();
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.solidWasteTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), Descriptor.DescriptorType.Effect, false));
 		Disease disease = Db.Get().Diseases.Get(this.diseaseId);
-		int num = this.diseasePerFlush + this.diseaseOnDupePerFlush;
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), Descriptor.DescriptorType.DiseaseSource, false));
+		int num2 = this.diseasePerFlush + this.diseaseOnDupePerFlush;
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num2)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num2)), Descriptor.DescriptorType.DiseaseSource, false));
 		return list;
 	}
 
@@ -125,6 +133,9 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 	[SerializeField]
 	public int diseaseOnDupePerFlush;
 
+	[SerializeField]
+	public float dirtUsedPerFlush = 13f;
+
 	[Serialize]
 	public int _flushesUsed;
 
@@ -132,6 +143,9 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 
 	[MyCmpReq]
 	private Storage storage;
+
+	[MyCmpReq]
+	private ManualDeliveryKG manualdeliverykg;
 
 	private static readonly EventSystem.IntraObjectHandler<Toilet> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<Toilet>(delegate(Toilet component, object data)
 	{
@@ -177,14 +191,24 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			return base.master.maxFlushes - base.master.FlushesUsed;
 		}
 
-		public bool HasDirt()
+		public bool RequiresDirtDelivery()
 		{
-			return !base.master.storage.IsEmpty() && base.master.storage.Has(ElementLoader.FindElementByHash(SimHashes.Dirt).tag);
+			if (base.master.storage.IsEmpty())
+			{
+				return true;
+			}
+			Tag tag = ElementLoader.FindElementByHash(SimHashes.Dirt).tag;
+			return !base.master.storage.Has(tag) || (base.master.storage.GetAmountAvailable(tag) < base.master.manualdeliverykg.capacity && !this.IsSoiled);
 		}
 
 		public float MassPerFlush()
 		{
 			return base.master.solidWastePerUse.mass;
+		}
+
+		public float DirtUsedPerFlush()
+		{
+			return base.master.dirtUsedPerFlush;
 		}
 
 		public bool IsToxicSandRemoved()
@@ -212,10 +236,8 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			}
 		}
 
-		private void OnCleanComplete(Chore chore)
+		private void DropFromStorage(Tag tag)
 		{
-			this.cleanChore = null;
-			Tag tag = GameTagExtensions.Create(base.master.solidWastePerUse.elementID);
 			ListPool<GameObject, Toilet>.PooledList pooledList = ListPool<GameObject, Toilet>.Allocate();
 			base.master.storage.Find(tag, pooledList);
 			foreach (GameObject gameObject in pooledList)
@@ -223,6 +245,15 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 				base.master.storage.Drop(gameObject, true);
 			}
 			pooledList.Recycle();
+		}
+
+		private void OnCleanComplete(Chore chore)
+		{
+			this.cleanChore = null;
+			Tag tag = GameTagExtensions.Create(base.master.solidWastePerUse.elementID);
+			Tag tag2 = ElementLoader.FindElementByHash(SimHashes.Dirt).tag;
+			this.DropFromStorage(tag);
+			this.DropFromStorage(tag2);
 			base.master.meter.SetPositionPercent((float)base.master.FlushesUsed / (float)base.master.maxFlushes);
 		}
 
@@ -244,8 +275,14 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.needsdirt;
-			this.root.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => !smi.HasDirt()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
-			this.needsdirt.ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => smi.HasDirt());
+			this.root.PlayAnim("off").EventTransition(GameHashes.OnStorageChange, this.needsdirt, (Toilet.StatesInstance smi) => smi.RequiresDirtDelivery()).EventTransition(GameHashes.OperationalChanged, this.notoperational, (Toilet.StatesInstance smi) => !smi.Get<Operational>().IsOperational);
+			this.needsdirt.Enter(delegate(Toilet.StatesInstance smi)
+			{
+				if (smi.RequiresDirtDelivery())
+				{
+					smi.master.manualdeliverykg.RequestDelivery();
+				}
+			}).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null).EventTransition(GameHashes.OnStorageChange, this.ready, (Toilet.StatesInstance smi) => !smi.RequiresDirtDelivery());
 			this.ready.ParamTransition<int>(this.flushes, this.full, (Toilet.StatesInstance smi, int p) => smi.GetFlushesRemaining() <= 0).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Toilet, null).ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateUrgentUseChore), null)
 				.ToggleRecurringChore(new Func<Toilet.StatesInstance, Chore>(this.CreateBreakUseChore), null)
 				.ToggleTag(GameTags.Usable)
@@ -283,11 +320,7 @@ public class Toilet : StateMachineComponent<Toilet.StatesInstance>, ISaveLoadabl
 			this.empty.PlayAnim("off").Enter("ClearFlushes", delegate(Toilet.StatesInstance smi)
 			{
 				smi.master.FlushesUsed = 0;
-			}).Enter("ClearDirt", delegate(Toilet.StatesInstance smi)
-			{
-				smi.master.storage.ConsumeAllIgnoringDisease();
-			})
-				.GoTo(this.needsdirt);
+			}).GoTo(this.needsdirt);
 			this.notoperational.EventTransition(GameHashes.OperationalChanged, this.needsdirt, (Toilet.StatesInstance smi) => smi.Get<Operational>().IsOperational).ToggleMainStatusItem(Db.Get().BuildingStatusItems.Unusable, null);
 		}
 

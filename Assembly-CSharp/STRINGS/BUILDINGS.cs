@@ -458,9 +458,7 @@ namespace STRINGS
 
 				public static LocString EFFECT = string.Concat(new string[]
 				{
-					"Must be connected to ",
-					UI.FormatAsLink("Gas Pipes", "GASPIPING"),
-					" and a ",
+					"Must be placed above an open space and be connected to a ",
 					UI.FormatAsLink("Power Source", "POWER"),
 					".\n\nIncreases Duplicants ",
 					UI.FormatAsLink("Morale", "MORALE"),

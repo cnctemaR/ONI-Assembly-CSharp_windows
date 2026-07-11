@@ -31,6 +31,16 @@ public class DistributionPlatform : MonoBehaviour
 		}
 	}
 
+	public static event global::System.Action onExitRequest;
+
+	public static void RequestExit()
+	{
+		if (DistributionPlatform.onExitRequest != null)
+		{
+			DistributionPlatform.onExitRequest();
+		}
+	}
+
 	private static DistributionPlatform.Implementation Impl
 	{
 		get

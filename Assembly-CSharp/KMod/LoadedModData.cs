@@ -8,6 +8,6 @@ namespace KMod
 	{
 		public ICollection<Assembly> dlls;
 
-		public IEnumerable<MethodBase> patched_methods;
+		public ICollection<MethodBase> patched_methods;
 	}
 }

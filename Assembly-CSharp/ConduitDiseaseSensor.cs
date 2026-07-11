@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -21,7 +22,8 @@ public class ConduitDiseaseSensor : ConduitThresholdSensor, IThresholdSwitch
 				Color32 color = Color.white;
 				if (num != 255)
 				{
-					color = Db.Get().Diseases[num].overlayColour;
+					Disease disease = Db.Get().Diseases[num];
+					color = GlobalAssets.Instance.colorSet.GetColorByName(disease.overlayColourName);
 				}
 				this.animController.SetSymbolTint(ConduitDiseaseSensor.TINT_SYMBOL, color);
 				return;

@@ -10,7 +10,7 @@ public class JoyBehaviourMonitor : GameStateMachine<JoyBehaviourMonitor, JoyBeha
 	{
 		default_state = this.neutral;
 		base.serializable = true;
-		this.root.EventTransition(GameHashes.Died, null, null);
+		this.root.TagTransition(GameTags.Dead, null, false);
 		this.neutral.EventHandler(GameHashes.SleepFinished, delegate(JoyBehaviourMonitor.Instance smi)
 		{
 			if (smi.ShouldBeOverjoyed())

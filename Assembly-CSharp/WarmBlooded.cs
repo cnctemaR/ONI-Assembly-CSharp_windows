@@ -103,7 +103,7 @@ public class WarmBlooded : StateMachineComponent<WarmBlooded.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.alive.normal;
-			this.root.EventTransition(GameHashes.Died, this.dead, null).Enter(delegate(WarmBlooded.StatesInstance smi)
+			this.root.TagTransition(GameTags.Dead, this.dead, false).Enter(delegate(WarmBlooded.StatesInstance smi)
 			{
 				PrimaryElement component = smi.master.GetComponent<PrimaryElement>();
 				float num = SimUtil.EnergyFlowToTemperatureDelta(0.08368001f, component.Element.specificHeatCapacity, component.Mass);

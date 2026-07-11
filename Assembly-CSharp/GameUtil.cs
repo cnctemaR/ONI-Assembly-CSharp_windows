@@ -836,9 +836,9 @@ public static class GameUtil
 		return Util.FormatOneDecimalPlace(meters / 1000f) + " km";
 	}
 
-	public static string GetFormattedCycles(float seconds, string formatString = "F1")
+	public static string GetFormattedCycles(float seconds, string formatString = "F1", bool forceCycles = false)
 	{
-		if (Mathf.Abs(seconds) > 100f)
+		if (forceCycles || Mathf.Abs(seconds) > 100f)
 		{
 			return string.Format(UI.FORMATDAY, GameUtil.FloatToString(seconds / 600f, formatString));
 		}
@@ -1068,222 +1068,135 @@ public static class GameUtil
 		queue.Clear();
 	}
 
-	public static GameUtil.Hardness GetHardness(Element element)
-	{
-		if (!element.IsSolid)
-		{
-			return GameUtil.Hardness.NA;
-		}
-		if (element.hardness >= 255)
-		{
-			return GameUtil.Hardness.IMPENETRABLE;
-		}
-		if (element.hardness >= 150)
-		{
-			return GameUtil.Hardness.NEARLY_IMPENETRABLE;
-		}
-		if (element.hardness >= 50)
-		{
-			return GameUtil.Hardness.VERY_FIRM;
-		}
-		if (element.hardness >= 25)
-		{
-			return GameUtil.Hardness.FIRM;
-		}
-		if (element.hardness >= 10)
-		{
-			return GameUtil.Hardness.SOFT;
-		}
-		return GameUtil.Hardness.NA;
-	}
-
 	public static string GetHardnessString(Element element, bool addColor = true)
 	{
 		if (!element.IsSolid)
 		{
 			return ELEMENTS.HARDNESS.NA;
 		}
-		Color color = new Color(0.83137256f, 0.28627452f, 0.28235295f);
-		Color color2 = new Color(0.7411765f, 0.34901962f, 0.49803922f);
-		Color color3 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
-		Color color4 = new Color(0.5254902f, 0.41960785f, 0.64705884f);
-		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
-		Color color6 = new Color(0.44313726f, 0.67058825f, 0.8117647f);
-		Color color7 = color4;
-		string text = "";
-		GameUtil.Hardness hardness = GameUtil.GetHardness(element);
-		if (hardness <= GameUtil.Hardness.FIRM)
+		Color color = GameUtil.Hardness.firmColor;
+		string text;
+		if (element.hardness >= 255)
 		{
-			if (hardness != GameUtil.Hardness.NA)
-			{
-				if (hardness != GameUtil.Hardness.SOFT)
-				{
-					if (hardness == GameUtil.Hardness.FIRM)
-					{
-						color7 = color4;
-						text = string.Format(ELEMENTS.HARDNESS.FIRM, element.hardness);
-					}
-				}
-				else
-				{
-					color7 = color5;
-					text = string.Format(ELEMENTS.HARDNESS.SOFT, element.hardness);
-				}
-			}
-			else
-			{
-				color7 = color6;
-				text = string.Format(ELEMENTS.HARDNESS.VERYSOFT, element.hardness);
-			}
+			color = GameUtil.Hardness.ImpenetrableColor;
+			text = string.Format(ELEMENTS.HARDNESS.IMPENETRABLE, element.hardness);
 		}
-		else if (hardness != GameUtil.Hardness.VERY_FIRM)
+		else if (element.hardness >= 150)
 		{
-			if (hardness != GameUtil.Hardness.NEARLY_IMPENETRABLE)
-			{
-				if (hardness == GameUtil.Hardness.IMPENETRABLE)
-				{
-					color7 = color;
-					text = string.Format(ELEMENTS.HARDNESS.IMPENETRABLE, element.hardness);
-				}
-			}
-			else
-			{
-				color7 = color2;
-				text = string.Format(ELEMENTS.HARDNESS.NEARLYIMPENETRABLE, element.hardness);
-			}
+			color = GameUtil.Hardness.nearlyImpenetrableColor;
+			text = string.Format(ELEMENTS.HARDNESS.NEARLYIMPENETRABLE, element.hardness);
+		}
+		else if (element.hardness >= 50)
+		{
+			color = GameUtil.Hardness.veryFirmColor;
+			text = string.Format(ELEMENTS.HARDNESS.VERYFIRM, element.hardness);
+		}
+		else if (element.hardness >= 25)
+		{
+			color = GameUtil.Hardness.firmColor;
+			text = string.Format(ELEMENTS.HARDNESS.FIRM, element.hardness);
+		}
+		else if (element.hardness >= 10)
+		{
+			color = GameUtil.Hardness.softColor;
+			text = string.Format(ELEMENTS.HARDNESS.SOFT, element.hardness);
 		}
 		else
 		{
-			color7 = color3;
-			text = string.Format(ELEMENTS.HARDNESS.VERYFIRM, element.hardness);
+			color = GameUtil.Hardness.verySoftColor;
+			text = string.Format(ELEMENTS.HARDNESS.VERYSOFT, element.hardness);
 		}
 		if (addColor)
 		{
-			text = string.Format("<color=#{0}>{1}</color>", color7.ToHexString(), text);
+			text = string.Format("<color=#{0}>{1}</color>", color.ToHexString(), text);
 		}
 		return text;
 	}
 
-	public static GameUtil.GermResistanceModifier GetGermResistanceModifier(float modifier)
+	public static string GetGermResistanceModifierString(float modifier, bool addColor = true)
 	{
+		Color color = Color.black;
+		string text = "";
 		if (modifier > 0f)
 		{
 			if (modifier >= 5f)
 			{
-				return GameUtil.GermResistanceModifier.POSITIVE_LARGE;
+				color = GameUtil.GermResistanceValues.PositiveLargeColor;
+				text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_LARGE, modifier);
 			}
-			if (modifier >= 2f)
+			else if (modifier >= 2f)
 			{
-				return GameUtil.GermResistanceModifier.POSITIVE_MEDIUM;
+				color = GameUtil.GermResistanceValues.PositiveMediumColor;
+				text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_MEDIUM, modifier);
 			}
-			if (modifier >= 1f)
+			else if (modifier > 0f)
 			{
-				return GameUtil.GermResistanceModifier.POSITIVE_SMALL;
+				color = GameUtil.GermResistanceValues.PositiveSmallColor;
+				text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_SMALL, modifier);
 			}
 		}
 		else if (modifier < 0f)
 		{
 			if (modifier <= -5f)
 			{
-				return GameUtil.GermResistanceModifier.NEGATIVE_LARGE;
+				color = GameUtil.GermResistanceValues.NegativeLargeColor;
+				text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_LARGE, modifier);
 			}
-			if (modifier <= -2f)
+			else if (modifier <= -2f)
 			{
-				return GameUtil.GermResistanceModifier.NEGATIVE_MEDIUM;
+				color = GameUtil.GermResistanceValues.NegativeMediumColor;
+				text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_MEDIUM, modifier);
 			}
-			if (modifier <= -1f)
+			else if (modifier < 0f)
 			{
-				return GameUtil.GermResistanceModifier.NEGATIVE_SMALL;
+				color = GameUtil.GermResistanceValues.NegativeSmallColor;
+				text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_SMALL, modifier);
 			}
 		}
-		return GameUtil.GermResistanceModifier.NONE;
-	}
-
-	public static string GetGermResistanceModifierString(float modifier, bool addColor = true)
-	{
-		Color color = new Color(0.83137256f, 0.28627452f, 0.28235295f);
-		Color color2 = new Color(0.7411765f, 0.34901962f, 0.49803922f);
-		Color color3 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
-		Color color4 = new Color(0.5254902f, 0.41960785f, 0.64705884f);
-		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
-		Color color6 = new Color(0.44313726f, 0.67058825f, 0.8117647f);
-		Color color7 = color4;
-		string text = "";
-		switch (GameUtil.GetGermResistanceModifier(modifier))
+		else
 		{
-		case GameUtil.GermResistanceModifier.NEGATIVE_LARGE:
-			color7 = color4;
-			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_LARGE, modifier);
-			break;
-		case GameUtil.GermResistanceModifier.NEGATIVE_MEDIUM:
-			color7 = color3;
-			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_MEDIUM, modifier);
-			break;
-		case GameUtil.GermResistanceModifier.NEGATIVE_SMALL:
-			color7 = color2;
-			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_SMALL, modifier);
-			break;
-		case GameUtil.GermResistanceModifier.NONE:
-			color7 = color;
+			addColor = false;
 			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NONE, modifier);
-			break;
-		case GameUtil.GermResistanceModifier.POSITIVE_SMALL:
-			color7 = color5;
-			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_SMALL, modifier);
-			break;
-		case GameUtil.GermResistanceModifier.POSITIVE_MEDIUM:
-			color7 = color6;
-			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_MEDIUM, modifier);
-			break;
-		case GameUtil.GermResistanceModifier.POSITIVE_LARGE:
-			color7 = color6;
-			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_LARGE, modifier);
-			break;
 		}
 		if (addColor)
 		{
-			text = string.Format("<color=#{0}>{1}</color>", color7.ToHexString(), text);
+			text = string.Format("<color=#{0}>{1}</color>", color.ToHexString(), text);
 		}
 		return text;
 	}
 
 	public static string GetThermalConductivityString(Element element, bool addColor = true, bool addValue = true)
 	{
-		Color color = new Color(0.83137256f, 0.28627452f, 0.28235295f);
-		Color color2 = new Color(0.7411765f, 0.34901962f, 0.49803922f);
-		Color color3 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
-		Color color4 = new Color(0.5254902f, 0.41960785f, 0.64705884f);
-		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
-		Color color6;
+		Color color = GameUtil.ThermalConductivityValues.mediumConductivityColor;
 		string text;
 		if (element.thermalConductivity >= 50f)
 		{
-			color6 = color5;
+			color = GameUtil.ThermalConductivityValues.veryHighConductivityColor;
 			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.VERY_HIGH_CONDUCTIVITY;
 		}
 		else if (element.thermalConductivity >= 10f)
 		{
-			color6 = color4;
+			color = GameUtil.ThermalConductivityValues.highConductivityColor;
 			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.HIGH_CONDUCTIVITY;
 		}
 		else if (element.thermalConductivity >= 2f)
 		{
-			color6 = color3;
+			color = GameUtil.ThermalConductivityValues.mediumConductivityColor;
 			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.MEDIUM_CONDUCTIVITY;
 		}
 		else if (element.thermalConductivity >= 1f)
 		{
-			color6 = color2;
+			color = GameUtil.ThermalConductivityValues.lowConductivityColor;
 			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.LOW_CONDUCTIVITY;
 		}
 		else
 		{
-			color6 = color;
+			color = GameUtil.ThermalConductivityValues.veryLowConductivityColor;
 			text = UI.ELEMENTAL.THERMALCONDUCTIVITY.ADJECTIVES.VERY_LOW_CONDUCTIVITY;
 		}
 		if (addColor)
 		{
-			text = string.Format("<color=#{0}>{1}</color>", color6.ToHexString(), text);
+			text = string.Format("<color=#{0}>{1}</color>", color.ToHexString(), text);
 		}
 		if (addValue)
 		{
@@ -1298,81 +1211,76 @@ public static class GameUtil
 		{
 			return "";
 		}
-		Color color = new Color(0.44313726f, 0.67058825f, 0.8117647f);
-		Color color2 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
-		Color color3 = new Color(0.83137256f, 0.28627452f, 0.28235295f);
+		Color color = GameUtil.BreathableValues.positiveColor;
 		SimHashes id = element.id;
-		Color color4;
 		LocString locString;
 		if (id != SimHashes.Oxygen)
 		{
 			if (id != SimHashes.ContaminatedOxygen)
 			{
-				color4 = color3;
+				color = GameUtil.BreathableValues.negativeColor;
 				locString = UI.OVERLAYS.OXYGEN.LEGEND4;
 			}
 			else if (Mass >= SimDebugView.optimallyBreathable)
 			{
-				color4 = color;
+				color = GameUtil.BreathableValues.positiveColor;
 				locString = UI.OVERLAYS.OXYGEN.LEGEND1;
 			}
 			else if (Mass >= SimDebugView.minimumBreathable + (SimDebugView.optimallyBreathable - SimDebugView.minimumBreathable) / 2f)
 			{
-				color4 = color;
+				color = GameUtil.BreathableValues.positiveColor;
 				locString = UI.OVERLAYS.OXYGEN.LEGEND2;
 			}
 			else if (Mass >= SimDebugView.minimumBreathable)
 			{
-				color4 = color2;
+				color = GameUtil.BreathableValues.warningColor;
 				locString = UI.OVERLAYS.OXYGEN.LEGEND3;
 			}
 			else
 			{
-				color4 = color3;
+				color = GameUtil.BreathableValues.negativeColor;
 				locString = UI.OVERLAYS.OXYGEN.LEGEND4;
 			}
 		}
 		else if (Mass >= SimDebugView.optimallyBreathable)
 		{
-			color4 = color;
+			color = GameUtil.BreathableValues.positiveColor;
 			locString = UI.OVERLAYS.OXYGEN.LEGEND1;
 		}
 		else if (Mass >= SimDebugView.minimumBreathable + (SimDebugView.optimallyBreathable - SimDebugView.minimumBreathable) / 2f)
 		{
-			color4 = color;
+			color = GameUtil.BreathableValues.positiveColor;
 			locString = UI.OVERLAYS.OXYGEN.LEGEND2;
 		}
 		else if (Mass >= SimDebugView.minimumBreathable)
 		{
-			color4 = color2;
+			color = GameUtil.BreathableValues.warningColor;
 			locString = UI.OVERLAYS.OXYGEN.LEGEND3;
 		}
 		else
 		{
-			color4 = color3;
+			color = GameUtil.BreathableValues.negativeColor;
 			locString = UI.OVERLAYS.OXYGEN.LEGEND4;
 		}
-		return string.Format(ELEMENTS.BREATHABLEDESC, color4.ToHexString(), locString);
+		return string.Format(ELEMENTS.BREATHABLEDESC, color.ToHexString(), locString);
 	}
 
-	public static string GetWireLoadColor(float load, float maxLoad)
+	public static string GetWireLoadColor(float load, float maxLoad, float potentialLoad)
 	{
-		Color color = new Color(0.9843137f, 0.6901961f, 0.23137255f);
-		Color color2 = new Color(1f, 0.19215687f, 0.19215687f);
-		Color color3;
+		Color color;
 		if (load > maxLoad)
 		{
-			color3 = color2;
+			color = GameUtil.WireLoadValues.negativeColor;
 		}
-		else if (load / maxLoad >= 0.75f)
+		else if (potentialLoad > maxLoad && load / maxLoad >= 0.75f)
 		{
-			color3 = color;
+			color = GameUtil.WireLoadValues.warningColor;
 		}
 		else
 		{
-			color3 = Color.white;
+			color = Color.white;
 		}
-		return color3.ToHexString();
+		return color.ToHexString();
 	}
 
 	public static string AppendHotkeyString(string template, global::Action action)
@@ -2270,7 +2178,7 @@ public static class GameUtil
 		Disease disease = Db.Get().Diseases[(int)idx];
 		if (color)
 		{
-			return string.Format(UI.OVERLAYS.DISEASE.DISEASE_NAME_FORMAT, disease.Name, GameUtil.ColourToHex(disease.overlayColour));
+			return string.Format(UI.OVERLAYS.DISEASE.DISEASE_NAME_FORMAT, disease.Name, GameUtil.ColourToHex(GlobalAssets.Instance.colorSet.GetColorByName(disease.overlayColourName)));
 		}
 		return string.Format(UI.OVERLAYS.DISEASE.DISEASE_NAME_FORMAT_NO_COLOR, disease.Name);
 	}
@@ -2284,7 +2192,7 @@ public static class GameUtil
 		Disease disease = Db.Get().Diseases[(int)idx];
 		if (color)
 		{
-			return string.Format(UI.OVERLAYS.DISEASE.DISEASE_FORMAT, disease.Name, GameUtil.GetFormattedDiseaseAmount(units), GameUtil.ColourToHex(disease.overlayColour));
+			return string.Format(UI.OVERLAYS.DISEASE.DISEASE_FORMAT, disease.Name, GameUtil.GetFormattedDiseaseAmount(units), GameUtil.ColourToHex(GlobalAssets.Instance.colorSet.GetColorByName(disease.overlayColourName)));
 		}
 		return string.Format(UI.OVERLAYS.DISEASE.DISEASE_FORMAT_NO_COLOR, disease.Name, GameUtil.GetFormattedDiseaseAmount(units));
 	}
@@ -2627,6 +2535,36 @@ public static class GameUtil
 		return Color.white;
 	}
 
+	public static void SubscribeToTags<T>(T target, EventSystem.IntraObjectHandler<T> handler) where T : KMonoBehaviour
+	{
+		handler.Trigger(target.gameObject, null);
+		target.Subscribe<T>(-1582839653, handler);
+	}
+
+	public static EventSystem.IntraObjectHandler<T> CreateHasTagHandler<T>(Tag tag, Action<T, object> callback) where T : KMonoBehaviour
+	{
+		return new EventSystem.IntraObjectHandler<T>(delegate(T component, object data)
+		{
+			KPrefabID component2 = component.GetComponent<KPrefabID>();
+			if (component2 != null && component2.HasTag(tag))
+			{
+				callback(component, data);
+			}
+		});
+	}
+
+	public static EventSystem.IntraObjectHandler<T> CreateDoesntHaveTagHandler<T>(Tag tag, Action<T, object> callback) where T : KMonoBehaviour
+	{
+		return new EventSystem.IntraObjectHandler<T>(delegate(T component, object data)
+		{
+			KPrefabID component2 = component.GetComponent<KPrefabID>();
+			if (component2 != null && !component2.HasTag(tag))
+			{
+				callback(component, data);
+			}
+		});
+	}
+
 	public static GameUtil.TemperatureUnit temperatureUnit;
 
 	public static GameUtil.MassUnit massUnit;
@@ -2730,26 +2668,88 @@ public static class GameUtil
 		public int depth;
 	}
 
-	public enum Hardness
+	public static class Hardness
 	{
-		NA,
-		VERY_SOFT = 0,
-		SOFT = 10,
-		FIRM = 25,
-		VERY_FIRM = 50,
-		NEARLY_IMPENETRABLE = 150,
-		SUPER_HARD = 200,
-		IMPENETRABLE = 255
+		public const int VERY_SOFT = 0;
+
+		public const int SOFT = 10;
+
+		public const int FIRM = 25;
+
+		public const int VERY_FIRM = 50;
+
+		public const int NEARLY_IMPENETRABLE = 150;
+
+		public const int SUPER_HARD = 200;
+
+		public const int IMPENETRABLE = 255;
+
+		public static Color ImpenetrableColor = new Color(0.83137256f, 0.28627452f, 0.28235295f);
+
+		public static Color nearlyImpenetrableColor = new Color(0.7411765f, 0.34901962f, 0.49803922f);
+
+		public static Color veryFirmColor = new Color(0.6392157f, 0.39215687f, 0.6039216f);
+
+		public static Color firmColor = new Color(0.5254902f, 0.41960785f, 0.64705884f);
+
+		public static Color softColor = new Color(0.42745098f, 0.48235294f, 0.75686276f);
+
+		public static Color verySoftColor = new Color(0.44313726f, 0.67058825f, 0.8117647f);
 	}
 
-	public enum GermResistanceModifier
+	public static class GermResistanceValues
 	{
-		NONE,
-		POSITIVE_SMALL,
-		POSITIVE_MEDIUM,
-		POSITIVE_LARGE = 5,
-		NEGATIVE_SMALL = -1,
-		NEGATIVE_MEDIUM = -2,
-		NEGATIVE_LARGE = -5
+		public const float MEDIUM = 2f;
+
+		public const float LARGE = 5f;
+
+		public static Color NegativeLargeColor = new Color(0.83137256f, 0.28627452f, 0.28235295f);
+
+		public static Color NegativeMediumColor = new Color(0.7411765f, 0.34901962f, 0.49803922f);
+
+		public static Color NegativeSmallColor = new Color(0.6392157f, 0.39215687f, 0.6039216f);
+
+		public static Color PositiveSmallColor = new Color(0.5254902f, 0.41960785f, 0.64705884f);
+
+		public static Color PositiveMediumColor = new Color(0.42745098f, 0.48235294f, 0.75686276f);
+
+		public static Color PositiveLargeColor = new Color(0.44313726f, 0.67058825f, 0.8117647f);
+	}
+
+	public static class ThermalConductivityValues
+	{
+		public const float VERY_HIGH = 50f;
+
+		public const float HIGH = 10f;
+
+		public const float MEDIUM = 2f;
+
+		public const float LOW = 1f;
+
+		public static Color veryLowConductivityColor = new Color(0.83137256f, 0.28627452f, 0.28235295f);
+
+		public static Color lowConductivityColor = new Color(0.7411765f, 0.34901962f, 0.49803922f);
+
+		public static Color mediumConductivityColor = new Color(0.6392157f, 0.39215687f, 0.6039216f);
+
+		public static Color highConductivityColor = new Color(0.5254902f, 0.41960785f, 0.64705884f);
+
+		public static Color veryHighConductivityColor = new Color(0.42745098f, 0.48235294f, 0.75686276f);
+	}
+
+	public static class BreathableValues
+	{
+		public static Color positiveColor = new Color(0.44313726f, 0.67058825f, 0.8117647f);
+
+		public static Color warningColor = new Color(0.6392157f, 0.39215687f, 0.6039216f);
+
+		public static Color negativeColor = new Color(0.83137256f, 0.28627452f, 0.28235295f);
+	}
+
+	public static class WireLoadValues
+	{
+		public static Color warningColor = new Color(0.9843137f, 0.6901961f, 0.23137255f);
+
+		public static Color negativeColor = new Color(1f, 0.19215687f, 0.19215687f);
 	}
 }

@@ -339,7 +339,7 @@ public class VitalsTableScreen : TableScreen
 						{
 							num = Mathf.Min(new float[] { sicknessInstance.GetInfectedTimeRemaining() });
 						}
-						text += string.Format(UI.VITALSSCREEN.MULTIPLE_SICKNESSES, GameUtil.GetFormattedCycles(num, "F1"));
+						text += string.Format(UI.VITALSSCREEN.MULTIPLE_SICKNESSES, GameUtil.GetFormattedCycles(num, "F1", false));
 					}
 					else
 					{
@@ -349,7 +349,7 @@ public class VitalsTableScreen : TableScreen
 							{
 								text += "\n";
 							}
-							text += string.Format(UI.VITALSSCREEN.SICKNESS_REMAINING, sicknessInstance2.modifier.Name, GameUtil.GetFormattedCycles(sicknessInstance2.GetInfectedTimeRemaining(), "F1"));
+							text += string.Format(UI.VITALSSCREEN.SICKNESS_REMAINING, sicknessInstance2.modifier.Name, GameUtil.GetFormattedCycles(sicknessInstance2.GetInfectedTimeRemaining(), "F1", false));
 						}
 					}
 					return text;

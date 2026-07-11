@@ -733,6 +733,13 @@ namespace STRINGS
 				public static LocString DESC = "Can be crushed to produce " + UI.FormatAsLink("Lime", "LIME") + ".";
 			}
 
+			public class BABY_CRAB_SHELL
+			{
+				public static LocString NAME = "Small Pokeshell Molt";
+
+				public static LocString DESC = "Can be crushed to produce " + UI.FormatAsLink("Lime", "LIME") + ".";
+			}
+
 			public class WOOD
 			{
 				public static LocString NAME = "Lumber";

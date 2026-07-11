@@ -6,12 +6,6 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.Subscribe<Stinky>(1623392196, Stinky.OnDeathDelegate);
-		base.Subscribe<Stinky>(-1117766961, Stinky.OnRevivedDelegate);
-	}
-
 	protected override void OnSpawn()
 	{
 		base.smi.StartSM();
@@ -55,20 +49,6 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 		KFMOD.PlayOneShot(GlobalAssets.GetSound("Dupe_Flatulence", false), vector3, num2);
 	}
 
-	private void OnDeath(object data)
-	{
-		base.enabled = false;
-	}
-
-	private void OnRevived(object data)
-	{
-		base.enabled = true;
-	}
-
-	public void ModifyTrait(Trait t)
-	{
-	}
-
 	private const float EmitMass = 0.0025000002f;
 
 	private const SimHashes EmitElement = SimHashes.ContaminatedOxygen;
@@ -78,16 +58,6 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 	private const float MaxDistanceSq = 2.25f;
 
 	private KBatchedAnimController stinkyController;
-
-	private static readonly EventSystem.IntraObjectHandler<Stinky> OnDeathDelegate = new EventSystem.IntraObjectHandler<Stinky>(delegate(Stinky component, object data)
-	{
-		component.OnDeath(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<Stinky> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Stinky>(delegate(Stinky component, object data)
-	{
-		component.OnRevived(data);
-	});
 
 	private static readonly HashedString[] WorkLoopAnims = new HashedString[] { "working_pre", "working_loop", "working_pst" };
 
@@ -104,7 +74,7 @@ public class Stinky : StateMachineComponent<Stinky.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
-			this.root.Enter(delegate(Stinky.StatesInstance smi)
+			this.root.TagTransition(GameTags.Dead, null, false).Enter(delegate(Stinky.StatesInstance smi)
 			{
 				KBatchedAnimController kbatchedAnimController = FXHelpers.CreateEffect("odor_fx_kanim", smi.master.gameObject.transform.GetPosition(), smi.master.gameObject.transform, true, Grid.SceneLayer.Front, false);
 				kbatchedAnimController.Play(Stinky.WorkLoopAnims, KAnim.PlayMode.Once);

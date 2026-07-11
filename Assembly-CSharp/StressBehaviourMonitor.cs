@@ -6,7 +6,7 @@ public class StressBehaviourMonitor : GameStateMachine<StressBehaviourMonitor, S
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.satisfied;
-		this.root.EventTransition(GameHashes.Died, null, null);
+		this.root.TagTransition(GameTags.Dead, null, false);
 		this.satisfied.EventTransition(GameHashes.Stressed, this.stressed, (StressBehaviourMonitor.Instance smi) => smi.gameObject.GetSMI<StressMonitor.Instance>() != null && smi.gameObject.GetSMI<StressMonitor.Instance>().IsStressed());
 		this.stressed.DefaultState(this.stressed.tierOne).ToggleExpression(Db.Get().Expressions.Unhappy, null).ToggleAnims((StressBehaviourMonitor.Instance smi) => smi.tierOneLocoAnim)
 			.Transition(this.satisfied, (StressBehaviourMonitor.Instance smi) => smi.gameObject.GetSMI<StressMonitor.Instance>() != null && !smi.gameObject.GetSMI<StressMonitor.Instance>().IsStressed(), UpdateRate.SIM_200ms);

@@ -8,7 +8,7 @@ public class StickerBomber : GameStateMachine<StickerBomber, StickerBomber.Insta
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.neutral;
-		this.root.EventTransition(GameHashes.Died, null, null);
+		this.root.TagTransition(GameTags.Dead, null, false);
 		this.neutral.TagTransition(GameTags.Overjoyed, this.overjoyed, false).Exit(delegate(StickerBomber.Instance smi)
 		{
 			smi.nextStickerBomb = GameClock.Instance.GetTime() + TRAITS.JOY_REACTIONS.STICKER_BOMBER.TIME_PER_STICKER_BOMB;

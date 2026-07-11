@@ -6,12 +6,6 @@ using TUNING;
 [SkipSaveFileSerialization]
 public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.Subscribe<NightOwl>(1623392196, NightOwl.OnDeathDelegate);
-		base.Subscribe<NightOwl>(-1117766961, NightOwl.OnRevivedDelegate);
-	}
-
 	protected override void OnSpawn()
 	{
 		this.attributeModifiers = new AttributeModifier[]
@@ -51,34 +45,10 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 		}
 	}
 
-	private void OnDeath(object data)
-	{
-		base.enabled = false;
-	}
-
-	private void OnRevived(object data)
-	{
-		base.enabled = true;
-	}
-
-	public void ModifyTrait(Trait t)
-	{
-	}
-
 	[MyCmpReq]
 	private KPrefabID kPrefabID;
 
 	private AttributeModifier[] attributeModifiers;
-
-	private static readonly EventSystem.IntraObjectHandler<NightOwl> OnDeathDelegate = new EventSystem.IntraObjectHandler<NightOwl>(delegate(NightOwl component, object data)
-	{
-		component.OnDeath(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<NightOwl> OnRevivedDelegate = new EventSystem.IntraObjectHandler<NightOwl>(delegate(NightOwl component, object data)
-	{
-		component.OnRevived(data);
-	});
 
 	public class StatesInstance : GameStateMachine<NightOwl.States, NightOwl.StatesInstance, NightOwl, object>.GameInstance
 	{
@@ -98,6 +68,7 @@ public class NightOwl : StateMachineComponent<NightOwl.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
+			this.root.TagTransition(GameTags.Dead, null, false);
 			this.idle.Transition(this.early, (NightOwl.StatesInstance smi) => smi.IsNight(), UpdateRate.SIM_200ms);
 			this.early.Enter("Night", delegate(NightOwl.StatesInstance smi)
 			{

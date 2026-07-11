@@ -276,7 +276,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 				{
 					if (Grid.Solid[num])
 					{
-						WorldDamage.Instance.ApplyDamage(num, 10000f, num, -1, BUILDINGS.DAMAGESOURCES.ROCKET, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.ROCKET);
+						WorldDamage.Instance.ApplyDamage(num, 10000f, num, BUILDINGS.DAMAGESOURCES.ROCKET, UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.ROCKET);
 					}
 					else if (Grid.FakeFloor[num])
 					{

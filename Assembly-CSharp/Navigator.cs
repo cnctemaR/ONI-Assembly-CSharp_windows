@@ -560,6 +560,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			this.preAnim = transition.preAnim;
 			this.anim = transition.anim;
 			this.speed = default_speed;
+			this.animSpeed = transition.animSpeed;
 			this.navGridTransition = transition;
 		}
 

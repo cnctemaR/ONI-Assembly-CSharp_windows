@@ -7,7 +7,7 @@ public class SparkleStreaker : GameStateMachine<SparkleStreaker, SparkleStreaker
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.neutral;
-		this.root.EventTransition(GameHashes.Died, null, null);
+		this.root.TagTransition(GameTags.Dead, null, false);
 		this.neutral.TagTransition(GameTags.Overjoyed, this.overjoyed, false);
 		this.overjoyed.DefaultState(this.overjoyed.idle).TagTransition(GameTags.Overjoyed, this.neutral, true).ToggleEffect("IsSparkleStreaker")
 			.ToggleLoopingSound(this.soundPath, null, true, true, true)

@@ -1,46 +1,15 @@
 ﻿using System;
-using Klei.AI;
 using UnityEngine;
 
 [SkipSaveFileSerialization]
 public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 {
-	protected override void OnPrefabInit()
-	{
-		base.Subscribe<Snorer>(1623392196, Snorer.OnDeathDelegate);
-		base.Subscribe<Snorer>(-1117766961, Snorer.OnRevivedDelegate);
-	}
-
 	protected override void OnSpawn()
 	{
 		base.smi.StartSM();
 	}
 
-	private void OnDeath(object data)
-	{
-		base.enabled = false;
-	}
-
-	private void OnRevived(object data)
-	{
-		base.enabled = true;
-	}
-
-	public void ModifyTrait(Trait t)
-	{
-	}
-
 	private static readonly HashedString HeadHash = "snapTo_mouth";
-
-	private static readonly EventSystem.IntraObjectHandler<Snorer> OnDeathDelegate = new EventSystem.IntraObjectHandler<Snorer>(delegate(Snorer component, object data)
-	{
-		component.OnDeath(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<Snorer> OnRevivedDelegate = new EventSystem.IntraObjectHandler<Snorer>(delegate(Snorer component, object data)
-	{
-		component.OnRevived(data);
-	});
 
 	public class StatesInstance : GameStateMachine<Snorer.States, Snorer.StatesInstance, Snorer, object>.GameInstance
 	{
@@ -108,6 +77,7 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.idle;
+			this.root.TagTransition(GameTags.Dead, null, false);
 			this.idle.Transition(this.sleeping, (Snorer.StatesInstance smi) => smi.IsSleeping(), UpdateRate.SIM_200ms);
 			this.sleeping.DefaultState(this.sleeping.quiet).Enter(delegate(Snorer.StatesInstance smi)
 			{
@@ -146,23 +116,5 @@ public class Snorer : StateMachineComponent<Snorer.StatesInstance>
 
 			public GameStateMachine<Snorer.States, Snorer.StatesInstance, Snorer, object>.State snoring;
 		}
-	}
-
-	private struct CellInfo
-	{
-		public override int GetHashCode()
-		{
-			return this.cell;
-		}
-
-		public override bool Equals(object obj)
-		{
-			Snorer.CellInfo cellInfo = (Snorer.CellInfo)obj;
-			return this.cell == cellInfo.cell;
-		}
-
-		public int cell;
-
-		public int depth;
 	}
 }

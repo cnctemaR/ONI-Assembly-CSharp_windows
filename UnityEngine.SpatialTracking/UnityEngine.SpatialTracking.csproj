@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{46994E65-5B14-4593-820E-2BCEBDAA34FF}</ProjectGuid>
+    <ProjectGuid>{E70A1338-F4A6-444D-B2FC-247520AC9152}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine</RootNamespace>
     <AssemblyName>UnityEngine.SpatialTracking</AssemblyName>
@@ -24,7 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UnityEngine\UnityEngine.csproj">
-      <Project>{46994E65-5B14-4593-820E-2BCEBDAA34ED}</Project>
+      <Project>{E70A1338-F4A6-444D-B2FC-247520AC9140}</Project>
       <Name>UnityEngine</Name>
     </ProjectReference>
   </ItemGroup>

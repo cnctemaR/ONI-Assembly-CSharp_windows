@@ -6,7 +6,13 @@ public class RobotExhaustPipe : KMonoBehaviour, ISim4000ms
 {
 	public void Sim4000ms(float dt)
 	{
-		CO2Manager.instance.SpawnBreath(Grid.CellToPos(Grid.PosToCell(base.gameObject)), dt * this.CO2_RATE, 303.15f);
+		Facing component = base.GetComponent<Facing>();
+		bool flag = false;
+		if (component)
+		{
+			flag = component.GetFacing();
+		}
+		CO2Manager.instance.SpawnBreath(Grid.CellToPos(Grid.PosToCell(base.gameObject)), dt * this.CO2_RATE, 303.15f, flag);
 	}
 
 	private float CO2_RATE = 0.001f;

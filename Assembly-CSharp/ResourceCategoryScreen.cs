@@ -59,7 +59,7 @@ public class ResourceCategoryScreen : KScreen
 		{
 			float num = this.HideTarget.minHeight;
 			float num2 = this.targetContentHideHeight - num;
-			num2 *= this.HideSpeedFactor * Time.unscaledDeltaTime;
+			num2 = Mathf.Clamp(num2 * this.HideSpeedFactor * Time.unscaledDeltaTime, (num2 > 0f) ? (-num2) : num2, (num2 > 0f) ? num2 : (-num2));
 			num += num2;
 			this.HideTarget.minHeight = num;
 		}

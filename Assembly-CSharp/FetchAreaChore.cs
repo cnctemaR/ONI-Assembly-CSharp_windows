@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
@@ -58,6 +59,37 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		{
 			this.Fail("Tags changed");
 		}
+	}
+
+	private static bool IsPickupableStillValidForChore(Pickupable pickupable, FetchChore chore)
+	{
+		KPrefabID component = pickupable.GetComponent<KPrefabID>();
+		component.UpdateTagBits();
+		if (!component.HasAnyTags_AssumeLaundered(ref chore.tagBits))
+		{
+			List<Tag> tagsVerySlow = chore.tagBits.GetTagsVerySlow();
+			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has none of these tags: {1}", pickupable, string.Join<Tag>(",", tagsVerySlow)));
+			return false;
+		}
+		if (!component.HasAllTags_AssumeLaundered(ref chore.requiredTagBits))
+		{
+			ISet<Tag> pickupableTags2 = component.Tags;
+			List<Tag> list = (from x in chore.requiredTagBits.GetTagsVerySlow()
+				where !pickupableTags2.Contains(x)
+				select x).ToList<Tag>();
+			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it does not have the required tags: {1}", pickupable, string.Join<Tag>(",", list)));
+			return false;
+		}
+		if (component.HasAnyTags_AssumeLaundered(ref chore.forbiddenTagBits))
+		{
+			ISet<Tag> pickupableTags = component.Tags;
+			List<Tag> list2 = (from x in chore.forbiddenTagBits.GetTagsVerySlow()
+				where pickupableTags.Contains(x)
+				select x).ToList<Tag>();
+			global::Debug.Log(string.Format("Pickupable {0} is not valid for chore because it has the forbidden tags: {1}", pickupable, string.Join<Tag>(",", list2)));
+			return false;
+		}
+		return true;
 	}
 
 	public static void GatherNearbyFetchChores(FetchChore root_chore, Chore.Precondition.Context context, int x, int y, int radius, List<Chore.Precondition.Context> succeeded_contexts, List<Chore.Precondition.Context> failed_contexts)
@@ -209,17 +241,47 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 			this.deliveries.Clear();
 		}
 
+		private static TagBits CreateTransientDeliveryMask()
+		{
+			TagBits tagBits = new TagBits(new Tag[]
+			{
+				GameTags.Garbage,
+				GameTags.Creatures.Deliverable
+			});
+			tagBits.Complement();
+			return tagBits;
+		}
+
 		public void SetupDelivery()
 		{
-			this.deliverables.RemoveAll((Pickupable x) => x == null || x.TotalAmount <= 0f);
-			if (this.deliveries.Count <= 0 || this.deliverables.Count <= 0)
+			if (this.deliveries.Count == 0)
 			{
 				this.StopSM("FetchAreaChoreComplete");
 				return;
 			}
-			base.sm.deliveryDestination.Set(this.deliveries[0].destination, base.smi);
+			FetchAreaChore.StatesInstance.Delivery nextDelivery = this.deliveries[0];
+			nextDelivery.chore.requiredTagBits.And(ref FetchAreaChore.StatesInstance.s_transientDeliveryMask);
+			this.deliverables.RemoveAll(delegate(Pickupable x)
+			{
+				if (x == null || x.TotalAmount <= 0f)
+				{
+					return true;
+				}
+				if (!FetchAreaChore.IsPickupableStillValidForChore(x, nextDelivery.chore))
+				{
+					global::Debug.LogWarning(string.Format("Removing deliverable {0} for a delivery to {1} which did not request it", x, nextDelivery.chore.destination));
+					return true;
+				}
+				return false;
+			});
+			if (this.deliverables.Count == 0)
+			{
+				this.StopSM("FetchAreaChoreComplete");
+				return;
+			}
+			base.sm.deliveryDestination.Set(nextDelivery.destination, base.smi);
 			base.sm.deliveryObject.Set(this.deliverables[0], base.smi);
-			if (!(this.deliveries[0].destination != null))
+			if (!(nextDelivery.destination != null))
 			{
 				base.smi.GoTo(base.sm.delivering.deliverfail);
 				return;
@@ -432,6 +494,8 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 
 		public bool pickingup;
 
+		private static TagBits s_transientDeliveryMask = FetchAreaChore.StatesInstance.CreateTransientDeliveryMask();
+
 		public struct Delivery
 		{
 			public Storage destination { get; private set; }
@@ -473,6 +537,10 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 								{
 									this.destination.ForceStore(this.chore.tags[0], num);
 								}
+							}
+							else if (!FetchAreaChore.IsPickupableStillValidForChore(deliverables[num2], this.chore))
+							{
+								global::Debug.LogError(string.Format("Attempting to store {0} in a {1} which did not request it", deliverables[num2], this.destination));
 							}
 							else
 							{

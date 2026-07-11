@@ -36,7 +36,7 @@ public class DigTool : DragTool
 		{
 			if (Grid.IsValidCell(cell) && Grid.Solid[cell] && !Grid.Foundation[cell])
 			{
-				WorldDamage.Instance.DestroyCell(cell, -1);
+				WorldDamage.Instance.DestroyCell(cell);
 				return;
 			}
 		}

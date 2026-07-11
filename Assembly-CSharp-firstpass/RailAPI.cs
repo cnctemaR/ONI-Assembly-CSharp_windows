@@ -11,6 +11,9 @@ public static class RailAPI
 	public static extern bool Initialize();
 
 	[DllImport("RailAPI")]
+	public static extern bool NotifyWindowAntiAddiction();
+
+	[DllImport("RailAPI")]
 	public static extern void Shutdown();
 
 	[DllImport("RailAPI")]
@@ -45,7 +48,8 @@ public static class RailAPI
 
 	public enum Event
 	{
-		AuthTicketAcquired = 13001
+		AuthTicketAcquired = 13001,
+		EventSystemChanged = 2
 	}
 
 	[Serializable]
@@ -53,6 +57,12 @@ public static class RailAPI
 	{
 		[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 2048)]
 		public string ticket;
+	}
+
+	[Serializable]
+	public struct RailSystemStateChanged
+	{
+		public bool mRequestExit;
 	}
 
 	public delegate void EventHandler(RailAPI.Event eventId, IntPtr data);

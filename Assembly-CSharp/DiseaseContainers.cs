@@ -178,7 +178,7 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 					this.GetVisualDiseaseIdxAndCount(diseaseHeader, ref diseaseContainer, out num2, out num3);
 					if (num2 != 255)
 					{
-						color2 = diseases[num2].overlayColour;
+						color2 = GlobalAssets.Instance.colorSet.GetColorByName(diseases[num2].overlayColourName);
 						num = num3;
 					}
 					if (diseaseContainer.isContainer)
@@ -196,7 +196,7 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 									if (header.diseaseCount > num && header.diseaseIdx != 255)
 									{
 										num = header.diseaseCount;
-										color2 = diseases[(int)header.diseaseIdx].overlayColour;
+										color2 = GlobalAssets.Instance.colorSet.GetColorByName(diseases[(int)header.diseaseIdx].overlayColourName);
 									}
 								}
 							}
@@ -211,7 +211,7 @@ public class DiseaseContainers : KGameObjectSplitComponentManager<DiseaseHeader,
 						if (contents.diseaseIdx != 255 && contents.diseaseCount > num)
 						{
 							num = contents.diseaseCount;
-							color2 = diseases[(int)contents.diseaseIdx].overlayColour;
+							color2 = GlobalAssets.Instance.colorSet.GetColorByName(diseases[(int)contents.diseaseIdx].overlayColourName);
 							color2.a = byte.MaxValue;
 						}
 					}

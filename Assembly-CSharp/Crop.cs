@@ -134,12 +134,6 @@ public class Crop : KMonoBehaviour, IGameObjectEffectDescriptor
 		LocString yield = UI.UISIDESCREENS.PLANTERSIDESCREEN.YIELD;
 		Descriptor descriptor = new Descriptor(string.Format(yield, prefab.GetProperName(), text2), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.YIELD, text, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true), GameUtil.GetFormattedCalories(num2, GameUtil.TimeSlice.None, true)), Descriptor.DescriptorType.Effect, false);
 		list.Add(descriptor);
-		SeedProducer component3 = base.GetComponent<SeedProducer>();
-		if (component3 && component3.seedInfo.productionType == SeedProducer.ProductionType.Harvest)
-		{
-			Descriptor descriptor2 = new Descriptor(string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), string.Format(UI.UISIDESCREENS.PLANTERSIDESCREEN.TOOLTIPS.BONUS_SEEDS, GameUtil.GetFormattedPercent(10f, GameUtil.TimeSlice.None)), Descriptor.DescriptorType.Effect, false);
-			list.Add(descriptor2);
-		}
 		return list;
 	}
 

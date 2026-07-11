@@ -20,11 +20,11 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 			float num = (instance.GetMax() - instance.value) / instance.GetDelta();
 			if (component != null && component.IsGrowing())
 			{
-				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING_CROP, GameUtil.GetFormattedCycles(num, "F1"), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
+				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING_CROP, GameUtil.GetFormattedCycles(num, "F1", false), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1", false));
 			}
 			else
 			{
-				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING, GameUtil.GetFormattedCycles(num, "F1"));
+				text += string.Format(CREATURES.STATS.MATURITY.TOOLTIP_GROWING, GameUtil.GetFormattedCycles(num, "F1", false));
 			}
 		}
 		else if (component.ReachedNextHarvest())
@@ -43,7 +43,7 @@ public class MaturityDisplayer : AsPercentAmountDisplayer
 		Growing component = instance.gameObject.GetComponent<Growing>();
 		if (component != null && component.IsGrowing())
 		{
-			return string.Format(CREATURES.STATS.MATURITY.AMOUNT_DESC_FMT, master.Name, this.formatter.GetFormattedValue(base.ToPercent(instance.value, instance), GameUtil.TimeSlice.None, null), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1"));
+			return string.Format(CREATURES.STATS.MATURITY.AMOUNT_DESC_FMT, master.Name, this.formatter.GetFormattedValue(base.ToPercent(instance.value, instance), GameUtil.TimeSlice.None, null), GameUtil.GetFormattedCycles(component.TimeUntilNextHarvest(), "F1", false));
 		}
 		return base.GetDescription(master, instance);
 	}

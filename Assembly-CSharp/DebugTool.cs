@@ -39,7 +39,7 @@ public class DebugTool : DragTool
 			switch (this.type)
 			{
 			case DebugTool.Type.Dig:
-				SimMessages.Dig(cell, -1);
+				SimMessages.Dig(cell, -1, false);
 				return;
 			case DebugTool.Type.Heat:
 				SimMessages.ModifyEnergy(cell, 10000f, 10000f, SimMessages.EnergySourceID.DebugHeat);

@@ -24,6 +24,9 @@ public class ElementDropper : KMonoBehaviour
 			{
 				pickupable = pickupable.Take(this.emitMass);
 				pickupable.transform.SetPosition(pickupable.transform.GetPosition() + this.emitOffset);
+				pickupable.transform.parent = null;
+				base.Trigger(-1697596308, pickupable.gameObject);
+				pickupable.Trigger(856640610, null);
 			}
 			else
 			{

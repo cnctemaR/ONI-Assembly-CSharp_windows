@@ -18,9 +18,9 @@ public class SweepBotStationConfig : IBuildingConfig
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, array, refined_METALS, num5, buildLocationRule, BUILDINGS.DECOR.PENALTY.TIER1, none, 0.2f);
+		buildingDef.ViewMode = OverlayModes.Power.ID;
 		buildingDef.Floodable = false;
 		buildingDef.AudioCategory = "Metal";
-		buildingDef.Overheatable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0f;

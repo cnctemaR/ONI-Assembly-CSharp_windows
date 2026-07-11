@@ -2,6 +2,7 @@
 using KSerialization;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 [AddComponentMenu("KMonoBehaviour/scripts/HarvestDesignatable")]
 public class HarvestDesignatable : KMonoBehaviour
@@ -137,12 +138,16 @@ public class HarvestDesignatable : KMonoBehaviour
 			HierarchyReferences component = this.HarvestWhenReadyOverlayIcon.GetComponent<HierarchyReferences>();
 			if (this.harvestWhenReady)
 			{
-				component.GetReference("On").gameObject.SetActive(true);
+				Image image = (Image)component.GetReference("On");
+				image.gameObject.SetActive(true);
+				image.color = GlobalAssets.Instance.colorSet.harvestEnabled;
 				component.GetReference("Off").gameObject.SetActive(false);
 				return;
 			}
 			component.GetReference("On").gameObject.SetActive(false);
-			component.GetReference("Off").gameObject.SetActive(true);
+			Image image2 = (Image)component.GetReference("Off");
+			image2.gameObject.SetActive(true);
+			image2.color = GlobalAssets.Instance.colorSet.harvestDisabled;
 		}
 	}
 

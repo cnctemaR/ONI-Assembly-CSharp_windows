@@ -116,7 +116,7 @@ namespace Klei.AI
 			}
 			if (effectInstance.effect.duration > 0f)
 			{
-				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_REMAINING, GameUtil.GetFormattedCycles(this.GetTimeRemaining(), "F1"));
+				text = text + "\n" + string.Format(DUPLICANTS.MODIFIERS.TIME_REMAINING, GameUtil.GetFormattedCycles(this.GetTimeRemaining(), "F1", false));
 			}
 			return text;
 		}

@@ -319,7 +319,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				World.Instance.groundRenderer.MarkDirty(num2);
 				if (is_door_open)
 				{
-					SimMessages.Dig(num2, Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false)).index);
+					SimMessages.Dig(num2, Game.Instance.callbackManager.Add(new Game.CallbackInfo(new global::System.Action(this.OnSimDoorOpened), false)).index, true);
 					if (this.ShouldBlockFallingSand)
 					{
 						SimMessages.ClearCellProperties(num2, 4);

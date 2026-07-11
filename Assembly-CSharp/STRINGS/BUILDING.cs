@@ -2616,6 +2616,13 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "This Hot Tub is currently filling with water.\n\nIt will be available to use when water level reaches <b>100%</b>";
 			}
+
+			public class WINDTUNNELINTAKE
+			{
+				public static LocString NAME = "Intake Requires Gas";
+
+				public static LocString TOOLTIP = "A wind tunnel requires Gas at the top and bottom intakes in order to operate.\n\nThe intakes for this wind tunnel don't have enough gas to operate.";
+			}
 		}
 
 		public class DETAILS

@@ -371,6 +371,8 @@ namespace Database
 				return string.Format(str, text4);
 			};
 			this.BeingProductive = this.CreateStatusItem("BeingProductive", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BalloonArtistPlanning = this.CreateStatusItem("BalloonArtistPlanning", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.BalloonArtistHandingOut = this.CreateStatusItem("BalloonArtistHandingOut", "DUPLICANTS", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 		}
 
 		public StatusItem Idle;
@@ -552,6 +554,10 @@ namespace Database
 		public StatusItem LightWorkEfficiencyBonus;
 
 		public StatusItem BeingProductive;
+
+		public StatusItem BalloonArtistPlanning;
+
+		public StatusItem BalloonArtistHandingOut;
 
 		private const int NONE_OVERLAY = 0;
 	}

@@ -788,6 +788,15 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This Duplicant is learning a new " + UI.PRE_KEYWORD + "Skill" + UI.PST_KEYWORD;
 			}
 
+			public class UNLEARNSKILL
+			{
+				public static LocString NAME = "Unlearn Skills";
+
+				public static LocString STATUS = "Unlearning skills";
+
+				public static LocString TOOLTIP = "This Duplicant is unlearning " + UI.PRE_KEYWORD + "Skills" + UI.PST_KEYWORD;
+			}
+
 			public class RECHARGE
 			{
 				public static LocString NAME = "Recharge Equipment";
@@ -1271,6 +1280,15 @@ namespace STRINGS
 					UI.PST_KEYWORD,
 					" to a new location"
 				});
+			}
+
+			public class FETCHRANCHING
+			{
+				public static LocString NAME = "Ranching Supply";
+
+				public static LocString STATUS = "Supplying ranching materials";
+
+				public static LocString TOOLTIP = "This Duplicant is delivering materials for ranching activities";
 			}
 
 			public class TRANSPORT
@@ -3087,6 +3105,20 @@ namespace STRINGS
 				public static LocString NAME = "Super Focused";
 
 				public static LocString TOOLTIP = "This Duplicant is focused on being super productive right now";
+			}
+
+			public class BALLOONARTISTPLANNING
+			{
+				public static LocString NAME = "Balloon Artist";
+
+				public static LocString TOOLTIP = "This Duplicant is planning hand out balloons in their downtime.";
+			}
+
+			public class BALLOONARTISTHANDINGOUT
+			{
+				public static LocString NAME = "Balloon Artist";
+
+				public static LocString TOOLTIP = "This Duplicant is handing out balloons to other Duplicants.";
 			}
 		}
 

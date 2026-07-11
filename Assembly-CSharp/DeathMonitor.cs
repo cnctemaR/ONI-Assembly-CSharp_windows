@@ -20,9 +20,9 @@ public class DeathMonitor : GameStateMachine<DeathMonitor, DeathMonitor.Instance
 				KFMOD.PlayUISound(GlobalAssets.GetSound("Death_Notification_ST", false));
 				Messenger.Instance.QueueMessage(deathMessage);
 			}
-		}).GoTo(this.dead);
-		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f).DefaultState(this.dead.ground).TriggerOnEnter(GameHashes.Died, null)
-			.ToggleTag(GameTags.Dead)
+		}).TriggerOnExit(GameHashes.Died)
+			.GoTo(this.dead);
+		this.dead.ToggleAnims("anim_emotes_default_kanim", 0f).DefaultState(this.dead.ground).ToggleTag(GameTags.Dead)
 			.Enter(delegate(DeathMonitor.Instance smi)
 			{
 				smi.ApplyDeath();

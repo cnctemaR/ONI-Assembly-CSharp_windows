@@ -78,6 +78,7 @@ public class DragTool : InterfaceTool
 		this.downPos = cursor_pos;
 		this.previousCursorPos = cursor_pos;
 		KScreenManager.Instance.SetEventSystemEnabled(false);
+		this.hasFocus = true;
 		if (this.areaVisualizerTextPrefab != null)
 		{
 			this.areaVisualizerText = NameDisplayScreen.Instance.AddWorldText("", this.areaVisualizerTextPrefab);

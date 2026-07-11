@@ -42,7 +42,7 @@ public class SolidConduitFlowVisualizer
 	{
 		if (this.showContents)
 		{
-			return Color32.Lerp(this.visInfo.overlayTint, this.visInfo.overlayInsulatedTint, insulation_lerp);
+			return Color32.Lerp(GlobalAssets.Instance.colorSet.GetColorByName(this.visInfo.overlayTintName), GlobalAssets.Instance.colorSet.GetColorByName(this.visInfo.overlayInsulatedTintName), insulation_lerp);
 		}
 		return Color32.Lerp(this.visInfo.tint, this.visInfo.insulatedTint, insulation_lerp);
 	}

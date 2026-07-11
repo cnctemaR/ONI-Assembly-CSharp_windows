@@ -6,7 +6,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.StatesInstance>, IGameObjectEffectDescriptor
+public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.StatesInstance>, IGameObjectEffectDescriptor, ISim200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -24,11 +24,15 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 		{
 			this.OnElementConsumed(true, info);
 		};
+		this.operational = base.GetComponent<Operational>();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.invalidIntake = this.HasInvalidIntake();
+		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.WindTunnelIntake, this.invalidIntake, this);
+		this.operational.SetFlag(VerticalWindTunnel.validIntakeFlag, !this.invalidIntake);
 		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
 		{
 			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, true);
@@ -116,6 +120,60 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 		}
 	}
 
+	public void Sim200ms(float dt)
+	{
+		bool flag = this.HasInvalidIntake();
+		if (flag != this.invalidIntake)
+		{
+			this.invalidIntake = flag;
+			base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.WindTunnelIntake, this.invalidIntake, this);
+			this.operational.SetFlag(VerticalWindTunnel.validIntakeFlag, !this.invalidIntake);
+		}
+	}
+
+	private float GetIntakeRatio(int fromCell, int radius)
+	{
+		float num = 0f;
+		float num2 = 0f;
+		for (int i = -radius; i < radius; i++)
+		{
+			for (int j = -radius; j < radius; j++)
+			{
+				int num3 = Grid.OffsetCell(fromCell, j, i);
+				if (!Grid.IsSolidCell(num3))
+				{
+					if (Grid.IsGas(num3))
+					{
+						num2 += 1f;
+					}
+					num += 1f;
+				}
+			}
+		}
+		return num2 / num;
+	}
+
+	private bool HasInvalidIntake()
+	{
+		Vector3 position = base.transform.GetPosition();
+		int num = Grid.XYToCell((int)position.x, (int)position.y);
+		int num2 = Grid.OffsetCell(num, (int)this.topConsumer.sampleCellOffset.x, (int)this.topConsumer.sampleCellOffset.y);
+		int num3 = Grid.OffsetCell(num, (int)this.bottomConsumer.sampleCellOffset.x, (int)this.bottomConsumer.sampleCellOffset.y);
+		this.avgGasAccumTop += this.GetIntakeRatio(num2, (int)this.topConsumer.consumptionRadius);
+		this.avgGasAccumBottom += this.GetIntakeRatio(num3, (int)this.bottomConsumer.consumptionRadius);
+		int num4 = 5;
+		this.avgGasCounter = (this.avgGasCounter + 1) % num4;
+		if (this.avgGasCounter == 0)
+		{
+			double num5 = (double)(this.avgGasAccumTop / (float)num4);
+			float num6 = this.avgGasAccumBottom / (float)num4;
+			this.avgGasAccumBottom = 0f;
+			this.avgGasAccumTop = 0f;
+			return num5 < 0.5 || (double)num6 < 0.5;
+		}
+		return this.invalidIntake;
+	}
+
 	public void SetGasWalls(bool set)
 	{
 		Building component = base.GetComponent<Building>();
@@ -176,6 +234,16 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 
 	public float displacementAmount_DescriptorOnly;
 
+	public static Operational.Flag validIntakeFlag = new Operational.Flag("valid_intake", Operational.Flag.Type.Requirement);
+
+	private bool invalidIntake;
+
+	private float avgGasAccumTop;
+
+	private float avgGasAccumBottom;
+
+	private int avgGasCounter;
+
 	public CellOffset[] choreOffsets = new CellOffset[]
 	{
 		new CellOffset(0, 0),
@@ -190,6 +258,8 @@ public class VerticalWindTunnel : StateMachineComponent<VerticalWindTunnel.State
 	private ElementConsumer bottomConsumer;
 
 	private ElementConsumer topConsumer;
+
+	private Operational operational;
 
 	public HashSet<int> players = new HashSet<int>();
 

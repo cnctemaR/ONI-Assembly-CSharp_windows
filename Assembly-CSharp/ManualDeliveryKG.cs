@@ -122,6 +122,26 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 		this.UpdateFetchList();
 	}
 
+	public void RequestDelivery()
+	{
+		if (this.fetchList != null)
+		{
+			return;
+		}
+		float massAvailable = this.storage.GetMassAvailable(this.requestedItemTag);
+		if (massAvailable < this.capacity)
+		{
+			float num = this.capacity - massAvailable;
+			num = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, num);
+			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
+			this.fetchList = new FetchList2(this.storage, byHash);
+			this.fetchList.ShowStatusItem = this.ShowStatusItem;
+			this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.minimumMass);
+			this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, null, num, FetchOrder2.OperationalRequirement.None);
+			this.fetchList.Submit(null, false);
+		}
+	}
+
 	private void UpdateFetchList()
 	{
 		if (this.paused)
@@ -141,20 +161,9 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 				return;
 			}
 		}
-		else if (this.fetchList == null)
+		else if (this.fetchList == null && this.storage.GetMassAvailable(this.requestedItemTag) < this.refillMass)
 		{
-			float massAvailable = this.storage.GetMassAvailable(this.requestedItemTag);
-			if (massAvailable < this.refillMass)
-			{
-				float num = this.capacity - massAvailable;
-				num = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, num);
-				ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
-				this.fetchList = new FetchList2(this.storage, byHash);
-				this.fetchList.ShowStatusItem = this.ShowStatusItem;
-				this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.minimumMass);
-				this.fetchList.Add(new Tag[] { this.requestedItemTag }, null, null, num, FetchOrder2.OperationalRequirement.None);
-				this.fetchList.Submit(null, false);
-			}
+			this.RequestDelivery();
 		}
 	}
 

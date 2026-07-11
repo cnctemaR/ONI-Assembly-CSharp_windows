@@ -1522,13 +1522,13 @@ namespace STRINGS
 
 			public class MOTD
 			{
-				public static LocString IMAGE_HEADER = "AUTOMATION PACK!";
+				public static LocString IMAGE_HEADER = "DLC ROADMAP!";
 
 				public static LocString NEWS_HEADER = "JOIN THE DISCUSSION";
 
 				public static LocString NEWS_BODY = "Stay up to date by joining our mailing list, or head on over to the forums and join the discussion.";
 
-				public static LocString PATCH_NOTES_SUMMARY = "<b>Welcome to Banhi's Automation Innovation Pack!</b>\n\n<b>Update Features:</b>\n\n• New and Improved automation sensors and outputs for work and for play\n• New 'Sweepy' robot helps keep your colony tidy and stylish\n• Bunches of optimizations, bug fixes, and improvements across the game\n\nPlease view the full patch notes for further details!";
+				public static LocString PATCH_NOTES_SUMMARY = "<b>New Bugfix Patch for July 2020</b>\n\n • Fixed multiple simulation heat creation/destruction bugs\n • Fixed Duplicants getting stuck digging forever\n • Continued work on alternate color modes\n • Dozens of other fixes and improvements\n\nPlease check out the full patch notes for more details!";
 
 				public static LocString UPDATE_TEXT = "LAUNCHED!";
 			}
@@ -1585,6 +1585,13 @@ namespace STRINGS
 				public static LocString IO_ERROR = "An error occurred trying to save your game. Please ensure there is sufficient disk space.\n\n{0}";
 
 				public static LocString REPORT_BUG = "Report Bug";
+			}
+
+			public class RAILFORCEQUIT
+			{
+				public static LocString SAVE_EXIT = "Play time has expired, the game is exiting would you like to overwrite {0}?";
+
+				public static LocString WARN_EXIT = "Play time has expired, the game will now exit.";
 			}
 
 			public class MOD_ERRORS
@@ -3564,6 +3571,8 @@ namespace STRINGS
 				public static LocString LANDING = "Landing";
 
 				public static LocString UNDERWAY = "Underway";
+
+				public static LocString DESTROYED = "Destroyed";
 
 				public static LocString GO = "ALL SYSTEMS GO";
 			}

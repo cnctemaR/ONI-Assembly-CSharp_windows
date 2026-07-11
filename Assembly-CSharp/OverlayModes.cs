@@ -200,15 +200,15 @@ public abstract class OverlayModes
 					Color32 color;
 					if (def.ThermalConductivity == 1f)
 					{
-						color = conduitVisInfo.overlayTint;
+						color = GlobalAssets.Instance.colorSet.GetColorByName(conduitVisInfo.overlayTintName);
 					}
 					else if (def.ThermalConductivity < 1f)
 					{
-						color = conduitVisInfo.overlayInsulatedTint;
+						color = GlobalAssets.Instance.colorSet.GetColorByName(conduitVisInfo.overlayInsulatedTintName);
 					}
 					else
 					{
-						color = conduitVisInfo.overlayRadiantTint;
+						color = GlobalAssets.Instance.colorSet.GetColorByName(conduitVisInfo.overlayRadiantTintName);
 					}
 					if (this.connectedNetworks.Count > 0)
 					{
@@ -877,7 +877,7 @@ public abstract class OverlayModes
 			list2.Sort((OverlayModes.Disease.DiseaseSortInfo a, OverlayModes.Disease.DiseaseSortInfo b) => a.sortkey.CompareTo(b.sortkey));
 			foreach (OverlayModes.Disease.DiseaseSortInfo diseaseSortInfo in list2)
 			{
-				list.Add(new LegendEntry(diseaseSortInfo.disease.Name, diseaseSortInfo.disease.overlayLegendHovertext.ToString(), diseaseSortInfo.disease.overlayColour, null, null, true));
+				list.Add(new LegendEntry(diseaseSortInfo.disease.Name, diseaseSortInfo.disease.overlayLegendHovertext.ToString(), GlobalAssets.Instance.colorSet.GetColorByName(diseaseSortInfo.disease.overlayColourName), null, null, true));
 			}
 			return list;
 		}
@@ -1069,7 +1069,7 @@ public abstract class OverlayModes
 			public DiseaseSortInfo(Klei.AI.Disease d)
 			{
 				this.disease = d;
-				this.sortkey = OverlayModes.Disease.CalculateHUE(d.overlayColour);
+				this.sortkey = OverlayModes.Disease.CalculateHUE(GlobalAssets.Instance.colorSet.GetColorByName(d.overlayColourName));
 			}
 
 			public float sortkey;
@@ -1979,7 +1979,7 @@ public abstract class OverlayModes
 				{
 					text = text + "\n\n" + roomType.GetRoomEffectsString();
 				}
-				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, roomType.category.color, null, null, true));
+				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, GlobalAssets.Instance.colorSet.GetColorByName(roomType.category.colorName), null, null, true));
 			}
 			return list;
 		}
@@ -2394,7 +2394,7 @@ public abstract class OverlayModes
 			return "Power";
 		}
 
-		public Power(Canvas powerLabelParent, LocText powerLabelPrefab, BatteryUI batteryUIPrefab, Vector3 powerLabelOffset, Vector3 batteryUIOffset, Vector3 batteryUITransformerOffset, Vector3 batteryUISmallTransformerOffset, Color consumerColour, Color generatorColour, Color buildingDisabledColour, Color32 circuitUnpoweredColour, Color32 circuitSafeColour, Color32 circuitStrainingColour, Color32 circuitOverloadingColour)
+		public Power(Canvas powerLabelParent, LocText powerLabelPrefab, BatteryUI batteryUIPrefab, Vector3 powerLabelOffset, Vector3 batteryUIOffset, Vector3 batteryUITransformerOffset, Vector3 batteryUISmallTransformerOffset)
 		{
 			this.powerLabelParent = powerLabelParent;
 			this.powerLabelPrefab = powerLabelPrefab;
@@ -2403,13 +2403,6 @@ public abstract class OverlayModes
 			this.batteryUIOffset = batteryUIOffset;
 			this.batteryUITransformerOffset = batteryUITransformerOffset;
 			this.batteryUISmallTransformerOffset = batteryUISmallTransformerOffset;
-			this.consumerColour = consumerColour;
-			this.generatorColour = generatorColour;
-			this.buildingDisabledColour = buildingDisabledColour;
-			this.circuitUnpoweredColour = circuitUnpoweredColour;
-			this.circuitSafeColour = circuitSafeColour;
-			this.circuitStrainingColour = circuitStrainingColour;
-			this.circuitOverloadingColour = circuitOverloadingColour;
 			this.targetLayer = LayerMask.NameToLayer("MaskedOverlay");
 			this.cameraLayerMask = LayerMask.GetMask(new string[] { "MaskedOverlay", "MaskedOverlayBG" });
 			this.selectionMask = this.cameraLayerMask;
@@ -2511,19 +2504,19 @@ public abstract class OverlayModes
 							Color32 color;
 							if (wattsUsedByCircuit <= 0f)
 							{
-								color = this.circuitUnpoweredColour;
+								color = GlobalAssets.Instance.colorSet.powerCircuitUnpowered;
 							}
 							else if (wattsUsedByCircuit > maxSafeWattageForCircuit)
 							{
-								color = this.circuitOverloadingColour;
+								color = GlobalAssets.Instance.colorSet.powerCircuitOverloading;
 							}
 							else if (wattsNeededWhenActive > maxSafeWattageForCircuit && maxSafeWattageForCircuit > 0f && wattsUsedByCircuit / maxSafeWattageForCircuit >= 0.75f)
 							{
-								color = this.circuitStrainingColour;
+								color = GlobalAssets.Instance.colorSet.powerCircuitStraining;
 							}
 							else
 							{
-								color = this.circuitSafeColour;
+								color = GlobalAssets.Instance.colorSet.powerCircuitSafe;
 							}
 							if (this.connectedNetworks.Count > 0 && component2.IsConnectedToNetworks(this.connectedNetworks))
 							{
@@ -2636,7 +2629,7 @@ public abstract class OverlayModes
 						}
 						powerLabel.text = ((num != 0) ? ("+" + num.ToString()) : num.ToString());
 						BuildingEnabledButton component = item.GetComponent<BuildingEnabledButton>();
-						Color color = ((component != null && !component.IsEnabled) ? this.buildingDisabledColour : this.generatorColour);
+						Color color = ((component != null && !component.IsEnabled) ? GlobalAssets.Instance.colorSet.powerBuildingDisabled : GlobalAssets.Instance.colorSet.powerGenerator);
 						powerLabel.color = color;
 						unitLabel.color = color;
 						Image outputIcon = generator.GetComponent<BuildingCellVisualizer>().GetOutputIcon();
@@ -2648,7 +2641,7 @@ public abstract class OverlayModes
 					if (consumer != null)
 					{
 						BuildingEnabledButton component2 = item.GetComponent<BuildingEnabledButton>();
-						Color color2 = ((component2 != null && !component2.IsEnabled) ? this.buildingDisabledColour : this.consumerColour);
+						Color color2 = ((component2 != null && !component2.IsEnabled) ? GlobalAssets.Instance.colorSet.powerBuildingDisabled : GlobalAssets.Instance.colorSet.powerConsumer);
 						int num2 = Mathf.Max(0, Mathf.RoundToInt(consumer.WattsNeededWhenActive));
 						string text = num2.ToString();
 						powerLabel.text = ((num2 != 0) ? ("-" + text) : text);
@@ -2835,20 +2828,6 @@ public abstract class OverlayModes
 		private Vector3 batteryUITransformerOffset;
 
 		private Vector3 batteryUISmallTransformerOffset;
-
-		private Color32 consumerColour;
-
-		private Color32 generatorColour;
-
-		private Color32 buildingDisabledColour;
-
-		private Color32 circuitUnpoweredColour;
-
-		private Color32 circuitSafeColour;
-
-		private Color32 circuitStrainingColour;
-
-		private Color32 circuitOverloadingColour;
 
 		private int freePowerLabelIdx;
 
@@ -3403,7 +3382,7 @@ public abstract class OverlayModes
 			int num = SimDebugView.Instance.temperatureThresholds.Length - 1;
 			for (int i = 0; i < this.temperatureLegend.Count; i++)
 			{
-				this.temperatureLegend[i].colour = SimDebugView.Instance.temperatureThresholds[num - i].color;
+				this.temperatureLegend[i].colour = GlobalAssets.Instance.colorSet.GetColorByName(SimDebugView.Instance.temperatureThresholds[num - i].colorName);
 				this.temperatureLegend[i].desc_arg = GameUtil.GetFormattedTemperature(SimDebugView.Instance.temperatureThresholds[num - i].value, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false);
 			}
 		}

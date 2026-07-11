@@ -338,7 +338,7 @@ public class SandboxToolParameterMenu : KScreen
 		this.diseaseSelector = new SandboxToolParameterMenu.SelectorValue(array, delegate(object disease)
 		{
 			this.settings.SetStringSetting("SandboxTools.SelectedDisease", ((Disease)disease).Id);
-		}, (object disease) => (disease as Disease).Name, null, (object disease) => new global::Tuple<Sprite, Color>(Assets.GetSprite("germ"), (disease as Disease).overlayColour), UI.SANDBOXTOOLS.SETTINGS.DISEASE.NAME, null);
+		}, (object disease) => (disease as Disease).Name, null, (object disease) => new global::Tuple<Sprite, Color>(Assets.GetSprite("germ"), GlobalAssets.Instance.colorSet.GetColorByName((disease as Disease).overlayColourName)), UI.SANDBOXTOOLS.SETTINGS.DISEASE.NAME, null);
 	}
 
 	protected override void OnCmpEnable()

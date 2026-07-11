@@ -60,8 +60,8 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 				}
 				if (flag)
 				{
+					int num4 = num3;
 					bool flag2 = false;
-					int num4;
 					if (num2 != num3)
 					{
 						num4 = num2;
@@ -69,16 +69,39 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 					}
 					else
 					{
-						num4 = num3;
-						while (Grid.IsValidCell(num4))
+						bool flag3 = false;
+						int num5 = -1;
+						int num6 = -1;
+						foreach (CellOffset cellOffset in OxygenBreather.DEFAULT_BREATHABLE_OFFSETS)
 						{
-							Element element2 = Grid.Element[num4];
-							if (!element2.IsLiquid && !element2.IsSolid)
+							int num7 = Grid.OffsetCell(num3, cellOffset);
+							if (Grid.IsValidCell(num7))
 							{
-								flag2 = true;
-								break;
+								Element element2 = Grid.Element[num7];
+								if (element2.id == SimHashes.CarbonDioxide || element2.HasTag(GameTags.Breathable))
+								{
+									num5 = num7;
+									flag3 = true;
+									flag2 = true;
+									break;
+								}
+								if (element2.IsGas)
+								{
+									num6 = num7;
+									flag2 = true;
+								}
 							}
-							num4 = Grid.CellAbove(num4);
+						}
+						if (flag2)
+						{
+							if (flag3)
+							{
+								num4 = num5;
+							}
+							else
+							{
+								num4 = num6;
+							}
 						}
 					}
 					co.TriggerDestroy();
@@ -102,7 +125,7 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		}
 	}
 
-	public void SpawnCO2(Vector3 position, float mass, float temperature)
+	public void SpawnCO2(Vector3 position, float mass, float temperature, bool flip)
 	{
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
 		GameObject gameObject = this.co2Pool.GetInstance();
@@ -116,20 +139,22 @@ public class CO2Manager : KMonoBehaviour, ISim33ms
 		KBatchedAnimController component2 = component.GetComponent<KBatchedAnimController>();
 		component2.TintColour = this.tintColour;
 		component2.onDestroySelf = new Action<GameObject>(this.OnDestroyCO2);
+		component2.FlipX = flip;
 		component.StartLoop();
 		this.co2Items.Add(component);
 	}
 
-	public void SpawnBreath(Vector3 position, float mass, float temperature)
+	public void SpawnBreath(Vector3 position, float mass, float temperature, bool flip)
 	{
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.Front);
-		this.SpawnCO2(position, mass, temperature);
+		this.SpawnCO2(position, mass, temperature, flip);
 		GameObject gameObject = this.breathPool.GetInstance();
 		gameObject.transform.SetPosition(position);
 		gameObject.SetActive(true);
 		KBatchedAnimController component = gameObject.GetComponent<KBatchedAnimController>();
 		component.TintColour = this.tintColour;
 		component.onDestroySelf = new Action<GameObject>(this.OnDestroyBreath);
+		component.FlipX = flip;
 		component.Play("breath", KAnim.PlayMode.Once, 1f, 0f);
 	}
 

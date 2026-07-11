@@ -92,7 +92,7 @@ namespace Database
 				if (((Growing)data).GetComponent<Crop>() != null)
 				{
 					float num = ((Growing)data).TimeUntilNextHarvest();
-					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(num, "F1"));
+					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(num, "F1", false));
 				}
 				float num2 = 100f * ((Growing)data).PercentGrown();
 				str = str.Replace("{PercentGrow}", Math.Floor((double)Math.Max(num2, 0f)).ToString("F0"));
@@ -140,7 +140,7 @@ namespace Database
 			{
 				if (data is Growing && data != null)
 				{
-					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(Mathf.Min(((Growing)data).growthTime, ((Growing)data).TimeUntilNextHarvest()), "F1"));
+					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(Mathf.Min(((Growing)data).growthTime, ((Growing)data).TimeUntilNextHarvest()), "F1", false));
 				}
 				str = str.Replace("{Reasons}", (data as KMonoBehaviour).GetComponent<WiltCondition>().WiltCausesString());
 				return str;
@@ -150,7 +150,7 @@ namespace Database
 			{
 				if (data is Growing && data != null)
 				{
-					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(Mathf.Min(((Growing)data).growthTime, ((Growing)data).TimeUntilNextHarvest()), "F1"));
+					str = str.Replace("{TimeUntilNextHarvest}", GameUtil.GetFormattedCycles(Mathf.Min(((Growing)data).growthTime, ((Growing)data).TimeUntilNextHarvest()), "F1", false));
 				}
 				str = str.Replace("{Reasons}", (data as KMonoBehaviour).GetComponent<WiltCondition>().WiltCausesString());
 				return str;
@@ -303,7 +303,7 @@ namespace Database
 			this.Old.resolveTooltipCallback = delegate(string str, object data)
 			{
 				AgeMonitor.Instance instance7 = (AgeMonitor.Instance)data;
-				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(instance7.CyclesUntilDeath * 600f, "F1"));
+				return str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(instance7.CyclesUntilDeath * 600f, "F1", false));
 			};
 			this.ExchangingElementConsume = new StatusItem("ExchangingElementConsume", "CREATURES", "", StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			this.ExchangingElementConsume.resolveStringCallback = delegate(string str, object data)

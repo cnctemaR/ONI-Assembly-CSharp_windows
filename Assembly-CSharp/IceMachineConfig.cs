@@ -22,7 +22,6 @@ public class IceMachineConfig : IBuildingConfig
 		buildingDef.EnergyConsumptionWhenActive = this.energyConsumption;
 		buildingDef.ExhaustKilowattsWhenActive = 4f;
 		buildingDef.SelfHeatKilowattsWhenActive = 12f;
-		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = OverlayModes.Temperature.ID;
 		buildingDef.AudioCategory = "Metal";
 		return buildingDef;

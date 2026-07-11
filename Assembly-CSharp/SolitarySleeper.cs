@@ -58,7 +58,7 @@ public class SolitarySleeper : StateMachineComponent<SolitarySleeper.StatesInsta
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.satisfied;
-			this.root.EventTransition(GameHashes.Died, null, (SolitarySleeper.StatesInstance smi) => smi.gameObject.GetSMI<DeathMonitor.Instance>().IsDead()).EventTransition(GameHashes.NewDay, this.satisfied, null).Update("SolitarySleeperCheck", delegate(SolitarySleeper.StatesInstance smi, float dt)
+			this.root.TagTransition(GameTags.Dead, null, false).EventTransition(GameHashes.NewDay, this.satisfied, null).Update("SolitarySleeperCheck", delegate(SolitarySleeper.StatesInstance smi, float dt)
 			{
 				if (smi.master.IsUncomfortable())
 				{

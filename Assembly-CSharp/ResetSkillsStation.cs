@@ -35,7 +35,7 @@ public class ResetSkillsStation : Workable
 
 	private void CreateChore()
 	{
-		this.chore = new WorkChore<ResetSkillsStation>(Db.Get().ChoreTypes.Train, this, null, true, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		this.chore = new WorkChore<ResetSkillsStation>(Db.Get().ChoreTypes.UnlearnSkill, this, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 	}
 
 	protected override void OnStartWork(Worker worker)

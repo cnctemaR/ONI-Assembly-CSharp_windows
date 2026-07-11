@@ -75,7 +75,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.Subscribe<Storage>(1623392196, Storage.OnDeathDelegate);
+		GameUtil.SubscribeToTags<Storage>(this, Storage.OnDeadTagChangedDelegate);
 		base.Subscribe<Storage>(1502190696, Storage.OnQueueDestroyObjectDelegate);
 		base.Subscribe<Storage>(-905833192, Storage.OnCopySettingsDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Storing;
@@ -1257,7 +1257,7 @@ public class Storage : Workable, ISaveLoadableDetails, IGameObjectEffectDescript
 		Storage.StoredItemModifier.Insulate
 	};
 
-	private static readonly EventSystem.IntraObjectHandler<Storage> OnDeathDelegate = new EventSystem.IntraObjectHandler<Storage>(delegate(Storage component, object data)
+	private static readonly EventSystem.IntraObjectHandler<Storage> OnDeadTagChangedDelegate = GameUtil.CreateHasTagHandler<Storage>(GameTags.Dead, delegate(Storage component, object data)
 	{
 		component.OnDeath(data);
 	});

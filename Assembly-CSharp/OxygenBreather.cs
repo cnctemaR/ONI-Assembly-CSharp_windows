@@ -25,8 +25,7 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 	protected override void OnPrefabInit()
 	{
-		base.Subscribe<OxygenBreather>(1623392196, OxygenBreather.OnDeathDelegate);
-		base.Subscribe<OxygenBreather>(-1117766961, OxygenBreather.OnRevivedDelegate);
+		GameUtil.SubscribeToTags<OxygenBreather>(this, OxygenBreather.OnDeadTagChangedDelegate);
 	}
 
 	public bool IsLowOxygen()
@@ -79,10 +78,15 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 					{
 						this.accumulatedCO2 -= this.minCO2ToEmit;
 						Vector3 position = base.transform.GetPosition();
-						position.x += (this.facing.GetFacing() ? (-this.mouthOffset.x) : this.mouthOffset.x);
-						position.y += this.mouthOffset.y;
-						position.z -= 0.5f;
-						CO2Manager.instance.SpawnBreath(position, this.minCO2ToEmit, this.temperature.value);
+						Vector3 vector = position;
+						vector.x += (this.facing.GetFacing() ? (-this.mouthOffset.x) : this.mouthOffset.x);
+						vector.y += this.mouthOffset.y;
+						vector.z -= 0.5f;
+						if (Mathf.FloorToInt(vector.x) != Mathf.FloorToInt(position.x))
+						{
+							vector.x = Mathf.Floor(position.x) + (this.facing.GetFacing() ? 0.01f : 0.99f);
+						}
+						CO2Manager.instance.SpawnBreath(vector, this.minCO2ToEmit, this.temperature.value, this.facing.GetFacing());
 					}
 				}
 				else if (this.gasProvider.ShouldStoreCO2())
@@ -123,11 +127,6 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		KSelectable component = base.GetComponent<KSelectable>();
 		component.RemoveStatusItem(Db.Get().DuplicantStatusItems.BreathingO2, false);
 		component.RemoveStatusItem(Db.Get().DuplicantStatusItems.EmittingCO2, false);
-	}
-
-	private void OnRevived(object data)
-	{
-		base.enabled = true;
 	}
 
 	private int GetMouthCellAtCell(int cell, CellOffset[] offsets)
@@ -239,6 +238,16 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	public static CellOffset[] DEFAULT_BREATHABLE_OFFSETS = new CellOffset[]
+	{
+		new CellOffset(0, 0),
+		new CellOffset(0, 1),
+		new CellOffset(1, 1),
+		new CellOffset(-1, 1),
+		new CellOffset(1, 0),
+		new CellOffset(-1, 0)
+	};
+
 	public float O2toCO2conversion = 0.5f;
 
 	public float lowOxygenThreshold;
@@ -277,14 +286,9 @@ public class OxygenBreather : KMonoBehaviour, ISim200ms
 
 	private OxygenBreather.IGasProvider gasProvider;
 
-	private static readonly EventSystem.IntraObjectHandler<OxygenBreather> OnDeathDelegate = new EventSystem.IntraObjectHandler<OxygenBreather>(delegate(OxygenBreather component, object data)
+	private static readonly EventSystem.IntraObjectHandler<OxygenBreather> OnDeadTagChangedDelegate = GameUtil.CreateHasTagHandler<OxygenBreather>(GameTags.Dead, delegate(OxygenBreather component, object data)
 	{
 		component.OnDeath(data);
-	});
-
-	private static readonly EventSystem.IntraObjectHandler<OxygenBreather> OnRevivedDelegate = new EventSystem.IntraObjectHandler<OxygenBreather>(delegate(OxygenBreather component, object data)
-	{
-		component.OnRevived(data);
 	});
 
 	public interface IGasProvider

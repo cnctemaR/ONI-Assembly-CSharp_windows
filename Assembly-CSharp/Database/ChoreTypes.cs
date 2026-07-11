@@ -86,6 +86,7 @@ namespace Database
 			this.Heal = this.Add("Heal", new string[0], "Heal", new string[] { "Vomit", "Cough", "EmoteHighPriority" }, DUPLICANTS.CHORES.HEAL.NAME, DUPLICANTS.CHORES.HEAL.STATUS, DUPLICANTS.CHORES.HEAL.TOOLTIP, false, -1, null);
 			this.Shower = this.Add("Shower", new string[0], "Shower", new string[0], DUPLICANTS.CHORES.SHOWER.NAME, DUPLICANTS.CHORES.SHOWER.STATUS, DUPLICANTS.CHORES.SHOWER.TOOLTIP, false, -1, null);
 			this.LearnSkill = this.Add("LearnSkill", new string[0], "LearnSkill", new string[0], DUPLICANTS.CHORES.LEARNSKILL.NAME, DUPLICANTS.CHORES.LEARNSKILL.STATUS, DUPLICANTS.CHORES.LEARNSKILL.TOOLTIP, false, -1, null);
+			this.UnlearnSkill = this.Add("UnlearnSkill", new string[0], "", new string[0], DUPLICANTS.CHORES.UNLEARNSKILL.NAME, DUPLICANTS.CHORES.UNLEARNSKILL.STATUS, DUPLICANTS.CHORES.UNLEARNSKILL.TOOLTIP, false, -1, null);
 			this.Equip = this.Add("Equip", new string[0], "", new string[0], DUPLICANTS.CHORES.EQUIP.NAME, DUPLICANTS.CHORES.EQUIP.STATUS, DUPLICANTS.CHORES.EQUIP.TOOLTIP, false, -1, null);
 			this.JoyReaction = this.Add("JoyReaction", new string[0], "", new string[0], DUPLICANTS.CHORES.JOYREACTION.NAME, DUPLICANTS.CHORES.JOYREACTION.STATUS, DUPLICANTS.CHORES.JOYREACTION.TOOLTIP, false, 5000, null);
 			this.StressHeal = this.Add("StressHeal", new string[0], "", new string[] { "" }, DUPLICANTS.CHORES.STRESSHEAL.NAME, DUPLICANTS.CHORES.STRESSHEAL.STATUS, DUPLICANTS.CHORES.STRESSHEAL.TOOLTIP, false, -1, null);
@@ -99,6 +100,7 @@ namespace Database
 			this.Toggle = this.Add("Toggle", new string[] { "Toggle" }, "", new string[0], DUPLICANTS.CHORES.TOGGLE.NAME, DUPLICANTS.CHORES.TOGGLE.STATUS, DUPLICANTS.CHORES.TOGGLE.TOOLTIP, true, 5000, null);
 			this.Capture = this.Add("Capture", new string[] { "Ranching" }, "", new string[0], DUPLICANTS.CHORES.CAPTURE.NAME, DUPLICANTS.CHORES.CAPTURE.STATUS, DUPLICANTS.CHORES.CAPTURE.TOOLTIP, false, 5000, null);
 			this.CreatureFetch = this.Add("CreatureFetch", new string[] { "Ranching" }, "", new string[0], DUPLICANTS.CHORES.FETCHCREATURE.NAME, DUPLICANTS.CHORES.FETCHCREATURE.STATUS, DUPLICANTS.CHORES.FETCHCREATURE.TOOLTIP, false, 5000, null);
+			this.RanchingFetch = this.Add("RanchingFetch", new string[] { "Ranching" }, "", new string[0], DUPLICANTS.CHORES.FETCHRANCHING.NAME, DUPLICANTS.CHORES.FETCHRANCHING.STATUS, DUPLICANTS.CHORES.FETCHRANCHING.TOOLTIP, false, 5000, null);
 			this.EggSing = this.Add("EggSing", new string[] { "Ranching" }, "", new string[0], DUPLICANTS.CHORES.SINGTOEGG.NAME, DUPLICANTS.CHORES.SINGTOEGG.STATUS, DUPLICANTS.CHORES.SINGTOEGG.TOOLTIP, false, 5000, null);
 			this.Astronaut = this.Add("Astronaut", new string[] { "MachineOperating" }, "", new string[0], DUPLICANTS.CHORES.ASTRONAUT.NAME, DUPLICANTS.CHORES.ASTRONAUT.STATUS, DUPLICANTS.CHORES.ASTRONAUT.TOOLTIP, false, 5000, null);
 			this.FetchCritical = this.Add("FetchCritical", new string[] { "Hauling", "LifeSupport" }, "", new string[0], DUPLICANTS.CHORES.FETCHCRITICAL.NAME, DUPLICANTS.CHORES.FETCHCRITICAL.STATUS, DUPLICANTS.CHORES.FETCHCRITICAL.TOOLTIP, false, 5000, DUPLICANTS.CHORES.FETCHCRITICAL.REPORT_NAME);
@@ -167,7 +169,7 @@ namespace Database
 				new ChoreType[] { this.JoyReaction },
 				new ChoreType[] { this.Attack },
 				new ChoreType[] { this.Flee },
-				new ChoreType[] { this.LearnSkill, this.Eat, this.BreakPee },
+				new ChoreType[] { this.LearnSkill, this.UnlearnSkill, this.Eat, this.BreakPee },
 				new ChoreType[] { this.TakeMedicine },
 				new ChoreType[] { this.Heal, this.SleepDueToDisease, this.RestDueToDisease },
 				new ChoreType[] { this.Sleep, this.Narcolepsy },
@@ -183,9 +185,9 @@ namespace Database
 					this.Checkpoint, this.TravelTubeEntrance, this.WashHands, this.Recharge, this.ScrubOre, this.Ranch, this.MoveToSafety, this.Relocate, this.Research, this.Mop,
 					this.Toggle, this.Deconstruct, this.Capture, this.EggSing, this.Art, this.GeneratePower, this.CropTend, this.PowerTinker, this.MachineTinker, this.DropUnusedInventory,
 					this.Harvest, this.Uproot, this.FarmingFabricate, this.PowerFabricate, this.Compound, this.Fabricate, this.Train, this.Cook, this.Build, this.Dig,
-					this.BuildDig, this.FlipCompost, this.Depressurize, this.StressEmote, this.Astronaut, this.EmptyDesalinator, this.FetchCritical, this.ResearchFetch, this.CreatureFetch, this.Fetch,
-					this.Transport, this.FarmFetch, this.BuildFetch, this.CookFetch, this.DoctorFetch, this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.FoodFetch, this.StorageFetch,
-					this.RepairFetch
+					this.BuildDig, this.FlipCompost, this.Depressurize, this.StressEmote, this.Astronaut, this.EmptyDesalinator, this.FetchCritical, this.ResearchFetch, this.CreatureFetch, this.RanchingFetch,
+					this.Fetch, this.Transport, this.FarmFetch, this.BuildFetch, this.CookFetch, this.DoctorFetch, this.MachineFetch, this.PowerFetch, this.FabricateFetch, this.FoodFetch,
+					this.StorageFetch, this.RepairFetch
 				},
 				new ChoreType[] { this.ReturnSuitIdle, this.EmoteIdle },
 				new ChoreType[] { this.Idle }
@@ -342,6 +344,8 @@ namespace Database
 
 		public ChoreType CreatureFetch;
 
+		public ChoreType RanchingFetch;
+
 		public ChoreType FoodFetch;
 
 		public ChoreType DoctorFetch;
@@ -429,6 +433,8 @@ namespace Database
 		public ChoreType TravelTubeEntrance;
 
 		public ChoreType LearnSkill;
+
+		public ChoreType UnlearnSkill;
 
 		public ChoreType SwitchHat;
 

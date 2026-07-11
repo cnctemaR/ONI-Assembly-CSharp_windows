@@ -45,7 +45,7 @@ public class ConduitFlowVisualizer
 		{
 			return this.visInfo.tint;
 		}
-		return this.visInfo.overlayTint;
+		return GlobalAssets.Instance.colorSet.GetColorByName(this.visInfo.overlayTintName);
 	}
 
 	private Color32 GetInsulatedTintColour()
@@ -54,7 +54,7 @@ public class ConduitFlowVisualizer
 		{
 			return this.visInfo.insulatedTint;
 		}
-		return this.visInfo.overlayInsulatedTint;
+		return GlobalAssets.Instance.colorSet.GetColorByName(this.visInfo.overlayInsulatedTintName);
 	}
 
 	private Color32 GetRadiantTintColour()
@@ -63,7 +63,7 @@ public class ConduitFlowVisualizer
 		{
 			return this.visInfo.radiantTint;
 		}
-		return this.visInfo.overlayRadiantTint;
+		return GlobalAssets.Instance.colorSet.GetColorByName(this.visInfo.overlayRadiantTintName);
 	}
 
 	private Color32 GetCellTintColour(int cell)

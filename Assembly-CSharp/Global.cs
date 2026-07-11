@@ -308,6 +308,7 @@ public class Global : MonoBehaviour
 		KProfiler.main_thread = Thread.CurrentThread;
 		this.RestoreLegacyMetricsSetting();
 		this.TestDataLocations();
+		DistributionPlatform.onExitRequest += this.OnExitRequest;
 		if (DistributionPlatform.Initialized)
 		{
 			if (!KPrivacyPrefs.instance.disableDataCollection)
@@ -331,6 +332,39 @@ public class Global : MonoBehaviour
 		}
 		this.modManager.Load(Content.LayerableFiles);
 		GlobalResources.Instance();
+	}
+
+	private void OnExitRequest()
+	{
+		bool flag = true;
+		if (Game.Instance != null)
+		{
+			string filename = SaveLoader.GetActiveSaveFilePath();
+			if (!string.IsNullOrEmpty(filename) && File.Exists(filename))
+			{
+				flag = false;
+				KScreen component = KScreenManager.AddChild(this.globalCanvas, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<KScreen>();
+				component.Activate();
+				component.GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(string.Format(UI.FRONTEND.RAILFORCEQUIT.SAVE_EXIT, Path.GetFileNameWithoutExtension(filename)), delegate
+				{
+					SaveLoader.Instance.Save(filename, false, true);
+					ReportErrorDialog.MOST_RECENT_SAVEFILE = filename;
+					App.Quit();
+				}, delegate
+				{
+					App.Quit();
+				}, null, null, null, null, null, null, true);
+			}
+		}
+		if (flag)
+		{
+			KScreen component2 = KScreenManager.AddChild(this.globalCanvas, ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject).GetComponent<KScreen>();
+			component2.Activate();
+			component2.GetComponent<ConfirmDialogScreen>().PopupConfirmDialog(UI.FRONTEND.RAILFORCEQUIT.WARN_EXIT, delegate
+			{
+				App.Quit();
+			}, null, null, null, null, null, null, null, true);
+		}
 	}
 
 	private void RestoreLegacyMetricsSetting()
@@ -526,7 +560,7 @@ public class Global : MonoBehaviour
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 410209U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 419840U);
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("SaveFolderWriteTest", Global.saveFolderTestResult);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{

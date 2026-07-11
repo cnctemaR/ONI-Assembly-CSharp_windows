@@ -135,7 +135,7 @@ namespace KMod
 			Mod.ArchivedVersion archivedVersion = null;
 			foreach (Mod.ArchivedVersion archivedVersion2 in archivedVersionArray.archivedVersions)
 			{
-				if (410209L <= (long)archivedVersion2.lastWorkingBuild && (archivedVersion == null || archivedVersion2.lastWorkingBuild < archivedVersion.lastWorkingBuild))
+				if (419840L <= (long)archivedVersion2.lastWorkingBuild && (archivedVersion == null || archivedVersion2.lastWorkingBuild < archivedVersion.lastWorkingBuild))
 				{
 					archivedVersion = archivedVersion2;
 				}

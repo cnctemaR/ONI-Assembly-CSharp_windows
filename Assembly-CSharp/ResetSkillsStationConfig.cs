@@ -33,7 +33,6 @@ public class ResetSkillsStationConfig : IBuildingConfig
 		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddTag(GameTags.NotRoomAssignable);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
-		Prioritizable.AddRef(go);
 		go.AddOrGet<Ownable>().slotID = Db.Get().AssignableSlots.ResetSkillsStation.Id;
 		ResetSkillsStation resetSkillsStation = go.AddOrGet<ResetSkillsStation>();
 		resetSkillsStation.workTime = 180f;

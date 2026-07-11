@@ -31,17 +31,9 @@ public class MinionConfig : IEntityConfig
 		oxygenBreather.O2toCO2conversion = 0.02f;
 		oxygenBreather.lowOxygenThreshold = 0.52f;
 		oxygenBreather.noOxygenThreshold = 0.05f;
-		oxygenBreather.mouthOffset = new Vector2f(0.25f, 0.7f);
+		oxygenBreather.mouthOffset = new Vector2f(0.25f, 0.97f);
 		oxygenBreather.minCO2ToEmit = 0.02f;
-		oxygenBreather.breathableCells = new CellOffset[]
-		{
-			new CellOffset(0, 0),
-			new CellOffset(0, 1),
-			new CellOffset(1, 1),
-			new CellOffset(-1, 1),
-			new CellOffset(1, 0),
-			new CellOffset(-1, 0)
-		};
+		oxygenBreather.breathableCells = OxygenBreather.DEFAULT_BREATHABLE_OFFSETS;
 		gameObject.AddOrGet<WarmBlooded>();
 		gameObject.AddOrGet<MinionIdentity>();
 		GridVisibility gridVisibility = gameObject.AddOrGet<GridVisibility>();

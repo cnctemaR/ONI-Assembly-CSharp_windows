@@ -17,7 +17,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: Q2-" + 312373U.ToString(), null);
+		global::Debug.Log("Development Build: Q2-" + 312713U.ToString(), null);
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();

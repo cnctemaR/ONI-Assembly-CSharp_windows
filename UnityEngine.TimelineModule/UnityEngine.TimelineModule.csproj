@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{7AA19CAA-81F2-46BB-A97D-E1A047EA7559}</ProjectGuid>
+    <ProjectGuid>{A57BA8F8-3F20-4013-A06F-C84AC9BEE8F7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>UnityEngine.TimelineModule</RootNamespace>
     <AssemblyName>UnityEngine.TimelineModule</AssemblyName>
@@ -18,11 +18,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\mscorlib\mscorlib.csproj">
-      <Project>{7AA19CAA-81F2-46BB-A97D-E1A047EA751F}</Project>
+      <Project>{A57BA8F8-3F20-4013-A06F-C84AC9BEE8BD}</Project>
       <Name>mscorlib</Name>
     </ProjectReference>
     <ProjectReference Include="..\UnityEngine.SharedInternalsModule\UnityEngine.SharedInternalsModule.csproj">
-      <Project>{7AA19CAA-81F2-46BB-A97D-E1A047EA754D}</Project>
+      <Project>{A57BA8F8-3F20-4013-A06F-C84AC9BEE8EB}</Project>
       <Name>UnityEngine.SharedInternalsModule</Name>
     </ProjectReference>
   </ItemGroup>

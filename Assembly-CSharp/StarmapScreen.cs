@@ -834,13 +834,23 @@ public class StarmapScreen : KModalScreen
 			if (component != null)
 			{
 				BreakdownListRow breakdownListRow = this.rocketDetailsFuel.AddRow();
-				breakdownListRow.ShowData(gameObject.gameObject.GetProperName() + " (" + ElementLoader.GetElement(engineFuelTag).name + ")", GameUtil.GetFormattedMass(component.GetAmountAvailable(engineFuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
+				if (engineFuelTag.IsValid)
+				{
+					Element element = ElementLoader.GetElement(engineFuelTag);
+					breakdownListRow.ShowData(gameObject.gameObject.GetProperName() + " (" + element.name + ")", GameUtil.GetFormattedMass(component.GetAmountAvailable(engineFuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
+				}
+				else
+				{
+					breakdownListRow.ShowData(gameObject.gameObject.GetProperName(), UI.STARMAP.ROCKETSTATS.NO_ENGINE);
+					breakdownListRow.SetStatusColor(Color.red);
+				}
 			}
 			SolidBooster component2 = gameObject.GetComponent<SolidBooster>();
 			if (component2 != null)
 			{
 				BreakdownListRow breakdownListRow2 = this.rocketDetailsFuel.AddRow();
-				breakdownListRow2.ShowData(gameObject.gameObject.GetProperName() + " (" + ElementLoader.GetElement(component2.fuelTag).name + ")", GameUtil.GetFormattedMass(component2.fuelStorage.GetMassAvailable(component2.fuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
+				Element element2 = ElementLoader.GetElement(component2.fuelTag);
+				breakdownListRow2.ShowData(gameObject.gameObject.GetProperName() + " (" + element2.name + ")", GameUtil.GetFormattedMass(component2.fuelStorage.GetMassAvailable(component2.fuelTag), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
 			}
 		}
 		BreakdownListRow breakdownListRow3 = this.rocketDetailsFuel.AddRow();
@@ -1031,7 +1041,7 @@ public class StarmapScreen : KModalScreen
 			foreach (Tuple<ArtifactTier, float> tuple in artifactDropTable.rates)
 			{
 				BreakdownListRow breakdownListRow5 = this.destinationDetailsArtifacts.AddRow();
-				breakdownListRow5.ShowData(tuple.first.name_key.String, GameUtil.GetFormattedPercent(tuple.second / artifactDropTable.totalWeight * 100f, GameUtil.TimeSlice.None));
+				breakdownListRow5.ShowData(Strings.Get(tuple.first.name_key), GameUtil.GetFormattedPercent(tuple.second / artifactDropTable.totalWeight * 100f, GameUtil.TimeSlice.None));
 			}
 		}
 		this.destinationDetailsContainer.gameObject.SetActive(true);

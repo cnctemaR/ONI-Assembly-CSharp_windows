@@ -864,20 +864,20 @@ public class PlanScreen : KIconToggleMenu
 				break;
 			}
 		}
-		if (buildingDef == null)
+		DebugUtil.DevAssert(buildingDef, new object[] { "def is null" });
+		if (buildingDef)
 		{
-			global::Debug.Log("No def!", null);
-		}
-		if (buildingDef.isKAnimTile && buildingDef.isUtility)
-		{
-			IList<Tag> getSelectedElementAsList = this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList;
-			bool flag = buildingDef.BuildingComplete.GetComponent<Wire>() != null;
-			BaseUtilityBuildTool baseUtilityBuildTool = ((!flag) ? UtilityBuildTool.Instance : WireBuildTool.Instance);
-			baseUtilityBuildTool.Activate(buildingDef, getSelectedElementAsList);
-		}
-		else
-		{
-			BuildTool.Instance.Activate(buildingDef, this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList, null);
+			if (buildingDef.isKAnimTile && buildingDef.isUtility)
+			{
+				IList<Tag> getSelectedElementAsList = this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList;
+				bool flag = buildingDef.BuildingComplete.GetComponent<Wire>() != null;
+				BaseUtilityBuildTool baseUtilityBuildTool = ((!flag) ? UtilityBuildTool.Instance : WireBuildTool.Instance);
+				baseUtilityBuildTool.Activate(buildingDef, getSelectedElementAsList);
+			}
+			else
+			{
+				BuildTool.Instance.Activate(buildingDef, this.productInfoScreen.materialSelectionPanel.GetSelectedElementAsList, null);
+			}
 		}
 	}
 

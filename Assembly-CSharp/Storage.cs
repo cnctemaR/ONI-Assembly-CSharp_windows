@@ -285,6 +285,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			else
 			{
 				this.Transfer(gameObject, dest_storage, block_events, hide_popups);
+				amount = component.Units;
 			}
 			return amount;
 		}

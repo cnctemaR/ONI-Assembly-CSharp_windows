@@ -424,7 +424,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 				}
 				this.OnMachineOrderCancelledOrComplete(this.machineOrders[j]);
 				this.machineOrders[j].Cancel();
-				this.machineOrders.RemoveAt(j);
+				if (this.machineOrders.Count != 0)
+				{
+					this.machineOrders.RemoveAt(j);
+				}
 			}
 		}
 	}
@@ -485,7 +488,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 					ComplexRecipe.RecipeElement[] ingredients = parentOrder.recipe.ingredients;
 					foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
 					{
-						dictionary[recipeElement.material] = this.inStorage.GetMassAvailable(recipeElement.material);
+						dictionary[recipeElement.material] = this.inStorage.GetAmountAvailable(recipeElement.material);
 					}
 				}
 			}
@@ -591,8 +594,8 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		bool flag = true;
 		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
 		{
-			float massAvailable = storage.GetMassAvailable(recipeElement.material);
-			if (massAvailable < recipeElement.amount)
+			float amountAvailable = storage.GetAmountAvailable(recipeElement.material);
+			if (amountAvailable < recipeElement.amount)
 			{
 				flag = false;
 				break;
@@ -831,7 +834,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		}
 		else
 		{
-			this.currentOrderIdx = this.GetUserOrderIndex(nextMachineOrder.parentOrder);
+			this.currentOrderIdx = Mathf.Max(0, this.GetUserOrderIndex(nextMachineOrder.parentOrder));
 		}
 	}
 
@@ -936,10 +939,13 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		this.SpawnOrderProduct(this.machineOrders[0].parentOrder);
 		this.buildStorage.Transfer(this.outStorage, true, true);
 		this.OnMachineOrderCancelledOrComplete(this.machineOrders[0]);
+		this.willBeSadIfMachineOrdersChanges = false;
 		int userOrderIndex = this.GetUserOrderIndex(this.machineOrders[0].parentOrder);
 		this.machineOrders.RemoveAt(0);
-		this.willBeSadIfMachineOrdersChanges = false;
-		this.DecrementRecipeQueueCount(this.userOrders[userOrderIndex].recipe, true);
+		if (userOrderIndex != -1)
+		{
+			this.DecrementRecipeQueueCount(this.userOrders[userOrderIndex].recipe, true);
+		}
 		this.SetCurrentUserOrderByMachineOrder((this.machineOrders.Count <= 0) ? null : this.machineOrders[0]);
 		this.UpdateMachineOrders(false);
 		this.ShowProgressBar(false);
@@ -954,12 +960,19 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 				return i;
 			}
 		}
-		global::Debug.LogError("Could not find user order index", null);
+		global::Debug.LogWarningFormat("Could not find user order index for order with recipe {0}. There are {1} User orders and {2} machine orders.", new object[]
+		{
+			order.recipe.GetUIName(),
+			this.userOrders.Count,
+			this.machineOrders.Count
+		});
 		return -1;
 	}
 
 	private void OnDroppedAll(object data)
 	{
+		this.CancelAllMachineOrders();
+		this.UpdateMachineOrders(false);
 	}
 
 	private void OnOperationalChanged(object data)

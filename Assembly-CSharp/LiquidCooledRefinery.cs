@@ -72,9 +72,11 @@ public class LiquidCooledRefinery : ComplexFabricator
 	protected override void TransferCurrentRecipeIngredientsForBuild()
 	{
 		base.TransferCurrentRecipeIngredientsForBuild();
-		while (this.buildStorage.GetAmountAvailable(this.coolantTag) < this.minCoolantMass && this.inStorage.GetAmountAvailable(this.coolantTag) > 0f)
+		float num = this.minCoolantMass;
+		while (this.buildStorage.GetAmountAvailable(this.coolantTag) < this.minCoolantMass && this.inStorage.GetAmountAvailable(this.coolantTag) > 0f && num > 0f)
 		{
-			this.inStorage.Transfer(this.buildStorage, this.coolantTag, this.minCoolantMass, false, true);
+			float num2 = this.inStorage.Transfer(this.buildStorage, this.coolantTag, num, false, true);
+			num -= num2;
 		}
 	}
 
@@ -92,7 +94,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 			PrimaryElement component2 = gameObject.GetComponent<PrimaryElement>();
 			if (component2.Mass != 0f)
 			{
-				num2 = component2.Mass * component2.Element.specificHeatCapacity;
+				num2 += component2.Mass * component2.Element.specificHeatCapacity;
 			}
 		}
 		foreach (GameObject gameObject2 in pooledList)
@@ -107,7 +109,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 				component3.Temperature += num5;
 			}
 		}
-		this.buildStorage.Transfer(this.outStorage, this.coolantTag, this.minCoolantMass, false, true);
+		this.buildStorage.Transfer(this.outStorage, this.coolantTag, float.MaxValue, false, true);
 		pooledList.Recycle();
 		return list;
 	}

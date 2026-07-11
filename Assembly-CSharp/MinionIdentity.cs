@@ -179,10 +179,13 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	protected override void OnCleanUp()
 	{
-		MinionAssignablesProxy minionAssignablesProxy = this.assignableProxy.Get();
-		if (minionAssignablesProxy && minionAssignablesProxy.target == this)
+		if (this.assignableProxy != null)
 		{
-			Util.KDestroyGameObject(minionAssignablesProxy.gameObject);
+			MinionAssignablesProxy minionAssignablesProxy = this.assignableProxy.Get();
+			if (minionAssignablesProxy && minionAssignablesProxy.target == this)
+			{
+				Util.KDestroyGameObject(minionAssignablesProxy.gameObject);
+			}
 		}
 		Components.MinionIdentities.Remove(this);
 		Components.LiveMinionIdentities.Remove(this);
@@ -223,22 +226,33 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 		{
 			return;
 		}
-		if (!base.GetComponent<Navigator>().IsMoving())
+		if (this.navigator == null)
+		{
+			this.navigator = base.GetComponent<Navigator>();
+		}
+		if (this.navigator != null && !this.navigator.IsMoving())
 		{
 			return;
 		}
-		Chore currentChore = base.GetComponent<ChoreDriver>().GetCurrentChore();
-		if (currentChore != null)
+		if (this.choreDriver == null)
 		{
-			ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
-			if (currentChore is FetchAreaChore)
+			this.choreDriver = base.GetComponent<ChoreDriver>();
+		}
+		if (this.choreDriver != null)
+		{
+			Chore currentChore = this.choreDriver.GetCurrentChore();
+			if (currentChore != null)
 			{
-				MinionResume component = base.GetComponent<MinionResume>();
-				if (component != null)
+				ReportManager.Instance.ReportValue(ReportManager.ReportType.TravelTime, dt, currentChore.choreType.Name, currentChore.driver.GetProperName());
+				if (currentChore is FetchAreaChore)
 				{
-					component.AddExperienceIfRole("Hauler", dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-					component.AddExperienceIfRole(MaterialsManager.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
-					component.AddExperienceIfRole(Handyman.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+					MinionResume component = base.GetComponent<MinionResume>();
+					if (component != null)
+					{
+						component.AddExperienceIfRole("Hauler", dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+						component.AddExperienceIfRole(MaterialsManager.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+						component.AddExperienceIfRole(Handyman.ID, dt * ROLES.ACTIVE_EXPERIENCE_VERY_SLOW);
+					}
 				}
 			}
 		}
@@ -327,6 +341,10 @@ public class MinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableIdentity
 
 	[Serialize]
 	public Ref<MinionAssignablesProxy> assignableProxy;
+
+	private Navigator navigator;
+
+	private ChoreDriver choreDriver;
 
 	public float timeLastSpoke;
 

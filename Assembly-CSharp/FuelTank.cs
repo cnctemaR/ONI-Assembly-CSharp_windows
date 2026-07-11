@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization;
-using STRINGS;
 using TUNING;
 using UnityEngine;
 
-public class FuelTank : Storage, ISingleSliderControl, ISliderControl
+public class FuelTank : Storage, IUserControlledCapacity
 {
 	public bool IsSuspended
 	{
@@ -15,7 +14,7 @@ public class FuelTank : Storage, ISingleSliderControl, ISliderControl
 		}
 	}
 
-	public float TargetFillMass
+	public float UserMaxCapacity
 	{
 		get
 		{
@@ -25,11 +24,57 @@ public class FuelTank : Storage, ISingleSliderControl, ISliderControl
 		{
 			this.targetFillMass = value;
 			this.capacityKg = this.targetFillMass;
-			float num = base.MassStored();
-			if (this.capacityKg < num)
+			ConduitConsumer component = base.GetComponent<ConduitConsumer>();
+			if (component != null)
 			{
-				base.DropAll(false);
+				component.capacityKG = this.targetFillMass;
 			}
+			ManualDeliveryKG component2 = base.GetComponent<ManualDeliveryKG>();
+			if (component2 != null)
+			{
+				component2.capacity = (component2.refillMass = this.targetFillMass);
+			}
+			base.Trigger(-945020481, this);
+		}
+	}
+
+	public float MinCapacity
+	{
+		get
+		{
+			return 0f;
+		}
+	}
+
+	public float MaxCapacity
+	{
+		get
+		{
+			return 900f;
+		}
+	}
+
+	public float AmountStored
+	{
+		get
+		{
+			return base.MassStored();
+		}
+	}
+
+	public bool WholeValues
+	{
+		get
+		{
+			return false;
+		}
+	}
+
+	public LocString CapacityUnits
+	{
+		get
+		{
+			return GameUtil.GetCurrentMassUnit(false);
 		}
 	}
 
@@ -47,22 +92,11 @@ public class FuelTank : Storage, ISingleSliderControl, ISliderControl
 				this.storageFilters = new List<Tag>();
 			}
 			this.storageFilters.Add(this.fuelType);
-		}
-	}
-
-	public string SliderTitleKey
-	{
-		get
-		{
-			return "STRINGS.BUILDINGS.PREFABS.LIQUIDFUELTANK.NAME";
-		}
-	}
-
-	public string SliderUnits
-	{
-		get
-		{
-			return UI.UNITSUFFIXES.MASS.KILOGRAM;
+			ManualDeliveryKG component = base.GetComponent<ManualDeliveryKG>();
+			if (component != null)
+			{
+				component.requestedItemTag = this.fuelType;
+			}
 		}
 	}
 
@@ -85,27 +119,22 @@ public class FuelTank : Storage, ISingleSliderControl, ISliderControl
 
 	public void FillTank()
 	{
-		CommandModule commandModule = null;
-		List<GameObject> attachedNetwork = AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>());
-		foreach (GameObject gameObject in attachedNetwork)
+		RocketEngine rocketEngine = null;
+		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(base.GetComponent<AttachableBuilding>()))
 		{
-			commandModule = gameObject.GetComponent<CommandModule>();
-			if (commandModule)
+			rocketEngine = gameObject.GetComponent<RocketEngine>();
+			if (rocketEngine != null && rocketEngine.mainEngine)
 			{
 				break;
 			}
 		}
-		if (commandModule != null)
+		if (rocketEngine != null)
 		{
-			RocketEngine mainEngine = commandModule.rocketStats.GetMainEngine();
-			if (mainEngine != null)
-			{
-				base.AddLiquid(ElementLoader.GetElementID(mainEngine.fuelTag), this.minimumLaunchMass - base.MassStored(), ElementLoader.GetElement(mainEngine.fuelTag).defaultValues.temperature, 0, 0, false, true);
-			}
+			base.AddLiquid(ElementLoader.GetElementID(rocketEngine.fuelTag), this.targetFillMass - base.MassStored(), ElementLoader.GetElement(rocketEngine.fuelTag).defaultValues.temperature, 0, 0, false, true);
 		}
 		else
 		{
-			global::Debug.LogWarning("Fuel tank couldn't find command module", null);
+			global::Debug.LogWarning("Fuel tank couldn't find rocket engine", null);
 		}
 	}
 
@@ -118,40 +147,15 @@ public class FuelTank : Storage, ISingleSliderControl, ISliderControl
 		this.items.Clear();
 	}
 
-	public float GetSliderMin(int index)
-	{
-		return 0f;
-	}
-
-	public float GetSliderMax(int index)
-	{
-		return 900f;
-	}
-
-	public float GetSliderValue(int index)
-	{
-		return this.TargetFillMass;
-	}
-
-	public void SetSliderValue(float mass, int index)
-	{
-		this.TargetFillMass = mass;
-	}
-
-	public string GetSliderTooltipKey(int index)
-	{
-		return "STRINGS.UI.UISIDESCREENS.LIQUIDFUELTANK.FUELAMOUNT";
-	}
-
 	private bool isSuspended;
 
 	private MeterController meter;
 
 	[Serialize]
-	public float targetFillMass = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
+	public float targetFillMass = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
 
 	[SerializeField]
 	private Tag fuelType;
 
-	public float minimumLaunchMass = global::TUNING.BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
+	public float minimumLaunchMass = BUILDINGS.ROCKETRY_MASS_KG.FUEL_TANK_WET_MASS[0];
 }

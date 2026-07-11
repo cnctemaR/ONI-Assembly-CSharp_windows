@@ -392,11 +392,14 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 
 		public override void Update(float dt)
 		{
-			Rotatable component = this.suitMarker.GetComponent<Rotatable>();
-			Facing facing = ((!this.reactor) ? null : this.reactor.GetComponent<Facing>());
-			if (facing)
+			if (this.suitMarker != null)
 			{
-				facing.SetFacing(component.GetOrientation() == Orientation.FlipH);
+				Rotatable component = this.suitMarker.GetComponent<Rotatable>();
+				Facing facing = ((!this.reactor) ? null : this.reactor.GetComponent<Facing>());
+				if (facing)
+				{
+					facing.SetFacing(component.GetOrientation() == Orientation.FlipH);
+				}
 			}
 			if (Time.time - this.startTime > 2.8f)
 			{
@@ -411,9 +414,9 @@ public class SuitMarker : KMonoBehaviour, Pathfinding.INavigationFeature
 			{
 				GameObject reactor = this.reactor;
 				bool flag = !reactor.GetComponent<MinionIdentity>().GetEquipment().IsSlotOccupied(Db.Get().AssignableSlots.Suit);
-				reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(this.suitMarker.interactAnim);
 				if (this.suitMarker != null)
 				{
+					reactor.GetComponent<KBatchedAnimController>().RemoveAnimOverrides(this.suitMarker.interactAnim);
 					bool flag2 = false;
 					Navigator component = reactor.GetComponent<Navigator>();
 					bool flag3 = component != null && (byte)(component.flags & this.suitMarker.PathFlag) != 0;

@@ -18,26 +18,31 @@ public class AssignableSideScreenRow : KMonoBehaviour
 		}
 		else
 		{
-			Assignable assignable = null;
-			MinionIdentity minionIdentity = this.targetIdentity as MinionIdentity;
-			if (minionIdentity != null)
+			bool flag = false;
+			KMonoBehaviour kmonoBehaviour = (KMonoBehaviour)this.targetIdentity;
+			Ownables component = kmonoBehaviour.GetComponent<Ownables>();
+			if (component != null)
 			{
-				foreach (Assignables assignables in minionIdentity.GetComponents<Assignables>())
+				AssignableSlotInstance slot = component.GetSlot(this.sideScreen.targetAssignable.slot);
+				if (slot != null && slot.IsAssigned())
 				{
-					Assignable assignable2 = assignables.GetAssignable(this.sideScreen.targetAssignable.slot);
-					if (assignable2 != null && assignable2 != this.sideScreen.targetAssignable)
-					{
-						assignable = assignable2;
-						break;
-					}
+					this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+					this.assignmentText.text = slot.assignable.GetProperName();
+					flag = true;
 				}
 			}
-			if (assignable != null)
+			Equipment component2 = kmonoBehaviour.GetComponent<Equipment>();
+			if (component2 != null)
 			{
-				this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
-				this.assignmentText.text = assignable.GetProperName();
+				AssignableSlotInstance slot2 = component2.GetSlot(this.sideScreen.targetAssignable.slot);
+				if (slot2 != null && slot2.IsAssigned())
+				{
+					this.currentState = AssignableSideScreenRow.AssignableState.AssignedToOther;
+					this.assignmentText.text = slot2.assignable.GetProperName();
+					flag = true;
+				}
 			}
-			else
+			if (!flag)
 			{
 				this.currentState = AssignableSideScreenRow.AssignableState.Unassigned;
 				this.assignmentText.text = UI.UISIDESCREENS.ASSIGNABLESIDESCREEN.UNASSIGNED;

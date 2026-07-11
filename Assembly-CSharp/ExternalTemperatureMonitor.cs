@@ -113,11 +113,17 @@ public class ExternalTemperatureMonitor : GameStateMachine<ExternalTemperatureMo
 				if (this.occupyArea != null)
 				{
 					float num2 = 0f;
+					int num3 = 0;
 					for (int i = 0; i < this.occupyArea.OccupiedCellsOffsets.Length; i++)
 					{
-						num2 += Grid.Temperature[Grid.OffsetCell(num, this.occupyArea.OccupiedCellsOffsets[i])];
+						int num4 = Grid.OffsetCell(num, this.occupyArea.OccupiedCellsOffsets[i]);
+						if (Grid.IsValidCell(num4))
+						{
+							num3++;
+							num2 += Grid.Temperature[num4];
+						}
 					}
-					return num2 / (float)this.occupyArea.OccupiedCellsOffsets.Length;
+					return num2 / (float)Mathf.Max(1, num3);
 				}
 				return Grid.Temperature[num];
 			}

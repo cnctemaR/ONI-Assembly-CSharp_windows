@@ -38,6 +38,10 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 			{
 				this.navigator.SetCurrentNavType(NavType.Floor);
 			}
+			else if (this.navigator.IsValidNavType(NavType.Hover))
+			{
+				this.navigator.SetCurrentNavType(NavType.Hover);
+			}
 		}
 
 		public bool ShouldFall()
@@ -68,7 +72,15 @@ public class CreatureFallMonitor : GameStateMachine<CreatureFallMonitor, Creatur
 				{
 					return false;
 				}
-				if (this.navigator.CurrentNavType != NavType.Floor)
+				if (this.navigator.CurrentNavType == NavType.Ceiling)
+				{
+					return true;
+				}
+				if (this.navigator.CurrentNavType == NavType.LeftWall)
+				{
+					return true;
+				}
+				if (this.navigator.CurrentNavType == NavType.RightWall)
 				{
 					return true;
 				}

@@ -66,6 +66,12 @@ public class BuildingTemplates
 		def.DefaultAnimState = "grounded";
 	}
 
+	public static void CreateMonumentBuildingDef(BuildingDef def)
+	{
+		BuildingTemplates.CreateStandardBuildingDef(def);
+		def.Invincible = true;
+	}
+
 	public static Storage CreateDefaultStorage(GameObject go, bool forceCreate = false)
 	{
 		Storage storage = ((!forceCreate) ? go.AddOrGet<Storage>() : go.AddComponent<Storage>());

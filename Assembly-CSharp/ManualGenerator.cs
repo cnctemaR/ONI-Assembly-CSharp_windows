@@ -155,7 +155,7 @@ public class ManualGenerator : Workable, ISingleSliderControl, ISliderControl
 				{
 					if (this.chore == null && this.smi.GetCurrentState() == this.smi.sm.on)
 					{
-						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+						this.chore = new WorkChore<ManualGenerator>(Db.Get().ChoreTypes.GeneratePower, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 					}
 				}
 				else if (this.chore != null)

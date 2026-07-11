@@ -107,7 +107,7 @@ public class FetchManager : KMonoBehaviour, ISim1000ms
 		}
 		if (source != null)
 		{
-			if (destination.ShouldOnlyTransferFromLowerPriority && destination.masterPriority <= source.masterPriority)
+			if (!source.ignoreSourcePriority && destination.ShouldOnlyTransferFromLowerPriority && destination.masterPriority <= source.masterPriority)
 			{
 				return false;
 			}

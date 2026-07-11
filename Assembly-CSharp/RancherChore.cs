@@ -15,7 +15,7 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 			return instance.IsCreatureAvailableForRanching();
 		};
 		this.IsCreatureAvailableForRanching = precondition;
-		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime);
+		base..ctor(Db.Get().ChoreTypes.Ranch, rancher_station, null, false, null, null, null, PriorityScreen.PriorityClass.basic, 5, false, true, 0, false, ReportManager.ReportType.WorkTime);
 		base.AddPrecondition(this.IsCreatureAvailableForRanching, rancher_station.GetSMI<RanchStation.Instance>());
 		base.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanUseRanchStation.Id);
 		base.AddPrecondition(ChorePreconditions.instance.IsScheduledTime, Db.Get().ScheduleBlockTypes.Work);
@@ -123,7 +123,13 @@ public class RancherChore : Chore<RancherChore.RancherChoreStates.Instance>
 
 		private static void RanchCreature(RancherChore.RancherChoreStates.Instance smi)
 		{
-			KPrefabID component = smi.ranchStation.targetRanchable.GetComponent<KPrefabID>();
+			global::Debug.Assert(smi.ranchStation != null, "smi.ranchStation was null");
+			RanchableMonitor.Instance targetRanchable = smi.ranchStation.targetRanchable;
+			if (targetRanchable.IsNullOrStopped())
+			{
+				return;
+			}
+			KPrefabID component = targetRanchable.GetComponent<KPrefabID>();
 			smi.sm.rancher.Get(smi).Trigger(937885943, component.PrefabTag.Name);
 			smi.ranchStation.RanchCreature();
 		}

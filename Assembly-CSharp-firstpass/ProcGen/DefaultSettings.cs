@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 
 namespace ProcGen
 {
-	public class DefaultSettings : YamlIO<DefaultSettings>
+	[Serializable]
+	public class DefaultSettings
 	{
 		public DefaultSettings()
 		{
 			this.data = new Dictionary<string, object>();
+			this.defaultMoveTags = new List<string>();
+			this.overworldAddTags = new List<string>();
 		}
 
 		public BaseLocation baseData { get; private set; }

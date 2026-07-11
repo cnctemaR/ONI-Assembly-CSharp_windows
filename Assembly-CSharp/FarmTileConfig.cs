@@ -63,7 +63,7 @@ public class FarmTileConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RemoveLoopingSounds(go);
-		go.GetComponent<KPrefabID>().AddTag(GameTags.FarmTiles);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.FarmTiles, false);
 		FarmTileConfig.SetUpFarmPlotTags(go);
 	}
 

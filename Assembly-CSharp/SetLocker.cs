@@ -67,12 +67,10 @@ public class SetLocker : StateMachineComponent<SetLocker.StatesInstance>
 			return;
 		}
 		base.GetComponent<Workable>().SetWorkTime(1.5f);
-		ChoreType emptyStorage = Db.Get().ChoreTypes.EmptyStorage;
-		KAnimFile anim = Assets.GetAnim(this.overrideAnim);
-		this.chore = new WorkChore<Workable>(emptyStorage, this, null, null, true, delegate(Chore o)
+		this.chore = new WorkChore<Workable>(Db.Get().ChoreTypes.EmptyStorage, this, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
-		}, null, null, true, null, false, true, anim, false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
+		}, null, null, true, null, false, true, Assets.GetAnim(this.overrideAnim), false, true, true, PriorityScreen.PriorityClass.high, 5, false, true);
 		this.OnRefreshUserMenu(null);
 	}
 

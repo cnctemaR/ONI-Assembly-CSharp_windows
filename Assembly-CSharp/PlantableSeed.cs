@@ -4,7 +4,7 @@ using KSerialization;
 using STRINGS;
 using UnityEngine;
 
-public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEffectDescriptor, ISim200ms
+public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEffectDescriptor
 {
 	public SingleEntityReceptacle.ReceptacleDirection Direction
 	{
@@ -30,20 +30,15 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 	{
 	}
 
-	public void Sim200ms(float dt)
-	{
-		this.timeUntilSelfPlant -= dt;
-		if (this.timeUntilSelfPlant <= 0f)
-		{
-			this.TryPlant();
-		}
-	}
-
-	public void TryPlant()
+	public void TryPlant(bool allow_plant_from_storage = false)
 	{
 		this.timeUntilSelfPlant = Util.RandomVariance(2400f, 600f);
+		if (!allow_plant_from_storage && base.gameObject.HasTag(GameTags.Stored))
+		{
+			return;
+		}
 		int num = Grid.PosToCell(base.gameObject);
-		if (this.TestSuitableGround(num, false))
+		if (this.TestSuitableGround(num))
 		{
 			Vector3 vector = Grid.CellToPosCBC(num, Grid.SceneLayer.BuildingFront);
 			GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.PlantID), vector, Grid.SceneLayer.BuildingFront, null, 0);
@@ -65,9 +60,34 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 		}
 	}
 
-	private bool TestSuitableGround(int cell, bool ignoreGround = false)
+	public bool TestSuitableGround(int cell)
 	{
 		if (!Grid.IsValidCell(cell))
+		{
+			return false;
+		}
+		int num;
+		if (this.Direction == SingleEntityReceptacle.ReceptacleDirection.Bottom)
+		{
+			num = Grid.CellAbove(cell);
+		}
+		else
+		{
+			num = Grid.CellBelow(cell);
+		}
+		if (!Grid.IsValidCell(num))
+		{
+			return false;
+		}
+		if (Grid.Foundation[num])
+		{
+			return false;
+		}
+		if (Grid.Element[num].hardness >= 150)
+		{
+			return false;
+		}
+		if (this.replantGroundTag.IsValid && !Grid.Element[num].HasTag(this.replantGroundTag))
 		{
 			return false;
 		}
@@ -77,40 +97,23 @@ public class PlantableSeed : KMonoBehaviour, IReceptacleDirection, IGameObjectEf
 		{
 			return false;
 		}
-		PressureVulnerable component2 = prefab.GetComponent<PressureVulnerable>();
+		DrowningMonitor component2 = prefab.GetComponent<DrowningMonitor>();
 		if (component2 != null && !component2.IsCellSafe(cell))
 		{
 			return false;
 		}
-		DrowningMonitor component3 = prefab.GetComponent<DrowningMonitor>();
+		TemperatureVulnerable component3 = prefab.GetComponent<TemperatureVulnerable>();
 		if (component3 != null && !component3.IsCellSafe(cell))
 		{
 			return false;
 		}
-		TemperatureVulnerable component4 = prefab.GetComponent<TemperatureVulnerable>();
+		UprootedMonitor component4 = prefab.GetComponent<UprootedMonitor>();
 		if (component4 != null && !component4.IsCellSafe(cell))
 		{
 			return false;
 		}
-		UprootedMonitor component5 = prefab.GetComponent<UprootedMonitor>();
-		if (component5 != null && !component5.IsCellSafe(cell))
-		{
-			return false;
-		}
-		OccupyArea component6 = prefab.GetComponent<OccupyArea>();
-		if (component6 != null && !component6.CanOccupyArea(cell, ObjectLayer.Building))
-		{
-			return false;
-		}
-		if (!ignoreGround)
-		{
-			int num = Grid.CellBelow(cell);
-			if (Grid.Foundation[num] || (this.replantGroundTag.IsValid && !Grid.Element[num].HasTag(this.replantGroundTag)))
-			{
-				return false;
-			}
-		}
-		return true;
+		OccupyArea component5 = prefab.GetComponent<OccupyArea>();
+		return !(component5 != null) || component5.CanOccupyArea(cell, ObjectLayer.Building);
 	}
 
 	public List<Descriptor> GetDescriptors(GameObject go)

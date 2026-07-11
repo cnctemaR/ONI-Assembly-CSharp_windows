@@ -14,6 +14,10 @@ public class MixManager : MonoBehaviour
 
 	private void OnApplicationFocus(bool hasFocus)
 	{
+		if (AudioMixer.instance == null || AudioMixerSnapshots.Get() == null)
+		{
+			return;
+		}
 		if (!hasFocus && KPlayerPrefs.GetInt(AudioOptionsScreen.MuteOnFocusLost) == 1)
 		{
 			AudioMixer.instance.Start(AudioMixerSnapshots.Get().GameNotFocusedSnapshot);

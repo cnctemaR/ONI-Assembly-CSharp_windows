@@ -11,20 +11,22 @@ public class UIDupeRandomizer : MonoBehaviour
 		for (int i = 0; i < this.anims.Length; i++)
 		{
 			this.anims[i].curBody = null;
-			this.anims[i].overrideSet = false;
 			this.GetNewBody(i);
 		}
 	}
 
 	protected void GetNewBody(int minion_idx)
 	{
-		this.Apply(this.anims[minion_idx].minon, ref this.anims[minion_idx]);
-	}
-
-	private void Apply(KBatchedAnimController dupe, ref UIDupeRandomizer.AnimChoice anim)
-	{
 		int num = global::UnityEngine.Random.Range(0, Db.Get().Personalities.Count);
 		Personality personality = Db.Get().Personalities[num];
+		foreach (KBatchedAnimController kbatchedAnimController in this.anims[minion_idx].minions)
+		{
+			this.Apply(kbatchedAnimController, personality);
+		}
+	}
+
+	private void Apply(KBatchedAnimController dupe, Personality personality)
+	{
 		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(personality);
 		SymbolOverrideController component = dupe.GetComponent<SymbolOverrideController>();
 		component.RemoveAllSymbolOverrides(0);
@@ -62,11 +64,6 @@ public class UIDupeRandomizer : MonoBehaviour
 			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Hair.targetSymbolId, true);
 			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.HatHair.targetSymbolId, false);
 			dupe.SetSymbolVisiblity(Db.Get().AccessorySlots.Hat.targetSymbolId, false);
-		}
-		if (!anim.overrideSet)
-		{
-			dupe.AddAnimOverrides(anim.target_minion_anim, 0f);
-			anim.overrideSet = true;
 		}
 	}
 
@@ -113,7 +110,7 @@ public class UIDupeRandomizer : MonoBehaviour
 	{
 		public string anim_name;
 
-		public KBatchedAnimController minon;
+		public List<KBatchedAnimController> minions;
 
 		public float minSecondsBetweenAction;
 
@@ -122,9 +119,5 @@ public class UIDupeRandomizer : MonoBehaviour
 		public float lastWaitTime;
 
 		public KAnimFile curBody;
-
-		public KAnimFile target_minion_anim;
-
-		public bool overrideSet;
 	}
 }

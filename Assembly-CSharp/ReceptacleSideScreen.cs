@@ -345,6 +345,10 @@ public class ReceptacleSideScreen : SideScreenContent, IRender1000ms
 
 	private void CheckAmountsAndUpdate(object data)
 	{
+		if (this.targetReceptacle == null)
+		{
+			return;
+		}
 		bool flag = this.UpdateAvailableAmounts(null);
 		if (flag)
 		{

@@ -40,7 +40,7 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 		{
 			return;
 		}
-		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
+		this.operatingEnergyStatusItem = new StatusItem("OperatingEnergy", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 		this.operatingEnergyStatusItem.resolveStringCallback = delegate(string str, object ev_data)
 		{
 			int num = (int)ev_data;
@@ -64,9 +64,9 @@ public class StructureTemperatureComponents : KGameObjectSplitComponentManager<S
 				string text = string.Empty;
 				foreach (StructureTemperaturePayload.EnergySource energySource in payload.energySourcesKW)
 				{
-					text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedHeatEnergy(energySource.value * 1000f, GameUtil.HeatEnergyFormatterUnit.Automatic));
+					text += string.Format(BUILDING.STATUSITEMS.OPERATINGENERGY.LINEITEM, energySource.source, GameUtil.GetFormattedHeatEnergy(energySource.value * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S));
 				}
-				str = string.Format(str, GameUtil.GetFormattedHeatEnergy(payload.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.None), text);
+				str = string.Format(str, GameUtil.GetFormattedHeatEnergy(payload.TotalEnergyProducedKW * 1000f, GameUtil.HeatEnergyFormatterUnit.DTU_S), text);
 			}
 			return str;
 		};

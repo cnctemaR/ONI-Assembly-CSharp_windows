@@ -37,7 +37,7 @@ public class GroundRenderer : KMonoBehaviour
 		}
 	}
 
-	public void Render(Vector2I vis_min, Vector2I vis_max)
+	public void Render(Vector2I vis_min, Vector2I vis_max, bool forceVisibleRebuild = false)
 	{
 		if (!base.enabled)
 		{
@@ -51,7 +51,7 @@ public class GroundRenderer : KMonoBehaviour
 			for (int j = vector2I.x; j < vector2I2.x; j++)
 			{
 				GroundRenderer.WorldChunk worldChunk = this.worldChunks[j, i];
-				if (this.dirtyChunks[j, i] || GroundRenderer.forceVisibleRebuild)
+				if (this.dirtyChunks[j, i] || forceVisibleRebuild)
 				{
 					this.dirtyChunks[j, i] = false;
 					worldChunk.Rebuild(this.biomeMasks, this.elementMaterials);
@@ -60,6 +60,11 @@ public class GroundRenderer : KMonoBehaviour
 			}
 		}
 		this.RebuildDirtyChunks();
+	}
+
+	public void RenderAll()
+	{
+		this.Render(new Vector2I(0, 0), new Vector2I(this.worldChunks.GetLength(0) * 16, this.worldChunks.GetLength(1) * 16), true);
 	}
 
 	private void RebuildDirtyChunks()
@@ -273,8 +278,6 @@ public class GroundRenderer : KMonoBehaviour
 	private const int ChunkEdgeSize = 16;
 
 	private Vector2I size;
-
-	private static bool forceVisibleRebuild;
 
 	[Serializable]
 	private struct Materials

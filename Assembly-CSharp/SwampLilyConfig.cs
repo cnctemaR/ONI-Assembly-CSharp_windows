@@ -23,7 +23,7 @@ public class SwampLilyConfig : IEntityConfig
 		float num4 = 448.15f;
 		SimHashes[] array = new SimHashes[] { SimHashes.ChlorineGas };
 		text4 = SwampLilyFlowerConfig.ID;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, array, true, 0f, 0.15f, text4, true, true);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, array, true, 0f, 0.15f, text4, true, true, true, true, 2400f);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject2 = gameObject;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;

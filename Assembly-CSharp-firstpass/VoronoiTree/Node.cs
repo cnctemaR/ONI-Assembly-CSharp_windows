@@ -34,6 +34,8 @@ namespace VoronoiTree
 
 		public Tree parent { get; private set; }
 
+		public PowerDiagram debug_LastPD { get; private set; }
+
 		public void SetParent(Tree newParent)
 		{
 			this.parent = newParent;
@@ -49,42 +51,6 @@ namespace VoronoiTree
 				}
 			}
 			return null;
-		}
-
-		public int DistanceToTag(int dist, int maxDist, TagSet targetTags, HashSet<Node> nvis)
-		{
-			if (nvis.Contains(this))
-			{
-				return -1;
-			}
-			nvis.Add(this);
-			if (this.tags.ContainsOne(targetTags))
-			{
-				return dist;
-			}
-			if (maxDist == 0)
-			{
-				return -1;
-			}
-			maxDist--;
-			dist++;
-			List<Node> neighbors = this.GetNeighbors();
-			int num = -1;
-			for (int i = 0; i < neighbors.Count; i++)
-			{
-				if (!nvis.Contains(neighbors[i]))
-				{
-					int num2 = neighbors[i].DistanceToTag(dist, maxDist, targetTags, nvis);
-					if (num2 != -1)
-					{
-						if (num == -1 || num2 < num)
-						{
-							num = num2;
-						}
-					}
-				}
-			}
-			return num;
 		}
 
 		public List<Node> GetNeighbors()
@@ -196,24 +162,24 @@ namespace VoronoiTree
 			}
 		}
 
-		public bool ComputeNode(List<Diagram.Site> sites)
+		public bool ComputeNode(List<Diagram.Site> diagramSites)
 		{
-			if (this.site.poly == null || sites == null || sites.Count == 0)
+			if (this.site.poly == null || diagramSites == null || diagramSites.Count == 0)
 			{
 				this.visited = Node.VisitedType.MissingData;
 				return false;
 			}
 			this.visited = Node.VisitedType.VisitedSuccess;
-			if (sites.Count == 1)
+			if (diagramSites.Count == 1)
 			{
-				sites[0].poly = this.site.poly;
-				sites[0].position = sites[0].poly.Centroid();
+				diagramSites[0].poly = this.site.poly;
+				diagramSites[0].position = diagramSites[0].poly.Centroid();
 				return true;
 			}
 			HashSet<Diagram.Site> hashSet = new HashSet<Diagram.Site>();
-			for (int i = 0; i < sites.Count; i++)
+			for (int i = 0; i < diagramSites.Count; i++)
 			{
-				hashSet.Add(new Diagram.Site(sites[i].id, sites[i].position, sites[i].weight));
+				hashSet.Add(new Diagram.Site(diagramSites[i].id, diagramSites[i].position, diagramSites[i].weight));
 			}
 			hashSet.Add(new Diagram.Site(Node.maxIndex + 1U, new Vector2(this.site.poly.bounds.xMin - 500f, this.site.poly.bounds.yMin + this.site.poly.bounds.height / 2f), 1f));
 			hashSet.Add(new Diagram.Site(Node.maxIndex + 2U, new Vector2(this.site.poly.bounds.xMax + 500f, this.site.poly.bounds.yMin + this.site.poly.bounds.height / 2f), 1f));
@@ -221,11 +187,11 @@ namespace VoronoiTree
 			hashSet.Add(new Diagram.Site(Node.maxIndex + 4U, new Vector2(this.site.poly.bounds.xMin + this.site.poly.bounds.width / 2f, this.site.poly.bounds.yMax + 500f), 1f));
 			Rect rect = new Rect(this.site.poly.bounds.xMin - 500f, this.site.poly.bounds.yMin - 500f, this.site.poly.bounds.width + 500f, this.site.poly.bounds.height + 500f);
 			Diagram diagram = new Diagram(rect, hashSet);
-			for (int j = 0; j < sites.Count; j++)
+			for (int j = 0; j < diagramSites.Count; j++)
 			{
-				if (sites[j].id <= Node.maxIndex)
+				if (diagramSites[j].id <= Node.maxIndex)
 				{
-					List<Vector2> list = diagram.diagram.Region(sites[j].position);
+					List<Vector2> list = diagram.diagram.Region(diagramSites[j].position);
 					if (list == null)
 					{
 						if (this.type != Node.NodeType.Leaf)
@@ -247,61 +213,66 @@ namespace VoronoiTree
 						}
 						else
 						{
-							sites[j].poly = polygon;
+							diagramSites[j].poly = polygon;
 						}
 					}
 				}
 			}
-			for (int k = 0; k < sites.Count; k++)
+			for (int k = 0; k < diagramSites.Count; k++)
 			{
-				if (sites[k].id <= Node.maxIndex)
+				if (diagramSites[k].id <= Node.maxIndex)
 				{
-					HashSet<uint> hashSet2 = diagram.diagram.NeighborSitesIDsForSite(sites[k].position);
-					Node.FilterNeighbours(sites[k], hashSet2, sites);
-					sites[k].position = sites[k].poly.Centroid();
+					HashSet<uint> hashSet2 = diagram.diagram.NeighborSitesIDsForSite(diagramSites[k].position);
+					Node.FilterNeighbours(diagramSites[k], hashSet2, diagramSites);
+					diagramSites[k].position = diagramSites[k].poly.Centroid();
 				}
 			}
 			return true;
 		}
 
-		public bool ComputeNodePD(List<Diagram.Site> sites, int maxIters = 500, float threashold = 0.2f)
+		public bool ComputeNodePD(List<Diagram.Site> diagramSites, int maxIters = 500, float threshold = 0.2f)
 		{
-			if (this.site.poly == null || sites == null || sites.Count == 0)
+			if (this.site.poly == null || diagramSites == null || diagramSites.Count == 0)
 			{
 				this.visited = Node.VisitedType.MissingData;
 				return false;
 			}
 			this.visited = Node.VisitedType.VisitedSuccess;
 			List<Site> list = new List<Site>();
-			for (int i = 0; i < sites.Count; i++)
+			for (int i = 0; i < diagramSites.Count; i++)
 			{
-				Site site = new Site(sites[i].id, sites[i].position, sites[i].weight);
+				Site site = new Site(diagramSites[i].id, diagramSites[i].position, diagramSites[i].weight);
 				list.Add(site);
 			}
 			PowerDiagram powerDiagram = new PowerDiagram(this.site.poly, list);
 			powerDiagram.ComputeVD();
-			powerDiagram.ComputePowerDiagram(maxIters, threashold);
-			for (int j = 0; j < sites.Count; j++)
+			powerDiagram.ComputePowerDiagram(maxIters, threshold);
+			for (int j = 0; j < diagramSites.Count; j++)
 			{
-				sites[j].poly = list[j].poly;
-				if (sites[j].poly == null)
+				diagramSites[j].poly = list[j].poly;
+				if (diagramSites[j].poly == null)
 				{
 					global::Debug.LogErrorFormat("Site [{0}] at index [{1}]: Poly shouldnt be null here ever", new object[]
 					{
-						sites[j].id,
+						diagramSites[j].id,
 						j
 					});
 				}
+			}
+			for (int k = 0; k < diagramSites.Count; k++)
+			{
 				HashSet<uint> hashSet = new HashSet<uint>();
-				for (int k = 0; k < list[j].neighbours.Count; k++)
+				for (int l = 0; l < list[k].neighbours.Count; l++)
 				{
-					if (!list[j].neighbours[k].dummy)
+					if (!list[k].neighbours[l].dummy)
 					{
-						hashSet.Add((uint)list[j].neighbours[k].id);
+						hashSet.Add((uint)list[k].neighbours[l].id);
 					}
 				}
-				sites[j].position = sites[j].poly.Centroid();
+				Node.FilterNeighbours(diagramSites[k], hashSet, diagramSites);
+				diagramSites[k].position = diagramSites[k].poly.Centroid();
 			}
+			this.debug_LastPD = powerDiagram;
 			return true;
 		}
 
@@ -395,7 +366,7 @@ namespace VoronoiTree
 		[Serialize]
 		public TagSet tags;
 
-		public Dictionary<Tag, int> minDistaceToTag = new Dictionary<Tag, int>();
+		public Dictionary<Tag, int> minDistanceToTag = new Dictionary<Tag, int>();
 
 		public enum NodeType
 		{

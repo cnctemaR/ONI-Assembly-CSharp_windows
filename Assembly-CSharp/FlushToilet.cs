@@ -56,15 +56,17 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 			num += num3 * component.Temperature;
 		}
 		pooledList.Recycle();
-		float num4 = num / this.massConsumedPerUse;
+		float num4 = this.massEmittedPerUse - this.massConsumedPerUse;
+		num += num4 * this.newPeeTemperature;
+		float num5 = num / this.massEmittedPerUse;
 		byte index = Db.Get().Diseases.GetIndex(this.diseaseId);
-		this.storage.AddLiquid(SimHashes.DirtyWater, this.massEmittedPerUse, num4, index, this.diseasePerFlush, false, true);
+		this.storage.AddLiquid(SimHashes.DirtyWater, this.massEmittedPerUse, num5, index, this.diseasePerFlush, false, true);
 		if (worker != null)
 		{
 			PrimaryElement component2 = worker.GetComponent<PrimaryElement>();
 			component2.AddDisease(index, this.diseaseOnDupePerFlush, "FlushToilet.Flush");
 			PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Resource, string.Format(DUPLICANTS.DISEASES.ADDED_POPFX, Db.Get().Diseases[(int)index].Name, this.diseasePerFlush + this.diseaseOnDupePerFlush), base.transform, Vector3.up, 1.5f, false, false);
-			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms);
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_LotsOfGerms, true);
 		}
 		else
 		{
@@ -86,7 +88,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 		List<Descriptor> list = new List<Descriptor>();
 		Element element = ElementLoader.FindElementByHash(SimHashes.DirtyWater);
 		string text = element.tag.ProperName();
-		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}")), Descriptor.DescriptorType.Effect, false));
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.newPeeTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTED_TOILET, text, GameUtil.GetFormattedMass(this.massEmittedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.##}"), GameUtil.GetFormattedTemperature(this.newPeeTemperature, GameUtil.TimeSlice.None, GameUtil.TemperatureInterpretation.Absolute, true, false)), Descriptor.DescriptorType.Effect, false));
 		Disease disease = Db.Get().Diseases.Get(this.diseaseId);
 		int num = this.diseasePerFlush + this.diseaseOnDupePerFlush;
 		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASEEMITTEDPERUSE, disease.Name, GameUtil.GetFormattedDiseaseAmount(num)), Descriptor.DescriptorType.DiseaseSource, false));
@@ -126,6 +128,9 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 	[SerializeField]
 	public float massEmittedPerUse = 5f;
+
+	[SerializeField]
+	public float newPeeTemperature;
 
 	[SerializeField]
 	public string diseaseId;
@@ -304,7 +309,7 @@ public class FlushToilet : StateMachineComponent<FlushToilet.SMInstance>, IUsabl
 
 		private Chore CreateUseChore(FlushToilet.SMInstance smi, ChoreType choreType)
 		{
-			WorkChore<ToiletWorkableUse> workChore = new WorkChore<ToiletWorkableUse>(choreType, smi.master, null, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
+			WorkChore<ToiletWorkableUse> workChore = new WorkChore<ToiletWorkableUse>(choreType, smi.master, null, true, null, null, null, false, null, true, true, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
 			smi.activeUseChores.Add(workChore);
 			WorkChore<ToiletWorkableUse> workChore2 = workChore;
 			workChore2.onExit = (Action<Chore>)Delegate.Combine(workChore2.onExit, new Action<Chore>(delegate(Chore exiting_chore)

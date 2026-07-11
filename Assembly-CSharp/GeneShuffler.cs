@@ -28,6 +28,7 @@ public class GeneShuffler : Workable
 	{
 		base.OnPrefabInit();
 		this.assignable.OnAssign += this.Assign;
+		this.lightEfficiencyBonus = false;
 	}
 
 	protected override void OnSpawn()
@@ -181,7 +182,7 @@ public class GeneShuffler : Workable
 		base.GetComponent<Workable>().SetWorkTime(float.PositiveInfinity);
 		ChoreType geneShuffle = Db.Get().ChoreTypes.GeneShuffle;
 		KAnimFile anim = Assets.GetAnim("anim_interacts_neuralvacillator_kanim");
-		this.chore = new WorkChore<Workable>(geneShuffle, this, null, null, true, delegate(Chore o)
+		this.chore = new WorkChore<Workable>(geneShuffle, this, null, true, delegate(Chore o)
 		{
 			this.CompleteChore();
 		}, null, null, true, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);

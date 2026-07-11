@@ -67,7 +67,18 @@ public class LogicElementSensor : Switch, ISaveLoadable, ISim200ms
 
 	private void OnElementSelected(Tag element_tag)
 	{
-		this.desiredElementIdx = ElementLoader.GetElementIndex(element_tag);
+		if (!element_tag.IsValid)
+		{
+			return;
+		}
+		Element element = ElementLoader.GetElement(element_tag);
+		bool flag = true;
+		if (element != null)
+		{
+			this.desiredElementIdx = (byte)ElementLoader.GetElementIndex(element.id);
+			flag = element.id == SimHashes.Void || element.id == SimHashes.Vacuum;
+		}
+		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, flag, null);
 	}
 
 	private void OnOperationalChanged(object data)

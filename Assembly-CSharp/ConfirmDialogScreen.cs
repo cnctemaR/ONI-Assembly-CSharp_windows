@@ -28,8 +28,14 @@ public class ConfirmDialogScreen : KModalScreen
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string title_text = null, string confirm_text = null, string cancel_text = null, Sprite image_sprite = null)
+	public void PopupConfirmDialog(string text, global::System.Action on_confirm, global::System.Action on_cancel, string configurable_text = null, global::System.Action on_configurable_clicked = null, string title_text = null, string confirm_text = null, string cancel_text = null, Sprite image_sprite = null, bool activateBlackBackground = true)
 	{
+		while (base.transform.parent.GetComponent<Canvas>() == null && base.transform.parent.parent != null)
+		{
+			base.transform.SetParent(base.transform.parent.parent);
+		}
+		base.transform.SetAsLastSibling();
+		this.fadeBG.SetActive(activateBlackBackground);
 		this.confirmAction = on_confirm;
 		this.cancelAction = on_cancel;
 		this.configurableAction = on_configurable_clicked;
@@ -134,4 +140,7 @@ public class ConfirmDialogScreen : KModalScreen
 
 	[SerializeField]
 	private Image image;
+
+	[SerializeField]
+	private GameObject fadeBG;
 }

@@ -254,7 +254,7 @@ public class SimpleInfoScreen : TargetScreen
 			{
 				this.vitalsPanel.gameObject.SetActive(component8.GetPlanterStorage != null);
 			}
-			Growing component9 = this.selectedTarget.gameObject.GetComponent<Growing>();
+			WiltCondition component9 = this.selectedTarget.gameObject.GetComponent<WiltCondition>();
 			if (component9 != null)
 			{
 				this.vitalsPanel.gameObject.SetActive(true);
@@ -392,7 +392,7 @@ public class SimpleInfoScreen : TargetScreen
 							Storage selected_storage = storage;
 							component.onClick += delegate
 							{
-								selected_storage.Remove(select_item, true);
+								selected_storage.Drop(select_item, true);
 							};
 						}
 					}
@@ -633,6 +633,15 @@ public class SimpleInfoScreen : TargetScreen
 			item.SetIcon(this.image);
 			this.widget.SetActive(true);
 			this.toolTip.OnToolTip = new Func<string>(this.OnToolTip);
+			this.button = this.widget.GetComponentInChildren<KButton>();
+			if (item.item.statusItemClickCallback != null)
+			{
+				this.button.onClick += this.OnClick;
+			}
+			else
+			{
+				this.button.enabled = false;
+			}
 			this.fadeStage = ((!skip_fade) ? SimpleInfoScreen.StatusItemEntry.FadeStage.IN : SimpleInfoScreen.StatusItemEntry.FadeStage.WAIT);
 			SimAndRenderScheduler.instance.Add(this, false);
 			this.Refresh();
@@ -702,6 +711,11 @@ public class SimpleInfoScreen : TargetScreen
 			return string.Empty;
 		}
 
+		private void OnClick()
+		{
+			this.item.OnClick();
+		}
+
 		public void Refresh()
 		{
 			string name = this.item.GetName();
@@ -755,6 +769,8 @@ public class SimpleInfoScreen : TargetScreen
 		private Image image;
 
 		private LocText text;
+
+		private KButton button;
 
 		public Color color;
 

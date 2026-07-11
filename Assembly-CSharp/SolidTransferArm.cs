@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Database;
 using FMODUnity;
@@ -25,7 +26,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.GetAttributes().Add(attributeModifier);
 		this.worker.usesMultiTool = false;
 		this.storage.fxPrefix = Storage.FXPrefix.PickedUp;
-		this.simRenderLoadBalance = true;
+		this.simRenderLoadBalance = false;
 	}
 
 	protected override void OnSpawn()
@@ -53,9 +54,6 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.arm_go.transform.SetPosition(vector);
 		this.arm_go.SetActive(true);
 		this.link = new KAnimLink(component, this.arm_anim_ctrl);
-		this.pickupableExtents = new Extents(this.NaturalBuildingCell(), this.pickupRange);
-		this.pickupablesChangedEntry = GameScenePartitioner.Instance.Add("SolidTransferArm.PickupablesChanged", base.gameObject, this.pickupableExtents, GameScenePartitioner.Instance.pickupablesChangedLayer, new Action<object>(this.OnPickupablesChanged));
-		this.pickupablesDirty = true;
 		ChoreGroups choreGroups = Db.Get().ChoreGroups;
 		for (int i = 0; i < choreGroups.Count; i++)
 		{
@@ -73,19 +71,56 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	protected override void OnCleanUp()
 	{
-		GameScenePartitioner.Instance.Free(ref this.pickupablesChangedEntry);
 		MinionGroupProber.Get().ReleaseProber(this);
 		base.OnCleanUp();
 	}
 
-	public void Sim1000ms(float dt)
+	private static void CachePickupables()
 	{
-		if (!this.operational.IsOperational)
+		SolidTransferArm.cached_pickupables.Clear();
+		foreach (KeyValuePair<Tag, FetchManager.FetchablesByPrefabId> keyValuePair in Game.Instance.fetchManager.prefabIdToFetchables)
 		{
+			List<FetchManager.Fetchable> dataList = keyValuePair.Value.fetchables.GetDataList();
+			SolidTransferArm.cached_pickupables.Capacity = Math.Max(SolidTransferArm.cached_pickupables.Capacity, SolidTransferArm.cached_pickupables.Count + dataList.Count);
+			foreach (FetchManager.Fetchable fetchable in dataList)
+			{
+				SolidTransferArm.cached_pickupables.Add(new SolidTransferArm.CachedPickupable
+				{
+					pickupable = fetchable.pickupable,
+					storage_cell = fetchable.pickupable.storageCell
+				});
+			}
+		}
+	}
+
+	public static void BatchUpdate(List<UpdateBucketWithUpdater<ISim1000ms>.Entry> solid_transfer_arms, float time_delta)
+	{
+		SolidTransferArm.BatchUpdateContext batchUpdateContext = new SolidTransferArm.BatchUpdateContext(solid_transfer_arms);
+		if (batchUpdateContext.solid_transfer_arms.Count == 0)
+		{
+			batchUpdateContext.Finish();
 			return;
 		}
-		this.RefreshReachableCells();
-		this.pickupablesDirty = true;
+		SolidTransferArm.CachePickupables();
+		SolidTransferArm.batch_update_job.Reset(batchUpdateContext);
+		int num = Math.Max(1, batchUpdateContext.solid_transfer_arms.Count / CPUBudget.coreCount);
+		int num2 = Math.Min(batchUpdateContext.solid_transfer_arms.Count, CPUBudget.coreCount);
+		for (int num3 = 0; num3 != num2; num3++)
+		{
+			int num4 = num3 * num;
+			int num5 = ((num3 != num2 - 1) ? (num4 + num) : batchUpdateContext.solid_transfer_arms.Count);
+			SolidTransferArm.batch_update_job.Add(new SolidTransferArm.BatchUpdateTask(num4, num5));
+		}
+		GlobalJobManager.Run(SolidTransferArm.batch_update_job);
+		for (int num6 = 0; num6 != SolidTransferArm.batch_update_job.Count; num6++)
+		{
+			SolidTransferArm.batch_update_job.GetWorkItem(num6).Finish();
+		}
+		batchUpdateContext.Finish();
+	}
+
+	private void Sim()
+	{
 		Chore.Precondition.Context context = default(Chore.Precondition.Context);
 		if (this.choreConsumer.FindNextChore(ref context))
 		{
@@ -103,20 +138,17 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.operational.SetActive(this.choreDriver.HasChore(), false);
 	}
 
+	public void Sim1000ms(float dt)
+	{
+	}
+
 	private void UpdateArmAnim()
 	{
 		FetchAreaChore fetchAreaChore = this.choreDriver.GetCurrentChore() as FetchAreaChore;
 		if (this.worker.workable && fetchAreaChore != null && this.rotation_complete)
 		{
 			this.StopRotateSound();
-			if (fetchAreaChore.IsDelivering)
-			{
-				this.SetArmAnim(SolidTransferArm.ArmAnim.Drop);
-			}
-			else
-			{
-				this.SetArmAnim(SolidTransferArm.ArmAnim.Pickup);
-			}
+			this.SetArmAnim((!fetchAreaChore.IsDelivering) ? SolidTransferArm.ArmAnim.Pickup : SolidTransferArm.ArmAnim.Drop);
 		}
 		else
 		{
@@ -124,13 +156,12 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		}
 	}
 
-	private void RefreshReachableCells()
+	private bool AsyncUpdate(int cell, HashSet<int> workspace, GameObject game_object)
 	{
-		ListPool<int, SolidTransferArm>.PooledList pooledList = ListPool<int, SolidTransferArm>.Allocate(this.reachableCells);
-		this.reachableCells.Clear();
+		workspace.Clear();
 		int num;
 		int num2;
-		Grid.CellToXY(Grid.PosToCell(this), out num, out num2);
+		Grid.CellToXY(cell, out num, out num2);
 		for (int i = num2 - this.pickupRange; i < num2 + this.pickupRange + 1; i++)
 		{
 			for (int j = num - this.pickupRange; j < num + this.pickupRange + 1; j++)
@@ -138,30 +169,33 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 				int num3 = Grid.XYToCell(j, i);
 				if (Grid.IsValidCell(num3) && Grid.IsPhysicallyAccessible(num, num2, j, i, true))
 				{
-					this.reachableCells.Add(num3);
+					workspace.Add(num3);
 				}
 			}
 		}
-		bool flag = false;
-		if (this.reachableCells.Count == pooledList.Count)
+		bool flag = !this.reachableCells.SetEquals(workspace);
+		if (flag)
 		{
-			flag = true;
-			for (int num4 = 0; num4 != this.reachableCells.Count; num4++)
+			this.reachableCells.Clear();
+			this.reachableCells.UnionWith(workspace);
+		}
+		this.pickupables.Clear();
+		foreach (SolidTransferArm.CachedPickupable cachedPickupable in SolidTransferArm.cached_pickupables)
+		{
+			int cellRange = Grid.GetCellRange(cell, cachedPickupable.storage_cell);
+			if (cellRange <= this.pickupRange && this.IsPickupableRelevantToMyInterests(cachedPickupable.pickupable.KPrefabID, cachedPickupable.storage_cell) && cachedPickupable.pickupable.CouldBePickedUpByTransferArm(game_object))
 			{
-				if (this.reachableCells[num4] != pooledList[num4])
-				{
-					flag = false;
-					break;
-				}
+				this.pickupables.Add(cachedPickupable.pickupable);
 			}
 		}
-		pooledList.Recycle();
-		if (!flag)
-		{
-			this.serial_no++;
-			MinionGroupProber.Get().SetValidSerialNos(this, this.serial_no, this.serial_no);
-			MinionGroupProber.Get().Occupy(this, this.serial_no, this.reachableCells);
-		}
+		return flag;
+	}
+
+	private void IncrementSerialNo()
+	{
+		this.serial_no++;
+		MinionGroupProber.Get().SetValidSerialNos(this, this.serial_no, this.serial_no);
+		MinionGroupProber.Get().Occupy(this, this.serial_no, this.reachableCells);
 	}
 
 	public bool IsCellReachable(int cell)
@@ -169,53 +203,13 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		return this.reachableCells.Contains(cell);
 	}
 
-	private void RefreshPickupables()
+	private bool IsPickupableRelevantToMyInterests(KPrefabID prefabID, int storage_cell)
 	{
-		if (!this.pickupablesDirty)
-		{
-			return;
-		}
-		this.pickupables.Clear();
-		int num = Grid.PosToCell(this);
-		foreach (KeyValuePair<Tag, FetchManager.FetchablesByPrefabId> keyValuePair in Game.Instance.fetchManager.prefabIdToFetchables)
-		{
-			foreach (FetchManager.Fetchable fetchable in keyValuePair.Value.fetchables.GetDataList())
-			{
-				Pickupable pickupable = fetchable.pickupable;
-				int pickupableCell = this.GetPickupableCell(pickupable);
-				int cellRange = Grid.GetCellRange(num, pickupableCell);
-				if (cellRange <= this.pickupRange && this.IsPickupableRelevantToMyInterests(pickupable) && pickupable.CouldBePickedUpByTransferArm(base.gameObject))
-				{
-					this.pickupables.Add(pickupable);
-				}
-			}
-		}
-		this.pickupablesDirty = false;
-	}
-
-	private void OnPickupablesChanged(object data)
-	{
-		Pickupable pickupable = data as Pickupable;
-		if (pickupable && this.IsPickupableRelevantToMyInterests(pickupable))
-		{
-			this.pickupablesDirty = true;
-		}
-	}
-
-	private bool IsPickupableRelevantToMyInterests(Pickupable pickupable)
-	{
-		KPrefabID kprefabID = pickupable.KPrefabID;
-		if (!kprefabID.HasAnyTags(ref SolidTransferArm.tagBits))
-		{
-			return false;
-		}
-		int pickupableCell = this.GetPickupableCell(pickupable);
-		return this.IsCellReachable(pickupableCell);
+		return prefabID.HasAnyTags(ref SolidTransferArm.tagBits) && this.IsCellReachable(storage_cell);
 	}
 
 	public void FindFetchTarget(Storage destination, TagBits tag_bits, TagBits required_tags, TagBits forbid_tags, float required_amount, ref Pickupable target)
 	{
-		this.RefreshPickupables();
 		target = FetchManager.FindFetchTarget(this.pickupables, destination, ref tag_bits, ref required_tags, ref forbid_tags, required_amount);
 	}
 
@@ -233,39 +227,31 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		this.UpdateArmAnim();
 	}
 
-	private int GetPickupableCell(Pickupable pickupable)
-	{
-		if (pickupable.storage)
-		{
-			return Grid.PosToCell(pickupable.storage);
-		}
-		return pickupable.cachedCell;
-	}
-
 	private void SetArmAnim(SolidTransferArm.ArmAnim new_anim)
 	{
-		if (new_anim != this.arm_anim)
+		if (new_anim == this.arm_anim)
 		{
-			this.arm_anim = new_anim;
-			SolidTransferArm.ArmAnim armAnim = this.arm_anim;
-			if (armAnim != SolidTransferArm.ArmAnim.Idle)
+			return;
+		}
+		this.arm_anim = new_anim;
+		SolidTransferArm.ArmAnim armAnim = this.arm_anim;
+		if (armAnim != SolidTransferArm.ArmAnim.Idle)
+		{
+			if (armAnim != SolidTransferArm.ArmAnim.Pickup)
 			{
-				if (armAnim != SolidTransferArm.ArmAnim.Pickup)
+				if (armAnim == SolidTransferArm.ArmAnim.Drop)
 				{
-					if (armAnim == SolidTransferArm.ArmAnim.Drop)
-					{
-						this.arm_anim_ctrl.Play("arm_drop", KAnim.PlayMode.Loop, 1f, 0f);
-					}
-				}
-				else
-				{
-					this.arm_anim_ctrl.Play("arm_pickup", KAnim.PlayMode.Loop, 1f, 0f);
+					this.arm_anim_ctrl.Play("arm_drop", KAnim.PlayMode.Loop, 1f, 0f);
 				}
 			}
 			else
 			{
-				this.arm_anim_ctrl.Play("arm", KAnim.PlayMode.Loop, 1f, 0f);
+				this.arm_anim_ctrl.Play("arm_pickup", KAnim.PlayMode.Loop, 1f, 0f);
 			}
+		}
+		else
+		{
+			this.arm_anim_ctrl.Play("arm", KAnim.PlayMode.Loop, 1f, 0f);
 		}
 	}
 
@@ -359,6 +345,21 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 		}
 	}
 
+	[Conditional("ENABLE_FETCH_PROFILING")]
+	private static void BeginDetailedSample(string region_name)
+	{
+	}
+
+	[Conditional("ENABLE_FETCH_PROFILING")]
+	private static void BeginDetailedSample(string region_name, int count)
+	{
+	}
+
+	[Conditional("ENABLE_FETCH_PROFILING")]
+	private static void EndDetailedSample()
+	{
+	}
+
 	[MyCmpReq]
 	private Operational operational;
 
@@ -386,11 +387,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private List<Pickupable> pickupables = new List<Pickupable>();
 
-	private HandleVector<int>.Handle pickupablesChangedEntry;
-
 	public static TagBits tagBits = new TagBits(STORAGEFILTERS.NOT_EDIBLE_SOLIDS.Concat<Tag>(STORAGEFILTERS.FOOD).ToArray<Tag>());
-
-	private bool pickupablesDirty;
 
 	private Extents pickupableExtents;
 
@@ -415,7 +412,7 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 	private SolidTransferArm.ArmAnim arm_anim;
 
-	private List<int> reachableCells = new List<int>(100);
+	private HashSet<int> reachableCells = new HashSet<int>();
 
 	private static readonly EventSystem.IntraObjectHandler<SolidTransferArm> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<SolidTransferArm>(delegate(SolidTransferArm component, object data)
 	{
@@ -426,6 +423,10 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 	{
 		component.OnEndChore(data);
 	});
+
+	private static List<SolidTransferArm.CachedPickupable> cached_pickupables = new List<SolidTransferArm.CachedPickupable>();
+
+	private static WorkItemCollection<SolidTransferArm.BatchUpdateTask, SolidTransferArm.BatchUpdateContext> batch_update_job = new WorkItemCollection<SolidTransferArm.BatchUpdateTask, SolidTransferArm.BatchUpdateContext>();
 
 	private int serial_no;
 
@@ -473,5 +474,94 @@ public class SolidTransferArm : StateMachineComponent<SolidTransferArm.SMInstanc
 
 			public GameStateMachine<SolidTransferArm.States, SolidTransferArm.SMInstance, SolidTransferArm, object>.State working;
 		}
+	}
+
+	private struct BatchUpdateContext
+	{
+		public BatchUpdateContext(List<UpdateBucketWithUpdater<ISim1000ms>.Entry> solid_transfer_arms)
+		{
+			this.solid_transfer_arms = ListPool<SolidTransferArm, SolidTransferArm.BatchUpdateContext>.Allocate();
+			this.solid_transfer_arms.Capacity = solid_transfer_arms.Count;
+			this.refreshed_reachable_cells = ListPool<bool, SolidTransferArm.BatchUpdateContext>.Allocate();
+			this.refreshed_reachable_cells.Capacity = solid_transfer_arms.Count;
+			this.cells = ListPool<int, SolidTransferArm.BatchUpdateContext>.Allocate();
+			this.cells.Capacity = solid_transfer_arms.Count;
+			this.game_objects = ListPool<GameObject, SolidTransferArm.BatchUpdateContext>.Allocate();
+			this.game_objects.Capacity = solid_transfer_arms.Count;
+			for (int num = 0; num != solid_transfer_arms.Count; num++)
+			{
+				UpdateBucketWithUpdater<ISim1000ms>.Entry entry = solid_transfer_arms[num];
+				entry.lastUpdateTime = 0f;
+				solid_transfer_arms[num] = entry;
+				SolidTransferArm solidTransferArm = (SolidTransferArm)entry.data;
+				if (solidTransferArm.operational.IsOperational)
+				{
+					this.solid_transfer_arms.Add(solidTransferArm);
+					this.refreshed_reachable_cells.Add(false);
+					this.cells.Add(Grid.PosToCell(solidTransferArm));
+					this.game_objects.Add(solidTransferArm.gameObject);
+				}
+			}
+		}
+
+		public void Finish()
+		{
+			for (int num = 0; num != this.solid_transfer_arms.Count; num++)
+			{
+				if (this.refreshed_reachable_cells[num])
+				{
+					this.solid_transfer_arms[num].IncrementSerialNo();
+				}
+				this.solid_transfer_arms[num].Sim();
+			}
+			this.refreshed_reachable_cells.Recycle();
+			this.cells.Recycle();
+			this.game_objects.Recycle();
+			this.solid_transfer_arms.Recycle();
+		}
+
+		public ListPool<SolidTransferArm, SolidTransferArm.BatchUpdateContext>.PooledList solid_transfer_arms;
+
+		public ListPool<bool, SolidTransferArm.BatchUpdateContext>.PooledList refreshed_reachable_cells;
+
+		public ListPool<int, SolidTransferArm.BatchUpdateContext>.PooledList cells;
+
+		public ListPool<GameObject, SolidTransferArm.BatchUpdateContext>.PooledList game_objects;
+	}
+
+	private struct BatchUpdateTask : IWorkItem<SolidTransferArm.BatchUpdateContext>
+	{
+		public BatchUpdateTask(int start, int end)
+		{
+			this.start = start;
+			this.end = end;
+			this.reachable_cells_workspace = HashSetPool<int, SolidTransferArm>.Allocate();
+		}
+
+		public void Run(SolidTransferArm.BatchUpdateContext context)
+		{
+			for (int num = this.start; num != this.end; num++)
+			{
+				context.refreshed_reachable_cells[num] = context.solid_transfer_arms[num].AsyncUpdate(context.cells[num], this.reachable_cells_workspace, context.game_objects[num]);
+			}
+		}
+
+		public void Finish()
+		{
+			this.reachable_cells_workspace.Recycle();
+		}
+
+		private int start;
+
+		private int end;
+
+		private HashSetPool<int, SolidTransferArm>.PooledHashSet reachable_cells_workspace;
+	}
+
+	public struct CachedPickupable
+	{
+		public Pickupable pickupable;
+
+		public int storage_cell;
 	}
 }

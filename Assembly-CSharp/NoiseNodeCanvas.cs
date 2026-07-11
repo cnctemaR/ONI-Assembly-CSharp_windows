@@ -15,7 +15,7 @@ public class NoiseNodeCanvas : NodeCanvas
 	public static NoiseNodeCanvas CreateInstance()
 	{
 		NoiseNodeCanvas noiseNodeCanvas = ScriptableObject.CreateInstance<NoiseNodeCanvas>();
-		noiseNodeCanvas.ntf = YamlIO<NoiseTreeFiles>.LoadFile(NoiseTreeFiles.GetPath(), null);
+		noiseNodeCanvas.ntf = YamlIO.LoadFile<NoiseTreeFiles>(NoiseTreeFiles.GetPath(), null, null);
 		return noiseNodeCanvas;
 	}
 
@@ -61,13 +61,13 @@ public class NoiseNodeCanvas : NodeCanvas
 			{
 				tree.ClearEmptyLists();
 				string treeFilePath = NoiseTreeFiles.GetTreeFilePath(sceneCanvasName);
-				tree.Save(treeFilePath, null);
+				YamlIO.Save<Tree>(tree, treeFilePath, null);
 			}
 		}
 		GUILayout.EndHorizontal();
 		if (this.ntf == null)
 		{
-			this.ntf = YamlIO<NoiseTreeFiles>.LoadFile(NoiseTreeFiles.GetPath(), null);
+			this.ntf = YamlIO.LoadFile<NoiseTreeFiles>(NoiseTreeFiles.GetPath(), null, null);
 		}
 		if (this.ntf != null && GUILayout.Button(new GUIContent("Load Tree", "Loads the Canvas from Trees list"), new GUILayoutOption[0]))
 		{
@@ -378,7 +378,7 @@ public class NoiseNodeCanvas : NodeCanvas
 	{
 		NodeCanvas nodeCanvas = null;
 		string treeFilePath = NoiseTreeFiles.GetTreeFilePath(name);
-		Tree tree = YamlIO<Tree>.LoadFile(treeFilePath, null);
+		Tree tree = YamlIO.LoadFile<Tree>(treeFilePath, null, null);
 		if (tree != null)
 		{
 			if (tree.settings.name == null || tree.settings.name == string.Empty)

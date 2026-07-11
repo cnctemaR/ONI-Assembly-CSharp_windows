@@ -13,6 +13,7 @@ public class ConduitFlowVisualizer
 		this.tuning = tuning;
 		this.movingBallMesh = new ConduitFlowVisualizer.ConduitFlowMesh();
 		this.staticBallMesh = new ConduitFlowVisualizer.ConduitFlowMesh();
+		ConduitFlowVisualizer.RenderMeshTask.Ball.InitializeResources();
 	}
 
 	public void FreeResources()
@@ -73,9 +74,6 @@ public class ConduitFlowVisualizer
 
 	public void Render(float z, int render_layer, float lerp_percent, bool trigger_audio = false)
 	{
-		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		Vector2I vector2I = new Vector2I(Mathf.Max(0, visibleArea.Min.x - 1), Mathf.Max(0, visibleArea.Min.y - 1));
-		Vector2I vector2I2 = new Vector2I(Mathf.Min(Grid.WidthInCells - 1, visibleArea.Max.x + 1), Mathf.Min(Grid.HeightInCells - 1, visibleArea.Max.y + 1));
 		this.animTime += (double)Time.deltaTime;
 		if (trigger_audio)
 		{
@@ -92,143 +90,63 @@ public class ConduitFlowVisualizer
 				this.audioInfo[i] = audioInfo;
 			}
 		}
-		Vector3 position = CameraController.Instance.transform.GetPosition();
-		Element element = null;
 		if (this.tuning.renderMesh)
 		{
-			float num = 0f;
-			if (this.showContents)
-			{
-				num = 1f;
-			}
-			int num2 = (int)(this.animTime / (1.0 / (double)this.tuning.framesPerSecond)) % (int)this.tuning.spriteCount;
-			float num3 = (float)num2 * (1f / this.tuning.spriteCount);
-			this.movingBallMesh.Begin();
-			this.movingBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
-			this.movingBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
-			this.movingBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num, num3));
-			this.movingBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
-			this.staticBallMesh.Begin();
-			this.staticBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
-			this.staticBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
-			this.staticBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num, 0f));
-			this.staticBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
-			for (int j = 0; j < this.flowManager.soaInfo.NumEntries; j++)
-			{
-				int cell = this.flowManager.soaInfo.GetCell(j);
-				Vector2I vector2I3 = Grid.CellToXY(cell);
-				if (!(vector2I3 < vector2I) && !(vector2I3 > vector2I2))
-				{
-					ConduitFlow.Conduit conduit = this.flowManager.soaInfo.GetConduit(j);
-					ConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this.flowManager);
-					ConduitFlow.ConduitContents initialContents = conduit.GetInitialContents(this.flowManager);
-					if (lastFlowInfo.contents.mass > 0f)
-					{
-						int cell2 = conduit.GetCell(this.flowManager);
-						int cellFromDirection = ConduitFlow.GetCellFromDirection(cell2, lastFlowInfo.direction);
-						Vector2I vector2I4 = Grid.CellToXY(cell2);
-						Vector2I vector2I5 = Grid.CellToXY(cellFromDirection);
-						Vector2 vector = vector2I4;
-						if (cell2 != -1)
-						{
-							vector = Vector2.Lerp(new Vector2((float)vector2I4.x, (float)vector2I4.y), new Vector2((float)vector2I5.x, (float)vector2I5.y), lerp_percent);
-						}
-						Color32 cellTintColour = this.GetCellTintColour(cell2);
-						Color32 cellTintColour2 = this.GetCellTintColour(cellFromDirection);
-						Color32 color = Color32.Lerp(cellTintColour, cellTintColour2, lerp_percent);
-						Vector2I vector2I6 = new Vector2I(0, 0);
-						Vector2I vector2I7 = new Vector2I(0, 1);
-						Vector2I vector2I8 = new Vector2I(1, 0);
-						Vector2I vector2I9 = new Vector2I(1, 1);
-						switch (lastFlowInfo.direction)
-						{
-						case ConduitFlow.FlowDirection.Up:
-						case ConduitFlow.FlowDirection.Down:
-							vector2I6 = new Vector2I(1, 0);
-							vector2I7 = new Vector2I(0, 0);
-							vector2I8 = new Vector2I(1, 1);
-							vector2I9 = new Vector2I(0, 1);
-							break;
-						}
-						IL_04B5:
-						float num4 = 0f;
-						if (this.showContents)
-						{
-							if (lastFlowInfo.contents.mass >= initialContents.mass)
-							{
-								this.movingBallMesh.AddQuad(vector, color, this.tuning.size, 0f, 0f, vector2I6, vector2I7, vector2I8, vector2I9);
-							}
-							if (element == null || lastFlowInfo.contents.element != element.id)
-							{
-								element = ElementLoader.FindElementByHash(lastFlowInfo.contents.element);
-							}
-						}
-						else
-						{
-							element = null;
-							int num5 = Grid.PosToCell(new Vector3(vector.x + ConduitFlowVisualizer.GRID_OFFSET.x, vector.y + ConduitFlowVisualizer.GRID_OFFSET.y, 0f));
-							if (num5 == this.highlightedCell)
-							{
-								num4 = 1f;
-							}
-						}
-						Color32 contentsColor = this.GetContentsColor(element, color);
-						float num6 = 1f;
-						if (this.showContents || lastFlowInfo.contents.mass < initialContents.mass)
-						{
-							num6 = this.CalculateMassScale(lastFlowInfo.contents.mass);
-						}
-						this.movingBallMesh.AddQuad(vector, contentsColor, this.tuning.size * num6, 1f, num4, vector2I6, vector2I7, vector2I8, vector2I9);
-						if (trigger_audio)
-						{
-							this.AddAudioSource(conduit, position);
-							goto IL_0615;
-						}
-						goto IL_0615;
-						goto IL_04B5;
-					}
-					IL_0615:
-					if (initialContents.mass > lastFlowInfo.contents.mass && initialContents.mass > 0f)
-					{
-						int cell3 = conduit.GetCell(this.flowManager);
-						Vector2I vector2I10 = Grid.CellToXY(cell3);
-						Vector2 vector2 = vector2I10;
-						float num7 = initialContents.mass - lastFlowInfo.contents.mass;
-						Vector2I vector2I11 = new Vector2I(0, 0);
-						Vector2I vector2I12 = new Vector2I(0, 1);
-						Vector2I vector2I13 = new Vector2I(1, 0);
-						Vector2I vector2I14 = new Vector2I(1, 1);
-						float num8 = 0f;
-						Color32 cellTintColour3 = this.GetCellTintColour(cell3);
-						float num9 = this.CalculateMassScale(num7);
-						if (this.showContents)
-						{
-							this.staticBallMesh.AddQuad(vector2, cellTintColour3, this.tuning.size * num9, 0f, 0f, vector2I11, vector2I12, vector2I13, vector2I14);
-							if (element == null || initialContents.element != element.id)
-							{
-								element = ElementLoader.FindElementByHash(initialContents.element);
-							}
-						}
-						else
-						{
-							element = null;
-							if (cell3 == this.highlightedCell)
-							{
-								num8 = 1f;
-							}
-						}
-						Color32 contentsColor2 = this.GetContentsColor(element, cellTintColour3);
-						this.staticBallMesh.AddQuad(vector2, contentsColor2, this.tuning.size * num9, 1f, num8, vector2I11, vector2I12, vector2I13, vector2I14);
-					}
-				}
-			}
-			this.movingBallMesh.End(z, this.layer);
-			this.staticBallMesh.End(z, this.layer);
+			this.RenderMesh(z, render_layer, lerp_percent, trigger_audio);
 		}
 		if (trigger_audio)
 		{
 			this.TriggerAudio();
 		}
+	}
+
+	private void RenderMesh(float z, int render_layer, float lerp_percent, bool trigger_audio)
+	{
+		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+		Vector2I vector2I = new Vector2I(Mathf.Max(0, visibleArea.Min.x - 1), Mathf.Max(0, visibleArea.Min.y - 1));
+		Vector2I vector2I2 = new Vector2I(Mathf.Min(Grid.WidthInCells - 1, visibleArea.Max.x + 1), Mathf.Min(Grid.HeightInCells - 1, visibleArea.Max.y + 1));
+		ConduitFlowVisualizer.RenderMeshContext renderMeshContext = new ConduitFlowVisualizer.RenderMeshContext(this, lerp_percent, vector2I, vector2I2);
+		if (renderMeshContext.visible_conduits.Count == 0)
+		{
+			renderMeshContext.Finish();
+			return;
+		}
+		ConduitFlowVisualizer.render_mesh_job.Reset(renderMeshContext);
+		int num = Mathf.Max(1, (int)((float)(renderMeshContext.visible_conduits.Count / CPUBudget.coreCount) / 1.5f));
+		int num2 = Mathf.Max(1, renderMeshContext.visible_conduits.Count / num);
+		for (int num3 = 0; num3 != num2; num3++)
+		{
+			int num4 = num3 * num;
+			int num5 = ((num3 != num2 - 1) ? (num4 + num) : renderMeshContext.visible_conduits.Count);
+			ConduitFlowVisualizer.render_mesh_job.Add(new ConduitFlowVisualizer.RenderMeshTask(num4, num5));
+		}
+		GlobalJobManager.Run(ConduitFlowVisualizer.render_mesh_job);
+		float num6 = 0f;
+		if (this.showContents)
+		{
+			num6 = 1f;
+		}
+		int num7 = (int)(this.animTime / (1.0 / (double)this.tuning.framesPerSecond)) % (int)this.tuning.spriteCount;
+		float num8 = (float)num7 * (1f / this.tuning.spriteCount);
+		this.movingBallMesh.Begin();
+		this.movingBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
+		this.movingBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
+		this.movingBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num6, num8));
+		this.movingBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
+		this.staticBallMesh.Begin();
+		this.staticBallMesh.SetTexture("_BackgroundTex", this.tuning.backgroundTexture);
+		this.staticBallMesh.SetTexture("_ForegroundTex", this.tuning.foregroundTexture);
+		this.staticBallMesh.SetVector("_SpriteSettings", new Vector4(1f / this.tuning.spriteCount, 1f, num6, 0f));
+		this.staticBallMesh.SetVector("_Highlight", new Vector4((float)this.highlightColour.r / 255f, (float)this.highlightColour.g / 255f, (float)this.highlightColour.b / 255f, 0f));
+		Vector3 position = CameraController.Instance.transform.GetPosition();
+		ConduitFlowVisualizer conduitFlowVisualizer = ((!trigger_audio) ? null : this);
+		for (int num9 = 0; num9 != ConduitFlowVisualizer.render_mesh_job.Count; num9++)
+		{
+			ConduitFlowVisualizer.render_mesh_job.GetWorkItem(num9).Finish(this.movingBallMesh, this.staticBallMesh, position, conduitFlowVisualizer);
+		}
+		this.movingBallMesh.End(z, this.layer);
+		this.staticBallMesh.End(z, this.layer);
+		renderMeshContext.Finish();
 	}
 
 	public void ColourizePipeContents(bool show_contents, bool move_to_overlay_layer)
@@ -364,6 +282,8 @@ public class ConduitFlowVisualizer
 
 	private ConduitFlowVisualizer.Tuning tuning;
 
+	private static WorkItemCollection<ConduitFlowVisualizer.RenderMeshTask, ConduitFlowVisualizer.RenderMeshContext> render_mesh_job = new WorkItemCollection<ConduitFlowVisualizer.RenderMeshTask, ConduitFlowVisualizer.RenderMeshContext>();
+
 	[Serializable]
 	public class Tuning
 	{
@@ -474,5 +394,232 @@ public class ConduitFlowVisualizer
 		public float distance;
 
 		public Vector3 position;
+	}
+
+	private struct RenderMeshContext
+	{
+		public RenderMeshContext(ConduitFlowVisualizer outer, float lerp_percent, Vector2I min, Vector2I max)
+		{
+			this.outer = outer;
+			this.lerp_percent = lerp_percent;
+			this.visible_conduits = ListPool<int, ConduitFlowVisualizer>.Allocate();
+			this.visible_conduits.Capacity = outer.flowManager.soaInfo.NumEntries;
+			for (int num = 0; num != outer.flowManager.soaInfo.NumEntries; num++)
+			{
+				Vector2I vector2I = Grid.CellToXY(outer.flowManager.soaInfo.GetCell(num));
+				if (min <= vector2I && vector2I <= max)
+				{
+					this.visible_conduits.Add(num);
+				}
+			}
+		}
+
+		public void Finish()
+		{
+			this.visible_conduits.Recycle();
+		}
+
+		public ListPool<int, ConduitFlowVisualizer>.PooledList visible_conduits;
+
+		public ConduitFlowVisualizer outer;
+
+		public float lerp_percent;
+	}
+
+	private struct RenderMeshTask : IWorkItem<ConduitFlowVisualizer.RenderMeshContext>
+	{
+		public RenderMeshTask(int start, int end)
+		{
+			this.start = start;
+			this.end = end;
+			int num = end - start;
+			this.moving_balls = ListPool<ConduitFlowVisualizer.RenderMeshTask.Ball, ConduitFlowVisualizer.RenderMeshTask>.Allocate();
+			this.moving_balls.Capacity = num;
+			this.static_balls = ListPool<ConduitFlowVisualizer.RenderMeshTask.Ball, ConduitFlowVisualizer.RenderMeshTask>.Allocate();
+			this.static_balls.Capacity = num;
+			this.moving_conduits = ListPool<ConduitFlow.Conduit, ConduitFlowVisualizer.RenderMeshTask>.Allocate();
+			this.moving_conduits.Capacity = num;
+		}
+
+		public void Run(ConduitFlowVisualizer.RenderMeshContext context)
+		{
+			Element element = null;
+			for (int num = this.start; num != this.end; num++)
+			{
+				ConduitFlow.Conduit conduit = context.outer.flowManager.soaInfo.GetConduit(context.visible_conduits[num]);
+				ConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(context.outer.flowManager);
+				ConduitFlow.ConduitContents initialContents = conduit.GetInitialContents(context.outer.flowManager);
+				if (lastFlowInfo.contents.mass > 0f)
+				{
+					int cell = conduit.GetCell(context.outer.flowManager);
+					int cellFromDirection = ConduitFlow.GetCellFromDirection(cell, lastFlowInfo.direction);
+					Vector2I vector2I = Grid.CellToXY(cell);
+					Vector2I vector2I2 = Grid.CellToXY(cellFromDirection);
+					Vector2 vector = ((cell != -1) ? Vector2.Lerp(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y), context.lerp_percent) : vector2I);
+					Color32 cellTintColour = context.outer.GetCellTintColour(cell);
+					Color32 cellTintColour2 = context.outer.GetCellTintColour(cellFromDirection);
+					Color32 color = Color32.Lerp(cellTintColour, cellTintColour2, context.lerp_percent);
+					bool flag = false;
+					if (context.outer.showContents)
+					{
+						if (lastFlowInfo.contents.mass >= initialContents.mass)
+						{
+							this.moving_balls.Add(new ConduitFlowVisualizer.RenderMeshTask.Ball(lastFlowInfo.direction, vector, color, context.outer.tuning.size, false, false));
+						}
+						if (element == null || lastFlowInfo.contents.element != element.id)
+						{
+							element = ElementLoader.FindElementByHash(lastFlowInfo.contents.element);
+						}
+					}
+					else
+					{
+						element = null;
+						int num2 = Grid.PosToCell(new Vector3(vector.x + ConduitFlowVisualizer.GRID_OFFSET.x, vector.y + ConduitFlowVisualizer.GRID_OFFSET.y, 0f));
+						flag = num2 == context.outer.highlightedCell;
+					}
+					Color32 contentsColor = context.outer.GetContentsColor(element, color);
+					float num3 = 1f;
+					if (context.outer.showContents || lastFlowInfo.contents.mass < initialContents.mass)
+					{
+						num3 = context.outer.CalculateMassScale(lastFlowInfo.contents.mass);
+					}
+					this.moving_balls.Add(new ConduitFlowVisualizer.RenderMeshTask.Ball(lastFlowInfo.direction, vector, contentsColor, context.outer.tuning.size * num3, true, flag));
+					this.moving_conduits.Add(conduit);
+				}
+				if (initialContents.mass > lastFlowInfo.contents.mass && initialContents.mass > 0f)
+				{
+					int cell2 = conduit.GetCell(context.outer.flowManager);
+					Vector2I vector2I3 = Grid.CellToXY(cell2);
+					Vector2 vector2 = vector2I3;
+					float num4 = initialContents.mass - lastFlowInfo.contents.mass;
+					bool flag2 = false;
+					Color32 cellTintColour3 = context.outer.GetCellTintColour(cell2);
+					float num5 = context.outer.CalculateMassScale(num4);
+					if (context.outer.showContents)
+					{
+						this.static_balls.Add(new ConduitFlowVisualizer.RenderMeshTask.Ball(ConduitFlow.FlowDirections.None, vector2, cellTintColour3, context.outer.tuning.size * num5, false, false));
+						if (element == null || initialContents.element != element.id)
+						{
+							element = ElementLoader.FindElementByHash(initialContents.element);
+						}
+					}
+					else
+					{
+						element = null;
+						flag2 = cell2 == context.outer.highlightedCell;
+					}
+					Color32 contentsColor2 = context.outer.GetContentsColor(element, cellTintColour3);
+					this.static_balls.Add(new ConduitFlowVisualizer.RenderMeshTask.Ball(ConduitFlow.FlowDirections.None, vector2, contentsColor2, context.outer.tuning.size * num5, true, flag2));
+				}
+			}
+		}
+
+		public void Finish(ConduitFlowVisualizer.ConduitFlowMesh moving_ball_mesh, ConduitFlowVisualizer.ConduitFlowMesh static_ball_mesh, Vector3 camera_pos, ConduitFlowVisualizer visualizer)
+		{
+			for (int num = 0; num != this.moving_balls.Count; num++)
+			{
+				this.moving_balls[num].Consume(moving_ball_mesh);
+			}
+			this.moving_balls.Recycle();
+			for (int num2 = 0; num2 != this.static_balls.Count; num2++)
+			{
+				this.static_balls[num2].Consume(static_ball_mesh);
+			}
+			this.static_balls.Recycle();
+			if (visualizer != null)
+			{
+				foreach (ConduitFlow.Conduit conduit in this.moving_conduits)
+				{
+					visualizer.AddAudioSource(conduit, camera_pos);
+				}
+			}
+			this.moving_conduits.Recycle();
+		}
+
+		private ListPool<ConduitFlowVisualizer.RenderMeshTask.Ball, ConduitFlowVisualizer.RenderMeshTask>.PooledList moving_balls;
+
+		private ListPool<ConduitFlowVisualizer.RenderMeshTask.Ball, ConduitFlowVisualizer.RenderMeshTask>.PooledList static_balls;
+
+		private ListPool<ConduitFlow.Conduit, ConduitFlowVisualizer.RenderMeshTask>.PooledList moving_conduits;
+
+		private int start;
+
+		private int end;
+
+		public struct Ball
+		{
+			public Ball(ConduitFlow.FlowDirections direction, Vector2 pos, Color32 color, float size, bool foreground, bool highlight)
+			{
+				this.pos = pos;
+				this.size = size;
+				this.color = color;
+				this.direction = direction;
+				this.foreground = foreground;
+				this.highlight = highlight;
+			}
+
+			public static void InitializeResources()
+			{
+				ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[ConduitFlow.FlowDirections.None] = new ConduitFlowVisualizer.RenderMeshTask.Ball.UVPack
+				{
+					bl = new Vector2I(0, 0),
+					tl = new Vector2I(0, 1),
+					br = new Vector2I(1, 0),
+					tr = new Vector2I(1, 1)
+				};
+				ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[ConduitFlow.FlowDirections.Left] = new ConduitFlowVisualizer.RenderMeshTask.Ball.UVPack
+				{
+					bl = new Vector2I(0, 0),
+					tl = new Vector2I(0, 1),
+					br = new Vector2I(1, 0),
+					tr = new Vector2I(1, 1)
+				};
+				ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[ConduitFlow.FlowDirections.Right] = ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[ConduitFlow.FlowDirections.Left];
+				ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[ConduitFlow.FlowDirections.Up] = new ConduitFlowVisualizer.RenderMeshTask.Ball.UVPack
+				{
+					bl = new Vector2I(1, 0),
+					tl = new Vector2I(0, 0),
+					br = new Vector2I(1, 1),
+					tr = new Vector2I(0, 1)
+				};
+				ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[ConduitFlow.FlowDirections.Down] = ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[ConduitFlow.FlowDirections.Up];
+			}
+
+			private static ConduitFlowVisualizer.RenderMeshTask.Ball.UVPack GetUVPack(ConduitFlow.FlowDirections direction)
+			{
+				return ConduitFlowVisualizer.RenderMeshTask.Ball.uv_packs[direction];
+			}
+
+			public void Consume(ConduitFlowVisualizer.ConduitFlowMesh mesh)
+			{
+				ConduitFlowVisualizer.RenderMeshTask.Ball.UVPack uvpack = ConduitFlowVisualizer.RenderMeshTask.Ball.GetUVPack(this.direction);
+				mesh.AddQuad(this.pos, this.color, this.size, (float)((!this.foreground) ? 0 : 1), (float)((!this.highlight) ? 0 : 1), uvpack.bl, uvpack.tl, uvpack.br, uvpack.tr);
+			}
+
+			private Vector2 pos;
+
+			private float size;
+
+			private Color32 color;
+
+			private ConduitFlow.FlowDirections direction;
+
+			private bool foreground;
+
+			private bool highlight;
+
+			private static Dictionary<ConduitFlow.FlowDirections, ConduitFlowVisualizer.RenderMeshTask.Ball.UVPack> uv_packs = new Dictionary<ConduitFlow.FlowDirections, ConduitFlowVisualizer.RenderMeshTask.Ball.UVPack>();
+
+			private class UVPack
+			{
+				public Vector2I bl;
+
+				public Vector2I tl;
+
+				public Vector2I br;
+
+				public Vector2I tr;
+			}
+		}
 	}
 }

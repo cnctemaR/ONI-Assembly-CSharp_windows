@@ -108,7 +108,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 			{
 				if (SaveGame.Instance.GetComponent<SeasonManager>().TimeUntilNextBombardment() <= detectTime)
 				{
-					component.AddTag(GameTags.Detecting);
+					component.AddTag(GameTags.Detecting, false);
 				}
 				else
 				{
@@ -125,7 +125,7 @@ public class CometDetector : GameStateMachine<CometDetector, CometDetector.Insta
 				}
 				else if (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Launching || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.WaitingToLand || spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Landing || (spacecraftFromLaunchConditionManager.state == Spacecraft.MissionState.Underway && spacecraftFromLaunchConditionManager.GetTimeLeft() <= detectTime))
 				{
-					component.AddTag(GameTags.Detecting);
+					component.AddTag(GameTags.Detecting, false);
 				}
 				else
 				{

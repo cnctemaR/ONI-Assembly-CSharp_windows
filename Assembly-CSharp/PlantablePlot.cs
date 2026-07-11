@@ -199,12 +199,12 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 	private void RegisterWithPlant(GameObject plant)
 	{
 		base.occupyingObject = plant;
-		plant.Trigger(1309017699, this.storage);
 		ReceptacleMonitor component = plant.GetComponent<ReceptacleMonitor>();
 		if (component)
 		{
-			component.smi.sm.receptacle.Set(this, component.smi);
+			component.SetReceptacle(this);
 		}
+		plant.Trigger(1309017699, this.storage);
 	}
 
 	protected override void SubscribeToOccupant()
@@ -242,7 +242,7 @@ public class PlantablePlot : SingleEntityReceptacle, ISaveLoadable, IEffectDescr
 		{
 			return;
 		}
-		component.MarkForUproot();
+		component.MarkForUproot(true);
 	}
 
 	public override void SetPreview(Tag entityTag, bool solid = false)

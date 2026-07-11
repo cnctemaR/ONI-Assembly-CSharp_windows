@@ -7,7 +7,7 @@ using UnityEngine;
 public class VomitChore : Chore<VomitChore.StatesInstance>
 {
 	public VomitChore(ChoreType chore_type, IStateMachineTarget target, StatusItem status_item, Notification notification, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.Vomit, target, target.GetComponent<ChoreProvider>(), true, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.Vomit, target, target.GetComponent<ChoreProvider>(), true, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new VomitChore.StatesInstance(this, target.gameObject, status_item, notification);
 	}

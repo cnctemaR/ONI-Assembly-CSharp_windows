@@ -12,7 +12,7 @@ public class StatusItem : Resource
 		this.tooltipText = Strings.Get(composed_prefix + ".TOOLTIP");
 	}
 
-	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 63486)
+	public StatusItem(string id, string prefix, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, bool showWorldIcon = true, int status_overlays = 129022)
 		: this(id, "STRINGS." + prefix + ".STATUSITEMS." + id.ToUpper())
 	{
 		if (icon_type != StatusItem.IconType.Info)
@@ -46,7 +46,7 @@ public class StatusItem : Resource
 		}
 	}
 
-	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 63486)
+	public StatusItem(string id, string name, string tooltip, string icon, StatusItem.IconType icon_type, NotificationType notification_type, bool allow_multiples, HashedString render_overlay, int status_overlays = 129022)
 		: base(id, name)
 	{
 		if (icon_type != StatusItem.IconType.Info)
@@ -188,6 +188,14 @@ public class StatusItem : Resource
 		return this;
 	}
 
+	public void OnClick(object data)
+	{
+		if (this.statusItemClickCallback != null)
+		{
+			this.statusItemClickCallback(data);
+		}
+	}
+
 	public static StatusItem.StatusItemOverlays GetStatusItemOverlayBySimViewMode(HashedString mode)
 	{
 		StatusItem.StatusItemOverlays statusItemOverlays;
@@ -233,11 +241,13 @@ public class StatusItem : Resource
 
 	public int status_overlays;
 
+	public Action<object> statusItemClickCallback;
+
 	private string composedPrefix;
 
 	private bool showShowWorldIcon = true;
 
-	public const int ALL_OVERLAYS = 63486;
+	public const int ALL_OVERLAYS = 129022;
 
 	private static Dictionary<HashedString, StatusItem.StatusItemOverlays> overlayBitfieldMap = new Dictionary<HashedString, StatusItem.StatusItemOverlays>
 	{
@@ -330,6 +340,7 @@ public class StatusItem : Resource
 		Rooms = 4096,
 		Suits = 8192,
 		Logic = 16384,
-		Conveyor = 32768
+		Conveyor = 32768,
+		Radiation = 65536
 	}
 }

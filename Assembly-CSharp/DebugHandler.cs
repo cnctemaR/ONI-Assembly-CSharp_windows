@@ -58,7 +58,7 @@ public class DebugHandler : IInputHandler
 		Vector3 vector = Grid.CellToPosCBC(DebugHandler.GetMouseCell(), Grid.SceneLayer.Move);
 		gameObject.transform.SetLocalPosition(vector);
 		gameObject.SetActive(true);
-		MinionStartingStats minionStartingStats = new MinionStartingStats(false);
+		MinionStartingStats minionStartingStats = new MinionStartingStats(false, null);
 		minionStartingStats.Apply(gameObject);
 	}
 
@@ -209,11 +209,6 @@ public class DebugHandler : IInputHandler
 		}
 		else if (e.TryConsume(global::Action.DebugToggle))
 		{
-			PropertyTextures.FogOfWarScale = 1f - PropertyTextures.FogOfWarScale;
-			if (CameraController.Instance != null)
-			{
-				CameraController.Instance.FreeCameraEnabled = !CameraController.Instance.FreeCameraEnabled;
-			}
 			if (Game.Instance != null)
 			{
 				Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
@@ -228,6 +223,11 @@ public class DebugHandler : IInputHandler
 					DebugElementMenu.Instance.root.SetActive(false);
 				}
 				DebugBaseTemplateButton.Instance.gameObject.SetActive(!activeSelf);
+				PropertyTextures.FogOfWarScale = (float)(activeSelf ? 0 : 1);
+				if (CameraController.Instance != null)
+				{
+					CameraController.Instance.EnableFreeCamera(!activeSelf);
+				}
 			}
 		}
 		else if (e.TryConsume(global::Action.DebugCollectGarbage))
@@ -456,7 +456,7 @@ public class DebugHandler : IInputHandler
 		DebugHandler.SetHideUI(!DebugHandler.HideUI);
 		if (CameraController.Instance != null)
 		{
-			CameraController.Instance.FreeCameraEnabled = !CameraController.Instance.FreeCameraEnabled;
+			CameraController.Instance.EnableFreeCamera(DebugHandler.HideUI);
 		}
 		if (KScreenManager.Instance != null)
 		{
@@ -467,22 +467,12 @@ public class DebugHandler : IInputHandler
 	public static void SetHideUI(bool hide)
 	{
 		DebugHandler.HideUI = hide;
-		foreach (Canvas canvas in Resources.FindObjectsOfTypeAll<Canvas>())
-		{
-			CanvasGroup canvasGroup = canvas.GetComponent<CanvasGroup>();
-			if (canvasGroup == null)
-			{
-				canvasGroup = canvas.gameObject.AddComponent<CanvasGroup>();
-			}
-			if (DebugHandler.HideUI)
-			{
-				canvasGroup.alpha = 0f;
-			}
-			else
-			{
-				canvasGroup.alpha = 1f;
-			}
-		}
+		float num = ((!DebugHandler.HideUI) ? 1f : 0f);
+		GameScreenManager.Instance.ssHoverTextCanvas.GetComponent<CanvasGroup>().alpha = num;
+		GameScreenManager.Instance.ssCameraCanvas.GetComponent<CanvasGroup>().alpha = num;
+		GameScreenManager.Instance.ssOverlayCanvas.GetComponent<CanvasGroup>().alpha = num;
+		GameScreenManager.Instance.worldSpaceCanvas.GetComponent<CanvasGroup>().alpha = num;
+		GameScreenManager.Instance.screenshotModeCanvas.GetComponent<CanvasGroup>().alpha = 1f - num;
 	}
 
 	public static bool InstantBuildMode;

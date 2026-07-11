@@ -35,7 +35,7 @@ public class AudioOptionsScreen : KModalScreen
 			});
 			if (keyValuePair.Key == "Master")
 			{
-				newSlider.transform.SetSiblingIndex(1);
+				newSlider.transform.SetSiblingIndex(2);
 				newSlider.slider.onValueChanged.AddListener(new UnityAction<float>(this.CheckMasterValue));
 				this.CheckMasterValue(keyValuePair.Value.busLevel);
 			}

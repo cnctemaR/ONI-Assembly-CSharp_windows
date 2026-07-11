@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using LibNoiseDotNet.Graphics.Tools.Noise;
 
 namespace ProcGen.Noise
 {
-	public class Tree : YamlIO<Tree>
+	public class Tree
 	{
 		public Tree()
 		{

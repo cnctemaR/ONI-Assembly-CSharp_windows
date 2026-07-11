@@ -3,6 +3,14 @@ using System.Collections.Generic;
 
 public class EnergySim
 {
+	public HashSet<Generator> Generators
+	{
+		get
+		{
+			return this.generators;
+		}
+	}
+
 	public void AddGenerator(Generator generator)
 	{
 		this.generators.Add(generator);

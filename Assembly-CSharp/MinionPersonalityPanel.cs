@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Database;
 using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class MinionPersonalityPanel : TargetScreen
@@ -129,7 +128,7 @@ public class MinionPersonalityPanel : TargetScreen
 				if (keyValuePair.Value != 0f)
 				{
 					SkillGroup skillGroup = Db.Get().SkillGroups.Get(keyValuePair.Key);
-					this.bioDrawer.NewLabel("  • " + skillGroup.Name).Tooltip(string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, keyValuePair.Value * ROLES.APTITUDE_EXPERIENCE_SCALE));
+					this.bioDrawer.NewLabel("  • " + skillGroup.Name).Tooltip(string.Format(DUPLICANTS.ROLES.GROUPS.APTITUDE_DESCRIPTION, skillGroup.Name, keyValuePair.Value));
 				}
 			}
 		}

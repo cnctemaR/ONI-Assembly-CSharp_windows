@@ -12,7 +12,7 @@ public class Ladder : KMonoBehaviour, IEffectDescriptor
 		int num = Grid.PosToCell(this);
 		Grid.HasPole[num] = this.isPole;
 		Grid.HasLadder[num] = !this.isPole;
-		base.GetComponent<KPrefabID>().AddTag(GameTags.Ladders);
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Ladders, false);
 		Components.Ladders.Add(this);
 	}
 

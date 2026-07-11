@@ -66,7 +66,7 @@ public class GameClock : KMonoBehaviour, ISaveLoadable, ISim33ms, IRender1000ms
 		{
 			this.isNight = false;
 		}
-		if (flag && this.cycle % 1 == 0)
+		if (flag && SaveGame.Instance.autoSaveCycleInterval > 0 && this.cycle % SaveGame.Instance.autoSaveCycleInterval == 0)
 		{
 			this.DoAutoSave(this.cycle);
 		}

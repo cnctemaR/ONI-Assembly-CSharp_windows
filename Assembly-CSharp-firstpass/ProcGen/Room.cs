@@ -12,9 +12,6 @@ namespace ProcGen
 		}
 
 		[StringEnumConverter]
-		public Room.RoomSize roomsize { get; private set; }
-
-		[StringEnumConverter]
 		public Room.Shape shape { get; private set; }
 
 		[StringEnumConverter]
@@ -71,15 +68,6 @@ namespace ProcGen
 
 		private List<WeightedMob> bucket;
 
-		public enum RoomSize
-		{
-			VerySmall,
-			Small,
-			Medium,
-			Large,
-			VeryLarge
-		}
-
 		public enum Shape
 		{
 			Circle,
@@ -90,7 +78,8 @@ namespace ProcGen
 			TallThin,
 			ShortWide,
 			Template,
-			PhysicalLayout
+			PhysicalLayout,
+			Splat
 		}
 
 		public enum Selection
@@ -100,7 +89,8 @@ namespace ProcGen
 			NOfEach,
 			Weighted,
 			WeightedBucket,
-			WeightedResample
+			WeightedResample,
+			PickOneWeighted
 		}
 	}
 }

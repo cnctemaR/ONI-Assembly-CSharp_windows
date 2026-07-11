@@ -69,16 +69,19 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 	{
 		return new List<Descriptor>
 		{
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.REQUIRESELEMENT, ElementLoader.FindElementByHash(this.consumedElement).name), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESELEMENT, ElementLoader.FindElementByHash(this.consumedElement).name), Descriptor.DescriptorType.Requirement, false)
+			new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTCONSUMEDPERUSE, ElementLoader.FindElementByHash(this.consumedElement).name, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTCONSUMEDPERUSE, ElementLoader.FindElementByHash(this.consumedElement).name, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Requirement, false)
 		};
 	}
 
 	public List<Descriptor> EffectDescriptors(BuildingDef def)
 	{
-		return new List<Descriptor>
+		List<Descriptor> list = new List<Descriptor>();
+		if (this.outputElement != SimHashes.Vacuum)
 		{
-			new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount)), Descriptor.DescriptorType.Effect, false)
-		};
+			list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.ELEMENTEMITTEDPERUSE, ElementLoader.FindElementByHash(this.outputElement).name, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.ELEMENTEMITTEDPERUSE, ElementLoader.FindElementByHash(this.outputElement).name, GameUtil.GetFormattedMass(this.massConsumedPerUse, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}")), Descriptor.DescriptorType.Effect, false));
+		}
+		list.Add(new Descriptor(string.Format(UI.BUILDINGEFFECTS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount)), string.Format(UI.BUILDINGEFFECTS.TOOLTIPS.DISEASECONSUMEDPERUSE, GameUtil.GetFormattedDiseaseAmount(this.diseaseRemovalCount)), Descriptor.DescriptorType.Effect, false));
+		return list;
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -244,7 +247,7 @@ public class HandSanitizer : StateMachineComponent<HandSanitizer.SMInstance>, IE
 			this.shouldTransferDiseaseWithWorker = false;
 			GameScheduler.Instance.Schedule("WaterFetchingTutorial", 2f, delegate(object obj)
 			{
-				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater);
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater, true);
 			}, null, null);
 		}
 

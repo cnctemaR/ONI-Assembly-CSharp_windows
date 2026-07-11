@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public static class QueuePool<ObjectType, PoolIdentifier>
 {
@@ -21,6 +22,7 @@ public static class QueuePool<ObjectType, PoolIdentifier>
 
 	private static ContainerPool<QueuePool<ObjectType, PoolIdentifier>.PooledQueue, PoolIdentifier> pool = new ContainerPool<QueuePool<ObjectType, PoolIdentifier>.PooledQueue, PoolIdentifier>();
 
+	[DebuggerDisplay("Count={Count}")]
 	public class PooledQueue : Queue<ObjectType>
 	{
 		public void Recycle()

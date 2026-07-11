@@ -1,18 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Steamworks;
 using STRINGS;
 using UnityEngine;
 
 namespace KMod
 {
-	public class Steam : IDistributionPlatform, SteamUGCService.IUGCEventHandler
+	public class Steam : IDistributionPlatform, SteamUGCService.IClient
 	{
-		public Steam()
-		{
-			this.UpdateSubscriptions();
-		}
-
-		private Mod MakeMod(SteamUGCService.Subscribed subscribed)
+		private Mod MakeMod(SteamUGCService.Mod subscribed)
 		{
 			if (subscribed == null)
 			{
@@ -27,7 +24,7 @@ namespace KMod
 			{
 				id = id,
 				distribution_platform = Label.DistributionPlatform.Steam,
-				version = subscribed.lastUpdateTime,
+				version = (long)subscribed.lastUpdateTime,
 				title = subscribed.title
 			};
 			ulong num;
@@ -48,63 +45,56 @@ namespace KMod
 			});
 		}
 
-		private void UpdateSubscriptions()
+		public void UpdateMods(IEnumerable<PublishedFileId_t> added, IEnumerable<PublishedFileId_t> updated, IEnumerable<PublishedFileId_t> removed, IEnumerable<SteamUGCService.Mod> loaded_previews)
 		{
-			foreach (SteamUGCService.Subscribed subscribed in SteamUGCService.Instance.GetSubscribed())
+			foreach (PublishedFileId_t publishedFileId_t in added)
 			{
-				Mod mod = this.MakeMod(subscribed);
-				if (mod != null)
+				SteamUGCService.Mod mod = SteamUGCService.Instance.FindMod(publishedFileId_t);
+				if (mod == null)
 				{
-					Global.Instance.modManager.Subscribe(mod, this);
+					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!");
+				}
+				else
+				{
+					Mod mod2 = this.MakeMod(mod);
+					if (mod2 != null)
+					{
+						Global.Instance.modManager.Subscribe(mod2, this);
+					}
 				}
 			}
-		}
-
-		public void OnUGCItemSubscribed(RemoteStoragePublishedFileSubscribed_t pCallback)
-		{
-			Mod mod = this.MakeMod(SteamUGCService.Instance.GetSubscribed(pCallback.m_nPublishedFileId));
-			if (mod == null)
+			foreach (PublishedFileId_t publishedFileId_t2 in updated)
 			{
-				return;
+				SteamUGCService.Mod mod3 = SteamUGCService.Instance.FindMod(publishedFileId_t2);
+				if (mod3 == null)
+				{
+					DebugUtil.DevAssert(false, "SteamUGCService just told us this id was valid!");
+				}
+				else
+				{
+					Mod mod4 = this.MakeMod(mod3);
+					if (mod4 != null)
+					{
+						Global.Instance.modManager.Update(mod4, this);
+					}
+				}
 			}
-			Global.Instance.modManager.Subscribe(mod, this);
-			Global.Instance.modManager.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.STEAM_SUBSCRIBED.TITLE, UI.FRONTEND.MOD_DIALOGS.STEAM_SUBSCRIBED.MESSAGE, null);
-		}
-
-		public void OnUGCItemInstalled(ItemInstalled_t pCallback)
-		{
-		}
-
-		public void OnUGCItemUpdated(RemoteStoragePublishedFileUpdated_t pCallback)
-		{
-			Mod mod = this.MakeMod(SteamUGCService.Instance.GetSubscribed(pCallback.m_nPublishedFileId));
-			if (mod == null)
+			foreach (PublishedFileId_t publishedFileId_t3 in removed)
 			{
-				return;
+				Global.Instance.modManager.Unsubscribe(new Label
+				{
+					id = publishedFileId_t3.m_PublishedFileId.ToString(),
+					distribution_platform = Label.DistributionPlatform.Steam
+				}, this);
 			}
-			Global.Instance.modManager.Subscribe(mod, this);
-			Global.Instance.modManager.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.STEAM_UPDATED.TITLE, UI.FRONTEND.MOD_DIALOGS.STEAM_UPDATED.MESSAGE, null);
-		}
-
-		public void OnUGCItemUnsubscribed(RemoteStoragePublishedFileUnsubscribed_t pCallback)
-		{
-			Mod mod = this.MakeMod(SteamUGCService.Instance.GetSubscribed(pCallback.m_nPublishedFileId));
-			if (mod == null)
+			if (added.Count<PublishedFileId_t>() != 0)
 			{
-				return;
+				Global.Instance.modManager.Sanitize(null);
 			}
-			Global.Instance.modManager.Unsubscribe(mod.label, this);
-			Global.Instance.modManager.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.STEAM_UNSUBSCRIBED.TITLE, UI.FRONTEND.MOD_DIALOGS.STEAM_UNSUBSCRIBED.MESSAGE, null);
-		}
-
-		public void OnUGCItemDownloaded(DownloadItemResult_t pCallback)
-		{
-		}
-
-		public void OnUGCRefresh()
-		{
-			this.UpdateSubscriptions();
-			Global.Instance.modManager.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.STEAM_REFRESH.TITLE, UI.FRONTEND.MOD_DIALOGS.STEAM_REFRESH.MESSAGE, null);
+			else
+			{
+				Global.Instance.modManager.Report(null);
+			}
 		}
 	}
 }

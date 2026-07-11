@@ -162,9 +162,19 @@ public static class GameUtil
 		return kilowatts / (shc * mass);
 	}
 
-	public static void DeltaThermalEnergy(PrimaryElement pe, float kilowatts)
+	public static void DeltaThermalEnergy(PrimaryElement pe, float kilowatts, float targetTemperature)
 	{
-		pe.Temperature += GameUtil.CalculateTemperatureChange(pe.Element.specificHeatCapacity, pe.Mass, kilowatts);
+		float num = GameUtil.CalculateTemperatureChange(pe.Element.specificHeatCapacity, pe.Mass, kilowatts);
+		float num2 = pe.Temperature + num;
+		if (targetTemperature > pe.Temperature)
+		{
+			num2 = Mathf.Clamp(num2, pe.Temperature, targetTemperature);
+		}
+		else
+		{
+			num2 = Mathf.Clamp(num2, targetTemperature, pe.Temperature);
+		}
+		pe.Temperature = num2;
 	}
 
 	public static BindingEntry ActionToBinding(global::Action action)
@@ -199,6 +209,7 @@ public static class GameUtil
 
 	public static float EnergyToTemperatureDelta(float kilojoules, PrimaryElement element)
 	{
+		global::Debug.Assert(element.Mass > 0f);
 		float energyInPrimaryElement = GameUtil.GetEnergyInPrimaryElement(element);
 		float num = Mathf.Max(energyInPrimaryElement - kilojoules, 1f);
 		float temperature = element.Temperature;
@@ -230,6 +241,17 @@ public static class GameUtil
 			global::Debug.LogError(string.Format("Calculated an invalid temperature: t1={0}, m1={1}, t2={2}, m2={3}, min_temp={4}, max_temp={5}", new object[] { t1, m1, t2, m2, num4, num5 }));
 		}
 		return num3;
+	}
+
+	public static void ForceTotalConduction(PrimaryElement a, PrimaryElement b)
+	{
+		float num = a.Temperature * a.Element.specificHeatCapacity * a.Mass;
+		float temperature = a.Temperature;
+		float num2 = b.Temperature * b.Element.specificHeatCapacity * b.Mass;
+		float temperature2 = b.Temperature;
+		float num3 = num2 / (num + num2);
+		a.Temperature = (temperature2 - temperature) * num3 + temperature;
+		b.Temperature = (temperature - temperature2) * 1f - num3 + temperature2;
 	}
 
 	public static string FloatToString(float f, string format = null)
@@ -357,8 +379,7 @@ public static class GameUtil
 	public static string GetFormattedCaloriesForItem(Tag tag, float amount, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
 	{
 		EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
-		float num = foodInfo.CaloriesPerUnit * amount;
-		return GameUtil.GetFormattedCalories(num, timeSlice, forceKcal);
+		return GameUtil.GetFormattedCalories((foodInfo == null) ? (-1f) : (foodInfo.CaloriesPerUnit * amount), timeSlice, forceKcal);
 	}
 
 	public static string GetFormattedCalories(float calories, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None, bool forceKcal = true)
@@ -387,6 +408,30 @@ public static class GameUtil
 		{
 			text2 = GameUtil.FloatToString(calories, "#,###") + text;
 		}
+		return GameUtil.AddTimeSliceText(text2, timeSlice);
+	}
+
+	public static string GetFormattedPlantGrowth(float percent, GameUtil.TimeSlice timeSlice = GameUtil.TimeSlice.None)
+	{
+		percent = GameUtil.ApplyTimeSlice(percent, timeSlice);
+		string text = string.Empty;
+		if (Mathf.Abs(percent) == 0f)
+		{
+			text = "0";
+		}
+		else if (Mathf.Abs(percent) < 0.1f)
+		{
+			text = "##0.##";
+		}
+		else if (Mathf.Abs(percent) < 1f)
+		{
+			text = "##0.#";
+		}
+		else
+		{
+			text = "##0";
+		}
+		string text2 = GameUtil.FloatToString(percent, text) + UI.UNITSUFFIXES.PERCENT + " " + UI.UNITSUFFIXES.GROWTH;
 		return GameUtil.AddTimeSliceText(text2, timeSlice);
 	}
 
@@ -475,31 +520,33 @@ public static class GameUtil
 	public static string GetFormattedHeatEnergy(float dtu, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
 	{
 		LocString locString = string.Empty;
-		if (unit != GameUtil.HeatEnergyFormatterUnit.Automatic)
+		string text;
+		switch (unit)
 		{
-			if (unit != GameUtil.HeatEnergyFormatterUnit.KDTU_S)
-			{
-				if (unit == GameUtil.HeatEnergyFormatterUnit.DTU_S)
-				{
-					locString = UI.UNITSUFFIXES.HEAT.DTU;
-				}
-			}
-			else
+		case GameUtil.HeatEnergyFormatterUnit.DTU_S:
+			locString = UI.UNITSUFFIXES.HEAT.DTU;
+			text = "###0.";
+			break;
+		case GameUtil.HeatEnergyFormatterUnit.KDTU_S:
+			dtu /= 1000f;
+			locString = UI.UNITSUFFIXES.HEAT.KDTU;
+			text = "###0.##";
+			break;
+		default:
+			if (Mathf.Abs(dtu) > 1000f)
 			{
 				dtu /= 1000f;
 				locString = UI.UNITSUFFIXES.HEAT.KDTU;
+				text = "###0.##";
 			}
+			else
+			{
+				locString = UI.UNITSUFFIXES.HEAT.DTU;
+				text = "###0.";
+			}
+			break;
 		}
-		else if (Mathf.Abs(dtu) > 1000f)
-		{
-			dtu /= 1000f;
-			locString = UI.UNITSUFFIXES.HEAT.KDTU;
-		}
-		else
-		{
-			locString = UI.UNITSUFFIXES.HEAT.DTU;
-		}
-		return GameUtil.FloatToString(dtu, "###0.##") + locString;
+		return GameUtil.FloatToString(dtu, text) + locString;
 	}
 
 	public static string GetFormattedHeatEnergyRate(float dtu_s, GameUtil.HeatEnergyFormatterUnit unit = GameUtil.HeatEnergyFormatterUnit.Automatic)
@@ -1123,6 +1170,90 @@ public static class GameUtil
 		return text;
 	}
 
+	public static GameUtil.GermResistanceModifier GetGermResistanceModifier(float modifier)
+	{
+		if (modifier > 0f)
+		{
+			if (modifier >= 5f)
+			{
+				return GameUtil.GermResistanceModifier.POSITIVE_LARGE;
+			}
+			if (modifier >= 2f)
+			{
+				return GameUtil.GermResistanceModifier.POSITIVE_MEDIUM;
+			}
+			if (modifier >= 1f)
+			{
+				return GameUtil.GermResistanceModifier.POSITIVE_SMALL;
+			}
+		}
+		else if (modifier < 0f)
+		{
+			if (modifier <= -5f)
+			{
+				return GameUtil.GermResistanceModifier.NEGATIVE_LARGE;
+			}
+			if (modifier <= -2f)
+			{
+				return GameUtil.GermResistanceModifier.NEGATIVE_MEDIUM;
+			}
+			if (modifier <= -1f)
+			{
+				return GameUtil.GermResistanceModifier.NEGATIVE_SMALL;
+			}
+		}
+		return GameUtil.GermResistanceModifier.NONE;
+	}
+
+	public static string GetGermResistanceModifierString(float modifier, bool addColor = true)
+	{
+		Color color = new Color(0.83137256f, 0.28627452f, 0.28235295f);
+		Color color2 = new Color(0.7411765f, 0.34901962f, 0.49803922f);
+		Color color3 = new Color(0.6392157f, 0.39215687f, 0.6039216f);
+		Color color4 = new Color(0.5254902f, 0.41960785f, 0.64705884f);
+		Color color5 = new Color(0.42745098f, 0.48235294f, 0.75686276f);
+		Color color6 = new Color(0.44313726f, 0.67058825f, 0.8117647f);
+		Color color7 = color4;
+		string text = string.Empty;
+		GameUtil.GermResistanceModifier germResistanceModifier = GameUtil.GetGermResistanceModifier(modifier);
+		switch (germResistanceModifier + 5)
+		{
+		case GameUtil.GermResistanceModifier.NONE:
+			color7 = color4;
+			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_LARGE, modifier);
+			break;
+		case (GameUtil.GermResistanceModifier)3:
+			color7 = color3;
+			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_MEDIUM, modifier);
+			break;
+		case (GameUtil.GermResistanceModifier)4:
+			color7 = color2;
+			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NEGATIVE_SMALL, modifier);
+			break;
+		case GameUtil.GermResistanceModifier.POSITIVE_LARGE:
+			color7 = color;
+			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.NONE, modifier);
+			break;
+		case (GameUtil.GermResistanceModifier)6:
+			color7 = color5;
+			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_SMALL, modifier);
+			break;
+		case (GameUtil.GermResistanceModifier)7:
+			color7 = color6;
+			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_MEDIUM, modifier);
+			break;
+		case (GameUtil.GermResistanceModifier)10:
+			color7 = color6;
+			text = string.Format(DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.MODIFIER_DESCRIPTORS.POSITIVE_LARGE, modifier);
+			break;
+		}
+		if (addColor)
+		{
+			text = string.Format("<color=#{0}>{1}</color>", color7.ToHexString(), text);
+		}
+		return text;
+	}
+
 	public static string GetThermalConductivityString(Element element, bool addColor = true, bool addValue = true)
 	{
 		Color color = new Color(0.83137256f, 0.28627452f, 0.28235295f);
@@ -1228,44 +1359,17 @@ public static class GameUtil
 
 	public static string AppendHotkeyString(string template, global::Action action)
 	{
-		Color color = new Color(0.95686275f, 0.2901961f, 0.2784314f);
-		return string.Concat(new string[]
-		{
-			template,
-			"<color=#",
-			color.ToHexString(),
-			">(",
-			GameUtil.GetActionString(action),
-			")</color>"
-		});
+		return template + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]");
 	}
 
 	public static string ReplaceHotkeyString(string template, global::Action action)
 	{
-		Color color = new Color(0.95686275f, 0.2901961f, 0.2784314f);
-		return template.Replace("{Hotkey}", string.Concat(new string[]
-		{
-			"<color=#",
-			color.ToHexString(),
-			">(",
-			GameUtil.GetActionString(action),
-			")</color>"
-		}));
+		return template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action) + "]"));
 	}
 
 	public static string ReplaceHotkeyString(string template, global::Action action1, global::Action action2)
 	{
-		Color color = new Color(0.95686275f, 0.2901961f, 0.2784314f);
-		return template.Replace("{Hotkey}", string.Concat(new string[]
-		{
-			"<color=#",
-			color.ToHexString(),
-			">(",
-			GameUtil.GetActionString(action2),
-			") + (",
-			GameUtil.GetActionString(action2),
-			")</color>"
-		}));
+		return template.Replace("{Hotkey}", UI.FormatAsHotkey("[" + GameUtil.GetActionString(action1) + "]") + UI.FormatAsHotkey("[" + GameUtil.GetActionString(action2) + "]"));
 	}
 
 	public static string GetKeycodeLocalized(KKeyCode key_code)
@@ -2527,6 +2631,35 @@ public static class GameUtil
 		return text;
 	}
 
+	public static bool IsCapturingTimeLapse()
+	{
+		return Game.Instance != null && Game.Instance.timelapser != null && Game.Instance.timelapser.CapturingTimelapseScreenshot;
+	}
+
+	public static ExposureType GetExposureTypeForDisease(Disease disease)
+	{
+		for (int i = 0; i < GERM_EXPOSURE.TYPES.Length; i++)
+		{
+			if (disease.id == GERM_EXPOSURE.TYPES[i].germ_id)
+			{
+				return GERM_EXPOSURE.TYPES[i];
+			}
+		}
+		return null;
+	}
+
+	public static Sickness GetSicknessForDisease(Disease disease)
+	{
+		for (int i = 0; i < GERM_EXPOSURE.TYPES.Length; i++)
+		{
+			if (disease.id == GERM_EXPOSURE.TYPES[i].germ_id)
+			{
+				return Db.Get().Sicknesses.Get(GERM_EXPOSURE.TYPES[i].sickness_id);
+			}
+		}
+		return null;
+	}
+
 	public static GameUtil.TemperatureUnit temperatureUnit;
 
 	public static GameUtil.MassUnit massUnit;
@@ -2620,8 +2753,7 @@ public static class GameUtil
 	{
 		DTU_S,
 		KDTU_S,
-		Automatic,
-		None
+		Automatic
 	}
 
 	public struct FloodFillInfo
@@ -2639,6 +2771,18 @@ public static class GameUtil
 		FIRM = 25,
 		VERY_FIRM = 50,
 		NEARLY_IMPENETRABLE = 150,
+		SUPER_HARD = 200,
 		IMPENETRABLE = 255
+	}
+
+	public enum GermResistanceModifier
+	{
+		NONE,
+		POSITIVE_SMALL,
+		POSITIVE_MEDIUM,
+		POSITIVE_LARGE = 5,
+		NEGATIVE_SMALL = -1,
+		NEGATIVE_MEDIUM = -2,
+		NEGATIVE_LARGE = -5
 	}
 }

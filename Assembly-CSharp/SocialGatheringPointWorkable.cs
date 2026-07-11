@@ -20,6 +20,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 		this.synchronizeAnims = false;
 		this.showProgressBar = false;
 		this.resetProgressOnStop = true;
+		this.lightEfficiencyBonus = false;
 	}
 
 	public override Vector3 GetFacingTarget()
@@ -49,7 +50,7 @@ public class SocialGatheringPointWorkable : Workable, IWorkerPrioritizable
 	{
 		base.OnStartWork(worker);
 		KPrefabID component = worker.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.AlwaysConverse);
+		component.AddTag(GameTags.AlwaysConverse, false);
 		worker.Subscribe(-594200555, new Action<object>(this.OnStartedTalking));
 		worker.Subscribe(25860745, new Action<object>(this.OnStoppedTalking));
 	}

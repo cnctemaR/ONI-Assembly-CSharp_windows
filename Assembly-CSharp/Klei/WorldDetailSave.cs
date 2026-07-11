@@ -34,10 +34,13 @@ namespace Klei
 			public OverworldCell(SubWorld.ZoneType zoneType, TerrainCell tc)
 			{
 				this.poly = tc.poly;
+				this.tags = tc.node.tags;
 				this.zoneType = zoneType;
 			}
 
 			public Polygon poly;
+
+			public TagSet tags;
 
 			public SubWorld.ZoneType zoneType;
 		}

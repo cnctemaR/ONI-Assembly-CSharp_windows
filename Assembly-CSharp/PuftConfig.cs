@@ -15,7 +15,7 @@ public class PuftConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -PuftTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
-		gameObject = BasePuftConfig.SetupDiet(gameObject, SimHashes.ContaminatedOxygen.CreateTag(), SimHashes.SlimeMold.CreateTag(), PuftConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, "SlimeLung", 1000f, PuftConfig.MIN_POOP_SIZE_IN_KG);
+		gameObject = BasePuftConfig.SetupDiet(gameObject, SimHashes.ContaminatedOxygen.CreateTag(), SimHashes.SlimeMold.CreateTag(), PuftConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_2, "SlimeLung", 1000f, PuftConfig.MIN_POOP_SIZE_IN_KG);
 		DiseaseSourceVisualizer diseaseSourceVisualizer = gameObject.AddOrGet<DiseaseSourceVisualizer>();
 		diseaseSourceVisualizer.alwaysShowDisease = "SlimeLung";
 		return gameObject;
@@ -50,11 +50,11 @@ public class PuftConfig : IEntityConfig
 
 	public const float EMIT_DISEASE_PER_KG = 1000f;
 
-	private static float KG_ORE_EATEN_PER_CYCLE = 30f;
+	private static float KG_ORE_EATEN_PER_CYCLE = 50f;
 
 	private static float CALORIES_PER_KG_OF_ORE = PuftTuning.STANDARD_CALORIES_PER_CYCLE / PuftConfig.KG_ORE_EATEN_PER_CYCLE;
 
-	private static float MIN_POOP_SIZE_IN_KG = 5f;
+	private static float MIN_POOP_SIZE_IN_KG = 15f;
 
 	public static int EGG_SORT_ORDER = 300;
 }

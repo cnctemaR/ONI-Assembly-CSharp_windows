@@ -21,6 +21,7 @@ public class RoleStationConfig : IBuildingConfig
 		buildingDef.RequiresPowerInput = false;
 		buildingDef.AudioCategory = "Metal";
 		buildingDef.AudioSize = "large";
+		buildingDef.Deprecated = true;
 		return buildingDef;
 	}
 
@@ -28,8 +29,6 @@ public class RoleStationConfig : IBuildingConfig
 	{
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		Prioritizable.AddRef(go);
-		RoleStation roleStation = go.AddOrGet<RoleStation>();
-		roleStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_job_station_kanim") };
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

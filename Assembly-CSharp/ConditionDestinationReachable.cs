@@ -13,11 +13,15 @@ public class ConditionDestinationReachable : RocketLaunchCondition
 		return null;
 	}
 
-	public override bool EvaluateLaunchCondition()
+	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
 	{
 		int id = SpacecraftManager.instance.GetSpacecraftFromLaunchConditionManager(this.commandModule.GetComponent<LaunchConditionManager>()).id;
 		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(id);
-		return spacecraftDestination != null && this.CanReachDestination(spacecraftDestination);
+		if (spacecraftDestination != null && this.CanReachDestination(spacecraftDestination) && spacecraftDestination.GetDestinationType().visitable)
+		{
+			return RocketLaunchCondition.LaunchStatus.Ready;
+		}
+		return RocketLaunchCondition.LaunchStatus.Failure;
 	}
 
 	public bool CanReachDestination(SpaceDestination destination)

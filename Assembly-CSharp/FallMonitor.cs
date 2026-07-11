@@ -220,7 +220,7 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			base.sm.isEntombed.Set(flag2, base.smi);
 		}
 
-		public bool IsCellSafe(int cell)
+		private bool IsValidNavCell(int cell)
 		{
 			return this.navigator.NavGrid.NavTable.IsValid(cell, this.navigator.CurrentNavType);
 		}
@@ -230,31 +230,36 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 			int num = Grid.PosToCell(base.transform.GetPosition());
 			foreach (CellOffset cellOffset in this.entombedEscapeOffsets)
 			{
-				int num2 = Grid.OffsetCell(num, cellOffset);
-				if (this.IsCellSafe(num2))
+				if (Grid.IsCellOffsetValid(num, cellOffset))
 				{
-					base.transform.SetPosition(Grid.CellToPosCBC(num2, Grid.SceneLayer.Move));
-					base.transform.GetComponent<Navigator>().Stop(false);
-					base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
-					this.UpdateFalling();
-					this.GoTo(base.sm.standing);
-					return;
+					int num2 = Grid.OffsetCell(num, cellOffset);
+					if (this.IsValidNavCell(num2))
+					{
+						base.transform.SetPosition(Grid.CellToPosCBC(num2, Grid.SceneLayer.Move));
+						base.transform.GetComponent<Navigator>().Stop(false);
+						this.UpdateFalling();
+						this.GoTo(base.sm.standing);
+						return;
+					}
 				}
 			}
 			foreach (CellOffset cellOffset2 in this.entombedEscapeOffsets)
 			{
-				int num3 = Grid.OffsetCell(num, cellOffset2);
-				int num4 = Grid.CellAbove(num3);
-				if (Grid.IsValidCell(num3) && Grid.IsValidCell(num4))
+				if (Grid.IsCellOffsetValid(num, cellOffset2))
 				{
-					if (!Grid.Solid[num3] && !Grid.Solid[num4])
+					int num3 = Grid.OffsetCell(num, cellOffset2);
+					int num4 = Grid.CellAbove(num3);
+					if (Grid.IsValidCell(num4))
 					{
-						base.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.Move));
-						base.transform.GetComponent<Navigator>().Stop(false);
-						base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
-						this.UpdateFalling();
-						this.GoTo(base.sm.standing);
-						return;
+						if (!Grid.Solid[num3] && !Grid.Solid[num4])
+						{
+							base.transform.SetPosition(Grid.CellToPosCBC(num3, Grid.SceneLayer.Move));
+							base.transform.GetComponent<Navigator>().Stop(false);
+							base.transform.GetComponent<Navigator>().SetCurrentNavType(NavType.Floor);
+							this.UpdateFalling();
+							this.GoTo(base.sm.standing);
+							return;
+						}
 					}
 				}
 			}
@@ -264,12 +269,14 @@ public class FallMonitor : GameStateMachine<FallMonitor, FallMonitor.Instance>
 		private CellOffset[] entombedEscapeOffsets = new CellOffset[]
 		{
 			new CellOffset(0, 1),
+			new CellOffset(0, -1),
 			new CellOffset(1, 0),
 			new CellOffset(-1, 0),
 			new CellOffset(1, 1),
 			new CellOffset(-1, 1),
 			new CellOffset(1, -1),
-			new CellOffset(-1, -1)
+			new CellOffset(-1, -1),
+			new CellOffset(0, 2)
 		};
 
 		private Navigator navigator;

@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using Klei;
 
 namespace ProcGen
 {
-	public class MobSettings : YamlIO<MobSettings>
+	[Serializable]
+	public class MobSettings : IMerge<MobSettings>
 	{
 		public MobSettings()
 		{
-			this.MobLookupTable = new Dictionary<string, Mob>();
+			this.MobLookupTable = new ComposableDictionary<string, Mob>();
 		}
 
-		public Dictionary<string, Mob> MobLookupTable { get; private set; }
+		public ComposableDictionary<string, Mob> MobLookupTable { get; private set; }
 
 		public bool HasMob(string id)
 		{
@@ -30,18 +29,21 @@ namespace ProcGen
 			if (this.mobkeys == null)
 			{
 				this.mobkeys = new TagSet();
-				Dictionary<string, Mob>.Enumerator enumerator = this.MobLookupTable.GetEnumerator();
-				while (enumerator.MoveNext())
+				foreach (string text in this.MobLookupTable.Keys)
 				{
-					TagSet tagSet = this.mobkeys;
-					KeyValuePair<string, Mob> keyValuePair = enumerator.Current;
-					tagSet.Add(new Tag(keyValuePair.Key));
+					this.mobkeys.Add(new Tag(text));
 				}
 			}
 			return this.mobkeys;
 		}
 
-		public static int AmbientMobDensity = 1;
+		public void Merge(MobSettings other)
+		{
+			this.MobLookupTable.Merge(other.MobLookupTable);
+			this.mobkeys = null;
+		}
+
+		public static float AmbientMobDensity = 1f;
 
 		private TagSet mobkeys;
 	}

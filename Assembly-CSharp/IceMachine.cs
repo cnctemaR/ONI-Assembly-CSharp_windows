@@ -13,16 +13,18 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 
 	private bool CanMakeIce()
 	{
-		return this.waterStorage != null && !this.waterStorage.IsEmpty();
+		bool flag = this.waterStorage != null && this.waterStorage.GetMassAvailable(SimHashes.Water) >= 0.1f;
+		bool flag2 = this.iceStorage != null && this.iceStorage.IsFull();
+		return flag && !flag2;
 	}
 
 	private void MakeIce(IceMachine.StatesInstance smi, float dt)
 	{
-		float num = (this.energyConsumption - this.energyWaste) * dt / (float)this.waterStorage.items.Count;
+		float num = this.heatRemovalRate * dt / (float)this.waterStorage.items.Count;
 		foreach (GameObject gameObject in this.waterStorage.items)
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
-			GameUtil.DeltaThermalEnergy(component, -num);
+			GameUtil.DeltaThermalEnergy(component, -num, smi.master.targetTemperature);
 		}
 		for (int i = this.waterStorage.items.Count; i > 0; i--)
 		{
@@ -34,28 +36,17 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 				this.waterStorage.ConsumeIgnoringDisease(gameObject2);
 			}
 		}
-		for (int j = this.waterStorage.items.Count; j > 0; j--)
-		{
-			GameObject gameObject3 = this.waterStorage.items[j - 1];
-			if (gameObject3 && gameObject3.GetComponent<PrimaryElement>().Temperature <= this.targetTemperature)
-			{
-				this.waterStorage.Transfer(gameObject3, this.iceStorage, true, true);
-			}
-		}
 		smi.UpdateIceState();
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.deliveryComponents = base.GetComponents<ManualDeliveryKG>();
 		base.smi.StartSM();
 	}
 
 	[MyCmpGet]
 	private Operational operational;
-
-	private ManualDeliveryKG[] deliveryComponents;
 
 	public Storage waterStorage;
 
@@ -63,21 +54,47 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 
 	public float targetTemperature;
 
-	public float energyConsumption;
+	public float heatRemovalRate;
 
-	public float energyWaste;
+	private static StatusItem iceStorageFullStatusItem;
 
 	public class StatesInstance : GameStateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.GameInstance
 	{
 		public StatesInstance(IceMachine smi)
 			: base(smi)
 		{
+			this.meter = new MeterController(base.gameObject.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_OL", "meter_frame", "meter_fill" });
+			this.UpdateMeter();
+			base.Subscribe(-1697596308, new Action<object>(this.OnStorageChange));
+		}
+
+		private void OnStorageChange(object data)
+		{
+			this.UpdateMeter();
+		}
+
+		public void UpdateMeter()
+		{
+			this.meter.SetPositionPercent(Mathf.Clamp01(base.smi.master.iceStorage.MassStored() / base.smi.master.iceStorage.Capacity()));
 		}
 
 		public void UpdateIceState()
 		{
-			base.sm.shouldDropIce.Set(!base.smi.master.iceStorage.IsEmpty(), this);
+			bool flag = false;
+			for (int i = base.smi.master.waterStorage.items.Count; i > 0; i--)
+			{
+				GameObject gameObject = base.smi.master.waterStorage.items[i - 1];
+				if (gameObject && gameObject.GetComponent<PrimaryElement>().Temperature <= base.smi.master.targetTemperature)
+				{
+					flag = true;
+				}
+			}
+			base.sm.doneFreezingIce.Set(flag, this);
 		}
+
+		private MeterController meter;
+
+		public Chore emptyChore;
 	}
 
 	public class States : GameStateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine>
@@ -85,6 +102,7 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.off;
+			base.serializable = true;
 			this.off.PlayAnim("off").EventTransition(GameHashes.OperationalChanged, this.on, (IceMachine.StatesInstance smi) => smi.master.operational.IsOperational);
 			this.on.PlayAnim("on").EventTransition(GameHashes.OperationalChanged, this.off, (IceMachine.StatesInstance smi) => !smi.master.operational.IsOperational).DefaultState(this.on.waiting);
 			this.on.waiting.EventTransition(GameHashes.OnStorageChange, this.on.working_pre, (IceMachine.StatesInstance smi) => smi.master.CanMakeIce());
@@ -92,35 +110,41 @@ public class IceMachine : StateMachineComponent<IceMachine.StatesInstance>
 			{
 				smi.UpdateIceState();
 			}).PlayAnim("working_pre").OnAnimQueueComplete(this.on.working);
-			this.on.working.Enter(delegate(IceMachine.StatesInstance smi)
-			{
-				smi.master.operational.SetActive(true, false);
-				smi.master.gameObject.GetComponent<ManualDeliveryKG>().Pause(true, "Working");
-			}).QueueAnim("working_loop", true, null).Update("UpdateWorking", delegate(IceMachine.StatesInstance smi, float dt)
+			this.on.working.QueueAnim("working_loop", true, null).Update("UpdateWorking", delegate(IceMachine.StatesInstance smi, float dt)
 			{
 				smi.master.MakeIce(smi, dt);
-			}, UpdateRate.SIM_200ms, false)
-				.ParamTransition<bool>(this.shouldDropIce, this.on.working_pst, GameStateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.IsTrue)
+			}, UpdateRate.SIM_200ms, false).ParamTransition<bool>(this.doneFreezingIce, this.on.working_pst, GameStateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.IsTrue)
+				.Enter(delegate(IceMachine.StatesInstance smi)
+				{
+					smi.master.operational.SetActive(true, false);
+					smi.master.gameObject.GetComponent<ManualDeliveryKG>().Pause(true, "Working");
+				})
 				.Exit(delegate(IceMachine.StatesInstance smi)
 				{
 					smi.master.operational.SetActive(false, false);
 					smi.master.gameObject.GetComponent<ManualDeliveryKG>().Pause(false, "Done Working");
 				});
-			this.on.working_pst.Exit(delegate(IceMachine.StatesInstance smi)
-			{
-				Storage iceStorage = smi.master.iceStorage;
-				Vector3 vector = new Vector3(1f, 0f, 0f);
-				iceStorage.DropAll(false, false, vector, true);
-			}).PlayAnim("working_pst").OnAnimQueueComplete(this.on.waiting);
+			this.on.working_pst.Exit(new StateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.State.Callback(this.DoTransfer)).PlayAnim("working_pst").OnAnimQueueComplete(this.on);
 		}
 
-		public StateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.BoolParameter shouldDropIce;
+		private void DoTransfer(IceMachine.StatesInstance smi)
+		{
+			for (int i = smi.master.waterStorage.items.Count - 1; i >= 0; i--)
+			{
+				GameObject gameObject = smi.master.waterStorage.items[i];
+				if (gameObject && gameObject.GetComponent<PrimaryElement>().Temperature <= smi.master.targetTemperature)
+				{
+					smi.master.waterStorage.Transfer(gameObject, smi.master.iceStorage, false, true);
+				}
+			}
+			smi.UpdateMeter();
+		}
+
+		public StateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.BoolParameter doneFreezingIce;
 
 		public GameStateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.State off;
 
 		public IceMachine.States.OnStates on;
-
-		private static readonly HashedString[] FULL_ANIMS = new HashedString[] { "working_pst", "off" };
 
 		public class OnStates : GameStateMachine<IceMachine.States, IceMachine.StatesInstance, IceMachine, object>.State
 		{

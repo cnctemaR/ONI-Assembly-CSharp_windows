@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using UnityEngine;
 
 public class SicknessMonitor : GameStateMachine<SicknessMonitor, SicknessMonitor.Instance>
 {
@@ -22,6 +23,8 @@ public class SicknessMonitor : GameStateMachine<SicknessMonitor, SicknessMonitor
 			});
 		this.post_nocheer.Enter(delegate(SicknessMonitor.Instance smi)
 		{
+			StateMachine.Instance instance = new SicknessCuredFX.Instance(smi.master, new Vector3(0f, 0f, -0.1f));
+			instance.StartSM();
 			if (smi.IsSleepingOrSleepSchedule())
 			{
 				smi.GoTo(this.healthy);

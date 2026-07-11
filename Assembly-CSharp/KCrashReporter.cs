@@ -162,7 +162,7 @@ public class KCrashReporter : MonoBehaviour
 		GameObject gameObject2 = global::UnityEngine.Object.Instantiate<GameObject>(this.reportErrorPrefab, Vector3.zero, Quaternion.identity);
 		gameObject2.transform.SetParent(gameObject.transform, false);
 		this.errorDialog = gameObject2.GetComponentInChildren<ReportErrorDialog>();
-		this.errorDialog.PopupConfirmDialog("ERROR OCCURRED!\nDo you want to report this error?", delegate
+		this.errorDialog.PopupConfirmDialog(delegate
 		{
 			string text = null;
 			if (KCrashReporter.MOST_RECENT_SAVEFILE != null)
@@ -170,13 +170,7 @@ public class KCrashReporter : MonoBehaviour
 				text = KCrashReporter.UploadSaveFile(KCrashReporter.MOST_RECENT_SAVEFILE, stack_trace, null);
 			}
 			KCrashReporter.ReportError(error, stack_trace, text, this.confirmDialogPrefab, this.errorDialog.UserMessage());
-		}, delegate
-		{
-			this.OnQuitToDesktop();
-		}, delegate
-		{
-			this.OnCloseErrorDialog();
-		});
+		}, new global::System.Action(this.OnQuitToDesktop), new global::System.Action(this.OnCloseErrorDialog));
 		return true;
 	}
 
@@ -323,7 +317,7 @@ public class KCrashReporter : MonoBehaviour
 		{
 			return;
 		}
-		string text6;
+		string text7;
 		using (WebClient webClient = new WebClient())
 		{
 			webClient.Encoding = Encoding.UTF8;
@@ -341,7 +335,8 @@ public class KCrashReporter : MonoBehaviour
 			}
 			if (string.IsNullOrEmpty(stack_trace))
 			{
-				stack_trace = string.Format("No stack trace.\n\n{0}", msg);
+				string text3 = "LU-" + 356355U.ToString();
+				stack_trace = string.Format("No stack trace {0}\n\n{1}", text3, msg);
 			}
 			List<string> list = new List<string>();
 			if (KCrashReporter.debugWasUsed)
@@ -354,18 +349,18 @@ public class KCrashReporter : MonoBehaviour
 			}
 			list.Add(msg);
 			string[] array = new string[] { "Debug:LogError", "UnityEngine.Debug", "Output:LogError", "DebugUtil:Assert", "System.Array", "System.Collections", "KCrashReporter.Assert", "No stack trace." };
-			foreach (string text3 in stack_trace.Split(new char[] { '\n' }))
+			foreach (string text4 in stack_trace.Split(new char[] { '\n' }))
 			{
 				if (list.Count >= 5)
 				{
 					break;
 				}
-				if (!string.IsNullOrEmpty(text3))
+				if (!string.IsNullOrEmpty(text4))
 				{
 					bool flag = false;
-					foreach (string text4 in array)
+					foreach (string text5 in array)
 					{
-						if (text3.StartsWith(text4))
+						if (text4.StartsWith(text5))
 						{
 							flag = true;
 							break;
@@ -373,7 +368,7 @@ public class KCrashReporter : MonoBehaviour
 					}
 					if (!flag)
 					{
-						list.Add(text3);
+						list.Add(text4);
 					}
 				}
 			}
@@ -389,7 +384,7 @@ public class KCrashReporter : MonoBehaviour
 				error.callstack = error.callstack + "\n" + Guid.NewGuid().ToString();
 			}
 			error.fullstack = string.Format("{0}\n\n{1}", msg, stack_trace);
-			error.build = 336724;
+			error.build = 356355;
 			error.log = KCrashReporter.GetLogContents();
 			error.summaryline = string.Join("\n", list.ToArray());
 			error.user_message = userMessage;
@@ -401,13 +396,13 @@ public class KCrashReporter : MonoBehaviour
 			{
 				error.steam64_verified = DistributionPlatform.Inst.LocalUser.Id.ToInt64();
 			}
-			string text5 = JsonConvert.SerializeObject(error);
+			string text6 = JsonConvert.SerializeObject(error);
 			string empty = string.Empty;
 			Uri uri = new Uri("http://crashes.klei.ca/submitCrash");
 			global::Debug.Log("Submitting crash:");
 			try
 			{
-				webClient.UploadStringAsync(uri, text5);
+				webClient.UploadStringAsync(uri, text6);
 			}
 			catch (Exception ex)
 			{
@@ -416,13 +411,13 @@ public class KCrashReporter : MonoBehaviour
 			if (confirm_prefab != null)
 			{
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(confirm_prefab.gameObject, null);
-				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog("Reported Error", null, null, null, null, null, null, null, null, true);
 			}
-			text6 = empty;
+			text7 = empty;
 		}
 		if (KCrashReporter.onCrashReported != null)
 		{
-			KCrashReporter.onCrashReported(text6);
+			KCrashReporter.onCrashReported(text7);
 		}
 	}
 

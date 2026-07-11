@@ -52,9 +52,17 @@ namespace TUNING
 
 		public const float TRAVEL_TIME_WARNING_THRESHOLD = 0.4f;
 
+		public static readonly string[] ALL_ATTRIBUTES = new string[]
+		{
+			"Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art", "Ranching",
+			"Athletics"
+		};
+
 		public static readonly string[] DISTRIBUTED_ATTRIBUTES = new string[] { "Strength", "Caring", "Construction", "Digging", "Machinery", "Learning", "Cooking", "Botanist", "Art", "Ranching" };
 
 		public static readonly string[] ROLLED_ATTRIBUTES = new string[] { "Athletics" };
+
+		public static readonly int[] APTITUDE_ATTRIBUTE_BONUSES = new int[] { 7, 3, 1 };
 
 		public static int ROLLED_ATTRIBUTE_MAX = 5;
 
@@ -72,9 +80,9 @@ namespace TUNING
 
 		public static int MEDIUM_STATPOINT_BONUS = 3;
 
-		public static int MIN_STAT_POINTS = 7;
+		public static int MIN_STAT_POINTS = 0;
 
-		public static int MAX_STAT_POINTS = 10;
+		public static int MAX_STAT_POINTS = 0;
 
 		public static int MAX_TRAITS = 4;
 
@@ -557,6 +565,22 @@ namespace TUNING
 			public const float SUNBURN_DELAY_TIME = 120f;
 
 			public const int LUX_PLEASANT_LIGHT = 40000;
+
+			public static float LIGHT_WORK_EFFICIENCY_BONUS = 0.15f;
+
+			public const int NO_LIGHT = 0;
+
+			public const int VERY_LOW_LIGHT = 1;
+
+			public const int LOW_LIGHT = 100;
+
+			public const int MEDIUM_LIGHT = 1000;
+
+			public const int HIGH_LIGHT = 10000;
+
+			public const int VERY_HIGH_LIGHT = 50000;
+
+			public const int MAX_LIGHT = 100000;
 		}
 
 		public class MOVEMENT

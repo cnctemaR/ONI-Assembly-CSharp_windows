@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace ProcGen
 {
+	[Serializable]
 	public class WeightedBiome : IWeighted
 	{
 		public WeightedBiome()

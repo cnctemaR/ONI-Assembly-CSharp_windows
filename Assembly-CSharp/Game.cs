@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using FMOD.Studio;
 using Klei;
+using Klei.AI;
 using Klei.CustomSettings;
 using KSerialization;
 using ProcGenGame;
@@ -56,6 +57,8 @@ public class Game : KMonoBehaviour
 			"Level Loaded....",
 			SceneManager.GetActiveScene().name
 		});
+		Components.BuildingCellVisualizers.OnAdd += this.OnAddBuildingCellVisualizer;
+		Components.BuildingCellVisualizers.OnRemove += this.OnRemoveBuildingCellVisualizer;
 		Singleton<KBatchedAnimUpdater>.CreateInstance();
 		Singleton<CellChangeMonitor>.CreateInstance();
 		this.userMenu = new UserMenu();
@@ -159,6 +162,7 @@ public class Game : KMonoBehaviour
 		this.liquidFlowVisualizer.FreeResources();
 		this.solidFlowVisualizer.FreeResources();
 		LightGridManager.Shutdown();
+		RadiationGridManager.Shutdown();
 		App.OnPreLoadScene = (global::System.Action)Delegate.Remove(App.OnPreLoadScene, new global::System.Action(this.StopBE));
 		base.OnForcedCleanUp();
 	}
@@ -169,12 +173,13 @@ public class Game : KMonoBehaviour
 		PropertyTextures.FogOfWarScale = 0f;
 		if (CameraController.Instance != null)
 		{
-			CameraController.Instance.FreeCameraEnabled = false;
+			CameraController.Instance.EnableFreeCamera(false);
 		}
 		this.LocalPlayer = this.SpawnPlayer();
 		WaterCubes.Instance.Init();
 		SpeedControlScreen.Instance.Pause(false);
 		LightGridManager.Initialise();
+		RadiationGridManager.Initialise();
 		this.UnsafeOnSpawn();
 		Time.timeScale = 0f;
 		if (this.tempIntroScreenPrefab != null)
@@ -204,6 +209,8 @@ public class Game : KMonoBehaviour
 		this.solidConduitFlow.Initialize();
 		SimAndRenderScheduler.instance.Add(this.roomProber, false);
 		SimAndRenderScheduler.instance.Add(KComponentSpawn.instance, false);
+		SimAndRenderScheduler.instance.RegisterBatchUpdate<ISim200ms, AmountInstance>(new UpdateBucketWithUpdater<ISim200ms>.BatchUpdateDelegate(AmountInstance.BatchUpdate));
+		SimAndRenderScheduler.instance.RegisterBatchUpdate<ISim1000ms, SolidTransferArm>(new UpdateBucketWithUpdater<ISim1000ms>.BatchUpdateDelegate(SolidTransferArm.BatchUpdate));
 		if (!SaveLoader.Instance.loadedFromSave)
 		{
 			SettingConfig settingConfig = CustomGameSettings.Instance.QualitySettings[CustomGameSettingConfigs.SandboxMode.id];
@@ -222,6 +229,8 @@ public class Game : KMonoBehaviour
 	{
 		base.OnCleanUp();
 		SimAndRenderScheduler.instance.Remove(KComponentSpawn.instance);
+		SimAndRenderScheduler.instance.RegisterBatchUpdate<ISim200ms, AmountInstance>(null);
+		SimAndRenderScheduler.instance.RegisterBatchUpdate<ISim1000ms, SolidTransferArm>(null);
 		this.DestroyInstances();
 	}
 
@@ -621,7 +630,7 @@ public class Game : KMonoBehaviour
 		this.simDt += dt;
 		if (this.simDt >= 0.016666668f)
 		{
-			while (this.simDt >= 0.016666668f)
+			do
 			{
 				this.simSubTick++;
 				this.simSubTick %= 12;
@@ -636,6 +645,7 @@ public class Game : KMonoBehaviour
 				}
 				this.simDt -= 0.016666668f;
 			}
+			while (this.simDt >= 0.016666668f);
 		}
 		else
 		{
@@ -667,14 +677,52 @@ public class Game : KMonoBehaviour
 
 	private void LateUpdateComponents()
 	{
-		if (OverlayScreen.Instance != null)
+		this.UpdateOverlayScreen();
+	}
+
+	private void OnAddBuildingCellVisualizer(BuildingCellVisualizer building_cell_visualizer)
+	{
+		this.lastDrawnOverlayMode = default(HashedString);
+		if (PlayerController.Instance != null)
 		{
-			HashedString mode = OverlayScreen.Instance.GetMode();
-			foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers.Items)
+			BuildTool buildTool = PlayerController.Instance.ActiveTool as BuildTool;
+			if (buildTool != null && buildTool.visualizer == building_cell_visualizer.gameObject)
 			{
-				buildingCellVisualizer.Tick(mode);
+				this.previewVisualizer = building_cell_visualizer;
 			}
 		}
+	}
+
+	private void OnRemoveBuildingCellVisualizer(BuildingCellVisualizer building_cell_visualizer)
+	{
+		if (this.previewVisualizer == building_cell_visualizer)
+		{
+			this.previewVisualizer = null;
+		}
+	}
+
+	private void UpdateOverlayScreen()
+	{
+		if (OverlayScreen.Instance == null)
+		{
+			return;
+		}
+		HashedString mode = OverlayScreen.Instance.GetMode();
+		if (this.previewVisualizer != null)
+		{
+			this.previewVisualizer.DisableIcons();
+			this.previewVisualizer.DrawIcons(mode);
+		}
+		if (mode == this.lastDrawnOverlayMode)
+		{
+			return;
+		}
+		foreach (BuildingCellVisualizer buildingCellVisualizer in Components.BuildingCellVisualizers.Items)
+		{
+			buildingCellVisualizer.DisableIcons();
+			buildingCellVisualizer.DrawIcons(mode);
+		}
+		this.lastDrawnOverlayMode = mode;
 	}
 
 	public void ForceOverlayUpdate()
@@ -778,7 +826,7 @@ public class Game : KMonoBehaviour
 		{
 			return;
 		}
-		uint num = 336724U;
+		uint num = 356355U;
 		string text = global::System.DateTime.Now.ToShortDateString();
 		string text2 = global::System.DateTime.Now.ToShortTimeString();
 		string fileName = Path.GetFileName(GenericGameSettings.instance.performanceCapture.saveGame);
@@ -1482,6 +1530,8 @@ public class Game : KMonoBehaviour
 
 	public Unlocks unlocks;
 
+	public Timelapser timelapser;
+
 	private bool sandboxModeActive;
 
 	public HandleVector<Game.CallbackInfo> callbackManager = new HandleVector<Game.CallbackInfo>(256);
@@ -1605,6 +1655,10 @@ public class Game : KMonoBehaviour
 
 	private HashSet<int> solidChangedFilter = new HashSet<int>();
 
+	private HashedString lastDrawnOverlayMode;
+
+	private BuildingCellVisualizer previewVisualizer;
+
 	public SafetyConditions safetyConditions = new SafetyConditions();
 
 	public SimData simData = new SimData();
@@ -1668,6 +1722,8 @@ public class Game : KMonoBehaviour
 	public struct SavedInfo
 	{
 		public bool discoveredSurface;
+
+		public bool discoveredOilField;
 	}
 
 	public struct CallbackInfo

@@ -1,5 +1,6 @@
 ﻿using System;
 
+[Serializable]
 public struct EffectorValues
 {
 	public EffectorValues(int amt, int rad)

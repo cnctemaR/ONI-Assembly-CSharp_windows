@@ -106,7 +106,7 @@ public class Studyable : Workable, ISidescreenButtonControl
 			{
 				if (this.chore == null)
 				{
-					this.chore = new WorkChore<Studyable>(Db.Get().ChoreTypes.Research, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+					this.chore = new WorkChore<Studyable>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 				}
 				this.statusItemGuid = component.ReplaceStatusItem(this.statusItemGuid, Db.Get().MiscStatusItems.AwaitingStudy, null);
 			}

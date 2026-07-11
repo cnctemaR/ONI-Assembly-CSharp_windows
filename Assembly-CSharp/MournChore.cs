@@ -7,7 +7,7 @@ using UnityEngine;
 public class MournChore : Chore<MournChore.StatesInstance>
 {
 	public MournChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.Mourn, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.high, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new MournChore.StatesInstance(this);
 		base.AddPrecondition(ChorePreconditions.instance.IsNotRedAlert, null);

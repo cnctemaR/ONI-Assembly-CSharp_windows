@@ -5,7 +5,7 @@ using UnityEngine;
 public class AggressiveChore : Chore<AggressiveChore.StatesInstance>
 {
 	public AggressiveChore(IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.StressActingOut, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new AggressiveChore.StatesInstance(this, target.gameObject);
 	}

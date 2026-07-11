@@ -88,6 +88,10 @@ public class TextureLerper
 		}
 		float num2 = Mathf.Min(num / Mathf.Max(this.BlendDt - this.BlendTime, 0f), 1f);
 		this.BlendTime += num;
+		if (GameUtil.IsCapturingTimeLapse())
+		{
+			num2 = 1f;
+		}
 		this.source = this.BlendTextures[this.BlendIdx];
 		this.BlendIdx = (this.BlendIdx + 1) % 2;
 		this.dest = this.BlendTextures[this.BlendIdx];
@@ -102,9 +106,13 @@ public class TextureLerper
 
 	private Vector4 GetVisibleCellRange()
 	{
-		Camera main = Camera.main;
+		Camera camera = Camera.main;
+		if (GameUtil.IsCapturingTimeLapse())
+		{
+			camera = Game.Instance.timelapser.captureCamera;
+		}
 		float cellSizeInMeters = Grid.CellSizeInMeters;
-		Ray ray = main.ViewportPointToRay(Vector3.zero);
+		Ray ray = camera.ViewportPointToRay(Vector3.zero);
 		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
 		Vector3 vector = ray.GetPoint(num);
 		int num2 = Grid.PosToCell(vector);
@@ -112,7 +120,7 @@ public class TextureLerper
 		vector = Grid.CellToPos(num2, num3, num3, num3);
 		int num4 = Math.Max(0, (int)(vector.x / cellSizeInMeters));
 		int num5 = Math.Max(0, (int)(vector.y / cellSizeInMeters));
-		ray = main.ViewportPointToRay(Vector3.one);
+		ray = camera.ViewportPointToRay(Vector3.one);
 		num = Mathf.Abs(ray.origin.z / ray.direction.z);
 		vector = ray.GetPoint(num);
 		int num6 = Mathf.CeilToInt(vector.x / cellSizeInMeters);

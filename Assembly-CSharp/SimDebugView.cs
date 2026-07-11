@@ -24,6 +24,7 @@ public class SimDebugView : KMonoBehaviour
 		dictionary2.Add(global::OverlayModes.Decor.ID, new Func<SimDebugView, int, Color>(SimDebugView.GetDecorColour));
 		dictionary2.Add(global::OverlayModes.Oxygen.ID, new Func<SimDebugView, int, Color>(SimDebugView.GetOxygenMapColour));
 		dictionary2.Add(global::OverlayModes.Light.ID, new Func<SimDebugView, int, Color>(SimDebugView.GetLightColour));
+		dictionary2.Add(global::OverlayModes.Radiation.ID, new Func<SimDebugView, int, Color>(SimDebugView.GetRadiationColour));
 		dictionary2.Add(global::OverlayModes.Rooms.ID, new Func<SimDebugView, int, Color>(SimDebugView.GetRoomsColour));
 		dictionary2.Add(global::OverlayModes.TileMode.ID, new Func<SimDebugView, int, Color>(SimDebugView.GetTileColour));
 		dictionary2.Add(global::OverlayModes.Suit.ID, new Func<SimDebugView, int, Color>(SimDebugView.GetBlack));
@@ -151,7 +152,7 @@ public class SimDebugView : KMonoBehaviour
 		}
 		bool flag = this.mode != global::OverlayModes.None.ID;
 		this.plane.SetActive(flag);
-		SimDebugViewCompositor.Instance.Toggle(this.mode != global::OverlayModes.None.ID);
+		SimDebugViewCompositor.Instance.Toggle(this.mode != global::OverlayModes.None.ID && !GameUtil.IsCapturingTimeLapse());
 		SimDebugViewCompositor.Instance.material.SetVector("_Thresholds0", new Vector4(0.1f, 0.2f, 0.3f, 0.4f));
 		SimDebugViewCompositor.Instance.material.SetVector("_Thresholds1", new Vector4(0.5f, 0.6f, 0.7f, 0.8f));
 		float num = 0f;
@@ -366,6 +367,18 @@ public class SimDebugView : KMonoBehaviour
 		if (Grid.LightIntensity[cell] > 71999)
 		{
 			float num = ((float)Grid.LightIntensity[cell] + (float)LightGridManager.previewLux[cell] - 71999f) / 8001f;
+			num /= 10f;
+			color.r += Mathf.Min(0.1f, PerlinSimplexNoise.noise(Grid.CellToPos2D(cell).x / 8f, Grid.CellToPos2D(cell).y / 8f + (float)instance.currentFrame / 32f) * num);
+		}
+		return color;
+	}
+
+	public static Color GetRadiationColour(SimDebugView instance, int cell)
+	{
+		Color color = new Color(0.2f, 0.9f, 0.3f, Mathf.Clamp(Mathf.Sqrt((float)(Grid.RadiationCount[cell] + RadiationGridManager.previewLux[cell])) / Mathf.Sqrt(80000f), 0f, 1f));
+		if (Grid.RadiationCount[cell] > 71999)
+		{
+			float num = ((float)Grid.RadiationCount[cell] + (float)LightGridManager.previewLux[cell] - 71999f) / 8001f;
 			num /= 10f;
 			color.r += Mathf.Min(0.1f, PerlinSimplexNoise.noise(Grid.CellToPos2D(cell).x / 8f, Grid.CellToPos2D(cell).y / 8f + (float)instance.currentFrame / 32f) * num);
 		}

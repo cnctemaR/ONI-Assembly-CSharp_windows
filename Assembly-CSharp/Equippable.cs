@@ -36,7 +36,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		{
 			foreach (Tag tag in this.def.AdditionalTags)
 			{
-				base.GetComponent<KPrefabID>().AddTag(tag);
+				base.GetComponent<KPrefabID>().AddTag(tag, false);
 			}
 		}
 	}
@@ -132,7 +132,7 @@ public class Equippable : Assignable, ISaveLoadable, IGameObjectEffectDescriptor
 		{
 			this.def.OnEquipCallBack(this);
 		}
-		base.GetComponent<KPrefabID>().AddTag(GameTags.Equipped);
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Equipped, false);
 	}
 
 	public void OnUnequip()

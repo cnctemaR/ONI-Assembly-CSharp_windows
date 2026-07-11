@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using UnityEngine;
 
 public class KAnimGroupFile : ScriptableObject
@@ -417,7 +416,7 @@ public class KAnimGroupFile : ScriptableObject
 		public HashedString animTarget;
 	}
 
-	public class GroupFile : YamlIO<KAnimGroupFile.GroupFile>
+	public class GroupFile
 	{
 		public string groupID { get; set; }
 

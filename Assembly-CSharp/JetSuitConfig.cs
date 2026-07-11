@@ -17,7 +17,6 @@ public class JetSuitConfig : IEquipmentConfig
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.THERMAL_CONDUCTIVITY_BARRIER, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_THERMAL_CONDUCTIVITY_BARRIER, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.Digging.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_DIGGING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
-		list.Add(new AttributeModifier(Db.Get().Amounts.Bladder.deltaAttribute.Id, global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_BLADDER, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		list.Add(new AttributeModifier(Db.Get().Attributes.ScaldingThreshold.Id, (float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_SCALDING, global::STRINGS.EQUIPMENT.PREFABS.ATMO_SUIT.NAME, false, false, true));
 		this.expertAthleticsModifier = new AttributeModifier(global::TUNING.EQUIPMENT.ATTRIBUTE_MOD_IDS.ATHLETICS, (float)(-(float)global::TUNING.EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS), Db.Get().Skills.Suits1.Name, false, false, true);
 		string text = "Jet_Suit";
@@ -31,7 +30,6 @@ public class JetSuitConfig : IEquipmentConfig
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));
-		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("Unclean"));
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
@@ -80,7 +78,13 @@ public class JetSuitConfig : IEquipmentConfig
 						{
 							component5.RemoveAnimOverrides(Assets.GetAnim("anim_loco_hover_kanim"));
 						}
+						Effects component6 = targetGameObject2.GetComponent<Effects>();
+						if (component6.HasEffect("SoiledSuit"))
+						{
+							component6.Remove("SoiledSuit");
+						}
 					}
+					eq.GetComponent<Storage>().DropAll(eq.transform.GetPosition(), true, true, default(Vector3), false);
 				}
 			}
 		};
@@ -98,8 +102,13 @@ public class JetSuitConfig : IEquipmentConfig
 		HelmetController helmetController = go.AddComponent<HelmetController>();
 		helmetController.has_jets = true;
 		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Clothes);
-		component.AddTag(GameTags.PedestalDisplayable);
+		component.AddTag(GameTags.Clothes, false);
+		component.AddTag(GameTags.PedestalDisplayable, false);
+		component.AddTag(GameTags.AirtightSuit, false);
+		Storage storage = go.AddOrGet<Storage>();
+		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
+		storage.showInUI = true;
+		go.AddOrGet<AtmoSuit>();
 		go.AddComponent<SuitDiseaseHandler>();
 	}
 

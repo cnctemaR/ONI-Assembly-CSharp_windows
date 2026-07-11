@@ -24,6 +24,11 @@ public class ReportScreen : KScreen
 		{
 			this.ShowReport(this.currentReport.day + 1);
 		};
+		this.summaryButton.onClick += delegate
+		{
+			RetireColonyUtility.SaveColonySummaryData();
+			MainMenu.ActivateRetiredColoniesScreen(PauseScreen.Instance.transform.parent.gameObject, SaveGame.Instance.BaseName, null);
+		};
 		this.ConsumeMouseScroll = true;
 	}
 
@@ -191,6 +196,9 @@ public class ReportScreen : KScreen
 
 	[SerializeField]
 	private KButton nextButton;
+
+	[SerializeField]
+	private KButton summaryButton;
 
 	[SerializeField]
 	private GameObject lineItem;

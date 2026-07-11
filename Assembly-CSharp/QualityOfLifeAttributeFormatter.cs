@@ -20,13 +20,14 @@ public class QualityOfLifeAttributeFormatter : StandardAttributeFormatter
 		string text = base.GetTooltip(master, instance);
 		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(instance.gameObject);
 		text = text + "\n\n" + string.Format(DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION, this.GetFormattedValue(attributeInstance.GetTotalDisplayValue(), GameUtil.TimeSlice.None, instance.gameObject));
-		if (instance.GetTotalDisplayValue() >= attributeInstance.GetTotalDisplayValue())
+		float num = instance.GetTotalDisplayValue() - attributeInstance.GetTotalDisplayValue();
+		if (num >= 0f)
 		{
-			text = text + "\n" + DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_OVER;
+			text = text + "\n\n" + DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_OVER;
 		}
 		else
 		{
-			text = text + "\n" + DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_UNDER;
+			text = text + "\n\n" + DUPLICANTS.ATTRIBUTES.QUALITYOFLIFE.TOOLTIP_EXPECTATION_UNDER;
 		}
 		return text;
 	}

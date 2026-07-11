@@ -6,11 +6,12 @@ using Klei.AI;
 [DebuggerDisplay("{IdHash}")]
 public class ChoreGroup : Resource
 {
-	public ChoreGroup(string id, string name, string attribute, int default_personal_priority)
+	public ChoreGroup(string id, string name, Klei.AI.Attribute attribute, string sprite, int default_personal_priority)
 		: base(id, name)
 	{
-		this.attribute = Db.Get().Attributes.Get(attribute);
+		this.attribute = attribute;
 		this.description = Strings.Get("STRINGS.DUPLICANTS.CHOREGROUPS." + id.ToUpper() + ".DESC").String;
+		this.sprite = sprite;
 		this.defaultPersonalPriority = default_personal_priority;
 	}
 
@@ -27,6 +28,8 @@ public class ChoreGroup : Resource
 	public Klei.AI.Attribute attribute;
 
 	public string description;
+
+	public string sprite;
 
 	private int defaultPersonalPriority;
 }

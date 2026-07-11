@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using Klei;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -149,7 +151,7 @@ namespace KMod
 			{
 				this.available_content |= Content.DLL;
 			}
-			if (file.EndsWith(".po") || file.EndsWith(".pot"))
+			if (file.EndsWith(".po"))
 			{
 				this.available_content |= Content.Translation;
 			}
@@ -164,7 +166,6 @@ namespace KMod
 			if ((byte)(content & (Content.Strings | Content.Translation)) != 0)
 			{
 				extensions.Add(".po");
-				extensions.Add(".pot");
 			}
 		}
 
@@ -230,8 +231,7 @@ namespace KMod
 
 		private bool LoadStrings()
 		{
-			string[] array = new string[] { "strings.pot", "strings.po" };
-			string text = FSUtil.Normalize(Path.Combine(this.label.install_path, "strings"));
+			string text = FileSystem.Normalize(Path.Combine(this.label.install_path, "strings"));
 			if (!Directory.Exists(text))
 			{
 				return false;
@@ -240,28 +240,54 @@ namespace KMod
 			DirectoryInfo directoryInfo = new DirectoryInfo(text);
 			foreach (FileInfo fileInfo in directoryInfo.GetFiles())
 			{
-				bool flag = false;
-				foreach (string text2 in array)
-				{
-					if (fileInfo.Name.ToLower() == text2)
-					{
-						flag = true;
-						break;
-					}
-				}
-				if (flag)
+				if (!(fileInfo.Extension.ToLower() != ".po"))
 				{
 					num++;
-					Dictionary<string, string> dictionary = Localization.LoadStringsFile(fileInfo.FullName, Path.GetExtension(fileInfo.Name.ToLower()) == ".pot");
+					Dictionary<string, string> dictionary = Localization.LoadStringsFile(fileInfo.FullName, false);
 					Localization.OverloadStrings(dictionary);
 				}
 			}
-			return num > 0;
+			return true;
+		}
+
+		private bool LoadTranslations()
+		{
+			string text = FileSystem.Normalize(this.label.install_path);
+			if (!Directory.Exists(text))
+			{
+				return false;
+			}
+			DirectoryInfo directoryInfo = new DirectoryInfo(text);
+			HashSetPool<Localization.Locale, Mod>.PooledHashSet pooledHashSet = HashSetPool<Localization.Locale, Mod>.Allocate();
+			foreach (FileInfo fileInfo in directoryInfo.GetFiles())
+			{
+				if (!(fileInfo.Extension.ToLower() != ".po"))
+				{
+					string[] array = File.ReadAllLines(fileInfo.FullName, Encoding.UTF8);
+					pooledHashSet.Add(Localization.GetLocale(array));
+					Dictionary<string, string> dictionary = Localization.ExtractTranslatedStrings(array, false);
+					Localization.OverloadStrings(dictionary);
+				}
+			}
+			if (pooledHashSet.Count == 0)
+			{
+				return false;
+			}
+			Localization.Locale new_locale = pooledHashSet.First<Localization.Locale>();
+			if (!pooledHashSet.All<Localization.Locale>((Localization.Locale locale) => locale == new_locale))
+			{
+				return false;
+			}
+			Localization.SetLocale(new_locale);
+			Localization.SwapToLocalizedFont(new_locale.FontName);
+			KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_TYPE_KEY, Localization.SelectedLanguageType.UGC.ToString());
+			KPlayerPrefs.SetString(Localization.SELECTED_LANGUAGE_CODE_KEY, new_locale.Code);
+			return true;
 		}
 
 		private bool LoadAnimation()
 		{
-			string text = FSUtil.Normalize(Path.Combine(this.label.install_path, "anims"));
+			string text = FileSystem.Normalize(Path.Combine(this.label.install_path, "anims"));
 			if (!Directory.Exists(text))
 			{
 				return false;
@@ -302,7 +328,7 @@ namespace KMod
 				}
 			}
 			pooledList.Recycle();
-			return num != 0;
+			return true;
 		}
 
 		public void Load(Content content)
@@ -312,7 +338,7 @@ namespace KMod
 			{
 				this.loaded_content |= Content.Strings;
 			}
-			if ((byte)(content & Content.Translation) != 0)
+			if ((byte)(content & Content.Translation) != 0 && this.LoadTranslations())
 			{
 				this.loaded_content |= Content.Translation;
 			}
@@ -322,7 +348,7 @@ namespace KMod
 			}
 			if ((byte)(content & Content.LayerableFiles) != 0)
 			{
-				Global.Instance.layeredFileSystem.AddFileSystem(this.file_source.GetFileSystem());
+				FileSystem.file_sources.Insert(0, this.file_source.GetFileSystem());
 				this.loaded_content |= Content.LayerableFiles;
 			}
 			if ((byte)(content & Content.Animation) != 0 && this.LoadAnimation())
@@ -336,7 +362,7 @@ namespace KMod
 			content &= this.loaded_content;
 			if ((byte)(content & Content.LayerableFiles) != 0)
 			{
-				Global.Instance.layeredFileSystem.RemoveFileSystem(this.file_source.GetFileSystem());
+				FileSystem.file_sources.Remove(this.file_source.GetFileSystem());
 				this.loaded_content &= ~Content.LayerableFiles;
 			}
 		}
@@ -403,6 +429,8 @@ namespace KMod
 		public int crash_count;
 
 		public IFileSource file_source;
+
+		public bool is_subscribed;
 
 		public const int MAX_CRASH_COUNT = 3;
 

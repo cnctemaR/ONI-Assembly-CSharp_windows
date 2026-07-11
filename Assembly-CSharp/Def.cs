@@ -29,7 +29,7 @@ public class Def : ScriptableObject
 		{
 			if ((item as Element).IsSolid)
 			{
-				return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName, centered), Color.white);
+				return new Tuple<Sprite, Color>(Def.GetUISpriteFromMultiObjectAnim((item as Element).substance.anim, animName, centered, string.Empty), Color.white);
 			}
 			if ((item as Element).IsLiquid)
 			{
@@ -77,7 +77,7 @@ public class Def : ScriptableObject
 			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
 			if (component2)
 			{
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered);
+				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], animName, centered, string.Empty);
 				return new Tuple<Sprite, Color>(uispriteFromMultiObjectAnim, (!(uispriteFromMultiObjectAnim != null)) ? Color.clear : Color.white);
 			}
 			if (gameObject.GetComponent<Building>() != null)
@@ -128,7 +128,7 @@ public class Def : ScriptableObject
 		}
 	}
 
-	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile animFile, string animName = "ui", bool centered = false)
+	public static Sprite GetUISpriteFromMultiObjectAnim(KAnimFile animFile, string animName = "ui", bool centered = false, string symbolName = "")
 	{
 		Tuple<KAnimFile, string, bool> tuple = new Tuple<KAnimFile, string, bool>(animFile, animName, centered);
 		if (Def.knownUISprites.ContainsKey(tuple))
@@ -170,14 +170,19 @@ public class Def : ScriptableObject
 		}
 		KAnim.Anim.FrameElement frameElement = default(KAnim.Anim.FrameElement);
 		KAnimHashedString kanimHashedString = new KAnimHashedString(animName);
-		frameElement = data.FindAnimFrameElement(kanimHashedString);
+		if (string.IsNullOrEmpty(symbolName))
+		{
+			symbolName = animName;
+		}
+		frameElement = data.FindAnimFrameElement(symbolName);
 		KAnim.Build.Symbol symbol = data.build.GetSymbol(frameElement.symbol);
 		if (symbol == null)
 		{
 			DebugUtil.LogWarningArgs(new object[] { animFile.name, animName, "placeSymbol [", frameElement.symbol, "] is missing" });
 			return null;
 		}
-		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frameElement.frame).symbolFrame;
+		int frame2 = frameElement.frame;
+		KAnim.Build.SymbolFrame symbolFrame = symbol.GetFrame(frame2).symbolFrame;
 		if (symbolFrame == null)
 		{
 			DebugUtil.LogWarningArgs(new object[] { animName, "SymbolFrame [", frameElement.frame, "] is missing" });

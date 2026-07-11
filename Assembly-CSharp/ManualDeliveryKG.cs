@@ -128,7 +128,7 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 				float num = this.capacity - massAvailable;
 				num = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, num);
 				ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.choreTypeIDHash);
-				this.fetchList = new FetchList2(this.storage, byHash, this.choreTags);
+				this.fetchList = new FetchList2(this.storage, byHash);
 				this.fetchList.ShowStatusItem = this.ShowStatusItem;
 				this.fetchList.MinimumAmount[this.requestedItemTag] = Mathf.Max(PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT, this.minimumMass);
 				FetchList2 fetchList = this.fetchList;
@@ -248,13 +248,9 @@ public class ManualDeliveryKG : KMonoBehaviour, ISim1000ms
 	[SerializeField]
 	public HashedString choreTypeIDHash;
 
-	[SerializeField]
-	public Tag[] choreTags;
-
 	[Serialize]
 	private bool userPaused;
 
-	[NonSerialized]
 	public bool ShowStatusItem = true;
 
 	private FetchList2 fetchList;

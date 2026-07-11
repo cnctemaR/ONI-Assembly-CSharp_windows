@@ -7,6 +7,7 @@ public class Compostable : KMonoBehaviour
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
+		this.isMarkedForCompost = base.GetComponent<KPrefabID>().HasTag(GameTags.Compostable);
 		if (this.isMarkedForCompost)
 		{
 			this.MarkForCompost(false);
@@ -18,8 +19,6 @@ public class Compostable : KMonoBehaviour
 	private void MarkForCompost(bool force = false)
 	{
 		this.RefreshStatusItem();
-		base.GetComponent<KPrefabID>().AddTag(GameTags.MarkedForCompost);
-		base.GetComponent<KPrefabID>().AddTag(GameTags.Compostable);
 		Storage storage = base.GetComponent<Pickupable>().storage;
 		if (storage != null)
 		{

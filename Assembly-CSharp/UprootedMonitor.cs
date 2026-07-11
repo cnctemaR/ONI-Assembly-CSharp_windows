@@ -8,7 +8,7 @@ public class UprootedMonitor : KMonoBehaviour
 	{
 		get
 		{
-			return this.uprooted;
+			return this.uprooted || base.GetComponent<KPrefabID>().HasTag(GameTags.Uprooted);
 		}
 	}
 
@@ -38,13 +38,19 @@ public class UprootedMonitor : KMonoBehaviour
 
 	public bool IsCellSafe(int cell)
 	{
-		return CreatureHelpers.isSolidGround(this.ground);
+		if (!Grid.IsCellOffsetValid(cell, this.monitorCell))
+		{
+			return false;
+		}
+		int num = Grid.OffsetCell(cell, this.monitorCell);
+		return Grid.Solid[num];
 	}
 
 	public void OnGroundChanged(object callbackData)
 	{
 		if (!this.CheckTileGrowable())
 		{
+			base.GetComponent<KPrefabID>().AddTag(GameTags.Uprooted, false);
 			this.uprooted = true;
 			base.Trigger(-216549700, null);
 		}
@@ -74,6 +80,7 @@ public class UprootedMonitor : KMonoBehaviour
 	{
 		if (!component.uprooted)
 		{
+			component.GetComponent<KPrefabID>().AddTag(GameTags.Uprooted, false);
 			component.uprooted = true;
 			component.Trigger(-216549700, null);
 		}

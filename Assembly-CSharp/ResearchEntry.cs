@@ -14,7 +14,7 @@ public class ResearchEntry : KMonoBehaviour
 		this.BG.color = this.defaultColor;
 		foreach (Tech tech in this.targetTech.requiredTech)
 		{
-			float num = this.targetTech.width / 2f;
+			float num = this.targetTech.width / 2f + 18f;
 			Vector2 zero = Vector2.zero;
 			Vector2 zero2 = Vector2.zero;
 			if (tech.center.y > this.targetTech.center.y + 2f)
@@ -89,7 +89,7 @@ public class ResearchEntry : KMonoBehaviour
 		string text = string.Empty;
 		foreach (TechItem techItem in this.targetTech.unlockedItems)
 		{
-			KPointerImage componentInChildrenOnly = this.GetFreeIcon().GetComponentInChildrenOnly<KPointerImage>();
+			KImage componentInChildrenOnly = this.GetFreeIcon().GetComponentInChildrenOnly<KImage>();
 			componentInChildrenOnly.transform.parent.gameObject.SetActive(true);
 			if (text != string.Empty)
 			{
@@ -99,11 +99,6 @@ public class ResearchEntry : KMonoBehaviour
 			string text2 = string.Format("{0}\n{1}", techItem.Name, techItem.description);
 			componentInChildrenOnly.GetComponent<ToolTip>().toolTip = text2;
 			componentInChildrenOnly.sprite = techItem.UISprite();
-			componentInChildrenOnly.ClearPointerEvents();
-			componentInChildrenOnly.onPointerEnter += delegate
-			{
-				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("HUD_Mouseover", false));
-			};
 		}
 		text = string.Format(UI.RESEARCHSCREEN_UNLOCKSTOOLTIP, text);
 		this.researchName.GetComponent<ToolTip>().toolTip = string.Format("{0}\n{1}\n\n{2}", this.targetTech.Name, this.targetTech.desc, text);
@@ -247,10 +242,6 @@ public class ResearchEntry : KMonoBehaviour
 			{
 				Transform child3 = keyValuePair3.Value.transform.GetChild(0);
 				child3.GetComponentsInChildren<Image>()[1].color = new Color(0.52156866f, 0.52156866f, 0.52156866f);
-			}
-			foreach (Image image3 in this.iconPanel.GetComponentsInChildren<Image>())
-			{
-				image3.material = this.DesaturatedUIMaterial;
 			}
 		}
 	}
@@ -433,8 +424,6 @@ public class ResearchEntry : KMonoBehaviour
 	public int lineThickness_inactive = 2;
 
 	public Material StandardUIMaterial;
-
-	public Material DesaturatedUIMaterial;
 
 	private Dictionary<string, GameObject> progressBarsByResearchTypeID = new Dictionary<string, GameObject>();
 

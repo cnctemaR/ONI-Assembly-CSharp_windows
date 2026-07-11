@@ -1,9 +1,8 @@
 ﻿using System;
-using Klei;
 
 namespace ProcGen
 {
-	public class LevelLayerSettings : YamlIO<LevelLayerSettings>
+	public class LevelLayerSettings : IMerge<LevelLayerSettings>
 	{
 		public LevelLayerSettings()
 		{
@@ -11,5 +10,10 @@ namespace ProcGen
 		}
 
 		public LevelLayer LevelLayers { get; private set; }
+
+		public void Merge(LevelLayerSettings other)
+		{
+			this.LevelLayers.Merge(other.LevelLayers);
+		}
 	}
 }

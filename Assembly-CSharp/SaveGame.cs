@@ -66,7 +66,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 		}
 		byte[] bytes = Encoding.UTF8.GetBytes(text);
 		header = default(SaveGame.Header);
-		header.buildVersion = 336724U;
+		header.buildVersion = 356355U;
 		header.headerSize = bytes.Length;
 		header.headerVersion = 1U;
 		header.compression = ((!isCompressed) ? 0 : 1);
@@ -136,6 +136,12 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 	[Serialize]
 	public bool sandboxEnabled;
 
+	[Serialize]
+	public int autoSaveCycleInterval = 1;
+
+	[Serialize]
+	public Vector2I timelapseResolution = new Vector2I(640, 360);
+
 	private string baseName;
 
 	public static SaveGame Instance;
@@ -178,7 +184,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = isAutoSave;
 			this.originalSaveName = originalSaveName;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 8;
+			this.saveMinorVersion = 11;
 		}
 
 		public GameInfo(int numberOfCycles, int numberOfDuplicants, string baseName, bool sandboxEnabled = false)
@@ -189,7 +195,7 @@ public class SaveGame : KMonoBehaviour, ISaveLoadable
 			this.isAutoSave = false;
 			this.originalSaveName = string.Empty;
 			this.saveMajorVersion = 7;
-			this.saveMinorVersion = 8;
+			this.saveMinorVersion = 11;
 		}
 
 		public bool IsVersionOlderThan(int major, int minor)

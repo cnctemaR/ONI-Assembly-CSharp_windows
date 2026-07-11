@@ -64,6 +64,7 @@ public class MinionStorage : KMonoBehaviour
 		AttributeLevels component6 = src_id.GetComponent<AttributeLevels>();
 		component6.OnSerializing();
 		dest_id.attributeLevels = new List<AttributeLevels.LevelSaveLoad>(component6.SaveLoadLevels);
+		MinionStorage.StoreModifiers(src_id, dest_id);
 		Schedulable component7 = src_id.GetComponent<Schedulable>();
 		Schedule schedule = component7.GetSchedule();
 		if (schedule != null)
@@ -71,6 +72,22 @@ public class MinionStorage : KMonoBehaviour
 			schedule.Unassign(component7);
 			Schedulable component8 = dest_id.GetComponent<Schedulable>();
 			schedule.Assign(component8);
+		}
+	}
+
+	private static void StoreModifiers(MinionIdentity src_id, StoredMinionIdentity dest_id)
+	{
+		MinionModifiers component = src_id.GetComponent<MinionModifiers>();
+		foreach (AttributeInstance attributeInstance in component.attributes)
+		{
+			if (dest_id.minionModifiers.attributes.Get(attributeInstance.Attribute.Id) == null)
+			{
+				dest_id.minionModifiers.attributes.Add(attributeInstance.Attribute);
+			}
+			for (int i = 0; i < attributeInstance.Modifiers.Count; i++)
+			{
+				dest_id.minionModifiers.attributes.Get(attributeInstance.Id).Add(attributeInstance.Modifiers[i]);
+			}
 		}
 	}
 

@@ -3,6 +3,7 @@ using KSerialization.Converters;
 
 namespace ProcGen
 {
+	[Serializable]
 	public class SampleDescriber
 	{
 		public SampleDescriber()
@@ -35,6 +36,7 @@ namespace ProcGen
 			Centroid
 		}
 
+		[Serializable]
 		public class Override
 		{
 			public Override()
@@ -62,6 +64,19 @@ namespace ProcGen
 			public string diseaseOverride { get; protected set; }
 
 			public int? diseaseAmountOverride { get; protected set; }
+
+			public void ModMultiplyMass(float mult)
+			{
+				if (this.massMultiplier == null)
+				{
+					this.massMultiplier = new float?(mult);
+				}
+				else
+				{
+					float? massMultiplier = this.massMultiplier;
+					this.massMultiplier = ((massMultiplier == null) ? null : new float?(massMultiplier.GetValueOrDefault() * mult));
+				}
+			}
 		}
 	}
 }

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using KSerialization.Converters;
-using VoronoiTree;
 
 namespace ProcGen
 {
+	[Serializable]
 	public class SubWorld : SampleDescriber
 	{
 		public SubWorld()
@@ -14,7 +14,9 @@ namespace ProcGen
 			this.tags = new List<string>();
 			this.biomes = new List<WeightedBiome>();
 			this.samplers = new List<SampleDescriber>();
+			this.pointsOfInterest = new Dictionary<string, string[]>();
 			this.featureTemplates = new Dictionary<string, int>();
+			this.pdWeight = 1f;
 		}
 
 		public string biomeNoise { get; protected set; }
@@ -22,6 +24,8 @@ namespace ProcGen
 		public string overrideNoise { get; protected set; }
 
 		public string densityNoise { get; protected set; }
+
+		public string borderOverride { get; protected set; }
 
 		[StringEnumConverter]
 		public Temperature.Range temperatureRange { get; protected set; }
@@ -50,31 +54,7 @@ namespace ProcGen
 
 		public List<SampleDescriber> samplers { get; private set; }
 
-		public Node AddCenteralFeature(Tree node, Graph graph, TagSet newTags)
-		{
-			if (this.centralFeature == null)
-			{
-				return null;
-			}
-			Node node2 = graph.AddNode(this.centralFeature.type);
-			node2.SetPosition(node.site.poly.Centroid());
-			Node node3 = node.AddSite(new Diagram.Site((uint)node2.node.Id, node2.position, 1f), Node.NodeType.Internal);
-			node3.tags = new TagSet(newTags);
-			node3.AddTag(new Tag(this.centralFeature.type));
-			node3.AddTag(WorldGenTags.Feature);
-			node3.AddTag(WorldGenTags.CenteralFeature);
-			for (int i = 0; i < this.centralFeature.tags.Count; i++)
-			{
-				node3.AddTag(new Tag(this.centralFeature.tags[i]));
-			}
-			return node2;
-		}
-
-		public void GenerateStartArea(Tree node, Graph graph)
-		{
-		}
-
-		public float pdWeight;
+		public float pdWeight { get; private set; }
 
 		public enum ZoneType
 		{
@@ -85,7 +65,10 @@ namespace ProcGen
 			ToxicJungle,
 			MagmaCore,
 			OilField,
-			Space
+			Space,
+			Ocean,
+			Rust,
+			Forest
 		}
 	}
 }

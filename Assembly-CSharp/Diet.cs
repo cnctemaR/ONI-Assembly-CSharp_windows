@@ -11,6 +11,10 @@ public class Diet
 		for (int i = 0; i < infos.Length; i++)
 		{
 			Diet.Info info = infos[i];
+			if (info.eatsPlantsDirectly)
+			{
+				this.eatsPlantsDirectly = true;
+			}
 			using (HashSet<Tag>.Enumerator enumerator = info.consumedTags.GetEnumerator())
 			{
 				while (enumerator.MoveNext())
@@ -47,11 +51,13 @@ public class Diet
 
 	public List<KeyValuePair<Tag, float>> producedTags;
 
+	public bool eatsPlantsDirectly;
+
 	private Dictionary<Tag, Diet.Info> consumedTagToInfo = new Dictionary<Tag, Diet.Info>();
 
 	public class Info
 	{
-		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f, bool produce_solid_tile = false)
+		public Info(HashSet<Tag> consumed_tags, Tag produced_element, float calories_per_kg, float produced_conversion_rate = 1f, string disease_id = null, float disease_per_kg_produced = 0f, bool produce_solid_tile = false, bool eats_plants_directly = false)
 		{
 			this.consumedTags = consumed_tags;
 			this.producedElement = produced_element;
@@ -66,6 +72,7 @@ public class Diet
 				this.diseaseIdx = byte.MaxValue;
 			}
 			this.produceSolidTile = produce_solid_tile;
+			this.eatsPlantsDirectly = eats_plants_directly;
 		}
 
 		public HashSet<Tag> consumedTags { get; private set; }
@@ -81,6 +88,8 @@ public class Diet
 		public float diseasePerKgProduced { get; private set; }
 
 		public bool produceSolidTile { get; private set; }
+
+		public bool eatsPlantsDirectly { get; private set; }
 
 		public bool IsMatch(Tag tag)
 		{

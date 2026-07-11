@@ -49,7 +49,6 @@ public class LogicWireConfig : IBuildingConfig
 		base.DoPostConfigureUnderConstruction(go);
 		Constructable component = go.GetComponent<Constructable>();
 		component.isDiggingRequired = false;
-		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddOrGet<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Logic;
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;

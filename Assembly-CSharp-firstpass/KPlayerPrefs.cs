@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Klei;
 
-public class KPlayerPrefs : YamlIO<KPlayerPrefs>
+public class KPlayerPrefs
 {
 	public KPlayerPrefs()
 	{
@@ -23,7 +23,7 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 				KPlayerPrefs.PATH = KPlayerPrefs.GetPath();
 				try
 				{
-					YamlIO<KPlayerPrefs>.LoadFile(KPlayerPrefs.PATH, null);
+					KPlayerPrefs._instance = YamlIO.LoadFile<KPlayerPrefs>(KPlayerPrefs.PATH, null, null);
 				}
 				catch
 				{
@@ -62,7 +62,7 @@ public class KPlayerPrefs : YamlIO<KPlayerPrefs>
 	{
 		try
 		{
-			KPlayerPrefs.instance.Save(KPlayerPrefs.PATH, null);
+			YamlIO.Save<KPlayerPrefs>(KPlayerPrefs.instance, KPlayerPrefs.PATH, null);
 		}
 		catch (Exception ex)
 		{

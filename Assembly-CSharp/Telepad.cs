@@ -141,6 +141,8 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 		{
 			default_state = this.idle;
 			base.serializable = true;
+			this.root.OnSignal(this.idlePortal, this.resetToIdle);
+			this.resetToIdle.GoTo(this.idle);
 			this.idle.Enter(delegate(Telepad.StatesInstance smi)
 			{
 				smi.UpdateMeter();
@@ -179,7 +181,11 @@ public class Telepad : StateMachineComponent<Telepad.StatesInstance>
 
 		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.Signal closePortal;
 
+		public StateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.Signal idlePortal;
+
 		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State idle;
+
+		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State resetToIdle;
 
 		public GameStateMachine<Telepad.States, Telepad.StatesInstance, Telepad, object>.State opening;
 

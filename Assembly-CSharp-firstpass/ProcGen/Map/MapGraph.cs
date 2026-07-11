@@ -44,7 +44,14 @@ namespace ProcGen.Map
 
 		public Edge GetEdge(Corner corner0, Corner corner1, bool createOK = true)
 		{
-			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 || e.corner0 == corner1) && (e.corner1 == corner0 || e.corner1 == corner1));
+			bool flag;
+			return this.GetEdge(corner0, corner1, createOK, out flag);
+		}
+
+		public Edge GetEdge(Corner corner0, Corner corner1, bool createOK, out bool didCreate)
+		{
+			didCreate = false;
+			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 && e.corner1 == corner1) || (e.corner1 == corner0 && e.corner0 == corner1));
 			if (edge != null)
 			{
 				return edge;
@@ -58,12 +65,20 @@ namespace ProcGen.Map
 			edge = new Edge(arc, corner0, corner1);
 			this.arcList.Add(edge);
 			this.edgeList.Add(edge);
+			didCreate = true;
 			return edge;
 		}
 
 		public Edge GetEdge(Corner corner0, Corner corner1, Cell site0, Cell site1, bool createOK = true)
 		{
-			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 || e.corner0 == corner1) && (e.corner1 == corner0 || e.corner1 == corner1));
+			bool flag;
+			return this.GetEdge(corner0, corner1, site0, site1, createOK, out flag);
+		}
+
+		public Edge GetEdge(Corner corner0, Corner corner1, Cell site0, Cell site1, bool createOK, out bool didCreate)
+		{
+			didCreate = false;
+			Edge edge = this.edgeList.Find((Edge e) => (e.corner0 == corner0 && e.corner1 == corner1) || (e.corner1 == corner0 && e.corner0 == corner1));
 			if (edge != null)
 			{
 				return edge;
@@ -77,13 +92,17 @@ namespace ProcGen.Map
 			edge = new Edge(arc, corner0, corner1, site0, site1);
 			this.arcList.Add(edge);
 			this.edgeList.Add(edge);
+			didCreate = true;
 			return edge;
 		}
 
 		public Corner GetCorner(Vector2 position, bool createOK = true)
 		{
-			position = new Vector2((float)((int)position.x), (float)((int)position.y));
-			Corner corner = this.cornerList.Find((Corner c) => c.position == position);
+			Corner corner = this.cornerList.Find(delegate(Corner c)
+			{
+				Vector2 vector = c.position - position;
+				return vector.x < 1f && vector.x > -1f && vector.y < 1f && vector.y > -1f;
+			});
 			if (corner == null)
 			{
 				if (!createOK)
@@ -106,14 +125,27 @@ namespace ProcGen.Map
 
 		public Cell GetCell(Vector2 position)
 		{
-			position = new Vector2((float)((int)position.x), (float)((int)position.y));
-			return this.cellList.Find((Cell c) => c.position == position);
+			return this.cellList.Find(delegate(Cell c)
+			{
+				Vector2 vector = c.position - position;
+				return vector.x < 1f && vector.x > -1f && vector.y < 1f && vector.y > -1f;
+			});
 		}
 
 		public Cell GetCell(Vector2 position, Node node, bool createOK = true)
 		{
-			position = new Vector2((float)((int)position.x), (float)((int)position.y));
-			Cell cell = this.cellList.Find((Cell c) => c.position == position);
+			bool flag;
+			return this.GetCell(position, node, createOK, out flag);
+		}
+
+		public Cell GetCell(Vector2 position, Node node, bool createOK, out bool didCreate)
+		{
+			Cell cell = this.cellList.Find(delegate(Cell c)
+			{
+				Vector2 vector = c.position - position;
+				return vector.x < 1f && vector.x > -1f && vector.y < 1f && vector.y > -1f;
+			});
+			didCreate = false;
 			if (cell == null)
 			{
 				if (!createOK)
@@ -125,6 +157,7 @@ namespace ProcGen.Map
 				if (cell == null)
 				{
 					cell = new Cell(node);
+					didCreate = true;
 					cell.SetPosition(position);
 					this.cellList.Add(cell);
 				}

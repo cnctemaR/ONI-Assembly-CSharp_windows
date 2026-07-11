@@ -1,7 +1,7 @@
 ﻿using System;
 using ProcGen;
 
-internal class ZoneTile : KMonoBehaviour
+public class ZoneTile : KMonoBehaviour
 {
 	protected override void OnSpawn()
 	{

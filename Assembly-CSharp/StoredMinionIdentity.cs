@@ -4,6 +4,7 @@ using System.Runtime.Serialization;
 using Database;
 using Klei.AI;
 using KSerialization;
+using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
@@ -34,6 +35,7 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 				this.AptitudeBySkillGroup[keyValuePair2.Key] = keyValuePair2.Value;
 			}
 		}
+		this.OnDeserializeModifiers();
 	}
 
 	public bool HasPerk(SkillPerk perk)
@@ -56,12 +58,51 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 	protected override void OnPrefabInit()
 	{
 		this.assignableProxy = new Ref<MinionAssignablesProxy>();
+		this.minionModifiers = base.GetComponent<MinionModifiers>();
+		this.savedAttributeValues = new Dictionary<string, float>();
+	}
+
+	[OnSerializing]
+	private void OnSerialize()
+	{
+		this.savedAttributeValues.Clear();
+		foreach (AttributeInstance attributeInstance in this.minionModifiers.attributes)
+		{
+			this.savedAttributeValues.Add(attributeInstance.Attribute.Id, attributeInstance.GetTotalValue());
+		}
 	}
 
 	protected override void OnSpawn()
 	{
+		MinionConfig.AddMinionAmounts(this.minionModifiers);
+		MinionConfig.AddMinionTraits(DUPLICANTS.MODIFIERS.BASEDUPLICANT.NAME, this.minionModifiers);
 		this.ValidateProxy();
 		this.CleanupLimboMinions();
+	}
+
+	private void OnDeserializeModifiers()
+	{
+		foreach (KeyValuePair<string, float> keyValuePair in this.savedAttributeValues)
+		{
+			Klei.AI.Attribute attribute = Db.Get().Attributes.TryGet(keyValuePair.Key);
+			if (attribute == null)
+			{
+				attribute = Db.Get().BuildingAttributes.TryGet(keyValuePair.Key);
+			}
+			if (attribute != null)
+			{
+				if (this.minionModifiers.attributes.Get(attribute.Id) != null)
+				{
+					this.minionModifiers.attributes.Get(attribute.Id).Modifiers.Clear();
+					this.minionModifiers.attributes.Get(attribute.Id).ClearModifiers();
+				}
+				else
+				{
+					this.minionModifiers.attributes.Add(attribute);
+				}
+				this.minionModifiers.attributes.Add(new AttributeModifier(attribute.Id, keyValuePair.Value, () => DUPLICANTS.ATTRIBUTES.STORED_VALUE, false, false));
+			}
+		}
 	}
 
 	public void ValidateProxy()
@@ -310,4 +351,9 @@ public class StoredMinionIdentity : KMonoBehaviour, ISaveLoadable, IAssignableId
 
 	[Serialize]
 	public List<AttributeLevels.LevelSaveLoad> attributeLevels;
+
+	[Serialize]
+	public Dictionary<string, float> savedAttributeValues;
+
+	public MinionModifiers minionModifiers;
 }

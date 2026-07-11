@@ -252,7 +252,7 @@ public class PropertyTextures : KMonoBehaviour, ISim200ms
 		for (int i = 0; i < this.allTextureProperties.Count; i++)
 		{
 			PropertyTextures.TextureProperties textureProperties2 = this.allTextureProperties[i];
-			if (num5 == i || textureProperties2.updateEveryFrame)
+			if (num5 == i || textureProperties2.updateEveryFrame || GameUtil.IsCapturingTimeLapse())
 			{
 				this.UpdateProperty(ref textureProperties2, num, num2, num3, num4);
 			}

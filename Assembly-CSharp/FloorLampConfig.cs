@@ -17,7 +17,7 @@ public class FloorLampConfig : IBuildingConfig
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.BONUS.TIER1, none, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 8f;
 		buildingDef.SelfHeatKilowattsWhenActive = 0.5f;
@@ -33,6 +33,11 @@ public class FloorLampConfig : IBuildingConfig
 		lightShapePreview.radius = 4f;
 		lightShapePreview.shape = LightShape.Circle;
 		lightShapePreview.offset = new CellOffset((int)def.BuildingComplete.GetComponent<Light2D>().Offset.x, (int)def.BuildingComplete.GetComponent<Light2D>().Offset.y);
+	}
+
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightSource, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

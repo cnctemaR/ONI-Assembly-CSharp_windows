@@ -226,6 +226,27 @@ namespace ProcGen
 			return new List<Vector2I>(hashSet);
 		}
 
+		public static List<Vector2I> GetSplat(Vector2 center, float radius, global::System.Random rng)
+		{
+			HashSet<Vector2I> hashSet = new HashSet<Vector2I>();
+			float num = 6.2831855f * radius;
+			int num2 = Mathf.RoundToInt(num * 1f);
+			for (int i = 0; i < num2; i++)
+			{
+				float num3 = (float)rng.NextDouble();
+				num3 *= num3;
+				float num4 = num3 * radius;
+				float num5 = 6.2831855f * ((float)i / (float)num2);
+				float num6 = Mathf.Sin(num5) * num4;
+				float num7 = Mathf.Cos(num5) * num4;
+				foreach (Vector2I vector2I in Util.GetLine(center, new Vector2(num6, num7) + center))
+				{
+					hashSet.Add(vector2I);
+				}
+			}
+			return new List<Vector2I>(hashSet);
+		}
+
 		public static List<Vector2I> GetBorder(HashSet<Vector2I> sourcePoints, int radius)
 		{
 			HashSet<Vector2I> hashSet = new HashSet<Vector2I>();

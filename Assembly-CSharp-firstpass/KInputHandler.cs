@@ -106,13 +106,13 @@ public class KInputHandler
 
 	public void HandleKeyDown(KButtonEvent e)
 	{
-		this.lastConsumedEvent = null;
+		this.lastConsumedEventDown = null;
 		foreach (Action<KButtonEvent> action in this.mOnKeyDownDelegates)
 		{
 			action(e);
 			if (e.Consumed)
 			{
-				this.lastConsumedEvent = e;
+				this.lastConsumedEventDown = e;
 			}
 		}
 		if (!e.Consumed && this.mChildren != null)
@@ -130,13 +130,13 @@ public class KInputHandler
 
 	public void HandleKeyUp(KButtonEvent e)
 	{
-		this.lastConsumedEvent = null;
+		this.lastConsumedEventUp = null;
 		foreach (Action<KButtonEvent> action in this.mOnKeyUpDelegates)
 		{
 			action(e);
 			if (e.Consumed)
 			{
-				this.lastConsumedEvent = e;
+				this.lastConsumedEventUp = e;
 			}
 		}
 		if (!e.Consumed && this.mChildren != null)
@@ -223,7 +223,9 @@ public class KInputHandler
 
 	private string name;
 
-	private KButtonEvent lastConsumedEvent;
+	private KButtonEvent lastConsumedEventDown;
+
+	private KButtonEvent lastConsumedEventUp;
 
 	public delegate void KButtonEventHandler(KButtonEvent e);
 

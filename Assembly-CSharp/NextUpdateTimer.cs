@@ -28,7 +28,7 @@ public class NextUpdateTimer : KMonoBehaviour
 		TimeSpan timeSpan2 = this.nextReleaseDate - global::System.DateTime.UtcNow;
 		TimeSpan timeSpan3 = global::System.DateTime.UtcNow - this.currentReleaseDate;
 		string text = string.Empty;
-		string text2 = "1";
+		string text2 = "4";
 		if (this.useSpecificDate)
 		{
 			text = UI.DEVELOPMENTBUILDS.UPDATES.SPECIFIC_DATE;
@@ -61,7 +61,9 @@ public class NextUpdateTimer : KMonoBehaviour
 		this.TimerText.text = text;
 		this.UpdateAnimController.Play(text2, KAnim.PlayMode.Loop, 1f, 0f);
 		double num3 = timeSpan3.TotalSeconds / timeSpan.TotalSeconds;
+		DebugUtil.LogArgs(new object[] { "ANIM PERCENT", num3 });
 		float num4 = Mathf.Clamp01((float)num3);
+		DebugUtil.LogArgs(new object[] { "ANIM PERCENT FLOAT", num4 });
 		this.UpdateAnimMeterController.SetPositionPercent(num4);
 	}
 

@@ -38,6 +38,34 @@ public class MinionAssignablesProxy : KMonoBehaviour, IAssignableIdentity
 		return null;
 	}
 
+	public float GetArrivalTime()
+	{
+		if (this.GetTargetGameObject().GetComponent<MinionIdentity>() != null)
+		{
+			return this.GetTargetGameObject().GetComponent<MinionIdentity>().arrivalTime;
+		}
+		if (this.GetTargetGameObject().GetComponent<StoredMinionIdentity>() != null)
+		{
+			return this.GetTargetGameObject().GetComponent<StoredMinionIdentity>().arrivalTime;
+		}
+		global::Debug.LogError("Could not get minion arrival time");
+		return -1f;
+	}
+
+	public int GetTotalSkillpoints()
+	{
+		if (this.GetTargetGameObject().GetComponent<MinionIdentity>() != null)
+		{
+			return this.GetTargetGameObject().GetComponent<MinionResume>().TotalSkillPointsGained;
+		}
+		if (this.GetTargetGameObject().GetComponent<StoredMinionIdentity>() != null)
+		{
+			return MinionResume.CalculateTotalSkillPointsGained(this.GetTargetGameObject().GetComponent<StoredMinionIdentity>().TotalExperienceGained);
+		}
+		global::Debug.LogError("Could not get minion skill points time");
+		return -1;
+	}
+
 	public void SetTarget(IAssignableIdentity target, GameObject targetGO)
 	{
 		global::Debug.Assert(target != null, "target was null");

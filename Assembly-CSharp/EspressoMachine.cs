@@ -11,7 +11,7 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 		base.smi.StartSM();
 		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
 		{
-			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule);
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, true);
 		}, null, null);
 	}
 
@@ -71,7 +71,7 @@ public class EspressoMachine : StateMachineComponent<EspressoMachine.StatesInsta
 			ChoreType relax = Db.Get().ChoreTypes.Relax;
 			Workable workable = component;
 			ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-			Chore chore = new WorkChore<EspressoMachineWorkable>(relax, workable, null, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			Chore chore = new WorkChore<EspressoMachineWorkable>(relax, workable, null, true, null, null, null, false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 			chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, component);
 			return chore;
 		}

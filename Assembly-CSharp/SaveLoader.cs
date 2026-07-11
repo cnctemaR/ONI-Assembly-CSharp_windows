@@ -213,7 +213,7 @@ public class SaveLoader : KMonoBehaviour
 				saveFileRoot.active_mods.Add(new Label
 				{
 					id = modInfo.assetID,
-					version = modInfo.lastModifiedTime,
+					version = (long)modInfo.lastModifiedTime,
 					distribution_platform = Label.DistributionPlatform.Steam,
 					title = modInfo.description
 				});
@@ -236,13 +236,14 @@ public class SaveLoader : KMonoBehaviour
 			}
 			catch
 			{
-				text2 = "worlds/Default";
+				text2 = "worlds/SandstoneDefault";
 			}
 		}
 		Game.worldID = text2;
-		this.worldGen = new WorldGen(text2);
+		this.worldGen = new WorldGen(text2, null);
 		Game.LoadSettings(deserializer);
 		GridSettings.Reset(saveFileRoot.WidthInCells, saveFileRoot.HeightInCells);
+		Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
 		SimMessages.CreateDiseaseTable();
@@ -377,7 +378,7 @@ public class SaveLoader : KMonoBehaviour
 			}
 			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
 			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null);
+			component.PopupConfirmDialog(text2, null, null, null, null, null, null, null, null, true);
 		}
 		return list;
 	}
@@ -415,6 +416,7 @@ public class SaveLoader : KMonoBehaviour
 	{
 		global::KSerialization.Manager.Clear();
 		this.ReportSaveMetrics(isAutoSave);
+		RetireColonyUtility.SaveColonySummaryData();
 		if (isAutoSave && !GenericGameSettings.instance.keepAllAutosaves)
 		{
 			List<string> saveFiles = SaveLoader.GetSaveFiles(Path.GetDirectoryName(filename));
@@ -485,14 +487,14 @@ public class SaveLoader : KMonoBehaviour
 			{
 				DebugUtil.LogArgs(new object[] { "UnauthorizedAccessException for " + filename });
 				ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "Unauthorized Access Exception"), null, null, null, null, null, null, null, null, true);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
 			if (ex3 is IOException)
 			{
 				DebugUtil.LogArgs(new object[] { "IOException (probably out of disk space) for " + filename });
 				ConfirmDialogScreen confirmDialogScreen2 = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, GameScreenManager.Instance.ssOverlayCanvas.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null);
+				confirmDialogScreen2.PopupConfirmDialog(string.Format(UI.CRASHSCREEN.SAVEFAILED, "IOException. You may not have enough free space!"), null, null, null, null, null, null, null, null, true);
 				return SaveLoader.GetActiveSaveFilePath();
 			}
 			throw ex3;
@@ -616,9 +618,9 @@ public class SaveLoader : KMonoBehaviour
 		}
 		catch
 		{
-			text = "worlds/Default";
+			text = "worlds/SandstoneDefault";
 		}
-		this.worldGen = new WorldGen(text);
+		this.worldGen = new WorldGen(text, null);
 		SimSaveFileStructure simSaveFileStructure = this.worldGen.LoadWorldGenSim();
 		if (simSaveFileStructure == null)
 		{
@@ -631,6 +633,7 @@ public class SaveLoader : KMonoBehaviour
 			global::Debug.LogError("Detail is null");
 		}
 		GridSettings.Reset(simSaveFileStructure.WidthInCells, simSaveFileStructure.HeightInCells);
+		Singleton<KBatchedAnimUpdater>.Instance.InitializeGrid();
 		Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 		SimMessages.CreateSimElementsTable(ElementLoader.elements);
 		SimMessages.CreateDiseaseTable();

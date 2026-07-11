@@ -6,9 +6,13 @@ public class MinionBrain : Brain
 {
 	public bool IsCellClear(int cell)
 	{
+		if (Grid.Reserved[cell])
+		{
+			return false;
+		}
 		GameObject gameObject = Grid.Objects[cell, 0];
 		bool flag = gameObject != null && base.gameObject != gameObject && !gameObject.GetComponent<Navigator>().IsMoving();
-		return (gameObject == null && !Grid.Reserved[cell]) || !flag;
+		return !flag;
 	}
 
 	protected override void OnPrefabInit()
@@ -85,6 +89,15 @@ public class MinionBrain : Brain
 				DiscoveredSpaceMessage discoveredSpaceMessage = new DiscoveredSpaceMessage(position);
 				Messenger.Instance.QueueMessage(discoveredSpaceMessage);
 				Game.Instance.Trigger(-818188514, base.gameObject);
+			}
+		}
+		if (!Game.Instance.savedInfo.discoveredOilField)
+		{
+			int num2 = Grid.PosToCell(base.gameObject);
+			SubWorld.ZoneType subWorldZoneType2 = global::World.Instance.zoneRenderData.GetSubWorldZoneType(num2);
+			if (subWorldZoneType2 == SubWorld.ZoneType.OilField)
+			{
+				Game.Instance.savedInfo.discoveredOilField = true;
 			}
 		}
 	}

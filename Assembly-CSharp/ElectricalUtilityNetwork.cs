@@ -96,7 +96,10 @@ public class ElectricalUtilityNetwork : UtilityNetwork
 					{
 						damage = 1,
 						source = BUILDINGS.DAMAGESOURCES.CIRCUIT_OVERLOADED,
-						popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CIRCUIT_OVERLOADED
+						popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.CIRCUIT_OVERLOADED,
+						takeDamageEffect = SpawnFXHashes.BuildingSpark,
+						fullDamageEffectName = "spark_damage_kanim",
+						statusItemID = Db.Get().BuildingStatusItems.Overloaded.Id
 					});
 				}
 				if (this.overloadedNotification == null)

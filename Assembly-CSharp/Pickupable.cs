@@ -42,6 +42,14 @@ public class Pickupable : Workable, IHasSortOrder
 
 	public int cachedCell { get; private set; }
 
+	public int storageCell
+	{
+		get
+		{
+			return (!(this.storage != null)) ? this.cachedCell : Grid.PosToCell(this.storage);
+		}
+	}
+
 	public bool IsEntombed
 	{
 		get
@@ -55,7 +63,7 @@ public class Pickupable : Workable, IHasSortOrder
 				this.isEntombed = value;
 				if (this.isEntombed)
 				{
-					base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed);
+					base.GetComponent<KPrefabID>().AddTag(GameTags.Entombed, false);
 				}
 				else
 				{
@@ -69,15 +77,12 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private bool CouldBePickedUpCommon(GameObject carrier)
 	{
-		bool flag = this.UnreservedAmount > 0f || this.GetReservedAmount(carrier) > 0f;
-		bool flag2 = this.UnreservedAmount >= this.MinTakeAmount;
-		return flag && flag2;
+		return this.UnreservedAmount >= this.MinTakeAmount && (this.UnreservedAmount > 0f || this.FindReservedAmount(carrier) > 0f);
 	}
 
 	public bool CouldBePickedUpByMinion(GameObject carrier)
 	{
-		bool flag = this.storage == null || !this.storage.automatable || !this.storage.automatable.GetAutomationOnly();
-		return this.CouldBePickedUpCommon(carrier) && flag;
+		return this.CouldBePickedUpCommon(carrier) && (this.storage == null || !this.storage.automatable || !this.storage.automatable.GetAutomationOnly());
 	}
 
 	public bool CouldBePickedUpByTransferArm(GameObject carrier)
@@ -85,7 +90,7 @@ public class Pickupable : Workable, IHasSortOrder
 		return this.CouldBePickedUpCommon(carrier);
 	}
 
-	public float GetReservedAmount(GameObject reserver)
+	public float FindReservedAmount(GameObject reserver)
 	{
 		for (int i = 0; i < this.reservations.Count; i++)
 		{
@@ -206,7 +211,7 @@ public class Pickupable : Workable, IHasSortOrder
 		base.Subscribe<Pickupable>(1807976145, Pickupable.OnOreSizeChangedDelegate);
 		base.Subscribe<Pickupable>(-1432940121, Pickupable.OnReachableChangedDelegate);
 		base.Subscribe<Pickupable>(-778359855, Pickupable.RefreshStorageTagsDelegate);
-		this.KPrefabID.AddTag(GameTags.Pickupable);
+		this.KPrefabID.AddTag(GameTags.Pickupable, false);
 		Components.Pickupables.Add(this);
 	}
 
@@ -261,7 +266,7 @@ public class Pickupable : Workable, IHasSortOrder
 		this.objectLayerListItem = new ObjectLayerListItem(base.gameObject, ObjectLayer.Pickupables, num);
 		this.solidPartitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterSolidListener", base.gameObject, num, GameScenePartitioner.Instance.solidChangedLayer, new Action<object>(this.OnSolidChanged));
 		this.partitionerEntry = GameScenePartitioner.Instance.Add("Pickupable.RegisterPickupable", this, num, GameScenePartitioner.Instance.pickupablesLayer, null);
-		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.RegisterListeners");
+		Singleton<CellChangeMonitor>.Instance.RegisterCellChangedHandler(base.transform, new global::System.Action(this.OnCellChange), "Pickupable.OnCellChange");
 		Singleton<CellChangeMonitor>.Instance.MarkDirty(base.transform);
 	}
 
@@ -389,15 +394,16 @@ public class Pickupable : Workable, IHasSortOrder
 			}
 			GameScenePartitioner.Instance.UpdatePosition(this.solidPartitionerEntry, num);
 			GameScenePartitioner.Instance.UpdatePosition(this.partitionerEntry, num);
+			int cachedCell = this.cachedCell;
+			this.UpdateCachedCell(num);
 			if (!flag)
 			{
 				this.NotifyChanged(num);
 			}
-			if (Grid.IsValidCell(this.cachedCell) && num != this.cachedCell)
+			if (Grid.IsValidCell(cachedCell) && num != cachedCell)
 			{
-				this.NotifyChanged(this.cachedCell);
+				this.NotifyChanged(cachedCell);
 			}
-			this.UpdateCachedCell(num);
 		}
 	}
 
@@ -530,11 +536,11 @@ public class Pickupable : Workable, IHasSortOrder
 		bool flag = data is Storage || (data != null && (bool)data);
 		if (flag)
 		{
-			this.KPrefabID.AddTag(GameTags.Stored);
+			this.KPrefabID.AddTag(GameTags.Stored, false);
 			bool flag2 = this.storage == null || !this.storage.allowItemRemoval;
 			if (flag2)
 			{
-				this.KPrefabID.AddTag(GameTags.StoredPrivate);
+				this.KPrefabID.AddTag(GameTags.StoredPrivate, false);
 			}
 			else
 			{
@@ -676,7 +682,7 @@ public class Pickupable : Workable, IHasSortOrder
 
 	private void AddFaller(Vector2 initial_velocity)
 	{
-		if (this.isKinematic || base.GetComponent<Health>() != null)
+		if (base.GetComponent<Health>() != null)
 		{
 			return;
 		}

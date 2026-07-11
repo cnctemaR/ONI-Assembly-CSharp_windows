@@ -1,43 +1,65 @@
 ﻿using System;
 using STRINGS;
+using UnityEngine;
 
-internal class MoveToLureStates : GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>
+public class MoveToLureStates : GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.move;
-		GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State state = this.root.Enter("SetLure", delegate(MoveToLureStates.Instance smi)
-		{
-			this.target.Set(smi.GetSMI<LureableMonitor.Instance>().GetTargetLure(), smi);
-		});
+		GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State root = this.root;
 		string text = CREATURES.STATUSITEMS.CONSIDERINGLURE.NAME;
 		string text2 = CREATURES.STATUSITEMS.CONSIDERINGLURE.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
-		this.move.MoveTo(new Func<MoveToLureStates.Instance, int>(MoveToLureStates.GetLureCell), new Func<MoveToLureStates.Instance, CellOffset[]>(MoveToLureStates.GetLureOffsets), this.behaviourcomplete, null, false);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
+		this.move.MoveTo(new Func<MoveToLureStates.Instance, int>(MoveToLureStates.GetLureCell), new Func<MoveToLureStates.Instance, CellOffset[]>(MoveToLureStates.GetLureOffsets), this.arrive_at_lure, this.behaviourcomplete, false);
+		this.arrive_at_lure.Enter(delegate(MoveToLureStates.Instance smi)
+		{
+			Lure.Instance targetLure = MoveToLureStates.GetTargetLure(smi);
+			if (targetLure != null && targetLure.HasTag(GameTags.OneTimeUseLure))
+			{
+				targetLure.GetComponent<KPrefabID>().AddTag(GameTags.LureUsed, false);
+			}
+		}).GoTo(this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.MoveToLure, false);
 	}
 
 	private static Lure.Instance GetTargetLure(MoveToLureStates.Instance smi)
 	{
-		return smi.GetSMI<LureableMonitor.Instance>().GetTargetLure().GetSMI<Lure.Instance>();
+		LureableMonitor.Instance smi2 = smi.GetSMI<LureableMonitor.Instance>();
+		GameObject targetLure = smi2.GetTargetLure();
+		if (targetLure == null)
+		{
+			return null;
+		}
+		return targetLure.GetSMI<Lure.Instance>();
 	}
 
 	private static int GetLureCell(MoveToLureStates.Instance smi)
 	{
-		return Grid.PosToCell(MoveToLureStates.GetTargetLure(smi).transform.GetPosition());
+		Lure.Instance targetLure = MoveToLureStates.GetTargetLure(smi);
+		if (targetLure == null)
+		{
+			return Grid.InvalidCell;
+		}
+		return Grid.PosToCell(targetLure);
 	}
 
 	private static CellOffset[] GetLureOffsets(MoveToLureStates.Instance smi)
 	{
-		return MoveToLureStates.GetTargetLure(smi).def.lurePoints;
+		Lure.Instance targetLure = MoveToLureStates.GetTargetLure(smi);
+		if (targetLure == null)
+		{
+			return null;
+		}
+		return targetLure.def.lurePoints;
 	}
 
 	public GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State move;
 
-	public GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State behaviourcomplete;
+	public GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State arrive_at_lure;
 
-	public StateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.TargetParameter target;
+	public GameStateMachine<MoveToLureStates, MoveToLureStates.Instance, IStateMachineTarget, MoveToLureStates.Def>.State behaviourcomplete;
 
 	public class Def : StateMachine.BaseDef
 	{

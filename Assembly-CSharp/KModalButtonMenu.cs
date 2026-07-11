@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class KModalButtonMenu : KButtonMenu
 {
@@ -65,8 +64,6 @@ public class KModalButtonMenu : KButtonMenu
 
 	public void SetBackgroundActive(bool active)
 	{
-		int num = ((!active) ? 0 : 70);
-		base.GetComponent<Image>().color = new Color32(0, 0, 0, (byte)num);
 	}
 
 	protected GameObject ActivateChildScreen(GameObject screenPrefab)

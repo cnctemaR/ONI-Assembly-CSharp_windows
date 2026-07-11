@@ -1,6 +1,6 @@
 ﻿using System;
 
-internal class AnimInterruptStates : GameStateMachine<AnimInterruptStates, AnimInterruptStates.Instance, IStateMachineTarget, AnimInterruptStates.Def>
+public class AnimInterruptStates : GameStateMachine<AnimInterruptStates, AnimInterruptStates.Instance, IStateMachineTarget, AnimInterruptStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{

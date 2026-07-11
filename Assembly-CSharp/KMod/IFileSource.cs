@@ -12,7 +12,7 @@ namespace KMod
 
 		void GetTopLevelItems(List<FileSystemItem> file_system_items);
 
-		IFileSystem GetFileSystem();
+		IFileDirectory GetFileSystem();
 
 		void CopyTo(string path, List<string> extensions = null);
 

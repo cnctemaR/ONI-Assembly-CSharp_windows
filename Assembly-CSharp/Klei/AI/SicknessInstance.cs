@@ -99,7 +99,7 @@ namespace Klei.AI
 			HashedString invalid = HashedString.Invalid;
 			string sourceInfo = this.exposureInfo.sourceInfo;
 			this.notification = new Notification(text, notificationType, invalid, func, sourceInfo, true, 0f, null, null, null);
-			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, string.Empty, (disease.severity > Sickness.Severity.Minor) ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, (disease.severity > Sickness.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, false, OverlayModes.None.ID, 63486);
+			this.statusItem = new StatusItem(disease.Id, disease.Name, DUPLICANTS.DISEASES.STATUS_ITEM_TOOLTIP.TEMPLATE, string.Empty, (disease.severity > Sickness.Severity.Minor) ? StatusItem.IconType.Exclamation : StatusItem.IconType.Info, (disease.severity > Sickness.Severity.Minor) ? NotificationType.Bad : NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
 			this.statusItem.resolveTooltipCallback = new Func<string, object, string>(this.ResolveString);
 			if (this.smi != null)
 			{
@@ -270,6 +270,14 @@ namespace Klei.AI
 				if (PopFXManager.Instance != null)
 				{
 					PopFXManager.Instance.SpawnFX(PopFXManager.Instance.sprite_Plus, string.Format(DUPLICANTS.DISEASES.CURED_POPUP, modifier.Name), base.gameObject.transform, 1.5f, true);
+				}
+				if (!string.IsNullOrEmpty(modifier.recoveryEffect))
+				{
+					Effects component = base.gameObject.GetComponent<Effects>();
+					if (component)
+					{
+						component.Add(modifier.recoveryEffect, true);
+					}
 				}
 			}
 

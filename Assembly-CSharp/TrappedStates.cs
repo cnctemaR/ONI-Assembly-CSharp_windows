@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>
+public class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -10,8 +10,16 @@ internal class TrappedStates : GameStateMachine<TrappedStates, TrappedStates.Ins
 		string text = CREATURES.STATUSITEMS.TRAPPED.NAME;
 		string text2 = CREATURES.STATUSITEMS.TRAPPED.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
-		this.trapped.ToggleTag(GameTags.Creatures.Deliverable).PlayAnim("trapped", KAnim.PlayMode.Loop).TagTransition(GameTags.Trapped, null, true);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
+		this.trapped.Enter(delegate(TrappedStates.Instance smi)
+		{
+			Navigator component = smi.GetComponent<Navigator>();
+			if (component.IsValidNavType(NavType.Floor))
+			{
+				component.SetCurrentNavType(NavType.Floor);
+			}
+		}).ToggleTag(GameTags.Creatures.Deliverable).PlayAnim("trapped", KAnim.PlayMode.Loop)
+			.TagTransition(GameTags.Trapped, null, true);
 	}
 
 	private GameStateMachine<TrappedStates, TrappedStates.Instance, IStateMachineTarget, TrappedStates.Def>.State trapped;

@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class DropElementStates : GameStateMachine<DropElementStates, DropElementStates.Instance, IStateMachineTarget, DropElementStates.Def>
+public class DropElementStates : GameStateMachine<DropElementStates, DropElementStates.Instance, IStateMachineTarget, DropElementStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -10,7 +10,7 @@ internal class DropElementStates : GameStateMachine<DropElementStates, DropEleme
 		string text = CREATURES.STATUSITEMS.EXPELLING_GAS.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXPELLING_GAS.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
 		this.dropping.PlayAnim("dirty").OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.Enter("DropElement", delegate(DropElementStates.Instance smi)
 		{

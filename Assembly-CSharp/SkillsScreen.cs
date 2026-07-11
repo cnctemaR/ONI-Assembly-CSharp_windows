@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Database;
 using Klei.AI;
 using STRINGS;
@@ -116,6 +117,7 @@ public class SkillsScreen : KModalScreen
 			AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(component2);
 			AttributeInstance attributeInstance2 = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(component2);
 			float num4 = 0f;
+			float num5 = 0f;
 			if (!string.IsNullOrEmpty(this.hoveredSkillID) && !component2.HasMasteredSkill(this.hoveredSkillID))
 			{
 				List<string> list = new List<string>();
@@ -130,7 +132,7 @@ public class SkillsScreen : KModalScreen
 							num4 += (float)(Db.Get().Skills.Get(list[i]).tier + 1);
 							if (component2.AptitudeBySkillGroup.ContainsKey(Db.Get().Skills.Get(list[i]).skillGroup) && component2.AptitudeBySkillGroup[Db.Get().Skills.Get(list[i]).skillGroup] > 0f)
 							{
-								num4 -= 1f;
+								num5 += 1f;
 							}
 							foreach (string text in Db.Get().Skills.Get(list[i]).priorSkills)
 							{
@@ -143,15 +145,15 @@ public class SkillsScreen : KModalScreen
 					list2.Clear();
 				}
 			}
-			float num5 = attributeInstance.GetTotalValue() / (attributeInstance2.GetTotalValue() + num4);
-			float num6 = Mathf.Max(attributeInstance.GetTotalValue(), attributeInstance2.GetTotalValue() + num4);
-			while (this.moraleNotches.Count < Mathf.RoundToInt(num6))
+			float num6 = attributeInstance.GetTotalValue() + num5 / (attributeInstance2.GetTotalValue() + num4);
+			float num7 = Mathf.Max(attributeInstance.GetTotalValue() + num5, attributeInstance2.GetTotalValue() + num4);
+			while (this.moraleNotches.Count < Mathf.RoundToInt(num7))
 			{
 				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.moraleNotch, this.moraleNotch.transform.parent);
 				gameObject.SetActive(true);
 				this.moraleNotches.Add(gameObject);
 			}
-			while (this.moraleNotches.Count > Mathf.RoundToInt(num6))
+			while (this.moraleNotches.Count > Mathf.RoundToInt(num7))
 			{
 				GameObject gameObject2 = this.moraleNotches[this.moraleNotches.Count - 1];
 				this.moraleNotches.Remove(gameObject2);
@@ -159,7 +161,7 @@ public class SkillsScreen : KModalScreen
 			}
 			for (int j = 0; j < this.moraleNotches.Count; j++)
 			{
-				if ((float)j < attributeInstance.GetTotalValue())
+				if ((float)j < attributeInstance.GetTotalValue() + num5)
 				{
 					this.moraleNotches[j].GetComponentsInChildren<Image>()[1].color = this.moraleNotchColor;
 				}
@@ -169,13 +171,18 @@ public class SkillsScreen : KModalScreen
 				}
 			}
 			this.moraleProgressLabel.text = UI.SKILLS_SCREEN.MORALE + ": " + attributeInstance.GetTotalValue().ToString();
-			while (this.expectationNotches.Count < Mathf.RoundToInt(num6))
+			if (num5 > 0f)
+			{
+				LocText locText = this.moraleProgressLabel;
+				locText.text = locText.text + " + " + GameUtil.ApplyBoldString(GameUtil.ColourizeString(this.moraleNotchColor, num5.ToString()));
+			}
+			while (this.expectationNotches.Count < Mathf.RoundToInt(num7))
 			{
 				GameObject gameObject3 = global::UnityEngine.Object.Instantiate<GameObject>(this.expectationNotch, this.expectationNotch.transform.parent);
 				gameObject3.SetActive(true);
 				this.expectationNotches.Add(gameObject3);
 			}
-			while (this.expectationNotches.Count > Mathf.RoundToInt(num6))
+			while (this.expectationNotches.Count > Mathf.RoundToInt(num7))
 			{
 				GameObject gameObject4 = this.expectationNotches[this.expectationNotches.Count - 1];
 				this.expectationNotches.Remove(gameObject4);
@@ -202,10 +209,10 @@ public class SkillsScreen : KModalScreen
 			this.expectationsProgressLabel.text = UI.SKILLS_SCREEN.MORALE_EXPECTATION + ": " + attributeInstance2.GetTotalValue().ToString();
 			if (num4 > 0f)
 			{
-				LocText locText = this.expectationsProgressLabel;
-				locText.text = locText.text + " + " + GameUtil.ApplyBoldString(GameUtil.ColourizeString(new Color(1f, 0.5f, 0.5f, 1f), num4.ToString()));
+				LocText locText2 = this.expectationsProgressLabel;
+				locText2.text = locText2.text + " + " + GameUtil.ApplyBoldString(GameUtil.ColourizeString(this.expectationNotchColor, num4.ToString()));
 			}
-			if (num5 < 1f)
+			if (num6 < 1f)
 			{
 				this.expectationWarning.SetActive(true);
 				this.moraleWarning.SetActive(false);
@@ -216,6 +223,7 @@ public class SkillsScreen : KModalScreen
 				this.moraleWarning.SetActive(true);
 			}
 			string text2 = string.Empty;
+			Dictionary<string, float> dictionary = new Dictionary<string, float>();
 			string text3 = text2;
 			text2 = string.Concat(new object[]
 			{
@@ -227,15 +235,21 @@ public class SkillsScreen : KModalScreen
 			});
 			for (int l = 0; l < attributeInstance.Modifiers.Count; l++)
 			{
+				dictionary.Add(attributeInstance.Modifiers[l].GetDescription(), attributeInstance.Modifiers[l].Value);
+			}
+			List<KeyValuePair<string, float>> list3 = dictionary.ToList<KeyValuePair<string, float>>();
+			list3.Sort((KeyValuePair<string, float> pair1, KeyValuePair<string, float> pair2) => pair2.Value.CompareTo(pair1.Value));
+			foreach (KeyValuePair<string, float> keyValuePair in list3)
+			{
 				text3 = text2;
 				text2 = string.Concat(new string[]
 				{
 					text3,
 					"    • ",
-					attributeInstance.Modifiers[l].GetDescription(),
+					keyValuePair.Key,
 					": ",
-					(attributeInstance.Modifiers[l].Value <= 0f) ? UIConstants.ColorPrefixRed : UIConstants.ColorPrefixGreen,
-					attributeInstance.Modifiers[l].GetFormattedString(component2.gameObject),
+					(keyValuePair.Value <= 0f) ? UIConstants.ColorPrefixRed : UIConstants.ColorPrefixGreen,
+					keyValuePair.Value.ToString(),
 					UIConstants.ColorSuffix,
 					"\n"
 				});
@@ -489,6 +503,10 @@ public class SkillsScreen : KModalScreen
 
 	private void OnRemoveMinionIdentity(MinionIdentity remove)
 	{
+		if (this.CurrentlySelectedMinion == remove)
+		{
+			this.CurrentlySelectedMinion = null;
+		}
 		this.BuildMinions();
 		this.RefreshAll();
 	}

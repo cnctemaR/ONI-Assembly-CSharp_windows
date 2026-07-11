@@ -35,7 +35,7 @@ public class OilRefineryConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		OilRefinery oilRefinery = go.AddOrGet<OilRefinery>();
 		oilRefinery.overpressureMass = 5f;
@@ -59,8 +59,8 @@ public class OilRefineryConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(5f, SimHashes.Petroleum, 348.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.09f, SimHashes.Methane, 348.15f, false, 0f, 3f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(5f, SimHashes.Petroleum, 348.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.09f, SimHashes.Methane, 348.15f, false, false, 0f, 3f, 1f, byte.MaxValue, 0)
 		};
 		Prioritizable.AddRef(go);
 	}

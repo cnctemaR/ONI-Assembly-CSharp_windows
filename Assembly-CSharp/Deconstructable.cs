@@ -125,8 +125,6 @@ public class Deconstructable : Workable
 			}
 			else
 			{
-				Vector3 vector;
-				gameObject.transform.GetPosition().x = vector.x + (global::UnityEngine.Random.value - 0.5f) * 0.5f;
 				zero = new Vector2(global::UnityEngine.Random.Range(-1f, 1f) * Deconstructable.INITIAL_VELOCITY_RANGE.x, Deconstructable.INITIAL_VELOCITY_RANGE.y);
 			}
 			if (GameComps.Fallers.Has(gameObject))
@@ -150,7 +148,7 @@ public class Deconstructable : Workable
 			else
 			{
 				Prioritizable.AddRef(base.gameObject);
-				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, null, true, null, null, null, true, null, false, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
+				this.chore = new WorkChore<Deconstructable>(Db.Get().ChoreTypes.Deconstruct, this, null, true, null, null, null, true, null, false, false, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
 				base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.PendingDeconstruction, this);
 				this.isMarkedForDeconstruction = true;
 				base.Trigger(2108245096, "Deconstruct");

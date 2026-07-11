@@ -4,6 +4,12 @@ using STRINGS;
 
 public class ResetSkillsStation : Workable
 {
+	protected override void OnPrefabInit()
+	{
+		base.OnPrefabInit();
+		this.lightEfficiencyBonus = false;
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
@@ -26,7 +32,7 @@ public class ResetSkillsStation : Workable
 
 	private void CreateChore()
 	{
-		this.chore = new WorkChore<ResetSkillsStation>(Db.Get().ChoreTypes.Train, this, null, null, true, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		this.chore = new WorkChore<ResetSkillsStation>(Db.Get().ChoreTypes.Train, this, null, true, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
 	protected override void OnStartWork(Worker worker)

@@ -15,7 +15,10 @@ public class PuftBleachstoneConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -PuftTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 75f, name, false, false, true));
-		return BasePuftConfig.SetupDiet(gameObject, SimHashes.ChlorineGas.CreateTag(), SimHashes.BleachStone.CreateTag(), PuftBleachstoneConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, PuftBleachstoneConfig.MIN_POOP_SIZE_IN_KG);
+		gameObject = BasePuftConfig.SetupDiet(gameObject, SimHashes.ChlorineGas.CreateTag(), SimHashes.BleachStone.CreateTag(), PuftBleachstoneConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.GOOD_2, null, 0f, PuftBleachstoneConfig.MIN_POOP_SIZE_IN_KG);
+		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
+		def.lures = new Tag[] { SimHashes.BleachStone.CreateTag() };
+		return gameObject;
 	}
 
 	public GameObject CreatePrefab()
@@ -43,7 +46,7 @@ public class PuftBleachstoneConfig : IEntityConfig
 
 	public const SimHashes EMIT_ELEMENT = SimHashes.BleachStone;
 
-	private static float KG_ORE_EATEN_PER_CYCLE = 10f;
+	private static float KG_ORE_EATEN_PER_CYCLE = 30f;
 
 	private static float CALORIES_PER_KG_OF_ORE = PuftTuning.STANDARD_CALORIES_PER_CYCLE / PuftBleachstoneConfig.KG_ORE_EATEN_PER_CYCLE;
 

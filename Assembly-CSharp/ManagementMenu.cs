@@ -29,14 +29,14 @@ public class ManagementMenu : KIconToggleMenu
 		this.consumablesInfo = new KIconToggleMenu.ToggleInfo(UI.CONSUMABLES, "OverviewUI_consumables_icon", null, global::Action.ManageConsumables, UI.TOOLTIPS.MANAGEMENTMENU_CONSUMABLES, string.Empty);
 		this.vitalsInfo = new KIconToggleMenu.ToggleInfo(UI.VITALS, "OverviewUI_vitals_icon", null, global::Action.ManageVitals, UI.TOOLTIPS.MANAGEMENTMENU_VITALS, string.Empty);
 		this.reportsInfo = new KIconToggleMenu.ToggleInfo(UI.REPORT, "OverviewUI_reports_icon", null, global::Action.ManageReport, UI.TOOLTIPS.MANAGEMENTMENU_DAILYREPORT, string.Empty);
+		this.reportsInfo.prefabOverride = this.smallPrefab;
 		this.researchInfo = new KIconToggleMenu.ToggleInfo(UI.RESEARCH, "OverviewUI_research_nav_icon", null, global::Action.ManageResearch, UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, string.Empty);
-		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_priority_icon", null, global::Action.ManagePeople, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, string.Empty);
-		this.skillsInfo = new KIconToggleMenu.ToggleInfo(UI.SKILLS, "OverviewUI_jobs_icon", null, global::Action.ManageRoles, UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, string.Empty);
-		this.starmapInfo = new KIconToggleMenu.ToggleInfo(UI.STARMAP.MANAGEMENT_BUTTON, "ic_rocket", null, global::Action.ManageStarmap, UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, string.Empty);
-		this.codexInfo = new KIconToggleMenu.ToggleInfo(UI.CODEX.MANAGEMENT_BUTTON, "OverviewUI_database_icon", null, global::Action.ManageCodex, UI.TOOLTIPS.MANAGEMENTMENU_CODEX, string.Empty);
+		this.jobsInfo = new KIconToggleMenu.ToggleInfo(UI.JOBS, "OverviewUI_priority_icon", null, global::Action.ManagePriorities, UI.TOOLTIPS.MANAGEMENTMENU_JOBS, string.Empty);
+		this.skillsInfo = new KIconToggleMenu.ToggleInfo(UI.SKILLS, "OverviewUI_jobs_icon", null, global::Action.ManageSkills, UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, string.Empty);
+		this.starmapInfo = new KIconToggleMenu.ToggleInfo(UI.STARMAP.MANAGEMENT_BUTTON, "OverviewUI_starmap_icon", null, global::Action.ManageStarmap, UI.TOOLTIPS.MANAGEMENTMENU_STARMAP, string.Empty);
+		this.codexInfo = new KIconToggleMenu.ToggleInfo(UI.CODEX.MANAGEMENT_BUTTON, "OverviewUI_database_icon", null, global::Action.ManageDatabase, UI.TOOLTIPS.MANAGEMENTMENU_CODEX, string.Empty);
 		this.codexInfo.prefabOverride = this.smallPrefab;
-		this.scheduleInfo = new KIconToggleMenu.ToggleInfo(UI.SCHEDULE, null, null, global::Action.ManageSchedule, UI.TOOLTIPS.MANAGEMENTMENU_SCHEDULE, string.Empty);
-		this.scheduleInfo.instanceOverride = global::DateTime.Instance.scheduleToggle;
+		this.scheduleInfo = new KIconToggleMenu.ToggleInfo(UI.SCHEDULE, "OverviewUI_schedule2_icon", null, global::Action.ManageSchedule, UI.TOOLTIPS.MANAGEMENTMENU_SCHEDULE, string.Empty);
 		this.ScreenInfoMatch.Add(this.consumablesInfo, new ManagementMenu.ScreenData
 		{
 			screen = this.consumablesScreen,
@@ -85,8 +85,11 @@ public class ManagementMenu : KIconToggleMenu
 			tabIdx = 7,
 			toggleInfo = this.starmapInfo
 		});
-		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.consumablesInfo, this.vitalsInfo, this.reportsInfo, this.researchInfo, this.jobsInfo, this.skillsInfo, this.starmapInfo, this.codexInfo, this.scheduleInfo });
+		base.Setup(new List<KIconToggleMenu.ToggleInfo> { this.vitalsInfo, this.consumablesInfo, this.scheduleInfo, this.jobsInfo, this.skillsInfo, this.researchInfo, this.starmapInfo, this.reportsInfo, this.codexInfo });
 		base.onSelect += this.OnButtonClick;
+		this.PauseMenuButton.onClick += this.OnPauseMenuClicked;
+		this.PauseMenuButton.transform.SetAsLastSibling();
+		this.PauseMenuButton.GetComponent<ToolTip>().toolTip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_PAUSEMENU, global::Action.Escape);
 		Components.ResearchCenters.OnAdd += new Action<ResearchCenter>(this.CheckResearch);
 		Components.ResearchCenters.OnRemove += new Action<ResearchCenter>(this.CheckResearch);
 		Components.RoleStations.OnAdd += new Action<RoleStation>(this.CheckSkills);
@@ -96,7 +99,7 @@ public class ManagementMenu : KIconToggleMenu
 		Components.Telescopes.OnAdd += new Action<Telescope>(this.CheckStarmap);
 		Components.Telescopes.OnRemove += new Action<Telescope>(this.CheckStarmap);
 		this.skillsTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_SKILL_STATION;
-		this.skillsTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, global::Action.ManageRoles);
+		this.skillsTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_SKILLS, global::Action.ManageSkills);
 		this.researchTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_RESEARCH;
 		this.researchTooltip = GameUtil.ReplaceHotkeyString(UI.TOOLTIPS.MANAGEMENTMENU_RESEARCH, global::Action.ManageResearch);
 		this.starmapTooltipDisabled = UI.TOOLTIPS.MANAGEMENTMENU_REQUIRES_TELESCOPE;
@@ -115,6 +118,12 @@ public class ManagementMenu : KIconToggleMenu
 			ktoggle.soundPlayer.toggle_widget_sound_events[0].PlaySound = false;
 			ktoggle.soundPlayer.toggle_widget_sound_events[1].PlaySound = false;
 		}
+	}
+
+	private void OnPauseMenuClicked()
+	{
+		PauseScreen.Instance.Show(true);
+		this.PauseMenuButton.isOn = false;
 	}
 
 	public void AddResearchScreen(ResearchScreen researchScreen)
@@ -427,6 +436,8 @@ public class ManagementMenu : KIconToggleMenu
 	private Dictionary<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData> ScreenInfoMatch = new Dictionary<KIconToggleMenu.ToggleInfo, ManagementMenu.ScreenData>();
 
 	public KButton[] CloseButtons;
+
+	public KToggle PauseMenuButton;
 
 	private string skillsTooltip;
 

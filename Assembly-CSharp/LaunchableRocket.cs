@@ -123,7 +123,7 @@ public class LaunchableRocket : StateMachineComponent<LaunchableRocket.StatesIns
 					}
 				}
 				smi.SetMissionState(Spacecraft.MissionState.Launching);
-			}).ScheduleGoTo(3f, this.not_grounded.launch_loop);
+			}).ScheduleGoTo(5f, this.not_grounded.launch_loop);
 			this.not_grounded.launch_loop.EventTransition(GameHashes.ReturnRocket, this.not_grounded.returning, null).Update(delegate(LaunchableRocket.StatesInstance smi, float dt)
 			{
 				smi.master.isLanding = false;

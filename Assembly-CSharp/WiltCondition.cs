@@ -35,6 +35,7 @@ public class WiltCondition : KMonoBehaviour
 		this.WiltConditions.Add(7, true);
 		this.WiltConditions.Add(9, true);
 		this.WiltConditions.Add(10, true);
+		this.WiltConditions.Add(11, true);
 		base.Subscribe<WiltCondition>(-107174716, WiltCondition.SetTemperatureFalseDelegate);
 		base.Subscribe<WiltCondition>(-1758196852, WiltCondition.SetTemperatureFalseDelegate);
 		base.Subscribe<WiltCondition>(-1234705021, WiltCondition.SetTemperatureFalseDelegate);
@@ -60,6 +61,7 @@ public class WiltCondition : KMonoBehaviour
 		base.Subscribe<WiltCondition>(1628751838, WiltCondition.SetReceptacleTrueDelegate);
 		base.Subscribe<WiltCondition>(960378201, WiltCondition.SetReceptacleFalseDelegate);
 		base.Subscribe<WiltCondition>(-1089732772, WiltCondition.SetEntombedDelegate);
+		base.Subscribe<WiltCondition>(912965142, WiltCondition.SetRootHealthDelegate);
 	}
 
 	protected override void OnSpawn()
@@ -162,21 +164,21 @@ public class WiltCondition : KMonoBehaviour
 	{
 		this.wiltSchedulerHandler.ClearScheduler();
 		KSelectable component = base.GetComponent<KSelectable>();
-		component.GetComponent<KPrefabID>().AddTag(GameTags.Wilting);
+		component.GetComponent<KPrefabID>().AddTag(GameTags.Wilting, false);
 		if (!this.wilting)
 		{
 			this.wilting = true;
 			base.Trigger(-724860998, null);
 		}
-		if (this.growing != null)
+		if (this.rm != null)
 		{
-			if (this.growing.Replanted)
+			if (this.rm.Replanted)
 			{
-				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, base.GetComponent<Growing>());
+				component.AddStatusItem(Db.Get().CreatureStatusItems.WiltingDomestic, base.GetComponent<ReceptacleMonitor>());
 			}
 			else
 			{
-				component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, base.GetComponent<Growing>());
+				component.AddStatusItem(Db.Get().CreatureStatusItems.Wilting, base.GetComponent<ReceptacleMonitor>());
 			}
 		}
 		else
@@ -235,7 +237,7 @@ public class WiltCondition : KMonoBehaviour
 	}
 
 	[MyCmpGet]
-	private Growing growing;
+	private ReceptacleMonitor rm;
 
 	[Serialize]
 	private bool goingToWilt;
@@ -348,6 +350,11 @@ public class WiltCondition : KMonoBehaviour
 		component.SetCondition(WiltCondition.Condition.Entombed, !(bool)data);
 	});
 
+	private static readonly EventSystem.IntraObjectHandler<WiltCondition> SetRootHealthDelegate = new EventSystem.IntraObjectHandler<WiltCondition>(delegate(WiltCondition component, object data)
+	{
+		component.SetCondition(WiltCondition.Condition.UnhealthyRoot, (bool)data);
+	});
+
 	public enum Condition
 	{
 		Temperature,
@@ -361,6 +368,7 @@ public class WiltCondition : KMonoBehaviour
 		Darkness,
 		Receptacle,
 		Entombed,
+		UnhealthyRoot,
 		Count
 	}
 }

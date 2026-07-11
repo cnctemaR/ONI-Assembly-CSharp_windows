@@ -143,9 +143,7 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	{
 		if (this.markedForCapture && this.chore == null)
 		{
-			ChoreType capture = Db.Get().ChoreTypes.Capture;
-			Tag[] array = new Tag[] { GameTags.ChoreTypes.Ranching };
-			this.chore = new WorkChore<Capturable>(capture, this, null, array, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.chore = new WorkChore<Capturable>(Db.Get().ChoreTypes.Capture, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
 		else if (!this.markedForCapture && this.chore != null)
 		{
@@ -157,7 +155,7 @@ public class Capturable : Workable, IGameObjectEffectDescriptor
 	protected override void OnStartWork(Worker worker)
 	{
 		KPrefabID component = base.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Creatures.Stunned);
+		component.AddTag(GameTags.Creatures.Stunned, false);
 	}
 
 	protected override void OnStopWork(Worker worker)

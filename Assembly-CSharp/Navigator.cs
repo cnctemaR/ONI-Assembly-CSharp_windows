@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using STRINGS;
 using UnityEngine;
@@ -15,16 +16,37 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	{
 		byte currentNavType = (byte)this.CurrentNavType;
 		writer.Write(currentNavType);
+		writer.Write(this.distanceTravelledByNavType.Count);
+		foreach (KeyValuePair<NavType, int> keyValuePair in this.distanceTravelledByNavType)
+		{
+			byte key = (byte)keyValuePair.Key;
+			writer.Write(key);
+			writer.Write(keyValuePair.Value);
+		}
 	}
 
 	public void Deserialize(IReader reader)
 	{
 		byte b = reader.ReadByte();
 		NavType navType = (NavType)b;
-		bool flag = false;
-		foreach (NavType navType2 in this.NavGrid.ValidNavTypes)
+		if (!SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 11))
 		{
-			if (navType2 == navType)
+			int num = reader.ReadInt32();
+			for (int i = 0; i < num; i++)
+			{
+				byte b2 = reader.ReadByte();
+				NavType navType2 = (NavType)b2;
+				int num2 = reader.ReadInt32();
+				if (this.distanceTravelledByNavType.ContainsKey(navType2))
+				{
+					this.distanceTravelledByNavType[navType2] = num2;
+				}
+			}
+		}
+		bool flag = false;
+		foreach (NavType navType3 in this.NavGrid.ValidNavTypes)
+		{
+			if (navType3 == navType)
 			{
 				flag = true;
 				break;
@@ -47,6 +69,11 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 		this.NavGrid = Pathfinding.Instance.GetNavGrid(this.NavGridName);
 		PathProber component = base.GetComponent<PathProber>();
 		component.SetValidNavTypes(this.NavGrid.ValidNavTypes, this.maxProbingRadius);
+		this.distanceTravelledByNavType = new Dictionary<NavType, int>();
+		for (int i = 0; i < 10; i++)
+		{
+			this.distanceTravelledByNavType.Add((NavType)i, 0);
+		}
 	}
 
 	protected override void OnSpawn()
@@ -190,6 +217,7 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 			if (this.path.IsValid())
 			{
 				this.BeginTransition(this.NavGrid.transitions[this.path.nodes[1].transitionId]);
+				this.distanceTravelledByNavType[this.CurrentNavType] = Mathf.Max(this.distanceTravelledByNavType[this.CurrentNavType] + 1, this.distanceTravelledByNavType[this.CurrentNavType]);
 			}
 			else if (this.path.HasArrived())
 			{
@@ -504,6 +532,8 @@ public class Navigator : StateMachineComponent<Navigator.StatesInstance>, ISaveL
 	public PathFinder.PotentialPath.Flags flags;
 
 	private LoggerFS log;
+
+	public Dictionary<NavType, int> distanceTravelledByNavType;
 
 	public Grid.SceneLayer sceneLayer = Grid.SceneLayer.Move;
 

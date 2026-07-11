@@ -17,6 +17,7 @@ namespace Database
 			this.Hospital = this.Add("Hospital", string.Empty, new Color(1f, 0.5176471f, 0.5568628f));
 			this.Industrial = this.Add("Industrial", string.Empty, new Color(0.95686275f, 0.77254903f, 0.25882354f));
 			this.Agricultural = this.Add("Agricultural", string.Empty, new Color(0.8039216f, 0.9490196f, 0.28235295f));
+			this.Park = this.Add("Park", string.Empty, new Color(0.6745098f, 1f, 0.7411765f));
 		}
 
 		private RoomTypeCategory Add(string id, string name, Color color)
@@ -41,5 +42,7 @@ namespace Database
 		public RoomTypeCategory Industrial;
 
 		public RoomTypeCategory Agricultural;
+
+		public RoomTypeCategory Park;
 	}
 }

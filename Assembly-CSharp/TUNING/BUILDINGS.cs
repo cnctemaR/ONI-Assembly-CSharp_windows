@@ -59,11 +59,12 @@ namespace TUNING
 				"BunkerTile", "CarpetTile", "Door", "ManualPressureDoor", "PressureDoor", "BunkerDoor", "StorageLocker", "StorageLockerSmart", "LiquidReservoir", "GasReservoir",
 				"ObjectDispenser", "TravelTube", "TravelTubeEntrance", "TravelTubeWallBridge"
 			}),
-			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer" }),
+			new PlanScreen.PlanInfo(new HashedString("Oxygen"), false, new List<string> { "MineralDeoxidizer", "AlgaeHabitat", "AirFilter", "CO2Scrubber", "Electrolyzer", "RustDeoxidizer" }),
 			new PlanScreen.PlanInfo(new HashedString("Power"), false, new List<string>
 			{
 				"ManualGenerator",
 				"Generator",
+				"WoodGasGenerator",
 				"HydrogenGenerator",
 				"MethaneGenerator",
 				"PetroleumGenerator",
@@ -91,8 +92,8 @@ namespace TUNING
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Food"), false, new List<string>
 			{
-				"MicrobeMusher", "CookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder",
-				"FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure"
+				"MicrobeMusher", "CookingStation", "GourmetCookingStation", "PlanterBox", "FarmTile", "HydroponicFarm", "RationBox", "Refrigerator", "CreatureDeliveryPoint", "FishDeliveryPoint",
+				"CreatureFeeder", "FishFeeder", "EggIncubator", "EggCracker", "CreatureTrap", "FishTrap", "AirborneCreatureLure", "FlyingCreatureBait"
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Plumbing"), false, new List<string>
 			{
@@ -140,8 +141,8 @@ namespace TUNING
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Refining"), false, new List<string>
 			{
-				"Compost", "WaterPurifier", "FertilizerMaker", "AlgaeDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge", "OilRefinery", "Polymerizer",
-				"OxyliteRefinery", "SupermaterialRefinery"
+				"Compost", "WaterPurifier", "Desalinator", "FertilizerMaker", "AlgaeDistillery", "EthanolDistillery", "RockCrusher", "Kiln", "MetalRefinery", "GlassForge",
+				"OilRefinery", "Polymerizer", "OxyliteRefinery", "SupermaterialRefinery"
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Medical"), false, new List<string> { "WashBasin", "WashSink", "HandSanitizer", "Apothecary", "DoctorStation", "AdvancedDoctorStation", "MedicalCot", "MassageTable", "Grave" }),
 			new PlanScreen.PlanInfo(new HashedString("Furniture"), false, new List<string>
@@ -169,7 +170,11 @@ namespace TUNING
 				"Canvas",
 				"CanvasWide",
 				"CanvasTall",
-				"ItemPedestal"
+				"ItemPedestal",
+				"MonumentBottom",
+				"MonumentMiddle",
+				"MonumentTop",
+				"ParkSign"
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Equipment"), false, new List<string>
 			{
@@ -185,14 +190,8 @@ namespace TUNING
 			{
 				"LogicWire",
 				"LogicWireBridge",
-				"LogicGateAND",
-				"LogicGateOR",
-				"LogicGateXOR",
-				"LogicGateNOT",
-				"LogicGateBUFFER",
-				"LogicGateFILTER",
-				LogicMemoryConfig.ID,
 				LogicSwitchConfig.ID,
+				"LogicDuplicantSensor",
 				LogicPressureSensorGasConfig.ID,
 				LogicPressureSensorLiquidConfig.ID,
 				LogicTemperatureSensorConfig.ID,
@@ -202,7 +201,14 @@ namespace TUNING
 				LogicCritterCountSensorConfig.ID,
 				"FloorSwitch",
 				"Checkpoint",
-				CometDetectorConfig.ID
+				CometDetectorConfig.ID,
+				"LogicGateNOT",
+				"LogicGateAND",
+				"LogicGateOR",
+				"LogicGateBUFFER",
+				"LogicGateFILTER",
+				"LogicGateXOR",
+				LogicMemoryConfig.ID
 			}),
 			new PlanScreen.PlanInfo(new HashedString("Conveyance"), true, new List<string> { "SolidTransferArm", "SolidConduit", "SolidConduitInbox", "SolidConduitOutbox", "SolidVent", "SolidLogicValve", "SolidConduitBridge", "AutoMiner" }),
 			new PlanScreen.PlanInfo(new HashedString("Rocketry"), true, new List<string>
@@ -216,6 +222,7 @@ namespace TUNING
 		{
 			typeof(BottleEmptier),
 			typeof(CookingStation),
+			typeof(GourmetCookingStation),
 			typeof(RoleStation),
 			typeof(ResearchCenter),
 			typeof(LiquidCooledFan),
@@ -303,6 +310,9 @@ namespace TUNING
 			typeof(Capturable),
 			typeof(Trappable),
 			typeof(SpaceArtifact),
+			typeof(MessStation),
+			typeof(PlantElementEmitter),
+			typeof(Radiator),
 			typeof(DecorProvider)
 		};
 
@@ -475,6 +485,8 @@ namespace TUNING
 			public const float TIER7 = 32f;
 
 			public const float TIER8 = 64f;
+
+			public const float TIER_NUCLEAR = 16384f;
 		}
 
 		public class MELTING_POINT_KELVIN
@@ -609,6 +621,21 @@ namespace TUNING
 					amount = 30,
 					radius = 6
 				};
+
+				public class MONUMENT
+				{
+					public static readonly EffectorValues COMPLETE = new EffectorValues
+					{
+						amount = 40,
+						radius = 10
+					};
+
+					public static readonly EffectorValues INCOMPLETE = new EffectorValues
+					{
+						amount = 10,
+						radius = 5
+					};
+				}
 			}
 
 			public class PENALTY

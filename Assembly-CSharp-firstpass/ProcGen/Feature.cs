@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace ProcGen
 {
+	[Serializable]
 	public class Feature
 	{
 		public Feature()

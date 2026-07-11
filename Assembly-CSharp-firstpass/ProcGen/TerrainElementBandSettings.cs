@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 
 namespace ProcGen
 {
-	public class TerrainElementBandSettings : YamlIO<TerrainElementBandSettings>
+	[Serializable]
+	public class TerrainElementBandSettings
 	{
 		public TerrainElementBandSettings()
 		{

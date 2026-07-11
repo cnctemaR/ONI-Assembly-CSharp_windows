@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using KSerialization.Converters;
 
 namespace ProcGen
 {
-	public class FeatureSettings : YamlIO<FeatureSettings>
+	[Serializable]
+	public class FeatureSettings
 	{
 		public FeatureSettings()
 		{
 			this.ElementChoiceGroups = new Dictionary<string, ElementChoiceGroup<WeightedSimHash>>();
 			this.borders = new List<int>();
-			this.excludeTags = new List<string>();
+			this.tags = new List<string>();
+			this.internalMobs = new List<MobReference>();
 		}
 
 		[StringEnumConverter]
@@ -21,7 +22,13 @@ namespace ProcGen
 
 		public MinMax blobSize { get; private set; }
 
-		public List<string> excludeTags { get; private set; }
+		public string forceBiome { get; private set; }
+
+		public List<string> biomeTags { get; private set; }
+
+		public List<MobReference> internalMobs { get; private set; }
+
+		public List<string> tags { get; private set; }
 
 		public Dictionary<string, ElementChoiceGroup<WeightedSimHash>> ElementChoiceGroups { get; private set; }
 

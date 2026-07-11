@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-internal class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>
+public class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -11,11 +11,18 @@ internal class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, IS
 		string text = CREATURES.STATUSITEMS.FLOPPING.NAME;
 		string text2 = CREATURES.STATUSITEMS.FLOPPING.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
-		this.flop_pre.Enter(new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.State.Callback(FlopStates.ChooseDirection)).GoTo(this.flop_cycle);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
+		this.flop_pre.Enter(new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.State.Callback(FlopStates.ChooseDirection)).Transition(this.flop_cycle, new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Transition.ConditionCallback(FlopStates.ShouldFlop), UpdateRate.SIM_200ms).Transition(this.pst, GameStateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Not(new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Transition.ConditionCallback(FlopStates.ShouldFlop)), UpdateRate.SIM_200ms);
 		this.flop_cycle.PlayAnim("flop_loop", KAnim.PlayMode.Once).Transition(this.pst, new StateMachine<FlopStates, FlopStates.Instance, IStateMachineTarget, FlopStates.Def>.Transition.ConditionCallback(FlopStates.IsSubstantialLiquid), UpdateRate.SIM_200ms).Update("Flop", new Action<FlopStates.Instance, float>(FlopStates.FlopForward), UpdateRate.SIM_33ms, false)
 			.OnAnimQueueComplete(this.flop_pre);
-		this.pst.QueueAnim("idle_loop", true, null).BehaviourComplete(GameTags.Creatures.Flopping, false);
+		this.pst.QueueAnim("flop_loop", true, null).BehaviourComplete(GameTags.Creatures.Flopping, false);
+	}
+
+	public static bool ShouldFlop(FlopStates.Instance smi)
+	{
+		int num = Grid.PosToCell(smi.transform.GetPosition());
+		int num2 = Grid.CellBelow(num);
+		return Grid.IsValidCell(num2) && Grid.Solid[num2];
 	}
 
 	public static void ChooseDirection(FlopStates.Instance smi)
@@ -51,6 +58,10 @@ internal class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, IS
 			{
 				return false;
 			}
+			if (Grid.CritterImpassable[cell])
+			{
+				return false;
+			}
 			int num = Grid.CellBelow(cell);
 			if (Grid.IsValidCell(num) && Grid.Solid[num])
 			{
@@ -74,7 +85,8 @@ internal class FlopStates : GameStateMachine<FlopStates, FlopStates.Instance, IS
 		Vector3 position = smi.transform.GetPosition();
 		Vector3 vector = position;
 		vector.x = position.x + smi.currentDir * dt * 1f;
-		if (!Grid.Solid[Grid.PosToCell(vector)])
+		int num = Grid.PosToCell(vector);
+		if (Grid.IsValidCell(num) && !Grid.Solid[num] && !Grid.CritterImpassable[num])
 		{
 			smi.transform.SetPosition(vector);
 		}

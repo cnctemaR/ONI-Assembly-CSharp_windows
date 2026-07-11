@@ -7,7 +7,7 @@ using UnityEngine;
 public class EatChore : Chore<EatChore.StatesInstance>
 {
 	public EatChore(IStateMachineTarget master)
-		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, null, false, ReportManager.ReportType.PersonalTime)
+		: base(Db.Get().ChoreTypes.Eat, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.PersonalTime)
 	{
 		base.smi = new EatChore.StatesInstance(this);
 		this.showAvailabilityInHoverText = false;
@@ -89,9 +89,19 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			base.smi.sm.messstation.Set(assignable, base.smi);
 		}
 
+		public bool UseSalt()
+		{
+			if (base.smi.sm.messstation != null && base.smi.sm.messstation.Get(base.smi) != null)
+			{
+				MessStation component = base.smi.sm.messstation.Get(base.smi).GetComponent<MessStation>();
+				return component != null && component.HasSalt;
+			}
+			return false;
+		}
+
 		public void CreateLocator()
 		{
-			int num = base.sm.eater.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>().GetCell();
+			int num = base.sm.eater.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>().GetCellQuery();
 			if (num == Grid.InvalidCell)
 			{
 				num = Grid.PosToCell(base.sm.eater.Get<Transform>(base.smi).GetPosition());
@@ -127,6 +137,19 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			}
 		}
 
+		public void ApplySaltEffect()
+		{
+			Storage component = base.sm.messstation.Get(base.smi).gameObject.GetComponent<Storage>();
+			if (component != null && component.Has(TableSaltConfig.ID.ToTag()))
+			{
+				component.ConsumeIgnoringDisease(TableSaltConfig.ID.ToTag(), TableSaltTuning.CONSUMABLE_RATE);
+				Worker component2 = base.sm.eater.Get(base.smi).gameObject.GetComponent<Worker>();
+				Effects component3 = component2.GetComponent<Effects>();
+				component3.Add("MessTableSalt", true);
+				base.sm.messstation.Get(base.smi).gameObject.Trigger(1356255274, null);
+			}
+		}
+
 		private int locatorCell;
 	}
 
@@ -150,6 +173,7 @@ public class EatChore : Chore<EatChore.StatesInstance>
 			{
 				smi.SetZ(this.eater.Get(smi), Grid.GetLayerZ(Grid.SceneLayer.BuildingFront));
 				smi.ApplyRoomEffects();
+				smi.ApplySaltEffect();
 			})
 				.Exit(delegate(EatChore.StatesInstance smi)
 				{

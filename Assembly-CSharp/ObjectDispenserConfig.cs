@@ -62,5 +62,5 @@ public class ObjectDispenserConfig : IBuildingConfig
 
 	public const string ID = "ObjectDispenser";
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(ObjectDispenser.PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_INACTIVE, false) };
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort(ObjectDispenser.PORT_ID, new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.OBJECTDISPENSER.LOGIC_PORT_INACTIVE, false, false) };
 }

@@ -98,7 +98,8 @@ public class SolidConduitFlowVisualizer
 					SolidConduitFlow.Conduit conduit = this.flowManager.GetSOAInfo().GetConduit(j);
 					SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this.flowManager);
 					SolidConduitFlow.ConduitContents initialContents = conduit.GetInitialContents(this.flowManager);
-					if (lastFlowInfo.contents.pickupableHandle.IsValid())
+					bool flag = lastFlowInfo.direction != SolidConduitFlow.FlowDirection.None;
+					if (flag)
 					{
 						int cell2 = conduit.GetCell(this.flowManager);
 						int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell2, lastFlowInfo.direction);
@@ -120,7 +121,7 @@ public class SolidConduitFlowVisualizer
 						float num7 = 0f;
 						if (this.showContents)
 						{
-							if (lastFlowInfo.contents.pickupableHandle.IsValid() != initialContents.pickupableHandle.IsValid())
+							if (flag != initialContents.pickupableHandle.IsValid())
 							{
 								this.movingBallMesh.AddQuad(vector, color, this.tuning.size, 0f, 0f, vector2I6, vector2I7, vector2I8, vector2I9);
 							}
@@ -142,7 +143,7 @@ public class SolidConduitFlowVisualizer
 							this.AddAudioSource(conduit, position);
 						}
 					}
-					if (initialContents.pickupableHandle.IsValid() && !lastFlowInfo.contents.pickupableHandle.IsValid())
+					if (initialContents.pickupableHandle.IsValid() && !flag)
 					{
 						int cell3 = conduit.GetCell(this.flowManager);
 						Vector2I vector2I10 = Grid.CellToXY(cell3);

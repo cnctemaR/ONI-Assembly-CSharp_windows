@@ -4,7 +4,7 @@ using UnityEngine;
 public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 {
 	public MoveToSafetyChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.MoveToSafety, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new MoveToSafetyChore.StatesInstance(this, target.gameObject);
 	}
@@ -16,12 +16,12 @@ public class MoveToSafetyChore : Chore<MoveToSafetyChore.StatesInstance>
 		{
 			base.sm.mover.Set(mover, base.smi);
 			this.sensor = base.sm.mover.Get<Sensors>(base.smi).GetSensor<SafeCellSensor>();
-			this.targetCell = this.sensor.GetCell();
+			this.targetCell = this.sensor.GetSensorCell();
 		}
 
 		public void UpdateTargetCell()
 		{
-			this.targetCell = this.sensor.GetCell();
+			this.targetCell = this.sensor.GetSensorCell();
 		}
 
 		private SafeCellSensor sensor;

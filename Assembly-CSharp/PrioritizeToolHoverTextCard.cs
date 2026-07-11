@@ -39,8 +39,5 @@ public class PrioritizeToolHoverTextCard : HoverTextConfiguration
 		{
 			this.ToolName = Strings.Get(this.ToolNameStringKey).String.ToUpper() + string.Format(UI.TOOLS.FILTER_HOVERCARD_HEADER, Strings.Get("STRINGS.UI.TOOLS.FILTERLAYERS." + lastEnabledFilter).String.ToUpper());
 		}
-		this.lastUpdatedFilter = lastEnabledFilter;
 	}
-
-	private string lastUpdatedFilter;
 }

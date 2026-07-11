@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
@@ -26,7 +27,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		this.meter = new MeterController(base.GetComponent<KBatchedAnimController>(), "meter_target", "meter", Meter.Offset.Infront, Grid.SceneLayer.NoLayer, new string[] { "meter_target", "meter_arrow", "meter_scale" });
 		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), base.gameObject);
 		base.smi.StartSM();
-		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits);
+		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits, true);
 	}
 
 	public KPrefabID GetStoredOutfit()
@@ -46,6 +47,41 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			}
 		}
 		return null;
+	}
+
+	public float GetSuitScore()
+	{
+		float num = -1f;
+		KPrefabID partiallyChargedOutfit = this.GetPartiallyChargedOutfit();
+		if (partiallyChargedOutfit)
+		{
+			num = partiallyChargedOutfit.GetComponent<SuitTank>().PercentFull();
+			JetSuitTank component = partiallyChargedOutfit.GetComponent<JetSuitTank>();
+			if (component && component.PercentFull() < num)
+			{
+				num = component.PercentFull();
+			}
+		}
+		return num;
+	}
+
+	public KPrefabID GetPartiallyChargedOutfit()
+	{
+		KPrefabID storedOutfit = this.GetStoredOutfit();
+		if (!storedOutfit)
+		{
+			return null;
+		}
+		if (storedOutfit.GetComponent<SuitTank>().PercentFull() < global::TUNING.EQUIPMENT.SUITS.MINIMUM_USABLE_SUIT_CHARGE)
+		{
+			return null;
+		}
+		JetSuitTank component = storedOutfit.GetComponent<JetSuitTank>();
+		if (component && component.PercentFull() < global::TUNING.EQUIPMENT.SUITS.MINIMUM_USABLE_SUIT_CHARGE)
+		{
+			return null;
+		}
+		return storedOutfit;
 	}
 
 	public KPrefabID GetFullyChargedOutfit()
@@ -74,7 +110,7 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 		float num = 1f;
 		Tag[] outfitTags = this.OutfitTags;
 		Tag[] array = new Tag[] { GameTags.Assigned };
-		this.fetchChore = new FetchChore(storageFetch, component, num, outfitTags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
+		this.fetchChore = new FetchChore(storageFetch, component, num, outfitTags, null, array, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
 		this.fetchChore.allowMultifetch = false;
 	}
 
@@ -447,11 +483,11 @@ public class SuitLocker : StateMachineComponent<SuitLocker.StatesInstance>
 			if (this.urgentChore == null)
 			{
 				SuitLocker component = base.GetComponent<SuitLocker>();
-				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
+				this.urgentChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitUrgent, this, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
 				this.urgentChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingUrgent, null);
 				this.urgentChore.AddPrecondition(this.HasSuitMarker, component);
 				this.urgentChore.AddPrecondition(this.SuitTypeMatchesLocker, component);
-				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.idle, 5, false, false);
+				this.idleChore = new WorkChore<SuitLocker.ReturnSuitWorkable>(Db.Get().ChoreTypes.ReturnSuitIdle, this, null, true, null, null, null, true, null, false, false, null, false, true, false, PriorityScreen.PriorityClass.idle, 5, false, false);
 				this.idleChore.AddPrecondition(SuitLocker.ReturnSuitWorkable.DoesSuitNeedRechargingIdle, null);
 				this.idleChore.AddPrecondition(this.HasSuitMarker, component);
 				this.idleChore.AddPrecondition(this.SuitTypeMatchesLocker, component);

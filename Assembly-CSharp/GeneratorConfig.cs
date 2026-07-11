@@ -30,9 +30,9 @@ public class GeneratorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		EnergyGenerator energyGenerator = go.AddOrGet<EnergyGenerator>();
-		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon, 1f, 600f, SimHashes.Void, 0f, true);
+		energyGenerator.formula = EnergyGenerator.CreateSimpleFormula(SimHashes.Carbon.CreateTag(), 1f, 600f, SimHashes.CarbonDioxide, 0.02f, false, new CellOffset(1, 2), 383.15f);
 		energyGenerator.meterOffset = Meter.Offset.Behind;
 		energyGenerator.SetSliderValue(50f, 0);
 		energyGenerator.powerDistributionOrder = 9;
@@ -45,13 +45,7 @@ public class GeneratorConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = new Tag("Coal");
 		manualDeliveryKG.capacity = storage.capacityKg;
 		manualDeliveryKG.refillMass = 100f;
-		manualDeliveryKG.choreTags = new Tag[] { GameTags.ChoreTypes.Power };
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.PowerFetch.IdHash;
-		BuildingElementEmitter buildingElementEmitter = go.AddOrGet<BuildingElementEmitter>();
-		buildingElementEmitter.emitRate = 0.02f;
-		buildingElementEmitter.temperature = 310f;
-		buildingElementEmitter.element = SimHashes.CarbonDioxide;
-		buildingElementEmitter.modifierOffset = new Vector2(1f, 2f);
 		Tinkerable.MakePowerTinkerable(go);
 	}
 
@@ -77,4 +71,6 @@ public class GeneratorConfig : IBuildingConfig
 	private const float COAL_BURN_RATE = 1f;
 
 	private const float COAL_CAPACITY = 600f;
+
+	public const float CO2_OUTPUT_TEMPERATURE = 383.15f;
 }

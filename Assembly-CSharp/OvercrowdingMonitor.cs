@@ -8,7 +8,7 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
-		this.root.Update(new Action<OvercrowdingMonitor.Instance, float>(OvercrowdingMonitor.UpdateState), UpdateRate.SIM_1000ms, false);
+		this.root.Update(new Action<OvercrowdingMonitor.Instance, float>(OvercrowdingMonitor.UpdateState), UpdateRate.SIM_1000ms, true);
 		OvercrowdingMonitor.futureOvercrowdedEffect = new Effect("FutureOvercrowded", CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null);
 		OvercrowdingMonitor.futureOvercrowdedEffect.Add(new AttributeModifier(Db.Get().Amounts.Fertility.deltaAttribute.Id, -1f, CREATURES.MODIFIERS.FUTURE_OVERCROWDED.NAME, true, false, true));
 		OvercrowdingMonitor.overcrowdedEffect = new Effect("Overcrowded", CREATURES.MODIFIERS.OVERCROWDED.NAME, CREATURES.MODIFIERS.OVERCROWDED.TOOLTIP, 0f, true, false, true, null, 0f, null);
@@ -116,11 +116,13 @@ public class OvercrowdingMonitor : GameStateMachine<OvercrowdingMonitor, Overcro
 			if (smi.cavity != null)
 			{
 				OvercrowdingMonitor.GetCreatureCollection(smi, smi.cavity).Remove(component);
+				Game.Instance.roomProber.UpdateRoom(smi.cavity);
 			}
 			smi.cavity = cavityForCell;
 			if (smi.cavity != null)
 			{
 				OvercrowdingMonitor.GetCreatureCollection(smi, smi.cavity).Add(component);
+				Game.Instance.roomProber.UpdateRoom(smi.cavity);
 			}
 		}
 	}

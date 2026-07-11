@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class FetchList2 : IFetchList
 {
-	public FetchList2(Storage destination, ChoreType chore_type, Tag[] chore_tags)
+	public FetchList2(Storage destination, ChoreType chore_type)
 	{
 		this.Destination = destination;
 		this.choreType = chore_type;
-		this.choreTags = chore_tags;
 	}
 
 	public bool ShowStatusItem
@@ -74,7 +73,7 @@ public class FetchList2 : IFetchList
 				this.MinimumAmount[tag] = amount;
 			}
 		}
-		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, required_tags, forbidden_tags, this.Destination, amount, operationalRequirementDEPRECATED, this.PriorityMod, this.choreTags);
+		FetchOrder2 fetchOrder = new FetchOrder2(this.choreType, tags, required_tags, forbidden_tags, this.Destination, amount, operationalRequirementDEPRECATED, this.PriorityMod);
 		this.FetchOrders.Add(fetchOrder);
 	}
 
@@ -237,8 +236,6 @@ public class FetchList2 : IFetchList
 	private global::System.Action OnComplete;
 
 	private ChoreType choreType;
-
-	private Tag[] choreTags;
 
 	public Guid waitingForMaterialsHandle = Guid.Empty;
 

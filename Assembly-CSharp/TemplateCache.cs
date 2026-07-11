@@ -9,7 +9,7 @@ public static class TemplateCache
 	public static void Init()
 	{
 		TemplateCache.templates = new Dictionary<string, TemplateContainer>();
-		TemplateCache.baseTemplatePath = Application.streamingAssetsPath + "/templates";
+		TemplateCache.baseTemplatePath = FileSystem.Normalize(Path.Combine(Application.streamingAssetsPath, "templates"));
 	}
 
 	public static void Clear()
@@ -23,14 +23,14 @@ public static class TemplateCache
 		return TemplateCache.baseTemplatePath;
 	}
 
-	public static TemplateContainer GetBaseStartingTemplate()
+	public static TemplateContainer GetStartingBaseTemplate(string startingTemplateName)
 	{
+		DebugUtil.Assert(startingTemplateName != null, "Tried loading a starting template named ", startingTemplateName);
 		if (TemplateCache.baseTemplatePath == null)
 		{
 			TemplateCache.Init();
 		}
-		string text = Path.Combine(TemplateCache.baseTemplatePath, "bases/startingBase.yaml");
-		return YamlIO<TemplateContainer>.LoadFile(text, null);
+		return TemplateCache.GetTemplate(Path.Combine("bases", startingTemplateName));
 	}
 
 	public static TemplateContainer GetTemplate(string templatePath)
@@ -41,8 +41,8 @@ public static class TemplateCache
 		}
 		if (TemplateCache.templates[templatePath] == null)
 		{
-			string text = Path.Combine(TemplateCache.baseTemplatePath, templatePath);
-			TemplateContainer templateContainer = YamlIO<TemplateContainer>.LoadFile(text + ".yaml", null);
+			string text = FileSystem.Normalize(Path.Combine(TemplateCache.baseTemplatePath, templatePath));
+			TemplateContainer templateContainer = YamlIO.LoadFile<TemplateContainer>(text + ".yaml", null, null);
 			if (templateContainer == null)
 			{
 				global::Debug.LogWarning("Missing template [" + text + ".yaml]");
@@ -52,33 +52,40 @@ public static class TemplateCache
 		return TemplateCache.templates[templatePath];
 	}
 
-	public static List<string> CollectBaseTemplateNames(string folder = "bases/")
+	private static void GetAssetPaths(string folder, List<string> paths)
+	{
+		FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(TemplateCache.baseTemplatePath, folder)), "*.yaml", paths);
+	}
+
+	public static List<string> CollectBaseTemplateNames(string folder = "bases")
 	{
 		List<string> list = new List<string>();
-		string text = Path.Combine(TemplateCache.baseTemplatePath, folder);
-		string[] files = Directory.GetFiles(text, "*.yaml");
-		foreach (string text2 in files)
+		ListPool<string, TemplateContainer>.PooledList pooledList = ListPool<string, TemplateContainer>.Allocate();
+		TemplateCache.GetAssetPaths(folder, pooledList);
+		foreach (string text in pooledList)
 		{
-			string text3 = folder + Path.GetFileNameWithoutExtension(text2);
-			list.Add(text3);
-			if (!TemplateCache.templates.ContainsKey(text3))
+			string text2 = FileSystem.Normalize(Path.Combine(folder, Path.GetFileNameWithoutExtension(text)));
+			list.Add(text2);
+			if (!TemplateCache.templates.ContainsKey(text2))
 			{
-				TemplateCache.templates.Add(text3, null);
+				TemplateCache.templates.Add(text2, null);
 			}
 		}
+		pooledList.Recycle();
 		list.Sort((string x, string y) => x.CompareTo(y));
 		return list;
 	}
 
-	public static List<TemplateContainer> CollectBaseTemplateAssets(string folder = "bases/")
+	public static List<TemplateContainer> CollectBaseTemplateAssets(string folder = "bases")
 	{
 		List<TemplateContainer> list = new List<TemplateContainer>();
-		string text = Path.Combine(TemplateCache.baseTemplatePath, folder);
-		string[] files = Directory.GetFiles(text, "*.yaml");
-		foreach (string text2 in files)
+		ListPool<string, TemplateContainer>.PooledList pooledList = ListPool<string, TemplateContainer>.Allocate();
+		TemplateCache.GetAssetPaths(folder, pooledList);
+		foreach (string text in pooledList)
 		{
-			list.Add(YamlIO<TemplateContainer>.LoadFile(text2, null));
+			list.Add(YamlIO.LoadFile<TemplateContainer>(text, null, null));
 		}
+		pooledList.Recycle();
 		list.Sort(delegate(TemplateContainer x, TemplateContainer y)
 		{
 			if (y.priority - x.priority == 0)
@@ -94,5 +101,5 @@ public static class TemplateCache
 
 	private static Dictionary<string, TemplateContainer> templates;
 
-	private const string defaultAssetFolder = "bases/";
+	private const string defaultAssetFolder = "bases";
 }

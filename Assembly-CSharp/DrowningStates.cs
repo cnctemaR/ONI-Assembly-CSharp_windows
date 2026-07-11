@@ -1,31 +1,36 @@
 ﻿using System;
-using UnityEngine;
+using STRINGS;
 
-internal class DrowningStates : GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>
+public class DrowningStates : GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
-		default_state = this.drowning;
-		this.root.ToggleStatusItem(Db.Get().CreatureStatusItems.Drowning, null).TagTransition(GameTags.Creatures.Drowning, null, true);
-		this.drowning.PlayAnim("harvest", KAnim.PlayMode.Loop).ToggleScheduleCallback("IdleMove", (DrowningStates.Instance smi) => (float)global::UnityEngine.Random.Range(1, 3), delegate(DrowningStates.Instance smi)
-		{
-			smi.GoTo(this.escape);
-		});
-		this.escape.Enter(new StateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State.Callback(this.MoveToSafeCell)).EventTransition(GameHashes.DestinationReached, this.drowning, null).EventTransition(GameHashes.NavigationFailed, this.drowning, null);
+		default_state = this.drown;
+		GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State root = this.root;
+		string text = CREATURES.STATUSITEMS.DROWNING.NAME;
+		string text2 = CREATURES.STATUSITEMS.DROWNING.TOOLTIP;
+		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).TagTransition(GameTags.Creatures.Drowning, null, true);
+		this.drown.PlayAnim("drown_pre").QueueAnim("drown_loop", true, null).Transition(this.drown_pst, new StateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.Transition.ConditionCallback(this.UpdateSafeCell), UpdateRate.SIM_1000ms);
+		this.drown_pst.PlayAnim("drown_pst").OnAnimQueueComplete(this.move_to_safe);
+		this.move_to_safe.MoveTo((DrowningStates.Instance smi) => smi.safeCell, null, null, false);
 	}
 
-	public void MoveToSafeCell(DrowningStates.Instance smi)
+	public bool UpdateSafeCell(DrowningStates.Instance smi)
 	{
 		Navigator component = smi.GetComponent<Navigator>();
 		DrowningMonitor component2 = smi.GetComponent<DrowningMonitor>();
 		DrowningStates.EscapeCellQuery escapeCellQuery = new DrowningStates.EscapeCellQuery(component2);
 		component.RunQuery(escapeCellQuery);
-		component.GoTo(escapeCellQuery.GetResultCell(), null);
+		smi.safeCell = escapeCellQuery.GetResultCell();
+		return smi.safeCell != Grid.InvalidCell;
 	}
 
-	public GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State drowning;
+	public GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State drown;
 
-	public GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State escape;
+	public GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State drown_pst;
+
+	public GameStateMachine<DrowningStates, DrowningStates.Instance, IStateMachineTarget, DrowningStates.Def>.State move_to_safe;
 
 	public class Def : StateMachine.BaseDef
 	{
@@ -38,6 +43,8 @@ internal class DrowningStates : GameStateMachine<DrowningStates, DrowningStates.
 		{
 			chore.AddPrecondition(ChorePreconditions.instance.HasTag, GameTags.Creatures.Drowning);
 		}
+
+		public int safeCell = Grid.InvalidCell;
 	}
 
 	public class EscapeCellQuery : PathFinderQuery

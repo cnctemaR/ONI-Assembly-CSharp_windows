@@ -26,7 +26,7 @@ public class ReactionMonitor : GameStateMachine<ReactionMonitor, ReactionMonitor
 			{
 				if (this.reactable.Get(smi).preventChoreInterruption)
 				{
-					smi.GetComponent<KPrefabID>().AddTag(GameTags.PreventChoreInterruption);
+					smi.GetComponent<KPrefabID>().AddTag(GameTags.PreventChoreInterruption, false);
 				}
 			})
 			.Exit("Reactable.RemoveChorePreventionTag", delegate(ReactionMonitor.Instance smi)

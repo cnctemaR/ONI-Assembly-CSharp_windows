@@ -220,6 +220,7 @@ public class ToolTipScreen : KScreen
 				this.anchorRoot.GetComponentInChildren<Image>(true).enabled = false;
 			}
 			this.multiTooltipContainer.transform.localScale = Vector3.zero;
+			this.toolTipIsBlank = true;
 			for (int i = 0; i < this.multiTooltipContainer.transform.childCount; i++)
 			{
 				if (this.multiTooltipContainer.transform.GetChild(i).transform.localScale != Vector3.one)
@@ -228,13 +229,14 @@ public class ToolTipScreen : KScreen
 				}
 				LayoutElement component = this.multiTooltipContainer.transform.GetChild(i).GetComponent<LayoutElement>();
 				TextMeshProUGUI component2 = component.GetComponent<TextMeshProUGUI>();
+				this.toolTipIsBlank = component2.text == string.Empty && this.toolTipIsBlank;
 				if (component.minHeight != component2.preferredHeight)
 				{
 					component.minHeight = component2.preferredHeight;
 				}
 			}
 		}
-		else if (this.multiTooltipContainer.transform.localScale != Vector3.one)
+		else if (this.multiTooltipContainer.transform.localScale != Vector3.one && !this.toolTipIsBlank)
 		{
 			Image componentInChildren2 = this.anchorRoot.GetComponentInChildren<Image>();
 			if (componentInChildren2 != null)
@@ -305,6 +307,8 @@ public class ToolTipScreen : KScreen
 	public GameObject labelPrefab;
 
 	private GameObject multiTooltipContainer;
+
+	private bool toolTipIsBlank;
 
 	private Vector2 ScreenEdgePadding = new Vector2(8f, 8f);
 

@@ -19,11 +19,13 @@ public class ConduitElementSensor : ConduitSensor
 			return;
 		}
 		Element element = ElementLoader.GetElement(tag);
-		if (element == null)
+		bool flag = true;
+		if (element != null)
 		{
-			return;
+			this.desiredElement = element.id;
+			flag = this.desiredElement == SimHashes.Void || this.desiredElement == SimHashes.Vacuum;
 		}
-		this.desiredElement = element.id;
+		base.GetComponent<KSelectable>().ToggleStatusItem(Db.Get().BuildingStatusItems.NoFilterElementSelected, flag, null);
 	}
 
 	protected override void ConduitUpdate(float dt)

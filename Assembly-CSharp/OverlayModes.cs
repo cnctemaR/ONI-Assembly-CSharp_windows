@@ -258,8 +258,8 @@ public abstract class OverlayModes
 				WiltCondition component = h.GetComponent<WiltCondition>();
 				return component != null && component.IsWilting();
 			});
-			array[1] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => new Color(0.9843137f, 0.6901961f, 0.23137255f, 0.75f), (KMonoBehaviour h) => !(h as Harvestable).CanBeHavested);
-			array[2] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => new Color(0.41960785f, 0.827451f, 0.5176471f, 0.75f), (KMonoBehaviour h) => (h as Harvestable).CanBeHavested);
+			array[1] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => new Color(0.9843137f, 0.6901961f, 0.23137255f, 0.75f), (KMonoBehaviour h) => !(h as HarvestDesignatable).CanBeHarvested());
+			array[2] = new OverlayModes.ColorHighlightCondition((KMonoBehaviour h) => new Color(0.41960785f, 0.827451f, 0.5176471f, 0.75f), (KMonoBehaviour h) => (h as HarvestDesignatable).CanBeHarvested());
 			this.highlightConditions = array;
 			base..ctor(OverlayScreen.HarvestableIDs);
 			this.uiRoot = ui_root;
@@ -283,7 +283,7 @@ public abstract class OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			OverlayModes.Mode.RemoveOffscreenTargets<Harvestable>(this.layerTargets, vector2I, vector2I2, null);
+			OverlayModes.Mode.RemoveOffscreenTargets<HarvestDesignatable>(this.layerTargets, vector2I, vector2I2, null);
 			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
 			IEnumerator enumerator = allIntersecting.GetEnumerator();
 			try
@@ -291,8 +291,8 @@ public abstract class OverlayModes
 				while (enumerator.MoveNext())
 				{
 					object obj = enumerator.Current;
-					Harvestable harvestable = (Harvestable)obj;
-					base.AddTargetIfVisible<Harvestable>(harvestable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+					HarvestDesignatable harvestDesignatable = (HarvestDesignatable)obj;
+					base.AddTargetIfVisible<HarvestDesignatable>(harvestDesignatable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 				}
 			}
 			finally
@@ -303,12 +303,12 @@ public abstract class OverlayModes
 					disposable.Dispose();
 				}
 			}
-			foreach (Harvestable harvestable2 in this.layerTargets)
+			foreach (HarvestDesignatable harvestDesignatable2 in this.layerTargets)
 			{
-				Vector2I vector2I3 = Grid.PosToXY(harvestable2.transform.GetPosition());
+				Vector2I vector2I3 = Grid.PosToXY(harvestDesignatable2.transform.GetPosition());
 				if (vector2I <= vector2I3 && vector2I3 <= vector2I2)
 				{
-					this.AddCropUI(harvestable2);
+					this.AddCropUI(harvestDesignatable2);
 				}
 			}
 			foreach (OverlayModes.Crop.UpdateCropInfo updateCropInfo in this.updateCropInfo)
@@ -322,7 +322,7 @@ public abstract class OverlayModes
 					this.harvestableNotificationList[i].SetActive(false);
 				}
 			}
-			base.UpdateHighlightTypeOverlay<Harvestable>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Constant, this.targetLayer);
+			base.UpdateHighlightTypeOverlay<HarvestDesignatable>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Constant, this.targetLayer);
 			base.Update();
 		}
 
@@ -363,7 +363,7 @@ public abstract class OverlayModes
 			return gameObject;
 		}
 
-		private void AddCropUI(Harvestable harvestable)
+		private void AddCropUI(HarvestDesignatable harvestable)
 		{
 			GameObject freeCropUI = this.GetFreeCropUI();
 			OverlayModes.Crop.UpdateCropInfo updateCropInfo = new OverlayModes.Crop.UpdateCropInfo(harvestable, freeCropUI);
@@ -388,13 +388,13 @@ public abstract class OverlayModes
 
 		private struct UpdateCropInfo
 		{
-			public UpdateCropInfo(Harvestable harvestable, GameObject harvestableUI)
+			public UpdateCropInfo(HarvestDesignatable harvestable, GameObject harvestableUI)
 			{
 				this.harvestable = harvestable;
 				this.harvestableUI = harvestableUI;
 			}
 
-			public Harvestable harvestable;
+			public HarvestDesignatable harvestable;
 
 			public GameObject harvestableUI;
 		}
@@ -425,7 +425,7 @@ public abstract class OverlayModes
 			Vector2I vector2I;
 			Vector2I vector2I2;
 			Grid.GetVisibleExtents(out vector2I, out vector2I2);
-			OverlayModes.Mode.RemoveOffscreenTargets<Harvestable>(this.layerTargets, vector2I, vector2I2, null);
+			OverlayModes.Mode.RemoveOffscreenTargets<HarvestDesignatable>(this.layerTargets, vector2I, vector2I2, null);
 			IEnumerable allIntersecting = this.partition.GetAllIntersecting(new Vector2((float)vector2I.x, (float)vector2I.y), new Vector2((float)vector2I2.x, (float)vector2I2.y));
 			IEnumerator enumerator = allIntersecting.GetEnumerator();
 			try
@@ -433,8 +433,8 @@ public abstract class OverlayModes
 				while (enumerator.MoveNext())
 				{
 					object obj = enumerator.Current;
-					Harvestable harvestable = (Harvestable)obj;
-					base.AddTargetIfVisible<Harvestable>(harvestable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
+					HarvestDesignatable harvestDesignatable = (HarvestDesignatable)obj;
+					base.AddTargetIfVisible<HarvestDesignatable>(harvestDesignatable, vector2I, vector2I2, this.layerTargets, this.targetLayer, null, null);
 				}
 			}
 			finally
@@ -445,7 +445,7 @@ public abstract class OverlayModes
 					disposable.Dispose();
 				}
 			}
-			base.UpdateHighlightTypeOverlay<Harvestable>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Constant, this.targetLayer);
+			base.UpdateHighlightTypeOverlay<HarvestDesignatable>(vector2I, vector2I2, this.layerTargets, this.targetIDs, this.highlightConditions, OverlayModes.BringToFrontLayerSetting.Constant, this.targetLayer);
 			base.Update();
 		}
 
@@ -467,7 +467,7 @@ public abstract class OverlayModes
 		public override void Enable()
 		{
 			base.RegisterSaveLoadListeners();
-			this.partition = OverlayModes.Mode.PopulatePartition<Harvestable>(this.targetIDs);
+			this.partition = OverlayModes.Mode.PopulatePartition<HarvestDesignatable>(this.targetIDs);
 			Camera.main.cullingMask |= this.cameraLayerMask;
 			SelectTool.Instance.SetLayerMask(this.selectionMask);
 			DragTool.SetLayerMask(this.selectionMask);
@@ -480,7 +480,7 @@ public abstract class OverlayModes
 			{
 				return;
 			}
-			Harvestable component = item.GetComponent<Harvestable>();
+			HarvestDesignatable component = item.GetComponent<HarvestDesignatable>();
 			if (component == null)
 			{
 				return;
@@ -494,7 +494,7 @@ public abstract class OverlayModes
 			{
 				return;
 			}
-			Harvestable component = item.GetComponent<Harvestable>();
+			HarvestDesignatable component = item.GetComponent<HarvestDesignatable>();
 			if (component == null)
 			{
 				return;
@@ -509,7 +509,7 @@ public abstract class OverlayModes
 		public override void Disable()
 		{
 			base.UnregisterSaveLoadListeners();
-			base.DisableHighlightTypeOverlay<Harvestable>(this.layerTargets);
+			base.DisableHighlightTypeOverlay<HarvestDesignatable>(this.layerTargets);
 			Camera.main.cullingMask &= ~this.cameraLayerMask;
 			this.partition.Clear();
 			this.layerTargets.Clear();
@@ -517,9 +517,9 @@ public abstract class OverlayModes
 			DragTool.ClearLayerMask();
 		}
 
-		protected UniformGrid<Harvestable> partition;
+		protected UniformGrid<HarvestDesignatable> partition;
 
-		protected HashSet<Harvestable> layerTargets = new HashSet<Harvestable>();
+		protected HashSet<HarvestDesignatable> layerTargets = new HashSet<HarvestDesignatable>();
 
 		protected ICollection<Tag> targetIDs;
 
@@ -542,14 +542,32 @@ public abstract class OverlayModes
 				if (dp != null)
 				{
 					int num = Grid.PosToCell(CameraController.Instance.baseCamera.ScreenToWorldPoint(KInputManager.GetMousePos()));
-					float decorForCell = (dp as DecorProvider).GetDecorForCell(num);
-					if (decorForCell > 0f)
+					float num2 = (dp as DecorProvider).GetDecorForCell(num);
+					if (num2 > 0f)
 					{
 						black2 = new Color(0f, 0.8f, 0f, 0.8f);
 					}
-					else if (decorForCell < 0f)
+					else if (num2 < 0f)
 					{
 						black2 = new Color(1f, 0f, 0f, 0.4f);
+					}
+					else if (dp.GetComponent<MonumentPart>() != null && dp.GetComponent<MonumentPart>().IsMonumentCompleted())
+					{
+						List<GameObject> attachedNetwork = AttachableBuilding.GetAttachedNetwork(dp.GetComponent<AttachableBuilding>());
+						foreach (GameObject gameObject in attachedNetwork)
+						{
+							num2 = gameObject.GetComponent<DecorProvider>().GetDecorForCell(num);
+							if (num2 > 0f)
+							{
+								black2 = new Color(0f, 0.8f, 0f, 0.8f);
+								break;
+							}
+							if (num2 < 0f)
+							{
+								black2 = new Color(1f, 0f, 0f, 0.4f);
+								break;
+							}
+						}
 					}
 				}
 				return Color.Lerp(black, black2, 0.85f);
@@ -1625,6 +1643,21 @@ public abstract class OverlayModes
 		public static readonly HashedString ID = "Light";
 	}
 
+	public class Radiation : OverlayModes.Mode
+	{
+		public override HashedString ViewMode()
+		{
+			return OverlayModes.Radiation.ID;
+		}
+
+		public override string GetSoundName()
+		{
+			return "Lights";
+		}
+
+		public static readonly HashedString ID = "Radiation";
+	}
+
 	public class Priorities : OverlayModes.Mode
 	{
 		public override HashedString ViewMode()
@@ -1685,13 +1718,14 @@ public abstract class OverlayModes
 		public override List<LegendEntry> GetCustomLegendData()
 		{
 			List<LegendEntry> list = new List<LegendEntry>();
-			for (int i = 0; i < Db.Get().RoomTypes.Count; i++)
+			List<RoomType> list2 = new List<RoomType>(Db.Get().RoomTypes.resources);
+			list2.Sort((RoomType a, RoomType b) => a.sortKey.CompareTo(b.sortKey));
+			foreach (RoomType roomType in list2)
 			{
-				RoomType roomType = Db.Get().RoomTypes[i];
 				string text = roomType.GetCriteriaString();
 				if (roomType.effects != null && roomType.effects.Length > 0)
 				{
-					text += roomType.GetRoomEffectsString();
+					text = text + "\n\n" + roomType.GetRoomEffectsString();
 				}
 				list.Add(new LegendEntry(roomType.Name + "\n" + roomType.effect, text, roomType.category.color));
 			}
@@ -3249,7 +3283,7 @@ public abstract class OverlayModes
 
 		public override string GetSoundName()
 		{
-			return string.Empty;
+			return "SuitRequired";
 		}
 
 		public override void Enable()
@@ -3398,15 +3432,12 @@ public abstract class OverlayModes
 			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.FARMABLE, this.legendFilters))
 			{
 				Game.Instance.tileOverlayFilters.Add(GameTags.Farmable);
+				Game.Instance.tileOverlayFilters.Add(GameTags.Agriculture);
 			}
 			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.GAS, this.legendFilters))
 			{
 				Game.Instance.tileOverlayFilters.Add(GameTags.Breathable);
 				Game.Instance.tileOverlayFilters.Add(GameTags.Unbreathable);
-			}
-			if (base.InFilter(ToolParameterMenu.FILTERLAYERS.AGRICULTURE, this.legendFilters))
-			{
-				Game.Instance.tileOverlayFilters.Add(GameTags.Agriculture);
 			}
 			base.DisableHighlightTypeOverlay<PrimaryElement>(this.layerTargets);
 			this.layerTargets.Clear();

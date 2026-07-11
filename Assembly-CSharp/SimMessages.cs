@@ -443,7 +443,6 @@ public static class SimMessages
 
 	public unsafe static void Dig(int gameCell, int callbackIdx = -1)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -456,7 +455,6 @@ public static class SimMessages
 
 	public unsafe static void SetInsulation(int gameCell, float value)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -469,7 +467,6 @@ public static class SimMessages
 
 	public unsafe static void SetStrength(int gameCell, int weight, float strengthMultiplier)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -484,7 +481,6 @@ public static class SimMessages
 
 	public unsafe static void SetCellProperties(int gameCell, byte properties)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -498,7 +494,6 @@ public static class SimMessages
 
 	public unsafe static void ClearCellProperties(int gameCell, byte properties)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -512,20 +507,41 @@ public static class SimMessages
 
 	public unsafe static void ModifyCell(int gameCell, int elementIdx, float temperature, float mass, byte disease_idx, int disease_count, SimMessages.ReplaceType replace_type = SimMessages.ReplaceType.None, bool do_vertical_solid_displacement = false, int callbackIdx = -1)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
 		}
-		if (temperature < 0f || 10000f < temperature)
+		Element element = ElementLoader.elements[elementIdx];
+		if (element.maxMass == 0f && mass > element.maxMass)
 		{
-			Debug.LogWarningFormat("Invalid cell modification (temp out of bounds): Cell={0}, EIdx={1}, T={2}, M={3}", new object[] { gameCell, elementIdx, temperature, mass });
-			temperature = ElementLoader.elements[elementIdx].defaultValues.temperature;
+			Debug.LogWarningFormat("Invalid cell modification (mass greater than element maximum): Cell={0}, EIdx={1}, T={2}, M={3}, {4} max mass = {5}", new object[] { gameCell, elementIdx, temperature, mass, element.id, element.maxMass });
+			mass = element.maxMass;
 		}
-		if (temperature == 0f && mass > 0f && elementIdx >= 0)
+		if (temperature < 0f || temperature > 10000f)
 		{
-			Debug.LogWarningFormat("Invalid cell modification (zero temp with non-zero mass): Cell={0}, EIdx={1}, T={2}, M={3}", new object[] { gameCell, elementIdx, temperature, mass });
-			temperature = ElementLoader.elements[elementIdx].defaultValues.temperature;
+			Debug.LogWarningFormat("Invalid cell modification (temp out of bounds): Cell={0}, EIdx={1}, T={2}, M={3}, {4} default temp = {5}", new object[]
+			{
+				gameCell,
+				elementIdx,
+				temperature,
+				mass,
+				element.id,
+				element.defaultValues.temperature
+			});
+			temperature = element.defaultValues.temperature;
+		}
+		if (temperature == 0f && mass > 0f)
+		{
+			Debug.LogWarningFormat("Invalid cell modification (zero temp with non-zero mass): Cell={0}, EIdx={1}, T={2}, M={3}, {4} default temp = {5}", new object[]
+			{
+				gameCell,
+				elementIdx,
+				temperature,
+				mass,
+				element.id,
+				element.defaultValues.temperature
+			});
+			temperature = element.defaultValues.temperature;
 		}
 		SimMessages.ModifyCellMessage* ptr = stackalloc SimMessages.ModifyCellMessage[checked(1 * sizeof(SimMessages.ModifyCellMessage))];
 		ptr->cellIdx = gameCell;
@@ -566,7 +582,6 @@ public static class SimMessages
 
 	public unsafe static void ConsumeMass(int gameCell, SimHashes element, float mass, byte radius, int callbackIdx = -1)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -583,7 +598,6 @@ public static class SimMessages
 
 	public unsafe static void EmitMass(int gameCell, byte element_idx, float mass, float temperature, byte disease_idx, int disease_count, int callbackIdx = -1)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -621,14 +635,15 @@ public static class SimMessages
 
 	public static void AddRemoveSubstance(int gameCell, int elementIdx, CellAddRemoveSubstanceEvent ev, float mass, float temperature, byte disease_idx, int disease_count, bool do_vertical_solid_displacement = true, int callbackIdx = -1)
 	{
-		if (elementIdx != -1)
+		if (elementIdx == -1)
 		{
-			Element element = ElementLoader.elements[elementIdx];
-			float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
-			SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, do_vertical_solid_displacement, callbackIdx);
-			if (ev != null)
-			{
-			}
+			return;
+		}
+		Element element = ElementLoader.elements[elementIdx];
+		float num = ((temperature == -1f) ? element.defaultValues.temperature : temperature);
+		SimMessages.ModifyCell(gameCell, elementIdx, num, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, do_vertical_solid_displacement, callbackIdx);
+		if (ev != null)
+		{
 		}
 	}
 
@@ -662,7 +677,6 @@ public static class SimMessages
 
 	public unsafe static void ModifyEnergy(int gameCell, float kilojoules, float max_temperature, SimMessages.EnergySourceID id)
 	{
-		Debug.Assert(Grid.IsValidCell(gameCell));
 		if (!Grid.IsValidCell(gameCell))
 		{
 			return;
@@ -696,7 +710,6 @@ public static class SimMessages
 		}
 		else
 		{
-			Debug.Assert(mass < 0f);
 			SimMessages.ModifyCell(gameCell, 0, temperature, mass, disease_idx, disease_count, SimMessages.ReplaceType.None, false, -1);
 		}
 	}

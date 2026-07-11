@@ -1,5 +1,6 @@
 ﻿using System;
 
+[Serializable]
 public class Gradient<T>
 {
 	public Gradient(T content, float bandSize)

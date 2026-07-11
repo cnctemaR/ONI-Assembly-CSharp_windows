@@ -2,6 +2,7 @@
 
 namespace ProcGen
 {
+	[Serializable]
 	public class WeightedSimHash : IWeighted
 	{
 		public WeightedSimHash()

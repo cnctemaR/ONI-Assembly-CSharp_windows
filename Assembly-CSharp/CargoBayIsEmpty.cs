@@ -14,17 +14,17 @@ public class CargoBayIsEmpty : RocketLaunchCondition
 		return null;
 	}
 
-	public override bool EvaluateLaunchCondition()
+	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
 	{
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.commandModule.GetComponent<AttachableBuilding>()))
 		{
 			CargoBay component = gameObject.GetComponent<CargoBay>();
 			if (component != null && component.storage.MassStored() != 0f)
 			{
-				return false;
+				return RocketLaunchCondition.LaunchStatus.Failure;
 			}
 		}
-		return true;
+		return RocketLaunchCondition.LaunchStatus.Ready;
 	}
 
 	public override string GetLaunchStatusMessage(bool ready)

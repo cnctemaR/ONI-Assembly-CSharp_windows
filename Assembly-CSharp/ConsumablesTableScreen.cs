@@ -178,9 +178,6 @@ public class ConsumablesTableScreen : TableScreen
 			MinionIdentity minionIdentity = minion as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minionIdentity.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.QUALITYOFLIFE_EXPECTATIONS_TOOLTIP, Db.Get().Attributes.QualityOfLifeExpectation.Lookup(minionIdentity).GetFormattedValue()), null);
-				tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
 				tooltip.AddMultiStringTooltip(Db.Get().Attributes.QualityOfLife.Lookup(minionIdentity).GetAttributeValueTooltip(), null);
 			}
 			break;
@@ -427,6 +424,7 @@ public class ConsumablesTableScreen : TableScreen
 			{
 				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_AVAILABLE, GameUtil.GetFormattedCalories(WorldInventory.Instance.GetAmount(consumableInfoTableColumn.consumable_info.ConsumableId.ToTag()) * foodInfo.CaloriesPerUnit, GameUtil.TimeSlice.None, true)), null);
 				tooltip.AddMultiStringTooltip(string.Format(UI.CONSUMABLESSCREEN.FOOD_QUALITY, GameUtil.AddPositiveSign(num.ToString(), num > 0)), null);
+				tooltip.AddMultiStringTooltip("\n" + foodInfo.Description, null);
 			}
 			else
 			{
@@ -522,7 +520,7 @@ public class ConsumablesTableScreen : TableScreen
 			Image image = widget_go.GetComponent<HierarchyReferences>().GetReference("PortraitImage") as Image;
 			if (component2.AnimFiles.Length > 0)
 			{
-				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui", false);
+				Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component2.AnimFiles[0], "ui", false, string.Empty);
 				image.sprite = uispriteFromMultiObjectAnim;
 			}
 			image.color = Color.white;

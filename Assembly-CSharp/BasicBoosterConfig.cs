@@ -23,7 +23,7 @@ public class BasicBoosterConfig : IEntityConfig
 		{
 			time = 50f,
 			description = ITEMS.PILLS.BASICBOOSTER.RECIPEDESC,
-			useResultAsDescription = true,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "Apothecary" },
 			sortOrder = 1
 		};

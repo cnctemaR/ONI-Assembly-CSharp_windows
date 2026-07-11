@@ -671,6 +671,26 @@ namespace VoronoiTree
 			}
 		}
 
+		public void GetNodesWithoutTag(Tag tag, List<Node> nodes)
+		{
+			if (this.children.Count == 0 && !this.tags.Contains(tag))
+			{
+				nodes.Add(this);
+				return;
+			}
+			for (int i = 0; i < this.children.Count; i++)
+			{
+				if (this.children[i].type == Node.NodeType.Internal)
+				{
+					((Tree)this.children[i]).GetNodesWithoutTag(tag, nodes);
+				}
+				else if (!this.children[i].tags.Contains(tag))
+				{
+					nodes.Add(this.children[i]);
+				}
+			}
+		}
+
 		protected List<Node> children;
 
 		public bool dontRelaxChildren;

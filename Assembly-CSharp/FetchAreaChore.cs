@@ -12,7 +12,7 @@ public class FetchAreaChore : Chore<FetchAreaChore.StatesInstance>
 		bool flag = false;
 		PriorityScreen.PriorityClass priority_class = context.masterPriority.priority_class;
 		int priority_value = context.masterPriority.priority_value;
-		base..ctor(choreType, consumer, choreProvider, flag, null, null, null, priority_class, priority_value, false, true, 0, null, false, ReportManager.ReportType.WorkTime);
+		base..ctor(choreType, consumer, choreProvider, flag, null, null, null, priority_class, priority_value, false, true, 0, false, ReportManager.ReportType.WorkTime);
 		this.showAvailabilityInHoverText = false;
 		base.smi = new FetchAreaChore.StatesInstance(this, context);
 	}

@@ -64,7 +64,7 @@ public class DoorConfig : IBuildingConfig
 
 	public const string ID = "Door";
 
-	public static readonly LogicPorts.Port[] INPUT_PORTS_0_0 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Door.OPEN_CLOSE_PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_INACTIVE, false) };
+	public static readonly LogicPorts.Port[] INPUT_PORTS_0_0 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Door.OPEN_CLOSE_PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_INACTIVE, false, false) };
 
-	public static readonly LogicPorts.Port[] INPUT_PORTS_N1_0 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Door.OPEN_CLOSE_PORT_ID, new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_INACTIVE, false) };
+	public static readonly LogicPorts.Port[] INPUT_PORTS_N1_0 = new LogicPorts.Port[] { LogicPorts.Port.InputPort(Door.OPEN_CLOSE_PORT_ID, new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.DOOR.LOGIC_OPEN_INACTIVE, false, false) };
 }

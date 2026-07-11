@@ -206,7 +206,7 @@ public class TravelTubeEntrance : StateMachineComponent<TravelTubeEntrance.SMIns
 	private void OnOperationalChanged(object data)
 	{
 		bool flag = (bool)data;
-		Grid.ActivateTubeEntrance(Grid.PosToCell(this), flag);
+		Grid.SetTubeEntranceOperational(Grid.PosToCell(this), flag);
 		this.UpdateActive();
 	}
 

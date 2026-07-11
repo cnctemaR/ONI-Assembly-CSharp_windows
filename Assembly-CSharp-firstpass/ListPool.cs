@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public static class ListPool<ObjectType, PoolIdentifier>
 {
@@ -28,6 +29,7 @@ public static class ListPool<ObjectType, PoolIdentifier>
 
 	private static ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier> pool = new ContainerPool<ListPool<ObjectType, PoolIdentifier>.PooledList, PoolIdentifier>();
 
+	[DebuggerDisplay("Count={Count}")]
 	public class PooledList : List<ObjectType>
 	{
 		public void Recycle()

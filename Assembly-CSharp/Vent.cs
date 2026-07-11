@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using KSerialization;
 using STRINGS;
 using UnityEngine;
 
@@ -15,6 +16,26 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 		{
 			this.sortKey = value;
 		}
+	}
+
+	public void UpdateVentedMass(SimHashes element, float mass)
+	{
+		if (!this.lifeTimeVentMass.ContainsKey(element))
+		{
+			this.lifeTimeVentMass.Add(element, mass);
+			return;
+		}
+		Dictionary<SimHashes, float> dictionary;
+		(dictionary = this.lifeTimeVentMass)[element] = dictionary[element] + mass;
+	}
+
+	public float GetVentedMass(SimHashes element)
+	{
+		if (this.lifeTimeVentMass.ContainsKey(element))
+		{
+			return this.lifeTimeVentMass[element];
+		}
+		return 0f;
 	}
 
 	protected override void OnSpawn()
@@ -85,6 +106,9 @@ public class Vent : KMonoBehaviour, IEffectDescriptor
 	private int cell = -1;
 
 	private int sortKey;
+
+	[Serialize]
+	public Dictionary<SimHashes, float> lifeTimeVentMass = new Dictionary<SimHashes, float>();
 
 	private Vent.StatesInstance smi;
 

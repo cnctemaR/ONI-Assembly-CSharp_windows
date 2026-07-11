@@ -108,20 +108,6 @@ public class DebugBaseTemplateButton : KScreen
 	{
 	}
 
-	private void OnClickPasteStartingBase()
-	{
-		DebugTool.Instance.DeactivateTool(null);
-		this.pasteAndSelectAsset = null;
-		this.pasteAndSelectAsset = TemplateCache.GetBaseStartingTemplate();
-		if (this.pasteAndSelectAsset == null)
-		{
-			return;
-		}
-		this.ClearSelection();
-		StampTool.Instance.Activate(this.pasteAndSelectAsset, true, false);
-		this.nameField.text = this.pasteAndSelectAsset.name;
-	}
-
 	private void OnClickDestroySelection()
 	{
 		DebugTool.Instance.Activate(DebugTool.Type.Destroy);

@@ -4,7 +4,7 @@ using UnityEngine;
 public class DropUnusedInventoryChore : Chore<DropUnusedInventoryChore.StatesInstance>
 {
 	public DropUnusedInventoryChore(ChoreType chore_type, IStateMachineTarget target)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), true, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new DropUnusedInventoryChore.StatesInstance(this);
 	}

@@ -34,7 +34,7 @@ public class AccessControl : KMonoBehaviour, ISaveLoadable
 		base.OnPrefabInit();
 		if (AccessControl.accessControlActive == null)
 		{
-			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 63486);
+			AccessControl.accessControlActive = new StatusItem("accessControlActive", BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.NAME, BUILDING.STATUSITEMS.ACCESS_CONTROL.ACTIVE.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 		}
 		base.Subscribe<AccessControl>(279163026, AccessControl.OnControlStateChangedDelegate);
 		base.Subscribe<AccessControl>(-905833192, AccessControl.OnCopySettingsDelegate);

@@ -144,11 +144,11 @@ public class EventSystem
 		}
 	}
 
-	public void Subscribe(GameObject target, int eventName, Action<object> handler)
+	public int Subscribe(GameObject target, int eventName, Action<object> handler)
 	{
 		this.RegisterEvent(target, eventName, handler);
 		KObject orCreateObject = KObjectManager.Instance.GetOrCreateObject(target);
-		orCreateObject.GetEventSystem().Subscribe(eventName, handler);
+		return orCreateObject.GetEventSystem().Subscribe(eventName, handler);
 	}
 
 	public int Subscribe<ComponentType>(int eventName, EventSystem.IntraObjectHandler<ComponentType> handler)

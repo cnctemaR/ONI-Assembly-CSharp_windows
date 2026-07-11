@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Klei
 {
-	public class GenericGameSettings : YamlIO<GenericGameSettings>
+	public class GenericGameSettings
 	{
 		public GenericGameSettings()
 		{
@@ -26,7 +26,7 @@ namespace Klei
 				{
 					try
 					{
-						YamlIO<GenericGameSettings>.LoadFile(GenericGameSettings.Path, null);
+						GenericGameSettings._instance = YamlIO.LoadFile<GenericGameSettings>(GenericGameSettings.Path, null, null);
 					}
 					catch
 					{
@@ -83,7 +83,7 @@ namespace Klei
 		{
 			try
 			{
-				base.Save(GenericGameSettings.Path, null);
+				YamlIO.Save<GenericGameSettings>(this, GenericGameSettings.Path, null);
 			}
 			catch (Exception ex)
 			{
@@ -93,7 +93,7 @@ namespace Klei
 
 		private static GenericGameSettings _instance;
 
-		public class PerformanceCapture : YamlIO<GenericGameSettings.PerformanceCapture>
+		public class PerformanceCapture
 		{
 			public string saveGame { get; set; }
 

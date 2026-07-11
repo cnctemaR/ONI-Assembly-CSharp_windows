@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 internal class TaskDivision<Task, SharedData> where Task : DivisibleTask<SharedData>, new()
 {
@@ -13,7 +12,7 @@ internal class TaskDivision<Task, SharedData> where Task : DivisibleTask<SharedD
 	}
 
 	public TaskDivision()
-		: this(SystemInfo.processorCount)
+		: this(CPUBudget.coreCount)
 	{
 	}
 

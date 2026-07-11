@@ -169,16 +169,8 @@ public class JobsTableScreen : TableScreen
 					text = text.Replace("{Attribute}", choreGroup.attribute.Name);
 					AttributeInstance attributeInstance = minionIdentity.GetAttributes().Get(choreGroup.attribute);
 					float totalValue = attributeInstance.GetTotalValue();
-					TextStyleSetting textStyleSetting = this.TooltipTextStyle_Ability;
-					if (totalValue > 0f)
-					{
-						textStyleSetting = this.TooltipTextStyle_AbilityPositiveModifier;
-					}
-					else if (totalValue < 0f)
-					{
-						textStyleSetting = this.TooltipTextStyle_AbilityNegativeModifier;
-					}
-					text += GameUtil.ColourizeString(textStyleSetting.textColor, totalValue.ToString());
+					TextStyleSetting tooltipTextStyle_Ability = this.TooltipTextStyle_Ability;
+					text += GameUtil.ColourizeString(tooltipTextStyle_Ability.textColor, totalValue.ToString());
 					componentInChildren.AddMultiStringTooltip(text, null);
 				}
 				componentInChildren.AddMultiStringTooltip(UI.HORIZONTAL_RULE + "\n" + this.GetUsageString(), null);
@@ -609,7 +601,7 @@ public class JobsTableScreen : TableScreen
 		float num3 = 0f;
 		HorizontalLayoutGroup component3 = this.header_row.GetComponent<HorizontalLayoutGroup>();
 		component3.spacing = num3;
-		component3.childAlignment = TextAnchor.UpperLeft;
+		component3.childAlignment = TextAnchor.MiddleLeft;
 		foreach (TableRow tableRow in this.rows)
 		{
 			tableRow.transform.GetComponentInChildren<HorizontalLayoutGroup>().spacing = num3;

@@ -378,7 +378,7 @@ public class MusicManager : KMonoBehaviour, ISerializationCallbackReceiver
 			text2 = text2 + keyValuePair.Key + ", ";
 			global::Debug.Log(text2);
 		}
-		KCrashReporter.Assert(false, "Song failed to play: " + nextDynamicSong);
+		DebugUtil.DevAssert(false, "Song failed to play: " + nextDynamicSong);
 	}
 
 	public void StopDynamicMusic(bool stopImmediate = false)

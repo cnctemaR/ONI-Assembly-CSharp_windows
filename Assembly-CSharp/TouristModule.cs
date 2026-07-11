@@ -100,7 +100,7 @@ public class TouristModule : StateMachineComponent<TouristModule.StatesInstance>
 	{
 		ChoreType astronaut = Db.Get().ChoreTypes.Astronaut;
 		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
-		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
+		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
 		return workChore;
 	}

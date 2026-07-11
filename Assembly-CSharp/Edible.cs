@@ -64,7 +64,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 			}
 			this.foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.FoodID);
 		}
-		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible);
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Edible, false);
 		base.Subscribe<Edible>(748399584, Edible.OnCraftDelegate);
 		base.Subscribe<Edible>(1272413801, Edible.OnCraftDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Eating;
@@ -80,22 +80,26 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	public override HashedString[] GetWorkAnims(Worker worker)
 	{
+		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
+		bool flag = smi != null && smi.UseSalt();
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (component != null && component.CurrentHat != null)
 		{
-			return Edible.hatWorkAnims;
+			return (!flag) ? Edible.hatWorkAnims : Edible.saltHatWorkAnims;
 		}
-		return Edible.normalWorkAnims;
+		return (!flag) ? Edible.normalWorkAnims : Edible.saltWorkAnims;
 	}
 
 	public override HashedString GetWorkPstAnim(Worker worker, bool successfully_completed)
 	{
+		EatChore.StatesInstance smi = worker.GetSMI<EatChore.StatesInstance>();
+		bool flag = smi != null && smi.UseSalt();
 		MinionResume component = worker.GetComponent<MinionResume>();
 		if (component != null && component.CurrentHat != null)
 		{
-			return Edible.hatWorkPstAnim;
+			return (!flag) ? Edible.hatWorkPstAnim : Edible.saltHatWorkPstAnim;
 		}
-		return Edible.normalWorkPstAnim;
+		return (!flag) ? Edible.normalWorkPstAnim : Edible.saltWorkPstAnim;
 	}
 
 	private void OnCraft(object data)
@@ -122,7 +126,7 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 		base.SetWorkTime(this.GetFeedingTime(worker));
 		worker.GetAttributes().Add(this.caloriesModifier);
 		KPrefabID component = worker.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.AlwaysConverse);
+		component.AddTag(GameTags.AlwaysConverse, false);
 		this.StartConsuming();
 	}
 
@@ -249,9 +253,17 @@ public class Edible : Workable, IGameObjectEffectDescriptor
 
 	private static readonly HashedString[] hatWorkAnims = new HashedString[] { "hat_pre", "working_loop" };
 
+	private static readonly HashedString[] saltWorkAnims = new HashedString[] { "salt_pre", "salt_loop" };
+
+	private static readonly HashedString[] saltHatWorkAnims = new HashedString[] { "salt_hat_pre", "salt_hat_loop" };
+
 	private static readonly HashedString normalWorkPstAnim = "working_pst";
 
 	private static readonly HashedString hatWorkPstAnim = "hat_pst";
+
+	private static readonly HashedString saltWorkPstAnim = "salt_pst";
+
+	private static readonly HashedString saltHatWorkPstAnim = "salt_hat_pst";
 
 	private static Dictionary<int, string> qualityEffects = new Dictionary<int, string>
 	{

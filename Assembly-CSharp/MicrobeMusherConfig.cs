@@ -19,7 +19,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER3;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2, tier2, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, MicrobeMusherConfig.DECOR, tier2, 0.2f);
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 240f;
 		buildingDef.ExhaustKilowattsWhenActive = 0.5f;
@@ -64,7 +64,7 @@ public class MicrobeMusherConfig : IBuildingConfig
 		{
 			time = 40f,
 			description = ITEMS.FOOD.MUSHBAR.RECIPEDESC,
-			useResultAsDescription = true,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 1
 		};
@@ -82,25 +82,43 @@ public class MicrobeMusherConfig : IBuildingConfig
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.BASICPLANTBAR.RECIPEDESC,
-			useResultAsDescription = true,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 2
 		};
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("ColdWheatSeed", 5f),
-			new ComplexRecipe.RecipeElement(PrickleFruitConfig.ID, 1f)
+			new ComplexRecipe.RecipeElement("BeanPlantSeed", 6f),
+			new ComplexRecipe.RecipeElement("Water".ToTag(), 50f)
 		};
 		ComplexRecipe.RecipeElement[] array6 = new ComplexRecipe.RecipeElement[]
 		{
-			new ComplexRecipe.RecipeElement("FruitCake".ToTag(), 1f)
+			new ComplexRecipe.RecipeElement("Tofu".ToTag(), 1f)
 		};
 		string text3 = ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array5, array6);
-		FruitCakeConfig.recipe = new ComplexRecipe(text3, array5, array6)
+		TofuConfig.recipe = new ComplexRecipe(text3, array5, array6)
+		{
+			time = FOOD.RECIPES.STANDARD_COOK_TIME,
+			description = ITEMS.FOOD.TOFU.RECIPEDESC,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
+			fabricators = new List<Tag> { "MicrobeMusher" },
+			sortOrder = 3
+		};
+		ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("ColdWheatSeed", 5f),
+			new ComplexRecipe.RecipeElement(PrickleFruitConfig.ID, 1f)
+		};
+		ComplexRecipe.RecipeElement[] array8 = new ComplexRecipe.RecipeElement[]
+		{
+			new ComplexRecipe.RecipeElement("FruitCake".ToTag(), 1f)
+		};
+		string text4 = ComplexRecipeManager.MakeRecipeID("MicrobeMusher", array7, array8);
+		FruitCakeConfig.recipe = new ComplexRecipe(text4, array7, array8)
 		{
 			time = FOOD.RECIPES.STANDARD_COOK_TIME,
 			description = ITEMS.FOOD.FRUITCAKE.RECIPEDESC,
-			useResultAsDescription = true,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "MicrobeMusher" },
 			sortOrder = 3
 		};
@@ -111,4 +129,6 @@ public class MicrobeMusherConfig : IBuildingConfig
 	}
 
 	public const string ID = "MicrobeMusher";
+
+	public static EffectorValues DECOR = global::TUNING.BUILDINGS.DECOR.PENALTY.TIER2;
 }

@@ -58,14 +58,68 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 		return num;
 	}
 
+	public float CountRationsByFoodType(string foodID, bool excludeUnreachable = true)
+	{
+		float num = 0f;
+		List<Pickupable> pickupables = WorldInventory.Instance.GetPickupables(GameTags.Edible);
+		if (pickupables != null)
+		{
+			foreach (Pickupable pickupable in pickupables)
+			{
+				if (!pickupable.KPrefabID.HasTag(GameTags.StoredPrivate))
+				{
+					Edible component = pickupable.GetComponent<Edible>();
+					if (component.FoodID == foodID)
+					{
+						num += component.Calories;
+					}
+				}
+			}
+		}
+		return num;
+	}
+
 	public void RegisterCaloriesProduced(float calories)
 	{
 		this.currentFrame.caloriesProduced = this.currentFrame.caloriesProduced + calories;
 	}
 
-	public void RegisterRationsConsumed(float calories)
+	public void RegisterRationsConsumed(Edible edible)
 	{
-		this.currentFrame.caloriesConsumed = this.currentFrame.caloriesConsumed + calories;
+		this.currentFrame.caloriesConsumed = this.currentFrame.caloriesConsumed + edible.caloriesConsumed;
+		if (!this.caloriesConsumedByFood.ContainsKey(edible.FoodInfo.Id))
+		{
+			this.caloriesConsumedByFood.Add(edible.FoodInfo.Id, edible.caloriesConsumed);
+		}
+		else
+		{
+			Dictionary<string, float> dictionary;
+			string id;
+			(dictionary = this.caloriesConsumedByFood)[id = edible.FoodInfo.Id] = dictionary[id] + edible.caloriesConsumed;
+		}
+	}
+
+	public float GetCaloiresConsumedByFood(List<string> foodTypes)
+	{
+		float num = 0f;
+		foreach (string text in foodTypes)
+		{
+			if (this.caloriesConsumedByFood.ContainsKey(text))
+			{
+				num += this.caloriesConsumedByFood[text];
+			}
+		}
+		return num;
+	}
+
+	public float GetCaloriesConsumed()
+	{
+		float num = 0f;
+		foreach (KeyValuePair<string, float> keyValuePair in this.caloriesConsumedByFood)
+		{
+			num += keyValuePair.Value;
+		}
+		return num;
 	}
 
 	private static RationTracker instance;
@@ -75,6 +129,9 @@ public class RationTracker : KMonoBehaviour, ISaveLoadable
 
 	[Serialize]
 	public RationTracker.Frame previousFrame = default(RationTracker.Frame);
+
+	[Serialize]
+	public Dictionary<string, float> caloriesConsumedByFood = new Dictionary<string, float>();
 
 	private static readonly EventSystem.IntraObjectHandler<RationTracker> OnNewDayDelegate = new EventSystem.IntraObjectHandler<RationTracker>(delegate(RationTracker component, object data)
 	{

@@ -28,7 +28,7 @@ public class PrickleFlowerConfig : IEntityConfig
 			SimHashes.CarbonDioxide
 		};
 		text4 = PrickleFruitConfig.ID;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, array, true, 0f, 0.15f, text4, true, true);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, array, true, 0f, 0.15f, text4, true, true, true, true, 2400f);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

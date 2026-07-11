@@ -3,7 +3,7 @@ using Klei;
 using STRINGS;
 using UnityEngine;
 
-internal class LayEggStates : GameStateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>
+public class LayEggStates : GameStateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -12,7 +12,7 @@ internal class LayEggStates : GameStateMachine<LayEggStates, LayEggStates.Instan
 		string text = CREATURES.STATUSITEMS.LAYINGANEGG.NAME;
 		string text2 = CREATURES.STATUSITEMS.LAYINGANEGG.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
 		this.layeggpre.Enter(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.LayEgg)).Exit(new StateMachine<LayEggStates, LayEggStates.Instance, IStateMachineTarget, LayEggStates.Def>.State.Callback(LayEggStates.ShowEgg)).PlayAnim("lay_egg_pre")
 			.OnAnimQueueComplete(this.layeggpst);
 		this.layeggpst.PlayAnim("lay_egg_pst").OnAnimQueueComplete(this.moveaside);

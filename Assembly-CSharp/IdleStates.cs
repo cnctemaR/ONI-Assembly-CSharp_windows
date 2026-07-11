@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>
+public class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -14,7 +14,7 @@ internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IS
 		string text = CREATURES.STATUSITEMS.IDLE.NAME;
 		string text2 = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).ToggleTag(GameTags.Idle);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).ToggleTag(GameTags.Idle);
 		this.loop.Enter(new StateMachine<IdleStates, IdleStates.Instance, IStateMachineTarget, IdleStates.Def>.State.Callback(this.PlayIdle)).ToggleScheduleCallback("IdleMove", (IdleStates.Instance smi) => (float)global::UnityEngine.Random.Range(3, 10), delegate(IdleStates.Instance smi)
 		{
 			smi.GoTo(this.move);
@@ -26,6 +26,7 @@ internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IS
 	{
 		Navigator component = smi.GetComponent<Navigator>();
 		IdleStates.MoveCellQuery moveCellQuery = new IdleStates.MoveCellQuery(component.CurrentNavType);
+		moveCellQuery.allowLiquid = smi.gameObject.HasTag(GameTags.Amphibious);
 		component.RunQuery(moveCellQuery);
 		component.GoTo(moveCellQuery.GetResultCell(), null);
 	}
@@ -85,18 +86,27 @@ internal class IdleStates : GameStateMachine<IdleStates, IdleStates.Instance, IS
 			this.maxIterations = global::UnityEngine.Random.Range(5, 25);
 		}
 
+		public bool allowLiquid { get; set; }
+
 		public override bool IsMatch(int cell, int parent_cell, int cost)
 		{
 			if (!Grid.IsValidCell(cell))
 			{
 				return false;
 			}
-			if (Grid.IsSubstantialLiquid(cell, 0.35f) == (this.navType == NavType.Swim))
+			bool flag = this.navType != NavType.Swim;
+			bool flag2 = this.navType == NavType.Swim || this.allowLiquid;
+			bool flag3 = Grid.IsSubstantialLiquid(cell, 0.35f);
+			if (flag3 && !flag2)
 			{
-				this.targetCell = cell;
-				return --this.maxIterations <= 0;
+				return false;
 			}
-			return false;
+			if (!flag3 && !flag)
+			{
+				return false;
+			}
+			this.targetCell = cell;
+			return --this.maxIterations <= 0;
 		}
 
 		public override int GetResultCell()

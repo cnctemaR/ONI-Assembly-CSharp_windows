@@ -11,6 +11,11 @@ namespace Rendering
 			this.forceRebuild = false;
 		}
 
+		public static BlockTileRenderer.RenderInfoLayer GetRenderInfoLayer(bool isReplacement, SimHashes element)
+		{
+			return (!isReplacement) ? ((element == SimHashes.Void) ? BlockTileRenderer.RenderInfoLayer.UnderConstruction : BlockTileRenderer.RenderInfoLayer.Built) : BlockTileRenderer.RenderInfoLayer.Replacement;
+		}
+
 		public bool ForceRebuild
 		{
 			get
@@ -21,7 +26,7 @@ namespace Rendering
 
 		public void FreeResources()
 		{
-			foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
+			foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
 			{
 				if (keyValuePair.Value != null)
 				{
@@ -149,10 +154,25 @@ namespace Rendering
 
 		public void LateUpdate()
 		{
-			GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-			Vector2I vector2I = new Vector2I(visibleArea.Min.x / 16, visibleArea.Min.y / 16);
-			Vector2I vector2I2 = new Vector2I((visibleArea.Max.x + 16 - 1) / 16, (visibleArea.Max.y + 16 - 1) / 16);
-			foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
+			this.Render();
+		}
+
+		private void Render()
+		{
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			if (GameUtil.IsCapturingTimeLapse())
+			{
+				vector2I = new Vector2I(0, 0);
+				vector2I2 = new Vector2I(Grid.WidthInCells / 16, Grid.HeightInCells / 16);
+			}
+			else
+			{
+				GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+				vector2I = new Vector2I(visibleArea.Min.x / 16, visibleArea.Min.y / 16);
+				vector2I2 = new Vector2I((visibleArea.Max.x + 16 - 1) / 16, (visibleArea.Max.y + 16 - 1) / 16);
+			}
+			foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
 			{
 				BlockTileRenderer.RenderInfo value = keyValuePair.Value;
 				for (int i = vector2I.y; i < vector2I2.y; i++)
@@ -194,21 +214,22 @@ namespace Rendering
 			return new Vector2I(vector2I.x / 16, vector2I.y / 16);
 		}
 
-		public void AddBlock(int renderLayer, BuildingDef def, SimHashes element, int cell)
+		public void AddBlock(int renderLayer, BuildingDef def, bool isReplacement, SimHashes element, int cell)
 		{
-			KeyValuePair<BuildingDef, bool> keyValuePair = new KeyValuePair<BuildingDef, bool>(def, element != SimHashes.Void);
+			KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer> keyValuePair = new KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>(def, BlockTileRenderer.GetRenderInfoLayer(isReplacement, element));
 			BlockTileRenderer.RenderInfo renderInfo;
 			if (!this.renderInfo.TryGetValue(keyValuePair, out renderInfo))
 			{
-				renderInfo = new BlockTileRenderer.RenderInfo(this, (int)def.TileLayer, renderLayer, def, element);
+				int num = (int)((!isReplacement) ? def.TileLayer : def.ReplacementLayer);
+				renderInfo = new BlockTileRenderer.RenderInfo(this, num, renderLayer, def, element);
 				this.renderInfo[keyValuePair] = renderInfo;
 			}
 			renderInfo.AddCell(cell);
 		}
 
-		public void RemoveBlock(BuildingDef def, SimHashes element, int cell)
+		public void RemoveBlock(BuildingDef def, bool isReplacement, SimHashes element, int cell)
 		{
-			KeyValuePair<BuildingDef, bool> keyValuePair = new KeyValuePair<BuildingDef, bool>(def, element != SimHashes.Void);
+			KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer> keyValuePair = new KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>(def, BlockTileRenderer.GetRenderInfoLayer(isReplacement, element));
 			BlockTileRenderer.RenderInfo renderInfo;
 			if (this.renderInfo.TryGetValue(keyValuePair, out renderInfo))
 			{
@@ -218,7 +239,7 @@ namespace Rendering
 
 		public void Rebuild(ObjectLayer layer, int cell)
 		{
-			foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
+			foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
 			{
 				if (keyValuePair.Key.Key.TileLayer == layer)
 				{
@@ -250,13 +271,13 @@ namespace Rendering
 				{
 					if (cell_status != -1)
 					{
-						foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
+						foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair in this.renderInfo)
 						{
 							keyValuePair.Value.MarkDirtyIfOccupied(cell_status);
 						}
 					}
 					cell_status = cell;
-					foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair2 in this.renderInfo)
+					foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair2 in this.renderInfo)
 					{
 						keyValuePair2.Value.MarkDirtyIfOccupied(cell_status);
 					}
@@ -264,7 +285,7 @@ namespace Rendering
 			}
 			else if (cell_status == cell)
 			{
-				foreach (KeyValuePair<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> keyValuePair3 in this.renderInfo)
+				foreach (KeyValuePair<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> keyValuePair3 in this.renderInfo)
 				{
 					keyValuePair3.Value.MarkDirty(cell_status);
 				}
@@ -290,13 +311,20 @@ namespace Rendering
 
 		private const int chunkEdgeSize = 16;
 
-		protected Dictionary<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo> renderInfo = new Dictionary<KeyValuePair<BuildingDef, bool>, BlockTileRenderer.RenderInfo>();
+		protected Dictionary<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo> renderInfo = new Dictionary<KeyValuePair<BuildingDef, BlockTileRenderer.RenderInfoLayer>, BlockTileRenderer.RenderInfo>();
 
 		private int selectedCell = -1;
 
 		private int highlightCell = -1;
 
 		private int invalidPlaceCell = -1;
+
+		public enum RenderInfoLayer
+		{
+			Built,
+			UnderConstruction,
+			Replacement
+		}
 
 		[Flags]
 		public enum Bits

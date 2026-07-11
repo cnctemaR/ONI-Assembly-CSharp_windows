@@ -13,7 +13,7 @@ public class KInputController : IInputHandler
 		this.IsGamepad = is_gamepad;
 		this.mAxis = new float[4];
 		this.mActiveModifiers = Modifier.None;
-		this.mActionState = new bool[234];
+		this.mActionState = new bool[247];
 		this.mScrollState = new bool[2];
 		this.inputHandler = new KInputHandler(this, this);
 	}
@@ -308,7 +308,7 @@ public class KInputController : IInputHandler
 		{
 			this.mKeyCode = key_code;
 			this.mModifier = modifier;
-			this.mActionFlags = new bool[234];
+			this.mActionFlags = new bool[247];
 		}
 
 		public KKeyCode mKeyCode;

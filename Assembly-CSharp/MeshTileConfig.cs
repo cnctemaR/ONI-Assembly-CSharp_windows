@@ -59,7 +59,7 @@ public class MeshTileConfig : IBuildingConfig
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		GeneratedBuildings.RemoveLoopingSounds(go);
-		go.GetComponent<KPrefabID>().AddTag(GameTags.FloorTiles);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.FloorTiles, false);
 		go.AddComponent<SimTemperatureTransfer>();
 		go.AddComponent<ZoneTile>();
 	}

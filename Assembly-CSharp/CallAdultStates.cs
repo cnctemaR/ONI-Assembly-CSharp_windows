@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class CallAdultStates : GameStateMachine<CallAdultStates, CallAdultStates.Instance, IStateMachineTarget, CallAdultStates.Def>
+public class CallAdultStates : GameStateMachine<CallAdultStates, CallAdultStates.Instance, IStateMachineTarget, CallAdultStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -10,7 +10,7 @@ internal class CallAdultStates : GameStateMachine<CallAdultStates, CallAdultStat
 		string text = CREATURES.STATUSITEMS.SLEEPING.NAME;
 		string text2 = CREATURES.STATUSITEMS.SLEEPING.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main);
+		root.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main);
 		this.pre.QueueAnim("call_pre", false, null).OnAnimQueueComplete(this.loop);
 		this.loop.QueueAnim("call_loop", false, null).OnAnimQueueComplete(this.pst);
 		this.pst.QueueAnim("call_pst", false, null).OnAnimQueueComplete(this.behaviourcomplete);

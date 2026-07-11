@@ -34,6 +34,11 @@ public class CeilingLightConfig : IBuildingConfig
 		lightShapePreview.shape = LightShape.Cone;
 	}
 
+	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
+	{
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.LightSource, false);
+	}
+
 	public override void DoPostConfigureComplete(GameObject go)
 	{
 		go.AddOrGet<LoopingSounds>();

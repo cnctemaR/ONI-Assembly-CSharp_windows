@@ -265,7 +265,7 @@ public static class Util
 		return gameObject;
 	}
 
-	public static T KInstantiateUI<T>(GameObject original, GameObject parent = null, bool force_active = false) where T : MonoBehaviour
+	public static T KInstantiateUI<T>(GameObject original, GameObject parent = null, bool force_active = false) where T : Component
 	{
 		GameObject gameObject = Util.KInstantiateUI(original, parent, force_active);
 		return gameObject.GetComponent<T>();
@@ -472,6 +472,36 @@ public static class Util
 		};
 	}
 
+	public static Color ColorFromHex(string hex)
+	{
+		int num = Convert.ToInt32(hex, 16);
+		float num2 = 1f;
+		float num3 = 1f;
+		float num4 = 1f;
+		float num5 = 1f;
+		if (hex.Length == 6)
+		{
+			num2 = (float)((num >> 16) & 255);
+			num2 /= 255f;
+			num3 = (float)((num >> 8) & 255);
+			num3 /= 255f;
+			num4 = (float)(num & 255);
+			num4 /= 255f;
+		}
+		else if (hex.Length == 8)
+		{
+			num2 = (float)((num >> 24) & 255);
+			num2 /= 255f;
+			num3 = (float)((num >> 16) & 255);
+			num3 /= 255f;
+			num4 = (float)((num >> 8) & 255);
+			num4 /= 255f;
+			num5 = (float)(num & 255);
+			num5 /= 255f;
+		}
+		return new Color(num2, num3, num4, num5);
+	}
+
 	public static string ToHexString(this Color c)
 	{
 		return string.Format("{0:X2}{1:X2}{2:X2}{3:X2}", new object[]
@@ -533,6 +563,11 @@ public static class Util
 	public static string GetTitleFolderName()
 	{
 		return "OxygenNotIncluded";
+	}
+
+	public static string GetRetiredColoniesFolderName()
+	{
+		return "RetiredColonies";
 	}
 
 	public static string RootFolder()

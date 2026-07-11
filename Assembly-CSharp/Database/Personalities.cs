@@ -36,7 +36,7 @@ namespace Database
 			}
 		}
 
-		private class PersonalityLoader : AsyncCsvLoader<Personalities.PersonalityLoader, Personalities.PersonalityInfo>
+		public class PersonalityLoader : AsyncCsvLoader<Personalities.PersonalityLoader, Personalities.PersonalityInfo>
 		{
 			public PersonalityLoader()
 				: base(Assets.instance.personalitiesFile)

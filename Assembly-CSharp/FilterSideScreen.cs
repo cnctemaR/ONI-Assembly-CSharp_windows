@@ -15,29 +15,28 @@ public class FilterSideScreen : SideScreenContent
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<Filterable>() != null;
+		bool flag;
+		if (this.isLogicFilter)
+		{
+			flag = target.GetComponent<ConduitElementSensor>() != null || target.GetComponent<LogicElementSensor>() != null;
+		}
+		else
+		{
+			flag = target.GetComponent<ElementFilter>() != null;
+		}
+		return flag && target.GetComponent<Filterable>() != null;
 	}
 
-	protected override void OnShow(bool show)
+	public override void SetTarget(GameObject target)
 	{
-		base.OnShow(show);
-		if (!show)
-		{
-			return;
-		}
-		if (DetailsScreen.Instance.target == null)
-		{
-			return;
-		}
-		Filterable component = DetailsScreen.Instance.target.GetComponent<Filterable>();
+		base.SetTarget(target);
+		Filterable component = target.GetComponent<Filterable>();
 		if (component == null)
 		{
 			return;
 		}
-		this.outputElementHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.OUTPUTELEMENTHEADER;
-		this.selectElementHeaderLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.SELECTELEMENTHEADER;
 		this.everythingElseHeaderLabel.text = ((component.filterElementState != Filterable.ElementState.Gas) ? UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.LIQUID : UI.UISIDESCREENS.FILTERSIDESCREEN.UNFILTEREDELEMENTS.GAS);
-		Element element = ((!component.SelectedTag.IsValid) ? null : ElementLoader.GetElement(component.SelectedTag));
+		Element element = ((!component.SelectedTag.IsValid) ? ElementLoader.FindElementByHash(SimHashes.Void) : ElementLoader.GetElement(component.SelectedTag));
 		this.SetFilterElement(element);
 		this.Configure(component);
 	}
@@ -45,7 +44,18 @@ public class FilterSideScreen : SideScreenContent
 	private void PopulateElements()
 	{
 		List<Element> list = new List<Element>(ElementLoader.elements);
-		list.Sort((Element a, Element b) => a.name.CompareTo(b.name));
+		list.Sort(delegate(Element a, Element b)
+		{
+			if (a.id == SimHashes.Void)
+			{
+				return -1;
+			}
+			if (b.id == SimHashes.Void)
+			{
+				return 1;
+			}
+			return a.name.CompareTo(b.name);
+		});
 		foreach (Element element in list)
 		{
 			FilterSideScreenRow row = Util.KInstantiateUI(this.elementEntryPrefab, this.elementEntryContainer, false).GetComponent<FilterSideScreenRow>();
@@ -85,9 +95,16 @@ public class FilterSideScreen : SideScreenContent
 			{
 				bool flag = keyValuePair.Key == element;
 				keyValuePair.Value.SetSelected(flag);
-				if (flag && element.id != SimHashes.Void && element.id != SimHashes.Vacuum)
+				if (flag)
 				{
-					this.currentSelectionLabel.text = string.Format(locString, element.name);
+					if (element.id != SimHashes.Void && element.id != SimHashes.Vacuum)
+					{
+						this.currentSelectionLabel.text = string.Format(locString, element.name);
+					}
+					else
+					{
+						this.currentSelectionLabel.text = UI.UISIDESCREENS.FILTERSIDESCREEN.NO_SELECTION;
+					}
 				}
 			}
 		}
@@ -110,4 +127,6 @@ public class FilterSideScreen : SideScreenContent
 	public LocText currentSelectionLabel;
 
 	public Dictionary<Element, FilterSideScreenRow> filterRowMap = new Dictionary<Element, FilterSideScreenRow>();
+
+	public bool isLogicFilter;
 }

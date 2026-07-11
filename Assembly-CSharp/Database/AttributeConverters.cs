@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 
@@ -38,6 +39,19 @@ namespace Database
 			base.Add(attributeConverter);
 			attribute.converters.Add(attributeConverter);
 			return attributeConverter;
+		}
+
+		public List<AttributeConverter> GetConvertersForAttribute(Klei.AI.Attribute attrib)
+		{
+			List<AttributeConverter> list = new List<AttributeConverter>();
+			foreach (AttributeConverter attributeConverter in this.resources)
+			{
+				if (attributeConverter.attribute == attrib)
+				{
+					list.Add(attributeConverter);
+				}
+			}
+			return list;
 		}
 
 		public AttributeConverter MovementSpeed;

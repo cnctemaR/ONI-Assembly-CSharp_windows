@@ -30,7 +30,7 @@ public class ElementEmitter : SimComponent
 		int num2 = Grid.OffsetCell(num, (int)this.outputElement.outputElementOffset.x, (int)this.outputElement.outputElementOffset.y);
 		if (this.outputElement.elementHash != (SimHashes)0 && this.outputElement.massGenerationRate > 0f && this.emissionFrequency > 0f)
 		{
-			float num3 = ((this.outputElement.outputTemperature != 0f) ? this.outputElement.outputTemperature : base.GetComponent<PrimaryElement>().Temperature);
+			float num3 = ((this.outputElement.minOutputTemperature != 0f) ? this.outputElement.minOutputTemperature : base.GetComponent<PrimaryElement>().Temperature);
 			SimMessages.ModifyElementEmitter(this.simHandle, num2, (int)this.emitRange, this.outputElement.elementHash, this.emissionFrequency, this.outputElement.massGenerationRate, num3, this.maxPressure, this.outputElement.addedDiseaseIdx, this.outputElement.addedDiseaseCount);
 		}
 		if (this.showDescriptor)
@@ -56,7 +56,7 @@ public class ElementEmitter : SimComponent
 		{
 			return;
 		}
-		float num = ((temperature <= 0f) ? this.outputElement.outputTemperature : temperature);
+		float num = ((temperature <= 0f) ? this.outputElement.minOutputTemperature : temperature);
 		Element element = ElementLoader.FindElementByHash(this.outputElement.elementHash);
 		if (element.IsGas || element.IsLiquid)
 		{

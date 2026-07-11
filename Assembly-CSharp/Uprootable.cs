@@ -57,9 +57,12 @@ public class Uprootable : Workable
 		Components.Uprootables.Add(this);
 		this.area = base.GetComponent<OccupyArea>();
 		Prioritizable.AddRef(base.gameObject);
+		base.gameObject.AddTag(GameTags.Plant);
+		Extents extents = new Extents(Grid.PosToCell(base.gameObject), base.gameObject.GetComponent<OccupyArea>().OccupiedCellsOffsets);
+		this.partitionerEntry = GameScenePartitioner.Instance.Add(base.gameObject.name, base.gameObject.GetComponent<KPrefabID>(), extents, GameScenePartitioner.Instance.plants, null);
 		if (this.isMarkedForUproot)
 		{
-			this.MarkForUproot();
+			this.MarkForUproot(true);
 		}
 	}
 
@@ -104,19 +107,19 @@ public class Uprootable : Workable
 		this.uprootComplete = state;
 	}
 
-	public void MarkForUproot()
+	public void MarkForUproot(bool instantOnDebug = true)
 	{
 		if (!this.canBeUprooted)
 		{
 			return;
 		}
-		if (DebugHandler.InstantBuildMode)
+		if (DebugHandler.InstantBuildMode && instantOnDebug)
 		{
 			this.Uproot();
 		}
 		else if (this.chore == null)
 		{
-			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.chore = new WorkChore<Uprootable>(Db.Get().ChoreTypes.Uproot, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			base.GetComponent<KSelectable>().AddStatusItem(this.pendingStatusItem, this);
 		}
 		this.isMarkedForUproot = true;
@@ -146,7 +149,7 @@ public class Uprootable : Workable
 
 	private void OnClickUproot()
 	{
-		this.MarkForUproot();
+		this.MarkForUproot(true);
 	}
 
 	protected void OnClickCancelUproot()
@@ -161,6 +164,10 @@ public class Uprootable : Workable
 
 	private void OnRefreshUserMenu(object data)
 	{
+		if (!this.showUserMenuButtons)
+		{
+			return;
+		}
 		if (this.uprootComplete)
 		{
 			if (this.deselectOnUproot)
@@ -201,6 +208,7 @@ public class Uprootable : Workable
 	protected override void OnCleanUp()
 	{
 		base.OnCleanUp();
+		GameScenePartitioner.Instance.Free(ref this.partitionerEntry);
 		Components.Uprootables.Remove(this);
 	}
 
@@ -238,6 +246,10 @@ public class Uprootable : Workable
 	public OccupyArea area;
 
 	private Storage planterStorage;
+
+	public bool showUserMenuButtons = true;
+
+	public HandleVector<int>.Handle partitionerEntry;
 
 	private static readonly EventSystem.IntraObjectHandler<Uprootable> OnPlanterStorageDelegate = new EventSystem.IntraObjectHandler<Uprootable>(delegate(Uprootable component, object data)
 	{

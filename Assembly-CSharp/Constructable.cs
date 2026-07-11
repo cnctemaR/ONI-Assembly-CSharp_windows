@@ -213,16 +213,7 @@ public class Constructable : Workable, ISaveLoadable
 		{
 			this.MarkArea();
 		}
-		if (this.choreTags == null)
-		{
-			this.choreTags = GameTags.ChoreTypes.BuildingChores;
-		}
-		else if (Array.IndexOf<Tag>(this.choreTags, GameTags.ChoreTypes.Building) < 0)
-		{
-			Array.Resize<Tag>(ref this.choreTags, this.choreTags.Length + 1);
-			this.choreTags[this.choreTags.Length - 1] = GameTags.ChoreTypes.Building;
-		}
-		this.fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.BuildFetch, this.choreTags);
+		this.fetchList = new FetchList2(this.storage, Db.Get().ChoreTypes.BuildFetch);
 		PrimaryElement component = base.GetComponent<PrimaryElement>();
 		Element element = ElementLoader.GetElement(this.SelectedElementsTags[0]);
 		global::Debug.Assert(element != null, "Missing primary element for Constructable");
@@ -254,7 +245,6 @@ public class Constructable : Workable, ISaveLoadable
 				}
 			}
 		});
-		Diggable.UpdateBuildableDiggables(Grid.PosToCell(this));
 		if (this.IsReplacementTile && this.building.Def.ReplacementLayer != ObjectLayer.NumLayers)
 		{
 			int num2 = Grid.PosToCell(base.transform.GetPosition());
@@ -265,7 +255,7 @@ public class Constructable : Workable, ISaveLoadable
 				if (base.gameObject.GetComponent<SimCellOccupier>() != null)
 				{
 					int num3 = LayerMask.NameToLayer("Overlay");
-					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, SimHashes.Void, num2);
+					World.Instance.blockTileRenderer.AddBlock(num3, this.building.Def, this.IsReplacementTile, SimHashes.Void, num2);
 				}
 				TileVisualizer.RefreshCell(num2, this.building.Def.TileLayer, this.building.Def.ReplacementLayer);
 			}
@@ -416,7 +406,7 @@ public class Constructable : Workable, ISaveLoadable
 			GameObject gameObject = Grid.Objects[num, (int)this.building.Def.ReplacementLayer];
 			if (gameObject == base.gameObject && gameObject.GetComponent<SimCellOccupier>() != null)
 			{
-				World.Instance.blockTileRenderer.RemoveBlock(this.building.Def, SimHashes.Void, num);
+				World.Instance.blockTileRenderer.RemoveBlock(this.building.Def, this.IsReplacementTile, SimHashes.Void, num);
 			}
 		}
 		GameScenePartitioner.Instance.Free(ref this.solidPartitionerEntry);
@@ -432,8 +422,6 @@ public class Constructable : Workable, ISaveLoadable
 			this.fetchList.Cancel("Constructable destroyed");
 		}
 		this.UnmarkArea();
-		Queue<GameUtil.FloodFillInfo> floodFillNext = GameUtil.FloodFillNext;
-		floodFillNext.Clear();
 		foreach (int num2 in this.building.PlacementCells)
 		{
 			Diggable diggable = Diggable.GetDiggable(num2);
@@ -441,28 +429,7 @@ public class Constructable : Workable, ISaveLoadable
 			{
 				diggable.gameObject.DeleteObject();
 			}
-			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
-			{
-				cell = Grid.CellLeft(num2),
-				depth = 0
-			});
-			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
-			{
-				cell = Grid.CellRight(num2),
-				depth = 0
-			});
-			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
-			{
-				cell = Grid.CellAbove(num2),
-				depth = 0
-			});
-			floodFillNext.Enqueue(new GameUtil.FloodFillInfo
-			{
-				cell = Grid.CellBelow(num2),
-				depth = 0
-			});
 		}
-		Diggable.UpdateBuildableDiggables(floodFillNext);
 		base.OnCleanUp();
 	}
 
@@ -537,7 +504,6 @@ public class Constructable : Workable, ISaveLoadable
 						diggable.Subscribe(-1432940121, new Action<object>(this.OnDiggableReachabilityChanged));
 					}
 					diggable.choreTypeIdHash = Db.Get().ChoreTypes.BuildDig.IdHash;
-					diggable.choreTags = this.choreTags;
 					diggable.GetComponent<Prioritizable>().SetMasterPriority(masterPriority);
 					RenderUtil.EnableRenderer(diggable.transform, false);
 					SaveLoadRoot component = diggable.GetComponent<SaveLoadRoot>();
@@ -562,9 +528,7 @@ public class Constructable : Workable, ISaveLoadable
 		bool flag2 = digs_complete && flag && this.fetchList == null;
 		if (flag2 && this.buildChore == null)
 		{
-			ChoreType build = Db.Get().ChoreTypes.Build;
-			Tag[] array = this.choreTags;
-			this.buildChore = new WorkChore<Constructable>(build, this, null, array, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.buildChore = new WorkChore<Constructable>(Db.Get().ChoreTypes.Build, this, null, true, new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), new Action<Chore>(this.UpdateBuildState), true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 			this.UpdateBuildState(this.buildChore);
 		}
 		else if (!flag2 && this.buildChore != null)
@@ -668,7 +632,7 @@ public class Constructable : Workable, ISaveLoadable
 	{
 		UserMenu userMenu = Game.Instance.userMenu;
 		GameObject gameObject = base.gameObject;
-		string text = "icon_cancel";
+		string text = "action_cancel";
 		string text2 = UI.USERMENUACTIONS.CANCELCONSTRUCTION.NAME;
 		global::System.Action action = new global::System.Action(this.OnPressCancel);
 		string text3 = UI.USERMENUACTIONS.CANCELCONSTRUCTION.TOOLTIP;
@@ -730,9 +694,6 @@ public class Constructable : Workable, ISaveLoadable
 
 	[Serialize]
 	public bool IsReplacementTile;
-
-	[Serialize]
-	public Tag[] choreTags;
 
 	private HandleVector<int>.Handle solidPartitionerEntry;
 

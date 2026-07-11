@@ -56,14 +56,14 @@ public class StandardAmountDisplayer : IAmountDisplayer
 
 	public virtual string GetTooltip(Amount master, AmountInstance instance)
 	{
-		string text = master.Name;
+		string text = string.Empty;
 		if (master.description.IndexOf("{1}") > -1)
 		{
-			text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), GameUtil.GetIdentityDescriptor(instance.gameObject));
+			text += string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null), GameUtil.GetIdentityDescriptor(instance.gameObject));
 		}
 		else
 		{
-			text = text + UI.HORIZONTAL_BR_RULE + string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
+			text += string.Format(master.description, this.formatter.GetFormattedValue(instance.value, GameUtil.TimeSlice.None, null));
 		}
 		text += "\n\n";
 		if (this.formatter.DeltaTimeSlice == GameUtil.TimeSlice.PerCycle)

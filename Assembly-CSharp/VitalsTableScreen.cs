@@ -91,7 +91,6 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = minion as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
 				tooltip.AddMultiStringTooltip(Db.Get().Amounts.Stress.Lookup(minionIdentity).GetTooltip(), null);
 			}
 			break;
@@ -178,9 +177,6 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = identity as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minionIdentity.GetProperName()), null);
-				tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.QUALITYOFLIFE_EXPECTATIONS_TOOLTIP, Db.Get().Attributes.QualityOfLifeExpectation.Lookup(minionIdentity).GetFormattedValue()), null);
-				tooltip.AddMultiStringTooltip(UI.HORIZONTAL_RULE, null);
 				tooltip.AddMultiStringTooltip(Db.Get().Attributes.QualityOfLife.Lookup(minionIdentity).GetAttributeValueTooltip(), null);
 			}
 			break;
@@ -278,7 +274,6 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = identity as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minionIdentity.GetProperName()), null);
 				tooltip.AddMultiStringTooltip(Db.Get().Amounts.HitPoints.Lookup(minionIdentity).GetTooltip(), null);
 			}
 			break;
@@ -376,7 +371,6 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = minion as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minionIdentity.GetProperName()), null);
 				Sicknesses sicknesses = minionIdentity.GetComponent<MinionModifiers>().sicknesses;
 				if (sicknesses.IsInfected())
 				{
@@ -473,7 +467,6 @@ public class VitalsTableScreen : TableScreen
 			MinionIdentity minionIdentity = identity as MinionIdentity;
 			if (minionIdentity != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minionIdentity.GetProperName()), null);
 				tooltip.AddMultiStringTooltip(Db.Get().Amounts.Calories.Lookup(minionIdentity).GetTooltip(), null);
 			}
 			break;
@@ -583,7 +576,6 @@ public class VitalsTableScreen : TableScreen
 		case TableRow.RowType.Minion:
 			if (minion != null)
 			{
-				tooltip.AddMultiStringTooltip(string.Format(UI.TABLESCREENS.DUPLICANT_PROPERNAME, minion.GetProperName()), null);
 				float num = VitalsTableScreen.RationsEatenToday(minion as MinionIdentity);
 				tooltip.AddMultiStringTooltip(string.Format(UI.VITALSSCREEN.EATEN_TODAY_TOOLTIP, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true)), null);
 			}

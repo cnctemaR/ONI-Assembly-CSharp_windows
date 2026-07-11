@@ -3,6 +3,7 @@ using System.Diagnostics;
 using ProcGen;
 
 [DebuggerDisplay("{content} {bandSize} {maxValue}")]
+[Serializable]
 public class ElementGradient : Gradient<string>
 {
 	public ElementGradient()
@@ -17,4 +18,15 @@ public class ElementGradient : Gradient<string>
 	}
 
 	public SampleDescriber.Override overrides { get; set; }
+
+	public void Mod(WorldTrait.ElementBandModifier mod)
+	{
+		global::Debug.Assert(mod.element == base.content);
+		base.bandSize *= mod.bandMultiplier;
+		if (this.overrides == null)
+		{
+			this.overrides = new SampleDescriber.Override();
+		}
+		this.overrides.ModMultiplyMass(mod.massMultiplier);
+	}
 }

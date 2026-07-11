@@ -63,7 +63,7 @@ public class SelectedRecipeQueueScreen : KScreen
 		this.target = target;
 		this.selectedRecipe = recipe;
 		this.recipeName.text = recipe.GetUIName();
-		Tuple<Sprite, Color> uisprite = Def.GetUISprite((!recipe.useResultAsDescription) ? recipe.ingredients[0].material : recipe.results[0].material, "ui", false);
+		Tuple<Sprite, Color> uisprite = Def.GetUISprite((recipe.nameDisplay != ComplexRecipe.RecipeNameDisplay.Ingredient) ? recipe.results[0].material : recipe.ingredients[0].material, "ui", false);
 		this.recipeIcon.sprite = uisprite.first;
 		this.recipeIcon.color = uisprite.second;
 		this.RefreshIngredientDescriptors();

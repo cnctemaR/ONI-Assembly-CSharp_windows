@@ -25,7 +25,7 @@ public class ReportErrorDialog : MonoBehaviour
 		this.quitButton.onClick += this.OnSelect_QUIT;
 		this.uploadSaveButton.onClick += this.OnSelect_UPLOADSAVE;
 		this.skipUploadSaveButton.onClick += this.OnSelect_SKIPUPLOADSAVE;
-		this.messageInputField.text = UI.CRASHSCREEN.BODY.text;
+		this.messageInputField.text = UI.CRASHSCREEN.BODY;
 		ReportErrorDialog.hasCrash = true;
 	}
 
@@ -54,22 +54,14 @@ public class ReportErrorDialog : MonoBehaviour
 		}
 	}
 
-	public void PopupConfirmDialog(string text, global::System.Action onConfirm, global::System.Action onQuit, global::System.Action onContinue)
+	public void PopupConfirmDialog(global::System.Action onConfirm, global::System.Action onQuit, global::System.Action onContinue)
 	{
 		this.confirmAction = onConfirm;
 		this.quitAction = onQuit;
 		this.continueAction = onContinue;
+		this.continueGameButton.gameObject.SetActive(this.continueAction != null);
 		this.VCCrashLabel.gameObject.SetActive(false);
 		this.VCLinkButton.gameObject.SetActive(false);
-		int num = 0;
-		if (this.confirmAction != null)
-		{
-			num++;
-		}
-		if (this.quitAction != null)
-		{
-			num++;
-		}
 		this.quitButton.gameObject.SetActive(onQuit != null);
 	}
 

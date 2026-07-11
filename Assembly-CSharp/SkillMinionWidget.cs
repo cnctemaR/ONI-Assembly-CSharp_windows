@@ -175,7 +175,7 @@ public class SkillMinionWidget : KMonoBehaviour, IPointerEnterHandler, IPointerE
 		}
 		if (this.minion == this.skillsScreen.CurrentlySelectedMinion)
 		{
-			this.skillsScreen.selectedHat.sprite = Assets.GetSprite(component.TargetHat);
+			this.skillsScreen.selectedHat.sprite = Assets.GetSprite((!string.IsNullOrEmpty(component.TargetHat)) ? component.TargetHat : "hat_role_none");
 		}
 	}
 

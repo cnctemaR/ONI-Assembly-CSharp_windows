@@ -467,7 +467,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 	[Serializable]
 	public struct Port
 	{
-		public Port(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon, LogicPortSpriteType sprite_type)
+		public Port(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon, LogicPortSpriteType sprite_type, bool display_custom_name = false)
 		{
 			this.id = id;
 			this.cellOffset = cell_offset;
@@ -476,16 +476,17 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 			this.inactiveDescription = inactiveDescription;
 			this.requiresConnection = show_wire_missing_icon;
 			this.spriteType = sprite_type;
+			this.displayCustomName = display_custom_name;
 		}
 
-		public static LogicPorts.Port InputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false)
+		public static LogicPorts.Port InputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false, bool display_custom_name = false)
 		{
-			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.Input);
+			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.Input, display_custom_name);
 		}
 
-		public static LogicPorts.Port OutputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false)
+		public static LogicPorts.Port OutputPort(HashedString id, CellOffset cell_offset, string description, string activeDescription, string inactiveDescription, bool show_wire_missing_icon = false, bool display_custom_name = false)
 		{
-			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.Output);
+			return new LogicPorts.Port(id, cell_offset, description, activeDescription, inactiveDescription, show_wire_missing_icon, LogicPortSpriteType.Output, display_custom_name);
 		}
 
 		public HashedString id;
@@ -501,5 +502,7 @@ public class LogicPorts : KMonoBehaviour, IEffectDescriptor, IRenderEveryTick
 		public bool requiresConnection;
 
 		public LogicPortSpriteType spriteType;
+
+		public bool displayCustomName;
 	}
 }

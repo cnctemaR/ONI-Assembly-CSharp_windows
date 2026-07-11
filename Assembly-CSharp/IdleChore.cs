@@ -4,7 +4,7 @@ using UnityEngine;
 public class IdleChore : Chore<IdleChore.StatesInstance>
 {
 	public IdleChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, null, false, ReportManager.ReportType.IdleTime)
+		: base(Db.Get().ChoreTypes.Idle, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.idle, 5, false, true, 0, false, ReportManager.ReportType.IdleTime)
 	{
 		this.showAvailabilityInHoverText = false;
 		base.smi = new IdleChore.StatesInstance(this, target.gameObject);

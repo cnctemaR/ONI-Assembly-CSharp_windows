@@ -81,8 +81,7 @@ namespace VoronoiTree
 				}
 				site.position = site.poly.Centroid();
 			}
-			int i = 0;
-			while (i <= maxIterations)
+			for (int i = 0; i <= maxIterations; i++)
 			{
 				try
 				{
@@ -92,7 +91,7 @@ namespace VoronoiTree
 				catch (Exception ex)
 				{
 					global::Debug.LogError(string.Concat(new object[] { "Error [", num, "] iters ", this.completedIterations, "/", maxIterations, " Exception:", ex.Message, "\n", ex.StackTrace }));
-					return;
+					break;
 				}
 				num = 0f;
 				foreach (Site site2 in this.sites)
@@ -107,10 +106,7 @@ namespace VoronoiTree
 					break;
 				}
 				this.completedIterations++;
-				i++;
-				continue;
 			}
-			global::Debug.Log(string.Concat(new object[] { "error [", num, "] iters ", this.completedIterations, "/", maxIterations }));
 		}
 
 		public void ComputeVD()
@@ -362,14 +358,16 @@ namespace VoronoiTree
 			while (stack.Count > 0)
 			{
 				PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d> convexFaceExt = stack.Pop();
+				list2.Add(convexFaceExt);
 				for (int i = 0; i < convexFaceExt.Adjacency.Length; i++)
 				{
 					if (this.ContainsVert(convexFaceExt.Adjacency[i], dualSite) && !list2.Contains(convexFaceExt.Adjacency[i]))
 					{
 						PowerDiagram.Edge edge = this.GetEdge(convexFaceExt, convexFaceExt.Adjacency[i]);
 						PowerDiagram.DualSite3d dualSite3d = ((edge.First != dualSite) ? edge.First : edge.Second);
+						global::Debug.Assert(dualSite3d != dualSite, "We're our own neighbour??");
+						global::Debug.Assert(dualSite3d.site.id == -1 || !list.Contains(dualSite3d.site), "Tried adding a site twice!");
 						list.Add(dualSite3d.site);
-						list2.Add(convexFaceExt.Adjacency[i]);
 						stack.Push(convexFaceExt.Adjacency[i]);
 					}
 				}
@@ -426,6 +424,7 @@ namespace VoronoiTree
 					}
 				}
 			}
+			this.debug_LastHull = convexHull;
 		}
 
 		private void UpdateWeights(List<Site> sites)
@@ -581,6 +580,8 @@ namespace VoronoiTree
 		private List<Site> sites = new List<Site>();
 
 		private List<PowerDiagram.DualSite2d> dualSites = new List<PowerDiagram.DualSite2d>();
+
+		private ConvexHull<PowerDiagram.DualSite3d, PowerDiagram.ConvexFaceExt<PowerDiagram.DualSite3d>> debug_LastHull;
 
 		private class Edge : MathUtil.Pair<PowerDiagram.DualSite3d, PowerDiagram.DualSite3d>
 		{

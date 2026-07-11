@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class AttackStates : GameStateMachine<AttackStates, AttackStates.Instance, IStateMachineTarget, AttackStates.Def>
+public class AttackStates : GameStateMachine<AttackStates, AttackStates.Instance, IStateMachineTarget, AttackStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -21,7 +21,7 @@ internal class AttackStates : GameStateMachine<AttackStates, AttackStates.Instan
 		string text = CREATURES.STATUSITEMS.ATTACK_APPROACH.NAME;
 		string text2 = CREATURES.STATUSITEMS.ATTACK_APPROACH.TOOLTIP;
 		StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, statusItemCategory);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, statusItemCategory);
 		GameStateMachine<AttackStates, AttackStates.Instance, IStateMachineTarget, AttackStates.Def>.State state2 = this.attack.Enter(delegate(AttackStates.Instance smi)
 		{
 			smi.Play("eat_pre", KAnim.PlayMode.Once);
@@ -34,7 +34,7 @@ internal class AttackStates : GameStateMachine<AttackStates, AttackStates.Instan
 		text2 = CREATURES.STATUSITEMS.ATTACK.NAME;
 		text = CREATURES.STATUSITEMS.ATTACK.TOOLTIP;
 		statusItemCategory = Db.Get().StatusItemCategories.Main;
-		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, statusItemCategory).OnAnimQueueComplete(this.behaviourcomplete);
+		state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, statusItemCategory).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.BehaviourComplete(GameTags.Creatures.Attack, false);
 	}
 

@@ -28,7 +28,7 @@ namespace KMod
 					}
 				}, 5);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
 				global::Debug.LogWarningFormat(UI.FRONTEND.MODS.DB_CORRUPT, new object[] { filename });
 				this.mods = new List<Mod>();
@@ -87,11 +87,22 @@ namespace KMod
 			}
 		}
 
-		public void Sanitize()
+		public void Sanitize(GameObject parent)
 		{
-			this.mods.RemoveAll((Mod mod) => mod.file_source == null);
-			this.dirty = true;
-			this.Update(this);
+			ListPool<Label, Manager>.PooledList pooledList = ListPool<Label, Manager>.Allocate();
+			foreach (Mod mod in this.mods)
+			{
+				if (!mod.is_subscribed)
+				{
+					pooledList.Add(mod.label);
+				}
+			}
+			foreach (Label label in pooledList)
+			{
+				this.Unsubscribe(label, this);
+			}
+			pooledList.Recycle();
+			this.Report(parent);
 		}
 
 		public bool HaveMods()
@@ -175,6 +186,7 @@ namespace KMod
 		{
 			global::Debug.LogFormat("Subscribe to mod {0}", new object[] { mod.title });
 			Mod mod2 = this.mods.Find((Mod candidate) => mod.label.Match(candidate.label));
+			mod.is_subscribed = true;
 			if (mod2 == null)
 			{
 				this.mods.Add(mod);
@@ -207,7 +219,7 @@ namespace KMod
 				{
 					this.events.Add(new Event
 					{
-						event_type = EventType.ContentDeleted,
+						event_type = EventType.AvailableContentChanged,
 						mod = mod.label
 					});
 				}
@@ -217,11 +229,13 @@ namespace KMod
 				this.mods.Insert(num, mod);
 				if (flag3 || mod.status == Mod.Status.NotInstalled)
 				{
+					bool enabled = mod.enabled;
 					if (flag3)
 					{
 						this.Uninstall(mod);
 					}
 					this.Install(mod);
+					mod.enabled = enabled;
 					if (mod.enabled && (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != 0)
 					{
 						this.events.Add(new Event
@@ -240,21 +254,52 @@ namespace KMod
 			this.Update(caller);
 		}
 
+		public void Update(Mod mod, object caller)
+		{
+			global::Debug.LogFormat("Update mod {0}", new object[] { mod.title });
+			Mod mod2 = this.mods.Find((Mod candidate) => mod.label.Match(candidate.label));
+			DebugUtil.DevAssert(string.IsNullOrEmpty(mod2.label.id), "Should be subscribed to a mod we are getting an Update notification for");
+			if (mod2.status == Mod.Status.UninstallPending)
+			{
+				return;
+			}
+			this.events.Add(new Event
+			{
+				event_type = EventType.VersionUpdate,
+				mod = mod.label
+			});
+			mod2.CopyPersistentDataTo(mod);
+			int num = this.mods.IndexOf(mod2);
+			this.mods.RemoveAt(num);
+			this.mods.Insert(num, mod);
+			bool enabled = mod.enabled;
+			this.Uninstall(mod);
+			this.Install(mod);
+			mod.enabled = enabled;
+			if (mod.enabled && (byte)(mod.available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != 0)
+			{
+				this.events.Add(new Event
+				{
+					event_type = EventType.RestartRequested,
+					mod = mod.label
+				});
+			}
+			this.dirty = true;
+			this.Update(caller);
+		}
+
 		public void Unsubscribe(Label label, object caller)
 		{
 			global::Debug.LogFormat("Unsubscribe from mod {0}", new object[] { label.ToString() });
 			int num = 0;
-			if (this.mods.Count != 0)
+			foreach (Mod mod in this.mods)
 			{
-				foreach (Mod mod in this.mods)
+				if (mod.label.Match(label))
 				{
-					if (mod.label.Match(label))
-					{
-						global::Debug.LogFormat("\t...found it: {0}", new object[] { mod.title });
-						break;
-					}
-					num++;
+					global::Debug.LogFormat("\t...found it: {0}", new object[] { mod.title });
+					break;
 				}
+				num++;
 			}
 			if (num == this.mods.Count)
 			{
@@ -319,7 +364,7 @@ namespace KMod
 				}
 				this.load_user_mod_loader_dll = false;
 			}
-			global::Debug.LogFormat("Load mods:", new object[0]);
+			global::Debug.LogFormat("Load content ({0}) for mods:", new object[] { content });
 			foreach (Mod mod in this.mods)
 			{
 				if (mod.enabled)
@@ -343,6 +388,11 @@ namespace KMod
 					if (!mod2.enabled)
 					{
 						flag = true;
+						this.events.Add(new Event
+						{
+							event_type = EventType.Deactivated,
+							mod = mod2.label
+						});
 					}
 					global::Debug.LogFormat("Failed to load mod {0}...disabling", new object[] { mod2.title });
 					this.events.Add(new Event
@@ -468,18 +518,13 @@ namespace KMod
 
 		private string GetFilename()
 		{
-			return FSUtil.Normalize(Path.Combine(Manager.GetDirectory(), "mods.json"));
+			return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), "mods.json"));
 		}
 
-		private static void UserDialog(string title, string text, global::System.Action on_confirm, global::System.Action on_cancel, GameObject parent = null)
+		public static void Dialog(GameObject parent = null, string title = null, string text = null, string confirm_text = null, global::System.Action on_confirm = null, string cancel_text = null, global::System.Action on_cancel = null, string configurable_text = null, global::System.Action on_configurable_clicked = null, Sprite image_sprite = null, bool activateBlackBackground = true)
 		{
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, (!(parent == null)) ? parent : Global.Instance.globalCanvas);
-			confirmDialogScreen.PopupConfirmDialog(text, on_confirm, on_cancel, null, null, title, null, null, null);
-		}
-
-		private static void ErrorDialog(string text, global::System.Action on_confirm = null, global::System.Action on_cancel = null)
-		{
-			Manager.UserDialog(UI.FRONTEND.MOD_ERRORS.TITLE, text, on_confirm, on_cancel, null);
+			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent ?? Global.Instance.globalCanvas);
+			confirmDialogScreen.PopupConfirmDialog(text, on_confirm, on_cancel, configurable_text, on_configurable_clicked, title, confirm_text, cancel_text, image_sprite, activateBlackBackground);
 		}
 
 		private static string MakeModList(List<Event> events, EventType event_type)
@@ -496,7 +541,7 @@ namespace KMod
 			return stringBuilder.ToString();
 		}
 
-		private static string MakeModList(List<Event> events)
+		private static string MakeEventList(List<Event> events)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine();
@@ -505,12 +550,17 @@ namespace KMod
 			foreach (Event @event in events)
 			{
 				Event.GetUIStrings(@event.event_type, out text, out text2);
-				stringBuilder.AppendFormat("{0}: {1}\n", text, @event.mod.title);
+				stringBuilder.AppendFormat("{0}: {1}", text, @event.mod.title);
+				if (!string.IsNullOrEmpty(@event.details))
+				{
+					stringBuilder.AppendFormat(" ({0})", @event.details);
+				}
+				stringBuilder.Append("\n");
 			}
 			return stringBuilder.ToString();
 		}
 
-		private static string MakeSimpleModList(List<Event> events)
+		private static string MakeModList(List<Event> events)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			stringBuilder.AppendLine();
@@ -538,50 +588,66 @@ namespace KMod
 				{
 					foreach (Mod mod in this.mods)
 					{
-						if (mod.label.Match(@event.mod))
+						if (mod.label.distribution_platform != Label.DistributionPlatform.Local && mod.label.distribution_platform != Label.DistributionPlatform.Dev)
 						{
-							mod.status = Mod.Status.ReinstallPending;
+							if (mod.label.Match(@event.mod))
+							{
+								mod.status = Mod.Status.ReinstallPending;
+							}
 						}
 					}
 				}
 			}
 			this.dirty = true;
 			this.Update(this);
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent);
-			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
 			string text = UI.FRONTEND.MOD_DIALOGS.LOAD_FAILURE.TITLE;
 			string text2 = string.Format(UI.FRONTEND.MOD_DIALOGS.LOAD_FAILURE.MESSAGE, Manager.MakeModList(this.events, EventType.LoadError));
-			string text3 = UI.FRONTEND.MOD_DIALOGS.LOAD_FAILURE.RESTART_LATER;
-			global::System.Action action = new global::System.Action(App.instance.Restart);
-			confirmDialogScreen2.PopupConfirmDialog(text2, action, delegate
+			string text3 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
+			string text4 = UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
+			Manager.Dialog(parent, text, text2, text3, new global::System.Action(App.instance.Restart), text4, delegate
 			{
-			}, null, null, text, UI.FRONTEND.MOD_DIALOGS.LOAD_FAILURE.RESTART_NOW, text3, null);
+			}, null, null, null, true);
 			this.events.Clear();
 		}
 
-		private void DevRestartDialog(GameObject parent)
+		private void DevRestartDialog(GameObject parent, bool is_crash)
 		{
 			if (this.events.Count == 0)
 			{
 				return;
 			}
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent);
-			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
-			string text = UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.TITLE;
-			string text2 = string.Format(UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.DEV_MESSAGE, Manager.MakeSimpleModList(this.events));
-			string text3 = UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.DEV_CONTINUE;
-			confirmDialogScreen2.PopupConfirmDialog(text2, delegate
+			if (is_crash)
 			{
-				foreach (Mod mod in this.mods)
+				string text = UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.TITLE;
+				string text2 = string.Format(UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.DEV_MESSAGE, Manager.MakeEventList(this.events));
+				string text3 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
+				string text4 = UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
+				Manager.Dialog(parent, text, text2, text3, delegate
 				{
-					mod.enabled = false;
-				}
-				this.dirty = true;
-				this.Update(this);
-				App.instance.Restart();
-			}, delegate
+					foreach (Mod mod in this.mods)
+					{
+						mod.enabled = false;
+					}
+					this.dirty = true;
+					this.Update(this);
+					App.instance.Restart();
+				}, text4, delegate
+				{
+				}, null, null, null, true);
+			}
+			else
 			{
-			}, null, null, text, UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.DEV_RESTART, text3, null);
+				string text4 = UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE;
+				string text3 = string.Format(UI.FRONTEND.MOD_DIALOGS.RESTART.DEV_MESSAGE, Manager.MakeEventList(this.events));
+				string text2 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
+				string text = UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
+				Manager.Dialog(parent, text4, text3, text2, delegate
+				{
+					App.instance.Restart();
+				}, text, delegate
+				{
+				}, null, null, null, true);
+			}
 			this.events.Clear();
 		}
 
@@ -591,12 +657,10 @@ namespace KMod
 			{
 				return;
 			}
-			ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent);
-			ConfirmDialogScreen confirmDialogScreen2 = confirmDialogScreen;
-			string text = string.Format(message_format, (!with_details) ? Manager.MakeSimpleModList(this.events) : Manager.MakeModList(this.events));
-			string text2 = cancel_text ?? UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
-			global::System.Action action = new global::System.Action(App.instance.Restart);
-			confirmDialogScreen2.PopupConfirmDialog(text, action, on_cancel, null, null, title, UI.FRONTEND.MOD_DIALOGS.RESTART.OK, text2, null);
+			string text = string.Format(message_format, (!with_details) ? Manager.MakeModList(this.events) : Manager.MakeEventList(this.events));
+			string text2 = UI.FRONTEND.MOD_DIALOGS.RESTART.OK;
+			string text3 = cancel_text ?? UI.FRONTEND.MOD_DIALOGS.RESTART.CANCEL;
+			Manager.Dialog(parent, title, text, text2, new global::System.Action(App.instance.Restart), text3, on_cancel, null, null, null, true);
 			this.events.Clear();
 		}
 
@@ -606,13 +670,13 @@ namespace KMod
 			{
 				return;
 			}
-			Manager.UserDialog(title, string.Format(message_format, Manager.MakeModList(this.events)), null, null, parent);
+			Manager.Dialog(parent, title, string.Format(message_format, Manager.MakeEventList(this.events)), null, null, null, null, null, null, null, true);
 			this.events.Clear();
 		}
 
 		public void HandleCrash()
 		{
-			global::Debug.Log("Error occurred with mods active. Disabling all mods.");
+			global::Debug.Log("Error occurred with mods active. Disabling all mods (unless dev mods active).");
 			bool flag = this.IsInDevMode();
 			foreach (Mod mod in this.mods)
 			{
@@ -624,9 +688,66 @@ namespace KMod
 						mod = mod.label
 					});
 					mod.Crash(!flag);
+					if (!flag)
+					{
+						this.events.Add(new Event
+						{
+							event_type = EventType.Deactivated,
+							mod = mod.label
+						});
+					}
 				}
 			}
 			this.dirty = true;
+			this.Update(this);
+		}
+
+		public void HandleErrors(List<YamlIO.Error> world_gen_errors)
+		{
+			string text = FileSystem.Normalize(Manager.GetDirectory());
+			ListPool<Mod, Manager>.PooledList pooledList = ListPool<Mod, Manager>.Allocate();
+			foreach (YamlIO.Error error in world_gen_errors)
+			{
+				string text2 = ((error.file.source == null) ? string.Empty : FileSystem.Normalize(error.file.source.GetRoot()));
+				YamlIO.LogError(error, text2.Contains(text));
+				if (error.severity != YamlIO.Error.Severity.Recoverable)
+				{
+					if (text2.Contains(text))
+					{
+						foreach (Mod mod in this.mods)
+						{
+							if (mod.enabled)
+							{
+								if (text2.Contains(mod.label.install_path))
+								{
+									this.events.Add(new Event
+									{
+										event_type = EventType.BadWorldGen,
+										mod = mod.label,
+										details = Path.GetFileName(error.file.full_path)
+									});
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			bool flag = this.IsInDevMode();
+			foreach (Mod mod2 in pooledList)
+			{
+				mod2.Crash(!flag);
+				if (!flag)
+				{
+					this.events.Add(new Event
+					{
+						event_type = EventType.Deactivated,
+						mod = mod2.label
+					});
+				}
+				this.dirty = true;
+			}
+			pooledList.Recycle();
 			this.Update(this);
 		}
 
@@ -636,25 +757,58 @@ namespace KMod
 			{
 				return;
 			}
+			for (int i = 0; i < this.events.Count; i++)
+			{
+				Event @event = this.events[i];
+				for (int num = this.events.Count - 1; num != i; num--)
+				{
+					if (this.events[num].event_type == @event.event_type && this.events[num].mod.Match(@event.mod) && this.events[num].details == @event.details)
+					{
+						this.events.RemoveAt(num);
+					}
+				}
+			}
 			bool flag = false;
-			bool flag2 = this.IsInDevMode();
+			bool flag2 = false;
 			bool flag3 = false;
-			foreach (Event @event in this.events)
+			foreach (Event event2 in this.events)
 			{
-				if (@event.event_type == EventType.ActiveDuringCrash)
+				EventType event_type = event2.event_type;
+				switch (event_type)
 				{
-					flag = true;
-				}
-				if (@event.event_type == EventType.LoadError)
-				{
+				case EventType.VersionUpdate:
+				case EventType.AvailableContentChanged:
+				case EventType.RestartRequested:
 					flag3 = true;
+					break;
+				default:
+					if (event_type != EventType.LoadError)
+					{
+						if (event_type == EventType.ActiveDuringCrash)
+						{
+							flag = true;
+						}
+					}
+					else
+					{
+						flag2 = true;
+					}
+					break;
+				case EventType.Deactivated:
+					if ((byte)(this.FindMod(event2.mod).available_content & (Content.Strings | Content.DLL | Content.Translation | Content.Animation)) != 0)
+					{
+						flag3 = true;
+					}
+					break;
 				}
 			}
-			if (flag2)
+			flag3 = flag || flag2 || flag3;
+			bool flag4 = this.IsInDevMode();
+			if (flag3 && flag4)
 			{
-				this.DevRestartDialog(parent);
+				this.DevRestartDialog(parent, flag);
 			}
-			else if (flag3)
+			else if (flag2)
 			{
 				this.LoadFailureDialog(parent);
 			}
@@ -662,9 +816,13 @@ namespace KMod
 			{
 				this.RestartDialog(UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.TITLE, UI.FRONTEND.MOD_DIALOGS.MOD_ERRORS_ON_BOOT.MESSAGE, null, false, parent, null);
 			}
+			else if (flag3)
+			{
+				this.RestartDialog(UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE, UI.FRONTEND.MOD_DIALOGS.RESTART.MESSAGE, null, true, parent, null);
+			}
 			else
 			{
-				this.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE, UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.MESSAGE, parent);
+				this.NotifyDialog(UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.TITLE, (!flag4) ? UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.MESSAGE : UI.FRONTEND.MOD_DIALOGS.MOD_EVENTS.DEV_MESSAGE, parent);
 			}
 		}
 

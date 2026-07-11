@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using UnityEngine;
 
-public class CodexEntry : YamlIO<CodexEntry>
+public class CodexEntry
 {
 	public CodexEntry()
 	{

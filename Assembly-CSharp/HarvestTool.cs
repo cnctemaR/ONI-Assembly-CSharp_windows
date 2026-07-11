@@ -22,20 +22,20 @@ public class HarvestTool : DragTool
 	{
 		if (Grid.IsValidCell(cell))
 		{
-			foreach (Harvestable harvestable in Components.Harvestables.Items)
+			foreach (HarvestDesignatable harvestDesignatable in Components.HarvestDesignatables.Items)
 			{
-				OccupyArea area = harvestable.area;
-				if (Grid.PosToCell(harvestable) == cell || (area != null && area.CheckIsOccupying(cell)))
+				OccupyArea area = harvestDesignatable.area;
+				if (Grid.PosToCell(harvestDesignatable) == cell || (area != null && area.CheckIsOccupying(cell)))
 				{
 					if (this.options["HARVEST_WHEN_READY"] == ToolParameterMenu.ToggleState.On)
 					{
-						harvestable.SetHarvestWhenReady(true);
+						harvestDesignatable.SetHarvestWhenReady(true);
 					}
 					else if (this.options["DO_NOT_HARVEST"] == ToolParameterMenu.ToggleState.On)
 					{
-						harvestable.SetHarvestWhenReady(false);
+						harvestDesignatable.SetHarvestWhenReady(false);
 					}
-					Prioritizable component = harvestable.GetComponent<Prioritizable>();
+					Prioritizable component = harvestDesignatable.GetComponent<Prioritizable>();
 					if (component != null)
 					{
 						component.SetMasterPriority(ToolMenu.Instance.PriorityScreen.GetLastSelectedPriority());

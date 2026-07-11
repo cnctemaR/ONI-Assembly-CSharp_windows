@@ -2,6 +2,7 @@
 
 namespace ProcGen
 {
+	[Serializable]
 	public class WeightedName : IWeighted
 	{
 		public WeightedName()

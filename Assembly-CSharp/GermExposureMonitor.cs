@@ -3,25 +3,29 @@ using System.Collections.Generic;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
-[SerializationConfig(MemberSerialization.OptIn)]
 public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExposureMonitor.Instance>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
 		default_state = this.root;
 		base.serializable = false;
-		this.root.EventHandler(GameHashes.EatCompleteEater, delegate(GermExposureMonitor.Instance smi, object obj)
+		this.root.Update(delegate(GermExposureMonitor.Instance smi, float dt)
+		{
+			smi.OnInhaleExposureTick(dt);
+		}, UpdateRate.SIM_1000ms, true).EventHandler(GameHashes.EatCompleteEater, delegate(GermExposureMonitor.Instance smi, object obj)
 		{
 			smi.OnEatComplete(obj);
 		}).EventHandler(GameHashes.SicknessAdded, delegate(GermExposureMonitor.Instance smi, object data)
 		{
 			smi.OnSicknessAdded(data);
-		}).EventHandler(GameHashes.SicknessCured, delegate(GermExposureMonitor.Instance smi, object data)
-		{
-			smi.OnSicknessCured(data);
 		})
+			.EventHandler(GameHashes.SicknessCured, delegate(GermExposureMonitor.Instance smi, object data)
+			{
+				smi.OnSicknessCured(data);
+			})
 			.EventHandler(GameHashes.SleepFinished, delegate(GermExposureMonitor.Instance smi)
 			{
 				smi.OnSleepFinished();
@@ -30,88 +34,26 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 
 	public static float GetContractionChance(float rating)
 	{
-		return 0.5f - 0.5f * (float)Math.Tanh(0.5 * (double)rating);
+		return 0.5f - 0.5f * (float)Math.Tanh(0.25 * (double)rating);
 	}
-
-	private const int MIN_GERM_EXPOSURE_THRESHOLD = 100;
-
-	public static GermExposureMonitor.ExposureType[] exposureTypes = new GermExposureMonitor.ExposureType[]
-	{
-		new GermExposureMonitor.ExposureType
-		{
-			germ_id = "FoodPoisoning",
-			sickness_id = "FoodSickness",
-			excluded_traits = new List<string> { "IronGut" },
-			base_resistance = 1
-		},
-		new GermExposureMonitor.ExposureType
-		{
-			germ_id = "SlimeLung",
-			sickness_id = "SlimeSickness",
-			base_resistance = 2
-		},
-		new GermExposureMonitor.ExposureType
-		{
-			germ_id = "ZombieSpores",
-			sickness_id = "ZombieSickness",
-			exposure_threshold = 1,
-			base_resistance = -1
-		},
-		new GermExposureMonitor.ExposureType
-		{
-			germ_id = "PollenGerms",
-			sickness_id = "Allergies",
-			exposure_threshold = 1,
-			infect_immediately = true,
-			required_traits = new List<string> { "Allergies" },
-			excluded_effects = new List<string> { "HistamineSuppression" }
-		},
-		new GermExposureMonitor.ExposureType
-		{
-			germ_id = "PollenGerms",
-			infection_effect = "SmelledFlowers",
-			exposure_threshold = 1,
-			infect_immediately = true,
-			excluded_traits = new List<string> { "Allergies" }
-		}
-	};
 
 	public enum ExposureState
 	{
 		None,
+		Contact,
 		Exposed,
 		Contracted,
 		Sick
 	}
 
-	public class ExposureType
-	{
-		public string germ_id;
-
-		public string sickness_id;
-
-		public string infection_effect;
-
-		public int exposure_threshold = 100;
-
-		public bool infect_immediately;
-
-		public List<string> required_traits;
-
-		public List<string> excluded_traits;
-
-		public List<string> excluded_effects;
-
-		public int base_resistance;
-	}
-
 	public class ExposureStatusData
 	{
-		public GermExposureMonitor.ExposureType exposure_type;
+		public ExposureType exposure_type;
 
 		public GermExposureMonitor.Instance owner;
 	}
 
+	[SerializationConfig(MemberSerialization.OptIn)]
 	public new class Instance : GameStateMachine<GermExposureMonitor, GermExposureMonitor.Instance, IStateMachineTarget, object>.GameInstance
 	{
 		public Instance(IStateMachineTarget master)
@@ -121,8 +63,9 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			this.primaryElement = master.GetComponent<PrimaryElement>();
 			this.traits = master.GetComponent<Traits>();
 			this.lastDiseaseSources = new Dictionary<HashedString, GermExposureMonitor.Instance.DiseaseSourceInfo>();
+			this.lastExposureTime = new Dictionary<HashedString, float>();
+			this.inhaleExposureTick = new Dictionary<HashedString, GermExposureMonitor.Instance.InhaleTickInfo>();
 			GameClock.Instance.Subscribe(-722330267, new Action<object>(this.OnNightTime));
-			this.modifiers = base.gameObject.GetComponent<Modifiers>();
 			OxygenBreather component = base.GetComponent<OxygenBreather>();
 			component.onSimConsume = (Action<Sim.MassConsumedCallback>)Delegate.Combine(component.onSimConsume, new Action<Sim.MassConsumedCallback>(this.OnAirConsumed));
 		}
@@ -130,11 +73,19 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		public override void StartSM()
 		{
 			base.StartSM();
+			this.RefreshStatusItems();
 		}
 
 		public override void StopSM(string reason)
 		{
 			GameClock.Instance.Unsubscribe(-722330267, new Action<object>(this.OnNightTime));
+			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
+			{
+				Guid guid;
+				this.statusItemHandles.TryGetValue(exposureType.germ_id, out guid);
+				KSelectable component = base.GetComponent<KSelectable>();
+				guid = component.RemoveStatusItem(guid, false);
+			}
 			base.StopSM(reason);
 		}
 
@@ -166,6 +117,22 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			}
 		}
 
+		public void OnInhaleExposureTick(float dt)
+		{
+			foreach (KeyValuePair<HashedString, GermExposureMonitor.Instance.InhaleTickInfo> keyValuePair in this.inhaleExposureTick)
+			{
+				if (keyValuePair.Value.inhaled)
+				{
+					keyValuePair.Value.inhaled = false;
+					keyValuePair.Value.ticks++;
+				}
+				else
+				{
+					keyValuePair.Value.ticks = Mathf.Max(0, keyValuePair.Value.ticks - 1);
+				}
+			}
+		}
+
 		public void TryInjectDisease(byte disease_idx, int count, Tag source, Sickness.InfectionVector vector)
 		{
 			if (disease_idx != 255)
@@ -175,33 +142,141 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			}
 		}
 
+		public float GetGermResistance()
+		{
+			return Db.Get().Attributes.GermResistance.Lookup(base.gameObject).GetTotalValue();
+		}
+
+		public float GetResistanceToExposureType(ExposureType exposureType, float overrideExposureTier = -1f)
+		{
+			float num = overrideExposureTier;
+			if (num == -1f)
+			{
+				num = this.GetExposureTier(exposureType.germ_id);
+			}
+			num = Mathf.Clamp(num, 1f, 3f);
+			float num2 = GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[(int)num - 1];
+			AttributeInstance attributeInstance = Db.Get().Attributes.GermResistance.Lookup(base.gameObject);
+			float totalValue = attributeInstance.GetTotalValue();
+			return (float)exposureType.base_resistance + totalValue + num2;
+		}
+
+		public int AssessDigestedGerms(ExposureType exposure_type, int count)
+		{
+			int exposure_threshold = exposure_type.exposure_threshold;
+			int num = count / exposure_threshold;
+			return MathUtil.Clamp(1, 3, num);
+		}
+
+		public bool AssessInhaledGerms(ExposureType exposure_type)
+		{
+			GermExposureMonitor.Instance.InhaleTickInfo inhaleTickInfo;
+			this.inhaleExposureTick.TryGetValue(exposure_type.germ_id, out inhaleTickInfo);
+			if (inhaleTickInfo == null)
+			{
+				inhaleTickInfo = new GermExposureMonitor.Instance.InhaleTickInfo();
+				this.inhaleExposureTick[exposure_type.germ_id] = inhaleTickInfo;
+			}
+			if (!inhaleTickInfo.inhaled)
+			{
+				float exposureTier = this.GetExposureTier(exposure_type.germ_id);
+				inhaleTickInfo.inhaled = true;
+				return inhaleTickInfo.ticks >= GERM_EXPOSURE.INHALE_TICK_THRESHOLD[(int)exposureTier];
+			}
+			return false;
+		}
+
 		public void InjectDisease(Disease disease, int count, Tag source, Sickness.InfectionVector vector)
 		{
-			foreach (GermExposureMonitor.ExposureType exposureType in GermExposureMonitor.exposureTypes)
+			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
 				if (disease.id == exposureType.germ_id && count > exposureType.exposure_threshold)
 				{
-					if (this.IsExposureValidForTraits(exposureType))
+					if (this.HasMinExposurePeriodElapsed(exposureType.germ_id))
 					{
-						Sickness sickness = ((exposureType.sickness_id == null) ? null : Db.Get().Sicknesses.Get(exposureType.sickness_id));
-						if ((sickness == null || sickness.infectionVectors.Contains(vector)) && this.GetExposureState(exposureType.germ_id) == GermExposureMonitor.ExposureState.None)
+						if (this.IsExposureValidForTraits(exposureType))
 						{
-							AttributeInstance attributeInstance = Db.Get().Attributes.GermResistance.Lookup(base.gameObject);
-							float totalValue = attributeInstance.GetTotalValue();
-							float num = (float)exposureType.base_resistance + totalValue;
-							float contractionChance = GermExposureMonitor.GetContractionChance(num);
-							if (contractionChance > 0f)
+							Sickness sickness = ((exposureType.sickness_id == null) ? null : Db.Get().Sicknesses.Get(exposureType.sickness_id));
+							if (sickness == null || sickness.infectionVectors.Contains(vector))
 							{
-								this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance);
-								if (exposureType.infect_immediately)
+								GermExposureMonitor.ExposureState exposureState = this.GetExposureState(exposureType.germ_id);
+								float exposureTier = this.GetExposureTier(exposureType.germ_id);
+								if (exposureState == GermExposureMonitor.ExposureState.None || exposureState == GermExposureMonitor.ExposureState.Contact)
 								{
-									this.InfectImmediately(exposureType);
+									float resistanceToExposureType = this.GetResistanceToExposureType(exposureType, -1f);
+									float contractionChance = GermExposureMonitor.GetContractionChance(resistanceToExposureType);
+									this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Contact);
+									if (contractionChance > 0f)
+									{
+										this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance, base.transform.GetPosition());
+										if (exposureType.infect_immediately)
+										{
+											this.InfectImmediately(exposureType);
+										}
+										else
+										{
+											bool flag = true;
+											bool flag2 = vector == Sickness.InfectionVector.Inhalation;
+											bool flag3 = vector == Sickness.InfectionVector.Digestion;
+											int num = 1;
+											if (flag2)
+											{
+												flag = this.AssessInhaledGerms(exposureType);
+											}
+											if (flag3)
+											{
+												num = this.AssessDigestedGerms(exposureType, count);
+											}
+											if (flag)
+											{
+												if (flag2)
+												{
+													this.inhaleExposureTick[exposureType.germ_id].ticks = 0;
+												}
+												this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Exposed);
+												this.SetExposureTier(exposureType.germ_id, (float)num);
+												float num2 = Mathf.Clamp01(contractionChance);
+												GermExposureTracker.Instance.AddExposure(exposureType, num2);
+											}
+										}
+									}
 								}
-								else
+								else if (exposureState == GermExposureMonitor.ExposureState.Exposed && exposureTier < 3f)
 								{
-									this.SetExposureState(exposureType.germ_id, GermExposureMonitor.ExposureState.Exposed);
-									float num2 = Mathf.Clamp01(contractionChance);
-									GermExposureTracker.Instance.AddExposure(exposureType, num2);
+									float resistanceToExposureType2 = this.GetResistanceToExposureType(exposureType, -1f);
+									float contractionChance2 = GermExposureMonitor.GetContractionChance(resistanceToExposureType2);
+									if (contractionChance2 > 0f)
+									{
+										this.lastDiseaseSources[disease.id] = new GermExposureMonitor.Instance.DiseaseSourceInfo(source, vector, contractionChance2, base.transform.GetPosition());
+										if (!exposureType.infect_immediately)
+										{
+											bool flag4 = true;
+											bool flag5 = vector == Sickness.InfectionVector.Inhalation;
+											bool flag6 = vector == Sickness.InfectionVector.Digestion;
+											int num3 = 1;
+											if (flag5)
+											{
+												flag4 = this.AssessInhaledGerms(exposureType);
+											}
+											if (flag6)
+											{
+												num3 = this.AssessDigestedGerms(exposureType, count);
+											}
+											if (flag4)
+											{
+												if (flag5)
+												{
+													this.inhaleExposureTick[exposureType.germ_id].ticks = 0;
+												}
+												this.SetExposureTier(exposureType.germ_id, this.GetExposureTier(exposureType.germ_id) + (float)num3);
+												float resistanceToExposureType3 = this.GetResistanceToExposureType(exposureType, -1f);
+												float contractionChance3 = GermExposureMonitor.GetContractionChance(resistanceToExposureType3);
+												float num4 = contractionChance3 - contractionChance2;
+												float num5 = Mathf.Clamp01(num4);
+												GermExposureTracker.Instance.AddExposure(exposureType, num5);
+											}
+										}
+									}
 								}
 							}
 						}
@@ -214,13 +289,27 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		public GermExposureMonitor.ExposureState GetExposureState(string germ_id)
 		{
 			GermExposureMonitor.ExposureState exposureState;
-			bool flag = this.exposureStates.TryGetValue(germ_id, out exposureState);
+			this.exposureStates.TryGetValue(germ_id, out exposureState);
 			return exposureState;
+		}
+
+		public float GetExposureTier(string germ_id)
+		{
+			float num = 1f;
+			this.exposureTiers.TryGetValue(germ_id, out num);
+			return Mathf.Clamp(num, 1f, 3f);
 		}
 
 		public void SetExposureState(string germ_id, GermExposureMonitor.ExposureState exposure_state)
 		{
 			this.exposureStates[germ_id] = exposure_state;
+			this.RefreshStatusItems();
+		}
+
+		public void SetExposureTier(string germ_id, float tier)
+		{
+			tier = Mathf.Clamp(tier, 0f, 3f);
+			this.exposureTiers[germ_id] = tier;
 			this.RefreshStatusItems();
 		}
 
@@ -234,7 +323,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		public void OnSicknessAdded(object sickness_instance_data)
 		{
 			SicknessInstance sicknessInstance = (SicknessInstance)sickness_instance_data;
-			foreach (GermExposureMonitor.ExposureType exposureType in GermExposureMonitor.exposureTypes)
+			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
 				if (exposureType.sickness_id == sicknessInstance.Sickness.Id)
 				{
@@ -246,7 +335,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		public void OnSicknessCured(object sickness_instance_data)
 		{
 			SicknessInstance sicknessInstance = (SicknessInstance)sickness_instance_data;
-			foreach (GermExposureMonitor.ExposureType exposureType in GermExposureMonitor.exposureTypes)
+			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
 				if (exposureType.sickness_id == sicknessInstance.Sickness.Id)
 				{
@@ -255,7 +344,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			}
 		}
 
-		private bool IsExposureValidForTraits(GermExposureMonitor.ExposureType exposure_type)
+		private bool IsExposureValidForTraits(ExposureType exposure_type)
 		{
 			if (exposure_type.required_traits != null && exposure_type.required_traits.Count > 0)
 			{
@@ -291,28 +380,57 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			return true;
 		}
 
+		private bool HasMinExposurePeriodElapsed(string germ_id)
+		{
+			float num;
+			this.lastExposureTime.TryGetValue(germ_id, out num);
+			if (num == 0f)
+			{
+				return true;
+			}
+			float num2 = GameClock.Instance.GetTime() - num;
+			return num2 > 540f;
+		}
+
 		private void RefreshStatusItems()
 		{
-			foreach (GermExposureMonitor.ExposureType exposureType in GermExposureMonitor.exposureTypes)
+			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
 				Guid guid;
-				this.statusItemHandles.TryGetValue(exposureType.germ_id, out guid);
+				this.contactStatusItemHandles.TryGetValue(exposureType.germ_id, out guid);
+				Guid guid2;
+				this.statusItemHandles.TryGetValue(exposureType.germ_id, out guid2);
 				GermExposureMonitor.ExposureState exposureState = this.GetExposureState(exposureType.germ_id);
-				if (guid == Guid.Empty && (exposureState == GermExposureMonitor.ExposureState.Exposed || exposureState == GermExposureMonitor.ExposureState.Contracted))
+				if (guid2 == Guid.Empty && (exposureState == GermExposureMonitor.ExposureState.Exposed || exposureState == GermExposureMonitor.ExposureState.Contracted))
 				{
 					KSelectable component = base.GetComponent<KSelectable>();
-					guid = component.AddStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, new GermExposureMonitor.ExposureStatusData
+					guid2 = component.AddStatusItem(Db.Get().DuplicantStatusItems.ExposedToGerms, new GermExposureMonitor.ExposureStatusData
 					{
 						exposure_type = exposureType,
 						owner = this
 					});
 				}
-				else if (guid != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Exposed && exposureState != GermExposureMonitor.ExposureState.Contracted)
+				else if (guid2 != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Exposed && exposureState != GermExposureMonitor.ExposureState.Contracted)
 				{
 					KSelectable component2 = base.GetComponent<KSelectable>();
-					guid = component2.RemoveStatusItem(guid, false);
+					guid2 = component2.RemoveStatusItem(guid2, false);
 				}
-				this.statusItemHandles[exposureType.germ_id] = guid;
+				this.statusItemHandles[exposureType.germ_id] = guid2;
+				if (guid == Guid.Empty && exposureState == GermExposureMonitor.ExposureState.Contact)
+				{
+					KSelectable component3 = base.GetComponent<KSelectable>();
+					guid = component3.AddStatusItem(Db.Get().DuplicantStatusItems.ContactWithGerms, new GermExposureMonitor.ExposureStatusData
+					{
+						exposure_type = exposureType,
+						owner = this
+					});
+				}
+				else if (guid != Guid.Empty && exposureState != GermExposureMonitor.ExposureState.Contact)
+				{
+					KSelectable component4 = base.GetComponent<KSelectable>();
+					guid = component4.RemoveStatusItem(guid, false);
+				}
+				this.contactStatusItemHandles[exposureType.germ_id] = guid;
 			}
 		}
 
@@ -326,7 +444,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			ReportManager.Instance.ReportValue(ReportManager.ReportType.DiseaseStatus, (float)this.primaryElement.DiseaseCount, StringFormatter.Replace(UI.ENDOFDAYREPORT.NOTES.GERMS, "{0}", base.master.name), base.master.gameObject.GetProperName());
 		}
 
-		public void InfectImmediately(GermExposureMonitor.ExposureType exposure_type)
+		public void InfectImmediately(ExposureType exposure_type)
 		{
 			if (exposure_type.infection_effect != null)
 			{
@@ -343,7 +461,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 
 		public void OnSleepFinished()
 		{
-			foreach (GermExposureMonitor.ExposureType exposureType in GermExposureMonitor.exposureTypes)
+			foreach (ExposureType exposureType in GERM_EXPOSURE.TYPES)
 			{
 				if (!exposureType.infect_immediately)
 				{
@@ -359,6 +477,7 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 						SicknessExposureInfo sicknessExposureInfo = new SicknessExposureInfo(exposureType.sickness_id, lastDiseaseSource);
 						this.sicknesses.Infect(sicknessExposureInfo);
 					}
+					this.SetExposureTier(exposureType.germ_id, 0f);
 				}
 			}
 		}
@@ -392,12 +511,23 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			return text;
 		}
 
+		public Vector3 GetLastExposurePosition(string germ_id)
+		{
+			GermExposureMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;
+			if (this.lastDiseaseSources.TryGetValue(germ_id, out diseaseSourceInfo))
+			{
+				return diseaseSourceInfo.position;
+			}
+			return base.transform.GetPosition();
+		}
+
 		public float GetExposureWeight(string id)
 		{
+			float exposureTier = this.GetExposureTier(id);
 			GermExposureMonitor.Instance.DiseaseSourceInfo diseaseSourceInfo;
 			if (this.lastDiseaseSources.TryGetValue(id, out diseaseSourceInfo))
 			{
-				return diseaseSourceInfo.factor;
+				return diseaseSourceInfo.factor * exposureTier;
 			}
 			return 0f;
 		}
@@ -405,26 +535,36 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 		[Serialize]
 		public Dictionary<HashedString, GermExposureMonitor.Instance.DiseaseSourceInfo> lastDiseaseSources;
 
+		[Serialize]
+		public Dictionary<HashedString, float> lastExposureTime;
+
+		private Dictionary<HashedString, GermExposureMonitor.Instance.InhaleTickInfo> inhaleExposureTick;
+
 		private Sicknesses sicknesses;
 
 		private PrimaryElement primaryElement;
-
-		private Modifiers modifiers;
 
 		private Traits traits;
 
 		[Serialize]
 		private Dictionary<string, GermExposureMonitor.ExposureState> exposureStates = new Dictionary<string, GermExposureMonitor.ExposureState>();
 
+		[Serialize]
+		private Dictionary<string, float> exposureTiers = new Dictionary<string, float>();
+
 		private Dictionary<string, Guid> statusItemHandles = new Dictionary<string, Guid>();
 
+		private Dictionary<string, Guid> contactStatusItemHandles = new Dictionary<string, Guid>();
+
+		[Serializable]
 		public class DiseaseSourceInfo
 		{
-			public DiseaseSourceInfo(Tag sourceObject, Sickness.InfectionVector vector, float factor)
+			public DiseaseSourceInfo(Tag sourceObject, Sickness.InfectionVector vector, float factor, Vector3 position)
 			{
 				this.sourceObject = sourceObject;
 				this.vector = vector;
 				this.factor = factor;
+				this.position = position;
 			}
 
 			public Tag sourceObject;
@@ -432,6 +572,15 @@ public class GermExposureMonitor : GameStateMachine<GermExposureMonitor, GermExp
 			public Sickness.InfectionVector vector;
 
 			public float factor;
+
+			public Vector3 position;
+		}
+
+		public class InhaleTickInfo
+		{
+			public bool inhaled;
+
+			public int ticks;
 		}
 	}
 }

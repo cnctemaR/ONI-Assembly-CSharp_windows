@@ -35,7 +35,7 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 	{
 		get
 		{
-			return "STRINGS.UI.UISIDESCREENS.LOGIC_DELAY_SIDE_SCREEN.TITLE";
+			return "STRINGS.UI.UISIDESCREENS.LOGIC_BUFFER_SIDE_SCREEN.TITLE";
 		}
 	}
 
@@ -74,7 +74,7 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 
 	public string GetSliderTooltipKey(int index)
 	{
-		return "STRINGS.UI.UISIDESCREENS.LOGIC_DELAY_SIDE_SCREEN.TOOLTIP";
+		return "STRINGS.UI.UISIDESCREENS.LOGIC_BUFFER_SIDE_SCREEN.TOOLTIP";
 	}
 
 	protected override void OnPrefabInit()
@@ -103,7 +103,20 @@ public class LogicGateBuffer : LogicGate, ISingleSliderControl, ISliderControl
 
 	private void Update()
 	{
-		this.meter.SetPositionPercent((float)this.delayTicksRemaining / (float)this.DelayAmountTicks);
+		float num;
+		if (this.input_was_previously_positive)
+		{
+			num = 0f;
+		}
+		else if (this.delayTicksRemaining > 0)
+		{
+			num = (float)(this.DelayAmountTicks - this.delayTicksRemaining) / (float)this.DelayAmountTicks;
+		}
+		else
+		{
+			num = 1f;
+		}
+		this.meter.SetPositionPercent(num);
 	}
 
 	public override void LogicTick()

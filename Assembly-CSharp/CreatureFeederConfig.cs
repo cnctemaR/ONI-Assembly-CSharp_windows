@@ -30,7 +30,7 @@ public class CreatureFeederConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		Prioritizable.AddRef(go);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.CreatureFeeder);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.CreatureFeeder, false);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 2000f;
 		storage.showInUI = true;
@@ -54,7 +54,8 @@ public class CreatureFeederConfig : IBuildingConfig
 		{
 			GameTags.Creatures.Species.LightBugSpecies,
 			GameTags.Creatures.Species.HatchSpecies,
-			GameTags.Creatures.Species.MoleSpecies
+			GameTags.Creatures.Species.MoleSpecies,
+			GameTags.Creatures.Species.CrabSpecies
 		};
 		foreach (KeyValuePair<Tag, Diet> keyValuePair in DietManager.CollectDiets(array))
 		{

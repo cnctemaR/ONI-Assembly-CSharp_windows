@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>
+public class FixedCaptureStates : GameStateMachine<FixedCaptureStates, FixedCaptureStates.Instance, IStateMachineTarget, FixedCaptureStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{

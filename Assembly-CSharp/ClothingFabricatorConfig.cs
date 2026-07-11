@@ -30,7 +30,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);
@@ -59,7 +59,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		{
 			time = global::TUNING.EQUIPMENT.VESTS.WARM_VEST_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.WARM_VEST.RECIPE_DESC,
-			useResultAsDescription = true,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "ClothingFabricator" },
 			sortOrder = 1
 		};
@@ -76,7 +76,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		{
 			time = global::TUNING.EQUIPMENT.VESTS.COOL_VEST_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.COOL_VEST.RECIPE_DESC,
-			useResultAsDescription = true,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "ClothingFabricator" },
 			sortOrder = 1
 		};
@@ -93,7 +93,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 		{
 			time = global::TUNING.EQUIPMENT.VESTS.FUNKY_VEST_FABTIME,
 			description = global::STRINGS.EQUIPMENT.PREFABS.FUNKY_VEST.RECIPE_DESC,
-			useResultAsDescription = true,
+			nameDisplay = ComplexRecipe.RecipeNameDisplay.Result,
 			fabricators = new List<Tag> { "ClothingFabricator" },
 			sortOrder = 1
 		};
@@ -101,7 +101,7 @@ public class ClothingFabricatorConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
+		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)
 		{
 			ComplexFabricatorWorkable component = game_object.GetComponent<ComplexFabricatorWorkable>();
 			component.AttributeConverter = Db.Get().AttributeConverters.MachinerySpeed;

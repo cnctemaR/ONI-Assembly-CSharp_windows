@@ -124,18 +124,79 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 
 	private void SetAnimator()
 	{
-		Image component = this.contentBody.GetComponent<Image>();
 		GameObject prefab = Assets.GetPrefab(this.info.id.ToTag());
-		if (prefab != null)
+		EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(this.info.id);
+		int num;
+		if (ElementLoader.FindElementByName(this.info.id) != null)
 		{
-			Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
-			component.sprite = uisprite.first;
-			component.color = uisprite.second;
+			num = 1;
+		}
+		else if (foodInfo != null)
+		{
+			num = (int)(this.info.quantity % foodInfo.CaloriesPerUnit);
 		}
 		else
 		{
-			component.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(this.info.id.ToTag()).substance.anim, "ui", false);
-			component.color = ElementLoader.GetElement(this.info.id.ToTag()).substance.uiColour;
+			num = (int)this.info.quantity;
+		}
+		if (prefab != null)
+		{
+			for (int i = 0; i < num; i++)
+			{
+				GameObject gameObject = Util.KInstantiateUI(this.contentBody, this.contentBody.transform.parent.gameObject, false);
+				gameObject.SetActive(true);
+				Image component = gameObject.GetComponent<Image>();
+				Tuple<Sprite, Color> uisprite = Def.GetUISprite(prefab, "ui", false);
+				component.sprite = uisprite.first;
+				component.color = uisprite.second;
+				this.entryIcons.Add(gameObject);
+				if (num > 1)
+				{
+					int num2;
+					int num3;
+					int num4;
+					if (num % 2 == 1)
+					{
+						num2 = Mathf.CeilToInt((float)(num / 2));
+						num3 = num2 - i;
+						num4 = ((num3 <= 0) ? (-1) : 1);
+						num3 = Mathf.Abs(num3);
+					}
+					else
+					{
+						num2 = num / 2 - 1;
+						if (i <= num2)
+						{
+							num3 = Mathf.Abs(num2 - i);
+							num4 = -1;
+						}
+						else
+						{
+							num3 = Mathf.Abs(num2 + 1 - i);
+							num4 = 1;
+						}
+					}
+					int num5 = 0;
+					if (num % 2 == 0)
+					{
+						num5 = ((i > num2) ? 6 : (-6));
+						gameObject.transform.SetPosition(gameObject.transform.position += new Vector3((float)num5, 0f, 0f));
+					}
+					gameObject.transform.localScale = new Vector3(1f - (float)num3 * 0.1f, 1f - (float)num3 * 0.1f, 1f);
+					gameObject.transform.Rotate(0f, 0f, 3f * (float)num3 * (float)num4);
+					gameObject.transform.SetPosition(gameObject.transform.position + new Vector3(25f * (float)num3 * (float)num4, 5f * (float)num3) + new Vector3((float)num5, 0f, 0f));
+					gameObject.GetComponent<Canvas>().sortingOrder = num - num3;
+				}
+			}
+		}
+		else
+		{
+			GameObject gameObject2 = Util.KInstantiateUI(this.contentBody, this.contentBody.transform.parent.gameObject, false);
+			gameObject2.SetActive(true);
+			Image component2 = gameObject2.GetComponent<Image>();
+			component2.sprite = Def.GetUISpriteFromMultiObjectAnim(ElementLoader.GetElement(this.info.id.ToTag()).substance.anim, "ui", false, string.Empty);
+			component2.color = ElementLoader.GetElement(this.info.id.ToTag()).substance.uiColour;
+			this.entryIcons.Add(gameObject2);
 		}
 	}
 
@@ -152,6 +213,35 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 			return element.substance.name;
 		}
 		return string.Empty;
+	}
+
+	private string GetSpawnableQuantityOnly()
+	{
+		if (ElementLoader.GetElement(this.info.id.ToTag()) != null)
+		{
+			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, GameUtil.GetFormattedMass(this.info.quantity, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+		}
+		if (Game.Instance.ediblesManager.GetFoodInfo(this.info.id) != null)
+		{
+			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, GameUtil.GetFormattedCaloriesForItem(this.info.id, this.info.quantity, GameUtil.TimeSlice.None, true));
+		}
+		return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_ELEMENT_COUNT_ONLY, this.info.quantity.ToString());
+	}
+
+	private string GetCurrentQuantity()
+	{
+		if (ElementLoader.GetElement(this.info.id.ToTag()) != null)
+		{
+			float amount = WorldInventory.Instance.GetAmount(this.info.id.ToTag());
+			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedMass(amount, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"));
+		}
+		if (Game.Instance.ediblesManager.GetFoodInfo(this.info.id) != null)
+		{
+			float num = RationTracker.Get().CountRationsByFoodType(this.info.id, true);
+			return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, GameUtil.GetFormattedCalories(num, GameUtil.TimeSlice.None, true));
+		}
+		float amount2 = WorldInventory.Instance.GetAmount(this.info.id.ToTag());
+		return string.Format(UI.IMMIGRANTSCREEN.CARE_PACKAGE_CURRENT_AMOUNT, amount2.ToString());
 	}
 
 	private string GetSpawnableQuantity()
@@ -191,7 +281,9 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	{
 		this.characterName.SetText(this.GetSpawnableName());
 		this.description.SetText(this.GetSpawnableDescription());
-		this.quantity.SetText(this.GetSpawnableQuantity());
+		this.itemName.SetText(this.GetSpawnableName());
+		this.quantity.SetText(this.GetSpawnableQuantityOnly());
+		this.currentQuantity.SetText(this.GetCurrentQuantity());
 	}
 
 	public void SelectDeliverable()
@@ -300,6 +392,7 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			this.DeselectDeliverable();
 		}
+		this.ClearEntryIcons();
 		this.GenerateCharacter(is_starter);
 	}
 
@@ -369,8 +462,17 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 		{
 			return;
 		}
+		this.ClearEntryIcons();
 		this.SetAnimator();
 		this.SetInfoText();
+	}
+
+	private void ClearEntryIcons()
+	{
+		for (int i = 0; i < this.entryIcons.Count; i++)
+		{
+			global::UnityEngine.Object.Destroy(this.entryIcons[i]);
+		}
 	}
 
 	[Header("UI References")]
@@ -397,7 +499,13 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	private KBatchedAnimController animController;
 
 	[SerializeField]
+	private LocText itemName;
+
+	[SerializeField]
 	private LocText quantity;
+
+	[SerializeField]
+	private LocText currentQuantity;
 
 	[SerializeField]
 	private LocText description;
@@ -420,6 +528,8 @@ public class CarePackageContainer : KScreen, ITelepadDeliverableContainer
 	private Dictionary<string, Sprite> professionIconMap;
 
 	public float baseCharacterScale = 0.38f;
+
+	private List<GameObject> entryIcons = new List<GameObject>();
 
 	[Serializable]
 	public struct ProfessionIcon

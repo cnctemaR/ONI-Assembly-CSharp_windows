@@ -120,7 +120,7 @@ public class LiquidPumpingStation : Workable, ISim200ms
 				{
 					liquidInfo.source = base.GetComponent<Storage>().AddLiquid(liquidInfo.element.id, liquidInfo.amount, liquidInfo.element.defaultValues.temperature, byte.MaxValue, 0, false, true).GetComponent<SubstanceChunk>();
 					Pickupable component = liquidInfo.source.GetComponent<Pickupable>();
-					component.GetComponent<KPrefabID>().AddTag(GameTags.LiquidSource);
+					component.GetComponent<KPrefabID>().AddTag(GameTags.LiquidSource, false);
 					component.SetOffsets(new CellOffset[]
 					{
 						new CellOffset(0, 1)

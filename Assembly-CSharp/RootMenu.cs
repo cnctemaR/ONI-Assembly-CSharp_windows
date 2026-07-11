@@ -119,6 +119,10 @@ public class RootMenu : KScreen
 	{
 		if (!e.Consumed && e.TryConsume(global::Action.Escape) && SelectTool.Instance.enabled)
 		{
+			if (!this.canTogglePauseScreen)
+			{
+				return;
+			}
 			if (this.AreSubMenusOpen())
 			{
 				KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Back", false));
@@ -167,9 +171,6 @@ public class RootMenu : KScreen
 	public void TogglePauseScreen()
 	{
 		PauseScreen.Instance.Show(true);
-		AudioMixer.instance.Start(AudioMixerSnapshots.Get().ESCPauseSnapshot);
-		MusicManager.instance.OnEscapeMenu(true);
-		MusicManager.instance.PlaySong("Music_ESC_Menu", false);
 	}
 
 	public void ExternalClose()
@@ -216,6 +217,11 @@ public class RootMenu : KScreen
 		return list.ToArray();
 	}
 
+	public bool IsBuildingChorePanelActive()
+	{
+		return this.detailsScreen != null && this.detailsScreen.GetActiveTab() is BuildingChoresPanel;
+	}
+
 	private DetailsScreen detailsScreen;
 
 	private UserMenuScreen userMenu;
@@ -236,6 +242,8 @@ public class RootMenu : KScreen
 	private List<KScreen> subMenus = new List<KScreen>();
 
 	private TileScreen tileScreenInst;
+
+	public bool canTogglePauseScreen = true;
 
 	public GameObject selectedGO;
 }

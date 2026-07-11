@@ -17,9 +17,6 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.applyButton.isInteractable = false;
 		this.applyButton.onClick += this.OnApply;
 		this.applyButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.APPLYBUTTON);
-		this.revertButton.isInteractable = false;
-		this.revertButton.onClick += this.OnRevert;
-		this.revertButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.REVERTBUTTON);
 		this.doneButton.onClick += this.OnDone;
 		this.closeButton.onClick += this.OnDone;
 		this.doneButton.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.DONE_BUTTON);
@@ -27,11 +24,12 @@ internal class GraphicsOptionsScreen : KModalScreen
 		this.BuildOptions();
 		this.resolutionDropdown.options = this.options;
 		this.resolutionDropdown.onValueChanged.AddListener(new UnityAction<int>(this.OnResolutionChanged));
-		this.fullscreenToggle.isOn = Screen.fullScreen;
-		this.fullscreenToggle.onValueChanged.AddListener(new UnityAction<bool>(this.OnFullscreenToggle));
+		this.fullscreenToggle.ChangeState((!Screen.fullScreen) ? 0 : 1);
+		MultiToggle multiToggle = this.fullscreenToggle;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(this.OnFullscreenToggle));
 		this.fullscreenToggle.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.FULLSCREEN);
 		this.resolutionDropdown.transform.parent.GetComponentInChildren<LocText>().SetText(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.RESOLUTION);
-		if (this.fullscreenToggle.isOn)
+		if (this.fullscreenToggle.CurrentState == 1)
 		{
 			int resolutionIndex = this.GetResolutionIndex(this.originalSettings.resolution);
 			if (resolutionIndex != -1)
@@ -41,7 +39,14 @@ internal class GraphicsOptionsScreen : KModalScreen
 		}
 		this.CanvasScalers = global::UnityEngine.Object.FindObjectsOfType<KCanvasScaler>();
 		this.UpdateSliderLabel();
-		this.uiScaleSlider.onValueChanged.AddListener(new UnityAction<float>(this.UpdateUIScale));
+		this.uiScaleSlider.onValueChanged.AddListener(delegate(float data)
+		{
+			this.sliderLabel.text = this.uiScaleSlider.value + "%";
+		});
+		this.uiScaleSlider.onReleaseHandle += delegate
+		{
+			this.UpdateUIScale(this.uiScaleSlider.value);
+		};
 	}
 
 	public static void SetResolutionFromPrefs()
@@ -236,11 +241,10 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			GraphicsOptionsScreen.Settings new_settings = default(GraphicsOptionsScreen.Settings);
 			new_settings.resolution = this.resolutions[this.resolutionDropdown.value];
-			new_settings.fullscreen = this.fullscreenToggle.isOn;
+			new_settings.fullscreen = this.fullscreenToggle.CurrentState != 0;
 			this.ApplyConfirmSettings(new_settings, delegate
 			{
 				this.applyButton.isInteractable = false;
-				this.revertButton.isInteractable = true;
 				GraphicsOptionsScreen.SaveResolutionToPrefs(new_settings);
 			});
 		}
@@ -253,20 +257,10 @@ internal class GraphicsOptionsScreen : KModalScreen
 				stringBuilder.Append("\t" + resolution.ToString() + "\n");
 			}
 			stringBuilder.Append("Selected Resolution Idx: " + this.resolutionDropdown.value.ToString());
-			stringBuilder.Append("FullScreen: " + this.fullscreenToggle.isOn.ToString());
+			stringBuilder.Append("FullScreen: " + this.fullscreenToggle.CurrentState.ToString());
 			global::Debug.LogError(stringBuilder.ToString());
 			throw ex;
 		}
-	}
-
-	private void OnRevert()
-	{
-		this.ApplyConfirmSettings(this.originalSettings, delegate
-		{
-			this.applyButton.isInteractable = false;
-			this.revertButton.isInteractable = false;
-			GraphicsOptionsScreen.SaveResolutionToPrefs(this.originalSettings);
-		});
 	}
 
 	public void OnDone()
@@ -277,7 +271,11 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private void RefreshApplyButton()
 	{
 		GraphicsOptionsScreen.Settings settings = this.CaptureSettings();
-		if (this.fullscreenToggle.isOn != settings.fullscreen)
+		if (settings.fullscreen && this.fullscreenToggle.CurrentState == 0)
+		{
+			this.applyButton.isInteractable = true;
+		}
+		else if (!settings.fullscreen && this.fullscreenToggle.CurrentState == 1)
 		{
 			this.applyButton.isInteractable = true;
 		}
@@ -288,8 +286,9 @@ internal class GraphicsOptionsScreen : KModalScreen
 		}
 	}
 
-	private void OnFullscreenToggle(bool enabled)
+	private void OnFullscreenToggle()
 	{
+		this.fullscreenToggle.ChangeState((this.fullscreenToggle.CurrentState != 0) ? 0 : 1);
 		this.RefreshApplyButton();
 	}
 
@@ -312,7 +311,7 @@ internal class GraphicsOptionsScreen : KModalScreen
 		{
 			this.StopCoroutine(timer);
 		};
-		this.confirmDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null);
+		this.confirmDialog.PopupConfirmDialog(UI.FRONTEND.GRAPHICS_OPTIONS_SCREEN.ACCEPT_CHANGES.text, on_confirm, action, null, null, null, null, null, null, true);
 		this.confirmDialog.gameObject.SetActive(true);
 	}
 
@@ -348,13 +347,10 @@ internal class GraphicsOptionsScreen : KModalScreen
 	private Dropdown resolutionDropdown;
 
 	[SerializeField]
-	private Toggle fullscreenToggle;
+	private MultiToggle fullscreenToggle;
 
 	[SerializeField]
 	private KButton applyButton;
-
-	[SerializeField]
-	private KButton revertButton;
 
 	[SerializeField]
 	private KButton doneButton;

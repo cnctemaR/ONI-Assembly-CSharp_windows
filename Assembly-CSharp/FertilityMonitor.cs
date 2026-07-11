@@ -162,6 +162,7 @@ public class FertilityMonitor : GameStateMachine<FertilityMonitor, FertilityMoni
 			{
 				component.AddSymbolOverride(FertilityMonitor.Instance.targetEggSymbol, symbol, 0);
 			}
+			base.Trigger(1193600993, this.egg);
 		}
 
 		public bool IsReadyToLayEgg()

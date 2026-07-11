@@ -57,9 +57,9 @@ public class ComplexFabricatorWorkable : Workable
 		}
 	}
 
-	protected override void OnSpawn()
+	protected override void OnPrefabInit()
 	{
-		base.OnSpawn();
+		base.OnPrefabInit();
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Processing;
 		this.attributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
 		this.attributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.PART_DAY_EXPERIENCE;
@@ -80,26 +80,14 @@ public class ComplexFabricatorWorkable : Workable
 		{
 			return;
 		}
-		this.operational.SetActive(true, false);
-		if (this.fabricator.CurrentMachineOrder != null)
+		if (this.fabricator.CurrentWorkingOrder != null)
 		{
-			this.InstantiateVisualizer(this.fabricator.CurrentMachineOrder);
+			this.InstantiateVisualizer(this.fabricator.CurrentWorkingOrder);
 		}
 		else
 		{
 			DebugUtil.DevAssertArgs(false, new object[] { "ComplexFabricatorWorkable.OnStartWork called but CurrentMachineOrder is null", base.gameObject });
 		}
-	}
-
-	protected override void OnStopWork(Worker worker)
-	{
-		base.OnStopWork(worker);
-		this.operational.SetActive(false, false);
-	}
-
-	public void ResetWorkTime()
-	{
-		this.workTimeRemaining = this.GetWorkTime();
 	}
 
 	protected override bool OnWorkTick(Worker worker, float dt)
@@ -108,41 +96,36 @@ public class ComplexFabricatorWorkable : Workable
 		{
 			this.OnWorkTickActions(worker, dt);
 		}
-		if (this.meter != null)
-		{
-			this.UpdateMeter(worker, dt);
-		}
+		this.UpdateOrderProgress(worker, dt);
 		return base.OnWorkTick(worker, dt);
 	}
 
 	public override float GetWorkTime()
 	{
-		ComplexFabricator.MachineOrder currentMachineOrder = this.fabricator.CurrentMachineOrder;
-		if (currentMachineOrder != null)
+		ComplexRecipe currentWorkingOrder = this.fabricator.CurrentWorkingOrder;
+		if (currentWorkingOrder != null)
 		{
-			this.workTime = currentMachineOrder.parentOrder.recipe.time;
+			this.workTime = currentWorkingOrder.time;
 			return this.workTime;
 		}
 		return -1f;
 	}
 
-	public void CreateOrder(ComplexFabricator.MachineOrder buildable_order, ChoreType choreType, Tag[] choreTags)
+	public Chore CreateWorkChore(ChoreType choreType, float order_progress)
 	{
-		buildable_order.chore = new WorkChore<ComplexFabricatorWorkable>(choreType, this, null, choreTags, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
-		if (this.workTimeRemaining <= 0f)
-		{
-			this.workTimeRemaining = this.GetWorkTime();
-		}
+		WorkChore<ComplexFabricatorWorkable> workChore = new WorkChore<ComplexFabricatorWorkable>(choreType, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		this.workTimeRemaining = this.GetWorkTime() * (1f - order_progress);
+		return workChore;
 	}
 
 	protected override void OnCompleteWork(Worker worker)
 	{
 		base.OnCompleteWork(worker);
-		this.fabricator.OnCompleteMachineOrder();
+		this.fabricator.CompleteWorkingOrder();
 		this.DestroyVisualizer();
 	}
 
-	private void InstantiateVisualizer(ComplexFabricator.MachineOrder order)
+	private void InstantiateVisualizer(ComplexRecipe recipe)
 	{
 		if (this.visualizer != null)
 		{
@@ -153,11 +136,11 @@ public class ComplexFabricatorWorkable : Workable
 			this.visualizerLink.Unregister();
 			this.visualizerLink = null;
 		}
-		if (order.parentOrder.recipe.FabricationVisualizer == null)
+		if (recipe.FabricationVisualizer == null)
 		{
 			return;
 		}
-		this.visualizer = Util.KInstantiate(order.parentOrder.recipe.FabricationVisualizer, null, null);
+		this.visualizer = Util.KInstantiate(recipe.FabricationVisualizer, null, null);
 		this.visualizer.transform.parent = this.meter.meterController.transform;
 		this.visualizer.transform.SetLocalPosition(new Vector3(0f, 0f, 1f));
 		this.visualizer.SetActive(true);
@@ -166,11 +149,18 @@ public class ComplexFabricatorWorkable : Workable
 		this.visualizerLink = new KAnimLink(component, component2);
 	}
 
-	private void UpdateMeter(Worker worker, float dt)
+	private void UpdateOrderProgress(Worker worker, float dt)
 	{
 		float workTime = this.GetWorkTime();
-		float num = (workTime - base.WorkTimeRemaining) / workTime;
-		this.meter.SetPositionPercent(num);
+		float num = Mathf.Clamp01((workTime - base.WorkTimeRemaining) / workTime);
+		if (this.fabricator)
+		{
+			this.fabricator.OrderProgress = num;
+		}
+		if (this.meter != null)
+		{
+			this.meter.SetPositionPercent(num);
+		}
 	}
 
 	private void DestroyVisualizer()

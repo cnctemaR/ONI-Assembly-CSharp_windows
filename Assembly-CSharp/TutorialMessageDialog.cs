@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using STRINGS;
 using UnityEngine;
+using UnityEngine.Video;
 
 public class TutorialMessageDialog : MessageDialog
 {
@@ -20,6 +23,25 @@ public class TutorialMessageDialog : MessageDialog
 	{
 		this.message = base_message as TutorialMessage;
 		this.description.text = this.message.GetMessageBody();
+		if (!string.IsNullOrEmpty(this.message.videoClipId))
+		{
+			VideoClip video = Assets.GetVideo(this.message.videoClipId);
+			this.SetVideo(video, this.message.videoOverlayName, this.message.videoTitleText);
+		}
+	}
+
+	public void SetVideo(VideoClip clip, string overlayName, string titleText)
+	{
+		if (this.videoWidget == null)
+		{
+			this.videoWidget = Util.KInstantiateUI(this.videoWidgetPrefab, base.transform.gameObject, true).GetComponent<VideoWidget>();
+			this.videoWidget.transform.SetAsFirstSibling();
+		}
+		this.videoWidget.SetClip(clip, overlayName, new List<string>
+		{
+			titleText,
+			VIDEOS.TUTORIAL_HEADER
+		});
 	}
 
 	public override void OnClickAction()
@@ -35,4 +57,9 @@ public class TutorialMessageDialog : MessageDialog
 	private LocText description;
 
 	private TutorialMessage message;
+
+	[SerializeField]
+	private GameObject videoWidgetPrefab;
+
+	private VideoWidget videoWidget;
 }

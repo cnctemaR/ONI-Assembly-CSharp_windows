@@ -49,5 +49,7 @@ namespace TUNING
 		public static readonly string[] BUILDING_FIBER = new string[] { "BuildingFiber" };
 
 		public static readonly string[] ANY_BUILDABLE = new string[] { "BuildableAny" };
+
+		public static readonly string[] FLYING_CRITTER_FOOD = new string[] { "FlyingCritterEdible" };
 	}
 }

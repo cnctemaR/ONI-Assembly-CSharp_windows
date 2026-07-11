@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using Database;
 using STRINGS;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TelepadSideScreen : SideScreenContent
 {
@@ -12,6 +15,17 @@ public class TelepadSideScreen : SideScreenContent
 			ImmigrantScreen.InitializeImmigrantScreen(this.targetTelepad);
 			Game.Instance.Trigger(288942073, null);
 		};
+		this.viewColonySummaryBtn.onClick += delegate
+		{
+			this.newAchievementsEarned.gameObject.SetActive(false);
+			RetireColonyUtility.SaveColonySummaryData();
+			MainMenu.ActivateRetiredColoniesScreen(PauseScreen.Instance.transform.parent.gameObject, SaveGame.Instance.BaseName, null);
+		};
+		this.openRolesScreenButton.onClick += delegate
+		{
+			ManagementMenu.Instance.ToggleSkills();
+		};
+		this.BuildVictoryConditions();
 	}
 
 	public override bool IsValidForTarget(GameObject target)
@@ -60,6 +74,8 @@ public class TelepadSideScreen : SideScreenContent
 				}
 				this.SetContentState(!Immigration.Instance.ImmigrantsAvailable);
 			}
+			this.UpdateVictoryConditions();
+			this.UpdateAchievementsUnlocked();
 		}
 	}
 
@@ -75,6 +91,57 @@ public class TelepadSideScreen : SideScreenContent
 		}
 	}
 
+	private void BuildVictoryConditions()
+	{
+		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
+		{
+			if (colonyAchievement.isVictoryCondition)
+			{
+				Dictionary<ColonyAchievementRequirement, GameObject> dictionary = new Dictionary<ColonyAchievementRequirement, GameObject>();
+				GameObject gameObject = Util.KInstantiateUI(this.conditionContainerTemplate, this.victoryConditionsContainer, true);
+				gameObject.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").SetText(colonyAchievement.Name);
+				foreach (ColonyAchievementRequirement colonyAchievementRequirement in colonyAchievement.requirementChecklist)
+				{
+					VictoryColonyAchievementRequirement victoryColonyAchievementRequirement = colonyAchievementRequirement as VictoryColonyAchievementRequirement;
+					if (victoryColonyAchievementRequirement != null)
+					{
+						GameObject gameObject2 = Util.KInstantiateUI(this.checkboxLinePrefab, gameObject, true);
+						gameObject2.GetComponent<HierarchyReferences>().GetReference<LocText>("Label").SetText(victoryColonyAchievementRequirement.Name());
+						gameObject2.GetComponent<ToolTip>().SetSimpleTooltip(victoryColonyAchievementRequirement.Description());
+						dictionary.Add(colonyAchievementRequirement, gameObject2);
+					}
+					else
+					{
+						global::Debug.LogWarning(string.Format("Colony achievement {0} is not a victory requirement but it is attached to a victory achievement {1}.", colonyAchievementRequirement.GetType().ToString(), colonyAchievement.Name));
+					}
+				}
+				this.entries.Add(colonyAchievement.Id, dictionary);
+			}
+		}
+	}
+
+	private void UpdateVictoryConditions()
+	{
+		foreach (ColonyAchievement colonyAchievement in Db.Get().ColonyAchievements.resources)
+		{
+			if (colonyAchievement.isVictoryCondition)
+			{
+				foreach (ColonyAchievementRequirement colonyAchievementRequirement in colonyAchievement.requirementChecklist)
+				{
+					this.entries[colonyAchievement.Id][colonyAchievementRequirement].GetComponent<HierarchyReferences>().GetReference<Image>("Check").enabled = colonyAchievementRequirement.Success();
+				}
+			}
+		}
+	}
+
+	private void UpdateAchievementsUnlocked()
+	{
+		if (SaveGame.Instance.GetComponent<ColonyAchievementTracker>().achievementsToDisplay.Count > 0)
+		{
+			this.newAchievementsEarned.gameObject.SetActive(true);
+		}
+	}
+
 	[SerializeField]
 	private LocText timeLabel;
 
@@ -83,4 +150,24 @@ public class TelepadSideScreen : SideScreenContent
 
 	[SerializeField]
 	private Telepad targetTelepad;
+
+	[SerializeField]
+	private KButton viewColonySummaryBtn;
+
+	[SerializeField]
+	private Image newAchievementsEarned;
+
+	[SerializeField]
+	private KButton openRolesScreenButton;
+
+	[SerializeField]
+	private GameObject victoryConditionsContainer;
+
+	[SerializeField]
+	private GameObject conditionContainerTemplate;
+
+	[SerializeField]
+	private GameObject checkboxLinePrefab;
+
+	private Dictionary<string, Dictionary<ColonyAchievementRequirement, GameObject>> entries = new Dictionary<string, Dictionary<ColonyAchievementRequirement, GameObject>>();
 }

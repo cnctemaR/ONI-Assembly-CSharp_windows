@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ProcGen.Noise
 {
-	public class NoiseTreeFiles : YamlIO<NoiseTreeFiles>
+	public class NoiseTreeFiles
 	{
 		public NoiseTreeFiles()
 		{
@@ -27,11 +27,17 @@ namespace ProcGen.Noise
 
 		public List<string> tree_files { get; set; }
 
+		public void Clear()
+		{
+			this.tree_files.Clear();
+			this.trees.Clear();
+		}
+
 		public void LoadAllTrees()
 		{
 			for (int i = 0; i < this.tree_files.Count; i++)
 			{
-				Tree tree = YamlIO<Tree>.LoadFile(NoiseTreeFiles.GetTreeFilePath(this.tree_files[i]), null);
+				Tree tree = YamlIO.LoadFile<Tree>(NoiseTreeFiles.GetTreeFilePath(this.tree_files[i]), null, null);
 				if (tree != null)
 				{
 					this.trees.Add(this.tree_files[i], tree);
@@ -45,7 +51,7 @@ namespace ProcGen.Noise
 			{
 				if (!this.trees.ContainsKey(name))
 				{
-					Tree tree = YamlIO<Tree>.LoadFile(path + name + ".yaml", null);
+					Tree tree = YamlIO.LoadFile<Tree>(path + name + ".yaml", null, null);
 					if (tree != null)
 					{
 						this.trees.Add(name, tree);
@@ -85,7 +91,7 @@ namespace ProcGen.Noise
 		{
 			if (!this.trees.ContainsKey(name))
 			{
-				Tree tree = YamlIO<Tree>.LoadFile(path + "/" + name + ".yaml", null);
+				Tree tree = YamlIO.LoadFile<Tree>(path + "/" + name + ".yaml", null, null);
 				if (tree == null)
 				{
 					return null;

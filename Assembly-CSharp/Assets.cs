@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Video;
 
 public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 {
@@ -164,6 +165,12 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 		return sprite;
 	}
 
+	public static VideoClip GetVideo(string name)
+	{
+		string text = "video/" + name;
+		return Resources.Load<VideoClip>(text);
+	}
+
 	public static Texture2D GetTexture(string name)
 	{
 		Texture2D texture2D = null;
@@ -179,6 +186,18 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 			}
 		}
 		return texture2D;
+	}
+
+	public static ComicData GetComic(string id)
+	{
+		foreach (ComicData comicData in Assets.instance.comics)
+		{
+			if (comicData.name == id)
+			{
+				return comicData;
+			}
+		}
+		return null;
 	}
 
 	public static void AddPrefab(KPrefabID prefab)
@@ -379,6 +398,10 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 
 	public static Dictionary<HashedString, Sprite> Sprites;
 
+	public List<string> videoClipNames;
+
+	private const string VIDEO_ASSET_PATH = "video";
+
 	public List<TintedSprite> TintedSpriteAssets;
 
 	public static List<TintedSprite> TintedSprites;
@@ -448,6 +471,8 @@ public class Assets : KMonoBehaviour, ISerializationCallbackReceiver
 	public DigPlacerConfig.DigPlacerAssets digPlacerAssets;
 
 	public MopPlacerConfig.MopPlacerAssets mopPlacerAssets;
+
+	public ComicData[] comics;
 
 	public static Assets instance;
 

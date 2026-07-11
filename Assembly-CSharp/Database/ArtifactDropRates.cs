@@ -13,6 +13,9 @@ namespace Database
 
 		private void CreateDropRates()
 		{
+			this.None = new ArtifactDropRate();
+			this.None.AddItem(DECOR.SPACEARTIFACT.TIER_NONE, 1f);
+			base.Add(this.None);
 			this.Bad = new ArtifactDropRate();
 			this.Bad.AddItem(DECOR.SPACEARTIFACT.TIER_NONE, 10f);
 			this.Bad.AddItem(DECOR.SPACEARTIFACT.TIER0, 5f);
@@ -49,6 +52,8 @@ namespace Database
 			this.Perfect.AddItem(DECOR.SPACEARTIFACT.TIER5, 4f);
 			base.Add(this.Perfect);
 		}
+
+		public ArtifactDropRate None;
 
 		public ArtifactDropRate Bad;
 

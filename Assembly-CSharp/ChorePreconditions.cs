@@ -68,7 +68,13 @@ public class ChorePreconditions
 		precondition6.description = DUPLICANTS.CHORES.PRECONDITIONS.IS_IN_MY_ROOM;
 		precondition6.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
-			Room room = (Room)data;
+			int num = (int)data;
+			CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(num);
+			Room room = null;
+			if (cavityForCell != null)
+			{
+				room = cavityForCell.room;
+			}
 			if (room != null)
 			{
 				if (context.consumerState.ownable != null)
@@ -86,19 +92,19 @@ public class ChorePreconditions
 				FetchChore fetchChore = context.chore as FetchChore;
 				if (fetchChore != null && fetchChore.destination != null)
 				{
-					CavityInfo cavityForCell = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(fetchChore.destination));
-					if (cavityForCell != null)
+					CavityInfo cavityForCell2 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell(fetchChore.destination));
+					if (cavityForCell2 != null)
 					{
-						room2 = cavityForCell.room;
+						room2 = cavityForCell2.room;
 					}
 					return room2 != null && room2 == room;
 				}
 				if (context.chore is WorkChore<Tinkerable>)
 				{
-					CavityInfo cavityForCell2 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell((context.chore as WorkChore<Tinkerable>).gameObject));
-					if (cavityForCell2 != null)
+					CavityInfo cavityForCell3 = Game.Instance.roomProber.GetCavityForCell(Grid.PosToCell((context.chore as WorkChore<Tinkerable>).gameObject));
+					if (cavityForCell3 != null)
 					{
-						room2 = cavityForCell2.room;
+						room2 = cavityForCell3.room;
 					}
 					return room2 != null && room2 == room;
 				}
@@ -173,6 +179,10 @@ public class ChorePreconditions
 		precondition11.fn = delegate(ref Chore.Precondition.Context context, object data)
 		{
 			if (context.isAttemptingOverride)
+			{
+				return true;
+			}
+			if (context.skipMoreSatisfyingEarlyPrecondition)
 			{
 				return true;
 			}
@@ -280,10 +290,10 @@ public class ChorePreconditions
 				return false;
 			}
 			IApproachable approachable = (IApproachable)kmonoBehaviour2;
-			int num;
-			if (context.consumerState.consumer.GetNavigationCost(approachable, out num))
+			int num2;
+			if (context.consumerState.consumer.GetNavigationCost(approachable, out num2))
 			{
-				context.cost += num;
+				context.cost += num2;
 				return true;
 			}
 			return false;
@@ -454,10 +464,10 @@ public class ChorePreconditions
 			{
 				return false;
 			}
-			int num2 = 0;
-			if (workerPrioritizable.GetWorkerPriority(context.consumerState.worker, out num2))
+			int num3 = 0;
+			if (workerPrioritizable.GetWorkerPriority(context.consumerState.worker, out num3))
 			{
-				context.consumerPriority += num2;
+				context.consumerPriority += num3;
 				return true;
 			}
 			return false;

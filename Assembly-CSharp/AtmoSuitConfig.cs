@@ -31,7 +31,6 @@ public class AtmoSuitConfig : IEquipmentConfig
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("SoakingWet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("WetFeet"));
 		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("PoppedEarDrums"));
-		equipmentDef.EffectImmunites.Add(Db.Get().effects.Get("Unclean"));
 		equipmentDef.OnEquipCallBack = delegate(Equippable eq)
 		{
 			Ownables soleOwner = eq.assignee.GetSoleOwner();
@@ -92,13 +91,13 @@ public class AtmoSuitConfig : IEquipmentConfig
 		suitTank.capacity = 75f;
 		go.AddComponent<HelmetController>();
 		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Clothes);
-		component.AddTag(GameTags.PedestalDisplayable);
-		component.AddTag(GameTags.AirtightSuit);
+		component.AddTag(GameTags.Clothes, false);
+		component.AddTag(GameTags.PedestalDisplayable, false);
+		component.AddTag(GameTags.AirtightSuit, false);
 		Storage storage = go.AddOrGet<Storage>();
 		storage.SetDefaultStoredItemModifiers(Storage.StandardInsulatedStorage);
 		storage.showInUI = true;
-		AtmoSuit atmoSuit = go.AddOrGet<AtmoSuit>();
+		go.AddOrGet<AtmoSuit>();
 		go.AddComponent<SuitDiseaseHandler>();
 	}
 

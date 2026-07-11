@@ -1,0 +1,120 @@
+﻿using System;
+using System.Collections.Generic;
+using STRINGS;
+using TUNING;
+using UnityEngine;
+
+public class OxyfernConfig : IEntityConfig
+{
+	public GameObject CreatePrefab()
+	{
+		string text = "Oxyfern";
+		string text2 = global::STRINGS.CREATURES.SPECIES.OXYFERN.NAME;
+		string text3 = global::STRINGS.CREATURES.SPECIES.OXYFERN.DESC;
+		float num = 1f;
+		KAnimFile kanimFile = Assets.GetAnim("oxy_fern_kanim");
+		string text4 = "idle_full";
+		EffectorValues tier = DECOR.PENALTY.TIER1;
+		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingBack, 1, 2, tier, default(EffectorValues), SimHashes.Creature, null, 293f);
+		gameObject.AddOrGet<ReceptacleMonitor>();
+		gameObject.AddOrGet<EntombVulnerable>();
+		gameObject.AddOrGet<WiltCondition>();
+		gameObject.AddOrGet<Prioritizable>();
+		gameObject.AddOrGet<Uprootable>();
+		gameObject.AddOrGet<UprootedMonitor>();
+		gameObject.AddOrGet<DrowningMonitor>();
+		TemperatureVulnerable temperatureVulnerable = gameObject.AddOrGet<TemperatureVulnerable>();
+		temperatureVulnerable.Configure(273.15f, 253.15f, 313.15f, 373.15f);
+		Tag tag = ElementLoader.FindElementByHash(SimHashes.Water).tag;
+		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
+		{
+			new PlantElementAbsorber.ConsumeInfo
+			{
+				tag = tag,
+				massConsumptionRate = 0.031666666f
+			}
+		});
+		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
+		{
+			new PlantElementAbsorber.ConsumeInfo
+			{
+				tag = GameTags.Dirt,
+				massConsumptionRate = 0.006666667f
+			}
+		});
+		gameObject.AddOrGet<Oxyfern>();
+		gameObject.AddOrGet<OccupyArea>().objectLayers = new ObjectLayer[] { ObjectLayer.Building };
+		gameObject.AddOrGet<KBatchedAnimController>().randomiseLoopedOffset = true;
+		PressureVulnerable pressureVulnerable = gameObject.AddOrGet<PressureVulnerable>();
+		PressureVulnerable pressureVulnerable2 = pressureVulnerable;
+		num = 0.025f;
+		float num2 = 0f;
+		SimHashes[] array = new SimHashes[] { SimHashes.CarbonDioxide };
+		pressureVulnerable2.Configure(num, num2, 10f, 30f, array);
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		component.prefabInitFn += delegate(GameObject inst)
+		{
+			PressureVulnerable component2 = inst.GetComponent<PressureVulnerable>();
+			component2.safe_atmospheres.Add(ElementLoader.FindElementByHash(SimHashes.CarbonDioxide));
+		};
+		gameObject.AddOrGet<LoopingSounds>();
+		Storage storage = gameObject.AddOrGet<Storage>();
+		storage.showInUI = false;
+		storage.capacityKg = 1f;
+		ElementConsumer elementConsumer = gameObject.AddOrGet<ElementConsumer>();
+		elementConsumer.showInStatusPanel = false;
+		elementConsumer.storeOnConsume = true;
+		elementConsumer.storage = storage;
+		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;
+		elementConsumer.configuration = ElementConsumer.Configuration.Element;
+		elementConsumer.consumptionRadius = 2;
+		elementConsumer.EnableConsumption(true);
+		elementConsumer.sampleCellOffset = new Vector3(0f, 0f);
+		elementConsumer.consumptionRate = 0.00015625001f;
+		ElementConverter elementConverter = gameObject.AddOrGet<ElementConverter>();
+		elementConverter.OutputMultiplier = 50f;
+		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
+		{
+			new ElementConverter.ConsumedElement(SimHashes.CarbonDioxide.ToString().ToTag(), 0.00062500004f)
+		};
+		elementConverter.outputElements = new ElementConverter.OutputElement[]
+		{
+			new ElementConverter.OutputElement(0.031250004f, SimHashes.Oxygen, 0f, true, false, 0f, 1f, 0.75f, byte.MaxValue, 0)
+		};
+		GameObject gameObject2 = gameObject;
+		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Hidden;
+		text4 = "OxyfernSeed";
+		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.NAME;
+		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.OXYFERN.DESC;
+		kanimFile = Assets.GetAnim("seed_oxyfern_kanim");
+		List<Tag> list = new List<Tag> { GameTags.CropSeed };
+		GameObject gameObject3 = EntityTemplates.CreateAndRegisterSeedForPlant(gameObject2, productionType, text4, text3, text2, kanimFile, "object", 1, list, SingleEntityReceptacle.ReceptacleDirection.Top, default(Tag), 2, global::STRINGS.CREATURES.SPECIES.OXYFERN.DOMESTICATEDDESC, EntityTemplates.CollisionShape.CIRCLE, 0.3f, 0.3f, null, string.Empty, false);
+		EntityTemplates.CreateAndRegisterPreviewForPlant(gameObject3, "Oxyfern_preview", Assets.GetAnim("oxy_fern_kanim"), "place", 1, 2);
+		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_harvest", NOISE_POLLUTION.CREATURES.TIER3);
+		SoundEventVolumeCache.instance.AddVolume("oxy_fern_kanim", "MealLice_LP", NOISE_POLLUTION.CREATURES.TIER4);
+		return gameObject;
+	}
+
+	public void OnPrefabInit(GameObject prefab)
+	{
+	}
+
+	public void OnSpawn(GameObject inst)
+	{
+		inst.GetComponent<Oxyfern>().SetConsumptionRate();
+	}
+
+	public const string ID = "Oxyfern";
+
+	public const string SEED_ID = "OxyfernSeed";
+
+	public const float WATER_CONSUMPTION_RATE = 0.031666666f;
+
+	public const float FERTILIZATION_RATE = 0.006666667f;
+
+	public const float CO2_RATE = 0.00062500004f;
+
+	private const float CONVERSION_RATIO = 50f;
+
+	public const float OXYGEN_RATE = 0.031250004f;
+}

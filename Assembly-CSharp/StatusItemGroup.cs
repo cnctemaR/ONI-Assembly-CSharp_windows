@@ -261,6 +261,11 @@ public class StatusItemGroup
 			return this.id == other.id;
 		}
 
+		public void OnClick()
+		{
+			this.item.OnClick(this.data);
+		}
+
 		public Guid id;
 
 		public StatusItem item;

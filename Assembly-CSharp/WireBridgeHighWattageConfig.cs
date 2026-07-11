@@ -69,8 +69,6 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		Constructable component = go.GetComponent<Constructable>();
-		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
@@ -80,7 +78,7 @@ public class WireBridgeHighWattageConfig : IBuildingConfig
 	{
 		WireUtilityNetworkLink wireUtilityNetworkLink = this.AddNetworkLink(go);
 		wireUtilityNetworkLink.visualizeOnly = false;
-		go.GetComponent<KPrefabID>().AddTag(GameTags.WireBridges);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.WireBridges, false);
 		go.AddOrGet<BuildingCellVisualizer>();
 	}
 

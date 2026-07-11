@@ -139,6 +139,9 @@ public class SubworldZoneRenderData : KMonoBehaviour
 		new Color32(201, 152, 181, 4),
 		new Color32(222, 90, 59, 5),
 		new Color32(201, 152, 181, 6),
-		new Color32(byte.MaxValue, 0, 0, 7)
+		new Color32(byte.MaxValue, 0, 0, 7),
+		new Color32(201, 201, 151, 8),
+		new Color32(236, 90, 110, 9),
+		new Color32(110, 236, 110, 10)
 	};
 }

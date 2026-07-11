@@ -63,10 +63,10 @@ public class LiquidCooledRefinery : ComplexFabricator
 		}
 	}
 
-	protected override bool HasIngredients(ComplexFabricator.MachineOrder order, Storage storage)
+	protected override bool HasIngredients(ComplexRecipe recipe, Storage storage)
 	{
 		float amountAvailable = storage.GetAmountAvailable(this.coolantTag);
-		return amountAvailable >= this.minCoolantMass && base.HasIngredients(order, storage);
+		return amountAvailable >= this.minCoolantMass && base.HasIngredients(recipe, storage);
 	}
 
 	protected override void TransferCurrentRecipeIngredientsForBuild()
@@ -80,9 +80,9 @@ public class LiquidCooledRefinery : ComplexFabricator
 		}
 	}
 
-	protected override List<GameObject> SpawnOrderProduct(ComplexFabricator.UserOrder completed_order)
+	protected override List<GameObject> SpawnOrderProduct(ComplexRecipe recipe)
 	{
-		List<GameObject> list = base.SpawnOrderProduct(completed_order);
+		List<GameObject> list = base.SpawnOrderProduct(recipe);
 		PrimaryElement component = list[0].GetComponent<PrimaryElement>();
 		component.Temperature = this.outputTemperature;
 		float num = GameUtil.CalculateEnergyDeltaForElementChange(component.Element.specificHeatCapacity, component.Mass, component.Element.highTemp, this.outputTemperature);
@@ -180,7 +180,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 		{
 			if (LiquidCooledRefinery.States.waitingForCoolantStatus == null)
 			{
-				LiquidCooledRefinery.States.waitingForCoolantStatus = new StatusItem("waitingForCoolantStatus", BUILDING.STATUSITEMS.ENOUGH_COOLANT.NAME, BUILDING.STATUSITEMS.ENOUGH_COOLANT.TOOLTIP, "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, 63486);
+				LiquidCooledRefinery.States.waitingForCoolantStatus = new StatusItem("waitingForCoolantStatus", BUILDING.STATUSITEMS.ENOUGH_COOLANT.NAME, BUILDING.STATUSITEMS.ENOUGH_COOLANT.TOOLTIP, "status_item_no_liquid_to_pump", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, 129022);
 				LiquidCooledRefinery.States.waitingForCoolantStatus.resolveStringCallback = delegate(string str, object obj)
 				{
 					LiquidCooledRefinery liquidCooledRefinery = (LiquidCooledRefinery)obj;
@@ -191,7 +191,7 @@ public class LiquidCooledRefinery : ComplexFabricator
 			this.waiting_for_coolant.ToggleStatusItem(LiquidCooledRefinery.States.waitingForCoolantStatus, (LiquidCooledRefinery.StatesInstance smi) => smi.master).EventTransition(GameHashes.OnStorageChange, this.ready, (LiquidCooledRefinery.StatesInstance smi) => smi.master.HasEnoughCoolant()).ParamTransition<bool>(this.outputBlocked, this.output_blocked, GameStateMachine<LiquidCooledRefinery.States, LiquidCooledRefinery.StatesInstance, LiquidCooledRefinery, object>.IsTrue);
 			this.ready.EventTransition(GameHashes.OnStorageChange, this.waiting_for_coolant, (LiquidCooledRefinery.StatesInstance smi) => !smi.master.HasEnoughCoolant()).ParamTransition<bool>(this.outputBlocked, this.output_blocked, GameStateMachine<LiquidCooledRefinery.States, LiquidCooledRefinery.StatesInstance, LiquidCooledRefinery, object>.IsTrue).Enter(delegate(LiquidCooledRefinery.StatesInstance smi)
 			{
-				smi.master.UpdateMachineOrders(false);
+				smi.master.SetQueueDirty();
 			});
 			this.output_blocked.ToggleStatusItem(Db.Get().BuildingStatusItems.OutputPipeFull, null).ParamTransition<bool>(this.outputBlocked, this.waiting_for_coolant, GameStateMachine<LiquidCooledRefinery.States, LiquidCooledRefinery.StatesInstance, LiquidCooledRefinery, object>.IsFalse);
 		}

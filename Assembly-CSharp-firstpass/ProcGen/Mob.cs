@@ -3,6 +3,7 @@ using KSerialization.Converters;
 
 namespace ProcGen
 {
+	[Serializable]
 	public class Mob : SampleDescriber
 	{
 		public Mob()
@@ -36,7 +37,9 @@ namespace ProcGen
 			Solid,
 			Water,
 			ShallowLiquid,
-			Surface
+			Surface,
+			LiquidFloor,
+			AnyFloor
 		}
 	}
 }

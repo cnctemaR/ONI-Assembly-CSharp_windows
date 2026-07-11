@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public static class DictionaryPool<KeyType, ObjectType, PoolIdentifier>
 {
@@ -21,6 +22,7 @@ public static class DictionaryPool<KeyType, ObjectType, PoolIdentifier>
 
 	private static ContainerPool<DictionaryPool<KeyType, ObjectType, PoolIdentifier>.PooledDictionary, PoolIdentifier> pool = new ContainerPool<DictionaryPool<KeyType, ObjectType, PoolIdentifier>.PooledDictionary, PoolIdentifier>();
 
+	[DebuggerDisplay("Count={Count}")]
 	public class PooledDictionary : Dictionary<KeyType, ObjectType>
 	{
 		public void Recycle()

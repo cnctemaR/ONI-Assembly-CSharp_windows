@@ -46,7 +46,7 @@ public class InitializeCheck : MonoBehaviour
 		global::System.Action action = new global::System.Action(this.Quit);
 		global::System.Action action2 = null;
 		Sprite sprite = this.sadDupe;
-		confirmDialogScreen2.PopupConfirmDialog(msg, action, action2, null, null, null, null, null, sprite);
+		confirmDialogScreen2.PopupConfirmDialog(msg, action, action2, null, null, null, null, null, sprite, true);
 	}
 
 	private void ShowFileErrorDialogs()

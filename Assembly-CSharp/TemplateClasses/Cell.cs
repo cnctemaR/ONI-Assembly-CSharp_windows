@@ -1,10 +1,9 @@
 ﻿using System;
-using Klei;
 
 namespace TemplateClasses
 {
 	[Serializable]
-	public class Cell : YamlIO<Cell>, ICloneable
+	public class Cell : ICloneable
 	{
 		public Cell()
 		{

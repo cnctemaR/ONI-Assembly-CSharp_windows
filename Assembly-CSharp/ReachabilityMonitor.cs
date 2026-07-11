@@ -49,14 +49,12 @@ public class ReachabilityMonitor : GameStateMachine<ReachabilityMonitor, Reachab
 
 		public void UpdateReachability()
 		{
-			if (base.master != null)
+			if (base.master == null)
 			{
-				int num = Grid.PosToCell(base.master);
-				CellOffset[] offsets = base.master.GetOffsets(num);
-				MinionGroupProber minionGroupProber = MinionGroupProber.Get();
-				bool flag = minionGroupProber.IsReachable(num) || minionGroupProber.IsReachable(num, offsets);
-				base.sm.isReachable.Set(flag, base.smi);
+				return;
 			}
+			int num = Grid.PosToCell(base.master);
+			base.sm.isReachable.Set(MinionGroupProber.Get().IsAllReachable(num, base.master.GetOffsets(num)), base.smi);
 		}
 	}
 }

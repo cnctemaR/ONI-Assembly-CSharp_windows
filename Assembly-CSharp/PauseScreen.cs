@@ -8,11 +8,6 @@ using UnityEngine.Events;
 
 public class PauseScreen : KModalButtonMenu
 {
-	public override bool IsModal()
-	{
-		return true;
-	}
-
 	public static PauseScreen Instance
 	{
 		get
@@ -39,6 +34,7 @@ public class PauseScreen : KModalButtonMenu
 				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.SAVEAS, global::Action.NumActions, new UnityAction(this.OnSaveAs), null, null),
 				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.LOAD, global::Action.NumActions, new UnityAction(this.OnLoad), null, null),
 				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.OPTIONS, global::Action.NumActions, new UnityAction(this.OnOptions), null, null),
+				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.COLONY_SUMMARY, global::Action.NumActions, new UnityAction(this.OnColonySummary), null, null),
 				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.QUIT, global::Action.NumActions, new UnityAction(this.OnQuit), null, null),
 				new KButtonMenu.ButtonInfo(UI.FRONTEND.PAUSE_SCREEN.DESKTOPQUIT, global::Action.NumActions, new UnityAction(this.OnDesktopQuit), null, null)
 			};
@@ -68,11 +64,25 @@ public class PauseScreen : KModalButtonMenu
 
 	private void OnResume()
 	{
-		ToolTipScreen.Instance.ClearToolTip(this.closeButton.GetComponent<ToolTip>());
 		base.Show(false);
-		AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
-		MusicManager.instance.OnEscapeMenu(false);
-		MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
+	}
+
+	protected override void OnShow(bool show)
+	{
+		base.OnShow(show);
+		if (show)
+		{
+			AudioMixer.instance.Start(AudioMixerSnapshots.Get().ESCPauseSnapshot);
+			MusicManager.instance.OnEscapeMenu(true);
+			MusicManager.instance.PlaySong("Music_ESC_Menu", false);
+		}
+		else
+		{
+			ToolTipScreen.Instance.ClearToolTip(this.closeButton.GetComponent<ToolTip>());
+			AudioMixer.instance.Stop(AudioMixerSnapshots.Get().ESCPauseSnapshot, STOP_MODE.ALLOWFADEOUT);
+			MusicManager.instance.OnEscapeMenu(false);
+			MusicManager.instance.StopSong("Music_ESC_Menu", true, STOP_MODE.ALLOWFADEOUT);
+		}
 	}
 
 	private void OnOptions()
@@ -96,7 +106,7 @@ public class PauseScreen : KModalButtonMenu
 			{
 				this.DoSave(filename);
 				this.gameObject.SetActive(true);
-			}, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null);
+			}, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
 		}
 		else
 		{
@@ -123,7 +133,7 @@ public class PauseScreen : KModalButtonMenu
 			}, null, UI.FRONTEND.SAVESCREEN.REPORT_BUG, delegate
 			{
 				KCrashReporter.ReportError(e.Message, e.StackTrace.ToString(), null, null, string.Empty);
-			}, null, null, null, null);
+			}, null, null, null, null, true);
 		}
 	}
 
@@ -131,12 +141,18 @@ public class PauseScreen : KModalButtonMenu
 	{
 		base.gameObject.SetActive(false);
 		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)GameScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.transform.parent.gameObject, GameScreenManager.UIRenderTarget.ScreenSpaceOverlay);
-		confirmDialogScreen.PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null);
+		confirmDialogScreen.PopupConfirmDialog(text, onConfirm, new global::System.Action(this.OnCancelPopup), null, null, null, null, null, null, true);
 	}
 
 	private void OnLoad()
 	{
 		base.ActivateChildScreen(this.loadScreenPrefab.gameObject);
+	}
+
+	private void OnColonySummary()
+	{
+		RetireColonyUtility.SaveColonySummaryData();
+		MainMenu.ActivateRetiredColoniesScreen(base.transform.parent.gameObject, SaveGame.Instance.BaseName, null);
 	}
 
 	private void OnQuit()
@@ -162,6 +178,11 @@ public class PauseScreen : KModalButtonMenu
 			this.Deactivate();
 			App.LoadScene("frontend");
 		});
+	}
+
+	private void OnRetireConfirm()
+	{
+		RetireColonyUtility.SaveColonySummaryData();
 	}
 
 	private void OnQuitConfirm()

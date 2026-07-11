@@ -33,6 +33,8 @@ public class Db : EntityModifierSet
 		this.StatusItemCategories = new StatusItemCategories(this.Root);
 		this.Techs = new Techs(this.Root);
 		this.Techs.Load(this.researchTreeFile);
+		this.TechTreeTitles = new TechTreeTitles(this.Root);
+		this.TechTreeTitles.Load(this.researchTreeFile);
 		this.TechItems = new TechItems(this.Root);
 		this.Accessories = new Accessories(this.Root);
 		this.AccessorySlots = new AccessorySlots(this.Root, null, null, null);
@@ -47,6 +49,7 @@ public class Db : EntityModifierSet
 		this.SkillPerks = new SkillPerks(this.Root);
 		this.SkillGroups = new SkillGroups(this.Root);
 		this.Skills = new Skills(this.Root);
+		this.ColonyAchievements = new ColonyAchievements(this.Root);
 		this.MiscStatusItems = new MiscStatusItems(this.Root);
 		this.CreatureStatusItems = new CreatureStatusItems(this.Root);
 		this.BuildingStatusItems = new BuildingStatusItems(this.Root);
@@ -136,6 +139,8 @@ public class Db : EntityModifierSet
 
 	public Techs Techs;
 
+	public TechTreeTitles TechTreeTitles;
+
 	public TechItems TechItems;
 
 	public AccessorySlots AccessorySlots;
@@ -159,6 +164,8 @@ public class Db : EntityModifierSet
 	public SkillGroups SkillGroups;
 
 	public Skills Skills;
+
+	public ColonyAchievements ColonyAchievements;
 
 	[Serializable]
 	public class SlotInfo : Resource

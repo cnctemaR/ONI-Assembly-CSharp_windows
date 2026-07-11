@@ -3,7 +3,7 @@ using STRINGS;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ModeSelectScreen : KScreen
+public class ModeSelectScreen : NewGameFlowScreen
 {
 	protected override void OnSpawn()
 	{
@@ -26,7 +26,7 @@ public class ModeSelectScreen : KScreen
 		multiToggle5.onExit = (global::System.Action)Delegate.Combine(multiToggle5.onExit, new global::System.Action(this.OnHoverExitNosweat));
 		MultiToggle multiToggle6 = this.nosweatButton;
 		multiToggle6.onClick = (global::System.Action)Delegate.Combine(multiToggle6.onClick, new global::System.Action(this.OnClickNosweat));
-		this.closeButton.onClick += this.Deactivate;
+		this.closeButton.onClick += base.NavigateBackward;
 		this.SetAnimScale();
 	}
 
@@ -50,8 +50,7 @@ public class ModeSelectScreen : KScreen
 	{
 		this.Deactivate();
 		CustomGameSettings.Instance.SetSurvivalDefaults();
-		GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.NewGameSettingsScreen.gameObject, base.transform.parent.gameObject, true);
-		gameObject.GetComponent<KScreen>().Activate();
+		base.NavigateForward();
 	}
 
 	private void OnHoverEnterNosweat()
@@ -74,8 +73,7 @@ public class ModeSelectScreen : KScreen
 	{
 		this.Deactivate();
 		CustomGameSettings.Instance.SetNosweatDefaults();
-		GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.NewGameSettingsScreen.gameObject, base.transform.parent.gameObject, true);
-		gameObject.GetComponent<KScreen>().Activate();
+		base.NavigateForward();
 	}
 
 	private void SetAnimScale()

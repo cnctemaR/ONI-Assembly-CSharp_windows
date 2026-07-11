@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using KSerialization.Converters;
 
-public class ContentContainer : YamlIO<ContentContainer>
+public class ContentContainer
 {
 	public ContentContainer()
 	{

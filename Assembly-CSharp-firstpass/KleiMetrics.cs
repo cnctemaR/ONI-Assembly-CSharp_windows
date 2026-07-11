@@ -9,7 +9,7 @@ public class KleiMetrics : ThreadedHttps<KleiMetrics>
 {
 	public KleiMetrics()
 	{
-		this.LIVE_ENDPOINT = "metric.kleientertainment.com/write";
+		this.LIVE_ENDPOINT = "oni.metrics.klei.com/write";
 		this.serviceName = "KleiMetrics";
 		this.CLIENT_KEY = DistributionPlatform.Inst.MetricsClientKey;
 		this.PlatformUserIDFieldName = DistributionPlatform.Inst.MetricsUserIDField;

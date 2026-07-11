@@ -41,6 +41,8 @@ public class Components
 
 	public static Components.Cmps<Light2D> Light2Ds = new Components.Cmps<Light2D>();
 
+	public static Components.Cmps<Radiator> Radiators = new Components.Cmps<Radiator>();
+
 	public static Components.Cmps<Edible> Edibles = new Components.Cmps<Edible>();
 
 	public static Components.Cmps<Diggable> Diggables = new Components.Cmps<Diggable>();
@@ -48,6 +50,8 @@ public class Components
 	public static Components.Cmps<ResearchCenter> ResearchCenters = new Components.Cmps<ResearchCenter>();
 
 	public static Components.Cmps<Harvestable> Harvestables = new Components.Cmps<Harvestable>();
+
+	public static Components.Cmps<HarvestDesignatable> HarvestDesignatables = new Components.Cmps<HarvestDesignatable>();
 
 	public static Components.Cmps<Uprootable> Uprootables = new Components.Cmps<Uprootable>();
 
@@ -98,6 +102,8 @@ public class Components
 	public static Components.Cmps<MinionAssignablesProxy> MinionAssignablesProxy = new Components.Cmps<MinionAssignablesProxy>();
 
 	public static Components.Cmps<ComplexFabricator> ComplexFabricators = new Components.Cmps<ComplexFabricator>();
+
+	public static Components.Cmps<MonumentPart> MonumentParts = new Components.Cmps<MonumentPart>();
 
 	public class Cmps<T> : ICollection, IEnumerable
 	{

@@ -32,8 +32,8 @@ public class ShowerConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.WashStation);
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.AdvancedWashStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.WashStation, false);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.AdvancedWashStation, false);
 		Shower shower = go.AddOrGet<Shower>();
 		shower.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_shower_kanim") };
 		shower.workTime = 15f;
@@ -58,7 +58,7 @@ public class ShowerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(1f, SimHashes.DirtyWater, 0f, true, 0f, 0.5f, true, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(1f, SimHashes.DirtyWater, 0f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0)
 		};
 		Storage storage = go.AddOrGet<Storage>();
 		storage.capacityKg = 10f;

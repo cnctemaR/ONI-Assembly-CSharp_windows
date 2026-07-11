@@ -8,6 +8,18 @@ using UnityEngine.UI;
 
 public class CodexScreen : KScreen
 {
+	private string activeEntryID
+	{
+		get
+		{
+			return this._activeEntryID;
+		}
+		set
+		{
+			this._activeEntryID = value;
+		}
+	}
+
 	protected override void OnActivate()
 	{
 		this.ConsumeMouseScroll = true;
@@ -58,12 +70,17 @@ public class CodexScreen : KScreen
 		this.textStyles[CodexTextStyle.Title] = this.textStyleTitle;
 		this.textStyles[CodexTextStyle.Subtitle] = this.textStyleSubtitle;
 		this.textStyles[CodexTextStyle.Body] = this.textStyleBody;
+		this.textStyles[CodexTextStyle.BodyWhite] = this.textStyleBodyWhite;
 		this.SetupPrefabs();
 		this.PopulatePools();
 		this.CategorizeEntries();
 		this.FilterSearch(string.Empty);
 		Game.Instance.Subscribe(1594320620, delegate(object val)
 		{
+			if (!base.gameObject.activeSelf)
+			{
+				return;
+			}
 			this.FilterSearch(this.searchInputField.text);
 			if (!string.IsNullOrEmpty(this.activeEntryID))
 			{
@@ -81,8 +98,10 @@ public class CodexScreen : KScreen
 		this.ContentPrefabs[typeof(CodexDividerLine)] = this.prefabDividerLineWidget;
 		this.ContentPrefabs[typeof(CodexSpacer)] = this.prefabSpacer;
 		this.ContentPrefabs[typeof(CodexLabelWithIcon)] = this.prefabLabelWithIcon;
+		this.ContentPrefabs[typeof(CodexLabelWithLargeIcon)] = this.prefabLabelWithLargeIcon;
 		this.ContentPrefabs[typeof(CodexContentLockedIndicator)] = this.prefabContentLocked;
 		this.ContentPrefabs[typeof(CodexLargeSpacer)] = this.prefabLargeSpacer;
+		this.ContentPrefabs[typeof(CodexVideo)] = this.prefabVideoWidget;
 	}
 
 	private List<CodexEntry> FilterSearch(string input)
@@ -455,7 +474,7 @@ public class CodexScreen : KScreen
 		{
 			global::UnityEngine.Object.DestroyImmediate(layoutGroup);
 		}
-		if (Game.Instance.unlocks.IsUnlocked(container.lockID))
+		if (Game.Instance.unlocks.IsUnlocked(container.lockID) || string.IsNullOrEmpty(container.lockID))
 		{
 			ContentContainer.ContentLayout contentLayout = container.contentLayout;
 			if (contentLayout != ContentContainer.ContentLayout.Horizontal)
@@ -466,8 +485,9 @@ public class CodexScreen : KScreen
 					{
 						layoutGroup = containerGameObject.AddComponent<GridLayoutGroup>();
 						(layoutGroup as GridLayoutGroup).constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-						(layoutGroup as GridLayoutGroup).constraintCount = 3;
-						(layoutGroup as GridLayoutGroup).cellSize = new Vector2(170f, 32f);
+						(layoutGroup as GridLayoutGroup).constraintCount = 4;
+						(layoutGroup as GridLayoutGroup).cellSize = new Vector2(128f, 180f);
+						(layoutGroup as GridLayoutGroup).spacing = new Vector2(6f, 6f);
 					}
 				}
 				else
@@ -502,7 +522,7 @@ public class CodexScreen : KScreen
 		}
 	}
 
-	private string activeEntryID;
+	private string _activeEntryID;
 
 	private Dictionary<Type, UIGameObjectPool> ContentUIPools = new Dictionary<Type, UIGameObjectPool>();
 
@@ -581,7 +601,13 @@ public class CodexScreen : KScreen
 	private GameObject prefabLabelWithIcon;
 
 	[SerializeField]
+	private GameObject prefabLabelWithLargeIcon;
+
+	[SerializeField]
 	private GameObject prefabContentLocked;
+
+	[SerializeField]
+	private GameObject prefabVideoWidget;
 
 	[Header("Text Styles")]
 	[SerializeField]
@@ -592,6 +618,9 @@ public class CodexScreen : KScreen
 
 	[SerializeField]
 	private TextStyleSetting textStyleBody;
+
+	[SerializeField]
+	private TextStyleSetting textStyleBodyWhite;
 
 	private Dictionary<CodexTextStyle, TextStyleSetting> textStyles = new Dictionary<CodexTextStyle, TextStyleSetting>();
 

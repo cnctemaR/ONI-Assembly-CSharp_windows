@@ -51,29 +51,59 @@ public class RocketModule : KMonoBehaviour
 		base.Subscribe<RocketModule>(-1056989049, RocketModule.OnLaunchDelegate);
 		base.Subscribe<RocketModule>(238242047, RocketModule.OnLandDelegate);
 		base.Subscribe<RocketModule>(1502190696, RocketModule.DEBUG_OnDestroyDelegate);
+		this.FixSorting();
+		AttachableBuilding component2 = base.GetComponent<AttachableBuilding>();
+		component2.onAttachmentNetworkChanged = (Action<AttachableBuilding>)Delegate.Combine(component2.onAttachmentNetworkChanged, new Action<AttachableBuilding>(this.OnAttachmentNetworkChanged));
 		if (this.bgAnimFile != null)
 		{
 			this.AddBGGantry();
 		}
 	}
 
+	public void FixSorting()
+	{
+		int num = 0;
+		AttachableBuilding attachableBuilding = base.GetComponent<AttachableBuilding>();
+		while (attachableBuilding != null)
+		{
+			BuildingAttachPoint attachedTo = attachableBuilding.GetAttachedTo();
+			if (!(attachedTo != null))
+			{
+				break;
+			}
+			attachableBuilding = attachedTo.GetComponent<AttachableBuilding>();
+			num++;
+		}
+		Vector3 localPosition = base.transform.GetLocalPosition();
+		localPosition.z = Grid.GetLayerZ(Grid.SceneLayer.BuildingFront) - (float)num * 0.01f;
+		base.transform.SetLocalPosition(localPosition);
+		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
+		component.enabled = false;
+		component.enabled = true;
+	}
+
+	private void OnAttachmentNetworkChanged(AttachableBuilding ab)
+	{
+		this.FixSorting();
+	}
+
 	private void AddBGGantry()
 	{
 		KAnimControllerBase component = base.GetComponent<KAnimControllerBase>();
-		GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(Assets.GetPrefab(this.rocket_gantry_bg_prefab));
+		GameObject gameObject = new GameObject();
 		gameObject.name = string.Format(this.rocket_module_bg_base_string, base.name, this.rocket_module_bg_affix);
 		gameObject.SetActive(false);
 		Vector3 position = component.transform.GetPosition();
 		position.z = Grid.GetLayerZ(Grid.SceneLayer.InteriorWall);
 		gameObject.transform.SetPosition(position);
 		gameObject.transform.parent = base.transform;
-		KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
-		component2.AnimFiles = new KAnimFile[] { this.bgAnimFile };
-		component2.initialAnim = this.rocket_module_bg_anim;
-		component2.fgLayer = Grid.SceneLayer.NoLayer;
-		component2.initialMode = KAnim.PlayMode.Paused;
-		component2.FlipX = component.FlipX;
-		component2.FlipY = component.FlipY;
+		KBatchedAnimController kbatchedAnimController = gameObject.AddOrGet<KBatchedAnimController>();
+		kbatchedAnimController.AnimFiles = new KAnimFile[] { this.bgAnimFile };
+		kbatchedAnimController.initialAnim = this.rocket_module_bg_anim;
+		kbatchedAnimController.fgLayer = Grid.SceneLayer.NoLayer;
+		kbatchedAnimController.initialMode = KAnim.PlayMode.Paused;
+		kbatchedAnimController.FlipX = component.FlipX;
+		kbatchedAnimController.FlipY = component.FlipY;
 		gameObject.SetActive(true);
 	}
 
@@ -245,8 +275,6 @@ public class RocketModule : KMonoBehaviour
 	private string rocket_module_bg_affix = "BG";
 
 	private string rocket_module_bg_anim = "on";
-
-	private string rocket_gantry_bg_prefab = "RocketGantryBG";
 
 	[SerializeField]
 	private KAnimFile bgAnimFile;

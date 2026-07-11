@@ -188,6 +188,10 @@ public class Grid
 			return false;
 		}
 		Grid.TubeEntrance tubeEntrance = Grid.tubeEntrances[cell];
+		if (!tubeEntrance.operational)
+		{
+			return false;
+		}
 		HashSet<int> reservations = tubeEntrance.reservations;
 		return reservations.Count < tubeEntrance.reservationCapacity || reservations.Contains(minion);
 	}
@@ -198,10 +202,12 @@ public class Grid
 		return Grid.tubeEntrances[cell].reservations.Contains(minion);
 	}
 
-	public static void ActivateTubeEntrance(int cell, bool activate)
+	public static void SetTubeEntranceOperational(int cell, bool operational)
 	{
-		DebugUtil.Assert(Grid.tubeEntrances.ContainsKey(cell));
-		Grid.HasTubeEntrance[cell] = activate;
+		DebugUtil.Assert(Grid.HasTubeEntrance[cell]);
+		Grid.TubeEntrance tubeEntrance = Grid.tubeEntrances[cell];
+		tubeEntrance.operational = operational;
+		Grid.tubeEntrances[cell] = tubeEntrance;
 	}
 
 	public static void RegisterSuitMarker(int cell)
@@ -340,13 +346,13 @@ public class Grid
 		switch (d)
 		{
 		case Direction.Up:
-			return cell + Grid.WidthInCells;
+			return Grid.CellAbove(cell);
 		case Direction.Right:
-			return cell + 1;
+			return Grid.CellRight(cell);
 		case Direction.Down:
-			return cell - Grid.WidthInCells;
+			return Grid.CellBelow(cell);
 		case Direction.Left:
-			return cell - 1;
+			return Grid.CellLeft(cell);
 		case Direction.None:
 			return cell;
 		}
@@ -762,8 +768,18 @@ public class Grid
 
 	public static void GetVisibleExtents(out int min_x, out int min_y, out int max_x, out int max_y)
 	{
-		Vector3 vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
-		Vector3 vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
+		Vector3 vector;
+		Vector3 vector2;
+		if (GameUtil.IsCapturingTimeLapse())
+		{
+			vector = Game.Instance.timelapser.captureCamera.ViewportToWorldPoint(new Vector3(1f, 1f, Game.Instance.timelapser.captureCamera.transform.GetPosition().z));
+			vector2 = Game.Instance.timelapser.captureCamera.ViewportToWorldPoint(new Vector3(0f, 0f, Game.Instance.timelapser.captureCamera.transform.GetPosition().z));
+		}
+		else
+		{
+			vector = Camera.main.ViewportToWorldPoint(new Vector3(1f, 1f, Camera.main.transform.GetPosition().z));
+			vector2 = Camera.main.ViewportToWorldPoint(new Vector3(0f, 0f, Camera.main.transform.GetPosition().z));
+		}
 		min_y = (int)vector2.y;
 		max_y = (int)(vector.y + 0.5f);
 		min_x = (int)vector2.x;
@@ -1012,6 +1028,8 @@ public class Grid
 	public static Element[] Element;
 
 	public static int[] LightCount;
+
+	public static int[] RadiationCount;
 
 	public static Grid.PressureIndexer Pressure;
 
@@ -1403,6 +1421,8 @@ public class Grid
 
 	private struct TubeEntrance
 	{
+		public bool operational;
+
 		public int reservationCapacity;
 
 		public HashSet<int> reservations;

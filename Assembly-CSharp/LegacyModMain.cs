@@ -167,6 +167,11 @@ public class LegacyModMain
 			},
 			new LegacyModMain.ElementInfo
 			{
+				id = SimHashes.Lead,
+				overheatMod = -20f
+			},
+			new LegacyModMain.ElementInfo
+			{
 				id = SimHashes.Granite,
 				decor = 0.2f,
 				overheatMod = 15f

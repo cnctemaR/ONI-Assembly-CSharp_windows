@@ -1,19 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using TUNING;
 
 namespace Database
 {
 	public class Skill : Resource
 	{
-		public Skill(string id, string name, string description, int tier, string hat, string skillGroup)
+		public Skill(string id, string name, string description, int tier, string hat, string badge, string skillGroup)
 			: base(id, name)
 		{
 			this.description = description;
 			this.tier = tier;
 			this.hat = hat;
+			this.badge = badge;
 			this.skillGroup = skillGroup;
 			this.perks = new List<SkillPerk>();
 			this.priorSkills = new List<string>();
+		}
+
+		public int GetMoraleExpectation()
+		{
+			return SKILLS.SKILL_TIER_MORALE_COST[this.tier];
 		}
 
 		public bool GivesPerk(SkillPerk perk)
@@ -38,6 +45,8 @@ namespace Database
 		public string skillGroup;
 
 		public string hat;
+
+		public string badge;
 
 		public int tier;
 

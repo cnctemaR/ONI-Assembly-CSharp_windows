@@ -5,7 +5,7 @@ using UnityEngine;
 
 public abstract class Chore
 {
-	public Chore(ChoreType chore_type, ChoreProvider chore_provider, Tag[] chore_tags, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod, bool add_to_daily_report, ReportManager.ReportType report_type)
+	public Chore(ChoreType chore_type, ChoreProvider chore_provider, bool run_until_complete, Action<Chore> on_complete, Action<Chore> on_begin, Action<Chore> on_end, PriorityScreen.PriorityClass priority_class, int priority_value, bool is_preemptable, bool allow_in_context_menu, int priority_mod, bool add_to_daily_report, ReportManager.ReportType report_type)
 	{
 		if (priority_value == 2147483647)
 		{
@@ -25,7 +25,6 @@ public abstract class Chore
 			DebugUtil.Assert(chore_provider != null);
 		}
 		this.choreType = chore_type;
-		this.choreTags = chore_tags;
 		this.runUntilComplete = run_until_complete;
 		this.onComplete = on_complete;
 		this.onEnd = on_end;
@@ -58,8 +57,6 @@ public abstract class Chore
 	public bool isComplete { get; protected set; }
 
 	public IStateMachineTarget target { get; protected set; }
-
-	public Tag[] choreTags { get; private set; }
 
 	public bool runUntilComplete { get; set; }
 
@@ -444,6 +441,7 @@ public abstract class Chore
 				this.isAttemptingOverride = is_attempting_override;
 				this.data = data;
 				this.choreTypeForPermission = chore.choreType;
+				this.skipMoreSatisfyingEarlyPrecondition = RootMenu.Instance != null && RootMenu.Instance.IsBuildingChorePanelActive();
 				this.SetPriority(chore);
 			}
 
@@ -638,6 +636,8 @@ public abstract class Chore
 			public bool isAttemptingOverride;
 
 			public ChoreType choreTypeForPermission;
+
+			public bool skipMoreSatisfyingEarlyPrecondition;
 		}
 	}
 }

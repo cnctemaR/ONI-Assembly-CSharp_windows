@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameScreenManager : KMonoBehaviour
 {
@@ -48,6 +49,8 @@ public class GameScreenManager : KMonoBehaviour
 			return this.ssOverlayCanvas.GetComponent<Canvas>().worldCamera;
 		case GameScreenManager.UIRenderTarget.HoverTextScreen:
 			return this.ssHoverTextCanvas.GetComponent<Canvas>().worldCamera;
+		case GameScreenManager.UIRenderTarget.ScreenshotModeCamera:
+			return this.screenshotModeCanvas.GetComponent<Canvas>().worldCamera;
 		default:
 			return base.gameObject.GetComponent<Canvas>().worldCamera;
 		}
@@ -62,6 +65,9 @@ public class GameScreenManager : KMonoBehaviour
 			return;
 		case GameScreenManager.UIRenderTarget.ScreenSpaceOverlay:
 			this.ssOverlayCanvas.GetComponent<Canvas>().worldCamera = camera;
+			return;
+		case GameScreenManager.UIRenderTarget.ScreenshotModeCamera:
+			this.screenshotModeCanvas.GetComponent<Canvas>().worldCamera = camera;
 			return;
 		}
 		this.ssCameraCanvas.GetComponent<Canvas>().worldCamera = camera;
@@ -79,6 +85,8 @@ public class GameScreenManager : KMonoBehaviour
 			return this.ssOverlayCanvas;
 		case GameScreenManager.UIRenderTarget.HoverTextScreen:
 			return this.ssHoverTextCanvas;
+		case GameScreenManager.UIRenderTarget.ScreenshotModeCamera:
+			return this.screenshotModeCanvas;
 		default:
 			return base.gameObject;
 		}
@@ -126,14 +134,19 @@ public class GameScreenManager : KMonoBehaviour
 
 	public GameObject worldSpaceCanvas;
 
+	public GameObject screenshotModeCanvas;
+
 	[SerializeField]
 	private Color[] uiColors;
+
+	public Image fadePlane;
 
 	public enum UIRenderTarget
 	{
 		WorldSpace,
 		ScreenSpaceCamera,
 		ScreenSpaceOverlay,
-		HoverTextScreen
+		HoverTextScreen,
+		ScreenshotModeCamera
 	}
 }

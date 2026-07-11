@@ -95,7 +95,7 @@ public class Operational : KMonoBehaviour
 			}
 			if (this.IsOperational)
 			{
-				base.GetComponent<KPrefabID>().AddTag(GameTags.Operational);
+				base.GetComponent<KPrefabID>().AddTag(GameTags.Operational, false);
 			}
 			else
 			{

@@ -17,6 +17,7 @@ public class Sleepable : Workable
 		this.workerStatusItem = null;
 		this.synchronizeAnims = false;
 		this.triggerWorkReactions = false;
+		this.lightEfficiencyBonus = false;
 	}
 
 	protected override void OnSpawn()

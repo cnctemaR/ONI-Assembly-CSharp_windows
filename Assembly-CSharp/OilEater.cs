@@ -81,7 +81,7 @@ public class OilEater : StateMachineComponent<OilEater.StatesInstance>
 			});
 			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive, (OilEater.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject)).EventTransition(GameHashes.TooColdWarning, this.alive, (OilEater.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
 				.EventTransition(GameHashes.TooHotWarning, this.alive, (OilEater.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
-				.EventTransition(GameHashes.Uprooted, this.dead, (OilEater.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
+				.TagTransition(GameTags.Uprooted, this.dead, false);
 			this.grow.Enter(delegate(OilEater.StatesInstance smi)
 			{
 				if (smi.master.receptacleMonitor.HasReceptacle() && !this.alive.ForceUpdateStatus(smi.master.gameObject))

@@ -47,61 +47,99 @@ public static class LightGridManager
 		pooledList.Recycle();
 	}
 
+	public const float DEFAULT_FALLOFF_RATE = 0.5f;
+
 	public static List<Tuple<int, int>> previewLightCells = new List<Tuple<int, int>>();
 
 	public static int[] previewLux;
 
 	public class LightGridEmitter
 	{
-		public LightGridEmitter(int cell, List<int> lit_cells, int intensity, float radius, Color colour, LightShape shape, float falloffRate = 0.5f)
+		public void UpdateLitCells()
 		{
-			this.cell = cell;
-			this.radius = radius;
-			this.intensity = intensity;
-			this.colour = colour;
-			this.shape = shape;
-			this.litCells = lit_cells;
-			this.falloffRate = falloffRate;
+			DiscreteShadowCaster.GetVisibleCells(this.state.origin, this.litCells, (int)this.state.radius, this.state.shape);
 		}
 
-		public void Add()
+		public void AddToGrid(bool update_lit_cells)
 		{
-			this.Remove();
-			DiscreteShadowCaster.GetVisibleCells(this.cell, this.litCells, (int)this.radius, this.shape);
-			for (int i = 0; i < this.litCells.Count; i++)
+			DebugUtil.DevAssert(!update_lit_cells || this.litCells.Count == 0, "adding an already added emitter");
+			if (update_lit_cells)
 			{
-				int num = this.litCells[i];
-				int num2 = Mathf.Max(1, Mathf.RoundToInt(this.falloffRate * (float)Mathf.Max(Grid.GetCellDistance(num, this.cell), 1)));
-				int num3 = Mathf.Max(0, Grid.LightCount[num] + this.intensity / num2);
-				Grid.LightCount[num] = num3;
-				LightGridManager.previewLux[num] = num3;
+				this.UpdateLitCells();
+			}
+			foreach (int num in this.litCells)
+			{
+				int num2 = Mathf.Max(0, Grid.LightCount[num] + this.ComputeLux(num));
+				Grid.LightCount[num] = num2;
+				LightGridManager.previewLux[num] = num2;
 			}
 		}
 
-		public void Remove()
+		public void RemoveFromGrid()
 		{
-			for (int i = 0; i < this.litCells.Count; i++)
+			foreach (int num in this.litCells)
 			{
-				int num = this.litCells[i];
-				int num2 = LightGridManager.CalculateFalloff(this.falloffRate, num, this.cell);
-				Grid.LightCount[num] = Mathf.Max(0, Grid.LightCount[num] - this.intensity / num2);
+				Grid.LightCount[num] = Mathf.Max(0, Grid.LightCount[num] - this.ComputeLux(num));
 				LightGridManager.previewLux[num] = 0;
 			}
 			this.litCells.Clear();
 		}
 
-		public int cell = -1;
+		public bool Refresh(LightGridManager.LightGridEmitter.State state, bool force = false)
+		{
+			if (!force && EqualityComparer<LightGridManager.LightGridEmitter.State>.Default.Equals(this.state, state))
+			{
+				return false;
+			}
+			this.RemoveFromGrid();
+			this.state = state;
+			this.AddToGrid(true);
+			return true;
+		}
 
-		public LightShape shape;
+		private int ComputeLux(int cell)
+		{
+			return this.state.intensity / this.ComputeFalloff(cell);
+		}
 
-		public float radius = 4f;
+		private int ComputeFalloff(int cell)
+		{
+			return LightGridManager.CalculateFalloff(this.state.falloffRate, this.state.origin, cell);
+		}
 
-		public int intensity = 1;
+		private LightGridManager.LightGridEmitter.State state = LightGridManager.LightGridEmitter.State.DEFAULT;
 
-		public Color colour = Color.white;
+		private List<int> litCells = new List<int>();
 
-		public float falloffRate = 0.5f;
+		[Serializable]
+		public struct State : IEquatable<LightGridManager.LightGridEmitter.State>
+		{
+			public bool Equals(LightGridManager.LightGridEmitter.State rhs)
+			{
+				return this.origin == rhs.origin && this.shape == rhs.shape && this.radius == rhs.radius && this.intensity == rhs.intensity && this.falloffRate == rhs.falloffRate && this.colour == rhs.colour;
+			}
 
-		private List<int> litCells;
+			public int origin;
+
+			public LightShape shape;
+
+			public float radius;
+
+			public int intensity;
+
+			public float falloffRate;
+
+			public Color colour;
+
+			public static readonly LightGridManager.LightGridEmitter.State DEFAULT = new LightGridManager.LightGridEmitter.State
+			{
+				origin = Grid.InvalidCell,
+				shape = LightShape.Circle,
+				radius = 4f,
+				intensity = 1,
+				falloffRate = 0.5f,
+				colour = Color.white
+			};
+		}
 	}
 }

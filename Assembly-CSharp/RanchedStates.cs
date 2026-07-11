@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>
+public class RanchedStates : GameStateMachine<RanchedStates, RanchedStates.Instance, IStateMachineTarget, RanchedStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{

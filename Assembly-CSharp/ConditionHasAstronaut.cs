@@ -14,11 +14,15 @@ public class ConditionHasAstronaut : RocketLaunchCondition
 		return null;
 	}
 
-	public override bool EvaluateLaunchCondition()
+	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
 	{
 		MinionStorage component = this.module.GetComponent<MinionStorage>();
 		List<MinionStorage.Info> storedMinionInfo = component.GetStoredMinionInfo();
-		return storedMinionInfo.Count > 0 && storedMinionInfo[0].serializedMinion != null;
+		if (storedMinionInfo.Count > 0 && storedMinionInfo[0].serializedMinion != null)
+		{
+			return RocketLaunchCondition.LaunchStatus.Ready;
+		}
+		return RocketLaunchCondition.LaunchStatus.Failure;
 	}
 
 	public override string GetLaunchStatusMessage(bool ready)

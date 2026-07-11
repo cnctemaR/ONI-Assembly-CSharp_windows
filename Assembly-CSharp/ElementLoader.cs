@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Klei;
 using ProcGenGame;
@@ -13,16 +12,31 @@ public class ElementLoader
 	public static List<ElementLoader.ElementEntry> CollectElementsFromYAML()
 	{
 		List<ElementLoader.ElementEntry> list = new List<ElementLoader.ElementEntry>();
-		string[] files = Directory.GetFiles(ElementLoader.path, "*.yaml");
-		foreach (string text in files)
+		ListPool<FileHandle, ElementLoader>.PooledList pooledList = ListPool<FileHandle, ElementLoader>.Allocate();
+		FileSystem.GetFiles(FileSystem.Normalize(ElementLoader.path), "*.yaml", pooledList);
+		ListPool<YamlIO.Error, ElementLoader>.PooledList errors = ListPool<YamlIO.Error, ElementLoader>.Allocate();
+		using (List<FileHandle>.Enumerator enumerator = pooledList.GetEnumerator())
 		{
-			string text2 = text;
-			ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO<ElementLoader.ElementEntryCollection>.LoadFile(text2, null);
-			foreach (ElementLoader.ElementEntry elementEntry in elementEntryCollection.elements)
+			while (enumerator.MoveNext())
 			{
-				list.Add(elementEntry);
+				FileHandle file = enumerator.Current;
+				ElementLoader.ElementEntryCollection elementEntryCollection = YamlIO.LoadFile<ElementLoader.ElementEntryCollection>(file.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
+				{
+					error.file = file;
+					errors.Add(error);
+				}, null);
+				if (elementEntryCollection != null)
+				{
+					list.AddRange(elementEntryCollection.elements);
+				}
 			}
 		}
+		pooledList.Recycle();
+		if (Global.Instance != null && Global.Instance.modManager != null)
+		{
+			Global.Instance.modManager.HandleErrors(errors);
+		}
+		errors.Recycle();
 		return list;
 	}
 
@@ -30,21 +44,26 @@ public class ElementLoader
 	{
 		ElementLoader.elements = new List<Element>();
 		ElementLoader.elementTable = new Dictionary<int, Element>();
-		foreach (ElementLoader.ElementEntry elementEntry in ElementLoader.CollectElementsFromYAML())
+		List<ElementLoader.ElementEntry> list = ElementLoader.CollectElementsFromYAML();
+		foreach (ElementLoader.ElementEntry elementEntry in list)
 		{
 			int num = Hash.SDBMLower(elementEntry.elementId);
-			Element element = new Element();
-			element.id = (SimHashes)num;
-			ElementLoader.elements.Add(element);
-			ElementLoader.elementTable[num] = element;
-			element.name = Strings.Get(elementEntry.localizationID);
-			element.nameUpperCase = element.name.ToUpper();
-			element.tag = TagManager.Create(elementEntry.elementId, element.name);
-			ElementLoader.Copy(elementEntry, element);
+			if (!ElementLoader.elementTable.ContainsKey(num))
+			{
+				Element element = new Element();
+				element.id = (SimHashes)num;
+				element.name = Strings.Get(elementEntry.localizationID);
+				element.nameUpperCase = element.name.ToUpper();
+				element.description = Strings.Get(elementEntry.description);
+				element.tag = TagManager.Create(elementEntry.elementId, element.name);
+				ElementLoader.CopyEntryToElement(elementEntry, element);
+				ElementLoader.elements.Add(element);
+				ElementLoader.elementTable[num] = element;
+			}
 		}
 		foreach (Element element2 in ElementLoader.elements)
 		{
-			if (!ElementLoader.SetOrCreateSubstanceForElement(element2, ref substanceList, substanceTable))
+			if (!ElementLoader.ManifestSubstanceForElement(element2, ref substanceList, substanceTable))
 			{
 				global::Debug.LogWarning("Missing substance for element: " + element2.id.ToString());
 			}
@@ -53,7 +72,7 @@ public class ElementLoader
 		WorldGen.SetupDefaultElements();
 	}
 
-	private static void Copy(ElementLoader.ElementEntry entry, Element elem)
+	private static void CopyEntryToElement(ElementLoader.ElementEntry entry, Element elem)
 	{
 		int num = Hash.SDBMLower(entry.elementId);
 		elem.tag = TagManager.Create(entry.elementId.ToString());
@@ -61,6 +80,7 @@ public class ElementLoader
 		elem.thermalConductivity = entry.thermalConductivity;
 		elem.molarMass = entry.molarMass;
 		elem.strength = entry.strength;
+		elem.disabled = entry.isDisabled;
 		elem.flow = entry.flow;
 		elem.maxMass = entry.maxMass;
 		elem.maxCompression = entry.liquidCompression;
@@ -118,68 +138,57 @@ public class ElementLoader
 		elem.defaultValues = physicsData;
 	}
 
-	private static bool SetOrCreateSubstanceForElement(Element elem, ref Hashtable substanceList, SubstanceTable substanceTable)
+	private static bool ManifestSubstanceForElement(Element elem, ref Hashtable substanceList, SubstanceTable substanceTable)
 	{
-		bool flag = false;
-		SimHashes id = elem.id;
-		if (!substanceList.ContainsKey(id))
+		elem.substance = null;
+		if (substanceList.ContainsKey(elem.id))
 		{
-			flag = true;
-			Substance substance = null;
-			if (substanceTable != null)
-			{
-				substance = substanceTable.GetSubstance(id);
-			}
-			if (substance == null)
-			{
-				substance = new Substance();
-				substanceTable.GetList().Add(substance);
-			}
-			ElementLoader.CleanupSubstance(substance, elem);
-			substance.elementID = id;
-			substance.renderedByWorld = elem.IsSolid;
-			substance.idx = substanceList.Count;
-			if (substance.uiColour == ElementLoader.noColour)
-			{
-				int count = ElementLoader.elements.Count;
-				int idx = substance.idx;
-				substance.uiColour = Color.HSVToRGB((float)idx / (float)count, 1f, 1f);
-			}
-			string text = UI.StripLinkFormatting(elem.name);
-			substance.name = text;
-			if (Array.IndexOf<SimHashes>((SimHashes[])Enum.GetValues(typeof(SimHashes)), elem.id) >= 0)
-			{
-				substance.nameTag = GameTagExtensions.Create(elem.id);
-			}
-			else
-			{
-				substance.nameTag = ((text == null) ? Tag.Invalid : TagManager.Create(text));
-			}
-			substance.audioConfig = ElementsAudio.Instance.GetConfigForElement(id);
-			substanceList.Add(id, substance);
+			elem.substance = substanceList[elem.id] as Substance;
+			return false;
 		}
-		elem.substance = substanceList[id] as Substance;
-		return flag;
-	}
-
-	private static void CleanupSubstance(Substance substance, Element element)
-	{
-	}
-
-	public static Element GetElement(string name)
-	{
-		SimHashes simHashes = (SimHashes)Enum.Parse(typeof(SimHashes), name);
-		return ElementLoader.FindElementByHash(simHashes);
+		if (substanceTable != null)
+		{
+			elem.substance = substanceTable.GetSubstance(elem.id);
+		}
+		if (elem.substance == null)
+		{
+			elem.substance = new Substance();
+			substanceTable.GetList().Add(elem.substance);
+		}
+		elem.substance.elementID = elem.id;
+		elem.substance.renderedByWorld = elem.IsSolid;
+		elem.substance.idx = substanceList.Count;
+		if (elem.substance.uiColour == ElementLoader.noColour)
+		{
+			int count = ElementLoader.elements.Count;
+			int idx = elem.substance.idx;
+			elem.substance.uiColour = Color.HSVToRGB((float)idx / (float)count, 1f, 1f);
+		}
+		string text = UI.StripLinkFormatting(elem.name);
+		elem.substance.name = text;
+		if (Array.IndexOf<SimHashes>((SimHashes[])Enum.GetValues(typeof(SimHashes)), elem.id) >= 0)
+		{
+			elem.substance.nameTag = GameTagExtensions.Create(elem.id);
+		}
+		else
+		{
+			elem.substance.nameTag = ((text == null) ? Tag.Invalid : TagManager.Create(text));
+		}
+		elem.substance.audioConfig = ElementsAudio.Instance.GetConfigForElement(elem.id);
+		substanceList.Add(elem.id, elem.substance);
+		return true;
 	}
 
 	public static Element FindElementByName(string name)
 	{
-		Element element = null;
-		object obj = Enum.Parse(typeof(SimHashes), name);
-		if (obj != null)
+		Element element;
+		try
 		{
-			SimHashes simHashes = (SimHashes)obj;
-			ElementLoader.elementTable.TryGetValue((int)simHashes, out element);
+			element = ElementLoader.FindElementByHash((SimHashes)Enum.Parse(typeof(SimHashes), name));
+		}
+		catch
+		{
+			element = ElementLoader.FindElementByHash((SimHashes)Hash.SDBMLower(name));
 		}
 		return element;
 	}
@@ -355,7 +364,7 @@ public class ElementLoader
 					}
 					else
 					{
-						ElementLoader.SetOrCreateSubstanceForElement(element, ref substanceList, substanceTable);
+						ElementLoader.ManifestSubstanceForElement(element, ref substanceList, substanceTable);
 					}
 				}
 				global::Debug.Assert(element.substance.nameTag.IsValid);
@@ -422,12 +431,12 @@ public class ElementLoader
 
 	private static readonly Color noColour = new Color(0f, 0f, 0f, 0f);
 
-	public class ElementEntryCollection : YamlIO<ElementLoader.ElementEntryCollection>
+	public class ElementEntryCollection
 	{
 		public ElementLoader.ElementEntry[] elements { get; set; }
 	}
 
-	public class ElementEntry : YamlIO<ElementLoader.ElementEntry>
+	public class ElementEntry
 	{
 		public ElementEntry()
 		{
@@ -508,5 +517,19 @@ public class ElementLoader
 		public Element.State state { get; set; }
 
 		public string localizationID { get; set; }
+
+		public string description
+		{
+			get
+			{
+				return this.description_backing ?? ("STRINGS.ELEMENTS." + this.elementId.ToString().ToUpper() + ".DESC");
+			}
+			set
+			{
+				this.description_backing = value;
+			}
+		}
+
+		private string description_backing;
 	}
 }

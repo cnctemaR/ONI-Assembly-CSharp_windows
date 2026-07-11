@@ -61,6 +61,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 		this.hasAstronaut = (ConditionHasAstronaut)component.AddLaunchCondition(new ConditionHasAstronaut(this));
 		this.hasSuit = (ConditionHasAtmoSuit)component.AddLaunchCondition(new ConditionHasAtmoSuit(this));
 		this.cargoEmpty = (CargoBayIsEmpty)component.AddLaunchCondition(new CargoBayIsEmpty(this));
+		this.destHasResources = (ConditionHasMinimumMass)component.AddLaunchCondition(new ConditionHasMinimumMass(this));
 		this.flightPathIsClear = (ConditionFlightPathIsClear)component.AddFlightCondition(new ConditionFlightPathIsClear(base.gameObject, 1));
 	}
 
@@ -102,7 +103,7 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	{
 		ChoreType astronaut = Db.Get().ChoreTypes.Astronaut;
 		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
-		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
+		WorkChore<CommandModuleWorkable> workChore = new WorkChore<CommandModuleWorkable>(astronaut, this, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
 		workChore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, Db.Get().SkillPerks.CanUseRockets);
 		workChore.AddPrecondition(ChorePreconditions.instance.IsAssignedtoMe, this.assignable);
 		return workChore;
@@ -136,6 +137,8 @@ public class CommandModule : StateMachineComponent<CommandModule.StatesInstance>
 	public ConditionHasAtmoSuit hasSuit;
 
 	public CargoBayIsEmpty cargoEmpty;
+
+	public ConditionHasMinimumMass destHasResources;
 
 	public ConditionFlightPathIsClear flightPathIsClear;
 

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Klei;
 using KSerialization.Converters;
 
-public class AnimCommandFile : YamlIO<AnimCommandFile>
+public class AnimCommandFile
 {
 	public AnimCommandFile()
 	{

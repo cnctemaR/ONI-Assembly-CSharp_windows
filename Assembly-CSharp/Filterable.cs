@@ -25,35 +25,39 @@ public class Filterable : KMonoBehaviour
 	public virtual IList<Tag> GetTagOptions()
 	{
 		List<Tag> list = new List<Tag>();
+		list.Add(GameTags.Void);
 		foreach (Element element in ElementLoader.elements)
 		{
-			bool flag = true;
-			if (this.filterElementState != Filterable.ElementState.None)
+			if (!element.disabled)
 			{
-				Filterable.ElementState elementState = this.filterElementState;
-				if (elementState != Filterable.ElementState.Gas)
+				bool flag = true;
+				if (this.filterElementState != Filterable.ElementState.None)
 				{
-					if (elementState != Filterable.ElementState.Liquid)
+					Filterable.ElementState elementState = this.filterElementState;
+					if (elementState != Filterable.ElementState.Gas)
 					{
-						if (elementState == Filterable.ElementState.Solid)
+						if (elementState != Filterable.ElementState.Liquid)
 						{
-							flag = element.IsSolid;
+							if (elementState == Filterable.ElementState.Solid)
+							{
+								flag = element.IsSolid;
+							}
+						}
+						else
+						{
+							flag = element.IsLiquid;
 						}
 					}
 					else
 					{
-						flag = element.IsLiquid;
+						flag = element.IsGas;
 					}
 				}
-				else
+				if (flag)
 				{
-					flag = element.IsGas;
+					Tag tag = GameTagExtensions.Create(element.id);
+					list.Add(tag);
 				}
-			}
-			if (flag)
-			{
-				Tag tag = GameTagExtensions.Create(element.id);
-				list.Add(tag);
 			}
 		}
 		return list;
@@ -100,7 +104,7 @@ public class Filterable : KMonoBehaviour
 	public Filterable.ElementState filterElementState;
 
 	[Serialize]
-	private Tag selectedTag;
+	private Tag selectedTag = GameTags.Void;
 
 	private static readonly Operational.Flag filterSelected = new Operational.Flag("filterSelected", Operational.Flag.Type.Requirement);
 

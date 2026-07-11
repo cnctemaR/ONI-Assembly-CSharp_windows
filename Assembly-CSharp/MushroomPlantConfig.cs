@@ -23,7 +23,7 @@ public class MushroomPlantConfig : IEntityConfig
 		float num4 = 398.15f;
 		SimHashes[] array = new SimHashes[] { SimHashes.CarbonDioxide };
 		text4 = MushroomConfig.ID;
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, array, true, 0f, 0.15f, text4, true, true);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, num, num2, num3, num4, array, true, 0f, 0.15f, text4, true, true, true, true, 2400f);
 		EntityTemplates.ExtendPlantToFertilizable(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo

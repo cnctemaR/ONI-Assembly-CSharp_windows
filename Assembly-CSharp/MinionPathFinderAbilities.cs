@@ -29,11 +29,11 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 		return !Grid.HasAccessDoor[cell] || Grid.HasPermission(cell, proxyID, from_cell);
 	}
 
-	public override int GetSubmergedPathCostPenalty(PathFinder.PotentialPath path)
+	public override int GetSubmergedPathCostPenalty(PathFinder.PotentialPath path, NavGrid.Link link)
 	{
 		if (!path.HasAnyFlag(PathFinder.PotentialPath.Flags.HasAtmoSuit | PathFinder.PotentialPath.Flags.HasJetPack))
 		{
-			return 128;
+			return (int)(link.cost * 2);
 		}
 		return 0;
 	}
@@ -110,8 +110,6 @@ public class MinionPathFinderAbilities : PathFinderAbilities
 	private void EndSample()
 	{
 	}
-
-	private const int SUBMERGED_PATH_COST_PENALTY = 128;
 
 	private CellOffset[][] transitionVoidOffsets;
 

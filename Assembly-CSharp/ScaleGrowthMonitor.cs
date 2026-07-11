@@ -20,7 +20,7 @@ public class ScaleGrowthMonitor : GameStateMachine<ScaleGrowthMonitor, ScaleGrow
 		string text2 = CREATURES.STATUSITEMS.STUNTED_SCALE_GROWTH.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
 		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, main);
-		this.fullyGrown.Transition(this.growing, GameStateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Not(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.AreScalesFullyGrown)), UpdateRate.SIM_1000ms);
+		this.fullyGrown.ToggleTag(GameTags.Creatures.ScalesGrown).ToggleBehaviour(GameTags.Creatures.ScalesGrown, (ScaleGrowthMonitor.Instance smi) => smi.HasTag(GameTags.Creatures.CanMolt), null).Transition(this.growing, GameStateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Not(new StateMachine<ScaleGrowthMonitor, ScaleGrowthMonitor.Instance, IStateMachineTarget, ScaleGrowthMonitor.Def>.Transition.ConditionCallback(ScaleGrowthMonitor.AreScalesFullyGrown)), UpdateRate.SIM_1000ms);
 	}
 
 	private static bool IsInCorrectAtmosphere(ScaleGrowthMonitor.Instance smi)

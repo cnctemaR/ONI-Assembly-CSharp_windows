@@ -29,7 +29,7 @@ public class PowerControlStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.PowerStation, false);
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -55,6 +55,7 @@ public class PowerControlStationConfig : IBuildingConfig
 		tinkerStation.inputMaterial = PowerControlStationConfig.MATERIAL_FOR_TINKER;
 		tinkerStation.massPerTinker = 5f;
 		tinkerStation.outputPrefab = PowerControlStationConfig.TINKER_TOOLS;
+		tinkerStation.outputTemperature = 308.15f;
 		tinkerStation.requiredSkillPerk = PowerControlStationConfig.ROLE_PERK;
 		tinkerStation.choreType = Db.Get().ChoreTypes.PowerFabricate.IdHash;
 		tinkerStation.useFilteredStorage = true;
@@ -82,4 +83,6 @@ public class PowerControlStationConfig : IBuildingConfig
 	public const float MASS_PER_TINKER = 5f;
 
 	public static string ROLE_PERK = "CanPowerTinker";
+
+	public const float OUTPUT_TEMPERATURE = 308.15f;
 }

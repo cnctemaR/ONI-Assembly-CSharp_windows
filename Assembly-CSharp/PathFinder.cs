@@ -258,7 +258,8 @@ public class PathFinder
 			if (pathGridCellData2.isSubmerged)
 			{
 				num7 = underwater_cost + 1;
-				num6 += abilities.GetSubmergedPathCostPenalty(potentialPath);
+				int submergedPathCostPenalty = abilities.GetSubmergedPathCostPenalty(potentialPath, link6);
+				num6 += submergedPathCostPenalty;
 			}
 			else
 			{

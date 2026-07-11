@@ -30,13 +30,13 @@ namespace KMod
 
 		public string GetDirectory()
 		{
-			return FSUtil.Normalize(Path.Combine(Manager.GetDirectory(), this.folder));
+			return FileSystem.Normalize(Path.Combine(Manager.GetDirectory(), this.folder));
 		}
 
 		private void Subscribe(string id, long timestamp, IFileSource file_source)
 		{
 			string text = file_source.Read("mod.yaml");
-			Local.Header header = ((!string.IsNullOrEmpty(text)) ? YamlIO<Local.Header>.Parse(text, null) : null);
+			Local.Header header = ((!string.IsNullOrEmpty(text)) ? YamlIO.Parse<Local.Header>(text, file_source.GetRoot() + "\\mod.yaml", null, null) : null);
 			if (header == null)
 			{
 				header = new Local.Header
@@ -49,7 +49,7 @@ namespace KMod
 			{
 				id = id,
 				distribution_platform = this.distribution_platform,
-				version = (ulong)timestamp,
+				version = (long)id.GetHashCode(),
 				title = header.title
 			};
 			Mod mod = new Mod(label, header.description, file_source, UI.FRONTEND.MODS.TOOLTIPS.MANAGE_LOCAL_MOD, delegate
@@ -63,7 +63,7 @@ namespace KMod
 			Global.Instance.modManager.Subscribe(mod, this);
 		}
 
-		private class Header : YamlIO<Local.Header>
+		private class Header
 		{
 			public string title { get; set; }
 

@@ -15,7 +15,8 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		base.GetComponent<KPrefabID>().AddTag(TagManager.Create("RelaxationPoint", MISC.TAGS.RELAXATION_POINT));
+		this.lightEfficiencyBonus = false;
+		base.GetComponent<KPrefabID>().AddTag(TagManager.Create("RelaxationPoint", MISC.TAGS.RELAXATION_POINT), false);
 		if (RelaxationPoint.stressReductionEffect == null)
 		{
 			RelaxationPoint.stressReductionEffect = this.CreateEffect();
@@ -87,7 +88,7 @@ public class RelaxationPoint : Workable, IEffectDescriptor
 
 	protected virtual WorkChore<RelaxationPoint> CreateWorkChore()
 	{
-		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, null, false, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		return new WorkChore<RelaxationPoint>(Db.Get().ChoreTypes.Relax, this, null, false, null, null, null, false, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)

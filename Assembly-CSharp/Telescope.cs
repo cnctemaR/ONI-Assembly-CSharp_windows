@@ -13,9 +13,9 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 		Components.Telescopes.Add(this);
 		if (Telescope.reducedVisibilityStatusItem == null)
 		{
-			Telescope.reducedVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_REDUCED", "BUILDING", "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+			Telescope.reducedVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_REDUCED", "BUILDING", "status_item_no_sky", StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			Telescope.reducedVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
-			Telescope.noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+			Telescope.noVisibilityStatusItem = new StatusItem("SPACE_VISIBILITY_NONE", "BUILDING", "status_item_no_sky", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			Telescope.noVisibilityStatusItem.resolveStringCallback = new Func<string, object, string>(Telescope.GetStatusItemString);
 		}
 		this.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(this.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
@@ -110,7 +110,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 			this.workerGasProvider = component.GetGasProvider();
 			component.SetGasProvider(this);
 			component.GetComponent<CreatureSimTemperatureTransfer>().enabled = false;
-			component2.AddTag(GameTags.Shaded);
+			component2.AddTag(GameTags.Shaded, false);
 		}
 	}
 
@@ -144,9 +144,7 @@ public class Telescope : Workable, OxygenBreather.IGasProvider, IEffectDescripto
 
 	protected Chore CreateChore()
 	{
-		ChoreType research = Db.Get().ChoreTypes.Research;
-		Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-		WorkChore<Telescope> workChore = new WorkChore<Telescope>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		WorkChore<Telescope> workChore = new WorkChore<Telescope>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		workChore.AddPrecondition(Telescope.ContainsOxygen, null);
 		return workChore;
 	}

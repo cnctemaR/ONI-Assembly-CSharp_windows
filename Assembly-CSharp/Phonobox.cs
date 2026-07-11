@@ -14,7 +14,7 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectD
 		base.smi.StartSM();
 		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
 		{
-			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule);
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, true);
 		}, null, null);
 		this.workables = new PhonoboxWorkable[this.choreOffsets.Length];
 		this.chores = new Chore[this.choreOffsets.Length];
@@ -50,7 +50,7 @@ public class Phonobox : StateMachineComponent<Phonobox.StatesInstance>, IEffectD
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
 		Workable workable2 = workable;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<PhonoboxWorkable>(relax, workable2, null, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+		Chore chore = new WorkChore<PhonoboxWorkable>(relax, workable2, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
 		return chore;
 	}

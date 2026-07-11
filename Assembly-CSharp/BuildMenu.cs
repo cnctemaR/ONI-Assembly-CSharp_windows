@@ -651,6 +651,7 @@ public class BuildMenu : KScreen
 			{
 				new BuildMenu.BuildingInfo("MicrobeMusher", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("CookingStation", global::Action.BuildMenuKeyG),
+				new BuildMenu.BuildingInfo("GourmetCookingStation", global::Action.BuildMenuKeyS),
 				new BuildMenu.BuildingInfo("EggCracker", global::Action.BuildMenuKeyE)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Ranching"), "icon_category_food", global::Action.BuildCategoryRanching, KKeyCode.R, new List<BuildMenu.BuildingInfo>
@@ -664,7 +665,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("EggIncubator", global::Action.BuildMenuKeyI),
 				new BuildMenu.BuildingInfo("CreatureTrap", global::Action.BuildMenuKeyT),
 				new BuildMenu.BuildingInfo("FishTrap", global::Action.BuildMenuKeyA),
-				new BuildMenu.BuildingInfo("AirborneCreatureLure", global::Action.BuildMenuKeyL)
+				new BuildMenu.BuildingInfo("AirborneCreatureLure", global::Action.BuildMenuKeyL),
+				new BuildMenu.BuildingInfo("FlyingCreatureBait", global::Action.BuildMenuKeyB)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Health And Happiness"), "icon_category_medical", global::Action.Plan3, KKeyCode.None, new List<BuildMenu.DisplayInfo>
@@ -712,7 +714,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("WaterCooler", global::Action.BuildMenuKeyC),
 				new BuildMenu.BuildingInfo("ArcadeMachine", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("Phonobox", global::Action.BuildMenuKeyP),
-				new BuildMenu.BuildingInfo("EspressoMachine", global::Action.BuildMenuKeyE)
+				new BuildMenu.BuildingInfo("EspressoMachine", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("ParkSign", global::Action.BuildMenuKeyR)
 			})
 		}),
 		new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Infrastructure"), "icon_category_utilities", global::Action.Plan4, KKeyCode.None, new List<BuildMenu.DisplayInfo>
@@ -732,6 +735,7 @@ public class BuildMenu : KScreen
 			{
 				new BuildMenu.BuildingInfo("ManualGenerator", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("Generator", global::Action.BuildMenuKeyC),
+				new BuildMenu.BuildingInfo("WoodGasGenerator", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("HydrogenGenerator", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("MethaneGenerator", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("PetroleumGenerator", global::Action.BuildMenuKeyR),
@@ -799,7 +803,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo("AlgaeHabitat", global::Action.BuildMenuKeyA),
 				new BuildMenu.BuildingInfo("AirFilter", global::Action.BuildMenuKeyD),
 				new BuildMenu.BuildingInfo("CO2Scrubber", global::Action.BuildMenuKeyC),
-				new BuildMenu.BuildingInfo("Electrolyzer", global::Action.BuildMenuKeyE)
+				new BuildMenu.BuildingInfo("Electrolyzer", global::Action.BuildMenuKeyE),
+				new BuildMenu.BuildingInfo("RustDeoxidizer", global::Action.BuildMenuKeyF)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("Utilities"), "icon_category_utilities", global::Action.BuildCategoryUtilities, KKeyCode.T, new List<BuildMenu.BuildingInfo>
 			{
@@ -817,6 +822,7 @@ public class BuildMenu : KScreen
 			{
 				new BuildMenu.BuildingInfo("WaterPurifier", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("AlgaeDistillery", global::Action.BuildMenuKeyA),
+				new BuildMenu.BuildingInfo("EthanolDistillery", global::Action.BuildMenuKeyX),
 				new BuildMenu.BuildingInfo("RockCrusher", global::Action.BuildMenuKeyG),
 				new BuildMenu.BuildingInfo("Kiln", global::Action.BuildMenuKeyZ),
 				new BuildMenu.BuildingInfo("OilWellCap", global::Action.BuildMenuKeyC),
@@ -904,7 +910,8 @@ public class BuildMenu : KScreen
 				new BuildMenu.BuildingInfo(LogicElementSensorGasConfig.ID, global::Action.BuildMenuKeyE),
 				new BuildMenu.BuildingInfo("FloorSwitch", global::Action.BuildMenuKeyW),
 				new BuildMenu.BuildingInfo("Checkpoint", global::Action.BuildMenuKeyC),
-				new BuildMenu.BuildingInfo(CometDetectorConfig.ID, global::Action.BuildMenuKeyR)
+				new BuildMenu.BuildingInfo(CometDetectorConfig.ID, global::Action.BuildMenuKeyR),
+				new BuildMenu.BuildingInfo("LogicDuplicantSensor", global::Action.BuildMenuKeyF)
 			}),
 			new BuildMenu.DisplayInfo(BuildMenu.CacheHashString("ConduitSensors"), "icon_category_automation", global::Action.BuildCategoryLogicConduits, KKeyCode.X, new List<BuildMenu.BuildingInfo>
 			{

@@ -34,21 +34,24 @@ public class AlgaeHabitatConfig : IBuildingConfig
 	{
 		Storage storage = go.AddOrGet<Storage>();
 		storage.showInUI = true;
+		List<Tag> list = new List<Tag> { SimHashes.DirtyWater.CreateTag() };
+		Tag tag = SimHashes.Algae.CreateTag();
+		Tag tag2 = SimHashes.Water.CreateTag();
 		Storage storage2 = go.AddComponent<Storage>();
 		storage2.capacityKg = 360f;
 		storage2.showInUI = true;
 		storage2.SetDefaultStoredItemModifiers(AlgaeHabitatConfig.PollutedWaterStorageModifiers);
 		storage2.allowItemRemoval = false;
-		storage2.storageFilters = AlgaeHabitatConfig.pollutedWaterFilter;
+		storage2.storageFilters = list;
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
-		manualDeliveryKG.requestedItemTag = new Tag("Algae");
+		manualDeliveryKG.requestedItemTag = tag;
 		manualDeliveryKG.capacity = 90f;
 		manualDeliveryKG.refillMass = 18f;
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FetchCritical.IdHash;
 		ManualDeliveryKG manualDeliveryKG2 = go.AddComponent<ManualDeliveryKG>();
 		manualDeliveryKG2.SetStorage(storage);
-		manualDeliveryKG2.requestedItemTag = new Tag("Water");
+		manualDeliveryKG2.requestedItemTag = tag2;
 		manualDeliveryKG2.capacity = 360f;
 		manualDeliveryKG2.refillMass = 72f;
 		manualDeliveryKG2.allowPause = true;
@@ -64,17 +67,17 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		ElementConverter elementConverter = go.AddComponent<ElementConverter>();
 		elementConverter.consumedElements = new ElementConverter.ConsumedElement[]
 		{
-			new ElementConverter.ConsumedElement(new Tag("Algae"), 0.030000001f),
-			new ElementConverter.ConsumedElement(new Tag("Water"), 0.3f)
+			new ElementConverter.ConsumedElement(tag, 0.030000001f),
+			new ElementConverter.ConsumedElement(tag2, 0.3f)
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.040000003f, SimHashes.Oxygen, 303.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0)
 		};
 		ElementConverter elementConverter2 = go.AddComponent<ElementConverter>();
 		elementConverter2.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.29033333f, SimHashes.DirtyWater, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.29033333f, SimHashes.DirtyWater, 303.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0)
 		};
 		ElementConsumer elementConsumer = go.AddOrGet<ElementConsumer>();
 		elementConsumer.elementToConsume = SimHashes.CarbonDioxide;
@@ -119,6 +122,4 @@ public class AlgaeHabitatConfig : IBuildingConfig
 		Storage.StoredItemModifier.Hide,
 		Storage.StoredItemModifier.Seal
 	};
-
-	public static List<Tag> pollutedWaterFilter = new List<Tag> { ElementLoader.FindElementByHash(SimHashes.DirtyWater).tag };
 }

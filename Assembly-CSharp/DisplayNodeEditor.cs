@@ -139,7 +139,7 @@ public class DisplayNodeEditor : BaseNodeEditor
 		if (this.featureOptions == null)
 		{
 			this.InitSettings();
-			this.featureOptions = SettingsCache.features.GetNames();
+			this.featureOptions = SettingsCache.GetCachedFeatureNames().ToArray();
 		}
 	}
 

@@ -78,6 +78,8 @@ public class Element : IComparable<Element>
 
 	public string nameUpperCase { get; set; }
 
+	public string description { get; set; }
+
 	public string GetStateString()
 	{
 		return Element.GetStateString(this.state);
@@ -151,7 +153,7 @@ public class Element : IComparable<Element>
 
 	public string Description()
 	{
-		return Strings.Get("STRINGS.ELEMENTS." + this.id.ToString().ToUpper() + ".DESC");
+		return this.description;
 	}
 
 	public bool HasTag(Tag search_tag)

@@ -16,7 +16,7 @@ public class ModsScreen : KModalScreen
 			Application.OpenURL("http://steamcommunity.com/workshop/browse/?appid=457140");
 		};
 		this.workshopButton.onClick += action;
-		Global.Instance.modManager.Sanitize();
+		Global.Instance.modManager.Sanitize(base.gameObject);
 		this.mod_footprint.Clear();
 		foreach (Mod mod in Global.Instance.modManager.mods)
 		{
@@ -89,17 +89,18 @@ public class ModsScreen : KModalScreen
 				component.listener = modOrderingDragListener;
 				LocText reference = hierarchyReferences.GetReference<LocText>("Title");
 				reference.text = mod.title;
-				reference.GetComponent<ToolTip>().toolTip = mod.description;
+				ToolTip reference2 = hierarchyReferences.GetReference<ToolTip>("Description");
+				reference2.toolTip = mod.description;
 				if (mod.crash_count != 0)
 				{
 					reference.color = Color.Lerp(Color.white, Color.red, (float)mod.crash_count / 3f);
 				}
-				KButton reference2 = hierarchyReferences.GetReference<KButton>("ManageButton");
-				reference2.isInteractable = mod.is_managed;
-				if (reference2.isInteractable)
+				KButton reference3 = hierarchyReferences.GetReference<KButton>("ManageButton");
+				reference3.isInteractable = mod.is_managed;
+				if (reference3.isInteractable)
 				{
-					reference2.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
-					reference2.onClick += mod.on_managed;
+					reference3.GetComponent<ToolTip>().toolTip = mod.manage_tooltip;
+					reference3.onClick += mod.on_managed;
 				}
 				MultiToggle toggle = hierarchyReferences.GetReference<MultiToggle>("EnabledToggle");
 				toggle.ChangeState((!mod.enabled) ? 0 : 1);

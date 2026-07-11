@@ -992,7 +992,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		return list;
 	}
 
-	private static void MakeItemTemperatureInsulated(GameObject go, bool is_stored, bool is_initializing)
+	public static void MakeItemTemperatureInsulated(GameObject go, bool is_stored, bool is_initializing)
 	{
 		SimTemperatureTransfer component = go.GetComponent<SimTemperatureTransfer>();
 		if (component == null)
@@ -1002,7 +1002,7 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		component.enabled = !is_stored;
 	}
 
-	private static void MakeItemInvisible(GameObject go, bool is_stored, bool is_initializing)
+	public static void MakeItemInvisible(GameObject go, bool is_stored, bool is_initializing)
 	{
 		if (is_initializing)
 		{
@@ -1021,13 +1021,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
-	private static void MakeItemSealed(GameObject go, bool is_stored, bool is_initializing)
+	public static void MakeItemSealed(GameObject go, bool is_stored, bool is_initializing)
 	{
 		if (go != null)
 		{
 			if (is_stored)
 			{
-				go.GetComponent<KPrefabID>().AddTag(GameTags.Sealed);
+				go.GetComponent<KPrefabID>().AddTag(GameTags.Sealed, false);
 			}
 			else
 			{
@@ -1036,13 +1036,13 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 		}
 	}
 
-	private static void MakeItemPreserved(GameObject go, bool is_stored, bool is_initializing)
+	public static void MakeItemPreserved(GameObject go, bool is_stored, bool is_initializing)
 	{
 		if (go != null)
 		{
 			if (is_stored)
 			{
-				go.GetComponent<KPrefabID>().AddTag(GameTags.Preserved);
+				go.GetComponent<KPrefabID>().AddTag(GameTags.Preserved, false);
 			}
 			else
 			{
@@ -1232,6 +1232,8 @@ public class Storage : Workable, ISaveLoadableDetails, IEffectDescriptor
 			component.OnCopySettings(data);
 		});
 	}
+
+	public bool ignoreSourcePriority;
 
 	public bool allowItemRemoval;
 

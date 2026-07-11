@@ -1,7 +1,5 @@
 ﻿using System;
-using Klei.AI;
 using STRINGS;
-using TUNING;
 using UnityEngine;
 
 public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
@@ -10,8 +8,6 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 	{
 		base.OnPrefabInit();
 		base.Subscribe<PrickleGrass>(1309017699, PrickleGrass.SetReplantedTrueDelegate);
-		this.growth_bonus.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.GROWTH_BONUS;
-		this.wilt_penalty.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.WILT_PENALTY;
 	}
 
 	protected override void OnSpawn()
@@ -34,13 +30,15 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 
 	public bool replanted;
 
-	private AttributeModifier growth_bonus = new AttributeModifier("Effect", (float)DECOR.BONUS.TIER3.amount, null, false, false, true);
-
-	private AttributeModifier wilt_penalty = new AttributeModifier("Effect", (float)DECOR.PENALTY.TIER1.amount, null, false, false, true);
-
 	public EffectorValues positive_decor_effect = new EffectorValues
 	{
 		amount = 1,
+		radius = 5
+	};
+
+	public EffectorValues negative_decor_effect = new EffectorValues
+	{
+		amount = -1,
 		radius = 5
 	};
 
@@ -64,8 +62,8 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 			default_state = this.grow;
 			base.serializable = true;
 			GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State state = this.dead;
-			string text = global::STRINGS.CREATURES.STATUSITEMS.DEAD.NAME;
-			string text2 = global::STRINGS.CREATURES.STATUSITEMS.DEAD.TOOLTIP;
+			string text = CREATURES.STATUSITEMS.DEAD.NAME;
+			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
 			StatusItemCategory statusItemCategory = Db.Get().StatusItemCategories.Main;
 			state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory).ToggleTag(GameTags.PreventEmittingDisease).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
@@ -77,7 +75,7 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 			});
 			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject)).EventTransition(GameHashes.TooColdWarning, this.alive, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
 				.EventTransition(GameHashes.TooHotWarning, this.alive, (PrickleGrass.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
-				.EventTransition(GameHashes.Uprooted, this.dead, (PrickleGrass.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
+				.TagTransition(GameTags.Uprooted, this.dead, false);
 			this.grow.Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
 				if (smi.master.replanted && !this.alive.ForceUpdateStatus(smi.master.gameObject))
@@ -86,15 +84,12 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 				}
 			}).PlayAnim("grow_seed", KAnim.PlayMode.Once).EventTransition(GameHashes.AnimQueueComplete, this.alive, null);
 			GameStateMachine<PrickleGrass.States, PrickleGrass.StatesInstance, PrickleGrass, object>.State state2 = this.alive.InitializeStates(this.masterTarget, this.dead).DefaultState(this.alive.idle);
-			text2 = global::STRINGS.CREATURES.STATUSITEMS.IDLE.NAME;
-			text = global::STRINGS.CREATURES.STATUSITEMS.IDLE.TOOLTIP;
+			text2 = CREATURES.STATUSITEMS.IDLE.NAME;
+			text = CREATURES.STATUSITEMS.IDLE.TOOLTIP;
 			statusItemCategory = Db.Get().StatusItemCategories.Main;
 			state2.ToggleStatusItem(text2, text, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, statusItemCategory);
 			this.alive.idle.EventTransition(GameHashes.Wilt, this.alive.wilting, (PrickleGrass.StatesInstance smi) => smi.master.wiltCondition.IsWilting()).PlayAnim("idle", KAnim.PlayMode.Loop).Enter(delegate(PrickleGrass.StatesInstance smi)
 			{
-				smi.master.growth_bonus.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.GROWTH_BONUS;
-				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.wilt_penalty);
-				smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add(smi.master.growth_bonus);
 				smi.master.GetComponent<DecorProvider>().SetValues(smi.master.positive_decor_effect);
 				smi.master.GetComponent<DecorProvider>().Refresh();
 				smi.master.AddTag(GameTags.Decoration);
@@ -102,10 +97,7 @@ public class PrickleGrass : StateMachineComponent<PrickleGrass.StatesInstance>
 			this.alive.wilting.PlayAnim("wilt1", KAnim.PlayMode.Loop).EventTransition(GameHashes.WiltRecover, this.alive.idle, null).ToggleTag(GameTags.PreventEmittingDisease)
 				.Enter(delegate(PrickleGrass.StatesInstance smi)
 				{
-					smi.master.growth_bonus.Description = global::STRINGS.CREATURES.SPECIES.PRICKLEGRASS.WILT_PENALTY;
-					smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Remove(smi.master.growth_bonus);
-					smi.master.GetAttributes().Get(Db.Get().Attributes.Decor).Add(smi.master.wilt_penalty);
-					smi.master.GetComponent<DecorProvider>().SetValues(DECOR.PENALTY.TIER1);
+					smi.master.GetComponent<DecorProvider>().SetValues(smi.master.negative_decor_effect);
 					smi.master.GetComponent<DecorProvider>().Refresh();
 					smi.master.RemoveTag(GameTags.Decoration);
 				});

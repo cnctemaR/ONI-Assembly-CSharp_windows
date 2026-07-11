@@ -16,10 +16,10 @@ public static class BasePuftConfig
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, traitId, "FlyerNavGrid1x1", NavType.Hover, 32, 2f, "Meat", 1, true, true, 302f, 318f, 243.15f, 343.15f);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim(anim_file), symbol_override_prefix, 0);
+			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
 		}
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Creatures.Flyer);
+		component.AddTag(GameTags.Creatures.Flyer, false);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
@@ -46,7 +46,7 @@ public static class BasePuftConfig
 			.Add(new BaggedStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)
 			.Add(new DebugGoToStates.Def(), true)
-			.Add(new SubmergedStates.Def(), true)
+			.Add(new DrowningStates.Def(), true)
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true)
 			.Add(new FixedCaptureStates.Def(), true)
@@ -71,9 +71,14 @@ public static class BasePuftConfig
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false)
+			new Diet.Info(new HashSet<Tag> { consumed_tag }, producedTag, caloriesPerKg, producedConversionRate, diseaseId, diseasePerKgProduced, false, false)
 		};
-		Diet diet = new Diet(array);
+		return BasePuftConfig.SetupDiet(prefab, array, caloriesPerKg, minPoopSizeInKg);
+	}
+
+	public static GameObject SetupDiet(GameObject prefab, Diet.Info[] diet_infos, float caloriesPerKg, float minPoopSizeInKg)
+	{
+		Diet diet = new Diet(diet_infos);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();
 		def.diet = diet;
 		def.minPoopSizeInCalories = minPoopSizeInKg * caloriesPerKg;

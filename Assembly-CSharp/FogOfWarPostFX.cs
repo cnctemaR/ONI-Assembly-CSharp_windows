@@ -24,14 +24,18 @@ public class FogOfWarPostFX : MonoBehaviour
 		{
 			return;
 		}
-		Camera main = Camera.main;
-		Ray ray = main.ViewportPointToRay(Vector3.zero);
+		Camera camera = Camera.main;
+		if (GameUtil.IsCapturingTimeLapse())
+		{
+			camera = Game.Instance.timelapser.captureCamera;
+		}
+		Ray ray = camera.ViewportPointToRay(Vector3.zero);
 		float num = Mathf.Abs(ray.origin.z / ray.direction.z);
 		Vector3 vector = ray.GetPoint(num);
 		Vector4 vector2;
 		vector2.x = vector.x / Grid.WidthInMeters;
 		vector2.y = vector.y / Grid.HeightInMeters;
-		ray = main.ViewportPointToRay(Vector3.one);
+		ray = camera.ViewportPointToRay(Vector3.one);
 		num = Mathf.Abs(ray.origin.z / ray.direction.z);
 		vector = ray.GetPoint(num);
 		vector2.z = vector.x / Grid.WidthInMeters - vector2.x;

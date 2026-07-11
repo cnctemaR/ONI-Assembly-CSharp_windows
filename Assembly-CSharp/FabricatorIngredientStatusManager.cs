@@ -30,15 +30,11 @@ public class FabricatorIngredientStatusManager : KMonoBehaviour, ISim1000ms
 
 	private void RefreshStatusItems()
 	{
-		using (Dictionary<ComplexRecipe, Guid>.Enumerator enumerator = this.statusItems.GetEnumerator())
+		foreach (KeyValuePair<ComplexRecipe, Guid> keyValuePair in this.statusItems)
 		{
-			while (enumerator.MoveNext())
+			if (!this.fabricator.IsRecipeQueued(keyValuePair.Key))
 			{
-				KeyValuePair<ComplexRecipe, Guid> status = enumerator.Current;
-				if (this.fabricator.GetUserOrders().Find((ComplexFabricator.UserOrder match) => match.recipe == status.Key) == null)
-				{
-					this.deadOrderKeys.Add(status.Key);
-				}
+				this.deadOrderKeys.Add(keyValuePair.Key);
 			}
 		}
 		foreach (ComplexRecipe complexRecipe in this.deadOrderKeys)
@@ -52,38 +48,41 @@ public class FabricatorIngredientStatusManager : KMonoBehaviour, ISim1000ms
 			this.statusItems.Remove(complexRecipe);
 		}
 		this.deadOrderKeys.Clear();
-		foreach (ComplexFabricator.UserOrder userOrder in this.fabricator.GetUserOrders())
+		foreach (ComplexRecipe complexRecipe2 in this.fabricator.GetRecipes())
 		{
-			bool flag = false;
-			foreach (ComplexRecipe.RecipeElement recipeElement2 in userOrder.recipe.ingredients)
+			if (this.fabricator.IsRecipeQueued(complexRecipe2))
 			{
-				float num = this.fabricator.inStorage.GetAmountAvailable(recipeElement2.material) + this.fabricator.buildStorage.GetAmountAvailable(recipeElement2.material) + WorldInventory.Instance.GetAmount(recipeElement2.material) - recipeElement2.amount;
-				flag = flag || this.ChangeRecipeRequiredResourceBalance(userOrder.recipe, recipeElement2.material, num) || (this.statusItems.ContainsKey(userOrder.recipe) && this.fabricator.GetRecipeQueueCount(userOrder.recipe) == 0);
-			}
-			if (flag)
-			{
-				if (this.statusItems.ContainsKey(userOrder.recipe))
+				bool flag = false;
+				foreach (ComplexRecipe.RecipeElement recipeElement2 in complexRecipe2.ingredients)
 				{
-					this.selectable.RemoveStatusItem(this.statusItems[userOrder.recipe], false);
-					this.statusItems.Remove(userOrder.recipe);
+					float num = this.fabricator.inStorage.GetAmountAvailable(recipeElement2.material) + this.fabricator.buildStorage.GetAmountAvailable(recipeElement2.material) + WorldInventory.Instance.GetTotalAmount(recipeElement2.material) - recipeElement2.amount;
+					flag = flag || this.ChangeRecipeRequiredResourceBalance(complexRecipe2, recipeElement2.material, num) || (this.statusItems.ContainsKey(complexRecipe2) && this.fabricator.GetRecipeQueueCount(complexRecipe2) == 0);
 				}
-				if (this.fabricator.GetRecipeQueueCount(userOrder.recipe) > 0 || this.fabricator.GetRecipeQueueCount(userOrder.recipe) == ComplexFabricator.QUEUE_INFINITE)
+				if (flag)
 				{
-					foreach (float num2 in this.recipeRequiredResourceBalances[userOrder.recipe].Values)
+					if (this.statusItems.ContainsKey(complexRecipe2))
 					{
-						if (num2 < 0f)
+						this.selectable.RemoveStatusItem(this.statusItems[complexRecipe2], false);
+						this.statusItems.Remove(complexRecipe2);
+					}
+					if (this.fabricator.IsRecipeQueued(complexRecipe2))
+					{
+						foreach (float num2 in this.recipeRequiredResourceBalances[complexRecipe2].Values)
 						{
-							Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
-							foreach (KeyValuePair<Tag, float> keyValuePair in this.recipeRequiredResourceBalances[userOrder.recipe])
+							if (num2 < 0f)
 							{
-								if (keyValuePair.Value < 0f)
+								Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
+								foreach (KeyValuePair<Tag, float> keyValuePair2 in this.recipeRequiredResourceBalances[complexRecipe2])
 								{
-									dictionary.Add(keyValuePair.Key, -keyValuePair.Value);
+									if (keyValuePair2.Value < 0f)
+									{
+										dictionary.Add(keyValuePair2.Key, -keyValuePair2.Value);
+									}
 								}
+								Guid guid = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, dictionary);
+								this.statusItems.Add(complexRecipe2, guid);
+								break;
 							}
-							Guid guid = this.selectable.AddStatusItem(Db.Get().BuildingStatusItems.MaterialsUnavailable, dictionary);
-							this.statusItems.Add(userOrder.recipe, guid);
-							break;
 						}
 					}
 				}

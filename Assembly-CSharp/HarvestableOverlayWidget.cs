@@ -24,7 +24,7 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 			GameObject gameObject = Util.KInstantiateUI(this.horizontal_container_prefab, this.vertical_container, false);
 			this.horizontal_containers[i] = gameObject;
 		}
-		for (int j = 0; j < 11; j++)
+		for (int j = 0; j < 12; j++)
 		{
 			if (this.condition_sprites.ContainsKey((WiltCondition.Condition)j))
 			{
@@ -35,7 +35,7 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 		}
 	}
 
-	public void Refresh(Harvestable target_harvestable)
+	public void Refresh(HarvestDesignatable target_harvestable)
 	{
 		Image image = this.bar.GetComponent<HierarchyReferences>().GetReference("Fill") as Image;
 		AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(target_harvestable);
@@ -43,11 +43,11 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 		{
 			float num = amountInstance.value / amountInstance.GetMax();
 			image.rectTransform.offsetMin = new Vector2(image.rectTransform.offsetMin.x, 3f);
-			if (this.bar.activeSelf != !target_harvestable.CanBeHavested)
+			if (this.bar.activeSelf != !target_harvestable.CanBeHarvested())
 			{
-				this.bar.SetActive(!target_harvestable.CanBeHavested);
+				this.bar.SetActive(!target_harvestable.CanBeHarvested());
 			}
-			float num2 = ((!target_harvestable.CanBeHavested) ? (19f - 19f * num + 3f) : 3f);
+			float num2 = ((!target_harvestable.CanBeHarvested()) ? (19f - 19f * num + 3f) : 3f);
 			image.rectTransform.offsetMax = new Vector2(image.rectTransform.offsetMax.x, -num2);
 		}
 		else if (this.bar.activeSelf)
@@ -136,7 +136,7 @@ public class HarvestableOverlayWidget : KMonoBehaviour
 	[SerializeField]
 	private GameObject horizontal_container_prefab;
 
-	private GameObject[] horizontal_containers = new GameObject[5];
+	private GameObject[] horizontal_containers = new GameObject[6];
 
 	[SerializeField]
 	private GameObject icon_gameobject_prefab;

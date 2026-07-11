@@ -35,7 +35,7 @@ public class TemperatureSuitConfig : IEquipmentConfig
 		suitTank.element = "Water";
 		suitTank.amount = 100f;
 		KPrefabID component = go.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.PedestalDisplayable);
+		component.AddTag(GameTags.PedestalDisplayable, false);
 	}
 
 	public const string ID = "Temperature_Suit";

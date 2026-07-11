@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
 using UnityEngine;
@@ -47,20 +48,26 @@ public class StandardAttributeFormatter : IAttributeFormatter
 
 	public virtual string GetTooltipDescription(Klei.AI.Attribute master, AttributeInstance instance)
 	{
-		return master.Name + UI.HORIZONTAL_BR_RULE + master.Description;
+		return master.Description;
 	}
 
 	public virtual string GetTooltip(Klei.AI.Attribute master, AttributeInstance instance)
 	{
 		string text = this.GetTooltipDescription(master, instance);
-		text += string.Format(DUPLICANTS.ATTRIBUTES.TOTAL_VALUE, this.GetFormattedValue(instance.GetTotalDisplayValue(), GameUtil.TimeSlice.None, null));
+		text += string.Format(DUPLICANTS.ATTRIBUTES.TOTAL_VALUE, this.GetFormattedValue(instance.GetTotalDisplayValue(), GameUtil.TimeSlice.None, null), instance.Name);
 		if (instance.GetBaseValue() != 0f)
 		{
 			text += string.Format(DUPLICANTS.ATTRIBUTES.BASE_VALUE, instance.GetBaseValue());
 		}
-		for (int num = 0; num != instance.Modifiers.Count; num++)
+		List<AttributeModifier> list = new List<AttributeModifier>();
+		for (int i = 0; i < instance.Modifiers.Count; i++)
 		{
-			AttributeModifier attributeModifier = instance.Modifiers[num];
+			list.Add(instance.Modifiers[i]);
+		}
+		list.Sort((AttributeModifier p1, AttributeModifier p2) => p2.Value.CompareTo(p1.Value));
+		for (int num = 0; num != list.Count; num++)
+		{
+			AttributeModifier attributeModifier = list[num];
 			string formattedString = attributeModifier.GetFormattedString(instance.gameObject);
 			if (formattedString != null)
 			{
@@ -75,7 +82,7 @@ public class StandardAttributeFormatter : IAttributeFormatter
 			{
 				if (attributeConverterInstance.converter.attribute == master)
 				{
-					string text3 = attributeConverterInstance.DescriptionFromAttribute();
+					string text3 = attributeConverterInstance.DescriptionFromAttribute(attributeConverterInstance.Evaluate(), attributeConverterInstance.gameObject);
 					if (text3 != null)
 					{
 						text2 = text2 + "\n" + text3;

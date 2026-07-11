@@ -22,7 +22,7 @@ internal class NestingPoopState : GameStateMachine<NestingPoopState, NestingPoop
 		string text = CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).PlayAnim("poop").OnAnimQueueComplete(this.behaviourcomplete);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).PlayAnim("poop").OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.Enter(delegate(NestingPoopState.Instance smi)
 		{
 			smi.SetLastPoopCell();

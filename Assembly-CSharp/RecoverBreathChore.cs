@@ -6,7 +6,7 @@ using UnityEngine;
 public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 {
 	public RecoverBreathChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.RecoverBreath, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new RecoverBreathChore.StatesInstance(this, target.gameObject);
 	}
@@ -79,7 +79,7 @@ public class RecoverBreathChore : Chore<RecoverBreathChore.StatesInstance>
 			}).Update("UpdateLocator", delegate(RecoverBreathChore.StatesInstance smi, float dt)
 			{
 				smi.UpdateLocator();
-			}, UpdateRate.SIM_200ms, false);
+			}, UpdateRate.SIM_200ms, true);
 			this.approach.InitializeStates(this.recoverer, this.locator, this.remove_suit, null, null, null);
 			this.remove_suit.GoTo(this.recover);
 			this.recover.ToggleAnims("anim_emotes_default_kanim", 0f).DefaultState(this.recover.pre).ToggleAttributeModifier("Recovering Breath", (RecoverBreathChore.StatesInstance smi) => smi.recoveringbreath, null)

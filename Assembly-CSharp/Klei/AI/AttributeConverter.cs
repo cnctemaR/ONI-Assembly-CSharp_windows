@@ -30,6 +30,29 @@ namespace Klei.AI
 			return null;
 		}
 
+		public string DescriptionFromAttribute(float value, GameObject go)
+		{
+			string text;
+			if (this.formatter != null)
+			{
+				text = this.formatter.GetFormattedValue(value, this.formatter.DeltaTimeSlice, go);
+			}
+			else if (this.attribute.formatter != null)
+			{
+				text = this.attribute.formatter.GetFormattedValue(value, this.attribute.formatter.DeltaTimeSlice, go);
+			}
+			else
+			{
+				text = GameUtil.GetFormattedSimple(value, GameUtil.TimeSlice.None, null);
+			}
+			if (text != null)
+			{
+				text = GameUtil.AddPositiveSign(text, value > 0f);
+				return string.Format(this.description, text);
+			}
+			return null;
+		}
+
 		public string description;
 
 		public float multiplier;

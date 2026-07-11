@@ -32,10 +32,15 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	{
 		get
 		{
-			float num = this.TotalExperienceGained / (float)SKILLS.TARGET_SKILLS_CYCLE / 600f;
-			float num2 = Mathf.Pow(num, 1f / SKILLS.EXPERIENCE_LEVEL_POWER);
-			return Mathf.FloorToInt(num2 * (float)SKILLS.TARGET_SKILLS_EARNED);
+			return MinionResume.CalculateTotalSkillPointsGained(this.TotalExperienceGained);
 		}
+	}
+
+	public static int CalculateTotalSkillPointsGained(float experience)
+	{
+		float num = experience / (float)SKILLS.TARGET_SKILLS_CYCLE / 600f;
+		float num2 = Mathf.Pow(num, 1f / SKILLS.EXPERIENCE_LEVEL_POWER);
+		return Mathf.FloorToInt(num2 * (float)SKILLS.TARGET_SKILLS_EARNED);
 	}
 
 	public int SkillsMastered
@@ -90,7 +95,6 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		this.selectable = base.GetComponent<KSelectable>();
 		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
 		{
 			if (keyValuePair.Value)
@@ -114,6 +118,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			}
 		}
 		this.UpdateExpectations();
+		this.UpdateMorale();
 		KBatchedAnimController component = base.GetComponent<KBatchedAnimController>();
 		MinionResume.ApplyHat(this.currentHat, component);
 	}
@@ -228,7 +233,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
-	public bool CheckSkillTraitDisabled(string skillId)
+	public bool IsAbleToLearnSkill(string skillId)
 	{
 		Skill skill = Db.Get().Skills.Get(skillId);
 		string choreGroupID = Db.Get().SkillGroups.Get(skill.skillGroup).choreGroupID;
@@ -243,27 +248,30 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 					{
 						if (choreGroup.Id == choreGroupID)
 						{
-							return true;
+							return false;
 						}
 					}
 				}
 			}
-			return false;
+			return true;
 		}
-		return false;
+		return true;
 	}
 
-	public bool CanMasterSkill(string skillId)
+	public bool BelowMoraleExpectation(Skill skill)
 	{
-		Skill skill = Db.Get().Skills.Get(skillId);
-		if (this.CheckSkillTraitDisabled(skillId))
+		float num = Db.Get().Attributes.QualityOfLife.Lookup(this).GetTotalValue();
+		float totalValue = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(this).GetTotalValue();
+		int moraleExpectation = skill.GetMoraleExpectation();
+		if (this.AptitudeBySkillGroup.ContainsKey(skill.skillGroup) && this.AptitudeBySkillGroup[skill.skillGroup] > 0f)
 		{
-			return false;
+			num += 1f;
 		}
-		if (this.AvailableSkillpoints < 1)
-		{
-			return false;
-		}
+		return totalValue + (float)moraleExpectation <= num;
+	}
+
+	public bool HasMasteredDirectlyRequiredSkillsForSkill(Skill skill)
+	{
 		for (int i = 0; i < skill.priorSkills.Count; i++)
 		{
 			if (!this.HasMasteredSkill(skill.priorSkills[i]))
@@ -272,6 +280,48 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			}
 		}
 		return true;
+	}
+
+	public bool HasSkillPointsRequiredForSkill(Skill skill)
+	{
+		return this.AvailableSkillpoints >= 1;
+	}
+
+	public bool HasSkillAptitude(Skill skill)
+	{
+		return this.AptitudeBySkillGroup.ContainsKey(skill.skillGroup) && this.AptitudeBySkillGroup[skill.skillGroup] > 0f;
+	}
+
+	public MinionResume.SkillMasteryConditions[] GetSkillMasteryConditions(string skillId)
+	{
+		List<MinionResume.SkillMasteryConditions> list = new List<MinionResume.SkillMasteryConditions>();
+		Skill skill = Db.Get().Skills.Get(skillId);
+		if (this.HasSkillAptitude(skill))
+		{
+			list.Add(MinionResume.SkillMasteryConditions.SkillAptitude);
+		}
+		if (!this.BelowMoraleExpectation(skill))
+		{
+			list.Add(MinionResume.SkillMasteryConditions.StressWarning);
+		}
+		if (!this.IsAbleToLearnSkill(skillId))
+		{
+			list.Add(MinionResume.SkillMasteryConditions.UnableToLearn);
+		}
+		if (!this.HasSkillPointsRequiredForSkill(skill))
+		{
+			list.Add(MinionResume.SkillMasteryConditions.NeedsSkillPoints);
+		}
+		if (!this.HasMasteredDirectlyRequiredSkillsForSkill(skill))
+		{
+			list.Add(MinionResume.SkillMasteryConditions.MissingPreviousSkill);
+		}
+		return list.ToArray();
+	}
+
+	public bool CanMasterSkill(MinionResume.SkillMasteryConditions[] masteryConditions)
+	{
+		return !Array.Exists<MinionResume.SkillMasteryConditions>(masteryConditions, (MinionResume.SkillMasteryConditions element) => element == MinionResume.SkillMasteryConditions.UnableToLearn || element == MinionResume.SkillMasteryConditions.NeedsSkillPoints || element == MinionResume.SkillMasteryConditions.MissingPreviousSkill);
 	}
 
 	public bool OwnsHat(string hatId)
@@ -304,6 +354,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		this.MasteryBySkillID[skillId] = true;
 		this.ApplySkillPerks(skillId);
 		this.UpdateExpectations();
+		this.UpdateMorale();
 		this.TriggerMasterSkillEvents();
 		if (!this.ownedHats.ContainsKey(Db.Get().Skills.Get(skillId).hat))
 		{
@@ -318,6 +369,7 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			this.MasteryBySkillID.Remove(skillId);
 			this.RemoveSkillPerks(skillId);
 			this.UpdateExpectations();
+			this.UpdateMorale();
 			this.TriggerMasterSkillEvents();
 		}
 	}
@@ -356,11 +408,6 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 			{
 				Skill skill = Db.Get().Skills.Get(keyValuePair.Key);
 				num += skill.tier + 1;
-				float num2 = 0f;
-				if (this.AptitudeBySkillGroup.TryGetValue(new HashedString(skill.skillGroup), out num2))
-				{
-					num -= (int)num2;
-				}
 			}
 		}
 		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLifeExpectation.Lookup(this);
@@ -376,11 +423,38 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 		}
 	}
 
+	private void UpdateMorale()
+	{
+		int num = 0;
+		foreach (KeyValuePair<string, bool> keyValuePair in this.MasteryBySkillID)
+		{
+			if (keyValuePair.Value)
+			{
+				Skill skill = Db.Get().Skills.Get(keyValuePair.Key);
+				float num2 = 0f;
+				if (this.AptitudeBySkillGroup.TryGetValue(new HashedString(skill.skillGroup), out num2))
+				{
+					num += (int)num2;
+				}
+			}
+		}
+		AttributeInstance attributeInstance = Db.Get().Attributes.QualityOfLife.Lookup(this);
+		if (this.skillsMoraleModifier != null)
+		{
+			attributeInstance.Remove(this.skillsMoraleModifier);
+			this.skillsMoraleModifier = null;
+		}
+		if (num > 0)
+		{
+			this.skillsMoraleModifier = new AttributeModifier(attributeInstance.Id, (float)num, DUPLICANTS.NEEDS.QUALITYOFLIFE.APTITUDE_SKILLS_MOD_NAME, false, false, true);
+			attributeInstance.Add(this.skillsMoraleModifier);
+		}
+	}
+
 	private void OnSkillPointGained()
 	{
 		Game.Instance.Trigger(1505456302, this);
 		SkillMasteredMessage skillMasteredMessage = new SkillMasteredMessage(this);
-		MusicManager.instance.PlaySong("Stinger_JobMastered", false);
 		Messenger.Instance.QueueMessage(skillMasteredMessage);
 		if (PopFXManager.Instance != null)
 		{
@@ -530,7 +604,6 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public static bool AnyMinionHasPerk(string perk)
 	{
-		List<MinionResume> list = new List<MinionResume>();
 		foreach (MinionResume minionResume in Components.MinionResumes.Items)
 		{
 			if (minionResume.HasPerk(perk))
@@ -543,7 +616,6 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 
 	public static bool AnyOtherMinionHasPerk(string perk, MinionResume me)
 	{
-		List<MinionResume> list = new List<MinionResume>();
 		foreach (MinionResume minionResume in Components.MinionResumes.Items)
 		{
 			if (!(minionResume == me))
@@ -605,13 +677,22 @@ public class MinionResume : KMonoBehaviour, ISaveLoadable, ISim200ms
 	[Serialize]
 	private float totalExperienceGained;
 
-	private KSelectable selectable;
-
 	private AttributeModifier skillsMoraleExpectationModifier;
+
+	private AttributeModifier skillsMoraleModifier;
 
 	public float DEBUG_PassiveExperienceGained;
 
 	public float DEBUG_ActiveExperienceGained;
 
 	public float DEBUG_SecondsAlive;
+
+	public enum SkillMasteryConditions
+	{
+		SkillAptitude,
+		StressWarning,
+		UnableToLearn,
+		NeedsSkillPoints,
+		MissingPreviousSkill
+	}
 }

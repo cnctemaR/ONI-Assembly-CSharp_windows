@@ -6,18 +6,12 @@ public class RoleStationSideScreen : SideScreenContent
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		this.openRolesScreenButton.onClick += delegate
-		{
-			ManagementMenu.Instance.ToggleSkills();
-		};
 	}
 
 	public override bool IsValidForTarget(GameObject target)
 	{
-		return target.GetComponent<RoleStation>() != null;
+		return false;
 	}
-
-	public KButton openRolesScreenButton;
 
 	public GameObject content;
 

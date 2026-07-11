@@ -4,7 +4,7 @@ using STRINGS;
 
 public class RoomType : Resource
 {
-	public RoomType(string id, string name, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false, string[] effects = null)
+	public RoomType(string id, string name, string tooltip, string effect, RoomTypeCategory category, RoomConstraints.Constraint primary_constraint, RoomConstraints.Constraint[] additional_constraints, RoomDetails.Detail[] display_details, int priority = 0, RoomType[] upgrade_paths = null, bool single_assignee = false, bool priority_building_use = false, string[] effects = null, int sortKey = 0)
 		: base(id, name)
 	{
 		this.tooltip = tooltip;
@@ -18,6 +18,7 @@ public class RoomType : Resource
 		this.single_assignee = single_assignee;
 		this.priority_building_use = priority_building_use;
 		this.effects = effects;
+		this.sortKey = sortKey;
 		if (this.upgrade_paths != null)
 		{
 			foreach (RoomType roomType in this.upgrade_paths)
@@ -48,6 +49,8 @@ public class RoomType : Resource
 	public RoomType[] upgrade_paths { get; private set; }
 
 	public string[] effects { get; private set; }
+
+	public int sortKey { get; private set; }
 
 	public RoomType.RoomIdentificationResult isSatisfactory(Room candidate_room)
 	{

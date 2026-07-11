@@ -7,6 +7,7 @@ public class RoleStation : Workable, IEffectDescriptor
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.synchronizeAnims = true;
 	}
 
 	protected override void OnSpawn()
@@ -15,10 +16,17 @@ public class RoleStation : Workable, IEffectDescriptor
 		Components.RoleStations.Add(this);
 		this.smi = new RoleStation.RoleStationSM.Instance(this);
 		this.smi.StartSM();
-		base.SetWorkTime(2f);
+		base.SetWorkTime(7.53f);
+		this.resetProgressOnStop = true;
 		this.subscriptions.Add(Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateSkillPointAvailableStatusItem)));
 		this.subscriptions.Add(Game.Instance.Subscribe(1505456302, new Action<object>(this.UpdateSkillPointAvailableStatusItem)));
 		this.UpdateSkillPointAvailableStatusItem(null);
+	}
+
+	protected override void OnStopWork(Worker worker)
+	{
+		Telepad.StatesInstance statesInstance = this.GetSMI<Telepad.StatesInstance>();
+		statesInstance.sm.idlePortal.Trigger(statesInstance);
 	}
 
 	private void UpdateSkillPointAvailableStatusItem(object data = null)
@@ -56,7 +64,7 @@ public class RoleStation : Workable, IEffectDescriptor
 	{
 		ChoreType learnSkill = Db.Get().ChoreTypes.LearnSkill;
 		KAnimFile anim = Assets.GetAnim("anim_hat_kanim");
-		return new WorkChore<RoleStation>(learnSkill, this, null, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
+		return new WorkChore<RoleStation>(learnSkill, this, null, true, null, null, null, false, null, false, true, anim, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, false);
 	}
 
 	protected override void OnCompleteWork(Worker worker)

@@ -6,6 +6,7 @@ using Klei;
 using KMod;
 using KSerialization;
 using Steamworks;
+using STRINGS;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -23,13 +24,13 @@ public class Global : MonoBehaviour
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.PanLeft, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.D, Modifier.None, global::Action.PanRight, true, false),
 			new BindingEntry("Tool", GamepadButton.NumButtons, KKeyCode.O, Modifier.None, global::Action.RotateBuilding, true, false),
-			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.L, Modifier.None, global::Action.ManagePeople, true, false),
+			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.L, Modifier.None, global::Action.ManagePriorities, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.F, Modifier.None, global::Action.ManageConsumables, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.V, Modifier.None, global::Action.ManageVitals, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.R, Modifier.None, global::Action.ManageResearch, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.E, Modifier.None, global::Action.ManageReport, true, false),
-			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.U, Modifier.None, global::Action.ManageCodex, true, false),
-			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.J, Modifier.None, global::Action.ManageRoles, true, false),
+			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.U, Modifier.None, global::Action.ManageDatabase, true, false),
+			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.J, Modifier.None, global::Action.ManageSkills, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.Period, Modifier.None, global::Action.ManageSchedule, true, false),
 			new BindingEntry("Management", GamepadButton.NumButtons, KKeyCode.Z, Modifier.None, global::Action.ManageStarmap, true, false),
 			new BindingEntry("Root", GamepadButton.NumButtons, KKeyCode.G, Modifier.None, global::Action.Dig, true, false),
@@ -103,6 +104,17 @@ public class Global : MonoBehaviour
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha8, Modifier.Shift, global::Action.GotoUserNav8, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha9, Modifier.Shift, global::Action.GotoUserNav9, true, false),
 			new BindingEntry("Navigation", GamepadButton.NumButtons, KKeyCode.Alpha0, Modifier.Shift, global::Action.GotoUserNav10, true, false),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.C, Modifier.None, global::Action.CinemaCamEnable, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.A, Modifier.None, global::Action.CinemaPanLeft, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.D, Modifier.None, global::Action.CinemaPanRight, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.W, Modifier.None, global::Action.CinemaPanUp, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.S, Modifier.None, global::Action.CinemaPanDown, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.I, Modifier.None, global::Action.CinemaZoomIn, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.O, Modifier.None, global::Action.CinemaZoomOut, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.Z, Modifier.None, global::Action.CinemaZoomSpeedPlus, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.Z, Modifier.Shift, global::Action.CinemaZoomSpeedMinus, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.T, Modifier.None, global::Action.CinemaToggleLock, true, true),
+			new BindingEntry("CinematicCamera", GamepadButton.NumButtons, KKeyCode.E, Modifier.None, global::Action.CinemaToggleEasing, true, true),
 			new BindingEntry("Building", GamepadButton.NumButtons, KKeyCode.Slash, Modifier.None, global::Action.ToggleOpen, true, false),
 			new BindingEntry("Building", GamepadButton.NumButtons, KKeyCode.Return, Modifier.None, global::Action.ToggleEnabled, true, false),
 			new BindingEntry("Building", GamepadButton.NumButtons, KKeyCode.Backslash, Modifier.None, global::Action.BuildingUtility1, true, false),
@@ -196,9 +208,12 @@ public class Global : MonoBehaviour
 			new BindingEntry("Sandbox", GamepadButton.NumButtons, KKeyCode.R, Modifier.Shift, global::Action.SandboxReveal, true, false)
 		};
 		IList<BuildMenu.DisplayInfo> list2 = (IList<BuildMenu.DisplayInfo>)BuildMenu.OrderedBuildings.data;
-		foreach (BuildMenu.DisplayInfo displayInfo in list2)
+		if (BuildMenu.UseHotkeyBuildMenu())
 		{
-			Global.AddBindings(HashedString.Invalid, displayInfo, list);
+			foreach (BuildMenu.DisplayInfo displayInfo in list2)
+			{
+				Global.AddBindings(HashedString.Invalid, displayInfo, list);
+			}
 		}
 		return list.ToArray();
 	}
@@ -263,14 +278,13 @@ public class Global : MonoBehaviour
 				}
 			}
 		}
-		LayeredFileSystem.CreateInstance();
-		this.layeredFileSystem = LayeredFileSystem.instance;
-		this.standardFS = new StandardFileSystem();
-		this.layeredFileSystem.AddFileSystem(this.standardFS);
+		FileSystem.Initialize();
 		Singleton<StateMachineUpdater>.CreateInstance();
 		Singleton<StateMachineManager>.CreateInstance();
+		Localization.RegisterForTranslation(typeof(UI));
 		this.modManager = new global::KMod.Manager();
-		this.modManager.Load(Content.DLL | Content.Animation);
+		this.modManager.Load(Content.DLL);
+		this.modManager.Load(Content.Animation);
 		this.modManager.Load(Content.Strings);
 		global::KSerialization.Manager.Initialize();
 		this.mInputManager = new GameInputManager(Global.GenerateDefaultBindings());
@@ -309,6 +323,7 @@ public class Global : MonoBehaviour
 			global::Debug.LogWarning("Can't init " + DistributionPlatform.Inst.Name + " distribution platform...");
 			this.OnGetUserIdKey();
 		}
+		this.modManager.Load(Content.LayerableFiles);
 		GlobalResources.Instance();
 	}
 
@@ -362,8 +377,9 @@ public class Global : MonoBehaviour
 			this.updated_with_initialized_distribution_platform = true;
 			SteamUGCService.Initialize();
 			Steam steam = new Steam();
-			SteamUGCService.Instance.ugcEventHandlers.Add(steam);
+			SteamUGCService.Instance.AddClient(steam);
 			this.modManager.distribution_platforms.Add(steam);
+			SteamAchievementService.Initialize();
 		}
 		if (this.gotKleiUserID)
 		{
@@ -372,12 +388,13 @@ public class Global : MonoBehaviour
 			ThreadedHttps<KleiMetrics>.Instance.StartSession();
 		}
 		ThreadedHttps<KleiMetrics>.Instance.SetLastUserAction(KInputManager.lastUserActionTicks);
+		Localization.VerifyTranslationModSubscription(this.globalCanvas);
 	}
 
 	private void SetONIStaticSessionVariables()
 	{
 		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Branch", "release");
-		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 336724U);
+		ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable("Build", 356355U);
 		if (KPlayerPrefs.HasKey(UnitConfigurationScreen.MassUnitKey))
 		{
 			ThreadedHttps<KleiMetrics>.Instance.SetStaticSessionVariable(UnitConfigurationScreen.MassUnitKey, ((GameUtil.MassUnit)KPlayerPrefs.GetInt(UnitConfigurationScreen.MassUnitKey)).ToString());
@@ -468,12 +485,6 @@ public class Global : MonoBehaviour
 	private AnimEventManager mAnimEventManager;
 
 	public global::KMod.Manager modManager;
-
-	public LayeredFileSystem layeredFileSystem;
-
-	public StandardFileSystem standardFS;
-
-	public ZipFileSystem worldGenZipFS;
 
 	private bool gotKleiUserID;
 

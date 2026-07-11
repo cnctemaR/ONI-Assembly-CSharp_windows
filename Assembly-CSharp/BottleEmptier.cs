@@ -13,6 +13,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		base.OnSpawn();
 		base.smi.StartSM();
 		base.Subscribe<BottleEmptier>(493375141, BottleEmptier.OnRefreshUserMenuDelegate);
+		base.Subscribe<BottleEmptier>(-905833192, BottleEmptier.OnCopySettingsDelegate);
 	}
 
 	public List<Descriptor> GetDescriptors(BuildingDef def)
@@ -49,6 +50,13 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		Game.Instance.userMenu.AddButton(base.gameObject, buttonInfo2, 1f);
 	}
 
+	private void OnCopySettings(object data)
+	{
+		GameObject gameObject = (GameObject)data;
+		BottleEmptier component = gameObject.GetComponent<BottleEmptier>();
+		this.allowManualPumpingStationFetching = component.allowManualPumpingStationFetching;
+	}
+
 	public float emptyRate = 10f;
 
 	[Serialize]
@@ -63,6 +71,11 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 	private static readonly EventSystem.IntraObjectHandler<BottleEmptier> OnRefreshUserMenuDelegate = new EventSystem.IntraObjectHandler<BottleEmptier>(delegate(BottleEmptier component, object data)
 	{
 		component.OnRefreshUserMenu(data);
+	});
+
+	private static readonly EventSystem.IntraObjectHandler<BottleEmptier> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<BottleEmptier>(delegate(BottleEmptier component, object data)
+	{
+		component.OnCopySettings(data);
 	});
 
 	public class StatesInstance : GameStateMachine<BottleEmptier.States, BottleEmptier.StatesInstance, BottleEmptier, object>.GameInstance
@@ -103,7 +116,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 			float num = component2.Capacity();
 			Tag[] tags2 = base.GetComponent<TreeFilterable>().GetTags();
 			Tag[] array2 = array;
-			this.chore = new FetchChore(storageFetch, storage, num, tags2, null, array2, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0, null);
+			this.chore = new FetchChore(storageFetch, storage, num, tags2, null, array2, null, true, null, null, null, FetchOrder2.OperationalRequirement.Operational, 0);
 		}
 
 		public void CancelChore()
@@ -208,7 +221,7 @@ public class BottleEmptier : StateMachineComponent<BottleEmptier.StatesInstance>
 		public override void InitializeStates(out StateMachine.BaseState default_state)
 		{
 			default_state = this.waitingfordelivery;
-			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 63486);
+			this.statusItem = new StatusItem("BottleEmptier", string.Empty, string.Empty, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 			this.statusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				BottleEmptier bottleEmptier = (BottleEmptier)data;

@@ -172,6 +172,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			Grid.HasAccessDoor[num2] = false;
 			Game.Instance.SetDupePassableSolid(num2, false, Grid.Solid[num2]);
 			Grid.CritterImpassable[num2] = false;
+			Grid.DupeImpassable[num2] = false;
 			Pathfinding.Instance.AddDirtyNavGridCell(num2);
 		}
 		base.OnCleanUp();
@@ -298,14 +299,19 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				bool flag = !is_door_open;
 				bool flag2 = this.controlState != Door.ControlState.Locked;
 				Game.Instance.SetDupePassableSolid(num, flag2, flag);
+				if (this.controlState == Door.ControlState.Opened)
+				{
+					this.doorOpenLiquidRefreshHack = true;
+					this.doorOpenLiquidRefreshTime = 1f;
+				}
 				break;
 			}
 			case Door.DoorType.Internal:
 				Grid.CritterImpassable[num] = this.controlState != Door.ControlState.Opened;
 				Grid.DupeImpassable[num] = this.controlState == Door.ControlState.Locked;
-				Pathfinding.Instance.AddDirtyNavGridCell(num);
 				break;
 			}
+			Pathfinding.Instance.AddDirtyNavGridCell(num);
 		}
 	}
 
@@ -400,7 +406,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 				this.changeStateChore.Cancel("Change state");
 			}
 			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().BuildingStatusItems.ChangeDoorControlState, this);
-			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			this.changeStateChore = new WorkChore<Door>(Db.Get().ChoreTypes.Toggle, this, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
 	}
 
@@ -565,6 +571,18 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 		{
 			return;
 		}
+		if (this.doorOpenLiquidRefreshHack)
+		{
+			this.doorOpenLiquidRefreshTime -= dt;
+			if (this.doorOpenLiquidRefreshTime <= 0f)
+			{
+				this.doorOpenLiquidRefreshHack = false;
+				foreach (int num in this.building.PlacementCells)
+				{
+					Pathfinding.Instance.AddDirtyNavGridCell(num);
+				}
+			}
+		}
 		if (this.applyLogicChange)
 		{
 			this.applyLogicChange = false;
@@ -576,9 +594,9 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 			HandleVector<int>.Handle handle = structureTemperatures.GetHandle(base.gameObject);
 			if (handle.IsValid() && !structureTemperatures.GetPayload(handle).enabled)
 			{
-				foreach (int num in this.building.PlacementCells)
+				foreach (int num2 in this.building.PlacementCells)
 				{
-					if (!Grid.Solid[num])
+					if (!Grid.Solid[num2])
 					{
 						PrimaryElement component = base.GetComponent<PrimaryElement>();
 						StructureTemperatureComponents.DoMelt(component);
@@ -657,6 +675,12 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 	private Door.Controller.Instance controller;
 
 	private LoggerFSS log;
+
+	private const float REFRESH_HACK_DELAY = 1f;
+
+	private bool doorOpenLiquidRefreshHack;
+
+	private float doorOpenLiquidRefreshTime;
 
 	private static readonly EventSystem.IntraObjectHandler<Door> OnCopySettingsDelegate = new EventSystem.IntraObjectHandler<Door>(delegate(Door component, object data)
 	{
@@ -814,7 +838,7 @@ public class Door : Workable, ISaveLoadable, ISim200ms
 
 		private Chore CreateUnsealChore(Door.Controller.Instance smi, bool approach_right)
 		{
-			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			return new WorkChore<Unsealable>(Db.Get().ChoreTypes.Toggle, smi.master, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
 
 		public GameStateMachine<Door.Controller, Door.Controller.Instance, Door, object>.State open;

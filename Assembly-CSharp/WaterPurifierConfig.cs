@@ -35,7 +35,7 @@ public class WaterPurifierConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		Storage storage = BuildingTemplates.CreateDefaultStorage(go, false);
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		go.AddOrGet<WaterPurifier>();
@@ -48,8 +48,8 @@ public class WaterPurifierConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(5f, SimHashes.Water, 313.15f, true, 0f, 0.5f, false, 0.75f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.2f, SimHashes.ToxicSand, 313.15f, true, 0f, 0.5f, false, 0.25f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(5f, SimHashes.Water, 0f, false, true, 0f, 0.5f, 0.75f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.2f, SimHashes.ToxicSand, 0f, false, true, 0f, 0.5f, 0.25f, byte.MaxValue, 0)
 		};
 		ElementDropper elementDropper = go.AddComponent<ElementDropper>();
 		elementDropper.emitMass = 10f;
@@ -102,4 +102,6 @@ public class WaterPurifierConfig : IBuildingConfig
 	private const float USED_FILTER_OUTPUT_RATE = 0.2f;
 
 	private const float CLEAN_WATER_OUTPUT_RATE = 5f;
+
+	private const float TARGET_OUTPUT_TEMPERATURE = 313.15f;
 }

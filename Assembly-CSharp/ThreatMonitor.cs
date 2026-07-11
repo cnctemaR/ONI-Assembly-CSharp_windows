@@ -247,12 +247,18 @@ public class ThreatMonitor : GameStateMachine<ThreatMonitor, ThreatMonitor.Insta
 
 		private void GotoThreatResponse()
 		{
+			bool flag = base.smi.master.GetComponent<Navigator>().IsMoving();
+			Chore currentChore = base.smi.master.GetComponent<ChoreDriver>().GetCurrentChore();
 			if (this.WillFight() && this.mainThreat.GetComponent<FactionAlignment>().targeted)
 			{
 				base.smi.GoTo(base.smi.sm.threatened.duplicant.ShouldFight);
 			}
 			else
 			{
+				if (flag || (currentChore != null && currentChore.target != null && currentChore.target.GetComponent<Pickupable>() != null))
+				{
+					return;
+				}
 				base.smi.GoTo(base.smi.sm.threatened.duplicant.ShoudFlee);
 			}
 		}

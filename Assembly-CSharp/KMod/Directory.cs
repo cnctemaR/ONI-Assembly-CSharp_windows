@@ -13,7 +13,7 @@ namespace KMod
 		public Directory(string root)
 		{
 			this.root = root;
-			this.file_system = new PrefixFileSystem(root, root, Application.streamingAssetsPath);
+			this.file_system = new AliasDirectory(root, root, Application.streamingAssetsPath);
 		}
 
 		public string GetRoot()
@@ -39,7 +39,7 @@ namespace KMod
 			}
 		}
 
-		public IFileSystem GetFileSystem()
+		public IFileDirectory GetFileSystem()
 		{
 			return this.file_system;
 		}
@@ -130,7 +130,7 @@ namespace KMod
 			return num;
 		}
 
-		private PrefixFileSystem file_system;
+		private AliasDirectory file_system;
 
 		private string root;
 	}

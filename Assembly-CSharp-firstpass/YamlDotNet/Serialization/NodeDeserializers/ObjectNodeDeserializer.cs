@@ -7,11 +7,12 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 {
 	public sealed class ObjectNodeDeserializer : INodeDeserializer
 	{
-		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched)
+		public ObjectNodeDeserializer(IObjectFactory objectFactory, ITypeInspector typeDescriptor, bool ignoreUnmatched, Action<string> unmatchedLogFn)
 		{
 			this._objectFactory = objectFactory;
 			this._typeDescriptor = typeDescriptor;
 			this._ignoreUnmatched = ignoreUnmatched;
+			this._unmatchedLogFn = unmatchedLogFn;
 		}
 
 		bool INodeDeserializer.Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
@@ -28,6 +29,10 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 				IPropertyDescriptor property = this._typeDescriptor.GetProperty(expectedType, null, scalar.Value, this._ignoreUnmatched);
 				if (property == null)
 				{
+					if (this._unmatchedLogFn != null)
+					{
+						this._unmatchedLogFn(string.Format("{2} Found a property '{0}' on a type '{1}', but that type doesn't have that property!", scalar.Value, expectedType.FullName, parser.Current.Start));
+					}
 					parser.SkipThisAndNestedEvents();
 				}
 				else
@@ -59,5 +64,7 @@ namespace YamlDotNet.Serialization.NodeDeserializers
 		private readonly ITypeInspector _typeDescriptor;
 
 		private readonly bool _ignoreUnmatched;
+
+		private readonly Action<string> _unmatchedLogFn;
 	}
 }

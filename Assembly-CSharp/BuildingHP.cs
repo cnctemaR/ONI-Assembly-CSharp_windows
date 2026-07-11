@@ -114,6 +114,18 @@ public class BuildingHP : Workable
 		this.damageSourceInfo = (BuildingHP.DamageSourceInfo)data;
 		this.DoDamage(this.damageSourceInfo.damage);
 		this.DoDamagePopFX(this.damageSourceInfo);
+		this.DoTakeDamageFX(this.damageSourceInfo);
+	}
+
+	private void DoTakeDamageFX(BuildingHP.DamageSourceInfo info)
+	{
+		if (info.takeDamageEffect != SpawnFXHashes.None)
+		{
+			BuildingDef def = base.GetComponent<BuildingComplete>().Def;
+			int num = Grid.PosToCell(this);
+			int num2 = Grid.OffsetCell(num, 0, def.HeightInCells - 1);
+			Game.Instance.SpawnFX(info.takeDamageEffect, num2, 0f);
+		}
 	}
 
 	private void DoDamagePopFX(BuildingHP.DamageSourceInfo info)
@@ -185,6 +197,12 @@ public class BuildingHP : Workable
 		public string source;
 
 		public string popString;
+
+		public SpawnFXHashes takeDamageEffect;
+
+		public string fullDamageEffectName;
+
+		public string statusItemID;
 	}
 
 	public class SMInstance : GameStateMachine<BuildingHP.States, BuildingHP.SMInstance, BuildingHP, object>.GameInstance
@@ -278,20 +296,32 @@ public class BuildingHP : Workable
 
 		public void ShowDamagedEffect()
 		{
-			BuildingDef def = base.master.building.Def;
-			if (def.RequiresPowerInput || def.RequiresPowerOutput || def.GeneratorWattageRating > 0f)
+			if (base.master.damageSourceInfo.takeDamageEffect != SpawnFXHashes.None)
 			{
+				BuildingDef def = base.master.GetComponent<BuildingComplete>().Def;
 				int num = Grid.PosToCell(base.master);
-				int num2 = Grid.OffsetCell(num, def.WidthInCells - 1, def.HeightInCells - 1);
-				Game.Instance.SpawnFX(SpawnFXHashes.BuildingSpark, num2, 0f);
+				int num2 = Grid.OffsetCell(num, 0, def.HeightInCells - 1);
+				Game.Instance.SpawnFX(base.master.damageSourceInfo.takeDamageEffect, num2, 0f);
 			}
 		}
 
-		public FXAnim.Instance InstantiateSmokeDamageFX()
+		public FXAnim.Instance InstantiateDamageFX()
 		{
+			if (base.master.damageSourceInfo.fullDamageEffectName == null)
+			{
+				return null;
+			}
 			BuildingDef def = base.master.GetComponent<BuildingComplete>().Def;
-			Vector3 vector = new Vector3((float)(def.WidthInCells - 1), (float)(def.HeightInCells - 1), 0f);
-			return new FXAnim.Instance(base.smi.master, "smoke_damage_kanim", "idle", KAnim.PlayMode.Loop, vector, Lighting.Instance.Settings.SmokeDamageTint);
+			Vector3 zero = Vector3.zero;
+			if (def.HeightInCells > 1)
+			{
+				zero = new Vector3(0f, (float)(def.HeightInCells - 1), 0f);
+			}
+			else
+			{
+				zero = new Vector3(0f, 0.5f, 0f);
+			}
+			return new FXAnim.Instance(base.smi.master, base.master.damageSourceInfo.fullDamageEffectName, "idle", KAnim.PlayMode.Loop, zero, Color.white);
 		}
 
 		public void SetCrackOverlayValue(float value)
@@ -330,6 +360,7 @@ public class BuildingHP : Workable
 				{
 					smi.UpdateMeter();
 				})
+				.ToggleStatusItem((BuildingHP.SMInstance smi) => (smi.master.damageSourceInfo.statusItemID == null) ? null : Db.Get().BuildingStatusItems.Get(smi.master.damageSourceInfo.statusItemID), null)
 				.Exit(delegate(BuildingHP.SMInstance smi)
 				{
 					smi.ShowProgressBar(false);
@@ -348,6 +379,7 @@ public class BuildingHP : Workable
 				smi.master.Trigger(774203113, smi.master);
 				smi.SetCrackOverlayValue(1f);
 			}).ToggleNotification((BuildingHP.SMInstance smi) => smi.CreateBrokenMachineNotification()).ToggleStatusItem(Db.Get().BuildingStatusItems.Broken, null)
+				.ToggleFX((BuildingHP.SMInstance smi) => smi.InstantiateDamageFX())
 				.EventTransition(GameHashes.BuildingPartiallyRepaired, this.healthy.perfect, (BuildingHP.SMInstance smi) => smi.master.HitPoints == smi.master.building.Def.HitPoints)
 				.EventHandler(GameHashes.BuildingPartiallyRepaired, delegate(BuildingHP.SMInstance smi)
 				{
@@ -367,7 +399,7 @@ public class BuildingHP : Workable
 
 		private Chore CreateRepairChore(BuildingHP.SMInstance smi)
 		{
-			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+			return new WorkChore<BuildingHP>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		}
 
 		private static readonly Operational.Flag healthyFlag = new Operational.Flag("healthy", Operational.Flag.Type.Functional);

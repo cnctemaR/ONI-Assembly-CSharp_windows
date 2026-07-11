@@ -145,8 +145,6 @@ public class DoctorStation : Workable
 		return false;
 	}
 
-	private static Operational.Flag supplies_flag = new Operational.Flag("HasMedicalSupplies", Operational.Flag.Type.Requirement);
-
 	private static readonly EventSystem.IntraObjectHandler<DoctorStation> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<DoctorStation>(delegate(DoctorStation component, object data)
 	{
 		component.OnStorageChange(data);
@@ -207,7 +205,7 @@ public class DoctorStation : Workable
 
 		private Chore CreatePatientChore(DoctorStation.StatesInstance smi)
 		{
-			WorkChore<DoctorStation> workChore = new WorkChore<DoctorStation>(Db.Get().ChoreTypes.GetDoctored, smi.master, null, null, true, null, null, null, false, null, false, true, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
+			WorkChore<DoctorStation> workChore = new WorkChore<DoctorStation>(Db.Get().ChoreTypes.GetDoctored, smi.master, null, true, null, null, null, false, null, false, true, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
 			workChore.AddPrecondition(DoctorStation.TreatmentAvailable, smi.master);
 			workChore.AddPrecondition(DoctorStation.DoctorAvailable, smi.master);
 			return workChore;
@@ -216,7 +214,7 @@ public class DoctorStation : Workable
 		private Chore CreateDoctorChore(DoctorStation.StatesInstance smi)
 		{
 			DoctorStationDoctorWorkable component = smi.master.GetComponent<DoctorStationDoctorWorkable>();
-			return new WorkChore<DoctorStationDoctorWorkable>(Db.Get().ChoreTypes.Doctor, component, null, null, true, null, null, null, false, null, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+			return new WorkChore<DoctorStationDoctorWorkable>(Db.Get().ChoreTypes.Doctor, component, null, true, null, null, null, false, null, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 		}
 
 		public GameStateMachine<DoctorStation.States, DoctorStation.StatesInstance, DoctorStation, object>.State unoperational;

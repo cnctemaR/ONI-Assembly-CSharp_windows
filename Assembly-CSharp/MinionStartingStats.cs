@@ -7,11 +7,11 @@ using UnityEngine;
 
 public class MinionStartingStats : ITelepadDeliverable
 {
-	public MinionStartingStats(bool is_starter_minion)
+	public MinionStartingStats(bool is_starter_minion, string guaranteedAptitudeID = null)
 	{
 		if (is_starter_minion)
 		{
-			int num = global::UnityEngine.Random.Range(0, 31);
+			int num = global::UnityEngine.Random.Range(0, 29);
 			this.personality = Db.Get().Personalities[num];
 		}
 		else
@@ -25,7 +25,7 @@ public class MinionStartingStats : ITelepadDeliverable
 		this.GenderStringKey = this.personality.genderStringKey;
 		this.Traits.Add(Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID));
 		List<ChoreGroup> list = new List<ChoreGroup>();
-		this.GenerateAptitudes();
+		this.GenerateAptitudes(guaranteedAptitudeID);
 		int num3 = this.GenerateTraits(is_starter_minion, list);
 		this.GenerateAttributes(num3, list);
 		KCompBuilder.BodyData bodyData = MinionStartingStats.CreateBodyData(this.personality);
@@ -123,7 +123,7 @@ public class MinionStartingStats : ITelepadDeliverable
 					if (traitVal.requiredNonPositiveAptitudes != null)
 					{
 						bool flag2 = false;
-						foreach (KeyValuePair<HashedString, float> keyValuePair in this.skillAptitudes)
+						foreach (KeyValuePair<SkillGroup, float> keyValuePair in this.skillAptitudes)
 						{
 							if (flag2)
 							{
@@ -131,7 +131,7 @@ public class MinionStartingStats : ITelepadDeliverable
 							}
 							foreach (HashedString hashedString in traitVal.requiredNonPositiveAptitudes)
 							{
-								if (hashedString == keyValuePair.Key && keyValuePair.Value > 0f)
+								if (hashedString == keyValuePair.Key.IdHash && keyValuePair.Value > 0f)
 								{
 									flag2 = true;
 									break;
@@ -205,83 +205,97 @@ public class MinionStartingStats : ITelepadDeliverable
 		return statDelta;
 	}
 
-	private void GenerateAptitudes()
+	private void GenerateAptitudes(string guaranteedAptitudeID = null)
 	{
 		int num = global::UnityEngine.Random.Range(1, 4);
 		List<SkillGroup> list = new List<SkillGroup>(Db.Get().SkillGroups.resources);
 		list.Shuffle<SkillGroup>();
+		if (guaranteedAptitudeID != null)
+		{
+			this.skillAptitudes.Add(Db.Get().SkillGroups.Get(guaranteedAptitudeID), (float)DUPLICANTSTATS.APTITUDE_BONUS);
+			list.Remove(Db.Get().SkillGroups.Get(guaranteedAptitudeID));
+			num--;
+		}
 		for (int i = 0; i < num; i++)
 		{
-			this.skillAptitudes.Add(list[i].IdHash, (float)DUPLICANTSTATS.APTITUDE_BONUS);
+			this.skillAptitudes.Add(list[i], (float)DUPLICANTSTATS.APTITUDE_BONUS);
 		}
 	}
 
 	private void GenerateAttributes(int pointsDelta, List<ChoreGroup> disabled_chore_groups)
 	{
 		float num = Util.GaussianRandom(0f, 1f) * ((float)DUPLICANTSTATS.MAX_STAT_POINTS - (float)DUPLICANTSTATS.MIN_STAT_POINTS) / 2f + (float)DUPLICANTSTATS.MIN_STAT_POINTS;
-		int i = pointsDelta + Mathf.RoundToInt(num);
-		List<string> list = new List<string>(DUPLICANTSTATS.DISTRIBUTED_ATTRIBUTES);
+		int num2 = Mathf.RoundToInt(num);
+		List<string> list = new List<string>(DUPLICANTSTATS.ALL_ATTRIBUTES);
 		int[] randomDistribution = DUPLICANTSTATS.DISTRIBUTIONS.GetRandomDistribution();
-		while (i > 0)
+		for (int i = 0; i < list.Count; i++)
 		{
-			list.Shuffle<string>();
-			for (int j = 0; j < list.Count; j++)
+			if (!this.StartingLevels.ContainsKey(list[i]))
 			{
-				if (i <= 0)
-				{
-					break;
-				}
-				string text = list[j];
-				int num2 = randomDistribution[Mathf.Min(j, randomDistribution.Length - 1)];
-				int num3 = Mathf.Min(i, num2);
-				if (!this.StartingLevels.ContainsKey(text))
-				{
-					this.StartingLevels[text] = 0;
-				}
-				Dictionary<string, int> startingLevels;
-				string text2;
-				(startingLevels = this.StartingLevels)[text2 = text] = startingLevels[text2] + num3;
-				i -= num3;
+				this.StartingLevels[list[i]] = 0;
 			}
+		}
+		foreach (KeyValuePair<SkillGroup, float> keyValuePair in this.skillAptitudes)
+		{
+			if (keyValuePair.Key.relevantAttributes.Count > 0)
+			{
+				for (int j = 0; j < keyValuePair.Key.relevantAttributes.Count; j++)
+				{
+					Dictionary<string, int> dictionary;
+					string id;
+					(dictionary = this.StartingLevels)[id = keyValuePair.Key.relevantAttributes[j].Id] = dictionary[id] + DUPLICANTSTATS.APTITUDE_ATTRIBUTE_BONUSES[this.skillAptitudes.Count - 1];
+				}
+			}
+		}
+		list.Shuffle<string>();
+		for (int k = 0; k < list.Count; k++)
+		{
+			string text = list[k];
+			int num3 = randomDistribution[Mathf.Min(k, randomDistribution.Length - 1)];
+			int num4 = Mathf.Min(num2, num3);
+			if (!this.StartingLevels.ContainsKey(text))
+			{
+				this.StartingLevels[text] = 0;
+			}
+			Dictionary<string, int> dictionary;
+			string text2;
+			(dictionary = this.StartingLevels)[text2 = text] = dictionary[text2] + num4;
+			num2 -= num4;
 		}
 		if (disabled_chore_groups.Count > 0)
 		{
-			int num4 = 0;
 			int num5 = 0;
-			foreach (KeyValuePair<string, int> keyValuePair in this.StartingLevels)
+			int num6 = 0;
+			foreach (KeyValuePair<string, int> keyValuePair2 in this.StartingLevels)
 			{
-				if (keyValuePair.Value > num4)
+				if (keyValuePair2.Value > num5)
 				{
-					num4 = keyValuePair.Value;
+					num5 = keyValuePair2.Value;
 				}
-				if (keyValuePair.Key == disabled_chore_groups[0].attribute.Id)
+				if (keyValuePair2.Key == disabled_chore_groups[0].attribute.Id)
 				{
-					num5 = keyValuePair.Value;
+					num6 = keyValuePair2.Value;
 				}
 			}
-			if (num4 == num5)
+			if (num5 == num6)
 			{
 				foreach (string text3 in list)
 				{
 					if (text3 != disabled_chore_groups[0].attribute.Id)
 					{
-						int num6 = 0;
-						this.StartingLevels.TryGetValue(text3, out num6);
 						int num7 = 0;
-						if (num6 > 0)
+						this.StartingLevels.TryGetValue(text3, out num7);
+						int num8 = 0;
+						if (num7 > 0)
 						{
-							num7 = 1;
+							num8 = 1;
 						}
-						this.StartingLevels[disabled_chore_groups[0].attribute.Id] = num6 - num7;
-						this.StartingLevels[text3] = num4 + num7;
+						this.StartingLevels[disabled_chore_groups[0].attribute.Id] = num7 - num8;
+						this.StartingLevels[text3] = num5 + num8;
 						break;
 					}
 				}
 			}
-		}
-		foreach (string text4 in DUPLICANTSTATS.ROLLED_ATTRIBUTES)
-		{
-			this.StartingLevels[text4] = Mathf.RoundToInt(Mathf.Pow(global::UnityEngine.Random.value, DUPLICANTSTATS.ROLLED_ATTRIBUTE_POWER) * (float)DUPLICANTSTATS.ROLLED_ATTRIBUTE_MAX);
 		}
 	}
 
@@ -339,9 +353,9 @@ public class MinionStartingStats : ITelepadDeliverable
 	public void ApplyAptitudes(GameObject go)
 	{
 		MinionResume component = go.GetComponent<MinionResume>();
-		foreach (KeyValuePair<HashedString, float> keyValuePair in this.skillAptitudes)
+		foreach (KeyValuePair<SkillGroup, float> keyValuePair in this.skillAptitudes)
 		{
-			component.SetAptitude(keyValuePair.Key, keyValuePair.Value);
+			component.SetAptitude(keyValuePair.Key.Id, keyValuePair.Value);
 		}
 	}
 
@@ -394,5 +408,5 @@ public class MinionStartingStats : ITelepadDeliverable
 
 	public List<Accessory> accessories = new List<Accessory>();
 
-	public Dictionary<HashedString, float> skillAptitudes = new Dictionary<HashedString, float>();
+	public Dictionary<SkillGroup, float> skillAptitudes = new Dictionary<SkillGroup, float>();
 }

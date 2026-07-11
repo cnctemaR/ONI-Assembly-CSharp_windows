@@ -124,7 +124,7 @@ public static class Sim
 		Sim.DLLExceptionHandlerMessage* ptr2 = (Sim.DLLExceptionHandlerMessage*)(void*)data;
 		string text4 = Marshal.PtrToStringAnsi(ptr2->callstack);
 		string text5 = Marshal.PtrToStringAnsi(ptr2->dmpFilename);
-		KCrashReporter.ReportSimDLLCrash(text4, text4, text5);
+		KCrashReporter.ReportSimDLLCrash("SimDLL Crash Dump", text4, text5);
 		return 0;
 	}
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Klei.AI;
 using STRINGS;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -283,8 +284,8 @@ public class DebugPaintElementScreen : KScreen
 
 	public void OnElementsFilterEdited(string new_filter)
 	{
-		this.filter = ((!string.IsNullOrEmpty(new_filter)) ? new_filter : null);
-		this.FilterElements(new_filter);
+		this.filter = ((!string.IsNullOrEmpty(this.filterInput.text)) ? this.filterInput.text : null);
+		this.FilterElements(this.filter);
 	}
 
 	public override void OnKeyDown(KButtonEvent e)
@@ -325,9 +326,9 @@ public class DebugPaintElementScreen : KScreen
 			GameObject currentSelectedGameObject = global::UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject;
 			if (currentSelectedGameObject != null)
 			{
-				foreach (InputField inputField in this.inputFields)
+				foreach (TMP_InputField tmp_InputField in this.inputFields)
 				{
-					if (currentSelectedGameObject == inputField.gameObject)
+					if (currentSelectedGameObject == tmp_InputField.gameObject)
 					{
 						flag = true;
 						break;
@@ -383,16 +384,16 @@ public class DebugPaintElementScreen : KScreen
 
 	[Header("Value Inputs")]
 	[SerializeField]
-	private InputField massPressureInput;
+	private TMP_InputField massPressureInput;
 
 	[SerializeField]
-	private InputField temperatureInput;
+	private TMP_InputField temperatureInput;
 
 	[SerializeField]
-	private InputField diseaseCountInput;
+	private TMP_InputField diseaseCountInput;
 
 	[SerializeField]
-	private InputField filterInput;
+	private TMP_InputField filterInput;
 
 	[Header("Tool Buttons")]
 	[SerializeField]
@@ -426,7 +427,7 @@ public class DebugPaintElementScreen : KScreen
 
 	public Toggle paintAllowFOWReveal;
 
-	private List<InputField> inputFields = new List<InputField>();
+	private List<TMP_InputField> inputFields = new List<TMP_InputField>();
 
 	private List<string> options_list = new List<string>();
 

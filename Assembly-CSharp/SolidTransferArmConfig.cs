@@ -35,7 +35,6 @@ public class SolidTransferArmConfig : IBuildingConfig
 		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		SolidTransferArmConfig.AddVisualizer(go, false);
 		Constructable component = go.GetComponent<Constructable>();
-		component.choreTags = GameTags.ChoreTypes.ConveyorChores;
 		component.requiredSkillPerk = Db.Get().SkillPerks.ConveyorBuild.Id;
 	}
 

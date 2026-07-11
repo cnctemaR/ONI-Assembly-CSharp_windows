@@ -59,7 +59,6 @@ public class OverlayMenu : KIconToggleMenu
 
 	private void InitializeToggleGroups()
 	{
-		this.overlayToggleGroups = new List<OverlayMenu.OverlayToggleGroup>();
 	}
 
 	private void InitializeToggles()
@@ -139,8 +138,6 @@ public class OverlayMenu : KIconToggleMenu
 	public static OverlayMenu Instance;
 
 	private List<KIconToggleMenu.ToggleInfo> overlayToggleInfos;
-
-	private List<OverlayMenu.OverlayToggleGroup> overlayToggleGroups;
 
 	private class OverlayToggleGroup : KIconToggleMenu.ToggleInfo
 	{

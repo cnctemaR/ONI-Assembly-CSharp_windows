@@ -4,6 +4,7 @@ using KSerialization.Converters;
 
 namespace ProcGen
 {
+	[Serializable]
 	public class ElementChoiceGroup<T>
 	{
 		public ElementChoiceGroup()

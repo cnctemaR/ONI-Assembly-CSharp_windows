@@ -162,7 +162,7 @@ public class MaterialSelector : KScreen
 			if (gameObject2 != null)
 			{
 				KBatchedAnimController component = gameObject2.GetComponent<KBatchedAnimController>();
-				image.sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false);
+				image.sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, string.Empty);
 			}
 			gameObject.SetActive(WorldInventory.Instance.IsDiscovered(elem) || DebugHandler.InstantBuildMode || Game.Instance.SandboxModeActive);
 			this.SetToggleBGImage(keyValuePair.Value, keyValuePair.Key);

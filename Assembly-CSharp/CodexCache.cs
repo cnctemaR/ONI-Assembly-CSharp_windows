@@ -28,31 +28,35 @@ public static class CodexCache
 				new Tuple<string, Type>("!CodexDividerLine", typeof(CodexDividerLine)),
 				new Tuple<string, Type>("!CodexSpacer", typeof(CodexSpacer)),
 				new Tuple<string, Type>("!CodexLabelWithIcon", typeof(CodexLabelWithIcon)),
+				new Tuple<string, Type>("!CodexLabelWithLargeIcon", typeof(CodexLabelWithLargeIcon)),
 				new Tuple<string, Type>("!CodexContentLockedIndicator", typeof(CodexContentLockedIndicator)),
-				new Tuple<string, Type>("!CodexLargeSpacer", typeof(CodexLargeSpacer))
+				new Tuple<string, Type>("!CodexLargeSpacer", typeof(CodexLargeSpacer)),
+				new Tuple<string, Type>("!CodexVideo", typeof(CodexVideo))
 			};
 		}
-		string text = CodexCache.FormatLinkID("creatures");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator.GenerateCreatureEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Hatch").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
+		string text = CodexCache.FormatLinkID("tips");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TIPS, CodexEntryGenerator.GenerateTutorialNotificationEntries(), Assets.GetSprite("unknown"), false, false, UI.CODEX.TIPS));
+		text = CodexCache.FormatLinkID("creatures");
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.CREATURES, CodexEntryGenerator.GenerateCreatureEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Hatch").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, string.Empty), true, true, null));
 		text = CodexCache.FormatLinkID("plants");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("PrickleFlower").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.PLANTS, CodexEntryGenerator.GeneratePlantEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("PrickleFlower").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, string.Empty), true, true, null));
 		text = CodexCache.FormatLinkID("food");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.FOOD, CodexEntryGenerator.GenerateFoodEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("CookedMeat").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.FOOD, CodexEntryGenerator.GenerateFoodEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("CookedMeat").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, string.Empty), true, true, null));
 		text = CodexCache.FormatLinkID("buildings");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BUILDINGS, CodexEntryGenerator.GenerateBuildingEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Generator").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false)));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.BUILDINGS, CodexEntryGenerator.GenerateBuildingEntries(), Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab("Generator").GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, string.Empty), true, true, null));
 		text = CodexCache.FormatLinkID("tech");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TECH, CodexEntryGenerator.GenerateTechEntries(), Assets.GetSprite("hud_research")));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.TECH, CodexEntryGenerator.GenerateTechEntries(), Assets.GetSprite("hud_research"), true, true, null));
 		text = CodexCache.FormatLinkID("roles");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ROLES, CodexEntryGenerator.GenerateRoleEntries(), Assets.GetSprite("hat_role_mining2")));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ROLES, CodexEntryGenerator.GenerateRoleEntries(), Assets.GetSprite("hat_role_mining2"), true, true, null));
 		text = CodexCache.FormatLinkID("disease");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.DISEASE, CodexEntryGenerator.GenerateDiseaseEntries(), Assets.GetSprite("overlay_disease")));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.DISEASE, CodexEntryGenerator.GenerateDiseaseEntries(), Assets.GetSprite("codexDiseases"), false, true, null));
 		text = CodexCache.FormatLinkID("elements");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ELEMENTS, CodexEntryGenerator.GenerateElementEntries(), null));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.ELEMENTS, CodexEntryGenerator.GenerateElementEntries(), null, true, false, null));
 		text = CodexCache.FormatLinkID("geysers");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.GEYSERS, CodexEntryGenerator.GenerateGeyserEntries(), null));
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.GEYSERS, CodexEntryGenerator.GenerateGeyserEntries(), null, true, true, null));
 		text = CodexCache.FormatLinkID("equipment");
-		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.EQUIPMENT, CodexEntryGenerator.GenerateEquipmentEntries(), null));
-		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID("HOME"), UI.CODEX.CATEGORYNAMES.ROOT, dictionary, null);
+		dictionary.Add(text, CodexEntryGenerator.GenerateCategoryEntry(text, UI.CODEX.CATEGORYNAMES.EQUIPMENT, CodexEntryGenerator.GenerateEquipmentEntries(), null, true, true, null));
+		CategoryEntry categoryEntry = CodexEntryGenerator.GenerateCategoryEntry(CodexCache.FormatLinkID("HOME"), UI.CODEX.CATEGORYNAMES.ROOT, dictionary, null, true, true, null);
 		CodexEntryGenerator.GeneratePageNotFound();
 		List<CategoryEntry> list = new List<CategoryEntry>();
 		foreach (KeyValuePair<string, CodexEntry> keyValuePair in dictionary)
@@ -111,7 +115,33 @@ public static class CodexCache
 				keyValuePair2.Value.contentContainers.AddRange(keyValuePair2.Value.subEntries[i].contentContainers);
 			}
 		}
-		CodexEntryGenerator.PopulateCategoryEntries(list);
+		CodexEntryGenerator.PopulateCategoryEntries(list, delegate(CodexEntry a, CodexEntry b)
+		{
+			if (a.name == UI.CODEX.CATEGORYNAMES.TIPS)
+			{
+				return -1;
+			}
+			if (b.name == UI.CODEX.CATEGORYNAMES.TIPS)
+			{
+				return 1;
+			}
+			return UI.StripLinkFormatting(a.name).CompareTo(UI.StripLinkFormatting(b.name));
+		});
+	}
+
+	public static CodexEntry FindEntry(string id)
+	{
+		if (CodexCache.entries == null)
+		{
+			global::Debug.LogWarning("Can't search Codex cache while it's stil null");
+			return null;
+		}
+		if (CodexCache.entries.ContainsKey(id))
+		{
+			return CodexCache.entries[id];
+		}
+		global::Debug.LogWarning("Could not find codex entry with id: " + id);
+		return null;
 	}
 
 	public static SubEntry FindSubEntry(string id)
@@ -284,7 +314,7 @@ public static class CodexCache
 		{
 			try
 			{
-				entry.icon = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(entry.iconPrefabID).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false);
+				entry.icon = Def.GetUISpriteFromMultiObjectAnim(Assets.GetPrefab(entry.iconPrefabID).GetComponent<KBatchedAnimController>().AnimFiles[0], "ui", false, string.Empty);
 			}
 			catch
 			{
@@ -359,7 +389,7 @@ public static class CodexCache
 		if (CodexCache.entries[templatePath] == null)
 		{
 			string text = Path.Combine(CodexCache.baseEntryPath, templatePath);
-			CodexEntry codexEntry = YamlIO<CodexEntry>.LoadFile(text + ".yaml", CodexCache.widgetTagMappings);
+			CodexEntry codexEntry = YamlIO.LoadFile<CodexEntry>(text + ".yaml", null, CodexCache.widgetTagMappings);
 			if (codexEntry == null)
 			{
 				global::Debug.LogWarning("Missing template [" + text + ".yaml]");
@@ -367,6 +397,12 @@ public static class CodexCache
 			CodexCache.entries[templatePath] = codexEntry;
 		}
 		return CodexCache.entries[templatePath];
+	}
+
+	private static void YamlParseErrorCB(YamlIO.Error error, bool force_log_as_warning)
+	{
+		string text = string.Format("{0} parse error in {1}\n{2}", error.severity, error.file.full_path, error.message);
+		throw new Exception(text, error.inner_exception);
 	}
 
 	public static List<CodexEntry> CollectEntries(string folder)
@@ -385,11 +421,22 @@ public static class CodexCache
 		string text2 = folder.ToUpper();
 		foreach (string text3 in array)
 		{
-			CodexEntry codexEntry = YamlIO<CodexEntry>.LoadFile(text3, CodexCache.widgetTagMappings);
-			if (codexEntry != null)
+			try
 			{
-				codexEntry.category = text2;
-				list.Add(codexEntry);
+				CodexEntry codexEntry = YamlIO.LoadFile<CodexEntry>(text3, new YamlIO.ErrorHandler(CodexCache.YamlParseErrorCB), CodexCache.widgetTagMappings);
+				if (codexEntry != null)
+				{
+					codexEntry.category = text2;
+					list.Add(codexEntry);
+				}
+			}
+			catch (Exception ex2)
+			{
+				DebugUtil.DevLogErrorFormat("CodexCache.CollectEntries failed to load [{0}]: {1}", new object[]
+				{
+					text3,
+					ex2.ToString()
+				});
 			}
 		}
 		list.Sort((CodexEntry x, CodexEntry y) => x.title.CompareTo(y.title));
@@ -411,10 +458,21 @@ public static class CodexCache
 		}
 		foreach (string text2 in array)
 		{
-			SubEntry subEntry = YamlIO<SubEntry>.LoadFile(text2, CodexCache.widgetTagMappings);
-			if (subEntry != null)
+			try
 			{
-				list.Add(subEntry);
+				SubEntry subEntry = YamlIO.LoadFile<SubEntry>(text2, new YamlIO.ErrorHandler(CodexCache.YamlParseErrorCB), CodexCache.widgetTagMappings);
+				if (subEntry != null)
+				{
+					list.Add(subEntry);
+				}
+			}
+			catch (Exception ex2)
+			{
+				DebugUtil.DevLogErrorFormat("CodexCache.CollectSubEntries failed to load [{0}]: {1}", new object[]
+				{
+					text2,
+					ex2.ToString()
+				});
 			}
 		}
 		list.Sort((SubEntry x, SubEntry y) => x.title.CompareTo(y.title));

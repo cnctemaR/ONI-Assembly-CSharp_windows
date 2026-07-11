@@ -15,7 +15,7 @@ public static class BaseDreckoConfig
 		float num2 = (warnLowTemp + warnHighTemp) / 2f;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, desc, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Creatures.Walker);
+		component.AddTag(GameTags.Creatures.Walker, false);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
@@ -34,7 +34,7 @@ public static class BaseDreckoConfig
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, trait_id, text3, NavType.Floor, 32, num2, text4, num3, true, false, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
 		if (!string.IsNullOrEmpty(symbol_override_prefix))
 		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim(anim_file), symbol_override_prefix, 0);
+			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbol_override_prefix, null, 0);
 		}
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<CreatureFallMonitor.Def>();

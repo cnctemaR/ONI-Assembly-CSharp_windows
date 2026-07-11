@@ -4,7 +4,7 @@ using UnityEngine;
 public class EntombedChore : Chore<EntombedChore.StatesInstance>
 {
 	public EntombedChore(IStateMachineTarget target)
-		: base(Db.Get().ChoreTypes.Entombed, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.Entombed, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new EntombedChore.StatesInstance(this, target.gameObject);
 	}

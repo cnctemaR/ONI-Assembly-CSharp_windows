@@ -4,7 +4,7 @@ using UnityEngine;
 public class StressEmoteChore : Chore<StressEmoteChore.StatesInstance>
 {
 	public StressEmoteChore(IStateMachineTarget target, ChoreType chore_type, HashedString emote_kanim, HashedString[] emote_anims, KAnim.PlayMode play_mode, Func<StatusItem> get_status_item)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.AddPrecondition(ChorePreconditions.instance.IsMoving, null);
 		base.AddPrecondition(ChorePreconditions.instance.IsOffLadder, null);

@@ -113,6 +113,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 		float num;
 		this.storage.ConsumeAndGetDisease(this.inputMaterial, this.massPerTinker, out diseaseInfo, out num);
 		GameObject gameObject = GameUtil.KInstantiate(Assets.GetPrefab(this.outputPrefab), base.transform.GetPosition(), Grid.SceneLayer.Ore, null, 0);
+		gameObject.GetComponent<PrimaryElement>().Temperature = this.outputTemperature;
 		gameObject.SetActive(true);
 		this.chore = null;
 	}
@@ -128,7 +129,7 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 		{
 			if (this.chore == null)
 			{
-				this.chore = new WorkChore<TinkerStation>(Db.Get().ChoreTypes.GetByHash(this.choreType), this, null, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+				this.chore = new WorkChore<TinkerStation>(Db.Get().ChoreTypes.GetByHash(this.choreType), this, null, true, null, null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 				this.chore.AddPrecondition(ChorePreconditions.instance.HasSkillPerk, this.requiredSkillPerk);
 				base.SetWorkTime(this.workTime);
 			}
@@ -209,6 +210,8 @@ public class TinkerStation : Workable, IEffectDescriptor, ISim1000ms
 	public Tag inputMaterial;
 
 	public Tag outputPrefab;
+
+	public float outputTemperature;
 
 	private static readonly EventSystem.IntraObjectHandler<TinkerStation> OnOperationalChangedDelegate = new EventSystem.IntraObjectHandler<TinkerStation>(delegate(TinkerStation component, object data)
 	{

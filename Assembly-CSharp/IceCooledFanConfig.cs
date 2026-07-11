@@ -11,14 +11,15 @@ public class IceCooledFanConfig : IBuildingConfig
 		int num2 = 2;
 		string text2 = "fanice_kanim";
 		int num3 = 30;
-		float num4 = 10f;
-		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER2;
+		float num4 = 30f;
+		float[] tier = BUILDINGS.CONSTRUCTION_MASS_KG.TIER4;
 		string[] all_METALS = MATERIALS.ALL_METALS;
 		float num5 = 1600f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnFloor;
 		EffectorValues tier2 = NOISE_POLLUTION.NOISY.TIER2;
 		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, all_METALS, num5, buildLocationRule, BUILDINGS.DECOR.NONE, tier2, 0.2f);
-		buildingDef.ExhaustKilowattsWhenActive = -this.COOLING_RATE;
+		buildingDef.SelfHeatKilowattsWhenActive = -this.COOLING_RATE * 0.25f;
+		buildingDef.ExhaustKilowattsWhenActive = -this.COOLING_RATE * 0.75f;
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = OverlayModes.Temperature.ID;
 		buildingDef.AudioCategory = "Metal";
@@ -61,6 +62,14 @@ public class IceCooledFanConfig : IBuildingConfig
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
+		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)
+		{
+			HandleVector<int>.Handle handle = GameComps.StructureTemperatures.GetHandle(game_object);
+			StructureTemperaturePayload payload = GameComps.StructureTemperatures.GetPayload(handle);
+			int num = Grid.PosToCell(game_object);
+			payload.OverrideExtents(new Extents(num, IceCooledFanConfig.overrideOffsets));
+			GameComps.StructureTemperatures.SetPayload(handle, ref payload);
+		};
 	}
 
 	public const string ID = "IceCooledFan";
@@ -70,4 +79,12 @@ public class IceCooledFanConfig : IBuildingConfig
 	private float TARGET_TEMPERATURE = 278.15f;
 
 	private float ICE_CAPACITY = 50f;
+
+	private static readonly CellOffset[] overrideOffsets = new CellOffset[]
+	{
+		new CellOffset(-2, 1),
+		new CellOffset(2, 1),
+		new CellOffset(-1, 0),
+		new CellOffset(1, 0)
+	};
 }

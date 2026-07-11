@@ -1207,7 +1207,7 @@ public class BuildingDef : Def
 
 	public Sprite GetUISprite(string animName = "ui", bool centered = false)
 	{
-		return Def.GetUISpriteFromMultiObjectAnim(this.AnimFiles[0], animName, centered);
+		return Def.GetUISpriteFromMultiObjectAnim(this.AnimFiles[0], animName, centered, string.Empty);
 	}
 
 	public void GenerateOffsets()
@@ -1274,6 +1274,51 @@ public class BuildingDef : Def
 			}
 		}
 		return flag;
+	}
+
+	public bool CheckRequiresBuildingCellVisualizer()
+	{
+		return this.CheckRequiresPowerInput() || this.CheckRequiresPowerOutput() || this.CheckRequiresGasInput() || this.CheckRequiresGasOutput() || this.CheckRequiresLiquidInput() || this.CheckRequiresLiquidOutput() || this.CheckRequiresSolidInput() || this.CheckRequiresSolidOutput() || this.DiseaseCellVisName != null;
+	}
+
+	public bool CheckRequiresPowerInput()
+	{
+		return this.RequiresPowerInput;
+	}
+
+	public bool CheckRequiresPowerOutput()
+	{
+		return this.GeneratorWattageRating > 0f || this.RequiresPowerOutput;
+	}
+
+	public bool CheckRequiresGasInput()
+	{
+		return this.InputConduitType == ConduitType.Gas;
+	}
+
+	public bool CheckRequiresGasOutput()
+	{
+		return this.OutputConduitType == ConduitType.Gas;
+	}
+
+	public bool CheckRequiresLiquidInput()
+	{
+		return this.InputConduitType == ConduitType.Liquid;
+	}
+
+	public bool CheckRequiresLiquidOutput()
+	{
+		return this.OutputConduitType == ConduitType.Liquid;
+	}
+
+	public bool CheckRequiresSolidInput()
+	{
+		return this.InputConduitType == ConduitType.Solid;
+	}
+
+	public bool CheckRequiresSolidOutput()
+	{
+		return this.OutputConduitType == ConduitType.Solid;
 	}
 
 	public float EnergyConsumptionWhenActive;

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using UnityEngine;
 using UnityEngine.UI;
 
-public abstract class CodexWidget<SubClass> : YamlIO<SubClass>, ICodexWidget
+public abstract class CodexWidget<SubClass> : ICodexWidget
 {
 	protected CodexWidget()
 	{

@@ -53,8 +53,6 @@ public class LogicWireBridgeConfig : IBuildingConfig
 	public override void DoPostConfigureUnderConstruction(GameObject go)
 	{
 		base.DoPostConfigureUnderConstruction(go);
-		Constructable component = go.GetComponent<Constructable>();
-		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		LogicUtilityNetworkLink logicUtilityNetworkLink = this.AddNetworkLink(go);
 		logicUtilityNetworkLink.visualizeOnly = true;
 		go.AddOrGet<BuildingCellVisualizer>();
@@ -83,7 +81,7 @@ public class LogicWireBridgeConfig : IBuildingConfig
 
 	public static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[]
 	{
-		LogicPorts.Port.InputPort(LogicWireBridgeConfig.BRIDGE_LOGIC_IO_ID, new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_INACTIVE, false),
-		LogicPorts.Port.InputPort(LogicWireBridgeConfig.BRIDGE_LOGIC_IO_ID, new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_INACTIVE, false)
+		LogicPorts.Port.InputPort(LogicWireBridgeConfig.BRIDGE_LOGIC_IO_ID, new CellOffset(-1, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_INACTIVE, false, false),
+		LogicPorts.Port.InputPort(LogicWireBridgeConfig.BRIDGE_LOGIC_IO_ID, new CellOffset(1, 0), global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.LOGICWIREBRIDGE.LOGIC_PORT_INACTIVE, false, false)
 	};
 }

@@ -67,6 +67,7 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 	private void CheckRequirements(bool forceEvent)
 	{
 		bool flag = true;
+		bool flag2 = false;
 		if (this.requirePower)
 		{
 			bool isConnected = this.energy.IsConnected;
@@ -79,8 +80,8 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 				}
 				if (this.visualizeRequirements)
 				{
-					bool flag2 = !isPowered && (this.button == null || this.button.IsEnabled);
-					this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NeedPower, flag2, this);
+					bool flag3 = !isPowered && (this.button == null || this.button.IsEnabled);
+					this.selectable.ToggleStatusItem(Db.Get().BuildingStatusItems.NeedPower, flag3, this);
 				}
 				flag = flag && isPowered;
 			}
@@ -97,14 +98,15 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 				flag = flag && isConnected;
 			}
 			this.wasConnected = isConnected;
+			flag2 = flag != this.RequirementsMet && base.GetComponent<Light2D>() != null;
 		}
 		if (this.requireConduit && this.visualizeRequirements)
 		{
-			bool flag3 = !this.conduitConsumer.enabled || this.conduitConsumer.IsConnected;
-			bool flag4 = !this.conduitConsumer.enabled || this.conduitConsumer.IsSatisfied;
-			if (this.previouslyConnected != flag3)
+			bool flag4 = !this.conduitConsumer.enabled || this.conduitConsumer.IsConnected;
+			bool flag5 = !this.conduitConsumer.enabled || this.conduitConsumer.IsSatisfied;
+			if (this.previouslyConnected != flag4)
 			{
-				this.previouslyConnected = flag3;
+				this.previouslyConnected = flag4;
 				StatusItem statusItem = null;
 				ConduitType typeOfConduit = this.conduitConsumer.TypeOfConduit;
 				if (typeOfConduit != ConduitType.Liquid)
@@ -120,14 +122,14 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 				}
 				if (statusItem != null)
 				{
-					this.selectable.ToggleStatusItem(statusItem, !flag3, new Tuple<ConduitType, Tag>(this.conduitConsumer.TypeOfConduit, this.conduitConsumer.capacityTag));
+					this.selectable.ToggleStatusItem(statusItem, !flag4, new Tuple<ConduitType, Tag>(this.conduitConsumer.TypeOfConduit, this.conduitConsumer.capacityTag));
 				}
-				this.operational.SetFlag(RequireInputs.inputConnectedFlag, flag3);
+				this.operational.SetFlag(RequireInputs.inputConnectedFlag, flag4);
 			}
-			flag = flag && flag3;
-			if (this.previouslySatisfied != flag4)
+			flag = flag && flag4;
+			if (this.previouslySatisfied != flag5)
 			{
-				this.previouslySatisfied = flag4;
+				this.previouslySatisfied = flag5;
 				StatusItem statusItem2 = null;
 				ConduitType typeOfConduit2 = this.conduitConsumer.TypeOfConduit;
 				if (typeOfConduit2 != ConduitType.Liquid)
@@ -145,13 +147,21 @@ public class RequireInputs : KMonoBehaviour, ISim200ms
 				{
 					if (statusItem2 != null)
 					{
-						this.selectable.ToggleStatusItem(statusItem2, !flag4, this);
+						this.selectable.ToggleStatusItem(statusItem2, !flag5, this);
 					}
-					this.operational.SetFlag(RequireInputs.pipesHaveMass, flag4);
+					this.operational.SetFlag(RequireInputs.pipesHaveMass, flag5);
 				}
 			}
 		}
 		this.requirementsMet = flag;
+		if (flag2)
+		{
+			Room roomOfGameObject = Game.Instance.roomProber.GetRoomOfGameObject(base.gameObject);
+			if (roomOfGameObject != null)
+			{
+				Game.Instance.roomProber.UpdateRoom(roomOfGameObject.cavity);
+			}
+		}
 	}
 
 	[SerializeField]

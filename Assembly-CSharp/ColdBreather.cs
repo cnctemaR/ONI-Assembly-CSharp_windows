@@ -10,8 +10,32 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	{
 		base.OnSpawn();
 		this.simEmitCBHandle = Game.Instance.massEmitCallbackManager.Add(new Action<Sim.MassEmittedCallback, object>(ColdBreather.OnSimEmittedCallback), this, "ColdBreather");
-		this.elementConsumer.EnableConsumption(false);
 		base.smi.StartSM();
+	}
+
+	protected override void OnPrefabInit()
+	{
+		this.elementConsumer.EnableConsumption(false);
+		base.Subscribe<ColdBreather>(1309017699, ColdBreather.OnReplantedDelegate);
+		base.OnPrefabInit();
+	}
+
+	private void OnReplanted(object data = null)
+	{
+		ReceptacleMonitor component = base.GetComponent<ReceptacleMonitor>();
+		if (component == null)
+		{
+			return;
+		}
+		ElementConsumer component2 = base.GetComponent<ElementConsumer>();
+		if (component.Replanted)
+		{
+			component2.consumptionRate = this.consumptionRate;
+		}
+		else
+		{
+			component2.consumptionRate = this.consumptionRate * 0.25f;
+		}
 	}
 
 	protected override void OnCleanUp()
@@ -99,6 +123,8 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 
 	private const float EXHALE_PERIOD = 1f;
 
+	public float consumptionRate;
+
 	public float deltaEmitTemperature = -5f;
 
 	public Vector3 emitOffsetCell = new Vector3(0f, 0f);
@@ -110,6 +136,11 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 	private int nextGasEmitIndex;
 
 	private HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.Handle simEmitCBHandle = HandleVector<Game.ComplexCallbackInfo<Sim.MassEmittedCallback>>.InvalidHandle;
+
+	private static readonly EventSystem.IntraObjectHandler<ColdBreather> OnReplantedDelegate = new EventSystem.IntraObjectHandler<ColdBreather>(delegate(ColdBreather component, object data)
+	{
+		component.OnReplanted(data);
+	});
 
 	public class StatesInstance : GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.GameInstance
 	{
@@ -125,7 +156,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 		{
 			base.serializable = true;
 			default_state = this.grow;
-			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 63486);
+			this.statusItemCooling = new StatusItem("cooling", CREATURES.STATUSITEMS.COOLING.NAME, CREATURES.STATUSITEMS.COOLING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 			GameStateMachine<ColdBreather.States, ColdBreather.StatesInstance, ColdBreather, object>.State state = this.dead;
 			string text = CREATURES.STATUSITEMS.DEAD.NAME;
 			string text2 = CREATURES.STATUSITEMS.DEAD.TOOLTIP;
@@ -140,7 +171,7 @@ public class ColdBreather : StateMachineComponent<ColdBreather.StatesInstance>, 
 			});
 			this.blocked_from_growing.ToggleStatusItem(Db.Get().MiscStatusItems.RegionIsBlocked, null).EventTransition(GameHashes.EntombedChanged, this.alive, (ColdBreather.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject)).EventTransition(GameHashes.TooColdWarning, this.alive, (ColdBreather.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
 				.EventTransition(GameHashes.TooHotWarning, this.alive, (ColdBreather.StatesInstance smi) => this.alive.ForceUpdateStatus(smi.master.gameObject))
-				.EventTransition(GameHashes.Uprooted, this.dead, (ColdBreather.StatesInstance smi) => UprootedMonitor.IsObjectUprooted(smi.master.gameObject));
+				.TagTransition(GameTags.Uprooted, this.dead, false);
 			this.grow.Enter(delegate(ColdBreather.StatesInstance smi)
 			{
 				if (smi.master.receptacleMonitor.HasReceptacle() && !this.alive.ForceUpdateStatus(smi.master.gameObject))

@@ -136,7 +136,8 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 			{
 				damage = 1,
 				source = BUILDINGS.DAMAGESOURCES.BUILDING_OVERHEATED,
-				popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.OVERHEAT
+				popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.OVERHEAT,
+				fullDamageEffectName = "smoke_damage_kanim"
 			});
 		}
 
@@ -156,7 +157,7 @@ public class Overheatable : StateMachineComponent<Overheatable.StatesInstance>, 
 			this.safeTemperature.TriggerOnEnter(GameHashes.OptimalTemperatureAchieved, null).EventTransition(GameHashes.BuildingOverheated, this.overheated, null);
 			this.overheated.Enter(delegate(Overheatable.StatesInstance smi)
 			{
-				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_OverheatingBuildings);
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_OverheatingBuildings, true);
 			}).EventTransition(GameHashes.BuildingNoLongerOverheated, this.safeTemperature, null).ToggleStatusItem(Db.Get().BuildingStatusItems.Overheated, null)
 				.ToggleNotification((Overheatable.StatesInstance smi) => smi.master.CreateOverheatedNotification())
 				.TriggerOnEnter(GameHashes.TooHotWarning, null)

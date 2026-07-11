@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
 using Klei;
@@ -19,6 +20,9 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 	}
 
+	[field: DebuggerBrowsable(DebuggerBrowsableState.Never)]
+	public event Action<SettingConfig, SettingLevel> OnSettingChanged;
+
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
@@ -26,25 +30,35 @@ public class CustomGameSettings : KMonoBehaviour
 		{
 			this.customGameMode = ((!this.is_custom_game) ? CustomGameSettings.CustomGameMode.Survival : CustomGameSettings.CustomGameMode.Custom);
 		}
+		if (this.CurrentQualityLevelsBySetting.ContainsKey("CarePackages "))
+		{
+			if (!this.CurrentQualityLevelsBySetting.ContainsKey(CustomGameSettingConfigs.CarePackages.id))
+			{
+				this.CurrentQualityLevelsBySetting.Add(CustomGameSettingConfigs.CarePackages.id, this.CurrentQualityLevelsBySetting["CarePackages "]);
+			}
+			this.CurrentQualityLevelsBySetting.Remove("CarePackages ");
+		}
 	}
 
 	protected override void OnPrefabInit()
 	{
 		CustomGameSettings.instance = this;
+		this.AddSettingConfig(CustomGameSettingConfigs.World);
+		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
 		this.AddSettingConfig(CustomGameSettingConfigs.ImmuneSystem);
+		this.AddSettingConfig(CustomGameSettingConfigs.CalorieBurn);
+		this.AddSettingConfig(CustomGameSettingConfigs.Morale);
 		this.AddSettingConfig(CustomGameSettingConfigs.Stress);
 		this.AddSettingConfig(CustomGameSettingConfigs.StressBreaks);
-		this.AddSettingConfig(CustomGameSettingConfigs.Morale);
-		this.AddSettingConfig(CustomGameSettingConfigs.CalorieBurn);
-		this.AddSettingConfig(CustomGameSettingConfigs.WorldgenSeed);
-		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
-		this.AddSettingConfig(CustomGameSettingConfigs.World);
 		this.AddSettingConfig(CustomGameSettingConfigs.CarePackages);
+		this.AddSettingConfig(CustomGameSettingConfigs.SandboxMode);
+		this.VerifySettingCoordinates();
 	}
 
 	public void SetSurvivalDefaults()
 	{
 		this.customGameMode = CustomGameSettings.CustomGameMode.Survival;
+		this.LoadWorlds();
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
 			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.default_level_id);
@@ -54,6 +68,7 @@ public class CustomGameSettings : KMonoBehaviour
 	public void SetNosweatDefaults()
 	{
 		this.customGameMode = CustomGameSettings.CustomGameMode.Nosweat;
+		this.LoadWorlds();
 		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
 		{
 			this.SetQualitySetting(keyValuePair.Value, keyValuePair.Value.nosweat_default_level_id);
@@ -62,19 +77,61 @@ public class CustomGameSettings : KMonoBehaviour
 
 	public SettingLevel CycleSettingLevel(ListSettingConfig config, int direction)
 	{
-		this.CurrentQualityLevelsBySetting[config.id] = config.CycleSettingLevelID(this.CurrentQualityLevelsBySetting[config.id], direction);
+		this.SetQualitySetting(config, config.CycleSettingLevelID(this.CurrentQualityLevelsBySetting[config.id], direction));
 		return config.GetLevel(this.CurrentQualityLevelsBySetting[config.id]);
 	}
 
 	public SettingLevel ToggleSettingLevel(ToggleSettingConfig config)
 	{
-		this.CurrentQualityLevelsBySetting[config.id] = config.ToggleSettingLevelID(this.CurrentQualityLevelsBySetting[config.id]);
+		this.SetQualitySetting(config, config.ToggleSettingLevelID(this.CurrentQualityLevelsBySetting[config.id]));
 		return config.GetLevel(this.CurrentQualityLevelsBySetting[config.id]);
 	}
 
 	public void SetQualitySetting(SettingConfig config, string value)
 	{
 		this.CurrentQualityLevelsBySetting[config.id] = value;
+		bool flag = true;
+		bool flag2 = true;
+		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
+		{
+			if (this.QualitySettings[keyValuePair.Key].triggers_custom_game)
+			{
+				if (keyValuePair.Value != this.QualitySettings[keyValuePair.Key].default_level_id)
+				{
+					flag = false;
+				}
+				if (keyValuePair.Value != this.QualitySettings[keyValuePair.Key].nosweat_default_level_id)
+				{
+					flag2 = false;
+				}
+				if (!flag && !flag2)
+				{
+					break;
+				}
+			}
+		}
+		CustomGameSettings.CustomGameMode customGameMode;
+		if (flag)
+		{
+			customGameMode = CustomGameSettings.CustomGameMode.Survival;
+		}
+		else if (flag2)
+		{
+			customGameMode = CustomGameSettings.CustomGameMode.Nosweat;
+		}
+		else
+		{
+			customGameMode = CustomGameSettings.CustomGameMode.Custom;
+		}
+		if (customGameMode != this.customGameMode)
+		{
+			DebugUtil.LogArgs(new object[] { "Game mode changed from", this.customGameMode, "to", customGameMode });
+			this.customGameMode = customGameMode;
+		}
+		if (this.OnSettingChanged != null)
+		{
+			this.OnSettingChanged(config, this.GetCurrentQualitySetting(config));
+		}
 	}
 
 	public SettingLevel GetCurrentQualitySetting(SettingConfig setting)
@@ -84,13 +141,14 @@ public class CustomGameSettings : KMonoBehaviour
 
 	public SettingLevel GetCurrentQualitySetting(string setting_id)
 	{
+		SettingConfig settingConfig = this.QualitySettings[setting_id];
 		if (this.customGameMode == CustomGameSettings.CustomGameMode.Survival)
 		{
-			return this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].default_level_id);
+			return (!settingConfig.triggers_custom_game) ? settingConfig.GetLevel(this.CurrentQualityLevelsBySetting[setting_id]) : settingConfig.GetLevel(settingConfig.default_level_id);
 		}
 		if (this.customGameMode == CustomGameSettings.CustomGameMode.Nosweat)
 		{
-			return this.QualitySettings[setting_id].GetLevel(this.QualitySettings[setting_id].nosweat_default_level_id);
+			return (!settingConfig.triggers_custom_game) ? settingConfig.GetLevel(this.CurrentQualityLevelsBySetting[setting_id]) : settingConfig.GetLevel(settingConfig.nosweat_default_level_id);
 		}
 		if (!this.CurrentQualityLevelsBySetting.ContainsKey(setting_id))
 		{
@@ -98,6 +156,11 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 		string text = this.CurrentQualityLevelsBySetting[setting_id];
 		return this.QualitySettings[setting_id].GetLevel(text);
+	}
+
+	public string GetCurrentQualitySettingLevelId(SettingConfig config)
+	{
+		return this.CurrentQualityLevelsBySetting[config.id];
 	}
 
 	public string GetSettingLevelLabel(string setting_id, string level_id)
@@ -111,7 +174,7 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.label;
 			}
 		}
-		Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id);
+		global::Debug.LogWarning("No label string for setting: " + setting_id + " level: " + level_id);
 		return string.Empty;
 	}
 
@@ -126,7 +189,7 @@ public class CustomGameSettings : KMonoBehaviour
 				return level.tooltip;
 			}
 		}
-		Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id);
+		global::Debug.LogWarning("No tooltip string for setting: " + setting_id + " level: " + level_id);
 		return string.Empty;
 	}
 
@@ -139,29 +202,35 @@ public class CustomGameSettings : KMonoBehaviour
 		}
 	}
 
-	private static void AddWorldMods(IFileSystem fs, object user_data, List<SettingLevel> levels)
+	private static void AddWorldMods(object user_data, List<SettingLevel> levels)
 	{
-		string text = FSUtil.Normalize(global::System.IO.Path.Combine(SettingsCache.GetPath(), "worlds"));
+		string text = FileSystem.Normalize(global::System.IO.Path.Combine(SettingsCache.GetPath(), "worlds"));
 		ListPool<string, CustomGameSettings>.PooledList pooledList = ListPool<string, CustomGameSettings>.Allocate();
-		FSUtil.GetFiles(fs, text, "*.yaml", pooledList);
+		FileSystem.GetFiles(text, "*.yaml", pooledList);
 		foreach (string text2 in pooledList)
 		{
-			global::ProcGen.World world = YamlIO<global::ProcGen.World>.LoadFile(text2, null);
+			global::ProcGen.World world = YamlIO.LoadFile<global::ProcGen.World>(text2, null, null);
 			string worldName = Worlds.GetWorldName(text2);
-			levels.Add(new SettingLevel(worldName, world.name, world.description, user_data));
+			string text3 = worldName;
+			string name = world.name;
+			string description = world.description;
+			levels.Add(new SettingLevel(text3, name, description, 0, user_data));
 		}
 		pooledList.Recycle();
 	}
 
 	public void LoadWorlds()
 	{
-		Dictionary<string, Worlds.Data> worldCache = SettingsCache.worlds.worldCache;
+		Dictionary<string, global::ProcGen.World> worldCache = SettingsCache.worlds.worldCache;
 		List<SettingLevel> list = new List<SettingLevel>(worldCache.Count);
-		foreach (KeyValuePair<string, Worlds.Data> keyValuePair in worldCache)
+		foreach (KeyValuePair<string, global::ProcGen.World> keyValuePair in worldCache)
 		{
-			list.Add(new SettingLevel(keyValuePair.Key, keyValuePair.Value.world.name, keyValuePair.Value.world.description, null));
+			StringEntry stringEntry;
+			string text = ((!Strings.TryGet(new StringKey(keyValuePair.Value.name), out stringEntry)) ? keyValuePair.Value.name : stringEntry.ToString());
+			string text2 = ((!Strings.TryGet(new StringKey(keyValuePair.Value.description), out stringEntry)) ? keyValuePair.Value.description : stringEntry.ToString());
+			list.Add(new SettingLevel(keyValuePair.Key, text, text2, 0, null));
 		}
-		CustomGameSettingConfigs.World.StompLevels(list, "worlds/Default", "worlds/Default");
+		CustomGameSettingConfigs.World.StompLevels(list, "worlds/SandstoneDefault", "worlds/SandstoneDefault");
 	}
 
 	public void Print()
@@ -172,7 +241,7 @@ public class CustomGameSettings : KMonoBehaviour
 			string text2 = text;
 			text = string.Concat(new string[] { text2, keyValuePair.Key, "=", keyValuePair.Value, "," });
 		}
-		Debug.Log(text);
+		global::Debug.Log(text);
 	}
 
 	private bool AllValuesMatch(Dictionary<string, string> data, CustomGameSettings.CustomGameMode mode)
@@ -254,7 +323,120 @@ public class CustomGameSettings : KMonoBehaviour
 		return list;
 	}
 
-	public const string TAG_WORLDGEN = "worldgen";
+	public bool VerifySettingCoordinates()
+	{
+		Dictionary<int, string> dictionary = new Dictionary<int, string>();
+		bool flag = false;
+		foreach (KeyValuePair<string, SettingConfig> keyValuePair in this.QualitySettings)
+		{
+			if (keyValuePair.Value.coordinate_dimension < 0 || keyValuePair.Value.coordinate_dimension_width < 0)
+			{
+				if (keyValuePair.Value.coordinate_dimension >= 0 || keyValuePair.Value.coordinate_dimension_width >= 0)
+				{
+					flag = true;
+					global::Debug.Assert(false, keyValuePair.Value.id + ": Both coordinate dimension props must be unset (-1) if either is unset.");
+				}
+			}
+			else
+			{
+				List<SettingLevel> levels = keyValuePair.Value.GetLevels();
+				if (keyValuePair.Value.coordinate_dimension_width < levels.Count)
+				{
+					flag = true;
+					global::Debug.Assert(false, string.Concat(new object[]
+					{
+						keyValuePair.Value.id,
+						": Range between coordinate min and max insufficient for all levels (",
+						keyValuePair.Value.coordinate_dimension_width,
+						"<",
+						levels.Count,
+						")"
+					}));
+				}
+				foreach (SettingLevel settingLevel in levels)
+				{
+					int num = keyValuePair.Value.coordinate_dimension * settingLevel.coordinate_offset;
+					string text = keyValuePair.Value.id + " > " + settingLevel.id;
+					if (settingLevel.coordinate_offset < 0)
+					{
+						flag = true;
+						global::Debug.Assert(false, text + ": Level coordinate offset must be >= 0");
+					}
+					else if (settingLevel.coordinate_offset == 0)
+					{
+						if (settingLevel.id != keyValuePair.Value.default_level_id)
+						{
+							flag = true;
+							global::Debug.Assert(false, text + ": Only the default level should have a coordinate offset of 0");
+						}
+					}
+					else if (settingLevel.coordinate_offset > keyValuePair.Value.coordinate_dimension_width)
+					{
+						flag = true;
+						global::Debug.Assert(false, text + ": level coordinate must be <= dimension width");
+					}
+					else
+					{
+						string text2;
+						bool flag2 = !dictionary.TryGetValue(num, out text2);
+						dictionary[num] = text;
+						if (settingLevel.id == keyValuePair.Value.default_level_id)
+						{
+							flag = true;
+							global::Debug.Assert(false, text + ": Default level must be coordinate 0");
+						}
+						if (!flag2)
+						{
+							flag = true;
+							global::Debug.Assert(false, text + ": Combined coordinate conflicts with another coordinate (" + text2 + "). Ensure this SettingConfig's min and max don't overlap with another SettingConfig's");
+						}
+					}
+				}
+			}
+		}
+		return flag;
+	}
+
+	public string GetSettingsCoordinate()
+	{
+		global::ProcGen.World worldData = SettingsCache.worlds.GetWorldData(CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World).id);
+		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
+		string otherSettingsCode = this.GetOtherSettingsCode();
+		return string.Format("{0}-{1}-{2}", worldData.GetCoordinatePrefix(), currentQualitySetting.id, otherSettingsCode);
+	}
+
+	private string GetOtherSettingsCode()
+	{
+		int num = 0;
+		foreach (KeyValuePair<string, string> keyValuePair in this.CurrentQualityLevelsBySetting)
+		{
+			SettingConfig settingConfig = this.QualitySettings[keyValuePair.Key];
+			if (settingConfig.coordinate_dimension >= 0 && settingConfig.coordinate_dimension_width >= 0)
+			{
+				SettingLevel level = settingConfig.GetLevel(keyValuePair.Value);
+				int num2 = settingConfig.coordinate_dimension * level.coordinate_offset;
+				num += num2;
+			}
+		}
+		return this.Base10toBase36(num);
+	}
+
+	private string Base10toBase36(int input)
+	{
+		if (input == 0)
+		{
+			return "0";
+		}
+		int i = input;
+		string text = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		string text2 = string.Empty;
+		while (i > 0)
+		{
+			text2 += text[i % 36];
+			i /= 36;
+		}
+		return text2;
+	}
 
 	private static CustomGameSettings instance;
 

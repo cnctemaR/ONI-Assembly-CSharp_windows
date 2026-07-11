@@ -6,10 +6,37 @@ using UnityEngine;
 [SkipSaveFileSerialization]
 public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesInstance>, IGameObjectEffectDescriptor, IWiltCause, ISim1000ms
 {
+	public bool Replanted
+	{
+		get
+		{
+			return this.replanted;
+		}
+	}
+
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
 		base.smi.StartSM();
+	}
+
+	public PlantablePlot GetReceptacle()
+	{
+		return (PlantablePlot)base.smi.sm.receptacle.Get(base.smi);
+	}
+
+	public void SetReceptacle(PlantablePlot plot = null)
+	{
+		if (plot == null)
+		{
+			base.smi.sm.receptacle.Set(null, base.smi);
+			this.replanted = false;
+		}
+		else
+		{
+			base.smi.sm.receptacle.Set(plot, base.smi);
+			this.replanted = true;
+		}
 	}
 
 	public void Sim1000ms(float dt)
@@ -72,6 +99,8 @@ public class ReceptacleMonitor : StateMachineComponent<ReceptacleMonitor.StatesI
 			new Descriptor(UI.GAMEOBJECTEFFECTS.REQUIRES_RECEPTACLE, UI.GAMEOBJECTEFFECTS.TOOLTIPS.REQUIRES_RECEPTACLE, Descriptor.DescriptorType.Requirement, false)
 		};
 	}
+
+	private bool replanted;
 
 	public class StatesInstance : GameStateMachine<ReceptacleMonitor.States, ReceptacleMonitor.StatesInstance, ReceptacleMonitor, object>.GameInstance
 	{

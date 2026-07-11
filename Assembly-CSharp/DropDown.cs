@@ -24,6 +24,12 @@ public class DropDown : KMonoBehaviour
 		this.canvasScaler = GameScreenManager.Instance.ssOverlayCanvas.GetComponent<KCanvasScaler>();
 	}
 
+	public void CustomizeEmptyRow(string txt, Sprite icon)
+	{
+		this.emptyRowLabel = txt;
+		this.emptyRowSprite = icon;
+	}
+
 	public void OnClick()
 	{
 		if (!this.open)
@@ -79,7 +85,20 @@ public class DropDown : KMonoBehaviour
 				this.onEntrySelectedAction(null, this.targetData);
 				this.Close();
 			};
-			this.emptyRow.GetComponent<DropDownEntry>().label.text = UI.DROPDOWN.NONE;
+			string text;
+			if (this.emptyRowLabel != null)
+			{
+				text = this.emptyRowLabel;
+			}
+			else
+			{
+				text = UI.DROPDOWN.NONE;
+			}
+			this.emptyRow.GetComponent<DropDownEntry>().label.text = text;
+			if (this.emptyRowSprite != null)
+			{
+				this.emptyRow.GetComponent<DropDownEntry>().image.sprite = this.emptyRowSprite;
+			}
 		}
 		for (int j = 0; j < contentKeys.Count; j++)
 		{
@@ -208,6 +227,10 @@ public class DropDown : KMonoBehaviour
 	private Func<IListableOption, IListableOption, object, int> sortFunction;
 
 	private GameObject emptyRow;
+
+	private string emptyRowLabel;
+
+	private Sprite emptyRowSprite;
 
 	private bool built;
 

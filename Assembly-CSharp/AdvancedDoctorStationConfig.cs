@@ -29,7 +29,7 @@ public class AdvancedDoctorStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Clinic);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.Clinic, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
@@ -42,8 +42,7 @@ public class AdvancedDoctorStationConfig : IBuildingConfig
 		manualDeliveryKG.capacity = 10f;
 		manualDeliveryKG.refillMass = 5f;
 		manualDeliveryKG.minimumMass = 1f;
-		manualDeliveryKG.choreTags = GameTags.ChoreTypes.DoctoringChores;
-		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.MachineFetch.IdHash;
+		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.DoctorFetch.IdHash;
 		manualDeliveryKG.operationalRequirement = FetchOrder2.OperationalRequirement.Functional;
 		DoctorStation doctorStation = go.AddOrGet<DoctorStation>();
 		doctorStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_medical_bed_kanim") };

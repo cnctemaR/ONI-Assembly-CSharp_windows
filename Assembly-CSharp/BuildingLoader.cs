@@ -154,7 +154,7 @@ public class BuildingLoader : KMonoBehaviour
 			gameObject.GetComponent<PrimaryElement>().MassPerUnit += def.Mass[i];
 		}
 		KPrefabID kprefabID = BuildingLoader.AddID(gameObject, def.PrefabID + "UnderConstruction");
-		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
+		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, def.CheckRequiresBuildingCellVisualizer());
 		Constructable component2 = gameObject.GetComponent<Constructable>();
 		component2.SetWorkTime(def.ConstructionTime);
 		Rotatable rotatable = BuildingLoader.UpdateComponentRequirement<Rotatable>(gameObject, def.PermittedRotations != PermittedRotations.Unrotatable);
@@ -259,7 +259,7 @@ public class BuildingLoader : KMonoBehaviour
 			GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 			go.AddOrGet<LogicOperationalController>();
 		}
-		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(go, BuildingCellVisualizer.CheckRequiresComponent(def));
+		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(go, def.CheckRequiresBuildingCellVisualizer());
 		if (def.BaseDecor != 0f)
 		{
 			DecorProvider decorProvider = BuildingLoader.UpdateComponentRequirement<DecorProvider>(go, true);
@@ -299,7 +299,7 @@ public class BuildingLoader : KMonoBehaviour
 		kprefabID.defaultLayer = num;
 		KSelectable component2 = gameObject.GetComponent<KSelectable>();
 		component2.SetName(def.Name);
-		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, BuildingCellVisualizer.CheckRequiresComponent(def));
+		BuildingLoader.UpdateComponentRequirement<BuildingCellVisualizer>(gameObject, def.CheckRequiresBuildingCellVisualizer());
 		KAnimGraphTileVisualizer component3 = gameObject.GetComponent<KAnimGraphTileVisualizer>();
 		if (component3 != null)
 		{

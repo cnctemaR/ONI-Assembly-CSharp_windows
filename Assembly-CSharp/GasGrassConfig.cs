@@ -16,7 +16,7 @@ public class GasGrassConfig : IEntityConfig
 		string text4 = "idle_empty";
 		EffectorValues tier = DECOR.BONUS.TIER3;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(text, text2, text3, num, kanimFile, text4, Grid.SceneLayer.BuildingFront, 1, 3, tier, default(EffectorValues), SimHashes.Creature, null, 255f);
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 0f, 348.15f, 373.15f, null, true, 0f, 0.15f, "GasGrassHarvested", true, true);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject, 218.15f, 0f, 348.15f, 373.15f, null, true, 0f, 0.15f, "GasGrassHarvested", true, true, true, true, 2400f);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -26,8 +26,8 @@ public class GasGrassConfig : IEntityConfig
 			}
 		});
 		gameObject.AddOrGet<StandardCropPlant>();
-		Harvestable harvestable = gameObject.AddOrGet<Harvestable>();
-		harvestable.defaultHarvestStateWhenPlanted = false;
+		HarvestDesignatable harvestDesignatable = gameObject.AddOrGet<HarvestDesignatable>();
+		harvestDesignatable.defaultHarvestStateWhenPlanted = false;
 		CropSleepingMonitor.Def def = gameObject.AddOrGetDef<CropSleepingMonitor.Def>();
 		def.lightIntensityThreshold = 20000f;
 		def.prefersDarkness = false;

@@ -8,7 +8,7 @@ namespace Klei.AI
 	public class SlimeSickness : Sickness
 	{
 		public SlimeSickness()
-			: base("SlimeSickness", Sickness.SicknessType.Pathogen, Sickness.Severity.Minor, 0.00025f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Inhalation }, 2220f)
+			: base("SlimeSickness", Sickness.SicknessType.Pathogen, Sickness.Severity.Minor, 0.00025f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Inhalation }, 2220f, "SlimeSicknessRecovery")
 		{
 			base.AddSicknessComponent(new CommonSickEffectSickness());
 			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]
@@ -27,9 +27,9 @@ namespace Klei.AI
 
 		private const int DISEASE_AMOUNT = 1000;
 
-		private const float DEATH_TIMER = 4800f;
-
 		public const string ID = "SlimeSickness";
+
+		public const string RECOVERY_ID = "SlimeSicknessRecovery";
 
 		public class SlimeLungComponent : Sickness.SicknessComponent
 		{

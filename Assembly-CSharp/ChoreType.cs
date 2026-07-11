@@ -5,13 +5,13 @@ using System.Diagnostics;
 [DebuggerDisplay("{IdHash}")]
 public class ChoreType : Resource
 {
-	public ChoreType(string id, ResourceSet parent, string[] chore_groups, string urge, string name, string status_message, string tooltip, Tag[] interrupt_exclusion, int implicit_priority, int explicit_priority)
+	public ChoreType(string id, ResourceSet parent, string[] chore_groups, string urge, string name, string status_message, string tooltip, IEnumerable<Tag> interrupt_exclusion, int implicit_priority, int explicit_priority)
 		: base(id, parent, name)
 	{
-		this.statusItem = new StatusItem(id, status_message, tooltip, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 63486);
+		this.statusItem = new StatusItem(id, status_message, tooltip, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, 129022);
 		this.statusItem.resolveStringCallback = new Func<string, object, string>(this.ResolveStringCallback);
 		this.tags.Add(TagManager.Create(id));
-		this.interruptExclusion = new List<Tag>(interrupt_exclusion);
+		this.interruptExclusion = new HashSet<Tag>(interrupt_exclusion);
 		Db.Get().DuplicantStatusItems.Add(this.statusItem);
 		this.groups = new ChoreGroup[chore_groups.Length];
 		for (int i = 0; i < this.groups.Length; i++)
@@ -49,9 +49,9 @@ public class ChoreType : Resource
 
 	public StatusItem statusItem;
 
-	public List<Tag> tags = new List<Tag>();
+	public HashSet<Tag> tags = new HashSet<Tag>();
 
-	public List<Tag> interruptExclusion;
+	public HashSet<Tag> interruptExclusion;
 
 	public string reportName;
 }

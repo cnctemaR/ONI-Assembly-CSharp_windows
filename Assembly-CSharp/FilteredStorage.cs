@@ -20,7 +20,7 @@ public class FilteredStorage
 		this.storage.Subscribe(644822890, new Action<object>(this.OnOnlyFetchMarkedItemsSettingChanged));
 		if (FilteredStorage.capacityStatusItem == null)
 		{
-			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
+			FilteredStorage.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			FilteredStorage.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				FilteredStorage filteredStorage = (FilteredStorage)data;
@@ -53,7 +53,7 @@ public class FilteredStorage
 				}
 				return str;
 			};
-			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+			FilteredStorage.noFilterStatusItem = new StatusItem("NoStorageFilterSet", "BUILDING", "status_item_no_filter_set", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 		}
 		root.GetComponent<KSelectable>().SetStatusItem(Db.Get().StatusItemCategories.Main, FilteredStorage.capacityStatusItem, this);
 	}
@@ -198,7 +198,7 @@ public class FilteredStorage
 		if (num > 0f && flag)
 		{
 			num = Mathf.Max(0f, this.GetMaxCapacity() - amountStored);
-			this.fetchList = new FetchList2(this.storage, this.choreType, null);
+			this.fetchList = new FetchList2(this.storage, this.choreType);
 			this.fetchList.ShowStatusItem = false;
 			this.fetchList.Add(tags, this.requiredTags, this.forbiddenTags, num, FetchOrder2.OperationalRequirement.Functional);
 			this.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);

@@ -11,8 +11,6 @@ public class SneezeMonitor : GameStateMachine<SneezeMonitor, SneezeMonitor.Insta
 		this.sneezy.ParamTransition<bool>(this.isSneezy, this.idle, (SneezeMonitor.Instance smi, bool p) => !p).ToggleReactable((SneezeMonitor.Instance smi) => smi.GetReactable());
 	}
 
-	private static readonly HashedString[] SneezeAnims = new HashedString[] { "sneeze", "sneeze_pst" };
-
 	public StateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.BoolParameter isSneezy = new StateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.BoolParameter(false);
 
 	public GameStateMachine<SneezeMonitor, SneezeMonitor.Instance, IStateMachineTarget, object>.State idle;

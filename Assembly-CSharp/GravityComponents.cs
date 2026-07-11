@@ -73,7 +73,21 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 								}
 							}
 						}
-						if (Grid.Solid[num6] || (gravityComponent.landOnFakeFloors && Grid.FakeFloor[num6]))
+						bool flag3 = Grid.Solid[num6];
+						if (!flag3 && gravityComponent.landOnFakeFloors && Grid.FakeFloor[num6])
+						{
+							Navigator component = gravityComponent.transform.GetComponent<Navigator>();
+							if (component)
+							{
+								flag3 = component.NavGrid.NavTable.IsValid(num6, NavType.Floor);
+								if (!flag3)
+								{
+									int num7 = Grid.CellAbove(num6);
+									flag3 = component.NavGrid.NavTable.IsValid(num7, NavType.Hover);
+								}
+							}
+						}
+						if (flag3)
 						{
 							vector3.y = Grid.CellToPosCBC(Grid.CellAbove(num6), Grid.SceneLayer.Move).y + gravityComponent.radius;
 							gravityComponent.velocity.x = 0f;
@@ -90,8 +104,8 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 						{
 							Vector2 vector5 = vector3;
 							vector5.x -= gravityComponent.radius;
-							int num7 = Grid.PosToCell(vector5);
-							if (Grid.IsValidCell(num7) && Grid.Solid[num7])
+							int num8 = Grid.PosToCell(vector5);
+							if (Grid.IsValidCell(num8) && Grid.Solid[num8])
 							{
 								vector3.x = Mathf.Floor(vector3.x - gravityComponent.radius) + (1f + gravityComponent.radius);
 								gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;
@@ -101,8 +115,8 @@ public class GravityComponents : KGameObjectComponentManager<GravityComponent>
 							{
 								Vector3 vector6 = vector3;
 								vector6.x += gravityComponent.radius;
-								int num8 = Grid.PosToCell(vector6);
-								if (Grid.IsValidCell(num8) && Grid.Solid[num8])
+								int num9 = Grid.PosToCell(vector6);
+								if (Grid.IsValidCell(num9) && Grid.Solid[num9])
 								{
 									vector3.x = Mathf.Floor(vector3.x + gravityComponent.radius) - gravityComponent.radius;
 									gravityComponent.velocity.x = -0.1f * gravityComponent.velocity.x;

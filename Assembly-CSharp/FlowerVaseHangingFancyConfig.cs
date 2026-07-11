@@ -17,7 +17,11 @@ public class FlowerVaseHangingFancyConfig : IBuildingConfig
 		float num5 = 800f;
 		BuildLocationRule buildLocationRule = BuildLocationRule.OnCeiling;
 		EffectorValues none = NOISE_POLLUTION.NONE;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, transparents, num5, buildLocationRule, BUILDINGS.DECOR.NONE, none, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, tier, transparents, num5, buildLocationRule, new EffectorValues
+		{
+			amount = BUILDINGS.DECOR.BONUS.TIER1.amount,
+			radius = BUILDINGS.DECOR.BONUS.TIER3.radius
+		}, none, 0.2f);
 		buildingDef.Floodable = false;
 		buildingDef.Overheatable = false;
 		buildingDef.ViewMode = OverlayModes.Decor.ID;
@@ -36,7 +40,7 @@ public class FlowerVaseHangingFancyConfig : IBuildingConfig
 		plantablePlot.plantLayer = Grid.SceneLayer.BuildingFront;
 		plantablePlot.occupyingObjectVisualOffset = new Vector3(0f, -0.45f, 0f);
 		go.AddOrGet<FlowerVase>();
-		go.GetComponent<KPrefabID>().AddTag(GameTags.Decoration);
+		go.GetComponent<KPrefabID>().AddTag(GameTags.Decoration, false);
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)

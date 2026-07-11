@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class FetchOrder2
 {
-	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None, int priorityMod = 0, Tag[] chore_tags = null)
+	public FetchOrder2(ChoreType chore_type, Tag[] tags, Tag[] required_tags, Tag[] forbidden_tags, Storage destination, float amount, FetchOrder2.OperationalRequirement operationalRequirementDEPRECATED = FetchOrder2.OperationalRequirement.None, int priorityMod = 0)
 	{
 		if (amount <= PICKUPABLETUNING.MINIMUM_PICKABLE_AMOUNT)
 		{
@@ -24,7 +24,6 @@ public class FetchOrder2
 		this.TotalAmount = amount;
 		this.UnfetchedAmount = amount;
 		this.PriorityMod = priorityMod;
-		this.ChoreTags = chore_tags;
 		this.operationalRequirement = operationalRequirementDEPRECATED;
 	}
 
@@ -37,8 +36,6 @@ public class FetchOrder2
 	public Tag[] RequiredTags { get; protected set; }
 
 	public Tag[] ForbiddenTags { get; protected set; }
-
-	public Tag[] ChoreTags { get; protected set; }
 
 	public Storage Destination { get; set; }
 
@@ -93,7 +90,7 @@ public class FetchOrder2
 
 	private void SetFetchTask(float amount)
 	{
-		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.RequiredTags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod, this.ChoreTags);
+		FetchChore fetchChore = new FetchChore(this.choreType, this.Destination, amount, this.Tags, this.RequiredTags, this.ForbiddenTags, null, true, new Action<Chore>(this.OnFetchChoreComplete), new Action<Chore>(this.OnFetchChoreBegin), new Action<Chore>(this.OnFetchChoreEnd), this.operationalRequirement, this.PriorityMod);
 		this.Chores.Add(fetchChore);
 	}
 

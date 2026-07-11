@@ -3,7 +3,7 @@ using KSerialization;
 using STRINGS;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class Clearable : Workable, ISaveLoadable
+public class Clearable : Workable, ISaveLoadable, IRender200ms
 {
 	protected override void OnPrefabInit()
 	{
@@ -13,6 +13,8 @@ public class Clearable : Workable, ISaveLoadable
 		base.Subscribe<Clearable>(493375141, Clearable.OnRefreshUserMenuDelegate);
 		base.Subscribe<Clearable>(-1617557748, Clearable.OnEquippedDelegate);
 		this.workerStatusItem = Db.Get().DuplicantStatusItems.Clearing;
+		this.simRenderLoadBalance = true;
+		this.autoRegisterSimRender = false;
 	}
 
 	protected override void OnSpawn()
@@ -51,7 +53,6 @@ public class Clearable : Workable, ISaveLoadable
 	{
 		if (this.isMarkedForClear)
 		{
-			base.GetComponent<KSelectable>().RemoveStatusItem(Db.Get().MiscStatusItems.PendingClear, false);
 			this.isMarkedForClear = false;
 			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Garbage);
 			Prioritizable.RemoveRef(base.gameObject);
@@ -60,6 +61,8 @@ public class Clearable : Workable, ISaveLoadable
 				GlobalChoreProvider.Instance.UnregisterClearable(this.clearHandle);
 				this.clearHandle.Clear();
 			}
+			this.RefreshClearableStatus();
+			SimAndRenderScheduler.instance.Remove(this);
 		}
 	}
 
@@ -71,11 +74,12 @@ public class Clearable : Workable, ISaveLoadable
 		}
 		if ((!this.isMarkedForClear || force) && !this.pickupable.IsEntombed && !this.clearHandle.IsValid() && !this.HasTag(GameTags.Stored))
 		{
-			base.GetComponent<KSelectable>().AddStatusItem(Db.Get().MiscStatusItems.PendingClear, this);
 			Prioritizable.AddRef(base.gameObject);
-			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage);
+			base.GetComponent<KPrefabID>().AddTag(GameTags.Garbage, false);
 			this.isMarkedForClear = true;
 			this.clearHandle = GlobalChoreProvider.Instance.RegisterClearable(this);
+			this.RefreshClearableStatus();
+			SimAndRenderScheduler.instance.Add(this, this.simRenderLoadBalance);
 		}
 	}
 
@@ -144,8 +148,31 @@ public class Clearable : Workable, ISaveLoadable
 		}
 	}
 
+	public void Render200ms(float dt)
+	{
+		this.RefreshClearableStatus();
+	}
+
+	public void RefreshClearableStatus()
+	{
+		if (this.isMarkedForClear)
+		{
+			bool flag = GlobalChoreProvider.Instance.ClearableHasDestination(this.pickupable);
+			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClear, flag, this);
+			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClearNoStorage, !flag, this);
+		}
+		else
+		{
+			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClear, false, this);
+			this.selectable.ToggleStatusItem(Db.Get().MiscStatusItems.PendingClearNoStorage, false, this);
+		}
+	}
+
 	[MyCmpReq]
 	private Pickupable pickupable;
+
+	[MyCmpReq]
+	private KSelectable selectable;
 
 	[Serialize]
 	private bool isMarkedForClear;

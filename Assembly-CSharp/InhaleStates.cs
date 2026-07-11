@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>
+public class InhaleStates : GameStateMachine<InhaleStates, InhaleStates.Instance, IStateMachineTarget, InhaleStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{

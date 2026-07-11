@@ -16,15 +16,15 @@ public static class BasePacuConfig
 		float num2 = (warnLowTemp + warnHighTemp) / 2f;
 		GameObject gameObject = EntityTemplates.CreatePlacedEntity(id, name, description, num, anim, text, Grid.SceneLayer.Creatures, 1, 1, tier, default(EffectorValues), SimHashes.Creature, null, num2);
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.SwimmingCreature);
-		component.AddTag(GameTags.Creatures.Swimmer);
+		component.AddTag(GameTags.SwimmingCreature, false);
+		component.AddTag(GameTags.Creatures.Swimmer, false);
 		Trait trait = Db.Get().CreateTrait(base_trait_id, name, name, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.maxAttribute.Id, PacuTuning.STANDARD_STOMACH_SIZE, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -PacuTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, false, false, true);
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "Meat", 1, false, false, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Prey, base_trait_id, "SwimmerNavGrid", NavType.Swim, 32, 2f, "FishMeat", 1, false, false, warnLowTemp, warnHighTemp, warnLowTemp - 20f, warnHighTemp + 20f);
 		if (is_baby)
 		{
 			KBatchedAnimController component2 = gameObject.GetComponent<KBatchedAnimController>();
@@ -55,7 +55,7 @@ public static class BasePacuConfig
 		EntityTemplates.AddCreatureBrain(gameObject, builder2, GameTags.Creatures.Species.PacuSpecies, symbol_prefix);
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(new HashSet<Tag> { SimHashes.Algae.CreateTag() }, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false)
+			new Diet.Info(new HashSet<Tag> { SimHashes.Algae.CreateTag() }, SimHashes.ToxicSand.CreateTag(), BasePacuConfig.CALORIES_PER_KG_OF_ORE, global::TUNING.CREATURES.CONVERSION_EFFICIENCY.NORMAL, null, 0f, false, false)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def3 = gameObject.AddOrGetDef<CreatureCalorieMonitor.Def>();
@@ -67,7 +67,7 @@ public static class BasePacuConfig
 		def5.lures = new Tag[] { GameTags.Creatures.FishTrapLure };
 		if (!string.IsNullOrEmpty(symbol_prefix))
 		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim("pacu_kanim"), symbol_prefix, 0);
+			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim("pacu_kanim"), symbol_prefix, null, 0);
 		}
 		return gameObject;
 	}

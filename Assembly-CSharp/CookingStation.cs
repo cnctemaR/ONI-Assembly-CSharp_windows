@@ -11,7 +11,11 @@ public class CookingStation : ComplexFabricator, IEffectDescriptor
 		base.OnPrefabInit();
 		this.choreType = Db.Get().ChoreTypes.Cook;
 		this.fetchChoreTypeIdHash = Db.Get().ChoreTypes.CookFetch.IdHash;
-		this.choreTags = GameTags.ChoreTypes.CookingChores;
+	}
+
+	protected override void OnSpawn()
+	{
+		base.OnSpawn();
 		this.workable.requiredSkillPerk = Db.Get().SkillPerks.CanElectricGrill.Id;
 		this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Cooking;
 		this.workable.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_cookstation_kanim") };
@@ -32,14 +36,13 @@ public class CookingStation : ComplexFabricator, IEffectDescriptor
 		}));
 	}
 
-	protected override List<GameObject> SpawnOrderProduct(ComplexFabricator.UserOrder completed_order)
+	protected override List<GameObject> SpawnOrderProduct(ComplexRecipe recipe)
 	{
-		List<GameObject> list = base.SpawnOrderProduct(completed_order);
+		List<GameObject> list = base.SpawnOrderProduct(recipe);
 		foreach (GameObject gameObject in list)
 		{
 			PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
 			component.ModifyDiseaseCount(-component.DiseaseCount, "CookingStation.CompleteOrder");
-			component.Temperature = 368.15f;
 		}
 		base.GetComponent<Operational>().SetActive(false, false);
 		return list;

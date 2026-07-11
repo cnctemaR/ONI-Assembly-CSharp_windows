@@ -27,7 +27,7 @@ public class AcousticDisturbance
 					if (AcousticDisturbance.cellsInRange.Contains(num5) && minionIdentity.GetSMI<StaminaMonitor.Instance>().IsSleeping())
 					{
 						minionIdentity.Trigger(-527751701, data);
-						minionIdentity.Trigger(-2105031705, data);
+						minionIdentity.Trigger(1621815900, data);
 					}
 				}
 			}

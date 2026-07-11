@@ -14,7 +14,7 @@ namespace KMod
 		{
 			this.filename = filename;
 			this.zipfile = ZipFile.Read(filename);
-			this.file_system = new ZipFileSystem(this.zipfile.Name, this.zipfile, Application.streamingAssetsPath);
+			this.file_system = new ZipFileDirectory(this.zipfile.Name, this.zipfile, Application.streamingAssetsPath);
 		}
 
 		public string GetRoot()
@@ -32,7 +32,7 @@ namespace KMod
 			HashSetPool<string, ZipFile>.PooledHashSet pooledHashSet = HashSetPool<string, ZipFile>.Allocate();
 			foreach (ZipEntry zipEntry in this.zipfile)
 			{
-				string[] array = FSUtil.Normalize(zipEntry.FileName).Split(new char[] { '/' });
+				string[] array = FileSystem.Normalize(zipEntry.FileName).Split(new char[] { '/' });
 				string text = array[0];
 				if (pooledHashSet.Add(text))
 				{
@@ -46,7 +46,7 @@ namespace KMod
 			pooledHashSet.Recycle();
 		}
 
-		public IFileSystem GetFileSystem()
+		public IFileDirectory GetFileSystem()
 		{
 			return this.file_system;
 		}
@@ -69,7 +69,7 @@ namespace KMod
 				}
 				if (flag)
 				{
-					string text2 = FSUtil.Normalize(Path.Combine(path, zipEntry.FileName));
+					string text2 = FileSystem.Normalize(Path.Combine(path, zipEntry.FileName));
 					string directoryName = Path.GetDirectoryName(text2);
 					if (string.IsNullOrEmpty(directoryName) || FileUtil.CreateDirectory(directoryName, 0))
 					{
@@ -108,6 +108,6 @@ namespace KMod
 
 		private ZipFile zipfile;
 
-		private ZipFileSystem file_system;
+		private ZipFileDirectory file_system;
 	}
 }

@@ -123,7 +123,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		if (this.Def.Deprecated && base.GetComponent<KSelectable>() != null)
 		{
 			KSelectable component4 = base.GetComponent<KSelectable>();
-			Building.deprecatedBuildingStatusItem = new StatusItem("BUILDING_DEPRECATED", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+			Building.deprecatedBuildingStatusItem = new StatusItem("BUILDING_DEPRECATED", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 			component4.AddStatusItem(Building.deprecatedBuildingStatusItem, null);
 		}
 	}
@@ -142,7 +142,10 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			if (component != null)
 			{
 				SimHashes visualizationElementID = this.GetVisualizationElementID(component);
-				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, visualizationElementID, Grid.PosToCell(base.transform.GetPosition()));
+				int num = Grid.PosToCell(base.transform.GetPosition());
+				Constructable component2 = base.GetComponent<Constructable>();
+				bool flag = component2 != null && component2.IsReplacementTile;
+				World.Instance.blockTileRenderer.AddBlock(base.gameObject.layer, this.Def, flag, visualizationElementID, num);
 			}
 		}
 	}
@@ -200,7 +203,10 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 			if (component != null)
 			{
 				SimHashes visualizationElementID = this.GetVisualizationElementID(component);
-				World.Instance.blockTileRenderer.RemoveBlock(this.Def, visualizationElementID, Grid.PosToCell(base.transform.GetPosition()));
+				int num = Grid.PosToCell(base.transform.GetPosition());
+				Constructable component2 = base.GetComponent<Constructable>();
+				bool flag = component2 != null && component2.IsReplacementTile;
+				World.Instance.blockTileRenderer.RemoveBlock(this.Def, flag, visualizationElementID, num);
 			}
 		}
 	}
@@ -250,7 +256,7 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 		else if (def.OutputConduitType == ConduitType.Gas)
 		{
 			Descriptor descriptor5 = default(Descriptor);
-			descriptor5.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESGASOUTPUT, UI.BUILDINGEFFECTS.REQUIRESGASOUTPUT, Descriptor.DescriptorType.Requirement);
+			descriptor5.SetupDescriptor(UI.BUILDINGEFFECTS.REQUIRESGASOUTPUT, UI.BUILDINGEFFECTS.TOOLTIPS.REQUIRESGASOUTPUT, Descriptor.DescriptorType.Requirement);
 			list.Add(descriptor5);
 		}
 		if (component.isManuallyOperated)
@@ -365,8 +371,6 @@ public class Building : KMonoBehaviour, IEffectDescriptor, IUniformGridObject, I
 	private Extents extents;
 
 	private static StatusItem deprecatedBuildingStatusItem;
-
-	private Guid deprecatedBuildingHandle = Guid.Empty;
 
 	private HandleVector<int>.Handle scenePartitionerEntry;
 }

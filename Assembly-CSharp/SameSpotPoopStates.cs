@@ -2,7 +2,7 @@
 using KSerialization;
 using STRINGS;
 
-internal class SameSpotPoopStates : GameStateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>
+public class SameSpotPoopStates : GameStateMachine<SameSpotPoopStates, SameSpotPoopStates.Instance, IStateMachineTarget, SameSpotPoopStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -16,7 +16,7 @@ internal class SameSpotPoopStates : GameStateMachine<SameSpotPoopStates, SameSpo
 		string text = CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
 		this.updatepoopcell.Enter(delegate(SameSpotPoopStates.Instance smi)
 		{
 			smi.SetLastPoopCell();

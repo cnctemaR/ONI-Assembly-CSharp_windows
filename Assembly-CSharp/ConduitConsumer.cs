@@ -28,6 +28,23 @@ public class ConduitConsumer : KMonoBehaviour
 		}
 	}
 
+	public float stored_mass
+	{
+		get
+		{
+			return (!(this.storage == null)) ? ((!(this.capacityTag != GameTags.Any)) ? this.storage.MassStored() : this.storage.GetMassAvailable(this.capacityTag)) : 0f;
+		}
+	}
+
+	public float space_remaining_kg
+	{
+		get
+		{
+			float num = this.capacityKG - this.stored_mass;
+			return (!(this.storage == null)) ? Mathf.Min(this.storage.RemainingCapacity(), num) : num;
+		}
+	}
+
 	public void SetConduitData(ConduitType type)
 	{
 		this.conduitType = type;
@@ -144,85 +161,81 @@ public class ConduitConsumer : KMonoBehaviour
 
 	private void Consume(float dt, ConduitFlow conduit_mgr)
 	{
+		this.IsSatisfied = false;
 		if (this.building.Def.CanMove)
 		{
 			this.utilityCell = this.GetInputCell();
 		}
-		if (this.IsConnected)
+		if (!this.IsConnected)
 		{
-			ConduitFlow.ConduitContents contents = conduit_mgr.GetContents(this.utilityCell);
-			if (contents.mass > 0f)
+			return;
+		}
+		ConduitFlow.ConduitContents contents = conduit_mgr.GetContents(this.utilityCell);
+		if (contents.mass <= 0f)
+		{
+			return;
+		}
+		this.IsSatisfied = true;
+		if (!this.alwaysConsume && !this.operational.IsOperational)
+		{
+			return;
+		}
+		float num = this.ConsumptionRate * dt;
+		num = Mathf.Min(num, this.space_remaining_kg);
+		float num2 = 0f;
+		if (num > 0f)
+		{
+			ConduitFlow.ConduitContents conduitContents = conduit_mgr.RemoveElement(this.utilityCell, num);
+			num2 = conduitContents.mass;
+			this.lastConsumedElement = conduitContents.element;
+		}
+		Element element = ElementLoader.FindElementByHash(contents.element);
+		bool flag = element.HasTag(this.capacityTag);
+		if (num2 > 0f && this.capacityTag != GameTags.Any && !flag)
+		{
+			base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
 			{
-				this.IsSatisfied = true;
-				if (this.alwaysConsume || this.operational.IsOperational)
+				damage = 1,
+				source = BUILDINGS.DAMAGESOURCES.BAD_INPUT_ELEMENT,
+				popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.WRONG_ELEMENT
+			});
+		}
+		if (flag || this.wrongElementResult == ConduitConsumer.WrongElementResult.Store || contents.element == SimHashes.Vacuum || this.capacityTag == GameTags.Any)
+		{
+			if (num2 > 0f)
+			{
+				int num3 = (int)((float)contents.diseaseCount * (num2 / contents.mass));
+				Element element2 = ElementLoader.FindElementByHash(contents.element);
+				ConduitType conduitType = this.conduitType;
+				if (conduitType != ConduitType.Liquid)
 				{
-					float num = ((!(this.capacityTag != GameTags.Any)) ? this.storage.MassStored() : this.storage.GetMassAvailable(this.capacityTag));
-					float num2 = Mathf.Min(this.storage.RemainingCapacity(), this.capacityKG - num);
-					float num3 = this.ConsumptionRate * dt;
-					num3 = Mathf.Min(num3, num2);
-					float num4 = 0f;
-					if (num3 > 0f)
+					if (conduitType == ConduitType.Gas)
 					{
-						num4 = conduit_mgr.RemoveElement(this.utilityCell, num3).mass;
-					}
-					Element element = ElementLoader.FindElementByHash(contents.element);
-					bool flag = element.HasTag(this.capacityTag);
-					if (num4 > 0f && this.capacityTag != GameTags.Any && !flag)
-					{
-						base.Trigger(-794517298, new BuildingHP.DamageSourceInfo
+						if (element2.IsGas)
 						{
-							damage = 1,
-							source = BUILDINGS.DAMAGESOURCES.BAD_INPUT_ELEMENT,
-							popString = UI.GAMEOBJECTEFFECTS.DAMAGE_POPS.WRONG_ELEMENT
-						});
-					}
-					if (flag || this.wrongElementResult == ConduitConsumer.WrongElementResult.Store || contents.element == SimHashes.Vacuum || this.capacityTag == GameTags.Any)
-					{
-						if (num4 > 0f)
+							this.storage.AddGasChunk(contents.element, num2, contents.temperature, contents.diseaseIdx, num3, this.keepZeroMassObject, false);
+						}
+						else
 						{
-							int num5 = (int)((float)contents.diseaseCount * (num4 / contents.mass));
-							Element element2 = ElementLoader.FindElementByHash(contents.element);
-							ConduitType conduitType = this.conduitType;
-							if (conduitType != ConduitType.Liquid)
-							{
-								if (conduitType == ConduitType.Gas)
-								{
-									if (element2.IsGas)
-									{
-										this.storage.AddGasChunk(contents.element, num4, contents.temperature, contents.diseaseIdx, num5, this.keepZeroMassObject, false);
-									}
-									else
-									{
-										global::Debug.LogWarning("Gas conduit consumer consuming non gas: " + element2.id.ToString());
-									}
-								}
-							}
-							else if (element2.IsLiquid)
-							{
-								this.storage.AddLiquid(contents.element, num4, contents.temperature, contents.diseaseIdx, num5, this.keepZeroMassObject, false);
-							}
-							else
-							{
-								global::Debug.LogWarning("Liquid conduit consumer consuming non liquid: " + element2.id.ToString());
-							}
+							global::Debug.LogWarning("Gas conduit consumer consuming non gas: " + element2.id.ToString());
 						}
 					}
-					else if (num4 > 0f && this.wrongElementResult == ConduitConsumer.WrongElementResult.Dump)
-					{
-						int num6 = (int)((float)contents.diseaseCount * (num4 / contents.mass));
-						int num7 = Grid.PosToCell(base.transform.GetPosition());
-						SimMessages.AddRemoveSubstance(num7, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num4, contents.temperature, contents.diseaseIdx, num6, true, -1);
-					}
+				}
+				else if (element2.IsLiquid)
+				{
+					this.storage.AddLiquid(contents.element, num2, contents.temperature, contents.diseaseIdx, num3, this.keepZeroMassObject, false);
+				}
+				else
+				{
+					global::Debug.LogWarning("Liquid conduit consumer consuming non liquid: " + element2.id.ToString());
 				}
 			}
-			else
-			{
-				this.IsSatisfied = false;
-			}
 		}
-		else
+		else if (num2 > 0f && this.wrongElementResult == ConduitConsumer.WrongElementResult.Dump)
 		{
-			this.IsSatisfied = false;
+			int num4 = (int)((float)contents.diseaseCount * (num2 / contents.mass));
+			int num5 = Grid.PosToCell(base.transform.GetPosition());
+			SimMessages.AddRemoveSubstance(num5, contents.element, CellEventLogger.Instance.ConduitConsumerWrongElement, num2, contents.temperature, contents.diseaseIdx, num4, true, -1);
 		}
 	}
 
@@ -254,7 +267,7 @@ public class ConduitConsumer : KMonoBehaviour
 	public bool isConsuming = true;
 
 	[MyCmpReq]
-	private Operational operational;
+	public Operational operational;
 
 	[MyCmpReq]
 	private Building building;
@@ -265,6 +278,8 @@ public class ConduitConsumer : KMonoBehaviour
 	private int utilityCell = -1;
 
 	public float consumptionRate = float.PositiveInfinity;
+
+	public SimHashes lastConsumedElement = SimHashes.Vacuum;
 
 	public static readonly Operational.Flag elementRequirementFlag = new Operational.Flag("elementRequired", Operational.Flag.Type.Requirement);
 

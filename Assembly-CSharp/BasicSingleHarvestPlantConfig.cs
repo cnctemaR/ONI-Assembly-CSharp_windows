@@ -23,7 +23,7 @@ public class BasicSingleHarvestPlantConfig : IEntityConfig
 			SimHashes.ContaminatedOxygen,
 			SimHashes.CarbonDioxide
 		};
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 218.15f, 283.15f, 303.15f, 398.15f, array, true, 0f, 0.15f, "BasicPlantFood", true, false);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 218.15f, 283.15f, 303.15f, 398.15f, array, true, 0f, 0.15f, "BasicPlantFood", true, false, true, true, 2400f);
 		gameObject.AddOrGet<StandardCropPlant>();
 		gameObject.AddOrGet<KAnimControllerBase>().randomiseLoopedOffset = true;
 		gameObject.AddOrGet<LoopingSounds>();

@@ -157,7 +157,7 @@ public abstract class Assignable : KMonoBehaviour, ISaveLoadable
 			this.assignee_identityRef.Set(null);
 			this.assignee_groupID = ((AssignmentGroup)new_assignee).id;
 		}
-		base.GetComponent<KPrefabID>().AddTag(GameTags.Assigned);
+		base.GetComponent<KPrefabID>().AddTag(GameTags.Assigned, false);
 		this.assignee = new_assignee;
 		if (this.slot != null && (new_assignee is MinionIdentity || new_assignee is StoredMinionIdentity || new_assignee is MinionAssignablesProxy))
 		{

@@ -20,8 +20,8 @@ public class PasteBaseTemplateScreen : KScreen
 			global::UnityEngine.Object.Destroy(gameObject);
 		}
 		this.template_buttons.Clear();
-		this.base_template_assets = TemplateCache.CollectBaseTemplateNames("bases/");
-		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames("poi/"));
+		this.base_template_assets = TemplateCache.CollectBaseTemplateNames("bases");
+		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames("poi"));
 		this.base_template_assets.AddRange(TemplateCache.CollectBaseTemplateNames(string.Empty));
 		foreach (string text in this.base_template_assets)
 		{

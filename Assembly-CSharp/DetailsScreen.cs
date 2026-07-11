@@ -32,6 +32,15 @@ public class DetailsScreen : KTabMenu
 		UIRegistry.detailsScreen = this;
 		this.DeactivateSideContent();
 		base.Show(false);
+		base.Subscribe(Game.Instance.gameObject, -1503271301, new Action<object>(this.OnSelectObject));
+	}
+
+	private void OnSelectObject(object data)
+	{
+		if (data == null)
+		{
+			this.previouslyActiveTab = -1;
+		}
 	}
 
 	protected override void OnSpawn()
@@ -215,9 +224,9 @@ public class DetailsScreen : KTabMenu
 							num = j;
 						}
 					}
-					else
+					else if (flag3 && this.previouslyActiveTab >= 0 && this.previouslyActiveTab < this.screens.Length && this.screens[j].name == this.screens[this.previouslyActiveTab].name)
 					{
-						num = j;
+						num = this.screens[j].tabIdx;
 					}
 				}
 			}
@@ -337,6 +346,7 @@ public class DetailsScreen : KTabMenu
 		BuildingUnderConstruction component2 = SelectTool.Instance.selected.GetComponent<BuildingUnderConstruction>();
 		CreatureBrain component3 = SelectTool.Instance.selected.GetComponent<CreatureBrain>();
 		PlantableSeed component4 = SelectTool.Instance.selected.GetComponent<PlantableSeed>();
+		BudUprootedMonitor component5 = SelectTool.Instance.selected.GetComponent<BudUprootedMonitor>();
 		if (component != null)
 		{
 			text = CodexCache.FormatLinkID(component.element.id.ToString());
@@ -354,6 +364,17 @@ public class DetailsScreen : KTabMenu
 		{
 			text = CodexCache.FormatLinkID(SelectTool.Instance.selected.PrefabID().ToString());
 			text = text.Replace("SEED", string.Empty);
+		}
+		else if (component5 != null)
+		{
+			if (component5.parentObject.Get() != null)
+			{
+				text = CodexCache.FormatLinkID(component5.parentObject.Get().PrefabID().ToString());
+			}
+			else if (component5.GetComponent<TreeBud>() != null)
+			{
+				text = CodexCache.FormatLinkID(component5.GetComponent<TreeBud>().buddingTrunk.Get().PrefabID().ToString());
+			}
 		}
 		else
 		{
@@ -421,21 +442,21 @@ public class DetailsScreen : KTabMenu
 		if (component4 != null)
 		{
 			KBatchedAnimController component5 = component4.GetComponent<KBatchedAnimController>();
-			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component5.AnimFiles[0], "ui", false);
+			Sprite uispriteFromMultiObjectAnim = Def.GetUISpriteFromMultiObjectAnim(component5.AnimFiles[0], "ui", false, string.Empty);
 			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim);
 			return;
 		}
 		PrimaryElement component6 = target.GetComponent<PrimaryElement>();
 		if (component6 != null)
 		{
-			this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component6.ElementID).substance.anim, "ui", false));
+			this.TabTitle.portrait.SetPortrait(Def.GetUISpriteFromMultiObjectAnim(ElementLoader.FindElementByHash(component6.ElementID).substance.anim, "ui", false, string.Empty));
 			return;
 		}
 		CellSelectionObject component7 = target.GetComponent<CellSelectionObject>();
 		if (component7 != null)
 		{
 			string text = ((!component7.element.IsSolid) ? component7.element.substance.name : "ui");
-			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component7.element.substance.anim, text, false);
+			Sprite uispriteFromMultiObjectAnim2 = Def.GetUISpriteFromMultiObjectAnim(component7.element.substance.anim, text, false, string.Empty);
 			this.TabTitle.portrait.SetPortrait(uispriteFromMultiObjectAnim2);
 			return;
 		}
@@ -480,6 +501,15 @@ public class DetailsScreen : KTabMenu
 	public void SetTitle(string title)
 	{
 		this.TabTitle.SetTitle(title);
+	}
+
+	public TargetScreen GetActiveTab()
+	{
+		if (this.previouslyActiveTab >= 0 && this.previouslyActiveTab < this.screens.Length)
+		{
+			return this.screens[this.previouslyActiveTab].screen;
+		}
+		return null;
 	}
 
 	public static DetailsScreen Instance;

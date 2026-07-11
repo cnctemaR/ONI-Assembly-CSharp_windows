@@ -43,7 +43,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			string text = Shower.EffectsRemoved[i];
 			component.Remove(text);
 		}
-		component.Add(this.showerEffect, true);
+		component.Add(Shower.SHOWER_EFFECT, true);
 		HygieneMonitor.Instance instance = worker.GetSMI<HygieneMonitor.Instance>();
 		if (instance != null)
 		{
@@ -104,13 +104,13 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 				list.Add(descriptor2);
 			}
 		}
-		Effect.AddModifierDescriptions(base.gameObject, list, this.showerEffect, true);
+		Effect.AddModifierDescriptions(base.gameObject, list, Shower.SHOWER_EFFECT, true);
 		return list;
 	}
 
 	private Shower.ShowerSM.Instance smi;
 
-	public string showerEffect = "Showered";
+	public static string SHOWER_EFFECT = "Showered";
 
 	public SimHashes outputTargetElement;
 
@@ -141,7 +141,7 @@ public class Shower : Workable, IEffectDescriptor, IGameObjectEffectDescriptor
 			ChoreType shower = Db.Get().ChoreTypes.Shower;
 			Shower master = smi.master;
 			ScheduleBlockType hygiene = Db.Get().ScheduleBlockTypes.Hygiene;
-			return new WorkChore<Shower>(shower, master, null, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.personalNeeds, 5, false, true);
+			return new WorkChore<Shower>(shower, master, null, true, null, null, null, false, hygiene, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 		}
 
 		private void UpdateStatusItems(Shower.ShowerSM.Instance smi, float dt)

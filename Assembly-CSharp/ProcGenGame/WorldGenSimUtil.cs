@@ -13,7 +13,7 @@ namespace ProcGenGame
 	{
 		public unsafe static bool DoSettleSim(WorldGenSettings settings, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dcs, WorldGen.OfflineCallbackFunction updateProgressFn, Data data, List<KeyValuePair<Vector2I, TemplateContainer>> templateSpawnTargets, Action<OfflineWorldGen.ErrorInfo> error_cb, Action<Sim.Cell[], float[], Sim.DiseaseCell[]> onSettleComplete)
 		{
-			Sim.SIM_Initialize(null);
+			Sim.SIM_Initialize(new Sim.GAME_MessageHandler(Sim.DLL_MessageHandler));
 			SimMessages.CreateSimElementsTable(ElementLoader.elements);
 			SimMessages.CreateWorldGenHACKDiseaseTable(WorldGen.diseaseIds);
 			Sim.DiseaseCell[] array = new Sim.DiseaseCell[dcs.Length];
@@ -130,7 +130,7 @@ namespace ProcGenGame
 				SimSaveFileStructure simSaveFileStructure = new SimSaveFileStructure();
 				for (int i = 0; i < data.overworldCells.Count; i++)
 				{
-					simSaveFileStructure.worldDetail.overworldCells.Add(new WorldDetailSave.OverworldCell(settings.GetSubWorld(data.overworldCells[i].node.type).zoneType, data.overworldCells[i]));
+					simSaveFileStructure.worldDetail.overworldCells.Add(new WorldDetailSave.OverworldCell(SettingsCache.GetCachedSubWorld(data.overworldCells[i].node.type).zoneType, data.overworldCells[i]));
 				}
 				simSaveFileStructure.worldDetail.globalWorldSeed = data.globalWorldSeed;
 				simSaveFileStructure.worldDetail.globalWorldLayoutSeed = data.globalWorldLayoutSeed;

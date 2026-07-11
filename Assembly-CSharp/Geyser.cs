@@ -21,8 +21,8 @@ public class Geyser : StateMachineComponent<Geyser.StatesInstance>, IGameObjectE
 		SimHashes element = this.configuration.GetElement();
 		float temperature = this.configuration.GetTemperature();
 		float num = (float)this.outputOffset.x;
-		int num2 = Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate());
-		elementEmitter.outputElement = new ElementConverter.OutputElement(emitRate, element, temperature, false, num, (float)this.outputOffset.y, false, 1f, this.configuration.GetDiseaseIdx(), num2);
+		float num2 = (float)this.outputOffset.y;
+		elementEmitter.outputElement = new ElementConverter.OutputElement(emitRate, element, temperature, false, false, num, num2, 1f, this.configuration.GetDiseaseIdx(), Mathf.RoundToInt((float)this.configuration.GetDiseaseCount() * this.configuration.GetEmitRate()));
 		base.smi.StartSM();
 		Workable component = base.GetComponent<Studyable>();
 		if (component != null)

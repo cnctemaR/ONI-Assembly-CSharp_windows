@@ -4,7 +4,7 @@ using UnityEngine;
 public class PutOnHatChore : Chore<PutOnHatChore.StatesInstance>
 {
 	public PutOnHatChore(IStateMachineTarget target, ChoreType chore_type)
-		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(chore_type, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new PutOnHatChore.StatesInstance(this, target.gameObject);
 	}

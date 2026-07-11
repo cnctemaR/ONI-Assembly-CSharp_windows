@@ -42,6 +42,8 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 	public class Def : StateMachine.BaseDef
 	{
 		public Tag adultPrefab;
+
+		public string onGrowDropID;
 	}
 
 	public new class Instance : GameStateMachine<BabyMonitor, BabyMonitor.Instance, IStateMachineTarget, BabyMonitor.Def>.GameInstance
@@ -58,6 +60,11 @@ public class BabyMonitor : GameStateMachine<BabyMonitor, BabyMonitor.Instance, I
 			GameObject gameObject = Util.KInstantiate(Assets.GetPrefab(base.smi.def.adultPrefab), position);
 			gameObject.SetActive(true);
 			gameObject.GetSMI<AnimInterruptMonitor.Instance>().PlayAnim("growup_pst");
+			if (base.smi.def.onGrowDropID != null)
+			{
+				GameObject gameObject2 = Util.KInstantiate(Assets.GetPrefab(base.smi.def.onGrowDropID), position);
+				gameObject2.SetActive(true);
+			}
 			foreach (AmountInstance amountInstance in base.gameObject.GetAmounts())
 			{
 				AmountInstance amountInstance2 = amountInstance.amount.Lookup(gameObject);

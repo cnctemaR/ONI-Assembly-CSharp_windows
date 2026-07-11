@@ -15,6 +15,8 @@ public class SpaceDestination
 		this.id = id;
 		this.type = type;
 		this.distance = distance;
+		SpaceDestinationType destinationType = this.GetDestinationType();
+		this.availableMass = (float)(destinationType.maxiumMass - destinationType.minimumMass);
 		this.GenerateSurfaceElements();
 		this.GenerateMissions();
 		this.GenerateResearchOpportunities();
@@ -40,9 +42,30 @@ public class SpaceDestination
 		}
 	}
 
+	public float CurrentMass
+	{
+		get
+		{
+			return (float)this.GetDestinationType().minimumMass + this.availableMass;
+		}
+	}
+
+	public float AvailableMass
+	{
+		get
+		{
+			return this.availableMass;
+		}
+	}
+
 	[OnDeserialized]
 	private void OnDeserialized()
 	{
+		if (SaveLoader.Instance.GameInfo.IsVersionOlderThan(7, 9))
+		{
+			SpaceDestinationType destinationType = this.GetDestinationType();
+			this.availableMass = (float)(destinationType.maxiumMass - destinationType.minimumMass);
+		}
 	}
 
 	public SpaceDestinationType GetDestinationType()
@@ -156,11 +179,13 @@ public class SpaceDestination
 				num += this.GetResourceValue(keyValuePair.Key, keyValuePair.Value);
 			}
 		}
+		float num2 = Mathf.Min(this.CurrentMass - (float)this.GetDestinationType().minimumMass, totalCargoSpace);
 		foreach (KeyValuePair<SimHashes, float> keyValuePair2 in this.recoverableElements)
 		{
 			if ((ElementLoader.FindElementByHash(keyValuePair2.Key).IsSolid && solids) || (ElementLoader.FindElementByHash(keyValuePair2.Key).IsLiquid && liquids) || (ElementLoader.FindElementByHash(keyValuePair2.Key).IsGas && gasses))
 			{
-				dictionary.Add(keyValuePair2.Key, totalCargoSpace * (this.GetResourceValue(keyValuePair2.Key, keyValuePair2.Value) / num));
+				float num3 = num2 * (this.GetResourceValue(keyValuePair2.Key, keyValuePair2.Value) / num);
+				dictionary.Add(keyValuePair2.Key, num3);
 			}
 		}
 		return dictionary;
@@ -184,6 +209,69 @@ public class SpaceDestination
 	{
 		return this.GetRecoverableEntities();
 	}
+
+	public void UpdateRemainingResources(CargoBay bay)
+	{
+		if (bay != null)
+		{
+			foreach (KeyValuePair<SimHashes, float> keyValuePair in this.recoverableElements)
+			{
+				if (this.HasElementType(bay.storageType))
+				{
+					Storage component = bay.GetComponent<Storage>();
+					this.availableMass = Mathf.Max(0f, this.availableMass - component.capacityKg);
+					break;
+				}
+			}
+		}
+	}
+
+	public bool HasElementType(CargoBay.CargoType type)
+	{
+		foreach (KeyValuePair<SimHashes, float> keyValuePair in this.recoverableElements)
+		{
+			if ((ElementLoader.FindElementByHash(keyValuePair.Key).IsSolid && type == CargoBay.CargoType.solids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsLiquid && type == CargoBay.CargoType.liquids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsGas && type == CargoBay.CargoType.gasses))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void Replenish(float dt)
+	{
+		SpaceDestinationType destinationType = this.GetDestinationType();
+		if (this.CurrentMass < (float)destinationType.maxiumMass)
+		{
+			this.availableMass += destinationType.replishmentPerSim1000ms;
+		}
+	}
+
+	public float GetAvailableResourcesPercentage(CargoBay.CargoType cargoType)
+	{
+		float num = 0f;
+		float totalMass = this.GetTotalMass();
+		foreach (KeyValuePair<SimHashes, float> keyValuePair in this.recoverableElements)
+		{
+			if ((ElementLoader.FindElementByHash(keyValuePair.Key).IsSolid && cargoType == CargoBay.CargoType.solids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsLiquid && cargoType == CargoBay.CargoType.liquids) || (ElementLoader.FindElementByHash(keyValuePair.Key).IsGas && cargoType == CargoBay.CargoType.gasses))
+			{
+				num += this.GetResourceValue(keyValuePair.Key, keyValuePair.Value) / totalMass;
+			}
+		}
+		return num;
+	}
+
+	public float GetTotalMass()
+	{
+		float num = 0f;
+		foreach (KeyValuePair<SimHashes, float> keyValuePair in this.recoverableElements)
+		{
+			num += this.GetResourceValue(keyValuePair.Key, keyValuePair.Value);
+		}
+		return num;
+	}
+
+	private const int MASS_TO_RECOVER_AMOUNT = 1000;
 
 	private static List<Tuple<float, int>> RARE_ELEMENT_CHANCES = new List<Tuple<float, int>>
 	{
@@ -234,6 +322,9 @@ public class SpaceDestination
 	public List<SpaceDestination.ResearchOpportunity> researchOpportunities = new List<SpaceDestination.ResearchOpportunity>();
 
 	public List<SpaceMission> missions = new List<SpaceMission>();
+
+	[Serialize]
+	private float availableMass;
 
 	[SerializationConfig(MemberSerialization.OptIn)]
 	public class ResearchOpportunity

@@ -79,6 +79,7 @@ public class Equipment : Assignables
 		}
 		equippable.transform.parent = slot.gameObject.transform;
 		equippable.transform.SetLocalPosition(Vector3.zero);
+		this.SetEquippableStoredModifiers(equippable, true);
 		equippable.OnEquip(slot);
 		if (this.refreshHandle.TimeRemaining > 0f)
 		{
@@ -142,6 +143,7 @@ public class Equipment : Assignables
 					component3.Drop(equippable.gameObject, true);
 				}
 			}
+			this.SetEquippableStoredModifiers(equippable, false);
 			equippable.transform.parent = null;
 			equippable.transform.SetPosition(targetGameObject.transform.GetPosition() + Vector3.up / 2f);
 			KBatchedAnimController component4 = equippable.GetComponent<KBatchedAnimController>();
@@ -193,6 +195,13 @@ public class Equipment : Assignables
 				assignableSlotInstance.assignable.Unassign();
 			}
 		}
+	}
+
+	private void SetEquippableStoredModifiers(Equippable equippable, bool isStoring)
+	{
+		GameObject gameObject = equippable.gameObject;
+		Storage.MakeItemTemperatureInsulated(gameObject, isStoring, false);
+		Storage.MakeItemInvisible(gameObject, isStoring, false);
 	}
 
 	private SchedulerHandle refreshHandle;

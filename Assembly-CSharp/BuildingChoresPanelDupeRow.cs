@@ -17,8 +17,8 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 		bool flag = data.context.IsPotentialSuccess();
 		if (flag)
 		{
-			string text = ((!(data.context.chore.driver == data.consumer.choreDriver)) ? ("#" + data.rank.ToString()) : "Current Errand");
-			this.label.text = data.consumer.name + " -- " + text;
+			string text = ((!(data.context.chore.driver == data.consumer.choreDriver)) ? string.Format(DUPLICANTS.CHORES.PRECONDITIONS.RANK_FORMAT.text, data.rank) : DUPLICANTS.CHORES.PRECONDITIONS.CURRENT_ERRAND.text);
+			this.label.text = DUPLICANTS.CHORES.PRECONDITIONS.SUCCESS_ROW.Replace("{Duplicant}", data.consumer.name).Replace("{Rank}", text);
 		}
 		else
 		{
@@ -28,8 +28,8 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 			{
 				text2 = text2.Replace("{Assignee}", data.context.chore.driver.GetProperName());
 			}
-			text2 = text2.Replace("{Selected}", this.GetProperName());
-			this.label.text = data.consumer.name + " -- " + text2;
+			text2 = text2.Replace("{Selected}", data.context.chore.gameObject.GetProperName());
+			this.label.text = DUPLICANTS.CHORES.PRECONDITIONS.FAILURE_ROW.Replace("{Duplicant}", data.consumer.name).Replace("{Reason}", text2);
 		}
 		this.icon.sprite = JobsTableScreen.priorityInfo[data.personalPriority].sprite;
 		this.toolTip.toolTip = BuildingChoresPanelDupeRow.TooltipForDupe(data.context, data.consumer, data.rank);
@@ -71,7 +71,7 @@ public class BuildingChoresPanelDupeRow : KMonoBehaviour
 		text = text.Replace("{Errand}", GameUtil.GetChoreName(context.chore, context.data));
 		if (!flag)
 		{
-			text = text.Replace("{FailedPrecondition}", context.chore.GetPreconditions()[context.failedPreconditionId].id + "\n" + context.chore.GetPreconditions()[context.failedPreconditionId].description);
+			text = text.Replace("{FailedPrecondition}", context.chore.GetPreconditions()[context.failedPreconditionId].description);
 		}
 		else
 		{

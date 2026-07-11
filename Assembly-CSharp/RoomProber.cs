@@ -143,9 +143,24 @@ public class RoomProber : ISim1000ms
 								break;
 							}
 						}
+						foreach (KPrefabID kprefabID2 in data.plants)
+						{
+							if (component.InstanceID == kprefabID2.InstanceID)
+							{
+								flag = true;
+								break;
+							}
+						}
 						if (!flag)
 						{
-							data.AddBuilding(component);
+							if (component.GetComponent<Deconstructable>())
+							{
+								data.AddBuilding(component);
+							}
+							else if (component.HasTag(GameTags.Plant) && !component.HasTag("ForestTreeBranch".ToTag()))
+							{
+								data.AddPlants(component);
+							}
 						}
 					}
 				}
@@ -199,6 +214,10 @@ public class RoomProber : ISim1000ms
 					{
 						kprefabID.Trigger(144050788, cavityInfo.room);
 					}
+					foreach (KPrefabID kprefabID2 in cavityInfo.plants)
+					{
+						kprefabID2.Trigger(144050788, cavityInfo.room);
+					}
 				}
 				cavityInfo.dirty = false;
 			}
@@ -216,7 +235,7 @@ public class RoomProber : ISim1000ms
 		}
 		foreach (KPrefabID kprefabID in room.buildings)
 		{
-			if (!kprefabID.HasTag(GameTags.NotRoomAssignable))
+			if (!(kprefabID == null) && !kprefabID.HasTag(GameTags.NotRoomAssignable))
 			{
 				Assignable component = kprefabID.GetComponent<Assignable>();
 				if (component != null && (roomType.primary_constraint == null || !roomType.primary_constraint.building_criteria(kprefabID.GetComponent<KPrefabID>())))
@@ -227,10 +246,9 @@ public class RoomProber : ISim1000ms
 		}
 	}
 
-	private void UnassignBuildingsToRoom(Room room)
+	private void UnassignKPrefabIDs(Room room, List<KPrefabID> list)
 	{
-		global::Debug.Assert(room != null);
-		foreach (KPrefabID kprefabID in room.buildings)
+		foreach (KPrefabID kprefabID in list)
 		{
 			if (!(kprefabID == null))
 			{
@@ -241,6 +259,35 @@ public class RoomProber : ISim1000ms
 					component.Unassign();
 				}
 			}
+		}
+	}
+
+	private void UnassignBuildingsToRoom(Room room)
+	{
+		global::Debug.Assert(room != null);
+		this.UnassignKPrefabIDs(room, room.buildings);
+		this.UnassignKPrefabIDs(room, room.plants);
+	}
+
+	public void UpdateRoom(CavityInfo cavity)
+	{
+		if (cavity == null)
+		{
+			return;
+		}
+		if (cavity.room != null)
+		{
+			this.ClearRoom(cavity.room);
+			cavity.room = null;
+		}
+		this.CreateRoom(cavity);
+		foreach (KPrefabID kprefabID in cavity.buildings)
+		{
+			kprefabID.Trigger(144050788, cavity.room);
+		}
+		foreach (KPrefabID kprefabID2 in cavity.plants)
+		{
+			kprefabID2.Trigger(144050788, cavity.room);
 		}
 	}
 

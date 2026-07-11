@@ -6,7 +6,7 @@ using UnityEngine;
 public class BingeEatChore : Chore<BingeEatChore.StatesInstance>
 {
 	public BingeEatChore(IStateMachineTarget target, Action<Chore> on_complete = null)
-		: base(Db.Get().ChoreTypes.BingeEat, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.BingeEat, target, target.GetComponent<ChoreProvider>(), false, on_complete, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new BingeEatChore.StatesInstance(this, target.gameObject);
 		base.Subscribe(1121894420, new Action<object>(this.OnEat));

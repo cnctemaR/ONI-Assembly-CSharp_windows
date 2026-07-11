@@ -34,6 +34,8 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		go.AddOrGet<DropAllWorkable>();
 		go.AddOrGet<BuildingComplete>().isManuallyOperated = true;
 		ComplexFabricator complexFabricator = go.AddOrGet<ComplexFabricator>();
+		complexFabricator.resultState = ComplexFabricator.ResultState.Heated;
+		complexFabricator.heatedTemperature = 313.15f;
 		complexFabricator.sideScreenStyle = ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid;
 		complexFabricator.duplicantOperated = true;
 		go.AddOrGet<FabricatorIngredientStatusManager>();
@@ -58,7 +60,7 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		ComplexRecipe complexRecipe = new ComplexRecipe(text, array, array2);
 		complexRecipe.time = 80f;
 		complexRecipe.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.SUPERCOOLANT_RECIPE_DESCRIPTION;
-		complexRecipe.useResultAsDescription = true;
+		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
 		float num3 = 0.15f;
 		float num4 = 0.05f;
@@ -77,7 +79,7 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		complexRecipe = new ComplexRecipe(text2, array3, array4);
 		complexRecipe.time = 80f;
 		complexRecipe.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.SUPERINSULATOR_RECIPE_DESCRIPTION;
-		complexRecipe.useResultAsDescription = true;
+		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
 		float num6 = 0.05f;
 		ComplexRecipe.RecipeElement[] array5 = new ComplexRecipe.RecipeElement[]
@@ -93,7 +95,7 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		complexRecipe = new ComplexRecipe(text3, array5, array6);
 		complexRecipe.time = 80f;
 		complexRecipe.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.TEMPCONDUCTORSOLID_RECIPE_DESCRIPTION;
-		complexRecipe.useResultAsDescription = true;
+		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
 		float num7 = 0.35f;
 		ComplexRecipe.RecipeElement[] array7 = new ComplexRecipe.RecipeElement[]
@@ -109,13 +111,13 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 		complexRecipe = new ComplexRecipe(text4, array7, array8);
 		complexRecipe.time = 80f;
 		complexRecipe.description = global::STRINGS.BUILDINGS.PREFABS.SUPERMATERIALREFINERY.VISCOGEL_RECIPE_DESCRIPTION;
-		complexRecipe.useResultAsDescription = true;
+		complexRecipe.nameDisplay = ComplexRecipe.RecipeNameDisplay.Result;
 		complexRecipe.fabricators = new List<Tag> { TagManager.Create("SupermaterialRefinery") };
 	}
 
 	public override void DoPostConfigureComplete(GameObject go)
 	{
-		go.GetComponent<KPrefabID>().prefabInitFn += delegate(GameObject game_object)
+		go.GetComponent<KPrefabID>().prefabSpawnFn += delegate(GameObject game_object)
 		{
 			ComplexFabricatorWorkable component = game_object.GetComponent<ComplexFabricatorWorkable>();
 			component.AttributeConverter = Db.Get().AttributeConverters.MachinerySpeed;
@@ -130,4 +132,6 @@ public class SupermaterialRefineryConfig : IBuildingConfig
 	private const float INPUT_KG = 100f;
 
 	private const float OUTPUT_KG = 100f;
+
+	private const float OUTPUT_TEMPERATURE = 313.15f;
 }

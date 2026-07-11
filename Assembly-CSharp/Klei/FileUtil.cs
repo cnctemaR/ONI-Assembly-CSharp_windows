@@ -13,7 +13,7 @@ namespace Klei
 			global::Debug.Log(msg);
 			GameObject gameObject = ((!(FrontEndManager.Instance == null)) ? FrontEndManager.Instance.gameObject : GameScreenManager.Instance.ssOverlayCanvas);
 			ConfirmDialogScreen component = Util.KInstantiateUI(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, gameObject, true).GetComponent<ConfirmDialogScreen>();
-			component.PopupConfirmDialog(msg, null, null, null, null, null, null, null, null);
+			component.PopupConfirmDialog(msg, null, null, null, null, null, null, null, null, true);
 			global::UnityEngine.Object.DontDestroyOnLoad(component.gameObject);
 		}
 

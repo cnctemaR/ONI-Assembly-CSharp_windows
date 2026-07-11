@@ -4,6 +4,7 @@ using System.Linq;
 using Klei.AI;
 using KSerialization;
 using STRINGS;
+using TUNING;
 using UnityEngine;
 
 public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, CreatureCalorieMonitor.Instance, IStateMachineTarget, CreatureCalorieMonitor.Def>
@@ -21,23 +22,23 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		}).Update(new Action<CreatureCalorieMonitor.Instance, float>(CreatureCalorieMonitor.UpdateMetabolismCalorieModifier), UpdateRate.SIM_200ms, false);
 		this.normal.Transition(this.hungry, (CreatureCalorieMonitor.Instance smi) => smi.IsHungry(), UpdateRate.SIM_1000ms);
 		this.hungry.DefaultState(this.hungry.hungry).ToggleTag(GameTags.Creatures.Hungry).EventTransition(GameHashes.CaloriesConsumed, this.normal, (CreatureCalorieMonitor.Instance smi) => !smi.IsHungry());
-		this.hungry.hungry.Transition(this.normal, (CreatureCalorieMonitor.Instance smi) => !smi.IsHungry(), UpdateRate.SIM_1000ms).Transition(this.hungry.outofcalories, (CreatureCalorieMonitor.Instance smi) => smi.IsOutOfCalories(), UpdateRate.SIM_1000ms).ToggleStatusItem(CREATURES.STATUSITEMS.HUNGRY.NAME, CREATURES.STATUSITEMS.HUNGRY.TOOLTIP, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, null);
+		this.hungry.hungry.Transition(this.normal, (CreatureCalorieMonitor.Instance smi) => !smi.IsHungry(), UpdateRate.SIM_1000ms).Transition(this.hungry.outofcalories, (CreatureCalorieMonitor.Instance smi) => smi.IsOutOfCalories(), UpdateRate.SIM_1000ms).ToggleStatusItem(Db.Get().CreatureStatusItems.Hungry, null);
 		this.hungry.outofcalories.DefaultState(this.hungry.outofcalories.wild).Transition(this.hungry.hungry, (CreatureCalorieMonitor.Instance smi) => !smi.IsOutOfCalories(), UpdateRate.SIM_1000ms);
-		this.hungry.outofcalories.wild.TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.tame, true).ToggleStatusItem(CREATURES.STATUSITEMS.HUNGRY.NAME, CREATURES.STATUSITEMS.HUNGRY.TOOLTIP, string.Empty, StatusItem.IconType.Info, (NotificationType)0, false, default(HashedString), 0, null, null, null);
+		this.hungry.outofcalories.wild.TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.tame, true).ToggleStatusItem(Db.Get().CreatureStatusItems.Hungry, null);
 		this.hungry.outofcalories.tame.Enter("StarvationStartTime", new StateMachine<CreatureCalorieMonitor, CreatureCalorieMonitor.Instance, IStateMachineTarget, CreatureCalorieMonitor.Def>.State.Callback(CreatureCalorieMonitor.StarvationStartTime)).Exit("ClearStarvationTime", delegate(CreatureCalorieMonitor.Instance smi)
 		{
 			this.starvationStartTime.Set(0f, smi);
 		}).Transition(this.hungry.outofcalories.starvedtodeath, (CreatureCalorieMonitor.Instance smi) => smi.GetDeathTimeRemaining() <= 0f, UpdateRate.SIM_1000ms)
 			.TagTransition(GameTags.Creatures.Wild, this.hungry.outofcalories.wild, false)
-			.ToggleStatusItem(CREATURES.STATUSITEMS.STARVING.NAME, CREATURES.STATUSITEMS.STARVING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, default(HashedString), 0, (string str, CreatureCalorieMonitor.Instance smi) => str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(smi.GetDeathTimeRemaining(), "F1")), null, null)
-			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notifications, object data) => CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null, null))
+			.ToggleStatusItem(global::STRINGS.CREATURES.STATUSITEMS.STARVING.NAME, global::STRINGS.CREATURES.STATUSITEMS.STARVING.TOOLTIP, string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, default(HashedString), 0, (string str, CreatureCalorieMonitor.Instance smi) => str.Replace("{TimeUntilDeath}", GameUtil.GetFormattedCycles(smi.GetDeathTimeRemaining(), "F1")), null, null)
+			.ToggleNotification((CreatureCalorieMonitor.Instance smi) => new Notification(global::STRINGS.CREATURES.STATUSITEMS.STARVING.NOTIFICATION_NAME, NotificationType.BadMinor, HashedString.Invalid, (List<Notification> notifications, object data) => global::STRINGS.CREATURES.STATUSITEMS.STARVING.NOTIFICATION_TOOLTIP + notifications.ReduceMessages(false), null, true, 0f, null, null, null))
 			.ToggleEffect((CreatureCalorieMonitor.Instance smi) => this.outOfCaloriesTame);
 		this.hungry.outofcalories.starvedtodeath.Enter(delegate(CreatureCalorieMonitor.Instance smi)
 		{
 			smi.GetSMI<DeathMonitor.Instance>().Kill(Db.Get().Deaths.Starvation);
 		});
-		this.outOfCaloriesTame = new Effect("OutOfCaloriesTame", CREATURES.MODIFIERS.OUT_OF_CALORIES.NAME, CREATURES.MODIFIERS.OUT_OF_CALORIES.TOOLTIP, 0f, false, false, false, null, 0f, null);
-		this.outOfCaloriesTame.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, CREATURES.MODIFIERS.OUT_OF_CALORIES.NAME, false, false, true));
+		this.outOfCaloriesTame = new Effect("OutOfCaloriesTame", global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.NAME, global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.TOOLTIP, 0f, false, false, false, null, 0f, null);
+		this.outOfCaloriesTame.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -10f, global::STRINGS.CREATURES.MODIFIERS.OUT_OF_CALORIES.NAME, false, false, true));
 	}
 
 	private static bool ReadyToPoop(CreatureCalorieMonitor.Instance smi)
@@ -47,7 +48,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 	private static void UpdateMetabolismCalorieModifier(CreatureCalorieMonitor.Instance smi, float dt)
 	{
-		smi.deltaCalorieMetabolismModifier.SetValue(1f - Db.Get().CritterAttributes.Metabolism.Lookup(smi.gameObject).GetTotalValue() / 100f);
+		smi.deltaCalorieMetabolismModifier.SetValue(1f - smi.metabolism.GetTotalValue() / 100f);
 	}
 
 	private static void StarvationStartTime(CreatureCalorieMonitor.Instance smi)
@@ -85,6 +86,7 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 		{
 			List<Descriptor> list = new List<Descriptor>();
 			list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_HEADER, UI.BUILDINGEFFECTS.TOOLTIPS.DIET_HEADER, Descriptor.DescriptorType.Effect, false));
+			float dailyPlantGrowthConsumption = 1f;
 			if (this.diet.consumedTags.Count > 0)
 			{
 				float calorie_loss_per_second = 0f;
@@ -97,13 +99,38 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 					}
 				}
 				string text = string.Join(", ", this.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => t.Key.ProperName()).ToArray<string>());
-				string text2 = string.Join("\n", this.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(-calorie_loss_per_second / t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
+				string text2 = string.Empty;
+				if (this.diet.eatsPlantsDirectly)
+				{
+					text2 = string.Join("\n", this.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>(delegate(KeyValuePair<Tag, float> t)
+					{
+						dailyPlantGrowthConsumption = -calorie_loss_per_second / t.Value;
+						GameObject prefab = Assets.GetPrefab(t.Key.ToString());
+						Crop crop = prefab.GetComponent<Crop>();
+						float cropDuration = CROPS.CROP_TYPES.Find((Crop.CropVal m) => m.cropId == crop.cropId).cropDuration;
+						float num = cropDuration / 600f;
+						float num2 = 1f / num;
+						return UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedPlantGrowth(-calorie_loss_per_second / t.Value * num2 * 100f, GameUtil.TimeSlice.PerCycle));
+					}).ToArray<string>());
+				}
+				else
+				{
+					text2 = string.Join("\n", this.diet.consumedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_CONSUMED_ITEM.text.Replace("{Food}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(-calorie_loss_per_second / t.Value, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
+				}
 				list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_CONSUMED.text.Replace("{Foodlist}", text), UI.BUILDINGEFFECTS.TOOLTIPS.DIET_CONSUMED.text.Replace("{Foodlist}", text2), Descriptor.DescriptorType.Effect, false));
 			}
 			if (this.diet.producedTags.Count > 0)
 			{
 				string text3 = string.Join(", ", this.diet.producedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => t.Key.ProperName()).ToArray<string>());
-				string text4 = string.Join("\n", this.diet.producedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM.text.Replace("{Item}", t.Key.ProperName()).Replace("{Percent}", GameUtil.GetFormattedPercent(t.Value * 100f, GameUtil.TimeSlice.None))).ToArray<string>());
+				string text4 = string.Empty;
+				if (this.diet.eatsPlantsDirectly)
+				{
+					text4 = string.Join("\n", this.diet.producedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM_FROM_PLANT.text.Replace("{Item}", t.Key.ProperName()).Replace("{Amount}", GameUtil.GetFormattedMass(t.Value * dailyPlantGrowthConsumption, GameUtil.TimeSlice.PerCycle, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"))).ToArray<string>());
+				}
+				else
+				{
+					text4 = string.Join("\n", this.diet.producedTags.Select<KeyValuePair<Tag, float>, string>((KeyValuePair<Tag, float> t) => UI.BUILDINGEFFECTS.DIET_PRODUCED_ITEM.text.Replace("{Item}", t.Key.ProperName()).Replace("{Percent}", GameUtil.GetFormattedPercent(t.Value * 100f, GameUtil.TimeSlice.None))).ToArray<string>());
+				}
 				list.Add(new Descriptor(UI.BUILDINGEFFECTS.DIET_PRODUCED.text.Replace("{Items}", text3), UI.BUILDINGEFFECTS.TOOLTIPS.DIET_PRODUCED.text.Replace("{Items}", text4), Descriptor.DescriptorType.Effect, false));
 			}
 			return list;
@@ -143,6 +170,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 			this.owner = owner;
 			this.minPoopSizeInCalories = min_poop_size_in_calories;
 		}
+
+		public Diet diet { get; private set; }
 
 		public void Poop()
 		{
@@ -286,8 +315,6 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 		private float minPoopSizeInCalories;
 
-		private Diet diet;
-
 		private GameObject owner;
 
 		[Serializable]
@@ -338,7 +365,8 @@ public class CreatureCalorieMonitor : GameStateMachine<CreatureCalorieMonitor, C
 
 		public bool IsHungry()
 		{
-			return this.GetCalories0to1() < 0.9f;
+			float calories0to = this.GetCalories0to1();
+			return calories0to < 0.9f;
 		}
 
 		public bool IsOutOfCalories()

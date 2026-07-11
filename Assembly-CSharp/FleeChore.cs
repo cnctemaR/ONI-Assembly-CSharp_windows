@@ -5,7 +5,7 @@ using UnityEngine;
 public class FleeChore : Chore<FleeChore.StatesInstance>
 {
 	public FleeChore(IStateMachineTarget target, GameObject enemy)
-		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.Flee, target, target.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new FleeChore.StatesInstance(this);
 		base.smi.sm.self.Set(this.gameObject, base.smi);

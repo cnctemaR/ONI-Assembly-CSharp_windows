@@ -32,7 +32,7 @@ public class ElectrolyzerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		Electrolyzer electrolyzer = go.AddOrGet<Electrolyzer>();
 		electrolyzer.maxMass = 1.8f;
 		electrolyzer.hasMeter = true;
@@ -51,8 +51,8 @@ public class ElectrolyzerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.888f, SimHashes.Oxygen, 343.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.11199999f, SimHashes.Hydrogen, 343.15f, false, 0f, 1f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.888f, SimHashes.Oxygen, 343.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.11199999f, SimHashes.Hydrogen, 343.15f, false, false, 0f, 1f, 1f, byte.MaxValue, 0)
 		};
 		Prioritizable.AddRef(go);
 	}

@@ -28,7 +28,7 @@ public class FXAnim : GameStateMachine<FXAnim, FXAnim.Instance>
 			this.animController = FXHelpers.CreateEffect(kanim_file, base.smi.master.transform.GetPosition() + offset, base.smi.master.transform, false, Grid.SceneLayer.Front, false);
 			this.animController.gameObject.Subscribe(-1061186183, new Action<object>(this.OnAnimQueueComplete));
 			this.animController.TintColour = tint_colour;
-			base.sm.fx.Set(this.controller.gameObject, base.smi);
+			base.sm.fx.Set(this.animController.gameObject, base.smi);
 			this.anim = anim;
 			this.mode = mode;
 		}

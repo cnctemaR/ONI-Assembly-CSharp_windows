@@ -17,6 +17,7 @@ public class StatusItemRenderer
 		}
 		this.backgroundColor = new Color32(244, 74, 71, byte.MaxValue);
 		this.selectedColor = new Color32(225, 181, 180, byte.MaxValue);
+		this.neutralColor = new Color32(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
 		this.arrowSprite = Assets.GetSprite("StatusBubbleTop");
 		this.backgroundSprite = Assets.GetSprite("StatusBubble");
 		this.scale = 1f;
@@ -32,6 +33,8 @@ public class StatusItemRenderer
 	public Color32 backgroundColor { get; private set; }
 
 	public Color32 selectedColor { get; private set; }
+
+	public Color32 neutralColor { get; private set; }
 
 	public Sprite arrowSprite { get; private set; }
 
@@ -308,23 +311,35 @@ public class StatusItemRenderer
 				float num5 = 0.02f;
 				Color32 color = new Color32(0, 0, 0, byte.MaxValue);
 				Color32 color2 = new Color32(0, 0, 0, 75);
-				Color32 color3 = renderer.backgroundColor;
+				Color32 color3 = renderer.neutralColor;
 				if (renderer.selectedHandle == this.handle || renderer.highlightHandle == this.handle)
 				{
 					color3 = renderer.selectedColor;
+				}
+				else
+				{
+					for (int i = 0; i < this.statusItems.Count; i++)
+					{
+						StatusItem statusItem3 = this.statusItems[i];
+						if (statusItem3.notificationType != NotificationType.Neutral)
+						{
+							color3 = renderer.backgroundColor;
+							break;
+						}
+					}
 				}
 				meshBuilder.AddQuad(new Vector2(0f, 0.29f) + vector2, new Vector2(0.05f, 0.05f), num4, renderer.arrowSprite, color2);
 				meshBuilder.AddQuad(new Vector2(0f, 0f) + vector2, new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color2);
 				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2 + num5, num3 + num5), num4, renderer.backgroundSprite, color);
 				meshBuilder.AddQuad(new Vector2(0f, 0f), new Vector2(num3 * (float)num2, num3), num4, renderer.backgroundSprite, color3);
 				int num6 = 0;
-				for (int i = 0; i < this.statusItems.Count; i++)
+				for (int j = 0; j < this.statusItems.Count; j++)
 				{
-					StatusItem statusItem3 = this.statusItems[i];
-					if (statusItem3.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem3.render_overlay != overlay))
+					StatusItem statusItem4 = this.statusItems[j];
+					if (statusItem4.UseConditionalCallback(overlay, this.transform) || !(overlay != OverlayModes.None.ID) || !(statusItem4.render_overlay != overlay))
 					{
 						float num7 = (float)num6 * num3 * 2f - num3 * (float)(num2 - 1);
-						Sprite sprite = this.statusItems[i].sprite.sprite;
+						Sprite sprite = this.statusItems[j].sprite.sprite;
 						meshBuilder.AddQuad(new Vector2(num7, 0f), new Vector2(num3, num3), num4, sprite, color);
 						num6++;
 					}

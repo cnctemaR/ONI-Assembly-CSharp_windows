@@ -2,11 +2,11 @@
 using STRINGS;
 using UnityEngine;
 
-public class UnitConfigurationScreen : KModalScreen
+[Serializable]
+public class UnitConfigurationScreen
 {
-	protected override void OnPrefabInit()
+	public void Init()
 	{
-		base.OnPrefabInit();
 		this.celsiusToggle = Util.KInstantiateUI(this.toggleUnitPrefab, this.toggleGroup, true);
 		this.celsiusToggle.GetComponentInChildren<ToolTip>().toolTip = UI.FRONTEND.UNIT_OPTIONS_SCREEN.CELSIUS_TOOLTIP;
 		this.celsiusToggle.GetComponentInChildren<KButton>().onClick += this.OnCelsiusClicked;
@@ -20,8 +20,6 @@ public class UnitConfigurationScreen : KModalScreen
 		this.fahrenheitToggle.GetComponentInChildren<KButton>().onClick += this.OnFahrenheitClicked;
 		this.fahrenheitToggle.GetComponentInChildren<LocText>().text = UI.FRONTEND.UNIT_OPTIONS_SCREEN.FAHRENHEIT;
 		this.DisplayCurrentUnit();
-		this.closeButton.onClick += this.Deactivate;
-		this.doneButton.onClick += this.Deactivate;
 	}
 
 	private void DisplayCurrentUnit()
@@ -51,18 +49,6 @@ public class UnitConfigurationScreen : KModalScreen
 		}
 	}
 
-	public override void OnKeyDown(KButtonEvent e)
-	{
-		if (e.TryConsume(global::Action.Escape) || e.TryConsume(global::Action.MouseRight))
-		{
-			this.Deactivate();
-		}
-		else
-		{
-			base.OnKeyDown(e);
-		}
-	}
-
 	private void OnCelsiusClicked()
 	{
 		GameUtil.temperatureUnit = GameUtil.TemperatureUnit.Celsius;
@@ -89,12 +75,6 @@ public class UnitConfigurationScreen : KModalScreen
 
 	[SerializeField]
 	private GameObject toggleGroup;
-
-	[SerializeField]
-	private KButton closeButton;
-
-	[SerializeField]
-	private KButton doneButton;
 
 	private GameObject celsiusToggle;
 

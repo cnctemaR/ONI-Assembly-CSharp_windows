@@ -24,10 +24,10 @@ public static class BaseLightBugConfig
 		EntityTemplates.ExtendEntityToBasicCreature(gameObject2, factionID, traitId, text2, navType, 32, num, text3, num2, true, true, freezing_, hot_, CREATURES.TEMPERATURE.FREEZING_2, CREATURES.TEMPERATURE.HOT_2);
 		if (symbolOverridePrefix != null)
 		{
-			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByPrefix(Assets.GetAnim(anim_file), symbolOverridePrefix, 0);
+			gameObject.AddOrGet<SymbolOverrideController>().ApplySymbolOverridesByAffix(Assets.GetAnim(anim_file), symbolOverridePrefix, null, 0);
 		}
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Creatures.Flyer);
+		component.AddTag(GameTags.Creatures.Flyer, false);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
@@ -64,7 +64,7 @@ public static class BaseLightBugConfig
 			.Add(new BaggedStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)
 			.Add(new DebugGoToStates.Def(), true)
-			.Add(new SubmergedStates.Def(), true)
+			.Add(new DrowningStates.Def(), true)
 			.PushInterruptGroup()
 			.Add(new CreatureSleepStates.Def(), true)
 			.Add(new FixedCaptureStates.Def(), true)
@@ -83,7 +83,7 @@ public static class BaseLightBugConfig
 	{
 		Diet.Info[] array = new Diet.Info[]
 		{
-			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f, false)
+			new Diet.Info(consumed_tags, producedTag, caloriesPerKg, 1f, null, 0f, false, false)
 		};
 		Diet diet = new Diet(array);
 		CreatureCalorieMonitor.Def def = prefab.AddOrGetDef<CreatureCalorieMonitor.Def>();

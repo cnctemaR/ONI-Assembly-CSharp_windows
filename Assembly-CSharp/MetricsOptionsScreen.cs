@@ -22,8 +22,6 @@ public class MetricsOptionsScreen : KModalScreen
 		{
 			this.Deactivate();
 		};
-		LocText reference2 = this.dismissButton.GetComponent<HierarchyReferences>().GetReference<LocText>("Text");
-		reference2.SetText(UI.FRONTEND.METRICS_OPTIONS_SCREEN.DONE_BUTTON);
 		this.closeButton.onClick += delegate
 		{
 			this.Deactivate();

@@ -31,18 +31,17 @@ public class OfflineWorldGen : KMonoBehaviour
 		return flag;
 	}
 
-	protected override void OnPrefabInit()
+	public void Generate()
 	{
 		this.doWorldGen = !OfflineWorldGen.CanLoadSave();
-		this.updateText = GameObject.Find("Status").GetComponent<LocText>();
 		this.updateText.gameObject.SetActive(false);
-		this.percentText = GameObject.Find("Percent").GetComponent<LocText>();
 		this.percentText.gameObject.SetActive(false);
 		this.doWorldGen |= this.debug;
 		if (this.doWorldGen)
 		{
-			GameObject.Find("Title").GetComponent<LocText>().text = UI.FRONTEND.WORLDGENSCREEN.TITLE.ToString();
-			GameObject.Find("MainText").GetComponent<LocText>().text = UI.WORLDGEN.CHOOSEWORLDSIZE.ToString();
+			this.seedText.text = string.Format(UI.WORLDGEN.USING_PLAYER_SEED, this.seed);
+			this.titleText.text = UI.FRONTEND.WORLDGENSCREEN.TITLE.ToString();
+			this.mainText.text = UI.WORLDGEN.CHOOSEWORLDSIZE.ToString();
 			for (int i = 0; i < this.validDimensions.Length; i++)
 			{
 				GameObject gameObject = global::UnityEngine.Object.Instantiate<GameObject>(this.buttonPrefab);
@@ -66,16 +65,14 @@ public class OfflineWorldGen : KMonoBehaviour
 				this.DoWorldGen(0);
 				this.ToggleGenerationUI();
 			}
-			if (KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) != 0)
-			{
-				this.InitSeeds();
-				GameObject.Find("Seed").GetComponent<LocText>().text = UI.WORLDGEN.USING_PLAYER_SEED.ToString() + this.worldSeed.ToString();
-			}
+			ScreenResize instance = ScreenResize.Instance;
+			instance.OnResize = (global::System.Action)Delegate.Combine(instance.OnResize, new global::System.Action(this.OnResize));
+			this.OnResize();
 		}
 		else
 		{
-			GameObject.Find("Title").GetComponent<LocText>().text = UI.FRONTEND.WORLDGENSCREEN.LOADINGGAME.ToString();
-			GameObject.Find("MainText").SetActive(false);
+			this.titleText.text = UI.FRONTEND.WORLDGENSCREEN.LOADINGGAME.ToString();
+			this.mainText.gameObject.SetActive(false);
 			this.currentConvertedCurrentStage = UI.WORLDGEN.COMPLETE.key;
 			this.currentPercent = 100f;
 			this.updateText.gameObject.SetActive(false);
@@ -85,11 +82,20 @@ public class OfflineWorldGen : KMonoBehaviour
 		this.buttonPrefab.SetActive(false);
 	}
 
+	private void OnResize()
+	{
+		float canvasScale = base.GetComponentInParent<KCanvasScaler>().GetCanvasScale();
+		if (this.asteriodAnim != null)
+		{
+			this.asteriodAnim.animScale = 0.005f * (1f / canvasScale);
+		}
+	}
+
 	private void ToggleGenerationUI()
 	{
-		this.percentText.gameObject.SetActive(true);
+		this.percentText.gameObject.SetActive(false);
 		this.updateText.gameObject.SetActive(true);
-		GameObject.Find("Title").GetComponent<LocText>().text = UI.FRONTEND.WORLDGENSCREEN.GENERATINGWORLD.ToString();
+		this.titleText.text = UI.FRONTEND.WORLDGENSCREEN.GENERATINGWORLD.ToString();
 		if (this.titleText != null && this.titleText.gameObject != null)
 		{
 			this.titleText.gameObject.SetActive(false);
@@ -97,10 +103,6 @@ public class OfflineWorldGen : KMonoBehaviour
 		if (this.buttonRoot != null && this.buttonRoot.gameObject != null)
 		{
 			this.buttonRoot.gameObject.SetActive(false);
-		}
-		if (this.mainText != null && this.mainText.gameObject != null)
-		{
-			this.mainText.SetActive(false);
 		}
 	}
 
@@ -271,9 +273,10 @@ public class OfflineWorldGen : KMonoBehaviour
 			}
 			if (this.currentPercent > 0f && !this.percentText.gameObject.activeSelf)
 			{
-				this.percentText.gameObject.SetActive(true);
+				this.percentText.gameObject.SetActive(false);
 			}
-			this.percentText.text = this.currentPercent.ToString("N1");
+			this.percentText.text = GameUtil.GetFormattedPercent(this.currentPercent, GameUtil.TimeSlice.None);
+			this.meterAnim.SetPositionPercent(this.currentPercent / 100f);
 			if (this.firstPassGeneration)
 			{
 				this.generateThreadComplete = this.worldGen.IsGenerateComplete();
@@ -308,7 +311,7 @@ public class OfflineWorldGen : KMonoBehaviour
 			foreach (OfflineWorldGen.ErrorInfo errorInfo in this.errors)
 			{
 				ConfirmDialogScreen confirmDialogScreen = global::Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, FrontEndManager.Instance.gameObject, true);
-				confirmDialogScreen.PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null);
+				confirmDialogScreen.PopupConfirmDialog(errorInfo.errorDesc, new global::System.Action(this.OnConfirmExit), null, null, null, null, null, null, null, true);
 			}
 		}
 		this.errorMutex.ReleaseMutex();
@@ -348,42 +351,16 @@ public class OfflineWorldGen : KMonoBehaviour
 		this.DoWorldGenInitialize();
 	}
 
-	public static void SetSeed(int seed)
-	{
-		KPlayerPrefs.SetInt(OfflineWorldGen.WORLD_SEED_KEY, seed);
-		KPlayerPrefs.SetInt(OfflineWorldGen.LAYOUT_SEED_KEY, seed);
-		KPlayerPrefs.SetInt(OfflineWorldGen.TERRAIN_SEED_KEY, seed);
-		KPlayerPrefs.SetInt(OfflineWorldGen.NOISE_SEED_KEY, seed);
-	}
-
-	public static void RemoveSeeds()
-	{
-		KPlayerPrefs.DeleteKey(OfflineWorldGen.WORLD_SEED_KEY);
-		KPlayerPrefs.DeleteKey(OfflineWorldGen.LAYOUT_SEED_KEY);
-		KPlayerPrefs.DeleteKey(OfflineWorldGen.TERRAIN_SEED_KEY);
-		KPlayerPrefs.DeleteKey(OfflineWorldGen.NOISE_SEED_KEY);
-	}
-
-	private void InitSeeds()
-	{
-		this.worldSeed = KPlayerPrefs.GetInt(OfflineWorldGen.WORLD_SEED_KEY, -1);
-		this.layoutSeed = KPlayerPrefs.GetInt(OfflineWorldGen.LAYOUT_SEED_KEY, -1);
-		this.terrainSeed = KPlayerPrefs.GetInt(OfflineWorldGen.TERRAIN_SEED_KEY, -1);
-		this.noiseSeed = KPlayerPrefs.GetInt(OfflineWorldGen.NOISE_SEED_KEY, -1);
-	}
-
 	private void DoWorldGenInitialize()
 	{
 		SettingLevel currentQualitySetting = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.World);
-		this.worldGen = new WorldGen(currentQualitySetting.id);
+		SettingLevel currentQualitySetting2 = CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.WorldgenSeed);
+		this.seed = int.Parse(currentQualitySetting2.id);
+		List<string> randomTraits = SettingsCache.GetRandomTraits(this.seed);
+		this.worldGen = new WorldGen(currentQualitySetting.id, randomTraits);
 		Vector2I worldsize = this.worldGen.Settings.world.worldsize;
 		GridSettings.Reset(worldsize.x, worldsize.y);
-		if (KPlayerPrefs.GetInt(OfflineWorldGen.USE_WORLD_SEED_KEY, 0) != 0)
-		{
-			global::Debug.Log("Using player defined seed");
-			this.InitSeeds();
-		}
-		this.worldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.worldSeed, this.layoutSeed, this.terrainSeed, this.noiseSeed);
+		this.worldGen.Initialise(new WorldGen.OfflineCallbackFunction(this.UpdateProgress), new Action<OfflineWorldGen.ErrorInfo>(this.OnError), this.seed, this.seed, this.seed, this.seed);
 		this.firstPassGeneration = true;
 		this.worldGen.GenerateOfflineThreaded();
 	}
@@ -414,6 +391,8 @@ public class OfflineWorldGen : KMonoBehaviour
 	[SerializeField]
 	private GameObject locationButtonPrefab;
 
+	private const float baseScale = 0.005f;
+
 	private Mutex errorMutex = new Mutex();
 
 	private List<OfflineWorldGen.ErrorInfo> errors = new List<OfflineWorldGen.ErrorInfo>();
@@ -440,18 +419,30 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	public bool debug;
 
-	public GameObject mainText;
-
 	private bool trackProgress = true;
 
 	private bool doWorldGen;
 
+	[SerializeField]
+	private LocText titleText;
+
+	[SerializeField]
+	private LocText mainText;
+
+	[SerializeField]
 	private LocText updateText;
 
+	[SerializeField]
 	private LocText percentText;
 
 	[SerializeField]
-	private Text titleText;
+	private LocText seedText;
+
+	[SerializeField]
+	private KBatchedAnimController meterAnim;
+
+	[SerializeField]
+	private KBatchedAnimController asteriodAnim;
 
 	private WorldGen worldGen;
 
@@ -487,23 +478,7 @@ public class OfflineWorldGen : KMonoBehaviour
 
 	private bool secondPassGeneration;
 
-	public static string USE_WORLD_SEED_KEY = "UseWorldSeedKey";
-
-	public static string WORLD_SEED_KEY = "WorldSeedKey";
-
-	public static string LAYOUT_SEED_KEY = "LayoutSeedKey";
-
-	public static string TERRAIN_SEED_KEY = "TerrainSeedKey";
-
-	public static string NOISE_SEED_KEY = "NoiseSeedKey";
-
-	private int worldSeed = -1;
-
-	private int layoutSeed = -1;
-
-	private int terrainSeed = -1;
-
-	private int noiseSeed = -1;
+	private int seed;
 
 	public struct ErrorInfo
 	{

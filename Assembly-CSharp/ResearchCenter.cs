@@ -21,7 +21,6 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		base.Subscribe<ResearchCenter>(-1503271301, ResearchCenter.OnSelectObjectDelegate);
 		Research.Instance.Subscribe(-1914338957, new Action<object>(this.UpdateWorkingState));
 		Research.Instance.Subscribe(-125623018, new Action<object>(this.UpdateWorkingState));
 		base.Subscribe<ResearchCenter>(187661686, ResearchCenter.UpdateWorkingStateDelegate);
@@ -58,9 +57,7 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 
 	protected virtual Chore CreateChore()
 	{
-		ChoreType research = Db.Get().ChoreTypes.Research;
-		Tag[] researchChores = GameTags.ChoreTypes.ResearchChores;
-		WorkChore<ResearchCenter> workChore = new WorkChore<ResearchCenter>(research, this, null, researchChores, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
+		WorkChore<ResearchCenter> workChore = new WorkChore<ResearchCenter>(Db.Get().ChoreTypes.Research, this, null, true, null, null, null, true, null, false, true, null, true, true, true, PriorityScreen.PriorityClass.basic, 5, false, true);
 		workChore.preemption_cb = new Func<Chore.Precondition.Context, bool>(ResearchCenter.CanPreemptCB);
 		return workChore;
 	}
@@ -189,11 +186,6 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 		Game.Instance.Trigger(-1974454597, null);
 	}
 
-	private void OnSelectObject(object data)
-	{
-		this.ClearResearchScreen();
-	}
-
 	private void CheckHasMaterial(object o = null)
 	{
 		if (!this.HasMaterial() && this.chore != null)
@@ -309,11 +301,6 @@ public class ResearchCenter : Workable, IEffectDescriptor, ISim200ms
 	private float remainder_mass_points;
 
 	public static readonly Operational.Flag ResearchSelectedFlag = new Operational.Flag("researchSelected", Operational.Flag.Type.Requirement);
-
-	private static readonly EventSystem.IntraObjectHandler<ResearchCenter> OnSelectObjectDelegate = new EventSystem.IntraObjectHandler<ResearchCenter>(delegate(ResearchCenter component, object data)
-	{
-		component.OnSelectObject(data);
-	});
 
 	private static readonly EventSystem.IntraObjectHandler<ResearchCenter> UpdateWorkingStateDelegate = new EventSystem.IntraObjectHandler<ResearchCenter>(delegate(ResearchCenter component, object data)
 	{

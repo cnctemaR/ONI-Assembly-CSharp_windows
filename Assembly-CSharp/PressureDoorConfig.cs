@@ -21,6 +21,7 @@ public class PressureDoorConfig : IBuildingConfig
 		buildingDef.Overheatable = false;
 		buildingDef.RequiresPowerInput = true;
 		buildingDef.EnergyConsumptionWhenActive = 120f;
+		buildingDef.Floodable = false;
 		buildingDef.Entombable = false;
 		buildingDef.IsFoundation = true;
 		buildingDef.ViewMode = OverlayModes.Power.ID;

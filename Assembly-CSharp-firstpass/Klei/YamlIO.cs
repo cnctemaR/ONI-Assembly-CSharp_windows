@@ -5,9 +5,9 @@ using YamlDotNet.Serialization;
 
 namespace Klei
 {
-	public class YamlIO<T>
+	public static class YamlIO
 	{
-		public void Save(string filename, List<Tuple<string, Type>> tagMappings = null)
+		public static void Save<T>(T some_object, string filename, List<Tuple<string, Type>> tagMappings = null)
 		{
 			using (StreamWriter streamWriter = new StreamWriter(filename))
 			{
@@ -20,28 +20,72 @@ namespace Klei
 					}
 				}
 				Serializer serializer = serializerBuilder.Build();
-				serializer.Serialize(streamWriter, this);
+				serializer.Serialize(streamWriter, some_object);
 			}
 		}
 
-		public static T LoadFile(string filename, List<Tuple<string, Type>> tagMappings = null)
+		public static T LoadFile<T>(string filename, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
 		{
-			string text = ((LayeredFileSystem.instance == null) ? File.ReadAllText(filename) : LayeredFileSystem.instance.ReadText(filename));
-			T t = YamlIO<T>.Parse(text, tagMappings);
-			if (t == null)
-			{
-				Debug.LogWarning("Exception while loading yaml file [" + filename + "]");
-			}
-			return t;
+			return YamlIO.Parse<T>(FileSystem.ConvertToText(FileSystem.ReadBytes(filename)), filename, handle_error, tagMappings);
 		}
 
-		public static T Parse(string readText, List<Tuple<string, Type>> tagMappings = null)
+		public static void LogError(YamlIO.Error error, bool force_log_as_warning)
+		{
+			YamlIO.ErrorLogger errorLogger;
+			if (force_log_as_warning || error.severity == YamlIO.Error.Severity.Recoverable)
+			{
+				errorLogger = new YamlIO.ErrorLogger(Debug.LogWarningFormat);
+			}
+			else
+			{
+				errorLogger = new YamlIO.ErrorLogger(Debug.LogErrorFormat);
+			}
+			YamlIO.ErrorLogger errorLogger2 = errorLogger;
+			if (error.inner_exception == null)
+			{
+				errorLogger2("{0} parse error in {1}\n{2}", new object[]
+				{
+					error.severity,
+					error.file.full_path,
+					error.message
+				});
+			}
+			else
+			{
+				errorLogger2("{0} parse error in {1}\n{2}\n{3}", new object[]
+				{
+					error.severity,
+					error.file.full_path,
+					error.message,
+					error.inner_exception.Message
+				});
+			}
+		}
+
+		public static T Parse<T>(string readText, string debugFilename, YamlIO.ErrorHandler handle_error = null, List<Tuple<string, Type>> tagMappings = null)
 		{
 			try
 			{
+				if (handle_error == null)
+				{
+					handle_error = new YamlIO.ErrorHandler(YamlIO.LogError);
+				}
 				readText = readText.Replace("\t", "    ");
+				Action<string> action = delegate(string error)
+				{
+					handle_error(new YamlIO.Error
+					{
+						file = new FileHandle
+						{
+							full_path = debugFilename
+						},
+						text = readText,
+						message = error,
+						severity = YamlIO.Error.Severity.Recoverable
+					}, false);
+				};
 				DeserializerBuilder deserializerBuilder = new DeserializerBuilder();
-				deserializerBuilder.IgnoreUnmatchedProperties();
+				deserializerBuilder.IgnoreUnmatchedProperties(action);
 				if (tagMappings != null)
 				{
 					foreach (Tuple<string, Type> tuple in tagMappings)
@@ -55,10 +99,44 @@ namespace Klei
 			}
 			catch (Exception ex)
 			{
-				string message = ex.Message;
-				DebugUtil.DevLogError("Exception while loading yaml data: " + message + "\n YAML FILE:\n" + readText);
+				handle_error(new YamlIO.Error
+				{
+					file = new FileHandle
+					{
+						full_path = debugFilename
+					},
+					text = readText,
+					message = ex.Message,
+					inner_exception = ex.InnerException,
+					severity = YamlIO.Error.Severity.Fatal
+				}, false);
 			}
 			return default(T);
 		}
+
+		private const bool verbose_errors = false;
+
+		public struct Error
+		{
+			public FileHandle file;
+
+			public string message;
+
+			public Exception inner_exception;
+
+			public string text;
+
+			public YamlIO.Error.Severity severity;
+
+			public enum Severity
+			{
+				Fatal,
+				Recoverable
+			}
+		}
+
+		public delegate void ErrorHandler(YamlIO.Error error, bool force_log_as_warning);
+
+		private delegate void ErrorLogger(string format, params object[] args);
 	}
 }

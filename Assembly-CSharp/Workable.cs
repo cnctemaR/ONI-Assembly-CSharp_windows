@@ -101,7 +101,8 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			this.skillsUpdateHandle = Game.Instance.Subscribe(-1523247426, new Action<object>(this.UpdateStatusItem));
 		}
 		KPrefabID component = base.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.HasChores);
+		component.AddTag(GameTags.HasChores, false);
+		this.lightEfficiencyBonusStatusItem = Db.Get().DuplicantStatusItems.LightWorkEfficiencyBonus;
 		this.ShowProgressBar(this.alwaysShowProgressBar && this.workTimeRemaining < this.GetWorkTime());
 		this.UpdateStatusItem(null);
 	}
@@ -183,12 +184,33 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 
 	public virtual float GetEfficiencyMultiplier(Worker worker)
 	{
+		float num = 1f;
 		if (this.attributeConverter != null)
 		{
 			AttributeConverterInstance converter = worker.GetComponent<AttributeConverters>().GetConverter(this.attributeConverter.Id);
-			return Mathf.Max(1f + converter.Evaluate(), this.minimumAttributeMultiplier);
+			num += converter.Evaluate();
 		}
-		return 1f;
+		if (this.lightEfficiencyBonus)
+		{
+			int num2 = Grid.PosToCell(worker.gameObject);
+			if (Grid.IsValidCell(num2))
+			{
+				int num3 = Grid.LightIntensity[num2];
+				if (num3 > 0)
+				{
+					num += DUPLICANTSTATS.LIGHT.LIGHT_WORK_EFFICIENCY_BONUS;
+					if (this.lightEfficiencyBonusStatusItemHandle == Guid.Empty)
+					{
+						this.lightEfficiencyBonusStatusItemHandle = worker.GetComponent<KSelectable>().AddStatusItem(Db.Get().DuplicantStatusItems.LightWorkEfficiencyBonus, this);
+					}
+				}
+				else if (this.lightEfficiencyBonusStatusItemHandle != Guid.Empty)
+				{
+					worker.GetComponent<KSelectable>().RemoveStatusItem(this.lightEfficiencyBonusStatusItemHandle, false);
+				}
+			}
+		}
+		return Mathf.Max(num, this.minimumAttributeMultiplier);
 	}
 
 	public virtual global::Klei.AI.Attribute GetWorkAttribute()
@@ -246,6 +268,10 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 			this.workTimeRemaining = this.GetWorkTime();
 		}
 		this.ShowProgressBar(this.alwaysShowProgressBar && this.workTimeRemaining < this.GetWorkTime());
+		if (this.lightEfficiencyBonusStatusItemHandle != Guid.Empty)
+		{
+			this.lightEfficiencyBonusStatusItemHandle = workerToStop.GetComponent<KSelectable>().RemoveStatusItem(this.lightEfficiencyBonusStatusItemHandle, false);
+		}
 		this.worker = null;
 		this.UpdateStatusItem(null);
 	}
@@ -484,6 +510,12 @@ public class Workable : KMonoBehaviour, ISaveLoadable, IApproachable
 	protected bool showProgressBar = true;
 
 	public bool alwaysShowProgressBar;
+
+	protected bool lightEfficiencyBonus = true;
+
+	protected StatusItem lightEfficiencyBonusStatusItem;
+
+	protected Guid lightEfficiencyBonusStatusItemHandle;
 
 	protected StatusItem workerStatusItem;
 

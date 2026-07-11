@@ -20,12 +20,12 @@ public class GlomConfig : IEntityConfig
 		Trait trait = Db.Get().CreateTrait("GlomBaseTrait", text, text, null, false, null, true, true);
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 25f, text, false, false, true));
 		KPrefabID component = gameObject.GetComponent<KPrefabID>();
-		component.AddTag(GameTags.Creatures.Walker);
+		component.AddTag(GameTags.Creatures.Walker, false);
 		component.prefabInitFn += delegate(GameObject inst)
 		{
 			inst.GetAttributes().Add(Db.Get().Attributes.MaxUnderwaterTravelCost);
 		};
-		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, "GlomBaseTrait", "HatchNavGrid", NavType.Floor, 32, 2f, string.Empty, 0, true, true, 293.15f, 393.15f, 273.15f, 423.15f);
+		EntityTemplates.ExtendEntityToBasicCreature(gameObject, FactionManager.FactionID.Pest, "GlomBaseTrait", "WalkerNavGrid1x1", NavType.Floor, 32, 2f, string.Empty, 0, true, true, 293.15f, 393.15f, 273.15f, 423.15f);
 		gameObject.AddWeapon(1f, 1f, AttackProperties.DamageType.Standard, AttackProperties.TargetType.Single, 1, 0f);
 		gameObject.AddOrGet<Trappable>();
 		gameObject.AddOrGetDef<ThreatMonitor.Def>();

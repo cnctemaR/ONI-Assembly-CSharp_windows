@@ -126,10 +126,6 @@ public class Prioritizable : KMonoBehaviour
 		{
 			this.highPriorityStatusItem = base.GetComponent<KSelectable>().RemoveStatusItem(this.highPriorityStatusItem, false);
 		}
-		if (GlobalChoreProvider.Instance != null)
-		{
-			GlobalChoreProvider.Instance.RefreshTopPriorityChoreStatus();
-		}
 	}
 
 	[SerializeField]

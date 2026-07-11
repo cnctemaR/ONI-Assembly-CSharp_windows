@@ -4,25 +4,31 @@ using UnityEngine;
 
 public class DescriptorPanel : KMonoBehaviour
 {
+	public bool HasDescriptors()
+	{
+		return this.labels.Count > 0;
+	}
+
 	public void SetDescriptors(IList<Descriptor> descriptors)
 	{
 		int i;
 		for (i = 0; i < descriptors.Count; i++)
 		{
-			GameObject gameObject;
+			GameObject gameObject2;
 			if (i >= this.labels.Count)
 			{
-				gameObject = Util.KInstantiate(ScreenPrefabs.Instance.DescriptionLabel, base.gameObject, null);
-				gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
-				this.labels.Add(gameObject);
+				GameObject gameObject = ((!(this.customLabelPrefab != null)) ? ScreenPrefabs.Instance.DescriptionLabel : this.customLabelPrefab);
+				gameObject2 = Util.KInstantiate(gameObject, base.gameObject, null);
+				gameObject2.transform.localScale = new Vector3(1f, 1f, 1f);
+				this.labels.Add(gameObject2);
 			}
 			else
 			{
-				gameObject = this.labels[i];
+				gameObject2 = this.labels[i];
 			}
-			gameObject.GetComponent<LocText>().text = descriptors[i].IndentedText();
-			gameObject.GetComponent<ToolTip>().toolTip = descriptors[i].tooltipText;
-			gameObject.SetActive(true);
+			gameObject2.GetComponent<LocText>().text = descriptors[i].IndentedText();
+			gameObject2.GetComponent<ToolTip>().toolTip = descriptors[i].tooltipText;
+			gameObject2.SetActive(true);
 		}
 		while (i < this.labels.Count)
 		{
@@ -31,5 +37,8 @@ public class DescriptorPanel : KMonoBehaviour
 		}
 	}
 
-	public List<GameObject> labels = new List<GameObject>();
+	[SerializeField]
+	private GameObject customLabelPrefab;
+
+	private List<GameObject> labels = new List<GameObject>();
 }

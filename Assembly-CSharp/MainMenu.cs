@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using Klei;
-using KMod;
 using Steamworks;
 using STRINGS;
 using UnityEngine;
 
-public class MainMenu : KMonoBehaviour
+public class MainMenu : KScreen
 {
 	private KButton MakeButton(MainMenu.ButtonInfo info)
 	{
@@ -24,10 +23,14 @@ public class MainMenu : KMonoBehaviour
 		base.OnPrefabInit();
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.NEWGAME, new global::System.Action(this.NewGame), 22));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.LOADGAME, new global::System.Action(this.LoadGame), 14));
+		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.RETIREDCOLONIES, delegate
+		{
+			MainMenu.ActivateRetiredColoniesScreen(base.transform.gameObject, string.Empty, null);
+		}, 14));
 		if (DistributionPlatform.Initialized)
 		{
 			this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.TRANSLATIONS, new global::System.Action(this.Translations), 14));
-			this.mods_button = this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MODS.TITLE, new global::System.Action(this.Mods), 14));
+			this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MODS.TITLE, new global::System.Action(this.Mods), 14));
 		}
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.OPTIONS, new global::System.Action(this.Options), 14));
 		this.MakeButton(new MainMenu.ButtonInfo(UI.FRONTEND.MAINMENU.QUITTODESKTOP, new global::System.Action(this.QuitGame), 14));
@@ -35,19 +38,22 @@ public class MainMenu : KMonoBehaviour
 		this.RefreshResumeButton();
 		this.Button_ResumeGame.onClick += this.ResumeGame;
 		this.StartFEAudio();
+		this.SpawnVideoScreen();
 		if (PatchNotesScreen.ShouldShowScreen())
 		{
 			this.patchNotesScreen.SetActive(true);
 		}
 		this.CheckDoubleBoundKeys();
-		Global.Instance.modManager.Unload(Content.LayerableFiles);
-		this.OnModManagerUpdate(this);
 		this.lastUpdateTime = Time.unscaledTime;
+		this.activateOnSpawn = true;
 	}
 
 	public void RefreshMainMenu()
 	{
-		this.RefreshResumeButton();
+		if (this.refreshResumeButton)
+		{
+			this.RefreshResumeButton();
+		}
 	}
 
 	private void PlayMouseOverSound()
@@ -66,7 +72,6 @@ public class MainMenu : KMonoBehaviour
 		base.OnSpawn();
 		Canvas.ForceUpdateCanvases();
 		this.ShowLanguageConfirmation();
-		this.SubscribeToModManager(true);
 		string savePrefix = SaveLoader.GetSavePrefix();
 		try
 		{
@@ -94,7 +99,7 @@ public class MainMenu : KMonoBehaviour
 			}
 			string text3 = string.Format(text2, savePrefix);
 			ConfirmDialogScreen confirmDialogScreen = Util.KInstantiateUI<ConfirmDialogScreen>(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, base.gameObject, true);
-			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null);
+			confirmDialogScreen.PopupConfirmDialog(text3, null, null, null, null, null, null, null, null, true);
 		}
 		Global.Instance.modManager.Report(base.gameObject);
 		if ((GenericGameSettings.instance.autoResumeGame && !MainMenu.HasAutoresumedOnce) || !string.IsNullOrEmpty(GenericGameSettings.instance.performanceCapture.saveGame))
@@ -104,28 +109,13 @@ public class MainMenu : KMonoBehaviour
 		}
 	}
 
-	private void SubscribeToModManager(bool subscribe)
+	public override void ScreenUpdate(bool topLevel)
 	{
-		if (subscribe == this.subscribed_to_mod_manager)
-		{
-			return;
-		}
-		if (subscribe)
-		{
-			Manager modManager = Global.Instance.modManager;
-			modManager.on_update = (Manager.OnUpdate)Delegate.Combine(modManager.on_update, new Manager.OnUpdate(this.OnModManagerUpdate));
-		}
-		else
-		{
-			Manager modManager2 = Global.Instance.modManager;
-			modManager2.on_update = (Manager.OnUpdate)Delegate.Remove(modManager2.on_update, new Manager.OnUpdate(this.OnModManagerUpdate));
-		}
-		this.subscribed_to_mod_manager = subscribe;
+		this.refreshResumeButton = topLevel;
 	}
 
 	protected override void OnLoadLevel()
 	{
-		this.SubscribeToModManager(false);
 		base.OnLoadLevel();
 	}
 
@@ -163,8 +153,7 @@ public class MainMenu : KMonoBehaviour
 
 	private void NewGame()
 	{
-		this.GameSettingsScreen = Util.KInstantiateUI(ScreenPrefabs.Instance.ModeSelectScreen.gameObject, base.gameObject, true);
-		this.GameSettingsScreen.GetComponent<KScreen>().Activate();
+		base.GetComponent<NewGameFlow>().BeginFlow();
 	}
 
 	private void LoadGame()
@@ -177,6 +166,25 @@ public class MainMenu : KMonoBehaviour
 			component.SetBackgroundActive(true);
 		}
 		LoadScreen.Instance.gameObject.SetActive(true);
+	}
+
+	public static void ActivateRetiredColoniesScreen(GameObject parent, string colonyID = "", string[] newlyAchieved = null)
+	{
+		if (RetiredColonyInfoScreen.Instance == null)
+		{
+			GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.RetiredColonyInfoScreen.gameObject, parent, true);
+		}
+		RetiredColonyInfoScreen.Instance.Show(true);
+		if (!string.IsNullOrEmpty(colonyID))
+		{
+			RetiredColonyInfoScreen.Instance.LoadColony(RetiredColonyInfoScreen.Instance.GetColonyDataByBaseName(colonyID));
+		}
+	}
+
+	private void SpawnVideoScreen()
+	{
+		GameObject gameObject = Util.KInstantiateUI(ScreenPrefabs.Instance.VideoScreen.gameObject, base.gameObject, false);
+		VideoScreen.Instance = gameObject.GetComponent<VideoScreen>();
 	}
 
 	private void Update()
@@ -220,7 +228,7 @@ public class MainMenu : KMonoBehaviour
 					header = saveFileEntry.header;
 					gameInfo = saveFileEntry.headerData;
 				}
-				if (header.buildVersion > 336724U || gameInfo.saveMajorVersion < 7)
+				if (header.buildVersion > 356355U || gameInfo.saveMajorVersion < 7)
 				{
 					flag = false;
 				}
@@ -262,14 +270,9 @@ public class MainMenu : KMonoBehaviour
 		modsScreen.SetBackgroundActive(true);
 	}
 
-	private void OnModManagerUpdate(object change_source)
-	{
-	}
-
 	private void Options()
 	{
-		OptionsMenuScreen optionsMenuScreen = Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
-		optionsMenuScreen.SetBackgroundActive(true);
+		Util.KInstantiateUI<OptionsMenuScreen>(ScreenPrefabs.Instance.OptionsScreen.gameObject, base.gameObject, true);
 	}
 
 	private void QuitGame()
@@ -307,7 +310,7 @@ public class MainMenu : KMonoBehaviour
 				Application.OpenURL("http://support.kleientertainment.com/customer/en/portal/articles/2947881-no-audio-when-playing-oxygen-not-included");
 			};
 			Sprite sadDupeAudio = GlobalResources.Instance().sadDupeAudio;
-			confirmDialogScreen2.PopupConfirmDialog(text, action, action2, text2, action3, null, null, null, sadDupeAudio);
+			confirmDialogScreen2.PopupConfirmDialog(text, action, action2, text2, action3, null, null, null, sadDupeAudio, true);
 		}
 	}
 
@@ -365,7 +368,7 @@ public class MainMenu : KMonoBehaviour
 			global::System.Action action = null;
 			global::System.Action action2 = null;
 			Sprite sadDupe = GlobalResources.Instance().sadDupe;
-			confirmDialogScreen2.PopupConfirmDialog(text2, action, action2, null, null, null, null, null, sadDupe);
+			confirmDialogScreen2.PopupConfirmDialog(text2, action, action2, null, null, null, null, null, sadDupe, true);
 		}
 	}
 
@@ -394,9 +397,7 @@ public class MainMenu : KMonoBehaviour
 
 	private static bool HasAutoresumedOnce;
 
-	private KButton mods_button;
-
-	private bool subscribed_to_mod_manager;
+	private bool refreshResumeButton = true;
 
 	private static int LANGUAGE_CONFIRMATION_VERSION = 2;
 

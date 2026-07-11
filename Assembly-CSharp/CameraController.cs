@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
@@ -19,13 +20,11 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public KInputHandler inputHandler { get; set; }
 
-	private float zoomScaledKeyPanningSpeed
-	{
-		get
-		{
-			return this.keyPanningSpeed / 20f * this.targetOrthographicSize;
-		}
-	}
+	public float targetOrthographicSize { get; private set; }
+
+	public bool isTargetPosSet { get; set; }
+
+	public Vector3 targetPos { get; private set; }
 
 	public bool DisableUserCameraControl
 	{
@@ -136,8 +135,18 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.uiCamera.transform.parent = base.transform;
 		this.uiCamera.transform.SetLocalPosition(Vector3.zero);
 		this.uiCamera.depth = this.baseCamera.depth + 5f;
+		this.timelapseFreezeCamera = this.CopyCamera(this.uiCamera, "timelapseFreezeCamera");
+		this.timelapseFreezeCamera.depth = this.uiCamera.depth + 3f;
+		this.timelapseFreezeCamera.gameObject.AddComponent<FillRenderTargetEffect>();
+		this.timelapseFreezeCamera.enabled = false;
+		Camera camera = CameraController.CloneCamera(this.overlayCamera, "timelapseCamera");
+		Timelapser timelapser = camera.gameObject.AddComponent<Timelapser>();
+		camera.transparencySortMode = TransparencySortMode.Orthographic;
+		Game.Instance.timelapser = timelapser;
 		GameScreenManager.Instance.SetCamera(GameScreenManager.UIRenderTarget.ScreenSpaceCamera, this.uiCamera);
 		GameScreenManager.Instance.SetCamera(GameScreenManager.UIRenderTarget.WorldSpace, this.uiCamera);
+		GameScreenManager.Instance.SetCamera(GameScreenManager.UIRenderTarget.ScreenshotModeCamera, this.uiCamera);
+		this.infoText = GameScreenManager.Instance.screenshotModeCanvas.GetComponentInChildren<LocText>();
 	}
 
 	public static Camera CloneCamera(Camera camera, string name)
@@ -163,6 +172,67 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		this.Restore();
 	}
 
+	public void FadeOut(float targetPercentage = 1f, float speed = 1f)
+	{
+		if (this.activeFadeRoutine != null)
+		{
+			base.StopCoroutine(this.activeFadeRoutine);
+		}
+		this.activeFadeRoutine = base.StartCoroutine(this.FadeToBlack(targetPercentage, speed));
+	}
+
+	public void FadeIn(float targetPercentage = 0f, float speed = 1f)
+	{
+		if (this.activeFadeRoutine != null)
+		{
+			base.StopCoroutine(this.activeFadeRoutine);
+		}
+		this.activeFadeRoutine = base.StartCoroutine(this.FadeInFromBlack(targetPercentage, speed));
+	}
+
+	public void SetWorldInteractive(bool state)
+	{
+		GameScreenManager.Instance.fadePlane.raycastTarget = !state;
+	}
+
+	private IEnumerator FadeToBlack(float targetBlackPercent = 1f, float speed = 1f)
+	{
+		float currentAlphaPercentage = Mathf.Max(0f, GameScreenManager.Instance.fadePlane.color.a);
+		float duration = 1f;
+		for (float i = 0f; i <= duration; i += Time.unscaledDeltaTime * speed)
+		{
+			currentAlphaPercentage = Mathf.Max(Mathf.Min(i / duration, targetBlackPercent), GameScreenManager.Instance.fadePlane.color.a);
+			GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, currentAlphaPercentage);
+			yield return 0;
+		}
+		GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, targetBlackPercent);
+		this.activeFadeRoutine = null;
+		yield return 0;
+		yield break;
+	}
+
+	private IEnumerator FadeInFromBlack(float targetBlackPercent = 0f, float speed = 1f)
+	{
+		float alphaPercentage = Mathf.Min(1f, GameScreenManager.Instance.fadePlane.color.a);
+		float duration = 1f;
+		for (float i = 0f; i <= duration; i += Time.unscaledDeltaTime * speed)
+		{
+			alphaPercentage = Mathf.Min(Mathf.Max(1f - i / duration, targetBlackPercent), GameScreenManager.Instance.fadePlane.color.a);
+			GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, alphaPercentage);
+			yield return 0;
+		}
+		GameScreenManager.Instance.fadePlane.color = new Color(0f, 0f, 0f, targetBlackPercent);
+		this.activeFadeRoutine = null;
+		yield return 0;
+		yield break;
+	}
+
+	public void EnableFreeCamera(bool enable)
+	{
+		this.FreeCameraEnabled = enable;
+		this.SetInfoText("Screenshot Mode (ESC to exit)");
+	}
+
 	private static bool WithinInputField()
 	{
 		global::UnityEngine.EventSystems.EventSystem current = global::UnityEngine.EventSystems.EventSystem.current;
@@ -176,6 +246,14 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			flag = true;
 		}
 		return flag;
+	}
+
+	private void SetInfoText(string text)
+	{
+		this.infoText.text = text;
+		Color color = this.infoText.color;
+		color.a = 0.5f;
+		this.infoText.color = color;
 	}
 
 	public void OnKeyDown(KButtonEvent e)
@@ -201,17 +279,83 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			float num = this.targetOrthographicSize - this.zoomFactor * this.targetOrthographicSize;
 			this.targetOrthographicSize = Mathf.Max(num, this.minOrthographicSize);
 			this.overrideZoomSpeed = 0f;
+			this.isTargetPosSet = false;
 		}
 		else if (e.TryConsume(global::Action.ZoomOut))
 		{
 			float num2 = this.targetOrthographicSize + this.zoomFactor * this.targetOrthographicSize;
 			this.targetOrthographicSize = Mathf.Min(num2, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug);
 			this.overrideZoomSpeed = 0f;
+			this.isTargetPosSet = false;
 		}
 		else if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
 		{
 			this.panning = true;
 			this.overrideZoomSpeed = 0f;
+			this.isTargetPosSet = false;
+		}
+		else if (this.FreeCameraEnabled && e.TryConsume(global::Action.CinemaCamEnable))
+		{
+			this.cinemaCamEnabled = !this.cinemaCamEnabled;
+			DebugUtil.LogArgs(new object[] { "Cinema Cam Enabled ", this.cinemaCamEnabled });
+			this.SetInfoText((!this.cinemaCamEnabled) ? "Cinema Cam Disabled" : "Cinema Cam Enabled");
+		}
+		else if (this.FreeCameraEnabled && this.cinemaCamEnabled)
+		{
+			if (e.TryConsume(global::Action.CinemaToggleLock))
+			{
+				this.cinemaToggleLock = !this.cinemaToggleLock;
+				DebugUtil.LogArgs(new object[] { "Cinema Toggle Lock ", this.cinemaToggleLock });
+				this.SetInfoText((!this.cinemaToggleLock) ? "Cinema Input Lock OFF" : "Cinema Input Lock ON");
+			}
+			else if (e.TryConsume(global::Action.CinemaToggleEasing))
+			{
+				this.cinemaToggleEasing = !this.cinemaToggleEasing;
+				DebugUtil.LogArgs(new object[] { "Cinema Toggle Easing ", this.cinemaToggleEasing });
+				this.SetInfoText((!this.cinemaToggleEasing) ? "Cinema Easing OFF" : "Cinema Easing ON");
+			}
+			else if (e.TryConsume(global::Action.CinemaPanLeft))
+			{
+				this.cinemaPanLeft = !this.cinemaToggleLock || !this.cinemaPanLeft;
+				this.cinemaPanRight = false;
+			}
+			else if (e.TryConsume(global::Action.CinemaPanRight))
+			{
+				this.cinemaPanRight = !this.cinemaToggleLock || !this.cinemaPanRight;
+				this.cinemaPanLeft = false;
+			}
+			else if (e.TryConsume(global::Action.CinemaPanUp))
+			{
+				this.cinemaPanUp = !this.cinemaToggleLock || !this.cinemaPanUp;
+				this.cinemaPanDown = false;
+			}
+			else if (e.TryConsume(global::Action.CinemaPanDown))
+			{
+				this.cinemaPanDown = !this.cinemaToggleLock || !this.cinemaPanDown;
+				this.cinemaPanUp = false;
+			}
+			else if (e.TryConsume(global::Action.CinemaZoomIn))
+			{
+				this.cinemaZoomIn = !this.cinemaToggleLock || !this.cinemaZoomIn;
+				this.cinemaZoomOut = false;
+			}
+			else if (e.TryConsume(global::Action.CinemaZoomOut))
+			{
+				this.cinemaZoomOut = !this.cinemaToggleLock || !this.cinemaZoomOut;
+				this.cinemaZoomIn = false;
+			}
+			else if (e.TryConsume(global::Action.CinemaZoomSpeedPlus))
+			{
+				this.cinemaZoomSpeed++;
+				DebugUtil.LogArgs(new object[] { "Cinema Zoom Speed ", this.cinemaZoomSpeed });
+				this.SetInfoText("Cinema Zoom Speed: " + this.cinemaZoomSpeed);
+			}
+			else if (e.TryConsume(global::Action.CinemaZoomSpeedMinus))
+			{
+				this.cinemaZoomSpeed--;
+				DebugUtil.LogArgs(new object[] { "Cinema Zoom Speed ", this.cinemaZoomSpeed });
+				this.SetInfoText("Cinema Zoom Speed: " + this.cinemaZoomSpeed);
+			}
 		}
 		else if (e.TryConsume(global::Action.PanLeft))
 		{
@@ -229,6 +373,10 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		{
 			this.panDown = true;
 		}
+		if (!e.Consumed && OverlayMenu.Instance != null)
+		{
+			OverlayMenu.Instance.OnKeyDown(e);
+		}
 	}
 
 	public void OnKeyUp(KButtonEvent e)
@@ -244,6 +392,33 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		if (e.TryConsume(global::Action.MouseMiddle) || e.IsAction(global::Action.MouseRight))
 		{
 			this.panning = false;
+		}
+		else if (this.FreeCameraEnabled && this.cinemaCamEnabled)
+		{
+			if (e.TryConsume(global::Action.CinemaPanLeft))
+			{
+				this.cinemaPanLeft = this.cinemaToggleLock && this.cinemaPanLeft;
+			}
+			else if (e.TryConsume(global::Action.CinemaPanRight))
+			{
+				this.cinemaPanRight = this.cinemaToggleLock && this.cinemaPanRight;
+			}
+			else if (e.TryConsume(global::Action.CinemaPanUp))
+			{
+				this.cinemaPanUp = this.cinemaToggleLock && this.cinemaPanUp;
+			}
+			else if (e.TryConsume(global::Action.CinemaPanDown))
+			{
+				this.cinemaPanDown = this.cinemaToggleLock && this.cinemaPanDown;
+			}
+			else if (e.TryConsume(global::Action.CinemaZoomIn))
+			{
+				this.cinemaZoomIn = this.cinemaToggleLock && this.cinemaZoomIn;
+			}
+			else if (e.TryConsume(global::Action.CinemaZoomOut))
+			{
+				this.cinemaZoomOut = this.cinemaToggleLock && this.cinemaZoomOut;
+			}
 		}
 		else if (e.TryConsume(global::Action.CameraHome))
 		{
@@ -312,8 +487,8 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			KMonoBehaviour.PlaySound(GlobalAssets.GetSound("Click_Notification", false));
 		}
 		this.isTargetPosSet = true;
+		pos.z = -100f;
 		this.targetPos = pos;
-		this.targetPos.z = -100f;
 		this.targetOrthographicSize = orthographic_size;
 	}
 
@@ -330,12 +505,179 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 	}
 
+	public void SetPosition(Vector3 pos)
+	{
+		base.transform.SetPosition(pos);
+	}
+
 	private Vector3 PointUnderCursor(Vector3 mousePos, Camera cam)
 	{
 		Ray ray = cam.ScreenPointToRay(mousePos);
 		Vector3 direction = ray.direction;
 		Vector3 vector = direction * Mathf.Abs(cam.transform.GetPosition().z / direction.z);
 		return ray.origin + vector;
+	}
+
+	private void CinemaCamUpdate()
+	{
+		float unscaledDeltaTime = Time.unscaledDeltaTime;
+		Camera main = Camera.main;
+		Vector3 localPosition = base.transform.GetLocalPosition();
+		float num = Mathf.Pow((float)this.cinemaZoomSpeed, 3f);
+		if (this.cinemaZoomIn)
+		{
+			this.overrideZoomSpeed = -num / TuningData<CameraController.Tuning>.Get().cinemaZoomFactor;
+			this.isTargetPosSet = false;
+		}
+		else if (this.cinemaZoomOut)
+		{
+			this.overrideZoomSpeed = num / TuningData<CameraController.Tuning>.Get().cinemaZoomFactor;
+			this.isTargetPosSet = false;
+		}
+		else
+		{
+			this.overrideZoomSpeed = 0f;
+		}
+		if (this.cinemaToggleEasing)
+		{
+			this.cinemaZoomVelocity += (this.overrideZoomSpeed - this.cinemaZoomVelocity) * this.cinemaEasing;
+		}
+		else
+		{
+			this.cinemaZoomVelocity = this.overrideZoomSpeed;
+		}
+		if (this.cinemaZoomVelocity != 0f)
+		{
+			this.SetOrthographicsSize(main.orthographicSize + this.cinemaZoomVelocity * unscaledDeltaTime * (main.orthographicSize / 20f));
+			this.targetOrthographicSize = main.orthographicSize;
+		}
+		float num2 = num / TuningData<CameraController.Tuning>.Get().cinemaZoomToFactor;
+		float num3 = this.keyPanningSpeed / 20f * main.orthographicSize;
+		float num4 = num3 * (num / TuningData<CameraController.Tuning>.Get().cinemaPanToFactor);
+		if (!this.isTargetPosSet && this.targetOrthographicSize != main.orthographicSize)
+		{
+			float num5 = Mathf.Min(num2 * unscaledDeltaTime, 0.1f);
+			this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num5));
+		}
+		Vector3 vector = Vector3.zero;
+		if (this.isTargetPosSet)
+		{
+			float num6 = this.cinemaEasing * TuningData<CameraController.Tuning>.Get().targetZoomEasingFactor;
+			float num7 = this.cinemaEasing * TuningData<CameraController.Tuning>.Get().targetPanEasingFactor;
+			float num8 = this.targetOrthographicSize - main.orthographicSize;
+			Vector3 vector2 = this.targetPos - localPosition;
+			float num9;
+			float num10;
+			if (!this.cinemaToggleEasing)
+			{
+				num9 = num2 * unscaledDeltaTime;
+				num10 = num4 * unscaledDeltaTime;
+			}
+			else
+			{
+				DebugUtil.LogArgs(new object[]
+				{
+					"Min zoom of:",
+					num2 * unscaledDeltaTime,
+					Mathf.Abs(num8) * num6 * unscaledDeltaTime
+				});
+				num9 = Mathf.Min(num2 * unscaledDeltaTime, Mathf.Abs(num8) * num6 * unscaledDeltaTime);
+				DebugUtil.LogArgs(new object[]
+				{
+					"Min pan of:",
+					num4 * unscaledDeltaTime,
+					vector2.magnitude * num7 * unscaledDeltaTime
+				});
+				num10 = Mathf.Min(num4 * unscaledDeltaTime, vector2.magnitude * num7 * unscaledDeltaTime);
+			}
+			float num11;
+			if (Mathf.Abs(num8) < num9)
+			{
+				num11 = num8;
+			}
+			else
+			{
+				num11 = Mathf.Sign(num8) * num9;
+			}
+			if (vector2.magnitude < num10)
+			{
+				vector = vector2;
+			}
+			else
+			{
+				vector = vector2.normalized * num10;
+			}
+			if (Mathf.Abs(num11) < 0.001f && vector.magnitude < 0.001f)
+			{
+				this.isTargetPosSet = false;
+				num11 = num8;
+				vector = vector2;
+			}
+			this.SetOrthographicsSize(main.orthographicSize + num11 * (main.orthographicSize / 20f));
+		}
+		if (!PlayerController.Instance.IsDragging())
+		{
+			this.panning = false;
+		}
+		Vector3 vector3 = Vector3.zero;
+		if (this.panning)
+		{
+			vector3 = -PlayerController.Instance.GetWorldDragDelta();
+			this.isTargetPosSet = false;
+			if (vector3.magnitude > 0f)
+			{
+				this.ClearFollowTarget();
+			}
+			this.keyPanDelta = Vector3.zero;
+		}
+		else
+		{
+			float num12 = num / TuningData<CameraController.Tuning>.Get().cinemaPanFactor;
+			Vector3 zero = Vector3.zero;
+			if (this.cinemaPanLeft)
+			{
+				this.ClearFollowTarget();
+				zero.x = -num3 * num12;
+				this.isTargetPosSet = false;
+			}
+			if (this.cinemaPanRight)
+			{
+				this.ClearFollowTarget();
+				zero.x = num3 * num12;
+				this.isTargetPosSet = false;
+			}
+			if (this.cinemaPanUp)
+			{
+				this.ClearFollowTarget();
+				zero.y = num3 * num12;
+				this.isTargetPosSet = false;
+			}
+			if (this.cinemaPanDown)
+			{
+				this.ClearFollowTarget();
+				zero.y = -num3 * num12;
+				this.isTargetPosSet = false;
+			}
+			if (this.cinemaToggleEasing)
+			{
+				this.keyPanDelta += (zero - this.keyPanDelta) * this.cinemaEasing;
+			}
+			else
+			{
+				this.keyPanDelta = zero;
+			}
+		}
+		Vector3 vector4 = localPosition + vector + vector3 + this.keyPanDelta * unscaledDeltaTime;
+		if (this.followTarget != null)
+		{
+			vector4.x = this.followTargetPos.x;
+			vector4.y = this.followTargetPos.y;
+		}
+		vector4.z = -100f;
+		if ((double)(vector4 - base.transform.GetLocalPosition()).magnitude > 0.001)
+		{
+			base.transform.SetLocalPosition(vector4);
+		}
 	}
 
 	private void NormalCamUpdate()
@@ -347,8 +689,9 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		Vector3 vector = ((this.overrideZoomSpeed == 0f) ? KInputManager.GetMousePos() : new Vector3((float)Screen.width / 2f, (float)Screen.height / 2f, 0f));
 		Vector3 vector2 = this.PointUnderCursor(vector, main);
 		Vector3 vector3 = main.ScreenToViewportPoint(vector);
-		float num2 = Mathf.Min(num * unscaledDeltaTime, 0.1f);
-		this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num2));
+		float num2 = this.keyPanningSpeed / 20f * main.orthographicSize;
+		float num3 = Mathf.Min(num * unscaledDeltaTime, 0.1f);
+		this.SetOrthographicsSize(Mathf.Lerp(main.orthographicSize, this.targetOrthographicSize, num3));
 		base.transform.SetLocalPosition(localPosition);
 		Vector3 vector4 = main.WorldToViewportPoint(vector2);
 		vector3.z = vector4.z;
@@ -386,28 +729,28 @@ public class CameraController : KMonoBehaviour, IInputHandler
 			if (this.panLeft)
 			{
 				this.ClearFollowTarget();
-				this.keyPanDelta.x = this.keyPanDelta.x - this.zoomScaledKeyPanningSpeed;
+				this.keyPanDelta.x = this.keyPanDelta.x - num2;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
 			if (this.panRight)
 			{
 				this.ClearFollowTarget();
-				this.keyPanDelta.x = this.keyPanDelta.x + this.zoomScaledKeyPanningSpeed;
+				this.keyPanDelta.x = this.keyPanDelta.x + num2;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
 			if (this.panUp)
 			{
 				this.ClearFollowTarget();
-				this.keyPanDelta.y = this.keyPanDelta.y + this.zoomScaledKeyPanningSpeed;
+				this.keyPanDelta.y = this.keyPanDelta.y + num2;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
 			if (this.panDown)
 			{
 				this.ClearFollowTarget();
-				this.keyPanDelta.y = this.keyPanDelta.y - this.zoomScaledKeyPanningSpeed;
+				this.keyPanDelta.y = this.keyPanDelta.y - num2;
 				this.isTargetPosSet = false;
 				this.overrideZoomSpeed = 0f;
 			}
@@ -430,7 +773,23 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	private void Update()
 	{
-		this.NormalCamUpdate();
+		if (!Game.Instance.timelapser.CapturingTimelapseScreenshot)
+		{
+			if (this.FreeCameraEnabled && this.cinemaCamEnabled)
+			{
+				this.CinemaCamUpdate();
+			}
+			else
+			{
+				this.NormalCamUpdate();
+			}
+		}
+		if (this.infoText.color.a > 0f)
+		{
+			Color color = this.infoText.color;
+			color.a = Mathf.Max(0f, this.infoText.color.a - Time.unscaledDeltaTime * 0.5f);
+			this.infoText.color = color;
+		}
 		this.ConstrainToWorld();
 		Vector3 vector = this.PointUnderCursor(KInputManager.GetMousePos(), Camera.main);
 		Shader.SetGlobalVector("_WorldCameraPos", new Vector4(base.transform.GetPosition().x, base.transform.GetPosition().y, base.transform.GetPosition().z, Camera.main.orthographicSize));
@@ -510,11 +869,20 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	{
 		if (CameraSaveData.valid)
 		{
-			base.transform.SetPosition(CameraSaveData.position);
-			base.transform.localScale = CameraSaveData.localScale;
-			base.transform.rotation = CameraSaveData.rotation;
-			this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug);
-			this.SnapTo(base.transform.GetPosition());
+			int num = Grid.PosToCell(CameraSaveData.position);
+			if (Grid.IsValidCell(num) && !Grid.IsVisible(num))
+			{
+				global::Debug.LogWarning("Resetting Camera Position... camera was saved in an undiscovered area of the map.");
+				this.CameraGoHome(2f);
+			}
+			else
+			{
+				base.transform.SetPosition(CameraSaveData.position);
+				base.transform.localScale = CameraSaveData.localScale;
+				base.transform.rotation = CameraSaveData.rotation;
+				this.targetOrthographicSize = Mathf.Clamp(CameraSaveData.orthographicsSize, this.minOrthographicSize, (!this.FreeCameraEnabled) ? this.maxOrthographicSize : TuningData<CameraController.Tuning>.Get().maxOrthographicSizeDebug);
+				this.SnapTo(base.transform.GetPosition());
+			}
 		}
 	}
 
@@ -586,9 +954,28 @@ public class CameraController : KMonoBehaviour, IInputHandler
 		}
 	}
 
+	public void RenderForTimelapser(ref RenderTexture tex)
+	{
+		this.RenderCameraForTimelapse(this.baseCamera, ref tex);
+		this.RenderCameraForTimelapse(this.overlayNoDepthCamera, ref tex);
+		this.RenderCameraForTimelapse(this.lightBufferCamera, ref tex);
+		this.RenderCameraForTimelapse(this.simOverlayCamera, ref tex);
+		this.RenderCameraForTimelapse(this.overlayCamera, ref tex);
+	}
+
+	private void RenderCameraForTimelapse(Camera cam, ref RenderTexture tex)
+	{
+		RenderTexture targetTexture = cam.targetTexture;
+		cam.targetTexture = tex;
+		cam.Render();
+		cam.targetTexture = targetTexture;
+	}
+
 	public const float DEFAULT_MAX_ORTHO_SIZE = 20f;
 
 	public float MAX_Y_SCALE = 1.1f;
+
+	public LocText infoText;
 
 	private const float FIXED_Z = -100f;
 
@@ -620,8 +1007,6 @@ public class CameraController : KMonoBehaviour, IInputHandler
 
 	public GridVisibleArea VisibleArea = new GridVisibleArea();
 
-	private float targetOrthographicSize;
-
 	private float maxOrthographicSize = 20f;
 
 	private float overrideZoomSpeed;
@@ -629,10 +1014,6 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	private bool panning;
 
 	private Vector3 keyPanDelta;
-
-	private bool isTargetPosSet;
-
-	private Vector3 targetPos;
 
 	private bool userCameraControlDisabled;
 
@@ -665,14 +1046,55 @@ public class CameraController : KMonoBehaviour, IInputHandler
 	[NonSerialized]
 	public Camera infraredCamera;
 
+	[NonSerialized]
+	public Camera timelapseFreezeCamera;
+
 	public List<Camera> cameras = new List<Camera>();
 
 	private MultipleRenderTarget mrt;
 
 	public SoundCuller soundCuller;
 
+	private bool cinemaCamEnabled;
+
+	private bool cinemaToggleLock;
+
+	private bool cinemaToggleEasing;
+
+	private bool cinemaPanLeft;
+
+	private bool cinemaPanRight;
+
+	private bool cinemaPanUp;
+
+	private bool cinemaPanDown;
+
+	private bool cinemaZoomIn;
+
+	private bool cinemaZoomOut;
+
+	private int cinemaZoomSpeed = 10;
+
+	private float cinemaEasing = 0.05f;
+
+	private float cinemaZoomVelocity;
+
+	private Coroutine activeFadeRoutine;
+
 	public class Tuning : TuningData<CameraController.Tuning>
 	{
 		public float maxOrthographicSizeDebug;
+
+		public float cinemaZoomFactor = 100f;
+
+		public float cinemaPanFactor = 50f;
+
+		public float cinemaZoomToFactor = 100f;
+
+		public float cinemaPanToFactor = 50f;
+
+		public float targetZoomEasingFactor = 400f;
+
+		public float targetPanEasingFactor = 100f;
 	}
 }

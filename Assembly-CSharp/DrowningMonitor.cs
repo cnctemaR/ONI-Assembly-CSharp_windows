@@ -1,4 +1,5 @@
 ﻿using System;
+using Klei.AI;
 using KSerialization;
 using STRINGS;
 using UnityEngine;
@@ -29,6 +30,16 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	{
 		base.OnPrefabInit();
 		this.timeToDrown = 75f;
+		if (DrowningMonitor.drowningEffect == null)
+		{
+			DrowningMonitor.drowningEffect = new Effect("Drowning", CREATURES.STATUSITEMS.DROWNING.NAME, CREATURES.STATUSITEMS.DROWNING.TOOLTIP, 0f, false, false, true, null, 0f, null);
+			DrowningMonitor.drowningEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -100f, CREATURES.STATUSITEMS.DROWNING.NAME, false, false, true));
+		}
+		if (DrowningMonitor.saturatedEffect == null)
+		{
+			DrowningMonitor.saturatedEffect = new Effect("Saturated", CREATURES.STATUSITEMS.SATURATED.NAME, CREATURES.STATUSITEMS.SATURATED.TOOLTIP, 0f, false, false, true, null, 0f, null);
+			DrowningMonitor.saturatedEffect.Add(new AttributeModifier(Db.Get().CritterAttributes.Happiness.Id, -100f, CREATURES.STATUSITEMS.SATURATED.NAME, false, false, true));
+		}
 	}
 
 	protected override void OnSpawn()
@@ -73,9 +84,9 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 			{
 				this.drowning = true;
 				base.Trigger(1949704522, null);
-				base.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Drowning);
+				base.GetComponent<KPrefabID>().AddTag(GameTags.Creatures.Drowning, false);
 			}
-			if (this.timeToDrown <= 0f)
+			if (this.timeToDrown <= 0f && this.canDrownToDeath)
 			{
 				DeathMonitor.Instance smi = this.GetSMI<DeathMonitor.Instance>();
 				if (smi != null)
@@ -91,6 +102,36 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 			this.drowning = false;
 			base.GetComponent<KPrefabID>().RemoveTag(GameTags.Creatures.Drowning);
 			base.Trigger(99949694, null);
+		}
+		if (this.livesUnderWater)
+		{
+			this.selectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Saturated, this.drowning, this);
+		}
+		else
+		{
+			this.selectable.ToggleStatusItem(Db.Get().CreatureStatusItems.Drowning, this.drowning, this);
+		}
+		if (this.effects != null)
+		{
+			if (this.drowning)
+			{
+				if (this.livesUnderWater)
+				{
+					this.effects.Add(DrowningMonitor.saturatedEffect, false);
+				}
+				else
+				{
+					this.effects.Add(DrowningMonitor.drowningEffect, false);
+				}
+			}
+			else if (this.livesUnderWater)
+			{
+				this.effects.Remove(DrowningMonitor.saturatedEffect);
+			}
+			else
+			{
+				this.effects.Remove(DrowningMonitor.drowningEffect);
+			}
 		}
 	}
 
@@ -136,6 +177,10 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 	{
 		get
 		{
+			if (this.livesUnderWater)
+			{
+				return CREATURES.STATUSITEMS.SATURATED.NAME;
+			}
 			return CREATURES.STATUSITEMS.DROWNING.NAME;
 		}
 	}
@@ -166,6 +211,12 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 		}
 	}
 
+	[MyCmpReq]
+	private KSelectable selectable;
+
+	[MyCmpGet]
+	private Effects effects;
+
 	private OccupyArea _occupyArea;
 
 	[Serialize]
@@ -183,7 +234,15 @@ public class DrowningMonitor : KMonoBehaviour, IWiltCause, ISim1000ms
 
 	protected const float CellLiquidThreshold = 0.95f;
 
+	public bool canDrownToDeath = true;
+
+	public bool livesUnderWater;
+
 	private Extents extents;
 
 	private HandleVector<int>.Handle partitionerEntry;
+
+	public static Effect drowningEffect;
+
+	public static Effect saturatedEffect;
 }

@@ -177,27 +177,39 @@ public class ResourceCategoryHeader : KMonoBehaviour, IPointerEnterHandler, IPoi
 		{
 			return;
 		}
+		ListPool<Tag, ResourceCategoryHeader>.PooledList pooledList = ListPool<Tag, ResourceCategoryHeader>.Allocate();
 		foreach (Tag tag in hashSet)
 		{
-			this.anyDiscovered = true;
-			if (!this.ResourcesDiscovered.ContainsKey(tag))
-			{
-				this.ResourcesDiscovered.Add(tag, this.NewResourceEntry(tag, this.Measure));
-			}
-			float num = WorldInventory.Instance.GetAmount(tag);
-			float num2 = ((!doExtras) ? 0f : WorldInventory.Instance.GetTotalAmount(tag));
-			float num3 = ((!doExtras) ? 0f : MaterialNeeds.Instance.GetAmount(tag));
+			EdiblesManager.FoodInfo foodInfo = null;
 			if (this.Measure == GameUtil.MeasureUnit.kcal)
 			{
-				EdiblesManager.FoodInfo foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
-				num *= foodInfo.CaloriesPerUnit;
-				num2 *= foodInfo.CaloriesPerUnit;
-				num3 *= foodInfo.CaloriesPerUnit;
+				foodInfo = Game.Instance.ediblesManager.GetFoodInfo(tag.Name);
+				if (foodInfo == null)
+				{
+					pooledList.Add(tag);
+					continue;
+				}
 			}
+			this.anyDiscovered = true;
+			ResourceEntry resourceEntry = null;
+			if (!this.ResourcesDiscovered.TryGetValue(tag, out resourceEntry))
+			{
+				resourceEntry = this.NewResourceEntry(tag, this.Measure);
+				this.ResourcesDiscovered.Add(tag, resourceEntry);
+			}
+			float num;
+			float num2;
+			float num3;
+			resourceEntry.GetAmounts(foodInfo, doExtras, out num, out num2, out num3);
 			available += num;
 			total += num2;
 			reserved += num3;
 		}
+		foreach (Tag tag2 in pooledList)
+		{
+			hashSet.Remove(tag2);
+		}
+		pooledList.Recycle();
 	}
 
 	public void UpdateContents()

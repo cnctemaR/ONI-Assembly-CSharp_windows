@@ -20,9 +20,10 @@ public class ConditionHasAtmoSuit : RocketLaunchCondition
 		return null;
 	}
 
-	public override bool EvaluateLaunchCondition()
+	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
 	{
-		return this.module.storage.GetAmountAvailable(GameTags.AtmoSuit) >= 1f;
+		bool flag = this.module.storage.GetAmountAvailable(GameTags.AtmoSuit) >= 1f;
+		return (!flag) ? RocketLaunchCondition.LaunchStatus.Failure : RocketLaunchCondition.LaunchStatus.Ready;
 	}
 
 	public override string GetLaunchStatusMessage(bool ready)

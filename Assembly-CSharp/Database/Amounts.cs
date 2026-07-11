@@ -27,7 +27,7 @@ namespace Database
 			this.Decor.SetDisplayer(new DecorDisplayer());
 			this.Maturity = this.CreateAmount("Maturity", 0f, 0f, true, Units.Flat, 0.0009166667f, true, "STRINGS.CREATURES.STATS", "ui_icon_maturity", null);
 			this.Maturity.SetDisplayer(new MaturityDisplayer());
-			this.OldAge = this.CreateAmount("OldAge", 0f, 2400f, false, Units.Flat, 0f, false, "STRINGS.CREATURES.STATS", null, null);
+			this.OldAge = this.CreateAmount("OldAge", 0f, 0f, false, Units.Flat, 0f, false, "STRINGS.CREATURES.STATS", null, null);
 			this.Fertilization = this.CreateAmount("Fertilization", 0f, 100f, true, Units.Flat, 0.1675f, true, "STRINGS.CREATURES.STATS", null, null);
 			this.Fertilization.SetDisplayer(new StandardAmountDisplayer(GameUtil.UnitClass.Percent, GameUtil.TimeSlice.PerSecond, null));
 			this.Fertility = this.CreateAmount("Fertility", 0f, 100f, true, Units.Flat, 0.008375f, true, "STRINGS.CREATURES.STATS", "ui_icon_fertility", null);
@@ -64,7 +64,8 @@ namespace Database
 			Klei.AI.Attribute attribute2 = new Klei.AI.Attribute(id + "Max", "Maximum" + text, string.Empty, string.Empty, max, Klei.AI.Attribute.Display.Normal, false, null, null);
 			string text3 = id + "Delta";
 			string text4 = Strings.Get(string.Format("STRINGS.DUPLICANTS.ATTRIBUTES.{0}.NAME", text3.ToUpper()));
-			Klei.AI.Attribute attribute3 = new Klei.AI.Attribute(text3, text4, string.Empty, string.Empty, 0f, Klei.AI.Attribute.Display.Normal, false, null, null);
+			string text5 = Strings.Get(string.Format("STRINGS.DUPLICANTS.ATTRIBUTES.{0}.DESC", text3.ToUpper()));
+			Klei.AI.Attribute attribute3 = new Klei.AI.Attribute(text3, text4, string.Empty, text5, 0f, Klei.AI.Attribute.Display.Normal, false, null, null);
 			Amount amount = new Amount(id, text, text2, attribute, attribute2, attribute3, show_max, units, delta_threshold, show_in_ui, uiSprite, thoughtSprite);
 			Db.Get().Attributes.Add(attribute);
 			Db.Get().Attributes.Add(attribute2);

@@ -7,7 +7,7 @@ namespace Klei.AI
 	public class HeatRash : Sickness
 	{
 		public HeatRash()
-			: base("HeatSickness", Sickness.SicknessType.Ailment, Sickness.Severity.Minor, 0.005f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Inhalation }, 180f)
+			: base("HeatSickness", Sickness.SicknessType.Ailment, Sickness.Severity.Minor, 0.005f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Inhalation }, 180f, null)
 		{
 			base.AddSicknessComponent(new CommonSickEffectSickness());
 			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]

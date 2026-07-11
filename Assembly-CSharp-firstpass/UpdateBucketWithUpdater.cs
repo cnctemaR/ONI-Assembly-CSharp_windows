@@ -40,27 +40,36 @@ public class UpdateBucketWithUpdater<DataType> : StateMachineUpdater.BaseUpdateB
 	public override void Update(float dt)
 	{
 		List<UpdateBucketWithUpdater<DataType>.Entry> dataList = this.entries.GetDataList();
-		int count = dataList.Count;
-		for (int i = 0; i < count; i++)
-		{
-			UpdateBucketWithUpdater<DataType>.Entry entry = dataList[i];
-			if (entry.updater != null)
-			{
-				entry.updater.Update(entry.data, dt - entry.lastUpdateTime);
-				entry.lastUpdateTime = 0f;
-				dataList[i] = entry;
-			}
-		}
 		foreach (HandleVector<int>.Handle handle in this.pendingRemovals)
 		{
 			this.entries.Free(handle);
 		}
 		this.pendingRemovals.Clear();
+		if (this.batch_update_delegate != null)
+		{
+			this.batch_update_delegate(dataList, dt);
+		}
+		else
+		{
+			int count = dataList.Count;
+			for (int i = 0; i < count; i++)
+			{
+				UpdateBucketWithUpdater<DataType>.Entry entry = dataList[i];
+				if (entry.updater != null)
+				{
+					entry.updater.Update(entry.data, dt - entry.lastUpdateTime);
+					entry.lastUpdateTime = 0f;
+					dataList[i] = entry;
+				}
+			}
+		}
 	}
 
 	private KCompactedVector<UpdateBucketWithUpdater<DataType>.Entry> entries = new KCompactedVector<UpdateBucketWithUpdater<DataType>.Entry>(0);
 
 	private List<HandleVector<int>.Handle> pendingRemovals = new List<HandleVector<int>.Handle>();
+
+	public UpdateBucketWithUpdater<DataType>.BatchUpdateDelegate batch_update_delegate;
 
 	public struct Entry
 	{
@@ -75,4 +84,6 @@ public class UpdateBucketWithUpdater<DataType> : StateMachineUpdater.BaseUpdateB
 	{
 		void Update(DataType smi, float dt);
 	}
+
+	public delegate void BatchUpdateDelegate(List<UpdateBucketWithUpdater<DataType>.Entry> items, float time_delta);
 }

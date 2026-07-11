@@ -7,7 +7,7 @@ namespace Klei.AI
 	public class FoodSickness : Sickness
 	{
 		public FoodSickness()
-			: base("FoodSickness", Sickness.SicknessType.Pathogen, Sickness.Severity.Minor, 0.005f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Digestion }, 1020f)
+			: base("FoodSickness", Sickness.SicknessType.Pathogen, Sickness.Severity.Minor, 0.005f, new List<Sickness.InfectionVector> { Sickness.InfectionVector.Digestion }, 1020f, "FoodSicknessRecovery")
 		{
 			base.AddSicknessComponent(new CommonSickEffectSickness());
 			base.AddSicknessComponent(new AttributeModifierSickness(new AttributeModifier[]
@@ -21,6 +21,8 @@ namespace Klei.AI
 		}
 
 		public const string ID = "FoodSickness";
+
+		public const string RECOVERY_ID = "FoodSicknessRecovery";
 
 		private const float VOMIT_FREQUENCY = 200f;
 	}

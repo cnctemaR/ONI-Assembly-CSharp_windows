@@ -1,6 +1,8 @@
 ﻿using System;
 using Klei.AI;
 using STRINGS;
+using TUNING;
+using UnityEngine;
 
 namespace Database
 {
@@ -121,7 +123,8 @@ namespace Database
 				}
 				return str;
 			};
-			this.SleepingInterrupted = this.CreateStatusItem("SleepingInterrupted", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.SleepingInterruptedByNoise = this.CreateStatusItem("SleepingInterruptedByNoise", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
+			this.SleepingInterruptedByLight = this.CreateStatusItem("SleepingInterruptedByLight", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Eating = this.CreateStatusItem("Eating", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
 			this.Eating.resolveStringCallback = func;
 			this.Digging = this.CreateStatusItem("Digging", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -214,13 +217,21 @@ namespace Database
 				float num = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
 				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
-				string text2 = attributeInstance.GetFormattedValue();
-				text2 += UI.HORIZONTAL_BR_RULE;
+				string text2 = "<b>" + attributeInstance.GetFormattedValue() + "</b>";
 				for (int num2 = 0; num2 != attributeInstance.Modifiers.Count; num2++)
 				{
 					AttributeModifier attributeModifier = attributeInstance.Modifiers[num2];
-					text2 = text2 + attributeModifier.GetDescription() + " " + attributeModifier.GetFormattedString(attributeInstance.gameObject);
 					text2 += "\n";
+					string text3 = text2;
+					text2 = string.Concat(new string[]
+					{
+						text3,
+						"    • ",
+						attributeModifier.GetDescription(),
+						" <b>",
+						attributeModifier.GetFormattedString(attributeInstance.gameObject),
+						"</b>"
+					});
 				}
 				str = str.Replace("{conductivityBarrier}", text2);
 				return str;
@@ -232,15 +243,23 @@ namespace Database
 				float num3 = ((ExternalTemperatureMonitor.Instance)data).temperatureTransferer.average_kilowatts_exchanged.GetWeightedAverage * 1000f;
 				str = str.Replace("{currentTransferWattage}", GameUtil.GetFormattedHeatEnergyRate(num3, GameUtil.HeatEnergyFormatterUnit.Automatic));
 				AttributeInstance attributeInstance2 = ((ExternalTemperatureMonitor.Instance)data).attributes.Get("ThermalConductivityBarrier");
-				string text3 = attributeInstance2.GetFormattedValue();
-				text3 += UI.HORIZONTAL_BR_RULE;
+				string text4 = "<b>" + attributeInstance2.GetFormattedValue() + "</b>";
 				for (int num4 = 0; num4 != attributeInstance2.Modifiers.Count; num4++)
 				{
 					AttributeModifier attributeModifier2 = attributeInstance2.Modifiers[num4];
-					text3 = text3 + attributeModifier2.GetDescription() + " " + attributeModifier2.GetFormattedString(attributeInstance2.gameObject);
-					text3 += "\n";
+					text4 += "\n";
+					string text5 = text4;
+					text4 = string.Concat(new string[]
+					{
+						text5,
+						"    • ",
+						attributeModifier2.GetDescription(),
+						" <b>",
+						attributeModifier2.GetFormattedString(attributeInstance2.gameObject),
+						"</b>"
+					});
 				}
-				str = str.Replace("{conductivityBarrier}", text3);
+				str = str.Replace("{conductivityBarrier}", text4);
 				return str;
 			};
 			this.BodyRegulatingHeating = this.CreateStatusItem("BodyRegulatingHeating", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 2);
@@ -289,25 +308,59 @@ namespace Database
 			this.Dancing = this.CreateStatusItem("Dancing", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Gaming = this.CreateStatusItem("Gaming", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 			this.Mingling = this.CreateStatusItem("Mingling", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
-			this.ExposedToGerms = this.CreateStatusItem("ExposedToGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.None.ID, true, 2);
-			this.ExposedToGerms.resolveStringCallback = delegate(string str, object data)
+			this.ContactWithGerms = this.CreateStatusItem("ContactWithGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.Disease.ID, true, 2);
+			this.ContactWithGerms.resolveStringCallback = delegate(string str, object data)
 			{
 				GermExposureMonitor.ExposureStatusData exposureStatusData = (GermExposureMonitor.ExposureStatusData)data;
 				string name = Db.Get().Sicknesses.Get(exposureStatusData.exposure_type.sickness_id).Name;
-				AttributeInstance attributeInstance3 = Db.Get().Attributes.GermResistance.Lookup(exposureStatusData.owner.gameObject);
-				string lastDiseaseSource = exposureStatusData.owner.GetLastDiseaseSource(exposureStatusData.exposure_type.germ_id);
-				int base_resistance = exposureStatusData.exposure_type.base_resistance;
-				float totalValue = attributeInstance3.GetTotalValue();
-				float num5 = totalValue + (float)base_resistance;
-				float contractionChance = GermExposureMonitor.GetContractionChance(num5);
 				str = str.Replace("{Sickness}", name);
+				return str;
+			};
+			this.ContactWithGerms.statusItemClickCallback = delegate(object data)
+			{
+				GermExposureMonitor.ExposureStatusData exposureStatusData2 = (GermExposureMonitor.ExposureStatusData)data;
+				Vector3 lastExposurePosition = exposureStatusData2.owner.GetLastExposurePosition(exposureStatusData2.exposure_type.germ_id);
+				CameraController.Instance.CameraGoTo(lastExposurePosition, 2f, true);
+				if (OverlayScreen.Instance.mode == OverlayModes.None.ID)
+				{
+					OverlayScreen.Instance.ToggleOverlay(OverlayModes.Disease.ID);
+				}
+			};
+			this.ExposedToGerms = this.CreateStatusItem("ExposedToGerms", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, true, OverlayModes.Disease.ID, true, 2);
+			this.ExposedToGerms.resolveStringCallback = delegate(string str, object data)
+			{
+				GermExposureMonitor.ExposureStatusData exposureStatusData3 = (GermExposureMonitor.ExposureStatusData)data;
+				string name2 = Db.Get().Sicknesses.Get(exposureStatusData3.exposure_type.sickness_id).Name;
+				AttributeInstance attributeInstance3 = Db.Get().Attributes.GermResistance.Lookup(exposureStatusData3.owner.gameObject);
+				string lastDiseaseSource = exposureStatusData3.owner.GetLastDiseaseSource(exposureStatusData3.exposure_type.germ_id);
+				GermExposureMonitor.Instance smi = exposureStatusData3.owner.GetSMI<GermExposureMonitor.Instance>();
+				float num5 = (float)exposureStatusData3.exposure_type.base_resistance + GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
+				float totalValue = attributeInstance3.GetTotalValue();
+				float resistanceToExposureType = smi.GetResistanceToExposureType(exposureStatusData3.exposure_type, -1f);
+				float contractionChance = GermExposureMonitor.GetContractionChance(resistanceToExposureType);
+				float exposureTier = smi.GetExposureTier(exposureStatusData3.exposure_type.germ_id);
+				float num6 = GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[(int)exposureTier - 1] - GERM_EXPOSURE.EXPOSURE_TIER_RESISTANCE_BONUSES[0];
+				str = str.Replace("{Severity}", DUPLICANTS.STATUSITEMS.EXPOSEDTOGERMS.EXPOSURE_TIERS[(int)exposureTier - 1]);
+				str = str.Replace("{Sickness}", name2);
 				str = str.Replace("{Source}", lastDiseaseSource);
-				str = str.Replace("{Base}", GameUtil.GetFormattedSimple((float)base_resistance, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{Base}", GameUtil.GetFormattedSimple(num5, GameUtil.TimeSlice.None, null));
 				str = str.Replace("{Dupe}", GameUtil.GetFormattedSimple(totalValue, GameUtil.TimeSlice.None, null));
-				str = str.Replace("{Total}", GameUtil.GetFormattedSimple(num5, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{Total}", GameUtil.GetFormattedSimple(resistanceToExposureType, GameUtil.TimeSlice.None, null));
+				str = str.Replace("{ExposureLevelBonus}", GameUtil.GetFormattedSimple(num6, GameUtil.TimeSlice.None, null));
 				str = str.Replace("{Chance}", GameUtil.GetFormattedPercent(contractionChance * 100f, GameUtil.TimeSlice.None));
 				return str;
 			};
+			this.ExposedToGerms.statusItemClickCallback = delegate(object data)
+			{
+				GermExposureMonitor.ExposureStatusData exposureStatusData4 = (GermExposureMonitor.ExposureStatusData)data;
+				Vector3 lastExposurePosition2 = exposureStatusData4.owner.GetLastExposurePosition(exposureStatusData4.exposure_type.germ_id);
+				CameraController.Instance.CameraGoTo(lastExposurePosition2, 2f, true);
+				if (OverlayScreen.Instance.mode == OverlayModes.None.ID)
+				{
+					OverlayScreen.Instance.ToggleOverlay(OverlayModes.Disease.ID);
+				}
+			};
+			this.LightWorkEfficiencyBonus = this.CreateStatusItem("LightWorkEfficiencyBonus", "DUPLICANTS", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 2);
 		}
 
 		public StatusItem Idle;
@@ -386,9 +439,9 @@ namespace Database
 
 		public StatusItem Sleeping;
 
-		public StatusItem SleepingInterruptedLight;
+		public StatusItem SleepingInterruptedByLight;
 
-		public StatusItem SleepingInterrupted;
+		public StatusItem SleepingInterruptedByNoise;
 
 		public StatusItem SleepingPeacefully;
 
@@ -486,7 +539,11 @@ namespace Database
 
 		public StatusItem Mingling;
 
+		public StatusItem ContactWithGerms;
+
 		public StatusItem ExposedToGerms;
+
+		public StatusItem LightWorkEfficiencyBonus;
 
 		private const int NONE_OVERLAY = 0;
 	}

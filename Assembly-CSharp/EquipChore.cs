@@ -3,7 +3,7 @@
 public class EquipChore : Chore<EquipChore.StatesInstance>
 {
 	public EquipChore(IStateMachineTarget equippable)
-		: base(Db.Get().ChoreTypes.Equip, equippable, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.Equip, equippable, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new EquipChore.StatesInstance(this);
 		base.smi.sm.equippable_source.Set(equippable.gameObject, base.smi);

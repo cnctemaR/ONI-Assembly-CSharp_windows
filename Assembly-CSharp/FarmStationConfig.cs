@@ -28,7 +28,7 @@ public class FarmStationConfig : IBuildingConfig
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FarmStation);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.FarmStation, false);
 	}
 
 	public override void DoPostConfigurePreview(BuildingDef def, GameObject go)
@@ -52,13 +52,13 @@ public class FarmStationConfig : IBuildingConfig
 		manualDeliveryKG.requestedItemTag = FarmStationConfig.MATERIAL_FOR_TINKER;
 		manualDeliveryKG.refillMass = 5f;
 		manualDeliveryKG.capacity = 50f;
-		manualDeliveryKG.choreTags = new Tag[] { GameTags.ChoreTypes.Farming };
 		manualDeliveryKG.choreTypeIDHash = Db.Get().ChoreTypes.FarmFetch.IdHash;
 		TinkerStation tinkerStation = go.AddOrGet<TinkerStation>();
 		tinkerStation.overrideAnims = new KAnimFile[] { Assets.GetAnim("anim_interacts_planttender_kanim") };
 		tinkerStation.inputMaterial = FarmStationConfig.MATERIAL_FOR_TINKER;
 		tinkerStation.massPerTinker = 5f;
 		tinkerStation.outputPrefab = FarmStationConfig.TINKER_TOOLS;
+		tinkerStation.outputTemperature = 308.15f;
 		tinkerStation.requiredSkillPerk = Db.Get().SkillPerks.CanFarmTinker.Id;
 		tinkerStation.choreType = Db.Get().ChoreTypes.FarmingFabricate.IdHash;
 		tinkerStation.fetchChoreType = Db.Get().ChoreTypes.FarmFetch.IdHash;
@@ -82,4 +82,6 @@ public class FarmStationConfig : IBuildingConfig
 	public static Tag TINKER_TOOLS = FarmStationToolsConfig.tag;
 
 	public const float MASS_PER_TINKER = 5f;
+
+	public const float OUTPUT_TEMPERATURE = 308.15f;
 }

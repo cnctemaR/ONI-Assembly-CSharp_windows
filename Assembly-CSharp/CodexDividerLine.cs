@@ -7,6 +7,6 @@ public class CodexDividerLine : CodexWidget<CodexDividerLine>
 {
 	public override void Configure(GameObject contentGameObject, Transform displayPane, Dictionary<CodexTextStyle, TextStyleSetting> textStyles)
 	{
-		contentGameObject.GetComponent<LayoutElement>().minWidth = displayPane.rectTransform().sizeDelta.x - 64f;
+		contentGameObject.GetComponent<LayoutElement>().minWidth = 530f;
 	}
 }

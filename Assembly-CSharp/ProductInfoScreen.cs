@@ -111,11 +111,11 @@ public class ProductInfoScreen : KScreen
 		}
 		if (this.ProductRequirementsPane != null)
 		{
-			this.ProductRequirementsPane.gameObject.SetActive(this.expandedInfo && this.ProductRequirementsPane.labels.Count > 0);
+			this.ProductRequirementsPane.gameObject.SetActive(this.expandedInfo && this.ProductRequirementsPane.HasDescriptors());
 		}
 		if (this.ProductEffectsPane != null)
 		{
-			this.ProductEffectsPane.gameObject.SetActive(this.expandedInfo && this.ProductEffectsPane.labels.Count > 0);
+			this.ProductEffectsPane.gameObject.SetActive(this.expandedInfo && this.ProductEffectsPane.HasDescriptors());
 		}
 		if (this.ProductFlavourPane != null)
 		{
@@ -150,85 +150,90 @@ public class ProductInfoScreen : KScreen
 
 	private void SetDescription(BuildingDef def)
 	{
-		if (this.productFlavourText != null)
+		if (def == null)
 		{
-			string text = def.Desc;
-			Dictionary<Klei.AI.Attribute, float> dictionary = new Dictionary<Klei.AI.Attribute, float>();
-			Dictionary<Klei.AI.Attribute, float> dictionary2 = new Dictionary<Klei.AI.Attribute, float>();
-			foreach (Klei.AI.Attribute attribute in def.attributes)
-			{
-				if (!dictionary.ContainsKey(attribute))
-				{
-					dictionary[attribute] = 0f;
-				}
-			}
-			foreach (AttributeModifier attributeModifier in def.attributeModifiers)
-			{
-				float num = 0f;
-				Klei.AI.Attribute attribute2 = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId);
-				dictionary.TryGetValue(attribute2, out num);
-				num += attributeModifier.Value;
-				dictionary[attribute2] = num;
-			}
-			if (this.materialSelectionPanel.CurrentSelectedElement != null)
-			{
-				Element element = ElementLoader.GetElement(this.materialSelectionPanel.CurrentSelectedElement);
-				if (element != null)
-				{
-					foreach (AttributeModifier attributeModifier2 in element.attributeModifiers)
-					{
-						float num2 = 0f;
-						Klei.AI.Attribute attribute3 = Db.Get().BuildingAttributes.Get(attributeModifier2.AttributeId);
-						dictionary2.TryGetValue(attribute3, out num2);
-						num2 += attributeModifier2.Value;
-						dictionary2[attribute3] = num2;
-					}
-				}
-				else
-				{
-					GameObject gameObject = Assets.TryGetPrefab(this.materialSelectionPanel.CurrentSelectedElement);
-					PrefabAttributeModifiers component = gameObject.GetComponent<PrefabAttributeModifiers>();
-					if (component != null)
-					{
-						foreach (AttributeModifier attributeModifier3 in component.descriptors)
-						{
-							float num3 = 0f;
-							Klei.AI.Attribute attribute4 = Db.Get().BuildingAttributes.Get(attributeModifier3.AttributeId);
-							dictionary2.TryGetValue(attribute4, out num3);
-							num3 += attributeModifier3.Value;
-							dictionary2[attribute4] = num3;
-						}
-					}
-				}
-			}
-			if (dictionary.Count > 0)
-			{
-				text += "\n\n";
-				foreach (KeyValuePair<Klei.AI.Attribute, float> keyValuePair in dictionary)
-				{
-					float num4 = 0f;
-					dictionary.TryGetValue(keyValuePair.Key, out num4);
-					float num5 = 0f;
-					string text2 = string.Empty;
-					if (dictionary2.TryGetValue(keyValuePair.Key, out num5))
-					{
-						num5 = Mathf.Abs(num4 * num5);
-						text2 = "(+" + num5 + ")";
-					}
-					string text3 = text;
-					text = string.Concat(new object[]
-					{
-						text3,
-						"\n",
-						keyValuePair.Key.Name,
-						": ",
-						num4 + num5,
-						text2
-					});
-				}
-			}
-			this.productFlavourText.text = text;
+			return;
 		}
+		if (this.productFlavourText == null)
+		{
+			return;
+		}
+		string text = def.Desc;
+		Dictionary<Klei.AI.Attribute, float> dictionary = new Dictionary<Klei.AI.Attribute, float>();
+		Dictionary<Klei.AI.Attribute, float> dictionary2 = new Dictionary<Klei.AI.Attribute, float>();
+		foreach (Klei.AI.Attribute attribute in def.attributes)
+		{
+			if (!dictionary.ContainsKey(attribute))
+			{
+				dictionary[attribute] = 0f;
+			}
+		}
+		foreach (AttributeModifier attributeModifier in def.attributeModifiers)
+		{
+			float num = 0f;
+			Klei.AI.Attribute attribute2 = Db.Get().BuildingAttributes.Get(attributeModifier.AttributeId);
+			dictionary.TryGetValue(attribute2, out num);
+			num += attributeModifier.Value;
+			dictionary[attribute2] = num;
+		}
+		if (this.materialSelectionPanel.CurrentSelectedElement != null)
+		{
+			Element element = ElementLoader.GetElement(this.materialSelectionPanel.CurrentSelectedElement);
+			if (element != null)
+			{
+				foreach (AttributeModifier attributeModifier2 in element.attributeModifiers)
+				{
+					float num2 = 0f;
+					Klei.AI.Attribute attribute3 = Db.Get().BuildingAttributes.Get(attributeModifier2.AttributeId);
+					dictionary2.TryGetValue(attribute3, out num2);
+					num2 += attributeModifier2.Value;
+					dictionary2[attribute3] = num2;
+				}
+			}
+			else
+			{
+				GameObject gameObject = Assets.TryGetPrefab(this.materialSelectionPanel.CurrentSelectedElement);
+				PrefabAttributeModifiers component = gameObject.GetComponent<PrefabAttributeModifiers>();
+				if (component != null)
+				{
+					foreach (AttributeModifier attributeModifier3 in component.descriptors)
+					{
+						float num3 = 0f;
+						Klei.AI.Attribute attribute4 = Db.Get().BuildingAttributes.Get(attributeModifier3.AttributeId);
+						dictionary2.TryGetValue(attribute4, out num3);
+						num3 += attributeModifier3.Value;
+						dictionary2[attribute4] = num3;
+					}
+				}
+			}
+		}
+		if (dictionary.Count > 0)
+		{
+			text += "\n\n";
+			foreach (KeyValuePair<Klei.AI.Attribute, float> keyValuePair in dictionary)
+			{
+				float num4 = 0f;
+				dictionary.TryGetValue(keyValuePair.Key, out num4);
+				float num5 = 0f;
+				string text2 = string.Empty;
+				if (dictionary2.TryGetValue(keyValuePair.Key, out num5))
+				{
+					num5 = Mathf.Abs(num4 * num5);
+					text2 = "(+" + num5 + ")";
+				}
+				string text3 = text;
+				text = string.Concat(new object[]
+				{
+					text3,
+					"\n",
+					keyValuePair.Key.Name,
+					": ",
+					num4 + num5,
+					text2
+				});
+			}
+		}
+		this.productFlavourText.text = text;
 	}
 
 	private void SetEffects(BuildingDef def)

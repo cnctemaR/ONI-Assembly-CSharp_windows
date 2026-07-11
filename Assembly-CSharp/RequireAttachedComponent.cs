@@ -26,7 +26,7 @@ public class RequireAttachedComponent : RocketLaunchCondition
 		}
 	}
 
-	public override bool EvaluateLaunchCondition()
+	public override RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition()
 	{
 		if (this.myAttachable != null)
 		{
@@ -34,12 +34,12 @@ public class RequireAttachedComponent : RocketLaunchCondition
 			{
 				if (gameObject.GetComponent(this.requiredType))
 				{
-					return true;
+					return RocketLaunchCondition.LaunchStatus.Ready;
 				}
 			}
-			return false;
+			return RocketLaunchCondition.LaunchStatus.Failure;
 		}
-		return false;
+		return RocketLaunchCondition.LaunchStatus.Failure;
 	}
 
 	public override string GetLaunchStatusMessage(bool ready)

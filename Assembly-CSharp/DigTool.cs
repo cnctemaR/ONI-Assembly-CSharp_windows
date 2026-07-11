@@ -22,13 +22,13 @@ public class DigTool : DragTool
 			{
 				if (Grid.PosToCell(uprootable.gameObject) == cell)
 				{
-					uprootable.MarkForUproot();
+					uprootable.MarkForUproot(true);
 					break;
 				}
 				OccupyArea area = uprootable.area;
 				if (area != null && area.CheckIsOccupying(cell))
 				{
-					uprootable.MarkForUproot();
+					uprootable.MarkForUproot(true);
 				}
 			}
 		}

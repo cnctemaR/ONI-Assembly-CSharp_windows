@@ -51,7 +51,6 @@ public abstract class BaseWireConfig : IBuildingConfig
 		base.DoPostConfigureUnderConstruction(go);
 		Constructable component = go.GetComponent<Constructable>();
 		component.isDiggingRequired = false;
-		component.choreTags = GameTags.ChoreTypes.WiringChores;
 		KAnimGraphTileVisualizer kanimGraphTileVisualizer = go.AddOrGet<KAnimGraphTileVisualizer>();
 		kanimGraphTileVisualizer.isPhysicalBuilding = false;
 		kanimGraphTileVisualizer.connectionSource = KAnimGraphTileVisualizer.ConnectionSource.Electrical;

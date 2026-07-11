@@ -34,11 +34,12 @@ namespace Klei.AI
 			});
 			base.AddGrowthRule(new StateGrowthRule(Element.State.Gas)
 			{
-				minCountPerKG = new float?(150f),
+				minCountPerKG = new float?(500f),
+				underPopulationDeathRate = new float?(2.6666667f),
 				populationHalfLife = new float?(10f),
 				overPopulationHalfLife = new float?(10f),
 				maxCountPerKG = new float?(1000000f),
-				minDiffusionCount = new int?(100),
+				minDiffusionCount = new int?(1000),
 				diffusionScale = new float?(0.015f)
 			});
 			base.AddGrowthRule(new ElementGrowthRule(SimHashes.Oxygen)

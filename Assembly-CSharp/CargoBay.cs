@@ -95,11 +95,19 @@ public class CargoBay : KMonoBehaviour
 
 	public void OnLaunch(object data)
 	{
+		this.ReserveResources();
 		ConduitDispenser component = base.GetComponent<ConduitDispenser>();
 		if (component != null)
 		{
 			component.conduitType = ConduitType.None;
 		}
+	}
+
+	private void ReserveResources()
+	{
+		int spacecraftID = SpacecraftManager.instance.GetSpacecraftID(base.GetComponent<RocketModule>().conditionManager.GetComponent<LaunchableRocket>());
+		SpaceDestination spacecraftDestination = SpacecraftManager.instance.GetSpacecraftDestination(spacecraftID);
+		spacecraftDestination.UpdateRemainingResources(this);
 	}
 
 	public void OnLand(object data)

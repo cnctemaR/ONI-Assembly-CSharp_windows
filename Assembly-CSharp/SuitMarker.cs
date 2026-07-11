@@ -58,7 +58,7 @@ public class SuitMarker : KMonoBehaviour
 		this.cell = Grid.PosToCell(this);
 		Grid.RegisterSuitMarker(this.cell);
 		base.GetComponent<KAnimControllerBase>().Play("no_suit", KAnim.PlayMode.Once, 1f, 0f);
-		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits);
+		Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Suits, true);
 		this.RefreshTraverseIfUnequipStatusItem();
 		SuitLocker.UpdateSuitMarkerStates(Grid.PosToCell(base.transform.position), base.gameObject);
 	}
@@ -125,7 +125,7 @@ public class SuitMarker : KMonoBehaviour
 			{
 				num++;
 			}
-			if (suitLocker.GetFullyChargedOutfit() != null)
+			if (suitLocker.GetPartiallyChargedOutfit() != null)
 			{
 				num2++;
 			}
@@ -370,6 +370,24 @@ public class SuitMarker : KMonoBehaviour
 						suitLocker.UnequipFrom(equipment);
 						flag2 = true;
 						break;
+					}
+				}
+				if (flag && !flag2)
+				{
+					SuitLocker suitLocker2 = null;
+					float num = 0f;
+					foreach (SuitLocker suitLocker3 in pooledList)
+					{
+						if (suitLocker3.GetSuitScore() > num)
+						{
+							suitLocker2 = suitLocker3;
+							num = suitLocker3.GetSuitScore();
+						}
+					}
+					if (suitLocker2 != null)
+					{
+						suitLocker2.EquipTo(equipment);
+						flag2 = true;
 					}
 				}
 				pooledList.Recycle();

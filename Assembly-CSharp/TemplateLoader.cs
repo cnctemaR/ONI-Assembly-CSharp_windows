@@ -94,17 +94,19 @@ public static class TemplateLoader
 			return gameObject;
 		}
 		BuildingComplete component = gameObject.GetComponent<BuildingComplete>();
-		Rotatable component2 = gameObject.GetComponent<Rotatable>();
-		if (component2 != null)
+		KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+		component2.AddTag(GameTags.TemplateBuilding, true);
+		Rotatable component3 = gameObject.GetComponent<Rotatable>();
+		if (component3 != null)
 		{
-			component2.SetOrientation(prefab.rotationOrientation);
+			component3.SetOrientation(prefab.rotationOrientation);
 		}
-		PrimaryElement component3 = component.GetComponent<PrimaryElement>();
+		PrimaryElement component4 = component.GetComponent<PrimaryElement>();
 		if (prefab.temperature > 0f)
 		{
-			component3.Temperature = prefab.temperature;
+			component4.Temperature = prefab.temperature;
 		}
-		component3.AddDisease(Db.Get().Diseases.GetIndex(prefab.diseaseName), prefab.diseaseCount, "TemplateLoader.PlaceBuilding");
+		component4.AddDisease(Db.Get().Diseases.GetIndex(prefab.diseaseName), prefab.diseaseCount, "TemplateLoader.PlaceBuilding");
 		if (prefab.id == "Door")
 		{
 			for (int i = 0; i < component.PlacementCells.Length; i++)
@@ -156,19 +158,19 @@ public static class TemplateLoader
 						}
 						else
 						{
-							Unsealable component4 = gameObject.GetComponent<Unsealable>();
-							if (component4)
+							Unsealable component5 = gameObject.GetComponent<Unsealable>();
+							if (component5)
 							{
-								component4.facingRight = template_amount_value2.value != 0f;
+								component5.facingRight = template_amount_value2.value != 0f;
 							}
 						}
 					}
 					else
 					{
-						Battery component5 = gameObject.GetComponent<Battery>();
-						if (component5)
+						Battery component6 = gameObject.GetComponent<Battery>();
+						if (component6)
 						{
-							component5.AddEnergy(template_amount_value2.value);
+							component6.AddEnergy(template_amount_value2.value);
 						}
 					}
 				}
@@ -176,8 +178,8 @@ public static class TemplateLoader
 		}
 		if (prefab.storage != null && prefab.storage.Count > 0)
 		{
-			Storage component6 = component.gameObject.GetComponent<Storage>();
-			if (component6 == null)
+			Storage component7 = component.gameObject.GetComponent<Storage>();
+			if (component7 == null)
 			{
 				global::Debug.LogWarning("No storage component on stampTemplate building " + prefab.id + ". Saved storage contents will be ignored.");
 			}
@@ -191,7 +193,7 @@ public static class TemplateLoader
 				{
 					Substance substance = ElementLoader.FindElementByHash(storageItem.element).substance;
 					gameObject2 = substance.SpawnResource(Vector3.zero, storageItem.units, storageItem.temperature, Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, false, false, false);
-					goto IL_0502;
+					goto IL_0518;
 				}
 				gameObject2 = Scenario.SpawnPrefab(root_cell, 0, 0, id2, Grid.SceneLayer.Ore);
 				if (gameObject2 == null)
@@ -201,29 +203,29 @@ public static class TemplateLoader
 				else
 				{
 					gameObject2.SetActive(true);
-					PrimaryElement component7 = gameObject2.GetComponent<PrimaryElement>();
-					component7.Units = storageItem.units;
-					component7.Temperature = storageItem.temperature;
-					component7.AddDisease(Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, "TemplateLoader.PlaceBuilding");
+					PrimaryElement component8 = gameObject2.GetComponent<PrimaryElement>();
+					component8.Units = storageItem.units;
+					component8.Temperature = storageItem.temperature;
+					component8.AddDisease(Db.Get().Diseases.GetIndex(storageItem.diseaseName), storageItem.diseaseCount, "TemplateLoader.PlaceBuilding");
 					global::Rottable.Instance smi = gameObject2.GetSMI<global::Rottable.Instance>();
 					if (smi != null)
 					{
 						smi.RotValue = storageItem.rottable.rotAmount;
-						goto IL_0502;
+						goto IL_0518;
 					}
-					goto IL_0502;
+					goto IL_0518;
 				}
-				IL_052C:
+				IL_0542:
 				l++;
 				continue;
-				IL_0502:
-				GameObject gameObject3 = component6.Store(gameObject2, true, true, true, false);
+				IL_0518:
+				GameObject gameObject3 = component7.Store(gameObject2, true, true, true, false);
 				if (gameObject3 != null)
 				{
-					gameObject3.GetComponent<Pickupable>().OnStore(component6);
-					goto IL_052C;
+					gameObject3.GetComponent<Pickupable>().OnStore(component7);
+					goto IL_0542;
 				}
-				goto IL_052C;
+				goto IL_0542;
 			}
 		}
 		if (prefab.connections != 0)

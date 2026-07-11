@@ -52,17 +52,17 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				this.RefreshQueueCountDisplay(gameObject, this.targetFab);
 			}
 		}
-		if (this.targetFab.CurrentMachineOrder != null)
+		if (this.targetFab.CurrentWorkingOrder != null)
 		{
-			this.currentOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CURRENT_ORDER, this.targetFab.CurrentMachineOrder.parentOrder.recipe.GetUIName());
+			this.currentOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CURRENT_ORDER, this.targetFab.CurrentWorkingOrder.GetUIName());
 		}
 		else
 		{
 			this.currentOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.CURRENT_ORDER, UI.UISIDESCREENS.FABRICATORSIDESCREEN.NO_WORKABLE_ORDER);
 		}
-		if (this.targetFab.GetMachineOrders().Count > 1)
+		if (this.targetFab.NextOrder != null)
 		{
-			this.nextOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.NEXT_ORDER, this.targetFab.GetMachineOrders()[1].parentOrder.recipe.GetUIName());
+			this.nextOrderLabel.text = string.Format(UI.UISIDESCREENS.FABRICATORSIDESCREEN.NEXT_ORDER, this.targetFab.NextOrder.GetUIName());
 		}
 		else
 		{
@@ -86,15 +86,6 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		base.OnShow(show);
 	}
 
-	private int CompareRecipe(ComplexRecipe a, ComplexRecipe b)
-	{
-		if (a.sortOrder != b.sortOrder)
-		{
-			return a.sortOrder - b.sortOrder;
-		}
-		return StringComparer.InvariantCulture.Compare(a.id, b.id);
-	}
-
 	public void Initialize(ComplexFabricator target)
 	{
 		if (target == null)
@@ -104,8 +95,6 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		}
 		this.targetFab = target;
 		base.gameObject.SetActive(true);
-		ComplexRecipe[] recipes = this.targetFab.GetRecipes();
-		Array.Sort<ComplexRecipe>(recipes, new Comparison<ComplexRecipe>(this.CompareRecipe));
 		this.recipeMap = new Dictionary<GameObject, ComplexRecipe>();
 		this.recipeToggles.ForEach(delegate(GameObject rbi)
 		{
@@ -120,22 +109,23 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 		case ComplexFabricatorSideScreen.StyleSetting.ListInputOutput:
 			component.constraintCount = 1;
 			component.cellSize = new Vector2(262f, component.cellSize.y);
-			goto IL_01A1;
+			goto IL_0182;
 		case ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator:
 			component.constraintCount = 128;
 			component.cellSize = new Vector2(78f, 96f);
 			this.buttonScrollContainer.minHeight = 100f;
-			goto IL_01A1;
+			goto IL_0182;
 		case ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid:
 			component.constraintCount = 1;
 			component.cellSize = new Vector2(264f, 64f);
 			this.buttonScrollContainer.minHeight = 66f;
-			goto IL_01A1;
+			goto IL_0182;
 		}
 		component.constraintCount = 3;
 		component.cellSize = new Vector2(116f, component.cellSize.y);
-		IL_01A1:
+		IL_0182:
 		int num = 0;
+		ComplexRecipe[] recipes = this.targetFab.GetRecipes();
 		ComplexRecipe[] array = recipes;
 		for (int i = 0; i < array.Length; i++)
 		{
@@ -194,14 +184,14 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				case ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator:
-					goto IL_062F;
+					goto IL_061E;
 				case ComplexFabricatorSideScreen.StyleSetting.ListQueueHybrid:
 				{
 					newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButtonQueueHybrid, this.recipeGrid, false);
 					entryGO = newToggle.gameObject;
 					this.recipeMap.Add(entryGO, <Initialize>c__AnonStorey2.recipe);
 					Image image = entryGO.GetComponentsInChildrenOnly<Image>()[2];
-					if (!<Initialize>c__AnonStorey2.recipe.useResultAsDescription)
+					if (<Initialize>c__AnonStorey2.recipe.nameDisplay == ComplexRecipe.RecipeNameDisplay.Ingredient)
 					{
 						image.sprite = uisprite.first;
 						image.color = uisprite.second;
@@ -229,9 +219,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					break;
 				}
 				default:
-					goto IL_062F;
+					goto IL_061E;
 				}
-				IL_06D2:
+				IL_06C1:
 				if (this.targetFab.sideScreenStyle == ComplexFabricatorSideScreen.StyleSetting.ClassicFabricator)
 				{
 					newToggle.GetComponentInChildren<LocText>().text = <Initialize>c__AnonStorey2.recipe.results[0].material.ProperName();
@@ -254,8 +244,8 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 				};
 				entryGO.SetActive(true);
 				this.recipeToggles.Add(entryGO);
-				goto IL_083B;
-				IL_062F:
+				goto IL_082A;
+				IL_061E:
 				newToggle = global::Util.KInstantiateUI<KToggle>(this.recipeButton, this.recipeGrid, false);
 				entryGO = newToggle.gameObject;
 				Image componentInChildrenOnly = newToggle.gameObject.GetComponentInChildrenOnly<Image>();
@@ -269,9 +259,9 @@ public class ComplexFabricatorSideScreen : SideScreenContent
 					componentInChildrenOnly.sprite = uisprite2.first;
 					componentInChildrenOnly.color = uisprite2.second;
 				}
-				goto IL_06D2;
+				goto IL_06C1;
 			}
-			IL_083B:;
+			IL_082A:;
 		}
 		if (this.recipeToggles.Count > 0)
 		{

@@ -11,6 +11,14 @@ public class Room : IAssignableIdentity
 		}
 	}
 
+	public List<KPrefabID> plants
+	{
+		get
+		{
+			return this.cavity.plants;
+		}
+	}
+
 	public string GetProperName()
 	{
 		return this.roomType.Name;
@@ -58,6 +66,13 @@ public class Room : IAssignableIdentity
 					this.primary_buildings.Add(kprefabID);
 				}
 			}
+			foreach (KPrefabID kprefabID2 in this.plants)
+			{
+				if (kprefabID2 != null && roomType.primary_constraint.building_criteria(kprefabID2))
+				{
+					this.primary_buildings.Add(kprefabID2);
+				}
+			}
 		}
 		return this.primary_buildings;
 	}
@@ -69,6 +84,13 @@ public class Room : IAssignableIdentity
 			if (!(kprefabID == null))
 			{
 				kprefabID.Trigger(144050788, this);
+			}
+		}
+		foreach (KPrefabID kprefabID2 in this.plants)
+		{
+			if (!(kprefabID2 == null))
+			{
+				kprefabID2.Trigger(144050788, this);
 			}
 		}
 	}

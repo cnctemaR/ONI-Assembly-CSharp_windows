@@ -9,7 +9,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 		base.smi.StartSM();
 		GameScheduler.Instance.Schedule("WaterFetchingTutorial", 2f, delegate(object obj)
 		{
-			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater);
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_FetchingWater, true);
 		}, null, null);
 		this.ConfigurePollutedWaterOutput();
 		Tutorial.Instance.oxygenGenerators.Add(base.gameObject);
@@ -82,7 +82,7 @@ public class AlgaeHabitat : StateMachineComponent<AlgaeHabitat.SMInstance>
 				this.emptyChore.Cancel("dupe");
 			}
 			AlgaeHabitatEmpty component = base.master.GetComponent<AlgaeHabitatEmpty>();
-			this.emptyChore = new WorkChore<AlgaeHabitatEmpty>(Db.Get().ChoreTypes.EmptyStorage, component, null, null, true, new Action<Chore>(this.OnEmptyComplete), null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
+			this.emptyChore = new WorkChore<AlgaeHabitatEmpty>(Db.Get().ChoreTypes.EmptyStorage, component, null, true, new Action<Chore>(this.OnEmptyComplete), null, null, true, null, false, true, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
 		}
 
 		public void CancelEmptyChore()

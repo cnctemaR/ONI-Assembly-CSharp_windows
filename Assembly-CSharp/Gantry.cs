@@ -8,7 +8,7 @@ public class Gantry : Switch
 		base.OnSpawn();
 		if (Gantry.infoStatusItem == null)
 		{
-			Gantry.infoStatusItem = new StatusItem("GantryAutomationInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
+			Gantry.infoStatusItem = new StatusItem("GantryAutomationInfo", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			Gantry.infoStatusItem.resolveStringCallback = new Func<string, object, string>(Gantry.ResolveInfoStatusItemString);
 		}
 		base.GetComponent<KAnimControllerBase>().PlaySpeedMultiplier = 0.5f;

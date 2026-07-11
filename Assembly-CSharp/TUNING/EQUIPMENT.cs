@@ -78,6 +78,8 @@ namespace TUNING
 			public static int TEMPERATURESUIT_ATHLETICS = EQUIPMENT.SUITS.ATMOSUIT_ATHLETICS;
 
 			public static int TEMPERATURESUIT_MASS = EQUIPMENT.SUITS.ATMOSUIT_MASS;
+
+			public static float MINIMUM_USABLE_SUIT_CHARGE = 0.95f;
 		}
 
 		public class VESTS

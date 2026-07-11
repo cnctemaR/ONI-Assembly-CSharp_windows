@@ -30,7 +30,7 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 		this.lastPrioritySetting = context.chore.masterPriority;
 		string choreName = GameUtil.GetChoreName(context.chore, context.data);
 		string text = GameUtil.ChoreGroupsForChoreType(context.chore.choreType);
-		string text2 = ((text == null) ? UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CHORE_TARGET : UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CHORE_TARGET_AND_GROUP);
+		string text2 = UI.UISIDESCREENS.MINIONTODOSIDESCREEN.CHORE_TARGET;
 		text2 = text2.Replace("{Target}", (!(context.chore.target.gameObject == consumer.gameObject)) ? context.chore.target.gameObject.GetProperName() : UI.UISIDESCREENS.MINIONTODOSIDESCREEN.SELF_LABEL.text);
 		if (text != null)
 		{
@@ -38,10 +38,12 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 		}
 		string text3 = ((context.chore.masterPriority.priority_class != PriorityScreen.PriorityClass.basic) ? string.Empty : context.chore.masterPriority.priority_value.ToString());
 		Sprite sprite = ((context.chore.masterPriority.priority_class != PriorityScreen.PriorityClass.basic) ? null : this.prioritySprites[context.chore.masterPriority.priority_value - 1]);
+		ChoreGroup choreGroup = MinionTodoChoreEntry.BestPriorityGroup(context, consumer);
+		this.icon.sprite = ((choreGroup == null) ? null : Assets.GetSprite(choreGroup.sprite));
 		this.label.SetText(choreName);
 		this.subLabel.SetText(text2);
 		this.priorityLabel.SetText(text3);
-		this.icon.sprite = sprite;
+		this.priorityIcon.sprite = sprite;
 		this.moreLabel.text = string.Empty;
 		base.GetComponent<ToolTip>().SetSimpleTooltip(MinionTodoChoreEntry.TooltipForChore(context, consumer));
 		KButton componentInChildren = base.GetComponentInChildren<KButton>();
@@ -61,6 +63,23 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 				CameraController.Instance.SetTargetPos(vector, 10f, true);
 			}
 		};
+	}
+
+	private static ChoreGroup BestPriorityGroup(Chore.Precondition.Context context, ChoreConsumer choreConsumer)
+	{
+		ChoreGroup choreGroup = null;
+		if (context.chore.choreType.groups.Length > 0)
+		{
+			choreGroup = context.chore.choreType.groups[0];
+			for (int i = 1; i < context.chore.choreType.groups.Length; i++)
+			{
+				if (choreConsumer.GetPersonalPriority(choreGroup) < choreConsumer.GetPersonalPriority(context.chore.choreType.groups[i]))
+				{
+					choreGroup = context.chore.choreType.groups[i];
+				}
+			}
+		}
+		return choreGroup;
 	}
 
 	private static string TooltipForChore(Chore.Precondition.Context context, ChoreConsumer choreConsumer)
@@ -97,23 +116,11 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 		text = text.Replace("{Description}", (!(context.chore.driver == choreConsumer.choreDriver)) ? UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP_DESC_INACTIVE : UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP_DESC_ACTIVE);
 		text = text.Replace("{IdleDescription}", (!(context.chore.driver == choreConsumer.choreDriver)) ? UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP_IDLEDESC_INACTIVE : UI.UISIDESCREENS.MINIONTODOSIDESCREEN.TOOLTIP_IDLEDESC_ACTIVE);
 		string text2 = GameUtil.ChoreGroupsForChoreType(context.chore.choreType);
-		string text3 = context.chore.choreType.Name;
-		if (context.chore.choreType.groups.Length > 0)
-		{
-			ChoreGroup choreGroup = context.chore.choreType.groups[0];
-			for (int i = 1; i < context.chore.choreType.groups.Length; i++)
-			{
-				if (choreConsumer.GetPersonalPriority(choreGroup) < choreConsumer.GetPersonalPriority(context.chore.choreType.groups[i]))
-				{
-					choreGroup = context.chore.choreType.groups[i];
-				}
-			}
-			text3 = choreGroup.Name;
-		}
+		ChoreGroup choreGroup = MinionTodoChoreEntry.BestPriorityGroup(context, choreConsumer);
 		text = text.Replace("{Name}", choreConsumer.name);
 		text = text.Replace("{Errand}", GameUtil.GetChoreName(context.chore, context.data));
 		text = text.Replace("{Groups}", text2);
-		text = text.Replace("{BestGroup}", text3);
+		text = text.Replace("{BestGroup}", (choreGroup == null) ? context.chore.choreType.Name : choreGroup.Name);
 		text = text.Replace("{ClassPriority}", num2.ToString());
 		text = text.Replace("{PersonalPriority}", JobsTableScreen.priorityInfo[num3].name.text);
 		text = text.Replace("{PersonalPriorityValue}", (num3 * 10).ToString());
@@ -124,6 +131,8 @@ public class MinionTodoChoreEntry : KMonoBehaviour
 	}
 
 	public Image icon;
+
+	public Image priorityIcon;
 
 	public LocText priorityLabel;
 

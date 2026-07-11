@@ -27,6 +27,10 @@ namespace STRINGS
 			public static LocString MOO = UI.FormatAsLink("Moo", "MOOSPECIES");
 
 			public static LocString MOLE = UI.FormatAsLink("Shove Vole", "MOLESPECIES");
+
+			public static LocString SQUIRREL = UI.FormatAsLink("Pip", "SQUIRRELSPECIES");
+
+			public static LocString CRAB = UI.FormatAsLink("Pokeshell", "CRABSPECIES");
 		}
 
 		public class FAMILY_PLURAL
@@ -48,10 +52,39 @@ namespace STRINGS
 			public static LocString MOOSPECIES = UI.FormatAsLink("Moos", "MOOSPECIES");
 
 			public static LocString MOLESPECIES = UI.FormatAsLink("Shove Voles", "MOLESPECIES");
+
+			public static LocString CRABSPECIES = UI.FormatAsLink("Pokeshells", "CRABSPECIES");
+
+			public static LocString SQUIRRELSPECIES = UI.FormatAsLink("Pips", "SQUIRRELSPECIES");
 		}
 
 		public class SPECIES
 		{
+			public class CRAB
+			{
+				public static LocString NAME = UI.FormatAsLink("Pokeshell", "Crab");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Pokeshells are nonhostile critters that eat ",
+					UI.FormatAsLink("Polluted Dirt", "TOXICSAND"),
+					" and ",
+					UI.FormatAsLink("Rot Piles", "COMPOST"),
+					".\n\nThe shells they leave behind after molting can be crushed into ",
+					UI.FormatAsLink("Lime", "LIME"),
+					"."
+				});
+
+				public static LocString EGG_NAME = UI.FormatAsLink("Pinch Roe", "Crab");
+
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Pokeshell Spawn", "CRAB");
+
+					public static LocString DESC = "A snippy little Pokeshell Spawn.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Pokeshell", "CRAB") + ".";
+				}
+			}
+
 			public class CHLORINEGEYSER
 			{
 				public static LocString NAME = UI.FormatAsLink("Chlorine Geyser", "GeyserGeneric_CHLORINE_GAS");
@@ -237,6 +270,29 @@ namespace STRINGS
 
 						public static LocString DESC = "A bug-eyed little Glossy Drecklet.\n\nIn time it will mature into an adult Drecko morph, the " + UI.FormatAsLink("Glossy Drecko", "DRECKOPLASTIC") + ".";
 					}
+				}
+			}
+
+			public class SQUIRREL
+			{
+				public static LocString NAME = UI.FormatAsLink("Pip", "SQUIRREL");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Pips are pesky, nonhostile critters that subsist on raw ",
+					UI.FormatAsLink("Lumber", "WOOD"),
+					".\n\nThey are known to bury ",
+					UI.FormatAsLink("Seeds", "PLANTS"),
+					" in the ground whenever they can find a suitable area with enough space."
+				});
+
+				public static LocString EGG_NAME = UI.FormatAsLink("Pip Egg", "SQUIRREL");
+
+				public class BABY
+				{
+					public static LocString NAME = UI.FormatAsLink("Pipsqueak", "SQUIRREL");
+
+					public static LocString DESC = "A little purring Pipsqueak.\n\nIn time it will mature into a fully grown " + UI.FormatAsLink("Pip", "SQUIRREL") + ".";
 				}
 			}
 
@@ -556,6 +612,13 @@ namespace STRINGS
 					public static LocString DESC = "A highly pressurized vent that periodically erupts with scalding " + UI.FormatAsLink("Steam", "STEAM") + ".";
 				}
 
+				public class SALT_WATER
+				{
+					public static LocString NAME = UI.FormatAsLink("Salt Water Geyser", "GeyserGeneric_SALT_WATER");
+
+					public static LocString DESC = "A highly pressurized geyser that periodically erupts with " + UI.FormatAsLink("Salt Water", "SALTWATER") + ".";
+				}
+
 				public class HOT_WATER
 				{
 					public static LocString NAME = UI.FormatAsLink("Water Geyser", "GeyserGeneric_HOT_WATER");
@@ -817,15 +880,15 @@ namespace STRINGS
 			{
 				public static LocString NAME = UI.FormatAsLink("Sporechid", "EVILFLOWER");
 
-				public static LocString DESC = "This beautiful specemin is actually the host for a particularly nasty strain of brain fungus.";
+				public static LocString DESC = "Sporechids have an eerily alluring appearance to mask the fact that they host particularly nasty strain of brain fungus.";
 
 				public static LocString DOMESTICATEDDESC = string.Concat(new string[]
 				{
 					"This plant improves ",
 					UI.FormatAsLink("Decor", "DECOR"),
-					" but also produces ",
+					" but produces high quantities of ",
 					UI.FormatAsLink("Zombie Spores", "ZOMBIESPORES"),
-					" in abundance."
+					"."
 				});
 
 				public static LocString GROWTH_BONUS = "Growth Bonus";
@@ -925,6 +988,13 @@ namespace STRINGS
 				public static LocString DESC = "Muckroots are incapable of propagating but can be harvested for a single " + UI.FormatAsLink("Food", "FOOD") + " serving.";
 			}
 
+			public class FORESTFORAGEPLANTPLANTED
+			{
+				public static LocString NAME = UI.FormatAsLink("Hexalent", "FORESTFORAGEPLANTPLANTED");
+
+				public static LocString DESC = "Hexalents are incapable of propagating but can be harvested for a single, calorie dense " + UI.FormatAsLink("Food", "FOOD") + " serving.";
+			}
+
 			public class COLDBREATHER
 			{
 				public static LocString NAME = UI.FormatAsLink("Wheezewort", "COLDBREATHER");
@@ -948,6 +1018,93 @@ namespace STRINGS
 				});
 
 				public static LocString DOMESTICATEDDESC = "This plant produces " + ITEMS.FOOD.SPICENUT.NAME + " spices.";
+			}
+
+			public class SALTPLANT
+			{
+				public static LocString NAME = UI.FormatAsLink("Dasha Saltvine", "SALTPLANT");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Dasha Saltvines consume small amounts of ",
+					UI.FormatAsLink("Chlorine Gas", "CHLORINE"),
+					" and form sodium deposits as they grow, producing harvestable ",
+					UI.FormatAsLink("Salt", "SALT"),
+					"."
+				});
+
+				public static LocString DOMESTICATEDDESC = "This plant produces unrefined " + UI.FormatAsLink("Salt", "SALT") + ".";
+			}
+
+			public class OXYFERN
+			{
+				public static LocString NAME = UI.FormatAsLink("Oxyfern", "OXYFERN");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Oxyferns absorb ",
+					UI.FormatAsLink("Carbon Dioxide", "CARBONDIOXIDE"),
+					" and exude breathable ",
+					UI.FormatAsLink("Oxygen", "OXYGEN"),
+					"."
+				});
+
+				public static LocString DOMESTICATEDDESC = string.Concat(new string[]
+				{
+					"This plant converts ",
+					UI.FormatAsLink("CO<sub>2</sub>", "CARBONDIOXIDE"),
+					" into ",
+					UI.FormatAsLink("Oxygen", "OXYGEN"),
+					"."
+				});
+			}
+
+			public class BEAN_PLANT
+			{
+				public static LocString NAME = UI.FormatAsLink("Nosh Sprout", "BEAN_PLANT");
+
+				public static LocString DESC = "Nosh Sprouts thrive in colder climates and produce edible " + UI.FormatAsLink("Nosh Beans", "BEAN") + ".";
+
+				public static LocString DOMESTICATEDDESC = "This plant produces " + UI.FormatAsLink("Nosh Beans", "BEAN") + ".";
+			}
+
+			public class WOOD_TREE
+			{
+				public static LocString NAME = UI.FormatAsLink("Arbor Tree", "FOREST_TREE");
+
+				public static LocString DESC = string.Concat(new string[]
+				{
+					"Arbor Trees grow ",
+					UI.FormatAsLink("Arbor Tree Branches", "FOREST_TREE"),
+					" that can be harvested for ",
+					UI.FormatAsLink("Lumber", "WOOD"),
+					"."
+				});
+
+				public static LocString DOMESTICATEDDESC = string.Concat(new string[]
+				{
+					"This plant produces ",
+					UI.FormatAsLink("Arbor Tree Branches", "FOREST_TREE"),
+					" that can be harvested for ",
+					UI.FormatAsLink("Lumber", "WOOD"),
+					"."
+				});
+			}
+
+			public class WOOD_TREE_BRANCH
+			{
+				public static LocString NAME = UI.FormatAsLink("Arbor Tree Branch", "FOREST_TREE");
+
+				public static LocString DESC = "Arbor Trees Branches can be harvested for " + UI.FormatAsLink("Lumber", "WOOD") + ".";
+			}
+
+			public class SEALETTUCE
+			{
+				public static LocString NAME = UI.FormatAsLink("Waterweed", "SEALETTUCE");
+
+				public static LocString DESC = "Waterweeds thrive in salty water and can be harvested for fresh, edible " + UI.FormatAsLink("Lettuce", "LETTUCE") + ".";
+
+				public static LocString DOMESTICATEDDESC = "This plant produces " + UI.FormatAsLink("Lettuce", "LETTUCE") + ".";
 			}
 
 			public class SEEDS
@@ -976,7 +1133,7 @@ namespace STRINGS
 						UI.FormatAsLink("Seed", "PLANTS"),
 						" of a ",
 						UI.FormatAsLink("Jumping Joya", "CACTUSPLANT"),
-						".\n\nDigging up Buried Objects may uncover a Joy Seed."
+						".\n\nDigging up Buried Objects may uncover a Joya Seed."
 					});
 				}
 
@@ -1083,7 +1240,8 @@ namespace STRINGS
 						" of a ",
 						CREATURES.SPECIES.EVILFLOWER.NAME,
 						".\n\nDigging up Buried Objects may uncover a ",
-						CREATURES.SPECIES.SEEDS.EVILFLOWER.NAME
+						CREATURES.SPECIES.SEEDS.EVILFLOWER.NAME,
+						"."
 					});
 				}
 
@@ -1143,6 +1301,20 @@ namespace STRINGS
 					});
 				}
 
+				public class SALTPLANT
+				{
+					public static LocString NAME = UI.FormatAsLink("Dasha Saltvine Seed", "SALTPLANT");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The ",
+						UI.FormatAsLink("Seed", "PLANTS"),
+						" of a ",
+						CREATURES.SPECIES.SALTPLANT.NAME,
+						".\n\nDigging up Buried Objects may uncover a Dasha Saltvine Seed."
+					});
+				}
+
 				public class SPICE_VINE
 				{
 					public static LocString NAME = UI.FormatAsLink("Pincha Pepper Seed", "SPICE_VINE");
@@ -1154,6 +1326,34 @@ namespace STRINGS
 						" of a ",
 						CREATURES.SPECIES.SPICE_VINE.NAME,
 						".\n\nDigging up Buried Objects may uncover a Pincha Pepper Seed."
+					});
+				}
+
+				public class BEAN_PLANT
+				{
+					public static LocString NAME = UI.FormatAsLink("Nosh Bean", "BEAN_PLANT");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The ",
+						UI.FormatAsLink("Seed", "PLANTS"),
+						" of a ",
+						UI.FormatAsLink("Nosh Sprout", "BEAN_PLANT"),
+						".\n\nDigging up Buried Objects may uncover a Nosh Bean."
+					});
+				}
+
+				public class WOOD_TREE
+				{
+					public static LocString NAME = UI.FormatAsLink("Arbor Acorn", "WOOD_TREE");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The ",
+						UI.FormatAsLink("Seed", "PLANTS"),
+						" of an ",
+						UI.FormatAsLink("Arbor Tree", "WOOD_TREE"),
+						".\n\nDigging up Buried Objects may uncover an Arbor Acorn."
 					});
 				}
 
@@ -1170,6 +1370,34 @@ namespace STRINGS
 						".\n\nDigging up Buried Objects may uncover an Ink Bloom Seed."
 					});
 				}
+
+				public class OXYFERN
+				{
+					public static LocString NAME = UI.FormatAsLink("Oxyfern Seed", "OXYFERN");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The ",
+						UI.FormatAsLink("Seed", "PLANTS"),
+						" of an ",
+						UI.FormatAsLink("Oxyfern", "OXYFERN"),
+						" plant."
+					});
+				}
+
+				public class SEALETTUCE
+				{
+					public static LocString NAME = UI.FormatAsLink("Waterweed Seed", "SEALETTUCE");
+
+					public static LocString DESC = string.Concat(new string[]
+					{
+						"The ",
+						UI.FormatAsLink("Seed", "PLANTS"),
+						" of a ",
+						UI.FormatAsLink("Waterweed", "SEALETTUCE"),
+						".\n\nDigging up Buried Objects may uncover a Waterweed Seed."
+					});
+				}
 			}
 		}
 
@@ -1181,7 +1409,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Sleeping";
 
-				public static LocString TOOLTIP = "This critter is replenishing its stamina";
+				public static LocString TOOLTIP = "This critter is replenishing its " + UI.PRE_KEYWORD + "Stamina" + UI.PST_KEYWORD;
 			}
 
 			public class CALL_ADULT
@@ -1195,49 +1423,106 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Toasty surroundings";
 
-				public static LocString TOOLTIP = "This critter cannot let off enough heat to keep cool in this environment\n\nIt prefers temperatures between {0} and {1}";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter cannot let off enough ",
+					UI.PRE_KEYWORD,
+					"Heat",
+					UI.PST_KEYWORD,
+					" to keep cool in this environment\n\nIt prefers ",
+					UI.PRE_KEYWORD,
+					"Temperatures",
+					UI.PST_KEYWORD,
+					" between <b>{0}</b> and <b>{1}</b>"
+				});
 			}
 
 			public class COLD
 			{
 				public static LocString NAME = "Chilly surroundings";
 
-				public static LocString TOOLTIP = "This critter cannot retain enough heat to stay warm in this environment\n\nIt prefers temperatures between {0} and {1}";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter cannot retain enough ",
+					UI.PRE_KEYWORD,
+					"Heat",
+					UI.PST_KEYWORD,
+					" to stay warm in this environment\n\nIt prefers ",
+					UI.PRE_KEYWORD,
+					"Temperatures",
+					UI.PST_KEYWORD,
+					" between <b>{0}</b> and <b>{1}</b>"
+				});
 			}
 
 			public class CROP_TOO_DARK
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.ILLUMINATION.NAME;
 
-				public static LocString TOOLTIP = "Growth will resume when light requirements are met";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Growth will resume when ",
+					UI.PRE_KEYWORD,
+					"Light",
+					UI.PST_KEYWORD,
+					" requirements are met"
+				});
 			}
 
 			public class CROP_TOO_BRIGHT
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.ILLUMINATION.NAME;
 
-				public static LocString TOOLTIP = "Growth will resume when darkness requirements are met";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Growth will resume when ",
+					UI.PRE_KEYWORD,
+					"Light",
+					UI.PST_KEYWORD,
+					" requirements are met"
+				});
 			}
 
 			public class HOT_CROP
 			{
 				public static LocString NAME = "    • " + DUPLICANTS.STATS.TEMPERATURE.NAME;
 
-				public static LocString TOOLTIP = "Growth will resume when ambient temperature is between {low_temperature} and {high_temperature}";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Growth will resume when ambient ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" is between <b>{low_temperature}</b> and <b>{high_temperature}</b>"
+				});
 			}
 
 			public class COLD_CROP
 			{
 				public static LocString NAME = "    • " + DUPLICANTS.STATS.TEMPERATURE.NAME;
 
-				public static LocString TOOLTIP = "Growth will resume when ambient temperature is between {low_temperature} and {high_temperature}";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Growth will resume when ambient ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" is between <b>{low_temperature}</b> and <b>{high_temperature}</b>"
+				});
 			}
 
 			public class PERFECTTEMPERATURE
 			{
 				public static LocString NAME = "Ideal Temperature";
 
-				public static LocString TOOLTIP = "This critter finds the current ambient temperature comfortable\n\nIdeal Range: {0} - {1}";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter finds the current ambient ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" comfortable\n\nIdeal Range: <b>{0}</b> - <b>{1}</b>"
+				});
 			}
 
 			public class EATING
@@ -1265,7 +1550,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Foraging";
 
-				public static LocString TOOLTIP = "This critter is hungry and looking for food";
+				public static LocString TOOLTIP = "This critter is hungry and looking for " + UI.PRE_KEYWORD + "Food" + UI.PST_KEYWORD;
 			}
 
 			public class IDLE
@@ -1279,7 +1564,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Excited";
 
-				public static LocString TOOLTIP = "This critter heard a Rancher call for it and is very excited!";
+				public static LocString TOOLTIP = "This critter heard a Duplicant call for it and is very excited!";
 			}
 
 			public class GETTING_RANCHED
@@ -1321,25 +1606,53 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Freezing";
 
-				public static LocString TOOLTIP = "Internal temperature is dangerously low";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Internal ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" is dangerously low"
+				});
 			}
 
 			public class SCALDING
 			{
 				public static LocString NAME = "Scalding";
 
-				public static LocString TOOLTIP = "Current external temperature is perilously high [{ExternalTemperature} / {TargetTemperature}]";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Current external ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" is perilously high [<b>{ExternalTemperature}</b> / <b>{TargetTemperature}</b>]"
+				});
 
 				public static LocString NOTIFICATION_NAME = "Scalding";
 
-				public static LocString NOTIFICATION_TOOLTIP = "Scalding temperatures are hurting these Duplicants:";
+				public static LocString NOTIFICATION_TOOLTIP = string.Concat(new string[]
+				{
+					"Scalding ",
+					UI.PRE_KEYWORD,
+					"Temperatures",
+					UI.PST_KEYWORD,
+					" are hurting these Duplicants:"
+				});
 			}
 
 			public class HYPERTHERMIA
 			{
 				public static LocString NAME = "Overheating";
 
-				public static LocString TOOLTIP = "Internal temperature is dangerously high [{InternalTemperature} / {TargetTemperature}]";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Internal ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" is dangerously high [<b>{InternalTemperature}</b> / <b>{TargetTemperature}</b>]"
+				});
 			}
 
 			public class TIRED
@@ -1402,6 +1715,27 @@ namespace STRINGS
 				public static LocString TOOLTIP = "This critter is leaving its burrow";
 			}
 
+			public class PLANTINGSEED
+			{
+				public static LocString NAME = "Planting Seed";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is burying a ",
+					UI.PRE_KEYWORD,
+					"Seed",
+					UI.PST_KEYWORD,
+					" for later"
+				});
+			}
+
+			public class RUMMAGINGSEED
+			{
+				public static LocString NAME = "Rummaging for seeds";
+
+				public static LocString TOOLTIP = "This critter is searching for tasty " + UI.PRE_KEYWORD + "Seeds" + UI.PST_KEYWORD;
+			}
+
 			public class EXPELLING_SOLID
 			{
 				public static LocString NAME = "Expelling Waste";
@@ -1413,7 +1747,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Passing Gas";
 
-				public static LocString TOOLTIP = "This critter is emitting gas\n\nYuck!";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is emitting ",
+					UI.PRE_KEYWORD,
+					"Gas",
+					UI.PST_KEYWORD,
+					"\n\nYuck!"
+				});
 			}
 
 			public class EXPELLING_LIQUID
@@ -1442,6 +1783,13 @@ namespace STRINGS
 				public static LocString NAME = "Combat!";
 
 				public static LocString TOOLTIP = "This critter is on the attack!";
+			}
+
+			public class PROTECTINGENTITY
+			{
+				public static LocString NAME = "Protecting";
+
+				public static LocString TOOLTIP = "This creature is guarding something special to them and will likely attack if approached";
 			}
 
 			public class LAYINGANEGG
@@ -1483,7 +1831,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Piqued";
 
-				public static LocString TOOLTIP = "This critter is tempted to bite a nearby lure";
+				public static LocString TOOLTIP = "This critter is tempted to bite a nearby " + UI.PRE_KEYWORD + "Lure" + UI.PST_KEYWORD;
 			}
 
 			public class FALLING
@@ -1504,14 +1852,21 @@ namespace STRINGS
 			{
 				public static LocString NAME = "    • Beached";
 
-				public static LocString TOOLTIP = "This plant must be submerged in liquid to grow";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This plant must be submerged in ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" to grow"
+				});
 			}
 
 			public class GROWING
 			{
 				public static LocString NAME = "Growing [{PercentGrow}%]";
 
-				public static LocString TOOLTIP = "Next harvest: {TimeUntilNextHarvest}";
+				public static LocString TOOLTIP = "Next harvest: <b>{TimeUntilNextHarvest}</b>";
 			}
 
 			public class CROP_SLEEPING
@@ -1520,18 +1875,32 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Requires: {REQUIREMENTS}";
 
-				public static LocString REQUIREMENT_LUMINANCE = "{0} Lux";
+				public static LocString REQUIREMENT_LUMINANCE = "<b>{0}</b> Lux";
 
 				public static LocString REASON_TOO_DARK = "Too Dark";
 
 				public static LocString REASON_TOO_BRIGHT = "Too Bright";
 			}
 
+			public class MOLTING
+			{
+				public static LocString NAME = "Molting";
+
+				public static LocString TOOLTIP = "This critter is shedding its skin. Yuck";
+			}
+
 			public class NEEDSFERTILIZER
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "Growth will resume when fertilization requirements are met";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Growth will resume when ",
+					UI.PRE_KEYWORD,
+					"Fertilization",
+					UI.PST_KEYWORD,
+					" requirements are met"
+				});
 
 				public static LocString LINE_ITEM = "\n            • {Resource}: {Amount}";
 			}
@@ -1540,7 +1909,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.IRRIGATION.NAME;
 
-				public static LocString TOOLTIP = "Growth will resume when liquid requirements are met";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Growth will resume when ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					" requirements are met"
+				});
 
 				public static LocString LINE_ITEM = "\n            • {Resource}: {Amount}";
 			}
@@ -1549,7 +1925,16 @@ namespace STRINGS
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the unusable materials";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This farm is storing materials that are not suitable for this plant",
+					UI.HORIZONTAL_BR_RULE,
+					"Empty this building's ",
+					UI.PRE_KEYWORD,
+					"Storage",
+					UI.PST_KEYWORD,
+					" to remove the unusable materials"
+				});
 
 				public static LocString LINE_ITEM = "            • {0}: {1}\n";
 			}
@@ -1567,7 +1952,15 @@ namespace STRINGS
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the unusable materials";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This farm is storing materials that are not suitable for this plant",
+					UI.HORIZONTAL_BR_RULE,
+					UI.PRE_KEYWORD,
+					"Empty Storage",
+					UI.PST_KEYWORD,
+					" on this building to remove the unusable materials"
+				});
 
 				public static LocString LINE_ITEM = "        " + CREATURES.STATUSITEMS.WRONGFERTILIZER.LINE_ITEM;
 			}
@@ -1576,7 +1969,15 @@ namespace STRINGS
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.IRRIGATION.NAME;
 
-				public static LocString TOOLTIP = "This farm is storing materials that are not suitable for this plant" + UI.HORIZONTAL_BR_RULE + "Empty this building's storage to remove the incorrect materials";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This farm is storing materials that are not suitable for this plant",
+					UI.HORIZONTAL_BR_RULE,
+					UI.PRE_KEYWORD,
+					"Empty Storage",
+					UI.PST_KEYWORD,
+					" on this building to remove the incorrect materials"
+				});
 
 				public static LocString LINE_ITEM = "        " + CREATURES.STATUSITEMS.WRONGIRRIGATION.LINE_ITEM;
 			}
@@ -1585,14 +1986,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.FERTILIZATION.NAME;
 
-				public static LocString TOOLTIP = "This farm plot does not accept fertilizer\n\nMove the selected plant to a fertilization capable plot for optimal growth";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This farm plot does not accept ",
+					UI.PRE_KEYWORD,
+					"Fertilizer",
+					UI.PST_KEYWORD,
+					"\n\nMove the selected plant to a fertilization capable plot for optimal growth"
+				});
 			}
 
 			public class CANTACCEPTIRRIGATION
 			{
 				public static LocString NAME = "    • " + CREATURES.STATS.IRRIGATION.NAME;
 
-				public static LocString TOOLTIP = "This farm plot does not accept irrigation\n\nMove the selected plant to an irrigation capable plot for optimal growth";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This farm plot does not accept ",
+					UI.PRE_KEYWORD,
+					"Irrigation",
+					UI.PST_KEYWORD,
+					"\n\nMove the selected plant to an irrigation capable plot for optimal growth"
+				});
 			}
 
 			public class READYFORHARVEST
@@ -1640,7 +2055,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Drowning";
 
-				public static LocString TOOLTIP = "This critter can't breathe in liquid!";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter can't breathe in ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					"!"
+				});
+			}
+
+			public class SATURATED
+			{
+				public static LocString NAME = "Too Wet!";
+
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter likes ",
+					UI.PRE_KEYWORD,
+					"Liquid",
+					UI.PST_KEYWORD,
+					", but not that much!"
+				});
 			}
 
 			public class WILTING
@@ -1668,35 +2104,42 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Barren";
 
-				public static LocString TOOLTIP = "This plant will produce no more seeds";
+				public static LocString TOOLTIP = "This plant will produce no more " + UI.PRE_KEYWORD + "Seeds" + UI.PST_KEYWORD;
 			}
 
 			public class ATMOSPHERICPRESSURETOOLOW
 			{
 				public static LocString NAME = "    • Pressure";
 
-				public static LocString TOOLTIP = "Growth will resume when air pressure is between {low_mass} and {high_mass}";
+				public static LocString TOOLTIP = "Growth will resume when air pressure is between <b>{low_mass}</b> and <b>{high_mass}</b>";
 			}
 
 			public class WRONGATMOSPHERE
 			{
 				public static LocString NAME = "    • Atmosphere";
 
-				public static LocString TOOLTIP = "Growth will resume when submersed in one of the following gases: {elements}";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Growth will resume when submersed in one of the following ",
+					UI.PRE_KEYWORD,
+					"Gases",
+					UI.PST_KEYWORD,
+					": {elements}"
+				});
 			}
 
 			public class ATMOSPHERICPRESSURETOOHIGH
 			{
 				public static LocString NAME = "    • Pressure";
 
-				public static LocString TOOLTIP = "Growth will resume when air pressure is between {low_mass} and {high_mass}";
+				public static LocString TOOLTIP = "Growth will resume when air pressure is between <b>{low_mass}</b> and <b>{high_mass}</b>";
 			}
 
 			public class PERFECTATMOSPHERICPRESSURE
 			{
 				public static LocString NAME = "Ideal Air Pressure";
 
-				public static LocString TOOLTIP = "This critter is comfortable in the current atmospheric pressure\n\nIdeal Range: {0} - {1}";
+				public static LocString TOOLTIP = "This critter is comfortable in the current atmospheric pressure\n\nIdeal Range: <b>{0}</b> - <b>{1}</b>";
 			}
 
 			public class HEALTHSTATUS
@@ -1717,21 +2160,42 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Unrefrigerated";
 
-				public static LocString TOOLTIP = "Temperatures above {RotTemperature} spoil food more quickly";
+				public static LocString TOOLTIP = UI.PRE_KEYWORD + "Temperatures" + UI.PST_KEYWORD + " above <b>{RotTemperature}</b> spoil food more quickly";
 			}
 
 			public class CONTAMINATEDATMOSPHERE
 			{
 				public static LocString NAME = "Pollution Exposure";
 
-				public static LocString TOOLTIP = "Exposure to contaminants is accelerating this food's decay rate";
+				public static LocString TOOLTIP = "Exposure to contaminants is accelerating this food's " + UI.PRE_KEYWORD + "Decay Rate" + UI.PST_KEYWORD;
 			}
 
 			public class STERILIZINGATMOSPHERE
 			{
 				public static LocString NAME = "Sterile Atmosphere";
 
-				public static LocString TOOLTIP = "Microbe destroying conditions are preventing this food from decaying";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Microbe destroying conditions have decreased this food's ",
+					UI.PRE_KEYWORD,
+					"Decay Rate",
+					UI.PST_KEYWORD,
+					string.Empty
+				});
+			}
+
+			public class EXCHANGINGELEMENTCONSUME
+			{
+				public static LocString NAME = "Consuming {ConsumeElement} at {ConsumeRate}";
+
+				public static LocString TOOLTIP = "{ConsumeElement} is being used at a rate of " + UI.FormatAsNegativeRate("{ConsumeRate}");
+			}
+
+			public class EXCHANGINGELEMENTOUTPUT
+			{
+				public static LocString NAME = "Outputting {OutputElement} at {OutputRate}";
+
+				public static LocString TOOLTIP = "{OutputElement} is being expelled at a rate of " + UI.FormatAsPositiveRate("{OutputRate}");
 			}
 
 			public class FRESH
@@ -1745,35 +2209,73 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Stale {RotPercentage}";
 
-				public static LocString TOOLTIP = "This food is still edible but will soon expire\n{RotTooltip}";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					UI.PRE_KEYWORD,
+					"Food",
+					UI.PST_KEYWORD,
+					" is still edible but will soon expire\n{RotTooltip}"
+				});
 			}
 
 			public class SPOILED
 			{
 				public static LocString NAME = "Rotten";
 
-				public static LocString TOOLTIP = "This food has putrefied and should not be consumed";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					UI.PRE_KEYWORD,
+					"Food",
+					UI.PST_KEYWORD,
+					" has putrefied and should not be consumed"
+				});
 			}
 
 			public class STUNTED_SCALE_GROWTH
 			{
 				public static LocString NAME = "Stunted Scales";
 
-				public static LocString TOOLTIP = "This critter's scale growth is being stunted by an unfavorable environment";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter's ",
+					UI.PRE_KEYWORD,
+					"Scale Growth",
+					UI.PST_KEYWORD,
+					" is being stunted by an unfavorable environment"
+				});
 			}
 
 			public class REFRIGERATED
 			{
 				public static LocString NAME = "Refrigerated";
 
-				public static LocString TOOLTIP = "Ideal temperature storage is slowing this food's decay rate";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Ideal ",
+					UI.PRE_KEYWORD,
+					"Temperature",
+					UI.PST_KEYWORD,
+					" storage is slowing this food's ",
+					UI.PRE_KEYWORD,
+					"Decay Rate",
+					UI.PST_KEYWORD
+				});
 			}
 
 			public class RECEPTACLEINOPERATIONAL
 			{
 				public static LocString NAME = "    • Farm plot inoperable";
 
-				public static LocString TOOLTIP = "This farm plot cannot grow plants in its current state";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This farm plot cannot grow ",
+					UI.PRE_KEYWORD,
+					"Plants",
+					UI.PST_KEYWORD,
+					" in its current state"
+				});
 			}
 
 			public class TRAPPED
@@ -1787,7 +2289,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Exhaling";
 
-				public static LocString TOOLTIP = "This critter is expelling gas from its lungsacs";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is expelling ",
+					UI.PRE_KEYWORD,
+					"Gas",
+					UI.PST_KEYWORD,
+					" from its lungsacs"
+				});
 			}
 
 			public class INHALING
@@ -1840,7 +2349,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Elderly";
 
-				public static LocString TOOLTIP = "This sweet ol'critter is over the hill and will pass on in {TimeUntilDeath}";
+				public static LocString TOOLTIP = "This sweet ol'critter is over the hill and will pass on in <b>{TimeUntilDeath}</b>";
 			}
 		}
 
@@ -1855,7 +2364,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Age";
 
-				public static LocString TOOLTIP = "This critter will die when its Age reaches its species' maximum lifespan";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter will die when its ",
+					UI.PRE_KEYWORD,
+					"Age",
+					UI.PST_KEYWORD,
+					" reaches its species' maximum lifespan"
+				});
 			}
 
 			public class MATURITY
@@ -1864,19 +2380,19 @@ namespace STRINGS
 
 				public static LocString TOOLTIP = "Growth Progress" + UI.HORIZONTAL_BR_RULE;
 
-				public static LocString TOOLTIP_GROWING = "Predicted Maturation: {0}";
+				public static LocString TOOLTIP_GROWING = "Predicted Maturation: <b>{0}</b>";
 
-				public static LocString TOOLTIP_GROWING_CROP = "Predicted Maturation Time: {0}\nNext harvest occurs in approximately {1}";
+				public static LocString TOOLTIP_GROWING_CROP = "Predicted Maturation Time: <b>{0}</b>\nNext harvest occurs in approximately <b>{1}</b>";
 
 				public static LocString TOOLTIP_GROWN = "Growth paused while plant awaits harvest";
 
 				public static LocString TOOLTIP_STALLED = "Poor conditions have halted this plant's growth";
 
-				public static LocString AMOUNT_DESC_FMT = "{0}: {1}\nNext harvest in {2}";
+				public static LocString AMOUNT_DESC_FMT = "{0}: {1}\nNext harvest in <b>{2}</b>";
 
-				public static LocString GROWING = "Domestic growth rate";
+				public static LocString GROWING = "Domestic Growth Rate";
 
-				public static LocString GROWINGWILD = "Wild growth rate";
+				public static LocString GROWINGWILD = "Wild Growth Rate";
 			}
 
 			public class FERTILIZATION
@@ -1892,42 +2408,112 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Domestication";
 
-				public static LocString TOOLTIP = "Fully domesticated critters produce more materials than wild ones, and may even provide psychological benefits to my colony\n\nThis critter is {0} domesticated";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Fully ",
+					UI.PRE_KEYWORD,
+					"Tame",
+					UI.PST_KEYWORD,
+					" critters produce more materials than wild ones, and may even provide psychological benefits to my colony\n\nThis critter is <b>{0}</b> domesticated"
+				});
 			}
 
 			public class HAPPINESS
 			{
 				public static LocString NAME = "Happiness";
 
-				public static LocString TOOLTIP = "High Happiness increases a critter's productivity and indirectly improves their egg laying rates\n\nIt also provides the satisfaction in knowing they're living a good little critter life";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"High ",
+					UI.PRE_KEYWORD,
+					"Happiness",
+					UI.PST_KEYWORD,
+					" increases a critter's productivity and indirectly improves their ",
+					UI.PRE_KEYWORD,
+					"Egg",
+					UI.PST_KEYWORD,
+					" laying rates\n\nIt also provides the satisfaction in knowing they're living a good little critter life"
+				});
 			}
 
 			public class WILDNESS
 			{
 				public static LocString NAME = "Wildness";
 
-				public static LocString TOOLTIP = "At 0% Wildness a critter becomes Tame, increasing its metabolism and requiring regular care from a Rancher";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"At 0% ",
+					UI.PRE_KEYWORD,
+					"Wildness",
+					UI.PST_KEYWORD,
+					" a critter becomes ",
+					UI.PRE_KEYWORD,
+					"Tame",
+					UI.PST_KEYWORD,
+					", increasing its ",
+					UI.PRE_KEYWORD,
+					"Metabolism",
+					UI.PST_KEYWORD,
+					" and requiring regular care from Duplicants\n\nDuplicants must possess the ",
+					UI.PRE_KEYWORD,
+					"Critter Ranching",
+					UI.PST_KEYWORD,
+					" Skill to care for critters"
+				});
 			}
 
 			public class FERTILITY
 			{
 				public static LocString NAME = "Reproduction";
 
-				public static LocString TOOLTIP = "At 100% Reproduction, critters will reach the end of their reproduction cycle and lay a new egg\n\nAfter an egg is laid, Reproduction is rolled back to 0%";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"At 100% ",
+					UI.PRE_KEYWORD,
+					"Reproduction",
+					UI.PST_KEYWORD,
+					", critters will reach the end of their reproduction cycle and lay a new ",
+					UI.PRE_KEYWORD,
+					"Egg",
+					UI.PST_KEYWORD,
+					"\n\nAfter an ",
+					UI.PRE_KEYWORD,
+					"Egg",
+					UI.PST_KEYWORD,
+					" is laid, ",
+					UI.PRE_KEYWORD,
+					"Reproduction",
+					UI.PST_KEYWORD,
+					" is rolled back to 0%"
+				});
 			}
 
 			public class INCUBATION
 			{
 				public static LocString NAME = "Incubation";
 
-				public static LocString TOOLTIP = "Eggs hatch into brand new critters at the end of their incubation period";
+				public static LocString TOOLTIP = "Eggs hatch into brand new " + UI.FormatAsLink("Critters", "CREATURES") + " at the end of their incubation period";
 			}
 
 			public class VIABILITY
 			{
 				public static LocString NAME = "Viability";
 
-				public static LocString TOOLTIP = "Eggs will lose viability over time when exposed to poor environmental conditions\n\nAt 0% Viability a critter egg will become \"Cracked\" and be unable to hatch";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Eggs will lose ",
+					UI.PRE_KEYWORD,
+					"Viability",
+					UI.PST_KEYWORD,
+					" over time when exposed to poor environmental conditions\n\nAt 0% ",
+					UI.PRE_KEYWORD,
+					"Viability",
+					UI.PST_KEYWORD,
+					" a critter egg will crack and produce a ",
+					ITEMS.FOOD.RAWEGG.NAME,
+					" and ",
+					ITEMS.INDUSTRIAL_PRODUCTS.EGG_SHELL.NAME
+				});
 			}
 
 			public class IRRIGATION
@@ -1948,14 +2534,28 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Thermal Conductivity Barrier";
 
-				public static LocString TOOLTIP = "Thick conductivity barriers increase the time it takes an object to heat up or cool down";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Thick ",
+					UI.PRE_KEYWORD,
+					"Conductivity Barriers",
+					UI.PST_KEYWORD,
+					" increase the time it takes an object to heat up or cool down"
+				});
 			}
 
 			public class ROT
 			{
-				public static LocString NAME = "Freshness Percent";
+				public static LocString NAME = "Freshness";
 
-				public static LocString TOOLTIP = "Food items become stale at fifty percent freshness, and rot at zero percent";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"Food items become stale at fifty percent ",
+					UI.PRE_KEYWORD,
+					"Freshness",
+					UI.PST_KEYWORD,
+					", and rot at zero percent"
+				});
 			}
 
 			public class SCALEGROWTH
@@ -1969,7 +2569,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Air Pressure";
 
-				public static LocString TOOLTIP = "The average gas density of the air surrounding this plant";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"The average ",
+					UI.PRE_KEYWORD,
+					"Gas",
+					UI.PST_KEYWORD,
+					" density of the air surrounding this plant"
+				});
 			}
 		}
 
@@ -1993,7 +2600,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Base Reproduction";
 
-				public static LocString TOOLTIP = "This is the base speed with which critters produce new eggs";
+				public static LocString TOOLTIP = "This is the base speed with which critters produce new " + UI.PRE_KEYWORD + "Eggs" + UI.PST_KEYWORD;
 			}
 
 			public class BASE_INCUBATION_RATE
@@ -2010,7 +2617,20 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Lullabied";
 
-				public static LocString TOOLTIP = "This calm egg was recently sung to by a Rancher" + UI.HORIZONTAL_BR_RULE + "Increased incubation rate";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This egg was recently sung to by a kind Duplicant",
+					UI.HORIZONTAL_BR_RULE,
+					"Increased ",
+					UI.PRE_KEYWORD,
+					"Incubation Rate",
+					UI.PST_KEYWORD,
+					"\n\nDuplicants must possess the ",
+					UI.PRE_KEYWORD,
+					"Critter Ranching",
+					UI.PST_KEYWORD,
+					" Skill to sing to eggs"
+				});
 			}
 
 			public class INCUBATING
@@ -2031,7 +2651,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Groomed";
 
-				public static LocString TOOLTIP = "This critter has recently been attended to by a Rancher";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter has recently been attended to by a kind Duplicant\n\nDuplicants must possess the ",
+					UI.PRE_KEYWORD,
+					"Critter Ranching",
+					UI.PST_KEYWORD,
+					" Skill to care for critters"
+				});
 			}
 
 			public class HAPPY
@@ -2052,7 +2679,14 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Ate From Feeder";
 
-				public static LocString TOOLTIP = "This critter is getting tamer because it ate from a feeder.";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter is getting more ",
+					UI.PRE_KEYWORD,
+					"Tame",
+					UI.PST_KEYWORD,
+					" because it ate from a feeder."
+				});
 			}
 
 			public class WILD
@@ -2080,7 +2714,7 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Tame";
 
-				public static LocString TOOLTIP = "This critter is tame";
+				public static LocString TOOLTIP = "This critter is " + UI.PRE_KEYWORD + "Tame" + UI.PST_KEYWORD;
 			}
 
 			public class OUT_OF_CALORIES
@@ -2094,14 +2728,36 @@ namespace STRINGS
 			{
 				public static LocString NAME = "Cramped";
 
-				public static LocString TOOLTIP = "This room will become overcrowded once all nearby eggs hatch\n\nThe selected critter has slowed its egg production to prevent further overpopulation";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This ",
+					UI.PRE_KEYWORD,
+					"Room",
+					UI.PST_KEYWORD,
+					" will become overcrowded once all nearby ",
+					UI.PRE_KEYWORD,
+					"Eggs",
+					UI.PST_KEYWORD,
+					" hatch\n\nThe selected critter has slowed its ",
+					UI.PRE_KEYWORD,
+					"Reproduction",
+					UI.PST_KEYWORD,
+					" to prevent further overpopulation"
+				});
 			}
 
 			public class OVERCROWDED
 			{
 				public static LocString NAME = "Overcrowded";
 
-				public static LocString TOOLTIP = "This critter isn't comfortable with so many other critters in a room of this size";
+				public static LocString TOOLTIP = string.Concat(new string[]
+				{
+					"This critter isn't comfortable with so many other critters in a ",
+					UI.PRE_KEYWORD,
+					"Room",
+					UI.PST_KEYWORD,
+					" of this size"
+				});
 			}
 
 			public class CONFINED

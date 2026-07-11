@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 public static class HashSetPool<ObjectType, PoolIdentifier>
 {
@@ -21,6 +22,7 @@ public static class HashSetPool<ObjectType, PoolIdentifier>
 
 	private static ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier> pool = new ContainerPool<HashSetPool<ObjectType, PoolIdentifier>.PooledHashSet, PoolIdentifier>();
 
+	[DebuggerDisplay("Count={Count}")]
 	public class PooledHashSet : HashSet<ObjectType>
 	{
 		public void Recycle()

@@ -19,7 +19,7 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 		{
 			if (flag2)
 			{
-				component.AddTag(RoomConstraints.ConstraintTags.Decor20);
+				component.AddTag(RoomConstraints.ConstraintTags.Decor20, false);
 			}
 			else
 			{
@@ -317,7 +317,10 @@ public class DecorProvider : KMonoBehaviour, IEffectDescriptor, IGameObjectEffec
 						if (Grid.IsValidCell(num8))
 						{
 							Grid.Decor[num8] += this.decor;
-							this.provider.cells[this.provider.cellCount++] = num8;
+							if (this.provider.cellCount >= 0 && this.provider.cellCount < this.provider.cells.Length)
+							{
+								this.provider.cells[this.provider.cellCount++] = num8;
+							}
 						}
 					}
 				}

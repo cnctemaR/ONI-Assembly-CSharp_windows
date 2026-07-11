@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 
 namespace ProcGen
 {
-	public class BiomeSettings : YamlIO<BiomeSettings>
+	public class BiomeSettings : IMerge<BiomeSettings>
 	{
 		public BiomeSettings()
 		{
-			this.TerrainBiomeLookupTable = new Dictionary<string, ElementBandConfiguration>();
+			this.TerrainBiomeLookupTable = new ComposableDictionary<string, ElementBandConfiguration>();
 		}
 
-		public Dictionary<string, ElementBandConfiguration> TerrainBiomeLookupTable { get; private set; }
+		public ComposableDictionary<string, ElementBandConfiguration> TerrainBiomeLookupTable { get; private set; }
 
 		public string[] GetNames()
 		{
@@ -22,6 +21,11 @@ namespace ProcGen
 				array[num++] = keyValuePair.Key;
 			}
 			return array;
+		}
+
+		public void Merge(BiomeSettings other)
+		{
+			this.TerrainBiomeLookupTable.Merge(other.TerrainBiomeLookupTable);
 		}
 	}
 }

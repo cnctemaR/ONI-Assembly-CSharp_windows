@@ -55,7 +55,7 @@ namespace YamlDotNet.Serialization
 			lazyComponentRegistrationList.Add(typeof(DictionaryNodeDeserializer), (Nothing _) => new DictionaryNodeDeserializer(this.objectFactory));
 			lazyComponentRegistrationList.Add(typeof(CollectionNodeDeserializer), (Nothing _) => new CollectionNodeDeserializer(this.objectFactory));
 			lazyComponentRegistrationList.Add(typeof(EnumerableNodeDeserializer), (Nothing _) => new EnumerableNodeDeserializer());
-			lazyComponentRegistrationList.Add(typeof(ObjectNodeDeserializer), (Nothing _) => new ObjectNodeDeserializer(this.objectFactory, base.BuildTypeInspector(), this.ignoreUnmatched));
+			lazyComponentRegistrationList.Add(typeof(ObjectNodeDeserializer), (Nothing _) => new ObjectNodeDeserializer(this.objectFactory, base.BuildTypeInspector(), this.ignoreUnmatched, this.unmatchedLogFn));
 			this.nodeDeserializerFactories = lazyComponentRegistrationList;
 			LazyComponentRegistrationList<Nothing, INodeTypeResolver> lazyComponentRegistrationList2 = new LazyComponentRegistrationList<Nothing, INodeTypeResolver>();
 			lazyComponentRegistrationList2.Add(typeof(YamlConvertibleTypeResolver), (Nothing _) => new YamlConvertibleTypeResolver());
@@ -228,9 +228,10 @@ namespace YamlDotNet.Serialization
 			return this;
 		}
 
-		public DeserializerBuilder IgnoreUnmatchedProperties()
+		public DeserializerBuilder IgnoreUnmatchedProperties(Action<string> unmatchedLogFn = null)
 		{
 			this.ignoreUnmatched = true;
+			this.unmatchedLogFn = unmatchedLogFn;
 			return this;
 		}
 
@@ -253,5 +254,7 @@ namespace YamlDotNet.Serialization
 		private readonly Dictionary<string, Type> tagMappings;
 
 		private bool ignoreUnmatched;
+
+		private Action<string> unmatchedLogFn;
 	}
 }

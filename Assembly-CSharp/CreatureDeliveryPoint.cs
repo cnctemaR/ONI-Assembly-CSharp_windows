@@ -16,7 +16,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		Prioritizable.AddRef(base.gameObject);
 		if (CreatureDeliveryPoint.capacityStatusItem == null)
 		{
-			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 63486);
+			CreatureDeliveryPoint.capacityStatusItem = new StatusItem("StorageLocker", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.None.ID, true, 129022);
 			CreatureDeliveryPoint.capacityStatusItem.resolveStringCallback = delegate(string str, object data)
 			{
 				IUserControlledCapacity userControlledCapacity = (IUserControlledCapacity)data;
@@ -125,7 +125,7 @@ public class CreatureDeliveryPoint : StateMachineComponent<CreatureDeliveryPoint
 		}
 		if (num6 == 0 && this.fetches.Count < num)
 		{
-			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, this.requiredFetchTags, null, component2, 1f, FetchOrder2.OperationalRequirement.Operational, 0, null);
+			FetchOrder2 fetchOrder = new FetchOrder2(creatureFetch, tags, this.requiredFetchTags, null, component2, 1f, FetchOrder2.OperationalRequirement.Operational, 0);
 			fetchOrder.Submit(new Action<FetchOrder2, Pickupable>(this.OnFetchComplete), false, new Action<FetchOrder2, Pickupable>(this.OnFetchBegun));
 			this.fetches.Add(fetchOrder);
 			num3++;

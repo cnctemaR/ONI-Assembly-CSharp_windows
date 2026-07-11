@@ -15,6 +15,20 @@ public class CavityInfo
 		this.dirty = true;
 	}
 
+	public void AddPlants(KPrefabID plant)
+	{
+		this.plants.Add(plant);
+		this.dirty = true;
+	}
+
+	public void OnEnter(object data)
+	{
+		foreach (KPrefabID kprefabID in this.buildings)
+		{
+			kprefabID.Trigger(-832141045, data);
+		}
+	}
+
 	public HandleVector<int>.Handle handle;
 
 	public bool dirty;
@@ -32,6 +46,8 @@ public class CavityInfo
 	public Room room;
 
 	public List<KPrefabID> buildings = new List<KPrefabID>();
+
+	public List<KPrefabID> plants = new List<KPrefabID>();
 
 	public List<KPrefabID> creatures = new List<KPrefabID>();
 

@@ -95,4 +95,6 @@ public class LocString
 		}
 		return list.ToArray();
 	}
+
+	public const BindingFlags data_member_fields = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
 }

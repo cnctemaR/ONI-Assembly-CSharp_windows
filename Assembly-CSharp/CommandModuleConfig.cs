@@ -36,7 +36,7 @@ public class CommandModuleConfig : IBuildingConfig
 	{
 		BuildingConfigManager.Instance.IgnoreDefaultKComponent(typeof(RequiresFoundation), prefab_tag);
 		go.AddOrGet<LoopingSounds>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		RocketModule rocketModule = go.AddOrGet<RocketModule>();
 		rocketModule.SetBGKAnim(Assets.GetAnim("rocket_command_module_bg_kanim"));
 		LaunchConditionManager launchConditionManager = go.AddOrGet<LaunchConditionManager>();
@@ -81,7 +81,7 @@ public class CommandModuleConfig : IBuildingConfig
 
 	private const string LAUNCH_READY_PORT_ID = "LaunchReady";
 
-	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort("TriggerLaunch", new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH_INACTIVE, false) };
+	private static readonly LogicPorts.Port[] INPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.InputPort("TriggerLaunch", new CellOffset(0, 1), global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_LAUNCH_INACTIVE, false, false) };
 
-	private static readonly LogicPorts.Port[] OUTPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.OutputPort("LaunchReady", new CellOffset(0, 2), global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY_INACTIVE, false) };
+	private static readonly LogicPorts.Port[] OUTPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.OutputPort("LaunchReady", new CellOffset(0, 2), global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.COMMANDMODULE.LOGIC_PORT_READY_INACTIVE, false, false) };
 }

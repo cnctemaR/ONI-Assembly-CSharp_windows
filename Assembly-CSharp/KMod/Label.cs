@@ -24,7 +24,16 @@ namespace KMod
 		{
 			get
 			{
-				return FSUtil.Normalize(Path.Combine(Path.Combine(Manager.GetDirectory(), this.distribution_platform_name), this.id));
+				return FileSystem.Normalize(Path.Combine(Path.Combine(Manager.GetDirectory(), this.distribution_platform_name), this.id));
+			}
+		}
+
+		[JsonIgnore]
+		public global::System.DateTime time_stamp
+		{
+			get
+			{
+				return global::System.DateTime.FromFileTimeUtc(this.version);
 			}
 		}
 
@@ -42,7 +51,7 @@ namespace KMod
 
 		public string id;
 
-		public ulong version;
+		public long version;
 
 		public string title;
 

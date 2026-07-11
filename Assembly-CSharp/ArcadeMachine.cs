@@ -13,7 +13,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 		base.OnSpawn();
 		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
 		{
-			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule);
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, true);
 		}, null, null);
 		this.workables = new ArcadeMachineWorkable[this.choreOffsets.Length];
 		this.chores = new Chore[this.choreOffsets.Length];
@@ -58,7 +58,7 @@ public class ArcadeMachine : StateMachineComponent<ArcadeMachine.StatesInstance>
 		ChoreType relax = Db.Get().ChoreTypes.Relax;
 		Workable workable2 = workable;
 		ScheduleBlockType recreation = Db.Get().ScheduleBlockTypes.Recreation;
-		Chore chore = new WorkChore<ArcadeMachineWorkable>(relax, workable2, null, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
+		Chore chore = new WorkChore<ArcadeMachineWorkable>(relax, workable2, null, true, null, null, new Action<Chore>(this.OnSocialChoreEnd), false, recreation, false, true, null, false, true, false, PriorityScreen.PriorityClass.high, 5, false, true);
 		chore.AddPrecondition(ChorePreconditions.instance.CanDoWorkerPrioritizable, workable);
 		return chore;
 	}

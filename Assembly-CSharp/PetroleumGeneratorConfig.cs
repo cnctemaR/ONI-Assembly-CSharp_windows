@@ -12,13 +12,9 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		string text2 = "generatorpetrol_kanim";
 		int num3 = 100;
 		float num4 = 480f;
-		string[] array = new string[] { "Metal", "Plastic" };
+		string[] array = new string[] { "Metal" };
 		EffectorValues tier = NOISE_POLLUTION.NOISY.TIER5;
-		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[]
-		{
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0],
-			BUILDINGS.CONSTRUCTION_MASS_KG.TIER2[0]
-		}, array, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier, 0.2f);
+		BuildingDef buildingDef = BuildingTemplates.CreateBuildingDef(text, num, num2, text2, num3, num4, new float[] { BUILDINGS.CONSTRUCTION_MASS_KG.TIER5[0] }, array, 2400f, BuildLocationRule.OnFloor, BUILDINGS.DECOR.PENALTY.TIER2, tier, 0.2f);
 		buildingDef.GeneratorWattageRating = 2000f;
 		buildingDef.GeneratorBaseCapacity = 2000f;
 		buildingDef.ExhaustKilowattsWhenActive = 4f;
@@ -45,7 +41,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 	{
 		GeneratedBuildings.RegisterLogicPorts(go, LogicOperationalController.INPUT_PORTS_0_0);
 		go.AddOrGet<LogicOperationalController>();
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		go.AddOrGet<LoopingSounds>();
 		go.AddOrGet<Storage>();
 		BuildingDef def = go.GetComponent<Building>().Def;
@@ -54,7 +50,7 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		ConduitConsumer conduitConsumer = go.AddOrGet<ConduitConsumer>();
 		conduitConsumer.conduitType = def.InputConduitType;
 		conduitConsumer.consumptionRate = 10f;
-		conduitConsumer.capacityTag = SimHashes.Petroleum.CreateTag();
+		conduitConsumer.capacityTag = GameTags.CombustibleLiquid;
 		conduitConsumer.capacityKG = num;
 		conduitConsumer.forceAlwaysSatisfied = true;
 		conduitConsumer.wrongElementResult = ConduitConsumer.WrongElementResult.Dump;
@@ -66,12 +62,12 @@ public class PetroleumGeneratorConfig : IBuildingConfig
 		{
 			inputs = new EnergyGenerator.InputItem[]
 			{
-				new EnergyGenerator.InputItem(SimHashes.Petroleum.CreateTag(), 2f, num)
+				new EnergyGenerator.InputItem(GameTags.CombustibleLiquid, 2f, num)
 			},
 			outputs = new EnergyGenerator.OutputItem[]
 			{
-				new EnergyGenerator.OutputItem(SimHashes.CarbonDioxide, 0.5f, false, new CellOffset(0, 3), 0f),
-				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 0.75f, false, new CellOffset(1, 1), 0f)
+				new EnergyGenerator.OutputItem(SimHashes.CarbonDioxide, 0.5f, false, new CellOffset(0, 3), 383.15f),
+				new EnergyGenerator.OutputItem(SimHashes.DirtyWater, 0.75f, false, new CellOffset(1, 1), 313.15f)
 			}
 		};
 		Tinkerable.MakePowerTinkerable(go);

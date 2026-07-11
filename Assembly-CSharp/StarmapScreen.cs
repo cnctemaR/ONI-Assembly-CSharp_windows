@@ -65,6 +65,10 @@ public class StarmapScreen : KModalScreen
 		this.destinationDetailsResearch.SetIcon(this.destinationDetailsResearchIcon);
 		this.destinationDetailsResearch.gameObject.name = "destinationDetailsResearch";
 		this.destinationDetailsResearch.SetDescription(string.Format(UI.STARMAP.RESEARCH_DESCRIPTION, 0));
+		this.destinationDetailsMass = global::UnityEngine.Object.Instantiate<BreakdownList>(this.breakdownListPrefab, this.destinationDetailsContainer);
+		this.destinationDetailsMass.SetTitle(UI.STARMAP.LISTTITLES.DESTINATION_MASS);
+		this.destinationDetailsMass.SetIcon(this.destinationDetailsMassIcon);
+		this.destinationDetailsMass.gameObject.name = "destinationDetailsMass";
 		this.destinationDetailsComposition = global::UnityEngine.Object.Instantiate<BreakdownList>(this.breakdownListPrefab, this.destinationDetailsContainer);
 		this.destinationDetailsComposition.SetTitle(UI.STARMAP.LISTTITLES.WORLDCOMPOSITION);
 		this.destinationDetailsComposition.SetIcon(this.destinationDetailsCompositionIcon);
@@ -237,6 +241,75 @@ public class StarmapScreen : KModalScreen
 	private string DisplayDistance(float distance)
 	{
 		return global::Util.FormatWholeNumber(distance) + " " + UI.UNITSUFFIXES.DISTANCE.KILOMETER;
+	}
+
+	private string DisplayDestinationMass(SpaceDestination selectedDestination)
+	{
+		return GameUtil.GetFormattedMass(selectedDestination.AvailableMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}");
+	}
+
+	private string DisplayTotalStorageCapacity(CommandModule command)
+	{
+		float num = 0f;
+		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(command.GetComponent<AttachableBuilding>()))
+		{
+			CargoBay component = gameObject.GetComponent<CargoBay>();
+			if (component != null)
+			{
+				num += component.storage.Capacity();
+			}
+		}
+		return GameUtil.GetFormattedMass(num, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}");
+	}
+
+	private string StorageCapacityTooltip(CommandModule command, SpaceDestination dest)
+	{
+		string text = string.Empty;
+		bool flag = dest != null && SpacecraftManager.instance.GetDestinationAnalysisState(dest) == SpacecraftManager.DestinationAnalysisState.Complete;
+		if (dest != null && flag)
+		{
+			if (dest.AvailableMass <= ConditionHasMinimumMass.CargoCapacity(dest, command))
+			{
+				text = text + UI.STARMAP.LAUNCHCHECKLIST.INSUFFICENT_MASS_TOOLTIP + UI.HORIZONTAL_BR_RULE;
+			}
+			text = text + string.Format(UI.STARMAP.LAUNCHCHECKLIST.RESOURCE_MASS_TOOLTIP, dest.GetDestinationType().Name, GameUtil.GetFormattedMass(dest.AvailableMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(ConditionHasMinimumMass.CargoCapacity(dest, command), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")) + "\n\n";
+		}
+		float num = ((dest == null) ? 0f : dest.AvailableMass);
+		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(command.GetComponent<AttachableBuilding>()))
+		{
+			CargoBay component = gameObject.GetComponent<CargoBay>();
+			if (component != null)
+			{
+				if (flag)
+				{
+					float availableResourcesPercentage = dest.GetAvailableResourcesPercentage(component.storageType);
+					float num2 = Mathf.Min(component.storage.Capacity(), availableResourcesPercentage * num);
+					num -= num2;
+					string text2 = text;
+					text = string.Concat(new string[]
+					{
+						text2,
+						component.gameObject.GetProperName(),
+						" ",
+						string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(Mathf.Min(num2, component.storage.Capacity()), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")),
+						"\n"
+					});
+				}
+				else
+				{
+					string text2 = text;
+					text = string.Concat(new string[]
+					{
+						text2,
+						component.gameObject.GetProperName(),
+						" ",
+						string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")),
+						"\n"
+					});
+				}
+			}
+		}
+		return text;
 	}
 
 	private void LoadPlanets()
@@ -535,38 +608,38 @@ public class StarmapScreen : KModalScreen
 				}
 				BreakdownListRow breakdownListRow = component.AddRow();
 				string text = UI.STARMAP.MISSION_STATUS.GROUNDED;
-				Color color = Color.green;
+				BreakdownListRow.Status status = BreakdownListRow.Status.Green;
 				switch (<FillRocketListPanel>c__AnonStorey.rocket.state)
 				{
 				case Spacecraft.MissionState.Grounded:
-					color = Color.green;
+					status = BreakdownListRow.Status.Green;
 					text = UI.STARMAP.MISSION_STATUS.GROUNDED;
 					break;
 				case Spacecraft.MissionState.Launching:
 					text = UI.STARMAP.MISSION_STATUS.LAUNCHING;
-					color = Color.yellow;
+					status = BreakdownListRow.Status.Yellow;
 					break;
 				case Spacecraft.MissionState.Underway:
-					color = Color.red;
+					status = BreakdownListRow.Status.Red;
 					text = UI.STARMAP.MISSION_STATUS.UNDERWAY;
 					break;
 				case Spacecraft.MissionState.WaitingToLand:
-					color = Color.yellow;
+					status = BreakdownListRow.Status.Yellow;
 					text = UI.STARMAP.MISSION_STATUS.WAITING_TO_LAND;
 					break;
 				case Spacecraft.MissionState.Landing:
-					color = Color.yellow;
+					status = BreakdownListRow.Status.Yellow;
 					text = UI.STARMAP.MISSION_STATUS.LANDING;
 					break;
 				}
-				breakdownListRow.ShowStatusData(UI.STARMAP.ROCKETSTATUS.STATUS, text, color);
+				breakdownListRow.ShowStatusData(UI.STARMAP.ROCKETSTATUS.STATUS, text, status);
 				breakdownListRow.SetHighlighted(true);
 				if (component8 != null)
 				{
 					List<MinionStorage.Info> storedMinionInfo = component8.GetStoredMinionInfo();
 					BreakdownListRow breakdownListRow2 = component.AddRow();
 					int count = storedMinionInfo.Count;
-					breakdownListRow2.ShowStatusData(UI.STARMAP.LISTTITLES.PASSENGERS, count.ToString(), (count != 0) ? Color.green : Color.red);
+					breakdownListRow2.ShowStatusData(UI.STARMAP.LISTTITLES.PASSENGERS, count.ToString(), (count != 0) ? BreakdownListRow.Status.Green : BreakdownListRow.Status.Red);
 				}
 				if (<FillRocketListPanel>c__AnonStorey.rocket.state == Spacecraft.MissionState.Grounded)
 				{
@@ -581,6 +654,28 @@ public class StarmapScreen : KModalScreen
 					breakdownListRow3.AddTooltip(text2);
 					BreakdownListRow breakdownListRow4 = component.AddRow();
 					breakdownListRow4.ShowData(UI.STARMAP.LISTTITLES.MAXRANGE, this.DisplayDistance(component7.rocketStats.GetRocketMaxDistance()));
+					BreakdownListRow breakdownListRow5 = component.AddRow();
+					breakdownListRow5.ShowData(UI.STARMAP.LISTTITLES.STORAGE, this.DisplayTotalStorageCapacity(component7));
+					breakdownListRow5.AddTooltip(this.StorageCapacityTooltip(component7, this.selectedDestination));
+					BreakdownListRow breakdownListRow6 = component.AddRow();
+					if (this.selectedDestination != null)
+					{
+						if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+						{
+							bool flag = this.selectedDestination.AvailableMass >= ConditionHasMinimumMass.CargoCapacity(this.selectedDestination, component7);
+							breakdownListRow6.ShowStatusData(UI.STARMAP.LISTTITLES.DESTINATION_MASS, this.DisplayDestinationMass(this.selectedDestination), (!flag) ? BreakdownListRow.Status.Yellow : BreakdownListRow.Status.Default);
+							breakdownListRow6.AddTooltip(this.StorageCapacityTooltip(component7, this.selectedDestination));
+						}
+						else
+						{
+							breakdownListRow6.ShowStatusData(UI.STARMAP.LISTTITLES.DESTINATION_MASS, UI.STARMAP.COMPOSITION_UNDISCOVERED_AMOUNT, BreakdownListRow.Status.Default);
+						}
+					}
+					else
+					{
+						breakdownListRow6.ShowStatusData(UI.STARMAP.DESTINATIONSELECTION.NOTSELECTED, string.Empty, BreakdownListRow.Status.Red);
+						breakdownListRow6.AddTooltip(UI.STARMAP.DESTINATIONSELECTION_TOOLTIP.NOTSELECTED);
+					}
 					component4.GetComponent<RectTransform>().SetAsLastSibling();
 					component4.gameObject.SetActive(true);
 					component6.gameObject.SetActive(false);
@@ -590,8 +685,8 @@ public class StarmapScreen : KModalScreen
 					float duration = <FillRocketListPanel>c__AnonStorey.rocket.GetDuration();
 					float timeLeft = <FillRocketListPanel>c__AnonStorey.rocket.GetTimeLeft();
 					float num = ((duration != 0f) ? (1f - timeLeft / duration) : 0f);
-					BreakdownListRow breakdownListRow5 = component.AddRow();
-					breakdownListRow5.ShowData(UI.STARMAP.ROCKETSTATUS.TIMEREMAINING, global::Util.FormatOneDecimalPlace(timeLeft / 600f) + " / " + GameUtil.GetFormattedCycles(duration, "F1"));
+					BreakdownListRow breakdownListRow7 = component.AddRow();
+					breakdownListRow7.ShowData(UI.STARMAP.ROCKETSTATUS.TIMEREMAINING, global::Util.FormatOneDecimalPlace(timeLeft / 600f) + " / " + GameUtil.GetFormattedCycles(duration, "F1"));
 					component6.gameObject.SetActive(true);
 					RectTransform reference = component6.GetReference<RectTransform>("ProgressImage");
 					LocText component9 = component6.GetReference<RectTransform>("ProgressText").GetComponent<LocText>();
@@ -622,13 +717,22 @@ public class StarmapScreen : KModalScreen
 		{
 			BreakdownListRow breakdownListRow = this.rocketDetailsChecklist.AddRow();
 			string launchStatusMessage = rocketLaunchCondition.GetLaunchStatusMessage(true);
-			bool flag = rocketLaunchCondition.EvaluateLaunchCondition();
-			breakdownListRow.ShowCheckmarkData(launchStatusMessage, string.Empty, flag);
-			if (!flag)
+			RocketLaunchCondition.LaunchStatus launchStatus = rocketLaunchCondition.EvaluateLaunchCondition();
+			BreakdownListRow.Status status = BreakdownListRow.Status.Green;
+			if (launchStatus == RocketLaunchCondition.LaunchStatus.Failure)
+			{
+				status = BreakdownListRow.Status.Red;
+			}
+			else if (launchStatus == RocketLaunchCondition.LaunchStatus.Warning)
+			{
+				status = BreakdownListRow.Status.Yellow;
+			}
+			breakdownListRow.ShowCheckmarkData(launchStatusMessage, string.Empty, status);
+			if (launchStatus != RocketLaunchCondition.LaunchStatus.Ready)
 			{
 				breakdownListRow.SetHighlighted(true);
 			}
-			breakdownListRow.AddTooltip(rocketLaunchCondition.GetLaunchStatusTooltip(flag));
+			breakdownListRow.AddTooltip(rocketLaunchCondition.GetLaunchStatusTooltip(launchStatus == RocketLaunchCondition.LaunchStatus.Failure));
 		}
 	}
 
@@ -652,7 +756,7 @@ public class StarmapScreen : KModalScreen
 		}
 		if (this.rangeRowTotal != null && this.selectedDestination != null && this.currentCommandModule != null)
 		{
-			this.rangeRowTotal.SetStatusColor((!this.currentCommandModule.reachable.CanReachDestination(this.selectedDestination)) ? Color.red : Color.green);
+			this.rangeRowTotal.SetStatusColor((!this.currentCommandModule.reachable.CanReachDestination(this.selectedDestination)) ? BreakdownListRow.Status.Red : BreakdownListRow.Status.Green);
 		}
 		this.UpdateDestinationStates();
 		this.Refresh(null);
@@ -737,6 +841,7 @@ public class StarmapScreen : KModalScreen
 	{
 		this.FillRocketListPanel();
 		this.RefreshAnalyzeButton();
+		this.ShowDestinationPanel();
 		if (this.currentCommandModule != null && this.currentLaunchConditionManager != null)
 		{
 			this.FillRocketPanel();
@@ -800,12 +905,12 @@ public class StarmapScreen : KModalScreen
 			breakdownListRow4.ShowData(UI.STARMAP.ROCKETSTATS.SOLID_BOOSTER, GameUtil.GetFormattedDistance(num));
 		}
 		BreakdownListRow breakdownListRow5 = this.rocketDetailsRange.AddRow();
-		breakdownListRow5.ShowStatusData(UI.STARMAP.ROCKETSTATS.TOTAL_THRUST, GameUtil.GetFormattedDistance(this.currentCommandModule.rocketStats.GetTotalThrust() * 1000f), Color.green);
+		breakdownListRow5.ShowStatusData(UI.STARMAP.ROCKETSTATS.TOTAL_THRUST, GameUtil.GetFormattedDistance(this.currentCommandModule.rocketStats.GetTotalThrust() * 1000f), BreakdownListRow.Status.Green);
 		breakdownListRow5.SetImportant(true);
 		float num2 = -(this.currentCommandModule.rocketStats.GetTotalThrust() - this.currentCommandModule.rocketStats.GetRocketMaxDistance());
 		this.rocketThrustWidget.gameObject.SetActive(true);
 		BreakdownListRow breakdownListRow6 = this.rocketDetailsRange.AddRow();
-		breakdownListRow6.ShowStatusData(UI.STARMAP.ROCKETSTATUS.WEIGHTPENALTY, this.DisplayDistance(num2), Color.red);
+		breakdownListRow6.ShowStatusData(UI.STARMAP.ROCKETSTATUS.WEIGHTPENALTY, this.DisplayDistance(num2), BreakdownListRow.Status.Red);
 		breakdownListRow6.SetHighlighted(true);
 		this.rocketDetailsRange.AddCustomRow(this.rocketThrustWidget.gameObject);
 		this.rocketThrustWidget.Draw(this.currentCommandModule);
@@ -843,7 +948,7 @@ public class StarmapScreen : KModalScreen
 				else
 				{
 					breakdownListRow.ShowData(gameObject.gameObject.GetProperName(), UI.STARMAP.ROCKETSTATS.NO_ENGINE);
-					breakdownListRow.SetStatusColor(Color.red);
+					breakdownListRow.SetStatusColor(BreakdownListRow.Status.Red);
 				}
 			}
 			SolidBooster component2 = gameObject.GetComponent<SolidBooster>();
@@ -891,13 +996,24 @@ public class StarmapScreen : KModalScreen
 
 	private void UpdateStorageDisplay()
 	{
+		float num = ((this.selectedDestination == null) ? 0f : this.selectedDestination.AvailableMass);
 		foreach (GameObject gameObject in AttachableBuilding.GetAttachedNetwork(this.currentCommandModule.GetComponent<AttachableBuilding>()))
 		{
 			CargoBay component = gameObject.GetComponent<CargoBay>();
 			if (component != null)
 			{
 				BreakdownListRow breakdownListRow = this.rocketDetailsStorage.AddRow();
-				breakdownListRow.ShowData(gameObject.gameObject.GetProperName(), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
+				if (this.selectedDestination != null)
+				{
+					float availableResourcesPercentage = this.selectedDestination.GetAvailableResourcesPercentage(component.storageType);
+					float num2 = Mathf.Min(component.storage.Capacity(), availableResourcesPercentage * num);
+					num -= num2;
+					breakdownListRow.ShowData(gameObject.gameObject.GetProperName(), string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(Mathf.Min(num2, component.storage.Capacity()), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")));
+				}
+				else
+				{
+					breakdownListRow.ShowData(gameObject.gameObject.GetProperName(), string.Format(UI.STARMAP.STORAGESTATS.STORAGECAPACITY, GameUtil.GetFormattedMass(0f, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(component.storage.Capacity(), GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")));
+				}
 			}
 		}
 	}
@@ -910,6 +1026,10 @@ public class StarmapScreen : KModalScreen
 
 	private void ShowDestinationPanel()
 	{
+		if (this.selectedDestination == null)
+		{
+			return;
+		}
 		this.destinationStatusLabel.text = UI.STARMAP.ROCKETSTATUS.SELECTED;
 		if (this.currentLaunchConditionManager != null)
 		{
@@ -925,128 +1045,150 @@ public class StarmapScreen : KModalScreen
 		this.destinationDistanceValueLabel.text = this.DisplayDistance((float)this.selectedDestination.OneBasedDistance * 10000f);
 		this.destinationDescriptionLabel.text = destinationType.description;
 		this.destinationDetailsComposition.ClearRows();
-		float num = 0f;
-		if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
-		{
-			foreach (KeyValuePair<SimHashes, float> keyValuePair in this.selectedDestination.recoverableElements)
-			{
-				num += this.selectedDestination.GetResourceValue(keyValuePair.Key, keyValuePair.Value);
-			}
-		}
 		this.destinationDetailsResearch.ClearRows();
-		if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
-		{
-			foreach (SpaceDestination.ResearchOpportunity researchOpportunity in this.selectedDestination.researchOpportunities)
-			{
-				BreakdownListRow breakdownListRow = this.destinationDetailsResearch.AddRow();
-				string text = ((researchOpportunity.discoveredRareResource == SimHashes.Void) ? researchOpportunity.description : string.Format("(!!) {0}", researchOpportunity.description));
-				breakdownListRow.ShowCheckmarkData(text, researchOpportunity.dataValue.ToString(), researchOpportunity.completed);
-			}
-		}
-		this.destinationAnalysisProgressBar.SetFillPercentage(SpacecraftManager.instance.GetDestinationAnalysisScore(this.selectedDestination.id) / (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE);
-		if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
-		{
-			foreach (KeyValuePair<SimHashes, float> keyValuePair2 in this.selectedDestination.recoverableElements)
-			{
-				BreakdownListRow breakdownListRow2 = this.destinationDetailsComposition.AddRow();
-				float num2 = this.selectedDestination.GetResourceValue(keyValuePair2.Key, keyValuePair2.Value) / num * 100f;
-				Element element = ElementLoader.FindElementByHash(keyValuePair2.Key);
-				Tuple<Sprite, Color> uisprite = Def.GetUISprite(element, "ui", false);
-				if (num2 <= 1f)
-				{
-					breakdownListRow2.ShowIconData(element.name, UI.STARMAP.COMPOSITION_SMALL_AMOUNT, uisprite.first, uisprite.second);
-				}
-				else
-				{
-					breakdownListRow2.ShowIconData(element.name, GameUtil.GetFormattedPercent(num2, GameUtil.TimeSlice.None), uisprite.first, uisprite.second);
-				}
-				if (element.IsGas)
-				{
-					string properName = Assets.GetPrefab("GasCargoBay".ToTag()).GetProperName();
-					if (this.currentRocketHasGasContainer)
-					{
-						breakdownListRow2.SetHighlighted(true);
-						breakdownListRow2.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName));
-					}
-					else
-					{
-						breakdownListRow2.SetDisabled(true);
-						breakdownListRow2.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName));
-					}
-				}
-				if (element.IsLiquid)
-				{
-					string properName2 = Assets.GetPrefab("LiquidCargoBay".ToTag()).GetProperName();
-					if (this.currentRocketHasLiquidContainer)
-					{
-						breakdownListRow2.SetHighlighted(true);
-						breakdownListRow2.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName2));
-					}
-					else
-					{
-						breakdownListRow2.SetDisabled(true);
-						breakdownListRow2.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName2));
-					}
-				}
-				if (element.IsSolid)
-				{
-					string properName3 = Assets.GetPrefab("CargoBay".ToTag()).GetProperName();
-					if (this.currentRocketHasSolidContainer)
-					{
-						breakdownListRow2.SetHighlighted(true);
-						breakdownListRow2.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName3));
-					}
-					else
-					{
-						breakdownListRow2.SetDisabled(true);
-						breakdownListRow2.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName3));
-					}
-				}
-			}
-			foreach (SpaceDestination.ResearchOpportunity researchOpportunity2 in this.selectedDestination.researchOpportunities)
-			{
-				if (!researchOpportunity2.completed && researchOpportunity2.discoveredRareResource != SimHashes.Void)
-				{
-					BreakdownListRow breakdownListRow3 = this.destinationDetailsComposition.AddRow();
-					breakdownListRow3.ShowData(UI.STARMAP.COMPOSITION_UNDISCOVERED, UI.STARMAP.COMPOSITION_UNDISCOVERED_AMOUNT);
-					breakdownListRow3.SetDisabled(true);
-					breakdownListRow3.AddTooltip(UI.STARMAP.COMPOSITION_UNDISCOVERED_TOOLTIP);
-				}
-			}
-		}
+		this.destinationDetailsMass.ClearRows();
 		this.destinationDetailsResources.ClearRows();
-		if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
-		{
-			foreach (KeyValuePair<Tag, int> keyValuePair3 in this.selectedDestination.GetRecoverableEntities())
-			{
-				BreakdownListRow breakdownListRow4 = this.destinationDetailsResources.AddRow();
-				GameObject prefab = Assets.GetPrefab(keyValuePair3.Key);
-				Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(prefab, "ui", false);
-				breakdownListRow4.ShowIconData(prefab.GetProperName(), string.Empty, uisprite2.first, uisprite2.second);
-				string properName4 = Assets.GetPrefab("SpecialCargoBay".ToTag()).GetProperName();
-				if (this.currentRocketHasEntitiesContainer)
-				{
-					breakdownListRow4.SetHighlighted(true);
-					breakdownListRow4.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, prefab.GetProperName(), properName4));
-				}
-				else
-				{
-					breakdownListRow4.SetDisabled(true);
-					breakdownListRow4.AddTooltip(string.Format(UI.STARMAP.CANT_CARRY_ELEMENT, properName4, prefab.GetProperName()));
-				}
-			}
-		}
 		this.destinationDetailsArtifacts.ClearRows();
-		if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+		if (destinationType.visitable)
 		{
-			ArtifactDropRate artifactDropTable = this.selectedDestination.GetDestinationType().artifactDropTable;
-			foreach (Tuple<ArtifactTier, float> tuple in artifactDropTable.rates)
+			float num = 0f;
+			if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
 			{
-				BreakdownListRow breakdownListRow5 = this.destinationDetailsArtifacts.AddRow();
-				breakdownListRow5.ShowData(Strings.Get(tuple.first.name_key), GameUtil.GetFormattedPercent(tuple.second / artifactDropTable.totalWeight * 100f, GameUtil.TimeSlice.None));
+				num = this.selectedDestination.GetTotalMass();
 			}
+			if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+			{
+				foreach (SpaceDestination.ResearchOpportunity researchOpportunity in this.selectedDestination.researchOpportunities)
+				{
+					BreakdownListRow breakdownListRow = this.destinationDetailsResearch.AddRow();
+					string text = ((researchOpportunity.discoveredRareResource == SimHashes.Void) ? researchOpportunity.description : string.Format("(!!) {0}", researchOpportunity.description));
+					breakdownListRow.ShowCheckmarkData(text, researchOpportunity.dataValue.ToString(), (!researchOpportunity.completed) ? BreakdownListRow.Status.Default : BreakdownListRow.Status.Green);
+				}
+			}
+			this.destinationAnalysisProgressBar.SetFillPercentage(SpacecraftManager.instance.GetDestinationAnalysisScore(this.selectedDestination.id) / (float)ROCKETRY.DESTINATION_ANALYSIS.COMPLETE);
+			float num2 = ConditionHasMinimumMass.CargoCapacity(this.selectedDestination, this.currentCommandModule);
+			if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+			{
+				string formattedMass = GameUtil.GetFormattedMass(this.selectedDestination.CurrentMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}");
+				string formattedMass2 = GameUtil.GetFormattedMass((float)destinationType.minimumMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}");
+				BreakdownListRow breakdownListRow2 = this.destinationDetailsMass.AddRow();
+				breakdownListRow2.ShowData(UI.STARMAP.CURRENT_MASS, formattedMass);
+				if (this.selectedDestination.AvailableMass < num2)
+				{
+					breakdownListRow2.SetStatusColor(BreakdownListRow.Status.Yellow);
+					breakdownListRow2.AddTooltip(string.Format(UI.STARMAP.CURRENT_MASS_TOOLTIP, GameUtil.GetFormattedMass(this.selectedDestination.AvailableMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"), GameUtil.GetFormattedMass(num2, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}")));
+				}
+				BreakdownListRow breakdownListRow3 = this.destinationDetailsMass.AddRow();
+				breakdownListRow3.ShowData(UI.STARMAP.MAXIMUM_MASS, GameUtil.GetFormattedMass((float)destinationType.maxiumMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Tonne, true, "{0:0.#}"));
+				BreakdownListRow breakdownListRow4 = this.destinationDetailsMass.AddRow();
+				breakdownListRow4.ShowData(UI.STARMAP.MINIMUM_MASS, formattedMass2);
+				breakdownListRow4.AddTooltip(UI.STARMAP.MINIMUM_MASS_TOOLTIP);
+				BreakdownListRow breakdownListRow5 = this.destinationDetailsMass.AddRow();
+				breakdownListRow5.ShowData(UI.STARMAP.REPLENISH_RATE, GameUtil.GetFormattedMass(destinationType.replishmentPerCycle, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.Kilogram, true, "{0:0.#}"));
+				breakdownListRow5.AddTooltip(UI.STARMAP.REPLENISH_RATE_TOOLTIP);
+			}
+			if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+			{
+				foreach (KeyValuePair<SimHashes, float> keyValuePair in this.selectedDestination.recoverableElements)
+				{
+					BreakdownListRow breakdownListRow6 = this.destinationDetailsComposition.AddRow();
+					float num3 = this.selectedDestination.GetResourceValue(keyValuePair.Key, keyValuePair.Value) / num * 100f;
+					Element element = ElementLoader.FindElementByHash(keyValuePair.Key);
+					Tuple<Sprite, Color> uisprite = Def.GetUISprite(element, "ui", false);
+					if (num3 <= 1f)
+					{
+						breakdownListRow6.ShowIconData(element.name, UI.STARMAP.COMPOSITION_SMALL_AMOUNT, uisprite.first, uisprite.second);
+					}
+					else
+					{
+						breakdownListRow6.ShowIconData(element.name, GameUtil.GetFormattedPercent(num3, GameUtil.TimeSlice.None), uisprite.first, uisprite.second);
+					}
+					if (element.IsGas)
+					{
+						string properName = Assets.GetPrefab("GasCargoBay".ToTag()).GetProperName();
+						if (this.currentRocketHasGasContainer)
+						{
+							breakdownListRow6.SetHighlighted(true);
+							breakdownListRow6.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName));
+						}
+						else
+						{
+							breakdownListRow6.SetDisabled(true);
+							breakdownListRow6.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName));
+						}
+					}
+					if (element.IsLiquid)
+					{
+						string properName2 = Assets.GetPrefab("LiquidCargoBay".ToTag()).GetProperName();
+						if (this.currentRocketHasLiquidContainer)
+						{
+							breakdownListRow6.SetHighlighted(true);
+							breakdownListRow6.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName2));
+						}
+						else
+						{
+							breakdownListRow6.SetDisabled(true);
+							breakdownListRow6.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName2));
+						}
+					}
+					if (element.IsSolid)
+					{
+						string properName3 = Assets.GetPrefab("CargoBay".ToTag()).GetProperName();
+						if (this.currentRocketHasSolidContainer)
+						{
+							breakdownListRow6.SetHighlighted(true);
+							breakdownListRow6.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, element.name, properName3));
+						}
+						else
+						{
+							breakdownListRow6.SetDisabled(true);
+							breakdownListRow6.AddTooltip(string.Format(UI.STARMAP.CONTAINER_REQUIRED, properName3));
+						}
+					}
+				}
+				foreach (SpaceDestination.ResearchOpportunity researchOpportunity2 in this.selectedDestination.researchOpportunities)
+				{
+					if (!researchOpportunity2.completed && researchOpportunity2.discoveredRareResource != SimHashes.Void)
+					{
+						BreakdownListRow breakdownListRow7 = this.destinationDetailsComposition.AddRow();
+						breakdownListRow7.ShowData(UI.STARMAP.COMPOSITION_UNDISCOVERED, UI.STARMAP.COMPOSITION_UNDISCOVERED_AMOUNT);
+						breakdownListRow7.SetDisabled(true);
+						breakdownListRow7.AddTooltip(UI.STARMAP.COMPOSITION_UNDISCOVERED_TOOLTIP);
+					}
+				}
+			}
+			if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+			{
+				foreach (KeyValuePair<Tag, int> keyValuePair2 in this.selectedDestination.GetRecoverableEntities())
+				{
+					BreakdownListRow breakdownListRow8 = this.destinationDetailsResources.AddRow();
+					GameObject prefab = Assets.GetPrefab(keyValuePair2.Key);
+					Tuple<Sprite, Color> uisprite2 = Def.GetUISprite(prefab, "ui", false);
+					breakdownListRow8.ShowIconData(prefab.GetProperName(), string.Empty, uisprite2.first, uisprite2.second);
+					string properName4 = Assets.GetPrefab("SpecialCargoBay".ToTag()).GetProperName();
+					if (this.currentRocketHasEntitiesContainer)
+					{
+						breakdownListRow8.SetHighlighted(true);
+						breakdownListRow8.AddTooltip(string.Format(UI.STARMAP.CAN_CARRY_ELEMENT, prefab.GetProperName(), properName4));
+					}
+					else
+					{
+						breakdownListRow8.SetDisabled(true);
+						breakdownListRow8.AddTooltip(string.Format(UI.STARMAP.CANT_CARRY_ELEMENT, properName4, prefab.GetProperName()));
+					}
+				}
+			}
+			if (SpacecraftManager.instance.GetDestinationAnalysisState(this.selectedDestination) == SpacecraftManager.DestinationAnalysisState.Complete)
+			{
+				ArtifactDropRate artifactDropTable = this.selectedDestination.GetDestinationType().artifactDropTable;
+				foreach (Tuple<ArtifactTier, float> tuple in artifactDropTable.rates)
+				{
+					BreakdownListRow breakdownListRow9 = this.destinationDetailsArtifacts.AddRow();
+					breakdownListRow9.ShowData(Strings.Get(tuple.first.name_key), GameUtil.GetFormattedPercent(tuple.second / artifactDropTable.totalWeight * 100f, GameUtil.TimeSlice.None));
+				}
+			}
+			this.destinationDetailsContainer.gameObject.SetActive(true);
 		}
-		this.destinationDetailsContainer.gameObject.SetActive(true);
 		LayoutRebuilder.ForceRebuildLayoutImmediate(this.destinationDetailsContainer);
 	}
 
@@ -1119,8 +1261,8 @@ public class StarmapScreen : KModalScreen
 			}
 			this.UnselectAllPlanets();
 			this.SelectPlanet(starmapPlanet);
-			starmapPlanet.ShowAsCurrentRocketDestination(true);
-			if (spacecraft.state != Spacecraft.MissionState.Grounded)
+			starmapPlanet.ShowAsCurrentRocketDestination(spacecraftDestination.GetDestinationType().visitable);
+			if (spacecraft.state != Spacecraft.MissionState.Grounded && spacecraftDestination.GetDestinationType().visitable)
 			{
 				this.visualizeRocketImage.gameObject.SetActive(true);
 				this.visualizeRocketTrajectory.gameObject.SetActive(true);
@@ -1262,6 +1404,10 @@ public class StarmapScreen : KModalScreen
 	private BreakdownList destinationDetailsResearch;
 
 	public Sprite destinationDetailsResearchIcon;
+
+	private BreakdownList destinationDetailsMass;
+
+	public Sprite destinationDetailsMassIcon;
 
 	private BreakdownList destinationDetailsComposition;
 

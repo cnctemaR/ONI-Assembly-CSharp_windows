@@ -21,6 +21,7 @@ public class RationalAi : GameStateMachine<RationalAi, RationalAi.Instance>
 			.ToggleStateMachine((RationalAi.Instance smi) => new SicknessMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new GermExposureMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BreathMonitor.Instance(smi.master))
+			.ToggleStateMachine((RationalAi.Instance smi) => new RoomMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new TemperatureMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new ExternalTemperatureMonitor.Instance(smi.master))
 			.ToggleStateMachine((RationalAi.Instance smi) => new BladderMonitor.Instance(smi.master))

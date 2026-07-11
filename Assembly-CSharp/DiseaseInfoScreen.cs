@@ -78,6 +78,129 @@ public class DiseaseInfoScreen : TargetScreen
 
 	private bool CreateImmuneInfo()
 	{
+		GermExposureMonitor.Instance smi = this.selectedTarget.GetSMI<GermExposureMonitor.Instance>();
+		if (smi != null)
+		{
+			this.immuneSystemPanel.SetTitle(UI.DETAILTABS.DISEASE.CONTRACTION_RATES);
+			this.immuneSystemPanel.SetLabel("germ_resistance", Db.Get().Attributes.GermResistance.Name + ": " + smi.GetGermResistance(), DUPLICANTS.ATTRIBUTES.GERMRESISTANCE.DESC);
+			for (int i = 0; i < Db.Get().Diseases.Count; i++)
+			{
+				Disease disease = Db.Get().Diseases[i];
+				ExposureType exposureTypeForDisease = GameUtil.GetExposureTypeForDisease(disease);
+				Sickness sicknessForDisease = GameUtil.GetSicknessForDisease(disease);
+				bool flag = true;
+				List<string> list = new List<string>();
+				if (exposureTypeForDisease.required_traits != null && exposureTypeForDisease.required_traits.Count > 0)
+				{
+					for (int j = 0; j < exposureTypeForDisease.required_traits.Count; j++)
+					{
+						if (!this.selectedTarget.GetComponent<Traits>().HasTrait(exposureTypeForDisease.required_traits[j]))
+						{
+							list.Add(exposureTypeForDisease.required_traits[j]);
+						}
+					}
+					if (list.Count > 0)
+					{
+						flag = false;
+					}
+				}
+				bool flag2 = false;
+				List<string> list2 = new List<string>();
+				if (exposureTypeForDisease.excluded_effects != null && exposureTypeForDisease.excluded_effects.Count > 0)
+				{
+					for (int k = 0; k < exposureTypeForDisease.excluded_effects.Count; k++)
+					{
+						if (this.selectedTarget.GetComponent<Effects>().HasEffect(exposureTypeForDisease.excluded_effects[k]))
+						{
+							list2.Add(exposureTypeForDisease.excluded_effects[k]);
+						}
+					}
+					if (list2.Count > 0)
+					{
+						flag2 = true;
+					}
+				}
+				bool flag3 = false;
+				List<string> list3 = new List<string>();
+				if (exposureTypeForDisease.excluded_traits != null && exposureTypeForDisease.excluded_traits.Count > 0)
+				{
+					for (int l = 0; l < exposureTypeForDisease.excluded_traits.Count; l++)
+					{
+						if (this.selectedTarget.GetComponent<Traits>().HasTrait(exposureTypeForDisease.excluded_traits[l]))
+						{
+							list3.Add(exposureTypeForDisease.excluded_traits[l]);
+						}
+					}
+					if (list3.Count > 0)
+					{
+						flag3 = true;
+					}
+				}
+				string text = string.Empty;
+				float num;
+				if (!flag)
+				{
+					num = 0f;
+					string text2 = string.Empty;
+					for (int m = 0; m < list.Count; m++)
+					{
+						if (text2 != string.Empty)
+						{
+							text2 += ", ";
+						}
+						text2 += Db.Get().traits.Get(list[m]).Name;
+					}
+					text += string.Format(DUPLICANTS.DISEASES.IMMUNE_FROM_MISSING_REQUIRED_TRAIT, text2);
+				}
+				else if (flag3)
+				{
+					num = 0f;
+					string text3 = string.Empty;
+					for (int n = 0; n < list3.Count; n++)
+					{
+						if (text3 != string.Empty)
+						{
+							text3 += ", ";
+						}
+						text3 += Db.Get().traits.Get(list3[n]).Name;
+					}
+					if (text != string.Empty)
+					{
+						text += "\n";
+					}
+					text += string.Format(DUPLICANTS.DISEASES.IMMUNE_FROM_HAVING_EXLCLUDED_TRAIT, text3);
+				}
+				else if (flag2)
+				{
+					num = 0f;
+					string text4 = string.Empty;
+					for (int num2 = 0; num2 < list2.Count; num2++)
+					{
+						if (text4 != string.Empty)
+						{
+							text4 += ", ";
+						}
+						text4 += Db.Get().effects.Get(list2[num2]).Name;
+					}
+					if (text != string.Empty)
+					{
+						text += "\n";
+					}
+					text += string.Format(DUPLICANTS.DISEASES.IMMUNE_FROM_HAVING_EXCLUDED_EFFECT, text4);
+				}
+				else if (exposureTypeForDisease.infect_immediately)
+				{
+					num = 1f;
+				}
+				else
+				{
+					num = GermExposureMonitor.GetContractionChance(smi.GetResistanceToExposureType(exposureTypeForDisease, 3f));
+				}
+				string text5 = ((!(text != string.Empty)) ? string.Format(DUPLICANTS.DISEASES.CONTRACTION_PROBABILITY, GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None), this.selectedTarget.GetProperName(), sicknessForDisease.Name) : text);
+				this.immuneSystemPanel.SetLabel("disease_" + disease.Id, "    • " + disease.Name + ": " + GameUtil.GetFormattedPercent(num * 100f, GameUtil.TimeSlice.None), string.Format(DUPLICANTS.DISEASES.RESISTANCES_PANEL_TOOLTIP, text5, sicknessForDisease.Name));
+			}
+			return true;
+		}
 		return false;
 	}
 
@@ -158,7 +281,7 @@ public class DiseaseInfoScreen : TargetScreen
 		bool flag = false;
 		if ((float)diseaseCount < growthRuleForElement.minCountPerKG * environmentMass)
 		{
-			this.currentGermsPanel.SetLabel("critical_status", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.DYING_OFF.TITLE, this.GetFormattedGrowthRate(growthRuleForElement.underPopulationDeathRate)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.DYING_OFF.TOOLTIP, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(growthRuleForElement.minCountPerKG * environmentMass)), GameUtil.GetFormattedMass(environmentMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), growthRuleForElement.minCountPerKG));
+			this.currentGermsPanel.SetLabel("critical_status", string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.DYING_OFF.TITLE, this.GetFormattedGrowthRate(-growthRuleForElement.underPopulationDeathRate)), string.Format(UI.DETAILTABS.DISEASE.DETAILS.GROWTH_FACTORS.DYING_OFF.TOOLTIP, GameUtil.GetFormattedDiseaseAmount(Mathf.RoundToInt(growthRuleForElement.minCountPerKG * environmentMass)), GameUtil.GetFormattedMass(environmentMass, GameUtil.TimeSlice.None, GameUtil.MetricMassFormat.UseThreshold, true, "{0:0.#}"), growthRuleForElement.minCountPerKG));
 			flag = true;
 		}
 		else if ((float)diseaseCount > growthRuleForElement.maxCountPerKG * environmentMass)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using FMOD.Studio;
 using FMODUnity;
@@ -16,6 +17,34 @@ public class WattsonMessage : KScreen
 	{
 		base.OnPrefabInit();
 		Game.Instance.Subscribe(-122303817, new Action<object>(this.OnNewBaseCreated));
+	}
+
+	private IEnumerator ExpandPanel()
+	{
+		yield return new WaitForSecondsRealtime(5f);
+		float height = 0f;
+		while (height < 299f)
+		{
+			height = Mathf.Lerp(this.dialog.rectTransform().sizeDelta.y, 300f, Time.unscaledDeltaTime * 15f);
+			this.dialog.rectTransform().sizeDelta = new Vector2(this.dialog.rectTransform().sizeDelta.x, height);
+			yield return 0;
+		}
+		yield return null;
+		yield break;
+	}
+
+	private IEnumerator CollapsePanel()
+	{
+		float height = 300f;
+		while (height > 1f)
+		{
+			height = Mathf.Lerp(this.dialog.rectTransform().sizeDelta.y, 0f, Time.unscaledDeltaTime * 15f);
+			this.dialog.rectTransform().sizeDelta = new Vector2(this.dialog.rectTransform().sizeDelta.x, height);
+			yield return 0;
+		}
+		this.Deactivate();
+		yield return null;
+		yield break;
 	}
 
 	protected override void OnSpawn()
@@ -68,7 +97,7 @@ public class WattsonMessage : KScreen
 		AudioMixer.instance.activeNIS = true;
 		this.button.onClick += delegate
 		{
-			this.Deactivate();
+			base.StartCoroutine(this.CollapsePanel());
 		};
 		this.dialog.GetComponent<KScreen>().Show(false);
 		this.startFade = false;
@@ -91,7 +120,7 @@ public class WattsonMessage : KScreen
 					new EmoteChore(chore_provider, Db.Get().ChoreTypes.EmoteHighPriority, "anim_interacts_portal_kanim", new HashedString[] { "portalbirth_" + idx }, null);
 				}, null, null);
 			}
-			UIScheduler.Instance.Schedule("Welcome", 4.6f, delegate(object data)
+			UIScheduler.Instance.Schedule("Welcome", 6.6f, delegate(object data)
 			{
 				kac.Play(new HashedString[] { "working_pst", "idle" }, KAnim.PlayMode.Once);
 			}, null, null);
@@ -106,9 +135,10 @@ public class WattsonMessage : KScreen
 			CameraController.Instance.SetOrthographicsSize(TuningData<WattsonMessage.Tuning>.Get().initialOrthographicSize);
 			CameraController.Instance.CameraGoHome(1f);
 			this.startFade = true;
+			base.StartCoroutine(this.ExpandPanel());
 			MusicManager.instance.PlaySong("Music_WattsonMessage", false);
 		}, null, null));
-		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("WelcomeDialog", 5.6f, delegate(object d)
+		this.scheduleHandles.Add(UIScheduler.Instance.Schedule("WelcomeDialog", 7.6f, delegate(object d)
 		{
 			SpeedControlScreen.Instance.Pause(false);
 			KFMOD.PlayOneShot(this.dialogSound);
@@ -137,11 +167,11 @@ public class WattsonMessage : KScreen
 		{
 			GameScheduler.Instance.Schedule("BasicTutorial", 1.5f, delegate(object data)
 			{
-				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Basics);
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Basics, true);
 			}, null, null);
 			GameScheduler.Instance.Schedule("WelcomeTutorial", 2f, delegate(object data)
 			{
-				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Welcome);
+				Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Welcome, true);
 			}, null, null);
 			foreach (KScreen kscreen in this.hideScreensWhileActive)
 			{
@@ -149,6 +179,7 @@ public class WattsonMessage : KScreen
 				kscreen.Show(true);
 			}
 			CameraController.Instance.SetMaxOrthographicSize(20f);
+			Game.Instance.timelapser.SaveScreenshot();
 		}, null, null);
 		Game.Instance.SetGameStarted();
 		if (TopLeftControlScreen.Instance != null)
@@ -179,15 +210,20 @@ public class WattsonMessage : KScreen
 
 	private const float STARTTIME = 0.1f;
 
-	private const float ENDTIME = 4.6f;
+	private const float ENDTIME = 6.6f;
 
 	private const float ALPHA_SPEED = 0.01f;
 
-	[SerializeField]
-	private Image bg;
+	private const float expandedHeight = 300f;
 
 	[SerializeField]
 	private GameObject dialog;
+
+	[SerializeField]
+	private RectTransform content;
+
+	[SerializeField]
+	private Image bg;
 
 	[SerializeField]
 	private KButton button;

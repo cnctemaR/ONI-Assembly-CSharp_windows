@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Klei;
 using UnityEngine;
 
-public class SubEntry : YamlIO<SubEntry>
+public class SubEntry
 {
 	public SubEntry()
 	{

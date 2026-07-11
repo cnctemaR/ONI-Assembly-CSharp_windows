@@ -29,7 +29,6 @@ public class SteamTurbine : Generator
 		{
 			int num2 = i - (def.WidthInCells - 1) / 2;
 			this.srcCells[i] = Grid.OffsetCell(num, new CellOffset(num2, -2));
-			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
 		}
 		this.smi = new SteamTurbine.Instance(this);
 		this.smi.StartSM();
@@ -46,13 +45,6 @@ public class SteamTurbine : Generator
 		if (this.smi != null)
 		{
 			this.smi.StopSM("cleanup");
-		}
-		BuildingDef def = base.GetComponent<BuildingComplete>().Def;
-		int num = Grid.PosToCell(this);
-		for (int i = 0; i < def.WidthInCells; i++)
-		{
-			int num2 = i - (def.WidthInCells - 1) / 2;
-			int num3 = Grid.OffsetCell(num, new CellOffset(num2, 0));
 		}
 		Game.Instance.massEmitCallbackManager.Release(this.simEmitCBHandle, "SteamTurbine");
 		this.simEmitCBHandle.Clear();
@@ -127,18 +119,18 @@ public class SteamTurbine : Generator
 
 	public static void InitializeStatusItems()
 	{
-		SteamTurbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 63486);
-		SteamTurbine.inputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_INPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
-		SteamTurbine.inputPartiallyBlockedStatusItem = new StatusItem("TURBINE_PARTIALLY_BLOCKED_INPUT", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+		SteamTurbine.activeStatusItem = new StatusItem("TURBINE_ACTIVE", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Good, false, OverlayModes.None.ID, true, 129022);
+		SteamTurbine.inputBlockedStatusItem = new StatusItem("TURBINE_BLOCKED_INPUT", "BUILDING", "status_item_vent_disabled", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
+		SteamTurbine.inputPartiallyBlockedStatusItem = new StatusItem("TURBINE_PARTIALLY_BLOCKED_INPUT", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 		SteamTurbine.inputPartiallyBlockedStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolvePartialBlockedStatus);
-		SteamTurbine.insufficientMassStatusItem = new StatusItem("TURBINE_INSUFFICIENT_MASS", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 63486);
+		SteamTurbine.insufficientMassStatusItem = new StatusItem("TURBINE_INSUFFICIENT_MASS", "BUILDING", "status_item_resource_unavailable", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 		SteamTurbine.insufficientMassStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolveStrings);
-		SteamTurbine.buildingTooHotItem = new StatusItem("TURBINE_TOO_HOT", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 63486);
+		SteamTurbine.buildingTooHotItem = new StatusItem("TURBINE_TOO_HOT", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.None.ID, true, 129022);
 		SteamTurbine.buildingTooHotItem.resolveTooltipCallback = new Func<string, object, string>(SteamTurbine.ResolveStrings);
-		SteamTurbine.insufficientTemperatureStatusItem = new StatusItem("TURBINE_INSUFFICIENT_TEMPERATURE", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 63486);
+		SteamTurbine.insufficientTemperatureStatusItem = new StatusItem("TURBINE_INSUFFICIENT_TEMPERATURE", "BUILDING", "status_item_plant_temperature", StatusItem.IconType.Custom, NotificationType.BadMinor, false, OverlayModes.Power.ID, true, 129022);
 		SteamTurbine.insufficientTemperatureStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolveStrings);
 		SteamTurbine.insufficientTemperatureStatusItem.resolveTooltipCallback = new Func<string, object, string>(SteamTurbine.ResolveStrings);
-		SteamTurbine.activeWattageStatusItem = new StatusItem("TURBINE_ACTIVE_WATTAGE", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.Power.ID, true, 63486);
+		SteamTurbine.activeWattageStatusItem = new StatusItem("TURBINE_ACTIVE_WATTAGE", "BUILDING", string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, OverlayModes.Power.ID, true, 129022);
 		SteamTurbine.activeWattageStatusItem.resolveStringCallback = new Func<string, object, string>(SteamTurbine.ResolveWattageStatus);
 	}
 
@@ -197,11 +189,14 @@ public class SteamTurbine : Generator
 					num = Mathf.Min(num3 * (num2 / this.pumpKGRate), this.maxWattage * dt);
 					float num4 = this.HeatFromCoolingSteam(component);
 					float num5 = num4 * (num2 / component.Mass);
+					float num6 = num2 / component.Mass;
+					int num7 = Mathf.RoundToInt((float)component.DiseaseCount * num6);
 					component.Mass -= num2;
-					float num6 = ((this.lastSampleTime <= 0f) ? 1f : (Time.time - this.lastSampleTime));
+					component.ModifyDiseaseCount(-num7, "SteamTurbine.EnergySim200ms");
+					float num8 = ((this.lastSampleTime <= 0f) ? 1f : (Time.time - this.lastSampleTime));
 					this.lastSampleTime = Time.time;
-					GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, num5 * this.wasteHeatToTurbinePercent, BUILDINGS.PREFABS.STEAMTURBINE2.HEAT_SOURCE, num6);
-					this.liquidStorage.AddLiquid(this.destElem, num2, this.outputElementTemperature, component.DiseaseIdx, Mathf.RoundToInt((float)component.DiseaseCount * (num2 / component.Mass)), false, true);
+					GameComps.StructureTemperatures.ProduceEnergy(this.structureTemperature, num5 * this.wasteHeatToTurbinePercent, BUILDINGS.PREFABS.STEAMTURBINE2.HEAT_SOURCE, num8);
+					this.liquidStorage.AddLiquid(this.destElem, num2, this.outputElementTemperature, component.DiseaseIdx, num7, false, true);
 				}
 			}
 		}

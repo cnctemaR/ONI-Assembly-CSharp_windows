@@ -86,36 +86,72 @@ namespace KMod
 						}
 						else
 						{
-							HarmonyInstance harmonyInstance = HarmonyInstance.Create(string.Format("OxygenNotIncluded_v{0}.{1}", 0, 1));
-							if (harmonyInstance != null)
-							{
-								foreach (Assembly assembly2 in list)
-								{
-									harmonyInstance.PatchAll(assembly2);
-								}
-							}
+							ListPool<MethodInfo, Manager>.PooledList pooledList = ListPool<MethodInfo, Manager>.Allocate();
+							ListPool<MethodInfo, Manager>.PooledList pooledList2 = ListPool<MethodInfo, Manager>.Allocate();
+							ListPool<MethodInfo, Manager>.PooledList pooledList3 = ListPool<MethodInfo, Manager>.Allocate();
+							ListPool<MethodInfo, Manager>.PooledList pooledList4 = ListPool<MethodInfo, Manager>.Allocate();
 							Type[] array = new Type[0];
 							Type[] array2 = new Type[] { typeof(string) };
-							object[] array3 = new object[] { path };
-							foreach (Assembly assembly3 in list)
+							Type[] array3 = new Type[] { typeof(HarmonyInstance) };
+							foreach (Assembly assembly2 in list)
 							{
-								foreach (Type type in assembly3.GetTypes())
+								foreach (Type type in assembly2.GetTypes())
 								{
 									if (type != null)
 									{
 										MethodInfo methodInfo = type.GetMethod("OnLoad", array);
 										if (methodInfo != null)
 										{
-											methodInfo.Invoke(null, null);
+											pooledList3.Add(methodInfo);
 										}
 										methodInfo = type.GetMethod("OnLoad", array2);
 										if (methodInfo != null)
 										{
-											methodInfo.Invoke(null, array3);
+											pooledList4.Add(methodInfo);
+										}
+										methodInfo = type.GetMethod("PrePatch", array3);
+										if (methodInfo != null)
+										{
+											pooledList.Add(methodInfo);
+										}
+										methodInfo = type.GetMethod("PostPatch", array3);
+										if (methodInfo != null)
+										{
+											pooledList2.Add(methodInfo);
 										}
 									}
 								}
 							}
+							HarmonyInstance harmonyInstance = HarmonyInstance.Create(string.Format("OxygenNotIncluded_v{0}.{1}", 0, 1));
+							if (harmonyInstance != null)
+							{
+								object[] array4 = new object[] { harmonyInstance };
+								foreach (MethodInfo methodInfo2 in pooledList)
+								{
+									methodInfo2.Invoke(null, array4);
+								}
+								foreach (Assembly assembly3 in list)
+								{
+									harmonyInstance.PatchAll(assembly3);
+								}
+								foreach (MethodInfo methodInfo3 in pooledList2)
+								{
+									methodInfo3.Invoke(null, array4);
+								}
+							}
+							pooledList.Recycle();
+							pooledList2.Recycle();
+							foreach (MethodInfo methodInfo4 in pooledList3)
+							{
+								methodInfo4.Invoke(null, null);
+							}
+							object[] array5 = new object[] { path };
+							foreach (MethodInfo methodInfo5 in pooledList4)
+							{
+								methodInfo5.Invoke(null, array5);
+							}
+							pooledList3.Recycle();
+							pooledList4.Recycle();
 							flag = true;
 						}
 					}

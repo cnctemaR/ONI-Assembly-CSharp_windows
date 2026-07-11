@@ -5,7 +5,7 @@ using UnityEngine;
 public class RescueIncapacitatedChore : Chore<RescueIncapacitatedChore.StatesInstance>
 {
 	public RescueIncapacitatedChore(IStateMachineTarget master, GameObject incapacitatedDuplicant)
-		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.RescueIncapacitated, master, null, false, null, null, null, PriorityScreen.PriorityClass.personalNeeds, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		base.smi = new RescueIncapacitatedChore.StatesInstance(this);
 		base.runUntilComplete = true;

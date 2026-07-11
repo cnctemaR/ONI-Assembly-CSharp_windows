@@ -4,19 +4,16 @@ using UnityEngine;
 
 public class EggCracker : KMonoBehaviour
 {
-	protected override void OnPrefabInit()
+	protected override void OnSpawn()
 	{
-		base.OnPrefabInit();
+		base.OnSpawn();
+		this.refinery.choreType = Db.Get().ChoreTypes.Cook;
+		this.refinery.fetchChoreTypeIdHash = Db.Get().ChoreTypes.CookFetch.IdHash;
 		this.workable.WorkerStatusItem = Db.Get().DuplicantStatusItems.Mushing;
 		this.workable.AttributeConverter = Db.Get().AttributeConverters.CookingSpeed;
 		this.workable.AttributeExperienceMultiplier = DUPLICANTSTATS.ATTRIBUTE_LEVELING.MOST_DAY_EXPERIENCE;
 		this.workable.SkillExperienceSkillGroup = Db.Get().SkillGroups.Cooking.Id;
 		this.workable.SkillExperienceMultiplier = SKILLS.MOST_DAY_EXPERIENCE;
-	}
-
-	protected override void OnSpawn()
-	{
-		base.OnSpawn();
 		ComplexFabricatorWorkable complexFabricatorWorkable = this.workable;
 		complexFabricatorWorkable.OnWorkableEventCB = (Action<Workable.WorkableEvent>)Delegate.Combine(complexFabricatorWorkable.OnWorkableEventCB, new Action<Workable.WorkableEvent>(this.OnWorkableEvent));
 	}
@@ -32,10 +29,10 @@ public class EggCracker : KMonoBehaviour
 	{
 		if (e == Workable.WorkableEvent.WorkStarted)
 		{
-			ComplexFabricator.MachineOrder currentMachineOrder = this.refinery.CurrentMachineOrder;
-			if (currentMachineOrder != null)
+			ComplexRecipe currentWorkingOrder = this.refinery.CurrentWorkingOrder;
+			if (currentWorkingOrder != null)
 			{
-				ComplexRecipe.RecipeElement[] ingredients = currentMachineOrder.parentOrder.recipe.ingredients;
+				ComplexRecipe.RecipeElement[] ingredients = currentWorkingOrder.ingredients;
 				if (ingredients.Length > 0)
 				{
 					ComplexRecipe.RecipeElement recipeElement = ingredients[0];

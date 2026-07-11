@@ -324,12 +324,12 @@ public class Repairable : Workable
 			PrimaryElement primaryElement = storageProxy.FindPrimaryElement(component.ElementID);
 			float num = component.Mass * 0.1f - ((!(primaryElement != null)) ? 0f : primaryElement.Mass);
 			Tag[] array = new Tag[] { GameTagExtensions.Create(component.ElementID) };
-			return new FetchChore(Db.Get().ChoreTypes.RepairFetch, smi.master.storageProxy, num, array, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0, null);
+			return new FetchChore(Db.Get().ChoreTypes.RepairFetch, smi.master.storageProxy, num, array, null, null, null, true, null, null, null, FetchOrder2.OperationalRequirement.None, 0);
 		}
 
 		private Chore CreateRepairChore(Repairable.SMInstance smi)
 		{
-			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
+			WorkChore<Repairable> workChore = new WorkChore<Repairable>(Db.Get().ChoreTypes.Repair, smi.master, null, true, null, null, null, true, null, false, false, null, false, true, true, PriorityScreen.PriorityClass.basic, 5, true, true);
 			Deconstructable component = smi.master.GetComponent<Deconstructable>();
 			if (component != null)
 			{

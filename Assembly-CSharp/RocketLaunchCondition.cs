@@ -2,7 +2,7 @@
 
 public abstract class RocketLaunchCondition
 {
-	public abstract bool EvaluateLaunchCondition();
+	public abstract RocketLaunchCondition.LaunchStatus EvaluateLaunchCondition();
 
 	public abstract string GetLaunchStatusMessage(bool ready);
 
@@ -11,5 +11,12 @@ public abstract class RocketLaunchCondition
 	public virtual RocketLaunchCondition GetParentCondition()
 	{
 		return null;
+	}
+
+	public enum LaunchStatus
+	{
+		Ready,
+		Warning,
+		Failure
 	}
 }

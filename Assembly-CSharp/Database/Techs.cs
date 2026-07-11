@@ -16,20 +16,24 @@ namespace Database
 			ResourceTreeLoader<ResourceTreeNode> resourceTreeLoader = new ResourceTreeLoader<ResourceTreeNode>(tree_file);
 			foreach (ResourceTreeNode resourceTreeNode in resourceTreeLoader)
 			{
-				Tech tech = base.TryGet(resourceTreeNode.Id);
-				if (tech == null)
+				string text = resourceTreeNode.Id.Substring(0, 1);
+				if (!string.Equals(text, "_"))
 				{
-					tech = new Tech(resourceTreeNode.Id, this, Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode.Id.ToUpper() + ".DESC"), resourceTreeNode);
-				}
-				foreach (ResourceTreeNode resourceTreeNode2 in resourceTreeNode.references)
-				{
-					Tech tech2 = base.TryGet(resourceTreeNode2.Id);
-					if (tech2 == null)
+					Tech tech = base.TryGet(resourceTreeNode.Id);
+					if (tech == null)
 					{
-						tech2 = new Tech(resourceTreeNode2.Id, this, Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode2.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode2.Id.ToUpper() + ".DESC"), resourceTreeNode2);
+						tech = new Tech(resourceTreeNode.Id, this, Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode.Id.ToUpper() + ".DESC"), resourceTreeNode);
 					}
-					tech2.requiredTech.Add(tech);
-					tech.unlockedTech.Add(tech2);
+					foreach (ResourceTreeNode resourceTreeNode2 in resourceTreeNode.references)
+					{
+						Tech tech2 = base.TryGet(resourceTreeNode2.Id);
+						if (tech2 == null)
+						{
+							tech2 = new Tech(resourceTreeNode2.Id, this, Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode2.Id.ToUpper() + ".NAME"), Strings.Get("STRINGS.RESEARCH.TECHS." + resourceTreeNode2.Id.ToUpper() + ".DESC"), resourceTreeNode2);
+						}
+						tech2.requiredTech.Add(tech);
+						tech.unlockedTech.Add(tech2);
+					}
 				}
 			}
 			this.tierCount = 0;
@@ -97,12 +101,16 @@ namespace Database
 				new string[] { "DiningTable", "FarmTile", "CookingStation", "EggCracker" }
 			},
 			{
+				"FinerDining",
+				new string[] { "GourmetCookingStation" }
+			},
+			{
 				"Agriculture",
-				new string[] { "FertilizerMaker", "HydroponicFarm", "Refrigerator", "FarmStation" }
+				new string[] { "FertilizerMaker", "HydroponicFarm", "Refrigerator", "FarmStation", "ParkSign" }
 			},
 			{
 				"Ranching",
-				new string[] { "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "RanchStation", "ShearingStation" }
+				new string[] { "CreatureDeliveryPoint", "FishDeliveryPoint", "CreatureFeeder", "FishFeeder", "RanchStation", "ShearingStation", "FlyingCreatureBait" }
 			},
 			{
 				"AnimalControl",
@@ -117,7 +125,7 @@ namespace Database
 			},
 			{
 				"ImprovedOxygen",
-				new string[] { "Electrolyzer" }
+				new string[] { "Electrolyzer", "RustDeoxidizer" }
 			},
 			{
 				"GasPiping",
@@ -141,7 +149,11 @@ namespace Database
 			},
 			{
 				"DirectedAirStreams",
-				new string[] { "PressureDoor", "OreScrubber", "AirFilter", "CO2Scrubber" }
+				new string[] { "PressureDoor", "AirFilter", "CO2Scrubber" }
+			},
+			{
+				"LiquidFiltering",
+				new string[] { "OreScrubber", "Desalinator" }
 			},
 			{
 				"MedicineI",
@@ -200,7 +212,7 @@ namespace Database
 			},
 			{
 				"Distillation",
-				new string[] { "WaterPurifier", "AlgaeDistillery", "GasBottler", "BottleEmptierGas" }
+				new string[] { "WaterPurifier", "AlgaeDistillery", "EthanolDistillery", "GasBottler", "BottleEmptierGas" }
 			},
 			{
 				"Catalytics",
@@ -217,7 +229,14 @@ namespace Database
 			},
 			{
 				"AdvancedPowerRegulation",
-				new string[] { "HydrogenGenerator", "HighWattageWire", "WireBridgeHighWattage", "PowerTransformerSmall", "PowerControlStation" }
+				new string[]
+				{
+					"HydrogenGenerator",
+					"HighWattageWire",
+					"WireBridgeHighWattage",
+					"PowerTransformerSmall",
+					LogicPowerRelayConfig.ID
+				}
 			},
 			{
 				"PrettyGoodConductors",
@@ -229,7 +248,7 @@ namespace Database
 			},
 			{
 				"Combustion",
-				new string[] { "Generator" }
+				new string[] { "Generator", "WoodGasGenerator" }
 			},
 			{
 				"ImprovedCombustion",
@@ -245,15 +264,15 @@ namespace Database
 			},
 			{
 				"Clothing",
-				new string[] { "Canvas", "ClothingFabricator", "CarpetTile" }
+				new string[] { "ClothingFabricator", "CarpetTile" }
 			},
 			{
 				"Acoustics",
-				new string[] { "Phonobox" }
+				new string[] { "Phonobox", "BatterySmart", "PowerControlStation" }
 			},
 			{
 				"FineArt",
-				new string[] { "CanvasWide", "CanvasTall", "Sculpture" }
+				new string[] { "Canvas", "Sculpture" }
 			},
 			{
 				"Luxury",
@@ -261,13 +280,20 @@ namespace Database
 				{
 					LuxuryBedConfig.ID,
 					"LadderFast",
-					"PlasticTile",
-					"ExteriorWall"
+					"PlasticTile"
 				}
 			},
 			{
 				"RefractiveDecor",
-				new string[] { "GlassTile", "FlowerVaseHangingFancy", "MarbleSculpture", "MetalSculpture" }
+				new string[] { "MetalSculpture", "CanvasWide" }
+			},
+			{
+				"GlassFurnishings",
+				new string[] { "GlassTile", "FlowerVaseHangingFancy" }
+			},
+			{
+				"RenaissanceArt",
+				new string[] { "MarbleSculpture", "CanvasTall", "MonumentBottom", "MonumentMiddle", "MonumentTop" }
 			},
 			{
 				"Plastics",
@@ -279,7 +305,7 @@ namespace Database
 			},
 			{
 				"Suits",
-				new string[] { "SuitMarker", "SuitLocker", "SuitFabricator", "SuitsOverlay" }
+				new string[] { "ExteriorWall", "SuitMarker", "SuitLocker", "SuitFabricator", "SuitsOverlay" }
 			},
 			{
 				"Jobs",
@@ -336,11 +362,11 @@ namespace Database
 				"LogicControl",
 				new string[]
 				{
-					"AutomationOverlay",
 					"LogicWire",
-					"LogicWireBridge",
+					"LogicDuplicantSensor",
 					LogicSwitchConfig.ID,
-					LogicPowerRelayConfig.ID
+					"LogicWireBridge",
+					"AutomationOverlay"
 				}
 			},
 			{
@@ -350,12 +376,13 @@ namespace Database
 					LogicTimeOfDaySensorConfig.ID,
 					"FloorSwitch",
 					LogicElementSensorGasConfig.ID,
-					"BatterySmart"
+					"BatterySmart",
+					"LogicGateNOT"
 				}
 			},
 			{
 				"LogicCircuits",
-				new string[] { "LogicGateAND", "LogicGateOR", "LogicGateXOR", "LogicGateNOT", "LogicGateBUFFER", "LogicGateFILTER", "BatterySmart" }
+				new string[] { "LogicGateAND", "LogicGateOR", "LogicGateBUFFER", "LogicGateFILTER" }
 			},
 			{
 				"DupeTrafficControl",
@@ -364,7 +391,8 @@ namespace Database
 					"Checkpoint",
 					LogicMemoryConfig.ID,
 					"ArcadeMachine",
-					"CosmicResearchCenter"
+					"CosmicResearchCenter",
+					"LogicGateXOR"
 				}
 			},
 			{

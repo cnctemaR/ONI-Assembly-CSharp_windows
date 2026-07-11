@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-internal class IncubatingStates : GameStateMachine<IncubatingStates, IncubatingStates.Instance, IStateMachineTarget, IncubatingStates.Def>
+public class IncubatingStates : GameStateMachine<IncubatingStates, IncubatingStates.Instance, IStateMachineTarget, IncubatingStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{

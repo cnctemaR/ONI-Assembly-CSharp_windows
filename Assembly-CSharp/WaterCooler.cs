@@ -13,7 +13,7 @@ public class WaterCooler : StateMachineComponent<WaterCooler.StatesInstance>, IA
 		base.OnSpawn();
 		GameScheduler.Instance.Schedule("Scheduling Tutorial", 2f, delegate(object obj)
 		{
-			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule);
+			Tutorial.Instance.TutorialMessage(Tutorial.TutorialMessages.TM_Schedule, true);
 		}, null, null);
 		this.workables = new SocialGatheringPointWorkable[this.socializeOffsets.Length];
 		for (int i = 0; i < this.workables.Length; i++)

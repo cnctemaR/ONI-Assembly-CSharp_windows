@@ -68,6 +68,12 @@ public class KScrollRect : ScrollRect
 		return 0f;
 	}
 
+	public void SetSmoothAutoScrollTarget(float normalizedVerticalPos)
+	{
+		this.autoScrollTargetVerticalPos = normalizedVerticalPos;
+		this.autoScrolling = true;
+	}
+
 	private void PlaySound(KScrollRect.SoundType soundType)
 	{
 		if (this.currentSounds.ContainsKey(soundType))
@@ -140,6 +146,14 @@ public class KScrollRect : ScrollRect
 		{
 			this.stopDrag = false;
 			this.isDragging = false;
+		}
+		if (this.autoScrolling)
+		{
+			base.normalizedPosition = new Vector2(base.normalizedPosition.x, Mathf.Lerp(base.normalizedPosition.y, this.autoScrollTargetVerticalPos, Time.unscaledDeltaTime * 3f));
+			if (Mathf.Abs(this.autoScrollTargetVerticalPos - base.normalizedPosition.y) < 0.01f)
+			{
+				this.autoScrolling = false;
+			}
 		}
 		base.LateUpdate();
 	}
@@ -294,6 +308,10 @@ public class KScrollRect : ScrollRect
 	private bool startDrag;
 
 	private bool stopDrag;
+
+	private bool autoScrolling;
+
+	private float autoScrollTargetVerticalPos;
 
 	public enum SoundType
 	{

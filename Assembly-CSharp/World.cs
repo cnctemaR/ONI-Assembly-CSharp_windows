@@ -61,8 +61,11 @@ public class World : KMonoBehaviour
 				this.OnSolidChanged(cellIdx);
 			}
 		}
-		SaveGame.Instance.entombedItemManager.OnSolidChanged(this.changedCells);
-		GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.solidChangedLayer, null);
+		if (this.changedCells.Count != 0)
+		{
+			SaveGame.Instance.entombedItemManager.OnSolidChanged(this.changedCells);
+			GameScenePartitioner.Instance.TriggerEvent(this.changedCells, GameScenePartitioner.Instance.solidChangedLayer, null);
+		}
 		int count2 = callbackInfo.Count;
 		for (int j = 0; j < count2; j++)
 		{
@@ -106,14 +109,25 @@ public class World : KMonoBehaviour
 		{
 			return;
 		}
-		GridArea visibleArea = GridVisibleArea.GetVisibleArea();
-		this.groundRenderer.Render(visibleArea.Min, visibleArea.Max);
-		Vector2I vector2I;
-		Vector2I vector2I2;
-		Singleton<KBatchedAnimUpdater>.Instance.GetVisibleArea(out vector2I, out vector2I2);
-		KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
-		KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
-		KAnimBatchManager.Instance().Render();
+		if (GameUtil.IsCapturingTimeLapse())
+		{
+			Game.Instance.UpdateGameActiveRegion(0, 0, Grid.WidthInCells, Grid.HeightInCells);
+			this.groundRenderer.RenderAll();
+			KAnimBatchManager.Instance().UpdateActiveArea(new Vector2I(0, 0), new Vector2I(9999, 9999));
+			KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
+			KAnimBatchManager.Instance().Render();
+		}
+		else
+		{
+			GridArea visibleArea = GridVisibleArea.GetVisibleArea();
+			this.groundRenderer.Render(visibleArea.Min, visibleArea.Max, false);
+			Vector2I vector2I;
+			Vector2I vector2I2;
+			Singleton<KBatchedAnimUpdater>.Instance.GetVisibleArea(out vector2I, out vector2I2);
+			KAnimBatchManager.Instance().UpdateActiveArea(vector2I, vector2I2);
+			KAnimBatchManager.Instance().UpdateDirty(Time.frameCount);
+			KAnimBatchManager.Instance().Render();
+		}
 		if (Camera.main != null)
 		{
 			Vector3 vector = Camera.main.ScreenToWorldPoint(new Vector3(KInputManager.GetMousePos().x, KInputManager.GetMousePos().y, -Camera.main.transform.GetPosition().z));

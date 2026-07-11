@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using KMod;
 using TUNING;
 using UnityEngine;
 
@@ -77,5 +79,11 @@ public static class ModUtil
 			material = material,
 			renderedByWorld = ((state & Element.State.Solid) == Element.State.Solid)
 		};
+	}
+
+	public static void RegisterForTranslation(Type locstring_tree_root)
+	{
+		Localization.RegisterForTranslation(locstring_tree_root);
+		Localization.GenerateStringsTemplate(locstring_tree_root, Path.Combine(Manager.GetDirectory(), "strings_templates"));
 	}
 }

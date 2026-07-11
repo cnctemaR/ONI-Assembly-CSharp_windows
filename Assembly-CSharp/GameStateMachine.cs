@@ -363,6 +363,11 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this.Update(this.sm.name + "." + this.name, callback, update_rate, load_balance);
 		}
 
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State BatchUpdate(UpdateBucketWithUpdater<StateMachineInstanceType>.BatchUpdateDelegate batch_update, UpdateRate update_rate = UpdateRate.SIM_200ms)
+		{
+			return this.BatchUpdate(this.sm.name + "." + this.name, batch_update, update_rate);
+		}
+
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Enter(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback)
 		{
 			return this.Enter("Enter", callback);
@@ -373,7 +378,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this.Exit("Exit", callback);
 		}
 
-		private GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InternalUpdate(string name, UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater bucket_updater, UpdateRate update_rate, bool load_balance)
+		private GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InternalUpdate(string name, UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater bucket_updater, UpdateRate update_rate, bool load_balance, UpdateBucketWithUpdater<StateMachineInstanceType>.BatchUpdateDelegate batch_update = null)
 		{
 			int num = this.CreateUpdateTableEntry();
 			if (this.updateActions == null)
@@ -393,6 +398,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			for (int i = 0; i < num2; i++)
 			{
 				UpdateBucketWithUpdater<StateMachineInstanceType> updateBucketWithUpdater = new UpdateBucketWithUpdater<StateMachineInstanceType>(name);
+				updateBucketWithUpdater.batch_update_delegate = batch_update;
 				Singleton<StateMachineUpdater>.Instance.AddBucket(update_rate, updateBucketWithUpdater);
 				updateAction.buckets[i] = updateBucketWithUpdater;
 			}
@@ -402,12 +408,17 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Update(string name, Action<StateMachineInstanceType, float> callback, UpdateRate update_rate = UpdateRate.SIM_200ms, bool load_balance = false)
 		{
-			return this.InternalUpdate(name, new BucketUpdater<StateMachineInstanceType>(callback), update_rate, load_balance);
+			return this.InternalUpdate(name, new BucketUpdater<StateMachineInstanceType>(callback), update_rate, load_balance, null);
+		}
+
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State BatchUpdate(string name, UpdateBucketWithUpdater<StateMachineInstanceType>.BatchUpdateDelegate batch_update, UpdateRate update_rate = UpdateRate.SIM_200ms)
+		{
+			return this.InternalUpdate(name, null, update_rate, false, batch_update);
 		}
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State FastUpdate(string name, UpdateBucketWithUpdater<StateMachineInstanceType>.IUpdater updater, UpdateRate update_rate = UpdateRate.SIM_200ms, bool load_balance = false)
 		{
-			return this.InternalUpdate(name, updater, update_rate, load_balance);
+			return this.InternalUpdate(name, updater, update_rate, load_balance, null);
 		}
 
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State Enter(string name, StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State.Callback callback)
@@ -928,7 +939,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			this.Enter("AddTag(" + tag.Name + ")", delegate(StateMachineInstanceType smi)
 			{
-				state_target.Get<KPrefabID>(smi).AddTag(tag);
+				state_target.Get<KPrefabID>(smi).AddTag(tag, false);
 			});
 			this.Exit("RemoveTag(" + tag.Name + ")", delegate(StateMachineInstanceType smi)
 			{
@@ -988,9 +999,12 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			this.Enter("AddStatusItem(DynamicallyConstructed)", delegate(StateMachineInstanceType smi)
 			{
 				StatusItem statusItem = status_item_cb(smi);
-				object obj = ((data_callback == null) ? null : data_callback(smi));
-				Guid guid = state_target.Get<KSelectable>(smi).AddStatusItem(statusItem, obj);
-				smi.dataTable[data_idx] = guid;
+				if (statusItem != null)
+				{
+					object obj = ((data_callback == null) ? null : data_callback(smi));
+					Guid guid = state_target.Get<KSelectable>(smi).AddStatusItem(statusItem, obj);
+					smi.dataTable[data_idx] = guid;
+				}
 			});
 			this.Exit("RemoveStatusItem(DynamicallyConstructed)", delegate(StateMachineInstanceType smi)
 			{
@@ -1587,7 +1601,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		{
 			this.Enter("DoTutorial()", delegate(StateMachineInstanceType smi)
 			{
-				Tutorial.Instance.TutorialMessage(msg);
+				Tutorial.Instance.TutorialMessage(msg, true);
 			});
 			return this;
 		}
@@ -1850,10 +1864,16 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter state_target = this.GetStateTarget();
 			this.Enter("Face", delegate(StateMachineInstanceType smi)
 			{
-				Facing facing = state_target.Get<Facing>(smi);
-				IApproachable approachable = face_target.Get<IApproachable>(smi);
-				float num = approachable.transform.GetPosition().x + x_offset;
-				facing.Face(num);
+				if (face_target != null)
+				{
+					IApproachable approachable = face_target.Get<IApproachable>(smi);
+					if (approachable != null)
+					{
+						float num = approachable.transform.GetPosition().x + x_offset;
+						Facing facing = state_target.Get<Facing>(smi);
+						facing.Face(num);
+					}
+				}
 			});
 			return this;
 		}
@@ -1901,7 +1921,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 			return this;
 		}
 
-		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleStatusItem(string name, string tooltip, string icon = "", StatusItem.IconType icon_type = StatusItem.IconType.Info, NotificationType notification_type = NotificationType.Neutral, bool allow_multiples = false, HashedString render_overlay = default(HashedString), int status_overlays = 63486, Func<string, StateMachineInstanceType, string> resolve_string_callback = null, Func<string, StateMachineInstanceType, string> resolve_tooltip_callback = null, StatusItemCategory category = null)
+		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State ToggleStatusItem(string name, string tooltip, string icon = "", StatusItem.IconType icon_type = StatusItem.IconType.Info, NotificationType notification_type = NotificationType.Neutral, bool allow_multiples = false, HashedString render_overlay = default(HashedString), int status_overlays = 129022, Func<string, StateMachineInstanceType, string> resolve_string_callback = null, Func<string, StateMachineInstanceType, string> resolve_tooltip_callback = null, StatusItemCategory category = null)
 		{
 			StatusItem statusItem = new StatusItem(this.longName, name, tooltip, icon, icon_type, notification_type, allow_multiples, render_overlay, status_overlays);
 			if (resolve_string_callback != null)
@@ -2261,7 +2281,7 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 	{
 		public GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State InitializeStates(StateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.TargetParameter plant, GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.State death_state = null)
 		{
-			base.root.Target(plant).EventTransition(GameHashes.Uprooted, death_state, (StateMachineInstanceType smi) => UprootedMonitor.IsObjectUprooted(plant.Get(smi))).EventTransition(GameHashes.TooColdFatal, death_state, (StateMachineInstanceType smi) => GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.PlantAliveSubState.isLethalTemperature(plant.Get(smi)))
+			base.root.Target(plant).TagTransition(GameTags.Uprooted, death_state, false).EventTransition(GameHashes.TooColdFatal, death_state, (StateMachineInstanceType smi) => GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.PlantAliveSubState.isLethalTemperature(plant.Get(smi)))
 				.EventTransition(GameHashes.TooHotFatal, death_state, (StateMachineInstanceType smi) => GameStateMachine<StateMachineType, StateMachineInstanceType, MasterType, DefType>.PlantAliveSubState.isLethalTemperature(plant.Get(smi)))
 				.EventTransition(GameHashes.Drowned, death_state, null);
 			return this;
@@ -2271,9 +2291,8 @@ public abstract class GameStateMachine<StateMachineType, StateMachineInstanceTyp
 		{
 			TemperatureVulnerable component = plant.GetComponent<TemperatureVulnerable>();
 			EntombVulnerable component2 = plant.GetComponent<EntombVulnerable>();
-			UprootedMonitor component3 = plant.GetComponent<UprootedMonitor>();
-			PressureVulnerable component4 = plant.GetComponent<PressureVulnerable>();
-			return (component == null || !component.IsLethal) && (component2 == null || !component2.GetEntombed) && (component3 == null || !component3.IsUprooted) && (component4 == null || !component4.IsLethal);
+			PressureVulnerable component3 = plant.GetComponent<PressureVulnerable>();
+			return (component == null || !component.IsLethal) && (component2 == null || !component2.GetEntombed) && (component3 == null || !component3.IsLethal);
 		}
 
 		private static bool isLethalTemperature(GameObject plant)

@@ -15,7 +15,7 @@ public class ScreenPrefabs : KMonoBehaviour
 		ConfirmDialogScreen confirmDialogScreen = (ConfirmDialogScreen)KScreenManager.Instance.StartScreen(ScreenPrefabs.Instance.ConfirmDialogScreen.gameObject, parent.gameObject);
 		confirmDialogScreen.PopupConfirmDialog(message, action, delegate
 		{
-		}, null, null, null, null, null, null);
+		}, null, null, null, null, null, null, true);
 	}
 
 	public ControlsScreen ControlsScreen;
@@ -54,6 +54,8 @@ public class ScreenPrefabs : KMonoBehaviour
 
 	public InfoDialogScreen InfoDialogScreen;
 
+	public StoryMessageScreen StoryMessageScreen;
+
 	public FileNameDialog FileNameDialog;
 
 	public TagFilterScreen TagFilterScreen;
@@ -69,6 +71,8 @@ public class ScreenPrefabs : KMonoBehaviour
 	public ModsScreen modsMenu;
 
 	public GameObject GameOverScreen;
+
+	public GameObject VictoryScreen;
 
 	public GameObject StatusItemIndicatorScreen;
 
@@ -89,4 +93,12 @@ public class ScreenPrefabs : KMonoBehaviour
 	public ModeSelectScreen ModeSelectScreen;
 
 	public NewGameSettingsScreen NewGameSettingsScreen;
+
+	public ColonyDestinationSelectScreen ColonyDestinationSelectScreen;
+
+	public RetiredColonyInfoScreen RetiredColonyInfoScreen;
+
+	public VideoScreen VideoScreen;
+
+	public ComicViewer ComicViewer;
 }

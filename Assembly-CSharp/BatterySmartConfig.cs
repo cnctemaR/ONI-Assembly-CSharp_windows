@@ -46,5 +46,5 @@ public class BatterySmartConfig : BaseBatteryConfig
 
 	public const string ID = "BatterySmart";
 
-	private static readonly LogicPorts.Port[] OUTPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.OutputPort(BatterySmart.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT_INACTIVE, true) };
+	private static readonly LogicPorts.Port[] OUTPUT_PORTS = new LogicPorts.Port[] { LogicPorts.Port.OutputPort(BatterySmart.PORT_ID, new CellOffset(0, 0), global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT, global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT_ACTIVE, global::STRINGS.BUILDINGS.PREFABS.BATTERYSMART.LOGIC_PORT_INACTIVE, true, false) };
 }

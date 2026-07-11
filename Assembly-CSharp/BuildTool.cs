@@ -138,7 +138,8 @@ public class BuildTool : DragTool
 				}
 				if ((gameObject == null || gameObject.GetComponent<Constructable>() == null) && (gameObject2 == null || gameObject2 == this.visualizer))
 				{
-					World.Instance.blockTileRenderer.RemoveBlock(this.def, SimHashes.Void, this.lastCell);
+					World.Instance.blockTileRenderer.RemoveBlock(this.def, false, SimHashes.Void, this.lastCell);
+					World.Instance.blockTileRenderer.RemoveBlock(this.def, true, SimHashes.Void, this.lastCell);
 					TileVisualizer.RefreshCell(this.lastCell, this.def.TileLayer, this.def.ReplacementLayer);
 				}
 			}
@@ -204,7 +205,7 @@ public class BuildTool : DragTool
 								{
 									blockTileRenderer.SetInvalidPlaceCell(this.lastCell, false);
 								}
-								blockTileRenderer.AddBlock(num3, this.def, SimHashes.Void, num2);
+								blockTileRenderer.AddBlock(num3, this.def, flag2, SimHashes.Void, num2);
 							}
 						}
 					}
@@ -255,7 +256,14 @@ public class BuildTool : DragTool
 		int num = Grid.PosToCell(this.visualizer);
 		if (num != cell)
 		{
-			return;
+			if (this.def.BuildingComplete.GetComponent<LogicPorts>())
+			{
+				return;
+			}
+			if (this.def.BuildingComplete.GetComponent<LogicGateBase>())
+			{
+				return;
+			}
 		}
 		this.lastDragCell = cell;
 		this.ClearTilePreview();

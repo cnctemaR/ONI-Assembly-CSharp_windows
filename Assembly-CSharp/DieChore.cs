@@ -3,7 +3,7 @@
 public class DieChore : Chore<DieChore.StatesInstance>
 {
 	public DieChore(IStateMachineTarget master, Death death)
-		: base(Db.Get().ChoreTypes.Die, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, null, false, ReportManager.ReportType.WorkTime)
+		: base(Db.Get().ChoreTypes.Die, master, master.GetComponent<ChoreProvider>(), false, null, null, null, PriorityScreen.PriorityClass.compulsory, 5, false, true, 0, false, ReportManager.ReportType.WorkTime)
 	{
 		this.showAvailabilityInHoverText = false;
 		base.smi = new DieChore.StatesInstance(this, death);

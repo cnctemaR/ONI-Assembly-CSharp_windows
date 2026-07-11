@@ -33,7 +33,7 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		AlgaeDistillery algaeDistillery = go.AddOrGet<AlgaeDistillery>();
 		algaeDistillery.emitTag = new Tag("Algae");
 		algaeDistillery.emitMass = 30f;
@@ -44,7 +44,7 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		storage.capacityKg = 1000f;
 		storage.SetDefaultStoredItemModifiers(Storage.StandardSealedStorage);
 		storage.showInUI = true;
-		Tag tag = new Tag("SlimeMold");
+		Tag tag = SimHashes.SlimeMold.CreateTag();
 		ManualDeliveryKG manualDeliveryKG = go.AddOrGet<ManualDeliveryKG>();
 		manualDeliveryKG.SetStorage(storage);
 		manualDeliveryKG.requestedItemTag = tag;
@@ -58,8 +58,8 @@ public class AlgaeDistilleryConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.2f, SimHashes.Algae, 303.15f, true, 0f, 1f, false, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.40000004f, SimHashes.DirtyWater, 303.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.2f, SimHashes.Algae, 303.15f, false, true, 0f, 1f, 1f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.40000004f, SimHashes.DirtyWater, 303.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0)
 		};
 		Prioritizable.AddRef(go);
 	}

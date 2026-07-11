@@ -8,45 +8,40 @@ namespace ProcGenGame
 {
 	public static class MobSpawning
 	{
-		public static Dictionary<int, string> PlaceAmbientMobs(WorldGenSettings worldGenSettings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug)
+		public static Dictionary<int, string> PlaceFeatureAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug)
 		{
 			Dictionary<int, string> dictionary = new Dictionary<int, string>();
 			Node node = tc.node;
-			HashSet<int> alreadyOccupiedCells = new HashSet<int>();
-			List<Tag> list = new List<Tag>();
-			bool flag = false;
-			int num = 0;
-			if (node.tags == null || node.biomeSpecificTags == null)
+			HashSet<int> hashSet = new HashSet<int>();
+			FeatureSettings featureSettings = null;
+			foreach (Tag tag in node.featureSpecificTags)
 			{
-				tc.LogInfo("PlaceAmbientMobs", "No tags", (float)node.node.Id);
-				return null;
-			}
-			foreach (Tag tag in node.biomeSpecificTags)
-			{
-				if (SettingsCache.mobs.HasMob(tag.Name) && SettingsCache.mobs.GetMob(tag.Name) != null)
+				if (settings.HasFeature(tag.Name))
 				{
-					list.Add(tag);
-					num++;
-					flag = true;
+					featureSettings = settings.GetFeature(tag.Name);
+					break;
 				}
 			}
-			if (!flag)
+			if (featureSettings == null)
 			{
-				tc.LogInfo("PlaceAmbientMobs", "No biome MOBS", (float)node.node.Id);
-				return null;
+				return dictionary;
 			}
-			List<int> availableSpawnCells = tc.GetAvailableSpawnCells();
-			tc.LogInfo("PlaceAmbientMobs", "possibleSpawnPoints", (float)availableSpawnCells.Count);
-			for (int i = availableSpawnCells.Count - 1; i > 0; i--)
+			if (featureSettings.internalMobs == null || featureSettings.internalMobs.Count == 0)
 			{
-				int num2 = availableSpawnCells[i];
-				if (ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num2].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num2))
+				return dictionary;
+			}
+			List<int> availableSpawnCellsFeature = tc.GetAvailableSpawnCellsFeature();
+			tc.LogInfo("PlaceFeatureAmbientMobs", "possibleSpawnPoints", (float)availableSpawnCellsFeature.Count);
+			for (int i = availableSpawnCellsFeature.Count - 1; i > 0; i--)
+			{
+				int num = availableSpawnCellsFeature[i];
+				if (ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num))
 				{
-					availableSpawnCells.RemoveAt(i);
+					availableSpawnCellsFeature.RemoveAt(i);
 				}
 			}
-			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)availableSpawnCells.Count);
-			if (availableSpawnCells.Count == 0)
+			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)availableSpawnCellsFeature.Count);
+			if (availableSpawnCellsFeature.Count == 0)
 			{
 				if (isDebug)
 				{
@@ -54,86 +49,148 @@ namespace ProcGenGame
 				}
 				return null;
 			}
-			int num3 = 0;
-			while (num3 < MobSettings.AmbientMobDensity && availableSpawnCells.Count > 0)
+			foreach (MobReference mobReference in featureSettings.internalMobs)
 			{
-				list.ShuffleSeeded<Tag>(rnd.RandomSource());
-				for (int j = 0; j < list.Count; j++)
+				Mob mob = settings.GetMob(mobReference.type);
+				if (mob == null)
 				{
-					if (!SettingsCache.mobs.GetMobTags().Contains(list[j]))
+					global::Debug.LogError("Missing mob description for internal mob [" + mobReference.type + "]");
+				}
+				else
+				{
+					List<int> mobPossibleSpawnPoints = MobSpawning.GetMobPossibleSpawnPoints(mob, availableSpawnCellsFeature, cells, hashSet, rnd);
+					if (mobPossibleSpawnPoints.Count == 0)
 					{
-						global::Debug.LogError("Missing sample description for tag [" + list[j].Name + "]");
+						if (isDebug)
+						{
+						}
 					}
 					else
 					{
-						Mob mob = SettingsCache.mobs.MobLookupTable[list[j].Name];
-						List<int> list2 = availableSpawnCells.FindAll((int cell) => MobSpawning.isSuitableMobSpawnPoint(cell, mob, cells, bgTemp, dc, ref alreadyOccupiedCells));
-						if (list2.Count == 0)
+						tc.LogInfo("\t\tpossible", string.Concat(new object[] { mobReference.type, " mps: ", mobPossibleSpawnPoints.Count, " ps:" }), (float)availableSpawnCellsFeature.Count);
+						int num2 = Mathf.RoundToInt(mobReference.count.GetRandomValueWithinRange(rnd));
+						tc.LogInfo("\t\tcount", mobReference.type, (float)num2);
+						Tag tag2 = ((mob.prefabName != null) ? new Tag(mob.prefabName) : new Tag(mobReference.type));
+						MobSpawning.SpawnCountMobs(mob, tag2, num2, mobPossibleSpawnPoints, tc, ref dictionary, ref hashSet);
+					}
+				}
+			}
+			return dictionary;
+		}
+
+		public static Dictionary<int, string> PlaceBiomeAmbientMobs(WorldGenSettings settings, TerrainCell tc, SeededRandom rnd, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, HashSet<int> avoidCells, bool isDebug)
+		{
+			Dictionary<int, string> dictionary = new Dictionary<int, string>();
+			Node node = tc.node;
+			HashSet<int> hashSet = new HashSet<int>();
+			List<Tag> list = new List<Tag>();
+			if (node.biomeSpecificTags == null)
+			{
+				tc.LogInfo("PlaceBiomeAmbientMobs", "No tags", (float)node.node.Id);
+				return null;
+			}
+			foreach (Tag tag in node.biomeSpecificTags)
+			{
+				if (settings.HasMob(tag.Name) && settings.GetMob(tag.Name) != null)
+				{
+					list.Add(tag);
+				}
+			}
+			if (list.Count <= 0)
+			{
+				tc.LogInfo("PlaceBiomeAmbientMobs", "No biome MOBS", (float)node.node.Id);
+				return null;
+			}
+			List<int> list2 = ((!node.tags.Contains(WorldGenTags.PreventAmbientMobsInFeature)) ? tc.GetAvailableSpawnCellsAll() : tc.GetAvailableSpawnCellsBiome());
+			tc.LogInfo("PlaceBiomAmbientMobs", "possibleSpawnPoints", (float)list2.Count);
+			for (int i = list2.Count - 1; i > 0; i--)
+			{
+				int num = list2[i];
+				if (ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Katairite || ElementLoader.elements[(int)cells[num].elementIdx].id == SimHashes.Unobtanium || avoidCells.Contains(num))
+				{
+					list2.RemoveAt(i);
+				}
+			}
+			tc.LogInfo("mob spawns", "Id:" + node.node.Id + " possible cells", (float)list2.Count);
+			if (list2.Count == 0)
+			{
+				if (isDebug)
+				{
+					global::Debug.LogWarning("No where to put mobs possibleSpawnPoints [" + tc.node.node.Id + "]");
+				}
+				return null;
+			}
+			list.ShuffleSeeded<Tag>(rnd.RandomSource());
+			for (int j = 0; j < list.Count; j++)
+			{
+				Mob mob = settings.GetMob(list[j].Name);
+				if (mob == null)
+				{
+					global::Debug.LogError("Missing sample description for tag [" + list[j].Name + "]");
+				}
+				else
+				{
+					List<int> mobPossibleSpawnPoints = MobSpawning.GetMobPossibleSpawnPoints(mob, list2, cells, hashSet, rnd);
+					if (mobPossibleSpawnPoints.Count == 0)
+					{
+						if (isDebug)
+						{
+						}
+					}
+					else
+					{
+						tc.LogInfo("\t\tpossible", string.Concat(new object[]
+						{
+							list[j].ToString(),
+							" mps: ",
+							mobPossibleSpawnPoints.Count,
+							" ps:"
+						}), (float)list2.Count);
+						float num2 = mob.density.GetRandomValueWithinRange(rnd) * MobSettings.AmbientMobDensity;
+						if (num2 > 1f)
 						{
 							if (isDebug)
 							{
-								global::Debug.LogWarning(string.Concat(new object[]
-								{
-									"No SuitableMobSpawnPoint to put mobs mobPossibleSpawnPoints [",
-									list[j].Name,
-									"] [",
-									tc.node.node.Id,
-									"]"
-								}));
+								global::Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!");
 							}
+							num2 = 1f;
 						}
-						else
-						{
-							list2.ShuffleSeeded<int>(rnd.RandomSource());
-							tc.LogInfo("\t\tpossible", string.Concat(new object[]
-							{
-								list[j].ToString(),
-								" mps: ",
-								list2.Count,
-								" ps:"
-							}), (float)availableSpawnCells.Count);
-							float num4 = mob.density.GetRandomValueWithinRange(rnd);
-							if (num4 > 1f)
-							{
-								if (isDebug)
-								{
-									global::Debug.LogWarning("Got a mob density greater than 1.0 for " + list[j].Name + ". Probably using density as spacing!");
-								}
-								num4 = 1f;
-							}
-							int num5 = Mathf.RoundToInt((float)list2.Count * num4);
-							tc.LogInfo("\t\tcount", list[j].ToString(), (float)num5);
-							Tag tag2 = ((mob.prefabName != null) ? new Tag(mob.prefabName) : list[j]);
-							int num6 = 0;
-							while (num6 < num5 && list2.Count != 0)
-							{
-								int num7 = list2[0];
-								for (int k = 0; k < mob.width; k++)
-								{
-									for (int l = 0; l < mob.height; l++)
-									{
-										int num8 = MobSpawning.MobWidthOffset(num7, k);
-										alreadyOccupiedCells.Add(num8);
-										if (list2.Contains(num8))
-										{
-											list2.Remove(num8);
-										}
-										if (availableSpawnCells.Contains(num8))
-										{
-											availableSpawnCells.Remove(num8);
-										}
-									}
-								}
-								tc.AddMob(new KeyValuePair<int, Tag>(num7, tag2));
-								dictionary.Add(num7, tag2.Name);
-								num6++;
-							}
-						}
+						tc.LogInfo("\t\tdensity:", string.Empty, num2);
+						int num3 = Mathf.RoundToInt((float)mobPossibleSpawnPoints.Count * num2);
+						tc.LogInfo("\t\tcount", list[j].ToString(), (float)num3);
+						Tag tag2 = ((mob.prefabName != null) ? new Tag(mob.prefabName) : list[j]);
+						MobSpawning.SpawnCountMobs(mob, tag2, num3, mobPossibleSpawnPoints, tc, ref dictionary, ref hashSet);
 					}
 				}
-				num3++;
 			}
 			return dictionary;
+		}
+
+		private static List<int> GetMobPossibleSpawnPoints(Mob mob, List<int> possibleSpawnPoints, Sim.Cell[] cells, HashSet<int> alreadyOccupiedCells, SeededRandom rnd)
+		{
+			List<int> list = possibleSpawnPoints.FindAll((int cell) => MobSpawning.IsSuitableMobSpawnPoint(cell, mob, cells, ref alreadyOccupiedCells));
+			list.ShuffleSeeded<int>(rnd.RandomSource());
+			return list;
+		}
+
+		public static void SpawnCountMobs(Mob mobData, Tag mobPrefab, int count, List<int> mobPossibleSpawnPoints, TerrainCell tc, ref Dictionary<int, string> spawnedMobs, ref HashSet<int> alreadyOccupiedCells)
+		{
+			int num = 0;
+			while (num < count && num < mobPossibleSpawnPoints.Count)
+			{
+				int num2 = mobPossibleSpawnPoints[num];
+				for (int i = 0; i < mobData.width; i++)
+				{
+					for (int j = 0; j < mobData.height; j++)
+					{
+						int num3 = MobSpawning.MobWidthOffset(num2, i);
+						alreadyOccupiedCells.Add(num3);
+					}
+				}
+				tc.AddMob(new KeyValuePair<int, Tag>(num2, mobPrefab));
+				spawnedMobs.Add(num2, mobPrefab.Name);
+				num++;
+			}
 		}
 
 		public static int MobWidthOffset(int occupiedCell, int widthIterator)
@@ -141,7 +198,7 @@ namespace ProcGenGame
 			return Grid.OffsetCell(occupiedCell, (widthIterator % 2 != 0) ? (widthIterator / 2 + widthIterator % 2) : (-(widthIterator / 2)), 0);
 		}
 
-		private static bool isSuitableMobSpawnPoint(int cell, Mob mob, Sim.Cell[] cells, float[] bgTemp, Sim.DiseaseCell[] dc, ref HashSet<int> alreadyOccupiedCells)
+		private static bool IsSuitableMobSpawnPoint(int cell, Mob mob, Sim.Cell[] cells, ref HashSet<int> alreadyOccupiedCells)
 		{
 			for (int i = 0; i < mob.width; i++)
 			{
@@ -181,6 +238,10 @@ namespace ProcGenGame
 				}
 				return flag;
 			}
+			case Mob.Location.LiquidFloor:
+				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)] && Grid.IsLiquid(cell);
+			case Mob.Location.AnyFloor:
+				return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell] && !Grid.Solid[Grid.CellAbove(cell)] && Grid.Solid[Grid.CellBelow(cell)];
 			}
 			return MobSpawning.isNaturalCavity(cell) && !Grid.Solid[cell];
 		}

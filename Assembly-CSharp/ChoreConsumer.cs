@@ -123,6 +123,49 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		}
 	}
 
+	private bool ChooseChore(ref Chore.Precondition.Context out_context, List<Chore.Precondition.Context> succeeded_contexts)
+	{
+		if (succeeded_contexts.Count == 0)
+		{
+			return false;
+		}
+		Chore currentChore = this.choreDriver.GetCurrentChore();
+		if (currentChore == null)
+		{
+			for (int i = succeeded_contexts.Count - 1; i >= 0; i--)
+			{
+				Chore.Precondition.Context context = succeeded_contexts[i];
+				if (context.IsSuccess())
+				{
+					out_context = context;
+					return true;
+				}
+			}
+		}
+		else
+		{
+			int interruptPriority = Db.Get().ChoreTypes.TopPriority.interruptPriority;
+			int num = ((currentChore.masterPriority.priority_class != PriorityScreen.PriorityClass.topPriority) ? currentChore.choreType.interruptPriority : interruptPriority);
+			for (int j = succeeded_contexts.Count - 1; j >= 0; j--)
+			{
+				Chore.Precondition.Context context2 = succeeded_contexts[j];
+				if (context2.IsSuccess())
+				{
+					int num2 = ((context2.masterPriority.priority_class != PriorityScreen.PriorityClass.topPriority) ? context2.interruptPriority : interruptPriority);
+					if (num2 > num)
+					{
+						if (!currentChore.choreType.interruptExclusion.Overlaps(context2.chore.choreType.tags))
+						{
+							out_context = context2;
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	public bool FindNextChore(ref Chore.Precondition.Context out_context)
 	{
 		if (this.debug)
@@ -182,53 +225,7 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 		}
 		this.preconditionSnapshot.succeededContexts.Sort();
 		List<Chore.Precondition.Context> succeededContexts = this.preconditionSnapshot.succeededContexts;
-		bool flag = false;
-		if (succeededContexts.Count > 0)
-		{
-			Chore currentChore = this.choreDriver.GetCurrentChore();
-			for (int j = succeededContexts.Count - 1; j >= 0; j--)
-			{
-				Chore.Precondition.Context context = succeededContexts[j];
-				if (context.IsSuccess())
-				{
-					int num3 = context.interruptPriority;
-					int num4 = -1;
-					if (context.masterPriority.priority_class == PriorityScreen.PriorityClass.topPriority)
-					{
-						num3 = Db.Get().ChoreTypes.TopPriority.interruptPriority;
-					}
-					if (currentChore != null)
-					{
-						num4 = currentChore.choreType.interruptPriority;
-						if (currentChore.masterPriority.priority_class == PriorityScreen.PriorityClass.topPriority)
-						{
-							num4 = Db.Get().ChoreTypes.TopPriority.interruptPriority;
-						}
-					}
-					if (currentChore == null || num3 > num4)
-					{
-						bool flag2 = false;
-						if (currentChore != null)
-						{
-							for (int k = 0; k < currentChore.choreType.interruptExclusion.Count; k++)
-							{
-								if (context.chore.choreType.tags.Contains(currentChore.choreType.interruptExclusion[k]))
-								{
-									flag2 = true;
-									break;
-								}
-							}
-						}
-						if (!flag2)
-						{
-							out_context = context;
-							flag = true;
-							break;
-						}
-					}
-				}
-			}
-		}
+		bool flag = this.ChooseChore(ref out_context, succeededContexts);
 		if (flag)
 		{
 			this.preconditionSnapshot.CopyTo(this.lastSuccessfulPreconditionSnapshot);
@@ -590,8 +587,6 @@ public class ChoreConsumer : KMonoBehaviour, IPersonalPriorityManager
 	private List<HashedString> traitDisabledChoreGroups = new List<HashedString>();
 
 	private List<HashedString> userDisabledChoreGroups = new List<HashedString>();
-
-	public HashSet<Tag> preferredChoreTags = new HashSet<Tag>();
 
 	private int stationaryReach = -1;
 

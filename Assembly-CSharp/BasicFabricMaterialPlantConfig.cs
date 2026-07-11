@@ -26,7 +26,7 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 			SimHashes.DirtyWater,
 			SimHashes.Water
 		};
-		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 248.15f, 295.15f, 310.15f, 398.15f, array, false, 0f, 0.15f, text4, false, true);
+		EntityTemplates.ExtendEntityToBasicPlant(gameObject2, 248.15f, 295.15f, 310.15f, 398.15f, array, false, 0f, 0.15f, text4, false, true, true, true, 2400f);
 		EntityTemplates.ExtendPlantToIrrigated(gameObject, new PlantElementAbsorber.ConsumeInfo[]
 		{
 			new PlantElementAbsorber.ConsumeInfo
@@ -40,7 +40,7 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 		gameObject.AddOrGet<LoopingSounds>();
 		gameObject2 = gameObject;
 		SeedProducer.ProductionType productionType = SeedProducer.ProductionType.Harvest;
-		text4 = "BasicFabricMaterialPlantSeed";
+		text4 = BasicFabricMaterialPlantConfig.SEED_ID;
 		text3 = global::STRINGS.CREATURES.SPECIES.SEEDS.BASICFABRICMATERIALPLANT.NAME;
 		text2 = global::STRINGS.CREATURES.SPECIES.SEEDS.BASICFABRICMATERIALPLANT.DESC;
 		kanimFile = Assets.GetAnim("seed_swampreed_kanim");
@@ -63,6 +63,8 @@ public class BasicFabricMaterialPlantConfig : IEntityConfig
 	}
 
 	public static string ID = "BasicFabricPlant";
+
+	public static string SEED_ID = "BasicFabricMaterialPlantSeed";
 
 	public const float WATER_RATE = 0.26666668f;
 }

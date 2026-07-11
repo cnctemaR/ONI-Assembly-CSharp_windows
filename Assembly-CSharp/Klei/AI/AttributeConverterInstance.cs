@@ -17,28 +17,9 @@ namespace Klei.AI
 			return this.converter.multiplier * this.attributeInstance.GetTotalValue() + this.converter.baseValue;
 		}
 
-		public string DescriptionFromAttribute()
+		public string DescriptionFromAttribute(float value, GameObject go)
 		{
-			float num = this.Evaluate();
-			string text;
-			if (this.converter.formatter != null)
-			{
-				text = this.converter.formatter.GetFormattedValue(num, this.converter.formatter.DeltaTimeSlice, base.gameObject);
-			}
-			else if (this.attributeInstance.Attribute.formatter != null)
-			{
-				text = this.attributeInstance.Attribute.formatter.GetFormattedValue(num, this.attributeInstance.Attribute.formatter.DeltaTimeSlice, base.gameObject);
-			}
-			else
-			{
-				text = GameUtil.GetFormattedSimple(num, GameUtil.TimeSlice.None, null);
-			}
-			if (text != null)
-			{
-				text = GameUtil.AddPositiveSign(text, num > 0f);
-				return string.Format(this.converter.description, text);
-			}
-			return null;
+			return this.converter.DescriptionFromAttribute(this.Evaluate(), go);
 		}
 
 		public AttributeConverter converter;

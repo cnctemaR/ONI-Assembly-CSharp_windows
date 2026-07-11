@@ -13,7 +13,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			smi.OnEatSolidComplete(data);
 		}).ToggleBehaviour(GameTags.Creatures.WantsToEat, (SolidConsumerMonitor.Instance smi) => smi.targetEdible != null && !smi.targetEdible.HasTag(GameTags.Creatures.ReservedByCreature), null);
 		this.satisfied.TagTransition(GameTags.Creatures.Hungry, this.lookingforfood, false);
-		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update(new Action<SolidConsumerMonitor.Instance, float>(SolidConsumerMonitor.FindFood), UpdateRate.SIM_1000ms, false);
+		this.lookingforfood.TagTransition(GameTags.Creatures.Hungry, this.satisfied, true).Update(new Action<SolidConsumerMonitor.Instance, float>(SolidConsumerMonitor.FindFood), UpdateRate.SIM_1000ms, true);
 	}
 
 	[Conditional("DETAILED_SOLID_CONSUMER_MONITOR_PROFILE")]
@@ -72,31 +72,41 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 				}
 				else if (component.HasAnyTags_AssumeLaundered(ref SolidConsumerMonitor.plantMask))
 				{
-					AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(component);
-					if (amountInstance != null)
+					float num4 = 0.25f;
+					float num5 = 0f;
+					BuddingTrunk component2 = component.GetComponent<BuddingTrunk>();
+					if (component2)
 					{
-						float num4 = 0.25f;
-						if (amountInstance.value / amountInstance.GetMax() < num4)
+						num5 = component2.GetMaxBranchMaturity();
+					}
+					else
+					{
+						AmountInstance amountInstance = Db.Get().Amounts.Maturity.Lookup(component);
+						if (amountInstance != null)
 						{
-							pooledList[num3] = null;
+							num5 = amountInstance.value / amountInstance.GetMax();
 						}
+					}
+					if (num5 < num4)
+					{
+						pooledList[num3] = null;
 					}
 				}
 			}
 		}
-		Navigator component2 = smi.GetComponent<Navigator>();
+		Navigator component3 = smi.GetComponent<Navigator>();
 		smi.targetEdible = null;
-		int num5 = -1;
+		int num6 = -1;
 		foreach (KMonoBehaviour kmonoBehaviour2 in pooledList)
 		{
 			if (!(kmonoBehaviour2 == null))
 			{
-				int navigationCost = component2.GetNavigationCost(Grid.PosToCell(kmonoBehaviour2.gameObject.transform.GetPosition()));
+				int navigationCost = component3.GetNavigationCost(Grid.PosToCell(kmonoBehaviour2.gameObject.transform.GetPosition()));
 				if (navigationCost != -1)
 				{
-					if (navigationCost < num5 || num5 == -1)
+					if (navigationCost < num6 || num6 == -1)
 					{
-						num5 = navigationCost;
+						num6 = navigationCost;
 						smi.targetEdible = kmonoBehaviour2.gameObject;
 					}
 				}
@@ -109,7 +119,7 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 
 	private GameStateMachine<SolidConsumerMonitor, SolidConsumerMonitor.Instance, IStateMachineTarget, SolidConsumerMonitor.Def>.State lookingforfood;
 
-	private static TagBits plantMask = new TagBits(GameTags.Plant);
+	private static TagBits plantMask = new TagBits(GameTags.GrowingPlant);
 
 	private static TagBits creatureMask = new TagBits(new Tag[]
 	{
@@ -154,21 +164,25 @@ public class SolidConsumerMonitor : GameStateMachine<SolidConsumerMonitor, Solid
 			Growing component2 = kprefabID.GetComponent<Growing>();
 			if (component2 != null)
 			{
-				AmountInstance amountInstance2 = Db.Get().Amounts.Maturity.Lookup(component2.gameObject);
-				float value = amountInstance2.value;
-				num2 = Mathf.Min(num2, value);
-				amountInstance2.value -= num2;
-				kprefabID.Trigger(-1793167409, null);
+				BuddingTrunk component3 = kprefabID.GetComponent<BuddingTrunk>();
+				if (component3)
+				{
+					component3.ConsumeMass(num2);
+				}
+				else
+				{
+					component2.ConsumeMass(num2);
+				}
 			}
 			else
 			{
 				num2 = Mathf.Min(num2, component.Mass);
 				component.Mass -= num2;
-				Pickupable component3 = component.GetComponent<Pickupable>();
-				if (component3.storage != null)
+				Pickupable component4 = component.GetComponent<Pickupable>();
+				if (component4.storage != null)
 				{
-					component3.storage.Trigger(-1452790913, base.gameObject);
-					component3.storage.Trigger(-1697596308, base.gameObject);
+					component4.storage.Trigger(-1452790913, base.gameObject);
+					component4.storage.Trigger(-1697596308, base.gameObject);
 				}
 			}
 			float num3 = dietInfo.ConvertConsumptionMassToCalories(num2);

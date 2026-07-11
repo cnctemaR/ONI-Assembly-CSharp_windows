@@ -19,8 +19,11 @@ public static class BaseMoleConfig
 		DiggerMonitor.Def def = gameObject.AddOrGetDef<DiggerMonitor.Def>();
 		def.depthToDig = MoleTuning.DEPTH_TO_HIDE;
 		EntityTemplates.CreateAndRegisterBaggedCreature(gameObject, true, true, false);
+		KPrefabID component = gameObject.GetComponent<KPrefabID>();
+		component.AddTag(GameTags.Creatures.Walker, false);
 		ChoreTable.Builder builder = new ChoreTable.Builder().Add(new DeathStates.Def(), true).Add(new AnimInterruptStates.Def(), true).Add(new FallStates.Def(), true)
 			.Add(new StunnedStates.Def(), true)
+			.Add(new DrowningStates.Def(), true)
 			.Add(new DiggerStates.Def(), true)
 			.Add(new GrowUpStates.Def(), true)
 			.Add(new TrappedStates.Def(), true)
@@ -50,7 +53,7 @@ public static class BaseMoleConfig
 		List<Diet.Info> list = new List<Diet.Info>();
 		foreach (Tag tag in elementTags)
 		{
-			list.Add(new Diet.Info(new HashSet<Tag> { tag }, tag, caloriesPerKg, producedConversionRate, null, 0f, true));
+			list.Add(new Diet.Info(new HashSet<Tag> { tag }, tag, caloriesPerKg, producedConversionRate, null, 0f, true, false));
 		}
 		return list;
 	}

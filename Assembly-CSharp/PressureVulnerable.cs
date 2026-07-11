@@ -19,7 +19,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 	}
 
-	public PressureVulnerable.PressureState GetExternalPressureState
+	public PressureVulnerable.PressureState ExternalPressureState
 	{
 		get
 		{
@@ -27,15 +27,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 	}
 
-	public float GetExternalPressure
-	{
-		get
-		{
-			return this.GetPressureOverArea(this.cell);
-		}
-	}
-
-	public Element GetExternalElement
+	public Element ExternalElement
 	{
 		get
 		{
@@ -47,7 +39,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		get
 		{
-			return this.GetExternalPressureState == PressureVulnerable.PressureState.LethalHigh || this.GetExternalPressureState == PressureVulnerable.PressureState.LethalLow || !this.IsSafeElement(this.GetExternalElement);
+			return this.pressureState == PressureVulnerable.PressureState.LethalHigh || this.pressureState == PressureVulnerable.PressureState.LethalLow || !this.IsSafeElement(this.ExternalElement);
 		}
 	}
 
@@ -55,7 +47,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	{
 		get
 		{
-			return this.IsSafeElement(this.GetExternalElement) && this.GetExternalPressureState == PressureVulnerable.PressureState.Normal;
+			return this.IsSafeElement(this.ExternalElement) && this.pressureState == PressureVulnerable.PressureState.Normal;
 		}
 	}
 
@@ -71,7 +63,9 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		base.OnSpawn();
 		this.cell = Grid.PosToCell(this);
 		base.smi.sm.pressure.Set(1f, base.smi);
-		base.smi.sm.safe_element.Set(this.IsSafeElement(this.GetExternalElement), base.smi);
+		base.smi.sm.safe_element.Set(this.IsSafeElement(this.ExternalElement), base.smi);
+		base.smi.master.pressureAccumulator = Game.Instance.accumulators.Add("pressureAccumulator", this);
+		base.smi.master.elementAccumulator = Game.Instance.accumulators.Add("elementAccumulator", this);
 		base.smi.StartSM();
 	}
 
@@ -144,7 +138,7 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 
 	public bool IsCellSafe(int cell)
 	{
-		return this.IsSafeElement(this.GetExternalElement) && this.IsSafePressure(this.GetPressureOverArea(cell));
+		return this.IsSafeElement(Grid.Element[cell]) && this.IsSafePressure(this.GetPressureOverArea(cell));
 	}
 
 	public bool IsSafeElement(Element element)
@@ -160,9 +154,20 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 	public void Sim1000ms(float dt)
 	{
 		float pressureOverArea = this.GetPressureOverArea(this.cell);
-		base.smi.sm.pressure.Set(pressureOverArea, base.smi);
-		this.displayPressureAmount.value = pressureOverArea;
-		base.smi.sm.safe_element.Set(this.IsSafeElement(this.GetExternalElement), base.smi);
+		Game.Instance.accumulators.Accumulate(base.smi.master.pressureAccumulator, pressureOverArea);
+		float averageRate = Game.Instance.accumulators.GetAverageRate(base.smi.master.pressureAccumulator);
+		this.displayPressureAmount.value = averageRate;
+		bool flag = this.IsSafeElement(this.ExternalElement);
+		Game.Instance.accumulators.Accumulate(base.smi.master.elementAccumulator, (!flag) ? 0f : 1f);
+		float averageRate2 = Game.Instance.accumulators.GetAverageRate(base.smi.master.elementAccumulator);
+		bool flag2 = averageRate2 > 0f;
+		base.smi.sm.safe_element.Set(flag2, base.smi);
+		base.smi.sm.pressure.Set(averageRate, base.smi);
+	}
+
+	public float GetExternalPressure()
+	{
+		return this.GetPressureOverArea(this.cell);
 	}
 
 	private float GetPressureOverArea(int cell)
@@ -193,6 +198,10 @@ public class PressureVulnerable : StateMachineComponent<PressureVulnerable.State
 		}
 		return list;
 	}
+
+	private HandleVector<int>.Handle pressureAccumulator = HandleVector<int>.InvalidHandle;
+
+	private HandleVector<int>.Handle elementAccumulator = HandleVector<int>.InvalidHandle;
 
 	private OccupyArea _occupyArea;
 

@@ -8,7 +8,7 @@ using STRINGS;
 using UnityEngine;
 
 [SerializationConfig(MemberSerialization.OptIn)]
-public class ComplexFabricator : KMonoBehaviour, ISim200ms
+public class ComplexFabricator : KMonoBehaviour, ISim200ms, ISim1000ms
 {
 	public ComplexFabricatorWorkable Workable
 	{
@@ -18,53 +18,47 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	public List<ComplexFabricator.UserOrder> GetUserOrders()
-	{
-		return this.userOrders;
-	}
-
-	public List<ComplexFabricator.MachineOrder> GetMachineOrders()
-	{
-		return this.machineOrders;
-	}
-
 	public int CurrentOrderIdx
 	{
 		get
 		{
-			return this.currentOrderIdx;
+			return this.nextOrderIdx;
 		}
 	}
 
-	public ComplexFabricator.MachineOrder CurrentMachineOrder
+	public ComplexRecipe CurrentWorkingOrder
 	{
 		get
 		{
-			return (this.machineOrders.Count <= 0) ? null : this.machineOrders[0];
+			return (!this.HasWorkingOrder) ? null : this.recipe_list[this.workingOrderIdx];
 		}
 	}
 
-	public bool IsSearchHandleActive
+	public ComplexRecipe NextOrder
 	{
 		get
 		{
-			return this.ingredientSearchHandle.IsValid;
+			return (!this.nextOrderIsWorkable) ? null : this.recipe_list[this.nextOrderIdx];
 		}
 	}
 
-	public int NumOrders
+	public float OrderProgress
 	{
 		get
 		{
-			return this.userOrders.Count;
+			return this.orderProgress;
+		}
+		set
+		{
+			this.orderProgress = value;
 		}
 	}
 
-	public bool WaitingForWorker
+	public bool HasAnyOrder
 	{
 		get
 		{
-			return this.machineOrders.Count > 0 && this.machineOrders[0].fetchList != null && this.machineOrders[0].fetchList.IsComplete;
+			return this.HasWorkingOrder || this.hasOpenOrders;
 		}
 	}
 
@@ -76,8 +70,32 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		}
 	}
 
+	public bool WaitingForWorker
+	{
+		get
+		{
+			return this.HasWorkingOrder && !this.HasWorker;
+		}
+	}
+
+	private bool HasWorkingOrder
+	{
+		get
+		{
+			return this.workingOrderIdx > -1;
+		}
+	}
+
+	public List<FetchList2> DebugFetchLists
+	{
+		get
+		{
+			return this.fetchListList;
+		}
+	}
+
 	[OnDeserialized]
-	private void OnDeserializedMethod()
+	protected virtual void OnDeserializedMethod()
 	{
 		List<string> list = new List<string>();
 		foreach (string text in this.recipeQueueCounts.Keys)
@@ -89,6 +107,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		}
 		foreach (string text2 in list)
 		{
+			global::Debug.LogWarningFormat("{1} removing missing recipe from queue: {0}", new object[] { text2, base.name });
 			this.recipeQueueCounts.Remove(text2);
 		}
 	}
@@ -96,36 +115,435 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
+		this.GetRecipes();
+		this.simRenderLoadBalance = true;
 		this.choreType = Db.Get().ChoreTypes.Fabricate;
-		this.choreTags = new Tag[] { GameTags.ChoreTypes.Fabricating };
 		base.Subscribe<ComplexFabricator>(-1957399615, ComplexFabricator.OnDroppedAllDelegate);
 		base.Subscribe<ComplexFabricator>(-592767678, ComplexFabricator.OnOperationalChangedDelegate);
+		base.Subscribe<ComplexFabricator>(-905833192, ComplexFabricator.OnCopySettingsDelegate);
+		base.Subscribe<ComplexFabricator>(-1697596308, ComplexFabricator.OnStorageChangeDelegate);
 		this.workable = base.GetComponent<ComplexFabricatorWorkable>();
-		if (this.duplicantOperated)
-		{
-		}
 		Components.ComplexFabricators.Add(this);
 	}
 
 	protected override void OnSpawn()
 	{
 		base.OnSpawn();
-		if (this.duplicantOperated)
-		{
-			this.workable = base.GetComponent<ComplexFabricatorWorkable>();
-		}
 		this.InitRecipeQueueCount();
 		foreach (string text in this.recipeQueueCounts.Keys)
 		{
-			if (this.recipeQueueCounts[text] == ComplexFabricator.MAX_QUEUE_SIZE + 1)
+			if (this.recipeQueueCounts[text] == 100)
 			{
 				this.recipeQueueCounts[text] = ComplexFabricator.QUEUE_INFINITE;
 			}
 		}
-		this.RefreshUserOrdersFromQueueCounts();
 		this.buildStorage.Transfer(this.inStorage, true, true);
-		this.UpdateMachineOrders(true);
-		base.Subscribe<ComplexFabricator>(-905833192, ComplexFabricator.OnCopySettingsDelegate);
+		this.DropExcessIngredients(this.inStorage);
+		int num = this.FindRecipeIndex(this.lastWorkingRecipe);
+		if (num > -1)
+		{
+			this.nextOrderIdx = num;
+		}
+	}
+
+	protected override void OnCleanUp()
+	{
+		this.CancelAllOpenOrders();
+		this.CancelChore();
+		Components.ComplexFabricators.Remove(this);
+		base.OnCleanUp();
+	}
+
+	private void OnOperationalChanged(object data)
+	{
+		bool flag = (bool)data;
+		if (flag)
+		{
+			this.queueDirty = true;
+		}
+		else
+		{
+			this.CancelAllOpenOrders();
+		}
+		this.UpdateChore();
+	}
+
+	public void Sim1000ms(float dt)
+	{
+		this.RefreshAndStartNextOrder();
+	}
+
+	public void Sim200ms(float dt)
+	{
+		if (!this.operational.IsOperational)
+		{
+			return;
+		}
+		this.operational.SetActive(this.HasWorkingOrder && this.HasWorker, false);
+		if (!this.duplicantOperated && this.HasWorkingOrder)
+		{
+			ComplexRecipe complexRecipe = this.recipe_list[this.workingOrderIdx];
+			this.orderProgress += dt / complexRecipe.time;
+			if (this.orderProgress >= 1f)
+			{
+				this.CompleteWorkingOrder();
+			}
+		}
+	}
+
+	private void RefreshAndStartNextOrder()
+	{
+		if (!this.operational.IsOperational)
+		{
+			return;
+		}
+		if (this.queueDirty)
+		{
+			this.RefreshQueue();
+		}
+		if (!this.HasWorkingOrder && this.nextOrderIsWorkable)
+		{
+			this.StartWorkingOrder(this.nextOrderIdx);
+		}
+	}
+
+	public void SetQueueDirty()
+	{
+		this.queueDirty = true;
+	}
+
+	private void RefreshQueue()
+	{
+		this.queueDirty = false;
+		this.ValidateWorkingOrder();
+		this.ValidateNextOrder();
+		this.UpdateOpenOrders();
+		this.DropExcessIngredients(this.inStorage);
+		base.Trigger(1721324763, this);
+	}
+
+	private void StartWorkingOrder(int index)
+	{
+		global::Debug.Assert(!this.HasWorkingOrder, "machineOrderIdx already set");
+		this.workingOrderIdx = index;
+		if (this.recipe_list[this.workingOrderIdx].id != this.lastWorkingRecipe)
+		{
+			this.orderProgress = 0f;
+			this.lastWorkingRecipe = this.recipe_list[this.workingOrderIdx].id;
+		}
+		this.TransferCurrentRecipeIngredientsForBuild();
+		global::Debug.Assert(this.openOrderCounts[this.workingOrderIdx] > 0, "openOrderCount invalid");
+		List<int> list;
+		int num;
+		(list = this.openOrderCounts)[num = this.workingOrderIdx] = list[num] - 1;
+		this.UpdateChore();
+		this.AdvanceNextOrder();
+	}
+
+	private void CancelWorkingOrder()
+	{
+		global::Debug.Assert(this.HasWorkingOrder, "machineOrderIdx not set");
+		this.buildStorage.Transfer(this.inStorage, true, true);
+		this.workingOrderIdx = -1;
+		this.orderProgress = 0f;
+		this.UpdateChore();
+	}
+
+	public void CompleteWorkingOrder()
+	{
+		if (!this.HasWorkingOrder)
+		{
+			global::Debug.LogWarning("CompleteWorkingOrder called with no working order.", base.gameObject);
+			return;
+		}
+		ComplexRecipe complexRecipe = this.recipe_list[this.workingOrderIdx];
+		this.SpawnOrderProduct(complexRecipe);
+		float num = this.buildStorage.MassStored();
+		if (num != 0f)
+		{
+			global::Debug.LogWarningFormat(base.gameObject, "{0} build storage contains mass {1} after order completion. Dropping...", new object[] { base.gameObject, num });
+			this.buildStorage.DropAll(false, false, default(Vector3), true);
+		}
+		this.DecrementRecipeQueueCountInternal(complexRecipe, true);
+		this.workingOrderIdx = -1;
+		this.orderProgress = 0f;
+		this.CancelChore();
+		if (!this.cancelling)
+		{
+			this.RefreshAndStartNextOrder();
+		}
+	}
+
+	private void ValidateWorkingOrder()
+	{
+		if (!this.HasWorkingOrder)
+		{
+			return;
+		}
+		ComplexRecipe complexRecipe = this.recipe_list[this.workingOrderIdx];
+		if (!this.IsRecipeQueued(complexRecipe))
+		{
+			this.CancelWorkingOrder();
+		}
+	}
+
+	private void UpdateChore()
+	{
+		if (!this.duplicantOperated)
+		{
+			return;
+		}
+		bool flag = this.operational.IsOperational && this.HasWorkingOrder;
+		if (flag && this.chore == null)
+		{
+			this.CreateChore();
+		}
+		else if (!flag && this.chore != null)
+		{
+			this.CancelChore();
+		}
+	}
+
+	private void AdvanceNextOrder()
+	{
+		for (int i = 0; i < this.recipe_list.Length; i++)
+		{
+			this.nextOrderIdx = (this.nextOrderIdx + 1) % this.recipe_list.Length;
+			ComplexRecipe complexRecipe = this.recipe_list[this.nextOrderIdx];
+			this.nextOrderIsWorkable = this.GetRemainingQueueCount(complexRecipe) > 0 && this.HasIngredients(complexRecipe, this.inStorage);
+			if (this.nextOrderIsWorkable)
+			{
+				break;
+			}
+		}
+	}
+
+	private void ValidateNextOrder()
+	{
+		ComplexRecipe complexRecipe = this.recipe_list[this.nextOrderIdx];
+		this.nextOrderIsWorkable = this.GetRemainingQueueCount(complexRecipe) > 0 && this.HasIngredients(complexRecipe, this.inStorage);
+		if (!this.nextOrderIsWorkable)
+		{
+			this.AdvanceNextOrder();
+		}
+	}
+
+	private void CancelAllOpenOrders()
+	{
+		for (int i = 0; i < this.openOrderCounts.Count; i++)
+		{
+			this.openOrderCounts[i] = 0;
+		}
+		this.ClearMaterialNeeds();
+		this.CancelFetches();
+	}
+
+	private void UpdateOpenOrders()
+	{
+		ComplexRecipe[] recipes = this.GetRecipes();
+		if (recipes.Length != this.openOrderCounts.Count)
+		{
+			global::Debug.LogErrorFormat(base.gameObject, "Recipe count {0} doesn't match open order count {1}", new object[]
+			{
+				recipes.Length,
+				this.openOrderCounts.Count
+			});
+		}
+		bool flag = false;
+		this.hasOpenOrders = false;
+		for (int i = 0; i < recipes.Length; i++)
+		{
+			ComplexRecipe complexRecipe = recipes[i];
+			int recipePrefetchCount = this.GetRecipePrefetchCount(complexRecipe);
+			if (recipePrefetchCount > 0)
+			{
+				this.hasOpenOrders = true;
+			}
+			int num = this.openOrderCounts[i];
+			if (num != recipePrefetchCount)
+			{
+				if (recipePrefetchCount < num)
+				{
+					flag = true;
+				}
+				this.openOrderCounts[i] = recipePrefetchCount;
+			}
+		}
+		DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary = DictionaryPool<Tag, float, ComplexFabricator>.Allocate();
+		DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary2 = DictionaryPool<Tag, float, ComplexFabricator>.Allocate();
+		DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary3 = DictionaryPool<Tag, float, ComplexFabricator>.Allocate();
+		for (int j = 0; j < this.openOrderCounts.Count; j++)
+		{
+			int num2 = this.openOrderCounts[j];
+			if (num2 > 0)
+			{
+				ComplexRecipe complexRecipe2 = this.recipe_list[j];
+				ComplexRecipe.RecipeElement[] ingredients = complexRecipe2.ingredients;
+				foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
+				{
+					pooledDictionary[recipeElement.material] = this.inStorage.GetAmountAvailable(recipeElement.material);
+				}
+			}
+		}
+		for (int l = 0; l < this.recipe_list.Length; l++)
+		{
+			int num3 = this.openOrderCounts[l];
+			if (num3 > 0)
+			{
+				ComplexRecipe complexRecipe3 = this.recipe_list[l];
+				ComplexRecipe.RecipeElement[] ingredients2 = complexRecipe3.ingredients;
+				foreach (ComplexRecipe.RecipeElement recipeElement2 in ingredients2)
+				{
+					float num4 = recipeElement2.amount * (float)num3;
+					float num5 = num4 - pooledDictionary[recipeElement2.material];
+					if (num5 > 0f)
+					{
+						float num6;
+						pooledDictionary2.TryGetValue(recipeElement2.material, out num6);
+						pooledDictionary2[recipeElement2.material] = num6 + num5;
+						pooledDictionary[recipeElement2.material] = 0f;
+					}
+					else
+					{
+						DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary pooledDictionary4;
+						Tag material;
+						(pooledDictionary4 = pooledDictionary)[material = recipeElement2.material] = pooledDictionary4[material] - num4;
+					}
+				}
+			}
+		}
+		if (flag)
+		{
+			this.CancelFetches();
+			if (pooledDictionary2.Count > 0)
+			{
+				this.AddFetch(pooledDictionary2);
+			}
+		}
+		else
+		{
+			bool flag2 = this.CheckNeedsDeltas(pooledDictionary2, pooledDictionary3);
+			if (flag2)
+			{
+				global::Debug.Assert(pooledDictionary3.Count > 0, "expected missingAmountsDelta to have entries");
+				this.AddFetch(pooledDictionary3);
+			}
+		}
+		this.UpdateMaterialNeeds(pooledDictionary2);
+		pooledDictionary2.Recycle();
+		pooledDictionary3.Recycle();
+		pooledDictionary.Recycle();
+	}
+
+	private void UpdateMaterialNeeds(Dictionary<Tag, float> missingAmounts)
+	{
+		this.ClearMaterialNeeds();
+		foreach (KeyValuePair<Tag, float> keyValuePair in missingAmounts)
+		{
+			MaterialNeeds.Instance.UpdateNeed(keyValuePair.Key, keyValuePair.Value);
+			this.materialNeedCache.Add(keyValuePair.Key, keyValuePair.Value);
+		}
+	}
+
+	private void ClearMaterialNeeds()
+	{
+		foreach (KeyValuePair<Tag, float> keyValuePair in this.materialNeedCache)
+		{
+			MaterialNeeds.Instance.UpdateNeed(keyValuePair.Key, -keyValuePair.Value);
+		}
+		this.materialNeedCache.Clear();
+	}
+
+	private bool CheckNeedsDeltas(Dictionary<Tag, float> missingAmounts, Dictionary<Tag, float> missingAmountsDelta)
+	{
+		bool flag = false;
+		HashSetPool<Tag, ComplexFabricator>.PooledHashSet pooledHashSet = HashSetPool<Tag, ComplexFabricator>.Allocate();
+		pooledHashSet.UnionWith(this.materialNeedCache.Keys);
+		pooledHashSet.UnionWith(missingAmounts.Keys);
+		foreach (Tag tag in pooledHashSet)
+		{
+			float num;
+			this.materialNeedCache.TryGetValue(tag, out num);
+			float num2;
+			missingAmounts.TryGetValue(tag, out num2);
+			float num3 = num2 - num;
+			if (num3 >= 0f)
+			{
+				if (num3 > 0f)
+				{
+					flag = true;
+				}
+			}
+			missingAmountsDelta.Add(tag, num3);
+		}
+		pooledHashSet.Recycle();
+		return flag;
+	}
+
+	private void OnFetchComplete()
+	{
+		for (int i = this.fetchListList.Count - 1; i >= 0; i--)
+		{
+			FetchList2 fetchList = this.fetchListList[i];
+			if (fetchList.IsComplete)
+			{
+				this.fetchListList.RemoveAt(i);
+			}
+		}
+	}
+
+	private void OnStorageChange(object data)
+	{
+		this.queueDirty = true;
+	}
+
+	private void OnDroppedAll(object data)
+	{
+		if (this.HasWorkingOrder)
+		{
+			this.CancelWorkingOrder();
+		}
+		this.CancelAllOpenOrders();
+		this.RefreshQueue();
+	}
+
+	private void DropExcessIngredients(Storage storage)
+	{
+		TagBits tagBits = default(TagBits);
+		tagBits.Or(ref this.keepAdditionalTags);
+		for (int i = 0; i < this.recipe_list.Length; i++)
+		{
+			ComplexRecipe complexRecipe = this.recipe_list[i];
+			if (this.IsRecipeQueued(complexRecipe))
+			{
+				foreach (ComplexRecipe.RecipeElement recipeElement in complexRecipe.ingredients)
+				{
+					tagBits.SetTag(recipeElement.material);
+				}
+			}
+		}
+		for (int k = storage.items.Count - 1; k >= 0; k--)
+		{
+			GameObject gameObject = storage.items[k];
+			if (!(gameObject == null))
+			{
+				PrimaryElement component = gameObject.GetComponent<PrimaryElement>();
+				if (!(component == null))
+				{
+					if (!this.keepExcessLiquids || !component.Element.IsLiquid)
+					{
+						KPrefabID component2 = gameObject.GetComponent<KPrefabID>();
+						if (component2)
+						{
+							if (!component2.HasAnyTags(ref tagBits))
+							{
+								storage.Drop(gameObject, true);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void OnCopySettings(object data)
@@ -140,7 +558,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		{
 			return;
 		}
-		foreach (ComplexRecipe complexRecipe in this.possible_recipes_cache)
+		foreach (ComplexRecipe complexRecipe in this.recipe_list)
 		{
 			int num;
 			if (!component.recipeQueueCounts.TryGetValue(complexRecipe.id, out num))
@@ -149,23 +567,21 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 			}
 			this.SetRecipeQueueCountInternal(complexRecipe, num);
 		}
-		this.SetOperationalInactive();
-		this.buildStorage.Transfer(this.inStorage, true, true);
-		this.RefreshUserOrdersFromQueueCounts();
-		this.UpdateMachineOrders(false);
+		this.RefreshQueue();
 	}
 
-	protected override void OnCleanUp()
+	private int CompareRecipe(ComplexRecipe a, ComplexRecipe b)
 	{
-		this.StopCheckWorldInventory();
-		this.CancelAllMachineOrders(false);
-		Components.ComplexFabricators.Remove(this);
-		base.OnCleanUp();
+		if (a.sortOrder != b.sortOrder)
+		{
+			return a.sortOrder - b.sortOrder;
+		}
+		return StringComparer.InvariantCulture.Compare(a.id, b.id);
 	}
 
 	public ComplexRecipe[] GetRecipes()
 	{
-		if (this.possible_recipes_cache == null)
+		if (this.recipe_list == null)
 		{
 			KPrefabID component = base.GetComponent<KPrefabID>();
 			Tag prefabTag = component.PrefabTag;
@@ -181,9 +597,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 					}
 				}
 			}
-			this.possible_recipes_cache = list.ToArray();
+			this.recipe_list = list.ToArray();
+			Array.Sort<ComplexRecipe>(this.recipe_list, new Comparison<ComplexRecipe>(this.CompareRecipe));
 		}
-		return this.possible_recipes_cache;
+		return this.recipe_list;
 	}
 
 	private void InitRecipeQueueCount()
@@ -203,48 +620,20 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 			{
 				this.recipeQueueCounts.Add(complexRecipe.id, 0);
 			}
+			this.openOrderCounts.Add(0);
 		}
 	}
 
-	private void RefreshUserOrdersFromQueueCounts()
+	private int FindRecipeIndex(string id)
 	{
-		ComplexFabricator.UserOrder prevCurrentOrder = null;
-		if (this.userOrders != null && this.currentOrderIdx != -1 && this.currentOrderIdx < this.userOrders.Count)
+		for (int i = 0; i < this.recipe_list.Length; i++)
 		{
-			prevCurrentOrder = this.userOrders[this.currentOrderIdx];
-		}
-		this.userOrders.Clear();
-		int num = 0;
-		foreach (KeyValuePair<string, int> keyValuePair in this.recipeQueueCounts)
-		{
-			if (keyValuePair.Value > 0 || keyValuePair.Value == ComplexFabricator.QUEUE_INFINITE)
+			if (this.recipe_list[i].id == id)
 			{
-				num++;
-				ComplexRecipe recipe = ComplexRecipeManager.Get().GetRecipe(keyValuePair.Key);
-				global::Debug.Assert(recipe != null, string.Format("{1} missing recipe: {0}", keyValuePair.Key, base.name));
-				ComplexFabricator.UserOrder userOrder = new ComplexFabricator.UserOrder(recipe, true);
-				this.userOrders.Add(userOrder);
+				return i;
 			}
 		}
-		if (prevCurrentOrder != null)
-		{
-			int num2 = this.userOrders.FindIndex((ComplexFabricator.UserOrder match) => match.recipe == prevCurrentOrder.recipe);
-			if (num2 != -1)
-			{
-				this.userOrders = this.ShiftListLeft<ComplexFabricator.UserOrder>(this.userOrders, num2);
-			}
-		}
-	}
-
-	public List<T> ShiftListLeft<T>(List<T> list, int shiftBy)
-	{
-		if (list.Count <= shiftBy)
-		{
-			return list;
-		}
-		List<T> range = list.GetRange(shiftBy, list.Count - shiftBy);
-		range.AddRange(list.GetRange(0, shiftBy));
-		return range;
+		return -1;
 	}
 
 	public int GetRecipeQueueCount(ComplexRecipe recipe)
@@ -252,30 +641,57 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		return this.recipeQueueCounts[recipe.id];
 	}
 
+	public bool IsRecipeQueued(ComplexRecipe recipe)
+	{
+		int num = this.recipeQueueCounts[recipe.id];
+		global::Debug.Assert(num >= 0 || num == ComplexFabricator.QUEUE_INFINITE);
+		return num != 0;
+	}
+
+	public int GetRecipePrefetchCount(ComplexRecipe recipe)
+	{
+		int remainingQueueCount = this.GetRemainingQueueCount(recipe);
+		global::Debug.Assert(remainingQueueCount >= 0);
+		return Mathf.Min(2, remainingQueueCount);
+	}
+
+	private int GetRemainingQueueCount(ComplexRecipe recipe)
+	{
+		int num = this.recipeQueueCounts[recipe.id];
+		global::Debug.Assert(num >= 0 || num == ComplexFabricator.QUEUE_INFINITE);
+		if (num == ComplexFabricator.QUEUE_INFINITE)
+		{
+			return ComplexFabricator.MAX_QUEUE_SIZE;
+		}
+		if (num > 0)
+		{
+			if (this.IsCurrentRecipe(recipe))
+			{
+				num--;
+			}
+			return num;
+		}
+		return 0;
+	}
+
+	private bool IsCurrentRecipe(ComplexRecipe recipe)
+	{
+		return this.workingOrderIdx >= 0 && this.recipe_list[this.workingOrderIdx].id == recipe.id;
+	}
+
 	public void SetRecipeQueueCount(ComplexRecipe recipe, int count)
 	{
 		this.SetRecipeQueueCountInternal(recipe, count);
-		this.RefreshUserOrdersFromQueueCounts();
-		this.UpdateMachineOrders(false);
+		this.RefreshQueue();
 	}
 
 	private void SetRecipeQueueCountInternal(ComplexRecipe recipe, int count)
 	{
-		ComplexFabricator.UserOrder userOrder = this.userOrders.Find((ComplexFabricator.UserOrder match) => match.recipe == recipe);
-		if (userOrder != null && this.GetUserOrderIndex(userOrder) == this.currentOrderIdx && this.GetRecipeQueueCount(recipe) == ComplexFabricator.QUEUE_INFINITE)
-		{
-			this.CancelMachineOrdersByUserOrder(userOrder);
-		}
 		this.recipeQueueCounts[recipe.id] = count;
 	}
 
 	public void IncrementRecipeQueueCount(ComplexRecipe recipe)
 	{
-		ComplexFabricator.UserOrder userOrder = this.userOrders.Find((ComplexFabricator.UserOrder match) => match.recipe == recipe);
-		if (userOrder != null && this.GetUserOrderIndex(userOrder) == this.currentOrderIdx && this.GetRecipeQueueCount(recipe) == ComplexFabricator.QUEUE_INFINITE)
-		{
-			this.CancelMachineOrdersByUserOrder(userOrder);
-		}
 		if (this.recipeQueueCounts[recipe.id] == ComplexFabricator.QUEUE_INFINITE)
 		{
 			this.recipeQueueCounts[recipe.id] = 0;
@@ -290,286 +706,88 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 			string id;
 			(dictionary = this.recipeQueueCounts)[id = recipe.id] = dictionary[id] + 1;
 		}
-		this.RefreshUserOrdersFromQueueCounts();
-		this.UpdateMachineOrders(false);
+		this.RefreshQueue();
 	}
 
 	public void DecrementRecipeQueueCount(ComplexRecipe recipe, bool respectInfinite = true)
 	{
-		bool flag = false;
-		ComplexFabricator.UserOrder userOrder = this.userOrders.Find((ComplexFabricator.UserOrder match) => match.recipe == recipe);
-		if (userOrder != null && this.GetRecipeQueueCount(recipe) == 1)
-		{
-			if (this.GetUserOrderIndex(userOrder) == this.currentOrderIdx)
-			{
-				flag = true;
-			}
-			this.CancelMachineOrdersByUserOrder(userOrder);
-		}
+		this.DecrementRecipeQueueCountInternal(recipe, respectInfinite);
+		this.RefreshQueue();
+	}
+
+	private void DecrementRecipeQueueCountInternal(ComplexRecipe recipe, bool respectInfinite = true)
+	{
 		if (!respectInfinite || this.recipeQueueCounts[recipe.id] != ComplexFabricator.QUEUE_INFINITE)
 		{
 			if (this.recipeQueueCounts[recipe.id] == ComplexFabricator.QUEUE_INFINITE)
 			{
 				this.recipeQueueCounts[recipe.id] = ComplexFabricator.MAX_QUEUE_SIZE;
-				flag = true;
 			}
 			else if (this.recipeQueueCounts[recipe.id] == 0)
 			{
 				this.recipeQueueCounts[recipe.id] = ComplexFabricator.QUEUE_INFINITE;
-				flag = true;
 			}
 			else
 			{
 				Dictionary<string, int> dictionary;
 				string id;
 				(dictionary = this.recipeQueueCounts)[id = recipe.id] = dictionary[id] - 1;
-				flag = true;
-			}
-		}
-		this.RefreshUserOrdersFromQueueCounts();
-		if (flag)
-		{
-			this.UpdateMachineOrders(false);
-		}
-	}
-
-	private int GetTotalQueuedCount()
-	{
-		int num = 0;
-		foreach (KeyValuePair<string, int> keyValuePair in this.recipeQueueCounts)
-		{
-			if (keyValuePair.Value == ComplexFabricator.QUEUE_INFINITE)
-			{
-				num += ComplexFabricator.MAX_QUEUE_SIZE + 1;
-			}
-			else
-			{
-				num += keyValuePair.Value;
-			}
-		}
-		return num;
-	}
-
-	private List<ComplexFabricator.UserOrder> GetNextMachineOrders()
-	{
-		List<ComplexFabricator.UserOrder> list = new List<ComplexFabricator.UserOrder>();
-		bool flag = false;
-		int num = 0;
-		while (list.Count < Mathf.Min(3, this.GetTotalQueuedCount()))
-		{
-			int num2 = (this.currentOrderIdx + num) % this.userOrders.Count;
-			ComplexFabricator.UserOrder userOrder = this.userOrders[num2];
-			if (userOrder.CheckMaterialRequirements(WorldInventory.Instance, this.inStorage) || userOrder.CheckMaterialRequirements(WorldInventory.Instance, this.buildStorage))
-			{
-				list.Add(userOrder);
-			}
-			else
-			{
-				flag = true;
-			}
-			num++;
-			if (num > this.userOrders.Count * 3)
-			{
-				break;
-			}
-		}
-		if (flag)
-		{
-			this.ScheduleCheckWorldInventory();
-		}
-		return list;
-	}
-
-	private bool CheckIngredientsInStorage(ComplexRecipe recipe)
-	{
-		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
-		{
-			if (this.inStorage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private void ClearInvalidMachineOrders(List<ComplexFabricator.UserOrder> nextMachineOrderSources)
-	{
-		int num = -1;
-		for (int i = 0; i < this.machineOrders.Count; i++)
-		{
-			if (nextMachineOrderSources.Count <= i)
-			{
-				num = i;
-				break;
-			}
-			if (this.machineOrders[i].parentOrder.recipe != nextMachineOrderSources[i].recipe)
-			{
-				num = i;
-				break;
-			}
-		}
-		if (num != -1)
-		{
-			for (int j = this.machineOrders.Count - 1; j >= num; j--)
-			{
-				global::Debug.Assert(!this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
-				if (j == 0 && this.machineOrders[0].chore != null)
-				{
-					this.buildStorage.Transfer(this.inStorage, true, true);
-				}
-				this.OnMachineOrderCancelledOrComplete(this.machineOrders[j]);
-				this.machineOrders[j].Cancel();
-				if (this.machineOrders.Count != 0)
-				{
-					this.machineOrders.RemoveAt(j);
-				}
 			}
 		}
 	}
 
-	private void AddValidMachineOrders(List<ComplexFabricator.UserOrder> nextMachineOrderSources)
+	private void CreateChore()
 	{
-		for (int i = this.machineOrders.Count; i < nextMachineOrderSources.Count; i++)
-		{
-			global::Debug.Assert(!this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
-			ComplexFabricator.MachineOrder machineOrder = new ComplexFabricator.MachineOrder();
-			machineOrder.parentOrder = nextMachineOrderSources[i];
-			this.machineOrders.Add(machineOrder);
-			this.OnCreateMachineOrder(machineOrder);
-		}
+		global::Debug.Assert(this.chore == null, "chore should be null");
+		this.chore = this.workable.CreateWorkChore(this.choreType, this.orderProgress);
 	}
 
-	private void RefreshMachineOrderList()
+	private void CancelChore()
 	{
-		List<ComplexFabricator.UserOrder> nextMachineOrders = this.GetNextMachineOrders();
-		this.ClearInvalidMachineOrders(nextMachineOrders);
-		this.AddValidMachineOrders(nextMachineOrders);
-	}
-
-	protected void UpdateMachineOrders(bool force_update = false)
-	{
-		if (!force_update && !this.operational.IsOperational)
+		if (this.cancelling)
 		{
 			return;
 		}
-		this.RefreshMachineOrderList();
-		if (this.machineOrders.Count > 0)
+		this.cancelling = true;
+		if (this.chore != null)
 		{
-			if (!this.machineOrders[0].underway && this.machineOrders[0].parentOrder.CheckMaterialRequirements(WorldInventory.Instance, this.inStorage))
+			this.chore.Cancel("order cancelled");
+			this.chore = null;
+		}
+		this.cancelling = false;
+	}
+
+	private void AddFetch(DictionaryPool<Tag, float, ComplexFabricator>.PooledDictionary missingAmounts)
+	{
+		ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreTypeIdHash);
+		FetchList2 fetchList = new FetchList2(this.inStorage, byHash);
+		fetchList.ShowStatusItem = false;
+		foreach (KeyValuePair<Tag, float> keyValuePair in missingAmounts)
+		{
+			if (keyValuePair.Value > 0f)
 			{
-				if (this.duplicantOperated)
-				{
-					this.machineOrders[0].underway = true;
-				}
-				else if (!this.operational.IsActive && !this.machineOrders[0].underway && this.HasIngredients(this.machineOrders[0], this.inStorage))
-				{
-					this.TransferCurrentRecipeIngredientsForBuild();
-					this.machineOrders[0].underway = true;
-				}
-			}
-			if (this.duplicantOperated && this.machineOrders[0].underway && this.machineOrders[0].chore == null && this.HasIngredients(this.machineOrders[0], this.inStorage))
-			{
-				this.TransferCurrentRecipeIngredientsForBuild();
-				this.workable.CreateOrder(this.machineOrders[0], this.choreType, this.choreTags);
-				this.workable.ResetWorkTime();
-			}
-			Dictionary<Tag, float> dictionary = new Dictionary<Tag, float>();
-			for (int i = 0; i < this.machineOrders.Count; i++)
-			{
-				ComplexFabricator.MachineOrder machineOrder = this.machineOrders[i];
-				if (machineOrder.chore == null)
-				{
-					ComplexFabricator.UserOrder parentOrder = machineOrder.parentOrder;
-					ComplexRecipe.RecipeElement[] ingredients = parentOrder.recipe.ingredients;
-					foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
-					{
-						dictionary[recipeElement.material] = this.inStorage.GetAmountAvailable(recipeElement.material);
-					}
-				}
-			}
-			ChoreType byHash = Db.Get().ChoreTypes.GetByHash(this.fetchChoreTypeIdHash);
-			Dictionary<Tag, float> dictionary2 = new Dictionary<Tag, float>();
-			for (int k = 0; k < this.machineOrders.Count; k++)
-			{
-				ComplexFabricator.MachineOrder machineOrder2 = this.machineOrders[k];
-				if (machineOrder2.chore == null && (!machineOrder2.underway || this.duplicantOperated))
-				{
-					ComplexFabricator.UserOrder parentOrder2 = machineOrder2.parentOrder;
-					ComplexRecipe.RecipeElement[] ingredients2 = parentOrder2.recipe.ingredients;
-					bool flag = true;
-					foreach (ComplexRecipe.RecipeElement recipeElement2 in ingredients2)
-					{
-						if (dictionary[recipeElement2.material] < recipeElement2.amount)
-						{
-							if (dictionary2.ContainsKey(recipeElement2.material))
-							{
-								Dictionary<Tag, float> dictionary3;
-								Tag material;
-								(dictionary3 = dictionary2)[material = recipeElement2.material] = dictionary3[material] + (recipeElement2.amount - dictionary[recipeElement2.material]);
-							}
-							else
-							{
-								dictionary2.Add(recipeElement2.material, recipeElement2.amount - dictionary[recipeElement2.material]);
-							}
-							dictionary[recipeElement2.material] = 0f;
-							flag = false;
-						}
-						else
-						{
-							Dictionary<Tag, float> dictionary3;
-							Tag material2;
-							(dictionary3 = dictionary)[material2 = recipeElement2.material] = dictionary3[material2] - recipeElement2.amount;
-						}
-					}
-					int num = -k;
-					if (machineOrder2.fetchList == null && !flag)
-					{
-						machineOrder2.fetchList = new FetchList2(this.inStorage, byHash, this.choreTags);
-						machineOrder2.fetchList.ShowStatusItem = false;
-						machineOrder2.fetchList.SetPriorityMod(num);
-						ComplexRecipe.RecipeElement[] array3 = new ComplexRecipe.RecipeElement[dictionary2.Count];
-						int num2 = 0;
-						foreach (Tag tag in dictionary2.Keys.ToList<Tag>())
-						{
-							float num3 = 0f;
-							foreach (ComplexRecipe.RecipeElement recipeElement3 in machineOrder2.parentOrder.recipe.ingredients)
-							{
-								if (recipeElement3.material == tag)
-								{
-									num3 = recipeElement3.amount;
-									break;
-								}
-							}
-							float num4 = Mathf.Min(num3, dictionary2[tag]);
-							if (num4 != 0f)
-							{
-								array3[num2] = new ComplexRecipe.RecipeElement(tag, num4);
-								Dictionary<Tag, float> dictionary3;
-								Tag tag2;
-								(dictionary3 = dictionary2)[tag2 = tag] = dictionary3[tag2] - num4;
-							}
-							num2++;
-						}
-						this.AddIngredientsToFetchList(array3, machineOrder2.fetchList);
-						machineOrder2.fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
-					}
-					else if (machineOrder2.fetchList != null)
-					{
-						machineOrder2.fetchList.SetPriorityMod(num);
-					}
-				}
+				FetchList2 fetchList2 = fetchList;
+				Tag key = keyValuePair.Key;
+				float value = keyValuePair.Value;
+				fetchList2.Add(key, null, null, value, FetchOrder2.OperationalRequirement.None);
 			}
 		}
-		base.Trigger(1721324763, this);
-		if (this.machineOrders.Count > 0)
+		fetchList.Submit(new global::System.Action(this.OnFetchComplete), false);
+		this.fetchListList.Add(fetchList);
+	}
+
+	private void CancelFetches()
+	{
+		foreach (FetchList2 fetchList in this.fetchListList)
 		{
-			this.SetCurrentUserOrderByMachineOrder(this.machineOrders[0]);
+			fetchList.Cancel("cancel all orders");
 		}
+		this.fetchListList.Clear();
 	}
 
 	protected virtual void TransferCurrentRecipeIngredientsForBuild()
 	{
-		ComplexRecipe.RecipeElement[] ingredients = this.machineOrders[0].parentOrder.recipe.ingredients;
+		ComplexRecipe.RecipeElement[] ingredients = this.recipe_list[this.workingOrderIdx].ingredients;
 		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
 		{
 			while (this.buildStorage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
@@ -583,107 +801,21 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		}
 	}
 
-	protected virtual bool HasIngredients(ComplexFabricator.MachineOrder order, Storage storage)
+	protected virtual bool HasIngredients(ComplexRecipe recipe, Storage storage)
 	{
-		ComplexRecipe.RecipeElement[] ingredients = order.parentOrder.recipe.ingredients;
-		bool flag = true;
+		ComplexRecipe.RecipeElement[] ingredients = recipe.ingredients;
 		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
 		{
 			float amountAvailable = storage.GetAmountAvailable(recipeElement.material);
 			if (amountAvailable < recipeElement.amount)
 			{
-				flag = false;
-				break;
+				return false;
 			}
 		}
-		return flag;
+		return true;
 	}
 
-	public void Sim200ms(float dt)
-	{
-		if (this.duplicantOperated)
-		{
-			return;
-		}
-		if (this.operational.IsOperational && !this.operational.IsActive && this.machineOrders.Count > 0 && this.machineOrders[0].underway)
-		{
-			this.StartWork();
-		}
-		if (this.operational.IsActive)
-		{
-			bool flag = this.machineOrders.Count > 0;
-			if (flag)
-			{
-				this.orderProgress += dt / this.machineOrders[0].parentOrder.recipe.time;
-				if (this.orderProgress >= 1f)
-				{
-					this.machineOrders[0].underway = false;
-					this.SetOperationalInactive();
-					this.OnCompleteMachineOrder();
-					this.orderProgress = 0f;
-				}
-			}
-		}
-	}
-
-	private void CancelMachineOrder(ComplexFabricator.MachineOrder order)
-	{
-		global::Debug.Assert(!this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
-		this.OnMachineOrderCancelledOrComplete(order);
-		order.Cancel();
-		this.machineOrders.Remove(order);
-		if (!this.duplicantOperated && order.underway)
-		{
-			this.buildStorage.Transfer(this.inStorage, true, true);
-			this.SetOperationalInactive();
-			this.orderProgress = 0f;
-		}
-		else if (this.duplicantOperated && (order.chore != null || order.underway))
-		{
-			this.buildStorage.Transfer(this.inStorage, true, true);
-			this.SetOperationalInactive();
-			this.orderProgress = 0f;
-		}
-	}
-
-	private void CancelMachineOrdersByUserOrder(ComplexFabricator.UserOrder order)
-	{
-		this.isCancellingOrder = true;
-		for (int i = this.machineOrders.Count - 1; i >= 0; i--)
-		{
-			ComplexFabricator.MachineOrder machineOrder = this.machineOrders[i];
-			if (machineOrder.parentOrder.recipe == order.recipe)
-			{
-				this.CancelMachineOrder(this.machineOrders[i]);
-			}
-		}
-		if (this.OnUserOrderCancelledOrComplete != null)
-		{
-			this.OnUserOrderCancelledOrComplete(order);
-		}
-		this.isCancellingOrder = false;
-	}
-
-	private void CancelAllMachineOrders(bool clear_storage)
-	{
-		if (clear_storage)
-		{
-			this.buildStorage.Transfer(this.inStorage, true, true);
-		}
-		global::Debug.Assert(this.machineOrders.Count == 0 || !this.willBeSadIfMachineOrdersChanges, "machineOrders changed when it wasn't expected. sad.");
-		while (this.machineOrders.Count > 0)
-		{
-			ComplexFabricator.MachineOrder machineOrder = this.machineOrders[0];
-			machineOrder.Cancel();
-			if (this.machineOrders.Count > 0 && this.machineOrders[0] == machineOrder)
-			{
-				this.OnMachineOrderCancelledOrComplete(this.machineOrders[0]);
-				this.machineOrders.RemoveAt(0);
-			}
-		}
-	}
-
-	protected virtual List<GameObject> SpawnOrderProduct(ComplexFabricator.UserOrder completed_order)
+	protected virtual List<GameObject> SpawnOrderProduct(ComplexRecipe recipe)
 	{
 		List<GameObject> list = new List<GameObject>();
 		SimUtil.DiseaseInfo diseaseInfo;
@@ -691,11 +823,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		diseaseInfo.idx = 0;
 		float num = 0f;
 		float num2 = 0f;
-		foreach (ComplexRecipe.RecipeElement recipeElement in completed_order.recipe.ingredients)
+		foreach (ComplexRecipe.RecipeElement recipeElement in recipe.ingredients)
 		{
 			num2 += recipeElement.amount;
 		}
-		foreach (ComplexRecipe.RecipeElement recipeElement2 in completed_order.recipe.ingredients)
+		foreach (ComplexRecipe.RecipeElement recipeElement2 in recipe.ingredients)
 		{
 			float num3 = recipeElement2.amount / num2;
 			SimUtil.DiseaseInfo diseaseInfo2;
@@ -707,7 +839,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 			}
 			num += num4 * num3;
 		}
-		foreach (ComplexRecipe.RecipeElement recipeElement3 in completed_order.recipe.results)
+		foreach (ComplexRecipe.RecipeElement recipeElement3 in recipe.results)
 		{
 			GameObject gameObject = this.buildStorage.FindFirst(recipeElement3.material);
 			if (gameObject != null)
@@ -719,7 +851,7 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 				}
 			}
 			ComplexFabricator.ResultState resultState = this.resultState;
-			if (resultState != ComplexFabricator.ResultState.Normal && resultState != ComplexFabricator.ResultState.Hot)
+			if (resultState != ComplexFabricator.ResultState.PassTemperature && resultState != ComplexFabricator.ResultState.Heated)
 			{
 				if (resultState == ComplexFabricator.ResultState.Melted)
 				{
@@ -738,9 +870,9 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 				gameObject2.transform.SetPosition(Grid.CellToPosCCC(num6, Grid.SceneLayer.Ore) + this.outputOffset);
 				PrimaryElement component2 = gameObject2.GetComponent<PrimaryElement>();
 				component2.Units = recipeElement3.amount;
-				component2.Temperature = num;
+				component2.Temperature = ((this.resultState != ComplexFabricator.ResultState.PassTemperature) ? this.heatedTemperature : num);
 				gameObject2.SetActive(true);
-				float num7 = recipeElement3.amount / completed_order.recipe.TotalResultUnits();
+				float num7 = recipeElement3.amount / recipe.TotalResultUnits();
 				component2.AddDisease(diseaseInfo.idx, Mathf.RoundToInt((float)diseaseInfo.count * num7), "ComplexFabricator.CompleteOrder");
 				gameObject2.GetComponent<KMonoBehaviour>().Trigger(748399584, null);
 				list.Add(gameObject2);
@@ -772,130 +904,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		return list;
 	}
 
-	private void PollInventory(object data = null)
-	{
-		bool flag = false;
-		for (int i = 0; i < Mathf.Min(3, this.GetTotalQueuedCount()); i++)
-		{
-			int num = (this.currentOrderIdx + i) % this.userOrders.Count;
-			ComplexFabricator.UserOrder userOrder = this.userOrders[num];
-			bool flag2 = false;
-			foreach (ComplexFabricator.MachineOrder machineOrder in this.machineOrders)
-			{
-				if (machineOrder.parentOrder.recipe == userOrder.recipe)
-				{
-					flag2 = true;
-					break;
-				}
-			}
-			if (!flag2)
-			{
-				if (userOrder.CheckMaterialRequirements(WorldInventory.Instance, this.inStorage))
-				{
-					flag = true;
-					break;
-				}
-			}
-		}
-		this.StopCheckWorldInventory();
-		if (flag)
-		{
-			this.UpdateMachineOrders(false);
-		}
-		else
-		{
-			this.ScheduleCheckWorldInventory();
-		}
-	}
-
-	private void ScheduleCheckWorldInventory()
-	{
-		if (!this.ingredientSearchHandle.IsValid)
-		{
-			this.ingredientSearchHandle = GameScheduler.Instance.Schedule("Idle ComplexFabricator look for ingredients", 4f, new Action<object>(this.PollInventory), null, null);
-		}
-	}
-
-	private void StopCheckWorldInventory()
-	{
-		if (this.ingredientSearchHandle.IsValid)
-		{
-			this.ingredientSearchHandle.ClearScheduler();
-		}
-	}
-
-	public void SetCurrentUserOrderByMachineOrder(ComplexFabricator.MachineOrder nextMachineOrder)
-	{
-		if (nextMachineOrder == null)
-		{
-			this.currentOrderIdx = 0;
-		}
-		else
-		{
-			this.currentOrderIdx = Mathf.Max(0, this.GetUserOrderIndex(nextMachineOrder.parentOrder));
-		}
-	}
-
-	private void AddIngredientsToFetchList(ComplexRecipe.RecipeElement[] ingredients, FetchList2 fetchList)
-	{
-		if (fetchList == null || ingredients == null || ingredients.Length == 0)
-		{
-			global::Debug.LogError("Invalid parameters received for the fetch list.");
-			return;
-		}
-		foreach (ComplexRecipe.RecipeElement recipeElement in ingredients)
-		{
-			if (recipeElement != null && recipeElement.amount > 0f)
-			{
-				Tag material = recipeElement.material;
-				float amount = recipeElement.amount;
-				fetchList.Add(material, null, null, amount, FetchOrder2.OperationalRequirement.None);
-			}
-		}
-	}
-
-	private void StartWork()
-	{
-		this.operational.SetActive(true, false);
-		this.ShowProgressBar(true);
-	}
-
-	public void ShowProgressBar(bool show)
-	{
-		if (show)
-		{
-			this.progressBar = ProgressBar.CreateProgressBar(base.GetComponent<Building>(), () => this.orderProgress);
-		}
-		else if (this.progressBar != null)
-		{
-			this.progressBar.gameObject.DeleteObject();
-			this.progressBar = null;
-		}
-	}
-
-	private void SetOperationalInactive()
-	{
-		this.operational.SetActive(false, false);
-		this.ShowProgressBar(false);
-	}
-
-	private void OnFetchComplete()
-	{
-		this.UpdateMachineOrders(false);
-	}
-
-	private bool CanFabricate(ComplexFabricator.UserOrder order, Storage storage)
-	{
-		foreach (ComplexRecipe.RecipeElement recipeElement in order.recipe.ingredients)
-		{
-			if (storage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public virtual List<Descriptor> GetDescriptors(BuildingDef def)
 	{
 		List<Descriptor> list = new List<Descriptor>();
@@ -922,66 +930,6 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		return list;
 	}
 
-	public void OnCompleteMachineOrder()
-	{
-		if (this.isCancellingOrder)
-		{
-			return;
-		}
-		if (this.machineOrders.Count <= 0)
-		{
-			global::Debug.LogWarning("Somehow we tried to complete an order when there was no orders to complete. Need more info on how to reproduce this for a proper fix.");
-			return;
-		}
-		this.willBeSadIfMachineOrdersChanges = true;
-		this.SpawnOrderProduct(this.machineOrders[0].parentOrder);
-		this.buildStorage.Transfer(this.outStorage, true, true);
-		this.OnMachineOrderCancelledOrComplete(this.machineOrders[0]);
-		this.willBeSadIfMachineOrdersChanges = false;
-		int userOrderIndex = this.GetUserOrderIndex(this.machineOrders[0].parentOrder);
-		this.machineOrders.RemoveAt(0);
-		if (userOrderIndex != -1)
-		{
-			this.DecrementRecipeQueueCount(this.userOrders[userOrderIndex].recipe, true);
-		}
-		this.SetCurrentUserOrderByMachineOrder((this.machineOrders.Count <= 0) ? null : this.machineOrders[0]);
-		this.UpdateMachineOrders(false);
-		this.ShowProgressBar(false);
-	}
-
-	private int GetUserOrderIndex(ComplexFabricator.UserOrder order)
-	{
-		for (int i = 0; i < this.userOrders.Count; i++)
-		{
-			if (this.userOrders[i].recipe == order.recipe)
-			{
-				return i;
-			}
-		}
-		global::Debug.LogWarningFormat("Could not find user order index for order with recipe {0}. There are {1} User orders and {2} machine orders.", new object[]
-		{
-			order.recipe.GetUIName(),
-			this.userOrders.Count,
-			this.machineOrders.Count
-		});
-		return -1;
-	}
-
-	private void OnDroppedAll(object data)
-	{
-		this.CancelAllMachineOrders(true);
-		this.UpdateMachineOrders(false);
-	}
-
-	private void OnOperationalChanged(object data)
-	{
-		bool flag = (bool)data;
-		if (flag)
-		{
-			this.UpdateMachineOrders(false);
-		}
-	}
-
 	public virtual List<Descriptor> AdditionalEffectsForRecipe(ComplexRecipe recipe)
 	{
 		return new List<Descriptor>();
@@ -989,30 +937,31 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 
 	public string GetConversationTopic()
 	{
-		if (this.machineOrders.Count > 0)
+		if (this.HasWorkingOrder)
 		{
-			ComplexFabricator.UserOrder parentOrder = this.machineOrders[0].parentOrder;
-			ComplexRecipe recipe = parentOrder.recipe;
-			return recipe.results[0].material.Name;
+			ComplexRecipe complexRecipe = this.recipe_list[this.workingOrderIdx];
+			if (complexRecipe != null)
+			{
+				return complexRecipe.results[0].material.Name;
+			}
 		}
 		return null;
 	}
 
+	private const int MaxPrefetchCount = 2;
+
 	public bool duplicantOperated = true;
 
 	protected ComplexFabricatorWorkable workable;
-
-	public Action<ComplexFabricator.UserOrder> OnUserOrderCancelledOrComplete;
-
-	public Action<ComplexFabricator.MachineOrder> OnCreateMachineOrder;
-
-	public Action<ComplexFabricator.MachineOrder> OnMachineOrderCancelledOrComplete;
 
 	[SerializeField]
 	public HashedString fetchChoreTypeIdHash = Db.Get().ChoreTypes.FabricateFetch.IdHash;
 
 	[SerializeField]
 	public ComplexFabricator.ResultState resultState;
+
+	[SerializeField]
+	public float heatedTemperature;
 
 	[SerializeField]
 	public bool storeProduced;
@@ -1023,11 +972,11 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 
 	public Vector3 outputOffset = Vector3.zero;
 
-	private const int MaxPrefetchCount = 3;
+	public ChoreType choreType;
 
-	protected ChoreType choreType;
+	public bool keepExcessLiquids;
 
-	protected Tag[] choreTags;
+	public TagBits keepAdditionalTags = default(TagBits);
 
 	public static int MAX_QUEUE_SIZE = 99;
 
@@ -1036,25 +985,33 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 	[Serialize]
 	private Dictionary<string, int> recipeQueueCounts = new Dictionary<string, int>();
 
+	private int nextOrderIdx;
+
+	private bool nextOrderIsWorkable;
+
+	private int workingOrderIdx = -1;
+
 	[Serialize]
-	public bool clearUserOrderOnComplete;
-
-	protected List<ComplexFabricator.UserOrder> userOrders = new List<ComplexFabricator.UserOrder>();
-
-	protected List<ComplexFabricator.MachineOrder> machineOrders = new List<ComplexFabricator.MachineOrder>();
+	private string lastWorkingRecipe;
 
 	[Serialize]
-	private int currentOrderIdx;
-
-	private bool isCancellingOrder;
-
 	private float orderProgress;
 
-	private bool willBeSadIfMachineOrdersChanges;
+	private List<int> openOrderCounts = new List<int>();
 
-	private ComplexRecipe[] possible_recipes_cache;
+	private bool queueDirty = true;
 
-	private SchedulerHandle ingredientSearchHandle;
+	private bool hasOpenOrders;
+
+	private List<FetchList2> fetchListList = new List<FetchList2>();
+
+	private Chore chore;
+
+	private bool cancelling;
+
+	private ComplexRecipe[] recipe_list;
+
+	private Dictionary<Tag, float> materialNeedCache = new Dictionary<Tag, float>();
 
 	[SerializeField]
 	public Storage inStorage;
@@ -1068,18 +1025,18 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 	[MyCmpAdd]
 	private LoopingSounds loopingSounds;
 
-	[MyCmpGet]
-	private OutputPoint outputPoint;
-
 	[MyCmpReq]
 	protected Operational operational;
 
 	[MyCmpAdd]
 	private ComplexFabricatorSM fabricatorSM;
 
-	private MeterController outputVisualizer;
-
 	private ProgressBar progressBar;
+
+	private static readonly EventSystem.IntraObjectHandler<ComplexFabricator> OnStorageChangeDelegate = new EventSystem.IntraObjectHandler<ComplexFabricator>(delegate(ComplexFabricator component, object data)
+	{
+		component.OnStorageChange(data);
+	});
 
 	private static readonly EventSystem.IntraObjectHandler<ComplexFabricator> OnDroppedAllDelegate = new EventSystem.IntraObjectHandler<ComplexFabricator>(delegate(ComplexFabricator component, object data)
 	{
@@ -1096,104 +1053,10 @@ public class ComplexFabricator : KMonoBehaviour, ISim200ms
 		component.OnCopySettings(data);
 	});
 
-	protected enum SubAnim
-	{
-		Queued,
-		Full,
-		On,
-		Use
-	}
-
 	public enum ResultState
 	{
-		Normal,
-		Hot,
+		PassTemperature,
+		Heated,
 		Melted
-	}
-
-	[Serializable]
-	public class UserOrder
-	{
-		public UserOrder(ComplexRecipe recipe, bool infinite = false)
-		{
-			this.recipe = recipe;
-		}
-
-		public Tag Result
-		{
-			get
-			{
-				return this.recipe.results[0].material;
-			}
-		}
-
-		public Sprite Icon
-		{
-			get
-			{
-				return this.recipe.GetUIIcon();
-			}
-		}
-
-		public Color IconColor
-		{
-			get
-			{
-				return this.recipe.GetUIColor();
-			}
-		}
-
-		public bool CheckMaterialRequirements(WorldInventory worldInventory, Storage storage)
-		{
-			foreach (ComplexRecipe.RecipeElement recipeElement in this.recipe.ingredients)
-			{
-				if (worldInventory.GetAmount(recipeElement.material) + storage.GetAmountAvailable(recipeElement.material) < recipeElement.amount)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-
-		public ComplexRecipe recipe;
-	}
-
-	public class MachineOrder
-	{
-		public void Cancel()
-		{
-			if (this.chore != null)
-			{
-				this.chore.Cancel("Fabrication cancelled");
-				this.chore = null;
-			}
-			if (this.fetchList != null)
-			{
-				this.fetchList.Cancel("Fabrication cancelled");
-				this.fetchList = null;
-			}
-		}
-
-		public ComplexFabricator.UserOrder parentOrder;
-
-		public FetchList2 fetchList;
-
-		public Chore chore;
-
-		public bool underway;
-	}
-
-	[Serializable]
-	public struct OrderSaveData
-	{
-		public OrderSaveData(string id, bool infinite)
-		{
-			this.id = id;
-			this.infinite = infinite;
-		}
-
-		public string id;
-
-		public bool infinite;
 	}
 }

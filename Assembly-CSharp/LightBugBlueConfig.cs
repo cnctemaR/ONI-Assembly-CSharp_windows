@@ -16,13 +16,20 @@ public class LightBugBlueConfig : IEntityConfig
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Calories.deltaAttribute.Id, -LightBugTuning.STANDARD_CALORIES_PER_CYCLE / 600f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.HitPoints.maxAttribute.Id, 5f, name, false, false, true));
 		trait.Add(new AttributeModifier(Db.Get().Amounts.Age.maxAttribute.Id, 25f, name, false, false, true));
-		return BaseLightBugConfig.SetupDiet(gameObject, new HashSet<Tag>
+		gameObject = BaseLightBugConfig.SetupDiet(gameObject, new HashSet<Tag>
 		{
 			TagManager.Create("SpiceBread"),
 			TagManager.Create("Salsa"),
 			SimHashes.Phosphorite.CreateTag(),
 			SimHashes.Phosphorus.CreateTag()
 		}, Tag.Invalid, LightBugBlueConfig.CALORIES_PER_KG_OF_ORE);
+		LureableMonitor.Def def = gameObject.AddOrGetDef<LureableMonitor.Def>();
+		def.lures = new Tag[]
+		{
+			SimHashes.Phosphorite.CreateTag(),
+			SimHashes.Phosphorus.CreateTag()
+		};
+		return gameObject;
 	}
 
 	public GameObject CreatePrefab()

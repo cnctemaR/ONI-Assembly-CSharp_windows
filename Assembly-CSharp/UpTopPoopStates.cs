@@ -1,7 +1,7 @@
 ﻿using System;
 using STRINGS;
 
-internal class UpTopPoopStates : GameStateMachine<UpTopPoopStates, UpTopPoopStates.Instance, IStateMachineTarget, UpTopPoopStates.Def>
+public class UpTopPoopStates : GameStateMachine<UpTopPoopStates, UpTopPoopStates.Instance, IStateMachineTarget, UpTopPoopStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -15,7 +15,7 @@ internal class UpTopPoopStates : GameStateMachine<UpTopPoopStates, UpTopPoopStat
 		string text = CREATURES.STATUSITEMS.EXPELLING_SOLID.NAME;
 		string text2 = CREATURES.STATUSITEMS.EXPELLING_SOLID.TOOLTIP;
 		StatusItemCategory main = Db.Get().StatusItemCategories.Main;
-		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 63486, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
+		state.ToggleStatusItem(text, text2, string.Empty, StatusItem.IconType.Info, NotificationType.Neutral, false, default(HashedString), 129022, null, null, main).OnAnimQueueComplete(this.behaviourcomplete);
 		this.behaviourcomplete.PlayAnim("idle_loop", KAnim.PlayMode.Loop).BehaviourComplete(GameTags.Creatures.Poop, false);
 	}
 

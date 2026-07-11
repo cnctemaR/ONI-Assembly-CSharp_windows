@@ -12,7 +12,7 @@ namespace ProcGen
 			return this.worldCache.ContainsKey(name);
 		}
 
-		public Worlds.Data GetWorldData(string name)
+		public World GetWorldData(string name)
 		{
 			return this.worldCache[name];
 		}
@@ -27,32 +27,40 @@ namespace ProcGen
 			return "worlds/" + Path.GetFileNameWithoutExtension(path);
 		}
 
-		public void LoadFiles(string path, IFileSystem filesystem)
+		public void LoadFiles(string path, List<YamlIO.Error> errors)
 		{
 			this.worldCache.Clear();
-			this.UpdateWorldCache(path, filesystem);
+			this.UpdateWorldCache(path, errors);
 		}
 
-		private void UpdateWorldCache(string path, IFileSystem filesystem)
+		private void UpdateWorldCache(string path, List<YamlIO.Error> errors)
 		{
-			List<string> list = new List<string>();
-			FSUtil.GetFiles(filesystem, FSUtil.Normalize(Path.Combine(path, "worlds")), "*.yaml", list);
-			foreach (string text in list)
+			ListPool<FileHandle, Worlds>.PooledList pooledList = ListPool<FileHandle, Worlds>.Allocate();
+			FileSystem.GetFiles(FileSystem.Normalize(Path.Combine(path, "worlds")), "*.yaml", pooledList);
+			using (List<FileHandle>.Enumerator enumerator = pooledList.GetEnumerator())
 			{
-				World world = YamlIO<World>.LoadFile(text, null);
-				string worldName = Worlds.GetWorldName(text);
-				this.worldCache[worldName] = new Worlds.Data
+				while (enumerator.MoveNext())
 				{
-					world = world
-				};
+					FileHandle world_file = enumerator.Current;
+					World world = YamlIO.LoadFile<World>(world_file.full_path, delegate(YamlIO.Error error, bool force_log_as_warning)
+					{
+						error.file = world_file;
+						errors.Add(error);
+					}, null);
+					if (world == null)
+					{
+						DebugUtil.LogWarningArgs(new object[] { "Failed to load world: ", world_file.full_path });
+					}
+					else if (!world.skip)
+					{
+						world.filePath = Worlds.GetWorldName(world_file.full_path);
+						this.worldCache[world.filePath] = world;
+					}
+				}
 			}
+			pooledList.Recycle();
 		}
 
-		public Dictionary<string, Worlds.Data> worldCache = new Dictionary<string, Worlds.Data>();
-
-		public struct Data
-		{
-			public World world;
-		}
+		public Dictionary<string, World> worldCache = new Dictionary<string, World>();
 	}
 }

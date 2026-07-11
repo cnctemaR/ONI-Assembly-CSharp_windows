@@ -477,17 +477,21 @@ public class SolidConduitFlow : IConduitFlow
 			{
 				SolidConduitFlow.Conduit conduit = this.GetSOAInfo().GetConduit(i);
 				SolidConduitFlow.ConduitFlowInfo lastFlowInfo = conduit.GetLastFlowInfo(this);
-				if (lastFlowInfo.contents.pickupableHandle.IsValid())
+				if (lastFlowInfo.direction != SolidConduitFlow.FlowDirection.None)
 				{
 					int cell2 = conduit.GetCell(this);
 					int cellFromDirection = SolidConduitFlow.GetCellFromDirection(cell2, lastFlowInfo.direction);
-					Vector3 vector = Grid.CellToPosCCC(cell2, Grid.SceneLayer.SolidConduitContents);
-					Vector3 vector2 = Grid.CellToPosCCC(cellFromDirection, Grid.SceneLayer.SolidConduitContents);
-					Vector3 vector3 = Vector3.Lerp(vector, vector2, this.ContinuousLerpPercent);
-					Pickupable pickupable = this.GetPickupable(lastFlowInfo.contents.pickupableHandle);
-					if (pickupable != null)
+					SolidConduitFlow.ConduitContents contents = this.GetContents(cellFromDirection);
+					if (contents.pickupableHandle.IsValid())
 					{
-						pickupable.transform.SetPosition(vector3);
+						Vector3 vector = Grid.CellToPosCCC(cell2, Grid.SceneLayer.SolidConduitContents);
+						Vector3 vector2 = Grid.CellToPosCCC(cellFromDirection, Grid.SceneLayer.SolidConduitContents);
+						Vector3 vector3 = Vector3.Lerp(vector, vector2, this.ContinuousLerpPercent);
+						Pickupable pickupable = this.GetPickupable(contents.pickupableHandle);
+						if (pickupable != null)
+						{
+							pickupable.transform.SetPosition(vector3);
+						}
 					}
 				}
 			}
@@ -551,7 +555,7 @@ public class SolidConduitFlow : IConduitFlow
 			{
 				SolidConduitFlow.ConduitContents conduitContents = this.RemoveFromGrid(conduit);
 				this.AddToGrid(cell2, conduitContents);
-				this.soaInfo.SetLastFlowInfo(conduit.idx, this.soaInfo.GetTargetFlowDirection(conduit.idx), ref conduitContents);
+				this.soaInfo.SetLastFlowInfo(conduit.idx, this.soaInfo.GetTargetFlowDirection(conduit.idx));
 				this.soaInfo.SetUpdated(conduitFromDirection.idx, true);
 				this.soaInfo.SetSrcFlowDirection(conduitFromDirection.idx, conduitFromDirection.GetNextFlowSource(this));
 			}
@@ -874,8 +878,7 @@ public class SolidConduitFlow : IConduitFlow
 			this.initialContents.Add(contents);
 			this.lastFlowInfo.Add(new SolidConduitFlow.ConduitFlowInfo
 			{
-				direction = SolidConduitFlow.FlowDirection.None,
-				contents = SolidConduitFlow.ConduitContents.EmptyContents()
+				direction = SolidConduitFlow.FlowDirection.None
 			});
 			this.cells.Add(cell);
 			this.updated.Add(false);
@@ -979,8 +982,7 @@ public class SolidConduitFlow : IConduitFlow
 				this.initialContents[i] = contents;
 				this.lastFlowInfo[i] = new SolidConduitFlow.ConduitFlowInfo
 				{
-					direction = SolidConduitFlow.FlowDirection.None,
-					contents = SolidConduitFlow.ConduitContents.EmptyContents()
+					direction = SolidConduitFlow.FlowDirection.None
 				};
 				int num = this.cells[i];
 				manager.grid[num].contents = contents;
@@ -1020,8 +1022,7 @@ public class SolidConduitFlow : IConduitFlow
 			{
 				this.lastFlowInfo[idx] = new SolidConduitFlow.ConduitFlowInfo
 				{
-					direction = SolidConduitFlow.FlowDirection.None,
-					contents = SolidConduitFlow.ConduitContents.EmptyContents()
+					direction = SolidConduitFlow.FlowDirection.None
 				};
 				SolidConduitFlow.Conduit conduit = this.conduits[idx];
 				this.targetFlowDirections[idx] = conduit.GetNextFlowTarget(manager);
@@ -1030,12 +1031,11 @@ public class SolidConduitFlow : IConduitFlow
 			}
 		}
 
-		public void SetLastFlowInfo(int idx, SolidConduitFlow.FlowDirection direction, ref SolidConduitFlow.ConduitContents contents)
+		public void SetLastFlowInfo(int idx, SolidConduitFlow.FlowDirection direction)
 		{
 			this.lastFlowInfo[idx] = new SolidConduitFlow.ConduitFlowInfo
 			{
-				direction = direction,
-				contents = contents
+				direction = direction
 			};
 		}
 
@@ -1174,8 +1174,6 @@ public class SolidConduitFlow : IConduitFlow
 	public struct ConduitFlowInfo
 	{
 		public SolidConduitFlow.FlowDirection direction;
-
-		public SolidConduitFlow.ConduitContents contents;
 	}
 
 	[Serializable]

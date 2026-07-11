@@ -28,11 +28,12 @@ public class IncubatorSideScreen : ReceptacleSideScreen
 	public override void SetTarget(GameObject target)
 	{
 		base.SetTarget(target);
-		this.continuousToggle.ChangeState((!target.GetComponent<EggIncubator>().AutoReplaceEntity) ? 1 : 0);
+		EggIncubator incubator = target.GetComponent<EggIncubator>();
+		this.continuousToggle.ChangeState((!incubator.autoReplaceEntity) ? 1 : 0);
 		this.continuousToggle.onClick = delegate
 		{
-			target.GetComponent<EggIncubator>().ToggleAutoReplace();
-			this.continuousToggle.ChangeState((!target.GetComponent<EggIncubator>().AutoReplaceEntity) ? 1 : 0);
+			incubator.autoReplaceEntity = !incubator.autoReplaceEntity;
+			this.continuousToggle.ChangeState((!incubator.autoReplaceEntity) ? 1 : 0);
 		};
 	}
 

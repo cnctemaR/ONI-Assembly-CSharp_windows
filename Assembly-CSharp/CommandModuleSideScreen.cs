@@ -9,6 +9,22 @@ public class CommandModuleSideScreen : SideScreenContent
 	{
 		base.OnSpawn();
 		this.ScheduleUpdate();
+		MultiToggle multiToggle = this.debugVictoryButton;
+		multiToggle.onClick = (global::System.Action)Delegate.Combine(multiToggle.onClick, new global::System.Action(delegate
+		{
+			SpaceDestination spaceDestination = SpacecraftManager.instance.destinations.Find((SpaceDestination match) => match.GetDestinationType() == Db.Get().SpaceDestinationTypes.Wormhole);
+			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().DebugTriggerAchievement(Db.Get().ColonyAchievements.Clothe8Dupes.Id);
+			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().DebugTriggerAchievement(Db.Get().ColonyAchievements.Build4NatureReserves.Id);
+			SaveGame.Instance.GetComponent<ColonyAchievementTracker>().DebugTriggerAchievement(Db.Get().ColonyAchievements.ReachedSpace.Id);
+			this.target.Launch(spaceDestination);
+		}));
+		this.debugVictoryButton.gameObject.SetActive(DebugHandler.InstantBuildMode && this.CheckHydrogenRocket());
+	}
+
+	private bool CheckHydrogenRocket()
+	{
+		RocketModule rocketModule = this.target.rocketModules.Find((RocketModule match) => match.GetComponent<RocketEngine>());
+		return rocketModule != null && rocketModule.GetComponent<RocketEngine>().fuelTag == ElementLoader.FindElementByHash(SimHashes.LiquidHydrogen).tag;
 	}
 
 	private void ScheduleUpdate()
@@ -40,6 +56,7 @@ public class CommandModuleSideScreen : SideScreenContent
 		}
 		this.ClearConditions();
 		this.ConfigureConditions();
+		this.debugVictoryButton.gameObject.SetActive(DebugHandler.InstantBuildMode && this.CheckHydrogenRocket());
 	}
 
 	private void ClearConditions()
@@ -74,7 +91,7 @@ public class CommandModuleSideScreen : SideScreenContent
 			}
 			GameObject gameObject = this.conditionTable[rocketLaunchCondition];
 			HierarchyReferences component = gameObject.GetComponent<HierarchyReferences>();
-			if (rocketLaunchCondition.GetParentCondition() != null && !rocketLaunchCondition.GetParentCondition().EvaluateLaunchCondition())
+			if (rocketLaunchCondition.GetParentCondition() != null && rocketLaunchCondition.GetParentCondition().EvaluateLaunchCondition() == RocketLaunchCondition.LaunchStatus.Failure)
 			{
 				gameObject.SetActive(false);
 			}
@@ -82,7 +99,7 @@ public class CommandModuleSideScreen : SideScreenContent
 			{
 				gameObject.SetActive(true);
 			}
-			bool flag2 = rocketLaunchCondition.EvaluateLaunchCondition();
+			bool flag2 = rocketLaunchCondition.EvaluateLaunchCondition() != RocketLaunchCondition.LaunchStatus.Failure;
 			component.GetReference<LocText>("Label").text = rocketLaunchCondition.GetLaunchStatusMessage(flag2);
 			component.GetReference<LocText>("Label").color = ((!flag2) ? Color.red : Color.black);
 			component.GetReference<Image>("Box").color = ((!flag2) ? Color.red : Color.black);
@@ -121,6 +138,8 @@ public class CommandModuleSideScreen : SideScreenContent
 	public GameObject prefabConditionLineItem;
 
 	public MultiToggle destinationButton;
+
+	public MultiToggle debugVictoryButton;
 
 	private Dictionary<RocketLaunchCondition, GameObject> conditionTable = new Dictionary<RocketLaunchCondition, GameObject>();
 

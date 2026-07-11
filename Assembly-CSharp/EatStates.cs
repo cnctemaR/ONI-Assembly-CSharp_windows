@@ -2,7 +2,7 @@
 using STRINGS;
 using UnityEngine;
 
-internal class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>
+public class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStateMachineTarget, EatStates.Def>
 {
 	public override void InitializeStates(out StateMachine.BaseState default_state)
 	{
@@ -44,8 +44,14 @@ internal class EatStates : GameStateMachine<EatStates, EatStates.Instance, IStat
 		GameObject gameObject = smi.sm.target.Get(smi);
 		if (gameObject != null)
 		{
-			DebugUtil.Assert(gameObject.HasTag(GameTags.Creatures.ReservedByCreature));
-			gameObject.RemoveTag(GameTags.Creatures.ReservedByCreature);
+			if (gameObject.HasTag(GameTags.Creatures.ReservedByCreature))
+			{
+				gameObject.RemoveTag(GameTags.Creatures.ReservedByCreature);
+			}
+			else
+			{
+				global::Debug.LogWarningFormat(smi.gameObject, "{0} UnreserveEdible but it wasn't reserved: {1}", new object[] { smi.gameObject, gameObject });
+			}
 		}
 	}
 

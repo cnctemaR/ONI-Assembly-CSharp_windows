@@ -42,7 +42,10 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 
 	public void Render(float dt)
 	{
-		this.AdvanceBucketGroups("StateMachineUpdater.Render", this.renderBucketGroups, dt);
+		foreach (StateMachineUpdater.BucketGroup bucketGroup in this.renderBucketGroups)
+		{
+			bucketGroup.Advance(dt);
+		}
 	}
 
 	public void RenderEveryTick(float dt)
@@ -50,14 +53,6 @@ public class StateMachineUpdater : Singleton<StateMachineUpdater>
 		foreach (StateMachineUpdater.BucketGroup bucketGroup in this.renderEveryTickBucketGroups)
 		{
 			bucketGroup.AdvanceOneSubTick(dt);
-		}
-	}
-
-	private void AdvanceBucketGroups(string name, List<StateMachineUpdater.BucketGroup> bucket_groups, float dt)
-	{
-		foreach (StateMachineUpdater.BucketGroup bucketGroup in bucket_groups)
-		{
-			bucketGroup.Advance(dt);
 		}
 	}
 

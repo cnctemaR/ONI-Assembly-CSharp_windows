@@ -10,27 +10,30 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	protected override void OnPrefabInit()
 	{
 		base.OnPrefabInit();
-		foreach (Klei.AI.Attribute attribute in Db.Get().Attributes.resources)
+		if (this.addBaseTraits)
 		{
-			if (this.attributes.Get(attribute) == null)
+			foreach (Klei.AI.Attribute attribute in Db.Get().Attributes.resources)
 			{
-				this.attributes.Add(attribute);
+				if (this.attributes.Get(attribute) == null)
+				{
+					this.attributes.Add(attribute);
+				}
 			}
-		}
-		Traits component = base.GetComponent<Traits>();
-		Trait trait = Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID);
-		component.Add(trait);
-		foreach (Disease disease in Db.Get().Diseases.resources)
-		{
-			AmountInstance amountInstance = this.AddAmount(disease.amount);
-			this.attributes.Add(disease.cureSpeedBase);
-			amountInstance.SetValue(0f);
-		}
-		ChoreConsumer component2 = base.GetComponent<ChoreConsumer>();
-		if (component2 != null)
-		{
-			component2.AddProvider(GlobalChoreProvider.Instance);
-			base.gameObject.AddComponent<QualityOfLifeNeed>();
+			Traits component = base.GetComponent<Traits>();
+			Trait trait = Db.Get().traits.Get(MinionConfig.MINION_BASE_TRAIT_ID);
+			component.Add(trait);
+			foreach (Disease disease in Db.Get().Diseases.resources)
+			{
+				AmountInstance amountInstance = this.AddAmount(disease.amount);
+				this.attributes.Add(disease.cureSpeedBase);
+				amountInstance.SetValue(0f);
+			}
+			ChoreConsumer component2 = base.GetComponent<ChoreConsumer>();
+			if (component2 != null)
+			{
+				component2.AddProvider(GlobalChoreProvider.Instance);
+				base.gameObject.AddComponent<QualityOfLifeNeed>();
+			}
 		}
 	}
 
@@ -115,6 +118,8 @@ public class MinionModifiers : Modifiers, ISaveLoadable
 	{
 		base.GetComponent<Effects>().Remove("CenterOfAttention");
 	}
+
+	public bool addBaseTraits = true;
 
 	private static readonly EventSystem.IntraObjectHandler<MinionModifiers> OnDeathDelegate = new EventSystem.IntraObjectHandler<MinionModifiers>(delegate(MinionModifiers component, object data)
 	{

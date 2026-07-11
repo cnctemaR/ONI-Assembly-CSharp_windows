@@ -35,7 +35,7 @@ public class PolymerizerConfig : IBuildingConfig
 
 	public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
 	{
-		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery);
+		go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
 		Polymerizer polymerizer = go.AddOrGet<Polymerizer>();
 		polymerizer.emitMass = 30f;
 		polymerizer.emitTag = GameTagExtensions.Create(SimHashes.Polypropylene);
@@ -59,9 +59,9 @@ public class PolymerizerConfig : IBuildingConfig
 		};
 		elementConverter.outputElements = new ElementConverter.OutputElement[]
 		{
-			new ElementConverter.OutputElement(0.5f, SimHashes.Polypropylene, 348.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.008333334f, SimHashes.Steam, 473.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0),
-			new ElementConverter.OutputElement(0.008333334f, SimHashes.CarbonDioxide, 423.15f, true, 0f, 0.5f, false, 1f, byte.MaxValue, 0)
+			new ElementConverter.OutputElement(0.5f, SimHashes.Polypropylene, 348.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.008333334f, SimHashes.Steam, 473.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0),
+			new ElementConverter.OutputElement(0.008333334f, SimHashes.CarbonDioxide, 423.15f, false, true, 0f, 0.5f, 1f, byte.MaxValue, 0)
 		};
 		go.AddOrGet<DropAllWorkable>();
 		Prioritizable.AddRef(go);

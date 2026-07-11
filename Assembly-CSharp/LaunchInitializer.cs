@@ -17,7 +17,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 		GraphicsOptionsScreen.SetResolutionFromPrefs();
 		Util.ApplyInvariantCultureToThread(Thread.CurrentThread);
-		global::Debug.Log("Development Build: Q3-" + 336724U.ToString());
+		global::Debug.Log("release Build: LU-" + 356355U.ToString());
 		global::UnityEngine.Object.DontDestroyOnLoad(base.gameObject);
 		KPlayerPrefs.instance.Load();
 		KFMOD.Initialize();
@@ -54,7 +54,7 @@ public class LaunchInitializer : MonoBehaviour
 		}
 	}
 
-	public const string BUILD_PREFIX = "Q3";
+	public const string BUILD_PREFIX = "LU";
 
 	public GameObject[] SpawnPrefabs;
 

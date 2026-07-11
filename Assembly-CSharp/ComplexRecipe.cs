@@ -13,6 +13,14 @@ public class ComplexRecipe
 		ComplexRecipeManager.Get().Add(this);
 	}
 
+	public Tag FirstResult
+	{
+		get
+		{
+			return this.results[0].material;
+		}
+	}
+
 	public float TotalResultUnits()
 	{
 		float num = 0f;
@@ -41,12 +49,12 @@ public class ComplexRecipe
 	public Sprite GetUIIcon()
 	{
 		Sprite sprite = null;
-		Tag tag = ((!this.useResultAsDescription) ? this.ingredients[0].material : this.results[0].material);
+		Tag tag = ((this.nameDisplay != ComplexRecipe.RecipeNameDisplay.Ingredient) ? this.results[0].material : this.ingredients[0].material);
 		GameObject prefab = Assets.GetPrefab(tag);
 		KBatchedAnimController component = prefab.GetComponent<KBatchedAnimController>();
 		if (component != null)
 		{
-			sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false);
+			sprite = Def.GetUISpriteFromMultiObjectAnim(component.AnimFiles[0], "ui", false, string.Empty);
 		}
 		return sprite;
 	}
@@ -58,13 +66,14 @@ public class ComplexRecipe
 
 	public string GetUIName()
 	{
-		if (this.displayInputAndOutput)
+		switch (this.nameDisplay)
 		{
-			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
-		}
-		if (this.useResultAsDescription)
-		{
+		case ComplexRecipe.RecipeNameDisplay.Result:
 			return this.results[0].material.ProperName();
+		case ComplexRecipe.RecipeNameDisplay.IngredientToResult:
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_FROM_TO, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
+		case ComplexRecipe.RecipeNameDisplay.ResultWithIngredient:
+			return string.Format(UI.UISIDESCREENS.REFINERYSIDESCREEN.RECIPE_WITH, this.ingredients[0].material.ProperName(), this.results[0].material.ProperName());
 		}
 		return this.ingredients[0].material.ProperName();
 	}
@@ -79,9 +88,7 @@ public class ComplexRecipe
 
 	public GameObject FabricationVisualizer;
 
-	public bool useResultAsDescription;
-
-	public bool displayInputAndOutput;
+	public ComplexRecipe.RecipeNameDisplay nameDisplay;
 
 	public string description;
 
@@ -90,6 +97,14 @@ public class ComplexRecipe
 	public int sortOrder;
 
 	public string requiredTech;
+
+	public enum RecipeNameDisplay
+	{
+		Ingredient,
+		Result,
+		IngredientToResult,
+		ResultWithIngredient
+	}
 
 	public class RecipeElement
 	{

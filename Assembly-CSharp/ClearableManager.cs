@@ -70,10 +70,10 @@ internal class ClearableManager
 						break;
 					}
 				}
-				if (flag)
-				{
-					break;
-				}
+			}
+			if (flag)
+			{
+				break;
 			}
 		}
 	}
